@@ -2,6 +2,7 @@
 namespace App\Transformers\Ecommerce;
 
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
+use App\Repositories\Parts\PartRepositoryInterface;
 use App\Repositories\Parts\Textrail\PartRepository;
 use League\Fractal\TransformerAbstract;
 
@@ -12,25 +13,26 @@ class CompletedOrderTransformer extends TransformerAbstract
 
     /**
      * CompletedOrderTransformer constructor.
-     * @param PartRepository $textRailPartRepository
+     * @param PartRepositoryInterface $textRailPartRepository
      */
-    public function __construct(PartRepository $textRailPartRepository)
+    public function __construct(PartRepositoryInterface $textRailPartRepository)
     {
         $this->textRailPartRepository = $textRailPartRepository;
     }
 
-    public function transform(CompletedOrder $completedOrder)
+    public function transform(CompletedOrder $completedOrder): array
     {
-        $parts = $completedOrder->parts;
-
         $partCollection = [];
-
         $totalQty = 0;
-        if (!empty($parts)) {
-            foreach ($parts as $part) {
-                $partCollection[] = $this->textRailPartRepository->getById($part['id']);
+
+        if (!empty($completedOrder->parts)) {
+            $partIds = collect($completedOrder->parts)->map(static function (array $part) use(&$totalQty) : int {
                 $totalQty += $part['qty'];
-            }
+
+                return $part['id'];
+            })->toArray();
+
+            $partCollection = $this->textRailPartRepository->getAllByIds($partIds);
         }
 
         return [
@@ -41,6 +43,10 @@ class CompletedOrderTransformer extends TransformerAbstract
             'total_amount' => $completedOrder->total_amount,
             'payment_method' => $completedOrder->payment_method,
             'payment_status' => $completedOrder->payment_status,
+            'payment_intent' => $completedOrder->payment_intent,
+            'refund_status' => $completedOrder->refund_status,
+            'refunded_amount' => $completedOrder->refunded_amount,
+            'refunded_parts' => $completedOrder->refunded_parts,
             'stripe_customer_id' => $completedOrder->stripe_customer,
             'shipping_address' => $completedOrder->shipping_address,
             'shipping_country' => $completedOrder->shipping_country,

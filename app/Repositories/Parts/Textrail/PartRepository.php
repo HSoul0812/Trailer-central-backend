@@ -5,17 +5,18 @@ namespace App\Repositories\Parts\Textrail;
 use App\Models\Parts\Textrail\Part;
 use App\Repositories\Parts\PartRepositoryInterface;
 use App\Repositories\Parts\PartRepository as BaseRepository;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Arr;
+use Illuminate\Database\Eloquent\Collection;
 
 class PartRepository extends BaseRepository implements PartRepositoryInterface
 {
-    /**     
-     * @var App\Models\Parts\Textrail\Part
+    /**
+     * @var \App\Models\Parts\Textrail\Part
      */
     protected $model;
 
     public function __construct(Part $model) {
+        parent::__construct($model);
+
         $this->model = $model;
     }
 
@@ -33,11 +34,12 @@ class PartRepository extends BaseRepository implements PartRepositoryInterface
         return $this->model->where('sku', $sku)->first();
     }
 
-    public function update($params) {
-        $part = $this->model->find($params['id']);
-        $part->fill(Arr::except($params, 'id'));
-        $part->save();
-        return $part;
+    /**
+     * @param  array  $ids
+     * @return Collection|array<Part>
+     */
+    public function getAllByIds(array $ids): Collection
+    {
+        return $this->model->whereIn('id', $ids)->get();
     }
-
 }

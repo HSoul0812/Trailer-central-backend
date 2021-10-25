@@ -12,26 +12,22 @@ $factory->define(CompletedOrder::class, static function (Faker $faker, array $at
     // Get Created Date
     $createdAt = $faker->dateTimeThisMonth;
 
-    $price = $attributes['price'] ?? $faker->randomFloat(2, 2000, 9999);
-    $part = factory(Part::class, 1)->create([
-        "manufacturer_id" => 66,
-        "brand_id" => 25,
-        "type_id" => 11,
-        "category_id" => 8,
-    ]);
+    $createParts = static function (): array {
+        $part = factory(Part::class)->create([
+            'manufacturer_id' => 66,
+            'brand_id' => 25,
+            'type_id' => 11,
+            'category_id' => 8,
+        ]);
 
-    $Jsonpart = [
-        'id' => $part[0]['id'],
-        'qty' => 1
-    ];
-    $parts = [];
-    $parts[] = $Jsonpart;
-    
+        return [['id' => $part[0]['id'], 'qty' => 1]];
+    };
+
     return [
         'customer_email' => $faker->email,
         'total_amount' => $faker->randomFloat(2, 20, 9999),
         'payment_method' => $attributes['payment_method'] ?? 'card',
-        'payment_status' => $attributes['payment_status'] ?? $faker->randomElement(['paid', 'unpaid']),
+        'payment_status' => $attributes['payment_status'] ?? $faker->randomElement([CompletedOrder::PAYMENT_STATUS_PAID, CompletedOrder::PAYMENT_STATUS_UNPAID]),
         'event_id' => $attributes['event_id'] ?? Str::random(25),
         'object_id' => $attributes['object_id'] ?? Str::random(25),
         'stripe_customer' => $attributes['stripe_customer'] ?? Str::random(18),
@@ -47,7 +43,7 @@ $factory->define(CompletedOrder::class, static function (Faker $faker, array $at
         'billing_city' => $attributes['billing_city'] ?? $faker->city,
         'billing_zip' => $attributes['billing_zip'] ?? $faker->postcode,
         'billing_region' => $attributes['billing_region'] ?? $faker->stateAbbr,
-        'parts' => json_encode($parts),
+        'parts' => $attributes['parts'] ?? $createParts(),
         'status' => $attributes['status'] ?? 'dropshipped',
         'created_at' => $createdAt,
         'updated_at' => $createdAt,
