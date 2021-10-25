@@ -511,6 +511,7 @@ $api->version('v1', function ($route) {
         $route->put('user/dealer-location', 'App\Http\Controllers\v1\User\DealerLocationController@create');
         $route->get('user/dealer-location-quote-fees', 'App\Http\Controllers\v1\User\DealerLocationController@quoteFees');
         $route->get('user/dealer-location-available-tax-categories', 'App\Http\Controllers\v1\User\DealerLocationController@availableTaxCategories');
+        $route->get('user/dealer-location-titles', 'App\Http\Controllers\v1\User\DealerLocationController@getDealerLocationTitles');
 
         /*
         |--------------------------------------------------------------------------
