@@ -106,9 +106,9 @@ class PageRepository implements PageRepositoryInterface {
      * Get By Facebook Page ID
      * 
      * @param int $pageId
-     * @return Page
+     * @return null|Page
      */
-    public function getByPageId(int $pageId): Page {
+    public function getByPageId(int $pageId): ?Page {
         // Find Token By ID
         return Page::where('page_id', $pageId)->first();
     }

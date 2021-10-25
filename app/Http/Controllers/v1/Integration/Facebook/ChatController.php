@@ -34,6 +34,7 @@ class ChatController extends RestfulControllerV2 {
         ChatServiceInterface $service,
         ChatTransformer $transformer
     ) {
+        $this->middleware('setDealerIdOnRequest')->only(['create']);
         $this->middleware('setUserIdOnRequest')->only(['create', 'update', 'index']);
 
         $this->repository = $repository;
