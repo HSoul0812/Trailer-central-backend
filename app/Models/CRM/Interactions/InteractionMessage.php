@@ -131,7 +131,7 @@ class InteractionMessage extends Model
             $array['text'] = $message->message;
             $array['date_delivered'] = $message->created_at;
             $array['user_name'] = $message->conversation->fbUser->name;
-            $array['is_incoming'] = strcmp($message->from_id, $message->conversation->fbLead->user_id) === 0;
+            $array['is_incoming'] = strcmp($message->from_id, $message->conversation->user_id) === 0;
 
             $array['parent_message_id'] = null;
             $array['title'] = null;
