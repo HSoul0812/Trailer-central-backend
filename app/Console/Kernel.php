@@ -176,11 +176,11 @@ class Kernel extends ConsoleKernel
 
         // $schedule->command('inspire')
         //          ->hourly();
-        
+
         /**
          * Import textrail parts
          */
-         
+
         $schedule->command('command:get-textrail-parts')
            ->dailyAt('1:00')
            ->runInBackground();
