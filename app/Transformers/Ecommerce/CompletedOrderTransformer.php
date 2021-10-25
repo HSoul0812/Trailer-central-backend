@@ -26,7 +26,7 @@ class CompletedOrderTransformer extends TransformerAbstract
         $totalQty = 0;
 
         if (!empty($completedOrder->parts)) {
-            $partIds = collect($completedOrder->parts)->map(static function (array $part) use($totalQty) : int {
+            $partIds = collect($completedOrder->parts)->map(static function (array $part) use(&$totalQty) : int {
                 $totalQty += $part['qty'];
 
                 return $part['id'];
