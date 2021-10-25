@@ -5,6 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 use App\Models\User\Interfaces\PermissionsInterface;
+use App\Models\User\User;
 
 class AddQuotePermissionToSecondaryUsers extends Migration
 {
@@ -15,12 +16,10 @@ class AddQuotePermissionToSecondaryUsers extends Migration
      */
     public function up()
     {
-      $dealerUsers = DB::table('dealer_user_permissions')
-          ->select('dealer_user_id', 'permission_level')
-          ->where('feature', PermissionsInterface::CRM)->get();
+      $users = User::where('is_dms_active', 1)->get();
       
-      foreach ($dealerUsers as $dealer_user) {
-        if ($dealer_user->permission_level != PermissionsInterface::CANNOT_SEE_PERMISSION) {
+      foreach ($users as $user) {
+        foreach ($user->dealerUsers as $dealer_user) {
           DB::table('dealer_user_permissions')->insert([
               'dealer_user_id' => $dealer_user->dealer_user_id,
               'feature' => PermissionsInterface::QUOTES,
