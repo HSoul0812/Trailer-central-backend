@@ -101,13 +101,16 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
 
         $completedOrder = CompletedOrder::where('object_id', $data['id'])->first();
 
+        $isStripeCall = !isset($data['parts']);
+
         if (!$completedOrder) {
             $completedOrder = new CompletedOrder();
 
             $completedOrder->event_id = $params['id'];
             $completedOrder->object_id = $data['id'];
-            $completedOrder->parts = isset($data['parts']) ? json_decode($data['parts'], true) : [];
-            $completedOrder->total_amount = $data['amount_total'] / 100; // Since Stripe use the amount in cents, we need to convert it
+            $completedOrder->parts = $isStripeCall ? [] : json_decode($data['parts'], true);
+            // Since Stripe use the amount in cents, we need to convert it
+            $completedOrder->total_amount = $isStripeCall ? ($data['amount_total'] / 100) : $data['amount_total'];
             $completedOrder->payment_status = $data['payment_status'] ?? '';
             $completedOrder->invoice_id = $data['invoice_id'] ?? '';
             $completedOrder->invoice_url = $data['invoice_url'] ?? '';
@@ -137,7 +140,9 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
             }
         } else {
             $completedOrder->customer_email = $data['customer_details']['email'];
-            $completedOrder->total_amount = $data['amount_total'] / 100; // Since Stripe use the amount in cents, we need to convert it
+            // Since Stripe use the amount in cents, we need to convert it
+            $completedOrder->total_amount = $isStripeCall ? ($data['amount_total'] / 100) : $data['amount_total'];
+
             $completedOrder->payment_method = $data['payment_method_types'][0];
             $completedOrder->stripe_customer = $data['customer'] ?? '';
 
