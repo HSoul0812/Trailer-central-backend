@@ -76,7 +76,7 @@ class DealerLocationMileageFeeController extends RestfulControllerV2
      * @param int $feeId
      * @param Request $request
      */
-    public function delete(int $feeId, Request $request): Response {
+    public function delete(int $locationId, int $feeId, Request $request): Response {
         $this->dealerLocationMileageFeeRepository->delete([
             'id' => $feeId
         ]);

@@ -82,7 +82,7 @@ class DealerLocationMileageFeeControllerTest extends TestCase
 
         $request = new Request();
         $controller = app(DealerLocationMileageFeeController::class);
-        $controller->delete($feeId, $request);
+        $controller->delete(1, $feeId, $request);
         $this->assertDatabaseMissing(
             DealerLocationMileageFee::getTableName(),
             [
