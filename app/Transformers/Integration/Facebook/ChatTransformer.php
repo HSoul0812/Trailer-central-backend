@@ -46,7 +46,7 @@ class ChatTransformer extends TransformerAbstract
             'account_name' => $chat->account_name,
             'account_id' => $chat->account_id,
             'page' => $this->pageTransformer->transform($chat->page),
-            'sales_person_ids' => $chat->salesPersons()->pluck('id'),
+            'sales_person_ids' => $chat->sales_people_ids,
             'created_at' => $chat->created_at,
             'updated_at' => $chat->updated_at
         ];

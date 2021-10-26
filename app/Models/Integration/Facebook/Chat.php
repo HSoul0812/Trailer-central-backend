@@ -99,13 +99,23 @@ class Chat extends Model
     }
 
     /**
-     * Get Sales Person
+     * Get Sales Persons
      * 
      * @return BelongsToMany
      */
     public function salesPersons(): BelongsToMany
     {
-        return $this->belongsToMany(SalesPerson::class, 'fbapp_chat_sales_person', 'fbapp_chat_id', 'sales_person_id')
+        return $this->belongsToMany(SalesPerson::class, ChatSalesPeople::class, 'fbapp_chat_id', 'sales_person_id')
             ->withTimestamps();
+    }
+
+    /**
+     * Get Sales People Ids
+     * 
+     * @return array
+     */
+    public function getSalesPeopleIdsAttribute(): array
+    {
+        return $this->salesPersons()->pluck(SalesPerson::TABLE_NAME .'.id')->toArray();
     }
 }
