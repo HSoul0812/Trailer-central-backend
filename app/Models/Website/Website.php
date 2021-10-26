@@ -50,6 +50,106 @@ class Website extends Model
      * @var string
      */
     const UPDATED_AT = 'date_updated';
+  
+    /**
+     * Get the website type config.
+     *
+     * @param  string  $value
+     * @return string
+     */
+    public function getTypeConfigAttribute($value)
+    {
+      $printData = '';
+
+      if (@unserialize($value)) {
+        $unserializedFilter = unserialize($value);
+        $unserializedFilters = array();
+        if(isset($unserializedFilter['filters'])) {
+            $unserializedFilters = $unserializedFilter['filters'];
+        }
+        
+        if(isset($unserializedFilter['dealer_id'])) {
+            if (is_array($unserializedFilter['dealer_id'])) {
+                foreach($unserializedFilter['dealer_id'] as $dealer_id) {
+                    $printData .= 'dealer_id|eq|'.$dealer_id.PHP_EOL;                            
+                }   
+            } else {
+                $printData .= 'dealer_id|eq|'.$unserializedFilter['dealer_id'].PHP_EOL;
+            }                                             
+        }
+        
+        foreach($unserializedFilters as $match => $filterData) {
+            $prefix = "$match|";
+            foreach($filterData as $operator => $operatorValue) {
+                foreach($operatorValue as $actualValue) {
+                    if (is_array($actualValue)) {
+                        $printData .= $prefix."$operator|".current($actualValue).PHP_EOL;
+                    } else {
+                        $printData .= $prefix."$operator|".$actualValue.PHP_EOL;
+                    }
+                }                            
+            }
+        }
+      } else {
+        $printData = $value;
+      }        
+
+      return $printData;
+    }
+
+    public function setTypeConfigAttribute($value)
+    {
+
+      $filterData = '';
+      $globalFilter = explode(\PHP_EOL, $value);
+      
+      $filterLineData = array();
+      $filterLineData['filters'] = array();
+      foreach ($globalFilter as $filterLine) {
+        $filterLine = trim($filterLine);
+
+        if (strlen($filterLine) > 0  && $filterLine[0] !== '#' ) {
+          if (substr($filterLine, 0, 16) === 'classic filter: ') {
+              $filterMode = 'classic';
+              $filterData = substr($filterLine, 16);
+              break;
+          } else {                                        
+              $filterLineTmp = explode('|', $filterLine);
+              if($filterLineTmp[0] == 'dealer_id') {
+                  if(!isset($filterLineData['dealer_id'])) {
+                      $filterLineData['dealer_id'] = array();
+                  }
+                  $filterLineData['dealer_id'][] = $filterLineTmp[2];
+              } else {
+                  if(!isset($filterLineData['filters'][$filterLineTmp[0]][$filterLineTmp[1]])) {
+                      $filterLineData['filters'][$filterLineTmp[0]][$filterLineTmp[1]] = array();
+                  }
+                  $filterLineData['filters'][$filterLineTmp[0]][$filterLineTmp[1]][] = array($filterLineTmp[2]);
+              }                                        
+          }
+        }
+      }
+
+      $this->attributes['type_config'] = serialize($filterLineData);
+    }
+
+    public function getHeadScriptsAttribute()
+    {
+      return base64_decode($this->websiteConfigs()->where('key',  WebsiteConfig::GENERAL_HEAD_SCRIPT_KEY)->take(1)->value('value'));
+    }
+
+    public function setHeadScriptsAttribute($value)
+    {
+      $headScript = $this->websiteConfigs()->where('key',  WebsiteConfig::GENERAL_HEAD_SCRIPT_KEY)->first();
+      $value = base64_encode($value);
+  
+      if ($headScript) {
+        $headScript->update(['value' => $value]);
+      } else {
+        $this->websiteConfigs()->save(['key' =>  WebsiteConfig::GENERAL_HEAD_SCRIPT_KEY, 'value' => $value]);
+      }
+
+    }
 
     public function dealer()
     {
