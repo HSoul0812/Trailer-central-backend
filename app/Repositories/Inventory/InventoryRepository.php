@@ -463,9 +463,18 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query = $query->with(explode(',', $params['include']));
         }
 
-        if (isset($params['attribute_ids'])) {
-            $query = $query->leftJoin('eav_attribute_value', 'inventory.inventory_id', '=', 'eav_attribute_value.inventory_id');
-            $query = $query->whereIn('eav_attribute_value.attribute_id', $params['attribute_ids']);
+        if (isset($params['attribute_names'])) {
+            $query = $query->join('eav_attribute_value', 'inventory.inventory_id', '=', 'eav_attribute_value.inventory_id')->orderBy('eav_attribute_value.attribute_id', 'desc');
+            $query = $query->join('eav_attribute', 'eav_attribute.attribute_id', '=', 'eav_attribute_value.attribute_id');
+
+            $query = $query->where(function($q) use ($params) {
+                foreach ($params['attribute_names'] as $attribute => $value) {
+                    $q->orWhere(function ($q) use ($attribute, $value) {
+                        $q->where('code', '=', $attribute)
+                            ->where('value', '=', $value);
+                    });
+                }
+            });
         }
 
         if ($withDefault) {
