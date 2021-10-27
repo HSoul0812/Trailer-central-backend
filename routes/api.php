@@ -638,6 +638,7 @@ $api->version('v1', function ($route) {
                 $route->get('{id}', 'App\Http\Controllers\v1\Integration\Facebook\ChatController@show')->where('id', '[0-9]+');
                 $route->post('{id}', 'App\Http\Controllers\v1\Integration\Facebook\ChatController@update')->where('id', '[0-9]+');
                 $route->delete('{id}', 'App\Http\Controllers\v1\Integration\Facebook\ChatController@destroy')->where('id', '[0-9]+');
+                $route->post('{id}/salespeople', 'App\Http\Controllers\v1\Integration\Facebook\ChatController@assignSalespeople')->where('id', '[0-9]+');
             });
 
             /*

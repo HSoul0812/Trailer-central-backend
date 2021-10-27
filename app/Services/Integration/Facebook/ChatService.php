@@ -234,6 +234,19 @@ class ChatService implements ChatServiceInterface
     }
 
     /**
+     * Assign Sales People to Chat
+     * 
+     * @param array $params
+     * @return array<ChatTransformer>
+     */
+    public function assignSalespeople(array $params): array {
+
+        $this->chat->assignSalespeople($params['id'], $params['sales_person_ids']);
+
+        return $this->show($params);
+    }
+
+    /**
      * Return Response
      * 
      * @param Chat $chat
