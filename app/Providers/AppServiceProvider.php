@@ -100,6 +100,8 @@ use App\Repositories\User\DealerPasswordResetRepositoryInterface;
 use App\Repositories\User\DealerPasswordResetRepository;
 use App\Services\CRM\User\TimeClockService;
 use App\Services\CRM\User\TimeClockServiceInterface;
+use App\Services\Dms\Bills\BillService;
+use App\Services\Dms\Bills\BillServiceInterface;
 use App\Services\Dms\Pos\RegisterService;
 use App\Services\Dms\Pos\RegisterServiceInterface;
 use App\Services\File\FileService;
@@ -292,6 +294,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(QuickbookApprovalRepositoryInterface::class, QuickbookApprovalRepository::class);
         $this->app->bind(ManufacturerRepositoryInterface::class, ManufacturerRepository::class);
         $this->app->bind(FloorplanVendorRepositoryInterface::class, FloorplanVendorRepository::class);
+        $this->app->bind(BillServiceInterface::class, BillService::class);
 
         $this->app->bind(CostModifierRepositoryInterface::class, CostModifierRepository::class);
         $this->app->bind(MakesRepositoryInterface::class, MakesRepository::class);

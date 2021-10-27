@@ -2,30 +2,30 @@
 namespace App\Http\Controllers\v1\Dms\Quickbooks;
 
 use App\Http\Controllers\RestfulControllerV2;
-use App\Http\Requests\Dms\Bill\AddBillItemRequest;
 use App\Http\Requests\Dms\Bill\CreateBillRequest;
 use App\Http\Requests\Dms\Bill\GetBillRequest;
 use App\Http\Requests\Dms\Bill\UpdateBillRequest;
-use App\Repositories\Dms\Quickbooks\BillRepository;
+use App\Services\Dms\Bills\BillService;
+use App\Services\Dms\Bills\BillServiceInterface;
 use App\Transformers\Dms\Bill\BillTransformer;
 use Dingo\Api\Http\Request;
 
 class BillController extends RestfulControllerV2
 {
-    /** @var BillRepository */
-    private $billRepository;
+    /** @var BillServiceInterface */
+    private $billService;
 
     /** @var BillTransformer */
     private $billTransformer;
 
     /**
      * BillController constructor.
-     * @param BillRepository $billRepository
+     * @param BillServiceInterface $billService
      * @param BillTransformer $billTransformer
      */
-    public function __construct(BillRepository $billRepository, BillTransformer $billTransformer)
+    public function __construct(BillServiceInterface $billService, BillTransformer $billTransformer)
     {
-        $this->billRepository = $billRepository;
+        $this->billService = $billService;
         $this->billTransformer = $billTransformer;
 
         $this->middleware('setDealerIdOnRequest');
@@ -39,7 +39,7 @@ class BillController extends RestfulControllerV2
             return $this->response->errorBadRequest();
         }
 
-        $bill = $this->billRepository->getAll($request->all(), true);
+        $bill = $this->billService->getAll($request->all(), true);
         return $this->response->paginator($bill, $this->billTransformer);
     }
 
@@ -52,7 +52,7 @@ class BillController extends RestfulControllerV2
             return $this->response->errorBadRequest();
         }
 
-        $bill = $this->billRepository->get($request->all());
+        $bill = $this->billService->get($request->all());
         return $this->response->item($bill, $this->billTransformer);
     }
 
@@ -64,7 +64,7 @@ class BillController extends RestfulControllerV2
             return $this->response->errorBadRequest();
         }
 
-        $bill = $this->billRepository->create($request->all());
+        $bill = $this->billService->create($request->all());
         return $this->response->item($bill, $this->billTransformer);
     }
 
@@ -78,7 +78,7 @@ class BillController extends RestfulControllerV2
             return $this->response->errorBadRequest();
         }
 
-        $bill = $this->billRepository->update($requestData);
+        $bill = $this->billService->update($requestData);
         return $this->response->item($bill, $this->billTransformer);
     }
 }

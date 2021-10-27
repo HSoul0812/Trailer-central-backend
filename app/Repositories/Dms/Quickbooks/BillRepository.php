@@ -7,8 +7,8 @@ use App\Models\CRM\Dms\Quickbooks\Bill;
 use App\Models\CRM\Dms\Quickbooks\BillCategory;
 use App\Models\CRM\Dms\Quickbooks\BillItem;
 use App\Models\CRM\Dms\Quickbooks\BillPayment;
-use App\Models\Inventory\Inventory;
-use Grimzy\LaravelMysqlSpatial\Eloquent\Builder as GrimzyBuilder;
+use App\Repositories\Traits\SortTrait;
+use App\Traits\Repository\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -21,6 +21,9 @@ use Illuminate\Support\Facades\URL;
  */
 class BillRepository implements BillRepositoryInterface
 {
+
+    use SortTrait, Transaction;
+
     private const DEFAULT_PAGE_SIZE = 15;
 
     private $sortOrders = [
@@ -75,28 +78,35 @@ class BillRepository implements BillRepositoryInterface
             unset($params['payments']);
         }
 
-        $bill = new Bill($params);
-        $bill->save();
+        $this->beginTransaction();
 
-        foreach ($items as $item)
-        {
-            $item['bill_id'] = $bill->id;
-            $billItem = new BillItem($item);
-            $billItem->save();
+        try {
+            $bill = new Bill($params);
+            $bill->save();
+
+            foreach ($items as $item) {
+                $item['bill_id'] = $bill->id;
+                $billItem = new BillItem($item);
+                $billItem->save();
+            }
+
+            foreach ($categories as $category) {
+                $category['bill_id'] = $bill->id;
+                $billCategory = new BillCategory($category);
+                $billCategory->save();
+            }
+
+            foreach ($payments as $payment) {
+                $payment['bill_id'] = $bill->id;
+                $billPayment = new BillPayment($payment);
+                $billPayment->save();
+            }
+
+            $this->commitTransaction();
         }
-
-        foreach ($categories as $category)
+        catch (\Exception $exception)
         {
-            $category['bill_id'] = $bill->id;
-            $billCategory = new BillCategory($category);
-            $billCategory->save();
-        }
-
-        foreach ($payments as $payment)
-        {
-            $payment['bill_id'] = $bill->id;
-            $billPayment = new BillPayment($payment);
-            $billPayment->save();
+            $this->rollbackTransaction();
         }
 
         return $bill;
@@ -132,32 +142,39 @@ class BillRepository implements BillRepositoryInterface
         $bill = Bill::findOrFail($params['id']);
         $bill->fill($params)->save();
 
-        if (!empty($items)) {
-            DB::statement("DELETE FROM qb_bill_items WHERE bill_id = " . $bill->id);
-            foreach ($items as $item) {
-                $item['bill_id'] = $bill->id;
-                $billItem = new BillItem($item);
-                $billItem->save();
+        $this->beginTransaction();
+        try {
+            if (!empty($items)) {
+                DB::statement("DELETE FROM qb_bill_items WHERE bill_id = " . $bill->id);
+                foreach ($items as $item) {
+                    $item['bill_id'] = $bill->id;
+                    $billItem = new BillItem($item);
+                    $billItem->save();
+                }
             }
-        }
 
-        if (!empty($categories)) {
-            DB::statement("DELETE FROM qb_bill_categories WHERE bill_id = " . $bill->id);
-            foreach ($categories as $category) {
-                $category['bill_id'] = $bill->id;
-                $billCategory = new BillCategory($category);
-                $billCategory->save();
+            if (!empty($categories)) {
+                DB::statement("DELETE FROM qb_bill_categories WHERE bill_id = " . $bill->id);
+                foreach ($categories as $category) {
+                    $category['bill_id'] = $bill->id;
+                    $billCategory = new BillCategory($category);
+                    $billCategory->save();
+                }
             }
-        }
 
 
-        if (!empty($payments)) {
-            DB::statement("DELETE FROM qb_bill_payment WHERE bill_id = " . $bill->id);
-            foreach ($payments as $payment) {
-                $payment['bill_id'] = $bill->id;
-                $billPayment = new BillPayment($payment);
-                $billPayment->save();
+            if (!empty($payments)) {
+                DB::statement("DELETE FROM qb_bill_payment WHERE bill_id = " . $bill->id);
+                foreach ($payments as $payment) {
+                    $payment['bill_id'] = $bill->id;
+                    $billPayment = new BillPayment($payment);
+                    $billPayment->save();
+                }
             }
+
+            $this->commitTransaction();
+        } catch (\Exception $exception) {
+            $this->rollbackTransaction();
         }
 
         return $bill;
@@ -183,6 +200,11 @@ class BillRepository implements BillRepositoryInterface
         throw new NotImplementedException;
     }
 
+    /**
+     * @param array $params
+     * @param bool $paginated
+     * @return Builder[]|\Illuminate\Database\Eloquent\Collection|LengthAwarePaginator
+     */
     public function getAll($params, bool $paginated = false)
     {
         if ($paginated) {
@@ -243,6 +265,10 @@ class BillRepository implements BillRepositoryInterface
 
         if (isset($params['dealer_location_id'])) {
             $query = $query->where('qb_bills.dealer_location_id', $params['dealer_location_id']);
+        }
+
+        if (isset($params['sort'])) {
+            $query = $this->addSortQuery($query, $params['sort']);
         }
 
         return $query;
