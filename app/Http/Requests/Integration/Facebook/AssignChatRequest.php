@@ -11,6 +11,7 @@ class AssignChatRequest extends Request {
     
     protected $rules = [
         'id' => 'required|integer',
+        'sales_person_ids' => 'required|array',
         'sales_person_ids.*' => 'required|integer|sales_person_valid'
     ];
     
