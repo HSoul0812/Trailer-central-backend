@@ -10,6 +10,8 @@ use App\Models\Observers\CRM\Interactions\FbMessageObserver;
 use App\Models\Observers\CRM\Interactions\TextLogObserver;
 use App\Repositories\CRM\Interactions\InteractionMessageRepository;
 use App\Repositories\CRM\Interactions\InteractionMessageRepositoryInterface;
+use App\Services\CRM\Interactions\InteractionMessageService;
+use App\Services\CRM\Interactions\InteractionMessageServiceInterface;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 use App\Repositories\CRM\Email\BounceRepository;
@@ -90,6 +92,7 @@ class InteractionServiceProvider extends ServiceProvider
         $this->app->bind(NtlmEmailServiceInterface::class, NtlmEmailService::class);
         $this->app->bind(MessageServiceInterface::class, MessageService::class);
         $this->app->bind(WebhookServiceInterface::class, WebhookService::class);
+        $this->app->bind(InteractionMessageServiceInterface::class, InteractionMessageService::class);
 
 
         // Text Repositories
