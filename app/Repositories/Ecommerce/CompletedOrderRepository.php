@@ -111,7 +111,7 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
             $completedOrder->parts = $isStripeCall ? [] : json_decode($data['parts'], true);
             // Since Stripe use the amount in cents, we need to convert it
             $completedOrder->total_amount = $isStripeCall ? ($data['amount_total'] / 100) : $data['amount_total'];
-            $completedOrder->payment_status = $data['payment_status'] ?? '';
+            $completedOrder->payment_status = $data['payment_status'] ?? CompletedOrder::PAYMENT_STATUS_UNPAID;
             $completedOrder->invoice_id = $data['invoice_id'] ?? '';
             $completedOrder->invoice_url = $data['invoice_url'] ?? '';
             $completedOrder->payment_intent = $data['payment_intent'] ?? null;
@@ -145,6 +145,8 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
 
             $completedOrder->payment_method = $data['payment_method_types'][0];
             $completedOrder->stripe_customer = $data['customer'] ?? '';
+            $completedOrder->payment_status = $data['payment_status'] ?? CompletedOrder::PAYMENT_STATUS_UNPAID;
+            $completedOrder->payment_intent = $data['payment_intent'] ?? null;
 
             // Dispatch for handle quantity reducing.
             foreach ($completedOrder->parts as $part) {
