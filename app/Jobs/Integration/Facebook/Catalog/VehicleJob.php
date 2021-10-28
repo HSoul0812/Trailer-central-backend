@@ -339,11 +339,6 @@ class VehicleJob extends Job
         // Clean Up Results
         $clean = $this->cleanCsvRow($listing);
 
-        // Skip if Fields Missing
-        if(empty($clean->title) || empty($clean->description) || empty($clean->model)) {
-            return false;
-        }
-
         // Create Row
         $row = array();
         foreach($this->csvColumns as $k => $column) {
@@ -390,7 +385,9 @@ class VehicleJob extends Job
         }
 
         // Fix Availability
-        if($listing->availability === '4') {
+        if($listing->availability === '2') {
+            $listing->availability = self::UNAVAILABLE;
+        } elseif($listing->availability === '4') {
             $listing->availability = self::PENDING;
         } elseif($listing->availability === '2') {
             $listing->availability = self::UNAVAILABLE;
