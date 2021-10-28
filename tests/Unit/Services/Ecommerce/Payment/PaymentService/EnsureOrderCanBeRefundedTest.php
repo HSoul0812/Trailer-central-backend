@@ -130,53 +130,6 @@ class EnsureOrderCanBeRefundedTest extends PaymentServiceTestCase
     }
 
     /**
-     * Test SUT will throw and exception when some of provided parts was already refunded
-     */
-    public function testItWillThrowAnExceptionDueThePartIsRefunded(): void
-    {
-        $amountToRefund = Money::of(200, 'USD');
-        $partIdToRefund = 4;
-
-        /** @var Part $alreadyRefundedPart */
-        $alreadyRefundedPart = factory(Part::class)->make(['id' => $partIdToRefund]);
-
-        /** @var CompletedOrder $order */
-        $order = factory(CompletedOrder::class)->make([
-            'id' => $this->faker->unique(true)->numberBetween(1, 100),
-            'total_amount' => $this->faker->numberBetween(200, 1000),
-            'refund_status' => CompletedOrder::REFUND_STATUS_UNREFUNDED,
-            'payment_intent' => $this->faker->uuid,
-            'payment_status' => CompletedOrder::PAYMENT_STATUS_PAID,
-            'parts' => [['id' => 4, 'qty' => 3], ['id' => 6, 'qty' => 3]]
-        ]);
-
-        $dependencies = new PaymentServiceDependencies();
-
-        $dependencies->refundRepository
-            ->shouldReceive('getRefundedAmount')
-            ->andReturn(Money::zero('USD'))
-            ->with($order->id)
-            ->once();
-
-        $dependencies->refundRepository
-            ->shouldReceive('getRefundedParts')
-            ->andReturn(collect([$alreadyRefundedPart]))
-            ->with($order->id)
-            ->once();
-
-        $service = $this->getMockBuilder(PaymentService::class)
-            ->setConstructorArgs($dependencies->getOrderedArguments())
-            ->getMock();
-
-        $this->expectException(RefundException::class);
-        $this->expectExceptionMessage(
-            sprintf('%d order cannot be refunded due some provided part was already refunded', $order->id)
-        );
-
-        $this->invokeMethod($service, 'ensureOrderCanBeRefunded', [$order, $amountToRefund, [$partIdToRefund]]);
-    }
-
-    /**
      * @return array[]
      */
     public function ordersNotRefundableProvider(): array

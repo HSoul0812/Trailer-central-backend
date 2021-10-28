@@ -148,7 +148,6 @@ class PaymentService implements PaymentServiceInterface
      * @throws RefundAmountException when the order is not refundable due it is refunded
      * @throws RefundAmountException when the amount is greater than its balance
      * @throws RefundException when a provided part was not a placed part
-     * @throws RefundException when a provided part was already refunded
      * @throws RefundException when the order has not a related parts matching with the request
      * @throws RefundException when the order it has not a payment unique id
      */
@@ -210,16 +209,6 @@ class PaymentService implements PaymentServiceInterface
                 );
             }
         });
-
-        $refundedParts = $this->refundRepository->getRefundedParts($order->id)->map(static function (Part $part): int {
-            return $part->id;
-        })->toArray();
-
-        if (!empty(array_intersect($refundedParts, $parts))) {
-            throw new RefundException(
-                sprintf('%d order cannot be refunded due some provided part was already refunded', $order->id)
-            );
-        }
     }
 
     /**
