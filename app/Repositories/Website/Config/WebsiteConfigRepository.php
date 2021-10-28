@@ -65,7 +65,7 @@ class WebsiteConfigRepository implements WebsiteConfigRepositoryInterface {
 
       $query = $query->where('website_id', $websiteId);
       
-      $query->where('key', 'LIKE', '%call-to-action%');
+      $query->where('key', 'LIKE', '%'.WebsiteConfig::CALL_TO_ACTION.'%');
       
       return $query->get();
     }
