@@ -52,6 +52,53 @@ class WebsiteConfigRepository implements WebsiteConfigRepositoryInterface {
         return $query->get();
     }
 
+    /**
+     * Get All Website Config Call to Action
+     *
+     * @param int $websiteId
+     * @return array <WebsiteConfig>
+     */
+    public function getAllCallToAction(int $websiteId): object
+    {
+      $query = WebsiteConfig::select('*');
+
+      $query = $query->where('website_id', $websiteId);
+      
+      $query->where('key', 'LIKE', '%call-to-action%');
+      
+      return $query->get();
+    }
+
+    /**
+     * Get All Website Config Call to Action
+     *
+     * @param array $websiteId
+     * @return array<WebsiteConfig>
+     */
+    public function createOrUpdateCallToAction(int $websiteId, array $request) : array
+    {
+      $webisteConfigs = [];
+
+      foreach ($request as $websiteConfigDataKey => $websiteConfigDataValue) {
+        $websiteConfig = WebsiteConfig::where('website_id', $websiteId)->where('key', $websiteConfigDataKey)->first();
+
+        if ($websiteConfig) {
+          $websiteConfig->fill(['value' => $websiteConfigDataValue]);
+          $websiteConfig->save();
+          $webisteConfigs[] = $websiteConfig;
+        } else {
+          $websiteData = [
+            'website_id' => $websiteId,
+            'key' => $websiteConfigDataKey,
+            'value' => $websiteConfigDataValue
+          ];
+
+          $webisteConfigs[] = WebsiteConfig::create($websiteData);
+        }
+      }
+      return $webisteConfigs;
+    }
+
     public function update($params) {
         throw new NotImplementedException;
     }
