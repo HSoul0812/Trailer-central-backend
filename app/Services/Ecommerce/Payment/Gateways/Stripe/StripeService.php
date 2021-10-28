@@ -51,7 +51,7 @@ class StripeService implements PaymentGatewayServiceInterface
         ];
 
         if (!empty($parts)) {
-            $request['metadata'] = ['parts' => $parts];
+            $request['metadata'] = ['parts' => json_encode($parts)];
         }
 
         if (!empty($reason) && $this->isValidRefundReason($reason)) {
