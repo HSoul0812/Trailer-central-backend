@@ -225,6 +225,11 @@ $api->version('v1', function ($route) {
     $route->get('inventory/{inventory_id}/history', 'App\Http\Controllers\v1\Inventory\InventoryController@history')->where('inventory_id', '[0-9]+');
 
     /**
+     * Inventory distance
+     */
+    $route->get('inventory/{inventory_id}/delivery_price', 'App\Http\Controllers\v1\Inventory\InventoryController@delivery_price')->where('inventory_id', '[0-9]+');
+
+    /**
      * Inventory
      */
     $route->get('inventory', 'App\Http\Controllers\v1\Inventory\InventoryController@index');
@@ -324,6 +329,15 @@ $api->version('v1', function ($route) {
     $route->group(['prefix' => 'website/{websiteId}/user'], function($route) {
         $route->post('signup', 'App\Http\Controllers\v1\Website\User\WebsiteUserController@create');
         $route->post('login', 'App\Http\Controllers\v1\Website\User\WebsiteUserController@login');
+    });
+
+    /**
+     * Website User Favorite Inventory
+     */
+    $route->group(['prefix' => 'website/inventory/favorite', 'middleware' => 'api.auth', 'providers' => ['website_auth']], function ($route) {
+        $route->get('', 'App\Http\Controllers\v1\Website\User\WebsiteUserFavoriteInventoryController@index');
+        $route->post('', 'App\Http\Controllers\v1\Website\User\WebsiteUserFavoriteInventoryController@create');
+        $route->delete('', 'App\Http\Controllers\v1\Website\User\WebsiteUserFavoriteInventoryController@delete');
     });
 
     /*
@@ -504,14 +518,22 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('user/dealer-location', 'App\Http\Controllers\v1\User\DealerLocationController@index');
-        $route->delete('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@destroy')->where('id', '[0-9]+');
-        $route->get('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@show')->where('id', '[0-9]+');
-        $route->get('user/dealer-location/check/{name}', 'App\Http\Controllers\v1\User\DealerLocationController@check');
-        $route->post('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@update')->where('id', '[0-9]+');
         $route->put('user/dealer-location', 'App\Http\Controllers\v1\User\DealerLocationController@create');
+
+        $route->get('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@show')->where('id', '[0-9]+');
+        $route->post('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@update')->where('id', '[0-9]+');
+        $route->delete('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@destroy')->where('id', '[0-9]+');
+
+        $route->get('user/dealer-location/check/{name}', 'App\Http\Controllers\v1\User\DealerLocationController@check');
         $route->get('user/dealer-location-quote-fees', 'App\Http\Controllers\v1\User\DealerLocationController@quoteFees');
         $route->get('user/dealer-location-available-tax-categories', 'App\Http\Controllers\v1\User\DealerLocationController@availableTaxCategories');
         $route->get('user/dealer-location-titles', 'App\Http\Controllers\v1\User\DealerLocationController@getDealerLocationTitles');
+
+        $route->group(['prefix' => 'user/dealer-location/{locationId}'], function ($route) {
+            $route->get('/mileage-fee', 'App\Http\Controllers\v1\User\DealerLocationMileageFeeController@index');
+            $route->post('/mileage-fee', 'App\Http\Controllers\v1\User\DealerLocationMileageFeeController@create');
+            $route->delete('/mileage-fee/{feeId}', 'App\Http\Controllers\v1\User\DealerLocationMileageFeeController@delete');
+        });
 
         /*
         |--------------------------------------------------------------------------
@@ -1056,4 +1078,18 @@ $api->version('v1', function ($route) {
     */
     $route->post('files/local', 'App\Http\Controllers\v1\File\FileController@uploadLocal');
     $route->post('images/local', 'App\Http\Controllers\v1\File\ImageController@uploadLocal');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Bill
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+
+    $route->post('bills', 'App\Http\Controllers\v1\Dms\Quickbooks\BillController@create');
+    $route->put('bills/{id}', 'App\Http\Controllers\v1\Dms\Quickbooks\BillController@update')->where('id', '[0-9]+');
+    $route->get('bills/{id}', 'App\Http\Controllers\v1\Dms\Quickbooks\BillController@show')->where('id', '[0-9]+');
+    $route->get('bills', 'App\Http\Controllers\v1\Dms\Quickbooks\BillController@index');
 });

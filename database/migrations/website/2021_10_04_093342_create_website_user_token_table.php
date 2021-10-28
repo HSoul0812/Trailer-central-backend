@@ -14,9 +14,8 @@ class CreateWebsiteUserTokenTable extends Migration
     public function up()
     {
         Schema::create('website_user_token', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->bigInteger('website_user_id')->unsigned()->primary();
             $table->string('access_token', 255);
-            $table->bigInteger('website_user_id')->unsigned();
             $table->foreign('website_user_id')->references('id')->on('website_user')->onDelete('cascade');
             $table->timestamps();
         });

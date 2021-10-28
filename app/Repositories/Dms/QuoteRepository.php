@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use App\Repositories\Dms\QuoteRepositoryInterface;
 use App\Exceptions\NotImplementedException;
+use App\Models\CRM\Account\Invoice;
 use App\Models\CRM\Dms\UnitSale;
 use App\Models\CRM\Account\Payment;
 use Illuminate\Database\Eloquent\Collection;
@@ -49,11 +50,11 @@ class QuoteRepository implements QuoteRepositoryInterface
             'direction' => 'ASC'
         ],
         'completed_at' => [
-            'field' => 'completed_at',
+            'field' => 'invoice.invoice_date',
             'direction' => 'DESC'
         ],
         '-completed_at' => [
-            'field' => 'completed_at',
+            'field' => 'invoice.invoice_date',
             'direction' => 'ASC'
         ],
     ];
@@ -191,7 +192,17 @@ class QuoteRepository implements QuoteRepositoryInterface
         if (!isset($this->sortOrders[$sort])) {
             return;
         }
-        return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
+        $sortOrder = $this->sortOrders[$sort];
+        $query->select('dms_unit_sale.*');
+
+        if($sortOrder['field'] == 'invoice.invoice_date') {
+            $invoice = Invoice::select('id', 'unit_sale_id', 'invoice_date')->groupBy('unit_sale_id');
+            $query = $query->leftJoinSub($invoice, 'invoice', function($join) {
+                $join->on('dms_unit_sale.id', '=', 'invoice.unit_sale_id');
+            });
+        }
+
+        return $query->orderBy($sortOrder['field'], $sortOrder['direction']);
     }
 
     public function getCompletedDeals(int $dealerId): Collection

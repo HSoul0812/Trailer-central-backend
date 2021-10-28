@@ -213,6 +213,14 @@ class DealerLocation extends Model
     }
 
     /**
+     * @return HasMany
+     */
+    public function mileageFees(): HasMany
+    {
+        return $this->hasMany(DealerLocationMileageFee::class, 'dealer_location_id', 'dealer_location_id');
+    }
+
+    /**
      * @return BelongsTo
      */
     public function locationRegion(): BelongsTo

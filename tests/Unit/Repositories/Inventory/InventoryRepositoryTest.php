@@ -44,35 +44,5 @@ class InventoryRepositoryTest extends TestCase
      */
     public function testGetAllDefault(): void
     {
-        $serviceRepoParams = [
-            'id' =>  $this->serviceOrderMock->id,
-            'status' => ServiceOrder::SERVICE_ORDER_STATUS['picked_up']
-        ];
-
-        $this->serviceOrderMock
-                ->shouldReceive('save')
-                ->once()
-                ->andReturn(new ServiceOrder([
-                    'id' => $this->serviceOrderMock->id,
-                    'status' => ServiceOrder::SERVICE_ORDER_STATUS['ready_for_pickup']
-                ]));
-
-        $this->serviceOrderMock
-                ->shouldReceive('fill')
-                ->once()
-                ->with($serviceRepoParams);
-
-        $this->serviceOrderMock
-                ->shouldReceive('findOrFail')
-                ->once()
-                ->with($this->serviceOrderMock->id)
-                ->andReturn($this->serviceOrderMock);
-
-
-        $serviceRepo = $this->app->make(ServiceOrderRepository::class);
-
-        $result = $serviceRepo->update($serviceRepoParams);
-        $this->assertEquals($result->id, $this->serviceOrderMock->id);
     }
-
 }
