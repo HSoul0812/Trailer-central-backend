@@ -265,8 +265,8 @@ $api->version('v1', function ($route) {
 
     $route->put('website/{websiteId}/enable-proxied-domain-ssl', 'App\Http\Controllers\v1\Website\WebsiteController@enableProxiedDomainSsl');
 
-    $route->get('website/{websiteId}/call-to-action', 'App\Http\Controllers\v1\Website\Config\WebsiteConfigController@getCallToAction');
-    $route->put('website/{websiteId}/call-to-action', 'App\Http\Controllers\v1\Website\Config\WebsiteConfigController@configCallToAction')->where('websiteId', '[0-9]+');
+    $route->get('website/{websiteId}/call-to-action', 'App\Http\Controllers\v1\Website\Config\CallToActionController@index');
+    $route->put('website/{websiteId}/call-to-action', 'App\Http\Controllers\v1\Website\Config\CallToActionController@createOrUpdate')->where('websiteId', '[0-9]+');
 
 
     /**
