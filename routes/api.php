@@ -1075,4 +1075,18 @@ $api->version('v1', function ($route) {
     */
     $route->post('files/local', 'App\Http\Controllers\v1\File\FileController@uploadLocal');
     $route->post('images/local', 'App\Http\Controllers\v1\File\ImageController@uploadLocal');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Bill
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+
+    $route->post('bills', 'App\Http\Controllers\v1\Dms\Quickbooks\BillController@create');
+    $route->put('bills/{id}', 'App\Http\Controllers\v1\Dms\Quickbooks\BillController@update')->where('id', '[0-9]+');
+    $route->get('bills/{id}', 'App\Http\Controllers\v1\Dms\Quickbooks\BillController@show')->where('id', '[0-9]+');
+    $route->get('bills', 'App\Http\Controllers\v1\Dms\Quickbooks\BillController@index');
 });

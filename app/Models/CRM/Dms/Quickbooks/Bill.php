@@ -3,6 +3,7 @@
 namespace App\Models\CRM\Dms\Quickbooks;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Class Bill
@@ -39,4 +40,19 @@ class Bill extends Model
         'memo',
         'dealer_location_id'
     ];
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(BillItem::class, 'bill_id', 'id');
+    }
+
+    public function categories(): HasMany
+    {
+        return $this->hasMany(BillCategory::class, 'bill_id', 'id');
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(BillPayment::class, 'bill_id', 'id');
+    }
 }
