@@ -45,7 +45,7 @@ class MessageController extends RestfulController
         $request = new SendMessageRequest(array_merge(['lead_id' => $leadId], $request->all()));
 
         if ($request->validate()) {
-            return $this->response->collection($this->service->send($request), $this->transformer);
+            return $this->response->item($this->service->send($request), $this->transformer);
         }
 
         return $this->response->errorBadRequest();
