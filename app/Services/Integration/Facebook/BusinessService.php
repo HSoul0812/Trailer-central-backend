@@ -70,48 +70,6 @@ class BusinessService implements BusinessServiceInterface
 
 
     /**
-     * @const string Messaging Types
-     */
-    const MSG_TYPE_RESPONSE = 'RESPONSE';
-    const MSG_TYPE_UPDATE = 'UPDATE';
-    const MSG_TYPE_TAG = 'MESSAGE_TAG';
-    const MSG_TYPE_DEFAULT = self::MSG_TYPE_UPDATE;
-
-    /**
-     * @const string Supported Message Tags
-     */
-    const MSG_TYPE_EVENT = 'CONFIRMED_EVENT_UPDATE';
-    const MSG_TYPE_PURCHASE = 'POST_PURCHASE_UPDATE';
-    const MSG_TYPE_ACCOUNT = 'ACCOUNT_UPDATE';
-    const MSG_TYPE_HUMAN = 'HUMAN_AGENT';
-    const MSG_TYPE_FEEDBACK = 'CUSTOMER_FEEDBACK';
-
-    /**
-     * @const array Messaging Types That Make Primary Type MSG_TYPE_TAG
-     */
-    const MSG_TYPE_TAGS = [
-        self::MSG_TYPE_EVENT,
-        self::MSG_TYPE_PURCHASE,
-        self::MSG_TYPE_ACCOUNT,
-        self::MSG_TYPE_HUMAN,
-        self::MSG_TYPE_FEEDBACK
-    ];
-
-    /**
-     * @const array Supported "Type" Entries
-     */
-    const MSG_TYPE_ALL = [
-        self::MSG_TYPE_RESPONSE,
-        self::MSG_TYPE_UPDATE,
-        self::MSG_TYPE_EVENT,
-        self::MSG_TYPE_PURCHASE,
-        self::MSG_TYPE_ACCOUNT,
-        self::MSG_TYPE_HUMAN,
-        self::MSG_TYPE_FEEDBACK
-    ];
-
-
-    /**
      * @var string : marketing|chat
      */
     protected $type = 'marketing';
@@ -761,7 +719,7 @@ class BusinessService implements BusinessServiceInterface
     private function getTypeTag(?string $type = null): array {
         // No Type?
         if(empty($type)) {
-            $type = self::MSG_TYPE_DEFAULT;
+            $type = Message::MSG_TYPE_DEFAULT;
         }
 
         // Create Type/Tag Array
@@ -770,8 +728,8 @@ class BusinessService implements BusinessServiceInterface
         ];
 
         // Is Type a Tag Instead?
-        if(in_array($type, self::MSG_TYPE_TAGS)) {
-            $typeTag['messaging_type'] = self::MSG_TYPE_TAG;
+        if(in_array($type, Message::MSG_TYPE_TAGS)) {
+            $typeTag['messaging_type'] = Message::MSG_TYPE_TAG;
             $typeTag['tag'] = $type;
         }
 
