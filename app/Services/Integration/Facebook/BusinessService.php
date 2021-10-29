@@ -505,6 +505,7 @@ class BusinessService implements BusinessServiceInterface
 
         // Send Message
         try {
+            $this->log->info('Sending message type ' . ($type ?? Message::MSG_TYPE_DEFAULT) . ' to user #' . $userId);
             $sentMessage = $this->api->call("/me/messages", 'POST', array_merge($this->getTypeTag($type), [
                 'recipient' => [
                     'id' => $userId,
