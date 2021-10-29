@@ -57,43 +57,55 @@ class Website extends Model
      * @param  string  $value
      * @return string
      */
-    public function getTypeConfigAttribute($value)
+    public function getTypeConfigAttribute(?string $value) : string
+    {
+
+      $unserializedFilter = unserialize($value);
+
+      $unserializedFilters = $unserializedFilter['filters'] ?? [];
+
+      if (isset($unserializedFilter['dealer_id'])) {
+        $printData = $this->unserializeDelaerFilter($unserializedFilter['dealer_id']);
+      } else {
+        $printData = '';
+      }
+      $printData .= $this->unserializeAllFilter($unserializedFilters);
+
+      
+
+      return $printData; 
+
+    }
+
+    public function unserializeDelaerFilter(?array $dealer_ids) : string
+    {
+      if (is_array($dealer_ids)) {
+          foreach($dealer_ids as $dealer_id) {
+              $printData = 'dealer_id|eq|'.$dealer_id.PHP_EOL;                            
+          }   
+      } else {
+          $printData = 'dealer_id|eq|'.$dealer_ids.PHP_EOL;
+      }
+      return $printData;
+    }
+
+    public function unserializeAllFilter(array $unserializedFilters) : string
     {
       $printData = '';
 
-      if (@unserialize($value)) {
-        $unserializedFilter = unserialize($value);
-        $unserializedFilters = array();
-        if(isset($unserializedFilter['filters'])) {
-            $unserializedFilters = $unserializedFilter['filters'];
-        }
-        
-        if(isset($unserializedFilter['dealer_id'])) {
-            if (is_array($unserializedFilter['dealer_id'])) {
-                foreach($unserializedFilter['dealer_id'] as $dealer_id) {
-                    $printData .= 'dealer_id|eq|'.$dealer_id.PHP_EOL;                            
-                }   
-            } else {
-                $printData .= 'dealer_id|eq|'.$unserializedFilter['dealer_id'].PHP_EOL;
-            }                                             
-        }
-        
-        foreach($unserializedFilters as $match => $filterData) {
-            $prefix = "$match|";
-            foreach($filterData as $operator => $operatorValue) {
-                foreach($operatorValue as $actualValue) {
-                    if (is_array($actualValue)) {
-                        $printData .= $prefix."$operator|".current($actualValue).PHP_EOL;
-                    } else {
-                        $printData .= $prefix."$operator|".$actualValue.PHP_EOL;
-                    }
-                }                            
-            }
-        }
-      } else {
-        $printData = $value;
-      }        
-
+      foreach($unserializedFilters as $match => $filterData) {
+          $prefix = "$match|";
+          foreach($filterData as $operator => $operatorValue) {
+              foreach($operatorValue as $actualValue) {
+                  if (is_array($actualValue)) {
+                      $printData .= $prefix."$operator|".current($actualValue).PHP_EOL;
+                  } else {
+                      $printData .= $prefix."$operator|".$actualValue.PHP_EOL;
+                  }
+              }                            
+          }
+      }
+      
       return $printData;
     }
 
@@ -103,26 +115,26 @@ class Website extends Model
       $filterData = '';
       $globalFilter = explode(\PHP_EOL, $value);
       
-      $filterLineData = array();
-      $filterLineData['filters'] = array();
+      $filterLineData = [];
+      $filterLineData['filters'] = [];
       foreach ($globalFilter as $filterLine) {
         $filterLine = trim($filterLine);
 
         if (strlen($filterLine) > 0  && $filterLine[0] !== '#' ) {
           if (substr($filterLine, 0, 16) === 'classic filter: ') {
               $filterMode = 'classic';
-              $filterData = substr($filterLine, 16);
-              break;
+              $this->attributes['type_config'] = substr($filterLine, 16);
+              return;
           } else {                                        
               $filterLineTmp = explode('|', $filterLine);
               if($filterLineTmp[0] == 'dealer_id') {
                   if(!isset($filterLineData['dealer_id'])) {
-                      $filterLineData['dealer_id'] = array();
+                      $filterLineData['dealer_id'] = [];
                   }
                   $filterLineData['dealer_id'][] = $filterLineTmp[2];
               } else {
                   if(!isset($filterLineData['filters'][$filterLineTmp[0]][$filterLineTmp[1]])) {
-                      $filterLineData['filters'][$filterLineTmp[0]][$filterLineTmp[1]] = array();
+                      $filterLineData['filters'][$filterLineTmp[0]][$filterLineTmp[1]] = [];
                   }
                   $filterLineData['filters'][$filterLineTmp[0]][$filterLineTmp[1]][] = array($filterLineTmp[2]);
               }                                        
@@ -133,12 +145,12 @@ class Website extends Model
       $this->attributes['type_config'] = serialize($filterLineData);
     }
 
-    public function getHeadScriptsAttribute()
+    public function getHeadScriptsAttribute() : string
     {
       return base64_decode($this->websiteConfigs()->where('key',  WebsiteConfig::GENERAL_HEAD_SCRIPT_KEY)->take(1)->value('value'));
     }
 
-    public function setHeadScriptsAttribute($value)
+    public function setHeadScriptsAttribute($value) : void
     {
       $headScript = $this->websiteConfigs()->where('key',  WebsiteConfig::GENERAL_HEAD_SCRIPT_KEY)->first();
       $value = base64_encode($value);
@@ -146,7 +158,7 @@ class Website extends Model
       if ($headScript) {
         $headScript->update(['value' => $value]);
       } else {
-        $this->websiteConfigs()->save(['key' =>  WebsiteConfig::GENERAL_HEAD_SCRIPT_KEY, 'value' => $value]);
+        $this->websiteConfigs()->create(['key' =>  WebsiteConfig::GENERAL_HEAD_SCRIPT_KEY, 'value' => $value]);
       }
 
     }
