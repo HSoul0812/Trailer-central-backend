@@ -31,7 +31,7 @@ class CallToActionController extends RestfulControllerV2
     /**
      * @param int $websiteId
      */
-    public function index(int $websiteId, Request $request) : response
+    public function index(int $websiteId, Request $request) : Response
     {
       return $this->response->collection($this->websiteConfigRepository->getAllCallToAction($websiteId), new WebsiteConfigTransformer);
     }
@@ -40,7 +40,7 @@ class CallToActionController extends RestfulControllerV2
      * @param int $websiteId
      * @return array<WebsiteConfig>
      */
-    public function createOrUpdate(int $websiteId, Request $request) : response
+    public function createOrUpdate(int $websiteId, Request $request) : Response
     {
       return $this->response->array($this->websiteConfigRepository->createOrUpdateCallToAction($websiteId, $request->all()));
     }

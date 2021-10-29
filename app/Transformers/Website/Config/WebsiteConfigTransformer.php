@@ -11,10 +11,10 @@ class WebsiteConfigTransformer extends TransformerAbstract
     public function transform(WebsiteConfig $WebsiteConfig)
     {
         return [
-            'id' => (int)$WebsiteConfig->id,
-            'website_id' => (int)$WebsiteConfig->website_id,
-            'key' => (string)$WebsiteConfig->key,
-            'value' => (string)$WebsiteConfig->value
+            'id' => $WebsiteConfig->id,
+            'website_id' => $WebsiteConfig->website_id,
+            'key' => $WebsiteConfig->key,
+            'value' => $WebsiteConfig->value
         ];
     }
 }

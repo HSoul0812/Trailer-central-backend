@@ -4,6 +4,7 @@ namespace Tests\Feature\Website\Config;
 
 use Tests\TestCase;
 use App\Models\Website\Website;
+use App\Models\Website\Config\WebsiteConfig;
 use App\Models\User\User;
 use App\Models\User\AuthToken;
 
@@ -45,10 +46,15 @@ class WebsiteConfigTest extends TestCase
       
       $json2 = json_decode($responseUpdate->getContent(), true);
       
+      $updatedWebsiteConfig = WebsiteConfig::where('website_id', $this->website->id)->where('key', 'call-to-action/custom-text')->where('value', 'example custom text test 2')->first();
+      
       self::assertIsArray($json2[0]);
       self::assertTrue($json2[0]['website_id'] == $this->website->id);
       self::assertTrue($json2[0]['key'] == 'call-to-action/custom-text');
       self::assertTrue($json2[0]['value'] == 'example custom text test 2');
+
+      self::assertInstanceOf(WebsiteConfig::class, $updatedWebsiteConfig);
+      self::assertTrue($updatedWebsiteConfig['value'] == 'example custom text test 2');
     }
 
     public function testIndex()
