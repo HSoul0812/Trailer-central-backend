@@ -2,20 +2,20 @@
 
 namespace App\Transformers\User;
 
+use League\Fractal\Resource\Collection;
 use League\Fractal\TransformerAbstract;
-use App\Transformers\User\DealerPermissionsTransformer;
 
-class UserTransformer extends TransformerAbstract 
+class UserTransformer extends TransformerAbstract
 {
     private const PROFILE_IMAGE = 'https://static-trailercentral.s3.amazonaws.com/files/download+(1).png';
-    
+
     protected $defaultIncludes = [
         'permissions'
     ];
-    
-    public function transform($user)
-    {                
-	return [
+
+    public function transform($user): array
+    {
+	    return [
              'id' => $user->dealer_id,
              'identifier' => $user->identifier ?? $user->user->identifier,
              'created_at' => $user->created_at ?? $user->user->created_at,
@@ -25,9 +25,9 @@ class UserTransformer extends TransformerAbstract
              'website' => $user->website
         ];
     }
-    
-    public function includePermissions($user)
+
+    public function includePermissions($user): Collection
     {
-        return $this->collection($user->getPermissionsAllowed(), new DealerPermissionsTransformer());
+        return $this->collection($user->getPermissions(), new DealerPermissionsTransformer());
     }
 }
