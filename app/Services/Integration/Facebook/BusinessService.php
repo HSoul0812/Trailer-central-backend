@@ -2,7 +2,8 @@
 
 namespace App\Services\Integration\Facebook;
 
-use App\Exceptions\CRM\Interactions\Facebook\FailedSendFacebookMessagetException;
+use App\Exceptions\CRM\Interactions\Facebook\FailedSendFacebookMessageException;
+use App\Exceptions\CRM\Interactions\Facebook\WrongFacebookMessageWindowException;
 use App\Exceptions\Integration\Facebook\FailedGetProductFeedException;
 use App\Exceptions\Integration\Facebook\FailedGetConversationsException;
 use App\Exceptions\Integration\Facebook\FailedGetMessagesException;
@@ -67,10 +68,47 @@ class BusinessService implements BusinessServiceInterface
      */
     const CONVO_MAX_MONTHS = 6;
 
+
     /**
-     * @const string
+     * @const string Messaging Types
      */
-    const MESSAGING_TYPE = 'UPDATE';
+    const MSG_TYPE_RESPONSE = 'RESPONSE';
+    const MSG_TYPE_UPDATE = 'UPDATE';
+    const MSG_TYPE_TAG = 'MESSAGE_TAG';
+    const MSG_TYPE_DEFAULT = self::MSG_TYPE_UPDATE;
+
+    /**
+     * @const string Supported Message Tags
+     */
+    const MSG_TYPE_EVENT = 'CONFIRMED_EVENT_UPDATE';
+    const MSG_TYPE_PURCHASE = 'POST_PURCHASE_UPDATE';
+    const MSG_TYPE_ACCOUNT = 'ACCOUNT_UPDATE';
+    const MSG_TYPE_HUMAN = 'HUMAN_AGENT';
+    const MSG_TYPE_FEEDBACK = 'CUSTOMER_FEEDBACK';
+
+    /**
+     * @const array Messaging Types That Make Primary Type MSG_TYPE_TAG
+     */
+    const MSG_TYPE_TAGS = [
+        self::MSG_TYPE_EVENT,
+        self::MSG_TYPE_PURCHASE,
+        self::MSG_TYPE_ACCOUNT,
+        self::MSG_TYPE_HUMAN,
+        self::MSG_TYPE_FEEDBACK
+    ];
+
+    /**
+     * @const array Supported "Type" Entries
+     */
+    const MSG_TYPE_ALL = [
+        self::MSG_TYPE_RESPONSE,
+        self::MSG_TYPE_UPDATE,
+        self::MSG_TYPE_EVENT,
+        self::MSG_TYPE_PURCHASE,
+        self::MSG_TYPE_ACCOUNT,
+        self::MSG_TYPE_HUMAN,
+        self::MSG_TYPE_FEEDBACK
+    ];
 
 
     /**
@@ -499,23 +537,23 @@ class BusinessService implements BusinessServiceInterface
      * @param AccessToken $accessToken
      * @param int $userId
      * @param string $message
+     * @param null|string $type
      * @return string Message ID of Sent Message
      */
-    public function sendMessage(AccessToken $accessToken, int $userId, string $message): string {
+    public function sendMessage(AccessToken $accessToken, int $userId, string $message, ?string $type = null): string {
         // Configure Client
         $this->initApi($accessToken);
 
-        // Get Page
+        // Send Message
         try {
-            $sentMessage = $this->api->call("/me/messages", 'POST', [
-                'messaging_type' => self::MESSAGING_TYPE,
+            $sentMessage = $this->api->call("/me/messages", 'POST', array_merge($this->getTypeTag($type), [
                 'recipient' => [
                     'id' => $userId,
                 ],
                 'message' => [
                     'text' => $message
                 ]
-            ]);
+            ]));
             $this->log->info("Successfully sent message: " . print_r($sentMessage, true));
 
             // Return New Chat Message Entry
@@ -526,8 +564,10 @@ class BusinessService implements BusinessServiceInterface
             $this->log->error("Exception returned trying to send message: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
             if(strpos($msg, 'Session has expired')) {
                 throw new ExpiredFacebookAccessTokenException;
+            } elseif(strpos($msg, 'sent outside of allowed window')) {
+                throw new WrongFacebookMessageWindowException;
             } else {
-                throw new FailedSendFacebookMessagetException;
+                throw new FailedSendFacebookMessageException;
             }
         }
     }
@@ -708,6 +748,35 @@ class BusinessService implements BusinessServiceInterface
 
         // Return Null
         return null;
+    }
+
+
+    /**
+     * Get Type/Tag for Type String
+     * 
+     * @param null|string $type
+     * @return array{messaging_type: string,
+     *               ?tag: string}
+     */
+    private function getTypeTag(?string $type = null): array {
+        // No Type?
+        if(empty($type)) {
+            $type = self::MSG_TYPE_DEFAULT;
+        }
+
+        // Create Type/Tag Array
+        $typeTag = [
+            'messaging_type' => $type
+        ];
+
+        // Is Type a Tag Instead?
+        if(in_array($type, self::MSG_TYPE_TAGS)) {
+            $typeTag['messaging_type'] = self::MSG_TYPE_TAG;
+            $typeTag['tag'] = $type;
+        }
+
+        // Return Type/Tag Array
+        return $typeTag;
     }
 
 
