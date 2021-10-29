@@ -16,10 +16,17 @@ class WebsiteConfig extends Model
 {
     const INVENTORY_PRINT_LOGO_KEY = 'inventory/print_logo';
     const DURATION_BEFORE_AUTO_ARCHIVING_KEY = 'inventory/duration_before_auto_archiving';
+    const CALL_TO_ACTION = 'call-to-action';
 
     protected $table = 'website_config';
 
     public $timestamps = false;
+
+    protected $fillable = [
+        'website_id',
+        'value',
+        'key'
+    ];
 
     /**
      * @return BelongsTo
