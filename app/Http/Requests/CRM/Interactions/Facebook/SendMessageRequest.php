@@ -14,6 +14,6 @@ class SendMessageRequest extends Request
     protected $rules = [
         'lead_id' => 'required|integer',
         'message' => 'required|string',
-        'type' => 'optional|messaging_type_valid'
+        'type' => 'nullable|messaging_type_valid'
     ];
 }
