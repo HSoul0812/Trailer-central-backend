@@ -37,7 +37,7 @@ class InteractionMessageRepository extends RepositoryAbstract implements Interac
             $search->must('multi_match', [
                 'query' => $params['query'],
                 'fuzziness' => 'AUTO',
-                'fields' => ['title^1.3', 'lead_first_name^1.3', 'lead_last_name^1.3', 'text^0.5', 'user_name^1.3']
+                'fields' => ['lead_first_name^1.3', 'lead_last_name^1.3', 'user_name^1.3', 'from_email', 'to_email', 'from_number', 'to_number']
             ]);
         } else {
             $search->must('match_all', []);
@@ -57,6 +57,10 @@ class InteractionMessageRepository extends RepositoryAbstract implements Interac
 
         if ($params['lead_id'] ?? null) {
             $search->filter('term', ['lead_id' => $params['lead_id']]);
+        }
+
+        if ($params['lead_ids'] ?? null) {
+            $search->filter('terms', ['lead_id' => $params['lead_ids']]);
         }
 
         if ($params['message_type'] ?? null) {
