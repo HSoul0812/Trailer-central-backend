@@ -166,11 +166,6 @@ class HomeJob extends Job
         // Clean Up Results
         $clean = $this->cleanCsvRow($listing);
 
-        // Skip if Fields Missing
-        if(empty($clean->name) || empty($clean->description)) {
-            return false;
-        }
-
         // Create Row
         $row = array();
         foreach($this->csvColumns as $k => $column) {

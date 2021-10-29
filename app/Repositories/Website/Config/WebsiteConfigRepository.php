@@ -5,6 +5,7 @@ namespace App\Repositories\Website\Config;
 use App\Exceptions\NotImplementedException;
 use App\Models\Website\Config\WebsiteConfig;
 use App\Models\Website\Config\WebsiteConfigDefault;
+use Illuminate\Database\Eloquent\Collection;
 
 class WebsiteConfigRepository implements WebsiteConfigRepositoryInterface {
 
@@ -50,6 +51,50 @@ class WebsiteConfigRepository implements WebsiteConfigRepositoryInterface {
         }
 
         return $query->get();
+    }
+
+    /**
+     * Get All Website Config Call to Action
+     *
+     * @param int $websiteId
+     * @return \Illuminate\Database\Eloquent\Collection|array<WebsiteConfig>
+     */
+    public function getAllCallToAction(int $websiteId) : collection
+    {
+      $query = WebsiteConfig::select('*');
+
+      $query = $query->where('website_id', $websiteId);
+      
+      $query->where('key', 'LIKE', '%'.WebsiteConfig::CALL_TO_ACTION.'%');
+      
+      return $query->get();
+    }
+
+    /**
+     * Get All Website Config Call to Action
+     *
+     * @param array $websiteId
+     * @return array<WebsiteConfig>
+     */
+    public function createOrUpdateCallToAction(int $websiteId, array $request) : array
+    {
+      $webisteConfigs = [];
+
+      foreach ($request as $websiteConfigDataKey => $websiteConfigDataValue) {
+
+        $websiteConfig = WebsiteConfig::updateOrCreate([
+            'website_id'=> $websiteId,
+            'key'=> $websiteConfigDataKey
+        ],[
+          'website_id' => $websiteId,
+          'key' => $websiteConfigDataKey,
+          'value' => $websiteConfigDataValue
+        ]);
+
+        $webisteConfigs[] = $websiteConfig;
+
+      }
+      return $webisteConfigs;
     }
 
     public function update($params) {

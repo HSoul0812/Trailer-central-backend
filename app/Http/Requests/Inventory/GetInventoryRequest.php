@@ -22,7 +22,7 @@ class GetInventoryRequest extends Request {
         'status' => 'integer',
         'inventory_ids' => 'array',
         'inventory_ids.*' => 'integer',
-        'attribute_ids' => 'array',
+        'attribute_names' => 'array',
     ];
 
     public function __construct(array $query = [], array $request = [], array $attributes = [], array $cookies = [], array $files = [], array $server = [], $content = null) {
