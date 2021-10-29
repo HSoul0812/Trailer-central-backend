@@ -12,6 +12,7 @@ use App\Exceptions\Integration\Facebook\FailedCreateProductFeedException;
 use App\Exceptions\Integration\Facebook\MissingFacebookAccessTokenException;
 use App\Exceptions\Integration\Facebook\ExpiredFacebookAccessTokenException;
 use App\Exceptions\Integration\Facebook\FailedReceivingLongLivedTokenException;
+use App\Models\CRM\Interactions\Facebook\Message;
 use App\Models\Integration\Auth\AccessToken;
 use App\Repositories\Integration\Facebook\PageRepositoryInterface;
 use App\Services\CRM\Interactions\Facebook\DTOs\ChatConversation;
