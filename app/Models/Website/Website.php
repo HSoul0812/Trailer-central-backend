@@ -59,25 +59,24 @@ class Website extends Model
      */
     public function getTypeConfigAttribute(?string $value) : string
     {
+      $printData = '';
 
-      $unserializedFilter = unserialize($value);
+      try{
+        $unserializedFilter = unserialize($value);
 
-      $unserializedFilters = $unserializedFilter['filters'] ?? [];
+        $unserializedFilters = $unserializedFilter['filters'] ?? [];
 
-      if (isset($unserializedFilter['dealer_id'])) {
-        $printData = $this->unserializeDelaerFilter($unserializedFilter['dealer_id']);
-      } else {
-        $printData = '';
-      }
-      $printData .= $this->unserializeAllFilter($unserializedFilters);
+        if (isset($unserializedFilter['dealer_id'])) {
+          $printData = $this->unserializeDealerFilter($unserializedFilter['dealer_id']);
+        }
 
-      
-
-      return $printData; 
-
+        $printData .= $this->unserializeAllFilter($unserializedFilters);
+      } catch(\Exception $exception){
+         return $printData;
+       }
     }
 
-    public function unserializeDelaerFilter(?array $dealer_ids) : string
+    public function unserializeDealerFilter(?array $dealer_ids) : string
     {
       if (is_array($dealer_ids)) {
           foreach($dealer_ids as $dealer_id) {
