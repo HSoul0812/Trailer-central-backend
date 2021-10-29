@@ -6,6 +6,7 @@ use App\Exceptions\CRM\Interactions\Facebook\FacebookLeadDoesntExistException;
 use App\Http\Requests\CRM\Interactions\Facebook\SendMessageRequest;
 use App\Models\Integration\Auth\AccessToken;
 use App\Models\CRM\Leads\Facebook\User as FbUser;
+use App\Models\CRM\Interactions\Facebook\Message;
 use App\Repositories\CRM\Interactions\Facebook\ConversationRepositoryInterface;
 use App\Repositories\CRM\Interactions\Facebook\MessageRepositoryInterface;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
