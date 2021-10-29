@@ -61,7 +61,7 @@ class Website extends Model
     {
       $printData = '';
 
-      try{
+      try {
         $unserializedFilter = unserialize($value);
 
         $unserializedFilters = $unserializedFilter['filters'] ?? [];
@@ -71,9 +71,11 @@ class Website extends Model
         }
 
         $printData .= $this->unserializeAllFilter($unserializedFilters);
+        
+        return $printData;
       } catch(\Exception $exception){
          return $printData;
-       }
+      }
     }
 
     public function unserializeDealerFilter(?array $dealer_ids) : string
