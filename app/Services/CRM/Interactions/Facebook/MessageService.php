@@ -102,8 +102,8 @@ class MessageService implements MessageServiceInterface
             'message_id' => $messageId,
             'conversation_id' => $fbLead->conversation->conversation_id,
             'user_id' => $fbLead->conversation->user_id,
-            'from_id' => $this->conversation->page_id,
-            'to_id' => $this->conversation->user_id,
+            'from_id' => $fbLead->conversation->page_id,
+            'to_id' => $fbLead->conversation->user_id,
             'message' => $request->message
         ]);
     }
