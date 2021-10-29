@@ -37,7 +37,7 @@ class InteractionMessageRepository extends RepositoryAbstract implements Interac
             $search->must('multi_match', [
                 'query' => $params['query'],
                 'fuzziness' => 'AUTO',
-                'fields' => ['title^1.3', 'lead_first_name^1.3', 'lead_last_name^1.3', 'text^0.5']
+                'fields' => ['title^1.3', 'lead_first_name^1.3', 'lead_last_name^1.3', 'text^0.5', 'user_name^1.3']
             ]);
         } else {
             $search->must('match_all', []);
@@ -65,6 +65,10 @@ class InteractionMessageRepository extends RepositoryAbstract implements Interac
 
         if (isset($params['hidden'])) {
             $search->filter('term', ['hidden' => $params['hidden']]);
+        }
+
+        if (isset($params['is_read'])) {
+            $search->filter('term', ['is_read' => $params['is_read']]);
         }
 
         if (isset($params['dispatched'])) {
@@ -106,7 +110,7 @@ class InteractionMessageRepository extends RepositoryAbstract implements Interac
             })->toArray();
         }
 
-        $size = $options['size'] ?? 50;
+        $size = $params['size'] ?? 50;
         $search->size($size);
 
         return $search->execute()->documents()->map(function (Document $document) {
@@ -152,8 +156,13 @@ class InteractionMessageRepository extends RepositoryAbstract implements Interac
 
         $search->aggregateRaw([
             "grouped_by" => [
-                "terms" => ["field" => $groupBy]
-            ],
+                "terms" => ["field" => $groupBy],
+                "aggs" => [
+                    'group_by_lead_id' => [
+                        "cardinality" => ["field" => "lead_id"]
+                    ]
+                ]
+            ]
         ]);
 
         $data = [];
@@ -161,7 +170,11 @@ class InteractionMessageRepository extends RepositoryAbstract implements Interac
         $result = $search->execute()->aggregations()->toArray()['grouped_by']['buckets'];
 
         foreach ($result as $item) {
-            $data[$item['key']] = $item['doc_count'];
+            if (isset($params['unique_leads']) && $params['unique_leads']) {
+                $data[$item['key']] = $item['group_by_lead_id']['value'];
+            } else {
+                $data[$item['key']] = $item['doc_count'];
+            }
         }
 
         return $data;

@@ -16,5 +16,6 @@ class SearchCountOfRequest extends Request
         'hidden' => 'boolean',
         'dispatched' => 'boolean',
         'is_read' => 'boolean',
+        'unique_leads' => 'boolean',
     ];
 }

@@ -9,6 +9,7 @@ use App\Http\Requests\CRM\Interactions\Message\BulkUpdateRequest;
 use App\Http\Requests\CRM\Interactions\Message\SearchCountOfRequest;
 use App\Http\Requests\CRM\Interactions\Message\SearchRequest;
 use App\Http\Requests\CRM\Interactions\Message\UpdateRequest;
+use App\Services\CRM\Interactions\InteractionMessageServiceInterface;
 use App\Transformers\CRM\Interactions\Message\SearchCountOfTransformer;
 use Dingo\Api\Http\Request;
 use App\Repositories\CRM\Interactions\InteractionMessageRepositoryInterface;
@@ -27,13 +28,22 @@ class InteractionMessageController extends RestfulControllerV2
     private $interactionMessageRepository;
 
     /**
-     * @param InteractionMessageRepositoryInterface $interactionMessageRepository
+     * @var InteractionMessageServiceInterface
      */
-    public function __construct(InteractionMessageRepositoryInterface $interactionMessageRepository)
-    {
+    private $interactionMessageService;
+
+    /**
+     * @param InteractionMessageRepositoryInterface $interactionMessageRepository
+     * @param InteractionMessageServiceInterface $interactionMessageService
+     */
+    public function __construct(
+        InteractionMessageRepositoryInterface $interactionMessageRepository,
+        InteractionMessageServiceInterface $interactionMessageService
+    ) {
         $this->middleware('setDealerIdOnRequest')->only(['search', 'update', 'bulkUpdate', 'searchCountOf']);
 
         $this->interactionMessageRepository = $interactionMessageRepository;
+        $this->interactionMessageService = $interactionMessageService;
     }
 
     /**
@@ -175,6 +185,13 @@ class InteractionMessageController extends RestfulControllerV2
      *         required=false,
      *         @OA\Schema(type="boolean")
      *     ),
+     *     @OA\Parameter(
+     *         name="is_read",
+     *         in="query",
+     *         description="Read or not",
+     *         required=false,
+     *         @OA\Schema(type="boolean")
+     *     ),
      *     @OA\Response(
      *         response="200",
      *         description="Returns a list of interaction messages",
@@ -208,9 +225,9 @@ class InteractionMessageController extends RestfulControllerV2
     }
 
     /**
-     * @OA\Get(
+     * @OA\Post(
      *     path="/api/leads/interaction-message/{id}",
-     *     description="Retrieve a list of interaction messages",
+     *     description="Update an interaction message",
      *     tags={"Interaction"},
      *     @OA\Parameter(
      *         name="id",
@@ -264,9 +281,9 @@ class InteractionMessageController extends RestfulControllerV2
     }
 
     /**
-     * @OA\Get(
-     *     path="/api/leads/interaction-message/{id}",
-     *     description="Retrieve a list of interaction messages",
+     * @OA\Post(
+     *     path="/api/leads/interaction-message/bulk",
+     *     description="Bulk update interaction messages",
      *     tags={"Interaction"},
      *     @OA\Parameter(
      *         name="ids",
@@ -313,7 +330,7 @@ class InteractionMessageController extends RestfulControllerV2
             return $this->response->errorBadRequest();
         }
 
-        $this->interactionMessageRepository->bulkUpdate($request->all());
+        $this->interactionMessageService->bulkUpdate($request->all());
 
         return $this->updatedResponse();
     }

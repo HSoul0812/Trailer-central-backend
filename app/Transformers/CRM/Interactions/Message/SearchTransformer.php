@@ -24,6 +24,7 @@ class SearchTransformer extends TransformerAbstract
             'dealer_id' => $interactionMessage['dealer_id'],
             'lead_first_name' => $interactionMessage['lead_first_name'],
             'lead_last_name' => $interactionMessage['lead_last_name'],
+            'user_name' => $interactionMessage['user_name'],
             'interaction_id' => $interactionMessage['interaction_id'],
             'parent_message_id' => $interactionMessage['parent_message_id'],
             'from_number' => $interactionMessage['from_number'],
@@ -38,6 +39,7 @@ class SearchTransformer extends TransformerAbstract
             'date_sent' => $interactionMessage['date_sent'],
             'hidden' => $interactionMessage['hidden'],
             'is_read' => $interactionMessage['is_read'],
+            'is_incoming' => $interactionMessage['is_incoming'],
         ];
     }
 }

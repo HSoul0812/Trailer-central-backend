@@ -11,6 +11,7 @@ use App\Models\Integration\Facebook\Page;
 use App\Models\Integration\Auth\AccessToken;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * Class Chat
@@ -95,5 +96,26 @@ class Chat extends Model
         return $this->hasOne(AccessToken::class, 'relation_id', 'id')
                     ->whereTokenType('facebook')
                     ->whereRelationType('fbapp_chat');
+    }
+
+    /**
+     * Get Sales Persons
+     * 
+     * @return BelongsToMany
+     */
+    public function salesPersons(): BelongsToMany
+    {
+        return $this->belongsToMany(SalesPerson::class, ChatSalesPeople::class, 'fbapp_chat_id', 'sales_person_id')
+            ->withTimestamps();
+    }
+
+    /**
+     * Get Sales People Ids
+     * 
+     * @return array
+     */
+    public function getSalesPeopleIdsAttribute(): array
+    {
+        return $this->salesPersons()->pluck(SalesPerson::TABLE_NAME .'.id')->toArray();
     }
 }
