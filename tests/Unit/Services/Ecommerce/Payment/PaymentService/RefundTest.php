@@ -110,12 +110,6 @@ class RefundTest extends PaymentServiceTestCase
             ->once();
 
         $dependencies->refundRepository
-            ->shouldReceive('getRefundedParts')
-            ->andReturn($refundedParts)
-            ->with($order->id)
-            ->once();
-
-        $dependencies->refundRepository
             ->shouldReceive('getPartsToBeRefunded')
             ->andReturn(new Collection([$partToRefund]))
             ->with($partIdsToRefund)
@@ -232,12 +226,6 @@ class RefundTest extends PaymentServiceTestCase
         $dependencies->refundRepository
             ->shouldReceive('getRefundedAmount')
             ->andReturn(Money::zero('USD'))
-            ->with($order->id)
-            ->once();
-
-        $dependencies->refundRepository
-            ->shouldReceive('getRefundedParts')
-            ->andReturn($refundedParts)
             ->with($order->id)
             ->once();
 
@@ -374,12 +362,6 @@ class RefundTest extends PaymentServiceTestCase
         $dependencies->refundRepository
             ->shouldReceive('getRefundedAmount')
             ->andReturn(Money::zero('USD'))
-            ->with($order->id)
-            ->once();
-
-        $dependencies->refundRepository
-            ->shouldReceive('getRefundedParts')
-            ->andReturn($refundedParts)
             ->with($order->id)
             ->once();
 
