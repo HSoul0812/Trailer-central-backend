@@ -514,10 +514,10 @@ class BusinessService implements BusinessServiceInterface
                     'text' => $message
                 ]
             ]));
-            $this->log->info("Successfully sent message: " . print_r($sentMessage, true));
+            $this->log->info("Successfully sent message: " . print_r($sentMessage->getContent(), true));
 
             // Return New Chat Message Entry
-            return 'm_' . $sentMessage->message_id;
+            return $sentMessage->getContent()['message_id'];
         } catch (\Exception $ex) {
             // Expired Exception?
             $msg = $ex->getMessage();
