@@ -45,14 +45,16 @@ class BillController extends RestfulControllerV2
 
     public function show($id, Request $request)
     {
-        $request = new GetBillRequest($request->all());
-        $params['id'] = $id;
+        $requestData = $request->all();
+        $requestData['id'] = $id;
+
+        $request = new GetBillRequest($requestData);
 
         if (!$request->validate()) {
             return $this->response->errorBadRequest();
         }
 
-        $bill = $this->billService->get($request->all());
+        $bill = $this->billService->get($requestData);
         return $this->response->item($bill, $this->billTransformer);
     }
 
