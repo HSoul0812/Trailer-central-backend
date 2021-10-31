@@ -110,6 +110,8 @@ class InteractionMessageRepository extends RepositoryAbstract implements Interac
             $searchResult = $this->esPagination($search, $params['page'], $perPage, $paginationParams);
 
             return $searchResult->documents()->map(function (Document $document) {
+                var_dump($document->getContent());
+                die;
                 return $document->getContent();
             })->toArray();
         }
@@ -118,8 +120,6 @@ class InteractionMessageRepository extends RepositoryAbstract implements Interac
         $search->size($size);
 
         return $search->execute()->documents()->map(function (Document $document) {
-            var_dump($document->getContent());
-            die;
             return $document->getContent();
         })->toArray();
     }
