@@ -32,6 +32,8 @@ class InteractionMessageRepository extends RepositoryAbstract implements Interac
         $paginationParams = [];
 
         $search = InteractionMessage::boolSearch();
+        var_dump($search);
+        die;
 
         if ($params['query'] ?? null) {
             $search->must('multi_match', [

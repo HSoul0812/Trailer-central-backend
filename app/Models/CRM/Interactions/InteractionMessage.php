@@ -126,6 +126,7 @@ class InteractionMessage extends Model
             var_dump($message->conversation);
             $lead = $message->conversation->lead;
             var_dump($lead);
+            die;
             $leadId = $lead->lead_id;
             $dateSent = $message->created_at;
 
