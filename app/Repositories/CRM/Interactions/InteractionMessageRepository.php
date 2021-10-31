@@ -32,8 +32,6 @@ class InteractionMessageRepository extends RepositoryAbstract implements Interac
         $paginationParams = [];
 
         $search = InteractionMessage::boolSearch();
-        var_dump($search);
-        die;
 
         if ($params['query'] ?? null) {
             $search->must('multi_match', [
@@ -120,6 +118,8 @@ class InteractionMessageRepository extends RepositoryAbstract implements Interac
         $search->size($size);
 
         return $search->execute()->documents()->map(function (Document $document) {
+            var_dump($document->getContent());
+            die;
             return $document->getContent();
         })->toArray();
     }
