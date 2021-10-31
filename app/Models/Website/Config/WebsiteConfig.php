@@ -17,6 +17,7 @@ class WebsiteConfig extends Model
     const INVENTORY_PRINT_LOGO_KEY = 'inventory/print_logo';
     const DURATION_BEFORE_AUTO_ARCHIVING_KEY = 'inventory/duration_before_auto_archiving';
     const CALL_TO_ACTION = 'call-to-action';
+    const SHOWROOM_USE_SERIES = 'showroom/use_series';
 
     protected $table = 'website_config';
 

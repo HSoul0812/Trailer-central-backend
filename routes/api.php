@@ -268,6 +268,9 @@ $api->version('v1', function ($route) {
     $route->get('website/{websiteId}/call-to-action', 'App\Http\Controllers\v1\Website\Config\CallToActionController@index');
     $route->put('website/{websiteId}/call-to-action', 'App\Http\Controllers\v1\Website\Config\CallToActionController@createOrUpdate')->where('websiteId', '[0-9]+');
 
+    $route->get('website/{websiteId}/showroom', 'App\Http\Controllers\v1\Website\Config\ShowroomController@index');
+    $route->put('website/{websiteId}/showroom', 'App\Http\Controllers\v1\Website\Config\ShowroomController@createOrUpdate')->where('websiteId', '[0-9]+');
+
 
     /**
      * Log
