@@ -38,9 +38,8 @@ class FbMessagesCleaner extends Seeder
     {
         // Do NOT Run This on Production!
         if(env('APP_ENV') === self::ENV_PROD || env('APP_URL') === self::ENV_PROD_URL) {
-            die('Do NOT run this on production!');
+            die('Do NOT run this on production!' . PHP_EOL . PHP_EOL);
         }
-        die;
 
 
         // Get All Facebook Messages
