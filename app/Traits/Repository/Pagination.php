@@ -41,6 +41,8 @@ trait Pagination
 
         $searchResult = $search->execute();
         $data = $searchResult->models();
+        var_dump($data);
+        die;
 
         $total = (isset($params['aggregationTotal']) && $params['aggregationTotal'])
             ? $searchResult->aggregations()['total']['value']

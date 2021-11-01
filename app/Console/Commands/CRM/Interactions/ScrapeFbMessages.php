@@ -113,8 +113,12 @@ class ScrapeFbMessages extends Command
 
                 // Loop Chats
                 foreach($chats as $chat) {
-                    $this->dispatch(new MessageJob($chat->page->accessToken, $chat->page_id));
-                    $this->info("{$this->command} started message job for facebook page #{$chat->page_id} on dealer #{$dealer->id}");
+                    try {
+                        $this->dispatch(new MessageJob($chat->page->accessToken, $chat->page_id));
+                        $this->info("{$this->command} started message job for facebook page #{$chat->page_id} on dealer #{$dealer->id}");
+                    } catch (Exception $ex) {
+                        $this->error("{$this->command} message job for facebook page #{$chat->page_id} on dealer #{$dealer->id} returned exception {$ex->getMessage()}");
+                    }
                 }
             }
         } catch(\Exception $e) {
