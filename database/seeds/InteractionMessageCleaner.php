@@ -17,14 +17,17 @@ class InteractionMessageCleaner extends Seeder
      */
     public function run()
     {
-        // Get ES Interaction Message
-        $uri = env('ELASTICSEARCH_HOST') . '/interaction_message' . '?pretty';
+        // Try..Catch
+        try {
+            // Get ES Interaction Message
+            $uri = env('ELASTICSEARCH_HOST') . '/interaction_message' . '?pretty';
 
-        // Create Client
-        $client = new Client();
+            // Create Client
+            $client = new Client();
 
-        // Delete Request From Client
-        $client->request('DELETE', $uri);
+            // Delete Request From Client
+            $client->request('DELETE', $uri);
+        } catch(\Exception $e) {}
 
 
         // Re-Import ES Messages
