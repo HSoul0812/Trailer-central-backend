@@ -28,6 +28,6 @@ class InteractionMessageCleaner extends Seeder
 
 
         // Re-Import ES Messages
-        Artisan::call('scout:import "App\Models\CRM\Interactions\InteractionMessage" -v');
+        Artisan::call('scout:import "App\\Models\\CRM\\Interactions\\InteractionMessage" -v');
     }
 }
