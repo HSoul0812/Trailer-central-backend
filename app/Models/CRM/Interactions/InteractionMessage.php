@@ -124,7 +124,7 @@ class InteractionMessage extends Model
 
         if ($this->tb_name === FbMessage::getTableName()) {
             $lead = $message->conversation->lead;
-            $leadId = $lead->lead_id;
+            $leadId = $lead->identifier;
             $dateSent = $message->created_at;
 
             $array['interaction_id'] = $message->interaction_id;

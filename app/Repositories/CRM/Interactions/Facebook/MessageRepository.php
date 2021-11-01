@@ -46,7 +46,7 @@ class MessageRepository implements MessageRepositoryInterface {
     }
 
     public function getAll($params) {
-        $query = Message::where('identifier', '>', 0)
+        $query = Message::where('id', '>', 0)
                         ->leftJoin(Conversation::getTableName(), Conversation::getTableName().'.conversation_id', '=', Message::getTableName().'.conversation_id');
 
         if (isset($params['dealer_id'])) {

@@ -2,6 +2,8 @@
 
 namespace App\Services\Integration\Facebook;
 
+use App\Exceptions\CRM\Interactions\Facebook\FailedSendFacebookMessageException;
+use App\Exceptions\CRM\Interactions\Facebook\WrongFacebookMessageWindowException;
 use App\Exceptions\Integration\Facebook\FailedGetProductFeedException;
 use App\Exceptions\Integration\Facebook\FailedGetConversationsException;
 use App\Exceptions\Integration\Facebook\FailedGetMessagesException;
@@ -10,6 +12,7 @@ use App\Exceptions\Integration\Facebook\FailedCreateProductFeedException;
 use App\Exceptions\Integration\Facebook\MissingFacebookAccessTokenException;
 use App\Exceptions\Integration\Facebook\ExpiredFacebookAccessTokenException;
 use App\Exceptions\Integration\Facebook\FailedReceivingLongLivedTokenException;
+use App\Models\CRM\Interactions\Facebook\Message;
 use App\Models\Integration\Auth\AccessToken;
 use App\Repositories\Integration\Facebook\PageRepositoryInterface;
 use App\Services\CRM\Interactions\Facebook\DTOs\ChatConversation;
@@ -485,9 +488,48 @@ class BusinessService implements BusinessServiceInterface
                 throw new FailedGetMessagesException;
             }
         }
+    }
 
-        // Return Empty Collection
-        return $collection;
+    /**
+     * Get Conversations for Page
+     * 
+     * @param AccessToken $accessToken
+     * @param int $userId
+     * @param string $message
+     * @param null|string $type
+     * @return string Message ID of Sent Message
+     */
+    public function sendMessage(AccessToken $accessToken, int $userId, string $message, ?string $type = null): string {
+        // Configure Client
+        $this->initApi($accessToken);
+
+        // Send Message
+        try {
+            $this->log->info('Sending message type ' . ($type ?? Message::MSG_TYPE_DEFAULT) . ' to user #' . $userId);
+            $sentMessage = $this->api->call("/me/messages", 'POST', array_merge($this->getTypeTag($type), [
+                'recipient' => [
+                    'id' => $userId,
+                ],
+                'message' => [
+                    'text' => $message
+                ]
+            ]));
+            $this->log->info("Successfully sent message: " . print_r($sentMessage->getContent(), true));
+
+            // Return New Chat Message Entry
+            return $sentMessage->getContent()['message_id'];
+        } catch (\Exception $ex) {
+            // Expired Exception?
+            $msg = $ex->getMessage();
+            $this->log->error("Exception returned trying to send message: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+            if(strpos($msg, 'Session has expired')) {
+                throw new ExpiredFacebookAccessTokenException;
+            } elseif(strpos($msg, 'sent outside of allowed window')) {
+                throw new WrongFacebookMessageWindowException;
+            } else {
+                throw new FailedSendFacebookMessageException;
+            }
+        }
     }
 
 
@@ -666,6 +708,35 @@ class BusinessService implements BusinessServiceInterface
 
         // Return Null
         return null;
+    }
+
+
+    /**
+     * Get Type/Tag for Type String
+     * 
+     * @param null|string $type
+     * @return array{messaging_type: string,
+     *               ?tag: string}
+     */
+    private function getTypeTag(?string $type = null): array {
+        // No Type?
+        if(empty($type)) {
+            $type = Message::MSG_TYPE_DEFAULT;
+        }
+
+        // Create Type/Tag Array
+        $typeTag = [
+            'messaging_type' => $type
+        ];
+
+        // Is Type a Tag Instead?
+        if(in_array($type, Message::MSG_TYPE_TAGS)) {
+            $typeTag['messaging_type'] = Message::MSG_TYPE_TAG;
+            $typeTag['tag'] = $type;
+        }
+
+        // Return Type/Tag Array
+        return $typeTag;
     }
 
 

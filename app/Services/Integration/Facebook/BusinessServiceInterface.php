@@ -66,4 +66,14 @@ interface BusinessServiceInterface {
      * @return Collection<ChatMessage>
      */
     public function getMessages(AccessToken $accessToken, string $conversationId, int $limit = 0, string $after = ''): Collection;
+
+    /**
+     * Get Conversations for Page
+     * 
+     * @param AccessToken $accessToken
+     * @param int $userId
+     * @param string $message
+     * @return string Message ID of Sent Message
+     */
+    public function sendMessage(AccessToken $accessToken, int $userId, string $message): string;
 }

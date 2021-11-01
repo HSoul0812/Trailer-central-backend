@@ -160,4 +160,15 @@ class FacebookRepository implements FacebookRepositoryInterface {
         // Lead Exists?
         return !empty($lead->id);
     }
+
+    /**
+     * Get Facebook Lead
+     * 
+     * @param int $leadId
+     * @return null|FbLead
+     */
+    public function getFbLead(int $leadId): ?FbLead {
+        // Find FbLead
+        return FbLead::where('lead_id', $leadId)->first();
+    }
 }

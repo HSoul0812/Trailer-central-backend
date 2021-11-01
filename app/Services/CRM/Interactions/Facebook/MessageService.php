@@ -2,8 +2,11 @@
 
 namespace App\Services\CRM\Interactions\Facebook;
 
+use App\Exceptions\CRM\Interactions\Facebook\FacebookLeadDoesntExistException;
+use App\Http\Requests\CRM\Interactions\Facebook\SendMessageRequest;
 use App\Models\Integration\Auth\AccessToken;
 use App\Models\CRM\Leads\Facebook\User as FbUser;
+use App\Models\CRM\Interactions\Facebook\Message;
 use App\Repositories\CRM\Interactions\Facebook\ConversationRepositoryInterface;
 use App\Repositories\CRM\Interactions\Facebook\MessageRepositoryInterface;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
@@ -76,6 +79,34 @@ class MessageService implements MessageServiceInterface
 
         // Initialize Logger
         $this->log = Log::channel('facebook');
+    }
+
+    /**
+     * Send Facebook Message
+     * 
+     * @param SendMessageRequest
+     * @throws FacebookLeadDoesntExistException
+     * @return Message
+     */
+    public function send(SendMessageRequest $request): Message {
+        // Get Facebook Lead
+        $fbLead = $this->users->getFbLead($request->lead_id);
+        if(empty($fbLead)) {
+            throw new FacebookLeadDoesntExistException;
+        }
+
+        // Send Message
+        $messageId = $this->sdk->sendMessage($fbLead->page->accessToken, $fbLead->conversation->user_id, $request->message, $request->type);
+
+        // Save Message to DB
+        return $this->messages->createOrUpdate([
+            'message_id' => $messageId,
+            'conversation_id' => $fbLead->conversation->conversation_id,
+            'user_id' => $fbLead->conversation->user_id,
+            'from_id' => $fbLead->conversation->page_id,
+            'to_id' => $fbLead->conversation->user_id,
+            'message' => $request->message
+        ]);
     }
 
     /**

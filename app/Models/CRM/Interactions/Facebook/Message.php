@@ -33,7 +33,54 @@ class Message extends Model
 {
     use TableAware, SoftDeletes;
 
+
+    /**
+     * @const string Messaging Types
+     */
+    const MSG_TYPE_RESPONSE = 'RESPONSE';
+    const MSG_TYPE_UPDATE = 'UPDATE';
+    const MSG_TYPE_TAG = 'MESSAGE_TAG';
+    const MSG_TYPE_DEFAULT = self::MSG_TYPE_UPDATE;
+
+    /**
+     * @const string Supported Message Tags
+     */
+    const MSG_TYPE_EVENT = 'CONFIRMED_EVENT_UPDATE';
+    const MSG_TYPE_PURCHASE = 'POST_PURCHASE_UPDATE';
+    const MSG_TYPE_ACCOUNT = 'ACCOUNT_UPDATE';
+    const MSG_TYPE_HUMAN = 'HUMAN_AGENT';
+    const MSG_TYPE_FEEDBACK = 'CUSTOMER_FEEDBACK';
+
+    /**
+     * @const array Messaging Types That Make Primary Type MSG_TYPE_TAG
+     */
+    const MSG_TYPE_TAGS = [
+        self::MSG_TYPE_EVENT,
+        self::MSG_TYPE_PURCHASE,
+        self::MSG_TYPE_ACCOUNT,
+        self::MSG_TYPE_HUMAN,
+        self::MSG_TYPE_FEEDBACK
+    ];
+
+    /**
+     * @const array Supported "Type" Entries
+     */
+    const MSG_TYPE_ALL = [
+        self::MSG_TYPE_RESPONSE,
+        self::MSG_TYPE_UPDATE,
+        self::MSG_TYPE_EVENT,
+        self::MSG_TYPE_PURCHASE,
+        self::MSG_TYPE_ACCOUNT,
+        self::MSG_TYPE_HUMAN,
+        self::MSG_TYPE_FEEDBACK
+    ];
+
+
+    /**
+     * @const Table Name
+     */
     const TABLE_NAME = 'fbapp_messages';
+
 
     /**
      * The table associated with the model.
