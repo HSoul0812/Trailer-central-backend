@@ -18,9 +18,12 @@ class FbMessagesCleaner extends Seeder
     const ENV_PROD_URL = 'http://api.v1.staging.trailercentral.com';
 
     /**
-     * @const Dealer ID to Delete Messages From
+     * @const Conversations to Delete
      */
-    const DEALER_ID = 1001;
+    const CONVERSATIONS = [
+        't_10158702775091859',
+        't_10158681189796859'
+    ];
 
 
     /**
@@ -43,13 +46,11 @@ class FbMessagesCleaner extends Seeder
 
 
         // Get All Facebook Messages
-        $messages = Message::leftJoin(Conversation::getTableName(), Conversation::getTableName().'.conversation_id', '=', Message::getTableName().'.conversation_id')
-                           ->leftJoin(Page::getTableName(), Page::getTableName().'.page_id',  '=', Conversation::getTableName().'.page_id')
-                           ->where(Page::getTableName().'.dealer_id', self::DEALER_ID)->get();
+        $messages = Message::whereIn('conversation_id', self::CONVERSATIONS)->get();
 
         // Delete All
         foreach($messages as $message) {
-            Message::where('message_id', $message->message_id)->delete();
+            $message->delete();
         }
         die('Deleted ' . $messages->count() . ' messages');
     }
