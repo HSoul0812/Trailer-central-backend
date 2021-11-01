@@ -5,6 +5,7 @@ namespace App\Http\Controllers\v1\Website\Config;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Http\Controllers\RestfulControllerV2;
 use App\Transformers\Website\Config\WebsiteConfigTransformer;
+use App\Http\Requests\Website\Config\CreateOrUpdateRequest;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
 
@@ -12,7 +13,7 @@ use Dingo\Api\Http\Response;
  * Class CallToActionController
  * @package App\Http\Controllers\v1\Website\Config
  */
-class CallToActionController extends RestfulControllerV2
+class WebsiteConfigController extends RestfulControllerV2
 {
     /**
      * @var WebsiteConfigRepository
@@ -33,7 +34,7 @@ class CallToActionController extends RestfulControllerV2
      */
     public function index(int $websiteId, Request $request) : Response
     {
-      return $this->response->collection($this->websiteConfigRepository->getAllCallToAction($websiteId), new WebsiteConfigTransformer);
+      return $this->response->collection($this->websiteConfigRepository->getAll($websiteId), new WebsiteConfigTransformer);
     }
 
     /**
@@ -42,6 +43,12 @@ class CallToActionController extends RestfulControllerV2
      */
     public function createOrUpdate(int $websiteId, Request $request) : Response
     {
+      $request = new CreateOrUpdateRequest($request->all());
+
+      if (!$request->validate()) {
+          return $this->response->errorBadRequest();
+      }
+
       return $this->response->array($this->websiteConfigRepository->createOrUpdate($websiteId, $request->all()));
     }
 
