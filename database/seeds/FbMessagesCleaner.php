@@ -43,13 +43,8 @@ class FbMessagesCleaner extends Seeder
 
 
         // Get All Facebook Messages
-        $messages = Message::leftJoin(Conversation::getTableName(), Conversation::getTableName().'.conversation_id', '=', Message::getTableName().'.conversation_id')
-                           ->leftJoin(Page::getTableName(), Page::getTableName().'.page_id',  '=', Conversation::getTableName().'.page_id')
-                           ->where(Page::getTableName().'.dealer_id', self::DEALER_ID);
-
-        // Delete All
-        foreach($messages as $message) {
-            $message->delete();
-        }
+        Message::leftJoin(Conversation::getTableName(), Conversation::getTableName().'.conversation_id', '=', Message::getTableName().'.conversation_id')
+               ->leftJoin(Page::getTableName(), Page::getTableName().'.page_id',  '=', Conversation::getTableName().'.page_id')
+               ->where(Page::getTableName().'.dealer_id', self::DEALER_ID)->delete();
     }
 }
