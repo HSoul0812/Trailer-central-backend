@@ -51,5 +51,6 @@ class FbMessagesCleaner extends Seeder
         foreach($messages as $message) {
             Message::where('message_id', $message->message_id)->delete();
         }
+        die('Deleted ' . $messages->count() . ' messages');
     }
 }
