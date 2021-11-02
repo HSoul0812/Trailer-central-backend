@@ -65,7 +65,7 @@ class PaymentService implements PaymentServiceInterface
      * @throws RefundAmountException when the amount is greater than its balance
      * @throws RefundAmountException when the order cannot be refunded due some provided part amount is greater than its remaining balance
      * @throws RefundAmountException when the order cannot be refunded due some provided part amount is greater than the paid amount for that part
-     * @throws RefundAmountException when the order cannot be refunded due some provided part is not a placed part
+     * @throws RefundAmountException when the order cannot be refunded due the provided amount is is less than the total amount of the parts
      * @throws RefundException when a provided part was not a placed part
      * @throws RefundException when a provided part was already refunded
      * @throws RefundException when the order has not a related parts matching with the request
@@ -153,7 +153,7 @@ class PaymentService implements PaymentServiceInterface
      * @throws RefundAmountException when the amount is greater than its balance
      * @throws RefundAmountException when the order cannot be refunded due some provided part amount is greater than its remaining balance
      * @throws RefundAmountException when the order cannot be refunded due some provided part amount is greater than the paid amount for that part
-     * @throws RefundAmountException when the order cannot be refunded due some provided part is not a placed part
+     * @throws RefundAmountException when the order cannot be refunded due the provided amount is is less than the total amount of the parts
      * @throws RefundException when a provided part was not a placed part
      * @throws RefundException when the order has not a related parts matching with the request
      * @throws RefundException when the order it has not a payment unique id
@@ -244,7 +244,7 @@ class PaymentService implements PaymentServiceInterface
                     );
                 }
             } else {
-                throw new RefundAmountException(
+                throw new RefundException(
                     sprintf(
                         '%d order cannot be refunded due the provided part %d is not a placed part',
                         $order->id,
