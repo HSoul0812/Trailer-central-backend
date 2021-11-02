@@ -138,6 +138,14 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
                 $completedOrder->billing_zip = $data['billto_postal'] ?? '';
                 $completedOrder->billing_region = $data['billto_region'] ?? '';
             }
+
+            $completedOrder->tax = $data['tax'];
+            $completedOrder->tax_rate = $data['tax_rate'];
+            $completedOrder->total_before_tax = $data['total_before_tax'];
+            $completedOrder->handling_fee = $data['handling_fee'];
+            $completedOrder->shipping_fee = $data['shipping_fee'];
+            $completedOrder->subtotal = $data['subtotal'];
+            $completedOrder->in_store_pickup  = $data['in_store_pickup'];
         } else {
             $completedOrder->customer_email = $data['customer_details']['email'];
             // Since Stripe use the amount in cents, we need to convert it
