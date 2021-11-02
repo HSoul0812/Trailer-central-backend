@@ -213,7 +213,7 @@ class WebsiteConfigRepository implements WebsiteConfigRepositoryInterface {
             return $params;
         } catch (\Exception $exception) {
             $this->rollbackTransaction();
-            return ['error' => $exception->getMessage()];
+            throw $exception;
         }
     }
 }
