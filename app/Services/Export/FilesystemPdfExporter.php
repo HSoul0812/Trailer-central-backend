@@ -15,6 +15,8 @@ use Throwable;
  */
 class FilesystemPdfExporter extends PdfExporter implements ExporterInterface
 {
+    public const PDF_EXPORT_S3_PREFIX = 'financial-reports/';
+    
     /**
      * @var Filesystem
      */
@@ -57,6 +59,6 @@ class FilesystemPdfExporter extends PdfExporter implements ExporterInterface
         $this->engine->loadHTML($content);
         $output = $this->engine->output();
         ($this->afterLoadHtmlHandler)();
-        Storage::disk('tmp')->put($this->filename, $output);
+        Storage::disk('s3')->put(self::PDF_EXPORT_S3_PREFIX . $this->filename, $output, 'public');
     }
 }
