@@ -166,27 +166,6 @@ class WebsiteConfigRepository implements WebsiteConfigRepositoryInterface {
         return [$key => $value];
     }
 
-
-    /**
-     * @param array $params
-     * @return array
-     */
-    public function getShowroomConfig(array $params): array
-    {
-        $includeShowRoom = DB::select("SELECT * FROM website_entity WHERE website_id = " . $params['websiteId']);
-        $showroomDealers = DB::select("SELECT showroom, showroom_dealers FROM dealer WHERE dealer_id = " . $params['dealer_id']);
-        $showroomUserSeries = $this->getValueOfConfig($params['websiteId'], WebsiteConfig::SHOWROOM_USE_SERIES);
-
-        $dealers = unserialize($showroomDealers[0]->showroom_dealers);
-
-        return [
-            'include_showroom' => $includeShowRoom,
-            'showroom' => $showroomDealers[0]->showroom,
-            'showroom_dealers' => $dealers,
-            'showroom_user_series' => $showroomUserSeries,
-        ];
-    }
-
     public function createOrUpdateShowroomConfig(array $params): array
     {
         try {
@@ -231,7 +210,7 @@ class WebsiteConfigRepository implements WebsiteConfigRepositoryInterface {
 
             $this->commitTransaction();
 
-            return $this->getShowroomConfig($params);
+            return $params;
         } catch (\Exception $exception) {
             $this->rollbackTransaction();
             return ['error' => $exception->getMessage()];

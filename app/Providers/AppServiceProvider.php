@@ -132,6 +132,8 @@ use App\Services\Export\DomPdfExporterService;
 use App\Services\Export\DomPdfExporterServiceInterface;
 use App\Services\Website\Log\LogServiceInterface;
 use App\Services\Website\Log\LogService;
+use App\Services\Website\WebsiteConfigService;
+use App\Services\Website\WebsiteConfigServiceInterface;
 use GuzzleHttp\Client;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -346,5 +348,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(TimeClockRepositoryInterface::class, TimeClockRepository::class);
         $this->app->bind(EmployeeRepositoryInterface::class, EmployeeRepository::class);
         $this->app->bind(TimeClockServiceInterface::class, TimeClockService::class);
+        $this->app->bind(WebsiteConfigServiceInterface::class, WebsiteConfigService::class);
     }
 }

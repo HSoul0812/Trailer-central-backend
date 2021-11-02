@@ -8,7 +8,7 @@ use League\Fractal\TransformerAbstract;
 class ShowroomConfigTransformer extends TransformerAbstract
 {
 
-    public function transform(WebsiteConfig $WebsiteConfig)
+    public function transform(WebsiteConfig $WebsiteConfig): array
     {
         return [
             'id' => $WebsiteConfig->id,

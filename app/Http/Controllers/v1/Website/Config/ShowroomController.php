@@ -3,22 +3,24 @@ namespace App\Http\Controllers\v1\Website\Config;
 
 use App\Http\Controllers\RestfulControllerV2;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
+use App\Services\Website\WebsiteConfigServiceInterface;
 use App\Transformers\Website\Config\WebsiteConfigTransformer;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
 
 class ShowroomController extends RestfulControllerV2
 {
-    /** @var WebsiteConfigRepositoryInterface */
-    private $websiteConfigRepository;
+
+    /** @var WebsiteConfigServiceInterface */
+    private $websiteConfigService;
 
     /**
      * ShowroomController constructor.
-     * @param WebsiteConfigRepositoryInterface $websiteConfigRepo
+     * @param WebsiteConfigServiceInterface $websiteConfigService
      */
-    public function __construct(WebsiteConfigRepositoryInterface $websiteConfigRepo)
+    public function __construct(WebsiteConfigServiceInterface $websiteConfigService)
     {
-        $this->websiteConfigRepository = $websiteConfigRepo;
+        $this->websiteConfigService = $websiteConfigService;
 
         $this->middleware('setDealerIdOnRequest');
     }
@@ -33,18 +35,36 @@ class ShowroomController extends RestfulControllerV2
         $requestData = $request->all();
         $requestData['websiteId'] = $websiteId;
 
-        return $this->response->array($this->websiteConfigRepository->getShowroomConfig($requestData));
+        return $this->response->array($this->websiteConfigService->getShowroomConfig($requestData));
     }
 
     /**
      * @param int $websiteId
-     * @return array
+     * @param Request $request
+     * @return Response
      */
-    public function createOrUpdate(int $websiteId, Request $request) : Response
+    public function create(int $websiteId, Request $request): Response
     {
         $requestData = $request->all();
         $requestData['websiteId'] = $websiteId;
 
-        return $this->response->array($this->websiteConfigRepository->createOrUpdateShowroomConfig($requestData));
+        $this->websiteConfigService->createShowroomConfig($requestData);
+
+        return $this->response->array($this->websiteConfigService->getShowroomConfig($requestData));
+    }
+
+    /**
+     * @param int $websiteId
+     * @param Request $request
+     * @return Response
+     */
+    public function update(int $websiteId, Request $request): Response
+    {
+        $requestData = $request->all();
+        $requestData['websiteId'] = $websiteId;
+
+        $this->websiteConfigService->createShowroomConfig($requestData);
+
+        return $this->response->array($this->websiteConfigService->getShowroomConfig($requestData));
     }
 }
