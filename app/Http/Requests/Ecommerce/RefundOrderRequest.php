@@ -15,8 +15,9 @@ class RefundOrderRequest extends Request
         return [
             'order_id' => 'integer|min:1|required|exists:ecommerce_completed_orders,id',
             'amount' => 'required|min:1',
-            'parts' => 'nullable|array',
-            'parts.*' => 'integer|min:1',
+            'parts' => 'array',
+            'parts.*.id' => 'required|integer|min:1',
+            'parts.*.amount' => 'required|numeric',
             'reason' => sprintf('nullable|string|in:%s', implode(',', Refund::REASONS))
         ];
     }
@@ -31,9 +32,18 @@ class RefundOrderRequest extends Request
         return Money::of($this->input('amount', 0), 'USD');
     }
 
+    /**
+     * @return array array indexed by part id
+     */
     public function parts(): array
     {
-        return $this->input('parts', []);
+        $indexedParts = [];
+
+        foreach ($this->input('parts', []) as $part) {
+            $indexedParts[$part['id']] = $part;
+        }
+
+        return $indexedParts;
     }
 
     public function reason(): ?string
