@@ -64,6 +64,13 @@ class CompletedOrderTransformer extends TransformerAbstract
             'invoice_url' => $completedOrder->invoice_url,
             'parts' => $partCollection,
             'total_qty' => $totalQty,
+            'tax' => $completedOrder->tax,
+            'tax_rate' => $completedOrder->tax_rate,
+            'total_before_tax' => $completedOrder->total_before_tax,
+            'shipping_fee' => $completedOrder->shipping_fee,
+            'handling_fee' => $completedOrder->handling_fee,
+            'subtotal' => $completedOrder->subtotal,
+            'in_store_pickup' => $completedOrder->in_store_pickup,
         ];
     }
 }
