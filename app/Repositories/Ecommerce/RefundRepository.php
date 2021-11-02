@@ -6,6 +6,7 @@ namespace App\Repositories\Ecommerce;
 
 use App\Models\Ecommerce\Refund;
 use App\Models\Parts\Textrail\Part;
+use App\Models\Parts\Textrail\RefundedPart;
 use App\Services\Ecommerce\Payment\RefundResultInterface;
 use Brick\Math\RoundingMode;
 use Brick\Money\Money;
@@ -24,7 +25,7 @@ class RefundRepository implements RefundRepositoryInterface
     }
 
     /**
-     * @param  array  $params
+     * @param array $params
      * @return array<Refund>|Collection
      * @throws \InvalidArgumentException when "order_id" argument was not provided
      */
@@ -43,22 +44,40 @@ class RefundRepository implements RefundRepositoryInterface
     }
 
     /**
-     * @param  int  $orderId
-     * @return array<Part>|Collection
+     * @param int $orderId
+     * @return array<RefundedPart>|Collection
      */
     public function getRefundedParts(int $orderId): Collection
     {
         $parts = [];
 
-        foreach ($this->getAll(['order_id' => $orderId]) as $refund) {
-            array_push($parts, ...$refund->parts);
-        }
+        $adder = static function (int $id, float $amount) use (&$parts) {
+            return isset($parts[$id]) ? $parts[$id] + $amount : $amount;
+        };
 
-        return Part::query()->whereIn('id', array_unique($parts))->get();
+        // we'll make an array of parts with their total refunded amount indexed by part id
+        $this->getAll(['order_id' => $orderId])
+            ->each(static function (Refund $refund) use (&$parts, $adder) {
+                foreach ($refund->parts as $part) {
+                    $parts[$part['id']] = $adder($part['id'], $part['amount']);
+                }
+            });
+
+        return Part::query()
+            ->whereIn('id', array_keys($parts))
+            ->get()
+            ->map(static function (Part $part) use ($parts): RefundedPart {
+                return RefundedPart::from([
+                    'id' => $part->id,
+                    'title' => $part->title,
+                    'sku' => $part->sku,
+                    'amount' => $parts[$part->id]
+                ]);
+            });
     }
 
     /**
-     * @param  array<int>  $parts
+     * @param array<int> $parts
      * @return array<Part>|Collection
      */
     public function getPartsToBeRefunded(array $parts): Collection
@@ -68,7 +87,7 @@ class RefundRepository implements RefundRepositoryInterface
 
     public function getRefundedAmount(int $orderId): Money
     {
-        $amount = (float) Refund::query()
+        $amount = (float)Refund::query()
             ->where('order_id', '=', $orderId)
             ->where('status', '!=', Refund::STATUS_FAILED)
             ->sum('amount');
@@ -77,8 +96,8 @@ class RefundRepository implements RefundRepositoryInterface
     }
 
     /**
-     * @param  Refund  $refund
-     * @param  string  $errorMessage
+     * @param Refund $refund
+     * @param string $errorMessage
      * @return bool
      */
     public function markAsFailed(Refund $refund, string $errorMessage): bool
@@ -96,8 +115,8 @@ class RefundRepository implements RefundRepositoryInterface
      * When there was some error after the refund has been done successfully on the payment gateway side,
      * it should be provided a result in order to make traceable
      *
-     * @param  Refund  $refund
-     * @param  RefundResultInterface  $refundResult
+     * @param Refund $refund
+     * @param RefundResultInterface $refundResult
      * @return bool
      */
     public function markAsRecoverableFailure(Refund $refund, RefundResultInterface $refundResult): bool
@@ -113,8 +132,8 @@ class RefundRepository implements RefundRepositoryInterface
     }
 
     /**
-     * @param  Refund  $refund
-     * @param  RefundResultInterface  $refundResult
+     * @param Refund $refund
+     * @param RefundResultInterface $refundResult
      * @return bool
      */
     public function markAsFinished(Refund $refund, RefundResultInterface $refundResult): bool
@@ -126,8 +145,8 @@ class RefundRepository implements RefundRepositoryInterface
     }
 
     /**
-     * @param  int  $refundId
-     * @param  array  $params
+     * @param int $refundId
+     * @param array $params
      * @return bool
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */

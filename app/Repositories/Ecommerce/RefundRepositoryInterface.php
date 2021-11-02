@@ -6,6 +6,7 @@ namespace App\Repositories\Ecommerce;
 
 use App\Models\Ecommerce\Refund;
 use App\Models\Parts\Textrail\Part;
+use App\Models\Parts\Textrail\RefundedPart;
 use App\Repositories\GenericRepository;
 use App\Services\Ecommerce\Payment\RefundResultInterface;
 use Brick\Money\Money;
@@ -56,7 +57,7 @@ interface RefundRepositoryInterface extends GenericRepository
 
     /**
      * @param  int  $orderId
-     * @return array<Part>|Collection
+     * @return array<RefundedPart>|Collection
      */
     public function getRefundedParts(int $orderId): Collection;
 
