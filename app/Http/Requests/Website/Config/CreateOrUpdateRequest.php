@@ -8,7 +8,6 @@ use Illuminate\Validation\Rule;
 
 class CreateOrUpdateRequest extends Request
 {
-    protected $rules = [];
     protected function getRules(): array
     {
         return [
@@ -30,7 +29,7 @@ class CreateOrUpdateRequest extends Request
             'inventory/show_sold_unit_in_search' => 'boolean',
             'inventory/show_stock_overlay_on_stock_photos' => 'boolean',
             'inventory/filters_refresh_page_option' => 'in:update_button,check_filter',
-            'inventory/website_sidebar_filters_order' => 'in:countDesc,countDesc,countAsc,nameDesc,nameAsc',
+            'inventory/website_sidebar_filters_order' => 'in:countDesc,countAsc,nameDesc,nameAsc',
             'inventory/show_packages_on_inventory_item_page' => 'boolean',
             'inventory/additional_description' => 'string',
             'inventory/times_viewed' => 'in:show,do_not_show'
