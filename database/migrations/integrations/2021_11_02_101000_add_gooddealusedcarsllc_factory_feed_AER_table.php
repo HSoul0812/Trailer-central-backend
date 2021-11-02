@@ -39,7 +39,7 @@ class AddGooddealusedcarsllcFactoryFeedAERTable extends Migration
      */
     public function down()
     {
-        DB::table('integrations')->where(self::DEALER_PARAMS_LOCATION)->delete();
-        DB::table('integrations')->where(self::DEALER_PARAMS_ENTITY)->delete();
+        DB::table('api_entity_reference')->where(self::DEALER_PARAMS_LOCATION)->delete();
+        DB::table('api_entity_reference')->where(self::DEALER_PARAMS_ENTITY)->delete();
     }
 }
