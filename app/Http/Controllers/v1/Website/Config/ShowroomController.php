@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\v1\Website\Config;
 
 use App\Http\Controllers\RestfulControllerV2;
+use App\Http\Requests\Website\Configuration\Showroom\GetShowroomConfigRequest;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Services\Website\WebsiteConfigServiceInterface;
 use App\Transformers\Website\Config\WebsiteConfigTransformer;
@@ -34,6 +35,12 @@ class ShowroomController extends RestfulControllerV2
     {
         $requestData = $request->all();
         $requestData['websiteId'] = $websiteId;
+
+        $request = new GetShowroomConfigRequest($requestData);
+
+        if (!$request->validate()) {
+            return $this->response->errorBadRequest();
+        }
 
         return $this->response->array($this->websiteConfigService->getShowroomConfig($requestData));
     }
