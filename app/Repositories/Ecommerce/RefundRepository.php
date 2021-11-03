@@ -10,6 +10,7 @@ use App\Models\Parts\Textrail\RefundedPart;
 use App\Services\Ecommerce\Payment\RefundResultInterface;
 use Brick\Math\RoundingMode;
 use Brick\Money\Money;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
 class RefundRepository implements RefundRepositoryInterface
@@ -25,22 +26,37 @@ class RefundRepository implements RefundRepositoryInterface
     }
 
     /**
-     * @param array $params
-     * @return array<Refund>|Collection
-     * @throws \InvalidArgumentException when "order_id" argument was not provided
+     * @param array $params the filterable parameters are "dealer_id" and "order_id"
+     * @return array<Refund>|Collection|LengthAwarePaginator
+     * @throws \InvalidArgumentException when "order_id" and "dealer_id" arguments were not provided
      */
-    public function getAll(array $params): Collection
+    public function getAll(array $params)
     {
-        $query = Refund::query();
+        $query = Refund::with('order');
 
-        if (empty($params['order_id'])) {
-            throw new \InvalidArgumentException("'order_id' filter is required");
+        if (empty($params['dealer_id']) && empty($params['order_id'])) {
+            throw new \InvalidArgumentException('RefundRepository::getAll requires at least one argument of: "dealer_id" or "order_id" to filter by');
         }
 
-        return $query
-            ->where('order_id', '=', $params['order_id'])
-            ->where('status', '!=', Refund::STATUS_FAILED)
-            ->get();
+        if (!empty($params['dealer_id'])) {
+            $query->where('ecommerce_order_refunds.dealer_id', '=', $params['dealer_id']);
+        }
+
+        if (!empty($params['order_id'])) {
+            $query->where('order_id', '=', $params['order_id']);
+        }
+
+        $query->where('ecommerce_order_refunds.status', '!=', Refund::STATUS_FAILED);
+
+        if (!empty($params['paged'])) {
+            if (empty($params['per_page'])) {
+                $params['per_page'] = 100;
+            }
+
+            return $query->paginate($params['per_page'])->appends($params);
+        }
+
+        return $query->get();
     }
 
     /**
