@@ -10,7 +10,7 @@ use App\Models\User\AuthToken;
 
 
 
-class WebsiteConfigTest extends TestCase
+class CallToActionTest extends TestCase
 {
 
     
@@ -29,50 +29,50 @@ class WebsiteConfigTest extends TestCase
       
       $response = $this
           ->withHeaders(['access-token' => $this->accessToken()])
-          ->put('api/website/' . $this->website->id . '/website-config', ['home/bargain_listings/title' => 'example bargain title']);
+          ->put('api/website/' . $this->website->id . '/call-to-action', ['call-to-action/custom-text' => 'example custom text']);
       
       $json = json_decode($response->getContent(), true);
 
       self::assertIsArray($json[0]);
       self::assertTrue($json[0]['website_id'] == $this->website->id);
-      self::assertTrue($json[0]['key'] == 'home/bargain_listings/title');
-      self::assertTrue($json[0]['value'] == 'example bargain title');
+      self::assertTrue($json[0]['key'] == 'call-to-action/custom-text');
+      self::assertTrue($json[0]['value'] == 'example custom text');
       
       // test update
       
       $responseUpdate = $this
           ->withHeaders(['access-token' => $this->accessToken()])
-          ->put('api/website/' . $this->website->id . '/website-config', ['home/bargain_listings/title' => 'example bargain title 2']);
+          ->put('api/website/' . $this->website->id . '/call-to-action', ['call-to-action/custom-text' => 'example custom text test 2']);
       
       $json2 = json_decode($responseUpdate->getContent(), true);
       
-      $updatedWebsiteConfig = WebsiteConfig::where('website_id', $this->website->id)->where('key', 'home/bargain_listings/title')->where('value', 'example bargain title 2')->first();
+      $updatedWebsiteConfig = WebsiteConfig::where('website_id', $this->website->id)->where('key', 'call-to-action/custom-text')->where('value', 'example custom text test 2')->first();
       
       self::assertIsArray($json2[0]);
       self::assertTrue($json2[0]['website_id'] == $this->website->id);
-      self::assertTrue($json2[0]['key'] == 'home/bargain_listings/title');
-      self::assertTrue($json2[0]['value'] == 'example bargain title 2');
+      self::assertTrue($json2[0]['key'] == 'call-to-action/custom-text');
+      self::assertTrue($json2[0]['value'] == 'example custom text test 2');
 
       self::assertInstanceOf(WebsiteConfig::class, $updatedWebsiteConfig);
-      self::assertTrue($updatedWebsiteConfig['value'] == 'example bargain title 2');
+      self::assertTrue($updatedWebsiteConfig['value'] == 'example custom text test 2');
     }
 
     public function testIndex()
     {
       
       $this->withHeaders(['access-token' => $this->accessToken()])
-          ->put('api/website/' . $this->website->id . '/website-config', ['inventory/additional_description' => 'test additional description']);
+          ->put('api/website/' . $this->website->id . '/call-to-action', ['call-to-action/custom-text' => 'example custom text index']);
       
       $response = $this
           ->withHeaders(['access-token' => $this->accessToken()])
-          ->get('api/website/' . $this->website->id . '/website-config');
+          ->get('api/website/' . $this->website->id . '/call-to-action');
       
       $json = json_decode($response->getContent(), true);
       self::assertIsArray($json['data']);
       
       $recordExists = false;
       foreach ($json['data'] as $webisteConfig) {
-        if ($webisteConfig['key'] == 'inventory/additional_description' && $webisteConfig['value'] == 'test additional description') {
+        if ($webisteConfig['key'] == 'call-to-action/custom-text' && $webisteConfig['value'] == 'example custom text index') {
           $recordExists = true;
           return;
         }

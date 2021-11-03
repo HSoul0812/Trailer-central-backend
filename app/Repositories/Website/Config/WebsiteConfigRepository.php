@@ -71,12 +71,12 @@ class WebsiteConfigRepository implements WebsiteConfigRepositoryInterface {
     }
 
     /**
-     * Get All Website Config Call to Action
+     * Create or Update on bulk
      *
      * @param array $websiteId
      * @return array<WebsiteConfig>
      */
-    public function createOrUpdateCallToAction(int $websiteId, array $request) : array
+    public function createOrUpdate(int $websiteId, array $request) : array
     {
       $webisteConfigs = [];
 
