@@ -3,10 +3,13 @@
 namespace App\Models\Ecommerce\CompletedOrder;
 
 use App\Models\Traits\TableAware;
+use App\Models\User\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $id
+ * @property int $dealer_id
  * @property float $total_amount
  * @property string $payment_status 'paid', 'unpaid'
  * @property string $refund_status i.e 'unrefunded', 'refunded', 'partial_refunded'
@@ -14,6 +17,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property float $refunded_amount
  * @property string $payment_intent the payment unique id
  * @property array<array<int, int>> $parts i.e: [{id:int, qty: int}]
+ *
+ * @property-read User $dealer
  */
 class CompletedOrder extends Model
 {
@@ -46,6 +51,7 @@ class CompletedOrder extends Model
     ];
 
     protected $fillable = [
+        'dealer_id',
         'customer_email',
         'total_amount',
         'payment_method',
@@ -93,5 +99,10 @@ class CompletedOrder extends Model
             $this->refund_status,
             [self::REFUND_STATUS_PARTIAL_REFUNDED, self::REFUND_STATUS_UNREFUNDED]
         );
+    }
+
+    public function dealer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
     }
 }
