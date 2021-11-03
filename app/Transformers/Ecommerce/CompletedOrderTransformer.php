@@ -2,6 +2,7 @@
 namespace App\Transformers\Ecommerce;
 
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
+use App\Models\Parts\Part;
 use App\Repositories\Parts\PartRepositoryInterface;
 use App\Repositories\Parts\Textrail\PartRepository;
 use League\Fractal\TransformerAbstract;
@@ -22,18 +23,7 @@ class CompletedOrderTransformer extends TransformerAbstract
 
     public function transform(CompletedOrder $completedOrder): array
     {
-        $partCollection = [];
-        $totalQty = 0;
-
-        if (!empty($completedOrder->parts)) {
-            $partIds = collect($completedOrder->parts)->map(static function (array $part) use(&$totalQty) : int {
-                $totalQty += $part['qty'];
-
-                return $part['id'];
-            })->toArray();
-
-            $partCollection = $this->textRailPartRepository->getAllByIds($partIds);
-        }
+        $partsSummary = $this->getPartSummary($completedOrder);
 
         return [
             'id' => $completedOrder->id,
@@ -62,8 +52,43 @@ class CompletedOrderTransformer extends TransformerAbstract
             'status' => $completedOrder->status,
             'invoice_id' => $completedOrder->invoice_id,
             'invoice_url' => $completedOrder->invoice_url,
-            'parts' => $partCollection,
+            'parts' => $partsSummary['parts'],
+            'total_qty' => $partsSummary['total_qty'],
+        ];
+    }
+
+    /**
+     * @param CompletedOrder $order
+     * @return array{parts: array, total_qty: int}
+     */
+    public function getPartSummary(CompletedOrder $order): array
+    {
+        $partCollection = [];
+        $totalQty = 0;
+
+        if (!empty($order->parts)) {
+            $indexedParts = [];
+            $partIds = collect($order->parts)->map(static function (array $part) use (&$totalQty, &$indexedParts): int {
+                $totalQty += $part['qty'];
+                $indexedParts[$part['id']] = $part;
+
+                return $part['id'];
+            })->toArray();
+
+            $partCollection = $this->textRailPartRepository
+                ->getAllByIds($partIds)
+                ->map(static function (Part $part) use (&$indexedParts): array {
+                    return array_merge($indexedParts[$part->id], [
+                        'sku' => $part->sku,
+                        'title' => $part->title,
+                        'description' => $part->description
+                    ]);
+                });
+        }
+
+        return [
             'total_qty' => $totalQty,
+            'parts' => $partCollection
         ];
     }
 }

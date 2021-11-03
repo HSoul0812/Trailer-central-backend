@@ -15,8 +15,6 @@ use App\Services\Ecommerce\Payment\Gateways\Stripe\StripeRefundResult;
 use App\Services\Ecommerce\Payment\PaymentService;
 use Brick\Money\Exception\MoneyMismatchException;
 use Brick\Money\Money;
-use Doctrine\DBAL\DBALException;
-use Illuminate\Database\Eloquent\JsonEncodingException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Collection;
 
@@ -71,7 +69,9 @@ class RefundTest extends PaymentServiceTestCase
         $orderParts = factory(Part::class, 3)->make(['id' => $partIdGenerator]);
         /** @var  Part $partToRefund */
         $partToRefund = $orderParts->first();
-        $partIdsToRefund = [$partToRefund->id];
+        $indexedPartToRefund = [
+            $partToRefund->id => ['id' => $partToRefund->id, 'amount' => $amountToRefund->getAmount()->toFloat()]
+        ];
 
         /** @var CompletedOrder $order */
         $order = factory(CompletedOrder::class)->make([
@@ -81,7 +81,7 @@ class RefundTest extends PaymentServiceTestCase
             'refund_status' => CompletedOrder::REFUND_STATUS_UNREFUNDED,
             'payment_intent' => $this->faker->uuid,
             'parts' => $orderParts->map(function (Part $part): array {
-                return ['id' => $part->id, 'qty' => 3];
+                return ['id' => $part->id, 'qty' => 3, 'price' => $part->price];
             })->toArray()
         ]);
 
@@ -92,7 +92,7 @@ class RefundTest extends PaymentServiceTestCase
             'id' => $uniqueFaker->numberBetween(1, 100),
             'order_id' => $order->id,
             'reason' => $reason,
-            'parts' => $partIdsToRefund
+            'parts' => $indexedPartToRefund
         ]);
 
         $dependencies = new PaymentServiceDependencies();
@@ -110,9 +110,15 @@ class RefundTest extends PaymentServiceTestCase
             ->once();
 
         $dependencies->refundRepository
+            ->shouldReceive('getRefundedParts')
+            ->andReturn($refundedParts)
+            ->with($order->id)
+            ->once();
+
+        $dependencies->refundRepository
             ->shouldReceive('getPartsToBeRefunded')
             ->andReturn(new Collection([$partToRefund]))
-            ->with($partIdsToRefund)
+            ->with(array_keys($indexedPartToRefund))
             ->once();
 
         $dependencies->refundRepository
@@ -122,7 +128,7 @@ class RefundTest extends PaymentServiceTestCase
                 'order_id' => $order->id,
                 'amount' => $amountToRefund->getAmount(),
                 'reason' => $reason,
-                'parts' => $partIdsToRefund
+                'parts' => collect($indexedPartToRefund)->values()->toArray()
             ])
             ->once();
 
@@ -131,7 +137,7 @@ class RefundTest extends PaymentServiceTestCase
             ->once()
             ->with(
                 sprintf('A refund process for {%d} order has begun', $order->id),
-                ['id' => $order->id, 'amount' => $amountToRefund->getAmount(), 'parts' => $partIdsToRefund]
+                ['id' => $order->id, 'amount' => $amountToRefund->getAmount(), 'parts' => collect($indexedPartToRefund)->values()->toArray()]
             );
 
         $dependencies->paymentGatewayService
@@ -140,7 +146,7 @@ class RefundTest extends PaymentServiceTestCase
             ->with(
                 $order->payment_intent,
                 $amountToRefund,
-                [['sku' => $partToRefund->sku, 'title' => $partToRefund->title, 'id' => $partToRefund->id]],
+                [['sku' => $partToRefund->sku, 'title' => $partToRefund->title, 'id' => $partToRefund->id, 'amount' => $amountToRefund->getAmount()->toFloat()]],
                 $reason
             )
             ->once();
@@ -162,7 +168,7 @@ class RefundTest extends PaymentServiceTestCase
         $this->expectException(RefundPaymentGatewayException::class);
         $this->expectExceptionMessage($expectedException->getMessage());
 
-        $service->refund($order->id, $amountToRefund, $partIdsToRefund);
+        $service->refund($order->id, $amountToRefund, $indexedPartToRefund);
     }
 
     /**
@@ -187,7 +193,9 @@ class RefundTest extends PaymentServiceTestCase
         $orderParts = factory(Part::class, 3)->make(['id' => $partIdGenerator]);
         /** @var  Part $partToRefund */
         $partToRefund = $orderParts->first();
-        $partIdsToRefund = [$partToRefund->id];
+        $indexedPartToRefund = [
+            $partToRefund->id => ['id' => $partToRefund->id, 'amount' => $amountToRefund->getAmount()->toFloat()]
+        ];
 
         /** @var CompletedOrder $order */
         $order = factory(CompletedOrder::class)->make([
@@ -197,7 +205,7 @@ class RefundTest extends PaymentServiceTestCase
             'refund_status' => CompletedOrder::REFUND_STATUS_UNREFUNDED,
             'payment_intent' => $this->faker->uuid,
             'parts' => $orderParts->map(function (Part $part): array {
-                return ['id' => $part->id, 'qty' => 3];
+                return ['id' => $part->id, 'qty' => 3, 'price' => $part->price];
             })->toArray()
         ]);
 
@@ -212,7 +220,7 @@ class RefundTest extends PaymentServiceTestCase
             'id' => $uniqueFaker->numberBetween(1, 100),
             'order_id' => $order->id,
             'reason' => $reason,
-            'parts' => $partIdsToRefund
+            'parts' => $indexedPartToRefund
         ]);
 
         $dependencies = new PaymentServiceDependencies();
@@ -230,9 +238,15 @@ class RefundTest extends PaymentServiceTestCase
             ->once();
 
         $dependencies->refundRepository
+            ->shouldReceive('getRefundedParts')
+            ->andReturn($refundedParts)
+            ->with($order->id)
+            ->once();
+
+        $dependencies->refundRepository
             ->shouldReceive('getPartsToBeRefunded')
             ->andReturn(new Collection([$partToRefund]))
-            ->with($partIdsToRefund)
+            ->with(array_keys($indexedPartToRefund))
             ->once();
 
         $dependencies->refundRepository
@@ -242,7 +256,7 @@ class RefundTest extends PaymentServiceTestCase
                 'order_id' => $order->id,
                 'amount' => $amountToRefund->getAmount(),
                 'reason' => $reason,
-                'parts' => $partIdsToRefund
+                'parts' => collect($indexedPartToRefund)->values()->toArray()
             ])
             ->once();
 
@@ -251,7 +265,7 @@ class RefundTest extends PaymentServiceTestCase
             ->once()
             ->with(
                 sprintf('A refund process for {%d} order has begun', $order->id),
-                ['id' => $order->id, 'amount' => $amountToRefund->getAmount(), 'parts' => $partIdsToRefund]
+                ['id' => $order->id, 'amount' => $amountToRefund->getAmount(), 'parts' => $indexedPartToRefund, 'parts' => collect($indexedPartToRefund)->values()->toArray()]
             );
 
         $dependencies->paymentGatewayService
@@ -260,7 +274,7 @@ class RefundTest extends PaymentServiceTestCase
             ->with(
                 $order->payment_intent,
                 $amountToRefund,
-                [['sku' => $partToRefund->sku, 'title' => $partToRefund->title, 'id' => $partToRefund->id]],
+                [['sku' => $partToRefund->sku, 'title' => $partToRefund->title, 'id' => $partToRefund->id, 'amount' => $amountToRefund->getAmount()->toFloat()]],
                 $reason
             )
             ->once();
@@ -303,7 +317,7 @@ class RefundTest extends PaymentServiceTestCase
             )
         );
 
-        $service->refund($order->id, $amountToRefund, $partIdsToRefund);
+        $service->refund($order->id, $amountToRefund, $indexedPartToRefund);
     }
 
     public function testItWillCreateRefundButWillFailJustBeforeGatewaySide(): void
@@ -323,7 +337,9 @@ class RefundTest extends PaymentServiceTestCase
         $orderParts = factory(Part::class, 3)->make(['id' => $partIdGenerator]);
         /** @var  Part $partToRefund */
         $partToRefund = $orderParts->first();
-        $partIdsToRefund = [$partToRefund->id];
+        $indexedPartToRefund = [
+            $partToRefund->id => ['id' => $partToRefund->id, 'amount' => $amountToRefund->getAmount()->toFloat()]
+        ];
 
         /** @var CompletedOrder $order */
         $order = factory(CompletedOrder::class)->make([
@@ -333,7 +349,7 @@ class RefundTest extends PaymentServiceTestCase
             'refund_status' => CompletedOrder::REFUND_STATUS_UNREFUNDED,
             'payment_intent' => $this->faker->uuid,
             'parts' => $orderParts->map(function (Part $part): array {
-                return ['id' => $part->id, 'qty' => 3];
+                return ['id' => $part->id, 'qty' => 3, 'price' => $part->price];
             })->toArray()
         ]);
 
@@ -348,7 +364,7 @@ class RefundTest extends PaymentServiceTestCase
             'id' => $uniqueFaker->numberBetween(1, 100),
             'order_id' => $order->id,
             'reason' => $reason,
-            'parts' => $partIdsToRefund
+            'parts' => $indexedPartToRefund
         ]);
 
         $dependencies = new PaymentServiceDependencies();
@@ -366,9 +382,15 @@ class RefundTest extends PaymentServiceTestCase
             ->once();
 
         $dependencies->refundRepository
+            ->shouldReceive('getRefundedParts')
+            ->andReturn($refundedParts)
+            ->with($order->id)
+            ->once();
+
+        $dependencies->refundRepository
             ->shouldReceive('getPartsToBeRefunded')
             ->andReturn(new Collection([$partToRefund]))
-            ->with($partIdsToRefund)
+            ->with(array_keys($indexedPartToRefund))
             ->once();
 
         $dependencies->refundRepository
@@ -378,7 +400,7 @@ class RefundTest extends PaymentServiceTestCase
                 'order_id' => $order->id,
                 'amount' => $amountToRefund->getAmount(),
                 'reason' => $reason,
-                'parts' => $partIdsToRefund
+                'parts' => collect($indexedPartToRefund)->values()->toArray()
             ])
             ->once();
 
@@ -387,7 +409,7 @@ class RefundTest extends PaymentServiceTestCase
             ->once()
             ->with(
                 sprintf('A refund process for {%d} order has begun', $order->id),
-                ['id' => $order->id, 'amount' => $amountToRefund->getAmount(), 'parts' => $partIdsToRefund]
+                ['id' => $order->id, 'amount' => $amountToRefund->getAmount(), 'parts' => $indexedPartToRefund, 'parts' => collect($indexedPartToRefund)->values()->toArray()]
             );
 
         $dependencies->paymentGatewayService
@@ -396,7 +418,7 @@ class RefundTest extends PaymentServiceTestCase
             ->with(
                 $order->payment_intent,
                 $amountToRefund,
-                [['sku' => $partToRefund->sku, 'title' => $partToRefund->title, 'id' => $partToRefund->id]],
+                [['sku' => $partToRefund->sku, 'title' => $partToRefund->title, 'id' => $partToRefund->id, 'amount' => $amountToRefund->getAmount()->toFloat()]],
                 $reason
             )
             ->once();
@@ -418,6 +440,6 @@ class RefundTest extends PaymentServiceTestCase
         $this->expectException(MoneyMismatchException::class);
         $this->expectExceptionMessage($expectedException->getMessage());
 
-        $service->refund($order->id, $amountToRefund, $partIdsToRefund);
+        $service->refund($order->id, $amountToRefund, $indexedPartToRefund);
     }
 }

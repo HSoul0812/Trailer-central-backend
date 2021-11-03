@@ -10,9 +10,9 @@ namespace Tests\Unit\Services\Ecommerce\Payment\PaymentService;
 use App\Exceptions\Ecommerce\RefundAmountException;
 use App\Exceptions\Ecommerce\RefundException;
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
-use App\Models\Parts\Textrail\Part;
 use App\Services\Ecommerce\Payment\PaymentService;
 use Brick\Money\Money;
+use Illuminate\Support\Collection;
 
 /**
  * @covers \App\Services\Ecommerce\Payment\PaymentService::ensureOrderCanBeRefunded
@@ -94,6 +94,7 @@ class EnsureOrderCanBeRefundedTest extends PaymentServiceTestCase
     {
         $amountToRefund = Money::of(200, 'USD');
         $partIdToRefund = 8;
+        $refundedParts = new Collection();
 
         /** @var CompletedOrder $order */
         $order = factory(CompletedOrder::class)->make([
@@ -113,6 +114,12 @@ class EnsureOrderCanBeRefundedTest extends PaymentServiceTestCase
             ->with($order->id)
             ->once();
 
+        $dependencies->refundRepository
+            ->shouldReceive('getRefundedParts')
+            ->andReturn($refundedParts)
+            ->with($order->id)
+            ->once();
+
         $service = $this->getMockBuilder(PaymentService::class)
             ->setConstructorArgs($dependencies->getOrderedArguments())
             ->getMock();
@@ -126,7 +133,11 @@ class EnsureOrderCanBeRefundedTest extends PaymentServiceTestCase
             )
         );
 
-        $this->invokeMethod($service, 'ensureOrderCanBeRefunded', [$order, $amountToRefund, [$partIdToRefund]]);
+        $this->invokeMethod(
+            $service,
+            'ensureOrderCanBeRefunded',
+            [$order, $amountToRefund, [['id' => $partIdToRefund, 'amount' => $this->faker->numberBetween(5, 50)]]]
+        );
     }
 
     /**

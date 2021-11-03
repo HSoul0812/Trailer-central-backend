@@ -29,26 +29,30 @@ class EncodePartsToBeRefundedTest extends PaymentServiceTestCase
 
         /** @var Collection|array<Part> $parts */
         $parts = factory(Part::class, 3)->make(['id' => $partIdGenerator]);
-        $partIds = $parts->pluck('id')->toArray();
+
+        $partsToRefund = $parts->map(function (Part $part): array {
+            return ['id' => $part->id, 'amount' => $this->faker->numberBetween(4, 40)];
+        })->keyBy('id')->toArray();
 
         $dependencies = new PaymentServiceDependencies();
 
         $dependencies->refundRepository
             ->shouldReceive('getPartsToBeRefunded')
             ->andReturn($parts)
-            ->with($partIds)
+            ->with(array_keys($partsToRefund))
             ->once();
 
         $service = $this->getMockBuilder(PaymentService::class)
             ->setConstructorArgs($dependencies->getOrderedArguments())
             ->getMock();
 
-        $encodedParts = $this->invokeMethod($service, 'encodePartsToBeRefunded', [$partIds]);
+        $encodedParts = $this->invokeMethod($service, 'encodePartsToBeRefunded', [$partsToRefund]);
 
         $this->assertCount(3, $encodedParts);
         $this->assertArrayHasKey('title', $encodedParts[1]);
         $this->assertSame($parts->get(1)->title, $encodedParts[1]['title']);
         $this->assertArrayHasKey('sku', $encodedParts[1]);
         $this->assertSame($parts->get(1)->sku, $encodedParts[1]['sku']);
+        $this->assertSame($partsToRefund[$parts->get(1)->id]['amount'], $encodedParts[1]['amount']);
     }
 }

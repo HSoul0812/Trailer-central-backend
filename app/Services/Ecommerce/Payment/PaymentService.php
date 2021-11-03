@@ -38,12 +38,13 @@ class PaymentService implements PaymentServiceInterface
     private $logger;
 
     public function __construct(
-        RefundRepositoryInterface $refundRepository,
+        RefundRepositoryInterface         $refundRepository,
         CompletedOrderRepositoryInterface $orderRepository,
-        CompletedOrderServiceInterface $orderService,
-        PaymentGatewayServiceInterface $paymentGatewayService,
-        LoggerServiceInterface $logger
-    ) {
+        CompletedOrderServiceInterface    $orderService,
+        PaymentGatewayServiceInterface    $paymentGatewayService,
+        LoggerServiceInterface            $logger
+    )
+    {
         $this->refundRepository = $refundRepository;
         $this->orderRepository = $orderRepository;
         $this->orderService = $orderService;
@@ -52,16 +53,19 @@ class PaymentService implements PaymentServiceInterface
     }
 
     /**
-     * @param  int  $id
-     * @param  Money  $amount
-     * @param  array<int>  $parts  part's ids to be refunded
-     * @param  string|null  $reason
+     * @param int $id
+     * @param Money $amount
+     * @param array{id: int, amount: float} $parts parts to be refunded indexed by id
+     * @param string|null $reason
      * @return Refund
      *
      * @throws \Brick\Money\Exception\MoneyMismatchException
      * @throws RefundAmountException when the order is not refundable due it is unpaid
      * @throws RefundAmountException when the order is not refundable due it is refunded
      * @throws RefundAmountException when the amount is greater than its balance
+     * @throws RefundAmountException when the order cannot be refunded due some provided part amount is greater than its remaining balance
+     * @throws RefundAmountException when the order cannot be refunded due some provided part amount is greater than the paid amount for that part
+     * @throws RefundAmountException when the order cannot be refunded due the provided amount is is less than the total amount of the parts
      * @throws RefundException when a provided part was not a placed part
      * @throws RefundException when a provided part was already refunded
      * @throws RefundException when the order has not a related parts matching with the request
@@ -84,7 +88,7 @@ class PaymentService implements PaymentServiceInterface
 
         // This logic must not be a transaction to be able recuperating from an error after the refund has been
         // successfully created in the payment gateway side
-        $refund = $this->createRefund($order, $amount, $parts, $reason);
+        $refund = $this->createRefund($order, $amount, collect($parts)->values()->toArray(), $reason);
 
         try {
             $gatewayRefundResponse = $this->paymentGatewayService->refund(
@@ -139,14 +143,17 @@ class PaymentService implements PaymentServiceInterface
     }
 
     /**
-     * @param  CompletedOrder  $order
-     * @param  Money  $amount
-     * @param  array<int>  $parts  part's ids to be refunded
+     * @param CompletedOrder $order
+     * @param Money $amount
+     * @param array{id: int, amount: float} $parts parts to be refunded indexed by id
      *
      * @throws \Brick\Money\Exception\MoneyMismatchException
      * @throws RefundAmountException when the order is not refundable due it is unpaid
      * @throws RefundAmountException when the order is not refundable due it is refunded
      * @throws RefundAmountException when the amount is greater than its balance
+     * @throws RefundAmountException when the order cannot be refunded due some provided part amount is greater than its remaining balance
+     * @throws RefundAmountException when the order cannot be refunded due some provided part amount is greater than the paid amount for that part
+     * @throws RefundAmountException when the order cannot be refunded due the provided amount is is less than the total amount of the parts
      * @throws RefundException when a provided part was not a placed part
      * @throws RefundException when the order has not a related parts matching with the request
      * @throws RefundException when the order it has not a payment unique id
@@ -185,11 +192,9 @@ class PaymentService implements PaymentServiceInterface
             );
         }
 
-        $orderParts = collect($order->parts)->map(static function (array $part): int {
-            return $part['id'];
-        })->toArray();
+        $indexedOrderParts = collect($order->parts)->keyBy('id')->toArray();
 
-        if (empty($orderParts) && !empty($parts)) {
+        if (empty($indexedOrderParts) && !empty($parts)) {
             throw new RefundException(
                 sprintf(
                     '%d order cannot be refunded due it has not a related parts matching with the request',
@@ -198,8 +203,47 @@ class PaymentService implements PaymentServiceInterface
             );
         }
 
-        collect($parts)->each(static function (int $partId) use ($orderParts, $order) {
-            if (!empty($orderParts) && !in_array($partId, $orderParts)) {
+        $refundedParts = $this->refundRepository->getRefundedParts($order->id)->keyBy('id')->toArray();
+        $partsTotal = Money::zero('USD');
+
+        foreach ($parts as $part) {
+            ['id' => $partId, 'amount' => $partAmount] = $part;
+
+            $partsTotal = $partsTotal->plus(Money::of($partAmount, 'USD', null, RoundingMode::UP));
+
+            if (array_key_exists($partId, $indexedOrderParts)) {
+                // a part item is the price of the part multiplied by the quantity
+                $partSubTotal = Money::of(
+                    $indexedOrderParts[$partId]['qty'] * $indexedOrderParts[$partId]['price'],
+                    'USD',
+                    null,
+                    RoundingMode::UP
+                );
+
+                // check if the refunded amount will be greater than the total paid for the part item
+                if (isset($refundedParts[$partId])
+                    && Money::of($refundedParts[$partId]->amount + $partAmount, 'USD', null, RoundingMode::UP)->isGreaterThan($partSubTotal)
+                ) {
+                    throw new RefundAmountException(
+                        sprintf(
+                            '%d order cannot be refunded due the provided amount %f for the part %d is greater than its balance',
+                            $order->id,
+                            $partAmount,
+                            $partId
+                        )
+                    );
+                } elseif (!isset($refundedParts[$partId]) &&
+                    Money::of($partAmount, 'USD', null, RoundingMode::UP)->isGreaterThan($partSubTotal)) {
+                    throw new RefundAmountException(
+                        sprintf(
+                            '%d order cannot be refunded due the provided amount %.2f for the part %d is greater than the paid amount for the part',
+                            $order->id,
+                            $partAmount,
+                            $partId
+                        )
+                    );
+                }
+            } else {
                 throw new RefundException(
                     sprintf(
                         '%d order cannot be refunded due the provided part %d is not a placed part',
@@ -208,24 +252,35 @@ class PaymentService implements PaymentServiceInterface
                     )
                 );
             }
-        });
+        }
+
+        if ($partsTotal->isGreaterThan($amount)) {
+            throw new RefundAmountException(
+                sprintf(
+                    '%d order cannot be refunded due the provided amount %.2f is less than the total amount of the parts',
+                    $order->id,
+                    $amount->getAmount()->toFloat()
+                )
+            );
+        }
     }
 
     /**
-     * @param  CompletedOrder  $order
-     * @param  Money  $amount
-     * @param  array<int>  $parts  part's ids to be refunded
-     * @param  null|string  $reason
+     * @param CompletedOrder $order
+     * @param Money $amount
+     * @param array<int> $parts part's ids to be refunded
+     * @param null|string $reason
      *
      * @return Refund
      * @throws \Exception when some error has occurred on DB saving time
      */
     private function createRefund(
         CompletedOrder $order,
-        Money $amount,
-        array $parts,
-        ?string $reason = null
-    ): Refund {
+        Money          $amount,
+        array          $parts,
+        ?string        $reason = null
+    ): Refund
+    {
         $refund = $this->refundRepository->create([
             'order_id' => $order->id,
             'amount' => $amount->getAmount(),
@@ -242,8 +297,8 @@ class PaymentService implements PaymentServiceInterface
     }
 
     /**
-     * @param  Refund  $refund
-     * @param  StripeRefundResult  $gatewayRefundResponse
+     * @param Refund $refund
+     * @param StripeRefundResult $gatewayRefundResponse
      *
      * @throws AfterRemoteRefundException when there was some error after the refund was successfully done on payment gateway side
      */
@@ -287,15 +342,15 @@ class PaymentService implements PaymentServiceInterface
     }
 
     /**
-     * @param  array<int>  $parts  part's ids to be refunded
-     * @return array{sku:string, title:string, id:int}
+     * @param array{id: int, amount: float} $parts parts to be refunded indexed by id
+     * @return array{sku:string, title:string, id:int, amount: float}
      */
     private function encodePartsToBeRefunded(array $parts): array
     {
         return $this->refundRepository
-            ->getPartsToBeRefunded($parts)
-            ->map(static function (Part $part): array {
-                return ['sku' => $part->sku, 'title' => $part->title, 'id' => $part->id];
+            ->getPartsToBeRefunded(array_keys($parts))
+            ->map(static function (Part $part) use ($parts): array {
+                return ['sku' => $part->sku, 'title' => $part->title, 'id' => $part->id, 'amount' => $parts[$part->id]['amount']];
             })->toArray();
     }
 }

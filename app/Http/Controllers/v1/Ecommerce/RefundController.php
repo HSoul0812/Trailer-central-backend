@@ -21,6 +21,7 @@ class RefundController extends RestfulControllerV2
     }
 
     /**
+     * @param int $orderId
      * @param  Request  $request
      * @return Response|void
      *
