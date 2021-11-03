@@ -88,7 +88,14 @@ class CompletedOrderTransformer extends TransformerAbstract
 
         return [
             'total_qty' => $totalQty,
-            'parts' => $partCollection
+            'parts' => $partCollection,
+            'tax' => $order->tax,
+            'tax_rate' => $order->tax_rate,
+            'total_before_tax' => $order->total_before_tax,
+            'shipping_fee' => $order->shipping_fee,
+            'handling_fee' => $order->handling_fee,
+            'subtotal' => $order->subtotal,
+            'in_store_pickup' => $order->in_store_pickup
         ];
     }
 }
