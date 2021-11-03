@@ -159,6 +159,7 @@ class WebsiteUserControllerTest extends TestCase {
             'first_name' => 'first_name',
             'last_name' => 'last_name',
         ], ['access-token' => $accessToken]);
+
         $response->assertStatus(JsonResponse::HTTP_OK);
         $response->assertJson([
             'data' => [
@@ -172,4 +173,27 @@ class WebsiteUserControllerTest extends TestCase {
             ]
         ]);
     }
+
+    public function testUpdateAccountPassword() {
+        $this->websiteUserSeeder->seed();
+        $websiteUser = $this->websiteUserSeeder->websiteUser;
+        $accessToken = $websiteUser->token->access_token;
+        $response = $this->json('PUT', "/api/website/account", [
+            'current_password' => '12345',
+            'new_password' => '12345678',
+        ], ['access-token' => $accessToken]);
+        $response->assertStatus(JsonResponse::HTTP_OK);
+        $response->assertJson([
+            'data' => [
+                'access_token' => $accessToken,
+                'user' => [
+                    'id' => $websiteUser->getKey(),
+                    'first_name' => $websiteUser->first_name,
+                    'last_name' => $websiteUser->last_name,
+                    'middle_name' => $websiteUser->middle_name,
+                ],
+            ],
+        ]);
+    }
+
 }

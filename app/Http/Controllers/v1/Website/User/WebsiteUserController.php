@@ -75,11 +75,13 @@ class WebsiteUserController extends RestfulControllerV2 {
             $this->response->errorBadRequest();
         }
 
-        if(isset($requestData['password']) && $requestData['password']) {
-            $user->password = $requestData['password'];
+        if(isset($requestData['current_password'])) {
+            if ($user->checkPassword($requestData['current_password'])) {
+                $user->password = $requestData['new_password'];
+            } else {
+                $this->response->errorBadRequest();
+            }
         }
-
-        unset($requestData['password']);
 
         $user->fill($requestData);
         $user->save();
