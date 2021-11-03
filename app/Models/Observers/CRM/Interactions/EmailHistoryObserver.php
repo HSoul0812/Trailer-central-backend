@@ -31,12 +31,15 @@ class EmailHistoryObserver
      */
     public function created(EmailHistory $emailHistory)
     {
+        $isIncoming = strcasecmp($emailHistory->lead->email_address, $emailHistory->from_email) === 0;
+
         $this->interactionMessageRepository->create([
             'message_type' => InteractionMessage::MESSAGE_TYPE_EMAIL,
             'tb_primary_id' => $emailHistory->email_id,
             'tb_name' => EmailHistory::getTableName(),
             'name' => null,
-            'hidden' => false
+            'hidden' => false,
+            'is_read' => !$isIncoming,
         ]);
     }
 
