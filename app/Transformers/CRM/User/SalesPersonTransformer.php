@@ -2,8 +2,8 @@
 
 namespace App\Transformers\CRM\User;
 
-use App\Transformers\Integration\Facebook\ChatTransformer;
 use App\Transformers\Dms\GenericSaleTransformer;
+use App\Transformers\Integration\Facebook\ChatTransformer;
 use App\Transformers\Pos\SaleTransformer;
 use League\Fractal\TransformerAbstract;
 use App\Models\CRM\User\SalesPerson;
@@ -18,48 +18,10 @@ class SalesPersonTransformer extends TransformerAbstract
         'smtp',
         'imap',
         'folders',
-        'facebookIntegrations'
+        'facebookIntegrations',
     ];
 
-    /**
-     * @var EmailFolderTransformer
-     */
-    protected $emailFolderTransformer;
-
-    /**
-     * @var SaleTransformer
-     */
-    protected $saleTransformer;
-
-    /**
-     * @var GenericSaleTransformer
-     */
-    protected $genericSaleTransformer;
-
-    /**
-     * @var ChatTransformer
-     */
-    protected $chatTransformer;
-
-
-    /**
-     * SalesPersonTransformer constructor.
-     * 
-     * @param ImapServiceInterface $imapService
-     */
-    public function __construct(
-        EmailFolderTransformer $emailFolderTransformer,
-        SaleTransformer $saleTransformer,
-        GenericSaleTransformer $genericSaleTransformer,
-        ChatTransformer $chatTransformer
-    ) {
-        $this->emailFolderTransformer = $emailFolderTransformer;
-        $this->saleTransformer = $saleTransformer;
-        $this->genericSaleTransformer = $genericSaleTransformer;
-        $this->chatTransformer = $chatTransformer;
-    }
-
-    public function transform(SalesPerson $salesPerson)
+    public function transform(SalesPerson $salesPerson): array
     {
         return [
             'id' => $salesPerson->id,
@@ -110,21 +72,22 @@ class SalesPersonTransformer extends TransformerAbstract
 
     public function includeFolders(SalesPerson $salesPerson)
     {
-        return $this->collection($salesPerson->folders, $this->emailFolderTransformer);
+        return $this->collection($salesPerson->folders, new EmailFolderTransformer());
     }
 
     public function includePosSales(SalesPerson $salesPerson)
     {
-        return $this->collection($salesPerson->posSales, $this->saleTransformer);
+        return $this->collection($salesPerson->posSales, new SaleTransformer());
     }
 
     public function includeAllSales(SalesPerson $salesPerson)
     {
-        return $this->collection($salesPerson->allSales(), $this->genericSaleTransformer);
+        return $this->collection($salesPerson->allSales(), new GenericSaleTransformer());
     }
 
     public function includeFacebookIntegrations(SalesPerson $salesPerson)
     {
-        return $this->collection($salesPerson->facebookIntegrations, $this->chatTransformer);
+        $chatTransformer = app()->make(ChatTransformer::class);
+        return $this->collection($salesPerson->facebookIntegrations, $chatTransformer);
     }
 }
