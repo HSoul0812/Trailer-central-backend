@@ -69,7 +69,14 @@ class CompletedOrder extends Model
         'billing_city',
         'billing_region',
         'billing_zip',
-        'parts'
+        'parts',
+        'tax',
+        'tax_rate',
+        'total_before_tax',
+        'handling_fee',
+        'shipping_fee',
+        'subtotal',
+        'in_store_pickup',
     ];
 
     protected $casts = [
