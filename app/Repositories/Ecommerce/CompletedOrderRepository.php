@@ -38,24 +38,25 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
     ];
 
     /**
+     * @param int $dealerId
      * @return array{total_all: float,total_qty: int }
      */
-    public function getGrandTotals(): array
+    public function getGrandTotals(int $dealerId): array
     {
         return [
-            'total_all' => $this->getTotalAmount(),
-            'total_qty' => $this->getTotalQty(),
+            'total_all' => $this->getTotalAmount($dealerId),
+            'total_qty' => $this->getTotalQty($dealerId),
         ];
     }
 
-    private function getTotalAmount(): float
+    private function getTotalAmount(int $dealerId): float
     {
-        return CompletedOrder::sum('total_amount');
+        return CompletedOrder::query()->where('dealer_id', $dealerId)->sum('total_amount');
     }
 
-    private function getTotalQty(): float
+    private function getTotalQty(int $dealerId): float
     {
-        $completedOrders = CompletedOrder::select('parts')->get();
+        $completedOrders = CompletedOrder::select('parts')->where('dealer_id', $dealerId)->get();
 
         $totalQty = 0;
         foreach ($completedOrders as $completedOrder)
@@ -77,14 +78,18 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
      */
     public function getAll($params): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
+        if (empty($params['dealer_id'])) {
+            throw new \InvalidArgumentException('RefundRepository::getAll requires at least one argument of: "dealer_id" or "order_id" to filter by');
+        }
+
         if (!isset($params['per_page'])) {
           $params['per_page'] = 100;
         }
 
-        $query = CompletedOrder::select('*');
-
+        $query = CompletedOrder::select('*')->where('dealer_id', '=', $params['dealer_id']);
+//$query->dd();
         /**
-         * Filters
+         * Filters-
          */
         $query = $this->addFiltersToQuery($query, $params);
 
@@ -95,6 +100,12 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
         return $query->paginate($params['per_page'])->appends($params);
     }
 
+    /**
+     * @param array $params
+     * @return CompletedOrder
+     *
+     * @throws \InvalidArgumentException when "dealer_id" was not provided (only for creation)
+     */
     public function create($params): CompletedOrder
     {
         $data = $params['data']['object'];
@@ -104,8 +115,13 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
         $isStripeCall = !isset($data['parts']);
 
         if (!$completedOrder) {
+            if (empty($params['dealer_id'])) {
+                throw new \InvalidArgumentException('"dealer_id" is required');
+            }
+
             $completedOrder = new CompletedOrder();
 
+            $completedOrder->dealer_id = $params['dealer_id'];
             $completedOrder->event_id = $params['id'];
             $completedOrder->object_id = $data['id'];
             $completedOrder->parts = $isStripeCall ? [] : json_decode($data['parts'], true);

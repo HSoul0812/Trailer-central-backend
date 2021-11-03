@@ -9,5 +9,5 @@ interface CompletedOrderRepositoryInterface extends Repository, TransactionalRep
 {
     public function getAll($params);
 
-    public function getGrandTotals(): array;
+    public function getGrandTotals(int $dealerId): array;
 }
