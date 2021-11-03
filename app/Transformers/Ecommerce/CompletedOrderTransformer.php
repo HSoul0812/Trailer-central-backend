@@ -37,6 +37,7 @@ class CompletedOrderTransformer extends TransformerAbstract
             'refund_status' => $completedOrder->refund_status,
             'refunded_amount' => $completedOrder->refunded_amount,
             'refunded_parts' => $completedOrder->refunded_parts,
+            'max_refundable_amount' => $completedOrder->total_amount - (float) $completedOrder->refunded_amount,
             'stripe_customer_id' => $completedOrder->stripe_customer,
             'shipping_address' => $completedOrder->shipping_address,
             'shipping_country' => $completedOrder->shipping_country,
