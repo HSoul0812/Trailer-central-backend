@@ -37,6 +37,8 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
  * @property boolean|null $was_skipped
  * @property \DateTimeInterface $created_at
  * @property \DateTimeInterface $updated_at
+ *
+ * @property Lead $lead
  */
 class EmailHistory extends Model
 {

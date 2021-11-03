@@ -31,12 +31,15 @@ class FbMessageObserver
      */
     public function created(Message $message)
     {
+        $isIncoming = strcmp($message->from_id, $message->conversation->user_id) === 0;
+
         $this->interactionMessageRepository->create([
             'message_type' => InteractionMessage::MESSAGE_TYPE_FB,
             'tb_primary_id' => $message->id,
             'tb_name' => Message::getTableName(),
             'name' => null,
-            'hidden' => false
+            'hidden' => false,
+            'is_read' => !$isIncoming,
         ]);
     }
 
