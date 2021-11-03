@@ -10,11 +10,11 @@ use Brick\Money\Money;
 interface PaymentServiceInterface
 {
     /**
-     * @param  int  $id
+     * @param  int  $orderId
      * @param  Money  $amount
-     * @param  array<int> $parts part's ids to be refunded
+     * @param  array{id:int, amount: float} $parts part's ids to be refunded
      * @param  string|null  $reason
      * @return Refund
      */
-    public function refund(int $id, Money $amount, array $parts, ?string $reason = null): Refund;
+    public function refund(int $orderId, Money $amount, array $parts, ?string $reason = null): Refund;
 }

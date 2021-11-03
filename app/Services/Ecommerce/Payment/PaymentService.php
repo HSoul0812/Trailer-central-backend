@@ -53,7 +53,7 @@ class PaymentService implements PaymentServiceInterface
     }
 
     /**
-     * @param int $id
+     * @param int $orderId
      * @param Money $amount
      * @param array{id: int, amount: float} $parts parts to be refunded indexed by id
      * @param string|null $reason
@@ -75,16 +75,16 @@ class PaymentService implements PaymentServiceInterface
      * @throws RefundPaymentGatewayException when there was some error on payment gateway remote process
      * @throws AfterRemoteRefundException when there was some error after the refund was successfully done on payment gateway side
      */
-    public function refund(int $id, Money $amount, array $parts, ?string $reason = null): Refund
+    public function refund(int $orderId, Money $amount, array $parts, ?string $reason = null): Refund
     {
-        $order = $this->orderRepository->get(['id' => $id]);
+        $order = $this->orderRepository->get(['id' => $orderId]);
 
         $this->ensureOrderCanBeRefunded($order, $amount, $parts);
 
         $encodedParts = $this->encodePartsToBeRefunded($parts);
 
         // Some issuable context information
-        $logContext = ['id' => $id, 'amount' => $amount->getAmount(), 'parts' => $encodedParts];
+        $logContext = ['id' => $orderId, 'amount' => $amount->getAmount(), 'parts' => $encodedParts];
 
         // This logic must not be a transaction to be able recuperating from an error after the refund has been
         // successfully created in the payment gateway side
@@ -105,7 +105,7 @@ class PaymentService implements PaymentServiceInterface
             $errorMessage = sprintf(
                 'The refund {%d} for {%d} order had a remote process error: %s',
                 $refund->id,
-                $id,
+                $orderId,
                 $exception->getMessage()
             );
 
@@ -130,7 +130,7 @@ class PaymentService implements PaymentServiceInterface
             $errorMessage = sprintf(
                 'The refund {%d} for {%d} order had a local error: %s',
                 $refund->id,
-                $id,
+                $orderId,
                 $exception->getMessage()
             );
 
@@ -282,6 +282,7 @@ class PaymentService implements PaymentServiceInterface
     ): Refund
     {
         $refund = $this->refundRepository->create([
+            'dealer_id' => $order->dealer_id,
             'order_id' => $order->id,
             'amount' => $amount->getAmount(),
             'reason' => $reason,
