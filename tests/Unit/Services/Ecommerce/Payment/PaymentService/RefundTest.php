@@ -91,6 +91,7 @@ class RefundTest extends PaymentServiceTestCase
         $expectedRefund = factory(Refund::class)->make([
             'id' => $uniqueFaker->numberBetween(1, 100),
             'order_id' => $order->id,
+            'dealer_id' => $order->dealer_id,
             'reason' => $reason,
             'parts' => $indexedPartToRefund
         ]);
@@ -126,6 +127,7 @@ class RefundTest extends PaymentServiceTestCase
             ->andReturn($expectedRefund)
             ->with([
                 'order_id' => $order->id,
+                'dealer_id' => $order->dealer_id,
                 'amount' => $amountToRefund->getAmount(),
                 'reason' => $reason,
                 'parts' => collect($indexedPartToRefund)->values()->toArray()
@@ -219,6 +221,7 @@ class RefundTest extends PaymentServiceTestCase
         $expectedRefund = factory(Refund::class)->make([
             'id' => $uniqueFaker->numberBetween(1, 100),
             'order_id' => $order->id,
+            'dealer_id' => $order->dealer_id,
             'reason' => $reason,
             'parts' => $indexedPartToRefund
         ]);
@@ -254,6 +257,7 @@ class RefundTest extends PaymentServiceTestCase
             ->andReturn($expectedRefund)
             ->with([
                 'order_id' => $order->id,
+                'dealer_id' => $order->dealer_id,
                 'amount' => $amountToRefund->getAmount(),
                 'reason' => $reason,
                 'parts' => collect($indexedPartToRefund)->values()->toArray()
@@ -363,6 +367,7 @@ class RefundTest extends PaymentServiceTestCase
         $expectedRefund = factory(Refund::class)->make([
             'id' => $uniqueFaker->numberBetween(1, 100),
             'order_id' => $order->id,
+            'dealer_id' => $order->dealer_id,
             'reason' => $reason,
             'parts' => $indexedPartToRefund
         ]);
@@ -398,6 +403,7 @@ class RefundTest extends PaymentServiceTestCase
             ->andReturn($expectedRefund)
             ->with([
                 'order_id' => $order->id,
+                'dealer_id' => $order->dealer_id,
                 'amount' => $amountToRefund->getAmount(),
                 'reason' => $reason,
                 'parts' => collect($indexedPartToRefund)->values()->toArray()

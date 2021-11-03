@@ -20,7 +20,7 @@ $factory->define(CompletedOrder::class, static function (Faker $faker, array $at
             'category_id' => 8,
         ]);
 
-        return [['id' => $part[0]['id'], 'qty' => 1]];
+        return [['id' => $part->id, 'qty' => 1, 'price' => $part->price]];
     };
 
     return [
@@ -48,4 +48,8 @@ $factory->define(CompletedOrder::class, static function (Faker $faker, array $at
         'created_at' => $createdAt,
         'updated_at' => $createdAt,
     ];
+})->afterMaking(CompletedOrder::class, function (CompletedOrder $order, Faker $faker) {
+    if (empty($order->dealer_id)) {
+        $order->dealer_id = $faker->numberBetween(100, 10000);
+    }
 });
