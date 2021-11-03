@@ -2,6 +2,7 @@
 
 namespace App\Models\Observers\CRM\Interactions;
 
+use App\Helpers\SanitizeHelper;
 use App\Models\CRM\Interactions\InteractionMessage;
 use App\Models\CRM\Interactions\TextLog;
 use App\Repositories\CRM\Interactions\InteractionMessageRepositoryInterface;
@@ -18,11 +19,17 @@ class TextLogObserver
     private $interactionMessageRepository;
 
     /**
+     * @var SanitizeHelper
+     */
+    private $sanitizeHelper;
+
+    /**
      * @param InteractionMessageRepositoryInterface $interactionMessageRepository
      */
-    public function __construct(InteractionMessageRepositoryInterface $interactionMessageRepository)
+    public function __construct(InteractionMessageRepositoryInterface $interactionMessageRepository, SanitizeHelper $sanitizeHelper)
     {
         $this->interactionMessageRepository = $interactionMessageRepository;
+        $this->sanitizeHelper = $sanitizeHelper;
     }
 
     /**
@@ -31,12 +38,16 @@ class TextLogObserver
      */
     public function created(TextLog $textLog)
     {
+        $helper = $this->sanitizeHelper;
+        $isIncoming = $helper->sanitizePhoneNumber($textLog->from_number) === $helper->sanitizePhoneNumber($textLog->lead->phone_number);
+
         $this->interactionMessageRepository->create([
             'message_type' => InteractionMessage::MESSAGE_TYPE_SMS,
             'tb_primary_id' => $textLog->id,
             'tb_name' => TextLog::getTableName(),
             'name' => null,
-            'hidden' => false
+            'hidden' => false,
+            'is_read' => !$isIncoming,
         ]);
     }
 
