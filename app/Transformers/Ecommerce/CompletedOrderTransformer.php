@@ -54,6 +54,13 @@ class CompletedOrderTransformer extends TransformerAbstract
             'invoice_url' => $completedOrder->invoice_url,
             'parts' => $partsSummary['parts'],
             'total_qty' => $partsSummary['total_qty'],
+            'tax' => $partsSummary['tax'],
+            'tax_rate' => $partsSummary['tax_rate'],
+            'total_before_tax' => $partsSummary['total_before_tax'],
+            'shipping_fee' => $partsSummary['shipping_fee'],
+            'handling_fee' => $partsSummary['handling_fee'],
+            'subtotal' => $partsSummary['subtotal'],
+            'in_store_pickup' => $partsSummary['in_store_pickup']
         ];
     }
 
