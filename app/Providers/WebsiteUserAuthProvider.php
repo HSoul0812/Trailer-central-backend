@@ -7,8 +7,8 @@ use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 class WebsiteUserAuthProvider extends Authorization {
     public function authenticate(\Illuminate\Http\Request $request, \Dingo\Api\Routing\Route $route)
     {
-        if ($request->header('access-token')) {
-            $accessToken = WebsiteUserToken::where('access_token', $request->header('access-token'))->first();
+        if ($request->header('user-access-token')) {
+            $accessToken = WebsiteUserToken::where('access_token', $request->header('user-access-token'))->first();
             if ($accessToken && $accessToken->user) {
                 return $accessToken->user;
             }

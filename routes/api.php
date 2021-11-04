@@ -343,6 +343,14 @@ $api->version('v1', function ($route) {
     });
 
     /**
+     * Website account profile
+     */
+    $route->group(['prefix' => 'website/account', 'middleware' => 'api.auth', 'providers' => ['website_auth']], function($route) {
+        $route->get('', 'App\Http\Controllers\v1\Website\User\WebsiteUserController@get');
+        $route->put('', 'App\Http\Controllers\v1\Website\User\WebsiteUserController@update');
+    });
+
+    /**
      * Website User Favorite Inventory
      */
     $route->group(['prefix' => 'website/inventory/favorite', 'middleware' => 'api.auth', 'providers' => ['website_auth']], function ($route) {

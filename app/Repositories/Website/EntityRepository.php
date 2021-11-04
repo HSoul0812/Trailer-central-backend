@@ -7,13 +7,15 @@ use App\Exceptions\NotImplementedException;
 use App\Models\Website\Entity;
 
 class EntityRepository implements EntityRepositoryInterface {
-    
+
     public function create($params) {
         throw new NotImplementedException;
     }
 
     public function delete($params) {
-        throw new NotImplementedException;
+        return Entity::where('entity_type', $params['entity_type'])
+            ->where('website_id', $params['website_id'])
+            ->update(['deleted' =>  1]);
     }
 
     public function get($params) {
@@ -27,9 +29,15 @@ class EntityRepository implements EntityRepositoryInterface {
     }
 
     public function update($params) {
-        throw new NotImplementedException;
+        return Entity::updateOrCreate(
+            [
+                'entity_type' => $params['entity_type'],
+                'website_id' => $params['website_id']
+            ],
+            $params
+        );
     }
-    
+
     public function getAllPages($websiteId) {
         return Entity::where('website_id', $websiteId)
                     ->where('is_active', 1)
@@ -38,7 +46,7 @@ class EntityRepository implements EntityRepositoryInterface {
                     ->where('url_path_external', 0)
                     ->orderBy('sort_order', 'desc')
                     ->get();
-        
+
     }
 
 }
