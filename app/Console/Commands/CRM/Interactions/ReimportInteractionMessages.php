@@ -39,10 +39,16 @@ class ReimportInteractionMessages extends Command
      */
     public function handle()
     {
+        // Get Command
+        $command = 'interaction:messages:reimport';
+
         // Try..Catch
         try {
             // Get ES Interaction Message
             $uri = env('ELASTICSEARCH_HOST') . '/interaction_message' . '?pretty';
+
+            // Deleting Index
+            $this->info("{$command} deleting elastic index: " . $uri);
 
             // Create Client
             $client = new Client();
@@ -59,8 +65,14 @@ class ReimportInteractionMessages extends Command
         if(!empty($reimport)) {
             // Try..Catch
             try {
+                // Get Call
+                $call = 'scout:import "App\\\\Models\\\\CRM\\\\Interactions\\\\InteractionMessage" -v';
+
+                // Deleting Index
+                $this->info("{$command} recreating elastic index with artisan command: " . $call);
+
                 // Re-Import ES Messages
-                Artisan::call('scout:import "App\\\\Models\\\\CRM\\\\Interactions\\\\InteractionMessage" -v');
+                Artisan::call($call);
             } catch(\Exception $e) {
                 $this->error('Error occurred re-imported index on ES: ' . $e->getMessage());
             }
