@@ -50,7 +50,7 @@ class ReimportInteractionMessages extends Command
             // Delete Request From Client
             $client->request('DELETE', $uri);
         } catch(\Exception $e) {
-            $this->error('Error occurred clearing interaction_message index on ES: ', $e->getMessage());
+            $this->error('Error occurred clearing interaction_message index on ES: ' . $e->getMessage());
         }
 
 
@@ -62,7 +62,7 @@ class ReimportInteractionMessages extends Command
                 // Re-Import ES Messages
                 Artisan::call('scout:import "App\\\\Models\\\\CRM\\\\Interactions\\\\InteractionMessage" -v');
             } catch(\Exception $e) {
-                $this->error('Error occurred re-imported index on ES: ', $e->getMessage());
+                $this->error('Error occurred re-imported index on ES: ' . $e->getMessage());
             }
         }
     }
