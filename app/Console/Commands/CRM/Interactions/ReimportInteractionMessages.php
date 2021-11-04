@@ -55,7 +55,7 @@ class ReimportInteractionMessages extends Command
 
 
         // Reimport?!
-        $reimport = $this->argument('boundLower');
+        $reimport = $this->argument('reimport');
         if(!empty($reimport)) {
             // Try..Catch
             try {
