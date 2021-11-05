@@ -159,6 +159,8 @@ class InteractionMessage extends Model
 
         $array['dealer_id'] = $lead->website->dealer_id ?? $lead->dealer_id;
 
+        $array['sales_person_id'] = $lead->leadStatus ? $lead->leadStatus->sales_person_id : null;
+
         return $array;
     }
 }

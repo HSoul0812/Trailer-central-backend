@@ -79,6 +79,14 @@ class InteractionMessageRepository extends RepositoryAbstract implements Interac
             $search->filter('exists', ['field' => 'date_sent']);
         }
 
+        if (isset($params['sales_person_id'])) {
+            if ($params['sales_person_id'] == '-1') {
+                $search->filter('exists', ['field' => 'sales_person_id']);
+            } else {
+                $search->filter('term', ['sales_person_id' => $params['sales_person_id']]);
+            }
+        }
+
         if ($params['latest_messages'] ?? null) {
             $search->sort('date_sent', "desc");
 
@@ -186,6 +194,19 @@ class InteractionMessageRepository extends RepositoryAbstract implements Interac
 
     /**
      * @param array $params
+     * @return Collection
+     */
+    public function getAll($params): Collection
+    {
+        if (empty($params['ids']) || !is_array($params['ids'])) {
+            throw new RepositoryInvalidArgumentException('ids has been missed. Params - ' . json_encode($params));
+        }
+
+        return InteractionMessage::query()->whereIn('id', $params['ids'])->get();
+    }
+
+    /**
+     * @param array $params
      * @return InteractionMessage
      */
     public function create($params): InteractionMessage
@@ -264,7 +285,7 @@ class InteractionMessageRepository extends RepositoryAbstract implements Interac
     public function searchable(array $params): InteractionMessage
     {
         if (empty($params['tb_name']) || empty($params['tb_primary_id'])) {
-            throw new RepositoryInvalidArgumentException('message_type or tb_primary_id has been missed. Params - ' . json_encode($params));
+            throw new RepositoryInvalidArgumentException('tb_name or tb_primary_id has been missed. Params - ' . json_encode($params));
         }
 
         /** @var InteractionMessage $interactionMessage */

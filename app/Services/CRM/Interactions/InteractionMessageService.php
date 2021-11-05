@@ -37,11 +37,7 @@ class InteractionMessageService implements InteractionMessageServiceInterface
 
         try {
             if (!empty($params['search_params']) && is_array($params['search_params'])) {
-                $searchParams = $params['search_params'];
-
-                $searchParams['size'] = 10000;
-
-                $ids = array_column($repository->search($searchParams), 'id');
+                $ids = $this->getIds($params['search_params']);
 
                 $params['ids'] = array_merge($ids, $params['ids'] ?? []);
 
@@ -56,7 +52,49 @@ class InteractionMessageService implements InteractionMessageServiceInterface
 
         } catch (\Exception $e) {
             Log::error('Interaction message bulk update error. Message - ' . $e->getMessage() , $e->getTrace());
-            throw new InteractionMessageException('Inventory item create error');
+            throw new InteractionMessageException('Interaction message bulk update error');
         }
+    }
+
+    /**
+     * @param array $params
+     * @return bool
+     *
+     * @throws InteractionMessageException
+     */
+    public function bulkSearchable(array $params): bool
+    {
+        $repository = $this->interactionMessageRepository;
+
+        try {
+            if (!empty($params['search_params']) && is_array($params['search_params'])) {
+                $ids = $this->getIds($params['search_params']);
+
+                $params['ids'] = array_merge($ids, $params['ids'] ?? []);
+
+                if (empty($params['ids'])) {
+                    return false;
+                }
+
+                unset($params['search_params']);
+            }
+
+            return $repository->getAll($params)->searchable();
+
+        } catch (\Exception $e) {
+            Log::error('Interaction message bulk searchable error error. Message - ' . $e->getMessage() , $e->getTrace());
+            throw new InteractionMessageException('Interaction message bulk searchable error');
+        }
+    }
+
+    /**
+     * @param array $searchParams
+     * @return array
+     */
+    private function getIds(array $searchParams): array
+    {
+        $searchParams['size'] = 10000;
+
+        return array_column($this->interactionMessageRepository->search($searchParams), 'id');
     }
 }
