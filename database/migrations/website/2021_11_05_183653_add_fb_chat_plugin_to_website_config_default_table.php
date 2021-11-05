@@ -11,10 +11,9 @@ class AddFbChatPluginToWebsiteConfigDefaultTable extends Migration
         'label' => 'FB Chat Plugin',
         'note' => 'As a Faceboook Page Admin, Go to Page Settings > Messaging. ' .
                     'In the "Add Messenger to your website" section, click the ' .
-                    '"Get Started" Button. Follow the instructions on-screen then ' .
-                    'return here and paste the code snippet you receive.<br><br>' .
-                    'You may also follow the instructions here: ' .
-                    'https://developers.facebook.com/docs/messenger-platform/discovery/facebook-chat-plugin#setup_tool',
+                    '"Get Started" Button. Configure your Chat Plugin the way you ' .
+                    'want it to look, then click "Set Up" next to "Set Up Your Chat ' .
+                    'Plugin" to receive a code to paste in here.',
         'grouping' => 'General',
         'default_label' => '',
         'sort_order' => 1300,
