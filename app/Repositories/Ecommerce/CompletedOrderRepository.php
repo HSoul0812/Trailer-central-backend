@@ -87,7 +87,7 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
         }
 
         $query = CompletedOrder::select('*')->where('dealer_id', '=', $params['dealer_id']);
-//$query->dd();
+
         /**
          * Filters-
          */
