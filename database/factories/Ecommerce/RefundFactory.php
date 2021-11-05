@@ -13,15 +13,8 @@ $factory->define(Refund::class, static function (Faker $faker, array $attributes
 
     $createdAt = $faker->dateTimeThisMonth;
 
-    $factoryMethod = 'create';
-
-    if (isset($attributes['factory_method'])) {
-        $factoryMethod = $attributes['factory_method'];
-        unset($attributes['factory_method']);
-    }
-
     return [
-        'order_id' => $attributes['order_id'] ?? factory(CompletedOrder::class)->$factoryMethod()->getKey(),
+        'order_id' => $attributes['order_id'] ?? factory(CompletedOrder::class)->create()->getKey(),
         'amount' => $faker->numberBetween(100, 1000),
         'reason' => $faker->randomElement(Refund::REASONS),
         'object_id' => $faker->uuid,
@@ -29,4 +22,12 @@ $factory->define(Refund::class, static function (Faker $faker, array $attributes
         'parts' => [],
         'created_at' => $createdAt
     ];
+})->afterMaking(Refund::class, function (Refund $refund, Faker $faker) {
+    if (empty($refund->id)) {
+        $refund->id = $faker->$faker->numberBetween(100, 10000);
+    }
+
+    if (empty($refund->id)) {
+        $refund->id = $faker->$faker->numberBetween(100, 10000);
+    }
 });

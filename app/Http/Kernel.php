@@ -6,6 +6,7 @@ use App\Http\Middleware\Ecommerce\StripeWebhookValidate;
 use App\Http\Middleware\Ecommerce\ValidHookIpMiddleware;
 use App\Http\Middleware\Inventory\CreateInventoryPermissionMiddleware;
 use App\Http\Middleware\SetDealerIdFilterOnRequest;
+use App\Http\Middleware\SetDealerIdWhenAuthenticatedOnRequest;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 use App\Http\Middleware\CorsMiddleware;
 use App\Http\Middleware\AccessToken;
@@ -95,6 +96,7 @@ class Kernel extends HttpKernel
         'forms.field-map.validate' => FieldMapValidate::class,
         'accesstoken.validate' => ValidAccessToken::class,
         'setDealerIdOnRequest' => SetDealerIdOnRequest::class,
+        'setDealerIdWhenAuthenticatedOnRequest' => SetDealerIdWhenAuthenticatedOnRequest::class,
         'setDealerIdFilterOnRequest' => SetDealerIdFilterOnRequest::class,
         'setWebsiteIdOnRequest' => SetWebsiteIdOnRequest::class,
         'setUserIdOnRequest' => SetUserIdOnRequest::class,

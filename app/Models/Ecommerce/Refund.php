@@ -4,20 +4,28 @@ declare(strict_types=1);
 
 namespace App\Models\Ecommerce;
 
+use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
 use App\Models\Traits\TableAware;
+use App\Models\User\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Query\Builder;
 
 /**
  * @property int $id
+ * @property int $dealer_id
  * @property int $order_id
  * @property float $amount
- * @property array<int> $parts a valid json array
+ * @property array{id:int, amount: float} $parts a valid json array
  * @property string $reason
  * @property string $object_id
  * @property string $status 'finished', 'failed', 'recoverable_failure'
+ * @property \DateTimeInterface $created_at
  * @property array $metadata a valid and useful json object (response, error, etc..)
+ *
+ * @property-read User $dealer
+ * @property-read CompletedOrder $order
  *
  * @method static Builder select($columns = ['*'])
  * @method static self find(int $id)
@@ -42,13 +50,14 @@ class Refund extends Model
         'requested_by_customer'
     ];
 
-    /** @var string  */
+    /** @var string */
     protected $table = 'ecommerce_order_refunds';
 
     /** @var bool */
     public $timestamps = false;
 
     protected $fillable = [
+        'dealer_id',
         'order_id',
         'amount',
         'parts',
@@ -72,4 +81,14 @@ class Refund extends Model
         'parts' => 'array',
         'metadata' => 'json'
     ];
+
+    public function dealer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
+    }
+
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(CompletedOrder::class, 'order_id', 'id');
+    }
 }

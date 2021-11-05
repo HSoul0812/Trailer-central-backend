@@ -56,8 +56,7 @@ class CompletedOrderSeeder extends Seeder
             'user_type' => AuthToken::USER_TYPE_DEALER,
         ]);
 
-
-        $this->completedOrder = factory(CompletedOrder::class, 1)->create(); // 1 new completed order
+        $this->completedOrder = factory(CompletedOrder::class, 1)->create(['dealer_id' => $this->dealer->dealer_id]); // 1 new completed order
     }
 
     public function seedPart(): void

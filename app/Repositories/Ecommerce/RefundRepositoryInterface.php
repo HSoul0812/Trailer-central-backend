@@ -10,6 +10,7 @@ use App\Models\Parts\Textrail\RefundedPart;
 use App\Repositories\GenericRepository;
 use App\Services\Ecommerce\Payment\RefundResultInterface;
 use Brick\Money\Money;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
 interface RefundRepositoryInterface extends GenericRepository
@@ -44,10 +45,10 @@ interface RefundRepositoryInterface extends GenericRepository
 
     /**
      * @param  array  $params
-     * @return array<Refund>|Collection
+     * @return array<Refund>|Collection|LengthAwarePaginator
      * @throws \InvalidArgumentException when some provided argument is not valid, or it is required
      */
-    public function getAll(array $params): Collection;
+    public function getAll(array $params);
 
     /**
      * @param  array<int>  $parts  part's ids to be refunded

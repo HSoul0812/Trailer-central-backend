@@ -39,6 +39,7 @@ class CreateRefundTest extends PaymentServiceTestCase
         $expectedRefund = factory(Refund::class)->make([
             'id' => $uniqueFaker->numberBetween(1, 100),
             'order_id' => $order->id,
+            'dealer_id' => $order->dealer_id,
             'reason' => $reason,
             'parts' => $parts
         ]);
@@ -50,6 +51,7 @@ class CreateRefundTest extends PaymentServiceTestCase
             ->andReturn($expectedRefund)
             ->with([
                 'order_id' => $order->id,
+                'dealer_id' => $order->dealer_id,
                 'amount' => $amountToRefund->getAmount(),
                 'reason' => $reason,
                 'parts' => $parts
