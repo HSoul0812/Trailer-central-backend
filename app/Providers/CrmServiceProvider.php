@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Mail\CRM\CustomEmail;
 use App\Models\CRM\Dms\Refund;
+use App\Models\CRM\Leads\LeadStatus;
+use App\Models\Observers\CRM\Lead\LeadStatusObserver;
 use App\Repositories\CRM\Refund\RefundRepository;
 use App\Repositories\CRM\Refund\RefundRepositoryInterface;
 use App\Services\CRM\Email\InquiryEmailService;
@@ -85,5 +87,12 @@ class CrmServiceProvider extends ServiceProvider
         $this->app->bind('ses.mailer', function($app, $config) {
             return CustomEmail::getCustomSesMailer($app, $config);
         });
+    }
+
+    public function boot()
+    {
+        \Validator::extend('valid_lead', 'App\Rules\CRM\Leads\ValidLead@passes');
+
+        LeadStatus::observe(LeadStatusObserver::class);
     }
 }

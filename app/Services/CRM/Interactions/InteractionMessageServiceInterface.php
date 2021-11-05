@@ -9,4 +9,6 @@ namespace App\Services\CRM\Interactions;
 interface InteractionMessageServiceInterface
 {
     public function bulkUpdate(array $params): bool;
+
+    public function bulkSearchable(array $params): bool;
 }
