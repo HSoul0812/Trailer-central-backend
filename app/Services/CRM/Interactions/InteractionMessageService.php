@@ -79,7 +79,9 @@ class InteractionMessageService implements InteractionMessageServiceInterface
                 unset($params['search_params']);
             }
 
-            return $repository->getAll($params)->searchable();
+            $repository->getAll($params)->searchable();
+
+            return true;
 
         } catch (\Exception $e) {
             Log::error('Interaction message bulk searchable error error. Message - ' . $e->getMessage() , $e->getTrace());

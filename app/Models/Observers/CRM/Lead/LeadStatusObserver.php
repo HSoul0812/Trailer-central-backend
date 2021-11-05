@@ -26,10 +26,6 @@ class LeadStatusObserver
      */
     public function created(LeadStatus $leadStatus)
     {
-        if (!$leadStatus->wasChanged('sales_person_id')) {
-            return;
-        }
-
         $params['search_params']['lead_id'] = $leadStatus->tc_lead_identifier;
 
         $this->interactionMessageService->bulkSearchable($params);
@@ -56,10 +52,6 @@ class LeadStatusObserver
      */
     public function deleted(LeadStatus $leadStatus)
     {
-        if (!$leadStatus->wasChanged('sales_person_id')) {
-            return;
-        }
-
         $params['search_params']['lead_id'] = $leadStatus->tc_lead_identifier;
 
         $this->interactionMessageService->bulkSearchable($params);
