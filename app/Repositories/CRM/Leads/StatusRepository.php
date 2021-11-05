@@ -50,7 +50,7 @@ class StatusRepository implements StatusRepositoryInterface {
 
     /**
      * Get All Statuses
-     * 
+     *
      * @param array $params
      * @return Collection<SimpleData>
      */
@@ -69,7 +69,11 @@ class StatusRepository implements StatusRepositoryInterface {
     }
 
     public function update($params) {
-        $status = $this->get(['lead_id' => $params['lead_id']]);
+        if (isset($params['id'])) {
+            $status = LeadStatus::findOrFail($params['id']);
+        } else {
+            $status = $this->get(['lead_id' => $params['lead_id']]);
+        }
 
         DB::transaction(function() use (&$status, $params) {
             // Override Lead ID
@@ -107,7 +111,7 @@ class StatusRepository implements StatusRepositoryInterface {
 
     /**
      * Create or Update Lead Status
-     * 
+     *
      * @param array $params
      * @return LeadStatus
      */

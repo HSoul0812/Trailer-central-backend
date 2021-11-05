@@ -20,6 +20,7 @@ use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Traits\CompactHelper;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 /**
@@ -59,6 +60,7 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
  * @property int $unique_id
  *
  * @property Website $website
+ * @property LeadStatus $leadStatus
  */
 class Lead extends Model
 {
@@ -293,9 +295,10 @@ class Lead extends Model
     /**
      * Retrieves this lead status from the DB
      *
-     * @return string
+     * @return HasOne
      */
-    public function leadStatus() {
+    public function leadStatus(): HasOne
+    {
         return $this->hasOne(LeadStatus::class, 'tc_lead_identifier', 'identifier');
     }
 
