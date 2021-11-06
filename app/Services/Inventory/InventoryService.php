@@ -9,6 +9,8 @@ use App\Models\Inventory\Inventory;
 use App\Models\Website\Config\WebsiteConfig;
 use App\Repositories\Dms\Quickbooks\BillRepositoryInterface;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
+use App\Repositories\GeoLocation\GeoLocationRepository;
+use App\Repositories\GeoLocation\GeoLocationRepositoryInterface;
 use App\Repositories\Inventory\CategoryRepositoryInterface;
 use App\Repositories\Inventory\FileRepositoryInterface;
 use App\Repositories\Inventory\ImageRepositoryInterface;
@@ -83,6 +85,10 @@ class InventoryService implements InventoryServiceInterface
     private $categoryRepository;
 
     /**
+     * @var GeoLocationRepository
+     */
+    private $geolocationRepository;
+    /**
      * InventoryService constructor.
      * @param InventoryRepositoryInterface $inventoryRepository
      * @param ImageRepositoryInterface $imageRepository
@@ -107,7 +113,8 @@ class InventoryService implements InventoryServiceInterface
         FileService $fileService,
         DealerLocationRepositoryInterface $dealerLocationRepository,
         DealerLocationMileageFeeRepositoryInterface $dealerLocationMileageFeeRepository,
-        CategoryRepositoryInterface $categoryRepository
+        CategoryRepositoryInterface $categoryRepository,
+        GeoLocationRepositoryInterface $geolocationRepository
     ) {
         $this->inventoryRepository = $inventoryRepository;
         $this->imageRepository = $imageRepository;
@@ -120,6 +127,7 @@ class InventoryService implements InventoryServiceInterface
         $this->imageService = $imageService;
         $this->fileService = $fileService;
         $this->categoryRepository = $categoryRepository;
+        $this->geolocationRepository = $geolocationRepository;
     }
 
     /**
@@ -631,7 +639,7 @@ class InventoryService implements InventoryServiceInterface
         return $changedFields;
     }
 
-    public function deliveryPrice(int $inventoryId): float
+    public function deliveryPrice(int $inventoryId, string $toZip=null): float
     {
         $inventory = $this->inventoryRepository->get(['id' => $inventoryId]);
         $dealerLocation = $inventory->dealerLocation;
@@ -642,7 +650,16 @@ class InventoryService implements InventoryServiceInterface
             'inventory_category_id' => $inventoryCategory->getKey()
         ]);
         $feePerMile = $mileageFee->fee_per_mile;
-        $distance = $this->calculateDistanceBetweenTwoPoints($dealerLocation->latitude, $dealerLocation->longitude, $inventory->latitude, $inventory->longitude, 'ML');
+        $fromLat = $dealerLocation->latitude;
+        $fromLng = $dealerLocation->longitude;
+
+        if($toZip != null) {
+            $geolocation = $this->geolocationRepository->get(['zip' => $toZip]);
+            $fromLat = $geolocation->latitude;
+            $fromLng = $geolocation->longitude;
+        }
+
+        $distance = $this->calculateDistanceBetweenTwoPoints($fromLat, $fromLng, $inventory->latitude, $inventory->longitude, 'ML');
         return $feePerMile * $distance;
     }
 
