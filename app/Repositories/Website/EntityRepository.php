@@ -19,7 +19,9 @@ class EntityRepository implements EntityRepositoryInterface {
     }
 
     public function get($params) {
-        throw new NotImplementedException;
+        if (isset($params['websiteId'])) {
+            return Entity::where('website_id', $params['websiteId'])->get();
+        }
     }
 
     public function getAll($params) {

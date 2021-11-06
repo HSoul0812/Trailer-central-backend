@@ -18,6 +18,7 @@ class WebsiteConfig extends Model
     const DURATION_BEFORE_AUTO_ARCHIVING_KEY = 'inventory/duration_before_auto_archiving';
     const GENERAL_HEAD_SCRIPT_KEY = 'general/head_script';
     const CALL_TO_ACTION = 'call-to-action';
+    const SHOWROOM_USE_SERIES = 'showroom/use_series';
 
     protected $table = 'website_config';
 

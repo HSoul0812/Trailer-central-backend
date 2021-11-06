@@ -2,6 +2,9 @@
 
 namespace App\Transformers\User;
 
+use App\Models\User\DealerUser;
+use App\Models\User\DealerUserPermission;
+use App\Models\User\User;
 use League\Fractal\Resource\Collection;
 use League\Fractal\TransformerAbstract;
 
@@ -26,6 +29,19 @@ class UserTransformer extends TransformerAbstract
 
     public function includePermissions($user): Collection
     {
-        return $this->collection($user->getPermissions(), new DealerPermissionsTransformer());
+        return $this->collection($this->getUserPermissions($user), new DealerPermissionsTransformer());
+    }
+
+    /**
+     * @param User|DealerUser $user
+     * @return \Illuminate\Support\Collection|array<DealerUserPermission>
+     */
+    private function getUserPermissions($user)
+    {
+        if ($user instanceof DealerUser) {
+            return $user->getPermissions();
+        }
+
+        return $user->getPermissionsAllowed();
     }
 }

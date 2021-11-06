@@ -102,10 +102,18 @@ class SmtpConfig
      * @return SmtpConfig
      */
     public static function fillFromSalesPerson(SalesPerson $salesperson): SmtpConfig {
+        
+        $username = $salesperson->smtp_email;
+        
+        if (empty($username)) {
+            // get dealer primary email
+            $username = $salesperson->newDealerUser->user->email;
+        }
+        
         // Return SmtpConfig
         return new self([
             'from_name' => $salesperson->full_name,
-            'username' => $salesperson->smtp_email,
+            'username' => $username,
             'password' => $salesperson->smtp_password,
             'host' => $salesperson->smtp_server,
             'port' => $salesperson->smtp_port,

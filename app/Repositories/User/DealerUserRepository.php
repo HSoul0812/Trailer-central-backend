@@ -109,6 +109,8 @@ class DealerUserRepository extends RepositoryAbstract implements DealerUserRepos
                         ->where('dealer_user_id', $dealerUser->dealer_user_id)
                         ->where('feature', $permission['feature'])
                         ->delete();
+
+                    DealerUserPermission::create(['dealer_user_id' => $dealerUser->dealer_user_id] + $permission);
                 }
             }
         });
