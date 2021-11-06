@@ -27,8 +27,6 @@ use App\Repositories\Dms\StockRepository;
 use App\Repositories\Dms\StockRepositoryInterface;
 use App\Repositories\Feed\Mapping\Incoming\ApiEntityReferenceRepository;
 use App\Repositories\Feed\Mapping\Incoming\ApiEntityReferenceRepositoryInterface;
-use App\Repositories\GeoLocation\GeoLocationRepository;
-use App\Repositories\GeoLocation\GeoLocationRepositoryInterface;
 use App\Repositories\Inventory\CategoryRepository;
 use App\Repositories\Inventory\CategoryRepositoryInterface;
 use App\Repositories\Inventory\AttributeRepository;
@@ -333,7 +331,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(PackageServiceInterface::class, PackageService::class);
         $this->app->bind(RegisterRepositoryInterface::class, RegisterRepository::class);
         $this->app->bind(RegisterServiceInterface::class, RegisterService::class);
-        $this->app->bind(GeoLocationRepositoryInterface::class, GeoLocationRepository::class);
         $this->app->when(FileController::class)
             ->needs(FileServiceInterface::class)
             ->give(function () {

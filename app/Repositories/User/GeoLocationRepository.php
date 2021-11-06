@@ -1,5 +1,5 @@
 <?php
-namespace App\Repositories\GeoLocation;
+namespace App\Repositories\User;
 
 use App\Exceptions\NotImplementedException;
 use App\Models\User\Location\Geolocation;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories\GeoLocation;
+namespace App\Repositories\User;
 
 use App\Repositories\Repository;
 

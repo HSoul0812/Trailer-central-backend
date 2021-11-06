@@ -168,9 +168,9 @@ class InventorySeeder extends Seeder
     {
         InventoryMfg::destroy($this->inventoryMfg->id);
         Brand::destroy($this->brand->brand_id);
+        DealerLocationMileageFee::destroy(['id' => $this->dealerLocationMileageFee->getKey()]);
         Category::destroy($this->category->inventory_category_id);
         Inventory::where(['dealer_id' => $this->dealer->dealer_id])->delete();
-        DealerLocationMileageFee::destroy(['id' => $this->dealerLocationMileageFee->getKey()]);
         DealerLocation::where(['dealer_id' => $this->dealer->dealer_id])->delete();
         AuthToken::where(['user_id' => $this->authToken->user_id, 'user_type' => $this->userType])->delete();
 

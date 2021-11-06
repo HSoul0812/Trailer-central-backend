@@ -9,8 +9,6 @@ use App\Models\Inventory\Inventory;
 use App\Models\Website\Config\WebsiteConfig;
 use App\Repositories\Dms\Quickbooks\BillRepositoryInterface;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
-use App\Repositories\GeoLocation\GeoLocationRepository;
-use App\Repositories\GeoLocation\GeoLocationRepositoryInterface;
 use App\Repositories\Inventory\CategoryRepositoryInterface;
 use App\Repositories\Inventory\FileRepositoryInterface;
 use App\Repositories\Inventory\ImageRepositoryInterface;
@@ -18,6 +16,7 @@ use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\Repository;
 use App\Repositories\User\DealerLocationMileageFeeRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
+use App\Repositories\User\GeoLocationRepositoryInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Services\File\FileService;
 use App\Services\File\ImageService;
@@ -85,9 +84,10 @@ class InventoryService implements InventoryServiceInterface
     private $categoryRepository;
 
     /**
-     * @var GeoLocationRepository
+     * @var GeoLocationRepositoryInterface
      */
     private $geolocationRepository;
+
     /**
      * InventoryService constructor.
      * @param InventoryRepositoryInterface $inventoryRepository
@@ -101,6 +101,7 @@ class InventoryService implements InventoryServiceInterface
      * @param DealerLocationRepositoryInterface $dealerLocationRepository
      * @param DealerLocationMileageFeeRepositoryInterface $dealerLocationMileageFeeRepository
      * @param CategoryRepositoryInterface $categoryRepository
+     * @param GeoLocationRepositoryInterface $geolocationRepository
      */
     public function __construct(
         InventoryRepositoryInterface $inventoryRepository,
