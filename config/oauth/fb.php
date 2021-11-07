@@ -6,7 +6,7 @@ return [
     | Facebook
     |--------------------------------------------------------------------------
     |
-    | Here are the MS Azure Graph details.
+    | Here are the Facebook App Details
     |
     */
 
@@ -32,5 +32,10 @@ return [
 
         // Chat Scopes
         'scopes' => env('FB_CHAT_SCOPES', 'email, pages_show_list, pages_read_engagement, pages_messaging, pages_manage_metadata'),
+    ],
+
+    // Catalog Settings
+    'catalog'         => [
+        'domain' => env('FB_CATALOG_DEFAULT_DOMAIN')
     ]
 ];

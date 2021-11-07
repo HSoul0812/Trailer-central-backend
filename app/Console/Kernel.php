@@ -18,9 +18,9 @@ use App\Console\Commands\CRM\Leads\AutoAssign;
 use App\Console\Commands\Parts\IncreaseDealerCostCommand;
 use App\Console\Commands\Parts\FixPartVendor;
 use App\Console\Commands\CRM\Dms\CVR\GenerateCVRDocumentCommand;
-use App\Console\Commands\CRM\Dms\GetCompletedSaleWithNoFullInvoice;
+use App\Console\Commands\CRM\Dms\UnitSale\GetCompletedSaleWithNoFullInvoice;
+use App\Console\Commands\CRM\Dms\UnitSale\FixEmptyManufacturerUnitSale;
 use App\Console\Commands\Inventory\FixFloorplanBillStatus;
-use App\Console\Commands\CRM\Dms\FixEmptyManufacturerUnitSale;
 
 class Kernel extends ConsoleKernel
 {
@@ -66,7 +66,7 @@ class Kernel extends ConsoleKernel
                 ->runInBackground();
 
         $schedule->command('user:create-access-token')
-                ->daily()
+                ->hourly()
                 ->runInBackground();
 
         $schedule->command('crm:dms:update-po-num-ref')
@@ -167,7 +167,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('inventory:auto-archive-sold-items')
             ->daily()
             ->runInBackground();
-        
+
         $schedule->command('inventory:fix-floorplan-bill-status')
             ->hourly()
             ->runInBackground();

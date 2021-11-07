@@ -3,6 +3,10 @@
 namespace App\Repositories\Parts;
 
 use App\Events\Parts\PartQtyUpdated;
+use App\Models\Parts\Brand;
+use App\Models\Parts\Category;
+use App\Models\Parts\Type;
+use App\Models\Parts\Vendor;
 use App\Repositories\Repository;
 use App\Models\Parts\Part;
 use App\Models\Parts\PartImage;
@@ -406,12 +410,27 @@ class PartRepository implements PartRepositoryInterface {
     /**
      * Get all rows by dealerId.
      * note: used by csv export
-     * @param $dealerId
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param int $dealerId
+     * @return Builder
      */
-    public function queryAllByDealerId($dealerId)
+    public function queryAllByDealerId(int $dealerId): Builder
     {
-        return Part::with(['vendor', 'brand', 'images', 'bins'])->where('dealer_id', $dealerId);
+        return DB::table(Part::getTableName().' AS p')
+            ->select([
+                'p.*',
+                'v.name AS vendor_name',
+                'b.name AS brand_name',
+                't.name AS type_name',
+                'b.name AS category_name',
+            ])
+            ->selectRaw(DB::raw('COALESCE((SELECT SUM(bc.qty) FROM part_bin_qty bc WHERE bc.part_id = p.id), 0) total_qty'))
+            ->selectRaw(DB::raw("(SELECT group_concat(i.image_url , '\\n') FROM part_images i WHERE i.part_id = p.id) images"))
+            ->leftJoin(Vendor::getTableName().' AS v', 'p.vendor_id','=','v.id')
+            ->leftJoin(Brand::getTableName().' AS b', 'p.brand_id','=','b.id')
+            ->leftJoin(Type::getTableName().' AS t', 'p.type_id','=','t.id')
+            ->leftJoin(Category::getTableName().' AS c', 'p.category_id','=','c.id')
+            ->orderBy('p.id')
+            ->where('p.dealer_id', $dealerId);
     }
 
     public function update($params) {
@@ -446,7 +465,9 @@ class PartRepository implements PartRepositoryInterface {
 
                         }
                     }
-                }
+                } else {
+                    $part->images()->delete();
+                } 
 
                 if (isset($params['bins'])) {
                     $part->bins()->delete();
@@ -532,7 +553,7 @@ class PartRepository implements PartRepositoryInterface {
         } else {
             throw new \Exception('Query is required');
         }
-        
+
         // vendor id
         if ($query['vendor_id'] ?? null) {
             $search->filter('term', ['vendor_id' => $query['vendor_id']]);

@@ -8,8 +8,10 @@ use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\Inventory\CreateInventoryRequest;
 use App\Http\Requests\Inventory\DeleteInventoryRequest;
 use App\Http\Requests\Inventory\ExistsInventoryRequest;
+use App\Http\Requests\Inventory\GetInventoryDeliveryPriceRequest;
 use App\Http\Requests\Inventory\GetInventoryHistoryRequest;
 use App\Http\Requests\Inventory\UpdateInventoryRequest;
+use App\Models\Inventory\Inventory;
 use App\Repositories\Inventory\InventoryHistoryRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Services\Inventory\InventoryServiceInterface;
@@ -188,7 +190,7 @@ class InventoryController extends RestfulControllerV2
      * @return \Dingo\Api\Http\Response
      */
     public function show(int $id) {
-        return $this->response->item($this->inventoryRepository->get(['id' => $id]), new InventoryTransformer());
+        return $this->response->item($this->inventoryRepository->getAndIncrementTimesViewed(['id' => $id]), new InventoryTransformer());
     }
 
     /**
@@ -350,5 +352,14 @@ class InventoryController extends RestfulControllerV2
         }
 
         $this->response->errorBadRequest();
+    }
+
+    public function delivery_price(int $inventoryId, Request $request):Response {
+        return $this->response->array([
+            'response' => [
+                'status' => 'success',
+                'fee' => $this->inventoryService->deliveryPrice($inventoryId)
+            ]
+        ]);
     }
 }

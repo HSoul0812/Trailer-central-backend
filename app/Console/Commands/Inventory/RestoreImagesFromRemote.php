@@ -83,7 +83,13 @@ class RestoreImagesFromRemote extends Command
     private function getRemoteInventory($func) : void
     {
         $connection = $this->getRemoteDbConnection();
-        $users = User::where('dealer_id', '>', 1000)->get();
+        
+        if ($this->dealerId) {
+            $users = User::where('dealer_id', $this->dealerId)->get();
+        } else {
+            $users = User::where('dealer_id', '>', 1000)->get();
+        }
+                
         foreach($users as $user) {
             if ($user->dealer_id) {
                 $select = $connection->prepare("SELECT * FROM inventory WHERE is_archived = 0 AND status != 2 AND dealer_id = '{$user->dealer_id}'");
@@ -111,22 +117,26 @@ class RestoreImagesFromRemote extends Command
             return false;
         }
 
-        $this->info("Restoring inventory images for {$inventory->stock}");
+        
        
         DB::transaction(function() use ($inventory, $imagesQuery) {
             
-            InventoryImage::where('inventory_id', $inventory->inventory_id)->delete();
+            $images = InventoryImage::where('inventory_id', $inventory->inventory_id)->get();
+//            InventoryImage::where('inventory_id', $inventory->inventory_id)->delete();
             
-            while($image = $imagesQuery->fetch(\PDO::FETCH_ASSOC)) {
-                try {
-                    $newImage = Image::create($image);
-                    $image['image_id'] = $newImage->image_id;
-                    InventoryImage::create($image); 
-                } catch (\Exception $ex) {
-                    $this->error($ex->getMessage());
+            if ($images->count() === 0) {                
+                while($image = $imagesQuery->fetch(\PDO::FETCH_ASSOC)) {
+                    try {
+                        $newImage = Image::create($image);
+                        $image['image_id'] = $newImage->image_id;
+                        InventoryImage::create($image); 
+                    } catch (\Exception $ex) {
+                        $this->error($ex->getMessage());
+                    }
+                    
+                    $this->info("Restoring inventory images for {$inventory->stock}");
                 }
-                           
-            }
+            }   
         });
                 
         return true;

@@ -53,9 +53,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $ids_token
  * @property string|null $ids_default_location
  * @property string|null $xml_url
+ * @property string|null $pipe_delimited
+ * @property string|null $motility
  * @property string|null $zero_msrp
  * @property string|null $only_types
  * @property string|null $linebreak_characters
+ * @property bool $use_latest_ftp_file_only
+ * @property bool $spincar_active
+ * @property int|null $spincar_spincar_id
+ * @property string|null $spincar_filenames
  * 
  * @property Collection<CollectorSpecification> $specifications
  * @property User $dealers
@@ -68,7 +74,9 @@ class Collector extends Model implements Filterable
         self::FILE_FORMAT_CSV,
         self::FILE_FORMAT_CDK,
         self::FILE_FORMAT_IDS,
-        self::FILE_FORMAT_XML_URL
+        self::FILE_FORMAT_XML_URL,
+        self::FILE_FORMAT_PIPE_DELIMITED,
+        self::FILE_FORMAT_MOTILITY,
     ];
 
     public const FILE_FORMAT_CDK = 'cdk';
@@ -76,6 +84,8 @@ class Collector extends Model implements Filterable
     public const FILE_FORMAT_CSV = 'csv';
     public const FILE_FORMAT_IDS = 'ids';
     public const FILE_FORMAT_XML_URL = 'xml_url';
+    public const FILE_FORMAT_PIPE_DELIMITED = 'pipe_delimited';
+    public const FILE_FORMAT_MOTILITY = 'motility';
 
     public const MSRP_ZEROED_OUT_ON_USED = 1;
     public const MSRP_NOT_ZEROED_OUT_ON_USED = 0;
@@ -133,12 +143,20 @@ class Collector extends Model implements Filterable
         'unarchive_sold_items',
         'cdk_password',
         'cdk_username',
+        'motility_username',
+        'motility_password',
+        'motility_account_no',
+        'motility_integration_id',
         'use_factory_mapping',
         'skip_categories',
         'skip_locations',
         'zero_msrp',
         'only_types',
-        'linebreak_characters'
+        'linebreak_characters',
+        'use_latest_ftp_file_only',
+        'spincar_active',
+        'spincar_spincar_id',
+        'spincar_filenames'
     ];
 
     public function dealers(): BelongsTo

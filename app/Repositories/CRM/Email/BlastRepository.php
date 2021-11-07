@@ -41,6 +41,12 @@ class BlastRepository implements BlastRepositoryInterface {
      * @return BlastSent
      */
     public function sent(int $blastId, int $leadId, ?string $messageId = null): BlastSent {
+        // Get Sent?
+        $sent = $this->getSent($blastId, $leadId);
+        if(!empty($sent->email_blasts_id)) {
+            return $sent;
+        }
+
         DB::beginTransaction();
 
         try {
@@ -109,6 +115,33 @@ class BlastRepository implements BlastRepositoryInterface {
                          ->where(Lead::getTableName() . '.email_address', $email)->first();
 
         // Was Blast Sent?
+        return !empty($sent->email_blasts_id);
+    }
+
+    /**
+     * Get Blast Sent Entry for Lead
+     * 
+     * @param int $blastId
+     * @param int $leadId
+     * @return null|BlastSent
+     */
+    public function getSent(int $blastId, int $leadId): ?BlastSent {
+        // Get Blast Sent Entry
+        return BlastSent::where('email_blasts_id', $blastId)->where('lead_id', $leadId)->first();
+    }
+
+    /**
+     * Was Blast Already Sent to Lead?
+     * 
+     * @param int $blastId
+     * @param int $leadId
+     * @return bool
+     */
+    public function wasLeadSent(int $blastId, int $leadId): bool {
+        // Get Blast Sent Entry
+        $sent = $this->getSent($blastId, $leadId);
+
+        // Successful?
         return !empty($sent->email_blasts_id);
     }
 }

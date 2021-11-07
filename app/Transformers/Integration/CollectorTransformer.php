@@ -58,10 +58,18 @@ class CollectorTransformer extends TransformerAbstract
             'ids_default_location' => $collector->ids_default_location,
             'use_factory_mapping' => $collector->use_factory_mapping,
             'xml_url' => $collector->xml_url,
+            'motility_username' => $collector->motility_username,
+            'motility_password' => $collector->motility_password,
+            'motility_account_no' => $collector->motility_account_no,
+            'motility_integration_id' => $collector->motility_integration_id,
             'zero_msrp_on_used' => $collector->zero_msrp,
             'specifications' => $collector->specifications,
             'linebreak_characters' => $collector->linebreak_characters,
-            'local_image_directory_address' => $collector->local_image_directory_address
+            'local_image_directory_address' => $collector->local_image_directory_address,
+            'use_latest_ftp_file_only' => $collector->use_latest_ftp_file_only,
+            'spincar_active' => $collector->spincar_active,
+            'spincar_spincar_id' => $collector->spincar_spincar_id,
+            'spincar_filenames' => $collector->spincar_filenames
         ];
     }
 }

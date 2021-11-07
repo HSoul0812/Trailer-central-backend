@@ -36,4 +36,22 @@ interface CampaignRepositoryInterface extends Repository {
      * @return bool
      */
     public function wasSent(int $campaignId, string $email): bool;
+
+    /**
+     * Get Campaign Sent Entry for Lead
+     * 
+     * @param int $campaignId
+     * @param int $leadId
+     * @return null|CampaignSent
+     */
+    public function getSent(int $campaignId, int $leadId): ?CampaignSent;
+
+    /**
+     * Was Campaign Already Sent to Lead?
+     * 
+     * @param int $campaignId
+     * @param int $leadId
+     * @return bool
+     */
+    public function wasLeadSent(int $campaignId, int $leadId): bool;
 }

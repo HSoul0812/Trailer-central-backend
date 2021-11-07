@@ -98,6 +98,22 @@ class InventoryRepository implements InventoryRepositoryInterface
         '-fp_vendor' => [
             'field' => 'fp_vendor',
             'direction' => 'ASC'
+        ],
+        'created_at' => [
+            'field' => 'created_at',
+            'direction' => 'DESC'
+        ],
+        '-created_at' => [
+            'field' => 'created_at',
+            'direction' => 'ASC'
+        ],
+        'updated_at' => [
+            'field' => 'updated_at',
+            'direction' => 'DESC'
+        ],
+        '-updated_at' => [
+            'field' => 'updated_at',
+            'direction' => 'ASC'
         ]
     ];
 
@@ -440,10 +456,25 @@ class InventoryRepository implements InventoryRepositoryInterface
     private function buildInventoryQuery(array $params, bool $withDefault = true) : GrimzyBuilder
     {
         /** @var Builder $query */
-        $query = Inventory::where('inventory.inventory_id', '>', 0);
+        $query = Inventory::query()->select(['inventory.*'])->where('inventory.inventory_id', '>', 0);
+        $query->select(['inventory.*']);
 
         if (isset($params['include']) && is_string($params['include'])) {
             $query = $query->with(explode(',', $params['include']));
+        }
+
+        if (isset($params['attribute_names'])) {
+            $query = $query->join('eav_attribute_value', 'inventory.inventory_id', '=', 'eav_attribute_value.inventory_id')->orderBy('eav_attribute_value.attribute_id', 'desc');
+            $query = $query->join('eav_attribute', 'eav_attribute.attribute_id', '=', 'eav_attribute_value.attribute_id');
+
+            $query = $query->where(function($q) use ($params) {
+                foreach ($params['attribute_names'] as $attribute => $value) {
+                    $q->orWhere(function ($q) use ($attribute, $value) {
+                        $q->where('code', '=', $attribute)
+                            ->where('value', '=', $value);
+                    });
+                }
+            });
         }
 
         if ($withDefault) {
@@ -526,7 +557,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         } else if (isset($params['images_less_than'])) {
             $query->havingRaw('image_count <= '. $params['images_less_than']);
         } else {
-            $query->select('*');
+            $query->select(['inventory.*']);
         }
 
         if (isset($params['sort'])) {
@@ -698,4 +729,16 @@ class InventoryRepository implements InventoryRepositoryInterface
             $item->inventoryFiles()->where('file_id', '=', $existingFile['file_id'])->update($inventoryFileParams);
         }
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getAndIncrementTimesViewed(array $params): Inventory 
+    {
+        $inventory = $this->get($params);
+        $inventory->times_viewed += 1;
+        $inventory->save();
+        return $inventory;
+    }
+
 }

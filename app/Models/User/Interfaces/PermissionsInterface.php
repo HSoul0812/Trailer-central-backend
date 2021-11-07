@@ -29,6 +29,7 @@ interface PermissionsInterface
     const MANAGE_SUBSCRIPTION = 'manage_subscription';
     const LOCATIONS = 'locations';
     const DEALER_TEXTS = 'dealer_texts';
+    const QUOTES = 'quotes';
 
     const FEATURES = [
         self::INVENTORY,
@@ -47,6 +48,7 @@ interface PermissionsInterface
         self::MANAGE_SUBSCRIPTION,
         self::LOCATIONS,
         self::DEALER_TEXTS,
+        self::QUOTES
     ];
 
     /**

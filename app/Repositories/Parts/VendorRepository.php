@@ -5,8 +5,6 @@ namespace App\Repositories\Parts;
 use App\Repositories\Parts\VendorRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\Parts\Vendor;
-use App\Models\Parts\Part;
-use Illuminate\Support\Facades\DB;
 
 /**
  *  

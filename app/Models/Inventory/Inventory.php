@@ -15,6 +15,7 @@ use ElasticScoutDriverPlus\CustomSearch;
 use Grimzy\LaravelMysqlSpatial\Eloquent\SpatialTrait;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Illuminate\Database\Eloquent\Collection;
+use App\Models\Inventory\AttributeValue;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Parts\Vendor;
 use App\Models\User\User;
@@ -313,6 +314,7 @@ class Inventory extends Model
         'qb_sync_processed',
         'changed_fields_in_dashboard',
         'is_archived',
+        'times_viewed'
     ];
 
     protected $casts = [
@@ -352,7 +354,7 @@ class Inventory extends Model
 
     public function attribute(): HasManyThrough
     {
-        return $this->hasManyThrough(Attribute::class, 'eav_attribute_value', 'attribute_id', 'inventory_id');
+        return $this->hasManyThrough(Attribute::class, AttributeValue::class, 'eav_attribute_value', 'attribute_id', 'inventory_id');
     }
 
     public function dealerLocation(): BelongsTo
@@ -434,6 +436,14 @@ class Inventory extends Model
         }
 
         return $category->label;
+    }
+    
+    public function getAttributesAttribute()
+    { 
+        return self::select('*')
+                    ->join('eav_attribute_value', 'inventory.inventory_id', '=', 'eav_attribute_value.inventory_id')
+                    ->where('inventory.inventory_id', $this->inventory_id)
+                    ->get();
     }
 
     public function getColorAttribute()

@@ -16,6 +16,8 @@ use App\Repositories\Integration\Facebook\ChatRepository;
 use App\Repositories\Integration\Facebook\ChatRepositoryInterface;
 use App\Repositories\Integration\Facebook\FeedRepository;
 use App\Repositories\Integration\Facebook\FeedRepositoryInterface;
+use App\Repositories\Feed\TransactionExecuteQueueRepositoryInterface;
+use App\Repositories\Feed\TransactionExecuteQueueRepository;
 use App\Repositories\Integration\Facebook\PageRepository;
 use App\Repositories\Integration\Facebook\PageRepositoryInterface;
 use App\Services\CRM\User\SalesAuthService;
@@ -64,6 +66,8 @@ class IntegrationServiceProvider extends ServiceProvider
         $this->app->bind(ChatRepositoryInterface::class, ChatRepository::class);
         $this->app->bind(FeedRepositoryInterface::class, FeedRepository::class);
         $this->app->bind(PageRepositoryInterface::class, PageRepository::class);
+        
+        $this->app->bind(TransactionExecuteQueueRepositoryInterface::class, TransactionExecuteQueueRepository::class);
         
         $this->app->bind(CvrFileRepositoryInterface::class, CvrFileRepository::class);
         $this->app->bind(CvrFileServiceInterface::class, CvrFileService::class);

@@ -1,4 +1,4 @@
- <?php
+<?php
 
 use Dingo\Api\Routing\Router;
 
@@ -31,16 +31,40 @@ $api->version('v1', function ($route) {
     /**
      * Floorplan Payments
      */
-    $route->get('inventory/floorplan/payments', 'App\Http\Controllers\v1\Inventory\Floorplan\PaymentController@index');
-    $route->put('inventory/floorplan/payments', 'App\Http\Controllers\v1\Inventory\Floorplan\PaymentController@create');
 
-    $route->put('inventory/floorplan/bulk/payments', 'App\Http\Controllers\v1\Inventory\Floorplan\Bulk\PaymentController@create');
+    $route->group([
+        'prefix' => 'inventory'
+    ], function ($route) {
+        $route->group([
+            'prefix' => 'floorplan',
+        ], function ($route) {
+            $route->get(
+                'payments',
+                'App\Http\Controllers\v1\Inventory\Floorplan\PaymentController@index'
+            );
+            $route->put(
+                'payments',
+                'App\Http\Controllers\v1\Inventory\Floorplan\PaymentController@create'
+            );
+            $route->put(
+                'bulk/payments',
+                'App\Http\Controllers\v1\Inventory\Floorplan\Bulk\PaymentController@create'
+            );
 
-    $route->get('inventory/floorplan/vendors', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@index');
-    $route->put('inventory/floorplan/vendors', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@create');
-    $route->get('inventory/floorplan/vendors/{id}', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@show')->where('id', '[0-9]+');
-    $route->post('inventory/floorplan/vendors/{id}', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@update')->where('id', '[0-9]+');
-    $route->delete('inventory/floorplan/vendors/{id}', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@destroy')->where('id', '[0-9]+');
+            $route->group([
+                'prefix' => 'vendors',
+            ], function ($route) {
+                $route->get('/', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@index');
+                $route->put('/', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@create');
+                $route->get('{id}', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@show')
+                    ->where('id', '[0-9]+');
+                $route->post('{id}', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@update')
+                    ->where('id', '[0-9]+');
+                $route->delete('{id}', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@destroy')
+                    ->where('id', '[0-9]+');
+            });
+        });
+    });
 
     /**
      * Part bins
@@ -159,14 +183,12 @@ $api->version('v1', function ($route) {
     |
     */
 
-
     /**
      * Inventory Overlay
      */
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
         $route->get('inventory/overlay', 'App\Http\Controllers\v1\Inventory\CustomOverlayController@index');
     });
-
 
     /**
      * Inventory Entity
@@ -204,6 +226,11 @@ $api->version('v1', function ($route) {
     $route->get('inventory/{inventory_id}/history', 'App\Http\Controllers\v1\Inventory\InventoryController@history')->where('inventory_id', '[0-9]+');
 
     /**
+     * Inventory distance
+     */
+    $route->get('inventory/{inventory_id}/delivery_price', 'App\Http\Controllers\v1\Inventory\InventoryController@delivery_price')->where('inventory_id', '[0-9]+');
+
+    /**
      * Inventory
      */
     $route->get('inventory', 'App\Http\Controllers\v1\Inventory\InventoryController@index');
@@ -235,10 +262,8 @@ $api->version('v1', function ($route) {
     |
     |
     */
+    $route->get('website', 'App\Http\Controllers\v1\Website\WebsiteController@index');
 
-    /**
-     * Website
-     */
     $route->put('website/{websiteId}/enable-proxied-domain-ssl', 'App\Http\Controllers\v1\Website\WebsiteController@enableProxiedDomainSsl');
 
     /**
@@ -298,6 +323,23 @@ $api->version('v1', function ($route) {
         $route->get('website/forms/field-map/types', 'App\Http\Controllers\v1\Website\Forms\FieldMapController@types');
     });
 
+
+    /**
+     * Website users
+     */
+    $route->group(['prefix' => 'website/{websiteId}/user'], function($route) {
+        $route->post('signup', 'App\Http\Controllers\v1\Website\User\WebsiteUserController@create');
+        $route->post('login', 'App\Http\Controllers\v1\Website\User\WebsiteUserController@login');
+    });
+
+    /**
+     * Website User Favorite Inventory
+     */
+    $route->group(['prefix' => 'website/inventory/favorite', 'middleware' => 'api.auth', 'providers' => ['website_auth']], function ($route) {
+        $route->get('', 'App\Http\Controllers\v1\Website\User\WebsiteUserFavoriteInventoryController@index');
+        $route->post('', 'App\Http\Controllers\v1\Website\User\WebsiteUserFavoriteInventoryController@create');
+        $route->delete('', 'App\Http\Controllers\v1\Website\User\WebsiteUserFavoriteInventoryController@delete');
+    });
 
     /*
     |--------------------------------------------------------------------------
@@ -386,6 +428,8 @@ $api->version('v1', function ($route) {
     |
     |
     */
+
+    $route->post('feed/atw', 'App\Http\Controllers\v1\Feed\AtwController@create');
 
     // upload feed data
     $route->post('feed/uploader/{code}', 'App\Http\Controllers\v1\Feed\UploadController@upload')->where('code', '\w+');
@@ -489,6 +533,8 @@ $api->version('v1', function ($route) {
         */
         $route->get('user/quotes', 'App\Http\Controllers\v1\Dms\UnitSaleController@index');
 
+        $route->put('user/quotes/bulk-archive', 'App\Http\Controllers\v1\Dms\UnitSaleController@bulkArchive');
+
         /*
         |--------------------------------------------------------------------------
         | Dealer Locations
@@ -498,13 +544,22 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('user/dealer-location', 'App\Http\Controllers\v1\User\DealerLocationController@index');
-        $route->delete('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@destroy')->where('id', '[0-9]+');
-        $route->get('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@show')->where('id', '[0-9]+');
-        $route->get('user/dealer-location/check/{name}', 'App\Http\Controllers\v1\User\DealerLocationController@check');
-        $route->post('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@update')->where('id', '[0-9]+');
         $route->put('user/dealer-location', 'App\Http\Controllers\v1\User\DealerLocationController@create');
+
+        $route->get('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@show')->where('id', '[0-9]+');
+        $route->post('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@update')->where('id', '[0-9]+');
+        $route->delete('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@destroy')->where('id', '[0-9]+');
+
+        $route->get('user/dealer-location/check/{name}', 'App\Http\Controllers\v1\User\DealerLocationController@check');
         $route->get('user/dealer-location-quote-fees', 'App\Http\Controllers\v1\User\DealerLocationController@quoteFees');
         $route->get('user/dealer-location-available-tax-categories', 'App\Http\Controllers\v1\User\DealerLocationController@availableTaxCategories');
+        $route->get('user/dealer-location-titles', 'App\Http\Controllers\v1\User\DealerLocationController@getDealerLocationTitles');
+
+        $route->group(['prefix' => 'user/dealer-location/{locationId}'], function ($route) {
+            $route->get('/mileage-fee', 'App\Http\Controllers\v1\User\DealerLocationMileageFeeController@index');
+            $route->post('/mileage-fee', 'App\Http\Controllers\v1\User\DealerLocationMileageFeeController@create');
+            $route->delete('/mileage-fee/{feeId}', 'App\Http\Controllers\v1\User\DealerLocationMileageFeeController@delete');
+        });
 
         /*
         |--------------------------------------------------------------------------
@@ -1061,4 +1116,18 @@ $api->version('v1', function ($route) {
     */
     $route->post('files/local', 'App\Http\Controllers\v1\File\FileController@uploadLocal');
     $route->post('images/local', 'App\Http\Controllers\v1\File\ImageController@uploadLocal');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Bill
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+
+    $route->post('bills', 'App\Http\Controllers\v1\Dms\Quickbooks\BillController@create');
+    $route->put('bills/{id}', 'App\Http\Controllers\v1\Dms\Quickbooks\BillController@update')->where('id', '[0-9]+');
+    $route->get('bills/{id}', 'App\Http\Controllers\v1\Dms\Quickbooks\BillController@show')->where('id', '[0-9]+');
+    $route->get('bills', 'App\Http\Controllers\v1\Dms\Quickbooks\BillController@index');
 });
