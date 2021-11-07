@@ -7,16 +7,12 @@ use App\Services\CRM\User\DTOs\SalesPersonConfig;
 use App\Services\CRM\Email\ImapServiceInterface;
 use App\Transformers\CRM\Email\ImapMailboxTransformer;
 use App\Transformers\Dms\GenericSaleTransformer;
+use App\Transformers\Integration\Facebook\ChatTransformer;
 use App\Transformers\Pos\SaleTransformer;
 use League\Fractal\TransformerAbstract;
 
 class SalesPersonTransformer extends TransformerAbstract
 {
-    /**
-     * @var ImapServiceInterface
-     */
-    private $imapService;
-
     protected $defaultIncludes = [];
 
     protected $availableIncludes = [
@@ -26,18 +22,11 @@ class SalesPersonTransformer extends TransformerAbstract
         'imap',
         'folders',
         'defaultFolders',
-        'authTypes'
+        'authTypes',
+        'facebookIntegrations',
     ];
 
-    /**
-     * SalesPersonTransformer constructor.
-     * @param ImapServiceInterface $imapService
-     */
-    public function __construct(ImapServiceInterface $imapService) {
-        $this->imapService = $imapService;
-    }
-
-    public function transform(SalesPerson $salesPerson)
+    public function transform(SalesPerson $salesPerson): array
     {
         // Get SalesPersonConfig
         $config = new SalesPersonConfig();
@@ -84,7 +73,8 @@ class SalesPersonTransformer extends TransformerAbstract
     {
         return $this->item($salesPerson, function($salesPerson) {
             // Get Validate
-            $validate = $this->imapService->validate($salesPerson->imap_config);
+            $imapService = app()->make(ImapServiceInterface::class);
+            $validate = $imapService->validate($salesPerson->imap_config);
 
             // Return Results
             return [
@@ -117,11 +107,9 @@ class SalesPersonTransformer extends TransformerAbstract
 
     public function includeDefaultFolders(SalesPerson $salesPerson)
     {
-        $folders = $salesPerson->default_folders;
-        if(!empty($this->imapService)) {
-            $validate = $this->imapService->validate($salesPerson->imap_config);
-            $folders = $validate->getDefaultFolders();
-        }
+        $imapService = app()->make(ImapServiceInterface::class);
+        $validate = $imapService->validate($salesPerson->imap_config);
+        $folders = $validate->getDefaultFolders();
         return $this->collection($folders, new ImapMailboxTransformer());
     }
 
@@ -133,5 +121,11 @@ class SalesPersonTransformer extends TransformerAbstract
     public function includeAllSales(SalesPerson $salesPerson)
     {
         return $this->collection($salesPerson->allSales(), new GenericSaleTransformer());
+    }
+
+    public function includeFacebookIntegrations(SalesPerson $salesPerson)
+    {
+        $chatTransformer = app()->make(ChatTransformer::class);
+        return $this->collection($salesPerson->facebookIntegrations, $chatTransformer);
     }
 }

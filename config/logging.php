@@ -82,6 +82,13 @@ return [
             'days' => 7,
         ],
 
+        'facebook' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/services/facebook.log'),
+            'level' => 'debug',
+            'days' => 3,
+        ],
+
         'leads' => [
             'driver' => 'daily',
             'path' => storage_path('logs/services/leads.log'),

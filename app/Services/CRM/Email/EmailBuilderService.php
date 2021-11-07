@@ -355,7 +355,13 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         // Loop Leads
         foreach($leads as $leadId) {
             // Add Lead Config to Builder Email
-            $lead = $this->leads->get(['id' => $leadId]);
+            try {
+                $lead = $this->leads->get(['id' => $leadId]);
+            } catch(\Exception $e) {
+                $this->log->error("Exception returned trying to get lead #" . $leadId . ": " . $e->getMessage());
+                $stats->updateStats(BuilderStats::STATUS_ERROR);
+                continue;
+            }
             $builder->setLeadConfig($lead);
 
             // Log to Database
@@ -374,11 +380,6 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             // Send Lead Email
             $status = $this->sendLeadEmail($builder, $leadId);
             $stats->updateStats($status);
-        }
-
-        // Errors Occurred and No Emails Sent?
-        if($stats->noSent < 1 && $stats->noErrors > 0) {
-            throw new SendBuilderEmailsFailedException;
         }
 
         // Return Sent Emails Collection
@@ -666,25 +667,32 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      */
     private function markBounced(BuilderEmail $builder, ?string $type = null): void
     {
-        // Get Parsed Email
-        $parsedEmail = $builder->getParsedEmail($builder->emailId);
-        $this->log->info('Marking ' . $builder->type . ' #' . $builder->id . ' as ' .
-                            ($type ?? 'skipped') . ' for the Message-ID ' . $parsedEmail->messageId);
+        // Ignore if: Lead ID Already Exists in Sent AND We're Marking as Skipped
+        if($type === null &&
+          (($builder->type === BuilderEmail::TYPE_BLAST && $this->blasts->wasLeadSent($builder->id, $builder->leadId)) ||
+          ($builder->type === BuilderEmail::TYPE_CAMPAIGN && $this->campaigns->wasLeadSent($builder->id, $builder->leadId)))) {
+            $this->log->info('Sent status already applied for ' . $builder->type . ' #' . $builder->id . ' lead #' . $builder->leadId);
+        } else {
+            // Get Parsed Email
+            $parsedEmail = $builder->getParsedEmail($builder->emailId);
+            $this->log->info('Marking ' . $builder->type . ' #' . $builder->id . ' as ' .
+                                ($type ?? 'skipped') . ' for the Message-ID ' . $parsedEmail->messageId);
 
-        // Create Or Update Bounced Entry in DB
-        $this->emailhistory->update([
-            'id' => $builder->emailId,
-            'message_id' => $parsedEmail->messageId,
-            'body' => $parsedEmail->body,
-            'was_skipped' => 1,
-            'date_bounced' => ($type === 'bounce') ? 1 : 0,
-            'date_complained' => ($type === 'complaint') ? 1 : 0,
-            'date_unsubscribed' => ($type === 'unsubscribe') ? 1 : 0,
-            'invalid_email' => ($type === 'invalid') ? 1 : 0
-        ]);
+            // Create Or Update Bounced Entry in DB
+            $this->emailhistory->update([
+                'id' => $builder->emailId,
+                'message_id' => $parsedEmail->messageId,
+                'body' => $parsedEmail->body,
+                'was_skipped' => 1,
+                'date_bounced' => ($type === 'bounce') ? 1 : 0,
+                'date_complained' => ($type === 'complaint') ? 1 : 0,
+                'date_unsubscribed' => ($type === 'unsubscribe') ? 1 : 0,
+                'invalid_email' => ($type === 'invalid') ? 1 : 0
+            ]);
 
-        // Mark Sent With Message ID
-        $this->markSentMessageId($builder, $parsedEmail);
+            // Mark Sent With Message ID
+            $this->markSentMessageId($builder, $parsedEmail);
+        }
     }
 
     /**

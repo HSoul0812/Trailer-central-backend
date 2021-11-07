@@ -45,7 +45,7 @@ class UnitSale extends Model implements GenericSaleInterface
 
     const UPDATED_AT = null;
 
-    public function dealer() : BelongsTo
+    public function dealer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
     }
@@ -60,7 +60,7 @@ class UnitSale extends Model implements GenericSaleInterface
         return $this->belongsTo(DealerLocation::class, 'dealer_location_id', 'dealer_location_id');
     }
 
-    public function coCustomer() : BelongsTo
+    public function coCustomer(): BelongsTo
     {
         return $this->belongsTo(Customer::class, 'cobuyer_id', 'id');
     }
@@ -80,7 +80,7 @@ class UnitSale extends Model implements GenericSaleInterface
         return $this->hasManyThrough(Payment::class, Invoice::class, 'unit_sale_id');
     }
 
-    public function tradeIn() : HasMany
+    public function tradeIn(): HasMany
     {
         return $this->hasMany(TradeIn::class, 'unit_sale_id');
     }
@@ -100,7 +100,8 @@ class UnitSale extends Model implements GenericSaleInterface
         return $this->hasManyThrough(Payment::class, Invoice::class, 'unit_sale_id')->sum('amount');
     }
 
-    public function getStatusAttribute() {
+    public function getStatusAttribute()
+    {
         if (!empty($this->is_archived)) {
             return 'Archived';
         }
@@ -142,13 +143,13 @@ class UnitSale extends Model implements GenericSaleInterface
             $this->labor_discount;
     }
 
-    public function getCostOfPrimaryVehicleAttribute() : float
+    public function getCostOfPrimaryVehicleAttribute(): float
     {
         $costOfVehicle = 0;
-        if ( $this->invoice ) {
-            foreach($this->invoice as $invoice) {
-                foreach($invoice->items as $item) {
-                    if ( $item->item->type === Item::ITEM_TYPES['TRAILER'] ) {
+        if ($this->invoice) {
+            foreach ($this->invoice as $invoice) {
+                foreach ($invoice->items as $item) {
+                    if ($item->item->type === Item::ITEM_TYPES['TRAILER']) {
                         $costOfVehicle += $item->cost;
                     }
                 }
@@ -157,11 +158,11 @@ class UnitSale extends Model implements GenericSaleInterface
         return $costOfVehicle;
     }
 
-    public function amountFinanced() : float
+    public function amountFinanced(): float
     {
         $amountFinanced = 0;
-        foreach($this->payments as $payment) {
-            if( $payment->paymentMethod->type === PaymentMethod::PAYMENT_METHOD_FINANCING ) {
+        foreach ($this->payments as $payment) {
+            if ($payment->paymentMethod->type === PaymentMethod::PAYMENT_METHOD_FINANCING) {
                 $amountFinanced += $payment->amount;
             }
         }
@@ -169,10 +170,10 @@ class UnitSale extends Model implements GenericSaleInterface
         return $amountFinanced;
     }
 
-    public function isFinanced() : bool
+    public function isFinanced(): bool
     {
-        foreach($this->payments as $payment) {
-            if( $payment->paymentMethod->type === PaymentMethod::PAYMENT_METHOD_FINANCING ) {
+        foreach ($this->payments as $payment) {
+            if ($payment->paymentMethod->type === PaymentMethod::PAYMENT_METHOD_FINANCING) {
                 return true;
             }
         }
@@ -180,13 +181,13 @@ class UnitSale extends Model implements GenericSaleInterface
         return false;
     }
 
-    public function taxTotal() : float
+    public function taxTotal(): float
     {
         $taxAmount = 0;
-        if ( $this->invoice ) {
-            foreach($this->invoice as $invoice) {
-                foreach($invoice->items as $item) {
-                    if ( $item->item->type === Item::ITEM_TYPES['TAX'] ) {
+        if ($this->invoice) {
+            foreach ($this->invoice as $invoice) {
+                foreach ($invoice->items as $item) {
+                    if ($item->item->type === Item::ITEM_TYPES['TAX']) {
                         $taxAmount += $item->itemPrice;
                     }
                 }

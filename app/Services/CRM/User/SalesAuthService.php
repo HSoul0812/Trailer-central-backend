@@ -54,7 +54,7 @@ class SalesAuthService implements SalesAuthServiceInterface
     /**
      * @var SalesPersonTransformer
      */
-    protected $salesTransformer;
+    protected $transformer;
 
     /**
      * @var Manager
@@ -70,7 +70,7 @@ class SalesAuthService implements SalesAuthServiceInterface
         TokenRepositoryInterface $tokens,
         AuthServiceInterface $auth,
         ImapServiceInterface $imap,
-        SalesPersonTransformer $salesTransformer,
+        SalesPersonTransformer $transformer,
         Manager $fractal
     ) {
         $this->salesPersonService = $salesPersonService;
@@ -78,7 +78,7 @@ class SalesAuthService implements SalesAuthServiceInterface
         $this->tokens = $tokens;
         $this->auth = $auth;
         $this->imap = $imap;
-        $this->salesTransformer = $salesTransformer;
+        $this->transformer = $transformer;
         $this->fractal = $fractal;
 
         // Fractal
@@ -306,8 +306,8 @@ class SalesAuthService implements SalesAuthServiceInterface
         ]);
 
         // Return Sales Person Response Array
-        $item = new Item($salesPerson, $this->salesTransformer, 'sales_person');
-        $this->fractal->parseIncludes('smtp,imap,folders,defaultFolders,authTypes');
+        $item = new Item($salesPerson, $this->transformer, 'sales_person');
+        $this->fractal->parseIncludes('smtp,imap,folders,defaultFolders,authTypes,facebookIntegrations');
         return $this->fractal->createData($item)->toArray();
     }
 }

@@ -12,6 +12,7 @@
         "php": "^7.2",
         "ext-json": "*",
         "algolia/algoliasearch-client-php": "^2.4",
+        "awobaz/compoships": "^2.1",
         "aws/aws-sdk-php": "^3.0",
         "babenkoivan/elastic-migrations": "^1.2",
         "babenkoivan/elastic-scout-driver": "^1.2",

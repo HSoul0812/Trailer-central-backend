@@ -68,6 +68,8 @@ use App\Services\Dms\Printer\InstructionsServiceInterface;
 use App\Services\Dms\Printer\ZPL\InstructionsService;
 use App\Services\Dms\Printer\FormServiceInterface as PrinterFormServiceInterface;
 use App\Services\Dms\Printer\ESCP\FormService as PrinterFormService;
+use App\Services\Dms\UnitSale\UnitSaleService;
+use App\Services\Dms\UnitSale\UnitSaleServiceInterface;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
@@ -128,6 +130,8 @@ class DmsServiceProvider extends ServiceProvider
         $this->app->bind(TypeRepositoryInterface::class, function () {
             return new TypeRepository(Type::query());
         });
+
+        $this->app->bind(UnitSaleServiceInterface::class, UnitSaleService::class);
     }
 
     public function boot()

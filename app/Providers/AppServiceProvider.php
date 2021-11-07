@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Contracts\LoggerServiceInterface;
+use App\DealerLocationMileageFee;
 use App\Helpers\ImageHelper;
 use App\Helpers\SanitizeHelper;
 use App\Http\Controllers\v1\File\FileController;
@@ -63,6 +64,8 @@ use App\Repositories\Showroom\ShowroomFieldsMappingRepository;
 use App\Repositories\Showroom\ShowroomFieldsMappingRepositoryInterface;
 use App\Repositories\Pos\SalesReportRepository;
 use App\Repositories\Pos\SalesReportRepositoryInterface;
+use App\Repositories\User\DealerLocationMileageFeeRepository;
+use App\Repositories\User\DealerLocationMileageFeeRepositoryInterface;
 use App\Repositories\User\DealerLocationQuoteFeeRepository;
 use App\Repositories\User\DealerLocationQuoteFeeRepositoryInterface;
 use App\Repositories\User\DealerLocationSalesTaxItemRepository;
@@ -97,6 +100,8 @@ use App\Repositories\User\DealerPasswordResetRepositoryInterface;
 use App\Repositories\User\DealerPasswordResetRepository;
 use App\Services\CRM\User\TimeClockService;
 use App\Services\CRM\User\TimeClockServiceInterface;
+use App\Services\Dms\Bills\BillService;
+use App\Services\Dms\Bills\BillServiceInterface;
 use App\Services\Dms\Pos\RegisterService;
 use App\Services\Dms\Pos\RegisterServiceInterface;
 use App\Services\File\FileService;
@@ -278,7 +283,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(FieldMapRepositoryInterface::class, FieldMapRepository::class);
         $this->app->bind(CrmUserRepositoryInterface::class, CrmUserRepository::class);
         $this->app->bind(CrmUserRoleRepositoryInterface::class, CrmUserRoleRepository::class);
-        $this->app->bind(DealerLocationQuoteFeeRepositoryInterface::class, DealerLocationQuoteFeeRepository::class);
         $this->app->bind(InvoiceRepositoryInterface::class, InvoiceRepository::class);
         $this->app->bind(SaleRepositoryInterface::class, SaleRepository::class);
         $this->app->bind(SalesReportRepositoryInterface::class, SalesReportRepository::class);
@@ -292,6 +296,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(QuickbookApprovalRepositoryInterface::class, QuickbookApprovalRepository::class);
         $this->app->bind(ManufacturerRepositoryInterface::class, ManufacturerRepository::class);
         $this->app->bind(FloorplanVendorRepositoryInterface::class, FloorplanVendorRepository::class);
+        $this->app->bind(BillServiceInterface::class, BillService::class);
 
         $this->app->bind(CostModifierRepositoryInterface::class, CostModifierRepository::class);
         $this->app->bind(MakesRepositoryInterface::class, MakesRepository::class);
@@ -320,6 +325,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(DealerLocationServiceInterface::class, DealerLocationService::class);
         $this->app->bind(DealerLocationSalesTaxItemRepositoryInterface::class, DealerLocationSalesTaxItemRepository::class);
         $this->app->bind(DealerLocationSalesTaxRepositoryInterface::class, DealerLocationSalesTaxRepository::class);
+        $this->app->bind(DealerLocationQuoteFeeRepositoryInterface::class, DealerLocationQuoteFeeRepository::class);
+        $this->app->bind(DealerLocationMileageFeeRepositoryInterface::class, DealerLocationMileageFeeRepository::class);
 
         $this->app->bind(PackageRepositoryInterface::class, PackageRepository::class);
         $this->app->bind(PackageServiceInterface::class, PackageService::class);

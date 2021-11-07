@@ -360,4 +360,28 @@ class DealerLocationService implements DealerLocationServiceInterface
     {
         return $isAdditional ?  Str::camel($title) . random_int(1, 1000) : $type;
     }
+
+    /**
+     * @param array $params
+     * @return array
+     */
+    public function getDealerLocationTitles(array $params): array
+    {
+        $params['select'] = [
+            'dealer_location_id',
+            'city',
+            'region',
+            'name',
+        ];
+
+        $models = $this->locationRepo->find($params);
+
+        $dealerLocations = $models->pluck('location_title', 'dealer_location_id');
+
+        if ($dealerLocations->isNotEmpty()) {
+            $dealerLocations->prepend('Choose a Dealer Location', 0);
+        }
+
+        return $dealerLocations->toArray();
+    }
 }

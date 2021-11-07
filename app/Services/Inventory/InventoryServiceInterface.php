@@ -39,4 +39,11 @@ interface InventoryServiceInterface
      * @return array
      */
     public function archiveSoldItems(): array;
+
+    /**
+     * @param int $inventoryId
+     * @return float
+     */
+    public function deliveryPrice(int $inventoryId): float;
+
 }
