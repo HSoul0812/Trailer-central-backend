@@ -3,8 +3,10 @@
 namespace App\Models\Ecommerce\CompletedOrder;
 
 use App\Models\Traits\TableAware;
+use Illuminate\Database\Eloquent\Collection;
 use App\Models\User\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -15,10 +17,19 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $refund_status i.e 'unrefunded', 'refunded', 'partial_refunded'
  * @property array<int> $refunded_parts part's ids
  * @property float $refunded_amount
+ * @property string $payment_method
  * @property string $payment_intent the payment unique id
- * @property array<array<int, int>> $parts i.e: [{id:int, qty: int}]
- *
+ * @property array<array<int, int, float>> $parts i.e: [{id:int, qty: int, price: float}]
+ * @property int $ecommerce_customer_id
+ * @property string $ecommerce_cart_id
+ * @property int $ecommerce_order_id
+ * @property array $ecommerce_items
+ * @property string $shipping_carrier_code
+ * @property string $shipping_method_code
  * @property-read User $dealer
+ *
+ * @method static Collection|static create(array $attributes = [])
+ * @method static Builder where($column, $operator = null, $value = null, $boolean = 'and')
  */
 class CompletedOrder extends Model
 {
@@ -69,6 +80,8 @@ class CompletedOrder extends Model
         'shipping_city',
         'shipping_region',
         'shipping_zip',
+        'shipping_carrier_code',
+        'shipping_method_code',
         'billing_address',
         'billing_name',
         'billing_country',
@@ -83,11 +96,16 @@ class CompletedOrder extends Model
         'shipping_fee',
         'subtotal',
         'in_store_pickup',
+        'ecommerce_customer_id',
+        'ecommerce_cart_id',
+        'ecommerce_order_id',
+        'ecommerce_items'
     ];
 
     protected $casts = [
         'parts' => 'json',
-        'refunded_parts' => 'json'
+        'refunded_parts' => 'json',
+        'ecommerce_items' => 'json'
     ];
 
     public function isPaid(): bool
