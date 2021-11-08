@@ -8,7 +8,6 @@ use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\Inventory\CreateInventoryRequest;
 use App\Http\Requests\Inventory\DeleteInventoryRequest;
 use App\Http\Requests\Inventory\ExistsInventoryRequest;
-use App\Http\Requests\Inventory\GetInventoryDeliveryPriceRequest;
 use App\Http\Requests\Inventory\GetInventoryHistoryRequest;
 use App\Http\Requests\Inventory\UpdateInventoryRequest;
 use App\Models\Inventory\Inventory;
