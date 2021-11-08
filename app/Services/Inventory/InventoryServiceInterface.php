@@ -42,8 +42,9 @@ interface InventoryServiceInterface
 
     /**
      * @param int $inventoryId
+     * @param string $toZip
      * @return float
      */
-    public function deliveryPrice(int $inventoryId): float;
+    public function deliveryPrice(int $inventoryId, string $toZip): float;
 
 }

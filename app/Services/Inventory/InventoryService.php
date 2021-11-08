@@ -16,6 +16,7 @@ use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\Repository;
 use App\Repositories\User\DealerLocationMileageFeeRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
+use App\Repositories\User\GeoLocationRepositoryInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Services\File\FileService;
 use App\Services\File\ImageService;
@@ -83,6 +84,11 @@ class InventoryService implements InventoryServiceInterface
     private $categoryRepository;
 
     /**
+     * @var GeoLocationRepositoryInterface
+     */
+    private $geolocationRepository;
+
+    /**
      * InventoryService constructor.
      * @param InventoryRepositoryInterface $inventoryRepository
      * @param ImageRepositoryInterface $imageRepository
@@ -95,6 +101,7 @@ class InventoryService implements InventoryServiceInterface
      * @param DealerLocationRepositoryInterface $dealerLocationRepository
      * @param DealerLocationMileageFeeRepositoryInterface $dealerLocationMileageFeeRepository
      * @param CategoryRepositoryInterface $categoryRepository
+     * @param GeoLocationRepositoryInterface $geolocationRepository
      */
     public function __construct(
         InventoryRepositoryInterface $inventoryRepository,
@@ -107,7 +114,8 @@ class InventoryService implements InventoryServiceInterface
         FileService $fileService,
         DealerLocationRepositoryInterface $dealerLocationRepository,
         DealerLocationMileageFeeRepositoryInterface $dealerLocationMileageFeeRepository,
-        CategoryRepositoryInterface $categoryRepository
+        CategoryRepositoryInterface $categoryRepository,
+        GeoLocationRepositoryInterface $geolocationRepository
     ) {
         $this->inventoryRepository = $inventoryRepository;
         $this->imageRepository = $imageRepository;
@@ -120,6 +128,7 @@ class InventoryService implements InventoryServiceInterface
         $this->imageService = $imageService;
         $this->fileService = $fileService;
         $this->categoryRepository = $categoryRepository;
+        $this->geolocationRepository = $geolocationRepository;
     }
 
     /**
@@ -631,7 +640,7 @@ class InventoryService implements InventoryServiceInterface
         return $changedFields;
     }
 
-    public function deliveryPrice(int $inventoryId): float
+    public function deliveryPrice(int $inventoryId, string $toZip=null): float
     {
         $inventory = $this->inventoryRepository->get(['id' => $inventoryId]);
         $dealerLocation = $inventory->dealerLocation;
@@ -642,7 +651,16 @@ class InventoryService implements InventoryServiceInterface
             'inventory_category_id' => $inventoryCategory->getKey()
         ]);
         $feePerMile = $mileageFee->fee_per_mile;
-        $distance = $this->calculateDistanceBetweenTwoPoints($dealerLocation->latitude, $dealerLocation->longitude, $inventory->latitude, $inventory->longitude, 'ML');
+        $fromLat = $dealerLocation->latitude;
+        $fromLng = $dealerLocation->longitude;
+
+        if($toZip != null) {
+            $geolocation = $this->geolocationRepository->get(['zip' => $toZip]);
+            $fromLat = $geolocation->latitude;
+            $fromLng = $geolocation->longitude;
+        }
+
+        $distance = $this->calculateDistanceBetweenTwoPoints($fromLat, $fromLng, $inventory->latitude, $inventory->longitude, 'ML');
         return $feePerMile * $distance;
     }
 
