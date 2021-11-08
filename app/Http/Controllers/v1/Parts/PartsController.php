@@ -13,7 +13,7 @@ use App\Http\Requests\Parts\ShowPartRequest;
 use App\Http\Requests\Parts\GetPartsRequest;
 use App\Http\Requests\Parts\UpdatePartRequest;
 use App\Services\Parts\PartServiceInterface;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use App\Transformers\Parts\PartsTransformerInterface;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use League\Fractal\Manager;
@@ -45,7 +45,7 @@ class PartsController extends RestfulController
      * @param  PartServiceInterface  $partService
      * @param  Manager  $fractal
      */
-    public function __construct(PartRepositoryInterface $parts, PartServiceInterface $partService, Manager $fractal, PartsTransformer $partsTransformer)
+    public function __construct(PartRepositoryInterface $parts, PartServiceInterface $partService, Manager $fractal, PartsTransformerInterface $partsTransformer)
     {
         $this->middleware('setDealerIdOnRequest')->only(['create', 'update']);
         $this->parts = $parts;

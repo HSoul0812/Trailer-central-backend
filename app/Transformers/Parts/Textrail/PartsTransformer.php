@@ -3,9 +3,10 @@
 namespace App\Transformers\Parts\Textrail;
 
 use App\Models\Parts\Textrail\Part;
+use App\Transformers\Parts\PartsTransformerInterface;
 use League\Fractal\TransformerAbstract;
 
-class PartsTransformer extends TransformerAbstract 
+class PartsTransformer extends TransformerAbstract implements PartsTransformerInterface
 {
     public function transform(Part $part): array
     {
