@@ -1,10 +1,13 @@
 <?php
-namespace Tests\Integration\Services\Parts;
+
+namespace Tests\Integration\Services\Parts\Textrail;
 
 use App\Services\Parts\Textrail\TextrailPartService;
 use App\Services\Parts\Textrail\TextrailPartServiceInterface;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Tests\TestCase;
 use stdClass;
+
 class TextrailPartServiceTest extends TestCase
 {
 
@@ -32,14 +35,14 @@ class TextrailPartServiceTest extends TestCase
     public function testgetTextrailBrands()
     {
       $getBrands = $this->getConcreteService()->getTextrailBrands();
-  
+
       self::assertIsArray($getBrands);
     }
 
     public function testgetTextrailManufacturers()
     {
       $getManufacturers = $this->getConcreteService()->getTextrailManufacturers();
-  
+
       self::assertIsArray($getManufacturers);
     }
 

@@ -1,10 +1,9 @@
 <?php
-namespace Tests\Integration\Services\Parts;
+
+namespace Tests\Integration\Services\Parts\Textrail;
 
 use App\Services\Parts\Textrail\TextrailPartService;
-use App\Services\Parts\Textrail\TextrailPartServiceInterface;
 use App\Services\Parts\Textrail\TextrailPartImporterService;
-use App\Services\Parts\Textrail\TextrailPartImporterServiceInterface;
 use App\Repositories\Parts\Textrail\PartRepository;
 use App\Repositories\Parts\Textrail\BrandRepositoryInterface;
 use App\Repositories\Parts\Textrail\TypeRepositoryInterface;
@@ -15,10 +14,9 @@ use App\Transformers\Parts\Textrail\TextrailPartsTransformer;
 use Tests\Integration\Services\Ecommerce\DataProvider\Providers\TextrailMagentoSandbox;
 use League\Fractal\Manager;
 use Tests\TestCase;
-use stdClass;
+
 class TextrailPartImporterServiceTest extends TestCase
 {
-
     public function testTextrailImporterServiceCreate(): void
     {
 
@@ -31,18 +29,18 @@ class TextrailPartImporterServiceTest extends TestCase
                   app()->make(ImageRepositoryInterface::class),
                   app()->make(TextrailPartsTransformer::class),
                   app()->make(Manager::class));
-      
+
       $service->run();
       $dataProvider = new TextrailMagentoSandbox();
       $partRepository = $this->app->make(PartRepository::class);
       $getOnePart = $dataProvider->getAllParts()[0];
-      
+
       $getDatabasePart = $partRepository->getBySku($getOnePart->sku);
-      
+
       self::assertDatabaseHas('textrail_parts', [
         'sku' => $getOnePart->sku
       ]);
-      
+
     }
 
     public function testTextrailImporterServiceUpdate(): void
@@ -62,16 +60,15 @@ class TextrailPartImporterServiceTest extends TestCase
       $dataProvider = new TextrailMagentoSandbox();
       $partRepository = $this->app->make(PartRepository::class);
       $getOnePart = $dataProvider->getAllParts()[0];
-      
+
       // updated one part to other price
       $getDatabasePart = $partRepository->getBySku($getOnePart->sku);
       $partUpdated = $partRepository->update(['id' => $getDatabasePart->id, 'price' => 144]);
-      
-      // run again to check the importer service update back the price 
+
+      // run again to check the importer service update back the price
       $service->run();
       $getDatabasePartAgain = $partRepository->getBySku($getOnePart->sku);
       // check the price is the same after import again
       self::assertSame($getOnePart->price, (int)$getDatabasePartAgain->price);
     }
-
 }
