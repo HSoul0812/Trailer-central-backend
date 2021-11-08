@@ -67,7 +67,7 @@ class AuditLogRepository extends RepositoryAbstract implements AuditLogRepositor
         });
         fclose($fp);
         return [
-            'export_file' => env('APP_URL').'/storage'.$fileName
+            'export_file' => url()->to('/').'/storage'.$fileName
         ];
     }
 
