@@ -75,6 +75,10 @@ class InteractionMessageRepository extends RepositoryAbstract implements Interac
             $search->filter('term', ['is_read' => $params['is_read']]);
         }
 
+        if (isset($params['unassigned'])) {
+            $search->filter('term', ['unassigned' => (bool)$params['unassigned']]);
+        }
+
         if (isset($params['dispatched'])) {
             $search->filter('exists', ['field' => 'date_sent']);
         }

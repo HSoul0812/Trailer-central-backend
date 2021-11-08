@@ -3,6 +3,7 @@
 namespace App\Models\CRM\Interactions;
 
 use App\Helpers\SanitizeHelper;
+use App\Models\CRM\Leads\LeadType;
 use ElasticScoutDriverPlus\CustomSearch;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -156,6 +157,8 @@ class InteractionMessage extends Model
 
         $array['lead_first_name'] = $lead->first_name;
         $array['lead_last_name'] = $lead->last_name;
+
+        $array['unassigned'] = $lead->lead_type === LeadType::TYPE_NONLEAD;
 
         $array['dealer_id'] = $lead->website->dealer_id ?? $lead->dealer_id;
 
