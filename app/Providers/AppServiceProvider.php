@@ -5,7 +5,6 @@ namespace App\Providers;
 use App\Contracts\LoggerServiceInterface;
 use App\Helpers\ImageHelper;
 use App\Helpers\SanitizeHelper;
-use App\Http\Controllers\v1\Ecommerce\CompletedOrderController;
 use App\Http\Controllers\v1\File\FileController;
 use App\Http\Controllers\v1\File\ImageController;
 use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping;
@@ -26,10 +25,6 @@ use App\Repositories\Dms\Pos\RegisterRepository;
 use App\Repositories\Dms\Pos\RegisterRepositoryInterface;
 use App\Repositories\Dms\StockRepository;
 use App\Repositories\Dms\StockRepositoryInterface;
-use App\Repositories\Ecommerce\CompletedOrderRepository;
-use App\Repositories\Ecommerce\CompletedOrderRepositoryInterface;
-use App\Repositories\Ecommerce\RefundRepository;
-use App\Repositories\Ecommerce\RefundRepositoryInterface;
 use App\Repositories\Feed\Mapping\Incoming\ApiEntityReferenceRepository;
 use App\Repositories\Feed\Mapping\Incoming\ApiEntityReferenceRepositoryInterface;
 use App\Repositories\Inventory\CategoryRepository;
@@ -58,8 +53,6 @@ use App\Repositories\Dms\Quickbooks\ItemNewRepository;
 use App\Repositories\Dms\Quickbooks\ItemNewRepositoryInterface;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepository;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
-use App\Repositories\Parts\PartRepositoryInterface;
-use App\Repositories\Parts\Textrail\PartRepository;
 use App\Repositories\Pos\SaleRepository;
 use App\Repositories\Pos\SaleRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepository;
@@ -106,18 +99,6 @@ use App\Services\CRM\User\TimeClockService;
 use App\Services\CRM\User\TimeClockServiceInterface;
 use App\Services\Dms\Pos\RegisterService;
 use App\Services\Dms\Pos\RegisterServiceInterface;
-use App\Services\Ecommerce\CompletedOrder\CompletedOrderService;
-use App\Services\Ecommerce\CompletedOrder\CompletedOrderServiceInterface;
-use App\Services\Ecommerce\DataProvider\DataProviderInterface;
-use App\Services\Ecommerce\DataProvider\DataProviderManager;
-use App\Services\Ecommerce\DataProvider\DataProviderManagerInterface;
-use App\Services\Ecommerce\DataProvider\Providers\TextrailMagento;
-use App\Services\Ecommerce\Payment\Gateways\PaymentGatewayServiceInterface;
-use App\Services\Ecommerce\Payment\Gateways\Stripe\StripeService;
-use App\Services\Ecommerce\Payment\PaymentServiceInterface as EcommercePaymentServiceInterface;
-use App\Services\Ecommerce\Payment\PaymentService as EcommercePaymentService;
-use App\Services\Ecommerce\Shipping\ShippingService;
-use App\Services\Ecommerce\Shipping\ShippingServiceInterface;
 use App\Services\File\FileService;
 use App\Services\File\FileServiceInterface;
 use App\Services\File\ImageService;
@@ -144,16 +125,12 @@ use App\Services\Pos\CustomSalesReportExporterService;
 use App\Services\Pos\CustomSalesReportExporterServiceInterface;
 use App\Services\Website\Log\LogServiceInterface;
 use App\Services\Website\Log\LogService;
-use App\Transformers\Ecommerce\CompletedOrderTransformer;
 use GuzzleHttp\Client;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Nova\Nova;
-use Stripe\StripeClient;
-use Stripe\StripeClientInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -345,24 +322,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(PackageServiceInterface::class, PackageService::class);
         $this->app->bind(RegisterRepositoryInterface::class, RegisterRepository::class);
         $this->app->bind(RegisterServiceInterface::class, RegisterService::class);
-
-        $this->app->bind(CompletedOrderServiceInterface::class, CompletedOrderService::class);
-        $this->app->bind(CompletedOrderRepositoryInterface::class, CompletedOrderRepository::class);
-        $this->app->when([CompletedOrderService::class, CompletedOrderController::class, CompletedOrderTransformer::class])
-            ->needs(PartRepositoryInterface::class)
-            ->give(function () {
-                return app()->make(PartRepository::class);
-            });
-        $this->app->bind(RefundRepositoryInterface::class, RefundRepository::class);
-        $this->app->bind(EcommercePaymentServiceInterface::class, EcommercePaymentService::class);
-        $this->app->bind(StripeClientInterface::class, static function (): StripeClient {
-            return new StripeClient(Config::get('stripe_checkout.secret'));
-        });
-        $this->app->bind(PaymentGatewayServiceInterface::class, StripeService::class);
-
-        $this->app->bind(ShippingServiceInterface::class, ShippingService::class);
-        $this->app->bind(DataProviderManagerInterface::class, DataProviderManager::class);
-        $this->app->bind(DataProviderInterface::class, TextrailMagento::class);
 
         $this->app->when(FileController::class)
             ->needs(FileServiceInterface::class)
