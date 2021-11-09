@@ -3,6 +3,8 @@
 namespace App\Repositories\CRM\User;
 
 use App\Models\CRM\User\EmailFolder;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 
 class EmailFolderRepository implements EmailFolderRepositoryInterface
@@ -41,6 +43,7 @@ class EmailFolderRepository implements EmailFolderRepositoryInterface
      * Update Email Folder
      * 
      * @param array $params
+     * @throws ModelNotFoundException
      * @return EmailFolder
      */
     public function update($params) {
@@ -104,8 +107,23 @@ class EmailFolderRepository implements EmailFolderRepositoryInterface
     }
 
     /**
+     * Mark Imported as Current Time
+     * 
+     * @param int $folderId
+     * @throws ModelNotFoundException
+     * @return EmailFolder
+     */
+    public function markImported(int $folderId): EmailFolder {
+        return $this->update([
+            'id' => $folderId,
+            'date_imported' => Carbon::now()
+        ]);
+    }
+
+    /**
      * find records; similar to findBy()
      * @param array $params
+     * @throws ModelNotFoundException
      * @return Collection<EmailFolder>
      */
     public function get($params)
@@ -129,5 +147,20 @@ class EmailFolderRepository implements EmailFolderRepositoryInterface
         }
 
         return $folders->paginate($params['per_page'])->appends($params);
+    }
+
+    /**
+     * Delete Multiple Folders for Sales Person
+     * 
+     * @param int $salesPersonId
+     * @param array<int> $excludeIds
+     * @return int Number of successfully deleted folders
+     */
+    public function deleteBulk(int $salesPersonId, array $excludeIds = []): int
+    {
+        // Delete All Folders Except Provided Ones
+        return EmailFolder::where('sales_person_id', $salesPersonId)
+                          ->whereNotIn('folder_id', $excludeIds)
+                          ->delete();
     }
 }

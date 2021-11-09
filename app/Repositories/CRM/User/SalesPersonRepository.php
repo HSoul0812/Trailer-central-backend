@@ -36,16 +36,29 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
     }
 
     /**
+     * Delete Sales Person
+     * 
+     * @param array $params
+     * @return bool true if deleted, false if doesn't exist
+     */
+    public function delete($params) {
+        return SalesPerson::findOrFail($params['id'])->delete();
+    }
+
+    /**
      * Update Sales Person
      *
      * @param array $params
      * @return SalesPerson
      */
     public function update($params) {
-        $salesPerson = SalesPerson::findOrFail($params['id']);
+        $salesPerson = SalesPerson::withTrashed()->findOrFail($params['id']);
 
         DB::transaction(function() use (&$salesPerson, $params) {
-            // Fill Text Details
+            // Restore if Soft Deleted
+            $salesPerson->restore();
+
+            // Fill Sales Person Details
             $salesPerson->fill($params)->save();
         });
 
@@ -133,13 +146,12 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
      * Get All Salespeople w/Imap Credentials
      *
      * @param int $userId
-     * @return Collection of SalesPerson
+     * @return Collection<SalesPerson>
      */
-    public function getAllImap($userId) {
+    public function getAllImap(int $userId): Collection {
         return SalesPerson::select(SalesPerson::getTableName().'.*')
-                                ->leftJoin(AccessToken::getTableName(), function($join) {
+                          ->leftJoin(AccessToken::getTableName(), function($join) {
             $join->on(AccessToken::getTableName().'.relation_id', '=', SalesPerson::getTableName().'.id')
-                 ->whereTokenType('google')
                  ->whereRelationType('sales_person');
         })->where('user_id', $userId)->where(function($query) {
             $query->whereNotNull(AccessToken::getTableName().'.id')
@@ -151,7 +163,19 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                           ->whereNotNull('imap_port')
                           ->where('imap_port', '<>', '');
             });
-        })->get();
+        })->groupBy(SalesPerson::getTableName().'.id')->get();
+    }
+
+    /**
+     * Get By Email
+     *
+     * @param int $userId
+     * @param string $email
+     * @return null|SalesPerson
+     */
+    public function getByEmail(int $userId, string $email): ?SalesPerson {
+        // Get SalesPerson By User ID and Email
+        return SalesPerson::withTrashed()->where('user_id', $userId)->where('email', $email)->first();
     }
 
     /**

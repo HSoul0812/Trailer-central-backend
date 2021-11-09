@@ -5,20 +5,23 @@ namespace App\Services\CRM\Interactions;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Interactions\Interaction;
 use App\Models\CRM\User\SalesPerson;
+use App\Models\Integration\Auth\AccessToken;
 use App\Models\User\User;
+use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
-use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
-use App\Services\Integration\Common\DTOs\AttachmentFile;
-use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\CRM\Interactions\InteractionServiceInterface;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Services\CRM\Interactions\NtlmEmailServiceInterface;
+use App\Services\Integration\AuthServiceInterface;
+use App\Services\Integration\Common\DTOs\AttachmentFile;
+use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Google\GoogleServiceInterface;
-use Illuminate\Http\UploadedFile;
 use App\Services\Integration\Google\GmailServiceInterface;
+use App\Services\Integration\Microsoft\OfficeServiceInterface;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -31,13 +34,75 @@ use Carbon\Carbon;
 class InteractionService implements InteractionServiceInterface
 {
     /**
+     * @var App\Services\Integration\AuthServiceInterface
+     */
+    protected $auth;
+
+    /**
+     * @var App\Services\Integration\Google\GoogleServiceInterface
+     */
+    protected $google;
+
+    /**
+     * @var App\Services\Integration\Google\GmailServiceInterface
+     */
+    protected $gmail;
+
+    /**
+     * @var App\Services\Integration\Microsoft\OfficeServiceInterface
+     */
+    protected $office;
+
+    /**
+     * @var App\Services\CRM\Interactions\NtlmEmailServiceInterface
+     */
+    protected $ntlm;
+
+    /**
+     * @var App\Services\CRM\Interactions\InteractionEmailServiceInterface
+     */
+    protected $interactionEmail;
+
+    /**
+     * @var App\Repositories\CRM\Interactions\InteractionsRepositoryInterface
+     */
+    protected $interactions;
+
+    /**
+     * @var App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface
+     */
+    protected $emailHistory;
+
+    /**
+     * @var App\Repositories\Integration\Auth\TokenRepositoryInterface
+     */
+    protected $tokens;
+
+    /**
+     * @var App\Repositories\CRM\Leads\StatusRepositoryInterface
+     */
+    protected $leadStatus;
+
+
+    /**
      * InteractionsRepository constructor.
      * 
-     * @param EmailHistoryRepositoryInterface
+     * @param AuthServiceInterface $auth
+     * @param GoogleServiceInterface $google
+     * @param GmailServiceInterface $gmail
+     * @param OfficeServiceInterface $office
+     * @param NtlmEmailServiceInterface $ntlm
+     * @param InteractionEmailServiceInterface $service
+     * @param InteractionsRepositoryInterface $interactions
+     * @param EmailHistoryRepositoryInterface $emailHistory
+     * @param TokenRepositoryInterface $tokens
+     * @param StatusRepositoryInterface $leadStatus
      */
     public function __construct(
+        AuthServiceInterface $auth,
         GoogleServiceInterface $google,
         GmailServiceInterface $gmail,
+        OfficeServiceInterface $office,
         NtlmEmailServiceInterface $ntlm,
         InteractionEmailServiceInterface $service,
         InteractionsRepositoryInterface $interactions,
@@ -45,10 +110,15 @@ class InteractionService implements InteractionServiceInterface
         TokenRepositoryInterface $tokens,
         StatusRepositoryInterface $leadStatus
     ) {
+        // Initialize Services
+        $this->auth = $auth;
         $this->google = $google;
         $this->gmail = $gmail;
+        $this->office = $office;
         $this->ntlm = $ntlm;
         $this->interactionEmail = $service;
+
+        // Initialize Repositories
         $this->interactions = $interactions;
         $this->emailHistory = $emailHistory;
         $this->tokens = $tokens;
@@ -61,10 +131,10 @@ class InteractionService implements InteractionServiceInterface
      * @param int $leadId
      * @param array $params
      * @param array $attachments
-     * @return Interaction || error
+     * @return Interaction
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
-    public function email($leadId, $params, $attachments = array()) {
+    public function email(int $leadId, array $params, array $attachments = []): Interaction {
         // Get User
         $user = User::find($params['dealer_id']);
         $lead = Lead::findOrFail($leadId);
@@ -103,6 +173,9 @@ class InteractionService implements InteractionServiceInterface
         // Send Email
         if($smtpConfig->isAuthTypeGmail()) {
             $finalEmail = $this->gmail->send($smtpConfig, $parsedEmail);
+        } elseif($smtpConfig->isAuthTypeOffice()) {
+            // Send Office Email
+            $finalEmail = $this->office->send($smtpConfig, $parsedEmail);
         } elseif($smtpConfig->isAuthTypeNtlm()) {
             $finalEmail = $this->ntlm->send($user->dealer_id, $smtpConfig, $parsedEmail);
         } else {
@@ -178,17 +251,10 @@ class InteractionService implements InteractionServiceInterface
             // Get SMTP Config
             $smtpConfig = SmtpConfig::fillFromSalesPerson($user->sales_person);
 
-            // Get Sales Person Auth
-            $accessToken = $this->tokens->getRelation([
-                'token_type' => 'google',
-                'relation_type' => 'sales_person',
-                'relation_id' => $user->sales_person->id
-            ]);
-
             // Set Access Token on SMTP Config
-            if(!empty($accessToken->id)) {
-                $smtpConfig->setAuthType(SmtpConfig::AUTH_GMAIL);
-                $smtpConfig->setAccessToken($this->refreshToken($accessToken));
+            if($smtpConfig->isAuthConfigOauth()) {
+                $smtpConfig->setAccessToken($this->refreshToken($smtpConfig->accessToken));
+                $smtpConfig->calcAuthConfig();
             }
 
             // Return SMTP Config
@@ -209,9 +275,10 @@ class InteractionService implements InteractionServiceInterface
      * @param int $userId
      * @param ParsedEmail $parsedEmail
      * @param null|SalesPerson $salesPerson
+     * @param null|bool $interactionEmail
      * @return Interaction
      */
-    private function saveEmail(int $leadId, int $userId, ParsedEmail $parsedEmail, ?SalesPerson $salesPerson = null, ?bool $interactionEmail): Interaction {
+    private function saveEmail(int $leadId, int $userId, ParsedEmail $parsedEmail, ?SalesPerson $salesPerson = null, ?bool $interactionEmail = null): Interaction {
         // Initialize Transaction
         DB::transaction(function() use (&$parsedEmail, $leadId, $userId, $salesPerson, $interactionEmail) {
             // Create or Update
@@ -236,10 +303,10 @@ class InteractionService implements InteractionServiceInterface
 
             // Create Interaction Email
             if ($interactionEmail) {
-              $this->interactions->createInteractionEmail([
-                'interaction_id'  => $interaction->interaction_id,
-                'message_id'      => $emailHistory->message_id
-              ]);
+                $this->interactions->createInteractionEmail([
+                    'interaction_id' => $interaction->interaction_id,
+                    'message_id'     => $emailHistory->message_id
+                ]);
             }
 
         });
@@ -256,11 +323,11 @@ class InteractionService implements InteractionServiceInterface
      * @param AccessToken $accessToken
      * @return AccessToken
      */
-    private function refreshToken($accessToken) {
+    private function refreshToken(AccessToken $accessToken): AccessToken {
         // Validate Token
-        $validate = $this->google->validate($accessToken);
-        if(!empty($validate['new_token'])) {
-            $accessToken = $this->tokens->refresh($accessToken->id, $validate['new_token']);
+        $validate = $this->auth->validate($accessToken);
+        if($validate->accessToken) {
+            $accessToken = $validate->accessToken;
         }
 
         // Return Access Token

@@ -82,6 +82,8 @@ class ChatRepository implements ChatRepositoryInterface {
 
         if (isset($params['sales_person_id'])) {
             $query = $query->where('sales_person_id', $params['sales_person_id']);
+        } else {
+            $query = $query->where('sales_person_id', 0);
         }
 
         if (isset($params['id'])) {
