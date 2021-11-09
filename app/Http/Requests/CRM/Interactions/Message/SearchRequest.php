@@ -20,6 +20,7 @@ class SearchRequest extends Request
         'dispatched' => 'boolean',
         'is_read' => 'boolean',
         'latest_messages' => 'boolean',
+        'unassigned' => 'boolean',
         'sort' => 'string|in:date_sent,-date_sent',
     ];
 }
