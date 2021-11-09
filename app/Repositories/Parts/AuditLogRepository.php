@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Builder;
 use App\Transformers\Parts\AuditLogDateTransformer;
+use Illuminate\Support\Facades\Storage;
 
 class AuditLogRepository extends RepositoryAbstract implements AuditLogRepositoryInterface
 {
@@ -57,8 +58,8 @@ class AuditLogRepository extends RepositoryAbstract implements AuditLogRepositor
     
     public function getByYearCsv(int $year, int $dealerId) : array
     {
-        $fileName = '/'.uniqid().".csv";
-        $fileExport = "/var/www/html/public/storage$fileName";
+        $fileName = '/storage/'.uniqid().".csv";
+        $fileExport = "/var/www/html/public/temp$fileName";
         $fp = fopen($fileExport, 'w+');
         $this->getByYear($year, $dealerId)->chunk(100, function($auditLogs) use (&$fp) {
             foreach($auditLogs as $auditLog) {
@@ -66,9 +67,12 @@ class AuditLogRepository extends RepositoryAbstract implements AuditLogRepositor
             }
         });
         fclose($fp);
-        return [
-            'export_file' => url()->to('/').'/storage'.$fileName
-        ];
+        $result = Storage::disk('s3')->put($fileName, file_get_contents($fileExport), ['visibility' => 'public']);
+        if ($result){
+            return [
+                'export_file' => 'https://'.env('AWS_BUCKET').'.s3.amazonaws.com'.$fileName
+            ];
+        }
     }
 
     /**
