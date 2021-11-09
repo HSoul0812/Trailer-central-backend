@@ -66,7 +66,7 @@ class Website extends Model
 
         $unserializedFilters = $unserializedFilter['filters'] ?? [];
 
-        if (isset($unserializedFilter['dealer_id'])) {
+        if (isset($unserializedFilter['dealer_id']) && is_array($unserializedFilter['dealer_id'])) {
           $printData = $this->unserializeDealerFilter($unserializedFilter['dealer_id']);
         }
 
