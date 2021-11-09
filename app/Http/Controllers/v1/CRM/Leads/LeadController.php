@@ -65,8 +65,6 @@ class LeadController extends RestfulController
     {
         $request = new GetLeadRequest(['id' => $id]);
 
-        // dd($this->leads->get(['id' => $id]));
-
         if ($request->validate()) {
             return $this->response->item($this->leads->get(['id' => $id]), $this->transformer);
         }
