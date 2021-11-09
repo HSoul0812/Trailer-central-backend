@@ -52,55 +52,58 @@ class LeadController extends RestfulController
             return $this->response->paginator($this->leads->getAll($requestData), $this->transformer)
                         ->addMeta('lead_counts', $this->leads->getLeadStatusCountByDealer($requestData['dealer_id'], $requestData));
         }
-        
+
         return $this->response->errorBadRequest();
     }
-    
+
     /**
      * Display data about the record in the DB
      *
      * @param int $id
      */
-    public function show(int $id) {
+    public function show(int $id)
+    {
         $request = new GetLeadRequest(['id' => $id]);
-        
+
+        // dd($this->leads->get(['id' => $id]));
+
         if ($request->validate()) {
             return $this->response->item($this->leads->get(['id' => $id]), $this->transformer);
         }
-        
+
         return $this->response->errorBadRequest();
     }
-    
+
     public function create(Request $request) {
         $request = new CreateLeadRequest($request->all());
-        
-        if ($request->validate()) {             
+
+        if ($request->validate()) {
             return $this->response->item($this->service->create($request->all()), $this->transformer);
         }
-        
+
         return $this->response->errorBadRequest();
     }
-    
+
     public function update(int $id, Request $request) {
         $requestData = $request->all();
         $requestData['id'] = $id;
         $request = new UpdateLeadRequest($requestData);
-        
+
         if ($request->validate()) {
             return $this->response->item($this->service->update($request->all()), $this->transformer);
         }
-        
+
         return $this->response->errorBadRequest();
     }
-    
+
     public function sortFields(Request $request) {
         $request = new GetLeadsSortFieldsRequest($request->all());
         $requestData = $request->all();
 
-        if ($request->validate()) {             
+        if ($request->validate()) {
             return $this->response->array([ 'data' => $this->leads->getLeadsSortFields() ]);
         }
-        
+
         return $this->response->errorBadRequest();
     }
 }
