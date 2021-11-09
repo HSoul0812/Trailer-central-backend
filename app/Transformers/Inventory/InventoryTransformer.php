@@ -10,6 +10,7 @@ use App\Transformers\User\UserTransformer;
 use App\Transformers\User\DealerLocationTransformer;
 use Illuminate\Database\Eloquent\Collection;
 use App\Transformers\Website\WebsiteTransformer;
+use App\Models\User\User;
 
 class InventoryTransformer extends TransformerAbstract
 {
@@ -37,6 +38,8 @@ class InventoryTransformer extends TransformerAbstract
 
     public function transform(Inventory $inventory): array
     {
+        $user = User::where('dealer_id', $inventory->dealer_id)->first();
+                
         return [
              'id' => $inventory->inventory_id,
              'identifier' => $inventory->identifier,
@@ -92,7 +95,8 @@ class InventoryTransformer extends TransformerAbstract
              'created_at' => $inventory->created_at,
              'updated_at' => $inventory->updated_at,
              'times_viewed' => $inventory->times_viewed,
-             'attribute' => $inventory->attributes
+             'attribute' => $inventory->attributes,
+             'quote_url' => config('app.new_design_crm_url') . $user->getCrmLoginUrl('bill-of-sale/new?inventory_id=' . $inventory->identifier)
          ];
     }
 
