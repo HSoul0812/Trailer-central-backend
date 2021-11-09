@@ -30,18 +30,19 @@ class CompletedOrderRepositoryTest extends TestCase
 
   public function testIndexWithFilterIsWorkingProperly(): void
   {
-      
+
       $this->seeder->seed();
 
       $completedOrderParams = [
-        'status' => 'dropshipped'
+        'status' => 'dropshipped',
+        'dealer_id' => $this->seeder->dealer->dealer_id
       ];
 
       // When I call find
       // Then I got a single tracking data
       /** @var CompletedOrder $completedOrder */
       $repository = $this->getConcreteRepository();
-      
+
       $completedOrders = $repository->getAll($completedOrderParams);
 
       self::assertSame($completedOrders[0]->status, $completedOrderParams['status']);
@@ -65,6 +66,6 @@ class CompletedOrderRepositoryTest extends TestCase
   {
       return $this->app->make(CompletedOrderRepositoryInterface::class);
   }
-  
+
 
 }

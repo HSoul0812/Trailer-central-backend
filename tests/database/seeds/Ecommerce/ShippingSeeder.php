@@ -67,6 +67,7 @@ class ShippingSeeder extends Seeder
         $name = $faker->name;
         $lastName = $faker->lastName;
         $email = $faker->email;
+        $phone = $faker->e164PhoneNumber;
 
         $this->customerDetails = [
             'customer' => [
@@ -93,7 +94,7 @@ class ShippingSeeder extends Seeder
                 "lastname" => $lastName,
                 "customer_id" => 0,
                 "email" => $email,
-                "telephone" => "",
+                "telephone" => $phone,
                 "same_as_billing" => 1
             ]
         ];
