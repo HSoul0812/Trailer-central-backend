@@ -8,7 +8,6 @@ use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\Inventory\CreateInventoryRequest;
 use App\Http\Requests\Inventory\DeleteInventoryRequest;
 use App\Http\Requests\Inventory\ExistsInventoryRequest;
-use App\Http\Requests\Inventory\GetInventoryDeliveryPriceRequest;
 use App\Http\Requests\Inventory\GetInventoryHistoryRequest;
 use App\Http\Requests\Inventory\UpdateInventoryRequest;
 use App\Models\Inventory\Inventory;
@@ -354,11 +353,17 @@ class InventoryController extends RestfulControllerV2
         $this->response->errorBadRequest();
     }
 
+    /**
+     * @param int $inventoryId
+     * @param Request $request
+     * @return Response
+     */
     public function delivery_price(int $inventoryId, Request $request):Response {
+        $toZipcode = $request->input('tozip');
         return $this->response->array([
             'response' => [
                 'status' => 'success',
-                'fee' => $this->inventoryService->deliveryPrice($inventoryId)
+                'fee' => $this->inventoryService->deliveryPrice($inventoryId, $toZipcode)
             ]
         ]);
     }

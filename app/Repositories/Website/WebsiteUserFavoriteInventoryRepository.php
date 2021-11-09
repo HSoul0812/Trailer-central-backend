@@ -45,6 +45,7 @@ class WebsiteUserFavoriteInventoryRepository implements WebsiteUserFavoriteInven
     {
         return $this->websiteUserFavoriteInventory
             ->where('website_user_id', $params['website_user_id'])
+            ->with('inventory')
             ->get();
     }
 }
