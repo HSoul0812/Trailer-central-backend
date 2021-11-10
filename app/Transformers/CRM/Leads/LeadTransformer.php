@@ -7,6 +7,7 @@ use App\Transformers\CRM\Interactions\InteractionTransformer;
 use App\Transformers\Inventory\InventoryTransformer;
 use App\Transformers\User\DealerLocationTransformer;
 use League\Fractal\TransformerAbstract;
+use League\Fractal\Resource\Item;
 
 class LeadTransformer extends TransformerAbstract
 {
@@ -92,7 +93,7 @@ class LeadTransformer extends TransformerAbstract
         return $this->collection($lead->units, new InventoryTransformer());
     }
 
-    public function includeOtherLeadProperties(Lead $lead)
+    public function includeOtherLeadProperties(Lead $lead): Item
     {
         return $this->item($lead, function ($lead) {
             return [
