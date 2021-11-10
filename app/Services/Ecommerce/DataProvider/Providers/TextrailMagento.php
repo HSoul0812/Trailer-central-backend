@@ -469,21 +469,22 @@ class TextrailMagento implements DataProviderInterface,
      * @return string order id
      * @throws \App\Exceptions\Ecommerce\TextrailException when some error occurs on the Magento side
      */
-    public function createOrderFromGuestCart(string $cartId): string
+    public function createOrderFromGuestCart(string $cartId, string $poNumber): string
     {
         $url = $this->generateUrlWithCartAndView(self::GUEST_CART_CREATE_ORDER, $cartId);
 
         $response = $this->httpClient->put($url, [
                 'json' => [
                     'paymentMethod' => [
-                        'method' => config('ecommerce.textrail.payment_method')
+                        'method' => config('ecommerce.textrail.payment_method'),
+                        'po_number' => $poNumber
                     ]
                 ]
             ]
         );
 
         if ($response->getStatusCode() === BaseResponse::HTTP_OK) {
-            return $response->getBody()->getContents();
+            return json_decode($response->getBody()->getContents(), true);
         }
 
         throw new TextrailException('Order creation for session cart has failed.');

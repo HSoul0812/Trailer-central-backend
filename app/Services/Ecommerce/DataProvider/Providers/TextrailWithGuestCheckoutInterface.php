@@ -21,7 +21,7 @@ interface TextrailWithGuestCheckoutInterface
      */
     public function estimateGuestShipping(array $params);
 
-    public function createOrderFromGuestCart(string $cartId): string;
+    public function createOrderFromGuestCart(string $cartId, string $poNumber): string;
 
     public function addShippingInformationToGuestCart(string $cartId, array $shippingInformation): void;
 }

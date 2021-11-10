@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * @property int $id
  * @property int $dealer_id
+ * @property string $po_number
  * @property float $total_amount
  * @property string $payment_status 'paid', 'unpaid'
  * @property string $refund_status i.e 'unrefunded', 'refunded', 'partial_refunded'
@@ -63,6 +64,7 @@ class CompletedOrder extends Model
 
     protected $fillable = [
         'dealer_id',
+        'po_number',
         'customer_email',
         'total_amount',
         'payment_method',

@@ -38,18 +38,26 @@ class SyncOrderJob extends Job
         $order = $repository->get(['id' => $this->orderId]);
 
         try {
-            $method = $order->ecommerce_customer_id ? 'createOrderFromCart' : 'createOrderFromGuestCart';
+            $repository->beginTransaction();
 
-            /** @var string $orderId */
-            $orderId = $provider->$method($order->ecommerce_cart_id, $order->payment_method);
+            // just in case we need to covert a customer cart into an order, we should use another method like createOrderFromCart
+            //$method = $order->ecommerce_customer_id ? 'createOrderFromCart' : 'createOrderFromGuestCart';
 
-            $repository->update(['id' => $order->id, 'ecommerce_order_id' => $orderId]);
+            $poNumber = $repository->generateNextPoNumber($order->dealer_id);
+
+            $orderId = $provider->createOrderFromGuestCart($order->ecommerce_cart_id, $poNumber);
+
+            $repository->update(['id' => $order->id, 'ecommerce_order_id' => $orderId, 'po_number' => $poNumber]);
+
+            $repository->commitTransaction();
 
             $logger->info(
                 sprintf('Magento order was successfully create for: %d', $this->orderId),
                 ['ecommerce_order_id' => $orderId]
             );
         } catch (\Exception $exception) {
+            $repository->rollbackTransaction();
+
             $logger->error($exception->getMessage());
 
             throw new TextrailSyncException($exception->getMessage(), $exception->getCode(), $exception);

@@ -173,6 +173,36 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
         // TODO: Implement delete() method.
     }
 
+    /**
+     * it will return a PO number like this pattern: PO-{dealer_id}{next_number} e.g: PO-10011, PO-10012
+     *
+     * This always should be wrapped in a transaction, because we need to lock the rows for the provided dealer.
+     *
+     * @param int $dealerId
+     * @return string
+     */
+    public function generateNextPoNumber(int $dealerId): string
+    {
+        // we need to look the rows for the provided dealer, then generate the next number
+        // it will be released when transaction ended
+        CompletedOrder::query()->where('dealer_id', $dealerId)->lockForUpdate()->get(['po_number']);
+
+        /** @var CompletedOrder $order */
+        $order = CompletedOrder::query()
+            ->where('dealer_id', $dealerId)
+            ->whereNotNull('po_number')
+            ->orderBy('po_number', 'desc')
+            ->first(['po_number']);
+
+        if (is_null($order)) {
+            return sprintf('PO-%d%d', $dealerId, 1);
+        }
+
+        [, $currentNumber] = explode('PO-' . $dealerId, $order->po_number);
+
+        return sprintf('PO-%d%d', $dealerId, ((int)$currentNumber) + 1);
+    }
+
     private function addFiltersToQuery(Builder $query, array $filters, bool $noStatusJoin = false): Builder
     {
         if (isset($filters['search_term'])) {
