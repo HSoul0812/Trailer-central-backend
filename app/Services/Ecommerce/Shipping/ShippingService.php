@@ -1,6 +1,6 @@
 <?php
-namespace App\Services\Ecommerce\Shipping;
 
+namespace App\Services\Ecommerce\Shipping;
 
 use App\Services\Ecommerce\DataProvider\DataProviderManagerInterface;
 
@@ -18,6 +18,10 @@ class ShippingService implements ShippingServiceInterface
         $this->dataProviderManager = $dataProviderManager;
     }
 
+    /**
+     * @param array $params
+     * @return array{cost: float, tax: float, cart_id: string, customer_id: ?int, method_code: string, carrier_code: string}
+     */
     public function calculateShippingCosts(array $params): array
     {
         return $this->dataProviderManager->getProvider()->estimateShippingCost($params);

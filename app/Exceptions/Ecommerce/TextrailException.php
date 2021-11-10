@@ -1,6 +1,6 @@
 <?php
-namespace App\Services\Ecommerce\DataProvider\Providers;
 
+namespace App\Exceptions\Ecommerce;
 
 class TextrailException extends \LogicException
 {

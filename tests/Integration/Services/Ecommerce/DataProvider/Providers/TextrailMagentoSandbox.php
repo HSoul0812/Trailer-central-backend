@@ -1,47 +1,17 @@
 <?php
+
 namespace Tests\Integration\Services\Ecommerce\DataProvider\Providers;
 
-use App\Services\Ecommerce\DataProvider\DataProviderInterface;
-use Dingo\Api\Http\Response;
-use GuzzleHttp\Client as GuzzleHttpClient;
-use http\Exception\InvalidArgumentException;
-use Illuminate\Support\Facades\Config;
+use App\Services\Ecommerce\DataProvider\Providers\TextrailPartsInterface;
 use App\Services\Parts\Textrail\DTO\TextrailPartDTO;
-use App\Services\Ecommerce\DataProvider\Providers\TextrailMagentoInterface;
 
-class TextrailMagentoSandbox implements DataProviderInterface, TextrailMagentoInterface
+class TextrailMagentoSandbox implements TextrailPartsInterface
 {
-
-  public function createCustomer(array $params): array
-  {
-      return null;
-  }
-
-  public function generateAccessToken(array $credentials)
-  {
-      return null;
-  }
-
-  public function addItemToCart(array $params, int $quoteId)
-  {
-      return null;
-  }
-
-  public function estimateShippingCost(array $params)
-  {
-      return null;
-  }
-
-  public function createQuote(): int
-  {
-      return null;
-  }
-
-  public function getAllParts(): array
+  public function getAllParts(int $currentPage = 1, int $pageSize = 1000): array
   {
     $Allparts = [];
     $images = [['position' => '1', 'file' => '/test']];
-    
+
     $dtoTextrail = TextrailPartDTO::from([
       'id' => 1,
       'sku' => 1111,
@@ -54,7 +24,7 @@ class TextrailMagentoSandbox implements DataProviderInterface, TextrailMagentoIn
       'brand_id' => 1,
       'images' => $images
     ]);
-    
+
     $dtoTextrail2 = TextrailPartDTO::from([
       'id' => 2,
       'sku' => 2222,
@@ -67,10 +37,10 @@ class TextrailMagentoSandbox implements DataProviderInterface, TextrailMagentoIn
       'brand_id' => 1,
       'images' => $images
     ]);
-    
+
     array_push($Allparts, $dtoTextrail);
     array_push($Allparts, $dtoTextrail2);
-    
+
     return $Allparts;
   }
 
@@ -109,15 +79,19 @@ class TextrailMagentoSandbox implements DataProviderInterface, TextrailMagentoIn
       $imageData = file_get_contents($img_url, false, stream_context_create(['ssl' => ['verify_peer' => false, 'verify_peer_name' => false]]));
       $explodedImage = explode('/', $img['file']);
       $fileName = $explodedImage[count($explodedImage) - 1];
-      
+
       return ['imageData' => $imageData, 'fileName' => $fileName];
     } else {
       return null;
     }
   }
 
-  public function getTextrailImagesBaseUrl(): string{
+  protected function getTextrailImagesBaseUrl(): string{
     return 'https://upload.wikimedia.org';
   }
 
-} 
+  public function getTextrailTotalPartsCount(int $pageSize = 1, int $currentPage = 1): int
+  {
+   return 0;
+  }
+}

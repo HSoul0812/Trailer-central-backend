@@ -14,6 +14,7 @@ use Tests\database\seeds\Seeder;
 /**
  * @property-read CompletedOrder $completedOrder
  * @property-read AuthToken $authToken
+ * @property-read User $dealer
  */
 class CompletedOrderSeeder extends Seeder
 {

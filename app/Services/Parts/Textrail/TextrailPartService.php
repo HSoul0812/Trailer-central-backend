@@ -2,23 +2,16 @@
 
 namespace App\Services\Parts\Textrail;
 
-
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Config;
-use App\Services\Parts\Textrail\DTO\TextrailPartDTO;
-use App\Services\Ecommerce\DataProvider\Providers\TextrailMagento;
-use App\Services\Ecommerce\DataProvider\DataProviderInterface;
-
+use App\Services\Ecommerce\DataProvider\Providers\TextrailPartsInterface;
 
 class TextrailPartService implements TextrailPartServiceInterface
 {
-    /**     
-     * @var DataProviderInterface
+    /**
+     * @var TextrailPartsInterface
      */
     private $provider;
 
-    public function __construct(DataProviderInterface $provider)
+    public function __construct(TextrailPartsInterface $provider)
     {
         $this->provider = $provider;
     }
@@ -26,7 +19,7 @@ class TextrailPartService implements TextrailPartServiceInterface
     public function getAllParts(int $currentPage = 1, int $pageSize = 1000): array
     {
       return $this->provider->getAllParts($currentPage , $pageSize);
-  
+
     }
 
     public function getTextrailCategory(int $categoryId): object
@@ -38,7 +31,7 @@ class TextrailPartService implements TextrailPartServiceInterface
     {
       return $this->provider->getTextrailManufacturers();
     }
-      
+
     public function getTextrailBrands(): array
     {
       return $this->provider->getTextrailBrands();
@@ -47,5 +40,10 @@ class TextrailPartService implements TextrailPartServiceInterface
     public function getTextrailImage(array $img): ?array
     {
       return $this->provider->getTextrailImage($img);
+    }
+
+    public function getTextrailTotalPartsCount(int $pageSize = 1, int $currentPage = 1): int
+    {
+        return $this->provider->getTextrailTotalPartsCount($pageSize, $currentPage);
     }
 }

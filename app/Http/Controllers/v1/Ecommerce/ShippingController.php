@@ -5,7 +5,6 @@ use App\Http\Controllers\RestfulController;
 use App\Http\Requests\Ecommerce\CalculateShippingCostsRequest;
 use App\Services\Ecommerce\Shipping\ShippingServiceInterface;
 use Dingo\Api\Http\Request;
-use Dingo\Api\Http\Response;
 use Illuminate\Http\JsonResponse;
 
 class ShippingController extends RestfulController

@@ -27,7 +27,18 @@ class ShippingControllerTest extends TestCase
 
         $this->assertArrayHasKey('cost', $responseJson);
         $this->assertArrayHasKey('tax', $responseJson);
-        $this->assertEquals(54, $responseJson['cost']);
+        $this->assertArrayHasKey('cart_id', $responseJson);
+        $this->assertArrayHasKey('customer_id', $responseJson);
+        $this->assertArrayHasKey('items', $responseJson);
+        $this->assertArrayHasKey('method_code', $responseJson);
+        $this->assertArrayHasKey('carrier_code', $responseJson);
+
+        $this->assertNull($responseJson['customer_id']);
+        $this->assertCount(2, $responseJson['items']);
+
+        $this->assertSame($shippingSeeder->products[0]['sku'], $responseJson['items'][0]['sku']);
+
+        $this->assertEquals(0, $responseJson['cost']);
         $this->assertEquals(0, $responseJson['tax']);
     }
 

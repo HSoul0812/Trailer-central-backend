@@ -1,7 +1,8 @@
 <?php
+
 namespace App\Repositories\Ecommerce;
 
-use App\Events\Ecommerce\QtyUpdated;
+use App\Events\Ecommerce\OrderSuccessfullyPaid;
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
 use App\Traits\Repository\Transaction;
 use Illuminate\Database\Eloquent\Builder;
@@ -89,7 +90,7 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
         $query = CompletedOrder::select('*')->where('dealer_id', '=', $params['dealer_id']);
 
         /**
-         * Filters-
+         * Filters
          */
         $query = $this->addFiltersToQuery($query, $params);
 
@@ -101,6 +102,8 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
     }
 
     /**
+     * Create or update an order
+     *
      * @param array $params
      * @return CompletedOrder
      *
@@ -108,77 +111,33 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
      */
     public function create($params): CompletedOrder
     {
-        $data = $params['data']['object'];
-
-        $completedOrder = CompletedOrder::where('object_id', $data['id'])->first();
-
-        $isStripeCall = !isset($data['parts']);
+        /** @var CompletedOrder $completedOrder */
+        $completedOrder = CompletedOrder::where('object_id', $params['object_id'])->first();
 
         if (!$completedOrder) {
             if (empty($params['dealer_id'])) {
                 throw new \InvalidArgumentException('"dealer_id" is required');
             }
 
-            $completedOrder = new CompletedOrder();
-
-            $completedOrder->dealer_id = $params['dealer_id'];
-            $completedOrder->event_id = $params['id'];
-            $completedOrder->object_id = $data['id'];
-            $completedOrder->parts = $isStripeCall ? [] : json_decode($data['parts'], true);
-            // Since Stripe use the amount in cents, we need to convert it
-            $completedOrder->total_amount = $isStripeCall ? ($data['amount_total'] / 100) : $data['amount_total'];
-            $completedOrder->payment_status = $data['payment_status'] ?? CompletedOrder::PAYMENT_STATUS_UNPAID;
-            $completedOrder->invoice_id = $data['invoice_id'] ?? '';
-            $completedOrder->invoice_url = $data['invoice_url'] ?? '';
-            $completedOrder->payment_intent = $data['payment_intent'] ?? null;
-
-            $completedOrder->shipping_name = $data['shipto_name'] ?? '';
-            $completedOrder->shipping_country = $data['shipto_country'] ?? '';
-            $completedOrder->shipping_address = $data['shipto_address'] ?? '';
-            $completedOrder->shipping_city = $data['shipto_city'] ?? '';
-            $completedOrder->shipping_zip = $data['shipto_postal'] ?? '';
-            $completedOrder->shipping_region = $data['shipto_region'] ?? '';
-
-            if (isset($data['no-billing']) && $data['no-billing'] == "1") {
-                $completedOrder->billing_name = $data['shipto_name'] ?? '';
-                $completedOrder->billing_country = $data['shipto_country'] ?? '';
-                $completedOrder->billing_address = $data['shipto_address'] ?? '';
-                $completedOrder->billing_city = $data['shipto_city'] ?? '';
-                $completedOrder->billing_zip = $data['shipto_postal'] ?? '';
-                $completedOrder->billing_region = $data['shipto_region'] ?? '';
-            } else {
-                $completedOrder->billing_name = $data['billto_name'] ?? '';
-                $completedOrder->billing_country = $data['billto_country'] ?? '';
-                $completedOrder->billing_address = $data['billto_address'] ?? '';
-                $completedOrder->billing_city = $data['billto_city'] ?? '';
-                $completedOrder->billing_zip = $data['billto_postal'] ?? '';
-                $completedOrder->billing_region = $data['billto_region'] ?? '';
-            }
-
-            $completedOrder->tax = $data['tax'];
-            $completedOrder->tax_rate = $data['tax_rate'];
-            $completedOrder->total_before_tax = $data['total_before_tax'];
-            $completedOrder->handling_fee = $data['handling_fee'];
-            $completedOrder->shipping_fee = $data['shipping_fee'];
-            $completedOrder->subtotal = $data['subtotal'];
-            $completedOrder->in_store_pickup  = $data['in_store_pickup'];
-        } else {
-            $completedOrder->customer_email = $data['customer_details']['email'];
-            // Since Stripe use the amount in cents, we need to convert it
-            $completedOrder->total_amount = $isStripeCall ? ($data['amount_total'] / 100) : $data['amount_total'];
-
-            $completedOrder->payment_method = $data['payment_method_types'][0];
-            $completedOrder->stripe_customer = $data['customer'] ?? '';
-            $completedOrder->payment_status = $data['payment_status'] ?? CompletedOrder::PAYMENT_STATUS_UNPAID;
-            $completedOrder->payment_intent = $data['payment_intent'] ?? null;
-
-            // Dispatch for handle quantity reducing.
-            foreach ($completedOrder->parts as $part) {
-                QtyUpdated::dispatch($part['id'], $part['qty']);
-            }
+            return CompletedOrder::create($params);
         }
 
-        $completedOrder->save();
+        $wasNotPaid = $completedOrder->isUnpaid();
+
+        $attributesToUpdate = collect($params)->only([
+            'customer_email',
+            'total_amount',
+            'payment_method',
+            'stripe_customer',
+            'payment_status',
+            'payment_intent',
+        ])->toArray();
+
+        $completedOrder->fill($attributesToUpdate)->save();
+
+        if ($wasNotPaid && $completedOrder->isPaid()) {
+            event(new OrderSuccessfullyPaid($completedOrder));
+        }
 
         return $completedOrder;
     }
@@ -212,6 +171,36 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
     public function delete($params)
     {
         // TODO: Implement delete() method.
+    }
+
+    /**
+     * it will return a PO number like this pattern: PO-{dealer_id}{next_number} e.g: PO-10011, PO-10012
+     *
+     * This always should be wrapped in a transaction, because we need to lock the rows for the provided dealer.
+     *
+     * @param int $dealerId
+     * @return string
+     */
+    public function generateNextPoNumber(int $dealerId): string
+    {
+        // we need to look the rows for the provided dealer, then generate the next number
+        // it will be released when transaction ended
+        CompletedOrder::query()->where('dealer_id', $dealerId)->lockForUpdate()->get(['po_number']);
+
+        /** @var CompletedOrder $order */
+        $order = CompletedOrder::query()
+            ->where('dealer_id', $dealerId)
+            ->whereNotNull('po_number')
+            ->orderBy('po_number', 'desc')
+            ->first(['po_number']);
+
+        if (is_null($order)) {
+            return sprintf('PO-%d%d', $dealerId, 1);
+        }
+
+        [, $currentNumber] = explode('PO-' . $dealerId, $order->po_number);
+
+        return sprintf('PO-%d%d', $dealerId, ((int)$currentNumber) + 1);
     }
 
     private function addFiltersToQuery(Builder $query, array $filters, bool $noStatusJoin = false): Builder

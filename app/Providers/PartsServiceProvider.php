@@ -2,9 +2,7 @@
 
 namespace App\Providers;
 
-use App\Events\Ecommerce\QtyUpdated;
 use App\Events\Parts\PartQtyUpdated;
-use App\Listeners\Ecommerce\PartQtyReducer;
 use App\Listeners\Parts\PartQtyAuditLogNotification;
 use App\Listeners\Parts\PartReindexNotification;
 use App\Repositories\Bulk\Parts\BulkDownloadRepositoryInterface;
@@ -19,14 +17,6 @@ use App\Services\Dms\ServiceOrder\BulkCsvTechnicianReportServiceInterface;
 use App\Services\Dms\ServiceOrder\BulkCsvTechnicianReportService;
 use App\Repositories\Parts\PartRepositoryInterface;
 use App\Repositories\Parts\PartRepository;
-use App\Models\Parts\Textrail\Part as TextrailPart;
-use App\Transformers\Parts\PartsTransformer;
-use App\Transformers\Parts\PartsTransformerInterface;
-use App\Transformers\Parts\Textrail\PartsTransformer as TextrailPartsTransformer;
-use App\Models\Parts\Part;
-use App\Repositories\Parts\Textrail\PartRepository as TextrailPartRepository;
-use App\Http\Controllers\v1\Parts\Textrail\PartsController as TextrailPartsController;
-use App\Http\Controllers\v1\Parts\PartsController;
 use App\Repositories\Parts\AuditLogRepository;
 use App\Repositories\Parts\AuditLogRepositoryInterface;
 use App\Services\Export\Parts\BulkCsvDownloadJobService;
@@ -35,8 +25,8 @@ use App\Services\Export\Parts\BulkReportJobService;
 use App\Services\Export\Parts\BulkReportJobServiceInterface;
 use App\Services\Parts\PartService;
 use App\Services\Parts\PartServiceInterface;
-use App\Services\Parts\Textrail\TextrailPartService;
-use App\Services\Parts\Textrail\TextrailPartServiceInterface;
+use App\Transformers\Parts\PartsTransformer;
+use App\Transformers\Parts\PartsTransformerInterface;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
@@ -55,9 +45,6 @@ class PartsServiceProvider extends ServiceProvider
 
             // part should be reindexed
             PartReindexNotification::class,
-        ],
-        QtyUpdated::class => [
-            PartQtyReducer::class,
         ]
     ];
 
@@ -84,20 +71,7 @@ class PartsServiceProvider extends ServiceProvider
 
     public function register()
     {
-        //
-        $this->app->when(TextrailPartsController::class)
-            ->needs(PartRepositoryInterface::class)
-            ->give(function () {
-                return new TextrailPartRepository(new TextrailPart());
-            }); 
-                        
-        $this->app->when(TextrailPartsController::class)
-            ->needs(PartsTransformerInterface::class)
-            ->give(function () {
-                return new TextrailPartsTransformer;
-            }); 
-        
-        $this->app->bind(PartRepositoryInterface::class, PartRepository::class);  
+        $this->app->bind(PartRepositoryInterface::class, PartRepository::class);
         $this->app->bind('App\Repositories\Parts\BinRepositoryInterface', 'App\Repositories\Parts\BinRepository');
         $this->app->bind('App\Repositories\Parts\CycleCountRepositoryInterface', 'App\Repositories\Parts\CycleCountRepository');
         $this->app->bind('App\Repositories\Parts\BrandRepositoryInterface', 'App\Repositories\Parts\BrandRepository');
@@ -108,16 +82,11 @@ class PartsServiceProvider extends ServiceProvider
         $this->app->bind('App\Repositories\Parts\PartOrderRepositoryInterface', 'App\Repositories\Parts\PartOrderRepository');
         $this->app->bind('App\Services\Import\Parts\CsvImportServiceInterface', 'App\Services\Import\Parts\CsvImportService');
         $this->app->bind(PartServiceInterface::class, PartService::class);
-        $this->app->bind(TextrailPartServiceInterface::class, TextrailPartService::class);
-        $this->app->bind('App\Services\Parts\Textrail\TextrailPartImporterServiceInterface', 'App\Services\Parts\Textrail\TextrailPartImporterService');
-        $this->app->bind('App\Repositories\Parts\Textrail\BrandRepositoryInterface', 'App\Repositories\Parts\Textrail\BrandRepository');
-        $this->app->bind('App\Repositories\Parts\Textrail\CategoryRepositoryInterface', 'App\Repositories\Parts\Textrail\CategoryRepository');
-        $this->app->bind('App\Repositories\Parts\Textrail\ManufacturerRepositoryInterface', 'App\Repositories\Parts\Textrail\ManufacturerRepository');
-        $this->app->bind('App\Repositories\Parts\Textrail\TypeRepositoryInterface', 'App\Repositories\Parts\Textrail\TypeRepository');
-        $this->app->bind('App\Repositories\Parts\Textrail\ImageRepositoryInterface', 'App\Repositories\Parts\Textrail\ImageRepository');
         $this->app->bind(AuditLogRepositoryInterface::class, AuditLogRepository::class);
         $this->app->bind(CostHistoryRepositoryInterface::class, CostHistoryRepository::class);
-        
+
+        $this->app->bind(PartsTransformerInterface::class, PartsTransformer::class);
+
         // CSV exporter bindings
         $this->app->bind(BulkDownloadRepositoryInterface::class, BulkDownloadRepository::class);
         $this->app->bind(BulkUploadRepositoryInterface::class, BulkUploadRepository::class);

@@ -11,6 +11,7 @@ use App\Repositories\Parts\PartRepositoryInterface;
 use App\Repositories\Parts\Textrail\PartRepository;
 use App\Services\Ecommerce\CompletedOrder\CompletedOrderServiceInterface;
 use App\Transformers\Ecommerce\CompletedOrderTransformer;
+use App\Transformers\Ecommerce\CompleteOrderRequestTransformer;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
 
@@ -96,7 +97,9 @@ class CompletedOrderController extends RestfulControllerV2
             return $this->response->errorBadRequest();
         }
 
-        $order = $this->completedOrderService->create($orderCreateRequest->all());
+        $params = (new CompleteOrderRequestTransformer())->transform($orderCreateRequest);
+
+        $order = $this->completedOrderService->create($params);
 
         return $this->createdResponse($order->id);
     }
