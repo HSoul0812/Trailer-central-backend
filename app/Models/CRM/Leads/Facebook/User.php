@@ -61,7 +61,7 @@ class User extends Model
      */
     public function leads(): BelongsToMany
     {
-        return $this->belongsToMany(Lead::class, UserLead::class, 'user_id', 'lead_id','user_id', 'identifier');
+        return $this->belongsToMany(Lead::class, UserLead::class, 'user_id', 'lead_id', 'user_id', 'identifier');
     }
 
     /**
