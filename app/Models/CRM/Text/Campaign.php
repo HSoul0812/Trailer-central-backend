@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Leads\LeadType;
 
 /**
  * Class Text Campaign
@@ -129,6 +130,7 @@ class Campaign extends Model
                         return $join->on(DB::raw("CONCAT('+1', SUBSTR(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(website_lead.phone_number, '(', ''), ')', ''), '-', ''), ' ', ''), '-', ''), '+', ''), '.', ''), 1, 10))"), '=', Stop::getTableName() . '.sms_number')
                                     ->orOn(DB::raw("CONCAT('+', SUBSTR(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(website_lead.phone_number, '(', ''), ')', ''), '-', ''), ' ', ''), '-', ''), '+', ''), '.', ''), 1, 11))"), '=', Stop::getTableName() . '.sms_number');
                      })
+                     ->where('website_lead.lead_type', '<>', LeadType::TYPE_NONLEAD)
                      ->where('website_lead.dealer_id', $campaign->newDealerUser->id)
                      ->where('website_lead.phone_number', '<>', '')
                      ->whereNotNull('website_lead.phone_number')
