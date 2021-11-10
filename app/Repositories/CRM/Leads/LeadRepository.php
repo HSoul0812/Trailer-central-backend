@@ -84,7 +84,8 @@ class LeadRepository implements LeadRepositoryInterface {
     }
 
     public function getAll($params) {
-        $query = Lead::where('identifier', '>', 0);
+        $query = Lead::where('identifier', '>', 0)
+                     ->where('website_lead.lead_type', '<>', LeadType::TYPE_NONLEAD);
 
         if (isset($params['dealer_id'])) {
             $query = $query->where(Lead::getTableName().'.dealer_id', $params['dealer_id']);
@@ -116,7 +117,8 @@ class LeadRepository implements LeadRepositoryInterface {
      * @return type
      */
     public function getAllUnassigned($params) {
-        $query = Lead::select(Lead::getTableName() . '.*')->with('inventory');
+        $query = Lead::select(Lead::getTableName() . '.*')->with('inventory')
+                     ->where('lead_type', '<>', LeadType::TYPE_NONLEAD);
 
         if (isset($params['dealer_id'])) {
             $query = $query->where(Lead::getTableName() . '.dealer_id', $params['dealer_id']);
@@ -168,6 +170,7 @@ class LeadRepository implements LeadRepositoryInterface {
     public function getByEmails(int $dealerId, array $emails) {
         // Return Lead Emails for User ID
         return Lead::select(['identifier', 'email_address'])
+                     ->where('lead_type', '<>', LeadType::TYPE_NONLEAD)
                      ->where('dealer_id', $dealerId)
                      ->where(function($query) use($emails) {
                          // Append Query
@@ -205,7 +208,8 @@ class LeadRepository implements LeadRepositoryInterface {
         }
 
         // Find Leads That Match Current!
-        $lead = Lead::where('dealer_id', $params['dealer_id']);
+        $lead = Lead::where('dealer_id', $params['dealer_id'])
+                    ->where('lead_type', '<>', LeadType::TYPE_NONLEAD);
 
         // Find Name
         return $lead->where(function(Builder $query) use($params) {
@@ -241,7 +245,7 @@ class LeadRepository implements LeadRepositoryInterface {
     }
 
     public function getCustomers($params = []) {
-        $query = Lead::select('*');
+        $query = Lead::select('*')->where('lead_type', '<>', LeadType::TYPE_NONLEAD);
 
         if (isset($params['dealer_id'])) {
             $query = $query->where(Lead::getTableName().'.dealer_id', $params['dealer_id']);
@@ -485,6 +489,7 @@ class LeadRepository implements LeadRepositoryInterface {
             ->whereNull('website_lead.customer_id')
             ->where('dealer.is_dms_active', '=', 1)
             ->where('website_lead.is_spam', '=', 0)
+            ->where('website_lead.lead_type', '<>', LeadType::TYPE_NONLEAD)
 
             ->where('website_lead.first_name', '<>', '')
             ->whereNotNull('website_lead.first_name')

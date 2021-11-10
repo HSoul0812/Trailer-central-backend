@@ -11,8 +11,8 @@ use App\Mail\InteractionEmail;
 use App\Traits\CustomerHelper;
 use App\Traits\MailHelper;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Collection;
 
 /**
@@ -31,8 +31,9 @@ class InteractionEmailService implements InteractionEmailServiceInterface
      * @param SmtpConfig $smtpConfig
      * @param ParsedEmail $parsedEmail
      * @throws SendEmailFailedException
+     * @return ParsedEmail
      */
-    public function send(int $dealerId, SmtpConfig $smtpConfig, ParsedEmail $parsedEmail) {
+    public function send(int $dealerId, SmtpConfig $smtpConfig, ParsedEmail $parsedEmail): ParsedEmail {
         // Get Unique Message ID
         if(empty($parsedEmail->getMessageId())) {
             $messageId = sprintf('%s@%s', $this->generateId(), $this->serverHostname());
@@ -41,19 +42,16 @@ class InteractionEmailService implements InteractionEmailServiceInterface
             $messageId = str_replace('<', '', str_replace('>', '', $parsedEmail->getMessageId()));
         }
 
-        // Fill Smtp Config
-        $this->setSmtpConfig($smtpConfig);
-
         // Try/Send Email!
         try {
-            // Send Interaction Email
-            Mail::to($this->getCleanTo([
+            // Fill Smtp Config
+            Log::info('Send from ' . $smtpConfig->username . ' to: ' .
+                        $parsedEmail->getToName() . ' <' . $parsedEmail->getToEmail() . '>');
+            $this->sendCustomEmail($smtpConfig, [
                 'email' => $parsedEmail->getToEmail(),
                 'name' => $parsedEmail->getToName()
-            ]))->send(new InteractionEmail([
+            ], new InteractionEmail([
                 'date' => Carbon::now()->setTimezone('UTC')->toDateTimeString(),
-                'replyToEmail' => $smtpConfig->getUsername(),
-                'replyToName' => $smtpConfig->getFromName(),
                 'subject' => $parsedEmail->getSubject(),
                 'body' => $parsedEmail->getBody(),
                 'attach' => $parsedEmail->getAllAttachments(),

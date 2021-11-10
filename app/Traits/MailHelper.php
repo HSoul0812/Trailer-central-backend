@@ -8,6 +8,7 @@ use App\Services\CRM\Email\DTOs\SmtpConfig;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 
 trait MailHelper
 {
@@ -28,7 +29,8 @@ trait MailHelper
             'password'  => $config->getPassword(),
             'host'      => $config->getHost(),
             'port'      => $config->getPort(),
-            'security'  => $config->getSecurity()
+            'security'  => $config->getSecurity(),
+            'authMode'  => $config->getAuthMode()
         ];
 
         // Create CRM Mailer
@@ -205,7 +207,7 @@ trait MailHelper
 
     /**
      * Get the server hostname.
-     * Returns 'localhost.localdomain' if unknown.
+     * Returns config('mail.hostname') if unknown.
      *
      * @return string
      */
@@ -220,8 +222,11 @@ trait MailHelper
             $result = gethostname();
         } elseif (php_uname('n') !== false) {
             $result = php_uname('n');
-        } else {
-            return 'localhost.localdomain';
+        }
+
+        // Set Default Server Hostname
+        if(empty($result) || $result === '_') {
+            return config('mail.hostname');
         }
 
         return $result;

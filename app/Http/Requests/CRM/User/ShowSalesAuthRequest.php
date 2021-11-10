@@ -8,7 +8,7 @@ class ShowSalesAuthRequest extends Request {
 
     protected $rules = [
         'id' => 'required|integer',
-        'token_type' => 'required|valid_token_type'
+        'token_type' => 'nullable|valid_token_type'
     ];
 
 }
