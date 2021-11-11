@@ -61,7 +61,7 @@ class ConversationController extends RestfulControllerV2
         $request = new GetConversationsRequest($requestData);
 
         if ($request->validate()) {
-            return $this->response->paginate($this->repository->getAll($request->all()), $this->transformer);
+            return $this->response->paginator($this->repository->getAll($request->all()), $this->transformer);
         }
 
         return $this->response->errorBadRequest();
