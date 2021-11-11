@@ -398,13 +398,13 @@ class LeadRepository implements LeadRepositoryInterface {
             $query = $this->addLeadTypeToQuery($query, $filters['lead_type']);
         }
 
-//        if (isset($filters['product_status'])) {
-//            $query = $this->addProductStatusToQuery($query, $filters['product_status']);
-//        }
-//
-//        if(isset($filters['lead_source'])) {
-//            $query = $this->addLeadSourceToQuery($query, $filters['lead_source']);
-//        }
+        if (isset($filters['product_status'])) {
+            $query = $this->addProductStatusToQuery($query, $filters['product_status']);
+        }
+
+        if(isset($filters['lead_source'])) {
+            $query = $this->addLeadSourceToQuery($query, $filters['lead_source']);
+        }
 
         return $query;
     }
