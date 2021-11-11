@@ -94,6 +94,7 @@ class CrmServiceProvider extends ServiceProvider
     public function boot()
     {
         \Validator::extend('valid_lead', 'App\Rules\CRM\Leads\ValidLead@passes');
+        \Validator::extend('non_lead_exists', 'App\Rules\CRM\Leads\NonLeadExists@passes');
 
         LeadStatus::observe(LeadStatusObserver::class);
         Lead::observe(LeadObserver::class);

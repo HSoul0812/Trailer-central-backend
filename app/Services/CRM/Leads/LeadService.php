@@ -2,8 +2,10 @@
 
 namespace App\Services\CRM\Leads;
 
+use App\Models\CRM\Interactions\Facebook\Message;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Interactions\Interaction;
+use App\Repositories\CRM\Interactions\Facebook\MessageRepositoryInterface;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
@@ -16,45 +18,50 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Class LeadService
- * 
+ *
  * @package App\Services\CRM\Leads
  */
 class LeadService implements LeadServiceInterface
 {
     /**
-     * @var App\Repositories\CRM\Leads\LeadRepositoryInterface
+     * @var LeadRepositoryInterface
      */
     protected $leads;
 
     /**
-     * @var App\Repositories\CRM\Leads\StatusRepositoryInterface
+     * @var StatusRepositoryInterface
      */
     protected $status;
 
     /**
-     * @var App\Repositories\CRM\Leads\SourceRepositoryInterface
+     * @var SourceRepositoryInterface
      */
     protected $sources;
 
     /**
-     * @var App\Repositories\CRM\Leads\TypeRepositoryInterface
+     * @var TypeRepositoryInterface
      */
     protected $types;
 
     /**
-     * @var App\Repositories\CRM\Leads\UnitRepositoryInterface
+     * @var UnitRepositoryInterface
      */
     protected $units;
 
     /**
-     * @var App\Repositories\Inventory\InventoryRepositoryInterface
+     * @var InventoryRepositoryInterface
      */
     protected $inventory;
 
     /**
-     * @var App\Repositories\CRM\Interactions\InteractionsRepositoryInterface
+     * @var InteractionsRepositoryInterface
      */
     protected $interactions;
+
+    /**
+     * @var MessageRepositoryInterface
+     */
+    protected $fbMessageRepository;
 
     /**
      * LeadService constructor.
@@ -66,7 +73,8 @@ class LeadService implements LeadServiceInterface
         TypeRepositoryInterface $types,
         UnitRepositoryInterface $units,
         InventoryRepositoryInterface $inventory,
-        InteractionsRepositoryInterface $interactions
+        InteractionsRepositoryInterface $interactions,
+        MessageRepositoryInterface $fbMessageRepository
     ) {
         // Initialize Repositories
         $this->leads = $leads;
@@ -76,12 +84,13 @@ class LeadService implements LeadServiceInterface
         $this->units = $units;
         $this->inventory = $inventory;
         $this->interactions = $interactions;
+        $this->fbMessageRepository = $fbMessageRepository;
     }
 
 
     /**
      * Create Lead
-     * 
+     *
      * @param array $rawParams
      * @return Lead
      */
@@ -122,7 +131,7 @@ class LeadService implements LeadServiceInterface
 
     /**
      * Update Lead
-     * 
+     *
      * @param array $rawParams
      * @return Lead
      */
@@ -164,7 +173,7 @@ class LeadService implements LeadServiceInterface
 
     /**
      * Merge Lead
-     * 
+     *
      * @param Lead $lead
      * @param array $params
      * @return Interaction
@@ -280,7 +289,7 @@ class LeadService implements LeadServiceInterface
 
     /**
      * Clean Lead Types/Units of Interest Params
-     * 
+     *
      * @param array $params
      * @return array
      */
@@ -313,7 +322,7 @@ class LeadService implements LeadServiceInterface
 
     /**
      * Append Relation Params
-     * 
+     *
      * @param Lead $lead
      * @param array $params
      * @return type
@@ -337,5 +346,33 @@ class LeadService implements LeadServiceInterface
 
         // Return Params
         return $params;
+    }
+
+    /**
+     * @param array $params
+     * @return Lead
+     */
+    public function assign(array $params): Lead
+    {
+        $lead = $this->update($params);
+
+        $params['first_name'] = $lead->first_name;
+        $params['last_name'] = $lead->last_name;
+        $params['phone_number'] = $lead->phone_number;
+        $params['email_address'] = $lead->phone_number;
+
+        $interaction = $this->merge($lead, $params);
+
+        if ($lead->fbLead && $lead->fbLead->conversation) {
+            /** @var Collection<Message> $messages */
+            $messages = $lead->fbLead->conversation->messages;
+
+            if (!$messages->isEmpty()) {
+                $ids = $messages->pluck('id')->toArray();
+                $this->fbMessageRepository->bulkUpdate(['ids' => $ids, 'interaction_id' => $interaction->interaction_id]);
+            }
+        }
+
+        return $lead;
     }
 }

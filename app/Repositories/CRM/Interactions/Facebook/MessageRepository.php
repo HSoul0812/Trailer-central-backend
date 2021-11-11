@@ -3,12 +3,13 @@
 namespace App\Repositories\CRM\Interactions\Facebook;
 
 use App\Exceptions\NotImplementedException;
-use App\Repositories\CRM\Interactions\Facebook\MessageRepositoryInterface;
+use App\Exceptions\RepositoryInvalidArgumentException;
 use App\Models\CRM\Interactions\Facebook\Conversation;
 use App\Models\CRM\Interactions\Facebook\Message;
 use App\Models\CRM\Leads\Facebook\Lead as FbLead;
 use App\Models\Integration\Facebook\Page;
 use App\Repositories\Traits\SortTrait;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Query\JoinClause;
@@ -108,7 +109,7 @@ class MessageRepository implements MessageRepositoryInterface {
 
     /**
      * Find By ID or Message ID
-     * 
+     *
      * @param array $params
      * @return null|Message
      */
@@ -129,7 +130,7 @@ class MessageRepository implements MessageRepositoryInterface {
 
     /**
      * Create Or Update Message
-     * 
+     *
      * @param array $params
      * @return Message
      */
@@ -144,5 +145,24 @@ class MessageRepository implements MessageRepositoryInterface {
 
         // Create Instead
         return $this->create($params);
+    }
+
+    public function bulkUpdate(array $params): bool
+    {
+        if (empty($params['ids']) || !is_array($params['ids'])) {
+            throw new RepositoryInvalidArgumentException('ids has been missed. Params - ' . json_encode($params));
+        }
+
+        $ids = $params['ids'];
+        unset($params['ids']);
+
+        /** @var Message<Collection> $interactionMessages */
+        $interactionMessages = Message::query()->whereIn('id', $ids)->get();
+
+        foreach ($interactionMessages as $interactionMessage) {
+            $interactionMessage->update($params);
+        }
+
+        return true;
     }
 }

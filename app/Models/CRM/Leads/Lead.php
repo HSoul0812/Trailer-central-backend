@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
+use App\Models\CRM\Leads\Facebook\Lead as FbLead;
 
 /**
  * Class Lead
@@ -61,6 +62,7 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
  *
  * @property Website $website
  * @property LeadStatus $leadStatus
+ * @property FbLead $fbLead
  */
 class Lead extends Model
 {
@@ -272,6 +274,14 @@ class Lead extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
+    }
+
+    /**
+     * @return HasOne
+     */
+    public function fbLead(): HasOne
+    {
+        return $this->hasOne(FbLead::class, 'lead_id', 'identifier');
     }
 
     /**
