@@ -53,7 +53,7 @@ class ConversationController extends RestfulController
         $request = new ShowConversationRequest($request->all());
 
         if ($request->validate()) {
-            return $this->response->item($this->conversation->get($request->all()), $this->transformer);
+            return $this->response->item($this->repository->get($request->all()), $this->transformer);
         }
 
         return $this->response->errorBadRequest();
