@@ -11,7 +11,7 @@ class ConversationTransformer extends TransformerAbstract
     /**
      * @var array
      */
-    protected $defaultIncludes = [
+    protected $availableIncludes = [
         'messages'
     ];
 
