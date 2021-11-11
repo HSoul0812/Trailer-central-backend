@@ -361,15 +361,26 @@ class LeadService implements LeadServiceInterface
         $params['phone_number'] = $lead->phone_number;
         $params['email_address'] = $lead->phone_number;
 
-        $interaction = $this->merge($lead, $params);
-
         if ($lead->fbLead && $lead->fbLead->conversation) {
             /** @var Collection<Message> $messages */
             $messages = $lead->fbLead->conversation->messages;
 
+            // Loop Messages
             if (!$messages->isEmpty()) {
-                $ids = $messages->pluck('id')->toArray();
-                $this->fbMessageRepository->bulkUpdate(['ids' => $ids, 'interaction_id' => $interaction->interaction_id]);
+                foreach($messages as $message) {
+                    // Create Interaction
+                    $interaction = $this->interactions->create([
+                        'lead_id' => $lead->identifier,
+                        'interaction_type' => Interaction::TYPE_FB,
+                        'interaction_notes' => $message->message
+                    ]);
+
+                    // Add Interaction ID
+                    $this->fbMessageRepository->update([
+                        'message_id' => $message->message_id,
+                        'interaction_id' => $interaction->interaction_id
+                    ]);
+                }
             }
         }
 
