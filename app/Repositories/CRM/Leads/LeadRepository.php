@@ -2,6 +2,8 @@
 
 namespace App\Repositories\CRM\Leads;
 
+use App\Models\Website\Website;
+use App\Nova\Resources\Leads\WebsiteLead;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Leads\Lead;
@@ -89,7 +91,6 @@ class LeadRepository implements LeadRepositoryInterface {
         if (isset($params['dealer_id'])) {
             $query = $query->where(Lead::getTableName().'.dealer_id', $params['dealer_id']);
         }
-
         /**
          * Filters
          */
@@ -192,7 +193,7 @@ class LeadRepository implements LeadRepositoryInterface {
 
     /**
      * Find Existing Leads That Matches Current Lead!
-     * 
+     *
      * @param array $params
      * @return Collection<Lead>
      */
@@ -397,7 +398,32 @@ class LeadRepository implements LeadRepositoryInterface {
             $query = $this->addLeadTypeToQuery($query, $filters['lead_type']);
         }
 
+//        if (isset($filters['product_status'])) {
+//            $query = $this->addProductStatusToQuery($query, $filters['product_status']);
+//        }
+//
+//        if(isset($filters['lead_source'])) {
+//            $query = $this->addLeadSourceToQuery($query, $filters['lead_source']);
+//        }
+
         return $query;
+    }
+
+    private function addLeadSourceToQuery($query, $leadSource) {
+        if($leadSource === 'trailertraders') {
+            $query->where(Lead::getTableName().'.website_id', '284');
+        } elseif($leadSource === 'classifieds') {
+            $query = $query->leftJoin(Website::getTableName().'.id',  '=', Lead::getTableName().'.website_id');
+            $query->where(Website::getTableName().'.type', 'classified');
+        }
+    }
+
+    private function addProductStatusToQuery($query, $productStatus) {
+        if($productStatus == 'has_product') {
+            return $query->where(Lead::getTableName().'.inventory_id', '>', 0);
+        } else {
+            return $query->where(Lead::getTableName().'.inventory_id', 0);
+        }
     }
 
     private function addDateToToQuery($query, $dateTo) {

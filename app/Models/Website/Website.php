@@ -2,6 +2,7 @@
 
 namespace App\Models\Website;
 
+use App\Models\Traits\TableAware;
 use App\Models\Website\Config\WebsiteConfig;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Website\Blog\Post;
@@ -33,6 +34,7 @@ use App\Models\User\User;
  */
 class Website extends Model
 {
+    use TableAware;
     const WEBSITE_TYPE_CLASSIFIED = 'classified';
 
     protected $table = 'website';
@@ -50,7 +52,7 @@ class Website extends Model
      * @var string
      */
     const UPDATED_AT = 'date_updated';
-  
+
     /**
      * Get the website type config.
      *
@@ -71,7 +73,7 @@ class Website extends Model
         }
 
         $printData .= $this->unserializeAllFilter($unserializedFilters);
-        
+
         return $printData;
       } catch(\Exception $exception){
          return $printData;
@@ -82,8 +84,8 @@ class Website extends Model
     {
       if (is_array($dealer_ids)) {
           foreach($dealer_ids as $dealer_id) {
-              $printData = 'dealer_id|eq|'.$dealer_id.PHP_EOL;                            
-          }   
+              $printData = 'dealer_id|eq|'.$dealer_id.PHP_EOL;
+          }
       } else {
           $printData = 'dealer_id|eq|'.$dealer_ids.PHP_EOL;
       }
@@ -103,10 +105,10 @@ class Website extends Model
                   } else {
                       $printData .= $prefix."$operator|".$actualValue.PHP_EOL;
                   }
-              }                            
+              }
           }
       }
-      
+
       return $printData;
     }
 
@@ -115,7 +117,7 @@ class Website extends Model
 
       $filterData = '';
       $globalFilter = explode(\PHP_EOL, $value);
-      
+
       $filterLineData = [];
       $filterLineData['filters'] = [];
       foreach ($globalFilter as $filterLine) {
@@ -126,7 +128,7 @@ class Website extends Model
               $filterMode = 'classic';
               $this->attributes['type_config'] = substr($filterLine, 16);
               return;
-          } else {                                        
+          } else {
               $filterLineTmp = explode('|', $filterLine);
               if($filterLineTmp[0] == 'dealer_id') {
                   if(!isset($filterLineData['dealer_id'])) {
@@ -138,7 +140,7 @@ class Website extends Model
                       $filterLineData['filters'][$filterLineTmp[0]][$filterLineTmp[1]] = [];
                   }
                   $filterLineData['filters'][$filterLineTmp[0]][$filterLineTmp[1]][] = array($filterLineTmp[2]);
-              }                                        
+              }
           }
         }
       }
@@ -155,7 +157,7 @@ class Website extends Model
     {
       $headScript = $this->websiteConfigs()->where('key',  WebsiteConfig::GENERAL_HEAD_SCRIPT_KEY)->first();
       $value = base64_encode($value);
-  
+
       if ($headScript) {
         $headScript->update(['value' => $value]);
       } else {
