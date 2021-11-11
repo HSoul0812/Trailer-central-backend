@@ -60,6 +60,12 @@ class AuditLogRepository extends RepositoryAbstract implements AuditLogRepositor
     {
         $fileName = '/storage/'.uniqid().".csv";
         $fileExport = "/var/www/html/public/temp$fileName";
+
+        $directoryPath = dirname($fileExport);
+        if(!file_exists($directoryPath)){
+            mkdir($directoryPath, 0777, true);
+        }
+
         $fp = fopen($fileExport, 'w+');
         $this->getByYear($year, $dealerId)->chunk(100, function($auditLogs) use (&$fp) {
             foreach($auditLogs as $auditLog) {
