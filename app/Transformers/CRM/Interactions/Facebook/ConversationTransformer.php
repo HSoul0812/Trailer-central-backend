@@ -45,7 +45,7 @@ class ConversationTransformer extends TransformerAbstract
             "link" => $conversation->link,
             "snippet" => $conversation->snippet,
             "newest_update" => $conversation->newest_update,
-            "incoming_update" => $conversation->incoming_update,
+            "newest_incoming" => $conversation->newest_incoming,
             "created_at" => $conversation->created_at,
             "updated_at" => $conversation->updated_at
         ];

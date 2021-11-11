@@ -112,7 +112,7 @@ class Conversation extends Model
      *
      * @return Lead
      */
-    public function getIncomingUpdateAttribute(): string
+    public function getNewestIncomingAttribute(): string
     {
         return $this->messages()->where('to_id', $this->page_id)->max('created_at');
     }
