@@ -63,7 +63,7 @@ class ConversationRepository implements ConversationRepositoryInterface {
     }
 
     public function getAll($params) {
-        $query = Conversation::where('id', '>', 0);
+        $query = Conversation::where(Conversation::getTableName() . '.id', '>', 0);
 
         if (isset($params['dealer_id'])) {
             $query = $query->leftJoin(Page::getTableName(), Page::getTableName().'.page_id',  '=', Conversation::getTableName().'.page_id');
