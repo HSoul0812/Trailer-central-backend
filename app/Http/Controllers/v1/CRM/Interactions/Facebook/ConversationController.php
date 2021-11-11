@@ -4,6 +4,7 @@ namespace App\Http\Controllers\v1\CRM\Interactions\Facebook;
 
 use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\CRM\Interactions\Facebook\ShowConversationRequest;
+use App\Http\Requests\CRM\Interactions\Facebook\GetConversationsRequest;
 use App\Repositories\CRM\Interactions\Facebook\ConversationRepositoryInterface;
 use App\Transformers\CRM\Interactions\Facebook\ConversationTransformer;
 use Dingo\Api\Http\Request;
