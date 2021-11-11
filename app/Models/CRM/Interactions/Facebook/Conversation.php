@@ -106,4 +106,14 @@ class Conversation extends Model
     {
         return $this->fbLead->lead;
     }
+
+    /**
+     * Get newest incoming message
+     *
+     * @return Lead
+     */
+    public function getIncomingUpdateAttribute(): Lead
+    {
+        return $this->messages()->where('to_id', $this->page_id)->max('created_at');
+    }
 }

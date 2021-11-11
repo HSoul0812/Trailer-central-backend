@@ -50,6 +50,12 @@ class ConversationRepository implements ConversationRepositoryInterface {
     }
 
     public function get($params) {
+        // Return Conversation By Conversation ID
+        if(isset($params['conversation_id'])) {
+            return Conversation::where('conversation_id', $params['conversation_id'])->first();
+        }
+
+        // Return Conversation By ID
         return Conversation::findOrFail($params['id']);
     }
 
