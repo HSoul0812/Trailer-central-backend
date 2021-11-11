@@ -8,7 +8,7 @@ use App\Repositories\CRM\Interactions\Facebook\ConversationRepositoryInterface;
 use App\Transformers\CRM\Interactions\Facebook\ConversationTransformer;
 use Dingo\Api\Http\Request;
 
-class ConversationController extends RestfulController
+class ConversationController extends RestfulControllerV2
 {
     /**
      * @var ConversationRepositoryInterface
@@ -42,13 +42,38 @@ class ConversationController extends RestfulController
     }
 
     /**
+     * Get Conversations
+     * 
+     * @mode GET
+     * @param Request $request
+     * @param int $leadId
+     * @return Response
+     */
+    public function index(Request $request, int $leadId) {
+        // Get Request Data
+        $requestData = $request->all();
+        if(!empty($leadId)) {
+            $requestData['lead_id'] = $leadId;
+        }
+
+        // Convert to Request
+        $request = new GetConversationsRequest($requestData);
+
+        if ($request->validate()) {
+            return $this->response->collection($this->repository->getAll($request->all()), $this->transformer);
+        }
+
+        return $this->response->errorBadRequest();
+    }
+
+    /**
      * Get Conversation
      * 
      * @mode GET
      * @param Request $request
      * @return Response
      */
-    public function get(Request $request) {
+    public function show(Request $request) {
         // Convert to Request
         $request = new ShowConversationRequest($request->all());
 

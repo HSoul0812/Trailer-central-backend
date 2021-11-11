@@ -5,6 +5,8 @@ namespace App\Repositories\CRM\Interactions\Facebook;
 use App\Exceptions\NotImplementedException;
 use App\Repositories\CRM\Interactions\Facebook\ConversationRepositoryInterface;
 use App\Models\CRM\Interactions\Facebook\Conversation;
+use App\Models\CRM\Leads\Facebook\Lead as FbLead;
+use App\Models\Integration\Facebook\Page;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -65,6 +67,13 @@ class ConversationRepository implements ConversationRepositoryInterface {
         if (isset($params['dealer_id'])) {
             $query = $query->leftJoin(Page::getTableName(), Page::getTableName().'.page_id',  '=', Conversation::getTableName().'.page_id');
             $query = $query->where(Page::getTableName().'.dealer_id', $params['dealer_id']);
+        }
+
+        if (isset($params['lead_id'])) {
+            $query = $query->leftJoin(FbLead::getTableName(), function (JoinClause $join) {
+                $join->on(FbLead::getTableName().'.page_id', '=', Conversation::getTableName().'.page_id')
+                     ->on(FbLead::getTableName().'.user_id', '=', Conversation::getTableName().'.user_id');
+            })->where(FbLead::getTableName().'.lead_id', $params['lead_id']);
         }
 
         if (isset($params['page_id'])) {
