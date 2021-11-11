@@ -19,6 +19,7 @@ class MessageTransformer extends TransformerAbstract
             "message" => $message->message,
             "tags" => $message->tags_array,
             "read" => !empty($message->read),
+            "direction" => $message->direction,
             "created_at" => $message->created_at,
             "updated_at" => $message->updated_at
         ];
