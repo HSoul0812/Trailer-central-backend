@@ -141,4 +141,15 @@ class Message extends Model
     {
         return $this->morphOne(InteractionMessage::class, 'interactionMessage', 'tb_name', 'tb_primary_id');
     }
+
+
+    /**
+     * Get Message Direction
+     * 
+     * @return string: incoming|outgoing
+     */
+    public function getDirectionAttribute(): string
+    {
+        return ($this->conversation->page_id === $this->to_id) ? 'incoming' : 'outgoing';
+    }
 }

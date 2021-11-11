@@ -40,7 +40,7 @@ class ConversationTransformer extends TransformerAbstract
 	return [
             "id" => $conversation->id,
             "conversation_id" => $conversation->conversation_id,
-            "page_id" => $conversation->conversation_id,
+            "page_id" => $conversation->page_id,
             "user_id" => $conversation->user_id,
             "link" => $conversation->link,
             "snippet" => $conversation->snippet,
