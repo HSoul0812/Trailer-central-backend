@@ -10,6 +10,7 @@ use App\Models\Integration\Facebook\Page;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\Query\JoinClause;
 
 class ConversationRepository implements ConversationRepositoryInterface {
 
