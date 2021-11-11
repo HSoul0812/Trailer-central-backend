@@ -372,7 +372,8 @@ class LeadService implements LeadServiceInterface
                     $interaction = $this->interactions->create([
                         'lead_id' => $lead->identifier,
                         'interaction_type' => Interaction::TYPE_FB,
-                        'interaction_notes' => $message->message
+                        'interaction_notes' => $message->message,
+                        'interaction_time' => $message->created_at
                     ]);
 
                     // Add Interaction ID
