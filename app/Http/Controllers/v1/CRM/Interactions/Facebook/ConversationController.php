@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\v1\CRM\Interactions\Facebook;
 
 use App\Http\Controllers\RestfulController;
-use App\Http\Requests\CRM\Interactions\Facebook\ShowConversationsRequest;
+use App\Http\Requests\CRM\Interactions\Facebook\ShowConversationRequest;
 use App\Repositories\CRM\Interactions\Facebook\ConversationRepositoryInterface;
 use App\Transformers\CRM\Interactions\Facebook\ConversationTransformer;
 use Dingo\Api\Http\Request;
@@ -48,7 +48,7 @@ class ConversationController extends RestfulController
      * @param Request $request
      * @return Response
      */
-    public function show(Request $request) {
+    public function get(Request $request) {
         // Convert to Request
         $request = new ShowConversationRequest($request->all());
 

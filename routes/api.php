@@ -388,7 +388,7 @@ $api->version('v1', function ($route) {
      * Facebook Endpoints
      */
     $route->group(['middleware' => 'facebook.message.validate'], function ($route) {
-        $route->get('leads/{leadId}/facebook/conversation', 'App\Http\Controllers\v1\CRM\Interactions\Facebook\ConversationController@show')->where('leadId', '[0-9]+');
+        $route->get('leads/{leadId}/facebook/conversation', 'App\Http\Controllers\v1\CRM\Interactions\Facebook\ConversationController@get')->where('leadId', '[0-9]+');
         $route->get('leads/{leadId}/facebook/message', 'App\Http\Controllers\v1\CRM\Interactions\Facebook\MessageController@index')->where('leadId', '[0-9]+');
         $route->post('leads/{leadId}/facebook/message', 'App\Http\Controllers\v1\CRM\Interactions\Facebook\MessageController@send')->where('leadId', '[0-9]+');
     });
