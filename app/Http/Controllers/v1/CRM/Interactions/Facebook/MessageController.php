@@ -65,7 +65,7 @@ class MessageController extends RestfulController
         $request = new GetMessagesRequest($requestData);
 
         if ($request->validate()) {
-            return $this->response->collection($this->repository->getAll($request->all()), $this->transformer);
+            return $this->response->paginate($this->repository->getAll($request->all()), $this->transformer);
         }
 
         return $this->response->errorBadRequest();
