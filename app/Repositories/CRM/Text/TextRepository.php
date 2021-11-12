@@ -2,6 +2,8 @@
 
 namespace App\Repositories\CRM\Text;
 
+use App\Exceptions\RepositoryInvalidArgumentException;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
@@ -172,5 +174,37 @@ class TextRepository implements TextRepositoryInterface {
         }
 
         return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
+    }
+
+    /**
+     * @param array $params
+     * @return bool
+     */
+    public function bulkUpdate(array $params): bool
+    {
+        if ((empty($params['ids']) || !is_array($params['ids'])) && (empty($params['search']) || !is_array($params['search']))) {
+            throw new RepositoryInvalidArgumentException('ids or search param has been missed. Params - ' . json_encode($params));
+        }
+
+        $query = TextLog::query();
+
+        if (!empty($params['ids']) && is_array($params['ids'])) {
+            $query->whereIn('id', $params['ids']);
+            unset($params['ids']);
+        }
+
+        if (!empty($params['search']['lead_id'])) {
+            $query->where('lead_id', $params['search']['lead_id']);
+            unset($params['search']['lead_id']);
+        }
+
+        /** @var TextLog<Collection> $textLogs */
+        $textLogs = $query->get();
+
+        foreach ($textLogs as $textLog) {
+            $textLog->update($params);
+        }
+
+        return true;
     }
 }

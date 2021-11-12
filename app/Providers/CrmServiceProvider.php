@@ -95,6 +95,7 @@ class CrmServiceProvider extends ServiceProvider
     {
         \Validator::extend('valid_lead', 'App\Rules\CRM\Leads\ValidLead@passes');
         \Validator::extend('non_lead_exists', 'App\Rules\CRM\Leads\NonLeadExists@passes');
+        \Validator::extend('valid_texts_log', ' App\Rules\CRM\Text\ValidTextsLog@passes');
 
         LeadStatus::observe(LeadStatusObserver::class);
         Lead::observe(LeadObserver::class);
