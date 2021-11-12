@@ -4,7 +4,10 @@
 namespace App\Models\CRM\Dms\Quickbooks;
 
 
+use App\Models\CRM\Account\Invoice;
+use App\Models\CRM\Account\InvoiceItem;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Class Item
@@ -30,4 +33,9 @@ class Item extends Model
         'UNDEFINED' => 'undefined',
         'TRADE_IN_PAYOFF' => 'trade_in_payoff'
     ];
+
+    public function category()
+    {
+        return $this->belongsTo(ItemCategory::class, 'item_category_id', 'id');
+    }
 }
