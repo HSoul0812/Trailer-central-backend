@@ -528,6 +528,8 @@ $api->version('v1', function ($route) {
         */
         $route->get('user/quotes', 'App\Http\Controllers\v1\Dms\UnitSaleController@index');
 
+        $route->put('user/quotes/bulk-archive', 'App\Http\Controllers\v1\Dms\UnitSaleController@bulkArchive');
+
         /*
         |--------------------------------------------------------------------------
         | Dealer Locations
@@ -546,6 +548,7 @@ $api->version('v1', function ($route) {
         $route->get('user/dealer-location/check/{name}', 'App\Http\Controllers\v1\User\DealerLocationController@check');
         $route->get('user/dealer-location-quote-fees', 'App\Http\Controllers\v1\User\DealerLocationController@quoteFees');
         $route->get('user/dealer-location-available-tax-categories', 'App\Http\Controllers\v1\User\DealerLocationController@availableTaxCategories');
+        $route->get('user/dealer-location-titles', 'App\Http\Controllers\v1\User\DealerLocationController@getDealerLocationTitles');
 
         $route->group(['prefix' => 'user/dealer-location/{locationId}'], function ($route) {
             $route->get('/mileage-fee', 'App\Http\Controllers\v1\User\DealerLocationMileageFeeController@index');

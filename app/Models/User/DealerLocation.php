@@ -87,7 +87,7 @@ class DealerLocation extends Model
      */
     protected $primaryKey = 'dealer_location_id';
 
-    const DEFAULT_SALES_TAX_ITEM_COLUMN_TITLES = [
+    public const DEFAULT_SALES_TAX_ITEM_COLUMN_TITLES = [
          'standard' => 'Standard',
          'tax_exempt' => 'Tax Exempt',
          'out_of_state_reciprocal' => 'Out-of-state Reciprocal',
@@ -287,5 +287,23 @@ class DealerLocation extends Model
         parent::boot();
 
         self::observe(app()->make(DealerLocationObserver::class));
+    }
+
+    public function getLocationTitleAttribute(): string
+    {
+        $locationAddr = $this->city;
+
+        if (!empty($locationAddr) && !empty($this->region)) {
+            $locationAddr .= ', ';
+        }
+
+        $locationAddr .= $this->region;
+
+        $locationTitle = $this->name;
+        if (!empty($locationAddr)) {
+            $locationTitle .= ' (' . $locationAddr . ')';
+        }
+
+        return $locationTitle;
     }
 }

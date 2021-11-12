@@ -8,11 +8,13 @@ use App\Exceptions\Requests\Validation\NoObjectIdValueSetException;
 use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\Pos\Sales\Reports\PostCustomSalesReportRequest;
 use App\Repositories\Pos\SalesReportRepositoryInterface;
+use App\Services\Pos\CustomSalesReportExporterService;
 use App\Services\Pos\CustomSalesReportExporterServiceInterface;
 use App\Transformers\Pos\Sales\Reports\CustomSalesReportTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 use League\Csv\CannotInsertRecord;
 use League\Fractal\Manager;
@@ -77,13 +79,10 @@ class SalesReportController extends RestfulControllerV2
         $request = new PostCustomSalesReportRequest($request->all());
 
         if ($request->validate()) {
-            $data = new Collection(
-                $this->salesRepository->customReport($request->all()),
-                new CustomSalesReportTransformer(),
-                'data'
-            );
+            $salesReportService = resolve(CustomSalesReportExporterService::class);
+            $collection = $salesReportService->get($request->all());
 
-            return $this->response->array($this->fractal->createData($data)->toArray());
+            return $this->response->array($this->fractal->createData($collection)->toArray());
         }
 
         $this->response->errorBadRequest();

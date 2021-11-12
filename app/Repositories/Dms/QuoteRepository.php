@@ -14,7 +14,15 @@ use Illuminate\Database\Eloquent\Collection;
 /**
  * @author Marcel
  */
-class QuoteRepository implements QuoteRepositoryInterface {
+class QuoteRepository implements QuoteRepositoryInterface
+{
+    /**
+     * @param UnitSale $unitSale
+     */
+    public function __construct(UnitSale $unitSale)
+    {
+        $this->model = $unitSale;
+    }
 
     private $sortOrders = [
         'title' => [
@@ -52,19 +60,23 @@ class QuoteRepository implements QuoteRepositoryInterface {
     ];
 
 
-    public function create($params) {
+    public function create($params)
+    {
         throw new NotImplementedException;
     }
 
-    public function delete($params) {
+    public function delete($params)
+    {
         throw new NotImplementedException;
     }
 
-    public function get($params) {
+    public function get($params)
+    {
         return UnitSale::findOrFail($params['id']);
     }
 
-    public function getAll($params) {
+    public function getAll($params)
+    {
         /** @var Builder $query */
         if (isset($params['dealer_id'])) {
             $query = UnitSale::where('dealer_id', '=', $params['dealer_id']);
@@ -116,9 +128,9 @@ class QuoteRepository implements QuoteRepositoryInterface {
                 case UnitSale::QUOTE_STATUS_COMPLETED:
                     $query = $query
                         ->where('is_archived', '=', 0)
-                        ->where(function($query) {
+                        ->where(function ($query) {
                             $query->where('is_po', '=', 1)
-                                ->orWhereHas('payments', function($query) {
+                                ->orWhereHas('payments', function ($query) {
                                     $query->select(DB::raw('sum(amount) as paid_amount'))
                                         ->groupBy('unit_sale_id')
                                         ->havingRaw('paid_amount >= dms_unit_sale.total_price');
@@ -142,7 +154,7 @@ class QuoteRepository implements QuoteRepositoryInterface {
             $query = UnitSale::where('id', '>', 0);
         }
         if (isset($params['search_term'])) {
-            $query = $query->where(function($q) use($params) {
+            $query = $query->where(function ($q) use ($params) {
                 $q->where('title', 'LIKE', '%' . $params['search_term'] . '%')
                     ->orWhere('created_at', 'LIKE', '%' . $params['search_term'] . '%')
                     ->orWhere('total_price', 'LIKE', '%' . $params['search_term'] . '%')
@@ -170,11 +182,13 @@ class QuoteRepository implements QuoteRepositoryInterface {
             ->get();
     }
 
-    public function update($params) {
+    public function update($params)
+    {
         throw new NotImplementedException;
     }
 
-    private function addSortQuery($query, $sort) {
+    private function addSortQuery($query, $sort)
+    {
         if (!isset($this->sortOrders[$sort])) {
             return;
         }
@@ -191,7 +205,7 @@ class QuoteRepository implements QuoteRepositoryInterface {
         return $query->orderBy($sortOrder['field'], $sortOrder['direction']);
     }
 
-    public function getCompletedDeals(int $dealerId): Collection 
+    public function getCompletedDeals(int $dealerId): Collection
     {
         return UnitSale::where('dealer_id', '=', $dealerId)
                 ->where('is_archived', '=', 0)
@@ -205,4 +219,18 @@ class QuoteRepository implements QuoteRepositoryInterface {
                 })->orderBy('created_at', 'asc')->get();
     }
 
+    /**
+     * @param int $dealerId
+     * @param array $quoteIds
+     * @return bool
+     */
+    public function bulkArchive(int $dealerId, array $quoteIds): bool
+    {
+        return (bool) $this->model::query()
+            ->where('dealer_id', $dealerId)
+            ->whereIn('id', $quoteIds)
+            ->update([
+                'is_archived' => true,
+            ]);
+    }
 }

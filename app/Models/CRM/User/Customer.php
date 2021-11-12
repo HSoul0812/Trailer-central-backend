@@ -12,6 +12,7 @@ use Laravel\Scout\Searchable;
 use App\Models\User\User as Dealer;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Repositories\Dms\Customer\InventoryRepositoryInterface;
 use App\Models\CRM\Leads\Lead;
 use Carbon\Carbon;
@@ -60,7 +61,7 @@ use Carbon\Carbon;
  */
 class Customer extends Model
 {
-    use Searchable, CustomSearch;
+    use Searchable, CustomSearch, SoftDeletes;
 
     protected $table = 'dms_customer';
 
