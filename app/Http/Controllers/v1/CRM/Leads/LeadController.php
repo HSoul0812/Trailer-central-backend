@@ -65,7 +65,8 @@ class LeadController extends RestfulControllerV2
      *
      * @param int $id
      */
-    public function show(int $id) {
+    public function show(int $id)
+    {
         $request = new GetLeadRequest(['id' => $id]);
 
         if ($request->validate()) {

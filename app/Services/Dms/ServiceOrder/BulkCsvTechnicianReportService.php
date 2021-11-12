@@ -14,6 +14,7 @@ use App\Models\Parts\Part;
 use App\Repositories\Bulk\Parts\BulkDownloadRepositoryInterface;
 use App\Repositories\Common\MonitoredJobRepositoryInterface;
 use App\Repositories\Dms\ServiceOrder\ServiceItemTechnicianRepositoryInterface;
+use App\Services\Export\FilesystemPdfExporter;
 use App\Services\Common\AbstractMonitoredJobService;
 use Exception;
 use Illuminate\Support\Facades\Storage;
@@ -105,7 +106,7 @@ class BulkCsvTechnicianReportService extends AbstractMonitoredJobService impleme
         }
         $this->repository->updateProgress($job->token, 95);
 
-        Storage::disk('tmp')->put($job->payload->filename, $csv_data);
+        Storage::disk('s3')->put(FilesystemPdfExporter::PDF_EXPORT_S3_PREFIX . $job->payload->filename, $csv_data, 'public');
 
         $this->repository->setCompleted($job->token);
     }

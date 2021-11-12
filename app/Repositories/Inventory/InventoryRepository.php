@@ -114,6 +114,38 @@ class InventoryRepository implements InventoryRepositoryInterface
         '-updated_at' => [
             'field' => 'updated_at',
             'direction' => 'ASC'
+        ],
+        'stock' => [
+            'field' => 'stock',
+            'direction' => 'DESC'
+        ],
+        '-stock' => [
+            'field' => 'stock',
+            'direction' => 'ASC'
+        ],
+        'category' => [
+            'field' => 'category',
+            'direction' => 'DESC'
+        ],
+        '-category' => [
+            'field' => 'category',
+            'direction' => 'ASC'
+        ],
+        'price' => [
+            'field' => 'price',
+            'direction' => 'DESC'
+        ],
+        '-price' => [
+            'field' => 'price',
+            'direction' => 'ASC'
+        ],
+        'sales_price' => [
+            'field' => 'sales_price',
+            'direction' => 'DESC'
+        ],
+        '-sales_price' => [
+            'field' => 'sales_price',
+            'direction' => 'ASC'
         ]
     ];
 

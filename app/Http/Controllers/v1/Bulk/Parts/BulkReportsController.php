@@ -22,6 +22,7 @@ use App\Models\Bulk\Parts\BulkReportPayload;
 use App\Repositories\Bulk\Parts\BulkReportRepositoryInterface;
 use App\Services\Export\Parts\BulkReportJobServiceInterface;
 use App\Services\Dms\ServiceOrder\BulkCsvTechnicianReportServiceInterface;
+use App\Services\Export\FilesystemPdfExporter;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\JsonResponse;
 use Dingo\Api\Http\Request;
@@ -324,7 +325,7 @@ class BulkReportsController extends MonitoredJobsController
         $payload = BulkReportPayload::from($job->payload);
 
         return response()->streamDownload(static function () use ($payload) {
-            fpassthru(Storage::disk('tmp')->readStream($payload->filename));
+            fpassthru(Storage::disk('s3')->readStream(FilesystemPdfExporter::PDF_EXPORT_S3_PREFIX . $payload->filename));
         }, $payload->filename);
     }
 }
