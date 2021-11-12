@@ -20,7 +20,6 @@ class LeadTransformer extends TransformerAbstract
     ];
 
     protected $availableIncludes = [
-        'leads',
         'interactions',
         'otherLeadProperties',
     ];
