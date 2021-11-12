@@ -14,7 +14,7 @@ class AddDraftSavedToCrmEmailHistoryTable extends Migration
     public function up()
     {
         Schema::table('crm_email_history', function (Blueprint $table) {
-            $table->timestamp('draft_saved')->after('use_html')->nullable();
+            $table->dateTime('draft_saved')->after('use_html')->nullable();
         });
     }
 
