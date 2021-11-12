@@ -4,7 +4,9 @@ namespace App\Providers;
 
 use App\Mail\CRM\CustomEmail;
 use App\Models\CRM\Dms\Refund;
+use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadStatus;
+use App\Models\Observers\CRM\Lead\LeadObserver;
 use App\Models\Observers\CRM\Lead\LeadStatusObserver;
 use App\Repositories\CRM\Refund\RefundRepository;
 use App\Repositories\CRM\Refund\RefundRepositoryInterface;
@@ -92,7 +94,9 @@ class CrmServiceProvider extends ServiceProvider
     public function boot()
     {
         \Validator::extend('valid_lead', 'App\Rules\CRM\Leads\ValidLead@passes');
+        \Validator::extend('non_lead_exists', 'App\Rules\CRM\Leads\NonLeadExists@passes');
 
         LeadStatus::observe(LeadStatusObserver::class);
+        Lead::observe(LeadObserver::class);
     }
 }

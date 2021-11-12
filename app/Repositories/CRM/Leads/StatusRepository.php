@@ -121,7 +121,7 @@ class StatusRepository implements StatusRepositoryInterface {
 
         // Status Exists?
         if(!empty($status->id)) {
-            return $this->update($params);
+            return $this->update(array_merge($params, ['id' => $status->id]));
         }
 
         // Create Status!
