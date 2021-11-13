@@ -509,7 +509,7 @@ class LeadRepository implements LeadRepositoryInterface {
                 ->where([
                     ['identifier', '>', 0],
                     ['dealer_id', '=', $dealerId],
-                    ['lead_type', '=', LeadType::TYPE_NONLEAD],
+                    ['lead_type', '!=', LeadType::TYPE_NONLEAD],
                     ['is_spam', '=', 0],
                 ])
                 ->where(function ($query) use ($paramsCollect) {
