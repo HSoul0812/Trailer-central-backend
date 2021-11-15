@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Class LeadService
- * 
+ *
  * @package App\Services\CRM\Leads
  */
 class LeadService implements LeadServiceInterface
@@ -81,7 +81,7 @@ class LeadService implements LeadServiceInterface
 
     /**
      * Create Lead
-     * 
+     *
      * @param array $rawParams
      * @return Lead
      */
@@ -122,7 +122,7 @@ class LeadService implements LeadServiceInterface
 
     /**
      * Update Lead
-     * 
+     *
      * @param array $rawParams
      * @return Lead
      */
@@ -164,7 +164,7 @@ class LeadService implements LeadServiceInterface
 
     /**
      * Merge Lead
-     * 
+     *
      * @param Lead $lead
      * @param array $params
      * @return Interaction
@@ -280,7 +280,7 @@ class LeadService implements LeadServiceInterface
 
     /**
      * Clean Lead Types/Units of Interest Params
-     * 
+     *
      * @param array $params
      * @return array
      */
@@ -313,7 +313,7 @@ class LeadService implements LeadServiceInterface
 
     /**
      * Append Relation Params
-     * 
+     *
      * @param Lead $lead
      * @param array $params
      * @return type
@@ -337,5 +337,10 @@ class LeadService implements LeadServiceInterface
 
         // Return Params
         return $params;
+    }
+
+    public function getMatches(array $params)
+    {
+        return $this->leads->getMatches($params['dealer_id'], $params);
     }
 }
