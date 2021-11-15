@@ -383,6 +383,11 @@ $api->version('v1', function ($route) {
     });
 
     /**
+     * Email History
+     */
+    $route->post('leads/interactions/email-history/bulk', 'App\Http\Controllers\v1\CRM\Interactions\EmailHistoryController@bulkUpdate');
+
+    /**
      * Texts Logs
      */
     $route->group(['middleware' => 'text.validate'], function ($route) {
