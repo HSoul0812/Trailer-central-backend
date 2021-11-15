@@ -2,10 +2,12 @@
 
 namespace App\Repositories\CRM\Leads;
 
-use App\Repositories\CRM\Leads\FacebookRepositoryInterface;
+use App\Exceptions\RepositoryInvalidArgumentException;
+use App\Models\CRM\Interactions\Facebook\Conversation;
 use App\Models\CRM\Leads\Facebook\User;
 use App\Models\CRM\Leads\Facebook\Lead as FbLead;
 use App\Repositories\Traits\SortTrait;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 class FacebookRepository implements FacebookRepositoryInterface {
@@ -89,7 +91,7 @@ class FacebookRepository implements FacebookRepositoryInterface {
 
     /**
      * Find By ID or User ID
-     * 
+     *
      * @param array $params
      * @return null|User
      */
@@ -110,7 +112,7 @@ class FacebookRepository implements FacebookRepositoryInterface {
 
     /**
      * Create Or Update User
-     * 
+     *
      * @param array $params
      * @return User
      */
@@ -130,7 +132,7 @@ class FacebookRepository implements FacebookRepositoryInterface {
 
     /**
      * Create Facebook Lead
-     * 
+     *
      * @param int $pageId
      * @param int $userId
      * @param int $leadId
@@ -148,7 +150,7 @@ class FacebookRepository implements FacebookRepositoryInterface {
 
     /**
      * Lead Exists for Page/User?
-     * 
+     *
      * @param int $pageId
      * @param int $userId
      * @return bool
@@ -163,12 +165,51 @@ class FacebookRepository implements FacebookRepositoryInterface {
 
     /**
      * Get Facebook Lead
-     * 
+     *
      * @param int $leadId
      * @return null|FbLead
      */
     public function getFbLead(int $leadId): ?FbLead {
         // Find FbLead
         return FbLead::where('lead_id', $leadId)->first();
+    }
+
+    /**
+     * @param array $params
+     * @return bool
+     */
+    public function bulkUpdateFbLead(array $params): bool
+    {
+        if ((empty($params['ids']) || !is_array($params['ids'])) && (empty($params['search']) || !is_array($params['search']))) {
+            throw new RepositoryInvalidArgumentException('ids or search param has been missed. Params - ' . json_encode($params));
+        }
+
+        $query = FbLead::query();
+
+        if (!empty($params['ids']) && is_array($params['ids'])) {
+            $query->whereIn('id', $params['ids']);
+            unset($params['ids']);
+        }
+
+        if (!empty($params['search']['lead_id'])) {
+            $query->where('lead_id', $params['search']['lead_id']);
+            unset($params['search']['lead_id']);
+        }
+
+        /** @var Collection<FbLead> $fbLeads */
+        $fbLeads = $query->get();
+
+        foreach ($fbLeads as $fbLead) {
+            $fbLead->update($params);
+
+            /** @var Conversation|null $conversation */
+            $conversation = $fbLead->conversation;
+
+            if ($conversation) {
+                $conversation->messages()->searchable();
+            }
+        }
+
+        return true;
     }
 }

@@ -405,6 +405,11 @@ $api->version('v1', function ($route) {
     $route->post('leads/facebook/message', 'App\Http\Controllers\v1\CRM\Interactions\Facebook\WebhookController@message');
 
     /**
+     * Facebook Leads Endpoint
+     */
+    $route->post('leads/facebook/bulk', 'App\Http\Controllers\v1\CRM\Interactions\Facebook\LeadController@bulkUpdate');
+
+    /**
      * Facebook Endpoints
      */
     $route->group(['middleware' => 'facebook.message.validate'], function ($route) {
