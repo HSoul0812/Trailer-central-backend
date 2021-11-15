@@ -26,4 +26,9 @@ class BillCategory extends Model
         'description',
         'amount',
     ];
+
+    public function account()
+    {
+        return $this->belongsTo(Account::class, 'account_id', 'id');
+    }
 }
