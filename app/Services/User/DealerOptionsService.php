@@ -6,7 +6,6 @@ use App\Helpers\StringHelper;
 use App\Models\User\NewDealerUser;
 use App\Models\User\NewUser;
 use App\Models\User\User;
-use App\Models\Website\Config\WebsiteConfig;
 use App\Repositories\CRM\User\CrmUserRepositoryInterface;
 use App\Repositories\CRM\User\CrmUserRoleRepositoryInterface;
 use App\Repositories\User\DealerPartRepositoryInterface;
@@ -18,6 +17,7 @@ use App\Exceptions\Nova\Actions\Dealer\EcommerceDeactivationException;
 use App\Repositories\Repository;
 use App\Repositories\Website\Config\WebsiteConfigRepository;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
+use App\Repositories\Website\EntityRepositoryInterface as WebsiteEntityRepositoryInterface;
 use App\Repositories\Website\WebsiteRepositoryInterface;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
@@ -79,6 +79,12 @@ class DealerOptionsService implements DealerOptionsServiceInterface
      */
     private $websiteRepository;
 
+
+    /**
+     * @var WebsiteEntityRepositoryInterface
+     */
+    private $websiteEntityRepository;
+
     /**
      * DealerOptionsService constructor.
      * @param UserRepositoryInterface $userRepository
@@ -91,6 +97,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
      * @param StringHelper $stringHelper
      * @param WebsiteRepositoryInterface $websiteRepository
      * @param WebsiteConfigRepositoryInterface $websiteConfigRepository
+     * @param WebsiteEntityRepositoryInterface $websiteEntityRepository
      */
     public function __construct(
         UserRepositoryInterface $userRepository,
@@ -102,7 +109,8 @@ class DealerOptionsService implements DealerOptionsServiceInterface
         NewUserRepositoryInterface $newUserRepository,
         StringHelper $stringHelper,
         WebsiteRepositoryInterface $websiteRepository,
-        WebsiteConfigRepositoryInterface  $websiteConfigRepository
+        WebsiteConfigRepositoryInterface  $websiteConfigRepository,
+        WebsiteEntityRepositoryInterface $websiteEntityRepository
     ) {
         $this->userRepository = $userRepository;
         $this->crmUserRepository = $crmUserRepository;
@@ -115,6 +123,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
         $this->stringHelper = $stringHelper;
         $this->websiteRepository = $websiteRepository;
         $this->websiteConfigRepository = $websiteConfigRepository;
+        $this->websiteEntityRepository = $websiteEntityRepository;
     }
 
     /**
@@ -313,7 +322,62 @@ class DealerOptionsService implements DealerOptionsServiceInterface
 
             foreach($websites as $website) {
                 $this->websiteConfigRepository->setValue($website->getKey(), 'general/user_accounts', 1);
+
+                $this->websiteEntityRepository->update([
+                    'entity_type' => '41',
+                    'website_id' => $website->getKey(),
+                    'entity_view' => 'login',
+                    'template' => '1column',
+                    'parent' => 0,
+                    'title' => 'Login',
+                    'url_path' => 'login',
+                    'url_path_external' => 0,
+                    'sort_order' => 85,
+                    'in_nav' => 1,
+                    'is_active' => 1,
+                    'deleted' => 0
+                ]);
+                $this->websiteEntityRepository->update([
+                    'entity_type' => '42',
+                    'website_id' => $website->getKey(),
+                    'entity_view' => 'signup',
+                    'template' => '1column',
+                    'parent' => 0,
+                    'title' => 'SignUp',
+                    'url_path' => 'signup',
+                    'url_path_external' => 0,
+                    'in_nav' => 0,
+                    'is_active' => 1,
+                    'deleted' => 0
+                ]);
+                $this->websiteEntityRepository->update([
+                    'entity_type' => '43',
+                    'website_id' => $website->getKey(),
+                    'entity_view' => 'account',
+                    'template' => '1column',
+                    'parent' => 0,
+                    'title' => 'Account Information',
+                    'url_path' => 'account',
+                    'url_path_external' => 0,
+                    'in_nav' => 0,
+                    'is_active' => 1,
+                    'deleted' => 0
+                ]);
+                $this->websiteEntityRepository->update([
+                    'entity_type' => '44',
+                    'website_id' => $website->getKey(),
+                    'entity_view' => 'inventory-list-hybrid',
+                    'template' => '1column',
+                    'parent' => 0,
+                    'title' => 'Favorite Inventories',
+                    'url_path' => 'favorite-inventories',
+                    'url_path_external' => 0,
+                    'in_nav' => 0,
+                    'is_active' => 1,
+                    'deleted' => 0
+                ]);
             }
+
             return true;
         } catch(\Exception $e) {
             \Log::error($e->getMessage());
@@ -340,6 +404,24 @@ class DealerOptionsService implements DealerOptionsServiceInterface
 
             foreach($websites as $website) {
                 $this->websiteConfigRepository->setValue($website->getKey(), 'general/user_accounts', 0);
+
+                $this->websiteEntityRepository->delete([
+                    'entity_type' => '41',
+                    'website_id' => $website->getKey()
+                ]);
+
+                $this->websiteEntityRepository->delete([
+                    'entity_type' => '42',
+                    'website_id' => $website->getKey()
+                ]);
+                $this->websiteEntityRepository->delete([
+                    'entity_type' => '43',
+                    'website_id' => $website->getKey()
+                ]);
+                $this->websiteEntityRepository->delete([
+                    'entity_type' => '44',
+                    'website_id' => $website->getKey()
+                ]);
             }
             return true;
         } catch (\Exception $e) {

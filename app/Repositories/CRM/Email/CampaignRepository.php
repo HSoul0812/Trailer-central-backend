@@ -41,6 +41,12 @@ class CampaignRepository implements CampaignRepositoryInterface {
      * @return CampaignSent
      */
     public function sent(int $campaignId, int $leadId, ?string $messageId = null): CampaignSent {
+        // Get Sent?
+        $sent = $this->getSent($campaignId, $leadId);
+        if(!empty($sent->drip_campaigns_id)) {
+            return $sent;
+        }
+
         DB::beginTransaction();
 
         try {
@@ -109,6 +115,33 @@ class CampaignRepository implements CampaignRepositoryInterface {
                             ->where(Lead::getTableName() . '.email_address', $email)->first();
 
         // Was Campaign Sent?
+        return !empty($sent->drip_campaigns_id);
+    }
+
+    /**
+     * Get Campaign Sent Entry for Lead
+     * 
+     * @param int $campaignId
+     * @param int $leadId
+     * @return null|CampaignSent
+     */
+    public function getSent(int $campaignId, int $leadId): ?CampaignSent {
+        // Get Campaign Sent Entry
+        return CampaignSent::where('drip_campaigns_id', $campaignId)->where('lead_id', $leadId)->first();
+    }
+
+    /**
+     * Was Campaign Already Sent to Lead?
+     * 
+     * @param int $campaignId
+     * @param int $leadId
+     * @return bool
+     */
+    public function wasLeadSent(int $campaignId, int $leadId): bool {
+        // Get Campaign Sent Entry
+        $sent = $this->getSent($campaignId, $leadId);
+
+        // Successful?
         return !empty($sent->drip_campaigns_id);
     }
 }

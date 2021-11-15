@@ -2,14 +2,14 @@
 
 namespace App\Transformers\Inventory;
 
-use League\Fractal\TransformerAbstract;
 use App\Models\Inventory\Image;
 
-class ImageTransformer extends TransformerAbstract {
-    
-    public function transform(Image $image) {
+class ImageTransformer extends MediaFileTransformer
+{
+    public function transform(Image $image): array
+    {
         return [
-            'url' => env('AWS_URL').$image->filename
+            'url' => $this->getBaseUrl().$image->filename
         ];
     }
 }

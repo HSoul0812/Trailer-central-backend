@@ -8,17 +8,38 @@ use Generator;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
+/**
+ * Class SalesReportRepository
+ *
+ * @package App\Repositories\Pos
+ */
 class SalesReportRepository implements SalesReportRepositoryInterface
 {
     public const MIXED_REPORT_TYPE = 'mixed';
     public const PARTS_REPORT_TYPE = 'parts';
     public const UNITS_REPORT_TYPE = 'units';
+    public const LABORS_REPORT_TYPE = 'labors';
+    public const MIXED_PARTS_LABORS_REPORT_TYPE = 'parts_labors';
+
+    public const CUSTOM_REPORT_TYPES = [
+        self::MIXED_REPORT_TYPE,
+        self::PARTS_REPORT_TYPE,
+        self::UNITS_REPORT_TYPE,
+        self::LABORS_REPORT_TYPE,
+        self::MIXED_PARTS_LABORS_REPORT_TYPE,
+    ];
+
+    private const CUSTOM_PARAMS_LABOR = 'labor';
+    private const CUSTOM_PARAMS_PART = 'part';
+    private const CUSTOM_PARAMS_INVENTORY = 'inventory';
 
     private $customReportHelpers = [
         'partBoundParams' => [],
         'inventoryBoundParams' => [],
         'partsWhere' => ['part_qb' => '', 'part_pos' => ''],
-        'inventoryWhere' => ['inventory_qb' => '', 'inventory_pos' => '']
+        'inventoryWhere' => ['inventory_qb' => '', 'inventory_pos' => ''],
+        'laborBoundParams' => [],
+        'laborWhere' => ['labor_qb' => '', 'labor_pos' => ''],
     ];
 
     /**
@@ -27,6 +48,7 @@ class SalesReportRepository implements SalesReportRepositoryInterface
      * Also it validates if there are the minimum required parameters
      *
      * @param array $params
+     *
      * @return array[]
      *
      * @throws InvalidArgumentException when the parameter "dealer_id" was not provided
@@ -45,6 +67,7 @@ class SalesReportRepository implements SalesReportRepositoryInterface
      * Also it validates if there are the minimum required parameters
      *
      * @param array $params
+     *
      * @return Generator
      *
      * @throws InvalidArgumentException when the parameter "dealer_id" was not provided
@@ -63,6 +86,7 @@ class SalesReportRepository implements SalesReportRepositoryInterface
      * Also it validates if there are the minimum required parameters
      *
      * @param array $params
+     *
      * @return array{sql: string, params: array} sql and and params for binding
      */
     protected function sqlForCustomReport(array $params): array
@@ -100,14 +124,15 @@ class SalesReportRepository implements SalesReportRepositoryInterface
                            DATE_FORMAT(qi.invoice_date, '%M') AS month,
                            DATE_FORMAT(qi.invoice_date, '%d') AS day,
                            DATE_FORMAT(qi.invoice_date, '%Y-%m-%d') AS date,
-                           p.title,
-                           p.sku AS reference,
-                           IFNULL(iitem.cost,0) * ii.qty AS cost,
-                           IFNULL(ii.unit_price,0) * ii.qty AS price,
+                           @title:=IFNULL(p.title, iitem.name) AS title,
+                           IFNULL(IFNULL(p.sku, iitem.sku), @title) AS reference,
+                           @cost:=IFNULL(iitem.cost,0) * ii.qty AS cost,
+                           ROUND(IFNULL(qi.discount, 0), 2) AS invoice_discount,
+                           @actual_price:=ROUND(IFNULL(ii.unit_price,0) * ii.qty, 2) AS price,
                            FLOOR(ii.qty) AS qty,
                            ii.taxes_amount AS taxes_amount,
                            @refund:=IFNULL((SELECT SUM(rf.amount) FROM dealer_refunds_items rf WHERE rf.refunded_item_id = ii.id AND rf.refunded_item_tbl = 'qb_invoice_items'), 0) AS refund,
-                           ROUND((IFNULL(ii.unit_price,0) * ii.qty) - (IFNULL(iitem.cost,0) * ii.qty) - @refund, 2) AS profit,
+                           ROUND((@actual_price - @cost - @refund), 2) AS profit,
                            IF(
                               qi.unit_sale_id IS NOT NULL,
                               CONCAT('/bill-of-sale/edit/', qi.unit_sale_id),
@@ -132,9 +157,9 @@ class SalesReportRepository implements SalesReportRepositoryInterface
                     FROM dealer_sales_history sh
                     JOIN qb_invoices qi on sh.tb_primary_id = qi.id AND sh.tb_name = 'qb_invoices'
                     LEFT JOIN dms_repair_order ro on qi.repair_order_id = ro.id
-                    JOIN qb_invoice_items ii on qi.id = ii.invoice_id
+                    LEFT JOIN qb_invoice_items ii on qi.id = ii.invoice_id
                     JOIN qb_items iitem on ii.item_id = iitem.id AND iitem.type = 'part'
-                    JOIN parts_v1 p on iitem.item_primary_id = p.id
+                    LEFT JOIN parts_v1 p on iitem.item_primary_id = p.id
                     WHERE sh.dealer_location_id IN (SELECT l.dealer_location_id FROM dealer_location l WHERE l.dealer_id = :dealer_id_part_qb)
                           AND qi.invoice_date >= :from_date_part_qb AND qi.invoice_date <= :to_date_part_qb
                           {$this->customReportHelpers['partsWhere']['part_qb']}
@@ -144,14 +169,15 @@ class SalesReportRepository implements SalesReportRepositoryInterface
                         DATE_FORMAT(ps.created_at, '%M') AS month,
                         DATE_FORMAT(ps.created_at, '%d') AS day,
                         DATE_FORMAT(ps.created_at, '%Y-%m-%d') AS date,
-                        p.title,
-                        p.sku AS reference,
-                        IFNULL(iitem.cost,0)  * psp.qty AS cost,
-                        IFNULL(psp.price,0) * psp.qty AS price,
+                        @title:=IFNULL(p.title, p.sku) AS title,
+                        IFNULL(IFNULL(p.sku, iitem.sku), @title) AS reference,
+                        @cost:=IFNULL(iitem.cost,0) * psp.qty AS cost,
+                        ROUND(IFNULL(ps.discount, 0), 2) AS invoice_discount,
+                        @actual_price:=ROUND(IFNULL(psp.price,0) * psp.qty, 2) AS price,
                         FLOOR(psp.qty),
                         NULL AS taxes_amount,
                         @refund:=IFNULL((SELECT SUM(rf.amount) FROM dealer_refunds_items rf WHERE rf.refunded_item_id = psp.id AND rf.refunded_item_tbl = 'crm_pos_sale_products'), 0) AS refund,
-                        ROUND((IFNULL(psp.price,0) * psp.qty) - (IFNULL(iitem.cost,0) * psp.qty) - @refund, 2) AS profit,
+                        ROUND((@actual_price - @cost - @refund), 2) AS profit,
                         (
                             SELECT GROUP_CONCAT(r.receipt_path)
                             FROM dealer_sales_receipt r
@@ -169,7 +195,7 @@ class SalesReportRepository implements SalesReportRepositoryInterface
                     JOIN crm_pos_sales ps on sh.tb_primary_id = ps.id AND sh.tb_name = 'crm_pos_sales'
                     JOIN crm_pos_sale_products psp on ps.id = psp.sale_id
                     JOIN qb_items iitem on psp.item_id = iitem.id AND iitem.type = 'part'
-                    JOIN parts_v1 p on iitem.item_primary_id = p.id
+                    LEFT JOIN parts_v1 p on iitem.item_primary_id = p.id
                     WHERE sh.dealer_location_id IN (SELECT l.dealer_location_id FROM dealer_location l WHERE l.dealer_id = :dealer_id_part_pos)
                           AND ps.created_at >= :from_date_part_pos AND ps.created_at <= :to_date_part_pos
                           {$this->customReportHelpers['partsWhere']['part_pos']}
@@ -181,14 +207,15 @@ SQL;
                     DATE_FORMAT(qi.invoice_date, '%M') AS month,
                     DATE_FORMAT(qi.invoice_date, '%d') AS day,
                     DATE_FORMAT(qi.invoice_date, '%Y-%m-%d') AS date,
-                    i.title,
+                    IFNULL(i.title, i.stock) AS title,
                     i.stock AS reference,
-                    IFNULL(iitem.cost,0) * ii.qty AS cost,
-                    IFNULL(ii.unit_price,0) * ii.qty AS price,
+                    @cost:=IFNULL(iitem.cost,0) * ii.qty AS cost,
+                    ROUND(IFNULL(qi.discount, 0), 2) AS invoice_discount,
+                    @actual_price:=IFNULL(ii.unit_price,0) * ii.qty AS price,
                     FLOOR(ii.qty) AS qty,
                     ii.taxes_amount AS taxes_amount,
                     @refund:=IFNULL((SELECT SUM(rf.amount) FROM dealer_refunds_items rf WHERE rf.refunded_item_id = ii.id AND rf.refunded_item_tbl = 'qb_invoice_items'), 0) AS refund,
-                    ROUND((IFNULL(ii.unit_price,0) * ii.qty) - (IFNULL(iitem.cost,0) * ii.qty) - @refund, 2) AS profit,
+                    ROUND(@actual_price - @cost - @refund, 2) AS profit,
                     IF(
                       qi.unit_sale_id IS NOT NULL,
                       CONCAT('/bill-of-sale/edit/', qi.unit_sale_id),
@@ -226,14 +253,15 @@ SQL;
                         DATE_FORMAT(ps.created_at, '%M') AS month,
                         DATE_FORMAT(ps.created_at, '%d') AS day,
                         DATE_FORMAT(ps.created_at, '%Y-%m-%d') AS date,
-                        i.title,
+                        IFNULL(i.title, i.stock) AS title,
                         i.stock AS reference,
-                        IFNULL(iitem.cost,0) * psp.qty AS cost,
-                        IFNULL(psp.price,0) * psp.qty AS price,
+                        @cost:=IFNULL(iitem.cost,0) * psp.qty AS cost,
+                        ROUND(IFNULL(ps.discount, 0), 2) AS invoice_discount,
+                        @actual_price:=IFNULL(psp.price,0) * psp.qty AS price,
                         FLOOR(psp.qty),
                         NULL AS taxes_amount,
                         @refund:=IFNULL((SELECT SUM(rf.amount) FROM dealer_refunds_items rf WHERE rf.refunded_item_id = psp.id AND rf.refunded_item_tbl = 'crm_pos_sale_products'), 0) AS refund,
-                        ROUND((IFNULL(psp.price,0) * psp.qty) - (IFNULL(iitem.cost,0) * psp.qty) - @refund, 2) AS profit,
+                        ROUND(@actual_price - @cost - @refund, 2) AS profit,
                         (
                             SELECT GROUP_CONCAT(r.receipt_path)
                             FROM dealer_sales_receipt r
@@ -257,52 +285,43 @@ SQL;
                           {$this->customReportHelpers['inventoryWhere']['inventory_pos']}
 SQL;
 
-        if ($params['report_type'] === self::MIXED_REPORT_TYPE) {
-            $boundParams = array_merge(
-                $this->customReportHelpers['partBoundParams'],
-                $this->customReportHelpers['inventoryBoundParams'],
-                [
-                    'dealer_id_part_qb' => $params['dealer_id'],
-                    'dealer_id_part_pos' => $params['dealer_id'],
-                    'dealer_id_inventory_qb' => $params['dealer_id'],
-                    'dealer_id_inventory_pos' => $params['dealer_id'],
-                    'from_date_part_qb' => $params['from_date'],
-                    'from_date_part_pos' => $params['from_date'],
-                    'from_date_inventory_qb' => $params['from_date'],
-                    'from_date_inventory_pos' => $params['from_date'],
-                    'to_date_part_qb' => $params['to_date'] . ' 23:59:59',
-                    'to_date_part_pos' => $params['to_date'] . ' 23:59:59',
-                    'to_date_inventory_qb' => $params['to_date'] . ' 23:59:59',
-                    'to_date_inventory_pos' => $params['to_date'] . ' 23:59:59',
-                ]);
+        switch ($params['report_type']) {
+            case self::MIXED_REPORT_TYPE:
+                $boundParams = array_merge(
+                    $this->getCustomInventoryParams($params),
+                    $this->getCustomPartParams($params)
+                );
 
-            $sql = "$partsSQL \nUNION\n $inventorySQL";
-        } elseif ($params['report_type'] === self::PARTS_REPORT_TYPE) {
-            $boundParams = array_merge(
-                $this->customReportHelpers['partBoundParams'],
-                [
-                    'dealer_id_part_qb' => $params['dealer_id'],
-                    'dealer_id_part_pos' => $params['dealer_id'],
-                    'from_date_part_qb' => $params['from_date'],
-                    'from_date_part_pos' => $params['from_date'],
-                    'to_date_part_qb' => $params['to_date'] . ' 23:59:59',
-                    'to_date_part_pos' => $params['to_date'] . ' 23:59:59',
-                ]);
+                $sql = "$partsSQL \nUNION\n $inventorySQL";
 
-            $sql = $partsSQL;
-        } else {
-            $boundParams = array_merge(
-                $this->customReportHelpers['inventoryBoundParams'],
-                [
-                    'dealer_id_inventory_qb' => $params['dealer_id'],
-                    'dealer_id_inventory_pos' => $params['dealer_id'],
-                    'from_date_inventory_qb' => $params['from_date'],
-                    'from_date_inventory_pos' => $params['from_date'],
-                    'to_date_inventory_qb' => $params['to_date'] . ' 23:59:59',
-                    'to_date_inventory_pos' => $params['to_date'] . ' 23:59:59',
-                ]);
+                break;
+            case self::PARTS_REPORT_TYPE:
+                $boundParams = $this->getCustomPartParams($params);
 
-            $sql = $inventorySQL;
+                $sql = $partsSQL;
+
+                break;
+            case self::LABORS_REPORT_TYPE:
+                $boundParams = $this->getCustomLaborParams($params);
+
+                $sql = $this->getCustomSaleReportLaborQuery();
+
+                break;
+            case self::MIXED_PARTS_LABORS_REPORT_TYPE:
+                $boundParams = array_merge(
+                    $this->getCustomLaborParams($params),
+                    $this->getCustomPartParams($params)
+                );
+
+                $sql = "$partsSQL \nUNION\n " . $this->getCustomSaleReportLaborQuery();
+
+                break;
+            default:
+                $boundParams = $this->getCustomInventoryParams($params);
+
+                $sql = $inventorySQL;
+
+                break;
         }
 
         return ['sql' => $sql, 'params' => $boundParams];
@@ -385,7 +404,6 @@ SQL;
             $feeFilter = ['part_qb' => [], 'part_pos' => []];
 
             foreach (['part_qb', 'part_pos'] as $suffix) {
-
                 foreach ($params['fee_type'] as $fee) {
                     $text = '%' . strtoupper(str_replace('_', ' ', $fee)) . '%'; // snake to human text
 
@@ -405,7 +423,6 @@ SQL;
             $feeFilter = ['inventory_qb' => [], 'inventory_pos' => []];
 
             foreach (['inventory_qb', 'inventory_pos'] as $suffix) {
-
                 foreach ($params['fee_type'] as $fee) {
                     $text = '%' . strtoupper(str_replace('_', ' ', $fee)) . '%'; // snake to human text
 
@@ -421,6 +438,213 @@ SQL;
             $this->customReportHelpers['inventoryWhere']['inventory_pos'] .= ' AND EXISTS (SELECT r.id FROM crm_pos_sale_products r
                             JOIN qb_items sqi ON r.item_id = sqi.id
                             WHERE r.sale_id = ps.id AND (' . implode(' OR ', $feeFilter['inventory_pos']) . '))';
+
+            // Labor Fees Filter Query
+            $this->getFeeFilters($params);
         }
+    }
+
+    /**
+     * @param array $data
+     *
+     * @return array
+     */
+    private function getCustomPartParams(array $data): array
+    {
+        return array_merge_recursive(
+            self::getCustomParams($data, self::CUSTOM_PARAMS_PART),
+            $this->customReportHelpers['partBoundParams'],
+        );
+    }
+
+    /**
+     * @param array $data
+     *
+     * @return array
+     */
+    private function getCustomLaborParams(array $data): array
+    {
+        return array_merge_recursive(
+            self::getCustomParams($data, self::CUSTOM_PARAMS_LABOR),
+            $this->customReportHelpers['laborBoundParams'],
+        );
+    }
+
+    /**
+     * @param array $data
+     *
+     * @return array
+     */
+    private function getCustomInventoryParams(array $data): array
+    {
+        return array_merge_recursive(
+            self::getCustomParams($data, self::CUSTOM_PARAMS_INVENTORY),
+            $this->customReportHelpers['inventoryBoundParams'],
+        );
+    }
+
+    /**
+     * @param array $data
+     * @param string $entityKey
+     *
+     * @return array
+     */
+    private static function getCustomParams(array $data, string $entityKey): array
+    {
+        return [
+            "dealer_id_{$entityKey}_qb" => $data['dealer_id'],
+            "dealer_id_{$entityKey}_pos" => $data['dealer_id'],
+            "from_date_{$entityKey}_qb" => $data['from_date'],
+            "from_date_{$entityKey}_pos" => $data['from_date'],
+            "to_date_{$entityKey}_qb" => $data['to_date'] . ' 23:59:59',
+            "to_date_{$entityKey}_pos" => $data['to_date'] . ' 23:59:59',
+        ];
+    }
+
+    /**
+     * @return string
+     */
+    private function getCustomSaleReportLaborQuery(): string
+    {
+        return <<<SQL
+            SELECT
+                DATE_FORMAT(qi.invoice_date, '%Y') AS year,
+                DATE_FORMAT(qi.invoice_date, '%M') AS month,
+                DATE_FORMAT(qi.invoice_date, '%d') AS day,
+                DATE_FORMAT(qi.invoice_date, '%Y-%m-%d') AS date,
+                iitem.name AS title,
+                iitem.sku AS reference,
+                @cost:=IFNULL(iitem.cost,0) * ii.qty AS cost,
+                ROUND(IFNULL(qi.discount, 0), 2) AS invoice_discount,
+                @actual_price:=ROUND(IFNULL(ii.unit_price,0) * ii.qty, 2) AS price,
+                FLOOR(ii.qty) AS qty,
+                ii.taxes_amount AS taxes_amount,
+                @refund:=IFNULL(
+                    (
+                        SELECT SUM(rf.amount) FROM dealer_refunds_items rf
+                        WHERE rf.refunded_item_id = ii.id AND rf.refunded_item_tbl = 'qb_invoice_items'
+                    ),
+                    0
+                ) AS refund,
+                ROUND((@actual_price - @cost - @refund), 2) AS profit,
+                IF(
+                    qi.unit_sale_id IS NOT NULL,
+                    CONCAT('/bill-of-sale/edit/', qi.unit_sale_id),
+                    (
+                        SELECT GROUP_CONCAT(r.receipt_path)
+                        FROM dealer_sales_receipt r
+                        JOIN qb_payment p ON r.tb_primary_id = p.id
+                        WHERE p.invoice_id = qi.id AND r.tb_name = 'qb_payment'
+                    )
+                ) AS links,
+                ro.type AS ro_type,
+                'labor-qb' AS source,
+                iitem.id AS item_id,
+                qi.id AS doc_id,
+                qi.doc_num AS doc_num,
+                CASE
+                    WHEN qi.unit_sale_id IS NOT NULL THEN 'Deal'
+                    WHEN qi.sales_person_id IS NOT NULL THEN 'POS'
+                    ELSE 'Service'
+                END AS type,
+                '' AS model
+            FROM dealer_sales_history sh
+            JOIN qb_invoices qi on sh.tb_primary_id = qi.id AND sh.tb_name = 'qb_invoices'
+            LEFT JOIN dms_repair_order ro on qi.repair_order_id = ro.id
+            LEFT JOIN qb_invoice_items ii on qi.id = ii.invoice_id
+            JOIN qb_items iitem on ii.item_id = iitem.id AND iitem.type = 'labor'
+            WHERE sh.dealer_location_id IN (
+                    SELECT l.dealer_location_id FROM dealer_location l WHERE l.dealer_id = :dealer_id_labor_qb
+                )
+                AND qi.invoice_date >= :from_date_labor_qb
+                AND qi.invoice_date <= :to_date_labor_qb
+                {$this->customReportHelpers['laborWhere']['labor_qb']}
+            UNION
+            SELECT
+                DATE_FORMAT(ps.created_at, '%Y') AS year,
+                DATE_FORMAT(ps.created_at, '%M') AS month,
+                DATE_FORMAT(ps.created_at, '%d') AS day,
+                DATE_FORMAT(ps.created_at, '%Y-%m-%d') AS date,
+                iitem.name AS title,
+                iitem.sku AS reference,
+                @cost:=IFNULL(iitem.cost,0) * psp.qty AS cost,
+                ROUND(IFNULL(ps.discount, 0), 2) AS invoice_discount,
+                @actual_price:=ROUND(IFNULL(psp.price,0) * psp.qty, 2) AS price,
+                FLOOR(psp.qty),
+                NULL AS taxes_amount,
+                @refund:=IFNULL(
+                    (
+                        SELECT SUM(rf.amount) FROM dealer_refunds_items rf
+                        WHERE rf.refunded_item_id = psp.id AND rf.refunded_item_tbl = 'crm_pos_sale_products'
+                    ),
+                    0
+                ) AS refund,
+                ROUND((@actual_price - @cost - @refund), 2) AS profit,
+                (
+                    SELECT GROUP_CONCAT(r.receipt_path)
+                    FROM dealer_sales_receipt r
+                    JOIN crm_pos_sales p ON r.tb_primary_id = p.id
+                    WHERE r.tb_name = 'crm_pos_sales'
+                ) AS links,
+                '' AS ro_type,
+                'labor-pos' AS source,
+                iitem.id AS item_id,
+                ps.id AS doc_id,
+                CONCAT('POS Sales # ',  ps.id) AS doc_num,
+                'POS' AS type,
+                '' AS model
+            FROM dealer_sales_history sh
+            JOIN crm_pos_sales ps on sh.tb_primary_id = ps.id AND sh.tb_name = 'crm_pos_sales'
+            JOIN crm_pos_sale_products psp on ps.id = psp.sale_id
+            JOIN qb_items iitem on psp.item_id = iitem.id AND iitem.type = 'labor'
+            WHERE sh.dealer_location_id IN (SELECT l.dealer_location_id FROM dealer_location l WHERE l.dealer_id = :dealer_id_labor_pos)
+                AND ps.created_at >= :from_date_labor_pos AND ps.created_at <= :to_date_labor_pos
+                {$this->customReportHelpers['laborWhere']['labor_pos']}
+        SQL;
+    }
+
+    /**
+     * @param array $params
+     * @param string $qbKey
+     * @param string $posKey
+     * @param string $boundParamKey
+     * @param string $whereKey
+     *
+     * @return void
+     */
+    private function getFeeFilters(
+        array $params,
+        string $qbKey = self::CUSTOM_PARAMS_LABOR,
+        string $posKey = self::CUSTOM_PARAMS_LABOR,
+        string $boundParamKey = self::CUSTOM_PARAMS_LABOR,
+        string $whereKey = self::CUSTOM_PARAMS_LABOR
+    ): void {
+        $posKey .= '_pos';
+        $qbKey .= '_qb';
+        $boundParamKey .= 'BoundParams';
+        $whereKey .= 'Where';
+
+        $feeFilter = [$qbKey => [], $posKey => []];
+
+        foreach ([$qbKey, $posKey] as $suffix) {
+            foreach ($params['fee_type'] as $fee) {
+                // snake to human text
+                $text = '%' . strtoupper(str_replace('_', ' ', $fee)) . '%';
+
+                $feeSuffix = $fee . '_' . $suffix;
+
+                $this->customReportHelpers[$boundParamKey][$feeSuffix] = $text;
+
+                $feeFilter[$suffix][] = "sqi.name LIKE :{$feeSuffix}";
+            }
+        }
+
+        $this->customReportHelpers[$whereKey][$qbKey] .= ' AND EXISTS (SELECT r.id FROM qb_invoice_items r
+            JOIN qb_items sqi ON r.item_id = sqi.id
+            WHERE r.invoice_id = qi.id AND (' . implode(' OR ', $feeFilter[$qbKey]) . '))';
+
+        $this->customReportHelpers[$whereKey][$posKey] .= ' AND EXISTS (SELECT r.id FROM crm_pos_sale_products r
+            JOIN qb_items sqi ON r.item_id = sqi.id
+            WHERE r.sale_id = ps.id AND (' . implode(' OR ', $feeFilter[$posKey]) . '))';
     }
 }

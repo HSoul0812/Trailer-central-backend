@@ -10,6 +10,7 @@ use App\Http\Requests\Inventory\DeleteInventoryRequest;
 use App\Http\Requests\Inventory\ExistsInventoryRequest;
 use App\Http\Requests\Inventory\GetInventoryHistoryRequest;
 use App\Http\Requests\Inventory\UpdateInventoryRequest;
+use App\Models\Inventory\Inventory;
 use App\Repositories\Inventory\InventoryHistoryRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Services\Inventory\InventoryServiceInterface;
@@ -223,7 +224,7 @@ class InventoryController extends RestfulControllerV2
      * @throws NoObjectTypeSetException
      */
     public function update(int $id, Request $request): Response
-    {        
+    {
         $inventoryRequest = new UpdateInventoryRequest(array_merge($request->all(), ['inventory_id' => $id]));
 
         $transformer = app()->make(SaveInventoryTransformer::class);
@@ -350,5 +351,20 @@ class InventoryController extends RestfulControllerV2
         }
 
         $this->response->errorBadRequest();
+    }
+
+    /**
+     * @param int $inventoryId
+     * @param Request $request
+     * @return Response
+     */
+    public function delivery_price(int $inventoryId, Request $request):Response {
+        $toZipcode = $request->input('tozip');
+        return $this->response->array([
+            'response' => [
+                'status' => 'success',
+                'fee' => $this->inventoryService->deliveryPrice($inventoryId, $toZipcode)
+            ]
+        ]);
     }
 }

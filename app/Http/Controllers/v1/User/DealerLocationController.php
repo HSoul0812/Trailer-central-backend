@@ -15,6 +15,7 @@ use App\Services\User\DealerLocationServiceInterface;
 use App\Transformers\User\DealerLocationQuoteFeeTransformer;
 use App\Transformers\User\DealerLocationTransformer;
 use App\Http\Requests\User\CommonDealerLocationRequest;
+use App\Transformers\User\DealerLocationTitleTransformer;
 use Dingo\Api\Exception\ResourceException;
 use Illuminate\Http\Request;
 use Dingo\Api\Http\Response;
@@ -50,7 +51,8 @@ class DealerLocationController extends RestfulControllerV2 {
     )
     {
         $this->middleware('setDealerIdOnRequest')->only([
-            'index', 'quoteFees', 'destroy', 'update', 'show', 'create', 'update', 'check'
+            'index', 'quoteFees', 'destroy', 'update', 'show', 'create', 'update', 'check',
+            'getDealerLocationTitles'
         ]);
         $this->dealerLocation = $dealerLocationRepo;
         $this->dealerLocationQuoteFee = $dealerLocationRepoFee;
@@ -72,19 +74,6 @@ class DealerLocationController extends RestfulControllerV2 {
         }
 
         $this->response->errorBadRequest();
-    }
-
-    /**
-     * @param  Request  $request
-     * @return Response
-     */
-    public function availableTaxCategories(Request $request): Response
-    {
-        return $this->response->array([
-            'data' => collect($this->service::AVAILABLE_TAX_CATEGORIES)->map(function (string $name, int $id) {
-                return ['id' => $id, 'name' => $name];
-            })->values()
-        ]);
     }
 
     /**
@@ -188,9 +177,24 @@ class DealerLocationController extends RestfulControllerV2 {
     }
 
     /**
+     * @param  Request  $request
+     * @return Response
+     */
+    public function availableTaxCategories(Request $request): Response
+    {
+        return $this->response->array([
+            'data' => collect($this->service::AVAILABLE_TAX_CATEGORIES)->map(function (string $name, int $id) {
+                return ['id' => $id, 'name' => $name];
+            })->values()
+        ]);
+    }
+
+    /**
+     * @param Request $request
      * @return Response|void
      *
-     * @throws ResourceException when there was a failed validation
+     * @throws \App\Exceptions\Requests\Validation\NoObjectIdValueSetException
+     * @throws \App\Exceptions\Requests\Validation\NoObjectTypeSetException
      */
     public function quoteFees(Request $request): Response
     {
@@ -210,5 +214,22 @@ class DealerLocationController extends RestfulControllerV2 {
         $locationItem = new Item($this->dealerLocation->get(['dealer_location_id' => $id]), $this->transformer);
 
         return $this->response->array($this->fractal->createData($locationItem)->toArray());
+    }
+
+    /**
+     * @param Request $request
+     * @return Response
+     */
+    public function getDealerLocationTitles(Request $request): Response
+    {
+        $request = new GetDealerLocationRequest($request->all());
+
+        if ($request->validate()) {
+            return $this->response->array(
+                $this->service->getDealerLocationTitles($request->only('dealer_id'))
+            );
+        }
+
+        $this->response->errorBadRequest();
     }
 }

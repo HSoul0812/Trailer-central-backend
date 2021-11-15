@@ -54,6 +54,8 @@ use App\Repositories\Dms\TaxCalculatorRepository;
 use App\Repositories\Dms\TaxCalculatorRepositoryInterface;
 use App\Repositories\Dms\UnitSaleLaborRepository;
 use App\Repositories\Dms\UnitSaleLaborRepositoryInterface;
+use App\Repositories\Dms\UnitSaleRepository;
+use App\Repositories\Dms\UnitSaleRepositoryInterface;
 use App\Repositories\Pos\SaleRepository;
 use App\Repositories\Pos\SaleRepositoryInterface;
 use App\Repositories\Dms\Printer\SettingsRepository as PrinterSettingsRepository;
@@ -68,6 +70,8 @@ use App\Services\Dms\Printer\InstructionsServiceInterface;
 use App\Services\Dms\Printer\ZPL\InstructionsService;
 use App\Services\Dms\Printer\FormServiceInterface as PrinterFormServiceInterface;
 use App\Services\Dms\Printer\ESCP\FormService as PrinterFormService;
+use App\Services\Dms\UnitSale\UnitSaleService;
+use App\Services\Dms\UnitSale\UnitSaleServiceInterface;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
@@ -92,6 +96,7 @@ class DmsServiceProvider extends ServiceProvider
         $this->app->bind(CVRGeneratorServiceInterface::class, CVRGeneratorService::class);
         $this->app->bind(ServiceReportRepositoryInterface::class, ServiceReportRepository::class);
         $this->app->bind(CustomerServiceInterface::class, CustomerService::class);
+        $this->app->bind(UnitSaleRepositoryInterface::class, UnitSaleRepository::class);
 
         $this->app->bind(DocumentTemplatesRepositoryInterface::class, DocumentTemplatesRepository::class);
 
@@ -127,6 +132,8 @@ class DmsServiceProvider extends ServiceProvider
         $this->app->bind(TypeRepositoryInterface::class, function () {
             return new TypeRepository(Type::query());
         });
+
+        $this->app->bind(UnitSaleServiceInterface::class, UnitSaleService::class);
     }
 
     public function boot()

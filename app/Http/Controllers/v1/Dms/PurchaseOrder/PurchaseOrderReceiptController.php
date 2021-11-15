@@ -14,11 +14,11 @@ use App\Http\Requests\Dms\PurchaseOrder\ShowPoReceiptRequest;
  */
 class PurchaseOrderReceiptController extends RestfulController
 {
-    
+
     protected $poReceiptRepository;
 
     protected $poReceiptTransformer;
-    
+
     /**
      * Create a new controller instance.
      *
@@ -30,11 +30,11 @@ class PurchaseOrderReceiptController extends RestfulController
         $this->poReceiptRepository = $poReceiptRepository;
         $this->poReceiptTransformer = new PurchaseOrderReceiptTransformer();
     }
-    
+
     /**
      * @OA\Get(
      *     path="/api/dms/po-receipts",
-     *     description="Retrieve a list of purchase order receipts",     
+     *     description="Retrieve a list of purchase order receipts",
      *     tags={"Purchase Orders"},
      *     @OA\Parameter(
      *         name="per_page",
@@ -75,26 +75,26 @@ class PurchaseOrderReceiptController extends RestfulController
      *     ),
      * )
      */
-    public function index(Request $request) 
+    public function index(Request $request)
     {
         $request = new GetPoReceiptRequest($request->all());
-        
+
         if ($request->validate()) {
           return $this->response->paginator($this->poReceiptRepository->getAll($request->all()), $this->poReceiptTransformer);
         }
-        
+
         return $this->response->errorBadRequest();
     }
 
     public function show($id)
     {
         $request = new ShowPoReceiptRequest(['id' => $id]);
-        
+
         if ( $request->validate() ) {
             return $this->response->item($this->poReceiptRepository->get(['id' => $id]), $this->poReceiptTransformer);
         }
-        
+
         return $this->response->errorBadRequest();
     }
-    
+
 }

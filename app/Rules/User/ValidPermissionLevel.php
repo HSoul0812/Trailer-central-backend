@@ -2,7 +2,6 @@
 
 namespace App\Rules\User;
 
-use App\Models\User\Interfaces\PermissionsInterface;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
 
@@ -25,19 +24,18 @@ class ValidPermissionLevel
     {
         $salesPersonRepo = app(SalesPersonRepositoryInterface::class);
         $dealerLocationRepo = app(DealerLocationRepositoryInterface::class);
-        
-        if (in_array($value, PermissionsInterface::PERMISSION_LEVELS)) {
-            return true;
-        }
-                
+
         if ( $salesPersonRepo->get(['sales_person_id' => $value]) ) {
             return true;
         }
-        
-        if ( $dealerLocationRepo->get(['dealer_location_id' => $value]) ) {
-            return true;
+
+        try {
+            if ($dealerLocationRepo->get(['dealer_location_id' => (int) $value])) {
+                return true;
+            }
+        } catch (\Exception $e) {
+            return false;
         }
-        
 
         return false;
     }

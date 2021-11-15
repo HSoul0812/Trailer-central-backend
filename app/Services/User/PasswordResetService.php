@@ -1,38 +1,48 @@
 <?php
 
 namespace App\Services\User;
+
+use App\Models\User\UserAuthenticatable;
+use App\Repositories\User\DealerUserRepositoryInterface;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Repositories\User\DealerPasswordResetRepositoryInterface;
-use App\Services\User\PasswordResetServiceInterface;
 
 class PasswordResetService implements PasswordResetServiceInterface {
-    
+
     /**
-     * @var App\Repositories\User\UserRepositoryInterface
+     * @var \App\Repositories\User\UserRepositoryInterface
      */
     protected $userRepo;
-    
+
     /**
-     * @var App\Repositories\User\DealerPasswordResetRepositoryInterface
+     * @var \App\Repositories\User\DealerPasswordResetRepositoryInterface
      */
     protected $passwordResetRepo;
-    
-    public function __construct(UserRepositoryInterface $userRepo, DealerPasswordResetRepositoryInterface $passwordResetRepo)
+
+    /** @var DealerUserRepositoryInterface */
+    private $dealerUserRepo;
+
+    public function __construct(
+        UserRepositoryInterface $userRepo,
+        DealerUserRepositoryInterface $dealerUserRepo,
+        DealerPasswordResetRepositoryInterface $passwordResetRepo
+    )
     {
         $this->userRepo = $userRepo;
+        $this->dealerUserRepo = $dealerUserRepo;
         $this->passwordResetRepo = $passwordResetRepo;
     }
-    
+
     /**
      * {@inheritDoc}
      */
     public function initReset(string $email) : bool
     {
         $dealer = $this->userRepo->getByEmail($email);
-        $this->passwordResetRepo->initiatePasswordReset($dealer);        
+        $this->passwordResetRepo->initiatePasswordReset($dealer);
         return true;
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -40,5 +50,21 @@ class PasswordResetService implements PasswordResetServiceInterface {
     {
         return $this->passwordResetRepo->completePasswordReset($code, $password);
     }
-    
+
+    public function updatePassword(UserAuthenticatable $user, string $password) : bool
+    {
+        if($user->type === UserAuthenticatable::TYPE_DEALER){
+            $user = $this->userRepo->get(['dealer_id' => $user->id]);
+
+            $this->passwordResetRepo->updateDealerPassword($user, $password);
+
+            return true;
+        }
+
+        $user = $this->dealerUserRepo->get(['dealer_user_id' => $user->id]);
+
+        $this->passwordResetRepo->updateDealerUserPassword($user, $password);
+
+        return true;
+    }
 }

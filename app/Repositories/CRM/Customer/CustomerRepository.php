@@ -2,16 +2,17 @@
 
 namespace App\Repositories\CRM\Customer;
 
-use App\Exceptions\Dms\CustomerAlreadyExistsException;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\User\Customer;
+use App\Traits\Repository\ElasticSearch;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Carbon;
 
 class CustomerRepository implements CustomerRepositoryInterface
 {
+    use ElasticSearch\Helpers;
+
     protected $model;
 
     /**
@@ -171,29 +172,35 @@ class CustomerRepository implements CustomerRepositoryInterface
      */
     public function search($query, $dealerId, $options = [], &$paginator = null)
     {
+        if (empty($query['query']) && empty($options['allowAll'])) {
+            throw new \Exception('Query is required');
+        }
+
         $search = Customer::boolSearch();
 
         // filter by dealer first
-        $search->must('match_phrase', ['dealer_id' => $dealerId]);
+        $filters = [
+            ['match_phrase' => ['dealer_id' => $dealerId]]
+        ];
 
-        if ($query['query'] ?? null) { // if a query is specified
-            $search->filterRaw([
+        if (!empty($query['query'])) { // if a query is specified
+            $filters[] = [
                 'bool' => [
-                    'should' => [
-                        'multi_match' => [
-                            'query' => trim($query['query']),
-                            'fuzziness' => 'AUTO',
-                            'fields' => ['display_name^3', 'first_name^2', 'last_name^2', 'email^0.5', 'company_name^0.5', 'home_phone', 'cell_phone', 'work_phone']
-                        ],
-                    ],
-                    'minimum_should_match' => 1,
+                    'should' => $this->makeMultiMatchQueryWithRelevance([
+                        'display_name^0.7',
+                        'first_name^0.5',
+                        'last_name^0.5',
+                        'email^0.3',
+                        'company_name^0.4',
+                        'home_phone^0.2',
+                        'cell_phone^0.2',
+                        'work_phone^0.2'
+                    ], $query['query'])
                 ],
-            ]);
-        } else if ($options['allowAll'] ?? false) { // if no query supplied but is allowed
-            $search->must('match_all', []);
-        } else {
-            throw new \Exception('Query is required');
+            ];
         }
+
+        $search->mustRaw($filters);
 
         // sort order
         if ($query['sort'] ?? null) {
@@ -205,14 +212,14 @@ class CustomerRepository implements CustomerRepositoryInterface
 
             $search->sort($field, $sortDir);
         } else {
-            $search->sort("_score", "asc");
+            $search->sort("_score", "desc");
         }
 
         // load relations
         // $search->load([]);
 
         // if a paginator is requested
-        if ($options['page'] ?? null) {
+        if (!empty($options['page'])) {
             $page = $options['page'];
             $perPage = $options['per_page'] ?? 10;
 

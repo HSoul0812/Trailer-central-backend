@@ -5,6 +5,8 @@ namespace App\Repositories\Website\Config;
 use App\Exceptions\NotImplementedException;
 use App\Models\Website\Config\WebsiteConfig;
 use App\Models\Website\Config\WebsiteConfigDefault;
+use App\Traits\Repository\Transaction;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 class WebsiteConfigRepository implements WebsiteConfigRepositoryInterface {
@@ -68,15 +70,52 @@ class WebsiteConfigRepository implements WebsiteConfigRepositoryInterface {
         return $query->get();
     }
 
-    public function update($params)
+    /**
+     * Get All Website Config Call to Action
+     *
+     * @param int $websiteId
+     * @return \Illuminate\Database\Eloquent\Collection|array<WebsiteConfig>
+     */
+    public function getAllCallToAction(int $websiteId) : collection
     {
-      $websiteConfig = $this->websiteConfig->find($params['id']);
+      $query = WebsiteConfig::select('*');
 
-      DB::transaction(function() use (&$websiteConfig, $params) {
-          $websiteConfig->fill($params)->save();
-      });
+      $query = $query->where('website_id', $websiteId);
+      
+      $query->where('key', 'LIKE', '%'.WebsiteConfig::CALL_TO_ACTION.'%');
+      
+      return $query->get();
+    }
 
-      return $websiteConfig;
+    /**
+     * Create or Update on bulk
+     *
+     * @param array $websiteId
+     * @return array<WebsiteConfig>
+     */
+    public function createOrUpdate(int $websiteId, array $request) : array
+    {
+      $webisteConfigs = [];
+
+      foreach ($request as $websiteConfigDataKey => $websiteConfigDataValue) {
+
+        $websiteConfig = WebsiteConfig::updateOrCreate([
+            'website_id'=> $websiteId,
+            'key'=> $websiteConfigDataKey
+        ],[
+          'website_id' => $websiteId,
+          'key' => $websiteConfigDataKey,
+          'value' => $websiteConfigDataValue
+        ]);
+
+        $webisteConfigs[] = $websiteConfig;
+
+      }
+      return $webisteConfigs;
+    }
+
+    public function update($params) {
+        throw new NotImplementedException;
     }
 
     /**
@@ -98,6 +137,15 @@ class WebsiteConfigRepository implements WebsiteConfigRepositoryInterface {
 
         // Get Values Mapping for Default
         return $this->getValuesMapping($default->values_map, $default->default_value, $key);
+    }
+
+    /**
+     * @param int $websiteId
+     * @param string $key
+     * @return null|WebsiteConfig
+     */
+    public function getValueOfConfig(int $websiteId, string $key): ?WebsiteConfig {
+        return WebsiteConfig::select('value')->where('website_id', $websiteId)->where('key', $key)->first();
     }
 
 
@@ -129,5 +177,56 @@ class WebsiteConfigRepository implements WebsiteConfigRepositoryInterface {
 
         // Return Standard Map Instead
         return [$key => $value];
+    }
+
+    public function createOrUpdateShowroomConfig(array $params): array
+    {
+        try {
+            $this->beginTransaction();
+
+            $includeShowRoom = isset($params['include_showroom']) ? 1 : 0;
+
+            if (isset($params['showroom_dealers'])) {
+                $dealersArr = array();
+
+                if (is_array($params['showroom_dealers'])) {
+                    foreach ($params['showroom_dealers'] as $dealer) {
+                        $dealersArr[] = $dealer;
+                    }
+                } else {
+                    $dealersArr[0] = $params['showroom_dealers'];
+                }
+
+                $dealers = serialize($dealersArr);
+                DB::statement("UPDATE dealer SET `showroom` = '" . $includeShowRoom . "', `showroom_dealers` = '" . $dealers . "' WHERE dealer_id = " . $params['dealer_id']);
+            }
+
+            if (isset($params['use_series'])) {
+                $checkValue = $this->getValueOfConfig($params['websiteId'], WebsiteConfig::SHOWROOM_USE_SERIES);
+
+                if (!$checkValue) {
+                    DB::statement("INSERT INTO website_config (website_id, `key`, `value`) VALUES (" . $params['websiteId'] . ", '" . WebsiteConfig::SHOWROOM_USE_SERIES . "', '" . $params['use_series'] . "')");
+                } else {
+                    DB::statement("UPDATE website_config SET `value` = " . $params['use_series'] . " WHERE website_id = " . $params['websiteId'] . " AND `key` = '".WebsiteConfig::SHOWROOM_USE_SERIES."'");
+                }
+            }
+
+            if ($includeShowRoom) {
+                // just clear the showroom page to be safe
+                DB::statement("DELETE FROM website_entity WHERE website_id='" . $params['websiteId'] . "' AND entity_type = 9");
+
+                // if including showroom, just add the webpage entity
+                if (isset($_POST["include_showroom"])) {
+                    DB::statement("INSERT INTO website_entity (entity_type, website_id, parent, title, url_path, date_created, date_modified, sort_order, in_nav, is_active, template) VALUES (9, ".$params['websiteId'].", 0, 'Showroom', 'showroom', now(), now(), 99, 1, 1, '1column')");
+                }
+            }
+
+            $this->commitTransaction();
+
+            return $params;
+        } catch (\Exception $exception) {
+            $this->rollbackTransaction();
+            throw $exception;
+        }
     }
 }

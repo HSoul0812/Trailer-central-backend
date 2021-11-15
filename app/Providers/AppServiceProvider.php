@@ -31,6 +31,8 @@ use App\Repositories\Inventory\CategoryRepository;
 use App\Repositories\Inventory\CategoryRepositoryInterface;
 use App\Repositories\Inventory\AttributeRepository;
 use App\Repositories\Inventory\AttributeRepositoryInterface;
+use App\Repositories\Inventory\CustomOverlay\CustomOverlayRepository;
+use App\Repositories\Inventory\CustomOverlay\CustomOverlayRepositoryInterface;
 use App\Repositories\Inventory\FileRepository;
 use App\Repositories\Inventory\FileRepositoryInterface;
 use App\Repositories\Inventory\ImageRepository;
@@ -63,6 +65,8 @@ use App\Repositories\Showroom\ShowroomFieldsMappingRepository;
 use App\Repositories\Showroom\ShowroomFieldsMappingRepositoryInterface;
 use App\Repositories\Pos\SalesReportRepository;
 use App\Repositories\Pos\SalesReportRepositoryInterface;
+use App\Repositories\User\DealerLocationMileageFeeRepository;
+use App\Repositories\User\DealerLocationMileageFeeRepositoryInterface;
 use App\Repositories\User\DealerLocationQuoteFeeRepository;
 use App\Repositories\User\DealerLocationQuoteFeeRepositoryInterface;
 use App\Repositories\User\DealerLocationSalesTaxItemRepository;
@@ -97,11 +101,15 @@ use App\Repositories\User\DealerPasswordResetRepositoryInterface;
 use App\Repositories\User\DealerPasswordResetRepository;
 use App\Services\CRM\User\TimeClockService;
 use App\Services\CRM\User\TimeClockServiceInterface;
+use App\Services\Dms\Bills\BillService;
+use App\Services\Dms\Bills\BillServiceInterface;
 use App\Services\Dms\Pos\RegisterService;
 use App\Services\Dms\Pos\RegisterServiceInterface;
 use App\Services\File\FileService;
 use App\Services\File\FileServiceInterface;
 use App\Services\File\ImageService;
+use App\Services\Inventory\CustomOverlay\CustomOverlayService;
+use App\Services\Inventory\CustomOverlay\CustomOverlayServiceInterface;
 use App\Services\Inventory\Packages\PackageService;
 use App\Services\Inventory\Packages\PackageServiceInterface;
 use App\Services\User\DealerLocationService;
@@ -125,6 +133,8 @@ use App\Services\Pos\CustomSalesReportExporterService;
 use App\Services\Pos\CustomSalesReportExporterServiceInterface;
 use App\Services\Website\Log\LogServiceInterface;
 use App\Services\Website\Log\LogService;
+use App\Services\Website\WebsiteConfigService;
+use App\Services\Website\WebsiteConfigServiceInterface;
 use GuzzleHttp\Client;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -277,7 +287,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(FieldMapRepositoryInterface::class, FieldMapRepository::class);
         $this->app->bind(CrmUserRepositoryInterface::class, CrmUserRepository::class);
         $this->app->bind(CrmUserRoleRepositoryInterface::class, CrmUserRoleRepository::class);
-        $this->app->bind(DealerLocationQuoteFeeRepositoryInterface::class, DealerLocationQuoteFeeRepository::class);
         $this->app->bind(InvoiceRepositoryInterface::class, InvoiceRepository::class);
         $this->app->bind(SaleRepositoryInterface::class, SaleRepository::class);
         $this->app->bind(SalesReportRepositoryInterface::class, SalesReportRepository::class);
@@ -291,6 +300,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(QuickbookApprovalRepositoryInterface::class, QuickbookApprovalRepository::class);
         $this->app->bind(ManufacturerRepositoryInterface::class, ManufacturerRepository::class);
         $this->app->bind(FloorplanVendorRepositoryInterface::class, FloorplanVendorRepository::class);
+        $this->app->bind(BillServiceInterface::class, BillService::class);
 
         $this->app->bind(CostModifierRepositoryInterface::class, CostModifierRepository::class);
         $this->app->bind(MakesRepositoryInterface::class, MakesRepository::class);
@@ -317,12 +327,13 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(DealerLocationServiceInterface::class, DealerLocationService::class);
         $this->app->bind(DealerLocationSalesTaxItemRepositoryInterface::class, DealerLocationSalesTaxItemRepository::class);
         $this->app->bind(DealerLocationSalesTaxRepositoryInterface::class, DealerLocationSalesTaxRepository::class);
+        $this->app->bind(DealerLocationQuoteFeeRepositoryInterface::class, DealerLocationQuoteFeeRepository::class);
+        $this->app->bind(DealerLocationMileageFeeRepositoryInterface::class, DealerLocationMileageFeeRepository::class);
 
         $this->app->bind(PackageRepositoryInterface::class, PackageRepository::class);
         $this->app->bind(PackageServiceInterface::class, PackageService::class);
         $this->app->bind(RegisterRepositoryInterface::class, RegisterRepository::class);
         $this->app->bind(RegisterServiceInterface::class, RegisterService::class);
-
         $this->app->when(FileController::class)
             ->needs(FileServiceInterface::class)
             ->give(function () {
@@ -338,5 +349,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(TimeClockRepositoryInterface::class, TimeClockRepository::class);
         $this->app->bind(EmployeeRepositoryInterface::class, EmployeeRepository::class);
         $this->app->bind(TimeClockServiceInterface::class, TimeClockService::class);
+        $this->app->bind(WebsiteConfigServiceInterface::class, WebsiteConfigService::class);
     }
 }
