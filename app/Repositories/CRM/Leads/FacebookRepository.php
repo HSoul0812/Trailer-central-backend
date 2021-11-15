@@ -205,8 +205,10 @@ class FacebookRepository implements FacebookRepositoryInterface {
             /** @var Conversation|null $conversation */
             $conversation = $fbLead->conversation;
 
-            if ($conversation) {
-                $conversation->messages()->searchable();
+            if ($conversation && $conversation->messages->isNotEmpty()) {
+                foreach ($conversation->messages as $message) {
+                    $message->interactionMessage->searchable();
+                }
             }
         }
 

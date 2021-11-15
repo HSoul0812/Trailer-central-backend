@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\CRM\Leads\Facebook\Lead as FbLead;
+use Illuminate\Support\Collection;
 
 /**
  * Class Conversation
@@ -20,7 +21,7 @@ use App\Models\CRM\Leads\Facebook\Lead as FbLead;
  *  @property FbLead $fbLead
  *  @property Lead $lead
  *  @property Page $page
- *  @property Message<Collection> $messages
+ *  @property Collection<Message> $messages
  */
 class Conversation extends Model
 {
