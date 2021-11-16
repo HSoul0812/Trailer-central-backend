@@ -106,21 +106,7 @@ class BillTransformer extends TransformerAbstract
      */
     public function includeCategories(Bill $bill)
     {
-        $categories = [];
-        /** @var BillCategory $category */
-        foreach ($bill->categories as $category)
-        {
-            $categories[] = [
-                'account_name' => $category->account ? $category->account->name : '',
-                'account_id' => $category->account_id,
-                'description' => $category->description,
-                'amount' => $category->amount,
-                'bill_id' => $category->bill_id,
-                'id' => $category->id
-            ];
-        }
-
-        return $this->primitive($categories);
+        return $this->collection($bill->categories, new BillCategoryTransformer());
     }
 
     public function includePayments(Bill $bill)
