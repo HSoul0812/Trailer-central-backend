@@ -210,18 +210,20 @@ class InteractionService implements InteractionServiceInterface
     /**
      * Get Parsed Email From Params
      * 
-     * @param SmtpConfig $smtpConfig
+     * @param null|SmtpConfig $smtpConfig
      * @param int $leadId
      * @param array $params
      * @return ParsedEmail
      */
-    private function getParsedEmail(SmtpConfig $smtpConfig, int $leadId, array $params): ParsedEmail {
+    private function getParsedEmail(?SmtpConfig $smtpConfig, int $leadId, array $params): ParsedEmail {
         // Initialize Parsed Email
         $parsedEmail = new ParsedEmail();
 
         // Set From Details
-        $parsedEmail->setFromEmail($smtpConfig->getUsername());
-        $parsedEmail->setFromName($smtpConfig->getFromName() ?? $smtpConfig->getUsername());
+        if($smtpConfig !== null) {
+            $parsedEmail->setFromEmail($smtpConfig->getUsername());
+            $parsedEmail->setFromName($smtpConfig->getFromName() ?? $smtpConfig->getUsername());
+        }
 
         // Set Lead Details
         $lead = Lead::findOrFail($leadId);
