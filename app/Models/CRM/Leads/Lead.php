@@ -84,6 +84,8 @@ class Lead extends Model
     const IS_IDS_EXPORTED = 1;
     const IS_NOT_IDS_EXPORTED = 0;
 
+    const LEAD_TYPE_CLASSIFIED = 'classified';
+
     const TABLE_NAME = 'website_lead';
 
 

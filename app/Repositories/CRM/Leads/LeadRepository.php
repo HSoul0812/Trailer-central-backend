@@ -3,8 +3,6 @@
 namespace App\Repositories\CRM\Leads;
 
 use App\Models\Website\Website;
-use App\Nova\Resources\Leads\WebsiteLead;
-use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadAssign;
@@ -18,11 +16,16 @@ use App\Models\Inventory\Inventory;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
 
 class LeadRepository implements LeadRepositoryInterface {
 
     use SortTrait;
+
+    private const LEAD_SOURCE_TRAILERTRADERS = 'trailertraders';
+    private const LEAD_SOURCE_CLASSIFIEDS = 'classifieds';
+    private const HAS_PRODUCT = 'has_product';
 
     private $sortOrders = [
         'no_due_past_due_future_due' => [
@@ -412,14 +415,17 @@ class LeadRepository implements LeadRepositoryInterface {
     /**
      * @param Builder $query
      * @param string $leadSource
+     * @return Builder
      */
     private function addLeadSourceToQuery(Builder $query, string $leadSource) {
-        if($leadSource === 'trailertraders') {
+        if($leadSource === self::LEAD_SOURCE_TRAILERTRADERS) {
             $query->where(Lead::getTableName().'.website_id', '284');
-        } elseif($leadSource === 'classifieds') {
-            $query = $query->leftJoin(Website::getTableName().'.id',  '=', Lead::getTableName().'.website_id');
-            $query->where(Website::getTableName().'.type', 'classified');
+        } else if ($leadSource === self::LEAD_SOURCE_CLASSIFIEDS) {
+            $query
+                ->leftJoin(Website::getTableName() . '.id', '=', Lead::getTableName() . '.website_id')
+                ->where(Website::getTableName() . '.type', Lead::LEAD_TYPE_CLASSIFIED);
         }
+        return $query;
     }
 
     /**
@@ -428,37 +434,38 @@ class LeadRepository implements LeadRepositoryInterface {
      * @return Builder
      */
     private function addProductStatusToQuery(Builder $query, string $productStatus) {
-        if($productStatus == 'has_product') {
-            return $query->where(Lead::getTableName().'.inventory_id', '>', 0);
+        if($productStatus === self::HAS_PRODUCT) {
+            $query->where(Lead::getTableName().'.inventory_id', '>', 0);
         } else {
-            return $query->where(Lead::getTableName().'.inventory_id', 0);
+            $query->where(Lead::getTableName().'.inventory_id', 0);
         }
+        return $query;
     }
 
     /**
-     * @param Builder $query
+     * @param Builder|Relation $query
      * @param string $dateTo
      * @return Builder
      */
-    private function addDateToToQuery(Builder $query, string $dateTo) {
+    private function addDateToToQuery($query, string $dateTo) {
          return $query->where(Lead::getTableName().'.date_submitted', '<=', $dateTo);
     }
 
     /**
-     * @param Builder $query
+     * @param Builder|Relation $query
      * @param string $dateFrom
      * @return Builder
      */
-    private function addDateFromToQuery(Builder $query, string $dateFrom) {
+    private function addDateFromToQuery($query, string $dateFrom) {
         return $query->where(Lead::getTableName().'.date_submitted', '>=', $dateFrom);
     }
 
     /**
-     * @param Builder $query
+     * @param Builder|Relation $query
      * @param string $search
      * @return Builder|\Illuminate\Database\Query\Builder
      */
-    private function addSearchToQuery(Builder $query, string $search) {
+    private function addSearchToQuery($query, string $search) {
         $query = $query->leftJoin(Inventory::getTableName(), Inventory::getTableName().'.inventory_id',  '=', Lead::getTableName().'.inventory_id');
 
         return $query->where(function($q) use ($search) {
