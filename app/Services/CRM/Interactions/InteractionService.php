@@ -163,7 +163,12 @@ class InteractionService implements InteractionServiceInterface
 
         // Get SMTP Config
         $smtpConfig = $this->getSmtpConfig();
-        $fromEmail = ($smtpConfig !== null) ? $smtpConfig->getUsername() : config('mail.from.address');
+        if($smtpConfig !== null) {
+            $fromEmail = $smtpConfig->getUsername();
+        } else {
+            $fromEmail = $params['from_email'] = config('mail.from.address');
+            $params['from_name'] = $user->name;
+        }
 
         // Create Parsed Email
         $parsedEmail = $this->getParsedEmail($smtpConfig, $leadId, $params);
@@ -216,6 +221,9 @@ class InteractionService implements InteractionServiceInterface
         if($smtpConfig !== null) {
             $parsedEmail->setFromEmail($smtpConfig->getUsername());
             $parsedEmail->setFromName($smtpConfig->getFromName() ?? $smtpConfig->getUsername());
+        } else {
+            $parsedEmail->setFromEmail($params['from_email']);
+            $parsedEmail->setFromName($params['from_name']);
         }
 
         // Set Lead Details
