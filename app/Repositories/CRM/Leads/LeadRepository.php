@@ -434,12 +434,11 @@ class LeadRepository implements LeadRepositoryInterface {
      * @return Builder
      */
     private function addProductStatusToQuery(Builder $query, string $productStatus) {
-        if($productStatus === self::HAS_PRODUCT) {
-            $query->where(Lead::getTableName().'.inventory_id', '>', 0);
-        } else {
-            $query->where(Lead::getTableName().'.inventory_id', 0);
-        }
-        return $query;
+        return $query->where(
+            Lead::getTableName().'.inventory_id',
+            $productStatus === self::HAS_PRODUCT ? '>' : '=',
+            0
+        );
     }
 
     /**
@@ -480,7 +479,12 @@ class LeadRepository implements LeadRepositoryInterface {
         });
     }
 
-    private function addIsArchivedToQuery($query, $isArchived) {
+    /**
+     * @param Builder|Relation $query
+     * @param bool $isArchived
+     * @return mixed
+     */
+    private function addIsArchivedToQuery($query, bool $isArchived) {
         return $query->where(Lead::getTableName().'.is_archived', $isArchived);
     }
 
