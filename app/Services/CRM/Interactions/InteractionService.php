@@ -177,12 +177,12 @@ class InteractionService implements InteractionServiceInterface
         }
 
         // Send Email
-        if($smtpConfig->isAuthTypeGmail()) {
+        if(!empty($smtpConfig) && $smtpConfig->isAuthTypeGmail()) {
             $finalEmail = $this->gmail->send($smtpConfig, $parsedEmail);
-        } elseif($smtpConfig->isAuthTypeOffice()) {
+        } elseif(!empty($smtpConfig) && $smtpConfig->isAuthTypeOffice()) {
             // Send Office Email
             $finalEmail = $this->office->send($smtpConfig, $parsedEmail);
-        } elseif($smtpConfig->isAuthTypeNtlm()) {
+        } elseif(!empty($smtpConfig) && $smtpConfig->isAuthTypeNtlm()) {
             $finalEmail = $this->ntlm->send($user->dealer_id, $smtpConfig, $parsedEmail);
         } elseif($smtpConfig) {
             $finalEmail = $this->interactionEmail->send($user->dealer_id, $smtpConfig, $parsedEmail);
