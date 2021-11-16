@@ -22,7 +22,6 @@ use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
 use App\Services\Integration\Microsoft\OfficeServiceInterface;
 use App\Traits\MailHelper;
-use App\Mail\InteractionEmail;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
