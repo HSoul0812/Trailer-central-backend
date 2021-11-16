@@ -409,7 +409,11 @@ class LeadRepository implements LeadRepositoryInterface {
         return $query;
     }
 
-    private function addLeadSourceToQuery($query, $leadSource) {
+    /**
+     * @param Builder $query
+     * @param string $leadSource
+     */
+    private function addLeadSourceToQuery(Builder $query, string $leadSource) {
         if($leadSource === 'trailertraders') {
             $query->where(Lead::getTableName().'.website_id', '284');
         } elseif($leadSource === 'classifieds') {
@@ -418,7 +422,12 @@ class LeadRepository implements LeadRepositoryInterface {
         }
     }
 
-    private function addProductStatusToQuery($query, $productStatus) {
+    /**
+     * @param Builder $query
+     * @param string $productStatus
+     * @return Builder
+     */
+    private function addProductStatusToQuery(Builder $query, string $productStatus) {
         if($productStatus == 'has_product') {
             return $query->where(Lead::getTableName().'.inventory_id', '>', 0);
         } else {
@@ -426,15 +435,30 @@ class LeadRepository implements LeadRepositoryInterface {
         }
     }
 
-    private function addDateToToQuery($query, $dateTo) {
+    /**
+     * @param Builder $query
+     * @param string $dateTo
+     * @return Builder
+     */
+    private function addDateToToQuery(Builder $query, string $dateTo) {
          return $query->where(Lead::getTableName().'.date_submitted', '<=', $dateTo);
     }
 
-    private function addDateFromToQuery($query, $dateFrom) {
+    /**
+     * @param Builder $query
+     * @param string $dateFrom
+     * @return Builder
+     */
+    private function addDateFromToQuery(Builder $query, string $dateFrom) {
         return $query->where(Lead::getTableName().'.date_submitted', '>=', $dateFrom);
     }
 
-    private function addSearchToQuery($query, $search) {
+    /**
+     * @param Builder $query
+     * @param string $search
+     * @return Builder|\Illuminate\Database\Query\Builder
+     */
+    private function addSearchToQuery(Builder $query, string $search) {
         $query = $query->leftJoin(Inventory::getTableName(), Inventory::getTableName().'.inventory_id',  '=', Lead::getTableName().'.inventory_id');
 
         return $query->where(function($q) use ($search) {

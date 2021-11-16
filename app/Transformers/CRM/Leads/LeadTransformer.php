@@ -24,10 +24,6 @@ class LeadTransformer extends TransformerAbstract
         'otherLeadProperties',
     ];
 
-    public $lazyLoadedIncludes = [
-        'otherLeadProperties',
-    ];
-
     protected $inventoryTransformer;
 
     public function __construct()
