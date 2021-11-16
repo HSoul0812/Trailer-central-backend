@@ -21,6 +21,7 @@ use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
 use App\Services\Integration\Microsoft\OfficeServiceInterface;
+use App\Traits\MailHelper;
 use App\Mail\InteractionEmail;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
@@ -34,6 +35,9 @@ use Carbon\Carbon;
  */
 class InteractionService implements InteractionServiceInterface
 {
+    use MailHelper;
+
+
     /**
      * @var App\Services\Integration\AuthServiceInterface
      */
@@ -160,12 +164,13 @@ class InteractionService implements InteractionServiceInterface
 
         // Get SMTP Config
         $smtpConfig = $this->getSmtpConfig();
+        $fromName = ($smtpConfig !== null) ? $smtpConfig->getUsername() : config('services.ses.from.address');
 
         // Create Parsed Email
         $parsedEmail = $this->getParsedEmail($smtpConfig, $leadId, $params);
 
         // Get Draft if Exists
-        $emailHistory = $this->emailHistory->findEmailDraft($smtpConfig->getUsername(), $leadId);
+        $emailHistory = $this->emailHistory->findEmailDraft($fromName, $leadId);
         if(!empty($emailHistory->email_id)) {
             $parsedEmail->setEmailHistoryId($emailHistory->email_id);
             $parsedEmail->setMessageId($emailHistory->message_id);
