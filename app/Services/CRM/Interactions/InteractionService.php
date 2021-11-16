@@ -21,6 +21,7 @@ use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
 use App\Services\Integration\Microsoft\OfficeServiceInterface;
+use App\Mail\InteractionEmail;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -178,8 +179,19 @@ class InteractionService implements InteractionServiceInterface
             $finalEmail = $this->office->send($smtpConfig, $parsedEmail);
         } elseif($smtpConfig->isAuthTypeNtlm()) {
             $finalEmail = $this->ntlm->send($user->dealer_id, $smtpConfig, $parsedEmail);
-        } else {
+        } elseif($smtpConfig) {
             $finalEmail = $this->interactionEmail->send($user->dealer_id, $smtpConfig, $parsedEmail);
+            $interactionEmail = true;
+        } else {
+            // Send SES Email
+            $parsedEmail->getMessageId();
+            $this->sendCustomSesEmail($user, $parsedEmail->getToArray(), new InteractionEmail([
+                'date' => Carbon::now()->setTimezone('UTC')->toDateTimeString(),
+                'subject' => $parsedEmail->getSubject(),
+                'body' => $parsedEmail->getBody(),
+                'attach' => $parsedEmail->getAllAttachments(),
+                'id' => $parsedEmail->cleanMessageId()
+            ]));
             $interactionEmail = true;
         }
 
@@ -240,9 +252,9 @@ class InteractionService implements InteractionServiceInterface
     /**
      * Get SMTP Config From Auth
      * 
-     * @return SmtpConfig
+     * @return null|SmtpConfig
      */
-    private function getSmtpConfig(): SmtpConfig {
+    private function getSmtpConfig(): ?SmtpConfig {
         // Get User
         $user = Auth::user();
 
@@ -262,10 +274,7 @@ class InteractionService implements InteractionServiceInterface
         }
 
         // Get SMTP Config From Dealer
-        return new SmtpConfig([
-            'username' => $user->email,
-            'name' => $user->name ?? ''
-        ]);
+        return null;
     }
 
     /**
