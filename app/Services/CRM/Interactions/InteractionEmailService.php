@@ -28,12 +28,12 @@ class InteractionEmailService implements InteractionEmailServiceInterface
      * Send Email With Params
      * 
      * @param int $dealerId
-     * @param SmtpConfig $smtpConfig
+     * @param null|SmtpConfig $smtpConfig
      * @param ParsedEmail $parsedEmail
      * @throws SendEmailFailedException
      * @return ParsedEmail
      */
-    public function send(int $dealerId, SmtpConfig $smtpConfig, ParsedEmail $parsedEmail): ParsedEmail {
+    public function send(int $dealerId, ?SmtpConfig $smtpConfig, ParsedEmail $parsedEmail): ParsedEmail {
         // Get Unique Message ID
         if(empty($parsedEmail->getMessageId())) {
             $messageId = sprintf('%s@%s', $this->generateId(), $this->serverHostname());
@@ -44,19 +44,34 @@ class InteractionEmailService implements InteractionEmailServiceInterface
 
         // Try/Send Email!
         try {
+            // Get From Email
+            $fromEmail = ($smtpConfig !== null) ? $smtpConfig->getUsername() : config('mail.from.address');
+
             // Fill Smtp Config
-            Log::info('Send from ' . $smtpConfig->username . ' to: ' .
+            Log::info('Send from ' . $fromEmail . ' to: ' .
                         $parsedEmail->getToName() . ' <' . $parsedEmail->getToEmail() . '>');
-            $this->sendCustomEmail($smtpConfig, [
-                'email' => $parsedEmail->getToEmail(),
-                'name' => $parsedEmail->getToName()
-            ], new InteractionEmail([
+
+            // Create Interaction Email
+            $interactionEmail = new InteractionEmail([
                 'date' => Carbon::now()->setTimezone('UTC')->toDateTimeString(),
                 'subject' => $parsedEmail->getSubject(),
                 'body' => $parsedEmail->getBody(),
                 'attach' => $parsedEmail->getAllAttachments(),
                 'id' => $messageId
-            ]));
+            ]);
+
+            // Send Email
+            if($smtpConfig !== null) {
+                $this->sendCustomEmail($smtpConfig, [
+                    'email' => $parsedEmail->getToEmail(),
+                    'name' => $parsedEmail->getToName()
+                ], $interactionEmail);
+            } else {
+                $this->sendDefaultEmail($user, [
+                    'email' => $parsedEmail->getToEmail(),
+                    'name' => $parsedEmail->getToName()
+                ], $interactionEmail);
+            }
         } catch(\Exception $ex) {
             throw new SendEmailFailedException($ex->getMessage());
         }

@@ -164,13 +164,13 @@ class InteractionService implements InteractionServiceInterface
 
         // Get SMTP Config
         $smtpConfig = $this->getSmtpConfig();
-        $fromName = ($smtpConfig !== null) ? $smtpConfig->getUsername() : config('services.ses.from.address');
+        $fromEmail = ($smtpConfig !== null) ? $smtpConfig->getUsername() : config('mail.from.address');
 
         // Create Parsed Email
         $parsedEmail = $this->getParsedEmail($smtpConfig, $leadId, $params);
 
         // Get Draft if Exists
-        $emailHistory = $this->emailHistory->findEmailDraft($fromName, $leadId);
+        $emailHistory = $this->emailHistory->findEmailDraft($fromEmail, $leadId);
         if(!empty($emailHistory->email_id)) {
             $parsedEmail->setEmailHistoryId($emailHistory->email_id);
             $parsedEmail->setMessageId($emailHistory->message_id);
@@ -184,19 +184,8 @@ class InteractionService implements InteractionServiceInterface
             $finalEmail = $this->office->send($smtpConfig, $parsedEmail);
         } elseif(!empty($smtpConfig) && $smtpConfig->isAuthTypeNtlm()) {
             $finalEmail = $this->ntlm->send($user->dealer_id, $smtpConfig, $parsedEmail);
-        } elseif($smtpConfig) {
-            $finalEmail = $this->interactionEmail->send($user->dealer_id, $smtpConfig, $parsedEmail);
-            $interactionEmail = true;
         } else {
-            // Send SES Email
-            $parsedEmail->getMessageId();
-            $this->sendCustomSesEmail($user, $parsedEmail->getToArray(), new InteractionEmail([
-                'date' => Carbon::now()->setTimezone('UTC')->toDateTimeString(),
-                'subject' => $parsedEmail->getSubject(),
-                'body' => $parsedEmail->getBody(),
-                'attach' => $parsedEmail->getAllAttachments(),
-                'id' => $parsedEmail->cleanMessageId()
-            ]));
+            $finalEmail = $this->interactionEmail->send($user->dealer_id, $smtpConfig, $parsedEmail);
             $interactionEmail = true;
         }
 
