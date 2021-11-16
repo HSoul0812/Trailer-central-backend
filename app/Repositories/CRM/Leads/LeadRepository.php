@@ -482,29 +482,56 @@ class LeadRepository implements LeadRepositoryInterface {
     /**
      * @param Builder|Relation $query
      * @param bool $isArchived
-     * @return mixed
+     * @return Builder|Relation
      */
     private function addIsArchivedToQuery($query, bool $isArchived) {
         return $query->where(Lead::getTableName().'.is_archived', $isArchived);
     }
 
-    private function addLocationToQuery($query, $location) {
+    /**
+     * @param Builder|Relation $query
+     * @param int $location
+     * @return Builder|Relation
+     */
+
+    private function addLocationToQuery($query, int $location) {
         return $query->where(Lead::getTableName().'.dealer_location_id', $location);
     }
 
-    private function addCustomerNameToQuery($query, $customerName) {
+    /**
+     * @param Builder|Relation $query
+     * @param string $customerName
+     * @return Builder|Relation
+     */
+
+    private function addCustomerNameToQuery($query, string $customerName) {
         return $query->whereRaw("CONCAT(".Lead::getTableName().".first_name, ' ', ".Lead::getTableName().".last_name) LIKE ?", $customerName);
     }
 
-    private function addSalesPersonIdToQuery($query, $salesPersonId) {
+    /**
+     * @param Builder|Relation $query
+     * @param int $salesPersonId
+     * @return Builder|Relation
+     */
+    private function addSalesPersonIdToQuery($query, int $salesPersonId) {
         return $query->where(LeadStatus::getTableName().'.sales_person_id', $salesPersonId);
     }
 
-    private function addLeadStatusToQuery($query, $leadStatus) {
+    /**
+     * @param Builder|Relation $query
+     * @param $leadStatus
+     * @return Builder|Relation
+     */
+    private function addLeadStatusToQuery($query, string $leadStatus) {
         return $query->whereIn(LeadStatus::getTableName().'.status', $leadStatus);
     }
 
-    private function addLeadTypeToQuery($query, $leadType) {
+    /**
+     * @param Builder|Relation $query
+     * @param string $leadType
+     * @return Builder|Relation
+     */
+    private function addLeadTypeToQuery($query, string $leadType) {
         $query = $query->leftJoin(LeadType::getTableName(), LeadType::getTableName().'.lead_id',  '=', Lead::getTableName().'.identifier');
         return $query->whereIn(LeadType::getTableName().'.lead_type', $leadType);
     }
