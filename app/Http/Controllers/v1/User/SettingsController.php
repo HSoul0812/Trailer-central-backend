@@ -144,7 +144,7 @@ class SettingsController extends RestfulControllerV2
         $request = new EmailSettingsRequest($request->all());
         if ( $request->validate() ) {
             // Return Settings
-            return $this->response->collection(
+            return $this->response->item(
                 $this->interactionEmail->config($request->dealer_id, $request->sales_person_id),
                 $this->emailSettingsTransformer
             );
