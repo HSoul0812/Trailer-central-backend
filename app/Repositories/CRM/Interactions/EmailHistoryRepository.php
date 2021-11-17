@@ -172,6 +172,7 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
         // Return Email Draft
         return EmailHistory::whereLeadId($leadId)
             ->whereFromEmail($fromEmail)
+            ->whereNotNull('draft_saved')
             ->whereNull('date_sent')
             ->first();
     }
