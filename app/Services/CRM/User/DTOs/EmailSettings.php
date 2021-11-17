@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\CRM\Interactions\DTOs;
+namespace App\Services\CRM\User\DTOs;
 
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
@@ -20,6 +20,16 @@ class EmailSettings
      */
     const CONFIG_DEFAULT = 'default';
 
+
+    /**
+     * @var int Dealer ID of Current User
+     */
+    private $dealerId;
+
+    /**
+     * @var int Sales Person ID of Current User
+     */
+    private $salesPersonId = null;
 
     /**
      * @var string Type of Email Config Settings
@@ -55,4 +65,24 @@ class EmailSettings
      * @var string Reply-To Name to Use to Send Email From
      */
     private $replyName;
+
+
+    /**
+     * Get Reply Array
+     * 
+     * @return null|array{name: string,
+     *                    email: string}
+     */
+    public function getReply(): ?array {
+        // Return Null Instead
+        if($this->reply_email === null) {
+            return null;
+        }
+
+        // Return Array
+        return [
+            'email' => $this->replyEmail,
+            'name' => $this->replyName
+        ];
+    }
 }

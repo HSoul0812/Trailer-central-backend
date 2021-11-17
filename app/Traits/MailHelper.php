@@ -5,7 +5,7 @@ namespace App\Traits;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\User\User;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
-use App\Services\CRM\Interactions\DTOs\EmailSettings;
+use App\Services\CRM\User\DTOs\EmailSettings;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\Config;

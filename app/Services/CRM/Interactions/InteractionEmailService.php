@@ -8,8 +8,9 @@ use App\Models\CRM\Email\Attachment;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
-use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
+use App\Services\CRM\User\DTOs\EmailSettings;
+use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Traits\CustomerHelper;
 use App\Traits\MailHelper;
 use Carbon\Carbon;
@@ -66,6 +67,7 @@ class InteractionEmailService implements InteractionEmailServiceInterface
         // Get Default Email + Reply-To
         if(empty($salesPerson->id)) {
             return new EmailSettings([
+                'dealer_id' => $dealerId,
                 'type' => 'dealer',
                 'config' => EmailSettings::CONFIG_DEFAULT,
                 'perms' => 'admin',
@@ -94,6 +96,8 @@ class InteractionEmailService implements InteractionEmailServiceInterface
 
         // Get Sales Person Settings
         return new EmailSettings([
+            'dealer_id' => $dealerId,
+            'sales_person_id' => $salesPersonId,
             'type' => 'sales_person',
             'config' => $smtpValid ? $smtpConfig->getAuthConfig() : EmailSettings::CONFIG_DEFAULT,
             'perms' => $salesPerson->perms,
