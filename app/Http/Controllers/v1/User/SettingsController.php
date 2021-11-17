@@ -7,10 +7,12 @@ use App\Repositories\User\SettingsRepositoryInterface;
 use App\Transformers\User\SettingsTransformer;
 use App\Http\Requests\User\Settings\GetSettingsRequest;
 use App\Http\Requests\User\Settings\UpdateSettingsRequest;
+use App\Http\Requests\User\Settings\EmailSettingsRequest;
 use App\Transformers\User\NewsletterTransformer;
 use App\Repositories\User\DealerXmlExportRepositoryInterface;
 use App\Transformers\User\DealerXmlExportTransformer;
 use App\Models\User\User;
+use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
 
@@ -24,21 +26,38 @@ class SettingsController extends RestfulControllerV2
      * @var SettingsRepositoryInterface
      */
     private $repository;
-    
+
     /**     
      * @var DealerXmlExportRepositoryInterface 
      */
     protected $dealerXmlExportRepo;
 
+    /**     
+     * @var EmailSettingsTransformer
+     */
+    protected $emailSettingsTransformer;
+
     /**
      * SettingssController constructor.
+     * 
      * @param SettingsRepositoryInterface $repository
+     * @param DealerXmlExportRepositoryInterface $dealerXmlRepo
+     * @param InteractionEmailServiceInterface $interactionEmail
+     * @param EmailSettingsTransformer $emailSettings
      */
-    public function __construct(SettingsRepositoryInterface $repository, DealerXmlExportRepositoryInterface $dealerXmlRepo)
-    {
+    public function __construct(
+        SettingsRepositoryInterface $repository,
+        DealerXmlExportRepositoryInterface $dealerXmlRepo,
+        InteractionEmailServiceTransformer $interactionEmail,
+        EmailSettingsTransformer $emailSettings
+    ) {
         $this->middleware('setDealerIdOnRequest')->only(['index', 'update', 'updateNewsletter', 'getNewsletter', 'updateXmlExport', 'getXmlExport']);
+        $this->middleware('setSalesPersonIdOnRequest')->only(['email']);
+
         $this->repository = $repository;
         $this->dealerXmlExportRepo = $dealerXmlRepo;
+        $this->interactionEmail = $interactionEmail;
+        $this->emailSettingsTransformer = $emailSettings;
     }
     
     /**
@@ -98,6 +117,36 @@ class SettingsController extends RestfulControllerV2
         if ( $request->validate() ) {
             // Return Settings
             return $this->response->collection($this->repository->createOrUpdate($request->all()), new SettingsTransformer());
+        }
+
+        return $this->response->errorBadRequest();
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/user/settings/email",
+     *     description="Update Dealer Admin Settings",
+     * 
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns updated settings",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
+     *     ),
+     * )
+     */
+    public function email(Request $request): Response {
+        // Get Email Settings Request
+        $request = new EmailSettingsRequest($request->all());
+        if ( $request->validate() ) {
+            // Return Settings
+            return $this->response->collection(
+                $this->interactionEmail->config($request->dealer_id, $request->sales_person_id),
+                $this->emailSettingsTransformer
+            );
         }
 
         return $this->response->errorBadRequest();

@@ -189,7 +189,8 @@ class InteractionService implements InteractionServiceInterface
         } elseif(!empty($smtpConfig) && $smtpConfig->isAuthTypeNtlm()) {
             $finalEmail = $this->ntlm->send($user->dealer_id, $smtpConfig, $parsedEmail);
         } else {
-            $finalEmail = $this->interactionEmail->send($user->dealer_id, $smtpConfig, $parsedEmail);
+            $emailConfig = $this->interactionEmail->config($user->dealer_id, !empty($salesPerson) ? $salesPerson->id : null);
+            $finalEmail = $this->interactionEmail->send($emailConfig, $smtpConfig, $parsedEmail);
             $interactionEmail = true;
         }
 

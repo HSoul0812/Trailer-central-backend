@@ -6,6 +6,7 @@ use App\Exceptions\CRM\Email\SendEmailFailedException;
 use App\Mail\InteractionEmail;
 use App\Models\CRM\Email\Attachment;
 use App\Repositories\User\UserRepositoryInterface;
+use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
@@ -31,26 +32,88 @@ class InteractionEmailService implements InteractionEmailServiceInterface
      */
     private $users;
 
+    /**
+     * @var SalesPeresonRepositoryInterface
+     */
+    private $salespeople;
+
 
     /**
      * InteractionEmailServiceconstructor.
      * 
      * @param UserRepositoryInterface $users
+     * @param SalesPersonRepositoryInterface $salespeople
      */
-    public function __construct(UserRepositoryInterface $users) {
+    public function __construct(UserRepositoryInterface $users, SalesPersonRepositoryInterface $salespeople) {
         $this->users = $users;
+        $this->salespeople = $salespeople;
+    }
+
+    /**
+     * Get Email Config Settings
+     * 
+     * @param int $dealerId
+     * @param null|int $salesPersonId
+     * @return EmailSettings
+     */
+    public function config(int $dealerId, ?int $salesPersonId = null): EmailSettings {
+        // Get User Data
+        $user = $this->users->get(['dealer_id' => $dealerId]);
+        if(!empty($salesPersonId)) {
+            $salesPerson = $this->salespeople->get(['sales_person_id' => $salesPersonId]);
+        }
+
+        // Get Default Email + Reply-To
+        if(empty($salesPerson->id)) {
+            return new EmailSettings([
+                'type' => 'dealer',
+                'config' => EmailSettings::CONFIG_DEFAULT,
+                'perms' => 'admin',
+                'from_email' => config('mail.from.address'),
+                'from_name' => $user->name,
+                'reply_email' => $user->email,
+                'reply_name' => $user->name
+            ]);
+        }
+
+
+        // Get SMTP Config
+        $smtpConfig = SmtpConfig::fillFromSalesPerson($salesPerson);
+
+        // Set Access Token on SMTP Config
+        if($smtpConfig->isAuthConfigOauth()) {
+            $smtpConfig->setAccessToken($this->refreshToken($smtpConfig->accessToken));
+            $smtpConfig->calcAuthConfig();
+        }
+
+        // SMTP Valid?
+        $smtpValid = $salesPerson->smtp_validate->success;
+        if(!$smtpValid) {
+            $smtpValid = ($smtpConfig->getAuthMode() === 'oauth');
+        }
+
+        // Get Sales Person Settings
+        return new EmailSettings([
+            'type' => 'sales_person',
+            'config' => $smtpValid ? $smtpConfig->getAuthConfig() : EmailSettings::CONFIG_DEFAULT,
+            'perms' => $salesPerson->perms,
+            'from_email' => $smtpValid ? $smtpConfig->getUsername() : config('mail.from.address'),
+            'from_name' => $smtpConfig->getFromName(),
+            'reply_email' => !$smtpValid ? $smtpConfig->getUsername() : null,
+            'reply_name' => !$smtpValid ? $smtpConfig->getFromName() : null
+        ]);
     }
 
     /**
      * Send Email With Params
      * 
-     * @param int $dealerId
+     * @param EmailSettings $emailConfig
      * @param null|SmtpConfig $smtpConfig
      * @param ParsedEmail $parsedEmail
      * @throws SendEmailFailedException
      * @return ParsedEmail
      */
-    public function send(int $dealerId, ?SmtpConfig $smtpConfig, ParsedEmail $parsedEmail): ParsedEmail {
+    public function send(EmailSettings $emailConfig, ?SmtpConfig $smtpConfig, ParsedEmail $parsedEmail): ParsedEmail {
         // Get Unique Message ID
         if(empty($parsedEmail->getMessageId())) {
             $messageId = sprintf('%s@%s', $this->generateId(), $this->serverHostname());
@@ -76,14 +139,13 @@ class InteractionEmailService implements InteractionEmailServiceInterface
             ]);
 
             // Send Email
-            if($smtpConfig !== null) {
+            if($emailConfig->config !== 'default' && $smtpConfig !== null) {
                 $this->sendCustomEmail($smtpConfig, [
                     'email' => $parsedEmail->getToEmail(),
                     'name' => $parsedEmail->getToName()
                 ], $interactionEmail);
             } else {
-                $user = $this->users->get(['dealer_id' => $dealerId]);;
-                $this->sendDefaultEmail($user, [
+                $this->sendDefaultEmail($emailConfig, [
                     'email' => $parsedEmail->getToEmail(),
                     'name' => $parsedEmail->getToName()
                 ], $interactionEmail);
@@ -94,7 +156,7 @@ class InteractionEmailService implements InteractionEmailServiceInterface
 
         // Store Attachments
         if($parsedEmail->hasAttachments()) {
-            $parsedEmail->setAttachments($this->storeAttachments($dealerId, $parsedEmail));
+            $parsedEmail->setAttachments($this->storeAttachments($emailConfig->dealerId, $parsedEmail));
         }
 
         // Returns Params With Attachments
