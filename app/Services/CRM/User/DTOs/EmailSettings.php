@@ -75,7 +75,7 @@ class EmailSettings
      */
     public function getReply(): ?array {
         // Return Null Instead
-        if($this->reply_email === null) {
+        if($this->replyEmail === null) {
             return null;
         }
 
