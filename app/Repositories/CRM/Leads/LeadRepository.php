@@ -195,7 +195,7 @@ class LeadRepository implements LeadRepositoryInterface {
 
     /**
      * Find Existing Leads That Matches Current Lead!
-     * 
+     *
      * @param array $params
      * @return Collection<Lead>
      */
@@ -501,6 +501,35 @@ class LeadRepository implements LeadRepositoryInterface {
             $query->chunkById($chunkSize, $callback);
             return true;
         } else {
+            return $query->get();
+        }
+    }
+
+    /**
+     * Get Matches for LeadRepository
+     * 
+     * @param int $dealerId
+     * @param array $params
+     * @return Collection<Lead>
+     */
+    public function getMatches(int $dealerId, array $params)
+    {
+        $paramsCollect = collect($params['leads'] ?? null);
+
+        if ($paramsCollect) {
+            $query = Lead::query()
+                ->where([
+                    ['identifier', '>', 0],
+                    ['dealer_id', '=', $dealerId],
+                    ['lead_type', '!=', LeadType::TYPE_NONLEAD],
+                    ['is_spam', '=', 0],
+                ])
+                ->where(function ($query) use ($paramsCollect) {
+                    $query->whereIn('email_address', $paramsCollect->where('type', '=', 'email')->unique())
+                        ->orWhereIn('phone_number', $paramsCollect->where('type', '=', 'phone')->unique())
+                        ->orWhereIn('last_name', $paramsCollect->where('type', '=', 'last_name'));
+                });
+
             return $query->get();
         }
     }
