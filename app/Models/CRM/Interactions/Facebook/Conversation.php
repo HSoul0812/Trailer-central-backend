@@ -4,6 +4,7 @@ namespace App\Models\CRM\Interactions\Facebook;
 
 use App\Models\CRM\Leads\Facebook\User;
 use App\Models\CRM\Leads\Lead;
+use App\Models\Integration\Facebook\Chat;
 use App\Models\Integration\Facebook\Page;
 use App\Models\Traits\TableAware;
 use Awobaz\Compoships\Compoships;
@@ -20,6 +21,7 @@ use App\Models\CRM\Leads\Facebook\Lead as FbLead;
  *  @property FbLead $fbLead
  *  @property Lead $lead
  *  @property Page $page
+ *  @property Chat $chat
  *  @property Message<Collection> $messages
  */
 class Conversation extends Model
@@ -96,6 +98,13 @@ class Conversation extends Model
         return $this->belongsTo(FbLead::class, ['page_id', 'user_id'], ['page_id', 'user_id']);
     }
 
+    /**
+     * @return BelongsTo
+     */
+    public function chat(): BelongsTo
+    {
+        return $this->belongsTo(Chat::class, 'page_id', 'page_id');
+    }
 
     /**
      * Get lead

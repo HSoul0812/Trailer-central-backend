@@ -85,6 +85,7 @@ class InteractionMessage extends Model
             $lead = $message->lead;
             $leadId = $message->lead_id;
             $dateSent = $message->date_sent;
+            $salesPersonIds = [];
 
             $array['text'] = $message->log_message;
             $array['from_number'] = $message->from_number;
@@ -106,6 +107,7 @@ class InteractionMessage extends Model
             $lead = $message->lead;
             $leadId = $message->lead_id;
             $dateSent = $message->date_sent;
+            $salesPersonIds = [];
 
             $array['interaction_id'] = $message->interaction_id;
             $array['parent_message_id'] = $message->parent_message_id;
@@ -127,6 +129,12 @@ class InteractionMessage extends Model
             $lead = $message->conversation->lead;
             $leadId = $lead->identifier;
             $dateSent = $message->created_at;
+
+            if ($message->conversation->chat && $message->conversation->chat->salesPersons->isNotEmpty()) {
+                $salesPersonIds = $message->conversation->chat->salesPersons->pluck('id')->toArray();
+            } else {
+                $salesPersonIds = [];
+            }
 
             $array['interaction_id'] = $message->interaction_id;
             $array['text'] = $message->message;
@@ -162,7 +170,11 @@ class InteractionMessage extends Model
 
         $array['dealer_id'] = $lead->website->dealer_id ?? $lead->dealer_id;
 
-        $array['sales_person_id'] = $lead->leadStatus ? $lead->leadStatus->sales_person_id : null;
+        if ($lead->leadStatus) {
+            $salesPersonIds[] = $lead->leadStatus->sales_person_id;
+        }
+
+        $array['sales_person_ids'] = $salesPersonIds;
 
         return $array;
     }
