@@ -52,7 +52,7 @@ class SettingsController extends RestfulControllerV2
         InteractionEmailServiceInterface $interactionEmail,
         EmailSettingsTransformer $emailSettings
     ) {
-        $this->middleware('setDealerIdOnRequest')->only(['index', 'update', 'updateNewsletter', 'getNewsletter', 'updateXmlExport', 'getXmlExport']);
+        $this->middleware('setDealerIdOnRequest')->only(['index', 'update', 'email', 'updateNewsletter', 'getNewsletter', 'updateXmlExport', 'getXmlExport']);
         $this->middleware('setSalesPersonIdOnRequest')->only(['email']);
 
         $this->repository = $repository;
