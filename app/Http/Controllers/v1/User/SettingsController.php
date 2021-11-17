@@ -8,6 +8,7 @@ use App\Transformers\User\SettingsTransformer;
 use App\Http\Requests\User\Settings\GetSettingsRequest;
 use App\Http\Requests\User\Settings\UpdateSettingsRequest;
 use App\Http\Requests\User\Settings\EmailSettingsRequest;
+use App\Transformers\CRM\User\EmailSettingsTransformer;
 use App\Transformers\User\NewsletterTransformer;
 use App\Repositories\User\DealerXmlExportRepositoryInterface;
 use App\Transformers\User\DealerXmlExportTransformer;
