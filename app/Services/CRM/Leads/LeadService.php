@@ -349,6 +349,8 @@ class LeadService implements LeadServiceInterface
     }
 
     /**
+     * Convert FB User Into Lead
+     * 
      * @param array $params
      * @return Lead
      */
@@ -386,5 +388,16 @@ class LeadService implements LeadServiceInterface
         }
 
         return $lead;
+    }
+
+    /**
+     * Get Matches for Lead
+     * 
+     * @param array $params
+     * @return Collection<Lead>
+     */
+    public function getMatches(array $params)
+    {
+        return $this->leads->getMatches($params['dealer_id'], $params);
     }
 }
