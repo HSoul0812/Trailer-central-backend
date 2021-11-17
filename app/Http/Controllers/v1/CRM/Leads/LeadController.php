@@ -8,6 +8,7 @@ use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\CRM\Leads\AssignLeadRequest;
 use App\Http\Requests\CRM\Leads\GetLeadsRequest;
 use App\Http\Requests\CRM\Leads\GetLeadsSortFieldsRequest;
+use App\Http\Requests\CRM\Leads\MergeLeadsRequest;
 use App\Http\Requests\CRM\Leads\UpdateLeadRequest;
 use App\Http\Requests\CRM\Leads\CreateLeadRequest;
 use App\Http\Requests\CRM\Leads\GetLeadRequest;
@@ -42,7 +43,7 @@ class LeadController extends RestfulControllerV2
      */
     public function __construct(LeadRepositoryInterface $leads, LeadServiceInterface $service)
     {
-        $this->middleware('setDealerIdOnRequest')->only(['index', 'update', 'create', 'show', 'assign', 'getMatches']);
+        $this->middleware('setDealerIdOnRequest')->only(['index', 'update', 'create', 'show', 'assign', 'getMatches', 'mergeLeads']);
         $this->middleware('setWebsiteIdOnRequest')->only(['index', 'update', 'create']);
         $this->leads = $leads;
         $this->service = $service;
@@ -148,5 +149,18 @@ class LeadController extends RestfulControllerV2
         }
 
         return $this->response->errorBadRequest();
+    }
+
+    public function mergeLeads(int $id, Request $request)
+    {
+        $request = new MergeLeadsRequest(array_merge($request->all(), ['lead_id' => $id]));
+
+        if (!$request->validate()) {
+            return $this->response->errorBadRequest();
+        }
+
+
+
+        return $this->updatedResponse();
     }
 }

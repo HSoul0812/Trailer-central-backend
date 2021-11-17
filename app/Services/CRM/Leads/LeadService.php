@@ -5,13 +5,16 @@ namespace App\Services\CRM\Leads;
 use App\Models\CRM\Interactions\Facebook\Message;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Interactions\Interaction;
+use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Repositories\CRM\Interactions\Facebook\MessageRepositoryInterface;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
+use App\Repositories\CRM\Leads\FacebookRepositoryInterface;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\Leads\SourceRepositoryInterface;
 use App\Repositories\CRM\Leads\TypeRepositoryInterface;
 use App\Repositories\CRM\Leads\UnitRepositoryInterface;
+use App\Repositories\CRM\Text\TextRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -64,6 +67,21 @@ class LeadService implements LeadServiceInterface
     protected $fbMessageRepository;
 
     /**
+     * @var EmailHistoryRepositoryInterface
+     */
+    protected $emailHistoryRepository;
+
+    /**
+     * @var FacebookRepositoryInterface
+     */
+    protected $facebookRepository;
+
+    /**
+     * @var TextRepositoryInterface
+     */
+    protected $textRepository;
+
+    /**
      * LeadService constructor.
      */
     public function __construct(
@@ -74,7 +92,10 @@ class LeadService implements LeadServiceInterface
         UnitRepositoryInterface $units,
         InventoryRepositoryInterface $inventory,
         InteractionsRepositoryInterface $interactions,
-        MessageRepositoryInterface $fbMessageRepository
+        MessageRepositoryInterface $fbMessageRepository,
+        EmailHistoryRepositoryInterface $emailHistoryRepository,
+        FacebookRepositoryInterface $facebookRepository,
+        TextRepositoryInterface $textRepository
     ) {
         // Initialize Repositories
         $this->leads = $leads;
@@ -85,6 +106,9 @@ class LeadService implements LeadServiceInterface
         $this->inventory = $inventory;
         $this->interactions = $interactions;
         $this->fbMessageRepository = $fbMessageRepository;
+        $this->emailHistoryRepository = $emailHistoryRepository;
+        $this->facebookRepository = $facebookRepository;
+        $this->textRepository = $textRepository;
     }
 
 
@@ -350,7 +374,7 @@ class LeadService implements LeadServiceInterface
 
     /**
      * Convert FB User Into Lead
-     * 
+     *
      * @param array $params
      * @return Lead
      */
@@ -392,12 +416,27 @@ class LeadService implements LeadServiceInterface
 
     /**
      * Get Matches for Lead
-     * 
+     *
      * @param array $params
      * @return Collection<Lead>
      */
     public function getMatches(array $params)
     {
         return $this->leads->getMatches($params['dealer_id'], $params);
+    }
+
+
+    public function mergeLeads(int $leadId, int $mergesLeadId): bool
+    {
+        $params = [
+            'lead_id' => $leadId,
+            'search' => ['lead_id' => $mergesLeadId]
+        ];
+
+        $this->emailHistoryRepository->bulkUpdate($params);
+
+        $this->facebookRepository->bulkUpdateFbLead($params);
+
+        $this->textRepository->bulkUpdate($params);
     }
 }

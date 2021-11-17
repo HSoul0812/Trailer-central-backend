@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\v1\CRM\Text;
 
 use App\Http\Controllers\RestfulControllerV2;
-use App\Http\Requests\CRM\Text\BulkUpdateTextRequest;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
 use Dingo\Api\Http\Request;
 use App\Http\Requests\CRM\Text\GetTextsRequest;
@@ -13,7 +12,6 @@ use App\Http\Requests\CRM\Text\UpdateTextRequest;
 use App\Http\Requests\CRM\Text\DeleteTextRequest;
 use App\Http\Requests\CRM\Text\SendTextRequest;
 use App\Transformers\CRM\Text\TextTransformer;
-use Dingo\Api\Http\Response;
 
 class TextController extends RestfulControllerV2
 {
@@ -26,8 +24,6 @@ class TextController extends RestfulControllerV2
      */
     public function __construct(TextRepositoryInterface $texts)
     {
-        $this->middleware('setDealerIdOnRequest')->only(['bulkUpdate']);
-
         $this->texts = $texts;
     }
 
@@ -373,24 +369,5 @@ class TextController extends RestfulControllerV2
         }
 
         return $this->response->errorBadRequest();
-    }
-
-    /**
-     * @param Request $request
-     * @return Response
-     * @throws \App\Exceptions\Requests\Validation\NoObjectIdValueSetException
-     * @throws \App\Exceptions\Requests\Validation\NoObjectTypeSetException
-     */
-    public function bulkUpdate(Request $request): Response
-    {
-        $request = new BulkUpdateTextRequest($request->all());
-
-        if (!$request->validate()) {
-            return $this->response->errorBadRequest();
-        }
-
-        $this->texts->bulkUpdate($request->all());
-
-        return $this->updatedResponse();
     }
 }
