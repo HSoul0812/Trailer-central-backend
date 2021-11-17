@@ -71,8 +71,8 @@ trait MailHelper
     {
         // Set From/Reply-To
         $email->from(config('mail.from.address'), $config->fromName);
-        if(!empty($config) && $config->fromEmail) {
-            $email->replyTo($config->fromEmail, $config->fromName);
+        if(!empty($config) && $config->replyEmail) {
+            $email->replyTo($config->replyEmail, $config->replyName);
         }
 
         // Create CRM Mailer
