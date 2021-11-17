@@ -101,7 +101,8 @@ class CompletedOrder extends Model
         'ecommerce_customer_id',
         'ecommerce_cart_id',
         'ecommerce_order_id',
-        'ecommerce_items'
+        'ecommerce_items',
+        'phone_number'
     ];
 
     protected $casts = [
