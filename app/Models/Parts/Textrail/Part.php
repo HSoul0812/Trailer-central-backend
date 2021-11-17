@@ -3,6 +3,7 @@
 namespace App\Models\Parts\Textrail;
 
 use App\Models\Parts\Part as BasePart;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @property int $id
@@ -11,6 +12,7 @@ use App\Models\Parts\Part as BasePart;
  */
 class Part extends BasePart
 {
+    use SoftDeletes;
     protected $table = 'textrail_parts';
 
     /**

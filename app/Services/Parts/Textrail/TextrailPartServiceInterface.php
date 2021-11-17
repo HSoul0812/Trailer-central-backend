@@ -21,6 +21,11 @@ interface TextrailPartServiceInterface {
    * @return null|array{imageData: array, fileName: string}
    */
   public function getTextrailImage(array $img): ?array;
+  
+  /**
+   * @return null|array{imageData: array, fileName: string}
+   */
+  public function getTextrailPlaceholderImage(): ?array;
 
   public function getTextrailTotalPartsCount(int $pageSize = 1, int $currentPage = 1): int;
 }

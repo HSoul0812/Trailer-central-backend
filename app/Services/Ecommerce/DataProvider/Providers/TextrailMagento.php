@@ -19,6 +19,7 @@ class TextrailMagento implements DataProviderInterface,
     private const TEXTRAIL_ATTRIBUTES_MANUFACTURER_URL = 'rest/V1/products/attributes/manufacturer/options/';
     private const TEXTRAIL_ATTRIBUTES_BRAND_NAME_URL = 'rest/V1/products/attributes/brand_name/options/';
     private const TEXTRAIL_ATTRIBUTES_MEDIA_URL = 'media/catalog/product';
+    private const TEXTRAIL_ATTRIBUTES_PLACEHOLDER_URL = '/placeholder/default/TexTrail-LogoVertical_4_3.png';
 
     const VIEW_ID = 'trailer_central_t1_sv';
     const GUEST_CART_URL = 'rest/:view/V1/guest-carts';
@@ -419,6 +420,26 @@ class TextrailMagento implements DataProviderInterface,
       if ($checkFile[0] == "HTTP/1.1 200 OK") {
         $imageData = file_get_contents($img_url, false, stream_context_create(['ssl' => ['verify_peer' => false, 'verify_peer_name' => false]]));
         $explodedImage = explode('/', $img['file']);
+        $fileName = $explodedImage[count($explodedImage) - 1];
+
+        return ['imageData' => $imageData, 'fileName' => $fileName];
+      }
+
+      return null;
+    }
+
+    /**
+     * @return null|array{imageData: array, fileName: string}
+     */
+    public function getTextrailPlaceholderImage(): ?array
+    {
+      $img_url = $this->getTextrailImagesBaseUrl() . self::TEXTRAIL_ATTRIBUTES_PLACEHOLDER_URL;
+      
+      $checkFile = get_headers($img_url);
+
+      if ($checkFile[0] == "HTTP/1.1 200 OK") {
+        $imageData = file_get_contents($img_url, false, stream_context_create(['ssl' => ['verify_peer' => false, 'verify_peer_name' => false]]));
+        $explodedImage = explode('/', self::TEXTRAIL_ATTRIBUTES_PLACEHOLDER_URL);
         $fileName = $explodedImage[count($explodedImage) - 1];
 
         return ['imageData' => $imageData, 'fileName' => $fileName];

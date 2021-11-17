@@ -42,6 +42,11 @@ class TextrailPartService implements TextrailPartServiceInterface
       return $this->provider->getTextrailImage($img);
     }
 
+    public function getTextrailPlaceholderImage(): ?array
+    {
+      return $this->provider->getTextrailPlaceholderImage();
+    }
+
     public function getTextrailTotalPartsCount(int $pageSize = 1, int $currentPage = 1): int
     {
         return $this->provider->getTextrailTotalPartsCount($pageSize, $currentPage);

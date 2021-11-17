@@ -86,6 +86,26 @@ class TextrailMagentoSandbox implements TextrailPartsInterface
     }
   }
 
+  /**
+   * @return null|array{imageData: array, fileName: string}
+   */
+  public function getTextrailPlaceholderImage(): ?array
+  {
+    $img_url = $this->getTextrailImagesBaseUrl() . self::TEXTRAIL_ATTRIBUTES_PLACEHOLDER_URL;
+    
+    $checkFile = get_headers($img_url);
+
+    if ($checkFile[0] == "HTTP/1.1 200 OK") {
+      $imageData = file_get_contents($img_url, false, stream_context_create(['ssl' => ['verify_peer' => false, 'verify_peer_name' => false]]));
+      $explodedImage = explode('/', self::TEXTRAIL_ATTRIBUTES_PLACEHOLDER_URL);
+      $fileName = $explodedImage[count($explodedImage) - 1];
+
+      return ['imageData' => $imageData, 'fileName' => $fileName];
+    }
+
+    return null;
+  }
+
   protected function getTextrailImagesBaseUrl(): string{
     return 'https://upload.wikimedia.org';
   }
