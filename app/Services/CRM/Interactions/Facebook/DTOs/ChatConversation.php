@@ -134,10 +134,10 @@ class ChatConversation
      *               lead_type: string,
      *               first_name: string,
      *               last_name: string,
-     *               email_address: string,
      *               referral: string,
      *               comments: string,
-     *               newest_update: string}
+     *               date_submitted: string,
+     *               lead_source: string}
      */
     public function getLeadParams(): array {
         return [
@@ -146,8 +146,6 @@ class ChatConversation
             'lead_type' => LeadType::TYPE_NONLEAD,
             'first_name' => $this->user->getFirstName(),
             'last_name' => $this->user->getLastName(),
-            'email_address' => $this->user->email,
-            'preferred_contact' => 'email',
             'referral' => $this->link,
             'comments' => $this->snippet,
             'date_submitted' => $this->newestUpdate,

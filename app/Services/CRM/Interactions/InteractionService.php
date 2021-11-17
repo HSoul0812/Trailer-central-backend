@@ -21,6 +21,7 @@ use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
 use App\Services\Integration\Microsoft\OfficeServiceInterface;
+use App\Traits\MailHelper;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -33,6 +34,9 @@ use Carbon\Carbon;
  */
 class InteractionService implements InteractionServiceInterface
 {
+    use MailHelper;
+
+
     /**
      * @var App\Services\Integration\AuthServiceInterface
      */
@@ -159,24 +163,30 @@ class InteractionService implements InteractionServiceInterface
 
         // Get SMTP Config
         $smtpConfig = $this->getSmtpConfig();
+        if($smtpConfig !== null) {
+            $fromEmail = $smtpConfig->getUsername();
+        } else {
+            $fromEmail = $params['from_email'] = config('mail.from.address');
+            $params['from_name'] = $user->name;
+        }
 
         // Create Parsed Email
         $parsedEmail = $this->getParsedEmail($smtpConfig, $leadId, $params);
 
         // Get Draft if Exists
-        $emailHistory = $this->emailHistory->findEmailDraft($smtpConfig->getUsername(), $leadId);
+        $emailHistory = $this->emailHistory->findEmailDraft($fromEmail, $leadId);
         if(!empty($emailHistory->email_id)) {
             $parsedEmail->setEmailHistoryId($emailHistory->email_id);
             $parsedEmail->setMessageId($emailHistory->message_id);
         }
 
         // Send Email
-        if($smtpConfig->isAuthTypeGmail()) {
+        if(!empty($smtpConfig) && $smtpConfig->isAuthTypeGmail()) {
             $finalEmail = $this->gmail->send($smtpConfig, $parsedEmail);
-        } elseif($smtpConfig->isAuthTypeOffice()) {
+        } elseif(!empty($smtpConfig) && $smtpConfig->isAuthTypeOffice()) {
             // Send Office Email
             $finalEmail = $this->office->send($smtpConfig, $parsedEmail);
-        } elseif($smtpConfig->isAuthTypeNtlm()) {
+        } elseif(!empty($smtpConfig) && $smtpConfig->isAuthTypeNtlm()) {
             $finalEmail = $this->ntlm->send($user->dealer_id, $smtpConfig, $parsedEmail);
         } else {
             $finalEmail = $this->interactionEmail->send($user->dealer_id, $smtpConfig, $parsedEmail);
@@ -198,18 +208,23 @@ class InteractionService implements InteractionServiceInterface
     /**
      * Get Parsed Email From Params
      * 
-     * @param SmtpConfig $smtpConfig
+     * @param null|SmtpConfig $smtpConfig
      * @param int $leadId
      * @param array $params
      * @return ParsedEmail
      */
-    private function getParsedEmail(SmtpConfig $smtpConfig, int $leadId, array $params): ParsedEmail {
+    private function getParsedEmail(?SmtpConfig $smtpConfig, int $leadId, array $params): ParsedEmail {
         // Initialize Parsed Email
         $parsedEmail = new ParsedEmail();
 
         // Set From Details
-        $parsedEmail->setFromEmail($smtpConfig->getUsername());
-        $parsedEmail->setFromName($smtpConfig->getFromName() ?? $smtpConfig->getUsername());
+        if($smtpConfig !== null) {
+            $parsedEmail->setFromEmail($smtpConfig->getUsername());
+            $parsedEmail->setFromName($smtpConfig->getFromName() ?? $smtpConfig->getUsername());
+        } else {
+            $parsedEmail->setFromEmail($params['from_email']);
+            $parsedEmail->setFromName($params['from_name']);
+        }
 
         // Set Lead Details
         $lead = Lead::findOrFail($leadId);
@@ -240,9 +255,9 @@ class InteractionService implements InteractionServiceInterface
     /**
      * Get SMTP Config From Auth
      * 
-     * @return SmtpConfig
+     * @return null|SmtpConfig
      */
-    private function getSmtpConfig(): SmtpConfig {
+    private function getSmtpConfig(): ?SmtpConfig {
         // Get User
         $user = Auth::user();
 
@@ -262,10 +277,7 @@ class InteractionService implements InteractionServiceInterface
         }
 
         // Get SMTP Config From Dealer
-        return new SmtpConfig([
-            'username' => $user->email,
-            'name' => $user->name ?? ''
-        ]);
+        return null;
     }
 
     /**

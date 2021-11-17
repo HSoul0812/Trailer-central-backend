@@ -3,11 +3,12 @@
 namespace App\Services\CRM\Interactions;
 
 use App\Exceptions\CRM\Email\SendEmailFailedException;
+use App\Mail\InteractionEmail;
+use App\Models\CRM\Email\Attachment;
+use App\Repositories\User\UserRepositoryInterface;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
-use App\Models\CRM\Email\Attachment;
-use App\Mail\InteractionEmail;
 use App\Traits\CustomerHelper;
 use App\Traits\MailHelper;
 use Carbon\Carbon;
@@ -24,16 +25,32 @@ class InteractionEmailService implements InteractionEmailServiceInterface
 {
     use CustomerHelper, MailHelper;
 
+
+    /**
+     * @var UserRepositoryInterface
+     */
+    private $users;
+
+
+    /**
+     * InteractionEmailServiceconstructor.
+     * 
+     * @param UserRepositoryInterface $users
+     */
+    public function __construct(UserRepositoryInterface $users) {
+        $this->users = $users;
+    }
+
     /**
      * Send Email With Params
      * 
      * @param int $dealerId
-     * @param SmtpConfig $smtpConfig
+     * @param null|SmtpConfig $smtpConfig
      * @param ParsedEmail $parsedEmail
      * @throws SendEmailFailedException
      * @return ParsedEmail
      */
-    public function send(int $dealerId, SmtpConfig $smtpConfig, ParsedEmail $parsedEmail): ParsedEmail {
+    public function send(int $dealerId, ?SmtpConfig $smtpConfig, ParsedEmail $parsedEmail): ParsedEmail {
         // Get Unique Message ID
         if(empty($parsedEmail->getMessageId())) {
             $messageId = sprintf('%s@%s', $this->generateId(), $this->serverHostname());
@@ -44,19 +61,33 @@ class InteractionEmailService implements InteractionEmailServiceInterface
 
         // Try/Send Email!
         try {
-            // Fill Smtp Config
-            Log::info('Send from ' . $smtpConfig->username . ' to: ' .
+            // Get From Email
+            $fromEmail = ($smtpConfig !== null) ? $smtpConfig->getUsername() : config('mail.from.address');
+            Log::info('Send from ' . $fromEmail . ' to: ' .
                         $parsedEmail->getToName() . ' <' . $parsedEmail->getToEmail() . '>');
-            $this->sendCustomEmail($smtpConfig, [
-                'email' => $parsedEmail->getToEmail(),
-                'name' => $parsedEmail->getToName()
-            ], new InteractionEmail([
+
+            // Create Interaction Email
+            $interactionEmail = new InteractionEmail([
                 'date' => Carbon::now()->setTimezone('UTC')->toDateTimeString(),
                 'subject' => $parsedEmail->getSubject(),
                 'body' => $parsedEmail->getBody(),
                 'attach' => $parsedEmail->getAllAttachments(),
                 'id' => $messageId
-            ]));
+            ]);
+
+            // Send Email
+            if($smtpConfig !== null) {
+                $this->sendCustomEmail($smtpConfig, [
+                    'email' => $parsedEmail->getToEmail(),
+                    'name' => $parsedEmail->getToName()
+                ], $interactionEmail);
+            } else {
+                $user = $this->users->get(['dealer_id' => $dealerId]);;
+                $this->sendDefaultEmail($user, [
+                    'email' => $parsedEmail->getToEmail(),
+                    'name' => $parsedEmail->getToName()
+                ], $interactionEmail);
+            }
         } catch(\Exception $ex) {
             throw new SendEmailFailedException($ex->getMessage());
         }
