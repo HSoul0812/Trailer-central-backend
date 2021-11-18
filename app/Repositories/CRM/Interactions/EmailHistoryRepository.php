@@ -288,7 +288,7 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
                     $params[$key] = Carbon::now()->setTimezone('UTC')->toDateTimeString();
                 } elseif($value === 0) {
                     $params[$key] = NULL;
-                } else {
+                } elseif(\is_string($value) === false) {
                     unset($params[$key]);
                 }
             } elseif (in_array($key, EmailHistory::BOOL_FIELDS)) {
