@@ -225,7 +225,6 @@ class InteractionService implements InteractionServiceInterface
         $smtpConfig = null;
         $salesPerson = null;
         $interactionEmail = null;
-            var_dump($params);
         if(isset($params['sales_person_id'])) {
             $salesPerson = $this->salespeople->get(['sales_person_id' => $params['sales_person_id']]);
 
