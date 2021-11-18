@@ -9,7 +9,7 @@ use App\Repositories\Repository;
 interface FacebookRepositoryInterface extends Repository {
     /**
      * Find By ID or User ID
-     * 
+     *
      * @param array $params
      * @return null|User
      */
@@ -17,7 +17,7 @@ interface FacebookRepositoryInterface extends Repository {
 
     /**
      * Create Or Update User
-     * 
+     *
      * @param array $params
      * @return User
      */
@@ -26,7 +26,7 @@ interface FacebookRepositoryInterface extends Repository {
 
     /**
      * Create Facebook Lead
-     * 
+     *
      * @param int $pageId
      * @param int $userId
      * @param int $leadId
@@ -37,7 +37,7 @@ interface FacebookRepositoryInterface extends Repository {
 
     /**
      * Lead Exists for Page/User?
-     * 
+     *
      * @param int $pageId
      * @param int $userId
      * @return bool
@@ -46,9 +46,15 @@ interface FacebookRepositoryInterface extends Repository {
 
     /**
      * Get Facebook Lead
-     * 
+     *
      * @param int $leadId
      * @return null|FbLead
      */
     public function getFbLead(int $leadId): ?FbLead;
+
+    /**
+     * @param array $params
+     * @return bool
+     */
+    public function bulkUpdateFbLead(array $params): bool;
 }

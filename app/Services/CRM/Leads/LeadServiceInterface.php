@@ -36,4 +36,11 @@ interface LeadServiceInterface {
      * @return Lead
      */
     public function assign(array $params): Lead;
+
+    /**
+     * @param int $leadId
+     * @param int $mergesLeadId
+     * @return bool
+     */
+    public function mergeLeads(int $leadId, int $mergesLeadId): bool;
 }

@@ -2,8 +2,9 @@
 
 namespace App\Repositories\CRM\Interactions;
 
+use App\Exceptions\RepositoryInvalidArgumentException;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
-use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Models\CRM\Interactions\Interaction;
 use App\Models\CRM\Interactions\EmailHistory;
 use App\Models\CRM\Email\Attachment;
@@ -25,7 +26,7 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
 
     /**
      * Create Email History
-     * 
+     *
      * @param array $params
      * @return EmailHistory
      */
@@ -44,7 +45,7 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
 
     /**
      * Delete Email History
-     * 
+     *
      * @param array $params
      * @return EmailHistory
      */
@@ -54,7 +55,7 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
 
     /**
      * Get Email History
-     * 
+     *
      * @param array $params
      * @return EmailHistory
      */
@@ -64,13 +65,13 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
 
     /**
      * Get All Email History
-     * 
+     *
      * @param array $params
      * @return Collection EmailHistory
      */
     public function getAll($params) {
         $query = EmailHistory::where('id', '>', 0);
-        
+
         if (!isset($params['per_page'])) {
             $params['per_page'] = 100;
         }
@@ -86,13 +87,13 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
         }
-        
+
         return $query->paginate($params['per_page'])->appends($params);
     }
 
     /**
      * Update Email History
-     * 
+     *
      * @param array $params
      * @return EmailHistory
      */
@@ -117,7 +118,7 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
 
     /**
      * Create or Update Email History
-     * 
+     *
      * @param array $params
      * @return EmailHistory
      */
@@ -139,7 +140,7 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
 
     /**
      * Update Email Attachments
-     * 
+     *
      * @param string $messageId
      * @param array $attachments
      * @return Attachment
@@ -163,7 +164,7 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
 
     /**
      * Find Email Draft
-     * 
+     *
      * @param string $fromEmail
      * @param string $leadId
      * @return EmailHistory
@@ -178,7 +179,7 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
 
     /**
      * Get Message ID's for Dealer
-     * 
+     *
      * @param int $userId
      * @return array of Message ID's
      */
@@ -193,7 +194,7 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
 
     /**
      * Find Message ID Anywhere
-     * 
+     *
      * @param int $userId
      * @param string $messageId
      * @return bool
@@ -222,7 +223,7 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
 
     /**
      * Get Processed Message ID's for Dealer
-     * 
+     *
      * @param int $userId
      * @return array of Message ID's
      */
@@ -233,7 +234,7 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
 
     /**
      * Created Processed Emails
-     * 
+     *
      * @param int $userId
      * @param array $messageIds
      * @return Collection of Processed
@@ -257,10 +258,41 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
         return collect($processed);
     }
 
+    /**
+     * @param array $params
+     * @return bool
+     */
+    public function bulkUpdate(array $params): bool
+    {
+        if ((empty($params['ids']) || !is_array($params['ids'])) && (empty($params['search']) || !is_array($params['search']))) {
+            throw new RepositoryInvalidArgumentException('ids or search param has been missed. Params - ' . json_encode($params));
+        }
+
+        $query = EmailHistory::query();
+
+        if (!empty($params['ids']) && is_array($params['ids'])) {
+            $query->whereIn('id', $params['ids']);
+            unset($params['ids']);
+        }
+
+        if (!empty($params['search']['lead_id'])) {
+            $query->where('lead_id', $params['search']['lead_id']);
+            unset($params['search']['lead_id']);
+        }
+
+        /** @var EmailHistory<Collection> $emailHistory */
+        $emailHistory = $query->get();
+
+        foreach ($emailHistory as $email) {
+            $email->update($params);
+        }
+
+        return true;
+    }
 
     /**
      * Add Sort Query
-     * 
+     *
      * @param string $query
      * @param string $sort
      * @return string
@@ -275,7 +307,7 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
 
     /**
      * Fill Report Fields
-     * 
+     *
      * @param array $params
      * @return array of updated params
      */
