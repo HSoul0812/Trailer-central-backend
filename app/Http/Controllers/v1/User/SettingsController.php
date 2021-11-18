@@ -54,7 +54,7 @@ class SettingsController extends RestfulControllerV2
     public function __construct(
         SettingsRepositoryInterface $repository,
         DealerXmlExportRepositoryInterface $dealerXmlRepo,
-        InteractionEmailInterface $interaction,
+        InteractionServiceInterface $interaction,
         EmailSettingsTransformer $emailSettings
     ) {
         $this->middleware('setDealerIdOnRequest')->only(['index', 'update', 'email', 'updateNewsletter', 'getNewsletter', 'updateXmlExport', 'getXmlExport']);
