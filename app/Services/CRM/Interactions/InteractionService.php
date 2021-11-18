@@ -15,6 +15,7 @@ use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\CRM\Interactions\InteractionServiceInterface;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Services\CRM\Interactions\NtlmEmailServiceInterface;
+use App\Services\CRM\User\DTOs\EmailSettings;
 use App\Services\Integration\AuthServiceInterface;
 use App\Services\Integration\Common\DTOs\AttachmentFile;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
