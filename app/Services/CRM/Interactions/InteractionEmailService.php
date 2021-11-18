@@ -5,6 +5,7 @@ namespace App\Services\CRM\Interactions;
 use App\Exceptions\CRM\Email\SendEmailFailedException;
 use App\Mail\InteractionEmail;
 use App\Models\CRM\Email\Attachment;
+use App\Models\Integration\Auth\AccessToken;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
