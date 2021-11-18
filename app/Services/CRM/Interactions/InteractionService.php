@@ -191,7 +191,7 @@ class InteractionService implements InteractionServiceInterface
         // SMTP Valid?
         $smtpValid = $salesPerson->smtp_validate->success;
         if(!$smtpValid) {
-            $smtpValid = ($smtpConfig->getAuthMode() === 'oauth');
+            $smtpValid = $smtpConfig->isAuthConfigOauth();
         }
 
         // Get Sales Person Settings
