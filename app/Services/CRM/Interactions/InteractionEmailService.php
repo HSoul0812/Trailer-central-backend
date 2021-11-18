@@ -206,4 +206,21 @@ class InteractionEmailService implements InteractionEmailServiceInterface
         // Return All Attachments
         return $parsedEmail->getAllAttachments();
     }
+
+    /**
+     * Check If Token is Expired, Refresh if it Is
+     * 
+     * @param AccessToken $accessToken
+     * @return AccessToken
+     */
+    public function refreshToken(AccessToken $accessToken): AccessToken {
+        // Validate Token
+        $validate = $this->auth->validate($accessToken);
+        if($validate->accessToken) {
+            $accessToken = $validate->accessToken;
+        }
+
+        // Return Access Token
+        return $accessToken;
+    }
 }

@@ -269,7 +269,7 @@ class InteractionService implements InteractionServiceInterface
 
             // Set Access Token on SMTP Config
             if($smtpConfig->isAuthConfigOauth()) {
-                $smtpConfig->setAccessToken($this->refreshToken($smtpConfig->accessToken));
+                $smtpConfig->setAccessToken($this->interactionEmail->refreshToken($smtpConfig->accessToken));
                 $smtpConfig->calcAuthConfig();
             }
 
@@ -328,22 +328,5 @@ class InteractionService implements InteractionServiceInterface
         return $this->interactions->get([
             'id' => $parsedEmail->getInteractionId()
         ]);
-    }
-
-    /**
-     * Check If Token is Expired, Refresh if it Is
-     * 
-     * @param AccessToken $accessToken
-     * @return AccessToken
-     */
-    private function refreshToken(AccessToken $accessToken): AccessToken {
-        // Validate Token
-        $validate = $this->auth->validate($accessToken);
-        if($validate->accessToken) {
-            $accessToken = $validate->accessToken;
-        }
-
-        // Return Access Token
-        return $accessToken;
     }
 }
