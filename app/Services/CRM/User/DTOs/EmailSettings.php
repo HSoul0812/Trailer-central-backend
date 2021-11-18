@@ -85,19 +85,14 @@ class EmailSettings
     /**
      * Get Reply Array
      * 
-     * @return null|array{name: string,
-     *                    email: string}
+     * @return array{name: string,
+     *               email: string}
      */
-    public function getReply(): ?array {
-        // Return Null Instead
-        if($this->replyEmail === null) {
-            return null;
-        }
-
+    public function getReply(): array {
         // Return Array
         return [
-            'email' => $this->replyEmail,
-            'name' => $this->replyName
+            'email' => $this->replyEmail ?: '',
+            'name' => $this->replyName ?: ''
         ];
     }
 }
