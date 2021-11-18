@@ -20,6 +20,8 @@ interface TextrailPartsInterface
     public function getTextrailBrands(): array;
 
     public function getTextrailImage(array $img): ?array;
+    
+    public function getTextrailPlaceholderImage(): ?array;
 
     public function getTextrailTotalPartsCount(int $pageSize = 1, int $currentPage = 1): int;
 }

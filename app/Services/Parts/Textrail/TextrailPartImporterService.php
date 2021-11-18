@@ -14,6 +14,7 @@ use App\Services\Parts\Textrail\TextrailPartServiceInterface;
 use App\Transformers\Parts\Textrail\TextrailPartsTransformer;
 use League\Fractal\Resource\Item;
 use League\Fractal\Manager;
+use App\Models\Parts\Textrail\Part;
 use App\Models\Parts\Textrail\Category;
 use App\Models\Parts\Textrail\Type;
 use App\Models\Parts\Textrail\Manufacturer;
@@ -60,8 +61,15 @@ class TextrailPartImporterService implements TextrailPartImporterServiceInterfac
    {
      
      $parts = $this->textrailPartService->getAllParts();
-     
+     $parts_sku = [];
+
      foreach ($parts as $item) {
+       $parts_sku[] = $item->sku;
+
+       $trashed_item = $this->partRepo->getBySkuWithTrashed($item->sku);
+       if ($trashed_item) {
+         $trashed_item->restore();
+       }
 
        $textrailCategory = $this->textrailPartService->getTextrailCategory($item->category_id);
 
@@ -115,20 +123,45 @@ class TextrailPartImporterService implements TextrailPartImporterServiceInterfac
        $partsParams = $this->textrailPartsTransformer->transform($item);
        $newTextrailPart = $this->partRepo->createOrUpdateBySku($partsParams);
 
-       foreach ($item->images as $img) {
+       $newTextrailPart->images()->delete();
 
-         $textrailImage = $this->textrailPartService->getTextrailImage($img);
-         
-         if ($textrailImage) {
+       if (count($item->images) > 0) {
+         foreach ($item->images as $img) {
 
-           $imageParams = [
-             'part_id' => $newTextrailPart->id,
-             'position' => $img['position']
-           ];
-           $this->imageRepository->firstOrCreate($imageParams, $textrailImage['fileName'], $textrailImage['imageData']);
+           $textrailImage = $this->textrailPartService->getTextrailImage($img);
+           
+           if ($textrailImage) {
+
+             $imageParams = [
+               'part_id' => $newTextrailPart->id,
+               'position' => $img['position']
+             ];
+             $this->imageRepository->firstOrCreate($imageParams, $textrailImage['fileName'], $textrailImage['imageData']);
+           }
          }
+       } else {
+          $textrailImage = $this->textrailPartService->getTextrailPlaceholderImage();
+          
+          if ($textrailImage) {
+
+            $imageParams = [
+              'part_id' => $newTextrailPart->id,
+              'position' => $img['position']
+            ];
+            $this->imageRepository->firstOrCreate($imageParams, $textrailImage['fileName'], $textrailImage['imageData']);
+          }
        }
+
      }
+
+     $textrailParts = $this->partRepo->getAllExceptBySku($parts_sku);
+
+       foreach ($textrailParts as $textrailPart) {
+         Part::withoutSyncingToSearch(function() use ($textrailPart) {
+           $textrailPart->delete();
+         });
+       }
+     
    }
 
 }

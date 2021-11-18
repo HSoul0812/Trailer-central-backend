@@ -20,9 +20,24 @@ class PartRepository extends BaseRepository implements PartRepositoryInterface
         $this->model = $model;
     }
 
+    /**
+     * @param  array  $ids
+     * @return Collection|array<Part>
+     */
+
+    public function getAllExceptBySku(array $skus) : Collection
+    {
+      return $this->model->whereNotIn('sku', $skus)->get();
+    }
+
     public function getById(int $id) : ?Part
     {
         return $this->model->find($id);
+    }
+
+    public function getBySkuWithTrashed(int $sku) : ?Part
+    {
+        return $this->model->withTrashed()->where('sku', $sku)->first();
     }
 
     public function createOrUpdateBySku(array $params) : Part
