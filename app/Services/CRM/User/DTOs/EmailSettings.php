@@ -16,6 +16,16 @@ class EmailSettings
 
 
     /**
+     * @const Default Method Type
+     */
+    const METHOD_DEFAULT = 'smtp';
+
+    /**
+     * @const OAuth Method Type
+     */
+    const METHOD_OAUTH = 'oauth';
+
+    /**
      * @const Default Config Type
      */
     const CONFIG_DEFAULT = 'default';
@@ -35,6 +45,11 @@ class EmailSettings
      * @var string Type of Email Config Settings
      */
     private $type = 'dealer'; // dealer | sales_person
+
+    /**
+     * @var string Method Used for Email Settings
+     */
+    private $method; // smtp | oauth
 
     /**
      * @var string From Email to Use to Send Email From

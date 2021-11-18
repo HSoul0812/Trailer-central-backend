@@ -69,6 +69,7 @@ class InteractionEmailService implements InteractionEmailServiceInterface
             return new EmailSettings([
                 'dealer_id' => $dealerId,
                 'type' => 'dealer',
+                'method' => 'smtp',
                 'config' => EmailSettings::CONFIG_DEFAULT,
                 'perms' => 'admin',
                 'from_email' => config('mail.from.address'),
@@ -99,6 +100,7 @@ class InteractionEmailService implements InteractionEmailServiceInterface
             'dealer_id' => $dealerId,
             'sales_person_id' => $salesPersonId,
             'type' => 'sales_person',
+            'method' => $smtpConfig->isAuthConfigOauth() ? EmailSettings::METHOD_OAUTH : EmailSettings::METHOD_DEFAULT,
             'config' => $smtpValid ? $smtpConfig->getAuthConfig() : EmailSettings::CONFIG_DEFAULT,
             'perms' => $salesPerson->perms,
             'from_email' => $smtpValid ? $smtpConfig->getUsername() : config('mail.from.address'),
