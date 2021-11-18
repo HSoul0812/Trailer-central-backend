@@ -51,7 +51,7 @@ class ImapService implements ImapServiceInterface
      */
     public function __construct()
     {
-        $this->attachmentDir = env('MAIL_ATTACHMENT_DIR');
+        $this->attachmentDir = config('mail.attachments.dir');
         if(!file_exists($this->attachmentDir)) {
             mkdir($this->attachmentDir);
         }
