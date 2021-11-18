@@ -31,6 +31,8 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
  * @property $website_id
  * @property $lead_type
  * @property $inventory_id
+ * @property $customer_id
+ * @property $ids_exported
  * @property $referral
  * @property $title
  * @property $first_name
@@ -49,6 +51,7 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
  * @property $is_spam
  * @property $contact_email_sent
  * @property $adf_email_sent
+ * @property $last_visited_at
  * @property $cdk_email_sent
  * @property $metadata
  * @property $newsletter
@@ -62,7 +65,7 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 class Lead extends Model
 {
     use TableAware;
-       
+
     const STATUS_WON = 'Closed';
     const STATUS_WON_CLOSED = 'Closed (Won)';
     const STATUS_LOST = 'Closed (Lost)';
@@ -74,12 +77,14 @@ class Lead extends Model
 
     const NOT_ARCHIVED = 0;
     const LEAD_ARCHIVED = 1;
-    
+
     const IS_NOT_SPAM = 0;
     const IS_SPAM = 1;
-    
+
     const IS_IDS_EXPORTED = 1;
     const IS_NOT_IDS_EXPORTED = 0;
+
+    const LEAD_TYPE_CLASSIFIED = 'classified';
 
     const TABLE_NAME = 'website_lead';
 
@@ -154,7 +159,7 @@ class Lead extends Model
     {
         return $this->hasMany(EmailHistory::class, 'lead_id', 'identifier');
     }
-    
+
     public function getAllInteractions() : Collection
     {
         $interactionsRepo = app(InteractionsRepositoryInterface::class);
@@ -163,7 +168,7 @@ class Lead extends Model
             'lead_id' => $this->identifier
         ]);
     }
-    
+
     /**
      * Get the email history for the lead.
      */
@@ -195,7 +200,7 @@ class Lead extends Model
     {
         return $this->belongsToMany(Inventory::class, InventoryLead::class, 'website_lead_id', 'inventory_id', 'identifier');
     }
-    
+
     public function websiteTracking()
     {
         return $this->hasMany(Tracking::class, 'lead_id', 'identifier');
@@ -224,7 +229,7 @@ class Lead extends Model
     {
         return $this->hasMany(UnitSale::class, 'lead_id', 'identifier');
     }
- 
+
     /**
      * Get Dealer location
      */
@@ -243,7 +248,7 @@ class Lead extends Model
 
     /**
      * Get Crm User
-     * 
+     *
      * @return HasOneThrough
      */
     public function crmUser(): HasOneThrough
@@ -457,7 +462,7 @@ class Lead extends Model
 
     /**
      * Preferred Dealer Location Attribute
-     * 
+     *
      * @return null|DealerLocation
      */
     public function getPreferredDealerLocationAttribute()
@@ -488,7 +493,7 @@ class Lead extends Model
         // Return Nothing
         return 0;
     }
-    
+
     public function getInquiryTypeAttribute() : string
     {
         switch($this->lead_type) {
@@ -505,7 +510,7 @@ class Lead extends Model
 
     /**
      * Get Inquiry Name Attribute
-     * 
+     *
      * @return string
      */
     public function getInquiryNameAttribute(): string {
@@ -525,7 +530,7 @@ class Lead extends Model
 
     /**
      * Get Inquiry Email Attribute
-     * 
+     *
      * @return string
      */
     public function getInquiryEmailAttribute(): string {
