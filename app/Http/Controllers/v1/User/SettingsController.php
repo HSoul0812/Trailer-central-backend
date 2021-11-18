@@ -13,7 +13,7 @@ use App\Transformers\User\NewsletterTransformer;
 use App\Repositories\User\DealerXmlExportRepositoryInterface;
 use App\Transformers\User\DealerXmlExportTransformer;
 use App\Models\User\User;
-use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
+use App\Services\CRM\Interactions\InteractionServiceInterface;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
 
@@ -33,6 +33,11 @@ class SettingsController extends RestfulControllerV2
      */
     protected $dealerXmlExportRepo;
 
+    /**
+     * @var InteractionServiceInterface
+     */
+    protected $interaction;
+
     /**     
      * @var EmailSettingsTransformer
      */
@@ -43,13 +48,13 @@ class SettingsController extends RestfulControllerV2
      * 
      * @param SettingsRepositoryInterface $repository
      * @param DealerXmlExportRepositoryInterface $dealerXmlRepo
-     * @param InteractionEmailServiceInterface $interactionEmail
+     * @param InteractionServiceInterface $interaction
      * @param EmailSettingsTransformer $emailSettings
      */
     public function __construct(
         SettingsRepositoryInterface $repository,
         DealerXmlExportRepositoryInterface $dealerXmlRepo,
-        InteractionEmailServiceInterface $interactionEmail,
+        InteractionEmailInterface $interaction,
         EmailSettingsTransformer $emailSettings
     ) {
         $this->middleware('setDealerIdOnRequest')->only(['index', 'update', 'email', 'updateNewsletter', 'getNewsletter', 'updateXmlExport', 'getXmlExport']);
@@ -57,7 +62,7 @@ class SettingsController extends RestfulControllerV2
 
         $this->repository = $repository;
         $this->dealerXmlExportRepo = $dealerXmlRepo;
-        $this->interactionEmail = $interactionEmail;
+        $this->interaction = $interaction;
         $this->emailSettingsTransformer = $emailSettings;
     }
     
@@ -145,7 +150,7 @@ class SettingsController extends RestfulControllerV2
         if ( $request->validate() ) {
             // Return Settings
             return $this->response->item(
-                $this->interactionEmail->config($request->dealer_id, $request->sales_person_id),
+                $this->interaction->config($request->dealer_id, $request->sales_person_id),
                 $this->emailSettingsTransformer
             );
         }

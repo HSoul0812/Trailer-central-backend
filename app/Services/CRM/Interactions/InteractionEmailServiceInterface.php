@@ -9,15 +9,6 @@ use Illuminate\Support\Collection;
 
 interface InteractionEmailServiceInterface {
     /**
-     * Get Email Config Settings
-     * 
-     * @param int $dealerId
-     * @param null|int $salesPersonId
-     * @return EmailSettings
-     */
-    public function config(int $dealerId, ?int $salesPersonId = null): EmailSettings;
-
-    /**
      * Send Email With Params
      * 
      * @param EmailSettings $emailConfig

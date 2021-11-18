@@ -5,6 +5,7 @@ namespace App\Services\CRM\Interactions;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Interactions\Interaction;
 use App\Models\CRM\User\SalesPerson;
+use App\Models\Integration\Auth\AccessToken;
 use App\Models\User\User;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
@@ -35,6 +36,11 @@ class InteractionService implements InteractionServiceInterface
 {
     use MailHelper;
 
+
+    /**
+     * @var App\Services\Integration\AuthServiceInterface
+     */
+    protected $auth;
 
     /**
      * @var App\Services\Integration\Google\GoogleServiceInterface
@@ -81,10 +87,21 @@ class InteractionService implements InteractionServiceInterface
      */
     protected $leadStatus;
 
+    /**
+     * @var UserRepositoryInterface
+     */
+    protected $users;
+
+    /**
+     * @var SalesPeresonRepositoryInterface
+     */
+    protected $salespeople;
+
 
     /**
      * InteractionsRepository constructor.
      * 
+     * @param AuthServiceInterface $auth
      * @param GoogleServiceInterface $google
      * @param GmailServiceInterface $gmail
      * @param OfficeServiceInterface $office
@@ -94,8 +111,11 @@ class InteractionService implements InteractionServiceInterface
      * @param EmailHistoryRepositoryInterface $emailHistory
      * @param TokenRepositoryInterface $tokens
      * @param StatusRepositoryInterface $leadStatus
+     * @param UserRepositoryInterface $users
+     * @param SalesPersonRepositoryInterface $salespeople
      */
     public function __construct(
+        AuthServiceInterface $auth,
         GoogleServiceInterface $google,
         GmailServiceInterface $gmail,
         OfficeServiceInterface $office,
@@ -104,9 +124,12 @@ class InteractionService implements InteractionServiceInterface
         InteractionsRepositoryInterface $interactions,
         EmailHistoryRepositoryInterface $emailHistory,
         TokenRepositoryInterface $tokens,
-        StatusRepositoryInterface $leadStatus
+        StatusRepositoryInterface $leadStatus,
+        UserRepositoryInterface $users,
+        SalesPersonRepositoryInterface $salespeople
     ) {
         // Initialize Services
+        $this->auth = $auth;
         $this->google = $google;
         $this->gmail = $gmail;
         $this->office = $office;
@@ -118,6 +141,69 @@ class InteractionService implements InteractionServiceInterface
         $this->emailHistory = $emailHistory;
         $this->tokens = $tokens;
         $this->leadStatus = $leadStatus;
+        $this->users = $users;
+        $this->salespeople = $salespeople;
+    }
+
+
+    /**
+     * Get Email Config Settings
+     * 
+     * @param int $dealerId
+     * @param null|int $salesPersonId
+     * @return EmailSettings
+     */
+    public function config(int $dealerId, ?int $salesPersonId = null): EmailSettings {
+        // Get User Data
+        $user = $this->users->get(['dealer_id' => $dealerId]);
+        if(!empty($salesPersonId)) {
+            $salesPerson = $this->salespeople->get(['sales_person_id' => $salesPersonId]);
+        }
+
+        // Get Default Email + Reply-To
+        if(empty($salesPerson->id)) {
+            return new EmailSettings([
+                'dealer_id' => $dealerId,
+                'type' => 'dealer',
+                'method' => 'smtp',
+                'config' => EmailSettings::CONFIG_DEFAULT,
+                'perms' => 'admin',
+                'from_email' => config('mail.from.address'),
+                'from_name' => $user->name,
+                'reply_email' => $user->email,
+                'reply_name' => $user->name
+            ]);
+        }
+
+
+        // Get SMTP Config
+        $smtpConfig = SmtpConfig::fillFromSalesPerson($salesPerson);
+
+        // Set Access Token on SMTP Config
+        if($smtpConfig->isAuthConfigOauth()) {
+            $smtpConfig->setAccessToken($this->refreshToken($smtpConfig->accessToken));
+            $smtpConfig->calcAuthConfig();
+        }
+
+        // SMTP Valid?
+        $smtpValid = $salesPerson->smtp_validate->success;
+        if(!$smtpValid) {
+            $smtpValid = ($smtpConfig->getAuthMode() === 'oauth');
+        }
+
+        // Get Sales Person Settings
+        return new EmailSettings([
+            'dealer_id' => $dealerId,
+            'sales_person_id' => $salesPersonId,
+            'type' => 'sales_person',
+            'method' => $smtpConfig->isAuthConfigOauth() ? EmailSettings::METHOD_OAUTH : EmailSettings::METHOD_DEFAULT,
+            'config' => $smtpValid ? $smtpConfig->getAuthConfig() : EmailSettings::CONFIG_DEFAULT,
+            'perms' => $salesPerson->perms,
+            'from_email' => $smtpValid ? $smtpConfig->getUsername() : config('mail.from.address'),
+            'from_name' => $smtpConfig->getFromName(),
+            'reply_email' => !$smtpValid ? $smtpConfig->getUsername() : null,
+            'reply_name' => !$smtpValid ? $smtpConfig->getFromName() : null
+        ]);
     }
 
     /**
@@ -260,7 +346,7 @@ class InteractionService implements InteractionServiceInterface
 
             // Set Access Token on SMTP Config
             if($smtpConfig->isAuthConfigOauth()) {
-                $smtpConfig->setAccessToken($this->interactionEmail->refreshToken($smtpConfig->accessToken));
+                $smtpConfig->setAccessToken($this->refreshToken($smtpConfig->accessToken));
                 $smtpConfig->calcAuthConfig();
             }
 
@@ -319,5 +405,22 @@ class InteractionService implements InteractionServiceInterface
         return $this->interactions->get([
             'id' => $parsedEmail->getInteractionId()
         ]);
+    }
+
+    /**
+     * Check If Token is Expired, Refresh if it Is
+     * 
+     * @param AccessToken $accessToken
+     * @return AccessToken
+     */
+    private function refreshToken(AccessToken $accessToken): AccessToken {
+        // Validate Token
+        $validate = $this->auth->validate($accessToken);
+        if($validate->accessToken) {
+            $accessToken = $validate->accessToken;
+        }
+
+        // Return Access Token
+        return $accessToken;
     }
 }

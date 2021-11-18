@@ -5,13 +5,11 @@ namespace App\Services\CRM\Interactions;
 use App\Exceptions\CRM\Email\SendEmailFailedException;
 use App\Mail\InteractionEmail;
 use App\Models\CRM\Email\Attachment;
-use App\Models\Integration\Auth\AccessToken;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Services\CRM\User\DTOs\EmailSettings;
-use App\Services\Integration\AuthServiceInterface;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Traits\CustomerHelper;
 use App\Traits\MailHelper;
@@ -29,102 +27,6 @@ class InteractionEmailService implements InteractionEmailServiceInterface
 {
     use CustomerHelper, MailHelper;
 
-
-    /**
-     * @var App\Services\Integration\AuthServiceInterface
-     */
-    private $auth;
-
-    /**
-     * @var UserRepositoryInterface
-     */
-    private $users;
-
-    /**
-     * @var SalesPeresonRepositoryInterface
-     */
-    private $salespeople;
-
-
-    /**
-     * InteractionEmailServiceconstructor.
-     * 
-     * @param AuthServiceInterface $auth
-     * @param UserRepositoryInterface $users
-     * @param SalesPersonRepositoryInterface $salespeople
-     */
-    public function __construct(
-        AuthServiceInterface $auth,
-        UserRepositoryInterface $users,
-        SalesPersonRepositoryInterface $salespeople
-    ) {
-        // Initialize Services
-        $this->auth = $auth;
-
-        // Initialize Repositories
-        $this->users = $users;
-        $this->salespeople = $salespeople;
-    }
-
-    /**
-     * Get Email Config Settings
-     * 
-     * @param int $dealerId
-     * @param null|int $salesPersonId
-     * @return EmailSettings
-     */
-    public function config(int $dealerId, ?int $salesPersonId = null): EmailSettings {
-        // Get User Data
-        $user = $this->users->get(['dealer_id' => $dealerId]);
-        if(!empty($salesPersonId)) {
-            $salesPerson = $this->salespeople->get(['sales_person_id' => $salesPersonId]);
-        }
-
-        // Get Default Email + Reply-To
-        if(empty($salesPerson->id)) {
-            return new EmailSettings([
-                'dealer_id' => $dealerId,
-                'type' => 'dealer',
-                'method' => 'smtp',
-                'config' => EmailSettings::CONFIG_DEFAULT,
-                'perms' => 'admin',
-                'from_email' => config('mail.from.address'),
-                'from_name' => $user->name,
-                'reply_email' => $user->email,
-                'reply_name' => $user->name
-            ]);
-        }
-
-
-        // Get SMTP Config
-        $smtpConfig = SmtpConfig::fillFromSalesPerson($salesPerson);
-
-        // Set Access Token on SMTP Config
-        if($smtpConfig->isAuthConfigOauth()) {
-            $smtpConfig->setAccessToken($this->refreshToken($smtpConfig->accessToken));
-            $smtpConfig->calcAuthConfig();
-        }
-
-        // SMTP Valid?
-        $smtpValid = $salesPerson->smtp_validate->success;
-        if(!$smtpValid) {
-            $smtpValid = ($smtpConfig->getAuthMode() === 'oauth');
-        }
-
-        // Get Sales Person Settings
-        return new EmailSettings([
-            'dealer_id' => $dealerId,
-            'sales_person_id' => $salesPersonId,
-            'type' => 'sales_person',
-            'method' => $smtpConfig->isAuthConfigOauth() ? EmailSettings::METHOD_OAUTH : EmailSettings::METHOD_DEFAULT,
-            'config' => $smtpValid ? $smtpConfig->getAuthConfig() : EmailSettings::CONFIG_DEFAULT,
-            'perms' => $salesPerson->perms,
-            'from_email' => $smtpValid ? $smtpConfig->getUsername() : config('mail.from.address'),
-            'from_name' => $smtpConfig->getFromName(),
-            'reply_email' => !$smtpValid ? $smtpConfig->getUsername() : null,
-            'reply_name' => !$smtpValid ? $smtpConfig->getFromName() : null
-        ]);
-    }
 
     /**
      * Send Email With Params
@@ -221,22 +123,5 @@ class InteractionEmailService implements InteractionEmailServiceInterface
 
         // Return All Attachments
         return $parsedEmail->getAllAttachments();
-    }
-
-    /**
-     * Check If Token is Expired, Refresh if it Is
-     * 
-     * @param AccessToken $accessToken
-     * @return AccessToken
-     */
-    public function refreshToken(AccessToken $accessToken): AccessToken {
-        // Validate Token
-        $validate = $this->auth->validate($accessToken);
-        if($validate->accessToken) {
-            $accessToken = $validate->accessToken;
-        }
-
-        // Return Access Token
-        return $accessToken;
     }
 }
