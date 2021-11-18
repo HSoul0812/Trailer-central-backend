@@ -11,6 +11,7 @@ use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Services\CRM\User\DTOs\EmailSettings;
+use App\Services\Integration\AuthServiceInterface;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Traits\CustomerHelper;
 use App\Traits\MailHelper;
@@ -30,6 +31,11 @@ class InteractionEmailService implements InteractionEmailServiceInterface
 
 
     /**
+     * @var App\Services\Integration\AuthServiceInterface
+     */
+    private $auth;
+
+    /**
      * @var UserRepositoryInterface
      */
     private $users;
@@ -43,10 +49,19 @@ class InteractionEmailService implements InteractionEmailServiceInterface
     /**
      * InteractionEmailServiceconstructor.
      * 
+     * @param AuthServiceInterface $auth
      * @param UserRepositoryInterface $users
      * @param SalesPersonRepositoryInterface $salespeople
      */
-    public function __construct(UserRepositoryInterface $users, SalesPersonRepositoryInterface $salespeople) {
+    public function __construct(
+        AuthServiceInterface $auth,
+        UserRepositoryInterface $users,
+        SalesPersonRepositoryInterface $salespeople
+    ) {
+        // Initialize Services
+        $this->auth = $auth;
+
+        // Initialize Repositories
         $this->users = $users;
         $this->salespeople = $salespeople;
     }

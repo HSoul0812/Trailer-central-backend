@@ -5,7 +5,6 @@ namespace App\Services\CRM\Interactions;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Interactions\Interaction;
 use App\Models\CRM\User\SalesPerson;
-use App\Models\Integration\Auth\AccessToken;
 use App\Models\User\User;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
@@ -36,11 +35,6 @@ class InteractionService implements InteractionServiceInterface
 {
     use MailHelper;
 
-
-    /**
-     * @var App\Services\Integration\AuthServiceInterface
-     */
-    protected $auth;
 
     /**
      * @var App\Services\Integration\Google\GoogleServiceInterface
@@ -91,7 +85,6 @@ class InteractionService implements InteractionServiceInterface
     /**
      * InteractionsRepository constructor.
      * 
-     * @param AuthServiceInterface $auth
      * @param GoogleServiceInterface $google
      * @param GmailServiceInterface $gmail
      * @param OfficeServiceInterface $office
@@ -103,7 +96,6 @@ class InteractionService implements InteractionServiceInterface
      * @param StatusRepositoryInterface $leadStatus
      */
     public function __construct(
-        AuthServiceInterface $auth,
         GoogleServiceInterface $google,
         GmailServiceInterface $gmail,
         OfficeServiceInterface $office,
@@ -115,7 +107,6 @@ class InteractionService implements InteractionServiceInterface
         StatusRepositoryInterface $leadStatus
     ) {
         // Initialize Services
-        $this->auth = $auth;
         $this->google = $google;
         $this->gmail = $gmail;
         $this->office = $office;
