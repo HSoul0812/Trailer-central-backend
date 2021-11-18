@@ -375,6 +375,6 @@ class AttachmentFile
      * @return string
      */
     public static function getAttachmentDir(): string {
-        return env('MAIL_ATTACHMENT_DIR');
+        return config('mail.attachments.dir');
     }
 }

@@ -151,7 +151,14 @@ class LeadController extends RestfulControllerV2
         return $this->response->errorBadRequest();
     }
 
-    public function mergeLeads(int $id, Request $request)
+    /**
+     * @param int $id
+     * @param Request $request
+     * @return Response
+     * @throws NoObjectIdValueSetException
+     * @throws NoObjectTypeSetException
+     */
+    public function mergeLeads(int $id, Request $request): Response
     {
         $request = new MergeLeadsRequest(array_merge($request->all(), ['lead_id' => $id]));
 
@@ -159,7 +166,7 @@ class LeadController extends RestfulControllerV2
             return $this->response->errorBadRequest();
         }
 
-
+        $this->service->mergeLeads($id, $request->get('merges_lead_id'));
 
         return $this->updatedResponse();
     }

@@ -2,9 +2,11 @@
 
 namespace App\Services\CRM\Leads;
 
+use App\Exceptions\CRM\Leads\MergeLeadsException;
 use App\Models\CRM\Interactions\Facebook\Message;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Interactions\Interaction;
+use App\Repositories\CRM\Customer\CustomerRepositoryInterface;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Repositories\CRM\Interactions\Facebook\MessageRepositoryInterface;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
@@ -15,9 +17,12 @@ use App\Repositories\CRM\Leads\SourceRepositoryInterface;
 use App\Repositories\CRM\Leads\TypeRepositoryInterface;
 use App\Repositories\CRM\Leads\UnitRepositoryInterface;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
+use App\Repositories\Dms\QuoteRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
+use App\Traits\Repository\Transaction;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class LeadService
@@ -26,6 +31,8 @@ use Illuminate\Support\Facades\DB;
  */
 class LeadService implements LeadServiceInterface
 {
+    use Transaction;
+
     /**
      * @var LeadRepositoryInterface
      */
@@ -82,6 +89,16 @@ class LeadService implements LeadServiceInterface
     protected $textRepository;
 
     /**
+     * @var QuoteRepositoryInterface
+     */
+    protected $quoteRepository;
+
+    /**
+     * @var CustomerRepositoryInterface
+     */
+    protected $customerRepository;
+
+    /**
      * LeadService constructor.
      */
     public function __construct(
@@ -95,7 +112,9 @@ class LeadService implements LeadServiceInterface
         MessageRepositoryInterface $fbMessageRepository,
         EmailHistoryRepositoryInterface $emailHistoryRepository,
         FacebookRepositoryInterface $facebookRepository,
-        TextRepositoryInterface $textRepository
+        TextRepositoryInterface $textRepository,
+        QuoteRepositoryInterface $quoteRepository,
+        CustomerRepositoryInterface $customerRepository
     ) {
         // Initialize Repositories
         $this->leads = $leads;
@@ -109,6 +128,8 @@ class LeadService implements LeadServiceInterface
         $this->emailHistoryRepository = $emailHistoryRepository;
         $this->facebookRepository = $facebookRepository;
         $this->textRepository = $textRepository;
+        $this->quoteRepository = $quoteRepository;
+        $this->customerRepository = $customerRepository;
     }
 
 
@@ -425,7 +446,12 @@ class LeadService implements LeadServiceInterface
         return $this->leads->getMatches($params['dealer_id'], $params);
     }
 
-
+    /**
+     * @param int $leadId
+     * @param int $mergesLeadId
+     * @return bool
+     * @throws MergeLeadsException
+     */
     public function mergeLeads(int $leadId, int $mergesLeadId): bool
     {
         $params = [
@@ -433,10 +459,35 @@ class LeadService implements LeadServiceInterface
             'search' => ['lead_id' => $mergesLeadId]
         ];
 
-        $this->emailHistoryRepository->bulkUpdate($params);
+        $customerParams = [
+            'website_lead_id' => $leadId,
+            'search' => ['website_lead_id' => $mergesLeadId]
+        ];
 
-        $this->facebookRepository->bulkUpdateFbLead($params);
+        try {
+            $this->beginTransaction();
 
-        $this->textRepository->bulkUpdate($params);
+            $this->emailHistoryRepository->bulkUpdate($params);
+
+            $this->facebookRepository->bulkUpdateFbLead($params);
+
+            $this->textRepository->bulkUpdate($params);
+
+            $this->quoteRepository->bulkUpdate($params);
+
+            $this->customerRepository->bulkUpdate($customerParams);
+
+            $this->commitTransaction();
+
+            Log::info('leads has been successfully merged', ['leadId' => $leadId, 'mergesLeadId' => $mergesLeadId]);
+
+        } catch (\Exception $e) {
+            Log::error('Merge leads error. Message - ' . $e->getMessage() , $e->getTrace());
+            $this->rollbackTransaction();
+
+            throw new MergeLeadsException('Merge leads error');
+        }
+
+        return true;
     }
 }

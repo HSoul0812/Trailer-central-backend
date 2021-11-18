@@ -26,4 +26,10 @@ interface QuoteRepositoryInterface extends Repository
      * @return bool
      */
     public function bulkArchive(int $dealerId, array $quoteIds): bool;
+
+    /**
+     * @param array $params
+     * @return bool
+     */
+    public function bulkUpdate(array $params): bool;
 }

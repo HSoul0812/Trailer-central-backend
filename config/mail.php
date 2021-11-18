@@ -145,4 +145,18 @@ return [
 
     'hostname' => env('MAIL_HOSTNAME', 'api.v1.staging.trailercentral.com'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Default Attachments Options
+    |--------------------------------------------------------------------------
+    |
+    | Here you may provide the attachments settings including the temporary
+    | attachments directory location.
+    |
+    */
+
+    'attachments' => [
+        'dir' => env('MAIL_ATTACHMENT_DIR', '/tmp/mail')
+    ]
+
 ];

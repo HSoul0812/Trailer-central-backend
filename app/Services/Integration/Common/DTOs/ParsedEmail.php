@@ -335,6 +335,24 @@ class ParsedEmail
         $this->toName = $toName;
     }
 
+    /**
+     * Get To Array
+     * 
+     * @return array{email: string, ?name: string}
+     */
+    public function getToArray() {
+        // Initialize To Array
+        $to = ['email' => trim($this->to)];
+
+        // Append Name
+        if($this->toName) {
+            $to['name'] = trim($this->toName);
+        }
+
+        // Return To
+        return $to;
+    }
+
 
     /**
      * Return Full From

@@ -85,9 +85,9 @@ class InteractionMessageRepository extends RepositoryAbstract implements Interac
 
         if (isset($params['sales_person_id'])) {
             if ($params['sales_person_id'] == '-1') {
-                $search->filter('exists', ['field' => 'sales_person_id']);
+                $search->filter('exists', ['field' => 'sales_person_ids']);
             } else {
-                $search->filter('term', ['sales_person_id' => $params['sales_person_id']]);
+                $search->filter('term', ['sales_person_ids' => $params['sales_person_id']]);
             }
         }
 

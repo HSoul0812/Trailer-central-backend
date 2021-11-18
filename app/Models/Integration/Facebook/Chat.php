@@ -12,10 +12,14 @@ use App\Models\Integration\Auth\AccessToken;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Collection;
 
 /**
  * Class Chat
  * @package App\Models\Integration\Facebook
+ *
+ * @property SalesPerson $salesPerson
+ * @property Collection<SalesPerson> $salesPersons
  */
 class Chat extends Model
 {
@@ -48,7 +52,7 @@ class Chat extends Model
 
     /**
      * CRM User
-     * 
+     *
      * @return BelongsTo
      */
     public function crmUser(): BelongsTo
@@ -58,7 +62,7 @@ class Chat extends Model
 
     /**
      * Get new dealer user
-     * 
+     *
      * @return BelongsTo
      */
     public function newDealerUser(): BelongsTo
@@ -68,7 +72,7 @@ class Chat extends Model
 
     /**
      * Get Sales Person
-     * 
+     *
      * @return BelongsTo
      */
     public function salesPerson(): BelongsTo
@@ -78,7 +82,7 @@ class Chat extends Model
 
     /**
      * Get Page
-     * 
+     *
      * @return BelongsTo
      */
     public function page(): BelongsTo
@@ -88,7 +92,7 @@ class Chat extends Model
 
     /**
      * Access Token
-     * 
+     *
      * @return HasOne
      */
     public function accessToken()
@@ -100,7 +104,7 @@ class Chat extends Model
 
     /**
      * Get Sales Persons
-     * 
+     *
      * @return BelongsToMany
      */
     public function salesPersons(): BelongsToMany
@@ -111,7 +115,7 @@ class Chat extends Model
 
     /**
      * Get Sales People Ids
-     * 
+     *
      * @return array
      */
     public function getSalesPeopleIdsAttribute(): array
