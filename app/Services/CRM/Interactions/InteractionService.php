@@ -220,13 +220,13 @@ class InteractionService implements InteractionServiceInterface
      */
     public function email(int $leadId, array $params, array $attachments = []): Interaction {
         // Get User
-        $user = User::find($params['dealer_id']);
+        $user = $this->users->get(['dealer_id' => $params['dealer_id']]);
         $lead = Lead::findOrFail($leadId);
         $smtpConfig = null;
         $salesPerson = null;
         $interactionEmail = null;
         if(isset($params['sales_person_id'])) {
-            $salesPerson = SalesPerson::find($params['sales_person_id']);
+            $salesPerson = $this->salespeople->get(['sales_person_id' => $params['sales_person_id']]);
 
             // Get SMTP Config
             $smtpConfig = SmtpConfig::fillFromSalesPerson($salesPerson);
@@ -267,12 +267,12 @@ class InteractionService implements InteractionServiceInterface
         }
 
         // Send Email
-        if(!empty($smtpConfig) && $smtpConfig->isAuthTypeGmail()) {
+        if($smtpConfig !== null && $smtpConfig->isAuthTypeGmail()) {
             $finalEmail = $this->gmail->send($smtpConfig, $parsedEmail);
-        } elseif(!empty($smtpConfig) && $smtpConfig->isAuthTypeOffice()) {
+        } elseif($smtpConfig !== null && $smtpConfig->isAuthTypeOffice()) {
             // Send Office Email
             $finalEmail = $this->office->send($smtpConfig, $parsedEmail);
-        } elseif(!empty($smtpConfig) && $smtpConfig->isAuthTypeNtlm()) {
+        } elseif($smtpConfig !== null && $smtpConfig->isAuthTypeNtlm()) {
             $finalEmail = $this->ntlm->send($user->dealer_id, $smtpConfig, $parsedEmail);
         } else {
             $emailConfig = $this->config($user->dealer_id, !empty($salesPerson) ? $salesPerson->id : null);
