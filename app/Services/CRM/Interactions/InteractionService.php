@@ -222,10 +222,18 @@ class InteractionService implements InteractionServiceInterface
         // Get User
         $user = User::find($params['dealer_id']);
         $lead = Lead::findOrFail($leadId);
+        $smtpConfig = null;
         $salesPerson = null;
         $interactionEmail = null;
         if(isset($params['sales_person_id'])) {
             $salesPerson = SalesPerson::find($params['sales_person_id']);
+
+            // Get SMTP Config
+            $smtpConfig = SmtpConfig::fillFromSalesPerson($salesPerson);
+            if($smtpConfig->isAuthConfigOauth()) {
+                $smtpConfig->setAccessToken($this->refreshToken($smtpConfig->accessToken));
+                $smtpConfig->calcAuthConfig();
+            }
         }
 
         // Merge Attachments if Necessary
@@ -234,15 +242,13 @@ class InteractionService implements InteractionServiceInterface
         } else { 
             $params['attachments'] = $attachments;
         }
-        
         foreach($params['attachments'] as $key => $attachment) {
             if (!is_a($attachment, UploadedFile::class)) {
                 unset($params['attachments'][$key]);
             }
         }
 
-        // Get SMTP Config
-        $smtpConfig = $this->getSmtpConfig();
+        // Get From Email
         if($smtpConfig !== null) {
             $fromEmail = $smtpConfig->getUsername();
         } else {
@@ -331,34 +337,6 @@ class InteractionService implements InteractionServiceInterface
 
         // Return Filled Out Parsed Email
         return $parsedEmail;
-    }
-
-    /**
-     * Get SMTP Config From Auth
-     * 
-     * @return null|SmtpConfig
-     */
-    private function getSmtpConfig(): ?SmtpConfig {
-        // Get User
-        $user = Auth::user();
-
-        // Check if Sales Person Exists
-        if(!empty($user->sales_person)) {
-            // Get SMTP Config
-            $smtpConfig = SmtpConfig::fillFromSalesPerson($user->sales_person);
-
-            // Set Access Token on SMTP Config
-            if($smtpConfig->isAuthConfigOauth()) {
-                $smtpConfig->setAccessToken($this->refreshToken($smtpConfig->accessToken));
-                $smtpConfig->calcAuthConfig();
-            }
-
-            // Return SMTP Config
-            return $smtpConfig;
-        }
-
-        // Get SMTP Config From Dealer
-        return null;
     }
 
     /**
