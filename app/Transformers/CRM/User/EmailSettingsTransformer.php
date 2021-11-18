@@ -14,6 +14,7 @@ class EmailSettingsTransformer extends TransformerAbstract
             'dealer_id' => $config->dealerId,
             'sales_person_id' => $config->salesPersonId,
             'type' => $config->type,
+            'method' => $config->method,
             'config' => $config->config,
             'perms' => $config->perms,
             'from' => [
