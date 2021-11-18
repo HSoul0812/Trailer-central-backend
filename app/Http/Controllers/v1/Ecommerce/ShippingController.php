@@ -33,4 +33,17 @@ class ShippingController extends RestfulController
 
         return new JsonResponse($cost);
     }
+
+    public function getAvailableShippingMethods(Request $request): JsonResponse
+    {
+        $calculateRequest = new CalculateShippingCostsRequest($request->all());
+
+        if (!$calculateRequest->validate()) {
+            $this->response->errorBadRequest();
+        }
+
+        $available_methods = $this->shippingService->getAvailableShippingMethods($calculateRequest->all());
+
+        return new JsonResponse($available_methods);
+    }
 }
