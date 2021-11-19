@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $id
  * @property string $sku
  * @property string $title
+ * @property float $price
  */
 class Part extends BasePart
 {
