@@ -771,6 +771,7 @@ $api->version('v1', function ($route) {
             ], function ($route) {
                 $route->get('/', 'App\Http\Controllers\v1\User\SettingsController@index');
                 $route->post('/', 'App\Http\Controllers\v1\User\SettingsController@update');
+                $route->get('email', 'App\Http\Controllers\v1\User\SettingsController@email');
             });
 
             /*
