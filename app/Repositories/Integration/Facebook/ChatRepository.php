@@ -2,6 +2,8 @@
 
 namespace App\Repositories\Integration\Facebook;
 
+use App\Models\CRM\Interactions\Facebook\Conversation;
+use App\Models\CRM\Interactions\Facebook\Message;
 use Illuminate\Support\Facades\DB;
 use App\Exceptions\NotImplementedException;
 use App\Models\Integration\Facebook\Chat;
@@ -36,7 +38,7 @@ class ChatRepository implements ChatRepositoryInterface {
 
     /**
      * Create Facebook Chat
-     * 
+     *
      * @param array $params
      * @return Chat
      */
@@ -47,7 +49,7 @@ class ChatRepository implements ChatRepositoryInterface {
 
     /**
      * Delete Chat
-     * 
+     *
      * @param int $id
      * @throws NotImplementedException
      */
@@ -58,7 +60,7 @@ class ChatRepository implements ChatRepositoryInterface {
 
     /**
      * Get Chat
-     * 
+     *
      * @param array $params
      * @return Chat
      */
@@ -69,13 +71,13 @@ class ChatRepository implements ChatRepositoryInterface {
 
     /**
      * Get All Chats That Match Params
-     * 
+     *
      * @param array $params
      * @return Collection<Chat>
      */
     public function getAll($params) {
         $query = Chat::where('user_id', '=', $params['user_id']);
-        
+
         if (!isset($params['per_page'])) {
             $params['per_page'] = 100;
         }
@@ -93,13 +95,13 @@ class ChatRepository implements ChatRepositoryInterface {
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
         }
-        
+
         return $query->paginate($params['per_page'])->appends($params);
     }
 
     /**
      * Update Chat
-     * 
+     *
      * @param array $params
      * @return Chat
      */
@@ -120,13 +122,26 @@ class ChatRepository implements ChatRepositoryInterface {
 
     /**
      * Assign Sales Person to Chat
-     * 
+     *
      * @param int $id
      * @param array $sales_person_ids
      * @return array
      */
     public function assignSalespeople($id, $sales_person_ids) {
         // Find Chat by ID then assign Sales Person
-        return Chat::findOrFail($id)->salesPersons()->sync($sales_person_ids);
+        /** @var Chat $chat */
+        $chat = Chat::findOrFail($id);
+
+        $result = $chat->salesPersons()->sync($sales_person_ids);
+
+        /** @var Conversation $conversation */
+        foreach ($chat->conversations as $conversation) {
+            /** @var Message $message */
+            foreach ($conversation->messages as $message) {
+                $message->interactionMessage->searchable();
+            }
+        }
+
+        return $result;
     }
 }
