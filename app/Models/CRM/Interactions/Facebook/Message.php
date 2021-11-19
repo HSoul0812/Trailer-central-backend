@@ -28,6 +28,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property \DateTimeInterface $deleted_at
  *
  * @property Conversation $conversation
+ * @property InteractionMessage $interactionMessage
  */
 class Message extends Model
 {
@@ -145,7 +146,7 @@ class Message extends Model
 
     /**
      * Get Message Direction
-     * 
+     *
      * @return string: incoming|outgoing
      */
     public function getDirectionAttribute(): string
