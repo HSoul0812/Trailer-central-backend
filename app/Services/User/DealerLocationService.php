@@ -97,7 +97,9 @@ class DealerLocationService implements DealerLocationServiceInterface
 
                 foreach ($params['sales_tax_items'] as $item) {
                     $this->salesTaxItemRepo->create($item + $locationRelDefinition);
-                    $this->salesTaxItemRepo->createV1($item + $locationRelDefinition);// for backward compatibility
+                    if((int)$item['entity_type_id'] === 0) {
+                        $this->salesTaxItemRepo->createV1($item + $locationRelDefinition);// for backward compatibility
+                    }
                 }
             }
 
@@ -184,7 +186,9 @@ class DealerLocationService implements DealerLocationServiceInterface
 
                 foreach ($params['sales_tax_items'] as $item) {
                     $this->salesTaxItemRepo->create($item + $locationRelDefinition);
-                    $this->salesTaxItemRepo->createV1($item + $locationRelDefinition);// for backward compatibility
+                    if((int)$item['entity_type_id'] === 0) {
+                        $this->salesTaxItemRepo->createV1($item + $locationRelDefinition);// for backward compatibility
+                    }
                 }
             }
 
