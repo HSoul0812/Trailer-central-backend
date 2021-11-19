@@ -7,6 +7,7 @@ namespace App\Services\Ecommerce\Payment\Gateways\Stripe;
 use App\Exceptions\Ecommerce\RefundPaymentGatewayException;
 use App\Services\Ecommerce\Payment\Gateways\PaymentGatewayServiceInterface;
 use Brick\Money\Money;
+use Stripe\Exception\ApiErrorException;
 use Stripe\StripeClient;
 use Stripe\StripeClientInterface;
 
@@ -32,18 +33,17 @@ class StripeService implements PaymentGatewayServiceInterface
     /**
      * @param  string  $objectId
      * @param  Money  $amount
-     * @param  array{sku:string, title:string, id: int}  $parts
-     *
+     * @param  array<array{sku:string, title:string, id:int, amount: float}> $parts
      * @param  string|null  $reason
-     * @return StripeRefundResultInterface
-     * @throws RefundPaymentGatewayException when there was some error on the stripe remote process
+     * @return StripePaymentGatewayRefundResultInterface
+     * @throws RefundPaymentGatewayException when there was some error calling the stripe remote process
      */
     public function refund(
         string $objectId,
         Money $amount,
         array $parts = [],
         ?string $reason = null
-    ): StripeRefundResultInterface {
+    ): StripePaymentGatewayRefundResultInterface {
         $request = [
             'payment_intent' => $objectId,
             // Stripe doesn't allow decimals, instead it required the amount in cents
@@ -62,6 +62,15 @@ class StripeService implements PaymentGatewayServiceInterface
             $refund = $this->client->refunds->create($request);
 
             return StripeRefundResult::from($refund->toArray(), false);
+        } catch (ApiErrorException $exception) {
+            throw RefundPaymentGatewayException::factory(
+                $exception->getMessage(),
+                $exception->getHttpStatus(),
+                $exception->getHttpBody(),
+                $exception->getJsonBody(),
+                (array)$exception->getHttpHeaders(),
+                $exception->getStripeCode()
+            );
         } catch (\Exception $exception) {
             throw new RefundPaymentGatewayException($exception->getMessage());
         }

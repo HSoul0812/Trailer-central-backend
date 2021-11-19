@@ -10,7 +10,7 @@ use App\Traits\WithGetter;
 /**
  * @see https://stripe.com/docs/api/refunds/object
  */
-class StripeRefundResult implements StripeRefundResultInterface
+class StripeRefundResult implements StripePaymentGatewayRefundResultInterface
 {
     use WithGetter;
     use WithFactory;
