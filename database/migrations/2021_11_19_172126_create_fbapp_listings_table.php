@@ -22,7 +22,7 @@ class CreateFbappListingsTable extends Migration
             $table->bigInteger('facebook_id')->unique();
             $table->enum('account_type', Marketplace::ACCOUNT_TYPES);
             $table->integer('page_id')->default(0);
-            $table->enum('listing_type', Listings::LISTING_TYPES);
+            $table->enum('listing_type', array_keys(Listings::LISTING_TYPES));
             $table->enum('specific_type', Listings::getAllSpecificTypes());
             $table->tinyInteger('year');
             $table->decimal('price');
