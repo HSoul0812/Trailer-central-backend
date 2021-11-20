@@ -17,7 +17,7 @@ class CreateFbappMarketplaceFiltersTable extends Migration
         Schema::create('fbapp_marketplace_filters', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->integer('marketplace_id')->index();
-            $table->enum('filter_type', array_keys(Filter::FILE_TYPES));
+            $table->enum('filter_type', array_keys(Filter::FILTER_TYPES));
             $table->string('filter');
             $table->timestamps();
 
