@@ -13,6 +13,7 @@ use App\Traits\WithGetter;
  * @property-read string $title
  * @property-read string $sku
  * @property-read float $amount
+ * @property-read int $qty
  */
 class RefundedPart implements DTO
 {
@@ -31,13 +32,17 @@ class RefundedPart implements DTO
     /** @var string */
     private $sku;
 
+    /** @var int */
+    private $qty;
+
     public function asArray(): array
     {
         return [
             'id' => $this->id,
             'sku' => $this->sku,
             'title' => $this->title,
-            'amount' => $this->amount
+            'amount' => $this->amount,
+            'qty' => $this->qty
         ];
     }
 }
