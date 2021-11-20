@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services\Ecommerce\Payment\Gateways;
 
 use App\Exceptions\Ecommerce\RefundPaymentGatewayException;
-use App\Services\Ecommerce\Payment\Gateways\PaymentGatewayRefundResultInterface;
 use Brick\Money\Money;
 
 interface PaymentGatewayServiceInterface
