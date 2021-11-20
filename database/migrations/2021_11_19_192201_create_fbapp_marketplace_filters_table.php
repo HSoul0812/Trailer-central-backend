@@ -21,7 +21,7 @@ class CreateFbappMarketplaceFiltersTable extends Migration
             $table->string('filter');
             $table->timestamps();
 
-            $table->unique(['filter_type', 'filter']);
+            $table->index(['filter_type', 'filter']);
         });
     }
 
