@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateFbappMarketplaceListingsTable extends Migration
+class CreateFbappListingsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class CreateFbappMarketplaceListingsTable extends Migration
      */
     public function up()
     {
-        Schema::create('fbapp_marketplace_listings', function (Blueprint $table) {
-            $table->increments('id');
+        Schema::create('fbapp_listings', function (Blueprint $table) {
+            $table->bigIncrements('id');
             $table->integer('marketplace_id');
             $table->integer('inventory_id');
             $table->bigInteger('facebook_id')->unique();
@@ -22,7 +22,6 @@ class CreateFbappMarketplaceListingsTable extends Migration
             $table->integer('page_id')->default(0);
             $table->enum('listing_type', Listings::LISTING_TYPES);
             $table->enum('specific_type', Listings::getAllSpecificTypes());
-            $table->integer('images');
             $table->tinyInteger('year');
             $table->decimal('price');
             $table->string('make');
@@ -52,6 +51,6 @@ class CreateFbappMarketplaceListingsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('fbapp_marketplace_listings');
+        Schema::dropIfExists('fbapp_listings');
     }
 }

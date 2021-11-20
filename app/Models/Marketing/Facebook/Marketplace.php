@@ -4,6 +4,7 @@ namespace App\Models\Marketing\Facebook;
 
 use App\Models\User\User;
 use App\Models\User\DealerLocation;
+use App\Models\Marketing\Facebook\Filter;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -88,6 +89,16 @@ class Marketplace extends Model
      */
     public function listings(): HasMany
     {
-        return $this->hasMany(DealerLocation::class, 'id', 'marketplace_id');
+        return $this->hasMany(Listings::class, 'id', 'marketplace_id');
+    }
+
+    /**
+     * Get Filters
+     * 
+     * @return HasMany
+     */
+    public function filters(): HasMany
+    {
+        return $this->hasMany(Filter::class, 'id', 'marketplace_id');
     }
 }

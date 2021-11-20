@@ -3,6 +3,7 @@
 namespace App\Models\Marketing\Facebook;
 
 use App\Models\Marketing\Facebook\Marketplace;
+use App\Models\Marketing\Facebook\Image;
 use App\Models\Inventory\Inventory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -245,6 +246,16 @@ class Listings extends Model
     public function inventory(): BelongsTo
     {
         return $this->belongsTo(Inventory::class, 'inventory_id', 'inventory_id');
+    }
+
+    /**
+     * Get Images
+     * 
+     * @return HasMany
+     */
+    public function images(): HasMany
+    {
+        return $this->hasMany(Image::class, 'id', 'listing_id');
     }
 
 
