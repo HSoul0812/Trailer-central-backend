@@ -16,7 +16,7 @@ trait ErrorAware
 {
     /**
      * protected $casts = [
-     * 'errors' => 'json' // needed for json_encode
+     * 'errors' => 'array' // needed for json_encode
      * ];
      *
      *  protected $dates = [
@@ -30,7 +30,11 @@ trait ErrorAware
     public function addError($message, string $stage): bool
     {
         $time = $this->freshTimestamp();
-        $this->errors[] = ['time' => $time->toDateTimeString('microsecond'), 'body' => $message, 'stage' => $stage];
+
+        $errorLog = [['time' => $time->toDateTimeString('microsecond'), 'body' => $message, 'stage' => $stage]];
+
+        $this->errors = (array) $this->errors; //force to be an array in case it is empty
+        $this->errors = array_merge($this->errors, $errorLog);
         $this->failed_at = $time;
 
         return $this->save();
