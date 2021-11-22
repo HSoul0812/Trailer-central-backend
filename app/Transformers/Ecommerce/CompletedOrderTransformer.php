@@ -62,7 +62,8 @@ class CompletedOrderTransformer extends TransformerAbstract
             'shipping_fee' => $partsSummary['shipping_fee'],
             'handling_fee' => $partsSummary['handling_fee'],
             'subtotal' => $partsSummary['subtotal'],
-            'in_store_pickup' => $partsSummary['in_store_pickup']
+            'in_store_pickup' => $partsSummary['in_store_pickup'],
+            'phone_number' => $completedOrder->phone_number,
         ];
     }
 
