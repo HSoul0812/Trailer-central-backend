@@ -2,7 +2,9 @@
 
 namespace App\Models\CRM\Dms\Quickbooks;
 
+use App\Models\CRM\Account\InvoiceItem;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Class BillItem
@@ -28,4 +30,14 @@ class BillItem extends Model
         'qty',
         'unit_price',
     ];
+
+    public function item(): BelongsTo
+    {
+        return $this->belongsTo(Item::class, 'item_id', 'id');
+    }
+
+    public function invoice_item(): BelongsTo
+    {
+        return $this->belongsTo(InvoiceItem::class, 'item_id', 'item_id');
+    }
 }

@@ -13,3 +13,5 @@ node_modules
 .vscode/
 .phpunit.result.cache
 .remote-sync.json
+cghooks.lock
+

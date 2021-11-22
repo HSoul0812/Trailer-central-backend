@@ -86,6 +86,7 @@ class EmailHistory extends Model
         "subject",
         "body",
         "use_html",
+        "draft_saved",
         "date_sent",
         "date_delivered",
         "date_bounced",

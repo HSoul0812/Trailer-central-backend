@@ -188,6 +188,8 @@ $api->version('v1', function ($route) {
      */
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
         $route->get('inventory/overlay', 'App\Http\Controllers\v1\Inventory\CustomOverlayController@index');
+        $route->post('inventory/overlay', 'App\Http\Controllers\v1\Inventory\CustomOverlayController@update');
+        $route->post('inventory/bulk-overlay', 'App\Http\Controllers\v1\Inventory\CustomOverlayController@bulkUpdate');
     });
 
     /**

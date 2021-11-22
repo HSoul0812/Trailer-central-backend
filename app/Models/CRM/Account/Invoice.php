@@ -4,6 +4,7 @@ namespace App\Models\CRM\Account;
 
 use App\Models\CRM\Dms\UnitSale;
 use App\Models\CRM\User\Customer;
+use App\Models\Traits\TableAware;
 use App\Utilities\JsonApi\Filterable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -23,6 +24,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  */
 class Invoice extends Model implements Filterable
 {
+    use TableAware;
+
     /**
      * The table associated with the model.
      *
