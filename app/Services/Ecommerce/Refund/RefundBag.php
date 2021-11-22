@@ -7,8 +7,11 @@ declare(strict_types=1);
 namespace App\Services\Ecommerce\Refund;
 
 use App\Contracts\Support\DTO;
+use App\Exceptions\Ecommerce\RefundAmountException;
+use App\Exceptions\Ecommerce\RefundException;
 use App\Http\Requests\Ecommerce\RequestRefundOrderRequest;
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
+use App\Models\Ecommerce\CompletedOrder\OrderAmountsBag;
 use App\Models\Parts\Textrail\Part;
 use App\Repositories\Ecommerce\CompletedOrderRepositoryInterface;
 use App\Repositories\Ecommerce\RefundRepositoryInterface;
@@ -150,6 +153,97 @@ final class RefundBag implements DTO
         })->toArray();
 
         return ['total' => $total, 'list' => $list];
+    }
+
+    /**
+     * @throws RefundException when the order is not refundable due it is unpaid
+     * @throws RefundException when the order is not refundable due it is refunded
+     * @throws RefundException when the order has not a payment unique id
+     * @throws RefundException when the order has not a related parts matching with the request
+     * @throws RefundAmountException when the refund total amount is greater than the order remaining total balance
+     * @throws RefundAmountException when the refund parts amount is greater than the order remaining parts balance
+     * @throws RefundAmountException when the refund handling amount is greater than the order remaining handling balance
+     * @throws RefundAmountException when the refund shipping amount is greater than the order remaining shipping balance
+     * @throws RefundAmountException when the refund tax amount is greater than the order remaining tax balance
+     * @throws RefundAmountException when the some provided part qty is greater than the remaining qty
+     * @throws RefundAmountException when the some provided part qty is greater than the purchase qty
+     * @throws RefundException when a provided part was not a placed part in the order
+     */
+    public function validate(): void
+    {
+        if ($this->order->isUnpaid()) {
+            throw new RefundException(sprintf('%d order is not refundable due it is unpaid', $this->order->id));
+        }
+
+        if (!$this->order->isRefundable()) {
+            throw new RefundException(sprintf('%d order is not refundable due it is refunded', $this->order->id));
+        }
+
+        if (empty($this->order->payment_intent)) {
+            throw new RefundException(
+                sprintf('%d order is not refundable due it has not a payment unique id', $this->order->id)
+            );
+        }
+
+        $orderAmounts = OrderAmountsBag::fromOrder($this->order);
+
+        if (empty($orderAmounts->partsQtys) && !empty($this->parts)) {
+            throw new RefundException(
+                sprintf(
+                    '%d order cannot be refunded due it has not a related parts matching with the request',
+                    $this->order->id
+                )
+            );
+        }
+
+        // check if the amounts are greater than the order remaining balances
+        // when it check the total amount, it will check implicitly the adjustment amount
+        foreach (['total', 'parts', 'handling', 'shipping', 'tax'] as $amountToCheck) {
+            if ($orderAmounts->{$amountToCheck . 'RemainingBalance'}
+                ->minus($this->{$amountToCheck . 'Amount'})
+                ->isLessThan(0)) {
+                throw new RefundAmountException(
+                    sprintf(
+                        'The refund %s amount %0.2f is not valid due it is greater than order remaining %s balance %0.2f',
+                        $amountToCheck,
+                        $this->{$amountToCheck . 'Amount'}->getAmount(),
+                        $amountToCheck,
+                        $orderAmounts->{$amountToCheck . 'RemainingBalance'}->getAmount()
+                    )
+                );
+            }
+        }
+
+        foreach ($this->parts as $part) {
+            ['id' => $partId, 'qty' => $partQty] = $part;
+
+            if (array_key_exists($partId, $orderAmounts->partsQtys)) {
+                // check if the refunded qty will be greater than the total qty for the part item
+                if (isset($orderAmounts->partsRefundedQtys[$partId])
+                    && ($orderAmounts->partsRefundedQtys[$partId]->qty + $partQty) > $orderAmounts->partsQtys[$partId]['qty']
+                ) {
+                    throw new RefundAmountException(
+                        sprintf(
+                            'The refund part[%d] qty(%d) is greater than the remaining qty(%d)',
+                            $partId,
+                            $partQty,
+                            $orderAmounts->partsQtys[$partId]['qty'] - $orderAmounts->partsRefundedQtys[$partId]->qty
+                        )
+                    );
+                } elseif (!isset($orderAmounts->partsRefundedQtys[$partId]) && $partQty > $orderAmounts->partsQtys[$partId]['qty']) {
+                    throw new RefundAmountException(
+                        sprintf(
+                            'The refund part[%d] qty(%d) is greater than the purchase qty(%d)',
+                            $partId,
+                            $partQty,
+                            $orderAmounts->partsQtys[$partId]['qty']
+                        )
+                    );
+                }
+            } else {
+                throw new RefundException(sprintf('The refund part[%d] is not a placed part', $partId));
+            }
+        }
     }
 
     private function getRefundRepository(): RefundRepositoryInterface

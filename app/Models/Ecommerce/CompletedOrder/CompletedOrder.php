@@ -14,6 +14,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $dealer_id
  * @property string $po_number
  * @property float $total_amount
+ * @property float $tax
+ * @property float $handling_fee
+ * @property float $shipping_fee
  * @property string $payment_status 'paid', 'unpaid'
  * @property string $refund_status i.e 'unrefunded', 'refunded', 'partial_refunded'
  * @property array<int> $refunded_parts part's ids
