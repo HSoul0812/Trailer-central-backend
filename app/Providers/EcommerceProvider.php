@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use App\Contracts\LoggerServiceInterface;
 use App\Events\Ecommerce\OrderSuccessfullyPaid;
 use App\Events\Ecommerce\QtyUpdated;
 use App\Http\Controllers\v1\Ecommerce\CompletedOrderController;
@@ -27,10 +26,12 @@ use App\Services\Ecommerce\DataProvider\DataProviderManager;
 use App\Services\Ecommerce\DataProvider\DataProviderManagerInterface;
 use App\Services\Ecommerce\DataProvider\Providers\TextrailMagento;
 use App\Services\Ecommerce\DataProvider\Providers\TextrailPartsInterface;
+use App\Services\Ecommerce\DataProvider\Providers\TextrailRefundsInterface;
 use App\Services\Ecommerce\DataProvider\Providers\TextrailWithCheckoutInterface;
 use App\Services\Ecommerce\Payment\Gateways\PaymentGatewayServiceInterface;
 use App\Services\Ecommerce\Payment\Gateways\Stripe\StripeService;
-use App\Services\Ecommerce\Payment\PaymentService;
+use App\Services\Ecommerce\Refund\RefundService;
+use App\Services\Ecommerce\Refund\RefundServiceInterface;
 use App\Services\Parts\Textrail\TextrailPartImporterServiceInterface;
 use App\Repositories\Parts\Textrail\BrandRepositoryInterface;
 use App\Repositories\Parts\Textrail\BrandRepository;
@@ -42,7 +43,6 @@ use App\Repositories\Parts\Textrail\TypeRepositoryInterface;
 use App\Repositories\Parts\Textrail\TypeRepository;
 use App\Repositories\Parts\Textrail\ImageRepositoryInterface;
 use App\Repositories\Parts\Textrail\ImageRepository;
-use App\Services\Ecommerce\Payment\PaymentServiceInterface;
 use App\Services\Ecommerce\Shipping\ShippingService;
 use App\Services\Ecommerce\Shipping\ShippingServiceInterface;
 use App\Services\Parts\Textrail\TextrailPartImporterService;
@@ -108,17 +108,18 @@ class EcommerceProvider extends ServiceProvider
                 return app()->make(PartRepository::class);
             });
         $this->app->bind(RefundRepositoryInterface::class, RefundRepository::class);
-        $this->app->bind(PaymentServiceInterface::class, PaymentService::class);
         $this->app->bind(StripeClientInterface::class, static function (): StripeClient {
             return new StripeClient(Config::get('stripe_checkout.secret'));
         });
         $this->app->bind(PaymentGatewayServiceInterface::class, StripeService::class);
+        $this->app->bind(RefundServiceInterface::class, RefundService::class);
 
         $this->app->bind(ShippingServiceInterface::class, ShippingService::class);
         $this->app->bind(DataProviderManagerInterface::class, DataProviderManager::class);
         $this->app->bind(DataProviderInterface::class, TextrailMagento::class);
         $this->app->bind(TextrailPartsInterface::class, TextrailMagento::class);
         $this->app->bind(TextrailWithCheckoutInterface::class, TextrailMagento::class);
+        $this->app->bind(TextrailRefundsInterface::class, TextrailMagento::class);
 
         $this->app->when(PartsController::class)
             ->needs(PartRepositoryInterface::class)
@@ -142,11 +143,7 @@ class EcommerceProvider extends ServiceProvider
         $this->app->bind(ImageRepositoryInterface::class, ImageRepository::class);
 
         $this->app->bindMethod(SyncOrderJob::class . '@handle', function (SyncOrderJob $job): void {
-            $job->handle(
-                $this->app->make(TextrailWithCheckoutInterface::class),
-                $this->app->make(CompletedOrderRepositoryInterface::class),
-                $this->app->make(LoggerServiceInterface::class)
-            );
+            $job->handle($this->app->make(CompletedOrderServiceInterface::class));
         });
     }
 }

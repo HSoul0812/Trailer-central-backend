@@ -2,10 +2,13 @@
 
 namespace App\Services\Ecommerce\CompletedOrder;
 
+use App\Contracts\LoggerServiceInterface;
+use App\Exceptions\Ecommerce\TextrailSyncException;
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
 use App\Models\Parts\Textrail\RefundedPart;
 use App\Repositories\Ecommerce\CompletedOrderRepositoryInterface;
 use App\Repositories\Ecommerce\RefundRepositoryInterface;
+use App\Services\Ecommerce\DataProvider\Providers\TextrailWithCheckoutInterface;
 use Brick\Money\Money;
 
 class CompletedOrderService implements CompletedOrderServiceInterface
@@ -16,13 +19,23 @@ class CompletedOrderService implements CompletedOrderServiceInterface
     /** @var RefundRepositoryInterface */
     private $refundRepository;
 
+    /** @var TextrailWithCheckoutInterface */
+    private $textrailService;
+
+    /** @var LoggerServiceInterface */
+    private $logger;
+
     public function __construct(
         CompletedOrderRepositoryInterface $completedOrderRepository,
-        RefundRepositoryInterface         $refundRepository
+        RefundRepositoryInterface         $refundRepository,
+        TextrailWithCheckoutInterface     $textrailService,
+        LoggerServiceInterface            $logger
     )
     {
         $this->completedOrderRepository = $completedOrderRepository;
         $this->refundRepository = $refundRepository;
+        $this->textrailService = $textrailService;
+        $this->logger = $logger;
     }
 
     public function create(array $params): CompletedOrder
@@ -70,5 +83,46 @@ class CompletedOrderService implements CompletedOrderServiceInterface
                     'total_refunded_amount' => $refundedAmount->getAmount()
                 ]
             );
+    }
+
+    /**
+     * @param int $orderId TC ecommerce order id
+     * @return int the TexTrail order id
+     * @throws \App\Exceptions\Ecommerce\TextrailSyncException when some thing goes wrong on Magento side
+     */
+    public function syncSingleOrderOnTextrail(int $orderId): int
+    {
+        $this->logger->info(sprintf('Starting order Magento syncer for: %d', $orderId));
+
+        /** @var CompletedOrder $order */
+        $order = $this->completedOrderRepository->get(['id' => $orderId]);
+
+        try {
+            $this->completedOrderRepository->beginTransaction();
+
+            // just in case we need to covert a customer cart into an order, we should use another method like createOrderFromCart
+            //$method = $order->ecommerce_customer_id ? 'createOrderFromCart' : 'createOrderFromGuestCart';
+
+            $poNumber = $this->completedOrderRepository->generateNextPoNumber($order->dealer_id);
+
+            $texTrailOrderId = $this->textrailService->createOrderFromGuestCart($order->ecommerce_cart_id, $poNumber);
+
+            $this->completedOrderRepository->update(['id' => $orderId, 'ecommerce_order_id' => $texTrailOrderId, 'po_number' => $poNumber]);
+
+            $this->completedOrderRepository->commitTransaction();
+
+            $this->logger->info(
+                sprintf('Magento order was successfully create for: %d', $orderId),
+                ['ecommerce_order_id' => $texTrailOrderId]
+            );
+
+            return $texTrailOrderId;
+        } catch (\Exception $exception) {
+            $this->completedOrderRepository->rollbackTransaction();
+
+            $this->logger->error($exception->getMessage());
+
+            throw new TextrailSyncException($exception->getMessage(), $exception->getCode(), $exception);
+        }
     }
 }
