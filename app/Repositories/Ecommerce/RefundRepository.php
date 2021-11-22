@@ -116,7 +116,7 @@ class RefundRepository implements RefundRepositoryInterface
             ->where('status', '!=', Refund::STATUS_FAILED)
             ->sum('total_amount');
 
-        return Money::of($amount, 'USD', null, RoundingMode::DOWN);
+        return Money::of($amount, 'USD', null, RoundingMode::HALF_DOWN);
     }
 
     /**

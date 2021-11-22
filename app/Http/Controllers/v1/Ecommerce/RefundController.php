@@ -8,7 +8,7 @@ use App\Exceptions\Ecommerce\RefundException;
 use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\Ecommerce\GetAllRefundsRequest;
 use App\Http\Requests\Ecommerce\GetSingleRefundRequest;
-use App\Http\Requests\Ecommerce\RequestRefundOrderRequest;
+use App\Http\Requests\Ecommerce\IssueRefundOrderRequest;
 use App\Repositories\Ecommerce\RefundRepositoryInterface;
 use App\Services\Ecommerce\Refund\RefundBag;
 use App\Services\Ecommerce\Refund\RefundServiceInterface;
@@ -55,7 +55,7 @@ class RefundController extends RestfulControllerV2
      */
     public function issue(int $orderId, Request $request): Response
     {
-        $refundRequest = new RequestRefundOrderRequest($request->all() + ['order_id' => $orderId]);
+        $refundRequest = new IssueRefundOrderRequest($request->all() + ['order_id' => $orderId]);
 
         if ($refundRequest->validate()) {
             try {

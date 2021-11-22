@@ -9,7 +9,7 @@ namespace App\Services\Ecommerce\Refund;
 use App\Contracts\Support\DTO;
 use App\Exceptions\Ecommerce\RefundAmountException;
 use App\Exceptions\Ecommerce\RefundException;
-use App\Http\Requests\Ecommerce\RequestRefundOrderRequest;
+use App\Http\Requests\Ecommerce\IssueRefundOrderRequest;
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
 use App\Models\Ecommerce\CompletedOrder\OrderAmountsBag;
 use App\Models\Parts\Textrail\Part;
@@ -94,7 +94,7 @@ final class RefundBag implements DTO
             ->plus($taxAmount);
     }
 
-    public static function fromRequest(RequestRefundOrderRequest $request): self
+    public static function fromRequest(IssueRefundOrderRequest $request): self
     {
         return new self(
             $request->orderId(),
@@ -205,11 +205,11 @@ final class RefundBag implements DTO
                 ->isLessThan(0)) {
                 throw new RefundAmountException(
                     sprintf(
-                        'The refund %s amount %0.2f is not valid due it is greater than order remaining %s balance %0.2f',
+                        'The refund %s amount $%0.2f is not valid due it is greater than order remaining %s balance $%0.2f',
                         $amountToCheck,
-                        $this->{$amountToCheck . 'Amount'}->getAmount(),
+                        $this->{$amountToCheck . 'Amount'}->getAmount()->toFloat(),
                         $amountToCheck,
-                        $orderAmounts->{$amountToCheck . 'RemainingBalance'}->getAmount()
+                        $orderAmounts->{$amountToCheck . 'RemainingBalance'}->getAmount()->toFloat()
                     ),
                     $amountToCheck
                 );

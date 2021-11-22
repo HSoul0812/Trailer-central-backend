@@ -7,6 +7,7 @@ namespace App\Http\Requests\Ecommerce;
 use App\Http\Requests\Request;
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
 use App\Models\Ecommerce\Refund;
+use Brick\Math\RoundingMode;
 use Brick\Money\Money;
 
 /**
@@ -19,7 +20,7 @@ use Brick\Money\Money;
  * @property array{id: int, qty: int} $parts
  * @property string $reason
  */
-class RequestRefundOrderRequest extends Request
+class IssueRefundOrderRequest extends Request
 {
     public function getRules(): array
     {
@@ -44,22 +45,22 @@ class RequestRefundOrderRequest extends Request
 
     public function adjustmentAmount(): Money
     {
-        return Money::of($this->input('adjustment_amount', 0), 'USD');
+        return Money::of($this->input('adjustment_amount', 0), 'USD', null, RoundingMode::HALF_UP);
     }
 
     public function handlingAmount(): Money
     {
-        return Money::of($this->input('handling_amount', 0), 'USD');
+        return Money::of($this->input('handling_amount', 0), 'USD', null, RoundingMode::HALF_UP);
     }
 
     public function shippingAmount(): Money
     {
-        return Money::of($this->input('shipping_amount', 0), 'USD');
+        return Money::of($this->input('shipping_amount', 0), 'USD', null, RoundingMode::HALF_UP);
     }
 
     public function taxAmount(): Money
     {
-        return Money::of($this->input('tax_amount', 0), 'USD');
+        return Money::of($this->input('tax_amount', 0), 'USD', null, RoundingMode::HALF_UP);
     }
 
     /**
