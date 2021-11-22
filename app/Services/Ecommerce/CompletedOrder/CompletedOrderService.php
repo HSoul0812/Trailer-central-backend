@@ -98,6 +98,10 @@ class CompletedOrderService implements CompletedOrderServiceInterface
         /** @var CompletedOrder $order */
         $order = $this->completedOrderRepository->get(['id' => $orderId]);
 
+        if ($order->ecommerce_order_id) {
+            throw new TextrailSyncException(sprintf('The order %d has already been synced to TexTrail', $orderId));
+        }
+
         try {
             $this->completedOrderRepository->beginTransaction();
 
