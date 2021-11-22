@@ -6,28 +6,22 @@ use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
 use App\Models\Parts\Textrail\RefundedPart;
 use App\Repositories\Ecommerce\CompletedOrderRepositoryInterface;
 use App\Repositories\Ecommerce\RefundRepositoryInterface;
-use App\Repositories\Parts\PartRepositoryInterface;
 use Brick\Money\Money;
 
 class CompletedOrderService implements CompletedOrderServiceInterface
 {
-
     /** @var CompletedOrderRepositoryInterface */
     private $completedOrderRepository;
-
-    /** @var PartRepositoryInterface */
-    private $textRailPartRepository;
 
     /** @var RefundRepositoryInterface */
     private $refundRepository;
 
     public function __construct(
         CompletedOrderRepositoryInterface $completedOrderRepository,
-        PartRepositoryInterface $textRailPartRepository,
-        RefundRepositoryInterface $refundRepository
-    ) {
+        RefundRepositoryInterface         $refundRepository
+    )
+    {
         $this->completedOrderRepository = $completedOrderRepository;
-        $this->textRailPartRepository = $textRailPartRepository;
         $this->refundRepository = $refundRepository;
     }
 
@@ -36,15 +30,18 @@ class CompletedOrderService implements CompletedOrderServiceInterface
         return $this->completedOrderRepository->create($params);
     }
 
-    /**
-     * @throws \Brick\Money\Exception\MoneyMismatchException
-     */
     public function updateRefundSummary(int $orderId): bool
     {
         /** @var CompletedOrder $order */
         $order = $this->completedOrderRepository->get(['id' => $orderId]);
 
-        $refundedAmount = $this->refundRepository->getRefundedAmount($orderId);
+        $orderRefundSummary = $this->refundRepository->getOrderRefundSummary($orderId);
+
+        $refundedAmount = $orderRefundSummary['parts_amount']->plus($orderRefundSummary['adjustment_amount'])
+            ->plus($orderRefundSummary['handling_amount'])
+            ->plus($orderRefundSummary['shipping_amount'])
+            ->plus($orderRefundSummary['tax_amount']);
+
         $orderTotalAmount = Money::of($order->total_amount, 'USD');
 
         $refund_status = null;
@@ -61,13 +58,16 @@ class CompletedOrderService implements CompletedOrderServiceInterface
             return $part->asArray();
         })->toArray();
 
-        $refundedAmount = $this->refundRepository->getRefundedAmount($orderId);
-
         return $refund_status && $this->completedOrderRepository->update([
                     'id' => $orderId,
                     'refund_status' => $refund_status,
                     'refunded_parts' => $refundedParts,
-                    'refunded_amount' => $refundedAmount->getAmount()
+                    'parts_refunded_amount' => $orderRefundSummary['parts_amount']->getAmount(),
+                    'adjustment_refunded_amount' => $orderRefundSummary['adjustment_amount']->getAmount(),
+                    'handling_refunded_amount' => $orderRefundSummary['handling_amount']->getAmount(),
+                    'shipping_refunded_amount' => $orderRefundSummary['shipping_amount']->getAmount(),
+                    'tax_refunded_amount' => $orderRefundSummary['tax_amount']->getAmount(),
+                    'total_refunded_amount' => $refundedAmount->getAmount()
                 ]
             );
     }
