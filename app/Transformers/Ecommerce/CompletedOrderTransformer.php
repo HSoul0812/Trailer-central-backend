@@ -53,6 +53,7 @@ class CompletedOrderTransformer extends TransformerAbstract
             'status' => $completedOrder->status,
             'invoice_id' => $completedOrder->invoice_id,
             'invoice_url' => $completedOrder->invoice_url,
+            'invoice_pdf_url' => $completedOrder->invoice_pdf_url,
             'parts' => $partsSummary['parts'],
             'total_qty' => $partsSummary['total_qty'],
             'tax' => $partsSummary['tax'],
