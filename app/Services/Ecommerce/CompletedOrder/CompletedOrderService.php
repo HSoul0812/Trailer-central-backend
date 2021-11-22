@@ -10,6 +10,7 @@ use App\Repositories\Ecommerce\CompletedOrderRepositoryInterface;
 use App\Repositories\Ecommerce\RefundRepositoryInterface;
 use App\Services\Ecommerce\DataProvider\Providers\TextrailWithCheckoutInterface;
 use Brick\Money\Money;
+use GuzzleHttp\Exception\ClientException;
 
 class CompletedOrderService implements CompletedOrderServiceInterface
 {
@@ -117,10 +118,20 @@ class CompletedOrderService implements CompletedOrderServiceInterface
             );
 
             return $texTrailOrderId;
-        } catch (\Exception $exception) {
+        } catch (ClientException | \Exception $exception) {
+            $message = $exception instanceof ClientException && $exception->getResponse() ?
+                json_decode($exception->getResponse()->getBody()->getContents(), true) :
+                $exception->getMessage();
+
             $this->completedOrderRepository->rollbackTransaction();
 
-            $this->logger->error($exception->getMessage());
+            $this->logger->critical($exception->getMessage());
+
+            $this->completedOrderRepository->logError(
+                $order->id,
+                $message,
+                CompletedOrder::ERROR_STAGE_TEXTRAIL_REMOTE_SYNC
+            );
 
             throw new TextrailSyncException($exception->getMessage(), $exception->getCode(), $exception);
         }

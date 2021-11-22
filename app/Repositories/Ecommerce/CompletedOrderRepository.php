@@ -266,4 +266,15 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
     private function addStatusToQuery(Builder  $query, string $status): Builder {
         return $query->where(CompletedOrder::getTableName(). '.status', '=', $status);
     }
+
+    /**
+     * @param int $orderId
+     * @param array|string $error
+     * @param string $stage
+     * @return bool
+     */
+    public function logError(int $orderId, $error, string $stage): bool
+    {
+        return $this->get(['id' => $orderId])->addError($error, $stage);
+    }
 }

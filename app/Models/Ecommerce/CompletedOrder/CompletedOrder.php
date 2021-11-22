@@ -2,6 +2,7 @@
 
 namespace App\Models\Ecommerce\CompletedOrder;
 
+use App\Models\Traits\ErrorAware;
 use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Collection;
 use App\Models\User\User;
@@ -35,7 +36,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property array $ecommerce_items
  * @property string $shipping_carrier_code
  * @property string $shipping_method_code
- * @property array $errors
  * @property \DateTimeInterface $created_at
  * @property \DateTimeInterface $updated_at
  * @property \DateTimeInterface $refunded_at
@@ -49,6 +49,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class CompletedOrder extends Model
 {
     use TableAware;
+    use ErrorAware;
 
     public const PAYMENT_STATUS_PAID = 'paid';
     public const PAYMENT_STATUS_UNPAID = 'unpaid';
@@ -56,6 +57,8 @@ class CompletedOrder extends Model
     public const REFUND_STATUS_UNREFUNDED = 'unrefunded';
     public const REFUND_STATUS_REFUNDED = 'refunded';
     public const REFUND_STATUS_PARTIAL_REFUNDED = 'partial_refunded';
+
+    public const ERROR_STAGE_TEXTRAIL_REMOTE_SYNC = 'textrail_remote_sync';
 
     /**
      * The table associated with the model.
