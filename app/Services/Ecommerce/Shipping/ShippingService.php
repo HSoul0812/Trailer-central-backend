@@ -26,4 +26,9 @@ class ShippingService implements ShippingServiceInterface
     {
         return $this->dataProviderManager->getProvider()->estimateShippingCost($params);
     }
+
+    public function getAvailableShippingMethods(array $params): array
+    {
+        return $this->dataProviderManager->getProvider()->getAvailableShippingMethods($params);
+    }
 }

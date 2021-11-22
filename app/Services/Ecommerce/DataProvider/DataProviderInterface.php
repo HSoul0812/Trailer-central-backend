@@ -9,4 +9,5 @@ interface DataProviderInterface
      * @return array{cost: float, tax: float, cart_id: string, customer_id: ?int, carrier_code: string, method_code: string}
      */
     public function estimateShippingCost(array $params);
+    public function getAvailableShippingMethods(array $params): array;
 }

@@ -192,12 +192,7 @@ class TextrailMagento implements DataProviderInterface,
         return $this->estimateGuestShipping($params);
     }
 
-    /**
-     * @param array $params
-     * @throws \App\Exceptions\Ecommerce\TextrailException handles guzzle exception during estimation.
-     * @return array{cost: float, tax: float, cart_id: string, customer_id: ?int, method_code: string, carrier_code: string}
-     */
-    public function estimateGuestShipping(array $params): array
+    public function getAvailableShippingMethods(array $params): array
     {
         try {
             $shipping_details = $params['shipping_details'];
@@ -206,7 +201,7 @@ class TextrailMagento implements DataProviderInterface,
             // We are using cart_id as quote_id for guest checkouts, and turning it into an order at the ending of payment process
             $quoteId = $this->createGuestCart();
 
-            $cartItems = $this->addItemToGuestCart($items, $quoteId);
+            $this->addItemToGuestCart($items, $quoteId);
 
             $response = $this->httpClient->post($this->generateUrlWithCartAndView(self::GUEST_SHIPPING_COST_URL, $quoteId), [
                 'json' => $shipping_details
@@ -218,28 +213,52 @@ class TextrailMagento implements DataProviderInterface,
                 return strtolower($costItem['method_code']) !== strtolower('freeshipping');
             });
 
-            $shippingInfo = reset($shippingInfo);
+            return $shippingInfo;
+        } catch (ClientException $exception) {
+            throw new TextrailException("Method: getAvailableShippingMethods, Details: " . $exception->getMessage());
+        }
+    }
 
-            $this->addShippingInformationToGuestCart(
+    /**
+     * @param array $params
+     * @throws \App\Exceptions\Ecommerce\TextrailException handles guzzle exception during estimation.
+     * @return array{cost: float, tax: float, cart_id: string, customer_id: ?int, method_code: string, carrier_code: string}
+     */
+    public function estimateGuestShipping(array $params): array
+    {
+        try {
+
+            $shipping_details = $params['shipping_details'];
+            $items = $params['items'];
+            $shipping_method_data = explode('|', urldecode($shipping_details['shipping_method']));
+            $shipping_carrier = $shipping_method_data[0];
+            $shipping_method = $shipping_method_data[1];
+
+            // We are using cart_id as quote_id for guest checkouts, and turning it into an order at the ending of payment process
+            $quoteId = $this->createGuestCart();
+
+            $cartItems = $this->addItemToGuestCart($items, $quoteId);
+
+            $shippingInfo = $this->addShippingInformationToGuestCart(
                 $quoteId,
                 [
-                    'shipping_carrier_code' => $shippingInfo['carrier_code'],
-                    'shipping_method_code' => $shippingInfo['method_code'],
+                    'shipping_carrier_code' => $shipping_carrier,
+                    'shipping_method_code' => $shipping_method,
                     'shipping_address' => $shipping_details['address'],
                     'billing_address' => $shipping_details['address'],
                 ]
             );
 
-            $tax = ($shippingInfo['price_incl_tax'] - $shippingInfo['price_excl_tax'] < 0) ? 0 : $shippingInfo['price_incl_tax'] - $shippingInfo['price_excl_tax'];
+            $tax = $shippingInfo['totals']['tax_amount'];
 
             return [
-                'cost' => $shippingInfo['price_incl_tax'],
+                'cost' => $shippingInfo['totals']['shipping_incl_tax'],
                 'tax' => $tax,
                 'cart_id' => $quoteId,
                 'customer_id' => null,
                 'items' => $cartItems,
-                'method_code' => $shippingInfo['method_code'],
-                'carrier_code' => $shippingInfo['carrier_code']
+                'method_code' => $shipping_method,
+                'carrier_code' => $shipping_carrier
             ];
         } catch (ClientException $exception) {
             throw new TextrailException("Method: estimateGuestShipping, Details: " . $exception->getMessage());
@@ -517,7 +536,7 @@ class TextrailMagento implements DataProviderInterface,
      * @param string $cartId
      * @param array{shipping_carrier_code: string, shipping_method_code: string, shipping_address: array, billing_address: array} $shippingInformation
      */
-    public function addShippingInformationToGuestCart(string $cartId, array $shippingInformation): void
+    public function addShippingInformationToGuestCart(string $cartId, array $shippingInformation): array
     {
         $url = $this->generateUrlWithCartAndView(self::GUEST_CART_ADD_SHIPPING_INFO , $cartId);
 
@@ -527,7 +546,7 @@ class TextrailMagento implements DataProviderInterface,
         );
 
         if ($response->getStatusCode() === BaseResponse::HTTP_OK) {
-            return;
+            return json_decode($response->getBody()->getContents(), true);
         }
 
         throw new TextrailException('Order creation for session cart has failed.');
