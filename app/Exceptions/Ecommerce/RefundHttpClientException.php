@@ -13,7 +13,7 @@ use App\Traits\WithGetter;
  * @property null|array $jsonBody the HTTP status code
  * @property null|string $gatewayErrorCode the JSON deserialized body
  */
-class RefundHttpClientException extends RefundException
+class RefundHttpClientException extends \RuntimeException
 {
     use WithGetter;
 
@@ -46,7 +46,7 @@ class RefundHttpClientException extends RefundException
         ?string $httpBody = null,
         ?array  $jsonBody = null,
         ?array  $httpHeaders = null
-    ): RefundPaymentGatewayException
+    )
     {
         $instance = new static($message);
         $instance->httpBody = $httpBody;

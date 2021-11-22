@@ -22,7 +22,7 @@ class RefundPaymentGatewayException extends RefundHttpClientException
      * @param null|array $httpHeaders the HTTP headers array
      * @param null|string $gatewayErrorCode the Stripe error code
      *
-     * @return static
+     * @return RefundPaymentGatewayException
      */
     public static function factory(
         string  $message,

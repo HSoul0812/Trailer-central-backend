@@ -89,13 +89,12 @@ final class RefundBag implements DTO
         $this->taxAmount = $taxAmount;
         $this->reason = $reason;
         $this->totalAmount = $partsAmount->plus($adjustmentAmount)
-            ->plus($adjustmentAmount)
             ->plus($handlingAmount)
             ->plus($shippingAmount)
             ->plus($taxAmount);
     }
 
-    public function fromRequest(RequestRefundOrderRequest $request): self
+    public static function fromRequest(RequestRefundOrderRequest $request): self
     {
         return new self(
             $request->orderId(),
@@ -113,12 +112,12 @@ final class RefundBag implements DTO
         return [
             'order_id' => $this->order->id,
             'parts' => $this->parts,
-            'parts_amount' => $this->partsAmount->getAmount(),
-            'adjustment_amount' => $this->adjustmentAmount->getAmount(),
-            'handling_amount' => $this->handlingAmount->getAmount(),
-            'shipping_amount' => $this->shippingAmount->getAmount(),
-            'tax_amount' => $this->taxAmount->getAmount(),
-            'total_amount' => $this->totalAmount->getAmount(),
+            'parts_amount' => $this->partsAmount->getAmount()->toFloat(),
+            'adjustment_amount' => $this->adjustmentAmount->getAmount()->toFloat(),
+            'handling_amount' => $this->handlingAmount->getAmount()->toFloat(),
+            'shipping_amount' => $this->shippingAmount->getAmount()->toFloat(),
+            'tax_amount' => $this->taxAmount->getAmount()->toFloat(),
+            'total_amount' => $this->totalAmount->getAmount()->toFloat(),
             'reason' => $this->reason
         ];
     }
@@ -171,17 +170,18 @@ final class RefundBag implements DTO
      */
     public function validate(): void
     {
-        if ($this->order->isUnpaid()) {
-            throw new RefundException(sprintf('%d order is not refundable due it is unpaid', $this->order->id));
+        if (!$this->order->isPaid()) {
+            throw new RefundException(sprintf('%d order is not refundable due it is unpaid', $this->order->id), 'order');
         }
 
         if (!$this->order->isRefundable()) {
-            throw new RefundException(sprintf('%d order is not refundable due it is refunded', $this->order->id));
+            throw new RefundException(sprintf('%d order is not refundable due it is refunded', $this->order->id), 'order');
         }
 
         if (empty($this->order->payment_intent)) {
             throw new RefundException(
-                sprintf('%d order is not refundable due it has not a payment unique id', $this->order->id)
+                sprintf('%d order is not refundable due it has not a payment unique id', $this->order->id),
+                'order'
             );
         }
 
@@ -192,7 +192,8 @@ final class RefundBag implements DTO
                 sprintf(
                     '%d order cannot be refunded due it has not a related parts matching with the request',
                     $this->order->id
-                )
+                ),
+                'parts'
             );
         }
 
@@ -209,7 +210,8 @@ final class RefundBag implements DTO
                         $this->{$amountToCheck . 'Amount'}->getAmount(),
                         $amountToCheck,
                         $orderAmounts->{$amountToCheck . 'RemainingBalance'}->getAmount()
-                    )
+                    ),
+                    $amountToCheck
                 );
             }
         }
@@ -228,7 +230,8 @@ final class RefundBag implements DTO
                             $partId,
                             $partQty,
                             $orderAmounts->partsQtys[$partId]['qty'] - $orderAmounts->partsRefundedQtys[$partId]->qty
-                        )
+                        ),
+                        'parts'
                     );
                 } elseif (!isset($orderAmounts->partsRefundedQtys[$partId]) && $partQty > $orderAmounts->partsQtys[$partId]['qty']) {
                     throw new RefundAmountException(
@@ -237,11 +240,12 @@ final class RefundBag implements DTO
                             $partId,
                             $partQty,
                             $orderAmounts->partsQtys[$partId]['qty']
-                        )
+                        ),
+                        'parts'
                     );
                 }
             } else {
-                throw new RefundException(sprintf('The refund part[%d] is not a placed part', $partId));
+                throw new RefundException(sprintf('The refund part[%d] is not a placed part', $partId), 'parts');
             }
         }
     }

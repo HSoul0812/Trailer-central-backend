@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Exceptions\Ecommerce;
 
-class RefundAmountException extends \DomainException
+class RefundAmountException extends RefundException
 {
 
 }

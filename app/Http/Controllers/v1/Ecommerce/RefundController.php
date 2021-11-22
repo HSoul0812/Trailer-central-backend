@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\v1\Ecommerce;
 
+use App\Exceptions\Ecommerce\RefundException;
 use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\Ecommerce\GetAllRefundsRequest;
 use App\Http\Requests\Ecommerce\GetSingleRefundRequest;
@@ -12,6 +13,7 @@ use App\Repositories\Ecommerce\RefundRepositoryInterface;
 use App\Services\Ecommerce\Refund\RefundBag;
 use App\Services\Ecommerce\Refund\RefundServiceInterface;
 use App\Transformers\Ecommerce\RefundTransformer;
+use Dingo\Api\Exception\ResourceException;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
 
@@ -56,9 +58,13 @@ class RefundController extends RestfulControllerV2
         $refundRequest = new RequestRefundOrderRequest($request->all() + ['order_id' => $orderId]);
 
         if ($refundRequest->validate()) {
-            $refund = $this->service->issue(RefundBag::fromRequest($refundRequest));
+            try {
+                $refund = $this->service->issue(RefundBag::fromRequest($refundRequest));
 
-            return $this->createdResponse($refund->id);
+                return $this->createdResponse($refund->id);
+            } catch (RefundException $exception) {
+                throw new ResourceException('Validation Failed', $exception->getErrors(), $exception);
+            }
         }
 
         $this->response->errorBadRequest();
