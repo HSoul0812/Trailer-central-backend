@@ -7,16 +7,17 @@ namespace App\Http\Controllers\v1\Ecommerce;
 use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\Ecommerce\GetAllRefundsRequest;
 use App\Http\Requests\Ecommerce\GetSingleRefundRequest;
-use App\Http\Requests\Ecommerce\RefundOrderRequest;
+use App\Http\Requests\Ecommerce\RequestRefundOrderRequest;
 use App\Repositories\Ecommerce\RefundRepositoryInterface;
-use App\Services\Ecommerce\Payment\PaymentServiceInterface;
+use App\Services\Ecommerce\Refund\RefundBag;
+use App\Services\Ecommerce\Refund\RefundServiceInterface;
 use App\Transformers\Ecommerce\RefundTransformer;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
 
 class RefundController extends RestfulControllerV2
 {
-    /** @var PaymentServiceInterface */
+    /** @var RefundServiceInterface */
     private $service;
 
     /** @var RefundRepositoryInterface */
@@ -25,7 +26,7 @@ class RefundController extends RestfulControllerV2
     /** @var RefundTransformer */
     private $transformer;
 
-    public function __construct(PaymentServiceInterface   $service,
+    public function __construct(RefundServiceInterface    $service,
                                 RefundRepositoryInterface $repository,
                                 RefundTransformer         $transformer)
     {
@@ -33,10 +34,13 @@ class RefundController extends RestfulControllerV2
         $this->repository = $repository;
         $this->transformer = $transformer;
 
-        $this->middleware('setDealerIdOnRequest')->only(['create', 'index', 'show']);
+        $this->middleware('setDealerIdOnRequest')->only(['issue', 'index', 'show']);
     }
 
     /**
+     * It will create a full/partial refund in our database, then it will send a refund/memo request to TexTrail,
+     * but the refund process on the payment gateway will be remaining as pending until TextTrail send us a command to proceed.
+     *
      * @param int $orderId
      * @param Request $request
      * @return Response|void
@@ -47,17 +51,12 @@ class RefundController extends RestfulControllerV2
      * @noinspection PhpDocMissingThrowsInspection
      * @noinspection PhpUnhandledExceptionInspection
      */
-    public function create(int $orderId, Request $request): Response
+    public function issue(int $orderId, Request $request): Response
     {
-        $refundRequest = new RefundOrderRequest($request->all() + ['order_id' => $orderId]);
+        $refundRequest = new RequestRefundOrderRequest($request->all() + ['order_id' => $orderId]);
 
         if ($refundRequest->validate()) {
-            $refund = $this->service->refund(
-                $refundRequest->orderId(),
-                $refundRequest->amount(),
-                $refundRequest->parts(),
-                $refundRequest->reason()
-            );
+            $refund = $this->service->issue(RefundBag::fromRequest($refundRequest));
 
             return $this->createdResponse($refund->id);
         }
