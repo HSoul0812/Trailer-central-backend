@@ -125,7 +125,10 @@ class RefundService implements RefundServiceInterface
 
             $this->logger->error($exception->getMessage(), $logContext);
 
-            $this->refundRepository->markAsFailed($refund, $exception->getMessage());
+            $this->refundRepository->markAsFailed(
+                $refund, $exception->getMessage(),
+                Refund::ERROR_STAGE_TEXTRAIL_ISSUE_REMOTE
+            );
 
             throw $exception;
         } catch (AfterRemoteRefundException $exception) {
@@ -139,17 +142,19 @@ class RefundService implements RefundServiceInterface
             // refund attempt will be prevented
             $this->refundRepository->markAsRecoverableFailure(
                 $refund,
-                Refund::RECOVERABLE_FAILURE_TEXTRAIL,
-                [
-                    'textrail_id' => $textrailRefundId
-                ]
+                ['textrail_id' => $textrailRefundId],
+                $exception->getMessage(),
+                Refund::RECOVERABLE_STAGE_TEXTRAIL_ISSUE
             );
 
             throw $exception;
         } catch (\Exception $exception) {
             $this->logger->error($exception->getMessage(), $logContext);
 
-            $this->refundRepository->markAsFailed($refund, $exception->getMessage());
+            $this->refundRepository->markAsFailed(
+                $refund, $exception->getMessage(),
+                Refund::ERROR_STAGE_TEXTRAIL_ISSUE_LOCAL
+            );
 
             throw $exception;
         }
@@ -207,7 +212,10 @@ class RefundService implements RefundServiceInterface
 
                 $this->logger->error($errorMessage, $logContext);
 
-                $this->refundRepository->markAsFailed($refund, $exception->getMessage());
+                $this->refundRepository->markAsFailed(
+                    $refund, $exception->getMessage(),
+                    Refund::ERROR_STAGE_PAYMENT_GATEWAY_REFUND_LOCAL
+                );
 
                 throw $exception;
             } catch (\Exception  $exception) {
@@ -221,11 +229,9 @@ class RefundService implements RefundServiceInterface
                 // refund attempt will be prevented
                 $this->refundRepository->markAsRecoverableFailure(
                     $refund,
-                    Refund::RECOVERABLE_FAILURE_PAYMENT_GATEWAY,
-                    [
-                        'payment_gateway_id' => $gatewayRefundResponse->getId(),
-                        'metadata' => $gatewayRefundResponse->asArray()
-                    ]
+                    $gatewayRefundResponse->asArray(),
+                    $exception->getMessage(),
+                    Refund::RECOVERABLE_STAGE_PAYMENT_GATEWAY_REFUND
                 );
 
                 throw new RefundPaymentGatewayException($exception->getMessage(), $exception->getCode(), $exception);

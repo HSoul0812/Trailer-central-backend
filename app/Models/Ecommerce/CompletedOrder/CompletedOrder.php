@@ -39,7 +39,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property \DateTimeInterface $created_at
  * @property \DateTimeInterface $updated_at
  * @property \DateTimeInterface $refunded_at
- * @property \DateTimeInterface $failed_at
  *
  * @property-read User $dealer
  *

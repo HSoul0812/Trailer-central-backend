@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Ecommerce;
 
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
+use App\Models\Traits\ErrorAware;
 use App\Models\Traits\TableAware;
 use App\Models\User\User;
 use Illuminate\Database\Eloquent\Collection;
@@ -29,10 +30,9 @@ use Illuminate\Database\Query\Builder;
  * @property int $textrail_rma the return id on textrail
  * @property string $status 'pending', 'authorized', 'completed', 'return_received', 'failed'
  * @property string $recoverable_failure_stage 'payment_gateway', 'textrail'
- * @property array $metadata a valid and useful json object (response, error, etc..)
+ * @property array $metadata a valid and useful json object
  * @property \DateTimeInterface $created_at
  * @property \DateTimeInterface $updated_at
- * @property \DateTimeInterface $failed_at
  *
  * @property-read User $dealer
  * @property-read CompletedOrder $order
@@ -47,6 +47,7 @@ use Illuminate\Database\Query\Builder;
 class Refund extends Model
 {
     use TableAware;
+    use ErrorAware;
 
     public const STATUS_PENDING = 'pending';
     public const STATUS_AUTHORIZED = 'authorized'; // the refund has been authorized by TexTrail
@@ -57,8 +58,12 @@ class Refund extends Model
 
     // these are intended to advice that some refund has failed after their successfully done remote process
     // subsequently, the refund will be marked as failed, but TrailerCentral can still recover it
-    public const RECOVERABLE_FAILURE_PAYMENT_GATEWAY = 'payment_gateway';
-    public const RECOVERABLE_FAILURE_TEXTRAIL = 'textrail';
+    public const RECOVERABLE_STAGE_PAYMENT_GATEWAY_REFUND = 'payment_gateway_recoverable_refund';
+    public const RECOVERABLE_STAGE_TEXTRAIL_ISSUE = 'textrail_recoverable_issue';
+
+    public const ERROR_STAGE_TEXTRAIL_ISSUE_REMOTE = 'textrail_issue_remote';
+    public const ERROR_STAGE_TEXTRAIL_ISSUE_LOCAL = 'textrail_issue_local';
+    public const ERROR_STAGE_PAYMENT_GATEWAY_REFUND_LOCAL = 'payment_gateway_refund_remote';
 
     public const REASONS = [
         'duplicate',
@@ -106,7 +111,8 @@ class Refund extends Model
 
     protected $casts = [
         'parts' => 'array',
-        'metadata' => 'json'
+        'metadata' => 'json',
+        'errors' => 'json',
     ];
 
     public function dealer(): BelongsTo

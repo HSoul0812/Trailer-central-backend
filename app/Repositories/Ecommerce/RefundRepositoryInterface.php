@@ -32,19 +32,21 @@ interface RefundRepositoryInterface extends GenericRepository
     public function markAsCompleted(Refund $refund, PaymentGatewayRefundResultInterface $refundResult): bool;
 
     /**
-     * @param  Refund  $refund
-     * @param  string  $errorMessage
+     * @param Refund $refund
+     * @param string|array $message
+     * @param string $stage
      * @return bool
      */
-    public function markAsFailed(Refund $refund, string $errorMessage): bool;
+    public function markAsFailed(Refund $refund, $message, string $stage): bool;
 
     /**
      * @param Refund $refund
+     * @param array $metadata
+     * @param string|array $message
      * @param string $stage
-     * @param array $data
      * @return bool
      */
-    public function markAsRecoverableFailure(Refund $refund, string $stage, array $data): bool;
+    public function markAsRecoverableFailure(Refund $refund, array $metadata, $message, string $stage): bool;
 
     public function get(int $refundId): ?Refund;
 

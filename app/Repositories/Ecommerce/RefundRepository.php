@@ -150,29 +150,31 @@ class RefundRepository implements RefundRepositoryInterface
 
     /**
      * @param Refund $refund
-     * @param string $errorMessage
+     * @param string|array $message
+     * @param string $stage
      * @return bool
      */
-    public function markAsFailed(Refund $refund, string $errorMessage): bool
+    public function markAsFailed(Refund $refund, $message, string $stage): bool
     {
-        return $this->update(
-            $refund->id,
-            [
-                'status' => Refund::STATUS_FAILED,
-                'metadata' => ['error' => $errorMessage]
-            ]
-        );
+        $refund->status = Refund::STATUS_FAILED;
+
+        return $refund->addError($message, $stage);
     }
 
     /**
      * @param Refund $refund
-     * @param string $stage
      * @param array $data
+     * @param $message
+     * @param string $stage
      * @return bool
      */
-    public function markAsRecoverableFailure(Refund $refund, string $stage, array $data): bool
+    public function markAsRecoverableFailure(Refund $refund, array $metadata, $message, string $stage): bool
     {
-        return $this->update($refund->id, $data + ['recoverable_failure_stage' => $stage, 'status' => Refund::STATUS_FAILED]);
+        $refund->status = Refund::STATUS_FAILED;
+        $refund->recoverable_failure_stage = $stage;
+        $refund->metadata = $metadata;
+
+        return $refund->addError($message, $stage);
     }
 
     /**
