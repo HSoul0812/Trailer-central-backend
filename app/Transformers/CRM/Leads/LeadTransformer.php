@@ -11,18 +11,16 @@ use League\Fractal\Resource\Item;
 
 class LeadTransformer extends TransformerAbstract
 {
+    public $lazyLoadedIncludes = [
+        'otherLeadProperties'
+    ];
     protected $defaultIncludes = [
         'preferredLocation',
         'inventoryInterestedIn',
     ];
 
     protected $availableIncludes = [
-        'leads',
         'interactions',
-        'otherLeadProperties',
-    ];
-
-    public $lazyLoadedIncludes = [
         'otherLeadProperties',
     ];
 

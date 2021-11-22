@@ -2,7 +2,7 @@
 
 namespace App\Repositories\CRM\Leads;
 
-use App\Repositories\CRM\Leads\LeadRepositoryInterface;
+use App\Models\Website\Website;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadAssign;
@@ -16,11 +16,16 @@ use App\Models\Inventory\Inventory;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
 
 class LeadRepository implements LeadRepositoryInterface {
 
     use SortTrait;
+
+    private const LEAD_SOURCE_TRAILERTRADERS = 'trailertraders';
+    private const LEAD_SOURCE_CLASSIFIEDS = 'classifieds';
+    private const HAS_PRODUCT = 'has_product';
 
     private $sortOrders = [
         'no_due_past_due_future_due' => [
@@ -90,7 +95,6 @@ class LeadRepository implements LeadRepositoryInterface {
         if (isset($params['dealer_id'])) {
             $query = $query->where(Lead::getTableName().'.dealer_id', $params['dealer_id']);
         }
-
         /**
          * Filters
          */
@@ -401,18 +405,70 @@ class LeadRepository implements LeadRepositoryInterface {
             $query = $this->addLeadTypeToQuery($query, $filters['lead_type']);
         }
 
+        if (isset($filters['product_status'])) {
+            $query = $this->addProductStatusToQuery($query, $filters['product_status']);
+        }
+
+        if(isset($filters['lead_source'])) {
+            $query = $this->addLeadSourceToQuery($query, $filters['lead_source']);
+        }
+
         return $query;
     }
 
-    private function addDateToToQuery($query, $dateTo) {
+    /**
+     * @param Builder $query
+     * @param string $leadSource
+     * @return Builder
+     */
+    private function addLeadSourceToQuery(Builder $query, string $leadSource) {
+        if($leadSource === self::LEAD_SOURCE_TRAILERTRADERS) {
+            $query->where(Lead::getTableName().'.website_id', '284');
+        } else if ($leadSource === self::LEAD_SOURCE_CLASSIFIEDS) {
+            $query
+                ->leftJoin(Website::getTableName() . '.id', '=', Lead::getTableName() . '.website_id')
+                ->where(Website::getTableName() . '.type', Lead::LEAD_TYPE_CLASSIFIED);
+        }
+        return $query;
+    }
+
+    /**
+     * @param Builder $query
+     * @param string $productStatus
+     * @return Builder
+     */
+    private function addProductStatusToQuery(Builder $query, string $productStatus) {
+        return $query->where(
+            Lead::getTableName().'.inventory_id',
+            $productStatus === self::HAS_PRODUCT ? '>' : '=',
+            0
+        );
+    }
+
+    /**
+     * @param Builder|Relation $query
+     * @param string $dateTo
+     * @return Builder
+     */
+    private function addDateToToQuery($query, string $dateTo) {
          return $query->where(Lead::getTableName().'.date_submitted', '<=', $dateTo);
     }
 
-    private function addDateFromToQuery($query, $dateFrom) {
+    /**
+     * @param Builder|Relation $query
+     * @param string $dateFrom
+     * @return Builder
+     */
+    private function addDateFromToQuery($query, string $dateFrom) {
         return $query->where(Lead::getTableName().'.date_submitted', '>=', $dateFrom);
     }
 
-    private function addSearchToQuery($query, $search) {
+    /**
+     * @param Builder|Relation $query
+     * @param string $search
+     * @return Builder|\Illuminate\Database\Query\Builder
+     */
+    private function addSearchToQuery($query, string $search) {
         $query = $query->leftJoin(Inventory::getTableName(), Inventory::getTableName().'.inventory_id',  '=', Lead::getTableName().'.inventory_id');
 
         return $query->where(function($q) use ($search) {
@@ -427,27 +483,59 @@ class LeadRepository implements LeadRepositoryInterface {
         });
     }
 
-    private function addIsArchivedToQuery($query, $isArchived) {
+    /**
+     * @param Builder|Relation $query
+     * @param bool $isArchived
+     * @return Builder|Relation
+     */
+    private function addIsArchivedToQuery($query, bool $isArchived) {
         return $query->where(Lead::getTableName().'.is_archived', $isArchived);
     }
 
-    private function addLocationToQuery($query, $location) {
+    /**
+     * @param Builder|Relation $query
+     * @param int $location
+     * @return Builder|Relation
+     */
+
+    private function addLocationToQuery($query, int $location) {
         return $query->where(Lead::getTableName().'.dealer_location_id', $location);
     }
 
-    private function addCustomerNameToQuery($query, $customerName) {
+    /**
+     * @param Builder|Relation $query
+     * @param string $customerName
+     * @return Builder|Relation
+     */
+
+    private function addCustomerNameToQuery($query, string $customerName) {
         return $query->whereRaw("CONCAT(".Lead::getTableName().".first_name, ' ', ".Lead::getTableName().".last_name) LIKE ?", $customerName);
     }
 
-    private function addSalesPersonIdToQuery($query, $salesPersonId) {
+    /**
+     * @param Builder|Relation $query
+     * @param int $salesPersonId
+     * @return Builder|Relation
+     */
+    private function addSalesPersonIdToQuery($query, int $salesPersonId) {
         return $query->where(LeadStatus::getTableName().'.sales_person_id', $salesPersonId);
     }
 
-    private function addLeadStatusToQuery($query, $leadStatus) {
+    /**
+     * @param Builder|Relation $query
+     * @param $leadStatus
+     * @return Builder|Relation
+     */
+    private function addLeadStatusToQuery($query, string $leadStatus) {
         return $query->whereIn(LeadStatus::getTableName().'.status', $leadStatus);
     }
 
-    private function addLeadTypeToQuery($query, $leadType) {
+    /**
+     * @param Builder|Relation $query
+     * @param string $leadType
+     * @return Builder|Relation
+     */
+    private function addLeadTypeToQuery($query, string $leadType) {
         $query = $query->leftJoin(LeadType::getTableName(), LeadType::getTableName().'.lead_id',  '=', Lead::getTableName().'.identifier');
         return $query->whereIn(LeadType::getTableName().'.lead_type', $leadType);
     }

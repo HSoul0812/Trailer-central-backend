@@ -32,6 +32,8 @@ use App\Models\CRM\Leads\Facebook\Lead as FbLead;
  * @property int $website_id
  * @property string $lead_type
  * @property int $inventory_id
+ * @property int $customer_id
+ * @property int $ids_exported
  * @property string $referral
  * @property string $title
  * @property string $first_name
@@ -50,6 +52,7 @@ use App\Models\CRM\Leads\Facebook\Lead as FbLead;
  * @property bool $is_spam
  * @property \DateTimeInterface $contact_email_sent
  * @property \DateTimeInterface $adf_email_sent
+ * @property \DateTimeInterface $last_visited_at
  * @property bool $cdk_email_sent
  * @property string $metadata
  * @property bool $newsletter
@@ -85,6 +88,8 @@ class Lead extends Model
 
     const IS_IDS_EXPORTED = 1;
     const IS_NOT_IDS_EXPORTED = 0;
+
+    const LEAD_TYPE_CLASSIFIED = 'classified';
 
     const TABLE_NAME = 'website_lead';
 
