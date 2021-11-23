@@ -1113,4 +1113,58 @@ $api->version('v1', function ($route) {
     $route->put('bills/{id}', 'App\Http\Controllers\v1\Dms\Quickbooks\BillController@update')->where('id', '[0-9]+');
     $route->get('bills/{id}', 'App\Http\Controllers\v1\Dms\Quickbooks\BillController@show')->where('id', '[0-9]+');
     $route->get('bills', 'App\Http\Controllers\v1\Dms\Quickbooks\BillController@index');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Marketing
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+    $route->group([
+        'prefix' => 'marketing',
+        'middleware' => 'accesstoken.validate'
+    ], function ($route) {
+        // Facebook Marketplace
+        $route->group([
+            'prefix' => 'facebook',
+            'middleware' => 'marketing.facebook'
+        ], function ($route) {
+            $route->get('/', 'App\Http\Controllers\v1\Marketing\FacebookController@index');
+            $route->post('/', 'App\Http\Controllers\v1\Marketing\FacebookController@assign');
+            $route->get('{id}', 'App\Http\Controllers\v1\Marketing\FacebookController@show')->where('id', '[0-9]+');
+            $route->post('{id}', 'App\Http\Controllers\v1\Marketing\FacebookController@update')->where('id', '[0-9]+');
+        });
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Dispatch
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+    $route->group([
+        'prefix' => 'dispatch'
+    ], function ($route) {
+        // Facebook Marketplace Extension
+        $route->group([
+            'prefix' => 'facebook'
+        ], function ($route) {
+            // Login to Facebook Dispatch
+            $route->post('/', 'App\Http\Controllers\v1\Dispatch\FacebookController@index');
+
+            // Facebook Marketplace
+            $route->group([
+                'middleware' => 'dispatch.facebook'
+            ], function ($route) {
+                $route->get('/', 'App\Http\Controllers\v1\Dispatch\FacebookController@index');
+                $route->get('{id}', 'App\Http\Controllers\v1\Dispatch\FacebookController@show')->where('id', '[0-9]+');
+                $route->post('{id}', 'App\Http\Controllers\v1\Dispatch\FacebookController@update')->where('id', '[0-9]+');
+            });
+        });
+    });
 });
