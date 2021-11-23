@@ -1,18 +1,19 @@
 <?php
 
-namespace App\Http\Requests\Integration\Facebook;
+namespace App\Http\Requests\Marketing\Facebook;
 
 use App\Http\Requests\Request;
 
 /**
- * Delete Catalog Request
+ * Delete Marketplace Request
  *
+ * @package App\Http\Requests\Marketing\Facebook
  * @author David A Conway Jr.
  */
-class DeleteCatalogRequest extends Request {
-    
+class DeleteMarketplaceRequest extends Request {
+
     protected $rules = [
         'id' => 'required|integer'
     ];
-    
+
 }
