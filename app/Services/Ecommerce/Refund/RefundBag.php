@@ -27,6 +27,7 @@ use Brick\Money\Money;
  * @property-read  Money $taxAmount
  * @property-read  Money $totalAmount
  * @property-read  array<array{id: int, qty: int, price: float, amount: float}> $parts array indexed by part id containing the purchase price and its amount
+ * @property-read  array<array{order_item_id: int, qty: int}> $textrailItems
  * @property-read  string|null $reason
  */
 final class RefundBag implements DTO
@@ -57,6 +58,9 @@ final class RefundBag implements DTO
     /** @var array<array{id: int, qty: int, price: float, amount: float}> array indexed by part id containing the purchase price and its amount */
     private $parts;
 
+    /** @var array<array{order_item_id: int, qty: int}> */
+    private $textrailItems;
+
     /** @var CompletedOrder */
     private $order;
 
@@ -82,6 +86,17 @@ final class RefundBag implements DTO
         ['total' => $partsAmount, 'list' => $parts] = $this->getSummaryParts($partsWithQtys, $orderId);
 
         $this->parts = $parts;
+
+        // prepare the refund info to match with the order info in Textrail side
+        $this->textrailItems = collect($parts)->filter(function (array $part): bool {
+            return $part['textrail'] !== null;
+        })->map(function (array $part) {
+            return [
+                'order_item_id' => $part['textrail']['item_id'],
+                'qty' => $part['qty']
+            ];
+        })->toArray();
+
         $this->partsAmount = $partsAmount;
         $this->adjustmentAmount = $adjustmentAmount;
         $this->handlingAmount = $handlingAmount;
@@ -112,6 +127,7 @@ final class RefundBag implements DTO
         return [
             'order_id' => $this->order->id,
             'parts' => $this->parts,
+            'textrail_items' => $this->textrailItems,
             'parts_amount' => $this->partsAmount->getAmount()->toFloat(),
             'adjustment_amount' => $this->adjustmentAmount->getAmount()->toFloat(),
             'handling_amount' => $this->handlingAmount->getAmount()->toFloat(),
@@ -133,6 +149,15 @@ final class RefundBag implements DTO
 
         $indexedOrderParts = collect($this->order->parts)->keyBy('id')->toArray();
 
+        $indexedOrderTextrailItems = collect($this->order->ecommerce_items ?? [])->keyBy('sku')
+            ->map(static function (array $item): array {
+                return [
+                    'item_id' => (int)$item['item_id'],
+                    'product_type' => $item['product_type'],
+                    'quote_id' => (int)$item['quote_id']
+                ];
+            })->toArray();
+
         $partModelsToBeRefunded = $this->getRefundRepository()->getPartsToBeRefunded(array_keys($parts));
 
         // calculates the parts total having in count the purchase price, not the current part price
@@ -144,8 +169,9 @@ final class RefundBag implements DTO
             return $carry->plus($price * $parts[$part->id]['qty']);
         }, Money::zero('USD'));
 
-        $list = $partModelsToBeRefunded->map(static function (Part $part) use ($parts, $indexedOrderParts): array {
+        $list = $partModelsToBeRefunded->map(static function (Part $part) use ($parts, $indexedOrderParts, $indexedOrderTextrailItems): array {
             $price = (float)(isset($indexedOrderParts[$part->id]) ? $indexedOrderParts[$part->id]['price'] : $part->price);
+            $textTrailInfo = $indexedOrderTextrailItems[$part->sku] ?? null;
 
             return [
                 'sku' => $part->sku,
@@ -153,7 +179,8 @@ final class RefundBag implements DTO
                 'id' => $part->id,
                 'price' => $price,
                 'amount' => $price * $parts[$part->id]['qty'],
-                'qty' => $parts[$part->id]['qty']
+                'qty' => $parts[$part->id]['qty'],
+                'textrail' => $textTrailInfo
             ];
         })->toArray();
 
