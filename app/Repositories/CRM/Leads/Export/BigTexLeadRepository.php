@@ -4,6 +4,7 @@ namespace App\Repositories\CRM\Leads\Export;
 
 use App\Repositories\CRM\Leads\Export\BigTexLeadRepositoryInterface;
 use App\Exceptions\NotImplementedException;
+use App\Models\Website\Website;
 use App\Models\CRM\Leads\Lead;
 
 class BigTexLeadRepository implements BigTexLeadRepositoryInterface 
@@ -31,6 +32,7 @@ class BigTexLeadRepository implements BigTexLeadRepositoryInterface
     public function getAllNotExportedChunked($callable, string $fromDate, int $chunkSize = 500) : void {
         Lead::select('website_lead.*')  
                 ->join('inventory', 'website_lead.inventory_id', '=', 'inventory.inventory_id')
+                ->where('website_lead.website_id', Website::TRAILERTRADER_ID)
                 ->where('website_lead.is_spam', Lead::IS_NOT_SPAM)
                 ->where('website_lead.date_submitted', '>=', $fromDate)
                 ->where('website_lead.is_from_classifieds', Lead::IS_FROM_CLASSIFIEDS)

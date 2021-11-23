@@ -64,8 +64,7 @@ class BigTex extends Command
         $this->bigTexLeadRepository->getAllNotExportedChunked(function($leads) {
             foreach($leads as $lead) {
                 $this->info("Processing lead {$lead->identifier}");
-                $this->bigTexService->export($lead);              
-                die('123');
+                $this->bigTexService->export($lead);
             }
         }, $exportStartDate);
     }

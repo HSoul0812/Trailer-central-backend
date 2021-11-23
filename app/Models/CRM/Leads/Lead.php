@@ -62,6 +62,7 @@ use App\Models\CRM\Leads\Facebook\Lead as FbLead;
  * @property int $dealer_location_id
  * @property bool $is_archived
  * @property int $unique_id
+ * @property int $bigtex_exported
  *
  * @property Website $website
  * @property LeadStatus $leadStatus
