@@ -79,7 +79,7 @@ final class RefundBag implements DTO
         ?string $reason = null
     )
     {
-        ['total' => $partsAmount, 'list' => $parts] = $this->getSummaryParts(array_keys($partsWithQtys), $orderId);
+        ['total' => $partsAmount, 'list' => $parts] = $this->getSummaryParts($partsWithQtys, $orderId);
 
         $this->parts = $parts;
         $this->partsAmount = $partsAmount;
@@ -123,7 +123,7 @@ final class RefundBag implements DTO
     }
 
     /**
-     * @param array{int} $parts parts ids
+     * @param array<array{qty: int, id: int}> $parts parts qtys indexed by part id
      * @return array{total: Money, list:array{sku:string, title:string, id:int, amount: float, qty: int, price: float}}
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException when the order is not found
      */
@@ -137,16 +137,22 @@ final class RefundBag implements DTO
 
         // calculates the parts total having in count the purchase price, not the current part price
         $total = $partModelsToBeRefunded->reduce(function (Money $carry, Part $part) use ($parts, $indexedOrderParts): Money {
-            return $carry->plus($indexedOrderParts[$part->id]['price'] * $parts[$part->id]->qty);
+            // when the part is found in the order, the purchase price is used, otherwise the current price is used
+            // but only to be able showing a proper error message
+            $price = (float)(isset($indexedOrderParts[$part->id]) ? $indexedOrderParts[$part->id]['price'] : $part->price);
+
+            return $carry->plus($price * $parts[$part->id]['qty']);
         }, Money::zero('USD'));
 
         $list = $partModelsToBeRefunded->map(static function (Part $part) use ($parts, $indexedOrderParts): array {
+            $price = (float)(isset($indexedOrderParts[$part->id]) ? $indexedOrderParts[$part->id]['price'] : $part->price);
+
             return [
                 'sku' => $part->sku,
                 'title' => $part->title,
                 'id' => $part->id,
-                'price' => $indexedOrderParts[$part->id]['price'],
-                'amount' => $indexedOrderParts[$part->id]['price'] * $parts[$part->id]['qty'],
+                'price' => $price,
+                'amount' => $price * $parts[$part->id]['qty'],
                 'qty' => $parts[$part->id]['qty']
             ];
         })->toArray();
@@ -187,7 +193,7 @@ final class RefundBag implements DTO
 
         $orderAmounts = OrderAmountsBag::fromOrder($this->order);
 
-        if (empty($orderAmounts->partsQtys) && !empty($this->parts)) {
+        if ($orderAmounts->partsQtys === [] && $this->parts !== []) {
             throw new RefundException(
                 sprintf(
                     '%d order cannot be refunded due it has not a related parts matching with the request',
@@ -195,6 +201,39 @@ final class RefundBag implements DTO
                 ),
                 'parts'
             );
+        }
+
+        foreach ($this->parts as $part) {
+            ['id' => $partId, 'qty' => $partQty] = $part;
+
+            if (array_key_exists($partId, $orderAmounts->partsQtys)) {
+                // check if the refunded qty will be greater than the total qty for the part item
+                if (isset($orderAmounts->partsRefundedQtys[$partId])
+                    && ($orderAmounts->partsRefundedQtys[$partId] + $partQty) > $orderAmounts->partsQtys[$partId]
+                ) {
+                    throw new RefundAmountException(
+                        sprintf(
+                            'The refund part[%d] qty(%d) is greater than the remaining qty(%d)',
+                            $partId,
+                            $partQty,
+                            $orderAmounts->partsQtys[$partId] - $orderAmounts->partsRefundedQtys[$partId]
+                        ),
+                        'parts'
+                    );
+                } elseif (!isset($orderAmounts->partsRefundedQtys[$partId]) && $partQty > $orderAmounts->partsQtys[$partId]) {
+                    throw new RefundAmountException(
+                        sprintf(
+                            'The refund part[%d] qty(%d) is greater than the purchase qty(%d)',
+                            $partId,
+                            $partQty,
+                            $orderAmounts->partsQtys[$partId]
+                        ),
+                        'parts'
+                    );
+                }
+            } else {
+                throw new RefundException(sprintf('The refund part[%d] is not a placed part', $partId), 'parts');
+            }
         }
 
         // check if the amounts are greater than the order remaining balances
@@ -213,39 +252,6 @@ final class RefundBag implements DTO
                     ),
                     $amountToCheck
                 );
-            }
-        }
-
-        foreach ($this->parts as $part) {
-            ['id' => $partId, 'qty' => $partQty] = $part;
-
-            if (array_key_exists($partId, $orderAmounts->partsQtys)) {
-                // check if the refunded qty will be greater than the total qty for the part item
-                if (isset($orderAmounts->partsRefundedQtys[$partId])
-                    && ($orderAmounts->partsRefundedQtys[$partId]->qty + $partQty) > $orderAmounts->partsQtys[$partId]['qty']
-                ) {
-                    throw new RefundAmountException(
-                        sprintf(
-                            'The refund part[%d] qty(%d) is greater than the remaining qty(%d)',
-                            $partId,
-                            $partQty,
-                            $orderAmounts->partsQtys[$partId]['qty'] - $orderAmounts->partsRefundedQtys[$partId]->qty
-                        ),
-                        'parts'
-                    );
-                } elseif (!isset($orderAmounts->partsRefundedQtys[$partId]) && $partQty > $orderAmounts->partsQtys[$partId]['qty']) {
-                    throw new RefundAmountException(
-                        sprintf(
-                            'The refund part[%d] qty(%d) is greater than the purchase qty(%d)',
-                            $partId,
-                            $partQty,
-                            $orderAmounts->partsQtys[$partId]['qty']
-                        ),
-                        'parts'
-                    );
-                }
-            } else {
-                throw new RefundException(sprintf('The refund part[%d] is not a placed part', $partId), 'parts');
             }
         }
     }
