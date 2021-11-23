@@ -15,15 +15,25 @@ use App\Transformers\Marketing\Facebook\MarketplaceTransformer;
 
 class FacebookController extends RestfulControllerV2 {
     /**
+     * @var App\Services\Marketing\MarketplaceRepositoryInterface
+     */
+    private $repository;
+
+    /**
      * @var App\Services\Marketing\MarketplaceServiceInterface
      */
     private $service;
 
-    public function __construct(MarketplaceRepositoryInterface $catalogs, MarketplaceServiceInterface $service) {
+    public function __construct(
+        MarketplaceRepositoryInterface $repository,
+        MarketplaceServiceInterface $service,
+        MarketplaceTransformer $transformer
+    ) {
         $this->middleware('setDealerIdOnRequest')->only(['create', 'update', 'index']);
 
-        $this->catalogs = $catalogs;
+        $this->repository = $repository;
         $this->service = $service;
+        $this->transformer = $transformer;
     }
 
     /**
@@ -38,7 +48,7 @@ class FacebookController extends RestfulControllerV2 {
         $request = new GetMarketplaceRequest($request->all());
         if ($request->validate()) {
             // Get Marketplaces
-            return $this->response->paginator($this->catalogs->getAll($request->all()), new MarketplaceTransformer());
+            return $this->response->paginator($this->repository->getAll($request->all()), $this->transformer);
         }
         
         return $this->response->errorBadRequest();
