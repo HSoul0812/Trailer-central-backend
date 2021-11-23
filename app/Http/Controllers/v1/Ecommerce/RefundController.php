@@ -16,6 +16,7 @@ use App\Transformers\Ecommerce\RefundTransformer;
 use Dingo\Api\Exception\ResourceException;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class RefundController extends RestfulControllerV2
 {
@@ -49,6 +50,7 @@ class RefundController extends RestfulControllerV2
      *
      * @throws \Symfony\Component\HttpKernel\Exception\HttpException when there was a bad request
      * @throws \Dingo\Api\Exception\ResourceException when there were some validation error
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException when there were some error different from bad request or validation error
      *
      * @noinspection PhpDocMissingThrowsInspection
      * @noinspection PhpUnhandledExceptionInspection
@@ -64,6 +66,8 @@ class RefundController extends RestfulControllerV2
                 return $this->createdResponse($refund->id);
             } catch (RefundException $exception) {
                 throw new ResourceException('Validation Failed', $exception->getErrors(), $exception);
+            } catch (\Throwable $exception) {
+                throw new HttpException($exception->getCode() > 0 ? $exception->getCode() : 500, $exception->getMessage(), $exception);
             }
         }
 

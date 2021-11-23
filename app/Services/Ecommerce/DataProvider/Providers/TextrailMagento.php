@@ -3,6 +3,7 @@
 namespace App\Services\Ecommerce\DataProvider\Providers;
 
 use App\Services\Ecommerce\DataProvider\DataProviderInterface;
+use App\Services\Ecommerce\Refund\RefundBag;
 use GuzzleHttp\Client as GuzzleHttpClient;
 use Illuminate\Support\Facades\Config;
 use App\Services\Parts\Textrail\DTO\TextrailPartDTO;
@@ -13,7 +14,8 @@ use App\Exceptions\NotImplementedException;
 
 class TextrailMagento implements DataProviderInterface,
                                  TextrailWithCheckoutInterface,
-                                 TextrailPartsInterface
+                                 TextrailPartsInterface,
+                                 TextrailRefundsInterface
 {
     private const TEXTRAIL_CATEGORY_URL = 'rest/V1/categories/';
     private const TEXTRAIL_ATTRIBUTES_MANUFACTURER_URL = 'rest/V1/products/attributes/manufacturer/options/';
@@ -338,6 +340,8 @@ class TextrailMagento implements DataProviderInterface,
     }
 
     /**
+     * @param int $currentPage
+     * @param int $pageSize
      * @return array<TextrailPartDTO>
      */
     public function getAllParts(int $currentPage = 1, int $pageSize = 1000): array
@@ -429,6 +433,7 @@ class TextrailMagento implements DataProviderInterface,
     }
 
     /**
+     * @param array $img
      * @return null|array{imageData: array, fileName: string}
      */
     public function getTextrailImage(array $img): ?array
@@ -453,7 +458,7 @@ class TextrailMagento implements DataProviderInterface,
     public function getTextrailPlaceholderImage(): ?array
     {
       $img_url = $this->getTextrailImagesBaseUrl() . self::TEXTRAIL_ATTRIBUTES_PLACEHOLDER_URL;
-      
+
       $checkFile = get_headers($img_url);
 
       if ($checkFile[0] == "HTTP/1.1 200 OK") {
@@ -506,10 +511,11 @@ class TextrailMagento implements DataProviderInterface,
      * @see https://magento.redoc.ly/2.3.7-guest/tag/guest-cartscartIdorder
      *
      * @param string $cartId
-     * @return string order id
+     * @param string $poNumber
+     * @return int order id
      * @throws \App\Exceptions\Ecommerce\TextrailException when some error occurs on the Magento side
      */
-    public function createOrderFromGuestCart(string $cartId, string $poNumber): string
+    public function createOrderFromGuestCart(string $cartId, string $poNumber): int
     {
         $url = $this->generateUrlWithCartAndView(self::GUEST_CART_CREATE_ORDER, $cartId);
 
@@ -524,7 +530,7 @@ class TextrailMagento implements DataProviderInterface,
         );
 
         if ($response->getStatusCode() === BaseResponse::HTTP_OK) {
-            return json_decode($response->getBody()->getContents(), true);
+            return (int)json_decode($response->getBody()->getContents(), true);
         }
 
         throw new TextrailException('Order creation for session cart has failed.');
@@ -535,6 +541,7 @@ class TextrailMagento implements DataProviderInterface,
      *
      * @param string $cartId
      * @param array{shipping_carrier_code: string, shipping_method_code: string, shipping_address: array, billing_address: array} $shippingInformation
+     * @return array
      */
     public function addShippingInformationToGuestCart(string $cartId, array $shippingInformation): array
     {
@@ -555,5 +562,15 @@ class TextrailMagento implements DataProviderInterface,
     public function createOrderFromCart(string $cartId): string
     {
         throw new NotImplementedException;
+    }
+
+    /**
+     * @return int the refund/memo id
+     *
+     * @throws ClientException when some remote error appears
+     */
+    public function issueRefund(RefundBag $refundBag): int
+    {
+        throw new NotImplementedException('Not implemented yet');
     }
 }
