@@ -69,7 +69,7 @@ class BigTexService implements BigTexServiceInterface
                 self::VIN_FIELD_NAME => $lead->inventory ? $lead->inventory->vin : '',
                 self::INVENTORY_ID_FIELD_NAME => $lead->inventory ? $lead->inventory->inventory_id : '',
                 self::LISTING_ID_FIELD_NAME => $lead->inventory ? $lead->inventory->inventory_id : '',
-                self::FORM_URL_FIELD_NAME => $lead->inventory ? $lead->inventory->getUrl() : '',
+                self::FORM_URL_FIELD_NAME => $lead->inventory ? 'https://www.trailertrader.com' . $lead->inventory->getUrl() : '',
                 self::BUSINESS_UNIT_FIELD_NAME => self::FORM_BUSINESS_UNIT,
                 self::REQUEST_TYPE_FIELD_NAME => self::FORM_REQUEST_TYPE,
                 self::FORM_TYPE_FIELD_NAME => self::FORM_TYPE_NAME,
