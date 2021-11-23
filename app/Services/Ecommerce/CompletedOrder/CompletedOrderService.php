@@ -3,6 +3,7 @@
 namespace App\Services\Ecommerce\CompletedOrder;
 
 use App\Contracts\LoggerServiceInterface;
+use App\Events\Ecommerce\OrderSuccessfullySynced;
 use App\Exceptions\Ecommerce\TextrailSyncException;
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
 use App\Models\Parts\Textrail\RefundedPart;
@@ -89,17 +90,18 @@ class CompletedOrderService implements CompletedOrderServiceInterface
     /**
      * @param int $orderId TC ecommerce order id
      * @return int the TexTrail order id
-     * @throws \App\Exceptions\Ecommerce\TextrailSyncException when some thing goes wrong on Magento side
+     * @throws \App\Exceptions\Ecommerce\TextrailSyncException when some thing goes wrong on TexTrail side
+     * @throws \App\Exceptions\Ecommerce\TextrailSyncException when the order has already synced to TexTrail
      */
     public function syncSingleOrderOnTextrail(int $orderId): int
     {
-        $this->logger->info(sprintf('Starting order Magento syncer for: %d', $orderId));
+        $this->logger->info(sprintf('Starting order(%d) TexTrail syncer', $orderId));
 
         /** @var CompletedOrder $order */
         $order = $this->completedOrderRepository->get(['id' => $orderId]);
 
         if ($order->ecommerce_order_id) {
-            throw new TextrailSyncException(sprintf('The order %d has already been synced to TexTrail', $orderId));
+            throw new TextrailSyncException(sprintf('The order(%d) has already synced to TexTrail', $orderId));
         }
 
         try {
@@ -116,8 +118,10 @@ class CompletedOrderService implements CompletedOrderServiceInterface
 
             $this->completedOrderRepository->commitTransaction();
 
+            event(new OrderSuccessfullySynced($order));
+
             $this->logger->info(
-                sprintf('Magento order was successfully create for: %d', $orderId),
+                sprintf('Magento order(%d) was successfully created', $orderId),
                 ['ecommerce_order_id' => $texTrailOrderId]
             );
 
@@ -139,5 +143,68 @@ class CompletedOrderService implements CompletedOrderServiceInterface
 
             throw new TextrailSyncException($exception->getMessage(), $exception->getCode(), $exception);
         }
+    }
+
+    /**
+     * @param int $orderId
+     * @return bool
+     *
+     * @throws \App\Exceptions\Ecommerce\TextrailSyncException when the order has not synced yet to TexTrail
+     */
+    public function updateItemsIdsAccordingTextrail(int $orderId): bool
+    {
+        $this->logger->info(sprintf('Starting order(%d) items updater', $orderId));
+
+        /** @var CompletedOrder $order */
+        $order = $this->completedOrderRepository->get(['id' => $orderId]);
+
+        if (!$order->ecommerce_order_id) {
+            throw new TextrailSyncException(sprintf('The order(%d) has not been synced to TexTrail', $orderId));
+        }
+
+        try {
+            $indexedItems = $this->getIndexedOrderItems($order->ecommerce_order_id);
+
+            $items = collect($order->ecommerce_items)->map(function (array $item) use ($indexedItems): array {
+                return array_merge($item, [
+                    'quote_id' => (int)$item['item_id'],
+                    'quote_item_id' => (int)$item['item_id'],
+                    'item_id' => (int)$indexedItems[$item['item_id']]['item_id']
+                ]);
+            })->toArray();
+
+            $this->completedOrderRepository->update(['id' => $orderId, 'ecommerce_items' => $items]);
+
+            $this->logger->info(sprintf('Order(%d) items were successfully updated according to Textrail', $orderId));
+
+            return true;
+        } catch (ClientException | \Exception $exception) {
+            $message = $exception instanceof ClientException && $exception->getResponse() ?
+                json_decode($exception->getResponse()->getBody()->getContents(), true) :
+                $exception->getMessage();
+
+            $this->completedOrderRepository->rollbackTransaction();
+
+            $this->logger->critical($exception->getMessage());
+
+            $this->completedOrderRepository->logError(
+                $order->id,
+                $message,
+                CompletedOrder::ERROR_STAGE_TEXTRAIL_GET_ORDER
+            );
+
+            throw new TextrailSyncException($exception->getMessage(), $exception->getCode(), $exception);
+        }
+    }
+
+    /**
+     * @param int $orderId Textrail order id
+     * @return array
+     */
+    private function getIndexedOrderItems(int $orderId): array
+    {
+        $orderInfo = $this->textrailService->getOrderInfo($orderId);
+
+        return collect($orderInfo['items'])->keyBy('quote_item_id')->toArray();
     }
 }

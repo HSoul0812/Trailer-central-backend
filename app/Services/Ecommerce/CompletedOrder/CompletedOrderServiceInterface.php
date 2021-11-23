@@ -17,7 +17,16 @@ interface CompletedOrderServiceInterface
     /**
      * @param int $orderId TC ecommerce order id
      * @return int the TexTrail order id
-     * @throws \App\Exceptions\Ecommerce\TextrailSyncException when some thing goes wrong on Magento side
+     * @throws \App\Exceptions\Ecommerce\TextrailSyncException when some thing goes wrong on TexTrail side
+     * @throws \App\Exceptions\Ecommerce\TextrailSyncException when the order has already synced to TexTrail
      */
     public function syncSingleOrderOnTextrail(int $orderId): int;
+
+    /**
+     * @param int $orderId
+     * @return bool
+     *
+     * @throws \App\Exceptions\Ecommerce\TextrailSyncException when the order has not synced yet to TexTrail
+     */
+    public function updateItemsIdsAccordingTextrail(int $orderId): bool;
 }

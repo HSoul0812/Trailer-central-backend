@@ -58,6 +58,7 @@ class CompletedOrder extends Model
     public const REFUND_STATUS_PARTIAL_REFUNDED = 'partial_refunded';
 
     public const ERROR_STAGE_TEXTRAIL_REMOTE_SYNC = 'textrail_remote_sync';
+    public const ERROR_STAGE_TEXTRAIL_GET_ORDER = 'textrail_remote_get_order';
 
     /**
      * The table associated with the model.
