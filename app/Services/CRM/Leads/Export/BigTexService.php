@@ -80,7 +80,13 @@ class BigTexService implements BigTexServiceInterface
             ]
         ]);
         
-        return $response->getStatusCode() == 201;        
+        if ( $response->getStatusCode() == 201 ) {
+            $lead->bigtex_exported = 1;
+            $lead->save();
+            return true;
+        }      
+        
+        return false;
     }
     
     private function getFormSubmitRoute(): string

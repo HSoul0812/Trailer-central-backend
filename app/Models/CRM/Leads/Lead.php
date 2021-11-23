@@ -58,6 +58,7 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
  * @property $dealer_location_id
  * @property $is_archived
  * @property $unique_id
+ * @property $bigtex_exported
  */
 class Lead extends Model
 {
