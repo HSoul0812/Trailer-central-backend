@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Events\Ecommerce\OrderSuccessfullyPaid;
+use App\Events\Ecommerce\OrderSuccessfullySynced;
 use App\Events\Ecommerce\QtyUpdated;
 use App\Http\Controllers\v1\Ecommerce\CompletedOrderController;
 use App\Http\Controllers\v1\Parts\Textrail\PartsController;
 use App\Jobs\Ecommerce\SyncOrderJob;
 use App\Listeners\Ecommerce\PartQtyReducer;
 use App\Listeners\Ecommerce\SendOrderToTextrail;
+use App\Listeners\Ecommerce\UpdateOrderItemIds;
 use App\Listeners\Ecommerce\UpdateOrderPartsQty;
 use App\Models\Parts\Textrail\Part;
 use App\Repositories\Ecommerce\CompletedOrderRepository;
@@ -65,12 +67,15 @@ class EcommerceProvider extends ServiceProvider
     protected $listen = [
         // on order successfully paid
         OrderSuccessfullyPaid::class => [
-
             // send over Textrail Magento API
             SendOrderToTextrail::class,
-
             // update all order parts quantities
             UpdateOrderPartsQty::class,
+        ],
+        // on order successfully synced to Textrail
+        OrderSuccessfullySynced::class => [
+            // to be able refunding, we need to update all order parts (items) item ids (not quote items ids)
+            UpdateOrderItemIds::class,
         ],
         // on part update
         QtyUpdated::class => [
