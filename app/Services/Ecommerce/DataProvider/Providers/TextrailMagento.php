@@ -31,6 +31,9 @@ class TextrailMagento implements DataProviderInterface,
     const GUEST_CART_AVAILABLE_PAYMENT_METHODS = '/rest/:view/V1/guest-carts/:cartId/payment-methods';
     const GUEST_CART_ADD_SHIPPING_INFO = '/rest/:view/V1/guest-carts/:cartId/shipping-information';
 
+    const ORDER_GET_INFO = '/rest/:view/V1/orders/:orderId';
+    const ORDER_ISSUE_REFUND = '/rest/:view/V1/order/:orderId/refund';
+
     /** @var string */
     private $apiUrl;
 
@@ -154,11 +157,14 @@ class TextrailMagento implements DataProviderInterface,
         }
     }
 
-    private function generateUrlWithCartAndView(string $url, string $cart = null): string
+    private function generateUrlWithCartAndView(string $uri, string $cart = null): string
     {
-        $url = str_replace(':view', self::VIEW_ID, $url);
-        $url = str_replace(':cartId', $cart, $url);
-        return $url;
+        return str_replace([':view', ':cartId'], [self::VIEW_ID, $cart], $uri);
+    }
+
+    private function generateUrlWithOrderAndView(string $uri, int $orderId): string
+    {
+        return str_replace([':view', ':orderId'], [self::VIEW_ID, $orderId], $uri);
     }
 
     /**
@@ -565,12 +571,60 @@ class TextrailMagento implements DataProviderInterface,
     }
 
     /**
+     * @see https://magento.redoc.ly/2.3.7-admin/tag/ordersid#operation/salesOrderRepositoryV1GetGet
+     * @param int $orderId
+     * @return array
+     */
+    public function getOrderInfo(int $orderId): array
+    {
+        $endpoint = $this->generateUrlWithOrderAndView(self::ORDER_GET_INFO, $orderId);
+
+        $response = $this->httpClient->get($endpoint, ['headers' => $this->getHeaders()]);
+
+        return json_decode($response->getBody()->getContents(), true);
+    }
+
+    /**
+     * @see https://devdocs.magento.com/guides/v2.4/rest/tutorials/orders/order-issue-refund.html
+     *
      * @return int the refund/memo id
      *
      * @throws ClientException when some remote error appears
+     * @throws \Brick\Money\Exception\MoneyMismatchException
      */
     public function issueRefund(RefundBag $refundBag): int
     {
-        throw new NotImplementedException('Not implemented yet');
+        $endpoint = $this->generateUrlWithOrderAndView(self::ORDER_ISSUE_REFUND, $refundBag->order->ecommerce_order_id);
+
+        $requestInfo = [
+            'notify' => true,
+            'arguments' => [
+                'adjustment_negative' => 0, // never will be negative amount so far
+                'adjustment_positive' => 0
+            ]
+        ];
+
+        if ($refundBag->textrailItems !== []) {
+            $itemsId = collect($refundBag->textrailItems)->pluck('order_item_id')->toArray();
+
+            $requestInfo['items'] = $refundBag->textrailItems;
+            $requestInfo['arguments']['extension_attributes'] = [];
+            $requestInfo['arguments']['extension_attributes']['return_to_stock_items'] = $itemsId;
+        }
+
+        // due the endpoint doesn't allow to send each amount of money separately, we need to send the whole amount
+        // using 'adjustment_positive' argument
+        $restOfAmounts = $refundBag->adjustmentAmount->plus($refundBag->handlingAmount)->plus($refundBag->taxAmount);
+        if ($restOfAmounts->isGreaterThan(0)) {
+            $requestInfo['arguments']['adjustment_positive'] = $restOfAmounts->getAmount()->toFloat();
+        }
+
+        if ($refundBag->shippingAmount->isGreaterThan(0)) {
+            $requestInfo['arguments']['shipping_amount'] = $refundBag->shippingAmount->getAmount()->toFloat();
+        }
+
+        $response = $this->httpClient->post($endpoint, ['headers' => $this->getHeaders(), 'json' => $requestInfo]);
+
+        return (int)json_decode($response->getBody()->getContents(), true);
     }
 }

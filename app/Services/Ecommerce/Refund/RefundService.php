@@ -109,6 +109,8 @@ class RefundService implements RefundServiceInterface
 
             $exception = RefundHttpClientException::factory($clientException->getMessage());
 
+            $message = $exception->getMessage();
+
             if ($response) {
                 $message = $response->getBody()->getContents(); // to prevent any message truncation
 
@@ -123,10 +125,10 @@ class RefundService implements RefundServiceInterface
                 );
             }
 
-            $this->logger->error($exception->getMessage(), $logContext);
+            $this->logger->error($message, $logContext);
 
             $this->refundRepository->markAsFailed(
-                $refund, $exception->getMessage(),
+                $refund, $message,
                 Refund::ERROR_STAGE_TEXTRAIL_ISSUE_REMOTE
             );
 
