@@ -10,6 +10,7 @@ use App\Events\Ecommerce\QtyUpdated;
 use App\Http\Controllers\v1\Ecommerce\CompletedOrderController;
 use App\Http\Controllers\v1\Parts\Textrail\PartsController;
 use App\Jobs\Ecommerce\SyncOrderJob;
+use App\Jobs\Ecommerce\UpdateOrderItemsJob;
 use App\Listeners\Ecommerce\PartQtyReducer;
 use App\Listeners\Ecommerce\SendOrderToTextrail;
 use App\Listeners\Ecommerce\UpdateOrderItemIds;
@@ -148,6 +149,10 @@ class EcommerceProvider extends ServiceProvider
         $this->app->bind(ImageRepositoryInterface::class, ImageRepository::class);
 
         $this->app->bindMethod(SyncOrderJob::class . '@handle', function (SyncOrderJob $job): void {
+            $job->handle($this->app->make(CompletedOrderServiceInterface::class));
+        });
+
+        $this->app->bindMethod(UpdateOrderItemsJob::class . '@handle', function (UpdateOrderItemsJob $job): void {
             $job->handle($this->app->make(CompletedOrderServiceInterface::class));
         });
     }
