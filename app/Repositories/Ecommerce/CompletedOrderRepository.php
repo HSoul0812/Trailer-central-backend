@@ -122,7 +122,7 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
             return CompletedOrder::create($params);
         }
 
-        $wasNotPaid = $completedOrder->isUnpaid();
+        $wasNotPaid = !$completedOrder->ispaid();
 
         $attributesToUpdate = collect($params)->only([
             'customer_email',
