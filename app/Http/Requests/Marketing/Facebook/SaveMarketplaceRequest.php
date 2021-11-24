@@ -14,7 +14,7 @@ use App\Models\Marketing\Facebook\Filter;
  */
 class SaveMarketplaceRequest extends Request
 {
-    public function getRules(): array
+    protected function getRules(): array
     {
         // Get Rules
         return [
