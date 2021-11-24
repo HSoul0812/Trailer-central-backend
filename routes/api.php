@@ -1136,6 +1136,7 @@ $api->version('v1', function ($route) {
             $route->post('/', 'App\Http\Controllers\v1\Marketing\FacebookController@create');
             $route->get('{id}', 'App\Http\Controllers\v1\Marketing\FacebookController@show')->where('id', '[0-9]+');
             $route->put('{id}', 'App\Http\Controllers\v1\Marketing\FacebookController@update')->where('id', '[0-9]+');
+            $route->delete('{id}', 'App\Http\Controllers\v1\Marketing\FacebookController@delete')->where('id', '[0-9]+');
         });
     });
 
