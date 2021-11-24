@@ -14,19 +14,12 @@ class AddOtherFeesToEcommerceOrderRefunds extends Migration
     public function up(): void
     {
         Schema::table('ecommerce_order_refunds', function (Blueprint $table) {
-            $table->integer('textrail_id')
+            $table->integer('textrail_rma')
                 ->after('reason')
                 ->unsigned()
                 ->nullable()
                 ->unique()
-                ->comment('TexTrail memo/refund id');
-
-            $table->integer('textrail_rma')
-                ->after('textrail_id')
-                ->unsigned()
-                ->nullable()
-                ->unique()
-                ->comment('TexTrail used RMA for returns');
+                ->comment('TexTrail unique RMA id');
 
             $table->decimal('parts_amount', 10)
                 ->unsigned()
@@ -66,7 +59,6 @@ class AddOtherFeesToEcommerceOrderRefunds extends Migration
     {
         Schema::table('ecommerce_order_refunds', function (Blueprint $table) {
             $table->dropColumn([
-                'textrail_id',
                 'textrail_rma',
                 'parts_amount',
                 'shipping_amount',

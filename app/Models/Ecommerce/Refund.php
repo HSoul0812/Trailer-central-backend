@@ -26,7 +26,6 @@ use Illuminate\Database\Query\Builder;
  * @property array<array{sku:string, title:string, id:int, amount: float, qty: int, price: float}> $parts a valid json array of parts (items to refund)
  * @property string $reason
  * @property string $payment_gateway_id the refund id on the payment gateway
- * @property int $textrail_id the memo/refund id on textrail
  * @property int $textrail_rma the return id on textrail
  * @property string $status 'pending', 'authorized', 'completed', 'return_received', 'failed'
  * @property string $recoverable_failure_stage 'payment_gateway', 'textrail'
@@ -89,7 +88,6 @@ class Refund extends Model
         'parts',
         'reason',
         'payment_gateway_id',
-        'textrail_id',
         'textrail_rma',
         'metadata',
         'status',

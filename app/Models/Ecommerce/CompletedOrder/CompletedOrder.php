@@ -33,6 +33,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $ecommerce_customer_id
  * @property string $ecommerce_cart_id
  * @property int $ecommerce_order_id
+ * @property string $ecommerce_order_code a long unique code
  * @property array $ecommerce_items
  * @property string $shipping_carrier_code
  * @property string $shipping_method_code
@@ -122,6 +123,7 @@ class CompletedOrder extends Model
         'ecommerce_customer_id',
         'ecommerce_cart_id',
         'ecommerce_order_id',
+        'ecommerce_order_code',
         'ecommerce_items',
         'phone_number'
     ];

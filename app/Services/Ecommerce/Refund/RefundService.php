@@ -95,12 +95,14 @@ class RefundService implements RefundServiceInterface
         // This logic must not be a transaction to be able recuperating from an error after the successfully received Textrail refund request
         $refund = $this->createRefund($refundBag);
 
-        /** @var int $textrailRefundId */
+        /** @var int $textrailRma */
 
         try {
-            $textrailRefundId = $this->textrailService->issueRefund($refundBag);
+            $textrailRma = $this->textrailService->requestReturn($refundBag);
 
-            $this->updateRefundAfterTextrailSuccess($refund, $textrailRefundId);
+            $this->updateRefundAfterTextrailSuccess($refund, $textrailRma);
+
+            $this->refundRepository->updateRma($refund, $textrailRma);
 
             return $refund;
         } catch (ClientException $clientException) {
@@ -136,7 +138,7 @@ class RefundService implements RefundServiceInterface
         } catch (AfterRemoteRefundException $exception) {
             $this->logger->critical(
                 $exception->getMessage(),
-                array_merge($logContext, ['textrail_id' => $textrailRefundId])
+                array_merge($logContext, ['textrail_rma' => $textrailRma])
             );
 
             // This is a naive approach given that if there was a failure when it tried to finish the refund (post-gateway),
@@ -144,7 +146,7 @@ class RefundService implements RefundServiceInterface
             // refund attempt will be prevented
             $this->refundRepository->markAsRecoverableFailure(
                 $refund,
-                ['textrail_id' => $textrailRefundId],
+                ['textrail_rma' => $textrailRma],
                 $exception->getMessage(),
                 Refund::RECOVERABLE_STAGE_TEXTRAIL_ISSUE
             );
@@ -163,12 +165,13 @@ class RefundService implements RefundServiceInterface
     }
 
     /**
-     * It will create a full refund in the database, then it will enqueue a refund process on the payment gateway.
+     * It will create a full refund in the database, then it should enqueue a refund process on the payment gateway
+     * when it reaches the `return_receive` status.
      *
      * @param int $orderId
      * @return Refund
      */
-    public function makeReturn(int $orderId): Refund
+    public function cancelOrder(int $orderId): Refund
     {
         throw new NotImplementedException;
     }

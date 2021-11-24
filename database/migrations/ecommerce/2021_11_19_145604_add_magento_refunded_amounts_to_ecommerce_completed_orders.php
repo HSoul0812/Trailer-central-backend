@@ -14,6 +14,11 @@ class AddMagentoRefundedAmountsToEcommerceCompletedOrders extends Migration
     public function up(): void
     {
         Schema::table('ecommerce_completed_orders', function (Blueprint $table) {
+            $table->string('ecommerce_order_code', 32)
+                ->unique()
+                ->after('ecommerce_order_id')
+                ->nullable();
+
             $table->decimal('parts_refunded_amount', 10)
                 ->unsigned()
                 ->after('total_refunded_amount')
@@ -51,6 +56,7 @@ class AddMagentoRefundedAmountsToEcommerceCompletedOrders extends Migration
     {
         Schema::table('ecommerce_completed_orders', function (Blueprint $table) {
             $table->dropColumn([
+                'ecommerce_order_code',
                 'parts_refunded_amount',
                 'shipping_refunded_amount',
                 'handling_refunded_amount',

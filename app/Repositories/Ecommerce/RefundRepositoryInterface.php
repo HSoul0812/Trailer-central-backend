@@ -39,6 +39,8 @@ interface RefundRepositoryInterface extends GenericRepository
      */
     public function markAsFailed(Refund $refund, $message, string $stage): bool;
 
+    public function updateRma(Refund $refund, int $textrailRma): bool;
+
     /**
      * @param Refund $refund
      * @param array $metadata

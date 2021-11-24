@@ -33,6 +33,7 @@ class TextrailMagento implements DataProviderInterface,
 
     const ORDER_GET_INFO = '/rest/:view/V1/orders/:orderId';
     const ORDER_ISSUE_REFUND = '/rest/:view/V1/order/:orderId/refund';
+    const ORDER_CREATE_RETURN = '/rest/:view/V1/returns';
 
     /** @var string */
     private $apiUrl;
@@ -585,6 +586,9 @@ class TextrailMagento implements DataProviderInterface,
     }
 
     /**
+     * This was a first approach to request refunds to Textrail, but it was early deprecated, due we need to request returns, not refunds.
+     * However, we can still use this method to request refunds, if we need to.
+     *
      * @see https://devdocs.magento.com/guides/v2.4/rest/tutorials/orders/order-issue-refund.html
      *
      * @return int the refund/memo id
@@ -624,6 +628,42 @@ class TextrailMagento implements DataProviderInterface,
         }
 
         $response = $this->httpClient->post($endpoint, ['headers' => $this->getHeaders(), 'json' => $requestInfo]);
+
+        return (int)json_decode($response->getBody()->getContents(), true);
+    }
+
+    /**
+     * @see https://magento.redoc.ly/2.4.3-admin/tag/returns/#operation/rmaRmaManagementV1SaveRmaPost
+     *
+     * @return int the RMA
+     */
+    public function requestReturn(RefundBag $refundBag): int
+    {
+        $endpoint = $this->generateUrlWithOrderAndView(self::ORDER_ISSUE_REFUND, $refundBag->order->ecommerce_order_id);
+
+        $itemDefaults = [
+            'reason' => config('ecommerce.textrail.return.item_default_reason'),
+            'condition' => config('ecommerce.textrail.return.item_default_condition'),
+            'resolution' => config('ecommerce.textrail.return.item_default_resolution'),
+            'status' => config('ecommerce.textrail.return.item_default_status')
+        ];
+
+        $items = collect($refundBag->textrailItems)->map(static function (array $item) use ($itemDefaults): array {
+            return $item + $itemDefaults;
+        })->toArray();
+
+        $response = $this->httpClient->post($endpoint,
+            [
+                'headers' => $this->getHeaders(),
+                'json' => [
+                    'rmaDataObject' => [
+                        'order_id' => $refundBag->order->ecommerce_order_id,
+                        'store_id' => config('ecommerce.textrail.store_id'),
+                        'status' => config('ecommerce.textrail.return.default_status'),
+                        'items' => $items
+                    ]
+                ]
+            ]);
 
         return (int)json_decode($response->getBody()->getContents(), true);
     }

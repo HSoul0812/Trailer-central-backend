@@ -7,7 +7,6 @@ namespace App\Http\Requests\Ecommerce;
 use App\Http\Requests\Request;
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
 use App\Models\Ecommerce\Refund;
-use Brick\Math\RoundingMode;
 use Brick\Money\Money;
 
 /**
@@ -27,11 +26,11 @@ class IssueRefundOrderRequest extends Request
         return [
             'dealer_id' => 'integer|min:1|required|exists:dealer,dealer_id',
             'order_id' => 'integer|min:1|required|exists:ecommerce_completed_orders,id',
-            'adjustment_amount' => 'numeric|min:0',
-            'handling_amount' => 'numeric|min:0',
-            'shipping_amount' => 'numeric|min:0',
-            'tax_amount' => 'numeric|min:0',
-            'parts' => 'array',
+            // 'adjustment_amount' => 'numeric|min:0',
+            // 'handling_amount' => 'numeric|min:0',
+            // 'shipping_amount' => 'numeric|min:0',
+            // 'tax_amount' => 'numeric|min:0',
+            'parts' => 'array|required',
             'parts.*.id' => 'required|integer|min:1',
             'parts.*.qty' => 'required|int:min:1',
             'reason' => sprintf('nullable|string|in:%s', implode(',', Refund::REASONS))
@@ -45,22 +44,24 @@ class IssueRefundOrderRequest extends Request
 
     public function adjustmentAmount(): Money
     {
-        return Money::of($this->input('adjustment_amount', 0), 'USD', null, RoundingMode::HALF_UP);
+        // for now, we're not supporting adjustments or any refund amounts different from the order items
+        // return Money::of($this->input('adjustment_amount', 0), 'USD', null, RoundingMode::HALF_UP);
+        return Money::zero('USD');
     }
 
     public function handlingAmount(): Money
     {
-        return Money::of($this->input('handling_amount', 0), 'USD', null, RoundingMode::HALF_UP);
+        return Money::zero('USD');
     }
 
     public function shippingAmount(): Money
     {
-        return Money::of($this->input('shipping_amount', 0), 'USD', null, RoundingMode::HALF_UP);
+        return Money::zero('USD');
     }
 
     public function taxAmount(): Money
     {
-        return Money::of($this->input('tax_amount', 0), 'USD', null, RoundingMode::HALF_UP);
+        return Money::zero('USD');
     }
 
     /**

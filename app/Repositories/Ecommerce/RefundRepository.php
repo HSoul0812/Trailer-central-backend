@@ -192,6 +192,16 @@ class RefundRepository implements RefundRepositoryInterface
 
     /**
      * @param Refund $refund
+     * @param int $textrailRma
+     * @return bool
+     */
+    public function updateRma(Refund $refund, int $textrailRma): bool
+    {
+        return $this->update($refund->id, ['textrail_rma' => $textrailRma]);
+    }
+
+    /**
+     * @param Refund $refund
      * @param int $textrailId
      * @return bool
      */
@@ -201,7 +211,7 @@ class RefundRepository implements RefundRepositoryInterface
             $refund->id,
             [
                 'status' => Refund::STATUS_AUTHORIZED,
-                'textrail_id' => $textrailId
+                'textrail_rma' => $textrailId
             ]
         );
     }

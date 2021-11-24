@@ -151,7 +151,7 @@ class CompletedOrderService implements CompletedOrderServiceInterface
      *
      * @throws \App\Exceptions\Ecommerce\TextrailSyncException when the order has not synced yet to TexTrail
      */
-    public function updateItemsIdsAccordingTextrail(int $orderId): bool
+    public function updateRequiredInfoByTextrail(int $orderId): bool
     {
         $this->logger->info(sprintf('Starting order(%d) items updater', $orderId));
 
@@ -163,17 +163,27 @@ class CompletedOrderService implements CompletedOrderServiceInterface
         }
 
         try {
-            $indexedItems = $this->getIndexedOrderItems($order->ecommerce_order_id);
+            $orderInfo = $this->textrailService->getOrderInfo($order->ecommerce_order_id);
 
-            $items = collect($order->ecommerce_items)->map(function (array $item) use ($indexedItems): array {
-                return array_merge($item, [
-                    'quote_id' => (int)$item['item_id'],
-                    'quote_item_id' => (int)$item['item_id'],
-                    'item_id' => (int)$indexedItems[$item['item_id']]['item_id']
-                ]);
-            })->toArray();
+            $indexedItems = collect($orderInfo['items'])->keyBy('quote_item_id')->toArray();
 
-            $this->completedOrderRepository->update(['id' => $orderId, 'ecommerce_items' => $items]);
+            $infoToBeOverride =[
+                'ecommerce_order_code' => $orderInfo['increment_id']
+            ];
+
+            if (empty($order->ecommerce_order_code)) {
+                $infoToBeOverride['ecommerce_items'] = collect($order->ecommerce_items)
+                    ->map(function (array $item) use ($indexedItems): array {
+
+                        return array_merge($item, [
+                            'quote_id' => (int)$item['item_id'],
+                            'quote_item_id' => (int)$item['item_id'],
+                            'item_id' => (int)$indexedItems[$item['item_id']]['item_id']
+                        ]);
+                    })->toArray();
+            }
+
+            $this->completedOrderRepository->update($infoToBeOverride + ['id' => $orderId]);
 
             $this->logger->info(sprintf('Order(%d) items were successfully updated according to Textrail', $orderId));
 
@@ -195,16 +205,5 @@ class CompletedOrderService implements CompletedOrderServiceInterface
 
             throw new TextrailSyncException($exception->getMessage(), $exception->getCode(), $exception);
         }
-    }
-
-    /**
-     * @param int $orderId Textrail order id
-     * @return array
-     */
-    private function getIndexedOrderItems(int $orderId): array
-    {
-        $orderInfo = $this->textrailService->getOrderInfo($orderId);
-
-        return collect($orderInfo['items'])->keyBy('quote_item_id')->toArray();
     }
 }

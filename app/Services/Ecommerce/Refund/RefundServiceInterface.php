@@ -11,7 +11,7 @@ use App\Services\Ecommerce\Payment\Gateways\PaymentGatewayRefundResultInterface;
 interface RefundServiceInterface
 {
     /**
-     * It will create a full/partial refund in our database, then it will send a refund/memo request to TexTrail,
+     * It will create a full/partial refund in our database, then it will send a return request to TexTrail,
      * but the refund process on the payment gateway will be remaining as pending until TextTrail send us a command to proceed.
      *
      * @param RefundBag $refundBag
@@ -20,12 +20,13 @@ interface RefundServiceInterface
     public function issue(RefundBag $refundBag): Refund;
 
     /**
-     * It will create a full refund in the database, then it will enqueue a refund process on the payment gateway.
+     * It will create a full refund in the database, then it should enqueue a refund process on the payment gateway
+     * when it reaches the `return_receive` status.
      *
      * @param int $orderId
      * @return Refund
      */
-    public function makeReturn(int $orderId): Refund;
+    public function cancelOrder(int $orderId): Refund;
 
     /**
      * It will call the refund process on the payment gateway.

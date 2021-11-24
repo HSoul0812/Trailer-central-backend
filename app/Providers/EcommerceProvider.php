@@ -10,10 +10,10 @@ use App\Events\Ecommerce\QtyUpdated;
 use App\Http\Controllers\v1\Ecommerce\CompletedOrderController;
 use App\Http\Controllers\v1\Parts\Textrail\PartsController;
 use App\Jobs\Ecommerce\SyncOrderJob;
-use App\Jobs\Ecommerce\UpdateOrderItemsJob;
+use App\Jobs\Ecommerce\UpdateOrderRequiredInfoByTextrailJob;
 use App\Listeners\Ecommerce\PartQtyReducer;
 use App\Listeners\Ecommerce\SendOrderToTextrail;
-use App\Listeners\Ecommerce\UpdateOrderItemIds;
+use App\Listeners\Ecommerce\UpdateOrderRequiredInfoByTextrail;
 use App\Listeners\Ecommerce\UpdateOrderPartsQty;
 use App\Models\Parts\Textrail\Part;
 use App\Repositories\Ecommerce\CompletedOrderRepository;
@@ -76,7 +76,8 @@ class EcommerceProvider extends ServiceProvider
         // on order successfully synced to Textrail
         OrderSuccessfullySynced::class => [
             // to be able refunding, we need to update all order parts (items) item ids (not quote items ids)
-            UpdateOrderItemIds::class,
+            // and the order long code
+            UpdateOrderRequiredInfoByTextrail::class,
         ],
         // on part update
         QtyUpdated::class => [
@@ -152,7 +153,7 @@ class EcommerceProvider extends ServiceProvider
             $job->handle($this->app->make(CompletedOrderServiceInterface::class));
         });
 
-        $this->app->bindMethod(UpdateOrderItemsJob::class . '@handle', function (UpdateOrderItemsJob $job): void {
+        $this->app->bindMethod(UpdateOrderRequiredInfoByTextrailJob::class . '@handle', function (UpdateOrderRequiredInfoByTextrailJob $job): void {
             $job->handle($this->app->make(CompletedOrderServiceInterface::class));
         });
     }
