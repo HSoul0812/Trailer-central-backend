@@ -1133,9 +1133,9 @@ $api->version('v1', function ($route) {
             'middleware' => 'marketing.facebook'
         ], function ($route) {
             $route->get('/', 'App\Http\Controllers\v1\Marketing\FacebookController@index');
-            $route->post('/', 'App\Http\Controllers\v1\Marketing\FacebookController@assign');
+            $route->post('/', 'App\Http\Controllers\v1\Marketing\FacebookController@create');
             $route->get('{id}', 'App\Http\Controllers\v1\Marketing\FacebookController@show')->where('id', '[0-9]+');
-            $route->post('{id}', 'App\Http\Controllers\v1\Marketing\FacebookController@update')->where('id', '[0-9]+');
+            $route->put('{id}', 'App\Http\Controllers\v1\Marketing\FacebookController@update')->where('id', '[0-9]+');
         });
     });
 
