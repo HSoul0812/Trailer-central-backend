@@ -7,12 +7,12 @@ use App\Models\Marketing\Facebook\Marketplace;
 use App\Models\Marketing\Facebook\Filter;
 
 /**
- * Class SaveInventoryRequest
+ * Class SaveMarketplaceRequest
  * 
  * @package App\Http\Requests\Marketing\Facebook
  * @author David A Conway Jr.
  */
-class SaveInventoryRequest extends Request
+class SaveMarketplaceRequest extends Request
 {
     public function getRules(): array
     {
