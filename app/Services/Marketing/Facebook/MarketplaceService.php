@@ -2,7 +2,7 @@
 
 namespace App\Services\Marketing\Facebook;
 
-use App\Models\Integration\Facebook\Marketplace;
+use App\Models\Marketing\Facebook\Marketplace;
 use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
 use App\Repositories\Marketing\Facebook\FilterRepositoryInterface;
 use App\Http\Requests\Marketing\Facebook\CreateMarketplaceRequest;

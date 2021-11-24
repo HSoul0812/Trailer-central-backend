@@ -2,7 +2,7 @@
 
 namespace App\Services\Marketing\Facebook;
 
-use App\Models\Integration\Facebook\Marketplace;
+use App\Models\Marketing\Facebook\Marketplace;
 use App\Http\Requests\Marketing\Facebook\CreateMarketplaceRequest;
 use App\Http\Requests\Marketing\Facebook\UpdateMarketplaceRequest;
 
