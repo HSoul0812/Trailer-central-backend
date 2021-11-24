@@ -18,6 +18,11 @@ class CompleteOrderRequestTransformer extends TransformerAbstract
 
         $isStripeCall = !isset($data['parts']);
 
+        $firstName = $data['shipto_first_name'] ?? '';
+        $lastName = $data['shipto_last_name'] ?? '';
+
+        $fullName = $firstName . ' ' . $lastName;
+
         $result = [
             // Coming from dealer site
             'dealer_id' => $request->dealer_id,
@@ -26,7 +31,7 @@ class CompleteOrderRequestTransformer extends TransformerAbstract
             'parts' => $isStripeCall ? [] : json_decode($data['parts'], true),
 
             'invoice_id' => $data['invoice_id'] ?? '',
-            'shipping_name' => $data['shipto_name'] ?? '',
+            'shipping_name' => $fullName,
             'shipping_country' => $data['shipto_country'] ?? '',
             'shipping_address' => $data['shipto_address'] ?? '',
             'shipping_city' => $data['shipto_city'] ?? '',
