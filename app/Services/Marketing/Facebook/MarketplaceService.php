@@ -52,7 +52,7 @@ class MarketplaceService implements MarketplaceServiceInterface
         // Create All Filters
         if($request->filters && is_array($request->filters)) {
             foreach($request->filters as $filter) {
-                $this->filters->create($marketplace->id, $filter->type, $filter->value);
+                $this->filters->create($marketplace->id, $filter['type'], $filter['value']);
             }
         }
 
@@ -76,7 +76,7 @@ class MarketplaceService implements MarketplaceServiceInterface
         // Create All Filters
         if($request->filters && is_array($request->filters)) {
             foreach($request->filters as $filter) {
-                $this->filters->create($marketplace->id, $filter->type, $filter->value);
+                $this->filters->create($marketplace->id, $filter['type'], $filter['value']);
             }
         }
 
