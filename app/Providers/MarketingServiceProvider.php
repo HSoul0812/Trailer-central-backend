@@ -2,10 +2,10 @@
 
 namespace App\Providers;
 
-use App\Repositories\Website\Parts\MarketplaceRepository;
-use App\Repositories\Website\Parts\MarketplaceRepositoryInterface;
-use App\Repositories\Website\Parts\FilterRepository;
-use App\Repositories\Website\Parts\FilterRepositoryInterface;
+use App\Repositories\Marketing\Facebook\MarketplaceRepository;
+use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
+use App\Repositories\Marketing\Facebook\FilterRepository;
+use App\Repositories\Marketing\Facebook\FilterRepositoryInterface;
 use App\Services\Marketing\Facebook\MarketplaceService;
 use App\Services\Marketing\Facebook\MarketplaceServiceInterface;
 use Illuminate\Support\ServiceProvider;
