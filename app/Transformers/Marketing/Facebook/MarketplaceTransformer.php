@@ -59,6 +59,6 @@ class MarketplaceTransformer extends TransformerAbstract
 
     public function includeFilters(Marketplace $marketplace)
     {
-        return $this->collect($marketplace->filters, $this->filterTransformer);
+        return $this->collection($marketplace->filters, $this->filterTransformer);
     }
 }
