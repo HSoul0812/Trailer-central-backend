@@ -10,6 +10,10 @@ use League\Fractal\TransformerAbstract;
 
 class MarketplaceTransformer extends TransformerAbstract
 {
+    protected $defaultIncludes = [
+        'filters',
+    ];
+
     /**
      * @var FilterTransformer
      */

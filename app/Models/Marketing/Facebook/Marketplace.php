@@ -99,7 +99,7 @@ class Marketplace extends Model
      */
     public function filters(): HasMany
     {
-        return $this->hasMany(Filter::class, 'marketplace_id', 'id');
+        return $this->hasMany(Filter::class, 'id', 'marketplace_id');
     }
 
 
@@ -112,7 +112,7 @@ class Marketplace extends Model
     public function getFilterMapAttribute(): array
     {
         // Get Filters Map
-        $filters = $this->filters();
+        $filters = $this->filters()->get();
 
         // Loop Filters
         $filtersMap = [];
