@@ -37,7 +37,7 @@ class FacebookController extends RestfulControllerV2 {
     }
 
     /**
-     * Get Facebook Marketplaces With Access Tokens
+     * Get Facebook Marketplace Integrations
      * 
      * @param Request $request
      * @return type
@@ -55,7 +55,7 @@ class FacebookController extends RestfulControllerV2 {
     }
 
     /**
-     * Get Facebook Marketplace and Access Token
+     * Get Facebook Marketplace Integration
      * 
      * @param Request $request
      * @return type
@@ -68,14 +68,14 @@ class FacebookController extends RestfulControllerV2 {
         $request = new ShowMarketplaceRequest($requestData);
         if ($request->validate()) {
             // Return Auth
-            return $this->response->array($this->service->show($request->all()));
+            return $this->response->array($this->repository->get($request->all()), $this->transformer);
         }
         
         return $this->response->errorBadRequest();
     }
 
     /**
-     * Create Facebook Marketplace and Access Token
+     * Create Facebook Marketplace Integration
      * 
      * @param Request $request
      * @return type
@@ -86,14 +86,14 @@ class FacebookController extends RestfulControllerV2 {
         $request = new CreateMarketplaceRequest($request->all());
         if ($request->validate()) {
             // Return Auth
-            return $this->response->array($this->service->create($request));
+            return $this->response->item($this->service->create($request), $this->transformer);
         }
         
         return $this->response->errorBadRequest();
     }
 
     /**
-     * Update Facebook Marketplace and Access Token
+     * Update Facebook Marketplace Integration
      * 
      * @param Request $request
      * @return type
@@ -106,14 +106,14 @@ class FacebookController extends RestfulControllerV2 {
         $request = new UpdateMarketplaceRequest($requestData);
         if ($request->validate()) {
             // Return Auth
-            return $this->response->array($this->service->update($request));
+            return $this->response->item($this->service->update($request), $this->transformer);
         }
         
         return $this->response->errorBadRequest();
     }
 
     /**
-     * Delete Facebook Marketplace and Access Token
+     * Delete Facebook Marketplace Integration
      * 
      * @param int $id
      * @return type
