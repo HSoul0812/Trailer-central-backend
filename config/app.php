@@ -191,6 +191,7 @@ return [
         App\Providers\JobServiceProvider::class,
         App\Providers\UserServiceProvider::class,
         App\Providers\QuickbooksServiceProvider::class,
+        App\Providers\MarketingServiceProvider::class,
         /*
          * 3rd party stuff
          */
