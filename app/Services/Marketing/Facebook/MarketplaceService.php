@@ -3,8 +3,8 @@
 namespace App\Services\Marketing\Facebook;
 
 use App\Models\Integration\Facebook\Marketplace;
-use App\Repositories\Integration\Facebook\MarketplaceRepositoryInterface;
-use App\Repositories\Website\Parts\FilterRepositoryInterface;
+use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
+use App\Repositories\Marketing\Facebook\FilterRepositoryInterface;
 use App\Http\Requests\Marketing\Facebook\CreateMarketplaceRequest;
 use App\Http\Requests\Marketing\Facebook\UpdateMarketplaceRequest;
 
