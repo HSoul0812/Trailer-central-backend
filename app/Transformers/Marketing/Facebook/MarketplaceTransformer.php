@@ -2,11 +2,11 @@
 
 namespace App\Transformers\Marketing\Facebook;
 
-use League\Fractal\TransformerAbstract;
 use App\Models\Marketing\Facebook\Marketplace;
 use App\Transformers\Marketing\Facebook\FilterTransformer;
 use App\Transformers\User\UserTransformer;
 use App\Transformers\User\DealerLocationTransformer;
+use League\Fractal\TransformerAbstract;
 
 class MarketplaceTransformer extends TransformerAbstract
 {
@@ -47,7 +47,9 @@ class MarketplaceTransformer extends TransformerAbstract
             'tfa_username' => $marketplace->tfa_username,
             'tfa_password' => $marketplace->tfa_password,
             'tfa_type' => $marketplace->tfa_type,
-            'filter_map' => $marketplace->filter_map
+            'filter_map' => $marketplace->filter_map,
+            'created_at' => $filter->created_at,
+            'updated_at' => $filter->updated_at
         ];
     }
 
