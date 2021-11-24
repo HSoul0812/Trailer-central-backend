@@ -35,7 +35,7 @@ class PartRepository extends BaseRepository implements PartRepositoryInterface
         return $this->model->find($id);
     }
 
-    public function getBySkuWithTrashed(int $sku) : ?Part
+    public function getBySkuWithTrashed(string $sku) : ?Part
     {
         return $this->model->withTrashed()->where('sku', $sku)->first();
     }
