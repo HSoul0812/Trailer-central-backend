@@ -125,7 +125,8 @@ class CompletedOrder extends Model
         'ecommerce_order_id',
         'ecommerce_order_code',
         'ecommerce_items',
-        'phone_number'
+        'phone_number',
+        'invoice_pdf_url'
     ];
 
     /** @var array */

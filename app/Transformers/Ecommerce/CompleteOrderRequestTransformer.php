@@ -52,7 +52,8 @@ class CompleteOrderRequestTransformer extends TransformerAbstract
             'payment_method' => isset($data['payment_method_types']) ? $data['payment_method_types'][0] : '',
             'stripe_customer' => $data['customer'] ?? '',
             'payment_status' => $data['payment_status'] ?? CompletedOrder::PAYMENT_STATUS_UNPAID,
-            'payment_intent' => $data['payment_intent'] ?? null
+            'payment_intent' => $data['payment_intent'] ?? null,
+            'phone_number' => $data['phone_number'] ?? '',
         ];
 
         // also coming from dealer site
