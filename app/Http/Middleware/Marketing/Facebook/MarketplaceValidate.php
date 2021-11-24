@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Middleware\Integration\Facebook;
+namespace App\Http\Middleware\Marketing\Facebook;
 
 use Illuminate\Support\Facades\Auth;
 use App\Http\Middleware\ValidRoute;
