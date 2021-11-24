@@ -99,7 +99,7 @@ class Marketplace extends Model
      */
     public function filters(): HasMany
     {
-        return $this->hasMany(Filter::class, 'id', 'marketplace_id');
+        return $this->hasMany(Filter::class, 'marketplace_id', 'id');
     }
 
 
