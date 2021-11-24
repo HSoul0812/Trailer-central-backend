@@ -101,4 +101,30 @@ class Marketplace extends Model
     {
         return $this->hasMany(Filter::class, 'id', 'marketplace_id');
     }
+
+
+    /**
+     * Get Filters Map
+     * 
+     * @return array{entity: array<string>,
+     *               category: array<string>}
+     */
+    public function getFilterMapAttribute(): array
+    {
+        // Get Filters Map
+        $filters = $this->filters();
+
+        // Loop Filters
+        $filtersMap = [];
+        foreach($filters as $filter) {
+            $type = $filter->filter_type;
+            if(!isset($filtersMap[$type])) {
+                $filtersMap[$type] = [];
+            }
+            $filtersMap[$type][] = $filter->filter;
+        }
+
+        // Return Filters Map
+        return $filtersMap;
+    }
 }
