@@ -45,6 +45,10 @@ $api->version('v1', function ($route) {
         $route->post('ecommerce/orders', 'App\Http\Controllers\v1\Ecommerce\CompletedOrderController@create');
     });
 
+    $route->group(['middleware' => 'textrail.webhook.validate'], function ($route) {
+        $route->post('ecommerce/orders/{textrail_order_id}/approve', 'App\Http\Controllers\v1\Ecommerce\CompletedOrderController@markAsApproved')->where('textrail_order_id', '[0-9]+');
+    });
+
     /**
      * Floorplan Payments
      */

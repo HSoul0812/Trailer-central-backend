@@ -61,6 +61,10 @@ class CompletedOrder extends Model
     public const ERROR_STAGE_TEXTRAIL_REMOTE_SYNC = 'textrail_remote_sync';
     public const ERROR_STAGE_TEXTRAIL_GET_ORDER = 'textrail_remote_get_order';
 
+    public const ECOMMERCE_STATUS_NOT_APPROVED = 'not_approved';
+    public const ECOMMERCE_STATUS_APPROVED = 'approved';
+    public const ECOMMERCE_STATUS_CANCELED = 'canceled';
+
     /**
      * The table associated with the model.
      *
@@ -78,6 +82,12 @@ class CompletedOrder extends Model
         'pending',
         'fulfilled',
         'manual'
+    ];
+
+    const ECOMMERCE_ORDER_STATUSES = [
+        'not_approved',
+        'approved',
+        'canceled'
     ];
 
     protected $fillable = [
@@ -125,6 +135,7 @@ class CompletedOrder extends Model
         'ecommerce_order_id',
         'ecommerce_order_code',
         'ecommerce_items',
+        'ecommerce_order_status',
         'phone_number',
         'invoice_pdf_url'
     ];

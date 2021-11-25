@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\v1\Ecommerce;
 
 use App\Http\Controllers\RestfulControllerV2;
+use App\Http\Requests\Ecommerce\ApproveCompletedOrderRequest;
 use App\Http\Requests\Ecommerce\CreateCompletedOrderRequest;
 use App\Http\Requests\Ecommerce\GetAllCompletedOrderRequest;
 use App\Http\Requests\Ecommerce\GetSingleCompletedOrderRequest;
@@ -124,5 +125,26 @@ class CompletedOrderController extends RestfulControllerV2
         }
 
         $this->response->errorBadRequest();
+    }
+
+    /**
+     * @param int $textrail_order_id
+     * @param Request $request
+     * @return Response
+     * @throws \Dingo\Api\Exception\ResourceException when there were some validation error
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException when there was a bad request
+     *
+     * @noinspection PhpDocMissingThrowsInspection
+     * @noinspection PhpUnhandledExceptionInspection
+     */
+    public function markAsApproved(int $textrail_order_id, Request $request): Response
+    {
+        $approveRequest = new ApproveCompletedOrderRequest($request->all() + ['textrail_order_id' => $textrail_order_id]);
+
+        if ($approveRequest->validate()) {
+            return $this->response->item($this->completedOrderService->updateStatus($textrail_order_id), new CompletedOrderTransformer($this->textRailPartRepo));
+        }
+
+        return $this->response->errorBadRequest();
     }
 }

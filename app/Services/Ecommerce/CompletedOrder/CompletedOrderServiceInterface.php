@@ -29,4 +29,10 @@ interface CompletedOrderServiceInterface
      * @throws \App\Exceptions\Ecommerce\TextrailSyncException when the order has not synced yet to TexTrail
      */
     public function updateRequiredInfoByTextrail(int $orderId): bool;
+
+    /**
+     * @param int $textrailOrderId
+     * @return CompletedOrder
+     */
+    public function updateStatus(int $textrailOrderId): CompletedOrder;
 }

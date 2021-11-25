@@ -4,6 +4,7 @@ namespace App\Services\Ecommerce\CompletedOrder;
 
 use App\Contracts\LoggerServiceInterface;
 use App\Events\Ecommerce\OrderSuccessfullySynced;
+use App\Exceptions\Ecommerce\TextrailException;
 use App\Exceptions\Ecommerce\TextrailSyncException;
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
 use App\Models\Parts\Textrail\RefundedPart;
@@ -205,5 +206,24 @@ class CompletedOrderService implements CompletedOrderServiceInterface
 
             throw new TextrailSyncException($exception->getMessage(), $exception->getCode(), $exception);
         }
+    }
+
+    /**
+     * @param int $textrailOrderId
+     * @return CompletedOrder
+     * @throws TextrailException
+     */
+    public function updateStatus(int $textrailOrderId): CompletedOrder
+    {
+        $completedOrder = $this->completedOrderRepository->get(['ecommerce_order_id' => $textrailOrderId]);
+
+        if ($completedOrder) {
+            $completedOrder->ecommerce_order_status = CompletedOrder::ECOMMERCE_STATUS_APPROVED;
+            $completedOrder->save();
+
+            return $completedOrder;
+        }
+
+        throw new TextrailException('Order not found via given TexTrail order id: ' . $textrailOrderId);
     }
 }
