@@ -10,7 +10,7 @@ class AfterRemoteRefundException extends \RuntimeException
     private $context = [];
 
     /**  @var int */
-    private $textrailId;
+    private $textrailRma;
 
     public function withContext(array $context): self
     {
@@ -19,9 +19,9 @@ class AfterRemoteRefundException extends \RuntimeException
         return $this;
     }
 
-    public function withTextrailId(int $id): self
+    public function withTextrailRma(?int $rma): self
     {
-        $this->textrailId = $id;
+        $this->textrailRma = $rma;
 
         return $this;
     }
@@ -31,8 +31,8 @@ class AfterRemoteRefundException extends \RuntimeException
         return $this->context;
     }
 
-    public function getTextrailId(): ?int
+    public function getTextrailRma(): ?int
     {
-        return $this->textrailId;
+        return $this->textrailRma;
     }
 }
