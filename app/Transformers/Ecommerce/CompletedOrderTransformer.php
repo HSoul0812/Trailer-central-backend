@@ -30,6 +30,7 @@ class CompletedOrderTransformer extends TransformerAbstract
             'hook_event_id' => $completedOrder->event_id,
             'object_id' => $completedOrder->object_id,
             'customer_email' => $completedOrder->customer_email,
+            'shipping_name' => $completedOrder->shipping_name,
             'total_amount' => $completedOrder->total_amount,
             'payment_method' => $completedOrder->payment_method,
             'payment_status' => $completedOrder->payment_status,
