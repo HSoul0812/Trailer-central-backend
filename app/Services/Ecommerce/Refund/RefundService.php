@@ -10,9 +10,10 @@ use App\Exceptions\Ecommerce\RefundAmountException;
 use App\Exceptions\Ecommerce\RefundException;
 use App\Exceptions\Ecommerce\RefundHttpClientException;
 use App\Exceptions\Ecommerce\RefundPaymentGatewayException;
-use App\Exceptions\NotImplementedException;
+use App\Jobs\Ecommerce\ProcessRefundOnPaymentGatewayJob;
 use GuzzleHttp\Exception\ClientException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Foundation\Bus\DispatchesJobs;
 use Psr\Http\Message\ResponseInterface;
 use App\Models\Ecommerce\Refund;
 use App\Repositories\Ecommerce\CompletedOrderRepositoryInterface;
@@ -25,6 +26,8 @@ use Brick\Money\Money;
 
 class RefundService implements RefundServiceInterface
 {
+    use DispatchesJobs;
+
     /** @var RefundRepositoryInterface */
     private $refundRepository;
 
@@ -92,7 +95,8 @@ class RefundService implements RefundServiceInterface
         // Some issuable context information
         $logContext = $refundBag->asArray();
 
-        // This logic must not be a transaction to be able recuperating from an error after the successfully received Textrail refund request
+        // This logic must not be a transaction to be able recuperating from an error after the successfully
+        // received Textrail refund request
         $refund = $this->createRefund($refundBag);
 
         /** @var int $textrailRma */
@@ -100,7 +104,7 @@ class RefundService implements RefundServiceInterface
         try {
             $textrailRma = $this->textrailService->requestReturn($refundBag);
 
-            $this->updateRefundAfterTextrailSuccess($refund, $textrailRma);
+            $this->updateOrderRefundSummary($refund, $textrailRma);
 
             $this->refundRepository->updateRma($refund, $textrailRma);
 
@@ -129,10 +133,7 @@ class RefundService implements RefundServiceInterface
 
             $this->logger->error($message, $logContext);
 
-            $this->refundRepository->markAsFailed(
-                $refund, $message,
-                Refund::ERROR_STAGE_TEXTRAIL_ISSUE_REMOTE
-            );
+            $this->refundRepository->markAsFailed($refund, $message, Refund::ERROR_STAGE_TEXTRAIL_ISSUE_REMOTE);
 
             throw $exception;
         } catch (AfterRemoteRefundException $exception) {
@@ -141,7 +142,7 @@ class RefundService implements RefundServiceInterface
                 array_merge($logContext, ['textrail_rma' => $textrailRma])
             );
 
-            // This is a naive approach given that if there was a failure when it tried to finish the refund (post-gateway),
+            // This is a naive approach given that if there was a failure when it tried to finish the refund (post-textrail)
             // then, it probably will fail again here, but at least the critical log was recorded, and the subsequent
             // refund attempt will be prevented
             $this->refundRepository->markAsRecoverableFailure(
@@ -156,7 +157,8 @@ class RefundService implements RefundServiceInterface
             $this->logger->error($exception->getMessage(), $logContext);
 
             $this->refundRepository->markAsFailed(
-                $refund, $exception->getMessage(),
+                $refund,
+                $exception->getMessage(),
                 Refund::ERROR_STAGE_TEXTRAIL_ISSUE_LOCAL
             );
 
@@ -168,23 +170,58 @@ class RefundService implements RefundServiceInterface
      * It will create a full refund in the database, then it should enqueue a refund process on the payment gateway
      * when it reaches the `return_receive` status.
      *
-     * @param int $orderId
+     * @param RefundBag $refundBag
      * @return Refund
+     *
+     * @throws \Exception when some unknown exception has occurred
+     * @throws AfterRemoteRefundException when there was some error after the refund was successfully received by Textrail
      */
-    public function cancelOrder(int $orderId): Refund
+    public function cancelOrder(RefundBag $refundBag): Refund
     {
-        throw new NotImplementedException;
+        // Some issuable context information
+        $logContext = $refundBag->asArray() + ['textrail_order_id' => $refundBag->order->ecommerce_order_id];
+
+        // This logic must not be a transaction to be able recuperating from an error after it has been successfully
+        // received from Textrail
+        $refund = $this->createRefund($refundBag);
+
+        try {
+            $this->updateOrderRefundSummary($refund);
+
+            $this->refundRepository->markAsProcessing($refund);
+
+            $job = new ProcessRefundOnPaymentGatewayJob($refund->id);
+            $this->dispatch($job->onQueue(config('ecommerce.textrail.queue')));
+
+            return $refund;
+        } catch (\Exception $exception) {
+            $this->logger->critical(
+                $exception->getMessage(),
+                $logContext
+            );
+
+            // This is a naive approach given that if there was a failure when it tried to finish the refund (post-textrail),
+            // then, it probably will fail again here, but at least the critical log was recorded, and the subsequent
+            // refund attempt will be prevented
+            $this->refundRepository->markAsRecoverableFailure(
+                $refund,
+                ['textrail_order_id' => $refundBag->order->ecommerce_order_id],
+                $exception->getMessage(),
+                Refund::RECOVERABLE_STAGE_TEXTRAIL_ISSUE
+            );
+
+            throw $exception;
+        }
     }
 
     /**
      * It will call the refund process on the payment gateway.
      *
      * @param int $refundId
-     * @return PaymentGatewayRefundResultInterface
      * @throws RefundPaymentGatewayException
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
-    public function refund(int $refundId): PaymentGatewayRefundResultInterface
+    public function refund(int $refundId): void
     {
         $refund = $this->refundRepository->get($refundId);
 
@@ -206,7 +243,7 @@ class RefundService implements RefundServiceInterface
 
                 $this->refundRepository->markAsCompleted($refund, $gatewayRefundResponse);
 
-                return $gatewayRefundResponse;
+                return;
             } catch (RefundPaymentGatewayException $exception) {
                 $errorMessage = sprintf(
                     'The refund {%d} for {%d} order had a remote process error: %s',
@@ -248,11 +285,11 @@ class RefundService implements RefundServiceInterface
 
     /**
      * @param Refund $refund
-     * @param int $textrailRefundId
+     * @param int|null $textrailRma
      *
-     * @throws AfterRemoteRefundException when there was some error after the refund was successfully received by Textrail
+     * @throws AfterRemoteRefundException
      */
-    private function updateRefundAfterTextrailSuccess(Refund $refund, int $textrailRefundId): void
+    private function updateOrderRefundSummary(Refund $refund, ?int $textrailRma = null): void
     {
         // Some issuable context information
         $logContext = collect($refund->toArray())
@@ -284,7 +321,7 @@ class RefundService implements RefundServiceInterface
             // response payload somewhere for monitoring purpose, or any refund issue
             // @todo: many payment gateways doesn't allow cancelling refunds, so this should be a charge to rollback the refund
 
-            throw $exception->withContext($logContext)->withTextrailId($textrailRefundId);
+            throw $exception->withContext($logContext)->withTextrailRma($textrailRma);
         }
     }
 
