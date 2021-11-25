@@ -96,6 +96,13 @@ return [
             'days' => 3,
         ],
 
+        'dispatch-fb' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/dispatch/facebook.log'),
+            'level' => 'debug',
+            'days' => 7,
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),

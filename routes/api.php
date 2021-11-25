@@ -1156,7 +1156,7 @@ $api->version('v1', function ($route) {
             'prefix' => 'facebook'
         ], function ($route) {
             // Login to Facebook Dispatch
-            $route->post('/', 'App\Http\Controllers\v1\Dispatch\FacebookController@index');
+            $route->post('/', 'App\Http\Controllers\v1\Dispatch\FacebookController@login');
 
             // Facebook Marketplace
             $route->group([
