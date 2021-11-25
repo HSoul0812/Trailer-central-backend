@@ -98,8 +98,6 @@ class RefundController extends RestfulControllerV2
                 $refund = $this->service->cancelOrder(RefundBag::fromTextrailOrderId($textrailOrderId));
 
                 return $this->createdResponse($refund->id);
-            } catch (RefundException $exception) {
-                throw new ResourceException('Validation Failed', $exception->getErrors(), $exception);
             } catch (\Throwable $exception) {
                 throw new HttpException($exception->getCode() > 0 ? $exception->getCode() : 500, $exception->getMessage(), $exception);
             }
