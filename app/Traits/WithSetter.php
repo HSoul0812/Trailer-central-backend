@@ -19,7 +19,7 @@ trait WithSetter
         if(property_exists($this, $key)){
             $this->{$key} = $value;
         } else {
-            throw new PropertyDoesNotExists();
+            throw new PropertyDoesNotExists("'$key' property does not exists");
         }
     }
 }
