@@ -46,7 +46,7 @@ $api->version('v1', function ($route) {
     });
 
     // @todo: after https://operatebeyond.atlassian.net/browse/EC-117 has been merged, we need use the TexTrail webhook validation
-    $route->get('ecommerce/cancellation/{textrail_order_id','App\Http\Controllers\v1\Ecommerce\RefundController@cancelOrder')->where('textrail_order_id', '[0-9]+');
+    $route->post('ecommerce/cancellation/{textrail_order_id}','App\Http\Controllers\v1\Ecommerce\RefundController@cancelOrder')->where('textrail_order_id', '[0-9]+');
 
     /**
      * Floorplan Payments
