@@ -12,6 +12,7 @@ use App\Exceptions\Ecommerce\RefundException;
 use App\Http\Requests\Ecommerce\IssueRefundOrderRequest;
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
 use App\Models\Ecommerce\CompletedOrder\OrderAmountsBag;
+use App\Models\Ecommerce\Refund;
 use App\Models\Parts\Textrail\Part;
 use App\Repositories\Ecommerce\CompletedOrderRepositoryInterface;
 use App\Repositories\Ecommerce\RefundRepositoryInterface;
@@ -64,6 +65,9 @@ final class RefundBag implements DTO
     /** @var CompletedOrder */
     private $order;
 
+    /** @var OrderAmountsBag */
+    private $orderAmounts;
+
     /**
      * @param int $orderId
      * @param array<array{id: int, qty: int}> $partsWithQtys array indexed by part id containing the qty of every part
@@ -109,7 +113,7 @@ final class RefundBag implements DTO
             ->plus($taxAmount);
     }
 
-    public static function fromRequest(IssueRefundOrderRequest $request): self
+    public static function fromIssueRequest(IssueRefundOrderRequest $request): self
     {
         return new self(
             $request->orderId(),
@@ -119,6 +123,38 @@ final class RefundBag implements DTO
             $request->shippingAmount(),
             $request->taxAmount(),
             $request->reason
+        );
+    }
+
+    /**
+     * @param int $textrailOrderId
+     * @return static
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     */
+    public static function fromTextrailOrderId(int $textrailOrderId): self
+    {
+        /** @var CompletedOrderRepositoryInterface $repository */
+        $repository = app(CompletedOrderRepositoryInterface::class);
+
+        /** @var CompletedOrder $order */
+        $order = $repository->get(['ecommerce_order_id' => $textrailOrderId]);
+
+        $orderAmounts = OrderAmountsBag::fromOrder($order);
+
+        $partsToRefund = [];
+
+        foreach ($orderAmounts->partsQtys as $partId => $qty) {
+            $partsToRefund[$partId] = $qty - ($orderAmounts->refundedPartsQtys[$partId] ?? 0);
+        }
+
+        return new self(
+            $order->id,
+            $partsToRefund,
+            Money::zero('USD'),
+            $orderAmounts->handlingRemainingBalance,
+            $orderAmounts->shippingRemainingBalance,
+            $orderAmounts->taxRemainingBalance,
+            Refund::REASON_REQUESTED_BY_TEXTRAIL
         );
     }
 
@@ -236,18 +272,19 @@ final class RefundBag implements DTO
             if (array_key_exists($partId, $orderAmounts->partsQtys)) {
                 // check if the refunded qty will be greater than the total qty for the part item
                 if (isset($orderAmounts->partsRefundedQtys[$partId])
-                    && ($orderAmounts->partsRefundedQtys[$partId] + $partQty) > $orderAmounts->partsQtys[$partId]
-                ) {
-                    throw new RefundAmountException(
-                        sprintf(
-                            'The refund part[%d] qty(%d) is greater than the remaining qty(%d)',
-                            $partId,
-                            $partQty,
-                            $orderAmounts->partsQtys[$partId] - $orderAmounts->partsRefundedQtys[$partId]
-                        ),
-                        'parts'
-                    );
-                } elseif (!isset($orderAmounts->partsRefundedQtys[$partId]) && $partQty > $orderAmounts->partsQtys[$partId]) {
+                    && ($orderAmounts->partsRefundedQtys[$partId] + $partQty) > $orderAmounts->partsQtys[$partId]) {
+                        throw new RefundAmountException(
+                            sprintf(
+                                'The refund part[%d] qty(%d) is greater than the remaining qty(%d)',
+                                $partId,
+                                $partQty,
+                                $orderAmounts->partsQtys[$partId] - $orderAmounts->partsRefundedQtys[$partId]
+                            ),
+                            'parts'
+                        );
+                    }
+
+                if (!isset($orderAmounts->partsRefundedQtys[$partId]) && $partQty > $orderAmounts->partsQtys[$partId]) {
                     throw new RefundAmountException(
                         sprintf(
                             'The refund part[%d] qty(%d) is greater than the purchase qty(%d)',
