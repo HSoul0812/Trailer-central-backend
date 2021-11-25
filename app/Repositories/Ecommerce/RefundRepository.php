@@ -7,11 +7,12 @@ namespace App\Repositories\Ecommerce;
 use App\Models\Ecommerce\Refund;
 use App\Models\Parts\Textrail\Part;
 use App\Models\Parts\Textrail\RefundedPart;
-use App\Services\Ecommerce\Payment\RefundResultInterface;
+use App\Services\Ecommerce\Payment\Gateways\PaymentGatewayRefundResultInterface;
 use Brick\Math\RoundingMode;
 use Brick\Money\Money;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class RefundRepository implements RefundRepositoryInterface
 {
@@ -65,29 +66,36 @@ class RefundRepository implements RefundRepositoryInterface
      */
     public function getRefundedParts(int $orderId): Collection
     {
-        $parts = [];
+        $partsAmount = [];
+        $partsQty = [];
 
-        $adder = static function (int $id, float $amount) use (&$parts) {
-            return isset($parts[$id]) ? $parts[$id] + $amount : $amount;
+        $amountAdder = static function (int $id, float $amount) use (&$partsAmount) {
+            return isset($partsAmount[$id]) ? $partsAmount[$id] + $amount : $amount;
         };
 
-        // we'll make an array of parts with their total refunded amount indexed by part id
+        $qtyAdder = static function (int $id, int $qty) use (&$partsQty) {
+            return isset($partsQty[$id]) ? $partsQty[$id] + $qty : $qty;
+        };
+
+        // we'll make an two arrays of parts with their total refunded amount a qty indexed by part id
         $this->getAll(['order_id' => $orderId])
-            ->each(static function (Refund $refund) use (&$parts, $adder) {
+            ->each(static function (Refund $refund) use (&$partsAmount, &$partsQty, $amountAdder, $qtyAdder) {
                 foreach ($refund->parts as $part) {
-                    $parts[$part['id']] = $adder($part['id'], $part['amount']);
+                    $partsAmount[$part['id']] = $amountAdder($part['id'], $part['amount']);
+                    $partsQty[$part['id']] = $qtyAdder($part['id'], $part['qty']);
                 }
             });
 
         return Part::query()
-            ->whereIn('id', array_keys($parts))
+            ->whereIn('id', array_keys($partsAmount))
             ->get()
-            ->map(static function (Part $part) use ($parts): RefundedPart {
+            ->map(static function (Part $part) use ($partsAmount, $partsQty): RefundedPart {
                 return RefundedPart::from([
                     'id' => $part->id,
                     'title' => $part->title,
                     'sku' => $part->sku,
-                    'amount' => $parts[$part->id]
+                    'amount' => $partsAmount[$part->id],
+                    'qty' => $partsQty[$part->id]
                 ]);
             });
     }
@@ -106,57 +114,105 @@ class RefundRepository implements RefundRepositoryInterface
         $amount = (float)Refund::query()
             ->where('order_id', '=', $orderId)
             ->where('status', '!=', Refund::STATUS_FAILED)
-            ->sum('amount');
+            ->sum('total_amount');
 
-        return Money::of($amount, 'USD', null, RoundingMode::DOWN);
+        return Money::of($amount, 'USD', null, RoundingMode::HALF_DOWN);
+    }
+
+    /**
+     * @param int $orderId
+     * @return array{total_amount: Money, parts_amount: Money, handling_amount: Money, shipping_amount: Money, adjustment_amount: Money, tax_amount: Money}
+     */
+    public function getOrderRefundSummary(int $orderId): array
+    {
+        $select = DB::raw('
+                SUM(parts_amount) as parts_amount,
+                SUM(handling_amount) as handling_amount,
+                SUM(shipping_amount) as shipping_amount,
+                SUM(adjustment_amount) as adjustment_amount,
+                SUM(tax_amount) as tax_amount');
+
+        /** @var \stdClass $summary */
+        $summary = DB::table(Refund::getTableName())->selectRaw($select)
+            ->where('order_id', '=', $orderId)
+            ->where('status', '!=', Refund::STATUS_FAILED)
+            ->groupBy('order_id')
+            ->first();
+
+        return [
+            'parts_amount' => Money::of((float)$summary->parts_amount, 'USD'),
+            'handling_amount' => Money::of((float)$summary->handling_amount, 'USD'),
+            'shipping_amount' => Money::of((float)$summary->shipping_amount, 'USD'),
+            'adjustment_amount' => Money::of((float)$summary->adjustment_amount, 'USD'),
+            'tax_amount' => Money::of((float)$summary->tax_amount, 'USD'),
+        ];
     }
 
     /**
      * @param Refund $refund
-     * @param string $errorMessage
+     * @param string|array $message
+     * @param string $stage
      * @return bool
      */
-    public function markAsFailed(Refund $refund, string $errorMessage): bool
+    public function markAsFailed(Refund $refund, $message, string $stage): bool
+    {
+        $refund->status = Refund::STATUS_FAILED;
+
+        return $refund->addError($message, $stage);
+    }
+
+    /**
+     * @param Refund $refund
+     * @param array $data
+     * @param $message
+     * @param string $stage
+     * @return bool
+     */
+    public function markAsRecoverableFailure(Refund $refund, array $metadata, $message, string $stage): bool
+    {
+        $refund->status = Refund::STATUS_FAILED;
+        $refund->recoverable_failure_stage = $stage;
+        $refund->metadata = $metadata;
+
+        return $refund->addError($message, $stage);
+    }
+
+    /**
+     * @param Refund $refund
+     * @param PaymentGatewayRefundResultInterface $refundResult
+     * @return bool
+     */
+    public function markAsCompleted(Refund $refund, PaymentGatewayRefundResultInterface $refundResult): bool
     {
         return $this->update(
             $refund->id,
-            [
-                'status' => Refund::STATUS_FAILED,
-                'metadata' => ['error' => $errorMessage]
-            ]
+            ['payment_gateway_id' => $refundResult->getId(), 'metadata' => $refundResult->asArray()]
         );
     }
 
     /**
-     * When there was some error after the refund has been done successfully on the payment gateway side,
-     * it should be provided a result in order to make traceable
-     *
      * @param Refund $refund
-     * @param RefundResultInterface $refundResult
+     * @param int $textrailRma
      * @return bool
      */
-    public function markAsRecoverableFailure(Refund $refund, RefundResultInterface $refundResult): bool
+    public function updateRma(Refund $refund, int $textrailRma): bool
     {
-        return $this->update(
-            $refund->id,
-            [
-                'status' => Refund::STATUS_RECOVERABLE_FAILURE,
-                'object_id' => $refundResult->getId(),
-                'metadata' => $refundResult->asArray()
-            ]
-        );
+        return $this->update($refund->id, ['textrail_rma' => $textrailRma]);
     }
 
     /**
      * @param Refund $refund
-     * @param RefundResultInterface $refundResult
+     * @param int $textrailId
      * @return bool
      */
-    public function markAsFinished(Refund $refund, RefundResultInterface $refundResult): bool
+    public function markAsAuthorized(Refund $refund, int $textrailId): bool
     {
         return $this->update(
             $refund->id,
-            ['object_id' => $refundResult->getId(), 'metadata' => $refundResult->asArray()]
+            [
+                'status' => Refund::STATUS_AUTHORIZED,
+                'textrail_rma' => $textrailId
+            ]
         );
     }
 

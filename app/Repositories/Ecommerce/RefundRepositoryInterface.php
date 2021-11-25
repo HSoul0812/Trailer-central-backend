@@ -8,7 +8,7 @@ use App\Models\Ecommerce\Refund;
 use App\Models\Parts\Textrail\Part;
 use App\Models\Parts\Textrail\RefundedPart;
 use App\Repositories\GenericRepository;
-use App\Services\Ecommerce\Payment\RefundResultInterface;
+use App\Services\Ecommerce\Payment\Gateways\PaymentGatewayRefundResultInterface;
 use Brick\Money\Money;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -19,27 +19,36 @@ interface RefundRepositoryInterface extends GenericRepository
 
     /**
      * @param  Refund  $refund
-     * @param  RefundResultInterface  $refundResult
+     * @param  int  $textrailId
      * @return bool
      */
-    public function markAsFinished(Refund $refund, RefundResultInterface $refundResult): bool;
+    public function markAsAuthorized(Refund $refund, int $textrailId): bool;
 
     /**
      * @param  Refund  $refund
-     * @param  string  $errorMessage
+     * @param  PaymentGatewayRefundResultInterface  $refundResult
      * @return bool
      */
-    public function markAsFailed(Refund $refund, string $errorMessage): bool;
+    public function markAsCompleted(Refund $refund, PaymentGatewayRefundResultInterface $refundResult): bool;
 
     /**
-     * When there was some error after the refund has been done successfully on the payment gateway side,
-     * it should be provided a result in order to make traceable
-     *
-     * @param  Refund  $refund
-     * @param  RefundResultInterface  $refundResult
+     * @param Refund $refund
+     * @param string|array $message
+     * @param string $stage
      * @return bool
      */
-    public function markAsRecoverableFailure(Refund $refund, RefundResultInterface $refundResult): bool;
+    public function markAsFailed(Refund $refund, $message, string $stage): bool;
+
+    public function updateRma(Refund $refund, int $textrailRma): bool;
+
+    /**
+     * @param Refund $refund
+     * @param array $metadata
+     * @param string|array $message
+     * @param string $stage
+     * @return bool
+     */
+    public function markAsRecoverableFailure(Refund $refund, array $metadata, $message, string $stage): bool;
 
     public function get(int $refundId): ?Refund;
 
@@ -63,4 +72,10 @@ interface RefundRepositoryInterface extends GenericRepository
     public function getRefundedParts(int $orderId): Collection;
 
     public function getRefundedAmount(int $orderId): Money;
+
+    /**
+     * @param int $orderId
+     * @return array{total_amount: Money, parts_amount: Money, handling_amount: Money, shipping_amount: Money, adjustment_amount: Money, tax_amount: Money}
+     */
+    public function getOrderRefundSummary(int $orderId): array;
 }

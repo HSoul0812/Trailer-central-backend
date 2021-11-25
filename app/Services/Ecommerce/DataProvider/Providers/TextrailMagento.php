@@ -3,6 +3,7 @@
 namespace App\Services\Ecommerce\DataProvider\Providers;
 
 use App\Services\Ecommerce\DataProvider\DataProviderInterface;
+use App\Services\Ecommerce\Refund\RefundBag;
 use GuzzleHttp\Client as GuzzleHttpClient;
 use Illuminate\Support\Facades\Config;
 use App\Services\Parts\Textrail\DTO\TextrailPartDTO;
@@ -13,7 +14,8 @@ use App\Exceptions\NotImplementedException;
 
 class TextrailMagento implements DataProviderInterface,
                                  TextrailWithCheckoutInterface,
-                                 TextrailPartsInterface
+                                 TextrailPartsInterface,
+                                 TextrailRefundsInterface
 {
     private const TEXTRAIL_CATEGORY_URL = 'rest/V1/categories/';
     private const TEXTRAIL_ATTRIBUTES_MANUFACTURER_URL = 'rest/V1/products/attributes/manufacturer/options/';
@@ -28,6 +30,10 @@ class TextrailMagento implements DataProviderInterface,
     const GUEST_CART_CREATE_ORDER = '/rest/:view/V1/guest-carts/:cartId/order';
     const GUEST_CART_AVAILABLE_PAYMENT_METHODS = '/rest/:view/V1/guest-carts/:cartId/payment-methods';
     const GUEST_CART_ADD_SHIPPING_INFO = '/rest/:view/V1/guest-carts/:cartId/shipping-information';
+
+    const ORDER_GET_INFO = '/rest/:view/V1/orders/:orderId';
+    const ORDER_ISSUE_REFUND = '/rest/:view/V1/order/:orderId/refund';
+    const ORDER_CREATE_RETURN = '/rest/:view/V1/returns';
 
     /** @var string */
     private $apiUrl;
@@ -152,11 +158,14 @@ class TextrailMagento implements DataProviderInterface,
         }
     }
 
-    private function generateUrlWithCartAndView(string $url, string $cart = null): string
+    private function generateUrlWithCartAndView(string $uri, string $cart = null): string
     {
-        $url = str_replace(':view', self::VIEW_ID, $url);
-        $url = str_replace(':cartId', $cart, $url);
-        return $url;
+        return str_replace([':view', ':cartId'], [self::VIEW_ID, $cart], $uri);
+    }
+
+    private function generateUrlWithOrderAndView(string $uri, int $orderId): string
+    {
+        return str_replace([':view', ':orderId'], [self::VIEW_ID, $orderId], $uri);
     }
 
     /**
@@ -338,6 +347,8 @@ class TextrailMagento implements DataProviderInterface,
     }
 
     /**
+     * @param int $currentPage
+     * @param int $pageSize
      * @return array<TextrailPartDTO>
      */
     public function getAllParts(int $currentPage = 1, int $pageSize = 1000): array
@@ -429,6 +440,7 @@ class TextrailMagento implements DataProviderInterface,
     }
 
     /**
+     * @param array $img
      * @return null|array{imageData: array, fileName: string}
      */
     public function getTextrailImage(array $img): ?array
@@ -453,7 +465,7 @@ class TextrailMagento implements DataProviderInterface,
     public function getTextrailPlaceholderImage(): ?array
     {
       $img_url = $this->getTextrailImagesBaseUrl() . self::TEXTRAIL_ATTRIBUTES_PLACEHOLDER_URL;
-      
+
       $checkFile = get_headers($img_url);
 
       if ($checkFile[0] == "HTTP/1.1 200 OK") {
@@ -506,10 +518,11 @@ class TextrailMagento implements DataProviderInterface,
      * @see https://magento.redoc.ly/2.3.7-guest/tag/guest-cartscartIdorder
      *
      * @param string $cartId
-     * @return string order id
+     * @param string $poNumber
+     * @return int order id
      * @throws \App\Exceptions\Ecommerce\TextrailException when some error occurs on the Magento side
      */
-    public function createOrderFromGuestCart(string $cartId, string $poNumber): string
+    public function createOrderFromGuestCart(string $cartId, string $poNumber): int
     {
         $url = $this->generateUrlWithCartAndView(self::GUEST_CART_CREATE_ORDER, $cartId);
 
@@ -524,7 +537,7 @@ class TextrailMagento implements DataProviderInterface,
         );
 
         if ($response->getStatusCode() === BaseResponse::HTTP_OK) {
-            return json_decode($response->getBody()->getContents(), true);
+            return (int)json_decode($response->getBody()->getContents(), true);
         }
 
         throw new TextrailException('Order creation for session cart has failed.');
@@ -535,6 +548,7 @@ class TextrailMagento implements DataProviderInterface,
      *
      * @param string $cartId
      * @param array{shipping_carrier_code: string, shipping_method_code: string, shipping_address: array, billing_address: array} $shippingInformation
+     * @return array
      */
     public function addShippingInformationToGuestCart(string $cartId, array $shippingInformation): array
     {
@@ -555,5 +569,102 @@ class TextrailMagento implements DataProviderInterface,
     public function createOrderFromCart(string $cartId): string
     {
         throw new NotImplementedException;
+    }
+
+    /**
+     * @see https://magento.redoc.ly/2.3.7-admin/tag/ordersid#operation/salesOrderRepositoryV1GetGet
+     * @param int $orderId
+     * @return array
+     */
+    public function getOrderInfo(int $orderId): array
+    {
+        $endpoint = $this->generateUrlWithOrderAndView(self::ORDER_GET_INFO, $orderId);
+
+        $response = $this->httpClient->get($endpoint, ['headers' => $this->getHeaders()]);
+
+        return json_decode($response->getBody()->getContents(), true);
+    }
+
+    /**
+     * This was a first approach to request refunds to Textrail, but it was early deprecated, due we need to request returns, not refunds.
+     * However, we can still use this method to request refunds, if we need to.
+     *
+     * @see https://devdocs.magento.com/guides/v2.4/rest/tutorials/orders/order-issue-refund.html
+     *
+     * @return int the refund/memo id
+     *
+     * @throws ClientException when some remote error appears
+     * @throws \Brick\Money\Exception\MoneyMismatchException
+     */
+    public function issueRefund(RefundBag $refundBag): int
+    {
+        $endpoint = $this->generateUrlWithOrderAndView(self::ORDER_ISSUE_REFUND, $refundBag->order->ecommerce_order_id);
+
+        $requestInfo = [
+            'notify' => true,
+            'arguments' => [
+                'adjustment_negative' => 0, // never will be negative amount so far
+                'adjustment_positive' => 0
+            ]
+        ];
+
+        if ($refundBag->textrailItems !== []) {
+            $itemsId = collect($refundBag->textrailItems)->pluck('order_item_id')->toArray();
+
+            $requestInfo['items'] = $refundBag->textrailItems;
+            $requestInfo['arguments']['extension_attributes'] = [];
+            $requestInfo['arguments']['extension_attributes']['return_to_stock_items'] = $itemsId;
+        }
+
+        // due the endpoint doesn't allow to send each amount of money separately, we need to send the whole amount
+        // using 'adjustment_positive' argument
+        $restOfAmounts = $refundBag->adjustmentAmount->plus($refundBag->handlingAmount)->plus($refundBag->taxAmount);
+        if ($restOfAmounts->isGreaterThan(0)) {
+            $requestInfo['arguments']['adjustment_positive'] = $restOfAmounts->getAmount()->toFloat();
+        }
+
+        if ($refundBag->shippingAmount->isGreaterThan(0)) {
+            $requestInfo['arguments']['shipping_amount'] = $refundBag->shippingAmount->getAmount()->toFloat();
+        }
+
+        $response = $this->httpClient->post($endpoint, ['headers' => $this->getHeaders(), 'json' => $requestInfo]);
+
+        return (int)json_decode($response->getBody()->getContents(), true);
+    }
+
+    /**
+     * @see https://magento.redoc.ly/2.4.3-admin/tag/returns/#operation/rmaRmaManagementV1SaveRmaPost
+     *
+     * @return int the RMA
+     */
+    public function requestReturn(RefundBag $refundBag): int
+    {
+        $endpoint = $this->generateUrlWithOrderAndView(self::ORDER_ISSUE_REFUND, $refundBag->order->ecommerce_order_id);
+
+        $itemDefaults = [
+            'reason' => config('ecommerce.textrail.return.item_default_reason'),
+            'condition' => config('ecommerce.textrail.return.item_default_condition'),
+            'resolution' => config('ecommerce.textrail.return.item_default_resolution'),
+            'status' => config('ecommerce.textrail.return.item_default_status')
+        ];
+
+        $items = collect($refundBag->textrailItems)->map(static function (array $item) use ($itemDefaults): array {
+            return $item + $itemDefaults;
+        })->toArray();
+
+        $response = $this->httpClient->post($endpoint,
+            [
+                'headers' => $this->getHeaders(),
+                'json' => [
+                    'rmaDataObject' => [
+                        'order_id' => $refundBag->order->ecommerce_order_id,
+                        'store_id' => config('ecommerce.textrail.store_id'),
+                        'status' => config('ecommerce.textrail.return.default_status'),
+                        'items' => $items
+                    ]
+                ]
+            ]);
+
+        return (int)json_decode($response->getBody()->getContents(), true);
     }
 }

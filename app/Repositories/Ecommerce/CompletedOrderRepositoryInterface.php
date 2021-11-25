@@ -28,4 +28,12 @@ interface CompletedOrderRepositoryInterface extends Repository, TransactionalRep
      * @param int $dealerId
      */
     public function generateNextPoNumber(int $dealerId): string;
+
+    /**
+     * @param int $orderId
+     * @param string|array $error
+     * @param string $stage
+     * @return bool
+     */
+    public function logError(int $orderId, $error, string $stage): bool;
 }

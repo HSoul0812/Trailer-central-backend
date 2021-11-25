@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services\Ecommerce\Payment\Gateways\Stripe;
 
-use App\Services\Ecommerce\Payment\RefundResultInterface;
+use App\Services\Ecommerce\Payment\Gateways\PaymentGatewayRefundResultInterface;
 
-interface StripeRefundResultInterface extends RefundResultInterface
+interface StripePaymentGatewayRefundResultInterface extends PaymentGatewayRefundResultInterface
 {
     public function getOriginalStatus(): string;
 

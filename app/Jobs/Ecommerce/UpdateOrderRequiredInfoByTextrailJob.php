@@ -7,7 +7,7 @@ namespace App\Jobs\Ecommerce;
 use App\Jobs\Job;
 use App\Services\Ecommerce\CompletedOrder\CompletedOrderServiceInterface;
 
-class SyncOrderJob extends Job
+class UpdateOrderRequiredInfoByTextrailJob extends Job
 {
     /** @var int */
     private $orderId;
@@ -25,6 +25,6 @@ class SyncOrderJob extends Job
      */
     public function handle(CompletedOrderServiceInterface $service): void
     {
-        $service->syncSingleOrderOnTextrail($this->orderId);
+        $service->updateRequiredInfoByTextrail($this->orderId);
     }
 }

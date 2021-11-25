@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services\Ecommerce\Payment\Gateways;
 
 use App\Exceptions\Ecommerce\RefundPaymentGatewayException;
-use App\Services\Ecommerce\Payment\RefundResultInterface;
 use Brick\Money\Money;
 
 interface PaymentGatewayServiceInterface
@@ -14,9 +13,9 @@ interface PaymentGatewayServiceInterface
      * @param  string  $objectId
      * @param  Money  $amount
      * @param  string|null  $reason
-     * @param  array{sku:string, title:string}  $parts
+     * @param  array<array{sku:string, title:string, id:int, amount: float}> $parts
      *
-     * @return RefundResultInterface
+     * @return PaymentGatewayRefundResultInterface
      * @noinspection ReturnTypeCanBeDeclaredInspection
      * @noinspection PhpMissingReturnTypeInspection
      *

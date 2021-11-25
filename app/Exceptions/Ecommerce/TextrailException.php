@@ -2,7 +2,7 @@
 
 namespace App\Exceptions\Ecommerce;
 
-class TextrailException extends \LogicException
+class TextrailException extends \RuntimeException
 {
 
 }

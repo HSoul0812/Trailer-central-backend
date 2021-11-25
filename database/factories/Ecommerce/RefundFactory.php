@@ -10,15 +10,21 @@ use App\Models\Ecommerce\Refund;
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
 
 $factory->define(Refund::class, static function (Faker $faker, array $attributes): array {
-
     $createdAt = $faker->dateTimeThisMonth;
+
+    $adjustmentAmount = $faker->numberBetween(100, 1000);
+
+    $refundReasons = collect(Refund::REASONS)->filter(function (string $value, int $key): bool {
+        return $value !== Refund::REASON_REQUESTED_BY_TEXTRAIL;
+    })->toArray();
 
     return [
         'order_id' => $attributes['order_id'] ?? factory(CompletedOrder::class)->create()->getKey(),
-        'amount' => $faker->numberBetween(100, 1000),
-        'reason' => $faker->randomElement(Refund::REASONS),
-        'object_id' => $faker->uuid,
-        'status' => Refund::STATUS_FINISHED,
+        'adjustment_amount' => $adjustmentAmount,
+        'total_amount' => $adjustmentAmount,
+        'reason' => $faker->randomElement($refundReasons),
+        'payment_gateway_id' => $faker->uuid,
+        'status' => Refund::STATUS_COMPLETED,
         'parts' => [],
         'created_at' => $createdAt
     ];

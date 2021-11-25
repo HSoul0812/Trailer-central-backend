@@ -12,21 +12,27 @@ use Brick\Money\Money;
 /**
  * @property int $dealer_id
  * @property int $order_id
- * @property float $amount
- * @property array{id: int, amount: float} $parts
+ * @property float $adjustment_amount
+ * @property float $handling_amount
+ * @property float $shipping_amount
+ * @property float $tax_amount
+ * @property array{id: int, qty: int} $parts
  * @property string $reason
  */
-class RefundOrderRequest extends Request
+class IssueRefundOrderRequest extends Request
 {
     public function getRules(): array
     {
         return [
             'dealer_id' => 'integer|min:1|required|exists:dealer,dealer_id',
             'order_id' => 'integer|min:1|required|exists:ecommerce_completed_orders,id',
-            'amount' => 'required|min:1',
-            'parts' => 'array',
+            // 'adjustment_amount' => 'numeric|min:0',
+            // 'handling_amount' => 'numeric|min:0',
+            // 'shipping_amount' => 'numeric|min:0',
+            // 'tax_amount' => 'numeric|min:0',
+            'parts' => 'array|required',
             'parts.*.id' => 'required|integer|min:1',
-            'parts.*.amount' => 'required|numeric',
+            'parts.*.qty' => 'required|int:min:1',
             'reason' => sprintf('nullable|string|in:%s', implode(',', Refund::REASONS))
         ];
     }
@@ -36,9 +42,26 @@ class RefundOrderRequest extends Request
         return (int)$this->input('order_id');
     }
 
-    public function amount(): Money
+    public function adjustmentAmount(): Money
     {
-        return Money::of($this->input('amount', 0), 'USD');
+        // for now, we're not supporting adjustments or any refund amounts different from the order items
+        // return Money::of($this->input('adjustment_amount', 0), 'USD', null, RoundingMode::HALF_UP);
+        return Money::zero('USD');
+    }
+
+    public function handlingAmount(): Money
+    {
+        return Money::zero('USD');
+    }
+
+    public function shippingAmount(): Money
+    {
+        return Money::zero('USD');
+    }
+
+    public function taxAmount(): Money
+    {
+        return Money::zero('USD');
     }
 
     /**

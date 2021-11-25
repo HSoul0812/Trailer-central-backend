@@ -14,6 +14,8 @@ interface TextrailWithCustomerCheckoutInterface
 
     public function createOrderFromCart(string $cartId): string;
 
+    public function getOrderInfo(int $orderId): array;
+
     /**
      * @param array $params
      * @throws \App\Exceptions\Ecommerce\TextrailException handles guzzle exception during estimation.

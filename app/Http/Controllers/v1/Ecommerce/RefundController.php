@@ -4,19 +4,23 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\v1\Ecommerce;
 
+use App\Exceptions\Ecommerce\RefundException;
 use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\Ecommerce\GetAllRefundsRequest;
 use App\Http\Requests\Ecommerce\GetSingleRefundRequest;
-use App\Http\Requests\Ecommerce\RefundOrderRequest;
+use App\Http\Requests\Ecommerce\IssueRefundOrderRequest;
 use App\Repositories\Ecommerce\RefundRepositoryInterface;
-use App\Services\Ecommerce\Payment\PaymentServiceInterface;
+use App\Services\Ecommerce\Refund\RefundBag;
+use App\Services\Ecommerce\Refund\RefundServiceInterface;
 use App\Transformers\Ecommerce\RefundTransformer;
+use Dingo\Api\Exception\ResourceException;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class RefundController extends RestfulControllerV2
 {
-    /** @var PaymentServiceInterface */
+    /** @var RefundServiceInterface */
     private $service;
 
     /** @var RefundRepositoryInterface */
@@ -25,7 +29,7 @@ class RefundController extends RestfulControllerV2
     /** @var RefundTransformer */
     private $transformer;
 
-    public function __construct(PaymentServiceInterface   $service,
+    public function __construct(RefundServiceInterface    $service,
                                 RefundRepositoryInterface $repository,
                                 RefundTransformer         $transformer)
     {
@@ -33,33 +37,38 @@ class RefundController extends RestfulControllerV2
         $this->repository = $repository;
         $this->transformer = $transformer;
 
-        $this->middleware('setDealerIdOnRequest')->only(['create', 'index', 'show']);
+        $this->middleware('setDealerIdOnRequest')->only(['issue', 'index', 'show']);
     }
 
     /**
+     * It will create a full/partial refund in our database, then it will send a refund/memo request to TexTrail,
+     * but the refund process on the payment gateway will be remaining as pending until TextTrail send us a command to proceed.
+     *
      * @param int $orderId
      * @param Request $request
      * @return Response|void
      *
      * @throws \Symfony\Component\HttpKernel\Exception\HttpException when there was a bad request
      * @throws \Dingo\Api\Exception\ResourceException when there were some validation error
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException when there were some error different from bad request or validation error
      *
      * @noinspection PhpDocMissingThrowsInspection
      * @noinspection PhpUnhandledExceptionInspection
      */
-    public function create(int $orderId, Request $request): Response
+    public function issue(int $orderId, Request $request): Response
     {
-        $refundRequest = new RefundOrderRequest($request->all() + ['order_id' => $orderId]);
+        $refundRequest = new IssueRefundOrderRequest($request->all() + ['order_id' => $orderId]);
 
         if ($refundRequest->validate()) {
-            $refund = $this->service->refund(
-                $refundRequest->orderId(),
-                $refundRequest->amount(),
-                $refundRequest->parts(),
-                $refundRequest->reason()
-            );
+            try {
+                $refund = $this->service->issue(RefundBag::fromRequest($refundRequest));
 
-            return $this->createdResponse($refund->id);
+                return $this->createdResponse($refund->id);
+            } catch (RefundException $exception) {
+                throw new ResourceException('Validation Failed', $exception->getErrors(), $exception);
+            } catch (\Throwable $exception) {
+                throw new HttpException($exception->getCode() > 0 ? $exception->getCode() : 500, $exception->getMessage(), $exception);
+            }
         }
 
         $this->response->errorBadRequest();

@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace App\Exceptions\Ecommerce;
 
-use App\Services\Ecommerce\Payment\RefundResultInterface;
-
-class AfterRemoteRefundException extends RefundException
+class AfterRemoteRefundException extends \RuntimeException
 {
     /** @var array */
     private $context = [];
 
-    /** @var RefundResultInterface */
-    private $result;
+    /**  @var int */
+    private $textrailId;
 
     public function withContext(array $context): self
     {
@@ -21,9 +19,9 @@ class AfterRemoteRefundException extends RefundException
         return $this;
     }
 
-    public function withResult(RefundResultInterface $result): self
+    public function withTextrailId(int $id): self
     {
-        $this->result = $result;
+        $this->textrailId = $id;
 
         return $this;
     }
@@ -33,8 +31,8 @@ class AfterRemoteRefundException extends RefundException
         return $this->context;
     }
 
-    public function getResult(): RefundResultInterface
+    public function getTextrailId(): ?int
     {
-        return $this->result;
+        return $this->textrailId;
     }
 }
