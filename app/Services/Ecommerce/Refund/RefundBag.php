@@ -144,7 +144,7 @@ final class RefundBag implements DTO
         $partsToRefund = [];
 
         foreach ($orderAmounts->partsQtys as $partId => $qty) {
-            $partsToRefund[$partId] = $qty - ($orderAmounts->refundedPartsQtys[$partId] ?? 0);
+            $partsToRefund[$partId] = $qty - ($orderAmounts->partsRefundedQtys[$partId] ?? 0);
         }
 
         return new self(

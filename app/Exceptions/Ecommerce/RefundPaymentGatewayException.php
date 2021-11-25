@@ -33,7 +33,7 @@ class RefundPaymentGatewayException extends RefundHttpClientException
         ?string $gatewayErrorCode = null
     ): RefundPaymentGatewayException
     {
-        $instance = parent::factory($message, $httpBody, $httpStatus, $jsonBody, $httpHeaders);
+        $instance = parent::factory($message, $httpStatus, $httpBody,  $jsonBody, $httpHeaders);
         $instance->gatewayErrorCode = $gatewayErrorCode;
 
         return $instance;

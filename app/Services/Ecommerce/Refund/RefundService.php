@@ -173,11 +173,25 @@ class RefundService implements RefundServiceInterface
      * @param RefundBag $refundBag
      * @return Refund
      *
+     * @throws RefundException when the order is not refundable due it is unpaid
+     * @throws RefundException when the order is not refundable due it is refunded
+     * @throws RefundException when the order has not a payment unique id
+     * @throws RefundException when the order has not a related parts matching with the request
+     * @throws RefundAmountException when the refund total amount is greater than the order remaining total balance
+     * @throws RefundAmountException when the refund parts amount is greater than the order remaining parts balance
+     * @throws RefundAmountException when the refund handling amount is greater than the order remaining handling balance
+     * @throws RefundAmountException when the refund shipping amount is greater than the order remaining shipping balance
+     * @throws RefundAmountException when the refund tax amount is greater than the order remaining tax balance
+     * @throws RefundAmountException when the some provided part qty is greater than the remaining qty
+     * @throws RefundAmountException when the some provided part qty is greater than the purchase qty
+     * @throws RefundException when a provided part was not a placed part in the order
      * @throws \Exception when some unknown exception has occurred
      * @throws AfterRemoteRefundException when there was some error after the refund was successfully received by Textrail
      */
     public function cancelOrder(RefundBag $refundBag): Refund
     {
+        $refundBag->validate();
+
         // Some issuable context information
         $logContext = $refundBag->asArray() + ['textrail_order_id' => $refundBag->order->ecommerce_order_id];
 

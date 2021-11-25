@@ -96,9 +96,10 @@ class RefundRepository implements RefundRepositoryInterface
                 'status' => [Refund::STATUS_FAILED, Refund::STATUS_REJECTED]
             ]
         ])->each(static function (Refund $refund) use (&$partsAmount, &$partsQty, $amountAdder, $qtyAdder) {
+           // dd($refund->parts);
             foreach ($refund->parts as $part) {
                 $partsAmount[$part['id']] = $amountAdder($part['id'], $part['amount']);
-                $partsQty[$part['id']] = $qtyAdder($part['id'], $part['qty']);
+                $partsQty[$part['id']] = $qtyAdder($part['id'], (int)$part['qty']);
             }
         });
 
