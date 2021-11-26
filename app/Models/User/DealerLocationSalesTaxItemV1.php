@@ -15,6 +15,10 @@ class DealerLocationSalesTaxItemV1 extends DealerLocationSalesTaxItem
 
     public $timestamps = false;
 
+    protected $casts = [
+        'entity_type_id' => 'integer',
+    ];
+
     /**
      * The attributes that are mass assignable.
      *
