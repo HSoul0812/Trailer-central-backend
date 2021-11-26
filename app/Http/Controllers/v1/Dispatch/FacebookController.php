@@ -9,13 +9,13 @@ use App\Http\Requests\Dispatch\Facebook\ShowMarketplaceRequest;
 use App\Http\Requests\Dispatch\Facebook\CreateMarketplaceRequest;
 use App\Http\Requests\Dispatch\Facebook\UpdateMarketplaceRequest;
 use App\Http\Requests\Dispatch\Facebook\DeleteMarketplaceRequest;
-use App\Repositories\Dispatch\Facebook\MarketplaceRepositoryInterface;
+use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
 use App\Services\Dispatch\Facebook\MarketplaceServiceInterface;
 use App\Transformers\Dispatch\Facebook\MarketplaceTransformer;
 
 class FacebookController extends RestfulControllerV2 {
     /**
-     * @var App\Services\Dispatch\MarketplaceRepositoryInterface
+     * @var App\Services\Marketing\MarketplaceRepositoryInterface
      */
     private $repository;
 
