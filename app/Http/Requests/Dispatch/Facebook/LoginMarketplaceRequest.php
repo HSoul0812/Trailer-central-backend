@@ -12,6 +12,16 @@ use App\Http\Requests\Request;
  */
 class LoginMarketplaceRequest extends Request {
 
-    protected $rules = [];
+    protected $rules = [
+        'ip_address' => 'required|ip',
+        'client_uuid' => [
+            'required',
+            'regex:/fbm\d{16}/'
+        ],
+        'version' => [
+            'required',
+            'regex:/\d+[.]\d+[.]\d+/'
+        ]
+    ];
 
 }
