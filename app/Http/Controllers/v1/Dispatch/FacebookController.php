@@ -9,6 +9,7 @@ use App\Http\Requests\Dispatch\Facebook\ShowMarketplaceRequest;
 use App\Http\Requests\Dispatch\Facebook\CreateMarketplaceRequest;
 use App\Http\Requests\Dispatch\Facebook\UpdateMarketplaceRequest;
 use App\Http\Requests\Dispatch\Facebook\DeleteMarketplaceRequest;
+use App\Http\Requests\Dispatch\Facebook\LoginMarketplaceRequest;
 use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
 use App\Services\Dispatch\Facebook\MarketplaceServiceInterface;
 use App\Transformers\Marketing\Facebook\MarketplaceTransformer;
