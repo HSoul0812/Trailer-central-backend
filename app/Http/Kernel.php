@@ -3,6 +3,7 @@
 namespace App\Http;
 
 use App\Http\Middleware\Ecommerce\StripeWebhookValidate;
+use App\Http\Middleware\Ecommerce\TexTrailWebhookValidate;
 use App\Http\Middleware\Ecommerce\ValidHookIpMiddleware;
 use App\Http\Middleware\Inventory\CreateInventoryPermissionMiddleware;
 use App\Http\Middleware\SetDealerIdFilterOnRequest;
@@ -117,7 +118,7 @@ class Kernel extends HttpKernel
         'printer.instruction.validate' => PrinterInstructionValidate::class,
         'inventory.create.permission' => CreateInventoryPermissionMiddleware::class,
         'stripe.webhook.validate' => StripeWebhookValidate::class,
-        'inventory.create.permission' => CreateInventoryPermissionMiddleware::class
+        'textrail.webhook.validate' => TexTrailWebhookValidate::class,
     ];
 
     /**
