@@ -6,6 +6,7 @@ use App\Models\User\AuthToken;
 use App\Models\User\Integration\Integration;
 use App\Models\Marketing\Facebook\Marketplace;
 use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class MarketplaceService
