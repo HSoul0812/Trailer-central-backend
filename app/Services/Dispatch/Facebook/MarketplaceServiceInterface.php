@@ -2,13 +2,11 @@
 
 namespace App\Services\Dispatch\Facebook;
 
-use App\Models\User\AuthToken;
-
 interface MarketplaceServiceInterface {
     /**
      * Login to Marketplace
      * 
-     * Return Auth Token
+     * @return string
      */
-    public function login(): AuthToken;
+    public function login(): string;
 }

@@ -142,7 +142,9 @@ class FacebookController extends RestfulControllerV2 {
         if ($request->validate()) {
             // Get Acccess Token
             return $this->response->array([
-                'data' => $this->service->login()
+                'data' => $this->service->login($request->client_uuid,
+                                                $request->ip_address,
+                                                $request->version)
             ]);
         }
         

@@ -43,9 +43,20 @@ class MarketplaceService implements MarketplaceServiceInterface
     /**
      * Login to Marketplace
      * 
+     * @param string $uuid
+     * @param string $ip
+     * @param string $version
      * @return string
      */
-    public function login(): string {
+    public function login(string $uuid, string $ip, string $version): string {
+        // Log
+        $this->log->info('Login request received from client ' . $uuid .
+                            ' bearing the IP address ' . $ip .
+                            ' on extension version #' . $version);
+
+        // TO DO: Implement Version Checking
+        // TO DO: Implement IP Blockages
+
         // Get Integration Name
         $integration = Integration::where('name', self::INTEGRATION_NAME)->first();
 
