@@ -11,7 +11,7 @@ use App\Http\Requests\Dispatch\Facebook\UpdateMarketplaceRequest;
 use App\Http\Requests\Dispatch\Facebook\DeleteMarketplaceRequest;
 use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
 use App\Services\Dispatch\Facebook\MarketplaceServiceInterface;
-use App\Transformers\Dispatch\Facebook\MarketplaceTransformer;
+use App\Transformers\Marketing\Facebook\MarketplaceTransformer;
 
 class FacebookController extends RestfulControllerV2 {
     /**
