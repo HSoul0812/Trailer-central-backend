@@ -16,6 +16,14 @@ class MarketplaceRepository implements MarketplaceRepositoryInterface {
      * @var array
      */
     private $sortOrders = [
+        'username' => [
+            'field' => 'fb_username',
+            'direction' => 'DESC'
+        ],
+        '-username' => [
+            'field' => 'fb_username',
+            'direction' => 'ASC'
+        ],
         'location' => [
             'field' => 'dealer_location_id',
             'direction' => 'DESC'
@@ -82,10 +90,14 @@ class MarketplaceRepository implements MarketplaceRepositoryInterface {
      * @return Collection of Marketplaces
      */
     public function getAll($params) {
-        $query = Marketplace::where('dealer_id', '=', $params['dealer_id']);
+        $query = Marketplace::where('id', '>', 0);
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 100;
+        }
+
+        if (isset($params['dealer_id'])) {
+            $query = $query->where('dealer_id', $params['dealer_id']);
         }
 
         if (isset($params['dealer_location_id'])) {

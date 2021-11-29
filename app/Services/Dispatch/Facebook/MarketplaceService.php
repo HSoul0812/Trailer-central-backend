@@ -7,6 +7,7 @@ use App\Models\User\Integration\Integration;
 use App\Models\Marketing\Facebook\Marketplace;
 use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Redis\Connections\Connection;
 
 /**
  * Class MarketplaceService
@@ -22,6 +23,11 @@ class MarketplaceService implements MarketplaceServiceInterface
 
 
     /**
+     * @var Connection
+     */
+    private $redis;
+
+    /**
      * @var MarketplaceRepositoryInterface
      */
     protected $marketplace;
@@ -32,9 +38,11 @@ class MarketplaceService implements MarketplaceServiceInterface
      * @param MarketplaceRepositoryInterface $marketplace
      */
     public function __construct(
-        MarketplaceRepositoryInterface $marketplace
+        MarketplaceRepositoryInterface $marketplace,
+        TunnelRepositoryInterface $tunnels
     ) {
         $this->marketplace = $marketplace;
+        $this->tunnels = $tunnels;
 
         // Initialize Logger
         $this->log = Log::channel('dispatch-fb');
@@ -66,5 +74,121 @@ class MarketplaceService implements MarketplaceServiceInterface
 
         // Return Access Token
         return $token->access_token;
+    }
+    
+    /**
+     * Get Dealers List
+     * 
+     * @param null|array $logs
+     * @return MarketplaceStatus
+     */
+    public function dealers(?array $logs = null): MarketplaceStatus {
+        // Get All Marketplace Integration Dealers
+        $dealers = $this->getIntegrations();
+
+        // Get Available Tunnels
+        $tunnels = $this->getTunnels($dealers);
+
+        // Catch Logs
+        if(!empty($logs)) {
+            $this->catchLogs($logs, 'error');
+        }
+
+        // Return MarketplaceStatus
+        return new MarketplaceStatus([
+            'dealers' => $dealers,
+            'tunnels' => $tunnels
+        ]);
+    }
+
+
+    /**
+     * Get Dealer Integrations
+     * 
+     * @return Collection<DealerFacebook>
+     */
+    private function getIntegrations(): DealerFacebook {
+        $integrations = $this->marketplace->getAll([
+            'sort' => '-username'
+        ]);
+
+        // Loop Facebook Integrations
+        $dealers = [];
+        foreach($integrations as $dealer) {
+            $dealers->push(new DealerFacebook([
+                'id' => $dealer->id,
+                'dealer_id' => $dealer->dealer_id,
+                'dealer_name' => $dealer->user->name,
+                'fb_username' => $dealer->fb_username,
+                'fb_password' => $dealer->fb_password,
+                'auth_username' => $dealer->tfa_username,
+                'auth_password' => $dealer->tfa_password,
+                'auth_type' => $dealer->tfa_type,
+                'tunnels' => $this->repository(['dealer_id' => $dealer->dealer_id])
+            ]));
+        }
+
+        // Return Dealers Collection
+        return new collect($dealers);
+    }
+
+    /**
+     * Get Dealer Tunnels
+     * 
+     * @param Collection<DealerFacebook>
+     * @return Collection<DealerTunnel>
+     */
+    private function getTunnels(Collection $integrations): DealerTunnel {
+        // Get Unique Dealers
+        $dealers = [];
+        foreach($integrations as $integration) {
+            if(!in_array($integration->dealerId, $dealers)) {
+                $dealers[] = $integration->dealerId;
+            }
+        }
+
+        // Get All Tunnels for All Dealers
+        $tunnels = new Collection();
+        foreach($dealers as $dealer) {
+            $tunnels->merge($this->repository(['dealer_id' => $dealer->dealer_id]));
+        }
+
+        // Return Collection<DealerTunnel>
+        return $tunnels;
+    }
+
+
+    /**
+     * Catch Logs and Errors
+     * 
+     * @param null|array $logs
+     * @param null|bool $restrict
+     */
+    private function catchLogs(?array $logs = null, ?bool $restrict = null) {
+        // Catch All Logs
+        foreach($logs as $psr => $data) {
+            // Restrict Logs to One Type
+            if($restrict !== null && $restrict !== $psr) {
+                continue;
+            }
+
+            // Create String
+            $msg = '';
+            if(is_array($data)) {
+                foreach($data as $item) {
+                    $msg .= ((is_array($item) || is_object($item)) ? print_r($item, true) : $item);
+                }
+            }
+
+            // Add to Log File
+            $this->log->{$psr}($msg);
+
+            // Send Error to Slack
+            if($psr === 'error') {
+                // TO DO: Send to Slack
+                // Create a Service to Handle Slack Messages and Toggle Type
+                //$this->notifySlack($msg, $psr);
+            }
+        }
     }
 }
