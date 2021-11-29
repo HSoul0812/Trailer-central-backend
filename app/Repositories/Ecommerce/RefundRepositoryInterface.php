@@ -19,10 +19,9 @@ interface RefundRepositoryInterface extends GenericRepository
 
     /**
      * @param  Refund  $refund
-     * @param  int  $textrailId
      * @return bool
      */
-    public function markAsAuthorized(Refund $refund, int $textrailId): bool;
+    public function markAsProcessing(Refund $refund): bool;
 
     /**
      * @param  Refund  $refund

@@ -48,15 +48,29 @@ class Refund extends Model
     use TableAware;
     use ErrorAware;
 
+    /**
+     * Status flow:
+     *  1) when the refund is created from TC side, it might follow one of the below flows:
+     *      a) pending -> authorized -> return_received -> processing -> completed (all went well)
+     *      b) pending -> { authorized -> return_received -> processing } -> completed (recoverable_failure between any curly brakes status)
+     *      d) pending -> rejected
+     *      e) pending -> failed
+     *  2) when the refund is created from TexTrail side, it might follow one of the below flows:
+     *      a) pending -> processing -> completed (all went well)
+     *      b) pending -> { processing } -> completed (recoverable_failure between any curly brakes status)
+     */
     public const STATUS_PENDING = 'pending';
+    public const STATUS_REJECTED = 'rejected';
     public const STATUS_AUTHORIZED = 'authorized'; // the refund has been authorized by TexTrail
     public const STATUS_RETURN_RECEIVED = 'return_received'; // the refund should be proceeded by payment gateway
     public const STATUS_COMPLETED = 'completed'; // the refund has successfully been processed by the payment gateway
     public const STATUS_FAILED = 'failed';
+    public const STATUS_PROCESSING = 'processing'; // the refund has is being processed by the payment gateway
+    public const STATUS_RECOVERABLE_FAILURE = 'recoverable_failure';
 
-
-    // these are intended to advice that some refund has failed after their successfully done remote process
-    // subsequently, the refund will be marked as failed, but TrailerCentral can still recover it
+    // these are intended to advice that some refund has failed after a successfully done remote process, subsequently,
+    // the refund will be marked as recoverable_failure, ensuring it will prevent any refund greater than the remaining
+    // balance, and TrailerCentral can still recover it
     public const RECOVERABLE_STAGE_PAYMENT_GATEWAY_REFUND = 'payment_gateway_recoverable_refund';
     public const RECOVERABLE_STAGE_TEXTRAIL_ISSUE = 'textrail_recoverable_issue';
 

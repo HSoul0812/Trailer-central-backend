@@ -160,12 +160,19 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
      * @return CompletedOrder
      *
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     * @throws \InvalidArgumentException when "id" or "ecommerce_order_id" was not provided
      */
     public function get($params): CompletedOrder
     {
         if (isset($params['id'])) {
             return CompletedOrder::findOrFail($params['id']);
         }
+
+        if (isset($params['ecommerce_order_id'])) {
+            return CompletedOrder::query()->where('ecommerce_order_id', $params['ecommerce_order_id'])->firstOrFail();
+        }
+
+        throw new \InvalidArgumentException('RefundRepository::get requires at least one argument of: "id" or "ecommerce_order_id" to filter by');
     }
 
     public function delete($params)

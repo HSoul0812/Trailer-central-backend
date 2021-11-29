@@ -6,7 +6,6 @@ namespace App\Services\Ecommerce\Refund;
 
 use App\Exceptions\Ecommerce\RefundPaymentGatewayException;
 use App\Models\Ecommerce\Refund;
-use App\Services\Ecommerce\Payment\Gateways\PaymentGatewayRefundResultInterface;
 
 interface RefundServiceInterface
 {
@@ -23,17 +22,16 @@ interface RefundServiceInterface
      * It will create a full refund in the database, then it should enqueue a refund process on the payment gateway
      * when it reaches the `return_receive` status.
      *
-     * @param int $orderId
+     * @param RefundBag $refundBag
      * @return Refund
      */
-    public function cancelOrder(int $orderId): Refund;
+    public function cancelOrder(RefundBag $refundBag): Refund;
 
     /**
      * It will call the refund process on the payment gateway.
      *
      * @param int $refundId
-     * @return PaymentGatewayRefundResultInterface
      * @throws RefundPaymentGatewayException
      */
-    public function refund(int $refundId): PaymentGatewayRefundResultInterface;
+    public function refund(int $refundId): void;
 }
