@@ -15,7 +15,7 @@ class AddEcommerceOrderStatus extends Migration
     public function up(): void
     {
         Schema::table('ecommerce_completed_orders', function (Blueprint $table) {
-            $table->enum('ecommerce_order_status', CompletedOrder::ECOMMERCE_ORDER_STATUSES)->default('not_approved')->index();
+            $table->enum('ecommerce_order_status', CompletedOrder::ECOMMERCE_ORDER_STATUSES)->after('ecommerce_order_id')->default('not_approved')->index();
         });
     }
 

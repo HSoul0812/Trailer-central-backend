@@ -142,7 +142,7 @@ class CompletedOrderController extends RestfulControllerV2
         $approveRequest = new ApproveCompletedOrderRequest($request->all() + ['textrail_order_id' => $textrail_order_id]);
 
         if ($approveRequest->validate()) {
-            return $this->response->item($this->completedOrderService->updateStatus($textrail_order_id), new CompletedOrderTransformer($this->textRailPartRepo));
+            return $this->response->item($this->completedOrderService->approve($textrail_order_id), new CompletedOrderTransformer($this->textRailPartRepo));
         }
 
         return $this->response->errorBadRequest();

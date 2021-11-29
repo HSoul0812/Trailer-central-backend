@@ -211,11 +211,11 @@ class CompletedOrderService implements CompletedOrderServiceInterface
     /**
      * @param int $textrailOrderId
      * @return CompletedOrder
-     * @throws TextrailException
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
-    public function updateStatus(int $textrailOrderId): CompletedOrder
+    public function approve(int $textrailOrderId): CompletedOrder
     {
-        $completedOrder = $this->completedOrderRepository->get(['ecommerce_order_id' => $textrailOrderId]);
+        $completedOrder = CompletedOrder::where('ecommerce_order_id', '=', $textrailOrderId)->first();
 
         if ($completedOrder) {
             $completedOrder->ecommerce_order_status = CompletedOrder::ECOMMERCE_STATUS_APPROVED;
@@ -223,7 +223,5 @@ class CompletedOrderService implements CompletedOrderServiceInterface
 
             return $completedOrder;
         }
-
-        throw new TextrailException('Order not found via given TexTrail order id: ' . $textrailOrderId);
     }
 }

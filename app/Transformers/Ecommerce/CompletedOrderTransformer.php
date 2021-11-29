@@ -65,6 +65,7 @@ class CompletedOrderTransformer extends TransformerAbstract
             'subtotal' => $partsSummary['subtotal'],
             'in_store_pickup' => $partsSummary['in_store_pickup'],
             'phone_number' => $completedOrder->phone_number,
+            'order_status' => $completedOrder->ecommerce_order_status,
         ];
     }
 

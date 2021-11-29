@@ -34,5 +34,5 @@ interface CompletedOrderServiceInterface
      * @param int $textrailOrderId
      * @return CompletedOrder
      */
-    public function updateStatus(int $textrailOrderId): CompletedOrder;
+    public function approve(int $textrailOrderId): CompletedOrder;
 }
