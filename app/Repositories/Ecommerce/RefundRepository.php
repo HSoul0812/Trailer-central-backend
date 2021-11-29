@@ -49,6 +49,18 @@ class RefundRepository implements RefundRepositoryInterface
 
         $query->where('ecommerce_order_refunds.status', '!=', Refund::STATUS_FAILED);
 
+        if (isset($params[self::CONDITION_AND_WHERE_IN]) && is_array($params[self::CONDITION_AND_WHERE_IN])) {
+            foreach ($params[self::CONDITION_AND_WHERE_IN] as $field => $values) {
+                $query->whereIn($field, $values);
+            }
+        }
+
+        if (isset($params[self::CONDITION_AND_WHERE_NOT_IN]) && is_array($params[self::CONDITION_AND_WHERE_NOT_IN])) {
+            foreach ($params[self::CONDITION_AND_WHERE_NOT_IN] as $field => $values) {
+                $query->whereNotIn($field, $values);
+            }
+        }
+
         if (!empty($params['paged'])) {
             if (empty($params['per_page'])) {
                 $params['per_page'] = 100;
@@ -78,13 +90,18 @@ class RefundRepository implements RefundRepositoryInterface
         };
 
         // we'll make an two arrays of parts with their total refunded amount a qty indexed by part id
-        $this->getAll(['order_id' => $orderId])
-            ->each(static function (Refund $refund) use (&$partsAmount, &$partsQty, $amountAdder, $qtyAdder) {
-                foreach ($refund->parts as $part) {
-                    $partsAmount[$part['id']] = $amountAdder($part['id'], $part['amount']);
-                    $partsQty[$part['id']] = $qtyAdder($part['id'], $part['qty']);
-                }
-            });
+        $this->getAll([
+            'order_id' => $orderId,
+            self::CONDITION_AND_WHERE_NOT_IN => [
+                'status' => [Refund::STATUS_FAILED, Refund::STATUS_REJECTED]
+            ]
+        ])->each(static function (Refund $refund) use (&$partsAmount, &$partsQty, $amountAdder, $qtyAdder) {
+           // dd($refund->parts);
+            foreach ($refund->parts as $part) {
+                $partsAmount[$part['id']] = $amountAdder($part['id'], $part['amount']);
+                $partsQty[$part['id']] = $qtyAdder($part['id'], (int)$part['qty']);
+            }
+        });
 
         return Part::query()
             ->whereIn('id', array_keys($partsAmount))
@@ -113,7 +130,7 @@ class RefundRepository implements RefundRepositoryInterface
     {
         $amount = (float)Refund::query()
             ->where('order_id', '=', $orderId)
-            ->where('status', '!=', Refund::STATUS_FAILED)
+            ->whereNotIn('status', [Refund::STATUS_FAILED, Refund::STATUS_REJECTED])
             ->sum('total_amount');
 
         return Money::of($amount, 'USD', null, RoundingMode::HALF_DOWN);
@@ -135,7 +152,7 @@ class RefundRepository implements RefundRepositoryInterface
         /** @var \stdClass $summary */
         $summary = DB::table(Refund::getTableName())->selectRaw($select)
             ->where('order_id', '=', $orderId)
-            ->where('status', '!=', Refund::STATUS_FAILED)
+            ->whereNotIn('status', [Refund::STATUS_FAILED, Refund::STATUS_REJECTED])
             ->groupBy('order_id')
             ->first();
 
@@ -163,14 +180,14 @@ class RefundRepository implements RefundRepositoryInterface
 
     /**
      * @param Refund $refund
-     * @param array $data
+     * @param array $metadata
      * @param $message
      * @param string $stage
      * @return bool
      */
     public function markAsRecoverableFailure(Refund $refund, array $metadata, $message, string $stage): bool
     {
-        $refund->status = Refund::STATUS_FAILED;
+        $refund->status = Refund::STATUS_RECOVERABLE_FAILURE;
         $refund->recoverable_failure_stage = $stage;
         $refund->metadata = $metadata;
 
@@ -202,18 +219,11 @@ class RefundRepository implements RefundRepositoryInterface
 
     /**
      * @param Refund $refund
-     * @param int $textrailId
      * @return bool
      */
-    public function markAsAuthorized(Refund $refund, int $textrailId): bool
+    public function markAsProcessing(Refund $refund): bool
     {
-        return $this->update(
-            $refund->id,
-            [
-                'status' => Refund::STATUS_AUTHORIZED,
-                'textrail_rma' => $textrailId
-            ]
-        );
+        return $this->update($refund->id, ['status' => Refund::STATUS_PROCESSING]);
     }
 
     /**

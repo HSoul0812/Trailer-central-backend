@@ -6,6 +6,7 @@ namespace App\Http\Controllers\v1\Ecommerce;
 
 use App\Exceptions\Ecommerce\RefundException;
 use App\Http\Controllers\RestfulControllerV2;
+use App\Http\Requests\Ecommerce\CancelOrderRequest;
 use App\Http\Requests\Ecommerce\GetAllRefundsRequest;
 use App\Http\Requests\Ecommerce\GetSingleRefundRequest;
 use App\Http\Requests\Ecommerce\IssueRefundOrderRequest;
@@ -41,7 +42,7 @@ class RefundController extends RestfulControllerV2
     }
 
     /**
-     * It will create a full/partial refund in our database, then it will send a refund/memo request to TexTrail,
+     * It will create a full/partial refund in our database, then it will send a return request to TexTrail,
      * but the refund process on the payment gateway will be remaining as pending until TextTrail send us a command to proceed.
      *
      * @param int $orderId
@@ -61,9 +62,42 @@ class RefundController extends RestfulControllerV2
 
         if ($refundRequest->validate()) {
             try {
-                $refund = $this->service->issue(RefundBag::fromRequest($refundRequest));
+                $refund = $this->service->issue(RefundBag::fromIssueRequest($refundRequest));
 
                 return $this->createdResponse($refund->id);
+            } catch (RefundException $exception) {
+                throw new ResourceException('Validation Failed', $exception->getErrors(), $exception);
+            } catch (\Throwable $exception) {
+                throw new HttpException($exception->getCode() > 0 ? $exception->getCode() : 500, $exception->getMessage(), $exception);
+            }
+        }
+
+        $this->response->errorBadRequest();
+    }
+
+    /**
+     * It will create a full refund in the database, then it should enqueue a refund process on the payment gateway
+     * when it reaches the `return_receive` status.
+     *
+     * @param int $textrailOrderId
+     * @return Response|void
+     *
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException when there was a bad request
+     * @throws \Dingo\Api\Exception\ResourceException when there were some validation error
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException when there were some error different from bad request or validation error
+     *
+     * @noinspection PhpDocMissingThrowsInspection
+     * @noinspection PhpUnhandledExceptionInspection
+     */
+    public function cancelOrder(int $textrailOrderId): Response
+    {
+        $returnRequest = new CancelOrderRequest(['textrail_order_id' => $textrailOrderId]);
+
+        if ($returnRequest->validate()) {
+            try {
+                $refund = $this->service->cancelOrder(RefundBag::fromTextrailOrderId($textrailOrderId));
+
+                return $this->acceptedResponse($refund->id);
             } catch (RefundException $exception) {
                 throw new ResourceException('Validation Failed', $exception->getErrors(), $exception);
             } catch (\Throwable $exception) {
