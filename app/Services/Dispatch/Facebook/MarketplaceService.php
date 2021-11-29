@@ -6,8 +6,8 @@ use App\Models\User\AuthToken;
 use App\Models\User\Integration\Integration;
 use App\Models\Marketing\Facebook\Marketplace;
 use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
+use App\Repositories\Marketing\TunnelRepositoryInterface;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Redis\Connections\Connection;
 
 /**
  * Class MarketplaceService
@@ -23,19 +23,20 @@ class MarketplaceService implements MarketplaceServiceInterface
 
 
     /**
-     * @var Connection
-     */
-    private $redis;
-
-    /**
      * @var MarketplaceRepositoryInterface
      */
     protected $marketplace;
 
     /**
+     * @var TunnelRepositoryInterface
+     */
+    protected $tunnels;
+
+    /**
      * Construct Facebook Marketplace Service
      * 
      * @param MarketplaceRepositoryInterface $marketplace
+     * @param TunnelRepositoryInterface $tunnels
      */
     public function __construct(
         MarketplaceRepositoryInterface $marketplace,
@@ -107,7 +108,7 @@ class MarketplaceService implements MarketplaceServiceInterface
      * 
      * @return Collection<DealerFacebook>
      */
-    private function getIntegrations(): DealerFacebook {
+    private function getIntegrations(): Collection {
         $integrations = $this->marketplace->getAll([
             'sort' => '-username'
         ]);
@@ -138,7 +139,7 @@ class MarketplaceService implements MarketplaceServiceInterface
      * @param Collection<DealerFacebook>
      * @return Collection<DealerTunnel>
      */
-    private function getTunnels(Collection $integrations): DealerTunnel {
+    private function getTunnels(Collection $integrations): Collection {
         // Get Unique Dealers
         $dealers = [];
         foreach($integrations as $integration) {
