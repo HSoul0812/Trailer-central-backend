@@ -5,8 +5,8 @@ namespace App\Services\Dispatch\Facebook;
 use App\Models\User\AuthToken;
 use App\Models\User\Integration\Integration;
 use App\Models\Marketing\Facebook\Marketplace;
-use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
 use App\Repositories\Marketing\TunnelRepositoryInterface;
+use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
 use Illuminate\Support\Facades\Log;
 
 /**

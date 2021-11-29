@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Repositories\Website;
+namespace App\Repositories\Marketing;
 
 use App\Repositories\Repository;
 
 /**
- * Interface ProxiedDomainSslRepositoryInterface
- * @package App\Repositories\Website
+ * Interface TunnelRepositoryInterface
+ * 
+ * @package App\Repositories\Marketing
  */
-interface DealerProxyRepositoryInterface extends Repository {}
+interface TunnelRepositoryInterface extends Repository {}
