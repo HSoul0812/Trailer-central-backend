@@ -21,7 +21,6 @@ class ApproveOrderTest extends TestCase
         self::assertTrue($this->completedOrder->ecommerce_order_status == 'not_approved');
 
         $response = $this
-            ->withHeaders(['access-token' => $this->accessToken()])
             ->post('api/ecommerce/orders/' . $this->completedOrder->ecommerce_order_id . '/approve', []);
 
         $json = json_decode($response->getContent(), true);
