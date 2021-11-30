@@ -7,6 +7,7 @@ use App\Models\User\Integration\Integration;
 use App\Models\Marketing\Facebook\Marketplace;
 use App\Repositories\Marketing\TunnelRepositoryInterface;
 use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
+use App\Services\Dispatch\Facebook\DTOs\MarketplaceStatus;
 use Illuminate\Support\Facades\Log;
 
 /**
