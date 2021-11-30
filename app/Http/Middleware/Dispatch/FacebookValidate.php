@@ -43,10 +43,11 @@ class FacebookValidate extends ValidRoute {
      */
     public function handle($request, Closure $next)
     {
-        // Get Auth
-        $auth = Auth::user();
-        if ($auth->name === 'dispatch-fb') {
-            return parent::handle($request, $next);
+        if ($request->header('access-token')) {
+            $accessToken = AuthToken::where('access_token', $request->header('access-token'))->first();
+            if ($accessToken && $accessToken->user->user()->name === 'dispatch-fb') {
+                return parent::handle($request, $next);
+            }
         }
 
         return response('Valid facebook dispatch token is required.', 403);
