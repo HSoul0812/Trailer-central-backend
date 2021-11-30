@@ -248,4 +248,14 @@ class CustomerRepository implements CustomerRepositoryInterface
 
         return $search->execute()->models();
     }
+
+
+    public function getByEmailOrPhone(array $params): ?Customer
+    {
+        return Customer::where('email', '=', $params['email'])
+            ->orWhere('cell_phone', '=', trim($params['phone_number']))
+            ->orWhere('home_phone', '=', trim($params['phone_number']))
+            ->orWhere('work_phone', '=', trim($params['phone_number']))
+            ->get()->first();
+    }
 }
