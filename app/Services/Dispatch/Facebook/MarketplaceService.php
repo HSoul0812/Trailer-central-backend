@@ -89,7 +89,7 @@ class MarketplaceService implements MarketplaceServiceInterface
         $dealers = $this->getIntegrations();
 
         // Get Available Tunnels
-        $tunnels = $this->repository->getAll();
+        $tunnels = $this->tunnels->getAll();
 
         // Return MarketplaceStatus
         return new MarketplaceStatus([
@@ -121,7 +121,7 @@ class MarketplaceService implements MarketplaceServiceInterface
                 'auth_username' => $dealer->tfa_username,
                 'auth_password' => $dealer->tfa_password,
                 'auth_type' => $dealer->tfa_type,
-                'tunnels' => $this->repository->getAll(['dealer_id' => $dealer->dealer_id])
+                'tunnels' => $this->tunnels->getAll(['dealer_id' => $dealer->dealer_id])
             ]));
         }
 
