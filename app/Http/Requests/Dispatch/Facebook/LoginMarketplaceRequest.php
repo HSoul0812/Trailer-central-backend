@@ -16,7 +16,7 @@ class LoginMarketplaceRequest extends Request {
         'ip_address' => 'required|ip',
         'client_uuid' => [
             'required',
-            'regex:/fbm\d{16}/'
+            'regex:/fbm\d{10,}/'
         ],
         'version' => [
             'required',
