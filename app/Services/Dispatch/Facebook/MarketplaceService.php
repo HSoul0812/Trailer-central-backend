@@ -112,17 +112,17 @@ class MarketplaceService implements MarketplaceServiceInterface
 
         // Loop Facebook Integrations
         $dealers = new Collection();
-        foreach($integrations as $dealer) {
+        foreach($integrations as $integration) {
             $dealers->push(new DealerFacebook([
-                'id' => $dealer->id,
-                'dealer_id' => $dealer->dealer_id,
-                'dealer_name' => $dealer->user->name,
-                'fb_username' => $dealer->fb_username,
-                'fb_password' => $dealer->fb_password,
-                'auth_username' => $dealer->tfa_username,
-                'auth_password' => $dealer->tfa_password,
-                'auth_type' => $dealer->tfa_type,
-                'tunnels' => $this->tunnels->getAll(['dealer_id' => $dealer->dealer_id])
+                'dealer_id' => $integration->dealer_id,
+                'dealer_name' => $integration->user->name,
+                'integration_id' => $integration->id,
+                'fb_username' => $integration->fb_username,
+                'fb_password' => $integration->fb_password,
+                'auth_username' => $integration->tfa_username,
+                'auth_password' => $integration->tfa_password,
+                'auth_type' => $integration->tfa_type,
+                'tunnels' => $this->tunnels->getAll(['dealer_id' => $integration->dealer_id])
             ]));
         }
 

@@ -18,11 +18,6 @@ class DealerFacebook
     /**
      * @var int
      */
-    private $id;
-
-    /**
-     * @var int
-     */
     private $dealerId;
 
     /**
