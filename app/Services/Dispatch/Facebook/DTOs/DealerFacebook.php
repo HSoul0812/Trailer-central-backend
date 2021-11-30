@@ -26,6 +26,11 @@ class DealerFacebook
     private $dealerName;
 
     /**
+     * @var int
+     */
+    private $integrationId;
+
+    /**
      * @var string
      */
     private $fbUsername;

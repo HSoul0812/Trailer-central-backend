@@ -2,6 +2,8 @@
 
 namespace App\Services\Dispatch\Facebook;
 
+use App\Services\Dispatch\Facebook\DTOs\MarketplaceStatus;
+
 interface MarketplaceServiceInterface {
     /**
      * Login to Marketplace
@@ -12,4 +14,12 @@ interface MarketplaceServiceInterface {
      * @return string
      */
     public function login(string $uuid, string $ip, string $version): string;
+
+    /**
+     * Get Marketplace Status
+     * 
+     * @param null|array $logs
+     * @return MarketplaceStatus
+     */
+    public function status(?array $logs = null): MarketplaceStatus;
 }

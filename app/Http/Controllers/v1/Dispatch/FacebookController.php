@@ -13,7 +13,7 @@ use App\Http\Requests\Dispatch\Facebook\LoginMarketplaceRequest;
 use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
 use App\Services\Dispatch\Facebook\MarketplaceServiceInterface;
 use App\Transformers\Marketing\Facebook\MarketplaceTransformer;
-use App\Transformers\Dispatch\Facebook\DealersTransformer;
+use App\Transformers\Dispatch\Facebook\StatusTransformer;
 
 class FacebookController extends RestfulControllerV2 {
     /**
@@ -30,14 +30,14 @@ class FacebookController extends RestfulControllerV2 {
         MarketplaceRepositoryInterface $repository,
         MarketplaceServiceInterface $service,
         MarketplaceTransformer $transformer,
-        DealersTransformer $dealersTransformer
+        StatusTransformer $statusTransformer
     ) {
         $this->middleware('setDealerIdOnRequest')->only(['create', 'update', 'index']);
 
         $this->repository = $repository;
         $this->service = $service;
         $this->transformer = $transformer;
-        $this->dealersTransformer = $dealersTransformer;
+        $this->statusTransformer = $statusTransformer;
     }
 
     /**
@@ -52,7 +52,7 @@ class FacebookController extends RestfulControllerV2 {
         $request = new GetMarketplaceRequest($request->all());
         if ($request->validate()) {
             // Get Marketplaces
-            return $this->response->array($this->service->dealers($request->all()));
+            return $this->response->array($this->service->status($request->all()), $this->statusTransformer);
         }
         
         return $this->response->errorBadRequest();

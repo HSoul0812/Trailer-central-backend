@@ -76,14 +76,14 @@ class MarketplaceService implements MarketplaceServiceInterface
         // Return Access Token
         return $token->access_token;
     }
-    
+
     /**
-     * Get Dealers List
+     * Get Marketplace Status
      * 
      * @param null|array $logs
      * @return MarketplaceStatus
      */
-    public function dealers(?array $logs = null): MarketplaceStatus {
+    public function status(?array $logs = null): MarketplaceStatus {
         // Get All Marketplace Integration Dealers
         $dealers = $this->getIntegrations();
 
