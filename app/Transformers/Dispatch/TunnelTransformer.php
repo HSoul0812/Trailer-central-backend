@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Transformers\Dispatch\Facebook;
+namespace App\Transformers\Dispatch;
 
 use App\DTO\Marketing\DealerTunnel;
 use League\Fractal\TransformerAbstract;
 
-class StatusTransformer extends TransformerAbstract
+class TunnelTransformer extends TransformerAbstract
 {
     public function transform(DealerTunnel $tunnel)
     {
