@@ -35,6 +35,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $ecommerce_order_id
  * @property string $ecommerce_order_code a long unique code
  * @property array $ecommerce_items
+ * @property string $ecommerce_order_status not_approved, approved, canceled
  * @property string $shipping_carrier_code
  * @property string $shipping_method_code
  * @property \DateTimeInterface $created_at
