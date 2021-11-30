@@ -2,12 +2,12 @@
 
 namespace App\Providers;
 
+use App\Repositories\Marketing\TunnelRedisRepository;
+use App\Repositories\Marketing\TunnelRepositoryInterface;
 use App\Repositories\Marketing\Facebook\MarketplaceRepository;
 use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
 use App\Repositories\Marketing\Facebook\FilterRepository;
 use App\Repositories\Marketing\Facebook\FilterRepositoryInterface;
-use App\Repositories\Marketing\TunnelRedisRepository;
-use App\Repositories\Marketing\TunnelRepositoryInterface;
 use App\Services\Marketing\Facebook\MarketplaceService;
 use App\Services\Marketing\Facebook\MarketplaceServiceInterface;
 use App\Services\Dispatch\Facebook\MarketplaceService as MarketplaceDispatchService;

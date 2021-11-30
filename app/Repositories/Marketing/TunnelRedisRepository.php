@@ -4,12 +4,14 @@ namespace App\Repositories\Marketing;
 
 use App\DTO\Marketing\DealerTunnel;
 use App\Exceptions\NotImplementedException;
+use App\Repositories\Marketing\TunnelRepositoryInterface;
 use Illuminate\Redis\Connections\Connection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Redis;
 
 /**
  * Class TunnelRedisRepository
+ * 
  * @package App\Repositories\Marketing
  */
 class TunnelRedisRepository implements TunnelRepositoryInterface
