@@ -127,7 +127,7 @@ class MarketplaceService implements MarketplaceServiceInterface
         }
 
         // Return Dealers Collection
-        return new $dealers;
+        return $dealers;
     }
 
 
