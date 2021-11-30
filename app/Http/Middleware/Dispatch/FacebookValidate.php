@@ -45,6 +45,8 @@ class FacebookValidate extends ValidRoute {
     {
         if ($request->header('access-token')) {
             $accessToken = AuthToken::where('access_token', $request->header('access-token'))->first();
+            var_dump($accessToken->user);
+            die;
             if ($accessToken && $accessToken->user->user()->name === 'dispatch-fb') {
                 return parent::handle($request, $next);
             }
