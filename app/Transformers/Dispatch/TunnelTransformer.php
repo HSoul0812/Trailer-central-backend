@@ -2,42 +2,19 @@
 
 namespace App\Transformers\Dispatch\Facebook;
 
-use App\Services\Dispatch\Facebook\DTOs\DealerFacebook;
-use App\Transformers\Dispatch\TunnelsTransformer;
+use App\DTO\Marketing\DealerTunnel;
 use League\Fractal\TransformerAbstract;
 
 class StatusTransformer extends TransformerAbstract
 {
-    protected $defaultIncludes = [
-        'tunnels'
-    ];
-
-    public function __construct(
-        TunnelsTransformer $tunnelsTransformer
-    ) {
-        $this->tunnelsTransformer = $tunnelsTransformer;
-    }
-
-    public function transform(DealerFacebook $dealer)
+    public function transform(DealerTunnel $tunnel)
     {
         return [
-            'id' => $dealer->dealerId,
-            'name' => $dealer->dealerName,
-            'integration' => $dealer->integrationId,
-            'fb' => [
-                'username' => $dealer->fbUsername,
-                'password' => $dealer->fbPassword
-            ],
-            'auth' => [
-                'type' => $dealer->authType,
-                'username' => $dealer->authUsername,
-                'password' => $dealer->authPassword
-            ]
+            'dealer' => $tunnel->dealerId,
+            'type' => $tunnel->getTunnelType(),
+            'host' => $tunnel->getTunnelHost(),
+            'port' => $tunnel->port,
+            'is_active' => $tunnel->isActive()
         ];
-    }
-
-    public function includeTunnels(DealerFacebook $dealer)
-    {
-        return $this->collection($dealer->tunnels, $this->tunnelsTransformer);
     }
 }

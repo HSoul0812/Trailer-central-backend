@@ -6,7 +6,7 @@ use App\Services\Dispatch\Facebook\DTOs\DealerFacebook;
 use App\Transformers\Dispatch\TunnelTransformer;
 use League\Fractal\TransformerAbstract;
 
-class StatusTransformer extends TransformerAbstract
+class DealerTransformer extends TransformerAbstract
 {
     protected $defaultIncludes = [
         'tunnels'
