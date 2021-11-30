@@ -3,9 +3,9 @@
 namespace App\Http\Middleware\Dispatch;
 
 use Closure;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Middleware\ValidRoute;
 use App\Models\Marketing\Facebook\Marketplace;
+use App\Models\User\AuthToken;
 
 class FacebookValidate extends ValidRoute {
 
