@@ -152,12 +152,52 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
      */
     public function getAll($params)
     {
-        // Get Dealer ID
-        $dealerId = $params['dealer_id'];
-
         // Get Tunnels Server
         $server = $params['tunnel_server'] ?? self::SERVER_DEFAULT;
 
+        // Get By Dealer ID?
+        if(isset($params['dealer_id'])) {
+            $dealerTunnels = $this->getByDealer($params['dealer_id'], $server);
+        } else {
+            // Get Tunnels By Dealer
+            $tunnelIds = $this->redis->smembers('tunnels:all');
+
+            // Loop Tunnel ID's
+            $tunnels = [];
+            $dealerTunnels = new Collection();
+            foreach($tunnelIds as $pair) {
+                // Get Dealer/Tunnel
+                list($dealerId, $tunnelId) = explode(':', $pair);
+
+                // Get Dealer Tunnel
+                $dealerTunnel = $this->get([
+                    'tunnel_server' => $server,
+                    'dealer_id' => $dealerId,
+                    'id' => $tunnelId
+                ]);
+
+                // Port Exists?
+                if(in_array($dealerTunnel->port, $tunnels)) {
+                    continue;
+                }
+
+                // Get Dealer Tunnel
+                $dealerTunnels->push($dealerTunnel);
+            }
+        }
+
+        // Append Sort
+        return $this->sort($dealerTunnels, '-ping');
+    }
+
+    /**
+     * Get All Tunnels For Dealer
+     * 
+     * @param array $params
+     * @return Collection<DealerTunnel>
+     */
+    public function getByDealer(int $dealerId, string $server = self::SERVER_DEFAULT): Collection
+    {
         // Get Tunnels By Dealer
         $tunnelIds = $this->redis->smembers('tunnels:byDealerId:' . $server . ':' . $dealerId);
 
@@ -181,8 +221,8 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
             $dealerTunnels->push($dealerTunnel);
         }
 
-        // Append Sort
-        return $this->sort($dealerTunnels, '-ping');
+        // Return
+        return $dealerTunnels;
     }
 
 

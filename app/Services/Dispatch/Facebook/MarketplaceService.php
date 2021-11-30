@@ -89,7 +89,7 @@ class MarketplaceService implements MarketplaceServiceInterface
         $dealers = $this->getIntegrations();
 
         // Get Available Tunnels
-        $tunnels = $this->getTunnels($dealers);
+        $tunnels = $this->repository->getAll();
 
         // Return MarketplaceStatus
         return new MarketplaceStatus([
@@ -121,37 +121,12 @@ class MarketplaceService implements MarketplaceServiceInterface
                 'auth_username' => $dealer->tfa_username,
                 'auth_password' => $dealer->tfa_password,
                 'auth_type' => $dealer->tfa_type,
-                'tunnels' => $this->repository(['dealer_id' => $dealer->dealer_id])
+                'tunnels' => $this->repository->getAll(['dealer_id' => $dealer->dealer_id])
             ]));
         }
 
         // Return Dealers Collection
         return new $dealers;
-    }
-
-    /**
-     * Get Dealer Tunnels
-     * 
-     * @param Collection<DealerFacebook>
-     * @return Collection<DealerTunnel>
-     */
-    private function getTunnels(Collection $integrations): Collection {
-        // Get Unique Dealers
-        $dealers = [];
-        foreach($integrations as $integration) {
-            if(!in_array($integration->dealerId, $dealers)) {
-                $dealers[] = $integration->dealerId;
-            }
-        }
-
-        // Get All Tunnels for All Dealers
-        $tunnels = new Collection();
-        foreach($dealers as $dealer) {
-            $tunnels->merge($this->repository(['dealer_id' => $dealer->dealer_id]));
-        }
-
-        // Return Collection<DealerTunnel>
-        return $tunnels;
     }
 
 
