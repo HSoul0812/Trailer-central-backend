@@ -530,10 +530,7 @@ class LeadRepository implements LeadRepositoryInterface {
         }
 
         if (!empty($params['search_term'])) {
-            $query = $query->where(function (\Illuminate\Database\Query\Builder $query) use ($params) {
-                $query->where('first_name', 'LIKE', '%' . $params['search_term'] . '%')
-                    ->orWhere('last_name', 'LIKE', '%' . $params['search_term'] . '%');
-            });
+            $query->whereRaw('CONCAT(first_name,\' \', last_name) LIKE ?', ['%' . $params['search_term'] . '%']);
         }
 
         $query = $query->orderByRaw('TRIM(`first_name`), TRIM(`last_name`)');
