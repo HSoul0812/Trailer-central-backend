@@ -2,6 +2,7 @@
 
 namespace App\Models\User;
 
+use App\Models\User\Integration\Integration;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -62,6 +63,10 @@ class AuthToken extends Model
             return $this->dealerUser();
         }
 
+        if($this->user_type === 'integration') {
+            return $this->integration();
+        }
+
         // Return Dealer
         return $this->dealer();
     }
@@ -83,5 +88,15 @@ class AuthToken extends Model
     public function dealerUser()
     {
         return $this->hasOne(DealerUser::Class, 'dealer_user_id', 'user_id');
+    }
+
+    /**
+     * Get Interaction Integration
+     *
+     * @return HasOne
+     */
+    public function integration(): HasOne
+    {
+        return $this->hasOne(Integration::Class, 'id', 'user_id');
     }
 }
