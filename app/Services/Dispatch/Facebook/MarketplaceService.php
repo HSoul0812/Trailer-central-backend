@@ -81,20 +81,14 @@ class MarketplaceService implements MarketplaceServiceInterface
     /**
      * Get Marketplace Status
      * 
-     * @param null|array $logs
      * @return MarketplaceStatus
      */
-    public function status(?array $logs = null): MarketplaceStatus {
+    public function status(): MarketplaceStatus {
         // Get All Marketplace Integration Dealers
         $dealers = $this->getIntegrations();
 
         // Get Available Tunnels
         $tunnels = $this->getTunnels($dealers);
-
-        // Catch Logs
-        if(!empty($logs)) {
-            $this->catchLogs($logs, 'error');
-        }
 
         // Return MarketplaceStatus
         return new MarketplaceStatus([
