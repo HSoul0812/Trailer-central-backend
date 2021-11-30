@@ -62,7 +62,7 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
 
     public function __construct()
     {
-        $this->redis = Redis::connection();
+        $this->redis = Redis::connection('dealer-proxy');
     }
 
     /**
