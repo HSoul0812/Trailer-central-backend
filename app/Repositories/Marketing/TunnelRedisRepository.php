@@ -21,11 +21,6 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
      */
     const DEFAULT_SORT = '-port';
 
-    /**
-     * @const Default Server
-     */
-    const SERVER_DEFAULT = 'prod';
-
 
     /**
      * Define Sort Orders
@@ -166,6 +161,8 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
         } else {
             // Get Tunnels By Dealer
             $tunnelIds = $this->redis->smembers('tunnels:all:' . $server);
+            echo 'tunnels:all:' . $server;
+            die;
 
             // Loop Tunnel ID's
             $tunnels = [];
