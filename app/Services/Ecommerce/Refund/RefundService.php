@@ -10,6 +10,7 @@ use App\Exceptions\Ecommerce\RefundAmountException;
 use App\Exceptions\Ecommerce\RefundException;
 use App\Exceptions\Ecommerce\RefundHttpClientException;
 use App\Exceptions\Ecommerce\RefundPaymentGatewayException;
+use App\Exceptions\NotImplementedException;
 use App\Jobs\Ecommerce\ProcessRefundOnPaymentGatewayJob;
 use GuzzleHttp\Exception\ClientException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -226,6 +227,11 @@ class RefundService implements RefundServiceInterface
 
             throw $exception;
         }
+    }
+
+    public function updateStatus(Refund $refund, string $status): bool
+    {
+        throw new NotImplementedException('RefundService::updateStatus is not implemented yet.');
     }
 
     /**

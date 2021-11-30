@@ -34,4 +34,6 @@ interface RefundServiceInterface
      * @throws RefundPaymentGatewayException
      */
     public function refund(int $refundId): void;
+
+    public function updateStatus(Refund $refund, string $status): bool;
 }

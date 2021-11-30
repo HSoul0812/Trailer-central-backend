@@ -9,7 +9,7 @@ namespace App\Services\Ecommerce\Refund;
 use App\Contracts\Support\DTO;
 use App\Exceptions\Ecommerce\RefundAmountException;
 use App\Exceptions\Ecommerce\RefundException;
-use App\Http\Requests\Ecommerce\IssueRefundOrderRequest;
+use App\Http\Requests\Ecommerce\Refund\IssueRefundOrderRequest;
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
 use App\Models\Ecommerce\CompletedOrder\OrderAmountsBag;
 use App\Models\Ecommerce\Refund;
