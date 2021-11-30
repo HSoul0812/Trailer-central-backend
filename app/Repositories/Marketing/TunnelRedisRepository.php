@@ -161,7 +161,6 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
         } else {
             // Get Tunnels By Dealer
             $tunnelIds = $this->redis->smembers('tunnels:all:' . $server);
-            var_dump($tunnelIds);
 
             // Loop Tunnel ID's
             $tunnels = [];
