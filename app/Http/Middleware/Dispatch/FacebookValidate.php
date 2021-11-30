@@ -2,8 +2,10 @@
 
 namespace App\Http\Middleware\Dispatch;
 
+use Closure;
 use App\Http\Middleware\ValidRoute;
 use App\Models\Marketing\Facebook\Marketplace;
+use App\Models\User\AuthToken;
 
 class FacebookValidate extends ValidRoute {
 
@@ -30,5 +32,24 @@ class FacebookValidate extends ValidRoute {
             
             return true;
         };
+    }
+
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure  $next
+     * @return mixed
+     */
+    public function handle($request, Closure $next)
+    {
+        if ($request->header('access-token')) {
+            $accessToken = AuthToken::where('access_token', $request->header('access-token'))->first();
+            if ($accessToken && $accessToken->user->name === 'dispatch-facebook') {
+                return parent::handle($request, $next);
+            }
+        }
+
+        return response('Valid facebook dispatch token is required.', 403);
     }
 }
