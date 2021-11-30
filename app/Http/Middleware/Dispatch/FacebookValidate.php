@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Middleware\Marketing;
+namespace App\Http\Middleware\Dispatch;
 
 use Closure;
 use Illuminate\Support\Facades\Auth;
