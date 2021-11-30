@@ -65,6 +65,8 @@ class CompletedOrder extends Model
     public const ECOMMERCE_STATUS_APPROVED = 'approved';
     public const ECOMMERCE_STATUS_CANCELED = 'canceled';
 
+    public const STRIPE_INVOICE_URL = 'https://api.stripe.com/v1/invoices/';
+
     /**
      * The table associated with the model.
      *

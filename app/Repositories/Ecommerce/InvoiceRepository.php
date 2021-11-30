@@ -55,7 +55,7 @@ class InvoiceRepository implements InvoiceRepositoryInterface
             
           } elseif ($completedOrder->invoice_id && !$completedOrder->invoice_pdf_url) {
             $stripe_secret = DB::table('stripe_checkout_credentials')->first()->secret;
-            $endpoint = 'https://api.stripe.com/v1/invoices/' . $completedOrder->invoice_id;
+            $endpoint = CompletedOrder::STRIPE_INVOICE_URL . $completedOrder->invoice_id;
             
             $response = $this->httpClient->get($endpoint, ['headers' => ['Content-Type' => 'application/json', 'Authorization' => 'Bearer ' . $stripe_secret]]);
             $invoice = json_decode($response->getBody()->getContents(), true);
