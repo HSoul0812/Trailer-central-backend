@@ -39,6 +39,7 @@ $api->version('v1', function ($route) {
         $route->post('ecommerce/refunds/{order_id}','App\Http\Controllers\v1\Ecommerce\RefundController@issue')->where('order_id', '[0-9]+');
         $route->get('ecommerce/refunds','App\Http\Controllers\v1\Ecommerce\RefundController@index');
         $route->get('ecommerce/refunds/{refund_id}','App\Http\Controllers\v1\Ecommerce\RefundController@show')->where('order_id', '[0-9]+');
+        $route->get('ecommerce/invoice/{id}', 'App\Http\Controllers\v1\Ecommerce\InvoiceController@show')->where('id', '[0-9]+');
     });
 
     $route->group(['middleware' => 'stripe.webhook.validate'], function ($route) {

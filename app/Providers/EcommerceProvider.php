@@ -20,6 +20,8 @@ use App\Repositories\Ecommerce\CompletedOrderRepository;
 use App\Repositories\Ecommerce\CompletedOrderRepositoryInterface;
 use App\Repositories\Ecommerce\RefundRepository;
 use App\Repositories\Ecommerce\RefundRepositoryInterface;
+use App\Repositories\Ecommerce\InvoiceRepository;
+use App\Repositories\Ecommerce\InvoiceRepositoryInterface;
 use App\Repositories\Parts\PartRepositoryInterface;
 use App\Repositories\Parts\Textrail\PartRepository;
 use App\Services\Ecommerce\CompletedOrder\CompletedOrderService;
@@ -114,6 +116,7 @@ class EcommerceProvider extends ServiceProvider
             ->give(function () {
                 return app()->make(PartRepository::class);
             });
+        $this->app->bind(InvoiceRepositoryInterface::class, InvoiceRepository::class);
         $this->app->bind(RefundRepositoryInterface::class, RefundRepository::class);
         $this->app->bind(StripeClientInterface::class, static function (): StripeClient {
             return new StripeClient(Config::get('stripe_checkout.secret'));

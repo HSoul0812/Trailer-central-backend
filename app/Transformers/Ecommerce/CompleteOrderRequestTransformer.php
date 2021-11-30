@@ -31,6 +31,8 @@ class CompleteOrderRequestTransformer extends TransformerAbstract
             'parts' => $isStripeCall ? [] : json_decode($data['parts'], true),
 
             'invoice_id' => $data['invoice_id'] ?? '',
+            'invoice_url' => $data['invoice_url'] ?? '',
+            'invoice_pdf_url' => $data['invoice_pdf_url'] ?? '',
             'shipping_name' => $fullName,
             'shipping_country' => $data['shipto_country'] ?? '',
             'shipping_address' => $data['shipto_address'] ?? '',

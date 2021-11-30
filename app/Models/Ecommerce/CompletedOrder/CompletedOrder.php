@@ -137,7 +137,9 @@ class CompletedOrder extends Model
         'ecommerce_items',
         'ecommerce_order_status',
         'phone_number',
-        'invoice_pdf_url'
+        'invoice_pdf_url',
+        'invoice_id',
+        'invoice_url'
     ];
 
     /** @var array */
