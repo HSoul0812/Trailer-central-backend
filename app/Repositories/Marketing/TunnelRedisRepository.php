@@ -63,7 +63,7 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
     public function __construct()
     {
         $this->redis = Redis::connection();
-        var_dump($this->redis);
+        print_r($this->redis);
     }
 
     /**
