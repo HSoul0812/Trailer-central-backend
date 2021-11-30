@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Requests\Ecommerce;
+namespace App\Http\Requests\Ecommerce\Refund;
 
 use App\Http\Requests\Request;
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
