@@ -2,6 +2,7 @@
 
 namespace App\Repositories\CRM\Leads;
 
+use App\Exceptions\RepositoryInvalidArgumentException;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Leads\Lead;
@@ -14,6 +15,7 @@ use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\LeadType;
 use App\Models\Inventory\Inventory;
 use App\Repositories\Traits\SortTrait;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -192,7 +194,7 @@ class LeadRepository implements LeadRepositoryInterface {
 
     /**
      * Find Existing Leads That Matches Current Lead!
-     * 
+     *
      * @param array $params
      * @return Collection<Lead>
      */
@@ -498,5 +500,48 @@ class LeadRepository implements LeadRepositoryInterface {
         } else {
             return $query->get();
         }
+    }
+
+    /**
+     * @param array $params
+     * @return \Illuminate\Support\Collection|LengthAwarePaginator
+     */
+    public function getUniqueFullNames(array $params)
+    {
+        if (empty($params['dealer_id'])) {
+            throw new RepositoryInvalidArgumentException('Dealer Id is required');
+        }
+
+        $query = DB::table(Lead::getTableName());
+
+        $query = $query->selectRaw('DISTINCT TRIM(first_name) AS first_name, TRIM(last_name) AS last_name');
+
+        $query = $query->where('dealer_id', '=', $params['dealer_id']);
+
+        $query = $query->where(function (\Illuminate\Database\Query\Builder $query) {
+            $query->whereRaw('TRIM(`first_name`) <> \'\'')
+                ->orWhereRaw('TRIM(`last_name`) <> \'\'');
+        });
+
+        $query = $query->where('is_spam', '=', 0);
+
+        if (isset($params['is_archived'])) {
+            $query = $query->where('is_archived', '=', $params['is_archived']);
+        }
+
+        if (!empty($params['search_term'])) {
+            $query = $query->where(function (\Illuminate\Database\Query\Builder $query) use ($params) {
+                $query->where('first_name', 'LIKE', '%' . $params['search_term'] . '%')
+                    ->orWhere('last_name', 'LIKE', '%' . $params['search_term'] . '%');
+            });
+        }
+
+        $query = $query->orderByRaw('TRIM(`first_name`), TRIM(`last_name`)');
+
+        if (!empty($params['per_page'])) {
+            return $query->paginate($params['per_page'])->appends($params);
+        }
+
+        return $query->get();
     }
 }
