@@ -3,6 +3,7 @@
 namespace App\Http\Middleware\Dispatch;
 
 use Closure;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Middleware\ValidRoute;
 use App\Models\Marketing\Facebook\Marketplace;
 use App\Models\User\AuthToken;
@@ -43,6 +44,9 @@ class FacebookValidate extends ValidRoute {
      */
     public function handle($request, Closure $next)
     {
+        $auth = Auth::user();
+        var_dump($auth);
+        die;
         if ($request->header('access-token')) {
             $accessToken = AuthToken::where('access_token', $request->header('access-token'))->first();
             if ($accessToken && $accessToken->user->name === 'dispatch-facebook') {
