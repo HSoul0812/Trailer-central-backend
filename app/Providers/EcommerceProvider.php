@@ -38,6 +38,8 @@ use App\Services\Ecommerce\Payment\Gateways\Stripe\StripeService;
 use App\Services\Ecommerce\Refund\RefundService;
 use App\Services\Ecommerce\Refund\RefundServiceInterface;
 use App\Services\Parts\Textrail\TextrailPartImporterServiceInterface;
+use App\Services\Ecommerce\Invoice\InvoiceService;
+use App\Services\Ecommerce\Invoice\InvoiceServiceInterface;
 use App\Repositories\Parts\Textrail\BrandRepositoryInterface;
 use App\Repositories\Parts\Textrail\BrandRepository;
 use App\Repositories\Parts\Textrail\CategoryRepositoryInterface;
@@ -123,6 +125,7 @@ class EcommerceProvider extends ServiceProvider
         });
         $this->app->bind(PaymentGatewayServiceInterface::class, StripeService::class);
         $this->app->bind(RefundServiceInterface::class, RefundService::class);
+        $this->app->bind(InvoiceServiceInterface::class, InvoiceService::class);
 
         $this->app->bind(ShippingServiceInterface::class, ShippingService::class);
         $this->app->bind(DataProviderManagerInterface::class, DataProviderManager::class);

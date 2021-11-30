@@ -4,8 +4,7 @@ namespace App\Repositories\Ecommerce;
 
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
 use Illuminate\Database\Eloquent\Builder;
-use GuzzleHttp\Client as GuzzleHttpClient;
-use Illuminate\Support\Facades\DB;
+use App\Services\Ecommerce\Invoice\InvoiceService;
 
 class InvoiceRepository implements InvoiceRepositoryInterface
 {
@@ -16,9 +15,10 @@ class InvoiceRepository implements InvoiceRepositoryInterface
    
   protected $model;
 
-  public function __construct(CompletedOrder $model) {
+  public function __construct(CompletedOrder $model, InvoiceService $invoiceService) {
+    
       $this->model = $model;
-      $this->httpClient = new GuzzleHttpClient();
+      $this->invoiceService = $invoiceService;
   }
 
   public function create($params) {
@@ -54,11 +54,7 @@ class InvoiceRepository implements InvoiceRepositoryInterface
             return $completedOrder;
             
           } elseif ($completedOrder->invoice_id && !$completedOrder->invoice_pdf_url) {
-            $stripe_secret = DB::table('stripe_checkout_credentials')->first()->secret;
-            $endpoint = CompletedOrder::STRIPE_INVOICE_URL . $completedOrder->invoice_id;
-            
-            $response = $this->httpClient->get($endpoint, ['headers' => ['Content-Type' => 'application/json', 'Authorization' => 'Bearer ' . $stripe_secret]]);
-            $invoice = json_decode($response->getBody()->getContents(), true);
+            $invoice = $this->invoiceService->getStripeInvoice($completedOrder);
             
             $completedOrder->invoice_pdf_url = $invoice['invoice_pdf'];
             $completedOrder->save();
