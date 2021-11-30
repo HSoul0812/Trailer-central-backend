@@ -21,6 +21,11 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
      */
     const DEFAULT_SORT = '-port';
 
+    /**
+     * @const Default Server
+     */
+    const SERVER_DEFAULT = 'prod';
+
 
     /**
      * Define Sort Orders
