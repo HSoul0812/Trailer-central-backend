@@ -51,6 +51,8 @@ interface RefundRepositoryInterface extends GenericRepository
 
     public function get(int $refundId): ?Refund;
 
+    public function getByRma(int $rma): ?Refund;
+
     /**
      * @param  array  $params
      * @return array<Refund>|Collection|LengthAwarePaginator

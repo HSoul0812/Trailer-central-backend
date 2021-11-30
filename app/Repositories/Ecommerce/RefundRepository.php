@@ -26,6 +26,11 @@ class RefundRepository implements RefundRepositoryInterface
         return Refund::find($refundId);
     }
 
+    public function getByRma(int $rma): ?Refund
+    {
+        return Refund::query()->where('textrail_rma', $rma)->first();
+    }
+
     /**
      * @param array $params the filterable parameters are "dealer_id" and "order_id"
      * @return array<Refund>|Collection|LengthAwarePaginator
