@@ -150,7 +150,7 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
      * @param array $params
      * @return Collection<DealerTunnel>
      */
-    public function getAll($params)
+    public function getAll($params = [])
     {
         // Get Tunnels Server
         $server = $params['tunnel_server'] ?? self::SERVER_DEFAULT;
