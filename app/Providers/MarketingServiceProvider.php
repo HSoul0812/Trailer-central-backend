@@ -32,7 +32,7 @@ class MarketingServiceProvider extends ServiceProvider
 
 
         // Dispatch (Redis) Repositories
-        $this->app->bind(TunnelRedisRepository::class, TunnelRepositoryInterface::class);
+        $this->app->bind(TunnelRepositoryInterface::class, TunnelRedisRepository::class);
 
         // Dispatch Services
         $this->app->bind(MarketplaceDispatchServiceInterface::class, MarketplaceDispatchService::class);
