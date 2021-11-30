@@ -84,7 +84,7 @@ class InteractionMessageService implements InteractionMessageServiceInterface
             return true;
 
         } catch (\Exception $e) {
-            Log::error('Interaction message bulk searchable error error. Message - ' . $e->getMessage() , $e->getTrace());
+            Log::error('Interaction message bulk searchable error. Message - ' . $e->getMessage() , $e->getTrace());
             throw new InteractionMessageException('Interaction message bulk searchable error');
         }
     }
