@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware\Marketing;
 
+use Closure;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Middleware\ValidRoute;
 use App\Models\Marketing\Facebook\Marketplace;
