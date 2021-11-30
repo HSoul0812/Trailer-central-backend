@@ -109,7 +109,7 @@ class MarketplaceService implements MarketplaceServiceInterface
         ]);
 
         // Loop Facebook Integrations
-        $dealers = [];
+        $dealers = new Collection();
         foreach($integrations as $dealer) {
             $dealers->push(new DealerFacebook([
                 'id' => $dealer->id,
@@ -125,7 +125,7 @@ class MarketplaceService implements MarketplaceServiceInterface
         }
 
         // Return Dealers Collection
-        return new collect($dealers);
+        return new $dealers;
     }
 
     /**
