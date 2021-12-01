@@ -74,6 +74,8 @@ class CollectorTransformer extends TransformerAbstract
             'api_key_name' => $collector->api_key_name,
             'api_key_value' => $collector->api_key_value,
             'api_params' => $collector->api_params,
+            'api_max_records' => $collector->api_max_records,
+            'api_pagination' => $collector->api_pagination,
         ];
     }
 }
