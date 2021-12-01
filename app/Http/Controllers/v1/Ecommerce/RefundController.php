@@ -121,9 +121,9 @@ class RefundController extends RestfulControllerV2
      * @noinspection PhpDocMissingThrowsInspection
      * @noinspection PhpUnhandledExceptionInspection
      */
-    public function updateStatus(Request $request): Response
+    public function updateStatus(int $rma, Request $request): Response
     {
-        $returnRequest = new UpdateRefundTextrailRequest($request->all());
+        $returnRequest = new UpdateRefundTextrailRequest(array_merge($request->all(), ['Rma' => $rma]));
 
         if ($returnRequest->validate()) {
             try {
