@@ -252,10 +252,12 @@ class CustomerRepository implements CustomerRepositoryInterface
 
     public function getByEmailOrPhone(array $params): ?Customer
     {
-        return Customer::where('email', '=', $params['email'])
-            ->orWhere('cell_phone', '=', trim($params['phone_number']))
-            ->orWhere('home_phone', '=', trim($params['phone_number']))
-            ->orWhere('work_phone', '=', trim($params['phone_number']))
-            ->get()->first();
+        return Customer::where('dealer_id', '=', $params['dealer_id'])
+            ->where(function($query) use ($params) {
+                $query->where('email', '=', $params['email'])
+                    ->orWhere('cell_phone', '=', trim($params['phone_number']))
+                    ->orWhere('home_phone', '=', trim($params['phone_number']))
+                    ->orWhere('work_phone', '=', trim($params['phone_number']));
+            })->get()->first();
     }
 }

@@ -23,7 +23,13 @@ class CreateCustomerFromOrder
     {
         $order = $partQtyUpdatedEvent->order;
 
-        $customer = $this->customerRepository->getByEmailOrPhone(['email' => $order->customer_email, 'phone_number' => $order->phone_number]);
+        $customer = $this->customerRepository->getByEmailOrPhone(
+            [
+                'email' => $order->customer_email,
+                'phone_number' => $order->phone_number,
+                'dealer_id' => $order->dealer_id,
+            ]
+        );
 
         if (!$customer) {
             $params = [
