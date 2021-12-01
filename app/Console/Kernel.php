@@ -66,7 +66,7 @@ class Kernel extends ConsoleKernel
                 ->runInBackground();
 
         $schedule->command('user:create-access-token')
-                ->hourly()
+                ->withoutOverlapping()
                 ->runInBackground();
 
         $schedule->command('crm:dms:update-po-num-ref')
