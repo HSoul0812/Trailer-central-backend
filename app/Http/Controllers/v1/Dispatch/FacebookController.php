@@ -18,14 +18,29 @@ use App\Transformers\Dispatch\Facebook\StatusTransformer;
 
 class FacebookController extends RestfulControllerV2 {
     /**
-     * @var App\Services\Marketing\MarketplaceRepositoryInterface
+     * @var MarketplaceRepositoryInterface
      */
     private $repository;
 
     /**
-     * @var App\Services\Dispatch\MarketplaceServiceInterface
+     * @var MarketplaceServiceInterface
      */
     private $service;
+
+    /**
+     * @var MarketplaceTransformer
+     */
+    private $transformer;
+
+    /**
+     * @var ListingTransformer
+     */
+    private $listingTransformer;
+
+    /**
+     * @var StatusTransformer
+     */
+    private $statusTransformer;
 
     public function __construct(
         MarketplaceRepositoryInterface $repository,
@@ -34,11 +49,10 @@ class FacebookController extends RestfulControllerV2 {
         ListingTransformer $listingTransformer,
         StatusTransformer $statusTransformer
     ) {
-        $this->middleware('setDealerIdOnRequest')->only(['create', 'update', 'index']);
-
         $this->repository = $repository;
         $this->service = $service;
         $this->transformer = $transformer;
+        $this->listingTransformer = $listingTransformer;
         $this->statusTransformer = $statusTransformer;
     }
 
