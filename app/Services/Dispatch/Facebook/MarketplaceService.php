@@ -46,10 +46,11 @@ class MarketplaceService implements MarketplaceServiceInterface
     public function __construct(
         MarketplaceRepositoryInterface $marketplace,
         TunnelRepositoryInterface $tunnels,
-        ListingRepositoryInterface $tunnels
+        ListingRepositoryInterface $listings
     ) {
         $this->marketplace = $marketplace;
         $this->tunnels = $tunnels;
+        $this->listings = $listings;
 
         // Initialize Logger
         $this->log = Log::channel('dispatch-fb');
