@@ -13,7 +13,7 @@ use App\Http\Requests\Request;
 class CreateMarketplaceRequest extends Request {
 
     protected $rules = [
-        'id' => 'required|int',
+        'marketplace_id' => 'required|int',
         'inventory_id' => 'required|integer|min:1|required|exists:inventory,inventory_id',
         'facebook_id' => 'required|int',
         'status' => 'required|in:active,deleted,expired',

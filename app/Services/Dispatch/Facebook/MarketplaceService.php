@@ -9,6 +9,7 @@ use App\Models\Marketing\Facebook\Marketplace;
 use App\Repositories\Marketing\TunnelRepositoryInterface;
 use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
 use App\Repositories\Marketing\Facebook\ListingRepositoryInterface;
+use App\Repositories\Marketing\Facebook\ImageRepositoryInterface;
 use App\Services\Dispatch\Facebook\DTOs\DealerFacebook;
 use App\Services\Dispatch\Facebook\DTOs\MarketplaceStatus;
 use Illuminate\Support\Collection;
@@ -43,15 +44,18 @@ class MarketplaceService implements MarketplaceServiceInterface
      * @param MarketplaceRepositoryInterface $marketplace
      * @param TunnelRepositoryInterface $tunnels
      * @param ListingRepositoryInterfaces $listings
+     * @param ImageRepositoryInterfaces $images
      */
     public function __construct(
         MarketplaceRepositoryInterface $marketplace,
         TunnelRepositoryInterface $tunnels,
-        ListingRepositoryInterface $listings
+        ListingRepositoryInterface $listings,
+        ImageRepositoryInterface $images
     ) {
         $this->marketplace = $marketplace;
         $this->tunnels = $tunnels;
         $this->listings = $listings;
+        $this->images = $images;
 
         // Initialize Logger
         $this->log = Log::channel('dispatch-fb');
