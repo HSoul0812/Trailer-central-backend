@@ -130,6 +130,10 @@ class MarketplaceService implements MarketplaceServiceInterface
 
         // Create Images for Listing
         if($request->images && is_array($request->images)) {
+            // Delete Existing Images for Listing
+            $this->images->deleteAll(['listing_id' => $listing->id]);
+
+            // Add New Images
             foreach($request->images as $imageId) {
                 $this->images->create([
                     'listing_id' => $listing->id,

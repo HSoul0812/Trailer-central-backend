@@ -41,6 +41,12 @@ class ListingRepository implements ListingRepositoryInterface {
      * @return Listing
      */
     public function create($params) {
+        // Already Exists?!
+        $listing = Listings::where('facebook_id', $params['facebook_id'])->first();
+        if(!empty($listing->id)) {
+            return $this->update($params);
+        }
+
         // Create Listing
         return Listings::create($params);
     }
@@ -98,14 +104,14 @@ class ListingRepository implements ListingRepositoryInterface {
      * @return Listings
      */
     public function update($params) {
-        $filter = Listings::findOrFail($params['id']);
+        $listing = Listings::where('facebook_id', $params['facebook_id'])->firstOrFail();
 
-        DB::transaction(function() use (&$filter, $params) {
+        DB::transaction(function() use (&$listing, $params) {
             // Fill Listing Details
-            $filter->fill($params)->save();
+            $listing->fill($params)->save();
         });
 
-        return $filter;
+        return $listing;
     }
 
     protected function getSortOrders() {
