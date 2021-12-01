@@ -8,6 +8,7 @@ use App\Models\User\Integration\Integration;
 use App\Models\Marketing\Facebook\Marketplace;
 use App\Repositories\Marketing\TunnelRepositoryInterface;
 use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
+use App\Repositories\Marketing\Facebook\ListingRepositoryInterface;
 use App\Services\Dispatch\Facebook\DTOs\DealerFacebook;
 use App\Services\Dispatch\Facebook\DTOs\MarketplaceStatus;
 use Illuminate\Support\Collection;
@@ -44,7 +45,8 @@ class MarketplaceService implements MarketplaceServiceInterface
      */
     public function __construct(
         MarketplaceRepositoryInterface $marketplace,
-        TunnelRepositoryInterface $tunnels
+        TunnelRepositoryInterface $tunnels,
+        ListingRepositoryInterface $tunnels
     ) {
         $this->marketplace = $marketplace;
         $this->tunnels = $tunnels;

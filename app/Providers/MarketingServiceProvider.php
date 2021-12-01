@@ -8,6 +8,10 @@ use App\Repositories\Marketing\Facebook\MarketplaceRepository;
 use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
 use App\Repositories\Marketing\Facebook\FilterRepository;
 use App\Repositories\Marketing\Facebook\FilterRepositoryInterface;
+use App\Repositories\Marketing\Facebook\ListingRepository;
+use App\Repositories\Marketing\Facebook\ListingRepositoryInterface;
+use App\Repositories\Marketing\Facebook\ImageRepository;
+use App\Repositories\Marketing\Facebook\ImageRepositoryInterface;
 use App\Services\Marketing\Facebook\MarketplaceService;
 use App\Services\Marketing\Facebook\MarketplaceServiceInterface;
 use App\Services\Dispatch\Facebook\MarketplaceService as MarketplaceDispatchService;
@@ -29,6 +33,8 @@ class MarketingServiceProvider extends ServiceProvider
         // Integration Repositories
         $this->app->bind(MarketplaceRepositoryInterface::class, MarketplaceRepository::class);
         $this->app->bind(FilterRepositoryInterface::class, FilterRepository::class);
+        $this->app->bind(ListingRepositoryInterface::class, ListingRepository::class);
+        $this->app->bind(ImageRepositoryInterface::class, ImageRepository::class);
 
 
         // Dispatch (Redis) Repositories
