@@ -42,6 +42,7 @@ class MarketplaceService implements MarketplaceServiceInterface
      * 
      * @param MarketplaceRepositoryInterface $marketplace
      * @param TunnelRepositoryInterface $tunnels
+     * @param ListingRepositoryInterfaces $listings
      */
     public function __construct(
         MarketplaceRepositoryInterface $marketplace,
