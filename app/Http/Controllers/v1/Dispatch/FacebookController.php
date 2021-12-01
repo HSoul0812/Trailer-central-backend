@@ -30,6 +30,7 @@ class FacebookController extends RestfulControllerV2 {
         MarketplaceRepositoryInterface $repository,
         MarketplaceServiceInterface $service,
         MarketplaceTransformer $transformer,
+        ListingTransformer $listingTransformer,
         StatusTransformer $statusTransformer
     ) {
         $this->middleware('setDealerIdOnRequest')->only(['create', 'update', 'index']);
@@ -90,7 +91,7 @@ class FacebookController extends RestfulControllerV2 {
         $request = new CreateMarketplaceRequest($request->all());
         if ($request->validate()) {
             // Return Auth
-            return $this->response->item($this->service->create($request), $this->transformer);
+            return $this->response->item($this->service->create($request), $this->listingTransformer);
         }
         
         return $this->response->errorBadRequest();

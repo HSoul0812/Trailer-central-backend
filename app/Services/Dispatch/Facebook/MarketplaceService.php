@@ -2,6 +2,7 @@
 
 namespace App\Services\Dispatch\Facebook;
 
+use App\Http\Requests\Dispatch\Facebook\CreateMarketplaceRequest;
 use App\Models\User\AuthToken;
 use App\Models\User\Integration\Integration;
 use App\Models\Marketing\Facebook\Marketplace;
@@ -97,6 +98,41 @@ class MarketplaceService implements MarketplaceServiceInterface
             'dealers' => $dealers,
             'tunnels' => $tunnels
         ]);
+    }
+
+
+    /**
+     * Login to Marketplace
+     * 
+     * @param CreateMarketplaceRequest $request
+     * @return Listings
+     */
+    public function create(CreateMarketplaceRequest $request): Listings {
+        // Log
+        $this->log->info('Created Facebook Marketplace Inventory #' .
+                            $request->facebook_id . ' with the TC' .
+                            ' Inventory #' . $request->inventory_id .
+                            ' for the Marketplace Integration #' . $request->id);
+
+        // Insert Into DB
+        $listing = $this->listings->create($request->all());
+        $this->log->info('Saved Listing #' . $listing->id . ' for ' .
+                            'Facebook Listing #' . $request->facebook_id);
+
+        // Create Images for Listing
+        if($request->images && is_array($request->images)) {
+            foreach($request->images as $imageId) {
+                $this->images->create([
+                    'listing_id' => $listing->id,
+                    'image_id' => $imageId
+                ]);
+            }
+            $this->log->info('Saved ' . count($request->images) . ' for ' .
+                                'Listing #' . $request->id);
+        }
+
+        // Return Listing
+        return $listing;
     }
 
 
