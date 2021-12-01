@@ -14,6 +14,7 @@ return [
         'is_guest_checkout' => env('TEXTRAIL_GUEST_CHECKOUT', true),
         'queue' => env('TEXTRAIL_QUEUE', 'ecommerce'),
         'payment_method' => env('TEXTRAIL_PAYMENT_METHOD', 'purchaseorder'),
+        'stripe_invoice_url' => env('STRIPE_INVOICE_URL', 'https://api.stripe.com/v1/invoices/'),
         'return' =>[
             'default_status' => env('TEXTRAIL_RETURN_DEFAULT_STATUS', 'Pending'),
             'item_default_status' => env('TEXTRAIL_RETURN_ITEM_DEFAULT_STATUS', 'pending'),
