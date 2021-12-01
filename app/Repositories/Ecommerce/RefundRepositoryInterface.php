@@ -25,6 +25,28 @@ interface RefundRepositoryInterface extends GenericRepository
 
     /**
      * @param  Refund  $refund
+     * @param array<array{sku: string, qty: int}> $parts array of parts indexed by part sku
+     * @return bool
+     */
+    public function markAsRejected(Refund $refund, array $parts): bool;
+
+    /**
+     * @param  Refund  $refund
+     * @param array<array{sku:string, title:string, id:int, amount: float, qty: int, price: float}> $requestedParts
+     * @param array<array{sku:string, title:string, id:int, amount: float, qty: int, price: float}> $authorizedParts
+     * @return bool
+     */
+    public function markAsAuthorized(Refund $refund, array $requestedParts, array $authorizedParts): bool;
+
+    /**
+     * @param  Refund  $refund
+     * @param array<array{sku: string, qty: int}> $parts array of parts indexed by part sku
+     * @return bool
+     */
+    public function markAsReturnReceived(Refund $refund, array $parts): bool;
+
+    /**
+     * @param  Refund  $refund
      * @param  PaymentGatewayRefundResultInterface  $refundResult
      * @return bool
      */
