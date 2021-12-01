@@ -128,9 +128,9 @@ class RefundController extends RestfulControllerV2
         if ($returnRequest->validate()) {
             try {
                 /** @var Refund $refund */
-                $refund = $returnRequest->getRefund();
+                $refund = $returnRequest->refund();
 
-                $this->service->updateStatus($refund, $returnRequest->getMappedStatus());
+                $this->service->updateStatus($refund, $returnRequest->mappedStatus(), $returnRequest->parts());
 
                 return $this->acceptedResponse($refund->id);
             } catch (RefundException $exception) {

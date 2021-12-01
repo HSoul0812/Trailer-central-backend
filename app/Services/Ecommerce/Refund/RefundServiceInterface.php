@@ -35,5 +35,11 @@ interface RefundServiceInterface
      */
     public function refund(int $refundId): void;
 
-    public function updateStatus(Refund $refund, string $status): bool;
+    /**
+     * @param Refund $refund
+     * @param string $status
+     * @param array<array{sku: string, qty: int}> $parts array of parts indexed by part sku
+     * @return bool
+     */
+    public function updateStatus(Refund $refund, string $status, array $parts): bool;
 }
