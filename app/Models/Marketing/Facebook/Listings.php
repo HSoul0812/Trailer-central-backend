@@ -7,6 +7,7 @@ use App\Models\Marketing\Facebook\Image;
 use App\Models\Inventory\Inventory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Class Listings
