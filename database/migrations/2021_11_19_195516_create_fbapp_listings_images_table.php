@@ -19,7 +19,7 @@ class CreateFbappListingsImagesTable extends Migration
             $table->integer('image_id');
             $table->timestamps();
 
-            $table->unique('listing_id', 'image_id');
+            $table->unique(['listing_id', 'image_id']);
         });
     }
 
