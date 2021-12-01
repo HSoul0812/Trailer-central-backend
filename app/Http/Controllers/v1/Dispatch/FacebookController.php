@@ -91,7 +91,7 @@ class FacebookController extends RestfulControllerV2 {
     {
         // Handle Facebook Marketplace Request
         $requestData = $request->all();
-        $requestData['id'] = $id;
+        $requestData['marketplace_id'] = $id;
         $request = new CreateMarketplaceRequest($requestData);
         if ($request->validate()) {
             // Return Auth
@@ -111,7 +111,7 @@ class FacebookController extends RestfulControllerV2 {
     {
         // Handle Facebook Marketplace Request
         $requestData = $request->all();
-        $requestData['id'] = $id;
+        $requestData['marketplace_id'] = $id;
         $request = new UpdateMarketplaceRequest($requestData);
         if ($request->validate()) {
             // Return Auth
