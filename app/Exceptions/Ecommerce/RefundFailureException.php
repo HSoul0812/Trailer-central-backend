@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Exceptions\Ecommerce;
 
-class AfterRemoteRefundException extends \RuntimeException
+class RefundFailureException extends \RuntimeException
 {
     /** @var array */
     private $context = [];
