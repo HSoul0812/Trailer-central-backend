@@ -82,13 +82,16 @@ class FacebookController extends RestfulControllerV2 {
     /**
      * Create Facebook Marketplace Integration
      * 
+     * @param int $id
      * @param Request $request
      * @return type
      */
-    public function create(Request $request)
+    public function create(int $id, Request $request)
     {
         // Handle Facebook Marketplace Request
-        $request = new CreateMarketplaceRequest($request->all());
+        $requestData = $request->all();
+        $requestData['id'] = $id;
+        $request = new CreateMarketplaceRequest($requestData);
         if ($request->validate()) {
             // Return Auth
             return $this->response->item($this->service->create($request), $this->listingTransformer);

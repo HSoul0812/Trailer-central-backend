@@ -8,32 +8,34 @@ use App\Transformers\Marketing\Facebook\MarketplaceTransformer;
 use App\Transformers\Marketing\Facebook\ImageTransformer;
 use League\Fractal\TransformerAbstract;
 
-class MarketplaceTransformer extends TransformerAbstract
+class ListingTransformer extends TransformerAbstract
 {
     protected $defaultIncludes = [
         'images'
     ];
 
     /**
+     * @var MarketplaceTransformer
+     */
+    protected $marketplaceTransformer;
+
+    /**
+     * @var InventoryTransformer
+     */
+    protected $inventoryTransformer;
+
+    /**
      * @var ImageTransformer
      */
     protected $imageTransformer;
-
-    /**
-     * @var UserTransformer
-     */
-    protected $userTransformer;
-
-    /**
-     * @var DealerLocationTransformer
-     */
-    protected $dealerLocationTransformer;
 
     public function __construct(
         MarketplaceTransformer $marketplaceTransformer,
         InventoryTransformer $inventoryTransformer,
         ImageTransformer $imageTransformer
     ) {
+        $this->marketplaceTransformer = $marketplaceTransformer;
+        $this->inventoryTransformer = $inventoryTransformer;
         $this->imageTransformer = $imageTransformer;
     }
 
