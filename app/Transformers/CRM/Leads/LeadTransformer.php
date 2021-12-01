@@ -101,6 +101,7 @@ class LeadTransformer extends TransformerAbstract
             return [
                 'inventory_id' => $lead->inventory_id,
                 'first_name' => $lead->first_name,
+                'middle_name' => $lead->middle_name,
                 'last_name' => $lead->last_name,
                 'is_spam' => $lead->is_spam,
                 'contact_email_sent' => $lead->contact_email_sent,
