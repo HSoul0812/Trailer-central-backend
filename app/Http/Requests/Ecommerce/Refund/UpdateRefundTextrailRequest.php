@@ -11,36 +11,48 @@ use App\Repositories\Ecommerce\RefundRepositoryInterface;
 use Illuminate\Validation\Rule;
 
 /**
- * @property int $order_id Textrail order id
- * @property int $rma Order return id
- * @property array<{sku: string, qty: int}> $items
- * @property string $status Textrail status as they used
+ * @property int $Rma Order return id
+ * @property array<array{sku: string, qty: int}> $Items
+ * @property string $Status Textrail status as they used
  */
 class UpdateRefundTextrailRequest extends Request
 {
     public function getRules(): array
     {
         return [
-            'order_id' => 'integer|min:1|required|exists:ecommerce_completed_orders,ecommerce_order_id',
-            'rma' => 'integer|min:1|required|exists:ecommerce_order_refunds,textrail_rma',
-            'status' => ['required', 'string', Rule::in(array_keys(RefundTextrailStatuses::MAP))],
-            'items' => 'array|required',
-            'items.*.sku' => 'required|string|min:1',
-            'items.*.qty' => 'required|int:min:1'
+            'Rma' => 'integer|min:1|required|exists:ecommerce_order_refunds,textrail_rma',
+            'Status' => ['required', 'string', Rule::in(array_keys(RefundTextrailStatuses::MAP))],
+            'Items' => 'array|required',
+            'Items.*.Sku' => 'required|string|min:1',
+            'Items.*.Qty' => 'required|int:min:1'
         ];
     }
 
-    public function getRefund(): ?Refund
+    public function refund(): ?Refund
     {
-        return $this->getRepository()->getByRma((int)$this->rma);
+        return $this->repository()->getByRma((int)$this->Rma);
     }
 
-    public function getMappedStatus(): ?string
+    public function mappedStatus(): ?string
     {
-        return $this->status ?? RefundTextrailStatuses::MAP[$this->status] ?? RefundTextrailStatuses::PENDING;
+        return $this->status ?? RefundTextrailStatuses::MAP[$this->Status] ?? Refund::STATUS_PENDING;
     }
 
-    protected function getRepository(): RefundRepositoryInterface
+    /**
+     * @return array array of parts indexed by part sku
+     */
+    public function parts(): array
+    {
+        $indexedParts = [];
+
+        foreach ($this->input('Items', []) as $part) {
+            $indexedParts[$part['Sku']] = ['sku' => $part['Sku'], 'qty' => $part['Qty']];
+        }
+
+        return $indexedParts;
+    }
+
+    protected function repository(): RefundRepositoryInterface
     {
         return app(RefundRepositoryInterface::class);
     }
