@@ -256,7 +256,7 @@ class Listings extends Model
      */
     public function images(): HasMany
     {
-        return $this->hasMany(Image::class, 'id', 'listing_id');
+        return $this->hasMany(Image::class, 'listing_id', 'id');
     }
 
 
