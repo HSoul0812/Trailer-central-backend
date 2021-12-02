@@ -134,6 +134,11 @@ class CompletedOrderService implements CompletedOrderServiceInterface
 
             $this->completedOrderRepository->rollbackTransaction();
 
+            if (isset($texTrailOrderId)) {
+                // to do not lose this important info
+                $this->completedOrderRepository->update(['id' => $orderId, 'ecommerce_order_id' => $texTrailOrderId]);
+            }
+
             $this->logger->critical($exception->getMessage());
 
             $this->completedOrderRepository->logError(
