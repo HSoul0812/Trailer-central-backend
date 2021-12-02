@@ -83,4 +83,32 @@ abstract class IntegrationTestCase extends TestCase
             $this->assertArrayHasKey('id', $responseJson['response']['data']);
         }
     }
+
+    /**
+     * @param TestResponse $response
+     * @param bool $withData
+     */
+    protected function assertCreateResponse(TestResponse $response, bool $withData = true)
+    {
+        $responseJson = json_decode($response->getContent(), true);
+
+        $this->assertArrayHasKey('response', $responseJson);
+        $this->assertArrayHasKey('status', $responseJson['response']);
+        $this->assertSame('success', $responseJson['response']['status']);
+
+        if ($withData) {
+            $this->assertArrayHasKey('data', $responseJson['response']);
+            $this->assertArrayHasKey('id', $responseJson['response']['data']);
+        }
+    }
+
+    /**
+     * @param TestResponse $response
+     * @return int
+     */
+    protected function getResponseId(TestResponse $response): int
+    {
+        $responseJson = json_decode($response->getContent(), true);
+        return $responseJson['response']['data']['id'];
+    }
 }
