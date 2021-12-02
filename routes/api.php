@@ -250,7 +250,7 @@ $api->version('v1', function ($route) {
     |
     |
     */
-    $route->get('inventory/packages', 'App\Httloup\Controllers\v1\Inventory\PackageController@index');
+    $route->get('inventory/packages', 'App\Http\Controllers\v1\Inventory\PackageController@index');
     $route->get('inventory/packages/{id}', 'App\Http\Controllers\v1\Inventory\PackageController@show');
     $route->put('inventory/packages', 'App\Http\Controllers\v1\Inventory\PackageController@create');
     $route->post('inventory/packages/{id}', 'App\Http\Controllers\v1\Inventory\PackageController@update');
