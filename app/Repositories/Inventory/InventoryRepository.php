@@ -146,6 +146,14 @@ class InventoryRepository implements InventoryRepositoryInterface
         '-sales_price' => [
             'field' => 'sales_price',
             'direction' => 'ASC'
+        ],
+        'status' => [
+            'field' => 'status',
+            'direction' => 'DESC'
+        ],
+        '-status' => [
+            'field' => 'status',
+            'direction' => 'ASC'
         ]
     ];
 
