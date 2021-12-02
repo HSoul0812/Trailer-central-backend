@@ -89,7 +89,7 @@ class Marketplace extends Model
      */
     public function listings(): HasMany
     {
-        return $this->hasMany(Listings::class, 'id', 'marketplace_id');
+        return $this->hasMany(Listings::class, 'marketplace_id', 'id');
     }
 
     /**
@@ -99,6 +99,32 @@ class Marketplace extends Model
      */
     public function filters(): HasMany
     {
-        return $this->hasMany(Filter::class, 'id', 'marketplace_id');
+        return $this->hasMany(Filter::class, 'marketplace_id', 'id');
+    }
+
+
+    /**
+     * Get Filters Map
+     * 
+     * @return array{entity: array<string>,
+     *               category: array<string>}
+     */
+    public function getFilterMapAttribute(): array
+    {
+        // Get Filters Map
+        $filters = $this->filters()->get();
+
+        // Loop Filters
+        $filtersMap = [];
+        foreach($filters as $filter) {
+            $type = $filter->filter_type;
+            if(!isset($filtersMap[$type])) {
+                $filtersMap[$type] = [];
+            }
+            $filtersMap[$type][] = $filter->filter;
+        }
+
+        // Return Filters Map
+        return $filtersMap;
     }
 }
