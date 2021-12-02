@@ -51,6 +51,42 @@ class LeadStatusController extends RestfulControllerV2
     }
 
     /**
+     * @OA\Put(
+     *     path="/api/leads/status",
+     *     description="Create a lead status",
+     *     tags={"Lead"},
+     *     @OA\Parameter(
+     *         name="tc_lead_identifier",
+     *         in="query",
+     *         description="Lead Id",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="status",
+     *         in="query",
+     *         description="Lead Status",
+     *         required=true,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="sales_person_id",
+     *         in="query",
+     *         description="Sales Person Id",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns a part id",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
+     *     ),
+     * )
      * @param Request $request
      * @return Response
      *
@@ -69,6 +105,50 @@ class LeadStatusController extends RestfulControllerV2
     }
 
     /**
+     * @OA\Post(
+     *     path="/api/leads/status/{id}",
+     *     description="Update a lead status",
+     *     tags={"Lead"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Lead Status Id",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="tc_lead_identifier",
+     *         in="query",
+     *         description="Lead Id",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="status",
+     *         in="query",
+     *         description="Lead Status",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="sales_person_id",
+     *         in="query",
+     *         description="Sales Person Id",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns a part id",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
+     *     ),
+     * )
+     *
      * @param int $id
      * @param Request $request
      * @return Response

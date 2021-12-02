@@ -152,6 +152,36 @@ class LeadController extends RestfulControllerV2
     }
 
     /**
+     *  @OA\Post(
+     *     path="/api/leads/{id}/merge",
+     *     description="Merge Leads",
+     *     tags={"Lead"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Lead Id",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="merges_lead_id",
+     *         in="query",
+     *         description="Array With Lead Ids",
+     *         required=true,
+     *         @OA\Schema(type="array", @OA\Items(type="integer"))
+     *     ),
+     *
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns a part id",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
+     *     ),
+     * )
+     *
      * @param int $id
      * @param Request $request
      * @return Response
