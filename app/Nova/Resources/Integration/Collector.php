@@ -143,6 +143,21 @@ class Collector extends Resource
                 )->withMeta(['extraAttributes' => [
                     'placeholder' => 'status=active']
                 ]),
+                Heading::make('This are Specific Bish settings for API integration'),
+                Number::make('Max Records', 'api_max_records')->hideFromIndex()->help(
+                    'Number of Total Records that we can query. ' .
+                    'This field has been created for the Bish integration, '.
+                    'and a pagination of 3000 records is used in each query. '
+                )->withMeta(['extraAttributes' => [
+                    'placeholder' => '8500']
+                ]),
+                Number::make('Pagination', 'api_pagination')->hideFromIndex()->help(
+                    'The number of records to be filtered for pagination to be effective. ' .
+                    'This field has been created for the Bish integration. ' .
+                    'and is required if the previous field is filled.'
+                )->rules('required_if:api_max_records,true')->withMeta(['extraAttributes' => [
+                    'placeholder' => '3000']
+                ]),
 
             ]),
 
