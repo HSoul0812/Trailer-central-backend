@@ -86,7 +86,7 @@ class FacebookController extends RestfulControllerV2 {
         $request = new CreateMarketplaceRequest($request->all());
         if ($request->validate()) {
             // Return Auth
-            return $this->response->item($this->service->create($request), $this->transformer);
+            return $this->response->item($this->service->create($request->all()), $this->transformer);
         }
         
         return $this->response->errorBadRequest();
@@ -106,7 +106,7 @@ class FacebookController extends RestfulControllerV2 {
         $request = new UpdateMarketplaceRequest($requestData);
         if ($request->validate()) {
             // Return Auth
-            return $this->response->item($this->service->update($request), $this->transformer);
+            return $this->response->item($this->service->update($request->all()), $this->transformer);
         }
         
         return $this->response->errorBadRequest();
