@@ -5,6 +5,7 @@ namespace App\Models\User;
 use App\Models\User\DealerLocation;
 use App\Models\Upload\Upload;
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Leads\LeadType;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\Website\Website;
 use Illuminate\Database\Eloquent\Model;
@@ -138,7 +139,8 @@ class NewDealerUser extends Model
      */
     public function leads()
     {
-        return $this->hasMany(Lead::class, 'dealer_id', 'id')->where('is_spam', 0);
+        return $this->hasMany(Lead::class, 'dealer_id', 'id')->where('is_spam', 0)
+                    ->where('lead_type', '<>', LeadType::TYPE_NONLEAD);
     }
     
     public static function getTableName() {

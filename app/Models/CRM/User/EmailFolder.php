@@ -77,18 +77,26 @@ class EmailFolder extends Model
         $defaults = [
             [
                 'name' => 'INBOX',
+                'folder_id' => -6
+            ],
+            [
+                'name' => 'Inbox',
+                'folder_id' => -5
+            ],
+            [
+                'name' => 'SENT',
                 'folder_id' => -4
             ],
             [
-                'name' => 'INBOX.Sent Mail',
+                'name' => 'Sent Mail',
                 'folder_id' => -3
             ],
             [
-                'name' => '[Gmail]/Sent Mail',
+                'name' => 'Sent Items',
                 'folder_id' => -2
             ],
             [
-                'name' => 'Sent Items',
+                'name' => 'Sent',
                 'folder_id' => -1
             ]
         ];

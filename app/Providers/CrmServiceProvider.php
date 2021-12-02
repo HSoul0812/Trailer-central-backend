@@ -4,6 +4,10 @@ namespace App\Providers;
 
 use App\Mail\CRM\CustomEmail;
 use App\Models\CRM\Dms\Refund;
+use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Leads\LeadStatus;
+use App\Models\Observers\CRM\Lead\LeadObserver;
+use App\Models\Observers\CRM\Lead\LeadStatusObserver;
 use App\Repositories\CRM\Refund\RefundRepository;
 use App\Repositories\CRM\Refund\RefundRepositoryInterface;
 use App\Services\CRM\Email\InquiryEmailService;
@@ -32,6 +36,8 @@ use App\Repositories\CRM\Leads\TypeRepository;
 use App\Repositories\CRM\Leads\TypeRepositoryInterface;
 use App\Repositories\CRM\Leads\UnitRepository;
 use App\Repositories\CRM\Leads\UnitRepositoryInterface;
+use App\Repositories\CRM\Leads\FacebookRepository;
+use App\Repositories\CRM\Leads\FacebookRepositoryInterface;
 use App\Repositories\CRM\Leads\Export\IDSLeadRepository;
 use App\Repositories\CRM\Leads\Export\IDSLeadRepositoryInterface;
 use App\Repositories\CRM\Leads\Export\BigTexLeadRepository;
@@ -69,6 +75,7 @@ class CrmServiceProvider extends ServiceProvider
         $this->app->bind(StatusRepositoryInterface::class, StatusRepository::class);
         $this->app->bind(TypeRepositoryInterface::class, TypeRepository::class);
         $this->app->bind(UnitRepositoryInterface::class, UnitRepository::class);
+        $this->app->bind(FacebookRepositoryInterface::class, FacebookRepository::class);
         $this->app->bind(IDSLeadRepositoryInterface::class, IDSLeadRepository::class);
         $this->app->bind(BigTexLeadRepositoryInterface::class, BigTexLeadRepository::class);
         $this->app->bind(LeadEmailRepositoryInterface::class, LeadEmailRepository::class);
@@ -88,5 +95,15 @@ class CrmServiceProvider extends ServiceProvider
         $this->app->bind('ses.mailer', function($app, $config) {
             return CustomEmail::getCustomSesMailer($app, $config);
         });
+    }
+
+    public function boot()
+    {
+        \Validator::extend('valid_lead', 'App\Rules\CRM\Leads\ValidLead@passes');
+        \Validator::extend('non_lead_exists', 'App\Rules\CRM\Leads\NonLeadExists@passes');
+        \Validator::extend('valid_texts_log', ' App\Rules\CRM\Text\ValidTextsLog@passes');
+
+        LeadStatus::observe(LeadStatusObserver::class);
+        Lead::observe(LeadObserver::class);
     }
 }

@@ -1,8 +1,6 @@
 <?php
 
-
 namespace App\Providers;
-
 
 use App\Models\CRM\Account\Invoice;
 use App\Models\CRM\Account\Payment;
@@ -62,6 +60,8 @@ use App\Repositories\Dms\Printer\SettingsRepository as PrinterSettingsRepository
 use App\Repositories\Dms\Printer\SettingsRepositoryInterface as PrinterSettingsRepositoryInterface;
 use App\Repositories\Dms\Printer\FormRepository as PrinterFormRepository;
 use App\Repositories\Dms\Printer\FormRepositoryInterface as PrinterFormRepositoryInterface;
+use App\Services\CRM\User\SalesPersonService;
+use App\Services\CRM\User\SalesPersonServiceInterface;
 use App\Services\Dms\Customer\CustomerService;
 use App\Services\Dms\Customer\CustomerServiceInterface;
 use App\Services\Dms\CVR\CVRGeneratorService;
@@ -91,6 +91,7 @@ class DmsServiceProvider extends ServiceProvider
         $this->app->bind(BillRepositoryInterface::class, BillRepository::class);
         $this->app->bind(PrinterSettingsRepositoryInterface::class, PrinterSettingsRepository::class);
         $this->app->bind(PrinterFormRepositoryInterface::class, PrinterFormRepository::class);
+        $this->app->bind(SalesPersonServiceInterface::class, SalesPersonService::class);
         $this->app->bind(InstructionsServiceInterface::class, InstructionsService::class);
         $this->app->bind(PrinterFormServiceInterface::class, PrinterFormService::class);
         $this->app->bind(CVRGeneratorServiceInterface::class, CVRGeneratorService::class);

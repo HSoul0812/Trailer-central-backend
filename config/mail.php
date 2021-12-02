@@ -133,4 +133,30 @@ return [
 
     'log_channel' => env('MAIL_LOG_CHANNEL'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Default Mail Hostname
+    |--------------------------------------------------------------------------
+    |
+    | Here you may provide the hostname to be used by default for outgoing
+    | email Message-ID's. This may be overriden by certain email processes.
+    |
+    */
+
+    'hostname' => env('MAIL_HOSTNAME', 'api.v1.staging.trailercentral.com'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Default Attachments Options
+    |--------------------------------------------------------------------------
+    |
+    | Here you may provide the attachments settings including the temporary
+    | attachments directory location.
+    |
+    */
+
+    'attachments' => [
+        'dir' => env('MAIL_ATTACHMENT_DIR', '/tmp/mail')
+    ]
+
 ];

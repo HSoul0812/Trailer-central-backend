@@ -5,7 +5,6 @@ namespace App\Models\CRM\Interactions;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Traits\TableAware;
 use App\Models\CRM\Leads\Lead;
-use App\Models\CRM\User\SalesPerson;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\User\NewUser;
 
@@ -27,8 +26,20 @@ class Interaction extends Model
         'BLAST',
         'CONTACT',
         'TASK',
-        'CHAT'
+        'CHAT',
+        'FB'
     ];
+
+    /**
+     * @const string
+     */
+    const TYPE_EMAIL = 'EMAIL';
+
+    /**
+     * @const string
+     */
+    const TYPE_FB = 'FB';
+
 
     /**
      * The table associated with the model.

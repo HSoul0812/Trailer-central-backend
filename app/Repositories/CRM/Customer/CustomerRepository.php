@@ -2,6 +2,7 @@
 
 namespace App\Repositories\CRM\Customer;
 
+use App\Exceptions\RepositoryInvalidArgumentException;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\User\Customer;
 use App\Traits\Repository\ElasticSearch;
@@ -247,5 +248,30 @@ class CustomerRepository implements CustomerRepositoryInterface
         $search->size($size);
 
         return $search->execute()->models();
+    }
+
+    /**
+     * @param array $params
+     * @return bool
+     */
+    public function bulkUpdate(array $params): bool
+    {
+        if ((empty($params['ids']) || !is_array($params['ids'])) && (empty($params['search']) || !is_array($params['search']))) {
+            throw new RepositoryInvalidArgumentException('ids or search param has been missed. Params - ' . json_encode($params));
+        }
+
+        $query = Customer::query();
+
+        if (!empty($params['ids']) && is_array($params['ids'])) {
+            $query = $query->whereIn('id', $params['ids']);
+            unset($params['ids']);
+        }
+
+        if (!empty($params['search']['website_lead_id'])) {
+            $query = $query->where('website_lead_id', $params['search']['website_lead_id']);
+            unset($params['search']);
+        }
+
+        return (bool)$query->update($params);
     }
 }
