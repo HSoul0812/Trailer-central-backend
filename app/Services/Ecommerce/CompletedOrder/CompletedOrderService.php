@@ -113,7 +113,11 @@ class CompletedOrderService implements CompletedOrderServiceInterface
 
             $poNumber = $this->completedOrderRepository->generateNextPoNumber($order->dealer_id);
 
-            $texTrailOrderId = $this->textrailService->createOrderFromGuestCart($order->ecommerce_cart_id, $poNumber);
+            // it only will try to create a new order on the Magento Side when it hasn't been done before this,
+            // it should happen for example due a duplication entry error constraint
+            $texTrailOrderId = empty($order->ecommerce_order_id) ?
+                $this->textrailService->createOrderFromGuestCart($order->ecommerce_cart_id, $poNumber) :
+                $order->ecommerce_order_id;
 
             $this->completedOrderRepository->update(['id' => $orderId, 'ecommerce_order_id' => $texTrailOrderId, 'po_number' => $poNumber]);
 
@@ -133,6 +137,11 @@ class CompletedOrderService implements CompletedOrderServiceInterface
                 $exception->getMessage();
 
             $this->completedOrderRepository->rollbackTransaction();
+
+            if (isset($texTrailOrderId)) {
+                // to do not lose this important info
+                $this->completedOrderRepository->update(['id' => $orderId, 'ecommerce_order_id' => $texTrailOrderId]);
+            }
 
             $this->logger->critical($exception->getMessage());
 
