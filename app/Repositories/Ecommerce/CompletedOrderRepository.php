@@ -198,7 +198,7 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
         $order = CompletedOrder::query()
             ->where('dealer_id', $dealerId)
             ->whereNotNull('po_number')
-            ->orderBy('po_number', 'desc')
+            ->orderBy('id', 'desc')
             ->first(['po_number']);
 
         if (is_null($order)) {
