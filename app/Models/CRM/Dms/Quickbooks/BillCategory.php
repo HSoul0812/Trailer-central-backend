@@ -3,6 +3,7 @@
 namespace App\Models\CRM\Dms\Quickbooks;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Class BillCategory
@@ -26,4 +27,9 @@ class BillCategory extends Model
         'description',
         'amount',
     ];
+
+    public function account(): BelongsTo
+    {
+        return $this->belongsTo(Account::class, 'account_id', 'id');
+    }
 }

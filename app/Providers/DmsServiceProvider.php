@@ -52,6 +52,8 @@ use App\Repositories\Dms\TaxCalculatorRepository;
 use App\Repositories\Dms\TaxCalculatorRepositoryInterface;
 use App\Repositories\Dms\UnitSaleLaborRepository;
 use App\Repositories\Dms\UnitSaleLaborRepositoryInterface;
+use App\Repositories\Dms\UnitSaleRepository;
+use App\Repositories\Dms\UnitSaleRepositoryInterface;
 use App\Repositories\Pos\SaleRepository;
 use App\Repositories\Pos\SaleRepositoryInterface;
 use App\Repositories\Dms\Printer\SettingsRepository as PrinterSettingsRepository;
@@ -95,6 +97,7 @@ class DmsServiceProvider extends ServiceProvider
         $this->app->bind(CVRGeneratorServiceInterface::class, CVRGeneratorService::class);
         $this->app->bind(ServiceReportRepositoryInterface::class, ServiceReportRepository::class);
         $this->app->bind(CustomerServiceInterface::class, CustomerService::class);
+        $this->app->bind(UnitSaleRepositoryInterface::class, UnitSaleRepository::class);
 
         $this->app->bind(DocumentTemplatesRepositoryInterface::class, DocumentTemplatesRepository::class);
 

@@ -146,6 +146,14 @@ class InventoryRepository implements InventoryRepositoryInterface
         '-sales_price' => [
             'field' => 'sales_price',
             'direction' => 'ASC'
+        ],
+        'status' => [
+            'field' => 'status',
+            'direction' => 'DESC'
+        ],
+        '-status' => [
+            'field' => 'status',
+            'direction' => 'ASC'
         ]
     ];
 
@@ -495,12 +503,23 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query = $query->with(explode(',', $params['include']));
         }
 
+        $attributesEmpty = true;
+        
         if (isset($params['attribute_names'])) {
+           foreach($params['attribute_names'] as $value) {
+                if (!empty($value)) {
+                    $attributesEmpty = false;
+                    break;
+                }
+            } 
+        }        
+        
+        if (isset($params['attribute_names']) && !$attributesEmpty) {
             $query = $query->join('eav_attribute_value', 'inventory.inventory_id', '=', 'eav_attribute_value.inventory_id')->orderBy('eav_attribute_value.attribute_id', 'desc');
             $query = $query->join('eav_attribute', 'eav_attribute.attribute_id', '=', 'eav_attribute_value.attribute_id');
 
             $query = $query->where(function($q) use ($params) {
-                foreach ($params['attribute_names'] as $attribute => $value) {
+                foreach ($params['attribute_names'] as $attribute => $value) {                    
                     $q->orWhere(function ($q) use ($attribute, $value) {
                         $q->where('code', '=', $attribute)
                             ->where('value', '=', $value);
@@ -576,7 +595,7 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query = $query->where(function($q) use ($params) {
                 $q->where('stock', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('title', 'LIKE', '%' . $params['search_term'] . '%')
-                        ->orWhere('description', 'LIKE', '%' . $params['search_term'] . '%')
+                        ->orWhere('inventory.description', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('vin', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhereHas('floorplanVendor', function ($query) use ($params) {
                             $query->where('name', 'LIKE', '%' . $params['search_term'] . '%');
@@ -607,7 +626,7 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query->groupBy('inventory.inventory_id');
 
         }
-
+        
         return $query;
     }
 

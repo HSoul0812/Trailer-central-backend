@@ -6,9 +6,11 @@ use App\Exceptions\CRM\Email\SendEmailFailedException;
 use App\Mail\InteractionEmail;
 use App\Models\CRM\Email\Attachment;
 use App\Repositories\User\UserRepositoryInterface;
+use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
-use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
+use App\Services\CRM\User\DTOs\EmailSettings;
+use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Traits\CustomerHelper;
 use App\Traits\MailHelper;
 use Carbon\Carbon;
@@ -27,30 +29,15 @@ class InteractionEmailService implements InteractionEmailServiceInterface
 
 
     /**
-     * @var UserRepositoryInterface
-     */
-    private $users;
-
-
-    /**
-     * InteractionEmailServiceconstructor.
-     * 
-     * @param UserRepositoryInterface $users
-     */
-    public function __construct(UserRepositoryInterface $users) {
-        $this->users = $users;
-    }
-
-    /**
      * Send Email With Params
      * 
-     * @param int $dealerId
+     * @param EmailSettings $emailConfig
      * @param null|SmtpConfig $smtpConfig
      * @param ParsedEmail $parsedEmail
      * @throws SendEmailFailedException
      * @return ParsedEmail
      */
-    public function send(int $dealerId, ?SmtpConfig $smtpConfig, ParsedEmail $parsedEmail): ParsedEmail {
+    public function send(EmailSettings $emailConfig, ?SmtpConfig $smtpConfig, ParsedEmail $parsedEmail): ParsedEmail {
         // Get Unique Message ID
         if(empty($parsedEmail->getMessageId())) {
             $messageId = sprintf('%s@%s', $this->generateId(), $this->serverHostname());
@@ -76,14 +63,13 @@ class InteractionEmailService implements InteractionEmailServiceInterface
             ]);
 
             // Send Email
-            if($smtpConfig !== null) {
+            if($emailConfig->config !== 'default' && $smtpConfig !== null) {
                 $this->sendCustomEmail($smtpConfig, [
                     'email' => $parsedEmail->getToEmail(),
                     'name' => $parsedEmail->getToName()
                 ], $interactionEmail);
             } else {
-                $user = $this->users->get(['dealer_id' => $dealerId]);;
-                $this->sendDefaultEmail($user, [
+                $this->sendDefaultEmail($emailConfig, [
                     'email' => $parsedEmail->getToEmail(),
                     'name' => $parsedEmail->getToName()
                 ], $interactionEmail);
@@ -94,7 +80,7 @@ class InteractionEmailService implements InteractionEmailServiceInterface
 
         // Store Attachments
         if($parsedEmail->hasAttachments()) {
-            $parsedEmail->setAttachments($this->storeAttachments($dealerId, $parsedEmail));
+            $parsedEmail->setAttachments($this->storeAttachments($emailConfig->dealerId, $parsedEmail));
         }
 
         // Returns Params With Attachments

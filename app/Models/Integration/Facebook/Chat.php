@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace App\Models\Integration\Facebook;
 
+use App\Models\CRM\Interactions\Facebook\Conversation;
 use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
 use App\Models\CRM\User\SalesPerson;
-use App\Models\Integration\Facebook\Page;
 use App\Models\Integration\Auth\AccessToken;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 
 /**
@@ -20,6 +21,7 @@ use Illuminate\Support\Collection;
  *
  * @property SalesPerson $salesPerson
  * @property Collection<SalesPerson> $salesPersons
+ * @property Collection<Conversation> $conversations
  */
 class Chat extends Model
 {
@@ -88,6 +90,14 @@ class Chat extends Model
     public function page(): BelongsTo
     {
         return $this->belongsTo(Page::class, 'page_id', 'page_id');
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function conversations(): HasMany
+    {
+        return $this->hasMany(Conversation::class, 'page_id', 'page_id');
     }
 
     /**

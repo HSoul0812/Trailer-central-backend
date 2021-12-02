@@ -10,11 +10,14 @@ use App\Models\User\User;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
+use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
+use App\Repositories\User\UserRepositoryInterface;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\CRM\Interactions\InteractionServiceInterface;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Services\CRM\Interactions\NtlmEmailServiceInterface;
+use App\Services\CRM\User\DTOs\EmailSettings;
 use App\Services\Integration\AuthServiceInterface;
 use App\Services\Integration\Common\DTOs\AttachmentFile;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
@@ -87,6 +90,16 @@ class InteractionService implements InteractionServiceInterface
      */
     protected $leadStatus;
 
+    /**
+     * @var UserRepositoryInterface
+     */
+    protected $users;
+
+    /**
+     * @var SalesPeresonRepositoryInterface
+     */
+    protected $salespeople;
+
 
     /**
      * InteractionsRepository constructor.
@@ -101,6 +114,8 @@ class InteractionService implements InteractionServiceInterface
      * @param EmailHistoryRepositoryInterface $emailHistory
      * @param TokenRepositoryInterface $tokens
      * @param StatusRepositoryInterface $leadStatus
+     * @param UserRepositoryInterface $users
+     * @param SalesPersonRepositoryInterface $salespeople
      */
     public function __construct(
         AuthServiceInterface $auth,
@@ -112,7 +127,9 @@ class InteractionService implements InteractionServiceInterface
         InteractionsRepositoryInterface $interactions,
         EmailHistoryRepositoryInterface $emailHistory,
         TokenRepositoryInterface $tokens,
-        StatusRepositoryInterface $leadStatus
+        StatusRepositoryInterface $leadStatus,
+        UserRepositoryInterface $users,
+        SalesPersonRepositoryInterface $salespeople
     ) {
         // Initialize Services
         $this->auth = $auth;
@@ -127,6 +144,69 @@ class InteractionService implements InteractionServiceInterface
         $this->emailHistory = $emailHistory;
         $this->tokens = $tokens;
         $this->leadStatus = $leadStatus;
+        $this->users = $users;
+        $this->salespeople = $salespeople;
+    }
+
+
+    /**
+     * Get Email Config Settings
+     * 
+     * @param int $dealerId
+     * @param null|int $salesPersonId
+     * @return EmailSettings
+     */
+    public function config(int $dealerId, ?int $salesPersonId = null): EmailSettings {
+        // Get User Data
+        $user = $this->users->get(['dealer_id' => $dealerId]);
+        if(!empty($salesPersonId)) {
+            $salesPerson = $this->salespeople->get(['sales_person_id' => $salesPersonId]);
+        }
+
+        // Get Default Email + Reply-To
+        if(empty($salesPerson->id)) {
+            return new EmailSettings([
+                'dealer_id' => $dealerId,
+                'type' => 'dealer',
+                'method' => 'smtp',
+                'config' => EmailSettings::CONFIG_DEFAULT,
+                'perms' => 'admin',
+                'from_email' => config('mail.from.address'),
+                'from_name' => $user->name,
+                'reply_email' => $user->email,
+                'reply_name' => $user->name
+            ]);
+        }
+
+
+        // Get SMTP Config
+        $smtpConfig = SmtpConfig::fillFromSalesPerson($salesPerson);
+
+        // Set Access Token on SMTP Config
+        if($smtpConfig->isAuthConfigOauth()) {
+            $smtpConfig->setAccessToken($this->refreshToken($smtpConfig->accessToken));
+            $smtpConfig->calcAuthConfig();
+        }
+
+        // SMTP Valid?
+        $smtpValid = $salesPerson->smtp_validate->success;
+        if(!$smtpValid) {
+            $smtpValid = $smtpConfig->isAuthConfigOauth();
+        }
+
+        // Get Sales Person Settings
+        return new EmailSettings([
+            'dealer_id' => $dealerId,
+            'sales_person_id' => $salesPersonId,
+            'type' => 'sales_person',
+            'method' => $smtpConfig->isAuthConfigOauth() ? EmailSettings::METHOD_OAUTH : EmailSettings::METHOD_DEFAULT,
+            'config' => $smtpValid ? $smtpConfig->getAuthConfig() : EmailSettings::CONFIG_DEFAULT,
+            'perms' => $salesPerson->perms,
+            'from_email' => $smtpValid ? $smtpConfig->getUsername() : config('mail.from.address'),
+            'from_name' => $smtpConfig->getFromName(),
+            'reply_email' => !$smtpValid ? $smtpConfig->getUsername() : null,
+            'reply_name' => !$smtpValid ? $smtpConfig->getFromName() : null
+        ]);
     }
 
     /**
@@ -140,12 +220,20 @@ class InteractionService implements InteractionServiceInterface
      */
     public function email(int $leadId, array $params, array $attachments = []): Interaction {
         // Get User
-        $user = User::find($params['dealer_id']);
+        $user = $this->users->get(['dealer_id' => $params['dealer_id']]);
         $lead = Lead::findOrFail($leadId);
+        $smtpConfig = null;
         $salesPerson = null;
         $interactionEmail = null;
         if(isset($params['sales_person_id'])) {
-            $salesPerson = SalesPerson::find($params['sales_person_id']);
+            $salesPerson = $this->salespeople->get(['sales_person_id' => $params['sales_person_id']]);
+
+            // Get SMTP Config
+            $smtpConfig = SmtpConfig::fillFromSalesPerson($salesPerson);
+            if($smtpConfig->isAuthConfigOauth()) {
+                $smtpConfig->setAccessToken($this->refreshToken($smtpConfig->accessToken));
+                $smtpConfig->calcAuthConfig();
+            }
         }
 
         // Merge Attachments if Necessary
@@ -154,15 +242,13 @@ class InteractionService implements InteractionServiceInterface
         } else { 
             $params['attachments'] = $attachments;
         }
-        
         foreach($params['attachments'] as $key => $attachment) {
             if (!is_a($attachment, UploadedFile::class)) {
                 unset($params['attachments'][$key]);
             }
         }
 
-        // Get SMTP Config
-        $smtpConfig = $this->getSmtpConfig();
+        // Get From Email
         if($smtpConfig !== null) {
             $fromEmail = $smtpConfig->getUsername();
         } else {
@@ -181,15 +267,16 @@ class InteractionService implements InteractionServiceInterface
         }
 
         // Send Email
-        if(!empty($smtpConfig) && $smtpConfig->isAuthTypeGmail()) {
+        if($smtpConfig !== null && $smtpConfig->isAuthTypeGmail()) {
             $finalEmail = $this->gmail->send($smtpConfig, $parsedEmail);
-        } elseif(!empty($smtpConfig) && $smtpConfig->isAuthTypeOffice()) {
+        } elseif($smtpConfig !== null && $smtpConfig->isAuthTypeOffice()) {
             // Send Office Email
             $finalEmail = $this->office->send($smtpConfig, $parsedEmail);
-        } elseif(!empty($smtpConfig) && $smtpConfig->isAuthTypeNtlm()) {
+        } elseif($smtpConfig !== null && $smtpConfig->isAuthTypeNtlm()) {
             $finalEmail = $this->ntlm->send($user->dealer_id, $smtpConfig, $parsedEmail);
         } else {
-            $finalEmail = $this->interactionEmail->send($user->dealer_id, $smtpConfig, $parsedEmail);
+            $emailConfig = $this->config($user->dealer_id, !empty($salesPerson) ? $salesPerson->id : null);
+            $finalEmail = $this->interactionEmail->send($emailConfig, $smtpConfig, $parsedEmail);
             $interactionEmail = true;
         }
 
@@ -250,34 +337,6 @@ class InteractionService implements InteractionServiceInterface
 
         // Return Filled Out Parsed Email
         return $parsedEmail;
-    }
-
-    /**
-     * Get SMTP Config From Auth
-     * 
-     * @return null|SmtpConfig
-     */
-    private function getSmtpConfig(): ?SmtpConfig {
-        // Get User
-        $user = Auth::user();
-
-        // Check if Sales Person Exists
-        if(!empty($user->sales_person)) {
-            // Get SMTP Config
-            $smtpConfig = SmtpConfig::fillFromSalesPerson($user->sales_person);
-
-            // Set Access Token on SMTP Config
-            if($smtpConfig->isAuthConfigOauth()) {
-                $smtpConfig->setAccessToken($this->refreshToken($smtpConfig->accessToken));
-                $smtpConfig->calcAuthConfig();
-            }
-
-            // Return SMTP Config
-            return $smtpConfig;
-        }
-
-        // Get SMTP Config From Dealer
-        return null;
     }
 
     /**

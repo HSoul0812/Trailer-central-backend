@@ -22,6 +22,8 @@ use App\Services\CRM\Leads\Export\ADFServiceInterface as ADFExportServiceInterfa
 use App\Services\CRM\Leads\Export\ADFService as ADFExportService;
 use App\Services\CRM\Leads\Export\IDSServiceInterface;
 use App\Services\CRM\Leads\Export\IDSService;
+use App\Services\CRM\Leads\Export\BigTexServiceInterface;
+use App\Services\CRM\Leads\Export\BigTexService;
 use App\Services\CRM\Leads\Import\ADFServiceInterface as ADFImportServiceInterface;
 use App\Services\CRM\Leads\Import\ADFService as ADFImportService;
 use App\Repositories\CRM\Leads\LeadRepository;
@@ -38,6 +40,8 @@ use App\Repositories\CRM\Leads\FacebookRepository;
 use App\Repositories\CRM\Leads\FacebookRepositoryInterface;
 use App\Repositories\CRM\Leads\Export\IDSLeadRepository;
 use App\Repositories\CRM\Leads\Export\IDSLeadRepositoryInterface;
+use App\Repositories\CRM\Leads\Export\BigTexLeadRepository;
+use App\Repositories\CRM\Leads\Export\BigTexLeadRepositoryInterface;
 use App\Repositories\CRM\Leads\Export\LeadEmailRepositoryInterface;
 use App\Repositories\CRM\Leads\Export\LeadEmailRepository;
 use App\Repositories\CRM\Customer\CustomerRepositoryInterface;
@@ -61,6 +65,7 @@ class CrmServiceProvider extends ServiceProvider
         $this->app->bind(InquiryEmailServiceInterface::class, InquiryEmailService::class);
         $this->app->bind(AutoAssignServiceInterface::class, AutoAssignService::class);
         $this->app->bind(IDSServiceInterface::class, IDSService::class);
+        $this->app->bind(BigTexServiceInterface::class, BigTexService::class);
         $this->app->bind(ADFExportServiceInterface::class, ADFExportService::class);
         $this->app->bind(ADFImportServiceInterface::class, ADFImportService::class);
 
@@ -72,6 +77,7 @@ class CrmServiceProvider extends ServiceProvider
         $this->app->bind(UnitRepositoryInterface::class, UnitRepository::class);
         $this->app->bind(FacebookRepositoryInterface::class, FacebookRepository::class);
         $this->app->bind(IDSLeadRepositoryInterface::class, IDSLeadRepository::class);
+        $this->app->bind(BigTexLeadRepositoryInterface::class, BigTexLeadRepository::class);
         $this->app->bind(LeadEmailRepositoryInterface::class, LeadEmailRepository::class);
         $this->app->bind(CustomerRepositoryInterface::class, CustomerRepository::class);
         $this->app->bind(CustomerInventoryRepositoryInterface::class, CustomerInventoryRepository::class);

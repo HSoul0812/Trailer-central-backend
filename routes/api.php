@@ -188,6 +188,8 @@ $api->version('v1', function ($route) {
      */
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
         $route->get('inventory/overlay', 'App\Http\Controllers\v1\Inventory\CustomOverlayController@index');
+        $route->post('inventory/overlay', 'App\Http\Controllers\v1\Inventory\CustomOverlayController@update');
+        $route->post('inventory/bulk-overlay', 'App\Http\Controllers\v1\Inventory\CustomOverlayController@bulkUpdate');
     });
 
     /**
@@ -248,7 +250,7 @@ $api->version('v1', function ($route) {
     |
     |
     */
-    $route->get('inventory/packages', 'App\Httloup\Controllers\v1\Inventory\PackageController@index');
+    $route->get('inventory/packages', 'App\Http\Controllers\v1\Inventory\PackageController@index');
     $route->get('inventory/packages/{id}', 'App\Http\Controllers\v1\Inventory\PackageController@show');
     $route->put('inventory/packages', 'App\Http\Controllers\v1\Inventory\PackageController@create');
     $route->post('inventory/packages/{id}', 'App\Http\Controllers\v1\Inventory\PackageController@update');
@@ -518,6 +520,7 @@ $api->version('v1', function ($route) {
     $route->get('leads/types', 'App\Http\Controllers\v1\CRM\Leads\LeadTypeController@index');
     $route->get('leads/sources', 'App\Http\Controllers\v1\CRM\Leads\LeadSourceController@index');
     $route->get('leads/sort-fields', 'App\Http\Controllers\v1\CRM\Leads\LeadController@sortFields');
+    $route->get('leads/unique-full-names', 'App\Http\Controllers\v1\CRM\Leads\LeadController@uniqueFullNames');
     $route->get('crm/states', 'App\Http\Controllers\v1\CRM\StatesController@index');
 
     /*
@@ -771,6 +774,7 @@ $api->version('v1', function ($route) {
             ], function ($route) {
                 $route->get('/', 'App\Http\Controllers\v1\User\SettingsController@index');
                 $route->post('/', 'App\Http\Controllers\v1\User\SettingsController@update');
+                $route->get('email', 'App\Http\Controllers\v1\User\SettingsController@email');
             });
 
             /*

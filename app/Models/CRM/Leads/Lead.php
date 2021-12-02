@@ -32,6 +32,8 @@ use App\Models\CRM\Leads\Facebook\Lead as FbLead;
  * @property int $website_id
  * @property string $lead_type
  * @property int $inventory_id
+ * @property int $customer_id
+ * @property int $ids_exported
  * @property string $referral
  * @property string $title
  * @property string $first_name
@@ -50,6 +52,7 @@ use App\Models\CRM\Leads\Facebook\Lead as FbLead;
  * @property bool $is_spam
  * @property \DateTimeInterface $contact_email_sent
  * @property \DateTimeInterface $adf_email_sent
+ * @property \DateTimeInterface $last_visited_at
  * @property bool $cdk_email_sent
  * @property string $metadata
  * @property bool $newsletter
@@ -59,6 +62,7 @@ use App\Models\CRM\Leads\Facebook\Lead as FbLead;
  * @property int $dealer_location_id
  * @property bool $is_archived
  * @property int $unique_id
+ * @property int $bigtex_exported
  *
  * @property Website $website
  * @property LeadStatus $leadStatus
@@ -83,8 +87,17 @@ class Lead extends Model
     const IS_NOT_SPAM = 0;
     const IS_SPAM = 1;
 
+    const IS_FROM_CLASSIFIEDS = 1;
+    const IS_NOT_FROM_CLASSIFIEDS = 0;
+    
+    const IS_BIGTEX_EXPORTED = 1;
+    const IS_BIGTEX_NOT_EXPORTED = 0;
+
+    
     const IS_IDS_EXPORTED = 1;
     const IS_NOT_IDS_EXPORTED = 0;
+
+    const LEAD_TYPE_CLASSIFIED = 'classified';
 
     const TABLE_NAME = 'website_lead';
 
@@ -149,7 +162,8 @@ class Lead extends Model
         'newsletter',
         'is_spam',
         'is_archived',
-        'is_from_classifieds'
+        'is_from_classifieds',
+        'bigtex_exported'
     ];
 
     /**

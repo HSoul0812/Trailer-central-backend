@@ -31,6 +31,8 @@ use App\Repositories\Inventory\CategoryRepository;
 use App\Repositories\Inventory\CategoryRepositoryInterface;
 use App\Repositories\Inventory\AttributeRepository;
 use App\Repositories\Inventory\AttributeRepositoryInterface;
+use App\Repositories\Inventory\CustomOverlay\CustomOverlayRepository;
+use App\Repositories\Inventory\CustomOverlay\CustomOverlayRepositoryInterface;
 use App\Repositories\Inventory\FileRepository;
 use App\Repositories\Inventory\FileRepositoryInterface;
 use App\Repositories\Inventory\ImageRepository;
@@ -106,6 +108,8 @@ use App\Services\Dms\Pos\RegisterServiceInterface;
 use App\Services\File\FileService;
 use App\Services\File\FileServiceInterface;
 use App\Services\File\ImageService;
+use App\Services\Inventory\CustomOverlay\CustomOverlayService;
+use App\Services\Inventory\CustomOverlay\CustomOverlayServiceInterface;
 use App\Services\Inventory\Packages\PackageService;
 use App\Services\Inventory\Packages\PackageServiceInterface;
 use App\Services\User\DealerLocationService;
@@ -127,8 +131,6 @@ use App\Services\Inventory\InventoryService;
 use App\Services\Inventory\InventoryServiceInterface;
 use App\Services\Pos\CustomSalesReportExporterService;
 use App\Services\Pos\CustomSalesReportExporterServiceInterface;
-use App\Services\Export\DomPdfExporterService;
-use App\Services\Export\DomPdfExporterServiceInterface;
 use App\Services\Website\Log\LogServiceInterface;
 use App\Services\Website\Log\LogService;
 use App\Services\Website\WebsiteConfigService;
@@ -318,7 +320,8 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(LoggerServiceInterface::class, LoggerService::class);
 
-        $this->app->bind(DomPdfExporterServiceInterface::class, DomPdfExporterService::class);
+        $this->app->bind(CustomOverlayRepositoryInterface::class, CustomOverlayRepository::class);
+        $this->app->bind(CustomOverlayServiceInterface::class, CustomOverlayService::class);
 
         $this->app->bind(StockRepositoryInterface::class, StockRepository::class);
 

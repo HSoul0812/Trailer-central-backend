@@ -173,6 +173,7 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
         // Return Email Draft
         return EmailHistory::whereLeadId($leadId)
             ->whereFromEmail($fromEmail)
+            ->whereNotNull('draft_saved')
             ->whereNull('date_sent')
             ->first();
     }
@@ -320,7 +321,7 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
                     $params[$key] = Carbon::now()->setTimezone('UTC')->toDateTimeString();
                 } elseif($value === 0) {
                     $params[$key] = NULL;
-                } else {
+                } elseif(\is_string($value) === false) {
                     unset($params[$key]);
                 }
             } elseif (in_array($key, EmailHistory::BOOL_FIELDS)) {
