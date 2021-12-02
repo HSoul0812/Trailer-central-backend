@@ -113,35 +113,35 @@ class MarketplaceService implements MarketplaceServiceInterface
     /**
      * Login to Marketplace
      * 
-     * @param CreateMarketplaceRequest $request
+     * @param array $params
      * @return Listings
      */
-    public function create(CreateMarketplaceRequest $request): Listings {
+    public function create(array $params): Listings {
         // Log
         $this->log->info('Created Facebook Marketplace Inventory #' .
-                            $request->facebook_id . ' with the TC' .
-                            ' Inventory #' . $request->inventory_id .
-                            ' for the Marketplace Integration #' . $request->id);
+                            $params['facebook_id'] . ' with the TC' .
+                            ' Inventory #' . $params['inventory_id'] .
+                            ' for the Marketplace Integration #' . $params['id']);
 
         // Insert Into DB
-        $listing = $this->listings->create($request->all());
+        $listing = $this->listings->create($params);
         $this->log->info('Saved Listing #' . $listing->id . ' for ' .
-                            'Facebook Listing #' . $request->facebook_id);
+                            'Facebook Listing #' . $params['facebook_id']);
 
         // Create Images for Listing
-        if($request->images && is_array($request->images)) {
+        if(!empty($params['images']) && is_array($params['images'])) {
             // Delete Existing Images for Listing
             $this->images->deleteAll($listing->id);
 
             // Add New Images
-            foreach($request->images as $imageId) {
+            foreach($params['images'] as $imageId) {
                 $this->images->create([
                     'listing_id' => $listing->id,
                     'image_id' => $imageId
                 ]);
             }
-            $this->log->info('Saved ' . count($request->images) . ' for ' .
-                                'Listing #' . $request->id);
+            $this->log->info('Saved ' . count($params['images']) . ' for ' .
+                                'Listing #' . $params['id']);
         }
 
         // Return Listing
