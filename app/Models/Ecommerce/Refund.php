@@ -136,4 +136,17 @@ class Refund extends Model
     {
         return $this->belongsTo(CompletedOrder::class, 'order_id', 'id');
     }
+
+    public function canMoveStatusTo(string $status): bool
+    {
+        if (self::STATUS_PENDING === $this->status) {
+            return in_array($status, [self::STATUS_AUTHORIZED, self::STATUS_REJECTED]);
+        }
+
+        if (self::STATUS_AUTHORIZED === $this->status) {
+            return $status === self::STATUS_RETURN_RECEIVED;
+        }
+
+        return false;
+    }
 }

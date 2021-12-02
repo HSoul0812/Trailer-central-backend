@@ -9,7 +9,7 @@ namespace App\Services\Ecommerce\Refund;
 use App\Contracts\Support\DTO;
 use App\Exceptions\Ecommerce\RefundAmountException;
 use App\Exceptions\Ecommerce\RefundException;
-use App\Http\Requests\Ecommerce\IssueRefundOrderRequest;
+use App\Http\Requests\Ecommerce\Refund\IssueRefundOrderRequest;
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
 use App\Models\Ecommerce\CompletedOrder\OrderAmountsBag;
 use App\Models\Ecommerce\Refund;
@@ -233,8 +233,8 @@ final class RefundBag implements DTO
      * @throws RefundAmountException when the refund handling amount is greater than the order remaining handling balance
      * @throws RefundAmountException when the refund shipping amount is greater than the order remaining shipping balance
      * @throws RefundAmountException when the refund tax amount is greater than the order remaining tax balance
-     * @throws RefundAmountException when the some provided part qty is greater than the remaining qty
-     * @throws RefundAmountException when the some provided part qty is greater than the purchase qty
+     * @throws RefundAmountException when some provided part qty is greater than the remaining qty
+     * @throws RefundAmountException when some provided part qty is greater than the purchase qty
      * @throws RefundException when a provided part was not a placed part in the order
      */
     public function validate(): void

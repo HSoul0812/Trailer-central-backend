@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Ecommerce\Refund;
 
 use App\Contracts\LoggerServiceInterface;
-use App\Exceptions\Ecommerce\AfterRemoteRefundException;
+use App\Exceptions\Ecommerce\RefundFailureException;
 use App\Exceptions\Ecommerce\RefundAmountException;
 use App\Exceptions\Ecommerce\RefundException;
 use App\Exceptions\Ecommerce\RefundHttpClientException;
@@ -79,14 +79,14 @@ class RefundService implements RefundServiceInterface
      * @throws RefundAmountException when the refund handling amount is greater than the order remaining handling balance
      * @throws RefundAmountException when the refund shipping amount is greater than the order remaining shipping balance
      * @throws RefundAmountException when the refund tax amount is greater than the order remaining tax balance
-     * @throws RefundAmountException when the some provided part qty is greater than the remaining qty
-     * @throws RefundAmountException when the some provided part qty is greater than the purchase qty
+     * @throws RefundAmountException when some provided part qty is greater than the remaining qty
+     * @throws RefundAmountException when some provided part qty is greater than the purchase qty
      * @throws RefundException when a provided part was not a placed part in the order
      * @throws \Exception when some error has occurred on DB saving time
      * @throws \Exception when some error has occurred trying to send the refund request to TexTrail
      * @throws RefundException when there was some error on payment TexTrail local process
      * @throws RefundHttpClientException when there was some error on Textrail remote process
-     * @throws AfterRemoteRefundException when there was some error after the refund was successfully received by Textrail
+     * @throws RefundFailureException when there was some error after the refund was successfully received by Textrail
      */
     public function issue(RefundBag $refundBag): Refund
     {
@@ -136,7 +136,7 @@ class RefundService implements RefundServiceInterface
             $this->refundRepository->markAsFailed($refund, $message, Refund::ERROR_STAGE_TEXTRAIL_ISSUE_REMOTE);
 
             throw $exception;
-        } catch (AfterRemoteRefundException $exception) {
+        } catch (RefundFailureException $exception) {
             $this->logger->critical(
                 $exception->getMessage(),
                 array_merge($logContext, ['textrail_rma' => $textrailRma])
@@ -182,11 +182,11 @@ class RefundService implements RefundServiceInterface
      * @throws RefundAmountException when the refund handling amount is greater than the order remaining handling balance
      * @throws RefundAmountException when the refund shipping amount is greater than the order remaining shipping balance
      * @throws RefundAmountException when the refund tax amount is greater than the order remaining tax balance
-     * @throws RefundAmountException when the some provided part qty is greater than the remaining qty
-     * @throws RefundAmountException when the some provided part qty is greater than the purchase qty
+     * @throws RefundAmountException when some provided part qty is greater than the remaining qty
+     * @throws RefundAmountException when some provided part qty is greater than the purchase qty
      * @throws RefundException when a provided part was not a placed part in the order
      * @throws \Exception when some unknown exception has occurred
-     * @throws AfterRemoteRefundException when there was some error after the refund was successfully received by Textrail
+     * @throws RefundFailureException when there was some error after the refund was successfully received by Textrail
      */
     public function cancelOrder(RefundBag $refundBag): Refund
     {
@@ -202,10 +202,7 @@ class RefundService implements RefundServiceInterface
         try {
             $this->updateOrderRefundSummary($refund);
 
-            $this->refundRepository->markAsProcessing($refund);
-
-            $job = new ProcessRefundOnPaymentGatewayJob($refund->id);
-            $this->dispatch($job->onQueue(config('ecommerce.textrail.queue')));
+            $this->dispatchPaymentGatewayRefundJob($refund);
 
             return $refund;
         } catch (\Exception $exception) {
@@ -226,6 +223,39 @@ class RefundService implements RefundServiceInterface
 
             throw $exception;
         }
+    }
+
+    /**
+     * @param Refund $refund
+     * @param string $status
+     * @param array<array{sku: string, qty: int}> $parts array of parts indexed by part sku
+     * @return bool
+     * @throws RefundFailureException when it was not possible to mark it as rejected
+     * @throws \Brick\Money\Exception\MoneyMismatchException
+     */
+    public function updateStatus(Refund $refund, string $status, array $parts): bool
+    {
+        if (!in_array($status, [Refund::STATUS_REJECTED, Refund::STATUS_AUTHORIZED, Refund::STATUS_RETURN_RECEIVED])) {
+            throw new \InvalidArgumentException(sprintf("The refund status '%s' is not a valid status", $status));
+        }
+
+        if (!$refund->canMoveStatusTo($status)) {
+            throw new RefundException(
+                sprintf("Refund status cannot move from '%s' to '%s'", $refund->status, $status));
+        }
+
+        if ($status === Refund::STATUS_REJECTED) {
+            return $this->markAsRejected($refund, $refund->parts);
+        }
+
+        $recalculatedParts = $this->reCalculateParts($refund->parts, $parts);
+        $refund->parts_amount = $recalculatedParts['partsAmount']->getAmount()->toFloat(); // reset the parts amount
+
+        if ($status === Refund::STATUS_AUTHORIZED) {
+            return $this->markAsAuthorized($refund, $recalculatedParts['originalParts'], $recalculatedParts['updatedParts']);
+        }
+
+        return $this->markAsReturnReceived($refund, $recalculatedParts['updatedParts']);
     }
 
     /**
@@ -301,7 +331,7 @@ class RefundService implements RefundServiceInterface
      * @param Refund $refund
      * @param int|null $textrailRma
      *
-     * @throws AfterRemoteRefundException
+     * @throws RefundFailureException
      */
     private function updateOrderRefundSummary(Refund $refund, ?int $textrailRma = null): void
     {
@@ -324,7 +354,7 @@ class RefundService implements RefundServiceInterface
         } catch (\Exception $exception) {
             $this->orderRepository->rollbackTransaction();
 
-            $exception = new AfterRemoteRefundException(sprintf(
+            $exception = new RefundFailureException(sprintf(
                 'The refund {%d} for {%d} order had a critical error after the TexTrail remote process: %s',
                 $refund->id,
                 $refund->order_id,
@@ -355,5 +385,191 @@ class RefundService implements RefundServiceInterface
         );
 
         return $refund;
+    }
+
+    /**
+     * @param Refund $refund
+     */
+    private function dispatchPaymentGatewayRefundJob(Refund $refund): void
+    {
+        $this->refundRepository->markAsProcessing($refund);
+
+        $job = new ProcessRefundOnPaymentGatewayJob($refund->id);
+        $this->dispatch($job->onQueue(config('ecommerce.textrail.queue')));
+    }
+
+    /**
+     * When a return has been rejected, it should restore refunded order amounts and its refunded parts
+     *
+     * @param Refund $refund
+     * @param array<array{sku: string, qty: int}> $parts array of parts indexed by part sku
+     * @return bool
+     * @throws RefundFailureException when it was not possible to mark it as rejected
+     */
+    private function markAsRejected(Refund $refund, array $parts): bool
+    {
+        $logContext = ['id' => $refund->id, 'rma' => $refund->textrail_rma];
+
+        try {
+            $this->orderRepository->beginTransaction();
+
+            $this->refundRepository->markAsRejected($refund, $refund->parts);
+
+            $this->orderService->updateRefundSummary($refund->order_id);
+
+            $this->logger->info(
+                sprintf(
+                    'The refund {%d} for {%d} order was successfully marked as rejected',
+                    $refund->id,
+                    $refund->order_id
+                ),
+                $logContext
+            );
+
+            $this->orderRepository->commitTransaction();
+
+            return true;
+        } catch (\Exception $exception) {
+            $this->logger->critical(
+                $exception->getMessage(),
+                $logContext
+            );
+
+            $exception = new RefundFailureException(sprintf(
+                'The refund {%d} for {%d} order had a critical error when it was tried to be rejected: %s',
+                $refund->id,
+                $refund->order_id,
+                $exception->getMessage()
+            ));
+
+            throw $exception->withContext($logContext)->withTextrailRma($refund->textrail_rma);
+        }
+    }
+
+    /**
+     * @param Refund $refund
+     * @param array<array{sku:string, title:string, id:int, amount: float, qty: int, price: float}> $requestedParts
+     * @param array<array{sku:string, title:string, id:int, amount: float, qty: int, price: float}> $authorizedParts
+     * @return bool
+     */
+    private function markAsAuthorized(Refund $refund, array $requestedParts, array $authorizedParts): bool
+    {
+        $logContext = ['id' => $refund->id, 'rma' => $refund->textrail_rma];
+
+        try {
+            $this->orderRepository->beginTransaction();
+
+            $this->refundRepository->markAsAuthorized($refund, $requestedParts, $authorizedParts);
+
+            $this->orderService->updateRefundSummary($refund->order_id);
+
+            $this->logger->info(
+                sprintf(
+                    'The refund {%d} for {%d} order was successfully marked as authorized',
+                    $refund->id,
+                    $refund->order_id
+                ),
+                $logContext
+            );
+
+            $this->orderRepository->commitTransaction();
+
+            return true;
+        } catch (\Exception $exception) {
+            $this->logger->critical(
+                $exception->getMessage(),
+                $logContext
+            );
+
+            $exception = new RefundFailureException(sprintf(
+                'The refund {%d} for {%d} order had a critical error when it was tried to be authorized: %s',
+                $refund->id,
+                $refund->order_id,
+                $exception->getMessage()
+            ));
+
+            throw $exception->withContext($logContext)->withTextrailRma($refund->textrail_rma);
+        }
+    }
+
+    /**
+     * @param Refund $refund
+     * @param array<array{sku:string, title:string, id:int, amount: float, qty: int, price: float}> $parts
+     * @return bool
+     */
+    private function markAsReturnReceived(Refund $refund, array $parts): bool
+    {
+        $logContext = ['id' => $refund->id, 'rma' => $refund->textrail_rma];
+
+        try {
+            $this->orderRepository->beginTransaction();
+
+            $this->refundRepository->markAsReturnReceived($refund, $parts);
+
+            $this->orderService->updateRefundSummary($refund->order_id);
+
+            $this->logger->info(
+                sprintf(
+                    'The refund {%d} for {%d} order was successfully marked as return received',
+                    $refund->id,
+                    $refund->order_id
+                ),
+                $logContext
+            );
+
+            // When a refund has reached the status 'Return received', it should be processed on the payment gateway
+            $this->dispatchPaymentGatewayRefundJob($refund);
+
+            $this->orderRepository->commitTransaction();
+
+            return true;
+        } catch (\Exception $exception) {
+            $this->logger->critical(
+                $exception->getMessage(),
+                $logContext
+            );
+
+            $exception = new RefundFailureException(sprintf(
+                'The refund {%d} for {%d} order had a critical error when it was tried to be return received: %s',
+                $refund->id,
+                $refund->order_id,
+                $exception->getMessage()
+            ));
+
+            throw $exception->withContext($logContext)->withTextrailRma($refund->textrail_rma);
+        }
+    }
+
+    /**
+     * @param array<array{sku:string, title:string, id:int, amount: float, qty: int, price: float}> $originalParts
+     * @param array<array{sku: string, qty: int}> $parts array of parts indexed by part sku
+     * @return array{originalParts: array, updatedParts: array, partsAmount: Money}
+     * @throws \Brick\Money\Exception\MoneyMismatchException
+     */
+    private function reCalculateParts(array $originalParts, array $parts): array
+    {
+        // Given Textrail might send different quantities, so we need to update those requested quantities
+        // and the parts amount
+
+        $updatedParts = [];
+
+        $partsAmount = Money::zero('USD');
+
+        foreach ($parts as $sku => $qty) {
+            if (!isset($originalParts[$sku])) {
+                throw new RefundException(sprintf('"%s" part was not originally requested to be refunded', $sku));
+            }
+
+            $part = $originalParts[$sku];
+
+            if ($qty < 0 || $qty > $part['qty']) {
+                throw new RefundException(sprintf('"%s" part must be in the range of 0 and %d', $sku, $part['qty']));
+            }
+
+            $updatedParts[] = array_merge($part, ['qty' => $qty]);
+            $partsAmount = $partsAmount->plus($qty * $part['price']);
+        }
+
+        return ['originalParts' => $originalParts, 'updatedParts' => $updatedParts, 'partsAmount' => $partsAmount];
     }
 }

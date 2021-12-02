@@ -20,11 +20,14 @@ class RefundTransformer extends TransformerAbstract
 
         return [
                 'id' => $refund->id,
-                'amount' => $refund->amount,
+                'total_amount' => $refund->total_amount,
                 'reason' => $refund->reason,
                 'status' => $refund->status,
                 'parts' => $refund->parts,
+                'payment_gateway_id' => $refund->payment_gateway_id,
+                'metadata' => $refund->metadata,
                 'created_at' => $refund->created_at->format('Y-m-d H:i:s'),
+                'updated_at' => $refund->updated_at->format('Y-m-d H:i:s'),
             ] + $extraData;
     }
 

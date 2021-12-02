@@ -34,4 +34,12 @@ interface RefundServiceInterface
      * @throws RefundPaymentGatewayException
      */
     public function refund(int $refundId): void;
+
+    /**
+     * @param Refund $refund
+     * @param string $status
+     * @param array<array{sku: string, qty: int}> $parts array of parts indexed by part sku
+     * @return bool
+     */
+    public function updateStatus(Refund $refund, string $status, array $parts): bool;
 }
