@@ -5,10 +5,11 @@ namespace App\Repositories\Marketing\Facebook;
 use App\Exceptions\NotImplementedException;
 use App\Models\Marketing\Facebook\Marketplace;
 use App\Repositories\Traits\SortTrait;
+use App\Traits\Repository\Transaction;
 use Illuminate\Support\Facades\DB;
 
 class MarketplaceRepository implements MarketplaceRepositoryInterface {
-    use SortTrait;
+    use SortTrait, Transaction;
 
     /**
      * Define Sort Orders

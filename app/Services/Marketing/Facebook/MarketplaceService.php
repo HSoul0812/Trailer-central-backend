@@ -46,22 +46,37 @@ class MarketplaceService implements MarketplaceServiceInterface
      * @return Marketplace
      */
     public function create(CreateMarketplaceRequest $request): Marketplace {
-        // Create Marketplace Integration
-        $marketplace = $this->marketplace->create($request->all());
+        // Begin Transaction
+        $this->marketplace->beginTransaction();
 
-        // Create All Filters
-        if($request->filters && is_array($request->filters)) {
-            foreach($request->filters as $filter) {
-                $this->filters->create([
-                    'marketplace_id' => $marketplace->id,
-                    'filter_type' => $filter['type'],
-                    'filter' => $filter['value']
-                ]);
+        try {
+            // Create Marketplace Integration
+            $marketplace = $this->marketplace->create($request->all());
+
+            // Create All Filters
+            if($request->filters && is_array($request->filters)) {
+                foreach($request->filters as $filter) {
+                    $this->filters->create([
+                        'marketplace_id' => $marketplace->id,
+                        'filter_type' => $filter['type'],
+                        'filter' => $filter['value']
+                    ]);
+                }
             }
-        }
 
-        // Return Response
-        return $marketplace;
+            $this->marketplace->commitTransaction();
+
+            // Return Response
+            return $marketplace;
+        } catch (Exception $e) {
+            $this->logger->error('Marketplace Integration creation error. params=' .
+                json_encode($request->all() + ['dealer_id' => $request->dealer_id]),
+                $e->getTrace());
+
+            $this->marketplace->rollbackTransaction();
+
+            throw $e;
+        }
     }
 
     /**
@@ -71,25 +86,40 @@ class MarketplaceService implements MarketplaceServiceInterface
      * @return Marketplace
      */
     public function update(UpdateMarketplaceRequest $request): Marketplace {
-        // Update Marketplace Integration
-        $marketplace = $this->marketplace->update($request->all());
+        // Begin Transaction
+        $this->marketplace->beginTransaction();
 
-        // Delete Existing Filters
-        $this->filters->deleteAll($marketplace->id);
+        try {
+            // Update Marketplace Integration
+            $marketplace = $this->marketplace->update($request->all());
 
-        // Create All Filters
-        if($request->filters && is_array($request->filters)) {
-            foreach($request->filters as $filter) {
-                $this->filters->create([
-                    'marketplace_id' => $marketplace->id,
-                    'filter_type' => $filter['type'],
-                    'filter' => $filter['value']
-                ]);
+            // Delete Existing Filters
+            $this->filters->deleteAll($marketplace->id);
+
+            // Create All Filters
+            if($request->filters && is_array($request->filters)) {
+                foreach($request->filters as $filter) {
+                    $this->filters->create([
+                        'marketplace_id' => $marketplace->id,
+                        'filter_type' => $filter['type'],
+                        'filter' => $filter['value']
+                    ]);
+                }
             }
-        }
 
-        // Return Response
-        return $marketplace;
+            $this->marketplace->commitTransaction();
+
+            // Return Response
+            return $marketplace;
+        } catch (Exception $e) {
+            $this->logger->error('Marketplace Integration update error. params=' .
+                json_encode($request->all() + ['marketplace_id' => $request->id]),
+                $e->getTrace());
+
+            $this->marketplace->rollbackTransaction();
+
+            throw $e;
+        }
     }
 
     /**
@@ -99,10 +129,28 @@ class MarketplaceService implements MarketplaceServiceInterface
      * @return boolean
      */
     public function delete(int $id): bool {
-        // Delete Filters for Marketplace Integration
-        $this->filters->deleteAll($id);
+        // Begin Transaction
+        $this->marketplace->beginTransaction();
 
-        // Delete Marketplace
-        return $this->marketplace->delete($id);
+        try {
+            // Delete Filters for Marketplace Integration
+            $this->filters->deleteAll($id);
+
+            // Delete Marketplace
+            $success = $this->marketplace->delete($id);
+
+            $this->marketplace->commitTransaction();
+
+            // Return Result
+            return $success;
+        } catch (Exception $e) {
+            $this->logger->error('Marketplace Integration update error. params=' .
+                json_encode($request->all() + ['marketplace_id' => $request->id]),
+                $e->getTrace());
+
+            $this->marketplace->rollbackTransaction();
+
+            throw $e;
+        }
     }
 }
