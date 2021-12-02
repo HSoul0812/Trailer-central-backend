@@ -5,12 +5,14 @@ namespace App\Http\Controllers\v1\CRM\Leads;
 use App\Exceptions\Requests\Validation\NoObjectIdValueSetException;
 use App\Exceptions\Requests\Validation\NoObjectTypeSetException;
 use App\Http\Controllers\RestfulControllerV2;
-use App\Http\Requests\CRM\Leads\GetLeadsRequest;
+use App\Http\Requests\CRM\Leads\AssignLeadRequest;
+use App\Http\Requests\CRM\Leads\MergeLeadsRequest;
 use App\Http\Requests\CRM\Leads\GetLeadsSortFieldsRequest;
 use App\Http\Requests\CRM\Leads\GetUniqueFullNamesRequest;
 use App\Http\Requests\CRM\Leads\UpdateLeadRequest;
 use App\Http\Requests\CRM\Leads\CreateLeadRequest;
 use App\Http\Requests\CRM\Leads\GetLeadRequest;
+use App\Http\Requests\CRM\Leads\GetLeadsMatchesRequest;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Services\CRM\Leads\LeadServiceInterface;
 use App\Transformers\CRM\Leads\GetUniqueFullNamesTransformer;
@@ -42,7 +44,7 @@ class LeadController extends RestfulControllerV2
      */
     public function __construct(LeadRepositoryInterface $leads, LeadServiceInterface $service)
     {
-        $this->middleware('setDealerIdOnRequest')->only(['index', 'update', 'create', 'show', 'uniqueFullNames']);
+        $this->middleware('setDealerIdOnRequest')->only(['index', 'update', 'create', 'show', 'assign', 'getMatches', 'mergeLeads', 'uniqueFullNames']);
         $this->middleware('setWebsiteIdOnRequest')->only(['index', 'update', 'create']);
         $this->leads = $leads;
         $this->service = $service;
@@ -111,6 +113,46 @@ class LeadController extends RestfulControllerV2
     }
 
     /**
+     * @param int $id
+     * @param Request $request
+     * @return Response|void
+     * @throws NoObjectIdValueSetException
+     * @throws NoObjectTypeSetException
+     */
+    public function assign(int $id, Request $request): Response
+    {
+        $request = new AssignLeadRequest(array_merge($request->all(), ['id' => $id]));
+
+        if (!$request->validate()) {
+            return $this->response->errorBadRequest();
+        }
+
+        $lead = $this->service->assign($request->all());
+
+        return $this->updatedResponse($lead->identifier);
+    }
+
+    /**
+     * @param Request $request
+     * @return Response|void
+     * @throws NoObjectIdValueSetException
+     * @throws NoObjectTypeSetException
+     */
+    public function getMatches(Request $request)
+    {
+        $request = new GetLeadsMatchesRequest($request->all());
+
+        if ($request->validate()) {
+            return $this->response->collection(
+                $this->service->getMatches($request->all()),
+                $this->transformer
+            );
+        }
+
+        return $this->response->errorBadRequest();
+    }
+
+    /**
      * @OA\Get(
      *     path="/api/leads/unique-full-names",
      *     description="Retrieve a list of unique leads fullnames",
@@ -161,5 +203,25 @@ class LeadController extends RestfulControllerV2
         }
 
         return $this->response->errorBadRequest();
+    }
+
+    /**
+     * @param int $id
+     * @param Request $request
+     * @return Response
+     * @throws NoObjectIdValueSetException
+     * @throws NoObjectTypeSetException
+     */
+    public function mergeLeads(int $id, Request $request): Response
+    {
+        $request = new MergeLeadsRequest(array_merge($request->all(), ['lead_id' => $id]));
+
+        if (!$request->validate()) {
+            return $this->response->errorBadRequest();
+        }
+
+        $this->service->mergeLeads($id, $request->get('merges_lead_id'));
+
+        return $this->updatedResponse();
     }
 }

@@ -8,8 +8,11 @@ use App\Nova\Resources\Dealer\Location;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Boolean;
+use Laravel\Nova\Fields\Code;
 use Laravel\Nova\Fields\HasMany;
+use Laravel\Nova\Fields\Heading;
 use Laravel\Nova\Fields\ID;
+use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Panel;
@@ -107,7 +110,7 @@ class Collector extends Resource
                     'The path to list of items is in the file. For instance, "Units" or "Units/Items" (relevant for xml files)'
                 ),
             ]),
-            
+
             new Panel('Spincar', [
                 Boolean::make('Activate Spincar', 'spincar_active')->hideFromIndex()->help(
                     'Whether or not to use Spincar for this feed (images will be overwritten by whatever spincar sends)'
@@ -119,7 +122,30 @@ class Collector extends Resource
                     'The Spincar filename being dropped in our FTP'
                 ),
             ]),
-            
+
+            new Panel('Generic Api/Json Format', [
+                Text::make('API URL', 'api_url')->hideFromIndex()->help(
+                    'Complete endpoint url with http/s to get units. Please if the api url has / include it as well'
+                ),
+                Text::make('Key Name', 'api_key_name')->hideFromIndex()->help(
+                    'The name of the key used for authentication to the API to be queried on <strong>header</strong>'
+                )->withMeta(['extraAttributes' => [
+                    'placeholder' => 'api-key']
+                ]),
+                Text::make('Key Value', 'api_key_value')->hideFromIndex()->help(
+                    'The encrypted/encoded value that authenticates requests to the API. ' .
+                    'This value is mandatory if the previous field is filled in. This setting goes on <strong>header</strong>'
+                )->rules('required_if:api_key_name,true'),
+                Code::make('API Params', 'api_params')->hideFromIndex()->help(
+                    'It is a key=value params that are used to filter results. ' .
+                    'like <strong><code>status=active</code></strong>, please paste it using next format <strong><code>foo=1&bar=2</code></strong> '.
+                    'the <strong>&</strong> is needed to separate different parameters'
+                )->withMeta(['extraAttributes' => [
+                    'placeholder' => 'status=active']
+                ]),
+
+            ]),
+
             new Panel('Factory Settings', [
                 Boolean::make('Use Factory Mapping', 'use_factory_mapping')->hideFromIndex()->help(
                     'Whether or not to use the data from FV to populate these units'
@@ -145,7 +171,7 @@ class Collector extends Resource
                 Boolean::make('Update Images', 'update_images')->hideFromIndex(),
                 Boolean::make('Update Files', 'update_files')->hideFromIndex(),
                 Text::make('Image Directory Address', 'local_image_directory_address')->hideFromIndex()->help(
-                    'If the images in the feed are not a URL and instead are uploaded to the FTP include the address to the images here. **Example 1: 
+                    'If the images in the feed are not a URL and instead are uploaded to the FTP include the address to the images here. **Example 1:
                     / -> This would mean the images are in the root directory**
                     **Example 2: /images/ are in the images directory**'
                 ),
@@ -204,7 +230,7 @@ class Collector extends Resource
                 ),
                 Text::make('Types Affected By the Feed', 'only_types')->hideFromIndex()->help(
                     'Enter the types of the inventory you want this feed to affect separated by commas. For example if you want this feed to affect only trailers and boats you would enter: 1,5'
-                ),                
+                ),
             ]),
 
             HasMany::make('Specifications', 'specifications', CollectorSpecification::class)

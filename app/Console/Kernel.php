@@ -172,6 +172,14 @@ class Kernel extends ConsoleKernel
             ->hourly()
             ->runInBackground();
 
+
+        /**
+         * Scrape Facebook Messages
+         */
+        $schedule->command('facebook:scrape-messages')
+                ->withoutOverlapping()
+                ->runInBackground();
+
         // $schedule->command('inspire')
         //          ->hourly();
     }

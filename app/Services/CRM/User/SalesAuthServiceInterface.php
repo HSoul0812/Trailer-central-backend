@@ -2,51 +2,60 @@
 
 namespace App\Services\CRM\User;
 
+use App\Http\Requests\CRM\User\AuthorizeSalesAuthRequest;
+use App\Models\Integration\Auth\AccessToken;
+
 interface SalesAuthServiceInterface {
     /**
      * Show Sales Auth Response
      * 
      * @param array $params
-     * @return Fractal
+     * @return array
      */
-    public function show($params);
+    public function show(array $params): array;
 
     /**
-     * Create Sales Auth
+     * Create Sales Person and Auth
      * 
      * @param array $params
-     * @return Fractal
+     * @return array
      */
-    public function create($params);
+    public function create(array $params): array;
 
     /**
      * Update Sales Auth
      * 
      * @param array $params
-     * @return Fractal
+     * @return array
      */
-    public function update($params);
+    public function update(array $params): array;
 
+    /**
+     * Create Sales Person and Login
+     * 
+     * @param array $params
+     * @return array{data: array<LoginTokenTransformer>,
+     *               sales_person: array<SalesPersonTransformer>}
+     */
+    public function login(array $params): array;
+
+    /**
+     * Authorize Login With Code to Return Access Token
+     * 
+     * AuthorizeSalesAuthRequest $request
+     * @return array{data: array<TokenTransformer>,
+     *               sales_person: array<SalesPersonTransformer>}
+     */
+    public function authorize(AuthorizeSalesAuthRequest $request): array;
 
     /**
      * Return Response
      * 
-     * @param AccessToken $accessToken
-     * @param array $params
-     * @return array
+     * @param int $salesPersonId
+     * @param null|AccessToken $accessToken
+     * @return array{sales_person: array<SalesPersonTransformer>,
+     *               data: ?array<AccessToken>,
+     *               validate: array<ValidateTokenTransformer>}
      */
-    public function response($accessToken, $params);
-
-    /**
-     * Validate SMTP/IMAP Details
-     * 
-     * @param array $params {type: smtp|imap,
-     *                       username: string,
-     *                       password: string,
-     *                       security: string (ssl|tls)
-     *                       host: string
-     *                       port: int}
-     * @return bool
-     */
-    public function validate(array $params): bool;
+    public function response(int $salesPersonId, ?AccessToken $accessToken = null): array;
 }
