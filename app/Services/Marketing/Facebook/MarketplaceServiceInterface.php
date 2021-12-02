@@ -3,25 +3,23 @@
 namespace App\Services\Marketing\Facebook;
 
 use App\Models\Marketing\Facebook\Marketplace;
-use App\Http\Requests\Marketing\Facebook\CreateMarketplaceRequest;
-use App\Http\Requests\Marketing\Facebook\UpdateMarketplaceRequest;
 
 interface MarketplaceServiceInterface {
     /**
      * Create Marketplace
      * 
-     * @param CreateMarketplaceRequest $request
+     * @param array $params
      * @return Marketplace
      */
-    public function create(CreateMarketplaceRequest $request): Marketplace;
+    public function create(array $params): Marketplace;
 
     /**
      * Update Marketplace
      * 
-     * @param UpdateMarketplaceRequest $request
+     * @param array $params
      * @return Marketplace
      */
-    public function update(UpdateMarketplaceRequest $request): Marketplace;
+    public function update(array $params): Marketplace;
 
     /**
      * Delete Marketplace
