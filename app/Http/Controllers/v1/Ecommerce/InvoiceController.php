@@ -1,7 +1,6 @@
 <?php
 namespace App\Http\Controllers\v1\Ecommerce;
 
-use App\Http\Controllers\RestfulController;
 use App\Transformers\Ecommerce\InvoiceTransformer;
 use App\Http\Requests\Ecommerce\GetSingleCompletedOrderRequest;
 use App\Services\Ecommerce\CompletedOrder\CompletedOrderServiceInterface;

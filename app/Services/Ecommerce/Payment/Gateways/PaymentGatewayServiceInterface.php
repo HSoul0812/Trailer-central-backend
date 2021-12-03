@@ -24,5 +24,5 @@ interface PaymentGatewayServiceInterface
      */
     public function refund(string $objectId, Money $amount, array $parts = [], ?string $reason = null);
     
-    public function getStripeInvoice(CompletedOrder $completedOrder): array;
+    public function getInvoice(CompletedOrder $completedOrder): array;
 }

@@ -14,6 +14,7 @@ use App\Services\Ecommerce\Payment\Gateways\PaymentGatewayServiceInterface;
 use App\Services\Ecommerce\DataProvider\Providers\TextrailWithCheckoutInterface;
 use Brick\Money\Money;
 use GuzzleHttp\Exception\ClientException;
+use DomainException;
 
 class CompletedOrderService implements CompletedOrderServiceInterface
 {
@@ -248,17 +249,17 @@ class CompletedOrderService implements CompletedOrderServiceInterface
               return $completedOrder;
               
             } elseif ($completedOrder->invoice_id && !$completedOrder->invoice_pdf_url) {
-              $invoice = $this->paymentGatewayService->getStripeInvoice($completedOrder);
+              $invoice = $this->paymentGatewayService->getInvoice($completedOrder);
               
               $completedOrder->invoice_pdf_url = $invoice['invoice_pdf'];
               $completedOrder->save();
               
               return $completedOrder;
             } else {
-              throw new \InvalidArgumentException('invoice is not ready at the moment');
+              throw new DomainException('invoice is not ready at the moment');
             }
         }
 
-        throw new \InvalidArgumentException('required argument of: "id"');
+        throw new DomainException('required argument of: "id"');
     }
 }

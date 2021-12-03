@@ -82,7 +82,7 @@ class StripeService implements PaymentGatewayServiceInterface
         return in_array($reason, self::REFUND_REASONS);
     }
     
-    public function getStripeInvoice(CompletedOrder $completedOrder): array
+    public function getInvoice(CompletedOrder $completedOrder): array
     {
       $invoice = $this->client->invoices->retrieve($completedOrder->invoice_id);
       
