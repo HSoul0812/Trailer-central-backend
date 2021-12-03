@@ -55,6 +55,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $xml_url
  * @property string|null $pipe_delimited
  * @property string|null $motility
+ * @property string|null $generic_json
+ * @property string|null $bish
  * @property string|null $zero_msrp
  * @property string|null $only_types
  * @property string|null $linebreak_characters
@@ -62,7 +64,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property bool $spincar_active
  * @property int|null $spincar_spincar_id
  * @property string|null $spincar_filenames
- * 
+ * @property string|null $api_url
+ * @property string|null $api_key_name
+ * @property string|null $api_key_value
+ * @property string|null $api_params
+ * @property string|null $api_max_records
+ * @property string|null $api_pagination
  * @property Collection<CollectorSpecification> $specifications
  * @property User $dealers
  * @property DealerLocation $dealerLocation
@@ -77,6 +84,8 @@ class Collector extends Model implements Filterable
         self::FILE_FORMAT_XML_URL,
         self::FILE_FORMAT_PIPE_DELIMITED,
         self::FILE_FORMAT_MOTILITY,
+        self::FILE_FORMAT_JSON,
+        self::FILE_FORMAT_BISH,
     ];
 
     public const FILE_FORMAT_CDK = 'cdk';
@@ -86,6 +95,8 @@ class Collector extends Model implements Filterable
     public const FILE_FORMAT_XML_URL = 'xml_url';
     public const FILE_FORMAT_PIPE_DELIMITED = 'pipe_delimited';
     public const FILE_FORMAT_MOTILITY = 'motility';
+    public const FILE_FORMAT_JSON = 'json';
+    public const FILE_FORMAT_BISH = 'bish';
 
     public const MSRP_ZEROED_OUT_ON_USED = 1;
     public const MSRP_NOT_ZEROED_OUT_ON_USED = 0;
@@ -156,7 +167,13 @@ class Collector extends Model implements Filterable
         'use_latest_ftp_file_only',
         'spincar_active',
         'spincar_spincar_id',
-        'spincar_filenames'
+        'spincar_filenames',
+        'api_url',
+        'api_key_name',
+        'api_key_value',
+        'api_params',
+        'api_max_records',
+        'api_pagination',
     ];
 
     public function dealers(): BelongsTo

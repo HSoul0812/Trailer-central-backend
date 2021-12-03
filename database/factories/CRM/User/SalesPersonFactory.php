@@ -36,7 +36,7 @@ $factory->define(SalesPerson::class, function (Faker $faker) {
         'smtp_server' => 'smtp.' . $server,
         'smtp_port' => '993',
         'smtp_security' => 'ssl',
-        'smtp_auth' => array_rand(SalesPerson::AUTH_TYPES),
+        'smtp_auth' => array_rand(SalesPerson::CUSTOM_AUTH),
         'smtp_failed' => 0,
         'smtp_error' => 0,
         'imap_email' => $email,
