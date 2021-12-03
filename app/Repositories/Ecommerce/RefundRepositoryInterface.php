@@ -101,4 +101,12 @@ interface RefundRepositoryInterface extends GenericRepository
      * @return array{total_amount: Money, parts_amount: Money, handling_amount: Money, shipping_amount: Money, adjustment_amount: Money, tax_amount: Money}
      */
     public function getOrderRefundSummary(int $orderId): array;
+
+    /**
+     * @param int $refundId
+     * @param string|array $error
+     * @param string $stage
+     * @return bool
+     */
+    public function logError(int $refundId, $error, string $stage): bool;
 }
