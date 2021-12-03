@@ -555,19 +555,21 @@ class RefundService implements RefundServiceInterface
 
         $partsAmount = Money::zero('USD');
 
-        foreach ($parts as $sku => $qty) {
+        foreach ($parts as $sku => $part) {
+            $qty = $part['qty'];
+
             if (!isset($originalParts[$sku])) {
                 throw new RefundException(sprintf('"%s" part was not originally requested to be refunded', $sku));
             }
 
-            $part = $originalParts[$sku];
+            $originalPart = $originalParts[$sku];
 
-            if ($qty < 0 || $qty > $part['qty']) {
-                throw new RefundException(sprintf('"%s" part must be in the range of 0 and %d', $sku, $part['qty']));
+            if ($qty < 0 || $qty > $originalPart['qty']) {
+                throw new RefundException(sprintf('"%s" part must be in the range of 0 and %d', $sku, $originalPart['qty']));
             }
 
-            $updatedParts[] = array_merge($part, ['qty' => $qty]);
-            $partsAmount = $partsAmount->plus($qty * $part['price']);
+            $updatedParts[] = array_merge($originalPart, ['qty' => $qty]);
+            $partsAmount = $partsAmount->plus($qty * $originalPart['price']);
         }
 
         return ['originalParts' => $originalParts, 'updatedParts' => $updatedParts, 'partsAmount' => $partsAmount];

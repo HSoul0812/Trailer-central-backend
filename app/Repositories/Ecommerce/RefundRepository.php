@@ -128,7 +128,22 @@ class RefundRepository implements RefundRepositoryInterface
      */
     public function getPartsToBeRefunded(array $parts): Collection
     {
-        return Part::query()->whereIn('id', array_unique($parts))->get();
+        $partModels = Part::query()->whereIn('id', array_unique($parts))->get()->keyBy('id');
+
+        $createDummyPart = static function (int $id): Part {
+            $part = new Part();
+            $part->id = $id;
+
+            return $part;
+        };
+
+        foreach ($parts as $partId) {
+            if (!isset($partModels[$partId])) {
+                $partModels[$partId] = $createDummyPart($partId);
+            }
+        }
+
+        return $partModels;
     }
 
     public function getRefundedAmount(int $orderId): Money
