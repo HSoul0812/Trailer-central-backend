@@ -4,6 +4,10 @@ namespace App\Repositories\Dms;
 
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Dms\ServiceOrder;
+use App\Models\CRM\Account\Invoice;
+use Illuminate\Support\Facades\DB;
+use App\Models\CRM\Account\Payment;
+
 
 /**
  * @author Marcel
@@ -56,6 +60,14 @@ class ServiceOrderRepository implements ServiceOrderRepositoryInterface {
             'field' => 'status',
             'direction' => 'ASC'
         ],
+        'paid_amount' => [
+            'field' => 'total_paid_amount',
+            'direction' => 'DESC'
+        ],
+        '-paid_amount' => [
+            'field' => 'total_paid_amount',
+            'direction' => 'ASC'
+        ]
     ];
 
     public function __construct(ServiceOrder $serviceOrder) {
@@ -186,7 +198,22 @@ class ServiceOrderRepository implements ServiceOrderRepositoryInterface {
         if (!isset($this->sortOrders[$sort])) {
             return;
         }
-        return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
+        $sortOrder = $this->sortOrders[$sort];
+
+        if($sortOrder['field'] == 'total_paid_amount') {
+            $groupedPayments = Payment::select('repair_order_id', DB::raw('SUM(amount) as paid_amount, qb_invoices.po_no as po_no, qb_invoices.po_amount as po_amount'))
+                ->leftJoin('qb_invoices', 'qb_payment.invoice_id', '=', 'qb_invoices.id')
+                ->groupBy('qb_invoices.repair_order_id');
+            $query = $query->leftJoinSub($groupedPayments, 'invoice', function($join) {
+                $join->on('dms_repair_order.id', '=', 'invoice.repair_order_id');
+            });
+            $query->select('*', DB::raw('
+                IF(invoice.po_no AND NOT closed_by_related_unit_sale, 
+                (SELECT CASE WHEN closed_by_related_unit_sale THEN total_price ELSE invoice.paid_amount END) + invoice.po_amount,
+                (SELECT CASE WHEN closed_by_related_unit_sale THEN total_price ELSE invoice.paid_amount END)) AS total_paid_amount'));
+        }
+
+        return $query->orderBy($sortOrder['field'], $sortOrder['direction']);
     }
 
 }
