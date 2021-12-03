@@ -10,6 +10,7 @@ use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
 use App\Models\Parts\Textrail\RefundedPart;
 use App\Repositories\Ecommerce\CompletedOrderRepositoryInterface;
 use App\Repositories\Ecommerce\RefundRepositoryInterface;
+use App\Services\Ecommerce\Payment\Gateways\PaymentGatewayServiceInterface;
 use App\Services\Ecommerce\DataProvider\Providers\TextrailWithCheckoutInterface;
 use Brick\Money\Money;
 use GuzzleHttp\Exception\ClientException;
@@ -28,14 +29,19 @@ class CompletedOrderService implements CompletedOrderServiceInterface
     /** @var LoggerServiceInterface */
     private $logger;
 
+    /** @var PaymentGatewayServiceInterface */
+    private $paymentGatewayService;
+
     public function __construct(
         CompletedOrderRepositoryInterface $completedOrderRepository,
+        PaymentGatewayServiceInterface    $paymentGatewayService,
         RefundRepositoryInterface         $refundRepository,
         TextrailWithCheckoutInterface     $textrailService,
         LoggerServiceInterface            $logger
     )
     {
         $this->completedOrderRepository = $completedOrderRepository;
+        $this->paymentGatewayService = $paymentGatewayService;
         $this->refundRepository = $refundRepository;
         $this->textrailService = $textrailService;
         $this->logger = $logger;
@@ -223,5 +229,36 @@ class CompletedOrderService implements CompletedOrderServiceInterface
 
             return $completedOrder;
         }
+    }
+    
+    /**
+     * @param array $params
+     * @return string
+     *
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     * @throws \InvalidArgumentException when "id" was not provided
+     */
+    public function getInvoice(array $params): CompletedOrder
+    {
+        if (isset($params['id'])) {
+            $completedOrder = CompletedOrder::findOrFail($params['id']);
+
+            if ($completedOrder->invoice_pdf_url) {
+              
+              return $completedOrder;
+              
+            } elseif ($completedOrder->invoice_id && !$completedOrder->invoice_pdf_url) {
+              $invoice = $this->paymentGatewayService->getStripeInvoice($completedOrder);
+              
+              $completedOrder->invoice_pdf_url = $invoice['invoice_pdf'];
+              $completedOrder->save();
+              
+              return $completedOrder;
+            } else {
+              throw new \InvalidArgumentException('invoice is not ready at the moment');
+            }
+        }
+
+        throw new \InvalidArgumentException('required argument of: "id"');
     }
 }

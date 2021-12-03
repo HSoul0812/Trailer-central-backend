@@ -10,6 +10,7 @@ use Brick\Money\Money;
 use Stripe\Exception\ApiErrorException;
 use Stripe\StripeClient;
 use Stripe\StripeClientInterface;
+use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
 
 class StripeService implements PaymentGatewayServiceInterface
 {
@@ -80,4 +81,12 @@ class StripeService implements PaymentGatewayServiceInterface
     {
         return in_array($reason, self::REFUND_REASONS);
     }
+    
+    public function getStripeInvoice(CompletedOrder $completedOrder): array
+    {
+      $invoice = $this->client->invoices->retrieve($completedOrder->invoice_id);
+      
+      return $invoice->toArray();
+    }
+
 }

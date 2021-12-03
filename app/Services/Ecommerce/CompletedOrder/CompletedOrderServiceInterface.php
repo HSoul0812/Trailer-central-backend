@@ -35,4 +35,6 @@ interface CompletedOrderServiceInterface
      * @return CompletedOrder
      */
     public function approve(int $textrailOrderId): CompletedOrder;
+    
+    public function getInvoice(array $params): CompletedOrder;
 }

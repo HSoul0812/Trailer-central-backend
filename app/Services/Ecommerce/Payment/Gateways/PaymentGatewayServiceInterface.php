@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Ecommerce\Payment\Gateways;
 
 use App\Exceptions\Ecommerce\RefundPaymentGatewayException;
+use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
 use Brick\Money\Money;
 
 interface PaymentGatewayServiceInterface
@@ -22,4 +23,6 @@ interface PaymentGatewayServiceInterface
      * @throws RefundPaymentGatewayException when there was some error on payment gateway remote process
      */
     public function refund(string $objectId, Money $amount, array $parts = [], ?string $reason = null);
+    
+    public function getStripeInvoice(CompletedOrder $completedOrder): array;
 }
