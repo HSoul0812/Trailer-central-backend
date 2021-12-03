@@ -2,24 +2,33 @@
 
 namespace Tests\Unit\Services\CRM\Leads;
 
+use App\Exceptions\CRM\Leads\MergeLeadsException;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadSource;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\LeadType;
 use App\Models\CRM\Interactions\Interaction;
 use App\Models\User\NewDealerUser;
+use App\Repositories\CRM\Customer\CustomerRepositoryInterface;
+use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
+use App\Repositories\CRM\Interactions\Facebook\MessageRepositoryInterface;
+use App\Repositories\CRM\Leads\FacebookRepositoryInterface;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\Leads\SourceRepositoryInterface;
-use App\Repositories\CRM\Leads\TypeRepositoryInterface; 
+use App\Repositories\CRM\Leads\TypeRepositoryInterface;
 use App\Repositories\CRM\Leads\UnitRepositoryInterface;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
+use App\Repositories\CRM\Text\TextRepositoryInterface;
+use App\Repositories\Dms\QuoteRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Services\CRM\Leads\LeadServiceInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Mockery;
+use Mockery\LegacyMockInterface;
 use Tests\TestCase;
 
 /**
@@ -28,7 +37,7 @@ use Tests\TestCase;
  * Class LeadServiceTest
  * @package Tests\Unit\Services\CRM\Leads
  *
- * @coversDefaultClass \App\Services\CRM\CRM\Leads\LeadService
+ * @coversDefaultClass \App\Services\CRM\Leads\LeadService
  */
 class LeadServiceTest extends TestCase
 {
@@ -81,6 +90,36 @@ class LeadServiceTest extends TestCase
      */
     private $interactionRepositoryMock;
 
+    /**
+     * @var LegacyMockInterface|MessageRepositoryInterface
+     */
+    private $fbMessageRepositoryMock;
+
+    /**
+     * @var LegacyMockInterface|EmailHistoryRepositoryInterface
+     */
+    private $emailHistoryRepositoryMock;
+
+    /**
+     * @var LegacyMockInterface|FacebookRepositoryInterface
+     */
+    private $facebookRepositoryMock;
+
+    /**
+     * @var LegacyMockInterface|TextRepositoryInterface
+     */
+    private $textRepositoryMock;
+
+    /**
+     * @var LegacyMockInterface|QuoteRepositoryInterface
+     */
+    private $quoteRepositoryMock;
+
+    /**
+     * @var LegacyMockInterface|CustomerRepositoryInterface
+     */
+    private $customerRepositoryMock;
+
     public function setUp(): void
     {
         parent::setUp();
@@ -105,6 +144,24 @@ class LeadServiceTest extends TestCase
 
         $this->interactionRepositoryMock = Mockery::mock(InteractionsRepositoryInterface::class);
         $this->app->instance(InteractionsRepositoryInterface::class, $this->interactionRepositoryMock);
+
+        $this->fbMessageRepositoryMock = Mockery::mock(MessageRepositoryInterface::class);
+        $this->app->instance(MessageRepositoryInterface::class, $this->fbMessageRepositoryMock);
+
+        $this->emailHistoryRepositoryMock = Mockery::mock(EmailHistoryRepositoryInterface::class);
+        $this->app->instance(EmailHistoryRepositoryInterface::class, $this->emailHistoryRepositoryMock);
+
+        $this->facebookRepositoryMock = Mockery::mock(FacebookRepositoryInterface::class);
+        $this->app->instance(FacebookRepositoryInterface::class, $this->facebookRepositoryMock);
+
+        $this->textRepositoryMock = Mockery::mock(TextRepositoryInterface::class);
+        $this->app->instance(TextRepositoryInterface::class, $this->textRepositoryMock);
+
+        $this->quoteRepositoryMock = Mockery::mock(QuoteRepositoryInterface::class);
+        $this->app->instance(QuoteRepositoryInterface::class, $this->quoteRepositoryMock);
+
+        $this->customerRepositoryMock = Mockery::mock(CustomerRepositoryInterface::class);
+        $this->app->instance(CustomerRepositoryInterface::class, $this->customerRepositoryMock);
     }
 
 
@@ -641,7 +698,7 @@ class LeadServiceTest extends TestCase
 
         // Mock Lead Types
         $this->mockLeadTypes($lead, $types);
-        
+
 
         // Validate Update Catalog Result
         $result = $service->update($updateRequestParams);
@@ -742,12 +799,129 @@ class LeadServiceTest extends TestCase
         $this->assertSame($result->interaction_id, $interaction->interaction_id);
     }
 
+    /**
+     * @covers ::mergeLeads
+     */
+    public function testMergeLeads()
+    {
+        $leadId = PHP_INT_MAX;
+        $mergesLeadId = PHP_INT_MAX - 1;
+
+        $params = [
+            'lead_id' => $leadId,
+            'search' => ['lead_id' => $mergesLeadId]
+        ];
+
+        $customerParams = [
+            'website_lead_id' => $leadId,
+            'search' => ['website_lead_id' => $mergesLeadId]
+        ];
+
+        /** @var LegacyMockInterface|LeadServiceInterface $service */
+        $service = $this->app->make(LeadServiceInterface::class);
+
+        DB::shouldReceive('beginTransaction')
+            ->once();
+
+        $this->emailHistoryRepositoryMock
+            ->shouldReceive('bulkUpdate')
+            ->with($params)
+            ->once();
+
+        $this->facebookRepositoryMock
+            ->shouldReceive('bulkUpdateFbLead')
+            ->with($params)
+            ->once();
+
+        $this->textRepositoryMock
+            ->shouldReceive('bulkUpdate')
+            ->with($params)
+            ->once();
+
+        $this->quoteRepositoryMock
+            ->shouldReceive('bulkUpdate')
+            ->with($params)
+            ->once();
+
+        $this->customerRepositoryMock
+            ->shouldReceive('bulkUpdate')
+            ->with($customerParams)
+            ->once();
+
+        DB::shouldReceive('commit')
+            ->once();
+
+        Log::shouldReceive('info')
+            ->with('leads has been successfully merged', ['leadId' => $leadId, 'mergesLeadId' => $mergesLeadId])
+            ->once();
+
+        $result = $service->mergeLeads($leadId, $mergesLeadId);
+
+        $this->assertTrue($result);
+    }
+
+    /**
+     * @covers ::mergeLeads
+     */
+    public function testMergeLeadsWithError()
+    {
+        $leadId = PHP_INT_MAX;
+        $mergesLeadId = PHP_INT_MAX - 1;
+
+        $exception = new \Exception();
+
+        $params = [
+            'lead_id' => $leadId,
+            'search' => ['lead_id' => $mergesLeadId]
+        ];
+
+        /** @var LegacyMockInterface|LeadServiceInterface $service */
+        $service = $this->app->make(LeadServiceInterface::class);
+
+        DB::shouldReceive('beginTransaction')
+            ->once();
+
+        $this->emailHistoryRepositoryMock
+            ->shouldReceive('bulkUpdate')
+            ->with($params)
+            ->once();
+
+        $this->facebookRepositoryMock
+            ->shouldReceive('bulkUpdateFbLead')
+            ->with($params)
+            ->once()
+            ->andThrow($exception);;
+
+        $this->textRepositoryMock
+            ->shouldReceive('bulkUpdate')
+            ->with($params)
+            ->never();
+
+        $this->quoteRepositoryMock
+            ->shouldReceive('bulkUpdate')
+            ->with($params)
+            ->never();
+
+        $this->customerRepositoryMock
+            ->shouldReceive('bulkUpdate')
+            ->never();
+
+        DB::shouldReceive('rollback')
+            ->once();
+
+        Log::shouldReceive('error')
+            ->once();
+
+        $this->expectException(MergeLeadsException::class);
+
+        $service->mergeLeads($leadId, $mergesLeadId);
+    }
 
     /**
      * Mock All Units of Interest
-     * 
+     *
      * This is the same regardless of what test its on.
-     * 
+     *
      * @param Lead $lead
      * @param Collection<InventoryLead> $units
      * @return void
@@ -789,9 +963,9 @@ class LeadServiceTest extends TestCase
 
     /**
      * Mock All Lead Types
-     * 
+     *
      * This is the same regardless of what test its on.
-     * 
+     *
      * @param Lead $lead
      * @param Collection<LeadType> $types
      * @return void

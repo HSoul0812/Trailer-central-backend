@@ -115,6 +115,13 @@ class InteractionMessageController extends RestfulControllerV2
      *         @OA\Schema(type="boolean")
      *     ),
      *     @OA\Parameter(
+     *         name="unassigned",
+     *         in="query",
+     *         description="Unassigned or not",
+     *         required=false,
+     *         @OA\Schema(type="boolean")
+     *     ),
+     *     @OA\Parameter(
      *         name="sort",
      *         in="query",
      *         description="Sort order can be: date_sent,-date_sent",
@@ -186,9 +193,9 @@ class InteractionMessageController extends RestfulControllerV2
      *         @OA\Schema(type="boolean")
      *     ),
      *     @OA\Parameter(
-     *         name="is_read",
+     *         name="unique_leads",
      *         in="query",
-     *         description="Read or not",
+     *         description="Unique leads or not",
      *         required=false,
      *         @OA\Schema(type="boolean")
      *     ),
@@ -290,7 +297,7 @@ class InteractionMessageController extends RestfulControllerV2
      *         in="path",
      *         description="Interaction Message IDs",
      *         required=true,
-     *         @OA\Schema(type="array")
+     *         @OA\Schema(type="array", @OA\Items(type="integer"))
      *     ),
      *     @OA\Parameter(
      *         name="hidden",
