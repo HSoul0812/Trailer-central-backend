@@ -23,8 +23,8 @@ class UpdateRefundTextrailRequest extends Request
             'Rma' => 'integer|min:1|required|exists:ecommerce_order_refunds,textrail_rma',
             'Status' => ['required', 'string', Rule::in(array_keys(RefundTextrailStatuses::MAP))],
             'Items' => 'array|required',
-            'Items.*.Sku' => 'required|string|min:1',
-            'Items.*.Qty' => 'required|int:min:1'
+            'Items.*.Sku' => 'required',
+            'Items.*.Qty' => 'required|integer|min:1'
         ];
     }
 
