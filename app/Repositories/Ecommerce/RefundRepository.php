@@ -94,14 +94,13 @@ class RefundRepository implements RefundRepositoryInterface
             return isset($partsQty[$id]) ? $partsQty[$id] + $qty : $qty;
         };
 
-        // we'll make an two arrays of parts with their total refunded amount a qty indexed by part id
+        // we'll make two arrays of parts with their total refunded amount a qty indexed by part id
         $this->getAll([
             'order_id' => $orderId,
             self::CONDITION_AND_WHERE_NOT_IN => [
                 'status' => [Refund::STATUS_FAILED, Refund::STATUS_REJECTED]
             ]
         ])->each(static function (Refund $refund) use (&$partsAmount, &$partsQty, $amountAdder, $qtyAdder) {
-           // dd($refund->parts);
             foreach ($refund->parts as $part) {
                 $partsAmount[$part['id']] = $amountAdder($part['id'], $part['amount']);
                 $partsQty[$part['id']] = $qtyAdder($part['id'], (int)$part['qty']);
@@ -161,12 +160,21 @@ class RefundRepository implements RefundRepositoryInterface
             ->groupBy('order_id')
             ->first();
 
+        if($summary){
+            return [
+                'parts_amount' => Money::of((float)$summary->parts_amount, 'USD'),
+                'handling_amount' => Money::of((float)$summary->handling_amount, 'USD'),
+                'shipping_amount' => Money::of((float)$summary->shipping_amount, 'USD'),
+                'adjustment_amount' => Money::of((float)$summary->adjustment_amount, 'USD'),
+                'tax_amount' => Money::of((float)$summary->tax_amount, 'USD'),
+            ];
+        }
         return [
-            'parts_amount' => Money::of((float)$summary->parts_amount, 'USD'),
-            'handling_amount' => Money::of((float)$summary->handling_amount, 'USD'),
-            'shipping_amount' => Money::of((float)$summary->shipping_amount, 'USD'),
-            'adjustment_amount' => Money::of((float)$summary->adjustment_amount, 'USD'),
-            'tax_amount' => Money::of((float)$summary->tax_amount, 'USD'),
+            'parts_amount' => Money::zero('USD'),
+            'handling_amount' => Money::zero('USD'),
+            'shipping_amount' => Money::zero('USD'),
+            'adjustment_amount' => Money::zero('USD'),
+            'tax_amount' => Money::zero('USD'),
         ];
     }
 
@@ -242,7 +250,7 @@ class RefundRepository implements RefundRepositoryInterface
             $refund->id,
             [
                 'status' => Refund::STATUS_REJECTED,
-                'metadata' => array_merge($refund->metadata, ['rejected_parts' => $parts])
+                'metadata' => array_merge((array)$refund->metadata, ['rejected_parts' => $parts])
             ]
         );
     }
@@ -262,7 +270,7 @@ class RefundRepository implements RefundRepositoryInterface
                 'parts_amount' => $refund->parts_amount,
                 'total_amount' => $refund->parts_amount + $refund->adjustment_amount + $refund->handling_amount + $refund->shipping_amount,
                 'parts' => $authorizedParts,
-                'metadata' => array_merge($refund->metadata, ['requested_parts' => $requestedParts, 'authorized_parts' => $authorizedParts])
+                'metadata' => array_merge((array)$refund->metadata, ['requested_parts' => $requestedParts, 'authorized_parts' => $authorizedParts])
             ]
         );
     }
@@ -281,9 +289,20 @@ class RefundRepository implements RefundRepositoryInterface
                 'parts_amount' => $refund->parts_amount,
                 'total_amount' => $refund->parts_amount + $refund->adjustment_amount + $refund->handling_amount + $refund->shipping_amount,
                 'parts' => $parts,
-                'metadata' => array_merge($refund->metadata, ['received_parts' => $parts])
+                'metadata' => array_merge((array)$refund->metadata, ['received_parts' => $parts])
             ]
         );
+    }
+
+    /**
+     * @param int $refundId
+     * @param array|string $error
+     * @param string $stage
+     * @return bool
+     */
+    public function logError(int $refundId, $error, string $stage): bool
+    {
+        return $this->get($refundId)->addError($error, $stage);
     }
 
     /**
