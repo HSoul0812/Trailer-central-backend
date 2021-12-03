@@ -2,7 +2,10 @@
 
 namespace App\Services\Integration\Common\DTOs;
 
+use App\Traits\WithConstructor;
+use App\Traits\WithGetter;
 use Illuminate\Http\UploadedFile;
+use Webklex\PHPIMAP\Attachment;
 
 /**
  * Class AttachmentFile
@@ -11,6 +14,8 @@ use Illuminate\Http\UploadedFile;
  */
 class AttachmentFile
 {
+    use WithConstructor, WithGetter;
+
     const IMAGE_TYPES = [
         'gif',
         'png',
@@ -47,6 +52,11 @@ class AttachmentFile
      * @var string Contents of Current File
      */
     private $contents;
+
+    /**
+     * @var string
+     */
+    private $attachmentDir;
 
 
     /**
@@ -107,6 +117,25 @@ class AttachmentFile
         $attachment->setMimeType($mime);
         $attachment->setFileSize($size);
         return $attachment;
+    }
+
+    /**
+     * Get AttachmentFile By Webklex IMAP Attachment
+     * 
+     * @param Attachment $attachment
+     * @return AttachmentFile
+     */
+    public static function getByImapAttachment(Attachment $attachment): AttachmentFile {
+        // Save Attachment to Directory
+        $attachment->save(self::getAttachmentDir());
+
+        // Return Attachment File
+        return new self([
+            'tmp_name' => self::getAttachmentDir() . $attachment->getName(),
+            'file_name' => $attachment->getName(),
+            'mime_type' => $attachment->getMimeType(),
+            'file_size' => $attachment->get('size')
+        ]);
     }
 
 
@@ -262,6 +291,17 @@ class AttachmentFile
     }
 
     /**
+     * Return Base64 Encoded Contents
+     * 
+     * @return string base64_encode($this->getContents())
+     */
+    public function getContentsEncoded(): string
+    {
+        // Get Encoded Contents
+        return base64_encode($this->getContents());
+    }
+
+    /**
      * Set File Path
      * 
      * @param string $contents
@@ -326,5 +366,15 @@ class AttachmentFile
             'filename' => $this->filePath,
             'original_filename' => $this->fileName
         ];
+    }
+
+
+    /**
+     * Get Attachments Directory
+     * 
+     * @return string
+     */
+    public static function getAttachmentDir(): string {
+        return config('mail.attachments.dir');
     }
 }

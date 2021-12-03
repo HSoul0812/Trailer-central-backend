@@ -7,6 +7,7 @@ namespace Tests\database\seeds\CRM\Leads;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\User\SalesPerson;
+use App\Models\User\AuthToken;
 use App\Models\User\User;
 use App\Models\User\NewUser;
 use App\Models\User\DealerLocation;
@@ -19,6 +20,7 @@ use Tests\database\seeds\Seeder;
  * @property-read Website $website
  * @property-read SalesPerson $sales
  * @property-read Lead $leads
+ * @property-read AuthToken $authToken
  * @property-read array<LeadStatus> $missingStatus
  * @property-read array<LeadStatus> $createdStatus
  */
@@ -30,6 +32,11 @@ class StatusSeeder extends Seeder
      * @var User
      */
     private $dealer;
+
+    /**
+     * @var AuthToken
+     */
+    private $authToken;
 
     /**
      * @var Website
@@ -62,6 +69,10 @@ class StatusSeeder extends Seeder
     public function __construct()
     {
         $this->dealer = factory(User::class)->create();
+        $this->authToken = factory(AuthToken::class)->create([
+            'user_id' => $this->dealer->dealer_id,
+            'user_type' => AuthToken::USER_TYPE_DEALER,
+        ]);
         $this->website = factory(Website::class)->create(['dealer_id' => $this->dealer->dealer_id]);
         $this->user = factory(NewUser::class)->create(['user_id' => $this->dealer->dealer_id]);
         $this->sales = factory(SalesPerson::class)->create(['user_id' => $this->dealer->dealer_id]);
@@ -130,7 +141,8 @@ class StatusSeeder extends Seeder
         SalesPerson::destroy($salesId);
         NewUser::destroy($dealerId);
         DealerLocation::where('dealer_id', $dealerId)->delete();
-        Website::where('dealer_id', $dealerId)->delete();                
+        Website::where('dealer_id', $dealerId)->delete();
+        AuthToken::where(['user_id' => $this->authToken->user_id, 'user_type' => AuthToken::USER_TYPE_DEALER])->delete();
         User::destroy($dealerId);
     }
 }

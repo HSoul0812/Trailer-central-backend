@@ -26,7 +26,7 @@ interface LeadRepositoryInterface extends Repository {
 
     /**
      * Find Existing Lead That Matches Current Lead!
-     * 
+     *
      * @param array $params
      * @return Collection<Lead>
      */
@@ -71,6 +71,16 @@ interface LeadRepositoryInterface extends Repository {
      */
     public function getLeadsSortFields();
 
+    /**
+     * @param callable|null $callback
+     * @param int $chunkSize
+     * @return mixed
+     */
     public function getLeadsWithoutCustomers(callable $callback = null, $chunkSize = 1000);
 
+    /**
+     * @param array $params
+     * @return mixed
+     */
+    public function getUniqueFullNames(array $params);
 }

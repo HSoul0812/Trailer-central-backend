@@ -2,11 +2,12 @@
 
 namespace App\Services\Integration\Google;
 
+use App\Exceptions\Common\MissingFolderException;
 use App\Exceptions\Integration\Google\MissingGapiIdTokenException;
 use App\Exceptions\Integration\Google\InvalidGmailAuthMessageException;
+use App\Exceptions\Integration\Google\InvalidGoogleAuthCodeException;
 use App\Exceptions\Integration\Google\InvalidToEmailAddressException;
 use App\Exceptions\Integration\Google\MissingGmailLabelsException;
-use App\Exceptions\Integration\Google\MissingGmailLabelException;
 use App\Exceptions\Integration\Google\FailedInitializeGmailMessageException;
 use App\Exceptions\Integration\Google\FailedSendGmailMessageException;
 use App\Models\Integration\Auth\AccessToken;
@@ -18,12 +19,10 @@ use App\Services\Integration\Google\DTOs\GmailHeaders;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Traits\MailHelper;
-use App\Transformers\Integration\Auth\EmailTokenTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use Google_Service_Gmail;
 use Google_Service_Gmail_MessagePart;
 use League\Fractal\Manager;
-use League\Fractal\Resource\Item;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
@@ -61,7 +60,11 @@ class GmailService implements GmailServiceInterface
     /**
      * Construct Google Client
      */
-    public function __construct(InteractionEmailServiceInterface $interactionEmail, GoogleServiceInterface $google, Manager $fractal) {
+    public function __construct(
+        InteractionEmailServiceInterface $interactionEmail,
+        GoogleServiceInterface $google,
+        Manager $fractal
+    ) {
         // Set Interfaces
         $this->interactionEmail = $interactionEmail;
         $this->google = $google;
@@ -78,57 +81,59 @@ class GmailService implements GmailServiceInterface
     /**
      * Get Auth URL
      *
-     * @param string $redirectUrl url to redirect auth back to again
      * @param string $authCode auth code to get full credentials with
-     * @return array created from EmailTokenTransformer
+     * @param null|string $redirectUrl url to redirect auth back to again
+     * @return EmailToken
      */
-    public function auth($redirectUrl, $authCode): array {
+    public function auth(string $authCode, ?string $redirectUrl = null): EmailToken {
         // Set Redirect URL
         $client = $this->google->getClient();
         $client->setRedirectUri($redirectUrl);
+        $this->log->info('Set Redirect URI ' . $redirectUrl . ' to get Access Token Using Auth Code');
 
         // Return Auth URL for Login
         $authToken = $client->fetchAccessTokenWithAuthCode($authCode);
+        $this->log->info('Used Auth Code "' . $authCode . '" to get token: ' . print_r($authToken, true));
         if(empty($authToken['access_token'])) {
             throw new InvalidGoogleAuthCodeException;
         }
 
         // Return Formatted Auth Token
-        $emailToken = new EmailToken();
-        $emailToken->fillFromArray($authToken);
+        $accessToken = EmailToken::fillFromArray($authToken);
 
         // Get Profile
-        $this->profile($emailToken);
+        $emailToken = $this->profile($accessToken);
 
-        // Return Transformed Data
-        $data = new Item($emailToken, new EmailTokenTransformer());
-        return $this->fractal->createData($data)->toArray();
+        // Return Email Token
+        return $emailToken ?? $accessToken;
     }
 
     /**
      * Get Gmail Profile Email
      *
-     * @param EmailToken $emailToken
-     * @return EmailToken
+     * @param EmailToken $accessToken
+     * @return null|EmailToken
      */
-    public function profile(EmailToken $emailToken): EmailToken {
+    public function profile(EmailToken $accessToken): ?EmailToken {
         // Get Profile Details
-        $this->setEmailToken($emailToken);
+        $this->setEmailToken($accessToken);
 
         // Insert Gmail
         try {
             // Get Gmail Profile
             $profile = $this->gmail->users->getProfile('me');
 
-            // Append Profile
-            $emailToken->setEmailAddress($profile->getEmailAddress());
+            // Add Email Address From Profile
+            $params = $accessToken->toArray();
+            $params['email_address'] = $profile->getEmailAddress();
+            $emailToken = new EmailToken($params);
         } catch (\Exception $e) {
             // Log Error
             $this->log->error('Exception returned on getting gmail profile email; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
         }
 
         // Return Google Token
-        return $emailToken;
+        return $emailToken ?? null;
     }
 
     /**
@@ -276,8 +281,8 @@ class GmailService implements GmailServiceInterface
      * @param AccessToken $accessToken
      * @param string $search
      * @param bool $single
-     * @throws App\Exceptions\Integration\Google\MissingGmailLabelsException
-     * @throws App\Exceptions\Integration\Google\MissingGmailLabelException
+     * @throws MissingGmailLabelsException
+     * @throws MissingFolderException
      * @return array of labels
      */
     public function labels(AccessToken $accessToken, array $search = []) {
@@ -286,6 +291,7 @@ class GmailService implements GmailServiceInterface
 
         // Get Labels
         $results = $this->gmail->users_labels->listUsersLabels('me');
+        $this->log->info('Found ' . count($results->getLabels()) . ' total labels on Gmail Email');
         if(count($results->getLabels()) == 0) {
             throw new MissingGmailLabelsException;
         }
@@ -294,11 +300,8 @@ class GmailService implements GmailServiceInterface
         $labels = [];
         foreach($results->getLabels() as $label) {
             // Search for Label Exists?
-            if(!empty($search)) {
-                // Skip If Label Doesn't Match!
-                if(!in_array($label->getName(), $search)) {
-                    continue;
-                }
+            if(!empty($search) && !in_array($label->getName(), $search)) {
+                continue;
             }
 
             // Add Label to Array
@@ -306,8 +309,9 @@ class GmailService implements GmailServiceInterface
         }
 
         // None Exist?!
+        $this->log->info('Returned ' . count($labels) . ' labels on Gmail Email');
         if(count($labels) < 1) {
-            throw new MissingGmailLabelException;
+            throw new MissingFolderException;
         }
 
         // Return Labels

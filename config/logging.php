@@ -68,11 +68,25 @@ return [
             'days' => 3,
         ],
 
+        'auth' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/services/auth.log'),
+            'level' => 'debug',
+            'days' => 3,
+        ],
+
         'google' => [
             'driver' => 'daily',
             'path' => storage_path('logs/services/google.log'),
             'level' => 'debug',
             'days' => 7,
+        ],
+
+        'facebook' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/services/facebook.log'),
+            'level' => 'debug',
+            'days' => 3,
         ],
 
         'leads' => [
@@ -101,6 +115,13 @@ return [
             'path' => storage_path('logs/dispatch/facebook.log'),
             'level' => 'debug',
             'days' => 7,
+        ],
+
+        'azure' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/services/azure.log'),
+            'level' => 'debug',
+            'days' => 3,
         ],
 
         'slack' => [
