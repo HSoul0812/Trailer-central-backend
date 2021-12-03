@@ -29,7 +29,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property float $tax_refunded_amount
  * @property string $payment_method
  * @property string $payment_intent the payment unique id
- * @property array<array<int, int, float>> $parts i.e: [{id:int, qty: int, price: float}]
+ * @property array<array{id:int, qty: int, price: float}> $parts
  * @property int $ecommerce_customer_id
  * @property string $ecommerce_cart_id
  * @property int $ecommerce_order_id
