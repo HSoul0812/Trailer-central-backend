@@ -106,6 +106,7 @@ class CompletedOrder extends Model
         'adjustment_refunded_amount',
         'tax_refunded_amount',
         'refunded_parts',
+        'total_refunded_amount',
         'event_id',
         'object_id',
         'stripe_customer',
