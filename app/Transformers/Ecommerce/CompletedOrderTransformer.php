@@ -27,6 +27,7 @@ class CompletedOrderTransformer extends TransformerAbstract
 
         return [
             'id' => $completedOrder->id,
+            'po_number' => $completedOrder->po_number,
             'hook_event_id' => $completedOrder->event_id,
             'object_id' => $completedOrder->object_id,
             'customer_email' => $completedOrder->customer_email,
@@ -36,8 +37,8 @@ class CompletedOrderTransformer extends TransformerAbstract
             'payment_status' => $completedOrder->payment_status,
             'payment_intent' => $completedOrder->payment_intent,
             'refund_status' => $completedOrder->refund_status,
-            'refunded_amount' => $completedOrder->refunded_amount,
-            'refunded_parts' => $completedOrder->refunded_parts,
+            'total_refunded_amount' => (float) $completedOrder->total_refunded_amount,
+            'refunded_parts' => (array) $completedOrder->refunded_parts,
             'max_refundable_amount' => $completedOrder->total_amount - (float) $completedOrder->refunded_amount,
             'stripe_customer_id' => $completedOrder->stripe_customer,
             'shipping_address' => $completedOrder->shipping_address,
@@ -65,7 +66,10 @@ class CompletedOrderTransformer extends TransformerAbstract
             'subtotal' => $partsSummary['subtotal'],
             'in_store_pickup' => $partsSummary['in_store_pickup'],
             'phone_number' => $completedOrder->phone_number,
-            'order_status' => $completedOrder->ecommerce_order_status,
+            'textrail_order_id' => $completedOrder->ecommerce_order_id,
+            'textrail_order_code' => $completedOrder->ecommerce_order_code,
+            'textrail_cart_id' => $completedOrder->ecommerce_cart_id,
+            'order_status' => $completedOrder->ecommerce_order_status
         ];
     }
 

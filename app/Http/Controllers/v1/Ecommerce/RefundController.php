@@ -6,10 +6,12 @@ namespace App\Http\Controllers\v1\Ecommerce;
 
 use App\Exceptions\Ecommerce\RefundException;
 use App\Http\Controllers\RestfulControllerV2;
-use App\Http\Requests\Ecommerce\CancelOrderRequest;
-use App\Http\Requests\Ecommerce\GetAllRefundsRequest;
-use App\Http\Requests\Ecommerce\GetSingleRefundRequest;
-use App\Http\Requests\Ecommerce\IssueRefundOrderRequest;
+use App\Http\Requests\Ecommerce\Refund\CancelOrderRequest;
+use App\Http\Requests\Ecommerce\Refund\GetAllRefundsRequest;
+use App\Http\Requests\Ecommerce\Refund\GetSingleRefundRequest;
+use App\Http\Requests\Ecommerce\Refund\IssueRefundOrderRequest;
+use App\Http\Requests\Ecommerce\Refund\UpdateRefundTextrailRequest;
+use App\Models\Ecommerce\Refund;
 use App\Repositories\Ecommerce\RefundRepositoryInterface;
 use App\Services\Ecommerce\Refund\RefundBag;
 use App\Services\Ecommerce\Refund\RefundServiceInterface;
@@ -96,6 +98,39 @@ class RefundController extends RestfulControllerV2
         if ($returnRequest->validate()) {
             try {
                 $refund = $this->service->cancelOrder(RefundBag::fromTextrailOrderId($textrailOrderId));
+
+                return $this->acceptedResponse($refund->id);
+            } catch (RefundException $exception) {
+                throw new ResourceException('Validation Failed', $exception->getErrors(), $exception);
+            } catch (\Throwable $exception) {
+                throw new HttpException($exception->getCode() > 0 ? $exception->getCode() : 500, $exception->getMessage(), $exception);
+            }
+        }
+
+        $this->response->errorBadRequest();
+    }
+
+    /**
+     * @param Request $request
+     * @return Response|void
+     *
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException when there was a bad request
+     * @throws \Dingo\Api\Exception\ResourceException when there were some validation error
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException when there were some error different from bad request or validation error
+     *
+     * @noinspection PhpDocMissingThrowsInspection
+     * @noinspection PhpUnhandledExceptionInspection
+     */
+    public function updateStatus(int $rma, Request $request): Response
+    {
+        $returnRequest = new UpdateRefundTextrailRequest(array_merge($request->all(), ['Rma' => $rma]));
+
+        if ($returnRequest->validate()) {
+            try {
+                /** @var Refund $refund */
+                $refund = $returnRequest->refund();
+
+                $this->service->updateStatus($refund, $returnRequest->mappedStatus(), $returnRequest->parts());
 
                 return $this->acceptedResponse($refund->id);
             } catch (RefundException $exception) {

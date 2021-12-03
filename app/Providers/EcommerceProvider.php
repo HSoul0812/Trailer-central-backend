@@ -11,6 +11,7 @@ use App\Http\Controllers\v1\Ecommerce\CompletedOrderController;
 use App\Http\Controllers\v1\Parts\Textrail\PartsController;
 use App\Jobs\Ecommerce\SyncOrderJob;
 use App\Jobs\Ecommerce\UpdateOrderRequiredInfoByTextrailJob;
+use App\Listeners\Ecommerce\CreateCustomerFromOrder;
 use App\Listeners\Ecommerce\PartQtyReducer;
 use App\Listeners\Ecommerce\SendOrderToTextrail;
 use App\Listeners\Ecommerce\UpdateOrderRequiredInfoByTextrail;
@@ -73,6 +74,8 @@ class EcommerceProvider extends ServiceProvider
             SendOrderToTextrail::class,
             // update all order parts quantities
             UpdateOrderPartsQty::class,
+            // create customer from order
+            CreateCustomerFromOrder::class,
         ],
         // on order successfully synced to Textrail
         OrderSuccessfullySynced::class => [

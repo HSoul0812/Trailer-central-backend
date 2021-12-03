@@ -26,6 +26,11 @@ class RefundRepository implements RefundRepositoryInterface
         return Refund::find($refundId);
     }
 
+    public function getByRma(int $rma): ?Refund
+    {
+        return Refund::query()->where('textrail_rma', $rma)->first();
+    }
+
     /**
      * @param array $params the filterable parameters are "dealer_id" and "order_id"
      * @return array<Refund>|Collection|LengthAwarePaginator
@@ -224,6 +229,61 @@ class RefundRepository implements RefundRepositoryInterface
     public function markAsProcessing(Refund $refund): bool
     {
         return $this->update($refund->id, ['status' => Refund::STATUS_PROCESSING]);
+    }
+
+    /**
+     * @param Refund $refund
+     * @param array<array{sku:string, title:string, id:int, amount: float, qty: int, price: float}> $parts
+     * @return bool
+     */
+    public function markAsRejected(Refund $refund, array $parts): bool
+    {
+        return $this->update(
+            $refund->id,
+            [
+                'status' => Refund::STATUS_REJECTED,
+                'metadata' => array_merge($refund->metadata, ['rejected_parts' => $parts])
+            ]
+        );
+    }
+
+    /**
+     * @param Refund $refund
+     * @param array<array{sku:string, title:string, id:int, amount: float, qty: int, price: float}> $requestedParts
+     * @param array<array{sku:string, title:string, id:int, amount: float, qty: int, price: float}> $authorizedParts
+     * @return bool
+     */
+    public function markAsAuthorized(Refund $refund, array $requestedParts, array $authorizedParts): bool
+    {
+        return $this->update(
+            $refund->id,
+            [
+                'status' => Refund::STATUS_AUTHORIZED,
+                'parts_amount' => $refund->parts_amount,
+                'total_amount' => $refund->parts_amount + $refund->adjustment_amount + $refund->handling_amount + $refund->shipping_amount,
+                'parts' => $authorizedParts,
+                'metadata' => array_merge($refund->metadata, ['requested_parts' => $requestedParts, 'authorized_parts' => $authorizedParts])
+            ]
+        );
+    }
+
+    /**
+     * @param Refund $refund
+     * @param array<array{sku:string, title:string, id:int, amount: float, qty: int, price: float}> $parts
+     * @return bool
+     */
+    public function markAsReturnReceived(Refund $refund, array $parts): bool
+    {
+        return $this->update(
+            $refund->id,
+            [
+                'status' => Refund::STATUS_RETURN_RECEIVED,
+                'parts_amount' => $refund->parts_amount,
+                'total_amount' => $refund->parts_amount + $refund->adjustment_amount + $refund->handling_amount + $refund->shipping_amount,
+                'parts' => $parts,
+                'metadata' => array_merge($refund->metadata, ['received_parts' => $parts])
+            ]
+        );
     }
 
     /**
