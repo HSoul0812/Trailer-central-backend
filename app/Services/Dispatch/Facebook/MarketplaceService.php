@@ -148,6 +148,44 @@ class MarketplaceService implements MarketplaceServiceInterface
         return $listing;
     }
 
+    /**
+     * Logging Details for Step
+     * 
+     * @param MarketplaceStep $step
+     * @return MarketplaceStep
+     */
+    public function step(MarketplaceStep $step): MarketplaceStep {
+        // Log
+        $this->log->info($step->getResponse());
+
+        // Catch Logs From Extension
+        foreach($step->getLogs() as $psr => $data) {
+            // Get Step
+            if($step->status === MarketplaceStep::STEP_ERROR && $psr !== 'error') {
+                continue;
+            }
+
+            // Create String
+            $msg = '';
+            foreach($data as $item) {
+                $msg .= ((is_array($item) || is_object($item)) ? print_r($item, true) : $item);
+            }
+
+            // Add to Log File
+            $this->log->{$psr}($msg);
+
+            // Send Error to Slack
+            if($psr === 'error') {
+                // TO DO: Send to Slack
+                // Create a Service to Handle Slack Messages and Toggle Type
+                //$this->notifySlack($msg, $psr);
+            }
+        }
+
+        // Return Listing
+        return $step;
+    }
+
 
     /**
      * Get Dealer Integrations
@@ -177,40 +215,5 @@ class MarketplaceService implements MarketplaceServiceInterface
 
         // Return Dealers Collection
         return $dealers;
-    }
-
-
-    /**
-     * Catch Logs and Errors
-     * 
-     * @param null|array $logs
-     * @param null|bool $restrict
-     */
-    private function catchLogs(?array $logs = null, ?bool $restrict = null) {
-        // Catch All Logs
-        foreach($logs as $psr => $data) {
-            // Restrict Logs to One Type
-            if($restrict !== null && $restrict !== $psr) {
-                continue;
-            }
-
-            // Create String
-            $msg = '';
-            if(is_array($data)) {
-                foreach($data as $item) {
-                    $msg .= ((is_array($item) || is_object($item)) ? print_r($item, true) : $item);
-                }
-            }
-
-            // Add to Log File
-            $this->log->{$psr}($msg);
-
-            // Send Error to Slack
-            if($psr === 'error') {
-                // TO DO: Send to Slack
-                // Create a Service to Handle Slack Messages and Toggle Type
-                //$this->notifySlack($msg, $psr);
-            }
-        }
     }
 }
