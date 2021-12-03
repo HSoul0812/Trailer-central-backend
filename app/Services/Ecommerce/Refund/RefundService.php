@@ -248,7 +248,7 @@ class RefundService implements RefundServiceInterface
             return $this->markAsRejected($refund, $refund->parts);
         }
 
-        $recalculatedParts = $this->reCalculateParts($refund->parts, $parts);
+        $recalculatedParts = $this->reCalculateParts(collect($refund->parts)->keyBy('sku')->toArray(), $parts);
         $refund->parts_amount = $recalculatedParts['partsAmount']->getAmount()->toFloat(); // reset the parts amount
 
         if ($status === Refund::STATUS_AUTHORIZED) {
@@ -435,6 +435,12 @@ class RefundService implements RefundServiceInterface
                 $logContext
             );
 
+            $this->refundRepository->logError(
+                $refund->id,
+                $exception->getMessage(),
+                Refund::RECOVERABLE_STAGE_TEXTRAIL_ISSUE
+            );
+
             $exception = new RefundFailureException(sprintf(
                 'The refund {%d} for {%d} order had a critical error when it was tried to be rejected: %s',
                 $refund->id,
@@ -479,6 +485,12 @@ class RefundService implements RefundServiceInterface
             $this->logger->critical(
                 $exception->getMessage(),
                 $logContext
+            );
+
+            $this->refundRepository->logError(
+                $refund->id,
+                $exception->getMessage(),
+                Refund::RECOVERABLE_STAGE_TEXTRAIL_ISSUE
             );
 
             $exception = new RefundFailureException(sprintf(
@@ -529,6 +541,12 @@ class RefundService implements RefundServiceInterface
                 $logContext
             );
 
+            $this->refundRepository->logError(
+                $refund->id,
+                $exception->getMessage(),
+                Refund::RECOVERABLE_STAGE_TEXTRAIL_ISSUE
+            );
+
             $exception = new RefundFailureException(sprintf(
                 'The refund {%d} for {%d} order had a critical error when it was tried to be return received: %s',
                 $refund->id,
@@ -555,19 +573,21 @@ class RefundService implements RefundServiceInterface
 
         $partsAmount = Money::zero('USD');
 
-        foreach ($parts as $sku => $qty) {
+        foreach ($parts as $sku => $part) {
+            $qty = $part['qty'];
+
             if (!isset($originalParts[$sku])) {
                 throw new RefundException(sprintf('"%s" part was not originally requested to be refunded', $sku));
             }
 
-            $part = $originalParts[$sku];
+            $originalPart = $originalParts[$sku];
 
-            if ($qty < 0 || $qty > $part['qty']) {
-                throw new RefundException(sprintf('"%s" part must be in the range of 0 and %d', $sku, $part['qty']));
+            if ($qty < 0 || $qty > $originalPart['qty']) {
+                throw new RefundException(sprintf('"%s" part must be in the range of 0 and %d', $sku, $originalPart['qty']));
             }
 
-            $updatedParts[] = array_merge($part, ['qty' => $qty]);
-            $partsAmount = $partsAmount->plus($qty * $part['price']);
+            $updatedParts[] = array_merge($originalPart, ['qty' => $qty]);
+            $partsAmount = $partsAmount->plus($qty * $originalPart['price']);
         }
 
         return ['originalParts' => $originalParts, 'updatedParts' => $updatedParts, 'partsAmount' => $partsAmount];
