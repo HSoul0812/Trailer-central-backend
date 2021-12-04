@@ -104,7 +104,7 @@ class CompletedOrderController extends RestfulControllerV2
 
         $order = $this->completedOrderService->create($params);
 
-        return $this->response->item($order, new CompletedOrderTransformer($this->textRailPartRepo));
+        return $this->createdResponse($order->id);
     }
 
     /**

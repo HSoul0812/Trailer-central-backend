@@ -49,37 +49,7 @@ class CompletedOrderService implements CompletedOrderServiceInterface
 
     public function create(array $params): CompletedOrder
     {
-        $completedOrder = $this->completedOrderRepository->create($params);
-
-        try {
-            $poNumber = $this->completedOrderRepository->generateNextPoNumber($completedOrder->dealer_id);
-            $texTrailOrderId = $this->textrailService->createOrderFromGuestCart($params['ecommerce_cart_id'], $poNumber);
-
-            $this->completedOrderRepository->update(['id' => $completedOrder->id, 'ecommerce_order_id' => $texTrailOrderId, 'po_number' => $poNumber]);
-        } catch (ClientException | \Exception $exception) {
-            $message = $exception instanceof ClientException && $exception->getResponse() ?
-                json_decode($exception->getResponse()->getBody()->getContents(), true) :
-                $exception->getMessage();
-
-            $this->completedOrderRepository->rollbackTransaction();
-
-            if (isset($texTrailOrderId)) {
-                // to do not lose this important info
-                $this->completedOrderRepository->update(['id' => $completedOrder->id, 'ecommerce_order_id' => $texTrailOrderId]);
-            }
-
-            $this->logger->critical($exception->getMessage());
-
-            $this->completedOrderRepository->logError(
-                $completedOrder->id,
-                $message,
-                CompletedOrder::ERROR_STAGE_TEXTRAIL_REMOTE_SYNC
-            );
-
-            throw new TextrailSyncException($exception->getMessage(), $exception->getCode(), $exception);
-        }
-
-        return $completedOrder;
+        return $this->completedOrderRepository->create($params);
     }
 
     public function updateRefundSummary(int $orderId): bool
