@@ -4,7 +4,6 @@ namespace App\Services\Ecommerce\CompletedOrder;
 
 use App\Contracts\LoggerServiceInterface;
 use App\Events\Ecommerce\OrderSuccessfullySynced;
-use App\Exceptions\Ecommerce\TextrailException;
 use App\Exceptions\Ecommerce\TextrailSyncException;
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
 use App\Models\Parts\Textrail\RefundedPart;
@@ -50,7 +49,37 @@ class CompletedOrderService implements CompletedOrderServiceInterface
 
     public function create(array $params): CompletedOrder
     {
-        return $this->completedOrderRepository->create($params);
+        $completedOrder = $this->completedOrderRepository->create($params);
+
+        try {
+            $poNumber = $this->completedOrderRepository->generateNextPoNumber($completedOrder->dealer_id);
+            $texTrailOrderId = $this->textrailService->createOrderFromGuestCart($params['ecommerce_cart_id'], $poNumber);
+
+            $this->completedOrderRepository->update(['id' => $completedOrder->id, 'ecommerce_order_id' => $texTrailOrderId, 'po_number' => $poNumber]);
+        } catch (ClientException | \Exception $exception) {
+            $message = $exception instanceof ClientException && $exception->getResponse() ?
+                json_decode($exception->getResponse()->getBody()->getContents(), true) :
+                $exception->getMessage();
+
+            $this->completedOrderRepository->rollbackTransaction();
+
+            if (isset($texTrailOrderId)) {
+                // to do not lose this important info
+                $this->completedOrderRepository->update(['id' => $completedOrder->id, 'ecommerce_order_id' => $texTrailOrderId]);
+            }
+
+            $this->logger->critical($exception->getMessage());
+
+            $this->completedOrderRepository->logError(
+                $completedOrder->id,
+                $message,
+                CompletedOrder::ERROR_STAGE_TEXTRAIL_REMOTE_SYNC
+            );
+
+            throw new TextrailSyncException($exception->getMessage(), $exception->getCode(), $exception);
+        }
+
+        return $completedOrder;
     }
 
     public function updateRefundSummary(int $orderId): bool
@@ -118,7 +147,7 @@ class CompletedOrderService implements CompletedOrderServiceInterface
             // just in case we need to covert a customer cart into an order, we should use another method like createOrderFromCart
             //$method = $order->ecommerce_customer_id ? 'createOrderFromCart' : 'createOrderFromGuestCart';
 
-            $poNumber = $this->completedOrderRepository->generateNextPoNumber($order->dealer_id);
+            $poNumber = $order->po_number ? $order->po_number : $this->completedOrderRepository->generateNextPoNumber($order->dealer_id);
 
             // it only will try to create a new order on the Magento Side when it hasn't been done before this,
             // it should happen for example due a duplication entry error constraint

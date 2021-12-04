@@ -5,6 +5,7 @@ namespace App\Http\Controllers\v1\Ecommerce;
 use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\Ecommerce\ApproveCompletedOrderRequest;
 use App\Http\Requests\Ecommerce\CreateCompletedOrderRequest;
+use App\Http\Requests\Ecommerce\CreateProviderOrderRequest;
 use App\Http\Requests\Ecommerce\GetAllCompletedOrderRequest;
 use App\Http\Requests\Ecommerce\GetSingleCompletedOrderRequest;
 use App\Repositories\Ecommerce\CompletedOrderRepositoryInterface;
@@ -15,6 +16,7 @@ use App\Transformers\Ecommerce\CompletedOrderTransformer;
 use App\Transformers\Ecommerce\CompleteOrderRequestTransformer;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
+use Illuminate\Http\JsonResponse;
 
 class CompletedOrderController extends RestfulControllerV2
 {
@@ -102,7 +104,7 @@ class CompletedOrderController extends RestfulControllerV2
 
         $order = $this->completedOrderService->create($params);
 
-        return $this->createdResponse($order->id);
+        return $this->response->item($order, new CompletedOrderTransformer($this->textRailPartRepo));
     }
 
     /**

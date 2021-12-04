@@ -532,7 +532,8 @@ class TextrailMagento implements DataProviderInterface,
                         'method' => config('ecommerce.textrail.payment_method'),
                         'po_number' => $poNumber
                     ]
-                ]
+                ],
+                'verify' => false,
             ]
         );
 
