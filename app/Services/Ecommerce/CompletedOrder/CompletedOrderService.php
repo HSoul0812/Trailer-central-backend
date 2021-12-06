@@ -69,6 +69,10 @@ class CompletedOrderService implements CompletedOrderServiceInterface
 
         $refund_status = null;
 
+        if ($refundedAmount->isEqualTo(0)) {
+            $refund_status = CompletedOrder::REFUND_STATUS_UNREFUNDED;
+        }
+
         if ($refundedAmount->isEqualTo($orderTotalAmount)) {
             $refund_status = CompletedOrder::REFUND_STATUS_REFUNDED;
         }

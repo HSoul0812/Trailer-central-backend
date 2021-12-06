@@ -20,20 +20,18 @@ $factory->define(Refund::class, static function (Faker $faker, array $attributes
 
     return [
         'order_id' => $attributes['order_id'] ?? factory(CompletedOrder::class)->create()->getKey(),
-        'adjustment_amount' => $adjustmentAmount,
-        'total_amount' => $adjustmentAmount,
+        'adjustment_amount' => $attributes['adjustment_amount'] ?? $adjustmentAmount,
+        'total_amount' => $attributes['total_amount'] ?? 0,
         'reason' => $faker->randomElement($refundReasons),
-        'payment_gateway_id' => $faker->uuid,
-        'status' => Refund::STATUS_COMPLETED,
-        'parts' => [],
+        'parts' => $attributes['parts'] ?? [],
         'created_at' => $createdAt
     ];
 })->afterMaking(Refund::class, function (Refund $refund, Faker $faker) {
     if (empty($refund->id)) {
-        $refund->id = $faker->$faker->numberBetween(100, 10000);
+        $refund->id = $faker->numberBetween(100, 10000);
     }
 
     if (empty($refund->id)) {
-        $refund->id = $faker->$faker->numberBetween(100, 10000);
+        $refund->id = $faker->numberBetween(100, 10000);
     }
 });
