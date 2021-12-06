@@ -200,19 +200,17 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
         CompletedOrder::query()->where('dealer_id', $dealerId)->lockForUpdate()->get(['po_number']);
 
         /** @var CompletedOrder $order */
-        $order = CompletedOrder::query()
+        $order = CompletedOrder::query()->selectRaw("CAST(REPLACE(po_number, 'PO-','') AS UNSIGNED) AS po_number")
             ->where('dealer_id', $dealerId)
             ->whereNotNull('po_number')
-            ->orderBy('id', 'desc')
+            ->orderByRaw('1 DESC')
             ->first(['po_number']);
 
         if (is_null($order)) {
             return sprintf('PO-%d%d', $dealerId, 1);
         }
 
-        [, $currentNumber] = explode('PO-' . $dealerId, $order->po_number);
-
-        return sprintf('PO-%d%d', $dealerId, ((int)$currentNumber) + 1);
+        return sprintf('PO-%d', (int)$order->po_number + 1);
     }
 
     private function addFiltersToQuery(Builder $query, array $filters, bool $noStatusJoin = false): Builder
