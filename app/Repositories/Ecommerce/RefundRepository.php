@@ -18,7 +18,7 @@ class RefundRepository implements RefundRepositoryInterface
 {
     public function create(array $params): Refund
     {
-        return Refund::create($params);
+        return Refund::create($params)->refresh();
     }
 
     public function get(int $refundId): ?Refund
