@@ -2,7 +2,7 @@
 
 namespace App\Transformers\Inventory;
 
-use App\Models\Inventory\InventoryFeatureList;
+use App\Models\Inventory\InventoryFeature;
 use League\Fractal\TransformerAbstract;
 
 /**
@@ -12,16 +12,15 @@ use League\Fractal\TransformerAbstract;
 class FeatureTransformer extends TransformerAbstract
 {
     /**
-     * @param Attribute $attribute
+     * @param InventoryFeature $feature
      * @return array
      */
-    public function transform(InventoryFeatureList $featureList)
+    public function transform(InventoryFeature $feature): array
     {
         return [
-            'feature_list_id' => $featureList->feature_list_id,
-            'feature_name' => $featureList->feature_name,
-            'options' => $featureList->available_options
+            'feature_list_id' => $feature->feature_list_id,
+            'value' => $feature->value,
+            'feature_name' => $feature->featureList->feature_name,
         ];
     }
-
 }

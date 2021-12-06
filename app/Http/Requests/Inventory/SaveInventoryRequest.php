@@ -151,6 +151,17 @@ class SaveInventoryRequest extends Request
         'craigslist.default_image' => 'array|nullable',
         'craigslist.default_image.new' => 'checkbox|nullable',
         'craigslist.default_image.url' => 'string|nullable',
+
+        'attributes' => 'array|nullable',
+        'attributes.*.attribute_id' => 'int|exists:App\Models\Inventory\Attribute,attribute_id',
+        'attribute.*.value' => 'string|nullable',
+
+        'features' => 'array|nullable',
+        'features.*.feature_list_id' => 'int|exists:App\Models\Inventory\InventoryFeatureList,feature_list_id',
+        'features.*.value' => 'string',
+
+        'clapps' => 'array|nullable',
+        'clapps.*' => 'string',
     ];
 
     /**
