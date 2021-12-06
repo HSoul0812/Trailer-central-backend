@@ -6,6 +6,7 @@ namespace App\Providers;
 
 use App\Events\Ecommerce\OrderSuccessfullyPaid;
 use App\Events\Ecommerce\OrderSuccessfullySynced;
+use App\Events\Ecommerce\PrepareMagentoOrder;
 use App\Events\Ecommerce\QtyUpdated;
 use App\Http\Controllers\v1\Ecommerce\CompletedOrderController;
 use App\Http\Controllers\v1\Parts\Textrail\PartsController;
@@ -68,10 +69,12 @@ class EcommerceProvider extends ServiceProvider
      * events and listeners for ecommerce
      */
     protected $listen = [
-        // on order successfully paid
-        OrderSuccessfullyPaid::class => [
+        PrepareMagentoOrder::class => [
             // send over Textrail Magento API
             SendOrderToTextrail::class,
+        ],
+        // on order successfully paid
+        OrderSuccessfullyPaid::class => [
             // update all order parts quantities
             UpdateOrderPartsQty::class,
             // create customer from order

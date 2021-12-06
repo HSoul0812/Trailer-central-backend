@@ -21,19 +21,19 @@ class TextrailMagento implements DataProviderInterface,
     private const TEXTRAIL_ATTRIBUTES_MANUFACTURER_URL = 'rest/V1/products/attributes/manufacturer/options/';
     private const TEXTRAIL_ATTRIBUTES_BRAND_NAME_URL = 'rest/V1/products/attributes/brand_name/options/';
     private const TEXTRAIL_ATTRIBUTES_MEDIA_URL = 'media/catalog/product';
-    private const TEXTRAIL_ATTRIBUTES_PLACEHOLDER_URL = '/placeholder/default/TexTrail-LogoVertical_4_3.png';
+    private const TEXTRAIL_ATTRIBUTES_PLACEHOLDER_URL = 'placeholder/default/TexTrail-LogoVertical_4_3.png';
 
     const VIEW_ID = 'trailer_central_t1_sv';
     const GUEST_CART_URL = 'rest/:view/V1/guest-carts';
     const GUEST_CART_POPULATE_URL = 'rest/:view/V1/guest-carts/:cartId/items';
     const GUEST_SHIPPING_COST_URL = 'rest/:view/V1/guest-carts/:cartId/estimate-shipping-methods';
-    const GUEST_CART_CREATE_ORDER = '/rest/:view/V1/guest-carts/:cartId/order';
-    const GUEST_CART_AVAILABLE_PAYMENT_METHODS = '/rest/:view/V1/guest-carts/:cartId/payment-methods';
-    const GUEST_CART_ADD_SHIPPING_INFO = '/rest/:view/V1/guest-carts/:cartId/shipping-information';
+    const GUEST_CART_CREATE_ORDER = 'rest/:view/V1/guest-carts/:cartId/order';
+    const GUEST_CART_AVAILABLE_PAYMENT_METHODS = 'rest/:view/V1/guest-carts/:cartId/payment-methods';
+    const GUEST_CART_ADD_SHIPPING_INFO = 'rest/:view/V1/guest-carts/:cartId/shipping-information';
 
-    const ORDER_GET_INFO = '/rest/:view/V1/orders/:orderId';
-    const ORDER_ISSUE_REFUND = '/rest/:view/V1/order/:orderId/refund';
-    const ORDER_CREATE_RETURN = '/rest/:view/V1/returns';
+    const ORDER_GET_INFO = 'rest/:view/V1/orders/:orderId';
+    const ORDER_ISSUE_REFUND = 'rest/:view/V1/order/:orderId/refund';
+    const ORDER_CREATE_RETURN = 'rest/:view/V1/returns';
 
     /** @var string */
     private $apiUrl;
@@ -525,14 +525,13 @@ class TextrailMagento implements DataProviderInterface,
     public function createOrderFromGuestCart(string $cartId, string $poNumber): int
     {
         $url = $this->generateUrlWithCartAndView(self::GUEST_CART_CREATE_ORDER, $cartId);
-
         $response = $this->httpClient->put($url, [
                 'json' => [
                     'paymentMethod' => [
                         'method' => config('ecommerce.textrail.payment_method'),
                         'po_number' => $poNumber
                     ]
-                ]
+                ],
             ]
         );
 

@@ -3,6 +3,7 @@
 namespace App\Repositories\Ecommerce;
 
 use App\Events\Ecommerce\OrderSuccessfullyPaid;
+use App\Events\Ecommerce\PrepareMagentoOrder;
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
 use App\Traits\Repository\Transaction;
 use Illuminate\Database\Eloquent\Builder;
@@ -119,7 +120,11 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
                 throw new \InvalidArgumentException('"dealer_id" is required');
             }
 
-            return CompletedOrder::create($params);
+            $completedOrder = CompletedOrder::create($params);
+
+            if (!$completedOrder->isPaid()) {
+                event(new PrepareMagentoOrder($completedOrder));
+            }
         }
 
         $wasNotPaid = !$completedOrder->ispaid();

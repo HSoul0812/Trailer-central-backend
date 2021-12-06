@@ -4,7 +4,6 @@ namespace App\Services\Ecommerce\CompletedOrder;
 
 use App\Contracts\LoggerServiceInterface;
 use App\Events\Ecommerce\OrderSuccessfullySynced;
-use App\Exceptions\Ecommerce\TextrailException;
 use App\Exceptions\Ecommerce\TextrailSyncException;
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
 use App\Models\Parts\Textrail\RefundedPart;
@@ -122,7 +121,7 @@ class CompletedOrderService implements CompletedOrderServiceInterface
             // just in case we need to covert a customer cart into an order, we should use another method like createOrderFromCart
             //$method = $order->ecommerce_customer_id ? 'createOrderFromCart' : 'createOrderFromGuestCart';
 
-            $poNumber = $this->completedOrderRepository->generateNextPoNumber($order->dealer_id);
+            $poNumber = $order->po_number ? $order->po_number : $this->completedOrderRepository->generateNextPoNumber($order->dealer_id);
 
             // it only will try to create a new order on the Magento Side when it hasn't been done before this,
             // it should happen for example due a duplication entry error constraint
