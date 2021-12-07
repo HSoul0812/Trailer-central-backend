@@ -160,23 +160,17 @@ class MarketplaceService implements MarketplaceServiceInterface
         $this->log->info($step->getResponse());
 
         // Catch Logs From Extension
-        foreach($step->getLogs() as $psr => $data) {
+        foreach($step->getLogs() as $log) {
             // Get Step
-            if($step->status === MarketplaceStep::STEP_ERROR && $psr !== 'error') {
+            if($step->isError() && !$log->isError()) {
                 continue;
             }
 
-            // Create String
-            $msg = '';
-            foreach($data as $item) {
-                $msg .= ((is_array($item) || is_object($item)) ? print_r($item, true) : $item);
-            }
-
             // Add to Log File
-            $this->log->{$psr}($msg);
+            $this->log->{$log->psr}($log->getLogString());
 
             // Send Error to Slack
-            if($psr === 'error') {
+            if($log->isError()) {
                 // TO DO: Send to Slack
                 // Create a Service to Handle Slack Messages and Toggle Type
                 //$this->notifySlack($msg, $psr);

@@ -28,6 +28,11 @@ class MarketplaceStep
         'error' => 'Error'
     ];
 
+    /**
+     * @const string
+     */
+    const LOG_ERROR = 'error';
+
 
     /**
      * @var string
@@ -59,5 +64,14 @@ class MarketplaceStep
 
         // Compile Final Log
         return $prefix . ' ' . $desc . ' at ' . $this->date . ': ' . $this->message;
+    }
+
+    /**
+     * Is an Error?
+     * 
+     * @return bool
+     */
+    public function isError(): bool {
+        return ($this->psr === self::LOG_ERROR);
     }
 }

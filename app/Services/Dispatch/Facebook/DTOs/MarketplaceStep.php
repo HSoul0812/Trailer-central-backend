@@ -93,7 +93,7 @@ class MarketplaceStep
     /**
      * Get Selectors for Step
      * 
-     * @return Collection<>
+     * @return Collection<string>
      */
     public function getSelectors(): Collection {
         // Get Selector Routes to Import
@@ -108,5 +108,37 @@ class MarketplaceStep
 
         // Return All Selectors
         return $allSelectors;
+    }
+
+    /**
+     * Get Logs
+     * 
+     * @return Collection<MarketplaceLog>
+     */
+    public function getLogs(): Collection {
+        // Get Logs Array
+        $logs = json_decode($this->logs);
+
+        // Loop Logs
+        $logging = new Collection();
+        foreach($logs as $log) {
+            $logging->push(new MarketplaceLog([
+                'psr' => $log['loggerName'],
+                'message' => $log['logMessage'],
+                'date' => $log['date']
+            ]));
+        }
+
+        // Return Collection<MarketplaceLog>
+        return $logging;
+    }
+
+    /**
+     * Is an Error Step?
+     * 
+     * @return bool
+     */
+    public function isError(): bool {
+        return ($this->status === self::STEP_ERROR);
     }
 }
