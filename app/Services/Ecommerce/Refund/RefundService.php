@@ -11,6 +11,7 @@ use App\Exceptions\Ecommerce\RefundException;
 use App\Exceptions\Ecommerce\RefundHttpClientException;
 use App\Exceptions\Ecommerce\RefundPaymentGatewayException;
 use App\Jobs\Ecommerce\ProcessRefundOnPaymentGatewayJob;
+use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
 use GuzzleHttp\Exception\ClientException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Bus\DispatchesJobs;
@@ -72,6 +73,7 @@ class RefundService implements RefundServiceInterface
      *
      * @throws RefundException when the order is not refundable due it is unpaid
      * @throws RefundException when the order is not refundable due it is refunded
+     * @throws RefundException when the order is not refundable due it is canceled
      * @throws RefundException when the order has not a payment unique id
      * @throws RefundException when the order has not a related parts matching with the request
      * @throws RefundAmountException when the refund total amount is greater than the order remaining total balance
@@ -175,6 +177,7 @@ class RefundService implements RefundServiceInterface
      *
      * @throws RefundException when the order is not refundable due it is unpaid
      * @throws RefundException when the order is not refundable due it is refunded
+     * @throws RefundException when the order is not refundable due it is canceled
      * @throws RefundException when the order has not a payment unique id
      * @throws RefundException when the order has not a related parts matching with the request
      * @throws RefundAmountException when the refund total amount is greater than the order remaining total balance
@@ -200,6 +203,8 @@ class RefundService implements RefundServiceInterface
         $refund = $this->createRefund($refundBag);
 
         try {
+            $this->orderRepository->update(['id' => $refundBag->order->id, 'ecommerce_order_status' => CompletedOrder::ECOMMERCE_STATUS_CANCELED]);
+
             $this->updateOrderRefundSummary($refund);
 
             $this->dispatchPaymentGatewayRefundJob($refund);
