@@ -8,7 +8,7 @@ use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
 
 /**
- * Class CommonToken
+ * Class MarketplaceStatus
  * 
  * @package App\Services\Dispatch\Facebook\DTOs
  */

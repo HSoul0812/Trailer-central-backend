@@ -6,11 +6,11 @@ use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
 
 /**
- * Class CommonToken
+ * Class MarketplaceLog
  * 
  * @package App\Services\Dispatch\Facebook\DTOs
  */
-class MarketplaceStep
+class MarketplaceLog
 {
     use WithConstructor, WithGetter;
 

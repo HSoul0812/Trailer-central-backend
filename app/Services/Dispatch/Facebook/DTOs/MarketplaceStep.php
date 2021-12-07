@@ -7,7 +7,7 @@ use App\Traits\WithGetter;
 use Illuminate\Support\Collection;
 
 /**
- * Class CommonToken
+ * Class MarketplaceStep
  * 
  * @package App\Services\Dispatch\Facebook\DTOs
  */
