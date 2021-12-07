@@ -209,7 +209,7 @@ class ServiceOrderRepository implements ServiceOrderRepositoryInterface {
             });
             $query->select('*', DB::raw('
                 IF(invoice.po_no AND NOT closed_by_related_unit_sale, 
-                (SELECT CASE WHEN closed_by_related_unit_sale THEN total_price ELSE invoice.paid_amount END) + invoice.po_amount,
+                invoice.paid_amount + invoice.po_amount,
                 (SELECT CASE WHEN closed_by_related_unit_sale THEN total_price ELSE invoice.paid_amount END)) AS total_paid_amount'));
         }
 
