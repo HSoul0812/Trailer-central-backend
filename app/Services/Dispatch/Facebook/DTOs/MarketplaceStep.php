@@ -31,6 +31,11 @@ class MarketplaceStep
         'inventoryId' => 'int'
     ];
 
+    /**
+     * @const string
+     */
+    const STEP_ERROR = 'error';
+
 
     /**
      * @const string
