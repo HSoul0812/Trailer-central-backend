@@ -4,6 +4,7 @@ namespace App\Services\Dispatch\Facebook\DTOs;
 
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
+use Illuminate\Support\Collection;
 
 /**
  * Class CommonToken
@@ -30,12 +31,19 @@ class MarketplaceStep
         'inventoryId' => 'int'
     ];
 
+
     /**
      * @const string
      */
     const DEFAULT_RESPONSE = 'FB Marketplace Autoposter is currently handling the ' .
                                 'unknown step ":step" on the action ":action" for ' .
                                 'the inventory ID #:inventoryId.';
+
+    /**
+     * @const string
+     */
+    const DEFAULT_SELECTORS = 'common';
+
 
 
     /**
@@ -61,10 +69,12 @@ class MarketplaceStep
 
     /**
      * Get Response Message for Step
+     * 
+     * @return string
      */
-    public function getResponse() {
+    public function getResponse(): string {
         // Get Step Log Details
-        $text = config('marketing.fb.logs.' . $this->step, self::DEFAULT_RESPONSE);
+        $text = config('marketing.fb.steps.logs.' . $this->step, self::DEFAULT_RESPONSE);
 
         // Replace Vars
         $response = $text;
@@ -78,5 +88,25 @@ class MarketplaceStep
 
         // Return Response Logs
         return $response;
+    }
+
+    /**
+     * Get Selectors for Step
+     * 
+     * @return Collection<>
+     */
+    public function getSelectors(): Collection {
+        // Get Selector Routes to Import
+        $selectors = config('marketing.fb.steps.selectors.' . $this->step, self::DEFAULT_SELECTORS);
+
+        // Split Selectors
+        $allSelectors = new Collection();
+        foreach(explode(",", $selectors) as $selector) {
+            // Loop Selectors
+            $allSelectors->merge(config('marketing.fb.selectors.' . $selector));
+        }
+
+        // Return All Selectors
+        return $allSelectors;
     }
 }
