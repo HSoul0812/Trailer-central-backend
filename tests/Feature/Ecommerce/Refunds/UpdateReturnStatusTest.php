@@ -429,14 +429,6 @@ class UpdateReturnStatusTest extends TestCase
         ];
     }
 
-   /* public function __construct(?string $name = null, array $data = [], $dataName = '')
-    {
-        parent::__construct($name, $data, $dataName);
-
-        $this->refreshApplication();
-        $this->setUpTraits();
-    }*/
-
     private function assertResponseHasValidationError(TestResponse $response, string $message): void
     {
         $response->assertStatus(422);
