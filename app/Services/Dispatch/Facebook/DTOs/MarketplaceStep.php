@@ -123,9 +123,9 @@ class MarketplaceStep
         $logging = new Collection();
         foreach($logs as $log) {
             $logging->push(new MarketplaceLog([
-                'psr' => $log['loggerName'],
-                'message' => $log['logMessage'],
-                'date' => $log['date']
+                'psr' => $log->loggerName,
+                'message' => $log->logMessage,
+                'date' => $log->date
             ]));
         }
 
