@@ -13,6 +13,7 @@ use App\Repositories\Marketing\Facebook\ListingRepositoryInterface;
 use App\Repositories\Marketing\Facebook\ImageRepositoryInterface;
 use App\Services\Dispatch\Facebook\DTOs\DealerFacebook;
 use App\Services\Dispatch\Facebook\DTOs\MarketplaceStatus;
+use App\Services\Dispatch\Facebook\DTOs\MarketplaceStep;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
