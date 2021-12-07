@@ -210,7 +210,7 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
             return sprintf('PO-%d%d', $dealerId, 1);
         }
 
-        return sprintf('PO-%d%d', $dealerId, (int)(str_replace($dealerId, '', $order->po_number)) + 1);
+        return sprintf('PO-%d', (int)$order->po_number + 1);
     }
 
     private function addFiltersToQuery(Builder $query, array $filters, bool $noStatusJoin = false): Builder
