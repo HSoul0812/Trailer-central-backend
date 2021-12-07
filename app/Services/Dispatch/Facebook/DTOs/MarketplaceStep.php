@@ -103,15 +103,14 @@ class MarketplaceStep
     public function getSelectors(): Collection {
         // Get Selector Routes to Import
         $selectors = config('marketing.fb.steps.selectors.' . $this->step, self::DEFAULT_SELECTORS);
-        var_dump($selectors);
-        var_dump(explode(",", $selectors));
 
         // Split Selectors
         $allSelectors = new Collection();
         foreach(explode(",", $selectors) as $selector) {
             // Loop Selectors
-            var_dump($selector);
-            $allSelectors->merge(config('marketing.fb.selectors.' . $selector));
+            $chosenSelectors = config('marketing.fb.selectors.' . $selector);
+            var_dump($chosenSelectors);
+            $allSelectors->merge($chosenSelectors);
         }
 
         // Return All Selectors
