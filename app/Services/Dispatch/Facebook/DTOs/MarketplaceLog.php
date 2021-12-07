@@ -17,7 +17,7 @@ class MarketplaceLog
     /**
      * @const string
      */
-    const LOG_PREFIX = 'Facebook Marketplace';
+    const LOG_PREFIX = 'FB Autoposter';
 
     /**
      * @const array<string>
