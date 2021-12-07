@@ -30,6 +30,7 @@ use App\Traits\CompactHelper;
  * @property string $email
  *
  * @property bool $isCrmActive
+ * @property bool $is_dms_active
  * @property string $identifier
  *
  * @method static Builder whereIn($column, $values, $boolean = 'and', $not = false)
@@ -169,6 +170,7 @@ class User extends Model implements Authenticatable, PermissionsInterface
 
     protected $casts = [
         'autoresponder_enable' => 'boolean',
+        'is_dms_active' => 'boolean',
     ];
 
     /**

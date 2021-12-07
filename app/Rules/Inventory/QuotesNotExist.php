@@ -3,7 +3,9 @@
 namespace App\Rules\Inventory;
 
 use App\Models\CRM\Dms\UnitSale;
+use App\Models\User\User;
 use Illuminate\Contracts\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Class QuotesNotExist
@@ -18,9 +20,14 @@ class QuotesNotExist implements Rule
      * @param  mixed  $value
      * @return bool
      */
-    public function passes($attribute, $value)
+    public function passes($attribute, $value): bool
     {
-        return !UnitSale::query()->where('inventory_id', $value)->exists();
+        /** @var User $user */
+        $user = Auth::user();
+
+        $quotesExist = UnitSale::query()->where('inventory_id', $value)->exists();
+
+        return !$user->is_dms_active || !$quotesExist;
     }
 
     /**
@@ -28,7 +35,7 @@ class QuotesNotExist implements Rule
      *
      * @return string
      */
-    public function message()
+    public function message(): string
     {
         return 'Can\'t delete inventory linked to quotes. Inventory ID - :attribute';
     }
