@@ -85,14 +85,14 @@ class OrderCancellationTest extends TestCase
         Bus::assertDispatched(ProcessRefundOnPaymentGatewayJob::class);
     }
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
         $this->seed = $this->createDealerWithOrder();
     }
 
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         $this->tearDownSeed($this->seed['dealer']->dealer_id);
 

@@ -27,14 +27,14 @@ abstract class RefundTest extends TestCase
     /** @var array{dealer: User, order: CompletedOrder, token: AuthToken, refund: ?Refund} */
     protected $seed;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
         $this->seed = $this->createRefund([], static::SKIP_REFUND_CREATION);
     }
 
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         $this->tearDownSeed($this->seed['dealer']->dealer_id);
 

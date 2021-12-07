@@ -34,7 +34,7 @@ class UpdateReturnStatusTest extends TestCase
         array  $expectedErrorMessages
     ): void
     {
-        $rma = is_callable($parameters['Rma']) ? $parameters['Rma']($this->seed)->textrail_rma : $parameters['Rma'];
+        $rma = is_callable($parameters['Rma']) ? $parameters['Rma']($this->seed) : $parameters['Rma'];
 
         $response = $this->json(
             self::VERB, str_replace('{rma}', $rma, static::ENDPOINT),
@@ -241,14 +241,14 @@ class UpdateReturnStatusTest extends TestCase
         Bus::assertDispatched(ProcessRefundOnPaymentGatewayJob::class);
     }
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
         $this->seed = $this->seed ?? $this->createRefund();
     }
 
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         $this->tearDownSeed($this->seed['dealer']->dealer_id);
 
@@ -271,13 +271,20 @@ class UpdateReturnStatusTest extends TestCase
 
     public function badArgumentsProvider(): array
     {
-        $getRefund = static function (array $seed): Refund {
-            return $seed['refund'];
+        $this->refreshApplication();
+        $this->setUpFaker();
+
+        $getRefund = static function (array $seed): int {
+            return $seed['refund']->textrail_rma;
+        };
+
+        $getFakeRma = function (array $seed): int {
+            return $this->faker->numberBetween(12000, 15000);
         };
 
         return [
             'Non existent rma, no status, and not items' => [
-                ['Rma' => $this->faker->numberBetween(12000, 15000)],
+                ['Rma' => $getFakeRma],
                 422,
                 'Validation Failed',
                 [
@@ -422,13 +429,13 @@ class UpdateReturnStatusTest extends TestCase
         ];
     }
 
-    public function __construct(?string $name = null, array $data = [], $dataName = '')
+   /* public function __construct(?string $name = null, array $data = [], $dataName = '')
     {
         parent::__construct($name, $data, $dataName);
 
         $this->refreshApplication();
         $this->setUpTraits();
-    }
+    }*/
 
     private function assertResponseHasValidationError(TestResponse $response, string $message): void
     {
