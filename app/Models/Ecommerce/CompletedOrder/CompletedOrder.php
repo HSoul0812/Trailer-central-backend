@@ -170,6 +170,11 @@ class CompletedOrder extends Model
         return $this->payment_status === self::PAYMENT_STATUS_PAID;
     }
 
+    public function isCanceled(): bool
+    {
+        return $this->ecommerce_order_status === self::ECOMMERCE_STATUS_CANCELED;
+    }
+
     public function isRefundable(): bool
     {
         return in_array(
