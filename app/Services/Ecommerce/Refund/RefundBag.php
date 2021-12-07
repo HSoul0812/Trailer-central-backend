@@ -226,6 +226,7 @@ final class RefundBag implements DTO
     /**
      * @throws RefundException when the order is not refundable due it is unpaid
      * @throws RefundException when the order is not refundable due it is refunded
+     * @throws RefundException when the order is not refundable due it is canceled
      * @throws RefundException when the order has not a payment unique id
      * @throws RefundException when the order has not a related parts matching with the request
      * @throws RefundAmountException when the refund total amount is greater than the order remaining total balance
@@ -241,6 +242,10 @@ final class RefundBag implements DTO
     {
         if (!$this->order->isPaid()) {
             throw new RefundException(sprintf('%d order is not refundable due it is unpaid', $this->order->id), 'order');
+        }
+
+        if ($this->order->isCanceled()) {
+            throw new RefundException(sprintf('%d order is not refundable due it is canceled', $this->order->id), 'order');
         }
 
         if (!$this->order->isRefundable()) {
