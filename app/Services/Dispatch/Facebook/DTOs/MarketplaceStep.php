@@ -105,16 +105,14 @@ class MarketplaceStep
         $selectors = config('marketing.fb.steps.selectors.' . $this->step, self::DEFAULT_SELECTORS);
 
         // Split Selectors
-        $allSelectors = new Collection();
+        $allSelectors = [];
         foreach(explode(",", $selectors) as $selector) {
             // Loop Selectors
-            $chosenSelectors = config('marketing.fb.selectors.' . $selector);
-            var_dump($chosenSelectors);
-            $allSelectors->merge($chosenSelectors);
+            $allSelectors = array_merge($allSelectors, config('marketing.fb.selectors.' . $selector));
         }
 
         // Return All Selectors
-        return $allSelectors;
+        return new Collection($allSelectors);
     }
 
     /**
