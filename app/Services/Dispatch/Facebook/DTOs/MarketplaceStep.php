@@ -139,6 +139,6 @@ class MarketplaceStep
      * @return bool
      */
     public function isError(): bool {
-        return ($this->status === self::STEP_ERROR);
+        return ($this->step === self::STEP_ERROR);
     }
 }
