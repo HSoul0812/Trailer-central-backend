@@ -11,6 +11,7 @@ use App\Http\Requests\Dispatch\Facebook\StepMarketplaceRequest;
 use App\Http\Requests\Dispatch\Facebook\DeleteMarketplaceRequest;
 use App\Http\Requests\Dispatch\Facebook\LoginMarketplaceRequest;
 use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
+use App\Services\Dispatch\Facebook\DTOs\MarketplaceStep;
 use App\Services\Dispatch\Facebook\MarketplaceServiceInterface;
 use App\Transformers\Marketing\Facebook\MarketplaceTransformer;
 use App\Transformers\Marketing\Facebook\ListingTransformer;
