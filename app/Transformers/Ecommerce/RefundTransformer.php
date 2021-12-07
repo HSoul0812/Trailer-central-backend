@@ -25,6 +25,7 @@ class RefundTransformer extends TransformerAbstract
                 'status' => $refund->status,
                 'parts' => $refund->parts,
                 'payment_gateway_id' => $refund->payment_gateway_id,
+                'rma' => $refund->textrail_rma,
                 'metadata' => $refund->metadata,
                 'created_at' => $refund->created_at->format('Y-m-d H:i:s'),
                 'updated_at' => $refund->updated_at->format('Y-m-d H:i:s'),
