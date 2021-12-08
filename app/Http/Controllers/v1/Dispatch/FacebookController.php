@@ -35,6 +35,11 @@ class FacebookController extends RestfulControllerV2 {
     private $transformer;
 
     /**
+     * @var DealerTransformer
+     */
+    private $dealerTransformer;
+
+    /**
      * @var ListingTransformer
      */
     private $listingTransformer;
@@ -53,13 +58,16 @@ class FacebookController extends RestfulControllerV2 {
         MarketplaceRepositoryInterface $repository,
         MarketplaceServiceInterface $service,
         MarketplaceTransformer $transformer,
+        DealerTransformer $dealerTransformer,
         ListingTransformer $listingTransformer,
         StatusTransformer $statusTransformer,
         StepTransformer $stepTransformer
     ) {
         $this->repository = $repository;
         $this->service = $service;
+
         $this->transformer = $transformer;
+        $this->dealerTransformer = $dealerTransformer;
         $this->listingTransformer = $listingTransformer;
         $this->statusTransformer = $statusTransformer;
         $this->stepTransformer = $stepTransformer;
@@ -93,11 +101,11 @@ class FacebookController extends RestfulControllerV2 {
     {
         // Handle Facebook Marketplace Request
         $requestData = $request->all();
-        $requestData['marketplace_id'] = $id;
+        $requestData['id'] = $id;
         $request = new ShowMarketplaceRequest($requestData);
         if ($request->validate()) {
             // Return Auth
-            return $this->response->item($this->repository->get($request->all()), $this->transformer);
+            return $this->response->item($this->service->dealer($request->id), $this->transformer);
         }
         
         return $this->response->errorBadRequest();

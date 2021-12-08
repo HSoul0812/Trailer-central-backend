@@ -3,7 +3,10 @@
 namespace App\Repositories\Marketing\Facebook;
 
 use App\Exceptions\NotImplementedException;
+use App\Models\Inventory\Inventory;
+use App\Models\Marketing\Facebook\Filter;
 use App\Models\Marketing\Facebook\Listings;
+use App\Models\Marketing\Facebook\Marketplace;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Support\Facades\DB;
 
@@ -116,5 +119,39 @@ class ListingRepository implements ListingRepositoryInterface {
 
     protected function getSortOrders() {
         return $this->sortOrders;
+    }
+
+
+    /**
+     * Get All Inventory Missing on Facebook
+     * 
+     * @param Marketplace $integration
+     * @return Collection<Listings>
+     */
+    public function getAllMissing(Marketplace $integration): Collection {
+        // Initialize Inventory Query
+        $query = Inventory::where('dealer_id', '=', $integration->dealer_id)
+                          ->where('show_on_website', 1)
+                          ->where('is_archived', 0)
+                          ->where('status', '<>', 2);
+
+        // Append Join
+        $query = $query->leftJoin(Listings::getTableName(), function($join) use($integration) {
+            $join->on(Listings::getTableName() . '.inventory_id', '=',
+                        Inventory::getTableName() . '.inventory_id')
+                 ->where(Listings::getTableName().'.fb_username', '=', $integration->id);
+        })->whereNull(Listings::getTableName() . '.');
+
+        // Append Filters
+        if (!empty($integration->filter_map)) {
+            $query = $query->where(function(Where $query) use($integration) {
+                foreach($integration->filter_map as $type => $values) {
+                    $query = $query->orWhereIn(Filter::FILTER_COLUMNS[$type], $values);
+                }
+            });
+        }
+
+        // Get All Listings
+        return $query->get();
     }
 }

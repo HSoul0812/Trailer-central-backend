@@ -25,6 +25,14 @@ class Filter extends Model
         'category' => 'Category'
     ];
 
+    /**
+     * @const array Filter Columns
+     */
+    const FILTER_COLUMNS = [
+        'entity' => 'entity_type_id',
+        'category' => 'category'
+    ];
+
 
     /**
      * @var string

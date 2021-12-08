@@ -3,19 +3,23 @@
 namespace App\Transformers\Dispatch\Facebook;
 
 use App\Services\Dispatch\Facebook\DTOs\DealerFacebook;
+use App\Transformers\Dispatch\InventoryTransformer;
 use App\Transformers\Dispatch\TunnelTransformer;
 use League\Fractal\TransformerAbstract;
 
 class DealerTransformer extends TransformerAbstract
 {
     protected $defaultIncludes = [
-        'tunnels'
+        'tunnels',
+        'inventory'
     ];
 
     public function __construct(
-        TunnelTransformer $tunnelTransformer
+        TunnelTransformer $tunnelTransformer,
+        InventoryTransformer $inventoryTransformer
     ) {
         $this->tunnelTransformer = $tunnelTransformer;
+        $this->inventoryTransformer = $inventoryTransformer;
     }
 
     public function transform(DealerFacebook $dealer)
@@ -39,5 +43,13 @@ class DealerTransformer extends TransformerAbstract
     public function includeTunnels(DealerFacebook $dealer)
     {
         return $this->collection($dealer->tunnels, $this->tunnelTransformer);
+    }
+
+    public function includeInventory(DealerFacebook $dealer)
+    {
+        if($dealer->inventory) {
+            return $this->collection($dealer->inventory, $this->inventoryTransformer);
+        }
+        return $this->null();
     }
 }

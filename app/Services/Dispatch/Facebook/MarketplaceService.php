@@ -12,6 +12,8 @@ use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
 use App\Repositories\Marketing\Facebook\ListingRepositoryInterface;
 use App\Repositories\Marketing\Facebook\ImageRepositoryInterface;
 use App\Services\Dispatch\Facebook\DTOs\DealerFacebook;
+use App\Services\Dispatch\Facebook\DTOs\InventoryFacebook;
+use App\Services\Dispatch\Facebook\DTOs\MarketplaceInventory;
 use App\Services\Dispatch\Facebook\DTOs\MarketplaceStatus;
 use App\Services\Dispatch\Facebook\DTOs\MarketplaceStep;
 use Illuminate\Support\Collection;
@@ -110,6 +112,36 @@ class MarketplaceService implements MarketplaceServiceInterface
         ]);
     }
 
+
+    /**
+     * Get Dealer Inventory
+     * 
+     * @return DealerFacebook
+     */
+    public function dealer(int $integrationId): DealerFacebook {
+        // Get Integration
+        $integration = $this->marketplace->get([
+            'id' => $integrationId
+        ]);
+
+        // Get Facebook Dealer
+        return new DealerFacebook([
+            'dealer_id' => $integration->dealer_id,
+            'dealer_name' => $integration->user->name,
+            'integration_id' => $integration->id,
+            'fb_username' => $integration->fb_username,
+            'fb_password' => $integration->fb_password,
+            'auth_username' => $integration->tfa_username,
+            'auth_password' => $integration->tfa_password,
+            'auth_type' => $integration->tfa_type,
+            'tunnels' => $this->tunnels->getAll(['dealer_id' => $integration->dealer_id]),
+            'inventory' => new MarketplaceInventory([
+                'create' => $this->listings->getAllMissing($integration),
+                'update' => $this->listings->getAllUpdates($integration),
+                'delete' => $this->listings->getAllSold($integration)
+            ])
+        ]);
+    }
 
     /**
      * Login to Marketplace
