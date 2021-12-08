@@ -12,6 +12,7 @@ use App\Http\Requests\CRM\Leads\GetUniqueFullNamesRequest;
 use App\Http\Requests\CRM\Leads\UpdateLeadRequest;
 use App\Http\Requests\CRM\Leads\CreateLeadRequest;
 use App\Http\Requests\CRM\Leads\GetLeadRequest;
+use App\Http\Requests\CRM\Leads\GetLeadsRequest;
 use App\Http\Requests\CRM\Leads\GetLeadsMatchesRequest;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Services\CRM\Leads\LeadServiceInterface;
