@@ -20,7 +20,6 @@ interface TextrailRefundsInterface
      * @return int refund/memo id
      *
      * @throws ClientException when some remote error appears
-     * @throws \Brick\Money\Exception\MoneyMismatchException
      */
-    public function issueRefund(RefundBag $refundBag): int;
+    public function issueRefund(int $textrailOrderId, array $items): int;
 }
