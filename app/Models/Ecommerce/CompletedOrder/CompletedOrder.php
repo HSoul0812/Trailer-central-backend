@@ -38,6 +38,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $ecommerce_order_status not_approved, approved, canceled
  * @property string $shipping_carrier_code
  * @property string $shipping_method_code
+ * @property float $tax_rate
  * @property \DateTimeInterface $created_at
  * @property \DateTimeInterface $updated_at
  * @property \DateTimeInterface $refunded_at
