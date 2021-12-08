@@ -196,6 +196,7 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('payment_uuid_valid', 'App\Rules\Inventory\Floorplan\PaymentUUIDValid@validate');
         \Validator::extend('stock_type_valid', 'App\Rules\Bulks\Parts\StockTypeValid@passes');
         \Validator::extend('unit_sale_exists', 'App\Rules\Dms\UnitSaleExists@passes');
+        \Validator::extend('valid_include', 'App\Rules\ValidInclude@validate');
 
         Builder::macro('whereLike', function($attributes, string $searchTerm) {
             foreach(array_wrap($attributes) as $attribute) {
