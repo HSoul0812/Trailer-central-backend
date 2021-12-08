@@ -28,7 +28,7 @@ class RefundTransformer extends TransformerAbstract
                 'rma' => $refund->textrail_rma,
                 'metadata' => $refund->metadata,
                 'created_at' => $refund->created_at->format('Y-m-d H:i:s'),
-                'updated_at' => $refund->updated_at->format('Y-m-d H:i:s'),
+                'updated_at' => $refund->updated_at ? $refund->updated_at->format('Y-m-d H:i:s') : null,
             ] + $extraData;
     }
 
