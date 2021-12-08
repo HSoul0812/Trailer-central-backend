@@ -123,29 +123,43 @@ class MarketplaceService implements MarketplaceServiceInterface
                             ' Inventory #' . $params['inventory_id'] .
                             ' for the Marketplace Integration #' . $params['id']);
 
-        // Insert Into DB
-        $listing = $this->listings->create($params);
-        $this->log->info('Saved Listing #' . $listing->id . ' for ' .
-                            'Facebook Listing #' . $params['facebook_id']);
+        // Start Transaction
+        $this->listings->beginTransaction();
 
-        // Create Images for Listing
-        if(!empty($params['images']) && is_array($params['images'])) {
-            // Delete Existing Images for Listing
-            $this->images->deleteAll($listing->id);
+        try {
+            // Insert Into DB
+            $listing = $this->listings->create($params);
+            $this->log->info('Saved Listing #' . $listing->id . ' for ' .
+                                'Facebook Listing #' . $params['facebook_id']);
 
-            // Add New Images
-            foreach($params['images'] as $imageId) {
-                $this->images->create([
-                    'listing_id' => $listing->id,
-                    'image_id' => $imageId
-                ]);
+            // Create Images for Listing
+            if(!empty($params['images']) && is_array($params['images'])) {
+                // Delete Existing Images for Listing
+                $this->images->deleteAll($listing->id);
+
+                // Add New Images
+                foreach($params['images'] as $imageId) {
+                    $this->images->create([
+                        'listing_id' => $listing->id,
+                        'image_id' => $imageId
+                    ]);
+                }
+                $this->log->info('Saved ' . count($params['images']) . ' for ' .
+                                    'Listing #' . $params['id']);
             }
-            $this->log->info('Saved ' . count($params['images']) . ' for ' .
-                                'Listing #' . $params['id']);
-        }
 
-        // Return Listing
-        return $listing;
+            $this->listings->commitTransaction();
+
+            // Return Listing
+            return $listing;
+        } catch (Exception $e) {
+            $this->logger->error('Marketplace Listing create error. params=' .
+                                    json_encode($params), $e->getTrace());
+
+            $this->listings->rollbackTransaction();
+
+            throw $e;
+        }
     }
 
 
