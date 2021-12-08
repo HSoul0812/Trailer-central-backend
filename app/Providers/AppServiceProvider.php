@@ -129,6 +129,8 @@ use App\Services\Inventory\Floorplan\PaymentServiceInterface;
 use App\Services\Inventory\Floorplan\PaymentService;
 use App\Services\Inventory\InventoryService;
 use App\Services\Inventory\InventoryServiceInterface;
+use App\Repositories\Inventory\Manufacturers\BrandRepositoryInterface;
+use App\Repositories\Inventory\Manufacturers\BrandRepository;
 use App\Services\Pos\CustomSalesReportExporterService;
 use App\Services\Pos\CustomSalesReportExporterServiceInterface;
 use App\Services\Website\Log\LogServiceInterface;
@@ -353,5 +355,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(EmployeeRepositoryInterface::class, EmployeeRepository::class);
         $this->app->bind(TimeClockServiceInterface::class, TimeClockService::class);
         $this->app->bind(WebsiteConfigServiceInterface::class, WebsiteConfigService::class);
+        $this->app->bind(BrandRepositoryInterface::class, BrandRepository::class);
     }
 }
