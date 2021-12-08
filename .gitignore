@@ -1,4 +1,5 @@
 /vendor
+/public/vendor/horizon
 /.idea
 Homestead.json
 Homestead.yaml

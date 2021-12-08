@@ -9,8 +9,8 @@ use App\Http\Requests\Inventory\CreateInventoryRequest;
 use App\Http\Requests\Inventory\DeleteInventoryRequest;
 use App\Http\Requests\Inventory\ExistsInventoryRequest;
 use App\Http\Requests\Inventory\GetInventoryHistoryRequest;
+use App\Http\Requests\Inventory\GetInventoryItemRequest;
 use App\Http\Requests\Inventory\UpdateInventoryRequest;
-use App\Models\Inventory\Inventory;
 use App\Repositories\Inventory\InventoryHistoryRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Services\Inventory\InventoryServiceInterface;
@@ -169,7 +169,7 @@ class InventoryController extends RestfulControllerV2
      *     tags={"Inventory"},
      *     @OA\Parameter(
      *         name="id",
-     *         in="query",
+     *         in="path",
      *         description="Inventory ID",
      *         required=true,
      *         @OA\Schema(type="integer")
@@ -186,10 +186,19 @@ class InventoryController extends RestfulControllerV2
      * )
      *
      * @param int $id
-     * @return \Dingo\Api\Http\Response
+     * @return Response
+     * @throws NoObjectIdValueSetException
+     * @throws NoObjectTypeSetException
      */
-    public function show(int $id) {
-        return $this->response->item($this->inventoryRepository->getAndIncrementTimesViewed(['id' => $id]), new InventoryTransformer());
+    public function show(int $id, Request $request): Response
+    {
+        $request = new GetInventoryItemRequest(array_merge(['id' => $id], $request->all()));
+
+        if (!$request->validate()) {
+            $this->response->errorBadRequest();
+        }
+
+        return $this->response->item($this->inventoryRepository->getAndIncrementTimesViewed($request->all()), new InventoryTransformer());
     }
 
     /**

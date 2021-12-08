@@ -3,6 +3,7 @@
 namespace App\Models\Inventory;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Class InventoryImage
@@ -16,6 +17,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $showroom_image,
  * @property bool $was_manually_added,
  * @property bool $is_stock,
+ *
+ * @property Image $image
  */
 class InventoryImage extends Model {
     /**
@@ -37,5 +40,12 @@ class InventoryImage extends Model {
         'was_manually_added',
         'is_stock',
     ];
-    
+
+    /**
+     * @return BelongsTo
+     */
+    public function image(): BelongsTo
+    {
+        return $this->belongsTo(Image::class, 'image_id', 'image_id');
+    }
 }

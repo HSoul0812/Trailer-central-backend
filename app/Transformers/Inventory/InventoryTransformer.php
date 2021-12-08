@@ -3,44 +3,82 @@
 namespace App\Transformers\Inventory;
 
 use App\Models\Inventory\File;
+use App\Models\Inventory\InventoryImage;
 use App\Transformers\Dms\ServiceOrderTransformer;
+use Illuminate\Database\Eloquent\Collection;
+use League\Fractal\Resource\Item;
 use League\Fractal\TransformerAbstract;
 use App\Models\Inventory\Inventory;
 use App\Transformers\User\UserTransformer;
 use App\Transformers\User\DealerLocationTransformer;
-use Illuminate\Database\Eloquent\Collection;
 use App\Transformers\Website\WebsiteTransformer;
-use App\Models\User\User;
+use League\Fractal\Resource\Collection as FractalCollection;
 
+/**
+ * Class InventoryTransformer
+ * @package App\Transformers\Inventory
+ */
 class InventoryTransformer extends TransformerAbstract
 {
     protected $availableIncludes = [
         'website',
         'repairOrders',
-        'attributes'
+        'attributes',
+        'features',
+        'clapps',
     ];
 
+    /**
+     * @var UserTransformer
+     */
     protected $userTransformer;
 
+    /**
+     * @var DealerLocationTransformer
+     */
     protected $dealerLocationTransformer;
 
-    protected $imageTransformer;
+    /**
+     * @var InventoryImageTransformer
+     */
+    protected $inventoryImageTransformer;
 
-    /** @var FileTransformer */
+    /**
+     * @var AttributeValueTransformer
+     */
+    private $attributeValueTransformer;
+
+    /**
+     * @var FeatureTransformer
+     */
+    private $featureTransformer;
+
+    /**
+     * @var FileTransformer
+     */
     private $fileTransformer;
 
-    public function __construct()
-    {
-        $this->userTransformer = new UserTransformer();
-        $this->dealerLocationTransformer = new DealerLocationTransformer();
-        $this->imageTransformer = new ImageTransformer();
-        $this->fileTransformer = new FileTransformer();
+    /**
+     * @var ClappTransformer
+     */
+    private $clappTransformer;
+
+    public function __construct() {
+        $this->userTransformer = new UserTransformer;
+        $this->dealerLocationTransformer = new DealerLocationTransformer;
+        $this->inventoryImageTransformer = new InventoryImageTransformer;
+        $this->fileTransformer = new FileTransformer;
+        $this->attributeValueTransformer = new AttributeValueTransformer;
+        $this->featureTransformer = new FeatureTransformer;
+        $this->clappTransformer = new ClappTransformer;
     }
 
+    /**
+     * @param Inventory $inventory
+     * @return array
+     */
     public function transform(Inventory $inventory): array
     {
-        $user = User::where('dealer_id', $inventory->dealer_id)->first();
-                
         return [
              'id' => $inventory->inventory_id,
              'identifier' => $inventory->identifier,
@@ -62,9 +100,9 @@ class InventoryTransformer extends TransformerAbstract
              'fp_committed' => $inventory->fp_committed,
              'gvwr' => $inventory->gvwr,
              'height' => $inventory->height,
-             'images' => $this->transformImages($inventory->images),
+             'images' => $this->transformImages($inventory->inventoryImages),
              'files' => $this->transformFiles($inventory->files),
-             'primary_image' => $inventory->images->count() > 0 ? $this->imageTransformer->transform($inventory->images->first()) : null,
+             'primary_image' => $inventory->images->count() > 0 ? $this->inventoryImageTransformer->transform($inventory->inventoryImages->first()) : null,
              'is_archived' => $inventory->is_archived,
              'is_floorplan_bill' => $inventory->is_floorplan_bill,
              'length' => $inventory->length,
@@ -96,21 +134,52 @@ class InventoryTransformer extends TransformerAbstract
              'created_at' => $inventory->created_at,
              'updated_at' => $inventory->updated_at,
              'times_viewed' => $inventory->times_viewed,
-             'quote_url' => config('app.new_design_crm_url') . $user->getCrmLoginUrl('bill-of-sale/new?inventory_id=' . $inventory->identifier)
+             'quote_url' => config('app.new_design_crm_url') . $inventory->user->getCrmLoginUrl('bill-of-sale/new?inventory_id=' . $inventory->identifier)
          ];
     }
-    
-    public function includeAttributes($inventory)
+
+    /**
+     * @param Inventory $inventory
+     * @return FractalCollection
+     */
+    public function includeAttributes(Inventory $inventory): FractalCollection
     {
-        return $inventory->attributes;
+        return $this->collection($inventory->attributeValues, $this->attributeValueTransformer);
     }
 
-    public function includeWebsite($inventory)
+    /**
+     * @param Inventory $inventory
+     * @return FractalCollection
+     */
+    public function includeFeatures(Inventory $inventory): FractalCollection
+    {
+        return $this->collection($inventory->inventoryFeatures, $this->featureTransformer);
+    }
+
+    /**
+     * @param Inventory $inventory
+     * @return FractalCollection
+     */
+    public function includeClapps(Inventory $inventory): FractalCollection
+    {
+        return $this->collection($inventory->clapps, $this->clappTransformer);
+    }
+
+    /**
+     * @param Inventory $inventory
+     * @return Item
+     */
+    public function includeWebsite(Inventory $inventory): Item
     {
         return $this->item($inventory->user->website, new WebsiteTransformer);
     }
 
-    public function includeRepairOrders($inventory) {
+    /**
+     * @param $inventory
+     * @return array|FractalCollection
+     */
+    public function includeRepairOrders($inventory)
+    {
         if (empty($inventory->repairOrders)) {
             return [];
         }
@@ -118,15 +187,21 @@ class InventoryTransformer extends TransformerAbstract
         return $this->collection($inventory->repairOrders, new ServiceOrderTransformer());
     }
 
-    private function transformImages(Collection $images)
+    /**
+     * @param Collection $images
+     * @return array
+     */
+    private function transformImages(Collection $images): array
     {
-        $ret = [];
-        foreach($images as $img) {
-            $ret[] = $this->imageTransformer->transform($img);
-        }
-        return $ret;
+        return $images->map(function (InventoryImage $image) {
+            return $this->inventoryImageTransformer->transform($image);
+        })->toArray();
     }
 
+    /**
+     * @param Collection $files
+     * @return array
+     */
     private function transformFiles(Collection $files): array
     {
         return $files->map(function (File $file) {
