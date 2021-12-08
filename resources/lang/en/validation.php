@@ -209,4 +209,5 @@ return [
     'valid_smtp_email' => 'The selected :attribute doesn\'t have any smtp configuration!',
     'tax_calculator_valid' => 'The selected tax calculator id is invalid',
     'inventory_quotes_not_exist' => 'Can\'t delete inventory linked to quotes',
+    'valid_include' => 'The :attribute is not valid',
 ];

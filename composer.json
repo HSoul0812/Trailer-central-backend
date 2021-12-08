@@ -36,6 +36,7 @@
         "illuminate/support": "^6.0",
         "inspheric/nova-defaultable": "^1.2",
         "laravel/framework": "^6.0",
+        "laravel/horizon": "~3.0",
         "laravel/lumen-framework": "^6.0",
         "laravel/nova": "*",
         "laravel/scout": "^7.2",
@@ -46,7 +47,6 @@
         "league/oauth2-client": "^2.6",
         "microsoft/microsoft-graph": "^1.34",
         "php-ews/php-ews": "~1.0",
-        "webklex/laravel-imap": "~2.4",
         "predis/predis": "^1.1",
         "psr/log": "^1.0",
         "spatie/laravel-sitemap": "^5.7",
@@ -55,7 +55,8 @@
         "symfony/css-selector": "^5.1",
         "symfony/dom-crawler": "^5.1",
         "tijsverkoyen/css-to-inline-styles": "^2.2.1",
-        "twilio/sdk": "^5.31"
+        "twilio/sdk": "^5.31",
+        "webklex/laravel-imap": "~2.4"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.4",
