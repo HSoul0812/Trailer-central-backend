@@ -121,10 +121,6 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
             }
 
             $completedOrder = CompletedOrder::create($params);
-
-            if (!$completedOrder->isPaid()) {
-                event(new PrepareMagentoOrder($completedOrder));
-            }
         }
 
         $wasNotPaid = !$completedOrder->ispaid();

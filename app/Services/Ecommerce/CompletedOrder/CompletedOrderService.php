@@ -118,10 +118,9 @@ class CompletedOrderService implements CompletedOrderServiceInterface
         try {
             $this->completedOrderRepository->beginTransaction();
 
-            // just in case we need to covert a customer cart into an order, we should use another method like createOrderFromCart
-            //$method = $order->ecommerce_customer_id ? 'createOrderFromCart' : 'createOrderFromGuestCart';
 
-            $poNumber = $order->po_number ? $order->po_number : $this->completedOrderRepository->generateNextPoNumber($order->dealer_id);
+            // Using payment_intent as PO.
+            $poNumber = $order->payment_intent;
 
             // it only will try to create a new order on the Magento Side when it hasn't been done before this,
             // it should happen for example due a duplication entry error constraint
@@ -206,6 +205,21 @@ class CompletedOrderService implements CompletedOrderServiceInterface
             $this->completedOrderRepository->update($infoToBeOverride + ['id' => $orderId]);
 
             $this->logger->info(sprintf('Order(%d) items were successfully updated according to Textrail', $orderId));
+
+            // Update Payment Intent
+            $this->paymentGatewayService->updatePaymentIntent(
+                [
+                    'payment_intent' => $order->payment_intent,
+                    'ecommerce_order_id' => $order->ecommerce_order_id,
+                ]
+            );
+
+            // Confirm Payment Intent
+            $this->paymentGatewayService->confirmPaymentIntent(
+                [
+                'payment_intent' => $order->payment_intent,
+                ]
+            );
 
             return true;
         } catch (ClientException | \Exception $exception) {

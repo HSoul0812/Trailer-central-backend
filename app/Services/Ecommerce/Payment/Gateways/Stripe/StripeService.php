@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Ecommerce\Payment\Gateways\Stripe;
 
 use App\Exceptions\Ecommerce\RefundPaymentGatewayException;
+use App\Exceptions\Ecommerce\TextrailSyncException;
 use App\Services\Ecommerce\Payment\Gateways\PaymentGatewayServiceInterface;
 use Brick\Money\Money;
 use Stripe\Exception\ApiErrorException;
@@ -89,4 +90,25 @@ class StripeService implements PaymentGatewayServiceInterface
       return $invoice->toArray();
     }
 
+    public function updatePaymentIntent(array $params): bool
+    {
+        try {
+            $this->client->paymentIntents->update($params['payment_intent'], [
+                'metadata' => [
+                    'order_id' => $params['ecommerce_order_id']
+                ]
+            ]);
+        } catch (ApiErrorException $e) {
+            throw new TextrailSyncException($params['payment_intent']. " payment intent could not updated");
+        }
+    }
+
+    public function confirmPaymentIntent(array $params): bool
+    {
+        try {
+            $this->client->paymentIntents->confirm($params['payment_intent']);
+        } catch (ApiErrorException $e) {
+            throw new TextrailSyncException($params['payment_intent' . " payment intent confirm error."]);
+        }
+    }
 }
