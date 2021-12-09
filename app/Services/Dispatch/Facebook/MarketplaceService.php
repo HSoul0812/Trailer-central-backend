@@ -286,7 +286,6 @@ class MarketplaceService implements MarketplaceServiceInterface
                 $listings->push(InventoryFacebook::getFromListings($listing));
             }
         }
-        var_dump($inventory);
 
         // Return Facebook Inventory Updates
         return $listings;
