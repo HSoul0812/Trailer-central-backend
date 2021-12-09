@@ -121,10 +121,6 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
             }
 
             $completedOrder = CompletedOrder::create($params);
-
-            if (!$completedOrder->isPaid()) {
-                event(new PrepareMagentoOrder($completedOrder));
-            }
         }
 
         $wasNotPaid = !$completedOrder->ispaid();
@@ -183,34 +179,6 @@ class CompletedOrderRepository implements CompletedOrderRepositoryInterface
     public function delete($params)
     {
         // TODO: Implement delete() method.
-    }
-
-    /**
-     * it will return a PO number like this pattern: PO-{dealer_id}{next_number} e.g: PO-10011, PO-10012
-     *
-     * This always should be wrapped in a transaction, because we need to lock the rows for the provided dealer.
-     *
-     * @param int $dealerId
-     * @return string
-     */
-    public function generateNextPoNumber(int $dealerId): string
-    {
-        // we need to look the rows for the provided dealer, then generate the next number
-        // it will be released when transaction ended
-        CompletedOrder::query()->where('dealer_id', $dealerId)->lockForUpdate()->get(['po_number']);
-
-        /** @var CompletedOrder $order */
-        $order = CompletedOrder::query()->selectRaw("CAST(REPLACE(po_number, 'PO-','') AS UNSIGNED) AS po_number")
-            ->where('dealer_id', $dealerId)
-            ->whereNotNull('po_number')
-            ->orderByRaw('1 DESC')
-            ->first(['po_number']);
-
-        if (is_null($order)) {
-            return sprintf('PO-%d%d', $dealerId, 1);
-        }
-
-        return sprintf('PO-%d', (int)$order->po_number + 1);
     }
 
     private function addFiltersToQuery(Builder $query, array $filters, bool $noStatusJoin = false): Builder

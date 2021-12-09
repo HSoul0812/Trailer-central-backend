@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Services\Ecommerce\Payment\Gateways\Stripe;
 
 use App\Exceptions\Ecommerce\RefundPaymentGatewayException;
+use App\Exceptions\Ecommerce\TextrailSyncException;
 use App\Services\Ecommerce\Payment\Gateways\PaymentGatewayServiceInterface;
 use Brick\Money\Money;
+use GuzzleHttp\Exception\ClientException;
 use Stripe\Exception\ApiErrorException;
 use Stripe\StripeClient;
 use Stripe\StripeClientInterface;
@@ -81,12 +83,37 @@ class StripeService implements PaymentGatewayServiceInterface
     {
         return in_array($reason, self::REFUND_REASONS);
     }
-    
+
     public function getInvoice(CompletedOrder $completedOrder): array
     {
       $invoice = $this->client->invoices->retrieve($completedOrder->invoice_id);
-      
+
       return $invoice->toArray();
     }
 
+    public function updatePaymentIntent(array $params): bool
+    {
+        try {
+            $this->client->paymentIntents->update($params['payment_intent'], [
+                'metadata' => [
+                    'order_id' => $params['ecommerce_order_id']
+                ]
+            ]);
+
+            return true;
+        } catch (ClientException | \Exception $exception) {
+            throw new TextrailSyncException($exception->getMessage(), $exception->getCode(), $exception);
+        }
+    }
+
+    public function confirmPaymentIntent(array $params): bool
+    {
+        try {
+            $this->client->paymentIntents->confirm($params['payment_intent']);
+
+            return true;
+        } catch (ClientException | \Exception $exception) {
+            throw new TextrailSyncException($exception->getMessage(), $exception->getCode(), $exception);
+        }
+    }
 }
