@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e54a06823bc3e8f8009c45408b6997a6",
+    "content-hash": "d7a91ff7c3f784bca20793c0ec002b05",
     "packages": [
         {
             "name": "algolia/algoliasearch-client-php",
@@ -2142,7 +2142,7 @@
         },
         {
             "name": "feed/edit-mapping",
-            "version": "dev-develop",
+            "version": "dev-feature/FME-21-create-facebook-marketplace-dealer-inventory-endpoint",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/EditMapping",
@@ -11975,5 +11975,9 @@
         "ext-json": "*"
     },
     "platform-dev": [],
+    "platform-overrides": {
+        "ext-pcntl": "7.1",
+        "ext-posix": "7.1"
+    },
     "plugin-api-version": "2.1.0"
 }

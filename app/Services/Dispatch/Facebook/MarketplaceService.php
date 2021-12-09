@@ -136,9 +136,9 @@ class MarketplaceService implements MarketplaceServiceInterface
             'auth_type' => $integration->tfa_type,
             'tunnels' => $this->tunnels->getAll(['dealer_id' => $integration->dealer_id]),
             'inventory' => new MarketplaceInventory([
-                'create' => $this->listings->getAllMissing($integration),
-                'update' => $this->listings->getAllUpdates($integration),
-                'delete' => $this->listings->getAllSold($integration)
+                'create' => $this->getInventory($integration, 'missing')/*,
+                'update' => $this->getInventory($integration, 'updates'),
+                'delete' => $this->getInventory($integration, 'sold')*/
             ])
         ]);
     }
@@ -256,5 +256,38 @@ class MarketplaceService implements MarketplaceServiceInterface
 
         // Return Dealers Collection
         return $dealers;
+    }
+
+    /**
+     * Get Inventory to Post
+     * 
+     * @param Marketplace $integration
+     * @param string $type missing|updates|sold
+     * @return Collection<InventoryFacebook>
+     */
+    private function getInventory(Marketplace $integration, string $type): Collection {
+        // Invalid Type? Return Empty Collection!
+        if(isset(MarketplaceInventory::INVENTORY_METHODS[$type])) {
+            return new Collection();
+        }
+
+        // Get Method
+        $method = MarketplaceInventory::INVENTORY_METHODS[$type];
+
+        // Get Inventory
+        $inventory = $this->listings->{$method}($integration);
+
+        // Loop Through Inventory Items
+        $listings = new Collection();
+        foreach($inventory as $listing) {
+            if($type === MarketplaceInventory::METHOD_MISSING) {
+                $listings->push(InventoryFacebook::getFromInventory($listing, $integration));
+            } else {
+                $listings->push(InventoryFacebook::getFromListings($listing));
+            }
+        }
+
+        // Return Facebook Inventory Updates
+        return $listings;
     }
 }

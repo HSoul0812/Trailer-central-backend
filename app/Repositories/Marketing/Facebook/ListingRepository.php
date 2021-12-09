@@ -140,8 +140,9 @@ class ListingRepository implements ListingRepositoryInterface {
         $query = $query->leftJoin(Listings::getTableName(), function($join) use($integration) {
             $join->on(Listings::getTableName() . '.inventory_id', '=',
                         Inventory::getTableName() . '.inventory_id')
-                 ->where(Listings::getTableName().'.fb_username', '=', $integration->id);
-        })->whereNull(Listings::getTableName() . '.');
+                 ->where(Listings::getTableName().'.username', '=', $integration->fb_username)
+                 ->where(Listings::getTableName().'.page_id', '=', $integration->page_id);
+        })->whereNull(Listings::getTableName() . '.facebook_id');
 
         // Append Filters
         if (!empty($integration->filter_map)) {

@@ -164,6 +164,8 @@ class Inventory extends Model
     const COLOR_ATTRIBUTE_ID = 11;
     const FUEL_TYPE_ATTRIBUTE_ID = 14;
     const MILEAGE_ATTRIBUTE_ID = 16;
+    const TRANSMISSION_ATTRIBUTE_ID = 28;
+    const BODY_ATTRIBUTE_ID = 67;
 
     const TABLE_NAME = 'inventory';
 
@@ -511,6 +513,34 @@ class Inventory extends Model
     {
         // Get Attribute
         $attribute = $this->attributeValues()->where('attribute_id', self::MILEAGE_ATTRIBUTE_ID)->first();
+
+        // Return Value
+        return $attribute->value ?? '';
+    }
+
+    /**
+     * Get Transmission
+     *
+     * @return string
+     */
+    public function getTransmissionAttribute(): ?string
+    {
+        // Get Attribute
+        $attribute = $this->attributeValues()->where('attribute_id', self::TRANSMISSION_ATTRIBUTE_ID)->first();
+
+        // Return Value
+        return $attribute->value ?? '';
+    }
+
+    /**
+     * Get Body Type
+     *
+     * @return string
+     */
+    public function getBodyAttribute(): ?string
+    {
+        // Get Attribute
+        $attribute = $this->attributeValues()->where('attribute_id', self::BODY_ATTRIBUTE_ID)->first();
 
         // Return Value
         return $attribute->value ?? '';
