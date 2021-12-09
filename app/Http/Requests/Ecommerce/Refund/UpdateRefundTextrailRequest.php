@@ -6,14 +6,11 @@ namespace App\Http\Requests\Ecommerce\Refund;
 
 use App\Http\Requests\Request;
 use App\Models\Ecommerce\Refund;
-use App\Models\Ecommerce\RefundTextrailStatuses;
 use App\Repositories\Ecommerce\RefundRepositoryInterface;
-use Illuminate\Validation\Rule;
 
 /**
  * @property int $Rma Order return id
- * @property array<array{sku: string, qty: int}> $Items
- * @property string $Status Textrail status as they used
+ * @property array<array{sku: string, qty: int}> $Items list of approved items
  */
 class UpdateRefundTextrailRequest extends Request
 {
@@ -21,8 +18,7 @@ class UpdateRefundTextrailRequest extends Request
     {
         return [
             'Rma' => 'integer|min:1|required|exists:ecommerce_order_refunds,textrail_rma',
-            'Status' => ['required', 'string', Rule::in(array_keys(RefundTextrailStatuses::MAP))],
-            'Items' => 'array|required',
+            'Items' => 'array|present',
             'Items.*.Sku' => 'required',
             'Items.*.Qty' => 'required|integer|min:1'
         ];
@@ -31,11 +27,6 @@ class UpdateRefundTextrailRequest extends Request
     public function refund(): ?Refund
     {
         return $this->repository()->getByRma((int)$this->Rma);
-    }
-
-    public function mappedStatus(): ?string
-    {
-        return $this->status ?? RefundTextrailStatuses::MAP[$this->Status] ?? Refund::STATUS_PENDING;
     }
 
     /**
