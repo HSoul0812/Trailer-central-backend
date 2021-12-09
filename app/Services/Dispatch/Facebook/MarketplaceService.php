@@ -13,6 +13,7 @@ use App\Repositories\Marketing\Facebook\ListingRepositoryInterface;
 use App\Repositories\Marketing\Facebook\ImageRepositoryInterface;
 use App\Services\Dispatch\Facebook\DTOs\DealerFacebook;
 use App\Services\Dispatch\Facebook\DTOs\MarketplaceStatus;
+use App\Services\Dispatch\Facebook\DTOs\MarketplaceStep;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
@@ -162,6 +163,38 @@ class MarketplaceService implements MarketplaceServiceInterface
         }
     }
 
+    /**
+     * Logging Details for Step
+     * 
+     * @param MarketplaceStep $step
+     * @return MarketplaceStep
+     */
+    public function step(MarketplaceStep $step): MarketplaceStep {
+        // Log
+        $this->log->info($step->getResponse());
+
+        // Catch Logs From Extension
+        foreach($step->getLogs() as $log) {
+            // Get Step
+            if($step->isError() && !$log->isError()) {
+                continue;
+            }
+
+            // Add to Log File
+            $this->log->{$log->psr}($log->getLogString());
+
+            // Send Error to Slack
+            if($log->isError()) {
+                // TO DO: Send to Slack
+                // Create a Service to Handle Slack Messages and Toggle Type
+                //$this->notifySlack($msg, $psr);
+            }
+        }
+
+        // Return Listing
+        return $step;
+    }
+
 
     /**
      * Get Dealer Integrations
@@ -191,40 +224,5 @@ class MarketplaceService implements MarketplaceServiceInterface
 
         // Return Dealers Collection
         return $dealers;
-    }
-
-
-    /**
-     * Catch Logs and Errors
-     * 
-     * @param null|array $logs
-     * @param null|bool $restrict
-     */
-    private function catchLogs(?array $logs = null, ?bool $restrict = null) {
-        // Catch All Logs
-        foreach($logs as $psr => $data) {
-            // Restrict Logs to One Type
-            if($restrict !== null && $restrict !== $psr) {
-                continue;
-            }
-
-            // Create String
-            $msg = '';
-            if(is_array($data)) {
-                foreach($data as $item) {
-                    $msg .= ((is_array($item) || is_object($item)) ? print_r($item, true) : $item);
-                }
-            }
-
-            // Add to Log File
-            $this->log->{$psr}($msg);
-
-            // Send Error to Slack
-            if($psr === 'error') {
-                // TO DO: Send to Slack
-                // Create a Service to Handle Slack Messages and Toggle Type
-                //$this->notifySlack($msg, $psr);
-            }
-        }
     }
 }

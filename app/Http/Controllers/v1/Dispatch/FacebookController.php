@@ -7,14 +7,16 @@ use Dingo\Api\Http\Request;
 use App\Http\Requests\Dispatch\Facebook\GetMarketplaceRequest;
 use App\Http\Requests\Dispatch\Facebook\ShowMarketplaceRequest;
 use App\Http\Requests\Dispatch\Facebook\CreateMarketplaceRequest;
-use App\Http\Requests\Dispatch\Facebook\UpdateMarketplaceRequest;
+use App\Http\Requests\Dispatch\Facebook\StepMarketplaceRequest;
 use App\Http\Requests\Dispatch\Facebook\DeleteMarketplaceRequest;
 use App\Http\Requests\Dispatch\Facebook\LoginMarketplaceRequest;
 use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
+use App\Services\Dispatch\Facebook\DTOs\MarketplaceStep;
 use App\Services\Dispatch\Facebook\MarketplaceServiceInterface;
 use App\Transformers\Marketing\Facebook\MarketplaceTransformer;
 use App\Transformers\Marketing\Facebook\ListingTransformer;
 use App\Transformers\Dispatch\Facebook\StatusTransformer;
+use App\Transformers\Dispatch\Facebook\StepTransformer;
 
 class FacebookController extends RestfulControllerV2 {
     /**
@@ -42,18 +44,25 @@ class FacebookController extends RestfulControllerV2 {
      */
     private $statusTransformer;
 
+    /**
+     * @var StepTransformer
+     */
+    private $stepTransformer;
+
     public function __construct(
         MarketplaceRepositoryInterface $repository,
         MarketplaceServiceInterface $service,
         MarketplaceTransformer $transformer,
         ListingTransformer $listingTransformer,
-        StatusTransformer $statusTransformer
+        StatusTransformer $statusTransformer,
+        StepTransformer $stepTransformer
     ) {
         $this->repository = $repository;
         $this->service = $service;
         $this->transformer = $transformer;
         $this->listingTransformer = $listingTransformer;
         $this->statusTransformer = $statusTransformer;
+        $this->stepTransformer = $stepTransformer;
     }
 
     /**
@@ -95,7 +104,7 @@ class FacebookController extends RestfulControllerV2 {
     }
 
     /**
-     * Create Facebook Marketplace Integration
+     * Create Facebook Marketplace Inventory
      * 
      * @param int $id
      * @param Request $request
@@ -116,7 +125,7 @@ class FacebookController extends RestfulControllerV2 {
     }
 
     /**
-     * Update Facebook Marketplace Integration
+     * Log Step on Facebook Marketplace
      * 
      * @param Request $request
      * @return type
@@ -126,10 +135,10 @@ class FacebookController extends RestfulControllerV2 {
         // Handle Facebook Marketplace Request
         $requestData = $request->all();
         $requestData['marketplace_id'] = $id;
-        $request = new UpdateMarketplaceRequest($requestData);
+        $request = new StepMarketplaceRequest($requestData);
         if ($request->validate()) {
             // Return Auth
-            return $this->response->item($this->service->update($request), $this->transformer);
+            return $this->response->item($this->service->step(new MarketplaceStep($request->all())), $this->stepTransformer);
         }
         
         return $this->response->errorBadRequest();

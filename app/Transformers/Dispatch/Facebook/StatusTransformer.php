@@ -34,7 +34,11 @@ class StatusTransformer extends TransformerAbstract
 
     public function transform(MarketplaceStatus $status)
     {
-        return [];
+        return [
+            'config' => [
+                'selectors' => $status->getAllSelectors()
+            ]
+        ];
     }
 
     public function includeDealers(MarketplaceStatus $status)
