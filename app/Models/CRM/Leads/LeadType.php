@@ -11,9 +11,11 @@ class LeadType extends Model
     use TableAware;
     
     const TYPE_GENERAL = 'general';
+    const TYPE_MANUAL = 'manual';
     const TYPE_CRAIGSLIST = 'craigslist';
     const TYPE_INVENTORY = 'inventory';
     const TYPE_TEXT = 'text';
+    const TYPE_SHOWROOM = 'showroom';
     const TYPE_SHOWROOM_MODEL = 'showroomModel';
     const TYPE_JOTFORM = 'jotform';
     const TYPE_BUILD = 'build';
@@ -22,8 +24,8 @@ class LeadType extends Model
     const TYPE_SERVICE = 'service';
     const TYPE_CALL = 'call';
     const TYPE_TRADE = 'trade';
+    const TYPE_FB = 'facebook';
     const TYPE_NONLEAD = 'nonlead';
-    const TYPE_SHOWROOM = 'showroom';
 
     const TYPE_ARRAY = [
         self::TYPE_GENERAL,
@@ -37,6 +39,24 @@ class LeadType extends Model
         self::TYPE_SERVICE,
         self::TYPE_CALL,
         self::TYPE_TRADE
+    ];
+
+    const TYPE_ARRAY_FULL = [
+        self::TYPE_GENERAL,
+        self::TYPE_MANUAL,
+        self::TYPE_CRAIGSLIST,
+        self::TYPE_INVENTORY,
+        self::TYPE_TEXT,
+        self::TYPE_SHOWROOM_MODEL,
+        self::TYPE_JOTFORM,
+        self::TYPE_BUILD,
+        self::TYPE_RENTALS,
+        self::TYPE_FINANCING,
+        self::TYPE_SERVICE,
+        self::TYPE_CALL,
+        self::TYPE_TRADE,
+        self::TYPE_FB,
+        self::TYPE_NONLEAD
     ];
     
     const TABLE_NAME = 'website_lead_types';

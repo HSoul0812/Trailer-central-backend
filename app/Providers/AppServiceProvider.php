@@ -176,6 +176,8 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('lead_source_valid', 'App\Rules\CRM\Leads\ValidLeadSource@passes');
         \Validator::extend('inquiry_type_valid', 'App\Rules\CRM\Leads\ValidInquiryType@passes');
         \Validator::extend('sales_person_valid', 'App\Rules\CRM\User\ValidSalesPerson@passes');
+        \Validator::extend('sales_security_type', 'App\Rules\CRM\User\ValidSecurityType@passes');
+        \Validator::extend('sales_auth_type', 'App\Rules\CRM\User\ValidAuthType@passes');
         \Validator::extend('valid_smtp_email', 'App\Rules\CRM\User\ValidSmtpEmail@passes');
         \Validator::extend('interaction_type_valid', 'App\Rules\CRM\Interactions\ValidInteractionType@passes');
         \Validator::extend('campaign_action_valid', 'App\Rules\CRM\Email\CampaignActionValid@passes');
@@ -194,6 +196,7 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('payment_uuid_valid', 'App\Rules\Inventory\Floorplan\PaymentUUIDValid@validate');
         \Validator::extend('stock_type_valid', 'App\Rules\Bulks\Parts\StockTypeValid@passes');
         \Validator::extend('unit_sale_exists', 'App\Rules\Dms\UnitSaleExists@passes');
+        \Validator::extend('valid_include', 'App\Rules\ValidInclude@validate');
 
         Builder::macro('whereLike', function($attributes, string $searchTerm) {
             foreach(array_wrap($attributes) as $attribute) {

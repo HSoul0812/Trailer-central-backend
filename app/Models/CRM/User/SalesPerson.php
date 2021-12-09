@@ -9,10 +9,16 @@ use App\Models\Pos\Sale;
 use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
 use App\Models\Integration\Auth\AccessToken;
+use App\Models\Integration\Facebook\Chat;
 use App\Utilities\JsonApi\Filterable;
+use App\Services\CRM\Email\DTOs\ConfigValidate;
+use App\Services\CRM\Email\DTOs\ImapConfig;
+use App\Services\CRM\Email\DTOs\ImapMailbox;
 use App\Traits\SmtpHelper;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 
 /**
  * Class SalesPerson
@@ -38,14 +44,58 @@ class SalesPerson extends Model implements Filterable
     const TABLE_NAME = 'crm_sales_person';
 
     /**
-     * @array auth type map from key => name
+     * @const array of currently supported auth types for email
      */
     const AUTH_TYPES = [
+        'google' => 'Gmail (OAuth 2)',
+        'office365' => 'Office 365 (OAuth 2)',
+        'ntlm' => 'MS Exchange (SMTP/IMAP)',
+        'custom' => 'Custom (SMTP/IMAP)'
+    ];
+
+    /**
+     * @const array of currently supported auth types for email
+     */
+    const AUTH_TYPE_METHODS = [
+        'google' => 'oauth',
+        'office365' => 'oauth',
+        'ntlm' => 'smtp',
+        'custom' => 'smtp'
+    ];
+    const AUTH_METHOD_NTLM = 'ntlm';
+    const AUTH_METHOD_CUSTOM = 'custom';
+
+
+    /**
+     * @const array all available security types
+     */
+    const SECURITY_TYPES = [
+        'tls', 'ssl'
+    ];
+
+    /**
+     * @const array all available SMTP auth methods
+     */
+    const SMTP_AUTH = [
+        'auto', 'PLAIN', 'LOGIN', 'NTLM'
+    ];
+
+    /**
+     * @const array custom smtp auth type map from key => name
+     */
+    const CUSTOM_AUTH = [
         'auto' => 'Auto Detect',
         'PLAIN' => 'PLAIN',
-        'LOGIN' => 'LOGIN',
-        'NTLM'  => 'NTLM',
+        'LOGIN' => 'LOGIN'
     ];
+
+    /**
+     * @const array ntlm smtp auth type map from key => name
+     */
+    const NTLM_AUTH = [
+        'NTLM' => 'MS Exchange'
+    ];
+
 
     /**
      * The table associated with the model.
@@ -156,6 +206,17 @@ class SalesPerson extends Model implements Filterable
     }
 
     /**
+     * Access Tokens
+     * 
+     * @return HasMany
+     */
+    public function tokens(): HasMany
+    {
+        return $this->hasMany(AccessToken::class, 'relation_id', 'id')
+                    ->whereRelationType('sales_person');
+    }
+
+    /**
      * Google Access Token
      * 
      * @return HasOne
@@ -179,6 +240,15 @@ class SalesPerson extends Model implements Filterable
     }
 
     /**
+     * Get Facebook Integrations
+     * 
+     * @return HasMany
+     */
+    public function facebookIntegrations(): HasMany {
+        return $this->hasMany(Chat::class, 'sales_person_id', 'id');
+    }
+
+    /**
      * @return Collection<GenericSaleInterface>
      */
     public function allSales() {
@@ -194,7 +264,7 @@ class SalesPerson extends Model implements Filterable
     /**
      * Get Email Folders Including Defaults
      * 
-     * @return Collection of EmailFolder
+     * @return Collection<EmailFolder>
      */
     public function getEmailFoldersAttribute() {
         // Get Email Folders Based on Existing Data
@@ -213,22 +283,121 @@ class SalesPerson extends Model implements Filterable
     }
 
     /**
+     * Get Default Folders Via Mailbox Folders
+     * 
+     * @return Collection<ImapMailbox>
+     */
+    public function getDefaultFoldersAttribute(): Collection {
+        // Google Token Exists?
+        if(!empty($this->googleToken)) {
+            // Get Google Defaults
+            $folders = EmailFolder::getDefaultGmailFolders();
+        } else {
+            // Get Default Folders
+            $folders = EmailFolder::getDefaultFolders();
+        }
+
+        // Initialize Mailboxes
+        $mailboxes = new Collection();
+        foreach($folders as $folder) {
+            $mailboxes->push(new ImapMailbox([
+                'full' => $folder->name,
+                'name' => $folder->name,
+                'delimiter' => ImapMailbox::DELIMITER
+            ]));
+        }
+        return $mailboxes;
+    }
+
+
+    /**
+     * Return Active Access Token
+     * 
+     * @return null|AccessToken
+     */
+    public function getActiveTokenAttribute(): ?AccessToken {
+        // Access Token Exists?
+        if(!empty($this->tokens)) {
+            $token = $this->tokens()->orderBy('issued_at', 'desc')->first();
+            if(!empty($token->token_type)) {
+                return $token;
+            }
+        }
+
+        // Return Empty
+        return null;
+    }
+
+    /**
+     * Return Auth Config Type
+     * 
+     * @return string
+     */
+    public function getAuthConfigAttribute(): string {
+        // Access Token Exists?
+        if(!empty($this->tokens)) {
+            $token = $this->tokens()->orderBy('issued_at', 'desc')->first();
+            if(!empty($token->token_type)) {
+                return $token->token_type;
+            }
+        }
+
+        // Return Auth Config
+        if($this->smtp_auth === strtoupper(self::AUTH_METHOD_NTLM)) {
+            return self::AUTH_METHOD_NTLM;
+        }
+        // Return Custom
+        else if(!empty($this->smtp_server) || !empty($this->imap_server)) {
+            return self::AUTH_METHOD_CUSTOM;
+        }
+
+        // Return Empty
+        return '';
+    }
+
+    /**
+     * Return Auth Method
+     * 
+     * @return string
+     */
+    public function getAuthMethodAttribute(): string {
+        // Return Auth Method for Auth Config
+        if(!empty($this->auth_config) && isset(self::AUTH_TYPE_METHODS[$this->auth_config])) {
+            return self::AUTH_TYPE_METHODS[$this->auth_config];
+        }
+
+        // Return Empty
+        return '';
+    }
+
+    /**
      * Validate SMTP Details Using Swift Transport
      * 
-     * @return bool
+     * @return ConfigValidate
      */
-    public function getSmtpValidateAttribute(): bool {
+    public function getSmtpValidateAttribute(): ConfigValidate {
         return $this->validateSalesPersonSmtp($this);
     }
 
     /**
-     * Validate IMAP Details
-     * TO DO: Validate from here like SMTP above!
+     * Get Imap Validation
      * 
-     * @return bool
+     * @return ConfigValidate
      */
-    public function getImapValidateAttribute(): bool {
-        return $this->imap_failed;
+    public function getImapValidateAttribute(): ConfigValidate {
+        return new ConfigValidate([
+            'type' => 'imap',
+            'success' => !$this->imap_failed
+        ]);
+    }
+
+    /**
+     * Get Imap Config
+     * 
+     * @return ImapConfig
+     */
+    public function getImapConfigAttribute(): ImapConfig {
+        return ImapConfig::fillFromSalesPerson($this);
     }
 
     public static function getTableName() {

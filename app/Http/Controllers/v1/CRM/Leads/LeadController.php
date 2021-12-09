@@ -2,18 +2,26 @@
 
 namespace App\Http\Controllers\v1\CRM\Leads;
 
-use App\Http\Controllers\RestfulController;
-use App\Http\Requests\CRM\Leads\GetLeadsRequest;
+use App\Exceptions\Requests\Validation\NoObjectIdValueSetException;
+use App\Exceptions\Requests\Validation\NoObjectTypeSetException;
+use App\Http\Controllers\RestfulControllerV2;
+use App\Http\Requests\CRM\Leads\AssignLeadRequest;
+use App\Http\Requests\CRM\Leads\MergeLeadsRequest;
 use App\Http\Requests\CRM\Leads\GetLeadsSortFieldsRequest;
+use App\Http\Requests\CRM\Leads\GetUniqueFullNamesRequest;
 use App\Http\Requests\CRM\Leads\UpdateLeadRequest;
 use App\Http\Requests\CRM\Leads\CreateLeadRequest;
 use App\Http\Requests\CRM\Leads\GetLeadRequest;
+use App\Http\Requests\CRM\Leads\GetLeadsRequest;
+use App\Http\Requests\CRM\Leads\GetLeadsMatchesRequest;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Services\CRM\Leads\LeadServiceInterface;
+use App\Transformers\CRM\Leads\GetUniqueFullNamesTransformer;
 use App\Transformers\CRM\Leads\LeadTransformer;
 use Dingo\Api\Http\Request;
+use Dingo\Api\Http\Response;
 
-class LeadController extends RestfulController
+class LeadController extends RestfulControllerV2
 {
     /**
      * @var App\Repositories\CRM\Leads\LeadRepositoryInterface
@@ -37,7 +45,7 @@ class LeadController extends RestfulController
      */
     public function __construct(LeadRepositoryInterface $leads, LeadServiceInterface $service)
     {
-        $this->middleware('setDealerIdOnRequest')->only(['index', 'update', 'create', 'show']);
+        $this->middleware('setDealerIdOnRequest')->only(['index', 'update', 'create', 'show', 'assign', 'getMatches', 'mergeLeads', 'uniqueFullNames']);
         $this->middleware('setWebsiteIdOnRequest')->only(['index', 'update', 'create']);
         $this->leads = $leads;
         $this->service = $service;
@@ -103,5 +111,148 @@ class LeadController extends RestfulController
         }
 
         return $this->response->errorBadRequest();
+    }
+
+    /**
+     * @param int $id
+     * @param Request $request
+     * @return Response|void
+     * @throws NoObjectIdValueSetException
+     * @throws NoObjectTypeSetException
+     */
+    public function assign(int $id, Request $request): Response
+    {
+        $request = new AssignLeadRequest(array_merge($request->all(), ['id' => $id]));
+
+        if (!$request->validate()) {
+            return $this->response->errorBadRequest();
+        }
+
+        $lead = $this->service->assign($request->all());
+
+        return $this->updatedResponse($lead->identifier);
+    }
+
+    /**
+     * @param Request $request
+     * @return Response|void
+     * @throws NoObjectIdValueSetException
+     * @throws NoObjectTypeSetException
+     */
+    public function getMatches(Request $request)
+    {
+        $request = new GetLeadsMatchesRequest($request->all());
+
+        if ($request->validate()) {
+            return $this->response->collection(
+                $this->service->getMatches($request->all()),
+                $this->transformer
+            );
+        }
+
+        return $this->response->errorBadRequest();
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/leads/unique-full-names",
+     *     description="Retrieve a list of unique leads fullnames",
+     *     tags={"Lead"},
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Page Limit",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="is_archived",
+     *         in="query",
+     *         description="Archived or not",
+     *         required=false,
+     *         @OA\Schema(type="boolean")
+     *     ),
+     *     @OA\Parameter(
+     *         name="search_term",
+     *         in="query",
+     *         description="Search term",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns a list of unique leads fullnames",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
+     *     ),
+     * )
+     *
+     * @param Request $request
+     * @return Response
+     * @throws NoObjectIdValueSetException
+     * @throws NoObjectTypeSetException
+     */
+    public function uniqueFullNames(Request $request): Response
+    {
+        $request = new GetUniqueFullNamesRequest($request->all());
+
+        if ($request->validate()) {
+            return $this->response->paginator($this->leads->getUniqueFullNames($request->all()), new GetUniqueFullNamesTransformer());
+        }
+
+        return $this->response->errorBadRequest();
+    }
+
+    /**
+     *  @OA\Post(
+     *     path="/api/leads/{id}/merge",
+     *     description="Merge Leads",
+     *     tags={"Lead"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Lead Id",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="merges_lead_id",
+     *         in="query",
+     *         description="Array With Lead Ids",
+     *         required=true,
+     *         @OA\Schema(type="array", @OA\Items(type="integer"))
+     *     ),
+     *
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns a part id",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
+     *     ),
+     * )
+     *
+     * @param int $id
+     * @param Request $request
+     * @return Response
+     * @throws NoObjectIdValueSetException
+     * @throws NoObjectTypeSetException
+     */
+    public function mergeLeads(int $id, Request $request): Response
+    {
+        $request = new MergeLeadsRequest(array_merge($request->all(), ['lead_id' => $id]));
+
+        if (!$request->validate()) {
+            return $this->response->errorBadRequest();
+        }
+
+        $this->service->mergeLeads($id, $request->get('merges_lead_id'));
+
+        return $this->updatedResponse();
     }
 }

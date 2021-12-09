@@ -8,10 +8,11 @@ use App\Models\Marketing\Facebook\Filter;
 use App\Models\Marketing\Facebook\Listings;
 use App\Models\Marketing\Facebook\Marketplace;
 use App\Repositories\Traits\SortTrait;
+use App\Traits\Repository\Transaction;
 use Illuminate\Support\Facades\DB;
 
 class ListingRepository implements ListingRepositoryInterface {
-    use SortTrait;
+    use SortTrait, Transaction;
 
     /**
      * Define Sort Orders

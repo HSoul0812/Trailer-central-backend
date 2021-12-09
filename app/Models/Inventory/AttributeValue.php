@@ -4,10 +4,18 @@ namespace App\Models\Inventory;
 
 use App\Models\Traits\Inventory\CompositePrimaryKeys;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Class AttributeValue
  * @package App\Models\Inventory
+ *
+ * @property int $attribute_id
+ * @property int $inventory_id
+ * @property string $value
+ *
+ * @property Attribute $attribute
+ * @property Inventory $inventory
  */
 class AttributeValue extends Model
 {
@@ -30,12 +38,18 @@ class AttributeValue extends Model
         'value',
     ];
 
-    public function attribute()
+    /**
+     * @return BelongsTo
+     */
+    public function attribute(): BelongsTo
     {
         return $this->belongsTo(Attribute::class, 'attribute_id', 'attribute_id');
     }
 
-    public function inventory()
+    /**
+     * @return BelongsTo
+     */
+    public function inventory(): BelongsTo
     {
         return $this->belongsTo(Inventory::class, 'inventory_id', 'inventory_id');
     }

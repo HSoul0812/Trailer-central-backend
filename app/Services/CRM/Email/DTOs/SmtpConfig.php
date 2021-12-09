@@ -27,6 +27,7 @@ class SmtpConfig
      */
     const TLS = 'tls';
 
+
     /**
      * @const string Auth Auto
      */
@@ -38,6 +39,11 @@ class SmtpConfig
     const AUTH_GMAIL = 'GMAIL';
 
     /**
+     * @const string Auth Outlook
+     */
+    const AUTH_OFFICE = 'OFFICE';
+
+    /**
      * @const string Auth NTLM
      */
     const AUTH_NTLM = 'NTLM';
@@ -46,6 +52,28 @@ class SmtpConfig
      * @const string Auth SMTP
      */
     const AUTH_SMTP = 'SMTP';
+
+    /**
+     * @const string Auth Mode for XOAUTH (Gmail/Office 365)
+     */
+    const MODE_OAUTH = 'XOAUTH2';
+
+
+    /**
+     * @const Default Hosts By Auth Config
+     */
+    const DEFAULT_HOSTS = [
+        'GMAIL' => 'smtp.google.com',
+        'OFFICE' => 'outlook.office365.com'
+    ];
+
+    /**
+     * @const int Default Port
+     */
+    const DEFAULT_PORTS = [
+        'ssl' => 587,
+        'tls' => 587
+    ];
 
 
     /**
@@ -90,6 +118,11 @@ class SmtpConfig
     private $authType;
 
     /**
+     * @var string Auth Config for IMAP Connection
+     */
+    private $authConfig;
+
+    /**
      * @var string Access Token
      */
     private $accessToken;
@@ -101,7 +134,8 @@ class SmtpConfig
      * @param SalesPerson $salesperson
      * @return SmtpConfig
      */
-    public static function fillFromSalesPerson(SalesPerson $salesperson): SmtpConfig {
+    public static function fillFromSalesPerson(SalesPerson $salesperson): SmtpConfig
+    {
         
         $username = $salesperson->smtp_email;
         
@@ -109,18 +143,24 @@ class SmtpConfig
             // get dealer primary email
             $username = $salesperson->newDealerUser->user->email;
         }
-        
+
         // Return SmtpConfig
-        return new self([
+        $smtpConfig = new self([
             'from_name' => $salesperson->full_name,
             'username' => $username,
             'password' => $salesperson->smtp_password,
             'host' => $salesperson->smtp_server,
             'port' => $salesperson->smtp_port,
             'security' => $salesperson->smtp_security,
-            'auth_type' => !empty($salesperson->googleToken) ? self::AUTH_GMAIL : $salesperson->smtp_auth,
-            'access_token' => $salesperson->googleToken
+            'auth_type' => $salesperson->smtp_auth,
+            'access_token' => $salesperson->active_token
         ]);
+
+        // Calc Auth Config From Access Token
+        $smtpConfig->calcAuthConfig();
+
+        // Return IMAP Config
+        return $smtpConfig;
     }
 
 
@@ -175,6 +215,13 @@ class SmtpConfig
      */
     public function getPassword(): string
     {
+        // Are We OAuth?!
+        if($this->isAuthConfigOauth()) {
+            // Return XOAauth Password Instead!
+            return $this->accessToken->access_token;
+        }
+
+        // Return Standard Password
         return !empty($this->password) ? trim($this->password) : '';
     }
 
@@ -197,7 +244,13 @@ class SmtpConfig
      */
     public function getHost(): string
     {
-        return !empty($this->host) ? trim($this->host) : '';
+        // Host Exists?
+        if($this->host) {
+            return $this->host;
+        }
+
+        // Return Default!
+        return self::DEFAULT_HOSTS[$this->authConfig] ?? '';
     }
 
     /**
@@ -217,9 +270,16 @@ class SmtpConfig
      * 
      * @return int $this->port
      */
-    public function getPort(): ?int
+    public function getPort(): int
     {
-        return $this->port;
+        // Return Set Port
+        if($this->port) {
+            return $this->port;
+        }
+
+        // Return Default Port for Security
+        $security = $this->getSecurity();
+        return self::DEFAULT_PORTS[$security];
     }
 
     /**
@@ -242,7 +302,7 @@ class SmtpConfig
     public function getSecurity(): string
     {
         // Get Security Default
-        return $this->security ?: self::SSL;
+        return $this->security ?: self::TLS;
     }
 
     /**
@@ -268,17 +328,48 @@ class SmtpConfig
     }
 
     /**
-     * Return Auth Configuration Type
+     * Return Auth Mode
      * 
-     * @return string $this->authType
+     * @return null|string self::MODE_OAUTH
      */
-    public function getAuthConfig(): string
+    public function getAuthMode(): ?string
     {
-        if($this->getAuthType() === self::AUTH_GMAIL ||
-           $this->getAuthType() === self::AUTH_NTLM) {
-            return $this->authType;
+        // Are We OAuth?!
+        if($this->isAuthConfigOauth()) {
+            // Return XOAauth Password Instead!
+            return self::MODE_OAUTH;
         }
-        return self::AUTH_SMTP;
+        return null;
+    }
+
+    /**
+     * Is Auth Config Gmail?
+     * 
+     * @return bool $this->getAuthConfig() === self::AUTH_GMAIL
+     */
+    public function isAuthTypeGmail(): bool
+    {
+        return $this->getAuthConfig() === self::AUTH_GMAIL;
+    }
+
+    /**
+     * Is Auth Config Office 365?
+     * 
+     * @return bool $this->getAuthConfig() === self::AUTH_OFFICE
+     */
+    public function isAuthTypeOffice(): bool
+    {
+        return $this->getAuthConfig() === self::AUTH_OFFICE;
+    }
+
+    /**
+     * Is Auth Config NTLM?
+     * 
+     * @return bool $this->getAuthConfig() === self::AUTH_NTLM
+     */
+    public function isAuthTypeNtlm(): bool
+    {
+        return $this->getAuthConfig() === self::AUTH_NTLM;
     }
 
     /**
@@ -292,24 +383,53 @@ class SmtpConfig
         $this->authType = $authType;
     }
 
+
     /**
-     * Is Auth Type Gmail?
+     * Return Auth Configuration Type
      * 
-     * @return bool $this->getAuthType() === self::AUTH_GMAIL
+     * @return string $this->authType
      */
-    public function isAuthTypeGmail(): bool
+    public function getAuthConfig(): string
     {
-        return $this->getAuthType() === self::AUTH_GMAIL;
+        return $this->authConfig ?? self::AUTH_SMTP;
     }
 
     /**
-     * Is Auth Type NTLM?
+     * Return Auth Configuration Type
      * 
-     * @return bool $this->getAuthType === self::AUTH_NTLM
+     * @return bool Access Token Exists
      */
-    public function isAuthTypeNtlm(): bool
+    public function isAuthConfigOauth(): bool
     {
-        return $this->getAuthType() === self::AUTH_NTLM;
+        return (bool) $this->accessToken;
+    }
+
+    /**
+     * Determine Auth Config From Access Token
+     * 
+     * @return void
+     */
+    public function calcAuthConfig(): void
+    {
+        // Auth Type is NTLM?
+        if($this->authType === self::AUTH_NTLM) {
+            $this->authConfig = self::AUTH_NTLM;
+        } elseif($this->accessToken) {
+            // Token Type
+            switch($this->accessToken->token_type) {
+                case AccessToken::TOKEN_GOOGLE:
+                    $this->authConfig = self::AUTH_GMAIL;
+                break;
+                case AccessToken::TOKEN_OFFICE:
+                    $this->authConfig = self::AUTH_OFFICE;
+                break;
+                default:
+                    $this->authConfig = self::AUTH_SMTP;
+                break;
+            }
+        } else {
+            $this->authConfig = self::AUTH_SMTP;
+        }
     }
 
 

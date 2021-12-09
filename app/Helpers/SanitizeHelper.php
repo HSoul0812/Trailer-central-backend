@@ -350,4 +350,13 @@ END;
 
         return $result;
     }
+
+    /**
+     * @param string|null $phoneNumber
+     * @return int
+     */
+    public function sanitizePhoneNumber(?string $phoneNumber): int
+    {
+        return (int)str_replace(['(', ')', '-', '+', '.'], '', $phoneNumber);
+    }
 }

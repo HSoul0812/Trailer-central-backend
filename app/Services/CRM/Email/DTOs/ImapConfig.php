@@ -4,6 +4,10 @@ namespace App\Services\CRM\Email\DTOs;
 
 use App\Models\CRM\User\SalesPerson;
 use App\Models\CRM\User\EmailFolder;
+use App\Models\Integration\Auth\AccessToken;
+use App\Traits\WithConstructor;
+use App\Traits\WithGetter;
+use Carbon\Carbon;
 
 
 /**
@@ -11,8 +15,10 @@ use App\Models\CRM\User\EmailFolder;
  * 
  * @package App\Services\CRM\Email\DTOs
  */
-class IMAPConfig
+class ImapConfig
 {
+    use WithConstructor, WithGetter;
+
     /**
      * @const string SSL
      */
@@ -22,6 +28,27 @@ class IMAPConfig
      * @const string TLS
      */
     const TLS = 'tls';
+
+
+    /**
+     * @const string Auth Gmail
+     */
+    const AUTH_GMAIL = 'GMAIL';
+
+    /**
+     * @const string Auth Outlook
+     */
+    const AUTH_OFFICE = 'OFFICE';
+
+    /**
+     * @const string Auth NTLM
+     */
+    const AUTH_NTLM = 'NTLM';
+
+    /**
+     * @const string Auth IMAP
+     */
+    const AUTH_IMAP = 'IMAP';
 
     /**
      * @const default charset
@@ -33,6 +60,13 @@ class IMAPConfig
      */
     const CHARSET_NTLM = 'US-ASCII';
 
+
+    /**
+     * @const string Auth Mode for XOAUTH (Gmail/Office 365)
+     */
+    const MODE_OAUTH = 'oauth';
+
+
     /**
      * @const No Certificate Suffix
      */
@@ -42,6 +76,38 @@ class IMAPConfig
      * @const No Valid Certificates
      */
     const NO_CERT_HOSTS = ['imap.gmail.com'];
+
+    /**
+     * @const No SSL By Default on These Ports
+     */
+    const NO_SSL_PORTS = [143];
+
+    /**
+     * @const Default Hosts By Auth Config
+     */
+    const DEFAULT_HOSTS = [
+        'GMAIL' => 'imap.google.com',
+        'OFFICE' => 'outlook.office365.com'
+    ];
+
+    /**
+     * @const int Default Port
+     */
+    const DEFAULT_PORTS = [
+        'ssl' => 993,
+        'tls' => 143
+    ];
+
+
+    /**
+     * @const int IMAP Timeout
+     */
+    const DEFAULT_TIMEOUT = 2;
+
+    /**
+     * @const Folder Inbox
+     */
+    const FOLDER_INBOX = 'INBOX';
 
 
     /**
@@ -75,6 +141,16 @@ class IMAPConfig
     private $authType;
 
     /**
+     * @var string Auth Config for IMAP Connection
+     */
+    private $authConfig;
+
+    /**
+     * @var string Access Token
+     */
+    private $accessToken;
+
+    /**
      * @var string Charset for IMAP Connection
      */
     private $charset;
@@ -94,30 +170,35 @@ class IMAPConfig
      * Get Smtp Config From Sales Person
      * 
      * @param SalesPerson $salesperson
+     * @param null|EmailFolder $folder
      * @return ImapConfig
      */
-    public static function fillFromSalesPerson(SalesPerson $salesperson, EmailFolder $folder): ImapConfig {
-        // Initialize
-        $imapConfig = new self();
+    public static function fillFromSalesPerson(SalesPerson $salesperson, ?EmailFolder $folder = null): ImapConfig
+    {
+        // Get Start Date
+        $startDate = Carbon::now()->sub(1, 'month');
+        if(!empty($folder->date_imported)) {
+            $startDate = $folder->date_imported;
+        }
 
-        // Set Username/Password
-        $imapConfig->setUsername($salesperson->imap_email);
-        $imapConfig->setPassword($salesperson->imap_password);
+        // Return SmtpConfig
+        $imapConfig = new self([
+            'username' => $salesperson->imap_email,
+            'password' => $salesperson->imap_password,
+            'host' => $salesperson->imap_server,
+            'port' => $salesperson->imap_port,
+            'security' => $salesperson->imap_security,
+            'auth_type' => $salesperson->smtp_auth,
+            'access_token' => $salesperson->active_token,
+            'folder_name' => !empty($folder->name) ? $folder->name : 'INBOX',
+            'start_date' => $startDate
+        ]);
 
-        // Set Host/Post
-        $imapConfig->setHost($salesperson->imap_server);
-        $imapConfig->setPort((int) $salesperson->imap_port ?? 0);
-        $imapConfig->setSecurity($salesperson->imap_security ?: '');
-        $imapConfig->setAuthType($salesperson->smtp_auth ?: '');
+        // Calc Charset
         $imapConfig->calcCharset();
 
-        // Set Folder Config
-        $imapConfig->setFolderName($folder->name);
-        if(!empty($folder->date_imported)) {
-            $imapConfig->setStartDate($folder->date_imported);
-        } else {
-            $imapConfig->setStartDate(Carbon::now()->sub(1, 'month'));
-        }
+        // Calc Auth Config From Access Token
+        $imapConfig->calcAuthConfig();
 
         // Return IMAP Config
         return $imapConfig;
@@ -131,7 +212,7 @@ class IMAPConfig
      */
     public function getUsername(): string
     {
-        return $this->username;
+        return $this->username ? trim($this->username) : '';
     }
 
     /**
@@ -149,11 +230,18 @@ class IMAPConfig
     /**
      * Return Password
      * 
-     * @return string $this->password
+     * @return string XOAuth password || $this->password
      */
     public function getPassword(): string
     {
-        return $this->password;
+        // Are We OAuth?!
+        if($this->isAuthConfigOauth()) {
+            // Return XOAauth Password Instead!
+            return $this->accessToken->access_token ?? '';
+        }
+
+        // Return Standard Password
+        return $this->password ? trim($this->password) : '';
     }
 
     /**
@@ -175,7 +263,13 @@ class IMAPConfig
      */
     public function getHost(): string
     {
-        return $this->host;
+        // Host Exists?
+        if($this->host) {
+            return $this->host;
+        }
+
+        // Return Default!
+        return self::DEFAULT_HOSTS[$this->authConfig] ?? '';
     }
 
     /**
@@ -197,7 +291,14 @@ class IMAPConfig
      */
     public function getPort(): int
     {
-        return $this->port;
+        // Return Set Port
+        if($this->port) {
+            return $this->port;
+        }
+
+        // Return Default Port for Security
+        $security = $this->getSecurity();
+        return self::DEFAULT_PORTS[$security];
     }
 
     /**
@@ -219,6 +320,11 @@ class IMAPConfig
      */
     public function getSecurity(): string
     {
+        // If No Security, Return Empty
+        if($this->isNoSecurity()) {
+            return '';
+        }
+
         // Set Security Default
         $security = $this->security ?: self::SSL;
 
@@ -254,6 +360,36 @@ class IMAPConfig
     }
 
     /**
+     * Is Auth Config Gmail?
+     * 
+     * @return bool $this->getAuthConfig() === self::AUTH_GMAIL
+     */
+    public function isAuthTypeGmail(): bool
+    {
+        return $this->getAuthConfig() === self::AUTH_GMAIL;
+    }
+
+    /**
+     * Is Auth Config Office 365?
+     * 
+     * @return bool $this->getAuthConfig() === self::AUTH_OFFICE
+     */
+    public function isAuthTypeOffice(): bool
+    {
+        return $this->getAuthConfig() === self::AUTH_OFFICE;
+    }
+
+    /**
+     * Is Auth Config NTLM?
+     * 
+     * @return bool $this->getAuthConfig() === self::AUTH_NTLM
+     */
+    public function isAuthTypeNtlm(): bool
+    {
+        return $this->getAuthConfig() === self::AUTH_NTLM;
+    }
+
+    /**
      * Set Auth Type
      * 
      * @param string $authType
@@ -262,6 +398,60 @@ class IMAPConfig
     public function setAuthType(string $authType): void
     {
         $this->authType = $authType;
+    }
+
+
+    /**
+     * Return Auth Configuration Type
+     * 
+     * @return string $this->authConfig
+     */
+    public function getAuthConfig(): string
+    {
+        return $this->authConfig ?? self::AUTH_IMAP;
+    }
+
+    /**
+     * Return Auth Configuration Type
+     * 
+     * @return bool Access Token Exists
+     */
+    public function isAuthConfigOauth(): bool
+    {
+        if($this->accessToken) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Determine Auth Config From Access Token
+     * 
+     * @return void
+     */
+    public function calcAuthConfig(): void
+    {
+        // Is Auth Type oAuth?!
+        if($this->accessToken) {
+            // Token Type
+            switch($this->accessToken->token_type) {
+                case AccessToken::TOKEN_GOOGLE:
+                    $this->authConfig = self::AUTH_GMAIL;
+                break;
+                case AccessToken::TOKEN_OFFICE:
+                    $this->authConfig = self::AUTH_OFFICE;
+                break;
+                default:
+                    $this->authConfig = self::AUTH_IMAP;
+                break;
+            }
+        } elseif($this->authType === self::AUTH_NTLM) {
+            // Auth Type is NTLM?
+            $this->authConfig = self::AUTH_NTLM;
+        } else {
+            // Standard IMAP!
+            $this->authConfig = self::AUTH_IMAP;
+        }
     }
 
 
@@ -300,6 +490,20 @@ class IMAPConfig
         }
     }
 
+    /**
+     * Toggle Charset From One to the Other
+     * 
+     * @return void
+     */
+    public function toggleCharset(): void
+    {
+        if($this->charset === self::CHARSET_NTLM) {
+            $this->setCharset(self::CHARSET_DEFAULT);
+        } else {
+            $this->setCharset(self::CHARSET_NTLM);
+        }
+    }
+
 
     /**
      * Return Folder Name
@@ -330,7 +534,7 @@ class IMAPConfig
      */
     public function getStartDate(): string
     {
-        return $this->startDate;
+        return $this->startDate ?? 'days';
     }
 
     /**
@@ -353,5 +557,43 @@ class IMAPConfig
     public function isNoCert(): bool {
         // Validate if Host is No Certificate
         return (!empty($this->host) && in_array($this->host, self::NO_CERT_HOSTS));
+    }
+
+    /**
+     * Get Credentials for IMAP From Config
+     * 
+     * @return array{host: string,
+     *               port: int,
+     *               encryption: string,
+     *               validate_cert: bool,
+     *               username: string,
+     *               password: string,
+     *               protocol: string,
+     *               authentication: null|string,
+     *               timeout: int}
+     */
+    public function getCredentials(): array {
+        // Initialize Credentials
+        return [
+            'host'           => $this->getHost(),
+            'port'           => $this->getPort(),
+            'encryption'     => $this->getSecurity(),
+            'validate_cert'  => true,
+            'username'       => $this->getUsername(),
+            'password'       => $this->getPassword(),
+            'protocol'       => 'imap',
+            'authentication' => $this->isAuthConfigOauth() ? self::MODE_OAUTH : null,
+            'timeout'        => self::DEFAULT_TIMEOUT
+        ];
+    }
+
+    /**
+     * Current IMAP Config Doesn't Append Any Security Settings?
+     * 
+     * @return bool
+     */
+    public function isNoSecurity(): bool {
+        // Validate if Port is No Security
+        return (!empty($this->port) && in_array($this->port, self::NO_SSL_PORTS));
     }
 }
