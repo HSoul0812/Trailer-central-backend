@@ -7,8 +7,6 @@ use App\Models\CRM\Interactions\EmailHistory;
 use App\Models\CRM\Interactions\Interaction;
 use App\Models\CRM\Interactions\TextLog;
 use App\Models\CRM\Product\Product;
-use App\Models\CRM\Leads\LeadProduct;
-use App\Models\CRM\Leads\InventoryLead;
 use App\Models\User\User;
 use App\Models\User\DealerLocation;
 use App\Models\User\NewDealerUser;
@@ -21,46 +19,54 @@ use App\Models\Website\Tracking\Tracking;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Traits\CompactHelper;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
+use App\Models\CRM\Leads\Facebook\Lead as FbLead;
 
 /**
  * Class Lead
  * @package App\Models\CRM\Leads
  *
- * @property $identifier
- * @property $website_id
- * @property $lead_type
- * @property $inventory_id
- * @property $customer_id
- * @property $ids_exported
- * @property $referral
- * @property $title
- * @property $first_name
- * @property $last_name
- * @property $email_address
- * @property $address
- * @property $city
- * @property $state
- * @property $zip
- * @property $preferred_contact
- * @property $phone_number
- * @property $status
- * @property $comments
- * @property $next_followup
- * @property $date_submitted
- * @property $is_spam
- * @property $contact_email_sent
- * @property $adf_email_sent
- * @property $last_visited_at
- * @property $cdk_email_sent
- * @property $metadata
- * @property $newsletter
- * @property $note
- * @property $is_from_classifieds
- * @property $dealer_id
- * @property $dealer_location_id
- * @property $is_archived
- * @property $unique_id
+ * @property int $identifier
+ * @property int $website_id
+ * @property string $lead_type
+ * @property int $inventory_id
+ * @property int $customer_id
+ * @property int $ids_exported
+ * @property string $referral
+ * @property string $title
+ * @property string $first_name
+ * @property string $last_name
+ * @property string $email_address
+ * @property string $address
+ * @property string $city
+ * @property string $state
+ * @property string $zip
+ * @property string $preferred_contact
+ * @property string $phone_number
+ * @property string $status
+ * @property string $comments
+ * @property \DateTimeInterface $next_followup
+ * @property \DateTimeInterface $date_submitted
+ * @property bool $is_spam
+ * @property \DateTimeInterface $contact_email_sent
+ * @property \DateTimeInterface $adf_email_sent
+ * @property \DateTimeInterface $last_visited_at
+ * @property bool $cdk_email_sent
+ * @property string $metadata
+ * @property bool $newsletter
+ * @property string $note
+ * @property bool $is_from_classifieds
+ * @property int $dealer_id
+ * @property int $dealer_location_id
+ * @property bool $is_archived
+ * @property int $unique_id
+ * @property int $bigtex_exported
+ *
+ * @property Website $website
+ * @property LeadStatus $leadStatus
+ * @property FbLead $fbLead
  */
 class Lead extends Model
 {
@@ -81,6 +87,13 @@ class Lead extends Model
     const IS_NOT_SPAM = 0;
     const IS_SPAM = 1;
 
+    const IS_FROM_CLASSIFIEDS = 1;
+    const IS_NOT_FROM_CLASSIFIEDS = 0;
+    
+    const IS_BIGTEX_EXPORTED = 1;
+    const IS_BIGTEX_NOT_EXPORTED = 0;
+
+    
     const IS_IDS_EXPORTED = 1;
     const IS_NOT_IDS_EXPORTED = 0;
 
@@ -149,7 +162,8 @@ class Lead extends Model
         'newsletter',
         'is_spam',
         'is_archived',
-        'is_from_classifieds'
+        'is_from_classifieds',
+        'bigtex_exported'
     ];
 
     /**
@@ -259,9 +273,9 @@ class Lead extends Model
     /**
      * Get Website.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
-    public function website()
+    public function website(): BelongsTo
     {
         return $this->belongsTo(Website::class, 'website_id', 'id');
     }
@@ -274,6 +288,14 @@ class Lead extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
+    }
+
+    /**
+     * @return HasOne
+     */
+    public function fbLead(): HasOne
+    {
+        return $this->hasOne(FbLead::class, 'lead_id', 'identifier');
     }
 
     /**
@@ -297,9 +319,10 @@ class Lead extends Model
     /**
      * Retrieves this lead status from the DB
      *
-     * @return string
+     * @return HasOne
      */
-    public function leadStatus() {
+    public function leadStatus(): HasOne
+    {
         return $this->hasOne(LeadStatus::class, 'tc_lead_identifier', 'identifier');
     }
 

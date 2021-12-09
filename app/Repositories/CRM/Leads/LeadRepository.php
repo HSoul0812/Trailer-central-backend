@@ -3,6 +3,8 @@
 namespace App\Repositories\CRM\Leads;
 
 use App\Models\Website\Website;
+use App\Exceptions\RepositoryInvalidArgumentException;
+use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadAssign;
@@ -14,6 +16,7 @@ use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\LeadType;
 use App\Models\Inventory\Inventory;
 use App\Repositories\Traits\SortTrait;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -89,7 +92,8 @@ class LeadRepository implements LeadRepositoryInterface {
     }
 
     public function getAll($params) {
-        $query = Lead::where('identifier', '>', 0);
+        $query = Lead::where('identifier', '>', 0)
+                     ->where('website_lead.lead_type', '<>', LeadType::TYPE_NONLEAD);
 
         if (isset($params['dealer_id'])) {
             $query = $query->where(Lead::getTableName().'.dealer_id', $params['dealer_id']);
@@ -120,7 +124,8 @@ class LeadRepository implements LeadRepositoryInterface {
      * @return type
      */
     public function getAllUnassigned($params) {
-        $query = Lead::select(Lead::getTableName() . '.*')->with('inventory');
+        $query = Lead::select(Lead::getTableName() . '.*')->with('inventory')
+                     ->where('lead_type', '<>', LeadType::TYPE_NONLEAD);
 
         if (isset($params['dealer_id'])) {
             $query = $query->where(Lead::getTableName() . '.dealer_id', $params['dealer_id']);
@@ -172,6 +177,7 @@ class LeadRepository implements LeadRepositoryInterface {
     public function getByEmails(int $dealerId, array $emails) {
         // Return Lead Emails for User ID
         return Lead::select(['identifier', 'email_address'])
+                     ->where('lead_type', '<>', LeadType::TYPE_NONLEAD)
                      ->where('dealer_id', $dealerId)
                      ->where(function($query) use($emails) {
                          // Append Query
@@ -209,7 +215,8 @@ class LeadRepository implements LeadRepositoryInterface {
         }
 
         // Find Leads That Match Current!
-        $lead = Lead::where('dealer_id', $params['dealer_id']);
+        $lead = Lead::where('dealer_id', $params['dealer_id'])
+                    ->where('lead_type', '<>', LeadType::TYPE_NONLEAD);
 
         // Find Name
         return $lead->where(function(Builder $query) use($params) {
@@ -245,7 +252,7 @@ class LeadRepository implements LeadRepositoryInterface {
     }
 
     public function getCustomers($params = []) {
-        $query = Lead::select('*');
+        $query = Lead::select('*')->where('lead_type', '<>', LeadType::TYPE_NONLEAD);
 
         if (isset($params['dealer_id'])) {
             $query = $query->where(Lead::getTableName().'.dealer_id', $params['dealer_id']);
@@ -573,6 +580,7 @@ class LeadRepository implements LeadRepositoryInterface {
             ->whereNull('website_lead.customer_id')
             ->where('dealer.is_dms_active', '=', 1)
             ->where('website_lead.is_spam', '=', 0)
+            ->where('website_lead.lead_type', '<>', LeadType::TYPE_NONLEAD)
 
             ->where('website_lead.first_name', '<>', '')
             ->whereNotNull('website_lead.first_name')
@@ -588,6 +596,13 @@ class LeadRepository implements LeadRepositoryInterface {
         }
     }
 
+    /**
+     * Get Matches for LeadRepository
+     * 
+     * @param int $dealerId
+     * @param array $params
+     * @return Collection<Lead>
+     */
     public function getMatches(int $dealerId, array $params)
     {
         $paramsCollect = collect($params['leads'] ?? null);
@@ -608,5 +623,47 @@ class LeadRepository implements LeadRepositoryInterface {
 
             return $query->get();
         }
+    }
+
+    /**
+     * Get Unique Full Names
+     * 
+     * @param array $params
+     * @return \Illuminate\Support\Collection|LengthAwarePaginator
+     */
+    public function getUniqueFullNames(array $params)
+    {
+        if (empty($params['dealer_id'])) {
+            throw new RepositoryInvalidArgumentException('Dealer Id is required');
+        }
+
+        $query = DB::table(Lead::getTableName());
+
+        $query = $query->selectRaw('DISTINCT TRIM(first_name) AS first_name, TRIM(last_name) AS last_name');
+
+        $query = $query->where('dealer_id', '=', $params['dealer_id']);
+
+        $query = $query->where(function (\Illuminate\Database\Query\Builder $query) {
+            $query->whereRaw('TRIM(`first_name`) <> \'\'')
+                ->orWhereRaw('TRIM(`last_name`) <> \'\'');
+        });
+
+        $query = $query->where('is_spam', '=', 0);
+
+        if (isset($params['is_archived'])) {
+            $query = $query->where('is_archived', '=', $params['is_archived']);
+        }
+
+        if (!empty($params['search_term'])) {
+            $query->whereRaw('CONCAT(first_name,\' \', last_name) LIKE ?', ['%' . trim($params['search_term']) . '%']);
+        }
+
+        $query = $query->orderByRaw('TRIM(`first_name`), TRIM(`last_name`)');
+
+        if (!empty($params['per_page'])) {
+            return $query->paginate($params['per_page'])->appends($params);
+        }
+
+        return $query->get();
     }
 }

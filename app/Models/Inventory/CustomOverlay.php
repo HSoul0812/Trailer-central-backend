@@ -12,9 +12,24 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $name,
  * @property string $value,
  * @property int $dealer_id
+ *
+ * @method self create(array $attributes = [])
  */
 class CustomOverlay extends Model
 {
+    public const VALID_CUSTOM_NAMES = [
+        'overlay_1',
+        'overlay_2',
+        'overlay_3',
+        'overlay_4',
+        'overlay_5',
+        'overlay_6',
+        'overlay_7',
+        'overlay_8',
+        'overlay_9',
+        'overlay_10'
+    ];
+
     /**
      * The table associated with the model.
      *
@@ -28,7 +43,7 @@ class CustomOverlay extends Model
      * @var string
      */
     protected $primaryKey = 'id';
-    
+
     public $timestamps = false;
 
     protected $fillable = [

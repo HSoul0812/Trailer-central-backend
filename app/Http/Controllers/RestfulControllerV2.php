@@ -91,10 +91,10 @@ class RestfulControllerV2 extends Controller
     /**
      * @param mixed $data
      * @param TransformerAbstract $transformer
-     * @param LengthAwarePaginator $paginator
+     * @param LengthAwarePaginator|null $paginator
      * @return Response
      */
-    protected function collectionResponse($data, TransformerAbstract $transformer, LengthAwarePaginator $paginator): Response
+    protected function collectionResponse($data, TransformerAbstract $transformer, ?LengthAwarePaginator $paginator = null): Response
     {
         $fractal = new Manager();
         $fractal->setSerializer(new NoDataArraySerializer());
@@ -102,16 +102,21 @@ class RestfulControllerV2 extends Controller
         $fractal->parseIncludes(request()->query('with', ''));
 
         $collection = new Collection($data, $transformer);
-        $collection->setPaginator(new IlluminatePaginatorAdapter($paginator));
+
+        if ($paginator) {
+            $collection->setPaginator(new IlluminatePaginatorAdapter($paginator));
+        }
 
         $responseData = $fractal->createData($collection)->toArray();
 
-        $meta = $responseData['meta'];
-        unset($responseData['meta']);
+        if ($paginator) {
+            $meta = $responseData['meta'];
+            unset($responseData['meta']);
+        }
 
         return $this->response->array([
             'data' => $responseData,
-            'meta' => $meta,
+            'meta' => $meta ?? [],
         ]);
     }
 }

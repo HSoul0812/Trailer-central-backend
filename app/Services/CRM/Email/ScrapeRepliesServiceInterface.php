@@ -11,17 +11,18 @@ interface ScrapeRepliesServiceInterface {
      * Process Dealer
      * 
      * @param User $dealer
+     * @return int total number of imported emails
      */
-    public function dealer(NewDealerUser $dealer);
+    public function dealer(NewDealerUser $dealer): int;
 
     /**
      * Process Sales Person
      * 
      * @param NewDealerUser $dealer
      * @param SalesPerson $salesperson
-     * @return false || array of EmailHistory
+     * @return int total number of imported emails
      */
-    public function salesperson(NewDealerUser $dealer, SalesPerson $salesperson);
+    public function salesperson(NewDealerUser $dealer, SalesPerson $salesperson): int;
 
     /**
      * Import Single Folder
@@ -29,7 +30,7 @@ interface ScrapeRepliesServiceInterface {
      * @param NewDealerUser $dealer
      * @param SalesPerson $salesperson
      * @param Folder $folder
-     * @return total number of imported emails
+     * @return int total number of imported emails
      */
-    public function folder(NewDealerUser $dealer, SalesPerson $salesperson, EmailFolder $folder);
+    public function folder(NewDealerUser $dealer, SalesPerson $salesperson, EmailFolder $folder): int;
 }

@@ -35,6 +35,8 @@ use App\Models\User\User;
 class Website extends Model
 {
     use TableAware;
+
+    const TRAILERTRADER_ID = 284;
     const WEBSITE_TYPE_CLASSIFIED = 'classified';
 
     protected $table = 'website';

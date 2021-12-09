@@ -25,14 +25,26 @@ use Illuminate\Support\Facades\Auth;
 
 class CustomerController extends RestfulControllerV2
 {
-
+    /**
+     * @var LeadRepositoryInterface
+     */
     protected $leads;
 
+    /**
+     * @var CustomerTransformer
+     */
     protected $transformer;
+
+    /**
+     * @var CustomerDetailTransformer
+     */
+    protected $detailTransformer;
+
     /**
      * @var Manager
      */
     private $fractal;
+
     /**
      * @var CustomerRepositoryInterface
      */
@@ -46,13 +58,18 @@ class CustomerController extends RestfulControllerV2
      * @param  CustomerTransformer  $transformer
      * @param  Manager  $fractal
      */
-    public function __construct(CustomerRepositoryInterface $customerRepository, LeadRepositoryInterface $leadRepo, CustomerTransformer $transformer, Manager $fractal)
-    {
+    public function __construct(
+        CustomerRepositoryInterface $customerRepository,
+        LeadRepositoryInterface $leadRepo,
+        CustomerTransformer $transformer,
+        CustomerDetailTransformer $detailTransformer,
+        Manager $fractal
+    ) {
         $this->middleware('setDealerIdOnRequest')->only(['index', 'search', 'create', 'update','destroy']);
         $this->leads = $leadRepo;
-        $this->transformer = new CustomerTransformer;
         $this->fractal = $fractal;
         $this->transformer = $transformer;
+        $this->detailTransformer = $detailTransformer;
         $this->customerRepository = $customerRepository;
     }
 
@@ -90,7 +107,7 @@ class CustomerController extends RestfulControllerV2
         $user = Auth::user();
         
         $response = $this->response
-                ->item($customer, new CustomerDetailTransformer())
+                ->item($customer, $this->detailTransformer)
                 ->addMeta('major_units_link', config('app.new_design_crm_url') . $user->getCrmLoginUrl('/bill-of-sale'))
                 ->addMeta('service_link', config('app.new_design_crm_url') . $user->getCrmLoginUrl('/repair-orders'))
                 ->addMeta('parts_link', config('app.new_design_crm_url') . $user->getCrmLoginUrl('/pos-reports'));

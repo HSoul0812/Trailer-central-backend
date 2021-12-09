@@ -2,17 +2,27 @@
 
 namespace App\Services\CRM\Leads;
 
+use App\Exceptions\CRM\Leads\MergeLeadsException;
+use App\Models\CRM\Interactions\Facebook\Message;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Interactions\Interaction;
+use App\Repositories\CRM\Customer\CustomerRepositoryInterface;
+use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
+use App\Repositories\CRM\Interactions\Facebook\MessageRepositoryInterface;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
+use App\Repositories\CRM\Leads\FacebookRepositoryInterface;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\Leads\SourceRepositoryInterface;
 use App\Repositories\CRM\Leads\TypeRepositoryInterface;
 use App\Repositories\CRM\Leads\UnitRepositoryInterface;
+use App\Repositories\CRM\Text\TextRepositoryInterface;
+use App\Repositories\Dms\QuoteRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
+use App\Traits\Repository\Transaction;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class LeadService
@@ -21,40 +31,72 @@ use Illuminate\Support\Facades\DB;
  */
 class LeadService implements LeadServiceInterface
 {
+    use Transaction;
+
     /**
-     * @var App\Repositories\CRM\Leads\LeadRepositoryInterface
+     * @var LeadRepositoryInterface
      */
     protected $leads;
 
     /**
-     * @var App\Repositories\CRM\Leads\StatusRepositoryInterface
+     * @var StatusRepositoryInterface
      */
     protected $status;
 
     /**
-     * @var App\Repositories\CRM\Leads\SourceRepositoryInterface
+     * @var SourceRepositoryInterface
      */
     protected $sources;
 
     /**
-     * @var App\Repositories\CRM\Leads\TypeRepositoryInterface
+     * @var TypeRepositoryInterface
      */
     protected $types;
 
     /**
-     * @var App\Repositories\CRM\Leads\UnitRepositoryInterface
+     * @var UnitRepositoryInterface
      */
     protected $units;
 
     /**
-     * @var App\Repositories\Inventory\InventoryRepositoryInterface
+     * @var InventoryRepositoryInterface
      */
     protected $inventory;
 
     /**
-     * @var App\Repositories\CRM\Interactions\InteractionsRepositoryInterface
+     * @var InteractionsRepositoryInterface
      */
     protected $interactions;
+
+    /**
+     * @var MessageRepositoryInterface
+     */
+    protected $fbMessageRepository;
+
+    /**
+     * @var EmailHistoryRepositoryInterface
+     */
+    protected $emailHistoryRepository;
+
+    /**
+     * @var FacebookRepositoryInterface
+     */
+    protected $facebookRepository;
+
+    /**
+     * @var TextRepositoryInterface
+     */
+    protected $textRepository;
+
+    /**
+     * @var QuoteRepositoryInterface
+     */
+    protected $quoteRepository;
+
+    /**
+     * @var CustomerRepositoryInterface
+     */
+    protected $customerRepository;
 
     /**
      * LeadService constructor.
@@ -66,7 +108,13 @@ class LeadService implements LeadServiceInterface
         TypeRepositoryInterface $types,
         UnitRepositoryInterface $units,
         InventoryRepositoryInterface $inventory,
-        InteractionsRepositoryInterface $interactions
+        InteractionsRepositoryInterface $interactions,
+        MessageRepositoryInterface $fbMessageRepository,
+        EmailHistoryRepositoryInterface $emailHistoryRepository,
+        FacebookRepositoryInterface $facebookRepository,
+        TextRepositoryInterface $textRepository,
+        QuoteRepositoryInterface $quoteRepository,
+        CustomerRepositoryInterface $customerRepository
     ) {
         // Initialize Repositories
         $this->leads = $leads;
@@ -76,6 +124,12 @@ class LeadService implements LeadServiceInterface
         $this->units = $units;
         $this->inventory = $inventory;
         $this->interactions = $interactions;
+        $this->fbMessageRepository = $fbMessageRepository;
+        $this->emailHistoryRepository = $emailHistoryRepository;
+        $this->facebookRepository = $facebookRepository;
+        $this->textRepository = $textRepository;
+        $this->quoteRepository = $quoteRepository;
+        $this->customerRepository = $customerRepository;
     }
 
 
@@ -339,8 +393,101 @@ class LeadService implements LeadServiceInterface
         return $params;
     }
 
+    /**
+     * Convert FB User Into Lead
+     *
+     * @param array $params
+     * @return Lead
+     */
+    public function assign(array $params): Lead
+    {
+        $lead = $this->update($params);
+
+        $params['first_name'] = $lead->first_name;
+        $params['last_name'] = $lead->last_name;
+        $params['phone_number'] = $lead->phone_number;
+        $params['email_address'] = $lead->phone_number;
+
+        if ($lead->fbLead && $lead->fbLead->conversation) {
+            /** @var Collection<Message> $messages */
+            $messages = $lead->fbLead->conversation->messages;
+
+            // Loop Messages
+            if (!$messages->isEmpty()) {
+                foreach($messages as $message) {
+                    // Create Interaction
+                    $interaction = $this->interactions->create([
+                        'lead_id' => $lead->identifier,
+                        'interaction_type' => Interaction::TYPE_FB,
+                        'interaction_notes' => $message->message,
+                        'interaction_time' => $message->created_at
+                    ]);
+
+                    // Add Interaction ID
+                    $this->fbMessageRepository->update([
+                        'message_id' => $message->message_id,
+                        'interaction_id' => $interaction->interaction_id
+                    ]);
+                }
+            }
+        }
+
+        return $lead;
+    }
+
+    /**
+     * Get Matches for Lead
+     *
+     * @param array $params
+     * @return Collection<Lead>
+     */
     public function getMatches(array $params)
     {
         return $this->leads->getMatches($params['dealer_id'], $params);
+    }
+
+    /**
+     * @param int $leadId
+     * @param int $mergesLeadId
+     * @return bool
+     * @throws MergeLeadsException
+     */
+    public function mergeLeads(int $leadId, int $mergesLeadId): bool
+    {
+        $params = [
+            'lead_id' => $leadId,
+            'search' => ['lead_id' => $mergesLeadId]
+        ];
+
+        $customerParams = [
+            'website_lead_id' => $leadId,
+            'search' => ['website_lead_id' => $mergesLeadId]
+        ];
+
+        try {
+            $this->beginTransaction();
+
+            $this->emailHistoryRepository->bulkUpdate($params);
+
+            $this->facebookRepository->bulkUpdateFbLead($params);
+
+            $this->textRepository->bulkUpdate($params);
+
+            $this->quoteRepository->bulkUpdate($params);
+
+            $this->customerRepository->bulkUpdate($customerParams);
+
+            $this->commitTransaction();
+
+            Log::info('leads has been successfully merged', ['leadId' => $leadId, 'mergesLeadId' => $mergesLeadId]);
+
+        } catch (\Exception $e) {
+            Log::error('Merge leads error. Message - ' . $e->getMessage() , $e->getTrace());
+            $this->rollbackTransaction();
+
+            throw new MergeLeadsException('Merge leads error');
+        }
+
+        return true;
     }
 }

@@ -11,7 +11,6 @@ use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Repositories\Integration\Facebook\CatalogRepositoryInterface;
 use App\Repositories\Integration\Facebook\FeedRepositoryInterface;
 use App\Repositories\Integration\Facebook\PageRepositoryInterface;
-use App\Services\Integration\AuthServiceInterface;
 use App\Transformers\Integration\Facebook\CatalogTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use Illuminate\Support\Facades\Log;
@@ -50,11 +49,6 @@ class CatalogService implements CatalogServiceInterface
     protected $tokens;
 
     /**
-     * @var AuthServiceInterface
-     */
-    protected $auth;
-
-    /**
      * @var BusinessServiceInterface
      */
     protected $sdk;
@@ -65,6 +59,11 @@ class CatalogService implements CatalogServiceInterface
     private $fractal;
 
     /**
+     * Log
+     */
+    private $log;
+
+    /**
      * Construct Facebook Service
      */
     public function __construct(
@@ -72,7 +71,6 @@ class CatalogService implements CatalogServiceInterface
         FeedRepositoryInterface $feeds,
         PageRepositoryInterface $pages,
         TokenRepositoryInterface $tokens,
-        AuthServiceInterface $auth,
         BusinessServiceInterface $sdk,
         Manager $fractal
     ) {
@@ -80,11 +78,13 @@ class CatalogService implements CatalogServiceInterface
         $this->feeds = $feeds;
         $this->pages = $pages;
         $this->tokens = $tokens;
-        $this->auth = $auth;
         $this->sdk = $sdk;
         $this->fractal = $fractal;
 
         $this->fractal->setSerializer(new NoDataArraySerializer());
+
+        // Initialize Logger
+        $this->log = Log::channel('facebook');
     }
 
     /**
@@ -121,7 +121,7 @@ class CatalogService implements CatalogServiceInterface
         $params['relation_id'] = $catalog->id;
 
         // Find Refresh Token
-        $refresh = $this->auth->refresh($params);
+        $refresh = $this->sdk->refresh($params);
         if(!empty($refresh)) {
             $params['refresh_token'] = $refresh['access_token'];
             if(isset($refresh['expires_in'])) {
@@ -141,7 +141,7 @@ class CatalogService implements CatalogServiceInterface
             $params['relation_id'] = $page->id;
 
             // Get Refresh Token
-            $refresh = $this->auth->refresh($params);
+            $refresh = $this->sdk->refresh($params);
             if(!empty($refresh)) {
                 $params['refresh_token'] = $refresh;
             } else {
@@ -180,7 +180,7 @@ class CatalogService implements CatalogServiceInterface
         // Access Token is Set?
         if(isset($params['access_token']) && empty($params['refresh_token'])) {
             // Find Refresh Token
-            $refresh = $this->auth->refresh($params);
+            $refresh = $this->sdk->refresh($params);
             if(!empty($refresh)) {
                 $params['refresh_token'] = $refresh['access_token'];
                 if(isset($refresh['expires_in'])) {
@@ -204,7 +204,7 @@ class CatalogService implements CatalogServiceInterface
             $params['relation_id'] = $page->id;
 
             // Get Refresh Token
-            $refresh = $this->auth->refresh($params);
+            $refresh = $this->sdk->refresh($params);
             if(!empty($refresh)) {
                 $params['refresh_token'] = $refresh;
             } else {
@@ -304,7 +304,7 @@ class CatalogService implements CatalogServiceInterface
         $response = $this->fractal->createData($data)->toArray();
 
         // Set Validate
-        $response['validate'] = $this->auth->validate($accessToken);
+        $response['validate'] = $this->sdk->validate($accessToken);
 
         // Return Response
         return $response;
@@ -326,7 +326,7 @@ class CatalogService implements CatalogServiceInterface
                 $feed = $this->sdk->validateFeed($accessToken, $catalogId, $feedId);
                 $feedId = $feed['id'];
             } catch(\Exception $ex) {
-                Log::error("Exception returned during validate feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+                $this->log->error("Exception returned during validate feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
             }
         }
 
@@ -338,7 +338,7 @@ class CatalogService implements CatalogServiceInterface
                 $feed = $this->sdk->scheduleFeed($accessToken, $catalogId, $feedUrl, $feedName);
                 $feedId = $feed['id'];
             } catch(\Exception $ex) {
-                Log::error("Exception returned during schedule feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+                $this->log->error("Exception returned during schedule feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
                 $feedId = 0;
             }
         }

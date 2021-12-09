@@ -10,11 +10,26 @@ use Carbon\Carbon;
 
 class InteractionTransformer extends TransformerAbstract
 {
+    /**
+     * @var SalesPersonTransformer
+     */
+    private $salesPersonTransformer;
+
     protected $defaultIncludes = [
         'lead',
         'salesPerson',
         'emailHistory'
     ];
+
+    /**
+     * SalesPersonTransformer constructor.
+     * @param SalesPersonTransformer $salesPersonTransformer
+     * @param EmailHistoryTransformer $emailHistoryTransformer
+     */
+    public function __construct(SalesPersonTransformer $salesPersonTransformer, EmailHistoryTransformer $emailHistoryTransformer) {
+        $this->salesPersonTransformer = $salesPersonTransformer;
+        $this->emailHistoryTransformer = $emailHistoryTransformer;
+    }
 
     /**
      * Transform Interaction
@@ -43,7 +58,7 @@ class InteractionTransformer extends TransformerAbstract
     public function includeSalesPerson(Interaction $interaction)
     {
         if ($interaction->leadStatus && $interaction->leadStatus->salesPerson) {
-            return $this->item($interaction->leadStatus->salesPerson, new SalesPersonTransformer());
+            return $this->item($interaction->leadStatus->salesPerson, $this->salesPersonTransformer);
         } else {
             return $this->null();
         }
@@ -51,6 +66,6 @@ class InteractionTransformer extends TransformerAbstract
 
     public function includeEmailHistory(Interaction $interaction)
     {
-        return $this->collection($interaction->emailHistory, new EmailHistoryTransformer());
+        return $this->collection($interaction->emailHistory, $this->emailHistoryTransformer);
     }
 }

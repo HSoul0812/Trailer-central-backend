@@ -8,6 +8,7 @@ use App\Models\User\User;
 use App\Models\User\DealerUser;
 use App\Services\Common\EncrypterServiceInterface;
 use App\Models\User\DealerUserPermission;
+use App\Models\User\AuthToken;
 use Illuminate\Support\Facades\DB;
 
 class DealerUserRepository extends RepositoryAbstract implements DealerUserRepositoryInterface
@@ -62,7 +63,13 @@ class DealerUserRepository extends RepositoryAbstract implements DealerUserRepos
 
         DB::transaction(function() use ($params, &$dealerUser) {
             $dealerUser = DealerUser::create($params);
-
+            
+            AuthToken::create([
+                'user_id' => $dealerUser->dealer_user_id,
+                'user_type' => 'dealer_user',
+                'access_token' => md5($dealerUser->dealer_user_id.uniqid())
+            ]);
+            
             foreach($params['user_permissions'] as $permission) {
                 DealerUserPermission::create(['dealer_user_id' => $dealerUser->dealer_user_id] + $permission);
             }
