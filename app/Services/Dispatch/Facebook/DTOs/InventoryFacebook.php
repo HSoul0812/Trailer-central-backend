@@ -444,7 +444,7 @@ class InventoryFacebook
      */
     public function getListingType(): string {
         // Return Listing Type
-        return self::LISTING_MAP[$this->entityType] ?? self::LISTING_VEHICLE;
+        return self::LISTING_MAP[$this->entityTypeId] ?? self::LISTING_VEHICLE;
     }
 
     /**
