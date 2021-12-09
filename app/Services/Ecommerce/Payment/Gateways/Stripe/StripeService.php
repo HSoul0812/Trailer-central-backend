@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services\Ecommerce\Payment\Gateways\Stripe;
 
-use App\Contracts\LoggerServiceInterface;
 use App\Exceptions\Ecommerce\RefundPaymentGatewayException;
 use App\Exceptions\Ecommerce\TextrailSyncException;
 use App\Services\Ecommerce\Payment\Gateways\PaymentGatewayServiceInterface;
@@ -20,9 +19,6 @@ class StripeService implements PaymentGatewayServiceInterface
     /** @var StripeClient */
     private $client;
 
-    /** @var LoggerServiceInterface */
-    private $logger;
-
     /**
      * @array given in the future the common reasons could be changed, we need to ensure those reasons are according to Stripe API
      */
@@ -32,10 +28,9 @@ class StripeService implements PaymentGatewayServiceInterface
         'requested_by_customer'
     ];
 
-    public function __construct(StripeClientInterface $client, LoggerServiceInterface $logger)
+    public function __construct(StripeClientInterface $client)
     {
         $this->client = $client;
-        $this->logger = $logger;
     }
 
     /**
@@ -88,11 +83,11 @@ class StripeService implements PaymentGatewayServiceInterface
     {
         return in_array($reason, self::REFUND_REASONS);
     }
-    
+
     public function getInvoice(CompletedOrder $completedOrder): array
     {
       $invoice = $this->client->invoices->retrieve($completedOrder->invoice_id);
-      
+
       return $invoice->toArray();
     }
 
@@ -104,8 +99,9 @@ class StripeService implements PaymentGatewayServiceInterface
                     'order_id' => $params['ecommerce_order_id']
                 ]
             ]);
+
+            return true;
         } catch (ClientException | \Exception $exception) {
-            $this->logger->critical($exception->getMessage());
 
             throw new TextrailSyncException($exception->getMessage(), $exception->getCode(), $exception);
         }
