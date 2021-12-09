@@ -7,6 +7,7 @@ use App\Models\Marketing\Facebook\Image;
 use App\Models\Inventory\Inventory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Class Listings
@@ -209,8 +210,8 @@ class Listings extends Model
         'facebook_id',
         'account_type',
         'page_id',
-        'vehicle_type',
-        'images',
+        'listing_type',
+        'specific_type',
         'year',
         'price',
         'make',
@@ -255,7 +256,7 @@ class Listings extends Model
      */
     public function images(): HasMany
     {
-        return $this->hasMany(Image::class, 'id', 'listing_id');
+        return $this->hasMany(Image::class, 'listing_id', 'id');
     }
 
 

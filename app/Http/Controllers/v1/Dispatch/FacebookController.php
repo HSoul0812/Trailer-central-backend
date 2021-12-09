@@ -13,30 +13,46 @@ use App\Http\Requests\Dispatch\Facebook\LoginMarketplaceRequest;
 use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
 use App\Services\Dispatch\Facebook\MarketplaceServiceInterface;
 use App\Transformers\Marketing\Facebook\MarketplaceTransformer;
+use App\Transformers\Marketing\Facebook\ListingTransformer;
 use App\Transformers\Dispatch\Facebook\StatusTransformer;
 
 class FacebookController extends RestfulControllerV2 {
     /**
-     * @var App\Services\Marketing\MarketplaceRepositoryInterface
+     * @var MarketplaceRepositoryInterface
      */
     private $repository;
 
     /**
-     * @var App\Services\Dispatch\MarketplaceServiceInterface
+     * @var MarketplaceServiceInterface
      */
     private $service;
+
+    /**
+     * @var MarketplaceTransformer
+     */
+    private $transformer;
+
+    /**
+     * @var ListingTransformer
+     */
+    private $listingTransformer;
+
+    /**
+     * @var StatusTransformer
+     */
+    private $statusTransformer;
 
     public function __construct(
         MarketplaceRepositoryInterface $repository,
         MarketplaceServiceInterface $service,
         MarketplaceTransformer $transformer,
+        ListingTransformer $listingTransformer,
         StatusTransformer $statusTransformer
     ) {
-        $this->middleware('setDealerIdOnRequest')->only(['create', 'update', 'index']);
-
         $this->repository = $repository;
         $this->service = $service;
         $this->transformer = $transformer;
+        $this->listingTransformer = $listingTransformer;
         $this->statusTransformer = $statusTransformer;
     }
 
@@ -68,7 +84,7 @@ class FacebookController extends RestfulControllerV2 {
     {
         // Handle Facebook Marketplace Request
         $requestData = $request->all();
-        $requestData['id'] = $id;
+        $requestData['marketplace_id'] = $id;
         $request = new ShowMarketplaceRequest($requestData);
         if ($request->validate()) {
             // Return Auth
@@ -81,16 +97,19 @@ class FacebookController extends RestfulControllerV2 {
     /**
      * Create Facebook Marketplace Integration
      * 
+     * @param int $id
      * @param Request $request
      * @return type
      */
-    public function create(Request $request)
+    public function create(int $id, Request $request)
     {
         // Handle Facebook Marketplace Request
-        $request = new CreateMarketplaceRequest($request->all());
+        $requestData = $request->all();
+        $requestData['marketplace_id'] = $id;
+        $request = new CreateMarketplaceRequest($requestData);
         if ($request->validate()) {
             // Return Auth
-            return $this->response->item($this->service->create($request), $this->transformer);
+            return $this->response->item($this->service->create($request->all()), $this->listingTransformer);
         }
         
         return $this->response->errorBadRequest();
@@ -106,7 +125,7 @@ class FacebookController extends RestfulControllerV2 {
     {
         // Handle Facebook Marketplace Request
         $requestData = $request->all();
-        $requestData['id'] = $id;
+        $requestData['marketplace_id'] = $id;
         $request = new UpdateMarketplaceRequest($requestData);
         if ($request->validate()) {
             // Return Auth

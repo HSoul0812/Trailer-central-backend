@@ -2,6 +2,7 @@
 
 namespace App\Models\Marketing\Facebook;
 
+use App\Models\Inventory\Image as InventoryImage;
 use App\Models\Marketing\Facebook\Listings;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -46,5 +47,15 @@ class Image extends Model
     public function listings(): BelongsTo
     {
         return $this->belongsTo(Listings::class, 'listing_id', 'id');
+    }
+
+    /**
+     * Get Inventory Image
+     * 
+     * @return BelongsTo
+     */
+    public function image(): BelongsTo
+    {
+        return $this->belongsTo(InventoryImage::class, 'image_id', 'image_id');
     }
 }

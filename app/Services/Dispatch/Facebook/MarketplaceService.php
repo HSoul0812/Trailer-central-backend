@@ -2,11 +2,15 @@
 
 namespace App\Services\Dispatch\Facebook;
 
+use App\Http\Requests\Dispatch\Facebook\CreateMarketplaceRequest;
 use App\Models\User\AuthToken;
 use App\Models\User\Integration\Integration;
 use App\Models\Marketing\Facebook\Marketplace;
+use App\Models\Marketing\Facebook\Listings;
 use App\Repositories\Marketing\TunnelRepositoryInterface;
 use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
+use App\Repositories\Marketing\Facebook\ListingRepositoryInterface;
+use App\Repositories\Marketing\Facebook\ImageRepositoryInterface;
 use App\Services\Dispatch\Facebook\DTOs\DealerFacebook;
 use App\Services\Dispatch\Facebook\DTOs\MarketplaceStatus;
 use Illuminate\Support\Collection;
@@ -40,13 +44,19 @@ class MarketplaceService implements MarketplaceServiceInterface
      * 
      * @param MarketplaceRepositoryInterface $marketplace
      * @param TunnelRepositoryInterface $tunnels
+     * @param ListingRepositoryInterfaces $listings
+     * @param ImageRepositoryInterfaces $images
      */
     public function __construct(
         MarketplaceRepositoryInterface $marketplace,
-        TunnelRepositoryInterface $tunnels
+        TunnelRepositoryInterface $tunnels,
+        ListingRepositoryInterface $listings,
+        ImageRepositoryInterface $images
     ) {
         $this->marketplace = $marketplace;
         $this->tunnels = $tunnels;
+        $this->listings = $listings;
+        $this->images = $images;
 
         // Initialize Logger
         $this->log = Log::channel('dispatch-fb');
@@ -97,6 +107,59 @@ class MarketplaceService implements MarketplaceServiceInterface
             'dealers' => $dealers,
             'tunnels' => $tunnels
         ]);
+    }
+
+
+    /**
+     * Login to Marketplace
+     * 
+     * @param array $params
+     * @return Listings
+     */
+    public function create(array $params): Listings {
+        // Log
+        $this->log->info('Created Facebook Marketplace Inventory #' .
+                            $params['facebook_id'] . ' with the TC' .
+                            ' Inventory #' . $params['inventory_id'] .
+                            ' for the Marketplace Integration #' . $params['id']);
+
+        // Start Transaction
+        $this->listings->beginTransaction();
+
+        try {
+            // Insert Into DB
+            $listing = $this->listings->create($params);
+            $this->log->info('Saved Listing #' . $listing->id . ' for ' .
+                                'Facebook Listing #' . $params['facebook_id']);
+
+            // Create Images for Listing
+            if(!empty($params['images']) && is_array($params['images'])) {
+                // Delete Existing Images for Listing
+                $this->images->deleteAll($listing->id);
+
+                // Add New Images
+                foreach($params['images'] as $imageId) {
+                    $this->images->create([
+                        'listing_id' => $listing->id,
+                        'image_id' => $imageId
+                    ]);
+                }
+                $this->log->info('Saved ' . count($params['images']) . ' for ' .
+                                    'Listing #' . $params['id']);
+            }
+
+            $this->listings->commitTransaction();
+
+            // Return Listing
+            return $listing;
+        } catch (Exception $e) {
+            $this->logger->error('Marketplace Listing create error. params=' .
+                                    json_encode($params), $e->getTrace());
+
+            $this->listings->rollbackTransaction();
+
+            throw $e;
+        }
     }
 
 
