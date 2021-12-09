@@ -426,7 +426,7 @@ class InventoryFacebook
      * 
      * @return string
      */
-    private function getAccountType(): string {
+    public function getAccountType(): string {
         // Page URL Exists?
         if($this->pageUrl) {
             // Type is Page
@@ -442,7 +442,7 @@ class InventoryFacebook
      * 
      * @return string
      */
-    private function getListingType(): string {
+    public function getListingType(): string {
         // Return Listing Type
         return self::LISTING_MAP[$this->entityType] ?? self::LISTING_VEHICLE;
     }
@@ -452,7 +452,7 @@ class InventoryFacebook
      * 
      * @return string
      */
-    private function getSpecificType(): string {
+    public function getSpecificType(): string {
         // Entity Exists?
         if(!empty(self::SPECIFIC_ENTITY_MAP[$this->entityTypeId])) {
             return self::SPECIFIC_ENTITY_MAP[$this->entityTypeId];
