@@ -49,24 +49,24 @@ class DealerTransformer extends TransformerAbstract
 
     public function includeInventoryMissing(DealerFacebook $dealer)
     {
-        if($dealer->inventory && $dealer->inventory->create) {
-            return $this->collection($dealer->inventory->create, $this->inventoryTransformer);
+        if($dealer->inventory && $dealer->inventory->missing) {
+            return $this->collection($dealer->inventory->missing, $this->inventoryTransformer);
         }
         return $this->null();
     }
 
     public function includeInventoryUpdates(DealerFacebook $dealer)
     {
-        if($dealer->inventory && $dealer->inventory->update) {
-            return $this->collection($dealer->inventory->update, $this->inventoryTransformer);
+        if($dealer->inventory && $dealer->inventory->updates) {
+            return $this->collection($dealer->inventory->updates, $this->inventoryTransformer);
         }
         return $this->null();
     }
 
     public function includeInventorySold(DealerFacebook $dealer)
     {
-        if($dealer->inventory && $dealer->inventory->delete) {
-            return $this->collection($dealer->inventory->delete, $this->inventoryTransformer);
+        if($dealer->inventory && $dealer->inventory->sold) {
+            return $this->collection($dealer->inventory->sold, $this->inventoryTransformer);
         }
         return $this->null();
     }
