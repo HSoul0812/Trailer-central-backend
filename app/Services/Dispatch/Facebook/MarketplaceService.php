@@ -136,9 +136,9 @@ class MarketplaceService implements MarketplaceServiceInterface
             'auth_type' => $integration->tfa_type,
             'tunnels' => $this->tunnels->getAll(['dealer_id' => $integration->dealer_id]),
             'inventory' => new MarketplaceInventory([
-                'create' => $this->getInventory($integration, 'missing')/*,
-                'update' => $this->getInventory($integration, 'updates'),
-                'delete' => $this->getInventory($integration, 'sold')*/
+                'missing' => $this->getInventory($integration, 'missing')/*,
+                'updates' => $this->getInventory($integration, 'updates'),
+                'sold' => $this->getInventory($integration, 'sold')*/
             ])
         ]);
     }
