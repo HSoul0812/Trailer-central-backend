@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Services\Ecommerce\Payment\Gateways\Stripe;
 
+use App\Contracts\LoggerServiceInterface;
 use App\Exceptions\Ecommerce\RefundPaymentGatewayException;
 use App\Exceptions\Ecommerce\TextrailSyncException;
 use App\Services\Ecommerce\Payment\Gateways\PaymentGatewayServiceInterface;
 use Brick\Money\Money;
+use GuzzleHttp\Exception\ClientException;
 use Stripe\Exception\ApiErrorException;
 use Stripe\StripeClient;
 use Stripe\StripeClientInterface;
@@ -18,6 +20,9 @@ class StripeService implements PaymentGatewayServiceInterface
     /** @var StripeClient */
     private $client;
 
+    /** @var LoggerServiceInterface */
+    private $logger;
+
     /**
      * @array given in the future the common reasons could be changed, we need to ensure those reasons are according to Stripe API
      */
@@ -27,9 +32,10 @@ class StripeService implements PaymentGatewayServiceInterface
         'requested_by_customer'
     ];
 
-    public function __construct(StripeClientInterface $client)
+    public function __construct(StripeClientInterface $client, LoggerServiceInterface $logger)
     {
         $this->client = $client;
+        $this->logger = $logger;
     }
 
     /**
@@ -98,8 +104,10 @@ class StripeService implements PaymentGatewayServiceInterface
                     'order_id' => $params['ecommerce_order_id']
                 ]
             ]);
-        } catch (ApiErrorException $e) {
-            throw new TextrailSyncException($params['payment_intent']. " payment intent could not updated");
+        } catch (ClientException | \Exception $exception) {
+            $this->logger->critical($exception->getMessage());
+
+            throw new TextrailSyncException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }
 
@@ -107,8 +115,10 @@ class StripeService implements PaymentGatewayServiceInterface
     {
         try {
             $this->client->paymentIntents->confirm($params['payment_intent']);
-        } catch (ApiErrorException $e) {
-            throw new TextrailSyncException($params['payment_intent' . " payment intent confirm error."]);
+        } catch (ClientException | \Exception $exception) {
+            $this->logger->critical($exception->getMessage());
+
+            throw new TextrailSyncException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }
 }
