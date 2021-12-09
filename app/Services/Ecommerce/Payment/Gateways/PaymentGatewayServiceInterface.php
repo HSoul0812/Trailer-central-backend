@@ -25,4 +25,8 @@ interface PaymentGatewayServiceInterface
     public function refund(string $objectId, Money $amount, array $parts = [], ?string $reason = null);
     
     public function getInvoice(CompletedOrder $completedOrder): array;
+
+    public function updatePaymentIntent(array $params): bool;
+
+    public function confirmPaymentIntent(array $params): bool;
 }

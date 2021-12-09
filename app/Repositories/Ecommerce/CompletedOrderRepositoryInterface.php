@@ -23,13 +23,6 @@ interface CompletedOrderRepositoryInterface extends Repository, TransactionalRep
     public function get($params): ?CompletedOrder;
 
     /**
-     * This always should be wrapped in a transaction, because we need to lock the rows for the provided dealer.
-     *
-     * @param int $dealerId
-     */
-    public function generateNextPoNumber(int $dealerId): string;
-
-    /**
      * @param int $orderId
      * @param string|array $error
      * @param string $stage
