@@ -104,7 +104,7 @@ class InventoryFacebook
         5 => self::SPECIFIC_BOAT,
         6 => self::SPECIFIC_COMMERCIAL,
         7 => self::SPECIFIC_COMMERCIAL,
-        8 => self::SPECIFIC_POWERSPORT,
+        8 => self::SPECIFIC_POWER,
         9 => self::SPECIFIC_COMMERCIAL
     ];
 
