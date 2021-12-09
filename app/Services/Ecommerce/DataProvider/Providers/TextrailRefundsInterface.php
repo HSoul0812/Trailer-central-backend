@@ -15,11 +15,4 @@ interface TextrailRefundsInterface
      * @throws ClientException when some remote error appears
      */
     public function requestReturn(RefundBag $refundBag): int;
-
-    /**
-     * @return int refund/memo id
-     *
-     * @throws ClientException when some remote error appears
-     */
-    public function issueRefund(int $textrailOrderId, array $items): int;
 }
