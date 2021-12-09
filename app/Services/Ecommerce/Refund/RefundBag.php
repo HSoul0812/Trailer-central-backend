@@ -94,10 +94,12 @@ final class RefundBag implements DTO
         // prepare the refund info to match with the order info in Textrail side
         $this->textrailItems = collect($parts)->filter(function (array $part): bool {
             return $part['textrail'] !== null;
-        })->map(function (array $part) {
+        })->map(function (array $part) use (&$taxAmount): array {
+            $taxAmount = $taxAmount->plus($part['qty'] * $part['price'] * $this->order->tax_rate);
+
             return [
                 'order_item_id' => $part['textrail']['item_id'],
-                'qty' => $part['qty']
+                'qty_requested' => $part['qty']
             ];
         })->toArray();
 

@@ -102,7 +102,6 @@ class RefundService implements RefundServiceInterface
         $refund = $this->createRefund($refundBag);
 
         /** @var int $textrailRma */
-
         try {
             $textrailRma = $this->textrailService->requestReturn($refundBag);
 

@@ -585,60 +585,13 @@ class TextrailMagento implements DataProviderInterface,
     }
 
     /**
-     * This was a first approach to request refunds to Textrail, but it was early deprecated, due we need to request returns, not refunds.
-     * However, we can still use this method to request refunds, if we need to.
-     *
-     * @see https://devdocs.magento.com/guides/v2.4/rest/tutorials/orders/order-issue-refund.html
-     *
-     * @return int the refund/memo id
-     *
-     * @throws ClientException when some remote error appears
-     * @throws \Brick\Money\Exception\MoneyMismatchException
-     */
-    public function issueRefund(RefundBag $refundBag): int
-    {
-        $endpoint = $this->generateUrlWithOrderAndView(self::ORDER_ISSUE_REFUND, $refundBag->order->ecommerce_order_id);
-
-        $requestInfo = [
-            'notify' => true,
-            'arguments' => [
-                'adjustment_negative' => 0, // never will be negative amount so far
-                'adjustment_positive' => 0
-            ]
-        ];
-
-        if ($refundBag->textrailItems !== []) {
-            $itemsId = collect($refundBag->textrailItems)->pluck('order_item_id')->toArray();
-
-            $requestInfo['items'] = $refundBag->textrailItems;
-            $requestInfo['arguments']['extension_attributes'] = [];
-            $requestInfo['arguments']['extension_attributes']['return_to_stock_items'] = $itemsId;
-        }
-
-        // due the endpoint doesn't allow to send each amount of money separately, we need to send the whole amount
-        // using 'adjustment_positive' argument
-        $restOfAmounts = $refundBag->adjustmentAmount->plus($refundBag->handlingAmount)->plus($refundBag->taxAmount);
-        if ($restOfAmounts->isGreaterThan(0)) {
-            $requestInfo['arguments']['adjustment_positive'] = $restOfAmounts->getAmount()->toFloat();
-        }
-
-        if ($refundBag->shippingAmount->isGreaterThan(0)) {
-            $requestInfo['arguments']['shipping_amount'] = $refundBag->shippingAmount->getAmount()->toFloat();
-        }
-
-        $response = $this->httpClient->post($endpoint, ['headers' => $this->getHeaders(), 'json' => $requestInfo]);
-
-        return (int)json_decode($response->getBody()->getContents(), true);
-    }
-
-    /**
      * @see https://magento.redoc.ly/2.4.3-admin/tag/returns/#operation/rmaRmaManagementV1SaveRmaPost
      *
      * @return int the RMA
      */
     public function requestReturn(RefundBag $refundBag): int
     {
-        $endpoint = $this->generateUrlWithOrderAndView(self::ORDER_ISSUE_REFUND, $refundBag->order->ecommerce_order_id);
+        $endpoint = $this->generateUrlWithOrderAndView(self::ORDER_CREATE_RETURN, $refundBag->order->ecommerce_order_id);
 
         $itemDefaults = [
             'reason' => config('ecommerce.textrail.return.item_default_reason'),
