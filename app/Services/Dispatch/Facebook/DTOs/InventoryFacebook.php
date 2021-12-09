@@ -521,6 +521,6 @@ class InventoryFacebook
      */
     public function getFuelType(): string {
         // Get Fuel Type
-        return self::VEHICLE_FUEL_MAP[$this->fuel_type] ?? self::VEHICLE_FUEL_OTHER;
+        return self::VEHICLE_FUEL_MAP[$this->fuelType] ?? self::VEHICLE_FUEL_OTHER;
     }
 }
