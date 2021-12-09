@@ -5,6 +5,7 @@ namespace App\Models\Marketing\Facebook;
 use App\Models\User\User;
 use App\Models\User\DealerLocation;
 use App\Models\Marketing\Facebook\Filter;
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -16,6 +17,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Marketplace extends Model
 {
+    use TableAware;
+
+
     // Define Table Name Constant
     const TABLE_NAME = 'fbapp_marketplace';
 

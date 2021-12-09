@@ -4,6 +4,7 @@ namespace App\Models\Marketing\Facebook;
 
 use App\Models\Inventory\Image as InventoryImage;
 use App\Models\Marketing\Facebook\Listings;
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -14,6 +15,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Image extends Model
 {
+    use TableAware;
+
+
     // Define Table Name Constant
     const TABLE_NAME = 'fbapp_listings_images';
 
