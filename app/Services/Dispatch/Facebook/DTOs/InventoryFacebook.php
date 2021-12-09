@@ -121,6 +121,11 @@ class InventoryFacebook
 
 
     /**
+     * @const Default Color
+     */
+    const COLOR_DEFAULT = 'White';
+
+    /**
      * @const Facebook External Colors
      */
     const COLOR_EXTERNAL = [
@@ -472,11 +477,11 @@ class InventoryFacebook
     public function getColor(bool $internal = false): string {
         // Get External
         if(!$internal) {
-            return self::COLOR_EXTERNAL[$this->color];
+            return self::COLOR_EXTERNAL[$this->color] ?? self::COLOR_DEFAULT;
         }
 
         // Get Internal
-        return self::COLOR_INTERNAL[$this->color];
+        return self::COLOR_INTERNAL[$this->color] ?? self::COLOR_DEFAULT;
     }
 
     /**
