@@ -9,7 +9,7 @@ use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\Ecommerce\Refund\CancelOrderRequest;
 use App\Http\Requests\Ecommerce\Refund\GetAllRefundsRequest;
 use App\Http\Requests\Ecommerce\Refund\GetSingleRefundRequest;
-use App\Http\Requests\Ecommerce\Refund\IssueRefundOrderRequest;
+use App\Http\Requests\Ecommerce\Refund\IssueReturnRequest;
 use App\Http\Requests\Ecommerce\Refund\UpdateRefundTextrailRequest;
 use App\Models\Ecommerce\Refund;
 use App\Repositories\Ecommerce\RefundRepositoryInterface;
@@ -60,11 +60,11 @@ class RefundController extends RestfulControllerV2
      */
     public function issue(int $orderId, Request $request): Response
     {
-        $refundRequest = new IssueRefundOrderRequest($request->all() + ['order_id' => $orderId]);
+        $refundRequest = new IssueReturnRequest($request->all() + ['order_id' => $orderId]);
 
         if ($refundRequest->validate()) {
             try {
-                $refund = $this->service->issue(RefundBag::fromIssueRequest($refundRequest));
+                $refund = $this->service->issueReturn(RefundBag::fromIssueReturnRequest($refundRequest));
 
                 return $this->createdResponse($refund->id);
             } catch (RefundException $exception) {
@@ -97,7 +97,7 @@ class RefundController extends RestfulControllerV2
 
         if ($returnRequest->validate()) {
             try {
-                $refund = $this->service->cancelOrder(RefundBag::fromTextrailOrderId($textrailOrderId));
+                $refund = $this->service->cancelOrder(RefundBag::fromTextrailOrderCancellation($textrailOrderId));
 
                 return $this->acceptedResponse($refund->id);
             } catch (RefundException $exception) {
@@ -111,6 +111,7 @@ class RefundController extends RestfulControllerV2
     }
 
     /**
+     * @param int $rma
      * @param Request $request
      * @return Response|void
      *
@@ -121,7 +122,7 @@ class RefundController extends RestfulControllerV2
      * @noinspection PhpDocMissingThrowsInspection
      * @noinspection PhpUnhandledExceptionInspection
      */
-    public function updateStatus(int $rma, Request $request): Response
+    public function updateReturnStatus(int $rma, Request $request): Response
     {
         $returnRequest = new UpdateRefundTextrailRequest(array_merge($request->all(), ['Rma' => $rma]));
 
@@ -130,7 +131,7 @@ class RefundController extends RestfulControllerV2
                 /** @var Refund $refund */
                 $refund = $returnRequest->refund();
 
-                $this->service->updateStatus($refund, $returnRequest->mappedStatus(), $returnRequest->parts());
+                $this->service->updateReturnStatus($refund, $returnRequest->parts());
 
                 return $this->acceptedResponse($refund->id);
             } catch (RefundException $exception) {
