@@ -102,7 +102,6 @@ class StripeService implements PaymentGatewayServiceInterface
 
             return true;
         } catch (ClientException | \Exception $exception) {
-
             throw new TextrailSyncException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }
@@ -111,9 +110,9 @@ class StripeService implements PaymentGatewayServiceInterface
     {
         try {
             $this->client->paymentIntents->confirm($params['payment_intent']);
-        } catch (ClientException | \Exception $exception) {
-            $this->logger->critical($exception->getMessage());
 
+            return true;
+        } catch (ClientException | \Exception $exception) {
             throw new TextrailSyncException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }
