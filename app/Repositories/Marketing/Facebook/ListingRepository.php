@@ -132,7 +132,8 @@ class ListingRepository implements ListingRepositoryInterface {
      */
     public function getAllMissing(Marketplace $integration): Collection {
         // Initialize Inventory Query
-        $query = Inventory::where('dealer_id', '=', $integration->dealer_id)
+        $query = Inventory::select(Inventory::getTableName().'.*')
+                          ->where('dealer_id', '=', $integration->dealer_id)
                           ->where('show_on_website', 1)
                           ->where('is_archived', 0)
                           ->where(Inventory::getTableName().'.status', '<>', 2);
