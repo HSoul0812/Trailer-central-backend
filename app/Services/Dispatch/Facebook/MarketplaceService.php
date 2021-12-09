@@ -267,9 +267,7 @@ class MarketplaceService implements MarketplaceServiceInterface
      */
     private function getInventory(Marketplace $integration, string $type): Collection {
         // Invalid Type? Return Empty Collection!
-        var_dump($type);
-        var_dump(MarketplaceInventory::INVENTORY_METHODS[$type]);
-        if(isset(MarketplaceInventory::INVENTORY_METHODS[$type])) {
+        if(!isset(MarketplaceInventory::INVENTORY_METHODS[$type])) {
             return new Collection();
         }
 
