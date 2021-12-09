@@ -13,9 +13,9 @@ use App\Http\Requests\Dispatch\Facebook\LoginMarketplaceRequest;
 use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
 use App\Services\Dispatch\Facebook\DTOs\MarketplaceStep;
 use App\Services\Dispatch\Facebook\MarketplaceServiceInterface;
-use App\Transformers\Marketing\Facebook\DealerTransformer;
 use App\Transformers\Marketing\Facebook\MarketplaceTransformer;
 use App\Transformers\Marketing\Facebook\ListingTransformer;
+use App\Transformers\Dispatch\Facebook\DealerTransformer;
 use App\Transformers\Dispatch\Facebook\StatusTransformer;
 use App\Transformers\Dispatch\Facebook\StepTransformer;
 
