@@ -5,7 +5,6 @@ namespace Tests\Feature\Ecommerce\Refunds;
 use App\Jobs\Ecommerce\ProcessRefundOnPaymentGatewayJob;
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
 use App\Models\Ecommerce\Refund;
-use App\Models\Ecommerce\RefundTextrailStatuses;
 use App\Models\Parts\Textrail\Part;
 use App\Models\User\User;
 use Illuminate\Foundation\Testing\TestResponse;
@@ -51,19 +50,20 @@ class UpdateReturnStatusTest extends TestCase
         self::assertSame($expectedErrorMessages, $json['errors']);
     }
 
-    public function testItShouldNotUpdateTheRefundDueTheStatusIsWrong(): void
+    public function testItShouldNotUpdateTheRefundIsNotPending(): void
     {
         // Refund on authorized status, trying to update to an invalid status
         // 1) authorized -> authorized
         /** @var Refund $refund */
         $refund = $this->seed['refund'];
+        $refund->status = Refund::STATUS_APPROVED;
+        $refund->save();
 
         $parts = collect($refund->parts)->map(function (array $part) {
             return ['Sku' => $part['sku'], 'Qty' => $part['qty']];
         })->toArray();
 
         $body = [
-            'Status' => RefundTextrailStatuses::RECEIVED,
             'Items' => $parts
         ];
 
@@ -72,23 +72,7 @@ class UpdateReturnStatusTest extends TestCase
             $body
         );
 
-        $this->assertResponseHasValidationError($response, "Refund status cannot move from 'pending' to 'return_received'");
-
-        // 1) authorized -> authorized
-        $refund->status = Refund::STATUS_AUTHORIZED;
-        $refund->save();
-
-        $body = [
-            'Status' => RefundTextrailStatuses::AUTHORIZED,
-            'Items' => $parts
-        ];
-
-        $response = $this->json(
-            self::VERB, str_replace('{rma}', $refund->textrail_rma, static::ENDPOINT),
-            $body
-        );
-
-        $this->assertResponseHasValidationError($response, "Refund status cannot move from 'authorized' to 'authorized'");
+        $this->assertResponseHasValidationError($response, 'Refund status cannot be approved due it is not pending');
     }
 
     public function testItShouldNotUpdateTheRefundDueWrongItem(): void
@@ -100,7 +84,6 @@ class UpdateReturnStatusTest extends TestCase
 
         // some wrong sku part
         $body = [
-            'Status' => RefundTextrailStatuses::AUTHORIZED,
             'Items' => collect($refund->parts)->map(function (array $part) use ($wrongSku) {
                 return ['Sku' => $wrongSku, 'Qty' => $part['qty']];
             })->toArray()
@@ -115,7 +98,6 @@ class UpdateReturnStatusTest extends TestCase
 
         // some wrong qty part
         $body = [
-            'Status' => RefundTextrailStatuses::AUTHORIZED,
             'Items' => collect($refund->parts)->map(function (array $part) {
                 return ['Sku' => $part['sku'], 'Qty' => $part['qty'] + 2];
             })->toArray()
@@ -132,7 +114,7 @@ class UpdateReturnStatusTest extends TestCase
         );
     }
 
-    public function testItShouldMarkTheRefundAsRejected(): void
+    public function testItShouldMarkTheRefundAsDenied(): void
     {
         /** @var Refund $refund */
         $refund = $this->seed['refund'];
@@ -140,10 +122,7 @@ class UpdateReturnStatusTest extends TestCase
         $order = $this->seed['order'];
 
         $body = [
-            'Status' => RefundTextrailStatuses::DENIED,
-            'Items' => collect($refund->parts)->map(function (array $part) {
-                return ['Sku' => $part['sku'], 'Qty' => $part['qty']];
-            })->toArray()
+            'Items' => []
         ];
 
         $response = $this->json(
@@ -159,6 +138,10 @@ class UpdateReturnStatusTest extends TestCase
         self::assertArrayHasKey('status', $json['response']);
         self::assertArrayHasKey('data', $json['response']);
         self::assertArrayHasKey('id', $json['response']['data']);
+
+        /** @var Refund $refundUpdated */
+        $refundUpdated = Refund::query()->where('id', $refund->id)->first();
+        self::assertSame(Refund::STATUS_DENIED, $refundUpdated->status);
 
         /** @var CompletedOrder $updatedOrder */
         $updatedOrder = CompletedOrder::query()->where('id', $order->id)->first();
@@ -166,54 +149,23 @@ class UpdateReturnStatusTest extends TestCase
         self::assertSame(0.0, (float)$updatedOrder->total_refunded_amount);
     }
 
-    public function testItShouldMarkTheRefundAsAuthorized(): void
+    public function testItShouldMarkTheRefundAsApproved(): void
     {
         /** @var Refund $refund */
         $refund = $this->seed['refund'];
-        /** @var CompletedOrder $order */
-        $order = $this->seed['order'];
-
-        $body = [
-            'Status' => RefundTextrailStatuses::AUTHORIZED,
-            'Items' => collect($refund->parts)->map(function (array $part) {
-                return ['Sku' => $part['sku'], 'Qty' => $part['qty'] - 1]; // we will authorize the requested qty minus one
-            })->toArray()
-        ];
-
-        $response = $this->json(
-            self::VERB, str_replace('{rma}', $refund->textrail_rma, static::ENDPOINT),
-            $body
-        );
-
-        $response->assertStatus(202);
-
-        $json = json_decode($response->getContent(), true);
-
-        self::assertArrayHasKey('response', $json);
-        self::assertArrayHasKey('status', $json['response']);
-        self::assertArrayHasKey('data', $json['response']);
-        self::assertArrayHasKey('id', $json['response']['data']);
-
-        /** @var CompletedOrder $updatedOrder */
-        $updatedOrder = CompletedOrder::query()->where('id', $order->id)->first();
-
-        self::assertGreaterThan((float)$updatedOrder->total_refunded_amount, $order->total_refunded_amount);
-    }
-
-    public function testItShouldMarkTheRefundAsReceived(): void
-    {
-        /** @var Refund $refund */
-        $refund = $this->seed['refund'];
-        $refund->status = Refund::STATUS_AUTHORIZED;
-        $refund->save();
 
         /** @var CompletedOrder $order */
         $order = $this->seed['order'];
 
+        $expectedTotal = 0;
+
         $body = [
-            'Status' => RefundTextrailStatuses::RECEIVED,
-            'Items' => collect($refund->parts)->map(function (array $part) {
-                return ['Sku' => $part['sku'], 'Qty' => $part['qty']];
+            'Items' => collect($refund->parts)->take(1)->map(function (array $part) use (&$expectedTotal) {
+                $qty = $part['qty'] - 1;
+
+                $expectedTotal += $qty * $part['price'];
+
+                return ['Sku' => $part['sku'], 'Qty' => $qty];
             })->toArray()
         ];
 
@@ -233,11 +185,16 @@ class UpdateReturnStatusTest extends TestCase
         self::assertArrayHasKey('data', $json['response']);
         self::assertArrayHasKey('id', $json['response']['data']);
 
+        /** @var Refund $refundUpdated */
+        $refundUpdated = Refund::query()->where('id', $refund->id)->first();
+
+        self::assertSame(Refund::STATUS_PROCESSING, $refundUpdated->status);
 
         /** @var CompletedOrder $updatedOrder */
         $updatedOrder = CompletedOrder::query()->where('id', $order->id)->first();
 
-        self::assertSame((float)$updatedOrder->total_refunded_amount, $order->total_refunded_amount);
+        self::assertSame($expectedTotal, (float)$updatedOrder->total_refunded_amount);
+
         Bus::assertDispatched(ProcessRefundOnPaymentGatewayJob::class);
     }
 
@@ -289,21 +246,11 @@ class UpdateReturnStatusTest extends TestCase
                 'Validation Failed',
                 [
                     'Rma' => ['The selected rma is invalid.'],
-                    'Status' => ['The status field is required.'],
-                    'Items' => ['The items field is required.']
-                ]
-            ],
-            'Bad status, and not items' => [
-                ['Rma' => $getRefund, 'Status' => 'Wrong status'],
-                422,
-                'Validation Failed',
-                [
-                    'Status' => ['The selected status is invalid.'],
-                    'Items' => ['The items field is required.']
+                    'Items' => ['The items field must be present.']
                 ]
             ],
             'Items as string' => [
-                ['Rma' => $getRefund, 'Status' => RefundTextrailStatuses::AUTHORIZED, 'Items' => 'Wrong items'],
+                ['Rma' => $getRefund, 'Items' => 'Wrong items'],
                 422,
                 'Validation Failed',
                 [
@@ -311,7 +258,7 @@ class UpdateReturnStatusTest extends TestCase
                 ]
             ],
             'Sku qty is required' => [
-                ['Rma' => $getRefund, 'Status' => RefundTextrailStatuses::AUTHORIZED, 'Items' => [['Qty' => $this->faker->numberBetween(3, 8)]]],
+                ['Rma' => $getRefund, 'Items' => [['Qty' => $this->faker->numberBetween(3, 8)]]],
                 422,
                 'Validation Failed',
                 [
@@ -319,7 +266,7 @@ class UpdateReturnStatusTest extends TestCase
                 ]
             ],
             'Item qty is required' => [
-                ['Rma' => $getRefund, 'Status' => RefundTextrailStatuses::AUTHORIZED, 'Items' => [['Sku' => $this->faker->word]]],
+                ['Rma' => $getRefund, 'Items' => [['Sku' => $this->faker->word]]],
                 422,
                 'Validation Failed',
                 [
@@ -327,7 +274,7 @@ class UpdateReturnStatusTest extends TestCase
                 ]
             ],
             'Item qty is wrong' => [
-                ['Rma' => $getRefund, 'Status' => RefundTextrailStatuses::AUTHORIZED, 'Items' => [['Sku' => $this->faker->word, 'Qty' => 'Hello']]],
+                ['Rma' => $getRefund, 'Items' => [['Sku' => $this->faker->word, 'Qty' => 'Hello']]],
                 422,
                 'Validation Failed',
                 [
@@ -336,7 +283,6 @@ class UpdateReturnStatusTest extends TestCase
             ]
         ];
     }
-
 
     /**
      * @param array{order: ?array,refund: ?array} $attributes
@@ -406,6 +352,7 @@ class UpdateReturnStatusTest extends TestCase
                 [
                     'dealer_id' => $dealer->dealer_id,
                     'order_id' => $order->id,
+                    'adjustment_amount' => 0,
                     'parts' => $parts,
                     'parts_amount' => $total,
                     'total_amount' => $total,

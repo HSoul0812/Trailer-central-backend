@@ -9,7 +9,7 @@ namespace App\Services\Ecommerce\Refund;
 use App\Contracts\Support\DTO;
 use App\Exceptions\Ecommerce\RefundAmountException;
 use App\Exceptions\Ecommerce\RefundException;
-use App\Http\Requests\Ecommerce\Refund\IssueRefundOrderRequest;
+use App\Http\Requests\Ecommerce\Refund\IssueReturnRequest;
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
 use App\Models\Ecommerce\CompletedOrder\OrderAmountsBag;
 use App\Models\Ecommerce\Refund;
@@ -76,6 +76,8 @@ final class RefundBag implements DTO
      * @param Money $shippingAmount
      * @param Money $taxAmount
      * @param string|null $reason
+     *
+     * @noinspection PhpDocMissingThrowsInspection
      */
     public function __construct(
         int     $orderId,
@@ -115,15 +117,15 @@ final class RefundBag implements DTO
             ->plus($taxAmount);
     }
 
-    public static function fromIssueRequest(IssueRefundOrderRequest $request): self
+    public static function fromIssueReturnRequest(IssueReturnRequest $request): self
     {
         return new self(
             $request->orderId(),
             $request->parts(),
-            $request->adjustmentAmount(),
-            $request->handlingAmount(),
-            $request->shippingAmount(),
-            $request->taxAmount(),
+            Money::zero('USD'),
+            Money::zero('USD'),
+            Money::zero('USD'),
+            Money::zero('USD'),
             $request->reason
         );
     }
@@ -133,7 +135,7 @@ final class RefundBag implements DTO
      * @return static
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
-    public static function fromTextrailOrderId(int $textrailOrderId): self
+    public static function fromTextrailOrderCancellation(int $textrailOrderId): self
     {
         /** @var CompletedOrderRepositoryInterface $repository */
         $repository = app(CompletedOrderRepositoryInterface::class);

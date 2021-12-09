@@ -98,7 +98,7 @@ class RefundRepository implements RefundRepositoryInterface
         $this->getAll([
             'order_id' => $orderId,
             self::CONDITION_AND_WHERE_NOT_IN => [
-                'status' => [Refund::STATUS_FAILED, Refund::STATUS_REJECTED]
+                'status' => [Refund::STATUS_FAILED, Refund::STATUS_DENIED]
             ]
         ])->each(static function (Refund $refund) use (&$partsAmount, &$partsQty, $amountAdder, $qtyAdder) {
             foreach ($refund->parts as $part) {
@@ -149,7 +149,7 @@ class RefundRepository implements RefundRepositoryInterface
     {
         $amount = (float)Refund::query()
             ->where('order_id', '=', $orderId)
-            ->whereNotIn('status', [Refund::STATUS_FAILED, Refund::STATUS_REJECTED])
+            ->whereNotIn('status', [Refund::STATUS_FAILED, Refund::STATUS_DENIED])
             ->sum('total_amount');
 
         return Money::of($amount, 'USD', null, RoundingMode::HALF_DOWN);
@@ -171,7 +171,7 @@ class RefundRepository implements RefundRepositoryInterface
         /** @var \stdClass $summary */
         $summary = DB::table(Refund::getTableName())->selectRaw($select)
             ->where('order_id', '=', $orderId)
-            ->whereNotIn('status', [Refund::STATUS_FAILED, Refund::STATUS_REJECTED])
+            ->whereNotIn('status', [Refund::STATUS_FAILED])
             ->groupBy('order_id')
             ->first();
 
@@ -215,7 +215,6 @@ class RefundRepository implements RefundRepositoryInterface
      */
     public function markAsRecoverableFailure(Refund $refund, array $metadata, $message, string $stage): bool
     {
-        $refund->status = Refund::STATUS_RECOVERABLE_FAILURE;
         $refund->recoverable_failure_stage = $stage;
         $refund->metadata = $metadata;
 
@@ -255,58 +254,32 @@ class RefundRepository implements RefundRepositoryInterface
     }
 
     /**
+     * Depending on the total amount, the status will be updated to approved or denied:
+     *      - when the total amount is greater than zero it will be marked as approved
+     *      - when the total amount is less or equal zero it will be marked as denied
+     *
      * @param Refund $refund
      * @param array<array{sku:string, title:string, id:int, amount: float, qty: int, price: float}> $parts
-     * @return bool
+     * @return Refund
      */
-    public function markAsRejected(Refund $refund, array $parts): bool
+    public function markAsApprovedOrDenied(Refund $refund, array $parts): Refund
     {
-        return $this->update(
-            $refund->id,
-            [
-                'status' => Refund::STATUS_REJECTED,
-                'metadata' => array_merge((array)$refund->metadata, ['rejected_parts' => $parts])
-            ]
-        );
-    }
+        // shipping/handling/adjustment are not taken in account due this refund is a return
+        $total = $refund->parts_amount + $refund->tax_amount;
 
-    /**
-     * @param Refund $refund
-     * @param array<array{sku:string, title:string, id:int, amount: float, qty: int, price: float}> $requestedParts
-     * @param array<array{sku:string, title:string, id:int, amount: float, qty: int, price: float}> $authorizedParts
-     * @return bool
-     */
-    public function markAsAuthorized(Refund $refund, array $requestedParts, array $authorizedParts): bool
-    {
-        return $this->update(
+        $this->update(
             $refund->id,
             [
-                'status' => Refund::STATUS_AUTHORIZED,
+                'status' => ($total > 0 ? Refund::STATUS_APPROVED : Refund::STATUS_DENIED),
                 'parts_amount' => $refund->parts_amount,
-                'total_amount' => $refund->parts_amount + $refund->adjustment_amount + $refund->handling_amount + $refund->shipping_amount,
-                'parts' => $authorizedParts,
-                'metadata' => array_merge((array)$refund->metadata, ['requested_parts' => $requestedParts, 'authorized_parts' => $authorizedParts])
-            ]
-        );
-    }
-
-    /**
-     * @param Refund $refund
-     * @param array<array{sku:string, title:string, id:int, amount: float, qty: int, price: float}> $parts
-     * @return bool
-     */
-    public function markAsReturnReceived(Refund $refund, array $parts): bool
-    {
-        return $this->update(
-            $refund->id,
-            [
-                'status' => Refund::STATUS_RETURN_RECEIVED,
-                'parts_amount' => $refund->parts_amount,
-                'total_amount' => $refund->parts_amount + $refund->adjustment_amount + $refund->handling_amount + $refund->shipping_amount,
+                'tax_amount' => $refund->tax_amount,
+                'total_amount' => $total,
                 'parts' => $parts,
-                'metadata' => array_merge((array)$refund->metadata, ['received_parts' => $parts])
+                'metadata' => array_merge((array)$refund->metadata, ['processed_parts' => $parts])
             ]
         );
+
+        return $this->get($refund->id);
     }
 
     /**
