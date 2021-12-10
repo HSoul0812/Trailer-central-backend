@@ -245,19 +245,23 @@ class CompletedOrderService implements CompletedOrderServiceInterface
      * @param int $textrailOrderId
      * @return CompletedOrder
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     * @throws \DomainException when the order has been approved or cancelled
      */
     public function approve(int $textrailOrderId): CompletedOrder
     {
-        $completedOrder = CompletedOrder::where('ecommerce_order_id', '=', $textrailOrderId)->first();
+        /** @var CompletedOrder $completedOrder */
+        $completedOrder = CompletedOrder::where('ecommerce_order_id', '=', $textrailOrderId)->firstOrFail();
 
-        if ($completedOrder) {
-            $completedOrder->ecommerce_order_status = CompletedOrder::ECOMMERCE_STATUS_APPROVED;
-            $completedOrder->save();
-
-            return $completedOrder;
+        if (!$completedOrder->isNotApproved()) {
+            throw new \DomainException('The order only could be approved when it is not approved');
         }
+
+        $completedOrder->ecommerce_order_status = CompletedOrder::ECOMMERCE_STATUS_APPROVED;
+        $completedOrder->save();
+
+        return $completedOrder;
     }
-    
+
     /**
      * @param array $params
      * @return string
@@ -271,15 +275,15 @@ class CompletedOrderService implements CompletedOrderServiceInterface
             $completedOrder = CompletedOrder::findOrFail($params['id']);
 
             if ($completedOrder->invoice_pdf_url) {
-              
+
               return $completedOrder;
-              
+
             } elseif ($completedOrder->invoice_id && !$completedOrder->invoice_pdf_url) {
               $invoice = $this->paymentGatewayService->getInvoice($completedOrder);
-              
+
               $completedOrder->invoice_pdf_url = $invoice['invoice_pdf'];
               $completedOrder->save();
-              
+
               return $completedOrder;
             } else {
               throw new DomainException('invoice is not ready at the moment');

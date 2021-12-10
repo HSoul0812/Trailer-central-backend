@@ -171,6 +171,11 @@ class CompletedOrder extends Model
         return $this->payment_status === self::PAYMENT_STATUS_PAID;
     }
 
+    public function isNotApproved(): bool
+    {
+        return $this->ecommerce_order_status === self::ECOMMERCE_STATUS_NOT_APPROVED;
+    }
+
     public function isCanceled(): bool
     {
         return $this->ecommerce_order_status === self::ECOMMERCE_STATUS_CANCELED;
