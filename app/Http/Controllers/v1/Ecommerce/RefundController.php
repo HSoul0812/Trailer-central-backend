@@ -70,7 +70,7 @@ class RefundController extends RestfulControllerV2
             } catch (RefundException $exception) {
                 throw new ResourceException('Validation Failed', $exception->getErrors(), $exception);
             } catch (\Throwable $exception) {
-                throw new HttpException($exception->getCode() > 0 ? $exception->getCode() : 500, $exception->getMessage(), $exception);
+                throw $this->createHttpException($exception);
             }
         }
 
@@ -103,7 +103,7 @@ class RefundController extends RestfulControllerV2
             } catch (RefundException $exception) {
                 throw new ResourceException('Validation Failed', $exception->getErrors(), $exception);
             } catch (\Throwable $exception) {
-                throw new HttpException($exception->getCode() > 0 ? $exception->getCode() : 500, $exception->getMessage(), $exception);
+                throw $this->createHttpException($exception);
             }
         }
 
@@ -137,7 +137,7 @@ class RefundController extends RestfulControllerV2
             } catch (RefundException $exception) {
                 throw new ResourceException('Validation Failed', $exception->getErrors(), $exception);
             } catch (\Throwable $exception) {
-                throw new HttpException($exception->getCode() > 0 ? $exception->getCode() : 500, $exception->getMessage(), $exception);
+                throw $this->createHttpException($exception);
             }
         }
 
@@ -187,5 +187,14 @@ class RefundController extends RestfulControllerV2
         }
 
         $this->response->errorBadRequest();
+    }
+
+    private function createHttpException(\Throwable $exception): HttpException
+    {
+        return new HttpException(
+            is_int($exception->getCode()) && $exception->getCode() > 0 ?
+                $exception->getCode() : 500,
+            $exception->getMessage(),
+            $exception);
     }
 }

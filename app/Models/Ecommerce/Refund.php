@@ -27,7 +27,8 @@ use Illuminate\Database\Query\Builder;
  * @property string $reason
  * @property string $payment_gateway_id the refund id on the payment gateway
  * @property int $textrail_rma the return id on textrail
- * @property string $status 'pending', 'approved', 'denied', 'completed', 'failed'
+ * @property int $textrail_refund_id the refund id on textrail
+ * @property string $status 'pending', 'approved', 'denied', 'processing', 'processed', 'completed', 'failed'
  * @property string $recoverable_failure_stage 'payment_gateway_refund', 'textrail_issue_return', 'textrail_update_return_status', 'textrail_order_cancellation'
  * @property array $metadata a valid and useful json object
  * @property \DateTimeInterface $created_at
@@ -52,17 +53,18 @@ class Refund extends Model
      * Status flow:
      *  1) when the refund is created from TC side (known as return), it might follow one of the below flows:
      *      a) pending -> denied
-     *      b) pending -> approved -> processing -> completed
-     *      e) pending -> failed (when something goes wrong before it was created on the Magento side)
-     *  2) when the refund is created from TexTrail side (known as order cancellation), it might follow one of the below flows:
-     *      a) pending -> processing -> completed
+     *      b) pending -> approved -> processing -> processed -> completed
+     *      c) pending -> failed (when something goes wrong before it was created on the Magento side)
+     *  2) when the refund is created from TexTrail side (known as order cancellation), it will follow the below flow:
+     *      pending -> processing -> processed
      */
     public const STATUS_PENDING = 'pending';
-    public const STATUS_APPROVED = 'approved'; // the refund should be proceeded by payment gateway
     public const STATUS_DENIED = 'denied';
-    public const STATUS_COMPLETED = 'completed'; // the refund has been created on Magento side
     public const STATUS_FAILED = 'failed'; // something goes wrong before it was created on the Magento side
+    public const STATUS_APPROVED = 'approved'; // the refund should be proceeded by payment gateway
     public const STATUS_PROCESSING = 'processing'; // the refund is being processed by the payment gateway
+    public const STATUS_PROCESSED = 'processed'; // the refund was processed by the payment gateway
+    public const STATUS_COMPLETED = 'completed'; // the refund has been created on Magento side once it has been processed by the payment gateway
 
     // these are intended to advice that some refund has failed after a successfully done remote process, subsequently,
     // the refund will be marked as recoverable_failure and TrailerCentral can still recover it
@@ -70,6 +72,7 @@ class Refund extends Model
     public const RECOVERABLE_STAGE_TEXTRAIL_ISSUE_RETURN = 'textrail_issue_return';
     public const RECOVERABLE_STAGE_TEXTRAIL_UPDATE_RETURN_STATUS = 'textrail_update_return_status';
     public const RECOVERABLE_STAGE_TEXTRAIL_ORDER_CANCELLATION = 'textrail_order_cancellation';
+    public const RECOVERABLE_STAGE_TEXTRAIL_CREATE_REFUND = 'textrail_create_refund';
 
     public const ERROR_STAGE_TEXTRAIL_ISSUE_RETURN_REMOTE = 'textrail_issue_return_remote';
     public const ERROR_STAGE_TEXTRAIL_ISSUE_RETURN_LOCAL = 'textrail_issue_return_local';
@@ -99,6 +102,7 @@ class Refund extends Model
         'reason',
         'payment_gateway_id',
         'textrail_rma',
+        'textrail_refund_id',
         'metadata',
         'status',
         'recoverable_failure_stage',
@@ -141,5 +145,10 @@ class Refund extends Model
     public function isApproved(): bool
     {
         return $this->status === self::STATUS_APPROVED;
+    }
+
+    public function isProcessed(): bool
+    {
+        return $this->status === self::STATUS_PROCESSED;
     }
 }

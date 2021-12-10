@@ -10,9 +10,17 @@ use GuzzleHttp\Exception\ClientException;
 interface TextrailRefundsInterface
 {
     /**
-     * @return int the RMA
+     * @param RefundBag $refundBag
+     * @return array
      *
      * @throws ClientException when some remote error appears
      */
-    public function requestReturn(RefundBag $refundBag): int;
+    public function requestReturn(RefundBag $refundBag): array;
+
+    /**
+     * @return int int the refund/memo id
+     *
+     * @throws ClientException when some remote error appears
+     */
+    public function createRefund(int $textrailOrderId, array $items): int;
 }

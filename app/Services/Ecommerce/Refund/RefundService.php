@@ -10,6 +10,7 @@ use App\Exceptions\Ecommerce\RefundAmountException;
 use App\Exceptions\Ecommerce\RefundException;
 use App\Exceptions\Ecommerce\RefundHttpClientException;
 use App\Exceptions\Ecommerce\RefundPaymentGatewayException;
+use App\Jobs\Ecommerce\NotifyRefundOnMagentoJob;
 use App\Jobs\Ecommerce\ProcessRefundOnPaymentGatewayJob;
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
 use GuzzleHttp\Exception\ClientException;
@@ -22,7 +23,6 @@ use App\Repositories\Ecommerce\RefundRepositoryInterface;
 use App\Services\Ecommerce\CompletedOrder\CompletedOrderServiceInterface;
 use App\Services\Ecommerce\DataProvider\Providers\TextrailRefundsInterface;
 use App\Services\Ecommerce\Payment\Gateways\PaymentGatewayServiceInterface;
-use App\Services\Ecommerce\Payment\Gateways\PaymentGatewayRefundResultInterface;
 use Brick\Money\Money;
 
 class RefundService implements RefundServiceInterface
@@ -105,9 +105,9 @@ class RefundService implements RefundServiceInterface
         try {
             $textrailRma = $this->textrailService->requestReturn($refundBag);
 
-            $this->updateOrderRefundSummary($refund, $textrailRma);
+            $this->updateOrderRefundSummary($refund, $textrailRma['entity_id']);
 
-            $this->refundRepository->updateRma($refund, $textrailRma);
+            $this->refundRepository->updateRma($refund, $textrailRma['entity_id']);
 
             return $refund;
         } catch (ClientException $clientException) {
@@ -236,14 +236,16 @@ class RefundService implements RefundServiceInterface
      * @param Refund $refund
      * @param array<array{sku: string, qty: int}> $parts array of parts indexed by part sku
      * @return bool
-     * @throws RefundFailureException when it was not possible to mark it as rejected
+     * @throws RefundFailureException when it was not possible to update its status
      * @throws \Brick\Money\Exception\MoneyMismatchException
      */
     public function updateReturnStatus(Refund $refund, array $parts): bool
     {
         if (!$refund->canBeApproved()) {
-            throw new RefundException("Refund status cannot be approved due it is not pending");
+            throw new RefundException('Refund cannot be approved due it is not pending');
         }
+
+        $logContext = ['id' => $refund->id, 'rma' => $refund->textrail_rma];
 
         $recalculatedParts = $this->recalculatePartsRelatedAmounts(
             collect($refund->parts)->keyBy('sku')->toArray(),
@@ -253,8 +255,6 @@ class RefundService implements RefundServiceInterface
 
         $refund->parts_amount = $recalculatedParts['partsAmount']->getAmount()->toFloat(); // reset the parts amount
         $refund->tax_amount = $recalculatedParts['taxAmount']->getAmount()->toFloat(); // reset the tax amount
-
-        $logContext = ['id' => $refund->id, 'rma' => $refund->textrail_rma];
 
         try {
             $this->orderRepository->beginTransaction();
@@ -274,7 +274,7 @@ class RefundService implements RefundServiceInterface
             );
 
             if ($refund->isApproved()) {
-                // When a refund has reached the status 'Return received', it should be processed on the payment gateway
+                // When a refund has reached the status 'approved', it should be processed on the payment gateway
                 $this->dispatchPaymentGatewayRefundJob($refund);
             }
 
@@ -294,7 +294,7 @@ class RefundService implements RefundServiceInterface
             );
 
             $exception = new RefundFailureException(sprintf(
-                'The refund {%d} for {%d} order had a critical error when it was tried to be marked as processed_closed: %s',
+                'The refund {%d} for {%d} order had a critical error when it was tried to update its status: %s',
                 $refund->id,
                 $refund->order_id,
                 $exception->getMessage()
@@ -308,7 +308,7 @@ class RefundService implements RefundServiceInterface
      * It will call the refund process on the payment gateway and will create a refund on Magento side
      *
      * @param int $refundId
-     * @throws RefundPaymentGatewayException
+     * @throws RefundPaymentGatewayException when there were some error trying to refund the payment on the payment processor
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
     public function refund(int $refundId): void
@@ -320,8 +320,6 @@ class RefundService implements RefundServiceInterface
             $logContext = collect($refund->toArray())
                 ->except(['created_at', 'updated_at', 'failed_at', 'metadata'])
                 ->toArray();
-
-            /** @var PaymentGatewayRefundResultInterface $gatewayRefundResponse */
 
             try {
                 $this->logger->info(
@@ -341,13 +339,15 @@ class RefundService implements RefundServiceInterface
                     $logContext
                 );
 
-                $this->refundRepository->markAsCompleted($refund, $gatewayRefundResponse);
+                $refund = $this->refundRepository->markAsProcessed($refund, $gatewayRefundResponse);
+
+                $this->dispatchPaymentTextrailNotifyRefundJob($refund);
 
                 return;
             } catch (\Exception $exception) {
                 $metadata = (array) $refund->metadata;
 
-                if ($gatewayRefundResponse) {
+                if (isset($gatewayRefundResponse)) {
                     // there was some error after the payment gateway remote process has successfully done, so we need
                     // to store somewhere that important info
                     $logContext['response'] = $gatewayRefundResponse->asArray();
@@ -378,10 +378,90 @@ class RefundService implements RefundServiceInterface
     }
 
     /**
+     * It will create a refund on Textrail side,then it will be marked as completed
+     *
+     * @param int $refundId
+     * @return bool
+     * @throws RefundFailureException when it was not possible to create the refund on Textrail side
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     */
+    public function notify(int $refundId): bool
+    {
+        $refund = $this->refundRepository->get($refundId);
+
+        if ($refund) {
+            if (!$refund->isProcessed()) {
+                throw new RefundException('Refund cannot be completed due it is not processed');
+            }
+
+            // Some issuable context information
+            $logContext = collect($refund->toArray())
+                ->except(['created_at', 'updated_at', 'failed_at', 'metadata'])
+                ->toArray();
+
+            try {
+                $this->logger->info(
+                    sprintf('The refund creation on Textrail for {%d} has started', $refund->id),
+                    $logContext
+                );
+
+                $parts = collect($refund->parts)->map(function (array $part): array {
+                    return [
+                        'order_item_id' => $part['textrail']['item_id'],
+                        'qty' => $part['qty']
+                    ];
+                })->toArray();
+
+                $textrailRefundId = $this->textrailService->createRefund($refund->order->ecommerce_order_id, $parts);
+
+                $this->logger->info(
+                    sprintf('The refund creation for {%d} has successfully done', $refund->id),
+                    $logContext
+                );
+
+                return $this->refundRepository->markAsCompleted($refund, $textrailRefundId);
+            } catch (\Exception $exception) {
+                $metadata = (array)$refund->metadata;
+
+                if (isset($textrailRefundId)) {
+                    // there was some error after the payment gateway remote process has successfully done, so we need
+                    // to store somewhere that important info
+                    $logContext['textrail_refund_id'] = $textrailRefundId;
+                    $metadata['textrail_refund_id'] = $textrailRefundId;
+                }
+
+                $this->logger->critical($exception->getMessage(), $logContext);
+
+                // This is a naive approach given that if there was a failure when it tried to finish the refund (post-gateway),
+                // then, it probably will fail again here, but at least the critical log was recorded, and the subsequent
+                // refund attempt will be prevented
+                $this->refundRepository->markAsRecoverableFailure(
+                    $refund,
+                    $metadata,
+                    $exception->getMessage(),
+                    Refund::RECOVERABLE_STAGE_TEXTRAIL_CREATE_REFUND
+                );
+
+                $exception = new RefundFailureException(sprintf(
+                    'The refund {%d} for {%d} order had a critical error when it was tried to be created on Textrail side: %s',
+                    $refund->id,
+                    $refund->order_id,
+                    $exception->getMessage()
+                ));
+
+                throw $exception->withContext($logContext)->withTextrailRma($refund->textrail_rma);
+            }
+        }
+
+        throw new ModelNotFoundException(sprintf('No query results for model [%s] %s', Refund::class, $refundId));
+    }
+
+    /**
      * @param Refund $refund
      * @param int|null $textrailRma
      *
-     * @throws RefundFailureException
+     * @throws RefundFailureException when it was not possible to update the order refund summary
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
     private function updateOrderRefundSummary(Refund $refund, ?int $textrailRma = null): void
     {
@@ -445,6 +525,15 @@ class RefundService implements RefundServiceInterface
         $this->refundRepository->markAsProcessing($refund);
 
         $job = new ProcessRefundOnPaymentGatewayJob($refund->id);
+        $this->dispatch($job->onQueue(config('ecommerce.textrail.queue')));
+    }
+
+    /**
+     * @param Refund $refund
+     */
+    private function dispatchPaymentTextrailNotifyRefundJob(Refund $refund): void
+    {
+        $job = new NotifyRefundOnMagentoJob($refund->id);
         $this->dispatch($job->onQueue(config('ecommerce.textrail.queue')));
     }
 

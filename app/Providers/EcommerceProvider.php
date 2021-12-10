@@ -9,6 +9,7 @@ use App\Events\Ecommerce\OrderSuccessfullySynced;
 use App\Events\Ecommerce\QtyUpdated;
 use App\Http\Controllers\v1\Ecommerce\CompletedOrderController;
 use App\Http\Controllers\v1\Parts\Textrail\PartsController;
+use App\Jobs\Ecommerce\NotifyRefundOnMagentoJob;
 use App\Jobs\Ecommerce\SyncOrderJob;
 use App\Jobs\Ecommerce\UpdateOrderRequiredInfoByTextrailJob;
 use App\Listeners\Ecommerce\CreateCustomerFromOrder;
@@ -55,7 +56,6 @@ use App\Services\Parts\Textrail\TextrailPartServiceInterface;
 use App\Transformers\Ecommerce\CompletedOrderTransformer;
 use App\Transformers\Parts\PartsTransformerInterface;
 use App\Transformers\Parts\Textrail\PartsTransformer;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\ServiceProvider;
 use Stripe\StripeClient;
 use Stripe\StripeClientInterface;
@@ -160,6 +160,14 @@ class EcommerceProvider extends ServiceProvider
 
         $this->app->bindMethod(UpdateOrderRequiredInfoByTextrailJob::class . '@handle', function (UpdateOrderRequiredInfoByTextrailJob $job): void {
             $job->handle($this->app->make(CompletedOrderServiceInterface::class));
+        });
+
+        $this->app->bindMethod(NotifyRefundOnMagentoJob::class . '@handle', function (NotifyRefundOnMagentoJob $job): void {
+            $job->handle($this->app->make(RefundServiceInterface::class));
+        });
+
+        $this->app->bindMethod(ProcessRefundOnPaymentGatewayJob::class . '@handle', function (ProcessRefundOnPaymentGatewayJob $job): void {
+            $job->handle($this->app->make(RefundServiceInterface::class));
         });
     }
 }
