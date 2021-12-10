@@ -21,6 +21,7 @@ class RefundTransformer extends TransformerAbstract
         return [
                 'id' => $refund->id,
                 'total_amount' => $refund->total_amount,
+                'parts_amount' => $refund->parts_amount,
                 'tax_amount' => $refund->tax_amount,
                 'shipping_amount' => $refund->shipping_amount,
                 'handling_amount' => $refund->handling_amount,
