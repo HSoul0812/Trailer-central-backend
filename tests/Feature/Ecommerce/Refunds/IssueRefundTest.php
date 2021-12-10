@@ -125,6 +125,9 @@ class IssueRefundTest extends RefundTest
 
     public function badArgumentsProvider(): array
     {
+        $this->refreshApplication();
+        $this->setUpTraits();
+
         $getOrder = static function (array $seed): CompletedOrder {
             return $seed['order'];
         };
@@ -181,13 +184,5 @@ class IssueRefundTest extends RefundTest
                 ]
             ]
         ];
-    }
-
-    public function __construct(?string $name = null, array $data = [], $dataName = '')
-    {
-        parent::__construct($name, $data, $dataName);
-
-        $this->refreshApplication();
-        $this->setUpTraits();
     }
 }

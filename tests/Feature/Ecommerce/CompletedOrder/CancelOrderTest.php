@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Ecommerce\Refunds;
+namespace Tests\Feature\Ecommerce\CompletedOrder;
 
 use App\Jobs\Ecommerce\ProcessRefundOnPaymentGatewayJob;
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
@@ -10,7 +10,7 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Bus;
 use Tests\TestCase;
 
-class OrderCancellationTest extends TestCase
+class CancelOrderTest extends TestCase
 {
     use WithFaker;
 

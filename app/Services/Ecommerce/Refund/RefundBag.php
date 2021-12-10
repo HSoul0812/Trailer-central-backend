@@ -310,7 +310,7 @@ final class RefundBag implements DTO
         }
 
         // check if the amounts are greater than the order remaining balances
-        // when it check the total amount, it will check implicitly the adjustment amount
+        // when it checks the total amount, it will check implicitly the adjustment amount
         foreach (['total', 'parts', 'handling', 'shipping', 'tax'] as $amountToCheck) {
             if ($orderAmounts->{$amountToCheck . 'RemainingBalance'}
                 ->minus($this->{$amountToCheck . 'Amount'})
