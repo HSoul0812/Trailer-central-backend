@@ -17,8 +17,8 @@ class TextrailRefundIdToEcommerceOrderRefunds extends Migration
             $table->integer('textrail_refund_id')
                 ->after('textrail_rma')
                 ->unsigned()
-                ->nullable()
                 ->unique()
+                ->nullable()
                 ->comment('TexTrail unique refund id');
         });
     }
