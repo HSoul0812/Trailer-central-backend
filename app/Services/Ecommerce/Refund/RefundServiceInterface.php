@@ -30,7 +30,8 @@ interface RefundServiceInterface
      * It will call the refund process on the payment gateway and will create a refund on Magento side
      *
      * @param int $refundId
-     * @throws RefundPaymentGatewayException
+     * @throws RefundPaymentGatewayException when there were some error trying to refund the payment on the payment processor
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
     public function refund(int $refundId): void;
 
@@ -43,4 +44,12 @@ interface RefundServiceInterface
      * @return bool
      */
     public function updateReturnStatus(Refund $refund, array $parts): bool;
+
+    /**
+     * It will create a refund on Textrail side,then it will be marked as completed
+     *
+     * @param int $refundId
+     * @return bool
+     */
+    public function notify(int $refundId): bool;
 }
