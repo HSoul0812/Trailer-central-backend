@@ -23,7 +23,6 @@ use App\Repositories\Ecommerce\RefundRepositoryInterface;
 use App\Services\Ecommerce\CompletedOrder\CompletedOrderServiceInterface;
 use App\Services\Ecommerce\DataProvider\Providers\TextrailRefundsInterface;
 use App\Services\Ecommerce\Payment\Gateways\PaymentGatewayServiceInterface;
-use App\Services\Ecommerce\Payment\Gateways\PaymentGatewayRefundResultInterface;
 use Brick\Money\Money;
 
 class RefundService implements RefundServiceInterface
@@ -238,6 +237,7 @@ class RefundService implements RefundServiceInterface
      * @param array<array{sku: string, qty: int}> $parts array of parts indexed by part sku
      * @return bool
      * @throws RefundFailureException when it was not possible to update its status
+     * @throws \Brick\Money\Exception\MoneyMismatchException
      */
     public function updateReturnStatus(Refund $refund, array $parts): bool
     {
@@ -247,16 +247,16 @@ class RefundService implements RefundServiceInterface
 
         $logContext = ['id' => $refund->id, 'rma' => $refund->textrail_rma];
 
+        $recalculatedParts = $this->recalculatePartsRelatedAmounts(
+            collect($refund->parts)->keyBy('sku')->toArray(),
+            $parts,
+            (float)$refund->order->tax_rate
+        );
+
+        $refund->parts_amount = $recalculatedParts['partsAmount']->getAmount()->toFloat(); // reset the parts amount
+        $refund->tax_amount = $recalculatedParts['taxAmount']->getAmount()->toFloat(); // reset the tax amount
+
         try {
-            $recalculatedParts = $this->recalculatePartsRelatedAmounts(
-                collect($refund->parts)->keyBy('sku')->toArray(),
-                $parts,
-                (float)$refund->order->tax_rate
-            );
-
-            $refund->parts_amount = $recalculatedParts['partsAmount']->getAmount()->toFloat(); // reset the parts amount
-            $refund->tax_amount = $recalculatedParts['taxAmount']->getAmount()->toFloat(); // reset the tax amount
-
             $this->orderRepository->beginTransaction();
 
             $refund = $this->refundRepository->markAsApprovedOrDenied($refund, $recalculatedParts['updatedParts']);
