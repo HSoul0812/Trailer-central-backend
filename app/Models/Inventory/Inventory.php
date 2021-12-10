@@ -164,8 +164,6 @@ class Inventory extends Model
     const COLOR_ATTRIBUTE_ID = 11;
     const FUEL_TYPE_ATTRIBUTE_ID = 14;
     const MILEAGE_ATTRIBUTE_ID = 16;
-    const TRANSMISSION_ATTRIBUTE_ID = 28;
-    const BODY_ATTRIBUTE_ID = 67;
 
     const TABLE_NAME = 'inventory';
 
@@ -513,20 +511,6 @@ class Inventory extends Model
     public function getIdentifierAttribute(): string
     {
         return CompactHelper::shorten($this->inventory_id);
-    }
-
-    /**
-     * Get Fuel Type
-     *
-     * @return string
-     */
-    public function getFuelTypeAttribute(): ?string
-    {
-        // Get Attribute
-        $attribute = $this->attributeValues()->where('attribute_id', self::FUEL_TYPE_ATTRIBUTE_ID)->first();
-
-        // Return Value
-        return $attribute->value ?? '';
     }
 
     /**
