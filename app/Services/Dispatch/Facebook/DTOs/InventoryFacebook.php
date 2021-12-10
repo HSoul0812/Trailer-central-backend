@@ -417,11 +417,11 @@ class InventoryFacebook
             'description' => $inventory->description,
             'dealer_location_id' => $inventory->dealer_location_id,
             'location' => $inventory->dealerLocation->city_region,
-            'color' => $inventory->color,
-            'mileage' => $inventory->mileage,
-            'body' => $inventory->body,
-            'transmission' => $inventory->transmission,
-            'fuel_type' => $inventory->fuel_type
+            'color' => $inventory->attributes->get('color'),
+            'mileage' => $inventory->attributes->get('mileage'),
+            'body' => $inventory->attributes->get('body'),
+            'transmission' => $inventory->attributes->get('transmission'),
+            'fuel_type' => $inventory->attributes->get('fuel_type')
         ]);
     }
 

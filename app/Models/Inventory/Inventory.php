@@ -14,12 +14,12 @@ use App\Traits\GeospatialHelper;
 use ElasticScoutDriverPlus\CustomSearch;
 use Grimzy\LaravelMysqlSpatial\Eloquent\SpatialTrait;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
-use Illuminate\Database\Eloquent\Collection;
 use App\Models\Inventory\AttributeValue;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Parts\Vendor;
 use App\Models\User\User;
 use App\Models\Traits\TableAware;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
@@ -438,6 +438,20 @@ class Inventory extends Model
         return $this->hasMany(CustomerInventory::class, 'inventory_id', 'inventory_id');
     }
 
+    /**
+     * Get Attribute Values
+     *
+     * @return string
+     */
+    public function getFuelTypeAttribute(): ?string
+    {
+        // Get Attribute
+        $attribute = $this->attributeValues()->where('attribute_id', self::FUEL_TYPE_ATTRIBUTE_ID)->first();
+
+        // Return Value
+        return $attribute->value ?? '';
+    }
+
     public function getCategoryLabelAttribute()
     {
         $category = Category::where('legacy_category', $this->category)->first();
@@ -449,12 +463,23 @@ class Inventory extends Model
         return $category->label;
     }
 
-    public function getAttributesAttribute()
+    /**
+     * Get Attributes Map
+     * 
+     * @return Collection<code: value>
+     */
+    public function getAttributesAttribute(): Collection
     {
-        return self::select('*')
-                    ->join('eav_attribute_value', 'inventory.inventory_id', '=', 'eav_attribute_value.inventory_id')
-                    ->where('inventory.inventory_id', $this->inventory_id)
-                    ->get();
+        // Initialize Attributes
+        $attributes = [];
+
+        // Loop Attributes
+        foreach($this->attributeValues as $value) {
+            $attributes[$value->code] = $value->value;
+        }
+
+        // Return Attribute Map
+        return new Collection($attributes);
     }
 
     public function getColorAttribute()
@@ -513,34 +538,6 @@ class Inventory extends Model
     {
         // Get Attribute
         $attribute = $this->attributeValues()->where('attribute_id', self::MILEAGE_ATTRIBUTE_ID)->first();
-
-        // Return Value
-        return $attribute->value ?? '';
-    }
-
-    /**
-     * Get Transmission
-     *
-     * @return string
-     */
-    public function getTransmissionAttribute(): ?string
-    {
-        // Get Attribute
-        $attribute = $this->attributeValues()->where('attribute_id', self::TRANSMISSION_ATTRIBUTE_ID)->first();
-
-        // Return Value
-        return $attribute->value ?? '';
-    }
-
-    /**
-     * Get Body Type
-     *
-     * @return string
-     */
-    public function getBodyAttribute(): ?string
-    {
-        // Get Attribute
-        $attribute = $this->attributeValues()->where('attribute_id', self::BODY_ATTRIBUTE_ID)->first();
 
         // Return Value
         return $attribute->value ?? '';
