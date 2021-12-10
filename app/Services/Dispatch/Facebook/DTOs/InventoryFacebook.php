@@ -404,10 +404,6 @@ class InventoryFacebook
     public static function getFromInventory(Inventory $inventory,
             Marketplace $integration): InventoryFacebook
     {
-        if(!empty($inventory->color)) {
-            var_dump($inventory->attributes);
-            die;
-        }
         // Create Inventory Mapping
         return new self([
             'inventory_id' => $inventory->inventory_id,
