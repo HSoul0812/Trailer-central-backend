@@ -135,8 +135,16 @@ class ListingRepository implements ListingRepositoryInterface {
         $query = Inventory::select(Inventory::getTableName().'.*')
                           ->where('dealer_id', '=', $integration->dealer_id)
                           ->where('show_on_website', 1)
-                          ->where('is_archived', 0)
-                          ->where(Inventory::getTableName().'.status', '<>', 2);
+                          ->where(function(Where $query) {
+                              $query->where('is_archived', 0)
+                                    ->orWhereNull('is_archived');
+                          })
+                          ->where(function(Where $query) {
+                              $query->where(function(Where $query) {
+                                  $query->where(Inventory::getTableName().'.status', '<>', 2)
+                                        ->where(Inventory::getTableName().'.status', '<>', 6);
+                              })->orWhereNull(Inventory::getTableName().'.status');
+                          });
 
         // Append Join
         $query = $query->leftJoin(Listings::getTableName(), function($join) use($integration) {
