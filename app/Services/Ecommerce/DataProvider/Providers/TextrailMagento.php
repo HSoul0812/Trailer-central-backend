@@ -622,36 +622,29 @@ class TextrailMagento implements DataProviderInterface,
     }
 
     /**
-     * @see https://magento.redoc.ly/2.4.3-admin/tag/orderorderIdrefund#operation/salesRefundOrderV1ExecutePost
+     * @see https://devdocs.magento.com/guides/v2.4/rest/tutorials/orders/order-issue-refund.html
+     * @see https://magento.redoc.ly/2.3.7-admin/tag/orderorderIdrefund#operation/salesRefundOrderV1ExecutePost
+     *
      * @return int the memo id
      */
     public function createRefund(int $textrailOrderId, array $items): int
     {
         $endpoint = $this->generateUrlWithOrderAndView(self::ORDER_CREATE_REFUND, $textrailOrderId);
 
-        $itemDefaults = [
-            'reason' => config('ecommerce.textrail.return.item_default_reason'),
-            'condition' => config('ecommerce.textrail.return.item_default_condition'),
-            'resolution' => config('ecommerce.textrail.return.item_default_resolution'),
-            'status' => config('ecommerce.textrail.return.item_default_status')
+        $requestInfo = [
+            'notify' => true,
+            'items' => $items,
+            'arguments' => [
+                'shipping_amount' => 0,
+                'adjustment_positive' => 0,
+                'adjustment_negative' => 0,
+                'extension_attributes' => [
+                    'return_to_stock_items' => collect($items)->pluck('order_item_id')->toArray()
+                ],
+            ]
         ];
 
-        $items = collect($items)->map(static function (array $item) use ($itemDefaults): array {
-            return $item + $itemDefaults;
-        })->toArray();
-
-        $response = $this->httpClient->post($endpoint,
-            [
-                'headers' => $this->getHeaders(),
-                'json' => [
-                    'rmaDataObject' => [
-                        'order_id' => $textrailOrderId,
-                        'store_id' => config('ecommerce.textrail.store_id'),
-                        'status' => config('ecommerce.textrail.return.default_status'),
-                        'items' => $items
-                    ]
-                ]
-            ]);
+        $response = $this->httpClient->post($endpoint, ['headers' => $this->getHeaders(), 'json' => $requestInfo]);
 
         return (int)json_decode($response->getBody()->getContents(), true);
     }
