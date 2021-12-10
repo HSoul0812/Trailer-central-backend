@@ -72,7 +72,7 @@ class UpdateReturnStatusTest extends TestCase
             $body
         );
 
-        $this->assertResponseHasValidationError($response, 'Refund status cannot be approved due it is not pending');
+        $this->assertResponseHasValidationError($response, 'Refund cannot be approved due it is not pending');
     }
 
     public function testItShouldNotUpdateTheRefundDueWrongItem(): void

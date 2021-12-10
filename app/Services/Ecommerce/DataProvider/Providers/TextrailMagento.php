@@ -32,7 +32,7 @@ class TextrailMagento implements DataProviderInterface,
     const GUEST_CART_ADD_SHIPPING_INFO = 'rest/:view/V1/guest-carts/:cartId/shipping-information';
 
     const ORDER_GET_INFO = 'rest/:view/V1/orders/:orderId';
-    const ORDER_ISSUE_REFUND = 'rest/:view/V1/order/:orderId/refund';
+    const ORDER_CREATE_REFUND = 'rest/:view/V1/order/:orderId/refund';
     const ORDER_CREATE_RETURN = 'rest/:view/V1/returns';
 
     /** @var string */
@@ -587,9 +587,10 @@ class TextrailMagento implements DataProviderInterface,
     /**
      * @see https://magento.redoc.ly/2.4.3-admin/tag/returns/#operation/rmaRmaManagementV1SaveRmaPost
      *
-     * @return int the RMA
+     * @param RefundBag $refundBag
+     * @return array
      */
-    public function requestReturn(RefundBag $refundBag): int
+    public function requestReturn(RefundBag $refundBag): array
     {
         $endpoint = $this->generateUrlWithOrderAndView(self::ORDER_CREATE_RETURN, $refundBag->order->ecommerce_order_id);
 
@@ -610,6 +611,41 @@ class TextrailMagento implements DataProviderInterface,
                 'json' => [
                     'rmaDataObject' => [
                         'order_id' => $refundBag->order->ecommerce_order_id,
+                        'store_id' => config('ecommerce.textrail.store_id'),
+                        'status' => config('ecommerce.textrail.return.default_status'),
+                        'items' => $items
+                    ]
+                ]
+            ]);
+
+        return json_decode($response->getBody()->getContents(), true);
+    }
+
+    /**
+     * @see https://magento.redoc.ly/2.4.3-admin/tag/orderorderIdrefund#operation/salesRefundOrderV1ExecutePost
+     * @return int the memo id
+     */
+    public function createRefund(int $textrailOrderId, array $items): int
+    {
+        $endpoint = $this->generateUrlWithOrderAndView(self::ORDER_CREATE_REFUND, $textrailOrderId);
+
+        $itemDefaults = [
+            'reason' => config('ecommerce.textrail.return.item_default_reason'),
+            'condition' => config('ecommerce.textrail.return.item_default_condition'),
+            'resolution' => config('ecommerce.textrail.return.item_default_resolution'),
+            'status' => config('ecommerce.textrail.return.item_default_status')
+        ];
+
+        $items = collect($items)->map(static function (array $item) use ($itemDefaults): array {
+            return $item + $itemDefaults;
+        })->toArray();
+
+        $response = $this->httpClient->post($endpoint,
+            [
+                'headers' => $this->getHeaders(),
+                'json' => [
+                    'rmaDataObject' => [
+                        'order_id' => $textrailOrderId,
                         'store_id' => config('ecommerce.textrail.store_id'),
                         'status' => config('ecommerce.textrail.return.default_status'),
                         'items' => $items
