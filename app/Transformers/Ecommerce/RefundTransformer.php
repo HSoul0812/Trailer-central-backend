@@ -21,13 +21,16 @@ class RefundTransformer extends TransformerAbstract
         return [
                 'id' => $refund->id,
                 'total_amount' => $refund->total_amount,
+                'tax_amount' => $refund->tax_amount,
+                'shipping_amount' => $refund->shipping_amount,
+                'handling_amount' => $refund->handling_amount,
+                'adjustment_amount' => $refund->adjustment_amount,
                 'reason' => $refund->reason,
                 'status' => $refund->status,
                 'parts' => $refund->parts,
                 'payment_gateway_id' => $refund->payment_gateway_id,
                 'textrail_rma' => $refund->textrail_rma,
                 'textrail_refund_id' => $refund->textrail_refund_id,
-                'metadata' => $refund->metadata,
                 'created_at' => $refund->created_at->format('Y-m-d H:i:s'),
                 'updated_at' => $refund->updated_at ? $refund->updated_at->format('Y-m-d H:i:s') : null,
             ] + $extraData;
