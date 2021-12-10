@@ -134,6 +134,9 @@ class InventoryTransformer extends TransformerAbstract
              'created_at' => $inventory->created_at,
              'updated_at' => $inventory->updated_at,
              'times_viewed' => $inventory->times_viewed,
+             'is_featured' => $inventory->is_featured,
+             'is_special' => $inventory->is_special,
+             'chosen_overlay' => $inventory->chosen_overlay,
              'quote_url' => config('app.new_design_crm_url') . $inventory->user->getCrmLoginUrl('bill-of-sale/new?inventory_id=' . $inventory->identifier)
          ];
     }
