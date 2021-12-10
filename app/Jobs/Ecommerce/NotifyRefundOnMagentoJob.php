@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Jobs\Ecommerce;
 
-use App\Exceptions\Ecommerce\RefundPaymentGatewayException;
+use App\Exceptions\Ecommerce\RefundFailureException;
 use App\Jobs\Job;
 use App\Services\Ecommerce\Refund\RefundServiceInterface;
 
-class ProcessRefundOnPaymentGatewayJob extends Job
+class NotifyRefundOnMagentoJob extends Job
 {
     /** @var int */
     private $refundId;
@@ -21,11 +21,11 @@ class ProcessRefundOnPaymentGatewayJob extends Job
     /**
      * @param RefundServiceInterface $service
      *
-     * @throws RefundPaymentGatewayException when there were some error trying to refund the payment on the payment processor
+     * @throws RefundFailureException when it was not possible to create the refund on Textrail side
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
     public function handle(RefundServiceInterface $service): void
     {
-        $service->refund($this->refundId);
+        $service->notify($this->refundId);
     }
 }
