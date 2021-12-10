@@ -141,8 +141,8 @@ class SaveInventoryTransformer implements TransformerInterface
                 ->toArray();
 
             $createParams = $params;
-            $attributes = [];
-            $features = [];
+            $attributes = $params[self::ATTRIBUTES_KEY] ?? [];
+            $features = $params[self::FEATURES_KEY] ?? [];
 
             foreach ($createParams as $key => $value) {
                 if (is_array($value) && !in_array($key, self::ARRAY_VALUES)) {
@@ -247,15 +247,6 @@ class SaveInventoryTransformer implements TransformerInterface
 
                     unset($createParams[$createParamKey]);
 
-                } elseif ($createParamKey === self::FEATURES_KEY) {
-                    foreach ($createParamValue as $featureId => $featureValues) {
-                        foreach ($featureValues as $featureValue) {
-                            $features[] = [
-                                'feature_list_id' => $featureId,
-                                'value' => $featureValue,
-                            ];
-                        }
-                    }
                 }
             }
 

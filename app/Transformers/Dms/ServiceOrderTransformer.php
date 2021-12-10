@@ -44,6 +44,7 @@ class ServiceOrderTransformer extends TransformerAbstract
             'public_memo'   => $serviceOrder->public_memo,
             'private_memo'  => $serviceOrder->private_memo,
             'services'      => $serviceOrder->serviceItems,
+            'total_paid_amount' => $serviceOrder->total_paid_amount,
         ];
     }
 
