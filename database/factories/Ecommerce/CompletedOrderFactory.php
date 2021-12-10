@@ -23,9 +23,15 @@ $factory->define(CompletedOrder::class, static function (Faker $faker, array $at
         return [['id' => $part->id, 'qty' => 1, 'price' => $part->price]];
     };
 
+    $parts = $attributes['parts'] ?? $createParts();
+
+    $partsAmount = collect($parts)->reduce(function (float $carry, array $part): float {
+        return $carry + ($part['price'] * $part['qty']);
+    }, 0.00);
+
     return [
         'customer_email' => $faker->email,
-        'total_amount' => $faker->randomFloat(2, 20, 9999),
+        'total_amount' => $partsAmount,
         'payment_method' => $attributes['payment_method'] ?? 'card',
         'payment_status' => $attributes['payment_status'] ?? $faker->randomElement([CompletedOrder::PAYMENT_STATUS_PAID, CompletedOrder::PAYMENT_STATUS_UNPAID]),
         'event_id' => $attributes['event_id'] ?? Str::random(25),
@@ -43,7 +49,7 @@ $factory->define(CompletedOrder::class, static function (Faker $faker, array $at
         'billing_city' => $attributes['billing_city'] ?? $faker->city,
         'billing_zip' => $attributes['billing_zip'] ?? $faker->postcode,
         'billing_region' => $attributes['billing_region'] ?? $faker->stateAbbr,
-        'parts' => $attributes['parts'] ?? $createParts(),
+        'parts' => $parts,
         'status' => $attributes['status'] ?? 'dropshipped',
         'created_at' => $createdAt,
         'updated_at' => $createdAt,
