@@ -31,17 +31,32 @@ class CreateCustomerFromOrder
             ]
         );
 
+        $names = explode(" ", $order->shipping_name);
+
+        $firstName = $names[0] ?? '';
+        unset($names[0]);
+        $lastName  = join(" ", $names);
+
         if (!$customer) {
             $params = [
                 'dealer_id' => $order->dealer_id,
+                'first_name' => $firstName,
+                'last_name' => $lastName,
                 'display_name' => $order->shipping_name,
                 'email' => $order->customer_email,
                 'cell_phone' => $order->phone_number ?? null,
+                'home_phone' => $order->phone_number ?? null,
+                'work_phone' => $order->phone_number ?? null,
                 'shipping_address' => $order->shipping_address ?? null,
+                'address' => $order->shipping_address ?? null,
                 'shipping_city' => $order->shipping_city ?? null,
+                'city' => $order->shipping_city ?? null,
                 'shipping_region' => $order->shipping_region ?? null,
+                'region' => $order->shipping_region ?? null,
                 'shipping_postal_code' => $order->shipping_zip ?? null,
+                'postal_code' => $order->shipping_zip ?? null,
                 'shipping_country' => $order->shipping_country ?? null,
+                'country' => $order->shipping_country ?? null,
             ];
 
             $this->customerRepository->create($params);
