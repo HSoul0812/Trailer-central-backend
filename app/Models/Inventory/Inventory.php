@@ -473,7 +473,7 @@ class Inventory extends Model
 
         // Loop Attributes
         foreach($this->attributeValues as $value) {
-            $attributes[$value->code] = $value->value;
+            $attributes[$value->attribute->code] = $value->value;
         }
 
         // Return Attribute Map
