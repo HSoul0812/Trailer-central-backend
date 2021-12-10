@@ -9,6 +9,7 @@ use App\Models\Marketing\Facebook\Listings;
 use App\Models\Marketing\Facebook\Marketplace;
 use App\Repositories\Traits\SortTrait;
 use App\Traits\Repository\Transaction;
+use Illuminate\Database\Schema\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -135,12 +136,12 @@ class ListingRepository implements ListingRepositoryInterface {
         $query = Inventory::select(Inventory::getTableName().'.*')
                           ->where('dealer_id', '=', $integration->dealer_id)
                           ->where('show_on_website', 1)
-                          ->where(function(Where $query) {
+                          ->where(function(Builder $query) {
                               $query->where('is_archived', 0)
                                     ->orWhereNull('is_archived');
                           })
-                          ->where(function(Where $query) {
-                              $query->where(function(Where $query) {
+                          ->where(function(Builder $query) {
+                              $query->where(function(Builder $query) {
                                   $query->where(Inventory::getTableName().'.status', '<>', 2)
                                         ->where(Inventory::getTableName().'.status', '<>', 6);
                               })->orWhereNull(Inventory::getTableName().'.status');
@@ -156,7 +157,7 @@ class ListingRepository implements ListingRepositoryInterface {
 
         // Append Filters
         if (!empty($integration->filter_map)) {
-            $query = $query->where(function(Where $query) use($integration) {
+            $query = $query->where(function(Builder $query) use($integration) {
                 foreach($integration->filter_map as $type => $values) {
                     $query = $query->orWhereIn(Filter::FILTER_COLUMNS[$type], $values);
                 }
