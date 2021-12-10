@@ -224,14 +224,20 @@ class RefundRepository implements RefundRepositoryInterface
     /**
      * @param Refund $refund
      * @param PaymentGatewayRefundResultInterface $refundResult
-     * @return bool
+     * @return Refund
      */
-    public function markAsCompleted(Refund $refund, PaymentGatewayRefundResultInterface $refundResult): bool
+    public function markAsProcessed(Refund $refund, PaymentGatewayRefundResultInterface $refundResult): Refund
     {
-        return $this->update(
+        $this->update(
             $refund->id,
-            ['payment_gateway_id' => $refundResult->getId(), 'metadata' => $refundResult->asArray()]
+            [
+                'status' => Refund::STATUS_PROCESSED,
+                'payment_gateway_id' => $refundResult->getId(),
+                'metadata' => $refundResult->asArray()
+            ]
         );
+
+        return $this->get($refund->id);
     }
 
     /**
@@ -280,6 +286,22 @@ class RefundRepository implements RefundRepositoryInterface
         );
 
         return $this->get($refund->id);
+    }
+
+    /**
+     * @param Refund $refund
+     * @param int $refundTextrailId
+     * @return bool
+     */
+    public function markAsCompleted(Refund $refund, int $refundTextrailId): bool
+    {
+        return $this->update(
+            $refund->id,
+            [
+                'status' => Refund::STATUS_COMPLETED,
+                'textrail_refund_id' => $refundTextrailId
+            ]
+        );
     }
 
     /**

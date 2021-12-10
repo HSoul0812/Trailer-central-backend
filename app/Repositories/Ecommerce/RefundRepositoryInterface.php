@@ -31,11 +31,18 @@ interface RefundRepositoryInterface extends GenericRepository
     public function markAsApprovedOrDenied(Refund $refund, array $parts): Refund;
 
     /**
-     * @param  Refund  $refund
-     * @param  PaymentGatewayRefundResultInterface  $refundResult
+     * @param Refund $refund
+     * @param int $refundTextrailId
      * @return bool
      */
-    public function markAsCompleted(Refund $refund, PaymentGatewayRefundResultInterface $refundResult): bool;
+    public function markAsCompleted(Refund $refund, int $refundTextrailId): bool;
+
+    /**
+     * @param Refund $refund
+     * @param PaymentGatewayRefundResultInterface $refundResult
+     * @return Refund
+     */
+    public function markAsProcessed(Refund $refund, PaymentGatewayRefundResultInterface $refundResult): Refund;
 
     /**
      * @param Refund $refund
