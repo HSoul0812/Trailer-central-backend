@@ -158,7 +158,7 @@ class InventoryFacebook
     /**
      * @const array External Color Map
      */
-    const MAP_COLOR_EXTERNAL = [
+    const COLOR_EXTERNAL_MAP = [
         'aluminum' => 'Silver',
         'beige' => 'Beige',
         'bronze' => 'Orange',
@@ -198,7 +198,7 @@ class InventoryFacebook
     /**
      * @const array Internal Color Map
      */
-    const MAP_COLOR_INTERNAL = self::MAP_COLOR_EXTERNAL;
+    const COLOR_INTERNAL_MAP = self::COLOR_EXTERNAL_MAP;
 
 
     /**
@@ -477,11 +477,11 @@ class InventoryFacebook
     public function getColor(bool $internal = false): string {
         // Get External
         if(!$internal) {
-            return self::COLOR_EXTERNAL[$this->color] ?? self::COLOR_DEFAULT;
+            return self::COLOR_EXTERNAL_MAP[$this->color] ?? self::COLOR_DEFAULT;
         }
 
         // Get Internal
-        return self::COLOR_INTERNAL[$this->color] ?? self::COLOR_DEFAULT;
+        return self::COLOR_INTERNAL_MAP[$this->color] ?? self::COLOR_DEFAULT;
     }
 
     /**
