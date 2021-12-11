@@ -456,7 +456,7 @@ class Inventory extends Model
         }
 
         // Return Ordered Images
-        return $images;
+        return new Collection($images);
     }
 
 
