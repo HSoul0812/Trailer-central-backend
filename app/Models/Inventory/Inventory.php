@@ -436,6 +436,46 @@ class Inventory extends Model
         return $this->hasMany(CustomerInventory::class, 'inventory_id', 'inventory_id');
     }
 
+
+    /**
+     * Get Images Map
+     * 
+     * @return Collection<code: value>
+     */
+    public function getImagesMapAttribute(): Collection
+    {
+        // Initialize Images Map
+        $images = [];
+
+        // Loop Images
+        foreach($this->images as $img) {
+            $images[$img->image_id] = $img->filename;
+        }
+
+        // Return Images Map
+        return new Collection($images);
+    }
+
+
+    /**
+     * Get Attributes Map
+     * 
+     * @return Collection<code: value>
+     */
+    public function getAttributesAttribute(): Collection
+    {
+        // Initialize Attributes
+        $attributes = [];
+
+        // Loop Attributes
+        foreach($this->attributeValues as $value) {
+            $attributes[$value->attribute->code] = $value->value;
+        }
+
+        // Return Attribute Map
+        return new Collection($attributes);
+    }
+
     /**
      * Get Attribute Values
      *
@@ -459,25 +499,6 @@ class Inventory extends Model
         }
 
         return $category->label;
-    }
-
-    /**
-     * Get Attributes Map
-     * 
-     * @return Collection<code: value>
-     */
-    public function getAttributesAttribute(): Collection
-    {
-        // Initialize Attributes
-        $attributes = [];
-
-        // Loop Attributes
-        foreach($this->attributeValues as $value) {
-            $attributes[$value->attribute->code] = $value->value;
-        }
-
-        // Return Attribute Map
-        return new Collection($attributes);
     }
 
     public function getColorAttribute()
