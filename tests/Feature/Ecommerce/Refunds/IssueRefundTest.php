@@ -123,6 +123,40 @@ class IssueRefundTest extends RefundTest
         self::assertSame($expectedErrorMessages, $json['errors']);
     }
 
+    public function testItShouldNotCreateRefundWhenTheOrderIsNotApproved(): void
+    {
+        $expectedHttpStatusCode = 422;
+        $expectedMessage = 'Validation Failed';
+
+        ['order' => $order, 'token' => $token] = $this->seed;
+
+        $order->ecommerce_order_status = CompletedOrder::ECOMMERCE_STATUS_NOT_APPROVED;
+        $order->save();
+
+        $parameters = [
+            'parts' => collect($order->parts)->take(1)->map(function (array $part): array {
+                return ['id' => $part['id'], 'qty' => $part['qty']];
+            })->toArray()
+        ];
+
+        $expectedErrorMessages = ['order' => [sprintf('%d order is not refundable due it is not approved', $order->id)]];
+
+        $response = $this->withHeaders(['access-token' => $token->access_token])->json(
+            self::VERB,
+            str_replace('{order_id}', $order->id, static::ENDPOINT),
+            $parameters
+        );
+
+        $response->assertStatus($expectedHttpStatusCode);
+
+        $json = json_decode($response->getContent(), true);
+
+        self::assertArrayHasKey('message', $json);
+        self::assertArrayHasKey('errors', $json);
+        self::assertSame($expectedMessage, $json['message']);
+        self::assertSame($expectedErrorMessages, $json['errors']);
+    }
+
     public function badArgumentsProvider(): array
     {
         $this->refreshApplication();

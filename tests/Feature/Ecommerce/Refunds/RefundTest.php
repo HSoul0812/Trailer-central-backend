@@ -109,7 +109,8 @@ abstract class RefundTest extends TestCase
                     'ecommerce_cart_id' => $this->faker->uuid,
                     'parts' => $parts,
                     'ecommerce_items' => $textrailItems,
-                    'total_amount' => $totalOrder
+                    'total_amount' => $totalOrder,
+                    'ecommerce_order_status' => CompletedOrder::ECOMMERCE_STATUS_APPROVED
                 ],
                 $attributes['order'] ?? []
             )

@@ -76,6 +76,9 @@ final class RefundBag implements DTO
      * @param Money $shippingAmount
      * @param Money $taxAmount
      * @param string|null $reason
+     * @param bool $isOrderCancellation when it is an order cancellation, the order could be not approved,
+     *                                  but if it is a return, then the order must be approved
+     *
      *
      * @noinspection PhpDocMissingThrowsInspection
      */
@@ -86,9 +89,12 @@ final class RefundBag implements DTO
         Money   $handlingAmount,
         Money   $shippingAmount,
         Money   $taxAmount,
-        ?string $reason = null
+        ?string $reason = null,
+        bool $isOrderCancellation = true
     )
     {
+        $this->isOrderCancellation = $isOrderCancellation;
+
         ['total' => $partsAmount, 'list' => $parts] = $this->getSummaryParts($partsWithQtys, $orderId);
 
         $this->parts = $parts;
@@ -126,7 +132,8 @@ final class RefundBag implements DTO
             Money::zero('USD'),
             Money::zero('USD'),
             Money::zero('USD'),
-            $request->reason
+            $request->reason,
+            false
         );
     }
 
@@ -250,6 +257,10 @@ final class RefundBag implements DTO
 
         if ($this->order->isCanceled()) {
             throw new RefundException(sprintf('%d order is not refundable due it is canceled', $this->order->id), 'order');
+        }
+
+        if (!$this->isOrderCancellation && $this->order->isNotApproved()) {
+            throw new RefundException(sprintf('%d order is not refundable due it is not approved', $this->order->id), 'order');
         }
 
         if (!$this->order->isRefundable()) {
