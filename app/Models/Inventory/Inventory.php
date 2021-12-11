@@ -438,26 +438,6 @@ class Inventory extends Model
 
 
     /**
-     * Get Images Map
-     * 
-     * @return Collection<code: value>
-     */
-    public function getImagesMapAttribute(): Collection
-    {
-        // Initialize Images Map
-        $images = [];
-
-        // Loop Images
-        foreach($this->images as $img) {
-            $images[$img->image_id] = $img->filename;
-        }
-
-        // Return Images Map
-        return new Collection($images);
-    }
-
-
-    /**
      * Get Attributes Map
      * 
      * @return Collection<code: value>
