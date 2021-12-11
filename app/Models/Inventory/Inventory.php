@@ -438,6 +438,29 @@ class Inventory extends Model
 
 
     /**
+     * Get Accurately Ordered Images
+     * 
+     * @return Collection<Image>
+     */
+    public function getOrderedImagesAttribute(): Collection
+    {
+        // Initialize Images
+        $images = [];
+
+        // Get Ordered Images
+        $orderedImages = $this->inventoryImages()->with('image')
+                              ->orderByRaw('IFNULL(position, 99) ASC')
+                              ->orderBy('image_id', 'ASC')->get();
+        foreach($orderedImages as $bridge) {
+            $images[] = $bridge->image;
+        }
+
+        // Return Ordered Images
+        return $images;
+    }
+
+
+    /**
      * Get Attributes Map
      * 
      * @return Collection<code: value>

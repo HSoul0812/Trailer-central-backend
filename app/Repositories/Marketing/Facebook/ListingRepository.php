@@ -165,6 +165,6 @@ class ListingRepository implements ListingRepositoryInterface {
         }
 
         // Get All Listings
-        return $query->get();
+        return $query->with('attributeValues')->with('inventoryImages')->get();
     }
 }
