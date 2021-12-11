@@ -37,12 +37,14 @@ class CreateCustomerFromOrder
         unset($names[0]);
         $lastName  = join(" ", $names);
 
+        $displayName = $this->buildDisplayName($firstName, $lastName, $order);
+
         if (!$customer) {
             $params = [
                 'dealer_id' => $order->dealer_id,
                 'first_name' => $firstName,
                 'last_name' => $lastName,
-                'display_name' => $order->shipping_name,
+                'display_name' => $displayName,
                 'email' => $order->customer_email,
                 'cell_phone' => $order->phone_number ?? null,
                 'home_phone' => $order->phone_number ?? null,
@@ -61,5 +63,16 @@ class CreateCustomerFromOrder
 
             $this->customerRepository->create($params);
         }
+    }
+
+    /**
+     * @param $firstName
+     * @param string $lastName
+     * @param \App\Models\Ecommerce\CompletedOrder\CompletedOrder $order
+     * @return string
+     */
+    private function buildDisplayName($firstName, string $lastName, \App\Models\Ecommerce\CompletedOrder\CompletedOrder $order): string
+    {
+        return $firstName . '-' . $lastName . '-' . $order->customer_email;
     }
 }
