@@ -10,11 +10,15 @@ trait MarkdownHelper
     /**
      * Check for Markdown and Convert
      * 
-     * @param string $input content to convert to markdown
+     * @param null|string $input content to convert to markdown
      * @return string for markdown result
      */
-    public function convertMarkdown(string $input): string
+    public function convertMarkdown(?string $input = null): string
     {
+        if(empty($input)) {
+            return '';
+        }
+
         // HTML Exists?!
         $desc = html_entity_decode($input);
         if(preg_match('/<(br|p)\s*?\/?>/', $desc)) {
