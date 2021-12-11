@@ -4,6 +4,7 @@ namespace App\Services\Dispatch\Facebook\DTOs;
 
 use App\Models\Inventory\Inventory;
 use App\Models\Marketing\Facebook\Marketplace;
+use App\Traits\MarkdownHelper;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
 
@@ -14,7 +15,7 @@ use App\Traits\WithGetter;
  */
 class InventoryFacebook
 {
-    use WithConstructor, WithGetter;
+    use MarkdownHelper, WithConstructor, WithGetter;
 
 
     /**
@@ -431,6 +432,15 @@ class InventoryFacebook
         ]);
     }
 
+
+    /**
+     * Get Description With Markdown Conversion
+     * 
+     * @return string
+     */
+    public function getMarkdownDescription(): string {
+        return $this->convertMarkdown($this->description);
+    }
 
     /**
      * Get Account Type

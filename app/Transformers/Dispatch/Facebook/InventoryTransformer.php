@@ -20,7 +20,7 @@ class InventoryTransformer extends TransformerAbstract
             'year' => $inventory->year,
             'make' => $inventory->manufacturer,
             'model' => $inventory->model,
-            'description' => $inventory->description,
+            'description' => $inventory->getMarkdownDescription(),
             'location' => $inventory->location,
             'color_external' => $inventory->getColor(),
             'color_internal' => $inventory->getColor(true),
