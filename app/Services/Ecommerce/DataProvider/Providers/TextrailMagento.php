@@ -261,7 +261,7 @@ class TextrailMagento implements DataProviderInterface,
             $tax = $shippingInfo['totals']['tax_amount'];
 
             return [
-                'cost' => $shippingInfo['totals']['shipping_incl_tax'],
+                'cost' => $shippingInfo['totals']['shipping_amount'],
                 'tax' => $tax,
                 'cart_id' => $quoteId,
                 'customer_id' => null,
