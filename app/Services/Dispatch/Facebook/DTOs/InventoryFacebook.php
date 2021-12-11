@@ -393,6 +393,11 @@ class InventoryFacebook
      */
     private $fuelType;
 
+    /**
+     * @var Collection<Image>
+     */
+    private $images;
+
 
     /**
      * Create InventoryFacebook From Inventory
@@ -421,7 +426,8 @@ class InventoryFacebook
             'mileage' => $inventory->attributes->get('mileage'),
             'body' => $inventory->attributes->get('body'),
             'transmission' => $inventory->attributes->get('transmission'),
-            'fuel_type' => $inventory->attributes->get('fuel_type')
+            'fuel_type' => $inventory->attributes->get('fuel_type'),
+            'images' => $inventory->images
         ]);
     }
 

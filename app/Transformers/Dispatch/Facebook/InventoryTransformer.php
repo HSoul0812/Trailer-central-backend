@@ -28,7 +28,8 @@ class InventoryTransformer extends TransformerAbstract
             'body_style' => $inventory->getBodyStyle(),
             'condition' => $inventory->getCondition(),
             'transmission' => $inventory->getTransmission(),
-            'fuel_type' => $inventory->getFuelType()
+            'fuel_type' => $inventory->getFuelType(),
+            'images' => $inventory->images
         ];
     }
 }
