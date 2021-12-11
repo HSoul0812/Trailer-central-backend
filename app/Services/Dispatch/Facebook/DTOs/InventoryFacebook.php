@@ -183,7 +183,7 @@ class InventoryFacebook
         'red' => 'Red',
         'silver' => 'Silver',
         'tan' => 'Tan',
-        'two_tone' => 'White',
+        'two_tone' => 'Off White',
         'white' => 'White',
         'yellow' => 'Yellow',
         'light_blue_metallic' => 'Turquoise',
