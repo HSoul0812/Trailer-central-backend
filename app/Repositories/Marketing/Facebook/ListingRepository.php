@@ -3,9 +3,14 @@
 namespace App\Repositories\Marketing\Facebook;
 
 use App\Exceptions\NotImplementedException;
+use App\Models\Inventory\Inventory;
+use App\Models\Marketing\Facebook\Filter;
 use App\Models\Marketing\Facebook\Listings;
+use App\Models\Marketing\Facebook\Marketplace;
 use App\Repositories\Traits\SortTrait;
 use App\Traits\Repository\Transaction;
+use Grimzy\LaravelMysqlSpatial\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 class ListingRepository implements ListingRepositoryInterface {
@@ -117,5 +122,49 @@ class ListingRepository implements ListingRepositoryInterface {
 
     protected function getSortOrders() {
         return $this->sortOrders;
+    }
+
+
+    /**
+     * Get All Inventory Missing on Facebook
+     * 
+     * @param Marketplace $integration
+     * @return Collection<Listings>
+     */
+    public function getAllMissing(Marketplace $integration): Collection {
+        // Initialize Inventory Query
+        $query = Inventory::select(Inventory::getTableName().'.*')
+                          ->where('dealer_id', '=', $integration->dealer_id)
+                          ->where('show_on_website', 1)
+                          ->where(function(Builder $query) {
+                              $query->where('is_archived', 0)
+                                    ->orWhereNull('is_archived');
+                          })
+                          ->where(function(Builder $query) {
+                              $query->where(function(Builder $query) {
+                                  $query->where(Inventory::getTableName().'.status', '<>', 2)
+                                        ->where(Inventory::getTableName().'.status', '<>', 6);
+                              })->orWhereNull(Inventory::getTableName().'.status');
+                          });
+
+        // Append Join
+        $query = $query->leftJoin(Listings::getTableName(), function($join) use($integration) {
+            $join->on(Listings::getTableName() . '.inventory_id', '=',
+                        Inventory::getTableName() . '.inventory_id')
+                 ->where(Listings::getTableName().'.username', '=', $integration->fb_username)
+                 ->where(Listings::getTableName().'.page_id', '=', $integration->page_id);
+        })->whereNull(Listings::getTableName() . '.facebook_id');
+
+        // Append Filters
+        if (!empty($integration->filter_map)) {
+            $query = $query->where(function(Builder $query) use($integration) {
+                foreach($integration->filter_map as $type => $values) {
+                    $query = $query->orWhereIn(Filter::FILTER_COLUMNS[$type], $values);
+                }
+            });
+        }
+
+        // Get All Listings
+        return $query->with('attributeValues')->with('inventoryImages')->get();
     }
 }

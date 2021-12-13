@@ -19,6 +19,7 @@ class CreateMarketplaceRequest extends Request {
         'status' => 'required|in:active,deleted,expired',
         'account_type' => 'in:page,user',
         'page_id' => 'nullable|int',
+        'username' => 'required|string',
         'listing_type' => 'in:item,vehicle,home,job',
         'specific_type' => 'in:car,motorcycle,powersport,rv,trailer,boat,commercial,other',
         'year' => 'int',

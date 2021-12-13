@@ -14,12 +14,12 @@ use App\Traits\GeospatialHelper;
 use ElasticScoutDriverPlus\CustomSearch;
 use Grimzy\LaravelMysqlSpatial\Eloquent\SpatialTrait;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
-use Illuminate\Database\Eloquent\Collection;
 use App\Models\Inventory\AttributeValue;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Parts\Vendor;
 use App\Models\User\User;
 use App\Models\Traits\TableAware;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
@@ -436,6 +436,63 @@ class Inventory extends Model
         return $this->hasMany(CustomerInventory::class, 'inventory_id', 'inventory_id');
     }
 
+
+    /**
+     * Get Accurately Ordered Images
+     * 
+     * @return Collection<Image>
+     */
+    public function getOrderedImagesAttribute(): Collection
+    {
+        // Initialize Images
+        $images = [];
+
+        // Get Ordered Images
+        $orderedImages = $this->inventoryImages()->with('image')
+                              ->orderByRaw('IFNULL(position, 99) ASC')
+                              ->orderBy('image_id', 'ASC')->get();
+        foreach($orderedImages as $bridge) {
+            $images[] = $bridge->image;
+        }
+
+        // Return Ordered Images
+        return new Collection($images);
+    }
+
+
+    /**
+     * Get Attributes Map
+     * 
+     * @return Collection<code: value>
+     */
+    public function getAttributesAttribute(): Collection
+    {
+        // Initialize Attributes
+        $attributes = [];
+
+        // Loop Attributes
+        foreach($this->attributeValues as $value) {
+            $attributes[$value->attribute->code] = $value->value;
+        }
+
+        // Return Attribute Map
+        return new Collection($attributes);
+    }
+
+    /**
+     * Get Attribute Values
+     *
+     * @return string
+     */
+    public function getFuelTypeAttribute(): ?string
+    {
+        // Get Attribute
+        $attribute = $this->attributeValues()->where('attribute_id', self::FUEL_TYPE_ATTRIBUTE_ID)->first();
+
+        // Return Value
+        return $attribute->value ?? '';
+    }
+
     public function getCategoryLabelAttribute()
     {
         $category = Category::where('legacy_category', $this->category)->first();
@@ -445,14 +502,6 @@ class Inventory extends Model
         }
 
         return $category->label;
-    }
-
-    public function getAttributesAttribute()
-    {
-        return self::select('*')
-                    ->join('eav_attribute_value', 'inventory.inventory_id', '=', 'eav_attribute_value.inventory_id')
-                    ->where('inventory.inventory_id', $this->inventory_id)
-                    ->get();
     }
 
     public function getColorAttribute()
@@ -486,20 +535,6 @@ class Inventory extends Model
     public function getIdentifierAttribute(): string
     {
         return CompactHelper::shorten($this->inventory_id);
-    }
-
-    /**
-     * Get Fuel Type
-     *
-     * @return string
-     */
-    public function getFuelTypeAttribute(): ?string
-    {
-        // Get Attribute
-        $attribute = $this->attributeValues()->where('attribute_id', self::FUEL_TYPE_ATTRIBUTE_ID)->first();
-
-        // Return Value
-        return $attribute->value ?? '';
     }
 
     /**

@@ -59,4 +59,9 @@ class DealerFacebook
      * @var Collection<DealerTunnel>
      */
     private $tunnels;
+
+    /**
+     * @var Collection<InventoryFacebook>
+     */
+    private $inventory;
 }

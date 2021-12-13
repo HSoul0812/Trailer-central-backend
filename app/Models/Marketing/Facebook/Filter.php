@@ -3,6 +3,7 @@
 namespace App\Models\Marketing\Facebook;
 
 use App\Models\Marketing\Facebook\Marketplace;
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -13,6 +14,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Filter extends Model
 {
+    use TableAware;
+
+
     // Define Table Name Constant
     const TABLE_NAME = 'fbapp_marketplace_filters';
 
@@ -23,6 +27,14 @@ class Filter extends Model
     const FILTER_TYPES = [
         'entity' => 'Entity Type',
         'category' => 'Category'
+    ];
+
+    /**
+     * @const array Filter Columns
+     */
+    const FILTER_COLUMNS = [
+        'entity' => 'entity_type_id',
+        'category' => 'category'
     ];
 
 

@@ -12,6 +12,8 @@ use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
 use App\Repositories\Marketing\Facebook\ListingRepositoryInterface;
 use App\Repositories\Marketing\Facebook\ImageRepositoryInterface;
 use App\Services\Dispatch\Facebook\DTOs\DealerFacebook;
+use App\Services\Dispatch\Facebook\DTOs\InventoryFacebook;
+use App\Services\Dispatch\Facebook\DTOs\MarketplaceInventory;
 use App\Services\Dispatch\Facebook\DTOs\MarketplaceStatus;
 use App\Services\Dispatch\Facebook\DTOs\MarketplaceStep;
 use Illuminate\Support\Collection;
@@ -110,6 +112,36 @@ class MarketplaceService implements MarketplaceServiceInterface
         ]);
     }
 
+
+    /**
+     * Get Dealer Inventory
+     * 
+     * @return DealerFacebook
+     */
+    public function dealer(int $integrationId): DealerFacebook {
+        // Get Integration
+        $integration = $this->marketplace->get([
+            'id' => $integrationId
+        ]);
+
+        // Get Facebook Dealer
+        return new DealerFacebook([
+            'dealer_id' => $integration->dealer_id,
+            'dealer_name' => $integration->user->name,
+            'integration_id' => $integration->id,
+            'fb_username' => $integration->fb_username,
+            'fb_password' => $integration->fb_password,
+            'auth_username' => $integration->tfa_username,
+            'auth_password' => $integration->tfa_password,
+            'auth_type' => $integration->tfa_type,
+            'tunnels' => $this->tunnels->getAll(['dealer_id' => $integration->dealer_id]),
+            'inventory' => new MarketplaceInventory([
+                'missing' => $this->getInventory($integration, 'missing')/*,
+                'updates' => $this->getInventory($integration, 'updates'),
+                'sold' => $this->getInventory($integration, 'sold')*/
+            ])
+        ]);
+    }
 
     /**
      * Login to Marketplace
@@ -224,5 +256,38 @@ class MarketplaceService implements MarketplaceServiceInterface
 
         // Return Dealers Collection
         return $dealers;
+    }
+
+    /**
+     * Get Inventory to Post
+     * 
+     * @param Marketplace $integration
+     * @param string $type missing|updates|sold
+     * @return Collection<InventoryFacebook>
+     */
+    private function getInventory(Marketplace $integration, string $type): Collection {
+        // Invalid Type? Return Empty Collection!
+        if(!isset(MarketplaceInventory::INVENTORY_METHODS[$type])) {
+            return new Collection();
+        }
+
+        // Get Method
+        $method = MarketplaceInventory::INVENTORY_METHODS[$type];
+
+        // Get Inventory
+        $inventory = $this->listings->{$method}($integration);
+
+        // Loop Through Inventory Items
+        $listings = new Collection();
+        foreach($inventory as $listing) {
+            if($type === MarketplaceInventory::METHOD_MISSING) {
+                $listings->push(InventoryFacebook::getFromInventory($listing, $integration));
+            } else {
+                $listings->push(InventoryFacebook::getFromListings($listing));
+            }
+        }
+
+        // Return Facebook Inventory Updates
+        return $listings;
     }
 }
