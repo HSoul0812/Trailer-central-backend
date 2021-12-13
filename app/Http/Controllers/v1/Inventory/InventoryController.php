@@ -186,6 +186,7 @@ class InventoryController extends RestfulControllerV2
      * )
      *
      * @param int $id
+     * @param Request $request
      * @return Response
      * @throws NoObjectIdValueSetException
      * @throws NoObjectTypeSetException
@@ -198,7 +199,9 @@ class InventoryController extends RestfulControllerV2
             $this->response->errorBadRequest();
         }
 
-        return $this->response->item($this->inventoryRepository->getAndIncrementTimesViewed($request->all()), new InventoryTransformer());
+        $data = $this->inventoryRepository->getAndIncrementTimesViewed($request->all());
+
+        return $this->itemResponse($data, new InventoryTransformer());
     }
 
     /**
