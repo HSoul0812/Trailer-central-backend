@@ -696,7 +696,6 @@ class LeadRepository implements LeadRepositoryInterface {
             'city' => $customer->city,
             'zip' => $customer->postal_code,
             'phone_number' => $customer->cell_phone,
-            'status' => 'open'
         ]);
 
         // Update website_lead_id of this customer
