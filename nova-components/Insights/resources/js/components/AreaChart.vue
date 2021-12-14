@@ -37,9 +37,6 @@
 </template>
 
 <style>
-.stay-right{
-    width: 50%;
-}
 .insight-filters .vue-daterange-picker{
     -webkit-box-flex: 1;
     -ms-flex: auto;
