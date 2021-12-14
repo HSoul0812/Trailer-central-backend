@@ -2,12 +2,9 @@
 
 namespace App\Http\Controllers\v1\Inventory;
 
-use App\Http\Controllers\RestfulController;
 use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\Inventory\SaveInventoryAttributeRequest;
-use App\Models\Inventory\Inventory;
-use App\Repositories\Inventory\AttributeRepositoryInterface;
-use App\Transformers\Inventory\AttributeTransformer;
+use App\Services\Inventory\InventoryAttributeServiceInterface;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
 
@@ -19,36 +16,33 @@ use Dingo\Api\Http\Response;
 class InventoryAttributeController extends RestfulControllerV2
 {
     /**
-     * @var AttributeRepositoryInterface
+     * @var InventoryAttributeServiceInterface $service
      */
-    private $attributeRepository;
+    private $service;
 
     /**
-     * AttributesController constructor.
-     *
-     * @param AttributeRepositoryInterface $attributeRepository
+     * @param InventoryAttributeServiceInterface $service
      */
-    public function __construct(AttributeRepositoryInterface $attributeRepository)
+    public function __construct(InventoryAttributeServiceInterface $service)
     {
-        $this->attributeRepository = $attributeRepository;
+        $this->service = $service;
     }
 
     public function update(int $id, Request $request): Response
     {
-        // SaveInventoryAttributeRequest $request,
-        // dd($inventory);
         $inventoryAttributeRequest = new SaveInventoryAttributeRequest(
             ['inventoryId' => $id] + $request->all()
         );
 
-        $transformer = app()->make(SaveInventoryAttributeRequest::class);
-        $inventoryAttributeRequest->setTransformer($transformer);
+        if ($inventoryAttributeRequest->validate()) {
+            $transformer = app()->make(SaveInventoryAttributeRequest::class);
+            $inventoryAttributeRequest->setTransformer($transformer);
 
-        if (!$inventoryAttributeRequest->validate()) {
-            // || !($inventory = $this->inventoryService->update($inventoryAttributeRequest->all()))
-            return $this->response->errorBadRequest();
+            $inventory = $this->service->update($inventoryAttributeRequest->all());
+
+            return $this->updatedResponse(44);
         }
 
-        return $this->updatedResponse(44);
+        return $this->response->errorBadRequest();
     }
 }
