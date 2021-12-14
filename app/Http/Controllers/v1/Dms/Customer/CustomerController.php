@@ -100,22 +100,22 @@ class CustomerController extends RestfulControllerV2
             throw new StoreResourceFailedException('Unable to create customer: ' . $e->getMessage());
         }
     }
-    
+
     public function show(int $id) {
         $customer = $this->customerRepository->get(['id' => $id]);
-        
+
         $user = Auth::user();
-        
+
         $response = $this->response
                 ->item($customer, $this->detailTransformer)
                 ->addMeta('major_units_link', config('app.new_design_crm_url') . $user->getCrmLoginUrl('/bill-of-sale'))
                 ->addMeta('service_link', config('app.new_design_crm_url') . $user->getCrmLoginUrl('/repair-orders'))
                 ->addMeta('parts_link', config('app.new_design_crm_url') . $user->getCrmLoginUrl('/pos-reports'));
-        
+
         if ($customer->lead) {
             $response = $response->addMeta('see_more_interactions', config('app.url') . "/api/leads/{$customer->lead->identifier}/interactions");
         }
-        
+
         return $response;
     }
 
