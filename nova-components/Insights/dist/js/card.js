@@ -58675,7 +58675,7 @@ exports = module.exports = __webpack_require__(2)(false);
 
 
 // module
-exports.push([module.i, "\n.stay-right{\n    width: 50%;\n}\n.insight-filters .vue-daterange-picker{\n    -webkit-box-flex: 1;\n    -ms-flex: auto;\n    flex: auto;\n    display: block;\n}\n.date-range-picker-control{\n  padding-right: 25px;\n  margin-right: 5px;\n  padding-top: 5px;\n  cursor: pointer;\n  width: 180px;\n}\n.manufacturer-list {\n    margin-left: 3px;\n}\n.manufacturer-list .ui.dropdown,\n.manufacturer-list .ui.dropdown .menu > .item,\n.manufacturer-list .ui.search.dropdown > .text,\n.manufacturer-list .ui.search.selection.dropdown > input.search {\n    font-size: 12px;\n}\n.manufacturer-list {\n    min-width: 14rem;\n}\n.manufacturer-list .ui.search.selection.dropdown > input.search,\n.manufacturer-list .ui.selection.dropdown {\n    padding: 0 0.5em 0 1.5em;\n    height: 1.5rem;\n}\n.manufacturer-list .ui.search.dropdown > .text {\n    top: 5px\n}\n.manufacturer-list .ui.fluid.dropdown > .dropdown.icon {\n    padding: 0.5em;\n}\n", ""]);
+exports.push([module.i, "\n.insight-filters .vue-daterange-picker{\n    -webkit-box-flex: 1;\n    -ms-flex: auto;\n    flex: auto;\n    display: block;\n}\n.date-range-picker-control{\n  padding-right: 25px;\n  margin-right: 5px;\n  padding-top: 5px;\n  cursor: pointer;\n  width: 180px;\n}\n.manufacturer-list {\n    margin-left: 3px;\n}\n.manufacturer-list .ui.dropdown,\n.manufacturer-list .ui.dropdown .menu > .item,\n.manufacturer-list .ui.search.dropdown > .text,\n.manufacturer-list .ui.search.selection.dropdown > input.search {\n    font-size: 12px;\n}\n.manufacturer-list {\n    min-width: 14rem;\n}\n.manufacturer-list .ui.search.selection.dropdown > input.search,\n.manufacturer-list .ui.selection.dropdown {\n    padding: 0 0.5em 0 1.5em;\n    height: 1.5rem;\n}\n.manufacturer-list .ui.search.dropdown > .text {\n    top: 5px\n}\n.manufacturer-list .ui.fluid.dropdown > .dropdown.icon {\n    padding: 0.5em;\n}\n", ""]);
 
 // exports
 
@@ -59068,9 +59068,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_vue2_daterange_picker_dist_vue2_daterange_picker_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5_vue2_daterange_picker_dist_vue2_daterange_picker_css__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_vue_search_select_dist_VueSearchSelect_css__ = __webpack_require__(298);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_vue_search_select_dist_VueSearchSelect_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_6_vue_search_select_dist_VueSearchSelect_css__);
-//
-//
-//
 //
 //
 //
