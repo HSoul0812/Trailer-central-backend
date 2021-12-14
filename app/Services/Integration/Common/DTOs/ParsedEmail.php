@@ -669,6 +669,9 @@ class ParsedEmail
      */
     public function getDate(): string
     {
+        if(!$this->date) {
+            $this->setDateNow();
+        }
         return $this->date;
     }
 
