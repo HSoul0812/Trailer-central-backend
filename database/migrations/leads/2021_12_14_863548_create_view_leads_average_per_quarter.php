@@ -18,7 +18,7 @@ class CreateViewLeadsAveragePerQuarter extends Migration
                 FROM generate_series(
                             (SELECT date_trunc('quarter', submitted_at)::date FROM lead_logs LIMIT 1),
                              NOW(),
-                             '1 MONTH'
+                             '3 MONTH'
                          ) as series(date)
             ), -- list of quarters from the first record
             manufacturers as (SELECT l.manufacturer FROM lead_logs l GROUP BY l.manufacturer)
