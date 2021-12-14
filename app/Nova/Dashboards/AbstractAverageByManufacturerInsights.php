@@ -27,6 +27,9 @@ abstract class AbstractAverageByManufacturerInsights extends Dashboard
 
     /**
      * Get the cards for the dashboard.
+     *
+     * @throws \Dingo\Api\Exception\ResourceException                when some validation error has appeared
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException when some unknown error has appeared
      */
     public function cards(InsightRequestInterface $request): array
     {
