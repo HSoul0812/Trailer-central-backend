@@ -53,7 +53,7 @@ class InventoryAttributeService implements InventoryAttributeServiceInterface
             ]);
 
             $options = [
-                'inventory_id' => $inventory->getKey(),
+                'inventory_id' => $params['inventory_id'],
             ];
 
             foreach ($params['attributes'] as $key => $value) {

@@ -33,7 +33,7 @@ class SaveInventoryAttributeRequest extends Request
         ],
         'dealer_id' => [
             'integer',
-            'exists:App\Models\User\User,dealer_id',
+            'exists:dealer,dealer_id',
         ],
     ];
 }
