@@ -13,7 +13,9 @@ interface InsightRepositoryInterface
 
     public function getAllPerWeek(CriteriaBuilder $cb): Enumerable;
 
-    public function getAllPeMonth(CriteriaBuilder $cb): Enumerable;
+    public function getAllPerMonth(CriteriaBuilder $cb): Enumerable;
+
+    public function getAllPerQuarter(CriteriaBuilder $cb): Enumerable;
 
     public function getAllPerYear(CriteriaBuilder $cb): Enumerable;
 }
