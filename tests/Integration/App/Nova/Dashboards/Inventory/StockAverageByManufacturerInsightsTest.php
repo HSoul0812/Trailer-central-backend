@@ -15,55 +15,19 @@ class StockAverageByManufacturerInsightsTest extends IntegrationTestCase
 {
     protected string $seeder = AverageStockSeeder::class;
 
-    /**
-     * Test that SUT is returning a payload with a well known insights by week and by day.
-     */
-    public function testHasAnExpectedResponse(): void
-    {
-        $dashboard = app(StockAverageByManufacturerInsights::class);
+    protected StockAverageByManufacturerInsights $dashboard;
 
-        $this->testByWeeks($dashboard);
-        $this->testByDays($dashboard);
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->dashboard = app(StockAverageByManufacturerInsights::class);
     }
 
-    private function testByWeeks(StockAverageByManufacturerInsights $dashboard): void
-    {
-        $request = new StockAverageRequest();
-
-        $response = $dashboard->cards($request);
-
-        /** @var AreaChart $chart */
-        $chart = $response[0];
-        $meta = $chart->meta();
-
-        self::assertIsArray($response);
-        self::assertInstanceOf(AreaChart::class, $chart);
-
-        // series assertions
-        self::assertArrayHasKey('series', $meta);
-        self::assertArrayHasKey('data', $meta['series'][0]);
-
-        $series = collect($meta['series'][0]['data']);
-
-        self::assertGreaterThanOrEqual(39, $series->count());
-        self::assertEquals(6, $series->first());
-        self::assertEquals(0, $series->last());
-
-        // option categories assertions
-        self::assertArrayHasKey('options', $meta);
-        self::assertObjectHasAttribute('xAxis', $meta['options']);
-
-        $categories = collect($meta['options']->xAxis['categories']);
-
-        self::assertArrayHasKey('categories', $meta['options']->xAxis);
-        self::assertGreaterThanOrEqual(39, $categories->count());
-        self::assertSame('2020-53', $categories->first());
-    }
-
-    private function testByDays(StockAverageByManufacturerInsights $dashboard): void
+    public function testByDays(): void
     {
         $request = new StockAverageRequest(['period' => InsightRequestInterface::PERIOD_PER_DAY]);
-        $response = $dashboard->cards($request);
+        $response = $this->dashboard->cards($request);
 
         /** @var AreaChart $chart */
         $chart = $response[0];
@@ -91,5 +55,39 @@ class StockAverageByManufacturerInsightsTest extends IntegrationTestCase
         self::assertArrayHasKey('categories', $meta['options']->xAxis);
         self::assertGreaterThanOrEqual(278, $categories->count());
         self::assertSame('2021-01-01', $categories->first());
+    }
+
+    private function testByWeeks(): void
+    {
+        $request = new StockAverageRequest();
+
+        $response = $this->dashboard->cards($request);
+
+        /** @var AreaChart $chart */
+        $chart = $response[0];
+        $meta = $chart->meta();
+
+        self::assertIsArray($response);
+        self::assertInstanceOf(AreaChart::class, $chart);
+
+        // series assertions
+        self::assertArrayHasKey('series', $meta);
+        self::assertArrayHasKey('data', $meta['series'][0]);
+
+        $series = collect($meta['series'][0]['data']);
+
+        self::assertGreaterThanOrEqual(39, $series->count());
+        self::assertEquals(6, $series->first());
+        self::assertEquals(0, $series->last());
+
+        // option categories assertions
+        self::assertArrayHasKey('options', $meta);
+        self::assertObjectHasAttribute('xAxis', $meta['options']);
+
+        $categories = collect($meta['options']->xAxis['categories']);
+
+        self::assertArrayHasKey('categories', $meta['options']->xAxis);
+        self::assertGreaterThanOrEqual(39, $categories->count());
+        self::assertSame('2020-53', $categories->first());
     }
 }
