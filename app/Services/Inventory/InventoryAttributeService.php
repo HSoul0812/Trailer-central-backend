@@ -31,7 +31,7 @@ class InventoryAttributeService implements InventoryAttributeServiceInterface
      */
     public function __construct(
         InventoryRepositoryInterface $inventoryRepository,
-        AttributeValueRepositoryInterface $attributeValueRepository,
+        AttributeValueRepositoryInterface $attributeValueRepository
     ) {
         $this->inventoryRepository = $inventoryRepository;
         $this->attributeValueRepository = $attributeValueRepository;

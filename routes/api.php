@@ -349,7 +349,7 @@ $api->version('v1', function ($route) {
     /**
      * Website users
      */
-    $route->group(['prefix' => 'website/{websiteId}/user'], function($route) {
+    $route->group(['prefix' => 'website/{websiteId}/user'], function ($route) {
         $route->post('signup', 'App\Http\Controllers\v1\Website\User\WebsiteUserController@create');
         $route->post('login', 'App\Http\Controllers\v1\Website\User\WebsiteUserController@login');
     });
@@ -357,7 +357,7 @@ $api->version('v1', function ($route) {
     /**
      * Website account profile
      */
-    $route->group(['prefix' => 'website/account', 'middleware' => 'api.auth', 'providers' => ['website_auth']], function($route) {
+    $route->group(['prefix' => 'website/account', 'middleware' => 'api.auth', 'providers' => ['website_auth']], function ($route) {
         $route->get('', 'App\Http\Controllers\v1\Website\User\WebsiteUserController@get');
         $route->put('', 'App\Http\Controllers\v1\Website\User\WebsiteUserController@update');
     });
