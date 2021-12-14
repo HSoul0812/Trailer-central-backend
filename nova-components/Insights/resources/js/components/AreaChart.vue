@@ -86,8 +86,9 @@ export default {
         const filterPeriodList = [
             {text: 'Per day', value: 'per_day'},
             {text: 'Per week', value: 'per_week'},
-            // { text: 'Per month', value: 'per_month' },
-            // { text: 'Per year', value: 'per_year' }
+            {text: 'Per month', value: 'per_month' },
+            {text: 'Per quarter', value: 'per_quarter'},
+            {text: 'Per year', value: 'per_year'}
         ];
 
         const defaultStartDate = moment().startOf('year');
