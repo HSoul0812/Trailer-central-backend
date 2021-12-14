@@ -221,12 +221,8 @@ $api->version('v1', function ($route) {
      * Inventory Attributes
      */
     $route->get('inventory/attributes', 'App\Http\Controllers\v1\Inventory\AttributeController@index');
-
-    /**
-     * Inventory Attributes
-     */
     $route->put(
-        'inventory/{inventory}/attributes',
+        'inventory/{id}/attributes',
         'App\Http\Controllers\v1\Inventory\InventoryAttributeController@update'
     )->where('id', '[0-9]+');
 

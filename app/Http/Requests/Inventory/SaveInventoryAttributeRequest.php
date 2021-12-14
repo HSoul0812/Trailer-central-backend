@@ -3,7 +3,6 @@
 namespace App\Http\Requests\Inventory;
 
 use App\Http\Requests\Request;
-use App\Transformers\TransformerInterface;
 
 /**
  * Class SaveInventoryAttributeRequest
@@ -13,7 +12,7 @@ use App\Transformers\TransformerInterface;
 class SaveInventoryAttributeRequest extends Request
 {
     protected $rules = [
-        'inventoryId' => [
+        'inventory_id' => [
             'integer',
             'required',
             'exists:inventory,inventory_id',
@@ -25,34 +24,16 @@ class SaveInventoryAttributeRequest extends Request
         'attributes.*.id' => [
             'integer',
             'required',
+            'exists:eav_attribute,attribute_id',
         ],
         'attributes.*.value' => [
             'string',
             'required',
             'min:1',
         ],
+        'dealer_id' => [
+            'integer',
+            'exists:App\Models\User\User,dealer_id',
+        ],
     ];
-
-    /**
-     * @var TransformerInterface
-     */
-    private $transformer;
-
-    /**
-     * {@inheritDoc}
-     *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     */
-    public function all($keys = null)
-    {
-        return $this->transformer->transform(parent::all($keys));
-    }
-
-    /**
-     * @param TransformerInterface $transformer
-     */
-    public function setTransformer(TransformerInterface $transformer): void
-    {
-        $this->transformer = $transformer;
-    }
 }

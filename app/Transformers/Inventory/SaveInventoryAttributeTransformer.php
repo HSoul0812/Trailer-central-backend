@@ -3,25 +3,26 @@
 namespace App\Transformers\Inventory;
 
 use App\Http\Requests\Request;
-use League\Fractal\TransformerAbstract;
+use App\Transformers\TransformerInterface;
 
 /**
  * Class SaveInventoryAttributeTransformer
  *
  * @package App\Transformers\Inventory
  */
-class SaveInventoryAttributeTransformer implements TransformerAbstract
+class SaveInventoryAttributeTransformer implements TransformerInterface
 {
     /**
      * @param Request $request
      *
      * @return array
      */
-    public function transform(Request $request): array
+    public function transform(array $params): array
     {
         return [
-            'inventoryId' => $request->id,
-            'attributes' => $request->attributes,
+            'inventory_id' => $params['inventory_id'],
+            'dealer_id' => $params['dealer_id'],
+            'attributes' => $params['attributes'],
         ];
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Repositories\Inventory;
 
 use App\Exceptions\NotImplementedException;
+use App\Models\Inventory\AttributeValue;
 
 /**
  * Class AttributeValueRepository
@@ -11,6 +12,16 @@ use App\Exceptions\NotImplementedException;
  */
 class AttributeValueRepository implements AttributeValueRepositoryInterface
 {
+    /**
+     * @param AttributeValue
+     */
+    private $model;
+
+    public function __construct(AttributeValue $model)
+    {
+        $this->model = $model;
+    }
+
     /**
      * @param $params
      *
@@ -29,6 +40,21 @@ class AttributeValueRepository implements AttributeValueRepositoryInterface
     public function update($params)
     {
         throw new NotImplementedException;
+    }
+
+    /**
+     * @param array $data
+     * @param array $options
+     *
+     * @return AttributeValue|null
+     */
+    public function updateOrCreate(array $data, array $options): ?AttributeValue
+    {
+        if (!empty($options) && !empty($data)) {
+            return $this->model->updateOrCreate($options, $data);
+        }
+
+        return null;
     }
 
     /**
