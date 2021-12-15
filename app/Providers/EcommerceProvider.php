@@ -10,6 +10,7 @@ use App\Events\Ecommerce\QtyUpdated;
 use App\Http\Controllers\v1\Ecommerce\CompletedOrderController;
 use App\Http\Controllers\v1\Parts\Textrail\PartsController;
 use App\Jobs\Ecommerce\NotifyRefundOnMagentoJob;
+use App\Jobs\Ecommerce\ProcessRefundOnPaymentGatewayJob;
 use App\Jobs\Ecommerce\SyncOrderJob;
 use App\Jobs\Ecommerce\UpdateOrderRequiredInfoByTextrailJob;
 use App\Listeners\Ecommerce\CreateCustomerFromOrder;
