@@ -7,7 +7,8 @@ namespace App\Repositories;
  *
  * @author Eczek
  */
-interface Repository {
+interface Repository
+{
     const SELECT = 'select';
 
     const CONDITION_AND_WHERE = 'andWhere';
@@ -57,5 +58,4 @@ interface Repository {
      * @param array $params
      */
     public function getAll($params);
-
 }
