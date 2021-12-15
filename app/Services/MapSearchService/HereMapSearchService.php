@@ -1,10 +1,10 @@
 <?php
 
 
-namespace App\Services\GeocodeService;
+namespace App\Services\MapSearchService;
 
 
-class HereGeocodeService implements GeocodeServiceInterface
+class HereMapSearchService implements MapSearchServiceInterface
 {
     const AUTOCOMPLETE_API_URL = 'https://autocomplete.search.hereapi.com/v1/autocomplete';
     const GEOCODE_API_URL = 'https://geocode.search.hereapi.com/v1/geocode';

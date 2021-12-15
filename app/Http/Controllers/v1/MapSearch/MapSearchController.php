@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Http\Controllers\v1\Geocode;
+namespace App\Http\Controllers\v1\MapSearch;
 
 use App\Exceptions\NotImplementedException;
 use App\Http\Controllers\AbstractRestfulController;
@@ -9,7 +9,7 @@ use App\Http\Requests\CreateRequestInterface;
 use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\UpdateRequestInterface;
 
-class GeocodeController extends AbstractRestfulController {
+class MapSearchController extends AbstractRestfulController {
     public function autocomplete() {
         return $this->response->array([
             ['label' => '777 Brockton Avenue, Abington MA 2351'],

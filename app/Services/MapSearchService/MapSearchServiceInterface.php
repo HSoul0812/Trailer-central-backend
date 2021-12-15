@@ -1,10 +1,10 @@
 <?php
 
 
-namespace App\Services\GeocodeService;
+namespace App\Services\MapSearchService;
 
 
-interface GeocodeServiceInterface
+interface MapSearchServiceInterface
 {
     /**
      * @param string $searchText
