@@ -276,12 +276,16 @@ class CatalogService implements CatalogServiceInterface
 
             // Create Job
             if($integration->catalog_type === Catalog::VEHICLE_TYPE) {
-                $this->dispatch(new VehicleJob($integration, $feed->feed_url));
+                $job = new VehicleJob($integration, $feed->feed_url);
             } elseif($integration->catalog_type === Catalog::HOME_TYPE) {
-                $this->dispatch(new HomeJob($integration, $feed->feed_url));
+                $job = new HomeJob($integration, $feed->feed_url);
             } else {
-                $this->dispatch(new ProductJob($integration, $feed->feed_url));
+                $job = new ProductJob($integration, $feed->feed_url);
             }
+
+            // Dispatching Job
+            $this->log->info('Dispatching a ' . $integration->catalog_type . ' Catalog Job');
+            $this->dispatch($job->onQueue('fb-catalog'));
         }
 
         // Return Response
