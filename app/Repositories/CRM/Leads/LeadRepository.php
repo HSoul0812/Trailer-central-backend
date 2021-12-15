@@ -2,6 +2,7 @@
 
 namespace App\Repositories\CRM\Leads;
 
+use App\Models\CRM\User\Customer;
 use App\Models\Website\Website;
 use App\Exceptions\RepositoryInvalidArgumentException;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
@@ -598,7 +599,7 @@ class LeadRepository implements LeadRepositoryInterface {
 
     /**
      * Get Matches for LeadRepository
-     * 
+     *
      * @param int $dealerId
      * @param array $params
      * @return Collection<Lead>
@@ -627,7 +628,7 @@ class LeadRepository implements LeadRepositoryInterface {
 
     /**
      * Get Unique Full Names
-     * 
+     *
      * @param array $params
      * @return \Illuminate\Support\Collection|LengthAwarePaginator
      */
@@ -665,5 +666,40 @@ class LeadRepository implements LeadRepositoryInterface {
         }
 
         return $query->get();
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function createLeadFromCustomer(Customer $customer)
+    {
+        if(!is_null($customer->website_lead_id)) {
+            throw new \Exception("Customer id $customer->id already have a Lead.");
+        }
+
+        $websiteId = data_get($customer, 'dealer.website.id');
+
+        if(is_null($websiteId)) {
+            throw new \Exception("Customer id $customer->id (dealer id $customer->dealer_id) doesn't have a website.");
+        }
+
+        /** @var Lead $lead */
+        $lead = Lead::create([
+            'website_id' => $websiteId,
+            'dealer_id' => $customer->dealer_id,
+            'lead_type' => LeadType::TYPE_NONLEAD,
+            'first_name' => $customer->first_name,
+            'middle_name' => $customer->middle_name,
+            'last_name' => $customer->last_name,
+            'email_address' => $customer->email,
+            'address' => $customer->address,
+            'city' => $customer->city,
+            'zip' => $customer->postal_code,
+            'phone_number' => $customer->cell_phone,
+        ]);
+
+        // Update website_lead_id of this customer
+        $customer->website_lead_id = $lead->identifier;
+        $customer->save();
     }
 }
