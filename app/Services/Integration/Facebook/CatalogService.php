@@ -256,15 +256,20 @@ class CatalogService implements CatalogServiceInterface
             if(empty($integration->business_id) && empty($integration->catalog_id)) {
                 continue;
             }
-            $this->log->debug("Handling Catalog #" . $integration->catalog_id . " for Business #" . $integration->business_id);
+            $this->log->debug('Handling Catalog #' . $integration->catalog_id . ' for Business #' . $integration->business_id);
 
             // Get Access Token and Feed ID
             $catalog = $this->catalogs->findOne(['catalog_id' => $integration->catalog_id]);
             $feedId = !empty($catalog->feed) ? $catalog->feed->feed_id : 0;
+            if(empty($catalog->accessToken)) {
+                $this->log->error('Catalog Access Token MISSING, Cannot Process Catalog #' . $integration->catalog_id);
+                continue;
+            }
 
             // Get Feed ID From SDK
             $feedId = $this->scheduleFeed($catalog->accessToken, $integration->business_id, $integration->catalog_id, $feedId);
             if(empty($feedId)) {
+                $this->log->error('Feed Does Not Exist and Could Not Be Created for Catalog ID #' . $integration->catalog_id);
                 continue;
             }
 
