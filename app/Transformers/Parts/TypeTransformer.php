@@ -12,7 +12,7 @@ class TypeTransformer extends TransformerAbstract
 	     return [
              'id' => (int)$type->id,
              'name' => $type->name,
-             'types' => $type->categories
+             'categories' => $type->categories
          ];
     }
 }
