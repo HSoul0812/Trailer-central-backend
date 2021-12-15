@@ -1,7 +1,7 @@
 <?php
-use App\Http\Controllers\v1\MapSearch\MapSearchController;
-
 declare(strict_types=1);
+
+use App\Http\Controllers\v1\MapSearch\MapSearchController;
 
 $api = app(Dingo\Api\Routing\Router::class);
 
