@@ -11,6 +11,7 @@ use App\Repositories\Ecommerce\CompletedOrderRepositoryInterface;
 use App\Repositories\Ecommerce\RefundRepositoryInterface;
 use App\Services\Ecommerce\Payment\Gateways\PaymentGatewayServiceInterface;
 use App\Services\Ecommerce\DataProvider\Providers\TextrailWithCheckoutInterface;
+use Brick\Math\RoundingMode;
 use Brick\Money\Money;
 use GuzzleHttp\Exception\ClientException;
 use DomainException;
@@ -59,10 +60,10 @@ class CompletedOrderService implements CompletedOrderServiceInterface
 
         $orderRefundSummary = $this->refundRepository->getOrderRefundSummary($orderId);
 
-        $refundedAmount = $orderRefundSummary['parts_amount']->plus($orderRefundSummary['adjustment_amount'])
-            ->plus($orderRefundSummary['handling_amount'])
-            ->plus($orderRefundSummary['shipping_amount'])
-            ->plus($orderRefundSummary['tax_amount']);
+        $refundedAmount = $orderRefundSummary['parts_amount']->plus($orderRefundSummary['adjustment_amount'], RoundingMode::HALF_UP)
+            ->plus($orderRefundSummary['handling_amount'], RoundingMode::HALF_UP)
+            ->plus($orderRefundSummary['shipping_amount'], RoundingMode::HALF_UP)
+            ->plus($orderRefundSummary['tax_amount'], RoundingMode::HALF_UP);
 
         $orderTotalAmount = Money::of($order->total_amount, 'USD');
 

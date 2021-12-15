@@ -108,7 +108,7 @@ final class OrderAmountsBag implements DTO
         $this->totalPartsAmount = Money::zero('USD');
 
         $this->partsQtys = collect($order->parts)->keyBy('id')->map(function ($part) {
-            $this->totalPartsAmount = $this->totalPartsAmount->plus($part['qty'] * $part['price']);
+            $this->totalPartsAmount = $this->totalPartsAmount->plus($part['qty'] * $part['price'], RoundingMode::HALF_UP);
 
             return $part['qty'];
         })->toArray();

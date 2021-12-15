@@ -17,6 +17,7 @@ use App\Models\Parts\Textrail\Part;
 use App\Repositories\Ecommerce\CompletedOrderRepositoryInterface;
 use App\Repositories\Ecommerce\RefundRepositoryInterface;
 use App\Traits\WithGetter;
+use Brick\Math\RoundingMode;
 use Brick\Money\Money;
 
 /**
@@ -103,7 +104,7 @@ final class RefundBag implements DTO
         $this->textrailItems = collect($parts)->filter(function (array $part): bool {
             return $part['textrail'] !== null;
         })->map(function (array $part) use (&$taxAmount): array {
-            $taxAmount = $taxAmount->plus($part['qty'] * $part['price'] * $this->order->tax_rate);
+            $taxAmount = $taxAmount->plus($part['qty'] * $part['price'] * $this->order->tax_rate, RoundingMode::HALF_UP);
 
             return [
                 'order_item_id' => $part['textrail']['item_id'],
@@ -213,7 +214,7 @@ final class RefundBag implements DTO
             // but only to be able showing a proper error message
             $price = (float)(isset($indexedOrderParts[$part->id]) ? $indexedOrderParts[$part->id]['price'] : $part->price);
 
-            return $carry->plus($price * $parts[$part->id]['qty']);
+            return $carry->plus($price * $parts[$part->id]['qty'], RoundingMode::HALF_UP);
         }, Money::zero('USD'));
 
         $list = $partModelsToBeRefunded->map(static function (Part $part) use ($parts, $indexedOrderParts, $indexedOrderTextrailItems): array {
