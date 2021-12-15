@@ -1,8 +1,11 @@
 <template>
     <card class="p-10">
-        <div class="insight-filters">
-            <div class="stay-right">
+        <div class="flex insight-filters">
+            <div class="flex w-1/2">
+            </div>
+            <div class="stay-right flex w-1/2">
                 <date-range-picker
+                    control-container-class="date-range-picker-control select-box-sm ml-auto h-6 text-xs appearance-none bg-40 pl-2 pr-6"
                     ref="picker"
                     v-show="filters.datePicker.show"
                     :opens="left"
@@ -13,13 +16,13 @@
                     </template>
                 </date-range-picker>
                 <select @change="refresh()" v-model="filters.period.selected" v-show="filters.period.show"
-                        class="select-box-sm ml-auto min-w-24 h-6 text-xs appearance-none bg-40 pl-2 pr-6
+                        class="flex-auto select-box-sm ml-auto w-24 h-6 text-xs appearance-none bg-40 pl-2 pr-6
                                active:outline-none active:shadow-outline focus:outline-none focus:shadow-outline">
                     <option v-for="filter in filters.period.list" v-bind:value="filter.value" :key="filter.key">
                         {{ filter.text }}
                     </option>
                 </select>
-                <div class="float-right manufacturer-list">
+                <div class="flex-auto manufacturer-list">
                     <model-select :options="filters.subset.list"
                                   v-model="filters.subset.selected"
                                   @input="refresh"
@@ -34,6 +37,19 @@
 </template>
 
 <style>
+.insight-filters .vue-daterange-picker{
+    -webkit-box-flex: 1;
+    -ms-flex: auto;
+    flex: auto;
+    display: block;
+}
+.date-range-picker-control{
+  padding-right: 25px;
+  margin-right: 5px;
+  padding-top: 5px;
+  cursor: pointer;
+  width: 180px;
+}
 .manufacturer-list {
     margin-left: 3px;
 }
