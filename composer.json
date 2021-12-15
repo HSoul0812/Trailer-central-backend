@@ -20,7 +20,8 @@
         "laravel/tinker": "^2.5",
         "nesbot/carbon": "^2.53",
         "psr/log": "^1.0",
-        "trailer-trader/insights": "*"
+        "trailer-trader/insights": "*",
+        "ext-json": "*"
     },
     "require-dev": {
         "brianium/paratest": "^6.3",

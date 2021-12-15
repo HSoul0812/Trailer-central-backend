@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
 
 namespace App\Services\MapSearchService;
 
+use League\Fractal\TransformerAbstract;
 
 interface MapSearchServiceInterface
 {
@@ -23,5 +25,10 @@ interface MapSearchServiceInterface
      * @param float $lng
      * @return mixed
      */
-    public function reverse(float $lat, float $lng);
+    public function reverse(string $lat, string $lng);
+
+    /**
+     * @return TransformerAbstract
+     */
+    public function getTransformer(): TransformerAbstract;
 }

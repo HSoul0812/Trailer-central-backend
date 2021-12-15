@@ -20,6 +20,8 @@ use App\Services\Integrations\TrailerCentral\Console\Leads\LogService as LeadLog
 use App\Services\Integrations\TrailerCentral\Console\Leads\LogServiceInterface as LeadLogServiceInterface;
 use App\Services\Integrations\TrailerCentral\Console\Leads\SyncService as LeadSyncService;
 use App\Services\Integrations\TrailerCentral\Console\Leads\SyncServiceInterface as LeadSyncServiceInterface;
+use App\Services\MapSearchService\HereMapSearchService;
+use App\Services\MapSearchService\MapSearchServiceInterface;
 use Illuminate\Support\ServiceProvider;
 
 class TrailerCentralIntegrationServiceProvider extends ServiceProvider
@@ -38,6 +40,7 @@ class TrailerCentralIntegrationServiceProvider extends ServiceProvider
         $this->app->bind(LeadSyncServiceInterface::class, LeadSyncService::class);
         $this->app->bind(LeadLogServiceInterface::class, LeadLogService::class);
 
+        $this->app->bind(MapSearchServiceInterface::class, HereMapSearchService::class);
         $this->app->bind(SyncProcessRepositoryInterface::class, SyncProcessRepository::class);
     }
 }

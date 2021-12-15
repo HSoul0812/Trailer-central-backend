@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Http\Controllers\v1\MapSearch;
@@ -6,49 +7,61 @@ namespace App\Http\Controllers\v1\MapSearch;
 use App\Exceptions\NotImplementedException;
 use App\Http\Controllers\AbstractRestfulController;
 use App\Http\Requests\CreateRequestInterface;
+use App\Http\Requests\Home\IndexHomeRequest;
 use App\Http\Requests\IndexRequestInterface;
+use App\Http\Requests\MapService\AutocompleteRequest;
+use App\Http\Requests\MapService\GeocodeRequest;
+use App\Http\Requests\MapService\ReverseRequest;
 use App\Http\Requests\UpdateRequestInterface;
+use App\Services\MapSearchService\MapSearchServiceInterface;
 
-class MapSearchController extends AbstractRestfulController {
-    public function autocomplete() {
-        return $this->response->array([
-            ['label' => '777 Brockton Avenue, Abington MA 2351'],
-            ['label' => '30 Memorial Drive, Avon MA 2322'],
-            ['label' => '250 Hartford Avenue, Bellingham MA 2019'],
-            ['label' => '700 Oak Street, Brockton MA 2301'],
-            ['label' => '66-4 Parkhurst Rd, Chelmsford MA 1824'],
-        ]);
+class MapSearchController extends AbstractRestfulController
+{
+    /**
+     * @var MapSearchServiceInterface
+     */
+    private MapSearchServiceInterface $mapSearchService;
+
+    public function __construct(MapSearchServiceInterface $mapSearchService)
+    {
+        parent::__construct();
+        $this->mapSearchService = $mapSearchService;
     }
 
-    public function geocode() {
-        return $this->response->array([
-            'label' => 'William S Canning Blvd, Fall River, MA 02721, United States',
-            'position' => [
-                'lat' => 41.67052,
-                'lng' => -71.16053
-            ]
-        ]);
+    public function autocomplete(AutocompleteRequest $request)
+    {
+        if (!$request->validate()) {
+            $this->response->errorBadRequest();
+        }
+
+        $data = $this->mapSearchService->autocomplete($request->input('q'));
+        $transformer = $this->mapSearchService->getTransformer();
+        return $this->response->item($data, $transformer);
     }
 
-    public function reverse() {
-        return $this->response->array([
-            'label' => 'William S Canning Blvd, Fall River, MA 02721, United States',
-            'address' => [
-                'countryCode'=> 'USA',
-                'countryName'=> 'United States',
-                'stateCode'=> 'MA',
-                'state'=>  'Massachusetts',
-                'county'=> 'Bristol',
-                'city'=> 'Fall River',
-                'district'=> 'Maplewood',
-                'street'=> 'William S Canning Blvd',
-                'postalCode'=> '02721'
-            ],
-            'position' => [
-                'lat' => 41.67052,
-                'lng' => -71.16053
-            ]
-        ]);
+    public function geocode(GeocodeRequest $request)
+    {
+        if (!$request->validate()) {
+            $this->response->errorBadRequest();
+        }
+
+        $data = $this->mapSearchService->geocode($request->input('q'));
+        $transformer = $this->mapSearchService->getTransformer();
+        return $this->response->item($data, $transformer);
+    }
+
+    public function reverse(ReverseRequest $request)
+    {
+        if (!$request->validate()) {
+            $this->response->errorBadRequest();
+        }
+
+        $lat = $request->input('lat');
+        $lng = $request->input('lng');
+
+        $data = $this->mapSearchService->reverse($lat, $lng);
+        $transformer = $this->mapSearchService->getTransformer();
+        return $this->response->item($data, $transformer);
     }
 
     public function index(IndexRequestInterface $request)
@@ -78,5 +91,14 @@ class MapSearchController extends AbstractRestfulController {
 
     protected function constructRequestBindings(): void
     {
+        app()->bind(AutocompleteRequest::class, function () {
+            return inject_request_data(AutocompleteRequest::class);
+        });
+        app()->bind(GeocodeRequest::class, function () {
+            return inject_request_data(GeocodeRequest::class);
+        });
+        app()->bind(ReverseRequest::class, function () {
+            return inject_request_data(ReverseRequest::class);
+        });
     }
 }
