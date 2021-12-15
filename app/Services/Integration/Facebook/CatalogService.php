@@ -256,6 +256,7 @@ class CatalogService implements CatalogServiceInterface
             if(empty($integration->business_id) && empty($integration->catalog_id)) {
                 continue;
             }
+            $this->log->debug("Handling Catalog #" . $integration->catalog_id . " for Business #" . $integration->business_id);
 
             // Get Access Token and Feed ID
             $catalog = $this->catalogs->findOne(['catalog_id' => $integration->catalog_id]);
