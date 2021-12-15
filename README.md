@@ -69,6 +69,13 @@ The PHP wrapper (examples): `./bin/php <args>`
 ./bin/php artisan tinker
 ```
 
+The Postgres wrapper (examples): `./bin/psql <args>`
+
+```bash
+./bin/psql --version
+./bin/psql trailercenral
+```
+
 Apply code styles:
 
 ```bash

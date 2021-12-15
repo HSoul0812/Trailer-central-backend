@@ -30,6 +30,18 @@ class AbstractAverageByManufacturerService implements AverageByManufacturerServi
                 'complement' => $this->repository->getAllPerWeek($criteriaForAll),
                 'subset'     => !blank($manufacturer) ? $this->repository->getAllPerWeek($cb) : [],
             ],
+            'per_month' => [
+                'complement' => $this->repository->getAllPerMonth($criteriaForAll),
+                'subset'     => !blank($manufacturer) ? $this->repository->getAllPerMonth($cb) : [],
+            ],
+            'per_quarter' => [
+                'complement' => $this->repository->getAllPerQuarter($criteriaForAll),
+                'subset'     => !blank($manufacturer) ? $this->repository->getAllPerQuarter($cb) : [],
+            ],
+            'per_year' => [
+                'complement' => $this->repository->getAllPerYear($criteriaForAll),
+                'subset'     => !blank($manufacturer) ? $this->repository->getAllPerYear($cb) : [],
+            ],
         };
 
         $complement = [];

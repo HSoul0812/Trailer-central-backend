@@ -15,22 +15,20 @@ class LeadsAverageByManufacturerInsightsTest extends IntegrationTestCase
 {
     protected string $seeder = AverageSeeder::class;
 
-    /**
-     * Test that SUT is returning a payload with a well known insights by week and by day.
-     */
-    public function testHasAnExpectedResponse(): void
-    {
-        $dashboard = app(LeadsAverageByManufacturerInsights::class);
+    protected LeadsAverageByManufacturerInsights $dashboard;
 
-        $this->testByWeeks($dashboard);
-        $this->testByDays($dashboard);
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->dashboard = app(LeadsAverageByManufacturerInsights::class);
     }
 
-    private function testByWeeks(LeadsAverageByManufacturerInsights $dashboard): void
+    public function testByWeeks(): void
     {
         $request = new LeadsAverageRequest();
 
-        $response = $dashboard->cards($request);
+        $response = $this->dashboard->cards($request);
 
         /** @var AreaChart $chart */
         $chart = $response[0];
@@ -61,10 +59,10 @@ class LeadsAverageByManufacturerInsightsTest extends IntegrationTestCase
         self::assertSame('2020-53', $categories->first());
     }
 
-    private function testByDays(LeadsAverageByManufacturerInsights $dashboard): void
+    public function testByDays(): void
     {
         $request = new LeadsAverageRequest(['period' => InsightRequestInterface::PERIOD_PER_DAY]);
-        $response = $dashboard->cards($request);
+        $response = $this->dashboard->cards($request);
 
         /** @var AreaChart $chart */
         $chart = $response[0];

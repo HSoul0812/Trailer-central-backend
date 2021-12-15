@@ -34,9 +34,15 @@ abstract class AbstractAverageRequest extends Request implements InsightRequestI
     protected function getRules(): array
     {
         return [
-            'period' => Rule::in([self::PERIOD_PER_DAY, self::PERIOD_PER_WEEK]), // by the moment
-            'from'   => $this->validFromDate(),
-            'to'     => $this->validToDate(),
+            'period' => Rule::in([
+                self::PERIOD_PER_DAY,
+                self::PERIOD_PER_WEEK,
+                self::PERIOD_PER_MONTH,
+                self::PERIOD_PER_QUARTER,
+                self::PERIOD_PER_YEAR,
+            ]),
+            'from' => $this->validFromDate(),
+            'to'   => $this->validToDate(),
         ];
     }
 

@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+set -eu
+
+docker exec -it --workdir /tmp trailertrader_postgres psql -U postgres "$@"
