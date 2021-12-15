@@ -25,9 +25,9 @@ abstract class AbstractAverageRequest extends Request implements InsightRequestI
         return $this->input('to', Date::now()->format('Y-m-d'));
     }
 
-    public function getSubset(): ?string
+    public function getSubset(): array
     {
-        return $this->input('subset', '');
+        return $this->input('subset', []);
     }
 
     /** @noinspection PhpArrayShapeAttributeCanBeAddedInspection */
