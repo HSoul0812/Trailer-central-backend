@@ -57,7 +57,7 @@ class StockAverageByManufacturerInsightsTest extends IntegrationTestCase
         self::assertSame('2021-01-01', $categories->first());
     }
 
-    private function testByWeeks(): void
+    public function testByWeeks(): void
     {
         $request = new StockAverageRequest();
 
