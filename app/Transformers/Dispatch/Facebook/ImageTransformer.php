@@ -4,7 +4,7 @@ namespace App\Transformers\Dispatch\Facebook;
 
 use App\Models\Inventory\Image;
 
-class ImageTransformer extends MediaFileTransformer
+class ImageTransformer extends TransformerAbstract
 {
     public function transform(Image $image): array
     {
