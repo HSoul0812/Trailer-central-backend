@@ -3,14 +3,9 @@
 namespace App\Transformers\Dispatch\Facebook;
 
 use App\Services\Dispatch\Facebook\DTOs\DealerFacebook;
-use App\Services\Dispatch\Facebook\DTOs\MarketplaceInventory;
-use App\Transformers\Dispatch\Facebook\InventoryTransformer;
+use App\Transformers\Dispatch\Facebook\PaginatorTransformer;
 use App\Transformers\Dispatch\TunnelTransformer;
-use App\Utilities\Fractal\NoDataArraySerializer;
-use Illuminate\Support\Collection;
 use League\Fractal\TransformerAbstract;
-use League\Fractal\Manager;
-use League\Fractal\Resource\Collection as Pagination;
 
 class DealerTransformer extends TransformerAbstract
 {
@@ -20,14 +15,9 @@ class DealerTransformer extends TransformerAbstract
     private $tunnelTransformer;
 
     /**
-     * @var InventoryTransformer
+     * @var PaginatorTransformer
      */
-    private $inventoryTransformer;
-
-    /**
-     * @var Manager
-     */
-    private $fractal;
+    private $paginatorTransformer;
 
 
     protected $defaultIncludes = [
@@ -37,15 +27,10 @@ class DealerTransformer extends TransformerAbstract
 
     public function __construct(
         TunnelTransformer $tunnelTransformer,
-        InventoryTransformer $inventoryTransformer,
-        Manager $fractal
+        PaginatorTransformer $paginatorTransformer
     ) {
         $this->tunnelTransformer = $tunnelTransformer;
-        $this->inventoryTransformer = $inventoryTransformer;
-
-        // Fractal
-        $this->fractal = $fractal;
-        $this->fractal->setSerializer(new NoDataArraySerializer());
+        $this->paginatorTransformer = $paginatorTransformer;
     }
 
     public function transform(DealerFacebook $dealer)
@@ -71,34 +56,10 @@ class DealerTransformer extends TransformerAbstract
         return $this->collection($dealer->tunnels, $this->tunnelTransformer);
     }
 
-    /*public function includeInventory(DealerFacebook $dealer)
-    {
-        $collection = new Pagination($dealer->inventory->inventory, $this->inventoryTransformer);
-        $collection->setPaginator($dealer->inventory->paginator);
-        return $collection;
-    }*/
-
     public function includeInventory(DealerFacebook $dealer)
     {
         if($dealer->inventory) {
-            return $this->item($dealer->inventory, function(MarketplaceInventory $inventory) {
-                // Return Response
-                if(empty($inventory->inventory)) {
-                    $data = new Pagination($inventory->inventory, $this->inventoryTransformer);
-                    $inventory = $this->fractal->createData($data)->toArray();
-                }
-
-                // Return Formatted Array
-                return [
-                    'type' => $inventory->type,
-                    $inventory->type => $inventory->inventory ? $inventory : null,
-                    'page' => $inventory->paginator ? $inventory->paginator->getCurrentPage() : 0,
-                    'pages' => $inventory->paginator ? $inventory->paginator->getLastPage() : 0,
-                    'count' => $inventory->paginator ? $inventory->paginator->getCount() : 0,
-                    'total' => $inventory->paginator ? $inventory->paginator->getTotal() : 0,
-                    'per_page' => $inventory->paginator ? $inventory->paginator->getPerPage() : 0
-                ];
-            });
+            return $this->item($dealer->inventory, $this->paginatorTransformer);
         }
         return $this->null();
     }
