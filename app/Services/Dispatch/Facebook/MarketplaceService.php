@@ -13,7 +13,7 @@ use App\Repositories\Marketing\Facebook\ListingRepositoryInterface;
 use App\Repositories\Marketing\Facebook\ImageRepositoryInterface;
 use App\Services\Dispatch\Facebook\DTOs\DealerFacebook;
 use App\Services\Dispatch\Facebook\DTOs\InventoryFacebook;
-use App\Services\Dispatch\Facebook\DTOs\MarketplaceInventory;
+use App\Services\Dispatch\Facebook\DTOs\MarketplaceStatus;
 use App\Services\Dispatch\Facebook\DTOs\MarketplaceStatus;
 use App\Services\Dispatch\Facebook\DTOs\MarketplaceStep;
 use League\Fractal\Pagination\IlluminatePaginatorAdapter;
@@ -128,8 +128,8 @@ class MarketplaceService implements MarketplaceServiceInterface
         ]);
 
         // Get Types
-        if(!in_array($params['type'], MarketplaceInventory::RESPONSE_TYPES)) {
-            $params['type'] = MarketplaceInventory::RESPONSE_DEFAULT;
+        if(empty($params['type']) || empty(MarketplaceStatus::INVENTORY_METHODS[$params['type']])) {
+            $params['type'] = MarketplaceStatus::METHOD_DEFAULT;
         }
 
         // Get Facebook Dealer
@@ -272,12 +272,12 @@ class MarketplaceService implements MarketplaceServiceInterface
      */
     private function getInventory(Marketplace $integration, string $type, array $params): Collection {
         // Invalid Type? Return Empty Collection!
-        if(!isset(MarketplaceInventory::INVENTORY_METHODS[$type])) {
+        if(!isset(MarketplaceStatus::INVENTORY_METHODS[$type])) {
             return new Collection();
         }
 
         // Get Method
-        $method = MarketplaceInventory::INVENTORY_METHODS[$type];
+        $method = MarketplaceStatus::INVENTORY_METHODS[$type];
 
         // Get Inventory
         $inventory = $this->listings->{$method}($integration, $params);
@@ -285,7 +285,7 @@ class MarketplaceService implements MarketplaceServiceInterface
         // Loop Through Inventory Items
         $listings = new Collection();
         foreach($inventory as $listing) {
-            if($type === MarketplaceInventory::METHOD_MISSING) {
+            if($type === MarketplaceStatus::METHOD_MISSING) {
                 $listings->push(InventoryFacebook::getFromInventory($listing, $integration));
             } else {
                 $listings->push(InventoryFacebook::getFromListings($listing));
