@@ -17,7 +17,7 @@ class LeadRepository implements LeadRepositoryInterface
 
     public function queryAllSince(?string $lastDateSynchronized): Builder
     {
-        $columns = array_merge($this->getSerializableColumnsNames(), ['i.manufacturer', 'i.brand', 'i.vin']);
+        $columns = array_merge($this->getSerializableColumnsNames(), ['i.manufacturer', 'i.brand', 'i.vin', 'i.category']);
 
         $query = DB::connection('mysql')
             ->table('website_lead', 'l')
