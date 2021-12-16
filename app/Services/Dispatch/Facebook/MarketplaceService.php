@@ -16,6 +16,7 @@ use App\Services\Dispatch\Facebook\DTOs\InventoryFacebook;
 use App\Services\Dispatch\Facebook\DTOs\MarketplaceInventory;
 use App\Services\Dispatch\Facebook\DTOs\MarketplaceStatus;
 use App\Services\Dispatch\Facebook\DTOs\MarketplaceStep;
+use League\Fractal\Pagination\IlluminatePaginatorAdapter;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
@@ -126,6 +127,11 @@ class MarketplaceService implements MarketplaceServiceInterface
             'id' => $integrationId
         ]);
 
+        // Get Types
+        if(!in_array($params['type'], MarketplaceInventory::RESPONSE_TYPES)) {
+            $params['type'] = MarketplaceInventory::RESPONSE_DEFAULT;
+        }
+
         // Get Facebook Dealer
         return new DealerFacebook([
             'dealer_id' => $integration->dealer_id,
@@ -137,11 +143,7 @@ class MarketplaceService implements MarketplaceServiceInterface
             'auth_password' => $integration->tfa_password,
             'auth_type' => $integration->tfa_type,
             'tunnels' => $this->tunnels->getAll(['dealer_id' => $integration->dealer_id]),
-            'inventory' => new MarketplaceInventory([
-                'missing' => $this->getInventory($integration, 'missing', $params)/*,
-                'updates' => $this->getInventory($integration, 'updates', $params),
-                'sold' => $this->getInventory($integration, 'sold', $params)*/
-            ])
+            'inventory' => $this->getInventory($integration, $params['type'], $params)
         ]);
     }
 
@@ -289,6 +291,9 @@ class MarketplaceService implements MarketplaceServiceInterface
                 $listings->push(InventoryFacebook::getFromListings($listing));
             }
         }
+
+        // Append Paginator
+        $listings->setPaginator(new IlluminatePaginatorAdapter($inventory));
 
         // Return Facebook Inventory Updates
         return $listings;

@@ -15,7 +15,8 @@ class ShowMarketplaceRequest extends Request {
     protected $rules = [
         'id' => 'required|int',
         'per_page' => 'integer',
-        'page' => 'integer'
+        'page' => 'integer',
+        'type' => 'string|in:missing,updates,sold'
     ];
 
 }
