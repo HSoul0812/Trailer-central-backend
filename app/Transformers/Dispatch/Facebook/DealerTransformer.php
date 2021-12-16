@@ -80,23 +80,26 @@ class DealerTransformer extends TransformerAbstract
 
     public function includeInventory(DealerFacebook $dealer)
     {
-        return $this->item($dealer->inventory, function(MarketplaceInventory $inventory) {
-            // Return Response
-            if(empty($inventory->inventory)) {
-                $data = new Pagination($inventory->inventory, $this->inventoryTransformer);
-                $inventory = $this->fractal->createData($data)->toArray();
-            }
+        if($dealer->inventory) {
+            return $this->item($dealer->inventory, function(MarketplaceInventory $inventory) {
+                // Return Response
+                if(empty($inventory->inventory)) {
+                    $data = new Pagination($inventory->inventory, $this->inventoryTransformer);
+                    $inventory = $this->fractal->createData($data)->toArray();
+                }
 
-            // Return Formatted Array
-            return [
-                'type' => $inventory->type,
-                $inventory->type => $inventory->inventory ? $inventory : null,
-                'page' => $inventory->paginator ? $inventory->paginator->getCurrentPage() : 0,
-                'pages' => $inventory->paginator ? $inventory->paginator->getLastPage() : 0,
-                'count' => $inventory->paginator ? $inventory->paginator->getCount() : 0,
-                'total' => $inventory->paginator ? $inventory->paginator->getTotal() : 0,
-                'per_page' => $inventory->paginator ? $inventory->paginator->getPerPage() : 0
-            ];
-        });
+                // Return Formatted Array
+                return [
+                    'type' => $inventory->type,
+                    $inventory->type => $inventory->inventory ? $inventory : null,
+                    'page' => $inventory->paginator ? $inventory->paginator->getCurrentPage() : 0,
+                    'pages' => $inventory->paginator ? $inventory->paginator->getLastPage() : 0,
+                    'count' => $inventory->paginator ? $inventory->paginator->getCount() : 0,
+                    'total' => $inventory->paginator ? $inventory->paginator->getTotal() : 0,
+                    'per_page' => $inventory->paginator ? $inventory->paginator->getPerPage() : 0
+                ];
+            });
+        }
+        return $this->null();
     }
 }
