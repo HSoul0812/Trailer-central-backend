@@ -18,6 +18,7 @@ use App\Transformers\Marketing\Facebook\ListingTransformer;
 use App\Transformers\Dispatch\Facebook\DealerTransformer;
 use App\Transformers\Dispatch\Facebook\StatusTransformer;
 use App\Transformers\Dispatch\Facebook\StepTransformer;
+use App\Utilities\Fractal\NoDataArraySerializer;
 
 class FacebookController extends RestfulControllerV2 {
     /**
@@ -55,6 +56,11 @@ class FacebookController extends RestfulControllerV2 {
      */
     private $stepTransformer;
 
+    /**
+     * @var Manager
+     */
+    private $fractal;
+
     public function __construct(
         MarketplaceRepositoryInterface $repository,
         MarketplaceServiceInterface $service,
@@ -62,7 +68,8 @@ class FacebookController extends RestfulControllerV2 {
         DealerTransformer $dealerTransformer,
         ListingTransformer $listingTransformer,
         StatusTransformer $statusTransformer,
-        StepTransformer $stepTransformer
+        StepTransformer $stepTransformer,
+        Manager $fractal
     ) {
         $this->repository = $repository;
         $this->service = $service;
@@ -72,6 +79,10 @@ class FacebookController extends RestfulControllerV2 {
         $this->listingTransformer = $listingTransformer;
         $this->statusTransformer = $statusTransformer;
         $this->stepTransformer = $stepTransformer;
+
+        // Fractal
+        $this->fractal = $fractal;
+        $this->fractal->setSerializer(new NoDataArraySerializer());
     }
 
     /**
@@ -105,8 +116,10 @@ class FacebookController extends RestfulControllerV2 {
         $requestData['id'] = $id;
         $request = new ShowMarketplaceRequest($requestData);
         if ($request->validate()) {
-            // Return Auth
-            return $this->response->item($this->service->dealer($request->id), $this->dealerTransformer);
+            // Return Item Facebook Dispatch Dealer Transformer
+            $data = new Item($this->service->dealer($request->id), $this->dealerTransformer, 'data');
+            $response = $this->fractal->createData($data)->toArray();
+            return $this->response->array($response);
         }
         
         return $this->response->errorBadRequest();
