@@ -52,8 +52,11 @@ class DealerTransformer extends TransformerAbstract
             return [
                 'type' => $inventory->type,
                 'inventory' => $inventory->inventory ? $this->inventoryTransformer->transform($inventory->inventory) : null,
-                'count' => $inventory->paginator ? $inventory->paginator->count() : 0,
-                'options' => $inventory->paginator ? $inventory->paginator->options() : 0,
+                'page' => $inventory->paginator ? $inventory->paginator->getCurrentPage() : 0,
+                'pages' => $inventory->paginator ? $inventory->paginator->getLastPage() : 0,
+                'count' => $inventory->paginator ? $inventory->paginator->getCount() : 0,
+                'total' => $inventory->paginator ? $inventory->paginator->getTotal() : 0,
+                'per_page' => $inventory->paginator ? $inventory->paginator->getPerPage() : 0
             ];
         });
     }
