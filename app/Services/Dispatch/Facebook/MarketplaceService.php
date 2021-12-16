@@ -133,9 +133,9 @@ class MarketplaceService implements MarketplaceServiceInterface
         ]);
 
         // Get Types
-        $type = !empty($params['type']) ? $params['type'] : MarketplaceStatus::METHOD_DEFAULT;
+        $type = !empty($params['type']) ? $params['type'] : MarketplaceInventory::METHOD_DEFAULT;
         if(empty(MarketplaceStatus::INVENTORY_METHODS[$type])) {
-            $type = MarketplaceStatus::METHOD_DEFAULT;
+            $type = MarketplaceInventory::METHOD_DEFAULT;
         }
 
         // Get Facebook Dealer

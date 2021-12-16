@@ -36,11 +36,6 @@ class MarketplaceStatus
      */
     const METHOD_MISSING = 'missing';
 
-    /**
-     * @const Response Default
-     */
-    const METHOD_DEFAULT = self::METHOD_MISSING;
-
 
     /**
      * @var Collection<DealerFacebook>
