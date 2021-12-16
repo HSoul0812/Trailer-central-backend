@@ -17,6 +17,7 @@ use App\Services\Dispatch\Facebook\DTOs\MarketplaceStep;
 use League\Fractal\Pagination\IlluminatePaginatorAdapter;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use League\Fractal\Resource\Collection as Pagination;
 
 /**
  * Class MarketplaceService
@@ -282,7 +283,7 @@ class MarketplaceService implements MarketplaceServiceInterface
         $inventory = $this->listings->{$method}($integration, $params);
 
         // Loop Through Inventory Items
-        $listings = new Collection();
+        $listings = new Pagination();
         foreach($inventory as $listing) {
             if($type === MarketplaceStatus::METHOD_MISSING) {
                 $listings->push(InventoryFacebook::getFromInventory($listing, $integration));
