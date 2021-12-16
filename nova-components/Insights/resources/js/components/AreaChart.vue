@@ -214,6 +214,8 @@ export default {
                 if (chartData) {
                     this.fillData(chartData.options.xAxis.categories, chartData.series);
                 }
+
+                this.filters.subset.list = chartData.filters.subset.list;
             }).catch((error) => console.warn(error));
         },
         fillData(labels, datasets) {
