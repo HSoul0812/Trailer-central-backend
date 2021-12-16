@@ -230,6 +230,7 @@ class BusinessService implements BusinessServiceInterface
      */
     public function validateFeed($accessToken, $catalogId, $feedId) {
         // Configure Client
+        $this->log->debug("Validating Product Feed #" . $feedId . " exists on Catalog #" . $catalogId);
         $this->initApi($accessToken);
 
         // Get Product Catalog
@@ -275,6 +276,7 @@ class BusinessService implements BusinessServiceInterface
      */
     public function deleteFeed($accessToken, $catalogId, $feedId) {
         // Configure Client
+        $this->log->debug("Deleting Product Feed #" . $feedId . " on Catalog #" . $catalogId);
         $this->initApi($accessToken);
 
         // Get Product Catalog
@@ -321,6 +323,7 @@ class BusinessService implements BusinessServiceInterface
      */
     public function scheduleFeed($accessToken, $catalogId, $feedUrl, $feedName) {
         // Configure Client
+        $this->log->debug("Scheduled Product Feed " . $feedUrl . " for Catalog #" . $catalogId);
         $this->initApi($accessToken);
 
         // Get Product Catalog
