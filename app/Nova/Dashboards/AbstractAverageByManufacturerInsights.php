@@ -35,13 +35,15 @@ abstract class AbstractAverageByManufacturerInsights extends Dashboard
     public function cards(InsightRequestInterface $request): array
     {
         if ($request->validate()) {
-            $insights = $this->service->collect(new CriteriaBuilder([
+            $criteriaBuilder = new CriteriaBuilder([
                 'period'       => $request->getPeriod(),
                 'from'         => $request->getFrom(),
                 'to'           => $request->getTo(),
                 'manufacturer' => $request->getSubset(),
                 'category'     => $request->getCategory(),
-            ]));
+            ]);
+
+            $insights = $this->service->collect($criteriaBuilder);
 
             $series = [
                 [
@@ -75,7 +77,7 @@ abstract class AbstractAverageByManufacturerInsights extends Dashboard
             }
 
             $manufacturerList = $this->service
-                ->getAllManufacturers()
+                ->getAllManufacturers($criteriaBuilder)
                 ->map(fn (stdClass $item) => [
                     'text' => $item->manufacturer, 'value' => $item->manufacturer,
                 ])
