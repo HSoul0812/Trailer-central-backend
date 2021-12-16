@@ -3,6 +3,7 @@
 namespace App\Transformers\Dispatch\Facebook;
 
 use App\Models\Inventory\Image;
+use League\Fractal\TransformerAbstract;
 
 class ImageTransformer extends TransformerAbstract
 {
