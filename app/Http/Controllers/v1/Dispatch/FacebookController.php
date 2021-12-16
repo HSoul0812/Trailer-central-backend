@@ -19,6 +19,7 @@ use App\Transformers\Dispatch\Facebook\DealerTransformer;
 use App\Transformers\Dispatch\Facebook\StatusTransformer;
 use App\Transformers\Dispatch\Facebook\StepTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
+use League\Fractal\Manager;
 
 class FacebookController extends RestfulControllerV2 {
     /**
