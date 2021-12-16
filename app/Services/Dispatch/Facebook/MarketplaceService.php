@@ -12,6 +12,7 @@ use App\Repositories\Marketing\Facebook\ListingRepositoryInterface;
 use App\Repositories\Marketing\Facebook\ImageRepositoryInterface;
 use App\Services\Dispatch\Facebook\DTOs\DealerFacebook;
 use App\Services\Dispatch\Facebook\DTOs\InventoryFacebook;
+use App\Services\Dispatch\Facebook\DTOs\MarketplaceInventory;
 use App\Services\Dispatch\Facebook\DTOs\MarketplaceStatus;
 use App\Services\Dispatch\Facebook\DTOs\MarketplaceStep;
 use App\Transformers\Dispatch\Facebook\InventoryTransformer;
