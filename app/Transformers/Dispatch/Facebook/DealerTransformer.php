@@ -3,6 +3,7 @@
 namespace App\Transformers\Dispatch\Facebook;
 
 use App\Services\Dispatch\Facebook\DTOs\DealerFacebook;
+use App\Services\Dispatch\Facebook\DTOs\MarketplaceInventory;
 use App\Transformers\Dispatch\Facebook\InventoryTransformer;
 use App\Transformers\Dispatch\TunnelTransformer;
 use League\Fractal\TransformerAbstract;
