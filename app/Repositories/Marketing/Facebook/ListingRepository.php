@@ -129,9 +129,10 @@ class ListingRepository implements ListingRepositoryInterface {
      * Get All Inventory Missing on Facebook
      * 
      * @param Marketplace $integration
+     * @param array $params
      * @return Collection<Listings>
      */
-    public function getAllMissing(Marketplace $integration): Collection {
+    public function getAllMissing(Marketplace $integration, array $params): Collection {
         // Initialize Inventory Query
         $query = Inventory::select(Inventory::getTableName().'.*')
                           ->where('dealer_id', '=', $integration->dealer_id)
@@ -165,7 +166,12 @@ class ListingRepository implements ListingRepositoryInterface {
             });
         }
 
+        if (!isset($params['per_page'])) {
+            $params['per_page'] = 20;
+        }
+
         // Get All Listings
-        return $query->with('attributeValues')->has('inventoryImages')->get();
+        return $query->with('attributeValues')->has('inventoryImages')
+                     ->paginate($params['per_page'])->appends($params);;
     }
 }

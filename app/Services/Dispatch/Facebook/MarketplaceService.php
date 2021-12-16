@@ -116,9 +116,11 @@ class MarketplaceService implements MarketplaceServiceInterface
     /**
      * Get Dealer Inventory
      * 
+     * @param int $integrationId
+     * @param array $params
      * @return DealerFacebook
      */
-    public function dealer(int $integrationId): DealerFacebook {
+    public function dealer(int $integrationId, array $params): DealerFacebook {
         // Get Integration
         $integration = $this->marketplace->get([
             'id' => $integrationId
@@ -136,9 +138,9 @@ class MarketplaceService implements MarketplaceServiceInterface
             'auth_type' => $integration->tfa_type,
             'tunnels' => $this->tunnels->getAll(['dealer_id' => $integration->dealer_id]),
             'inventory' => new MarketplaceInventory([
-                'missing' => $this->getInventory($integration, 'missing')/*,
-                'updates' => $this->getInventory($integration, 'updates'),
-                'sold' => $this->getInventory($integration, 'sold')*/
+                'missing' => $this->getInventory($integration, 'missing', $params)/*,
+                'updates' => $this->getInventory($integration, 'updates', $params),
+                'sold' => $this->getInventory($integration, 'sold', $params)*/
             ])
         ]);
     }
@@ -263,9 +265,10 @@ class MarketplaceService implements MarketplaceServiceInterface
      * 
      * @param Marketplace $integration
      * @param string $type missing|updates|sold
+     * @param array $params
      * @return Collection<InventoryFacebook>
      */
-    private function getInventory(Marketplace $integration, string $type): Collection {
+    private function getInventory(Marketplace $integration, string $type, array $params): Collection {
         // Invalid Type? Return Empty Collection!
         if(!isset(MarketplaceInventory::INVENTORY_METHODS[$type])) {
             return new Collection();
@@ -275,7 +278,7 @@ class MarketplaceService implements MarketplaceServiceInterface
         $method = MarketplaceInventory::INVENTORY_METHODS[$type];
 
         // Get Inventory
-        $inventory = $this->listings->{$method}($integration);
+        $inventory = $this->listings->{$method}($integration, $params);
 
         // Loop Through Inventory Items
         $listings = new Collection();

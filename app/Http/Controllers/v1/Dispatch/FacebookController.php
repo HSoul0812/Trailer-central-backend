@@ -119,7 +119,8 @@ class FacebookController extends RestfulControllerV2 {
         $request = new ShowMarketplaceRequest($requestData);
         if ($request->validate()) {
             // Return Item Facebook Dispatch Dealer Transformer
-            $data = new Item($this->service->dealer($request->id), $this->dealerTransformer, 'data');
+            $data = new Item($this->service->dealer($request->id, $request->all()),
+                                $this->dealerTransformer, 'data');
             $response = $this->fractal->createData($data)->toArray();
             return $this->response->array($response);
         }
