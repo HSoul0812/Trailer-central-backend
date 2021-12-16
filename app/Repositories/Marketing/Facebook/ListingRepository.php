@@ -173,9 +173,6 @@ class ListingRepository implements ListingRepositoryInterface {
 
         // Require Inventory Images
         $query = $query->with('attributeValues')->has('inventoryImages');
-        echo $query->toSql();
-        print_r($query->getBindings);
-        die;
 
         // Return Paginated Inventory
         return $query->paginate($params['per_page'])->appends($params);;
