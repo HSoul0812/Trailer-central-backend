@@ -128,8 +128,9 @@ class MarketplaceService implements MarketplaceServiceInterface
         ]);
 
         // Get Types
-        if(empty($params['type']) || empty(MarketplaceStatus::INVENTORY_METHODS[$params['type']])) {
-            $params['type'] = MarketplaceStatus::METHOD_DEFAULT;
+        $type = !empty($params['type']) ? $params['type'] : MarketplaceStatus::METHOD_DEFAULT;
+        if(empty(MarketplaceStatus::INVENTORY_METHODS[$type])) {
+            $type = MarketplaceStatus::METHOD_DEFAULT;
         }
 
         // Get Facebook Dealer
@@ -143,7 +144,7 @@ class MarketplaceService implements MarketplaceServiceInterface
             'auth_password' => $integration->tfa_password,
             'auth_type' => $integration->tfa_type,
             'tunnels' => $this->tunnels->getAll(['dealer_id' => $integration->dealer_id]),
-            'inventory' => $this->getInventory($integration, $params['type'], $params)
+            'inventory' => $this->getInventory($integration, $type, $params)
         ]);
     }
 
