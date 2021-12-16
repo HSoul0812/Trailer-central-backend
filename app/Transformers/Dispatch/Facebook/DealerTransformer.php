@@ -8,6 +8,7 @@ use App\Transformers\Dispatch\Facebook\InventoryTransformer;
 use App\Transformers\Dispatch\TunnelTransformer;
 use League\Fractal\TransformerAbstract;
 use Illuminate\Support\Collection;
+use League\Fractal\Resource\Collection as Pagination;
 
 class DealerTransformer extends TransformerAbstract
 {
@@ -49,6 +50,13 @@ class DealerTransformer extends TransformerAbstract
 
     public function includeInventory(DealerFacebook $dealer)
     {
+        $collection = new Pagination($dealer->inventory->inventory, $this->inventoryCollection);
+        $collection->setPaginator($deaeler->inventory->paginator);
+        return $collection;
+    }
+
+    /*public function includeInventory(DealerFacebook $dealer)
+    {
         return $this->item($dealer->inventory, function(MarketplaceInventory $inventory) {
             return [
                 'type' => $inventory->type,
@@ -60,7 +68,7 @@ class DealerTransformer extends TransformerAbstract
                 'per_page' => $inventory->paginator ? $inventory->paginator->getPerPage() : 0
             ];
         });
-    }
+    }*/
 
 
     /**
