@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Repositories\AverageByManufacturerRepositoryInterface;
 use App\Support\CriteriaBuilder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 class AbstractAverageByManufacturerService implements AverageByManufacturerServiceInterface
 {
@@ -21,28 +22,13 @@ class AbstractAverageByManufacturerService implements AverageByManufacturerServi
         $manufacturer = $cb->get('manufacturer');
 
         /** @var array{complement: Collection, subset: Collection} $rawData */
-        $rawData = match ($cb->getOrFail('period')) {
-            'per_day' => [
-                'complement' => $this->repository->getAllPerDay($criteriaForAll),
-                'subset'     => !blank($manufacturer) ? $this->repository->getAllPerDay($cb) : [],
-            ],
-            'per_week' => [
-                'complement' => $this->repository->getAllPerWeek($criteriaForAll),
-                'subset'     => !blank($manufacturer) ? $this->repository->getAllPerWeek($cb) : [],
-            ],
-            'per_month' => [
-                'complement' => $this->repository->getAllPerMonth($criteriaForAll),
-                'subset'     => !blank($manufacturer) ? $this->repository->getAllPerMonth($cb) : [],
-            ],
-            'per_quarter' => [
-                'complement' => $this->repository->getAllPerQuarter($criteriaForAll),
-                'subset'     => !blank($manufacturer) ? $this->repository->getAllPerQuarter($cb) : [],
-            ],
-            'per_year' => [
-                'complement' => $this->repository->getAllPerYear($criteriaForAll),
-                'subset'     => !blank($manufacturer) ? $this->repository->getAllPerYear($cb) : [],
-            ],
-        };
+        $period = $cb->getOrFail('period');
+        $methodName = 'getAll' . Str::of($period)->camel()->ucfirst();
+
+        $rawData = [
+            'complement' => $this->repository->{$methodName}($criteriaForAll),
+            'subset'     => !blank($manufacturer) ? $this->repository->{$methodName}($cb) : [],
+        ];
 
         $complement = [];
         $legends = [];
@@ -55,7 +41,7 @@ class AbstractAverageByManufacturerService implements AverageByManufacturerServi
 
         if ($rawData['subset']) {
             foreach ($rawData['subset'] as $element) {
-                $subset[] = $element->aggregate;
+                $subset[$element->manufacturer][] = $element->aggregate;
             }
         }
 

@@ -21,138 +21,87 @@ abstract class AbstractAverageByManufacturerRepository implements AverageByManuf
     }
 
     /**
-     * @param CriteriaBuilder $cb {manufacturer:string, [from]:string[y-m-d], [to]:string[y-m-d]}
+     * @param CriteriaBuilder $cb {manufacturer:string[], [from]:string[y-m-d], [to]:string[y-m-d]}
      */
     public function getAllPerDay(CriteriaBuilder $cb): LazyCollection
     {
-        $query = DB::table($this->getPerDayViewName())->selectRaw('AVG(aggregate) AS aggregate, day AS period');
+        $dateRangeFilter = static function (
+            \Illuminate\Database\Query\Builder $query,
+            \Illuminate\Support\Carbon $from,
+            \Illuminate\Support\Carbon $to): \Illuminate\Database\Query\Builder {
+            return $query->whereBetween('day', [$from, $to]);
+        };
 
-        if ($cb->isNotBlank('manufacturer')) {
-            $query->where('manufacturer', $cb->get('manufacturer'));
-        }
-
-        if ($cb->isNotBlank('not_manufacturer')) {
-            $query->where('manufacturer', '!=', $cb->get('not_manufacturer'));
-        }
-
-        if ($cb->isNotBlank('from')) {
-            $from = $cb->get('from');
-            $to = $cb->get('to', Date::now()->format('y-m-d'));
-
-            $query->whereBetween('day', [$from, $to]);
-        }
-
-        $query->groupBy('day')->orderBy('day');
-
-        return $query->cursor();
+        return $this->getAllFromView($cb, 'day', $this->getPerDayViewName(), $dateRangeFilter);
     }
 
     /**
-     * @param CriteriaBuilder $cb {manufacturer:string, [from]:string[y-m-d], [to]:string[y-m-d]}
+     * @param CriteriaBuilder $cb {manufacturer:string[], [from]:string[y-m-d], [to]:string[y-m-d]}
      */
     public function getAllPerWeek(CriteriaBuilder $cb): LazyCollection
     {
-        $query = DB::table($this->getPerWeekViewName())->selectRaw('AVG(aggregate) AS aggregate, week AS period');
-
-        if ($cb->isNotBlank('manufacturer')) {
-            $query->where('manufacturer', $cb->get('manufacturer'));
-        }
-
-        if ($cb->isNotBlank('not_manufacturer')) {
-            $query->where('manufacturer', '!=', $cb->get('not_manufacturer'));
-        }
-
-        if ($cb->isNotBlank('from')) {
-            $from = Date::createFromFormat('Y-m-d', $cb->get('from', Date::now()->subYear()->format('Y-m-d')));
-            $to = Date::createFromFormat('Y-m-d', $cb->get('to', Date::now()->format('Y-m-d')));
-
-            $query->whereBetween('week', [
+        $dateRangeFilter = static function (
+            \Illuminate\Database\Query\Builder $query,
+            \Illuminate\Support\Carbon $from,
+            \Illuminate\Support\Carbon $to): \Illuminate\Database\Query\Builder {
+            return $query->whereBetween('week', [
                 sprintf('%d-%d', $from->isoWeekYear, $from->isoWeek),
                 sprintf('%d-%d', $to->isoWeekYear, $to->isoWeek),
             ]);
-        }
+        };
 
-        $query->groupBy('week')->orderBy('week');
-
-        return $query->cursor();
+        return $this->getAllFromView($cb, 'week', $this->getPerWeekViewName(), $dateRangeFilter);
     }
 
+    /**
+     * @param CriteriaBuilder $cb {manufacturer:string[], [from]:string[y-m-d], [to]:string[y-m-d]}
+     */
     public function getAllPerMonth(CriteriaBuilder $cb): LazyCollection
     {
-        $query = DB::table($this->getPerMonthViewName())->selectRaw('AVG(aggregate) AS aggregate, month AS period');
-
-        if ($cb->isNotBlank('manufacturer')) {
-            $query->where('manufacturer', $cb->get('manufacturer'));
-        }
-
-        if ($cb->isNotBlank('not_manufacturer')) {
-            $query->where('manufacturer', '!=', $cb->get('not_manufacturer'));
-        }
-
-        if ($cb->isNotBlank('from')) {
-            $from = Date::createFromFormat('Y-m-d', $cb->get('from', Date::now()->subYear()->format('Y-m-d')));
-            $to = Date::createFromFormat('Y-m-d', $cb->get('to', Date::now()->format('Y-m-d')));
-
-            $query->whereBetween('month', [
+        $dateRangeFilter = static function (
+            \Illuminate\Database\Query\Builder $query,
+            \Illuminate\Support\Carbon $from,
+            \Illuminate\Support\Carbon $to): \Illuminate\Database\Query\Builder {
+            return $query->whereBetween('month', [
                 sprintf('%d-%s', $from->year, $from->format('m')),
                 sprintf('%d-%s', $to->year, $to->format('m')),
             ]);
-        }
+        };
 
-        $query->groupBy('month')->orderBy('month');
-
-        return $query->cursor();
+        return $this->getAllFromView($cb, 'month', $this->getPerMonthViewName(), $dateRangeFilter);
     }
 
+    /**
+     * @param CriteriaBuilder $cb {manufacturer:string[], [from]:string[y-m-d], [to]:string[y-m-d]}
+     */
     public function getAllPerQuarter(CriteriaBuilder $cb): LazyCollection
     {
-        $query = DB::table($this->getPerQuarterViewName())->selectRaw('AVG(aggregate) AS aggregate, quarter AS period');
-
-        if ($cb->isNotBlank('manufacturer')) {
-            $query->where('manufacturer', $cb->get('manufacturer'));
-        }
-
-        if ($cb->isNotBlank('not_manufacturer')) {
-            $query->where('manufacturer', '!=', $cb->get('not_manufacturer'));
-        }
-
-        if ($cb->isNotBlank('from')) {
-            $from = Date::createFromFormat('Y-m-d', $cb->get('from', Date::now()->subYear()->format('Y-m-d')));
-            $to = Date::createFromFormat('Y-m-d', $cb->get('to', Date::now()->format('Y-m-d')));
-
-            $query->whereBetween('quarter', [
+        $dateRangeFilter = static function (
+            \Illuminate\Database\Query\Builder $query,
+            \Illuminate\Support\Carbon $from,
+            \Illuminate\Support\Carbon $to): \Illuminate\Database\Query\Builder {
+            return $query->whereBetween('quarter', [
                 sprintf('%d-Q%s', $from->year, $from->quarter),
                 sprintf('%d-Q%s', $to->year, $to->quarter),
             ]);
-        }
+        };
 
-        $query->groupBy('quarter')->orderBy('quarter');
-
-        return $query->cursor();
+        return $this->getAllFromView($cb, 'quarter', $this->getPerQuarterViewName(), $dateRangeFilter);
     }
 
+    /**
+     * @param CriteriaBuilder $cb {manufacturer:string[], [from]:string[y-m-d], [to]:string[y-m-d]}
+     */
     public function getAllPerYear(CriteriaBuilder $cb): LazyCollection
     {
-        $query = DB::table($this->getPerYearViewName())->selectRaw('AVG(aggregate) AS aggregate, year AS period');
+        $dateRangeFilter = static function (
+            \Illuminate\Database\Query\Builder $query,
+            \Illuminate\Support\Carbon $from,
+            \Illuminate\Support\Carbon $to): \Illuminate\Database\Query\Builder {
+            return $query->whereBetween('year', [$from->year, $to->year]);
+        };
 
-        if ($cb->isNotBlank('manufacturer')) {
-            $query->where('manufacturer', $cb->get('manufacturer'));
-        }
-
-        if ($cb->isNotBlank('not_manufacturer')) {
-            $query->where('manufacturer', '!=', $cb->get('not_manufacturer'));
-        }
-
-        if ($cb->isNotBlank('from')) {
-            $from = Date::createFromFormat('Y-m-d', $cb->get('from', Date::now()->subYear()->format('Y-m-d')));
-            $to = Date::createFromFormat('Y-m-d', $cb->get('to', Date::now()->format('Y-m-d')));
-
-            $query->whereBetween('year', [$from->year, $to->year]);
-        }
-
-        $query->groupBy('year')->orderBy('year');
-
-        return $query->cursor();
+        return $this->getAllFromView($cb, 'year', $this->getPerYearViewName(), $dateRangeFilter);
     }
 
     abstract protected function getPerDayViewName(): string;
@@ -164,4 +113,43 @@ abstract class AbstractAverageByManufacturerRepository implements AverageByManuf
     abstract protected function getPerQuarterViewName(): string;
 
     abstract protected function getPerYearViewName(): string;
+
+    /**
+     * @param CriteriaBuilder $cb              {manufacturer:string[], [from]:string[y-m-d], [to]:string[y-m-d]}
+     * @param string          $periodColumn    day|week|month|quarter|year
+     * @param string          $viewName        the materialized view name
+     * @param callable        $dateRangeFilter \Illuminate\Database\Query\Builder callable(
+     *                                         \Illuminate\Database\Query\Builder $query,
+     *                                         \Illuminate\Support\Carbon         $from,
+     *                                         \Illuminate\Support\Carbon         $to
+     */
+    private function getAllFromView(CriteriaBuilder $cb,
+                                    string $periodColumn,
+                                    string $viewName,
+                                    callable $dateRangeFilter): LazyCollection
+    {
+        $query = DB::table($viewName)->selectRaw("AVG(aggregate) AS aggregate, $periodColumn AS period");
+
+        if ($cb->isNotBlank('manufacturer')) {
+            $query->selectRaw('manufacturer')
+                ->whereIn('manufacturer', $cb->get('manufacturer'))
+                ->groupBy('manufacturer')
+                ->orderBy('manufacturer');
+        }
+
+        if ($cb->isNotBlank('not_manufacturer')) {
+            $query->whereNotIn('manufacturer', $cb->get('not_manufacturer'));
+        }
+
+        if ($cb->isNotBlank('from')) {
+            $from = Date::createFromFormat('Y-m-d', $cb->get('from', Date::now()->subYear()->format('Y-m-d')));
+            $to = Date::createFromFormat('Y-m-d', $cb->get('to', Date::now()->format('Y-m-d')));
+
+            $query = $dateRangeFilter($query, $from, $to);
+        }
+
+        $query->groupBy($periodColumn)->orderBy($periodColumn);
+
+        return $query->cursor();
+    }
 }

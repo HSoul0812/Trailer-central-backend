@@ -16,6 +16,7 @@ use TrailerTrader\Insights\AreaChart;
 abstract class AbstractAverageByManufacturerInsights extends Dashboard
 {
     use WithCardRequestBindings;
+    use WithColorPalette;
     use Helpers;
 
     public function __construct(private AverageByManufacturerServiceInterface $service, ?string $component = null)
@@ -52,13 +53,24 @@ abstract class AbstractAverageByManufacturerInsights extends Dashboard
             ];
 
             if (!is_null($insights->subset)) {
-                $series[] = [
-                    'barPercentage'   => 0.5,
-                    'label'           => $request->getSubset(),
-                    'borderColor'     => '#008AC5',
-                    'backgroundColor' => 'rgba(0, 138, 197, 0.2)',
-                    'data'            => $insights->subset,
-                ];
+                $colors = $this->generateColorPalette();
+                $colorIndex = 0;
+
+                foreach ($insights->subset as $title => $subset) {
+                    if (count($colors) === $colorIndex) {
+                        $colorIndex = 0;
+                    }
+
+                    $series[] = [
+                        'barPercentage'   => 0.5,
+                        'label'           => $title,
+                        'borderColor'     => $colors[$colorIndex],
+                        'backgroundColor' => $this->hex2rgb($colors[$colorIndex]),
+                        'data'            => $subset,
+                    ];
+
+                    ++$colorIndex;
+                }
             }
 
             $manufacturerList = $this->service
@@ -66,7 +78,6 @@ abstract class AbstractAverageByManufacturerInsights extends Dashboard
                 ->map(fn (stdClass $item) => [
                     'text' => $item->manufacturer, 'value' => $item->manufacturer,
                 ])
-                ->prepend(['value' => '', 'text' => 'Manufacturer'])
                 ->toArray();
 
             return [
@@ -80,10 +91,11 @@ abstract class AbstractAverageByManufacturerInsights extends Dashboard
                     ->series($series)
                     ->filters([
                         'subset' => [
-                            'show'     => true,
-                            'list'     => $manufacturerList,
-                            'default'  => 'Manufacturer',
-                            'selected' => $request->getSubset(),
+                            'show'        => true,
+                            'list'        => $manufacturerList,
+                            'default'     => 'Manufacturer',
+                            'selected'    => $request->getSubset(),
+                            'placeholder' => 'Select a manufacturer',
                         ],
                         'period' => [
                             'selected' => $request->getPeriod(),

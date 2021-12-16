@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Nova\Dashboards\Leads;
 
 use App\Nova\Dashboards\AbstractAverageByManufacturerInsights;
+use App\Nova\Http\Requests\InsightRequestInterface;
 use App\Nova\Http\Requests\Leads\LeadsAverageRequest;
 use App\Nova\Http\Requests\Leads\LeadsAverageRequestInterface;
 use App\Services\Leads\LeadsAverageByManufacturerServiceInterface;
@@ -38,9 +39,6 @@ class LeadsAverageByManufacturerInsights extends AbstractAverageByManufacturerIn
             fn () => inject_request_data(LeadsAverageRequest::class)
         );
 
-        app()->bindMethod(
-            __CLASS__ . '@cards',
-            fn (self $class) => $class->cards(app()->make(LeadsAverageRequestInterface::class))
-        );
+        app()->bind(InsightRequestInterface::class, LeadsAverageRequestInterface::class);
     }
 }

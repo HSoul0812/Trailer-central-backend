@@ -58675,7 +58675,7 @@ exports = module.exports = __webpack_require__(2)(false);
 
 
 // module
-exports.push([module.i, "\n.insight-filters .vue-daterange-picker{\n    -webkit-box-flex: 1;\n    -ms-flex: auto;\n    flex: auto;\n    display: block;\n}\n.date-range-picker-control{\n  padding-right: 25px;\n  margin-right: 5px;\n  padding-top: 5px;\n  cursor: pointer;\n  width: 180px;\n}\n.manufacturer-list {\n    margin-left: 3px;\n}\n.manufacturer-list .ui.dropdown,\n.manufacturer-list .ui.dropdown .menu > .item,\n.manufacturer-list .ui.search.dropdown > .text,\n.manufacturer-list .ui.search.selection.dropdown > input.search {\n    font-size: 12px;\n}\n.manufacturer-list {\n    min-width: 14rem;\n}\n.manufacturer-list .ui.search.selection.dropdown > input.search,\n.manufacturer-list .ui.selection.dropdown {\n    padding: 0 0.5em 0 1.5em;\n    height: 1.5rem;\n}\n.manufacturer-list .ui.search.dropdown > .text {\n    top: 5px\n}\n.manufacturer-list .ui.fluid.dropdown > .dropdown.icon {\n    padding: 0.5em;\n}\n", ""]);
+exports.push([module.i, "\n.date-range-picker-control {\n    height: 2.7em;\n    padding-top: 12px;\n    padding-right: 28px;\n    cursor: pointer;\n    color: black;\n    width: 210px;\n}\n.subset-list .menu.visible, .subset-list {\n    background-color: var(--40) !important;\n}\n", ""]);
 
 // exports
 
@@ -59123,32 +59123,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 
 
 
@@ -59165,7 +59139,7 @@ Chart.plugins.unregister(__WEBPACK_IMPORTED_MODULE_2_chartjs_plugin_datalabels__
     components: {
         LineChart: __WEBPACK_IMPORTED_MODULE_1__area_chart_js__["a" /* default */],
         DateRangePicker: __WEBPACK_IMPORTED_MODULE_3_vue2_daterange_picker___default.a,
-        ModelSelect: __WEBPACK_IMPORTED_MODULE_0_vue_search_select__["ModelSelect"]
+        MultiSelect: __WEBPACK_IMPORTED_MODULE_0_vue_search_select__["MultiSelect"]
     },
     data: function data() {
         var filterPeriodDefault = 'per_week';
@@ -59176,7 +59150,7 @@ Chart.plugins.unregister(__WEBPACK_IMPORTED_MODULE_2_chartjs_plugin_datalabels__
 
         this.card.options = this.card.options !== undefined ? this.card.options : {};
 
-        this.card.options.endpoint = this.card.options.endpoint !== undefined ? this.card.options.endpoint : document.URL.replace('admin', 'nova-api');
+        this.card.options.endpoint = this.card.options.endpoint !== undefined ? this.card.options.endpoint : document.URL.replace('admin/dashboards', 'nova-vendor/insight-filters');
 
         this.card.filters.period = this.card.filters.period !== undefined ? this.card.filters.period : {
             show: true,
@@ -59189,7 +59163,8 @@ Chart.plugins.unregister(__WEBPACK_IMPORTED_MODULE_2_chartjs_plugin_datalabels__
             show: false,
             list: [],
             default: null,
-            selected: ''
+            selected: [],
+            placeholder: ''
         };
 
         this.card.options.xAxis = this.card.options.xAxis !== undefined ? this.card.options.xAxis : { categories: [] };
@@ -59219,7 +59194,8 @@ Chart.plugins.unregister(__WEBPACK_IMPORTED_MODULE_2_chartjs_plugin_datalabels__
                     show: this.card.filters.subset.show !== undefined ? this.card.filters.subset.show : true,
                     list: this.card.filters.subset.list !== undefined ? this.card.filters.subset.list : [],
                     default: this.card.filters.subset.default !== undefined ? this.card.filters.subset.default : null,
-                    selected: this.card.filters.subset.selected !== undefined ? this.card.filters.subset.selected : null
+                    selected: this.card.filters.subset.selected !== undefined ? this.card.filters.subset.selected : [],
+                    placeholder: this.card.filters.subset.placeholder !== undefined ? this.card.filters.subset.placeholder : ''
                 }
             },
             chartTooltips: this.card.options.tooltips !== undefined ? this.card.options.tooltips : undefined,
@@ -59257,22 +59233,24 @@ Chart.plugins.unregister(__WEBPACK_IMPORTED_MODULE_2_chartjs_plugin_datalabels__
         dateFormat: function dateFormat(datetime) {
             return Object(__WEBPACK_IMPORTED_MODULE_4_moment_dist_moment__["a" /* default */])(datetime).format('YYYY-MM-DD');
         },
+        onSelectSubset: function onSelectSubset(items) {
+            this.filters.subset.selected = items;
+            this.refresh();
+        },
         refresh: function refresh() {
             var _this = this;
 
-            Nova.request().get(this.card.options.endpoint, {
-                params: {
-                    period: this.filters.period.selected,
-                    subset: this.filters.subset.selected,
-                    from: this.dateFormat(this.filters.datePicker.dateRange.startDate),
-                    to: this.dateFormat(this.filters.datePicker.dateRange.endDate)
-                }
+            Nova.request().post(this.card.options.endpoint, {
+                period: this.filters.period.selected,
+                subset: this.filters.subset.selected.map(function (item) {
+                    return item.value;
+                }),
+                from: this.dateFormat(this.filters.datePicker.dateRange.startDate),
+                to: this.dateFormat(this.filters.datePicker.dateRange.endDate)
             }).then(function (_ref) {
                 var data = _ref.data;
 
-                var chartData = data.cards.filter(function (card) {
-                    return card.component === 'area-chart';
-                })[0];
+                var chartData = data[0];
 
                 if (chartData) {
                     _this.fillData(chartData.options.xAxis.categories, chartData.series);
@@ -65534,9 +65512,10 @@ var render = function() {
                 }
               ],
               ref: "picker",
+              staticClass: "flex mr-4",
               attrs: {
                 "control-container-class":
-                  "date-range-picker-control select-box-sm ml-auto h-6 text-xs appearance-none bg-40 pl-2 pr-6",
+                  "date-range-picker-control select-box ml-auto text-sm appearance-none bg-40 pl-2 pr-6",
                 opens: _vm.left
               },
               on: {
@@ -65587,7 +65566,7 @@ var render = function() {
                   }
                 ],
                 staticClass:
-                  "flex-auto select-box-sm ml-auto w-24 h-6 text-xs appearance-none bg-40 pl-2 pr-6\n                           active:outline-none active:shadow-outline focus:outline-none focus:shadow-outline",
+                  "flex-auto select-box text-sm appearance-none bg-40 pl-2 pr-6 mr-4\n                           active:outline-none active:shadow-outline focus:outline-none focus:shadow-outline",
                 on: {
                   change: [
                     function($event) {
@@ -65631,9 +65610,9 @@ var render = function() {
             _vm._v(" "),
             _c(
               "div",
-              { staticClass: "flex-auto manufacturer-list" },
+              { staticClass: "flex-auto" },
               [
-                _c("model-select", {
+                _c("multi-select", {
                   directives: [
                     {
                       name: "show",
@@ -65642,15 +65621,13 @@ var render = function() {
                       expression: "filters.subset.show"
                     }
                   ],
-                  attrs: { options: _vm.filters.subset.list },
-                  on: { input: _vm.refresh },
-                  model: {
-                    value: _vm.filters.subset.selected,
-                    callback: function($$v) {
-                      _vm.$set(_vm.filters.subset, "selected", $$v)
-                    },
-                    expression: "filters.subset.selected"
-                  }
+                  staticClass: "subset-list",
+                  attrs: {
+                    options: _vm.filters.subset.list,
+                    "selected-options": _vm.filters.subset.selected,
+                    placeholder: _vm.filters.subset.placeholder
+                  },
+                  on: { select: _vm.onSelectSubset }
                 })
               ],
               1
