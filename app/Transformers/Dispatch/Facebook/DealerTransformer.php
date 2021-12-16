@@ -7,6 +7,7 @@ use App\Services\Dispatch\Facebook\DTOs\MarketplaceInventory;
 use App\Transformers\Dispatch\Facebook\InventoryTransformer;
 use App\Transformers\Dispatch\TunnelTransformer;
 use League\Fractal\TransformerAbstract;
+use Illuminate\Support\Collection;
 
 class DealerTransformer extends TransformerAbstract
 {
