@@ -275,7 +275,7 @@ class MarketplaceService implements MarketplaceServiceInterface
      * @param array $params
      * @return Pagination<InventoryFacebook>
      */
-    private function getInventory(Marketplace $integration, string $type, array $params): Pagination {
+    private function getInventory(Marketplace $integration, string $type, array $params): MarketplaceInventory {
         // Invalid Type? Return Empty Collection!
         if(!isset(MarketplaceStatus::INVENTORY_METHODS[$type])) {
             return new Pagination();
@@ -298,8 +298,10 @@ class MarketplaceService implements MarketplaceServiceInterface
         }
 
         // Append Paginator
-        $paginated = new Pagination($listings, $this->inventoryTransformer);
-        $paginated->setPaginator(new IlluminatePaginatorAdapter($inventory));
-        return $paginated;
+        return new MarketplaceInventory([
+            'type' => $type,
+            'listings' => $listings,
+            'paginator' => new IlluminatePaginatorAdapter($inventory)
+        ]);
     }
 }
