@@ -69,7 +69,11 @@ class DealerTransformer extends TransformerAbstract
      * Collection<InventoryFacebook>
      * @return array
      */
-    public function collectInventory(Collection $listings) {
-        return $this->collection($listings, $this->inventoryTransformer);
+    public function collectInventory(Collection $listings): array {
+        $response = [];
+        foreach($listings as $listing) {
+            $response[] = $this->inventoryTransformer->transform($listing);
+        }
+        return $response;
     }
 }
