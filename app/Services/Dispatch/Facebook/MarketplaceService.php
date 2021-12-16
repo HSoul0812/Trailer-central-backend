@@ -141,6 +141,7 @@ class MarketplaceService implements MarketplaceServiceInterface
         // Get Facebook Dealer
         return new DealerFacebook([
             'dealer_id' => $integration->dealer_id,
+            'dealer_location_id' => $integration->dealer_location_id,
             'dealer_name' => $integration->user->name,
             'integration_id' => $integration->id,
             'fb_username' => $integration->fb_username,
@@ -253,6 +254,7 @@ class MarketplaceService implements MarketplaceServiceInterface
         foreach($integrations as $integration) {
             $dealers->push(new DealerFacebook([
                 'dealer_id' => $integration->dealer_id,
+                'dealer_location_id' => $integration->dealer_location_id,
                 'dealer_name' => $integration->user->name,
                 'integration_id' => $integration->id,
                 'fb_username' => $integration->fb_username,

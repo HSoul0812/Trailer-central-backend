@@ -136,6 +136,7 @@ class ListingRepository implements ListingRepositoryInterface {
         // Initialize Inventory Query
         $query = Inventory::select(Inventory::getTableName().'.*')
                           ->where('dealer_id', '=', $integration->dealer_id)
+                          ->where('dealer_location_id', '=', $integration->dealer_location_id)
                           ->where('show_on_website', 1)
                           ->where(Inventory::getTableName().'.description', '<>', '')
                           ->where(function(Builder $query) {
