@@ -3,7 +3,7 @@
 namespace App\Transformers\Dispatch\Facebook;
 
 use App\Services\Dispatch\Facebook\DTOs\InventoryFacebook;
-use App\Services\Dispatch\Facebook\DTOs\ImageFacebook;
+use App\Transformers\Dispatch\Facebook\ImageTransformer;
 use League\Fractal\TransformerAbstract;
 
 class InventoryTransformer extends TransformerAbstract
