@@ -1,9 +1,9 @@
 <template>
     <card class="p-10">
         <div class="flex insight-filters">
-            <div class="flex w-1/6">
+            <div class="flex w-1/4">
             </div>
-            <div class="stay-right flex">
+            <div class="stay-right flex  w-3/4">
                 <date-range-picker
                     control-container-class="date-range-picker-control select-box ml-auto text-sm appearance-none bg-40 pl-2 pr-6"
                     ref="picker"
