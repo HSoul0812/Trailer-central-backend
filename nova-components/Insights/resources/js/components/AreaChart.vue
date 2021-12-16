@@ -1,9 +1,9 @@
 <template>
     <card class="p-10">
         <div class="flex insight-filters">
-            <div class="flex w-1/2">
+            <div class="flex w-1/6">
             </div>
-            <div class="stay-right flex w-1/2">
+            <div class="stay-right flex">
                 <date-range-picker
                     control-container-class="date-range-picker-control select-box ml-auto text-sm appearance-none bg-40 pl-2 pr-6"
                     ref="picker"
@@ -23,6 +23,15 @@
                         {{ filter.text }}
                     </option>
                 </select>
+                <div class="flex-auto mr-4">
+                    <multi-select :options="filters.category.list"
+                                  :selected-options="filters.category.selected"
+                                  placeholder="Select a category"
+                                  class="subset-list"
+                                  @select="onSelectCategory"
+                                  v-show="filters.category.show">
+                    </multi-select>
+                </div>
                 <div class="flex-auto">
                     <multi-select :options="filters.subset.list"
                                   :selected-options="filters.subset.selected"
@@ -105,6 +114,13 @@ export default {
             placeholder: ''
         };
 
+        this.card.filters.category = this.card.filters.category !== undefined ? this.card.filters.category : {
+            show: false,
+            list: [],
+            default: null,
+            selected: []
+        };
+
         this.card.options.xAxis = this.card.options.xAxis !== undefined ? this.card.options.xAxis : {categories: []};
 
         this.card.filters.datePicker = this.card.filters.datePicker !== undefined ? this.card.filters.datePicker : {
@@ -134,6 +150,12 @@ export default {
                     default: this.card.filters.subset.default !== undefined ? this.card.filters.subset.default : null,
                     selected: this.card.filters.subset.selected !== undefined ? this.card.filters.subset.selected : [],
                     placeholder: this.card.filters.subset.placeholder !== undefined ? this.card.filters.subset.placeholder : ''
+                },
+                category: {
+                    show: this.card.filters.category.show !== undefined ? this.card.filters.category.show : true,
+                    list: this.card.filters.category.list !== undefined ? this.card.filters.category.list : [],
+                    default: this.card.filters.category.default !== undefined ? this.card.filters.category.default : null,
+                    selected: this.card.filters.category.selected !== undefined ? this.card.filters.category.selected : []
                 }
             },
             chartTooltips: this.card.options.tooltips !== undefined ? this.card.options.tooltips : undefined,
@@ -171,6 +193,10 @@ export default {
         dateFormat (datetime) {
             return moment(datetime).format('YYYY-MM-DD')
         },
+        onSelectCategory(items) {
+            this.filters.category.selected = items
+            this.refresh();
+        },
         onSelectSubset(items) {
             this.filters.subset.selected = items
             this.refresh();
@@ -179,6 +205,7 @@ export default {
             Nova.request().post(this.card.options.endpoint, {
                 period: this.filters.period.selected,
                 subset: this.filters.subset.selected.map((item) => item.value),
+                category: this.filters.category.selected.map((item) => item.value),
                 from: this.dateFormat(this.filters.datePicker.dateRange.startDate),
                 to: this.dateFormat(this.filters.datePicker.dateRange.endDate)
             }).then(({data}) => {

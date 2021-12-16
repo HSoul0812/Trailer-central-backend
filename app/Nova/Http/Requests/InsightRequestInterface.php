@@ -25,4 +25,13 @@ interface InsightRequestInterface extends CardRequestInterface
      *  - by group.
      **/
     public function getSubset(): array|string|null;
+
+    /**
+     * Should return the criteria used to filter by, e.g:
+     *  - by manufacturer
+     *  - by state.
+     *
+     * However, right now it is only supporting by manufacturers
+     **/
+    public function getCategory(): array|string|null;
 }

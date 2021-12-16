@@ -20,6 +20,15 @@ abstract class AbstractAverageByManufacturerRepository implements AverageByManuf
             ->get();
     }
 
+    public function getAllCategories(): Collection
+    {
+        return DB::table($this->getPerWeekViewName())
+            ->select('category')
+            ->distinct()
+            ->whereRaw("trim(category) != ''")
+            ->get();
+    }
+
     /**
      * @param CriteriaBuilder $cb {manufacturer:string[], [from]:string[y-m-d], [to]:string[y-m-d]}
      */
@@ -135,6 +144,10 @@ abstract class AbstractAverageByManufacturerRepository implements AverageByManuf
                 ->whereIn('manufacturer', $cb->get('manufacturer'))
                 ->groupBy('manufacturer')
                 ->orderBy('manufacturer');
+        }
+
+        if ($cb->isNotBlank('category')) {
+            $query->whereIn('category', $cb->get('category'), 'or');
         }
 
         if ($cb->isNotBlank('not_manufacturer')) {
