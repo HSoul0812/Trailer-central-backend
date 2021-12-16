@@ -772,7 +772,10 @@ class InventoryRepository implements InventoryRepositoryInterface
                 continue;
             }
 
-            $item->inventoryImages()->where('image_id', '=', $existingImage['image_id'])->update($existingImage);
+            $inventoryImageFields = with(new InventoryImage())->getFillable();
+            $inventoryImageParams = array_intersect_key($existingImage, array_combine($inventoryImageFields, array_fill(0, count($inventoryImageFields), 0)));
+
+            $item->inventoryImages()->where('image_id', '=', $existingImage['image_id'])->update($inventoryImageParams);
         }
     }
 
