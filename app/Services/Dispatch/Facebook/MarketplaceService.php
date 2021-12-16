@@ -273,9 +273,9 @@ class MarketplaceService implements MarketplaceServiceInterface
      * @param Marketplace $integration
      * @param string $type missing|updates|sold
      * @param array $params
-     * @return Collection<InventoryFacebook>
+     * @return Pagination<InventoryFacebook>
      */
-    private function getInventory(Marketplace $integration, string $type, array $params): Collection {
+    private function getInventory(Marketplace $integration, string $type, array $params): Pagination {
         // Invalid Type? Return Empty Collection!
         if(!isset(MarketplaceStatus::INVENTORY_METHODS[$type])) {
             return new Pagination();
