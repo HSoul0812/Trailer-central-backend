@@ -48,9 +48,9 @@ class AbstractAverageByManufacturerService implements AverageByManufacturerServi
         return new InsightResultSet($subset, $complement, $legends);
     }
 
-    public function getAllManufacturers(): Collection
+    public function getAllManufacturers(CriteriaBuilder $cb): Collection
     {
-        return $this->repository->getAllManufacturers();
+        return $this->repository->getAllManufacturers($cb);
     }
 
     public function getAllCategories(): Collection

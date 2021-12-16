@@ -59284,6 +59284,8 @@ Chart.plugins.unregister(__WEBPACK_IMPORTED_MODULE_2_chartjs_plugin_datalabels__
                 if (chartData) {
                     _this.fillData(chartData.options.xAxis.categories, chartData.series);
                 }
+
+                _this.filters.subset.list = chartData.filters.subset.list;
             }).catch(function (error) {
                 return console.warn(error);
             });
@@ -65525,11 +65527,11 @@ var render = function() {
     { staticClass: "p-10" },
     [
       _c("div", { staticClass: "flex insight-filters" }, [
-        _c("div", { staticClass: "flex w-1/6" }),
+        _c("div", { staticClass: "flex w-1/4" }),
         _vm._v(" "),
         _c(
           "div",
-          { staticClass: "stay-right flex" },
+          { staticClass: "stay-right flex  w-3/4" },
           [
             _c("date-range-picker", {
               directives: [
