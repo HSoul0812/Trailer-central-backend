@@ -40,6 +40,7 @@ abstract class AbstractAverageByManufacturerInsights extends Dashboard
                 'from'         => $request->getFrom(),
                 'to'           => $request->getTo(),
                 'manufacturer' => $request->getSubset(),
+                'category'     => $request->getCategory(),
             ]));
 
             $series = [
@@ -80,6 +81,13 @@ abstract class AbstractAverageByManufacturerInsights extends Dashboard
                 ])
                 ->toArray();
 
+            $categoryList = $this->service
+                ->getAllCategories()
+                ->map(fn (stdClass $item) => [
+                    'text' => ucfirst(strtolower(str_replace(['_', '-'], [' ', ' '], $item->category))), 'value' => $item->category,
+                ])
+                ->toArray();
+
             return [
                 (new AreaChart())
                     ->title('YOY % CHANGE')
@@ -93,9 +101,13 @@ abstract class AbstractAverageByManufacturerInsights extends Dashboard
                         'subset' => [
                             'show'        => true,
                             'list'        => $manufacturerList,
-                            'default'     => 'Manufacturer',
                             'selected'    => $request->getSubset(),
                             'placeholder' => 'Select a manufacturer',
+                        ],
+                        'category' => [
+                            'show'     => true,
+                            'list'     => $categoryList,
+                            'selected' => $request->getSubset(),
                         ],
                         'period' => [
                             'selected' => $request->getPeriod(),

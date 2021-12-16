@@ -30,6 +30,11 @@ abstract class AbstractAverageRequest extends Request implements InsightRequestI
         return $this->input('subset', []);
     }
 
+    public function getCategory(): array
+    {
+        return $this->input('category', []);
+    }
+
     /** @noinspection PhpArrayShapeAttributeCanBeAddedInspection */
     protected function getRules(): array
     {

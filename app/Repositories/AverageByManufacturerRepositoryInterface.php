@@ -9,4 +9,6 @@ use Illuminate\Support\Collection;
 interface AverageByManufacturerRepositoryInterface extends InsightRepositoryInterface
 {
     public function getAllManufacturers(): Collection;
+
+    public function getAllCategories(): Collection;
 }

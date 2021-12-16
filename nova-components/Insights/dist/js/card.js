@@ -59123,6 +59123,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -59167,6 +59176,13 @@ Chart.plugins.unregister(__WEBPACK_IMPORTED_MODULE_2_chartjs_plugin_datalabels__
             placeholder: ''
         };
 
+        this.card.filters.category = this.card.filters.category !== undefined ? this.card.filters.category : {
+            show: false,
+            list: [],
+            default: null,
+            selected: []
+        };
+
         this.card.options.xAxis = this.card.options.xAxis !== undefined ? this.card.options.xAxis : { categories: [] };
 
         this.card.filters.datePicker = this.card.filters.datePicker !== undefined ? this.card.filters.datePicker : {
@@ -59196,6 +59212,12 @@ Chart.plugins.unregister(__WEBPACK_IMPORTED_MODULE_2_chartjs_plugin_datalabels__
                     default: this.card.filters.subset.default !== undefined ? this.card.filters.subset.default : null,
                     selected: this.card.filters.subset.selected !== undefined ? this.card.filters.subset.selected : [],
                     placeholder: this.card.filters.subset.placeholder !== undefined ? this.card.filters.subset.placeholder : ''
+                },
+                category: {
+                    show: this.card.filters.category.show !== undefined ? this.card.filters.category.show : true,
+                    list: this.card.filters.category.list !== undefined ? this.card.filters.category.list : [],
+                    default: this.card.filters.category.default !== undefined ? this.card.filters.category.default : null,
+                    selected: this.card.filters.category.selected !== undefined ? this.card.filters.category.selected : []
                 }
             },
             chartTooltips: this.card.options.tooltips !== undefined ? this.card.options.tooltips : undefined,
@@ -59233,6 +59255,10 @@ Chart.plugins.unregister(__WEBPACK_IMPORTED_MODULE_2_chartjs_plugin_datalabels__
         dateFormat: function dateFormat(datetime) {
             return Object(__WEBPACK_IMPORTED_MODULE_4_moment_dist_moment__["a" /* default */])(datetime).format('YYYY-MM-DD');
         },
+        onSelectCategory: function onSelectCategory(items) {
+            this.filters.category.selected = items;
+            this.refresh();
+        },
         onSelectSubset: function onSelectSubset(items) {
             this.filters.subset.selected = items;
             this.refresh();
@@ -59243,6 +59269,9 @@ Chart.plugins.unregister(__WEBPACK_IMPORTED_MODULE_2_chartjs_plugin_datalabels__
             Nova.request().post(this.card.options.endpoint, {
                 period: this.filters.period.selected,
                 subset: this.filters.subset.selected.map(function (item) {
+                    return item.value;
+                }),
+                category: this.filters.category.selected.map(function (item) {
                     return item.value;
                 }),
                 from: this.dateFormat(this.filters.datePicker.dateRange.startDate),
@@ -65496,11 +65525,11 @@ var render = function() {
     { staticClass: "p-10" },
     [
       _c("div", { staticClass: "flex insight-filters" }, [
-        _c("div", { staticClass: "flex w-1/2" }),
+        _c("div", { staticClass: "flex w-1/6" }),
         _vm._v(" "),
         _c(
           "div",
-          { staticClass: "stay-right flex w-1/2" },
+          { staticClass: "stay-right flex" },
           [
             _c("date-range-picker", {
               directives: [
@@ -65606,6 +65635,31 @@ var render = function() {
                 )
               }),
               0
+            ),
+            _vm._v(" "),
+            _c(
+              "div",
+              { staticClass: "flex-auto mr-4" },
+              [
+                _c("multi-select", {
+                  directives: [
+                    {
+                      name: "show",
+                      rawName: "v-show",
+                      value: _vm.filters.category.show,
+                      expression: "filters.category.show"
+                    }
+                  ],
+                  staticClass: "subset-list",
+                  attrs: {
+                    options: _vm.filters.category.list,
+                    "selected-options": _vm.filters.category.selected,
+                    placeholder: "Select a category"
+                  },
+                  on: { select: _vm.onSelectCategory }
+                })
+              ],
+              1
             ),
             _vm._v(" "),
             _c(
