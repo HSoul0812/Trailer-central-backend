@@ -10,7 +10,7 @@ use App\Models\Marketing\Facebook\Marketplace;
 use App\Repositories\Traits\SortTrait;
 use App\Traits\Repository\Transaction;
 use Grimzy\LaravelMysqlSpatial\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
 class ListingRepository implements ListingRepositoryInterface {
@@ -130,9 +130,9 @@ class ListingRepository implements ListingRepositoryInterface {
      * 
      * @param Marketplace $integration
      * @param array $params
-     * @return Collection<Listings>
+     * @return LengthAwarePaginator<Listings>
      */
-    public function getAllMissing(Marketplace $integration, array $params): Collection {
+    public function getAllMissing(Marketplace $integration, array $params): LengthAwarePaginator {
         // Initialize Inventory Query
         $query = Inventory::select(Inventory::getTableName().'.*')
                           ->where('dealer_id', '=', $integration->dealer_id)
