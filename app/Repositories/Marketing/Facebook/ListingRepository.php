@@ -170,8 +170,13 @@ class ListingRepository implements ListingRepositoryInterface {
             $params['per_page'] = 20;
         }
 
-        // Get All Listings
-        return $query->with('attributeValues')->has('inventoryImages')
-                     ->paginate($params['per_page'])->appends($params);;
+        // Require Inventory Images
+        $query = $query->with('attributeValues')->has('inventoryImages');
+        echo $query->toSql();
+        print_r($query->getBindings);
+        die;
+
+        // Return Paginated Inventory
+        return $query->paginate($params['per_page'])->appends($params);;
     }
 }
