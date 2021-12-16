@@ -13,7 +13,10 @@ use App\Http\Requests\Request;
 class ShowMarketplaceRequest extends Request {
 
     protected $rules = [
-        'id' => 'required|int'
+        'id' => 'required|int',
+        'per_page' => 'integer',
+        'page' => 'integer',
+        'type' => 'string|in:missing,updates,sold'
     ];
 
 }

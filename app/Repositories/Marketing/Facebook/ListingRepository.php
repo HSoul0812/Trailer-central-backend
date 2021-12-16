@@ -10,7 +10,7 @@ use App\Models\Marketing\Facebook\Marketplace;
 use App\Repositories\Traits\SortTrait;
 use App\Traits\Repository\Transaction;
 use Grimzy\LaravelMysqlSpatial\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
 class ListingRepository implements ListingRepositoryInterface {
@@ -129,13 +129,15 @@ class ListingRepository implements ListingRepositoryInterface {
      * Get All Inventory Missing on Facebook
      * 
      * @param Marketplace $integration
-     * @return Collection<Listings>
+     * @param array $params
+     * @return LengthAwarePaginator<Listings>
      */
-    public function getAllMissing(Marketplace $integration): Collection {
+    public function getAllMissing(Marketplace $integration, array $params): LengthAwarePaginator {
         // Initialize Inventory Query
         $query = Inventory::select(Inventory::getTableName().'.*')
                           ->where('dealer_id', '=', $integration->dealer_id)
                           ->where('show_on_website', 1)
+                          ->where(Inventory::getTableName().'.description', '<>', '')
                           ->where(function(Builder $query) {
                               $query->where('is_archived', 0)
                                     ->orWhereNull('is_archived');
@@ -164,7 +166,12 @@ class ListingRepository implements ListingRepositoryInterface {
             });
         }
 
+        if (!isset($params['per_page'])) {
+            $params['per_page'] = 20;
+        }
+
         // Get All Listings
-        return $query->with('attributeValues')->with('inventoryImages')->get();
+        return $query->with('attributeValues')->has('inventoryImages')
+                     ->paginate($params['per_page'])->appends($params);;
     }
 }

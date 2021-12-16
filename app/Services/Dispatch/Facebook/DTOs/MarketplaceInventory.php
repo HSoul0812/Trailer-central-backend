@@ -3,8 +3,11 @@
 namespace App\Services\Dispatch\Facebook\DTOs;
 
 use App\Services\Dispatch\Facebook\DTOs\InventoryFacebook;
+use App\Services\Dispatch\Facebook\DTOs\MarketplaceStatus;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
+use Illuminate\Support\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 /**
  * Class MarketplaceInventory
@@ -16,32 +19,23 @@ class MarketplaceInventory
     use WithConstructor, WithGetter;
 
     /**
-     * @const Inventory Methods
+     * @const Response Default
      */
-    const INVENTORY_METHODS = [
-        'missing' => 'getAllMissing',
-        'updates' => 'getAllUpdates',
-        'sold'    => 'getAllSold'
-    ];
+    const METHOD_DEFAULT = MarketplaceStatus::METHOD_MISSING;
+
 
     /**
-     * @const Missing Method
+     * @var string
      */
-    const METHOD_MISSING = 'missing';
-
+    private $type = self::METHOD_DEFAULT;
 
     /**
      * @var Collection<InventoryFacebook>
      */
-    private $missing;
+    private $inventory;
 
     /**
-     * @var Collection<InventoryFacebook>
+     * @var LengthAwarePaginator
      */
-    private $updates;
-
-    /**
-     * @var Collection<InventoryFacebook>
-     */
-    private $sold;
+    private $paginator;
 }

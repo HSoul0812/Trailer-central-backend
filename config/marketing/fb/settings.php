@@ -10,6 +10,12 @@ return [
     |
     */
 
+    // Image Domain
+    'images' => [
+        'domain' => env('FB_MARKETING_SETTINGS_IMAGE_DOMAIN', 'https://dealer-cdn.com')
+    ],
+
+
     // Primary Action to Start With
     'action' => env('FB_MARKETING_SETTING_ACTION', 'start-script'),
 

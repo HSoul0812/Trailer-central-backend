@@ -2,7 +2,6 @@
 
 namespace App\Services\Dispatch\Facebook;
 
-use App\Http\Requests\Dispatch\Facebook\CreateMarketplaceRequest;
 use App\Models\User\AuthToken;
 use App\Models\User\Integration\Integration;
 use App\Models\Marketing\Facebook\Marketplace;
@@ -16,8 +15,11 @@ use App\Services\Dispatch\Facebook\DTOs\InventoryFacebook;
 use App\Services\Dispatch\Facebook\DTOs\MarketplaceInventory;
 use App\Services\Dispatch\Facebook\DTOs\MarketplaceStatus;
 use App\Services\Dispatch\Facebook\DTOs\MarketplaceStep;
+use App\Transformers\Dispatch\Facebook\InventoryTransformer;
+use League\Fractal\Pagination\IlluminatePaginatorAdapter;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use League\Fractal\Resource\Collection as Pagination;
 
 /**
  * Class MarketplaceService
@@ -54,12 +56,16 @@ class MarketplaceService implements MarketplaceServiceInterface
         MarketplaceRepositoryInterface $marketplace,
         TunnelRepositoryInterface $tunnels,
         ListingRepositoryInterface $listings,
-        ImageRepositoryInterface $images
+        ImageRepositoryInterface $images,
+        InventoryTransformer $inventoryTransformer
     ) {
         $this->marketplace = $marketplace;
         $this->tunnels = $tunnels;
         $this->listings = $listings;
         $this->images = $images;
+
+        // Initialize Inventory Transformer
+        $this->inventoryTransformer = $inventoryTransformer;
 
         // Initialize Logger
         $this->log = Log::channel('dispatch-fb');
@@ -116,13 +122,21 @@ class MarketplaceService implements MarketplaceServiceInterface
     /**
      * Get Dealer Inventory
      * 
+     * @param int $integrationId
+     * @param array $params
      * @return DealerFacebook
      */
-    public function dealer(int $integrationId): DealerFacebook {
+    public function dealer(int $integrationId, array $params): DealerFacebook {
         // Get Integration
         $integration = $this->marketplace->get([
             'id' => $integrationId
         ]);
+
+        // Get Types
+        $type = !empty($params['type']) ? $params['type'] : MarketplaceInventory::METHOD_DEFAULT;
+        if(empty(MarketplaceStatus::INVENTORY_METHODS[$type])) {
+            $type = MarketplaceInventory::METHOD_DEFAULT;
+        }
 
         // Get Facebook Dealer
         return new DealerFacebook([
@@ -135,11 +149,7 @@ class MarketplaceService implements MarketplaceServiceInterface
             'auth_password' => $integration->tfa_password,
             'auth_type' => $integration->tfa_type,
             'tunnels' => $this->tunnels->getAll(['dealer_id' => $integration->dealer_id]),
-            'inventory' => new MarketplaceInventory([
-                'missing' => $this->getInventory($integration, 'missing')/*,
-                'updates' => $this->getInventory($integration, 'updates'),
-                'sold' => $this->getInventory($integration, 'sold')*/
-            ])
+            'inventory' => $this->getInventory($integration, $type, $params)
         ]);
     }
 
@@ -263,31 +273,36 @@ class MarketplaceService implements MarketplaceServiceInterface
      * 
      * @param Marketplace $integration
      * @param string $type missing|updates|sold
-     * @return Collection<InventoryFacebook>
+     * @param array $params
+     * @return Pagination<InventoryFacebook>
      */
-    private function getInventory(Marketplace $integration, string $type): Collection {
+    private function getInventory(Marketplace $integration, string $type, array $params): MarketplaceInventory {
         // Invalid Type? Return Empty Collection!
-        if(!isset(MarketplaceInventory::INVENTORY_METHODS[$type])) {
-            return new Collection();
+        if(!isset(MarketplaceStatus::INVENTORY_METHODS[$type])) {
+            return new Pagination();
         }
 
         // Get Method
-        $method = MarketplaceInventory::INVENTORY_METHODS[$type];
+        $method = MarketplaceStatus::INVENTORY_METHODS[$type];
 
         // Get Inventory
-        $inventory = $this->listings->{$method}($integration);
+        $inventory = $this->listings->{$method}($integration, $params);
 
         // Loop Through Inventory Items
         $listings = new Collection();
         foreach($inventory as $listing) {
-            if($type === MarketplaceInventory::METHOD_MISSING) {
+            if($type === MarketplaceStatus::METHOD_MISSING) {
                 $listings->push(InventoryFacebook::getFromInventory($listing, $integration));
             } else {
                 $listings->push(InventoryFacebook::getFromListings($listing));
             }
         }
 
-        // Return Facebook Inventory Updates
-        return $listings;
+        // Append Paginator
+        return new MarketplaceInventory([
+            'type' => $type,
+            'inventory' => $listings,
+            'paginator' => new IlluminatePaginatorAdapter($inventory)
+        ]);
     }
 }

@@ -23,6 +23,21 @@ class MarketplaceStatus
 
 
     /**
+     * @const Inventory Methods
+     */
+    const INVENTORY_METHODS = [
+        'missing' => 'getAllMissing',
+        'updates' => 'getAllUpdates',
+        'sold'    => 'getAllSold'
+    ];
+
+    /**
+     * @const Missing Method
+     */
+    const METHOD_MISSING = 'missing';
+
+
+    /**
      * @var Collection<DealerFacebook>
      */
     private $dealers;

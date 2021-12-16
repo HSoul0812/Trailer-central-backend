@@ -3,10 +3,19 @@
 namespace App\Transformers\Dispatch\Facebook;
 
 use App\Services\Dispatch\Facebook\DTOs\InventoryFacebook;
+use App\Transformers\Dispatch\Facebook\ImageTransformer;
 use League\Fractal\TransformerAbstract;
 
 class InventoryTransformer extends TransformerAbstract
 {
+    protected $defaultIncludes = [
+        'images'
+    ];
+
+    public function __construct(ImageTransformer $imageTransformer) {
+        $this->imageTransformer = $imageTransformer;
+    }
+
     public function transform(InventoryFacebook $inventory)
     {
         return [
@@ -28,8 +37,12 @@ class InventoryTransformer extends TransformerAbstract
             'body_style' => $inventory->getBodyStyle(),
             'condition' => $inventory->getCondition(),
             'transmission' => $inventory->getTransmission(),
-            'fuel_type' => $inventory->getFuelType(),
-            'images' => $inventory->images
+            'fuel_type' => $inventory->getFuelType()
         ];
+    }
+
+    public function includeImages(InventoryFacebook $inventory)
+    {
+        return $this->collection($inventory->images, $this->imageTransformer);
     }
 }
