@@ -47,11 +47,13 @@ class DealerTransformer extends TransformerAbstract
 
     public function includeInventory(DealerFacebook $dealer)
     {
-        if($dealer->inventory && $dealer->inventory->inventory) {
-            $collection = $this->collection($dealer->inventory->inventory, $this->inventoryTransformer);
-            $collection->setPaginator($dealer->inventory->paginator);
-            return $collection;
-        }
-        return $this->null();
+        return $this->item($dealer->inventory, function(MarketplaceInventory $inventory) {
+            return [
+                'type' => $inventory->inventory->type,
+                'inventory' => $inventory->inventory->inventory ? $this->inventoryTransformer->transform($inventory->inventory->inventory) : null,
+                'count' => $inventory->inventory->paginator ? $inventory->inventory->paginator->count() : 0,
+                'options' => $inventory->inventory->paginator ? $inventory->inventory->paginator->options() : 0,
+            ];
+        });
     }
 }
