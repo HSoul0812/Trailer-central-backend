@@ -14,6 +14,7 @@ use App\Services\Dispatch\Facebook\DTOs\DealerFacebook;
 use App\Services\Dispatch\Facebook\DTOs\InventoryFacebook;
 use App\Services\Dispatch\Facebook\DTOs\MarketplaceStatus;
 use App\Services\Dispatch\Facebook\DTOs\MarketplaceStep;
+use App\Transformers\Dispatch\Facebook\InventoryTransformer;
 use League\Fractal\Pagination\IlluminatePaginatorAdapter;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -54,12 +55,16 @@ class MarketplaceService implements MarketplaceServiceInterface
         MarketplaceRepositoryInterface $marketplace,
         TunnelRepositoryInterface $tunnels,
         ListingRepositoryInterface $listings,
-        ImageRepositoryInterface $images
+        ImageRepositoryInterface $images,
+        InventoryTransformer $inventoryTransformer
     ) {
         $this->marketplace = $marketplace;
         $this->tunnels = $tunnels;
         $this->listings = $listings;
         $this->images = $images;
+
+        // Initialize Inventory Transformer
+        $this->inventoryTransformer = $inventoryTransformer;
 
         // Initialize Logger
         $this->log = Log::channel('dispatch-fb');
@@ -273,7 +278,7 @@ class MarketplaceService implements MarketplaceServiceInterface
     private function getInventory(Marketplace $integration, string $type, array $params): Collection {
         // Invalid Type? Return Empty Collection!
         if(!isset(MarketplaceStatus::INVENTORY_METHODS[$type])) {
-            return new Collection();
+            return new Pagination();
         }
 
         // Get Method
@@ -283,7 +288,7 @@ class MarketplaceService implements MarketplaceServiceInterface
         $inventory = $this->listings->{$method}($integration, $params);
 
         // Loop Through Inventory Items
-        $listings = new Pagination();
+        $listings = new Collection();
         foreach($inventory as $listing) {
             if($type === MarketplaceStatus::METHOD_MISSING) {
                 $listings->push(InventoryFacebook::getFromInventory($listing, $integration));
@@ -293,9 +298,8 @@ class MarketplaceService implements MarketplaceServiceInterface
         }
 
         // Append Paginator
-        $listings->setPaginator(new IlluminatePaginatorAdapter($inventory));
-
-        // Return Facebook Inventory Updates
-        return $listings;
+        $paginated = new Pagination($listings, $this->inventoryTransformer);
+        $paginated->setPaginator(new IlluminatePaginatorAdapter($inventory));
+        return $paginated;
     }
 }
