@@ -51,7 +51,7 @@ class DealerTransformer extends TransformerAbstract
     public function includeInventory(DealerFacebook $dealer)
     {
         $collection = new Pagination($dealer->inventory->inventory, $this->inventoryCollection);
-        $collection->setPaginator($deaeler->inventory->paginator);
+        $collection->setPaginator($dealer->inventory->paginator);
         return $collection;
     }
 
