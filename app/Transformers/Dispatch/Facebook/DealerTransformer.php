@@ -50,10 +50,10 @@ class DealerTransformer extends TransformerAbstract
     {
         return $this->item($dealer->inventory, function(MarketplaceInventory $inventory) {
             return [
-                'type' => $inventory->inventory->type,
-                'inventory' => $inventory->inventory->inventory ? $this->inventoryTransformer->transform($inventory->inventory->inventory) : null,
-                'count' => $inventory->inventory->paginator ? $inventory->inventory->paginator->count() : 0,
-                'options' => $inventory->inventory->paginator ? $inventory->inventory->paginator->options() : 0,
+                'type' => $inventory->type,
+                'inventory' => $inventory->inventory ? $this->inventoryTransformer->transform($inventory->inventory) : null,
+                'count' => $inventory->paginator ? $inventory->paginator->count() : 0,
+                'options' => $inventory->paginator ? $inventory->paginator->options() : 0,
             ];
         });
     }
