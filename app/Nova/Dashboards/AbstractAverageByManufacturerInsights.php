@@ -55,7 +55,6 @@ abstract class AbstractAverageByManufacturerInsights extends Dashboard
     }
 
     /**
-     * @param InsightRequestInterface $request
      * @throws \Dingo\Api\Exception\ResourceException                when some validation error has appeared
      * @throws \Symfony\Component\HttpKernel\Exception\HttpException when some unknown error has appeared
      *

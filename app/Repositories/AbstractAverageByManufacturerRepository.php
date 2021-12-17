@@ -77,9 +77,6 @@ abstract class AbstractAverageByManufacturerRepository implements AverageByManuf
     }
 
     /**
-     * @param CriteriaBuilder $cb
-     * @return Collection
-     *
      * @throws NotImplementedException when there is not a view implemented yet for the period
      */
     public function getAllCategories(CriteriaBuilder $cb): Collection
@@ -249,8 +246,6 @@ abstract class AbstractAverageByManufacturerRepository implements AverageByManuf
     }
 
     /**
-     * @param string $period
-     * @return string
      * @throws NotImplementedException when period is not provided
      */
     protected function getViewName(string $period): string
