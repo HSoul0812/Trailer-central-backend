@@ -109,7 +109,9 @@ abstract class AbstractAverageByManufacturerRepository implements AverageByManuf
     {
         $query = DB::table($viewName)->selectRaw("AVG(aggregate) AS aggregate, $periodColumn AS period");
 
-        $query->whereIn('manufacturer', $this->getAllManufacturers($cb)->pluck('manufacturer')->toArray());
+        if (!$cb->isNotBlank('manufacturer')) {
+            $query->whereIn('manufacturer', $this->getAllManufacturers($cb)->pluck('manufacturer')->toArray());
+        }
 
         if ($cb->isNotBlank('manufacturer')) {
             $query->selectRaw('manufacturer')
@@ -119,7 +121,7 @@ abstract class AbstractAverageByManufacturerRepository implements AverageByManuf
         }
 
         if ($cb->isNotBlank('category')) {
-            $query->whereIn('category', $cb->get('category'), 'or');
+            $query->whereIn('category', $cb->get('category'));
         }
 
         if ($cb->isNotBlank('not_manufacturer')) {
