@@ -210,6 +210,21 @@ class InteractionMessageRepository extends RepositoryAbstract implements Interac
     }
 
     /**
+     * @param $params
+     * @return InteractionMessage|null
+     */
+    public function get($params): ?InteractionMessage
+    {
+        if (empty($params['tb_primary_id']) || empty('tb_name')) {
+            throw new RepositoryInvalidArgumentException('tb_primary_id or tb_name have been missed. Params - ' . json_encode($params));
+        }
+
+        $query = InteractionMessage::query();
+
+        return $query->where($params)->first();
+    }
+
+    /**
      * @param array $params
      * @return InteractionMessage
      */

@@ -44,25 +44,33 @@ class EmailHistoryObserver
     }
 
     /**
-     * @param EmailHistory $textLog
+     * @param EmailHistory $emailHistory
      * @return void
      */
-    public function updated(EmailHistory $textLog)
+    public function updated(EmailHistory $emailHistory)
     {
-        $this->interactionMessageRepository->searchable([
-            'tb_primary_id' => $textLog->email_id,
+        $params = [
+            'tb_primary_id' => $emailHistory->email_id,
             'tb_name' => EmailHistory::getTableName(),
-        ]);
+        ];
+
+        $interactionMessage = $this->interactionMessageRepository->get($params);
+
+        if ($interactionMessage) {
+            $this->interactionMessageRepository->searchable($params);
+        } else {
+            $this->created($emailHistory);
+        }
     }
 
     /**
-     * @param EmailHistory $textLog
+     * @param EmailHistory $emailHistory
      * @return void
      */
-    public function deleted(EmailHistory $textLog)
+    public function deleted(EmailHistory $emailHistory)
     {
         $this->interactionMessageRepository->delete([
-            'tb_primary_id' => $textLog->email_id,
+            'tb_primary_id' => $emailHistory->email_id,
             'tb_name' => EmailHistory::getTableName(),
         ]);
     }
