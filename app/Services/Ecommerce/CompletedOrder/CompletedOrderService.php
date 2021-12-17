@@ -215,12 +215,13 @@ class CompletedOrderService implements CompletedOrderServiceInterface
                 ]
             );
 
-            // Confirm Payment Intent
-            $this->paymentGatewayService->confirmPaymentIntent(
-                [
+            $orderPaymentIntent = [
                 'payment_intent' => $order->payment_intent,
-                ]
-            );
+            ];
+
+            if(! $this->paymentGatewayService->paymentIntentSucceeded($orderPaymentIntent)){
+                $this->paymentGatewayService->confirmPaymentIntent($orderPaymentIntent);
+            }
 
             return true;
         } catch (ClientException | \Exception $exception) {
