@@ -26,7 +26,6 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\Builder;
 use Laravel\Scout\Searchable;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Class Inventory
@@ -470,7 +469,6 @@ class Inventory extends Model
             foreach($this->attributeValues as $value) {
                 $attributes[$value->attribute->code] = $value->value;
             }
-            Log::channel('dispatch-fb')->info("Getting Attributes Collection every time?");
 
             // Set Attributes Collection
             $this->attributesCollection = new Collection($attributes);
