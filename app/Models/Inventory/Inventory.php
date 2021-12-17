@@ -352,6 +352,15 @@ class Inventory extends Model
         'geolocation'
     ];
 
+
+    /**
+     * Custom Attributes Collection
+     * 
+     * @var Collection
+     */
+    private $attributesCollection;
+
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
@@ -452,17 +461,23 @@ class Inventory extends Model
      */
     public function getAttributesAttribute(): Collection
     {
-        // Initialize Attributes
-        $attributes = [];
+        // Attributes Already Exist?
+        if(empty($this->attributesCollection)) {
+            // Initialize Attributes
+            $attributes = [];
 
-        // Loop Attributes
-        foreach($this->attributeValues as $value) {
-            $attributes[$value->attribute->code] = $value->value;
+            // Loop Attributes
+            foreach($this->attributeValues as $value) {
+                $attributes[$value->attribute->code] = $value->value;
+            }
+            Log::channel('dispatch-fb')->info("Getting Attributes Collection every time?");
+
+            // Set Attributes Collection
+            $this->attributesCollection = new Collection($attributes);
         }
-        Log::channel('dispatch-fb')->info("Getting Attributes Collection every time?");
 
         // Return Attribute Map
-        return new Collection($attributes);
+        return $this->attributesCollection;
     }
 
     /**
