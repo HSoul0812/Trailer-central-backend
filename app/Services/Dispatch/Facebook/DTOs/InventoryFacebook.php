@@ -409,19 +409,10 @@ class InventoryFacebook
      * @return InventoryFacebook
      */
     public static function getFromInventory(Inventory $inventory,
-            Marketplace $integration, ?float $startTime = null): InventoryFacebook
+            Marketplace $integration): InventoryFacebook
     {
-        // Check After Attributes
-        $log = Log::channel('dispatch-fb');
-        if(empty($startTime)) {
-            $startTime = microtime(true);
-        }
-        $orderedImages = $inventory->orderedImages;
-        $nowTime = microtime(true);
-        $log->info('Debug time start after ordered images: ' . ($nowTime - $startTime));
-
         // Create Inventory Mapping
-        $response = new self([
+        return new self([
             'inventory_id' => $inventory->inventory_id,
             'page_url' => $integration->page_url,
             'entity_type_id' => $inventory->entity_type_id,
@@ -438,11 +429,8 @@ class InventoryFacebook
             'body' => $inventory->attributes->get('body'),
             'transmission' => $inventory->attributes->get('transmission'),
             'fuel_type' => $inventory->attributes->get('fuel_type'),
-            'images' => $orderedImages
+            'images' => $inventory->orderedImages
         ]);
-        $nowTime = microtime(true);
-        $log->info('Debug time start after InventoryFacebook self: ' . ($nowTime - $startTime));
-        return $response;
     }
 
 
