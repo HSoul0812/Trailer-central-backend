@@ -13,6 +13,7 @@ use App\Exceptions\Ecommerce\RefundPaymentGatewayException;
 use App\Jobs\Ecommerce\NotifyRefundOnMagentoJob;
 use App\Jobs\Ecommerce\ProcessRefundOnPaymentGatewayJob;
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
+use Brick\Math\RoundingMode;
 use GuzzleHttp\Exception\ClientException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Bus\DispatchesJobs;
@@ -568,8 +569,8 @@ class RefundService implements RefundServiceInterface
             }
 
             $updatedParts[] = array_merge($originalPart, ['qty' => $qty]);
-            $partsAmount = $partsAmount->plus($qty * $originalPart['price']);
-            $taxAmount = $taxAmount->plus($qty * $originalPart['price'] * $taxRate);
+            $partsAmount = $partsAmount->plus($qty * $originalPart['price'], RoundingMode::HALF_UP);
+            $taxAmount = $taxAmount->plus($qty * $originalPart['price'] * $taxRate, RoundingMode::HALF_UP);
         }
 
         return ['originalParts' => $originalParts, 'updatedParts' => $updatedParts, 'partsAmount' => $partsAmount, 'taxAmount' => $taxAmount];
