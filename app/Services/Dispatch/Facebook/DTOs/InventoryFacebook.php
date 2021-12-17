@@ -416,9 +416,6 @@ class InventoryFacebook
         if(empty($startTime)) {
             $startTime = microtime(true);
         }
-        $cityRegion = $inventory->dealerLocation->city_region;
-        $nowTime = microtime(true);
-        $log->info('Debug time start after dealer location: ' . ($nowTime - $startTime));
         $orderedImages = $inventory->orderedImages;
         $nowTime = microtime(true);
         $log->info('Debug time start after ordered images: ' . ($nowTime - $startTime));
@@ -435,7 +432,7 @@ class InventoryFacebook
             'model' => $inventory->model,
             'description' => $inventory->description,
             'dealer_location_id' => $inventory->dealer_location_id,
-            'location' => $cityRegion,
+            'location' => $inventory->dealerLocation->city_region,
             'color' => $inventory->attributes->get('color'),
             'mileage' => $inventory->attributes->get('mileage'),
             'body' => $inventory->attributes->get('body'),
