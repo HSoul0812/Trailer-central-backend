@@ -124,13 +124,19 @@ class MarketplaceService implements MarketplaceServiceInterface
      * 
      * @param int $integrationId
      * @param array $params
+     * @param float $startTime
      * @return DealerFacebook
      */
-    public function dealer(int $integrationId, array $params): DealerFacebook {
+    public function dealer(int $integrationId, array $params, ?float $startTime = null): DealerFacebook {
         // Get Integration
+        if(empty($startTime)) {
+            $startTime = microtime(true);
+        }
         $integration = $this->marketplace->get([
             'id' => $integrationId
         ]);
+        $nowTime = microtime(true);
+        $this->log->info('Debug time after getting integration: ' . ($nowTime - $startTime));
 
         // Get Types
         $type = !empty($params['type']) ? $params['type'] : MarketplaceInventory::METHOD_DEFAULT;
@@ -138,20 +144,41 @@ class MarketplaceService implements MarketplaceServiceInterface
             $type = MarketplaceInventory::METHOD_DEFAULT;
         }
 
+        // Set Vars
+        $dealerId = $integration->dealer_id;
+        $dealerLocationId = $integration->dealer_location_id;
+        $dealerName = $integration->user->name;
+        $nowTime = microtime(true);
+        $this->log->info('Debug time after getting dealer: ' . ($nowTime - $startTime));
+        $fbUsername = $integration->fb_username;
+        $fbPassword = $integration->fb_password;
+        $tfaUsername = $integration->tfa_username;
+        $tfaPassword = $integration->tfa_password;
+        $tfaType = $integration->tfa_type;
+        $tunnels = $this->tunnels->getAll(['dealer_id' => $dealerId]);
+        $nowTime = microtime(true);
+        $this->log->info('Debug time after getting tunnels: ' . ($nowTime - $startTime));
+        $inventory = $this->getInventory($integration, $type, $params);
+        $nowTime = microtime(true);
+        $this->log->info('Debug time after getting inventory: ' . ($nowTime - $startTime));
+
         // Get Facebook Dealer
-        return new DealerFacebook([
-            'dealer_id' => $integration->dealer_id,
-            'dealer_location_id' => $integration->dealer_location_id,
-            'dealer_name' => $integration->user->name,
-            'integration_id' => $integration->id,
-            'fb_username' => $integration->fb_username,
-            'fb_password' => $integration->fb_password,
-            'auth_username' => $integration->tfa_username,
-            'auth_password' => $integration->tfa_password,
-            'auth_type' => $integration->tfa_type,
-            'tunnels' => $this->tunnels->getAll(['dealer_id' => $integration->dealer_id]),
-            'inventory' => $this->getInventory($integration, $type, $params)
+        $response = new DealerFacebook([
+            'dealer_id' => $dealerId,
+            'dealer_location_id' => $dealerLocationId,
+            'dealer_name' => $dealerName,
+            'integration_id' => $integrationId,
+            'fb_username' => $fbUsername,
+            'fb_password' => $fbPassword,
+            'auth_username' => $tfaUsername,
+            'auth_password' => $tfaPassword,
+            'auth_type' => $tfaType,
+            'tunnels' => $tunnels,
+            'inventory' => $inventory
         ]);
+        $nowTime = microtime(true);
+        $this->log->info('Debug time after creating DealerFacebook: ' . ($nowTime - $startTime));
+        return $response;
     }
 
     /**
