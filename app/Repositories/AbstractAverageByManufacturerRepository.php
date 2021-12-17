@@ -34,11 +34,12 @@ abstract class AbstractAverageByManufacturerRepository implements AverageByManuf
         return $query->get();
     }
 
-    public function getAllCategories(): Collection
-    {
+    public function getAllCategories(CriteriaBuilder $cb): Collection
+    {//$query->whereIn('manufacturer', $this->getAllManufacturers($cb)->pluck('manufacturer')->toArray());
         return DB::table($this->getPerWeekViewName())
             ->select('category')
             ->distinct()
+            ->whereIn('manufacturer', $this->getAllManufacturers($cb)->pluck('manufacturer')->toArray())
             ->whereRaw("trim(category) != ''")
             ->get();
     }

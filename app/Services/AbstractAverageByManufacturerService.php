@@ -53,8 +53,8 @@ class AbstractAverageByManufacturerService implements AverageByManufacturerServi
         return $this->repository->getAllManufacturers($cb);
     }
 
-    public function getAllCategories(): Collection
+    public function getAllCategories(CriteriaBuilder $cb): Collection
     {
-        return $this->repository->getAllCategories();
+        return $this->repository->getAllCategories($cb);
     }
 }

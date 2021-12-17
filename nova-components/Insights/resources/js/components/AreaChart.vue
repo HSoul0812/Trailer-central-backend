@@ -216,6 +216,7 @@ export default {
                 }
 
                 this.filters.subset.list = chartData.filters.subset.list;
+                this.filters.category.list = chartData.filters.category.list;
             }).catch((error) => console.warn(error));
         },
         fillData(labels, datasets) {
