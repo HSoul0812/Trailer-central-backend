@@ -139,6 +139,7 @@ class ListingRepository implements ListingRepositoryInterface {
                           ->where('dealer_location_id', '=', $integration->dealer_location_id)
                           ->where('show_on_website', 1)
                           ->where(Inventory::getTableName().'.description', '<>', '')
+                          ->has('inventoryImages')
                           ->where(function(Builder $query) {
                               $query->where('is_archived', 0)
                                     ->orWhereNull('is_archived');
@@ -172,7 +173,7 @@ class ListingRepository implements ListingRepositoryInterface {
         }
 
         // Require Inventory Images
-        $query = $query->with('attributeValues')->has('inventoryImages');
+        $query = $query->with('attributeValues')->with('inventoryImages')->with('dealerLocation');
 
         // Return Paginated Inventory
         return $query->paginate($params['per_page'])->appends($params);;
