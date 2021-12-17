@@ -7,14 +7,16 @@ use App\Exceptions\CRM\Text\NoBlastSmsFromNumberException;
 use App\Exceptions\CRM\Text\NoLeadsDeliverBlastException;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Text\BlastSent;
+use App\Models\User\NewDealerUser;
 use App\Services\CRM\Text\TextServiceInterface;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
 use App\Repositories\CRM\Text\BlastRepositoryInterface;
 use App\Repositories\CRM\Text\TemplateRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 /**
@@ -55,6 +57,12 @@ class BlastService implements BlastServiceInterface
     protected $dealerLocation;
 
     /**
+     * @var Log
+     */
+    protected $log;
+
+
+    /**
      * BlastService constructor.
      */
     public function __construct(TextServiceInterface $text,
@@ -73,6 +81,9 @@ class BlastService implements BlastServiceInterface
         $this->blasts = $blastRepo;
         $this->templates = $templateRepo;
         $this->dealerLocation = $dealerLocationRepo;
+
+        // Initialize Logger
+        $this->log = Log::channel('textcampaign');
     }
 
     /**
@@ -80,9 +91,11 @@ class BlastService implements BlastServiceInterface
      * 
      * @param NewDealerUser $dealer
      * @param Blast $blast
-     * @return Collection of BlastSent
+     * @throws NoBlastSmsFromNumberException
+     * @throws NoLeadsDeliverBlastException
+     * @return Collection<BlastSent>
      */
-    public function send($dealer, $blast) {
+    public function send(NewDealerUser $dealer, Blast $blast): Collection {
         // Get From Number
         $from_number = $blast->from_sms_number;
         if(empty($from_number)) {
@@ -98,7 +111,7 @@ class BlastService implements BlastServiceInterface
         }
 
         // Loop Leads for Current Dealer
-        $sent = collect([]);
+        $sent = new Collection();
         foreach($blast->leads as $lead) {
             // Not a Valid To Number?!
             if(empty($lead->text_phone)) {
@@ -128,7 +141,8 @@ class BlastService implements BlastServiceInterface
      * @param Lead $lead
      * @return BlastSent
      */
-    private function sendToLead($from_number, $dealer, $blast, $lead) {
+    private function sendToLead(string $from_number, NewDealerUser $dealer,
+                                Blast $blast, Lead $lead): BlastSent {
         // Get Text Message
         $textMessage = $this->templates->fillTemplate($blast->template->template, [
             'lead_name' => $lead->full_name,
@@ -160,10 +174,11 @@ class BlastService implements BlastServiceInterface
      * @param string $status
      * @return BlastSent
      */
-    private function markLeadSent($from_number, $blast, $lead, $textMessage, $status) {
+    private function markLeadSent(string $from_number, Blast $blast, Lead $lead,
+                                    string $textMessage, string $status): BlastSent {
         // Handle Transaction
         $textLog = null;
-        DB::transaction(function() use ($from_number, $blast, $lead, $textMessage, &$status, &$textLog) {
+        DB::transaction(function() use ($from_number, $lead, $textMessage, &$status, &$textLog) {
             // Save Lead Status
             $this->leadStatus->createOrUpdate([
                 'lead_id' => $lead->identifier,
@@ -202,14 +217,17 @@ class BlastService implements BlastServiceInterface
         return $sent;
     }
 
-    private function markDelivered($blast) {
+    /**
+     * Mark Blast as Delivered
+     * 
+     * @param Blast $blast
+     * @return Blast
+     */
+    private function markDelivered(Blast $blast): Blast {
         // Mark as Delivered
-        $blast = $this->blasts->update([
+        return $this->blasts->update([
             'id' => $blast->id,
             'is_delivered' => 1
         ]);
-
-        // Return Updated Blast
-        return $blast;
     }
 }

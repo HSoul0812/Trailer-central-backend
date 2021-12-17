@@ -13,8 +13,9 @@ use App\Repositories\CRM\Text\TextRepositoryInterface;
 use App\Repositories\CRM\Text\CampaignRepositoryInterface;
 use App\Repositories\CRM\Text\TemplateRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 /**
@@ -55,6 +56,11 @@ class CampaignService implements CampaignServiceInterface
     protected $dealerLocation;
 
     /**
+     * @var Log
+     */
+    private $log;
+
+    /**
      * CampaignService constructor.
      */
     public function __construct(TextServiceInterface $text,
@@ -73,6 +79,9 @@ class CampaignService implements CampaignServiceInterface
         $this->campaigns = $campaignRepo;
         $this->templates = $templateRepo;
         $this->dealerLocation = $dealerLocationRepo;
+
+        // Initialize Logger
+        $this->log = Log::channel('textcampaign');
     }
 
     /**
@@ -80,9 +89,11 @@ class CampaignService implements CampaignServiceInterface
      * 
      * @param NewDealerUser $dealer
      * @param Campaign $campaign
-     * @return Collection of CampaignSent
+     * @throws NoCampaignSmsFromNumberException
+     * @throws NoLeadsProcessCampaignException
+     * @return Collection<CampaignSent>
      */
-    public function send($dealer, $campaign) {
+    public function send(NewDealerUser $dealer, Campaign $campaign): Collection {
         // Get From Number
         $from_number = $campaign->from_sms_number;
         if(empty($from_number)) {
@@ -98,7 +109,7 @@ class CampaignService implements CampaignServiceInterface
         }
 
         // Loop Leads for Current Dealer
-        $sent = collect([]);
+        $sent = new Collection();
         foreach($campaign->leads as $lead) {
             // Not a Valid To Number?!
             if(empty($lead->text_phone)) {
