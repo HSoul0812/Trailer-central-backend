@@ -408,10 +408,35 @@ class InventoryFacebook
      * @return InventoryFacebook
      */
     public static function getFromInventory(Inventory $inventory,
-            Marketplace $integration): InventoryFacebook
+            Marketplace $integration, ?float $startTime = null): InventoryFacebook
     {
+        // Check After Attributes
+        if(empty($startTime)) {
+            $startTime = microtime(true);
+        }
+        $nowTime = microtime(true);
+        Log::channel('dispatch-fb')->info('Debug time start get inventory: ' . ($nowTime - $startTime));
+        $color = $inventory->attributes->get('color');
+        $nowTime = microtime(true);
+        Log::channel('dispatch-fb')->info('Debug time start after color: ' . ($nowTime - $startTime));
+        $mileage = $inventory->attributes->get('mileage');
+        $nowTime = microtime(true);
+        Log::channel('dispatch-fb')->info('Debug time start after mileage: ' . ($nowTime - $startTime));
+        $body = $inventory->attributes->get('body');
+        $nowTime = microtime(true);
+        Log::channel('dispatch-fb')->info('Debug time start after body: ' . ($nowTime - $startTime));
+        $transmission = $inventory->attributes->get('transmission');
+        $nowTime = microtime(true);
+        Log::channel('dispatch-fb')->info('Debug time start after transmission: ' . ($nowTime - $startTime));
+        $fuelType = $inventory->attributes->get('fuel_type');
+        $nowTime = microtime(true);
+        Log::channel('dispatch-fb')->info('Debug time start after fuel type: ' . ($nowTime - $startTime));
+        $cityRegion = $inventory->dealerLocation->city_region;
+        $nowTime = microtime(true);
+        Log::channel('dispatch-fb')->info('Debug time start after dealer location: ' . ($nowTime - $startTime));
+
         // Create Inventory Mapping
-        return new self([
+        $response = new self([
             'inventory_id' => $inventory->inventory_id,
             'page_url' => $integration->page_url,
             'entity_type_id' => $inventory->entity_type_id,
@@ -422,14 +447,17 @@ class InventoryFacebook
             'model' => $inventory->model,
             'description' => $inventory->description,
             'dealer_location_id' => $inventory->dealer_location_id,
-            'location' => $inventory->dealerLocation->city_region,
-            'color' => $inventory->attributes->get('color'),
-            'mileage' => $inventory->attributes->get('mileage'),
-            'body' => $inventory->attributes->get('body'),
-            'transmission' => $inventory->attributes->get('transmission'),
-            'fuel_type' => $inventory->attributes->get('fuel_type'),
+            'location' => $cityRegion,
+            'color' => $color,
+            'mileage' => $mileage,
+            'body' => $body,
+            'transmission' => $transmission,
+            'fuel_type' => $fuelType,
             'images' => $inventory->orderedImages
         ]);
+        $nowTime = microtime(true);
+        Log::channel('dispatch-fb')->info('Debug time start after InventoryFacebook self: ' . ($nowTime - $startTime));
+        return $response;
     }
 
 
