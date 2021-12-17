@@ -55,25 +55,6 @@ abstract class AbstractAverageByManufacturerRepository implements AverageByManuf
         $query->groupBy('manufacturer')->orderBy('manufacturer');
 
         return $query->get();
-        /*
-        $query = DB::table('inventory_stock_average_per_day')->selectRaw('manufacturer');
-
-        if ($filterCategories && $cb->isNotBlank('category')) {
-            $query->whereIn('category', $cb->get('category'));
-        }
-
-        if ($cb->isNotBlank('from')) {
-            $from = Date::createFromFormat('Y-m-d', $cb->get('from', Date::now()->subYear()->format('Y-m-d')));
-            $to = Date::createFromFormat('Y-m-d', $cb->get('to', Date::now()->format('Y-m-d')));
-
-            $query->whereBetween('day', [$from, $to]);
-        }
-
-        $query->groupBy('manufacturer')
-            ->havingRaw('AVG(aggregate) >= ?', [config('insights.having_min_avg')])
-            ->orderBy('manufacturer');
-        //if($filterCategories) $query->dd();
-        return $query->get();*/
     }
 
     /**
