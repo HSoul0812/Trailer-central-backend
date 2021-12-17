@@ -381,6 +381,13 @@ class Inventory extends Model
         return $this->hasMany(InventoryImage::class, 'inventory_id', 'inventory_id');
     }
 
+    public function orderedImages(): HasMany
+    {
+        return $this->inventoryImages()->with('image')
+                    ->orderByRaw('IFNULL(position, 99) ASC')
+                    ->orderBy('image_id', 'ASC');
+    }
+
     public function images(): HasManyThrough
     {
         return $this->hasManyThrough(Image::class, InventoryImage::class, 'inventory_id', 'image_id', 'inventory_id', 'image_id');
@@ -434,29 +441,6 @@ class Inventory extends Model
     public function customerInventories(): HasMany
     {
         return $this->hasMany(CustomerInventory::class, 'inventory_id', 'inventory_id');
-    }
-
-
-    /**
-     * Get Accurately Ordered Images
-     * 
-     * @return Collection<Image>
-     */
-    public function getOrderedImagesAttribute(): Collection
-    {
-        // Initialize Images
-        $images = [];
-
-        // Get Ordered Images
-        $orderedImages = $this->inventoryImages()->with('image')
-                              ->orderByRaw('IFNULL(position, 99) ASC')
-                              ->orderBy('image_id', 'ASC')->get();
-        foreach($orderedImages as $bridge) {
-            $images[] = $bridge->image;
-        }
-
-        // Return Ordered Images
-        return new Collection($images);
     }
 
 

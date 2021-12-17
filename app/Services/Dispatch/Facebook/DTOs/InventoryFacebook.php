@@ -428,7 +428,7 @@ class InventoryFacebook
             'body' => $inventory->attributes->get('body'),
             'transmission' => $inventory->attributes->get('transmission'),
             'fuel_type' => $inventory->attributes->get('fuel_type'),
-            'images' => $inventory->ordered_images
+            'images' => $inventory->orderedImages
         ]);
     }
 
