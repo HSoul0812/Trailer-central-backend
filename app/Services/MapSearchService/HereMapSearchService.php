@@ -11,6 +11,7 @@ use GuzzleHttp\Handler\CurlHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Uri;
+use JetBrains\PhpStorm\Pure;
 use League\Fractal\TransformerAbstract;
 use Psr\Http\Message\RequestInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -49,9 +50,6 @@ class HereMapSearchService implements MapSearchServiceInterface
         });
     }
 
-    /**
-     * @throws HttpException
-     */
     public function autocomplete(string $searchText): object
     {
         $queryData = ['q' => $searchText, 'in' => 'countryCode:CAN,USA'];
@@ -59,11 +57,6 @@ class HereMapSearchService implements MapSearchServiceInterface
         return $this->handleHttpRequest('GET', self::AUTOCOMPLETE_API_URL, ['query' => $queryData]);
     }
 
-    /**
-     * @throws HttpException
-     *
-     * @return mixed
-     */
     public function geocode(string $address): object
     {
         $queryData = ['q' => $address, 'in' => 'countryCode:CAN,USA'];
@@ -71,14 +64,6 @@ class HereMapSearchService implements MapSearchServiceInterface
         return $this->handleHttpRequest('GET', self::GEOCODE_API_URL, ['query' => $queryData]);
     }
 
-    /**
-     * @param string $lat
-     * @param string $lng
-     *
-     * @throws HttpException
-     *
-     * @return mixed
-     */
     public function reverse(float $lat, float $lng): object
     {
         $queryData = ['at' => "$lat,$lng", 'lang' => 'en-US'];
@@ -86,15 +71,22 @@ class HereMapSearchService implements MapSearchServiceInterface
         return $this->handleHttpRequest('GET', self::REVERSE_API_URL, ['query' => $queryData]);
     }
 
+    /**
+     * @return TransformerAbstract
+     */
+    #[Pure]
     public function getTransformer(): TransformerAbstract
     {
         return new HereMapSearchTransformer();
     }
 
     /**
-     * @return \Psr\Http\Message\ResponseInterface
+     * @param string $method
+     * @param string $url
+     * @param array $options
+     * @return object
      */
-    private function handleHttpRequest(string $method, string $url, array $options)
+    private function handleHttpRequest(string $method, string $url, array $options): object
     {
         try {
             $response = $this->httpClient->request($method, $url, $options);

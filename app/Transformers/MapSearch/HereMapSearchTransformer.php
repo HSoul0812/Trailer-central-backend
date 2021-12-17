@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Transformers\MapSearch;
 
+use JetBrains\PhpStorm\Pure;
 use League\Fractal\TransformerAbstract;
 
 class HereMapSearchTransformer extends TransformerAbstract
 {
-    public function transform($searchResult): array
+    #[Pure] public function transform($searchResult): array
     {
         $itemTransformer = new HereMapSearchItemTransformer();
         $data = [];

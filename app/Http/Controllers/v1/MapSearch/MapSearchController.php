@@ -13,18 +13,26 @@ use App\Http\Requests\MapService\GeocodeRequest;
 use App\Http\Requests\MapService\ReverseRequest;
 use App\Http\Requests\UpdateRequestInterface;
 use App\Services\MapSearchService\MapSearchServiceInterface;
+use \Dingo\Api\Http\Response;
 
 class MapSearchController extends AbstractRestfulController
 {
     private MapSearchServiceInterface $mapSearchService;
 
+    /**
+     * @param MapSearchServiceInterface $mapSearchService
+     */
     public function __construct(MapSearchServiceInterface $mapSearchService)
     {
         parent::__construct();
         $this->mapSearchService = $mapSearchService;
     }
 
-    public function autocomplete(AutocompleteRequest $request)
+    /**
+     * @param AutocompleteRequest $request
+     * @return Response
+     */
+    public function autocomplete(AutocompleteRequest $request): Response
     {
         if (!$request->validate()) {
             $this->response->errorBadRequest();
@@ -36,7 +44,11 @@ class MapSearchController extends AbstractRestfulController
         return $this->response->item($data, $transformer);
     }
 
-    public function geocode(GeocodeRequest $request)
+    /**
+     * @param GeocodeRequest $request
+     * @return Response
+     */
+    public function geocode(GeocodeRequest $request): Response
     {
         if (!$request->validate()) {
             $this->response->errorBadRequest();
@@ -48,7 +60,11 @@ class MapSearchController extends AbstractRestfulController
         return $this->response->item($data, $transformer);
     }
 
-    public function reverse(ReverseRequest $request)
+    /**
+     * @param ReverseRequest $request
+     * @return Response
+     */
+    public function reverse(ReverseRequest $request): Response
     {
         if (!$request->validate()) {
             $this->response->errorBadRequest();

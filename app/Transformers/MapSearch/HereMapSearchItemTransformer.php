@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Transformers\MapSearch;
 
+use JetBrains\PhpStorm\ArrayShape;
 use League\Fractal\TransformerAbstract;
 
 class HereMapSearchItemTransformer extends TransformerAbstract
 {
-    public function transform($item)
+    #[ArrayShape(['address' => "array", 'position' => "array|null"])]
+    public function transform(object $item): array
     {
         $address = $item->address;
 

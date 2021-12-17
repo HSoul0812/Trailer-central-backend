@@ -27,6 +27,9 @@ class HereMapSearchServiceTest extends TestCase
         $this->assertEquals('q=test&in=countryCode%3ACAN%2CUSA', $request->getUri()->getQuery());
     }
 
+    /**
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     */
     public function testAutocomplete()
     {
         $container = [];
