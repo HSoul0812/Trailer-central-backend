@@ -4,21 +4,19 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Exceptions\NotImplementedException;
 use App\Support\CriteriaBuilder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\LazyCollection;
+use Illuminate\Support\Str;
 
 abstract class AbstractAverageByManufacturerRepository implements AverageByManufacturerRepositoryInterface
 {
-    public function getAllManufacturers(CriteriaBuilder $cb): Collection
+    public function getAllManufacturersWhichMetStockCriteria(CriteriaBuilder $cb): Collection
     {
         $query = DB::table('inventory_stock_average_per_day')->selectRaw('manufacturer');
-
-        if ($cb->isNotBlank('category')) {
-            $query->whereIn('category', $cb->get('category'), 'or');
-        }
 
         if ($cb->isNotBlank('from')) {
             $from = Date::createFromFormat('Y-m-d', $cb->get('from', Date::now()->subYear()->format('Y-m-d')));
@@ -34,14 +32,76 @@ abstract class AbstractAverageByManufacturerRepository implements AverageByManuf
         return $query->get();
     }
 
+    public function getAllManufacturers(CriteriaBuilder $cb): Collection
+    {
+        $query = DB::table($this->getViewName($cb->getOrFail('period')))
+            ->selectRaw('manufacturer');
+
+        if ($cb->isNotBlank('manufacturers_stock_criteria')) {
+            $query->whereIn('manufacturer', $cb->get('manufacturers_stock_criteria'));
+        }
+
+        if ($cb->isNotBlank('category')) {
+            $query->whereIn('category', $cb->get('category'));
+        }
+
+        if ($cb->isNotBlank('from')) {
+            $from = Date::createFromFormat('Y-m-d', $cb->get('from', Date::now()->subYear()->format('Y-m-d')));
+            $to = Date::createFromFormat('Y-m-d', $cb->get('to', Date::now()->format('Y-m-d')));
+
+            $query = $this->getDateRangeFilter($cb)($query, $from, $to);
+        }
+
+        $query->groupBy('manufacturer')->orderBy('manufacturer');
+
+        return $query->get();
+        /*
+        $query = DB::table('inventory_stock_average_per_day')->selectRaw('manufacturer');
+
+        if ($filterCategories && $cb->isNotBlank('category')) {
+            $query->whereIn('category', $cb->get('category'));
+        }
+
+        if ($cb->isNotBlank('from')) {
+            $from = Date::createFromFormat('Y-m-d', $cb->get('from', Date::now()->subYear()->format('Y-m-d')));
+            $to = Date::createFromFormat('Y-m-d', $cb->get('to', Date::now()->format('Y-m-d')));
+
+            $query->whereBetween('day', [$from, $to]);
+        }
+
+        $query->groupBy('manufacturer')
+            ->havingRaw('AVG(aggregate) >= ?', [config('insights.having_min_avg')])
+            ->orderBy('manufacturer');
+        //if($filterCategories) $query->dd();
+        return $query->get();*/
+    }
+
+    /**
+     * @param CriteriaBuilder $cb
+     * @return Collection
+     *
+     * @throws NotImplementedException when there is not a view implemented yet for the period
+     */
     public function getAllCategories(CriteriaBuilder $cb): Collection
     {
-        return DB::table($this->getPerWeekViewName())
-            ->select('category')
-            ->distinct()
-            ->whereIn('manufacturer', $this->getAllManufacturers($cb)->pluck('manufacturer')->toArray())
-            ->whereRaw("trim(category) != ''")
-            ->get();
+        $query = DB::table($this->getViewName($cb->getOrFail('period')))
+            ->selectRaw('category')
+            ->whereRaw("trim(category) != ''");
+
+        if ($cb->isNotBlank('manufacturers_stock_criteria')) {
+            $query->whereIn('manufacturer', $cb->get('manufacturers_stock_criteria'));
+        }
+
+        if ($cb->isNotBlank('from')) {
+            $from = Date::createFromFormat('Y-m-d', $cb->get('from', Date::now()->subYear()->format('Y-m-d')));
+            $to = Date::createFromFormat('Y-m-d', $cb->get('to', Date::now()->format('Y-m-d')));
+
+            $query = $this->getDateRangeFilter($cb)($query, $from, $to);
+        }
+
+        $query->groupBy('category')->orderBy('category');
+
+        return $query->get();
     }
 
     /**
@@ -110,14 +170,14 @@ abstract class AbstractAverageByManufacturerRepository implements AverageByManuf
     {
         $query = DB::table($viewName)->selectRaw("AVG(aggregate) AS aggregate, $periodColumn AS period");
 
-        if (!$cb->isNotBlank('manufacturer')) {
-            $query->whereIn('manufacturer', $this->getAllManufacturers($cb)->pluck('manufacturer')->toArray());
+        if ($cb->isNotBlank('manufacturers_stock_criteria')) {
+            $query->whereIn('manufacturer', $cb->get('manufacturers_stock_criteria'));
         }
 
         if ($cb->isNotBlank('manufacturer')) {
             $query->selectRaw('manufacturer')
                 ->whereIn('manufacturer', $cb->get('manufacturer'))
-                ->groupBy('manufacturer')
+                ->groupBy('manufacturer') // it only should group by manufacturer when the manufacturer has been provided
                 ->orderBy('manufacturer');
         }
 
@@ -156,8 +216,8 @@ abstract class AbstractAverageByManufacturerRepository implements AverageByManuf
                 \Illuminate\Support\Carbon $from,
                 \Illuminate\Support\Carbon $to): \Illuminate\Database\Query\Builder {
                 return $query->whereBetween('week', [
-                    sprintf('%d-%d', $from->isoWeekYear, $from->isoWeek),
-                    sprintf('%d-%d', $to->isoWeekYear, $to->isoWeek),
+                    sprintf('%d-%s', $from->isoWeekYear, $from->isoWeek < 10 ? '0' . $from->isoWeek : $from->isoWeek),
+                    sprintf('%d-%s', $to->isoWeekYear, $to->isoWeek < 10 ? '0' . $to->isoWeek : $to->isoWeek),
                 ]);
             },
             'per_month' => static function (
@@ -186,5 +246,21 @@ abstract class AbstractAverageByManufacturerRepository implements AverageByManuf
             },
             default => $perDayRangeFilter
         };
+    }
+
+    /**
+     * @param string $period
+     * @return string
+     * @throws NotImplementedException when period is not provided
+     */
+    protected function getViewName(string $period): string
+    {
+        $methodName = 'get' . ucfirst(Str::camel($period)) . 'ViewName';
+
+        if (method_exists($this, $methodName)) {
+            return $this->{$methodName}();
+        }
+
+        throw new NotImplementedException(sprintf("'%s' is not implemented in %s", $methodName, get_class($this)));
     }
 }

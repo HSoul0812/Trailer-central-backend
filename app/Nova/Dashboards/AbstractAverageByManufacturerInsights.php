@@ -132,7 +132,7 @@ abstract class AbstractAverageByManufacturerInsights extends Dashboard
                     'category' => [
                         'show'     => true,
                         'list'     => $categoryList,
-                        'selected' => $request->getSubset(),
+                        'selected' => $request->getCategory(),
                     ],
                     'period' => [
                         'selected' => $request->getPeriod(),
