@@ -436,6 +436,9 @@ class InventoryFacebook
         $cityRegion = $inventory->dealerLocation->city_region;
         $nowTime = microtime(true);
         $log->info('Debug time start after dealer location: ' . ($nowTime - $startTime));
+        $orderedImages = $inventory->orderedImages;
+        $nowTime = microtime(true);
+        $log->info('Debug time start after ordered images: ' . ($nowTime - $startTime));
 
         // Create Inventory Mapping
         $response = new self([
@@ -455,7 +458,7 @@ class InventoryFacebook
             'body' => $body,
             'transmission' => $transmission,
             'fuel_type' => $fuelType,
-            'images' => $inventory->orderedImages
+            'images' => $orderedImages
         ]);
         $nowTime = microtime(true);
         $log->info('Debug time start after InventoryFacebook self: ' . ($nowTime - $startTime));
