@@ -2,18 +2,19 @@
 
 namespace App\Transformers\Marketing\Facebook;
 
-use App\Models\Marketing\Facebook\Image;
+use App\Models\Inventory\InventoryImage;
 use League\Fractal\TransformerAbstract;
 
 class ImageTransformer extends TransformerAbstract
 {
-    public function transform(Image $image)
+    public function transform(InventoryImage $invImage)
     {
         return [
-            'id' => $image->id,
-            'file' => $image->image->filename,
-            'created_at' => $image->created_at,
-            'updated_at' => $image->updated_at
+            'id' => $invImage->image->id,
+            'file' => $invImage->image->image->filename,
+            'created_at' => $invImage->image->created_at,
+            'updated_at' => $invImage->image->updated_at,
+            'position' => $invImage->position
         ];
     }
 }
