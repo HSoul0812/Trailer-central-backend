@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-
-set -eu
-
-docker exec -it --workdir /app trailertrader_php "$@"

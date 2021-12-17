@@ -8,6 +8,7 @@ Requirements
 --------------------------------------
 - Docker
 - Docker compose
+- Laravel Nova
 
 Setup
 --------------------------------------
@@ -24,7 +25,7 @@ Bring the containers up:
 ./bin/setup
 ```
 
-Daily work
+Tooling
 --------------------------------------
 
 Start the containers:
@@ -33,8 +34,128 @@ Start the containers:
 docker-compose start
 ```
 
-Start the server:
+Start the serve (multiples ways):
 
 ```bash
-./bin/server
+./bin/serve
+```
+```bash
+./bin/cli php artisan serve --host 0.0.0.0
+```
+```bash
+./bin/php artisan serve --host 0.0.0.0
+```
+
+Get into the PHP container:
+
+```bash
+./bin/cli /bin/bash
+```
+
+Using the PHP container (examples): `./bin/cli <args>`
+
+```bash
+./bin/cli ./artisan tinker
+./bin/cli php artisan tinker
+./bin/cli ls
+./bin/cli uname -a
+```
+
+The PHP wrapper (examples): `./bin/php <args>`
+
+```bash
+./bin/php -v
+./bin/php -m
+./bin/php artisan tinker
+```
+
+The Postgres wrapper (examples): `./bin/psql <args>`
+
+```bash
+./bin/psql --version
+./bin/psql trailercenral
+```
+
+Apply code styles:
+
+```bash
+./bin/fix-style-all
+```
+
+*pro-tip: to be able using the local bins add the follows to `.zshrc` or `.profile`*
+
+```
+# Options
+unsetopt cdablevars
+
+PATH="./bin:./vendor/bin:$PATH"
+```
+
+and you could use any binary on this way:
+
+```bash
+php artisan tinker
+```
+```bash
+cli /bin/bash
+```
+```bash
+serve
+```
+
+*NOTE: just in case the connection through the VPN is not working, you could use a global tunnel as follows:*
+
+Add to `.ssh/config`
+```
+Host tc-tunnel
+  User admin
+  HostName rober.crm.trailercentral.r4dm.co # use your dev envirment host name
+  IdentityFile ~/.ssh/id_rsa
+  AddKeysToAgent yes
+  ServerAliveInterval 240
+  ServerAliveCountMax 2
+  LocalForward 3306 db.develop.tc.internal:3306 # use the port wath you preffer 
+```
+Then
+```bash
+ssh -N tc-tunnel # let it working
+```
+And finally in `.env` file ensure to use the localhost IP address
+```
+DMS_DB_HOST=127.0.0.1
+DMS_DB_PORT=3306
+```
+
+Testing 
+--------------------------------------
+
+For normal testing 
+```bash
+./bin/php artisan test --env=testing
+```
+
+For parallel testing
+```bash
+./bin/php artisan test -p --env=testing
+```
+
+Test User access
+```
+tc@trailercentral.com
+squadron*RAF99
+```
+
+Seeding manually
+--------------------------------------
+In case it is necessary to seed some data that is thought to be seeded under demand by the tests,
+you could use the follows seeders:
+
+```bash
+php artisan db:seed --class=Database\\Seeders\\Inventory\\AverageStockSeeder
+```
+```bash
+php artisan db:seed --class=Database\\Seeders\\Inventory\\AveragePriceSeeder
+```
+```bash
+php artisan db:seed --class=Database\\Seeders\\Leads\\LeadsAverageSeeder
 ```

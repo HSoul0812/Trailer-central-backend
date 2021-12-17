@@ -7,16 +7,13 @@ namespace App\Http\Requests;
 use Dingo\Api\Exception\ResourceException;
 use Dingo\Api\Http\Request as BaseRequest;
 use Illuminate\Support\Facades\Validator;
-use App\Http\Requests\RequestInterface;
 
-class Request extends BaseRequest implements RequestInterface {
-
+class Request extends BaseRequest implements RequestInterface
+{
     /**
-     * Rules to validate
-     *
-     * @var array
+     * Rules to validate.
      */
-    protected $rules = [];
+    protected array $rules = [];
 
     /**
      * {@inheritDoc}
@@ -26,7 +23,7 @@ class Request extends BaseRequest implements RequestInterface {
         $validator = Validator::make($this->all(), $this->getRules());
 
         if ($validator->fails()) {
-            throw new ResourceException("Validation Failed", $validator->errors());
+            throw new ResourceException('Validation Failed', $validator->errors());
         }
 
         return true;

@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+set -eu
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+rm -Rf laravel-nova-bd32015c9dce9060fe327f09e96abbe729900648 # just in case it exists
+unzip nova.zip
+
+docker-compose down
+
+docker-compose up -d --build
+
+echo "Waiting for postgres database..."
+sleep 6 # this is not elegant, but it works
+
+"$ROOT"/bin/cli composer update nothing
+
+"$ROOT"/bin/php artisan optimize:clear
+"$ROOT"/bin/php artisan config:clear
+"$ROOT"/bin/php artisan cache:clear
+"$ROOT"/bin/php artisan migrate
+"$ROOT"/bin/php artisan migrate --env=testing
+"$ROOT"/bin/php artisan db:seed
+"$ROOT"/bin/php artisan db:seed --env=testing
+"$ROOT"/bin/php artisan nova:publish
+"$ROOT"/bin/php artisan route:clear
+

@@ -4,8 +4,10 @@
 /storage/*.key
 /vendor
 /nbproject
+/laravel-nova-bd32015c9dce9060fe327f09e96abbe729900648
 .env
 .env.backup
+.env.testing
 .phpunit.result.cache
 docker-compose.override.yml
 Homestead.json

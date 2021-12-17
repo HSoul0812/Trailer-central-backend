@@ -1,6 +1,8 @@
 <?php
 
-if (! function_exists('include_route_files')) {
+declare(strict_types=1);
+
+if (!function_exists('include_route_files')) {
     /**
      * Loops through a folder and requires all PHP files
      * Searches sub-directories as well.
@@ -14,7 +16,7 @@ if (! function_exists('include_route_files')) {
             $it = new RecursiveIteratorIterator($rdi);
 
             while ($it->valid()) {
-                if (! $it->isDot() && $it->isFile() && $it->isReadable() && $it->current()->getExtension() === 'php') {
+                if (!$it->isDot() && $it->isFile() && $it->isReadable() && $it->current()->getExtension() === 'php') {
                     require $it->key();
                 }
 
@@ -26,9 +28,9 @@ if (! function_exists('include_route_files')) {
     }
 }
 
-if (! function_exists('inject_request_data')) {
+if (!function_exists('inject_request_data')) {
     /**
-     * Injects request data from the global request
+     * Injects request data from the global request.
      *
      * @param $folder
      */

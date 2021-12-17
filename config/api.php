@@ -1,7 +1,8 @@
 <?php
 
-return [
+declare(strict_types=1);
 
+return [
     /*
     |--------------------------------------------------------------------------
     | Standards Tree
@@ -137,11 +138,11 @@ return [
     */
 
     'errorFormat' => [
-        'message' => ':message',
-        'errors' => ':errors',
-        'code' => ':code',
+        'message'     => ':message',
+        'errors'      => ':errors',
+        'code'        => ':code',
         'status_code' => ':status_code',
-        'debug' => ':debug',
+        'debug'       => ':debug',
     ],
 
     /*
@@ -154,7 +155,6 @@ return [
     */
 
     'middleware' => [
-
     ],
 
     /*
@@ -168,7 +168,6 @@ return [
     */
 
     'auth' => [
-
     ],
 
     /*
@@ -183,7 +182,6 @@ return [
     */
 
     'throttling' => [
-
     ],
 
     /*
@@ -214,19 +212,14 @@ return [
     'defaultFormat' => env('API_DEFAULT_FORMAT', 'json'),
 
     'formats' => [
-
         'json' => Dingo\Api\Http\Response\Format\Json::class,
-
     ],
 
     'formatsOptions' => [
-
         'json' => [
             'pretty_print' => env('API_JSON_FORMAT_PRETTY_PRINT_ENABLED', false),
             'indent_style' => env('API_JSON_FORMAT_INDENT_STYLE', 'space'),
-            'indent_size' => env('API_JSON_FORMAT_INDENT_SIZE', 2),
+            'indent_size'  => env('API_JSON_FORMAT_INDENT_SIZE', 2),
         ],
-
     ],
-
 ];
