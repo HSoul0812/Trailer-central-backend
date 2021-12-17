@@ -59279,14 +59279,10 @@ Chart.plugins.unregister(__WEBPACK_IMPORTED_MODULE_2_chartjs_plugin_datalabels__
             }).then(function (_ref) {
                 var data = _ref.data;
 
-                var chartData = data[0];
+                _this.fillData(data.legends, data.series);
 
-                if (chartData) {
-                    _this.fillData(chartData.options.xAxis.categories, chartData.series);
-                }
-
-                _this.filters.subset.list = chartData.filters.subset.list;
-                _this.filters.category.list = chartData.filters.category.list;
+                _this.filters.subset.list = data.filters.subset.list;
+                _this.filters.category.list = data.filters.category.list;
             }).catch(function (error) {
                 return console.warn(error);
             });
