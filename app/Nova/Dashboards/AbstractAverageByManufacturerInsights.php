@@ -84,7 +84,7 @@ abstract class AbstractAverageByManufacturerInsights extends Dashboard
                 ->toArray();
 
             $categoryList = $this->service
-                ->getAllCategories()
+                ->getAllCategories($criteriaBuilder)
                 ->map(fn (stdClass $item) => [
                     'text' => ucfirst(strtolower(str_replace(['_', '-'], [' ', ' '], $item->category))), 'value' => $item->category,
                 ])

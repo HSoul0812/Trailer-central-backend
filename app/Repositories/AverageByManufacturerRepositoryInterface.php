@@ -11,5 +11,5 @@ interface AverageByManufacturerRepositoryInterface extends InsightRepositoryInte
 {
     public function getAllManufacturers(CriteriaBuilder $cb): Collection;
 
-    public function getAllCategories(): Collection;
+    public function getAllCategories(CriteriaBuilder $cb): Collection;
 }

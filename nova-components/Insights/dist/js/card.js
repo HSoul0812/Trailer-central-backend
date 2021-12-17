@@ -59286,6 +59286,7 @@ Chart.plugins.unregister(__WEBPACK_IMPORTED_MODULE_2_chartjs_plugin_datalabels__
                 }
 
                 _this.filters.subset.list = chartData.filters.subset.list;
+                _this.filters.category.list = chartData.filters.category.list;
             }).catch(function (error) {
                 return console.warn(error);
             });
