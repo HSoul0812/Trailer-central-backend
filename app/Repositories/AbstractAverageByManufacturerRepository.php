@@ -14,7 +14,7 @@ abstract class AbstractAverageByManufacturerRepository implements AverageByManuf
 {
     public function getAllManufacturers(CriteriaBuilder $cb): Collection
     {
-        $query = DB::table('inventory_stock_average_per_day')->selectRaw("manufacturer");
+        $query = DB::table('inventory_stock_average_per_day')->selectRaw('manufacturer');
 
         if ($cb->isNotBlank('category')) {
             $query->whereIn('category', $cb->get('category'), 'or');
@@ -35,7 +35,7 @@ abstract class AbstractAverageByManufacturerRepository implements AverageByManuf
     }
 
     public function getAllCategories(CriteriaBuilder $cb): Collection
-    {//$query->whereIn('manufacturer', $this->getAllManufacturers($cb)->pluck('manufacturer')->toArray());
+    {
         return DB::table($this->getPerWeekViewName())
             ->select('category')
             ->distinct()
