@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api\Parts;
 
-use Tests\Common\FeatureTestCase;
 use Database\Seeders\Parts\CategoryAndTypeSeeder;
+use Tests\Common\FeatureTestCase;
 
 class TypeTest extends FeatureTestCase
 {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Parts;
 
 use App\Support\Traits\TableAware;
@@ -7,9 +9,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Type extends Model
 {
-    protected $table = 'part_types';
-
     use TableAware;
+    protected $table = 'part_types';
 
     /**
      * The attributes that are mass assignable.
@@ -17,7 +18,7 @@ class Type extends Model
      * @var array
      */
     protected $fillable = [
-        'name'
+        'name',
     ];
 
     /**
@@ -26,12 +27,11 @@ class Type extends Model
      * @var array
      */
     protected $hidden = [
-      'pivot'
+      'pivot',
     ];
 
     public function categories()
     {
         return $this->belongsToMany(Category::class, 'part_category_part_type', 'part_category_id', 'part_type_id')->select('id', 'name');
     }
-
 }
