@@ -9,26 +9,19 @@ use League\Fractal\TransformerAbstract;
 interface MapSearchServiceInterface
 {
     /**
-     * @param string $searchText
      * @return mixed
      */
-    public function autocomplete(string $searchText);
+    public function autocomplete(string $searchText): object;
 
     /**
-     * @param string $address
      * @return mixed
      */
-    public function geocode(string $address);
+    public function geocode(string $address): object;
 
     /**
-     * @param float $lat
-     * @param float $lng
      * @return mixed
      */
-    public function reverse(string $lat, string $lng);
+    public function reverse(float $lat, float $lng): object;
 
-    /**
-     * @return TransformerAbstract
-     */
     public function getTransformer(): TransformerAbstract;
 }

@@ -7,7 +7,6 @@ namespace App\Http\Controllers\v1\MapSearch;
 use App\Exceptions\NotImplementedException;
 use App\Http\Controllers\AbstractRestfulController;
 use App\Http\Requests\CreateRequestInterface;
-use App\Http\Requests\Home\IndexHomeRequest;
 use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\MapService\AutocompleteRequest;
 use App\Http\Requests\MapService\GeocodeRequest;
@@ -17,9 +16,6 @@ use App\Services\MapSearchService\MapSearchServiceInterface;
 
 class MapSearchController extends AbstractRestfulController
 {
-    /**
-     * @var MapSearchServiceInterface
-     */
     private MapSearchServiceInterface $mapSearchService;
 
     public function __construct(MapSearchServiceInterface $mapSearchService)
@@ -36,6 +32,7 @@ class MapSearchController extends AbstractRestfulController
 
         $data = $this->mapSearchService->autocomplete($request->input('q'));
         $transformer = $this->mapSearchService->getTransformer();
+
         return $this->response->item($data, $transformer);
     }
 
@@ -47,6 +44,7 @@ class MapSearchController extends AbstractRestfulController
 
         $data = $this->mapSearchService->geocode($request->input('q'));
         $transformer = $this->mapSearchService->getTransformer();
+
         return $this->response->item($data, $transformer);
     }
 
@@ -56,11 +54,12 @@ class MapSearchController extends AbstractRestfulController
             $this->response->errorBadRequest();
         }
 
-        $lat = $request->input('lat');
-        $lng = $request->input('lng');
+        $lat = floatval($request->input('lat'));
+        $lng = floatval($request->input('lng'));
 
         $data = $this->mapSearchService->reverse($lat, $lng);
         $transformer = $this->mapSearchService->getTransformer();
+
         return $this->response->item($data, $transformer);
     }
 
