@@ -28,6 +28,11 @@ class StripeService implements PaymentGatewayServiceInterface
         'requested_by_customer'
     ];
 
+    /**
+     * @string successful status of a PaymentIntent
+     */
+    public const PAYMENT_INTENT_SUCCEEDED = 'succeeded';
+
     public function __construct(StripeClientInterface $client)
     {
         $this->client = $client;
@@ -115,5 +120,23 @@ class StripeService implements PaymentGatewayServiceInterface
         } catch (ClientException | \Exception $exception) {
             throw new TextrailSyncException($exception->getMessage(), $exception->getCode(), $exception);
         }
+    }
+
+    public function retrievePaymentIntent(array $params): array
+    {
+        try {
+            $intent = $this->client->paymentIntents->retrieve($params['payment_intent']);
+
+            return $intent;
+        } catch (ClientException | \Exception $exception) {
+            throw new TextrailSyncException($exception->getMessage(), $exception->getCode(), $exception);
+        }
+    }
+
+    public function paymentIntentSucceeded(array $params): bool
+    {
+        $intent = $this->retrievePaymentIntent($params);
+
+        return $intent['status'] == self::PAYMENT_INTENT_SUCCEEDED;
     }
 }
