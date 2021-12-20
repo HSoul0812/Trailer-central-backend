@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Nova\Dashboards\Inventory;
 
 use App\Nova\Dashboards\AbstractAverageByManufacturerInsights;
+use App\Nova\Http\Requests\InsightRequestInterface;
 use App\Nova\Http\Requests\Inventory\PriceAverageRequest;
 use App\Nova\Http\Requests\Inventory\PriceAverageRequestInterface;
 use App\Services\Inventory\PriceAverageByManufacturerServiceInterface;
@@ -38,9 +39,6 @@ class PriceAverageByManufacturerInsights extends AbstractAverageByManufacturerIn
             fn () => inject_request_data(PriceAverageRequest::class)
         );
 
-        app()->bindMethod(
-            __CLASS__ . '@cards',
-            fn (self $class) => $class->cards(app()->make(PriceAverageRequestInterface::class))
-        );
+        app()->bind(InsightRequestInterface::class, PriceAverageRequestInterface::class);
     }
 }

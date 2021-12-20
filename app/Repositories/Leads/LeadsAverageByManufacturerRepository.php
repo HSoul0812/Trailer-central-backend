@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Repositories\Leads;
 
-use App\Exceptions\NotImplementedException;
 use App\Repositories\AbstractAverageByManufacturerRepository;
 
 class LeadsAverageByManufacturerRepository extends AbstractAverageByManufacturerRepository implements LeadsAverageByManufacturerRepositoryInterface
@@ -21,11 +20,16 @@ class LeadsAverageByManufacturerRepository extends AbstractAverageByManufacturer
 
     protected function getPerMonthViewName(): string
     {
-        throw new NotImplementedException();
+        return 'leads_average_per_month';
+    }
+
+    protected function getPerQuarterViewName(): string
+    {
+        return 'leads_average_per_quarter';
     }
 
     protected function getPerYearViewName(): string
     {
-        throw new NotImplementedException();
+        return 'leads_average_per_year';
     }
 }

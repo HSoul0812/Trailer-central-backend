@@ -21,8 +21,8 @@ class CardServiceProvider extends ServiceProvider
         });
 
         Nova::serving(function (ServingNova $event) {
-            Nova::script('insights', __DIR__ . '/../dist/js/card.js');
-            Nova::style('insights', __DIR__ . '/../dist/css/card.css');
+            Nova::script('insights-' . filesize(__DIR__ . '/../dist/js/card.js'), __DIR__ . '/../dist/js/card.js');
+            Nova::style('insights-' . filesize(__DIR__ . '/../dist/css/card.css'), __DIR__ . '/../dist/css/card.css');
         });
     }
 

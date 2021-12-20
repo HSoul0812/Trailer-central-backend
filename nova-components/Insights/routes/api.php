@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,6 +15,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Route::get('/endpoint', function (Request $request) {
-//     //
-// });
+Route::post('/stock-average-by-manufacturer-insights', [\App\Nova\Dashboards\Inventory\StockAverageByManufacturerInsights::class, 'data']);
+Route::post('/price-average-by-manufacturer-insights', [\App\Nova\Dashboards\Inventory\PriceAverageByManufacturerInsights::class, 'data']);
+Route::post('/leads-average-by-manufacturer-insights', [\App\Nova\Dashboards\Leads\LeadsAverageByManufacturerInsights::class, 'data']);

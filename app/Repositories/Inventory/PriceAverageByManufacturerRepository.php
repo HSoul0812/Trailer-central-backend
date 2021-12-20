@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Repositories\Inventory;
 
-use App\Exceptions\NotImplementedException;
 use App\Repositories\AbstractAverageByManufacturerRepository;
 
 class PriceAverageByManufacturerRepository extends AbstractAverageByManufacturerRepository implements PriceAverageByManufacturerRepositoryInterface
@@ -21,11 +20,16 @@ class PriceAverageByManufacturerRepository extends AbstractAverageByManufacturer
 
     protected function getPerMonthViewName(): string
     {
-        throw new NotImplementedException();
+        return 'inventory_price_average_per_month';
+    }
+
+    protected function getPerQuarterViewName(): string
+    {
+        return 'inventory_price_average_per_quarter';
     }
 
     protected function getPerYearViewName(): string
     {
-        throw new NotImplementedException();
+        return 'inventory_price_average_per_year';
     }
 }

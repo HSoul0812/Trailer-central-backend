@@ -21,22 +21,20 @@ class PriceAverageByManufacturerInsightsTest extends IntegrationTestCase
 {
     protected string $seeder = AveragePriceSeeder::class;
 
-    /**
-     * Test that SUT is returning a payload with a well known insights by week and by day.
-     */
-    public function testHasAnExpectedResponse(): void
-    {
-        $dashboard = app(PriceAverageByManufacturerInsights::class);
+    protected PriceAverageByManufacturerInsights $dashboard;
 
-        $this->testByWeeks($dashboard);
-        $this->testByDays($dashboard);
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->dashboard = app(PriceAverageByManufacturerInsights::class);
     }
 
-    private function testByWeeks(PriceAverageByManufacturerInsights $dashboard): void
+    public function testByWeeks(): void
     {
         $request = new PriceAverageRequest();
 
-        $response = $dashboard->cards($request);
+        $response = $this->dashboard->cards($request);
 
         /** @var AreaChart $chart */
         $chart = $response[0];
@@ -66,10 +64,10 @@ class PriceAverageByManufacturerInsightsTest extends IntegrationTestCase
         self::assertSame('2020-53', $categories->first());
     }
 
-    private function testByDays(PriceAverageByManufacturerInsights $dashboard): void
+    public function testByDays(): void
     {
         $request = new PriceAverageRequest(['period' => InsightRequestInterface::PERIOD_PER_DAY]);
-        $response = $dashboard->cards($request);
+        $response = $this->dashboard->cards($request);
 
         /** @var AreaChart $chart */
         $chart = $response[0];

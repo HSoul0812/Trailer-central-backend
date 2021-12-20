@@ -1,30 +1,45 @@
 <template>
     <card class="p-10">
-        <div class="insight-filters">
-            <div class="stay-right">
+        <div class="flex insight-filters">
+            <div class="flex w-1/4">
+            </div>
+            <div class="stay-right flex  w-3/4">
                 <date-range-picker
+                    control-container-class="date-range-picker-control select-box ml-auto text-sm appearance-none bg-40 pl-2 pr-6"
                     ref="picker"
                     v-show="filters.datePicker.show"
                     :opens="left"
                     v-model="filters.datePicker.dateRange"
+                    class="flex mr-4"
                     @update="refresh()">
                     <template v-slot:input="picker" style="min-width: 350px;">
                         {{ dateFormat(picker.startDate) }} - {{ dateFormat(picker.endDate) }}
                     </template>
                 </date-range-picker>
                 <select @change="refresh()" v-model="filters.period.selected" v-show="filters.period.show"
-                        class="select-box-sm ml-auto min-w-24 h-6 text-xs appearance-none bg-40 pl-2 pr-6
+                        class="flex-auto select-box text-sm appearance-none bg-40 pl-2 pr-6 mr-4
                                active:outline-none active:shadow-outline focus:outline-none focus:shadow-outline">
                     <option v-for="filter in filters.period.list" v-bind:value="filter.value" :key="filter.key">
                         {{ filter.text }}
                     </option>
                 </select>
-                <div class="float-right manufacturer-list">
-                    <model-select :options="filters.subset.list"
-                                  v-model="filters.subset.selected"
-                                  @input="refresh"
+                <div class="flex-auto mr-4">
+                    <multi-select :options="filters.category.list"
+                                  :selected-options="filters.category.selected"
+                                  placeholder="Select a category"
+                                  class="subset-list"
+                                  @select="onSelectCategory"
+                                  v-show="filters.category.show">
+                    </multi-select>
+                </div>
+                <div class="flex-auto">
+                    <multi-select :options="filters.subset.list"
+                                  :selected-options="filters.subset.selected"
+                                  v-bind:placeholder="filters.subset.placeholder"
+                                  class="subset-list"
+                                  @select="onSelectSubset"
                                   v-show="filters.subset.show">
-                    </model-select>
+                    </multi-select>
                 </div>
             </div>
         </div>
@@ -34,38 +49,22 @@
 </template>
 
 <style>
-.manufacturer-list {
-    margin-left: 3px;
+.date-range-picker-control {
+    height: 2.7em;
+    padding-top: 12px;
+    padding-right: 28px;
+    cursor: pointer;
+    color: black;
+    width: 210px;
 }
 
-.manufacturer-list .ui.dropdown,
-.manufacturer-list .ui.dropdown .menu > .item,
-.manufacturer-list .ui.search.dropdown > .text,
-.manufacturer-list .ui.search.selection.dropdown > input.search {
-    font-size: 12px;
-}
-
-.manufacturer-list {
-    min-width: 14rem;
-}
-
-.manufacturer-list .ui.search.selection.dropdown > input.search,
-.manufacturer-list .ui.selection.dropdown {
-    padding: 0 0.5em 0 1.5em;
-    height: 1.5rem;
-}
-
-.manufacturer-list .ui.search.dropdown > .text {
-    top: 5px
-}
-
-.manufacturer-list .ui.fluid.dropdown > .dropdown.icon {
-    padding: 0.5em;
+.subset-list .menu.visible, .subset-list {
+    background-color: var(--40) !important;
 }
 </style>
 <script>
 
-import { ModelSelect } from 'vue-search-select'
+import { MultiSelect } from 'vue-search-select'
 import LineChart from '../area-chart.js'
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import DateRangePicker from 'vue2-daterange-picker'
@@ -79,15 +78,16 @@ export default {
     components: {
         LineChart,
         DateRangePicker,
-        ModelSelect
+        MultiSelect
     },
     data() {
         const filterPeriodDefault = 'per_week';
         const filterPeriodList = [
             {text: 'Per day', value: 'per_day'},
             {text: 'Per week', value: 'per_week'},
-            // { text: 'Per month', value: 'per_month' },
-            // { text: 'Per year', value: 'per_year' }
+            {text: 'Per month', value: 'per_month' },
+            {text: 'Per quarter', value: 'per_quarter'},
+            {text: 'Per year', value: 'per_year'}
         ];
 
         const defaultStartDate = moment().startOf('year');
@@ -97,7 +97,7 @@ export default {
 
         this.card.options.endpoint = this.card.options.endpoint !== undefined ?
             this.card.options.endpoint :
-            document.URL.replace('admin', 'nova-api');
+            document.URL.replace('admin/dashboards', 'nova-vendor/insight-filters');
 
         this.card.filters.period = this.card.filters.period !== undefined ? this.card.filters.period : {
             show: true,
@@ -110,7 +110,15 @@ export default {
             show: false,
             list: [],
             default: null,
-            selected: ''
+            selected: [],
+            placeholder: ''
+        };
+
+        this.card.filters.category = this.card.filters.category !== undefined ? this.card.filters.category : {
+            show: false,
+            list: [],
+            default: null,
+            selected: []
         };
 
         this.card.options.xAxis = this.card.options.xAxis !== undefined ? this.card.options.xAxis : {categories: []};
@@ -140,7 +148,14 @@ export default {
                     show: this.card.filters.subset.show !== undefined ? this.card.filters.subset.show : true,
                     list: this.card.filters.subset.list !== undefined ? this.card.filters.subset.list : [],
                     default: this.card.filters.subset.default !== undefined ? this.card.filters.subset.default : null,
-                    selected: this.card.filters.subset.selected !== undefined ? this.card.filters.subset.selected : null
+                    selected: this.card.filters.subset.selected !== undefined ? this.card.filters.subset.selected : [],
+                    placeholder: this.card.filters.subset.placeholder !== undefined ? this.card.filters.subset.placeholder : ''
+                },
+                category: {
+                    show: this.card.filters.category.show !== undefined ? this.card.filters.category.show : true,
+                    list: this.card.filters.category.list !== undefined ? this.card.filters.category.list : [],
+                    default: this.card.filters.category.default !== undefined ? this.card.filters.category.default : null,
+                    selected: this.card.filters.category.selected !== undefined ? this.card.filters.category.selected : []
                 }
             },
             chartTooltips: this.card.options.tooltips !== undefined ? this.card.options.tooltips : undefined,
@@ -178,20 +193,26 @@ export default {
         dateFormat (datetime) {
             return moment(datetime).format('YYYY-MM-DD')
         },
+        onSelectCategory(items) {
+            this.filters.category.selected = items
+            this.refresh();
+        },
+        onSelectSubset(items) {
+            this.filters.subset.selected = items
+            this.refresh();
+        },
         refresh() {
-            Nova.request().get(this.card.options.endpoint, {
-                params: {
-                    period: this.filters.period.selected,
-                    subset: this.filters.subset.selected,
-                    from: this.dateFormat(this.filters.datePicker.dateRange.startDate),
-                    to: this.dateFormat(this.filters.datePicker.dateRange.endDate)
-                },
+            Nova.request().post(this.card.options.endpoint, {
+                period: this.filters.period.selected,
+                subset: this.filters.subset.selected.map((item) => item.value),
+                category: this.filters.category.selected.map((item) => item.value),
+                from: this.dateFormat(this.filters.datePicker.dateRange.startDate),
+                to: this.dateFormat(this.filters.datePicker.dateRange.endDate)
             }).then(({data}) => {
-                const chartData = data.cards.filter((card) => card.component === 'area-chart')[0];
+                this.fillData(data.legends, data.series);
 
-                if (chartData) {
-                    this.fillData(chartData.options.xAxis.categories, chartData.series);
-                }
+                this.filters.subset.list = data.filters.subset.list;
+                this.filters.category.list = data.filters.category.list;
             }).catch((error) => console.warn(error));
         },
         fillData(labels, datasets) {

@@ -25,18 +25,29 @@ abstract class AbstractAverageRequest extends Request implements InsightRequestI
         return $this->input('to', Date::now()->format('Y-m-d'));
     }
 
-    public function getSubset(): ?string
+    public function getSubset(): array
     {
-        return $this->input('subset', '');
+        return $this->input('subset', []);
+    }
+
+    public function getCategory(): array
+    {
+        return $this->input('category', []);
     }
 
     /** @noinspection PhpArrayShapeAttributeCanBeAddedInspection */
     protected function getRules(): array
     {
         return [
-            'period' => Rule::in([self::PERIOD_PER_DAY, self::PERIOD_PER_WEEK]), // by the moment
-            'from'   => $this->validFromDate(),
-            'to'     => $this->validToDate(),
+            'period' => Rule::in([
+                self::PERIOD_PER_DAY,
+                self::PERIOD_PER_WEEK,
+                self::PERIOD_PER_MONTH,
+                self::PERIOD_PER_QUARTER,
+                self::PERIOD_PER_YEAR,
+            ]),
+            'from' => $this->validFromDate(),
+            'to'   => $this->validToDate(),
         ];
     }
 

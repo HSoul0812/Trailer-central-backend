@@ -16,6 +16,7 @@ use TrailerTrader\Insights\AreaChart;
 abstract class AbstractAverageByManufacturerInsights extends Dashboard
 {
     use WithCardRequestBindings;
+    use WithColorPalette;
     use Helpers;
 
     public function __construct(private AverageByManufacturerServiceInterface $service, ?string $component = null)
@@ -27,16 +28,50 @@ abstract class AbstractAverageByManufacturerInsights extends Dashboard
 
     /**
      * Get the cards for the dashboard.
+     *
+     * @throws \Dingo\Api\Exception\ResourceException                when some validation error has appeared
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException when some unknown error has appeared
      */
     public function cards(InsightRequestInterface $request): array
     {
+        $data = $this->data($request);
+
+        return [
+            (new AreaChart())
+                ->title('YOY % CHANGE')
+                ->uriKey(static::uriKey())
+                ->animations([
+                    'enabled' => true,
+                    'easing'  => 'easeinout',
+                ])
+                ->series($data['series'])
+                ->filters($data['filters'])
+                ->options([
+                    'xAxis' => [
+                        'categories' => $data['legends'],
+                    ],
+                ]),
+        ];
+    }
+
+    /**
+     * @throws \Dingo\Api\Exception\ResourceException                when some validation error has appeared
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException when some unknown error has appeared
+     *
+     * @return array{series: array<array>, legends: array<string>, filters: array<array>}
+     */
+    public function data(InsightRequestInterface $request): array
+    {
         if ($request->validate()) {
-            $insights = $this->service->collect(new CriteriaBuilder([
+            $criteriaBuilder = new CriteriaBuilder([
                 'period'       => $request->getPeriod(),
                 'from'         => $request->getFrom(),
                 'to'           => $request->getTo(),
                 'manufacturer' => $request->getSubset(),
-            ]));
+                'category'     => $request->getCategory(),
+            ]);
+
+            $insights = $this->service->collect($criteriaBuilder);
 
             $series = [
                 [
@@ -49,55 +84,66 @@ abstract class AbstractAverageByManufacturerInsights extends Dashboard
             ];
 
             if (!is_null($insights->subset)) {
-                $series[] = [
-                    'barPercentage'   => 0.5,
-                    'label'           => $request->getSubset(),
-                    'borderColor'     => '#008AC5',
-                    'backgroundColor' => 'rgba(0, 138, 197, 0.2)',
-                    'data'            => $insights->subset,
-                ];
+                $colors = $this->generateColorPalette();
+                $colorIndex = 0;
+
+                foreach ($insights->subset as $title => $subset) {
+                    if (count($colors) === $colorIndex) {
+                        $colorIndex = 0;
+                    }
+
+                    $series[] = [
+                        'barPercentage'   => 0.5,
+                        'label'           => $title,
+                        'borderColor'     => $colors[$colorIndex],
+                        'backgroundColor' => $this->hex2rgb($colors[$colorIndex]),
+                        'data'            => $subset,
+                    ];
+
+                    ++$colorIndex;
+                }
             }
 
             $manufacturerList = $this->service
-                ->getAllManufacturers()
+                ->getAllManufacturers($criteriaBuilder)
                 ->map(fn (stdClass $item) => [
                     'text' => $item->manufacturer, 'value' => $item->manufacturer,
                 ])
-                ->prepend(['value' => '', 'text' => 'Manufacturer'])
+                ->toArray();
+
+            $categoryList = $this->service
+                ->getAllCategories($criteriaBuilder)
+                ->map(fn (stdClass $item) => [
+                    'text' => ucfirst(strtolower(str_replace(['_', '-'], [' ', ' '], $item->category))), 'value' => $item->category,
+                ])
                 ->toArray();
 
             return [
-                (new AreaChart())
-                    ->title('YOY % CHANGE')
-                    ->uriKey(static::uriKey())
-                    ->animations([
-                        'enabled' => true,
-                        'easing'  => 'easeinout',
-                    ])
-                    ->series($series)
-                    ->filters([
-                        'subset' => [
-                            'show'     => true,
-                            'list'     => $manufacturerList,
-                            'default'  => 'Manufacturer',
-                            'selected' => $request->getSubset(),
+                'series'  => $series,
+                'legends' => $insights->legends,
+                'filters' => [
+                    'subset' => [
+                        'show'        => true,
+                        'list'        => $manufacturerList,
+                        'selected'    => $request->getSubset(),
+                        'placeholder' => 'Select a manufacturer',
+                    ],
+                    'category' => [
+                        'show'     => true,
+                        'list'     => $categoryList,
+                        'selected' => $request->getCategory(),
+                    ],
+                    'period' => [
+                        'selected' => $request->getPeriod(),
+                    ],
+                    'datePicker' => [
+                        'show'      => true,
+                        'dateRange' => [
+                            'startDate' => $request->getFrom(),
+                            'endDate'   => $request->getTo(),
                         ],
-                        'period' => [
-                            'selected' => $request->getPeriod(),
-                        ],
-                        'datePicker' => [
-                            'show'      => true,
-                            'dateRange' => [
-                                'startDate' => $request->getFrom(),
-                                'endDate'   => $request->getTo(),
-                            ],
-                        ],
-                    ])
-                    ->options([
-                        'xAxis' => [
-                            'categories' => $insights->legends,
-                        ],
-                    ]),
+                    ],
+                ],
             ];
         }
 

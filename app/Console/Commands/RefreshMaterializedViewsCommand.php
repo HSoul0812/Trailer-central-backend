@@ -10,23 +10,19 @@ use Illuminate\Database\ConnectionInterface;
 
 class RefreshMaterializedViewsCommand extends Command
 {
-    public const RECURRENCE_DAILY = 'daily';
-    public const RECURRENCE_WEEKLY = 'weekly';
-    public const RECURRENCE_DEFAULT = self::RECURRENCE_DAILY;
-
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'db:refresh-views {recurrence=daily}';
+    protected $signature = 'db:refresh-views';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = "Refresh the materialized views defined on 'config/materializedviews.php' with a desired recurrence";
+    protected $description = 'Refresh all materialized views';
 
     public function __construct(private ConnectionInterface $connection, private LoggerServiceInterface $logger)
     {
@@ -35,23 +31,31 @@ class RefreshMaterializedViewsCommand extends Command
 
     public function handle(): void
     {
-        $recurrence = $this->getRecurrence();
+        $this->logger->info('[RefreshMaterializedViewsCommand] db:refresh-views');
 
-        $this->logger->info("[RefreshMaterializedViewsCommand] db:refresh-views {{$recurrence}}");
+        $viewsToMaterialize = [
+            'inventory_price_average_per_day',
+            'inventory_price_average_per_month',
+            'inventory_price_average_per_quarter',
+            'inventory_price_average_per_week',
+            'inventory_price_average_per_year',
+            'inventory_stock_average_per_day',
+            'inventory_stock_average_per_month',
+            'inventory_stock_average_per_quarter',
+            'inventory_stock_average_per_week',
+            'inventory_stock_average_per_year',
+            'leads_average_per_day',
+            'leads_average_per_month',
+            'leads_average_per_quarter',
+            'leads_average_per_week',
+            'leads_average_per_year',
+        ];
 
-        foreach (config("materializedviews.$recurrence") as $viewName) {
+        foreach ($viewsToMaterialize as $viewName) {
             $this->logger->info("[RefreshMaterializedViewsCommand] materializing `$viewName`");
+            $this->info("[RefreshMaterializedViewsCommand] materializing `$viewName`");
 
             $this->connection->statement("REFRESH MATERIALIZED VIEW $viewName");
         }
-    }
-
-    private function getRecurrence(): string
-    {
-        $recurrence = $this->argument('recurrence');
-
-        return in_array($recurrence, [self::RECURRENCE_DAILY, self::RECURRENCE_WEEKLY], true) ?
-            $recurrence :
-            self::RECURRENCE_DEFAULT;
     }
 }
