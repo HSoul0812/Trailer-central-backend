@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\App\Transformers\MapSearch;
 
-use App\Transformers\MapSearch\HereMapSearchTransformer;
+use App\DTOs\MapSearch\HereApiResponse;
+use App\Transformers\MapSearch\HereApiResponseTransformer;
 use Tests\Common\UnitTestCase;
 
 class HereMapSearchTransformerTest extends UnitTestCase
@@ -225,8 +226,8 @@ class HereMapSearchTransformerTest extends UnitTestCase
      */
     public function testTransformer($json, $expectedResponse)
     {
-        $jsonObject = json_decode($json);
-        $transformer = new HereMapSearchTransformer();
+        $jsonObject = HereApiResponse::fromData(json_decode($json, true));
+        $transformer = new HereApiResponseTransformer();
         $response = $transformer->transform($jsonObject);
         $this->assertJsonStringEqualsJsonString(json_encode($response), $expectedResponse);
     }

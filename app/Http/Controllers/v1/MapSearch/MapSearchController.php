@@ -17,15 +17,12 @@ use \Dingo\Api\Http\Response;
 
 class MapSearchController extends AbstractRestfulController
 {
-    private MapSearchServiceInterface $mapSearchService;
 
     /**
      * @param MapSearchServiceInterface $mapSearchService
      */
-    public function __construct(MapSearchServiceInterface $mapSearchService)
-    {
+    public function __construct(private MapSearchServiceInterface $mapSearchService){
         parent::__construct();
-        $this->mapSearchService = $mapSearchService;
     }
 
     /**

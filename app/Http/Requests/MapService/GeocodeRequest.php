@@ -12,9 +12,4 @@ class GeocodeRequest extends Request implements IndexRequestInterface
     protected array $rules = [
         'q' => 'required',
     ];
-
-    public function validate(): bool
-    {
-        return parent::validate();
-    }
 }

@@ -13,9 +13,4 @@ class ReverseRequest extends Request implements IndexRequestInterface
         'lat' => 'required|between:-90,90',
         'lng' => 'required|between:-180,180',
     ];
-
-    public function validate(): bool
-    {
-        return parent::validate();
-    }
 }
