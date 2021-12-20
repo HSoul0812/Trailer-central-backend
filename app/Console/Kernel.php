@@ -2,6 +2,8 @@
 
 namespace App\Console;
 
+use App\Console\Commands\CRM\Interactions\ReimportInteractionMessages;
+use App\Console\Commands\CRM\Interactions\ResetInteractionMessages;
 use App\Console\Commands\Files\ClearLocalTmpFolder;
 use App\Console\Commands\Inventory\AutoArchiveSoldItems;
 use App\Console\Commands\Website\AddSitemaps;
@@ -46,7 +48,9 @@ class Kernel extends ConsoleKernel
         GenerateDealerSpecificSiteUrls::class,
         AutoArchiveSoldItems::class,
         FixFloorplanBillStatus::class,
-        FixEmptyManufacturerUnitSale::class
+        FixEmptyManufacturerUnitSale::class,
+        ResetInteractionMessages::class,
+        ReimportInteractionMessages::class
     ];
 
     /**

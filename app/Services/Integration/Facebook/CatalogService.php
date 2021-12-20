@@ -256,14 +256,20 @@ class CatalogService implements CatalogServiceInterface
             if(empty($integration->business_id) && empty($integration->catalog_id)) {
                 continue;
             }
+            $this->log->debug('Handling Catalog #' . $integration->catalog_id . ' for Business #' . $integration->business_id);
 
             // Get Access Token and Feed ID
             $catalog = $this->catalogs->findOne(['catalog_id' => $integration->catalog_id]);
             $feedId = !empty($catalog->feed) ? $catalog->feed->feed_id : 0;
+            if(empty($catalog->accessToken)) {
+                $this->log->error('Catalog Access Token MISSING, Cannot Process Catalog #' . $integration->catalog_id);
+                continue;
+            }
 
             // Get Feed ID From SDK
             $feedId = $this->scheduleFeed($catalog->accessToken, $integration->business_id, $integration->catalog_id, $feedId);
             if(empty($feedId)) {
+                $this->log->error('Feed Does Not Exist and Could Not Be Created for Catalog ID #' . $integration->catalog_id);
                 continue;
             }
 
@@ -275,12 +281,16 @@ class CatalogService implements CatalogServiceInterface
 
             // Create Job
             if($integration->catalog_type === Catalog::VEHICLE_TYPE) {
-                $this->dispatch(new VehicleJob($integration, $feed->feed_url));
+                $job = new VehicleJob($integration, $feed->feed_url);
             } elseif($integration->catalog_type === Catalog::HOME_TYPE) {
-                $this->dispatch(new HomeJob($integration, $feed->feed_url));
+                $job = new HomeJob($integration, $feed->feed_url);
             } else {
-                $this->dispatch(new ProductJob($integration, $feed->feed_url));
+                $job = new ProductJob($integration, $feed->feed_url);
             }
+
+            // Dispatching Job
+            $this->log->info('Dispatching a ' . $integration->catalog_type . ' Catalog Job');
+            $this->dispatch($job->onQueue('fb-catalog'));
         }
 
         // Return Response
