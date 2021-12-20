@@ -12,6 +12,7 @@ use App\Http\Requests\Parts\Type\IndexTypeRequest;
 use App\Http\Requests\UpdateRequestInterface;
 use App\Repositories\Parts\TypeRepositoryInterface;
 use App\Transformers\Parts\TypeTransformer;
+use Dingo\Api\Http\Response;
 
 class TypeController extends AbstractRestfulController
 {
@@ -47,7 +48,7 @@ class TypeController extends AbstractRestfulController
     /**
      * {@inheritDoc}
      */
-    public function index(IndexRequestInterface $request)
+    public function index(IndexRequestInterface $request): Response
     {
         if ($request->validate()) {
             return $this->response->collection($this->typeRepo->getAll($request), $this->typesTransformer);

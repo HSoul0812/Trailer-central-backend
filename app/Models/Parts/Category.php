@@ -6,6 +6,7 @@ namespace App\Models\Parts;
 
 use App\Support\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Category extends Model
 {
@@ -30,7 +31,7 @@ class Category extends Model
        'pivot',
      ];
 
-    public function types()
+    public function types(): BelongsToMany
     {
         return $this->belongsToMany(Type::class, 'part_category_part_type', 'part_type_id', 'part_category_id')->select('id', 'name');
     }
