@@ -31,7 +31,11 @@ class EmailHistoryObserver
      */
     public function created(EmailHistory $emailHistory)
     {
-        $isIncoming = isset($emailHistory->lead->email_address) && strcasecmp($emailHistory->lead->email_address, $emailHistory->from_email) === 0;
+        if (empty($emailHistory->lead_id)) {
+            return;
+        }
+
+        $isIncoming = strcasecmp($emailHistory->lead->email_address, $emailHistory->from_email) === 0;
 
         $this->interactionMessageRepository->create([
             'message_type' => InteractionMessage::MESSAGE_TYPE_EMAIL,
