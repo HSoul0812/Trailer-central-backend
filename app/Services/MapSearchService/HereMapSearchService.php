@@ -6,16 +6,10 @@ namespace App\Services\MapSearchService;
 
 use App\DTOs\MapSearch\HereApiResponse;
 use App\Transformers\MapSearch\HereApiResponseTransformer;
-use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
-use GuzzleHttp\Handler\CurlHandler;
-use GuzzleHttp\HandlerStack;
-use GuzzleHttp\Middleware;
-use GuzzleHttp\Psr7\Uri;
 use JetBrains\PhpStorm\ArrayShape;
 use JetBrains\PhpStorm\Pure;
 use League\Fractal\TransformerAbstract;
-use Psr\Http\Message\RequestInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class HereMapSearchService implements MapSearchServiceInterface
@@ -24,7 +18,9 @@ class HereMapSearchService implements MapSearchServiceInterface
     private const GEOCODE_API_URL = 'https://geocode.search.hereapi.com/v1/geocode';
     private const REVERSE_API_URL = 'https://revgeocode.search.hereapi.com/v1/revgeocode';
 
-    public function __construct(private HereMapSearchClient $httpClient) {}
+    public function __construct(private HereMapSearchClient $httpClient)
+    {
+    }
 
     public static function register()
     {
@@ -34,10 +30,6 @@ class HereMapSearchService implements MapSearchServiceInterface
         });
     }
 
-    /**
-     * @param string $searchText
-     * @return HereApiResponse
-     */
     public function autocomplete(string $searchText): HereApiResponse
     {
         $queryData = ['q' => $searchText, 'in' => 'countryCode:CAN,USA'];
@@ -47,10 +39,6 @@ class HereMapSearchService implements MapSearchServiceInterface
         );
     }
 
-    /**
-     * @param string $address
-     * @return HereApiResponse
-     */
     public function geocode(string $address): HereApiResponse
     {
         $queryData = ['q' => $address, 'in' => 'countryCode:CAN,USA'];
@@ -60,11 +48,6 @@ class HereMapSearchService implements MapSearchServiceInterface
         );
     }
 
-    /**
-     * @param float $lat
-     * @param float $lng
-     * @return HereApiResponse
-     */
     public function reverse(float $lat, float $lng): HereApiResponse
     {
         $queryData = ['at' => "$lat,$lng", 'lang' => 'en-US'];
@@ -86,29 +69,30 @@ class HereMapSearchService implements MapSearchServiceInterface
     /**
      * @param string $method
      * @param string $url
-     * @param array $options
+     * @param array  $options
+     *
      * @return array
      */
     #[ArrayShape([
         'items' => [[
-            'title' => "string",
+            'title'   => 'string',
             'address' => [
-                'label' => 'string',
+                'label'       => 'string',
                 'countryCode' => 'string',
                 'countryName' => 'string',
-                'stateCode' => 'string',
-                'state' => 'string',
-                'county' => 'string',
-                'city' => 'string',
-                'district' => 'string',
-                'street' => 'string',
-                'postalCode' => 'string'
+                'stateCode'   => 'string',
+                'state'       => 'string',
+                'county'      => 'string',
+                'city'        => 'string',
+                'district'    => 'string',
+                'street'      => 'string',
+                'postalCode'  => 'string',
             ],
             'position' => [
                 'lat' => 'float',
-                'lng' => 'float'
-            ]
-        ]]
+                'lng' => 'float',
+            ],
+        ]],
     ])]
     private function handleHttpRequest(string $method, string $url, array $options): array
     {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\MapSearchService;
 
 use GuzzleHttp\Client;
@@ -11,7 +13,8 @@ use Psr\Http\Message\RequestInterface;
 
 class HereMapSearchClient extends Client
 {
-    public static function newClient(): self {
+    public static function newClient(): self
+    {
         $stack = new HandlerStack();
         $stack->setHandler(new CurlHandler());
         $stack->push(Middleware::mapRequest(function (RequestInterface $request) {

@@ -10,7 +10,7 @@ use League\Fractal\TransformerAbstract;
 
 class HereApiResponseItemTransformer extends TransformerAbstract
 {
-    #[ArrayShape(['address' => "array", 'position' => "array|null"])]
+    #[ArrayShape(['address' => 'array', 'position' => 'array|null'])]
     public function transform(HereApiResponseItem $item): array
     {
         $address = $item->address;
