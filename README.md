@@ -140,4 +140,4 @@ php artisan db:seed --class=Database\\Seeders\\Leads\\LeadsAverageSeeder
 How data logs works
 --------------------------------------
 
-Please read/maintain the[Confluence](https://operatebeyond.atlassian.net/wiki/spaces/TN/pages/1923219457/How+data+logs+works) page up to date:
+Please read/maintain the [Confluence](https://operatebeyond.atlassian.net/wiki/spaces/TN/pages/1923219457/How+data+logs+works) page up to date:
