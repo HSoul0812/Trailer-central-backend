@@ -36,7 +36,7 @@ class Type extends Model
     {
         return $this->belongsToMany(Category::class, 'part_category_part_type', 'part_category_id', 'part_type_id')->select('id', 'name');
     }
-    
+
     /**
      * Get the image associated with the type.
      */

@@ -1,12 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Parts;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
-class TypeImage extends Model {
-
+class TypeImage extends Model
+{
     protected $table = 'type_images';
 
     /**
@@ -16,7 +17,7 @@ class TypeImage extends Model {
      */
     protected $fillable = [
         'type_id',
-        'image_url'
+        'image_url',
     ];
 
     /**
@@ -25,7 +26,5 @@ class TypeImage extends Model {
      * @var array
      */
     protected $hidden = [
-
     ];
-
 }

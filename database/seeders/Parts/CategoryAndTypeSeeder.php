@@ -8,6 +8,7 @@ namespace Database\Seeders\Parts;
 
 use App\Models\Parts\Category;
 use App\Models\Parts\Type;
+use App\Models\Parts\TypeImage;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -19,6 +20,8 @@ class CategoryAndTypeSeeder extends Seeder
         'Semi Trailers'     => ['Day Cab Trucks', 'Sleeper Cab Trucks', 'Dump Trucks', 'Lowboy Trailers', 'Drop Deck Trailers', 'Dry Van Trailers', 'Flatbed Semi Trailers', 'Grain Trailers', 'Reefer Trailers', 'Semi Stock Trailers', 'Tank Trailers', 'Other Trucks'],
         'Truck Beds'        => ['Truck Beds'],
     ];
+
+    private const PLACEHOLDER_IMG_URL = 'https://s3.amazonaws.com/crm-trailercentral-dev/placeholder-types.png';
 
     /**
      * Run the database seeds.
@@ -32,10 +35,15 @@ class CategoryAndTypeSeeder extends Seeder
               'name' => $type,
           ]);
 
+            $new_image = TypeImage::create([
+            'image_url' => self::PLACEHOLDER_IMG_URL,
+            'type_id'   => $new_type->id,
+          ]);
+
             foreach ($categories as $category) {
                 $new_category = Category::create([
-                'name' => $category,
-            ]);
+                  'name' => $category,
+                ]);
 
                 $new_type->categories()->save($new_category);
             }
@@ -46,6 +54,7 @@ class CategoryAndTypeSeeder extends Seeder
     {
         Type::truncate();
         Category::truncate();
+        TypeImage::truncate();
         DB::table('part_category_part_type')->truncate();
     }
 }
