@@ -170,7 +170,7 @@ class ProductJob extends Job
      */
     const AVAILABLE = 'in stock';
     const UNAVAILABLE = 'out of stock';
-    const ONORDER = 'on order';
+    const ONORDER = 'available for order';
     const PENDING = 'pending';
 
 
