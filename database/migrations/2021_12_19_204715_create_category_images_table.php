@@ -15,7 +15,7 @@ class CreateCategoryImagesTable extends Migration
     {
         Schema::create('category_images', function (Blueprint $table) {
             $table->id();
-            $table->integer('category_id')->unsigned();
+            $table->integer('category_id')->unsigned()->index('category_images_i_category_id');
             $table->string('image_url');
             $table->timestamps();
         });
