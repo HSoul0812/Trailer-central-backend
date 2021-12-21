@@ -7,18 +7,19 @@ declare(strict_types=1);
 namespace Database\Seeders\Parts;
 
 use App\Models\Parts\Category;
+use App\Models\Parts\CategoryImage;
 use App\Models\Parts\Type;
-use App\Models\Parts\TypeImage;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 class CategoryAndTypeSeeder extends Seeder
 {
     private const TYPES_CATEGORIES = [
-        'Horse & Livestock' => ['Horse Trailers', 'Livestock Trailers', 'Stock Trailers'],
-        'Travel Trailers'   => ['Travel Trailers', 'Fifth Wheels', 'Toy Haulers', 'Camper Trailers'],
-        'Semi Trailers'     => ['Day Cab Trucks', 'Sleeper Cab Trucks', 'Dump Trucks', 'Lowboy Trailers', 'Drop Deck Trailers', 'Dry Van Trailers', 'Flatbed Semi Trailers', 'Grain Trailers', 'Reefer Trailers', 'Semi Stock Trailers', 'Tank Trailers', 'Other Trucks'],
-        'Truck Beds'        => ['Truck Beds'],
+        'Equipment Trailers' => ['Cargo Trailers (Enclosed)', 'Flatbed Trailers', 'Car Haulers', 'Tilt Trailers', 'Utility Trailers', 'Equipment Trailers', 'Dump Trailers', 'Car / Racing Trailers', 'Snowmobile', 'ATV Trailers', 'Watercraft Trailers', 'Concession Trailers (Vending / Concession)', 'Tow Dollys', 'Fiber Optic Trailers', 'Motorcycle Trailers', 'Other Trailers', 'Cycle Trailers'],
+        'Horse & Livestock'  => ['Horse Trailers', 'Livestock Trailers', 'Stock Trailers'],
+        'Travel Trailers'    => ['Travel Trailers', 'Fifth Wheels', 'Toy Haulers', 'Camper Trailers'],
+        'Semi Trailers'      => ['Day Cab Trucks', 'Sleeper Cab Trucks', 'Dump Trucks', 'Lowboy Trailers', 'Drop Deck Trailers', 'Dry Van Trailers', 'Flatbed Semi Trailers', 'Grain Trailers', 'Reefer Trailers', 'Semi Stock Trailers', 'Tank Trailers', 'Other Trucks'],
+        'Truck Beds'         => ['Truck Beds'],
     ];
 
     private const PLACEHOLDER_IMG_URL = 'https://s3.amazonaws.com/crm-trailercentral-dev/placeholder-types.png';
@@ -35,14 +36,14 @@ class CategoryAndTypeSeeder extends Seeder
               'name' => $type,
           ]);
 
-            $new_image = TypeImage::create([
-            'image_url' => self::PLACEHOLDER_IMG_URL,
-            'type_id'   => $new_type->id,
-          ]);
-
             foreach ($categories as $category) {
                 $new_category = Category::create([
                   'name' => $category,
+                ]);
+
+                $new_image = CategoryImage::create([
+                  'image_url'   => self::PLACEHOLDER_IMG_URL,
+                  'category_id' => $new_category->id,
                 ]);
 
                 $new_type->categories()->save($new_category);
@@ -54,7 +55,7 @@ class CategoryAndTypeSeeder extends Seeder
     {
         Type::truncate();
         Category::truncate();
-        TypeImage::truncate();
+        CategoryImage::truncate();
         DB::table('part_category_part_type')->truncate();
     }
 }

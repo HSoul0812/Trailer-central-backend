@@ -6,9 +6,9 @@ namespace App\Models\Parts;
 
 use Illuminate\Database\Eloquent\Model;
 
-class TypeImage extends Model
+class CategoryImage extends Model
 {
-    protected $table = 'type_images';
+    protected $table = 'category_images';
 
     /**
      * The attributes that are mass assignable.
@@ -16,7 +16,7 @@ class TypeImage extends Model
      * @var array
      */
     protected $fillable = [
-        'type_id',
+        'category_id',
         'image_url',
     ];
 
