@@ -385,7 +385,7 @@ class TextrailMagento implements DataProviderInterface,
               $description = $custom_attribute->value;
             }
 
-            if ($custom_attribute->attribute_code == 'category_ids') {
+            if ($custom_attribute->attribute_code == 'category_ids' && !empty($custom_attribute->value[0])) {
               $category_id = $custom_attribute->value[0];
             }
 
