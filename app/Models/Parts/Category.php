@@ -7,6 +7,7 @@ namespace App\Models\Parts;
 use App\Support\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Category extends Model
 {
@@ -34,5 +35,13 @@ class Category extends Model
     public function types(): BelongsToMany
     {
         return $this->belongsToMany(Type::class, 'part_category_part_type', 'part_type_id', 'part_category_id')->select('id', 'name');
+    }
+
+    /**
+     * Get the image associated with the category.
+     */
+    public function image(): HasOne
+    {
+        return $this->hasOne(CategoryImage::class)->select('id', 'image_url', 'category_id');
     }
 }
