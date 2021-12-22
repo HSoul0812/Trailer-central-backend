@@ -5,6 +5,7 @@ namespace App\Transformers\CRM\Text;
 use League\Fractal\TransformerAbstract;
 use App\Models\CRM\Text\Campaign;
 use App\Transformers\CRM\Leads\LeadTransformer;
+use App\Transformers\CRM\Text\CampaignReportTransformer;
 
 class CampaignTransformer extends TransformerAbstract
 {
@@ -12,6 +13,30 @@ class CampaignTransformer extends TransformerAbstract
         'leads',
         'report'
     ];
+
+    /**
+     * @var LeadTransformer
+     */
+    private $leadTransformer;
+
+    /**
+     * @var CampaignReportTransformer
+     */
+    private $reportTransformer;
+
+    /**
+     * CampaignTransformer constructor.
+     * 
+     * @param LeadTransformer $leadTransformer
+     * @param CampaignReportTransformer $reportTransformer
+     */
+    public function __construct(
+        LeadTransformer $leadTransformer,
+        CampaignReportTransformer $reportTransformer
+    ) {
+        $this->leadTransformer = $leadTransformer;
+        $this->reportTransformer = $reportTransformer;
+    }
 
     public function transform(Campaign $campaign)
     {
@@ -37,11 +62,11 @@ class CampaignTransformer extends TransformerAbstract
 
     public function includeLeads(Campaign $campaign)
     {
-        return $this->collection($campaign->leads, new LeadTransformer());
+        return $this->collection($campaign->leads, $this->leadTransformer);
     }
 
     public function includeReport(Campaign $campaign)
     {
-        return $this->item($campaign->stats, new CampaignReportTransformer());
+        return $this->item($campaign->stats, $this->reportTransformer);
     }
 }
