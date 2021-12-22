@@ -7,6 +7,7 @@ use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadType;
+use App\Services\CRM\Text\DTOs\BlastStats;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
@@ -142,6 +143,23 @@ class Blast extends Model
                     ->whereNull(Stop::getTableName() . '.sms_number')
                     ->whereNull(BlastSent::getTableName() . '.text_campaign_id')
                     ->get();
+    }
+
+
+    /**
+     * Get Status for Text Blast
+     * 
+     * @return BlastStats
+     */
+    public function getStatsAttribute(): BlastStats
+    {
+        // Get Leads for Blast
+        return new BlastStats([
+            'skipped' => $this->skipped,
+            'sent' => $this->success,
+            'failed' => $this->failed,
+            'unsubscribed' => $this->unsubscribed
+        ]);
     }
 
     /**

@@ -7,6 +7,7 @@ use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadType;
+use App\Services\CRM\Text\DTOs\CampaignStats;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
@@ -140,6 +141,23 @@ class Campaign extends Model
                     ->whereNull(Stop::getTableName() . '.sms_number')
                     ->whereNull('crm_text_campaign_sent.text_campaign_id')
                     ->get();
+    }
+
+
+    /**
+     * Get Status for Text Campaign
+     * 
+     * @return CampaignStats
+     */
+    public function getStatsAttribute(): CampaignStats
+    {
+        // Get Leads for Campaign
+        return new CampaignStats([
+            'skipped' => $this->skipped,
+            'sent' => $this->success,
+            'failed' => $this->failed,
+            'unsubscribed' => $this->unsubscribed
+        ]);
     }
 
     /**
