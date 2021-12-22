@@ -69,6 +69,6 @@ class BlastTransformer extends TransformerAbstract
 
     public function includeReport(Blast $blast)
     {
-        return $this->collection($blast->stats, $this->reportTransformer);
+        return $this->item($blast->stats, $this->reportTransformer);
     }
 }
