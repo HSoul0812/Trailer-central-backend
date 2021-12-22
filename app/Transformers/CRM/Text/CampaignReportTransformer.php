@@ -2,7 +2,7 @@
 
 namespace App\Transformers\CRM\Text;
 
-use App\Models\CRM\Text\CampaignStats;
+use App\Services\CRM\Text\DTOs\CampaignStats;
 use League\Fractal\TransformerAbstract;
 
 class CampaignReportTransformer extends TransformerAbstract

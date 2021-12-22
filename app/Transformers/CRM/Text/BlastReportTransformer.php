@@ -2,7 +2,7 @@
 
 namespace App\Transformers\CRM\Text;
 
-use App\Models\CRM\Text\BlastStats;
+use App\Services\CRM\Text\DTOs\BlastStats;
 use League\Fractal\TransformerAbstract;
 
 class BlastReportTransformer extends TransformerAbstract
