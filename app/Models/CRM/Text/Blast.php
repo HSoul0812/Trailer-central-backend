@@ -132,16 +132,16 @@ class Blast extends Model
 
 
     /**
-     * Get Leads for Campaign
+     * Get Leads for Text Blast
      * 
      * @return Collection of Leads
      */
     public function getLeadsAttribute()
     {
-        // Get Leads for Campaign
+        // Get Leads for Blast
         return $this->leadsBase()
                     ->whereNull(Stop::getTableName() . '.sms_number')
-                    ->whereNull(BlastSent::getTableName() . '.text_campaign_id')
+                    ->whereNull(BlastSent::getTableName() . '.text_blast_id')
                     ->get();
     }
 
@@ -163,15 +163,15 @@ class Blast extends Model
     }
 
     /**
-     * Get Skipped Leads for Campaign
+     * Get Skipped Leads for Text Blast
      * 
      * @return int
      */
     public function getSkippedAttribute(): int
     {
-        // Get Leads for Campaign
+        // Get Number of Skipped Leads on Blast
         return $this->leadsBase()
-                    ->whereNotIn(CampaignSent::getTableName() . '.status', CampaignSent::STATUS_SUCCESS)
+                    ->whereNotIn(BlastSent::getTableName() . '.status', BlastSent::STATUS_SUCCESS)
                     ->count();
     }
 
@@ -182,16 +182,16 @@ class Blast extends Model
      */
     public function getUnsubscribedAttribute(): int
     {
-        // Get Leads for Campaign
+        // Get Number of Unsubscribed Leads on Blast
         return $this->leadsBase()
-                    ->whereNotNull(BlastSent::getTableName() . '.text_campaign_id')
+                    ->whereNotNull(BlastSent::getTableName() . '.text_blast_id')
                     ->count();
     }
 
     /**
-     * Get Leads for Blast
+     * Get Builder Object for Blast Leads
      * 
-     * @return Collection of Leads
+     * @return Builder
      */
     private function leadsBase(): Builder
     {
