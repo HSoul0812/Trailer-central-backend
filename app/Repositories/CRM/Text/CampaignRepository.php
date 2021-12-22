@@ -112,6 +112,8 @@ class CampaignRepository implements CampaignRepositoryInterface {
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
         }
+        echo $query->toSql();
+        die;
         
         return $query->paginate($params['per_page'])->appends($params);
     }

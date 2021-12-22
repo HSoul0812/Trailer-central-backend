@@ -125,11 +125,8 @@ class BlastRepository implements BlastRepositoryInterface {
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
         }
-
-        // Return All?
-        if($params['per_page'] === 'all') {
-            return $query->get();
-        }
+        echo $query->toSql();
+        die;
         
         return $query->paginate($params['per_page'])->appends($params);
     }
