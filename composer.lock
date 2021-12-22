@@ -2142,7 +2142,7 @@
         },
         {
             "name": "feed/edit-mapping",
-            "version": "dev-develop",
+            "version": "dev-feature/DMM-190",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/EditMapping",
@@ -11975,5 +11975,5 @@
         "ext-json": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.1.0"
+    "plugin-api-version": "2.2.0"
 }
