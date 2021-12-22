@@ -11,6 +11,7 @@ use App\Services\CRM\Text\DTOs\CampaignStats;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Class Text Campaign
