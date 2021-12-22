@@ -33,6 +33,6 @@ class Type extends Model
 
     public function categories(): BelongsToMany
     {
-        return $this->belongsToMany(Category::class, 'part_category_part_type', 'part_category_id', 'part_type_id')->select('id', 'name')->with('image');
+        return $this->belongsToMany(Category::class, 'part_category_part_type', 'part_category_id', 'part_type_id')->select('id', 'name', 'description')->with('image');
     }
 }
