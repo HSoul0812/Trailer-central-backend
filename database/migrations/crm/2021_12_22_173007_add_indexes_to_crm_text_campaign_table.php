@@ -14,7 +14,11 @@ class AddIndexesToCrmTextCampaignTable extends Migration
     public function up()
     {
         Schema::table('crm_text_campaign', function (Blueprint $table) {
-            //
+            $table->index('user_id', 'USER_ID_SOLO');
+        });
+
+        Schema::table('crm_text_blast', function (Blueprint $table) {
+            $table->index('user_id', 'USER_ID_SOLO');
         });
     }
 
@@ -26,7 +30,11 @@ class AddIndexesToCrmTextCampaignTable extends Migration
     public function down()
     {
         Schema::table('crm_text_campaign', function (Blueprint $table) {
-            //
+            $table->dropIndex('USER_ID_SOLO');
+        });
+
+        Schema::table('crm_text_blast', function (Blueprint $table) {
+            $table->dropIndex('USER_ID_SOLO');
         });
     }
 }
