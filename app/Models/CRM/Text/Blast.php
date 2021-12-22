@@ -157,8 +157,8 @@ class Blast extends Model
         // Get Leads for Blast
         return new BlastStats([
             'skipped' => $this->skipped,
-            'sent' => $this->success,
-            'failed' => $this->failed,
+            'sent' => $this->success->count(),
+            'failed' => $this->failed->count(),
             'unsubscribed' => $this->unsubscribed
         ]);
     }
