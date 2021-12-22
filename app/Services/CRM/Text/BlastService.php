@@ -97,21 +97,17 @@ class BlastService implements BlastServiceInterface
      */
     public function send(NewDealerUser $dealer, Blast $blast): Collection {
         // Get From Number
-        $from_number = $blast->from_sms_number;
-        if(empty($from_number)) {
-            $from_number = $this->dealerLocation->findDealerSmsNumber($dealer->id);
-            if(empty($from_number)) {
-                throw new NoBlastSmsFromNumberException();
-            }
-        }
+        $from_number = $this->getFromNumber($dealer->id, $blast);
 
         // Get Unsent Blast Leads
         if(count($blast->leads) < 1) {
+            $this->log->error('No Leads found for Blast #' . $blast->id . ' for Dealer #: ' . $dealer->id);
             throw new NoLeadsDeliverBlastException();
         }
 
         // Loop Leads for Current Dealer
         $sent = new Collection();
+        $this->log->debug('Found ' . $blast->leads->count() . ' Leads for Blast #' . $blast->id);
         foreach($blast->leads as $lead) {
             // Not a Valid To Number?!
             if(empty($lead->text_phone)) {
@@ -130,6 +126,33 @@ class BlastService implements BlastServiceInterface
 
         // Return Blast Sent Entries
         return $sent;
+    }
+
+
+    /**
+     * Get From Number
+     * 
+     * @param int $dealerId
+     * @param Blast $blast
+     * @throw NoBlastSmsFromNumberException
+     * @return string
+     */
+    private function getFromNumber(int $dealerId, Blast $blast): string {
+        // Get From Number
+        $chosenNumber = $blast->from_sms_number;
+        if(!empty($chosenNumber)) {
+            return $chosenNumber;
+        }
+
+        // Get First Available Number From Dealer Location
+        $defaultNumber = $this->dealerLocation->findDealerSmsNumber($dealerId);
+        if(!empty($defaultNumber)) {
+            return $defaultNumber;
+        }
+
+        // Throw Exception
+        $this->log->error('No Blast SMS From Number for Dealer #: ' . $dealerId);
+        throw new NoBlastSmsFromNumberException;
     }
 
     /**
@@ -154,6 +177,17 @@ class BlastService implements BlastServiceInterface
             // Send Text
             $this->textService->send($from_number, $lead->text_phone, $textMessage, $lead->full_name);
             $status = BlastSent::STATUS_SENT;
+
+            // Update Lead Status
+            if($this->updateLead($lead)) {
+                $status = BlastSent::STATUS_LEAD;
+            }
+
+            // Save Text to DB
+            $textLog = $this->saveText($from_number, $lead, $textMessage);
+            if(!empty($textLog->id)) {
+                $status = CampaignSent::STATUS_LOGGED;
+            }
         } catch (CustomerLandlineNumberException $ex) {
             $status = BlastSent::STATUS_LANDLINE;
         } catch (\Exception $ex) {
@@ -161,60 +195,60 @@ class BlastService implements BlastServiceInterface
         }
 
         // Return Sent Result
-        return $this->markLeadSent($from_number, $blast, $lead, $textMessage, $status);
+        return $this->markLeadSent($blast, $lead, $status, $textLog);
+    }
+
+    /**
+     * Update Lead Status
+     * 
+     * @param Lead $lead
+     * @return LeadStatus
+     */
+    private function updateLead(Lead $lead): LeadStatus {
+        // Save Lead Status
+        return $this->leadStatus->createOrUpdate([
+            'lead_id' => $lead->identifier,
+            'status' => Lead::STATUS_MEDIUM,
+            'next_contact_date' => Carbon::now()->addDay()->toDateTimeString()
+        ]);
+    }
+
+    /**
+     * Save Text to DB
+     * 
+     * @param string $from_number sms from number
+     * @param Lead $lead
+     * @param string $textMessage filled text message
+     * @return TextLog
+     */
+    private function saveText(string $from_number, Lead $lead, string $textMessage): TextLog {
+        // Log SMS
+        return $this->texts->create([
+            'lead_id'     => $lead->identifier,
+            'from_number' => $from_number,
+            'to_number'   => $lead->text_phone,
+            'log_message' => $textMessage
+        ]);
     }
 
     /**
      * Mark Lead as Sent
      * 
-     * @param string $from_number sms from number
      * @param Blast $blast
      * @param Lead $lead
-     * @param string $textMessage filled text message
      * @param string $status
+     * @param null|TextLog $textLog
      * @return BlastSent
      */
-    private function markLeadSent(string $from_number, Blast $blast, Lead $lead,
-                                    string $textMessage, string $status): BlastSent {
-        // Handle Transaction
-        $textLog = null;
-        DB::transaction(function() use ($from_number, $lead, $textMessage, &$status, &$textLog) {
-            // Save Lead Status
-            $this->leadStatus->createOrUpdate([
-                'lead_id' => $lead->identifier,
-                'status' => Lead::STATUS_MEDIUM,
-                'next_contact_date' => Carbon::now()->addDay()->toDateTimeString()
-            ]);
-            $status = BlastSent::STATUS_LEAD;
-
-            // Log SMS
-            $textLog = $this->texts->create([
-                'lead_id'     => $lead->identifier,
-                'from_number' => $from_number,
-                'to_number'   => $lead->text_phone,
-                'log_message' => $textMessage
-            ]);
-        });
-
-        // Set Logged Status
-        if(!empty($textLog->id)) {
-            $status = BlastSent::STATUS_LOGGED;
-        }
-
-        // Handle Transaction
-        $sent = null;
-        DB::transaction(function() use ($blast, $lead, &$status, &$textLog, &$sent) {
-            // Mark Blast as Sent to Lead
-            $sent = $this->blasts->sent([
-                'text_blast_id' => $blast->id,
-                'lead_id' => $lead->identifier,
-                'text_id' => !empty($textLog->id) ? $textLog->id : 0,
-                'status' => $status
-            ]);
-        });
-
-        // Return Sent
-        return $sent;
+    private function markLeadSent(Blast $blast, Lead $lead, string $status,
+                                    ?TextLog $textLog = null): BlastSent {
+        // Mark Blast as Sent to Lead
+        return $this->blasts->sent([
+            'text_blast_id' => $blast->id,
+            'lead_id' => $lead->identifier,
+            'text_id' => !empty($textLog->id) ? $textLog->id : 0,
+            'status' => $status
+        ]);
     }
 
     /**

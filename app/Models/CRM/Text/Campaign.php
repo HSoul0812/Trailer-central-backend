@@ -2,13 +2,14 @@
 
 namespace App\Models\CRM\Text;
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
+use App\Models\Traits\TableAware;
 use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadType;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * Class Text Campaign
@@ -17,6 +18,8 @@ use App\Models\CRM\Leads\LeadType;
  */
 class Campaign extends Model
 {
+    use TableAware;
+
     protected $table = 'crm_text_campaign';
 
     // Define Constants to Make it Easier to Autocomplete
@@ -82,6 +85,22 @@ class Campaign extends Model
     }
 
     /**
+     * @return HasMany
+     */
+    public function success(): HasMany
+    {
+        return $this->sent()->whereIn(CampaignSent::STATUS_SUCCESS);
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function failed(): HasMany
+    {
+        return $this->sent()->whereIn(CampaignSent::STATUS_FAILED);
+    }
+
+    /**
      * Get CRM User
      */
     public function crmUser()
@@ -108,6 +127,7 @@ class Campaign extends Model
         return (int) $this->include_archived;
     }
 
+
     /**
      * Get Leads for Campaign
      * 
@@ -115,6 +135,44 @@ class Campaign extends Model
      */
     public function getLeadsAttribute()
     {
+        // Get Leads for Campaign
+        return $this->leadsBase()
+                    ->whereNull(Stop::getTableName() . '.sms_number')
+                    ->whereNull('crm_text_campaign_sent.text_campaign_id')
+                    ->get();
+    }
+
+    /**
+     * Get Skipped Leads for Campaign
+     * 
+     * @return int
+     */
+    public function getSkippedAttribute(): int
+    {
+        // Get Leads for Campaign
+        return $this->leadsBase()
+                    ->whereNotIn(CampaignSent::getTableName() . '.status', CampaignSent::STATUS_SUCCESS)
+                    ->count();
+    }
+
+    /**
+     * Get Unsubscribed Leads for Campaign
+     * 
+     * @return int
+     */
+    public function getUnsubscribedAttribute(): int
+    {
+        // Get Leads for Campaign
+        return $this->leadsBase()
+                    ->whereNotNull('crm_text_campaign_sent.text_campaign_id')
+                    ->count();
+    }
+
+
+    /**
+     * Get Leads Template
+     */
+    private function leadsBase(): Builder {
         // Initialize Campaign
         $campaign = $this;
 
@@ -133,9 +191,7 @@ class Campaign extends Model
                      ->where('website_lead.lead_type', '<>', LeadType::TYPE_NONLEAD)
                      ->where('website_lead.dealer_id', $campaign->newDealerUser->id)
                      ->where('website_lead.phone_number', '<>', '')
-                     ->whereNotNull('website_lead.phone_number')
-                     ->whereNull(Stop::getTableName() . '.sms_number')
-                     ->whereNull('crm_text_campaign_sent.text_campaign_id');
+                     ->whereNotNull('website_lead.phone_number');
 
         // Is Archived?!
         if($campaign->archived_status === -1) {
@@ -195,7 +251,6 @@ class Campaign extends Model
 
         // Return Filtered Query
         return $query->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $campaign->send_after_days . ' DAY) < NOW()')
-                     ->whereRaw('(FLOOR((UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(website_lead.date_submitted)) / (60 * 60 * 24)) - ' . $campaign->send_after_days . ') <= 10')
-                     ->get();
+                     ->whereRaw('(FLOOR((UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(website_lead.date_submitted)) / (60 * 60 * 24)) - ' . $campaign->send_after_days . ') <= 10');
     }
 }

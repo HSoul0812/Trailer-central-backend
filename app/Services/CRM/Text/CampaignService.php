@@ -95,21 +95,17 @@ class CampaignService implements CampaignServiceInterface
      */
     public function send(NewDealerUser $dealer, Campaign $campaign): Collection {
         // Get From Number
-        $from_number = $campaign->from_sms_number;
-        if(empty($from_number)) {
-            $from_number = $this->dealerLocation->findDealerSmsNumber($dealer->id);
-            if(empty($from_number)) {
-                throw new NoCampaignSmsFromNumberException();
-            }
-        }
+        $from_number = $this->getFromNumber($dealer->id, $campaign);
 
         // Get Unsent Campaign Leads
         if(count($campaign->leads) < 1) {
-            throw new NoLeadsProcessCampaignException();
+            $this->log->error('No Leads found for Campaign #' . $campaign->id . ' for Dealer #: ' . $dealer->id);
+            throw new NoLeadsProcessCampaignException;
         }
 
         // Loop Leads for Current Dealer
         $sent = new Collection();
+        $this->log->debug('Found ' . $campaign->leads->count() . ' Leads for Campaign #' . $campaign->id);
         foreach($campaign->leads as $lead) {
             // Not a Valid To Number?!
             if(empty($lead->text_phone)) {
@@ -118,11 +114,40 @@ class CampaignService implements CampaignServiceInterface
 
             // Send Lead
             $leadSent = $this->sendToLead($from_number, $dealer, $campaign, $lead);
-            $sent->push($leadSent);
+            if($leadSent !== null) {
+                $sent->push($leadSent);
+            }
         }
 
         // Return Campaign Sent Entries
         return $sent;
+    }
+
+
+    /**
+     * Get From Number
+     * 
+     * @param int $dealerId
+     * @param Campaign $campaign
+     * @throw NoCampaignSmsFromNumberException
+     * @return string
+     */
+    private function getFromNumber(int $dealerId, Campaign $campaign): string {
+        // Get From Number
+        $chosenNumber = $campaign->from_sms_number;
+        if(!empty($chosenNumber)) {
+            return $chosenNumber;
+        }
+
+        // Get First Available Number From Dealer Location
+        $defaultNumber = $this->dealerLocation->findDealerSmsNumber($dealerId);
+        if(!empty($defaultNumber)) {
+            return $defaultNumber;
+        }
+
+        // Throw Exception
+        $this->log->error('No Campaign SMS From Number for Dealer #: ' . $dealerId);
+        throw new NoCampaignSmsFromNumberException;
     }
 
     /**
@@ -146,6 +171,17 @@ class CampaignService implements CampaignServiceInterface
             // Send Text
             $this->textService->send($from_number, $lead->text_phone, $textMessage, $lead->full_name);
             $status = CampaignSent::STATUS_SENT;
+
+            // Update Lead Status
+            if($this->updateLead($lead)) {
+                $status = CampaignSent::STATUS_LEAD;
+            }
+
+            // Save Text to DB
+            $textLog = $this->saveText($from_number, $lead, $textMessage);
+            if(!empty($textLog->id)) {
+                $status = CampaignSent::STATUS_LOGGED;
+            }
         } catch (CustomerLandlineNumberException $ex) {
             $status = CampaignSent::STATUS_LANDLINE;
         } catch (Exception $ex) {
@@ -153,58 +189,59 @@ class CampaignService implements CampaignServiceInterface
         }
 
         // Return Sent Result
-        return $this->markLeadSent($from_number, $campaign, $lead, $textMessage, $status);
+        return $this->markLeadSent($campaign, $lead, $status, $textLog);
+    }
+
+    /**
+     * Update Lead Status
+     * 
+     * @param Lead $lead
+     * @return LeadStatus
+     */
+    private function updateLead(Lead $lead): LeadStatus {
+        // Save Lead Status
+        return $this->leadStatus->createOrUpdate([
+            'lead_id' => $lead->identifier,
+            'status' => Lead::STATUS_MEDIUM,
+            'next_contact_date' => Carbon::now()->addDay()->toDateTimeString()
+        ]);
+    }
+
+    /**
+     * Save Text to DB
+     * 
+     * @param string $from_number sms from number
+     * @param Lead $lead
+     * @param string $textMessage filled text message
+     * @return TextLog
+     */
+    private function saveText(string $from_number, Lead $lead, string $textMessage): TextLog {
+        // Log SMS
+        return $this->texts->create([
+            'lead_id'     => $lead->identifier,
+            'from_number' => $from_number,
+            'to_number'   => $lead->text_phone,
+            'log_message' => $textMessage
+        ]);
     }
 
     /**
      * Mark Lead as Sent
      * 
-     * @param string $from_number sms from number
      * @param Campaign $campaign
      * @param Lead $lead
-     * @param string $textMessage filled text message
      * @param string $status
+     * @param null|TextLog $textLog
      * @return CampaignSent
      */
-    private function markLeadSent($from_number, $campaign, $lead, $textMessage, $status) {
-        // Handle Transaction
-        $textLog = null;
-        DB::transaction(function() use ($from_number, $campaign, $lead, $textMessage, &$status, &$textLog) {
-            // Save Lead Status
-            $this->leadStatus->createOrUpdate([
-                'lead_id' => $lead->identifier,
-                'status' => Lead::STATUS_MEDIUM,
-                'next_contact_date' => Carbon::now()->addDay()->toDateTimeString()
-            ]);
-            $status = CampaignSent::STATUS_LEAD;
-
-            // Log SMS
-            $textLog = $this->texts->create([
-                'lead_id'     => $lead->identifier,
-                'from_number' => $from_number,
-                'to_number'   => $lead->text_phone,
-                'log_message' => $textMessage
-            ]);
-        });
-
-        // Set Logged Status
-        if(!empty($textLog->id)) {
-            $status = CampaignSent::STATUS_LOGGED;
-        }
-
-        // Handle Transaction
-        $sent = null;
-        DB::transaction(function() use ($campaign, $lead, &$status, &$textLog, &$sent) {
-            // Mark Blast as Sent to Lead
-            $sent = $this->campaigns->sent([
-                'text_campaign_id' => $campaign->id,
-                'lead_id' => $lead->identifier,
-                'text_id' => !empty($textLog->id) ? $textLog->id : 0,
-                'status' => $status
-            ]);
-        });
-
-        // Return Sent
-        return $sent;
+    private function markLeadSent(Campaign $campaign, Lead $lead, string $status,
+                                    ?TextLog $textLog = null): CampaignSent {
+        // Mark Campaign as Sent to Lead
+        return $this->campaigns->sent([
+            'text_blast_id' => $campaign->id,
+            'lead_id' => $lead->identifier,
+            'text_id' => !empty($textLog->id) ? $textLog->id : 0,
+            'status' => $status
+        ]);
     }
 }

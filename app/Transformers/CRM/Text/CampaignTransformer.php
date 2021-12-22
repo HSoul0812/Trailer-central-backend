@@ -9,7 +9,8 @@ use App\Transformers\CRM\Leads\LeadTransformer;
 class CampaignTransformer extends TransformerAbstract
 {
     protected $availableIncludes = [
-        'leads'
+        'leads',
+        'report'
     ];
 
     public function transform(Campaign $campaign)
@@ -37,5 +38,10 @@ class CampaignTransformer extends TransformerAbstract
     public function includeLeads(Campaign $campaign)
     {
         return $this->collection($campaign->leads, new LeadTransformer());
+    }
+
+    public function includeReport(Campaign $campaign)
+    {
+        return $this->item($campaign->stats, new CampaignReportTransformer());
     }
 }

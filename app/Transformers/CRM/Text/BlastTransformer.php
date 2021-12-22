@@ -9,7 +9,8 @@ use App\Transformers\CRM\Leads\LeadTransformer;
 class BlastTransformer extends TransformerAbstract
 {
     protected $availableIncludes = [
-        'leads'
+        'leads',
+        'report'
     ];
 
     public function transform(Blast $blast)
@@ -39,5 +40,10 @@ class BlastTransformer extends TransformerAbstract
     public function includeLeads(Blast $blast)
     {
         return $this->collection($blast->leads, new LeadTransformer());
+    }
+
+    public function includeReport(Blast $blast)
+    {
+        return $this->collection($blast->stats, new BlastReportTransformer());
     }
 }

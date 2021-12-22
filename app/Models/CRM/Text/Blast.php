@@ -2,13 +2,14 @@
 
 namespace App\Models\CRM\Text;
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
+use App\Models\Traits\TableAware;
 use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadType;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * Class Text Blast
@@ -17,6 +18,8 @@ use App\Models\CRM\Leads\LeadType;
  */
 class Blast extends Model
 {
+    use TableAware;
+
     protected $table = 'crm_text_blast';
 
     // Define Constants to Make it Easier to Autocomplete
@@ -76,11 +79,27 @@ class Blast extends Model
     }
 
     /**
-     * @return type
+     * @return HasMany
      */
-    public function sent()
+    public function sent(): HasMany
     {
-        return $this->hasOne(BlastSent::class, 'text_blast_id');
+        return $this->hasMany(BlastSent::class, 'text_blast_id');
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function success(): HasMany
+    {
+        return $this->sent()->whereIn(BlastSent::STATUS_SUCCESS);
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function failed(): HasMany
+    {
+        return $this->sent()->whereIn(BlastSent::STATUS_FAILED);
     }
 
     /**
@@ -110,12 +129,53 @@ class Blast extends Model
         return (int) $this->include_archived;
     }
 
+
+    /**
+     * Get Leads for Campaign
+     * 
+     * @return Collection of Leads
+     */
+    public function getLeadsAttribute()
+    {
+        // Get Leads for Campaign
+        return $this->leadsBase()
+                    ->whereNull(Stop::getTableName() . '.sms_number')
+                    ->whereNull(BlastSent::getTableName() . '.text_campaign_id')
+                    ->get();
+    }
+
+    /**
+     * Get Skipped Leads for Campaign
+     * 
+     * @return int
+     */
+    public function getSkippedAttribute(): int
+    {
+        // Get Leads for Campaign
+        return $this->leadsBase()
+                    ->whereNotIn(CampaignSent::getTableName() . '.status', CampaignSent::STATUS_SUCCESS)
+                    ->count();
+    }
+
+    /**
+     * Get Unsubscribed Leads for Campaign
+     * 
+     * @return int
+     */
+    public function getUnsubscribedAttribute(): int
+    {
+        // Get Leads for Campaign
+        return $this->leadsBase()
+                    ->whereNotNull(BlastSent::getTableName() . '.text_campaign_id')
+                    ->count();
+    }
+
     /**
      * Get Leads for Blast
      * 
      * @return Collection of Leads
      */
-    public function getLeadsAttribute()
+    private function leadsBase(): Builder
     {
         // Initialize Blast
         $blast = $this;
