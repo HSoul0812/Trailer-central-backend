@@ -29,10 +29,10 @@ class HereApiAddress
      $obj->stateCode = $data['stateCode'];
      $obj->state = $data['state'];
      $obj->county = $data['county'];
-     $obj->city = $data['city'];
-     $obj->district = $data['district'];
-     $obj->street = $data['street'];
-     $obj->postalCode = $data['postalCode'];
+     $obj->city = $data['city'] ?? null;
+     $obj->district = $data['district'] ?? null;
+     $obj->street = $data['street'] ?? null;
+     $obj->postalCode = $data['postalCode'] ?? null;
 
      return $obj;
  }
