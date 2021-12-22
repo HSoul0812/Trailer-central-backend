@@ -93,7 +93,7 @@ class Blast extends Model
      */
     public function success(): HasMany
     {
-        return $this->sent()->whereIn(BlastSent::STATUS_SUCCESS);
+        return $this->sent()->whereIn('status', BlastSent::STATUS_SUCCESS);
     }
 
     /**
@@ -101,7 +101,7 @@ class Blast extends Model
      */
     public function failed(): HasMany
     {
-        return $this->sent()->whereIn(BlastSent::STATUS_FAILED);
+        return $this->sent()->whereIn('status', BlastSent::STATUS_FAILED);
     }
 
     /**

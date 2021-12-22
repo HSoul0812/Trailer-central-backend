@@ -91,7 +91,7 @@ class Campaign extends Model
      */
     public function success(): HasMany
     {
-        return $this->sent()->whereIn(CampaignSent::STATUS_SUCCESS);
+        return $this->sent()->whereIn('status', CampaignSent::STATUS_SUCCESS);
     }
 
     /**
@@ -99,7 +99,7 @@ class Campaign extends Model
      */
     public function failed(): HasMany
     {
-        return $this->sent()->whereIn(CampaignSent::STATUS_FAILED);
+        return $this->sent()->whereIn('status', CampaignSent::STATUS_FAILED);
     }
 
     /**
