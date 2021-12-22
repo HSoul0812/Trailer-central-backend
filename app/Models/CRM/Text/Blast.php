@@ -274,7 +274,6 @@ class Blast extends Model
         }
 
         // Return Filtered Query
-        return $query->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $blast->send_after_days . ' DAY) >= NOW()')
-                     ->get();
+        return $query->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $blast->send_after_days . ' DAY) >= NOW()');
     }
 }
