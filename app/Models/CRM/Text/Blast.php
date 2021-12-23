@@ -143,6 +143,7 @@ class Blast extends Model
         return $this->leadsBase()
                     ->whereNull(Stop::getTableName() . '.sms_number')
                     ->whereNull(BlastSent::getTableName() . '.text_blast_id')
+                    ->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $this->send_after_days . ' DAY) >= NOW()')
                     ->get();
     }
 
@@ -158,7 +159,7 @@ class Blast extends Model
         return new BlastStats([
             'sent' => $this->success->count(),
             'failed' => $this->failed->count(),
-            'unsubscribed' => $this->unsubscribed
+            'unsubscribed' => $this->unsubscribed->count()
         ]);
     }
 
@@ -184,6 +185,7 @@ class Blast extends Model
     {
         // Get Number of Unsubscribed Leads on Blast
         return $this->leadsBase()
+                    ->whereNotNull(BlastSent::getTableName() . '.text_blast_id')
                     ->where(Stop::getTableName() . '.type', Stop::REPORT_TYPE_DEFAULT)
                     ->count();
     }
@@ -272,6 +274,6 @@ class Blast extends Model
         }
 
         // Return Filtered Query
-        return $query->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $blast->send_after_days . ' DAY) >= NOW()');
+        return $query;
     }
 }

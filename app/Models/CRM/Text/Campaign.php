@@ -140,7 +140,9 @@ class Campaign extends Model
         // Get Leads for Campaign
         return $this->leadsBase()
                     ->whereNull(Stop::getTableName() . '.sms_number')
-                    ->whereNull('crm_text_campaign_sent.text_campaign_id')
+                    ->whereNull(CampaignSent::getTableName() . '.text_campaign_id')
+                    ->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $this->send_after_days . ' DAY) < NOW()')
+                    ->whereRaw('(FLOOR((UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(website_lead.date_submitted)) / (60 * 60 * 24)) - ' . $this->send_after_days . ') <= 10')
                     ->get();
     }
 
@@ -182,6 +184,7 @@ class Campaign extends Model
     {
         // Get Leads for Campaign
         return $this->leadsBase()
+                    ->whereNotNull(CampaignSent::getTableName() . '.text_campaign_id')
                     ->where(Stop::getTableName() . '.type', Stop::REPORT_TYPE_DEFAULT)
                     ->count();
     }
@@ -268,7 +271,6 @@ class Campaign extends Model
         }
 
         // Return Filtered Query
-        return $query->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $campaign->send_after_days . ' DAY) < NOW()')
-                     ->whereRaw('(FLOOR((UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(website_lead.date_submitted)) / (60 * 60 * 24)) - ' . $campaign->send_after_days . ') <= 10');
+        return $query;
     }
 }
