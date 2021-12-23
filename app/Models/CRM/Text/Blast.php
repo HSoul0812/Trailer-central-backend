@@ -135,7 +135,7 @@ class Blast extends Model
     /**
      * Get Leads for Text Blast
      * 
-     * @return Collection of Leads
+     * @return Collection<Lead>
      */
     public function getLeadsAttribute()
     {
@@ -254,8 +254,7 @@ class Blast extends Model
      * 
      * @return Builder
      */
-    private function leadsBase(): Builder
-    {
+    private function leadsBase(): Builder {
         // Initialize Blast
         $blast = $this;
 

@@ -81,9 +81,9 @@ class Campaign extends Model
     /**
      * @return type
      */
-    public function sent()
+    public function sent(): HasMany
     {
-        return $this->hasOne(CampaignSent::class, 'text_campaign_id');
+        return $this->hasMany(CampaignSent::class, 'text_campaign_id');
     }
 
     /**
@@ -133,7 +133,7 @@ class Campaign extends Model
     /**
      * Get Leads for Campaign
      * 
-     * @return Collection of Leads
+     * @return Collection<Lead>
      */
     public function getLeadsAttribute()
     {
