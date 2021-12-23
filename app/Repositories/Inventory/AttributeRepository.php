@@ -71,7 +71,7 @@ class AttributeRepository implements AttributeRepositoryInterface
             return $this->getAllByEntityTypeId((int)$params['entity_type_id']);
         }
         return Attribute::select('*')->get();
-    } 
+    }
 
     /**
      * @param int $entityTypeId

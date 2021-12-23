@@ -146,8 +146,9 @@ class ChatService implements ChatServiceInterface
                 'refresh_token' => $pageToken
             ]);
 
-            // Dispatch Send EmailBuilder Job
-            $this->dispatch(new MessageJob($pageAccessToken, $page->page_id));
+            // Dispatch Send Message Job
+            $job = new MessageJob($pageAccessToken, $page->page_id);
+            $this->dispatch($job->onQueue('fb-messenger'));
         }
 
         // Return Response
