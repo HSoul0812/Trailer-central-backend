@@ -194,7 +194,8 @@ class BlastService implements BlastServiceInterface
             $this->log->error('Could not send text to number ' . $from_number . ': ' . $ex->getMessage());
         } catch (\Exception $ex) {
             $status = BlastSent::STATUS_INVALID;
-            $this->log->error('Exception returned trying to send text: ' . $ex->getMessage());
+            $this->log->error('Exception returned trying to send text: ' . $ex->getMessage() .
+                                PHP_EOL . $ex->getTraceAsString());
         }
 
         // Return Sent Result
