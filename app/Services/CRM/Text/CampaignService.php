@@ -186,12 +186,14 @@ class CampaignService implements CampaignServiceInterface
             }
         } catch (CustomerLandlineNumberException $ex) {
             $status = CampaignSent::STATUS_LANDLINE;
+            $this->log->error('Could not send text to number ' . $from_number . ': ' . $ex->getMessage());
         } catch (Exception $ex) {
             $status = CampaignSent::STATUS_INVALID;
+            $this->log->error('Exception returned trying to send text: ' . $ex->getMessage());
         }
 
         // Return Sent Result
-        return $this->markLeadSent($campaign, $lead, $status, $textLog);
+        return $this->markLeadSent($campaign, $lead, $status, $textLog ?? null);
     }
 
     /**

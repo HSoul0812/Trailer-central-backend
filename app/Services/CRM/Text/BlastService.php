@@ -191,12 +191,14 @@ class BlastService implements BlastServiceInterface
             }
         } catch (CustomerLandlineNumberException $ex) {
             $status = BlastSent::STATUS_LANDLINE;
+            $this->log->error('Could not send text to number ' . $from_number . ': ' . $ex->getMessage());
         } catch (\Exception $ex) {
             $status = BlastSent::STATUS_INVALID;
+            $this->log->error('Exception returned trying to send text: ' . $ex->getMessage());
         }
 
         // Return Sent Result
-        return $this->markLeadSent($blast, $lead, $status, $textLog);
+        return $this->markLeadSent($blast, $lead, $status, $textLog ?? null);
     }
 
     /**
