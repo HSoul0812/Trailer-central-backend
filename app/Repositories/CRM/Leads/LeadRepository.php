@@ -531,11 +531,12 @@ class LeadRepository implements LeadRepositoryInterface {
 
     /**
      * @param Builder|Relation $query
-     * @param $leadStatus
+     * @param array $leadStatus
      * @return Builder|Relation
      */
-    private function addLeadStatusToQuery($query, string $leadStatus) {
-        return $query->whereIn(LeadStatus::getTableName().'.status', $leadStatus);
+    private function addLeadStatusToQuery($query, array $leadStatus)
+    {
+        return $query->whereIn(LeadStatus::getTableName() . '.status', $leadStatus);
     }
 
     /**
