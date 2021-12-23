@@ -94,11 +94,10 @@ class LeadRepository implements LeadRepositoryInterface {
 
     public function getAll($params)
     {
-        $query = Lead::where('identifier', '>', 0);
-
-        if (empty($filters['lead_type'])) {
-            $query = $query->where('website_lead.lead_type', '<>', LeadType::TYPE_NONLEAD);
-        }
+        $query = Lead::where([
+            ['identifier', '>', 0],
+            ['website_lead.lead_type', '<>', LeadType::TYPE_NONLEAD],
+        ]);
 
         if (isset($params['dealer_id'])) {
             $query = $query->where(Lead::getTableName().'.dealer_id', $params['dealer_id']);
