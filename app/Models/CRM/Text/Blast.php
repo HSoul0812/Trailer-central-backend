@@ -159,7 +159,7 @@ class Blast extends Model
         return new BlastStats([
             'sent' => $this->success->count(),
             'failed' => $this->failed->count(),
-            'unsubscribed' => $this->unsubscribed->count()
+            'unsubscribed' => $this->unsubscribed
         ]);
     }
 
