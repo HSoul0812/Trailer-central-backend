@@ -17,6 +17,7 @@
         "babenkoivan/elastic-migrations": "^1.2",
         "babenkoivan/elastic-scout-driver": "^1.2",
         "babenkoivan/elastic-scout-driver-plus": "^1.11",
+        "barryvdh/laravel-dompdf": "^0.9.0",
         "barryvdh/laravel-snappy": "^0.4.8",
         "darkaonline/l5-swagger": "^6.0",
         "darkaonline/swagger-lume": "6.*",
