@@ -253,6 +253,7 @@ class AppServiceProvider extends ServiceProvider
         ]);
 
         // log all queries
+        var_dump(env('APP_LOG_QUERIES'));
         if (env('APP_LOG_QUERIES')) {
             DB::listen(function($query) {
                 Log::info(
