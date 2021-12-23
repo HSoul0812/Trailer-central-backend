@@ -242,17 +242,22 @@ class BlastService implements BlastServiceInterface
      * @param Lead $lead
      * @param string $status
      * @param null|TextLog $textLog
-     * @return BlastSent
+     * @return null|BlastSent
      */
     private function markLeadSent(Blast $blast, Lead $lead, string $status,
-                                    ?TextLog $textLog = null): BlastSent {
+                                    ?TextLog $textLog = null): ?BlastSent {
         // Mark Blast as Sent to Lead
-        return $this->blasts->sent([
-            'text_blast_id' => $blast->id,
-            'lead_id' => $lead->identifier,
-            'text_id' => !empty($textLog->id) ? $textLog->id : 0,
-            'status' => $status
-        ]);
+        try {
+            return $this->blasts->sent([
+                'text_blast_id' => $blast->id,
+                'lead_id' => $lead->identifier,
+                'text_id' => !empty($textLog->id) ? $textLog->id : 0,
+                'status' => $status
+            ]);
+        } catch(\Exception $ex) {
+            $this->log->error('Failed to mark lead as sent: ' . $ex->getMessage());
+            return null;
+        }
     }
 
     /**

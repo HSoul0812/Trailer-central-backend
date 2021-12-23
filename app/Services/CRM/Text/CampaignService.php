@@ -237,16 +237,21 @@ class CampaignService implements CampaignServiceInterface
      * @param Lead $lead
      * @param string $status
      * @param null|TextLog $textLog
-     * @return CampaignSent
+     * @return null|CampaignSent
      */
     private function markLeadSent(Campaign $campaign, Lead $lead, string $status,
-                                    ?TextLog $textLog = null): CampaignSent {
+                                    ?TextLog $textLog = null): ?CampaignSent {
         // Mark Campaign as Sent to Lead
-        return $this->campaigns->sent([
-            'text_blast_id' => $campaign->id,
-            'lead_id' => $lead->identifier,
-            'text_id' => !empty($textLog->id) ? $textLog->id : 0,
-            'status' => $status
-        ]);
+        try {
+            return $this->campaigns->sent([
+                'text_blast_id' => $campaign->id,
+                'lead_id' => $lead->identifier,
+                'text_id' => !empty($textLog->id) ? $textLog->id : 0,
+                'status' => $status
+            ]);
+        } catch(\Exception $ex) {
+            $this->log->error('Failed to mark lead as sent: ' . $ex->getMessage());
+            return null;
+        }
     }
 }
