@@ -140,82 +140,8 @@ class Blast extends Model
     public function getLeadsAttribute()
     {
         // Get Leads for Blast
-        return $this->leadsBase()
-                    ->whereNull(Stop::getTableName() . '.sms_number')
-                    ->whereNull(BlastSent::getTableName() . '.text_blast_id')
-                    ->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $this->send_after_days . ' DAY) >= NOW()')
-                    ->get();
-    }
-
-
-    /**
-     * Get Status for Text Blast
-     * 
-     * @return BlastStats
-     */
-    public function getStatsAttribute(): BlastStats
-    {
-        // Get Leads for Blast
-        return new BlastStats([
-            'sent' => $this->success->count(),
-            'failed' => $this->failed->count(),
-            'unsubscribed' => $this->unsubscribed
-        ]);
-    }
-
-    /**
-     * Get Skipped Leads for Text Blast
-     * 
-     * @return int
-     */
-    public function getSkippedAttribute(): int
-    {
-        // Get Number of Skipped Leads on Blast
-        return $this->leadsBase()
-                    ->whereNotIn(BlastSent::getTableName() . '.status', BlastSent::STATUS_SUCCESS)
-                    ->count();
-    }
-
-    /**
-     * Get Unsubscribed Leads for Campaign
-     * 
-     * @return int
-     */
-    public function getUnsubscribedAttribute(): int
-    {
-        // Get Number of Unsubscribed Leads on Blast
-        return $this->leadsBase()
-                    ->whereNotNull(BlastSent::getTableName() . '.text_blast_id')
-                    ->where(Stop::getTableName() . '.type', Stop::REPORT_TYPE_DEFAULT)
-                    ->count();
-    }
-
-    /**
-     * Get Builder Object for Blast Leads
-     * 
-     * @return Builder
-     */
-    private function leadsBase(): Builder
-    {
-        // Initialize Blast
         $blast = $this;
-
-        // Find Filtered Leads
-        $query = Lead::select('website_lead.*')
-                     ->leftJoin('inventory', 'website_lead.inventory_id', '=', 'inventory.inventory_id')
-                     ->leftJoin('crm_text_blast_sent', function($join) use($blast) {
-                        return $join->on('crm_text_blast_sent.lead_id', '=', 'website_lead.identifier')
-                                    ->where('crm_text_blast_sent.text_blast_id', '=', $blast->id);
-                     })
-                     ->leftJoin('crm_tc_lead_status', 'website_lead.identifier', '=', 'crm_tc_lead_status.tc_lead_identifier')
-                     ->leftJoin(Stop::getTableName(), function($join) {
-                        return $join->on(DB::raw("CONCAT('+1', SUBSTR(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(website_lead.phone_number, '(', ''), ')', ''), '-', ''), ' ', ''), '-', ''), '+', ''), '.', ''), 1, 10))"), '=', Stop::getTableName() . '.sms_number')
-                                    ->orOn(DB::raw("CONCAT('+', SUBSTR(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(website_lead.phone_number, '(', ''), ')', ''), '-', ''), ' ', ''), '-', ''), '+', ''), '.', ''), 1, 11))"), '=', Stop::getTableName() . '.sms_number');
-                     })
-                     ->where('website_lead.lead_type', '<>', LeadType::TYPE_NONLEAD)
-                     ->where('website_lead.dealer_id', $blast->newDealerUser->id)
-                     ->where('website_lead.phone_number', '<>', '')
-                     ->whereNotNull('website_lead.phone_number');
+        $query = $this->leadsBase();
 
         // Is Archived?!
         if($blast->archived_status === -1) {
@@ -273,7 +199,81 @@ class Blast extends Model
             });
         }
 
-        // Return Filtered Query
-        return $query;
+        // Append Remaining Requirements and Return Result
+        return $query->whereNull(Stop::getTableName() . '.sms_number')
+                     ->whereNull(BlastSent::getTableName() . '.text_blast_id')
+                     ->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $this->send_after_days . ' DAY) >= NOW()')
+                     ->get();
+    }
+
+
+    /**
+     * Get Status for Text Blast
+     * 
+     * @return BlastStats
+     */
+    public function getStatsAttribute(): BlastStats
+    {
+        // Get Leads for Blast
+        return new BlastStats([
+            'sent' => $this->success->count(),
+            'failed' => $this->failed->count(),
+            'unsubscribed' => $this->unsubscribed
+        ]);
+    }
+
+    /**
+     * Get Skipped Leads for Text Blast
+     * 
+     * @return int
+     */
+    public function getSkippedAttribute(): int
+    {
+        // Get Number of Skipped Leads on Blast
+        return $this->leadsBase()
+                    ->whereNotIn(BlastSent::getTableName() . '.status', BlastSent::STATUS_SUCCESS)
+                    ->count();
+    }
+
+    /**
+     * Get Unsubscribed Leads for Campaign
+     * 
+     * @return int
+     */
+    public function getUnsubscribedAttribute(): int
+    {
+        // Get Number of Unsubscribed Leads on Blast
+        return $this->leadsBase()
+                    ->whereNotNull(BlastSent::getTableName() . '.text_blast_id')
+                    ->where(Stop::getTableName() . '.type', Stop::REPORT_TYPE_DEFAULT)
+                    ->count();
+    }
+
+    /**
+     * Get Builder Object for Blast Leads
+     * 
+     * @return Builder
+     */
+    private function leadsBase(): Builder
+    {
+        // Initialize Blast
+        $blast = $this;
+
+        // Find Filtered Leads
+        return Lead::select('website_lead.*')
+                   ->leftJoin('inventory', 'website_lead.inventory_id', '=', 'inventory.inventory_id')
+                   ->leftJoin('crm_text_blast_sent', function($join) use($blast) {
+                        return $join->on('crm_text_blast_sent.lead_id', '=', 'website_lead.identifier')
+                                    ->where('crm_text_blast_sent.text_blast_id', '=', $blast->id);
+                   })
+                   ->leftJoin('crm_tc_lead_status', 'website_lead.identifier', '=', 'crm_tc_lead_status.tc_lead_identifier')
+                   ->leftJoin(Stop::getTableName(), function($join) {
+                        return $join->on(DB::raw("CONCAT('+1', SUBSTR(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(website_lead.phone_number, '(', ''), ')', ''), '-', ''), ' ', ''), '-', ''), '+', ''), '.', ''), 1, 10))"), '=', Stop::getTableName() . '.sms_number')
+                                    ->orOn(DB::raw("CONCAT('+', SUBSTR(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(website_lead.phone_number, '(', ''), ')', ''), '-', ''), ' ', ''), '-', ''), '+', ''), '.', ''), 1, 11))"), '=', Stop::getTableName() . '.sms_number');
+                   })
+                   ->where('website_lead.lead_type', '<>', LeadType::TYPE_NONLEAD)
+                   ->where('website_lead.dealer_id', $blast->newDealerUser->id)
+                   ->where('website_lead.phone_number', '<>', '')
+                   ->whereNotNull('website_lead.phone_number');
     }
 }
