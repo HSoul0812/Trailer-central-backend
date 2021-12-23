@@ -156,7 +156,6 @@ class Blast extends Model
     {
         // Get Leads for Blast
         return new BlastStats([
-            'skipped' => $this->skipped,
             'sent' => $this->success->count(),
             'failed' => $this->failed->count(),
             'unsubscribed' => $this->unsubscribed
@@ -185,7 +184,7 @@ class Blast extends Model
     {
         // Get Number of Unsubscribed Leads on Blast
         return $this->leadsBase()
-                    ->whereNotNull(BlastSent::getTableName() . '.text_blast_id')
+                    ->where(Stop::getTableName() . '.type', Stop::REPORT_TYPE_DEFAULT)
                     ->count();
     }
 
@@ -214,9 +213,7 @@ class Blast extends Model
                      ->where('website_lead.lead_type', '<>', LeadType::TYPE_NONLEAD)
                      ->where('website_lead.dealer_id', $blast->newDealerUser->id)
                      ->where('website_lead.phone_number', '<>', '')
-                     ->whereNotNull('website_lead.phone_number')
-                     ->whereNull(Stop::getTableName() . '.sms_number')
-                     ->whereNull('crm_text_blast_sent.text_blast_id');
+                     ->whereNotNull('website_lead.phone_number');
 
         // Is Archived?!
         if($blast->archived_status === -1) {

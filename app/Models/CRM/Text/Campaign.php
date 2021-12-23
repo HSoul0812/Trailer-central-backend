@@ -154,7 +154,6 @@ class Campaign extends Model
     {
         // Get Leads for Campaign
         return new CampaignStats([
-            'skipped' => $this->skipped,
             'sent' => $this->success->count(),
             'failed' => $this->failed->count(),
             'unsubscribed' => $this->unsubscribed
@@ -183,7 +182,7 @@ class Campaign extends Model
     {
         // Get Leads for Campaign
         return $this->leadsBase()
-                    ->whereNotNull('crm_text_campaign_sent.text_campaign_id')
+                    ->where(Stop::getTableName() . '.type', Stop::REPORT_TYPE_DEFAULT)
                     ->count();
     }
 
