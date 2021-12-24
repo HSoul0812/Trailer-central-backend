@@ -22,7 +22,7 @@ class CategoryAndTypeSeeder extends Seeder
         'Truck Beds'         => ['Truck Beds'],
     ];
 
-    private const PLACEHOLDER_IMG_URL = 'https://s3.amazonaws.com/crm-trailercentral-dev/placeholder-types.png';
+    private const PLACEHOLDER_IMG_URL = 'https://crm-trailercentral-dev.s3.amazonaws.com/placeholder.png';
 
     /**
      * Run the database seeds.
