@@ -53,7 +53,7 @@ return [
             'path' => storage_path('logs/laravel.log'),
             'level' => 'debug',
             'days' => 7,
-            'permission' => 777,
+            'permission' => 0664,
         ],
 
         'autoassign' => [
