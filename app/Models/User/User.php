@@ -7,6 +7,7 @@ use App\Traits\Models\HasPermissionsStub;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Leads\LeadType;
 use App\Models\Website\Website;
 use App\Models\Website\Config\WebsiteConfig;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
@@ -30,6 +31,7 @@ use App\Traits\CompactHelper;
  * @property string $email
  *
  * @property bool $isCrmActive
+ * @property bool $is_dms_active
  * @property string $identifier
  *
  * @method static Builder whereIn($column, $values, $boolean = 'and', $not = false)
@@ -169,6 +171,7 @@ class User extends Model implements Authenticatable, PermissionsInterface
 
     protected $casts = [
         'autoresponder_enable' => 'boolean',
+        'is_dms_active' => 'boolean',
     ];
 
     /**
@@ -301,7 +304,8 @@ class User extends Model implements Authenticatable, PermissionsInterface
      */
     public function leads()
     {
-        return $this->hasMany(Lead::class, 'dealer_id', 'dealer_id')->where('is_spam', 0);
+        return $this->hasMany(Lead::class, 'dealer_id', 'dealer_id')->where('is_spam', 0)
+                    ->where('lead_type', '<>', LeadType::TYPE_NONLEAD);
     }
 
     public function printerSettings() : HasOne

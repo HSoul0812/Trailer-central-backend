@@ -41,6 +41,10 @@ class UnitSale extends Model implements GenericSaleInterface
      */
     protected $table = 'dms_unit_sale';
 
+    protected $fillable = [
+        'lead_id',
+    ];
+
     protected $appends = ['paid_amount'];
 
     const UPDATED_AT = null;

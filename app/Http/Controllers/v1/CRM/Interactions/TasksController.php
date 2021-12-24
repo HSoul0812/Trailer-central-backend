@@ -20,11 +20,11 @@ class TasksController extends RestfulController
      *
      * @param Repository $interactions
      */
-    public function __construct(InteractionsRepositoryInterface $interactions)
+    public function __construct(InteractionsRepositoryInterface $interactions, TaskTransformer $transformer)
     {
         $this->middleware('setDealerIdOnRequest')->only(['index']);
         $this->interactions = $interactions;
-        $this->transformer = new TaskTransformer();
+        $this->transformer = $transformer;
     }
 
     public function index(Request $request) {

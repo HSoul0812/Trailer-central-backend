@@ -5,6 +5,7 @@ namespace App\Services\Integration\Common\DTOs;
 use App\Models\CRM\Email\Attachment;
 use App\Exceptions\CRM\Email\ExceededSingleAttachmentSizeException;
 use App\Exceptions\CRM\Email\ExceededTotalAttachmentSizeException;
+use App\Traits\MailHelper;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
 use Illuminate\Support\Collection;
@@ -17,7 +18,19 @@ use Carbon\Carbon;
  */
 class ParsedEmail
 {
-    use WithConstructor, WithGetter;
+    use MailHelper, WithConstructor, WithGetter;
+
+
+    /**
+     * Body HTML
+     */
+    const BODY_HTML = 'html';
+
+    /**
+     * Body Plain
+     */
+    const BODY_PLAIN = 'text';
+
 
     /**
      * @var string ID of Email from Source
@@ -75,6 +88,11 @@ class ParsedEmail
      * @var bool Is Email HTML?
      */
     private $isHtml = false;
+
+    /**
+     * @var bool $hasAttachments
+     */
+    private $hasAttachments = false;
 
     /**
      * @var Collection<AttachmentFile> Attachments Sent With Email
@@ -142,6 +160,13 @@ class ParsedEmail
      */
     public function getMessageId(): string
     {
+        // No Message ID Exists?
+        if(empty($this->messageId)) {
+            // Get Unique Message ID
+            $this->messageId = sprintf('%s@%s', $this->generateId(), $this->serverHostname());
+        }
+
+        // Return Message ID
         return $this->messageId;
     }
 
@@ -310,6 +335,24 @@ class ParsedEmail
         $this->toName = $toName;
     }
 
+    /**
+     * Get To Array
+     * 
+     * @return array{email: string, ?name: string}
+     */
+    public function getToArray() {
+        // Initialize To Array
+        $to = ['email' => trim($this->to)];
+
+        // Append Name
+        if($this->toName) {
+            $to['name'] = trim($this->toName);
+        }
+
+        // Return To
+        return $to;
+    }
+
 
     /**
      * Return Full From
@@ -435,6 +478,16 @@ class ParsedEmail
         }
     }
 
+    /**
+     * Return Body Type
+     * 
+     * @return string self::BODY_HTML | self::BODY_PLAIN
+     */
+    public function getBodyType(): string
+    {
+        return $this->getIsHtml() ? self::BODY_HTML : self::BODY_PLAIN;
+    }
+
 
     /**
      * Return Is HTML
@@ -443,7 +496,7 @@ class ParsedEmail
      */
     public function getIsHtml(): bool
     {
-        return $this->isHtml;
+        return (bool) $this->isHtml;
     }
 
     /**
@@ -483,6 +536,7 @@ class ParsedEmail
     public function setAttachments(Collection $attachments): void
     {
         $this->attachments = $attachments;
+        $this->hasAttachments = true;
     }
 
     /**
@@ -498,6 +552,7 @@ class ParsedEmail
         }
 
         // Append Attachment
+        $this->hasAttachments = true;
         $this->attachments->push($attachment);
     }
 
@@ -577,6 +632,7 @@ class ParsedEmail
         }
 
         // Append Existing Attachment
+        $this->hasAttachments = true;
         $this->existingAttachments->push($attachment);
     }
 
@@ -613,6 +669,9 @@ class ParsedEmail
      */
     public function getDate(): string
     {
+        if(!$this->date) {
+            $this->setDateNow();
+        }
         return $this->date;
     }
 

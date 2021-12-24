@@ -15,15 +15,15 @@ interface GmailServiceInterface {
      * @param string $authCode auth code to get full credentials with
      * @return array created from GoogleTokenTransformer
      */
-    public function auth($redirectUrl, $authCode): array;
+    public function auth(string $redirectUrl, string $authCode): EmailToken;
 
     /**
      * Get Gmail Profile Email
-     * 
-     * @param EmailToken $emailToken
-     * @return EmailToken
+     *
+     * @param EmailToken $accessToken
+     * @return null|EmailToken
      */
-    public function profile(EmailToken $emailToken): EmailToken;
+    public function profile(EmailToken $accessToken): ?EmailToken;
 
     /**
      * Send Gmail Email

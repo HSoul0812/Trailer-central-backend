@@ -6,7 +6,7 @@ use App\Http\Controllers\RestfulController;
 use App\Transformers\Inventory\AttributeTransformer;
 use Dingo\Api\Http\Request;
 use App\Models\Inventory\InventoryFeatureList;
-use App\Transformers\Inventory\FeatureTransformer;
+use App\Transformers\Inventory\FeatureListTransformer;
 
 /**
  * Class FeatureController
@@ -16,6 +16,6 @@ class FeatureController extends RestfulController
 {
     public function index(Request $request)
     {
-        return $this->response->collection(InventoryFeatureList::all(), new FeatureTransformer());
+        return $this->response->collection(InventoryFeatureList::all(), new FeatureListTransformer());
     }
 }
