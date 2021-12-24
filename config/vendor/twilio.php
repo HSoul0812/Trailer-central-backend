@@ -3,30 +3,22 @@
 return [
     /*
     |--------------------------------------------------------------------------
-    | Google API
+    | Twilio API
     |--------------------------------------------------------------------------
     |
-    | Here are the Google API details.
+    | Here are the Twilio API keys.
     |
     */
 
+    // Twilio Account SID
+    'sid'   => env('TWILIO_ACCOUNT_ID', ''),
+
+    // Twilio Auth Token
+    'token' => env('TWILIO_AUTH_TOKEN', ''),
+
     // API Key Settings
-    'api'             => [
-        'key'    => env('GOOGLE_OAUTH_API_KEY', ''),
-        'secret' => env('GOOGLE_OAUTH_API_SECRET', ''),
-    ],
-
-    // App Key Settings
-    'app'             => [
-        'id'     => env('GOOGLE_OAUTH_CLIENT_ID', ''),
-        'secret' => env('GOOGLE_OAUTH_CLIENT_SECRET', ''),
-        'name'   => env('GOOGLE_OAUTH_APP_NAME', 'Operate Beyond CRM')
-    ],
-
-    // Redirect URI
-    'redirectUri'     => env('GOOGLE_REDIRECT_URI', 'https://crm.trailercentral.com/oauth-result/google'),
-
-    // Required Scopes
-    'scopes'          => env('GOOGLE_OAUTH_SCOPES', 'openid profile offline_access email https://mail.google.com/'),
-    'discovery'       => env('GOOGLE_OAUTH_DISCOVERY', 'https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest')
+    'api'   => [
+        'key'    => env('TWILIO_API_KEY', ''),
+        'secret' => env('TWILIO_API_SECRET', ''),
+    ]
 ];

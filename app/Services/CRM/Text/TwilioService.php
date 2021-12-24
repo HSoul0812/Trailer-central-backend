@@ -56,7 +56,12 @@ class TwilioService implements TextServiceInterface
     public function __construct(NumberRepositoryInterface $numberRepo)
     {
         // Initialize Twilio Client
-        $this->twilio = new Client(config('vendor.twilio.sid'), env('TWILIO_AUTH_TOKEN'));
+        if(config('vendor.twilio.api.key') && config('vendor.twilio.api.secret')) {
+            $this->twilio = new Client(config('vendor.twilio.api.key'), config('vendor.twilio.api.secret'),
+                                        config('vendor.twilio.sid'));
+        } else {
+            $this->twilio = new Client(config('vendor.twilio.sid'), config('vendor.twilio.token'));
+        }
 
         // Initialize Number Repository
         $this->textNumber = $numberRepo;
