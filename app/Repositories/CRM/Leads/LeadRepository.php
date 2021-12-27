@@ -92,9 +92,12 @@ class LeadRepository implements LeadRepositoryInterface {
         return Lead::findOrFail($params['id']);
     }
 
-    public function getAll($params) {
-        $query = Lead::where('identifier', '>', 0)
-                     ->where('website_lead.lead_type', '<>', LeadType::TYPE_NONLEAD);
+    public function getAll($params)
+    {
+        $query = Lead::where([
+            ['identifier', '>', 0],
+            ['website_lead.lead_type', '<>', LeadType::TYPE_NONLEAD],
+        ]);
 
         if (isset($params['dealer_id'])) {
             $query = $query->where(Lead::getTableName().'.dealer_id', $params['dealer_id']);
@@ -109,7 +112,7 @@ class LeadRepository implements LeadRepositoryInterface {
         }
 
         if (isset($params['sort'])) {
-            $query = $query->leftJoin(Interaction::getTableName(), Interaction::getTableName().'.tc_lead_id',  '=', Lead::getTableName().'.identifier');
+            $query = $query->leftJoin(Interaction::getTableName(), Interaction::getTableName().'.tc_lead_id', '=', Lead::getTableName().'.identifier');
             $query = $query->orderBy($this->sortOrders[$params['sort']]['field'], $this->sortOrders[$params['sort']]['direction']);
         }
 
@@ -405,7 +408,7 @@ class LeadRepository implements LeadRepositoryInterface {
             $query = $this->addLeadStatusToQuery($query, $filters['lead_status']);
         }
 
-        if (isset($filters['lead_type'])) {
+        if (!empty($filters['lead_type'])) {
             $query = $this->addLeadTypeToQuery($query, $filters['lead_type']);
         }
 
@@ -537,12 +540,20 @@ class LeadRepository implements LeadRepositoryInterface {
 
     /**
      * @param Builder|Relation $query
-     * @param string $leadType
+     * @param array $leadType
      * @return Builder|Relation
      */
-    private function addLeadTypeToQuery($query, string $leadType) {
-        $query = $query->leftJoin(LeadType::getTableName(), LeadType::getTableName().'.lead_id',  '=', Lead::getTableName().'.identifier');
-        return $query->whereIn(LeadType::getTableName().'.lead_type', $leadType);
+    private function addLeadTypeToQuery($query, array $leadType)
+    {
+        $leadTypeTableName = LeadType::getTableName();
+
+        return $query->leftJoin(
+            $leadTypeTableName,
+            $leadTypeTableName . '.lead_id',
+            '=',
+            Lead::getTableName() . '.identifier'
+        )
+        ->whereIn($leadTypeTableName . '.lead_type', $leadType);
     }
 
     /**
