@@ -46,6 +46,6 @@ class CreateCustomerRequest extends Request
 
     public function __construct(array $query = array(), array $request = array(), array $attributes = array(), array $cookies = array(), array $files = array(), array $server = array(), $content = null) {
         parent::__construct($query, $request, $attributes, $cookies, $files, $server, $content);
-        $this->rules['display_name'] = 'required|string|customer_name_unique:'.$this->input('dealer_id');
+        $this->rules['display_name'] = 'required|string';
     }
 } 
