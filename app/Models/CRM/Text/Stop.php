@@ -12,11 +12,11 @@ use Illuminate\Database\Eloquent\Model;
 class Stop extends Model
 {
     /**
-     * Statuses for Lead Assign
+     * Statuses for Text Stop
      * 
      * @var array
      */
-    const REPORT_TYPES = ['unsubscribed', 'invalid', ''];
+    const REPORT_TYPES = ['unsubscribed', 'invalid'];
 
     /**
      * Statuses for Lead Assign
