@@ -73,17 +73,6 @@ class Employee extends Model
         'is_timeclock_user'
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'first_name' => StringTrim::class,
-        'last_name' => StringTrim::class,
-        'display_name' => StringTrim::class,
-    ];
-
     public function setFirstNameAttribute(string $value): void
     {
         $this->first_name = $value;

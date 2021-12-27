@@ -121,7 +121,6 @@ class CustomerController extends RestfulControllerV2
 
     public function update($id, Request $request)
     {
-        // dd($request->all());
         $customerData = $request->only([
             'dealer_id', 'first_name', 'last_name', 'display_name', 'email', 'drivers_license', 'home_phone',
             'work_phone', 'cell_phone', 'address', 'city', 'region', 'postal_code', 'country', 'website_lead_id',

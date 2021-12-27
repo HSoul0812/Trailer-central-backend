@@ -103,19 +103,6 @@ class Customer extends Model
         'qb_id'
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'company_name' => StringTrim::class,
-        'middle_name' => StringTrim::class,
-        'first_name' => StringTrim::class,
-        'last_name' => StringTrim::class,
-        'display_name' => StringTrim::class,
-    ];
-
     public function setCompanyNameAttribute(string $value): void
     {
         $this->company_name = $value;
