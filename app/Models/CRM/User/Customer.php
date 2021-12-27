@@ -103,6 +103,45 @@ class Customer extends Model
         'qb_id'
     ];
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'company_name' => StringTrim::class,
+        'middle_name' => StringTrim::class,
+        'first_name' => StringTrim::class,
+        'last_name' => StringTrim::class,
+        'display_name' => StringTrim::class,
+    ];
+
+    public function setCompanyNameAttribute(string $value): void
+    {
+        $this->company_name = $value;
+    }
+
+    public function setMiddleNameAttribute(string $value): void
+    {
+        $this->middle_name = $value;
+    }
+
+    public function setFirstNameAttribute(string $value): void
+    {
+        $this->first_name = $value;
+    }
+
+    public function setLastNameAttribute(string $value): void
+    {
+        $this->last_name = $value;
+    }
+
+    public function setDisplayNameAttribute(string $value): void
+    {
+        $this->display_name = $value;
+    }
+
+
     public function quotes()
     {
         return $this->hasMany(UnitSale::class, 'buyer_id', 'id');

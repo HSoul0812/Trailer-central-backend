@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\CRM\User;
 
+use App\Casts\StringTrim;
 use App\Models\CRM\Dms\ServiceOrder\ServiceItemTechnician;
 use App\Models\CRM\Dms\ServiceOrder\Technician;
 use App\Models\Traits\TableAware;
@@ -71,6 +72,32 @@ class Employee extends Model
         'qb_id',
         'is_timeclock_user'
     ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'first_name' => StringTrim::class,
+        'last_name' => StringTrim::class,
+        'display_name' => StringTrim::class,
+    ];
+
+    public function setFirstNameAttribute(string $value): void
+    {
+        $this->first_name = $value;
+    }
+
+    public function setLastNameAttribute(string $value): void
+    {
+        $this->last_name = $value;
+    }
+
+    public function setDisplayNameAttribute(string $value): void
+    {
+        $this->display_name = $value;
+    }
 
     public function dealer(): BelongsTo
     {
