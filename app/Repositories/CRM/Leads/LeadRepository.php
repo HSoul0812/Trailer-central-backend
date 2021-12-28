@@ -45,7 +45,7 @@ class LeadRepository implements LeadRepositoryInterface {
             'direction' => 'DESC'
         ],
         '-most_recent' => [
-            'field' => 'MAX(crm_interaction.interaction_time)',
+            'field' => 'MIN(crm_interaction.interaction_time)',
             'direction' => 'ASC'
         ],
         'most_recent' => [
