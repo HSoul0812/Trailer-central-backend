@@ -22,6 +22,7 @@ use League\Fractal\Manager;
 use League\Fractal\Pagination\IlluminatePaginatorAdapter;
 use League\Fractal\Resource\Collection;
 use Illuminate\Support\Facades\Auth;
+use Utils\StringUtil;
 
 class CustomerController extends RestfulControllerV2
 {
