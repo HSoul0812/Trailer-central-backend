@@ -12,6 +12,6 @@ namespace App\Exceptions\CRM\Text;
 class NoBlastSmsFromNumberException extends \Exception
 {
     
-    protected $message = 'Could not find find from sms number for blast!';
+    protected $message = 'Could not find from sms number for blast!';
 
 }
