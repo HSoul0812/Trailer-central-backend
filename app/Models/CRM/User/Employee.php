@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\CRM\User;
 
 use App\Casts\StringTrim;
+use App\Helpers\StringHelper;
 use App\Models\CRM\Dms\ServiceOrder\ServiceItemTechnician;
 use App\Models\CRM\Dms\ServiceOrder\Technician;
 use App\Models\Traits\TableAware;
@@ -75,17 +76,17 @@ class Employee extends Model
 
     public function setFirstNameAttribute(string $value): void
     {
-        $this->first_name = $value;
+        $this->first_name = StringHelper::trimWhiteSpaces($value);
     }
 
     public function setLastNameAttribute(string $value): void
     {
-        $this->last_name = $value;
+        $this->last_name = StringHelper::trimWhiteSpaces($value);
     }
 
     public function setDisplayNameAttribute(string $value): void
     {
-        $this->display_name = $value;
+        $this->display_name = StringHelper::trimWhiteSpaces($value);
     }
 
     public function dealer(): BelongsTo

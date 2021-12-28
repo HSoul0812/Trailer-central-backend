@@ -2,6 +2,7 @@
 
 namespace App\Models\CRM\User;
 
+use App\Helpers\StringHelper;
 use ElasticScoutDriverPlus\CustomSearch;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Dms\UnitSale;
@@ -105,29 +106,28 @@ class Customer extends Model
 
     public function setCompanyNameAttribute(string $value): void
     {
-        $this->company_name = $value;
-    }
-
-    public function setMiddleNameAttribute(string $value): void
-    {
-        $this->middle_name = $value;
+        $this->company_name = StringHelper::trimWhiteSpaces($value);
     }
 
     public function setFirstNameAttribute(string $value): void
     {
-        $this->first_name = $value;
+        $this->first_name = StringHelper::trimWhiteSpaces($value);
+    }
+
+    public function setMiddleNameAttribute(string $value): void
+    {
+        $this->middle_name = StringHelper::trimWhiteSpaces($value);
     }
 
     public function setLastNameAttribute(string $value): void
     {
-        $this->last_name = $value;
+        $this->last_name = StringHelper::trimWhiteSpaces($value);
     }
 
     public function setDisplayNameAttribute(string $value): void
     {
-        $this->display_name = $value;
+        $this->display_name = StringHelper::trimWhiteSpaces($value);
     }
-
 
     public function quotes()
     {
@@ -137,15 +137,14 @@ class Customer extends Model
     public function openQuotes()
     {
         return $this->quotes()->where('is_archived', 0)
-            ->where(function($query) {
+            ->where(function ($query) {
                 $query->whereDoesntHave('payments')
-                    ->orWhereHas('payments', function($query) {
+                    ->orWhereHas('payments', function ($query) {
                         $query->select(DB::raw('sum(amount) as paid_amount'))
                             ->groupBy('invoice_id')
                             ->havingRaw('paid_amount < dms_unit_sale.total_price or paid_amount <= 0');
                     });
             });
-
     }
 
     public function dealer(): BelongsTo
