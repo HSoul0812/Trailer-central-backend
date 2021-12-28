@@ -639,9 +639,8 @@ class InventoryRepository implements InventoryRepositoryInterface
 
         if (isset($params['images_greater_than']) || isset($params['images_less_than'])) {
             $query = $query->leftJoin('inventory_image', 'inventory_image.inventory_id', '=', 'inventory.inventory_id');
-            $query->selectRaw('inventory.*, count(inventory_image.inventory_id) as image_count');
+            $query->selectRaw('count(inventory_image.inventory_id) as image_count');
             $query->groupBy('inventory.inventory_id');
-
         }
 
         return $query;
@@ -775,7 +774,10 @@ class InventoryRepository implements InventoryRepositoryInterface
                 continue;
             }
 
-            $item->inventoryImages()->where('image_id', '=', $existingImage['image_id'])->update($existingImage);
+            $inventoryImageFields = with(new InventoryImage())->getFillable();
+            $inventoryImageParams = array_intersect_key($existingImage, array_combine($inventoryImageFields, array_fill(0, count($inventoryImageFields), 0)));
+
+            $item->inventoryImages()->where('image_id', '=', $existingImage['image_id'])->update($inventoryImageParams);
         }
     }
 

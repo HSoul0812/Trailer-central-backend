@@ -274,4 +274,20 @@ class CustomerRepository implements CustomerRepositoryInterface
 
         return (bool)$query->update($params);
     }
+
+    /**
+     * @param callable $callback The callback with the signature of (Collection $customers) => void;
+     * @param array $select The columns to select in the result query
+     * @param array $with The relationships to eager load
+     * @param int $chunkSize The chunk size of the chunkById operation
+     * @return void
+     */
+    public function getCustomersWithoutLeads(callable $callback, array $select = ['*'], array $with = [], $chunkSize = 500)
+    {
+        Customer::query()
+            ->select($select)
+            ->with($with)
+            ->whereNull('website_lead_id')
+            ->chunkById($chunkSize, $callback);
+    }
 }
