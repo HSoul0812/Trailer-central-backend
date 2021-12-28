@@ -70,6 +70,13 @@ return [
             'days' => 3,
         ],
 
+        'textcampaign' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/commands/text-campaigns.log'),
+            'level' => 'debug',
+            'days' => 3,
+        ],
+
         'auth' => [
             'driver' => 'daily',
             'path' => storage_path('logs/services/auth.log'),

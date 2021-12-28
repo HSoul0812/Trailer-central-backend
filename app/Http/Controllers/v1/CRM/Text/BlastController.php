@@ -22,10 +22,11 @@ class BlastController extends RestfulControllerV2
      *
      * @param Repository $blasts
      */
-    public function __construct(BlastRepositoryInterface $blasts)
+    public function __construct(BlastRepositoryInterface $blasts, BlastTransformer $transformer)
     {
         $this->middleware('setUserIdOnRequest')->only(['index', 'create', 'update']);
         $this->blasts = $blasts;
+        $this->transformer = $transformer;
     }
 
 
@@ -63,7 +64,7 @@ class BlastController extends RestfulControllerV2
         $request = new GetBlastsRequest($request->all());
         
         if ($request->validate()) {
-            return $this->response->paginator($this->blasts->getAll($request->all()), new BlastTransformer());
+            return $this->response->paginator($this->blasts->getAll($request->all()), $this->transformer);
         }
         
         return $this->response->errorBadRequest();
@@ -111,7 +112,7 @@ class BlastController extends RestfulControllerV2
         $request = new CreateBlastRequest($request->all());
         if ( $request->validate() ) {
             // Create Text
-            return $this->response->item($this->blasts->create($request->all()), new BlastTransformer());
+            return $this->response->item($this->blasts->create($request->all()), $this->transformer);
         }  
         
         return $this->response->errorBadRequest();
@@ -145,7 +146,7 @@ class BlastController extends RestfulControllerV2
         $request = new ShowBlastRequest(['id' => $id]);
         
         if ( $request->validate() ) {
-            return $this->response->item($this->blasts->get(['id' => $id]), new BlastTransformer());
+            return $this->response->item($this->blasts->get(['id' => $id]), $this->transformer);
         }
         
         return $this->response->errorBadRequest();
@@ -195,7 +196,7 @@ class BlastController extends RestfulControllerV2
         $request = new UpdateBlastRequest($requestData);
         
         if ( $request->validate() ) {
-            return $this->response->item($this->blasts->update($request->all()), new BlastTransformer());
+            return $this->response->item($this->blasts->update($request->all()), $this->transformer);
         }
         
         return $this->response->errorBadRequest();
@@ -229,7 +230,7 @@ class BlastController extends RestfulControllerV2
         
         if ( $request->validate()) {
             // Create Text
-            return $this->response->item($this->blasts->delete(['id' => $id]), new BlastTransformer());
+            return $this->response->item($this->blasts->delete(['id' => $id]), $this->transformer);
         }
         
         return $this->response->errorBadRequest();
@@ -263,7 +264,7 @@ class BlastController extends RestfulControllerV2
         
         if ( $request->validate()) {
             // Create Text
-            return $this->response->item($this->blasts->sent(['id' => $id]), new BlastTransformer());
+            return $this->response->item($this->blasts->sent(['id' => $id]), $this->transformer);
         }
         
         return $this->response->errorBadRequest();
