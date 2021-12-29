@@ -5,7 +5,6 @@ namespace App\Repositories\CRM\Leads;
 use App\Models\CRM\User\Customer;
 use App\Models\Website\Website;
 use App\Exceptions\RepositoryInvalidArgumentException;
-use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadAssign;
@@ -105,14 +104,14 @@ class LeadRepository implements LeadRepositoryInterface {
         /**
          * Filters
          */
-        $query = $this->addFiltersToQuery($query, $params);
+        $query = $this->addFiltersToQuery($query, $params, false, isset($params['sort']));
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
         }
 
         if (isset($params['sort'])) {
-            $query = $query->leftJoin(Interaction::getTableName(), Interaction::getTableName().'.tc_lead_id', '=', Lead::getTableName().'.identifier');
+            $query = $this->joinInteraction($query);
             $query = $query->orderBy($this->sortOrders[$params['sort']]['field'], $this->sortOrders[$params['sort']]['direction']);
         }
 
@@ -310,68 +309,73 @@ class LeadRepository implements LeadRepositoryInterface {
     private function getHotLeadsByDealer($dealerId, $params = []) {
         $user = User::findOrFail($dealerId);
 
-        if (!isset($params['is_archived'])) {
-            $params['is_archived'] = Lead::NOT_ARCHIVED;
-        }
-
         $hotLeadsQuery = $user->leads()
-                        ->join(LeadStatus::getTableName(), Lead::getTableName().'.identifier', '=', LeadStatus::getTableName().'.tc_lead_identifier')
-                        ->where(LeadStatus::getTableName().'.status', Lead::STATUS_HOT);
+                        ->leftJoin(LeadStatus::getTableName(), Lead::getTableName().'.identifier', '=', LeadStatus::getTableName().'.tc_lead_identifier')
+                        ->where(LeadStatus::getTableName().'.status', Lead::STATUS_HOT)
+                        ->distinct();
 
         $hotLeadsQuery = $this->addFiltersToQuery($hotLeadsQuery, $params, true);
 
-        return $hotLeadsQuery->count();
+        return $hotLeadsQuery->count('identifier');
     }
 
     private function getLostLeadsByDealer($dealerId, $params = []) {
         $user = User::findOrFail($dealerId);
 
-        if (!isset($params['is_archived'])) {
-            $params['is_archived'] = Lead::NOT_ARCHIVED;
-        }
-
         $lostLeadsQuery = $user->leads()
-                        ->join(LeadStatus::getTableName(), Lead::getTableName().'.identifier', '=', LeadStatus::getTableName().'.tc_lead_identifier')
-                        ->where(LeadStatus::getTableName().'.status', Lead::STATUS_LOST);
+                        ->leftJoin(LeadStatus::getTableName(), Lead::getTableName().'.identifier', '=', LeadStatus::getTableName().'.tc_lead_identifier')
+                        ->where(LeadStatus::getTableName().'.status', Lead::STATUS_LOST)
+                        ->distinct();
 
         $lostLeadsQuery = $this->addFiltersToQuery($lostLeadsQuery, $params, true);
 
-        return $lostLeadsQuery->count();
+        return $lostLeadsQuery->count('identifier');
     }
 
     private function getOpenLeadsbyDealer($dealerId, $params = []) {
         $user = User::findOrFail($dealerId);
 
-        if (!isset($params['is_archived'])) {
-            $params['is_archived'] = Lead::NOT_ARCHIVED;
-        }
 
         $openLeadsQuery = $user->leads()
-                            ->join(LeadStatus::getTableName(), Lead::getTableName().'.identifier', '=', LeadStatus::getTableName().'.tc_lead_identifier')
-                            ->whereNotIn(LeadStatus::getTableName().'.status', [Lead::STATUS_WON, Lead::STATUS_WON_CLOSED, Lead::STATUS_LOST]);
+                            ->leftJoin(LeadStatus::getTableName(), Lead::getTableName().'.identifier', '=', LeadStatus::getTableName().'.tc_lead_identifier')
+                            ->where(function($query) {
+                                $query->whereNotIn(LeadStatus::getTableName().'.status', [Lead::STATUS_WON, Lead::STATUS_WON_CLOSED, Lead::STATUS_LOST])
+                                    ->orWhereNull(LeadStatus::getTableName().'.status');
+                            })
+                            ->distinct();
 
         $openLeadsQuery = $this->addFiltersToQuery($openLeadsQuery, $params, true);
 
-        return $openLeadsQuery->count();
+        return $openLeadsQuery->count('identifier');
     }
 
     private function getWonLeadsByDealer($dealerId, $params = []) {
         $user = User::findOrFail($dealerId);
 
-        if (!isset($params['is_archived'])) {
-            $params['is_archived'] = Lead::NOT_ARCHIVED;
-        }
-
         $wonLeadsQuery = $user->leads()
-                            ->join(LeadStatus::getTableName(), Lead::getTableName().'.identifier', '=', LeadStatus::getTableName().'.tc_lead_identifier')
-                            ->whereIn(LeadStatus::getTableName().'.status', [Lead::STATUS_WON, Lead::STATUS_WON_CLOSED]);
+                            ->leftJoin(LeadStatus::getTableName(), Lead::getTableName().'.identifier', '=', LeadStatus::getTableName().'.tc_lead_identifier')
+                            ->whereIn(LeadStatus::getTableName().'.status', [Lead::STATUS_WON, Lead::STATUS_WON_CLOSED])
+                            ->distinct();
 
         $wonLeadsQuery = $this->addFiltersToQuery($wonLeadsQuery, $params, true);
 
-        return $wonLeadsQuery->count();
+        return $wonLeadsQuery->count('identifier');
     }
 
-    private function addFiltersToQuery($query, $filters, $noStatusJoin = false) {
+    /**
+     * @param Builder|Relation $query
+     * @return Builder|Relation
+     */
+    private function joinInteraction($query) {
+        return $query->leftJoin(
+            Interaction::getTableName(),
+            Interaction::getTableName() . '.tc_lead_id',
+            '=',
+            Lead::getTableName() . '.identifier'
+        );
+    }
+
+    private function addFiltersToQuery($query, $filters, $noStatusJoin = false, $noInteractionJoin = false) {
         if (!$noStatusJoin) {
             $query = $query->leftJoin(LeadStatus::getTableName(), Lead::getTableName().'.identifier', '=', LeadStatus::getTableName().'.tc_lead_identifier');
         }
@@ -386,6 +390,27 @@ class LeadRepository implements LeadRepositoryInterface {
 
         if (isset($filters['date_to'])) {
             $query = $this->addDateToToQuery($query, $filters['date_to']);
+        }
+
+
+        if (isset($filters['next_contact_from'])) {
+            $query = $this->addNextContactFromToQuery($query, $filters['next_contact_from']);
+        }
+
+        if (isset($filters['next_contact_to'])) {
+            $query = $this->addNextContactToToQuery($query, $filters['next_contact_to']);
+        }
+
+        if((isset($filters['interacted_from']) || isset($filters['interacted_to'])) && !$noInteractionJoin) {
+            $this->joinInteraction($query);
+        }
+
+        if (isset($filters['interacted_from'])) {
+            $query = $this->addInteractedFromToQuery($query, $filters['interacted_from']);
+        }
+
+        if (isset($filters['interacted_to'])) {
+            $query = $this->addInteractedToToQuery($query, $filters['interacted_to']);
         }
 
         if (isset($filters['is_archived'])) {
@@ -468,6 +493,22 @@ class LeadRepository implements LeadRepositoryInterface {
      */
     private function addDateFromToQuery($query, string $dateFrom) {
         return $query->where(Lead::getTableName().'.date_submitted', '>=', $dateFrom);
+    }
+
+    private function addNextContactFromToQuery($query, string $dateFrom) {
+        return $query->where(LeadStatus::getTableName().'.next_contact_date', '>=', $dateFrom);
+    }
+
+    private function addNextContactToToQuery($query, string $dateTo) {
+        return $query->where(LeadStatus::getTableName().'.next_contact_date', '<=', $dateTo);
+    }
+
+    private function addInteractedFromToQuery($query, string $dateFrom) {
+        return $query->where(Interaction::getTableName().'.interaction_time', '>=', $dateFrom);
+    }
+
+    private function addInteractedToToQuery($query, string $dateTo) {
+        return $query->where(Interaction::getTableName().'.interaction_time', '<=', $dateTo);
     }
 
     /**

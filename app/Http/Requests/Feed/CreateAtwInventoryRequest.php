@@ -14,7 +14,7 @@ class CreateAtwInventoryRequest extends Request
      * @var array
      */
     protected $rules = [
-        '*.source' => 'required|string|in:pj,bigtex',
+        '*.source' => 'required|string|in:pj,btt,bttw,bwt,cmtb,olt,pjt,pjtb,tt,ttcom,wcd',
         '*.attributes.model' => 'required|string',
         '*.stock_id' => 'required|string',
         '*.attributes.category' => 'required|string',

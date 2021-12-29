@@ -639,9 +639,8 @@ class InventoryRepository implements InventoryRepositoryInterface
 
         if (isset($params['images_greater_than']) || isset($params['images_less_than'])) {
             $query = $query->leftJoin('inventory_image', 'inventory_image.inventory_id', '=', 'inventory.inventory_id');
-            $query->selectRaw('inventory.*, count(inventory_image.inventory_id) as image_count');
+            $query->selectRaw('count(inventory_image.inventory_id) as image_count');
             $query->groupBy('inventory.inventory_id');
-
         }
 
         return $query;
@@ -725,6 +724,9 @@ class InventoryRepository implements InventoryRepositoryInterface
         $attributeObjs = [];
 
         foreach ($attributes as $attribute) {
+            if (!is_array($attribute)) {
+                continue;
+            }
             $attributeObjs[] = new AttributeValue($attribute);
         }
 
