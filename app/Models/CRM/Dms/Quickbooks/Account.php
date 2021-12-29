@@ -2,6 +2,7 @@
 
 namespace App\Models\CRM\Dms\Quickbooks;
 
+use App\Helpers\StringHelper;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -10,7 +11,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Account extends Model
 {
-
     use SoftDeletes;
 
     const TYPE_BANK = 'Bank';
@@ -28,7 +28,7 @@ class Account extends Model
     const TYPE_OTHER_CURRENT_LIABILITY = 'Other Current Liability';
     const TYPE_INCOME = 'Income';
     const TYPE_OTHER_INCOME = 'Other Income';
-    
+
     const ACCOUNT_TYPES = [
         self::TYPE_BANK,
         self::TYPE_OTHER_CURRENT_ASSET,
@@ -56,5 +56,10 @@ class Account extends Model
     public function parent()
     {
         return $this->hasOne(Account::class, 'id', 'parent_id');
+    }
+
+    public function setNameAttribute(string $value): void
+    {
+        $this->attributes['name'] = StringHelper::trimWhiteSpaces($value);
     }
 }
