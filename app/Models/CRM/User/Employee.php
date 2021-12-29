@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models\CRM\User;
 
-use App\Casts\StringTrim;
 use App\Helpers\StringHelper;
 use App\Models\CRM\Dms\ServiceOrder\ServiceItemTechnician;
 use App\Models\CRM\Dms\ServiceOrder\Technician;
