@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Collection;
 
-class AddCrmEmailHistoryIdColumnToCrmEmailBlastsSentTable1 extends Migration
+class AddCrmEmailHistoryIdColumnToCrmEmailBlastsSentTable extends Migration
 {
     /**
      * Run the migrations.
@@ -30,6 +30,9 @@ class AddCrmEmailHistoryIdColumnToCrmEmailBlastsSentTable1 extends Migration
         DB::table('crm_email_history')
             ->select(['crm_email_history.email_id', 'crm_email_blasts_sent.email_blasts_id'])
             ->join('crm_email_blasts_sent', 'crm_email_blasts_sent.message_id', '=', 'crm_email_history.message_id')
+            ->where('crm_email_history.message_id', '!=', 0)
+            ->where('crm_email_history.message_id', '!=', '')
+            ->whereNotNull('crm_email_history.message_id')
             ->orderBy('crm_email_history.email_id')
             ->chunk(5000, function (Collection $data) {
                 foreach ($data as $item) {
