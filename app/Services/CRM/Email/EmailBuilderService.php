@@ -373,7 +373,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
                 $this->log->info('The Lead With ID #' . $builder->leadId . ' has no email address, ' .
                                     'we cannot send it in Email ' . $builder->type . ' #' . $builder->id . '!');
                 $stats->updateStats(BuilderStats::STATUS_BOUNCED);
-                //$this->markBounced($builder, 'invalid');
+                $this->markBounced($builder, 'invalid');
                 continue;
             }
 
