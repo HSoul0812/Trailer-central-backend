@@ -59,11 +59,11 @@ class Vendor extends Model
 
     public function setContactNameAttribute(string $value): void
     {
-        $this->contact_name = StringHelper::trimWhiteSpaces($value);
+        $this->attributes['contact_name'] = StringHelper::trimWhiteSpaces($value);
     }
 
     public function setNameAttribute(string $value): void
     {
-        $this->name = StringHelper::trimWhiteSpaces($value);
+        $this->attributes['name'] = StringHelper::trimWhiteSpaces($value);
     }
 }

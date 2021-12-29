@@ -47,16 +47,16 @@ class FinancingCompany extends Model implements Filterable
 
     public function setFirstNameAttribute(string $value): void
     {
-        $this->first_name = StringHelper::trimWhiteSpaces($value);
+        $this->attributes['first_name'] = StringHelper::trimWhiteSpaces($value);
     }
 
     public function setLastNameAttribute(string $value): void
     {
-        $this->last_name = StringHelper::trimWhiteSpaces($value);
+        $this->attributes['last_name'] = StringHelper::trimWhiteSpaces($value);
     }
 
     public function setDisplayNameAttribute(string $value): void
     {
-        $this->display_name = StringHelper::trimWhiteSpaces($value);
+        $this->attributes['display_name'] = StringHelper::trimWhiteSpaces($value);
     }
 }

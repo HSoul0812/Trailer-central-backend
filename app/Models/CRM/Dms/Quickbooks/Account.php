@@ -60,6 +60,6 @@ class Account extends Model
 
     public function setNameAttribute(string $value): void
     {
-        $this->name = StringHelper::trimWhiteSpaces($value);
+        $this->attributes['name'] = StringHelper::trimWhiteSpaces($value);
     }
 }
