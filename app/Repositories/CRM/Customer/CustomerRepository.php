@@ -2,16 +2,18 @@
 
 namespace App\Repositories\CRM\Customer;
 
-use App\Exceptions\Dms\CustomerAlreadyExistsException;
+use App\Exceptions\RepositoryInvalidArgumentException;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\User\Customer;
+use App\Traits\Repository\ElasticSearch;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Carbon;
 
 class CustomerRepository implements CustomerRepositoryInterface
 {
+    use ElasticSearch\Helpers;
+
     protected $model;
 
     /**
@@ -171,29 +173,35 @@ class CustomerRepository implements CustomerRepositoryInterface
      */
     public function search($query, $dealerId, $options = [], &$paginator = null)
     {
+        if (empty($query['query']) && empty($options['allowAll'])) {
+            throw new \Exception('Query is required');
+        }
+
         $search = Customer::boolSearch();
 
         // filter by dealer first
-        $search->must('match_phrase', ['dealer_id' => $dealerId]);
+        $filters = [
+            ['match_phrase' => ['dealer_id' => $dealerId]]
+        ];
 
-        if ($query['query'] ?? null) { // if a query is specified
-            $search->filterRaw([
+        if (!empty($query['query'])) { // if a query is specified
+            $filters[] = [
                 'bool' => [
-                    'should' => [
-                        'multi_match' => [
-                            'query' => trim($query['query']),
-                            'fuzziness' => 'AUTO',
-                            'fields' => ['display_name^3', 'first_name^2', 'last_name^2', 'email^0.5', 'company_name^0.5', 'home_phone', 'cell_phone', 'work_phone']
-                        ],
-                    ],
-                    'minimum_should_match' => 1,
+                    'should' => $this->makeMultiMatchQueryWithRelevance([
+                        'display_name^0.7',
+                        'first_name^0.5',
+                        'last_name^0.5',
+                        'email^0.3',
+                        'company_name^0.4',
+                        'home_phone^0.2',
+                        'cell_phone^0.2',
+                        'work_phone^0.2'
+                    ], $query['query'])
                 ],
-            ]);
-        } else if ($options['allowAll'] ?? false) { // if no query supplied but is allowed
-            $search->must('match_all', []);
-        } else {
-            throw new \Exception('Query is required');
+            ];
         }
+
+        $search->mustRaw($filters);
 
         // sort order
         if ($query['sort'] ?? null) {
@@ -205,14 +213,14 @@ class CustomerRepository implements CustomerRepositoryInterface
 
             $search->sort($field, $sortDir);
         } else {
-            $search->sort("_score", "asc");
+            $search->sort("_score", "desc");
         }
 
         // load relations
         // $search->load([]);
 
         // if a paginator is requested
-        if ($options['page'] ?? null) {
+        if (!empty($options['page'])) {
             $page = $options['page'];
             $perPage = $options['per_page'] ?? 10;
 
@@ -240,5 +248,46 @@ class CustomerRepository implements CustomerRepositoryInterface
         $search->size($size);
 
         return $search->execute()->models();
+    }
+
+    /**
+     * @param array $params
+     * @return bool
+     */
+    public function bulkUpdate(array $params): bool
+    {
+        if ((empty($params['ids']) || !is_array($params['ids'])) && (empty($params['search']) || !is_array($params['search']))) {
+            throw new RepositoryInvalidArgumentException('ids or search param has been missed. Params - ' . json_encode($params));
+        }
+
+        $query = Customer::query();
+
+        if (!empty($params['ids']) && is_array($params['ids'])) {
+            $query = $query->whereIn('id', $params['ids']);
+            unset($params['ids']);
+        }
+
+        if (!empty($params['search']['website_lead_id'])) {
+            $query = $query->where('website_lead_id', $params['search']['website_lead_id']);
+            unset($params['search']);
+        }
+
+        return (bool)$query->update($params);
+    }
+
+    /**
+     * @param callable $callback The callback with the signature of (Collection $customers) => void;
+     * @param array $select The columns to select in the result query
+     * @param array $with The relationships to eager load
+     * @param int $chunkSize The chunk size of the chunkById operation
+     * @return void
+     */
+    public function getCustomersWithoutLeads(callable $callback, array $select = ['*'], array $with = [], $chunkSize = 500)
+    {
+        Customer::query()
+            ->select($select)
+            ->with($with)
+            ->whereNull('website_lead_id')
+            ->chunkById($chunkSize, $callback);
     }
 }

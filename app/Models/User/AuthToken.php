@@ -2,7 +2,9 @@
 
 namespace App\Models\User;
 
+use App\Models\User\Integration\Integration;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * Class AuthToken
@@ -55,11 +57,15 @@ class AuthToken extends Model
      *
      * @return HasOne
      */
-    public function user()
+    public function user(): HasOne
     {
         // Get Dealer User Instead?!
         if($this->user_type === 'dealer_user') {
             return $this->dealerUser();
+        }
+
+        if($this->user_type === 'integration') {
+            return $this->integration();
         }
 
         // Return Dealer
@@ -71,7 +77,8 @@ class AuthToken extends Model
      *
      * @return HasOne
      */
-    public function dealer() {
+    public function dealer(): HasOne
+    {
         return $this->hasOne(User::class, 'dealer_id', 'user_id');
     }
 
@@ -80,8 +87,18 @@ class AuthToken extends Model
      *
      * @return HasOne
      */
-    public function dealerUser()
+    public function dealerUser(): HasOne
     {
         return $this->hasOne(DealerUser::Class, 'dealer_user_id', 'user_id');
+    }
+
+    /**
+     * Get Dealer User
+     *
+     * @return HasOne
+     */
+    public function integration(): HasOne
+    {
+        return $this->hasOne(Integration::Class, 'id', 'user_id');
     }
 }

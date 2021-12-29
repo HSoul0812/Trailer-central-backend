@@ -186,33 +186,45 @@ $api->version('v1', function ($route) {
     /**
      * Inventory Overlay
      */
-
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
         $route->get('inventory/overlay', 'App\Http\Controllers\v1\Inventory\CustomOverlayController@index');
+        $route->post('inventory/overlay', 'App\Http\Controllers\v1\Inventory\CustomOverlayController@update');
+        $route->post('inventory/bulk-overlay', 'App\Http\Controllers\v1\Inventory\CustomOverlayController@bulkUpdate');
     });
 
     /**
      * Inventory Entity
      */
-
     $route->get('inventory/entity', 'App\Http\Controllers\v1\Inventory\EntityController@index');
 
     /**
      * Inventory Manufacturers
      */
     $route->get('inventory/manufacturers', 'App\Http\Controllers\v1\Inventory\ManufacturerController@index');
+
+    /**
+     * Inventory Brands
+     */
+    $route->get('inventory/brands', 'App\Http\Controllers\v1\Inventory\Manufacturers\BrandController@index');
+
     /**
      * Inventory Categories
      */
     $route->get('inventory/categories', 'App\Http\Controllers\v1\Inventory\CategoryController@index');
+
     /**
      * Inventory Statuses
      */
     $route->get('inventory/statuses', 'App\Http\Controllers\v1\Inventory\StatusController@index');
+
     /**
      * Inventory Attributes
      */
     $route->get('inventory/attributes', 'App\Http\Controllers\v1\Inventory\AttributeController@index');
+    $route->put(
+        'inventory/{id}/attributes',
+        'App\Http\Controllers\v1\Inventory\InventoryAttributeController@update'
+    )->where('id', '[0-9]+');
 
     /**
      * Inventory Attributes
@@ -223,6 +235,11 @@ $api->version('v1', function ($route) {
      * Inventory transactions history
      */
     $route->get('inventory/{inventory_id}/history', 'App\Http\Controllers\v1\Inventory\InventoryController@history')->where('inventory_id', '[0-9]+');
+
+    /**
+     * Inventory distance
+     */
+    $route->get('inventory/{inventory_id}/delivery_price', 'App\Http\Controllers\v1\Inventory\InventoryController@delivery_price')->where('inventory_id', '[0-9]+');
 
     /**
      * Inventory
@@ -259,6 +276,17 @@ $api->version('v1', function ($route) {
     $route->get('website', 'App\Http\Controllers\v1\Website\WebsiteController@index');
 
     $route->put('website/{websiteId}/enable-proxied-domain-ssl', 'App\Http\Controllers\v1\Website\WebsiteController@enableProxiedDomainSsl');
+
+    $route->get('website/{websiteId}/website-config', 'App\Http\Controllers\v1\Website\Config\WebsiteConfigController@index');
+    $route->put('website/{websiteId}/website-config', 'App\Http\Controllers\v1\Website\Config\WebsiteConfigController@createOrUpdate')->where('websiteId', '[0-9]+');
+
+    $route->get('website/{websiteId}/call-to-action', 'App\Http\Controllers\v1\Website\Config\CallToActionController@index');
+    $route->put('website/{websiteId}/call-to-action', 'App\Http\Controllers\v1\Website\Config\CallToActionController@createOrUpdate')->where('websiteId', '[0-9]+');
+
+    $route->get('website/{websiteId}/showroom', 'App\Http\Controllers\v1\Website\Config\ShowroomController@index');
+    $route->put('website/{websiteId}/showroom', 'App\Http\Controllers\v1\Website\Config\ShowroomController@update')->where('websiteId', '[0-9]+');
+    $route->post('website/{websiteId}/showroom', 'App\Http\Controllers\v1\Website\Config\ShowroomController@create')->where('websiteId', '[0-9]+');
+
 
     /**
      * Log
@@ -321,9 +349,26 @@ $api->version('v1', function ($route) {
     /**
      * Website users
      */
-    $route->group(['prefix' => 'website/{websiteId}/user'], function($route) {
+    $route->group(['prefix' => 'website/{websiteId}/user'], function ($route) {
         $route->post('signup', 'App\Http\Controllers\v1\Website\User\WebsiteUserController@create');
         $route->post('login', 'App\Http\Controllers\v1\Website\User\WebsiteUserController@login');
+    });
+
+    /**
+     * Website account profile
+     */
+    $route->group(['prefix' => 'website/account', 'middleware' => 'api.auth', 'providers' => ['website_auth']], function ($route) {
+        $route->get('', 'App\Http\Controllers\v1\Website\User\WebsiteUserController@get');
+        $route->put('', 'App\Http\Controllers\v1\Website\User\WebsiteUserController@update');
+    });
+
+    /**
+     * Website User Favorite Inventory
+     */
+    $route->group(['prefix' => 'website/inventory/favorite', 'middleware' => 'api.auth', 'providers' => ['website_auth']], function ($route) {
+        $route->get('', 'App\Http\Controllers\v1\Website\User\WebsiteUserFavoriteInventoryController@index');
+        $route->post('', 'App\Http\Controllers\v1\Website\User\WebsiteUserFavoriteInventoryController@create');
+        $route->delete('', 'App\Http\Controllers\v1\Website\User\WebsiteUserFavoriteInventoryController@delete');
     });
 
     /*
@@ -363,6 +408,32 @@ $api->version('v1', function ($route) {
     // Stop Text!
     $route->post('leads/texts/stop', 'App\Http\Controllers\v1\CRM\Text\StopController@index');
 
+    /**
+     * Facebook Webhooks
+     */
+    $route->get('leads/facebook/message', 'App\Http\Controllers\v1\CRM\Interactions\Facebook\WebhookController@verifyMessage');
+    $route->post('leads/facebook/message', 'App\Http\Controllers\v1\CRM\Interactions\Facebook\WebhookController@message');
+
+    /**
+     * Facebook Endpoints
+     */
+    $route->group(['middleware' => 'facebook.message.validate'], function ($route) {
+        $route->get('leads/{leadId}/facebook/conversation', 'App\Http\Controllers\v1\CRM\Interactions\Facebook\ConversationController@show')->where('leadId', '[0-9]+');
+        $route->get('leads/{leadId}/facebook/conversations', 'App\Http\Controllers\v1\CRM\Interactions\Facebook\ConversationController@index')->where('leadId', '[0-9]+');
+        $route->get('leads/{leadId}/facebook/message', 'App\Http\Controllers\v1\CRM\Interactions\Facebook\MessageController@index')->where('leadId', '[0-9]+');
+        $route->post('leads/{leadId}/facebook/message', 'App\Http\Controllers\v1\CRM\Interactions\Facebook\MessageController@send')->where('leadId', '[0-9]+');
+    });
+
+    /**
+     * Interaction Messages
+     */
+    $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
+        $route->get('leads/interaction-message/search', 'App\Http\Controllers\v1\CRM\Interactions\InteractionMessageController@search');
+        $route->get('leads/interaction-message/search/count-of/{field}', 'App\Http\Controllers\v1\CRM\Interactions\InteractionMessageController@searchCountOf');
+        $route->post('leads/interaction-message/bulk', 'App\Http\Controllers\v1\CRM\Interactions\InteractionMessageController@bulkUpdate');
+        $route->post('leads/interaction-message/{id}', 'App\Http\Controllers\v1\CRM\Interactions\InteractionMessageController@update');
+    });
+
 
     /*
     |--------------------------------------------------------------------------
@@ -390,9 +461,9 @@ $api->version('v1', function ($route) {
     |
     |
     */
-    
+
     $route->post('feed/atw', 'App\Http\Controllers\v1\Feed\AtwController@create');
-    
+
     // upload feed data
     $route->post('feed/uploader/{code}', 'App\Http\Controllers\v1\Feed\UploadController@upload')->where('code', '\w+');
 
@@ -453,9 +524,12 @@ $api->version('v1', function ($route) {
     */
 
     $route->get('leads/status', 'App\Http\Controllers\v1\CRM\Leads\LeadStatusController@index');
+    $route->put('leads/status', 'App\Http\Controllers\v1\CRM\Leads\LeadStatusController@create');
+    $route->post('leads/status/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadStatusController@update');
     $route->get('leads/types', 'App\Http\Controllers\v1\CRM\Leads\LeadTypeController@index');
     $route->get('leads/sources', 'App\Http\Controllers\v1\CRM\Leads\LeadSourceController@index');
     $route->get('leads/sort-fields', 'App\Http\Controllers\v1\CRM\Leads\LeadController@sortFields');
+    $route->get('leads/unique-full-names', 'App\Http\Controllers\v1\CRM\Leads\LeadController@uniqueFullNames');
     $route->get('crm/states', 'App\Http\Controllers\v1\CRM\StatesController@index');
 
     /*
@@ -479,9 +553,12 @@ $api->version('v1', function ($route) {
         */
 
         $route->get('leads', 'App\Http\Controllers\v1\CRM\Leads\LeadController@index');
+        $route->post('leads/assign/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@assign');
         $route->get('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@show')->where('id', '[0-9]+');
         $route->post('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@update')->where('id', '[0-9]+');
         $route->put('leads', 'App\Http\Controllers\v1\CRM\Leads\LeadController@create');
+        $route->post('leads/find-matches', 'App\Http\Controllers\v1\CRM\Leads\LeadController@getMatches');
+        $route->post('leads/{id}/merge', 'App\Http\Controllers\v1\CRM\Leads\LeadController@mergeLeads');
 
         /*
         |--------------------------------------------------------------------------
@@ -493,6 +570,8 @@ $api->version('v1', function ($route) {
         */
         $route->get('user/quotes', 'App\Http\Controllers\v1\Dms\UnitSaleController@index');
 
+        $route->put('user/quotes/bulk-archive', 'App\Http\Controllers\v1\Dms\UnitSaleController@bulkArchive');
+
         /*
         |--------------------------------------------------------------------------
         | Dealer Locations
@@ -502,13 +581,22 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('user/dealer-location', 'App\Http\Controllers\v1\User\DealerLocationController@index');
-        $route->delete('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@destroy')->where('id', '[0-9]+');
-        $route->get('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@show')->where('id', '[0-9]+');
-        $route->get('user/dealer-location/check/{name}', 'App\Http\Controllers\v1\User\DealerLocationController@check');
-        $route->post('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@update')->where('id', '[0-9]+');
         $route->put('user/dealer-location', 'App\Http\Controllers\v1\User\DealerLocationController@create');
+
+        $route->get('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@show')->where('id', '[0-9]+');
+        $route->post('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@update')->where('id', '[0-9]+');
+        $route->delete('user/dealer-location/{id}', 'App\Http\Controllers\v1\User\DealerLocationController@destroy')->where('id', '[0-9]+');
+
+        $route->get('user/dealer-location/check/{name}', 'App\Http\Controllers\v1\User\DealerLocationController@check');
         $route->get('user/dealer-location-quote-fees', 'App\Http\Controllers\v1\User\DealerLocationController@quoteFees');
         $route->get('user/dealer-location-available-tax-categories', 'App\Http\Controllers\v1\User\DealerLocationController@availableTaxCategories');
+        $route->get('user/dealer-location-titles', 'App\Http\Controllers\v1\User\DealerLocationController@getDealerLocationTitles');
+
+        $route->group(['prefix' => 'user/dealer-location/{locationId}'], function ($route) {
+            $route->get('/mileage-fee', 'App\Http\Controllers\v1\User\DealerLocationMileageFeeController@index');
+            $route->post('/mileage-fee', 'App\Http\Controllers\v1\User\DealerLocationMileageFeeController@create');
+            $route->delete('/mileage-fee/{feeId}', 'App\Http\Controllers\v1\User\DealerLocationMileageFeeController@delete');
+        });
 
         /*
         |--------------------------------------------------------------------------
@@ -591,14 +679,6 @@ $api->version('v1', function ($route) {
             });
         });
 
-        /*
-        |--------------------------------------------------------------------------
-        | Integrations
-        |--------------------------------------------------------------------------
-        |
-        |
-        |
-        */
         $route->group([
             'prefix' => 'integration'
         ], function ($route) {
@@ -618,6 +698,7 @@ $api->version('v1', function ($route) {
                 $route->put('/', 'App\Http\Controllers\v1\Integration\AuthController@create');
                 $route->post('/', 'App\Http\Controllers\v1\Integration\AuthController@valid');
                 $route->put('login', 'App\Http\Controllers\v1\Integration\AuthController@login');
+                $route->put('code', 'App\Http\Controllers\v1\Integration\AuthController@code');
                 $route->get('{id}', 'App\Http\Controllers\v1\Integration\AuthController@show')->where('id', '[0-9]+');
                 $route->post('{id}', 'App\Http\Controllers\v1\Integration\AuthController@update')->where('id', '[0-9]+');
             });
@@ -640,6 +721,26 @@ $api->version('v1', function ($route) {
                 $route->get('{id}', 'App\Http\Controllers\v1\Integration\FacebookController@show')->where('id', '[0-9]+');
                 $route->post('{id}', 'App\Http\Controllers\v1\Integration\FacebookController@update')->where('id', '[0-9]+');
                 $route->delete('{id}', 'App\Http\Controllers\v1\Integration\FacebookController@destroy')->where('id', '[0-9]+');
+            });
+
+            /*
+            |--------------------------------------------------------------------------
+            | Facebook Chat
+            |--------------------------------------------------------------------------
+            |
+            |
+            |
+            */
+            $route->group([
+                'prefix' => 'fbchat',
+                'middleware' => 'facebook.chat.validate'
+            ], function ($route) {
+                $route->get('/', 'App\Http\Controllers\v1\Integration\Facebook\ChatController@index');
+                $route->put('/', 'App\Http\Controllers\v1\Integration\Facebook\ChatController@create');
+                $route->get('{id}', 'App\Http\Controllers\v1\Integration\Facebook\ChatController@show')->where('id', '[0-9]+');
+                $route->post('{id}', 'App\Http\Controllers\v1\Integration\Facebook\ChatController@update')->where('id', '[0-9]+');
+                $route->delete('{id}', 'App\Http\Controllers\v1\Integration\Facebook\ChatController@destroy')->where('id', '[0-9]+');
+                $route->post('{id}/salespeople', 'App\Http\Controllers\v1\Integration\Facebook\ChatController@assignSalespeople')->where('id', '[0-9]+');
             });
 
             /*
@@ -682,6 +783,7 @@ $api->version('v1', function ($route) {
             ], function ($route) {
                 $route->get('/', 'App\Http\Controllers\v1\User\SettingsController@index');
                 $route->post('/', 'App\Http\Controllers\v1\User\SettingsController@update');
+                $route->get('email', 'App\Http\Controllers\v1\User\SettingsController@email');
             });
 
             /*
@@ -701,11 +803,14 @@ $api->version('v1', function ($route) {
                 $route->get('{id}', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@show')->where('id', '[0-9]+');
                 $route->post('{id}', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@update')->where('id', '[0-9]+');
                 $route->delete('{id}', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@destroy')->where('id', '[0-9]+');
+                $route->get('config', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@config');
 
                 // Validate SMTP/IMAP
                 $route->put('validate', 'App\Http\Controllers\v1\CRM\User\SalesPersonController@valid');
 
                 // Sales People w/Auth
+                $route->put('login', 'App\Http\Controllers\v1\CRM\User\SalesAuthController@login');
+                $route->put('code', 'App\Http\Controllers\v1\CRM\User\SalesAuthController@code');
                 $route->put('auth', 'App\Http\Controllers\v1\CRM\User\SalesAuthController@create');
                 $route->get('{id}/auth', 'App\Http\Controllers\v1\CRM\User\SalesAuthController@show')->where('id', '[0-9]+');
                 $route->post('{id}/auth', 'App\Http\Controllers\v1\CRM\User\SalesAuthController@update')->where('id', '[0-9]+');
@@ -1053,4 +1158,18 @@ $api->version('v1', function ($route) {
     */
     $route->post('files/local', 'App\Http\Controllers\v1\File\FileController@uploadLocal');
     $route->post('images/local', 'App\Http\Controllers\v1\File\ImageController@uploadLocal');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Bill
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+
+    $route->post('bills', 'App\Http\Controllers\v1\Dms\Quickbooks\BillController@create');
+    $route->put('bills/{id}', 'App\Http\Controllers\v1\Dms\Quickbooks\BillController@update')->where('id', '[0-9]+');
+    $route->get('bills/{id}', 'App\Http\Controllers\v1\Dms\Quickbooks\BillController@show')->where('id', '[0-9]+');
+    $route->get('bills', 'App\Http\Controllers\v1\Dms\Quickbooks\BillController@index');
 });

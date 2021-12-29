@@ -9,8 +9,9 @@ class UpdateLeadRequest extends Request {
 
     protected $rules = [
         'id' => 'exists:website_lead,identifier',
-        'lead_type' => 'array',
-        'lead_type.*' => 'lead_type_valid',
+        'lead_types' => 'array',
+        'lead_types.*' => 'string|lead_type_valid',
+        'lead_type' => 'string|lead_type_valid',
         'inventory' => 'array',
         'inventory.*' => 'inventory_valid',
         'customer_id' => 'exists:dms_customer,id',
@@ -53,4 +54,4 @@ class UpdateLeadRequest extends Request {
         return true;
     }
 
-} 
+}

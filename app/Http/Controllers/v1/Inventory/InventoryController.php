@@ -9,6 +9,7 @@ use App\Http\Requests\Inventory\CreateInventoryRequest;
 use App\Http\Requests\Inventory\DeleteInventoryRequest;
 use App\Http\Requests\Inventory\ExistsInventoryRequest;
 use App\Http\Requests\Inventory\GetInventoryHistoryRequest;
+use App\Http\Requests\Inventory\GetInventoryItemRequest;
 use App\Http\Requests\Inventory\UpdateInventoryRequest;
 use App\Repositories\Inventory\InventoryHistoryRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
@@ -168,7 +169,7 @@ class InventoryController extends RestfulControllerV2
      *     tags={"Inventory"},
      *     @OA\Parameter(
      *         name="id",
-     *         in="query",
+     *         in="path",
      *         description="Inventory ID",
      *         required=true,
      *         @OA\Schema(type="integer")
@@ -185,10 +186,22 @@ class InventoryController extends RestfulControllerV2
      * )
      *
      * @param int $id
-     * @return \Dingo\Api\Http\Response
+     * @param Request $request
+     * @return Response
+     * @throws NoObjectIdValueSetException
+     * @throws NoObjectTypeSetException
      */
-    public function show(int $id) {
-        return $this->response->item($this->inventoryRepository->getAndIncrementTimesViewed(['id' => $id]), new InventoryTransformer());
+    public function show(int $id, Request $request): Response
+    {
+        $request = new GetInventoryItemRequest(array_merge(['id' => $id], $request->all()));
+
+        if (!$request->validate()) {
+            $this->response->errorBadRequest();
+        }
+
+        $data = $this->inventoryRepository->getAndIncrementTimesViewed($request->all());
+
+        return $this->itemResponse($data, new InventoryTransformer());
     }
 
     /**
@@ -223,7 +236,7 @@ class InventoryController extends RestfulControllerV2
      * @throws NoObjectTypeSetException
      */
     public function update(int $id, Request $request): Response
-    {        
+    {
         $inventoryRequest = new UpdateInventoryRequest(array_merge($request->all(), ['inventory_id' => $id]));
 
         $transformer = app()->make(SaveInventoryTransformer::class);
@@ -350,5 +363,20 @@ class InventoryController extends RestfulControllerV2
         }
 
         $this->response->errorBadRequest();
+    }
+
+    /**
+     * @param int $inventoryId
+     * @param Request $request
+     * @return Response
+     */
+    public function delivery_price(int $inventoryId, Request $request):Response {
+        $toZipcode = $request->input('tozip');
+        return $this->response->array([
+            'response' => [
+                'status' => 'success',
+                'fee' => $this->inventoryService->deliveryPrice($inventoryId, $toZipcode)
+            ]
+        ]);
     }
 }

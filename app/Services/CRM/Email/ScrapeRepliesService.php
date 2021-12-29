@@ -2,10 +2,13 @@
 
 namespace App\Services\CRM\Email;
 
+use App\Exceptions\CRM\Email\MissingAccessTokenImportFolderException;
+use App\Exceptions\Common\MissingFolderException;
 use App\Models\User\NewDealerUser;
 use App\Models\CRM\Email\Attachment;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\CRM\User\EmailFolder;
+use App\Models\CRM\Interactions\EmailHistory;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
@@ -14,13 +17,15 @@ use App\Repositories\CRM\User\EmailFolderRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Services\CRM\Email\ImapServiceInterface;
 use App\Services\CRM\Email\DTOs\ImapConfig;
+use App\Services\Integration\AuthServiceInterface;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Google\GmailServiceInterface;
-use App\Services\Integration\Google\GoogleServiceInterface;
+use App\Services\Integration\Microsoft\OfficeServiceInterface;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Webklex\PHPIMAP\Message;
 use Carbon\Carbon;
 
 /**
@@ -38,14 +43,19 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     const IMPORT_SKIPPED = -1;
 
     /**
-     * @var App\Services\Integration\Google\GoogleServiceInterface
-     */
-    protected $google;
-
-    /**
      * @var App\Services\Integration\Google\GmailServiceInterface
      */
     protected $gmail;
+
+    /**
+     * @var App\Services\Integration\Microsoft\OfficeServiceInterface
+     */
+    protected $office;
+
+    /**
+     * @var App\Services\Integration\Google\AuthServiceInterface
+     */
+    protected $auth;
 
     /**
      * @var App\Services\CRM\Email\ImapServiceInterface
@@ -90,8 +100,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     /**
      * ScrapeRepliesService constructor.
      */
-    public function __construct(GoogleServiceInterface $google,
-                                GmailServiceInterface $gmail,
+    public function __construct(GmailServiceInterface $gmail,
+                                OfficeServiceInterface $office,
+                                AuthServiceInterface $auth,
                                 ImapServiceInterface $imap,
                                 InteractionsRepositoryInterface $interactions,
                                 EmailHistoryRepositoryInterface $emails,
@@ -101,8 +112,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                                 LeadRepositoryInterface $leads)
     {
         // Initialize Services
-        $this->google = $google;
         $this->gmail = $gmail;
+        $this->office = $office;
+        $this->auth = $auth;
         $this->imap = $imap;
 
         // Initialize Repositories
@@ -124,28 +136,30 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @param User $dealer
      * @return int total number of imported emails
      */
-    public function dealer(NewDealerUser $dealer) {
+    public function dealer(NewDealerUser $dealer): int {
         // Get Salespeople With Email Credentials
         $salespeople = $this->salespeople->getAllImap($dealer->user_id);
-        if(count($salespeople) < 1) {
+        $this->log->info('Dealer #' . $dealer->id . ' Found ' . $salespeople->count() .
+                            ' Active Salespeople with IMAP Credentials to Process');
+        if($salespeople->count() < 1) {
             return false;
         }
 
         // Loop Campaigns for Current Dealer
         $imported = 0;
-        $this->log->info("Dealer #{$dealer->id} Found " . count($salespeople) . " Active Salespeople with IMAP Credentials to Process");
         foreach($salespeople as $salesperson) {
             // Try Catching Error for Sales Person
             try {
                 // Import Emails
-                $this->log->info("Importing Emails on Sales Person #{$salesperson->id} for Dealer #{$dealer->id}");
+                $this->log->info('Importing Emails on Sales Person #' . $salesperson->id .
+                                    ' for Dealer #' . $dealer->id);
                 $imports = $this->salesperson($dealer, $salesperson);
 
                 // Adjust Total Import Counts
-                $this->log->info("Imported {$imports} Emails on Sales Person #{$salesperson->id}");
+                $this->log->info('Imported ' . $imports . ' Emails on Sales Person #' . $salesperson->id);
                 $imported += $imports;
             } catch(\Exception $e) {
-                $this->log->error("Exception returned on Sales Person #{$salesperson->id} {$e->getMessage()}: {$e->getTraceAsString()}");
+                $this->log->error('Exception returned on Sales Person #' . $salesperson->id . ': ' . $e->getMessage());
             }
         }
 
@@ -160,17 +174,14 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @param SalesPerson $salesperson
      * @return int total number of imported emails
      */
-    public function salesperson(NewDealerUser $dealer, SalesPerson $salesperson) {
+    public function salesperson(NewDealerUser $dealer, SalesPerson $salesperson): int {
         // Token Exists?
-        if(!empty($salesperson->googleToken)) {
+        if(!empty($salesperson->active_token)) {
             // Refresh Token
-            $validate = $this->google->validate($salesperson->googleToken);
-            if(!empty($validate['new_token'])) {
-                $accessToken = $this->tokens->refresh($salesperson->googleToken->id, $validate['new_token']);
-                $salesperson->setRelation('googleToken', $accessToken);
-            }
+            $this->log->info('Validating token #' . $salesperson->active_token->id);
+            $this->auth->validate($salesperson->active_token);
         }
-        
+
         // Process Messages
         $this->log->info('Processing Getting Emails for Sales Person #' . $salesperson->id);
         $imported = 0;
@@ -201,27 +212,34 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @param Folder $folder
      * @return int total number of imported emails
      */
-    public function folder(NewDealerUser $dealer, SalesPerson $salesperson, EmailFolder $folder) {
+    public function folder(NewDealerUser $dealer, SalesPerson $salesperson, EmailFolder $folder): int {
         // Try Importing
         try {
             // Get From Google?
-            if(!empty($salesperson->googleToken)) {
+            if(!empty($salesperson->active_token->access_token) && $salesperson->active_token->token_type === 'google') {
                 $total = $this->importGmail($dealer->id, $salesperson, $folder);
-            }
-            // Get From IMAP Instead
-            else {
+            } elseif(!empty($salesperson->active_token->access_token) && $salesperson->active_token->token_type === 'office365') {
+                // Get From Office 365?
+                $total = $this->importOffice($dealer->id, $salesperson, $folder);
+            } elseif(!empty($salesperson->active_token) && empty($salesperson->active_token->access_token)) {
+                throw new MissingAccessTokenImportFolderException;
+            } else {
+                // Get From IMAP Instead
                 $total = $this->importImap($dealer->id, $salesperson, $folder);
             }
 
             // Return Total
             return $total;
+        } catch (MissingFolderException $e) {
+            $this->folders->delete($folder->folder_id);
         } catch (\Exception $e) {
             $this->folders->markFailed($folder->folder_id);
-            $this->log->error('Failed to Connect to Sales Person #' . $salesperson->id .
-                        ' Folder ' . $folder->name . '; exception returned: ' .
-                        $e->getMessage() . ': ' . $e->getTraceAsString());
-            return 0;
         }
+
+        // Return Nothing
+        $this->log->error('Failed to Connect to Sales Person #' . $salesperson->id .
+                    ' Folder ' . $folder->name . '; exception returned: ' . $e->getMessage());
+        return 0;
     }
 
 
@@ -231,71 +249,65 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @param int $dealerId
      * @param SalesPerson $salesperson
      * @param EmailFolder $emailFolder
-     * @return false || array of email results
+     * @return int total number of imported emails
      */
-    private function importGmail(int $dealerId, SalesPerson $salesperson, EmailFolder $emailFolder) {
+    private function importGmail(int $dealerId, SalesPerson $salesperson, EmailFolder $emailFolder): int {
         // Get Emails From Gmail
         $this->log->info("Connecting to Gmail with email: " . $salesperson->smtp_email);
-        $messages = $this->gmail->messages($salesperson->googleToken, $emailFolder->name, [
+        $messages = $this->gmail->messages($salesperson->active_token, $emailFolder->name, [
             'after' => Carbon::parse($emailFolder->date_imported)->isoFormat('YYYY/M/D')
         ]);
         $folder = $this->updateFolder($salesperson, $emailFolder);
 
         // Loop Messages
-        $total = 0;
-        $skipped = 0;
+        $total = $skipped = 0;
         foreach($messages as $mailId) {
             // Get Parsed Message
             $email = $this->gmail->message($mailId);
 
             // Import Message
             $result = $this->importMessage($dealerId, $salesperson, $email);
-            if($result === 1) {
+            if($result === self::IMPORT_SUCCESS) {
                 $total++;
-            } elseif($result === 0) {
+            } elseif($result === self::IMPORT_PROCESSED) {
                 $skipped++;
             }
             $this->deleteAttachments($email->getAttachments());
         }
 
         // Process Skipped Message ID's
-        if($skipped > 0) {
+        if(!empty($skipped)) {
             $this->log->info("Processed " . $skipped . " emails that were skipped and not imported.");
         }
 
         // Updated Successful
-        $this->folders->update([
-            'id' => $folder->folder_id,
-            'date_imported' => Carbon::now()
-        ]);
+        $this->folders->markImported($folder->folder_id);
 
         // Return Result Messages That Match
         return $total;
     }
 
     /**
-     * Import Via Imap
+     * Import Office 365
      * 
      * @param int $dealerId
      * @param SalesPerson $salesperson
      * @param EmailFolder $emailFolder
-     * @return false || array of email results
+     * @return int total number of imported emails
      */
-    private function importImap(int $dealerId, SalesPerson $salesperson, EmailFolder $emailFolder) {
-        // Get Emails From IMAP
-        $imapConfig = $this->getImapConfig($salesperson, $emailFolder);
-        $messages = $this->imap->messages($imapConfig);
+    private function importOffice(int $dealerId, SalesPerson $salesperson, EmailFolder $emailFolder): int {
+        // Get Emails From Gmail
+        $this->log->info("Connecting to Office 365 with email: " . $salesperson->smtp_email);
+        $messages = $this->office->messages($salesperson->active_token, $emailFolder->name, [
+            'SentDateTime ge ' . Carbon::parse($emailFolder->date_imported)->isoFormat('YYYY-MM-DD')
+        ]);
         $folder = $this->updateFolder($salesperson, $emailFolder);
 
         // Loop Messages
-        $total = 0;
-        $skipped = 0;
-        foreach($messages as $mailId) {
-            // Get Message Overview
-            $email = $this->imap->overview($mailId);
-            if(empty($email)) {
-                continue;
-            }
+        $total = $skipped = 0;
+        foreach($messages as $message) {
+            // Get Parsed Message
+            $email = $this->office->message($message);
 
             // Import Message
             $result = $this->importMessage($dealerId, $salesperson, $email);
@@ -307,15 +319,54 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         }
 
         // Process Skipped Message ID's
-        if($skipped > 0) {
-            $this->log->info("Processed " . $skipped . " Emails That were Skipped and not Imported");
+        if(!empty($skipped)) {
+            $this->log->info("Processed " . $skipped . " emails that were skipped and not imported.");
         }
 
         // Updated Successful
-        $this->folders->update([
-            'id' => $folder->folder_id,
-            'date_imported' => Carbon::now()
-        ]);
+        $this->folders->markImported($folder->folder_id);
+
+        // Return Result Messages That Match
+        return $total;
+    }
+
+    /**
+     * Import Via Imap
+     * 
+     * @param int $dealerId
+     * @param SalesPerson $salesperson
+     * @param EmailFolder $emailFolder
+     * @return int total number of imported emails
+     */
+    private function importImap(int $dealerId, SalesPerson $salesperson, EmailFolder $emailFolder): int {
+        // Get Emails From IMAP
+        $imapConfig = ImapConfig::fillFromSalesPerson($salesperson, $emailFolder);
+        $messages = $this->imap->messages($imapConfig);
+        $folder = $this->updateFolder($salesperson, $emailFolder);
+
+        // Loop Messages
+        $total = $skipped = 0;
+        foreach($messages as $message) {
+            // Get Message Overview
+            $email = $this->imap->overview($message);
+            if(empty($email)) { continue; }
+
+            // Import Message
+            $result = $this->importMessage($dealerId, $salesperson, $email, $message);
+            if($result === self::IMPORT_SUCCESS) {
+                $total++;
+            } elseif($result === self::IMPORT_PROCESSED) {
+                $skipped++;
+            }
+        }
+
+        // Process Skipped Message ID's
+        if(!empty($skipped)) {
+            $this->log->info('Processed ' . $skipped . ' emails that were skipped and not imported.');
+        }
+
+        // Updated Successful
+        $this->folders->markImported($folder->folder_id);
 
         // Return Result Messages That Match
         return $total;
@@ -327,9 +378,10 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @param int $dealerId
      * @param SalesPerson $salesperson
      * @param ParsedEmail $email
+     * @param null|Message $message
      * @return int self::IMPORT_SKIPPED | self::IMPORT_PROCESSED | self::IMPORT_SUCCESS
      */
-    private function importMessage(int $dealerId, SalesPerson $salesperson, ParsedEmail $email) {
+    private function importMessage(int $dealerId, SalesPerson $salesperson, ParsedEmail $email, ?Message $message = null): int {
         // Check if Exists
         if(empty($email->getMessageId()) ||
            $this->emails->findMessageId($salesperson->user_id, $email->getMessageId())) {
@@ -342,10 +394,8 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
         // Lead ID Exists?
         if(!empty($email->getLeadId())) {
-            // Only on IMAP
-            if(empty($salesperson->googleToken)) {
-                $this->imap->full($email);
-            }
+            // Import Additional Details (Attachments and/or Body)
+            $this->importFull($salesperson, $email, $message);
             if(empty($email->getSubject()) || empty($email->getToEmail())) {
                 $this->deleteAttachments($email->getAttachments());
                 return self::IMPORT_SKIPPED;
@@ -366,14 +416,38 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     }
 
     /**
+     * Import Full Details (Attachments/Body) That Weren't Already Imported
+     * 
+     * @param SalesPerson $salesperson
+     * @param ParsedEmail $email
+     * @param null|Message $message
+     * @return ParsedEmail
+     */
+    private function importFull(SalesPerson $salesperson, ParsedEmail $email, ?Message $message = null): ParsedEmail {
+        // Get From Office 365?
+        if(!empty($salesperson->active_token) && $salesperson->active_token->token_type === 'office365') {
+            $email = $this->office->full($salesperson->active_token, $email);
+        } elseif(empty($salesperson->active_token)) {
+            // Get From IMAP Instead
+            $email = $this->imap->full($message, $email);
+        }
+
+        // Return Updated ParsedEmail
+        return $email;
+    }
+
+    /**
      * Find Lead That Matches Email
      * 
      * @param int $dealerId
      * @param SalesPerson $salesperson
      * @param ParsedEmail $email
-     * @return Lead
+     * @return ParsedEmail with Lead
      */
-    private function findLead(int $dealerId, SalesPerson $salesperson, ParsedEmail $email) {
+    private function findLead(int $dealerId, SalesPerson $salesperson, ParsedEmail $email): ParsedEmail {
+        // Lookup Lead
+        $this->log->info('Lookup lead for dealer #' . $dealerId . ' and sales person: ' . $salesperson->imap_email);
+
         // Get Emails
         $emails = [];
         if($salesperson->smtp_email !== $email->getToEmail() &&
@@ -402,11 +476,11 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @param int $dealerId
      * @param int $userId
      * @param ParsedEmail $email
-     * @return array
+     * @return null|EmailHistory
      */
-    private function insertReply($dealerId, $userId, $email) {
+    private function insertReply($dealerId, $userId, $email): ?EmailHistory {
         // Start Transaction
-        $emailHistory = [];
+        $emailHistory = null;
         DB::transaction(function() use (&$emailHistory, $dealerId, $userId, $email) {
             // Insert Interaction
             $interaction = $this->interactions->create([
@@ -447,7 +521,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @param EmailFolder $folder
      * @return EmailFolder
      */
-    private function updateFolder(SalesPerson $salesperson, EmailFolder $folder) {
+    private function updateFolder(SalesPerson $salesperson, EmailFolder $folder): EmailFolder {
         // Create or Update Folder
         return $this->folders->createOrUpdate([
             'id' => $folder->folder_id,
@@ -469,7 +543,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @param Collection<AttachmentFile>
      * @return Collection<Attachment>
      */
-    private function insertAttachments(int $dealerId, string $messageId, Collection $files) {
+    private function insertAttachments(int $dealerId, string $messageId, Collection $files): Collection {
         // Loop Attachments
         $attachments = [];
         foreach($files as $file) {
@@ -555,38 +629,5 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
         // Return Total
         return $deleted;
-    }
-
-    /**
-     * Get IMAP Config From Sales Person and Folder
-     * 
-     * @param SalesPerson $salesperson
-     * @param EmailFolder $folder
-     */
-    private function getImapConfig(SalesPerson $salesperson, EmailFolder $folder) {
-        // Initialize
-        $imapConfig = new ImapConfig();
-
-        // Set Username/Password
-        $imapConfig->setUsername($salesperson->imap_email);
-        $imapConfig->setPassword($salesperson->imap_password);
-
-        // Set Host/Post
-        $imapConfig->setHost($salesperson->imap_server);
-        $imapConfig->setPort($salesperson->imap_port);
-        $imapConfig->setSecurity($salesperson->imap_security ?: '');
-        $imapConfig->setAuthType($salesperson->smtp_auth ?: '');
-        $imapConfig->calcCharset();
-
-        // Set Folder Config
-        $imapConfig->setFolderName($folder->name);
-        if(!empty($folder->date_imported)) {
-            $imapConfig->setStartDate($folder->date_imported);
-        } else {
-            $imapConfig->setStartDate(Carbon::now()->sub(1, 'month'));
-        }
-
-        // Return IMAP Config
-        return $imapConfig;
     }
 }

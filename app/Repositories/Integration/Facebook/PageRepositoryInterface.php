@@ -2,14 +2,15 @@
 
 namespace App\Repositories\Integration\Facebook;
 
+use App\Models\Integration\Facebook\Page;
 use App\Repositories\Repository;
 
 interface PageRepositoryInterface extends Repository {
     /**
-     * Get Page by Facebook Page ID
+     * Get By Facebook Page ID
      * 
-     * @param array $params
-     * @return Catalog
+     * @param int $pageId
+     * @return null|Page
      */
-    public function getByPageId($params);
+    public function getByPageId(int $pageId): ?Page;
 }

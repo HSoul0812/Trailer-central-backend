@@ -2,14 +2,25 @@
 
 namespace App\Services\Integration;
 
-use App\Exceptions\Integration\Auth\MissingAuthLoginTokenTypeScopesException;
+use App\Exceptions\Integration\Auth\InvalidAuthLoginTokenTypeException;
+use App\Exceptions\Integration\Auth\InvalidAuthCodeTokenTypeException;
+use App\Http\Requests\Integration\Auth\AuthorizeTokenRequest;
+use App\Models\Integration\Auth\AccessToken;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
+use App\Services\Integration\Common\DTOs\AuthLoginPayload;
 use App\Services\Integration\Common\DTOs\CommonToken;
+use App\Services\Integration\Common\DTOs\EmailToken;
+use App\Services\Integration\Common\DTOs\ValidateToken;
 use App\Services\Integration\Facebook\BusinessServiceInterface;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
+use App\Services\Integration\Microsoft\AzureServiceInterface;
+use App\Services\Integration\Microsoft\OfficeServiceInterface;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use App\Transformers\Integration\Auth\TokenTransformer;
+use App\Transformers\Integration\Auth\LoginUrlTransformer;
+use App\Transformers\Integration\Auth\ValidateTokenTransformer;
+use Illuminate\Support\Facades\Log;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
 
@@ -41,6 +52,16 @@ class AuthService implements AuthServiceInterface
     protected $facebook;
 
     /**
+     * @var AzureServiceInterface
+     */
+    protected $azure;
+
+    /**
+     * @var OfficeServiceInterface
+     */
+    protected $office;
+
+    /**
      * @var Manager
      */
     private $fractal;
@@ -53,15 +74,23 @@ class AuthService implements AuthServiceInterface
         GoogleServiceInterface $google,
         GmailServiceInterface $gmail,
         BusinessServiceInterface $facebook,
+        AzureServiceInterface $azure,
+        OfficeServiceInterface $office,
         Manager $fractal
     ) {
         $this->tokens = $tokens;
         $this->google = $google;
         $this->gmail = $gmail;
         $this->facebook = $facebook;
-        $this->fractal = $fractal;
+        $this->azure = $azure;
+        $this->office = $office;
 
+        // Fractal
+        $this->fractal = $fractal;
         $this->fractal->setSerializer(new NoDataArraySerializer());
+
+        // Initialize Logger
+        $this->log = Log::channel('auth');
     }
 
     /**
@@ -124,50 +153,120 @@ class AuthService implements AuthServiceInterface
     /**
      * Get Login URL
      * 
-     * @param array $params
-     * @return refresh token
+     * @param AuthLoginPayload
+     * @throws InvalidAuthLoginTokenTypeException
+     * @return array{url: string, ?state: string}
      */
-    public function login($params) {
-        // Token Type and Scopes Required
-        if(empty($params['token_type']) || empty($params['scopes'])) {
-            throw new MissingAuthLoginTokenTypeScopesException;
+    public function login(AuthLoginPayload $payload): array {
+        // Get Login URL's
+        switch($payload->tokenType) {
+            case 'google':
+                $login = $this->google->login($payload->redirectUri, $payload->scopes);
+            break;
+            case 'office365':
+                $login = $this->office->login($payload->redirectUri, $payload->scopes);
+            break;
         }
 
-        // Initialize Login URL
-        $auth = ['url' => null];
-
-        // Get Login URL
-        if($params['token_type'] === 'google') {
-            // Auth Code Exists?!
-            if(!empty($params['auth_code'])) {
-                $auth = $this->gmail->auth($params['redirect_uri'], $params['auth_code']);
-            } else {
-                $login = $this->google->login($params['redirect_uri'], $params['scopes']);
-                $auth = ['url' => $login];
-            }
+        // Save State in Access Token Entry Temporarily
+        if($login->authState) {
+            $this->tokens->create([
+                'token_type' => $payload->tokenType,
+                'relation_type' => $payload->relationType,
+                'relation_id' => $payload->relationId,
+                'state' => $login->authState
+            ]);
         }
 
-        // Return Refresh Token
-        return $auth;
+        // Invalid Login URL Details
+        if(empty($login)) {
+            throw new InvalidAuthLoginTokenTypeException;
+        }
+
+        // Return Login Details
+        $data = new Item($login, new LoginUrlTransformer(), 'data');
+        return $this->fractal->createData($data)->toArray();
+    }
+
+    /**
+     * Handle Auth Code
+     * 
+     * @param string $tokenType
+     * @param string $code
+     * @param null|string $redirectUri
+     * @param array $scopes
+     * @throws InvalidAuthLoginTokenTypeException
+     * @return EmailToken
+     */
+    public function code(string $tokenType, string $code, ?string $redirectUri = null, array $scopes = []): EmailToken {
+        // Get Access Token
+        switch($tokenType) {
+            case 'google':
+                $emailToken = $this->gmail->auth($code, $redirectUri);
+            break;
+            case 'office365':
+                $emailToken = $this->office->auth($code, $redirectUri, $scopes);
+            break;
+        }
+
+        // Email Token Empty?
+        if(empty($emailToken)) {
+            // Invalid Token Type
+            throw new InvalidAuthCodeTokenTypeException;
+        }
+
+        // Return Email Token
+        return $emailToken;
+    }
+
+    /**
+     * Authorize Login and Retrieve Tokens
+     * 
+     * @param AuthorizeTokenRequest $request
+     * @throws InvalidAuthCodeTokenTypeException
+     * @return array<TokenTransformer>
+     */
+    public function authorize(AuthorizeTokenRequest $request): array {
+        if(!empty($request->state)) {
+            $stateToken = $this->tokens->getByState($request->state);
+        }
+
+        // Get Email Token
+        $emailToken = $this->code($request->token_type, $request->auth_code,
+                                    $request->redirect_uri, $request->scopes ?? []);
+
+        // Create/Update Correct Access Token Details
+        $accessToken = $this->tokens->create($emailToken->toArray($stateToken->id ?? null,
+                            $request->token_type, $request->relation_type, $request->relation_id));
+
+        // Return Response
+        return $this->response($accessToken);
     }
 
     /**
      * Get Refresh Token
      * 
-     * @param array $params
-     * @return refresh token
+     * @param AccessToken $accessToken
+     * @return null|CommonToken
      */
-    public function refresh($params) {
+    public function refresh(AccessToken $accessToken): ?CommonToken {
         // Initialize Refresh Token
-        $refresh = null;
+        $refresh = new CommonToken();
 
-        // Find Refresh Token
-        if(!empty($params['token_type'])) {
-            if($params['token_type'] === 'google') {
-                $refresh = $this->google->refresh($params);
-            } elseif($params['token_type'] === 'facebook') {
-                $refresh = $this->facebook->refresh($params);
-            }
+        // Validate Access Token
+        switch($accessToken->token_type) {
+            case 'google':
+                $refresh = $this->google->refresh($accessToken);
+            break;
+            case 'office365':
+                $refresh = $this->office->refresh($accessToken);
+            break;
+        }
+
+        // Update Refresh Token
+        if($refresh->exists()) {
+            $this->log->info('Refreshed access token with ID #' . $accessToken->id . ' with replacement!');
+            $this->tokens->refresh($accessToken->id, $refresh);
         }
 
         // Return Refresh Token
@@ -178,23 +277,27 @@ class AuthService implements AuthServiceInterface
      * Validate Access Token
      * 
      * @param AccessToken $accessToken
-     * @return array of validation
+     * @return ValidateToken
      */
-    public function validate($accessToken) {
-        // Initialize Access Token
-        $validate = [
-            'is_valid' => false,
-            'is_expired' => true
-        ];
+    public function validate(AccessToken $accessToken): ValidateToken {
+        // Initialize Validate Token
+        $validate = new ValidateToken();
 
         // Validate Access Token
-        if(!empty($accessToken->token_type)) {
-            if($accessToken->token_type === 'google') {
+        switch($accessToken->token_type) {
+            case 'google':
                 $validate = $this->google->validate($accessToken);
-            } elseif($accessToken->token_type === 'facebook') {
-                $validate = $this->facebook->validate($accessToken);
-                unset($validate['refresh_token']);
-            }
+            break;
+            case 'office365':
+                $validate = $this->office->validate($accessToken);
+            break;
+        }
+
+        // Update Refresh Token
+        if($validate->newToken && $validate->newToken->exists()) {
+            $this->log->info('Refreshed access token with ID #' . $accessToken->id . ' with replacement!');
+            $accessToken = $this->tokens->refresh($accessToken->id, $validate->newToken);
+            $validate->setAccessToken($accessToken);
         }
 
         // Return Validation
@@ -205,20 +308,26 @@ class AuthService implements AuthServiceInterface
      * Validate Custom Access Token
      * 
      * @param CommonToken $accessToken general access token filled with data from request
-     * @return array of validation
+     * @return ValidateToken
      */
-    public function validateCustom(CommonToken $accessToken) {
-        // Initialize Access Token
-        $validate = [
-            'is_valid' => false,
-            'is_expired' => true
-        ];
+    public function validateCustom(CommonToken $accessToken): ValidateToken {
+        // Initialize Validate Token
+        $validate = new ValidateToken();
 
         // Validate Access Token
-        if(!empty($accessToken->token_type)) {
-            if($accessToken->token_type === 'google') {
-                return $this->google->validateCustom($accessToken);
-            }
+        switch($accessToken->tokenType) {
+            case 'google':
+                $validate = $this->google->validateCustom($accessToken);
+            break;
+            case 'office365':
+                $validate = $this->office->validateCustom($accessToken);
+            break;
+        }
+
+        // Update Refresh Token
+        if($validate->newToken && $validate->newToken->exists()) {
+            $this->log->info('Refreshed access token with ID #' . $accessToken->id . ' with replacement!');
+            $this->tokens->refresh($accessToken->id, $validate->newToken);
         }
 
         // Return Validation
@@ -230,29 +339,23 @@ class AuthService implements AuthServiceInterface
      * 
      * @param AccessToken $accessToken
      * @param array $response
-     * @return array
+     * @return array{data: array<TokenTransformer>,
+     *               validate: array<ValidateTokenTransformer>}
      */
-    public function response($accessToken, $response = []) {
+    public function response(AccessToken $accessToken, array $response = []): array {
         // Set Validate
-        $validate = $this->validate($accessToken);
-        if(!empty($validate['new_token'])) {
-            $accessToken = $this->tokens->refresh($accessToken->id, $validate['new_token']);
-        }
+        $validation = new Item($this->validate($accessToken), new ValidateTokenTransformer(), 'validate');
+        $validate = $this->fractal->createData($validation)->toArray();
 
         // Convert Token to Array
         if(!empty($accessToken)) {
             $data = new Item($accessToken, new TokenTransformer(), 'data');
             $token = $this->fractal->createData($data)->toArray();
-            $response['data'] = $token['data'];
         } else {
-            $response['data'] = null;
+            $token = ['data' => null];
         }
 
-        // Set Validate
-        unset($validate['new_token']);
-        $response['validate'] = $validate;
-
         // Return Response
-        return $response;
+        return array_merge($response, $token, $validate);
     }
 }

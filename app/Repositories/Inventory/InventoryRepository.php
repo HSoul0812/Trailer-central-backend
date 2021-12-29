@@ -114,6 +114,46 @@ class InventoryRepository implements InventoryRepositoryInterface
         '-updated_at' => [
             'field' => 'updated_at',
             'direction' => 'ASC'
+        ],
+        'stock' => [
+            'field' => 'stock',
+            'direction' => 'DESC'
+        ],
+        '-stock' => [
+            'field' => 'stock',
+            'direction' => 'ASC'
+        ],
+        'category' => [
+            'field' => 'category',
+            'direction' => 'DESC'
+        ],
+        '-category' => [
+            'field' => 'category',
+            'direction' => 'ASC'
+        ],
+        'price' => [
+            'field' => 'price',
+            'direction' => 'DESC'
+        ],
+        '-price' => [
+            'field' => 'price',
+            'direction' => 'ASC'
+        ],
+        'sales_price' => [
+            'field' => 'sales_price',
+            'direction' => 'DESC'
+        ],
+        '-sales_price' => [
+            'field' => 'sales_price',
+            'direction' => 'ASC'
+        ],
+        'status' => [
+            'field' => 'status',
+            'direction' => 'DESC'
+        ],
+        '-status' => [
+            'field' => 'status',
+            'direction' => 'ASC'
         ]
     ];
 
@@ -260,17 +300,34 @@ class InventoryRepository implements InventoryRepositoryInterface
      */
     public function get($params)
     {
+        $query = Inventory::query()->select('*');
+
         if(isset($params['id'])) {
-            return Inventory::findOrFail($params['id']);
+            $query->where('inventory_id', $params['id']);
         }
 
-        $query = Inventory::select('*');
         if(isset($params['dealer_id'])) {
             $query->where('dealer_id', $params['dealer_id']);
         }
+
         if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
             $query->where($params[self::CONDITION_AND_WHERE]);
         }
+
+        $include = (isset($params['include']) && is_string($params['include'])) ? explode(',', $params['include']) : [];
+
+        if (in_array('attributes', $include)) {
+            $query = $query->with(['attributeValues' => function($query) {
+                $query->with('attribute');
+            }]);
+        }
+
+        if (in_array('features', $include)) {
+            $query = $query->with(['inventoryFeatures' => function($query) {
+                $query->with('featureList');
+            }]);
+        }
+
         return $query->firstOrFail();
     }
 
@@ -456,10 +513,36 @@ class InventoryRepository implements InventoryRepositoryInterface
     private function buildInventoryQuery(array $params, bool $withDefault = true) : GrimzyBuilder
     {
         /** @var Builder $query */
-        $query = Inventory::where('inventory.inventory_id', '>', 0);
+        $query = Inventory::query()->select(['inventory.*'])->where('inventory.inventory_id', '>', 0);
+        $query->select(['inventory.*']);
 
         if (isset($params['include']) && is_string($params['include'])) {
             $query = $query->with(explode(',', $params['include']));
+        }
+
+        $attributesEmpty = true;
+
+        if (isset($params['attribute_names'])) {
+           foreach($params['attribute_names'] as $value) {
+                if (!empty($value)) {
+                    $attributesEmpty = false;
+                    break;
+                }
+            }
+        }
+
+        if (isset($params['attribute_names']) && !$attributesEmpty) {
+            $query = $query->join('eav_attribute_value', 'inventory.inventory_id', '=', 'eav_attribute_value.inventory_id')->orderBy('eav_attribute_value.attribute_id', 'desc');
+            $query = $query->join('eav_attribute', 'eav_attribute.attribute_id', '=', 'eav_attribute_value.attribute_id');
+
+            $query = $query->where(function($q) use ($params) {
+                foreach ($params['attribute_names'] as $attribute => $value) {
+                    $q->orWhere(function ($q) use ($attribute, $value) {
+                        $q->where('code', '=', $attribute)
+                            ->where('value', '=', $value);
+                    });
+                }
+            });
         }
 
         if ($withDefault) {
@@ -493,7 +576,7 @@ class InventoryRepository implements InventoryRepositoryInterface
                 $query = $query->where('true_cost', 0);
             }
         }
-        
+
         if (isset($params['is_archived'])) {
             $withDefault = false;
             $query = $query->where('inventory.is_archived', $params['is_archived']);
@@ -529,7 +612,7 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query = $query->where(function($q) use ($params) {
                 $q->where('stock', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('title', 'LIKE', '%' . $params['search_term'] . '%')
-                        ->orWhere('description', 'LIKE', '%' . $params['search_term'] . '%')
+                        ->orWhere('inventory.description', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('vin', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhereHas('floorplanVendor', function ($query) use ($params) {
                             $query->where('name', 'LIKE', '%' . $params['search_term'] . '%');
@@ -542,7 +625,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         } else if (isset($params['images_less_than'])) {
             $query->havingRaw('image_count <= '. $params['images_less_than']);
         } else {
-            $query->select('*');
+            $query->select(['inventory.*']);
         }
 
         if (isset($params['sort'])) {
@@ -689,7 +772,10 @@ class InventoryRepository implements InventoryRepositoryInterface
                 continue;
             }
 
-            $item->inventoryImages()->where('image_id', '=', $existingImage['image_id'])->update($existingImage);
+            $inventoryImageFields = with(new InventoryImage())->getFillable();
+            $inventoryImageParams = array_intersect_key($existingImage, array_combine($inventoryImageFields, array_fill(0, count($inventoryImageFields), 0)));
+
+            $item->inventoryImages()->where('image_id', '=', $existingImage['image_id'])->update($inventoryImageParams);
         }
     }
 
@@ -718,7 +804,7 @@ class InventoryRepository implements InventoryRepositoryInterface
     /**
      * {@inheritDoc}
      */
-    public function getAndIncrementTimesViewed(array $params): Inventory 
+    public function getAndIncrementTimesViewed(array $params): Inventory
     {
         $inventory = $this->get($params);
         $inventory->times_viewed += 1;

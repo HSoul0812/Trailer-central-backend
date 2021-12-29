@@ -170,7 +170,7 @@ class ProductJob extends Job
      */
     const AVAILABLE = 'in stock';
     const UNAVAILABLE = 'out of stock';
-    const ONORDER = 'on order';
+    const ONORDER = 'available for order';
     const PENDING = 'pending';
 
 
@@ -230,6 +230,8 @@ class ProductJob extends Job
      */
     public function handle()
     {
+        $log = Log::channel('facebook');
+
         // Integration Empty?
         if(empty($this->integration) || empty($this->integration->listings)) {
             // We shouldn't be here if the integration has no listings, but throw an error just in case!
@@ -245,11 +247,12 @@ class ProductJob extends Job
         $file = $this->createCsv();
 
         // Process Integration
+        $log->info('Inserting ' . count($this->integration->listings) . ' Listings Into CSV File ' . $this->feedPath);
         foreach($this->integration->listings as $listing) {
             try {
                 $this->insertCsvRow($file, $listing);
             } catch(\Exception $e) {
-                Log::error("Exception returned processing listing #" . $listing->id .
+                $log->error("Exception returned processing listing #" . $listing->id .
                             " on catalog # " . $this->integration->catalog_id . "; " . 
                             $e->getMessage() . ": " . $e->getTraceAsString());
             }
@@ -287,11 +290,6 @@ class ProductJob extends Job
     private function insertCsvRow($file, $listing) {
         // Clean Up Results
         $clean = $this->cleanCsvRow($listing);
-
-        // Skip if Fields Missing
-        if(empty($clean->title) || empty($clean->brand)) {
-            return false;
-        }
 
         // Create Row
         $row = array();

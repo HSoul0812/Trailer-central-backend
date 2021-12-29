@@ -108,6 +108,8 @@ class HomeJob extends Job
      */
     public function handle()
     {
+        $log = Log::channel('facebook');
+
         // Integration Empty?
         if(empty($this->integration) || empty($this->integration->listings)) {
             // We shouldn't be here if the integration has no listings, but throw an error just in case!
@@ -123,11 +125,12 @@ class HomeJob extends Job
         $file = $this->createCsv();
 
         // Process Integration
+        $log->info('Inserting ' . count($this->integration->listings) . ' Listings Into CSV File ' . $this->feedPath);
         foreach($this->integration->listings as $listing) {
             try {
                 $this->insertCsvRow($file, $listing);
             } catch(\Exception $e) {
-                Log::error("Exception returned processing listing #" . $listing->vehicle_id .
+                $log->error("Exception returned processing listing #" . $listing->vehicle_id .
                             " on catalog # " . $this->integration->catalog_id . "; " . 
                             $e->getMessage() . ": " . $e->getTraceAsString());
             }
@@ -165,11 +168,6 @@ class HomeJob extends Job
     private function insertCsvRow($file, $listing) {
         // Clean Up Results
         $clean = $this->cleanCsvRow($listing);
-
-        // Skip if Fields Missing
-        if(empty($clean->name) || empty($clean->description)) {
-            return false;
-        }
 
         // Create Row
         $row = array();

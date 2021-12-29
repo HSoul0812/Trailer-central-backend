@@ -7,7 +7,7 @@ use App\Repositories\Repository;
 interface TextRepositoryInterface extends Repository {
     /**
      * Stop Processing Text Repository
-     * 
+     *
      * @param array $params
      * @return Stop
      */
@@ -15,10 +15,16 @@ interface TextRepositoryInterface extends Repository {
 
     /**
      * Send Text
-     * 
+     *
      * @param int $leadId
      * @param string $textMessage
      * @return TextLog
      */
     public function send($leadId, $textMessage);
+
+    /**
+     * @param array $params
+     * @return mixed
+     */
+    public function bulkUpdate(array $params): bool;
 }

@@ -12,7 +12,8 @@ class DealerLocationTransformer extends TransformerAbstract
     protected $availableIncludes = [
         'fees',
         'salesTaxItems',
-        'salesTaxItemsV1'
+        'salesTaxItemsV1',
+        'mileageFees',
     ];
 
     public function transform(DealerLocation $dealerLocation): array
@@ -38,7 +39,7 @@ class DealerLocationTransformer extends TransformerAbstract
             'dealer_location_no' => $dealerLocation->dealer_license_no,
             'location_id' => $dealerLocation->location_id,
             'dealer_location_id' => $dealerLocation->dealer_location_id,
-            'sales_tax_item_column_titles' => (object) ($dealerLocation->sales_tax_item_column_titles ?? [$dealerLocation::DEFAULT_SALES_TAX_ITEM_COLUMN_TITLES]),
+            'sales_tax_item_column_titles' => (object) $this->getSalesTaxItemColumnTitles($dealerLocation),
             'dealer_id' => $dealerLocation->dealer_id,
             'is_default' => $dealerLocation->is_default,
             'is_default_for_invoice' => $dealerLocation->is_default_for_invoice,
@@ -79,6 +80,15 @@ class DealerLocationTransformer extends TransformerAbstract
         return $this->primitive($location->salesTaxItems);
     }
 
+    public function includeMileageFees(DealerLocation  $location): Primitive
+    {
+        if (empty($location->mileageFees)) {
+            return new Primitive([]);
+        }
+
+        return $this->primitive($location->mileageFees);
+    }
+
     /**
      * This is for backward compatibility
      *
@@ -92,5 +102,16 @@ class DealerLocationTransformer extends TransformerAbstract
         }
 
         return $this->primitive($location->salesTaxItemsV1);
+    }
+
+    /**
+     * @param DealerLocation $dealerLocation
+     * @return array
+     */
+    private function getSalesTaxItemColumnTitles(DealerLocation $dealerLocation): array
+    {
+        return !empty($dealerLocation->sales_tax_item_column_titles)
+            ? $dealerLocation->sales_tax_item_column_titles
+            : [DealerLocation::DEFAULT_SALES_TAX_ITEM_COLUMN_TITLES];
     }
 }

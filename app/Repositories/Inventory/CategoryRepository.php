@@ -56,11 +56,18 @@ class CategoryRepository implements CategoryRepositoryInterface
 
     /**
      * @param $params
-     * @throws NotImplementedException
      */
     public function get($params)
     {
-        throw new NotImplementedException;
+        $query = Category::select(Category::getTableName() . '.*');
+
+        if (isset($params['legacy_category'])) {
+            $query = $query->where(
+                'legacy_category',
+                $params['legacy_category']
+            );
+        }
+        return $query->firstOrFail();
     }
 
     /**

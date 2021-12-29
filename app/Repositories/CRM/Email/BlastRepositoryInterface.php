@@ -36,4 +36,22 @@ interface BlastRepositoryInterface extends Repository {
      * @return bool
      */
     public function wasSent(int $blastId, string $email): bool;
+
+    /**
+     * Get Blast Sent Entry for Lead
+     * 
+     * @param int $blastId
+     * @param int $leadId
+     * @return null|BlastSent
+     */
+    public function getSent(int $blastId, int $leadId): ?BlastSent;
+
+    /**
+     * Was Blast Already Sent to Lead?
+     * 
+     * @param int $blastId
+     * @param int $leadId
+     * @return bool
+     */
+    public function wasLeadSent(int $blastId, int $leadId): bool;
 }

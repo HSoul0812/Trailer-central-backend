@@ -15,7 +15,7 @@ class AttributeTransformer extends TransformerAbstract
      * @param Attribute $attribute
      * @return array
      */
-    public function transform(Attribute $attribute)
+    public function transform(Attribute $attribute): array
     {
         return [
             'attribute_id' => $attribute->attribute_id,
@@ -29,5 +29,4 @@ class AttributeTransformer extends TransformerAbstract
             'aliases' => $attribute->aliases,
         ];
     }
-
 }

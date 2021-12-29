@@ -7,6 +7,7 @@ namespace Tests\database\seeds\User;
 use App\Models\Feed\Mapping\Incoming\ApiEntityReference;
 use App\Models\Inventory\Inventory;
 use App\Models\User\DealerLocation;
+use App\Models\User\DealerLocationMileageFee;
 use App\Models\User\DealerLocationQuoteFee;
 use App\Models\User\DealerLocationSalesTax;
 use App\Models\User\DealerLocationSalesTaxItemV1;
@@ -65,6 +66,12 @@ class DealerLocationSeeder extends Seeder
         ]));
 
         $firstInventoryId = $this->locations[$dealer1Id]->first()->dealer_location_id;
+
+        factory(DealerLocationMileageFee::class)->create([
+            'dealer_location_id' => $firstInventoryId,
+            'inventory_category_id' => 2,
+        ]);
+
         // 5 new inventories
         factory(Inventory::class, 5)->create([
             'dealer_id' => $dealer1Id,
@@ -117,6 +124,10 @@ class DealerLocationSeeder extends Seeder
             ->delete();
 
         DB::table(DealerLocationQuoteFee::getTableName())
+            ->whereIn('dealer_location_id', $locationsId)
+            ->delete();
+
+        DB::table(DealerLocationMileageFee::getTableName())
             ->whereIn('dealer_location_id', $locationsId)
             ->delete();
 

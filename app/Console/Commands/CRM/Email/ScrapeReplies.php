@@ -91,20 +91,20 @@ class ScrapeReplies extends Command
                 'dealer_id' => $this->dealerId
             ]);
 
-            $this->info("{$this->command} found " . count($dealers) . " dealers to process");
+            $this->info($this->command . ' found ' . $dealers->count() . ' dealers to process');
 
             // Get Dealers With Valid Salespeople
             foreach($dealers as $dealer) {
                 // Parse Single Dealer
                 $imported = $this->service->dealer($dealer);
                 if($imported !== false) {
-                    $this->info("{$this->command} imported {$imported} emails on dealer #{$dealer->id}");
+                    $this->info($this->command . ' imported ' . $imported . ' emails on dealer #' . $dealer->id);
                 } else {
-                    $this->info("{$this->command} skipped importing emails on dealer #{$dealer->id}");
+                    $this->info($this->command . ' skipped importing emails on dealer #' . $dealer->id);
                 }
             }
         } catch(\Exception $e) {
-            $this->error("{$this->command} exception returned {$e->getMessage()}: {$e->getTraceAsString()}");
+            $this->error($this->command . ' exception returned ' . $e->getMessage());
         }
 
         // Sleep for a Second to Prevent Rate Limiting

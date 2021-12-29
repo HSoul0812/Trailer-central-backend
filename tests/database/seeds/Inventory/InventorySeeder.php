@@ -8,6 +8,7 @@ use App\Models\Inventory\InventoryMfg;
 use App\Models\Inventory\Manufacturers\Brand;
 use App\Models\User\AuthToken;
 use App\Models\User\DealerLocation;
+use App\Models\User\DealerLocationMileageFee;
 use App\Models\User\DealerUser;
 use App\Models\User\DealerUserPermission;
 use App\Models\User\User;
@@ -94,6 +95,11 @@ class InventorySeeder extends Seeder
      */
     private $inventory;
 
+    /**
+     * @var DealerLocationMileageFee|null
+     */
+    private $dealerLocationMileageFee;
+
     public function __construct(array $params = [])
     {
         $this->userType = $params['userType'] ?? AuthToken::USER_TYPE_DEALER;
@@ -106,6 +112,8 @@ class InventorySeeder extends Seeder
         $this->dealer = factory(User::class)->create();
 
         $this->dealerLocation = factory(DealerLocation::class)->create([
+            'latitude' => 11,
+            'longitude' => 11,
             'dealer_id' => $this->dealer->dealer_id
         ]);
 
@@ -136,6 +144,10 @@ class InventorySeeder extends Seeder
         $this->inventoryMfg = factory(InventoryMfg::class)->create();
         $this->brand = factory(Brand::class)->create();
         $this->category = factory(Category::class)->create();
+        $this->dealerLocationMileageFee = factory(DealerLocationMileageFee::class)->create([
+            'dealer_location_id' => $this->dealerLocation->getKey(),
+            'inventory_category_id' => $this->category->getKey()
+        ]);
 
         if ($this->withInventory) {
             $inventoryParams = [
@@ -143,9 +155,11 @@ class InventorySeeder extends Seeder
                 'dealer_location_id' => $this->dealerLocation->dealer_location_id,
                 'manufacturer' => $this->inventoryMfg,
                 'brand' => $this->brand,
-                'category' => $this->category,
+                'entity_type_id' => $this->category->entity_type_id,
+                'category' => $this->category->legacy_category,
+                'latitude' => 10,
+                'longitude' => 10,
             ];
-
             $this->inventory = factory(Inventory::class)->create($inventoryParams);
         }
     }
@@ -154,6 +168,7 @@ class InventorySeeder extends Seeder
     {
         InventoryMfg::destroy($this->inventoryMfg->id);
         Brand::destroy($this->brand->brand_id);
+        DealerLocationMileageFee::destroy(['id' => $this->dealerLocationMileageFee->getKey()]);
         Category::destroy($this->category->inventory_category_id);
         Inventory::where(['dealer_id' => $this->dealer->dealer_id])->delete();
         DealerLocation::where(['dealer_id' => $this->dealer->dealer_id])->delete();

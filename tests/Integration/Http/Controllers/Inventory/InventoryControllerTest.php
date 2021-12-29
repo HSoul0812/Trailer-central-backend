@@ -9,6 +9,7 @@ use App\Http\Requests\Inventory\GetInventoryHistoryRequest;
 use App\Models\Inventory\Inventory;
 use App\Models\User\AuthToken;
 use App\Models\User\Interfaces\PermissionsInterface;
+use Tests\database\seeds\User\GeolocationSeeder;
 use Dingo\Api\Exception\ResourceException;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Tests\database\seeds\Inventory\InventorySeeder;
@@ -382,6 +383,41 @@ class InventoryControllerTest extends TestCase
         $seeder->cleanUp();
     }
 
+    public function testDeliveryPrice() {
+        $seeder = new InventorySeeder(['withInventory' => true]);
+        $seeder->seed();
+        $inventoryId = $seeder->inventory->getKey();
+        $response = $this->json('GET', "/api/inventory/$inventoryId/delivery_price", [], ['access-token' => $seeder->authToken->access_token]);
+        $response->assertJson([
+            'response' => [
+                'status' => 'success',
+                'fee' => $seeder->dealerLocationMileageFee->fee_per_mile * 96.893
+            ]
+        ]);
+        $seeder->cleanUp();
+    }
+
+    public function testDeliveryPriceToZip() {
+        $seeder = new InventorySeeder(['withInventory' => true]);
+        $locationSeeder = new GeolocationSeeder([
+            'latitude' => 11,
+            'longitude' => 11,
+        ]);
+
+        $seeder->seed();
+        $locationSeeder->seed();
+        $inventoryId = $seeder->inventory->getKey();
+        $response = $this->json('GET', "/api/inventory/$inventoryId/delivery_price?tozip=" . $locationSeeder->location->zip, [], ['access-token' => $seeder->authToken->access_token]);
+        $response->assertJson([
+            'response' => [
+                'status' => 'success',
+                'fee' => $seeder->dealerLocationMileageFee->fee_per_mile * 96.893
+            ]
+        ]);
+
+        $locationSeeder->cleanUp();
+        $seeder->cleanUp();
+    }
 
     /**
      * Examples of invalid query parameters with their respective expected exception class name and its messages

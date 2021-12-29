@@ -41,7 +41,7 @@ class CollectorTransformer extends TransformerAbstract
             'images_delimiter' => $collector->images_delimiter,
             'overridable_fields' => $collector->overridable_fields,
             'skip_categories' => $collector->skip_categories,
-            'skip_locations' => $collector->skip_locations, 
+            'skip_locations' => $collector->skip_locations,
             'only_types' => $collector->only_types,
             'path_to_fields_to_description' => $collector->path_to_fields_to_description,
             'fields_to_description' => $collector->fields_to_description,
@@ -65,7 +65,17 @@ class CollectorTransformer extends TransformerAbstract
             'zero_msrp_on_used' => $collector->zero_msrp,
             'specifications' => $collector->specifications,
             'linebreak_characters' => $collector->linebreak_characters,
-            'local_image_directory_address' => $collector->local_image_directory_address
+            'local_image_directory_address' => $collector->local_image_directory_address,
+            'use_latest_ftp_file_only' => $collector->use_latest_ftp_file_only,
+            'spincar_active' => $collector->spincar_active,
+            'spincar_spincar_id' => $collector->spincar_spincar_id,
+            'spincar_filenames' => $collector->spincar_filenames,
+            'api_url' => $collector->api_url,
+            'api_key_name' => $collector->api_key_name,
+            'api_key_value' => $collector->api_key_value,
+            'api_params' => $collector->api_params,
+            'api_max_records' => $collector->api_max_records,
+            'api_pagination' => $collector->api_pagination,
         ];
     }
 }

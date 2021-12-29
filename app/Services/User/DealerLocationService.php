@@ -97,7 +97,9 @@ class DealerLocationService implements DealerLocationServiceInterface
 
                 foreach ($params['sales_tax_items'] as $item) {
                     $this->salesTaxItemRepo->create($item + $locationRelDefinition);
-                    $this->salesTaxItemRepo->createV1($item + $locationRelDefinition);// for backward compatibility
+                    if((int)$item['entity_type_id'] === 0) {
+                        $this->salesTaxItemRepo->createV1($item + $locationRelDefinition);// for backward compatibility
+                    }
                 }
             }
 
@@ -184,7 +186,9 @@ class DealerLocationService implements DealerLocationServiceInterface
 
                 foreach ($params['sales_tax_items'] as $item) {
                     $this->salesTaxItemRepo->create($item + $locationRelDefinition);
-                    $this->salesTaxItemRepo->createV1($item + $locationRelDefinition);// for backward compatibility
+                    if((int)$item['entity_type_id'] === 0) {
+                        $this->salesTaxItemRepo->createV1($item + $locationRelDefinition);// for backward compatibility
+                    }
                 }
             }
 
@@ -359,5 +363,29 @@ class DealerLocationService implements DealerLocationServiceInterface
     private function assignFeeType(string $title, string $type, bool $isAdditional = false): string
     {
         return $isAdditional ?  Str::camel($title) . random_int(1, 1000) : $type;
+    }
+
+    /**
+     * @param array $params
+     * @return array
+     */
+    public function getDealerLocationTitles(array $params): array
+    {
+        $params['select'] = [
+            'dealer_location_id',
+            'city',
+            'region',
+            'name',
+        ];
+
+        $models = $this->locationRepo->find($params);
+
+        $dealerLocations = $models->pluck('location_title', 'dealer_location_id');
+
+        if ($dealerLocations->isNotEmpty()) {
+            $dealerLocations->prepend('Choose a Dealer Location', 0);
+        }
+
+        return $dealerLocations->toArray();
     }
 }

@@ -2,10 +2,13 @@
 namespace Tests\Unit\Services\Website;
 
 use App\Models\Website\User\WebsiteUser;
+use App\Models\Website\User\WebsiteUserFavoriteInventory;
+use App\Repositories\Website\WebsiteUserFavoriteInventoryRepository;
+use App\Repositories\Website\WebsiteUserFavoriteInventoryRepositoryInterface;
 use App\Repositories\Website\WebsiteUserRepository;
 use App\Repositories\Website\WebsiteUserRepositoryInterface;
 use App\Services\Website\WebsiteUserServiceInterface;
-use Illuminate\Auth\AuthenticationException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Mockery;
 use Tests\TestCase;
 
@@ -61,7 +64,7 @@ class WebsiteUserServiceTest extends TestCase {
 
         $this->app->instance(WebsiteUserRepositoryInterface::class, $websiteUserRepository);
 
-        $this->expectException(AuthenticationException::class);
+        $this->expectException(HttpException::class);
 
         $websiteUserService = $this->app->make(WebsiteUserServiceInterface::class);
         $websiteUserService->loginUser($params);
@@ -89,6 +92,42 @@ class WebsiteUserServiceTest extends TestCase {
         $result = $websiteUserService->createUser($params);
         $this->assertEquals($result->email, $params['email']);
         $this->assertTrue($result->checkPassword($params['password']));
+    }
+
+    public function testAddUserInventories() {
+        $websiteUserId = 1;
+        $inventoryIds = [1, 2, 3];
+
+        $inventory1 = new WebsiteUserFavoriteInventory([
+            'website_user_id' => $websiteUserId,
+            'inventory_id' => $inventoryIds[0]
+        ]);
+        $inventory2 = new WebsiteUserFavoriteInventory([
+            'website_user_id' => $websiteUserId,
+            'inventory_id' => $inventoryIds[1]
+        ]);
+        $inventory3 = new WebsiteUserFavoriteInventory([
+            'website_user_id' => $websiteUserId,
+            'inventory_id' => $inventoryIds[2]
+        ]);
+
+        $websiteUserFavoriteInventoryRepository = Mockery::mock(WebsiteUserFavoriteInventoryRepository::class);
+        $this->app->instance(
+            WebsiteUserFavoriteInventoryRepositoryInterface::class,
+            $websiteUserFavoriteInventoryRepository
+        );
+        $websiteUserFavoriteInventoryRepository
+            ->shouldReceive('create')
+            ->andReturn(
+                $inventory1,
+                $inventory2,
+                $inventory3
+            );
+        $websiteUserService = app()->make(WebsiteUserServiceInterface::class);
+        $inventories = $websiteUserService->addUserInventories($websiteUserId, $inventoryIds);
+        $this->assertEquals($inventory1, $inventories[0]);
+        $this->assertEquals($inventory2, $inventories[1]);
+        $this->assertEquals($inventory3, $inventories[2]);
     }
 
 }
