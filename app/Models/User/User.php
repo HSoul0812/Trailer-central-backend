@@ -290,9 +290,8 @@ class User extends Model implements Authenticatable, PermissionsInterface
      */
     public function leads()
     {
-        return $this->hasMany(Lead::class, 'dealer_id', 'dealer_id')
-                ->where('is_spam', 0)
-                ->where('lead_type', '<>', LeadType::TYPE_NONLEAD);
+        return $this->hasMany(Lead::class, 'dealer_id', 'dealer_id')->where('is_spam', 0)
+                    ->where(Lead::getTableName() . '.lead_type', '<>', LeadType::TYPE_NONLEAD);
     }
 
     public function printerSettings() : HasOne
