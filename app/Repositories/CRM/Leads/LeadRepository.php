@@ -110,7 +110,7 @@ class LeadRepository implements LeadRepositoryInterface {
 
         if (isset($params['sort'])) {
             $query = $query->leftJoin(Interaction::getTableName(), Interaction::getTableName().'.tc_lead_id',  '=', Lead::getTableName().'.identifier');
-            $query = $query->orderByRaw($this->sortOrders[$params['sort']]['field'] .' '. $this->sortOrders[$params['sort']]['direction']);
+            $query = $query->orderByRaw($this->sortOrders[$params['sort']]['field'] . ' ' . $this->sortOrders[$params['sort']]['direction']);
         }
 
         $query = $query->groupBy(Lead::getTableName().'.identifier');
@@ -153,7 +153,7 @@ class LeadRepository implements LeadRepositoryInterface {
 
         if (isset($params['sort'])) {
             $query = $query->leftJoin(Interaction::getTableName(), Interaction::getTableName() . '.tc_lead_id',  '=', Lead::getTableName() . '.identifier');
-            $query = $query->orderByRaw($this->sortOrders[$params['sort']]['field'] .' '. $this->sortOrders[$params['sort']]['direction']);
+            $query = $query->orderByRaw($this->sortOrders[$params['sort']]['field'] . ' ' . $this->sortOrders[$params['sort']]['direction']);
         }
 
         $query = $query->groupBy(Lead::getTableName() . '.identifier');
