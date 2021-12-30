@@ -58,7 +58,12 @@ class Account extends Model
         return $this->hasOne(Account::class, 'id', 'parent_id');
     }
 
-    public function setNameAttribute(string $value): void
+    /**
+     * @param string|null $value
+     *
+     * @return void
+     */
+    public function setNameAttribute(?string $value): void
     {
         $this->attributes['name'] = StringHelper::trimWhiteSpaces($value);
     }

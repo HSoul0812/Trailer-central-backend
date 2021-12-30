@@ -73,17 +73,32 @@ class Employee extends Model
         'is_timeclock_user'
     ];
 
-    public function setFirstNameAttribute(string $value): void
+    /**
+     * @param string|null $value
+     *
+     * @return void
+     */
+    public function setFirstNameAttribute(?string $value): void
     {
         $this->attributes['first_name'] = StringHelper::trimWhiteSpaces($value);
     }
 
-    public function setLastNameAttribute(string $value): void
+    /**
+     * @param string|null $value
+     *
+     * @return void
+     */
+    public function setLastNameAttribute(?string $value): void
     {
         $this->attributes['last_name'] = StringHelper::trimWhiteSpaces($value);
     }
 
-    public function setDisplayNameAttribute(string $value): void
+    /**
+     * @param string|null $value
+     *
+     * @return void
+     */
+    public function setDisplayNameAttribute(?string $value): void
     {
         $this->attributes['display_name'] = StringHelper::trimWhiteSpaces($value);
     }
