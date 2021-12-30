@@ -7,6 +7,7 @@ namespace App\Services\Ecommerce\Payment\Gateways;
 use App\Exceptions\Ecommerce\RefundPaymentGatewayException;
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
 use Brick\Money\Money;
+use Stripe\PaymentIntent;
 
 interface PaymentGatewayServiceInterface
 {
@@ -30,7 +31,7 @@ interface PaymentGatewayServiceInterface
 
     public function confirmPaymentIntent(array $params): bool;
 
-    public function retrievePaymentIntent(array $params): array;
+    public function retrievePaymentIntent(array $params): PaymentIntent;
 
     public function paymentIntentSucceeded(array $params): bool;
 }
