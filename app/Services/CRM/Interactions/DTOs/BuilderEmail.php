@@ -50,9 +50,9 @@ class BuilderEmail
     const UNSUBSCRIBE_LINK_VAR = '[unsubscribe_link]';
     
     /**
-     * @var string Unsubscribe Link Base URL
+     * @var string Unsubscribe Link Path
      */
-    const UNSUBSCRIBE_LINK = 'https://crm.trailercentral.com/emailtracker/unsubscribe/';
+    const UNSUBSCRIBE_LINK_PATH = '/emailtracker/unsubscribe/';
 
     /**
      * @var string Text of the Unsubscribe Link
@@ -282,7 +282,7 @@ class BuilderEmail
         if($emailId !== null) {
             // Check for Verlafix
             if(strpos($filled, self::UNSUBSCRIBE_LINK_VAR) !== FALSE) {
-                $filled = str_replace(self::UNSUBSCRIBE_LINK_VAR, self::UNSUBSCRIBE_LINK . $emailId, $filled);
+                $filled = str_replace(self::UNSUBSCRIBE_LINK_VAR, trim(config('app.crm_url'), '/') . self::UNSUBSCRIBE_LINK_PATH . $emailId, $filled);
             } else {
                 $filled .= $this->getUnsubscribeHtml($emailId);
             }
@@ -302,7 +302,7 @@ class BuilderEmail
     {
         return '<br /><br />
                 <p>
-                    <a href="' . self::UNSUBSCRIBE_LINK . $emailId . '">' .
+                    <a href="' . trim(config('app.crm_url'), '/') . self::UNSUBSCRIBE_LINK_PATH . $emailId . '">' .
                         self::UNSUBSCRIBE_TEXT . '
                     </a>
                 </p>';
