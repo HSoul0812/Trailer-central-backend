@@ -498,7 +498,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
                             $builder->leadId . ' with Message-ID: ' . $parsedEmail->messageId);
         switch($builder->type) {
             case "campaign":
-                $sent = $this->campaigns->updateSent($builder->id, $builder->leadId, $parsedEmail->messageId);
+                $sent = $this->campaigns->updateSent($builder->id, $builder->leadId, $parsedEmail->messageId, $parsedEmail->emailHistoryId);
             break;
             case "blast":
                 $sent = $this->blasts->updateSent($builder->id, $builder->leadId, $parsedEmail->messageId, $parsedEmail->emailHistoryId);
