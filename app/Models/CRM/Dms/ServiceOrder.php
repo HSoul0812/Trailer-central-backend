@@ -32,6 +32,7 @@ class ServiceOrder extends Model
 
     const SERVICE_ORDER_STATUS = [
         'picked_up' => 'Closed / Picked Up',
+        'closed_quote' => 'Closed / Quote',
         'ready_for_pickup' => 'Closed / Ready for Pickup',
         'on_tech_clipboard' => 'On Tech Clipboard',
         'waiting_custom' => 'Waiting on Custom',
@@ -47,6 +48,7 @@ class ServiceOrder extends Model
     const COMPLETED_ORDER_STATUS = [
         'picked_up',
         'ready_for_pickup',
+        'closed_quote'
     ];
 
     public const TYPES = [

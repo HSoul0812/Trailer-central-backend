@@ -724,6 +724,9 @@ class InventoryRepository implements InventoryRepositoryInterface
         $attributeObjs = [];
 
         foreach ($attributes as $attribute) {
+            if (!is_array($attribute)) {
+                continue;
+            }
             $attributeObjs[] = new AttributeValue($attribute);
         }
 

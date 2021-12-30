@@ -426,7 +426,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         $smtpConfig = !empty($salesPerson->id) ? SmtpConfig::fillFromSalesPerson($salesPerson) : null;
 
         // Refresh Access Token if Exists
-        if($smtpConfig->isAuthConfigOauth()) {
+        if(!empty($smtpConfig) && $smtpConfig->isAuthConfigOauth()) {
             $accessToken = $this->refreshAccessToken($smtpConfig->accessToken);
             $smtpConfig->setAccessToken($accessToken);
         }
