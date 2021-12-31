@@ -8,7 +8,7 @@ use App\Repositories\Repository;
 interface BlastRepositoryInterface extends Repository {
     /**
      * Mark Blast as Sent
-     * 
+     *
      * @param int $blastId
      * @param int $leadId
      * @param null|string $messageId = null
@@ -19,18 +19,19 @@ interface BlastRepositoryInterface extends Repository {
 
     /**
      * Update Sent Blast
-     * 
+     *
      * @param int $blastId
      * @param int $leadId
      * @param string $messageId
-     * @throws \Exception
+     * @param int $emailHistoryId
      * @return BlastSent
+     * @throws \Exception
      */
-    public function updateSent(int $blastId, int $leadId, string $messageId): BlastSent;
+    public function updateSent(int $blastId, int $leadId, string $messageId, int $emailHistoryId): BlastSent;
 
     /**
      * Was Blast Already Sent to Email Address?
-     * 
+     *
      * @param int $blastId
      * @param string $email
      * @return bool
@@ -39,7 +40,7 @@ interface BlastRepositoryInterface extends Repository {
 
     /**
      * Get Blast Sent Entry for Lead
-     * 
+     *
      * @param int $blastId
      * @param int $leadId
      * @return null|BlastSent
@@ -48,7 +49,7 @@ interface BlastRepositoryInterface extends Repository {
 
     /**
      * Was Blast Already Sent to Lead?
-     * 
+     *
      * @param int $blastId
      * @param int $leadId
      * @return bool
