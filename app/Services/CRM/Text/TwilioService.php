@@ -85,14 +85,19 @@ class TwilioService implements TextServiceInterface
      * @return result of $this->twilio->messages->create || array with error
      */
     public function send($from_number, $to_number, $textMessage, $fullName) {
-        // Look Up To Number
-        $carrier = $this->twilio->lookups->v1->phoneNumbers($to_number)->fetch(array("type" => array("carrier")))->carrier;
-        if (empty($carrier['mobile_country_code'])) {
-            //throw new CustomerLandlineNumberException();
-        }
+        try {
+            // Look Up To Number
+            $carrier = $this->twilio->lookups->v1->phoneNumbers($to_number)->fetch(array("type" => array("carrier")))->carrier;
+            if (empty($carrier['mobile_country_code'])) {
+                //throw new CustomerLandlineNumberException();
+            }
 
-        // Send Internal Number
-        return $this->sendInternal($from_number, $to_number, $textMessage, $fullName);
+            // Send Internal Number
+            return $this->sendInternal($from_number, $to_number, $textMessage, $fullName);
+        } catch (\Exception $ex) {
+            $this->log->error('Exception occurred trying to send text over Twilio: ' . $ex->getMessage());
+            return false;
+        }
     }
 
     /**
@@ -113,7 +118,7 @@ class TwilioService implements TextServiceInterface
             // Retrieved Phone Numbers!
             $this->log->info('Found ' . count($list) . ' Phone Numbers from Twilio');
         } catch (Exception $ex) {
-            $this->log->error('Failed to get Twilio Numbers');
+            $this->log->error('Error occurred  trying to get Twilio Numbers: ' . $ex->getMessage());
         }
 
         // Delete Number From DB
@@ -172,6 +177,7 @@ class TwilioService implements TextServiceInterface
 
         // Delete Number From DB
         if($this->textNumber->deleteTwilioNumber($number)) {
+            $this->log->error('Deleted Phone Number ' . $number . ' from DB');
             return true;
         }
         return $success;
@@ -204,7 +210,9 @@ class TwilioService implements TextServiceInterface
 
                 // Add Tried Phones to array
                 $this->tried[] = $fromPhone;
+                $this->log->error('Error occurred trying to pick twilio number to send text: ' . $ex->getMessage());
                 if (++$this->tries == $this->maxTries) {
+                    $this->log->error('Exceeded ' . $this->maxTries . ' attempts to send twilio text.'));
                     throw new TooManyNumbersTriedException();
                 }
 
@@ -244,6 +252,7 @@ class TwilioService implements TextServiceInterface
             );
         } catch (\Exception $ex) {
             // Exception occurred?!
+            $this->log->error('Error occurred sending twilio text: ' . $ex->getMessage());
             if (strpos($ex->getMessage(), 'is not a valid, SMS-capable inbound phone number')) {
                 throw new InvalidTwilioInboundNumberException();
             }
@@ -303,6 +312,7 @@ class TwilioService implements TextServiceInterface
                                     ]
                                 );
             } catch (\Exception $ex) {
+                $this->log->error('Error occurred getting twilio number: ' . $ex->getMessage());
                 throw new NoTwilioNumberAvailableException();
             }
 
