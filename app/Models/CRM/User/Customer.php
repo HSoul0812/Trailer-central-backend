@@ -104,27 +104,52 @@ class Customer extends Model
         'qb_id'
     ];
 
+    /**
+     * @param string|null $value
+     *
+     * @return void
+     */
     public function setCompanyNameAttribute(?string $value): void
     {
         $this->attributes['company_name'] = StringHelper::trimWhiteSpaces($value);
     }
 
-    public function setFirstNameAttribute(string $value): void
+    /**
+     * @param string|null $value
+     *
+     * @return void
+     */
+    public function setFirstNameAttribute(?string $value): void
     {
         $this->attributes['first_name'] = StringHelper::trimWhiteSpaces($value);
     }
 
+    /**
+     * @param string|null $value
+     *
+     * @return void
+     */
     public function setMiddleNameAttribute(?string $value): void
     {
         $this->attributes['middle_name'] = StringHelper::trimWhiteSpaces($value);
     }
 
-    public function setLastNameAttribute(string $value): void
+    /**
+     * @param string|null $value
+     *
+     * @return void
+     */
+    public function setLastNameAttribute(?string $value): void
     {
         $this->attributes['last_name'] = StringHelper::trimWhiteSpaces($value);
     }
 
-    public function setDisplayNameAttribute(string $value): void
+    /**
+     * @param string|null $value
+     *
+     * @return void
+     */
+    public function setDisplayNameAttribute(?string $value): void
     {
         $this->attributes['display_name'] = StringHelper::trimWhiteSpaces($value);
     }
@@ -204,7 +229,7 @@ class Customer extends Model
      *
      * @return string
      */
-    public function getDisplayFullNameAttribute(): string
+    public function getDisplayFullNameAttribute(): ?string
     {
         return $this->display_name ?: $this->full_name;
     }
