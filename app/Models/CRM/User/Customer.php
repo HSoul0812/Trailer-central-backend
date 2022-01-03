@@ -228,7 +228,7 @@ class Customer extends Model
      *
      * @return string
      */
-    public function getDisplayFullNameAttribute(): string
+    public function getDisplayFullNameAttribute(): ?string
     {
         return $this->display_name ?: $this->full_name;
     }
