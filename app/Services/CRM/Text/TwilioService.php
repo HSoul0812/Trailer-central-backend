@@ -12,6 +12,7 @@ use App\Repositories\CRM\Text\NumberRepositoryInterface;
 use App\Services\CRM\Text\TextServiceInterface;
 use App\Models\CRM\Text\NumberTwilio;
 use Twilio\Rest\Client;
+use Twilio\Rest\Chat\V1\Service\Channel\MessageInstance;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -38,6 +39,17 @@ class TwilioService implements TextServiceInterface
 
 
     /**
+     * @var array
+     */
+    private $from = [];
+
+    /**
+     * @var array
+     */
+    private $to = [];
+
+
+    /**
      * @var int
      * @var int
      * @var array
@@ -45,11 +57,6 @@ class TwilioService implements TextServiceInterface
     private $maxTries = 15;
     private $retries = 0;
     private $tried = [];
-
-    /**
-     * @const array
-     */
-    const MAGIC_NUMBERS = ['+15005550000', '+15005550007', '+15005550008', '+15005550001', '+15005550006'];
 
     /**
      * TwilioService constructor.
@@ -72,6 +79,10 @@ class TwilioService implements TextServiceInterface
         // Initialize Number Repository
         $this->textNumber = $numberRepo;
 
+        // Get From/To Numbers if Exist
+        $this->from = config('vendor.twilio.numbers.from');
+        $this->to = config('vendor.twilio.numbers.to');
+
         // Initialize Logger
         $this->log = Log::channel('texts');
     }
@@ -83,10 +94,16 @@ class TwilioService implements TextServiceInterface
      * @param string $to_number
      * @param string $textMessage
      * @param string $fullName
-     * @return result of $this->twilio->messages->create || array with error
+     * @return MessageInstance
      */
-    public function send($from_number, $to_number, $textMessage, $fullName) {
+    public function send(string $from_number, string $to_number, string $textMessage, string $fullName): MessageInstance {
         try {
+            // Send to Demo
+            if(!empty($this->from)) {
+                // Send Demo Number
+                return $this->sendDemo($from_number, $to_number, $textMessage, $fullName);
+            }
+
             // Look Up To Number
             $carrier = $this->twilio->lookups->v1->phoneNumbers($to_number)->fetch(array("type" => array("carrier")))->carrier;
             if (empty($carrier['mobile_country_code'])) {
@@ -232,15 +249,15 @@ class TwilioService implements TextServiceInterface
     /**
      * Send Text Via Twilio
      * 
-     * @param type $fromPhone
-     * @param type $toNumber
-     * @param type $textMessage
-     * @return type
+     * @param string $fromPhone
+     * @param string $toNumber
+     * @param string $textMessage
+     * @return MessageInstance
      * @throws NoTwilioNumberAvailableException
      * @throws TooManyTwilioNumbersTriedException
      * @throws CreateTwilioMessageException
      */
-    private function sendViaTwilio($fromPhone, $toNumber, $textMessage) {
+    private function sendViaTwilio(string $fromPhone, string $toNumber, string $textMessage): MessageInstance {
         // Try Creating Twilio Message
         try {
             // Create/Send Text Message
@@ -255,7 +272,7 @@ class TwilioService implements TextServiceInterface
             // Exception occurred?!
             $this->log->error('Error occurred sending twilio text: ' . $ex->getMessage());
             if (strpos($ex->getMessage(), 'is not a valid, SMS-capable inbound phone number')) {
-                throw new InvalidTwilioInboundNumberException();
+                throw new InvalidTwilioInboundNumberException;
             }
 
             // Throw Create Twilio Message Exception With Exact Error!
@@ -269,13 +286,13 @@ class TwilioService implements TextServiceInterface
     /**
      * Get Twilio Number
      * 
-     * @param type $from_number
-     * @param type $to_number
-     * @param type $customer_name
-     * @return type
+     * @param string $from_number
+     * @param string $to_number
+     * @param string $customer_name
+     * @return string
      * @throws NoTwilioNumberAvailableException
      */
-    private function getTwilioNumber($from_number, $to_number, $customer_name) {
+    private function getTwilioNumber(string $from_number, string $to_number, string $customer_name): string {
         // Get Active Twilio Number for From/To Numbers
         $twilioNumber = $this->textNumber->findActiveTwilioNumber($from_number, $to_number);
 
@@ -296,9 +313,10 @@ class TwilioService implements TextServiceInterface
     /**
      * Return next available phone number or false if no available phone numbers
      *
-     * @return NumberTwilio || boolean false
+     * @return null|string
+     * @throws NoTwilioNumberAvailableException
      */
-    private function getNextAvailableNumber() {
+    private function getNextAvailableNumber(): ?string {
         // Get Next Available Number
         if (!empty($this->twilio)) {
             $phoneNumber = current($this->twilio->availablePhoneNumbers("US")->local->read(array('smsEnabled' => true), 1))->phoneNumber;
@@ -308,10 +326,7 @@ class TwilioService implements TextServiceInterface
                                 ->create(["phoneNumber" => $phoneNumber]);
 
                 $this->twilio->incomingPhoneNumbers($phone->sid)
-                                ->update([
-                                        "smsUrl" => "http://crm.trailercentral.com/twilio/reply-twilio-message"
-                                    ]
-                                );
+                                ->update(["smsUrl" => config('vendor.twilio.reply')]);
             } catch (\Exception $ex) {
                 $this->log->error('Error occurred getting twilio number: ' . $ex->getMessage());
                 throw new NoTwilioNumberAvailableException();
@@ -324,7 +339,7 @@ class TwilioService implements TextServiceInterface
             return $phoneNumber;
         }
 
-        // Return
-        return false;
+        // Return Null
+        return null;
     }
 }

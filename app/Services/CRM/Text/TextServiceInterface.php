@@ -2,17 +2,19 @@
 
 namespace App\Services\CRM\Text;
 
+use Twilio\Rest\Chat\V1\Service\Channel\MessageInstance;
+
 interface TextServiceInterface {
     /**
-     * Send Text
+     * Send Text to Twilio
      * 
      * @param string $from_number
      * @param string $to_number
      * @param string $textMessage
      * @param string $fullName
-     * @return result || array with error
+     * @return MessageInstance
      */
-    public function send($from_number, $to_number, $textMessage, $fullName);
+    public function send(string $from_number, string $to_number, string $textMessage, string $fullName): MessageInstance;
 
     /**
      * Get All Twilio Phone Numbers on Account

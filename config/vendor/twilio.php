@@ -20,5 +20,14 @@ return [
     'api'   => [
         'key'    => env('TWILIO_API_KEY', ''),
         'secret' => env('TWILIO_API_SECRET', ''),
-    ]
+    ],
+
+    // Demo Numbers
+    'numbers' => [
+        'from' => explode(",", env('TWILIO_NUMBERS_FROM')),
+        'to' => explode(",", env('TWILIO_NUMBERS_TO'))
+    ],
+
+    // Reply URL
+    'reply' => env('TWILIO_REPLY_ENDPOINT', 'https://crm.trailercentral.com/twilio/reply-twilio-message')
 ];
