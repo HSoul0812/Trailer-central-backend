@@ -24,8 +24,8 @@ return [
 
     // Demo Numbers
     'numbers' => [
-        'from' => explode(",", env('TWILIO_NUMBERS_FROM')),
-        'to' => explode(",", env('TWILIO_NUMBERS_TO'))
+        'from' => explode(",", env('TWILIO_NUMBERS_FROM', '')),
+        'to' => explode(",", env('TWILIO_NUMBERS_TO', ''))
     ],
 
     // Reply URL
