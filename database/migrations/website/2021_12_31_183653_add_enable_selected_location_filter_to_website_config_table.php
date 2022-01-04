@@ -8,7 +8,6 @@ class AddEnableSelectedLocationFilterToWebsiteConfigTable extends Migration
     private const FILTER_BY_SELECTED_CONFIG = [
         'key' => 'inventory/enable_selected_location_filter',
         'dealer_names' => ['Happy Trailer Sales','Bish\'s Meridian'],
-        'website_id' => [44, 1322], // Happy and Bish websites
         'value' => 1
     ];
 
