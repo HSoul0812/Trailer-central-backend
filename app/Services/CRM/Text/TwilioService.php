@@ -101,7 +101,7 @@ class TwilioService implements TextServiceInterface
             // Send to Demo
             if(!empty($this->from)) {
                 // Send Demo Number
-                return $this->sendDemo($from_number, $to_number, $textMessage, $fullName);
+                return $this->sendDemo($to_number, $textMessage, $fullName);
             }
 
             // Look Up To Number
@@ -203,16 +203,56 @@ class TwilioService implements TextServiceInterface
 
 
     /**
+     * Send Demo Text
+     * 
+     * @param string $toNumber
+     * @param string $textMessage
+     * @return MessageInstance
+     * @throws InvalidTwilioInboundNumberException
+     * @throws CreateTwilioMessageException
+     */
+    private function sendDemo(string $toNumber, string $textMessage): MessageInstance {
+        // Get To Override
+        $toPhone = $toNumber;
+        if(!empty($this->to[0])) {
+            $toPhone = in_array($toNumber, $this->to) ? $toNumber : $this->to[0];
+        }
+
+        // Try Creating Twilio Message
+        try {
+            // Create/Send Text Message
+            $sent = $this->twilio->messages->create($toPhone,
+                        array('from' => $this->from[0], 'body' => $textMessage)
+            );
+        } catch (\Exception $ex) {
+            // Exception occurred?!
+            $this->log->error('Error occurred sending demo twilio text: ' . $ex->getMessage());
+            if (strpos($ex->getMessage(), 'is not a valid, SMS-capable inbound phone number')) {
+                throw new InvalidTwilioInboundNumberException;
+            }
+
+            // Throw Create Twilio Message Exception With Exact Error!
+            throw new CreateTwilioMessageException($ex->getMessage());
+        }
+
+        // Return Successful Result
+        $this->log->info('Sent demo text from ' . $this->from[0] . ' to ' . $toPhone);
+        return $sent;
+    }
+
+
+    /**
      * Send Internal Text
      * 
-     * @param type $from_number
-     * @param type $to_number
-     * @param type $textMessage
-     * @param type $fullName
-     * @return boolean
+     * @param string $from_number
+     * @param string $to_number
+     * @param string $textMessage
+     * @param string $fullName
+     * @return MessageInstance
      * @throws TooManyNumbersTriedException
      */
-    private function sendInternal($from_number, $to_number, $textMessage, $fullName) {
+    private function sendInternal(string $from_number, string $to_number,
+                                    string $textMessage, string $fullName): MessageInstance {
         // Get Twilio Number
         $fromPhone = $this->getTwilioNumber($from_number, $to_number, $fullName);
 
