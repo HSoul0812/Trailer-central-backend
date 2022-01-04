@@ -1,11 +1,13 @@
 <?php
 
+use Database\helpers\website\WebsiteConfig;
 use Illuminate\Database\Migrations\Migration;
 
 class AddEnableSelectedLocationFilterToWebsiteConfigTable extends Migration
 {
     private const FILTER_BY_SELECTED_CONFIG = [
         'key' => 'inventory/enable_selected_location_filter',
+        'dealer_names' => ['Happy Trailer Sales','Bish\'s Meridian'],
         'website_id' => [44, 1322], // Happy and Bish websites
         'value' => 1
     ];
@@ -15,17 +17,13 @@ class AddEnableSelectedLocationFilterToWebsiteConfigTable extends Migration
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
-        foreach (self::FILTER_BY_SELECTED_CONFIG['website_id'] as $websiteId) {
-            $composeKey = [
-                'website_id' => $websiteId,
-                'key' => self::FILTER_BY_SELECTED_CONFIG['key'],
-            ];
-
-            DB::table('website_config')->updateOrInsert(
-                $composeKey,
-                $composeKey + ['value' => self::FILTER_BY_SELECTED_CONFIG['value']]
+        foreach (self::FILTER_BY_SELECTED_CONFIG['dealer_names'] as $dealerName) {
+            WebsiteConfig::setKeyValueByDealerName(
+                $dealerName,
+                self::FILTER_BY_SELECTED_CONFIG['key'],
+                self::FILTER_BY_SELECTED_CONFIG['value']
             );
         }
     }
@@ -35,16 +33,14 @@ class AddEnableSelectedLocationFilterToWebsiteConfigTable extends Migration
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
-        foreach (self::FILTER_BY_SELECTED_CONFIG['website_id'] as $websiteId) {
-            $composeKey = [
-
-                'website_id' => $websiteId,
-                'key' => self::FILTER_BY_SELECTED_CONFIG['key'],
-            ];
-
-            DB::table('website_config')->updateOrInsert($composeKey, $composeKey + ['value' => 0]);
+        foreach (self::FILTER_BY_SELECTED_CONFIG['dealer_names'] as $dealerName) {
+            WebsiteConfig::setKeyValueByDealerName(
+                $dealerName,
+                self::FILTER_BY_SELECTED_CONFIG['key'],
+               0
+            );
         }
     }
 }
