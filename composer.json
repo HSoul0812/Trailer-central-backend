@@ -74,7 +74,8 @@
         ],
         "psr-4": {
             "App\\": "app/",
-            "Database\\traits\\": "database/traits"
+            "Database\\traits\\": "database/traits",
+            "Database\\helpers\\": "database/helpers"
         }
     },
     "autoload-dev": {
