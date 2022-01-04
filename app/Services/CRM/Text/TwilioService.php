@@ -99,7 +99,7 @@ class TwilioService implements TextServiceInterface
     public function send(string $from_number, string $to_number, string $textMessage, string $fullName): MessageInstance {
         try {
             // Send to Demo
-            if(!empty($this->from)) {
+            if(!empty($this->from) && !empty($this->from[0])) {
                 // Send Demo Number
                 return $this->sendDemo($to_number, $textMessage, $fullName);
             }
