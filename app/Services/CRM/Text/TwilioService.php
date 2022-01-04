@@ -7,6 +7,7 @@ use App\Exceptions\CRM\Text\InvalidTwilioInboundNumberException;
 use App\Exceptions\CRM\Text\CustomerLandlineNumberException;
 use App\Exceptions\CRM\Text\NoTwilioNumberAvailableException;
 use App\Exceptions\CRM\Text\TooManyNumbersTriedException;
+use App\Exceptions\CRM\Text\SendTwilioTextFailedException;
 use App\Repositories\CRM\Text\NumberRepositoryInterface;
 use App\Services\CRM\Text\TextServiceInterface;
 use App\Models\CRM\Text\NumberTwilio;
@@ -96,7 +97,7 @@ class TwilioService implements TextServiceInterface
             return $this->sendInternal($from_number, $to_number, $textMessage, $fullName);
         } catch (\Exception $ex) {
             $this->log->error('Exception occurred trying to send text over Twilio: ' . $ex->getMessage());
-            return false;
+            throw new SendTwilioTextFailedException;
         }
     }
 
@@ -118,7 +119,7 @@ class TwilioService implements TextServiceInterface
             // Retrieved Phone Numbers!
             $this->log->info('Found ' . count($list) . ' Phone Numbers from Twilio');
         } catch (Exception $ex) {
-            $this->log->error('Error occurred  trying to get Twilio Numbers: ' . $ex->getMessage());
+            $this->log->error('Error occurred trying to get Twilio Numbers: ' . $ex->getMessage());
         }
 
         // Delete Number From DB
