@@ -2,7 +2,7 @@
 
 namespace App\Services\CRM\Text;
 
-use Twilio\Rest\Chat\V1\Service\Channel\MessageInstance;
+use Twilio\Rest\Api\V2010\Account\MessageInstance;
 
 interface TextServiceInterface {
     /**

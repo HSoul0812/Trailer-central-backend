@@ -12,7 +12,7 @@ use App\Repositories\CRM\Text\NumberRepositoryInterface;
 use App\Services\CRM\Text\TextServiceInterface;
 use App\Models\CRM\Text\NumberTwilio;
 use Twilio\Rest\Client;
-use Twilio\Rest\Chat\V1\Service\Channel\MessageInstance;
+use Twilio\Rest\Api\V2010\Account\MessageInstance;
 use Illuminate\Support\Facades\Log;
 
 /**
