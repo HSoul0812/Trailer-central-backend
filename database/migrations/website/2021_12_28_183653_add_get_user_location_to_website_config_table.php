@@ -1,12 +1,13 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
+use Database\helpers\website\WebsiteConfig;
 
 class AddGetUserLocationToWebsiteConfigTable extends Migration
 {
     private const IP_LOCATION_CONFIG = [
         'key' => 'website/get_user_location',
-        'website_id' => 44,
+        'dealer_name' => 'Happy Trailer Sales',
         'value' => 1
     ];
 
@@ -15,15 +16,12 @@ class AddGetUserLocationToWebsiteConfigTable extends Migration
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
-        DB::table('website_config')->updateOrInsert(
-            [
-
-                'website_id' => self::IP_LOCATION_CONFIG['website_id'],
-                'key' => self::IP_LOCATION_CONFIG['key'],
-            ],
-            self::IP_LOCATION_CONFIG
+        WebsiteConfig::setKeyValueByDealerName(
+            self::IP_LOCATION_CONFIG['dealer_name'],
+            self::IP_LOCATION_CONFIG['key'],
+            self::IP_LOCATION_CONFIG['value']
         );
     }
 
@@ -32,15 +30,12 @@ class AddGetUserLocationToWebsiteConfigTable extends Migration
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
-        DB::table('website_config')->updateOrInsert(
-            [
-
-                'website_id' => self::IP_LOCATION_CONFIG['website_id'],
-                'key' => self::IP_LOCATION_CONFIG['key'],
-            ],
-            array_merge(self::IP_LOCATION_CONFIG, ['value' => 0])
+        WebsiteConfig::setKeyValueByDealerName(
+            self::IP_LOCATION_CONFIG['dealer_name'],
+            self::IP_LOCATION_CONFIG['key'],
+            0
         );
     }
 }
