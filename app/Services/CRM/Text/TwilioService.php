@@ -212,7 +212,7 @@ class TwilioService implements TextServiceInterface
                 $this->tried[] = $fromPhone;
                 $this->log->error('Error occurred trying to pick twilio number to send text: ' . $ex->getMessage());
                 if (++$this->tries == $this->maxTries) {
-                    $this->log->error('Exceeded ' . $this->maxTries . ' attempts to send twilio text.'));
+                    $this->log->error('Exceeded ' . $this->maxTries . ' attempts to send twilio text.');
                     throw new TooManyNumbersTriedException();
                 }
 
