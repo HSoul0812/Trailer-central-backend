@@ -23,6 +23,16 @@ class CategoryAndTypeSeeder extends Seeder
     ];
 
     private const PLACEHOLDER_IMG_URL = 'https://crm-trailercentral-dev.s3.amazonaws.com/placeholder.png';
+    
+    private const UNIQUE_PLACEHOLDER_IMAGES = [ 
+      'Equipment Trailers' => ['https://s3.amazonaws.com/crm-trailercentral-dev/cargo-trailers-enclosed.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/flatbed-trailers.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/car-haulers.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/tilt-trailers.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/utility-trailers.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/equipment-trailers.png', 
+      'https://s3.amazonaws.com/crm-trailercentral-dev/dump-trailers.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/car-racing.jpg', 'https://s3.amazonaws.com/crm-trailercentral-dev/snowmobile.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/atv-trailer.jpg', 'https://s3.amazonaws.com/crm-trailercentral-dev/watercraft-trailer.jpeg', 'https://s3.amazonaws.com/crm-trailercentral-dev/concession-trailers.jpeg', 'https://s3.amazonaws.com/crm-trailercentral-dev/tow-dolly.jpg', 
+      'https://s3.amazonaws.com/crm-trailercentral-dev/fiber-trailer.jpeg', 'https://s3.amazonaws.com/crm-trailercentral-dev/motorcycle-trailer.jpeg', 'https://s3.amazonaws.com/crm-trailercentral-dev/other-trailers.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/cycle-trailers.png'],
+      'Horse & Livestock'  => ['https://s3.amazonaws.com/crm-trailercentral-dev/horse-trailers.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/livestock-trailers.jpeg', 'https://s3.amazonaws.com/crm-trailercentral-dev/stock-trailers.png'],
+      'Travel Trailers'    => ['https://s3.amazonaws.com/crm-trailercentral-dev/travel-trailers.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/fifth-wheels-trailers.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/toy-haulers.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/camper-trailers.png'],
+      'Semi Trailers'      => ['https://s3.amazonaws.com/crm-trailercentral-dev/day-cab-trucks.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/sleeper-cab-trucks.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/dump-trucks.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/low-boy-trailers.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/drop-deck-trailers.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/dry-van-trailers.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/flatbed-semi-trailers.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/grain-trailers.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/reefer-trailers.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/semi-stock-trailers.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/tank-trailers.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/other-trucks.png'],
+      'Truck Beds'         => ['https://s3.amazonaws.com/crm-trailercentral-dev/truck-beds-trailers.png'],
+    ];
 
     /**
      * Run the database seeds.
@@ -36,14 +46,15 @@ class CategoryAndTypeSeeder extends Seeder
               'name' => $type,
           ]);
 
-            foreach ($categories as $category) {
+            foreach ($categories as $key => $category) {
                 $new_category = Category::create([
                   'name' => $category,
+                  'description' => $category . ' is the best trailer in the world.'
                 ]);
 
                 $new_image = CategoryImage::create([
-                  'image_url'   => self::PLACEHOLDER_IMG_URL,
-                  'category_id' => $new_category->id,
+                  'image_url'   => self::UNIQUE_PLACEHOLDER_IMAGES[$type][$key],
+                  'category_id' => $new_category->id
                 ]);
 
                 $new_type->categories()->save($new_category);
