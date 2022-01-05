@@ -133,10 +133,10 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     /**
      * Process Dealer
      * 
-     * @param User $dealer
-     * @return int total number of imported emails
+     * @param NewDealerUser $dealer
+     * @return bool
      */
-    public function dealer(NewDealerUser $dealer): int {
+    public function dealer(NewDealerUser $dealer): bool {
         // Get Salespeople With Email Credentials
         $salespeople = $this->salespeople->getAllImap($dealer->user_id);
         $this->log->info('Dealer #' . $dealer->id . ' Found ' . $salespeople->count() .
@@ -146,19 +146,16 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         }
 
         // Loop Campaigns for Current Dealer
-        $imported = 0;
         foreach($salespeople as $salesperson) {
             // Try Catching Error for Sales Person
             try {
                 // Import Emails
                 $this->log->info('Dealer #' . $dealer->id . ', Sales Person #' .
                                     $salesperson->id . ' - Starting Importing Email');
-                $imports = $this->salesperson($dealer, $salesperson);
 
-                // Adjust Total Import Counts
-                $this->log->info('Dealer #' . $dealer->id . ', Sales Person #' .
-                                    $salesperson->id . ' - Finished Importing ' . $imports . ' Emails');
-                $imported += $imports;
+                // Dispatch ScrapeReplies Job
+                $job = new ScrapeRepliesJob($dealer, $salesperson);
+                $this->dispatch($job->onQueue('scrapereplies'));
             } catch(\Exception $e) {
                 $this->log->error('Dealer #' . $dealer->id . ' Sales Person #' .
                                     $salesperson->id . ' - Exception returned: ' .
@@ -167,7 +164,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         }
 
         // Return Imported Email Count for Dealer
-        return $imported;
+        return true;
     }
 
     /**

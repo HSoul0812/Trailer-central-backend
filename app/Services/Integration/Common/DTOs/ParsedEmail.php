@@ -436,7 +436,7 @@ class ParsedEmail
      */
     public function getSubject(): string
     {
-        return $this->subject;
+        return $this->subject ?? '';
     }
 
     /**
