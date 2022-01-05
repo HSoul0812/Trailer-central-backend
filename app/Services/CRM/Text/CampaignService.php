@@ -246,7 +246,7 @@ class CampaignService implements CampaignServiceInterface
         // Mark Campaign as Sent to Lead
         try {
             return $this->campaigns->sent([
-                'text_blast_id' => $campaign->id,
+                'text_campaign_id' => $campaign->id,
                 'lead_id' => $lead->identifier,
                 'text_id' => !empty($textLog->id) ? $textLog->id : 0,
                 'status' => $status
