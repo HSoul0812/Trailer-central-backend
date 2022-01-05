@@ -11,9 +11,9 @@ class HereApiAddress
     public string $label;
     public string $countryCode;
     public string $countryName;
-    public string $stateCode;
-    public string $state;
-    public string $county;
+    public ?string $stateCode;
+    public ?string $state;
+    public ?string $county;
     public ?string $city;
     public ?string $district;
     public ?string $street;
@@ -26,9 +26,9 @@ class HereApiAddress
      $obj->label = $data['label'];
      $obj->countryCode = $data['countryCode'];
      $obj->countryName = $data['countryName'];
-     $obj->stateCode = $data['stateCode'];
-     $obj->state = $data['state'];
-     $obj->county = $data['county'];
+     $obj->stateCode = $data['stateCode'] ?? null;
+     $obj->state = $data['state'] ?? null;
+     $obj->county = $data['county'] ?? null;
      $obj->city = $data['city'] ?? null;
      $obj->district = $data['district'] ?? null;
      $obj->street = $data['street'] ?? null;
