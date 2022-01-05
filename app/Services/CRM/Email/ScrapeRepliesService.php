@@ -4,6 +4,7 @@ namespace App\Services\CRM\Email;
 
 use App\Exceptions\CRM\Email\MissingAccessTokenImportFolderException;
 use App\Exceptions\Common\MissingFolderException;
+use App\Jobs\CRM\Email\ScrapeRepliesJob;
 use App\Models\User\NewDealerUser;
 use App\Models\CRM\Email\Attachment;
 use App\Models\CRM\User\SalesPerson;
