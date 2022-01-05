@@ -383,7 +383,8 @@ class PartRepository implements PartRepositoryInterface {
 
             if (!isset($params['search_term']['dncontain']) && !isset($params['search_term']['contain'])) {
                 $query = $query->where(function ($q) use ($params) {
-                    $q->where('sku', 'LIKE', '%' . $params['search_term'] . '%')
+                    $q->where('id', '=', $params['search_term'])
+                        ->orWhere('sku', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('title', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('description', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('alternative_part_number', 'LIKE', '%' . $params['search_term'] . '%');
