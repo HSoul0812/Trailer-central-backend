@@ -6,6 +6,7 @@ use App\Exceptions\CRM\Text\CustomerLandlineNumberException;
 use App\Exceptions\CRM\Text\NoBlastSmsFromNumberException;
 use App\Exceptions\CRM\Text\NoLeadsDeliverBlastException;
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Text\Blast;
 use App\Models\CRM\Text\BlastSent;
 use App\Models\User\NewDealerUser;

@@ -6,6 +6,7 @@ use App\Exceptions\CRM\Text\CustomerLandlineNumberException;
 use App\Exceptions\CRM\Text\NoCampaignSmsFromNumberException;
 use App\Exceptions\CRM\Text\NoLeadsProcessCampaignException;
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Text\Campaign;
 use App\Models\CRM\Text\CampaignSent;
 use App\Models\User\NewDealerUser;
