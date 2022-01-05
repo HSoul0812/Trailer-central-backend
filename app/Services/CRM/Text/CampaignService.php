@@ -5,7 +5,9 @@ namespace App\Services\CRM\Text;
 use App\Exceptions\CRM\Text\CustomerLandlineNumberException;
 use App\Exceptions\CRM\Text\NoCampaignSmsFromNumberException;
 use App\Exceptions\CRM\Text\NoLeadsProcessCampaignException;
+use App\Models\CRM\Interactions\TextLog;
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Text\Campaign;
 use App\Models\CRM\Text\CampaignSent;
 use App\Models\User\NewDealerUser;
@@ -244,7 +246,7 @@ class CampaignService implements CampaignServiceInterface
         // Mark Campaign as Sent to Lead
         try {
             return $this->campaigns->sent([
-                'text_blast_id' => $campaign->id,
+                'text_campaign_id' => $campaign->id,
                 'lead_id' => $lead->identifier,
                 'text_id' => !empty($textLog->id) ? $textLog->id : 0,
                 'status' => $status

@@ -5,7 +5,9 @@ namespace App\Services\CRM\Text;
 use App\Exceptions\CRM\Text\CustomerLandlineNumberException;
 use App\Exceptions\CRM\Text\NoBlastSmsFromNumberException;
 use App\Exceptions\CRM\Text\NoLeadsDeliverBlastException;
+use App\Models\CRM\Interactions\TextLog;
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Text\Blast;
 use App\Models\CRM\Text\BlastSent;
 use App\Models\User\NewDealerUser;
@@ -187,7 +189,7 @@ class BlastService implements BlastServiceInterface
             // Save Text to DB
             $textLog = $this->saveText($from_number, $lead, $textMessage);
             if(!empty($textLog->id)) {
-                $status = CampaignSent::STATUS_LOGGED;
+                $status = BlastSent::STATUS_LOGGED;
             }
         } catch (CustomerLandlineNumberException $ex) {
             $status = BlastSent::STATUS_LANDLINE;
