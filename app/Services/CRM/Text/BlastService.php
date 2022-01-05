@@ -189,7 +189,7 @@ class BlastService implements BlastServiceInterface
             // Save Text to DB
             $textLog = $this->saveText($from_number, $lead, $textMessage);
             if(!empty($textLog->id)) {
-                $status = CampaignSent::STATUS_LOGGED;
+                $status = BlastSent::STATUS_LOGGED;
             }
         } catch (CustomerLandlineNumberException $ex) {
             $status = BlastSent::STATUS_LANDLINE;
