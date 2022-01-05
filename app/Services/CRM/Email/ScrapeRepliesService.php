@@ -151,15 +151,18 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             // Try Catching Error for Sales Person
             try {
                 // Import Emails
-                $this->log->info('Importing Emails on Sales Person #' . $salesperson->id .
-                                    ' for Dealer #' . $dealer->id);
+                $this->log->info('Dealer #' . $dealer->id . ', Sales Person #' .
+                                    $salesperson->id . ' - Starting Importing Email');
                 $imports = $this->salesperson($dealer, $salesperson);
 
                 // Adjust Total Import Counts
-                $this->log->info('Imported ' . $imports . ' Emails on Sales Person #' . $salesperson->id);
+                $this->log->info('Dealer #' . $dealer->id . ', Sales Person #' .
+                                    $salesperson->id . ' - Finished Importing ' . $imports . ' Emails');
                 $imported += $imports;
             } catch(\Exception $e) {
-                $this->log->error('Exception returned on Sales Person #' . $salesperson->id . ': ' . $e->getMessage());
+                $this->log->error('Dealer #' . $dealer->id . ' Sales Person #' .
+                                    $salesperson->id . ' - Exception returned: ' .
+                                    $e->getMessage() . PHP_EOL . $e->getTraceAsString());
             }
         }
 
@@ -178,25 +181,28 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         // Token Exists?
         if(!empty($salesperson->active_token)) {
             // Refresh Token
-            $this->log->info('Validating token #' . $salesperson->active_token->id);
+            $this->log->info('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
+                                ' - Validating token #' . $salesperson->active_token->id);
             $this->auth->validate($salesperson->active_token);
         }
 
         // Process Messages
-        $this->log->info('Processing Getting Emails for Sales Person #' . $salesperson->id);
+        $this->log->info('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
+                            ' - Processing Getting Emails');
         $imported = 0;
         foreach($salesperson->email_folders as $folder) {
             // Try Catching Error for Sales Person Folder
             try {
                 // Import Folder
                 $imports = $this->folder($dealer, $salesperson, $folder);
-                $this->log->info('Imported ' . $imports . ' Email Replies for Sales Person #' .
-                            $salesperson->id . ' Folder ' . $folder->name);
+                $this->log->info('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
+                                    ' - Finished Importing ' . $imports .
+                                    ' Replies for Folder' . $folder->name);
                 $imported += $imports;
             } catch(\Exception $e) {
-                $this->log->error('Error Importing Sales Person #' .
-                            $salesperson->id . ' Folder ' . $folder->name . '; ' .
-                            $e->getMessage() . ':' . $e->getTraceAsString());
+                $this->log->error('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
+                                    ' - Error Importing Folder ' . $folder->name . ': ' .
+                                    $e->getMessage() . PHP_EOL . $e->getTraceAsString());
             }
         }
 
@@ -237,8 +243,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         }
 
         // Return Nothing
-        $this->log->error('Failed to Connect to Sales Person #' . $salesperson->id .
-                    ' Folder ' . $folder->name . '; exception returned: ' . $e->getMessage());
+        $this->log->error('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
+                            ' - Failed to Connect to Folder ' . $folder->name .
+                            ': ' . $e->getMessage() . PHP_EOL . $e->getTraceAsString());
         return 0;
     }
 
@@ -253,7 +260,8 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      */
     private function importGmail(int $dealerId, SalesPerson $salesperson, EmailFolder $emailFolder): int {
         // Get Emails From Gmail
-        $this->log->info("Connecting to Gmail with email: " . $salesperson->smtp_email);
+        $this->log->info('Dealer #' . $dealerId . ', Sales Person #' . $salesperson->id . 
+                            ' - Connecting to Gmail with Email: ' . $salesperson->smtp_email);
         $messages = $this->gmail->messages($salesperson->active_token, $emailFolder->name, [
             'after' => Carbon::parse($emailFolder->date_imported)->isoFormat('YYYY/M/D')
         ]);
@@ -272,12 +280,13 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             } elseif($result === self::IMPORT_PROCESSED) {
                 $skipped++;
             }
-            $this->deleteAttachments($email->getAttachments());
+            $this->deleteAttachments($dealerId, $salesperson->id, $email->getAttachments());
         }
 
         // Process Skipped Message ID's
         if(!empty($skipped)) {
-            $this->log->info("Processed " . $skipped . " emails that were skipped and not imported.");
+            $this->log->info('Dealer #' . $dealerId . ', Sales Person #' . $salesperson->id . 
+                                ' - Processed ' . $skipped . ' emails that were skipped and not imported.');
         }
 
         // Updated Successful
@@ -297,7 +306,8 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      */
     private function importOffice(int $dealerId, SalesPerson $salesperson, EmailFolder $emailFolder): int {
         // Get Emails From Gmail
-        $this->log->info("Connecting to Office 365 with email: " . $salesperson->smtp_email);
+        $this->log->info('Dealer #' . $dealerId . ', Sales Person #' . $salesperson->id . 
+                                ' - Connecting to Office 365 with Email: ' . $salesperson->smtp_email);
         $messages = $this->office->messages($salesperson->active_token, $emailFolder->name, [
             'SentDateTime ge ' . Carbon::parse($emailFolder->date_imported)->isoFormat('YYYY-MM-DD')
         ]);
@@ -320,7 +330,8 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
         // Process Skipped Message ID's
         if(!empty($skipped)) {
-            $this->log->info("Processed " . $skipped . " emails that were skipped and not imported.");
+            $this->log->info('Dealer #' . $dealerId . ', Sales Person #' . $salesperson->id . 
+                                ' - Processed ' . $skipped . ' emails that were skipped and not imported.');
         }
 
         // Updated Successful
@@ -340,6 +351,8 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      */
     private function importImap(int $dealerId, SalesPerson $salesperson, EmailFolder $emailFolder): int {
         // Get Emails From IMAP
+        $this->log->info('Dealer #' . $dealerId . ', Sales Person #' . $salesperson->id . 
+                                ' - Connecting to Office 365 with Email: ' . $salesperson->imap_email);
         $imapConfig = ImapConfig::fillFromSalesPerson($salesperson, $emailFolder);
         $messages = $this->imap->messages($imapConfig);
         $folder = $this->updateFolder($salesperson, $emailFolder);
@@ -362,7 +375,8 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
         // Process Skipped Message ID's
         if(!empty($skipped)) {
-            $this->log->info('Processed ' . $skipped . ' emails that were skipped and not imported.');
+            $this->log->info('Dealer #' . $dealerId . ', Sales Person #' . $salesperson->id . 
+                                ' - Processed ' . $skipped . ' emails that were skipped and not imported.');
         }
 
         // Updated Successful
@@ -446,7 +460,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      */
     private function findLead(int $dealerId, SalesPerson $salesperson, ParsedEmail $email): ParsedEmail {
         // Lookup Lead
-        $this->log->info('Lookup lead for dealer #' . $dealerId . ' and sales person: ' . $salesperson->imap_email);
+        $this->log->info('Dealer #' . $dealerId . ', Sales Person #' . $salesperson->id . 
+                            ' - Looking Up Lead for Email From ' . $email->getFromEmail() .
+                            ' To ' . $email->getToEmail());
 
         // Get Emails
         $emails = [];
@@ -563,7 +579,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                     'original_filename' => $file->getFileName()
                 ]);
             } catch(\Exception $e) {
-                $this->log->error("Exception returned uploading attachment {$file->getFileName()} on Message ID #{$messageId}; {$e->getMessage()}: {$e->getTraceAsString()}");
+                $this->log->error('Dealer #' . $dealerId . ', Message ID #' . $messageId .
+                                    ' - Failed to upload attachment ' . $file->getFileName() . 
+                                    ': ' . $e->getMessage() . PHP_EOL . $e->getTraceAsString());
             }
         }
 
@@ -607,9 +625,12 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     /**
      * Delete Temporary Attachment Files
      * 
+     * @param int $dealerId
+     * @param int $salesPersonId
      * @param array $files
+     * @return int
      */
-    private function deleteAttachments($files) {
+    private function deleteAttachments(int $dealerId, int $salesPersonId, array $files): int {
         // Loop All Attachments
         $deleted = 0;
         if(!empty($files) && count($files) > 0) {
@@ -624,7 +645,8 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
         // Deleted Some Replies?
         if($deleted > 0) {
-            $this->log->info('Deleted ' . $deleted . ' Total Temporary Attachment Files');
+            $this->log->info('Dealer #' . $dealerId . ', Sales Person ID #' . $salesPersonId . 
+                                ' - Deleted ' . $deleted . ' Total Temporary Attachment Files');
         }
 
         // Return Total
