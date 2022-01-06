@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\v1\Marketing\Facebook;
 
-use App\Http\Controllers\RestfulController;
+use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\Marketing\Facebook\ShowPagetabRequest;
 use App\Http\Requests\Marketing\Facebook\GetPagetabRequest;
 use App\Http\Requests\Marketing\Facebook\CreatePagetabRequest;
@@ -12,7 +12,7 @@ use App\Repositories\Integration\Facebook\PageRepositoryInterface;
 use App\Transformers\Integration\Facebook\PageTransformer;
 use Dingo\Api\Http\Request;
 
-class PagetabController extends RestfulController
+class PagetabController extends RestfulControllerV2
 {
     /**
      * @var PageRepositoryInterface
@@ -64,7 +64,7 @@ class PagetabController extends RestfulController
      * @param Request $request
      * @return type
      */
-    public function show(int $id, Request $request)
+    public function show(int $id)
     {
         // Handle Facebook Page Request
         $requestData = $request->all();
