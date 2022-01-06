@@ -1189,7 +1189,7 @@ $api->version('v1', function ($route) {
         // Facebook Marketplace
         $route->group([
             'prefix' => 'pagetab',
-            'middleware' => 'marketing.facebook.tab'
+            'middleware' => 'marketing.facebook.pagetab'
         ], function ($route) {
             $route->get('/', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@index');
             $route->post('/', 'App\Http\Controllers\v1\Marketing\PagetabController@create');
