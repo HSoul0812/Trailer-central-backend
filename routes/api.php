@@ -1172,4 +1172,31 @@ $api->version('v1', function ($route) {
     $route->put('bills/{id}', 'App\Http\Controllers\v1\Dms\Quickbooks\BillController@update')->where('id', '[0-9]+');
     $route->get('bills/{id}', 'App\Http\Controllers\v1\Dms\Quickbooks\BillController@show')->where('id', '[0-9]+');
     $route->get('bills', 'App\Http\Controllers\v1\Dms\Quickbooks\BillController@index');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Marketing
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+    $route->group([
+        'prefix' => 'marketing',
+        'middleware' => 'accesstoken.validate'
+    ], function ($route) {
+        // Facebook Marketplace
+        $route->group([
+            'prefix' => 'pagetab',
+            'middleware' => 'marketing.facebook.tab'
+        ], function ($route) {
+            $route->get('/', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@index');
+            $route->post('/', 'App\Http\Controllers\v1\Marketing\PagetabController@create');
+            $route->put('/', 'App\Http\Controllers\v1\Marketing\PagetabController@update'); // requires page_id instead
+            $route->get('{id}', 'App\Http\Controllers\v1\Marketing\PagetabController@show')->where('id', '[0-9]+');
+            $route->put('{id}', 'App\Http\Controllers\v1\Marketing\PagetabController@update')->where('id', '[0-9]+');
+            $route->delete('{id}', 'App\Http\Controllers\v1\Marketing\PagetabController@destroy')->where('id', '[0-9]+');
+        });
+    });
 });

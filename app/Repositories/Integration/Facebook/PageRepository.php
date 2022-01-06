@@ -134,10 +134,6 @@ class PageRepository implements PageRepositoryInterface {
             $query = $query->where('user_id', $params['user_id']);
         }
 
-        if (isset($params['page_id'])) {
-            $query = $query->where('page_id', $params['page_id']);
-        }
-
         if (isset($params['id'])) {
             $query = $query->whereIn('id', $params['id']);
         }
