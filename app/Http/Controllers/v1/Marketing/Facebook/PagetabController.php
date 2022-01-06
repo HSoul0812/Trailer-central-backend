@@ -72,7 +72,7 @@ class PagetabController extends RestfulControllerV2
         $request = new ShowPagetabRequest($requestData);
         if ($request->validate()) {
             // Return Auth
-            return $this->response->array($this->repository->get($request->all()));
+            return $this->response->item($this->repository->get($request->all()), $this->transformer);
         }
         
         return $this->response->errorBadRequest();
@@ -90,7 +90,7 @@ class PagetabController extends RestfulControllerV2
         $request = new CreatePagetabRequest($request->all());
         if ($request->validate()) {
             // Return Auth
-            return $this->response->array($this->repository->get($request->all()));
+            return $this->response->item($this->repository->get($request->all()), $this->transformer);
         }
         
         return $this->response->errorBadRequest();
@@ -113,7 +113,7 @@ class PagetabController extends RestfulControllerV2
         $request = new UpdatePagetabRequest($requestData);
         if ($request->validate()) {
             // Return Auth
-            return $this->response->array($this->repository->update($request->all()));
+            return $this->response->item($this->repository->update($request->all()), $this->transformer);
         }
         
         return $this->response->errorBadRequest();
