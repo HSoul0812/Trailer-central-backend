@@ -64,7 +64,7 @@ class PagetabController extends RestfulControllerV2
      * @param Request $request
      * @return type
      */
-    public function show(int $id)
+    public function show(int $id, Request $request)
     {
         // Handle Facebook Page Request
         $requestData = $request->all();
