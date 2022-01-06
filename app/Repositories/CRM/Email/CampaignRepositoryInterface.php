@@ -8,7 +8,7 @@ use App\Repositories\Repository;
 interface CampaignRepositoryInterface extends Repository {
     /**
      * Mark Campaign as Sent
-     * 
+     *
      * @param int $campaignId
      * @param int $leadId
      * @param null|string $messageId = null
@@ -19,18 +19,19 @@ interface CampaignRepositoryInterface extends Repository {
 
     /**
      * Update Sent Campaign
-     * 
+     *
      * @param int $campaignId
      * @param int $leadId
      * @param string $messageId
-     * @throws \Exception
+     * @param int $emailHistoryId
      * @return CampaignSent
+     * @throws \Exception
      */
-    public function updateSent(int $campaignId, int $leadId, string $messageId): CampaignSent;
+    public function updateSent(int $campaignId, int $leadId, string $messageId, int $emailHistoryId): CampaignSent;
 
     /**
      * Was Campaign Already Sent?
-     * 
+     *
      * @param int $campaignId
      * @param string $email
      * @return bool
@@ -39,7 +40,7 @@ interface CampaignRepositoryInterface extends Repository {
 
     /**
      * Get Campaign Sent Entry for Lead
-     * 
+     *
      * @param int $campaignId
      * @param int $leadId
      * @return null|CampaignSent
@@ -48,7 +49,7 @@ interface CampaignRepositoryInterface extends Repository {
 
     /**
      * Was Campaign Already Sent to Lead?
-     * 
+     *
      * @param int $campaignId
      * @param int $leadId
      * @return bool

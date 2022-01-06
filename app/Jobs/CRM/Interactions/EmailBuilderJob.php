@@ -17,7 +17,7 @@ use Illuminate\Queue\SerializesModels;
  * @package App\Jobs\CRM\Interactions
  */
 class EmailBuilderJob extends Job
-{ 
+{
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
