@@ -33,7 +33,7 @@ class CampaignRepository implements CampaignRepositoryInterface {
 
     /**
      * Mark Campaign as Sent
-     * 
+     *
      * @param int $campaignId
      * @param int $leadId
      * @param null|string $messageId = null
@@ -62,47 +62,45 @@ class CampaignRepository implements CampaignRepositoryInterface {
             DB::rollBack();
             throw new \Exception($ex->getMessage());
         }
-        
+
         return $sent;
     }
 
     /**
      * Update Sent Campaign
-     * 
+     *
      * @param int $campaignId
      * @param int $leadId
-     * @param string $messageId
-     * @throws \Exception
+     * @param string|null $messageId
+     * @param int $emailHistoryId
      * @return CampaignSent
+     * @throws \Exception
      */
-    public function updateSent(int $campaignId, int $leadId, string $messageId): CampaignSent {
+    public function updateSent(int $campaignId, int $leadId, ?string $messageId, int $emailHistoryId): CampaignSent {
         // Get Campaign Sent Entry
         $sent = CampaignSent::where('drip_campaigns_id', $campaignId)->where('lead_id', $leadId)->first();
         if(empty($sent->drip_campaigns_id)) {
             return $this->sent($campaignId, $leadId, $messageId);
         }
 
-        DB::beginTransaction();
+        $params = ['crm_email_history_id' => $emailHistoryId];
 
-        try {
-            // Update Message ID
-            $sent->fill(['message_id' => $messageId]);
-
-            // Save Campaign Sent
-            $sent->save();
-
-            DB::commit();
-        } catch (\Exception $ex) {
-            DB::rollBack();
-            throw new \Exception($ex->getMessage());
+        if ($messageId) {
+            $params['message_id'] = $messageId;
         }
-        
+
+        // Update Message ID
+        $sent->fill($params);
+
+        // Save Campaign Sent
+        $sent->save();
+
         return $sent;
     }
 
     /**
      * Was Campaign Already Sent?
-     * 
+     *
      * @param int $campaignId
      * @param string $email
      * @return bool
@@ -120,7 +118,7 @@ class CampaignRepository implements CampaignRepositoryInterface {
 
     /**
      * Get Campaign Sent Entry for Lead
-     * 
+     *
      * @param int $campaignId
      * @param int $leadId
      * @return null|CampaignSent
@@ -132,7 +130,7 @@ class CampaignRepository implements CampaignRepositoryInterface {
 
     /**
      * Was Campaign Already Sent to Lead?
-     * 
+     *
      * @param int $campaignId
      * @param int $leadId
      * @return bool

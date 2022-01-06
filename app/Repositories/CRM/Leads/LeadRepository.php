@@ -44,11 +44,11 @@ class LeadRepository implements LeadRepositoryInterface {
             'direction' => 'DESC'
         ],
         '-most_recent' => [
-            'field' => 'crm_interaction.interaction_time',
+            'field' => 'MIN(crm_interaction.interaction_time)',
             'direction' => 'ASC'
         ],
         'most_recent' => [
-            'field' => 'crm_interaction.interaction_time',
+            'field' => 'MAX(crm_interaction.interaction_time)',
             'direction' => 'DESC'
         ],
         'status' => [
@@ -111,8 +111,8 @@ class LeadRepository implements LeadRepositoryInterface {
         }
 
         if (isset($params['sort'])) {
-            $query = $this->joinInteraction($query);
-            $query = $query->orderBy($this->sortOrders[$params['sort']]['field'], $this->sortOrders[$params['sort']]['direction']);
+            $query = $query->leftJoin(Interaction::getTableName(), Interaction::getTableName().'.tc_lead_id',  '=', Lead::getTableName().'.identifier');
+            $query = $query->orderByRaw($this->sortOrders[$params['sort']]['field'] . ' ' . $this->sortOrders[$params['sort']]['direction']);
         }
 
         $query = $query->groupBy(Lead::getTableName().'.identifier');
@@ -155,7 +155,7 @@ class LeadRepository implements LeadRepositoryInterface {
 
         if (isset($params['sort'])) {
             $query = $query->leftJoin(Interaction::getTableName(), Interaction::getTableName() . '.tc_lead_id',  '=', Lead::getTableName() . '.identifier');
-            $query = $query->orderBy($this->sortOrders[$params['sort']]['field'], $this->sortOrders[$params['sort']]['direction']);
+            $query = $query->orderByRaw($this->sortOrders[$params['sort']]['field'] . ' ' . $this->sortOrders[$params['sort']]['direction']);
         }
 
         $query = $query->groupBy(Lead::getTableName() . '.identifier');
