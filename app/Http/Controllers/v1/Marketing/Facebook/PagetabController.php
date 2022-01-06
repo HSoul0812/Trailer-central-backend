@@ -72,7 +72,7 @@ class PagetabController extends RestfulControllerV2
         $request = new ShowPagetabRequest($requestData);
         if ($request->validate()) {
             // Return Auth
-            return $this->response->array($this->repository->show($request->all()));
+            return $this->response->array($this->repository->get($request->all()));
         }
         
         return $this->response->errorBadRequest();
