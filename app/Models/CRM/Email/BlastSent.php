@@ -21,7 +21,7 @@ class BlastSent extends Model
 
     /**
      * Composite Primary Key
-     * 
+     *
      * @var array<string>
      */
     protected $primaryKey = ['email_blasts_id', 'lead_id'];
@@ -48,6 +48,7 @@ class BlastSent extends Model
     protected $fillable = [
         'email_blasts_id',
         'lead_id',
-        'message_id'
+        'message_id',
+        'crm_email_history_id',
     ];
 }

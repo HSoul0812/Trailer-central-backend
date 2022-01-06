@@ -91,10 +91,11 @@ class BlastRepository implements BlastRepositoryInterface {
     }
 
     public function getAll($params) {
-        $query = Blast::where('deleted', '=', 0);
+        $query = Blast::where('deleted', '=', 0)->with('template')
+                      ->with('brands')->with('categories');
         
         if (!isset($params['per_page'])) {
-            $params['per_page'] = 100;
+            $params['per_page'] = 20;
         }
 
         if (isset($params['user_id'])) {
@@ -123,11 +124,6 @@ class BlastRepository implements BlastRepositoryInterface {
 
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
-        }
-
-        // Return All?
-        if($params['per_page'] === 'all') {
-            return $query->get();
         }
         
         return $query->paginate($params['per_page'])->appends($params);
