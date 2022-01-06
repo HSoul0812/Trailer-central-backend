@@ -34,4 +34,8 @@ return [
     'here' => [
         'key' => env('HERE_API_KEY', ''),
     ],
+
+    'trailercentral' => [
+        'api' => env('TC_API_URL', 'https://trailertrader-staging.trailercentral.com/api/'),
+    ],
 ];

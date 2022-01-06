@@ -22,6 +22,8 @@ use App\Services\Integrations\TrailerCentral\Console\Leads\LogService as LeadLog
 use App\Services\Integrations\TrailerCentral\Console\Leads\LogServiceInterface as LeadLogServiceInterface;
 use App\Services\Integrations\TrailerCentral\Console\Leads\SyncService as LeadSyncService;
 use App\Services\Integrations\TrailerCentral\Console\Leads\SyncServiceInterface as LeadSyncServiceInterface;
+use App\Services\Inventory\InventoryService;
+use App\Services\Inventory\InventoryServiceInterface;
 use App\Services\MapSearchService\HereMapSearchService;
 use Illuminate\Support\ServiceProvider;
 
@@ -36,6 +38,7 @@ class TrailerCentralIntegrationServiceProvider extends ServiceProvider
         $this->app->bind(InventorySyncServiceInterface::class, InventorySyncService::class);
         $this->app->bind(InventoryLogRepositoryInterface::class, InventoryLogRepository::class);
         $this->app->bind(InventoryLogServiceInterface::class, InventoryLogService::class);
+        $this->app->bind(InventoryServiceInterface::class, InventoryService::class);
 
         $this->app->bind(TypeRepositoryInterface::class, TypeRepository::class);
 
