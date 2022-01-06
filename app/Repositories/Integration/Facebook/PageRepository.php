@@ -152,7 +152,11 @@ class PageRepository implements PageRepositoryInterface {
      * @return Page
      */
     public function update($params) {
-        $page = Page::findOrFail($params['id']);
+        if(!empty($params['id'])) {
+            $page = Page::findOrFail($params['id']);
+        } else {
+            $page = Page::where('page_id', $params['page_id'])->firstOrFail();
+        }
 
         DB::transaction(function() use (&$page, $params) {
             // Page Title Exists?
