@@ -11,6 +11,7 @@ use League\Fractal\TransformerAbstract;
 use App\Models\Inventory\Inventory;
 use App\Transformers\User\UserTransformer;
 use App\Transformers\User\DealerLocationTransformer;
+use App\Transformers\Inventory\FeatureTransformer;
 use App\Transformers\Website\WebsiteTransformer;
 use League\Fractal\Resource\Collection as FractalCollection;
 
@@ -99,6 +100,7 @@ class InventoryTransformer extends TransformerAbstract
              'fp_interest_paid' => $inventory->interest_paid,
              'fp_committed' => $inventory->fp_committed,
              'gvwr' => $inventory->gvwr,
+             'axle_capacity' => $inventory->axle_capacity,
              'height' => $inventory->height,
              'images' => $this->transformImages($inventory->inventoryImages),
              'files' => $this->transformFiles($inventory->files),
