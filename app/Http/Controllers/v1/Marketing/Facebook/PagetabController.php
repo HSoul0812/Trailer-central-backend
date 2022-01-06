@@ -90,7 +90,7 @@ class PagetabController extends RestfulControllerV2
         $request = new CreatePagetabRequest($request->all());
         if ($request->validate()) {
             // Return Auth
-            return $this->response->item($this->repository->get($request->all()), $this->transformer);
+            return $this->response->item($this->repository->create($request->all()), $this->transformer);
         }
         
         return $this->response->errorBadRequest();
