@@ -1192,11 +1192,11 @@ $api->version('v1', function ($route) {
             'middleware' => 'marketing.facebook.pagetab'
         ], function ($route) {
             $route->get('/', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@index');
-            $route->post('/', 'App\Http\Controllers\v1\Marketing\PagetabController@create');
-            $route->put('/', 'App\Http\Controllers\v1\Marketing\PagetabController@update'); // requires page_id instead
-            $route->get('{id}', 'App\Http\Controllers\v1\Marketing\PagetabController@show')->where('id', '[0-9]+');
-            $route->put('{id}', 'App\Http\Controllers\v1\Marketing\PagetabController@update')->where('id', '[0-9]+');
-            $route->delete('{id}', 'App\Http\Controllers\v1\Marketing\PagetabController@destroy')->where('id', '[0-9]+');
+            $route->post('/', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@create');
+            $route->put('/', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@update'); // requires page_id instead
+            $route->get('{id}', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@show')->where('id', '[0-9]+');
+            $route->put('{id}', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@update')->where('id', '[0-9]+');
+            $route->delete('{id}', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@destroy')->where('id', '[0-9]+');
         });
     });
 });
