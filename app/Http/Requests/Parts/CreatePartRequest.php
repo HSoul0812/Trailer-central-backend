@@ -46,9 +46,9 @@ class CreatePartRequest extends Request {
         'images.*.url' => 'url',
         'images.*.position' => 'integer',
         'bins' => 'array',
-        'bins.*.bin_id' => 'integer',
-        'bins.*.quantity' => 'integer',
-        'bins.*.old_quantity' => 'integer',
+        'bins.*.bin_id' => 'required|integer',
+        'bins.*.quantity' => 'required|numeric',
+        'bins.*.old_quantity' => 'numeric',
         'is_sublet_specific' => 'integer'
     ];
 

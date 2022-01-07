@@ -60,6 +60,8 @@ return [
 
     'new_design_crm_url' => env('NEW_DESIGN_CRM_URL', 'https://design-prod.crm.trailercentral.com/'),
 
+    'crm_url' => env('CRM_URL', 'https://crm.trailercentral.com/'),
+
     'user_master_password' => env('USER_MASTER_PASSWORD'),
 
     /*
