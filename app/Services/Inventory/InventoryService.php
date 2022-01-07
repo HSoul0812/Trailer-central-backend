@@ -45,7 +45,7 @@ class InventoryService implements InventoryServiceInterface
             \Log::info('Exception was thrown while calling here API.');
             \Log::info($e->getCode() . ': ' . $e->getMessage());
 
-            throw new HttpException(500, $e->getMessage());
+            throw new HttpException(422, $e->getMessage());
         }
     }
 }
