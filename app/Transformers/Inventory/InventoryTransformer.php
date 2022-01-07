@@ -85,6 +85,7 @@ class InventoryTransformer extends TransformerAbstract
              'identifier' => $inventory->identifier,
              'active' => $inventory->active,
              'archived_at' => $inventory->archived_at,
+             'payload_capacity' => $inventory->payload_capacity,
              'availability' => $inventory->availability,
              'bill_id' => $inventory->bill_id,
              'brand' => $inventory->brand,
