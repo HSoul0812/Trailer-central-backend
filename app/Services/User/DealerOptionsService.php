@@ -8,14 +8,19 @@ use App\Models\User\NewUser;
 use App\Models\User\User;
 use App\Repositories\CRM\User\CrmUserRepositoryInterface;
 use App\Repositories\CRM\User\CrmUserRoleRepositoryInterface;
-use App\Repositories\Repository;
+use App\Repositories\User\DealerPartRepositoryInterface;
 use App\Repositories\User\NewDealerUserRepositoryInterface;
 use App\Repositories\User\NewUserRepositoryInterface;
 use App\Repositories\User\UserRepositoryInterface;
+use App\Exceptions\Nova\Actions\Dealer\EcommerceActivationException;
+use App\Exceptions\Nova\Actions\Dealer\EcommerceDeactivationException;
+use App\Repositories\Repository;
+use App\Repositories\Website\Config\WebsiteConfigRepository;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Repositories\Website\EntityRepositoryInterface as WebsiteEntityRepositoryInterface;
 use App\Repositories\Website\WebsiteRepositoryInterface;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 /**
  * Class DealerOptionsService
@@ -23,6 +28,7 @@ use Illuminate\Support\Facades\Log;
  */
 class DealerOptionsService implements DealerOptionsServiceInterface
 {
+    private const ECOMMERCE_KEY_ENABLE = "parts/ecommerce/enabled";
     /**
      * @var UserRepositoryInterface
      */
@@ -37,6 +43,16 @@ class DealerOptionsService implements DealerOptionsServiceInterface
      * @var CrmUserRoleRepositoryInterface
      */
     private $crmUserRoleRepository;
+    
+    /**
+     * @var WebsiteConfigRepositoryInterface
+     */
+    private $websiteConfigRepository;
+
+    /**
+     * @var DealerPartRepositoryInterface
+     */
+    private $dealerPartRepository;
 
     /**
      * @var NewDealerUserRepositoryInterface
@@ -74,6 +90,8 @@ class DealerOptionsService implements DealerOptionsServiceInterface
      * @param UserRepositoryInterface $userRepository
      * @param CrmUserRepositoryInterface $crmUserRepository
      * @param CrmUserRoleRepositoryInterface $crmUserRoleRepository
+     * @param WebsiteRepositoryInterface $websiteConfigRepository
+     * @param DealerPartRepositoryInterface $dealerPartRepositoryInterface
      * @param NewDealerUserRepositoryInterface $newDealerUserRepository
      * @param NewUserRepositoryInterface $newUserRepository
      * @param StringHelper $stringHelper
@@ -85,6 +103,8 @@ class DealerOptionsService implements DealerOptionsServiceInterface
         UserRepositoryInterface $userRepository,
         CrmUserRepositoryInterface $crmUserRepository,
         CrmUserRoleRepositoryInterface $crmUserRoleRepository,
+        WebsiteConfigRepositoryInterface $websiteConfigRepository,
+        DealerPartRepositoryInterface $dealerPartRepository,
         NewDealerUserRepositoryInterface $newDealerUserRepository,
         NewUserRepositoryInterface $newUserRepository,
         StringHelper $stringHelper,
@@ -95,6 +115,8 @@ class DealerOptionsService implements DealerOptionsServiceInterface
         $this->userRepository = $userRepository;
         $this->crmUserRepository = $crmUserRepository;
         $this->crmUserRoleRepository = $crmUserRoleRepository;
+        $this->websiteConfigRepository = $websiteConfigRepository;
+        $this->dealerPartRepository = $dealerPartRepository;
         $this->newDealerUserRepository = $newDealerUserRepository;
         $this->newUserRepository = $newUserRepository;
 
@@ -198,6 +220,98 @@ class DealerOptionsService implements DealerOptionsServiceInterface
      * @param int $dealerId
      * @return bool
      */
+    public function activateECommerce(int $dealerId): bool
+    {
+      try {
+          $user = $this->userRepository->get(['dealer_id' => $dealerId]);
+          $webiste = $user->website;
+          
+          $websiteConfigParams = [
+              'website_id' => $webiste->id,
+              'key' => self::ECOMMERCE_KEY_ENABLE
+          ];
+
+          $websiteConfigall = $this->websiteConfigRepository->getall($websiteConfigParams);
+          
+          foreach ($websiteConfigall as $key => $websiteConfig) {
+            
+            $this->websiteConfigRepository->delete(['id' => $websiteConfig->id]);
+            
+          } 
+
+          $newWebsiteConfigActiveParams = [
+            'website_id' => $webiste->id,
+            'key' => self::ECOMMERCE_KEY_ENABLE,
+            'value' => 1
+          ];
+
+          if($this->isAllowedParts($dealerId)) {
+                
+            $this->websiteConfigRepository->create($newWebsiteConfigActiveParams);
+          } else {
+            $this->activateParts($dealerId);
+            
+            $this->websiteConfigRepository->create($newWebsiteConfigActiveParams);
+          }
+          
+          Log::info('E-Commerce has been successfully deactivated', ['user_id' => $user->user_id]);
+
+          return true;
+      } catch (\Exception $e) {
+          Log::error("E-Commerce activation error. dealer_id - {$dealerId}", $e->getTrace());
+
+          throw new EcommerceActivationException;
+      }
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateECommerce(int $dealerId): bool
+    {
+      try {
+          $user = $this->userRepository->get(['dealer_id' => $dealerId]);
+          $webiste = $user->website;
+          
+          $websiteConfigParams = [
+              'website_id' => $webiste->id,
+              'key' => self::ECOMMERCE_KEY_ENABLE
+          ];
+
+          $websiteConfigall = $this->websiteConfigRepository->getall($websiteConfigParams);
+          
+          foreach ($websiteConfigall as $key => $websiteConfig) {
+            
+            $this->websiteConfigRepository->delete(['id' => $websiteConfig->id]);
+            
+          }  
+
+          Log::info('E-Commerce has been successfully deactivated', ['user_id' => $user->user_id]);
+
+          return true;
+      } catch (\Exception $e) {
+          Log::error("E-Commerce deactivation error. dealer_id - {$user}", $e->getTrace());
+
+          throw new EcommerceDeactivationException;
+      }
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function activateParts(int $dealerId): bool
+    {
+      $dealerPartsParams = [
+        'dealer_id' => $dealerId,
+        'since' => Carbon::now()->format('Y-m-d')
+      ];
+      $dealerParts = $this->dealerPartRepository->create($dealerPartsParams);
+      
+      return (bool)$dealerParts;
+    }
+
     public function activateUserAccounts(int $dealerId): bool {
         try {
             $websites = $this->websiteRepository->getAll([
@@ -275,6 +389,11 @@ class DealerOptionsService implements DealerOptionsServiceInterface
      * @param int $dealerId
      * @return bool
      */
+    public function isAllowedParts(int $dealerId): bool
+    {
+      return $this->dealerPartRepository->get(['dealer_id' => $dealerId])->exists();
+    }
+
     public function deactivateUserAccounts(int $dealerId): bool {
         try {
             $websites = $this->websiteRepository->getAll([
