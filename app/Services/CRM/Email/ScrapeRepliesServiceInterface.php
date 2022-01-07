@@ -11,9 +11,9 @@ interface ScrapeRepliesServiceInterface {
      * Process Dealer
      * 
      * @param User $dealer
-     * @return int total number of imported emails
+     * @return bool
      */
-    public function dealer(NewDealerUser $dealer): int;
+    public function dealer(NewDealerUser $dealer): bool;
 
     /**
      * Process Sales Person
