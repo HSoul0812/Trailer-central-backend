@@ -11,6 +11,7 @@ use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\Inventory\IndexInventoryRequest;
 use App\Http\Requests\UpdateRequestInterface;
 use App\Services\Inventory\InventoryServiceInterface;
+use App\Transformers\Inventory\TcApiResponseInventoryTransformer;
 use Dingo\Api\Http\Response;
 
 class InventoryController extends AbstractRestfulController
@@ -21,10 +22,11 @@ class InventoryController extends AbstractRestfulController
      * @param TypeRepositoryInterface   $type
      * @param TypesTransformerInterface $typesTransformer
      */
-    public function __construct(InventoryServiceInterface $inventoryService)
+    public function __construct(InventoryServiceInterface $inventoryService, TcApiResponseInventoryTransformer $tcApiResponseInventoryTransformer)
     {
         parent::__construct();
         $this->inventoryRepository = $inventoryService;
+        $this->transformer = $tcApiResponseInventoryTransformer;
     }
 
     /**
@@ -54,9 +56,11 @@ class InventoryController extends AbstractRestfulController
     /**
      * {@inheritDoc}
      */
-    public function show(int $id)
+    public function show(int $id): Response
     {
-        return $this->inventoryRepository->show($id);
+        $data = $this->inventoryRepository->show($id);
+
+        return $this->response->item($data, $this->transformer);
     }
 
     /**
