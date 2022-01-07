@@ -4,8 +4,9 @@ namespace App\Repositories\User;
 
 use App\Repositories\Repository;
 use App\Models\User\User;
+use App\Repositories\TransactionalRepository;
 
-interface UserRepositoryInterface extends Repository {
+interface UserRepositoryInterface extends Repository, TransactionalRepository {
 
     /**
      * @param string $email
@@ -28,23 +29,17 @@ interface UserRepositoryInterface extends Repository {
 
     /**
      * Get CRM Active Users
-     * 
+     *
      * @param array $params
      * @return Collection of NewDealerUser
      */
     public function getCrmActiveUsers($params);
-    
+
     public function setAdminPasswd($dealerId, $passwd);
 
-    public function beginTransaction(): void;
-
-    public function commitTransaction(): void;
-
-    public function rollbackTransaction(): void;
-       
     /**
      * Updates dealer auto import settings
-     * 
+     *
      * @param int $dealerId
      * @param string $defaultDescription
      * @param bool $useDescriptionInFeed
@@ -55,9 +50,9 @@ interface UserRepositoryInterface extends Repository {
      * @return User
      */
     public function updateAutoImportSettings(int $dealerId, string $defaultDescription, bool $useDescriptionInFeed, int $autoImportHide, string $importConfig, bool $autoMsrp, float $autoMsrpPercent) : User;
-    
+
     /**
-     * 
+     *
      * @param int $dealerId
      * @param bool $overlayEnabled
      * @param bool $overlay_default
@@ -79,17 +74,17 @@ interface UserRepositoryInterface extends Repository {
      * @param string $overlay_logo_src
      * @return User
      */
-    public function updateOverlaySettings(int $dealerId, 
-                                          bool $overlayEnabled = null, 
-                                          bool $overlay_default = null, 
-                                          string $overlay_logo_position = null, 
-                                          int $overlay_logo_width = null, 
-                                          int $overlay_logo_height = null, 
-                                          string $overlay_upper = null, 
-                                          string $overlay_upper_bg = null, 
-                                          int $overlay_upper_alpha = null, 
-                                          string $overlay_upper_text = null, 
-                                          int $overlay_upper_size = null, 
+    public function updateOverlaySettings(int $dealerId,
+                                          bool $overlayEnabled = null,
+                                          bool $overlay_default = null,
+                                          string $overlay_logo_position = null,
+                                          int $overlay_logo_width = null,
+                                          int $overlay_logo_height = null,
+                                          string $overlay_upper = null,
+                                          string $overlay_upper_bg = null,
+                                          int $overlay_upper_alpha = null,
+                                          string $overlay_upper_text = null,
+                                          int $overlay_upper_size = null,
                                           int $overlay_upper_margin = null,
                                           string $overlay_lower = null,
                                           string $overlay_lower_bg = null,
@@ -101,7 +96,7 @@ interface UserRepositoryInterface extends Repository {
 
     /**
      * Check admin password
-     * 
+     *
      * @param int $dealerId
      * @param string $password
      */

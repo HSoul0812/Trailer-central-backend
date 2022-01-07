@@ -4,12 +4,13 @@ namespace App\Repositories\User;
 
 use App\Models\User\DealerLocation;
 use App\Repositories\Repository;
+use App\Repositories\TransactionalRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use InvalidArgumentException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
-interface DealerLocationRepositoryInterface extends Repository
+interface DealerLocationRepositoryInterface extends Repository, TransactionalRepository
 {
     public const DEFAULT_GET_PARAMS = [
         self::CONDITION_AND_WHERE => [
@@ -100,12 +101,6 @@ interface DealerLocationRepositoryInterface extends Repository
      * @throws InvalidArgumentException when `dealer_location_id` has not been provided
      */
     public function update($params): bool;
-
-    public function beginTransaction(): void;
-
-    public function commitTransaction(): void;
-
-    public function rollbackTransaction(): void;
 
     /**
      * @param string $name
