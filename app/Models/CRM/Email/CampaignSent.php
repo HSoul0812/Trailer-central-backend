@@ -21,7 +21,7 @@ class CampaignSent extends Model
 
     /**
      * Composite Primary Key
-     * 
+     *
      * @var array<string>
      */
     protected $primaryKey = ['drip_campaigns_id', 'lead_id'];
@@ -48,6 +48,7 @@ class CampaignSent extends Model
     protected $fillable = [
         'drip_campaigns_id',
         'lead_id',
-        'message_id'
+        'message_id',
+        'crm_email_history_id',
     ];
 }
