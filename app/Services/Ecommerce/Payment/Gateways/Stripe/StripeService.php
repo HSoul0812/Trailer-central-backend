@@ -11,6 +11,7 @@ use Brick\Money\Money;
 use GuzzleHttp\Exception\ClientException;
 use Stripe\Exception\ApiErrorException;
 use Stripe\StripeClient;
+use Stripe\PaymentIntent;
 use Stripe\StripeClientInterface;
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
 
@@ -122,7 +123,7 @@ class StripeService implements PaymentGatewayServiceInterface
         }
     }
 
-    public function retrievePaymentIntent(array $params): array
+    public function retrievePaymentIntent(array $params): PaymentIntent
     {
         try {
             $intent = $this->client->paymentIntents->retrieve($params['payment_intent']);
@@ -137,6 +138,6 @@ class StripeService implements PaymentGatewayServiceInterface
     {
         $intent = $this->retrievePaymentIntent($params);
 
-        return $intent['status'] == self::PAYMENT_INTENT_SUCCEEDED;
+        return $intent->status == self::PAYMENT_INTENT_SUCCEEDED;
     }
 }
