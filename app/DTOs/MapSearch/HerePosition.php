@@ -6,7 +6,7 @@ namespace App\DTOs\MapSearch;
 
 use JetBrains\PhpStorm\Pure;
 
-class HereApiPosition
+class HerePosition
 {
     public float $lat;
     public float $lng;

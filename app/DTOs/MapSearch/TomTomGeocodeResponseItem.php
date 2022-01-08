@@ -6,12 +6,12 @@ namespace App\DTOs\MapSearch;
 
 use JetBrains\PhpStorm\Pure;
 
-class TomTomApiResponseItem
+class TomTomGeocodeResponseItem
 {
     public string $type;
     public ?string $entityType;
-    public TomTomApiAddress $address;
-    public ?TomTomApiPosition $position;
+    public TomTomAddress $address;
+    public ?TomTomPosition $position;
 
     #[Pure]
  public static function fromData(array $data): self
@@ -19,8 +19,8 @@ class TomTomApiResponseItem
      $obj = new self();
      $obj->type = $data['type'];
      $obj->entityType = $data['entityType'] ?? null;
-     $obj->address = TomTomApiAddress::fromData($data['address']);
-     $obj->position = isset($data['position']) ? TomTomApiPosition::fromData($data['position']) : null;
+     $obj->address = TomTomAddress::fromData($data['address']);
+     $obj->position = isset($data['position']) ? TomTomPosition::fromData($data['position']) : null;
 
      return $obj;
  }

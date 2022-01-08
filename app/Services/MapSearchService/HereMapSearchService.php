@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\MapSearchService;
 
-use App\DTOs\MapSearch\HereApiResponse;
-use App\Transformers\MapSearch\HereApiResponseTransformer;
+use App\DTOs\MapSearch\HereResponse;
+use App\Transformers\MapSearch\HereResponseTransformer;
 use GuzzleHttp\Exception\GuzzleException;
 use JetBrains\PhpStorm\ArrayShape;
 use JetBrains\PhpStorm\Pure;
@@ -30,40 +30,41 @@ class HereMapSearchService implements MapSearchServiceInterface
         });
     }
 
-    public function autocomplete(string $searchText): HereApiResponse
+    public function autocomplete(string $searchText): HereResponse
     {
         $queryData = ['q' => $searchText, 'in' => 'countryCode:CAN,USA'];
 
-        return HereApiResponse::fromData(
+        return HereResponse::fromData(
             $this->handleHttpRequest('GET', self::AUTOCOMPLETE_API_URL, ['query' => $queryData])
         );
     }
 
-    public function geocode(string $address): HereApiResponse
+    public function geocode(string $address): HereResponse
     {
         $queryData = ['q' => $address, 'in' => 'countryCode:CAN,USA'];
 
-        return HereApiResponse::fromData(
+        return HereResponse::fromData(
             $this->handleHttpRequest('GET', self::GEOCODE_API_URL, ['query' => $queryData])
         );
     }
 
-    public function reverse(float $lat, float $lng): HereApiResponse
+    public function reverse(float $lat, float $lng): HereResponse
     {
         $queryData = ['at' => "$lat,$lng", 'lang' => 'en-US'];
 
-        return HereApiResponse::fromData(
+        return HereResponse::fromData(
             $this->handleHttpRequest('GET', self::REVERSE_API_URL, ['query' => $queryData])
         );
     }
 
     /**
+     * @param string $class
      * @return TransformerAbstract
      */
     #[Pure]
-    public function getTransformer(): TransformerAbstract
+    public function getTransformer(string $class): TransformerAbstract
     {
-        return new HereApiResponseTransformer();
+        return new HereResponseTransformer();
     }
 
     /**

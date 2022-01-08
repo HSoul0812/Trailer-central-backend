@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services\MapSearchService;
 
-use App\DTOs\MapSearch\TomTomApiResponse;
-use App\Transformers\MapSearch\TomTomApiResponseTransformer;
+use App\DTOs\MapSearch\TomTomGeocodeResponse;
+use App\DTOs\MapSearch\TomTomReverseGeocodeResponse;
+use App\Transformers\MapSearch\TomTomGeocodeResponseTransformer;
+use App\Transformers\MapSearch\TomTomReverseGeocodeResponseTransformer;
 use GuzzleHttp\Exception\GuzzleException;
 use JetBrains\PhpStorm\ArrayShape;
 use JetBrains\PhpStorm\Pure;
@@ -16,9 +18,13 @@ class TomTomMapSearchService implements MapSearchServiceInterface
 {
     private const AUTOCOMPLETE_API_URL = 'https://api.tomtom.com/search/2/geocode/';
     private const REVERSE_API_URL = 'https://api.tomtom.com/search/2/reverseGeocode/';
-
+    private array $transformers;
     public function __construct(private TomTomMapSearchClient $httpClient)
     {
+        $this->transformers = [
+            TomTomGeocodeResponse::class => TomTomGeocodeResponseTransformer::class,
+            TomTomReverseGeocodeResponse::class => TomTomReverseGeocodeResponseTransformer::class
+        ];
     }
 
     public static function register()
@@ -29,10 +35,10 @@ class TomTomMapSearchService implements MapSearchServiceInterface
         });
     }
 
-    public function autocomplete(string $searchText): TomTomApiResponse
+    public function autocomplete(string $searchText): TomTomGeocodeResponse
     {
         $url = self::AUTOCOMPLETE_API_URL . $searchText . ".json";
-        return TomTomApiResponse::fromData(
+        return TomTomGeocodeResponse::fromData(
             $this->handleHttpRequest('GET', $url, [
                 'query' => [
                     'countrySet' => 'US,CA',
@@ -42,27 +48,28 @@ class TomTomMapSearchService implements MapSearchServiceInterface
         );
     }
 
-    public function geocode(string $address): TomTomApiResponse
+    public function geocode(string $address): TomTomGeocodeResponse
     {
         return $this->autocomplete($address);
     }
 
-    public function reverse(float $lat, float $lng): TomTomApiResponse
+    public function reverse(float $lat, float $lng): TomTomReverseGeocodeResponse
     {
         $url = self::REVERSE_API_URL . "$lat,$lng" . ".json";
 
-        return TomTomApiResponse::fromData(
+        return TomTomReverseGeocodeResponse::fromData(
             $this->handleHttpRequest('GET', $url, [])
         );
     }
 
     /**
-     * @return TomTomApiResponseTransformer
+     * @param string $class
+     * @return TransformerAbstract
      */
     #[Pure]
-    public function getTransformer(): TomTomApiResponseTransformer
+    public function getTransformer(string $class): TransformerAbstract
     {
-        return new TomTomApiResponseTransformer();
+        return new $this->transformers[$class];
     }
 
     /**

@@ -6,7 +6,7 @@ namespace App\DTOs\MapSearch;
 
 use JetBrains\PhpStorm\Pure;
 
-class HereApiResponse
+class HereResponse
 {
     public array $items;
 
@@ -16,7 +16,7 @@ class HereApiResponse
      $obj = new self();
      $obj->items = [];
      foreach ($data['items'] as $item) {
-         $obj->items[] = HereApiResponseItem::fromData($item);
+         $obj->items[] = HereResponseItem::fromData($item);
      }
 
      return $obj;

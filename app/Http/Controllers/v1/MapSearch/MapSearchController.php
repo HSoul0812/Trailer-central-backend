@@ -32,7 +32,7 @@ class MapSearchController extends AbstractRestfulController
         }
 
         $data = $this->mapSearchService->autocomplete($request->input('q'));
-        $transformer = $this->mapSearchService->getTransformer();
+        $transformer = $this->mapSearchService->getTransformer(get_class($data));
 
         return $this->response->item($data, $transformer);
     }
@@ -44,7 +44,7 @@ class MapSearchController extends AbstractRestfulController
         }
 
         $data = $this->mapSearchService->geocode($request->input('q'));
-        $transformer = $this->mapSearchService->getTransformer();
+        $transformer = $this->mapSearchService->getTransformer(get_class($data));
 
         return $this->response->item($data, $transformer);
     }
@@ -59,7 +59,7 @@ class MapSearchController extends AbstractRestfulController
         $lng = floatval($request->input('lng'));
 
         $data = $this->mapSearchService->reverse($lat, $lng);
-        $transformer = $this->mapSearchService->getTransformer();
+        $transformer = $this->mapSearchService->getTransformer(get_class($data));
 
         return $this->response->item($data, $transformer);
     }

@@ -6,7 +6,7 @@ namespace App\DTOs\MapSearch;
 
 use JetBrains\PhpStorm\Pure;
 
-class TomTomApiAddress
+class TomTomAddress
 {
     public ?string $streetNumber;
     public ?string $streetName;

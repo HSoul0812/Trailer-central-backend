@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Unit\App\Services\MapSearchService;
 
-use App\Services\MapSearchService\HereMapSearchClient;
 use App\Services\MapSearchService\MapSearchServiceInterface;
+use App\Services\MapSearchService\TomTomMapSearchClient;
+use App\Services\MapSearchService\TomTomMapSearchService;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
@@ -70,7 +71,7 @@ class TomTomMapSearchServiceTest extends TestCase
         $this->assertEquals('GET', $request->getMethod());
         $this->assertEquals('api.tomtom.com', $request->getUri()->getHost());
         $this->assertEquals('/search/2/geocode/test.json', $request->getUri()->getPath());
-        $this->assertEquals('countrySet=US,CA&typeahead=true&language=en-US', $request->getUri()->getQuery());
+        $this->assertEquals('countrySet=US%2CCA&typeahead=true', $request->getUri()->getQuery());
     }
 
     /**
@@ -134,7 +135,7 @@ class TomTomMapSearchServiceTest extends TestCase
         $this->assertEquals('GET', $request->getMethod());
         $this->assertEquals('api.tomtom.com', $request->getUri()->getHost());
         $this->assertEquals('/search/2/geocode/test.json', $request->getUri()->getPath());
-        $this->assertEquals('countrySet=US,CA&typeahead=true&language=en-US', $request->getUri()->getQuery());
+        $this->assertEquals('countrySet=US%2CCA&typeahead=true', $request->getUri()->getQuery());
     }
 
     public function testReverse()
@@ -184,7 +185,7 @@ class TomTomMapSearchServiceTest extends TestCase
         $this->assertEquals('GET', $request->getMethod());
         $this->assertEquals('api.tomtom.com', $request->getUri()->getHost());
         $this->assertEquals('/search/2/reverseGeocode/34.52,60.52.json', $request->getUri()->getPath());
-        $this->assertEquals('language=en-US', $request->getUri()->getQuery());
+        $this->assertEquals('', $request->getUri()->getQuery());
     }
 
     private function mockHttpClient(string $mockData, array &$historyContainer)
@@ -197,8 +198,8 @@ class TomTomMapSearchServiceTest extends TestCase
         $stack = HandlerStack::create($mock);
         $stack->push($history);
 
-        app()->bind(HereMapSearchClient::class, function ($app) use ($stack) {
-            return new HereMapSearchClient(['handler' => $stack]);
+        app()->bind(TomTomMapSearchClient::class, function ($app) use ($stack) {
+            return new TomTomMapSearchClient(['handler' => $stack]);
         });
     }
 
@@ -207,6 +208,7 @@ class TomTomMapSearchServiceTest extends TestCase
      */
     private function getConcreteService()
     {
+        app()->bind(MapSearchServiceInterface::class, TomTomMapSearchService::class);
         return app()->make(MapSearchServiceInterface::class);
     }
 }

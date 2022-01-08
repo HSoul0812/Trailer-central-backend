@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Transformers\MapSearch;
 
-use App\DTOs\MapSearch\TomTomApiResponse;
+use App\DTOs\MapSearch\TomTomGeocodeResponse;
 use JetBrains\PhpStorm\Pure;
 use League\Fractal\TransformerAbstract;
 
-class TomTomApiResponseTransformer extends TransformerAbstract
+class TomTomGeocodeResponseTransformer extends TransformerAbstract
 {
-    #[Pure] public function transform(TomTomApiResponse $response): array
+    #[Pure] public function transform(TomTomGeocodeResponse $response): array
     {
-        $itemTransformer = new TomTomApiResponseItemTransformer();
+        $itemTransformer = new TomTomGeocodeResponseItemTransformer();
         $data = [];
         foreach ($response->results as $result) {
             $data[] = $itemTransformer->transform($result);

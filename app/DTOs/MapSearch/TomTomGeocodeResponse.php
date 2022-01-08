@@ -6,7 +6,7 @@ namespace App\DTOs\MapSearch;
 
 use JetBrains\PhpStorm\Pure;
 
-class TomTomApiResponse
+class TomTomGeocodeResponse
 {
     public array $results;
 
@@ -16,7 +16,7 @@ class TomTomApiResponse
      $obj = new self();
      $obj->results = [];
      foreach ($data['results'] as $item) {
-         $obj->results[] = TomTomApiResponseItem::fromData($item);
+         $obj->results[] = TomTomGeocodeResponseItem::fromData($item);
      }
 
      return $obj;

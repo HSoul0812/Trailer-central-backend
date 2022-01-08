@@ -6,7 +6,7 @@ namespace App\DTOs\MapSearch;
 
 use JetBrains\PhpStorm\Pure;
 
-class TomTomApiPosition
+class TomTomPosition
 {
     public float $lat;
     public float $lon;
