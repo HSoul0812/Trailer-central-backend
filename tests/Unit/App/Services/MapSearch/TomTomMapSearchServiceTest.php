@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\App\Services\MapSearchService;
+namespace Tests\Unit\App\Services\MapSearch;
 
-use App\Services\MapSearchService\MapSearchServiceInterface;
-use App\Services\MapSearchService\TomTomMapSearchClient;
-use App\Services\MapSearchService\TomTomMapSearchService;
+use App\Services\MapSearch\MapSearchServiceInterface;
+use App\Services\MapSearch\TomTomMapSearchClient;
+use App\Services\MapSearch\TomTomMapSearchService;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;

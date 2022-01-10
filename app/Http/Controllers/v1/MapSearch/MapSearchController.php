@@ -12,7 +12,7 @@ use App\Http\Requests\MapService\AutocompleteRequest;
 use App\Http\Requests\MapService\GeocodeRequest;
 use App\Http\Requests\MapService\ReverseRequest;
 use App\Http\Requests\UpdateRequestInterface;
-use App\Services\MapSearchService\MapSearchServiceInterface;
+use App\Services\MapSearch\MapSearchServiceInterface;
 use Dingo\Api\Http\Response;
 
 class MapSearchController extends AbstractRestfulController
@@ -32,7 +32,7 @@ class MapSearchController extends AbstractRestfulController
         }
 
         $data = $this->mapSearchService->autocomplete($request->input('q'));
-        $transformer = $this->mapSearchService->getTransformer(get_class($data));
+        $transformer = $this->mapSearchService->getTransformer();
 
         return $this->response->item($data, $transformer);
     }
@@ -44,7 +44,7 @@ class MapSearchController extends AbstractRestfulController
         }
 
         $data = $this->mapSearchService->geocode($request->input('q'));
-        $transformer = $this->mapSearchService->getTransformer(get_class($data));
+        $transformer = $this->mapSearchService->getTransformer();
 
         return $this->response->item($data, $transformer);
     }
@@ -59,7 +59,7 @@ class MapSearchController extends AbstractRestfulController
         $lng = floatval($request->input('lng'));
 
         $data = $this->mapSearchService->reverse($lat, $lng);
-        $transformer = $this->mapSearchService->getTransformer(get_class($data));
+        $transformer = $this->mapSearchService->getTransformer();
 
         return $this->response->item($data, $transformer);
     }
