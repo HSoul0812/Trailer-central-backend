@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Transformers\MapSearch;
 
-use App\DTOs\MapSearch\HereApiResponseItem;
+use App\DTOs\MapSearch\HereResponseItem;
 use JetBrains\PhpStorm\ArrayShape;
 use League\Fractal\TransformerAbstract;
 
-class HereApiResponseItemTransformer extends TransformerAbstract
+class HereResponseItemTransformer extends TransformerAbstract
 {
     #[ArrayShape(['address' => 'array', 'position' => 'array|null'])]
-    public function transform(HereApiResponseItem $item): array
+    public function transform(HereResponseItem $item): array
     {
         $address = $item->address;
 

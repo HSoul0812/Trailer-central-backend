@@ -6,17 +6,17 @@ namespace App\DTOs\MapSearch;
 
 use JetBrains\PhpStorm\Pure;
 
-class HereApiPosition
+class TomTomPosition
 {
     public float $lat;
-    public float $lng;
+    public float $lon;
 
     #[Pure]
  public static function fromData(array $data): self
  {
      $obj = new self();
      $obj->lat = $data['lat'];
-     $obj->lng = $data['lng'];
+     $obj->lon = $data['lon'];
 
      return $obj;
  }

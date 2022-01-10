@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Transformers\MapSearch;
 
-use App\DTOs\MapSearch\HereApiResponse;
+use App\DTOs\MapSearch\HereResponse;
 use League\Fractal\TransformerAbstract;
 
-class HereApiResponseTransformer extends TransformerAbstract
+class HereResponseTransformer extends TransformerAbstract
 {
-    public function transform(HereApiResponse $response): array
+    public function transform(HereResponse $response): array
     {
-        $itemTransformer = new HereApiResponseItemTransformer();
+        $itemTransformer = new HereResponseItemTransformer();
         $data = [];
         foreach ($response->items as $item) {
             $data[] = $itemTransformer->transform($item);

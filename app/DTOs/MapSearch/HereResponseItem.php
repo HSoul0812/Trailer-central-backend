@@ -6,19 +6,19 @@ namespace App\DTOs\MapSearch;
 
 use JetBrains\PhpStorm\Pure;
 
-class HereApiResponseItem
+class HereResponseItem
 {
     public string $title;
-    public HereApiAddress $address;
-    public ?HereApiPosition $position;
+    public HereAddress $address;
+    public ?HerePosition $position;
 
     #[Pure]
  public static function fromData(array $data): self
  {
      $obj = new self();
      $obj->title = $data['title'];
-     $obj->address = HereApiAddress::fromData($data['address']);
-     $obj->position = isset($data['position']) ? HereApiPosition::fromData($data['position']) : null;
+     $obj->address = HereAddress::fromData($data['address']);
+     $obj->position = isset($data['position']) ? HerePosition::fromData($data['position']) : null;
 
      return $obj;
  }

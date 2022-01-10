@@ -6,7 +6,7 @@ namespace App\DTOs\MapSearch;
 
 use JetBrains\PhpStorm\Pure;
 
-class HereApiAddress
+class HereAddress
 {
     public string $label;
     public string $countryCode;

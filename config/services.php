@@ -34,4 +34,8 @@ return [
     'here' => [
         'key' => env('HERE_API_KEY', ''),
     ],
+
+    'tomtom' => [
+        'key' => env('TOMTOM_API_KEY', ''),
+    ]
 ];
