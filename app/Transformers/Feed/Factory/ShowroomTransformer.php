@@ -37,6 +37,16 @@ class ShowroomTransformer extends TransformerAbstract
     private $mapping;
 
     /**
+     * @var array
+     */
+    private $tcWwwLwhMapping;
+
+    /**
+     * @var array
+     */
+    private $tcWwwTypeLwh;
+
+    /**
      * ShowroomTransformer constructor.
      * @param ShowroomFieldsMappingRepositoryInterface $showroomFieldsMappingRepository
      * @param ConvertHelper $convertHelper
@@ -50,6 +60,24 @@ class ShowroomTransformer extends TransformerAbstract
         $this->showroomFieldsMappingRepository = $showroomFieldsMappingRepository;
         $this->convertHelper = $convertHelper;
         $this->request = $request;
+
+        // These 2 variables are copied from tc-www
+        $this->tcWwwLwhMapping = [
+            'length' => ['length', 'length_min_real', 'length_min'],
+            'width' => ['width', 'width_max_real', 'max_width', 'beam'],
+            'height' => ['height', 'height_max_real', 'max_height'],
+            'overall_length' => ['length_max_real', 'length_max'],
+            'min_width' => ['width_min_real', 'min_width'],
+            'min_height' => ['height_min_real', 'min_height']
+        ];
+        $this->tcWwwTypeLwh = [
+            'length' => 'length',
+            'overall_length' => 'length',
+            'width' => 'width',
+            'min_width' => 'width',
+            'height' => 'height',
+            'min_height' => 'height'
+        ];
     }
 
     /**
@@ -62,6 +90,7 @@ class ShowroomTransformer extends TransformerAbstract
     {
         $data = [];
         $showroomFilesUrl = config('app.showroom_files_url');
+        $helper = $this->convertHelper;
 
         if ($this->mapping === null) {
             $this->mapping = $this->showroomFieldsMappingRepository->getAll([]);
@@ -115,6 +144,8 @@ class ShowroomTransformer extends TransformerAbstract
                     }
                     break;
 
+                // Even though we added new code below, we don't want to remove  this code
+                // just in case some columns has measure type, this way they won't break
                 case ShowroomFieldsMapping::TYPE_MEASURE:
                     if (empty($data[$map->map_to])) {
                         $data[$map->map_to] = number_format(0, 2);
@@ -124,8 +155,6 @@ class ShowroomTransformer extends TransformerAbstract
                     }
 
                     if (!empty($value)) {
-                        $helper = $this->convertHelper;
-
                         $ftDec = $helper->fromFeetAndInches($value, ConvertHelper::DISPLAY_MODE_FEET, $map->map_to);
                         $inDec = $helper->fromFeetAndInches($value, ConvertHelper::DISPLAY_MODE_INCHES, $map->map_to);
                         $ftOnly = $helper->fromFeetAndInches($value, ConvertHelper::DISPLAY_MODE_FEET_INCHES_FEET_ONLY, $map->map_to);
@@ -141,6 +170,36 @@ class ShowroomTransformer extends TransformerAbstract
 
                 default:
                     throw new \InvalidArgumentException("Wrong showroom fields mapping type ({$map->type}). Class - " . self::class);
+            }
+        }
+
+        // We will add a measurement logic that we copied from tc-www here
+        foreach ($this->tcWwwLwhMapping as $mapTo => $columns) {
+            $type = $this->tcWwwTypeLwh[$mapTo];
+            foreach ($columns as $column) {
+                // Process this if only if the length exist in the row and if it's not empty
+                if ($showroom->{$column} !== null && !empty($showroom->{$column})) {
+                    // Convert From Feet/Inches?
+                    $v = $showroom->{$column}; // if length exists in the current row, keep it in v
+                    $ftDec = $helper->fromFeetAndInches($v, ConvertHelper::DISPLAY_MODE_FEET, $type);
+                    $inDec = $helper->fromFeetAndInches($v, ConvertHelper::DISPLAY_MODE_INCHES, $type);
+                    $ftOnly = $helper->fromFeetAndInches($v, ConvertHelper::DISPLAY_MODE_FEET_INCHES_FEET_ONLY, $type);
+                    $inOnly = $helper->fromFeetAndInches($v, ConvertHelper::DISPLAY_MODE_FEET_INCHES_INCHES_ONLY, $type);
+
+                    // Format Feet/Inches
+                    $data[$mapTo] = number_format($ftDec, 2);
+                    $data[$mapTo . '_inches'] = number_format($inDec, 2);
+                    $data[$mapTo . '_second'] = number_format($ftOnly, 0);
+                    $data[$mapTo . '_second_inches'] = number_format($inOnly, 0);
+                }
+            }
+
+            // Doesn't Exist Yet? Set to 0
+            if (empty($data[$mapTo])) {
+                $data[$mapTo] = number_format(0, 2);
+                $data[$mapTo . '_inches'] = number_format(0, 2);
+                $data[$mapTo . '_second'] = number_format(0, 0);
+                $data[$mapTo . '_second_inches'] = number_format(0, 0);
             }
         }
 
