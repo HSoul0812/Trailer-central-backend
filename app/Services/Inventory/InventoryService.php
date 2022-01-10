@@ -14,26 +14,68 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
  */
 class InventoryService implements InventoryServiceInterface
 {
-    /**
-     * @var GuzzleHttpClient
-     */
-    private $httpClient;
-
-    public function __construct(GuzzleHttpClient $httpClient)
+    public function __construct(public GuzzleHttpClient $httpClient)
     {
-        $this->httpClient = $httpClient;
+
     }
 
     /**
      * @param int $id the id of the inventory
      */
-    public function show(int $id)
+    public function show(int $id): TcApiResponseInventory 
     {
         $url = config('services.trailercentral.api') . 'inventory/' . $id . '?include=features';
         $inventory = $this->handleHttpRequest('GET', $url);
 
         return TcApiResponseInventory::fromData($inventory['data']);
     }
+
+    /**
+     * @param string $method
+     * @param string $url
+     *
+     * @return array
+     */
+    #[ArrayShape([
+        'data' => [[
+            'title'   => 'string',
+            'address' => [
+                'id'       => 'int',
+                'payload_capacity' => 'float',
+                'url' => 'string',
+                'description'   => 'string',
+                'gvwr'       => 'float',
+                'weight'      => 'float',
+                'length'        => 'float',
+                'manufacturer'    => 'string',
+                'created_at'      => 'string',
+                'price'  => 'float',
+                'sales_price'  => 'string',
+                'title'  => 'string',
+            ],
+            'images' => [
+                'image_id' => 'int',
+                'is_default' => 'int',
+                'is_secondary' => 'int',
+                'position' => 'int',
+                'url' => 'string',
+            ],
+            'dealer' => [
+                'id' => 'int',
+                'identifier' => 'string',
+                'created_at' => 'string',
+                'name' => 'string',
+                'email' => 'string',
+                'profile_image' => 'string',
+                
+            ],
+            'features' => [
+                'feature_list_id' => 'int',
+                'value' => 'string',
+                'feature_name' => 'string',
+            ],
+        ]],
+    ])]
 
     private function handleHttpRequest(string $method, string $url): array
     {
@@ -42,7 +84,7 @@ class InventoryService implements InventoryServiceInterface
 
             return json_decode($response->getBody()->getContents(), true);
         } catch (GuzzleException $e) {
-            \Log::info('Exception was thrown while calling here API.');
+            \Log::info('Exception was thrown while calling TrailerCentral API.');
             \Log::info($e->getCode() . ': ' . $e->getMessage());
 
             throw new HttpException(422, $e->getMessage());

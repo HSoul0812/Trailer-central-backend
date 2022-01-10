@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace App\Transformers\Inventory;
 
 use League\Fractal\TransformerAbstract;
+use App\DTOs\Inventory\TcApiResponseInventory;
 
 class TcApiResponseInventoryTransformer extends TransformerAbstract
 {
-    public function transform($type): array
+    public function transform(TcApiResponseInventory $type): array
     {
         return [
              'id'               => (int) $type->id,

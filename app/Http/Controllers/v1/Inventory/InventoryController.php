@@ -22,11 +22,9 @@ class InventoryController extends AbstractRestfulController
      * @param TypeRepositoryInterface   $type
      * @param TypesTransformerInterface $typesTransformer
      */
-    public function __construct(InventoryServiceInterface $inventoryService, TcApiResponseInventoryTransformer $tcApiResponseInventoryTransformer)
+    public function __construct(private InventoryServiceInterface $inventoryRepository, private TcApiResponseInventoryTransformer $transformer)
     {
         parent::__construct();
-        $this->inventoryRepository = $inventoryService;
-        $this->transformer = $tcApiResponseInventoryTransformer;
     }
 
     /**
