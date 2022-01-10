@@ -68,6 +68,23 @@ class RestfulControllerV2 extends Controller
     }
 
     /**
+     * @param mixed $id
+     * @return Response
+     */
+    protected function acceptedResponse($id = null): Response
+    {
+        $params = [
+            'response' => ['status' => 'success']
+        ];
+
+        if ($id) {
+            $params['response']['data'] = ['id' => $id];
+        }
+
+        return $this->response->accepted(null, $params);
+    }
+
+    /**
      * @return Response
      */
     protected function deletedResponse(): Response

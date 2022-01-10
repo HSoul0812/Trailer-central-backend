@@ -53,6 +53,7 @@
         "psr/log": "^1.0",
         "spatie/laravel-sitemap": "^5.7",
         "staudenmeir/belongs-to-through": "^2.5",
+        "stripe/stripe-php": "^7.100",
         "swiftmailer/swiftmailer": "^6.0",
         "symfony/css-selector": "^5.1",
         "symfony/dom-crawler": "^5.1",
