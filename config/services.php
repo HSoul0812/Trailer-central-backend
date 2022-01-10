@@ -39,4 +39,8 @@ return [
         'api' => env('TC_API_URL', 'https://trailertrader-staging.trailercentral.com/api/'),
         'access_token' => env('TC_API_ACCESS_TOKEN', 'f3c74ad00f954cc698face16ff78d791'),
     ],
+    
+    'tomtom' => [
+        'key' => env('TOMTOM_API_KEY', ''),
+    ]
 ];

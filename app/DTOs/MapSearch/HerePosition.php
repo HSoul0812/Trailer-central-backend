@@ -6,18 +6,17 @@ namespace App\DTOs\MapSearch;
 
 use JetBrains\PhpStorm\Pure;
 
-class HereApiResponse
+class HerePosition
 {
-    public array $items;
+    public float $lat;
+    public float $lng;
 
     #[Pure]
  public static function fromData(array $data): self
  {
      $obj = new self();
-     $obj->items = [];
-     foreach ($data['items'] as $item) {
-         $obj->items[] = HereApiResponseItem::fromData($item);
-     }
+     $obj->lat = $data['lat'];
+     $obj->lng = $data['lng'];
 
      return $obj;
  }

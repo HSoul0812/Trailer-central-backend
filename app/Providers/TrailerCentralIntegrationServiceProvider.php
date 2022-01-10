@@ -25,6 +25,7 @@ use App\Services\Integrations\TrailerCentral\Console\Leads\SyncServiceInterface 
 use App\Services\Inventory\InventoryService;
 use App\Services\Inventory\InventoryServiceInterface;
 use App\Services\MapSearchService\HereMapSearchService;
+use App\Services\MapSearchService\TomTomMapSearchService;
 use Illuminate\Support\ServiceProvider;
 
 class TrailerCentralIntegrationServiceProvider extends ServiceProvider
@@ -48,6 +49,6 @@ class TrailerCentralIntegrationServiceProvider extends ServiceProvider
 
         $this->app->bind(SyncProcessRepositoryInterface::class, SyncProcessRepository::class);
 
-        HereMapSearchService::register();
+        TomTomMapSearchService::register();
     }
 }

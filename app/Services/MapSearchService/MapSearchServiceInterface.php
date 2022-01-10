@@ -14,5 +14,5 @@ interface MapSearchServiceInterface
 
     public function reverse(float $lat, float $lng): object;
 
-    public function getTransformer(): TransformerAbstract;
+    public function getTransformer(string $class): TransformerAbstract;
 }
