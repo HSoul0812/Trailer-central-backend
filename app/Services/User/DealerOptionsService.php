@@ -70,11 +70,6 @@ class DealerOptionsService implements DealerOptionsServiceInterface
     private $stringHelper;
 
     /**
-     * @var WebsiteConfigRepositoryInterface
-     */
-    private $websiteConfigRepository;
-
-    /**
      * @var WebsiteRepositoryInterface
      */
     private $websiteRepository;
@@ -109,13 +104,11 @@ class DealerOptionsService implements DealerOptionsServiceInterface
         NewUserRepositoryInterface $newUserRepository,
         StringHelper $stringHelper,
         WebsiteRepositoryInterface $websiteRepository,
-        WebsiteConfigRepositoryInterface  $websiteConfigRepository,
         WebsiteEntityRepositoryInterface $websiteEntityRepository
     ) {
         $this->userRepository = $userRepository;
         $this->crmUserRepository = $crmUserRepository;
         $this->crmUserRoleRepository = $crmUserRoleRepository;
-        $this->websiteConfigRepository = $websiteConfigRepository;
         $this->dealerPartRepository = $dealerPartRepository;
         $this->newDealerUserRepository = $newDealerUserRepository;
         $this->newUserRepository = $newUserRepository;
