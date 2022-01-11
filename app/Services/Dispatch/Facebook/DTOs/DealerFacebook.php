@@ -21,6 +21,11 @@ class DealerFacebook
     private $dealerId;
 
     /**
+     * @var int
+     */
+    private $dealerLocationId;
+
+    /**
      * @var string
      */
     private $dealerName;

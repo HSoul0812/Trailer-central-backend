@@ -126,8 +126,11 @@ class MarketplaceService implements MarketplaceServiceInterface
      * @param array $params
      * @return DealerFacebook
      */
-    public function dealer(int $integrationId, array $params): DealerFacebook {
+    public function dealer(int $integrationId, array $params, ?float $startTime = null): DealerFacebook {
         // Get Integration
+        if(empty($startTime)) {
+            $startTime = microtime(true);
+        }
         $integration = $this->marketplace->get([
             'id' => $integrationId
         ]);
@@ -139,10 +142,11 @@ class MarketplaceService implements MarketplaceServiceInterface
         }
 
         // Get Facebook Dealer
-        return new DealerFacebook([
+        $response = new DealerFacebook([
             'dealer_id' => $integration->dealer_id,
+            'dealer_location_id' => $integration->dealer_location_id,
             'dealer_name' => $integration->user->name,
-            'integration_id' => $integration->id,
+            'integration_id' => $integrationId,
             'fb_username' => $integration->fb_username,
             'fb_password' => $integration->fb_password,
             'auth_username' => $integration->tfa_username,
@@ -151,6 +155,9 @@ class MarketplaceService implements MarketplaceServiceInterface
             'tunnels' => $this->tunnels->getAll(['dealer_id' => $integration->dealer_id]),
             'inventory' => $this->getInventory($integration, $type, $params)
         ]);
+        $nowTime = microtime(true);
+        $this->log->info('Debug time after creating DealerFacebook: ' . ($nowTime - $startTime));
+        return $response;
     }
 
     /**
@@ -253,6 +260,7 @@ class MarketplaceService implements MarketplaceServiceInterface
         foreach($integrations as $integration) {
             $dealers->push(new DealerFacebook([
                 'dealer_id' => $integration->dealer_id,
+                'dealer_location_id' => $integration->dealer_location_id,
                 'dealer_name' => $integration->user->name,
                 'integration_id' => $integration->id,
                 'fb_username' => $integration->fb_username,
@@ -276,8 +284,11 @@ class MarketplaceService implements MarketplaceServiceInterface
      * @param array $params
      * @return Pagination<InventoryFacebook>
      */
-    private function getInventory(Marketplace $integration, string $type, array $params): MarketplaceInventory {
+    private function getInventory(Marketplace $integration, string $type, array $params, ?float $startTime = null): MarketplaceInventory {
         // Invalid Type? Return Empty Collection!
+        if(empty($startTime)) {
+            $startTime = microtime(true);
+        }
         if(!isset(MarketplaceStatus::INVENTORY_METHODS[$type])) {
             return new Pagination();
         }
@@ -287,6 +298,8 @@ class MarketplaceService implements MarketplaceServiceInterface
 
         // Get Inventory
         $inventory = $this->listings->{$method}($integration, $params);
+        $nowTime = microtime(true);
+        $this->log->info('Debug time after ' . $method . ': ' . ($nowTime - $startTime));
 
         // Loop Through Inventory Items
         $listings = new Collection();
@@ -296,13 +309,16 @@ class MarketplaceService implements MarketplaceServiceInterface
             } else {
                 $listings->push(InventoryFacebook::getFromListings($listing));
             }
+            $nowTime = microtime(true);
+            $this->log->info('Debug time InventoryFacebook #' . $listing->inventory_id . ': ' . ($nowTime - $startTime));
         }
 
         // Append Paginator
-        return new MarketplaceInventory([
+        $response = new MarketplaceInventory([
             'type' => $type,
             'inventory' => $listings,
             'paginator' => new IlluminatePaginatorAdapter($inventory)
         ]);
+        return $response;
     }
 }

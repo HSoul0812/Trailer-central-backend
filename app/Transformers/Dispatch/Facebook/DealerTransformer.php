@@ -37,6 +37,7 @@ class DealerTransformer extends TransformerAbstract
     {
         return [
             'id' => $dealer->dealerId,
+            'locationId' => $dealer->dealerLocationId,
             'name' => $dealer->dealerName,
             'integration' => $dealer->integrationId,
             'fb' => [

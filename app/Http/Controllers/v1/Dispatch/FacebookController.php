@@ -21,6 +21,7 @@ use App\Transformers\Dispatch\Facebook\StepTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
+use Illuminate\Support\Facades\Log;
 
 class FacebookController extends RestfulControllerV2 {
     /**
@@ -114,14 +115,19 @@ class FacebookController extends RestfulControllerV2 {
     public function show(int $id, Request $request)
     {
         // Handle Facebook Marketplace Request
+        $startTime = microtime(true);
         $requestData = $request->all();
         $requestData['id'] = $id;
         $request = new ShowMarketplaceRequest($requestData);
         if ($request->validate()) {
             // Return Item Facebook Dispatch Dealer Transformer
-            $data = new Item($this->service->dealer($request->id, $request->all()),
+            $nowTime = microtime(true);
+            Log::channel('dispatch-fb')->info('Debug time after validating FB Inventory endpoint: ' . ($nowTime - $startTime));
+            $data = new Item($this->service->dealer($request->id, $request->all(), $startTime),
                                 $this->dealerTransformer, 'data');
             $response = $this->fractal->createData($data)->toArray();
+            $nowTime = microtime(true);
+            Log::channel('dispatch-fb')->info('Debug time after calling service: ' . ($nowTime - $startTime));
             return $this->response->array($response);
         }
         

@@ -351,6 +351,15 @@ class Inventory extends Model
         'geolocation'
     ];
 
+
+    /**
+     * Custom Attributes Collection
+     * 
+     * @var Collection
+     */
+    private $attributesCollection;
+
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
@@ -379,6 +388,13 @@ class Inventory extends Model
     public function inventoryImages(): HasMany
     {
         return $this->hasMany(InventoryImage::class, 'inventory_id', 'inventory_id');
+    }
+
+    public function orderedImages(): HasMany
+    {
+        return $this->inventoryImages()->with('image')
+                    ->orderByRaw('IFNULL(position, 99) ASC')
+                    ->orderBy('image_id', 'ASC');
     }
 
     public function images(): HasManyThrough
@@ -438,45 +454,28 @@ class Inventory extends Model
 
 
     /**
-     * Get Accurately Ordered Images
-     * 
-     * @return Collection<Image>
-     */
-    public function getOrderedImagesAttribute(): Collection
-    {
-        // Initialize Images
-        $images = [];
-
-        // Get Ordered Images
-        $orderedImages = $this->inventoryImages()->with('image')
-                              ->orderByRaw('IFNULL(position, 99) ASC')
-                              ->orderBy('image_id', 'ASC')->get();
-        foreach($orderedImages as $bridge) {
-            $images[] = $bridge->image;
-        }
-
-        // Return Ordered Images
-        return new Collection($images);
-    }
-
-
-    /**
      * Get Attributes Map
      * 
      * @return Collection<code: value>
      */
     public function getAttributesAttribute(): Collection
     {
-        // Initialize Attributes
-        $attributes = [];
+        // Attributes Already Exist?
+        if(empty($this->attributesCollection)) {
+            // Initialize Attributes
+            $attributes = [];
 
-        // Loop Attributes
-        foreach($this->attributeValues as $value) {
-            $attributes[$value->attribute->code] = $value->value;
+            // Loop Attributes
+            foreach($this->attributeValues as $value) {
+                $attributes[$value->attribute->code] = $value->value;
+            }
+
+            // Set Attributes Collection
+            $this->attributesCollection = new Collection($attributes);
         }
 
         // Return Attribute Map
-        return new Collection($attributes);
+        return $this->attributesCollection;
     }
 
     /**
