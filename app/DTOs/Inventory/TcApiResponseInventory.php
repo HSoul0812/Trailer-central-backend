@@ -16,6 +16,7 @@ class TcApiResponseInventory
     public ?float $gvwr;
     public ?float $weight;
     public ?float $width;
+    public ?float $height;
     public ?float $length;
     public ?string $manufacturer;
     public array $dealer;
@@ -37,6 +38,7 @@ class TcApiResponseInventory
      $obj->gvwr = $data['gvwr'];
      $obj->weight = $data['weight'];
      $obj->width = $data['width'];
+     $obj->height = $data['height'];
      $obj->length = $data['length'];
      $obj->manufacturer = $data['manufacturer'];
      $obj->dealer = $data['dealer'];

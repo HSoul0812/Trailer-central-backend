@@ -47,6 +47,7 @@ class InventoryService implements InventoryServiceInterface
                 'gvwr'       => 'float',
                 'weight'      => 'float',
                 'width'      => 'float',
+                'height'      => 'float',
                 'length'        => 'float',
                 'manufacturer'    => 'string',
                 'created_at'      => 'string',
