@@ -11,6 +11,7 @@ use League\Fractal\TransformerAbstract;
 use App\Models\Inventory\Inventory;
 use App\Transformers\User\UserTransformer;
 use App\Transformers\User\DealerLocationTransformer;
+use App\Transformers\Inventory\FeatureTransformer;
 use App\Transformers\Website\WebsiteTransformer;
 use League\Fractal\Resource\Collection as FractalCollection;
 
@@ -84,6 +85,7 @@ class InventoryTransformer extends TransformerAbstract
              'identifier' => $inventory->identifier,
              'active' => $inventory->active,
              'archived_at' => $inventory->archived_at,
+             'payload_capacity' => $inventory->payload_capacity,
              'availability' => $inventory->availability,
              'bill_id' => $inventory->bill_id,
              'brand' => $inventory->brand,
@@ -99,6 +101,7 @@ class InventoryTransformer extends TransformerAbstract
              'fp_interest_paid' => $inventory->interest_paid,
              'fp_committed' => $inventory->fp_committed,
              'gvwr' => $inventory->gvwr,
+             'axle_capacity' => $inventory->axle_capacity,
              'height' => $inventory->height,
              'images' => $this->transformImages($inventory->inventoryImages),
              'files' => $this->transformFiles($inventory->files),
@@ -112,7 +115,7 @@ class InventoryTransformer extends TransformerAbstract
              'non_serialized' => $inventory->non_serialized,
              'notes' => $inventory->notes,
              'price' => $inventory->price ?? 0,
-             'sales_price' => $inventory->sales_price ?? 0,
+             'sales_price' => (float) $inventory->sales_price ?? 0,
              'send_to_quickbooks' => $inventory->send_to_quickbooks,
              'status' => $inventory->status_label,
              'stock' => $inventory->stock,
