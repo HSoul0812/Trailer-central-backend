@@ -19,6 +19,7 @@ class TcApiResponseInventoryTransformer extends TransformerAbstract
              'payload_capacity' => $type->payload_capacity,
              'gvwr'             => $type->gvwr,
              'weight'           => $type->weight,
+             'width'            => $type->width,
              'length'           => $type->length,
              'manufacturer'     => $type->manufacturer,
              'dealer'           => $type->dealer,

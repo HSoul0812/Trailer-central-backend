@@ -9,20 +9,21 @@ use JetBrains\PhpStorm\Pure;
 class TcApiResponseInventory
 {
     public int $id;
-    public string $url;
-    public array $features;
-    public string $description;
-    public float $payload_capacity;
-    public float $gvwr;
-    public float $weight;
-    public float $length;
-    public string $manufacturer;
+    public ?string $url;
+    public ?array $features;
+    public ?string $description;
+    public ?float $payload_capacity;
+    public ?float $gvwr;
+    public ?float $weight;
+    public ?float $width;
+    public ?float $length;
+    public ?string $manufacturer;
     public array $dealer;
     public string $listing_date;
-    public float $price;
-    public string $sales_price;
-    public string $inventory_title;
-    public array $photos;
+    public ?float $price;
+    public ?float $sales_price;
+    public ?string $inventory_title;
+    public ?array $photos;
 
     #[Pure]
  public static function fromData(array $data): self
@@ -35,6 +36,7 @@ class TcApiResponseInventory
      $obj->payload_capacity = $data['payload_capacity'];
      $obj->gvwr = $data['gvwr'];
      $obj->weight = $data['weight'];
+     $obj->width = $data['width'];
      $obj->length = $data['length'];
      $obj->manufacturer = $data['manufacturer'];
      $obj->dealer = $data['dealer'];
