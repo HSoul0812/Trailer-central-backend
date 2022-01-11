@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands\DMS;
+namespace App\Console\Commands\CRM\Dms;
 
 use App\Models\CRM\Dms\FinancingCompany;
 use App\Models\CRM\Dms\Quickbooks\Account;
@@ -10,21 +10,22 @@ use App\Models\Parts\Vendor;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Schema;
 
 /**
  * Class TrimWhiteSpace
  *
- * @package App\Console\Commands\DMS
+ * @package App\Console\Commands\CRM\Dms
  */
 class TrimWhiteSpace extends Command
 {
+    private const CHUNK_SIZE = 100;
+
     /**
      * @inheritDoc
      */
-    protected $signature = 'dms:trim-whitespace';
+    protected $signature = 'crm:dms:trim-whitespace';
 
     /**
      * @inheritDoc
@@ -58,7 +59,7 @@ class TrimWhiteSpace extends Command
 
     private function trim(Builder $query, string $functionName)
     {
-        $query->chunk(100, function ($models) use ($functionName) {
+        $query->chunk(self::CHUNK_SIZE, function (Collection $models) use ($functionName) {
             foreach ($models as $model) {
                 DB::beginTransaction();
 
