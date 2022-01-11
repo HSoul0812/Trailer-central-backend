@@ -147,6 +147,12 @@ class ShowroomTransformer extends TransformerAbstract
                 // Even though we added new code below, we don't want to remove  this code
                 // just in case some columns has measure type, this way they won't break
                 case ShowroomFieldsMapping::TYPE_MEASURE:
+                    // No need to process if map to is in one of the tc-www mapping
+                    // the replicate code below will deal with them manually
+                    if (array_key_exists($map->map_to, $this->tcWwwLwhMapping)) {
+                        break;
+                    }
+
                     if (empty($data[$map->map_to])) {
                         $data[$map->map_to] = number_format(0, 2);
                         $data[$map->map_to . '_inches'] = number_format(0, 2);
@@ -166,8 +172,8 @@ class ShowroomTransformer extends TransformerAbstract
                         $data[$map->map_to . '_second'] = number_format($ftOnly, 0);
                         $data[$map->map_to . '_second_inches'] = number_format($inOnly, 0);
                     }
-                    break;
 
+                    break;
                 default:
                     throw new \InvalidArgumentException("Wrong showroom fields mapping type ({$map->type}). Class - " . self::class);
             }
