@@ -115,7 +115,7 @@ class InventoryTransformer extends TransformerAbstract
              'non_serialized' => $inventory->non_serialized,
              'notes' => $inventory->notes,
              'price' => $inventory->price ?? 0,
-             'sales_price' => $inventory->sales_price ?? 0,
+             'sales_price' => (float) $inventory->sales_price ?? 0,
              'send_to_quickbooks' => $inventory->send_to_quickbooks,
              'status' => $inventory->status_label,
              'stock' => $inventory->stock,
