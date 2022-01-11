@@ -9,6 +9,7 @@ use Dingo\Api\Http\Request;
 use Illuminate\Support\Collection;
 use League\Fractal\TransformerAbstract;
 use App\Models\Showroom\Showroom;
+use League\HTMLToMarkdown\HtmlConverter;
 
 /**
  * Class ShowroomTransformer
@@ -219,6 +220,11 @@ class ShowroomTransformer extends TransformerAbstract
         // For a livingquarters attribute, we mark it as 1 automatically if the showroom type is camping_rv
         if ($showroom->type === 'camping_rv') {
             $data['attributes']['livingquarters'] = '1';
+        }
+
+        // Add the description_markdown
+        if (isset($data['description'])) {
+            $data['description_markdown'] = (new HtmlConverter())->convert($data['description']);
         }
 
         $with = $this->request->get('with', []);
