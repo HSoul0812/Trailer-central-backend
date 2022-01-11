@@ -209,6 +209,18 @@ class ShowroomTransformer extends TransformerAbstract
             }
         }
 
+        // For a pull type, we need to use tc-www logic
+        if(in_array($showroom->type, ['camper_popup', 'tent-camper', 'toy', 'camping_rv', 'expandable', 'destination_trailer'])) {
+            $data['attributes']['pull_type'] = 'bumper';
+        } else if($showroom->type === 'fifth_wheel_campers') {
+            $data['attributes']['pull_type'] = 'fifth_wheel';
+        }
+
+        // For a livingquarters attribute, we mark it as 1 automatically if the showroom type is camping_rv
+        if ($showroom->type === 'camping_rv') {
+            $data['attributes']['livingquarters'] = '1';
+        }
+
         $with = $this->request->get('with', []);
 
         if (in_array('features', $with)) {
