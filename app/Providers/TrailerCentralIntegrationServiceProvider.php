@@ -22,7 +22,7 @@ use App\Services\Integrations\TrailerCentral\Console\Leads\LogService as LeadLog
 use App\Services\Integrations\TrailerCentral\Console\Leads\LogServiceInterface as LeadLogServiceInterface;
 use App\Services\Integrations\TrailerCentral\Console\Leads\SyncService as LeadSyncService;
 use App\Services\Integrations\TrailerCentral\Console\Leads\SyncServiceInterface as LeadSyncServiceInterface;
-use App\Services\MapSearchService\TomTomMapSearchService;
+use App\Services\MapSearch\TomTomMapSearchService;
 use Illuminate\Support\ServiceProvider;
 
 class TrailerCentralIntegrationServiceProvider extends ServiceProvider

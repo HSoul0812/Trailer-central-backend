@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers\v1\Inventory;
 
+use App\Exceptions\NotImplementedException;
 use App\Http\Controllers\AbstractRestfulController;
-use Dingo\Api\Http\Response;
+use App\Http\Requests\CreateRequestInterface;
+use App\Http\Requests\IndexRequestInterface;
+use App\Http\Requests\UpdateRequestInterface;
+use App\Services\Inventory\InventoryServiceInterface;
 
 class InventoryController extends AbstractRestfulController
 {
@@ -12,7 +16,34 @@ class InventoryController extends AbstractRestfulController
         parent::__construct();
     }
 
-    public function list(): Response {
+    public function index(IndexRequestInterface $request)
+    {
+        $this->inventoryService->list($request->all());
+    }
+
+    public function create(CreateRequestInterface $request)
+    {
+        // TODO: Implement create() method.
+        throw new NotImplementedException();
+    }
+
+    public function show(int $id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public function update(int $id, UpdateRequestInterface $request)
+    {
+        throw new NotImplementedException();
+    }
+
+    public function destroy(int $id)
+    {
+        throw new NotImplementedException();
+    }
+
+    protected function constructRequestBindings(): void
+    {
 
     }
 }
