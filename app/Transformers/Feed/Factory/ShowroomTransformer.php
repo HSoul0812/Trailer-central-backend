@@ -10,6 +10,7 @@ use Illuminate\Support\Collection;
 use League\Fractal\TransformerAbstract;
 use App\Models\Showroom\Showroom;
 use League\HTMLToMarkdown\HtmlConverter;
+use Markdownify\Converter;
 
 /**
  * Class ShowroomTransformer
@@ -224,7 +225,8 @@ class ShowroomTransformer extends TransformerAbstract
 
         // Add the description_markdown
         if (isset($data['description'])) {
-            $data['description_markdown'] = (new HtmlConverter())->convert($data['description']);
+            // $data['description_markdown'] = (new HtmlConverter())->convert($data['description']);
+            $data['description_markdown'] = (new Converter())->parseString($data['description']);
         }
 
         $with = $this->request->get('with', []);
