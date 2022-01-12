@@ -628,10 +628,10 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * 
      * @param int $dealerId
      * @param int $salesPersonId
-     * @param array $files
+     * @param Collection $files
      * @return int
      */
-    private function deleteAttachments(int $dealerId, int $salesPersonId, array $files): int {
+    private function deleteAttachments(int $dealerId, int $salesPersonId, Collection $files): int {
         // Loop All Attachments
         $deleted = 0;
         if(!empty($files) && count($files) > 0) {
