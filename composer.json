@@ -9,7 +9,7 @@
     "license": "MIT",
     "type": "project",
     "require": {
-        "php": "^7.2",
+        "php": "~7.2.x|~7.3.x",
         "ext-json": "*",
         "algolia/algoliasearch-client-php": "^2.4",
         "awobaz/compoships": "^2.1",
