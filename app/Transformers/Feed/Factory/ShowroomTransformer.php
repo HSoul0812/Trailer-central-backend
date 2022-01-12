@@ -225,8 +225,9 @@ class ShowroomTransformer extends TransformerAbstract
 
         // Add the description_markdown
         if (isset($data['description'])) {
-            // $data['description_markdown'] = (new HtmlConverter())->convert($data['description']);
-            $data['description_markdown'] = (new Converter())->parseString($data['description']);
+            // We need to remove the \r\n from the HTML string
+            $description = str_replace("\r\n", "", $data['description']);
+            $data['description_markdown'] = (new Converter())->parseString($description);
         }
 
         $with = $this->request->get('with', []);
