@@ -9,7 +9,6 @@ use Dingo\Api\Http\Request;
 use Illuminate\Support\Collection;
 use League\Fractal\TransformerAbstract;
 use App\Models\Showroom\Showroom;
-use League\HTMLToMarkdown\HtmlConverter;
 use Markdownify\Converter;
 
 /**
