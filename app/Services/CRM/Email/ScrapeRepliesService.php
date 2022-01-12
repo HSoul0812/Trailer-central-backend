@@ -400,7 +400,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         // Check if Exists
         if(empty($email->getMessageId()) ||
            $this->emails->findMessageId($salesperson->user_id, $email->getMessageId())) {
-            $this->deleteAttachments($email->getAttachments());
+            $this->deleteAttachments($dealerId, $salesperson->id, $email->getAttachments());
             return self::IMPORT_SKIPPED;
         }
 
@@ -412,7 +412,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             // Import Additional Details (Attachments and/or Body)
             $this->importFull($salesperson, $email, $message);
             if(empty($email->getSubject()) || empty($email->getToEmail())) {
-                $this->deleteAttachments($email->getAttachments());
+                $this->deleteAttachments($dealerId, $salesperson->id, $email->getAttachments());
                 return self::IMPORT_SKIPPED;
             }
 
@@ -420,13 +420,13 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             $this->insertReply($dealerId, $salesperson->user_id, $email);
 
             // Delete Attachments
-            $this->deleteAttachments($email->getAttachments());
+            $this->deleteAttachments($dealerId, $salesperson->id, $email->getAttachments());
             return self::IMPORT_SUCCESS;
         }
 
         // Marked as Processed
         $this->emails->createProcessed($salesperson->user_id, $email->getMessageId());
-        $this->deleteAttachments($email->getAttachments());
+        $this->deleteAttachments($dealerId, $salesperson->id, $email->getAttachments());
         return self::IMPORT_PROCESSED;
     }
 
