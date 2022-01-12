@@ -227,7 +227,12 @@ class ShowroomTransformer extends TransformerAbstract
         if (isset($data['description'])) {
             // We need to remove the \r\n from the HTML string
             $description = str_replace("\r\n", "", $data['description']);
-            $data['description_markdown'] = (new Converter())->parseString($description);
+            $markdownDescription = (new Converter())->parseString($description);
+
+            // Once converted to markdown, we need to replace some left-over
+            // HTML line break with the \n
+            $breaks = array("<br />","<br>","<br/>");
+            $data['description_markdown'] = str_ireplace($breaks, "\n", $markdownDescription);
         }
 
         $with = $this->request->get('with', []);
