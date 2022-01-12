@@ -4,6 +4,7 @@ namespace App\Helpers;
 
 /**
  * Class StringHelper
+ *
  * @package App\Helpers
  */
 class StringHelper
@@ -11,6 +12,7 @@ class StringHelper
     /**
      * @param        $string
      * @param string $delimiter
+     *
      * @return string
      */
     public static function superSanitize($string, $delimiter = '-')
@@ -25,7 +27,7 @@ class StringHelper
         }
 
         // Replace other special chars
-        $specialCharacters = array(
+        $specialCharacters = [
             '#' => '',
             '$' => '',
             '%' => '',
@@ -38,13 +40,13 @@ class StringHelper
             '§' => '',
             '\\' => '',
             '/' => '',
-        );
+        ];
 
         if (isset($specialCharacters[$delimiter])) {
             unset($specialCharacters[$delimiter]);
         }
 
-        foreach($specialCharacters as $character => $replacement) {
+        foreach ($specialCharacters as $character => $replacement) {
             $string = str_replace($character, $delimiter . $replacement . $delimiter, $string);
         }
 
@@ -61,11 +63,31 @@ class StringHelper
 
     /**
      * @param int $length
+     *
      * @return string
+     *
      * @throws \Exception
      */
     public function getRandomHex(int $length = 20): string
     {
         return bin2hex(random_bytes($length));
+    }
+
+    /**
+     * @param string|null $value
+     *
+     * @return string|null
+     */
+    public static function trimWhiteSpaces(?string $value = ''): ?string
+    {
+        if (empty($value)) {
+            return null;
+        }
+
+        $text = trim($value);
+
+        return !empty($text)
+            ? preg_replace('/\s+/', ' ', $text)
+            : null;
     }
 }
