@@ -2,6 +2,7 @@
 
 namespace App\Models\CRM\User;
 
+use App\Helpers\StringHelper;
 use ElasticScoutDriverPlus\CustomSearch;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Dms\UnitSale;
@@ -103,6 +104,56 @@ class Customer extends Model
         'qb_id'
     ];
 
+    /**
+     * @param string|null $value
+     *
+     * @return void
+     */
+    public function setCompanyNameAttribute(?string $value): void
+    {
+        $this->attributes['company_name'] = StringHelper::trimWhiteSpaces($value);
+    }
+
+    /**
+     * @param string|null $value
+     *
+     * @return void
+     */
+    public function setFirstNameAttribute(?string $value): void
+    {
+        $this->attributes['first_name'] = StringHelper::trimWhiteSpaces($value);
+    }
+
+    /**
+     * @param string|null $value
+     *
+     * @return void
+     */
+    public function setMiddleNameAttribute(?string $value): void
+    {
+        $this->attributes['middle_name'] = StringHelper::trimWhiteSpaces($value);
+    }
+
+    /**
+     * @param string|null $value
+     *
+     * @return void
+     */
+    public function setLastNameAttribute(?string $value): void
+    {
+        $this->attributes['last_name'] = StringHelper::trimWhiteSpaces($value);
+    }
+
+    /**
+     * @param string|null $value
+     *
+     * @return void
+     */
+    public function setDisplayNameAttribute(?string $value): void
+    {
+        $this->attributes['display_name'] = StringHelper::trimWhiteSpaces($value);
+    }
+
     public function quotes()
     {
         return $this->hasMany(UnitSale::class, 'buyer_id', 'id');
@@ -111,9 +162,9 @@ class Customer extends Model
     public function openQuotes()
     {
         return $this->quotes()->where('is_archived', 0)
-            ->where(function($query) {
+            ->where(function ($query) {
                 $query->whereDoesntHave('payments')
-                    ->orWhereHas('payments', function($query) {
+                    ->orWhereHas('payments', function ($query) {
                         $query->select(DB::raw('sum(amount) as paid_amount'))
                             ->groupBy('invoice_id')
                             ->havingRaw('paid_amount < dms_unit_sale.total_price or paid_amount <= 0');
@@ -178,7 +229,7 @@ class Customer extends Model
      *
      * @return string
      */
-    public function getDisplayFullNameAttribute(): string
+    public function getDisplayFullNameAttribute(): ?string
     {
         return $this->display_name ?: $this->full_name;
     }
