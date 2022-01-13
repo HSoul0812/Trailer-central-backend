@@ -184,8 +184,8 @@ class ShowroomTransformer extends TransformerAbstract
         foreach ($this->tcWwwLwhMapping as $mapTo => $columns) {
             $type = $this->tcWwwTypeLwh[$mapTo];
             foreach ($columns as $column) {
-                // Process this if only if the length exist in the row and if it's not empty
-                if ($showroom->{$column} !== null && !empty($showroom->{$column})) {
+                // Process this if only if the length exist in the row and if it's not empty or null
+                if (!empty($showroom->{$column})) {
                     // Convert From Feet/Inches?
                     $v = $showroom->{$column}; // if length exists in the current row, keep it in v
                     $ftDec = $helper->fromFeetAndInches($v, ConvertHelper::DISPLAY_MODE_FEET, $type);
