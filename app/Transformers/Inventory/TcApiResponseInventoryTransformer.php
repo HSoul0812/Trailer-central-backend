@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Transformers\Inventory;
 
-use League\Fractal\TransformerAbstract;
 use App\DTOs\Inventory\TcApiResponseInventory;
+use League\Fractal\TransformerAbstract;
 
 class TcApiResponseInventoryTransformer extends TransformerAbstract
 {
@@ -29,6 +29,7 @@ class TcApiResponseInventoryTransformer extends TransformerAbstract
              'sales_price'      => $type->sales_price,
              'inventory_title'  => $type->inventory_title,
              'photos'           => $type->photos,
+             'dealer_location'  => $type->dealer_location,
          ];
     }
 }
