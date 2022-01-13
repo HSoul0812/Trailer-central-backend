@@ -48,6 +48,7 @@ class TcApiResponseInventory
      $obj->inventory_title = $data['title'];
      $obj->photos = $data['images'];
      $obj->dealer_location = $data['dealer_location'];
+     $obj->primary_image = $data['primary_image'];
 
      return $obj;
  }
