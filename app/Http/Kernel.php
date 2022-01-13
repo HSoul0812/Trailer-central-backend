@@ -28,6 +28,7 @@ use App\Http\Middleware\Dms\Printer\FormValidate as PrinterFormValidate;
 use App\Http\Middleware\Integration\AuthValidate;
 use App\Http\Middleware\Integration\Facebook\CatalogValidate;
 use App\Http\Middleware\Integration\Facebook\ChatValidate;
+use App\Http\Middleware\Marketing\Facebook\PagetabValidate;
 use App\Http\Middleware\Parts\PartOrderValidate;
 
 class Kernel extends HttpKernel
@@ -113,7 +114,8 @@ class Kernel extends HttpKernel
         'sales-person.validate' => SalesPersonValidate::class,
         'parts.orders.validate' => PartOrderValidate::class,
         'printer.form.validate' => PrinterFormValidate::class,
-        'inventory.create.permission' => CreateInventoryPermissionMiddleware::class
+        'inventory.create.permission' => CreateInventoryPermissionMiddleware::class,
+        'marketing.facebook.pagetab' => PagetabValidate::class
     ];
 
     /**

@@ -125,11 +125,6 @@ class GoogleService implements GoogleServiceInterface
      * @return ValidateToken
      */
     public function validate(AccessToken $accessToken): ValidateToken {
-        // ID Token Exists?
-        if(empty($accessToken->id_token)) {
-            throw new MissingGapiIdTokenException;
-        }
-
         // Configure Client
         $client = $this->getClient();
         $client->setAccessToken([
