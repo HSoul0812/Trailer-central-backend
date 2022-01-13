@@ -370,7 +370,7 @@ class ParsedEmail
      * @param string $fromFull
      * @return void
      */
-    public function setFrom(?string $fromFull): void
+    public function setFrom(?string $fromFull = null): void
     {
         // Separate Name From Email
         $email = $fromFull ?? '';
