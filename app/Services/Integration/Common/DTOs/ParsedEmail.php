@@ -309,9 +309,9 @@ class ParsedEmail
      * @param string $to
      * @return void
      */
-    public function setToEmail(string $to): void
+    public function setToEmail(?string $to = null): void
     {
-        $this->to = $to;
+        $this->to = $to ?? '';
     }
 
     /**
@@ -370,10 +370,10 @@ class ParsedEmail
      * @param string $fromFull
      * @return void
      */
-    public function setFrom(string $fromFull): void
+    public function setFrom(?string $fromFull): void
     {
         // Separate Name From Email
-        $email = $fromFull;
+        $email = $fromFull ?? '';
         $name = '';
         if(strpos($fromFull, '<') !== FALSE) {
             $parts = explode("<", $fromFull);
