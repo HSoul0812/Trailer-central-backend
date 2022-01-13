@@ -92,6 +92,13 @@ class InventoryService implements InventoryServiceInterface
                 'federal_id' => 'string',
                 'sales_tax'  => 'array',
             ],
+            'primary_image' => [
+                'image_id'     => 'int',
+                'is_default'   => 'int',
+                'is_secondary' => 'int',
+                'position'     => 'int',
+                'url'          => 'string',
+            ],
         ]],
     ])]
     private function handleHttpRequest(string $method, string $url): array
