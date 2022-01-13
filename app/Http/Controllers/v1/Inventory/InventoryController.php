@@ -6,8 +6,11 @@ use App\Exceptions\NotImplementedException;
 use App\Http\Controllers\AbstractRestfulController;
 use App\Http\Requests\CreateRequestInterface;
 use App\Http\Requests\IndexRequestInterface;
+use App\Http\Requests\Inventory\InventoryRequest;
 use App\Http\Requests\UpdateRequestInterface;
 use App\Services\Inventory\InventoryServiceInterface;
+use App\Transformers\Inventory\InventoryTransformer;
+use Dingo\Api\Http\Response;
 
 class InventoryController extends AbstractRestfulController
 {
@@ -16,9 +19,10 @@ class InventoryController extends AbstractRestfulController
         parent::__construct();
     }
 
-    public function index(IndexRequestInterface $request)
+    public function index(IndexRequestInterface $request): Response
     {
-        $this->inventoryService->list($request->all());
+        $result = $this->inventoryService->list($request->all());
+        return $this->response->paginator($result, new InventoryTransformer());
     }
 
     public function create(CreateRequestInterface $request)
@@ -44,6 +48,8 @@ class InventoryController extends AbstractRestfulController
 
     protected function constructRequestBindings(): void
     {
-
+        app()->bind(IndexRequestInterface::class, function () {
+            return inject_request_data(InventoryRequest::class);
+        });
     }
 }
