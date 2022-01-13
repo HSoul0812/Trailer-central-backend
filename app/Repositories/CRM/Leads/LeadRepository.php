@@ -94,8 +94,8 @@ class LeadRepository implements LeadRepositoryInterface {
     public function getAll($params)
     {
         $query = Lead::where([
-            ['identifier', '>', 0],
-            ['website_lead.lead_type', '<>', LeadType::TYPE_NONLEAD],
+                ['identifier', '>', 0],
+                [Lead::getTableName().'.lead_type', '<>', LeadType::TYPE_NONLEAD],
         ]);
 
         if (isset($params['dealer_id'])) {
@@ -118,6 +118,24 @@ class LeadRepository implements LeadRepositoryInterface {
         $query = $query->groupBy(Lead::getTableName().'.identifier');
 
         return $query->paginate($params['per_page'])->appends($params);
+    }
+
+    public function getEdgeDate($params)
+    {
+        $query = Lead::selectRaw('MIN(website_lead.date_submitted) AS min_date_submitted,
+                    MAX(website_lead.date_submitted) AS max_date_submitted')->where([
+                ['identifier', '>', 0],
+                [Lead::getTableName().'.lead_type', '<>', LeadType::TYPE_NONLEAD],
+        ]);
+
+        if (isset($params['dealer_id'])) {
+            $query = $query->where(Lead::getTableName().'.dealer_id', $params['dealer_id']);
+        }
+        /**
+         * Filters
+         */
+        $query = $this->addFiltersToQuery($query, $params, false, isset($params['sort']));
+        return $query->get()[0];
     }
 
     /**
@@ -394,11 +412,11 @@ class LeadRepository implements LeadRepositoryInterface {
 
 
         if (isset($filters['next_contact_from'])) {
-            $query = $this->addNextContactFromToQuery($query, $filters['next_contact_from']);
+            $query = $this->addNextContactFromToQuery($query, str_replace("T", " ", $filters['next_contact_from']));
         }
 
         if (isset($filters['next_contact_to'])) {
-            $query = $this->addNextContactToToQuery($query, $filters['next_contact_to']);
+            $query = $this->addNextContactToToQuery($query, str_replace("T", " ", $filters['next_contact_to']));
         }
 
         if((isset($filters['interacted_from']) || isset($filters['interacted_to'])) && !$noInteractionJoin) {
@@ -406,11 +424,11 @@ class LeadRepository implements LeadRepositoryInterface {
         }
 
         if (isset($filters['interacted_from'])) {
-            $query = $this->addInteractedFromToQuery($query, $filters['interacted_from']);
+            $query = $this->addInteractedFromToQuery($query, str_replace("T", " ", $filters['interacted_from']));
         }
 
         if (isset($filters['interacted_to'])) {
-            $query = $this->addInteractedToToQuery($query, $filters['interacted_to']);
+            $query = $this->addInteractedToToQuery($query, str_replace("T", " ", $filters['interacted_to']));
         }
 
         if (isset($filters['is_archived'])) {
