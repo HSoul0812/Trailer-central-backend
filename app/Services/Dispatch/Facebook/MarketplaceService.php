@@ -252,7 +252,7 @@ class MarketplaceService implements MarketplaceServiceInterface
      */
     private function getIntegrations(): Collection {
         $integrations = $this->marketplace->getAll([
-            'sort' => '-username'
+            'sort' => '-imported'
         ]);
 
         // Loop Facebook Integrations

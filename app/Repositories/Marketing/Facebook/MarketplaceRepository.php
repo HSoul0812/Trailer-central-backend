@@ -3,6 +3,7 @@
 namespace App\Repositories\Marketing\Facebook;
 
 use App\Exceptions\NotImplementedException;
+use App\Models\Marketing\Facebook\Listings;
 use App\Models\Marketing\Facebook\Marketplace;
 use App\Repositories\Traits\SortTrait;
 use App\Traits\Repository\Transaction;
@@ -32,6 +33,26 @@ class MarketplaceRepository implements MarketplaceRepositoryInterface {
         '-location' => [
             'field' => 'dealer_location_id',
             'direction' => 'ASC'
+        ],
+        'imported' => [
+            [
+                'field' => 'MAX(fbapp_listings.created_at)',
+                'direction' => 'DESC'
+            ],
+            [
+                'field' => 'created_at',
+                'direction' => 'DESC'
+            ]
+        ],
+        '-imported' => [
+            [
+                'field' => 'MIN(fbapp_listings.created_at)',
+                'direction' => 'ASC'
+            ],
+            [
+                'field' => 'created_at',
+                'direction' => 'ASC'
+            ]
         ],
         'created_at' => [
             'field' => 'created_at',
@@ -91,7 +112,9 @@ class MarketplaceRepository implements MarketplaceRepositoryInterface {
      * @return Collection of Marketplaces
      */
     public function getAll($params) {
-        $query = Marketplace::where('id', '>', 0);
+        $query = Marketplace::where('id', '>', 0)
+                            ->leftJoin(Listings::getTableName() . '.marketplace_id', '=',
+                                        Marketplace::getTableName() . '.id');
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 100;
