@@ -392,7 +392,6 @@ class LeadRepository implements LeadRepositoryInterface {
             $query = $this->addDateToToQuery($query, $filters['date_to']);
         }
 
-
         if (isset($filters['next_contact_from'])) {
             $query = $this->addNextContactFromToQuery($query, $filters['next_contact_from']);
         }
@@ -443,6 +442,14 @@ class LeadRepository implements LeadRepositoryInterface {
 
         if(isset($filters['lead_source'])) {
             $query = $this->addLeadSourceToQuery($query, $filters['lead_source']);
+        }
+
+        if(!isset($params['is_spam'])) {
+            $params['is_spam'] = 0;
+        }
+
+        if($params['is_spam'] !== -1) {
+            $query = $query->where(Lead::getTableName() . '.is_spam', '=', $filters['is_spam']);
         }
 
         return $query;
