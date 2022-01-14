@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
+use App\Utilities\TimeUtil;
 
 class LeadRepository implements LeadRepositoryInterface {
 
@@ -135,7 +136,7 @@ class LeadRepository implements LeadRepositoryInterface {
          * Filters
          */
         $query = $this->addFiltersToQuery($query, $params, false, isset($params['sort']));
-        return $query->get()[0];
+        return $query->first();
     }
 
     /**
@@ -412,11 +413,11 @@ class LeadRepository implements LeadRepositoryInterface {
 
 
         if (isset($filters['next_contact_from'])) {
-            $query = $this->addNextContactFromToQuery($query, str_replace("T", " ", $filters['next_contact_from']));
+            $query = $this->addNextContactFromToQuery($query, TimeUtil::convertTimeFormat($filters['next_contact_from'], TimeUtil::REQUEST_TIME_FORMAT, TimeUtil::MYSQL_TIME_FORMAT));
         }
 
         if (isset($filters['next_contact_to'])) {
-            $query = $this->addNextContactToToQuery($query, str_replace("T", " ", $filters['next_contact_to']));
+            $query = $this->addNextContactToToQuery($query, TimeUtil::convertTimeFormat($filters['next_contact_to'], TimeUtil::REQUEST_TIME_FORMAT, TimeUtil::MYSQL_TIME_FORMAT));
         }
 
         if((isset($filters['interacted_from']) || isset($filters['interacted_to'])) && !$noInteractionJoin) {
@@ -424,11 +425,11 @@ class LeadRepository implements LeadRepositoryInterface {
         }
 
         if (isset($filters['interacted_from'])) {
-            $query = $this->addInteractedFromToQuery($query, str_replace("T", " ", $filters['interacted_from']));
+            $query = $this->addInteractedFromToQuery($query, TimeUtil::convertTimeFormat($filters['interacted_from'], TimeUtil::REQUEST_TIME_FORMAT, TimeUtil::MYSQL_TIME_FORMAT));
         }
 
         if (isset($filters['interacted_to'])) {
-            $query = $this->addInteractedToToQuery($query, str_replace("T", " ", $filters['interacted_to']));
+            $query = $this->addInteractedToToQuery($query, TimeUtil::convertTimeFormat($filters['interacted_to'], TimeUtil::REQUEST_TIME_FORMAT, TimeUtil::MYSQL_TIME_FORMAT));
         }
 
         if (isset($filters['is_archived'])) {
