@@ -57,6 +57,7 @@ class Listings extends Model
         ]
     ];
 
+   
     /**
      * @const array Listing Statuses
      */
@@ -65,6 +66,21 @@ class Listings extends Model
         'deleted',
         'expired'
     ];
+
+    /**
+     * @const array Listing Status Active
+     */
+    const STATUS_ACTIVE = 'active';
+
+    /**
+     * @const array Listing Status Deleted
+     */
+    const STATUS_DELETED = 'deleted';
+
+    /**
+     * @const array Listing Status Expired
+     */
+    const STATUS_EXPIRED = 'expired';
 
 
     /**
