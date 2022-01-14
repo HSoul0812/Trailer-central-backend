@@ -112,7 +112,8 @@ class MarketplaceRepository implements MarketplaceRepositoryInterface {
      * @return Collection of Marketplaces
      */
     public function getAll($params) {
-        $query = Marketplace::where(Marketplace::getTableName() . '.id', '>', 0)
+        $query = Marketplace::select(Marketplace::getTableName() . '.*')
+                            ->where(Marketplace::getTableName() . '.id', '>', 0)
                             ->leftJoin(Listings::getTableName(),
                                         Listings::getTableName() . '.marketplace_id', '=',
                                         Marketplace::getTableName() . '.id');
