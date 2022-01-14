@@ -113,7 +113,8 @@ class MarketplaceRepository implements MarketplaceRepositoryInterface {
      */
     public function getAll($params) {
         $query = Marketplace::where('id', '>', 0)
-                            ->leftJoin(Listings::getTableName() . '.marketplace_id', '=',
+                            ->leftJoin(Listings::getTableName(),
+                                        Listings::getTableName() . '.marketplace_id', '=',
                                         Marketplace::getTableName() . '.id');
 
         if (!isset($params['per_page'])) {
