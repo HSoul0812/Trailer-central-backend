@@ -137,7 +137,8 @@ class MarketplaceRepository implements MarketplaceRepositoryInterface {
             $query = $this->addSortQuery($query, $params['sort']);
         }
 
-        return $query->paginate($params['per_page'])->appends($params);
+        return $query->groupBy(Marketplace::getTableName() . '.id')
+                     ->paginate($params['per_page'])->appends($params);
     }
 
     /**
