@@ -130,7 +130,7 @@ class MarketplaceRepository implements MarketplaceRepositoryInterface {
         }
 
         if (isset($params['id'])) {
-            $query = $query->whereIn('id', $params['id']);
+            $query = $query->whereIn(Marketplace::getTableName() . '.id', $params['id']);
         }
 
         if (isset($params['sort'])) {
