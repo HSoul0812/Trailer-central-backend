@@ -130,7 +130,7 @@ class ListingRepository implements ListingRepositoryInterface {
      * 
      * @param Marketplace $integration
      * @param array $params
-     * @return LengthAwarePaginator<Listings>
+     * @return LengthAwarePaginator<Inventory>
      */
     public function getAllMissing(Marketplace $integration, array $params): LengthAwarePaginator {
         // Initialize Inventory Query
@@ -212,7 +212,7 @@ class ListingRepository implements ListingRepositoryInterface {
         }
 
         // Require Inventory
-        $query = $query->with('inventory')->with('inventory.attributeValues')
+        $query = $query->with('marketplace')->with('inventory')->with('inventory.attributeValues')
                         ->with('inventory.orderedImages')->with('inventory.dealerLocation');
 
         // Return Paginated Inventory

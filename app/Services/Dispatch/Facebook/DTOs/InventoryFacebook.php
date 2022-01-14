@@ -433,6 +433,38 @@ class InventoryFacebook
         ]);
     }
 
+    /**
+     * Create InventoryFacebook From Inventory
+     * 
+     * @param Listings $listing
+     * @return InventoryFacebook
+     */
+    public static function getFromListings(Listings $listing): InventoryFacebook
+    {
+        // Create Inventory Mapping
+        $inventory = $listing->inventory;
+        return new self([
+            'inventory_id' => $inventory->inventory_id,
+            'facebook_id' => $listing->facebook_id,
+            'page_url' => $listing->marketplace->page_url,
+            'entity_type_id' => $inventory->entity_type_id,
+            'category' => $inventory->category,
+            'price' => $inventory->price,
+            'year' => $inventory->year,
+            'manufacturer' => $inventory->manufacturer,
+            'model' => $inventory->model,
+            'description' => $inventory->description,
+            'dealer_location_id' => $inventory->dealer_location_id,
+            'location' => $inventory->dealerLocation->city_region,
+            'color' => $inventory->attributes->get('color'),
+            'mileage' => $inventory->attributes->get('mileage'),
+            'body' => $inventory->attributes->get('body'),
+            'transmission' => $inventory->attributes->get('transmission'),
+            'fuel_type' => $inventory->attributes->get('fuel_type'),
+            'images' => $inventory->orderedImages
+        ]);
+    }
+
 
     /**
      * Get Description With Markdown Conversion
