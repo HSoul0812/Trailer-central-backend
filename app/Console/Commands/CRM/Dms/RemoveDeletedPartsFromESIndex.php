@@ -3,15 +3,15 @@
 namespace App\Console\Commands\CRM\Dms;
 
 use App\Domains\ElasticSearch\Actions\RemoveDeletedModelFromESIndexAction;
-use App\Models\CRM\User\Customer;
+use App\Models\Parts\Part;
 use App\Models\User\User;
 use Illuminate\Console\Command;
 
-class RemoveDeletedCustomersFromESIndex extends Command
+class RemoveDeletedPartsFromESIndex extends Command
 {
-    protected $signature = 'crm:dms:remove-deleted-customers-from-es-index {dealer_id : The dealer id to remove the deleted parts index}';
+    protected $signature = 'crm:dms:remove-deleted-parts-from-es-index {dealer_id : The dealer id to remove the deleted parts index}';
 
-    protected $description = 'Remove the deleted customer models from the ElasticSearch index';
+    protected $description = 'Remove the deleted part models from the ElasticSearch index';
 
     public function handle(RemoveDeletedModelFromESIndexAction $action)
     {
@@ -26,12 +26,12 @@ class RemoveDeletedCustomersFromESIndex extends Command
 
         // Use the action class to do the heavy lifting
         $result = $action
-            ->withModel(Customer::class)
+            ->withModel(Part::class)
             ->withMustRaw([
                 ['match_phrase' => ['dealer_id' => $dealerId]],
             ])
-            ->withOnDeletedDocumentIdCallback(function (string $customerId) {
-                $this->info("Deleted customer id $customerId from ES index.");
+            ->withOnDeletedDocumentIdCallback(function (string $partId) {
+                $this->info("Deleted part id $partId from ES index.");
             })
             ->execute();
 
