@@ -444,11 +444,10 @@ class LeadRepository implements LeadRepositoryInterface {
             $query = $this->addLeadSourceToQuery($query, $filters['lead_source']);
         }
 
-        if(!isset($params['is_spam'])) {
-            $params['is_spam'] = 0;
+        if(!isset($filters['is_spam'])) {
+            $filters['is_spam'] = 0;
         }
-
-        if($params['is_spam'] !== -1) {
+        if($filters['is_spam'] !== -1) {
             $query = $query->where(Lead::getTableName() . '.is_spam', '=', $filters['is_spam']);
         }
 
