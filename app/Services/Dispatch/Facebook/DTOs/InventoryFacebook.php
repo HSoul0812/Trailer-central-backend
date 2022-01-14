@@ -4,6 +4,7 @@ namespace App\Services\Dispatch\Facebook\DTOs;
 
 use App\Models\Inventory\Inventory;
 use App\Models\Marketing\Facebook\Marketplace;
+use App\Models\Marketing\Facebook\Listings;
 use App\Traits\MarkdownHelper;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
@@ -430,6 +431,38 @@ class InventoryFacebook
             'transmission' => $inventory->attributes->get('transmission'),
             'fuel_type' => $inventory->attributes->get('fuel_type'),
             'images' => $inventory->orderedImages
+        ]);
+    }
+
+    /**
+     * Create InventoryFacebook From Inventory
+     * 
+     * @param Listings $listing
+     * @return InventoryFacebook
+     */
+    public static function getFromListings(Listings $listing): InventoryFacebook
+    {
+        // Create Inventory Mapping
+        $inventory = $listing->inventory ?? null;
+        return new self([
+            'inventory_id' => $inventory ? $inventory->inventory_id : $listing->inventory_id,
+            'facebook_id' => $listing->facebook_id,
+            'page_url' => $listing->marketplace->page_url,
+            'entity_type_id' => $inventory ? $inventory->entity_type_id : null,
+            'category' => $inventory ? $inventory->category : null,
+            'price' => $inventory ? $inventory->price : null,
+            'year' => $inventory ? $inventory->year : null,
+            'manufacturer' => $inventory ? $inventory->manufacturer : null,
+            'model' => $inventory ? $inventory->model : null,
+            'description' => $inventory ? $inventory->description : null,
+            'dealer_location_id' => $inventory ? $inventory->dealer_location_id : null,
+            'location' => $inventory ? $inventory->dealerLocation->city_region : null,
+            'color' => $inventory ? $inventory->attributes->get('color') : null,
+            'mileage' => $inventory ? $inventory->attributes->get('mileage') : null,
+            'body' => $inventory ? $inventory->attributes->get('body') : null,
+            'transmission' => $inventory ? $inventory->attributes->get('transmission') : null,
+            'fuel_type' => $inventory ? $inventory->attributes->get('fuel_type') : null,
+            'images' => $inventory ? $inventory->orderedImages : null
         ]);
     }
 
