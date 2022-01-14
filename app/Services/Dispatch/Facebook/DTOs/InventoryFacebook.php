@@ -4,6 +4,7 @@ namespace App\Services\Dispatch\Facebook\DTOs;
 
 use App\Models\Inventory\Inventory;
 use App\Models\Marketing\Facebook\Marketplace;
+use App\Models\Marketing\Facebook\Listings;
 use App\Traits\MarkdownHelper;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
