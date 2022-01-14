@@ -9,6 +9,7 @@ use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\Inventory\InventoryRequest;
 use App\Http\Requests\UpdateRequestInterface;
 use App\Services\Inventory\InventoryServiceInterface;
+use App\Transformers\Inventory\InventoryListResponseTransformer;
 use App\Transformers\Inventory\InventoryTransformer;
 use Dingo\Api\Http\Response;
 
@@ -22,7 +23,7 @@ class InventoryController extends AbstractRestfulController
     public function index(IndexRequestInterface $request): Response
     {
         $result = $this->inventoryService->list($request->all());
-        return $this->response->paginator($result, new InventoryTransformer());
+        return $this->response->item($result, new InventoryListResponseTransformer());
     }
 
     public function create(CreateRequestInterface $request)

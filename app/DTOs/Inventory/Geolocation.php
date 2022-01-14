@@ -5,7 +5,7 @@ namespace App\DTOs\Inventory;
 use Illuminate\Contracts\Support\Arrayable;
 use JetBrains\PhpStorm\Pure;
 
-class GeoLocation implements Arrayable
+class Geolocation implements Arrayable
 {
     use \App\DTOs\Arrayable;
 

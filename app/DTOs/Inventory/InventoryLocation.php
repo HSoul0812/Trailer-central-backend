@@ -19,7 +19,7 @@ class InventoryLocation implements Arrayable
     public string $region;
     public string $postalCode;
     public string $country;
-    public GeoLocation $geo;
+    public Geolocation $geo;
 
     #[Pure] public static function fromData(array $data):self
     {
@@ -34,7 +34,7 @@ class InventoryLocation implements Arrayable
         $obj->region = $data['region'];
         $obj->postalCode = $data['postalCode'];
         $obj->country = $data['country'];
-        $obj->geo = GeoLocation::fromData($data['geo']);
+        $obj->geo = Geolocation::fromData($data['geo']);
         return $obj;
     }
 }

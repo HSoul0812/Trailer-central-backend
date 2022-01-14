@@ -2,9 +2,9 @@
 
 namespace App\Services\Inventory;
 
-use Illuminate\Contracts\Pagination\Paginator;
+use App\DTOs\Inventory\InventoryListResponse;
 
 interface InventoryServiceInterface
 {
-    public function list(array $params): Paginator;
+    public function list(array $params): InventoryListResponse;
 }
