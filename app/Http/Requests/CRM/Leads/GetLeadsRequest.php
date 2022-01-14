@@ -22,6 +22,5 @@ class GetLeadsRequest extends Request
         'sort' => 'in:no_due_past_due_future_due,created_at,future_due_past_due_no_due,-most_recent,most_recent,status',
         'per_page' => 'integer',
         'page' => 'integer',
-        'is_spam' => 'boolean',
     ];
 }
