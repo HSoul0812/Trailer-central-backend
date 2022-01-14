@@ -3,6 +3,7 @@
 namespace App\Repositories\Marketing\Facebook;
 
 use App\Exceptions\NotImplementedException;
+use App\Models\Marketing\Facebook\Listings;
 use App\Models\Marketing\Facebook\Marketplace;
 use App\Repositories\Traits\SortTrait;
 use App\Traits\Repository\Transaction;
@@ -18,35 +19,55 @@ class MarketplaceRepository implements MarketplaceRepositoryInterface {
      */
     private $sortOrders = [
         'username' => [
-            'field' => 'fb_username',
+            'field' => 'fbapp_marketplace.fb_username',
             'direction' => 'DESC'
         ],
         '-username' => [
-            'field' => 'fb_username',
+            'field' => 'fbapp_marketplace.fb_username',
             'direction' => 'ASC'
         ],
         'location' => [
-            'field' => 'dealer_location_id',
+            'field' => 'fbapp_marketplace.dealer_location_id',
             'direction' => 'DESC'
         ],
         '-location' => [
-            'field' => 'dealer_location_id',
+            'field' => 'fbapp_marketplace.dealer_location_id',
             'direction' => 'ASC'
         ],
+        'imported' => [
+            [
+                'field' => 'MAX(fbapp_listings.created_at)',
+                'direction' => 'DESC'
+            ],
+            [
+                'field' => 'fbapp_marketplace.created_at',
+                'direction' => 'DESC'
+            ]
+        ],
+        '-imported' => [
+            [
+                'field' => 'MIN(fbapp_listings.created_at)',
+                'direction' => 'ASC'
+            ],
+            [
+                'field' => 'fbapp_marketplace.created_at',
+                'direction' => 'ASC'
+            ]
+        ],
         'created_at' => [
-            'field' => 'created_at',
+            'field' => 'fbapp_marketplace.created_at',
             'direction' => 'DESC'
         ],
         '-created_at' => [
-            'field' => 'created_at',
+            'field' => 'fbapp_marketplace.created_at',
             'direction' => 'ASC'
         ],
         'updated_at' => [
-            'field' => 'updated_at',
+            'field' => 'fbapp_marketplace.updated_at',
             'direction' => 'DESC'
         ],
         '-updated_at' => [
-            'field' => 'updated_at',
+            'field' => 'fbapp_marketplace.updated_at',
             'direction' => 'ASC'
         ]
     ];
@@ -91,7 +112,10 @@ class MarketplaceRepository implements MarketplaceRepositoryInterface {
      * @return Collection of Marketplaces
      */
     public function getAll($params) {
-        $query = Marketplace::where('id', '>', 0);
+        $query = Marketplace::where(Marketplace::getTableName() . '.id', '>', 0)
+                            ->leftJoin(Listings::getTableName(),
+                                        Listings::getTableName() . '.marketplace_id', '=',
+                                        Marketplace::getTableName() . '.id');
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 100;
@@ -106,14 +130,15 @@ class MarketplaceRepository implements MarketplaceRepositoryInterface {
         }
 
         if (isset($params['id'])) {
-            $query = $query->whereIn('id', $params['id']);
+            $query = $query->whereIn(Marketplace::getTableName() . '.id', $params['id']);
         }
 
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
         }
 
-        return $query->paginate($params['per_page'])->appends($params);
+        return $query->groupBy(Marketplace::getTableName() . '.id')
+                     ->paginate($params['per_page'])->appends($params);
     }
 
     /**
