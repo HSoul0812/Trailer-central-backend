@@ -19,19 +19,19 @@ class MarketplaceRepository implements MarketplaceRepositoryInterface {
      */
     private $sortOrders = [
         'username' => [
-            'field' => 'fb_username',
+            'field' => 'fbapp_marketplace.fb_username',
             'direction' => 'DESC'
         ],
         '-username' => [
-            'field' => 'fb_username',
+            'field' => 'fbapp_marketplace.fb_username',
             'direction' => 'ASC'
         ],
         'location' => [
-            'field' => 'dealer_location_id',
+            'field' => 'fbapp_marketplace.dealer_location_id',
             'direction' => 'DESC'
         ],
         '-location' => [
-            'field' => 'dealer_location_id',
+            'field' => 'fbapp_marketplace.dealer_location_id',
             'direction' => 'ASC'
         ],
         'imported' => [
@@ -40,7 +40,7 @@ class MarketplaceRepository implements MarketplaceRepositoryInterface {
                 'direction' => 'DESC'
             ],
             [
-                'field' => 'created_at',
+                'field' => 'fbapp_marketplace.created_at',
                 'direction' => 'DESC'
             ]
         ],
@@ -50,24 +50,24 @@ class MarketplaceRepository implements MarketplaceRepositoryInterface {
                 'direction' => 'ASC'
             ],
             [
-                'field' => 'created_at',
+                'field' => 'fbapp_marketplace.created_at',
                 'direction' => 'ASC'
             ]
         ],
         'created_at' => [
-            'field' => 'created_at',
+            'field' => 'fbapp_marketplace.created_at',
             'direction' => 'DESC'
         ],
         '-created_at' => [
-            'field' => 'created_at',
+            'field' => 'fbapp_marketplace.created_at',
             'direction' => 'ASC'
         ],
         'updated_at' => [
-            'field' => 'updated_at',
+            'field' => 'fbapp_marketplace.updated_at',
             'direction' => 'DESC'
         ],
         '-updated_at' => [
-            'field' => 'updated_at',
+            'field' => 'fbapp_marketplace.updated_at',
             'direction' => 'ASC'
         ]
     ];
