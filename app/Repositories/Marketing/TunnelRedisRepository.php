@@ -70,7 +70,8 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
     {
         $this->log = Log::channel('tunnels');
         $this->redis = Redis::connection();
-        $this->log->info('Initialized Redis on TunnelRedisRepository ' . $this->redis->getName());
+        $this->log->info('Initialized Redis on for Tunnels Using ' . $this->redis->getName());
+        $this->log->info('Found Keys: ', $this->redis->keys('*'));
     }
 
     /**
@@ -79,24 +80,7 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
      */
     public function create($params)
     {
-        // Log Create
-        $this->log->info('Creating tunnel with params ', $params);
-
-        // Domain is Required
-        if (!isset($params['domain'])) {
-            $this->log->error('Param domain is missing');
-            throw new \InvalidArgumentException('Domain param is missing');
-        }
-
-        // Value is Required
-        if (!isset($params['value']) || !is_bool($params['value'])) {
-            $this->log->error('Param value is missing');
-            throw new \InvalidArgumentException('Value param is missing');
-        }
-
-        // Throw NotImplementedException
         throw new NotImplementedException;
-        //return $this->redis->set($params['domain'], $params['value']);
     }
 
     /**
@@ -105,24 +89,7 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
      */
     public function update($params)
     {
-        // Log Update
-        $this->log->info('Updating tunnel with params ', $params);
-
-        // Domain is Required
-        if (!isset($params['domain'])) {
-            $this->log->error('Param domain is missing');
-            throw new \InvalidArgumentException('Domain param is missing');
-        }
-
-        // Value is Required
-        if (!isset($params['value']) || !is_bool($params['value'])) {
-            $this->log->error('Param value is missing');
-            throw new \InvalidArgumentException('Value param is missing');
-        }
-
-        // Throw NotImplementedException
         throw new NotImplementedException;
-        //return $this->redis->set($params['domain'], $params['value']);
     }
 
     /**
