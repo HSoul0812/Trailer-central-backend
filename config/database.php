@@ -123,6 +123,8 @@ return [
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
+            //'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_database_'),
+            // NOTE: We can't use prefix across multiple redis connections!
         ],
 
         'default' => [
@@ -131,7 +133,6 @@ return [
             'password' => env('REDIS_PASSWORD', null),
             'port' => env('REDIS_PORT', '6379'),
             'database' => env('REDIS_DB', '0'),
-            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_database_'),
         ],
 
         'cache' => [
@@ -154,8 +155,7 @@ return [
             'host' => env('REDIS_HOST', '127.0.0.1'),
             'password' => env('REDIS_PASSWORD', null),
             'port' => env('REDIS_PORT', '6379'),
-            'database' => env('REDIS_CACHE_DB', '0'),
-            'prefix' => env('REDIS_PREFIX_TUNNELS', 'tunnels:'),
+            'database' => env('REDIS_CACHE_DB', '0')
         ],
     ],
 ];
