@@ -70,7 +70,7 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
     {
         $this->log = Log::channel('tunnels');
         $this->redis = Redis::connection();
-        var_dump($this->redis);
+        var_dump($this->redis->client());
         $this->log->info('Initialized Redis on TunnelRedisRepository ' . $this->redis->getName());
     }
 
@@ -158,7 +158,7 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
         // Get Data
         $key = 'tunnels:info:' . $server . ':' . $dealerId . ':' . $tunnelId;
         $this->log->info('Passing HGETALL ' . $key . ' to Redis');
-        $tunnelData = $this->redis->command('HGETALL ' . $key);
+        $tunnelData = $this->redis->hgetall($key);
         $this->log->info('Retrieved tunnel details for tunnel ID #' . $tunnelId . 
                             'on Dealer ID #' . $dealerId. ': ', $tunnelData);
 
@@ -194,8 +194,8 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
         } else {
             // Get Tunnels By Dealer
             $key = 'tunnels:all:' . $server;
-            $this->log->info('Passing ' . $key . ' to Redis');
-            $tunnelIds = $this->redis->command('SMEMBERS ' . $key);
+            $this->log->info('Passing SMEMBERS ' . $key . ' to Redis');
+            $tunnelIds = $this->redis->smembers($key);
             $this->log->info('Returned ' . count($tunnelIds) . ' tunnels in ' .
                                 'Total on server ' . $server, $tunnelIds);
 
@@ -239,7 +239,7 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
         // Get Tunnels By Dealer
         $key = 'tunnels:byDealerId:' . $server . ':' . $dealerId;
         $this->log->info('Passing SMEMBERS ' . $key . ' to Redis');
-        $tunnelIds = $this->redis->command('SMEMBERS ' . $key);
+        $tunnelIds = $this->redis->smembers($key);
         $this->log->info('Returned ' . count($tunnelIds) . ' tunnels for Dealer #' .
                             $dealerId . ' on server ' . $server, $tunnelIds);
 
