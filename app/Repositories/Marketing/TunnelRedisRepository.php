@@ -133,7 +133,7 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
             'id' => $params['id'],
             'dealer_id' => $dealerId,
             'port' => $tunnelData['port'],
-            'last_ping' => $tunnelData['lastPingAt']
+            'last_ping' => $tunnelData['lastPingTime']
         ]);
     }
 
