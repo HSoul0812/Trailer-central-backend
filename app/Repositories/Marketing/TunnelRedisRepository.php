@@ -71,6 +71,7 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
         $this->log = Log::channel('tunnels');
         $this->redis = Redis::connection('dealer-tunnels');
         $this->log->info('Initialized Redis on for Tunnels Using ' . $this->redis->getName());
+        $this->log->info('Found Keys: ', $this->redis->keys('*'));
     }
 
     /**
@@ -121,7 +122,7 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
         $server = $params['tunnel_server'] ?? self::SERVER_DEFAULT;
 
         // Get Data
-        $key = 'info:' . $server . ':' . $dealerId . ':' . $tunnelId;
+        $key = 'tunnels:info:' . $server . ':' . $dealerId . ':' . $tunnelId;
         $this->log->info('Passing HGETALL ' . $key . ' to Redis');
         $tunnelData = $this->redis->hgetall($key);
         $this->log->info('Retrieved tunnel details for tunnel ID #' . $tunnelId . 
@@ -158,7 +159,7 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
             $dealerTunnels = $this->getByDealer($params['dealer_id'], $server);
         } else {
             // Get Tunnels By Dealer
-            $key = 'all:' . $server;
+            $key = 'tunnels:all:' . $server;
             $this->log->info('Passing SMEMBERS ' . $key . ' to Redis');
             $tunnelIds = $this->redis->smembers($key);
             $this->log->info('Returned ' . count($tunnelIds) . ' tunnels in ' .
@@ -202,7 +203,7 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
     public function getByDealer(int $dealerId, string $server = self::SERVER_DEFAULT): Collection
     {
         // Get Tunnels By Dealer
-        $key = 'byDealerId:' . $server . ':' . $dealerId;
+        $key = 'tunnels:byDealerId:' . $server . ':' . $dealerId;
         $this->log->info('Passing SMEMBERS ' . $key . ' to Redis');
         $tunnelIds = $this->redis->smembers($key);
         $this->log->info('Returned ' . count($tunnelIds) . ' tunnels for Dealer #' .
