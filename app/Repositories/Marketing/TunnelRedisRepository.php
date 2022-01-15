@@ -8,6 +8,7 @@ use App\Repositories\Marketing\TunnelRepositoryInterface;
 use Illuminate\Redis\Connections\Connection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class TunnelRedisRepository
@@ -60,9 +61,16 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
      */
     private $redis;
 
+    /**
+     * @var Log
+     */
+    private $log;
+
     public function __construct()
     {
+        $this->log = Log::channel('tunnels');
         $this->redis = Redis::connection();
+        $this->log->info('Initialized Redis on TunnelRedisRepository')
     }
 
     /**
@@ -71,14 +79,22 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
      */
     public function create($params)
     {
+        // Log Create
+        $this->log->info('Creating tunnel with params ', $params);
+
+        // Domain is Required
         if (!isset($params['domain'])) {
-            throw new \InvalidArgumentException('Domain param is missed');
+            $this->log->error('Param domain is missing');
+            throw new \InvalidArgumentException('Domain param is missing');
         }
 
+        // Value is Required
         if (!isset($params['value']) || !is_bool($params['value'])) {
-            throw new \InvalidArgumentException('Value param is missed');
+            $this->log->error('Param value is missing');
+            throw new \InvalidArgumentException('Value param is missing');
         }
-        
+
+        // Throw NotImplementedException
         throw new NotImplementedException;
         //return $this->redis->set($params['domain'], $params['value']);
     }
@@ -89,16 +105,23 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
      */
     public function update($params)
     {
+        // Log Update
+        $this->log->info('Updating tunnel with params ', $params);
+
+        // Domain is Required
         if (!isset($params['domain'])) {
-            throw new \InvalidArgumentException('Domain param is missed');
+            $this->log->error('Param domain is missing');
+            throw new \InvalidArgumentException('Domain param is missing');
         }
 
+        // Value is Required
         if (!isset($params['value']) || !is_bool($params['value'])) {
-            throw new \InvalidArgumentException('Value param is missed');
+            $this->log->error('Param value is missing');
+            throw new \InvalidArgumentException('Value param is missing');
         }
 
+        // Throw NotImplementedException
         throw new NotImplementedException;
-
         //return $this->redis->set($params['domain'], $params['value']);
     }
 
@@ -111,15 +134,20 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
      */
     public function get($params)
     {
+        // Log Get
+        $this->log->info('Getting tunnel with params ', $params);
+
         // Get Dealer ID
         $dealerId = $params['dealer_id'];
         if(empty($dealerId)) {
+            $this->log->error('Param dealer_id is missing');
             throw new DealerIdRequiredForGetTunnelException;
         }
 
         // Get Tunnel ID
         $tunnelId = $params['id'];
         if(empty($tunnelId)) {
+            $this->log->error('Param id is missing');
             throw new IdRequiredForGetTunnelException;
         }
 
@@ -128,7 +156,10 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
 
         // Get Data
         $key = 'tunnels:info:' . $server . ':' . $dealerId . ':' . $tunnelId;
+        $this->log->info('Passing HGETALL ' . $key . ' to Redis');
         $tunnelData = $this->redis->hgetall($key);
+        $this->log->info('Retrieved tunnel details for tunnel ID #' . $tunnelId . 
+                            'on Dealer ID #' . $dealerId. ': ', $tunnelData);
 
         // Add Port to Tunnels Array
         return new DealerTunnel([
@@ -154,13 +185,18 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
     {
         // Get Tunnels Server
         $server = $params['tunnel_server'] ?? self::SERVER_DEFAULT;
+        $this->log->info('Getting All Tunnels for Server ' . $server . ' with Params', $params);
 
         // Get By Dealer ID?
         if(isset($params['dealer_id'])) {
             $dealerTunnels = $this->getByDealer($params['dealer_id'], $server);
         } else {
             // Get Tunnels By Dealer
-            $tunnelIds = $this->redis->smembers('tunnels:all:' . $server);
+            $key = 'tunnels:all:' . $server;
+            $this->log->info('Passing SMEMBERS ' . $key . ' to Redis');
+            $tunnelIds = $this->redis->smembers($key);
+            $this->log->info('Returned ' . count($tunnelIds) . ' tunnels in ' .
+                                'Total on server ' . $server, $tunnelIds);
 
             // Loop Tunnel ID's
             $tunnels = [];
@@ -183,6 +219,7 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
 
                 // Get Dealer Tunnel
                 $dealerTunnels->push($dealerTunnel);
+                $tunnels[] = $dealerTunnel->port;
             }
         }
 
@@ -199,7 +236,11 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
     public function getByDealer(int $dealerId, string $server = self::SERVER_DEFAULT): Collection
     {
         // Get Tunnels By Dealer
-        $tunnelIds = $this->redis->smembers('tunnels:byDealerId:' . $server . ':' . $dealerId);
+        $key = 'tunnels:byDealerId:' . $server . ':' . $dealerId;
+        $this->log->info('Passing SMEMBERS ' . $key . ' to Redis');
+        $tunnelIds = $this->redis->smembers($key);
+        $this->log->info('Returned ' . count($tunnelIds) . ' tunnels for Dealer #' .
+                            $dealerId . ' on server ' . $server, $tunnelIds);
 
         // Loop Tunnel ID's
         $tunnels = [];
@@ -242,6 +283,7 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
             $sort = self::DEFAULT_SORT;
             $order = $this->sortOrders[$sort];
         }
+        $this->log->info('Sorting ' . $tunnels->count() . ' Tunnels by Field ' . $order['field']);
 
         // Loop Tunnels
         $tunnels->sort(function($a, $b) use($order) {
