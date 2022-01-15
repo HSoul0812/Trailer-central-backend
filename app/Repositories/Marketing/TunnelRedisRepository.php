@@ -70,8 +70,6 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
     {
         $this->log = Log::channel('tunnels');
         $this->redis = Redis::connection();
-        $client = $this->redis->client();
-        var_dump($client->getOptions());
         $this->log->info('Initialized Redis on TunnelRedisRepository ' . $this->redis->getName());
     }
 
