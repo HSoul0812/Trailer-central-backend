@@ -35,7 +35,12 @@ return [
         'key' => env('HERE_API_KEY', ''),
     ],
 
+    'trailercentral' => [
+        'api'          => env('TC_API_URL', 'https://api.v1.staging.trailercentral.com/api/'),
+        'access_token' => env('TC_API_ACCESS_TOKEN', 'f3c74ad00f954cc698face16ff78d791'),
+    ],
+
     'tomtom' => [
         'key' => env('TOMTOM_API_KEY', ''),
-    ]
+    ],
 ];
