@@ -18,11 +18,7 @@ class RemoveDeletedModelFromESIndexActionTest extends TestCase
         /** @var Client $esClient */
         $esClient = $this->app->make(Client::class);
 
-        // Use our test dealer id here for simplicity
-        $dealerId = 1001;
-
         $customer = factory(Customer::class)->make();
-        $customer->dealer_id = $dealerId;
         $documentId = Str::random();
 
         $createResult = $esClient->create([
@@ -47,7 +43,7 @@ class RemoveDeletedModelFromESIndexActionTest extends TestCase
             ->withMustRaw(
                 [
                     'match_phrase' => [
-                        'dealer_id' => $dealerId
+                        '_id' => $documentId
                     ]
                 ],
             )
