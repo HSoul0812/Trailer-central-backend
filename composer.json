@@ -49,6 +49,7 @@
         "microsoft/microsoft-graph": "^1.34",
         "phenx/php-svg-lib": "0.3.3",
         "php-ews/php-ews": "~1.0",
+        "pixel418/markdownify": "^2.3",
         "predis/predis": "^1.1",
         "psr/log": "^1.0",
         "spatie/laravel-sitemap": "^5.7",
