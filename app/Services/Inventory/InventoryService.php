@@ -1,11 +1,10 @@
 <?php
 
-use GuzzleHttp\Exception\GuzzleException;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-
-<<<<<<< HEAD
 namespace App\Services\Inventory;
 
+use App\DTOs\Inventory\TcApiResponseInventory;
+use GuzzleHttp\Exception\GuzzleException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use App\DTOs\Inventory\Inventory;
 use App\DTOs\Inventory\InventoryListResponse;
 use App\Models\Geolocation\Geolocation;
@@ -15,137 +14,6 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Pagination\LengthAwarePaginator;
 use JetBrains\PhpStorm\ArrayShape;
 use JetBrains\PhpStorm\Pure;
-
-class SearchQueryBuilder {
-    private array $queries = [];
-    private bool $willPaginate = false;
-    private ?int $page = null;
-    private ?int $pageSize = null;
-    private ?array $globalAggregations = null;
-    private ?array $filterAggregations = null;
-    private ?array $geoScore = null;
-
-    public function getWillPaginate(): bool {
-        return $this->willPaginate;
-    }
-
-    public function getPage(): ?int {
-        return $this->page;
-    }
-
-    public function getPageSize(): ?int {
-        return $this->pageSize;
-    }
-
-    public function rangeQuery(string $fieldKey, $min, $max) {
-        if($min != null || $max != null) {
-            $rangeQuery = [
-                'range' => [
-                    $fieldKey => []
-                ]
-            ];
-            if($min != null) {
-                $rangeQuery['range'][$fieldKey]['gte'] = $min;
-            }
-            if($max != null) {
-                $rangeQuery['range'][$fieldKey]['lte'] = $max;
-            }
-
-            $this->queries[] = $rangeQuery;
-        }
-        return $this;
-    }
-
-    public function termQuery(string $fieldKey, $value) {
-        if($value != null) {
-            $this->queries[] = [
-                [
-                    'term' => [
-                        $fieldKey => $value
-                    ]
-                ]
-            ];
-        }
-        return $this;
-    }
-
-    public function geoScoring(float $lat, float $lng) {
-        $this->geoScore = [
-            'lat' => $lat,
-            'lon' => $lng
-        ];
-        return $this;
-    }
-
-    public function globalAggregate(array $aggregations) {
-        $this->globalAggregations = $aggregations;
-        return $this;
-    }
-
-    public function filterAggregate(array $aggregations) {
-        $this->filterAggregations = $aggregations;
-        return $this;
-    }
-
-    public function paginate(int $page, int $pageSize) {
-        $this->willPaginate = true;
-        $this->page = $page;
-        $this->pageSize = $pageSize;
-    }
-
-    public function build(): array {
-        $result = [];
-
-        if($this->willPaginate) {
-            $result['from'] = max(($this->page - 1) * $this->pageSize, 0);
-            $result['size'] = $this->pageSize;
-        }
-
-        if(count($this->queries) > 0) {
-            if($this->geoScore) {
-                $result['query'] = [
-                    'function_score' => [
-                        'query' => [
-                            'bool' => [
-                                'must' => $this->queries
-                            ]
-                        ],
-                        'script_score' => [
-                            'source' => "double d; if(doc['location.geo'].value != null) { d = doc['location.geo'].planeDistance(params.lat, params.lng) * 0.000621371; } else { return 0.1; } if(d >= (params.grouping*params.fromScore)) { return 0.2; } else { return params.fromScore - Math.floor(d\/params.grouping); ",
-                            'params' => [
-                                "lat" => $this->geoScore['lat'],
-							    "lng" => $this->geoScore['lon'],
-							    "fromScore" => 100,
-							    "grouping" => 60
-                            ]
-                        ]
-                    ]
-
-                ];
-            } else {
-                $result['query'] = [
-                    'bool' => [
-                        'must' => $this->queries
-                    ]
-                ];
-            }
-        }
-
-        $result['aggregations'] = array_merge(
-            [],
-            $this->globalAggregations ?? [],
-            $this->filterAggregations ? [
-                'filter_aggs' => [
-                    'filter' => [
-                        'bool' => ['must' => $this->queries]
-                    ],
-                    'aggregations' => $this->filterAggregations
-                ]
-            ] : []
-        );
-        return $result;
-    }
-}
 
 class InventoryService implements InventoryServiceInterface
 {
@@ -211,8 +79,8 @@ class InventoryService implements InventoryServiceInterface
     }
 
     #[ArrayShape(['from' => "int", 'size' => "int", 'query' => "array[]", 'aggregations' => "array"])]
-    private function buildSearchQuery(array $params): SearchQueryBuilder {
-        $queryBuilder = new SearchQueryBuilder();
+    private function buildSearchQuery(array $params): InventorySearchQueryBuilder {
+        $queryBuilder = new InventorySearchQueryBuilder();
         $location = $this->getGeolocation($params);
 
         $this->buildTermQueries($queryBuilder, $params);
@@ -227,11 +95,11 @@ class InventoryService implements InventoryServiceInterface
         return $queryBuilder;
     }
 
-    private function buildGeoScoring(SearchQueryBuilder $queryBuilder, Geolocation $location) {
+    private function buildGeoScoring(InventorySearchQueryBuilder $queryBuilder, Geolocation $location) {
         $queryBuilder->geoScoring($location->latitude, $location->longitude);
     }
 
-    private function buildAggregations(SearchQueryBuilder $queryBuilder, array $params) {
+    private function buildAggregations(InventorySearchQueryBuilder $queryBuilder, array $params) {
         $queryBuilder->globalAggregate([
             'pull_type' => ['terms' => ['field' => 'pullType']],
             'color' =>  ['terms' => ['field' => 'color']],
@@ -266,19 +134,19 @@ class InventoryService implements InventoryServiceInterface
         ]);
     }
 
-    private function buildPaginateQuery(SearchQueryBuilder $queryBuilder, array $params) {
+    private function buildPaginateQuery(InventorySearchQueryBuilder $queryBuilder, array $params) {
         $currentPage = LengthAwarePaginator::resolveCurrentPage();
         $queryBuilder->paginate($currentPage, $params['per_page'] ?? self::PAGE_SIZE);
     }
 
-    private function buildTermQueries(SearchQueryBuilder $queryBuilder, array $params) {
+    private function buildTermQueries(InventorySearchQueryBuilder $queryBuilder, array $params) {
         $queryBuilder->termQuery('isRental', false);
         foreach(self::TERM_SEARCH_KEY_MAP as $field => $searchField) {
             $queryBuilder->termQuery($searchField, $params[$field] ?? null);
         }
     }
 
-    private function buildRangeQueries(SearchQueryBuilder $queryBuilder, array $params)
+    private function buildRangeQueries(InventorySearchQueryBuilder $queryBuilder, array $params)
     {
         foreach (self::RANGE_SEARCH_KEY_MAP as $field => $searchField) {
             $minFieldKey = "{$field}_min";
