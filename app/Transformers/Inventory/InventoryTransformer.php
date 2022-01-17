@@ -2,7 +2,7 @@
 
 namespace App\Transformers\Inventory;
 
-use App\DTOs\Inventory\Inventory;
+use App\DTOs\Inventory\TcEsInventory;
 use JetBrains\PhpStorm\ArrayShape;
 use League\Fractal\TransformerAbstract;
 
@@ -92,7 +92,7 @@ class InventoryTransformer extends TransformerAbstract
         'images' => 'array',
         'imagesSecondary' => 'array'
     ])]
-    public function transform(Inventory $inventory): array {
+    public function transform(TcEsInventory $inventory): array {
         return $inventory->toArray();
     }
 }

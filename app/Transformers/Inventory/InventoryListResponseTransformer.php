@@ -2,7 +2,7 @@
 
 namespace App\Transformers\Inventory;
 
-use App\DTOs\Inventory\InventoryListResponse;
+use App\DTOs\Inventory\TcEsResponseInventoryList;
 use JetBrains\PhpStorm\ArrayShape;
 use League\Fractal\Manager;
 use League\Fractal\Pagination\IlluminatePaginatorAdapter;
@@ -13,7 +13,7 @@ use League\Fractal\TransformerAbstract;
 class InventoryListResponseTransformer extends TransformerAbstract
 {
     #[ArrayShape(['inventories' => "array", 'meta' => "array", 'aggregations' => "array"])]
-    public function transform(InventoryListResponse $response): array {
+    public function transform(TcEsResponseInventoryList $response): array {
         $manager = new Manager();
         $manager->setSerializer(new ArraySerializer());
         $inventories = $response->inventories->getCollection();

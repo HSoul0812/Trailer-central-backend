@@ -3,7 +3,7 @@ namespace App\DTOs\Inventory;
 
 use Illuminate\Contracts\Support\Arrayable;
 
-class Inventory implements Arrayable {
+class TcEsInventory implements Arrayable {
     use \App\DTOs\Arrayable;
 
     public string $id;
@@ -32,8 +32,8 @@ class Inventory implements Arrayable {
     public bool $showOnKsl;
     public bool $showOnRacingjunk;
     public bool $showOnWebsite;
-    public InventoryDealer $dealer;
-    public InventoryLocation $location;
+    public TcEsInventoryDealer $dealer;
+    public TcEsInventoryLocation $location;
     public string $widthInches;
     public string $heightInches;
     public string $lengthInches;
@@ -92,8 +92,8 @@ class Inventory implements Arrayable {
             }
         }
 
-        $obj->dealer = InventoryDealer::fromData($dealerData);
-        $obj->location = InventoryLocation::fromData($locationData);
+        $obj->dealer = TcEsInventoryDealer::fromData($dealerData);
+        $obj->location = TcEsInventoryLocation::fromData($locationData);
         return $obj;
     }
 }

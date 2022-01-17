@@ -4,7 +4,7 @@ namespace App\DTOs\Inventory;
 
 use Illuminate\Pagination\LengthAwarePaginator;
 
-class InventoryListResponse
+class TcEsResponseInventoryList
 {
     public array $aggregations;
     public LengthAwarePaginator $inventories;

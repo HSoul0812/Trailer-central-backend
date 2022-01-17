@@ -4,7 +4,7 @@ namespace App\DTOs\Inventory;
 use Illuminate\Contracts\Support\Arrayable;
 use JetBrains\PhpStorm\Pure;
 
-class InventoryDealer implements Arrayable {
+class TcEsInventoryDealer implements Arrayable {
     use \App\DTOs\Arrayable;
 
     public string $name;

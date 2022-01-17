@@ -5,7 +5,7 @@ namespace App\DTOs\Inventory;
 use Illuminate\Contracts\Support\Arrayable;
 use JetBrains\PhpStorm\Pure;
 
-class InventoryLocation implements Arrayable
+class TcEsInventoryLocation implements Arrayable
 {
     use \App\DTOs\Arrayable;
 
@@ -19,7 +19,7 @@ class InventoryLocation implements Arrayable
     public string $region;
     public string $postalCode;
     public string $country;
-    public Geolocation $geo;
+    public TcEsGeolocation $geo;
 
     #[Pure] public static function fromData(array $data):self
     {
@@ -34,7 +34,7 @@ class InventoryLocation implements Arrayable
         $obj->region = $data['region'];
         $obj->postalCode = $data['postalCode'];
         $obj->country = $data['country'];
-        $obj->geo = Geolocation::fromData($data['geo']);
+        $obj->geo = TcEsGeolocation::fromData($data['geo']);
         return $obj;
     }
 }

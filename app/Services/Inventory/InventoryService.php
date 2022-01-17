@@ -5,8 +5,8 @@ namespace App\Services\Inventory;
 use App\DTOs\Inventory\TcApiResponseInventory;
 use GuzzleHttp\Exception\GuzzleException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use App\DTOs\Inventory\Inventory;
-use App\DTOs\Inventory\InventoryListResponse;
+use App\DTOs\Inventory\TcEsInventory;
+use App\DTOs\Inventory\TcEsResponseInventoryList;
 use App\Models\Geolocation\Geolocation;
 use App\Repositories\Geolocation\GeolocationRepositoryInterface;
 use GuzzleHttp\Client as GuzzleHttpClient;
@@ -47,7 +47,7 @@ class InventoryService implements InventoryServiceInterface
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Exception
      */
-    public function list(array $params): InventoryListResponse
+    public function list(array $params): TcEsResponseInventoryList
     {
         $queryBuilder = $this->buildSearchQuery($params);
         $elasticSearchUrl = config('trailercentral.elasticsearch.url') . "/inventory/_search";
@@ -59,7 +59,7 @@ class InventoryService implements InventoryServiceInterface
             $result = [];
             $resJson = json_decode($res->getBody()->getContents(), true);
             foreach($resJson['hits']['hits'] as $hit) {
-                $result[] = Inventory::fromData($hit['_source']);
+                $result[] = TcEsInventory::fromData($hit['_source']);
             }
 
             $paginator = new LengthAwarePaginator(
@@ -69,7 +69,7 @@ class InventoryService implements InventoryServiceInterface
                 $queryBuilder->getPage()
             );
 
-            $response = new InventoryListResponse();
+            $response = new TcEsResponseInventoryList();
             $response->aggregations = $resJson['aggregations'];
             $response->inventories = $paginator;
             return $response;
