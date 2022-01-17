@@ -115,6 +115,6 @@ class InventoryListResponseTransformerTest extends UnitTestCase
 
         $this->assertEquals(1, count($json['inventories']));
         $this->assertEquals(1, $json['meta']['pagination']['total']);
-        $this->assertEquals(1000022125, $json['inventories'][0]['id']);
+        $this->assertEquals('1000022125', $json['inventories'][0]['id']);
     }
 }
