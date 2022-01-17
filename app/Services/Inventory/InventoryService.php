@@ -7,12 +7,10 @@ use App\DTOs\Inventory\InventoryListResponse;
 use App\Models\Geolocation\Geolocation;
 use App\Repositories\Geolocation\GeolocationRepositoryInterface;
 use GuzzleHttp\Client as GuzzleHttpClient;
-use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Pagination\LengthAwarePaginator;
 use JetBrains\PhpStorm\ArrayShape;
 use JetBrains\PhpStorm\Pure;
-use Laravel\Nova\Contracts\QueryBuilder;
 
 class SearchQueryBuilder {
     private array $queries = [];
@@ -21,7 +19,7 @@ class SearchQueryBuilder {
     private ?int $pageSize = null;
     private ?array $globalAggregations = null;
     private ?array $filterAggregations = null;
-    private array $sorts = ["_score"];
+    private ?array $geoScore = null;
 
     public function getWillPaginate(): bool {
         return $this->willPaginate;
@@ -67,25 +65,10 @@ class SearchQueryBuilder {
         return $this;
     }
 
-    public function geoDistance(string $fieldKey, float $lat, float $lng, string $range) {
-        $this->queries[] = [
-            'geo_distance' => [
-                'distance' => $range,
-                $fieldKey => [
-                    'lat' => $lat,
-                    'lon' => $lng
-                ]
-            ]
-        ];
-        $this->sorts[] = [
-            '_geo_distance' => [
-                $fieldKey => [
-                    'lat' => $lat,
-                    'lon' => $lng
-                ],
-                'order' => 'asc',
-                'unit' => 'km'
-            ]
+    public function geoScoring(float $lat, float $lng) {
+        $this->geoScore = [
+            'lat' => $lat,
+            'lon' => $lng
         ];
         return $this;
     }
@@ -109,18 +92,39 @@ class SearchQueryBuilder {
     public function build(): array {
         $result = [];
 
-        $result['sort'] = $this->sorts;
-
         if($this->willPaginate) {
             $result['from'] = max(($this->page - 1) * $this->pageSize, 0);
             $result['size'] = $this->pageSize;
         }
+
         if(count($this->queries) > 0) {
-            $result['query'] = [
-                'bool' => [
-                    'must' => $this->queries
-                ]
-            ];
+            if($this->geoScore) {
+                $result['query'] = [
+                    'function_score' => [
+                        'query' => [
+                            'bool' => [
+                                'must' => $this->queries
+                            ]
+                        ],
+                        'script_score' => [
+                            'source' => "double d; if(doc['location.geo'].value != null) { d = doc['location.geo'].planeDistance(params.lat, params.lng) * 0.000621371; } else { return 0.1; } if(d >= (params.grouping*params.fromScore)) { return 0.2; } else { return params.fromScore - Math.floor(d\/params.grouping); ",
+                            'params' => [
+                                "lat" => $this->geoScore['lat'],
+							    "lng" => $this->geoScore['lon'],
+							    "fromScore" => 100,
+							    "grouping" => 60
+                            ]
+                        ]
+                    ]
+
+                ];
+            } else {
+                $result['query'] = [
+                    'bool' => [
+                        'must' => $this->queries
+                    ]
+                ];
+            }
         }
 
         $result['aggregations'] = array_merge(
@@ -149,9 +153,6 @@ class InventoryService implements InventoryServiceInterface
         'manufacturer' => 'manufacturer',
         'category' => 'category',
         'condition' => 'condition',
-        'location_city' => 'location.city',
-        'location_region' => 'location.region',
-        'zip' => 'location.postalCode',
         'construction' => 'frameMaterial',
         'year' => 'year',
         'slideouts' => 'numSlideouts',
@@ -181,6 +182,7 @@ class InventoryService implements InventoryServiceInterface
         $res = $this->httpClient->post($elasticSearchUrl, [
             'json' => $queryBuilder->build()
         ]);
+
         if($res->getStatusCode() == 200) {
             $result = [];
             $resJson = json_decode($res->getBody()->getContents(), true);
@@ -214,7 +216,15 @@ class InventoryService implements InventoryServiceInterface
         $this->buildAggregations($queryBuilder, $params);
         $this->buildPaginateQuery($queryBuilder, $params);
 
+        if($location) {
+            $this->buildGeoScoring($queryBuilder, $location);
+        }
+
         return $queryBuilder;
+    }
+
+    private function buildGeoScoring(SearchQueryBuilder $queryBuilder, Geolocation $location) {
+        $queryBuilder->geoScoring($location->latitude, $location->longitude);
     }
 
     private function buildAggregations(SearchQueryBuilder $queryBuilder, array $params) {
