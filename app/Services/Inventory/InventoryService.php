@@ -142,7 +142,7 @@ class InventoryService implements InventoryServiceInterface
     private function buildTermQueries(InventorySearchQueryBuilder $queryBuilder, array $params) {
         $queryBuilder->termQuery('isRental', false);
         foreach(self::TERM_SEARCH_KEY_MAP as $field => $searchField) {
-            $queryBuilder->termQuery($searchField, $params[$field] ?? null);
+            $queryBuilder->termQueries($searchField, $params[$field] ?? null);
         }
     }
 

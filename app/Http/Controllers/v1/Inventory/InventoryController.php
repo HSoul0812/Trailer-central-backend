@@ -7,7 +7,7 @@ namespace App\Http\Controllers\v1\Inventory;
 use App\Exceptions\NotImplementedException;
 use App\Http\Controllers\AbstractRestfulController;
 use App\Http\Requests\CreateRequestInterface;
-use App\Http\Requests\Home\IndexInventoryRequest;
+use App\Http\Requests\Inventory\IndexInventoryRequest;
 use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\UpdateRequestInterface;
 use App\Services\Inventory\InventoryServiceInterface;

@@ -26,8 +26,7 @@ use App\Services\Integrations\TrailerCentral\Console\Leads\SyncService as LeadSy
 use App\Services\Integrations\TrailerCentral\Console\Leads\SyncServiceInterface as LeadSyncServiceInterface;
 use App\Services\Inventory\InventoryService;
 use App\Services\Inventory\InventoryServiceInterface;
-use App\Services\MapSearchService\HereMapSearchService;
-use App\Services\MapSearchService\TomTomMapSearchService;
+use App\Services\MapSearch\TomTomMapSearchService;
 use Illuminate\Support\ServiceProvider;
 
 class TrailerCentralIntegrationServiceProvider extends ServiceProvider

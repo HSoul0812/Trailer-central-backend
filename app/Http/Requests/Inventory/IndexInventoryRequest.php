@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Requests\Home;
+namespace App\Http\Requests\Inventory;
 
 use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\Request;
