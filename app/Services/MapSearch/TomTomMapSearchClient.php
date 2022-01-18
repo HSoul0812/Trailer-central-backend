@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services\MapSearchService;
+namespace App\Services\MapSearch;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\CurlHandler;
@@ -11,17 +11,19 @@ use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Uri;
 use Psr\Http\Message\RequestInterface;
 
-class HereMapSearchClient extends Client
+class TomTomMapSearchClient extends Client
 {
     public static function newClient(): self
     {
         $stack = new HandlerStack();
         $stack->setHandler(new CurlHandler());
         $stack->push(Middleware::mapRequest(function (RequestInterface $request) {
-            return $request->withUri(Uri::withQueryValue(
+            return $request->withUri(Uri::withQueryValues(
                 $request->getUri(),
-                'apikey',
-                config('services.here.key')
+                [
+                    'key' => config('services.tomtom.key'),
+                    'language' => 'en-US'
+                ]
             ));
         }));
 
