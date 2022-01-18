@@ -18,7 +18,7 @@ class SaveInventoryTransformer implements TransformerInterface
     private const INCHES_SECOND_FORMAT = '%s_inches_second';
 
     private const INCHES_FORMAT = '%s_inches';
-    
+
     private const FEATURES_KEY = 'features';
     private const ATTRIBUTES_KEY = 'attributes';
 
@@ -169,7 +169,7 @@ class SaveInventoryTransformer implements TransformerInterface
             foreach (self::FEET_INCHES_FIELDS as $feetInchesField) {
                 $feetSecond = sprintf(self::FEET_SECOND_FORMAT, $feetInchesField);
                 $inchesSecond = sprintf(self::INCHES_SECOND_FORMAT, $feetInchesField);
-                
+
                 $inchesField = sprintf(self::INCHES_FORMAT, $feetInchesField);
 
                 if (isset($createParams[$feetSecond]) && isset($createParams[$inchesSecond])) {
