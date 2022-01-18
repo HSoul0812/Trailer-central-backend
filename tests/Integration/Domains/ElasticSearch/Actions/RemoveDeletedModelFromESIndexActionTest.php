@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Domains\ElasticSearch\Actions;
+namespace Tests\Integration\Domains\ElasticSearch\Actions;
 
 use App\Domains\ElasticSearch\Actions\RemoveDeletedModelFromESIndexAction;
 use App\Models\CRM\User\Customer;
@@ -10,9 +10,6 @@ use Tests\TestCase;
 
 class RemoveDeletedModelFromESIndexActionTest extends TestCase
 {
-    /**
-     * @covers ::handle
-     */
     public function testItCanRemoveDeletedCustomerModelsFromESIndex()
     {
         /** @var Client $esClient */

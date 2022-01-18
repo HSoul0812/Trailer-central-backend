@@ -21,6 +21,7 @@ class RemoveDeletedPartsFromESIndex extends Command
         $dealerExist = User::where('dealer_id', $dealerId)->exists();
         if (!$dealerExist) {
             $this->error("Dealer id $dealerId doesn't exist.");
+
             return 1;
         }
 
@@ -36,7 +37,7 @@ class RemoveDeletedPartsFromESIndex extends Command
             ->execute();
 
         $this->info("The number of deleted index in ES: {$result['total_delete']}");
-        $this->info("The command has finished.");
+        $this->info('The command has finished.');
 
         return 0;
     }
