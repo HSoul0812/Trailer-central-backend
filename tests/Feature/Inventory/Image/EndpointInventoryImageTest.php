@@ -54,7 +54,7 @@ class EndpointInventoryImageTest extends TestCase
     }
 
     /**
-     * @return array{dealer: User, images: array<Image>, token: AuthToken}
+     * @return array{dealer: User, images: array<Image>, token: AuthToken, inventory: Inventory}
      */
     protected function createDealerAndInventoryWithImages(): array
     {
