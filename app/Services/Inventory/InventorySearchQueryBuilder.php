@@ -80,8 +80,8 @@ class InventorySearchQueryBuilder
         if ($value != null) {
             return
                 [
-                    'term' => [
-                        $fieldKey => $value
+                    'match_phrase' => [
+                        $fieldKey => str_replace("+", " ", $value)
                     ]
                 ];
         }
