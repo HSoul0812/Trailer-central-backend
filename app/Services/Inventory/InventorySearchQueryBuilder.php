@@ -61,7 +61,7 @@ class InventorySearchQueryBuilder
     public function termQueries(string $fieldKey, ?string $valueString)
     {
         if ($valueString != null) {
-            $valueArr = explode(',', $valueString);
+            $valueArr = explode(';', $valueString);
             $queries = [];
             foreach($valueArr as $value) {
                 $queries[] = $this->_termQuery($fieldKey, $value);
@@ -157,15 +157,13 @@ class InventorySearchQueryBuilder
 
         $result['aggregations'] = array_merge(
             [],
-            $this->globalAggregations ?? [],
-            $this->filterAggregations ? [
-                'filter_aggs' => [
-                    'filter' => [
-                        'bool' => ['must' => $this->queries]
-                    ],
-                    'aggregations' => $this->filterAggregations
+            $this->globalAggregations ? [
+                "all_inventories" => [
+                    "global" => new \stdClass(),
+                    "aggs" => $this->globalAggregations
                 ]
-            ] : []
+            ] : [],
+            $this->filterAggregations ?? []
         );
         return $result;
     }
