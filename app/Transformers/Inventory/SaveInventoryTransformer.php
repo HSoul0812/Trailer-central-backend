@@ -228,7 +228,10 @@ class SaveInventoryTransformer implements TransformerInterface
                 if (in_array($createParamKey, $defaultAttributes) && !empty($createParamValue)) {
                     $attributeId = array_search($createParamKey, $defaultAttributes);
 
-                    $attributeExists = count(array_filter($attributes, function($attribute) use ($attributeId){
+                    $attributeExists = count(array_filter($attributes, function($attribute) use ($attributeId) {
+                        if (!isset($attribute['attribute_id'])) {
+                            return false;
+                        }
                         return $attribute['attribute_id'] == $attributeId;
                     })) > 0;
 
