@@ -1,15 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Services\Inventory;
 
+use App\DTOs\Inventory\TcEsResponseInventoryList;
 use App\DTOs\Inventory\TcApiResponseInventory;
 
 interface InventoryServiceInterface
 {
-    /**
-     * @param int $id the id of the inventory
-     */
+    public function list(array $params): TcEsResponseInventoryList;
     public function show(int $id): TcApiResponseInventory;
 }

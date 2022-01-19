@@ -2,58 +2,63 @@
 
 declare(strict_types=1);
 
-namespace App\Services\MapSearchService;
+namespace App\Services\MapSearch;
 
-use App\DTOs\MapSearch\HereResponse;
-use App\Transformers\MapSearch\HereResponseTransformer;
+use App\DTOs\MapSearch\TomTomGeocodeResponse;
+use App\DTOs\MapSearch\TomTomReverseGeocodeResponse;
+use App\Transformers\MapSearch\TomTomGeocodeResponseTransformer;
+use App\Transformers\MapSearch\TomTomReverseGeocodeResponseTransformer;
 use GuzzleHttp\Exception\GuzzleException;
 use JetBrains\PhpStorm\ArrayShape;
 use JetBrains\PhpStorm\Pure;
 use League\Fractal\TransformerAbstract;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
-class HereMapSearchService implements MapSearchServiceInterface
+class TomTomMapSearchService implements MapSearchServiceInterface
 {
-    private const AUTOCOMPLETE_API_URL = 'https://autocomplete.search.hereapi.com/v1/autocomplete';
-    private const GEOCODE_API_URL = 'https://geocode.search.hereapi.com/v1/geocode';
-    private const REVERSE_API_URL = 'https://revgeocode.search.hereapi.com/v1/revgeocode';
-
-    public function __construct(private HereMapSearchClient $httpClient)
+    private const AUTOCOMPLETE_API_URL = 'https://api.tomtom.com/search/2/geocode/';
+    private const REVERSE_API_URL = 'https://api.tomtom.com/search/2/reverseGeocode/';
+    private array $transformers;
+    public function __construct(private TomTomMapSearchClient $httpClient)
     {
+        $this->transformers = [
+            TomTomGeocodeResponse::class => TomTomGeocodeResponseTransformer::class,
+            TomTomReverseGeocodeResponse::class => TomTomReverseGeocodeResponseTransformer::class
+        ];
     }
 
     public static function register()
     {
         app()->bind(MapSearchServiceInterface::class, self::class);
-        app()->bind(HereMapSearchClient::class, function ($app) {
-            return HereMapSearchClient::newClient();
+        app()->bind(TomTomMapSearchClient::class, function ($app) {
+            return TomTomMapSearchClient::newClient();
         });
     }
 
-    public function autocomplete(string $searchText): HereResponse
+    public function autocomplete(string $searchText): TomTomGeocodeResponse
     {
-        $queryData = ['q' => $searchText, 'in' => 'countryCode:CAN,USA'];
-
-        return HereResponse::fromData(
-            $this->handleHttpRequest('GET', self::AUTOCOMPLETE_API_URL, ['query' => $queryData])
+        $url = self::AUTOCOMPLETE_API_URL . $searchText . ".json";
+        return TomTomGeocodeResponse::fromData(
+            $this->handleHttpRequest('GET', $url, [
+                'query' => [
+                    'countrySet' => 'US,CA',
+                    'typeahead' => 'true'
+                ]
+            ])
         );
     }
 
-    public function geocode(string $address): HereResponse
+    public function geocode(string $address): TomTomGeocodeResponse
     {
-        $queryData = ['q' => $address, 'in' => 'countryCode:CAN,USA'];
-
-        return HereResponse::fromData(
-            $this->handleHttpRequest('GET', self::GEOCODE_API_URL, ['query' => $queryData])
-        );
+        return $this->autocomplete($address);
     }
 
-    public function reverse(float $lat, float $lng): HereResponse
+    public function reverse(float $lat, float $lng): TomTomReverseGeocodeResponse
     {
-        $queryData = ['at' => "$lat,$lng", 'lang' => 'en-US'];
+        $url = self::REVERSE_API_URL . "$lat,$lng" . ".json";
 
-        return HereResponse::fromData(
-            $this->handleHttpRequest('GET', self::REVERSE_API_URL, ['query' => $queryData])
+        return TomTomReverseGeocodeResponse::fromData(
+            $this->handleHttpRequest('GET', $url, [])
         );
     }
 
@@ -64,7 +69,7 @@ class HereMapSearchService implements MapSearchServiceInterface
     #[Pure]
     public function getTransformer(string $class): TransformerAbstract
     {
-        return new HereResponseTransformer();
+        return new $this->transformers[$class];
     }
 
     /**

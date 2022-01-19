@@ -9,6 +9,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.0",
+        "ext-json": "*",
         "ext-pcntl": "*",
         "ext-pdo": "*",
         "dingo/api": "^3.0",
@@ -20,8 +21,7 @@
         "laravel/tinker": "^2.5",
         "nesbot/carbon": "^2.53",
         "psr/log": "^1.0",
-        "trailer-trader/insights": "*",
-        "ext-json": "*"
+        "trailer-trader/insights": "*"
     },
     "require-dev": {
         "brianium/paratest": "^6.3",

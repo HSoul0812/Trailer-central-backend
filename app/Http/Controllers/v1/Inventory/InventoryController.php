@@ -7,10 +7,11 @@ namespace App\Http\Controllers\v1\Inventory;
 use App\Exceptions\NotImplementedException;
 use App\Http\Controllers\AbstractRestfulController;
 use App\Http\Requests\CreateRequestInterface;
-use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\Inventory\IndexInventoryRequest;
+use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\UpdateRequestInterface;
 use App\Services\Inventory\InventoryServiceInterface;
+use App\Transformers\Inventory\InventoryListResponseTransformer;
 use App\Transformers\Inventory\TcApiResponseInventoryTransformer;
 use Dingo\Api\Http\Response;
 
@@ -19,10 +20,11 @@ class InventoryController extends AbstractRestfulController
     /**
      * Create a new controller instance.
      *
-     * @param TypeRepositoryInterface   $type
-     * @param TypesTransformerInterface $typesTransformer
      */
-    public function __construct(private InventoryServiceInterface $inventoryRepository, private TcApiResponseInventoryTransformer $transformer)
+    public function __construct(
+        private InventoryServiceInterface $inventoryService,
+        private InventoryServiceInterface $inventoryRepository,
+        private TcApiResponseInventoryTransformer $transformer)
     {
         parent::__construct();
     }
@@ -48,7 +50,8 @@ class InventoryController extends AbstractRestfulController
      */
     public function index(IndexRequestInterface $request): Response
     {
-        throw new NotImplementedException();
+        $result = $this->inventoryService->list($request->all());
+        return $this->response->item($result, new InventoryListResponseTransformer());
     }
 
     /**

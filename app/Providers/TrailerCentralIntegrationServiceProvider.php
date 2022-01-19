@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Repositories\Geolocation\GeolocationRepository;
+use App\Repositories\Geolocation\GeolocationRepositoryInterface;
 use App\Repositories\Integrations\TrailerCentral\InventoryRepository;
 use App\Repositories\Integrations\TrailerCentral\InventoryRepositoryInterface;
 use App\Repositories\Integrations\TrailerCentral\LeadRepository;
@@ -26,8 +28,7 @@ use App\Services\Inventory\InventoryService;
 use App\Services\Inventory\InventoryServiceInterface;
 use App\Services\Leads\LeadService;
 use App\Services\Leads\LeadServiceInterface;
-use App\Services\MapSearchService\HereMapSearchService;
-use App\Services\MapSearchService\TomTomMapSearchService;
+use App\Services\MapSearch\TomTomMapSearchService;
 use Illuminate\Support\ServiceProvider;
 
 class TrailerCentralIntegrationServiceProvider extends ServiceProvider
@@ -52,6 +53,8 @@ class TrailerCentralIntegrationServiceProvider extends ServiceProvider
 
         $this->app->bind(SyncProcessRepositoryInterface::class, SyncProcessRepository::class);
 
+        $this->app->bind(InventoryServiceInterface::class, InventoryService::class);
+        $this->app->bind(GeolocationRepositoryInterface::class, GeolocationRepository::class);
         TomTomMapSearchService::register();
     }
 }
