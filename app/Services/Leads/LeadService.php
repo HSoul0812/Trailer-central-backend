@@ -21,7 +21,7 @@ class LeadService implements LeadServiceInterface
      */
     public function create(array $params): TcApiResponseLead
     {
-        $url = config('services.trailercentral.api') . 'leads/';
+        $url = config('services.trailercentral.api') . 'inquiry/send/';
         $lead = $this->handleHttpRequest('PUT', $url, ['query' => $params, 'headers' => ['access-token' => config('services.trailercentral.access_token')]]);
 
         return TcApiResponseLead::fromData($lead['data']);
