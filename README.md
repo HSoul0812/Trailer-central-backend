@@ -118,7 +118,7 @@ Update git hooks:
 4. The namespace root for tests is `Tests` and is located in the `tests/` directory.
 5. Feature test classes should extend `Tests\TestCase`.
 6. A Unit test class can extend `PHPUnit\Framework\TestCase` if it does not need the Application instance.
-7. Run tests by running `./vendor/bin/phpunit` (all), `./vendor/bin/phpunit --testsuite Unit` (unit tests only), `./vendor/bin/phpunit --testsuite Feature` (feature tests only) 
+7. Run tests by running `./vendor/bin/phpunit` (all), `./vendor/bin/phpunit --testsuite Unit` (unit tests only), `./vendor/bin/phpunit --testsuite Feature` (feature tests only). Another way to run test is by using `composer test` command. You can add flag like so `composer test -- --filter=RemoveDeletedModelFromESIndexActionTest` 
 
 
 ## Git hooks
