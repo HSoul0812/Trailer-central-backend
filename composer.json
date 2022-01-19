@@ -99,7 +99,8 @@
         "post-update-cmd": [
             "Google_Task_Composer::cleanup",
             "cghooks update"
-        ]
+        ],
+        "test": "phpunit"
     },
     "config": {
         "preferred-install": "dist",
