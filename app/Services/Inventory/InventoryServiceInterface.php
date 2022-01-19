@@ -3,7 +3,6 @@
 namespace App\Services\Inventory;
 
 use App\Models\Inventory\Inventory;
-use Brick\Money\Money;
 
 /**
  * Interface InventoryServiceInterface
@@ -47,4 +46,12 @@ interface InventoryServiceInterface
      */
     public function deliveryPrice(int $inventoryId, string $toZip): float;
 
+    /**
+     * Deletes the inventory images from the DB and the filesystem
+     *
+     * @param int $inventoryId
+     * @param int[] $imageIds
+     * @return bool
+     */
+    public function imageBulkDelete(int $inventoryId, array $imageIds): bool;
 }
