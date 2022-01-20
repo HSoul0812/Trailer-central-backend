@@ -12,6 +12,9 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class LeadService implements LeadServiceInterface
 {
+
+    private const INQUIRY_SEND_ROUTE = 'inquiry/send/';
+
     public function __construct(public GuzzleHttpClient $httpClient)
     {
     }
@@ -21,7 +24,7 @@ class LeadService implements LeadServiceInterface
      */
     public function create(array $params): TcApiResponseLead
     {
-        $url = config('services.trailercentral.api') . 'inquiry/send/';
+        $url = config('services.trailercentral.api') . self::INQUIRY_SEND_ROUTE;
         $lead = $this->handleHttpRequest('PUT', $url, ['query' => $params, 'headers' => ['access-token' => config('services.trailercentral.access_token')]]);
 
         return TcApiResponseLead::fromData($lead['data']);
