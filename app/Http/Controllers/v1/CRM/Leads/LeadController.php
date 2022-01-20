@@ -58,7 +58,8 @@ class LeadController extends RestfulControllerV2
 
         if ($request->validate()) {
             return $this->response->paginator($this->leads->getAll($requestData), $this->transformer)
-                        ->addMeta('lead_counts', $this->leads->getLeadStatusCountByDealer($requestData['dealer_id'], $requestData));
+                        ->addMeta('lead_counts', $this->leads->getLeadStatusCountByDealer($requestData['dealer_id'], $requestData))
+                        ->addMeta('edge_date', $this->leads->getEdgeDate($requestData));
         }
 
         return $this->response->errorBadRequest();
