@@ -5,15 +5,10 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use App\Models\User\DealerLocation;
 use App\Models\CRM\Leads\Export\LeadEmail;
+use App\Models\Website\Website;
 
 class AddTrailertraderData extends Migration
-{
-    private const WEBSITE_CONFIG_PARAMS = [
-        'key' => 'general/item_email_from',
-        'website_id' => 284,
-        'value' => 'trailer_trader'
-    ];
-  
+{  
     private const WEBSITE_CONFIG_DEFAULT_OLD_PARAMS = [
       'key' => 'general/item_email_from',
       'values' => '{"trailer_central": "Trailer Central", "operate_beyond": "Operate Beyond"}',
@@ -66,7 +61,7 @@ class AddTrailertraderData extends Migration
         'city'    => 'Grand Rapid',
         'postalcode' => '49503',
         'country' => 'US',
-        'email'   => 'trailertrader@trailertrader.com',
+        'email'   => 'help@trailertrader.com',
         'is_default' => 1
     ];
     
@@ -77,13 +72,22 @@ class AddTrailertraderData extends Migration
      */
     public function up()
     {
-      DB::table('website_config')->updateOrInsert(self::WEBSITE_CONFIG_PARAMS, self::WEBSITE_CONFIG_PARAMS);
-      DB::table('website_config_default')->where('key', self::WEBSITE_CONFIG_DEFAULT_PARAMS['key'])->update(self::WEBSITE_CONFIG_DEFAULT_PARAMS);
-      $dealer_location = DealerLocation::create(self::DEALER_LOCATION_PARAMS);
+      $website = Website::where('dealer_id', self::DEALER_LOCATION_PARAMS['dealer_id'])->first();
       
+      $websiteConfigParams = [
+          'key' => 'general/item_email_from',
+          'website_id' => $website['id'],
+          'value' => 'trailer_trader'
+      ];
+
+      DB::table('website_config')->updateOrInsert($websiteConfigParams, $websiteConfigParams);
+      DB::table('website_config_default')->where('key', self::WEBSITE_CONFIG_DEFAULT_PARAMS['key'])->update(self::WEBSITE_CONFIG_DEFAULT_PARAMS);
+
+      $dealer_location = DealerLocation::create(self::DEALER_LOCATION_PARAMS);
+
       $leadEmailParams = [
         'dealer_id' => 1002,
-        'email' => 'test@test.com',
+        'email' => 'help@trailertrader.com',
         'dealer_location_id' => $dealer_location['dealer_location_id']
       ];
       
@@ -97,7 +101,15 @@ class AddTrailertraderData extends Migration
      */
     public function down()
     {
-        DB::table('website_config')->where('key', self::WEBSITE_CONFIG_PARAMS['key'])->where('website_id', self::WEBSITE_CONFIG_PARAMS['website_id'])->delete();
+        $website = Website::where('dealer_id', self::DEALER_LOCATION_PARAMS['dealer_id'])->first();
+        
+        $websiteConfigParams = [
+            'key' => 'general/item_email_from',
+            'website_id' => $website['id'],
+            'value' => 'trailer_trader'
+        ];
+
+        DB::table('website_config')->where('key', $websiteConfigParams['key'])->where('website_id', $websiteConfigParams['website_id'])->delete();
         DB::table('website_config_default')->where('key', self::WEBSITE_CONFIG_DEFAULT_OLD_PARAMS['key'])->update(self::WEBSITE_CONFIG_DEFAULT_OLD_PARAMS);
         
         $dealerLocation = DealerLocation::where('dealer_id', self::DEALER_LOCATION_PARAMS['dealer_id'])->where('name', self::DEALER_LOCATION_PARAMS['name'])->first();
