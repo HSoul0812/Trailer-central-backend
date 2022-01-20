@@ -42,10 +42,10 @@ class InventoryTransformer extends TransformerAbstract
     {
         $user = User::where('dealer_id', $inventory->dealer_id)->first();
 
+        $age = now()->diffInDays(Carbon::parse($inventory->created_at));
+
         if($dateSoldOrArchived = $inventory->archived_at ?? $inventory->sold_at){
             $age = Carbon::parse($dateSoldOrArchived)->diffInDays(Carbon::parse($inventory->created_at));
-        }else{
-            $age = now()->diffInDays(Carbon::parse($inventory->created_at));
         }
 
         return [
