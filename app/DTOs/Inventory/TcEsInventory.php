@@ -32,8 +32,8 @@ class TcEsInventory implements Arrayable {
     public bool $showOnKsl;
     public bool $showOnRacingjunk;
     public bool $showOnWebsite;
-    public TcEsInventoryDealer $dealer;
-    public TcEsInventoryLocation $location;
+    public ?TcEsInventoryDealer $dealer = null;
+    public ?TcEsInventoryLocation $location = null;
     public string $widthInches;
     public string $heightInches;
     public string $lengthInches;
