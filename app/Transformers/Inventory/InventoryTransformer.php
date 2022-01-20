@@ -104,7 +104,8 @@ class InventoryTransformer extends TransformerAbstract
              'updated_at' => $inventory->updated_at,
              'times_viewed' => $inventory->times_viewed,
              'quote_url' => config('app.new_design_crm_url') . $user->getCrmLoginUrl('bill-of-sale/new?inventory_id=' . $inventory->identifier),
-             'age' => $age
+             'age' => $age,
+             'sold_at' => $inventory->sold_at
          ];
     }
 
