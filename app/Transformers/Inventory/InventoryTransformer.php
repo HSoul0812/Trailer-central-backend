@@ -11,6 +11,7 @@ use App\Transformers\User\DealerLocationTransformer;
 use Illuminate\Database\Eloquent\Collection;
 use App\Transformers\Website\WebsiteTransformer;
 use App\Models\User\User;
+use Carbon\Carbon;
 
 class InventoryTransformer extends TransformerAbstract
 {
@@ -40,7 +41,13 @@ class InventoryTransformer extends TransformerAbstract
     public function transform(Inventory $inventory): array
     {
         $user = User::where('dealer_id', $inventory->dealer_id)->first();
-                
+
+        if($dateSoldOrArchived = $inventory->archived_at ?? $inventory->sold_at){
+            $age = Carbon::parse($dateSoldOrArchived)->diffInDays(Carbon::parse($inventory->created_at));
+        }else{
+            $age = now()->diffInDays(Carbon::parse($inventory->created_at));
+        }
+
         return [
              'id' => $inventory->inventory_id,
              'identifier' => $inventory->identifier,
@@ -96,10 +103,11 @@ class InventoryTransformer extends TransformerAbstract
              'created_at' => $inventory->created_at,
              'updated_at' => $inventory->updated_at,
              'times_viewed' => $inventory->times_viewed,
-             'quote_url' => config('app.new_design_crm_url') . $user->getCrmLoginUrl('bill-of-sale/new?inventory_id=' . $inventory->identifier)
+             'quote_url' => config('app.new_design_crm_url') . $user->getCrmLoginUrl('bill-of-sale/new?inventory_id=' . $inventory->identifier),
+             'age' => $age
          ];
     }
-    
+
     public function includeAttributes($inventory)
     {
         return $inventory->attributes;
