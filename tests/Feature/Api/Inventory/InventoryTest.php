@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Api\Parts;
+namespace Tests\Feature\Api\Inventory;
 
 use Tests\Common\FeatureTestCase;
 use GuzzleHttp\Client as GuzzleHttpClient;
