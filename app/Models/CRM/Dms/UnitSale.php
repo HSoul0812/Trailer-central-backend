@@ -101,7 +101,8 @@ class UnitSale extends Model implements GenericSaleInterface
 
     public function getPaidAmountAttribute()
     {
-        return $this->hasManyThrough(Payment::class, Invoice::class, 'unit_sale_id')->sum('amount');
+        return round($this->payments->sum('calculated_amount'), 2);
+
     }
 
     public function getStatusAttribute()

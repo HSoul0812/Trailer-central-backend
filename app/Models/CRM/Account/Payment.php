@@ -50,6 +50,11 @@ class Payment extends Model
         return $this->hasMany(Refund::class, 'tb_primary_id');
     }
 
+    public function getCalculatedAmountAttribute()
+    {
+        return (float) $this->amount - (float) Refund::where('tb_name', 'qb_payment')->where('tb_primary_id', $this->id)->sum('amount');
+    }
+
     public function getReceiptsAttribute()
     {
         return DealerSalesReceipt::where('tb_name', 'qb_payment')->where('tb_primary_id', $this->id)->get();
