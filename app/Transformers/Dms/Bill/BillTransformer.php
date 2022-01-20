@@ -2,6 +2,7 @@
 namespace App\Transformers\Dms\Bill;
 
 use App\Models\CRM\Dms\Quickbooks\Bill;
+use App\Models\CRM\Dms\Quickbooks\BillCategory;
 use App\Models\CRM\Dms\Quickbooks\BillItem;
 use App\Models\CRM\Dms\UnitSale;
 use App\Repositories\Dms\UnitSaleRepositoryInterface;
@@ -9,6 +10,18 @@ use League\Fractal\TransformerAbstract;
 
 class BillTransformer extends TransformerAbstract
 {
+    protected $availableIncludes = [
+        'categories',
+        'payments',
+        'items'
+    ];
+
+    protected $defaultIncludes = [
+        'categories',
+        'payments',
+        'items'
+    ];
+
     /** @var UnitSaleRepositoryInterface */
     private $unitSaleRepository;
 
@@ -35,14 +48,11 @@ class BillTransformer extends TransformerAbstract
             'due_date' => $bill->due_date,
             'packing_list_no' => $bill->packing_list_no,
             'qb_id' => $bill->qb_id,
-            'items' => $this->formatItems($bill),
-            'categories' => $bill->categories,
-            'payments' => $bill->payments,
             'remaining_balance' => $this->calculateRemaining($bill)
         ];
     }
 
-    private function formatItems(Bill $bill)
+    public function includeItems(Bill $bill)
     {
         $items = [];
         /** @var BillItem $billItem */
@@ -72,9 +82,13 @@ class BillTransformer extends TransformerAbstract
             $items[] = $info;
         }
 
-        return $items;
+        return $this->primitive($items);
     }
 
+    /**
+     * @param Bill $bill
+     * @return float|int
+     */
     private function calculateRemaining(Bill $bill)
     {
         $balance = (float) $bill->total;
@@ -85,5 +99,18 @@ class BillTransformer extends TransformerAbstract
         }
 
         return $balance <= 0 ? 0 : $balance;
+    }
+
+    /**
+     * @param Bill $bill
+     */
+    public function includeCategories(Bill $bill)
+    {
+        return $this->collection($bill->categories, new BillCategoryTransformer());
+    }
+
+    public function includePayments(Bill $bill)
+    {
+        return $this->primitive($bill->payments);
     }
 }

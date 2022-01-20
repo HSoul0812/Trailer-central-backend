@@ -2,6 +2,7 @@
 
 namespace App\Repositories\CRM\Customer;
 
+use App\Exceptions\RepositoryInvalidArgumentException;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\User\Customer;
 use App\Traits\Repository\ElasticSearch;
@@ -249,15 +250,55 @@ class CustomerRepository implements CustomerRepositoryInterface
         return $search->execute()->models();
     }
 
-
     public function getByEmailOrPhone(array $params): ?Customer
     {
         return Customer::where('dealer_id', '=', $params['dealer_id'])
-            ->where(function($query) use ($params) {
+            ->where(function ($query) use ($params) {
                 $query->where('email', '=', $params['email'])
                     ->orWhere('cell_phone', '=', trim($params['phone_number']))
                     ->orWhere('home_phone', '=', trim($params['phone_number']))
                     ->orWhere('work_phone', '=', trim($params['phone_number']));
             })->get()->first();
+    }
+
+    /**
+     * @param array $params
+     * @return bool
+     */
+    public function bulkUpdate(array $params): bool
+    {
+        if ((empty($params['ids']) || !is_array($params['ids'])) && (empty($params['search']) || !is_array($params['search']))) {
+            throw new RepositoryInvalidArgumentException('ids or search param has been missed. Params - ' . json_encode($params));
+        }
+
+        $query = Customer::query();
+
+        if (!empty($params['ids']) && is_array($params['ids'])) {
+            $query = $query->whereIn('id', $params['ids']);
+            unset($params['ids']);
+        }
+
+        if (!empty($params['search']['website_lead_id'])) {
+            $query = $query->where('website_lead_id', $params['search']['website_lead_id']);
+            unset($params['search']);
+        }
+
+        return (bool)$query->update($params);
+    }
+
+    /**
+     * @param callable $callback The callback with the signature of (Collection $customers) => void;
+     * @param array $select The columns to select in the result query
+     * @param array $with The relationships to eager load
+     * @param int $chunkSize The chunk size of the chunkById operation
+     * @return void
+     */
+    public function getCustomersWithoutLeads(callable $callback, array $select = ['*'], array $with = [], $chunkSize = 500)
+    {
+        Customer::query()
+            ->select($select)
+            ->with($with)
+            ->whereNull('website_lead_id')
+            ->chunkById($chunkSize, $callback);
     }
 }

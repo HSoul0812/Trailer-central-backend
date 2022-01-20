@@ -2,6 +2,8 @@
 
 namespace App\Console;
 
+use App\Console\Commands\CRM\Interactions\ReimportInteractionMessages;
+use App\Console\Commands\CRM\Interactions\ResetInteractionMessages;
 use App\Console\Commands\Files\ClearLocalTmpFolder;
 use App\Console\Commands\Inventory\AutoArchiveSoldItems;
 use App\Console\Commands\Website\AddSitemaps;
@@ -48,7 +50,9 @@ class Kernel extends ConsoleKernel
         AutoArchiveSoldItems::class,
         FixFloorplanBillStatus::class,
         FixEmptyManufacturerUnitSale::class,
-        GetTextrailParts::class
+        GetTextrailParts::class,
+        ResetInteractionMessages::class,
+        ReimportInteractionMessages::class
     ];
 
     /**
@@ -73,37 +77,6 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('crm:dms:update-po-num-ref')
                 ->daily()
-                ->runInBackground();
-
-        /**
-         * Auto Assign Leads
-         */
-        $schedule->command('leads:assign:auto 0 2999')
-                ->withoutOverlapping()
-                ->runInBackground();
-
-        $schedule->command('leads:assign:auto 3000 5999')
-                ->withoutOverlapping()
-                ->runInBackground();
-
-        $schedule->command('leads:assign:auto 6000 6623')
-                ->withoutOverlapping()
-                ->runInBackground();
-
-        $schedule->command('leads:assign:auto 6625 8999')
-                ->withoutOverlapping()
-                ->runInBackground();
-
-        $schedule->command('leads:assign:auto 8999')
-                ->withoutOverlapping()
-                ->runInBackground();
-
-        $schedule->command('leads:assign:auto 0 0 6624')
-                ->withoutOverlapping()
-                ->runInBackground();
-
-        $schedule->command('leads:assign:auto 0 0 8770')
-                ->withoutOverlapping()
                 ->runInBackground();
 
         //$schedule->command('leads:assign:hotpotato')->withoutOverlapping();
@@ -173,6 +146,14 @@ class Kernel extends ConsoleKernel
         $schedule->command('inventory:fix-floorplan-bill-status')
             ->hourly()
             ->runInBackground();
+
+
+        /**
+         * Scrape Facebook Messages
+         */
+        $schedule->command('facebook:scrape-messages')
+                ->withoutOverlapping()
+                ->runInBackground();
 
         // $schedule->command('inspire')
         //          ->hourly();

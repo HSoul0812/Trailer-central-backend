@@ -126,10 +126,19 @@ use Laravel\Scout\Searchable;
  * @property bool $qb_sync_processed,
  * @property array|null $changed_fields_in_dashboard
  * @property string $identifier
+ * @property int $times_viewed
+ * @property bool $is_archived
+ * @property \DateTimeInterface $created_at
+ * @property \DateTimeInterface $updated_at
+ *
+ * @property string $category_label
+ * @property string $status_label
+ * @property string $color
+ * @property double $interest_paid
  *
  * @property User $user
  * @property Lead $lead
- * @property Collection<Attribute>  $attribute
+ * @property Collection<Attribute> $attribute
  * @property DealerLocation $dealerLocation
  * @property Collection<Payment> $floorplanPayments
  * @property Collection<InventoryImage> $inventoryImages
@@ -171,13 +180,13 @@ class Inventory extends Model
     const STATUS_ON_ORDER_LABEL = 'On Order';
     const STATUS_PENDING_SALE_LABEL = 'Pending Sale';
     const STATUS_SPECIAL_ORDER_LABEL = 'Special Order';
-    
+
     const IS_FLOORPLANNED = 1;
     const IS_NOT_FLOORPLANNED = 0;
 
     const IS_ARCHIVED = 1;
     const IS_NOT_ARCHIVED = 0;
-    
+
     const STATUS_MAPPING = [
         self::STATUS_QUOTE          => self::STATUS_QUOTE_LABEL,
         self::STATUS_AVAILABLE      => self::STATUS_AVAILABLE_LABEL,
@@ -314,7 +323,8 @@ class Inventory extends Model
         'qb_sync_processed',
         'changed_fields_in_dashboard',
         'is_archived',
-        'times_viewed'
+        'times_viewed',
+        'trailerworld_store_id'
     ];
 
     protected $casts = [
@@ -437,9 +447,9 @@ class Inventory extends Model
 
         return $category->label;
     }
-    
+
     public function getAttributesAttribute()
-    { 
+    {
         return self::select('*')
                     ->join('eav_attribute_value', 'inventory.inventory_id', '=', 'eav_attribute_value.inventory_id')
                     ->where('inventory.inventory_id', $this->inventory_id)
@@ -473,7 +483,7 @@ class Inventory extends Model
         // Return Value
         return $attribute->value ?? '';
     }
-    
+
     public function getIdentifierAttribute(): string
     {
         return CompactHelper::shorten($this->inventory_id);
@@ -507,9 +517,12 @@ class Inventory extends Model
         return $attribute->value ?? '';
     }
 
-    public function getStatusLabelAttribute()
+    /**
+     * @return string|null
+     */
+    public function getStatusLabelAttribute(): ?string
     {
-        return isset(self::STATUS_MAPPING[$this->status]) ? self::STATUS_MAPPING[$this->status] : null;
+        return self::STATUS_MAPPING[$this->status] ?? null;
     }
 
     /**

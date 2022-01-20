@@ -15,14 +15,18 @@ class ConvertHelper
     const DISPLAY_MODE_FEET_INCHES_FEET_ONLY = 'feet_inches_feet_only';
     const DISPLAY_MODE_FEET_INCHES_INCHES_ONLY = 'feet_inches_inches_only';
 
+    const TYPE_LENGTH = 'length';
+    const TYPE_WIDTH = 'width';
+    const TYPE_HEIGHT = 'height';
+
     const MAX_FEET_LENGTH = 90;
     const MAX_FEET_WIDTH = 12;
     const MAX_FEET_HEIGHT = 20;
 
     const TYPES_MAX_FEET = [
-        self::MAX_FEET_LENGTH,
-        self::MAX_FEET_WIDTH,
-        self::MAX_FEET_HEIGHT,
+        self::TYPE_LENGTH => self::MAX_FEET_LENGTH,
+        self::TYPE_WIDTH => self::MAX_FEET_WIDTH,
+        self::TYPE_HEIGHT => self::MAX_FEET_HEIGHT,
     ];
 
     /**
@@ -112,6 +116,25 @@ class ConvertHelper
     public function feetInchesToFeet(float $first, float $second): float
     {
         return $first + round($second / 12, 2);
+    }
+
+    /**
+     * @param float $first
+     * @param float $second
+     * @return float
+     */
+    public function feetInchesToInches(float $first, float $second): float
+    {
+        return $first * 12 + $second;
+    }
+
+    /**
+     * @param float $feet
+     * @return array
+     */
+    public function feetToFeetInches(float $feet): array
+    {
+        return [floor($feet), floor(($feet - floor($feet)) * 12)];
     }
 
     /**

@@ -19,6 +19,16 @@ trait HasPermissions
     private $userPermissions;
 
     /**
+     * @var string
+     */
+    protected $permissionLevelKey = 'permission_level';
+
+    /**
+     * @var string
+     */
+    protected $permissionFeatureKey = 'feature';
+
+    /**
      * @return Collection
      */
     public function getPermissions(): Collection
@@ -29,18 +39,18 @@ trait HasPermissions
 
         return $this->userPermissions;
     }
-    
+
     /**
      * Returns permissions allowed for a given user
-     * 
+     *
      * @return Collection
      */
     public function getPermissionsAllowed(): Collection
     {
         return $this->perms()
-                    ->where(function($query) {
-                        $query->where('permission_level', '!=', PermissionsInterface::CANNOT_SEE_PERMISSION);
-                    })->get();
+            ->where(function($query) {
+                $query->where($this->permissionLevelKey, '!=', PermissionsInterface::CANNOT_SEE_PERMISSION);
+            })->get();
     }
 
     /**
@@ -51,10 +61,19 @@ trait HasPermissions
     public function hasPermission(string $feature, string $permissionLevel): bool
     {
         $currentPermission = $this->getPermissions()->first(function ($permission, $key) use ($feature, $permissionLevel) {
-            return strcmp($permission['feature'], $feature) === 0 && strcmp($permission['permission_level'], $permissionLevel) === 0;
+            return strcmp($permission[$this->permissionFeatureKey], $feature) === 0 && strcmp($permission[$this->permissionLevelKey], $permissionLevel) === 0;
         });
 
         return !empty($currentPermission);
+    }
+
+    /**
+     * @param string $feature
+     * @return bool
+     */
+    public function hasPermissionCanSeeAndChange(string $feature): bool
+    {
+        return $this->hasPermission($feature, PermissionsInterface::CAN_SEE_AND_CHANGE_PERMISSION);
     }
 
     /**
