@@ -7,13 +7,13 @@ use JetBrains\PhpStorm\Pure;
 class TcEsInventoryDealer implements Arrayable {
     use \App\DTOs\Arrayable;
 
-    public string $name;
-    public string $email;
+    public ?string $name;
+    public ?string $email;
 
     #[Pure] public static function fromData(array $data):self {
         $obj = new self();
-        $obj->name = $data['name'];
-        $obj->email = $data['email'];
+        $obj->name = $data['name'] ?? null;
+        $obj->email = $data['email'] ?? null;
         return $obj;
     }
 }
