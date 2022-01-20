@@ -282,6 +282,11 @@ $api->version('v1', function ($route) {
     $route->delete('inventory/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@destroy')->where('id', '[0-9]+');
     $route->get('inventory/exists', 'App\Http\Controllers\v1\Inventory\InventoryController@exists');
 
+    /**
+     * Inventory images
+     */
+    $route->delete('inventory/{id}/images', 'App\Http\Controllers\v1\Inventory\ImageController@bulkDestroy')->where('id', '[0-9]+');
+
     /*
     |--------------------------------------------------------------------------
     | Packages
