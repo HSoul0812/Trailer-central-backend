@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\DB;
 class CategoryAndTypeSeeder extends Seeder
 {
     private const TYPES_CATEGORIES = [
-        'Equipment Trailers' => ['Cargo Trailers (Enclosed)', 'Flatbed Trailers', 'Car Haulers', 'Tilt Trailers', 'Utility Trailers', 'Equipment Trailers', 'Dump Trailers', 'Car / Racing Trailers', 'Snowmobile', 'ATV Trailers', 'Watercraft Trailers', 'Concession Trailers (Vending / Concession)', 'Tow Dollys', 'Fiber Optic Trailers', 'Motorcycle Trailers', 'Other Trailers', 'Cycle Trailers'],
+        'Equipment Trailers' => ['Cargo Trailers (Enclosed)', 'Flatbed Trailers', 'Car Haulers', 'Tilt Trailers', 'Utility Trailers', 'Equipment Trailers', 'Dump Trailers', 'Car / Racing Trailers', 'Snowmobile', 'ATV Trailers', 'Watercraft Trailers', 'Vending / Concession Trailers', 'Tow Dollys', 'Fiber Optic Trailers', 'Motorcycle Trailers', 'Other Trailers', 'Cycle Trailers'],
         'Horse & Livestock'  => ['Horse Trailers', 'Livestock Trailers', 'Stock Trailers'],
         'Travel Trailers'    => ['Travel Trailers', 'Fifth Wheels', 'Toy Haulers', 'Camper Trailers'],
         'Semi Trailers'      => ['Day Cab Trucks', 'Sleeper Cab Trucks', 'Dump Trucks', 'Lowboy Trailers', 'Drop Deck Trailers', 'Dry Van Trailers', 'Flatbed Semi Trailers', 'Grain Trailers', 'Reefer Trailers', 'Semi Stock Trailers', 'Tank Trailers', 'Other Trucks'],
