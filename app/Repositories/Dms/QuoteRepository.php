@@ -181,7 +181,7 @@ class QuoteRepository implements QuoteRepositoryInterface
                     });
             });
         }
-        $groupedPayments = Payment::select('unit_sale_id', DB::raw('sum(calculated_payments.balance) as calculated_amount, sum(amount) as paid_amount'))
+        $groupedPayments = Payment::select(DB::raw('sum(calculated_payments.balance) as calculated_amount, sum(amount) as paid_amount, qb_invoices.unit_sale_id as unit_sale_id'))
             ->rightJoin('qb_invoices', 'qb_payment.invoice_id', '=', 'qb_invoices.id')
             ->joinSub($this->calculatedPayments(), 'calculated_payments', function ($join) {
                 $join->on('qb_payment.id', '=', 'calculated_payments.id');
