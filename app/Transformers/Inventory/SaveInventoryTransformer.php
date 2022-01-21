@@ -100,7 +100,7 @@ class SaveInventoryTransformer implements TransformerInterface
     /**
      * The attribute that we allow value '0'
      */
-    private const ATTRIBUTES_ALLOWS_0 = [
+    private const ATTRIBUTES_ALLOWS_ZERO = [
         'slideouts',
     ];
 
@@ -235,12 +235,12 @@ class SaveInventoryTransformer implements TransformerInterface
             foreach ($createParams as $createParamKey => $createParamValue) {
                 if (in_array($createParamKey, $defaultAttributes)) {
                     $attributeId = array_search($createParamKey, $defaultAttributes);
-                    $attributeValueCanBe0 = in_array($createParamKey, self::ATTRIBUTES_ALLOWS_0);
+                    $attributeValueCanBeZero = in_array($createParamKey, self::ATTRIBUTES_ALLOWS_ZERO);
                     $attributeIsNotIgnored = !isset($createParams['ignore_attributes']) || $createParams['ignore_attributes'] != 1;
 
                     // We want to create the attribute if it's not empty
                     // OR if it's 0, and we want to allow it only if it's in the allow list
-                    $shouldCreateAttribute = !empty($createParamValue) || ($createParamValue === '0' && $attributeValueCanBe0);
+                    $shouldCreateAttribute = !empty($createParamValue) || ($createParamValue === '0' && $attributeValueCanBeZero);
 
                     $attributeExists = count(array_filter($attributes, function($attribute) use ($attributeId) {
                         if (!isset($attribute['attribute_id'])) {
