@@ -239,7 +239,7 @@ class SaveInventoryTransformer implements TransformerInterface
                     $attributeIsNotIgnored = !isset($createParams['ignore_attributes']) || $createParams['ignore_attributes'] != 1;
 
                     // We want to create the attribute if it's not empty
-                    // OR if it's 0, and we want to allow it
+                    // OR if it's 0, and we want to allow it only if it's in the allow list
                     $shouldCreateAttribute = !empty($createParamValue) || ($createParamValue === '0' && $attributeValueCanBe0);
 
                     $attributeExists = count(array_filter($attributes, function($attribute) use ($attributeId) {
