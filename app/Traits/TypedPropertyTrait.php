@@ -21,7 +21,7 @@ trait TypedPropertyTrait
 
         $this->$field = $value;
 
-        if($value) {
+        if($value !== null) {
             $fieldType = $this->getType($field);
             if($fieldType === 'int') {
                 $this->$field = intval($value);
