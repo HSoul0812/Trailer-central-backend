@@ -157,7 +157,6 @@ class InventoryService implements InventoryServiceInterface
     }
 
     private function getGeolocation(array $params): ?Geolocation {
-        return null;
         $locationType = $params['location_type'] ?? null;
         $location = null;
         try {
