@@ -17,6 +17,8 @@ class SaveInventoryTransformer implements TransformerInterface
     private const FEET_SECOND_FORMAT = '%s_second';
     private const INCHES_SECOND_FORMAT = '%s_inches_second';
 
+    private const INCHES_FORMAT = '%s_inches';
+
     private const FEATURES_KEY = 'features';
     private const ATTRIBUTES_KEY = 'attributes';
 
@@ -176,8 +178,11 @@ class SaveInventoryTransformer implements TransformerInterface
                 $feetSecond = sprintf(self::FEET_SECOND_FORMAT, $feetInchesField);
                 $inchesSecond = sprintf(self::INCHES_SECOND_FORMAT, $feetInchesField);
 
+                $inchesField = sprintf(self::INCHES_FORMAT, $feetInchesField);
+
                 if (isset($createParams[$feetSecond]) && isset($createParams[$inchesSecond])) {
                     $createParams[$feetInchesField] = $convertHelper->feetInchesToFeet((float)$createParams[$feetSecond], (float)$createParams[$inchesSecond]);
+                    $createParams[$inchesField] = $convertHelper->feetInchesToInches((float)$createParams[$feetSecond], (float)$createParams[$inchesSecond]);
                 }
             }
 
@@ -229,6 +234,7 @@ class SaveInventoryTransformer implements TransformerInterface
 
             foreach ($createParams as $createParamKey => $createParamValue) {
                 if (in_array($createParamKey, $defaultAttributes)) {
+                    $attributeId = array_search($createParamKey, $defaultAttributes);
                     $attributeValueCanBe0 = in_array($createParamKey, self::ATTRIBUTES_ALLOWS_0);
                     $attributeIsNotIgnored = !isset($createParams['ignore_attributes']) || $createParams['ignore_attributes'] != 1;
 
@@ -236,10 +242,16 @@ class SaveInventoryTransformer implements TransformerInterface
                     // OR if it's 0, and we want to allow it
                     $shouldCreateAttribute = !empty($createParamValue) || ($createParamValue === '0' && $attributeValueCanBe0);
 
-                    $shouldCreateAttribute = $shouldCreateAttribute && $attributeIsNotIgnored;
+                    $attributeExists = count(array_filter($attributes, function($attribute) use ($attributeId) {
+                        if (!isset($attribute['attribute_id'])) {
+                            return false;
+                        }
+                        return $attribute['attribute_id'] == $attributeId;
+                    })) > 0;
+
+                    $shouldCreateAttribute = $shouldCreateAttribute && !$attributeExists && $attributeIsNotIgnored;
 
                     if ($shouldCreateAttribute) {
-                        $attributeId = array_search($createParamKey, $defaultAttributes);
                         $attributes[] = [
                             'attribute_id' => $attributeId,
                             'value' => $createParamValue,
