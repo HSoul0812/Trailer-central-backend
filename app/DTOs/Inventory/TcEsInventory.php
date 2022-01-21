@@ -1,10 +1,14 @@
 <?php
 namespace App\DTOs\Inventory;
 
+use App\Traits\TypedPropertyTrait;
 use Illuminate\Contracts\Support\Arrayable;
 
 class TcEsInventory implements Arrayable {
     use \App\DTOs\Arrayable;
+    use TypedPropertyTrait;
+
+    const IMAGE_BASE_URL = 'https://dealer-cdn.com';
 
     public string $id;
     public bool $isActive;
@@ -18,25 +22,25 @@ class TcEsInventory implements Arrayable {
     public bool $isArchived;
     public string $stock;
     public string $title;
-    public string $year;
+    public int $year;
     public string $manufacturer;
     public string $model;
     public string $description;
-    public string $status;
+    public int $status;
     public string $category;
     public bool $useWebsitePrice;
     public string $condition;
-    public string $length;
-    public string $width;
-    public string $height;
+    public float $length;
+    public float $width;
+    public float $height;
     public bool $showOnKsl;
     public bool $showOnRacingjunk;
     public bool $showOnWebsite;
     public ?TcEsInventoryDealer $dealer = null;
     public ?TcEsInventoryLocation $location = null;
-    public string $widthInches;
-    public string $heightInches;
-    public string $lengthInches;
+    public float $widthInches;
+    public float $heightInches;
+    public float $lengthInches;
     public string $widthDisplayMode;
     public string $heightDisplayMode;
     public string $lengthDisplayMode;
@@ -45,20 +49,20 @@ class TcEsInventory implements Arrayable {
     public string $availabilityLabel;
     public string $typeLabel;
     public string $categoryLabel;
-    public ?string $basicPrice;
+    public ?float $basicPrice;
     public ?string $originalWebsitePrice;
-    public ?string $websitePrice;
-    public ?string $existingPrice;
-    public ?string $numAxles;
+    public ?float $websitePrice;
+    public ?float $existingPrice;
+    public ?int $numAxles;
     public ?string $frameMaterial;
     public ?string $pullType;
-    public ?string $numStalls;
+    public ?int $numStalls;
     public ?string $loadType;
     public ?string $roofType;
     public ?string $noseType;
     public ?string $color;
-    public ?string $numSleeps;
-    public ?string $numAc;
+    public ?int $numSleeps;
+    public ?int $numAc;
     public ?string $fuelType;
     public bool $isRental;
     public ?string $numSlideouts;
@@ -76,10 +80,19 @@ class TcEsInventory implements Arrayable {
     public string $image;
     public array $images;
     public array $imagesSecondary;
+    public ?float $gvwr;
+
+
+    public static function imageToAbsoluteUrl($image) {
+        if(str_starts_with($image, '/')) {
+            return self::IMAGE_BASE_URL . $image;
+        } else {
+            return $image;
+        }
+    }
 
     public static function fromData(array $data):self {
         $obj = new self();
-
         $dealerData = [];
         $locationData = [];
         foreach($data as $key => $value) {
@@ -87,8 +100,15 @@ class TcEsInventory implements Arrayable {
                 $dealerData[substr($key, 7)] = $value;
             } else if(str_starts_with($key, 'location.')) {
                 $locationData[substr($key, 9)] = $value;
+            } else if($key === 'image') {
+                $obj->image = self::imageToAbsoluteUrl($value);
+            } else if($key === 'images' || $key === 'imagesSecondary') {
+                $obj->$key = [];
+                foreach ($value as $image) {
+                    ($obj->$key)[] = self::imageToAbsoluteUrl($image);
+                }
             } else {
-                $obj->$key = $value;
+                $obj->setTypedProperty($key, $value);
             }
         }
 
