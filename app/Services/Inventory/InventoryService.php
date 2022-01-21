@@ -2,6 +2,7 @@
 
 namespace App\Services\Inventory;
 
+use App\Contracts\LoggerServiceInterface;
 use App\Exceptions\Inventory\InventoryException;
 use App\Jobs\Files\DeleteS3FilesJob;
 use App\Models\CRM\Dms\Quickbooks\Bill;
@@ -89,6 +90,11 @@ class InventoryService implements InventoryServiceInterface
     private $geolocationRepository;
 
     /**
+     * @var LoggerServiceInterface
+     */
+    private $logService;
+
+    /**
      * InventoryService constructor.
      * @param InventoryRepositoryInterface $inventoryRepository
      * @param ImageRepositoryInterface $imageRepository
@@ -115,7 +121,8 @@ class InventoryService implements InventoryServiceInterface
         DealerLocationRepositoryInterface $dealerLocationRepository,
         DealerLocationMileageFeeRepositoryInterface $dealerLocationMileageFeeRepository,
         CategoryRepositoryInterface $categoryRepository,
-        GeoLocationRepositoryInterface $geolocationRepository
+        GeoLocationRepositoryInterface $geolocationRepository,
+        ?LoggerServiceInterface $logService = null
     ) {
         $this->inventoryRepository = $inventoryRepository;
         $this->imageRepository = $imageRepository;
@@ -129,6 +136,7 @@ class InventoryService implements InventoryServiceInterface
         $this->fileService = $fileService;
         $this->categoryRepository = $categoryRepository;
         $this->geolocationRepository = $geolocationRepository;
+        $this->logService = $logService ?? app()->make(LoggerServiceInterface::class);
     }
 
     /**
@@ -701,5 +709,48 @@ class InventoryService implements InventoryServiceInterface
                 return $toNauticalMiles;
         }
 
+    }
+
+    /**
+     * Deletes the inventory images from the DB and the filesystem
+     *
+     * @param int $inventoryId
+     * @param int[] $imageIds
+     * @return bool
+     * @throws \RuntimeException when the images could not be deleted
+     */
+    public function imageBulkDelete(int $inventoryId, array $imageIds): bool
+    {
+        try {
+            $this->inventoryRepository->beginTransaction();
+
+            $imagesFilenames = $this->imageRepository
+                ->getAll([
+                    'inventory_id' => $inventoryId,
+                    ImageRepositoryInterface::CONDITION_AND_WHERE_IN => ['inventory_image.image_id' => $imageIds]
+                ])
+                ->pluck('filename')
+                ->toArray();
+
+            $this->imageRepository->delete([
+                ImageRepositoryInterface::CONDITION_AND_WHERE_IN => ['image_id' => $imageIds]
+            ]);
+
+            $this->dispatch((new DeleteS3FilesJob($imagesFilenames))->onQueue('files'));
+
+            $this->inventoryRepository->commitTransaction();
+
+            $this->logService->info('Images have been successfully deleted', ['image_ids' => $imageIds]);
+        } catch (\Exception $e) {
+            $this->inventoryRepository->rollbackTransaction();
+
+            $message = sprintf('Images deletion have failed: %s', $e->getMessage());
+
+            $this->logService->error($message, ['image_ids' => $imageIds]);
+
+            throw new \RuntimeException($message);
+        }
+
+        return true;
     }
 }
