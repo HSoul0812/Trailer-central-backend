@@ -38,6 +38,7 @@ class InventoryService implements InventoryServiceInterface
         'length' => 'length',
         'width' => 'width',
         'height' => 'height',
+        'gvwr' => 'gvwr'
     ];
 
     public function __construct(private GuzzleHttpClient $httpClient, private GeolocationRepositoryInterface $geolocationRepository)
@@ -156,6 +157,7 @@ class InventoryService implements InventoryServiceInterface
     }
 
     private function getGeolocation(array $params): ?Geolocation {
+        return null;
         $locationType = $params['location_type'] ?? null;
         $location = null;
         try {
@@ -199,7 +201,6 @@ class InventoryService implements InventoryServiceInterface
                 'payload_capacity' => 'float',
                 'url'              => 'string',
                 'description'      => 'string',
-                'gvwr'             => 'float',
                 'weight'           => 'float',
                 'width'            => 'float',
                 'height'           => 'float',
