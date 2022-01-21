@@ -28,8 +28,7 @@ class Payment extends Model
     ];
 
     protected $casts = [
-        'amount' => 'float',
-        'refunded_amount' => 'float'
+        'amount' => 'float'
     ];
 
     public $timestamps = false;
