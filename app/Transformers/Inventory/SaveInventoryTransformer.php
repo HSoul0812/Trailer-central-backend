@@ -72,6 +72,7 @@ class SaveInventoryTransformer implements TransformerInterface
         'hidden_price',
         'chosen_overlay',
         'pac_type',
+        'slideouts',
     ];
 
     private const IMAGES_FIELDS = [
@@ -92,6 +93,13 @@ class SaveInventoryTransformer implements TransformerInterface
 
     private const ARRAY_VALUES = [
         'craigslist'
+    ];
+
+    /**
+     * The attribute that we allow value '0'
+     */
+    private const ATTRIBUTES_ALLOWS_0 = [
+        'slideouts',
     ];
 
     private const FILE_TITLE = 'title';
@@ -220,8 +228,17 @@ class SaveInventoryTransformer implements TransformerInterface
             }
 
             foreach ($createParams as $createParamKey => $createParamValue) {
-                if (in_array($createParamKey, $defaultAttributes) && !empty($createParamValue)) {
-                    if (!isset($createParams['ignore_attributes']) || $createParams['ignore_attributes'] != 1) {
+                if (in_array($createParamKey, $defaultAttributes)) {
+                    $attributeValueCanBe0 = in_array($createParamKey, self::ATTRIBUTES_ALLOWS_0);
+                    $attributeIsNotIgnored = !isset($createParams['ignore_attributes']) || $createParams['ignore_attributes'] != 1;
+
+                    // We want to create the attribute if it's not empty
+                    // OR if it's 0, and we want to allow it
+                    $shouldCreateAttribute = !empty($createParamValue) || ($createParamValue === '0' && $attributeValueCanBe0);
+
+                    $shouldCreateAttribute = $shouldCreateAttribute && $attributeIsNotIgnored;
+
+                    if ($shouldCreateAttribute) {
                         $attributeId = array_search($createParamKey, $defaultAttributes);
                         $attributes[] = [
                             'attribute_id' => $attributeId,
