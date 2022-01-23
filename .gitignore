@@ -16,3 +16,4 @@ node_modules
 .remote-sync.json
 cghooks.lock
 
+.php-cs-fixer.cache
