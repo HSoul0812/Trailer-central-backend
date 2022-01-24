@@ -304,8 +304,8 @@ class MarketplaceService implements MarketplaceServiceInterface
         // Loop Through Inventory Items
         $listings = new Collection();
         foreach($inventory as $listing) {
-            $this->log->info('Found ' . $listing->ordererdImages->count() . ' images on listing' .
-                                PHP_EOL . print_r($listing->orderedImages, true));
+            $this->log->info('Found ' . $listing->ordererdImages()->count() . ' images on listing' .
+                                PHP_EOL . print_r($listing->orderedImages()->get(), true));
             if($type === MarketplaceStatus::METHOD_MISSING) {
                 $listings->push(InventoryFacebook::getFromInventory($listing, $integration));
             } else {
