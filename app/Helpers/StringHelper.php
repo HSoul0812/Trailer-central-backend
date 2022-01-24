@@ -2,6 +2,8 @@
 
 namespace App\Helpers;
 
+use Exception;
+
 /**
  * Class StringHelper
  *
@@ -66,7 +68,7 @@ class StringHelper
      *
      * @return string
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getRandomHex(int $length = 20): string
     {

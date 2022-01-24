@@ -22,6 +22,7 @@ class AccessToken
             Cache::put(env('DEALER_ID_KEY', 'api_dealer_id'), $request->get('dealer_id'));
         }
 
+
         if ($request->header('access-token')) {
             $accessToken = AuthToken::where('access_token', $request->header('access-token'))->first();
             if ($accessToken && $accessToken->user) {
@@ -46,6 +47,8 @@ class AccessToken
             strpos($request->url(), 'nova-api') === false &&
             strpos($request->url(), 'api/user/login') === false &&
             strpos($request->url(), 'api/user/password-reset/start') === false &&
+            strpos($request->url(), 'user/password-reset/finish') === false &&
+            strpos($request->url(), 'ecommerce/orders') === false &&
             preg_match('/api\/website\/[0-9]*\/user/', $request->url()) === false &&
             strpos($request->url(), 'user/password-reset/finish') === false) {
             return response('Invalid access token.', 403);

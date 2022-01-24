@@ -119,6 +119,25 @@ class ConvertHelper
     }
 
     /**
+     * @param float $first
+     * @param float $second
+     * @return float
+     */
+    public function feetInchesToInches(float $first, float $second): float
+    {
+        return $first * 12 + $second;
+    }
+
+    /**
+     * @param float $feet
+     * @return array
+     */
+    public function feetToFeetInches(float $feet): array
+    {
+        return [floor($feet), floor(($feet - floor($feet)) * 12)];
+    }
+
+    /**
      * @param int|string $input
      * @param int|null $round
      * @return float

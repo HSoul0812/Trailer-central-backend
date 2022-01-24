@@ -2,14 +2,16 @@
 
 namespace App\Mail\User;
 
+use App\Traits\WithGetter;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
 class PasswordResetEmail extends Mailable
 {
     const SUBJECT = "Password Reset Request";
-    
+
     use SerializesModels;
+    use WithGetter;
 
     /**
      * @var array

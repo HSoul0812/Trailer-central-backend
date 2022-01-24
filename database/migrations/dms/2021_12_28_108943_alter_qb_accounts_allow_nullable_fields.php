@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\DB;
 
 class AlterQbAccountsAllowNullableFields extends Migration
 {
+    private $tableName = 'qb_accounts';
+
     /**
      * Run the migrations.
      *

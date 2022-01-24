@@ -130,11 +130,11 @@ class QuoteRepository implements QuoteRepositoryInterface
                         ->where('is_po', '=', 0)
                         ->whereHas('payments', function($query) {
                             $query->select(DB::raw('sum(calculated_payments.balance) as calculated_amount'))
-                                ->leftJoinSub($this->calculatedPayments(), 'calculated_payments', function ($join) {
-                                    $join->on('qb_payment.id', '=', 'calculated_payments.id');
-                                })
-                                ->groupBy('unit_sale_id')
-                                ->havingRaw('calculated_amount < dms_unit_sale.total_price');
+                            ->leftJoinSub($this->calculatedPayments(), 'calculated_payments', function ($join) {
+                                $join->on('qb_payment.id', '=', 'calculated_payments.id');
+                            })
+                            ->groupBy('unit_sale_id')
+                            ->havingRaw('calculated_amount < dms_unit_sale.total_price');
                         });
                     break;
                 case UnitSale::QUOTE_STATUS_COMPLETED:
@@ -144,11 +144,11 @@ class QuoteRepository implements QuoteRepositoryInterface
                             $query->where('is_po', '=', 1)
                                 ->orWhereHas('payments', function ($query) {
                                     $query->select(DB::raw('sum(calculated_payments.balance) as calculated_amount'))
-                                          ->leftJoinSub($this->calculatedPayments(), 'calculated_payments', function ($join) {
-                                            $join->on('qb_payment.id', '=', 'calculated_payments.id');
-                                          })
-                                          ->groupBy('unit_sale_id')
-                                          ->havingRaw('calculated_amount >= dms_unit_sale.total_price');
+                                    ->leftJoinSub($this->calculatedPayments(), 'calculated_payments', function ($join) {
+                                      $join->on('qb_payment.id', '=', 'calculated_payments.id');
+                                    })
+                                    ->groupBy('unit_sale_id')
+                                    ->havingRaw('calculated_amount >= dms_unit_sale.total_price');
                                 });
                         });
                     break;
@@ -188,17 +188,17 @@ class QuoteRepository implements QuoteRepositoryInterface
             })
             ->groupBy('qb_invoices.unit_sale_id');
         return $query->select(
-                DB::raw('sum(dms_unit_sale.total_price) as totalFrontGross, count(*) as totalQty,
-                    IF(dms_unit_sale.is_po=1 OR COALESCE(group_payment.paid_amount, 0) > 0, 1, 0) AS deal,
-                    IF(dms_unit_sale.is_po=1 OR dms_unit_sale.total_price - CAST(group_payment.calculated_amount as DECIMAL(10, 2)) > 0, 0, 1) AS completed_deal')
-            )
-            ->leftJoinSub($groupedPayments, 'group_payment', function ($join) {
-                $join->on('dms_unit_sale.id', '=', 'group_payment.unit_sale_id');
-            })
-            ->where('dms_unit_sale.is_archived', '=', 0)
-            ->groupBy(DB::raw('CASE WHEN group_payment.paid_amount OR dms_unit_sale.is_po = 1 THEN 1 ELSE 0 END, 
-                CASE WHEN dms_unit_sale.total_price - CAST(group_payment.calculated_amount as DECIMAL(10, 2)) > 0 OR dms_unit_sale.is_po=1 THEN 0 ELSE 1 END'))
-            ->get();
+                    DB::raw('sum(dms_unit_sale.total_price) as totalFrontGross, count(*) as totalQty,
+                        IF(dms_unit_sale.is_po=1 OR COALESCE(group_payment.paid_amount, 0) > 0, 1, 0) AS deal,
+                        IF(dms_unit_sale.is_po=1 OR dms_unit_sale.total_price - CAST(group_payment.calculated_amount as DECIMAL(10, 2)) > 0, 0, 1) AS completed_deal')
+                )
+                ->leftJoinSub($groupedPayments, 'group_payment', function ($join) {
+                    $join->on('dms_unit_sale.id', '=', 'group_payment.unit_sale_id');
+                })
+                ->where('dms_unit_sale.is_archived', '=', 0)
+                ->groupBy(DB::raw('CASE WHEN group_payment.paid_amount OR dms_unit_sale.is_po = 1 THEN 1 ELSE 0 END,
+                    CASE WHEN dms_unit_sale.total_price - CAST(group_payment.calculated_amount as DECIMAL(10, 2)) > 0 OR dms_unit_sale.is_po=1 THEN 0 ELSE 1 END'))
+                ->get();
     }
 
     public function update($params)

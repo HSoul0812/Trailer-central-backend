@@ -102,7 +102,6 @@ class UnitSale extends Model implements GenericSaleInterface
     public function getPaidAmountAttribute()
     {
         return round($this->payments->sum('calculated_amount'), 2);
-
     }
 
     public function getStatusAttribute()

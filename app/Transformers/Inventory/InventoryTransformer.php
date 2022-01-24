@@ -2,6 +2,7 @@
 
 namespace App\Transformers\Inventory;
 
+use App\Helpers\ConvertHelper;
 use App\Models\Inventory\File;
 use App\Models\Inventory\InventoryImage;
 use App\Transformers\Dms\ServiceOrderTransformer;
@@ -11,6 +12,7 @@ use League\Fractal\TransformerAbstract;
 use App\Models\Inventory\Inventory;
 use App\Transformers\User\UserTransformer;
 use App\Transformers\User\DealerLocationTransformer;
+use App\Transformers\Inventory\FeatureTransformer;
 use App\Transformers\Website\WebsiteTransformer;
 use League\Fractal\Resource\Collection as FractalCollection;
 
@@ -63,6 +65,11 @@ class InventoryTransformer extends TransformerAbstract
      */
     private $clappTransformer;
 
+    /**
+     * @var ConvertHelper
+     */
+    private $convertHelper;
+
     public function __construct() {
         $this->userTransformer = new UserTransformer;
         $this->dealerLocationTransformer = new DealerLocationTransformer;
@@ -71,6 +78,8 @@ class InventoryTransformer extends TransformerAbstract
         $this->attributeValueTransformer = new AttributeValueTransformer;
         $this->featureTransformer = new FeatureTransformer;
         $this->clappTransformer = new ClappTransformer;
+
+        $this->convertHelper = new ConvertHelper();
     }
 
     /**
@@ -79,11 +88,24 @@ class InventoryTransformer extends TransformerAbstract
      */
     public function transform(Inventory $inventory): array
     {
+        if ($inventory->length > 0) {
+            list($lengthSecond, $lengthInchesSecond) = $this->convertHelper->feetToFeetInches($inventory->length);
+        }
+
+        if ($inventory->width > 0) {
+            list($widthSecond, $widthInchesSecond) = $this->convertHelper->feetToFeetInches($inventory->width);
+        }
+
+        if ($inventory->height > 0) {
+            list($heightSecond, $heightInchesSecond) = $this->convertHelper->feetToFeetInches($inventory->height);
+        }
+
         return [
              'id' => $inventory->inventory_id,
              'identifier' => $inventory->identifier,
              'active' => $inventory->active,
              'archived_at' => $inventory->archived_at,
+             'payload_capacity' => $inventory->payload_capacity,
              'availability' => $inventory->availability,
              'bill_id' => $inventory->bill_id,
              'brand' => $inventory->brand,
@@ -99,20 +121,27 @@ class InventoryTransformer extends TransformerAbstract
              'fp_interest_paid' => $inventory->interest_paid,
              'fp_committed' => $inventory->fp_committed,
              'gvwr' => $inventory->gvwr,
+             'axle_capacity' => $inventory->axle_capacity,
              'height' => $inventory->height,
+             'height_inches' => $inventory->height_inches,
+             'height_second' => $heightSecond ?? 0,
+             'height_inches_second' => $heightInchesSecond ?? 0,
              'images' => $this->transformImages($inventory->inventoryImages),
              'files' => $this->transformFiles($inventory->files),
              'primary_image' => $inventory->images->count() > 0 ? $this->inventoryImageTransformer->transform($inventory->inventoryImages->first()) : null,
              'is_archived' => $inventory->is_archived,
              'is_floorplan_bill' => $inventory->is_floorplan_bill,
              'length' => $inventory->length,
+             'length_inches' => $inventory->length_inches,
+             'length_second' => $lengthSecond ?? null,
+             'length_inches_second' => $lengthInchesSecond ?? null,
              'manufacturer' => $inventory->manufacturer,
              'model' => $inventory->model,
              'msrp' => $inventory->msrp,
              'non_serialized' => $inventory->non_serialized,
              'notes' => $inventory->notes,
              'price' => $inventory->price ?? 0,
-             'sales_price' => $inventory->sales_price ?? 0,
+             'sales_price' => (float) $inventory->sales_price ?? 0,
              'send_to_quickbooks' => $inventory->send_to_quickbooks,
              'status' => $inventory->status_label,
              'stock' => $inventory->stock,
@@ -126,6 +155,9 @@ class InventoryTransformer extends TransformerAbstract
              'vin' => $inventory->vin,
              'weight' => $inventory->weight,
              'width' => $inventory->width,
+             'width_inches' => $inventory->width_inches,
+             'width_second' => $widthSecond ?? null,
+             'width_inches_second' => $widthInchesSecond ?? null,
              'year' => $inventory->year,
              'color' => $inventory->color,
              'floorplan_payments' => $inventory->floorplanPayments,
@@ -137,6 +169,8 @@ class InventoryTransformer extends TransformerAbstract
              'is_featured' => $inventory->is_featured,
              'is_special' => $inventory->is_special,
              'chosen_overlay' => $inventory->chosen_overlay,
+             'hidden_price' => $inventory->hidden_price,
+             'monthly_payment' => $inventory->monthly_payment,
              'quote_url' => config('app.new_design_crm_url') . $inventory->user->getCrmLoginUrl('bill-of-sale/new?inventory_id=' . $inventory->identifier)
          ];
     }
