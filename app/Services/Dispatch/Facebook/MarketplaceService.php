@@ -305,7 +305,7 @@ class MarketplaceService implements MarketplaceServiceInterface
         $listings = new Collection();
         foreach($inventory as $listing) {
             if(!empty($listing)) {
-                $this->log->info('Found ' . count($listing->ordererdImages) . ' images on listing' .
+                $this->log->info('Found ' . $listing->ordererdImages->count() . ' images on listing' .
                                     PHP_EOL . print_r($listing->orderedImages(), true));
             }
             if($type === MarketplaceStatus::METHOD_MISSING) {
