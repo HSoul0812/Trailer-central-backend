@@ -40,6 +40,10 @@ class LeadRepository implements LeadRepositoryInterface {
             'field' => 'website_lead.date_submitted',
             'direction' => 'DESC'
         ],
+        '-created_at' => [
+            'field' => 'website_lead.date_submitted',
+            'direction' => 'ASC'
+        ],
         'future_due_past_due_no_due' => [
             'field' => 'crm_tc_lead_status.next_contact_date',
             'direction' => 'DESC'
@@ -64,6 +68,9 @@ class LeadRepository implements LeadRepositoryInterface {
         ],
         'created_at' => [
             'name' => 'Most Recently Created'
+        ],
+        '-created_at' => [
+            'name' => 'Least Recently Created'
         ],
         'future_due_past_due_no_due' => [
             'name' => 'Future Due Dates, Past Due Dates, No Due Date'
