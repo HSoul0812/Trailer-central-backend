@@ -196,7 +196,7 @@ class QuoteRepository implements QuoteRepositoryInterface
                     $join->on('dms_unit_sale.id', '=', 'group_payment.unit_sale_id');
                 })
                 ->where('dms_unit_sale.is_archived', '=', 0)
-                ->groupBy(DB::raw('CASE WHEN group_payment.paid_amount OR dms_unit_sale.is_po = 1 THEN 1 ELSE 0 END, 
+                ->groupBy(DB::raw('CASE WHEN group_payment.paid_amount OR dms_unit_sale.is_po = 1 THEN 1 ELSE 0 END,
                     CASE WHEN dms_unit_sale.total_price - CAST(group_payment.calculated_amount as DECIMAL(10, 2)) > 0 OR dms_unit_sale.is_po=1 THEN 0 ELSE 1 END'))
                 ->get();
     }
