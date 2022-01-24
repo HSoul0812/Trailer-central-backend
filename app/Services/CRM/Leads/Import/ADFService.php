@@ -255,15 +255,15 @@ class ADFService implements ADFServiceInterface {
         // Refresh Token
         $accessToken = $systemEmail->googleToken;
         $validate = $this->google->validate($accessToken);
-        if(!empty($validate['new_token'])) {
+        if(!empty($validate->newToken)) {
             // Refresh Access Token
             $time = CarbonImmutable::now();
             $accessToken = $this->tokens->update([
                 'id' => $accessToken->id,
-                'access_token' => $validate['new_token']['access_token'],
-                'id_token' => $validate['new_token']['id_token'],
-                'expires_in' => $validate['new_token']['expires_in'],
-                'expires_at' => $time->addSeconds($validate['new_token']['expires_in'])->toDateTimeString(),
+                'access_token' => $validate->newToken['access_token'],
+                'id_token' => $validate->newToken['id_token'],
+                'expires_in' => $validate->newToken['expires_in'],
+                'expires_at' => $time->addSeconds($validate->newToken['expires_in'])->toDateTimeString(),
                 'issued_at' => $time->toDateTimeString()
             ]);
         }

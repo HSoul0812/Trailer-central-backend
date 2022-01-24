@@ -60,9 +60,23 @@ class ImageRepository implements ImageRepositoryInterface
      * @param $params
      * @return Collection
      */
-    public function getAll($params)
+    public function getAll($params): Collection
     {
-        throw new NotImplementedException;
+        $query = Image::select('*')
+            ->join('inventory_image', 'inventory_image.image_id', '=', 'image.image_id')
+            ->join('inventory', 'inventory.inventory_id', '=', 'inventory_image.inventory_id');
+
+        if (!empty($params['inventory_id'])) {
+            $query->where('inventory_image.inventory_id', $params['inventory_id']);
+        }
+
+        if (isset($params[self::CONDITION_AND_WHERE_IN]) && is_array($params[self::CONDITION_AND_WHERE_IN])) {
+            foreach ($params[self::CONDITION_AND_WHERE_IN] as $field => $values) {
+                $query->whereIn($field, $values);
+            }
+        }
+
+        return $query->get();
     }
 
     /**

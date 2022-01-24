@@ -7,7 +7,7 @@ use League\Fractal\Resource\Collection;
 use League\Fractal\TransformerAbstract;
 use App\Models\Parts\Part;
 
-class PartsTransformer extends TransformerAbstract
+class PartsTransformer extends TransformerAbstract implements PartsTransformerInterface
 {
     protected $availableIncludes = [
         'purchaseOrders',
@@ -17,7 +17,7 @@ class PartsTransformer extends TransformerAbstract
     {
 	 return [
              'id' => (int)$part->id,
-             'dealer_id' => (int)$part->dealer_id,
+             'dealer_id' => $part->dealer_id ? (int)$part->dealer_id : null,
              'vendor' => $part->vendor,
              'manufacturer' => $part->manufacturer,
              'brand' => $part->brand,
