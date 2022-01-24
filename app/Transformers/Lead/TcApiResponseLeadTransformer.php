@@ -21,6 +21,7 @@ class TcApiResponseLeadTransformer extends TransformerAbstract
              'phone_number'     => $lead->phone_number,
              'comments'         => $lead->comments,
              'created_at'       => $lead->created_at,
+             'zip'              => $lead->zip
          ];
     }
 }

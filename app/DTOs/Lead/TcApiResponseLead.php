@@ -17,6 +17,7 @@ class TcApiResponseLead
     public ?string $phone;
     public ?string $comments;
     public ?string $created_at;
+    public ?string $zip;
 
     #[Pure]
  public static function fromData(array $data): self
@@ -31,6 +32,7 @@ class TcApiResponseLead
      $obj->phone_number = $data['phone'];
      $obj->comments = $data['comments'];
      $obj->created_at = $data['created_at'];
+     $obj->zip = $data['zip'];
 
      return $obj;
  }

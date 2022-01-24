@@ -48,6 +48,7 @@ class LeadService implements LeadServiceInterface
             "preferred_contact" => 'string',
             "address" => 'string',
             "comments" => 'string',
+            "zip" => 'string',
             "note" => 'string',
             "referral" => 'string',
             "title" => 'string',
