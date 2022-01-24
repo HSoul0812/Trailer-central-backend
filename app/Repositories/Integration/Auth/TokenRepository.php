@@ -5,9 +5,9 @@ namespace App\Repositories\Integration\Auth;
 use App\Exceptions\NotImplementedException;
 use App\Models\Integration\Auth\AccessToken;
 use App\Models\Integration\Auth\Scope;
+use App\Services\Integration\Common\DTOs\CommonToken;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Collection;
-use Carbon\CarbonImmutable;
 
 class TokenRepository implements TokenRepositoryInterface {
     /**
@@ -74,7 +74,7 @@ class TokenRepository implements TokenRepositoryInterface {
         }
 
         // Return Access Token
-        return $this->find($params);
+        return $this->get(['id' => $accessToken->id]);
     }
 
     /**
@@ -96,6 +96,34 @@ class TokenRepository implements TokenRepositoryInterface {
     }
 
     /**
+     * Delete All Access Token
+     * 
+     * @param string $type
+     * @param int $id
+     * @param null|int $except
+     * @return int
+     */
+    public function deleteAll(string $type, int $id, ?int $except = null): int
+    {
+        // Get Relations to Delete
+        $relations = $this->getRelations($type, $id);
+
+        // Loop Relations to Delete
+        $deleted = 0;
+        foreach($relations as $relation) {
+            if(!empty($except) && $relation->id === $except) {
+                continue;
+            }
+            if($this->delete(['id' => $relation->id])) {
+                $deleted++;
+            }
+        }
+
+        // Return Count of Deleted Successfully
+        return $deleted;
+    }
+
+    /**
      * Get Access Token
      * 
      * @param array $params
@@ -106,18 +134,43 @@ class TokenRepository implements TokenRepositoryInterface {
         return AccessToken::findOrFail($params['id']);
     }
 
+
     /**
      * Get Access Token Via Relation
      * 
      * @param array $params
-     * @return AccessToken
+     * @return null|AccessToken
      */
-    public function getRelation($params) {
+    public function getRelation(array $params): ?AccessToken {
         // Find Token From Relation
-        return AccessToken::where('token_type', $params['token_type'])
-                          ->where('relation_type', $params['relation_type'])
-                          ->where('relation_id', $params['relation_id'])
-                          ->first();
+        $token = AccessToken::where('relation_type', $params['relation_type'])
+                            ->where('relation_id', $params['relation_id']);
+
+        // Token Type Exists?
+        if(!empty($params['token_type'])) {
+            $token = $token->where('token_type', $params['token_type']);
+        }
+        // Find MOST RECENT Token Instead!
+        else {
+            $token = $this->addSortQuery($token, 'issued_at');
+        }
+
+        // Return First
+        return $token->first();
+    }
+
+    /**
+     * Get Access Tokens Via Relation
+     * 
+     * @param string $type
+     * @param int $id
+     * @return Collection<AccessToken>
+     */
+    public function getRelations(string $type, int $id): Collection {
+        // Find Token From Relation
+        return AccessToken::where('relation_type', $type)
+                          ->where('relation_id', $id)
+                          ->get();
     }
 
     /**
@@ -159,17 +212,23 @@ class TokenRepository implements TokenRepositoryInterface {
      * @return QueryBuilder
      */
     public function find($params) {
-        // Token ID Exists?
-        if (isset($params['id'])) {
-            return AccessToken::findOrFail($params['id']);
-        }
-
         // Relation Exists?
-        if (isset($params['token_type']) && isset($params['relation_type']) && isset($params['relation_id'])) {
-            $accessToken = AccessToken::where('token_type', $params['token_type'])
-                                      ->where('relation_type', $params['relation_type'])
-                                      ->where('relation_id', $params['relation_id'])
-                                      ->first();
+        if (isset($params['relation_type']) && isset($params['relation_id'])) {
+            // Find Token From Relation
+            $token = AccessToken::where('relation_type', $params['relation_type'])
+                                ->where('relation_id', $params['relation_id']);
+
+            // Token Type Exists?
+            if(!empty($params['token_type'])) {
+                $token = $token->where('token_type', $params['token_type']);
+            }
+            // Find MOST RECENT Token Instead!
+            else {
+                $token = $this->addSortQuery($token, 'issued_at');
+            }
+
+            // Get Access Token
+            $accessToken = $token->first();
 
             // Return Access Token
             if(!empty($accessToken->id)) {
@@ -177,8 +236,24 @@ class TokenRepository implements TokenRepositoryInterface {
             }
         }
 
+        // Token ID Exists?
+        if (isset($params['id'])) {
+            return AccessToken::findOrFail($params['id']);
+        }
+
         // Return Empty
         return null;
+    }
+
+    /**
+     * Get By State
+     * 
+     * @param string $state
+     * @return null|AccessToken
+     */
+    public function getByState(string $state): ?AccessToken {
+        // Get Access Token Entry By State
+        return AccessToken::where('state', $state)->first();
     }
 
     /**
@@ -188,17 +263,16 @@ class TokenRepository implements TokenRepositoryInterface {
      * @param array $newToken
      * @return AccessToken
      */
-    public function refresh($tokenId, $newToken) {
+    public function refresh(int $tokenId, CommonToken $newToken): AccessToken {
         // Refresh Access Token
-        $time = CarbonImmutable::now();
         return $this->update([
             'id' => $tokenId,
-            'access_token' => $newToken['access_token'],
-            'refresh_token' => $newToken['refresh_token'],
-            'id_token' => $newToken['id_token'],
-            'expires_in' => $newToken['expires_in'],
-            'expires_at' => $time->addSeconds($newToken['expires_in'])->toDateTimeString(),
-            'issued_at' => $time->toDateTimeString()
+            'access_token' => $newToken->accessToken,
+            'refresh_token' => $newToken->refreshToken,
+            'id_token' => $newToken->idToken,
+            'expires_in' => $newToken->expiresIn,
+            'expires_at' => $newToken->expiresAt,
+            'issued_at' => $newToken->issuedAt
         ]);
     }
 

@@ -2,6 +2,17 @@
 
 namespace App\Providers;
 
+use App\Models\CRM\Interactions\EmailHistory;
+use App\Models\CRM\Interactions\Facebook\Message;
+use App\Models\CRM\Interactions\TextLog;
+use App\Models\Observers\CRM\Interactions\EmailHistoryObserver;
+use App\Models\Observers\CRM\Interactions\FbMessageObserver;
+use App\Models\Observers\CRM\Interactions\TextLogObserver;
+use App\Repositories\CRM\Interactions\InteractionMessageRepository;
+use App\Repositories\CRM\Interactions\InteractionMessageRepositoryInterface;
+use App\Services\CRM\Interactions\InteractionMessageService;
+use App\Services\CRM\Interactions\InteractionMessageServiceInterface;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 use App\Repositories\CRM\Email\BounceRepository;
 use App\Repositories\CRM\Email\BounceRepositoryInterface;
@@ -15,6 +26,12 @@ use App\Repositories\CRM\Interactions\EmailHistoryRepository;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Repositories\CRM\Interactions\InteractionsRepository;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
+use App\Repositories\CRM\Interactions\Facebook\ConversationRepository;
+use App\Repositories\CRM\Interactions\Facebook\ConversationRepositoryInterface;
+use App\Repositories\CRM\Interactions\Facebook\MessageRepository;
+use App\Repositories\CRM\Interactions\Facebook\MessageRepositoryInterface;
+use App\Repositories\CRM\Leads\FacebookRepository;
+use App\Repositories\CRM\Leads\FacebookRepositoryInterface;
 use App\Repositories\CRM\Text\BlastRepository as TextBlastRepository;
 use App\Repositories\CRM\Text\BlastRepositoryInterface as TextBlastRepositoryInterface;
 use App\Repositories\CRM\Text\CampaignRepository as TextCampaignRepository;
@@ -37,6 +54,10 @@ use App\Services\CRM\Text\CampaignService as TextCampaignService;
 use App\Services\CRM\Text\CampaignServiceInterface as TextCampaignServiceInterface;
 use App\Services\CRM\Text\TwilioService;
 use App\Services\CRM\Text\TextServiceInterface;
+use App\Services\CRM\Interactions\Facebook\MessageService;
+use App\Services\CRM\Interactions\Facebook\MessageServiceInterface;
+use App\Services\CRM\Interactions\Facebook\WebhookService;
+use App\Services\CRM\Interactions\Facebook\WebhookServiceInterface;
 use App\Services\CRM\Interactions\InteractionService;
 use App\Services\CRM\Interactions\InteractionServiceInterface;
 use App\Services\CRM\Interactions\InteractionEmailService;
@@ -69,6 +90,9 @@ class InteractionServiceProvider extends ServiceProvider
         $this->app->bind(InteractionServiceInterface::class, InteractionService::class);
         $this->app->bind(InteractionEmailServiceInterface::class, InteractionEmailService::class);
         $this->app->bind(NtlmEmailServiceInterface::class, NtlmEmailService::class);
+        $this->app->bind(MessageServiceInterface::class, MessageService::class);
+        $this->app->bind(WebhookServiceInterface::class, WebhookService::class);
+        $this->app->bind(InteractionMessageServiceInterface::class, InteractionMessageService::class);
 
 
         // Text Repositories
@@ -87,6 +111,25 @@ class InteractionServiceProvider extends ServiceProvider
         // Interaction Repositories
         $this->app->bind(EmailHistoryRepositoryInterface::class, EmailHistoryRepository::class);
         $this->app->bind(InteractionsRepositoryInterface::class, InteractionsRepository::class);
+        $this->app->bind(InteractionMessageRepositoryInterface::class, InteractionMessageRepository::class);
+        $this->app->bind(ConversationRepositoryInterface::class, ConversationRepository::class);
+        $this->app->bind(MessageRepositoryInterface::class, MessageRepository::class);
+        $this->app->bind(FacebookRepositoryInterface::class, FacebookRepository::class);
     }
 
+    public function boot()
+    {
+        Relation::morphMap([
+            TextLog::getTableName() => TextLog::class,
+            EmailHistory::getTableName() => EmailHistory::class,
+            Message::getTableName() => Message::class,
+        ]);
+
+        TextLog::observe(TextLogObserver::class);
+        EmailHistory::observe(EmailHistoryObserver::class);
+        Message::observe(FbMessageObserver::class);
+
+        \Validator::extend('messaging_type_valid', 'App\Rules\CRM\Interactions\Facebook\ValidMessagingType@passes');
+        \Validator::extend('interaction_message_valid', 'App\Rules\CRM\Interactions\ValidInteractionMessage@passes');
+    }
 }

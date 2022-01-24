@@ -27,6 +27,10 @@ class TransactionExecuteQueueRepository implements TransactionExecuteQueueReposi
      */
     public function create($params) 
     {
+        if (!empty(TransactionExecuteQueue::SOURCE_MAPPINGS[$params['source']])) {
+            $params['source'] = TransactionExecuteQueue::SOURCE_MAPPINGS[$params['source']];
+        }
+
         $dataToInsert = [
             'queued_at' => Carbon::now()->toDateTimeString(),
             'api' => $params['source'],

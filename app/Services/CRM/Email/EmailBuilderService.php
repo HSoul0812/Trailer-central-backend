@@ -26,9 +26,11 @@ use App\Services\CRM\Email\EmailBuilderServiceInterface;
 use App\Services\CRM\Interactions\DTOs\BuilderEmail;
 use App\Services\CRM\Interactions\DTOs\BuilderStats;
 use App\Services\CRM\Interactions\NtlmEmailServiceInterface;
+use App\Services\Integration\AuthServiceInterface;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
+use App\Services\Integration\Microsoft\OfficeServiceInterface;
 use App\Traits\CustomerHelper;
 use App\Traits\MailHelper;
 use App\Transformers\CRM\Email\BuilderEmailTransformer;
@@ -41,7 +43,7 @@ use Carbon\Carbon;
 
 /**
  * Class EmailBuilderService
- * 
+ *
  * @package App\Services\CRM\Email
  */
 class EmailBuilderService implements EmailBuilderServiceInterface
@@ -104,6 +106,11 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     protected $ntlm;
 
     /**
+     * @var App\Services\Integration\AuthServiceInterface
+     */
+    protected $auth;
+
+    /**
      * @var App\Services\Integration\Google\GoogleServiceInterface
      */
     protected $google;
@@ -126,11 +133,15 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * @param BounceRepositoryInterface $bounces
      * @param LeadRepositoryInterface $leads
      * @param SalesPersonRepositoryInterface $salespeople
+     * @param InteractionsRepositoryInterface $interactions
      * @param EmailHistoryRepositoryInterface $emailhistory
      * @param TokenRepositoryInterface $tokens
      * @param UserRepositoryInterface $users
+     * @param NtlmEmailServiceInterface $ntlm
+     * @param AuthServiceInterface $auth
      * @param GoogleServiceInterface $google
      * @param GmailServiceInterface $gmail
+     * @param OfficeServiceInterface $office
      * @param Manager $fractal
      */
     public function __construct(
@@ -145,8 +156,10 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         TokenRepositoryInterface $tokens,
         UserRepositoryInterface $users,
         NtlmEmailServiceInterface $ntlm,
+        AuthServiceInterface $auth,
         GoogleServiceInterface $google,
         GmailServiceInterface $gmail,
+        OfficeServiceInterface $office,
         Manager $fractal
     ) {
         $this->blasts = $blasts;
@@ -161,8 +174,10 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         $this->users = $users;
 
         $this->ntlm = $ntlm;
+        $this->auth = $auth;
         $this->google = $google;
         $this->gmail = $gmail;
+        $this->office = $office;
 
         // Set Fractal
         $this->fractal = $fractal;
@@ -174,7 +189,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
     /**
      * Send Lead Emails for Blast
-     * 
+     *
      * @param int $id ID of Blast to Send Emails For
      * @param string Comma-Delimited String of Lead ID's to Send Emails For Blast
      * @throws FromEmailMissingSmtpConfigException
@@ -221,7 +236,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
     /**
      * Send Lead Emails for Campaign
-     * 
+     *
      * @param int $id ID of Campaign to Send Emails For
      * @param string Comma-Delimited String of Lead ID's to Send Emails For Blast
      * @throws FromEmailMissingSmtpConfigException
@@ -268,7 +283,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
     /**
      * Send Email for Template
-     * 
+     *
      * @param int $id ID of Template to Send Email For
      * @param string $subject Subject of Email to Send
      * @param string $toEmail Email Address to Send To
@@ -326,7 +341,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
     /**
      * Send Emails for Builder Config
-     * 
+     *
      * @param BuilderEmail $builder
      * @param array $leads
      * @throws SendBuilderEmailsFailedException
@@ -373,7 +388,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
     /**
      * Save Email Information to Database
-     * 
+     *
      * @param BuilderEmail $builder
      * @return EmailHistory
      */
@@ -398,7 +413,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
     /**
      * Send Email Via SMTP|Gmail|NTLM
-     * 
+     *
      * @param BuilderEmail $builder
      * @return ParsedEmail
      */
@@ -410,23 +425,26 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         $salesPerson = $this->salespeople->get(['sales_person_id' => $builder->salesPersonId]);
         $smtpConfig = !empty($salesPerson->id) ? SmtpConfig::fillFromSalesPerson($salesPerson) : null;
 
-        // Send Gmail Email
-        if(!empty($smtpConfig) && $smtpConfig->isAuthTypeGmail()) {
-            // Refresh Token
+        // Refresh Access Token if Exists
+        if(!empty($smtpConfig) && $smtpConfig->isAuthConfigOauth()) {
             $accessToken = $this->refreshAccessToken($smtpConfig->accessToken);
             $smtpConfig->setAccessToken($accessToken);
+        }
+
+        // Send Gmail Email
+        if(!empty($smtpConfig) && $smtpConfig->isAuthTypeGmail()) {
             $finalEmail = $this->gmail->send($smtpConfig, $parsedEmail);
-        }
-        // Send NTLM Email
-        elseif(!empty($smtpConfig) && $smtpConfig->isAuthTypeNtlm()) {
+        } elseif(!empty($smtpConfig) && $smtpConfig->isAuthTypeOffice()) {
+            // Send Office Email
+            $finalEmail = $this->office->send($smtpConfig, $parsedEmail);
+        } elseif(!empty($smtpConfig) && $smtpConfig->isAuthTypeNtlm()) {
+            // Send NTLM Email
             $finalEmail = $this->ntlm->send($builder->dealerId, $smtpConfig, $parsedEmail);
-        }
-        // Send Custom Email
-        elseif($smtpConfig) {
+        } elseif($smtpConfig) {
+            // Send Custom Email
             $this->sendCustomEmail($smtpConfig, $builder->getToEmail(), new EmailBuilderEmail($parsedEmail));
-        }
-        // Send SES Email
-        else {
+        } else {
+            // Send SES Email
             $user = $this->users->get(['dealer_id' => $builder->dealerId]);
             $this->sendCustomSesEmail($user, $builder->getToEmail(), new EmailBuilderEmail($parsedEmail, $builder));
             $parsedEmail->setMessageId('');
@@ -441,7 +459,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
     /**
      * Mark Email as Sent
-     * 
+     *
      * @param BuilderEmail $builder
      * @return boolean true if marked as sent (for campaign/blast) | false if nothing marked sent
      */
@@ -469,7 +487,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
     /**
      * Add Message ID to Sent
-     * 
+     *
      * @param BuilderEmail $builder
      * @param ParsedEmail $parsedEmail
      * @return boolean true if marked as sent (for campaign/blast) | false if nothing marked sent
@@ -480,10 +498,10 @@ class EmailBuilderService implements EmailBuilderServiceInterface
                             $builder->leadId . ' with Message-ID: ' . $parsedEmail->messageId);
         switch($builder->type) {
             case "campaign":
-                $sent = $this->campaigns->updateSent($builder->id, $builder->leadId, $parsedEmail->messageId);
+                $sent = $this->campaigns->updateSent($builder->id, $builder->leadId, $parsedEmail->messageId, $parsedEmail->emailHistoryId);
             break;
             case "blast":
-                $sent = $this->blasts->updateSent($builder->id, $builder->leadId, $parsedEmail->messageId);
+                $sent = $this->blasts->updateSent($builder->id, $builder->leadId, $parsedEmail->messageId, $parsedEmail->emailHistoryId);
             break;
         }
 
@@ -493,7 +511,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
     /**
      * Mark Email as Sent
-     * 
+     *
      * @param BuilderEmail $builder
      * @param ParsedEmail $finalEmail
      * @return boolean true if marked as sent (for campaign/blast) | false if nothing marked sent
@@ -518,7 +536,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
     /**
      * Replace Message ID in Email History ID and Sent
-     * 
+     *
      * @param string $type
      * @param int $id
      * @param int $lead
@@ -558,7 +576,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
     /**
      * Send Lead Email and Return Status from BuilderEmail
-     * 
+     *
      * @param BuilderEmail $builder
      * @return string
      */
@@ -588,9 +606,10 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             // Send Email Via SMTP, Gmail, or NTLM
             $finalEmail = $this->sendEmail($builder);
 
+            $this->markSentMessageId($builder, $finalEmail);
+
             // Mark Email as Sent Only if Not SES!
             if($finalEmail->messageId) {
-                $this->markSentMessageId($builder, $finalEmail);
                 $this->markEmailSent($finalEmail);
             }
 
@@ -605,7 +624,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
     /**
      * Send Email Manually for Builder Config
-     * 
+     *
      * @param BuilderEmail $builder
      * @param string $toEmail
      * @throws SendBuilderEmailsFailedException
@@ -642,7 +661,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
     /**
      * Mark Email as Bounced
-     * 
+     *
      * @param BuilderEmail $builder
      * @param null|string $type
      * @return void
@@ -679,7 +698,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
     /**
      * Return Send Emails Response
-     * 
+     *
      * @param BuilderEmail $builder
      * @param string $leads
      * @return array response
@@ -697,16 +716,16 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     }
 
     /**
-     * Refresh Gmail Access Token
-     * 
+     * Refresh Access Token
+     *
      * @param AccessToken $accessToken
      * @return AccessToken
      */
     private function refreshAccessToken(AccessToken $accessToken): AccessToken {
         // Refresh Token
-        $validate = $this->google->validate($accessToken);
-        if(!empty($validate['new_token'])) {
-            $accessToken = $this->tokens->refresh($accessToken->id, $validate['new_token']);
+        $validate = $this->auth->validate($accessToken);
+        if($validate->newToken) {
+            $accessToken = $this->tokens->refresh($accessToken->id, $validate->newToken);
         }
 
         // Return New Token

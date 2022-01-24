@@ -20,6 +20,7 @@ use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping as FeedDealerIncoming
 use App\Nova\Resource;
 use App\Nova\Filters\DealerIDMapping;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Laravel\Nova\Http\Requests\ResourceIndexRequest;
 
 class DealerIncomingMapping extends Resource
 {
@@ -85,7 +86,7 @@ class DealerIncomingMapping extends Resource
                 ->options($sortedTypes)
                 ->rules('required')
                 ->displayUsingLabels(),
-            
+
             Text::make('Dealer', 'dealer_id'),
 
             Text::make('Map From', 'map_from')->sortable()->rules('required'),
@@ -150,6 +151,20 @@ class DealerIncomingMapping extends Resource
         return $fields;
     }
 
+
+    /**
+     * @param Request $request
+     * @return string
+     */
+    public function fieldsMethod(Request $request): string
+    {
+        if ($this->isResourceIndexRequest() && method_exists($this, 'fieldsForIndex')) {
+            return 'fieldsForIndex';
+        }
+
+        return 'fields';
+    }
+
     /**
      * Build an "index" query for the given resource.
      *
@@ -207,5 +222,15 @@ class DealerIncomingMapping extends Resource
     public function actions(Request $request)
     {
         return [];
+    }
+
+    /**
+     * Determine if this request is a resource index request.
+     *
+     * @return bool
+     */
+    public function isResourceIndexRequest(): bool
+    {
+        return $this instanceof ResourceIndexRequest;
     }
 }

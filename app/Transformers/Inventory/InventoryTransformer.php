@@ -2,45 +2,99 @@
 
 namespace App\Transformers\Inventory;
 
+use App\Helpers\ConvertHelper;
 use App\Models\Inventory\File;
+use App\Models\Inventory\InventoryImage;
 use App\Transformers\Dms\ServiceOrderTransformer;
+use Illuminate\Database\Eloquent\Collection;
+use League\Fractal\Resource\Item;
+use Carbon\Carbon;
 use League\Fractal\TransformerAbstract;
 use App\Models\Inventory\Inventory;
 use App\Transformers\User\UserTransformer;
 use App\Transformers\User\DealerLocationTransformer;
-use Illuminate\Database\Eloquent\Collection;
 use App\Transformers\Website\WebsiteTransformer;
-use App\Models\User\User;
-use Carbon\Carbon;
+use League\Fractal\Resource\Collection as FractalCollection;
 
 class InventoryTransformer extends TransformerAbstract
 {
     protected $availableIncludes = [
         'website',
         'repairOrders',
-        'attributes'
+        'attributes',
+        'features',
+        'clapps',
     ];
 
+    /**
+     * @var UserTransformer
+     */
     protected $userTransformer;
 
+    /**
+     * @var DealerLocationTransformer
+     */
     protected $dealerLocationTransformer;
 
-    protected $imageTransformer;
+    /**
+     * @var InventoryImageTransformer
+     */
+    protected $inventoryImageTransformer;
 
-    /** @var FileTransformer */
+    /**
+     * @var AttributeValueTransformer
+     */
+    private $attributeValueTransformer;
+
+    /**
+     * @var FeatureTransformer
+     */
+    private $featureTransformer;
+
+    /**
+     * @var FileTransformer
+     */
     private $fileTransformer;
 
-    public function __construct()
-    {
-        $this->userTransformer = new UserTransformer();
-        $this->dealerLocationTransformer = new DealerLocationTransformer();
-        $this->imageTransformer = new ImageTransformer();
-        $this->fileTransformer = new FileTransformer();
+    /**
+     * @var ClappTransformer
+     */
+    private $clappTransformer;
+
+    /**
+     * @var ConvertHelper
+     */
+    private $convertHelper;
+
+    public function __construct() {
+        $this->userTransformer = new UserTransformer;
+        $this->dealerLocationTransformer = new DealerLocationTransformer;
+        $this->inventoryImageTransformer = new InventoryImageTransformer;
+        $this->fileTransformer = new FileTransformer;
+        $this->attributeValueTransformer = new AttributeValueTransformer;
+        $this->featureTransformer = new FeatureTransformer;
+        $this->clappTransformer = new ClappTransformer;
+
+        $this->convertHelper = new ConvertHelper();
     }
 
+    /**
+     * @param Inventory $inventory
+     * @return array
+     */
     public function transform(Inventory $inventory): array
     {
-        $user = User::where('dealer_id', $inventory->dealer_id)->first();
+        if ($inventory->length > 0) {
+            list($lengthSecond, $lengthInchesSecond) = $this->convertHelper->feetToFeetInches($inventory->length);
+        }
+
+        if ($inventory->width > 0) {
+            list($widthSecond, $widthInchesSecond) = $this->convertHelper->feetToFeetInches($inventory->width);
+        }
+
+        if ($inventory->height > 0) {
+            list($heightSecond, $heightInchesSecond) = $this->convertHelper->feetToFeetInches($inventory->height);
+        }
 
         $age = now()->diffInDays(Carbon::parse($inventory->created_at));
 
@@ -53,6 +107,7 @@ class InventoryTransformer extends TransformerAbstract
              'identifier' => $inventory->identifier,
              'active' => $inventory->active,
              'archived_at' => $inventory->archived_at,
+             'payload_capacity' => $inventory->payload_capacity,
              'availability' => $inventory->availability,
              'bill_id' => $inventory->bill_id,
              'brand' => $inventory->brand,
@@ -68,20 +123,27 @@ class InventoryTransformer extends TransformerAbstract
              'fp_interest_paid' => $inventory->interest_paid,
              'fp_committed' => $inventory->fp_committed,
              'gvwr' => $inventory->gvwr,
+             'axle_capacity' => $inventory->axle_capacity,
              'height' => $inventory->height,
-             'images' => $this->transformImages($inventory->images),
+             'height_inches' => $inventory->height_inches,
+             'height_second' => $heightSecond ?? 0,
+             'height_inches_second' => $heightInchesSecond ?? 0,
+             'images' => $this->transformImages($inventory->inventoryImages),
              'files' => $this->transformFiles($inventory->files),
-             'primary_image' => $inventory->images->count() > 0 ? $this->imageTransformer->transform($inventory->images->first()) : null,
+             'primary_image' => $inventory->images->count() > 0 ? $this->inventoryImageTransformer->transform($inventory->inventoryImages->first()) : null,
              'is_archived' => $inventory->is_archived,
              'is_floorplan_bill' => $inventory->is_floorplan_bill,
              'length' => $inventory->length,
+             'length_inches' => $inventory->length_inches,
+             'length_second' => $lengthSecond ?? null,
+             'length_inches_second' => $lengthInchesSecond ?? null,
              'manufacturer' => $inventory->manufacturer,
              'model' => $inventory->model,
              'msrp' => $inventory->msrp,
              'non_serialized' => $inventory->non_serialized,
              'notes' => $inventory->notes,
              'price' => $inventory->price ?? 0,
-             'sales_price' => $inventory->sales_price ?? 0,
+             'sales_price' => (float) $inventory->sales_price ?? 0,
              'send_to_quickbooks' => $inventory->send_to_quickbooks,
              'status' => $inventory->status_label,
              'stock' => $inventory->stock,
@@ -95,6 +157,9 @@ class InventoryTransformer extends TransformerAbstract
              'vin' => $inventory->vin,
              'weight' => $inventory->weight,
              'width' => $inventory->width,
+             'width_inches' => $inventory->width_inches,
+             'width_second' => $widthSecond ?? null,
+             'width_inches_second' => $widthInchesSecond ?? null,
              'year' => $inventory->year,
              'color' => $inventory->color,
              'floorplan_payments' => $inventory->floorplanPayments,
@@ -103,23 +168,59 @@ class InventoryTransformer extends TransformerAbstract
              'created_at' => $inventory->created_at,
              'updated_at' => $inventory->updated_at,
              'times_viewed' => $inventory->times_viewed,
-             'quote_url' => config('app.new_design_crm_url') . $user->getCrmLoginUrl('bill-of-sale/new?inventory_id=' . $inventory->identifier),
-             'age' => $age,
-             'sold_at' => $inventory->sold_at
+             'sold_at' => $inventory->sold_at,
+             'is_featured' => $inventory->is_featured,
+             'is_special' => $inventory->is_special,
+             'chosen_overlay' => $inventory->chosen_overlay,
+             'hidden_price' => $inventory->hidden_price,
+             'monthly_payment' => $inventory->monthly_payment,
+             'quote_url' => config('app.new_design_crm_url') . $inventory->user->getCrmLoginUrl('bill-of-sale/new?inventory_id=' . $inventory->identifier),
+             'age' => $age
          ];
     }
 
-    public function includeAttributes($inventory)
+    /**
+     * @param Inventory $inventory
+     * @return FractalCollection
+     */
+    public function includeAttributes(Inventory $inventory): FractalCollection
     {
-        return $inventory->attributes;
+        return $this->collection($inventory->attributeValues, $this->attributeValueTransformer);
     }
 
-    public function includeWebsite($inventory)
+    /**
+     * @param Inventory $inventory
+     * @return FractalCollection
+     */
+    public function includeFeatures(Inventory $inventory): FractalCollection
+    {
+        return $this->collection($inventory->inventoryFeatures, $this->featureTransformer);
+    }
+
+    /**
+     * @param Inventory $inventory
+     * @return FractalCollection
+     */
+    public function includeClapps(Inventory $inventory): FractalCollection
+    {
+        return $this->collection($inventory->clapps, $this->clappTransformer);
+    }
+
+    /**
+     * @param Inventory $inventory
+     * @return Item
+     */
+    public function includeWebsite(Inventory $inventory): Item
     {
         return $this->item($inventory->user->website, new WebsiteTransformer);
     }
 
-    public function includeRepairOrders($inventory) {
+    /**
+     * @param $inventory
+     * @return array|FractalCollection
+     */
+    public function includeRepairOrders($inventory)
+    {
         if (empty($inventory->repairOrders)) {
             return [];
         }
@@ -127,15 +228,21 @@ class InventoryTransformer extends TransformerAbstract
         return $this->collection($inventory->repairOrders, new ServiceOrderTransformer());
     }
 
-    private function transformImages(Collection $images)
+    /**
+     * @param Collection $images
+     * @return array
+     */
+    private function transformImages(Collection $images): array
     {
-        $ret = [];
-        foreach($images as $img) {
-            $ret[] = $this->imageTransformer->transform($img);
-        }
-        return $ret;
+        return $images->map(function (InventoryImage $image) {
+            return $this->inventoryImageTransformer->transform($image);
+        })->toArray();
     }
 
+    /**
+     * @param Collection $files
+     * @return array
+     */
     private function transformFiles(Collection $files): array
     {
         return $files->map(function (File $file) {

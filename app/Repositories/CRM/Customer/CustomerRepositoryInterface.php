@@ -13,4 +13,10 @@ interface CustomerRepositoryInterface extends Repository {
     public function createFromLead(Lead $lead, $useExisting = true);
 
     public function getByEmailOrPhone(array $params): ?Customer;
+
+    /**
+     * @param array $params
+     * @return bool
+     */
+    public function bulkUpdate(array $params): bool;
 }

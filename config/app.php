@@ -60,6 +60,8 @@ return [
 
     'new_design_crm_url' => env('NEW_DESIGN_CRM_URL', 'https://design-prod.crm.trailercentral.com/'),
 
+    'crm_url' => env('CRM_URL', 'https://crm.trailercentral.com/'),
+
     'user_master_password' => env('USER_MASTER_PASSWORD'),
 
     /*
@@ -167,7 +169,7 @@ return [
         Illuminate\Translation\TranslationServiceProvider::class,
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
-
+        Laravel\Horizon\HorizonServiceProvider::class,
         /*
          * Package Service Providers...
          */
@@ -179,6 +181,7 @@ return [
         App\Providers\AuthServiceProvider::class,
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
+        App\Providers\HorizonServiceProvider::class,
         App\Providers\NovaServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         App\Providers\PartsServiceProvider::class,

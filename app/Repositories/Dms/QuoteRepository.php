@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Dms;
 
+use App\Exceptions\RepositoryInvalidArgumentException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use App\Repositories\Dms\QuoteRepositoryInterface;
@@ -232,5 +233,30 @@ class QuoteRepository implements QuoteRepositoryInterface
             ->update([
                 'is_archived' => true,
             ]);
+    }
+
+    /**
+     * @param array $params
+     * @return bool
+     */
+    public function bulkUpdate(array $params): bool
+    {
+        if ((empty($params['ids']) || !is_array($params['ids'])) && (empty($params['search']) || !is_array($params['search']))) {
+            throw new RepositoryInvalidArgumentException('ids or search param has been missed. Params - ' . json_encode($params));
+        }
+
+        $query = $this->model::query();
+
+        if (!empty($params['ids']) && is_array($params['ids'])) {
+            $query->whereIn('id', $params['ids']);
+            unset($params['ids']);
+        }
+
+        if (!empty($params['search']['lead_id'])) {
+            $query->where('lead_id', $params['search']['lead_id']);
+            unset($params['search']);
+        }
+
+        return (bool)$query->update($params);
     }
 }

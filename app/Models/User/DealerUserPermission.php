@@ -8,6 +8,15 @@ class DealerUserPermission extends Model
 {
     const TABLE_NAME = 'dealer_user_permissions';
     
+    public const DMS_PERMISSIONS = [
+        'back_office',
+        'pos',
+        'purchase_orders',
+        'quotes',
+        'service',
+        'time_clock'
+    ];
+    
     /**
      * The table associated with the model.
      *

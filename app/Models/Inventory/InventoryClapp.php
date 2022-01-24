@@ -37,7 +37,7 @@ class InventoryClapp extends Model
     /**
      * @return BelongsTo
      */
-    public function inventory()
+    public function inventory(): BelongsTo
     {
         return $this->belongsTo(Inventory::class, 'inventory_id', 'inventory_id');
     }
