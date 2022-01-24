@@ -15,8 +15,8 @@ use App\Repositories\Parts\CostHistoryRepository;
 use App\Repositories\Parts\CostHistoryRepositoryInterface;
 use App\Services\Dms\ServiceOrder\BulkCsvTechnicianReportServiceInterface;
 use App\Services\Dms\ServiceOrder\BulkCsvTechnicianReportService;
-use App\Repositories\Common\MonitoredJobRepository\TechnicianReportRepository;
-use App\Repositories\Common\MonitoredJobRepository\TechnicianReportRepositoryInterface;
+use App\Repositories\Parts\PartRepositoryInterface;
+use App\Repositories\Parts\PartRepository;
 use App\Repositories\Parts\AuditLogRepository;
 use App\Repositories\Parts\AuditLogRepositoryInterface;
 use App\Services\Export\Parts\BulkCsvDownloadJobService;
@@ -25,6 +25,8 @@ use App\Services\Export\Parts\BulkReportJobService;
 use App\Services\Export\Parts\BulkReportJobServiceInterface;
 use App\Services\Parts\PartService;
 use App\Services\Parts\PartServiceInterface;
+use App\Transformers\Parts\PartsTransformer;
+use App\Transformers\Parts\PartsTransformerInterface;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
@@ -43,7 +45,7 @@ class PartsServiceProvider extends ServiceProvider
 
             // part should be reindexed
             PartReindexNotification::class,
-        ],
+        ]
     ];
 
     public function boot()
@@ -69,8 +71,7 @@ class PartsServiceProvider extends ServiceProvider
 
     public function register()
     {
-        //
-        $this->app->bind('App\Repositories\Parts\PartRepositoryInterface', 'App\Repositories\Parts\PartRepository');
+        $this->app->bind(PartRepositoryInterface::class, PartRepository::class);
         $this->app->bind('App\Repositories\Parts\BinRepositoryInterface', 'App\Repositories\Parts\BinRepository');
         $this->app->bind('App\Repositories\Parts\CycleCountRepositoryInterface', 'App\Repositories\Parts\CycleCountRepository');
         $this->app->bind('App\Repositories\Parts\BrandRepositoryInterface', 'App\Repositories\Parts\BrandRepository');
@@ -83,6 +84,8 @@ class PartsServiceProvider extends ServiceProvider
         $this->app->bind(PartServiceInterface::class, PartService::class);
         $this->app->bind(AuditLogRepositoryInterface::class, AuditLogRepository::class);
         $this->app->bind(CostHistoryRepositoryInterface::class, CostHistoryRepository::class);
+
+        $this->app->bind(PartsTransformerInterface::class, PartsTransformer::class);
 
         // CSV exporter bindings
         $this->app->bind(BulkDownloadRepositoryInterface::class, BulkDownloadRepository::class);

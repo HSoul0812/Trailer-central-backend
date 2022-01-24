@@ -65,7 +65,7 @@ class BigTexService implements BigTexServiceInterface
                 self::EMAIL_FIELD_NAME => $lead->email_address,
                 self::ZIP_FIELD_NAME => $lead->zip,
                 self::PHONE_FIELD_NAME => $lead->phone_number,
-                self::STORE_ID_FIELD_NAME => '',
+                self::STORE_ID_FIELD_NAME => $lead->inventory ? $lead->inventory->trailerworld_store_id : '',
                 self::VIN_FIELD_NAME => $lead->inventory ? $lead->inventory->vin : '',
                 self::INVENTORY_ID_FIELD_NAME => $lead->inventory ? $lead->inventory->inventory_id : '',
                 self::LISTING_ID_FIELD_NAME => $lead->inventory ? $lead->inventory->inventory_id : '',
