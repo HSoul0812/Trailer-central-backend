@@ -304,7 +304,7 @@ class MarketplaceService implements MarketplaceServiceInterface
         // Loop Through Inventory Items
         $listings = new Collection();
         foreach($inventory as $listing) {
-            if(!empty($listing)) {
+            if(!empty($listing) && !empty($listing->orderedImages)) {
                 $this->log->info('Found ' . $listing->ordererdImages->count() . ' images on listing' .
                                     PHP_EOL . print_r($listing->orderedImages(), true));
             }
