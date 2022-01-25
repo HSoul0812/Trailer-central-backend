@@ -63,10 +63,10 @@ class Integration extends Model
     /**
      * To avoid mutations and break something
      *
-     * @return array
+     * @return \Illuminate\Support\Collection
      */
     public function decodeSettings(): \Illuminate\Support\Collection
     {
-        return collect($this->settings ? unserialize($this->settings) : []);
+        return collect($this->settings ? unserialize($this->settings, ['allowed_classes' => false]) : []);
     }
 }

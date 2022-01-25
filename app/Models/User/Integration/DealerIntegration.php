@@ -75,11 +75,11 @@ class DealerIntegration extends Model
     {
         $settingValues = $this->decodeSettings();
 
-        return collect($this->integration->decodeSettings())
-            ->keyBy('name')
-            ->map(function (array $setting) use ($settingValues) {
-                return $setting + ['value' => $settingValues->get($setting['name'])];
-            });
+        $settingValueMapper = static function (array $setting) use ($settingValues): array {
+            return $setting + ['value' => $settingValues->get($setting['name'])];
+        };
+
+        return $this->integration->decodeSettings()->keyBy('name')->map($settingValueMapper);
     }
 
     /**
