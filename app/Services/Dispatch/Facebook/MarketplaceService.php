@@ -310,7 +310,6 @@ class MarketplaceService implements MarketplaceServiceInterface
                 $item = InventoryFacebook::getFromListings($listing);
             }
             $listings->push($item);
-            var_dump($item->images);
             $nowTime = microtime(true);
             $this->log->info('Debug time InventoryFacebook #' . $listing->inventory_id . ': ' . ($nowTime - $startTime));
         }
