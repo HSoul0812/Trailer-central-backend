@@ -35,7 +35,7 @@ class DealerIntegrationTransformer extends TransformerAbstract
             'updated_at' => $dealerIntegration->updated_at,
             'last_run_at' => $dealerIntegration->last_run_at,
             'active' => (bool)$dealerIntegration->active,
-            'settings' => $dealerIntegration->decodeSettingsWithValues()->values(),
+            'settings' => $dealerIntegration->decodeSettingsWithValues(),
             'location_ids' => $dealerIntegration->decodeLocationIds()->values(),
             'values' => $this->service->getValues($dealerIntegration->integration_id, $dealerIntegration->dealer_id)
         ];
