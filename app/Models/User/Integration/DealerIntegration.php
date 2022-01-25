@@ -53,6 +53,12 @@ class DealerIntegration extends Model
         'include_pending_sale'
     ];
 
+    protected $dates = [
+        'created_at',
+        'updated_at',
+        'last_run_at'
+    ];
+
     public function integration(): BelongsTo
     {
         return $this->belongsTo(Integration::class, 'integration_id', 'integration_id');

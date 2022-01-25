@@ -31,9 +31,9 @@ class DealerIntegrationTransformer extends TransformerAbstract
             'listing_count' => 0, // not sure where this come from
             'domain' => $dealerIntegration->integration->domain,
             'create_account_url' => $dealerIntegration->integration->create_account_url,
-            'created_at' => $dealerIntegration->created_at,
-            'updated_at' => $dealerIntegration->updated_at,
-            'last_run_at' => $dealerIntegration->last_run_at,
+            'created_at' => $dealerIntegration->created_at ? $dealerIntegration->created_at->format('Y-m-d H:i:s') : null,
+            'updated_at' => $dealerIntegration->updated_at ? $dealerIntegration->updated_at->format('Y-m-d H:i:s') : null,
+            'last_run_at' => $dealerIntegration->last_run_at ? $dealerIntegration->last_run_at->format('Y-m-d H:i:s') : null,
             'active' => (bool)$dealerIntegration->active,
             'settings' => $dealerIntegration->decodeSettingsWithValues(),
             'location_ids' => $dealerIntegration->decodeLocationIds(),
