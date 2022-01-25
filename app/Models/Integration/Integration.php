@@ -18,6 +18,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Integration extends Model
 {
+    public const STATUS_ACTIVE = 1;
+
     // Define Table Name Constant
     const TABLE_NAME = 'integration';
 

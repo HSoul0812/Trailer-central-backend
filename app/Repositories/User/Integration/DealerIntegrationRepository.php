@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories\User\Integration;
 
+use App\Models\Integration\Integration;
 use App\Models\User\Integration\DealerIntegration;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use InvalidArgumentException;
@@ -29,6 +30,12 @@ class DealerIntegrationRepository implements DealerIntegrationRepositoryInterfac
      */
     public function get(array $params): DealerIntegration
     {
+        $query = $this->model::query()
+            ->select('integration_dealer.*')
+            ->join('integration', 'integration.integration_id', '=', 'integration_dealer.integration_id')
+            ->where('integration.active', Integration::STATUS_ACTIVE)
+            ->where('integration_dealer.active', DealerIntegration::STATUS_ACTIVE);
+
         if (empty($params['integration_dealer_id'])) {
             if (empty($params['integration_id'])) {
                 throw new InvalidArgumentException(sprintf("[%s] 'dealer_id' argument is required", __CLASS__));
@@ -38,11 +45,12 @@ class DealerIntegrationRepository implements DealerIntegrationRepositoryInterfac
                 throw new InvalidArgumentException(sprintf("[%s] 'dealer_id' argument is required", __CLASS__));
             }
 
-            return $this->model
+            return $query
                 ->where('dealer_id', $params['dealer_id'])
-                ->where('integration_id', $params['integration_id'])->firstOrFail();
+                ->where('integration_dealer.integration_id', $params['integration_id'])
+                ->firstOrFail();
         }
 
-        return $this->model::findOrFail($params['integration_dealer_id']);
+        return $query->where('integration_dealer_id', $params['integration_dealer_id'])->firstOrFail();
     }
 }

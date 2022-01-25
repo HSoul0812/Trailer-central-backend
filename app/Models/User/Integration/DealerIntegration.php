@@ -35,6 +35,8 @@ use App\Models\Integration\Integration;
  */
 class DealerIntegration extends Model
 {
+    public const STATUS_ACTIVE = 1;
+
     protected $table = 'integration_dealer';
 
     protected $fillable = [
