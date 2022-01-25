@@ -44,8 +44,6 @@ class InventoryTransformer extends TransformerAbstract
     public function includeImages(InventoryFacebook $inventory)
     {
         if(!empty($inventory->images)) {
-            var_dump($inventory->images);
-            die;
             return $this->collection($inventory->images, $this->imageTransformer);
         }
         return $this->null();
