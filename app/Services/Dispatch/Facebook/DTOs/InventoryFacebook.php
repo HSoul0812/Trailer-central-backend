@@ -413,8 +413,6 @@ class InventoryFacebook
             Marketplace $integration): InventoryFacebook
     {
         // Create Inventory Mapping
-        var_dump($inventory->orderedImages);
-        die;
         return new self([
             'inventory_id' => $inventory->inventory_id,
             'page_url' => $integration->page_url,

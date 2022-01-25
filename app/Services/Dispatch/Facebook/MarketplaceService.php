@@ -305,10 +305,12 @@ class MarketplaceService implements MarketplaceServiceInterface
         $listings = new Collection();
         foreach($inventory as $listing) {
             if($type === MarketplaceStatus::METHOD_MISSING) {
-                $listings->push(InventoryFacebook::getFromInventory($listing, $integration));
+                $item = InventoryFacebook::getFromInventory($listing, $integration);
             } else {
-                $listings->push(InventoryFacebook::getFromListings($listing));
+                $item = InventoryFacebook::getFromListings($listing);
             }
+            $listings->push($item);
+            var_dump($item->images);
             $nowTime = microtime(true);
             $this->log->info('Debug time InventoryFacebook #' . $listing->inventory_id . ': ' . ($nowTime - $startTime));
         }
