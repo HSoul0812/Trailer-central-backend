@@ -108,7 +108,7 @@ class MarketplaceStep
         $allSelectors = [];
         foreach(explode(",", $selectors) as $selector) {
             // Loop Selectors
-            $allSelectors = array_merge($allSelectors, config('marketing.fb.selectors.' . $selector));
+            $allSelectors = array_merge($allSelectors, config('marketing.fb.selectors.' . $selector, []));
         }
 
         // Return All Selectors
