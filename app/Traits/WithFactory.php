@@ -12,8 +12,10 @@ trait WithFactory
     /**
      * @param stdClass|array $properties
      * @return static
+     *
+     * @throws InvalidArgumentException when there was provided a nonexistent properties
      */
-    public static function from($properties): self
+    public static function from($properties, bool $strict = true): self
     {
         $object = new static();
 
@@ -24,7 +26,7 @@ trait WithFactory
             if (method_exists($object, $methodName)) {
                 $object->$methodName($value);
             } else {
-                if (!property_exists($object, $property)) {
+                if ($strict && !property_exists($object, $property)) {
                     throw new InvalidArgumentException("$property is not settable");
                 }
 

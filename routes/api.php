@@ -29,6 +29,31 @@ $api->version('v1', function ($route) {
     */
 
     /**
+     * Completed Orders
+     */
+    $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
+        $route->get('ecommerce/orders', 'App\Http\Controllers\v1\Ecommerce\CompletedOrderController@index');
+        $route->get('ecommerce/orders/{id}', 'App\Http\Controllers\v1\Ecommerce\CompletedOrderController@show')->where('id', '[0-9]+');
+        $route->post('ecommerce/shipping-costs', 'App\Http\Controllers\v1\Ecommerce\ShippingController@calculateCosts');
+        $route->post('ecommerce/available-shipping-methods', 'App\Http\Controllers\v1\Ecommerce\ShippingController@getAvailableShippingMethods');
+        $route->post('ecommerce/refunds/{order_id}','App\Http\Controllers\v1\Ecommerce\RefundController@issue')->where('order_id', '[0-9]+');
+        $route->get('ecommerce/refunds','App\Http\Controllers\v1\Ecommerce\RefundController@index');
+        $route->get('ecommerce/refunds/{refund_id}','App\Http\Controllers\v1\Ecommerce\RefundController@show')->where('order_id', '[0-9]+');
+        $route->get('ecommerce/invoice/{id}', 'App\Http\Controllers\v1\Ecommerce\InvoiceController@show')->where('id', '[0-9]+');
+    });
+
+    $route->group(['middleware' => 'stripe.webhook.validate'], function ($route) {
+        $route->post('ecommerce/orders', 'App\Http\Controllers\v1\Ecommerce\CompletedOrderController@create');
+    });
+
+
+    $route->group(['middleware' => 'textrail.webhook.validate'], function ($route) {
+        $route->post('ecommerce/orders/{textrail_order_id}/approve', 'App\Http\Controllers\v1\Ecommerce\CompletedOrderController@markAsApproved')->where('textrail_order_id', '[0-9]+');
+        $route->post('ecommerce/cancellation/{textrail_order_id}','App\Http\Controllers\v1\Ecommerce\RefundController@cancelOrder')->where('textrail_order_id', '[0-9]+');
+        $route->post('ecommerce/returns/{rma}','App\Http\Controllers\v1\Ecommerce\RefundController@updateReturnStatus')->where('rma', '[0-9]+');
+    });
+
+    /**
      * Floorplan Payments
      */
 
@@ -174,6 +199,12 @@ $api->version('v1', function ($route) {
     $route->post('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@update')->where('id', '[0-9]+');
     $route->delete('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@destroy')->where('id', '[0-9]+');
 
+    /**
+     * Textrail Parts
+     */
+    $route->get('textrail/parts', 'App\Http\Controllers\v1\Parts\Textrail\PartsController@index');
+    $route->get('textrail/parts/{id}', 'App\Http\Controllers\v1\Parts\Textrail\PartsController@show')->where('id', '[0-9]+');
+
     /*
     |--------------------------------------------------------------------------
     | Inventory
@@ -251,6 +282,11 @@ $api->version('v1', function ($route) {
     $route->delete('inventory/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@destroy')->where('id', '[0-9]+');
     $route->get('inventory/exists', 'App\Http\Controllers\v1\Inventory\InventoryController@exists');
 
+    /**
+     * Inventory images
+     */
+    $route->delete('inventory/{id}/images', 'App\Http\Controllers\v1\Inventory\ImageController@bulkDestroy')->where('id', '[0-9]+');
+
     /*
     |--------------------------------------------------------------------------
     | Packages
@@ -301,6 +337,11 @@ $api->version('v1', function ($route) {
     $route->get('website/parts/filters/{id}', 'App\Http\Controllers\v1\Website\Parts\FilterController@show')->where('id', '[0-9]+');
     $route->post('website/parts/filters/{id}', 'App\Http\Controllers\v1\Website\Parts\FilterController@update')->where('id', '[0-9]+');
     $route->delete('website/parts/filters/{id}', 'App\Http\Controllers\v1\Website\Parts\FilterController@destroy')->where('id', '[0-9]+');
+
+    /**
+     * Website Textrail Part Filters
+     */
+       $route->get('website/parts/textrail/filters', 'App\Http\Controllers\v1\Website\Parts\Textrail\FilterController@index');
 
     /**
      * Website Blog Posts

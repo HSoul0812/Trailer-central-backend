@@ -55,7 +55,7 @@
                         <table cellspacing="0" cellpadding="4" border="0" width="650">
                             <tr>
                                 <td>
-                                    <p style="text-align: right; font-size: 10px; color: #ABABB8; margin: 0; font-family:Verdana, Arial, Helvetica, sans-serif;">Trailer Central. Copyright {{ $year }}, All rights reserved.</p>
+                                    <p style="text-align: right; font-size: 10px; color: #ABABB8; margin: 0; font-family:Verdana, Arial, Helvetica, sans-serif;">{{$fromName}}. Copyright {{ $year }}, All rights reserved.</p>
                                 </td>
                             </tr>
                         </table>
