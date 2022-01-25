@@ -11,8 +11,8 @@ class ImageTransformer extends TransformerAbstract
     {
         return [
             'image_id' => $invImage->image_id,
-            'url' => config('marketing.fb.settings.images.domain') . $invImage->filename,
-            'noverlay' => $invImage->filename_noverlay ? config('marketing.fb.settings.images.domain') . $invImage->filename_noverlay : '',
+            'url' => config('marketing.fb.settings.images.domain') . $invImage->image->filename,
+            'noverlay' => $invImage->image->filename_noverlay ? config('marketing.fb.settings.images.domain') . $invImage->image->filename_noverlay : '',
             'position' => $invImage->position
         ];
     }
