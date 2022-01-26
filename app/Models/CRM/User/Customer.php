@@ -170,7 +170,6 @@ class Customer extends Model
                             ->havingRaw('paid_amount < dms_unit_sale.total_price or paid_amount <= 0');
                     });
             });
-
     }
 
     public function dealer(): BelongsTo

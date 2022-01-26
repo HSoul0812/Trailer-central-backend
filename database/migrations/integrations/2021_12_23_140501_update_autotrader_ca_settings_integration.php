@@ -49,7 +49,7 @@ class UpdateAutotraderCaSettingsIntegration extends Migration
 
         if ($check) {
             DB::transaction(function () {
-                DB::table('integrations')->where(self::INTEGRATION_PARAMS)->update(self::NEW_SETTINGS);
+                DB::table('integration')->where(self::INTEGRATION_PARAMS)->update(self::NEW_SETTINGS);
 
                 $checkCapitalTrailers = $this->checkCapitalTrailers();
 
@@ -129,7 +129,7 @@ class UpdateAutotraderCaSettingsIntegration extends Migration
      */
     private function checkCapitalTrailers()
     {
-        $checkCapitalTrailers = DB::table('dealers')->where('dealer_id', self::CAPITAL_TRAILERS['dealer_id'])->exists();
+        $checkCapitalTrailers = DB::table('dealer')->where('dealer_id', self::CAPITAL_TRAILERS['dealer_id'])->exists();
 
         if ($checkCapitalTrailers) {
             return true;
@@ -143,7 +143,7 @@ class UpdateAutotraderCaSettingsIntegration extends Migration
      */
     private function checkSunwestRvCentre()
     {
-        $checkSunwestRvCentre = DB::table('dealers')->where('dealer_id', self::SUNWEST_RV_CENTRE['dealer_id'])->exists();
+        $checkSunwestRvCentre = DB::table('dealer')->where('dealer_id', self::SUNWEST_RV_CENTRE['dealer_id'])->exists();
 
         if ($checkSunwestRvCentre) {
             return true;

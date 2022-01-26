@@ -146,6 +146,7 @@ class InventoryTransformer extends TransformerAbstract
              'sales_price' => (float) $inventory->sales_price ?? 0,
              'send_to_quickbooks' => $inventory->send_to_quickbooks,
              'status' => $inventory->status_label,
+             'status_id' => $inventory->status,
              'stock' => $inventory->stock,
              'title' => $inventory->title,
              'true_cost' => $inventory->true_cost,
@@ -174,6 +175,7 @@ class InventoryTransformer extends TransformerAbstract
              'chosen_overlay' => $inventory->chosen_overlay,
              'hidden_price' => $inventory->hidden_price,
              'monthly_payment' => $inventory->monthly_payment,
+             'show_on_website' => $inventory->show_on_website,
              'quote_url' => config('app.new_design_crm_url') . $inventory->user->getCrmLoginUrl('bill-of-sale/new?inventory_id=' . $inventory->identifier),
              'age' => $age
          ];

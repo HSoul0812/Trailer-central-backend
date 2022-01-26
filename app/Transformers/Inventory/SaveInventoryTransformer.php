@@ -22,6 +22,8 @@ class SaveInventoryTransformer implements TransformerInterface
     private const FEATURES_KEY = 'features';
     private const ATTRIBUTES_KEY = 'attributes';
 
+    private const STATUS_FIELD = 'status';
+
     private const FEET_INCHES_FIELDS = [
         "width",
         "length",
@@ -51,7 +53,8 @@ class SaveInventoryTransformer implements TransformerInterface
         'dealer_location_identifier' => 'dealer_location_id',
         'external_color' => 'color',
         'exterior_color' => 'color',
-        'craigslist' => 'clapps'
+        'craigslist' => 'clapps',
+        'status_id' => 'status',
     ];
 
     private const SANITIZE_UTF8_FIELDS = [
@@ -74,6 +77,7 @@ class SaveInventoryTransformer implements TransformerInterface
         'hidden_price',
         'chosen_overlay',
         'pac_type',
+        'slideouts',
     ];
 
     private const IMAGES_FIELDS = [
@@ -94,6 +98,13 @@ class SaveInventoryTransformer implements TransformerInterface
 
     private const ARRAY_VALUES = [
         'craigslist'
+    ];
+
+    /**
+     * The attribute that we allow value '0'
+     */
+    private const ATTRIBUTES_ALLOWS_ZERO = [
+        'slideouts',
     ];
 
     private const FILE_TITLE = 'title';
@@ -160,7 +171,7 @@ class SaveInventoryTransformer implements TransformerInterface
             );
 
             foreach (self::FIELDS_MAPPING as $paramsField => $modelField) {
-                if (!isset($createParams[$modelField]) && isset($createParams[$paramsField])) {
+                if ((!isset($createParams[$modelField]) || $modelField === self::STATUS_FIELD) && isset($createParams[$paramsField])) {
                     $createParams[$modelField] = $createParams[$paramsField];
                     unset($createParams[$paramsField]);
                 }
@@ -225,8 +236,14 @@ class SaveInventoryTransformer implements TransformerInterface
             }
 
             foreach ($createParams as $createParamKey => $createParamValue) {
-                if (in_array($createParamKey, $defaultAttributes) && !empty($createParamValue)) {
+                if (in_array($createParamKey, $defaultAttributes)) {
                     $attributeId = array_search($createParamKey, $defaultAttributes);
+                    $attributeValueCanBeZero = in_array($createParamKey, self::ATTRIBUTES_ALLOWS_ZERO);
+                    $attributeIsNotIgnored = !isset($createParams['ignore_attributes']) || $createParams['ignore_attributes'] != 1;
+
+                    // We want to create the attribute if it's not empty
+                    // OR if it's 0, and we want to allow it only if it's in the allow list
+                    $shouldCreateAttribute = !empty($createParamValue) || ($createParamValue === '0' && $attributeValueCanBeZero);
 
                     $attributeExists = count(array_filter($attributes, function($attribute) use ($attributeId) {
                         if (!isset($attribute['attribute_id'])) {
@@ -235,7 +252,9 @@ class SaveInventoryTransformer implements TransformerInterface
                         return $attribute['attribute_id'] == $attributeId;
                     })) > 0;
 
-                    if (!$attributeExists && (!isset($createParams['ignore_attributes']) || $createParams['ignore_attributes'] != 1)) {
+                    $shouldCreateAttribute = $shouldCreateAttribute && !$attributeExists && $attributeIsNotIgnored;
+
+                    if ($shouldCreateAttribute) {
                         $attributes[] = [
                             'attribute_id' => $attributeId,
                             'value' => $createParamValue,
