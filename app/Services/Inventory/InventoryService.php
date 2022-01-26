@@ -110,7 +110,8 @@ class InventoryService implements InventoryServiceInterface
             'length' => ['stats' => ['field' => 'length']],
             'height_inches' => ['stats' => ['field' => 'heightInches']],
             'axles' => ['terms' => ['field' => 'numAxles']],
-            'manufacturer' => ['terms' => ['field' => 'manufacturer']]
+            'manufacturer' => ['terms' => ['field' => 'manufacturer']],
+            'gvwr' => ['stats' => ['field' => 'gvwr']]
         ]);
         $queryBuilder->filterAggregate([
             'pull_type' => ['terms' => ['field' => 'pullType']],
@@ -131,7 +132,8 @@ class InventoryService implements InventoryServiceInterface
             'construction' => ['terms' => ['field' => 'frameMaterial']],
             'category' => ['terms' => ['field' => 'category']],
             'stalls' => ['terms' => ['field' => 'numStalls']],
-            'height' => ['stats' => ['field' => 'height']]
+            'height' => ['stats' => ['field' => 'height']],
+            'gvwr' => ['stats' => ['field' => 'gvwr']],
         ]);
     }
 
@@ -157,6 +159,7 @@ class InventoryService implements InventoryServiceInterface
     }
 
     private function getGeolocation(array $params): ?Geolocation {
+        return null;
         $locationType = $params['location_type'] ?? null;
         $location = null;
         try {
