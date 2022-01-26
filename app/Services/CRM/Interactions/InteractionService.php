@@ -32,7 +32,7 @@ use Carbon\Carbon;
 
 /**
  * Class InteractionEmailService
- * 
+ *
  * @package App\Services\CRM\Interactions
  */
 class InteractionService implements InteractionServiceInterface
@@ -103,7 +103,7 @@ class InteractionService implements InteractionServiceInterface
 
     /**
      * InteractionsRepository constructor.
-     * 
+     *
      * @param AuthServiceInterface $auth
      * @param GoogleServiceInterface $google
      * @param GmailServiceInterface $gmail
@@ -151,7 +151,7 @@ class InteractionService implements InteractionServiceInterface
 
     /**
      * Get Email Config Settings
-     * 
+     *
      * @param int $dealerId
      * @param null|int $salesPersonId
      * @return EmailSettings
@@ -211,7 +211,7 @@ class InteractionService implements InteractionServiceInterface
 
     /**
      * Send Email to Lead
-     * 
+     *
      * @param int $leadId
      * @param array $params
      * @param array $attachments
@@ -236,12 +236,14 @@ class InteractionService implements InteractionServiceInterface
             }
         }
 
-        // Merge Attachments if Necessary
-        if(isset($params['attachments'])) {
-            $attachments = array_merge($attachments, (array)$params['attachments']);
-        } else { 
+        if(!isset($params['attachments'])) {
             $params['attachments'] = $attachments;
         }
+
+        if ($params['attachments'] instanceof UploadedFile) {
+            $params['attachments'] = array_fill(0, 1, $params['attachments']);
+        }
+
         foreach($params['attachments'] as $key => $attachment) {
             if (!is_a($attachment, UploadedFile::class)) {
                 unset($params['attachments'][$key]);
@@ -294,7 +296,7 @@ class InteractionService implements InteractionServiceInterface
 
     /**
      * Get Parsed Email From Params
-     * 
+     *
      * @param null|SmtpConfig $smtpConfig
      * @param int $leadId
      * @param array $params
@@ -341,7 +343,7 @@ class InteractionService implements InteractionServiceInterface
 
     /**
      * Save Email From Send Email
-     * 
+     *
      * @param int $leadId
      * @param int $userId
      * @param ParsedEmail $parsedEmail
@@ -390,7 +392,7 @@ class InteractionService implements InteractionServiceInterface
 
     /**
      * Check If Token is Expired, Refresh if it Is
-     * 
+     *
      * @param AccessToken $accessToken
      * @return AccessToken
      */

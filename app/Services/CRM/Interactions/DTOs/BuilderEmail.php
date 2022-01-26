@@ -330,7 +330,7 @@ class BuilderEmail
             'lead_id' => !empty($this->leadId) ? $this->leadId : 0,
             'interaction_id' => !empty($interactionId) ? $interactionId : 0,
             'message_id' => $this->getMessageId(),
-            'to_email' => $this->toEmail,
+            'to_email' => !empty($this->toEmail) ? $this->toEmail : '',
             'to_name' => !empty($this->toName) ? $this->toName : '',
             'from_email' => $this->fromEmail,
             'subject' => $this->subject,
