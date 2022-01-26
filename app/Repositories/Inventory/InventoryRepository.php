@@ -154,6 +154,14 @@ class InventoryRepository implements InventoryRepositoryInterface
         '-status' => [
             'field' => 'status',
             'direction' => 'ASC'
+        ],
+        'archived_at' => [
+            'field' => 'archived_at',
+            'direction' => 'DESC'
+        ],
+        '-archived_at' => [
+            'field' => 'archived_at',
+            'direction' => 'ASC'
         ]
     ];
 
