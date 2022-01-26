@@ -59,6 +59,7 @@ class LeadTransformer extends TransformerAbstract
             'next_contact_date' => ($lead->leadStatus) ? $lead->leadStatus->next_contact_date : null,
             'contact_type' => ($lead->leadStatus) ? $lead->leadStatus->contact_type : null,
             'created_at' => $lead->date_submitted,
+            'zip' => $lead->zip,
         ];
 
         if (!empty($lead->pretty_phone_number)) {
@@ -118,7 +119,6 @@ class LeadTransformer extends TransformerAbstract
                 'ids_exported' => $lead->ids_exported,
                 'city' => $lead->city,
                 'state' => $lead->state,
-                'zip' => $lead->zip,
             ];
         });
     }

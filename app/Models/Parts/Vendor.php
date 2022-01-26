@@ -2,6 +2,7 @@
 
 namespace App\Models\Parts;
 
+use App\Helpers\StringHelper;
 use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -54,5 +55,25 @@ class Vendor extends Model
     public function parts()
     {
         return $this->hasMany('App\Models\Parts\Part');
+    }
+
+    /**
+     * @param string|null $value
+     *
+     * @return void
+     */
+    public function setContactNameAttribute(?string $value): void
+    {
+        $this->attributes['contact_name'] = StringHelper::trimWhiteSpaces($value);
+    }
+
+    /**
+     * @param string|null $value
+     *
+     * @return void
+     */
+    public function setNameAttribute(?string $value): void
+    {
+        $this->attributes['name'] = StringHelper::trimWhiteSpaces($value);
     }
 }

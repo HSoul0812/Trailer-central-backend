@@ -19,6 +19,6 @@ trait WithGetter
             return $this->{$key};
         }
 
-        throw new PropertyDoesNotExists();
+        throw new PropertyDoesNotExists("'$key' property does not exists");
     }
 }

@@ -11,14 +11,27 @@ use Illuminate\Support\Facades\DB;
 
 class WebsiteConfigRepository implements WebsiteConfigRepositoryInterface {
 
-    use Transaction;
+      /**
+      * WebsiteConfigRepository constructor.
+      *
+      * @param WebsiteConfig $model
+      */
+     public function __construct(WebsiteConfig $websiteConfig)
+     {
+         $this->websiteConfig = $websiteConfig;
+     }
 
-    public function create($params) {
-        throw new NotImplementedException;
+    public function create($params) : WebsiteConfig
+    {
+      $this->websiteConfig->fill($params)->save();
+
+      return $this->websiteConfig;
     }
 
     public function delete($params) {
-        throw new NotImplementedException;
+      $websiteConfig = $this->websiteConfig->findOrFail($params['id']);
+
+      return (bool)$websiteConfig->delete();
     }
 
     public function get($params) {

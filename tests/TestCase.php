@@ -11,6 +11,7 @@ use Mockery;
 abstract class TestCase extends BaseTestCase
 {
     use CreatesApplication;
+    use MockPrivateMembers;
 
     protected function setUp(): void
     {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\CRM\User;
 
+use App\Helpers\StringHelper;
 use App\Models\CRM\Dms\ServiceOrder\ServiceItemTechnician;
 use App\Models\CRM\Dms\ServiceOrder\Technician;
 use App\Models\Traits\TableAware;
@@ -71,6 +72,36 @@ class Employee extends Model
         'qb_id',
         'is_timeclock_user'
     ];
+
+    /**
+     * @param string|null $value
+     *
+     * @return void
+     */
+    public function setFirstNameAttribute(?string $value): void
+    {
+        $this->attributes['first_name'] = StringHelper::trimWhiteSpaces($value);
+    }
+
+    /**
+     * @param string|null $value
+     *
+     * @return void
+     */
+    public function setLastNameAttribute(?string $value): void
+    {
+        $this->attributes['last_name'] = StringHelper::trimWhiteSpaces($value);
+    }
+
+    /**
+     * @param string|null $value
+     *
+     * @return void
+     */
+    public function setDisplayNameAttribute(?string $value): void
+    {
+        $this->attributes['display_name'] = StringHelper::trimWhiteSpaces($value);
+    }
 
     public function dealer(): BelongsTo
     {

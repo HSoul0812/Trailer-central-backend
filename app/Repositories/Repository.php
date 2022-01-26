@@ -7,20 +7,8 @@ namespace App\Repositories;
  *
  * @author Eczek
  */
-interface Repository
+interface Repository extends GenericRepository
 {
-    const SELECT = 'select';
-
-    const CONDITION_AND_WHERE = 'andWhere';
-    const CONDITION_AND_WHERE_RAW = 'andWhereRaw';
-    const CONDITION_AND_WHERE_IN = 'andWhereIn';
-
-    const RELATION_WITH_COUNT = 'withCount';
-
-    const CONDITION_AND_HAVING_COUNT = 'andHavingCount';
-
-    const GROUP_BY = 'groupBy';
-
     /**
      * Creates the record
      *
