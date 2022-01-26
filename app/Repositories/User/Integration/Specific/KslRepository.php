@@ -8,6 +8,10 @@ use App\Models\Inventory\Inventory;
 
 class KslRepository implements SpecificIntegrationRepositoryInterface
 {
+    use WithUsedSlotsGetter;
+
+    public const SHOWN_ON_KSL = 1;
+
     /**
      * @var Inventory
      */
@@ -18,21 +22,17 @@ class KslRepository implements SpecificIntegrationRepositoryInterface
         $this->model = $model;
     }
 
-    public const SHOWN_ON_KSL = 1;
-
-    public function get(array $params): array
+    protected function getUsedSlotsByDealerId(?int $dealerId): int
     {
         $query = $this->model::query();
 
-        if (!empty($params['dealer_id'])) {
-            $query->where('dealer_id', $params['dealer_id']);
+        if ($dealerId) {
+            $query->where('dealer_id', $dealerId);
         }
 
         $query->where('show_on_ksl', self::SHOWN_ON_KSL)
             ->whereNotIn('status', Inventory::UNAVAILABLE_STATUSES);
 
-        return [
-            'package' => $query->count('inventory_id') // aka used slots
-        ];
+        return $query->count('inventory_id');
     }
 }
