@@ -11,23 +11,25 @@ class UpdateV12softwareSettingsIntegration extends Migration
 
     private const DEALER_TABLE = 'dealer';
 
+    private const INTEGRATION_ID = 82;
+
     private const SULLIVAN_RV = [
-        'integration_id' => 82,
+        'integration_id' => self::INTEGRATION_ID,
         'dealer_id' => 6989
     ];
 
     private const MICHLS_TRAILER_SALES_LLC = [
-        'integration_id' => 82,
+        'integration_id' => self::INTEGRATION_ID,
         'dealer_id' => 10627
     ];
 
     private const SCHRECKS_AUTO = [
-        'integration_id' => 82,
+        'integration_id' => self::INTEGRATION_ID,
         'dealer_id' => 3953
     ];
 
     private const INTEGRATION_PARAMS = [
-        'integration_id' => 82,
+        'integration_id' => self::INTEGRATION_ID,
     ];
 
     private const ACTUAL_SETTINGS = [
@@ -102,7 +104,7 @@ class UpdateV12softwareSettingsIntegration extends Migration
      */
     private function checkIntegration(): bool
     {
-        $checkIntegration = DB::table(self::INTEGRATION_TABLE)->where('integration_id', self::INTEGRATION_PARAMS['integration_id'])->exists();
+        $checkIntegration = DB::table(self::INTEGRATION_TABLE)->where(self::INTEGRATION_PARAMS)->exists();
 
         if ($checkIntegration) {
             return true;
