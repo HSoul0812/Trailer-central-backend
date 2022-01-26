@@ -38,7 +38,8 @@ class InventoryService implements InventoryServiceInterface
         'length' => 'length',
         'width' => 'width',
         'height' => 'height',
-        'gvwr' => 'gvwr'
+        'gvwr' => 'gvwr',
+        'payload_capacity' => 'payloadCapacity'
     ];
 
     public function __construct(private GuzzleHttpClient $httpClient, private GeolocationRepositoryInterface $geolocationRepository)
@@ -111,7 +112,8 @@ class InventoryService implements InventoryServiceInterface
             'height_inches' => ['stats' => ['field' => 'heightInches']],
             'axles' => ['terms' => ['field' => 'numAxles']],
             'manufacturer' => ['terms' => ['field' => 'manufacturer']],
-            'gvwr' => ['stats' => ['field' => 'gvwr']]
+            'gvwr' => ['stats' => ['field' => 'gvwr']],
+            'payload_capacity' => ['stats' => ['field' => 'payloadCapacity']],
         ]);
         $queryBuilder->filterAggregate([
             'pull_type' => ['terms' => ['field' => 'pullType']],
@@ -134,6 +136,7 @@ class InventoryService implements InventoryServiceInterface
             'stalls' => ['terms' => ['field' => 'numStalls']],
             'height' => ['stats' => ['field' => 'height']],
             'gvwr' => ['stats' => ['field' => 'gvwr']],
+            'payload_capacity' => ['stats' => ['field' => 'payloadCapacity']],
         ]);
     }
 
@@ -159,7 +162,6 @@ class InventoryService implements InventoryServiceInterface
     }
 
     private function getGeolocation(array $params): ?Geolocation {
-        return null;
         $locationType = $params['location_type'] ?? null;
         $location = null;
         try {
