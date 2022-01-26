@@ -33,8 +33,8 @@ class DealerIntegrationRepository implements DealerIntegrationRepositoryInterfac
         $query = $this->model::query()
             ->select('integration_dealer.*')
             ->join('integration', 'integration.integration_id', '=', 'integration_dealer.integration_id')
-            ->where('integration.active', Integration::STATUS_ACTIVE)
-            ->where('integration_dealer.active', DealerIntegration::STATUS_ACTIVE);
+            ->orderBy('integration_dealer_id', 'DESC')
+            ->limit(1);
 
         if (empty($params['integration_dealer_id'])) {
             if (empty($params['integration_id'])) {
