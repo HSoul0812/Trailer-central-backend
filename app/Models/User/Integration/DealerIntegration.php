@@ -97,6 +97,6 @@ class DealerIntegration extends Model
      */
     public function decodeLocationIds(): \Illuminate\Support\Collection
     {
-        return collect(array_filter(explode(',', trim($this->location_ids))));
+        return collect(array_filter(explode(',', trim($this->location_ids ?? ''))));
     }
 }

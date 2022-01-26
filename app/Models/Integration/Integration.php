@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
  * Class Integration
  * @package App\Models\Integration
  *
+ * @property int $integration_id
  * @property string $name
  * @property string $description
  * @property string $domain
