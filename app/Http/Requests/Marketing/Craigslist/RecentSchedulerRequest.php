@@ -14,6 +14,9 @@ class RecentSchedulerRequest extends Request {
     protected $rules = [
         'dealer_id' => 'required|integer',
         'profile_id' => 'integer|valid_clapp_profile',
-        'slot_id' => 'integer'
+        'slot_id' => 'integer',
+        'sort' => 'in:scheduled,-scheduled,added,-added,updated,-updated',
+        'per_page' => 'integer',
+        'page' => 'integer',
     ];
 }
