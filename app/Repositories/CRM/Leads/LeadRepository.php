@@ -405,6 +405,10 @@ class LeadRepository implements LeadRepositoryInterface {
             $query = $query->leftJoin(LeadStatus::getTableName(), Lead::getTableName().'.identifier', '=', LeadStatus::getTableName().'.tc_lead_identifier');
         }
 
+        if (!$noInteractionJoin) {
+            $this->joinInteraction($query);
+        }
+
         if (isset($filters['search_term'])) {
             $query = $this->addSearchToQuery($query, $filters['search_term']);
         }
@@ -424,10 +428,6 @@ class LeadRepository implements LeadRepositoryInterface {
 
         if (isset($filters['next_contact_to'])) {
             $query = $this->addNextContactToToQuery($query, TimeUtil::convertTimeFormat($filters['next_contact_to'], TimeUtil::REQUEST_TIME_FORMAT, TimeUtil::MYSQL_TIME_FORMAT));
-        }
-
-        if((isset($filters['interacted_from']) || isset($filters['interacted_to'])) && !$noInteractionJoin) {
-            $this->joinInteraction($query);
         }
 
         if (isset($filters['interacted_from'])) {
