@@ -11,6 +11,7 @@ use App\Models\CRM\Account\Invoice;
 use App\Models\CRM\Dms\UnitSale;
 use App\Models\CRM\Account\Payment;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Str;
 
 /**
  * @author Marcel
@@ -97,17 +98,17 @@ class QuoteRepository implements QuoteRepositoryInterface
                 $q->where('title', 'LIKE', '%' . $params['search_term'] . '%')
                     ->orWhere('created_at', 'LIKE', '%' . $params['search_term'] . '%')
                     ->orWhere('total_price', 'LIKE', '%' . $params['search_term'] . '%')
-                    ->orWhere('inventory_vin', 'LIKE', '%' . $params['search_term'] . '%');
-                    // ->orWhereHas('customer', function($q) use($params) {
-                    //     $q->where('display_name', 'LIKE', '%' . $params['search_term'] . '%');
-                    // })
-                    // // also search extra inventory
-                    // ->orWhereHas('extraInventory', function($q) use($params) {
-                    //     $q->where('vin', 'LIKE', '%' . $params['search_term'] . '%');
-                    // })
-                    // ->orWhereHas('inventory', function($q) use($params) {
-                    //     $q->where('vin', 'LIKE', '%' . $params['search_term'] . '%');
-                    // });
+                    ->orWhere('inventory_vin', 'LIKE', '%' . $params['search_term'] . '%')
+                    ->orWhereHas('customer', function($q) use($params) {
+                        $q->where('display_name', 'LIKE', '%' . $params['search_term'] . '%');
+                    })
+                    // also search extra inventory
+                    ->orWhereHas('extraInventory', function($q) use($params) {
+                        $q->where('vin', 'LIKE', '%' . $params['search_term'] . '%');
+                    })
+                    ->orWhereHas('inventory', function($q) use($params) {
+                        $q->where('vin', 'LIKE', '%' . $params['search_term'] . '%');
+                    });
             });
         }
         if (!isset($params['per_page'])) {
