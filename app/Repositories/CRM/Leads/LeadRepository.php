@@ -112,14 +112,13 @@ class LeadRepository implements LeadRepositoryInterface {
         /**
          * Filters
          */
-        $query = $this->addFiltersToQuery($query, $params, false, isset($params['sort']));
+        $query = $this->addFiltersToQuery($query, $params);
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
         }
 
         if (isset($params['sort'])) {
-            $query = $query->leftJoin(Interaction::getTableName(), Interaction::getTableName().'.tc_lead_id',  '=', Lead::getTableName().'.identifier');
             $query = $query->orderByRaw($this->sortOrders[$params['sort']]['field'] . ' ' . $this->sortOrders[$params['sort']]['direction']);
         }
 
@@ -142,7 +141,7 @@ class LeadRepository implements LeadRepositoryInterface {
         /**
          * Filters
          */
-        $query = $this->addFiltersToQuery($query, $params, false, isset($params['sort']));
+        $query = $this->addFiltersToQuery($query, $params);
         return $query->first();
     }
 
