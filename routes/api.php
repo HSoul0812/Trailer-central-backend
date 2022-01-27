@@ -1227,6 +1227,19 @@ $api->version('v1', function ($route) {
         'prefix' => 'marketing',
         'middleware' => 'accesstoken.validate'
     ], function ($route) {
+        // Craigslist
+        $route->group([
+            'prefix' => 'clapp'
+        ], function ($route) {
+            // Facebook Marketplace
+            $route->group([
+                'prefix' => 'clapp'
+            ], function ($route) {
+                $route->get('recent', 'App\Http\Controllers\v1\Marketing\Craigslist\SchedulerController@recent');
+                $route->post('upcoming', 'App\Http\Controllers\v1\Marketing\Craigslist\SchedulerController@upcoming');
+            });
+        });
+
         // Facebook Marketplace
         $route->group([
             'prefix' => 'pagetab',
