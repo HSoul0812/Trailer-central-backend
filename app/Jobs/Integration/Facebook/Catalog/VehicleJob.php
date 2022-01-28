@@ -453,7 +453,6 @@ class VehicleJob extends Job
             rewind($file);
             $csv = stream_get_contents($file);
             fclose($file); // releases the memory (or tempfile)
-            unlink($file);
         } catch(\Exception $e) {
             $log->error('Exception returned loading CSV ' . $file . ' contents: ' . $e->getMessage());
         }
