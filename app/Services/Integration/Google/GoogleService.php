@@ -240,7 +240,7 @@ class GoogleService implements GoogleServiceInterface
         catch (\Exception $e) {
             // We actually just want to verify this is true or false
             // If it throws an exception, that means its false, the token isn't valid
-            $this->log->error('Exception returned for Google Access Token:' . $e->getMessage() . ': ' . $e->getTraceAsString());
+            $this->log->error('Exception returned for Google ID Token:' . $e->getMessage() . ': ' . $e->getTraceAsString());
         }
 
         // Return Validate
