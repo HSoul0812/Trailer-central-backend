@@ -47,10 +47,15 @@ trait SmtpHelper
         // Sales Person SMTP Service Exists?
         if (!empty($salesPerson->smtp_server)) {
             // Get Smtp Config From Sales Person
-            $config = SmtpConfig::fillFromSalesPerson($salesPerson);
+            try {
+                $config = SmtpConfig::fillFromSalesPerson($salesPerson);
 
-            // Validate Smtp Via Swift Mailer
-            $success = $this->validateSwiftSmtp($config);
+                // Validate Smtp Via Swift Mailer
+                $success = $this->validateSwiftSmtp($config);
+            } catch(\Exception $e) {
+                Log::channel('auth')->error('Exception returned validating sales person: ' . $e->getMessage());
+                $success = false;
+            }
         }
 
         // Return Validate SMTP as False
