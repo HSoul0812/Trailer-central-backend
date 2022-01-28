@@ -4,6 +4,7 @@ namespace App\Http\Controllers\v1\Feed;
 
 use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\Feed\CreateAtwInventoryRequest;
+use App\Http\Requests\Feed\UpdateAtwInventoryRequest;
 use App\Services\Import\Feed\DealerFeedUploaderService;
 use Dingo\Api\Http\Request;
 use App\Repositories\Feed\TransactionExecuteQueueRepositoryInterface;
@@ -53,6 +54,21 @@ class AtwController extends RestfulControllerV2
 
         if ($request->validate()) {
             $vins = $this->repository->createBulk($request->all());
+            return $this->response->array([
+                'message' => self::CREATE_RESPONSE_SUCCESFUL_MESSAGE,
+                'vins' => $vins
+            ]);
+        }
+        
+        return $this->response->errorBadRequest();
+    }
+    
+    public function update(Request $request)
+    {
+        $request = new UpdateAtwInventoryRequest($request->all());
+
+        if ($request->validate()) {
+            $vins = $this->repository->updateBulk($request->all());
             return $this->response->array([
                 'message' => self::CREATE_RESPONSE_SUCCESFUL_MESSAGE,
                 'vins' => $vins
