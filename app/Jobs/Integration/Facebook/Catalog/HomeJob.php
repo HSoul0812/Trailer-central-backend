@@ -248,9 +248,16 @@ class HomeJob extends Job
         rewind($file);
         $csv = stream_get_contents($file);
         fclose($file); // releases the memory (or tempfile)
+        unlink($file);
 
         // Return Stored File
-        return Storage::disk('s3')->put($filePath, $csv, 'public');
+        $file = Storage::disk('s3')->put($filePath, $csv, 'public');
+
+        // Inserted File
+        Log::channel('facebook')->info('Inserted ' . count($this->integration->listings) . ' Listings Into CSV File ' . $filePath);
+
+        // Return File
+        return $file;
     }
 
 
