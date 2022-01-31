@@ -59,7 +59,7 @@ class InventoryController extends RestfulControllerV2
         InventoryHistoryRepositoryInterface $inventoryHistoryRepository
     )
     {
-        $this->middleware('setDealerIdOnRequest')->only(['index', 'create', 'update', 'destroy', 'exists']);
+        $this->middleware('setDealerIdOnRequest')->only(['index', 'create', 'update', 'destroy', 'exists', 'getAll']);
         $this->middleware('inventory.create.permission')->only(['create', 'update']);
 
         $this->inventoryService = $inventoryService;
@@ -370,7 +370,7 @@ class InventoryController extends RestfulControllerV2
      * @param Request $request
      * @return Response
      */
-    public function delivery_price(int $inventoryId, Request $request):Response {
+    public function deliveryPrice(int $inventoryId, Request $request):Response {
         $toZipcode = $request->input('tozip');
         return $this->response->array([
             'response' => [
@@ -378,5 +378,57 @@ class InventoryController extends RestfulControllerV2
                 'fee' => $this->inventoryService->deliveryPrice($inventoryId, $toZipcode)
             ]
         ]);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/inventory/get_all",
+     *     description="Retrieve a list of inventory without defaults",
+
+     *     tags={"Inventory"},
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Page Limit",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="sort",
+     *         in="query",
+     *         description="Sort order can be: price,-price,relevance,title,-title,length,-length",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *   @OA\Parameter(
+     *         name="price",
+     *         in="query",
+     *         description="Inventory price can be in format: [10 TO 100], [10], [10.0 TO 100.0]",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns a list of parts",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
+     *     ),
+     * )
+     */
+    public function getAll(Request $request)
+    {
+        $request = new GetInventoryRequest($request->all());
+
+        if ($request->validate()) {
+            return $this->response->paginator(
+                $this->inventoryRepository->getAll($request->all(), false, true),
+                new InventoryTransformer()
+            );
+        }
+
+        return $this->response->errorBadRequest();
     }
 }

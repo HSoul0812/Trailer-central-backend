@@ -270,12 +270,13 @@ $api->version('v1', function ($route) {
     /**
      * Inventory distance
      */
-    $route->get('inventory/{inventory_id}/delivery_price', 'App\Http\Controllers\v1\Inventory\InventoryController@delivery_price')->where('inventory_id', '[0-9]+');
+    $route->get('inventory/{inventory_id}/delivery_price', 'App\Http\Controllers\v1\Inventory\InventoryController@deliveryPrice')->where('inventory_id', '[0-9]+');
 
     /**
      * Inventory
      */
     $route->get('inventory', 'App\Http\Controllers\v1\Inventory\InventoryController@index');
+    $route->get('inventory/get_all', 'App\Http\Controllers\v1\Inventory\InventoryController@getAll');
     $route->put('inventory', 'App\Http\Controllers\v1\Inventory\InventoryController@create');
     $route->get('inventory/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@show')->where('id', '[0-9]+');
     $route->post('inventory/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@update')->where('id', '[0-9]+');

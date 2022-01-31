@@ -301,7 +301,7 @@ class InventoryRepository implements InventoryRepositoryInterface
     public function get($params)
     {
         $query = Inventory::query()->select('*');
-
+        $params['id'] = 1407;
         if(isset($params['id'])) {
             $query->where('inventory_id', $params['id']);
         }
@@ -400,6 +400,8 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         $query = $this->buildInventoryQuery($params, $withDefault);
+
+        // dd($query->toSql(), $query->getBindings());
 
         return $query->get();
     }
@@ -523,7 +525,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         $attributesEmpty = true;
 
         if (isset($params['attribute_names'])) {
-           foreach($params['attribute_names'] as $value) {
+            foreach ($params['attribute_names'] as $value) {
                 if (!empty($value)) {
                     $attributesEmpty = false;
                     break;
@@ -535,7 +537,7 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query = $query->join('eav_attribute_value', 'inventory.inventory_id', '=', 'eav_attribute_value.inventory_id')->orderBy('eav_attribute_value.attribute_id', 'desc');
             $query = $query->join('eav_attribute', 'eav_attribute.attribute_id', '=', 'eav_attribute_value.attribute_id');
 
-            $query = $query->where(function($q) use ($params) {
+            $query = $query->where(function ($q) use ($params) {
                 foreach ($params['attribute_names'] as $attribute => $value) {
                     $q->orWhere(function ($q) use ($attribute, $value) {
                         $q->where('code', '=', $attribute)
@@ -609,7 +611,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         if (isset($params['search_term'])) {
-            $query = $query->where(function($q) use ($params) {
+            $query = $query->where(function ($q) use ($params) {
                 $q->where('stock', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('title', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('inventory.description', 'LIKE', '%' . $params['search_term'] . '%')
@@ -622,7 +624,7 @@ class InventoryRepository implements InventoryRepositoryInterface
 
         if (isset($params['images_greater_than'])) {
             $query->havingRaw('image_count >= '. $params['images_greater_than']);
-        } else if (isset($params['images_less_than'])) {
+        } elseif (isset($params['images_less_than'])) {
             $query->havingRaw('image_count <= '. $params['images_less_than']);
         } else {
             $query->select(['inventory.*']);
@@ -663,6 +665,8 @@ class InventoryRepository implements InventoryRepositoryInterface
 
         $paginatedQuery->skip(($currentPage - 1) * $perPage);
         $paginatedQuery->take($perPage);
+
+        // dd($paginatedQuery->toSql(), $paginatedQuery->getBindings());
 
         return (new LengthAwarePaginator(
             $paginatedQuery->get(),

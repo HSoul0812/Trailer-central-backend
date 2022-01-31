@@ -140,6 +140,8 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query = $this->addSortQuery($query, $params['sort']);
         }
 
+        // dd($query->toSql(), $query->getBindings());
+
         if ($paginated) {
             return $query->paginate($params['per_page'])->appends($params);
         }
@@ -163,11 +165,11 @@ class InventoryRepository implements InventoryRepositoryInterface
     public function get($params)
     {
         $query = CustomerInventory::select('*');
-        if(isset($params['customer_id'])) {
+        if (isset($params['customer_id'])) {
             $query->where('customer_id', $params['customer_id']);
         }
 
-        if(isset($params['inventory_id'])){
+        if (isset($params['inventory_id'])) {
             $query->where('inventory_id', $params['inventory_id']);
         };
         return $query->firstOrFail();

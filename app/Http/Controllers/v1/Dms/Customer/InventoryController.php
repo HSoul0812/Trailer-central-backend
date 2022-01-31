@@ -7,6 +7,7 @@ namespace App\Http\Controllers\v1\Dms\Customer;
 use App\Http\Controllers\RestfulController;
 use App\Http\Requests\Dms\Customer\CreateInventoryRequest;
 use App\Http\Requests\Dms\Customer\DeleteInventoryRequest;
+use App\Http\Requests\Dms\Customer\GetByDealerOrCustomerRequest;
 use App\Http\Requests\Dms\Customer\GetInventoryRequest;
 use App\Repositories\Dms\Customer\InventoryRepositoryInterface;
 use App\Transformers\Dms\Customer\CustomerInventoryTransformer;
@@ -52,7 +53,7 @@ class InventoryController extends RestfulController
      *     @OA\Parameter(
      *         name="customer_condition",
      *         in="query",
-     *         description="Condition for customer inventories: (has,-has) which has include only those inventories owned by the customer, and -has include only those invenotries not owned by the customer",
+     *         description="Condition for customer inventories: (has,-has) which has include only those inventories owned by the customer, and -has include only those inventories not owned by the customer",
      *         required=false,
      *         @OA\Schema(type="string")
      *     ),
@@ -111,7 +112,7 @@ class InventoryController extends RestfulController
      *     @OA\Parameter(
      *         name="customer_condition",
      *         in="query",
-     *         description="Condition for customer inventories: (has,-has) which has include only those inventories owned by the customer, and -has include only those invenotries not owned by the customer",
+     *         description="Condition for customer inventories: (has,-has) which has include only those inventories owned by the customer, and -has include only those inventories not owned by the customer",
      *         required=false,
      *         @OA\Schema(type="string")
      *     ),
@@ -143,6 +144,7 @@ class InventoryController extends RestfulController
      */
     public function getAllByCustomer(int $customer_id, Request $request): Response
     {
+        $customer_id = 10586;
         $request->offsetSet('customer_id', [$customer_id]);
 
         return $this->getAll($request);
@@ -152,7 +154,7 @@ class InventoryController extends RestfulController
      * @OA\Delete(
      *     path="/user/customers/{customer_id}/inventory",
      *     tags={"CustomerInventory"},
-     *     summary="Remove invetories",
+     *     summary="Remove inventories",
      *     description="Remove all desired inventories from a customer",
      *     @OA\Parameter(
      *         name="customer_id",
@@ -177,7 +179,7 @@ class InventoryController extends RestfulController
      *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="All invenories were remove from desired customer",
+     *         description="All inventories were remove from desired customer",
      *         content={
      *             @OA\MediaType(
      *                 mediaType="application/json",
@@ -194,7 +196,7 @@ class InventoryController extends RestfulController
      *                     ),
      *                     example={
      *                         "success": true,
-     *                         "message": "All  invenories were remove",
+     *                         "message": "All  inventories were remove",
      *                     }
      *                 )
      *             )
@@ -278,7 +280,7 @@ class InventoryController extends RestfulController
      * @OA\Post(
      *     path="/user/customers/{customer_id}/inventory",
      *     tags={"CustomerInventory"},
-     *     summary="Add invetories",
+     *     summary="Add inventories",
      *     description="Add an inventory to a customer",
      *     @OA\Parameter(
      *         name="customer_id",
@@ -302,7 +304,7 @@ class InventoryController extends RestfulController
      *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="The invenory was added to desired customer",
+     *         description="The inventory was added to desired customer",
      *         content={
      *             @OA\MediaType(
      *                 mediaType="application/json",
@@ -319,7 +321,7 @@ class InventoryController extends RestfulController
      *                     ),
      *                     example={
      *                         "success": true,
-     *                         "message": "The invenory was added to desired customer",
+     *                         "message": "The inventory was added to desired customer",
      *                     }
      *                 )
      *             )
