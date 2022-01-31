@@ -73,6 +73,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property Collection<CollectorSpecification> $specifications
  * @property User $dealers
  * @property DealerLocation $dealerLocation
+ * @property bool $ignore_manually_added_units
  */
 class Collector extends Model implements Filterable
 {
@@ -174,6 +175,7 @@ class Collector extends Model implements Filterable
         'api_params',
         'api_max_records',
         'api_pagination',
+        'ignore_manually_added_units'
     ];
 
     public function dealers(): BelongsTo
