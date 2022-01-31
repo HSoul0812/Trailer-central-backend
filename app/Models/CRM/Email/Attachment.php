@@ -37,11 +37,11 @@ class Attachment extends Model
      * @var int
      * @var int
      */
-    const MAX_FILE_SIZE = 2097152;
-    const MAX_UPLOAD_SIZE = 8388608;
+    const MAX_FILE_SIZE = 256000000;
+    const MAX_UPLOAD_SIZE = 256000000;
 
     /**
-     * @var 
+     * @var
      */
     const AWS_PREFIX = 'https://email-trailercentral.s3.amazonaws.com';
 
