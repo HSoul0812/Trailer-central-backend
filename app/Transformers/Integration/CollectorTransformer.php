@@ -76,6 +76,7 @@ class CollectorTransformer extends TransformerAbstract
             'api_params' => $collector->api_params,
             'api_max_records' => $collector->api_max_records,
             'api_pagination' => $collector->api_pagination,
+            'ignore_manually_added_units' => $collector->ignore_manually_added_units
         ];
     }
 }
