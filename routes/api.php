@@ -649,6 +649,7 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('user/website/images', 'App\Http\Controllers\v1\User\DealerWebsiteImagesController@index');
+        $route->post('user/website/image/{imageId}', 'App\Http\Controllers\v1\User\DealerWebsiteImagesController@update')->where('id', '[0-9]+');;
 
         /*
         |--------------------------------------------------------------------------

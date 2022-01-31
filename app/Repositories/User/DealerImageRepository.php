@@ -30,12 +30,16 @@ class DealerImageRepository implements DealerImageRepositoryInterface
     }
 
     /**
-     * @param $params
-     * @throws NotImplementedException
+     * Updates a dealer image
+     *
+     * @param array $params
      */
     public function update($params)
     {
-        throw new NotImplementedException;
+        $image = WebsiteImage::findOrFail($params['id']);
+        $image->fill($params)->save();
+
+        return $image;
     }
 
     /**

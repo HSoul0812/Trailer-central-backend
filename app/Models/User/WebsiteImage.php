@@ -46,6 +46,13 @@ class WebsiteImage extends Model
     protected $primaryKey = 'identifier';
 
     /**
+     * Timestamps generated.
+     *
+     * @var boolean
+     */
+    public $timestamps = false;
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array
