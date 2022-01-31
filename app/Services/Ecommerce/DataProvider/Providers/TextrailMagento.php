@@ -354,7 +354,7 @@ class TextrailMagento implements DataProviderInterface,
     public function getAllParts(int $currentPage = 1, int $pageSize = 1000): array
     {
       $totalParts = $this->getTextrailTotalPartsCount();
-      $url = 'rest/' . Config::get('ecommerce.textrail')['store'] . '/V1/products';
+      $url = 'rest/' . Config::get('ecommerce.textrail.store') . '/V1/products';
 
       $Allparts = [];
 
@@ -364,7 +364,7 @@ class TextrailMagento implements DataProviderInterface,
           'searchCriteria[page_size]' => $pageSize,
           'searchCriteria[currentPage]' => $currentPage,
           'searchCriteria[filter_groups][0][filters][0][field]' => 'website_id',
-          'searchCriteria[filter_groups][0][filters][0][value]' => 10,
+          'searchCriteria[filter_groups][0][filters][0][value]' => Config::get('ecommerce.textrail.store_id'),
           'searchCriteria[filter_groups][0][filters][0][condition_type]' => 'eq'
 
         ];
