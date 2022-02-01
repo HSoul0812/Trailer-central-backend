@@ -4,6 +4,7 @@ namespace App\Repositories\Marketing\Craigslist;
 
 use App\Exceptions\NotImplementedException;
 use App\Models\Marketing\Craigslist\Queue;
+use App\Models\Marketing\Craigslist\Session;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Collection;
