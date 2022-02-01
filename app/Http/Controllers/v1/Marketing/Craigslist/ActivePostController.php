@@ -32,6 +32,8 @@ class ActivePostController extends RestfulControllerV2
     ) {
         $this->repository = $repo;
         $this->transformer = $transformer;
+
+        $this->middleware('setDealerIdOnRequest')->only(['index']);
     }
 
     /**
