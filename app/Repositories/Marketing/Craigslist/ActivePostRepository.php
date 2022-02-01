@@ -89,7 +89,7 @@ class ActivePostRepository implements ActivePostRepositoryInterface {
      */
     public function getAll($params) {
         $query = ActivePost::leftJoin(Session::getTableName(), Session::getTableName().'.session_id', '=', ActivePost::getTableName().'.session_id')
-                           ->leftJoin(Profile::getTableName(), Profile::getTableName().'.profile_id', '=', ActivePost::getTableName().'.profile_id')
+                           ->leftJoin(Profile::getTableName(), Profile::getTableName().'.id', '=', ActivePost::getTableName().'.profile_id')
                            ->where(Profile::getTableName().'.dealer_id', '=', $params['dealer_id']);
 
         if (!isset($params['per_page'])) {
