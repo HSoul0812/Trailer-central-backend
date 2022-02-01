@@ -144,7 +144,6 @@ class InventoryController extends RestfulController
      */
     public function getAllByCustomer(int $customer_id, Request $request): Response
     {
-        $customer_id = 10586;
         $request->offsetSet('customer_id', [$customer_id]);
 
         return $this->getAll($request);

@@ -304,7 +304,6 @@ class InventoryRepository implements InventoryRepositoryInterface
     public function get($params)
     {
         $query = Inventory::query()->select('*');
-        $params['id'] = 1407;
         if(isset($params['id'])) {
             $query->where('inventory_id', $params['id']);
         }
@@ -403,8 +402,6 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         $query = $this->buildInventoryQuery($params, $withDefault);
-
-        // dd($query->toSql(), $query->getBindings());
 
         return $query->get();
     }
@@ -668,8 +665,6 @@ class InventoryRepository implements InventoryRepositoryInterface
 
         $paginatedQuery->skip(($currentPage - 1) * $perPage);
         $paginatedQuery->take($perPage);
-
-        // dd($paginatedQuery->toSql(), $paginatedQuery->getBindings());
 
         return (new LengthAwarePaginator(
             $paginatedQuery->get(),

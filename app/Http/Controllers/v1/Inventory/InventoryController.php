@@ -386,34 +386,12 @@ class InventoryController extends RestfulControllerV2
 
     /**
      * @OA\Get(
-     *     path="/api/inventory/get_all",
+     *     path="/api/inventory/get_all_titles",
      *     description="Retrieve a list of inventory without defaults",
 
-     *     tags={"Inventory"},
-     *     @OA\Parameter(
-     *         name="per_page",
-     *         in="query",
-     *         description="Page Limit",
-     *         required=false,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Parameter(
-     *         name="sort",
-     *         in="query",
-     *         description="Sort order can be: price,-price,relevance,title,-title,length,-length",
-     *         required=false,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *   @OA\Parameter(
-     *         name="price",
-     *         in="query",
-     *         description="Inventory price can be in format: [10 TO 100], [10], [10.0 TO 100.0]",
-     *         required=false,
-     *         @OA\Schema(type="string")
-     *     ),
      *     @OA\Response(
      *         response="200",
-     *         description="Returns a list of parts",
+     *         description="Returns a list of inventory titles",
      *         @OA\JsonContent()
      *     ),
      *     @OA\Response(
