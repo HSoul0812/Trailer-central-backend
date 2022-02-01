@@ -103,10 +103,10 @@ class Queue extends Model
     /**
      * Get Parameters
      * 
-     * @return string
+     * @return \stdclass
      */
-    public function getParametersAttribute(): string {
-        return json_encode($this->parameter);
+    public function getParametersAttribute(): \stdclass {
+        return json_decode($this->parameter);
     }
 
     /**
