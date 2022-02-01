@@ -126,29 +126,35 @@ class GoogleService implements GoogleServiceInterface
      */
     public function validate(AccessToken $accessToken): ValidateToken {
         // Configure Client
-        $client = $this->getClient();
-        $client->setAccessToken([
-            'access_token' => $accessToken->access_token,
-            'refresh_token' => $accessToken->refresh_token,
-            'id_token' => $accessToken->id_token,
-            'expires_in' => $accessToken->expires_in,
-            'created' => strtotime($accessToken->issued_at)
-        ]);
-        $client->setScopes($accessToken->scope);
+        try {
+            $client = $this->getClient();
+            $client->setAccessToken([
+                'access_token' => $accessToken->access_token,
+                'refresh_token' => $accessToken->refresh_token,
+                'id_token' => $accessToken->id_token,
+                'expires_in' => $accessToken->expires_in,
+                'created' => strtotime($accessToken->issued_at)
+            ]);
+            $client->setScopes($accessToken->scope);
 
-        // Valid/Expired
-        $isValid = $this->validateIdToken($accessToken->id_token);
-        $isExpired = $client->isAccessTokenExpired();
+            // Valid/Expired
+            $isValid = $this->validateIdToken($accessToken->id_token);
+            $isExpired = $client->isAccessTokenExpired();
 
-        // Try to Refresh Access Token!
-        if(!empty($accessToken->refresh_token) && (!$isValid || $isExpired)) {
-            $refresh = $this->refreshAccessToken($client);
-            if($refresh->exists()) {
-                $isValid = $this->validateIdToken($refresh->idToken);
-                $isExpired = false;
+            // Try to Refresh Access Token!
+            if(!empty($accessToken->refresh_token) && (!$isValid || $isExpired)) {
+                $refresh = $this->refreshAccessToken($client);
+                if($refresh->exists()) {
+                    $isValid = $this->validateIdToken($refresh->idToken);
+                    $isExpired = false;
+                }
             }
-        }
-        if(!$isValid) {
+            if(empty($isValid)) {
+                $isExpired = true;
+            }
+        } catch (\Exception $e) {
+            Log::channel('google')->error('Exception returned validating google oauth: ' . $e->getMessage());
+            $isValid = false;
             $isExpired = true;
         }
 
@@ -168,35 +174,37 @@ class GoogleService implements GoogleServiceInterface
      * @return ValidateToken
      */
     public function validateCustom(CommonToken $accessToken): ValidateToken {
-        // ID Token Exists?
-        if(empty($accessToken->getIdToken())) {
-            throw new MissingGapiIdTokenException;
-        }
-
         // Configure Client
-        $client = $this->getClient();
-        $client->setAccessToken([
-            'access_token' => $accessToken->getAccessToken(),
-            'refresh_token' => $accessToken->getRefreshToken(),
-            'id_token' => $accessToken->getIdToken(),
-            'expires_in' => $accessToken->getExpiresIn(),
-            'created' => $accessToken->getIssuedUnix()
-        ]);
-        $client->setScopes($accessToken->getScope());
+        try {
+            // Configure Client
+            $client = $this->getClient();
+            $client->setAccessToken([
+                'access_token' => $accessToken->getAccessToken(),
+                'refresh_token' => $accessToken->getRefreshToken(),
+                'id_token' => $accessToken->getIdToken(),
+                'expires_in' => $accessToken->getExpiresIn(),
+                'created' => $accessToken->getIssuedUnix()
+            ]);
+            $client->setScopes($accessToken->getScope());
 
-        // Valid/Expired
-        $isValid = $this->validateIdToken($accessToken->getIdToken());
-        $isExpired = $client->isAccessTokenExpired();
+            // Valid/Expired
+            $isValid = $this->validateIdToken($accessToken->getIdToken());
+            $isExpired = $client->isAccessTokenExpired();
 
-        // Try to Refresh Access Token!
-        if(!empty($accessToken->getRefreshToken()) && (!$isValid || $isExpired)) {
-            $refresh = $this->refreshAccessToken($client);
-            if($refresh->exists()) {
-                $isValid = $this->validateIdToken($refresh->idToken);
-                $isExpired = false;
+            // Try to Refresh Access Token!
+            if(!empty($accessToken->getRefreshToken()) && (!$isValid || $isExpired)) {
+                $refresh = $this->refreshAccessToken($client);
+                if($refresh->exists()) {
+                    $isValid = $this->validateIdToken($refresh->idToken);
+                    $isExpired = false;
+                }
             }
-        }
-        if(!$isValid) {
+            if(!$isValid) {
+                $isExpired = true;
+            }
+        } catch (\Exception $e) {
+            Log::channel('google')->error('Exception returned validating custom google oauth: ' . $e->getMessage());
+            $isValid = false;
             $isExpired = true;
         }
 
@@ -232,7 +240,7 @@ class GoogleService implements GoogleServiceInterface
         catch (\Exception $e) {
             // We actually just want to verify this is true or false
             // If it throws an exception, that means its false, the token isn't valid
-            $this->log->error('Exception returned for Google Access Token:' . $e->getMessage() . ': ' . $e->getTraceAsString());
+            $this->log->error('Exception returned for Google ID Token:' . $e->getMessage() . ': ' . $e->getTraceAsString());
         }
 
         // Return Validate
