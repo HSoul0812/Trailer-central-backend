@@ -384,7 +384,7 @@ class Inventory extends Model
 
     public function orderedImages(): HasMany
     {
-        return $this->inventoryImages()->with('image')
+        return $this->inventoryImages()->has('image')->with('image')
                     ->orderByRaw('IFNULL(position, 99) ASC')
                     ->orderBy('image_id', 'ASC');
     }
