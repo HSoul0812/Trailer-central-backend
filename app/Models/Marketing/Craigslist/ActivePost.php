@@ -128,7 +128,7 @@ class ActivePost extends Model
         if(!empty($this->inventory) && !empty($this->inventory->title)) {
             return $this->inventory->title;
         }
-        return $this->title;
+        return $this->title ?? '';
     }
 
     /**
@@ -154,7 +154,7 @@ class ActivePost extends Model
         if(!empty($this->inventory) && !empty($this->inventory->price)) {
             return $this->inventory->price;
         }
-        return $this->price;
+        return $this->price ?? 0;
     }
 
     /**
