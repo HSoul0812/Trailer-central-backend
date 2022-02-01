@@ -8,7 +8,7 @@ use App\Repositories\Traits\SortTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Collection;
 
-class ActivePostRepository implements ActivePostRepositoryInterface {
+class SchedulerRepository implements SchedulerRepositoryInterface {
     use SortTrait;
 
     /**
