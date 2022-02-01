@@ -156,7 +156,7 @@ class ListingRepository implements ListingRepositoryInterface {
             $join->on(Listings::getTableName() . '.inventory_id', '=',
                         Inventory::getTableName() . '.inventory_id')
                  ->where(Listings::getTableName().'.username', '=', $integration->fb_username)
-                 ->where(Listings::getTableName().'.page_id', '=', $integration->page_id);
+                 ->where(Listings::getTableName().'.page_id', '=', $integration->page_id ?? '0');
         })->where(function(Builder $query) {
             $query = $query->whereNull(Listings::getTableName() . '.facebook_id')
                            ->orWhere(Listings::getTableName() . '.status', Listings::STATUS_DELETED)
