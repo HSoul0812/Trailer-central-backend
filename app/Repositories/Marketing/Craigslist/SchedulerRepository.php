@@ -7,6 +7,7 @@ use App\Models\Marketing\Craigslist\Queue;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Query\JoinClause;
 
 class SchedulerRepository implements SchedulerRepositoryInterface {
     use SortTrait;
