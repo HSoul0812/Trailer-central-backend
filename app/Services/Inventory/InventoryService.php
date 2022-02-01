@@ -30,6 +30,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use League\Fractal\Resource\Collection as FractalResourceCollection;
 use League\Fractal\Manager as FractalManager;
+use App\Repositories\Dms\Customer\InventoryRepository as DmsCustomerInventoryRepository;
 
 /**
  * Class InventoryService
@@ -40,6 +41,10 @@ class InventoryService implements InventoryServiceInterface
     use DispatchesJobs;
 
     const SOURCE_DASHBOARD = 'dashboard';
+
+    private const RESOURCE_KEY = 'children';
+    private const OPTION_GROUP_TEXT_CUSTOMER_OWNED = 'Customer Owned Inventories';
+    private const OPTION_GROUP_TEXT_DEALER_OWNED = 'All Inventories';
 
     /**
      * @var InventoryRepositoryInterface
@@ -759,36 +764,44 @@ class InventoryService implements InventoryServiceInterface
         return true;
     }
 
-    public function getInventoriesTitle(array $params)
+    public function getInventoriesTitle(array $params): array
     {
-        $dealerInventories = $this->inventoryRepository->getTitles(
-            Arr::except($params, ['customer_id'])
-        );
+        $dealerInventories = $this->inventoryRepository->getTitles($params['dealer_id']);
 
-        $fractalManager = new FractalManager();
-        $fractalManager->setSerializer(new NoDataArraySerializer());
-
-        $customerInventories = $this->inventoryRepository->getTitles($params);
-
-        $dealerResource = new FractalResourceCollection(
-            $dealerInventories,
-            new InventoryShortTransformer,
-            'children'
-        );
-
-        $customerResource = new FractalResourceCollection(
-            $customerInventories,
-            new InventoryShortTransformer,
-            'children'
-        );
+        if (!empty($params['customer_id'])) {
+            $customerInventoryRepo = resolve(DmsCustomerInventoryRepository::class);
+            $customerInventories = $customerInventoryRepo->getTitles($params['customer_id']);
+        }
 
         return [
-            $fractalManager->createData($customerResource)->toArray() + [
-                'text' => 'Customer Owned Inventories',
-            ],
-            $fractalManager->createData($dealerResource)->toArray() + [
-                'text' => 'All Inventories',
-            ],
+            $this->processTitles($customerInventories ?? [], self::OPTION_GROUP_TEXT_CUSTOMER_OWNED),
+            $this->processTitles($dealerInventories, self::OPTION_GROUP_TEXT_DEALER_OWNED),
         ];
+    }
+
+    private function processTitles($data, $text): array
+    {
+        $resource = new FractalResourceCollection(
+            $data,
+            new InventoryShortTransformer,
+            self::RESOURCE_KEY
+        );
+
+
+        return $this->processTitleGroups($resource, $text);
+    }
+
+    private function processTitleGroups($data, $text): array
+    {
+        $resultantArray = [];
+        if (!empty($data)) {
+            $fractalManager = new FractalManager();
+            $fractalManager->setSerializer(new NoDataArraySerializer());
+            $resultantArray = $fractalManager->createData($data)->toArray();
+        }
+
+        return array_merge($resultantArray, [
+            'text' => $text,
+        ]);
     }
 }

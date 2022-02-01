@@ -23,4 +23,9 @@ class GetAllInventoryTitlesRequest extends Request
             'exists:dms_customer,id',
         ],
     ];
+
+    public function getDealerId(): int
+    {
+        return (int)$this->input('dealer_id');
+    }
 }

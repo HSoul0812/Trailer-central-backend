@@ -61,7 +61,7 @@ class InventoryController extends RestfulControllerV2
         InventoryHistoryRepositoryInterface $inventoryHistoryRepository
     )
     {
-        $this->middleware('setDealerIdOnRequest')->only(['index', 'create', 'update', 'destroy', 'exists', 'getAll']);
+        $this->middleware('setDealerIdOnRequest')->only(['index', 'create', 'update', 'destroy', 'exists', 'getAllTitles']);
         $this->middleware('inventory.create.permission')->only(['create', 'update']);
 
         $this->inventoryService = $inventoryService;

@@ -140,8 +140,6 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query = $this->addSortQuery($query, $params['sort']);
         }
 
-        // dd($query->toSql(), $query->getBindings());
-
         if ($paginated) {
             return $query->paginate($params['per_page'])->appends($params);
         }
@@ -187,5 +185,28 @@ class InventoryRepository implements InventoryRepositoryInterface
     protected function getSortOrders(): array
     {
         return $this->sortOrders;
+    }
+
+    /**
+     * @param int $customerId
+     *
+     * @return Collection
+     */
+    public function getTitles(int $customerId)
+    {
+        $customerInventoryTable = CustomerInventory::getTableName();
+        $inventoryTable = Inventory::getTableName();
+
+        $query = Inventory::select(["$inventoryTable.inventory_id", 'title', 'vin']);
+
+        $query->join(
+            $customerInventoryTable,
+            static function (JoinClause $join) use ($inventoryTable, $customerInventoryTable, $customerId): void {
+                $join->on("$customerInventoryTable.inventory_id", '=', "$inventoryTable.inventory_id")
+                    ->where("$customerInventoryTable.customer_id", $customerId);
+            }
+        );
+
+        return $query->get();
     }
 }

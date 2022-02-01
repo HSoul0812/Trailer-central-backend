@@ -822,53 +822,14 @@ class InventoryRepository implements InventoryRepositoryInterface
     }
 
     /**
-     * @param array $params
-     * @param bool $paginated
-     * @return Collection|LengthAwarePaginator
+     * @param int $dealerId
+     *
+     * @return Collection
      */
-    public function getTitles(array $params = [])
+    public function getTitles(int $dealerId)
     {
-        $customerInventoryTableName = CustomerInventory::getTableName();
-        $inventoryTableName = Inventory::getTableName();
-
-        // $query = Inventory::select("$inventoryTableName.id");
-        $query = Inventory::select(['inventory_id', 'title', 'vin']);
-
-        if (isset($params['dealer_id'])) {
-            $query->where("$inventoryTableName.dealer_id", $params['dealer_id']);
-        }
-
-        if (isset($params['customer_id'])) {
-            $query->join(
-                $customerInventoryTableName,
-                static function (JoinClause $join) use (
-                    $inventoryTableName,
-                    $customerInventoryTableName,
-                    $params
-                ): void {
-                    $join->on("$customerInventoryTableName.inventory_id", '=', "$inventoryTableName.inventory_id")
-                        ->where("$customerInventoryTableName.customer_id", $params['customer_id']);
-                }
-            );
-        }
-
-        /* if (!isset($params['per_page'])) {
-            $params['per_page'] = 15;
-        } */
-
-        if (isset($params['search_term'])) {
-            $query->where(static function (EloquentBuilder $query) use ($params
-            ) {
-                $query->where('title', 'LIKE', '%' . $params['search_term'] . '%')
-                    ->orWhere('vin', 'LIKE', '%' . $params['search_term'] . '%');
-            });
-        }
-
-        // dd($query->toSql(), $query->getBindings());
-
-        /* if ($paginated) {
-            return $query->paginate($params['per_page'])->appends($params);
-        } */
+        $query = Inventory::select(['inventory_id', 'title', 'vin'])
+            ->where('dealer_id', $dealerId);
 
         return $query->get();
     }
