@@ -5,11 +5,11 @@ namespace App\Http\Requests\Marketing\Facebook;
 use App\Http\Requests\Request;
 
 /**
- * Get Upcoming Scheduler Request
+ * Get Active Posts Request
  * 
  * @author David A Conway Jr.
  */
-class UpcomingSchedulerRequest extends Request {
+class GetActivePostsRequest extends Request {
     
     protected $rules = [
         'dealer_id' => 'required|integer',
