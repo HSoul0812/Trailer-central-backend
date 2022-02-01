@@ -4,8 +4,9 @@ namespace App\Repositories\Marketing\Craigslist;
 
 use Illuminate\Support\Facades\DB;
 use App\Exceptions\NotImplementedException;
-use App\Models\Marketing\Craigslist\Session;
 use App\Models\Marketing\Craigslist\ActivePost;
+use App\Models\Marketing\Craigslist\Session;
+use App\Models\Marketing\Craigslist\Profile;
 use App\Repositories\Traits\SortTrait;
 
 class ActivePostRepository implements ActivePostRepositoryInterface {
@@ -88,8 +89,8 @@ class ActivePostRepository implements ActivePostRepositoryInterface {
      */
     public function getAll($params) {
         $query = ActivePost::leftJoin(Session::getTableName(), Session::getTableName().'.session_id', '=', ActivePost::getTableName().'.session_id')
-                           ->where('profile_id', '=', $params['profile_id'])
-                           ->whereRaw('added < now()');
+                           ->leftJoin(Profile::getTableName(), Profile::getTableName().'.profile_id', '=', ActivePost::getTableName().'.profile_id')
+                           ->where(Profile::getTableName().'.dealer_id', '=', $params['dealer_id']);
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 5;
@@ -97,6 +98,10 @@ class ActivePostRepository implements ActivePostRepositoryInterface {
 
         if (isset($params['dealer_location_id'])) {
             $query = $query->where('dealer_location_id', $params['dealer_location_id']);
+        }
+
+        if (isset($params['profile_id'])) {
+            $query = $query->where(ActivePost::getTableName().'.profile_id', '=', $params['profile_id']);
         }
 
         if (isset($params['slot_id'])) {
