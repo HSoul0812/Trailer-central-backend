@@ -982,7 +982,7 @@ $api->version('v1', function ($route) {
                 });
 
                 // Upcoming Scheduler Posts
-                $route->gets('upcoming', 'App\Http\Controllers\v1\Marketing\Craigslist\SchedulerController@upcoming');
+                $route->get('upcoming', 'App\Http\Controllers\v1\Marketing\Craigslist\SchedulerController@upcoming');
             });
 
             // Facebook Marketplace
