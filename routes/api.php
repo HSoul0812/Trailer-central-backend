@@ -974,7 +974,14 @@ $api->version('v1', function ($route) {
             $route->group([
                 'prefix' => 'clapp'
             ], function ($route) {
-                $route->get('recent', 'App\Http\Controllers\v1\Marketing\Craigslist\SchedulerController@recent');
+                // Craigslist
+                $route->group([
+                    'prefix' => 'posts'
+                ], function ($route) {
+                    $route->get('/', 'App\Http\Controllers\v1\Marketing\Craigslist\ActivePostController@recent');
+                });
+
+                // Upcoming Scheduler Posts
                 $route->post('upcoming', 'App\Http\Controllers\v1\Marketing\Craigslist\SchedulerController@upcoming');
             });
 
