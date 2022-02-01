@@ -3,7 +3,6 @@
 namespace App\Repositories\Website\Image;
 
 use App\Models\Website\Image\WebsiteImage;
-use App\Models\Website\Website;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use App\Exceptions\NotImplementedException;
@@ -19,14 +18,12 @@ class WebsiteImageRepository implements WebsiteImageRepositoryInterface
      */
     private function getQueryBuilder(array $params): Builder
     {
-        if (!isset($params['dealer_id'])) {
-            throw new InvalidArgumentException("A dealer ID is required");
+        if (!isset($params['website_id'])) {
+            throw new InvalidArgumentException("A website id is required");
         }
 
-        $websiteId = Website::whereDealerId($params['dealer_id'])->value('id');
-
         $query = WebsiteImage::select('*');
-        $query = $query->where('website_id', $websiteId);
+        $query = $query->where('website_id', $params['website_id']);
 
         return $query;
     }

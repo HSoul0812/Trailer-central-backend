@@ -36,10 +36,11 @@ class WebsiteImagesController extends RestfulControllerV2
      */
     public function index(int $websiteId, Request $request)
     {
-        $request = new GetWebsiteImageRequest(['website_id' => $websiteId] + $request->all());
+        $data = ['website_id' => $websiteId] + $request->all();
+        $request = new GetWebsiteImageRequest($data);
 
         if ($request->validate()) {
-            return $this->response->paginator($this->websiteImage->getAll($request->all()), $this->transformer);
+            return $this->response->paginator($this->websiteImage->getAll($data), $this->transformer);
         }
 
         $this->response->errorBadRequest();
