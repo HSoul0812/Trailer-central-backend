@@ -24,7 +24,7 @@ class ActivePostTransformer extends TransformerAbstract
             'profile_id' => $post->profile_id,
             'session_id' => $post->session_id,
             'queue_id' => $post->queue_id,
-            'inventory_id' => $queue->inventory_id,
+            'inventory_id' => $post->inventory_id,
             'time' => strtotime($post->added),
             'created_at' => $post->added,
             'updated_at' => $post->updated,
