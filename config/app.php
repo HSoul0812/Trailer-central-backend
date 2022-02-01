@@ -56,6 +56,8 @@ return [
 
     'asset_url' => env('ASSET_URL', null),
 
+    'cdn_url' => env('CDN_URL', 'http://dealer-cdn.com/'),
+
     'showroom_files_url' => env('SHOWROOM_FILES_URL', 'http://dealer-cdn.com/showroom-files/'),
 
     'new_design_crm_url' => env('NEW_DESIGN_CRM_URL', 'https://design-prod.crm.trailercentral.com/'),
