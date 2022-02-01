@@ -7,8 +7,8 @@ use App\Models\Marketing\Craigslist\Queue;
 use App\Models\Marketing\Craigslist\Session;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class SchedulerRepository implements SchedulerRepositoryInterface {
     use SortTrait;
@@ -161,9 +161,9 @@ class SchedulerRepository implements SchedulerRepositoryInterface {
      * Get Upcoming Scheduler Posts
      * 
      * @param array $params
-     * @return Collection<Queue>
+     * @return LengthAwarePaginator<Queue>
      */
-    public function getUpcoming(array $params): Collection {
+    public function getUpcoming(array $params): LengthAwarePaginator {
         // Append Status Restrictions
         $params['s_status'] = 'scheduled';
         $params['q_status'] = 'done';

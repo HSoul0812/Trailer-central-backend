@@ -4,14 +4,14 @@ namespace App\Repositories\Marketing\Craigslist;
 
 use App\Models\Marketing\Craigslist\Queue;
 use App\Repositories\Repository;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 interface SchedulerRepositoryInterface extends Repository {
     /**
      * Get Upcoming Scheduler Posts
      * 
      * @param array $params
-     * @return Collection<Queue>
+     * @return LengthAwarePaginator<Queue>
      */
-    public function getUpcoming(array $params): Collection;
+    public function getUpcoming(array $params): LengthAwarePaginator;
 }
