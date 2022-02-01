@@ -20,11 +20,11 @@ class SchedulerRepository implements SchedulerRepositoryInterface {
      */
     private $sortOrders = [
         'scheduled' => [
-            'field' => 'clapp_session.clapp_scheduled',
+            'field' => 'clapp_session.session_scheduled',
             'direction' => 'DESC'
         ],
         '-scheduled' => [
-            'field' => 'clapp_session.clapp_scheduled',
+            'field' => 'clapp_session.session_scheduled',
             'direction' => 'ASC'
         ],
         'added' => [
