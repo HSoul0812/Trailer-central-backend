@@ -27,19 +27,19 @@ class ActivePostRepository implements ActivePostRepositoryInterface {
             'direction' => 'ASC'
         ],
         'added' => [
-            'field' => 'clapp_active_post.added',
+            'field' => 'clapp_active_posts.added',
             'direction' => 'DESC'
         ],
         '-added' => [
-            'field' => 'clapp_active_post.added',
+            'field' => 'clapp_active_posts.added',
             'direction' => 'ASC'
         ],
         'updated' => [
-            'field' => 'clapp_active_post.updated',
+            'field' => 'clapp_active_posts.updated',
             'direction' => 'DESC'
         ],
         '-updated' => [
-            'field' => 'clapp_active_post.updated',
+            'field' => 'clapp_active_posts.updated',
             'direction' => 'ASC'
         ]
     ];
