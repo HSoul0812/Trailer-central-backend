@@ -131,7 +131,7 @@ class SchedulerRepository implements SchedulerRepositoryInterface {
             $query = $this->addSortQuery($query, $params['sort']);
         }
 
-        return $query->with('inventory')->with('inventory.orderedImages')
+        return $query->has('inventory')->with('inventory')->with('inventory.orderedImages')
                      ->paginate($params['per_page'])->appends($params);
     }
 
