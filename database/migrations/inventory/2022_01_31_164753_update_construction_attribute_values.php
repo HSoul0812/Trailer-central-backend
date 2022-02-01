@@ -9,7 +9,7 @@ class UpdateConstructionAttributeValues extends Migration
 
     private const ATTRIBUTE_CODE = 'construction';
     private const ACTUAL_VALUES = 'aluminum:Aluminum,steel_frame_aluminum:Steel Frame / Aluminum Skin,composite:Composite,steel:Steel,galvanized:Galvanized';
-    private const UPDATED_VALUES = 'aluminum:Aluminum,composite:Composite,fiberglass:Fiberglass,steel:Steel,hypalon:Hypalon,roplene:Roplene,wood:Wood,other:Other';
+    private const UPDATED_VALUES = 'aluminum:Aluminum,steel_frame_aluminum:Steel Frame / Aluminum Skin,composite:Composite,fiberglass:Fiberglass,steel:Steel,galvanized:Galvanized,hypalon:Hypalon,roplene:Roplene,wood:Wood,other:Other';
 
     /**
      * Run the migrations.
