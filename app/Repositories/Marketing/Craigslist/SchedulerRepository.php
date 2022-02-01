@@ -89,7 +89,7 @@ class SchedulerRepository implements SchedulerRepositoryInterface {
      * @return Collection<Queue>
      */
     public function getAll($params) {
-        $query = Queue::leftJoin(Queue::getTableName(), function (JoinClause $join) {
+        $query = Queue::leftJoin(Session::getTableName(), function (JoinClause $join) {
                     $join->on(Queue::getTableName().'.session_id', '=', Session::getTableName().'.session_id')
                          ->on(Queue::getTableName().'.dealer_id', '=', Session::getTableName().'.session_dealer_id')
                          ->on(Queue::getTableName().'.profile_id', '=', Session::getTableName().'.session_profile_id');
