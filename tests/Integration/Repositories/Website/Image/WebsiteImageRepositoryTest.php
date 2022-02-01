@@ -107,6 +107,10 @@ class WebsiteImageRepositoryTest extends TestCase
         ]);
 
         $this->assertCount(4, $images);
+
+        $this->assertSame(4, collect($images->items())->filter(function ($each) use ($expiredImages) {
+            return $expiredImages->contains('identifier', $each->identifier);
+        })->count());
     }
 
     public function testGetAllNonExpired()
@@ -122,6 +126,10 @@ class WebsiteImageRepositoryTest extends TestCase
         ]);
 
         $this->assertCount(6, $images);
+
+        $this->assertSame(6, collect($images->items())->filter(function ($each) {
+            return $this->images->where('expires_at', null)->contains('identifier', $each->identifier);
+        })->count());
     }
 
     protected function getConcreteRepository(): WebsiteImageRepository

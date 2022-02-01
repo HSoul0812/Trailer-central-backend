@@ -82,6 +82,10 @@ class WebsiteImageTest extends TestCase
 
         $data = json_decode($response->getContent(), true);
 
+        $this->assertSame(4, collect($data['data'])->filter(function ($each) use ($expiredImages) {
+            return $expiredImages->contains('identifier', $each['id']);
+        })->count());
+
         $this->assertCount(4, $data['data']);
     }
 
@@ -98,6 +102,10 @@ class WebsiteImageTest extends TestCase
         $response->assertStatus(200);
 
         $data = json_decode($response->getContent(), true);
+
+        $this->assertSame(6, collect($data['data'])->filter(function ($each) {
+            return $this->images->where('expires_at', null)->contains('identifier', $each['id']);
+        })->count());
 
         $this->assertCount(6, $data['data']);
     }
