@@ -156,7 +156,7 @@ class Queue extends Model
     public function getCurrentImageAttribute(): string {
         // Return Primary Image Inventory
         if(!empty($this->inventory) && !empty($this->inventory->primary_image)) {
-            return $this->inventory->primary_image->filename;
+            return $this->inventory->primary_image->image->filename;
         }
         return $this->paramater->images[0] ?? '';
     }
