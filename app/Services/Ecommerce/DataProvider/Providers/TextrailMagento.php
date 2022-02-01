@@ -364,7 +364,7 @@ class TextrailMagento implements DataProviderInterface,
           'searchCriteria[page_size]' => $pageSize,
           'searchCriteria[currentPage]' => $currentPage,
           'searchCriteria[filter_groups][0][filters][0][field]' => 'website_id',
-          'searchCriteria[filter_groups][0][filters][0][value]' => 10,
+          'searchCriteria[filter_groups][0][filters][0][value]' => Config::get('ecommerce.textrail.store_id'),
           'searchCriteria[filter_groups][0][filters][0][condition_type]' => 'eq'
 
         ];
