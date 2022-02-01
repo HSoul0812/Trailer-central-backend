@@ -45,7 +45,7 @@ class ActivePostController extends RestfulControllerV2
         // Handle Get Active Posts Request
         $request = new GetActivePostsRequest($request->all());
         if ($request->validate()) {
-            // Get Recent Scheduler Posts
+            // Get Active Posts
             return $this->response->paginator($this->repository->getAll($request->all()), $this->transformer);
         }
         
