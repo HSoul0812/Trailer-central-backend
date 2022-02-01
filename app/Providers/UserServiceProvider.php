@@ -2,8 +2,6 @@
 
 namespace App\Providers;
 
-use App\Repositories\User\DealerImageRepository;
-use App\Repositories\User\DealerImageRepositoryInterface;
 use App\Repositories\User\GeoLocationRepository;
 use App\Repositories\User\GeoLocationRepositoryInterface;
 use Illuminate\Support\ServiceProvider;
@@ -48,7 +46,6 @@ class UserServiceProvider extends ServiceProvider
         $this->app->bind(DealerXmlExportRepositoryInterface::class, DealerXmlExportRepository::class);
         $this->app->bind(DealerPartRepositoryInterface::class, DealerPartRepository::class);
         $this->app->bind(GeoLocationRepositoryInterface::class, GeoLocationRepository::class);
-        $this->app->bind(DealerImageRepositoryInterface::class, DealerImageRepository::class);
     }
 
 }

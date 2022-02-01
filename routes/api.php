@@ -648,8 +648,8 @@ $api->version('v1', function ($route) {
         |
         |
         */
-        $route->get('user/website/images', 'App\Http\Controllers\v1\User\DealerWebsiteImagesController@index');
-        $route->post('user/website/image/{imageId}', 'App\Http\Controllers\v1\User\DealerWebsiteImagesController@update')->where('id', '[0-9]+');;
+        $route->get('website/{websiteId}/images', 'App\Http\Controllers\v1\Website\Image\WebsiteImagesController@index')->where('websiteId', '[0-9]+');
+        $route->post('website/{websiteId}/image/{imageId}', 'App\Http\Controllers\v1\Website\Image\WebsiteImagesController@update')->where(['websiteId' => '[0-9]+', 'imageId' => '[0-9]+']);
 
         /*
         |--------------------------------------------------------------------------

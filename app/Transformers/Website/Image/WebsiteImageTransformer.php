@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Transformers\User;
+namespace App\Transformers\Website\Image;
 
 use League\Fractal\TransformerAbstract;
-use App\Models\User\WebsiteImage;
+use App\Models\Website\Image\WebsiteImage;
 
-class DealerImageTransformer extends TransformerAbstract
+class WebsiteImageTransformer extends TransformerAbstract
 {
     public function transform(WebsiteImage $image): array
     {

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\User;
+namespace App\Models\Website\Image;
 
 use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Collection;
