@@ -191,6 +191,7 @@ return [
         App\Providers\CrmServiceProvider::class,
         App\Providers\IntegrationServiceProvider::class,
         App\Providers\InteractionServiceProvider::class,
+        App\Providers\MarketingServiceProvider::class,
         App\Providers\CatchAllOptionsRequestsProvider::class,
         App\Providers\WebsiteServiceProvider::class,
         App\Providers\JobServiceProvider::class,
