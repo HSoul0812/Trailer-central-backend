@@ -8,6 +8,7 @@ use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\Inventory\CreateInventoryRequest;
 use App\Http\Requests\Inventory\DeleteInventoryRequest;
 use App\Http\Requests\Inventory\ExistsInventoryRequest;
+use App\Http\Requests\Inventory\GetAllInventoryTitlesRequest;
 use App\Http\Requests\Inventory\GetInventoryHistoryRequest;
 use App\Http\Requests\Inventory\GetInventoryItemRequest;
 use App\Http\Requests\Inventory\UpdateInventoryRequest;
@@ -19,6 +20,7 @@ use App\Transformers\Inventory\InventoryHistoryTransformer;
 use Dingo\Api\Exception\ResourceException;
 use Dingo\Api\Http\Request;
 use App\Http\Requests\Inventory\GetInventoryRequest;
+use App\Transformers\Inventory\InventoryShortTransformer;
 use App\Transformers\Inventory\InventoryTransformer;
 use Dingo\Api\Http\Response;
 use Exception;
@@ -105,19 +107,21 @@ class InventoryController extends RestfulControllerV2
      *     ),
      * )
      */
-    public function index(Request $request) {
+    public function index(Request $request)
+    {
         $request = new GetInventoryRequest($request->all());
 
-        if ( $request->validate() ) {
-            if ($request->has('only_floorplanned') && !empty($request->input('only_floorplanned'))) {
-                /**
-                 * Filter only floored inventories to pay
-                 * https://crm.trailercentral.com/accounting/floorplan-payment
-                 */
-                return $this->response->paginator($this->inventoryRepository->getFloorplannedInventory($request->all()), new InventoryTransformer());
-            } else {
-                return $this->response->paginator($this->inventoryRepository->getAll($request->all(), true, true), new InventoryTransformer());
-            }
+        if ($request->validate()) {
+            $requestArray = $request->all();
+            /**
+             * Filter only floored inventories to pay
+             * https://crm.trailercentral.com/accounting/floorplan-payment
+             */
+            $result = $request->has('only_floorplanned') && !empty($request->input('only_floorplanned'))
+                ? $this->inventoryRepository->getFloorplannedInventory($requestArray)
+                : $this->inventoryRepository->getAll($requestArray, true, true);
+
+            return $this->response->paginator($result, new InventoryTransformer());
         }
 
         return $this->response->errorBadRequest();
@@ -418,15 +422,12 @@ class InventoryController extends RestfulControllerV2
      *     ),
      * )
      */
-    public function getAll(Request $request)
+    public function getAllTitles(Request $request)
     {
-        $request = new GetInventoryRequest($request->all());
+        $request = new GetAllInventoryTitlesRequest($request->all());
 
         if ($request->validate()) {
-            return $this->response->paginator(
-                $this->inventoryRepository->getAll($request->all(), false, true),
-                new InventoryTransformer()
-            );
+            return $this->response->array($this->inventoryService->getInventoriesTitle($request->all()));
         }
 
         return $this->response->errorBadRequest();

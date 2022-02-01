@@ -21,10 +21,15 @@ use App\Repositories\User\GeoLocationRepositoryInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Services\File\FileService;
 use App\Services\File\ImageService;
+use App\Transformers\Inventory\InventoryShortTransformer;
+use App\Utilities\Fractal\NoDataArraySerializer;
 use Illuminate\Foundation\Bus\DispatchesJobs;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use League\Fractal\Resource\Collection as FractalResourceCollection;
+use League\Fractal\Manager as FractalManager;
 
 /**
  * Class InventoryService
@@ -752,5 +757,38 @@ class InventoryService implements InventoryServiceInterface
         }
 
         return true;
+    }
+
+    public function getInventoriesTitle(array $params)
+    {
+        $dealerInventories = $this->inventoryRepository->getTitles(
+            Arr::except($params, ['customer_id'])
+        );
+
+        $fractalManager = new FractalManager();
+        $fractalManager->setSerializer(new NoDataArraySerializer());
+
+        $customerInventories = $this->inventoryRepository->getTitles($params);
+
+        $dealerResource = new FractalResourceCollection(
+            $dealerInventories,
+            new InventoryShortTransformer,
+            'children'
+        );
+
+        $customerResource = new FractalResourceCollection(
+            $customerInventories,
+            new InventoryShortTransformer,
+            'children'
+        );
+
+        return [
+            $fractalManager->createData($customerResource)->toArray() + [
+                'text' => 'Customer Owned Inventories',
+            ],
+            $fractalManager->createData($dealerResource)->toArray() + [
+                'text' => 'All Inventories',
+            ],
+        ];
     }
 }
