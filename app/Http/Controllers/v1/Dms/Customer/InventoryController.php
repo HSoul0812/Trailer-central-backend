@@ -7,7 +7,6 @@ namespace App\Http\Controllers\v1\Dms\Customer;
 use App\Http\Controllers\RestfulController;
 use App\Http\Requests\Dms\Customer\CreateInventoryRequest;
 use App\Http\Requests\Dms\Customer\DeleteInventoryRequest;
-use App\Http\Requests\Dms\Customer\GetByDealerOrCustomerRequest;
 use App\Http\Requests\Dms\Customer\GetInventoryRequest;
 use App\Repositories\Dms\Customer\InventoryRepositoryInterface;
 use App\Transformers\Dms\Customer\CustomerInventoryTransformer;
