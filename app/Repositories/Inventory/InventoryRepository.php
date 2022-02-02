@@ -512,11 +512,15 @@ class InventoryRepository implements InventoryRepositoryInterface
      *
      * @return Builder
      */
-    private function buildInventoryQuery(array $params, bool $withDefault = true) : GrimzyBuilder
-    {
+    private function buildInventoryQuery(
+        array $params,
+        bool $withDefault = true,
+        array $select = ['inventory.*']
+    ) : GrimzyBuilder {
         /** @var Builder $query */
-        $query = Inventory::query()->select(['inventory.*'])->where('inventory.inventory_id', '>', 0);
-        $query->select(['inventory.*']);
+        $query = Inventory::query()
+            ->select($select)
+            ->where('inventory.inventory_id', '>', 0);
 
         if (isset($params['include']) && is_string($params['include'])) {
             $query = $query->with(explode(',', $params['include']));
@@ -821,10 +825,13 @@ class InventoryRepository implements InventoryRepositoryInterface
      *
      * @return Collection
      */
-    public function getTitles(int $dealerId)
+    public function getTitles(int $dealerId): Collection
     {
-        $query = Inventory::select(['inventory_id', 'title', 'vin'])
-            ->where('dealer_id', $dealerId);
+        $params = [
+            'dealer_id' => $dealerId,
+        ];
+
+        $query = $this->buildInventoryQuery($params, false, ['inventory_id', 'title', 'vin']);
 
         return $query->get();
     }

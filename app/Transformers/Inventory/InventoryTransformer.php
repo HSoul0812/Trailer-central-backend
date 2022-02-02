@@ -13,7 +13,6 @@ use App\Models\Inventory\Inventory;
 use App\Transformers\User\UserTransformer;
 use App\Transformers\User\DealerLocationTransformer;
 use App\Transformers\Inventory\FeatureTransformer;
-use App\Transformers\Traits\ColumnsFilterOnTransformerTrait;
 use App\Transformers\Website\WebsiteTransformer;
 use League\Fractal\Resource\Collection as FractalCollection;
 
@@ -23,8 +22,6 @@ use League\Fractal\Resource\Collection as FractalCollection;
  */
 class InventoryTransformer extends TransformerAbstract
 {
-    use ColumnsFilterOnTransformerTrait;
-
     protected $availableIncludes = [
         'website',
         'repairOrders',
@@ -103,7 +100,7 @@ class InventoryTransformer extends TransformerAbstract
             list($heightSecond, $heightInchesSecond) = $this->convertHelper->feetToFeetInches($inventory->height);
         }
 
-        $resultArray = [
+        return [
             'id' => $inventory->inventory_id,
             'identifier' => $inventory->identifier,
             'active' => $inventory->active,
@@ -176,8 +173,6 @@ class InventoryTransformer extends TransformerAbstract
             'monthly_payment' => $inventory->monthly_payment,
             'quote_url' => config('app.new_design_crm_url') . $inventory->user->getCrmLoginUrl('bill-of-sale/new?inventory_id=' . $inventory->identifier)
         ];
-
-        return $this->filterTransformerByColumns($resultArray);
     }
 
     /**

@@ -6,11 +6,11 @@ use App\Models\Inventory\Inventory;
 use League\Fractal\TransformerAbstract;
 
 /**
- * Class InventoryShortTransformer
+ * Class InventoryTitleAndVinTransformer
  *
  * @package App\Transformers\Inventory
  */
-class InventoryShortTransformer extends TransformerAbstract
+class InventoryTitleAndVinTransformer extends TransformerAbstract
 {
     /**
      * @param Inventory $inventory

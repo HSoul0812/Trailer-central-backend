@@ -20,7 +20,6 @@ use App\Transformers\Inventory\InventoryHistoryTransformer;
 use Dingo\Api\Exception\ResourceException;
 use Dingo\Api\Http\Request;
 use App\Http\Requests\Inventory\GetInventoryRequest;
-use App\Transformers\Inventory\InventoryShortTransformer;
 use App\Transformers\Inventory\InventoryTransformer;
 use Dingo\Api\Http\Response;
 use Exception;
@@ -374,7 +373,8 @@ class InventoryController extends RestfulControllerV2
      * @param Request $request
      * @return Response
      */
-    public function deliveryPrice(int $inventoryId, Request $request):Response {
+    public function deliveryPrice(int $inventoryId, Request $request):Response
+    {
         $toZipcode = $request->input('tozip');
         return $this->response->array([
             'response' => [
@@ -405,7 +405,9 @@ class InventoryController extends RestfulControllerV2
         $request = new GetAllInventoryTitlesRequest($request->all());
 
         if ($request->validate()) {
-            return $this->response->array($this->inventoryService->getInventoriesTitle($request->all()));
+            return $this->response->array(
+                $this->inventoryService->getInventoriesTitle($request->all())
+            );
         }
 
         return $this->response->errorBadRequest();

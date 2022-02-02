@@ -21,10 +21,9 @@ use App\Repositories\User\GeoLocationRepositoryInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Services\File\FileService;
 use App\Services\File\ImageService;
-use App\Transformers\Inventory\InventoryShortTransformer;
+use App\Transformers\Inventory\InventoryTitleAndVinTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use Illuminate\Foundation\Bus\DispatchesJobs;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -200,7 +199,7 @@ class InventoryService implements InventoryServiceInterface
 
             Log::info('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
         } catch (\Exception $e) {
-            Log::error('Item create error. Message - ' . $e->getMessage() , $e->getTrace());
+            Log::error('Item create error. Message - ' . $e->getMessage(), $e->getTrace());
             $this->inventoryRepository->rollbackTransaction();
 
             throw new InventoryException('Inventory item create error');
@@ -274,7 +273,7 @@ class InventoryService implements InventoryServiceInterface
 
             Log::info('Item has been successfully updated', ['inventoryId' => $inventory->inventory_id]);
         } catch (\Exception $e) {
-            Log::error('Item update error. Message - ' . $e->getMessage() , $e->getTrace());
+            Log::error('Item update error. Message - ' . $e->getMessage(), $e->getTrace());
             $this->inventoryRepository->rollbackTransaction();
 
             throw new InventoryException('Inventory item update error');
@@ -484,7 +483,6 @@ class InventoryService implements InventoryServiceInterface
 
         if ($isOverlayEnabled && $params['overlay_enabled'] == Inventory::OVERLAY_ENABLED_ALL) {
             $withOverlay = $images;
-
         } elseif ($isOverlayEnabled && $params['overlay_enabled'] == Inventory::OVERLAY_ENABLED_PRIMARY) {
             $withOverlay = array_filter($images, function ($image) {
                 return isset($image['position']) && $image['position'] == 0;
@@ -493,7 +491,6 @@ class InventoryService implements InventoryServiceInterface
             $withoutOverlay = array_filter($images, function ($image) {
                 return !isset($image['position']) || $image['position'] != 0;
             });
-
         } else {
             $withoutOverlay = $images;
         }
@@ -602,7 +599,6 @@ class InventoryService implements InventoryServiceInterface
 
                 $this->inventoryRepository->update($inventoryParams);
             }
-
         } else if (empty($inventory->bill_id) && !empty($trueCost) && !empty($fpVendor) && !empty($fpBalance)) {
             $billStatus = $trueCost > $fpBalance ? Bill::STATUS_DUE : Bill::STATUS_PAID;
             $billNo = 'fp_auto_' . $inventory->inventory_id;
@@ -783,10 +779,9 @@ class InventoryService implements InventoryServiceInterface
     {
         $resource = new FractalResourceCollection(
             $data,
-            new InventoryShortTransformer,
+            new InventoryTitleAndVinTransformer,
             self::RESOURCE_KEY
         );
-
 
         return $this->processTitleGroups($resource, $text);
     }
