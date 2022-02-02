@@ -3,6 +3,7 @@
 namespace App\Repositories\Inventory;
 
 use App\Exceptions\RepositoryInvalidArgumentException;
+use App\Models\CRM\Dms\Customer\CustomerInventory;
 use App\Models\Inventory\AttributeValue;
 use App\Models\Inventory\File;
 use App\Models\Inventory\Image;
@@ -19,6 +20,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Grimzy\LaravelMysqlSpatial\Eloquent\Builder as GrimzyBuilder;
+use Illuminate\Database\Query\JoinClause;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 
 /**
  * Class InventoryRepository
@@ -510,11 +513,15 @@ class InventoryRepository implements InventoryRepositoryInterface
      *
      * @return Builder
      */
-    private function buildInventoryQuery(array $params, bool $withDefault = true) : GrimzyBuilder
-    {
+    private function buildInventoryQuery(
+        array $params,
+        bool $withDefault = true,
+        array $select = ['inventory.*']
+    ) : GrimzyBuilder {
         /** @var Builder $query */
-        $query = Inventory::query()->select(['inventory.*'])->where('inventory.inventory_id', '>', 0);
-        $query->select(['inventory.*']);
+        $query = Inventory::query()
+            ->select($select)
+            ->where('inventory.inventory_id', '>', 0);
 
         if (isset($params['include']) && is_string($params['include'])) {
             $query = $query->with(explode(',', $params['include']));
@@ -523,7 +530,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         $attributesEmpty = true;
 
         if (isset($params['attribute_names'])) {
-           foreach($params['attribute_names'] as $value) {
+            foreach ($params['attribute_names'] as $value) {
                 if (!empty($value)) {
                     $attributesEmpty = false;
                     break;
@@ -535,7 +542,7 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query = $query->join('eav_attribute_value', 'inventory.inventory_id', '=', 'eav_attribute_value.inventory_id')->orderBy('eav_attribute_value.attribute_id', 'desc');
             $query = $query->join('eav_attribute', 'eav_attribute.attribute_id', '=', 'eav_attribute_value.attribute_id');
 
-            $query = $query->where(function($q) use ($params) {
+            $query = $query->where(function ($q) use ($params) {
                 foreach ($params['attribute_names'] as $attribute => $value) {
                     $q->orWhere(function ($q) use ($attribute, $value) {
                         $q->where('code', '=', $attribute)
@@ -609,7 +616,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         if (isset($params['search_term'])) {
-            $query = $query->where(function($q) use ($params) {
+            $query = $query->where(function ($q) use ($params) {
                 $q->where('stock', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('title', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('inventory.description', 'LIKE', '%' . $params['search_term'] . '%')
@@ -622,7 +629,7 @@ class InventoryRepository implements InventoryRepositoryInterface
 
         if (isset($params['images_greater_than'])) {
             $query->havingRaw('image_count >= '. $params['images_greater_than']);
-        } else if (isset($params['images_less_than'])) {
+        } elseif (isset($params['images_less_than'])) {
             $query->havingRaw('image_count <= '. $params['images_less_than']);
         } else {
             $query->select(['inventory.*']);
@@ -814,4 +821,19 @@ class InventoryRepository implements InventoryRepositoryInterface
         return $inventory;
     }
 
+    /**
+     * @param int $dealerId
+     *
+     * @return Collection
+     */
+    public function getTitles(int $dealerId): Collection
+    {
+        $params = [
+            'dealer_id' => $dealerId,
+        ];
+
+        $query = $this->buildInventoryQuery($params, false, ['inventory_id', 'title', 'vin']);
+
+        return $query->get();
+    }
 }
