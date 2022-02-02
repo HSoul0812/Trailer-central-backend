@@ -16,10 +16,14 @@ use App\Repositories\Integration\Facebook\ChatRepository;
 use App\Repositories\Integration\Facebook\ChatRepositoryInterface;
 use App\Repositories\Integration\Facebook\FeedRepository;
 use App\Repositories\Integration\Facebook\FeedRepositoryInterface;
-use App\Repositories\Feed\TransactionExecuteQueueRepositoryInterface;
-use App\Repositories\Feed\TransactionExecuteQueueRepository;
 use App\Repositories\Integration\Facebook\PageRepository;
 use App\Repositories\Integration\Facebook\PageRepositoryInterface;
+use App\Repositories\Feed\TransactionExecuteQueueRepositoryInterface;
+use App\Repositories\Feed\TransactionExecuteQueueRepository;
+use App\Repositories\Marketing\Craigslist\ActivePostRepository;
+use App\Repositories\Marketing\Craigslist\ActivePostRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\SchedulerRepository;
+use App\Repositories\Marketing\Craigslist\SchedulerRepositoryInterface;
 use App\Services\CRM\User\SalesAuthService;
 use App\Services\CRM\User\SalesAuthServiceInterface;
 use App\Services\Integration\AuthService;
@@ -72,6 +76,10 @@ class IntegrationServiceProvider extends ServiceProvider
         $this->app->bind(ChatRepositoryInterface::class, ChatRepository::class);
         $this->app->bind(FeedRepositoryInterface::class, FeedRepository::class);
         $this->app->bind(PageRepositoryInterface::class, PageRepository::class);
+
+        // Marketing Repositories
+        $this->app->bind(ActivePostRepositoryInterface::class, ActivePostRepository::class);
+        $this->app->bind(SchedulerRepositoryInterface::class, SchedulerRepository::class);
         
         $this->app->bind(TransactionExecuteQueueRepositoryInterface::class, TransactionExecuteQueueRepository::class);
         
