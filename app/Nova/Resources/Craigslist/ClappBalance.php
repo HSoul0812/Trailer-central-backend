@@ -16,7 +16,7 @@ class ClappBalance extends Resource
      *
      * @var string
      */
-    public static $model = 'App\Models\Marketing\Clapp\Balance';
+    public static $model = 'App\Models\Marketing\Craigslist\Balance';
 
     /**
      * The single value that should be used to represent the resource when being displayed.
