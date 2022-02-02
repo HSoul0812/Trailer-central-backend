@@ -9,6 +9,8 @@ use App\Models\CRM\Leads\Lead;
 
 class BigTexLeadRepository implements BigTexLeadRepositoryInterface 
 {    
+    private const TRAILER_WORLD_DEALER_ID = 11320; // Needs to be moved to config
+    
     public function create($params) {
         throw new NotImplementedException;
     }
@@ -37,7 +39,7 @@ class BigTexLeadRepository implements BigTexLeadRepositoryInterface
                 ->where('website_lead.date_submitted', '>=', $fromDate)
                 ->where('website_lead.is_from_classifieds', Lead::IS_FROM_CLASSIFIEDS)
                 ->where('website_lead.bigtex_exported', Lead::IS_BIGTEX_NOT_EXPORTED)
-                ->where('inventory.manufacturer', 'LIKE', 'Big Tex Trailers')
+                ->where('inventory.dealer_id', self::TRAILER_WORLD_DEALER_ID)
                 ->groupBy('website_lead.identifier')
                 ->chunk($chunkSize, $callable); 
     }

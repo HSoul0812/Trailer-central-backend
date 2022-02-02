@@ -323,7 +323,8 @@ class Inventory extends Model
         'qb_sync_processed',
         'changed_fields_in_dashboard',
         'is_archived',
-        'times_viewed'
+        'times_viewed',
+        'trailerworld_store_id'
     ];
 
     protected $casts = [

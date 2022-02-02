@@ -250,6 +250,9 @@ class AppServiceProvider extends ServiceProvider
 
             // invoicing
             __DIR__ . '/../../database/migrations/invoicing',
+
+            // ecommerce
+            __DIR__ . '/../../database/migrations/ecommerce',
         ]);
 
         // log all queries
@@ -326,9 +329,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(MonitoredJobRepositoryInterface::class, MonitoredJobRepository::class);
 
         $this->app->singleton(LoggerServiceInterface::class, LoggerService::class);
-
-        $this->app->bind(CustomOverlayRepositoryInterface::class, CustomOverlayRepository::class);
-        $this->app->bind(CustomOverlayServiceInterface::class, CustomOverlayService::class);
 
         $this->app->bind(StockRepositoryInterface::class, StockRepository::class);
 

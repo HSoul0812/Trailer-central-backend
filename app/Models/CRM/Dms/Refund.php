@@ -46,6 +46,7 @@ class Refund extends Model implements Filterable
 
     protected $casts = [
         'meta' => 'array', // field contains json data
+        'amount' => 'float'
     ];
 
     /**
