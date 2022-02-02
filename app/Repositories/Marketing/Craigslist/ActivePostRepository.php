@@ -105,7 +105,7 @@ class ActivePostRepository implements ActivePostRepositoryInterface {
         }
 
         if (isset($params['slot_id'])) {
-            $query = $query->where(Session::getTableName() . '.slot_id', $params['slot_id']);
+            $query = $query->where(Session::getTableName() . '.session_slot_id', $params['slot_id']);
         }
 
         if (isset($params['id'])) {
