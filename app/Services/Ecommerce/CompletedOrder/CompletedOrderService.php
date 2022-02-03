@@ -81,7 +81,7 @@ class CompletedOrderService implements CompletedOrderServiceInterface
             $refund_status = CompletedOrder::REFUND_STATUS_PARTIAL_REFUNDED;
         }
 
-        $refundedParts = $this->refundRepository->getRefundedParts($orderId)->map(static function (RefundedPart $part): array {
+        $refundedParts = $this->refundRepository->getRefundedParts($orderId)->map(static function (RefundedPart $part): array {;
             return $part->asArray();
         })->toArray();
 
