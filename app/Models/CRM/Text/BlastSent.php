@@ -2,6 +2,7 @@
 
 namespace App\Models\CRM\Text;
 
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -11,6 +12,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class BlastSent extends Model
 {
+    use TableAware;
+
     protected $table = 'crm_text_blast_sent';
 
     /**
@@ -21,6 +24,27 @@ class BlastSent extends Model
     const STATUS_TYPES = [
         'landline', // not a valid mobile number
         'invalid', // not a valid number
+        'sent', // sent text
+        'lead', // lead updated
+        'logged' // logged text
+    ];
+
+    /**
+     * Statuses That Mean Text Failed to Send
+     * 
+     * @var array
+     */
+    const STATUS_FAILED = [
+        'landline', // not a valid mobile number
+        'invalid' // not a valid number
+    ];
+
+    /**
+     * Statuses That Mean Text Was Sent
+     * 
+     * @var array
+     */
+    const STATUS_SUCCESS = [
         'sent', // sent text
         'lead', // lead updated
         'logged' // logged text
