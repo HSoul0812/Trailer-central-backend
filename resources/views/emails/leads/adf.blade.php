@@ -47,9 +47,9 @@
      <country>{{ $vendorCountry }}</country>
     </address>
    </contact>
-   <provider>
-    <name part="full">{{ $providerName }}</name>
-   </provider>
   </vendor>
+  <provider>
+   <name part="full">{{ $providerName }}</name>
+  </provider>
  </prospect>
 </adf>

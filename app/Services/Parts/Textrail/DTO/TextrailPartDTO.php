@@ -8,7 +8,7 @@ use App\Traits\WithGetter;
 
 /**
  * Class SimpleData
- * 
+ *
  * @package App\Services\Common\DTOs
  */
 class TextrailPartDTO implements DTO
@@ -52,6 +52,9 @@ class TextrailPartDTO implements DTO
     /** @var array */
     private $images = [];
 
+    /** @var int */
+    public $qty = 0;
+
     public static function result(array $properties): self
     {
         return self::from($properties);
@@ -60,18 +63,19 @@ class TextrailPartDTO implements DTO
     public function asArray(): array
     {
         return [
-          'id' => $this->id,
-          'manufacturer_id' => $this->manufacturer_id,
-          'brand_id' => $this->brand_id,
-          'type_id' => $this->type_id,
-          'category_id' => $this->category_id,
-          'sku' => $this->sku,
-          'title' => $this->title,
-          'price' => $this->price,
-          'weight' => $this->weight ? $part->weight : '',
-          'description' => $this->description,
-          'show_on_website' => $this->show_on_website,
-          'images' => $this->images
+            'id' => $this->id,
+            'manufacturer_id' => $this->manufacturer_id,
+            'brand_id' => $this->brand_id,
+            'type_id' => $this->type_id,
+            'category_id' => $this->category_id,
+            'sku' => $this->sku,
+            'title' => $this->title,
+            'price' => $this->price,
+            'weight' => $this->weight ?? '',
+            'description' => $this->description,
+            'show_on_website' => $this->show_on_website,
+            'images' => $this->images,
+            'qty' => $this->qty,
         ];
     }
 }
