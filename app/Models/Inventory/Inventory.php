@@ -135,6 +135,7 @@ use Laravel\Scout\Searchable;
  * @property string $status_label
  * @property string $color
  * @property double $interest_paid
+ * @property double $cost_of_ros
  *
  * @property User $user
  * @property Lead $lead
@@ -323,7 +324,8 @@ class Inventory extends Model
         'qb_sync_processed',
         'changed_fields_in_dashboard',
         'is_archived',
-        'times_viewed'
+        'times_viewed',
+        'trailerworld_store_id'
     ];
 
     protected $casts = [
@@ -548,6 +550,14 @@ class Inventory extends Model
 
         // Return Value
         return $attribute->value ?? '';
+    }
+
+    /**
+     * @return float|null
+     */
+    public function getCostOfRosAttribute(): ?float
+    {
+        return $this->repairOrders()->sum('total_price');
     }
 
     /**

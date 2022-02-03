@@ -35,6 +35,7 @@ class DealerIncomingMapping extends Model {
     const SERIES = 'series';
     const CITY_MPG = 'city_mpg';
     const HIGHWAY_MPG = 'highway_mpg';
+    const PROPULSION = 'propulsion';
 
     public static $types = [
         self::MAKE => 'Manufacturer',
@@ -60,7 +61,8 @@ class DealerIncomingMapping extends Model {
         self::TRANSMISSION_SPEED => 'Transmission Speed',
         self::SERIES => 'Series',
         self::CITY_MPG => 'City MPG',
-        self::HIGHWAY_MPG => 'Highway MPG'
+        self::HIGHWAY_MPG => 'Highway MPG',
+        self::PROPULSION => 'Propulsion',
     ];
 
     protected $fillable = [

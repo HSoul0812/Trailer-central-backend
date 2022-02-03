@@ -2,6 +2,7 @@
 
 namespace App\Services\Inventory;
 
+use App\Contracts\LoggerServiceInterface;
 use App\Exceptions\Inventory\InventoryException;
 use App\Jobs\Files\DeleteS3FilesJob;
 use App\Models\CRM\Dms\Quickbooks\Bill;
@@ -20,10 +21,15 @@ use App\Repositories\User\GeoLocationRepositoryInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Services\File\FileService;
 use App\Services\File\ImageService;
+use App\Transformers\Inventory\InventoryTitleAndVinTransformer;
+use App\Utilities\Fractal\NoDataArraySerializer;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use League\Fractal\Resource\Collection as FractalResourceCollection;
+use League\Fractal\Manager as FractalManager;
+use App\Repositories\Dms\Customer\InventoryRepository as DmsCustomerInventoryRepository;
 
 /**
  * Class InventoryService
@@ -34,6 +40,10 @@ class InventoryService implements InventoryServiceInterface
     use DispatchesJobs;
 
     const SOURCE_DASHBOARD = 'dashboard';
+
+    private const RESOURCE_KEY = 'children';
+    private const OPTION_GROUP_TEXT_CUSTOMER_OWNED = 'Customer Owned Inventories';
+    private const OPTION_GROUP_TEXT_DEALER_OWNED = 'All Inventories';
 
     /**
      * @var InventoryRepositoryInterface
@@ -89,6 +99,11 @@ class InventoryService implements InventoryServiceInterface
     private $geolocationRepository;
 
     /**
+     * @var LoggerServiceInterface
+     */
+    private $logService;
+
+    /**
      * InventoryService constructor.
      * @param InventoryRepositoryInterface $inventoryRepository
      * @param ImageRepositoryInterface $imageRepository
@@ -115,7 +130,8 @@ class InventoryService implements InventoryServiceInterface
         DealerLocationRepositoryInterface $dealerLocationRepository,
         DealerLocationMileageFeeRepositoryInterface $dealerLocationMileageFeeRepository,
         CategoryRepositoryInterface $categoryRepository,
-        GeoLocationRepositoryInterface $geolocationRepository
+        GeoLocationRepositoryInterface $geolocationRepository,
+        ?LoggerServiceInterface $logService = null
     ) {
         $this->inventoryRepository = $inventoryRepository;
         $this->imageRepository = $imageRepository;
@@ -129,6 +145,7 @@ class InventoryService implements InventoryServiceInterface
         $this->fileService = $fileService;
         $this->categoryRepository = $categoryRepository;
         $this->geolocationRepository = $geolocationRepository;
+        $this->logService = $logService ?? app()->make(LoggerServiceInterface::class);
     }
 
     /**
@@ -182,7 +199,7 @@ class InventoryService implements InventoryServiceInterface
 
             Log::info('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
         } catch (\Exception $e) {
-            Log::error('Item create error. Message - ' . $e->getMessage() , $e->getTrace());
+            Log::error('Item create error. Message - ' . $e->getMessage(), $e->getTrace());
             $this->inventoryRepository->rollbackTransaction();
 
             throw new InventoryException('Inventory item create error');
@@ -256,7 +273,7 @@ class InventoryService implements InventoryServiceInterface
 
             Log::info('Item has been successfully updated', ['inventoryId' => $inventory->inventory_id]);
         } catch (\Exception $e) {
-            Log::error('Item update error. Message - ' . $e->getMessage() , $e->getTrace());
+            Log::error('Item update error. Message - ' . $e->getMessage(), $e->getTrace());
             $this->inventoryRepository->rollbackTransaction();
 
             throw new InventoryException('Inventory item update error');
@@ -466,7 +483,6 @@ class InventoryService implements InventoryServiceInterface
 
         if ($isOverlayEnabled && $params['overlay_enabled'] == Inventory::OVERLAY_ENABLED_ALL) {
             $withOverlay = $images;
-
         } elseif ($isOverlayEnabled && $params['overlay_enabled'] == Inventory::OVERLAY_ENABLED_PRIMARY) {
             $withOverlay = array_filter($images, function ($image) {
                 return isset($image['position']) && $image['position'] == 0;
@@ -475,7 +491,6 @@ class InventoryService implements InventoryServiceInterface
             $withoutOverlay = array_filter($images, function ($image) {
                 return !isset($image['position']) || $image['position'] != 0;
             });
-
         } else {
             $withoutOverlay = $images;
         }
@@ -584,7 +599,6 @@ class InventoryService implements InventoryServiceInterface
 
                 $this->inventoryRepository->update($inventoryParams);
             }
-
         } else if (empty($inventory->bill_id) && !empty($trueCost) && !empty($fpVendor) && !empty($fpBalance)) {
             $billStatus = $trueCost > $fpBalance ? Bill::STATUS_DUE : Bill::STATUS_PAID;
             $billNo = 'fp_auto_' . $inventory->inventory_id;
@@ -701,5 +715,88 @@ class InventoryService implements InventoryServiceInterface
                 return $toNauticalMiles;
         }
 
+    }
+
+    /**
+     * Deletes the inventory images from the DB and the filesystem
+     *
+     * @param int $inventoryId
+     * @param int[] $imageIds
+     * @return bool
+     * @throws \RuntimeException when the images could not be deleted
+     */
+    public function imageBulkDelete(int $inventoryId, array $imageIds): bool
+    {
+        try {
+            $this->inventoryRepository->beginTransaction();
+
+            $imagesFilenames = $this->imageRepository
+                ->getAll([
+                    'inventory_id' => $inventoryId,
+                    ImageRepositoryInterface::CONDITION_AND_WHERE_IN => ['inventory_image.image_id' => $imageIds]
+                ])
+                ->pluck('filename')
+                ->toArray();
+
+            $this->imageRepository->delete([
+                ImageRepositoryInterface::CONDITION_AND_WHERE_IN => ['image_id' => $imageIds]
+            ]);
+
+            $this->dispatch((new DeleteS3FilesJob($imagesFilenames))->onQueue('files'));
+
+            $this->inventoryRepository->commitTransaction();
+
+            $this->logService->info('Images have been successfully deleted', ['image_ids' => $imageIds]);
+        } catch (\Exception $e) {
+            $this->inventoryRepository->rollbackTransaction();
+
+            $message = sprintf('Images deletion have failed: %s', $e->getMessage());
+
+            $this->logService->error($message, ['image_ids' => $imageIds]);
+
+            throw new \RuntimeException($message);
+        }
+
+        return true;
+    }
+
+    public function getInventoriesTitle(array $params): array
+    {
+        $dealerInventories = $this->inventoryRepository->getTitles($params['dealer_id']);
+
+        if (!empty($params['customer_id'])) {
+            $customerInventoryRepo = resolve(DmsCustomerInventoryRepository::class);
+            $customerInventories = $customerInventoryRepo->getTitles($params['customer_id']);
+        }
+
+        return [
+            $this->processTitles($customerInventories ?? [], self::OPTION_GROUP_TEXT_CUSTOMER_OWNED),
+            $this->processTitles($dealerInventories, self::OPTION_GROUP_TEXT_DEALER_OWNED),
+        ];
+    }
+
+    private function processTitles($data, $text): array
+    {
+        $resource = new FractalResourceCollection(
+            $data,
+            new InventoryTitleAndVinTransformer,
+            self::RESOURCE_KEY
+        );
+
+        return $this->processTitleGroups($resource, $text);
+    }
+
+    private function processTitleGroups($data, $text): array
+    {
+        $resultantArray = [];
+        if (!empty($data)) {
+            $fractalManager = new FractalManager();
+            $fractalManager->setSerializer(new NoDataArraySerializer());
+            $resultantArray = $fractalManager->createData($data)->toArray();
+        }
+
+        return array_merge($resultantArray, [
+            'text' => $text,
+        ]);
     }
 }

@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\DB;
 
 class AddCastanetAutomallIntegration extends Migration
 {
+    public const TRAVELAND_RV_DEALER_ID = 10590;
+    public const AIRSTREAM_OF_TRAVELAND_DEALER_ID = 10591;
 
     private const CASTANET_AUTOMALL_PARAMS = [
         'integration_id' => 84,
@@ -27,7 +29,7 @@ class AddCastanetAutomallIntegration extends Migration
 
     private const TRAVELAND_RV_DEALER = [
         'integration_id' => 84,
-        'dealer_id' => 10590,
+        'dealer_id' => self::TRAVELAND_RV_DEALER_ID,
         'active' => 1,
         'settings' => [],
         'location_ids' => '',
@@ -39,7 +41,7 @@ class AddCastanetAutomallIntegration extends Migration
 
     private const AIRSTREAM_OF_TRAVELAND_DEALER = [
         'integration_id' => 84,
-        'dealer_id' => 10591,
+        'dealer_id' => self::AIRSTREAM_OF_TRAVELAND_DEALER_ID,
         'active' => 1,
         'settings' => [],
         'location_ids' => '',
@@ -56,19 +58,30 @@ class AddCastanetAutomallIntegration extends Migration
      */
     public function up(): void
     {
-        DB::transaction(function () {
-            $travelandrvDealer = self::TRAVELAND_RV_DEALER;
-            $travelandrvDealer['created_at'] = Carbon::now()->setTimezone('UTC')->toDateTimeString();
-            $travelandrvDealer['settings'] = serialize($travelandrvDealer['settings']);
+        $checkIntegration = DB::table('integration')->where('integration_id', self::CASTANET_AUTOMALL_PARAMS['integration_id'])->exists();
 
-            $airstreamoftravelandDealer = self::AIRSTREAM_OF_TRAVELAND_DEALER;
-            $airstreamoftravelandDealer['created_at'] = Carbon::now()->setTimezone('UTC')->toDateTimeString();
-            $airstreamoftravelandDealer['settings'] = serialize($airstreamoftravelandDealer['settings']);
+        if (!$checkIntegration) {
+            DB::transaction(function () {
+                DB::table('integration')->insert(self::CASTANET_AUTOMALL_PARAMS);
 
-            DB::table('integration')->insert(self::CASTANET_AUTOMALL_PARAMS);
-            DB::table('integration_dealer')->insert($travelandrvDealer);
-            DB::table('integration_dealer')->insert($airstreamoftravelandDealer);
-        });
+                $checkAirstream = DB::table('dealer')->where('dealer_id', self::AIRSTREAM_OF_TRAVELAND_DEALER_ID)->exists();
+                $checkTraveland = DB::table('dealer')->where('dealer_id', self::TRAVELAND_RV_DEALER_ID)->exists();
+
+                if ($checkAirstream) {
+                    $airstreamoftravelandDealer = self::AIRSTREAM_OF_TRAVELAND_DEALER;
+                    $airstreamoftravelandDealer['created_at'] = Carbon::now()->setTimezone('UTC')->toDateTimeString();
+                    $airstreamoftravelandDealer['settings'] = serialize($airstreamoftravelandDealer['settings']);
+                    DB::table('integration_dealer')->insert($airstreamoftravelandDealer);
+                }
+
+                if ($checkTraveland) {
+                    $travelandrvDealer = self::TRAVELAND_RV_DEALER;
+                    $travelandrvDealer['created_at'] = Carbon::now()->setTimezone('UTC')->toDateTimeString();
+                    $travelandrvDealer['settings'] = serialize($travelandrvDealer['settings']);
+                    DB::table('integration_dealer')->insert($travelandrvDealer);
+                }
+            });
+        }
     }
 
     /**

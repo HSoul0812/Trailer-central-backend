@@ -309,9 +309,9 @@ class ParsedEmail
      * @param string $to
      * @return void
      */
-    public function setToEmail(string $to): void
+    public function setToEmail(?string $to = null): void
     {
-        $this->to = $to;
+        $this->to = $to ?? '';
     }
 
     /**
@@ -370,10 +370,10 @@ class ParsedEmail
      * @param string $fromFull
      * @return void
      */
-    public function setFrom(string $fromFull): void
+    public function setFrom(?string $fromFull = null): void
     {
         // Separate Name From Email
-        $email = $fromFull;
+        $email = $fromFull ?? '';
         $name = '';
         if(strpos($fromFull, '<') !== FALSE) {
             $parts = explode("<", $fromFull);
@@ -436,7 +436,7 @@ class ParsedEmail
      */
     public function getSubject(): string
     {
-        return $this->subject;
+        return $this->subject ?? '';
     }
 
     /**
@@ -458,7 +458,7 @@ class ParsedEmail
      */
     public function getBody(): string
     {
-        return $this->body;
+        return $this->body ?? '';
     }
 
     /**
@@ -669,6 +669,9 @@ class ParsedEmail
      */
     public function getDate(): string
     {
+        if(!$this->date) {
+            $this->setDateNow();
+        }
         return $this->date;
     }
 

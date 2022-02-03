@@ -2,13 +2,19 @@
 
 namespace App\Services\CRM\Text;
 
+use App\Models\User\NewDealerUser;
+use App\Models\CRM\Text\Blast;
+use Illuminate\Support\Collection;
+
 interface BlastServiceInterface {
     /**
      * Send Blast Text
      * 
      * @param NewDealerUser $dealer
      * @param Blast $blast
-     * @return false || array of BlastSent
+     * @throws NoBlastSmsFromNumberException
+     * @throws NoLeadsDeliverBlastException
+     * @return Collection<BlastSent>
      */
-    public function send($dealer, $blast);
+    public function send(NewDealerUser $dealer, Blast $blast): Collection;
 }

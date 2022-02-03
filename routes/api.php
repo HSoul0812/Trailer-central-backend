@@ -29,6 +29,32 @@ $api->version('v1', function ($route) {
     */
 
     /**
+     * Completed Orders
+     */
+    $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
+        $route->get('ecommerce/orders', 'App\Http\Controllers\v1\Ecommerce\CompletedOrderController@index');
+        $route->get('ecommerce/orders/{id}', 'App\Http\Controllers\v1\Ecommerce\CompletedOrderController@show')->where('id', '[0-9]+');
+        $route->post('ecommerce/shipping-costs', 'App\Http\Controllers\v1\Ecommerce\ShippingController@calculateCosts');
+        $route->post('ecommerce/available-shipping-methods', 'App\Http\Controllers\v1\Ecommerce\ShippingController@getAvailableShippingMethods');
+        $route->post('ecommerce/refunds/{order_id}','App\Http\Controllers\v1\Ecommerce\RefundController@issue')->where('order_id', '[0-9]+');
+        $route->get('ecommerce/refunds','App\Http\Controllers\v1\Ecommerce\RefundController@index');
+        $route->get('ecommerce/refunds/{refund_id}','App\Http\Controllers\v1\Ecommerce\RefundController@show')->where('order_id', '[0-9]+');
+        $route->get('ecommerce/invoice/{id}', 'App\Http\Controllers\v1\Ecommerce\InvoiceController@show')->where('id', '[0-9]+');
+    });
+
+    $route->group(['middleware' => 'stripe.webhook.validate'], function ($route) {
+        $route->post('ecommerce/orders', 'App\Http\Controllers\v1\Ecommerce\CompletedOrderController@create');
+    });
+
+
+    $route->group(['middleware' => 'textrail.webhook.validate'], function ($route) {
+        $route->post('ecommerce/orders/{textrail_order_id}/approve', 'App\Http\Controllers\v1\Ecommerce\CompletedOrderController@markAsApproved')->where('textrail_order_id', '[0-9]+');
+        $route->post('ecommerce/cancellation/{textrail_order_id}','App\Http\Controllers\v1\Ecommerce\RefundController@cancelOrder')->where('textrail_order_id', '[0-9]+');
+        $route->post('ecommerce/returns/{rma}','App\Http\Controllers\v1\Ecommerce\RefundController@updateReturnStatus')->where('rma', '[0-9]+');
+        $route->post('ecommerce/orders/{textrail_order_id}/returns','App\Http\Controllers\v1\Ecommerce\RefundController@create')->where('textrail_order_id', '[0-9]+');
+    });
+
+    /**
      * Floorplan Payments
      */
 
@@ -174,6 +200,12 @@ $api->version('v1', function ($route) {
     $route->post('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@update')->where('id', '[0-9]+');
     $route->delete('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@destroy')->where('id', '[0-9]+');
 
+    /**
+     * Textrail Parts
+     */
+    $route->get('textrail/parts', 'App\Http\Controllers\v1\Parts\Textrail\PartsController@index');
+    $route->get('textrail/parts/{id}', 'App\Http\Controllers\v1\Parts\Textrail\PartsController@show')->where('id', '[0-9]+');
+
     /*
     |--------------------------------------------------------------------------
     | Inventory
@@ -203,6 +235,11 @@ $api->version('v1', function ($route) {
     $route->get('inventory/manufacturers', 'App\Http\Controllers\v1\Inventory\ManufacturerController@index');
 
     /**
+     * Inventory Brands
+     */
+    $route->get('inventory/brands', 'App\Http\Controllers\v1\Inventory\Manufacturers\BrandController@index');
+
+    /**
      * Inventory Categories
      */
     $route->get('inventory/categories', 'App\Http\Controllers\v1\Inventory\CategoryController@index');
@@ -216,6 +253,10 @@ $api->version('v1', function ($route) {
      * Inventory Attributes
      */
     $route->get('inventory/attributes', 'App\Http\Controllers\v1\Inventory\AttributeController@index');
+    $route->put(
+        'inventory/{id}/attributes',
+        'App\Http\Controllers\v1\Inventory\InventoryAttributeController@update'
+    )->where('id', '[0-9]+');
 
     /**
      * Inventory Attributes
@@ -230,17 +271,23 @@ $api->version('v1', function ($route) {
     /**
      * Inventory distance
      */
-    $route->get('inventory/{inventory_id}/delivery_price', 'App\Http\Controllers\v1\Inventory\InventoryController@delivery_price')->where('inventory_id', '[0-9]+');
+    $route->get('inventory/{inventory_id}/delivery_price', 'App\Http\Controllers\v1\Inventory\InventoryController@deliveryPrice')->where('inventory_id', '[0-9]+');
 
     /**
      * Inventory
      */
     $route->get('inventory', 'App\Http\Controllers\v1\Inventory\InventoryController@index');
+    $route->get('inventory/get_all_titles', 'App\Http\Controllers\v1\Inventory\InventoryController@getAllTitles');
     $route->put('inventory', 'App\Http\Controllers\v1\Inventory\InventoryController@create');
     $route->get('inventory/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@show')->where('id', '[0-9]+');
     $route->post('inventory/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@update')->where('id', '[0-9]+');
     $route->delete('inventory/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@destroy')->where('id', '[0-9]+');
     $route->get('inventory/exists', 'App\Http\Controllers\v1\Inventory\InventoryController@exists');
+
+    /**
+     * Inventory images
+     */
+    $route->delete('inventory/{id}/images', 'App\Http\Controllers\v1\Inventory\ImageController@bulkDestroy')->where('id', '[0-9]+');
 
     /*
     |--------------------------------------------------------------------------
@@ -294,6 +341,11 @@ $api->version('v1', function ($route) {
     $route->delete('website/parts/filters/{id}', 'App\Http\Controllers\v1\Website\Parts\FilterController@destroy')->where('id', '[0-9]+');
 
     /**
+     * Website Textrail Part Filters
+     */
+       $route->get('website/parts/textrail/filters', 'App\Http\Controllers\v1\Website\Parts\Textrail\FilterController@index');
+
+    /**
      * Website Blog Posts
      */
     $route->get('website/blog/posts', 'App\Http\Controllers\v1\Website\Blog\PostController@index');
@@ -340,7 +392,7 @@ $api->version('v1', function ($route) {
     /**
      * Website users
      */
-    $route->group(['prefix' => 'website/{websiteId}/user'], function($route) {
+    $route->group(['prefix' => 'website/{websiteId}/user'], function ($route) {
         $route->post('signup', 'App\Http\Controllers\v1\Website\User\WebsiteUserController@create');
         $route->post('login', 'App\Http\Controllers\v1\Website\User\WebsiteUserController@login');
     });
@@ -348,7 +400,7 @@ $api->version('v1', function ($route) {
     /**
      * Website account profile
      */
-    $route->group(['prefix' => 'website/account', 'middleware' => 'api.auth', 'providers' => ['website_auth']], function($route) {
+    $route->group(['prefix' => 'website/account', 'middleware' => 'api.auth', 'providers' => ['website_auth']], function ($route) {
         $route->get('', 'App\Http\Controllers\v1\Website\User\WebsiteUserController@get');
         $route->put('', 'App\Http\Controllers\v1\Website\User\WebsiteUserController@update');
     });
@@ -454,6 +506,7 @@ $api->version('v1', function ($route) {
     */
 
     $route->post('feed/atw', 'App\Http\Controllers\v1\Feed\AtwController@create');
+    $route->put('feed/atw', 'App\Http\Controllers\v1\Feed\AtwController@update');
 
     // upload feed data
     $route->post('feed/uploader/{code}', 'App\Http\Controllers\v1\Feed\UploadController@upload')->where('code', '\w+');
@@ -1177,10 +1230,23 @@ $api->version('v1', function ($route) {
         'prefix' => 'marketing',
         'middleware' => 'accesstoken.validate'
     ], function ($route) {
+        // Facebook Page Tab
+        $route->group([
+            'prefix' => 'pagetab',
+            'middleware' => 'marketing.facebook.pagetab'
+        ], function ($route) {
+            $route->get('/', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@index');
+            $route->post('/', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@create');
+            $route->put('/', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@update'); // requires page_id instead
+            $route->get('{id}', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@show')->where('id', '[0-9]+');
+            $route->put('{id}', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@update')->where('id', '[0-9]+');
+            $route->delete('{id}', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@destroy')->where('id', '[0-9]+');
+        });
+
         // Facebook Marketplace
         $route->group([
             'prefix' => 'facebook',
-            'middleware' => 'marketing.facebook'
+            'middleware' => 'marketing.facebook.marketplace'
         ], function ($route) {
             $route->get('/', 'App\Http\Controllers\v1\Marketing\FacebookController@index');
             $route->post('/', 'App\Http\Controllers\v1\Marketing\FacebookController@create');

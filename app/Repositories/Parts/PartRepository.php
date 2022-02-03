@@ -2,12 +2,10 @@
 
 namespace App\Repositories\Parts;
 
-use App\Events\Parts\PartQtyUpdated;
 use App\Models\Parts\Brand;
 use App\Models\Parts\Category;
 use App\Models\Parts\Type;
 use App\Models\Parts\Vendor;
-use App\Repositories\Repository;
 use App\Models\Parts\Part;
 use App\Models\Parts\PartImage;
 use Illuminate\Database\Query\Builder;
@@ -30,6 +28,8 @@ class PartRepository implements PartRepositoryInterface {
 
     const PARTS_IN_STOCK = 1;
     const PARTS_AVAILABLE = 2;
+    
+    protected $model;
 
     private $sortOrders = [
         'title' => [
@@ -107,6 +107,10 @@ class PartRepository implements PartRepositoryInterface {
         'sku' => 'sku.keyword',
         'price' => 'price.keyword',
     ];
+    
+    public function __construct(Part $model) {
+        $this->model = $model;
+    }
 
     public function create($params) {
         DB::beginTransaction();
@@ -163,12 +167,12 @@ class PartRepository implements PartRepositoryInterface {
     public function createOrUpdate($params) {
 
         if (isset($params['id'])) {
-            $part = Part::where('id', $params['id'])->where('dealer_id', $params['dealer_id'])->first();
+            $part = $this->model->where('id', $params['id'])->where('dealer_id', $params['dealer_id'])->first();
         }
 
         if (empty($part)) {
             // Part is unique if the SKU is unique for the dealer id
-            $part = Part::where('sku', $params['sku'])->where('dealer_id', $params['dealer_id'])->first();
+            $part = $this->model->where('sku', $params['sku'])->where('dealer_id', $params['dealer_id'])->first();
         }
 
         if ($part) {
@@ -180,26 +184,26 @@ class PartRepository implements PartRepositoryInterface {
     }
 
     public function delete($params) {
-        $part = Part::findOrFail($params['id']);
+        $part = $this->model->findOrFail($params['id']);
         return $part->delete();
     }
 
     public function get($params) {
-        return Part::findOrFail($params['id'])->load('bins.bin');
+        return $this->model->findOrFail($params['id'])->load('bins.bin');
     }
 
     public function getDealerSku($dealerId, $sku) {
-        return Part::where('sku', $sku)->where('dealer_id', $dealerId)->first();
+        return $this->model->where('sku', $sku)->where('dealer_id', $dealerId)->first();
     }
 
     public function getBySku($sku) {
-        return Part::where('sku', $sku)->first();
+        return $this->model->where('sku', $sku)->first();
     }
 
     public function getAll($params)
     {
         /** @var Builder $query */
-        $query = Part::where('id', '>', 0);
+        $query = $this->model->where('id', '>', 0);
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
@@ -383,7 +387,8 @@ class PartRepository implements PartRepositoryInterface {
 
             if (!isset($params['search_term']['dncontain']) && !isset($params['search_term']['contain'])) {
                 $query = $query->where(function ($q) use ($params) {
-                    $q->where('sku', 'LIKE', '%' . $params['search_term'] . '%')
+                    $q->where('id', '=', $params['search_term'])
+                        ->orWhere('sku', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('title', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('description', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('alternative_part_number', 'LIKE', '%' . $params['search_term'] . '%');
@@ -404,7 +409,7 @@ class PartRepository implements PartRepositoryInterface {
 
     public function getAllByDealerId($dealerId)
     {
-        return Part::where('dealer_id', $dealerId)->get();
+        return $this->model->where('dealer_id', $dealerId)->get();
     }
 
     /**
@@ -415,7 +420,7 @@ class PartRepository implements PartRepositoryInterface {
      */
     public function queryAllByDealerId(int $dealerId): Builder
     {
-        return DB::table(Part::getTableName().' AS p')
+        return DB::table($this->model->getTableName().' AS p')
             ->select([
                 'p.*',
                 'v.name AS vendor_name',
@@ -525,7 +530,7 @@ class PartRepository implements PartRepositoryInterface {
         if (empty($params['latest_cost'])) {
             $params['latest_cost'] = $params['dealer_cost'];
         }
-        return Part::create($params);
+        return $this->model->create($params);
     }
 
     /**
@@ -538,7 +543,7 @@ class PartRepository implements PartRepositoryInterface {
      */
     public function search($query, $dealerId, $options = [], &$paginator = null)
     {
-        $search = Part::boolSearch();
+        $search = $this->model->boolSearch();
 
         if ($query['query'] ?? null) { // if a query is specified
             $search->must('multi_match', [

@@ -2,8 +2,12 @@
 
 namespace App\Http;
 
+use App\Http\Middleware\Ecommerce\StripeWebhookValidate;
+use App\Http\Middleware\Ecommerce\TexTrailWebhookValidate;
+use App\Http\Middleware\Ecommerce\ValidHookIpMiddleware;
 use App\Http\Middleware\Inventory\CreateInventoryPermissionMiddleware;
 use App\Http\Middleware\SetDealerIdFilterOnRequest;
+use App\Http\Middleware\SetDealerIdWhenAuthenticatedOnRequest;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 use App\Http\Middleware\CorsMiddleware;
 use App\Http\Middleware\AccessToken;
@@ -26,10 +30,12 @@ use App\Http\Middleware\CRM\Text\CampaignValidate as TextCampaignValidate;
 use App\Http\Middleware\CRM\User\SalesPersonValidate;
 use App\Http\Middleware\Dispatch\FacebookValidate;
 use App\Http\Middleware\Dms\Printer\FormValidate as PrinterFormValidate;
+use App\Http\Middleware\Dms\Printer\InstructionValidate as PrinterInstructionValidate;
 use App\Http\Middleware\Integration\AuthValidate;
 use App\Http\Middleware\Integration\Facebook\CatalogValidate;
 use App\Http\Middleware\Integration\Facebook\ChatValidate;
 use App\Http\Middleware\Marketing\Facebook\MarketplaceValidate;
+use App\Http\Middleware\Marketing\Facebook\PagetabValidate;
 use App\Http\Middleware\Parts\PartOrderValidate;
 
 class Kernel extends HttpKernel
@@ -96,6 +102,7 @@ class Kernel extends HttpKernel
         'forms.field-map.validate' => FieldMapValidate::class,
         'accesstoken.validate' => ValidAccessToken::class,
         'setDealerIdOnRequest' => SetDealerIdOnRequest::class,
+        'setDealerIdWhenAuthenticatedOnRequest' => SetDealerIdWhenAuthenticatedOnRequest::class,
         'setDealerIdFilterOnRequest' => SetDealerIdFilterOnRequest::class,
         'setWebsiteIdOnRequest' => SetWebsiteIdOnRequest::class,
         'setUserIdOnRequest' => SetUserIdOnRequest::class,
@@ -115,8 +122,12 @@ class Kernel extends HttpKernel
         'sales-person.validate' => SalesPersonValidate::class,
         'parts.orders.validate' => PartOrderValidate::class,
         'printer.form.validate' => PrinterFormValidate::class,
+        'printer.instruction.validate' => PrinterInstructionValidate::class,
         'inventory.create.permission' => CreateInventoryPermissionMiddleware::class,
-        'marketing.facebook' => MarketplaceValidate::class,
+        'stripe.webhook.validate' => StripeWebhookValidate::class,
+        'textrail.webhook.validate' => TexTrailWebhookValidate::class,
+        'marketing.facebook.marketplace' => MarketplaceValidate::class,
+        'marketing.facebook.pagetab' => PagetabValidate::class,
         'dispatch.facebook' => FacebookValidate::class
     ];
 

@@ -9,6 +9,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use League\Fractal\Manager;
 use League\Fractal\Pagination\IlluminatePaginatorAdapter;
 use League\Fractal\Resource\Collection;
+use League\Fractal\Resource\Item;
 use League\Fractal\TransformerAbstract;
 
 /**
@@ -67,6 +68,23 @@ class RestfulControllerV2 extends Controller
     }
 
     /**
+     * @param mixed $id
+     * @return Response
+     */
+    protected function acceptedResponse($id = null): Response
+    {
+        $params = [
+            'response' => ['status' => 'success']
+        ];
+
+        if ($id) {
+            $params['response']['data'] = ['id' => $id];
+        }
+
+        return $this->response->accepted(null, $params);
+    }
+
+    /**
      * @return Response
      */
     protected function deletedResponse(): Response
@@ -89,7 +107,7 @@ class RestfulControllerV2 extends Controller
     }
 
     /**
-     * @param mixed $data
+     * @param  $data
      * @param TransformerAbstract $transformer
      * @param LengthAwarePaginator|null $paginator
      * @return Response
@@ -118,5 +136,24 @@ class RestfulControllerV2 extends Controller
             'data' => $responseData,
             'meta' => $meta ?? [],
         ]);
+    }
+
+    /**
+     * @param mixed $data
+     * @param TransformerAbstract $transformer
+     * @return Response
+     */
+    protected function itemResponse($data, TransformerAbstract $transformer): Response
+    {
+        $fractal = new Manager();
+        $fractal->setSerializer(new NoDataArraySerializer());
+
+        $fractal->parseIncludes(request()->query('include', ''));
+
+        $item = new Item($data, $transformer);
+
+        $responseData = $fractal->createData($item)->toArray();
+
+        return $this->response->array(['data' => $responseData]);
     }
 }

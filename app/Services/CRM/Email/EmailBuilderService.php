@@ -43,7 +43,7 @@ use Carbon\Carbon;
 
 /**
  * Class EmailBuilderService
- * 
+ *
  * @package App\Services\CRM\Email
  */
 class EmailBuilderService implements EmailBuilderServiceInterface
@@ -189,7 +189,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
     /**
      * Send Lead Emails for Blast
-     * 
+     *
      * @param int $id ID of Blast to Send Emails For
      * @param string Comma-Delimited String of Lead ID's to Send Emails For Blast
      * @throws FromEmailMissingSmtpConfigException
@@ -236,7 +236,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
     /**
      * Send Lead Emails for Campaign
-     * 
+     *
      * @param int $id ID of Campaign to Send Emails For
      * @param string Comma-Delimited String of Lead ID's to Send Emails For Blast
      * @throws FromEmailMissingSmtpConfigException
@@ -283,7 +283,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
     /**
      * Send Email for Template
-     * 
+     *
      * @param int $id ID of Template to Send Email For
      * @param string $subject Subject of Email to Send
      * @param string $toEmail Email Address to Send To
@@ -341,7 +341,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
     /**
      * Send Emails for Builder Config
-     * 
+     *
      * @param BuilderEmail $builder
      * @param array $leads
      * @throws SendBuilderEmailsFailedException
@@ -388,7 +388,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
     /**
      * Save Email Information to Database
-     * 
+     *
      * @param BuilderEmail $builder
      * @return EmailHistory
      */
@@ -413,7 +413,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
     /**
      * Send Email Via SMTP|Gmail|NTLM
-     * 
+     *
      * @param BuilderEmail $builder
      * @return ParsedEmail
      */
@@ -426,7 +426,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         $smtpConfig = !empty($salesPerson->id) ? SmtpConfig::fillFromSalesPerson($salesPerson) : null;
 
         // Refresh Access Token if Exists
-        if($smtpConfig->isAuthConfigOauth()) {
+        if(!empty($smtpConfig) && $smtpConfig->isAuthConfigOauth()) {
             $accessToken = $this->refreshAccessToken($smtpConfig->accessToken);
             $smtpConfig->setAccessToken($accessToken);
         }
@@ -459,7 +459,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
     /**
      * Mark Email as Sent
-     * 
+     *
      * @param BuilderEmail $builder
      * @return boolean true if marked as sent (for campaign/blast) | false if nothing marked sent
      */
@@ -487,7 +487,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
     /**
      * Add Message ID to Sent
-     * 
+     *
      * @param BuilderEmail $builder
      * @param ParsedEmail $parsedEmail
      * @return boolean true if marked as sent (for campaign/blast) | false if nothing marked sent
@@ -498,10 +498,10 @@ class EmailBuilderService implements EmailBuilderServiceInterface
                             $builder->leadId . ' with Message-ID: ' . $parsedEmail->messageId);
         switch($builder->type) {
             case "campaign":
-                $sent = $this->campaigns->updateSent($builder->id, $builder->leadId, $parsedEmail->messageId);
+                $sent = $this->campaigns->updateSent($builder->id, $builder->leadId, $parsedEmail->messageId, $parsedEmail->emailHistoryId);
             break;
             case "blast":
-                $sent = $this->blasts->updateSent($builder->id, $builder->leadId, $parsedEmail->messageId);
+                $sent = $this->blasts->updateSent($builder->id, $builder->leadId, $parsedEmail->messageId, $parsedEmail->emailHistoryId);
             break;
         }
 
@@ -511,7 +511,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
     /**
      * Mark Email as Sent
-     * 
+     *
      * @param BuilderEmail $builder
      * @param ParsedEmail $finalEmail
      * @return boolean true if marked as sent (for campaign/blast) | false if nothing marked sent
@@ -536,7 +536,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
     /**
      * Replace Message ID in Email History ID and Sent
-     * 
+     *
      * @param string $type
      * @param int $id
      * @param int $lead
@@ -576,7 +576,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
     /**
      * Send Lead Email and Return Status from BuilderEmail
-     * 
+     *
      * @param BuilderEmail $builder
      * @return string
      */
@@ -606,9 +606,10 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             // Send Email Via SMTP, Gmail, or NTLM
             $finalEmail = $this->sendEmail($builder);
 
+            $this->markSentMessageId($builder, $finalEmail);
+
             // Mark Email as Sent Only if Not SES!
             if($finalEmail->messageId) {
-                $this->markSentMessageId($builder, $finalEmail);
                 $this->markEmailSent($finalEmail);
             }
 
@@ -623,7 +624,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
     /**
      * Send Email Manually for Builder Config
-     * 
+     *
      * @param BuilderEmail $builder
      * @param string $toEmail
      * @throws SendBuilderEmailsFailedException
@@ -660,7 +661,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
     /**
      * Mark Email as Bounced
-     * 
+     *
      * @param BuilderEmail $builder
      * @param null|string $type
      * @return void
@@ -697,7 +698,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
     /**
      * Return Send Emails Response
-     * 
+     *
      * @param BuilderEmail $builder
      * @param string $leads
      * @return array response
@@ -716,7 +717,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
     /**
      * Refresh Access Token
-     * 
+     *
      * @param AccessToken $accessToken
      * @return AccessToken
      */

@@ -281,6 +281,8 @@ class VehicleJob extends Job
      */
     public function handle()
     {
+        $log = Log::channel('facebook');
+
         // Integration Empty?
         if(empty($this->integration) || empty($this->integration->listings)) {
             // We shouldn't be here if the integration has no listings, but throw an error just in case!
@@ -296,11 +298,12 @@ class VehicleJob extends Job
         $file = $this->createCsv();
 
         // Process Integration
+        $log->info('Inserting ' . count($this->integration->listings) . ' Listings Into CSV File ' . $this->feedPath);
         foreach($this->integration->listings as $listing) {
             try {
                 $this->insertCsvRow($file, $listing);
             } catch(\Exception $e) {
-                Log::error("Exception returned processing listing #" . $listing->vehicle_id .
+                $log->error("Exception returned processing listing #" . $listing->vehicle_id .
                             " on catalog # " . $this->integration->catalog_id . "; " . 
                             $e->getMessage() . ": " . $e->getTraceAsString());
             }
@@ -444,13 +447,28 @@ class VehicleJob extends Job
      * @return string
      */
     private function storeCsv($file, $filePath) {
-        // Get Temp File Contents
-        rewind($file);
-        $csv = stream_get_contents($file);
-        fclose($file); // releases the memory (or tempfile)
+        $log = Log::channel('facebook');
+        try {
+            // Get Temp File Contents
+            rewind($file);
+            $csv = stream_get_contents($file);
+            fclose($file); // releases the memory (or tempfile)
+        } catch(\Exception $e) {
+            $log->error('Exception returned loading CSV ' . $file . ' contents: ' . $e->getMessage());
+        }
 
         // Return Stored File
-        return Storage::disk('s3')->put($filePath, $csv, 'public');
+        try {
+            $saved = Storage::disk('s3')->put($filePath, $csv, 'public');
+        } catch(\Exception $e) {
+            $log->error('Exception returned sending file ' . $filePath . ' to S3: ' . $e->getMessage());
+        }
+
+        // Inserted File
+        $log->info('Inserted ' . count($this->integration->listings) . ' Listings Into CSV File ' . $filePath);
+
+        // Return File
+        return $saved;
     }
 
 

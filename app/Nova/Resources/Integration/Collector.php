@@ -246,6 +246,9 @@ class Collector extends Resource
                 Text::make('Types Affected By the Feed', 'only_types')->hideFromIndex()->help(
                     'Enter the types of the inventory you want this feed to affect separated by commas. For example if you want this feed to affect only trailers and boats you would enter: 1,5'
                 ),
+                Boolean::make('Ignore Manually Added Units', 'ignore_manually_added_units')->hideFromIndex()->help(
+                    'If active any manually added units will be ignored by the feed'
+                ),
             ]),
 
             HasMany::make('Specifications', 'specifications', CollectorSpecification::class)

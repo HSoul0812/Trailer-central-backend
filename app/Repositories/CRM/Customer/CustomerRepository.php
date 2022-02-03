@@ -250,6 +250,17 @@ class CustomerRepository implements CustomerRepositoryInterface
         return $search->execute()->models();
     }
 
+    public function getByEmailOrPhone(array $params): ?Customer
+    {
+        return Customer::where('dealer_id', '=', $params['dealer_id'])
+            ->where(function ($query) use ($params) {
+                $query->where('email', '=', $params['email'])
+                    ->orWhere('cell_phone', '=', trim($params['phone_number']))
+                    ->orWhere('home_phone', '=', trim($params['phone_number']))
+                    ->orWhere('work_phone', '=', trim($params['phone_number']));
+            })->get()->first();
+    }
+
     /**
      * @param array $params
      * @return bool
@@ -273,5 +284,21 @@ class CustomerRepository implements CustomerRepositoryInterface
         }
 
         return (bool)$query->update($params);
+    }
+
+    /**
+     * @param callable $callback The callback with the signature of (Collection $customers) => void;
+     * @param array $select The columns to select in the result query
+     * @param array $with The relationships to eager load
+     * @param int $chunkSize The chunk size of the chunkById operation
+     * @return void
+     */
+    public function getCustomersWithoutLeads(callable $callback, array $select = ['*'], array $with = [], $chunkSize = 500)
+    {
+        Customer::query()
+            ->select($select)
+            ->with($with)
+            ->whereNull('website_lead_id')
+            ->chunkById($chunkSize, $callback);
     }
 }

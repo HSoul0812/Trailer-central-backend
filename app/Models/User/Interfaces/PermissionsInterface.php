@@ -28,6 +28,7 @@ interface PermissionsInterface
     const PURCHASE_ORDERS = 'purchase_orders';
     const MANAGE_SUBSCRIPTION = 'manage_subscription';
     const LOCATIONS = 'locations';
+    const ECOMMERCE = 'ecommerce';
     const DEALER_TEXTS = 'dealer_texts';
     const QUOTES = 'quotes';
 
@@ -47,6 +48,7 @@ interface PermissionsInterface
         self::PURCHASE_ORDERS,
         self::MANAGE_SUBSCRIPTION,
         self::LOCATIONS,
+        self::ECOMMERCE,
         self::DEALER_TEXTS,
         self::QUOTES
     ];

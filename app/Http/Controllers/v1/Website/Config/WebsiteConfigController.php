@@ -34,7 +34,8 @@ class WebsiteConfigController extends RestfulControllerV2
      */
     public function index(int $websiteId, Request $request) : Response
     {
-      return $this->response->collection($this->websiteConfigRepository->getAll($websiteId), new WebsiteConfigTransformer);
+        $requestData = array_merge(['website_id' => $websiteId], $request->all());
+        return $this->response->collection($this->websiteConfigRepository->getAll($requestData), new WebsiteConfigTransformer);
     }
 
     /**

@@ -95,6 +95,8 @@ use App\Repositories\CRM\Invoice\InvoiceRepository;
 use App\Repositories\CRM\Invoice\InvoiceRepositoryInterface;
 use App\Repositories\CRM\Payment\PaymentRepository;
 use App\Repositories\CRM\Payment\PaymentRepositoryInterface;
+use App\Repositories\Inventory\AttributeValueRepository;
+use App\Repositories\Inventory\AttributeValueRepositoryInterface;
 use App\Repositories\Parts\CostModifierRepository;
 use App\Repositories\Parts\CostModifierRepositoryInterface;
 use App\Repositories\User\DealerPasswordResetRepositoryInterface;
@@ -129,6 +131,10 @@ use App\Services\Inventory\Floorplan\PaymentServiceInterface;
 use App\Services\Inventory\Floorplan\PaymentService;
 use App\Services\Inventory\InventoryService;
 use App\Services\Inventory\InventoryServiceInterface;
+use App\Repositories\Inventory\Manufacturers\BrandRepositoryInterface;
+use App\Repositories\Inventory\Manufacturers\BrandRepository;
+use App\Services\Inventory\InventoryAttributeService;
+use App\Services\Inventory\InventoryAttributeServiceInterface;
 use App\Services\Pos\CustomSalesReportExporterService;
 use App\Services\Pos\CustomSalesReportExporterServiceInterface;
 use App\Services\Website\Log\LogServiceInterface;
@@ -244,6 +250,9 @@ class AppServiceProvider extends ServiceProvider
 
             // invoicing
             __DIR__ . '/../../database/migrations/invoicing',
+
+            // ecommerce
+            __DIR__ . '/../../database/migrations/ecommerce',
         ]);
 
         // log all queries
@@ -321,9 +330,6 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(LoggerServiceInterface::class, LoggerService::class);
 
-        $this->app->bind(CustomOverlayRepositoryInterface::class, CustomOverlayRepository::class);
-        $this->app->bind(CustomOverlayServiceInterface::class, CustomOverlayService::class);
-
         $this->app->bind(StockRepositoryInterface::class, StockRepository::class);
 
         $this->app->bind(ApiEntityReferenceRepositoryInterface::class, ApiEntityReferenceRepository::class);
@@ -353,5 +359,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(EmployeeRepositoryInterface::class, EmployeeRepository::class);
         $this->app->bind(TimeClockServiceInterface::class, TimeClockService::class);
         $this->app->bind(WebsiteConfigServiceInterface::class, WebsiteConfigService::class);
+        $this->app->bind(BrandRepositoryInterface::class, BrandRepository::class);
+
+        $this->app->bind(AttributeValueRepositoryInterface::class, AttributeValueRepository::class);
+        $this->app->bind(InventoryAttributeServiceInterface::class, InventoryAttributeService::class);
     }
 }
