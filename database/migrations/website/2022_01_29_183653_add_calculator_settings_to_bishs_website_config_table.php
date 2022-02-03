@@ -15,7 +15,7 @@ class AddCalculatorSettingsToBishsWebsiteConfigTable extends Migration
         WebsiteConfig::setKeyValueByDealerName(
             "Bish's Meridian",
             'payment-calculator/terms-per-category',
-            json_encode(['trailer' => 14, 'rv' => 14])
+            json_encode(['trailer' => 16, 'rv' => 16])
         );
     }
 
