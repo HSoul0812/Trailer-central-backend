@@ -9,6 +9,7 @@ use App\Models\CRM\Text\BlastSent;
 use App\Models\CRM\Text\BlastBrand;
 use App\Models\CRM\Text\BlastCategory;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class BlastRepository implements BlastRepositoryInterface {
 
@@ -38,7 +39,7 @@ class BlastRepository implements BlastRepositoryInterface {
             'direction' => 'ASC'
         ]
     ];
-    
+
     public function create($params) {
         DB::beginTransaction();
 
@@ -69,9 +70,10 @@ class BlastRepository implements BlastRepositoryInterface {
             DB::commit();
         } catch (\Exception $ex) {
             DB::rollBack();
-            throw new \Exception($ex->getMessage());
+            Log::error('Text blast create error. Message - ' . $ex->getMessage() , $ex->getTrace());
+            throw new \Exception('Text blast create error');
         }
-        
+
         return $blast;
     }
 
@@ -93,7 +95,7 @@ class BlastRepository implements BlastRepositoryInterface {
     public function getAll($params) {
         $query = Blast::where('deleted', '=', 0)->with('template')
                       ->with('brands')->with('categories');
-        
+
         if (!isset($params['per_page'])) {
             $params['per_page'] = 20;
         }
@@ -125,13 +127,13 @@ class BlastRepository implements BlastRepositoryInterface {
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
         }
-        
+
         return $query->paginate($params['per_page'])->appends($params);
     }
 
     /**
      * Get All Active Blasts For Dealer
-     * 
+     *
      * @param int $userId
      * @return Collection of Blast
      */
@@ -144,7 +146,9 @@ class BlastRepository implements BlastRepositoryInterface {
     public function update($params) {
         $blast = Blast::findOrFail($params['id']);
 
-        DB::transaction(function() use (&$blast, $params) {
+        DB::beginTransaction();
+
+        try {
             // Get Categories
             $categories = array();
             if(isset($params['category'])) {
@@ -167,14 +171,20 @@ class BlastRepository implements BlastRepositoryInterface {
 
             // Fill Text Details
             $blast->fill($params)->save();
-        });
+
+            DB::commit();
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            Log::error('Text blast update error. Message - ' . $ex->getMessage() , $ex->getTrace());
+            throw new \Exception('Text blast update error');
+        }
 
         return $blast;
     }
 
     /**
      * Mark Blast as Sent
-     * 
+     *
      * @param array $params
      * return BlastSent
      */
@@ -190,13 +200,13 @@ class BlastRepository implements BlastRepositoryInterface {
             DB::rollBack();
             throw new \Exception($ex->getMessage());
         }
-        
+
         return $stop;
     }
 
     /**
      * Add Sort Query
-     * 
+     *
      * @param type $query
      * @param type $sort
      * @return type
@@ -211,7 +221,7 @@ class BlastRepository implements BlastRepositoryInterface {
 
     /**
      * Update Blast Brands
-     * 
+     *
      * @param int $blastId
      * @param array $brands
      */
@@ -233,7 +243,7 @@ class BlastRepository implements BlastRepositoryInterface {
 
     /**
      * Update Blast Categories
-     * 
+     *
      * @param int $blastId
      * @param array $categories
      */

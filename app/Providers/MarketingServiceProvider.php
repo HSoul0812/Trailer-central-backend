@@ -16,6 +16,10 @@ use App\Services\Marketing\Facebook\MarketplaceService;
 use App\Services\Marketing\Facebook\MarketplaceServiceInterface;
 use App\Services\Dispatch\Facebook\MarketplaceService as MarketplaceDispatchService;
 use App\Services\Dispatch\Facebook\MarketplaceServiceInterface as MarketplaceDispatchServiceInterface;
+use App\Repositories\Marketing\Craigslist\ActivePostRepository;
+use App\Repositories\Marketing\Craigslist\ActivePostRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\SchedulerRepository;
+use App\Repositories\Marketing\Craigslist\SchedulerRepositoryInterface;
 use Illuminate\Support\ServiceProvider;
 
 class MarketingServiceProvider extends ServiceProvider
@@ -27,15 +31,16 @@ class MarketingServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        // Integration Services
+        // Marketing Services
         $this->app->bind(MarketplaceServiceInterface::class, MarketplaceService::class);
 
-        // Integration Repositories
+        // Marketing Repositories
+        $this->app->bind(ActivePostRepositoryInterface::class, ActivePostRepository::class);
+        $this->app->bind(SchedulerRepositoryInterface::class, SchedulerRepository::class);
         $this->app->bind(MarketplaceRepositoryInterface::class, MarketplaceRepository::class);
         $this->app->bind(FilterRepositoryInterface::class, FilterRepository::class);
         $this->app->bind(ListingRepositoryInterface::class, ListingRepository::class);
         $this->app->bind(ImageRepositoryInterface::class, ImageRepository::class);
-
 
         // Dispatch (Redis) Repositories
         $this->app->bind(TunnelRepositoryInterface::class, TunnelRedisRepository::class);
