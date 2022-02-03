@@ -19,7 +19,7 @@ class TcEsInventoryLocation implements Arrayable
     public ?string $region;
     public ?string $postalCode;
     public ?string $country;
-    public TcEsGeolocation $geo;
+    public ?TcEsGeolocation $geo;
 
     #[Pure] public static function fromData(array $data):self
     {
@@ -34,7 +34,7 @@ class TcEsInventoryLocation implements Arrayable
         $obj->region = $data['region'] ?? null;
         $obj->postalCode = $data['postalCode'] ?? null;
         $obj->country = $data['country'] ?? null;
-        $obj->geo = TcEsGeolocation::fromData($data['geo']);
+        $obj->geo = isset($data['geo']) ? TcEsGeolocation::fromData($data['geo']) : null;
         return $obj;
     }
 }
