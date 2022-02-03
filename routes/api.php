@@ -642,6 +642,17 @@ $api->version('v1', function ($route) {
 
         /*
         |--------------------------------------------------------------------------
+        | Dealer Website Images
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('website/{websiteId}/images', 'App\Http\Controllers\v1\Website\Image\WebsiteImagesController@index')->where('websiteId', '[0-9]+');
+        $route->post('website/{websiteId}/image/{imageId}', 'App\Http\Controllers\v1\Website\Image\WebsiteImagesController@update')->where(['websiteId' => '[0-9]+', 'imageId' => '[0-9]+']);
+
+        /*
+        |--------------------------------------------------------------------------
         | Dealer integrations
         |--------------------------------------------------------------------------
         |
