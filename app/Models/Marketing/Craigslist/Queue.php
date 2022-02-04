@@ -145,7 +145,7 @@ class Queue extends Model
         if(!empty($this->inventory) && !empty($this->inventory->price)) {
             return $this->inventory->price;
         }
-        return $this->parameters->price ? floatval($this->parameter->price) : 0;
+        return $this->parameters->price ? floatval($this->parameters->price) : 0;
     }
 
     /**
