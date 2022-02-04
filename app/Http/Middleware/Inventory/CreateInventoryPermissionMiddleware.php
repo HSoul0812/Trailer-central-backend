@@ -36,6 +36,21 @@ class CreateInventoryPermissionMiddleware
         'l_fax',
     ];
 
+    private const MAIN_FIELDS = [
+        'dealer_id',
+        'id',
+        'dealer_identifier',
+        'stock',
+        'title',
+    ];
+
+    private const MARKETING_FIELDS = [
+        'new_images',
+        'existing_images',
+        'images_to_delete',
+        'overlay_enabled',
+    ];
+
     /**
      * Handle an incoming request.
      *
@@ -58,14 +73,27 @@ class CreateInventoryPermissionMiddleware
         if (
             !$user->hasPermission(Permissions::INVENTORY, Permissions::SUPER_ADMIN_PERMISSION)
             && !$user->hasPermission(Permissions::INVENTORY, Permissions::CAN_SEE_AND_CHANGE_PERMISSION)
+            && !$user->hasPermission(Permissions::INVENTORY, Permissions::CAN_SEE_AND_CHANGE_IMAGES_PERMISSION)
         ) {
             return response('Invalid access token.', 403);
         }
 
         if (!$user->hasPermission(Permissions::INVENTORY, Permissions::SUPER_ADMIN_PERMISSION)) {
-
             foreach ($request->request->all() as $key => $param) {
                 if (in_array($key, self::SUPER_ADMIN_FIELDS)) {
+                    unset($request[$key]);
+                    $request->request->remove($key);
+                }
+            }
+        }
+
+        if (
+            !$user->hasPermission(Permissions::INVENTORY, Permissions::SUPER_ADMIN_PERMISSION)
+            && !$user->hasPermission(Permissions::INVENTORY, Permissions::CAN_SEE_AND_CHANGE_PERMISSION)
+            && $user->hasPermission(Permissions::INVENTORY, Permissions::CAN_SEE_AND_CHANGE_IMAGES_PERMISSION)
+        ) {
+            foreach ($request->request->all() as $key => $param) {
+                if (!in_array($key, self::MARKETING_FIELDS) && !in_array($key, self::MAIN_FIELDS)) {
                     unset($request[$key]);
                     $request->request->remove($key);
                 }
