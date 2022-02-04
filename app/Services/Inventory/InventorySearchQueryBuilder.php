@@ -11,6 +11,7 @@ class InventorySearchQueryBuilder
     private ?array $globalAggregations = null;
     private ?array $filterAggregations = null;
     private ?array $geoScore = null;
+    private ?string $filterScript = null;
 
     public function getWillPaginate(): bool
     {
@@ -76,6 +77,10 @@ class InventorySearchQueryBuilder
         return $this;
     }
 
+    public function setFilterScript(string $script) {
+        $this->filterScript = $script;
+    }
+
     private function _termQuery(string $fieldKey, ?string $value) {
         if ($value != null) {
             return
@@ -126,14 +131,23 @@ class InventorySearchQueryBuilder
         }
 
         if (count($this->queries) > 0) {
+            $query = [
+                'bool' => [
+                    'must' => $this->queries
+                ]
+            ];
+            if($this->filterScript) {
+                $query['bool']['filter'] = [
+                    'script' => [
+                        'script' => $this->filterScript
+                    ]
+                ];
+            }
+
             if ($this->geoScore) {
                 $result['query'] = [
                     'function_score' => [
-                        'query' => [
-                            'bool' => [
-                                'must' => $this->queries
-                            ]
-                        ],
+                        'query' => $query,
                         'script_score' => [
                             'source' => "double d; if(doc['location.geo'].value != null) { d = doc['location.geo'].planeDistance(params.lat, params.lng) * 0.000621371; } else { return 0.1; } if(d >= (params.grouping*params.fromScore)) { return 0.2; } else { return params.fromScore - Math.floor(d\/params.grouping); ",
                             'params' => [
@@ -147,11 +161,7 @@ class InventorySearchQueryBuilder
 
                 ];
             } else {
-                $result['query'] = [
-                    'bool' => [
-                        'must' => $this->queries
-                    ]
-                ];
+                $result['query'] = $query;
             }
         }
 
