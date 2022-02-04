@@ -5,6 +5,7 @@ namespace App\Services\Inventory;
 class InventorySearchQueryBuilder
 {
     private array $queries = [];
+    private array $fieldSorts = [];
     private bool $willPaginate = false;
     private ?int $page = null;
     private ?int $pageSize = null;
@@ -116,6 +117,10 @@ class InventorySearchQueryBuilder
         $this->pageSize = $pageSize;
     }
 
+    public function orderBy(string $field, string $direction) {
+        $this->fieldSorts[] = [$field => $direction];
+    }
+
     public function build(): array
     {
         $result = [];
@@ -153,6 +158,11 @@ class InventorySearchQueryBuilder
                     ]
                 ];
             }
+        }
+
+        if(!empty($this->fieldSorts)) {
+            $sorts = array_merge($this->fieldSorts, ["_score"]);
+            $result['sort'] = $sorts;
         }
 
         $result['aggregations'] = array_merge(

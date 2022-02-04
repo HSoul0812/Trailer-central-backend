@@ -89,11 +89,11 @@ class InventoryService implements InventoryServiceInterface
         $this->buildRangeQueries($queryBuilder, $params);
         $this->buildAggregations($queryBuilder, $params);
         $this->buildPaginateQuery($queryBuilder, $params);
-
         if($location) {
             $this->buildGeoScoring($queryBuilder, $location);
         }
 
+        $queryBuilder->orderBy("updatedAt", "desc");
         return $queryBuilder;
     }
 
