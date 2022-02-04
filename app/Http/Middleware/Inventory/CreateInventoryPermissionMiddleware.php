@@ -74,6 +74,7 @@ class CreateInventoryPermissionMiddleware
             !$user->hasPermission(Permissions::INVENTORY, Permissions::SUPER_ADMIN_PERMISSION)
             && !$user->hasPermission(Permissions::INVENTORY, Permissions::CAN_SEE_AND_CHANGE_PERMISSION)
             && !$user->hasPermission(Permissions::INVENTORY, Permissions::CAN_SEE_AND_CHANGE_IMAGES_PERMISSION)
+            && !$user->hasPermission(Permissions::INVENTORY, Permissions::CAN_SEE_PERMISSION)
         ) {
             return response('Invalid access token.', 403);
         }
@@ -90,7 +91,10 @@ class CreateInventoryPermissionMiddleware
         if (
             !$user->hasPermission(Permissions::INVENTORY, Permissions::SUPER_ADMIN_PERMISSION)
             && !$user->hasPermission(Permissions::INVENTORY, Permissions::CAN_SEE_AND_CHANGE_PERMISSION)
-            && $user->hasPermission(Permissions::INVENTORY, Permissions::CAN_SEE_AND_CHANGE_IMAGES_PERMISSION)
+            && (
+                $user->hasPermission(Permissions::INVENTORY, Permissions::CAN_SEE_AND_CHANGE_IMAGES_PERMISSION)
+                || $user->hasPermission(Permissions::INVENTORY, Permissions::CAN_SEE_PERMISSION)
+            )
         ) {
             foreach ($request->request->all() as $key => $param) {
                 if (!in_array($key, self::MARKETING_FIELDS) && !in_array($key, self::MAIN_FIELDS)) {
