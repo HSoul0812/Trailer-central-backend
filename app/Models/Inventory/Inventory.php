@@ -455,7 +455,6 @@ class Inventory extends Model
     }
 
 
-<<<<<<< HEAD
     /**
      * Get Attributes Map
      * 
@@ -481,23 +480,9 @@ class Inventory extends Model
         return $this->attributesCollection;
     }
 
-    /**
-     * Get Attribute Values
-     *
-     * @return string
-     */
-    public function getFuelTypeAttribute(): ?string
-    {
-        // Get Attribute
-        $attribute = $this->attributeValues()->where('attribute_id', self::FUEL_TYPE_ATTRIBUTE_ID)->first();
-
-        // Return Value
-        return $attribute->value ?? '';
-=======
     public function getPrimaryImageAttribute(): InventoryImage
     {
         return $this->orderedImages()->first();
->>>>>>> develop
     }
 
     public function getCategoryLabelAttribute()
@@ -542,6 +527,20 @@ class Inventory extends Model
     public function getIdentifierAttribute(): string
     {
         return CompactHelper::shorten($this->inventory_id);
+    }
+
+    /**
+     * Get Fuel Type
+     *
+     * @return string
+     */
+    public function getFuelTypeAttribute(): ?string
+    {
+        // Get Fuel Type
+        $attribute = $this->attributeValues()->where('attribute_id', self::FUEL_TYPE_ATTRIBUTE_ID)->first();
+
+        // Return Value
+        return $attribute->value ?? '';
     }
 
     /**
