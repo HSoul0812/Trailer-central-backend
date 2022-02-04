@@ -49,6 +49,9 @@ class CreateInventoryPermissionMiddleware
         'existing_images',
         'images_to_delete',
         'overlay_enabled',
+        'description',
+        'features',
+        'update_features',
     ];
 
     /**
