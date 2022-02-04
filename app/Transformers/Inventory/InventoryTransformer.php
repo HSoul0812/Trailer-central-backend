@@ -172,6 +172,8 @@ class InventoryTransformer extends TransformerAbstract
              'hidden_price' => $inventory->hidden_price,
              'monthly_payment' => $inventory->monthly_payment,
              'show_on_website' => $inventory->show_on_website,
+             'overlay_enabled' => $inventory->overlay_enabled,
+             'cost_of_ros' => $inventory->cost_of_ros,
              'quote_url' => config('app.new_design_crm_url') . $inventory->user->getCrmLoginUrl('bill-of-sale/new?inventory_id=' . $inventory->identifier)
          ];
     }

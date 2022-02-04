@@ -51,4 +51,9 @@ class TextrailPartService implements TextrailPartServiceInterface
     {
         return $this->provider->getTextrailTotalPartsCount($pageSize, $currentPage);
     }
+
+    public function getTextrailDumpStock(): array
+    {
+        return $this->provider->getTextrailDumpStock();
+    }
 }

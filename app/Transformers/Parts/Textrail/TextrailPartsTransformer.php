@@ -5,7 +5,7 @@ namespace App\Transformers\Parts\Textrail;
 use App\Models\Parts\Textrail\Part;
 use League\Fractal\TransformerAbstract;
 
-class TextrailPartsTransformer extends TransformerAbstract 
+class TextrailPartsTransformer extends TransformerAbstract
 {
     public function transform($part): array
     {
@@ -19,8 +19,9 @@ class TextrailPartsTransformer extends TransformerAbstract
              'title' => $part->title,
              'price' => $part->price,
              'show_on_website' => $part->show_on_website,
-             'weight' => $part->weight ? $part->weight : '',
+             'weight' => $part->weight ?? '',
              'description' => $part->description,
+             'qty' => $part->qty ?? 0,
          ];
     }
 }

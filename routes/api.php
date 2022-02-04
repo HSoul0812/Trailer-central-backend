@@ -51,6 +51,7 @@ $api->version('v1', function ($route) {
         $route->post('ecommerce/orders/{textrail_order_id}/approve', 'App\Http\Controllers\v1\Ecommerce\CompletedOrderController@markAsApproved')->where('textrail_order_id', '[0-9]+');
         $route->post('ecommerce/cancellation/{textrail_order_id}','App\Http\Controllers\v1\Ecommerce\RefundController@cancelOrder')->where('textrail_order_id', '[0-9]+');
         $route->post('ecommerce/returns/{rma}','App\Http\Controllers\v1\Ecommerce\RefundController@updateReturnStatus')->where('rma', '[0-9]+');
+        $route->post('ecommerce/orders/{textrail_order_id}/returns','App\Http\Controllers\v1\Ecommerce\RefundController@create')->where('textrail_order_id', '[0-9]+');
     });
 
     /**
