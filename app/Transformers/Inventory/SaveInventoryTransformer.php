@@ -148,10 +148,14 @@ class SaveInventoryTransformer implements TransformerInterface
             $convertHelper = $this->convertHelper;
             $sanitizeHelper = $this->sanitizeHelper;
 
-            $defaultAttributes = $this->attributeRepository
-                ->getAllByEntityTypeId($params['entity_type_id'])
-                ->pluck('code', 'attribute_id')
-                ->toArray();
+            if (isset($params['entity_type_id'])) {
+                $defaultAttributes = $this->attributeRepository
+                    ->getAllByEntityTypeId($params['entity_type_id'])
+                    ->pluck('code', 'attribute_id')
+                    ->toArray();
+            } else {
+                $defaultAttributes = [];
+            }
 
             $createParams = $params;
             $attributes = $params[self::ATTRIBUTES_KEY] ?? [];
