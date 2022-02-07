@@ -27,6 +27,7 @@ class TcApiResponseInventoryTransformer extends TransformerAbstract
              'listing_date'     => $type->listing_date,
              'price'            => $type->price,
              'sales_price'      => $type->sales_price,
+             'website_price'    => $type->website_price,
              'inventory_title'  => $type->inventory_title,
              'photos'           => $type->photos,
              'dealer_location'  => $type->dealer_location,
