@@ -8,6 +8,7 @@ use App\DTOs\Lead\TcApiResponseLead;
 use GuzzleHttp\Client as GuzzleHttpClient;
 use GuzzleHttp\Exception\GuzzleException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Illuminate\Support\Facades\DB;
 
 
 class LeadService implements LeadServiceInterface
@@ -24,10 +25,19 @@ class LeadService implements LeadServiceInterface
      */
     public function create(array $params): TcApiResponseLead
     {
+        $access_token = $this->getAccessToken($params['inventory']['inventory_id']);
         $url = config('services.trailercentral.api') . self::INQUIRY_SEND_ROUTE;
-        $lead = $this->handleHttpRequest('PUT', $url, ['query' => $params, 'headers' => ['access-token' => config('services.trailercentral.access_token')]]);
+        $lead = $this->handleHttpRequest('PUT', $url, ['query' => $params, 'headers' => ['access-token' => $access_token]]);
 
         return TcApiResponseLead::fromData($lead['data']);
+    }
+
+    private function getAccessToken(string $inventoryId): String
+    {
+      $inventory = DB::connection('mysql')->table('inventory')->where('inventory_id', $inventoryId)->first();
+      $auth_token = DB::connection('mysql')->table('auth_token')->where('user_id', $inventory->dealer_id)->first();
+      
+      return $auth_token->access_token;
     }
 
     /**
