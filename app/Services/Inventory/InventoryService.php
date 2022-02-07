@@ -17,6 +17,10 @@ use JetBrains\PhpStorm\Pure;
 
 class InventoryService implements InventoryServiceInterface
 {
+    const FIELD_UPDATED_AT = 'updatedAt';
+    const ORDER_DESC = 'desc';
+    const ORDER_ASC = 'asc';
+
     const DEFAULT_COUNTRY = 'USA';
     const PAGE_SIZE = 10;
     const TERM_SEARCH_KEY_MAP = [
@@ -95,7 +99,7 @@ class InventoryService implements InventoryServiceInterface
             $this->buildGeoScoring($queryBuilder, $location);
         }
 
-        $queryBuilder->orderBy('updatedAt', 'desc');
+        $queryBuilder->orderBy(self::FIELD_UPDATED_AT, self::ORDER_DESC);
         return $queryBuilder;
     }
 
