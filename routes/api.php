@@ -51,6 +51,7 @@ $api->version('v1', function ($route) {
         $route->post('ecommerce/orders/{textrail_order_id}/approve', 'App\Http\Controllers\v1\Ecommerce\CompletedOrderController@markAsApproved')->where('textrail_order_id', '[0-9]+');
         $route->post('ecommerce/cancellation/{textrail_order_id}','App\Http\Controllers\v1\Ecommerce\RefundController@cancelOrder')->where('textrail_order_id', '[0-9]+');
         $route->post('ecommerce/returns/{rma}','App\Http\Controllers\v1\Ecommerce\RefundController@updateReturnStatus')->where('rma', '[0-9]+');
+        $route->post('ecommerce/orders/{textrail_order_id}/returns','App\Http\Controllers\v1\Ecommerce\RefundController@create')->where('textrail_order_id', '[0-9]+');
     });
 
     /**
@@ -505,6 +506,7 @@ $api->version('v1', function ($route) {
     */
 
     $route->post('feed/atw', 'App\Http\Controllers\v1\Feed\AtwController@create');
+    $route->put('feed/atw', 'App\Http\Controllers\v1\Feed\AtwController@update');
 
     // upload feed data
     $route->post('feed/uploader/{code}', 'App\Http\Controllers\v1\Feed\UploadController@upload')->where('code', '\w+');
@@ -1214,4 +1216,31 @@ $api->version('v1', function ($route) {
     $route->put('bills/{id}', 'App\Http\Controllers\v1\Dms\Quickbooks\BillController@update')->where('id', '[0-9]+');
     $route->get('bills/{id}', 'App\Http\Controllers\v1\Dms\Quickbooks\BillController@show')->where('id', '[0-9]+');
     $route->get('bills', 'App\Http\Controllers\v1\Dms\Quickbooks\BillController@index');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Marketing
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+    $route->group([
+        'prefix' => 'marketing',
+        'middleware' => 'accesstoken.validate'
+    ], function ($route) {
+        // Facebook Marketplace
+        $route->group([
+            'prefix' => 'pagetab',
+            'middleware' => 'marketing.facebook.pagetab'
+        ], function ($route) {
+            $route->get('/', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@index');
+            $route->post('/', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@create');
+            $route->put('/', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@update'); // requires page_id instead
+            $route->get('{id}', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@show')->where('id', '[0-9]+');
+            $route->put('{id}', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@update')->where('id', '[0-9]+');
+            $route->delete('{id}', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@destroy')->where('id', '[0-9]+');
+        });
+    });
 });

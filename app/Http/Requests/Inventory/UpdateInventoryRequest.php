@@ -13,6 +13,11 @@ class UpdateInventoryRequest extends SaveInventoryRequest
      */
     protected $selfRules = [
         'inventory_id' => 'required|inventory_valid',
+        'title' => 'max:255',
+        'dealer_location_id' => 'integer|exists:App\Models\User\DealerLocation,dealer_location_id',
+        'dealer_location_identifier' => 'integer|exists:App\Models\User\DealerLocation,dealer_location_id',
+        'entity_type' => 'integer',
+        'entity_type_id' => 'integer',
 
         'existing_images' => 'array|nullable',
         'existing_images.*.image_id' => 'integer|required',

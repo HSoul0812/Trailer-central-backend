@@ -66,7 +66,7 @@ class RefundService implements RefundServiceInterface
     }
 
     /**
-     * It will create a partial refund in our database, then it will send a return request to TexTrail,
+     * It will create a partial refund in our database, then if an RMA was not provided, it will make a return request to TexTrail,
      * but the partial refund process on the payment gateway will be remaining as pending until TextTrail send us a command to proceed.
      *
      * @param RefundBag $refundBag
@@ -104,7 +104,9 @@ class RefundService implements RefundServiceInterface
 
         /** @var int $textrailRma */
         try {
-            $textrailRma = $this->textrailService->requestReturn($refundBag);
+            $textrailRma = $refundBag->rma ?
+                ['entity_id' => $refundBag->rma, 'requested_by_textrail' => true] :
+                $this->textrailService->requestReturn($refundBag);
 
             $this->updateOrderRefundSummary($refund, $textrailRma['entity_id']);
 

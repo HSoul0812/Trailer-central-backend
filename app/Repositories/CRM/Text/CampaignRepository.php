@@ -90,10 +90,11 @@ class CampaignRepository implements CampaignRepositoryInterface {
     }
 
     public function getAll($params) {
-        $query = Campaign::where('deleted', '=', 0);
+        $query = Campaign::where('deleted', '=', 0)->with('template')
+                         ->with('brands')->with('categories');
         
         if (!isset($params['per_page'])) {
-            $params['per_page'] = 100;
+            $params['per_page'] = 20;
         }
 
         if (isset($params['user_id'])) {

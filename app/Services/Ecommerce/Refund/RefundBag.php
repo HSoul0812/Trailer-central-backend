@@ -9,6 +9,7 @@ namespace App\Services\Ecommerce\Refund;
 use App\Contracts\Support\DTO;
 use App\Exceptions\Ecommerce\RefundAmountException;
 use App\Exceptions\Ecommerce\RefundException;
+use App\Http\Requests\Ecommerce\Refund\CreateReturnRequest;
 use App\Http\Requests\Ecommerce\Refund\IssueReturnRequest;
 use App\Models\Ecommerce\CompletedOrder\CompletedOrder;
 use App\Models\Ecommerce\CompletedOrder\OrderAmountsBag;
@@ -19,6 +20,7 @@ use App\Repositories\Ecommerce\RefundRepositoryInterface;
 use App\Traits\WithGetter;
 use Brick\Math\RoundingMode;
 use Brick\Money\Money;
+use Brick\Money\MoneyContainer;
 
 /**
  * @property-read  CompletedOrder $order
@@ -28,9 +30,11 @@ use Brick\Money\Money;
  * @property-read  Money $shippingAmount
  * @property-read  Money $taxAmount
  * @property-read  Money $totalAmount
+ * @property-read  bool $isOrderCancellation
  * @property-read  array<array{id: int, qty: int, price: float, amount: float}> $parts array indexed by part id containing the purchase price and its amount
  * @property-read  array<array{order_item_id: int, qty: int}> $textrailItems
  * @property-read  string|null $reason
+ * @property-read  int|null $rma
  */
 final class RefundBag implements DTO
 {
@@ -69,29 +73,38 @@ final class RefundBag implements DTO
     /** @var OrderAmountsBag */
     private $orderAmounts;
 
+    /** @var int|null */
+    private $rma;
+
+    /** @var bool */
+    private $isOrderCancellation;
+
     /**
      * @param int $orderId
      * @param array<array{id: int, qty: int}> $partsWithQtys array indexed by part id containing the qty of every part
-     * @param Money $adjustmentAmount
-     * @param Money $handlingAmount
-     * @param Money $shippingAmount
-     * @param Money $taxAmount
+     * @param MoneyContainer $adjustmentAmount
+     * @param MoneyContainer $handlingAmount
+     * @param MoneyContainer $shippingAmount
+     * @param MoneyContainer $taxAmount
      * @param string|null $reason
      * @param bool $isOrderCancellation when it is an order cancellation, the order could be not approved,
      *                                  but if it is a return, then the order must be approved
+     * @param int|null $rma when it is an order return requested by Textrail, it should not try to create an RMA on Textrail,
+     *                      instead, it should use the RMA provided by Textrail.
      *
      *
      * @noinspection PhpDocMissingThrowsInspection
      */
     public function __construct(
-        int     $orderId,
-        array   $partsWithQtys,
-        Money   $adjustmentAmount,
-        Money   $handlingAmount,
-        Money   $shippingAmount,
-        Money   $taxAmount,
-        ?string $reason = null,
-        bool $isOrderCancellation = true
+        int            $orderId,
+        array          $partsWithQtys,
+        MoneyContainer $adjustmentAmount,
+        MoneyContainer $handlingAmount,
+        MoneyContainer $shippingAmount,
+        MoneyContainer $taxAmount,
+        ?string        $reason = null,
+        bool           $isOrderCancellation = true,
+        ?int           $rma = null
     )
     {
         $this->isOrderCancellation = $isOrderCancellation;
@@ -100,11 +113,13 @@ final class RefundBag implements DTO
 
         $this->parts = $parts;
 
+        $partsTaxAmount = Money::zero('USD');
+
         // prepare the refund info to match with the order info in Textrail side
         $this->textrailItems = collect($parts)->filter(function (array $part): bool {
             return $part['textrail'] !== null;
-        })->map(function (array $part) use (&$taxAmount): array {
-            $taxAmount = $taxAmount->plus($part['qty'] * $part['price'] * $this->order->tax_rate, RoundingMode::HALF_UP);
+        })->map(function (array $part) use (&$partsTaxAmount): array {
+            $partsTaxAmount = $partsTaxAmount->plus($part['qty'] * $part['price'] * $this->order->tax_rate, RoundingMode::HALF_UP);
 
             return [
                 'order_item_id' => $part['textrail']['item_id'],
@@ -112,11 +127,12 @@ final class RefundBag implements DTO
             ];
         })->toArray();
 
+        $this->rma = $rma;
         $this->partsAmount = $partsAmount;
         $this->adjustmentAmount = $adjustmentAmount;
         $this->handlingAmount = $handlingAmount;
         $this->shippingAmount = $shippingAmount;
-        $this->taxAmount = $taxAmount;
+        $this->taxAmount = $this->isOrderCancellation ? $taxAmount: $partsTaxAmount;
         $this->reason = $reason;
         $this->totalAmount = $partsAmount->plus($adjustmentAmount)
             ->plus($handlingAmount)
@@ -135,6 +151,21 @@ final class RefundBag implements DTO
             Money::zero('USD'),
             $request->reason,
             false
+        );
+    }
+
+    public static function fromCreateReturnRequest(CreateReturnRequest $request): self
+    {
+        return new self(
+            $request->orderId(),
+            $request->parts(),
+            Money::zero('USD'),
+            Money::zero('USD'),
+            Money::zero('USD'),
+            Money::zero('USD'),
+            null,
+            false,
+            $request->rma()
         );
     }
 
@@ -182,7 +213,8 @@ final class RefundBag implements DTO
             'shipping_amount' => $this->shippingAmount->getAmount()->toFloat(),
             'tax_amount' => $this->taxAmount->getAmount()->toFloat(),
             'total_amount' => $this->totalAmount->getAmount()->toFloat(),
-            'reason' => $this->reason
+            'reason' => $this->reason,
+            'rma' => $this->rma,
         ];
     }
 

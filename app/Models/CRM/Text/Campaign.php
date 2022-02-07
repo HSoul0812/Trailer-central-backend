@@ -2,13 +2,16 @@
 
 namespace App\Models\CRM\Text;
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
+use App\Models\Traits\TableAware;
 use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadType;
+use App\Services\CRM\Text\DTOs\CampaignStats;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Class Text Campaign
@@ -17,6 +20,8 @@ use App\Models\CRM\Leads\LeadType;
  */
 class Campaign extends Model
 {
+    use TableAware;
+
     protected $table = 'crm_text_campaign';
 
     // Define Constants to Make it Easier to Autocomplete
@@ -76,9 +81,25 @@ class Campaign extends Model
     /**
      * @return type
      */
-    public function sent()
+    public function sent(): HasMany
     {
-        return $this->hasOne(CampaignSent::class, 'text_campaign_id');
+        return $this->hasMany(CampaignSent::class, 'text_campaign_id');
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function success(): HasMany
+    {
+        return $this->sent()->whereIn('status', CampaignSent::STATUS_SUCCESS);
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function failed(): HasMany
+    {
+        return $this->sent()->whereIn('status', CampaignSent::STATUS_FAILED);
     }
 
     /**
@@ -108,34 +129,17 @@ class Campaign extends Model
         return (int) $this->include_archived;
     }
 
+
     /**
      * Get Leads for Campaign
      * 
-     * @return Collection of Leads
+     * @return Collection<Lead>
      */
     public function getLeadsAttribute()
     {
-        // Initialize Campaign
+        // Get Leads for Campaign
         $campaign = $this;
-
-        // Find Filtered Leads
-        $query = Lead::select('website_lead.*')
-                     ->leftJoin('inventory', 'website_lead.inventory_id', '=', 'inventory.inventory_id')
-                     ->leftJoin('crm_text_campaign_sent', function($join) use($campaign) {
-                        return $join->on('crm_text_campaign_sent.lead_id', '=', 'website_lead.identifier')
-                                    ->where('crm_text_campaign_sent.text_campaign_id', '=', $campaign->id);
-                     })
-                     ->leftJoin('crm_tc_lead_status', 'website_lead.identifier', '=', 'crm_tc_lead_status.tc_lead_identifier')
-                     ->leftJoin(Stop::getTableName(), function($join) {
-                        return $join->on(DB::raw("CONCAT('+1', SUBSTR(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(website_lead.phone_number, '(', ''), ')', ''), '-', ''), ' ', ''), '-', ''), '+', ''), '.', ''), 1, 10))"), '=', Stop::getTableName() . '.sms_number')
-                                    ->orOn(DB::raw("CONCAT('+', SUBSTR(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(website_lead.phone_number, '(', ''), ')', ''), '-', ''), ' ', ''), '-', ''), '+', ''), '.', ''), 1, 11))"), '=', Stop::getTableName() . '.sms_number');
-                     })
-                     ->where('website_lead.lead_type', '<>', LeadType::TYPE_NONLEAD)
-                     ->where('website_lead.dealer_id', $campaign->newDealerUser->id)
-                     ->where('website_lead.phone_number', '<>', '')
-                     ->whereNotNull('website_lead.phone_number')
-                     ->whereNull(Stop::getTableName() . '.sms_number')
-                     ->whereNull('crm_text_campaign_sent.text_campaign_id');
+        $query = $this->leadsBase();
 
         // Is Archived?!
         if($campaign->archived_status === -1) {
@@ -193,9 +197,79 @@ class Campaign extends Model
             });
         }
 
-        // Return Filtered Query
-        return $query->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $campaign->send_after_days . ' DAY) < NOW()')
-                     ->whereRaw('(FLOOR((UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(website_lead.date_submitted)) / (60 * 60 * 24)) - ' . $campaign->send_after_days . ') <= 10')
+        // Get Leads for Campaign
+        return $query->whereNull(Stop::getTableName() . '.sms_number')
+                     ->whereNull(CampaignSent::getTableName() . '.text_campaign_id')
+                     ->whereRaw('DATE_ADD(website_lead.date_submitted, INTERVAL +' . $this->send_after_days . ' DAY) < NOW()')
+                     ->whereRaw('(FLOOR((UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(website_lead.date_submitted)) / (60 * 60 * 24)) - ' . $this->send_after_days . ') <= 10')
                      ->get();
     }
-}
+
+
+    /**
+     * Get Status for Text Campaign
+     * 
+     * @return CampaignStats
+     */
+    public function getStatsAttribute(): CampaignStats
+    {
+        // Get Leads for Campaign
+        return new CampaignStats([
+            'sent' => $this->success->count(),
+            'failed' => $this->failed->count(),
+            'unsubscribed' => $this->unsubscribed
+        ]);
+    }
+
+    /**
+     * Get Skipped Leads for Campaign
+     * 
+     * @return int
+     */
+    public function getSkippedAttribute(): int
+    {
+        // Get Leads for Campaign
+        return $this->leadsBase()
+                    ->whereNotIn(CampaignSent::getTableName() . '.status', CampaignSent::STATUS_SUCCESS)
+                    ->count();
+    }
+
+    /**
+     * Get Unsubscribed Leads for Campaign
+     * 
+     * @return int
+     */
+    public function getUnsubscribedAttribute(): int
+    {
+        // Get Leads for Campaign
+        return $this->leadsBase()
+                    ->whereNotNull(CampaignSent::getTableName() . '.text_campaign_id')
+                    ->where(Stop::getTableName() . '.type', Stop::REPORT_TYPE_DEFAULT)
+                    ->count();
+    }
+
+
+    /**
+     * Get Leads Template
+     */
+    private function leadsBase(): Builder {
+        // Initialize Campaign
+        $campaign = $this;
+
+        // Find Filtered Leads
+        return Lead::select('website_lead.*')
+                   ->leftJoin('inventory', 'website_lead.inventory_id', '=', 'inventory.inventory_id')
+                   ->leftJoin('crm_text_campaign_sent', function($join) use($campaign) {
+                        return $join->on('crm_text_campaign_sent.lead_id', '=', 'website_lead.identifier')
+                                    ->where('crm_text_campaign_sent.text_campaign_id', '=', $campaign->id);
+                   })
+                   ->leftJoin('crm_tc_lead_status', 'website_lead.identifier', '=', 'crm_tc_lead_status.tc_lead_identifier')
+                   ->leftJoin(Stop::getTableName(), function($join) {
+                        return $join->on(DB::raw("CONCAT('+1', SUBSTR(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(website_lead.phone_number, '(', ''), ')', ''), '-', ''), ' ', ''), '-', ''), '+', ''), '.', ''), 1, 10))"), '=', Stop::getTableName() . '.sms_number')
+                                    ->orOn(DB::raw("CONCAT('+', SUBSTR(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(website_lead.phone_number, '(', ''), ')', ''), '-', ''), ' ', ''), '-', ''), '+', ''), '.', ''), 1, 11))"), '=', Stop::getTableName() . '.sms_number');
+                   })
+                   ->where('website_lead.lead_type', '<>', LeadType::TYPE_NONLEAD)
+                   ->where('website_lead.dealer_id', $campaign->newDealerUser->id)
+                   ->where('website_lead.phone_number', '<>', '')
+                   ->whereNotNull('website_lead.phone_number');
+    }}
