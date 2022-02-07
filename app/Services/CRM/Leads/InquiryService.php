@@ -231,12 +231,12 @@ class InquiryService implements InquiryServiceInterface
         if(empty($lead->leadStatus->sales_person_id)) {
             // Dispatch Auto Assign Job
             $job = new AutoAssignJob($lead);
-            $this->dispatch($job->onQueue('mails'));
+            $this->dispatch($job->onQueue('inquiry'));
         }
 
         // Dispatch Auto Responder Job
         $job = new AutoResponderJob($lead);
-        $this->dispatch($job->onQueue('mails'));
+        $this->dispatch($job->onQueue('inquiry'));
 
         // Export ADF if Possible
         if(!in_array(LeadType::TYPE_FINANCING, $inquiry->leadTypes)) {

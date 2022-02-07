@@ -69,7 +69,7 @@ class ADFService implements ADFServiceInterface
 
         // Dispatch ADF Export Job
         $job = new ADFJob($adf, $lead, $leadEmail->to_emails, $leadEmail->copied_emails, $hiddenCopiedEmails);
-        $this->dispatch($job->onQueue('mails'));
+        $this->dispatch($job->onQueue('inquiry'));
         
         return true;
     }
