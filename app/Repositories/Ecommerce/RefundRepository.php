@@ -85,6 +85,7 @@ class RefundRepository implements RefundRepositoryInterface
     {
         $partsAmount = [];
         $partsQty = [];
+        $partsStatus = [];
 
         $amountAdder = static function (int $id, float $amount) use (&$partsAmount) {
             return isset($partsAmount[$id]) ? $partsAmount[$id] + $amount : $amount;
@@ -101,22 +102,39 @@ class RefundRepository implements RefundRepositoryInterface
                 'status' => [Refund::STATUS_FAILED, Refund::STATUS_DENIED]
             ]
         ])->each(static function (Refund $refund) use (&$partsAmount, &$partsQty, $amountAdder, $qtyAdder) {
+            $orderParts = $refund->order->parts;
             foreach ($refund->parts as $part) {
                 $partsAmount[$part['id']] = $amountAdder($part['id'], $part['amount']);
                 $partsQty[$part['id']] = $qtyAdder($part['id'], (int)$part['qty']);
+            }
+
+            foreach ($orderParts as $orderPart) {
+               if (in_array($orderPart['id'], $partsQty)) {
+                   $refundQty = $partsQty[$orderPart['id']];
+                   $totalQty = $orderPart['qty'];
+
+                   if ($totalQty > $refundQty) {
+                       $partsStatus[$orderPart['id']] = RefundedPart::PARTY_REFUND;
+                   }
+
+                   if ($totalQty <= $refundQty) {
+                       $partsStatus[$orderPart['id']] = RefundedPart::FULLY_REFUND;
+                   }
+               }
             }
         });
 
         return Part::query()
             ->whereIn('id', array_keys($partsAmount))
             ->get()
-            ->map(static function (Part $part) use ($partsAmount, $partsQty): RefundedPart {
+            ->map(static function (Part $part) use ($partsAmount, $partsQty, $partsStatus): RefundedPart {
                 return RefundedPart::from([
                     'id' => $part->id,
                     'title' => $part->title,
                     'sku' => $part->sku,
                     'amount' => $partsAmount[$part->id],
-                    'qty' => $partsQty[$part->id]
+                    'qty' => $partsQty[$part->id],
+                    'status' => $partsStatus[$part->id] ?? RefundedPart::NON_REFUND,
                 ]);
             });
     }
