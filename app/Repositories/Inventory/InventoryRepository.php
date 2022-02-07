@@ -555,7 +555,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         if ($withDefault) {
             $query = $query->where(function ($q) {
                $q->where('status', '<>', Inventory::STATUS_QUOTE)
-                   ->orWhere('status', '=', null);
+                   ->orWhere('status', '=', Inventory::STATUS_NULL);
             });
         }
 
