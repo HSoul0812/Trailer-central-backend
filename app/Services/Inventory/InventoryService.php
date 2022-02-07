@@ -95,6 +95,7 @@ class InventoryService implements InventoryServiceInterface
             $this->buildGeoScoring($queryBuilder, $location);
         }
 
+        $queryBuilder->orderBy('updatedAt', 'desc');
         return $queryBuilder;
     }
 
