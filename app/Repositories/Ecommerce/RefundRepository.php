@@ -87,8 +87,8 @@ class RefundRepository implements RefundRepositoryInterface
         $partsQty = [];
         $partsStatus = [];
 
-        $amountAdder = static function (int $id, float $amount) use (&$partsAmount) {
-            return isset($partsAmount[$id]) ? $partsAmount[$id] + $amount : $amount;
+        $amountAdder = static function (string $sku, float $amount) use (&$partsAmount) {
+            return isset($partsAmount[$sku]) ? $partsAmount[$sku] + $amount : $amount;
         };
 
         $qtyAdder = static function (int $id, int $qty) use (&$partsQty) {
@@ -101,24 +101,24 @@ class RefundRepository implements RefundRepositoryInterface
             self::CONDITION_AND_WHERE_NOT_IN => [
                 'status' => [Refund::STATUS_FAILED, Refund::STATUS_DENIED]
             ]
-        ])->each(static function (Refund $refund) use (&$partsAmount, &$partsQty, $amountAdder, $qtyAdder) {
-            $orderParts = $refund->order->parts;
+        ])->each(static function (Refund $refund) use (&$partsAmount, &$partsQty, &$partsStatus $amountAdder, $qtyAdder) {
+            $orderParts = $refund->order->ecommerce_items;
             foreach ($refund->parts as $part) {
                 $partsAmount[$part['id']] = $amountAdder($part['id'], $part['amount']);
-                $partsQty[$part['id']] = $qtyAdder($part['id'], (int)$part['qty']);
+                $partsQty[$part['sku']] = $qtyAdder($part['sku'], (int)$part['qty']);
             }
 
             foreach ($orderParts as $orderPart) {
-               if (in_array($orderPart['id'], $partsQty)) {
-                   $refundQty = $partsQty[$orderPart['id']];
+               if (in_array($orderPart['sku'], $partsQty)) {
+                   $refundQty = $partsQty[$orderPart['sku']];
                    $totalQty = $orderPart['qty'];
 
                    if ($totalQty > $refundQty) {
-                       $partsStatus[$orderPart['id']] = RefundedPart::PARTY_REFUND;
+                       $partsStatus[$orderPart['sku']] = RefundedPart::PARTY_REFUND;
                    }
 
                    if ($totalQty <= $refundQty) {
-                       $partsStatus[$orderPart['id']] = RefundedPart::FULLY_REFUND;
+                       $partsStatus[$orderPart['sku']] = RefundedPart::FULLY_REFUND;
                    }
                }
             }
@@ -133,8 +133,8 @@ class RefundRepository implements RefundRepositoryInterface
                     'title' => $part->title,
                     'sku' => $part->sku,
                     'amount' => $partsAmount[$part->id],
-                    'qty' => $partsQty[$part->id],
-                    'status' => $partsStatus[$part->id] ?? RefundedPart::NON_REFUND,
+                    'qty' => $partsQty[$part->sku],
+                    'status' => $partsStatus[$part->sku] ?? RefundedPart::NON_REFUND,
                 ]);
             });
     }
