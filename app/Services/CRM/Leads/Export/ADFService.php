@@ -155,7 +155,7 @@ class ADFService implements ADFServiceInterface
     private function getAdfVendor(InquiryLead $inquiry): array {
         // Get Dealer & Location
         $dealer = $this->userRepository->get(['dealer_id' => $inquiry->dealerId]);
-        if($inquiry->dealerLocationId()) {
+        if($inquiry->dealerLocationId) {
             $location = $this->dealerLocationRepository->get(['id' => $inquiry->dealerLocationId]);
         } else {
             $location = $this->dealerLocationRepository->get(['dealer_id' => $inquiry->dealerId]);
