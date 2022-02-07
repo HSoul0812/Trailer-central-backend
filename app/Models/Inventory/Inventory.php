@@ -480,7 +480,7 @@ class Inventory extends Model
         return $this->attributesCollection;
     }
 
-    public function getPrimaryImageAttribute(): InventoryImage
+    public function getPrimaryImageAttribute(): ?InventoryImage
     {
         return $this->orderedImages()->first();
     }

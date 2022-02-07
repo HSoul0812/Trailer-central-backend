@@ -119,7 +119,7 @@ class Queue extends Model
         if(!empty($this->inventory) && !empty($this->inventory->title)) {
             return $this->inventory->title;
         }
-        return $this->paramater->title ?? '';
+        return $this->parameters->title ?? '';
     }
 
     /**
@@ -132,7 +132,7 @@ class Queue extends Model
         if(!empty($this->inventory) && !empty($this->inventory->stock)) {
             return $this->inventory->stock;
         }
-        return $this->paramater->stock ?? '';
+        return $this->parameters->stock ?? '';
     }
 
     /**
@@ -145,7 +145,7 @@ class Queue extends Model
         if(!empty($this->inventory) && !empty($this->inventory->price)) {
             return $this->inventory->price;
         }
-        return $this->paramater->price ? floatval($this->parameter->price) : 0;
+        return $this->parameters->price ? floatval($this->parameters->price) : 0;
     }
 
     /**
@@ -158,6 +158,6 @@ class Queue extends Model
         if(!empty($this->inventory) && !empty($this->inventory->primary_image)) {
             return $this->inventory->primary_image->image->filename;
         }
-        return $this->paramater->images[0] ?? '';
+        return $this->parameters->images[0] ?? '';
     }
 }
