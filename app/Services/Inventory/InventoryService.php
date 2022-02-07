@@ -89,12 +89,21 @@ class InventoryService implements InventoryServiceInterface
         $this->buildRangeQueries($queryBuilder, $params);
         $this->buildAggregations($queryBuilder, $params);
         $this->buildPaginateQuery($queryBuilder, $params);
+        $this->buildFilter($queryBuilder, $params);
+
         if($location) {
             $this->buildGeoScoring($queryBuilder, $location);
         }
 
-        $queryBuilder->orderBy("updatedAt", "desc");
         return $queryBuilder;
+    }
+
+    private function buildFilter(InventorySearchQueryBuilder $queryBuilder, array $params) {
+        if(!empty($params['is_sale'])) {
+            $queryBuilder->setFilterScript("
+            doc['salesPrice'].value > 0.0 && doc['salesPrice'].value < doc['websitePrice'].value
+            ");
+        }
     }
 
     private function buildGeoScoring(InventorySearchQueryBuilder $queryBuilder, Geolocation $location) {
