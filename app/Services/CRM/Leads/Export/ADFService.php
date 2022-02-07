@@ -120,15 +120,18 @@ class ADFService implements ADFServiceInterface
      */
     private function getAdfVehicle(array $inventory): array {
         // Get Inventory
-        $item = $this->inventoryRepository->get(['id' => reset($inventory)]);
+        $itemId = reset($inventory);
+        if(!empty($itemId)) {
+            $item = $this->inventoryRepository->get(['id' => $itemId]);
+        }
 
         // Initialize ADF Lead Params
         return [
-            'vehicleYear' => $item->year ?? 0,
-            'vehicleMake' => $item->manufacturer ?? '',
-            'vehicleModel' => $item->model ?? '',
-            'vehicleStock' => $item->stock ?? '',
-            'vehicleVin' => $item->vin ?? ''
+            'vehicleYear' => !empty($item->year) ? $item->year : 0,
+            'vehicleMake' => !empty($item->manufacturer) ? $item->manufacturer : '',
+            'vehicleModel' => !empty($item->model) ? $item->model : '',
+            'vehicleStock' => !empty($item->stock) ? $item->stock : '',
+            'vehicleVin' => !empty($item->vin) ? $item->vin : ''
         ];
     }
 
