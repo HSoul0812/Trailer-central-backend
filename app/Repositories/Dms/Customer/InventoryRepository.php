@@ -203,7 +203,7 @@ class InventoryRepository implements InventoryRepositoryInterface
             $customerInventoryTable,
             static function (JoinClause $join) use ($inventoryTable, $customerInventoryTable, $customerId): void {
                 $join->on("$customerInventoryTable.inventory_id", '=', "$inventoryTable.inventory_id")
-                    ->where("$customerInventoryTable.customer_id", $customerId);
+                ->where("$customerInventoryTable.customer_id", $customerId);
             }
         );
 

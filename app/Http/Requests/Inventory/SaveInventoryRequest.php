@@ -25,6 +25,7 @@ class SaveInventoryRequest extends Request
         'description' => 'string|nullable',
         'description_html' => 'string|nullable',
         'status' => 'integer|nullable',
+        'status_id' => 'integer|nullable',
         'availability' => 'string|nullable',
         'is_consignment' => 'boolean|nullable',
         'category' => 'inventory_cat_valid',

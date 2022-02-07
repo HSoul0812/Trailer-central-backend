@@ -4,28 +4,31 @@ namespace App\Services\Parts\Textrail;
 
 use App\Services\Parts\Textrail\DTO\TextrailPartDTO;
 
-interface TextrailPartServiceInterface {
+interface TextrailPartServiceInterface
+{
 
-  /**
-   * @return array<TextrailPartDTO>
-   */
-  public function getAllParts(): array;
+    /**
+     * @return array<TextrailPartDTO>
+     */
+    public function getAllParts(): array;
 
-  public function getTextrailCategory(int $categoryId): object;
+    public function getTextrailCategory(int $categoryId): object;
 
-  public function getTextrailManufacturers(): array;
+    public function getTextrailManufacturers(): array;
 
-  public function getTextrailBrands(): array;
+    public function getTextrailBrands(): array;
 
-  /**
-   * @return null|array{imageData: array, fileName: string}
-   */
-  public function getTextrailImage(array $img): ?array;
-  
-  /**
-   * @return null|array{imageData: array, fileName: string}
-   */
-  public function getTextrailPlaceholderImage(): ?array;
+    /**
+     * @return null|array{imageData: array, fileName: string}
+     */
+    public function getTextrailImage(array $img): ?array;
 
-  public function getTextrailTotalPartsCount(int $pageSize = 1, int $currentPage = 1): int;
+    /**
+     * @return null|array{imageData: array, fileName: string}
+     */
+    public function getTextrailPlaceholderImage(): ?array;
+
+    public function getTextrailTotalPartsCount(int $pageSize = 1, int $currentPage = 1): int;
+
+    public function getTextrailDumpStock(): array;
 }
