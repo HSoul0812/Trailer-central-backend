@@ -101,7 +101,7 @@ class RefundRepository implements RefundRepositoryInterface
             self::CONDITION_AND_WHERE_NOT_IN => [
                 'status' => [Refund::STATUS_FAILED, Refund::STATUS_DENIED]
             ]
-        ])->each(static function (Refund $refund) use (&$partsAmount, &$partsQty, &$partsStatus $amountAdder, $qtyAdder) {
+        ])->each(static function (Refund $refund) use (&$partsAmount, &$partsQty, &$partsStatus, $amountAdder, $qtyAdder) {
             $orderParts = $refund->order->ecommerce_items;
             foreach ($refund->parts as $part) {
                 $partsAmount[$part['id']] = $amountAdder($part['id'], $part['amount']);
