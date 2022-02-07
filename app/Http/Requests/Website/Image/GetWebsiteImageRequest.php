@@ -11,7 +11,8 @@ class GetWebsiteImageRequest extends Request
         return [
             'dealer_id' => 'integer|min:1|required|exists:dealer,dealer_id',
             'website_id' => 'integer|min:1|required|exists:website,id,dealer_id,' . $this->dealer_id,
-            'expired' => 'in:1,0'
+            'expired' => 'in:1,0',
+            'expires_at' => 'date_format:Y-m-d'
         ];
     }
 }

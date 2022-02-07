@@ -110,6 +110,29 @@ class WebsiteImageTest extends TestCase
         $this->assertCount(6, $data['data']);
     }
 
+    public function testGetImagesExpiredAtAGivenDate()
+    {
+        $dateExpired = now()->subDays(2);
+
+        $expiredImages = $this->images->take(4);
+        $expiredImages->each(function ($image) use ($dateExpired) {
+            $image->update(['expires_at' => $dateExpired]);
+        });
+
+        $response = $this
+            ->withHeaders(['access-token' => $this->accessToken()])
+            ->get('/api/website/' . $this->website->id . '/images?expires_at=' . $dateExpired->toDateString());
+        $response->assertStatus(200);
+
+        $data = json_decode($response->getContent(), true);
+
+        $this->assertSame(4, collect($data['data'])->filter(function ($each) use ($expiredImages) {
+            return $expiredImages->contains('identifier', $each['id']);
+        })->count());
+
+        $this->assertCount(4, $data['data']);
+    }
+
     public function testUpdateImageWithoutAccessToken()
     {
         $image = $this->images->first();

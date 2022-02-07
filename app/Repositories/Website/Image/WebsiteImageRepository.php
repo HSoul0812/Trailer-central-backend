@@ -84,7 +84,9 @@ class WebsiteImageRepository implements WebsiteImageRepositoryInterface
     {
         $query = $this->getQueryBuilder($params);
 
-        if (isset($params['expired'])) {
+        if (isset($params['expires_at'])) {
+            $query->whereDate('expires_at', $params['expires_at']);
+        } else if (isset($params['expired'])) {
             if ($params['expired'] == 1) {
                 $query->where('expires_at', '<>', null)->where('expires_at', '<', now());
             }

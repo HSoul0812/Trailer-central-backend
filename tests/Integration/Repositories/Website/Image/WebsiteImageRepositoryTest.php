@@ -132,6 +132,27 @@ class WebsiteImageRepositoryTest extends TestCase
         })->count());
     }
 
+    public function testGetAllImagesExpiredAtAGivenDate()
+    {
+        $dateExpired = now()->subDays(2);
+
+        $expiredImages = $this->images->take(6);
+        $expiredImages->each(function ($image) use ($dateExpired) {
+            $image->update(['expires_at' => $dateExpired]);
+        });
+
+        $images = $this->getConcreteRepository()->getAll([
+            'expires_at' => $dateExpired->toDateString(),
+            'website_id' => $this->website->id
+        ]);
+
+        $this->assertCount(6, $images);
+
+        $this->assertSame(6, collect($images->items())->filter(function ($each) use ($expiredImages) {
+            return $expiredImages->contains('identifier', $each->identifier);
+        })->count());
+    }
+
     protected function getConcreteRepository(): WebsiteImageRepository
     {
         return $this->app->make(WebsiteImageRepositoryInterface::class);
