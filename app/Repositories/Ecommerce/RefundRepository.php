@@ -91,8 +91,8 @@ class RefundRepository implements RefundRepositoryInterface
             return isset($partsAmount[$sku]) ? $partsAmount[$sku] + $amount : $amount;
         };
 
-        $qtyAdder = static function (int $id, int $qty) use (&$partsQty) {
-            return isset($partsQty[$id]) ? $partsQty[$id] + $qty : $qty;
+        $qtyAdder = static function (string $sku, int $qty) use (&$partsQty) {
+            return isset($partsQty[$sku]) ? $partsQty[$sku] + $qty : $qty;
         };
 
         // we'll make two arrays of parts with their total refunded amount a qty indexed by part id
@@ -104,7 +104,7 @@ class RefundRepository implements RefundRepositoryInterface
         ])->each(static function (Refund $refund) use (&$partsAmount, &$partsQty, &$partsStatus, $amountAdder, $qtyAdder) {
             $orderParts = $refund->order->ecommerce_items;
             foreach ($refund->parts as $part) {
-                $partsAmount[$part['id']] = $amountAdder($part['id'], $part['amount']);
+                $partsAmount[$part['sku']] = $amountAdder($part['sku'], $part['amount']);
                 $partsQty[$part['sku']] = $qtyAdder($part['sku'], (int)$part['qty']);
             }
 
@@ -125,14 +125,14 @@ class RefundRepository implements RefundRepositoryInterface
         });
 
         return Part::query()
-            ->whereIn('id', array_keys($partsAmount))
+            ->whereIn('sku', array_keys($partsAmount))
             ->get()
             ->map(static function (Part $part) use ($partsAmount, $partsQty, $partsStatus): RefundedPart {
                 return RefundedPart::from([
                     'id' => $part->id,
                     'title' => $part->title,
                     'sku' => $part->sku,
-                    'amount' => $partsAmount[$part->id],
+                    'amount' => $partsAmount[$part->sku],
                     'qty' => $partsQty[$part->sku],
                     'status' => $partsStatus[$part->sku] ?? RefundedPart::NON_REFUND,
                 ]);
