@@ -414,6 +414,15 @@ $api->version('v1', function ($route) {
         $route->delete('', 'App\Http\Controllers\v1\Website\User\WebsiteUserFavoriteInventoryController@delete');
     });
 
+    /**
+     * Website User Search Result
+     */
+    $route->group(['prefix' => 'website/user/search-result', 'middleware' => 'api.auth', 'providers' => ['website_auth']], function ($route) {
+        $route->get('', 'App\Http\Controllers\v1\Website\User\WebsiteUserSearchResultController@index');
+        $route->post('', 'App\Http\Controllers\v1\Website\User\WebsiteUserSearchResultController@create');
+//        $route->delete('', 'App\Http\Controllers\v1\Website\User\WebsiteUserFavoriteInventoryController@delete');
+    });
+
     /*
     |--------------------------------------------------------------------------
     | Interactions

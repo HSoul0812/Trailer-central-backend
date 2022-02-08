@@ -3,9 +3,8 @@ namespace App\Services\Website;
 
 use App\Models\Website\User\WebsiteUser;
 use App\Repositories\Website\WebsiteUserFavoriteInventoryRepository;
-use App\Repositories\Website\WebsiteUserFavoriteInventoryRepositoryInterface;
 use App\Repositories\Website\WebsiteUserRepository;
-use App\Repositories\Website\WebsiteUserRepositoryInterface;
+use App\Repositories\Website\WebsiteUserSearchResultRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Validation\UnauthorizedException;
 
@@ -16,21 +15,23 @@ class WebsiteUserService implements WebsiteUserServiceInterface {
      */
     private $websiteUserRepository;
 
+    /** @var WebsiteUserSearchResultRepository */
+    private $websiteUserSearchResultRepository;
+
     /**
      * @var WebsiteUserFavoriteInventoryRepository
      */
     private $websiteUserFavoriteInventoryRepository;
 
     /**
-     * WebsiteUserService constructor.
-     * @param WebsiteUserRepositoryInterface $websiteUserRepository
-     * @param WebsiteUserFavoriteInventoryRepositoryInterface $websiteUserFavoriteInventoryRepository
+     * @param WebsiteUserRepository $websiteUserRepository
+     * @param WebsiteUserSearchResultRepository $websiteUserSearchResultRepository
+     * @param WebsiteUserFavoriteInventoryRepository $websiteUserFavoriteInventoryRepository
      */
-    public function __construct(
-        WebsiteUserRepositoryInterface $websiteUserRepository,
-        WebsiteUserFavoriteInventoryRepositoryInterface $websiteUserFavoriteInventoryRepository
-    ) {
+    public function __construct(WebsiteUserRepository $websiteUserRepository, WebsiteUserSearchResultRepository $websiteUserSearchResultRepository, WebsiteUserFavoriteInventoryRepository $websiteUserFavoriteInventoryRepository)
+    {
         $this->websiteUserRepository = $websiteUserRepository;
+        $this->websiteUserSearchResultRepository = $websiteUserSearchResultRepository;
         $this->websiteUserFavoriteInventoryRepository = $websiteUserFavoriteInventoryRepository;
     }
 
@@ -78,6 +79,29 @@ class WebsiteUserService implements WebsiteUserServiceInterface {
     public function getUserInventories(int $websiteUserId): Collection {
         return $this->websiteUserFavoriteInventoryRepository->getAll(['website_user_id' => $websiteUserId]);
     }
+
+    public function addSearchUrlToUser(string $search_url, int $websiteUserId) {
+
+        $searchResult = $this->websiteUserSearchResultRepository->get([
+            'website_user_id' => $websiteUserId,
+            'search_url' => $search_url
+        ]);
+
+        if (!empty($searchResult)) {
+           throw new \LogicException("Search result already saved before.");
+        }
+
+        return $this->websiteUserSearchResultRepository->create([
+            'website_user_id' => $websiteUserId,
+            'search_url' => $search_url
+        ]);
+    }
+
+    public function getUserSearchResults(array $params)
+    {
+        return $this->websiteUserSearchResultRepository->getAll($params);
+    }
+
 
     /**
      * @return string
