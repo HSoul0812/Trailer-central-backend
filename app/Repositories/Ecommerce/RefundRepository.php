@@ -87,12 +87,12 @@ class RefundRepository implements RefundRepositoryInterface
         $partsQty = [];
         $partsStatus = [];
 
-        $amountAdder = static function (int $id, float $amount) use (&$partsAmount) {
-            return isset($partsAmount[$id]) ? $partsAmount[$id] + $amount : $amount;
+        $amountAdder = static function (string $sku, float $amount) use (&$partsAmount) {
+            return isset($partsAmount[$sku]) ? $partsAmount[$sku] + $amount : $amount;
         };
 
-        $qtyAdder = static function (int $id, int $qty) use (&$partsQty) {
-            return isset($partsQty[$id]) ? $partsQty[$id] + $qty : $qty;
+        $qtyAdder = static function (string $sku, int $qty) use (&$partsQty) {
+            return isset($partsQty[$sku]) ? $partsQty[$sku] + $qty : $qty;
         };
 
         // we'll make two arrays of parts with their total refunded amount a qty indexed by part id
@@ -101,40 +101,40 @@ class RefundRepository implements RefundRepositoryInterface
             self::CONDITION_AND_WHERE_NOT_IN => [
                 'status' => [Refund::STATUS_FAILED, Refund::STATUS_DENIED]
             ]
-        ])->each(static function (Refund $refund) use (&$partsAmount, &$partsQty, $amountAdder, $qtyAdder) {
-            $orderParts = $refund->order->parts;
+        ])->each(static function (Refund $refund) use (&$partsAmount, &$partsQty, &$partsStatus, $amountAdder, $qtyAdder) {
+            $orderParts = $refund->order->ecommerce_items;
             foreach ($refund->parts as $part) {
-                $partsAmount[$part['id']] = $amountAdder($part['id'], $part['amount']);
-                $partsQty[$part['id']] = $qtyAdder($part['id'], (int)$part['qty']);
+                $partsAmount[$part['sku']] = $amountAdder($part['sku'], $part['amount']);
+                $partsQty[$part['sku']] = $qtyAdder($part['sku'], (int)$part['qty']);
             }
 
             foreach ($orderParts as $orderPart) {
-               if (in_array($orderPart['id'], $partsQty)) {
-                   $refundQty = $partsQty[$orderPart['id']];
+               if (in_array($orderPart['sku'], $partsQty)) {
+                   $refundQty = $partsQty[$orderPart['sku']];
                    $totalQty = $orderPart['qty'];
 
                    if ($totalQty > $refundQty) {
-                       $partsStatus[$orderPart['id']] = RefundedPart::PARTY_REFUND;
+                       $partsStatus[$orderPart['sku']] = RefundedPart::PARTY_REFUND;
                    }
 
                    if ($totalQty <= $refundQty) {
-                       $partsStatus[$orderPart['id']] = RefundedPart::FULLY_REFUND;
+                       $partsStatus[$orderPart['sku']] = RefundedPart::FULLY_REFUND;
                    }
                }
             }
         });
 
         return Part::query()
-            ->whereIn('id', array_keys($partsAmount))
+            ->whereIn('sku', array_keys($partsAmount))
             ->get()
             ->map(static function (Part $part) use ($partsAmount, $partsQty, $partsStatus): RefundedPart {
                 return RefundedPart::from([
                     'id' => $part->id,
                     'title' => $part->title,
                     'sku' => $part->sku,
-                    'amount' => $partsAmount[$part->id],
-                    'qty' => $partsQty[$part->id],
-                    'status' => $partsStatus[$part->id] ?? RefundedPart::NON_REFUND,
+                    'amount' => $partsAmount[$part->sku],
+                    'qty' => $partsQty[$part->sku],
+                    'status' => $partsStatus[$part->sku] ?? RefundedPart::NON_REFUND,
                 ]);
             });
     }
