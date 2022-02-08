@@ -45,6 +45,7 @@ class TcApiResponseInventory
      $obj->listing_date = $data['created_at'];
      $obj->price = $data['price'];
      $obj->sales_price = $data['sales_price'];
+     $obj->website_price = $data['website_price'];
      $obj->inventory_title = $data['title'];
      $obj->photos = $data['images'];
      $obj->dealer_location = $data['dealer_location'];
