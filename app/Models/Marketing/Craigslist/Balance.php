@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Marketing\Clapp;
+namespace App\Models\Marketing\Craigslist;
 
 use Illuminate\Database\Eloquent\Model;
 

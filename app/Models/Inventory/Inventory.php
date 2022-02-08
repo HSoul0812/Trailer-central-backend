@@ -383,6 +383,13 @@ class Inventory extends Model
         return $this->hasMany(InventoryImage::class, 'inventory_id', 'inventory_id');
     }
 
+    public function orderedImages(): HasMany
+    {
+        return $this->inventoryImages()->has('image')->with('image')
+                    ->orderByRaw('IFNULL(position, 99) ASC')
+                    ->orderBy('image_id', 'ASC');
+    }
+
     public function images(): HasManyThrough
     {
         return $this->hasManyThrough(Image::class, InventoryImage::class, 'inventory_id', 'image_id', 'inventory_id', 'image_id');
@@ -436,6 +443,12 @@ class Inventory extends Model
     public function customerInventories(): HasMany
     {
         return $this->hasMany(CustomerInventory::class, 'inventory_id', 'inventory_id');
+    }
+
+
+    public function getPrimaryImageAttribute(): ?InventoryImage
+    {
+        return $this->orderedImages()->first();
     }
 
     public function getCategoryLabelAttribute()
