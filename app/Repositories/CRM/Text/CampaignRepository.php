@@ -8,6 +8,7 @@ use App\Models\CRM\Text\Campaign;
 use App\Models\CRM\Text\CampaignSent;
 use App\Models\CRM\Text\CampaignBrand;
 use App\Models\CRM\Text\CampaignCategory;
+use Illuminate\Support\Facades\Log;
 
 class CampaignRepository implements CampaignRepositoryInterface {
 
@@ -37,7 +38,7 @@ class CampaignRepository implements CampaignRepositoryInterface {
             'direction' => 'ASC'
         ]
     ];
-    
+
     public function create($params) {
         DB::beginTransaction();
 
@@ -68,9 +69,10 @@ class CampaignRepository implements CampaignRepositoryInterface {
             DB::commit();
         } catch (\Exception $ex) {
             DB::rollBack();
-            throw new \Exception($ex->getMessage());
+            Log::error('Text campaign create error. Message - ' . $ex->getMessage() , $ex->getTrace());
+            throw new \Exception('Text campaign create error');
         }
-        
+
         return $campaign;
     }
 
@@ -92,7 +94,7 @@ class CampaignRepository implements CampaignRepositoryInterface {
     public function getAll($params) {
         $query = Campaign::where('deleted', '=', 0)->with('template')
                          ->with('brands')->with('categories');
-        
+
         if (!isset($params['per_page'])) {
             $params['per_page'] = 20;
         }
@@ -112,13 +114,13 @@ class CampaignRepository implements CampaignRepositoryInterface {
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
         }
-        
+
         return $query->paginate($params['per_page'])->appends($params);
     }
 
     /**
      * Get All Active Campaigns For Dealer
-     * 
+     *
      * @param int $userId
      * @return Collection of Campaign
      */
@@ -130,7 +132,9 @@ class CampaignRepository implements CampaignRepositoryInterface {
         // Find Campaign or Die
         $campaign = Campaign::findOrFail($params['id']);
 
-        DB::transaction(function() use (&$campaign, $params) {
+        DB::beginTransaction();
+
+        try {
             // Get Categories
             $categories = array();
             if(isset($params['category'])) {
@@ -153,14 +157,19 @@ class CampaignRepository implements CampaignRepositoryInterface {
 
             // Fill Text Details
             $campaign->fill($params)->save();
-        });
 
+            DB::commit();
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            Log::error('Text campaign update error. Message - ' . $ex->getMessage() , $ex->getTrace());
+            throw new \Exception('Text campaign update error');
+        }
         return $campaign;
     }
 
     /**
      * Mark Campaign as Sent
-     * 
+     *
      * @param array $params
      * return CampaignSent
      */
@@ -176,14 +185,14 @@ class CampaignRepository implements CampaignRepositoryInterface {
             DB::rollBack();
             throw new \Exception($ex->getMessage());
         }
-        
+
         return $stop;
     }
 
 
     /**
      * Add Sort Query
-     * 
+     *
      * @param type $query
      * @param type $sort
      * @return type
@@ -198,7 +207,7 @@ class CampaignRepository implements CampaignRepositoryInterface {
 
     /**
      * Update Campaign Brands
-     * 
+     *
      * @param int $campaignId
      * @param array $brands
      */
@@ -220,7 +229,7 @@ class CampaignRepository implements CampaignRepositoryInterface {
 
     /**
      * Update Campaign Categories
-     * 
+     *
      * @param int $campaignId
      * @param array $categories
      */
