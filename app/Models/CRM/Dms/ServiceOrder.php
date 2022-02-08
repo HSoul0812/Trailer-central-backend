@@ -131,4 +131,8 @@ class ServiceOrder extends Model
         return $this->belongsTo(Inventory::class, 'inventory_id', 'inventory_id');
     }
 
+    public function getStatusNameAttribute(): ?string
+    {
+        return self::SERVICE_ORDER_STATUS[$this->status] ?? null;
+    }
 }
