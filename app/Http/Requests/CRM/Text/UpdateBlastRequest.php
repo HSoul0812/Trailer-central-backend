@@ -6,15 +6,15 @@ use App\Http\Requests\Request;
 
 /**
  * Update Blast Request
- * 
+ *
  * @author David A Conway Jr.
  */
 class UpdateBlastRequest extends Request {
-    
+
     protected $rules = [
         'id' => 'required|integer',
         'template_id' => 'text_template_exists',
-        'campaign_name' => 'string',
+        'campaign_name' => 'string|unique_text_blast_campaign_name',
         'send_date' => 'date_format:Y-m-d H:i:s',
         'from_sms_number' => 'nullable|regex:/(0-9)?[0-9]{10}/',
         'action' => 'campaign_action_valid',
@@ -28,5 +28,5 @@ class UpdateBlastRequest extends Request {
         'is_delivered' => 'nullable|boolean',
         'is_cancelled' => 'nullable|boolean',
     ];
-    
+
 }

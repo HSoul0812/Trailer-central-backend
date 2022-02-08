@@ -39,7 +39,8 @@ class UpdateLeadRequest extends Request {
         'lead_status' => 'lead_status_valid',
         'next_contact_date' => 'date_format:Y-m-d H:i:s',
         'contact_type' => 'in:CONTACT,TASK',
-        'sales_person_id' => 'sales_person_valid'
+        'sales_person_id' => 'sales_person_valid',
+        'next_followup' => 'nullable|date_format:Y-m-d H:i:s',
     ];
 
     protected function getObject() {
