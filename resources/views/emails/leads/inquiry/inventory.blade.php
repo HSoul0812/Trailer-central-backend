@@ -22,8 +22,12 @@
                 <tr>
                     <td valign="top">
                         <!-- begin content -->
-
-                        <h3 style="font-size:16px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">New Inventory Information Request on {{ $website }}</h3>
+                        <?php if ($website == 'trailertrader.com'): ?>
+                          <h3 style="font-size:16px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">TrailerTrader.com / A customer is interested in {{ $title }} “</h3>
+                        <?php else: ?>
+                          <h3 style="font-size:16px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">New Inventory Information Request on {{ $website }}</h3>
+                        <?php endif; ?>
+                        
 
                         <p style="font-size:12px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">Inventory Stock: <strong>{{ $stock }}</strong></p>
 

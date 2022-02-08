@@ -397,7 +397,12 @@ class InquiryLead
         }
         // Normal, Return Proper Inquiry
         else {
-            return [['name' => $this->inquiryName, 'email' => $this->inquiryEmail]];
+            if ($this->websiteDomain == 'trailertrader.com') {
+              return [['name' => $this->inquiryName, 'email' => $this->inquiryEmail], ['name' => $this->firstName, 'email' => $this->emailAddress]];
+            } else {
+              return [['name' => $this->inquiryName, 'email' => $this->inquiryEmail]];
+            }
+            
         }
 
         // Return With Merged CC To
