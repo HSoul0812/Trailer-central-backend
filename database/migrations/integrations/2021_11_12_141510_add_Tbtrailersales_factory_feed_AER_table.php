@@ -11,14 +11,14 @@ class AddTbtrailersalesFactoryFeedAERTable extends Migration
         'entity_id' => 41383,
         'reference_id' => '7535',
         'entity_type' => 'dealer',
-        'api_key' => 'lgs'
+        'api_key' => 'lamar'
     ];
 
     private const DEALER_PARAMS_LOCATION = [
         'entity_id' => 12073,
         'reference_id' => '7535',
         'entity_type' => 'dealer_location',
-        'api_key' => 'lgs'
+        'api_key' => 'lamar'
     ];
 
     /**

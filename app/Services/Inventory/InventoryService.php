@@ -21,10 +21,15 @@ use App\Repositories\User\GeoLocationRepositoryInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Services\File\FileService;
 use App\Services\File\ImageService;
+use App\Transformers\Inventory\InventoryTitleAndVinTransformer;
+use App\Utilities\Fractal\NoDataArraySerializer;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use League\Fractal\Resource\Collection as FractalResourceCollection;
+use League\Fractal\Manager as FractalManager;
+use App\Repositories\Dms\Customer\InventoryRepository as DmsCustomerInventoryRepository;
 
 /**
  * Class InventoryService
@@ -35,6 +40,10 @@ class InventoryService implements InventoryServiceInterface
     use DispatchesJobs;
 
     const SOURCE_DASHBOARD = 'dashboard';
+
+    private const RESOURCE_KEY = 'children';
+    private const OPTION_GROUP_TEXT_CUSTOMER_OWNED = 'Customer Owned Inventories';
+    private const OPTION_GROUP_TEXT_DEALER_OWNED = 'All Inventories';
 
     /**
      * @var InventoryRepositoryInterface
@@ -190,7 +199,7 @@ class InventoryService implements InventoryServiceInterface
 
             Log::info('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
         } catch (\Exception $e) {
-            Log::error('Item create error. Message - ' . $e->getMessage() , $e->getTrace());
+            Log::error('Item create error. Message - ' . $e->getMessage(), $e->getTrace());
             $this->inventoryRepository->rollbackTransaction();
 
             throw new InventoryException('Inventory item create error');
@@ -264,7 +273,7 @@ class InventoryService implements InventoryServiceInterface
 
             Log::info('Item has been successfully updated', ['inventoryId' => $inventory->inventory_id]);
         } catch (\Exception $e) {
-            Log::error('Item update error. Message - ' . $e->getMessage() , $e->getTrace());
+            Log::error('Item update error. Message - ' . $e->getMessage(), $e->getTrace());
             $this->inventoryRepository->rollbackTransaction();
 
             throw new InventoryException('Inventory item update error');
@@ -474,7 +483,6 @@ class InventoryService implements InventoryServiceInterface
 
         if ($isOverlayEnabled && $params['overlay_enabled'] == Inventory::OVERLAY_ENABLED_ALL) {
             $withOverlay = $images;
-
         } elseif ($isOverlayEnabled && $params['overlay_enabled'] == Inventory::OVERLAY_ENABLED_PRIMARY) {
             $withOverlay = array_filter($images, function ($image) {
                 return isset($image['position']) && $image['position'] == 0;
@@ -483,7 +491,6 @@ class InventoryService implements InventoryServiceInterface
             $withoutOverlay = array_filter($images, function ($image) {
                 return !isset($image['position']) || $image['position'] != 0;
             });
-
         } else {
             $withoutOverlay = $images;
         }
@@ -592,7 +599,6 @@ class InventoryService implements InventoryServiceInterface
 
                 $this->inventoryRepository->update($inventoryParams);
             }
-
         } else if (empty($inventory->bill_id) && !empty($trueCost) && !empty($fpVendor) && !empty($fpBalance)) {
             $billStatus = $trueCost > $fpBalance ? Bill::STATUS_DUE : Bill::STATUS_PAID;
             $billNo = 'fp_auto_' . $inventory->inventory_id;
@@ -752,5 +758,45 @@ class InventoryService implements InventoryServiceInterface
         }
 
         return true;
+    }
+
+    public function getInventoriesTitle(array $params): array
+    {
+        $dealerInventories = $this->inventoryRepository->getTitles($params['dealer_id']);
+
+        if (!empty($params['customer_id'])) {
+            $customerInventoryRepo = resolve(DmsCustomerInventoryRepository::class);
+            $customerInventories = $customerInventoryRepo->getTitles($params['customer_id']);
+        }
+
+        return [
+            $this->processTitles($customerInventories ?? [], self::OPTION_GROUP_TEXT_CUSTOMER_OWNED),
+            $this->processTitles($dealerInventories, self::OPTION_GROUP_TEXT_DEALER_OWNED),
+        ];
+    }
+
+    private function processTitles($data, $text): array
+    {
+        $resource = new FractalResourceCollection(
+            $data,
+            new InventoryTitleAndVinTransformer,
+            self::RESOURCE_KEY
+        );
+
+        return $this->processTitleGroups($resource, $text);
+    }
+
+    private function processTitleGroups($data, $text): array
+    {
+        $resultantArray = [];
+        if (!empty($data)) {
+            $fractalManager = new FractalManager();
+            $fractalManager->setSerializer(new NoDataArraySerializer());
+            $resultantArray = $fractalManager->createData($data)->toArray();
+        }
+
+        return array_merge($resultantArray, [
+            'text' => $text,
+        ]);
     }
 }
