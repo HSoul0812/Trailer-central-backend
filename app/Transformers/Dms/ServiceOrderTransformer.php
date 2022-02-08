@@ -38,7 +38,7 @@ class ServiceOrderTransformer extends TransformerAbstract
             'location' => $serviceOrder->dealerLocation ? $serviceOrder->dealerLocation->name : null,
             'paid_amount' => (float) $serviceOrder->paid_amount,
             'status' => $serviceOrder->status,
-            'status_name' => $serviceOrder->status_name,
+            'status_name' => ServiceOrder::SERVICE_ORDER_STATUS[$serviceOrder->status],
             'shipping' => (float) ($serviceOrder->shipping > 0 ? $serviceOrder->shipping : 0.0),
             'inventory'     => $serviceOrder->inventory,
             'public_memo'   => $serviceOrder->public_memo,
