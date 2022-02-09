@@ -166,7 +166,6 @@ class SchedulerRepository implements SchedulerRepositoryInterface {
     public function getUpcoming(array $params): LengthAwarePaginator {
         // Append Status Restrictions
         $params['s_status'] = 'scheduled';
-        $params['q_status'] = 'done';
         $params['q_status_not'] = ['error', 'done'];
 
         // Restrict Per Page Limit
