@@ -22,7 +22,7 @@
                 <tr>
                     <td valign="top">
                         <!-- begin content -->
-                        <?php if ($website == 'trailertrader.com'): ?>
+                        <?php if ($website == $simpleDomain): ?>
                           <h3 style="font-size:16px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">TrailerTrader.com / A customer is interested in {{ $title }} “</h3>
                         <?php else: ?>
                           <h3 style="font-size:16px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">New Inventory Information Request on {{ $website }}</h3>
