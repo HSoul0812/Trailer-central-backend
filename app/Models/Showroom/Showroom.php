@@ -16,8 +16,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property Category $category
  * @property InventoryFeatureList[] $features
  */
-class Showroom extends Model {
-
+class Showroom extends Model
+{
     protected $table = 'showroom';
 
     public $timestamps = false;
