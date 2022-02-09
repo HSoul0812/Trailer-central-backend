@@ -16,7 +16,7 @@ class CreateUserSearchResultTable extends Migration
         Schema::create('website_user_search_result', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('website_user_id');
-            $table->string('search_url');
+            $table->text('search_url');
             $table->foreign('website_user_id')->references('id')->on('website_user')->onDelete('cascade');
             $table->timestamps();
         });

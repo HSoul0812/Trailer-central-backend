@@ -2,6 +2,7 @@
 namespace App\Services\Website;
 
 use App\Models\Website\User\WebsiteUser;
+use App\Models\Website\User\WebsiteUserSearchResult;
 use App\Repositories\Website\WebsiteUserFavoriteInventoryRepository;
 use App\Repositories\Website\WebsiteUserRepository;
 use App\Repositories\Website\WebsiteUserSearchResultRepository;
@@ -80,7 +81,13 @@ class WebsiteUserService implements WebsiteUserServiceInterface {
         return $this->websiteUserFavoriteInventoryRepository->getAll(['website_user_id' => $websiteUserId]);
     }
 
-    public function addSearchUrlToUser(string $search_url, int $websiteUserId) {
+    /**
+     * @param string $search_url
+     * @param int $websiteUserId
+     * @return WebsiteUserSearchResult
+     * @throws \LogicException When a search result already saved.
+     */
+    public function addSearchUrlToUser(string $search_url, int $websiteUserId): ?WebsiteUserSearchResult {
 
         $searchResult = $this->websiteUserSearchResultRepository->get([
             'website_user_id' => $websiteUserId,
@@ -97,7 +104,11 @@ class WebsiteUserService implements WebsiteUserServiceInterface {
         ]);
     }
 
-    public function getUserSearchResults(array $params)
+    /**
+     * @param array $params
+     * @return object
+     */
+    public function getUserSearchResults(array $params): object
     {
         return $this->websiteUserSearchResultRepository->getAll($params);
     }

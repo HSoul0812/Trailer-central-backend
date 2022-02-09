@@ -7,6 +7,7 @@ use App\Http\Requests\Website\User\CreateSearchResultRequest;
 use App\Services\Website\WebsiteUserService;
 use App\Transformers\Website\WebsiteUserSearchResultTransformer;
 use Dingo\Api\Http\Request;
+use Dingo\Api\Http\Response;
 
 class WebsiteUserSearchResultController extends RestfulControllerV2
 {
@@ -23,7 +24,13 @@ class WebsiteUserSearchResultController extends RestfulControllerV2
         $this->websiteUserService = $websiteUserService;
     }
 
-    public function create(Request $request)
+    /**
+     * @param Request $request
+     * @return Response
+     * @throws \App\Exceptions\Requests\Validation\NoObjectIdValueSetException
+     * @throws \App\Exceptions\Requests\Validation\NoObjectTypeSetException
+     */
+    public function create(Request $request): Response
     {
         $dealerId = $this->user->website->dealer->getKey();
 
@@ -46,7 +53,11 @@ class WebsiteUserSearchResultController extends RestfulControllerV2
         return $this->response->item($result, new WebsiteUserSearchResultTransformer());
     }
 
-    public function index(Request $request)
+    /**
+     * @param Request $request
+     * @return Response
+     */
+    public function index(Request $request): Response
     {
         $websiteUserId = $this->user->getKey();
 
