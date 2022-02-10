@@ -3,11 +3,9 @@
 namespace App\Services\CRM\Text;
 
 use App\Exceptions\CRM\Leads\SendInquiryFailedException;
-use App\Repositories\Inventory\InventoryRepositoryInterface;
-use App\Repositories\CRM\Text\NumberRepositoryInterface;
+use App\Models\CRM\Leads\LeadType;
 use App\Repositories\User\DealerLocationRepositoryInterface;
-use Illuminate\Support\Facades\Log;
-use App\Services\CRM\Text\TwilioService;
+use App\Services\CRM\Text\TextServiceInterface;
 use Twilio\Rest\Api\V2010\Account\MessageInstance;
 
 /**
@@ -18,7 +16,7 @@ use Twilio\Rest\Api\V2010\Account\MessageInstance;
 class InquiryTextService implements InquiryTextServiceInterface
 {
     /**
-     * @var App\Services\CRM\Text\TwilioService
+     * @var App\Services\CRM\Text\TextServiceInterface
      */
     protected $textService;
 
@@ -28,29 +26,15 @@ class InquiryTextService implements InquiryTextServiceInterface
     protected $dealerLocation;
 
     /**
-     * @var App\Repositories\CRM\Text\NumberRepositoryInterface
-     */
-    protected $numberRepo;
-
-    /**
-     * @var Illuminate\Support\Facades\Log
-     */
-    protected $log;
-
-    /**
-     * @param InventoryRepositoryInterface $inventory
+     * @param TextServiceInterface $textService
      * @param DealerLocationRepositoryInterface $dealerLocation
      */
     public function __construct(
-        NumberRepositoryInterface $numberRepo,
+        TextServiceInterface $textService,
         DealerLocationRepositoryInterface $dealerLocation
     ) {
-        $this->numberRepo = $numberRepo;
-        $this->textService = new TwilioService($numberRepo);
+        $this->textService = $textService;
         $this->dealerLocation = $dealerLocation;
-
-        // Initialize Logger
-        $this->log = Log::channel('leads');
     }
 
     /**
@@ -62,13 +46,13 @@ class InquiryTextService implements InquiryTextServiceInterface
      */
     public function send(array $params): MessageInstance
     {
-        $dealerNumber = $this->dealerLocation->findDealerNumber($params['dealer_id'], $params['location_id']);
+        $dealerNumber = $this->dealerLocation->findDealerNumber($params['dealer_id'], $params['dealer_location_id']);
 
         $customerName = $params['customer_name'];
-        $customerNumber = '+1' . $params['phone_number'];
+        $customerNumber = $params['phone_number'];
 
         $messageBody = 'A customer has made an inquiry about model with stock #: ' . $params['inventory_name'] .
-            "\nSent From: $customerNumber\nCustomer Name: " . $customerName . "\nUnit link: " . $params['unit_url'] . "\n\n" . $params['sms_message'];
+            "\nSent From: $customerNumber\nCustomer Name: " . $customerName . "\nUnit link: " . $params['referral'] . "\n\n" . $params['sms_message'];
 
         return $this->textService->send($customerNumber, $dealerNumber, $messageBody, $customerName);
     }
@@ -92,7 +76,7 @@ class InquiryTextService implements InquiryTextServiceInterface
         }
 
         return $params +  [
-            'lead_types'          => ['text'],
+            'lead_types'          => [LeadType::TYPE_TEXT],
             'title'               => $params['inventory_name'],
             'preferred_contact'   => 'phone',
             'comments'            => $params['sms_message']
