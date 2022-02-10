@@ -2,23 +2,24 @@
 
 namespace App\Models\CRM\Dms;
 
+use App\Models\CRM\Account\Invoice;
+use App\Models\CRM\Account\Payment;
 use App\Models\CRM\Dms\ServiceOrder\MiscPartItem;
 use App\Models\CRM\Dms\ServiceOrder\OtherItem;
 use App\Models\CRM\Dms\ServiceOrder\PartItem;
 use App\Models\CRM\Dms\ServiceOrder\ServiceItem;
-use App\Models\Traits\TableAware;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
-use App\Models\CRM\Account\Invoice;
-use App\Models\CRM\Account\Payment;
 use App\Models\CRM\User\Customer;
 use App\Models\Inventory\Inventory;
+use App\Models\Traits\TableAware;
 use App\Models\User\DealerLocation;
-
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class ServiceOrder
+ *
  * @package App\Models\CRM\Dms
+ *
  * @property boolean $closed_by_related_unit_sale
  * @property Collection<PartItem> $partItems
  * @property Collection<MiscPartItem> $miscPartItems
@@ -39,7 +40,7 @@ class ServiceOrder extends Model
         'waiting_parts' => 'Waiting on Part(s)',
         'warranty_processing' => 'Warranty Processing',
         'quote' => 'Quote',
-        'work_available' => 'Work Available'
+        'work_available' => 'Work Available',
     ];
 
     /*
@@ -48,7 +49,7 @@ class ServiceOrder extends Model
     const COMPLETED_ORDER_STATUS = [
         'picked_up',
         'ready_for_pickup',
-        'closed_quote'
+        'closed_quote',
     ];
 
     public const TYPES = [
@@ -131,4 +132,8 @@ class ServiceOrder extends Model
         return $this->belongsTo(Inventory::class, 'inventory_id', 'inventory_id');
     }
 
+    public function getStatusNameAttribute(): string
+    {
+        return self::SERVICE_ORDER_STATUS[$this->status] ?? '';
+    }
 }
