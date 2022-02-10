@@ -17,6 +17,7 @@ class WebsiteUserSearchResultRepository implements WebsiteUserSearchResultReposi
     /**
      * @param $params
      * @return WebsiteUserSearchResult
+     * @throws \InvalidArgumentException when `website_user_id` is not provided
      */
     public function create($params)
     {

@@ -7,10 +7,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property-read  WebsiteUser $websiteUser
- * @property $website_user_id
- * @property $search_url
- * @property $summary
- * @property $created_at
+ * @property int $website_user_id
+ * @property string $search_url
+ * @property string $summary
+ * @property string $created_at
  */
 class WebsiteUserSearchResult extends Model
 {
