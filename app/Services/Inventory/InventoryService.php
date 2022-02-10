@@ -17,6 +17,8 @@ use JetBrains\PhpStorm\Pure;
 
 class InventoryService implements InventoryServiceInterface
 {
+    const ES_INDEX = 'inventoryclsf';
+    const HTTP_SUCCESS = 200;
     const FIELD_UPDATED_AT = 'updatedAt';
     const ORDER_DESC = 'desc';
     const ORDER_ASC = 'asc';
@@ -55,13 +57,15 @@ class InventoryService implements InventoryServiceInterface
      */
     public function list(array $params): TcEsResponseInventoryList
     {
+        $esIndex = self::ES_INDEX;
+        $elasticSearchUrl = config('trailercentral.elasticsearch.url') . "/$esIndex/_search";
+
         $queryBuilder = $this->buildSearchQuery($params);
-        $elasticSearchUrl = config('trailercentral.elasticsearch.url') . "/inventory/_search";
         $res = $this->httpClient->post($elasticSearchUrl, [
             'json' => $queryBuilder->build()
         ]);
 
-        if($res->getStatusCode() == 200) {
+        if($res->getStatusCode() == self::HTTP_SUCCESS) {
             $result = [];
             $resJson = json_decode($res->getBody()->getContents(), true);
             foreach($resJson['hits']['hits'] as $hit) {
@@ -227,7 +231,6 @@ class InventoryService implements InventoryServiceInterface
             'price'            => 'float',
             'sales_price'      => 'float',
             'website_price'    => 'float',
-            'title'            => 'string',
             'images' => [
                 'image_id'     => 'int',
                 'is_default'   => 'int',
