@@ -22,6 +22,7 @@ class WebsiteUserSearchResultTransformer extends TransformerAbstract
             'website_user_id' => $searchResult->website_user_id,
             'search_url' => $searchResult->search_url,
             'summary' => $searchResult->summary,
+            'created_at' => $searchResult->created_at,
          ];
     }
 }
