@@ -11,15 +11,15 @@ class TcEsInventory implements Arrayable {
     const IMAGE_BASE_URL = 'https://dealer-cdn.com';
 
     public string $id;
-    public ?bool $isActive;
-    public ?string $dealerId;
-    public ?string $dealerLocationId;
-    public ?string $createdAt;
-    public ?string $updatedAt;
-    public ?string $updatedAtUser;
-    public ?bool $isSpecial;
-    public ?bool $isFeatured;
-    public ?bool $isArchived;
+    public ?bool $is_active;
+    public ?string $dealer_id;
+    public ?string $dealer_location_id;
+    public ?string $created_at;
+    public ?string $updated_at;
+    public ?string $updated_at_user;
+    public ?bool $is_special;
+    public ?bool $is_featured;
+    public ?bool $is_archived;
     public ?string $stock;
     public ?string $title;
     public ?int $year;
@@ -28,58 +28,58 @@ class TcEsInventory implements Arrayable {
     public ?string $description;
     public ?int $status;
     public ?string $category;
-    public ?bool $useWebsitePrice;
+    public ?bool $use_website_price;
     public ?string $condition;
     public ?float $length;
     public ?float $width;
     public ?float $height;
-    public ?bool $showOnKsl;
-    public ?bool $showOnRacingjunk;
-    public ?bool $showOnWebsite;
+    public ?bool $show_on_ksl;
+    public ?bool $show_on_racingjunk;
+    public ?bool $show_on_website;
     public ?TcEsInventoryDealer $dealer = null;
     public ?TcEsInventoryLocation $location = null;
-    public ?float $widthInches;
-    public ?float $heightInches;
-    public ?float $lengthInches;
-    public ?string $widthDisplayMode;
-    public ?string $heightDisplayMode;
-    public ?string $lengthDisplayMode;
+    public ?float $width_inches;
+    public ?float $height_inches;
+    public ?float $length_inches;
+    public ?string $width_display_mode;
+    public ?string $height_display_mode;
+    public ?string $length_display_mode;
     public ?array $keywords;
     public ?string $availability;
-    public ?string $availabilityLabel;
-    public ?string $typeLabel;
-    public ?string $categoryLabel;
-    public ?float $basicPrice;
-    public ?string $originalWebsitePrice;
+    public ?string $availability_label;
+    public ?string $type_label;
+    public ?string $category_label;
+    public ?float $basic_price;
+    public ?string $original_website_price;
     public ?float $websitePrice;
-    public ?float $existingPrice;
-    public ?int $numAxles;
-    public ?string $frameMaterial;
-    public ?string $pullType;
-    public ?int $numStalls;
-    public ?string $loadType;
-    public ?string $roofType;
-    public ?string $noseType;
+    public ?float $existing_price;
+    public ?int $num_axles;
+    public ?string $frame_material;
+    public ?string $pull_type;
+    public ?int $num_stalls;
+    public ?string $load_type;
+    public ?string $roof_type;
+    public ?string $nose_type;
     public ?string $color;
-    public ?int $numSleeps;
-    public ?int $numAc;
-    public ?string $fuelType;
-    public ?bool $isRental;
-    public ?string $numSlideouts;
-    public ?string $numBatteries;
+    public ?int $num_sleeps;
+    public ?int $num_ac;
+    public ?string $fuel_type;
+    public ?bool $is_rental;
+    public ?string $num_slideouts;
+    public ?string $num_batteries;
     public ?string $horsepower;
-    public ?string $numPassengers;
+    public ?string $num_passengers;
     public ?string $conversion;
-    public ?string $cabType;
-    public ?string $engineSize;
+    public ?string $cab_type;
+    public ?string $engine_size;
     public ?string $transmission;
-    public ?string $driveTrail;
+    public ?string $drive_trail;
     public ?string $floorplan;
     public ?string $propulsion;
-    public ?array $featureList;
+    public ?array $feature_list;
     public ?string $image;
     public ?array $images;
-    public ?array $imagesSecondary;
+    public ?array $images_secondary;
     public ?float $gvwr;
 
 
@@ -96,19 +96,20 @@ class TcEsInventory implements Arrayable {
         $dealerData = [];
         $locationData = [];
         foreach($data as $key => $value) {
-            if(str_starts_with($key, 'dealer.')) {
-                $dealerData[substr($key, 7)] = $value;
-            } else if(str_starts_with($key, 'location.')) {
-                $locationData[substr($key, 9)] = $value;
-            } else if($key === 'image') {
+            $uKey = camel_case_2_underscore($key);
+            if(str_starts_with($uKey, 'dealer.')) {
+                $dealerData[substr($uKey, 7)] = $value;
+            } else if(str_starts_with($uKey, 'location.')) {
+                $locationData[substr($uKey, 9)] = $value;
+            } else if($uKey === 'image') {
                 $obj->image = self::imageToAbsoluteUrl($value);
-            } else if($key === 'images' || $key === 'imagesSecondary') {
-                $obj->$key = [];
+            } else if($uKey === 'images' || $uKey === 'images_secondary') {
+                $obj->$uKey = [];
                 foreach ($value as $image) {
-                    ($obj->$key)[] = self::imageToAbsoluteUrl($image);
+                    ($obj->$uKey)[] = self::imageToAbsoluteUrl($image);
                 }
             } else {
-                $obj->setTypedProperty($key, $value);
+                $obj->setTypedProperty($uKey, $value);
             }
         }
 

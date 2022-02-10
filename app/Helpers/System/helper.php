@@ -39,3 +39,15 @@ if (!function_exists('inject_request_data')) {
         return new $request_class(request()->all());
     }
 }
+
+if (!function_exists('camel_case_2_underscore')) {
+    function camel_case_2_underscore($str, $separator = "_")
+    {
+        if (empty($str)) {
+            return $str;
+        }
+        $str = lcfirst($str);
+        $str = preg_replace("/[A-Z]/", $separator . "$0", $str);
+        return strtolower($str);
+    }
+}

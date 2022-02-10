@@ -38,6 +38,8 @@ class InventoryServiceTest extends TestCase
         $this->assertEquals(154, $response->inventories->total());
         $this->assertEquals(1, $response->inventories->count());
         $this->assertEquals('1000022126', $response->inventories->items()[0]->id);
+        $this->assertEquals('1001', $response->inventories->items()[0]->dealer_id);
+        $this->assertEquals('9437', $response->inventories->items()[0]->dealer_location_id);
     }
 
     public function testListWithValidLocation() {
