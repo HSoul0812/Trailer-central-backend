@@ -53,9 +53,7 @@ class InventorySearchQueryBuilder
     {
         $query = $this->_termQuery($fieldKey, $value);
         if ($query != null) {
-            $this->queries[] = [
-                $query
-            ];
+            $this->queries[] = $query;
         }
         return $this;
     }
@@ -83,7 +81,7 @@ class InventorySearchQueryBuilder
     }
 
     private function _termQuery(string $fieldKey, ?string $value) {
-        if ($value != null) {
+        if ($value !== null) {
             return
                 [
                     'match_phrase' => [
