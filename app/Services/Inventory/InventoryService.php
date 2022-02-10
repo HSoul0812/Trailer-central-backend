@@ -83,13 +83,13 @@ class InventoryService implements InventoryServiceInterface
     #[ArrayShape(['from' => "int", 'size' => "int", 'query' => "array[]", 'aggregations' => "array"])]
     private function buildSearchQuery(array $params): InventorySearchQueryBuilder {
         $queryBuilder = new InventorySearchQueryBuilder();
-        $location = $this->getGeolocation($params);
 
         $this->buildTermQueries($queryBuilder, $params);
         $this->buildRangeQueries($queryBuilder, $params);
         $this->buildAggregations($queryBuilder, $params);
         $this->buildPaginateQuery($queryBuilder, $params);
 
+        $location = $this->getGeolocation($params);
         if($location) {
             $this->buildGeoScoring($queryBuilder, $location);
         }

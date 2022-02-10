@@ -17,7 +17,7 @@ class TcEsInventoryLocation implements Arrayable
     public ?string $address;
     public ?string $city;
     public ?string $region;
-    public ?string $postalCode;
+    public ?string $postal_code;
     public ?string $country;
     public ?TcEsGeolocation $geo;
 
@@ -32,7 +32,7 @@ class TcEsInventoryLocation implements Arrayable
         $obj->address = $data['address'] ?? null;
         $obj->city = $data['city'] ?? null;
         $obj->region = $data['region'] ?? null;
-        $obj->postalCode = $data['postalCode'] ?? null;
+        $obj->postal_code = $data['postalCode'] ?? null;
         $obj->country = $data['country'] ?? null;
         $obj->geo = isset($data['geo']) ? TcEsGeolocation::fromData($data['geo']) : null;
         return $obj;
