@@ -49,13 +49,11 @@ class InventorySearchQueryBuilder
         return $this;
     }
 
-    public function termQuery(string $fieldKey, ?string $value)
+    public function termQuery(string $fieldKey, $value)
     {
         $query = $this->_termQuery($fieldKey, $value);
         if ($query != null) {
-            $this->queries[] = [
-                $query
-            ];
+            $this->queries[] = $query;
         }
         return $this;
     }
@@ -82,12 +80,12 @@ class InventorySearchQueryBuilder
         $this->filterScript = $script;
     }
 
-    private function _termQuery(string $fieldKey, ?string $value) {
-        if ($value != null) {
+    private function _termQuery(string $fieldKey, $value) {
+        if ($value !== null) {
             return
                 [
                     'match_phrase' => [
-                        $fieldKey => str_replace("+", " ", $value)
+                        $fieldKey => is_bool($value) ? $value : str_replace("+", " ", $value)
                     ]
                 ];
         }
