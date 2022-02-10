@@ -12,6 +12,8 @@ use App\Repositories\CRM\Refund\RefundRepository;
 use App\Repositories\CRM\Refund\RefundRepositoryInterface;
 use App\Services\CRM\Email\InquiryEmailService;
 use App\Services\CRM\Email\InquiryEmailServiceInterface;
+use App\Services\CRM\Text\InquiryTextService;
+use App\Services\CRM\Text\InquiryTextServiceInterface;
 use App\Services\CRM\Leads\InquiryServiceInterface;
 use App\Services\CRM\Leads\InquiryService;
 use App\Services\CRM\Leads\LeadServiceInterface;
@@ -63,6 +65,7 @@ class CrmServiceProvider extends ServiceProvider
         $this->app->bind(LeadServiceInterface::class, LeadService::class);
         $this->app->bind(InquiryServiceInterface::class, InquiryService::class);
         $this->app->bind(InquiryEmailServiceInterface::class, InquiryEmailService::class);
+        $this->app->bind(InquiryTextServiceInterface::class, InquiryTextService::class);
         $this->app->bind(AutoAssignServiceInterface::class, AutoAssignService::class);
         $this->app->bind(IDSServiceInterface::class, IDSService::class);
         $this->app->bind(BigTexServiceInterface::class, BigTexService::class);

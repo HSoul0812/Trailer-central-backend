@@ -17,27 +17,27 @@ use Illuminate\Foundation\Bus\DispatchesJobs;
 class ADFService implements ADFServiceInterface
 {
     use DispatchesJobs;
-    
-    /**     
-     * @var App\Repositories\CRM\Leads\Export\LeadEmailRepositoryInterface 
+
+    /**
+     * @var App\Repositories\CRM\Leads\Export\LeadEmailRepositoryInterface
      */
     protected $leadEmailRepository;
-    
-    /**     
-     * @var App\Repositories\CRM\Inventory\InventoryRepositoryInterface 
+
+    /**
+     * @var App\Repositories\CRM\Inventory\InventoryRepositoryInterface
      */
     protected $inventoryRepository;
-    
-    /**     
-     * @var App\Repositories\User\UserRepositoryInterface 
+
+    /**
+     * @var App\Repositories\User\UserRepositoryInterface
      */
     protected $userRepository;
-    
-    /**     
-     * @var App\Repositories\User\DealerLocationRepositoryInterface 
+
+    /**
+     * @var App\Repositories\User\DealerLocationRepositoryInterface
      */
     protected $dealerLocationRepository;
-    
+
     public function __construct(
         LeadEmailRepositoryInterface $leadEmailRepository,
         InventoryRepositoryInterface $inventoryRepository,
@@ -52,32 +52,36 @@ class ADFService implements ADFServiceInterface
 
     /**
      * Takes a lead and export it to ADF in XML format
-     * 
+     *
      * @param InquiryLead $inquiry lead to export to IDS
      * @param Lead $lead lead to export to IDS
      * @return bool
      */
     public function export(InquiryLead $inquiry, Lead $lead) : bool {
         $leadEmail = $this->leadEmailRepository->find($inquiry->dealerId, $inquiry->dealerLocationId);
-        if ($leadEmail->export_format !== LeadEmail::EXPORT_FORMAT_ADF) {
-            return false;
+
+        if($leadEmail){
+            if ($leadEmail->export_format !== LeadEmail::EXPORT_FORMAT_ADF) {
+                return false;
+            }
+
+            $hiddenCopiedEmails = explode(',', config('adf.exports.copied_emails'));
+
+            $adf = $this->getAdfLead($inquiry, $lead->identifier);
+
+            // Dispatch ADF Export Job
+            $job = new ADFJob($adf, $lead, $leadEmail->to_emails, $leadEmail->copied_emails, $hiddenCopiedEmails);
+            $this->dispatch($job->onQueue('mails'));
+
+            return true;
         }
-
-        $hiddenCopiedEmails = explode(',', config('adf.exports.copied_emails'));
-
-        $adf = $this->getAdfLead($inquiry, $lead->identifier);
-
-        // Dispatch ADF Export Job
-        $job = new ADFJob($adf, $lead, $leadEmail->to_emails, $leadEmail->copied_emails, $hiddenCopiedEmails);
-        $this->dispatch($job->onQueue('mails'));
-        
-        return true;
+        return false;
     }
 
 
     /**
      * Create ADF Lead From InquiryLead
-     * 
+     *
      * @param InquiryLead $inquiry
      * @param int $leadId
      * @return ADFLead
@@ -110,7 +114,7 @@ class ADFService implements ADFServiceInterface
 
     /**
      * Get ADF Vehicle Params From Inventory
-     * 
+     *
      * @param array<int> $inventory
      * @return array{vehicleYear: int,
      *               vehicleMake: string,
@@ -134,7 +138,7 @@ class ADFService implements ADFServiceInterface
 
     /**
      * Get ADF Vendor Params From Dealer/DealerLocation
-     * 
+     *
      * @param InquiryLead $inquiry
      * @return array{dealerId: int,
      *               locationId: int,
