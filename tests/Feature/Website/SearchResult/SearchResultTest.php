@@ -53,11 +53,13 @@ class SearchResultTest extends TestCase
     public function testAuthUserCanCreate()
     {
         $newUrl = 'test_search_url';
+        $summary = 'test_summary';
 
         $response = $this
             ->withHeaders(['user-access-token' => $this->websiteUserToken->access_token])
             ->post('api/website/user/search-result', [
-                'search_url' => $newUrl
+                'search_url' => $newUrl,
+                'summary' => $summary,
             ]);
 
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
@@ -65,6 +67,7 @@ class SearchResultTest extends TestCase
         $content = json_decode($response->getContent(), true);
 
         $this->assertEquals($newUrl, $content['data']['search_url']);
+        $this->assertEquals($summary, $content['data']['summary']);
         $this->assertEquals($this->websiteUser->id, $content['data']['website_user_id']);
     }
 
@@ -76,7 +79,8 @@ class SearchResultTest extends TestCase
         $response = $this
             ->withHeaders(['user-access-token' => $this->websiteUserToken->access_token])
             ->post('api/website/user/search-result', [
-                'search_url' => $newUrl
+                'search_url' => $newUrl,
+                'summary' => 'test_summary,'
             ]);
 
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
@@ -85,7 +89,8 @@ class SearchResultTest extends TestCase
         $response = $this
             ->withHeaders(['user-access-token' => $this->websiteUserToken->access_token])
             ->post('api/website/user/search-result', [
-                'search_url' => $newUrl
+                'search_url' => $newUrl,
+                'summary' => 'test_summary'
             ]);
 
         $this->assertEquals(Response::HTTP_INTERNAL_SERVER_ERROR, $response->getStatusCode());
@@ -106,12 +111,15 @@ class SearchResultTest extends TestCase
 
     public function testAuthUserCanGet()
     {
-        $response = $this
+        // Create first
+        $this
             ->withHeaders(['user-access-token' => $this->websiteUserToken->access_token])
             ->post('api/website/user/search-result', [
-                'search_url' => 'sample_url'
+                'search_url' => 'sample_url',
+                'summary' => 'summary_string'
             ]);
 
+        // Fetch
         $response = $this
             ->withHeaders(['user-access-token' => $this->websiteUserToken->access_token])
             ->get('api/website/user/search-result');
@@ -120,6 +128,7 @@ class SearchResultTest extends TestCase
 
         $this->assertIsArray($content['data']);
         $this->assertEquals('sample_url', $content['data'][0]['search_url']);
+        $this->assertEquals('summary_string', $content['data'][0]['summary']);
         $this->assertEquals($this->websiteUser->id, $content['data'][0]['website_user_id']);
     }
 

@@ -20,7 +20,8 @@ class WebsiteUserSearchResultTransformer extends TransformerAbstract
         return [
             'id' => $searchResult->id,
             'website_user_id' => $searchResult->website_user_id,
-            'search_url' => $searchResult->search_url
+            'search_url' => $searchResult->search_url,
+            'summary' => $searchResult->summary,
          ];
     }
 }

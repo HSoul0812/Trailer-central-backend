@@ -20,6 +20,18 @@ class WebsiteUserSearchResultRepository implements WebsiteUserSearchResultReposi
      */
     public function create($params)
     {
+        if (empty($params['website_user_id'])) {
+            throw new \InvalidArgumentException("User ID is missing");
+        }
+
+        if (empty($params['summary'])) {
+            throw new \InvalidArgumentException("Summary is missing");
+        }
+
+        if (empty($params['search_url'])) {
+            throw new \InvalidArgumentException("Search URL is missing");
+        }
+
         return $this->websiteUserSearchResult->firstOrCreate($params);
     }
 

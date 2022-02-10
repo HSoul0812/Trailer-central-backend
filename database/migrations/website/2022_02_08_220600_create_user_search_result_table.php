@@ -17,6 +17,7 @@ class CreateUserSearchResultTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('website_user_id');
             $table->text('search_url');
+            $table->string('summary');
             $table->foreign('website_user_id')->references('id')->on('website_user')->onDelete('cascade');
             $table->timestamps();
         });

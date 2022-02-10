@@ -9,12 +9,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read  WebsiteUser $websiteUser
  * @property $website_user_id
  * @property $search_url
+ * @property $summary
  */
 class WebsiteUserSearchResult extends Model
 {
     protected $fillable = [
         'website_user_id',
-        'search_url'
+        'search_url',
+        'summary'
     ];
     protected $table = 'website_user_search_result';
 

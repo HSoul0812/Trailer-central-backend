@@ -87,11 +87,11 @@ class WebsiteUserService implements WebsiteUserServiceInterface {
      * @return WebsiteUserSearchResult
      * @throws \LogicException When a search result already saved.
      */
-    public function addSearchUrlToUser(string $search_url, int $websiteUserId): ?WebsiteUserSearchResult {
+    public function addSearchUrlToUser(array $params): ?WebsiteUserSearchResult {
 
         $searchResult = $this->websiteUserSearchResultRepository->get([
-            'website_user_id' => $websiteUserId,
-            'search_url' => $search_url
+            'website_user_id' => $params['website_user_id'],
+            'search_url' => $params['search_url']
         ]);
 
         if (!empty($searchResult)) {
@@ -99,8 +99,9 @@ class WebsiteUserService implements WebsiteUserServiceInterface {
         }
 
         return $this->websiteUserSearchResultRepository->create([
-            'website_user_id' => $websiteUserId,
-            'search_url' => $search_url
+            'website_user_id' => $params['website_user_id'],
+            'search_url' => $params['search_url'],
+            'summary' => $params['summary'],
         ]);
     }
 

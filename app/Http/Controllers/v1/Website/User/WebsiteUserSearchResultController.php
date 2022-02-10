@@ -34,21 +34,15 @@ class WebsiteUserSearchResultController extends RestfulControllerV2
     {
         $dealerId = $this->user->website->dealer->getKey();
 
-        $websiteUserId = $this->user->getKey();
-        $requestData = $request->all();
-
         $request = new CreateSearchResultRequest(
-            array_merge($request->all(), ['dealer_id' => $dealerId])
+            array_merge($request->all(), ['dealer_id' => $dealerId, 'website_user_id' => $this->user->getKey()])
         );
 
         if(!$request->validate()) {
             $this->response->errorBadRequest();
         }
 
-        $result = $this->websiteUserService->addSearchUrlToUser(
-            $requestData['search_url'],
-            $websiteUserId
-        );
+        $result = $this->websiteUserService->addSearchUrlToUser($request->all());
 
         return $this->response->item($result, new WebsiteUserSearchResultTransformer());
     }
