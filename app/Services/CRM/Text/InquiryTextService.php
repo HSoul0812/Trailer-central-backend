@@ -42,10 +42,31 @@ class InquiryTextService implements InquiryTextServiceInterface
      *
      * @param array $params
      * @throws SendInquiryFailedException
+     * @throws \InvalidArgumentException if `dealer_id` is not provided
+     * @throws \InvalidArgumentException if `dealer_location_id` is not provided
+     * @throws \InvalidArgumentException if `customer_name` is not provided
+     * @throws \InvalidArgumentException if `phone_number` is not provided
+     * @throws \InvalidArgumentException if `inventory_name` is not provided
+     * @throws \InvalidArgumentException if `referral` is not provided
+     * @throws \InvalidArgumentException if `sms_message` is not provided
      * @return MessageInstance
      */
     public function send(array $params): MessageInstance
     {
+        collect([
+            'dealer_id',
+            'dealer_location_id',
+            'customer_name',
+            'phone_number',
+            'inventory_name',
+            'referral',
+            'sms_message'
+        ])->each(function ($key) use ($params) {
+            if (!isset($params[$key])) {
+                throw new \InvalidArgumentException("Cannot send SMS: `$key` empty");
+            }
+        });
+
         $dealerNumber = $this->dealerLocation->findDealerNumber($params['dealer_id'], $params['dealer_location_id']);
 
         $customerName = $params['customer_name'];
@@ -61,10 +82,23 @@ class InquiryTextService implements InquiryTextServiceInterface
      * Merge default values with request params
      *
      * @param array $params
+     * @throws \InvalidArgumentException if `customer_name` is not provided
+     * @throws \InvalidArgumentException if `inventory_name` is not provided
+     * @throws \InvalidArgumentException if `sms_message` is not provided
      * @return array
      */
     public function merge(array $params): array
     {
+        collect([
+            'customer_name',
+            'inventory_name',
+            'sms_message'
+        ])->each(function ($key) use ($params) {
+            if (!isset($params[$key])) {
+                throw new \InvalidArgumentException("Cannot send SMS: `$key` empty");
+            }
+        });
+
         $name = $params['customer_name'];
         if (strpos($name, ' ') !== FALSE) {
             $namePieces = explode(' ', $name, 2);
