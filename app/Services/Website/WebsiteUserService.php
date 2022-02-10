@@ -107,6 +107,19 @@ class WebsiteUserService implements WebsiteUserServiceInterface {
 
     /**
      * @param array $params
+     * @return void
+     */
+    public function removeSearchResult(array $params): void
+    {
+        if (empty($params['search_id'])) {
+            throw new \LogicException("Missing saved search ID.");
+        }
+
+        $this->websiteUserSearchResultRepository->delete($params);
+    }
+
+    /**
+     * @param array $params
      * @return object
      */
     public function getUserSearchResults(array $params): object

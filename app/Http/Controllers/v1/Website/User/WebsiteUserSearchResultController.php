@@ -61,4 +61,19 @@ class WebsiteUserSearchResultController extends RestfulControllerV2
 
         return $this->response->collection($lastSearchResults, new WebsiteUserSearchResultTransformer());
     }
+
+    /**
+     * @param Request $request
+     * @return Response
+     */
+    public function delete(Request $request): Response
+    {
+        $websiteUserId = $this->user->getKey();
+
+        $requestData = array_merge($request->all(), ['website_user_id' => $websiteUserId]);
+
+        $this->websiteUserService->removeSearchResult($requestData);
+
+        return $this->response->noContent();
+    }
 }

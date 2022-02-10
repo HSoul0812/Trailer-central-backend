@@ -57,9 +57,13 @@ class WebsiteUserSearchResultRepository implements WebsiteUserSearchResultReposi
             ->first();
     }
 
+    /**
+     * @param $params
+     * @return bool
+     */
     public function delete($params)
     {
-        throw new NotImplementedException();
+        return WebsiteUserSearchResult::findOrFail($params['search_id'])->delete();
     }
 
     /**
