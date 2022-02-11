@@ -70,6 +70,11 @@ class InquiryLead
     /**
      * @const string
      */
+    const TT_SIMPLE_DOMAIN = 'trailertrader.com';
+
+    /**
+     * @const string
+     */
     const TT_EMAIL_BODY = '#ffff00';
 
     /**
@@ -172,6 +177,10 @@ class InquiryLead
      */
     private $fromName;
 
+    /**
+     * @var string Simple TrailerTrader Domain Name
+     */
+    private $simpleDomain;
 
     /**
      * @var array<string> Lead Types to Insert to Lead Inquiry
@@ -405,7 +414,13 @@ class InquiryLead
         }
         // Normal, Return Proper Inquiry
         else {
-            return $normalTo;
+            if ($this->websiteDomain == self::TT_SIMPLE_DOMAIN) {
+              $normalTo[] = ['name' => $this->firstName, 'email' => $this->emailAddress];
+              return $normalTo;
+            } else {
+              return $normalTo;;
+            }
+            
         }
 
         // Return With Merged CC To
@@ -644,7 +659,8 @@ class InquiryLead
             'phone'            => $this->phoneNumber,
             'postal'           => $this->zip,
             'preferred'        => $this->getPreferredContact(),
-            'comments'         => $this->comments
+            'comments'         => $this->comments,
+            'simpleDomain'     => self::TT_SIMPLE_DOMAIN
         ], $this->getAdminMsg());
     }
 
