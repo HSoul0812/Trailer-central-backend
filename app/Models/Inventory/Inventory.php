@@ -371,7 +371,7 @@ class Inventory extends Model
 
     public function dealerLocation(): BelongsTo
     {
-        return $this->belongsTo(DealerLocation::class, 'dealer_location_id', 'dealer_location_id');
+        return $this->belongsTo(DealerLocation::class, 'dealer_location_id', 'dealer_location_id')->withTrashed();;
     }
 
     public function floorplanPayments(): HasMany

@@ -387,6 +387,14 @@ class InquiryLead
      * @return array{array{name: string, email: string}, ...etc}
      */
     public function getInquiryToArray(): array {
+      
+        // Normal, support to many emails for leads on dealer location email field
+        $normalTo = [];
+        $inquiryEmail = preg_split('/,|;|\s/', $this->inquiryEmail, null, PREG_SPLIT_NO_EMPTY);
+
+        foreach ($inquiryEmail as $key => $value) {
+          $normalTo[$key] = ['name' =>$this->inquiryName, 'email' => $value];
+        }
         // If Dev, Only Return Specific Entries
         if(!empty($this->isDev())) {
             $to = self::INQUIRY_DEV_TO;
@@ -397,7 +405,7 @@ class InquiryLead
         }
         // Normal, Return Proper Inquiry
         else {
-            return [['name' => $this->inquiryName, 'email' => $this->inquiryEmail]];
+            return $normalTo;
         }
 
         // Return With Merged CC To
