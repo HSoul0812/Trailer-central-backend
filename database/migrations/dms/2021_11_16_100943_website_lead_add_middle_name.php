@@ -16,8 +16,10 @@ class WebsiteLeadAddMiddleName extends Migration
     public function up(): void
     {
         Schema::table($this->tableName, function (Blueprint $table) {
-            $table->string('middle_name', 50)->nullable()->default(null)
-                ->after('first_name');
+            if (!$table->hasColumn('middle_name')) {
+                $table->string('middle_name', 50)->nullable()->default(null)
+                    ->after('first_name');
+            }
         });
     }
 
