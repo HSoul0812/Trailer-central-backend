@@ -364,13 +364,28 @@ class ProductJob extends Job
      * @return string
      */
     private function storeCsv($file, $filePath) {
-        // Get Temp File Contents
-        rewind($file);
-        $csv = stream_get_contents($file);
-        fclose($file); // releases the memory (or tempfile)
+        $log = Log::channel('facebook');
+        try {
+            // Get Temp File Contents
+            rewind($file);
+            $csv = stream_get_contents($file);
+            fclose($file); // releases the memory (or tempfile)
+        } catch(\Exception $e) {
+            $log->error('Exception returned loading CSV ' . $file . ' contents: ' . $e->getMessage());
+        }
 
         // Return Stored File
-        return Storage::disk('s3')->put($filePath, $csv, 'public');
+        try {
+            $saved = Storage::disk('s3')->put($filePath, $csv, 'public');
+        } catch(\Exception $e) {
+            $log->error('Exception returned sending file ' . $filePath . ' to S3: ' . $e->getMessage());
+        }
+
+        // Inserted File
+        $log->info('Inserted ' . count($this->integration->listings) . ' Listings Into CSV File ' . $filePath);
+
+        // Return File
+        return $saved;
     }
 
 

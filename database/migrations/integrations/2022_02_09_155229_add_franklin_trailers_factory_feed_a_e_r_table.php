@@ -1,24 +1,22 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
-class AddTbtrailersalesFactoryFeedAERTable extends Migration
+class AddFranklinTrailersFactoryFeedAERTable extends Migration
 {
     private const DEALER_PARAMS_ENTITY = [
-        'entity_id' => 41383,
-        'reference_id' => '7535',
+        'entity_id' => 5780,
+        'reference_id' => 'fratra',
         'entity_type' => 'dealer',
-        'api_key' => 'lamar'
+        'api_key' => 'pj'
     ];
 
     private const DEALER_PARAMS_LOCATION = [
-        'entity_id' => 12073,
-        'reference_id' => '7535',
+        'entity_id' => 9100,
+        'reference_id' => 'fratra',
         'entity_type' => 'dealer_location',
-        'api_key' => 'lamar'
+        'api_key' => 'pj'
     ];
 
     /**
@@ -26,7 +24,7 @@ class AddTbtrailersalesFactoryFeedAERTable extends Migration
      *
      * @return void
      */
-    public function up()
+    public function up() : void
     {
         DB::table('api_entity_reference')->insert(self::DEALER_PARAMS_ENTITY);
         DB::table('api_entity_reference')->insert(self::DEALER_PARAMS_LOCATION);
@@ -37,7 +35,7 @@ class AddTbtrailersalesFactoryFeedAERTable extends Migration
      *
      * @return void
      */
-    public function down()
+    public function down() : void
     {
         DB::table('api_entity_reference')->where(self::DEALER_PARAMS_LOCATION)->delete();
         DB::table('api_entity_reference')->where(self::DEALER_PARAMS_ENTITY)->delete();

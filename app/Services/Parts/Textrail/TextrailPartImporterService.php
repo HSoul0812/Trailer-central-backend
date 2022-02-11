@@ -23,18 +23,18 @@ use App\Models\Parts\Textrail\Image;
 
 class TextrailPartImporterService implements TextrailPartImporterServiceInterface
 {
-    /**     
-     * @var PartRepositoryInterface 
+    /**
+     * @var PartRepositoryInterface
      */
     protected $partRepo;
-    
-    /**     
+
+    /**
      * @var GuzzleHttp\Client
      */
     protected $httpClient;
 
    public function __construct(
-     PartRepository $partRepository, 
+     PartRepository $partRepository,
      TextrailPartServiceInterface $textrailPartService,
      CategoryRepositoryInterface $categoryRepository,
      BrandRepositoryInterface $brandRepository,
@@ -57,111 +57,117 @@ class TextrailPartImporterService implements TextrailPartImporterServiceInterfac
        $this->manager = $manager;
    }
 
-   public function run()
-   {
-     
-     $parts = $this->textrailPartService->getAllParts();
-     $parts_sku = [];
+    public function run()
+    {
+        $stocks = $this->textrailPartService->getTextrailDumpStock();
 
-     foreach ($parts as $item) {
-       $parts_sku[] = $item->sku;
+        $parts = $this->textrailPartService->getAllParts();
+        $parts_sku = [];
 
-       $trashed_item = $this->partRepo->getBySkuWithTrashed($item->sku);
-       if ($trashed_item) {
-         $trashed_item->restore();
-       }
+        foreach ($parts as $item) {
+            $parts_sku[] = $item->sku;
 
-       $textrailCategory = $this->textrailPartService->getTextrailCategory($item->category_id);
+            // Prevent import 0 qty items to DB.
+            if (!array_key_exists($item->sku, $stocks)) {
+                continue;
+            }
 
-       $categoryParams = [
-         'name' => $textrailCategory->name
-       ];
+            $trashed_item = $this->partRepo->getBySkuWithTrashed($item->sku);
+            if ($trashed_item) {
+                $trashed_item->restore();
+            }
 
-       $category = $this->categoryRepository->firstOrCreate($categoryParams);
+            $textrailCategory = $this->textrailPartService->getTextrailCategory($item->category_id);
 
-       $item->category_id = $category->id;
-       
-       $textrailCategoryForType = $this->textrailPartService->getTextrailCategory($textrailCategory->parent_id);
-       
-       $typeParams = [
-         'name' => $textrailCategoryForType->name
-       ];
-
-       $type = $this->typeRepository->firstOrCreate($typeParams);
-       $item->type_id = $type->id;
-       
-       $textrailManufacturers = $this->textrailPartService->getTextrailManufacturers();
-
-       foreach ($textrailManufacturers as $textrailManufacturer) {
-         if ($textrailManufacturer->value == $item->manufacturer_id) {
-
-           $manufacturerParams = [
-             'name' => $textrailManufacturer->label
-           ];
-
-           $manufacturer = $this->manufacturerRepository->firstOrCreate($manufacturerParams);
-           $item->manufacturer_id = $manufacturer->id;
-         }
-         
-       }
-       
-       $textrailBrands = $this->textrailPartService->getTextrailBrands();
-
-       foreach ($textrailBrands as $textrailBrand) {
-         if ($textrailBrand->value == $item->brand_id) {
-
-           $brandParams = [
-             'name' => $textrailBrand->label
-           ];
-           
-           $brand = $this->brandRepository->firstOrCreate($brandParams);
-           $item->brand_id = $brand->id;
-         }
-         
-       }
-
-       $partsParams = $this->textrailPartsTransformer->transform($item);
-       $newTextrailPart = $this->partRepo->createOrUpdateBySku($partsParams);
-
-       $newTextrailPart->images()->delete();
-
-       if (count($item->images) > 0) {
-         foreach ($item->images as $img) {
-
-           $textrailImage = $this->textrailPartService->getTextrailImage($img);
-           
-           if ($textrailImage) {
-
-             $imageParams = [
-               'part_id' => $newTextrailPart->id,
-               'position' => $img['position']
-             ];
-             $this->imageRepository->firstOrCreate($imageParams, $textrailImage['fileName'], $textrailImage['imageData']);
-           }
-         }
-       } else {
-          $textrailImage = $this->textrailPartService->getTextrailPlaceholderImage();
-          
-          if ($textrailImage) {
-
-            $imageParams = [
-              'part_id' => $newTextrailPart->id,
-              'position' => $img['position']
+            $categoryParams = [
+                'name' => $textrailCategory->name
             ];
-            $this->imageRepository->firstOrCreate($imageParams, $textrailImage['fileName'], $textrailImage['imageData']);
-          }
-       }
 
-     }
+            $category = $this->categoryRepository->firstOrCreate($categoryParams);
 
-     $textrailParts = $this->partRepo->getAllExceptBySku($parts_sku);
+            $item->category_id = $category->id;
 
-       foreach ($textrailParts as $textrailPart) {
-         Part::withoutSyncingToSearch(function() use ($textrailPart) {
-           $textrailPart->delete();
-         });
-       }
-     
-   }
+            $textrailCategoryForType = $this->textrailPartService->getTextrailCategory($textrailCategory->parent_id);
 
+            $typeParams = [
+                'name' => $textrailCategoryForType->name
+            ];
+
+            $type = $this->typeRepository->firstOrCreate($typeParams);
+            $item->type_id = $type->id;
+
+            $textrailManufacturers = $this->textrailPartService->getTextrailManufacturers();
+
+            foreach ($textrailManufacturers as $textrailManufacturer) {
+                if ($textrailManufacturer->value == $item->manufacturer_id) {
+
+                    $manufacturerParams = [
+                        'name' => $textrailManufacturer->label
+                    ];
+
+                    $manufacturer = $this->manufacturerRepository->firstOrCreate($manufacturerParams);
+                    $item->manufacturer_id = $manufacturer->id;
+                }
+
+            }
+
+            $textrailBrands = $this->textrailPartService->getTextrailBrands();
+
+            foreach ($textrailBrands as $textrailBrand) {
+                if ($textrailBrand->value == $item->brand_id) {
+
+                    $brandParams = [
+                        'name' => $textrailBrand->label
+                    ];
+
+                    $brand = $this->brandRepository->firstOrCreate($brandParams);
+                    $item->brand_id = $brand->id;
+                }
+
+            }
+
+            $item->qty = $stocks[$item->sku] ?? 0;
+
+            $partsParams = $this->textrailPartsTransformer->transform($item);
+            $newTextrailPart = $this->partRepo->createOrUpdateBySku($partsParams);
+
+            $newTextrailPart->images()->delete();
+
+            if (count($item->images) > 0) {
+                foreach ($item->images as $img) {
+
+                    $textrailImage = $this->textrailPartService->getTextrailImage($img);
+
+                    if ($textrailImage) {
+
+                        $imageParams = [
+                            'part_id' => $newTextrailPart->id,
+                            'position' => $img['position']
+                        ];
+                        $this->imageRepository->firstOrCreate($imageParams, $textrailImage['fileName'], $textrailImage['imageData']);
+                    }
+                }
+            } else {
+                $textrailImage = $this->textrailPartService->getTextrailPlaceholderImage();
+
+                if ($textrailImage) {
+
+                    $imageParams = [
+                        'part_id' => $newTextrailPart->id,
+                        'position' => $img['position']
+                    ];
+                    $this->imageRepository->firstOrCreate($imageParams, $textrailImage['fileName'], $textrailImage['imageData']);
+                }
+            }
+
+        }
+
+        $textrailParts = $this->partRepo->getAllExceptBySku($parts_sku);
+
+        foreach ($textrailParts as $textrailPart) {
+            Part::withoutSyncingToSearch(function () use ($textrailPart) {
+                $textrailPart->delete();
+            });
+        }
+    }
 }

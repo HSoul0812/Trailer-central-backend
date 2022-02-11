@@ -40,7 +40,13 @@ class AccessToken
             if ( $request->header('access-token') === config('integrations.atw.credentials.access_token') )
             {
                 return $next($request);
+            } else 
+            {
+                return response('Invalid access token.', 403);
             }
+        } else if (strpos($request->url(), 'feed/atw'))
+        {
+            return response('Invalid access token.', 403);
         }
 
         if (strpos($request->url(), 'admin') === false &&
