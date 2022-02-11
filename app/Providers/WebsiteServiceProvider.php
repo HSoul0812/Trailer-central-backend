@@ -16,6 +16,8 @@ use App\Repositories\Website\WebsiteUserFavoriteInventoryRepository;
 use App\Repositories\Website\WebsiteUserFavoriteInventoryRepositoryInterface;
 use App\Repositories\Website\WebsiteUserRepository;
 use App\Repositories\Website\WebsiteUserRepositoryInterface;
+use App\Repositories\Website\Image\WebsiteImageRepository;
+use App\Repositories\Website\Image\WebsiteImageRepositoryInterface;
 use App\Repositories\Website\WebsiteUserSearchResultRepository;
 use App\Repositories\Website\WebsiteUserSearchResultRepositoryInterface;
 use App\Services\Website\WebsiteDealerUrlService;
@@ -45,6 +47,7 @@ class WebsiteServiceProvider extends ServiceProvider
             WebsiteUserFavoriteInventoryRepositoryInterface::class,
             WebsiteUserFavoriteInventoryRepository::class
         );
+        $this->app->bind(WebsiteImageRepositoryInterface::class, WebsiteImageRepository::class);
 
         // Services
         $this->app->bind(WebsiteDealerUrlServiceInterface::class, WebsiteDealerUrlService::class);
