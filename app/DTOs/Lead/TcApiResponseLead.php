@@ -9,7 +9,7 @@ use JetBrains\PhpStorm\Pure;
 class TcApiResponseLead
 {
     public int $id;
-    public int $website_id;
+    public $website_id;
     public int $dealer_id;
     public ?string $name;
     public ?array $lead_types;
