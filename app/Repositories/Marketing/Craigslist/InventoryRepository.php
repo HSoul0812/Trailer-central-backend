@@ -11,16 +11,13 @@ use Illuminate\Support\Collection;
 
 /**
  * Class InventoryRepository
- * @package App\Repositories\Inventory
+ * @package App\Repositories\Marketing\Craigslist
  */
 class InventoryRepository implements InventoryRepositoryInterface
 {
     use SortTrait, Transaction;
 
     private const DEFAULT_PAGE_SIZE = 15;
-
-    private const SHOW_UNITS_WITH_TRUE_COST = 1;
-    private const DO_NOT_SHOW_UNITS_WITH_TRUE_COST = 0;
 
 
     private $sortOrders = [
@@ -46,14 +43,6 @@ class InventoryRepository implements InventoryRepositoryInterface
         ],
         '-vin' => [
             'field' => 'vin',
-            'direction' => 'ASC'
-        ],
-        'true_cost' => [
-            'field' => 'true_cost',
-            'direction' => 'DESC'
-        ],
-        '-true_cost' => [
-            'field' => 'true_cost',
             'direction' => 'ASC'
         ],
         'fp_balance' => [
@@ -245,20 +234,6 @@ class InventoryRepository implements InventoryRepositoryInterface
             }
         }
 
-        if (isset($params['attribute_names']) && !$attributesEmpty) {
-            $query = $query->join('eav_attribute_value', 'inventory.inventory_id', '=', 'eav_attribute_value.inventory_id')->orderBy('eav_attribute_value.attribute_id', 'desc');
-            $query = $query->join('eav_attribute', 'eav_attribute.attribute_id', '=', 'eav_attribute_value.attribute_id');
-
-            $query = $query->where(function ($q) use ($params) {
-                foreach ($params['attribute_names'] as $attribute => $value) {
-                    $q->orWhere(function ($q) use ($attribute, $value) {
-                        $q->where('code', '=', $attribute)
-                            ->where('value', '=', $value);
-                    });
-                }
-            });
-        }
-
         if ($withDefault) {
             $query->where('status', '<>', Inventory::STATUS_QUOTE);
         }
@@ -283,14 +258,6 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query = $query->whereIn('inventory.inventory_id', $params['inventory_ids']);
         }
 
-        if (isset($params['units_with_true_cost'])) {
-            if ($params['units_with_true_cost'] == self::SHOW_UNITS_WITH_TRUE_COST) {
-                $query = $query->where('true_cost', '>', 0);
-            } else if ($params['units_with_true_cost'] == self::DO_NOT_SHOW_UNITS_WITH_TRUE_COST) {
-                $query = $query->where('true_cost', 0);
-            }
-        }
-
         if (isset($params['is_archived'])) {
             $withDefault = false;
             $query = $query->where('inventory.is_archived', $params['is_archived']);
@@ -298,14 +265,6 @@ class InventoryRepository implements InventoryRepositoryInterface
 
         if ($withDefault) {
             $query = $query->where(self::DEFAULT_GET_PARAMS[self::CONDITION_AND_WHERE]);
-        }
-
-        if (isset($params['sold_at_lt'])) {
-            $query = $query->where('inventory.sold_at', '<', $params['sold_at_lt']);
-        }
-
-        if (isset($params['integration_item_hash']) && $params['integration_item_hash'] === 'not_null') {
-            $query = $query->whereNotNull('integration_item_hash');
         }
 
         if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
@@ -318,28 +277,16 @@ class InventoryRepository implements InventoryRepositoryInterface
             }
         }
 
-        if (isset($params['floorplan_vendor'])) {
-            $query = $query->where('fp_vendor', $params['floorplan_vendor']);
-        }
-
         if (isset($params['search_term'])) {
             $query = $query->where(function ($q) use ($params) {
                 $q->where('stock', 'LIKE', '%' . $params['search_term'] . '%')
-                        ->orWhere('title', 'LIKE', '%' . $params['search_term'] . '%')
-                        ->orWhere('inventory.description', 'LIKE', '%' . $params['search_term'] . '%')
-                        ->orWhere('vin', 'LIKE', '%' . $params['search_term'] . '%')
-                        ->orWhereHas('floorplanVendor', function ($query) use ($params) {
-                            $query->where('name', 'LIKE', '%' . $params['search_term'] . '%');
-                        });
+                  ->orWhere('title', 'LIKE', '%' . $params['search_term'] . '%')
+                  ->orWhere('inventory.description', 'LIKE', '%' . $params['search_term'] . '%')
+                  ->orWhere('vin', 'LIKE', '%' . $params['search_term'] . '%')
+                  ->orWhereHas('floorplanVendor', function ($query) use ($params) {
+                    $query->where('name', 'LIKE', '%' . $params['search_term'] . '%');
+                  });
             });
-        }
-
-        if (isset($params['images_greater_than'])) {
-            $query->havingRaw('image_count >= '. $params['images_greater_than']);
-        } elseif (isset($params['images_less_than'])) {
-            $query->havingRaw('image_count <= '. $params['images_less_than']);
-        } else {
-            $query->select(['inventory.*']);
         }
 
         if (isset($params['sort'])) {
