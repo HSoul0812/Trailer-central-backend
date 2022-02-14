@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Marketing\Profile;
+namespace Tests\Feature\Marketing;
 
 use Tests\TestCase;
 
@@ -19,7 +19,7 @@ class ProfileGetTest extends TestCase
      */
     public function testGettingProfiles()
     {                    
-        $this->json('GET', '/api/marketing/profile') 
-            ->assertStatus(200);             
+        $this->json('GET', '/api/marketing/clapp/profile') 
+            ->assertStatus(200);
     }
 }
