@@ -24,6 +24,8 @@ use App\Repositories\Marketing\Craigslist\ActivePostRepository;
 use App\Repositories\Marketing\Craigslist\ActivePostRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\SchedulerRepository;
 use App\Repositories\Marketing\Craigslist\SchedulerRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\ProfileRepository;
+use App\Repositories\Marketing\Craigslist\ProfileRepositoryInterface;
 use App\Services\CRM\User\SalesAuthService;
 use App\Services\CRM\User\SalesAuthServiceInterface;
 use App\Services\Integration\AuthService;
@@ -80,6 +82,7 @@ class IntegrationServiceProvider extends ServiceProvider
         // Marketing Repositories
         $this->app->bind(ActivePostRepositoryInterface::class, ActivePostRepository::class);
         $this->app->bind(SchedulerRepositoryInterface::class, SchedulerRepository::class);
+        $this->app->bind(ProfileRepositoryInterface::class, ProfileRepository::class);
         
         $this->app->bind(TransactionExecuteQueueRepositoryInterface::class, TransactionExecuteQueueRepository::class);
         

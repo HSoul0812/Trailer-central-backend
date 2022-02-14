@@ -1000,6 +1000,13 @@ $api->version('v1', function ($route) {
                 $route->put('{id}', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@update')->where('id', '[0-9]+');
                 $route->delete('{id}', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@destroy')->where('id', '[0-9]+');
             });
+
+            // Profile
+            $route->group([
+                'prefix' => 'profile'
+            ], function ($route) {
+                $route->get('/', 'App\Http\Controllers\v1\Marketing\Craigslist\ProfileController@index');
+            });
         });
     });
 
