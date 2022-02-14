@@ -70,6 +70,11 @@ class InquiryLead
     /**
      * @const string
      */
+    const TT_SIMPLE_DOMAIN = 'trailertrader.com';
+
+    /**
+     * @const string
+     */
     const TT_EMAIL_BODY = '#ffff00';
 
     /**
@@ -172,6 +177,10 @@ class InquiryLead
      */
     private $fromName;
 
+    /**
+     * @var string Simple TrailerTrader Domain Name
+     */
+    private $simpleDomain;
 
     /**
      * @var array<string> Lead Types to Insert to Lead Inquiry
@@ -387,6 +396,14 @@ class InquiryLead
      * @return array{array{name: string, email: string}, ...etc}
      */
     public function getInquiryToArray(): array {
+      
+        // Normal, support to many emails for leads on dealer location email field
+        $normalTo = [];
+        $inquiryEmail = preg_split('/,|;|\s/', $this->inquiryEmail, null, PREG_SPLIT_NO_EMPTY);
+
+        foreach ($inquiryEmail as $key => $value) {
+          $normalTo[$key] = ['name' =>$this->inquiryName, 'email' => $value];
+        }
         // If Dev, Only Return Specific Entries
         if(!empty($this->isDev())) {
             $to = self::INQUIRY_DEV_TO;
@@ -397,7 +414,13 @@ class InquiryLead
         }
         // Normal, Return Proper Inquiry
         else {
-            return [['name' => $this->inquiryName, 'email' => $this->inquiryEmail]];
+            if ($this->websiteDomain == self::TT_SIMPLE_DOMAIN) {
+              $normalTo[] = ['name' => $this->firstName, 'email' => $this->emailAddress];
+              return $normalTo;
+            } else {
+              return $normalTo;;
+            }
+            
         }
 
         // Return With Merged CC To
@@ -636,7 +659,8 @@ class InquiryLead
             'phone'            => $this->phoneNumber,
             'postal'           => $this->zip,
             'preferred'        => $this->getPreferredContact(),
-            'comments'         => $this->comments
+            'comments'         => $this->comments,
+            'simpleDomain'     => self::TT_SIMPLE_DOMAIN
         ], $this->getAdminMsg());
     }
 

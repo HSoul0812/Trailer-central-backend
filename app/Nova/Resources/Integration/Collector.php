@@ -110,6 +110,12 @@ class Collector extends Resource
                     'The path to list of items is in the file. For instance, "Units" or "Units/Items" (relevant for xml files)'
                 ),
             ]),
+            
+            new Panel('BDV', [
+                Boolean::make('Activate BDV', 'is_bdv_enabled')->hideFromIndex()->help(
+                    'Whether or not to use BDV for this feed (images will be overwritten by whatever bdv sends)'
+                )
+            ]),
 
             new Panel('Spincar', [
                 Boolean::make('Activate Spincar', 'spincar_active')->hideFromIndex()->help(
@@ -245,6 +251,9 @@ class Collector extends Resource
                 ),
                 Text::make('Types Affected By the Feed', 'only_types')->hideFromIndex()->help(
                     'Enter the types of the inventory you want this feed to affect separated by commas. For example if you want this feed to affect only trailers and boats you would enter: 1,5'
+                ),
+                Boolean::make('Ignore Manually Added Units', 'ignore_manually_added_units')->hideFromIndex()->help(
+                    'If active any manually added units will be ignored by the feed'
                 ),
             ]),
 

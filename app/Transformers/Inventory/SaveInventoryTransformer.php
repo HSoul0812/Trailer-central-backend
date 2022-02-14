@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Class SaveInventoryTransformer
+ *
  * @package App\Transformers\Inventory
  */
 class SaveInventoryTransformer implements TransformerInterface
@@ -25,20 +26,20 @@ class SaveInventoryTransformer implements TransformerInterface
     private const STATUS_FIELD = 'status';
 
     private const FEET_INCHES_FIELDS = [
-        "width",
-        "length",
-        "height",
+        'width',
+        'length',
+        'height',
     ];
 
     private const VIDEO_EMBED_FIELDS = [
-        'video_embed_code'
+        'video_embed_code',
     ];
 
     private const FEET_DECIMAL_FIELDS = [
-        "width",
-        "length",
-        "height",
-        "shortwall_length",
+        'width',
+        'length',
+        'height',
+        'shortwall_length',
     ];
 
     private const POUND_DECIMAL_FIELDS = [
@@ -58,15 +59,15 @@ class SaveInventoryTransformer implements TransformerInterface
     ];
 
     private const SANITIZE_UTF8_FIELDS = [
-        'description'
+        'description',
     ];
 
     private const PRICE_FIELDS = [
-        "msrp",
-        "price",
-        "sales_price",
-        "website_price",
-        "hidden_price",
+        'msrp',
+        'price',
+        'sales_price',
+        'website_price',
+        'hidden_price',
     ];
 
     private const DEPENDED_FIELDS = [
@@ -97,7 +98,7 @@ class SaveInventoryTransformer implements TransformerInterface
     ];
 
     private const ARRAY_VALUES = [
-        'craigslist'
+        'craigslist',
     ];
 
     /**
@@ -126,6 +127,7 @@ class SaveInventoryTransformer implements TransformerInterface
 
     /**
      * SaveInventoryTransformer constructor.
+     *
      * @param AttributeRepositoryInterface $attributeRepository
      * @param ConvertHelper $convertHelper
      * @param SanitizeHelper $sanitizeHelper
@@ -140,6 +142,7 @@ class SaveInventoryTransformer implements TransformerInterface
 
     /**
      * @param array $params
+     *
      * @return array
      */
     public function transform(array $params): ?array
@@ -148,10 +151,14 @@ class SaveInventoryTransformer implements TransformerInterface
             $convertHelper = $this->convertHelper;
             $sanitizeHelper = $this->sanitizeHelper;
 
-            $defaultAttributes = $this->attributeRepository
-                ->getAllByEntityTypeId($params['entity_type_id'])
-                ->pluck('code', 'attribute_id')
-                ->toArray();
+            if (isset($params['entity_type_id'])) {
+                $defaultAttributes = $this->attributeRepository
+                    ->getAllByEntityTypeId($params['entity_type_id'])
+                    ->pluck('code', 'attribute_id')
+                    ->toArray();
+            } else {
+                $defaultAttributes = [];
+            }
 
             $createParams = $params;
             $attributes = $params[self::ATTRIBUTES_KEY] ?? [];
@@ -163,7 +170,8 @@ class SaveInventoryTransformer implements TransformerInterface
                 }
             }
 
-            $createParams = array_filter($createParams,
+            $createParams = array_filter(
+                $createParams,
                 function ($paramsKey) {
                     return !is_numeric($paramsKey);
                 },
@@ -245,10 +253,11 @@ class SaveInventoryTransformer implements TransformerInterface
                     // OR if it's 0, and we want to allow it only if it's in the allow list
                     $shouldCreateAttribute = !empty($createParamValue) || ($createParamValue === '0' && $attributeValueCanBeZero);
 
-                    $attributeExists = count(array_filter($attributes, function($attribute) use ($attributeId) {
+                    $attributeExists = count(array_filter($attributes, function ($attribute) use ($attributeId) {
                         if (!isset($attribute['attribute_id'])) {
                             return false;
                         }
+
                         return $attribute['attribute_id'] == $attributeId;
                     })) > 0;
 
@@ -262,7 +271,6 @@ class SaveInventoryTransformer implements TransformerInterface
                     }
 
                     unset($createParams[$createParamKey]);
-
                 } elseif (substr($createParamKey, 0, 8) == 'feature_' && !empty($createParamValue)) {
                     list(, $featureId) = explode('_', $createParamKey);
 
@@ -278,7 +286,6 @@ class SaveInventoryTransformer implements TransformerInterface
                     }
 
                     unset($createParams[$createParamKey]);
-
                 }
             }
 
@@ -291,12 +298,14 @@ class SaveInventoryTransformer implements TransformerInterface
             return $createParams;
         } catch (\Exception $e) {
             Log::error('Item transform error.', $e->getTrace());
+
             return null;
         }
     }
 
     /**
      * @param array $params
+     *
      * @return array
      */
     private function transformImages(array $params): array
@@ -328,6 +337,7 @@ class SaveInventoryTransformer implements TransformerInterface
 
     /**
      * @param array $params
+     *
      * @return array
      */
     private function transformFiles(array $params): array

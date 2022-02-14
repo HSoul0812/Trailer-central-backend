@@ -30,6 +30,7 @@ use Brick\Money\MoneyContainer;
  * @property-read  Money $shippingAmount
  * @property-read  Money $taxAmount
  * @property-read  Money $totalAmount
+ * @property-read  bool $isOrderCancellation
  * @property-read  array<array{id: int, qty: int, price: float, amount: float}> $parts array indexed by part id containing the purchase price and its amount
  * @property-read  array<array{order_item_id: int, qty: int}> $textrailItems
  * @property-read  string|null $reason
@@ -75,6 +76,9 @@ final class RefundBag implements DTO
     /** @var int|null */
     private $rma;
 
+    /** @var bool */
+    private $isOrderCancellation;
+
     /**
      * @param int $orderId
      * @param array<array{id: int, qty: int}> $partsWithQtys array indexed by part id containing the qty of every part
@@ -109,11 +113,13 @@ final class RefundBag implements DTO
 
         $this->parts = $parts;
 
+        $partsTaxAmount = Money::zero('USD');
+
         // prepare the refund info to match with the order info in Textrail side
         $this->textrailItems = collect($parts)->filter(function (array $part): bool {
             return $part['textrail'] !== null;
-        })->map(function (array $part) use (&$taxAmount): array {
-            $taxAmount = $taxAmount->plus($part['qty'] * $part['price'] * $this->order->tax_rate, RoundingMode::HALF_UP);
+        })->map(function (array $part) use (&$partsTaxAmount): array {
+            $partsTaxAmount = $partsTaxAmount->plus($part['qty'] * $part['price'] * $this->order->tax_rate, RoundingMode::HALF_UP);
 
             return [
                 'order_item_id' => $part['textrail']['item_id'],
@@ -126,7 +132,7 @@ final class RefundBag implements DTO
         $this->adjustmentAmount = $adjustmentAmount;
         $this->handlingAmount = $handlingAmount;
         $this->shippingAmount = $shippingAmount;
-        $this->taxAmount = $taxAmount;
+        $this->taxAmount = $this->isOrderCancellation ? $taxAmount: $partsTaxAmount;
         $this->reason = $reason;
         $this->totalAmount = $partsAmount->plus($adjustmentAmount)
             ->plus($handlingAmount)

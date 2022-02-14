@@ -57,25 +57,22 @@ class ADFService implements ADFServiceInterface
      * @param Lead $lead lead to export to IDS
      * @return bool
      */
-    public function export(InquiryLead $inquiry, Lead $lead) : bool {
+    public function export(InquiryLead $inquiry, Lead $lead): bool
+    {
         $leadEmail = $this->leadEmailRepository->find($inquiry->dealerId, $inquiry->dealerLocationId);
-
-        if($leadEmail){
-            if ($leadEmail->export_format !== LeadEmail::EXPORT_FORMAT_ADF) {
-                return false;
-            }
-
-            $hiddenCopiedEmails = explode(',', config('adf.exports.copied_emails'));
-
-            $adf = $this->getAdfLead($inquiry, $lead->identifier);
-
-            // Dispatch ADF Export Job
-            $job = new ADFJob($adf, $lead, $leadEmail->to_emails, $leadEmail->copied_emails, $hiddenCopiedEmails);
-            $this->dispatch($job->onQueue('mails'));
-
-            return true;
+        if (!$leadEmail || $leadEmail->export_format !== LeadEmail::EXPORT_FORMAT_ADF) {
+            return false;
         }
-        return false;
+
+        $hiddenCopiedEmails = explode(',', config('adf.exports.copied_emails'));
+
+        $adf = $this->getAdfLead($inquiry, $lead->identifier);
+
+        // Dispatch ADF Export Job
+        $job = new ADFJob($adf, $lead, $leadEmail->to_emails, $leadEmail->copied_emails, $hiddenCopiedEmails);
+        $this->dispatch($job->onQueue('mails'));
+
+        return true;
     }
 
 
@@ -86,7 +83,8 @@ class ADFService implements ADFServiceInterface
      * @param int $leadId
      * @return ADFLead
      */
-    private function getAdfLead(InquiryLead $inquiry, int $leadId): ADFLead {
+    private function getAdfLead(InquiryLead $inquiry, int $leadId): ADFLead
+    {
         // Initialize ADF Lead Params
         $params = [
             'leadId' => $leadId,
@@ -122,7 +120,8 @@ class ADFService implements ADFServiceInterface
      *               vehicleStock: string,
      *               vehicleVin: string}
      */
-    private function getAdfVehicle(array $inventory): array {
+    private function getAdfVehicle(array $inventory): array
+    {
         // Get Inventory
         $item = $this->inventoryRepository->get(['id' => reset($inventory)]);
 
@@ -153,7 +152,8 @@ class ADFService implements ADFServiceInterface
      *               vendorAddrZip: string,
      *               vendorAddrCountry: string}
      */
-    private function getAdfVendor(InquiryLead $inquiry): array {
+    private function getAdfVendor(InquiryLead $inquiry): array
+    {
         // Get Dealer & Location
         $dealer = $this->userRepository->get(['dealer_id' => $inquiry->dealerId]);
         $location = $this->dealerLocationRepository->get(['id' => $inquiry->dealerLocationId]);

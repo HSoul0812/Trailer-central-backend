@@ -163,11 +163,11 @@ class InventoryRepository implements InventoryRepositoryInterface
     public function get($params)
     {
         $query = CustomerInventory::select('*');
-        if(isset($params['customer_id'])) {
+        if (isset($params['customer_id'])) {
             $query->where('customer_id', $params['customer_id']);
         }
 
-        if(isset($params['inventory_id'])){
+        if (isset($params['inventory_id'])) {
             $query->where('inventory_id', $params['inventory_id']);
         };
         return $query->firstOrFail();
@@ -185,5 +185,28 @@ class InventoryRepository implements InventoryRepositoryInterface
     protected function getSortOrders(): array
     {
         return $this->sortOrders;
+    }
+
+    /**
+     * @param int $customerId
+     *
+     * @return Collection
+     */
+    public function getTitles(int $customerId)
+    {
+        $customerInventoryTable = CustomerInventory::getTableName();
+        $inventoryTable = Inventory::getTableName();
+
+        $query = Inventory::select(["$inventoryTable.inventory_id", 'title', 'vin']);
+
+        $query->join(
+            $customerInventoryTable,
+            static function (JoinClause $join) use ($inventoryTable, $customerInventoryTable, $customerId): void {
+                $join->on("$customerInventoryTable.inventory_id", '=', "$inventoryTable.inventory_id")
+                ->where("$customerInventoryTable.customer_id", $customerId);
+            }
+        );
+
+        return $query->get();
     }
 }

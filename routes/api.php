@@ -271,12 +271,13 @@ $api->version('v1', function ($route) {
     /**
      * Inventory distance
      */
-    $route->get('inventory/{inventory_id}/delivery_price', 'App\Http\Controllers\v1\Inventory\InventoryController@delivery_price')->where('inventory_id', '[0-9]+');
+    $route->get('inventory/{inventory_id}/delivery_price', 'App\Http\Controllers\v1\Inventory\InventoryController@deliveryPrice')->where('inventory_id', '[0-9]+');
 
     /**
      * Inventory
      */
     $route->get('inventory', 'App\Http\Controllers\v1\Inventory\InventoryController@index');
+    $route->get('inventory/get_all_titles', 'App\Http\Controllers\v1\Inventory\InventoryController@getAllTitles');
     $route->put('inventory', 'App\Http\Controllers\v1\Inventory\InventoryController@create');
     $route->get('inventory/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@show')->where('id', '[0-9]+');
     $route->post('inventory/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@update')->where('id', '[0-9]+');
@@ -413,6 +414,15 @@ $api->version('v1', function ($route) {
         $route->delete('', 'App\Http\Controllers\v1\Website\User\WebsiteUserFavoriteInventoryController@delete');
     });
 
+    /**
+     * Website User Search Result
+     */
+    $route->group(['prefix' => 'website/user/search-result', 'middleware' => 'api.auth', 'providers' => ['website_auth']], function ($route) {
+        $route->get('', 'App\Http\Controllers\v1\Website\User\WebsiteUserSearchResultController@index');
+        $route->post('', 'App\Http\Controllers\v1\Website\User\WebsiteUserSearchResultController@create');
+        $route->delete('', 'App\Http\Controllers\v1\Website\User\WebsiteUserSearchResultController@delete');
+    });
+
     /*
     |--------------------------------------------------------------------------
     | Interactions
@@ -505,6 +515,7 @@ $api->version('v1', function ($route) {
     */
 
     $route->post('feed/atw', 'App\Http\Controllers\v1\Feed\AtwController@create');
+    $route->put('feed/atw', 'App\Http\Controllers\v1\Feed\AtwController@update');
 
     // upload feed data
     $route->post('feed/uploader/{code}', 'App\Http\Controllers\v1\Feed\UploadController@upload')->where('code', '\w+');
