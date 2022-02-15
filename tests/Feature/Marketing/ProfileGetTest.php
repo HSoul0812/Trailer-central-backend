@@ -19,7 +19,18 @@ class ProfileGetTest extends TestCase
      */
     public function testGettingProfiles()
     {                    
-        $this->json('GET', '/api/marketing/clapp/profile') 
-            ->assertStatus(200);
+        $this->withHeaders(['access-token' => $this->accessToken()])
+            ->json('GET', '/api/marketing/clapp/profile') 
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'id',
+                        'profile',
+                        'username',
+                        'category'
+                    ]
+                ]
+            ]);
     }
 }
