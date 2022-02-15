@@ -250,16 +250,9 @@ class InquiryService implements InquiryServiceInterface
         }
 
         // Dispatch Auto Responder Job
-        // TO DO: This won't be necessary on regular queues, because the queue
-        // will throw an error and not affect the main process. The problem is
-        // on dev environments that use sync.
-        try {
-            $this->log->info('Handling auto responder on lead #' . $lead->identifier);
-            $job = new AutoResponderJob($lead);
-            $this->dispatch($job->onQueue('inquiry'));
-        } catch(\Exception $ex) {
-            $this->log->error('Exception thrown on autoresponder: ' . $ex->getMessage());
-        }
+        $this->log->info('Handling auto responder on lead #' . $lead->identifier);
+        $job = new AutoResponderJob($lead);
+        $this->dispatch($job->onQueue('inquiry'));
 
         // Export ADF if Possible
         if(!in_array(LeadType::TYPE_FINANCING, $inquiry->leadTypes)) {
