@@ -134,7 +134,7 @@ class InquiryService implements InquiryServiceInterface
 
         // Get Inquiry Lead
         $inquiry = $this->inquiryEmail->fill($params);
-        $this->log->info('Creating ' . $inquiry->inquiryType . ' inquiry email for ' . $inquiry->inquiryEmail);
+        $this->log->info('Creating ' . $inquiry->inquiryType . ' inquiry email for ' . $inquiry->getInquiryTo());
 
         // Create or Merge Lead
         return $this->mergeOrCreate($inquiry, $params);
@@ -158,7 +158,7 @@ class InquiryService implements InquiryServiceInterface
         $inquiry = $this->inquiryEmail->fill($params);
 
         // Send Inquiry Email
-        $this->log->info('Sending ' . $inquiry->inquiryType . ' inquiry email for ' . $inquiry->inquiryEmail);
+        $this->log->info('Sending ' . $inquiry->inquiryType . ' inquiry email for ' . $inquiry->getInquiryTo());
         $this->inquiryEmail->send($inquiry);
 
         // Merge or Create Lead
