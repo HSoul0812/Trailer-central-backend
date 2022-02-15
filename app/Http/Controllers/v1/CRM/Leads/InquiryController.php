@@ -24,7 +24,7 @@ class InquiryController extends RestfulController
      */
     public function __construct(InquiryServiceInterface $inquiry)
     {
-        $this->middleware('setDealerIdOnRequest')->only(['create', 'send']);
+        $this->middleware('setDealerIdOnRequest')->only(['create', 'send', 'text']);
         $this->inquiry = $inquiry;
     }
 
