@@ -31,8 +31,6 @@ use App\Repositories\Inventory\CategoryRepository;
 use App\Repositories\Inventory\CategoryRepositoryInterface;
 use App\Repositories\Inventory\AttributeRepository;
 use App\Repositories\Inventory\AttributeRepositoryInterface;
-use App\Repositories\Inventory\CustomOverlay\CustomOverlayRepository;
-use App\Repositories\Inventory\CustomOverlay\CustomOverlayRepositoryInterface;
 use App\Repositories\Inventory\FileRepository;
 use App\Repositories\Inventory\FileRepositoryInterface;
 use App\Repositories\Inventory\ImageRepository;
@@ -73,6 +71,8 @@ use App\Repositories\User\DealerLocationSalesTaxItemRepository;
 use App\Repositories\User\DealerLocationSalesTaxItemRepositoryInterface;
 use App\Repositories\User\DealerLocationSalesTaxRepository;
 use App\Repositories\User\DealerLocationSalesTaxRepositoryInterface;
+use App\Repositories\User\Integration\DealerIntegrationRepository;
+use App\Repositories\User\Integration\DealerIntegrationRepositoryInterface;
 use App\Repositories\Website\DealerProxyRedisRepository;
 use App\Repositories\Website\DealerProxyRepositoryInterface;
 use App\Repositories\Website\TowingCapacity\MakesRepository;
@@ -110,8 +110,8 @@ use App\Services\Dms\Pos\RegisterServiceInterface;
 use App\Services\File\FileService;
 use App\Services\File\FileServiceInterface;
 use App\Services\File\ImageService;
-use App\Services\Inventory\CustomOverlay\CustomOverlayService;
-use App\Services\Inventory\CustomOverlay\CustomOverlayServiceInterface;
+use App\Services\User\DealerIntegrationService;
+use App\Services\User\DealerIntegrationServiceInterface;
 use App\Services\Inventory\Packages\PackageService;
 use App\Services\Inventory\Packages\PackageServiceInterface;
 use App\Services\User\DealerLocationService;
@@ -334,6 +334,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(StockRepositoryInterface::class, StockRepository::class);
 
         $this->app->bind(ApiEntityReferenceRepositoryInterface::class, ApiEntityReferenceRepository::class);
+
+        $this->app->bind(DealerIntegrationServiceInterface::class, DealerIntegrationService::class);
+        $this->app->bind(DealerIntegrationRepositoryInterface::class, DealerIntegrationRepository::class);
         $this->app->bind(DealerLocationServiceInterface::class, DealerLocationService::class);
         $this->app->bind(DealerLocationSalesTaxItemRepositoryInterface::class, DealerLocationSalesTaxItemRepository::class);
         $this->app->bind(DealerLocationSalesTaxRepositoryInterface::class, DealerLocationSalesTaxRepository::class);

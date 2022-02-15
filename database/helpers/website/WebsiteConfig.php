@@ -8,7 +8,13 @@ use Illuminate\Support\Facades\DB;
 
 class WebsiteConfig
 {
-    public static function setKeyValueByDealerName(string $dealerName, string $keyName, int $configValue): void
+    /**
+     * @param string $dealerName
+     * @param string $keyName
+     * @param string|int $configValue
+     * @return void
+     */
+    public static function setKeyValueByDealerName(string $dealerName, string $keyName, $configValue): void
     {
         $websiteId = self::getWebsiteIdByDealerName($dealerName);
 
