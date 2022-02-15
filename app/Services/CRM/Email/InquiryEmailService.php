@@ -94,8 +94,8 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         $this->user = $user;
         $this->dealerLocation = $dealerLocation;
 
-        // Initialize Logger
-        $this->log = Log::channel('leads');
+        // Get Logger
+        $this->log = Log::channel('inquiry');
     }
 
     /**
