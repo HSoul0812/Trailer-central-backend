@@ -124,7 +124,7 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         }
 
         // Returns True on Success
-        $this->log->info('Inquiry Email Sent to ' . $inquiry->inquiryEmail .
+        $this->log->info('Inquiry Email Sent to ' . $inquiry->getInquiryTo() .
                             ' for the Lead ' . $inquiry->getFullName());
         return true;
     }

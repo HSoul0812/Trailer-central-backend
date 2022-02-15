@@ -381,6 +381,20 @@ class InquiryLead
     }
 
 
+
+    /**
+     * Get Inquiry To
+     * 
+     * @return string
+     */
+    public function getInquiryTo(): string {
+        // Get Inquiry
+        if(is_array($this->inquiryEmail)) {
+            return implode(";", $this->inquiryEmail);
+        }
+        return $this->inquiryEmail;
+    }
+
     /**
      * Get Inquiry To Array
      * 
