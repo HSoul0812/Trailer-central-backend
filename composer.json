@@ -109,7 +109,11 @@
     "config": {
         "preferred-install": "dist",
         "sort-packages": true,
-        "optimize-autoloader": true
+        "optimize-autoloader": true,
+        "platform": {
+            "ext-pcntl": "7.1",
+            "ext-posix": "7.1"
+        }
     },
     "repositories": [
         {
