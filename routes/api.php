@@ -414,6 +414,15 @@ $api->version('v1', function ($route) {
         $route->delete('', 'App\Http\Controllers\v1\Website\User\WebsiteUserFavoriteInventoryController@delete');
     });
 
+    /**
+     * Website User Search Result
+     */
+    $route->group(['prefix' => 'website/user/search-result', 'middleware' => 'api.auth', 'providers' => ['website_auth']], function ($route) {
+        $route->get('', 'App\Http\Controllers\v1\Website\User\WebsiteUserSearchResultController@index');
+        $route->post('', 'App\Http\Controllers\v1\Website\User\WebsiteUserSearchResultController@create');
+        $route->delete('', 'App\Http\Controllers\v1\Website\User\WebsiteUserSearchResultController@delete');
+    });
+
     /*
     |--------------------------------------------------------------------------
     | Interactions
@@ -641,6 +650,27 @@ $api->version('v1', function ($route) {
             $route->post('/mileage-fee', 'App\Http\Controllers\v1\User\DealerLocationMileageFeeController@create');
             $route->delete('/mileage-fee/{feeId}', 'App\Http\Controllers\v1\User\DealerLocationMileageFeeController@delete');
         });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Dealer Website Images
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('website/{websiteId}/images', 'App\Http\Controllers\v1\Website\Image\WebsiteImagesController@index')->where('websiteId', '[0-9]+');
+        $route->post('website/{websiteId}/image/{imageId}', 'App\Http\Controllers\v1\Website\Image\WebsiteImagesController@update')->where(['websiteId' => '[0-9]+', 'imageId' => '[0-9]+']);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Dealer integrations
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('user/integrations/{id}', 'App\Http\Controllers\v1\User\DealerIntegrationController@show');
 
         /*
         |--------------------------------------------------------------------------

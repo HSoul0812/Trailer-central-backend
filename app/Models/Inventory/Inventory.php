@@ -183,6 +183,14 @@ class Inventory extends Model
     const STATUS_PENDING_SALE_LABEL = 'Pending Sale';
     const STATUS_SPECIAL_ORDER_LABEL = 'Special Order';
 
+    const UNAVAILABLE_STATUSES = [
+        self::STATUS_SOLD,
+        self::STATUS_ON_ORDER,
+        self::STATUS_PENDING_SALE,
+        self::STATUS_SPECIAL_ORDER,
+        self::STATUS_QUOTE
+    ];
+
     const IS_FLOORPLANNED = 1;
     const IS_NOT_FLOORPLANNED = 0;
 
@@ -371,7 +379,7 @@ class Inventory extends Model
 
     public function dealerLocation(): BelongsTo
     {
-        return $this->belongsTo(DealerLocation::class, 'dealer_location_id', 'dealer_location_id');
+        return $this->belongsTo(DealerLocation::class, 'dealer_location_id', 'dealer_location_id')->withTrashed();
     }
 
     public function floorplanPayments(): HasMany

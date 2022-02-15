@@ -8,6 +8,7 @@ use App\Models\Inventory\InventoryImage;
 use App\Transformers\Dms\ServiceOrderTransformer;
 use Illuminate\Database\Eloquent\Collection;
 use League\Fractal\Resource\Item;
+use Carbon\Carbon;
 use League\Fractal\TransformerAbstract;
 use App\Models\Inventory\Inventory;
 use App\Transformers\User\UserTransformer;
@@ -15,10 +16,6 @@ use App\Transformers\User\DealerLocationTransformer;
 use App\Transformers\Website\WebsiteTransformer;
 use League\Fractal\Resource\Collection as FractalCollection;
 
-/**
- * Class InventoryTransformer
- * @package App\Transformers\Inventory
- */
 class InventoryTransformer extends TransformerAbstract
 {
     protected $availableIncludes = [
@@ -99,6 +96,12 @@ class InventoryTransformer extends TransformerAbstract
             list($heightSecond, $heightInchesSecond) = $this->convertHelper->feetToFeetInches($inventory->height);
         }
 
+        $age = now()->diffInDays(Carbon::parse($inventory->created_at));
+
+        if($dateSoldOrArchived = $inventory->archived_at ?? $inventory->sold_at){
+            $age = Carbon::parse($dateSoldOrArchived)->diffInDays(Carbon::parse($inventory->created_at));
+        }
+
         return [
              'id' => $inventory->inventory_id,
              'identifier' => $inventory->identifier,
@@ -140,7 +143,7 @@ class InventoryTransformer extends TransformerAbstract
              'non_serialized' => $inventory->non_serialized,
              'notes' => $inventory->notes,
              'price' => $inventory->price ?? 0,
-             'sales_price' => (float) $inventory->sales_price ?? 0,
+             'sales_price' => (float) ($inventory->sales_price ?? 0),
              'website_price' => $inventory->website_price ?? 0,
              'send_to_quickbooks' => $inventory->send_to_quickbooks,
              'status' => $inventory->status_label,
@@ -167,6 +170,7 @@ class InventoryTransformer extends TransformerAbstract
              'created_at' => $inventory->created_at,
              'updated_at' => $inventory->updated_at,
              'times_viewed' => $inventory->times_viewed,
+             'sold_at' => $inventory->sold_at,
              'is_featured' => $inventory->is_featured,
              'is_special' => $inventory->is_special,
              'chosen_overlay' => $inventory->chosen_overlay,
@@ -175,7 +179,8 @@ class InventoryTransformer extends TransformerAbstract
              'show_on_website' => $inventory->show_on_website,
              'overlay_enabled' => $inventory->overlay_enabled,
              'cost_of_ros' => $inventory->cost_of_ros,
-             'quote_url' => config('app.new_design_crm_url') . $inventory->user->getCrmLoginUrl('bill-of-sale/new?inventory_id=' . $inventory->identifier)
+             'quote_url' => config('app.new_design_crm_url') . $inventory->user->getCrmLoginUrl('bill-of-sale/new?inventory_id=' . $inventory->identifier),
+             'age' => $age
          ];
     }
 
