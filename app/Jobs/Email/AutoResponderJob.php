@@ -33,6 +33,7 @@ class AutoResponderJob extends Job
         Log::info('Starting AutoResponder', ['lead' => $this->lead->identifier]);
 
         $dealer = $this->lead->user;
+        $log = Log::channel('inquiry');
 
         if (!$dealer->autoresponder_enable || empty($dealer->autoresponder_text)) {
             return false;
@@ -49,10 +50,10 @@ class AutoResponderJob extends Job
                 ])
             );
 
-            Log::info('AutoResponder successfully completed', ['lead' => $this->lead->identifier]);
+            $log->info('AutoResponder successfully completed', ['lead' => $this->lead->identifier]);
             return true;
         } catch (\Exception $e) {
-            Log::error('AutoResponder error', $e->getTrace());
+            $log->error('AutoResponder error', $e->getTrace());
             throw $e;
         }
     }
