@@ -4,7 +4,6 @@
 
 namespace Tests\Feature\Inventory\Image;
 
-use App\Jobs\Ecommerce\ProcessRefundOnPaymentGatewayJob;
 use App\Jobs\Files\DeleteS3FilesJob;
 use Illuminate\Support\Facades\Bus;
 
@@ -114,8 +113,8 @@ class BulkDestroyInventoryImageTest extends EndpointInventoryImageTest
         return [
             'non exists inventory' => [['inventory' => $this->faker->numberBetween(1, 5)], 'inventory_id', 'The selected inventory id is invalid.', 422, 'Validation Failed'],
             'no images' => [['image_ids' => []], 'image_ids', 'The image ids field is required.', 422, 'Validation Failed'],
-            'foreign inventory' => [['foreign_inventory' => $getInventory, 'inventory' => $getInventory, 'image_ids' => $getImages], '', '', 401, '401 Unauthorized'],
-            'foreign image ids' => [['inventory' => $getInventory, 'foreign_image_ids' => $getImages], '', '', 401, '401 Unauthorized'],
+            'foreign inventory' => [['foreign_inventory' => $getInventory, 'inventory' => $getInventory, 'image_ids' => $getImages], '', '', 403, 'You are not allowed to delete images from this inventory'],
+            'foreign image ids' => [['inventory' => $getInventory, 'foreign_image_ids' => $getImages], '', '', 403, 'You are not allowed to delete those images'],
             'wrong image ids' => [['inventory' => $getInventory, 'image_ids' => ['333xxx', 'wwaaa']], 'image_ids.0', 'The image_ids.0 needs to be an integer.', 422, 'Validation Failed']
         ];
     }
