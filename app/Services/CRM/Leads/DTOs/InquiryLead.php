@@ -75,12 +75,12 @@ class InquiryLead
     /**
      * @const string
      */
-    const TT_EMAIL_BODY = '#ffff00';
+    const TT_EMAIL_BODY = '#ffffff';
 
     /**
      * @const string
      */
-    const TT_EMAIL_HEADER = '#00003d';
+    const TT_EMAIL_HEADER = '#F8F9FA';
 
 
     /**
@@ -481,7 +481,7 @@ class InquiryLead
      */
     public function isTrailerTrader(): bool
     {
-        return $this->websiteDomain === self::TT_DOMAIN;
+        return $this->websiteDomain === self::TT_SIMPLE_DOMAIN;
     }
 
     /**
