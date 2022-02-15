@@ -92,6 +92,40 @@ class PaymentRepository implements PaymentRepositoryInterface {
     public function get($params) {
         throw new NotImplementedException;
     }
+    
+    public function getByInventory($params)
+    {
+        if (isset($params['inventory_id'])) {
+            $query = Payment::with('inventory')
+                ->whereHas('inventory', function($q) use($params) {
+                    $q->where('inventory.inventory_id', $params['inventory_id']);
+                });
+        } else {
+            $query = Payment::where('id', '>', 0);  
+        }
+        
+        if (isset($params['search_term'])) {
+            $query = $query->where(function($q) use($params) {
+                $q->where('type', 'LIKE', '%' . $params['search_term'] . '%')
+                    ->orWhere('payment_type', 'LIKE', '%' . $params['search_term'] . '%')
+                    ->orWhere('amount', 'LIKE', '%' . $params['search_term'] . '%')
+                    ->orWhere('created_at', 'LIKE', '%' . $params['search_term'] . '%')
+                    ->orWhereHas('inventory', function($q) use($params) {
+                        $q->where('title', 'LIKE', '%' . $params['search_term'] . '%');
+                    });
+            });
+        }
+        
+        if (!isset($params['per_page'])) {
+            $params['per_page'] = 15;
+        }
+        
+        if (isset($params['sort'])) {
+            $query = $this->addSortQuery($query, $params['sort']);
+        } 
+        
+        return $query->paginate($params['per_page'])->appends($params);
+    }
 
     public function getAll($params) {
         if (isset($params['dealer_id'])) {
@@ -136,7 +170,7 @@ class PaymentRepository implements PaymentRepositoryInterface {
         return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
     }
     
-     /**
+    /**
      * If type is balance, decrease floorplan balance of the inventory
      * If type is interest, increase interest amount of the inventory
      */

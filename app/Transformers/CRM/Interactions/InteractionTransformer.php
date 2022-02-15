@@ -10,11 +10,26 @@ use Carbon\Carbon;
 
 class InteractionTransformer extends TransformerAbstract
 {
+    /**
+     * @var SalesPersonTransformer
+     */
+    private $salesPersonTransformer;
+
     protected $defaultIncludes = [
         'lead',
         'salesPerson',
         'emailHistory'
     ];
+
+    /**
+     * SalesPersonTransformer constructor.
+     * @param SalesPersonTransformer $salesPersonTransformer
+     * @param EmailHistoryTransformer $emailHistoryTransformer
+     */
+    public function __construct(SalesPersonTransformer $salesPersonTransformer, EmailHistoryTransformer $emailHistoryTransformer) {
+        $this->salesPersonTransformer = $salesPersonTransformer;
+        $this->emailHistoryTransformer = $emailHistoryTransformer;
+    }
 
     /**
      * Transform Interaction
@@ -27,10 +42,11 @@ class InteractionTransformer extends TransformerAbstract
         return [
             'id' => $interaction->interaction_id,
             'type' => $interaction->interaction_type,
-            'time' => Carbon::parse($interaction->interaction_time),
+            'time' => Carbon::parse($interaction->interaction_time)->format('F d, Y g:i A'),
             'notes' => $interaction->interaction_notes,
             'contact_name' => $interaction->lead->full_name,
-            'username' => $interaction->real_username
+            'username' => $interaction->real_username,
+            'to_no' => $interaction->to_no
         ];
     }
 
@@ -41,8 +57,8 @@ class InteractionTransformer extends TransformerAbstract
 
     public function includeSalesPerson(Interaction $interaction)
     {
-        if ($interaction->leadStatus) {
-            return $this->item($interaction->leadStatus->salesPerson, new SalesPersonTransformer());
+        if ($interaction->leadStatus && $interaction->leadStatus->salesPerson) {
+            return $this->item($interaction->leadStatus->salesPerson, $this->salesPersonTransformer);
         } else {
             return $this->null();
         }
@@ -50,6 +66,6 @@ class InteractionTransformer extends TransformerAbstract
 
     public function includeEmailHistory(Interaction $interaction)
     {
-        return $this->collection($interaction->emailHistory, new EmailHistoryTransformer());
+        return $this->collection($interaction->emailHistory, $this->emailHistoryTransformer);
     }
 }

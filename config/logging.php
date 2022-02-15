@@ -45,13 +45,85 @@ return [
             'driver' => 'single',
             'path' => storage_path('logs/laravel.log'),
             'level' => 'debug',
+            'permission' => 0664,
         ],
 
         'daily' => [
             'driver' => 'daily',
             'path' => storage_path('logs/laravel.log'),
             'level' => 'debug',
-            'days' => 14,
+            'days' => 7,
+            'permission' => 0664,
+        ],
+
+        'autoassign' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/commands/auto-assign.log'),
+            'level' => 'debug',
+            'days' => 3,
+        ],
+
+        'scrapereplies' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/commands/scrape-replies.log'),
+            'level' => 'debug',
+            'days' => 3,
+        ],
+
+        'textcampaign' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/commands/text-campaigns.log'),
+            'level' => 'debug',
+            'days' => 3,
+        ],
+
+        'auth' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/services/auth.log'),
+            'level' => 'debug',
+            'days' => 3,
+        ],
+
+        'google' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/services/google.log'),
+            'level' => 'debug',
+            'days' => 7,
+        ],
+
+        'facebook' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/services/facebook.log'),
+            'level' => 'debug',
+            'days' => 3,
+        ],
+
+        'leads' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/services/leads.log'),
+            'level' => 'debug',
+            'days' => 3,
+        ],
+
+        'emailbuilder' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/services/emailbuilder.log'),
+            'level' => 'debug',
+            'days' => 3,
+        ],
+
+        'texts' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/services/texts.log'),
+            'level' => 'debug',
+            'days' => 3,
+        ],
+
+        'azure' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/services/azure.log'),
+            'level' => 'debug',
+            'days' => 3,
         ],
 
         'slack' => [
@@ -107,10 +179,16 @@ return [
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
         ],
-        
+
         'showroom-imports' => [
             'path' => storage_path('logs/showroom-imports.log'),
-        ]
+        ],
+        'blog' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/services/blog.log'),
+            'level' => 'debug',
+            'days' => 3,
+        ],
     ],
 
 ];

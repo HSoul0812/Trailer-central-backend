@@ -4,8 +4,8 @@ namespace App\Console\Commands\CRM\Leads;
 
 use Illuminate\Console\Command;
 use App\Models\User\NewDealerUser;
-use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Services\CRM\Leads\AutoAssignServiceInterface;
+use Illuminate\Database\Eloquent\Collection;
 
 class AutoAssign extends Command
 {    
@@ -26,11 +26,6 @@ class AutoAssign extends Command
      * @var string
      */
     protected $description = 'Auto Assign leads to SalesPeople.';
-
-    /**     
-     * @var App\Repositories\CRM\Leads\LeadRepository
-     */
-    protected $leadRepository;
 
     /**     
      * @var App\Repositories\CRM\User\SalesPersonRepositoryInterface
@@ -67,11 +62,10 @@ class AutoAssign extends Command
      *
      * @return void
      */
-    public function __construct(LeadRepositoryInterface $leadRepo, AutoAssignServiceInterface $autoAssignService)
+    public function __construct(AutoAssignServiceInterface $autoAssignService)
     {
         parent::__construct();
 
-        $this->leadRepository = $leadRepo;
         $this->autoAssignService = $autoAssignService;
         
         date_default_timezone_set(env('DB_TIMEZONE'));
@@ -102,25 +96,12 @@ class AutoAssign extends Command
             $dealers = $this->getDealersToProcess();
             
             $this->info("{$command} found " . count($dealers) . " dealers to process");
-            
+
             // Get Dealers With Valid Salespeople
             foreach($dealers as $dealer) {
-                // Get Unassigned Leads
-                $leads = $this->leadRepository->getAllUnassigned([
-                    'per_page' => 'all',
-                    'dealer_id' => $dealer->id
-                ]);
-                                
-                if(count($leads) < 1) {
-                    $this->info("{$command} skipping dealer {$dealer->id} because there are no pending leads");
-                    continue;
-                }
-
-                $this->info("{$command} dealer #{$dealer->id} found " . count($leads) . " to process");
-
-                foreach($leads as $lead) {                    
-                    $this->autoAssignService->autoAssign($lead);
-                }
+                // Handle All Leads For Dealer
+                $leads = $this->autoAssignService->dealer($dealer);
+                $this->info("{$command} found " . $leads->count() . " leads to process for dealer " . $dealer->id);
             }
         } catch(\Exception $e) {
             $this->error("{$command} exception returned {$e->getMessage()}: {$e->getTraceAsString()}");
@@ -132,26 +113,37 @@ class AutoAssign extends Command
         $this->info("{$command} finished on " . $datetime->format("l, F jS, Y"));
     }
 
-    
-    private function getDealersToProcess() {
-        $dealers = array();
+
+    /**
+     * Get Dealers to Process
+     * 
+     * @return Collection<NewDealerUser>
+     */
+    private function getDealersToProcess(): Collection {
+        $dealers = new Collection();
         if(!empty($this->dealerId)) {
+            // Get Single Dealer
             $dealer = NewDealerUser::findOrFail($this->dealerId);
-            $dealers[] = $dealer;
-        } else if ($this->boundLower && $this->boundUpper) {            
+            $dealers->push($dealer);
+        } else if ($this->boundLower && $this->boundUpper) {
+            // Get Dealers In Range
             $dealers = NewDealerUser::where('id', '>=', $this->boundLower)
                             ->where('id', '<=', $this->boundUpper)
                             ->has('activeCrmUser')
                             ->has('salespeopleEmails')
-                                ->get();
+                            ->get();
         } else if ($this->boundLower) {
+            // Get Dealers From Minimum
             $dealers = NewDealerUser::where('id', '>=', $this->boundLower)
                             ->has('activeCrmUser')
                             ->has('salespeopleEmails')
-                                ->get();
+                            ->get();
         } else {
+            // Get All Dealers
             $dealers = NewDealerUser::has('activeCrmUser')->has('salespeopleEmails')->get();
         }
+
+        // Return Dealers Collection
         return $dealers;
     }
 }

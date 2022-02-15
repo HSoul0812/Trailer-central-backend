@@ -2,14 +2,29 @@
 
 namespace App\Models\Inventory;
 
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 /**
  * Class Attribute
  * @package App\Models\Inventory
+ *
+ * @property int $attribute_id
+ * @property string $code
+ * @property string $name
+ * @property string $type
+ * @property string $values
+ * @property string $extra_values
+ * @property string $description
+ * @property string $default_value
+ * @property string $aliases
  */
 class Attribute extends Model
 {
+    use TableAware;
+
     /**
      * The table associated with the model.
      *
@@ -24,23 +39,28 @@ class Attribute extends Model
      */
     protected $primaryKey = 'attribute_id';
 
-    public function inventory()
+    public $timestamps = false;
+
+    /**
+     * @return HasManyThrough
+     */
+    public function inventory(): HasManyThrough
     {
         return $this->hasManyThrough(Inventory::class, 'eav_attribute_value', 'inventory_id', 'attribute_id');
     }
 
     /**
-     * @return AttributeValue[]
+     * @return HasMany
      */
-    public function attributeValues()
+    public function attributeValues(): HasMany
     {
         return $this->hasMany(AttributeValue::class, 'attribute_id', 'attribute_id');
     }
 
     /**
-     * @return EntityTypeAttribute[]
+     * @return HasMany
      */
-    public function entityTypeAttributes()
+    public function entityTypeAttributes(): HasMany
     {
         return $this->hasMany(EntityTypeAttribute::class, 'attribute_id', 'attribute_id');
     }
@@ -48,14 +68,16 @@ class Attribute extends Model
     /**
      * @return array
      */
-    public function getValuesArray()
+    public function getValuesArray(): array
     {
         $values = explode(',', $this->values);
 
         $array = [];
         foreach ($values as $value) {
             $value = explode(':', $value);
-            $array[$value[0]] = $value[1];
+            if (isset($value[1]) && isset($value[0])) {
+                $array[$value[0]] = $value[1];
+            }
         }
 
         return $array;

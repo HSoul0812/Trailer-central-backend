@@ -1,39 +1,47 @@
 <?php
 
-namespace Tests\Unit\Repositories\Parts;
+namespace Tests\Unit\Repositories\Dms;
 
 use App\Models\Parts\AuditLog;
+use App\Repositories\Parts\AuditLogRepositoryInterface;
 use App\Repositories\Parts\AuditLogRepository;
-use Mockery\Mock;
+use Mockery;
 use Tests\TestCase;
 
+/**
+ * @coversDefaultClass App\Repositories\Parts\AuditLogRepository
+ */
 class AuditLogRepositoryTest extends TestCase
 {
-    public function testCreatesRow()
+    
+    /**
+     * @var LegacyMockInterface|App\Repositories\Parts\AuditLogRepositoryInterface
+     */
+    private $auditLogRepositoryMock;
+    
+    /**
+     * @var App\Models\Parts\AuditLog
+     */
+    private $auditLogMock;
+    
+    public function setUp(): void
     {
-        /** @var AuditLogRepository $repo */
-        $repo = app(AuditLogRepository::class);
-        $model = $repo->create([
-            'part_id' => 999990,
-            'bin_id' => 1,
-            'qty' => 2,
-            'balance' => 10,
-            'description' => 'Created by test',
-        ]);
+        parent::setUp();
 
-        $this->assertInstanceOf(AuditLog::class, $model);
-        $this->assertNotEmpty($model->id);
-        $this->assertSame(999990, $model->part_id);
-        $this->assertSame(1, $model->bin_id);
-        $this->assertSame(2, $model->qty);
-        $this->assertSame(10, $model->balance);
-        $this->assertSame('Created by test', $model->description);
-
-        $this->assertDatabaseHas('parts_audit_log', [
-            'part_id' => 999990,
-            'bin_id' => 1,
-        ]);
-
-        $model->delete();
+        $this->auditLogRepositoryMock = Mockery::mock(AuditLogRepositoryInterface::class);
+        $this->app->instance(AuditLogRepositoryInterface::class, $this->auditLogRepositoryMock);
+        
+        $this->auditLogMock = $this->getEloquentMock(AuditLog::class);
+        $this->app->instance(AuditLog::class, $this->auditLogMock);
     }
+    
+    /**
+     * @covers ::getByYear
+     */
+    public function testGetByYear(): void 
+    {
+        
+    }
+    
+
 }

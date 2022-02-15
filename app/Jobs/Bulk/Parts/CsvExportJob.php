@@ -1,16 +1,13 @@
 <?php
 
-
 namespace App\Jobs\Bulk\Parts;
-
 
 use App\Jobs\Job;
 use App\Models\Bulk\Parts\BulkDownload;
-use App\Services\Export\AbstractCsvQueryExporter;
-use App\Services\Export\Parts\CsvExportService;
-use Illuminate\Filesystem\Filesystem;
+use App\Services\Common\RunnableJobServiceInterface;
+use App\Services\Export\Parts\BulkDownloadMonitoredJobServiceInterface;
+use Exception;
 use Illuminate\Support\Facades\Log;
-use League\Csv\Exception;
 
 /**
  * Class CsvExportJob
@@ -25,40 +22,38 @@ class CsvExportJob extends Job
      * @var BulkDownload
      */
     private $download;
+
     /**
-     * @var Filesystem
-     */
-    private $filesystem;
-    /**
-     * @var CsvExportService
+     * @var RunnableJobServiceInterface
      */
     private $service;
-    /**
-     * @var AbstractCsvQueryExporter
-     */
-    private $exporter;
 
-    public function __construct(CsvExportService $service, BulkDownload $download, AbstractCsvQueryExporter $exporter)
+    public function __construct(BulkDownload $download)
     {
+        $this->service = app(BulkDownloadMonitoredJobServiceInterface::class);
         $this->download = $download;
-        $this->service = $service;
-        $this->exporter = $exporter;
     }
 
-    public function handle()
+    /**
+     * @return bool
+     * @throws Exception
+     */
+    public function handle(): bool
     {
         try {
-            $this->service->run($this->download, $this->exporter);
-            return true;
-
+            $this->service->run($this->download);
         } catch (Exception $e) {
             // catch and log
+
+            $payload = implode(',',$this->download->payload->asArray());
+
             Log::error("Error running export parts CSV export job: ".
-                "id[{$this->download->id}] ".
-                "token[{$this->download->token}] exception[{$e->getMessage()}]"
+                "token[{$this->download->token}, payload={{$payload}}] exception[{$e->getMessage()}]"
             );
 
             throw $e;
         }
+
+        return true;
     }
 }

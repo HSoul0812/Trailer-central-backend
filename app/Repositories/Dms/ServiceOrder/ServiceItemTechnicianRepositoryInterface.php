@@ -18,4 +18,10 @@ interface ServiceItemTechnicianRepositoryInterface extends Repository, RequestQu
      * @return Collection<ServiceItemTechnician>
      */
     public function findByLocation($locationId);
+
+    /**
+     * @param $params
+     * @return Collection
+     */
+    public function serviceReport($params): array;
 }

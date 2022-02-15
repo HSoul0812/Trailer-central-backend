@@ -6,22 +6,32 @@ use App\Http\Controllers\RestfulController;
 use Dingo\Api\Http\Request;
 use App\Repositories\Inventory\Floorplan\PaymentRepositoryInterface;
 use App\Transformers\Inventory\Floorplan\PaymentTransformer;
+use App\Transformers\Quickbooks\ExpenseTransformer;
 use App\Http\Requests\Inventory\Floorplan\CreatePaymentRequest;
 use App\Http\Requests\Inventory\Floorplan\GetPaymentRequest;
+use App\Services\Inventory\Floorplan\PaymentServiceInterface;
 
 class PaymentController extends RestfulController
 {
     
     protected $payment;
+
+    /**
+     * @var PaymentServiceInterface
+     */
+    private $paymentService;
     
     /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct(PaymentRepositoryInterface $payment)
+    public function __construct(PaymentRepositoryInterface $payment, PaymentServiceInterface $paymentService)
     {
         $this->payment = $payment;
+        $this->paymentService = $paymentService;
+
+        $this->middleware('setDealerIdOnRequest')->only(['create']);
     }
    
 
@@ -74,7 +84,12 @@ class PaymentController extends RestfulController
         $request = new GetPaymentRequest($request->all());
         
         if ( $request->validate() ) {
-            $payments = $this->payment->getAll($request->all());
+            if ($request->inventory_id) {
+                $payments = $this->payment->getByInventory($request->all());
+            } else {
+                $payments = $this->payment->getAll($request->all());
+            }
+            
             return $this->response->paginator($payments, new PaymentTransformer());
         }
         
@@ -84,14 +99,14 @@ class PaymentController extends RestfulController
     /**
      * @OA\Put(
      *     path="/api/inventory/floorplan/payments",
-     *     description="Create a floorplan payment
+     *     description="Create a floorplan payment",
      *     tags={"Floorplan Payments"},
      *     @OA\Parameter(
      *         name="inventory_id",
      *         in="query",
      *         description="Inventory ID",
      *         required=true,
-     *         @OA\Schema(@OA\Schema(type="integer"))
+     *         @OA\Schema(type="integer")
      *     ),
      *     @OA\Parameter(
      *         name="type",
@@ -135,15 +150,17 @@ class PaymentController extends RestfulController
      *     ),
      *     @OA\Response(
      *         response="422",
-     *         description="Error: Bad request.",
-     *     ),
+     *         description="Error: Bad request."
+     *     )
      * )
      */
     public function create(Request $request) {
         $request = new CreatePaymentRequest($request->all());
         
         if ( $request->validate() ) {
-            return $this->response->item($this->payment->create($request->all()), new PaymentTransformer());
+            $expense = $this->paymentService->create($request->all());
+
+            return $this->response->item($expense, new ExpenseTransformer());
         }  
         
         return $this->response->errorBadRequest();

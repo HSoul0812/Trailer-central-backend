@@ -2,15 +2,20 @@
 
 namespace App\Repositories\CRM\Customer;
 
-use App\Exceptions\Dms\CustomerAlreadyExistsException;
+use App\Exceptions\RepositoryInvalidArgumentException;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\User\Customer;
+use App\Traits\Repository\ElasticSearch;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
 
 class CustomerRepository implements CustomerRepositoryInterface
 {
+    use ElasticSearch\Helpers;
+
+    protected $model;
+
     /**
      * list if ES index fields that have a 'keyword' field
      */
@@ -19,7 +24,15 @@ class CustomerRepository implements CustomerRepositoryInterface
         'first_name' => 'first_name.keyword',
         'last_name' => 'last_name.keyword',
         'email' => 'email.keyword',
+        'address' => 'address.keyword',
+        'city' => 'city.keyword',
+        'region' => 'region.keyword',
+        'postal_code' => 'postal_code.keyword',
     ];
+
+    public function __construct(Customer $customer) {
+        $this->model = $customer;
+    }
 
     public function create($params)
     {
@@ -29,12 +42,40 @@ class CustomerRepository implements CustomerRepositoryInterface
         return $customer;
     }
 
+    /**
+     * @param array DeleteCustomerRequest
+     * @throws \InvalidArgumentException when the dealer id `dealer_id` is not provided
+     * @throws \InvalidArgumentException when the customer id `id` is not provided
+     */
     public function delete($params) {
-        throw NotImplementedException;
+
+        if (empty($params['dealer_id'])) {
+            throw new \InvalidArgumentException('Dealer Id is required');
+        }
+
+        if (empty($params['id'])) {
+            throw new \InvalidArgumentException('Customer Id is required');
+        }
+
+        return Customer::where([
+            ['dealer_id', '=', $params['dealer_id']],
+            ['id', '=', $params['id']]
+        ])->firstOrFail()->delete();
     }
 
     public function get($params) {
-        throw NotImplementedException;
+        if(isset($params['id'])) {
+            return $this->model->findOrFail($params['id']);
+        }
+
+        $query = Customer::select('*');
+        if(isset($params['dealer_id'])) {
+            $query->where('dealer_id', $params['dealer_id']);
+        }
+        if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
+            $query->where($params[self::CONDITION_AND_WHERE]);
+        }
+        return $query->firstOrFail();
     }
 
     public function getAll($params) {
@@ -132,41 +173,54 @@ class CustomerRepository implements CustomerRepositoryInterface
      */
     public function search($query, $dealerId, $options = [], &$paginator = null)
     {
-        $search = Customer::boolSearch();
-
-        if ($query['query'] ?? null) { // if a query is specified
-            $search->must('multi_match', [
-                'query' => $query['query'],
-                'fuzziness' => 'AUTO',
-                'fields' => ['display_name^2', 'first_name', 'last_name', 'email']
-            ]);
-
-        } else if ($options['allowAll'] ?? false) { // if no query supplied but is allowed
-            $search->must('match_all', []);
-
-        } else {
+        if (empty($query['query']) && empty($options['allowAll'])) {
             throw new \Exception('Query is required');
         }
 
-        // filter by dealer
-        $search->filter('term', ['dealer_id' => $dealerId]);
+        $search = Customer::boolSearch();
+
+        // filter by dealer first
+        $filters = [
+            ['match_phrase' => ['dealer_id' => $dealerId]]
+        ];
+
+        if (!empty($query['query'])) { // if a query is specified
+            $filters[] = [
+                'bool' => [
+                    'should' => $this->makeMultiMatchQueryWithRelevance([
+                        'display_name^0.7',
+                        'first_name^0.5',
+                        'last_name^0.5',
+                        'email^0.3',
+                        'company_name^0.4',
+                        'home_phone^0.2',
+                        'cell_phone^0.2',
+                        'work_phone^0.2'
+                    ], $query['query'])
+                ],
+            ];
+        }
+
+        $search->mustRaw($filters);
 
         // sort order
         if ($query['sort'] ?? null) {
-            $sortDir = substr($query['sort'], 0, 1) === '-'? 'asc': 'desc';
+            $sortDir = substr($query['sort'], 0, 1) === '-' ? 'asc' : 'desc';
             $field = str_replace('-', '', $query['sort']);
             if (array_key_exists($field, $this->indexKeywordFields)) {
                 $field = $this->indexKeywordFields[$field];
             }
 
             $search->sort($field, $sortDir);
+        } else {
+            $search->sort("_score", "desc");
         }
 
         // load relations
         // $search->load([]);
 
         // if a paginator is requested
-        if ($options['page'] ?? null) {
+        if (!empty($options['page'])) {
             $page = $options['page'];
             $perPage = $options['per_page'] ?? 10;
 
@@ -196,4 +250,55 @@ class CustomerRepository implements CustomerRepositoryInterface
         return $search->execute()->models();
     }
 
+    public function getByEmailOrPhone(array $params): ?Customer
+    {
+        return Customer::where('dealer_id', '=', $params['dealer_id'])
+            ->where(function ($query) use ($params) {
+                $query->where('email', '=', $params['email'])
+                    ->orWhere('cell_phone', '=', trim($params['phone_number']))
+                    ->orWhere('home_phone', '=', trim($params['phone_number']))
+                    ->orWhere('work_phone', '=', trim($params['phone_number']));
+            })->get()->first();
+    }
+
+    /**
+     * @param array $params
+     * @return bool
+     */
+    public function bulkUpdate(array $params): bool
+    {
+        if ((empty($params['ids']) || !is_array($params['ids'])) && (empty($params['search']) || !is_array($params['search']))) {
+            throw new RepositoryInvalidArgumentException('ids or search param has been missed. Params - ' . json_encode($params));
+        }
+
+        $query = Customer::query();
+
+        if (!empty($params['ids']) && is_array($params['ids'])) {
+            $query = $query->whereIn('id', $params['ids']);
+            unset($params['ids']);
+        }
+
+        if (!empty($params['search']['website_lead_id'])) {
+            $query = $query->where('website_lead_id', $params['search']['website_lead_id']);
+            unset($params['search']);
+        }
+
+        return (bool)$query->update($params);
+    }
+
+    /**
+     * @param callable $callback The callback with the signature of (Collection $customers) => void;
+     * @param array $select The columns to select in the result query
+     * @param array $with The relationships to eager load
+     * @param int $chunkSize The chunk size of the chunkById operation
+     * @return void
+     */
+    public function getCustomersWithoutLeads(callable $callback, array $select = ['*'], array $with = [], $chunkSize = 500)
+    {
+        Customer::query()
+            ->select($select)
+            ->with($with)
+            ->whereNull('website_lead_id')
+            ->chunkById($chunkSize, $callback);
+    }
 }

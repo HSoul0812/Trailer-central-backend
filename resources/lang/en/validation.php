@@ -3,6 +3,7 @@
 use App\Models\CRM\Interactions\Interaction;
 use App\Models\CRM\Leads\LeadType;
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\User\SalesPerson;
 
 return [
 
@@ -175,7 +176,7 @@ return [
     'price_format' => 'The format for :attribute is incorrect. Starting price needs to be lower than end price. Formats supported are: [10 TO 100], [10.05 TO 100], [10.05 TO 100.05], [10 TO 100.05], [10], [10.05]',
     'lead_type_valid' => 'Lead type status needs to be: '.
                             LeadType::TYPE_BUILD . ', ' .
-                            LeadType::TYPE_CALL . ', ' .  
+                            LeadType::TYPE_CALL . ', ' .
                             LeadType::TYPE_GENERAL . ', ' .
                             LeadType::TYPE_CRAIGSLIST . ', ' .
                             LeadType::TYPE_INVENTORY . ', ' .
@@ -188,7 +189,7 @@ return [
                             LeadType::TYPE_TRADE,
     'lead_status_valid' => 'Lead status needs to be: '.
                             Lead::STATUS_HOT . ', ' .
-                            Lead::STATUS_COLD . ',' .  
+                            Lead::STATUS_COLD . ',' .
                             Lead::STATUS_LOST . ',' .
                             Lead::STATUS_MEDIUM . ',' .
                             Lead::STATUS_NEW_INQUIRY . ',' .
@@ -197,7 +198,16 @@ return [
                             Lead::STATUS_WON_CLOSED,
     'interaction_type_valid' => 'Interaction type needs to be: '. implode(',', Interaction::INTERACTION_TYPES),
     'sales_person_valid' => 'Sales person ID must exist or be 0',
+    'sales_auth_type' => 'SMTP auth needs to be: ' . implode(", ", SalesPerson::SMTP_AUTH),
+    'sales_security_type' => 'Security type needs to be: ' . implode(", ", SalesPerson::SECURITY_TYPES),
     'dealer_location_valid' => 'Dealer Location ID must exist or be 0',
+    'unique_dealer_location_name' => 'Dealer Location must be unique',
     'website_valid' => 'Website ID must exist or be 0',
-    'inventory_valid' => 'Inventory ID must exist'
+    'inventory_valid' => 'Inventory ID must exist',
+    'stock_type_valid' => 'The selected :attribute is invalid.',
+    'inventory_unique_stock' => 'The selected :attribute already exists on another inventory item.',
+    'valid_smtp_email' => 'The selected :attribute doesn\'t have any smtp configuration!',
+    'tax_calculator_valid' => 'The selected tax calculator id is invalid',
+    'inventory_quotes_not_exist' => 'Can\'t delete inventory linked to quotes',
+    'valid_include' => 'The :attribute is not valid',
 ];

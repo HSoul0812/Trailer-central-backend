@@ -2,17 +2,22 @@
 
 namespace App\Services\Integration\Facebook;
 
-use App\Jobs\Integration\Facebook\CatalogJob;
+use App\Models\Integration\Auth\AccessToken;
+use App\Models\Integration\Facebook\Catalog;
+use App\Jobs\Integration\Facebook\Catalog\HomeJob;
+use App\Jobs\Integration\Facebook\Catalog\ProductJob;
+use App\Jobs\Integration\Facebook\Catalog\VehicleJob;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Repositories\Integration\Facebook\CatalogRepositoryInterface;
+use App\Repositories\Integration\Facebook\FeedRepositoryInterface;
 use App\Repositories\Integration\Facebook\PageRepositoryInterface;
-use App\Services\Integration\AuthServiceInterface;
 use App\Transformers\Integration\Facebook\CatalogTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
+use Carbon\Carbon;
 
 /**
  * Class CatalogService
@@ -29,6 +34,11 @@ class CatalogService implements CatalogServiceInterface
     protected $catalogs;
 
     /**
+     * @var FeedRepositoryInterface
+     */
+    protected $feeds;
+
+    /**
      * @var PageRepositoryInterface
      */
     protected $pages;
@@ -37,11 +47,6 @@ class CatalogService implements CatalogServiceInterface
      * @var TokenRepositoryInterface
      */
     protected $tokens;
-
-    /**
-     * @var AuthServiceInterface
-     */
-    protected $auth;
 
     /**
      * @var BusinessServiceInterface
@@ -54,24 +59,32 @@ class CatalogService implements CatalogServiceInterface
     private $fractal;
 
     /**
+     * Log
+     */
+    private $log;
+
+    /**
      * Construct Facebook Service
      */
     public function __construct(
         CatalogRepositoryInterface $catalogs,
+        FeedRepositoryInterface $feeds,
         PageRepositoryInterface $pages,
         TokenRepositoryInterface $tokens,
-        AuthServiceInterface $auth,
         BusinessServiceInterface $sdk,
         Manager $fractal
     ) {
         $this->catalogs = $catalogs;
+        $this->feeds = $feeds;
         $this->pages = $pages;
         $this->tokens = $tokens;
-        $this->auth = $auth;
         $this->sdk = $sdk;
         $this->fractal = $fractal;
 
         $this->fractal->setSerializer(new NoDataArraySerializer());
+
+        // Initialize Logger
+        $this->log = Log::channel('facebook');
     }
 
     /**
@@ -108,7 +121,7 @@ class CatalogService implements CatalogServiceInterface
         $params['relation_id'] = $catalog->id;
 
         // Find Refresh Token
-        $refresh = $this->auth->refresh($params);
+        $refresh = $this->sdk->refresh($params);
         if(!empty($refresh)) {
             $params['refresh_token'] = $refresh['access_token'];
             if(isset($refresh['expires_in'])) {
@@ -128,7 +141,7 @@ class CatalogService implements CatalogServiceInterface
             $params['relation_id'] = $page->id;
 
             // Get Refresh Token
-            $refresh = $this->auth->refresh($params);
+            $refresh = $this->sdk->refresh($params);
             if(!empty($refresh)) {
                 $params['refresh_token'] = $refresh;
             } else {
@@ -167,7 +180,7 @@ class CatalogService implements CatalogServiceInterface
         // Access Token is Set?
         if(isset($params['access_token']) && empty($params['refresh_token'])) {
             // Find Refresh Token
-            $refresh = $this->auth->refresh($params);
+            $refresh = $this->sdk->refresh($params);
             if(!empty($refresh)) {
                 $params['refresh_token'] = $refresh['access_token'];
                 if(isset($refresh['expires_in'])) {
@@ -191,7 +204,7 @@ class CatalogService implements CatalogServiceInterface
             $params['relation_id'] = $page->id;
 
             // Get Refresh Token
-            $refresh = $this->auth->refresh($params);
+            $refresh = $this->sdk->refresh($params);
             if(!empty($refresh)) {
                 $params['refresh_token'] = $refresh;
             } else {
@@ -216,15 +229,6 @@ class CatalogService implements CatalogServiceInterface
         // Get Catalog
         $catalog = $this->catalogs->get(['id' => $id]);
 
-        // Feed ID Exists?!
-        if(!empty($catalog->feed_id)) {
-            try {
-                $this->sdk->deleteFeed($catalog->accessToken, $catalog->catalog_id, $catalog->feed_id);
-            } catch (\Exception $ex) {
-                // Allow to continue even if exception occurs; if exception occurs feed doesn't exist!
-            }
-        }
-
         // Delete Access Token
         $this->tokens->delete([
             'token_type' => 'facebook',
@@ -239,73 +243,59 @@ class CatalogService implements CatalogServiceInterface
     /**
      * Process Payload
      * 
-     * @param array $params
+     * @param string $type
+     * @param string $payload
      * @return Fractal
      */
-    public function payload($params) {
+    public function payload(string $payload) {
         // Parse Payload Data
-        $payload = json_decode($params['payload']);
-        $success = false;
-        $feeds = array();
-        foreach($payload as $integration) {
+        $json = json_decode($payload);
+        $feeds = [];
+        foreach($json as $integration) {
             // Validate Payload
-            if(empty($integration->page_id)) {
+            if(empty($integration->business_id) && empty($integration->catalog_id)) {
+                continue;
+            }
+            $this->log->debug('Handling Catalog #' . $integration->catalog_id . ' for Business #' . $integration->business_id);
+
+            // Get Access Token and Feed ID
+            $catalog = $this->catalogs->findOne(['catalog_id' => $integration->catalog_id]);
+            $feedId = !empty($catalog->feed) ? $catalog->feed->feed_id : 0;
+            if(empty($catalog->accessToken)) {
+                $this->log->error('Catalog Access Token MISSING, Cannot Process Catalog #' . $integration->catalog_id);
                 continue;
             }
 
-            // Get Catalog
-            $catalog = $this->catalogs->get(['id' => $integration->catalog_id]);
-            if(empty($catalog->id)) {
+            // Get Feed ID From SDK
+            $feedId = $this->scheduleFeed($catalog->accessToken, $integration->business_id, $integration->catalog_id, $feedId);
+            if(empty($feedId)) {
+                $this->log->error('Feed Does Not Exist and Could Not Be Created for Catalog ID #' . $integration->catalog_id);
                 continue;
-            }
-
-            // Feed ID Exists?
-            $feed = null;
-            if(!empty($catalog->feed_id)) {
-                try {
-                    $feed = $this->sdk->validateFeed($catalog->accessToken, $catalog->catalog_id, $catalog->feed_id);
-                } catch(\Exception $ex) {
-                    Log::error("Exception returned during validate feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
-                }
-            }
-
-            // Feed Doesn't Exist?
-            if(empty($feed['id'])) {
-                try {
-                    $catalog->feed_id = 0;
-                    $feed = $this->sdk->scheduleFeed($catalog->accessToken, $catalog->catalog_id, $catalog->feed_url, $catalog->feed_name);
-                } catch(\Exception $ex) {
-                    Log::error("Exception returned during schedule feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
-                    continue;
-                }
             }
 
             // Feed Exists?
-            if(!empty($feed['id'])) {
-                $feeds[] = $feed['id'];
-
-                // Feed Doesn't Exist?
-                if(empty($catalog->feed_id)) {
-                    // Update Feed in Catalog
-                    $catalog = $this->catalogs->update([
-                        'id' => $catalog->id,
-                        'feed_id' => $feed['id']
-                    ]);
-                }
+            $feed = $this->updateFeed($integration->business_id, $integration->catalog_id, $feedId);
+            if(!empty($feed->feed_id)) {
+                $feeds[] = $feed->feed_id;
             }
 
             // Create Job
-            $this->dispatch(new CatalogJob($catalog, $integration));
-        }
+            if($integration->catalog_type === Catalog::VEHICLE_TYPE) {
+                $job = new VehicleJob($integration, $feed->feed_url);
+            } elseif($integration->catalog_type === Catalog::HOME_TYPE) {
+                $job = new HomeJob($integration, $feed->feed_url);
+            } else {
+                $job = new ProductJob($integration, $feed->feed_url);
+            }
 
-        // Validate Feeds Exist?
-        if(count($feeds) > 0) {
-            $success = true;
+            // Dispatching Job
+            $this->log->info('Dispatching a ' . $integration->catalog_type . ' Catalog Job');
+            $this->dispatch($job->onQueue('fb-catalog'));
         }
 
         // Return Response
         return [
-            'success' => $success,
+            'success' => count($feeds) > 0,
             'feeds' => count($feeds)
         ];
     }
@@ -318,15 +308,82 @@ class CatalogService implements CatalogServiceInterface
      * @param array $response
      * @return array
      */
-    public function response($catalog, $accessToken) {
+    public function response(Catalog $catalog, AccessToken $accessToken) {
         // Convert Catalog to Array
         $data = new Item($catalog, new CatalogTransformer(), 'data');
         $response = $this->fractal->createData($data)->toArray();
 
         // Set Validate
-        $response['validate'] = $this->auth->validate($accessToken);
+        $response['validate'] = $this->sdk->validate($accessToken);
 
         // Return Response
         return $response;
+    }
+
+
+    /**
+     * Schedule Feed With Catalog Data
+     * 
+     * @param int $businessId
+     * @param int $catalogId
+     * @param int $feedId
+     * @return int feed ID
+     */
+    private function scheduleFeed(AccessToken $accessToken, int $businessId, int $catalogId, int $feedId = 0) {
+        // Feed ID Exists?
+        if(!empty($feedId)) {
+            try {
+                $feed = $this->sdk->validateFeed($accessToken, $catalogId, $feedId);
+                $feedId = $feed['id'];
+            } catch(\Exception $ex) {
+                $this->log->error("Exception returned during validate feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+            }
+        }
+
+        // Feed Doesn't Exist?
+        if(empty($feedId)) {
+            try {
+                $feedUrl = $this->feeds->getFeedUrl($businessId, $catalogId);
+                $feedName = $this->feeds->getFeedName($catalogId);
+                $feed = $this->sdk->scheduleFeed($accessToken, $catalogId, $feedUrl, $feedName);
+                $feedId = $feed['id'];
+            } catch(\Exception $ex) {
+                $this->log->error("Exception returned during schedule feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+                $feedId = 0;
+            }
+        }
+
+        // Return Feed ID
+        return $feedId;
+    }
+
+    /**
+     * Update Catalog Feed
+     * 
+     * Catalog $catalog
+     * int $feedId
+     */
+    private function updateFeed(int $businessId, int $catalogId, int $feedId) {
+        // Feed Exists?
+        $feed = null;
+        if(!empty($feedId)) {
+            // Get Feed URL and Name
+            $feedUrl = $this->feeds->getFeedUrl($businessId, $catalogId, false);
+            $feedName = $this->feeds->getFeedName($catalogId);
+
+            // Update Feed in Catalog
+            $feed = $this->feeds->createOrUpdate([
+                'business_id' => $businessId,
+                'catalog_id' => $catalogId,
+                'feed_id' => $feedId,
+                'feed_title' => $feedName,
+                'feed_url' => $feedUrl,
+                'is_active' => 1,
+                'imported_at' => Carbon::now()->toDateTimeString()
+            ]);
+        }
+
+        // Return Feed
+        return $feed;
     }
 }

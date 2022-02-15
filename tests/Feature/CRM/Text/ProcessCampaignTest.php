@@ -800,6 +800,10 @@ class ProcessCampaignTest extends TestCase
         // Get Existing Unassigned Leads for Dealer ID
         $campaign = Campaign::find($campaignId);
 
+        // Get Website ID
+        $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
+        $websiteId = $dealer->website->id;
+
         // Loop Leads
         if(count($campaign->leads) > 0) {
             foreach($campaign->leads as $lead) {
@@ -811,6 +815,8 @@ class ProcessCampaignTest extends TestCase
         for($n = 0; $n < 10; $n++) {
             // Get Random Date Since "Send After Days"
             $params = [
+                'website_id' => $websiteId,
+                'dealer_id' => $dealer->id,
                 'date_submitted' => $this->faker->dateTimeBetween('-' . ($campaign->send_after_days + 10) . ' days', '-' . $campaign->send_after_days . ' days')
             ];
 
@@ -863,6 +869,7 @@ class ProcessCampaignTest extends TestCase
             // Add Done Status
             if(isset($filters['action']) && $filters['action'] === 'purchased') {
                 factory(LeadStatus::class)->create([
+                    'dealer_id' => self::getTestDealerId(),
                     'tc_lead_identifier' => $lead->identifier,
                     'status' => Lead::STATUS_WON_CLOSED
                 ]);
@@ -873,7 +880,10 @@ class ProcessCampaignTest extends TestCase
         $leads = array();
         for($n = 0; $n < 5; $n++) {
             // Initialize Empty Params
-            $params = [];
+            $params = [
+                'website_id' => $websiteId,
+                'dealer_id' => $dealer->id,
+            ];
 
             // Insert With Manufacturer or Category
             if(isset($filters['unused_brands']) || isset($filters['unused_categories'])) {
@@ -932,7 +942,10 @@ class ProcessCampaignTest extends TestCase
         // Create 5 Leads In Last X+10 Days to X+25 Days
         for($n = 0; $n < 5; $n++) {
             // Initialize Empty Params
-            $params = [];
+            $params = [
+                'website_id' => $websiteId,
+                'dealer_id' => $dealer->id,
+            ];
 
             // Insert With Manufacturer or Category
             if(isset($filters['unused_brands']) || isset($filters['unused_categories'])) {

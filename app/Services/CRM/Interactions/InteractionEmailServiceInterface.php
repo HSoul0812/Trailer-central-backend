@@ -2,30 +2,29 @@
 
 namespace App\Services\CRM\Interactions;
 
+use App\Services\CRM\Email\DTOs\SmtpConfig;
+use App\Services\CRM\User\DTOs\EmailSettings;
+use App\Services\Integration\Common\DTOs\ParsedEmail;
+use Illuminate\Support\Collection;
+
 interface InteractionEmailServiceInterface {
     /**
      * Send Email With Params
      * 
-     * @param int $dealerId
-     * @param array $params
+     * @param EmailSettings $emailConfig
+     * @param null|SmtpConfig $smtpConfig
+     * @param ParsedEmail $parsedEmail
      * @throws SendEmailFailedException
+     * @return ParsedEmail
      */
-    public function send($dealerId, $params);
-
-    /**
-     * Get Attachments
-     * 
-     * @param type $files
-     */
-    public function getAttachments($files);
+    public function send(EmailSettings $emailConfig, ?SmtpConfig $smtpConfig, ParsedEmail $parsedEmail): ParsedEmail;
 
     /**
      * Store Uploaded Attachments
      * 
-     * @param array $files
      * @param int $dealerId
-     * @param string $messageId
-     * @return array of saved attachments
+     * @param ParsedEmail $parsedEmail
+     * @return Collection<Attachment>
      */
-    public function storeAttachments($files, $dealerId, $messageId);
+    public function storeAttachments(int $dealerId, ParsedEmail $parsedEmail): Collection;
 }

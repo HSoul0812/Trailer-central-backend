@@ -7,6 +7,7 @@ use Dingo\Api\Http\Request;
 use App\Repositories\Website\Forms\FieldMapRepositoryInterface;
 use App\Http\Requests\Website\Forms\GetFieldMapRequest;
 use App\Http\Requests\Website\Forms\CreateFieldMapRequest;
+use App\Http\Requests\Website\Forms\TypesFieldMapRequest;
 use App\Transformers\Website\Forms\FieldMapTransformer;
 
 class FieldMapController extends RestfulController
@@ -26,8 +27,8 @@ class FieldMapController extends RestfulController
     
     /**
      * @OA\Put(
-     *     path="/api/website/blog/posts",
-     *     description="Create a post",
+     *     path="/api/website/forms/field-map",
+     *     description="Create a field map",
      *     tags={"Post"},
      *     @OA\Parameter(
      *         name="id",
@@ -74,8 +75,8 @@ class FieldMapController extends RestfulController
 
     /**
      * @OA\Get(
-     *     path="/api/posts",
-     *     description="Retrieve a list of posts",
+     *     path="/api/website/forms/field-map",
+     *     description="Retrieve a list of field maps by type",
      
      *     tags={"Post"},
      *     @OA\Parameter(
@@ -91,83 +92,6 @@ class FieldMapController extends RestfulController
      *         description="Sort order can be: price,-price,relevance,title,-title,length,-length",
      *         required=false,
      *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Parameter(
-     *         name="type_id",
-     *         in="query",
-     *         description="Post types",
-     *         required=false,
-     *         @OA\Property(
-     *            type="array",
-     *            @OA\Items(
-     *              type="array",
-     *              @OA\Items()
-     *            ),
-     *            description="Type ID arra"
-     *         )
-     *     ),     
-     *     @OA\Parameter(
-     *         name="category_id",
-     *         in="query",
-     *         description="Post categories",
-     *         required=false,
-     *          @OA\Property(
-     *            type="array",
-     *            @OA\Items(
-     *              type="array",
-     *              @OA\Items()
-     *            ),
-     *            description="Category ID array"
-     *         )
-     *     ),
-     *    @OA\Parameter(
-     *         name="manufacturer_id",
-     *         in="query",
-     *         description="Post manufacturers",
-     *         required=false,
-     *         @OA\Property(
-     *            type="array",
-     *            @OA\Items(
-     *              type="array",
-     *              @OA\Items()
-     *            ),
-     *            description="Manufacturer ID array"
-     *         )
-     *     ),
-     *     @OA\Parameter(
-     *         name="brand_id",
-     *         in="query",
-     *         description="Post brands",
-     *         required=false,
-     *         @OA\Property(
-     *            type="array",
-     *            @OA\Items(
-     *              type="array",
-     *              @OA\Items()
-     *            ),
-     *            description="Brand ID array"
-     *         )
-     *     ),
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="query",
-     *         description="Post IDs",
-     *         required=false,
-     *         @OA\Property(
-     *            type="array",
-     *            @OA\Items(
-     *              type="array",
-     *              @OA\Items()
-     *            ),
-     *            description="Post IDs array"
-     *         )
-     *     ),
-     *   @OA\Parameter(
-     *         name="price",
-     *         in="query",
-     *         description="Post price can be in format: [10 TO 100], [10], [10.0 TO 100.0]",
-     *         required=false,
-     *         @OA\Schema(type="string")
      *     ),
      *     @OA\Response(
      *         response="200",
@@ -185,6 +109,49 @@ class FieldMapController extends RestfulController
         
         if ( $request->validate() ) {
             $fields = $this->fields->getMap($request->all());
+            return $this->response->array([
+                'data' => $fields
+            ]);
+        }
+        
+        return $this->response->errorBadRequest();
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/website/forms/field-map/types",
+     *     description="Retrieve a field map types",
+     
+     *     tags={"Post"},
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Page Limit",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="sort",
+     *         in="query",
+     *         description="Sort order can be: price,-price,relevance,title,-title,length,-length",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns a list of posts",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
+     *     ),
+     * )
+     */
+    public function types(Request $request) {
+        $request = new TypesFieldMapRequest($request->all());
+        if ( $request->validate() ) {
+            $fields = $this->fields->getTypes();
             return $this->response->array([
                 'data' => $fields
             ]);

@@ -13,8 +13,8 @@ class GetQuickbookApprovalRequest extends Request {
     protected $rules = [
         'dealer_id' => 'integer',
         'search_term' => 'string',
-        'status' => 'in:'. QuickbookApproval::TO_SEND .','. QuickbookApproval::SENT .',' . QuickbookApproval::FAILED,
-        'sort' => 'in:created_at,-created_at,action_type,-action_type,tb_name,-tb_name'
+        'status' => 'in:'. QuickbookApproval::TO_SEND .','. QuickbookApproval::SENT .',' . QuickbookApproval::FAILED . ',' . QuickbookApproval::REMOVED,
+        'sort' => 'in:deleted_at,-deleted_at,created_at,-created_at,action_type,-action_type,tb_name,-tb_name'
     ];
-    
+
 }

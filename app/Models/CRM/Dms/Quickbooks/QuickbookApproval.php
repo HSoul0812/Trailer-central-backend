@@ -1,9 +1,8 @@
 <?php
-
-
 namespace App\Models\CRM\Dms\Quickbooks;
 
-
+use App\Models\User\Location\QboLocationMapping;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -24,6 +23,11 @@ use Illuminate\Database\Eloquent\Model;
  * @property $qb_id
  * @property $error_result
  *
+ * @method static \Illuminate\Database\Query\Builder select($columns = ['*'])
+ * @method static \Illuminate\Database\Query\Builder where($column, $operator = null, $value = null, $boolean = 'and')
+ * @method static \Illuminate\Database\Query\Builder whereIn($column, $values, $boolean = 'and', $not = false)
+ * @method static QuickbookApproval findOrFail($id, array $columns = ['*'])
+ * @method static QuickbookApproval|Collection|static[]|static|null find($id, $columns = ['*'])
  */
 class QuickbookApproval extends Model
 {
@@ -31,6 +35,12 @@ class QuickbookApproval extends Model
     const TO_SEND = 'to_send';
     const SENT = 'sent';
     const FAILED = 'failed';
+    const REMOVED = 'removed';
+
+    public const ACTION_UPDATE = 'update';
+    public const ACTION_ADD = 'add';
+
+    public const PRIORITY_DEALER_LOCATION = 40;
 
     const TABLE_NAME_MAPPER = [
         'qb_accounts' => 'Account',
@@ -50,6 +60,7 @@ class QuickbookApproval extends Model
         'qb_items_new' => 'Item (New)',
         'inventory_floor_plan_payment' => 'Floorplan Payment',
         'dealer_refunds' => 'Refunds Receipt',
+        'dealer_location' => 'Dealer location',
     ];
 
     protected $table = 'quickbook_approval';
@@ -59,6 +70,15 @@ class QuickbookApproval extends Model
     protected $guarded = ['qb_id'];
 
     public $timestamps = false;
+
+    protected $listAccountAttrName = [
+        'IncomeAccountRef',
+        'ExpenseAccountRef',
+        'AssetAccountRef',
+        'CreditCardAccountRef',
+        'BankAccountRef',
+        'DepositToAccountRef',
+    ];
 
     public function getTbLabelAttribute()
     {
@@ -75,6 +95,86 @@ class QuickbookApproval extends Model
             return $qbObj['CustomerRef']['name'];
         }
         return null;
+    }
+
+    public function getAccountAttribute(): ?string
+    {
+        $names = [];
+        $tbName = $this->tb_name;
+        $qbObj = json_decode($this->qb_obj,true);
+        switch($tbName) {
+            case 'qb_accounts':
+                if(!empty($qbObj['Name'])) {
+                    $names[] = $qbObj['Name'];
+                }
+                break;
+            case 'qb_bill_payment':
+                if(!empty($qbObj['CreditCardPayment']['CCAccountRef']['name'])) {
+                    $names[] = $qbObj['CreditCardPayment']['CCAccountRef']['name'];
+                }
+                break;
+            case 'qb_vendors':
+                if(!empty($qbObj['DisplayName'])) {
+                    $names[] = $qbObj['DisplayName'];
+                }
+                break;
+            case 'qb_items':
+            case 'qb_items_new':
+            case 'inventory_floor_plan_payment':
+            case 'qb_payment':
+                $names = $this->parseNameByItem();
+                break;
+            case 'qb_bills':
+            case 'qb_expenses':
+                $names = $this->parseNameInLine('AccountBasedExpenseLineDetail', 'AccountRef');
+                if(!empty($qbObj['AccountRef']['name'])) {
+                    $names[] = $qbObj['AccountRef']['name'];
+                }
+                break;
+            case 'qb_invoices':
+            case 'crm_pos_sales':
+            case 'dealer_refunds':
+                $names = $this->parseNameInLine('SalesItemLineDetail', 'ItemRef');
+                if(!empty($qbObj['DepositToAccountRef']['name'])) {
+                    $names[] = $qbObj['DepositToAccountRef']['name'];
+                }
+                break;
+            case 'qb_journal_entry':
+                $names = $this->parseNameInLine('JournalEntryLineDetail', 'AccountRef');
+                break;
+            default:
+                break;
+        }
+        $name = implode('<br/>', $names);
+        return $name;
+    }
+
+    protected function parseNameByItem():array
+    {
+        $names = [];
+        $qbObj = json_decode($this->qb_obj,true);
+        foreach($this->listAccountAttrName as $attr) {
+            if(!empty($qbObj[$attr]['name'])) {
+                $names[] = $qbObj[$attr]['name'];
+            }
+        }
+        return $names;
+    }
+
+    protected function parseNameInLine(string $key, string $subKey):array
+    {
+        $names = [];
+        $qbObj = json_decode($this->qb_obj,true);
+        if(!empty($qbObj['Line']) && is_array($qbObj['Line'])) {
+            foreach($qbObj['Line'] as $k => $line) {
+                if(!empty($line[$key][$subKey]['name'])) {
+                    $names[] = $line[$key][$subKey]['name'];
+                }
+            }
+        }
+
+        return $names;
+
     }
 
     public function getPaymentMethodAttribute()
@@ -141,4 +241,25 @@ class QuickbookApproval extends Model
         return $query->whereIn('tb_name', array_keys($filteredTables));
     }
 
+    /**
+     * @param QuickbookApprovalDeleted $obj
+     */
+    public function createFromDeleted(QuickbookApprovalDeleted $obj)
+    {
+        $this->id = $obj->id;
+        $this->dealer_id = $obj->dealer_id;
+        $this->action_type = $obj->action_type;
+        $this->tb_name = $obj->tb_name;
+        $this->tb_primary_id = $obj->tb_primary_id;
+        $this->send_to_quickbook = $obj->send_to_quickbook;
+        $this->qb_obj = $obj->qb_obj;
+        $this->is_approved = $obj->is_approved;
+        $this->sort_order = $obj->sort_order;
+        $this->created_at = $obj->created_at;
+        $this->exported_at = $obj->exported_at;
+        $this->qb_id = $obj->qb_id;
+        $this->error_result = $obj->error_result;
+
+        $this->save();
+    }
 }

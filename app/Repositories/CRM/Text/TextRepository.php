@@ -2,9 +2,10 @@
 
 namespace App\Repositories\CRM\Text;
 
+use App\Exceptions\RepositoryInvalidArgumentException;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
-use App\Repositories\CRM\Text\TextRepositoryInterface;
-use App\Repositories\CRM\Leads\LeadRepositoryInterface;
+use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Exceptions\CRM\Text\NoLeadSmsNumberAvailableException;
 use App\Exceptions\CRM\Text\NoDealerSmsNumberAvailableException;
@@ -22,9 +23,9 @@ class TextRepository implements TextRepositoryInterface {
     private $service;
 
     /**
-     * @var LeadRepositoryInterface
+     * @var StatusRepositoryInterface
      */
-    private $leads;
+    private $leadStatus;
 
     /**
      * @var DealerLocationRepositoryInterface
@@ -44,16 +45,16 @@ class TextRepository implements TextRepositoryInterface {
 
     /**
      * TextRepository constructor.
-     * 
+     *
      * @param TextServiceInterface $service
      */
-    public function __construct(TextServiceInterface $service, LeadRepositoryInterface $leads, DealerLocationRepositoryInterface $dealerLocation)
+    public function __construct(TextServiceInterface $service, StatusRepositoryInterface $leadStatus, DealerLocationRepositoryInterface $dealerLocation)
     {
         $this->service = $service;
-        $this->leads = $leads;
+        $this->leadStatus = $leadStatus;
         $this->dealerLocation = $dealerLocation;
     }
-    
+
     public function create($params) {
         return TextLog::create($params);
     }
@@ -69,7 +70,7 @@ class TextRepository implements TextRepositoryInterface {
 
     public function getAll($params) {
         $query = Template::where('id', '>', 0);
-        
+
         if (!isset($params['per_page'])) {
             $params['per_page'] = 100;
         }
@@ -85,7 +86,7 @@ class TextRepository implements TextRepositoryInterface {
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
         }
-        
+
         return $query->paginate($params['per_page'])->appends($params);
     }
 
@@ -102,7 +103,7 @@ class TextRepository implements TextRepositoryInterface {
 
     /**
      * Stop Processing Text Repository
-     * 
+     *
      * @param array $params
      * @return Stop
      */
@@ -118,7 +119,7 @@ class TextRepository implements TextRepositoryInterface {
 
     /**
      * Send Text
-     * 
+     *
      * @param int $leadId
      * @param string $textMessage
      * @return TextLog
@@ -144,9 +145,9 @@ class TextRepository implements TextRepositoryInterface {
         $this->service->send($from_number, $to_number, $textMessage, $fullName);
 
         // Save Lead Status
-        $this->leads->update([
-            'id' => $lead->identifier,
-            'lead_status' => Lead::STATUS_MEDIUM,
+        $this->leadStatus->createOrUpdate([
+            'lead_id' => $lead->identifier,
+            'status' => Lead::STATUS_MEDIUM,
             'next_contact_date' => Carbon::now()->addDay()->toDateTimeString()
         ]);
 
@@ -162,7 +163,7 @@ class TextRepository implements TextRepositoryInterface {
 
     /**
      * Add Sort Query
-     * 
+     *
      * @param type $query
      * @param type $sort
      * @return type
@@ -173,5 +174,37 @@ class TextRepository implements TextRepositoryInterface {
         }
 
         return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
+    }
+
+    /**
+     * @param array $params
+     * @return bool
+     */
+    public function bulkUpdate(array $params): bool
+    {
+        if ((empty($params['ids']) || !is_array($params['ids'])) && (empty($params['search']) || !is_array($params['search']))) {
+            throw new RepositoryInvalidArgumentException('ids or search param has been missed. Params - ' . json_encode($params));
+        }
+
+        $query = TextLog::query();
+
+        if (!empty($params['ids']) && is_array($params['ids'])) {
+            $query->whereIn('id', $params['ids']);
+            unset($params['ids']);
+        }
+
+        if (!empty($params['search']['lead_id'])) {
+            $query->where('lead_id', $params['search']['lead_id']);
+            unset($params['search']['lead_id']);
+        }
+
+        /** @var TextLog<Collection> $textLogs */
+        $textLogs = $query->get();
+
+        foreach ($textLogs as $textLog) {
+            $textLog->update($params);
+        }
+
+        return true;
     }
 }

@@ -5,6 +5,7 @@ namespace App\Models\CRM\Dms\ServiceOrder;
 
 
 use App\Models\CRM\Dms\ServiceOrder;
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
@@ -17,7 +18,11 @@ use Illuminate\Database\Eloquent\Model;
  */
 class ServiceItem extends Model
 {
-    protected $table = "dms_service_item";
+    use TableAware;
+
+    protected $table = 'dms_service_item';
+
+    public $timestamps = false;
 
     public function laborCode()
     {

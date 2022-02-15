@@ -1,21 +1,11 @@
 <?php
 
-
 namespace App\Services\Export;
 
 /**
- * Interface ExporterInterface
- *
- * Generic interface for a query exporter
- *
- * @package App\Services\Export
+ * Describe a generic file exporter
  */
 interface ExporterInterface
 {
-    function createFile();
-
-    function write($line);
-
-    function deliver();
-
+    public function export();
 }

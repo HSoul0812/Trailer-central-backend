@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\v1\CRM\User;
 
 use App\Http\Controllers\RestfulControllerV2;
-use Dingo\Api\Http\Request;
 use App\Http\Requests\CRM\User\ShowSalesAuthRequest;
 use App\Http\Requests\CRM\User\CreateSalesAuthRequest;
 use App\Http\Requests\CRM\User\UpdateSalesAuthRequest;
+use App\Http\Requests\CRM\User\LoginSalesAuthRequest;
+use App\Http\Requests\CRM\User\AuthorizeSalesAuthRequest;
 use App\Services\CRM\User\SalesAuthServiceInterface;
+use Dingo\Api\Http\Request;
+use Dingo\Api\Http\Response;
 
 class SalesAuthController extends RestfulControllerV2 {
     /**
@@ -15,8 +18,13 @@ class SalesAuthController extends RestfulControllerV2 {
      */
     private $service;
 
+    /**
+     * @param SalesAuthServiceInterface $service
+     */
     public function __construct(SalesAuthServiceInterface $service) {
-        $this->middleware('setDealerIdOnRequest')->only(['create', 'update']);
+        $this->middleware('setDealerIdOnRequest')->only(['create', 'update', 'login', 'code']);
+        $this->middleware('setUserIdOnRequest')->only(['create', 'update', 'login', 'code']);
+        $this->middleware('setSalesPersonIdOnRequest')->only(['login', 'code']);
 
         $this->service = $service;
     }
@@ -74,6 +82,44 @@ class SalesAuthController extends RestfulControllerV2 {
         if ($request->validate()) {
             // Return Auth
             return $this->response->array($this->service->update($request->all()));
+        }
+        
+        return $this->response->errorBadRequest();
+    }
+
+    /**
+     * Create Sales Person and Get Login URL
+     * 
+     * @param Request $request
+     * @return Response
+     */
+    public function login(Request $request): Response
+    {
+        // Handle Auth Sales People Request
+        $request = new LoginSalesAuthRequest($request->all());
+
+        if ($request->validate()) {
+            // Return Auth
+            return $this->response->array($this->service->login($request->all()));
+        }
+        
+        return $this->response->errorBadRequest();
+    }
+
+    /**
+     * Authorize OAuth With Code and Return Sales Person
+     * 
+     * @param Request $request
+     * @return Response
+     */
+    public function code(Request $request): Response
+    {
+        // Handle Authorize Sales People Request
+        $request = new AuthorizeSalesAuthRequest($request->all());
+
+        if ($request->validate()) {
+            // Return Auth
+            return $this->response->array($this->service->authorize($request));
         }
         
         return $this->response->errorBadRequest();

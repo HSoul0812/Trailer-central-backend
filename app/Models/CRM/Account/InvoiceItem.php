@@ -18,6 +18,8 @@ class InvoiceItem extends Model
 {
     protected $table = "qb_invoice_items";
 
+    public $timestamps = false;
+
     public function invoice()
     {
         return $this->belongsTo(Invoice::class, 'invoice_id');
@@ -26,5 +28,10 @@ class InvoiceItem extends Model
     public function item()
     {
         return $this->hasOne(Item::class, 'id', 'item_id');
+    }
+    
+    public function getItemPriceAttribute() : float
+    {
+        return (int)$this->qty * (float)$this->unit_price;
     }
 }

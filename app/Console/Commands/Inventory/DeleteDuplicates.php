@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands\Inventory;
 
-use App\Services\Inventory\InventoryService;
+use App\Services\Inventory\InventoryServiceInterface;
 use Illuminate\Console\Command;
 
 /**
@@ -19,15 +19,15 @@ class DeleteDuplicates extends Command
     protected $signature = "inventory:delete_duplicates {dealer_id}";
 
     /**
-     * @var InventoryService
+     * @var InventoryServiceInterface
      */
     private $inventoryService;
 
     /**
      * DeleteDuplicates constructor.
-     * @param InventoryService $inventoryService
+     * @param InventoryServiceInterface $inventoryService
      */
-    public function __construct(InventoryService $inventoryService)
+    public function __construct(InventoryServiceInterface $inventoryService)
     {
         parent::__construct();
 

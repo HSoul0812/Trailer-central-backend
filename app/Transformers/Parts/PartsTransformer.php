@@ -2,16 +2,22 @@
 
 namespace App\Transformers\Parts;
 
+use App\Models\CRM\Dms\PurchaseOrder\PurchaseOrderPart;
+use League\Fractal\Resource\Collection;
 use League\Fractal\TransformerAbstract;
 use App\Models\Parts\Part;
 
-class PartsTransformer extends TransformerAbstract
+class PartsTransformer extends TransformerAbstract implements PartsTransformerInterface
 {
-    public function transform(Part $part)
+    protected $availableIncludes = [
+        'purchaseOrders',
+    ];
+
+    public function transform(Part $part): array
     {
 	 return [
              'id' => (int)$part->id,
-             'dealer_id' => (int)$part->dealer_id,
+             'dealer_id' => $part->dealer_id ? (int)$part->dealer_id : null,
              'vendor' => $part->vendor,
              'manufacturer' => $part->manufacturer,
              'brand' => $part->brand,
@@ -22,8 +28,9 @@ class PartsTransformer extends TransformerAbstract
              'subcategory' => $part->subcategory,
              'title' => $part->title,
              'alternative_part_number' => $part->alternative_part_number,
-             'price' => (double)number_format((double)$part->modified_cost, 2, '.', ''),
+             'price' => (double)number_format((double)$part->price, 2, '.', ''),
              'dealer_cost' => (double)$part->dealer_cost,
+             'latest_cost' => (double)$part->latest_cost,
              'msrp' => (double)$part->msrp,
              'shipping_fee' => (double) $part->shipping_fee,
              'use_handling_fee' => (bool) $part->use_handling_fee,
@@ -41,7 +48,28 @@ class PartsTransformer extends TransformerAbstract
              'video_embed_code' => $part->video_embed_code,
              'stock_min' => $part->stock_min,
              'stock_max' => $part->stock_max,
-             'bins' => $part->bins
+             'bins' => $part->bins,
+             'disabled' => count($part->bins) === 0
          ];
+    }
+
+    /**
+     * Include purchases resource object
+     *
+     * @param Part $part
+     * @return Collection
+     */
+    public function includePurchaseOrders(Part $part): Collection
+    {
+        return $this->collection(
+            $part->purchaseOrders,
+            new PurchaseOrderPartTransformer(), 'data')
+            ->setMeta([
+                'has_not_completed' => $part->purchaseOrders->filter(static function (
+                    PurchaseOrderPart $poPart
+                ): bool {
+                    return !$poPart->purchaseOrder->isCompleted();
+                })->isNotEmpty()
+            ]);
     }
 }

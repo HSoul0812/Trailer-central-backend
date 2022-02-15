@@ -4,6 +4,7 @@
 namespace App\Repositories\Integration;
 
 use App\Exceptions\NotImplementedException;
+use App\Repositories\RepositoryAbstract;
 use App\Utilities\JsonApi\WithRequestQueryable;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
  * Class CollectorRepository
  * @package App\Repositories\Integration
  */
-class CollectorRepository implements CollectorRepositoryInterface
+class CollectorRepository extends RepositoryAbstract implements CollectorRepositoryInterface
 {
     use WithRequestQueryable;
 
@@ -21,47 +22,17 @@ class CollectorRepository implements CollectorRepositoryInterface
     }
 
     /**
-     * @param $params
-     * @throws NotImplementedException
-     */
-    public function create($params)
-    {
-        throw new NotImplementedException;
-    }
-
-    /**
-     * @param $params
-     * @throws NotImplementedException
-     */
-    public function update($params)
-    {
-        throw new NotImplementedException;
-    }
-
-    /**
-     * @param $params
-     * @throws NotImplementedException
-     */
-    public function get($params)
-    {
-        throw new NotImplementedException;
-    }
-
-    /**
-     * @param $params
-     * @throws NotImplementedException
-     */
-    public function delete($params)
-    {
-        throw new NotImplementedException;
-    }
-
-    /**
      * @param array $params
      * @return Builder[]|\Illuminate\Database\Eloquent\Collection|null[]
      */
     public function getAll($params)
     {
-        return $this->query()->get();
+        $query = $this->query();
+
+        $query->with(['specifications' => function ($query) {
+            $query->with(['rules', 'actions']);
+        }]);
+
+        return $query->get();
     }
 }

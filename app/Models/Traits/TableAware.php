@@ -1,12 +1,14 @@
 <?php
 
 namespace App\Models\Traits;
-use App\Exceptions\NotImplementedException;
 
+/**
+ * Trait TableAware
+ * @package App\Models\Traits
+ */
 trait TableAware {
-        
-    public static function getTableName() {
-        throw new NotImplementedException();
+    public static function getTableName()
+    {
+        return with(new static)->getTable();
     }
-    
 }

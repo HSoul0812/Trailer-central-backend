@@ -12,7 +12,9 @@ use Carbon\Carbon;
  * @package App\Models\Website\Blog
  */
 class Post extends Model
-{
+{    
+    const STATUS_PUBLISHED = 'published';
+    
     protected $table = 'website_blog';
 
     /**

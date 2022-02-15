@@ -1,51 +1,31 @@
 <?php
 
-
 namespace App\Repositories\Bulk\Parts;
 
-
 use App\Models\Bulk\Parts\BulkDownload;
-use App\Repositories\Bulk\BulkDownloadRepositoryInterface;
+use App\Repositories\Common\MonitoredJobRepository;
 
-class BulkDownloadRepository implements BulkDownloadRepositoryInterface
+/**
+ * Implementation for bulk download repository
+ */
+class BulkDownloadRepository extends MonitoredJobRepository implements BulkDownloadRepositoryInterface
 {
-
     /**
-     * @inheritDoc
+     * @param string $token
+     * @return BulkDownload|null
      */
-    public function find($id)
-    {
-        return BulkDownload::find($id);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function create($params)
-    {
-        return BulkDownload::create($params);
-    }
-
-    /**
-     * @param BulkDownload|int $download
-     * @return bool
-     */
-    public function setCompleted($download)
-    {
-        // is it a BulkDownload?
-        if ($download instanceof BulkDownload) {
-            return $download->save();
-        }
-
-        // no, it is an $id
-        return BulkDownload::where('id', $download)->update(['status' => BulkDownload::STATUS_COMPLETED]);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function findByToken($token)
+    public function findByToken(string $token): ?BulkDownload
     {
         return BulkDownload::where('token', $token)->get()->first();
+    }
+
+    /**
+     * @param array $params
+     *
+     * @return BulkDownload
+     */
+    public function create(array $params): BulkDownload
+    {
+        return BulkDownload::create($params);
     }
 }

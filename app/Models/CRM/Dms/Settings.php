@@ -14,6 +14,7 @@ class Settings extends Model
     protected $table = 'dms_settings';
 
     protected $fillable = [
+        "dealer_id",
         "pos_editable_sales_price",
         "pos_show_shipping",
         "labor_price_editable",

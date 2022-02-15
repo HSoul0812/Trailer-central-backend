@@ -23,6 +23,7 @@ class VendorController extends RestfulController
      */
     public function __construct(VendorRepositoryInterface $vendors)
     {
+        $this->middleware('setDealerIdOnRequest')->only(['index']);
         $this->vendors = $vendors;
     }
     

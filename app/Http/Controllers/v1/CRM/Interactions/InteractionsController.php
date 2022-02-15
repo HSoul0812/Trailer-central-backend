@@ -4,7 +4,6 @@ namespace App\Http\Controllers\v1\CRM\Interactions;
 
 use App\Http\Controllers\RestfulControllerV2;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
-use App\Transformers\CRM\Interactions\InteractionTextTransformer;
 use App\Transformers\CRM\Interactions\InteractionTransformer;
 use App\Http\Requests\CRM\Interactions\GetInteractionsRequest;
 use App\Http\Requests\CRM\Interactions\CreateInteractionRequest;
@@ -19,17 +18,23 @@ class InteractionsController extends RestfulControllerV2
 {
     protected $interactions;
     protected $service;
+    protected $interactionTransformer;
 
     /**
      * Create a new controller instance.
      *
      * @param Repository $interactions
      */
-    public function __construct(InteractionsRepositoryInterface $interactions, InteractionServiceInterface $service)
-    {
+    public function __construct(
+        InteractionsRepositoryInterface $interactions,
+        InteractionServiceInterface $service,
+        InteractionTransformer $interactionTransformer
+    ) {
+        $this->middleware('setDealerIdOnRequest')->only(['sendEmail']);
+        $this->middleware('setSalesPersonIdOnRequest')->only(['sendEmail']);
         $this->interactions = $interactions;
         $this->service = $service;
-        $this->transformer = new InteractionTransformer();
+        $this->interactionTransformer = $interactionTransformer;
     }
 
     public function index(Request $request) {
@@ -38,7 +43,7 @@ class InteractionsController extends RestfulControllerV2
         
         if ($request->validate()) {
             // Return Result
-            return $this->response->paginator($this->interactions->getAll($params), new InteractionTransformer());
+            return $this->response->paginator($this->interactions->getAll($params), $this->interactionTransformer);
         }
         
         return $this->response->errorBadRequest();
@@ -48,7 +53,7 @@ class InteractionsController extends RestfulControllerV2
         $request = new CreateInteractionRequest($request->all());
         if ( $request->validate() ) {
             // Create Text
-            return $this->response->item($this->interactions->create($request->all()), new InteractionTransformer());
+            return $this->response->item($this->interactions->create($request->all()), $this->interactionTransformer);
         }
         
         return $this->response->errorBadRequest();
@@ -58,7 +63,7 @@ class InteractionsController extends RestfulControllerV2
         $request = new ShowInteractionRequest(['id' => $id]);
         
         if ( $request->validate() ) {
-            return $this->response->item($this->interactions->get(['id' => $id]), new InteractionTransformer());
+            return $this->response->item($this->interactions->get(['id' => $id]), $this->interactionTransformer);
         }
         
         return $this->response->errorBadRequest();
@@ -70,7 +75,7 @@ class InteractionsController extends RestfulControllerV2
         $request = new UpdateInteractionRequest($requestData);
         
         if ( $request->validate() ) {
-            return $this->response->item($this->interactions->update($request->all()), new InteractionTransformer());
+            return $this->response->item($this->interactions->update($request->all()), $this->interactionTransformer);
         }
         
         return $this->response->errorBadRequest();
@@ -208,9 +213,9 @@ class InteractionsController extends RestfulControllerV2
         if ( $request->validate()) {
             // Get Results
             $result = $this->service->email($leadId, $params, $request->allFiles());
-
+            
             // Send Email Response
-            return $this->response->item($result, new InteractionTransformer());
+            return $this->response->item($result, $this->interactionTransformer);
         }
         
         return $this->response->errorBadRequest();

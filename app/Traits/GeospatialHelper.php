@@ -6,11 +6,11 @@ trait GeospatialHelper
 {
     /* http://dev.mysql.com/doc/refman/5.0/en/gis-wkb-format.html */
 
-    static function ToWKB($latitude, $longitude) {
+    protected function toWKB($latitude, $longitude) {
         return pack("cLdd", 1, 16777216, $latitude, $longitude);
     }
 
-    static function FromWKB($wkb) {
+    protected function fromWKB($wkb) {
         $geolocation = array();
 
         $geometry = unpack('corder/Ltype/dlat/dlon', $wkb);

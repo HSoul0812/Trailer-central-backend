@@ -7,10 +7,12 @@ use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Interactions\Interaction;
+use App\Models\CRM\Interactions\InteractionEmail;
 use App\Models\CRM\Interactions\TextLog;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\Lead;
 use App\Repositories\Traits\SortTrait;
+use Illuminate\Database\Eloquent\Collection;
 
 class InteractionsRepository implements InteractionsRepositoryInterface {
     
@@ -34,10 +36,10 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
     
     private $sortOrdersNames = [
         'created_at' => [
-            'name' => 'Newest Tasks to Oldest Tasks, then Future Tasks',
+            'name' => 'Newest Tasks to Oldest Tasks',
         ],
         '-created_at' => [
-            'name' => 'Oldest Tasks to Newest Tasks, then Future Tasks',
+            'name' => 'Oldest Tasks to Newest Tasks',
         ],
     ];
 
@@ -85,14 +87,15 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
                  'interaction_notes',
                  'interaction_time',
                  'sent_by',
-                 'from_email'])->where('tc_lead_id', $params['lead_id']);
+                 'from_email',
+                  DB::raw('"" AS to_no')])->where('tc_lead_id', $params['lead_id']);
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 100;
         }
 
         if(!isset($params['sort'])) {
-            $params['sort'] = '-created_at';
+            $params['sort'] = 'created_at';
         }
 
         if (!isset($params['include_texts']) || !empty($params['include_texts'])) {
@@ -102,6 +105,34 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
         $query = $this->addSortQuery($query, $params['sort']);
         
         return $query->paginate($params['per_page'])->appends($params);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public function getFirst10(array $params) : Collection {
+        // Get User ID
+        $query = Interaction::select(
+                ['interaction_id', 
+                 'lead_product_id', 
+                 'tc_lead_id', 
+                 'user_id', 
+                 'interaction_type',
+                 'interaction_notes',
+                 'interaction_time',
+                 'sent_by',
+                 'from_email',
+                  DB::raw('"" AS to_no')])->where('tc_lead_id', $params['lead_id']);
+
+        $query->limit(10);
+
+        if (!isset($params['include_texts']) || !empty($params['include_texts'])) {
+            $query = $this->addTextUnion($query, $params);
+        }
+
+        $query = $this->addSortQuery($query, 'created_at');
+        
+        return $query->get();
     }
 
     public function update($params) {
@@ -138,6 +169,17 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
 
         // Create Interaction
         return $this->create($params);
+    }
+
+    /**
+     * Create InteractionEmail
+     * 
+     * @param array $params
+     * @return InteractionEmail
+     */
+
+    public function createInteractionEmail($params) {
+        return InteractionEmail::create($params);
     }
 
     public function getTasksByDealerId($dealerId, $sort = '-created_at', $perPage = 15) {
@@ -188,6 +230,7 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
             'log_message AS interaction_notes',
             'date_sent AS interaction_time',
             DB::raw('from_number AS from_email'),
+            DB::raw('to_number AS to_no'),
             DB::raw('"" AS sent_by')
         ])->where('lead_id', $params['lead_id']);
 

@@ -7,13 +7,13 @@ use App\Models\Bulk\Parts\BulkUpload;
 
 class BulkUploadTransformer extends TransformerAbstract
 {
-    public function transform(BulkUpload $bulkUpload)
-    {                        
-	 return [
-             'id' => (int)$bulkUpload->id,
-             'status' => $bulkUpload->status,
-             'source_file' => $bulkUpload->import_source,
-             'validation_errors' => $bulkUpload->getValidationErrors()
-         ];
+    public function transform(BulkUpload $bulkUpload): array
+    {
+        return [
+            'id' => $bulkUpload->id,
+            'status' => $bulkUpload->status,
+            'source_file' => $bulkUpload->source_file,
+            'validation_errors' => $bulkUpload->validation_errors
+        ];
     }
 }

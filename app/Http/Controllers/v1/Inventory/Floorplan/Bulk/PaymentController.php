@@ -3,37 +3,43 @@
 namespace App\Http\Controllers\v1\Inventory\Floorplan\Bulk;
 
 use App\Http\Controllers\RestfulController;
-use Dingo\Api\Http\Request; 
-use App\Repositories\Inventory\Floorplan\PaymentRepositoryInterface;
+use Dingo\Api\Http\Request;
+
 use App\Transformers\Inventory\Floorplan\PaymentTransformer;
 use App\Http\Requests\Inventory\Floorplan\Bulk\CreatePaymentsRequest;
+use App\Services\Inventory\Floorplan\PaymentServiceInterface;
 
 class PaymentController extends RestfulController
 {
     
-    protected $payment;
+    /**
+     * @var PaymentServiceInterface
+     */
+    private $paymentService;
     
     /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct(PaymentRepositoryInterface $payment)
+    public function __construct(PaymentServiceInterface $paymentService)
     {
-        $this->payment = $payment;
+        $this->paymentService = $paymentService;
+
+        $this->middleware('setDealerIdOnRequest')->only(['create']);
     }
 
     /**
      * @OA\Put(
      *     path="/api/inventory/floorplan/bulk/payments",
-     *     description="Create a floorplan payment
+     *     description="Create a floorplan payment",
      *     tags={"Floorplan Payments"},
      *     @OA\Parameter(
      *         name="inventory_id",
      *         in="query",
      *         description="Inventory ID",
      *         required=true,
-     *         @OA\Schema(@OA\Schema(type="integer"))
+     *         @OA\Schema(type="integer")
      *     ),
      *     @OA\Parameter(
      *         name="type",
@@ -83,9 +89,16 @@ class PaymentController extends RestfulController
      */
     public function create(Request $request) {
         $request = new CreatePaymentsRequest($request->all());
-        
+
         if ( $request->validate() ) {
-            return $this->response->collection($this->payment->createBulk($request->all()['payments']), new PaymentTransformer());
+            $allRequests = $request->all();
+            $payments = $this->paymentService->createBulk(
+                $allRequests['dealer_id'],
+                $allRequests['payments'],
+                $allRequests['paymentUUID']
+            );
+
+            return $this->response->collection($payments, new PaymentTransformer());
         }  
         
         return $this->response->errorBadRequest();

@@ -8,7 +8,7 @@ class QuickbookApprovalTransformer extends TransformerAbstract
 {
 
     public function transform($quickbookApproval)
-    {   
+    {
         return [
             'id' => $quickbookApproval->id,
             'dealer_id' => $quickbookApproval->dealer_id,
@@ -23,6 +23,9 @@ class QuickbookApprovalTransformer extends TransformerAbstract
             'payment_method' => $quickbookApproval->payment_method,
             'sales_ticket_num' => $quickbookApproval->sales_ticket_num,
             'ticket_total' => $quickbookApproval->ticket_total,
+            'qbo_account' => $quickbookApproval->account,
+            'removed_by' => $quickbookApproval->dealer_name,
+            'deleted_at' => $quickbookApproval->deleted_at,
         ];
     }
-} 
+}

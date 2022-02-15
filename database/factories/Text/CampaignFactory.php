@@ -35,6 +35,22 @@ $factory->define(Campaign::class, function (Faker $faker) {
 });
 
 /**
+ * Define Campaign Sent Factory
+ */
+$factory->define(CampaignSent::class, function(Faker $faker, array $attributes) {
+    $drip_campaigns_id = $attributes['drip_campaigns_id'] ?? factory(Campaign::class)->create->getKey();
+
+    $lead_id = $attributes['lead_id'] ?? factory(Lead::class)->create->getKey();
+
+    // Return Overrides
+    return [
+        'drip_campaigns_id' => $drip_campaigns_id,
+        'lead_id' => $lead_id,
+        'message_id' => '<' . $faker->md5 . '@' . $faker->freeEmailDomain . '>'
+    ];
+});
+
+/**
  * Define Campaign Brand Factory
  */
 $factory->define(CampaignBrand::class, function (Faker $faker) {

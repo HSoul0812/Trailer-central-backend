@@ -4,7 +4,7 @@ namespace App\Services\Import\Parts;
 
 use App\Events\Parts\PartQtyUpdated;
 use App\Services\Import\Parts\CsvImportServiceInterface;
-use App\Repositories\Bulk\BulkUploadRepositoryInterface;
+use App\Repositories\Bulk\Parts\BulkUploadRepositoryInterface;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Parts\Vendor;
 use App\Models\Parts\Brand;
@@ -46,6 +46,7 @@ class CsvImportService implements CsvImportServiceInterface
     const STOCK_MAX = 'Stock Maximum';
     const VIDEO_EMBED_CODE = 'Video Embed Code';
     const ALTERNATE_PART_NUMBER = 'Alternate Part Number';
+    const PART_ID = 'Part ID';
 
     const BIN_ID = '/Bin\s+\d+\s+ID/i';
     const BIN_QTY = '/Bin\s+\d+\s+qty/i';
@@ -76,7 +77,8 @@ class CsvImportService implements CsvImportServiceInterface
         self::STOCK_MIN => true,
         self::STOCK_MAX => true,
         self::VIDEO_EMBED_CODE => true,
-        self::ALTERNATE_PART_NUMBER => true
+        self::ALTERNATE_PART_NUMBER => true,
+        self::PART_ID => true
     ];
 
     protected $optionalHeaderValues = [
@@ -313,7 +315,9 @@ class CsvImportService implements CsvImportServiceInterface
             $keyToIndexMapping[$value] = $index;
         }
 
-        $vendor = Vendor::where('name', $csvData[$keyToIndexMapping[self::VENDOR]])->first();
+        $vendor = Vendor::where('name', $csvData[$keyToIndexMapping[self::VENDOR]])
+            ->where('dealer_id', $this->bulkUpload->dealer_id)
+            ->first();
 
         $part = [];
         $part['dealer_id'] = $this->bulkUpload->dealer_id;
@@ -334,6 +338,10 @@ class CsvImportService implements CsvImportServiceInterface
         $part['stock_min'] = isset($csvData[$keyToIndexMapping[self::STOCK_MIN]]) ? $csvData[$keyToIndexMapping[self::STOCK_MIN]] : null;
         $part['stock_max'] = isset($csvData[$keyToIndexMapping[self::STOCK_MAX]]) ? $csvData[$keyToIndexMapping[self::STOCK_MAX]] : null;
         $part['alternative_part_number'] = isset($csvData[$keyToIndexMapping[self::ALTERNATE_PART_NUMBER]]) ? $csvData[$keyToIndexMapping[self::ALTERNATE_PART_NUMBER]] : null;
+        
+        if (isset($keyToIndexMapping[self::PART_ID]) && isset($csvData[$keyToIndexMapping[self::PART_ID]])) {
+            $part['id'] = $csvData[$keyToIndexMapping[self::PART_ID]];
+        }
         
         if (isset($keyToIndexMapping[self::VIDEO_EMBED_CODE]) && isset($csvData[$keyToIndexMapping[self::VIDEO_EMBED_CODE]])) {
             $part['video_embed_code'] = $csvData[$keyToIndexMapping[self::VIDEO_EMBED_CODE]];
@@ -369,7 +377,7 @@ class CsvImportService implements CsvImportServiceInterface
         switch($type) {
             case self::VENDOR:
                 if (!empty($value)) {
-                    $vendor = Vendor::where('name', $value)->first();
+                    $vendor = Vendor::where('name', $value)->where('dealer_id', $this->bulkUpload->dealer_id)->first();
                     if (empty($vendor)) {
                         return "Vendor {$value} does not exist in the system.";
                     }
@@ -416,6 +424,14 @@ class CsvImportService implements CsvImportServiceInterface
                 }
                 break;
             case self::ALTERNATE_PART_NUMBER:
+                break;
+            case self::PART_ID:
+                if (!empty($value)) {
+                    $part = Part::where('id', $value)->where('dealer_id', $this->bulkUpload->dealer_id)->first();
+                    if (empty($part)) {
+                        return "Part ID {$value} does not exist in the system.";
+                    }
+                }
                 break;
             case self::SHOW_ON_WEBSITE:
                 if (!empty($value)) {

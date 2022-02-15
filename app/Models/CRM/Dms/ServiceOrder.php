@@ -2,22 +2,25 @@
 
 namespace App\Models\CRM\Dms;
 
+use App\Models\CRM\Account\Invoice;
+use App\Models\CRM\Account\Payment;
 use App\Models\CRM\Dms\ServiceOrder\MiscPartItem;
 use App\Models\CRM\Dms\ServiceOrder\OtherItem;
 use App\Models\CRM\Dms\ServiceOrder\PartItem;
 use App\Models\CRM\Dms\ServiceOrder\ServiceItem;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
-use App\Models\CRM\Account\Invoice;
-use App\Models\CRM\Account\Payment;
 use App\Models\CRM\User\Customer;
 use App\Models\Inventory\Inventory;
+use App\Models\Traits\TableAware;
 use App\Models\User\DealerLocation;
-
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class ServiceOrder
+ *
  * @package App\Models\CRM\Dms
+ *
+ * @property boolean $closed_by_related_unit_sale
  * @property Collection<PartItem> $partItems
  * @property Collection<MiscPartItem> $miscPartItems
  * @property Collection<ServiceItem> $serviceItems
@@ -26,21 +29,44 @@ use App\Models\User\DealerLocation;
  */
 class ServiceOrder extends Model
 {
+    use TableAware;
 
     const SERVICE_ORDER_STATUS = [
         'picked_up' => 'Closed / Picked Up',
+        'closed_quote' => 'Closed / Quote',
         'ready_for_pickup' => 'Closed / Ready for Pickup',
         'on_tech_clipboard' => 'On Tech Clipboard',
         'waiting_custom' => 'Waiting on Custom',
         'waiting_parts' => 'Waiting on Part(s)',
         'warranty_processing' => 'Warranty Processing',
         'quote' => 'Quote',
-        'work_available' => 'Work Available'
+        'work_available' => 'Work Available',
     ];
 
-    const SERVICE_ORDER_ESTIMATE = 'estimate';
+    /*
+     * RO statuses which consider it done.
+     */
+    const COMPLETED_ORDER_STATUS = [
+        'picked_up',
+        'ready_for_pickup',
+        'closed_quote',
+    ];
+
+    public const TYPES = [
+        self::TYPE_ESTIMATE,
+        self::TYPE_INTERNAL,
+        self::TYPE_RETAIL,
+        self::TYPE_WARRANTY,
+    ];
+
+    public const TYPE_ESTIMATE = 'estimate';
+    public const TYPE_INTERNAL = 'internal';
+    public const TYPE_RETAIL = 'retail';
+    public const TYPE_WARRANTY = 'warranty';
+
     const SERVICE_ORDER_SCHEDULED = 'scheduled';
     const SERVICE_ORDER_COMPLETED = 'completed';
+    const SERVICE_ORDER_NOT_COMPLETED = 'not_completed';
 
     /**
      * The table associated with the model.
@@ -48,6 +74,11 @@ class ServiceOrder extends Model
      * @var string
      */
     protected $table = 'dms_repair_order';
+
+    protected $fillable = [
+        'status',
+        'closed_at',
+    ];
 
     const UPDATED_AT = null;
 
@@ -101,4 +132,8 @@ class ServiceOrder extends Model
         return $this->belongsTo(Inventory::class, 'inventory_id', 'inventory_id');
     }
 
+    public function getStatusNameAttribute(): string
+    {
+        return self::SERVICE_ORDER_STATUS[$this->status] ?? '';
+    }
 }

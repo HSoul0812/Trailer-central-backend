@@ -3,23 +3,30 @@
 namespace App\Jobs;
 
 use App\Models\Bulk\Parts\BulkUpload;
+use App\Services\Import\Parts\CsvImportServiceInterface;
 use Illuminate\Support\Facades\Log;
 
 /**
- * 
+ *
  *
  * @author Eczek
  */
 class ProcessBulkUpload extends Job {
-    
+
+    /**
+     * @var BulkUpload
+     */
     protected $bulk;
-    
+
+    /**
+     * @var CsvImportServiceInterface
+     */
     protected $csvImportService;
-    
+
     /**
      * Create a new job instance.
      *
-     * @return void
+     * @param BulkUpload $bulk
      */
     public function __construct(BulkUpload $bulk)
     {
@@ -42,5 +49,4 @@ class ProcessBulkUpload extends Job {
             Log::info($ex->getMessage());
         }
     }
-    
 }

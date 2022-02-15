@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Inventory;
 
 use App\Http\Requests\Request;
+use App\Models\CRM\Dms\UnitSale;
 
 /**
  * Class DeleteInventoryRequest
@@ -11,6 +12,6 @@ use App\Http\Requests\Request;
 class DeleteInventoryRequest extends Request
 {
     protected $rules = [
-        'id' => 'required|integer|inventory_valid'
+        'id' => 'required|integer|inventory_valid|inventory_quotes_not_exist'
     ];
 }

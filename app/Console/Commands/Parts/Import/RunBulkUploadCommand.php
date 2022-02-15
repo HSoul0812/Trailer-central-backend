@@ -3,11 +3,8 @@
 namespace App\Console\Commands\Parts\Import;
 
 use Illuminate\Console\Command;
-use App\Repositories\Bulk\BulkUploadRepositoryInterface;
+use App\Repositories\Bulk\Parts\BulkUploadRepositoryInterface;
 use App\Models\Bulk\Parts\BulkUpload;
-use App\Models\Parts\Part;
-use Illuminate\Support\Facades\Redis;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Class SyncPartsCommand
@@ -27,18 +24,19 @@ class RunBulkUploadCommand extends Command
      * @return mixed
      */
     public function handle(BulkUploadRepositoryInterface $bulkUploadRepo)
-    { 
-        $bulkId = $this->s3Bucket = $this->argument('bulk-id');
-        
+    {
+        // @todo: What's the purpose of this double assignment? So, What's $this->s3Bucket ?
+        $bulkId = $this->argument('bulk-id');
+
         if ($bulkId) {
             $bulk = $bulkUploadRepo->get(['id' => $bulkId]);
         } else {
             $bulk = $bulkUploadRepo->get(['status' => BulkUpload::PROCESSING]);
-        }
-        
+        } 
+
         if (empty($bulk)) {
             return;
-        }        
+        }
         $service = app('App\Services\Import\Parts\CsvImportServiceInterface');
         $service->setBulkUpload($bulk);
         $service->run();

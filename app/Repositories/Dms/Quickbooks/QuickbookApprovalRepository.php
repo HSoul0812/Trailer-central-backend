@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Dms\Quickbooks;
 
+use App\Models\CRM\Dms\Quickbooks\QuickbookApprovalDeleted;
 use App\Models\CRM\User\Customer;
 use Illuminate\Support\Facades\DB;
 
@@ -93,28 +94,33 @@ class QuickbookApprovalRepository implements QuickbookApprovalRepositoryInterfac
      * @note code lifted from crm
      * @param $params
      * @return mixed|void
-     * @throws \Exception
+     * @throws \Exception when the `dealer_id` param was not provided
+     * @throws \InvalidArgumentException when the `tb_primary_id` param was not provided
+     * @throws \InvalidArgumentException when the `tb_name` param was not provided
+     * @throws \InvalidArgumentException when the `qb_info` param was not provided
      */
     public function create($params)
     {
         if (empty($params['dealer_id'])) {
             throw new \Exception('Cannot create QB approval object: customer dealer id empty');
         }
+
+        if (empty($params['tb_name'])) {
+            throw new \InvalidArgumentException('Cannot create QB approval object: `tb_name` empty');
+        }
+
+        if (empty($params['tb_primary_id'])) {
+            throw new \InvalidArgumentException('Cannot create QB approval object: `tb_primary_id` empty');
+        }
+
+        if (empty($params['qb_info'])) {
+            throw new \InvalidArgumentException('Cannot create QB approval object: `qb_info` empty');
+        }
+
         $dealerId = $params['dealer_id'];
 
         // Remove existing approval object
-        $this->delete([
-            'dealer_id' => $dealerId,
-            'tb_name' => $params['tb_name'],
-            'tb_primary_id' => $params['tb_primary_id']
-        ]);
-
-        // reinstate these when they're needed
-//        if ($data['tbName'] === 'qb_item_category') {
-//            $em->getRepository(QbItemCategory::class)->removeQbApproval($data['tbPrimaryId']);
-//        } else if ($data['tbName'] === 'qb_items_new') {
-//            $em->getRepository(QbItemsNew::class)->removeQbApproval($data['tbPrimaryId']);
-//        }
+        $this->deleteByTbPrimaryId($params['tb_primary_id'], $params['tb_name']);
 
         // not sure what this is for yet; just copied from original
         if (empty($params['qb_id']) && isset($params['qb_info']['Active']) && !$params['qb_info']['Active']) return;
@@ -128,17 +134,37 @@ class QuickbookApprovalRepository implements QuickbookApprovalRepositoryInterfac
             $qbApproval->sort_order = $params['sort_order'];
         }
         if (!empty($params['qb_id'])) {
-            $qbApproval->action_type = 'update';
+            $qbApproval->action_type = QuickbookApproval::ACTION_UPDATE;
             $qbApproval->qb_id = $params['qb_id'];
         }
 
         $qbApproval->save();
+
         return $qbApproval;
     }
 
-    public function delete($params)
+    /**
+     * @param array $params
+     * @return QuickbookApproval
+     * @throws \Exception when some goes wrong in the data base
+     * @throws \InvalidArgumentException when the `id` param was not provided
+     */
+    public function delete($params): QuickbookApproval
     {
-        QuickbookApproval::where($params)->delete();
+        if (empty($params['id'])) {
+            throw new \InvalidArgumentException('The `id` param is required to delete a `QuickbookApproval`');
+        }
+
+        $quickBookApproval = QuickbookApproval::find($params['id']);
+
+        if ($quickBookApproval) {
+            $qbaDeleted = new QuickbookApprovalDeleted();
+            $qbaDeleted->createFromOriginal($quickBookApproval, $params['dealer_id']);
+
+            $quickBookApproval->delete();
+        }
+
+        return $quickBookApproval;
     }
 
     public function get($params) {
@@ -151,24 +177,25 @@ class QuickbookApprovalRepository implements QuickbookApprovalRepositoryInterfac
         } else {
             $query = QuickbookApproval::where('id', '>', 0);
         }
+
         if (isset($params['status'])) {
             switch ($params['status']) {
                 case QuickbookApproval::TO_SEND:
                     $query = $query->where([
                         ['send_to_quickbook', '=', 0],
-                        ['is_approved', '=', 0]
+                        ['is_approved', '=', 0],
                     ]);
                     break;
                 case QuickbookApproval::SENT:
                     $query = $query->where([
                         ['send_to_quickbook', '=', 1],
-                        ['is_approved', '=', 1]
+                        ['is_approved', '=', 1],
                     ]);
                     break;
                 case QuickbookApproval::FAILED:
                     $query = $query->where([
                         ['send_to_quickbook', '=', 1],
-                        ['is_approved', '=', 0]
+                        ['is_approved', '=', 0],
                     ]);
                     $query = $query->whereNotNull('error_result');
                     break;
@@ -180,12 +207,25 @@ class QuickbookApprovalRepository implements QuickbookApprovalRepositoryInterfac
             $query = $query->whereNotIn('tb_name', ['qb_items', 'qb_item_category']);
         }
         if (isset($params['search_term'])) {
-            $query = $query->where(function($q) use($params) {
-                $q->where('action_type', 'LIKE', '%' . $params['search_term'] . '%')
-                    ->orWhere('created_at', 'LIKE', '%' . $params['search_term'] . '%')
-                    ->orWhere(function($query) use($params) {
+            $search_term = preg_replace('/\s+/', '%',filter_var($params['search_term'], FILTER_SANITIZE_STRING));
+
+            $query = $query->where(function ($q) use ($params, $search_term) {
+                $q->where('action_type', 'LIKE', "%$search_term%")
+                    ->orWhere('created_at', 'LIKE', "%$search_term%")
+                    ->orWhere('qb_obj', 'LIKE', "%TotalAmt%$search_term%Line%") // ticket total
+                    ->orWhere('qb_obj', 'LIKE', "%CustomerRef%\"name\"%$search_term%TxnDate%") // customer name
+                    ->orWhere('qb_obj', 'LIKE', "%DisplayName%$search_term%PrimaryEmailAddr%") // customer name
+                    ->orWhere('qb_obj', 'LIKE', "\{\"Name\"\:\"%$search_term%\"\,\"AccountType%") // customer name
+                    ->orWhere('qb_obj', 'LIKE', "%PaymentMethodRef%name%$search_term%") // payment method
+                    ->orWhere('qb_obj', 'LIKE', "%PaymentRefNum%$search_term%TotalAmt%") // sales ticket
+                    ->orWhere('qb_obj', 'LIKE', "%DocNumber%$search_term%PrivateNote%") // sales ticket
+                    ->orWhere(function ($query) use ($params) {
                         $query->filterByTableName($params['search_term']);
                     });
+
+                if (!is_numeric($search_term) && (isset($params['status']) && $params['status'] === QuickbookApproval::TO_SEND)) {
+                    $q->orWhere('qb_obj', 'LIKE', "%$search_term%");
+                }
 
                 if (isset($params['status']) && $params['status'] === QuickbookApproval::FAILED) {
                     $q->orWhere('qb_obj', 'LIKE', '%' . $params['search_term'] . '%')
@@ -193,6 +233,7 @@ class QuickbookApprovalRepository implements QuickbookApprovalRepositoryInterfac
                 }
             });
         }
+
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
         }
@@ -227,4 +268,22 @@ class QuickbookApprovalRepository implements QuickbookApprovalRepositoryInterfac
         return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
     }
 
+    /**
+     * @param int $tbPrimaryId
+     * @param string $tableName
+     * @return bool
+     * @throws \Exception
+     */
+    public function deleteByTbPrimaryId(int $tbPrimaryId, string $tableName)
+    {
+        $quickbookApproval = QuickbookApproval::where('tb_primary_id', '=', $tbPrimaryId)
+            ->where('tb_name', '=', $tableName)
+            ->first();
+
+        if ($quickbookApproval instanceof QuickbookApproval) {
+            return $quickbookApproval->delete();
+        }
+
+        return false;
+    }
 }

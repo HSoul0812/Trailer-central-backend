@@ -7,7 +7,9 @@ namespace App\Http\Controllers\v1\Dms;
 use App\Http\Controllers\RestfulControllerV2;
 use App\Repositories\Dms\SettingsRepositoryInterface;
 use App\Transformers\Dms\SettingsTransformer;
+use App\Http\Requests\Dms\Settings\UpdateSettingsRequest;
 use Dingo\Api\Http\Request;
+use Dingo\Api\Http\Response;
 
 class SettingsController extends RestfulControllerV2
 {
@@ -15,6 +17,7 @@ class SettingsController extends RestfulControllerV2
      * @var SettingsRepositoryInterface
      */
     private $settingsRepository;
+
     /**
      * @var SettingsTransformer
      */
@@ -38,12 +41,15 @@ class SettingsController extends RestfulControllerV2
         return $this->response->item($settings, $this->transformer);
     }
 
-    public function update(Request $request)
+    
+    public function update(Request $request): Response
     {
-        $settings = $this->settingsRepository->getByDealerId($request->input('dealer_id'));
-        $settings->fillWithMeta($request->all());
-        $settings->save();
+        $request = new UpdateSettingsRequest($request->all());
+        if ($request->validate()) {
+            $this->settingsRepository->createOrUpdate($request->all());
+            return $this->response->accepted();
+        }
 
-        return $this->response->accepted();
+        return $this->response->errorBadRequest();
     }
 }

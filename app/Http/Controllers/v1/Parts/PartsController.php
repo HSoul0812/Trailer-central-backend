@@ -13,7 +13,7 @@ use App\Http\Requests\Parts\ShowPartRequest;
 use App\Http\Requests\Parts\GetPartsRequest;
 use App\Http\Requests\Parts\UpdatePartRequest;
 use App\Services\Parts\PartServiceInterface;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use App\Transformers\Parts\PartsTransformerInterface;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use League\Fractal\Manager;
@@ -45,7 +45,7 @@ class PartsController extends RestfulController
      * @param  PartServiceInterface  $partService
      * @param  Manager  $fractal
      */
-    public function __construct(PartRepositoryInterface $parts, PartServiceInterface $partService, Manager $fractal, PartsTransformer $partsTransformer)
+    public function __construct(PartRepositoryInterface $parts, PartServiceInterface $partService, Manager $fractal, PartsTransformerInterface $partsTransformer)
     {
         $this->middleware('setDealerIdOnRequest')->only(['create', 'update']);
         $this->parts = $parts;
@@ -55,7 +55,7 @@ class PartsController extends RestfulController
     }
 
     /**
-     * @OA\Put(
+     * @OA\Post(
      *     path="/api/parts/",
      *     description="Create a part",
      *     tags={"Parts"},
@@ -103,7 +103,7 @@ class PartsController extends RestfulController
      *     ),
      *   @OA\Parameter(
      *         name="category_id",
-     *         in="path",
+     *         in="query",
      *         description="Part category",
      *         required=true,
      *         @OA\Schema(type="integer")
@@ -152,6 +152,13 @@ class PartsController extends RestfulController
      *     ),
      *     @OA\Parameter(
      *         name="dealer_cost",
+     *         in="query",
+     *         description="Part average cost",
+     *         required=false,
+     *         @OA\Schema(type="numeric")
+     *     ),
+     *     @OA\Parameter(
+     *         name="latest_cost",
      *         in="query",
      *         description="Part dealer cost",
      *         required=false,
@@ -282,13 +289,16 @@ class PartsController extends RestfulController
      * )
      */
     public function create(Request $request) {
-        $request = new CreatePartRequest($request->all());
         $requestData = $request->all();
-
+        $request = new CreatePartRequest($requestData);
         if ( $request->validate() ) {
-            return $this->response->item($this->partService->create($requestData, !empty($requestData['bins']) ? $requestData['bins'] : []), new PartsTransformer());
-        }
+            $requestData['subcategory'] = $requestData['subcategory'] ?? '';
 
+            return $this->response->item(
+                $this->partService->create($requestData, !empty($requestData['bins'])
+                    ? $requestData['bins'] : []), new PartsTransformer()
+            );
+        }
         return $this->response->errorBadRequest();
     }
 
@@ -452,7 +462,7 @@ class PartsController extends RestfulController
         $request = new GetPartsRequest($request->all());
 
         if ($request->validate()) {
-            return $this->response->paginator($this->parts->getAll($request->all()), new PartsTransformer());
+            return $this->response->paginator($this->parts->getAll($request->all()), $this->partsTransformer);
         }
 
         return $this->response->errorBadRequest();
@@ -466,7 +476,7 @@ class PartsController extends RestfulController
      *     tags={"Parts"},
      *     @OA\Parameter(
      *         name="id",
-     *         in="query",
+     *         in="path",
      *         description="Part ID",
      *         required=true,
      *         @OA\Schema(type="integer")
@@ -493,14 +503,14 @@ class PartsController extends RestfulController
     }
 
     /**
-     * @OA\Post(
+     * @OA\Put(
      *     path="/api/parts/{id}",
      *     description="Update a part",
 
      *     tags={"Parts"},
      *     @OA\Parameter(
      *         name="id",
-     *         in="query",
+     *         in="path",
      *         description="Part ID",
      *         required=true,
      *         @OA\Schema(type="integer")
@@ -591,6 +601,13 @@ class PartsController extends RestfulController
      *     ),
      *     @OA\Parameter(
      *         name="dealer_cost",
+     *         in="query",
+     *         description="Part average cost",
+     *         required=false,
+     *         @OA\Schema(type="numeric")
+     *     ),
+     *     @OA\Parameter(
+     *         name="latest_cost",
      *         in="query",
      *         description="Part dealer cost",
      *         required=false,
@@ -742,6 +759,9 @@ class PartsController extends RestfulController
             if ($request->get('page')) {
                 $data->setPaginator(new IlluminatePaginatorAdapter($paginator));
             }
+
+            // parses the include params
+            $this->fractal->parseIncludes($request->get('include', []));
 
             // build the api response
             $result = (array) $this->fractal->createData($data)->toArray();

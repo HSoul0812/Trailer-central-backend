@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * Class Clapp
  * @package App\Models\Inventory
+ *
+ * @property int $inventory_id,
+ * @property int $inventory_clapp_id,
+ * @property string $field,
+ * @property string $value,
  */
 class InventoryClapp extends Model
 {
@@ -21,10 +26,18 @@ class InventoryClapp extends Model
      */
     protected $primaryKey = 'inventory_clapp_id';
 
+    public $timestamps = false;
+
+    protected $fillable = [
+        'inventory_id',
+        'field',
+        'value',
+    ];
+
     /**
      * @return BelongsTo
      */
-    public function inventory()
+    public function inventory(): BelongsTo
     {
         return $this->belongsTo(Inventory::class, 'inventory_id', 'inventory_id');
     }

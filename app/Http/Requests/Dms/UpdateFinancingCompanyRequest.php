@@ -43,7 +43,7 @@ class UpdateFinancingCompanyRequest extends Request
         return $this->input('id');
     }
 
-    protected function validateObjectBelongsToUser() {
+    protected function validateObjectBelongsToUser() : bool {
         return true;
     }
 

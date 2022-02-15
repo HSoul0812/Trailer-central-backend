@@ -5,7 +5,6 @@ namespace App\Models\CRM\Interactions;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Traits\TableAware;
 use App\Models\CRM\Leads\Lead;
-use App\Models\CRM\User\SalesPerson;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\User\NewUser;
 
@@ -27,8 +26,20 @@ class Interaction extends Model
         'BLAST',
         'CONTACT',
         'TASK',
-        'CHAT'
+        'CHAT',
+        'FB'
     ];
+
+    /**
+     * @const string
+     */
+    const TYPE_EMAIL = 'EMAIL';
+
+    /**
+     * @const string
+     */
+    const TYPE_FB = 'FB';
+
 
     /**
      * The table associated with the model.
@@ -53,9 +64,12 @@ class Interaction extends Model
         "lead_product_id",
         "tc_lead_id",
         "user_id",
+        "sales_person_id",
         "interaction_type",
         "interaction_notes",
-        "interaction_time"
+        "interaction_time",
+        "from_email",
+        "sent_by"
     ];
 
     /**
@@ -93,6 +107,14 @@ class Interaction extends Model
     
     public function getRealUsernameAttribute() 
     {
+       /**
+        *  If there's only one email history record associated to this interaction.
+        *  I.e there are no scraped replies associated to this record take the username from the from_email from the history 
+        */
+       if ($this->emailHistory->count() === 1) {
+           return $this->emailHistory->first()->from_email;
+       }
+       
        if (!empty($this->sent_by)) {
            return $this->sent_by;
        }

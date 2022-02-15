@@ -2,17 +2,21 @@
 
 namespace App\Nova\Resources\Dealer;
 
+use App\Nova\Actions\ActivateUserAccounts;
+use App\Nova\Actions\DeactivateUserAccounts;
+use App\Nova\Actions\Dealer\ActivateCrm;
+use App\Nova\Actions\Dealer\DeactivateCrm;
+use App\Nova\Actions\Dealer\ActivateECommerce;
+use App\Nova\Actions\Dealer\DeactivateECommerce;
 use Illuminate\Http\Request;
-use Laravel\Nova\Fields\Gravatar;
-use Laravel\Nova\Fields\ID;
-use Laravel\Nova\Fields\Password;
+use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Text;
 use App\Nova\Resource;
 
-class Dealer extends Resource 
+class Dealer extends Resource
 {
     public static $group = 'Dealer';
-    
+
     /**
      * The model the resource corresponds to.
      *
@@ -33,8 +37,10 @@ class Dealer extends Resource
      * @var array
      */
     public static $search = [
-        'id', 'name', 'email',
+        'dealer_id', 'name', 'email',
     ];
+
+    public static $with = ['crmUser'];
 
     /**
      * Get the fields displayed by the resource.
@@ -42,7 +48,7 @@ class Dealer extends Resource
      * @param  \Illuminate\Http\Request  $request
      * @return array
      */
-    public function fields(Request $request)
+    public function fields(Request $request): array
     {
         return [
             Text::make('Dealer ID')->sortable(),
@@ -53,7 +59,13 @@ class Dealer extends Resource
 
             Text::make('Email')
                 ->sortable()
-                ->rules('required', 'email', 'max:254')
+                ->rules('required', 'email', 'max:254'),
+
+            Boolean::make('CRM', 'isCrmActive')->hideWhenCreating()->hideWhenUpdating(),
+            
+            Boolean::make('ECommerce', 'IsEcommerceActive')->hideWhenCreating()->hideWhenUpdating(),
+
+            Boolean::make('User Accounts', 'isUserAccountsActive')->hideWhenCreating()->hideWhenUpdating(),
 
         ];
     }
@@ -64,7 +76,7 @@ class Dealer extends Resource
      * @param  \Illuminate\Http\Request  $request
      * @return array
      */
-    public function cards(Request $request)
+    public function cards(Request $request): array
     {
         return [];
     }
@@ -75,7 +87,7 @@ class Dealer extends Resource
      * @param  \Illuminate\Http\Request  $request
      * @return array
      */
-    public function filters(Request $request)
+    public function filters(Request $request): array
     {
         return [];
     }
@@ -86,7 +98,7 @@ class Dealer extends Resource
      * @param  \Illuminate\Http\Request  $request
      * @return array
      */
-    public function lenses(Request $request)
+    public function lenses(Request $request): array
     {
         return [];
     }
@@ -94,11 +106,19 @@ class Dealer extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @return array
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
-    public function actions(Request $request)
+    public function actions(Request $request): array
     {
-        return [];
+        return [
+            app()->make(ActivateCrm::class),
+            app()->make(DeactivateCrm::class),
+            app()->make(ActivateECommerce::class),
+            app()->make(DeactivateECommerce::class),
+            app()->make(ActivateUserAccounts::class),
+            app()->make(DeactivateUserAccounts::class),
+        ];
     }
 }

@@ -46,6 +46,6 @@ class ValidWebsite implements Rule
      */
     public function message()
     {
-        return 'Website must exist';
+        return 'Website must exist and belong to authenticated dealer!';
     }
 }

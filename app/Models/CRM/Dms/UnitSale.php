@@ -2,13 +2,21 @@
 
 namespace App\Models\CRM\Dms;
 
+use App\Models\User\DealerLocation;
 use App\Models\CRM\User\SalesPerson;
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Account\Invoice;
 use App\Models\CRM\Account\Payment;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\User\Customer;
-
+use App\Models\CRM\Dms\Quickbooks\PaymentMethod;
+use App\Models\CRM\Dms\Quickbooks\Item;
+use App\Models\Inventory\Inventory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\User\User;
+use App\Models\CRM\Dms\UnitSale\TradeIn;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Class UnitSale
@@ -19,6 +27,7 @@ use App\Models\CRM\User\Customer;
  */
 class UnitSale extends Model implements GenericSaleInterface
 {
+    use TableAware;
 
     const QUOTE_STATUS_OPEN = 'open';
     const QUOTE_STATUS_DEAL = 'deal';
@@ -32,13 +41,32 @@ class UnitSale extends Model implements GenericSaleInterface
      */
     protected $table = 'dms_unit_sale';
 
+    protected $fillable = [
+        'lead_id',
+    ];
+
     protected $appends = ['paid_amount'];
 
     const UPDATED_AT = null;
 
+    public function dealer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
+    }
+
     public function customer()
     {
         return $this->belongsTo(Customer::class, 'buyer_id', 'id');
+    }
+
+    public function location(): BelongsTo
+    {
+        return $this->belongsTo(DealerLocation::class, 'dealer_location_id', 'dealer_location_id');
+    }
+
+    public function coCustomer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class, 'cobuyer_id', 'id');
     }
 
     public function lead()
@@ -56,6 +84,16 @@ class UnitSale extends Model implements GenericSaleInterface
         return $this->hasManyThrough(Payment::class, Invoice::class, 'unit_sale_id');
     }
 
+    public function tradeIn(): HasMany
+    {
+        return $this->hasMany(TradeIn::class, 'unit_sale_id');
+    }
+
+    public function inventory()
+    {
+        return $this->belongsTo(Inventory::class, 'inventory_id', 'inventory_id');
+    }
+
     public function extraInventory()
     {
         return $this->hasMany(UnitSaleInventory::class, 'quote_id', 'id');
@@ -63,10 +101,11 @@ class UnitSale extends Model implements GenericSaleInterface
 
     public function getPaidAmountAttribute()
     {
-        return $this->hasManyThrough(Payment::class, Invoice::class, 'unit_sale_id')->sum('amount');
+        return round($this->payments->sum('calculated_amount'), 2);
     }
 
-    public function getStatusAttribute() {
+    public function getStatusAttribute()
+    {
         if (!empty($this->is_archived)) {
             return 'Archived';
         }
@@ -108,12 +147,58 @@ class UnitSale extends Model implements GenericSaleInterface
             $this->labor_discount;
     }
 
-    public function taxTotal()
+    public function getCostOfPrimaryVehicleAttribute(): float
     {
-        // todo implement total tax; need to create a service for server-side
-        //   tax computation, otherwise you can only get taxes server-side after
-        //   an invoice is made
-        throw new \Exception('Not implemented');
+        $costOfVehicle = 0;
+        if ($this->invoice) {
+            foreach ($this->invoice as $invoice) {
+                foreach ($invoice->items as $item) {
+                    if ($item->item->type === Item::ITEM_TYPES['TRAILER']) {
+                        $costOfVehicle += $item->cost;
+                    }
+                }
+            }
+        }
+        return $costOfVehicle;
+    }
+
+    public function amountFinanced(): float
+    {
+        $amountFinanced = 0;
+        foreach ($this->payments as $payment) {
+            if ($payment->paymentMethod->type === PaymentMethod::PAYMENT_METHOD_FINANCING) {
+                $amountFinanced += $payment->amount;
+            }
+        }
+
+        return $amountFinanced;
+    }
+
+    public function isFinanced(): bool
+    {
+        foreach ($this->payments as $payment) {
+            if ($payment->paymentMethod->type === PaymentMethod::PAYMENT_METHOD_FINANCING) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function taxTotal(): float
+    {
+        $taxAmount = 0;
+        if ($this->invoice) {
+            foreach ($this->invoice as $invoice) {
+                foreach ($invoice->items as $item) {
+                    if ($item->item->type === Item::ITEM_TYPES['TAX']) {
+                        $taxAmount += $item->itemPrice;
+                    }
+                }
+            }
+        }
+
+        return $taxAmount;
     }
 
     public function createdAt()

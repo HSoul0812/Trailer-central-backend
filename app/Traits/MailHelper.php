@@ -2,11 +2,106 @@
 
 namespace App\Traits;
 
-use Illuminate\Support\Facades\Config;
 use App\Models\CRM\User\SalesPerson;
+use App\Models\User\User;
+use App\Services\CRM\Email\DTOs\SmtpConfig;
+use App\Services\CRM\User\DTOs\EmailSettings;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Mail\Mailable;
+use Illuminate\Support\Facades\Config;
 
 trait MailHelper
 {
+    /**
+     * Send Custom Email
+     * 
+     * @param SmtpConfig $config
+     * @param array{email: string, ?name: string} $to}
+     * @param Mailable $email
+     * @return void
+     */
+    public function sendCustomEmail(SmtpConfig $config, array $to, Mailable $email): void
+    {
+        // Get SMTP Config Array
+        $smtpConfig = [
+            'fromName'  => $config->getFromName(),
+            'fromEmail' => $config->getUsername(),
+            'password'  => $config->getPassword(),
+            'host'      => $config->getHost(),
+            'port'      => $config->getPort(),
+            'security'  => $config->getSecurity(),
+            'authMode'  => $config->getAuthMode()
+        ];
+
+        // Create CRM Mailer
+        $mailer = app()->makeWith('crm.mailer', $smtpConfig);
+        $mailer->to($this->getCleanTo($to))->send($email);
+    }
+
+    /**
+     * Send Default Email
+     * 
+     * @param User $user
+     * @param array{email: string, ?name: string} $to}
+     * @param Mailable $email
+     * @return void
+     */
+    public function sendCustomSesEmail(User $user, array $to, Mailable $email): void
+    {
+        // Get SMTP Config Array
+        $sesConfig = [
+            'fromName'  => $user->name,
+            'replyEmail' => $user->email
+        ];
+
+        // Create CRM Mailer
+        $mailer = app()->makeWith('ses.mailer', $sesConfig);
+        $mailer->to($this->getCleanTo($to))->send($email);
+    }
+
+    /**
+     * Send Default Email
+     * 
+     * @param EmailSettings $config
+     * @param array{email: string, ?name: string} $to}
+     * @param Mailable $email
+     * @return void
+     */
+    public function sendDefaultEmail(EmailSettings $config, array $to, Mailable $email): void
+    {
+        // Set From/Reply-To
+        $email->from(config('mail.from.address'), $config->fromName);
+        if(!empty($config) && $config->replyEmail) {
+            $email->replyTo($config->replyEmail, $config->replyName);
+        }
+
+        // Create CRM Mailer
+        Mail::to($this->getCleanTo($to))->send($email);
+    }
+
+
+    /**
+     * @param null|SmtpConfig $smtpConfig
+     */
+    public function setSmtpConfig(?SmtpConfig $smtpConfig): void
+    {
+        if (!empty($smtpConfig) && $smtpConfig->host) {
+            $config = [
+                'driver'        => 'smtp',
+                'host'          => trim($smtpConfig->host),
+                'port'          => $smtpConfig->port ?? '2525',
+                'username'      => trim($smtpConfig->username),
+                'password'      => trim($smtpConfig->password),
+                'encryption'    => $smtpConfig->security,
+                'from'          => [
+                    'address'   => trim($smtpConfig->username),
+                    'name'      => $smtpConfig->fromName
+                ]
+            ];
+            Config::set('mail', $config);
+        }
+    }
+
     /**
      * @param SalesPerson $salesPerson
      */
@@ -15,19 +110,29 @@ trait MailHelper
         if (!empty($salesPerson->smtp_server)) {
             $config = [
                 'driver'        => 'smtp',
-                'host'          => $salesPerson->smtp_server,
+                'host'          => trim($salesPerson->smtp_server),
                 'port'          => $salesPerson->smtp_port ?? '2525',
-                'username'      => $salesPerson->smtp_email,
-                'password'      => $salesPerson->smtp_password,
+                'username'      => trim($salesPerson->smtp_email),
+                'password'      => trim($salesPerson->smtp_password),
                 'encryption'    => $salesPerson->smtp_security ?? 'tls',
                 'from'          => [
-                    'address'   => $salesPerson->smtp_email,
+                    'address'   => trim($salesPerson->smtp_email),
                     'name'      => $salesPerson->full_name
                 ]
             ];
             Config::set('mail', $config);
         }
     }
+
+    /**
+     * Get Default From Email
+     * 
+     * @return string
+     */
+    public function getDefaultFromEmail(): string {
+        return config('mail.from.address', 'noreply@trailercentral.com');
+    }
+
 
     /**
      * Fix To Config
@@ -102,7 +207,7 @@ trait MailHelper
 
     /**
      * Get the server hostname.
-     * Returns 'localhost.localdomain' if unknown.
+     * Returns config('mail.hostname') if unknown.
      *
      * @return string
      */
@@ -117,8 +222,11 @@ trait MailHelper
             $result = gethostname();
         } elseif (php_uname('n') !== false) {
             $result = php_uname('n');
-        } else {
-            return 'localhost.localdomain';
+        }
+
+        // Set Default Server Hostname
+        if(empty($result) || $result === '_') {
+            return config('mail.hostname');
         }
 
         return $result;

@@ -2,17 +2,24 @@
 
 namespace App\Models\Inventory;
 
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Inventory\EntityType;
 
+/**
+ * @property string $label
+ */
 class Category extends Model {
-    
+
+    use TableAware;
+
+    public const TABLE_NAME = 'inventory_category';
+
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'inventory_category';
+    protected $table = self::TABLE_NAME;
 
     /**
      * The attributes that are mass assignable.
@@ -40,4 +47,8 @@ class Category extends Model {
         return $this->hasOne(EntityType::class, 'entity_type_id', 'entity_type_id');
     }
 
+    public static function getTableName(): string
+    {
+        return self::TABLE_NAME;
+    }
 }

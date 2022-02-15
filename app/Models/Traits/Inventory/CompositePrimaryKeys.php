@@ -11,8 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 trait CompositePrimaryKeys
 {
     /**
-     * @param Builder $query
-     * @return Builder
+     * {@inheritDoc}
      */
     protected function setKeysForSaveQuery(Builder $query)
     {
@@ -21,5 +20,13 @@ trait CompositePrimaryKeys
         }
 
         return $query;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getIncrementing(): bool
+    {
+        return false;
     }
 }

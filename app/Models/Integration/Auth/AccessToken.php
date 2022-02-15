@@ -17,23 +17,29 @@ class AccessToken extends Model
     // Define Token Types
     const TOKEN_TYPES = [
         'google' => 'Google',
+        'office365' => 'Office 365',
         'facebook' => 'Facebook'
     ];
     const TOKEN_GOOGLE = 'google';
+    const TOKEN_OFFICE = 'office365';
     const TOKEN_FB = 'facebook';
 
     // Define Relation Types
     const RELATION_TYPES = [
+        'system_emails' => 'System Email',
         'sales_person' => 'Sales Person',
         'fbapp_page' => 'Facebook Page',
-        'fbapp_catalog' => 'Facebook Catalog'
+        'fbapp_catalog' => 'Facebook Catalog',
+        'fbapp_chat' => 'Facebook Chat'
     ];
 
     // Define Supported Token Types
     const RELATION_TOKENS = [
-        'sales_person' => 'google',
+        'system_emails' => 'google',
+        'sales_person' => ['google', 'office365'],
         'fbapp_page' => 'facebook',
-        'fbapp_catalog' => 'facebook'
+        'fbapp_catalog' => 'facebook',
+        'fbapp_chat' => 'facebook'
     ];
 
     /**
@@ -56,6 +62,7 @@ class AccessToken extends Model
         'token_type',
         'relation_type',
         'relation_id',
+        'state',
         'access_token',
         'refresh_token',
         'id_token',
@@ -95,5 +102,9 @@ class AccessToken extends Model
     public function setScopeAttribute($value)
     {
         $this->attributes['scope'] = is_array($value) ? $value : explode(" ", $value);
+    }
+
+    public static function getTableName() {
+        return self::TABLE_NAME;
     }
 }

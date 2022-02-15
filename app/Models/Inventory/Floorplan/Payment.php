@@ -15,6 +15,12 @@ class Payment extends Model
         'Interest' => 'interest',
     ];
 
+    const PAYMENT_TYPES = [
+        'Cash' => 'cash',
+        'Check' => 'check',
+        'Ach' => 'ach'
+    ];
+
     protected $table = 'inventory_floor_plan_payment';
 
     protected $guarded = ['qb_id'];

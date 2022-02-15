@@ -2,28 +2,49 @@
 
 namespace App\Http\Controllers\v1\Dms\Customer;
 
-use App\Http\Controllers\RestfulController;
+use App\Http\Controllers\RestfulControllerV2;
+use App\Http\Requests\Dms\DeleteCustomerRequest;
+use App\Models\CRM\User\Customer;
 use App\Repositories\CRM\Customer\CustomerRepositoryInterface;
 use App\Utilities\Fractal\NoDataArraySerializer;
+use Dingo\Api\Exception\DeleteResourceFailedException;
+use Dingo\Api\Exception\ResourceException;
+use Dingo\Api\Exception\StoreResourceFailedException;
+use Dingo\Api\Exception\UpdateResourceFailedException;
 use Dingo\Api\Http\Request;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Http\Requests\Dms\GetCustomersRequest;
+use App\Http\Requests\Dms\CreateCustomerRequest;
 use App\Transformers\Dms\CustomerTransformer;
+use App\Transformers\Dms\Customer\CustomerDetailTransformer;
 use Illuminate\Support\Facades\Log;
 use League\Fractal\Manager;
 use League\Fractal\Pagination\IlluminatePaginatorAdapter;
 use League\Fractal\Resource\Collection;
+use Illuminate\Support\Facades\Auth;
 
-class CustomerController extends RestfulController
+class CustomerController extends RestfulControllerV2
 {
-
+    /**
+     * @var LeadRepositoryInterface
+     */
     protected $leads;
 
+    /**
+     * @var CustomerTransformer
+     */
     protected $transformer;
+
+    /**
+     * @var CustomerDetailTransformer
+     */
+    protected $detailTransformer;
+
     /**
      * @var Manager
      */
     private $fractal;
+
     /**
      * @var CustomerRepositoryInterface
      */
@@ -37,13 +58,18 @@ class CustomerController extends RestfulController
      * @param  CustomerTransformer  $transformer
      * @param  Manager  $fractal
      */
-    public function __construct(CustomerRepositoryInterface $customerRepository, LeadRepositoryInterface $leadRepo, CustomerTransformer $transformer, Manager $fractal)
-    {
-        $this->middleware('setDealerIdOnRequest')->only(['index', 'search', 'create', 'update']);
+    public function __construct(
+        CustomerRepositoryInterface $customerRepository,
+        LeadRepositoryInterface $leadRepo,
+        CustomerTransformer $transformer,
+        CustomerDetailTransformer $detailTransformer,
+        Manager $fractal
+    ) {
+        $this->middleware('setDealerIdOnRequest')->only(['index', 'search', 'create', 'update','destroy']);
         $this->leads = $leadRepo;
-        $this->transformer = new CustomerTransformer;
         $this->fractal = $fractal;
         $this->transformer = $transformer;
+        $this->detailTransformer = $detailTransformer;
         $this->customerRepository = $customerRepository;
     }
 
@@ -55,20 +81,42 @@ class CustomerController extends RestfulController
             'tax_exempt', 'is_financing_company', 'account_number', 'qb_id', 'gender', 'dob', 'deleted_at',
             'is_wholesale', 'default_discount_percent', 'middle_name', 'company_name', 'use_same_address',
             'shipping_address', 'shipping_city', 'shipping_region', 'shipping_postal_code', 'shipping_country',
-            'county', 'shipping_county',
+            'county', 'shipping_county'
         ]);
 
         try {
-            $customer = $this->customerRepository->create($customerData);
+            $request = new CreateCustomerRequest($customerData);
+            if ($request->validate()) {
+                $customer = $this->customerRepository->create($customerData);
 
-            return $this->response->item($customer, $this->transformer);
+                return $this->response->item($customer, $this->transformer);
+            }
 
+            return $this->response->errorBadRequest();
         } catch (\Exception $e) {
             Log::error($e->getMessage());
             Log::error($e->getTraceAsString());
 
-            throw new \Exception('Unable to create customer: ' . $e->getMessage());
+            throw new StoreResourceFailedException('Unable to create customer: ' . $e->getMessage());
         }
+    }
+
+    public function show(int $id) {
+        $customer = $this->customerRepository->get(['id' => $id]);
+
+        $user = Auth::user();
+
+        $response = $this->response
+                ->item($customer, $this->detailTransformer)
+                ->addMeta('major_units_link', config('app.new_design_crm_url') . $user->getCrmLoginUrl('/bill-of-sale'))
+                ->addMeta('service_link', config('app.new_design_crm_url') . $user->getCrmLoginUrl('/repair-orders'))
+                ->addMeta('parts_link', config('app.new_design_crm_url') . $user->getCrmLoginUrl('/pos-reports'));
+
+        if ($customer->lead) {
+            $response = $response->addMeta('see_more_interactions', config('app.url') . "/api/leads/{$customer->lead->identifier}/interactions");
+        }
+
+        return $response;
     }
 
     public function update($id, Request $request)
@@ -92,7 +140,7 @@ class CustomerController extends RestfulController
             Log::error($e->getMessage());
             Log::error($e->getTraceAsString());
 
-            throw new \Exception('Unable to create customer: ' . $e->getMessage());
+            throw new UpdateResourceFailedException('Unable to update customer: ' . $e->getMessage());
         }
     }
 
@@ -122,10 +170,10 @@ class CustomerController extends RestfulController
             // do the search
             $result = $this->customerRepository->search(
                 $query, $dealerId, [
-                    'allowAll' => true,
-                    'page' => $request->get('page'),
-                    'per_page' => $request->get('per_page', 10),
-                ], $paginator
+                'allowAll' => true,
+                'page' => $request->get('page'),
+                'per_page' => $request->get('per_page', 10),
+            ], $paginator
             );
             $data = new Collection($result, $this->transformer, 'data');
 
@@ -144,6 +192,39 @@ class CustomerController extends RestfulController
 
             return $this->response->errorBadRequest($e->getMessage());
         }
+    }
+
+    /**
+     * @OA\Delete(
+     *     path="/api/user/customers/{id}",
+     *     description="Delete a customer",
+     *     tags={"Customers"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Customer Id",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response="204",
+     *         description="Confirms customer was deleted",
+     *         @OA\JsonContent()
+     *     ),
+     * )
+     */
+    public function destroy(int $id, Request $request) {
+        $customerData = new DeleteCustomerRequest(array_merge($request->all(), ['id' => $id]));
+
+        try {
+            if ($customerData->validate() && $this->customerRepository->delete($customerData->all())) {
+                return $this->response->noContent();
+            }
+        } catch (ResourceException $e) {
+            throw new DeleteResourceFailedException($e->getMessage(), $e->getErrors());
+        }
+
+        return $this->response->errorBadRequest();
     }
 
 }

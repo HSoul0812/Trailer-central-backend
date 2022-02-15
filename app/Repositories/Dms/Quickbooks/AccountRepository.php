@@ -48,7 +48,22 @@ class AccountRepository implements AccountRepositoryInterface {
     }
 
     public function get($params) {
-        throw new NotImplementedException;
+        if (isset($params['account_id'])) {
+            return Account::findOrFail($params['account_id']);
+        }
+
+        $query = Account::where('id', '>', 0);
+        if (isset($params['dealer_id'])) {
+            $query = $query->where('dealer_id', $params['dealer_id']);
+        }
+        if (isset($params['name'])) {
+            $query = $query->where('name', $params['name']);
+        }
+        if (isset($params['type'])) {
+            $query = $query->where('type', $params['type']);
+        }
+
+        return $query->first();
     }
 
     public function getAll($params) {

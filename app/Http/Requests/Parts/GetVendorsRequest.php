@@ -11,8 +11,8 @@ use App\Http\Requests\Request;
 class GetVendorsRequest extends Request {
     
     protected $rules = [
-        'dealer_id' => 'array',
-        'dealer_id.*' => 'integer',
+        'dealer_id' => 'required',
+        'name' => 'string',
         'show_on_part' => 'integer',
         'show_on_inventory' => 'integer',
         'show_on_floorplan' => 'integer'

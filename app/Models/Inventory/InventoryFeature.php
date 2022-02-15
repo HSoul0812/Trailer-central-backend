@@ -8,6 +8,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * Class Feature
  * @package App\Models\Inventory
+ *
+ * @property int $inventory_feature_id
+ * @property int $inventory_id
+ * @property int $feature_list_id
+ * @property string $value
+ *
+ * @property Inventory $inventory
+ * @property InventoryFeatureList $featureList
  */
 class InventoryFeature extends Model
 {
@@ -21,11 +29,27 @@ class InventoryFeature extends Model
      */
     protected $primaryKey = 'inventory_feature_id';
 
+    public $timestamps = false;
+
+    protected $fillable = [
+        'attribute_id',
+        'feature_list_id',
+        'value',
+    ];
+
     /**
      * @return BelongsTo
      */
-    public function inventory()
+    public function inventory(): BelongsTo
     {
         return $this->belongsTo(Inventory::class, 'inventory_id', 'inventory_id');
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function featureList(): BelongsTo
+    {
+        return $this->belongsTo(InventoryFeatureList::class, 'feature_list_id', 'feature_list_id');
     }
 }

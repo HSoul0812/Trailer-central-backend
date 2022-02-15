@@ -2,12 +2,17 @@
 
 namespace App\Models\Parts;
 
+use App\Helpers\StringHelper;
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Vendor extends Model
-{ 
+{
     protected $table = 'qb_vendors';
-    
+
+    use TableAware, SoftDeletes;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -32,6 +37,7 @@ class Vendor extends Model
         'notes',
         'ap_account',
         'active',
+        'auto_created',
         'created_at',
         'updated_at',
         'qb_id',
@@ -45,9 +51,29 @@ class Vendor extends Model
     protected $hidden = [
 
     ];
-    
+
     public function parts()
     {
         return $this->hasMany('App\Models\Parts\Part');
+    }
+
+    /**
+     * @param string|null $value
+     *
+     * @return void
+     */
+    public function setContactNameAttribute(?string $value): void
+    {
+        $this->attributes['contact_name'] = StringHelper::trimWhiteSpaces($value);
+    }
+
+    /**
+     * @param string|null $value
+     *
+     * @return void
+     */
+    public function setNameAttribute(?string $value): void
+    {
+        $this->attributes['name'] = StringHelper::trimWhiteSpaces($value);
     }
 }

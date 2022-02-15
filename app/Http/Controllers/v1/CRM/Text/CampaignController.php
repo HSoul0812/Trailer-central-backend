@@ -22,10 +22,11 @@ class CampaignController extends RestfulControllerV2
      *
      * @param Repository $campaigns
      */
-    public function __construct(CampaignRepositoryInterface $campaigns)
+    public function __construct(CampaignRepositoryInterface $campaigns, CampaignTransformer $transformer)
     {
         $this->middleware('setUserIdOnRequest')->only(['index', 'create', 'update']);
         $this->campaigns = $campaigns;
+        $this->transformer = $transformer;
     }
 
 
@@ -47,7 +48,7 @@ class CampaignController extends RestfulControllerV2
      *         description="Sort order can be: price,-price,relevance,title,-title,length,-length",
      *         required=false,
      *         @OA\Schema(type="integer")
-     *     )
+     *     ),
      *     @OA\Response(
      *         response="200",
      *         description="Returns a list of texts",
@@ -63,7 +64,7 @@ class CampaignController extends RestfulControllerV2
         $request = new GetCampaignsRequest($request->all());
         
         if ($request->validate()) {
-            return $this->response->paginator($this->campaigns->getAll($request->all()), new CampaignTransformer());
+            return $this->response->paginator($this->campaigns->getAll($request->all()), $this->transformer);
         }
         
         return $this->response->errorBadRequest();
@@ -111,7 +112,7 @@ class CampaignController extends RestfulControllerV2
         $request = new CreateCampaignRequest($request->all());
         if ( $request->validate() ) {
             // Create Text
-            return $this->response->item($this->campaigns->create($request->all()), new CampaignTransformer());
+            return $this->response->item($this->campaigns->create($request->all()), $this->transformer);
         }  
         
         return $this->response->errorBadRequest();
@@ -145,14 +146,14 @@ class CampaignController extends RestfulControllerV2
         $request = new ShowCampaignRequest(['id' => $id]);
         
         if ( $request->validate() ) {
-            return $this->response->item($this->campaigns->get(['id' => $id]), new CampaignTransformer());
+            return $this->response->item($this->campaigns->get(['id' => $id]), $this->transformer);
         }
         
         return $this->response->errorBadRequest();
     }
     
     /**
-     * @OA\Text(
+     * @OA\Post(
      *     path="/api/crm/{userId}/texts/campaign/{id}",
      *     description="Update a campaign",
      * 
@@ -195,7 +196,7 @@ class CampaignController extends RestfulControllerV2
         $request = new UpdateCampaignRequest($requestData);
         
         if ( $request->validate() ) {
-            return $this->response->item($this->campaigns->update($request->all()), new CampaignTransformer());
+            return $this->response->item($this->campaigns->update($request->all()), $this->transformer);
         }
         
         return $this->response->errorBadRequest();
@@ -229,14 +230,14 @@ class CampaignController extends RestfulControllerV2
         
         if ( $request->validate()) {
             // Create Text
-            return $this->response->item($this->campaigns->delete(['id' => $id]), new CampaignTransformer());
+            return $this->response->item($this->campaigns->delete(['id' => $id]), $this->transformer);
         }
         
         return $this->response->errorBadRequest();
     }
 
     /**
-     * @OA\Sent(
+     * @OA\Post(
      *     path="/api/crm/{userId}/texts/campaign/{id}/sent",
      *     description="Mark campaign and sent to lead",
      *     tags={"Text"},
@@ -263,7 +264,7 @@ class CampaignController extends RestfulControllerV2
         
         if ( $request->validate()) {
             // Create Text
-            return $this->response->item($this->campaigns->sent(['id' => $id]), new CampaignTransformer());
+            return $this->response->item($this->campaigns->sent(['id' => $id]), $this->transformer);
         }
         
         return $this->response->errorBadRequest();

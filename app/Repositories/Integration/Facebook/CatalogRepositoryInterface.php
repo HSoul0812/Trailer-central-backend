@@ -4,6 +4,4 @@ namespace App\Repositories\Integration\Facebook;
 
 use App\Repositories\Repository;
 
-interface CatalogRepositoryInterface extends Repository {
-
-}
+interface CatalogRepositoryInterface extends Repository {}

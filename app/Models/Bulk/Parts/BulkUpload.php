@@ -5,13 +5,15 @@ namespace App\Models\Bulk\Parts;
 use Illuminate\Database\Eloquent\Model;
 
 class BulkUpload extends Model {
-    
+
     const VALIDATION_ERROR = 'validation_error';
     const PROCESSING = 'processing';
     const COMPLETE = 'complete';
-    
+    const STATUS_FAILED = 'failed';
+    const EXCEPTION_ERROR = 'exception_error';
+
     protected $table = 'parts_bulk_upload';
-    
+
     /**
      * The attributes that are mass assignable.
      *
@@ -21,7 +23,7 @@ class BulkUpload extends Model {
         'dealer_id',
         'status',
         'import_source',
-        'validation_errors'
+        'validation_errors',
     ];
 
     /**
@@ -38,7 +40,7 @@ class BulkUpload extends Model {
         if (empty($this->validation_errors)) {
             return null;
         }
-        
+
         return json_decode($this->validation_errors);
     }
 }

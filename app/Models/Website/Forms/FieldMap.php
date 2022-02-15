@@ -73,7 +73,8 @@ class FieldMap extends Model
             LeadType::TYPE_BUILD => 'Build a Trailer',
             LeadType::TYPE_RENTALS => 'Rentals',
             LeadType::TYPE_TRADE => 'Trade',
-            LeadType::TYPE_SERVICE => 'Service'
+            LeadType::TYPE_SERVICE => 'Service',
+            LeadType::TYPE_NONLEAD => 'Non-Lead'
         ]
     ];
 

@@ -21,7 +21,8 @@ class BinTransformer extends TransformerAbstract
              'id' => (int)$bin->id,
              'dealer_id' => (int) $bin->dealer_id,
              'name' => $bin->bin_name,
-             'uncompletedCycleCounts' => $bin->uncompletedCycleCounts
+             'uncompletedCycleCounts' => $bin->uncompletedCycleCounts,
+             'location_name' => $bin->dealerLocation ? $bin->dealerLocation->name : null
          ];
     }
 }

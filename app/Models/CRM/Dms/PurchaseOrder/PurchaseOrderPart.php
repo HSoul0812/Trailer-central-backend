@@ -3,12 +3,11 @@
 namespace App\Models\CRM\Dms\PurchaseOrder;
 
 use Illuminate\Database\Eloquent\Model;
-
-use App\Models\CRM\Dms\PurchaseOrder\PurchaseOrder;
 use App\Models\CRM\Dms\Quickbooks\Item;
 
 /**
  * @package App\Models\CRM\Dms\PurchaseOrder
+ * @property-read PurchaseOrder $purchaseOrder
  */
 class PurchaseOrderPart extends Model
 {

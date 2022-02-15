@@ -11,6 +11,7 @@ use Mockery;
 abstract class TestCase extends BaseTestCase
 {
     use CreatesApplication;
+    use MockPrivateMembers;
 
     protected function setUp(): void
     {
@@ -27,7 +28,6 @@ abstract class TestCase extends BaseTestCase
         return env('TESTS_DEFAULT_ACCESS_TOKEN', '123');
     }
 
-
     // Get Test Dealer ID
     public static function getTestDealerId() {
         // Get Test Dealer ID
@@ -40,12 +40,19 @@ abstract class TestCase extends BaseTestCase
 
     // Get Test Dealer Location ID's
     public static function getTestDealerLocationIds() {
-        // Get Location
+        // Get Locations
         $locationId = env('TEST_LOCATION_ID');
         if(empty($locationId)) {
             throw new MissingTestDealerLocationIdException();
         }
         return explode(",", $locationId);
+    }
+
+    // Get Test Dealer Location ID
+    public static function getTestDealerLocationId() {
+        // Get Location
+        $locationIds = self::getTestDealerLocationIds();
+        return reset($locationIds);
     }
 
     // Get Random Test Dealer Location
@@ -112,7 +119,65 @@ abstract class TestCase extends BaseTestCase
         $mock->shouldReceive('getDateFormat')->passthru();
         $mock->shouldReceive('getRelationValue')->passthru();
         $mock->shouldReceive('relationLoaded')->passthru();
+        $mock->shouldReceive('fromFloat')->passthru();
 
         return $mock;
+    }
+
+    /**
+     * @return CallbackInterface
+     */
+    public static function getCallback(): CallbackInterface
+    {
+        return new class() implements CallbackInterface {
+            /**
+             * @var bool
+             */
+            private $isCalled = false;
+
+            /**
+             * @return \Closure
+             */
+            public function getClosure(): \Closure
+            {
+                return function ()  {
+                    $this->isCalled = true;
+                };
+            }
+
+            /**
+             * @return bool
+             */
+            public function isCalled(): bool
+            {
+                return $this->isCalled;
+            }
+        };
+    }
+
+    /**
+     * @param CallbackInterface $callback
+     * @param string $message
+     */
+    public static function assertCalled(CallbackInterface $callback, string $message = ''): void
+    {
+        if (empty($message)) {
+            $message = 'Failed asserting that not called is called';
+        }
+
+        self::assertTrue($callback->isCalled(), $message);
+    }
+
+    /**
+     * @param CallbackInterface $callback
+     * @param string $message
+     */
+    public static function assertNotCalled(CallbackInterface $callback, string $message = ''): void
+    {
+        if (empty($message)) {
+            $message = 'Failed asserting that called is not called.';
+        }
+
+        self::assertFalse($callback->isCalled(), $message);
     }
 }

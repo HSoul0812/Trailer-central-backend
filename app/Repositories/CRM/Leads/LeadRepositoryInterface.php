@@ -4,6 +4,8 @@ namespace App\Repositories\CRM\Leads;
 
 use App\Repositories\Repository;
 
+use Illuminate\Database\Eloquent\Collection;
+
 interface LeadRepositoryInterface extends Repository {
     /**
      * Get All Unassigned Leads
@@ -12,6 +14,23 @@ interface LeadRepositoryInterface extends Repository {
      * @return type
      */
     public function getAllUnassigned($params);
+
+    /**
+     * Get Leads By Emails
+     *
+     * @param int $dealerId
+     * @param array $emails
+     * @return Collection of Lead
+     */
+    public function getByEmails(int $dealerId, array $emails);
+
+    /**
+     * Find Existing Lead That Matches Current Lead!
+     *
+     * @param array $params
+     * @return Collection<Lead>
+     */
+    public function findAllMatches(array $params): Collection;
 
     /**
      * Create Assign Log for Lead
@@ -46,26 +65,22 @@ interface LeadRepositoryInterface extends Repository {
     public function getCustomers($params = []);
 
     /**
-     * Returns lead types
-     *
-     * @return array
-     */
-    public function getTypes();
-
-    /**
-     * Returns lead statuses
-     *
-     * @return array
-     */
-    public function getStatuses();
-
-    /**
      * Returns list of available sort fields
      *
      * @return array
      */
     public function getLeadsSortFields();
 
+    /**
+     * @param callable|null $callback
+     * @param int $chunkSize
+     * @return mixed
+     */
     public function getLeadsWithoutCustomers(callable $callback = null, $chunkSize = 1000);
 
+    /**
+     * @param array $params
+     * @return mixed
+     */
+    public function getUniqueFullNames(array $params);
 }

@@ -4,7 +4,9 @@ namespace App\Repositories\Parts;
 
 use App\Exceptions\NotImplementedException;
 use App\Models\Parts\Bin;
-use App\Repositories\Parts\BinRepositoryInterface;
+use App\Models\Parts\BinQuantity;
+use App\Models\Parts\Part;
+use Illuminate\Support\Facades\DB;
 
 /**
  *
@@ -15,12 +17,13 @@ class BinRepository implements BinRepositoryInterface
 
     public function create($params)
     {
-        throw new NotImplementedException;
+        return Bin::create($params);
     }
 
     public function delete($params)
     {
-        throw new NotImplementedException;
+        $bin = Bin::findOrFail($params['bin_id']);
+        return $bin->delete();
     }
 
     public function get($params)
@@ -41,7 +44,7 @@ class BinRepository implements BinRepositoryInterface
         if (isset($params['location'])) {
             $query = $query->where('location', $params['location']);
         }
-
+       
         // Return First Value
         return $query->first();
     }
@@ -61,13 +64,21 @@ class BinRepository implements BinRepositoryInterface
         if (isset($params['bin_name'])) {
             $query = $query->where('bin_name', 'like', '%' . $params['bin_name'] . '%');
         }
+        
+        // Added for consistency
+        if (isset($params['search_term'])) {
+            $query = $query->where('bin_name', 'LIKE', "%{$params['search_term']}%");
+        }
 
         return $query->paginate($params['per_page'])->appends($params);
     }
 
     public function update($params)
     {
-        throw new NotImplementedException;
+        $bin = $this->get($params);
+        $bin->fill($params);
+        $bin->save();
+        return $bin;
     }
 
     public function getOrCreate($params)
@@ -98,11 +109,11 @@ class BinRepository implements BinRepositoryInterface
                     'dealer_id' => $dealerId,
                     'bin_name' => $csvData[$keyToIndexMapping[$id]],
                 ));
-                
+
                 if (empty($bin)) {
                     break;
                 }
-                
+
                 $binId = $bin->id;
 
                 // Return Bin Array
@@ -121,4 +132,35 @@ class BinRepository implements BinRepositoryInterface
         return $bins;
     }
 
+    /**
+     * @param int $dealerId
+     * @return array
+     */
+    public function financialReportByDealer(int $dealerId): array
+    {
+        $binTable = Bin::getTableName();
+        $binQtyTable = BinQuantity::getTableName();
+        $partTable = Part::getTableName();
+
+        $bins = Bin::select(DB::raw("{$binQtyTable}.qty, {$binTable}.bin_name, {$binQtyTable}.bin_id, {$partTable}.id," .
+            " title, sku, price, dealer_cost"))
+            ->leftJoin($binQtyTable, static function ($join) use ($binTable, $binQtyTable) {
+                return $join->on("{$binQtyTable}.bin_id", '=', "{$binTable}.id")
+                    ->where("{$binQtyTable}.qty", '>', 0);
+            })
+            ->leftJoin($partTable, static function ($join) use ($dealerId, $partTable, $binQtyTable) {
+                return $join->on("{$partTable}.id", '=', "{$binQtyTable}.part_id")
+                    ->where("{$partTable}.dealer_id", '=', $dealerId);
+            })
+            ->whereNotNull("{$partTable}.id")->cursor();
+
+        $report = [];
+
+        /** @var Bin $bin */
+        foreach ($bins as $bin) {
+            $report[$bin->id][$bin->bin_id]['part'] = $bin->toArray();
+        }
+
+        return $report;
+    }
 }

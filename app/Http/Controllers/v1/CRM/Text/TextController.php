@@ -46,7 +46,7 @@ class TextController extends RestfulControllerV2
      *         description="Sort order can be: price,-price,relevance,title,-title,length,-length",
      *         required=false,
      *         @OA\Schema(type="integer")
-     *     )
+     *     ),
      *     @OA\Response(
      *         response="200",
      *         description="Returns a list of texts",
@@ -60,41 +60,55 @@ class TextController extends RestfulControllerV2
      */
     public function index(Request $request) {
         $request = new GetTextsRequest($request->all());
-        
+
         if ($request->validate()) {
             return $this->response->paginator($this->texts->getAll($request->all()), new TextTransformer());
         }
-        
+
         return $this->response->errorBadRequest();
     }
-    
+
     /**
      * @OA\Put(
      *     path="/api/leads/{leadId}/texts",
      *     description="Create a text",
      *     tags={"Text"},
      *     @OA\Parameter(
-     *         name="id",
+     *         name="log_message",
      *         in="query",
-     *         description="Text ID",
+     *         description="Text body",
      *         required=true,
-     *         @OA\Schema(@OA\Schema(type="integer"))
-     *     ),
-     *     @OA\Parameter(
-     *         name="title",
-     *         in="query",
-     *         description="Text title",
-     *         required=false,
      *         @OA\Schema(type="string")
      *     ),
      *     @OA\Parameter(
-     *         name="text_content",
+     *         name="from_number",
      *         in="query",
-     *         description="Text content",
+     *         description="From Number",
+     *         required=true,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="to_number",
+     *         in="query",
+     *         description="To Number",
+     *         required=true,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="date_sent",
+     *         in="query",
+     *         description="Date Sent",
+     *         required=true,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="lead_id",
+     *         in="query",
+     *         description="Website Lead Identifier",
      *         required=false,
      *         @OA\Schema(type="string")
      *     ),
-     * 
+     *
      *     @OA\Response(
      *         response="200",
      *         description="Returns a list of texts",
@@ -106,13 +120,14 @@ class TextController extends RestfulControllerV2
      *     ),
      * )
      */
-    public function create(Request $request) {
+    public function create(Request $request)
+    {
         $request = new CreateTextRequest($request->all());
-        if ( $request->validate() ) {
-            // Create Text
+
+        if ($request->validate()) {
             return $this->response->item($this->texts->create($request->all()), new TextTransformer());
         }
-        
+
         return $this->response->errorBadRequest();
     }
 
@@ -120,7 +135,7 @@ class TextController extends RestfulControllerV2
      * @OA\Get(
      *     path="/api/leads/{leadId}/texts/{id}",
      *     description="Retrieve a text",
-     
+
      *     tags={"Post"},
      *     @OA\Parameter(
      *         name="id",
@@ -142,19 +157,19 @@ class TextController extends RestfulControllerV2
      */
     public function show(int $leadId, int $id) {
         $request = new ShowTextRequest(['id' => $id]);
-        
+
         if ( $request->validate() ) {
             return $this->response->item($this->texts->get(['id' => $id]), new TextTransformer());
         }
-        
+
         return $this->response->errorBadRequest();
     }
-    
+
     /**
-     * @OA\Text(
+     * @OA\Put(
      *     path="/api/leads/{leadId}/texts/{id}",
      *     description="Update a text",
-     * 
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="query",
@@ -176,7 +191,7 @@ class TextController extends RestfulControllerV2
      *         required=false,
      *         @OA\Schema(type="string")
      *     ),
-     * 
+     *
      *     @OA\Response(
      *         response="200",
      *         description="Returns a list of texts",
@@ -192,18 +207,18 @@ class TextController extends RestfulControllerV2
         $requestData = $request->all();
         $requestData['id'] = $id;
         $request = new UpdateTextRequest($requestData);
-        
+
         if ( $request->validate() ) {
             return $this->response->item($this->texts->update($request->all()), new TextTransformer());
         }
-        
+
         return $this->response->errorBadRequest();
     }
 
     /**
      * @OA\Delete(
      *     path="/api/leads/{leadId}/texts/{id}",
-     *     description="Delete a text",     
+     *     description="Delete a text",
      *     tags={"Text"},
      *     @OA\Parameter(
      *         name="id",
@@ -225,12 +240,12 @@ class TextController extends RestfulControllerV2
      */
     public function destroy(int $leadId, int $id) {
         $request = new DeleteTextRequest(['id' => $id]);
-        
+
         if ( $request->validate()) {
             // Create Text
             return $this->response->item($this->texts->delete(['id' => $id]), new TextTransformer());
         }
-        
+
         return $this->response->errorBadRequest();
     }
 
@@ -243,6 +258,7 @@ class TextController extends RestfulControllerV2
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\MediaType(
+     *             mediaType="application/json",
      *             @OA\Schema(
      *                 @OA\Property(
      *                     property="user_id",
@@ -343,7 +359,7 @@ class TextController extends RestfulControllerV2
     {
         $params = $request->all();
         $request = new SendTextRequest($params);
-        
+
         if ( $request->validate()) {
             // Get Results
             $result = $this->texts->send($leadId, $params['log_message']);
@@ -351,7 +367,7 @@ class TextController extends RestfulControllerV2
             // Send Text
             return $this->response->item($result, new TextTransformer());
         }
-        
+
         return $this->response->errorBadRequest();
     }
 }

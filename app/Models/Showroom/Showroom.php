@@ -3,15 +3,21 @@
 namespace App\Models\Showroom;
 
 use App\Models\Inventory\Category;
+use App\Models\Inventory\InventoryFeatureList;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * Class Showroom
  * @package App\Models\Showroom
+ *
  * @property Category $category
+ * @property InventoryFeatureList[] $features
  */
-class Showroom extends Model {
-
+class Showroom extends Model
+{
     protected $table = 'showroom';
 
     public $timestamps = false;
@@ -121,8 +127,29 @@ class Showroom extends Model {
         'product_group'
     ];
 
-    public function category()
+    /**
+     * @return HasOne
+     */
+    public function category(): HasOne
     {
         return $this->hasOne(Category::class, 'legacy_category', 'type');
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function images(): HasMany
+    {
+        return $this->hasMany(ShowroomImage::class, 'showroom_id');
+    }
+
+    /**
+     * @return BelongsToMany
+     */
+    public function features(): BelongsToMany
+    {
+        return $this->belongsToMany(InventoryFeatureList::class, ShowroomFeature::class, 'showroom_id', 'feature_list_id')
+            ->using(ShowroomFeature::class)
+            ->withPivot('value');
     }
 }

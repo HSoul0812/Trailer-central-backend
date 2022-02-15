@@ -4,7 +4,7 @@ namespace App\Repositories\CRM\Leads;
 
 use App\Models\CRM\User\Customer;
 use App\Models\Website\Website;
-use App\Repositories\CRM\Leads\LeadRepositoryInterface;
+use App\Exceptions\RepositoryInvalidArgumentException;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadAssign;
@@ -12,17 +12,24 @@ use App\Models\CRM\User\SalesPerson;
 use App\Models\User\NewDealerUser;
 use App\Models\User\User;
 use App\Models\CRM\Interactions\Interaction;
-use App\Models\CRM\Leads\InventoryLead;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\LeadType;
-use App\Models\CRM\Leads\LeadSource;
 use App\Models\Inventory\Inventory;
 use App\Repositories\Traits\SortTrait;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
+use App\Utilities\TimeUtil;
 
 class LeadRepository implements LeadRepositoryInterface {
 
     use SortTrait;
+
+    private const LEAD_SOURCE_TRAILERTRADERS = 'trailertraders';
+    private const LEAD_SOURCE_CLASSIFIEDS = 'classifieds';
+    private const HAS_PRODUCT = 'has_product';
 
     private $sortOrders = [
         'no_due_past_due_future_due' => [
@@ -38,11 +45,11 @@ class LeadRepository implements LeadRepositoryInterface {
             'direction' => 'DESC'
         ],
         '-most_recent' => [
-            'field' => 'crm_interaction.interaction_time',
+            'field' => 'MIN(crm_interaction.interaction_time)',
             'direction' => 'ASC'
         ],
         'most_recent' => [
-            'field' => 'crm_interaction.interaction_time',
+            'field' => 'MAX(crm_interaction.interaction_time)',
             'direction' => 'DESC'
         ],
         'status' => [
@@ -72,68 +79,9 @@ class LeadRepository implements LeadRepositoryInterface {
         ]
     ];
 
-
     public function create($params) {
-        // Get First Lead Type
-        if(isset($params['lead_types']) && is_array($params['lead_types'])) {
-            $params['lead_type'] = reset($params['lead_types']);
-        }
-
-        // Fix Units of Interest
-        if(isset($params['inventory']) && is_array($params['inventory'])) {
-            $params['inventory_id'] = reset($params['inventory']);
-        }
-
-        // Fix Preferred Contact
-        if(empty($params['preferred_contact'])) {
-            $params['preferred_contact'] = 'phone';
-            if(empty($params['phone_number']) && !empty($params['email_address'])) {
-                $params['preferred_contact'] = 'email';
-            }
-        }
-
         // Create Lead
-        $lead = Lead::create($params);
-
-        // Start Lead Status Updates
-        $leadStatusUpdates = [
-            'tc_lead_identifier' => $lead->identifier,
-            'contact_type' => LeadStatus::TYPE_CONTACT,
-            'status' => Lead::STATUS_UNCONTACTED
-        ];
-
-        // Override Fixes
-        if (isset($params['lead_source'])) {
-            $leadStatusUpdates['source'] = $params['lead_source'];
-        }
-        if (isset($params['lead_status'])) {
-            $leadStatusUpdates['status'] = $params['lead_status'];
-        }
-        if (isset($params['next_contact_date'])) {
-            $leadStatusUpdates['next_contact_date'] = $params['next_contact_date'];
-        }
-        if (isset($params['contact_type'])) {
-            $leadStatusUpdates['contact_type'] = $params['contact_type'];
-        }
-        if (isset($params['sales_person_id'])) {
-            $leadStatusUpdates['sales_person_id'] = $params['sales_person_id'];
-        }
-
-        // Create Lead Status
-        LeadStatus::create($leadStatusUpdates);
-
-        // Update Units of Inventory
-        if (isset($params['inventory'])) {
-            $this->updateUnitsOfInterest($lead->identifier, $params['inventory']);
-        }
-
-        // Update Lead Types
-        if (isset($params['lead_types'])) {
-            $this->updateLeadTypes($lead->identifier, $params['lead_types']);
-        }
-
-        // Return Full Lead Details
-        return Lead::find($lead->identifier);
+        return Lead::create($params);
     }
 
     public function delete($params) {
@@ -144,17 +92,20 @@ class LeadRepository implements LeadRepositoryInterface {
         return Lead::findOrFail($params['id']);
     }
 
-    public function getAll($params) {
-        $query = Lead::where('identifier', '>', 0);
+    public function getAll($params)
+    {
+        $query = Lead::where([
+                ['identifier', '>', 0],
+                [Lead::getTableName().'.lead_type', '<>', LeadType::TYPE_NONLEAD],
+        ]);
 
         if (isset($params['dealer_id'])) {
             $query = $query->where(Lead::getTableName().'.dealer_id', $params['dealer_id']);
         }
-
         /**
          * Filters
          */
-        $query = $this->addFiltersToQuery($query, $params);
+        $query = $this->addFiltersToQuery($query, $params, false, isset($params['sort']));
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
@@ -162,12 +113,30 @@ class LeadRepository implements LeadRepositoryInterface {
 
         if (isset($params['sort'])) {
             $query = $query->leftJoin(Interaction::getTableName(), Interaction::getTableName().'.tc_lead_id',  '=', Lead::getTableName().'.identifier');
-            $query = $query->orderBy($this->sortOrders[$params['sort']]['field'], $this->sortOrders[$params['sort']]['direction']);
+            $query = $query->orderByRaw($this->sortOrders[$params['sort']]['field'] . ' ' . $this->sortOrders[$params['sort']]['direction']);
         }
 
         $query = $query->groupBy(Lead::getTableName().'.identifier');
 
         return $query->paginate($params['per_page'])->appends($params);
+    }
+
+    public function getEdgeDate($params)
+    {
+        $query = Lead::selectRaw('MIN(website_lead.date_submitted) AS min_date_submitted,
+                    MAX(website_lead.date_submitted) AS max_date_submitted')->where([
+                ['identifier', '>', 0],
+                [Lead::getTableName().'.lead_type', '<>', LeadType::TYPE_NONLEAD],
+        ]);
+
+        if (isset($params['dealer_id'])) {
+            $query = $query->where(Lead::getTableName().'.dealer_id', $params['dealer_id']);
+        }
+        /**
+         * Filters
+         */
+        $query = $this->addFiltersToQuery($query, $params, false, isset($params['sort']));
+        return $query->first();
     }
 
     /**
@@ -177,108 +146,76 @@ class LeadRepository implements LeadRepositoryInterface {
      * @return type
      */
     public function getAllUnassigned($params) {
-        $query = Lead::select(Lead::getTableName().'.*')->with('inventory');
+        $query = Lead::select(Lead::getTableName() . '.*')->with('inventory')
+                     ->where('lead_type', '<>', LeadType::TYPE_NONLEAD);
 
         if (isset($params['dealer_id'])) {
-            $query = $query->where(Lead::getTableName().'.dealer_id', $params['dealer_id']);
+            $query = $query->where(Lead::getTableName() . '.dealer_id', $params['dealer_id']);
         }
 
         // Join Lead Status
-        $query = $query->leftJoin(NewDealerUser::getTableName(), Lead::getTableName().'.dealer_id', '=', NewDealerUser::getTableName().'.id');
-        $query = $query->leftJoin(LeadStatus::getTableName(), Lead::getTableName().'.identifier', '=', LeadStatus::getTableName().'.tc_lead_identifier');
+        $query = $query->leftJoin(NewDealerUser::getTableName(), Lead::getTableName() . '.dealer_id', '=', NewDealerUser::getTableName() . '.id');
+        $query = $query->leftJoin(LeadStatus::getTableName(), Lead::getTableName() . '.identifier', '=', LeadStatus::getTableName() . '.tc_lead_identifier');
         $query = $query->leftJoin(SalesPerson::getTableName(), function ($join) {
-            $join->on(LeadStatus::getTableName().'.sales_person_id', '=', SalesPerson::getTableName().'.id')
-                 ->on(SalesPerson::getTableName().'.user_id', '=', NewDealerUser::getTableName().'.user_id')
-                 ->whereNull(SalesPerson::getTableName().'.deleted_at');
+            $join->on(LeadStatus::getTableName() . '.sales_person_id', '=', SalesPerson::getTableName() . '.id')
+                 ->on(SalesPerson::getTableName() . '.user_id', '=', NewDealerUser::getTableName() . '.user_id')
+                 ->whereNull(SalesPerson::getTableName() . '.deleted_at');
         });
 
         // Require Sales Person ID NULL or 0
-        $query = $query->where(function($query) {
-            $query->whereNull(LeadStatus::getTableName().'.sales_person_id')
-                  ->orWhere(LeadStatus::getTableName().'.sales_person_id', 0);
-        })->where(Lead::getTableName().'.is_archived', 0)
-          ->where(Lead::getTableName().'.is_spam', 0)
-          ->whereRaw(Lead::getTableName().'.date_submitted > CURDATE() - INTERVAL 30 DAY');
+        $query = $query->whereNull(SalesPerson::getTableName() . '.id')
+            ->where(Lead::getTableName() . '.is_archived', 0)
+            ->where(Lead::getTableName() . '.is_spam', 0)
+            ->whereRaw(Lead::getTableName() . '.date_submitted > CURDATE() - INTERVAL 30 DAY');
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
         }
 
         if (isset($params['sort'])) {
-            $query = $query->leftJoin(Interaction::getTableName(), Interaction::getTableName().'.tc_lead_id',  '=', Lead::getTableName().'.identifier');
-            $query = $query->orderBy($this->sortOrders[$params['sort']]['field'], $this->sortOrders[$params['sort']]['direction']);
+            $query = $query->leftJoin(Interaction::getTableName(), Interaction::getTableName() . '.tc_lead_id',  '=', Lead::getTableName() . '.identifier');
+            $query = $query->orderByRaw($this->sortOrders[$params['sort']]['field'] . ' ' . $this->sortOrders[$params['sort']]['direction']);
         }
 
-        $query = $query->groupBy(Lead::getTableName().'.identifier');
+        $query = $query->groupBy(Lead::getTableName() . '.identifier');
 
         // Return By Dealer?
         if($params['per_page'] === 'all') {
-            return $query->get();
+            return $query->orderBy(Lead::getTableName() . '.date_submitted', 'ASC')
+                         ->orderBy(Lead::getTableName() . '.identifier', 'ASC')->get();
         }
 
         // Paginate!
         return $query->paginate($params['per_page'])->appends($params);
     }
 
+    /**
+     * Get Leads By Emails
+     *
+     * @param int $dealerId
+     * @param array $emails
+     * @return Collection of Lead
+     */
+    public function getByEmails(int $dealerId, array $emails) {
+        // Return Lead Emails for User ID
+        return Lead::select(['identifier', 'email_address'])
+                     ->where('lead_type', '<>', LeadType::TYPE_NONLEAD)
+                     ->where('dealer_id', $dealerId)
+                     ->where(function($query) use($emails) {
+                         // Append Query
+                         foreach($emails as $email) {
+                             $query = $query->orWhere('email_address', '=', $email);
+                         }
+                     })->first();
+    }
+
     public function update($params) {
+        // Get Lead
         $lead = Lead::findOrFail($params['id']);
 
+        // Update Lead
         DB::transaction(function() use (&$lead, $params) {
-            $leadStatusUpdates = [];
-
-            if (isset($params['lead_status'])) {
-                $leadStatusUpdates['status'] = $params['lead_status'];
-            }
-
-            if (isset($params['lead_source'])) {
-                $leadStatusUpdates['source'] = $params['lead_source'];
-            }
-
-            if (isset($params['next_contact_date'])) {
-                $leadStatusUpdates['next_contact_date'] = $params['next_contact_date'];
-            }
-
-            if (isset($params['contact_type'])) {
-                $leadStatusUpdates['contact_type'] = $params['contact_type'];
-            }
-
-            if (isset($params['sales_person_id'])) {
-                $leadStatusUpdates['sales_person_id'] = $params['sales_person_id'];
-            }
-
-            if (!empty($leadStatusUpdates)) {
-                if ($lead->leadStatus) {
-                    $lead->leadStatus()->update($leadStatusUpdates);
-                } else {
-                    if (empty($leadStatusUpdates['status'])) {
-                        $leadStatusUpdates['status'] = Lead::STATUS_UNCONTACTED;
-                    }
-                    $lead->leadStatus()->create($leadStatusUpdates);
-                }
-            }
-
-            // Update Units of Inventory
-            if (isset($params['inventory']) && is_array($params['inventory'])) {
-                if(!in_array($lead->inventory_id, $params['inventory'])) {
-                    $params['inventory_id'] = reset($params['inventory']);
-                }
-
-                // Update Units of Interest
-                $this->updateUnitsOfInterest($lead->identifier, $params['inventory']);
-            }
-
-            // Process Lead Types
-            if(isset($params['lead_types']) && is_array($params['lead_types'])) {
-                if(!in_array($lead->lead_type, $params['lead_types'])) {
-                    $params['lead_type'] = reset($params['lead_types']);
-                }
-
-                // Update Lead Types
-                $this->updateLeadTypes($lead->identifier, $params['lead_types']);
-            }
-
             $lead->fill($params)->save();
-
         });
 
         // Return Full Lead Details
@@ -286,57 +223,39 @@ class LeadRepository implements LeadRepositoryInterface {
     }
 
     /**
-     * Delete Existing Lead Types and Insert New Ones
+     * Find Existing Leads That Matches Current Lead!
      *
-     * @param int $leadId
-     * @param array $leadTypes
-     * @return array of LeadType
+     * @param array $params
+     * @return Collection<Lead>
      */
-    public function updateLeadTypes($leadId, $leadTypes) {
-        // Initialize Lead Type
-        $leadTypeModels = array();
-        DB::transaction(function() use (&$leadTypeModels, $leadId, $leadTypes) {
-            // Delete Existing Lead Types!
-            LeadType::whereLeadId($leadId)->delete();
+    public function findAllMatches(array $params): Collection {
+        // Clean Phones
+        $params['phone1'] = preg_replace('/[-+)( x]+/', '', $params['phone_number'] ?? '');
+        $params['phone2'] = '1' . $params['phone1'];
+        if(strlen($params['phone1']) === 11) {
+            $params['phone2'] = substr($params['phone1'], 1);
+        }
 
-            // Loop Lead Types
-            foreach($leadTypes as $leadType) {
-                $leadTypeModels[] = LeadType::create([
-                    'lead_id' => $leadId,
-                    'lead_type' => $leadType
-                ]);
-            }
-        });
+        // Find Leads That Match Current!
+        $lead = Lead::where('dealer_id', $params['dealer_id'])
+                    ->where('lead_type', '<>', LeadType::TYPE_NONLEAD);
 
-        // Return Array of Lead Types
-        return $leadTypeModels;
-    }
-
-    /**
-     * Delete Existing Units of Interest and Insert New Ones
-     *
-     * @param int $leadId
-     * @param array $inventoryIds
-     * @return array of InventoryLead
-     */
-    public function updateUnitsOfInterest($leadId, $inventoryIds) {
-        // Initialize Lead Type
-        $inventoryLeads = array();
-        DB::transaction(function() use (&$inventoryLeads, $leadId, $inventoryIds) {
-            // Delete Existing Units of Interest!
-            InventoryLead::where('website_lead_id', $leadId)->delete();
-
-            // Loop Lead Types
-            foreach($inventoryIds as $inventoryId) {
-                $inventoryLeads[] = InventoryLead::create([
-                    'website_lead_id' => $leadId,
-                    'inventory_id' => $inventoryId
-                ]);
-            }
-        });
-
-        // Return Array of Inventory Lead
-        return $inventoryLeads;
+        // Find Name
+        return $lead->where(function(Builder $query) use($params) {
+            return $query->where(function(Builder $query) use($params) {
+                return $query->where('first_name', $params['first_name'])
+                             ->where('last_name', $params['last_name']);
+            })->orWhere(function(Builder $query) use($params) {
+                return $query->whereRaw('REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`phone_number`, \'+\', \'\'), \'-\', \'\'), \'(\', \'\'), \')\', \'\'), \' \', \'\'), \'x\', \'\') = ?', $params['phone1'])
+                             ->where('phone_number', '<>', '');
+            })->orWhere(function(Builder $query) use($params) {
+                return $query->whereRaw('REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`phone_number`, \'+\', \'\'), \'-\', \'\'), \'(\', \'\'), \')\', \'\'), \' \', \'\'), \'x\', \'\') = ?', $params['phone2'])
+                             ->where('phone_number', '<>', '');
+            })->orWhere(function(Builder $query) use($params) {
+                return $query->where('email_address', $params['email_address'] ?? '')
+                             ->where('email_address', '<>', '');
+            });
+        })->get();
     }
 
     /**
@@ -355,7 +274,7 @@ class LeadRepository implements LeadRepositoryInterface {
     }
 
     public function getCustomers($params = []) {
-        $query = Lead::select('*');
+        $query = Lead::select('*')->where('lead_type', '<>', LeadType::TYPE_NONLEAD);
 
         if (isset($params['dealer_id'])) {
             $query = $query->where(Lead::getTableName().'.dealer_id', $params['dealer_id']);
@@ -380,118 +299,6 @@ class LeadRepository implements LeadRepositoryInterface {
         $query = $query->orderBy('last_name', 'DESC');
 
         return $query->paginate($params['per_page'])->appends($params);
-    }
-
-    /**
-     * Get All Lead Statuses
-     *
-     * @return type
-     */
-    public function getStatuses() {
-        return [
-            [
-                'id' => Lead::STATUS_HOT,
-                'name' => Lead::STATUS_HOT
-            ],
-            [
-                'id' => Lead::STATUS_COLD,
-                'name' => Lead::STATUS_COLD
-            ],
-            [
-                'id' => Lead::STATUS_LOST,
-                'name' => Lead::STATUS_LOST
-            ],
-            [
-                'id' => Lead::STATUS_MEDIUM,
-                'name' => Lead::STATUS_MEDIUM
-            ],
-            [
-                'id' => Lead::STATUS_NEW_INQUIRY,
-                'name' => Lead::STATUS_NEW_INQUIRY
-            ],
-            [
-                'id' => Lead::STATUS_UNCONTACTED,
-                'name' => Lead::STATUS_UNCONTACTED
-            ],
-            [
-                'id' => Lead::STATUS_WON,
-                'name' => Lead::STATUS_WON
-            ],
-            [
-                'id' => Lead::STATUS_WON_CLOSED,
-                'name' => Lead::STATUS_WON_CLOSED
-            ]
-        ];
-    }
-
-    /**
-     * Get All Lead Types
-     *
-     * @return type
-     */
-    public function getTypes() {
-        return [
-            [
-                'id' => LeadType::TYPE_BUILD,
-                'name' => ucfirst(LeadType::TYPE_BUILD)
-            ],
-            [
-                'id' => LeadType::TYPE_CALL,
-                'name' => ucfirst(LeadType::TYPE_CALL)
-            ],
-            [
-                'id' => LeadType::TYPE_GENERAL,
-                'name' => ucfirst(LeadType::TYPE_GENERAL)
-            ],
-            [
-                'id' => LeadType::TYPE_CRAIGSLIST,
-                'name' => ucfirst(LeadType::TYPE_CRAIGSLIST)
-            ],
-            [
-                'id' => LeadType::TYPE_INVENTORY,
-                'name' => ucfirst(LeadType::TYPE_INVENTORY)
-            ],
-            [
-                'id' => LeadType::TYPE_TEXT,
-                'name' => ucfirst(LeadType::TYPE_TEXT)
-            ],
-            [
-                'id' => LeadType::TYPE_SHOWROOM_MODEL,
-                'name' => ucfirst(LeadType::TYPE_SHOWROOM_MODEL)
-            ],
-            [
-                'id' => LeadType::TYPE_JOTFORM,
-                'name' => ucfirst(LeadType::TYPE_JOTFORM)
-            ],
-            [
-                'id' => LeadType::TYPE_RENTALS,
-                'name' => ucfirst(LeadType::TYPE_RENTALS)
-            ],
-            [
-                'id' => LeadType::TYPE_FINANCING,
-                'name' => ucfirst(LeadType::TYPE_FINANCING)
-            ],
-            [
-                'id' => LeadType::TYPE_SERVICE,
-                'name' => ucfirst(LeadType::TYPE_SERVICE)
-            ],
-            [
-                'id' => LeadType::TYPE_TRADE,
-                'name' => ucfirst(LeadType::TYPE_TRADE)
-            ]
-        ];
-    }
-
-    /**
-     * Get All Default Lead Sources
-     *
-     * @return type
-     */
-    public function getSources() {
-        return LeadSource::select(['lead_source_id AS id', 'source_name AS name'])
-                         ->where('user_id', 0)
-                         ->orderBy('lead_source_id', 'ASC')
-                         ->get();
     }
 
     /**
@@ -521,68 +328,73 @@ class LeadRepository implements LeadRepositoryInterface {
     private function getHotLeadsByDealer($dealerId, $params = []) {
         $user = User::findOrFail($dealerId);
 
-        if (!isset($params['is_archived'])) {
-            $params['is_archived'] = Lead::NOT_ARCHIVED;
-        }
-
         $hotLeadsQuery = $user->leads()
-                        ->join(LeadStatus::getTableName(), Lead::getTableName().'.identifier', '=', LeadStatus::getTableName().'.tc_lead_identifier')
-                        ->where(LeadStatus::getTableName().'.status', Lead::STATUS_HOT);
+                        ->leftJoin(LeadStatus::getTableName(), Lead::getTableName().'.identifier', '=', LeadStatus::getTableName().'.tc_lead_identifier')
+                        ->where(LeadStatus::getTableName().'.status', Lead::STATUS_HOT)
+                        ->distinct();
 
         $hotLeadsQuery = $this->addFiltersToQuery($hotLeadsQuery, $params, true);
 
-        return $hotLeadsQuery->count();
+        return $hotLeadsQuery->count('identifier');
     }
 
     private function getLostLeadsByDealer($dealerId, $params = []) {
         $user = User::findOrFail($dealerId);
 
-        if (!isset($params['is_archived'])) {
-            $params['is_archived'] = Lead::NOT_ARCHIVED;
-        }
-
         $lostLeadsQuery = $user->leads()
-                        ->join(LeadStatus::getTableName(), Lead::getTableName().'.identifier', '=', LeadStatus::getTableName().'.tc_lead_identifier')
-                        ->where(LeadStatus::getTableName().'.status', Lead::STATUS_LOST);
+                        ->leftJoin(LeadStatus::getTableName(), Lead::getTableName().'.identifier', '=', LeadStatus::getTableName().'.tc_lead_identifier')
+                        ->where(LeadStatus::getTableName().'.status', Lead::STATUS_LOST)
+                        ->distinct();
 
         $lostLeadsQuery = $this->addFiltersToQuery($lostLeadsQuery, $params, true);
 
-        return $lostLeadsQuery->count();
+        return $lostLeadsQuery->count('identifier');
     }
 
     private function getOpenLeadsbyDealer($dealerId, $params = []) {
         $user = User::findOrFail($dealerId);
 
-        if (!isset($params['is_archived'])) {
-            $params['is_archived'] = Lead::NOT_ARCHIVED;
-        }
 
         $openLeadsQuery = $user->leads()
-                            ->join(LeadStatus::getTableName(), Lead::getTableName().'.identifier', '=', LeadStatus::getTableName().'.tc_lead_identifier')
-                            ->whereNotIn(LeadStatus::getTableName().'.status', [Lead::STATUS_WON, Lead::STATUS_WON_CLOSED, Lead::STATUS_LOST]);
+                            ->leftJoin(LeadStatus::getTableName(), Lead::getTableName().'.identifier', '=', LeadStatus::getTableName().'.tc_lead_identifier')
+                            ->where(function($query) {
+                                $query->whereNotIn(LeadStatus::getTableName().'.status', [Lead::STATUS_WON, Lead::STATUS_WON_CLOSED, Lead::STATUS_LOST])
+                                    ->orWhereNull(LeadStatus::getTableName().'.status');
+                            })
+                            ->distinct();
 
         $openLeadsQuery = $this->addFiltersToQuery($openLeadsQuery, $params, true);
 
-        return $openLeadsQuery->count();
+        return $openLeadsQuery->count('identifier');
     }
 
     private function getWonLeadsByDealer($dealerId, $params = []) {
         $user = User::findOrFail($dealerId);
 
-        if (!isset($params['is_archived'])) {
-            $params['is_archived'] = Lead::NOT_ARCHIVED;
-        }
-
         $wonLeadsQuery = $user->leads()
-                            ->join(LeadStatus::getTableName(), Lead::getTableName().'.identifier', '=', LeadStatus::getTableName().'.tc_lead_identifier')
-                            ->whereIn(LeadStatus::getTableName().'.status', [Lead::STATUS_WON, Lead::STATUS_WON_CLOSED]);
+                            ->leftJoin(LeadStatus::getTableName(), Lead::getTableName().'.identifier', '=', LeadStatus::getTableName().'.tc_lead_identifier')
+                            ->whereIn(LeadStatus::getTableName().'.status', [Lead::STATUS_WON, Lead::STATUS_WON_CLOSED])
+                            ->distinct();
 
         $wonLeadsQuery = $this->addFiltersToQuery($wonLeadsQuery, $params, true);
 
-        return $wonLeadsQuery->count();
+        return $wonLeadsQuery->count('identifier');
     }
 
-    private function addFiltersToQuery($query, $filters, $noStatusJoin = false) {
+    /**
+     * @param Builder|Relation $query
+     * @return Builder|Relation
+     */
+    private function joinInteraction($query) {
+        return $query->leftJoin(
+            Interaction::getTableName(),
+            Interaction::getTableName() . '.tc_lead_id',
+            '=',
+            Lead::getTableName() . '.identifier'
+        );
+    }
+
+    private function addFiltersToQuery($query, $filters, $noStatusJoin = false, $noInteractionJoin = false) {
         if (!$noStatusJoin) {
             $query = $query->leftJoin(LeadStatus::getTableName(), Lead::getTableName().'.identifier', '=', LeadStatus::getTableName().'.tc_lead_identifier');
         }
@@ -597,6 +409,27 @@ class LeadRepository implements LeadRepositoryInterface {
 
         if (isset($filters['date_to'])) {
             $query = $this->addDateToToQuery($query, $filters['date_to']);
+        }
+
+
+        if (isset($filters['next_contact_from'])) {
+            $query = $this->addNextContactFromToQuery($query, TimeUtil::convertTimeFormat($filters['next_contact_from'], TimeUtil::REQUEST_TIME_FORMAT, TimeUtil::MYSQL_TIME_FORMAT));
+        }
+
+        if (isset($filters['next_contact_to'])) {
+            $query = $this->addNextContactToToQuery($query, TimeUtil::convertTimeFormat($filters['next_contact_to'], TimeUtil::REQUEST_TIME_FORMAT, TimeUtil::MYSQL_TIME_FORMAT));
+        }
+
+        if((isset($filters['interacted_from']) || isset($filters['interacted_to'])) && !$noInteractionJoin) {
+            $this->joinInteraction($query);
+        }
+
+        if (isset($filters['interacted_from'])) {
+            $query = $this->addInteractedFromToQuery($query, TimeUtil::convertTimeFormat($filters['interacted_from'], TimeUtil::REQUEST_TIME_FORMAT, TimeUtil::MYSQL_TIME_FORMAT));
+        }
+
+        if (isset($filters['interacted_to'])) {
+            $query = $this->addInteractedToToQuery($query, TimeUtil::convertTimeFormat($filters['interacted_to'], TimeUtil::REQUEST_TIME_FORMAT, TimeUtil::MYSQL_TIME_FORMAT));
         }
 
         if (isset($filters['is_archived'])) {
@@ -619,22 +452,90 @@ class LeadRepository implements LeadRepositoryInterface {
             $query = $this->addLeadStatusToQuery($query, $filters['lead_status']);
         }
 
-        if (isset($filters['lead_type'])) {
+        if (!empty($filters['lead_type'])) {
             $query = $this->addLeadTypeToQuery($query, $filters['lead_type']);
+        }
+
+        if (isset($filters['product_status'])) {
+            $query = $this->addProductStatusToQuery($query, $filters['product_status']);
+        }
+
+        if(isset($filters['lead_source'])) {
+            $query = $this->addLeadSourceToQuery($query, $filters['lead_source']);
         }
 
         return $query;
     }
 
-    private function addDateToToQuery($query, $dateTo) {
+    /**
+     * @param Builder $query
+     * @param string $leadSource
+     * @return Builder
+     */
+    private function addLeadSourceToQuery(Builder $query, string $leadSource) {
+        if($leadSource === self::LEAD_SOURCE_TRAILERTRADERS) {
+            $query->where(Lead::getTableName().'.website_id', '284');
+        } else if ($leadSource === self::LEAD_SOURCE_CLASSIFIEDS) {
+            $query
+                ->leftJoin(Website::getTableName() . '.id', '=', Lead::getTableName() . '.website_id')
+                ->where(Website::getTableName() . '.type', Lead::LEAD_TYPE_CLASSIFIED);
+        }
+        return $query;
+    }
+
+    /**
+     * @param Builder $query
+     * @param string $productStatus
+     * @return Builder
+     */
+    private function addProductStatusToQuery(Builder $query, string $productStatus) {
+        return $query->where(
+            Lead::getTableName().'.inventory_id',
+            $productStatus === self::HAS_PRODUCT ? '>' : '=',
+            0
+        );
+    }
+
+    /**
+     * @param Builder|Relation $query
+     * @param string $dateTo
+     * @return Builder
+     */
+    private function addDateToToQuery($query, string $dateTo) {
          return $query->where(Lead::getTableName().'.date_submitted', '<=', $dateTo);
     }
 
-    private function addDateFromToQuery($query, $dateFrom) {
+    /**
+     * @param Builder|Relation $query
+     * @param string $dateFrom
+     * @return Builder
+     */
+    private function addDateFromToQuery($query, string $dateFrom) {
         return $query->where(Lead::getTableName().'.date_submitted', '>=', $dateFrom);
     }
 
-    private function addSearchToQuery($query, $search) {
+    private function addNextContactFromToQuery($query, string $dateFrom) {
+        return $query->where(LeadStatus::getTableName().'.next_contact_date', '>=', $dateFrom);
+    }
+
+    private function addNextContactToToQuery($query, string $dateTo) {
+        return $query->where(LeadStatus::getTableName().'.next_contact_date', '<=', $dateTo);
+    }
+
+    private function addInteractedFromToQuery($query, string $dateFrom) {
+        return $query->where(Interaction::getTableName().'.interaction_time', '>=', $dateFrom);
+    }
+
+    private function addInteractedToToQuery($query, string $dateTo) {
+        return $query->where(Interaction::getTableName().'.interaction_time', '<=', $dateTo);
+    }
+
+    /**
+     * @param Builder|Relation $query
+     * @param string $search
+     * @return Builder|\Illuminate\Database\Query\Builder
+     */
+    private function addSearchToQuery($query, string $search) {
         $query = $query->leftJoin(Inventory::getTableName(), Inventory::getTableName().'.inventory_id',  '=', Lead::getTableName().'.inventory_id');
 
         return $query->where(function($q) use ($search) {
@@ -649,29 +550,70 @@ class LeadRepository implements LeadRepositoryInterface {
         });
     }
 
-    private function addIsArchivedToQuery($query, $isArchived) {
+    /**
+     * @param Builder|Relation $query
+     * @param bool $isArchived
+     * @return Builder|Relation
+     */
+    private function addIsArchivedToQuery($query, bool $isArchived) {
         return $query->where(Lead::getTableName().'.is_archived', $isArchived);
     }
 
-    private function addLocationToQuery($query, $location) {
+    /**
+     * @param Builder|Relation $query
+     * @param int $location
+     * @return Builder|Relation
+     */
+
+    private function addLocationToQuery($query, int $location) {
         return $query->where(Lead::getTableName().'.dealer_location_id', $location);
     }
 
-    private function addCustomerNameToQuery($query, $customerName) {
+    /**
+     * @param Builder|Relation $query
+     * @param string $customerName
+     * @return Builder|Relation
+     */
+
+    private function addCustomerNameToQuery($query, string $customerName) {
         return $query->whereRaw("CONCAT(".Lead::getTableName().".first_name, ' ', ".Lead::getTableName().".last_name) LIKE ?", $customerName);
     }
 
-    private function addSalesPersonIdToQuery($query, $salesPersonId) {
+    /**
+     * @param Builder|Relation $query
+     * @param int $salesPersonId
+     * @return Builder|Relation
+     */
+    private function addSalesPersonIdToQuery($query, int $salesPersonId) {
         return $query->where(LeadStatus::getTableName().'.sales_person_id', $salesPersonId);
     }
 
-    private function addLeadStatusToQuery($query, $leadStatus) {
-        return $query->whereIn(LeadStatus::getTableName().'.status', $leadStatus);
+    /**
+     * @param Builder|Relation $query
+     * @param array $leadStatus
+     * @return Builder|Relation
+     */
+    private function addLeadStatusToQuery($query, array $leadStatus)
+    {
+        return $query->whereIn(LeadStatus::getTableName() . '.status', $leadStatus);
     }
 
-    private function addLeadTypeToQuery($query, $leadType) {
-        $query = $query->leftJoin(LeadType::getTableName(), LeadType::getTableName().'.lead_id',  '=', Lead::getTableName().'.identifier');
-        return $query->whereIn(LeadType::getTableName().'.lead_type', $leadType);
+    /**
+     * @param Builder|Relation $query
+     * @param array $leadType
+     * @return Builder|Relation
+     */
+    private function addLeadTypeToQuery($query, array $leadType)
+    {
+        $leadTypeTableName = LeadType::getTableName();
+
+        return $query->leftJoin(
+            $leadTypeTableName,
+            $leadTypeTableName . '.lead_id',
+            '=',
+            Lead::getTableName() . '.identifier'
+        )
+        ->whereIn($leadTypeTableName . '.lead_type', $leadType);
     }
 
     /**
@@ -711,6 +653,7 @@ class LeadRepository implements LeadRepositoryInterface {
             ->whereNull('website_lead.customer_id')
             ->where('dealer.is_dms_active', '=', 1)
             ->where('website_lead.is_spam', '=', 0)
+            ->where('website_lead.lead_type', '<>', LeadType::TYPE_NONLEAD)
 
             ->where('website_lead.first_name', '<>', '')
             ->whereNotNull('website_lead.first_name')
@@ -724,5 +667,111 @@ class LeadRepository implements LeadRepositoryInterface {
         } else {
             return $query->get();
         }
+    }
+
+    /**
+     * Get Matches for LeadRepository
+     *
+     * @param int $dealerId
+     * @param array $params
+     * @return Collection<Lead>
+     */
+    public function getMatches(int $dealerId, array $params)
+    {
+        $paramsCollect = collect($params['leads'] ?? null);
+
+        if ($paramsCollect) {
+            $query = Lead::query()
+                ->where([
+                    ['identifier', '>', 0],
+                    ['dealer_id', '=', $dealerId],
+                    ['lead_type', '!=', LeadType::TYPE_NONLEAD],
+                    ['is_spam', '=', 0],
+                ])
+                ->where(function ($query) use ($paramsCollect) {
+                    $query->whereIn('email_address', $paramsCollect->where('type', '=', 'email')->unique())
+                        ->orWhereIn('phone_number', $paramsCollect->where('type', '=', 'phone')->unique())
+                        ->orWhereIn('last_name', $paramsCollect->where('type', '=', 'last_name'));
+                });
+
+            return $query->get();
+        }
+    }
+
+    /**
+     * Get Unique Full Names
+     *
+     * @param array $params
+     * @return \Illuminate\Support\Collection|LengthAwarePaginator
+     */
+    public function getUniqueFullNames(array $params)
+    {
+        if (empty($params['dealer_id'])) {
+            throw new RepositoryInvalidArgumentException('Dealer Id is required');
+        }
+
+        $query = DB::table(Lead::getTableName());
+
+        $query = $query->selectRaw('DISTINCT TRIM(first_name) AS first_name, TRIM(last_name) AS last_name');
+
+        $query = $query->where('dealer_id', '=', $params['dealer_id']);
+
+        $query = $query->where(function (\Illuminate\Database\Query\Builder $query) {
+            $query->whereRaw('TRIM(`first_name`) <> \'\'')
+                ->orWhereRaw('TRIM(`last_name`) <> \'\'');
+        });
+
+        $query = $query->where('is_spam', '=', 0);
+
+        if (isset($params['is_archived'])) {
+            $query = $query->where('is_archived', '=', $params['is_archived']);
+        }
+
+        if (!empty($params['search_term'])) {
+            $query->whereRaw('CONCAT(first_name,\' \', last_name) LIKE ?', ['%' . trim($params['search_term']) . '%']);
+        }
+
+        $query = $query->orderByRaw('TRIM(`first_name`), TRIM(`last_name`)');
+
+        if (!empty($params['per_page'])) {
+            return $query->paginate($params['per_page'])->appends($params);
+        }
+
+        return $query->get();
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function createLeadFromCustomer(Customer $customer)
+    {
+        if(!is_null($customer->website_lead_id)) {
+            throw new \Exception("Customer id $customer->id already have a Lead.");
+        }
+
+        $websiteId = data_get($customer, 'dealer.website.id');
+
+        if(is_null($websiteId)) {
+            throw new \Exception("Customer id $customer->id (dealer id $customer->dealer_id) doesn't have a website.");
+        }
+
+        /** @var Lead $lead */
+        $lead = Lead::create([
+            'website_id' => $websiteId,
+            'dealer_id' => $customer->dealer_id,
+            'lead_type' => LeadType::TYPE_NONLEAD,
+            'first_name' => $customer->first_name,
+            'middle_name' => $customer->middle_name,
+            'last_name' => $customer->last_name,
+            'email_address' => $customer->email,
+            'address' => $customer->address,
+            'city' => $customer->city,
+            'zip' => $customer->postal_code,
+            'phone_number' => $customer->cell_phone,
+        ]);
+
+        // Update website_lead_id of this customer
+        $customer->website_lead_id = $lead->identifier;
+        $customer->save();
     }
 }

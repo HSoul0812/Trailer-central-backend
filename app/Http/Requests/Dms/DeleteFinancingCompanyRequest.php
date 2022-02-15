@@ -33,7 +33,7 @@ class DeleteFinancingCompanyRequest extends Request
      * Tells if request should check if object belongs to requesting user
      * Used by Request::validate() `$this->getObject()`
      */
-    protected function validateObjectBelongsToUser()
+    protected function validateObjectBelongsToUser(): bool
     {
         return true;
     }

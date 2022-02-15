@@ -2,6 +2,7 @@
 
 namespace App\Models\Inventory;
 
+use App\Models\Traits\TableAware;
 use App\Traits\Models\CompositePrimaryKeys;
 use Illuminate\Database\Eloquent\Model;
 
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class EntityTypeAttribute extends Model
 {
-    use CompositePrimaryKeys;
+    use CompositePrimaryKeys, TableAware;
 
     /**
      * The table associated with the model.

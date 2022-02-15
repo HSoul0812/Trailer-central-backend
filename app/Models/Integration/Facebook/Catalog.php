@@ -2,10 +2,10 @@
 
 namespace App\Models\Integration\Facebook;
 
-use Illuminate\Database\Eloquent\Model;
 use App\Models\User\User;
 use App\Models\User\DealerLocation;
 use App\Models\Integration\Auth\AccessToken;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class Catalog
@@ -16,10 +16,35 @@ class Catalog extends Model
     // Define Table Name Constant
     const TABLE_NAME = 'fbapp_catalog';
 
+
     /**
-     * Define Catalog URL Prefix
+     * @const array Catalog Types
      */
-    const CATALOG_URL_PREFIX = 'facebook/catalog';
+    const CATALOG_TYPES = [
+        'commerce',
+        'hotels',
+        'flights',
+        'destinations',
+        'home_listings',
+        'vehicles',
+        'vehicle_offers'
+    ];
+
+    /**
+     * @const array Vehicle Type
+     */
+    const VEHICLE_TYPE = 'vehicles';
+
+    /**
+     * @const array Home Type
+     */
+    const HOME_TYPE = 'home_listings';
+
+    /**
+     * @const string Default Catalog Type
+     */
+    const DEFAULT_TYPE = 'vehicles';
+
 
     /**
      * @var string
@@ -42,9 +67,10 @@ class Catalog extends Model
         'fbapp_page_id',
         'business_id',
         'catalog_id',
+        'catalog_name',
+        'catalog_type',
         'account_name',
         'account_id',
-        'feed_id',
         'filters',
         'is_active'
     ];
@@ -80,6 +106,16 @@ class Catalog extends Model
     }
 
     /**
+     * Get Feed
+     * 
+     * @return BelongsTo
+     */
+    public function feed()
+    {
+        return $this->belongsTo(Feed::class, 'catalog_id', 'catalog_id');
+    }
+
+    /**
      * Access Token
      * 
      * @return HasOne
@@ -93,32 +129,18 @@ class Catalog extends Model
 
 
     /**
-     * Get Feed Path
-     * 
-     * @return string of calculated feed path
+     * Get Catalog Name or ID
+     *
+     * @return string
      */
-    public function getFeedPathAttribute()
+    public function getCatalogNameIdAttribute(): string
     {
-        return '/' . self::CATALOG_URL_PREFIX . '/' . $this->account_id . '/' . $this->page->page_id . '.csv';
-    }
+        // Catalog Name Exists?
+        if(!empty($this->catalog_name)) {
+            return $this->catalog_name;
+        }
 
-    /**
-     * Get Feed Url
-     * 
-     * @return string of calculated feed url
-     */
-    public function getFeedUrlAttribute()
-    {
-        return $_ENV['AWS_URL'] . '/' . $_ENV['AWS_BUCKET'] . '/' . self::CATALOG_URL_PREFIX . '/' . $this->account_id . '/' . $this->page->page_id . '.csv';
-    }
-
-    /**
-     * Get Feed Name
-     * 
-     * @return string of calculated feed name
-     */
-    public function getFeedNameAttribute()
-    {
-        return $this->account_name . "'s Feed for " . $this->page_title;
+        // Return Catalog ID
+        return !empty($this->catalog_id) ? '#' . $this->catalog_id : '';
     }
 }

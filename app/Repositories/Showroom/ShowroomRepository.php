@@ -2,7 +2,7 @@
 
 namespace App\Repositories\Showroom;
 
-use App\Repositories\Showroom\ShowroomRepositoryInterface;
+use Illuminate\Database\Eloquent\Builder;
 use App\Exceptions\NotImplementedException;
 use Illuminate\Support\Facades\DB;
 use App\Models\Showroom\Showroom;
@@ -63,28 +63,42 @@ class ShowroomRepository implements ShowroomRepositoryInterface {
         throw new NotImplementedException;
     }
 
-    public function get($params) {
-        throw new NotImplementedException;
+    public function get($params)
+    {
+        return Showroom::findOrFail($params['id']);
     }
 
-    public function getAll($params) {
+    public function getAll($params)
+    {
+        /** @var Builder $query */
         $query = Showroom::where('id', '>', 0);
 
-        if (isset($params['with_category'])) {
-            $query = $query->with('category');
+        if (!empty($params['select']) && is_array($params['select'])) {
+            $query->select($params['select']);
         }
+
+        if (!empty($params['with']) && is_array($params['with'])) {
+            foreach ($params['with'] as $with) {
+                $query = $query->with($with);
+            }
+        }
+
         if (isset($params['search_term'])) {
             $query = $query->where('model', 'LIKE', '%' . $params['search_term'] . '%');
         }
+
         if (isset($params['manufacturer'])) {
             $query = $query->where('manufacturer', '=', $params['manufacturer']);
         }
+
         if (isset($params['model'])) {
             $query = $query->where('model', '=', $params['model']);
         }
+
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
         }
+
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
         }

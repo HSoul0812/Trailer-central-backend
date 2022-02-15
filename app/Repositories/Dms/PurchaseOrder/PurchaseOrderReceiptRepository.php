@@ -2,26 +2,27 @@
 
 namespace App\Repositories\Dms\PurchaseOrder;
 
-use App\Repositories\Dms\PurchaseOrder\PurchaseOrderReceiptRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Dms\PurchaseOrder\PurchaseOrderReceipt;
+use App\Repositories\Dms\PurchaseOrder\PurchaseOrderReceiptRepositoryInterface;
 
 /**
  * @author Marcel
  */
-class PurchaseOrderReceiptRepository implements PurchaseOrderReceiptRepositoryInterface {
+class PurchaseOrderReceiptRepository implements PurchaseOrderReceiptRepositoryInterface
+{
+    protected const DEFAULT_PAGINATE_RECORDS = 15;
 
     private $sortOrders = [
         'created_at' => [
             'field' => 'created_at',
-            'direction' => 'DESC'
+            'direction' => 'DESC',
         ],
         '-created_at' => [
             'field' => 'created_at',
-            'direction' => 'ASC'
+            'direction' => 'ASC',
         ],
     ];
-
 
     public function create($params) {
         throw new NotImplementedException;
@@ -35,33 +36,52 @@ class PurchaseOrderReceiptRepository implements PurchaseOrderReceiptRepositoryIn
         return PurchaseOrderReceipt::findOrFail($params['id']);
     }
 
-    public function getAll($params) {
-        if (isset($params['dealer_id'])) {
-            $query = PurchaseOrderReceipt::whereHas('purchaseOrder', function($query) use($params) {
-                $query->where('dealer_id', '=', $params['dealer_id']);
-            });
+    public function getAll($params)
+    {
+        $query = PurchaseOrderReceipt::query();
+
+        $purchaseOrderCondition = [];
+        $whereOrderCondition = [];
+        if (!empty($params['dealer_id'])) {
+            $purchaseOrderCondition[] = ['dealer_id', '=', $params['dealer_id']];
         } else {
-            $query = PurchaseOrderReceipt::where('id', '>', 0);  
+            $whereOrderCondition[] = ['id', '>', 0];
         }
-        if (isset($params['vendor_id'])) {
-            $query = $query->whereHas('purchaseOrder', function($query) use($params) {
-                $query->where('vendor_id', '=', $params['vendor_id']);
+
+        if (!empty($params['vendor_id'])) {
+            $purchaseOrderCondition[] = ['vendor_id', '=', $params['vendor_id']];
+        }
+
+        if (!empty($purchaseOrderCondition)) {
+            $query = $query->whereHas('purchaseOrder', function ($query) use (
+                $purchaseOrderCondition
+            ) {
+                $query->where($purchaseOrderCondition);
             });
         }
+
         if (isset($params['is_billed'])) {
-            $query = $query->where('is_billed', '=', (int) $params['is_billed']);
+            $whereOrderCondition[] = ['is_billed', '=', (int) $params['is_billed']];
         }
-        if (isset($params['search_term'])) {
-            $query = $query->where('ref_num', 'LIKE', '%' . $params['search_term'] . '%');
+
+        if (!empty($params['search_term'])) {
+            $whereOrderCondition[] = ['ref_num', 'LIKE', '%' . $params['search_term'] . '%'];
         }
-        if (!isset($params['per_page'])) {
-            $params['per_page'] = 15;
+
+        if (!empty($whereOrderCondition)) {
+            $query = $query->where($whereOrderCondition);
         }
+
+        if (!empty($params['ids'])) {
+            $query = $query->whereIn('id', $params['ids']);
+        }
+
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
         }
-        
-        return $query->paginate($params['per_page'])->appends($params);
+
+        return $query->paginate($params['per_page'] ?? self::DEFAULT_PAGINATE_RECORDS)
+            ->appends($params);
     }
 
     public function update($params) {
@@ -72,7 +92,7 @@ class PurchaseOrderReceiptRepository implements PurchaseOrderReceiptRepositoryIn
         if (!isset($this->sortOrders[$sort])) {
             return;
         }
+
         return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
     }
-
 }

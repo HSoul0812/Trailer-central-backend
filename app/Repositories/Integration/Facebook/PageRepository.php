@@ -62,7 +62,7 @@ class PageRepository implements PageRepositoryInterface {
 
         // Does User ID Already Exist?
         if(isset($params['page_id'])) {
-            $page = $this->getByPageId($params);
+            $page = $this->getByPageId($params['page_id']);
 
             // Exists?
             if(!empty($page->id)) {
@@ -105,19 +105,19 @@ class PageRepository implements PageRepositoryInterface {
     /**
      * Get By Facebook Page ID
      * 
-     * @param array $params
-     * @return AccessToken
+     * @param int $pageId
+     * @return null|Page
      */
-    public function getByPageId($params) {
+    public function getByPageId(int $pageId): ?Page {
         // Find Token By ID
-        return Page::where('page_id', $params['page_id'])->first();
+        return Page::where('page_id', $pageId)->first();
     }
 
     /**
      * Get All Pages That Match Params
      * 
      * @param array $params
-     * @return Collection of Pages
+     * @return Collection<Page>
      */
     public function getAll($params) {
         $query = Page::where('dealer_id', '=', $params['dealer_id']);
@@ -132,10 +132,6 @@ class PageRepository implements PageRepositoryInterface {
 
         if (isset($params['user_id'])) {
             $query = $query->where('user_id', $params['user_id']);
-        }
-
-        if (isset($params['page_id'])) {
-            $query = $query->where('page_id', $params['page_id']);
         }
 
         if (isset($params['id'])) {
@@ -156,7 +152,11 @@ class PageRepository implements PageRepositoryInterface {
      * @return Page
      */
     public function update($params) {
-        $page = Page::findOrFail($params['id']);
+        if(!empty($params['id'])) {
+            $page = Page::findOrFail($params['id']);
+        } else {
+            $page = Page::where('page_id', $params['page_id'])->firstOrFail();
+        }
 
         DB::transaction(function() use (&$page, $params) {
             // Page Title Exists?

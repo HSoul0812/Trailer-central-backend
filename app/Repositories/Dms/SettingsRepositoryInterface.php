@@ -9,6 +9,19 @@ use App\Repositories\Repository;
 
 interface SettingsRepositoryInterface extends Repository
 {
-    /** @return Settings */
-    public function getByDealerId($dealerId);
+    /**
+     * Create or Update DMS Settings
+     * 
+     * @param array $params
+     * @return Settings
+     */
+    public function createOrUpdate(array $params): Settings;
+
+    /**
+     * Get DMS Settings By Dealer ID
+     * 
+     * @param int $dealerId
+     * @return null|Settings
+     */
+    public function getByDealerId(int $dealerId): ?Settings;
 }

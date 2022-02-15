@@ -20,6 +20,7 @@ use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping as FeedDealerIncoming
 use App\Nova\Resource;
 use App\Nova\Filters\DealerIDMapping;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Laravel\Nova\Http\Requests\ResourceIndexRequest;
 
 class DealerIncomingMapping extends Resource
 {
@@ -86,7 +87,7 @@ class DealerIncomingMapping extends Resource
                 ->rules('required')
                 ->displayUsingLabels(),
 
-            BelongsTo::make('Dealer', 'dealers', Dealer::class)->sortable()->rules('required'),
+            Text::make('Dealer', 'dealer_id'),
 
             Text::make('Map From', 'map_from')->sortable()->rules('required'),
 
@@ -99,9 +100,7 @@ class DealerIncomingMapping extends Resource
             ])->dependsOn('type', FeedDealerIncomingMapping::STATUS)->onlyOnForms(),
 
             NovaDependencyContainer::make([
-                Select::make('Map To', 'map_to')
-                    ->options(DealerLocation::select('dealer_location_id', 'name')->orderBy('name')->get()->pluck('name', 'dealer_location_id'))
-                    ->rules('required')
+                Text::make('Map To', 'map_to')
             ])->dependsOn('type', FeedDealerIncomingMapping::LOCATION)->onlyOnForms(),
 
             NovaDependencyContainer::make([Text::make('Map To', 'map_to')->sortable()->rules('required')])
@@ -150,6 +149,20 @@ class DealerIncomingMapping extends Resource
         }
 
         return $fields;
+    }
+
+
+    /**
+     * @param Request $request
+     * @return string
+     */
+    public function fieldsMethod(Request $request): string
+    {
+        if ($this->isResourceIndexRequest() && method_exists($this, 'fieldsForIndex')) {
+            return 'fieldsForIndex';
+        }
+
+        return 'fields';
     }
 
     /**
@@ -209,5 +222,15 @@ class DealerIncomingMapping extends Resource
     public function actions(Request $request)
     {
         return [];
+    }
+
+    /**
+     * Determine if this request is a resource index request.
+     *
+     * @return bool
+     */
+    public function isResourceIndexRequest(): bool
+    {
+        return $this instanceof ResourceIndexRequest;
     }
 }

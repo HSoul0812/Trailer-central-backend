@@ -1,8 +1,6 @@
 <?php
 
-
 namespace App\Models\CRM\Account;
-
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Dms\Refund;
@@ -29,6 +27,10 @@ class Payment extends Model
         'related_payment_intent'
     ];
 
+    protected $casts = [
+        'amount' => 'float'
+    ];
+
     public $timestamps = false;
 
     // qb_payment has qb_payment.invoice_id but qb_invoices does not have qb_invoices.payment_id so i'm not sure if this is correct
@@ -51,7 +53,16 @@ class Payment extends Model
     {
         return $this->hasMany(Refund::class, 'tb_primary_id');
     }
-    
+
+    public function getCalculatedAmountAttribute()
+    {
+        $refundedAmount = Refund::where('tb_name', 'qb_payment')
+            ->where('tb_primary_id', $this->id)
+            ->sum('amount');
+
+        return $this->amount - $refundedAmount;
+    }
+
     public function getReceiptsAttribute()
     {
         return DealerSalesReceipt::where('tb_name', 'qb_payment')->where('tb_primary_id', $this->id)->get();

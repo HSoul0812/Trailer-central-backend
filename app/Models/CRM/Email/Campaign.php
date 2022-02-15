@@ -5,6 +5,7 @@ namespace App\Models\CRM\Email;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Class Email Campaign
@@ -13,12 +14,13 @@ use App\Models\User\NewDealerUser;
  */
 class Campaign extends Model
 {
-    protected $table = 'crm_drip_campaigns';
 
     // Define Constants to Make it Easier to Autocomplete
     const STATUS_ACTIONS = [
         'inquired',
-        'purchased'
+        'purchased',
+        'uncontacted',
+        'contacted'
     ];
 
     const STATUS_ARCHIVED = [
@@ -28,55 +30,43 @@ class Campaign extends Model
     ];
 
     /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'crm_drip_campaigns';
+
+    /**
+     * The primary key associated with the table.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'drip_campaigns_id';
+
+    /**
+     * Enable Timestamps
+     *
+     * @var bool
+     */
+    public $timestamps = false;
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
         'user_id',
-        'template_id',
+        'email_template_id',
         'campaign_name',
         'campaign_subject',
-        'from_sms_number',
+        'from_email_address',
         'action',
         'location_id',
         'send_after_days',
         'include_archived',
-        'is_enabled',
-        'deleted',
+        'is_enabled'
     ];
-
-    /**
-     * @return type
-     */
-    public function template()
-    {
-        return $this->belongsTo(Template::class);
-    }
-
-    /**
-     * @return type
-     */
-    public function brands()
-    {
-        return $this->hasMany(CampaignBrand::class, 'text_campaign_id');
-    }
-
-    /**
-     * @return type
-     */
-    public function categories()
-    {
-        return $this->hasMany(CampaignCategory::class, 'text_campaign_id');
-    }
-
-    /**
-     * @return type
-     */
-    public function sent()
-    {
-        return $this->hasOne(CampaignSent::class, 'text_campaign_id');
-    }
 
     /**
      * Get CRM User
@@ -92,5 +82,15 @@ class Campaign extends Model
     public function newDealerUser()
     {
         return $this->belongsTo(NewDealerUser::class, 'user_id', 'user_id');
+    }
+
+    /**
+     * Get Template
+     * 
+     * @return BelongsTo
+     */
+    public function template(): BelongsTo
+    {
+        return $this->belongsTo(Template::class, 'email_template_id', 'id');
     }
 }

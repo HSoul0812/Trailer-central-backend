@@ -5,9 +5,12 @@ namespace App\Models\User;
 use App\Models\User\DealerLocation;
 use App\Models\Upload\Upload;
 use App\Models\CRM\Leads\Lead;
-use App\Models\CRM\Leads\LeadStatus;
+use App\Models\CRM\Leads\LeadType;
 use App\Models\CRM\User\SalesPerson;
+use App\Models\Website\Website;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User\NewUser;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class NewDealerUser extends Model
 {
@@ -67,6 +70,14 @@ class NewDealerUser extends Model
     }
 
     /**
+     * @return Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function website()
+    {
+        return $this->hasOne(Website::class, 'dealer_id', 'id');
+    }
+
+    /**
      * Get the crm user
      */
     public function crmUser()
@@ -88,6 +99,11 @@ class NewDealerUser extends Model
     public function location()
     {
         return $this->hasMany(DealerLocation::class, 'dealer_id', 'id');
+    }
+    
+    public function newUser() : HasOne 
+    {
+        return $this->hasOne(NewUser::class, 'user_id', 'user_id');
     }
 
     /**
@@ -114,6 +130,17 @@ class NewDealerUser extends Model
      */
     public function salespeopleEmails() {
         return $this->salespeople()->whereNotNull('email')->where('email', '<>', '')->orderBy('id', 'asc');
+    }
+
+    /**
+     * Get leads
+     * 
+     * @return HasMany
+     */
+    public function leads()
+    {
+        return $this->hasMany(Lead::class, 'dealer_id', 'id')->where('is_spam', 0)
+                    ->where('lead_type', '<>', LeadType::TYPE_NONLEAD);
     }
     
     public static function getTableName() {

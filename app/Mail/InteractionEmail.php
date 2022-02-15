@@ -2,13 +2,14 @@
 
 namespace App\Mail;
 
+use App\Repositories\Traits\MailableAttachmentTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
 class InteractionEmail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, SerializesModels, MailableAttachmentTrait;
 
     /**
      * @var array
@@ -38,25 +39,14 @@ class InteractionEmail extends Mailable
      */
     public function build()
     {
-        $from = config('mail.from.address', 'noreply@trailercentral.com');
-        $name = config('mail.from.name', 'Trailer Central');
-
-        $build = $this->from($from, $name);
-
-        if (! empty($this->data['replyToEmail'])) {
-            $build->replyTo($this->data['replyToEmail'], $this->data['replyToName']);
-        }
+        $build = $this;
 
         $build->view('emails.interactions.interaction-email')
-            ->text('emails.interactions.interaction-email-plain');
+              ->text('emails.interactions.interaction-email-plain');
 
-        if (! empty($this->data['attach']) && is_array($this->data['attach'])) {
-            foreach ($this->data['attach'] as $attach) {
-                $build->attach($attach['path'], [
-                    'as'    => $attach['as'],
-                    'mime'  => $attach['mime']
-                ]);
-            }
+        // Add Attachments
+        if(!empty($this->data['attach'])) {
+            $this->applyAttachments($build, $this->data['attach']);
         }
 
         $build->with($this->data);

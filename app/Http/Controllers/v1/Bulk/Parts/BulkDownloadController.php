@@ -2,197 +2,160 @@
 
 namespace App\Http\Controllers\v1\Bulk\Parts;
 
-use App\Http\Controllers\Controller;
+use App\Exceptions\Common\BusyJobException;
+use App\Http\Controllers\v1\Jobs\MonitoredJobsController;
+use App\Http\Requests\Bulk\Parts\CreateBulkDownloadRequest;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Jobs\Bulk\Parts\CsvExportJob;
 use App\Models\Bulk\Parts\BulkDownload;
-use App\Repositories\Bulk\BulkDownloadRepositoryInterface as BulkDownloadRepository;
-use App\Services\Export\Parts\CsvExportService;
-use App\Services\Export\FilesystemCsvExporter;
+use App\Models\Bulk\Parts\BulkDownloadPayload;
+use App\Models\Common\MonitoredJob;
+use App\Repositories\Common\MonitoredJobRepositoryInterface;
+use App\Services\Export\Parts\BulkDownloadMonitoredJobServiceInterface;
 use Dingo\Api\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
 
-class BulkDownloadController extends Controller
+class BulkDownloadController extends MonitoredJobsController
 {
+    protected $failedMessage = 'This file could not be completed. Please request a new file.';
 
-    public function __construct()
+    /**
+     * @var BulkDownloadMonitoredJobServiceInterface
+     */
+    private $service;
+
+    public function __construct(
+        MonitoredJobRepositoryInterface $jobsRepository,
+        BulkDownloadMonitoredJobServiceInterface $service
+    )
     {
-        $this->middleware('setDealerIdOnRequest')->only(['create']);
+        parent::__construct($jobsRepository);
+
+        $this->middleware('setDealerIdOnRequest')->only(['index', 'status', 'create']);
+
+        $this->service = $service;
     }
 
     /**
      * Create a bulk csv file download request
      *
      * @param Request $request
-     * @param BulkDownloadRepository $repository
-     * @return \Illuminate\Http\JsonResponse
-     * @throws \League\Csv\Exception
+     * @return JsonResponse|StreamedResponse|void
+     * @throws BusyJobException when there is currently other job working
      *
      * @OA\Post(
      *     path="/api/parts/bulk/download",
+     *     description="Create a bulk csv file download request",
+     *     tags={"BulkDownloadParts"},
+     *     @OA\Parameter(
+     *         name="dealer_id",
+     *         in="path",
+     *         description="The dealer ID.",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="token",
+     *         in="path",
+     *         description="The token for the job.",
+     *         required=false,
+     *         @OA\Schema(type="string"),
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request."
+     *     )
      * )
      */
-    public function create(Request $request, BulkDownloadRepository $repository)
+    public function create(Request $request)
     {
-        $dealerId = $request->input('dealer_id');
+        $request = new CreateBulkDownloadRequest($request->all());
 
-        // create a new download token (can be anything)
-        $token = uniqid();
+        if ($request->validate()) {
+            $token = $request->input('token');
 
-        // create a download job
-        $download = $repository->create([
-            'dealer_id' => $dealerId,
-            'token' => $token,
-            'export_file' => 'parts-'. date('Ymd') . '-' . $token. '.csv'] // parts-20200305-$token.csv
-        );
-        $download->save();
+            $payload = BulkDownloadPayload::from([
+                'export_file' => str_replace('.', '-', uniqid('parts-' . date('Ymd'), true)) . '.csv']
+            );
+            $model = $this->service
+                ->setup($request->input('dealer_id'), $payload, $token)
+                ->withQueueableJob(static function (BulkDownload $job): CsvExportJob {
+                    return new CsvExportJob($job);
+                });
 
-        // create a queueable job
-        $job = new CsvExportJob(
-            app(CsvExportService::class),
-            $download,
-            new FilesystemCsvExporter(
-                Storage::disk('partsCsvExports'),
-                $download->export_file
-            )
-        );
+            // if requested, wait for file assembly then download it now. no need for separate api call
+            if ($request->input('wait')) {
+                $this->service->dispatchNow($model);
 
-        // dispatch job to queue
-        $this->dispatch($job->onQueue('parts-export-new'));
+                return $this->readStream($model);
+            }
 
-        // if requested, wait for file assembly then download it now. no need for separate api call
-        if ($request->input('wait')) {
-            return $this->waitForFile($download->token, $repository);
+            $this->service->dispatch($model);
+
+            return response()->json(['token' => $model->token], 202);
         }
 
-        return response()->json([
-            'token' => $download->token
-        ], 202);
+        $this->response->errorBadRequest();
     }
 
     /**
-     * Download the completed CSV file created from the request
-     *
-     * @param string $token The token returned by the create service
-     * @param Request $request
-     * @param BulkDownloadRepository $repository
-     * @return \Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\StreamedResponse
-     *
-     * @OA\Get(
+     * @param MonitoredJob|BulkDownload $job
+     * @return StreamedResponse
+     */
+    protected function readStream($job): StreamedResponse
+    {
+        $payload = BulkDownloadPayload::from($job instanceof BulkDownload ? $job->payload->asArray() : $job->payload);
+
+        return response()->streamDownload(static function () use ($payload) {
+            fpassthru(Storage::disk('partsCsvExports')->readStream($payload->export_file));
+        }, $payload->export_file);
+    }
+
+    /**
+     *  @OA\Get(
      *     path="/api/parts/bulk/file/{token}",
+     *     description="Download the completed CSV file created from the request",
+     *     tags={"BulkDownloadParts"},
      *     @OA\Parameter(
      *         name="token",
      *         in="path",
      *         required=true
-     *     )
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
+     *     ),
      * )
-     */
-    public function read($token, BulkDownloadRepository $repository)
-    {
-        $download = $repository->findByToken($token);
-
-        if ($download->status === BulkDownload::STATUS_NEW ||
-            $download->status === BulkDownload::STATUS_PROCESSING
-        ) {
-            return response()->json([
-                'message' => 'Still processing',
-                'progress' => $download->progress,
-            ], 202);
-        }
-
-        if ($download->status === BulkDownload::STATUS_ERROR) {
-            return response()->json([
-                'message' => 'This file could not be completed. Please request a new file.',
-            ], 500);
-        }
-
-        if ($download->status === BulkDownload::STATUS_COMPLETED) {
-            return response()->streamDownload(function() use ($download) {
-                fpassthru(Storage::disk('partsCsvExports')->readStream($download->export_file));
-            }, $download->export_file);
-        }
-
-        return response()->json([
-            'message' => 'Error: unknown status',
-        ], 500);
-    }
-
-    /**
-     * Check status of CSV file building
-     *
-     * @param string $token The token returned by the create service
-     * @param Request $request
-     * @param BulkDownloadRepository $repository
-     * @return \Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\StreamedResponse
      *
      * @OA\Get(
      *     path="/api/parts/bulk/status/{token}",
+     *     description="Check status of the process",
+     *     tags={"BulkDownloadParts"},
      *     @OA\Parameter(
      *         name="token",
      *         in="path",
      *         required=true
-     *     )
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
+     *     ),
      * )
      */
-    public function status($token, BulkDownloadRepository $repository)
-    {
-        $download = $repository->findByToken($token);
-
-        if ($download->status === BulkDownload::STATUS_NEW ||
-            $download->status === BulkDownload::STATUS_PROCESSING
-        ) {
-            return response()->json([
-                'message' => 'Still processing',
-                'progress' => $download->progress,
-            ], 200);
-        }
-
-        if ($download->status === BulkDownload::STATUS_COMPLETED
-        ) {
-            return response()->json([
-                'message' => 'Completed',
-                'progress' => $download->progress,
-            ], 200);
-        }
-
-        if ($download->status === BulkDownload::STATUS_ERROR) {
-            return response()->json([
-                'message' => 'This file could not be completed. Please request a new file.',
-            ], 500);
-        }
-
-        return response()->json([
-            'message' => 'Error: unknown status',
-        ], 500);
-    }
-
-    /**
-     * Wait for file assembly then return the file
-     * @param $token
-     * @param BulkDownloadRepository $repository
-     * @return \Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\StreamedResponse
-     */
-    private function waitForFile($token, BulkDownloadRepository $repository)
-    {
-        $timeStart = time();
-
-        while (true) {
-            $result = $this->read($token, $repository);
-
-            if (time() - $timeStart > 180) { // 3 minutes
-                break;
-            }
-
-            if ($result->getStatusCode() == 202) {
-                sleep(10);
-                continue;
-            }
-
-            return $result;
-        }
-
-        return response()->json([
-            'message' => 'Error: unknown status',
-        ], 500);
-    }
-
 }

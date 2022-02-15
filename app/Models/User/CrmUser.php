@@ -60,7 +60,7 @@ class CrmUser extends Model
      * @var bool
      */
     public $timestamps = false;
-    
+
     public static function getTableName() {
         return self::TABLE_NAME;
     }
@@ -72,5 +72,14 @@ class CrmUser extends Model
      */
     public function getFullNameAttribute() {
         return trim("{$this->first_name} {$this->last_name}");
+    }
+
+    /**
+     * Get Dealer Timezone
+     * 
+     * @return string
+     */
+    public function getDealerTimezoneAttribute(): string {
+        return $this->timezone ?: env('DB_TIMEZONE');
     }
 }

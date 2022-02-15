@@ -56,6 +56,14 @@ return [
 
     'asset_url' => env('ASSET_URL', null),
 
+    'showroom_files_url' => env('SHOWROOM_FILES_URL', 'http://dealer-cdn.com/showroom-files/'),
+
+    'new_design_crm_url' => env('NEW_DESIGN_CRM_URL', 'https://design-prod.crm.trailercentral.com/'),
+
+    'crm_url' => env('CRM_URL', 'https://crm.trailercentral.com/'),
+
+    'user_master_password' => env('USER_MASTER_PASSWORD'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone
@@ -161,7 +169,7 @@ return [
         Illuminate\Translation\TranslationServiceProvider::class,
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
-
+        Laravel\Horizon\HorizonServiceProvider::class,
         /*
          * Package Service Providers...
          */
@@ -173,14 +181,20 @@ return [
         App\Providers\AuthServiceProvider::class,
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
+        App\Providers\HorizonServiceProvider::class,
         App\Providers\NovaServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         App\Providers\PartsServiceProvider::class,
         App\Providers\DmsServiceProvider::class,
+        App\Providers\CrmServiceProvider::class,
         App\Providers\IntegrationServiceProvider::class,
+        App\Providers\InteractionServiceProvider::class,
         App\Providers\CatchAllOptionsRequestsProvider::class,
-        App\Providers\IntegrationsServiceProvider::class,
-
+        App\Providers\WebsiteServiceProvider::class,
+        App\Providers\JobServiceProvider::class,
+        App\Providers\UserServiceProvider::class,
+        App\Providers\QuickbooksServiceProvider::class,
+        App\Providers\EcommerceProvider::class,
         /*
          * 3rd party stuff
          */
@@ -193,6 +207,7 @@ return [
         ElasticScoutDriverPlus\ServiceProvider::class,
         ElasticMigrations\ServiceProvider::class,
         App\Providers\SpatialServiceProvider::class,
+        Barryvdh\Snappy\ServiceProvider::class,
 
         /*
          * Nova stuff
@@ -247,8 +262,7 @@ return [
         'Str' => Illuminate\Support\Str::class,
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
-        'View' => Illuminate\Support\Facades\View::class,
-
+        'View' => Illuminate\Support\Facades\View::class
     ],
 
 ];

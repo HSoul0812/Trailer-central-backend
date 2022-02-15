@@ -1,0 +1,57 @@
+<?php
+
+namespace App\Services\Inventory;
+
+use App\Models\Inventory\Inventory;
+
+/**
+ * Interface InventoryServiceInterface
+ * @package App\Services\Inventory
+ */
+interface InventoryServiceInterface
+{
+    /**
+     * @param array $params
+     * @return Inventory
+     */
+    public function create(array $params): Inventory;
+
+    /**
+     * @param array $params
+     * @return Inventory
+     */
+    public function update(array $params): Inventory;
+
+    /**
+     * @param int $inventoryId
+     * @return bool
+     */
+    public function delete(int $inventoryId): bool;
+
+    /**
+     * @param int $dealerId
+     * @return array
+     */
+    public function deleteDuplicates(int $dealerId): array;
+
+    /**
+     * @return array
+     */
+    public function archiveSoldItems(): array;
+
+    /**
+     * @param int $inventoryId
+     * @param string $toZip
+     * @return float
+     */
+    public function deliveryPrice(int $inventoryId, string $toZip): float;
+
+    /**
+     * Deletes the inventory images from the DB and the filesystem
+     *
+     * @param int $inventoryId
+     * @param int[] $imageIds
+     * @return bool
+     */
+    public function imageBulkDelete(int $inventoryId, array $imageIds): bool;
+}

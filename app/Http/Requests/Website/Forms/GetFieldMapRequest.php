@@ -11,11 +11,12 @@ use App\Http\Requests\Request;
  */
 class GetFieldMapRequest extends Request {
     
-    protected $rules = [];
+    protected $rules = [
+        'type' => 'valid_form_map_type'
+    ];
     
     public function all($keys = null) {
         // Return Result
-        $all = parent::all($keys);
-        return $all;
+        return parent::all($keys);
     }
 }

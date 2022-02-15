@@ -22,10 +22,11 @@ class BlastController extends RestfulControllerV2
      *
      * @param Repository $blasts
      */
-    public function __construct(BlastRepositoryInterface $blasts)
+    public function __construct(BlastRepositoryInterface $blasts, BlastTransformer $transformer)
     {
         $this->middleware('setUserIdOnRequest')->only(['index', 'create', 'update']);
         $this->blasts = $blasts;
+        $this->transformer = $transformer;
     }
 
 
@@ -47,7 +48,7 @@ class BlastController extends RestfulControllerV2
      *         description="Sort order can be: price,-price,relevance,title,-title,length,-length",
      *         required=false,
      *         @OA\Schema(type="integer")
-     *     )
+     *     ),
      *     @OA\Response(
      *         response="200",
      *         description="Returns a list of texts",
@@ -63,7 +64,7 @@ class BlastController extends RestfulControllerV2
         $request = new GetBlastsRequest($request->all());
         
         if ($request->validate()) {
-            return $this->response->paginator($this->blasts->getAll($request->all()), new BlastTransformer());
+            return $this->response->paginator($this->blasts->getAll($request->all()), $this->transformer);
         }
         
         return $this->response->errorBadRequest();
@@ -111,7 +112,7 @@ class BlastController extends RestfulControllerV2
         $request = new CreateBlastRequest($request->all());
         if ( $request->validate() ) {
             // Create Text
-            return $this->response->item($this->blasts->create($request->all()), new BlastTransformer());
+            return $this->response->item($this->blasts->create($request->all()), $this->transformer);
         }  
         
         return $this->response->errorBadRequest();
@@ -145,14 +146,14 @@ class BlastController extends RestfulControllerV2
         $request = new ShowBlastRequest(['id' => $id]);
         
         if ( $request->validate() ) {
-            return $this->response->item($this->blasts->get(['id' => $id]), new BlastTransformer());
+            return $this->response->item($this->blasts->get(['id' => $id]), $this->transformer);
         }
         
         return $this->response->errorBadRequest();
     }
     
     /**
-     * @OA\Text(
+     * @OA\Put(
      *     path="/api/crm/{userId}/texts/blast/{id}",
      *     description="Update a blast",
      * 
@@ -195,7 +196,7 @@ class BlastController extends RestfulControllerV2
         $request = new UpdateBlastRequest($requestData);
         
         if ( $request->validate() ) {
-            return $this->response->item($this->blasts->update($request->all()), new BlastTransformer());
+            return $this->response->item($this->blasts->update($request->all()), $this->transformer);
         }
         
         return $this->response->errorBadRequest();
@@ -229,16 +230,16 @@ class BlastController extends RestfulControllerV2
         
         if ( $request->validate()) {
             // Create Text
-            return $this->response->item($this->blasts->delete(['id' => $id]), new BlastTransformer());
+            return $this->response->item($this->blasts->delete(['id' => $id]), $this->transformer);
         }
         
         return $this->response->errorBadRequest();
     }
 
     /**
-     * @OA\Sent(
+     * @OA\Post(
      *     path="/api/crm/{userId}/texts/blast/{id}/sent",
-     *     description="Mark blast and sent to lead",
+     *     description="Mark blast and send to lead",
      *     tags={"Text"},
      *     @OA\Parameter(
      *         name="id",
@@ -263,7 +264,7 @@ class BlastController extends RestfulControllerV2
         
         if ( $request->validate()) {
             // Create Text
-            return $this->response->item($this->blasts->sent(['id' => $id]), new BlastTransformer());
+            return $this->response->item($this->blasts->sent(['id' => $id]), $this->transformer);
         }
         
         return $this->response->errorBadRequest();
