@@ -149,8 +149,11 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         // Get Inquiry Name/Email
         $details = $this->getInquiryDetails($params);
 
+        // Get Overrides
+        $overrides = $this->getInquiryOverrides($details);
+
         // Get Data By Inquiry Type
-        $vars = $this->getInquiryTypeVars($details);
+        $vars = $this->getInquiryTypeVars($overrides);
 
         // Create Inquiry Lead
         return new InquiryLead($vars);
@@ -227,6 +230,32 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         $dealer = $this->user->get(['dealer_id' => $params['dealer_id']]);
         $params['inquiry_name'] = $dealer->name;
         $params['inquiry_email'] = $dealer->email;
+        return $params;
+    }
+
+    /**
+     * Get Inquiry Overrides
+     * 
+     * @param array $params
+     * @return array
+     */
+    private function getInquiryOverrides(array $params) {
+        // Get Lead Type
+        $leadType = reset($params['lead_types']);
+
+        // Get Inquiry From Details For Website
+        $toEmails = $this->websiteConfig->getValueOfConfig($params['website_id'], 'contact/email/' . $leadType);
+        if(empty($toEmails->value)) {
+            $toEmails = $this->websiteConfig->getValueOfConfig($params['website_id'], 'contact/email');
+        }
+
+        // Return Original, No Updates
+        if(empty($toEmails->value)) {
+            return $params;
+        }
+
+        // Return Inquiry Email Override
+        $params['inquiry_email'] = explode(";", $toEmails->value);
         return $params;
     }
 

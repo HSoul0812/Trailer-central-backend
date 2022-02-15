@@ -397,7 +397,16 @@ class InquiryLead
         }
         // Normal, Return Proper Inquiry
         else {
-            return [['name' => $this->inquiryName, 'email' => $this->inquiryEmail]];
+            // Get To Emails
+            $to = [];
+            if(is_array($this->inquiryEmail)) {
+                foreach($this->inquiryEmail as $toEmail) {
+                    $to[] = ['name' => $this->inquiryName, 'email' => $toEmail];
+                }
+            } else {
+                $to[] = ['name' => $this->inquiryName, 'email' => $this->inquiryEmail];   
+            }
+            return $to;
         }
 
         // Return With Merged CC To
