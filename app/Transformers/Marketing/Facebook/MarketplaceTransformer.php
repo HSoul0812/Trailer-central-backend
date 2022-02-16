@@ -44,7 +44,7 @@ class MarketplaceTransformer extends TransformerAbstract
         return [
             'id' => $marketplace->id,
             'dealer' => $this->userTransformer->transform($marketplace->user),
-            'dealer_location' => $this->dealerLocationTransformer->transform($marketplace->dealerLocation),
+            'dealer_location' => !empty($marketplace->dealerLocation) ? $this->dealerLocationTransformer->transform($marketplace->dealerLocation) : null,
             'page_url' => $marketplace->page_url,
             'fb_username' => $marketplace->fb_username,
             'fb_password' => $marketplace->fb_password,
