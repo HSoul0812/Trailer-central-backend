@@ -14,9 +14,14 @@ use App\Traits\WithGetter;
  * @property-read string $sku
  * @property-read float $amount
  * @property-read int $qty
+ * @property-read string $status
  */
 class RefundedPart implements DTO
 {
+    const FULLY_REFUND = 'refunded';
+    CONST PARTY_REFUND = 'partially_refunded';
+    CONST NON_REFUND = 'non-refunded';
+
     use WithFactory;
     use WithGetter;
 
@@ -35,6 +40,9 @@ class RefundedPart implements DTO
     /** @var int */
     private $qty;
 
+    /** @var string */
+    private $status;
+
     public function asArray(): array
     {
         return [
@@ -42,7 +50,8 @@ class RefundedPart implements DTO
             'sku' => $this->sku,
             'title' => $this->title,
             'amount' => $this->amount,
-            'qty' => $this->qty
+            'qty' => $this->qty,
+            'status' => $this->status,
         ];
     }
 }

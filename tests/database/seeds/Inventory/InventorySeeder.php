@@ -13,10 +13,12 @@ use App\Models\User\DealerUser;
 use App\Models\User\DealerUserPermission;
 use App\Models\User\User;
 use App\Traits\WithGetter;
+use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Tests\database\seeds\Seeder;
 
 /**
  * Class InventoryCreateSeeder
+ *
  * @package Tests\database\seeds\Inventory
  *
  * @property-read User $dealer
@@ -114,7 +116,7 @@ class InventorySeeder extends Seeder
         $this->dealerLocation = factory(DealerLocation::class)->create([
             'latitude' => 11,
             'longitude' => 11,
-            'dealer_id' => $this->dealer->dealer_id
+            'dealer_id' => $this->dealer->dealer_id,
         ]);
 
         if ($this->userType === AuthToken::USER_TYPE_DEALER) {
@@ -124,7 +126,7 @@ class InventorySeeder extends Seeder
             ]);
         } else {
             $this->dealerUser = factory(DealerUser::class)->create([
-                'dealer_id' => $this->dealer->dealer_id
+                'dealer_id' => $this->dealer->dealer_id,
             ]);
 
             $this->authToken = factory(AuthToken::class)->create([
@@ -146,7 +148,7 @@ class InventorySeeder extends Seeder
         $this->category = factory(Category::class)->create();
         $this->dealerLocationMileageFee = factory(DealerLocationMileageFee::class)->create([
             'dealer_location_id' => $this->dealerLocation->getKey(),
-            'inventory_category_id' => $this->category->getKey()
+            'inventory_category_id' => $this->category->getKey(),
         ]);
 
         if ($this->withInventory) {
@@ -159,6 +161,7 @@ class InventorySeeder extends Seeder
                 'category' => $this->category->legacy_category,
                 'latitude' => 10,
                 'longitude' => 10,
+                'geolocation' => new Point(0, 0),
             ];
             $this->inventory = factory(Inventory::class)->create($inventoryParams);
         }
@@ -181,5 +184,4 @@ class InventorySeeder extends Seeder
 
         User::destroy($this->dealer->dealer_id);
     }
-
 }

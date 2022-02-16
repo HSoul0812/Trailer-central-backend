@@ -7,6 +7,7 @@ use App\Transformers\TransformerInterface;
 
 /**
  * Class CreateInventoryRequest
+ *
  * @package App\Http\Requests\Inventory
  */
 class SaveInventoryRequest extends Request
@@ -154,7 +155,8 @@ class SaveInventoryRequest extends Request
         'craigslist.default_image.url' => 'string|nullable',
 
         'attributes' => 'array|nullable',
-        'attributes.*.attribute_id' => 'int|exists:App\Models\Inventory\Attribute,attribute_id',
+        'attributes.*' => 'array',
+        'attributes.*.attribute_id' => 'required|int|exists:App\Models\Inventory\Attribute,attribute_id',
         'attribute.*.value' => 'string|nullable',
 
         'features' => 'array|nullable',
