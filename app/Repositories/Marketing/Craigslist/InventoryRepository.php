@@ -209,7 +209,27 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         if ($withDefault) {
-            $query->where('status', '<>', Inventory::STATUS_QUOTE);
+            $query = $query->where('status', '<>', Inventory::STATUS_QUOTE);
+        }
+
+        // Get Status Overrides
+        $statusAll = config('marketing.cl.overrides.statusAll', '');
+        if(in_array($params['dealer_id'], explode(",", $statusAll))) {
+            $query = $query->where(function($query) {
+                $query = $query->where('inventory.status', 1);
+
+                // Get Status On Order Overrides
+                $statusOnOrder = config('marketing.cl.overrides.statusAll', '');
+                if(in_array($params['dealer_id'], explode(",", $statusOnOrder))) {
+                    $query = $query->orWhere('inventory.status', 3);
+                }
+            });
+        }
+
+        // Get Show on Website Overrides
+        $showOnWebsite = config('marketing.cl.overrides.showOnWebsite', '');
+        if(in_array($params['dealer_id'], explode(",", $showOnWebsite))) {
+            $query = $query->where('inventory.show_on_website', 1);
         }
 
         if (isset($params['condition'])) {

@@ -23,12 +23,12 @@ class InventoryController extends RestfulControllerV2
     /**
      * Create a new controller instance.
      *
-     * @param ActivePostRepositoryInterface $repo
-     * @param ActivePostTransformer $transformer
+     * @param InventoryRepositoryInterface $repo
+     * @param InventoryTransformer $transformer
      */
     public function __construct(
-        ActivePostRepositoryInterface $repo,
-        ActivePostTransformer $transformer
+        InventoryRepositoryInterface $repo,
+        InventoryTransformer $transformer
     ) {
         $this->repository = $repo;
         $this->transformer = $transformer;
