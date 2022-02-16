@@ -146,6 +146,14 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         $params['logo_url'] = $config['logoUrl'];
         $params['from_name'] = $config['fromName'];
 
+        // GetInquiry Stock/Url/Title from the Inventory ID
+        if(!empty($params['inventory']['inventory_id'])) {
+          $inventory = $this->inventory->get(['id' => $params['inventory']['inventory_id']]);
+          $params['stock'] = $inventory->stock;
+          $params['url'] = $inventory ? $inventory->getUrl() : '';
+          $params['title'] = $inventory->title;
+        }
+
         // Get Inquiry Name/Email
         $details = $this->getInquiryDetails($params);
 
@@ -255,7 +263,7 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         }
 
         // Return Inquiry Email Override
-        $params['inquiry_email'] = explode(";", $toEmails->value);
+        $params['inquiry_email'] = preg_split('/,|;|\s/', $toEmails->value, null, PREG_SPLIT_NO_EMPTY);;
         return $params;
     }
 

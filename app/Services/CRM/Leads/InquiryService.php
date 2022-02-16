@@ -249,11 +249,6 @@ class InquiryService implements InquiryServiceInterface
             $this->dispatch($job->onQueue('inquiry'));
         }
 
-        // Dispatch Auto Responder Job
-        $this->log->info('Handling auto responder on lead #' . $lead->identifier);
-        $job = new AutoResponderJob($lead);
-        $this->dispatch($job->onQueue('inquiry'));
-
         // Export ADF if Possible
         if(!in_array(LeadType::TYPE_FINANCING, $inquiry->leadTypes)) {
             $this->log->info('Handling ADF export on lead #' . $lead->identifier);
