@@ -13,17 +13,29 @@
             <!-- begin wrapper -->
             <table bgcolor="{{ $bgColor }}" cellpadding="10" cellspacing="0" border="0" width="650" style="border:1px solid #E0E0E0;">
                 <tr style="background:{{ $bgHeader }}">
-                    <td valign="top">
-                        <a href="{{ $logoUrl }}">
-                            <img src="{{ $logo }}" alt="{{ $fromName }}" style="margin-bottom:10px;" border="0"/>
-                        </a>
-                    </td>
+                    <?php if ($website == $simpleDomain): ?>
+                      <td valign="top" style="text-align:center">
+                          <a href="{{ $logoUrl }}">
+                            <img src="{{ $logo }}" alt="{{ $fromName }}" style="margin-bottom:10px;margin-top:10px;height:20px;" border="0"/>
+                          </a>
+                      </td>
+                    <?php else: ?>
+                      <td valign="top">
+                          <a href="{{ $logoUrl }}">
+                            <img src="{{ $logo }}" alt="{{ $fromName }}" style="margin-bottom:10px;margin-top:10px;height:20px;" border="0"/>              
+                          </a>
+                      </td>
+                    <?php endif; ?>
                 </tr>
                 <tr>
                     <td valign="top">
                         <!-- begin content -->
-
-                        <h3 style="font-size:16px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">New Inventory Information Request on {{ $website }}</h3>
+                        <?php if ($website == $simpleDomain): ?>
+                          <h3 style="font-size:16px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">TrailerTrader.com / A customer is interested in {{ $title }} “</h3>
+                        <?php else: ?>
+                          <h3 style="font-size:16px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">New Inventory Information Request on {{ $website }}</h3>
+                        <?php endif; ?>
+                        
 
                         <p style="font-size:12px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">Inventory Stock: <strong>{{ $stock }}</strong></p>
 

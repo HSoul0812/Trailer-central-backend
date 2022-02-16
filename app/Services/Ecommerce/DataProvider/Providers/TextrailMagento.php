@@ -22,6 +22,7 @@ class TextrailMagento implements DataProviderInterface,
     private const TEXTRAIL_ATTRIBUTES_BRAND_NAME_URL = 'rest/V1/products/attributes/brand_name/options/';
     private const TEXTRAIL_ATTRIBUTES_MEDIA_URL = 'media/catalog/product';
     private const TEXTRAIL_ATTRIBUTES_PLACEHOLDER_URL = 'placeholder/default/TexTrail-LogoVertical_4_3.png';
+    private const TEXTRAIL_DUMP_STOCK_URL = 'rest/:view/V1/inventory/dump-stock-index-data/website/trailer_central_t1';
 
     const VIEW_ID = 'trailer_central_t1_sv';
     const GUEST_CART_URL = 'rest/:view/V1/guest-carts';
@@ -354,7 +355,7 @@ class TextrailMagento implements DataProviderInterface,
     public function getAllParts(int $currentPage = 1, int $pageSize = 1000): array
     {
       $totalParts = $this->getTextrailTotalPartsCount();
-      $url = 'rest/' . Config::get('ecommerce.textrail')['store'] . '/V1/products';
+      $url = 'rest/' . Config::get('ecommerce.textrail.store') . '/V1/products';
 
       $Allparts = [];
 
@@ -364,7 +365,7 @@ class TextrailMagento implements DataProviderInterface,
           'searchCriteria[page_size]' => $pageSize,
           'searchCriteria[currentPage]' => $currentPage,
           'searchCriteria[filter_groups][0][filters][0][field]' => 'website_id',
-          'searchCriteria[filter_groups][0][filters][0][value]' => 10,
+          'searchCriteria[filter_groups][0][filters][0][value]' => Config::get('ecommerce.textrail.store_id'),
           'searchCriteria[filter_groups][0][filters][0][condition_type]' => 'eq'
 
         ];
@@ -400,7 +401,7 @@ class TextrailMagento implements DataProviderInterface,
           }
 
           foreach ($item->media_gallery_entries as $img) {
-            array_push($images, ['file' => $img->file, 'position' => $img->position]);
+            array_push($images, ['file' => $img->file, 'position' => $img->position ?? 0]);
           }
 
           $dtoTextrail = TextrailPartDTO::from([
@@ -490,7 +491,7 @@ class TextrailMagento implements DataProviderInterface,
         'searchCriteria[page_size]' => $pageSize,
         'searchCriteria[currentPage]' => $currentPage,
         'searchCriteria[filter_groups][0][filters][0][field]' => 'website_id',
-        'searchCriteria[filter_groups][0][filters][0][value]' => 10,
+        'searchCriteria[filter_groups][0][filters][0][value]' => Config::get('ecommerce.textrail.store_id'),
         'searchCriteria[filter_groups][0][filters][0][condition_type]' => 'eq'
       ];
 
@@ -647,5 +648,20 @@ class TextrailMagento implements DataProviderInterface,
         $response = $this->httpClient->post($endpoint, ['headers' => $this->getHeaders(), 'json' => $requestInfo]);
 
         return (int)json_decode($response->getBody()->getContents(), true);
+    }
+
+    public function getTextrailDumpStock(): array
+    {
+        $url = $this->generateUrlWithCartAndView(self::TEXTRAIL_DUMP_STOCK_URL);
+        $stocks = json_decode($this->httpClient->get($url, ['headers' => $this->getHeaders()])->getBody()->getContents());
+
+        $availableStocks = [];
+        foreach ($stocks as $stock) {
+            if ($stock->qty > 0) {
+                $availableStocks[$stock->sku] = $stock->qty;
+            }
+        }
+
+        return $availableStocks;
     }
 }

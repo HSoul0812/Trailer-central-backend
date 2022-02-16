@@ -16,6 +16,8 @@ use League\Fractal\Resource\Item;
 use League\Fractal\Serializer\ArraySerializer;
 use OpenApi\Annotations as OA;
 use App\Http\Requests\Dms\ServiceOrder\UpdateServiceOrderRequest;
+use Exception;
+use Illuminate\Support\Facades\Log;
 
 /**
  * @author Marcel
@@ -99,11 +101,19 @@ class ServiceOrderController extends RestfulControllerV2
      */
     public function index(Request $request)
     {
-        $request = new GetServiceOrdersRequest($request->all());
-        $this->fractal->parseIncludes($request->query('with', ''));
+        try {
+            $request = new GetServiceOrdersRequest($request->all());
+            $this->fractal->parseIncludes($request->query('with', ''));
 
-        if ($request->validate()) {
-          return $this->response->paginator($this->serviceOrders->getAll($request->all()), new ServiceOrderTransformer);
+            if ($request->validate()) {
+                return $this->response->paginator(
+                    $this->serviceOrders->getAll($request->all()),
+                    new ServiceOrderTransformer
+                );
+            }
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+            Log::error($e->getTraceAsString());
         }
 
         return $this->response->errorBadRequest();
@@ -121,7 +131,7 @@ class ServiceOrderController extends RestfulControllerV2
             'data' => $this->fractal->createData($data)->toArray()
         ]);
     }
-    
+
     /**
      * @OA\Put(
      *     path="/api/dms/service-order/{id}",
@@ -151,20 +161,18 @@ class ServiceOrderController extends RestfulControllerV2
      * @throws ResourceException when there were some validation error
      * @throws NoObjectIdValueSetException
      * @throws NoObjectTypeSetException
-     */ 
+     */
     public function update(int $id, Request $request) {
         $requestData = $request->all();
         $requestData['id'] = $id;
         $request = new UpdateServiceOrderRequest($requestData);
 
-        if ( $request->validate() ) {
+        if ($request->validate()) {
             return $this->response->item($this->serviceOrders->update($request->all()), $this->transformer);
         }
 
         return $this->response->errorBadRequest();
     }
-    
-
 
     /**
      * Service for create/update invoice for an RO
@@ -175,5 +183,4 @@ class ServiceOrderController extends RestfulControllerV2
     {
 
     }
-
 }

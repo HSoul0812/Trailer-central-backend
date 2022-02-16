@@ -7,9 +7,20 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * Class Integration
  * @package App\Models\Integration
+ *
+ * @property int $integration_id
+ * @property string $name
+ * @property string $description
+ * @property string $domain
+ * @property string $code
+ * @property string $create_account_url
+ * @property string $settings originally encoded as PHP serialized string
+ * @property string $filters originally encoded as PHP serialized string
  */
 class Integration extends Model
 {
+    public const STATUS_ACTIVE = 1;
+
     // Define Table Name Constant
     const TABLE_NAME = 'integration';
 
@@ -51,4 +62,14 @@ class Integration extends Model
         'uses_staging',
         'show_for_integrated'
     ];
+
+    /**
+     * To avoid mutations and break something
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function decodeSettings(): \Illuminate\Support\Collection
+    {
+        return collect($this->settings ? unserialize($this->settings, ['allowed_classes' => false]) : []);
+    }
 }

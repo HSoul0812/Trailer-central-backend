@@ -135,6 +135,7 @@ use Laravel\Scout\Searchable;
  * @property string $status_label
  * @property string $color
  * @property double $interest_paid
+ * @property double $cost_of_ros
  *
  * @property User $user
  * @property Lead $lead
@@ -173,6 +174,7 @@ class Inventory extends Model
     const STATUS_ON_ORDER = 3;
     const STATUS_PENDING_SALE = 4;
     const STATUS_SPECIAL_ORDER = 5;
+    const STATUS_NULL = null;
 
     const STATUS_QUOTE_LABEL = 'Quote';
     const STATUS_AVAILABLE_LABEL = 'Available';
@@ -180,6 +182,14 @@ class Inventory extends Model
     const STATUS_ON_ORDER_LABEL = 'On Order';
     const STATUS_PENDING_SALE_LABEL = 'Pending Sale';
     const STATUS_SPECIAL_ORDER_LABEL = 'Special Order';
+
+    const UNAVAILABLE_STATUSES = [
+        self::STATUS_SOLD,
+        self::STATUS_ON_ORDER,
+        self::STATUS_PENDING_SALE,
+        self::STATUS_SPECIAL_ORDER,
+        self::STATUS_QUOTE
+    ];
 
     const IS_FLOORPLANNED = 1;
     const IS_NOT_FLOORPLANNED = 0;
@@ -369,7 +379,7 @@ class Inventory extends Model
 
     public function dealerLocation(): BelongsTo
     {
-        return $this->belongsTo(DealerLocation::class, 'dealer_location_id', 'dealer_location_id');
+        return $this->belongsTo(DealerLocation::class, 'dealer_location_id', 'dealer_location_id')->withTrashed();
     }
 
     public function floorplanPayments(): HasMany
@@ -515,6 +525,14 @@ class Inventory extends Model
 
         // Return Value
         return $attribute->value ?? '';
+    }
+
+    /**
+     * @return float|null
+     */
+    public function getCostOfRosAttribute(): ?float
+    {
+        return $this->repairOrders()->sum('total_price');
     }
 
     /**
