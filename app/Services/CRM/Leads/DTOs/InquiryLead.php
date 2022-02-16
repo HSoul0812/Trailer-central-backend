@@ -390,20 +390,26 @@ class InquiryLead
     }
 
 
+
+    /**
+     * Get Inquiry To
+     * 
+     * @return string
+     */
+    public function getInquiryTo(): string {
+        // Get Inquiry
+        if(is_array($this->inquiryEmail)) {
+            return implode(";", $this->inquiryEmail);
+        }
+        return $this->inquiryEmail;
+    }
+
     /**
      * Get Inquiry To Array
      * 
      * @return array{array{name: string, email: string}, ...etc}
      */
     public function getInquiryToArray(): array {
-      
-        // Normal, support to many emails for leads on dealer location email field
-        $normalTo = [];
-        $inquiryEmail = preg_split('/,|;|\s/', $this->inquiryEmail, null, PREG_SPLIT_NO_EMPTY);
-
-        foreach ($inquiryEmail as $key => $value) {
-          $normalTo[$key] = ['name' =>$this->inquiryName, 'email' => $value];
-        }
         // If Dev, Only Return Specific Entries
         if(!empty($this->isDev())) {
             $to = self::INQUIRY_DEV_TO;
@@ -414,13 +420,21 @@ class InquiryLead
         }
         // Normal, Return Proper Inquiry
         else {
-            if ($this->websiteDomain == self::TT_SIMPLE_DOMAIN) {
-              $normalTo[] = ['name' => $this->firstName, 'email' => $this->emailAddress];
-              return $normalTo;
+            // Get To Emails
+            $to = [];
+            if(is_array($this->inquiryEmail)) {
+                foreach($this->inquiryEmail as $toEmail) {
+                    $to[] = ['name' => $this->inquiryName, 'email' => $toEmail];
+                }
             } else {
-              return $normalTo;;
+                $to[] = ['name' => $this->inquiryName, 'email' => $this->inquiryEmail];   
             }
-            
+
+            // Append for TT
+            if ($this->websiteDomain == self::TT_SIMPLE_DOMAIN) {
+                $to[] = ['name' => $this->firstName, 'email' => $this->emailAddress];
+            }
+            return $to;
         }
 
         // Return With Merged CC To
