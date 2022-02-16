@@ -341,7 +341,7 @@ class Lead extends Model
             return '';
         }
         $source = $this->leadStatus->pluck('source')->toArray();
-        return $source['status'];
+        return $source['source'];
     }
 
     public function getStatusId() {

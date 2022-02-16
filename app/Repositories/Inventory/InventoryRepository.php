@@ -3,7 +3,6 @@
 namespace App\Repositories\Inventory;
 
 use App\Exceptions\RepositoryInvalidArgumentException;
-use App\Models\CRM\Dms\Customer\CustomerInventory;
 use App\Models\Inventory\AttributeValue;
 use App\Models\Inventory\File;
 use App\Models\Inventory\Image;
@@ -20,8 +19,6 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Grimzy\LaravelMysqlSpatial\Eloquent\Builder as GrimzyBuilder;
-use Illuminate\Database\Query\JoinClause;
-use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 
 /**
  * Class InventoryRepository
@@ -156,6 +153,14 @@ class InventoryRepository implements InventoryRepositoryInterface
         ],
         '-status' => [
             'field' => 'status',
+            'direction' => 'ASC'
+        ],
+        'archived_at' => [
+            'field' => 'archived_at',
+            'direction' => 'DESC'
+        ],
+        '-archived_at' => [
+            'field' => 'archived_at',
             'direction' => 'ASC'
         ]
     ];
@@ -305,11 +310,11 @@ class InventoryRepository implements InventoryRepositoryInterface
     {
         $query = Inventory::query()->select('*');
 
-        if(isset($params['id'])) {
+        if (isset($params['id'])) {
             $query->where('inventory_id', $params['id']);
         }
 
-        if(isset($params['dealer_id'])) {
+        if (isset($params['dealer_id'])) {
             $query->where('dealer_id', $params['dealer_id']);
         }
 
@@ -320,13 +325,13 @@ class InventoryRepository implements InventoryRepositoryInterface
         $include = (isset($params['include']) && is_string($params['include'])) ? explode(',', $params['include']) : [];
 
         if (in_array('attributes', $include)) {
-            $query = $query->with(['attributeValues' => function($query) {
+            $query = $query->with(['attributeValues' => function ($query) {
                 $query->with('attribute');
             }]);
         }
 
         if (in_array('features', $include)) {
-            $query = $query->with(['inventoryFeatures' => function($query) {
+            $query = $query->with(['inventoryFeatures' => function ($query) {
                 $query->with('featureList');
             }]);
         }
@@ -370,7 +375,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         /** @var Inventory $item */
         $item = Inventory::findOrFail($params['id']);
 
-        DB::transaction(function() use (&$item, $params) {
+        DB::transaction(function () use (&$item, $params) {
             $item->attributeValues()->delete();
             $item->inventoryFeatures()->delete();
             $item->clapps()->delete();
@@ -467,7 +472,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         if (isset($params['search_term'])) {
-            $query = $query->where(function($q) use ($params) {
+            $query = $query->where(function ($q) use ($params) {
                 $q->where('stock', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('title', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('description', 'LIKE', '%' . $params['search_term'] . '%')
@@ -494,7 +499,8 @@ class InventoryRepository implements InventoryRepositoryInterface
      * @param int $dealer_id
      * @return \Illuminate\Database\Eloquent\Model|Builder|object|null
      */
-    public function getPopularInventory(int $dealer_id) {
+    public function getPopularInventory(int $dealer_id)
+    {
         return DB::table('inventory')
             ->select(DB::raw('count(*) as type_count, entity_type_id, category'))
             ->where('dealer_id', $dealer_id)
@@ -503,7 +509,8 @@ class InventoryRepository implements InventoryRepositoryInterface
             ->first();
     }
 
-    protected function getSortOrders() {
+    protected function getSortOrders()
+    {
         return $this->sortOrders;
     }
 
@@ -553,7 +560,10 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         if ($withDefault) {
-            $query->where('status', '<>', Inventory::STATUS_QUOTE);
+            $query = $query->where(function ($q) {
+                $q->where('status', '<>', Inventory::STATUS_QUOTE)
+                   ->orWhere('status', '=', Inventory::STATUS_NULL);
+            });
         }
 
         if (isset($params['status'])) {
