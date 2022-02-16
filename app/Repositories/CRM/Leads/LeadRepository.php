@@ -238,7 +238,8 @@ class LeadRepository implements LeadRepositoryInterface {
 
         // Find Leads That Match Current!
         $lead = Lead::where('dealer_id', $params['dealer_id'])
-                    ->where('lead_type', '<>', LeadType::TYPE_NONLEAD);
+                    ->where('lead_type', '<>', LeadType::TYPE_NONLEAD)
+                    ->where('website_id', $params['website_id']);
 
         // Find Name
         return $lead->where(function(Builder $query) use($params) {
