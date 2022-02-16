@@ -89,11 +89,11 @@ class Lead extends Model
 
     const IS_FROM_CLASSIFIEDS = 1;
     const IS_NOT_FROM_CLASSIFIEDS = 0;
-    
+
     const IS_BIGTEX_EXPORTED = 1;
     const IS_BIGTEX_NOT_EXPORTED = 0;
 
-    
+
     const IS_IDS_EXPORTED = 1;
     const IS_NOT_IDS_EXPORTED = 0;
 
@@ -163,7 +163,8 @@ class Lead extends Model
         'is_spam',
         'is_archived',
         'is_from_classifieds',
-        'bigtex_exported'
+        'bigtex_exported',
+        'next_followup',
     ];
 
     /**
