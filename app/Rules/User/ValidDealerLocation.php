@@ -30,7 +30,7 @@ class ValidDealerLocation implements Rule
         }
 
         // Get Valid Dealer Location!
-        $dealerLocation = DealerLocation::find($value);
+        $dealerLocation = DealerLocation::withTrashed()->find($value);
         if(empty($dealerLocation)) {
             return false;
         }

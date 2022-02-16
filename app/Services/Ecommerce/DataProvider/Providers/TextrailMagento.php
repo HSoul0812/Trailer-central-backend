@@ -355,7 +355,7 @@ class TextrailMagento implements DataProviderInterface,
     public function getAllParts(int $currentPage = 1, int $pageSize = 1000): array
     {
       $totalParts = $this->getTextrailTotalPartsCount();
-      $url = 'rest/' . Config::get('ecommerce.textrail')['store'] . '/V1/products';
+      $url = 'rest/' . Config::get('ecommerce.textrail.store') . '/V1/products';
 
       $Allparts = [];
 
