@@ -60,7 +60,7 @@ class BigTexService implements BigTexServiceInterface
         $response = $this->httpClient->request('POST', $this->getFormSubmitRoute(), [
             'form_params' => [
                 self::FIRST_NAME_FIELD_NAME => $lead->first_name,
-                self::LAST_NAME_FIELD_NAME => $lead->last_name,
+                self::LAST_NAME_FIELD_NAME => $lead->last_name ?? '___',
                 self::PREFERRED_CONTACT_FIELD_NAME => ucfirst($lead->preferred_contact),
                 self::EMAIL_FIELD_NAME => $lead->email_address,
                 self::ZIP_FIELD_NAME => $lead->zip,
