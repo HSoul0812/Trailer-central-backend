@@ -192,7 +192,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         /** @var Builder $query */
         $query = $this->initInventoryQuery()
                       ->where(Inventory::getTableName().'.dealer_id', '=', $params['dealer_id'])
-                      ->where(Profile::getTableName().'.profile_id', '=', $params['profile_id']);
+                      ->where(Profile::getTableName().'.id', '=', $params['profile_id']);
 
         if (isset($params['include']) && is_string($params['include'])) {
             $query = $query->with(explode(',', $params['include']));
@@ -236,7 +236,7 @@ class InventoryRepository implements InventoryRepositoryInterface
                 ->crossJoin(Profile::getTableName())
                 ->leftJoin(Post::getTableName(), function($query) {
                     $query->where(Inventory::getTableName().'.inventory_id', '=', Post::getTableName().'.inventory_id')
-                          ->where(Profile::getTableName().'.profile_id', '=', Post::getTableName().'.profile_id');
+                          ->where(Profile::getTableName().'.id', '=', Post::getTableName().'.profile_id');
                 })->leftJoin(Queue::getTableName(), function($query) {
                     $query->where(Inventory::getTableName().'.inventory_id', '=', Queue::getTableName().'.inventory_id')
                           ->where(Profile::getTableName().'.id', '=', Queue::getTableName().'.profile_id');
