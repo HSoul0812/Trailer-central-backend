@@ -19,6 +19,11 @@ class InventoryRepository implements InventoryRepositoryInterface
 
     private const DEFAULT_PAGE_SIZE = 15;
 
+    private const SHOW_UNITS_WITH_TRUE_COST = 1;
+    private const DO_NOT_SHOW_UNITS_WITH_TRUE_COST = 0;
+
+    private const SESSION_SCHEDULED_STATUS = 'scheduled';
+
 
     private $sortOrders = [
         'inventory_id' => [
@@ -153,19 +158,18 @@ class InventoryRepository implements InventoryRepositoryInterface
 
     /**
      * @param $params
-     * @param bool $withDefault
      * @param bool $paginated
      * @return Collection|LengthAwarePaginator
      */
-    public function getAll($params, bool $withDefault = true, bool $paginated = false)
+    public function getAll($params, bool $paginated = false)
     {
         if ($paginated) {
-            return $this->getPaginatedResults($params, $withDefault);
+            return $this->getPaginatedResults($params);
         }
 
-        $query = $this->buildInventoryQuery($params, $withDefault);
+        $query = $this->buildInventoryQuery($params);
 
-        return $query->get();
+        return $this->createCollection($query);
     }
 
     protected function getSortOrders() {
@@ -174,53 +178,96 @@ class InventoryRepository implements InventoryRepositoryInterface
 
     /**
      * @param array $params
-     * @param bool $withDefault whether to apply default conditions or not
      *
      * @return Builder
      */
-    private function buildInventoryQuery(
-        array $params,
-        bool $withDefault = true,
-        array $select = ['inventory.*']
-    ) : GrimzyBuilder {
+    private function buildInventoryQuery(array $params): GrimzyBuilder {
         /** @var Builder $query */
-        $query = Inventory::query()->select($select)
-            ->crossJoin(Profile::getTableName())
-            ->leftJoin(Post::getTableName(), function($query) {
-                $query->where(Inventory::getTableName().'.inventory_id', '=', Post::getTableName().'.inventory_id')
-                      ->where(Profile::getTableName().'.profile_id', '=', Post::getTableName().'.profile_id');
-            })
-            ->leftJoin(ActivePost::getTableName(), function($query) {
-                $query->where(Inventory::getTableName().'.inventory_id', '=', ActivePost::getTableName().'.inventory_id')
-                      ->where(Profile::getTableName().'.profile_id', '=', ActivePost::getTableName().'.profile_id');
-            })
-            ->where(Inventory::getTableName().'.dealer_id', '=', $params['dealer_id'])
-            ->where(Profile::getTableName().'.profile_id', '=', $params['profile_id'])
-            /*->where(function ($query) {
-                $query->where(function ($query) {
-                    $query->where(Inventory::getTableName().'.is_archived', '=', 1)
-                          ->orWhere(Inventory::getTableName().'.show_on_website', '=', 0);
-                })->where();
-            })*/
-            ->with('orderedImages');
+        $query = $this->initInventoryQuery()
+                      ->where(Inventory::getTableName().'.dealer_id', '=', $params['dealer_id'])
+                      ->where(Profile::getTableName().'.profile_id', '=', $params['profile_id']);
 
         if (isset($params['include']) && is_string($params['include'])) {
             $query = $query->with(explode(',', $params['include']));
         }
 
-        if ($withDefault) {
-            $query = $query->where('status', '<>', Inventory::STATUS_QUOTE);
+        if (isset($params['dealer_location_id'])) {
+            $query = $query->where('inventory.dealer_location_id', $params['dealer_location_id']);
         }
 
+        if (isset($params['type']) && $params['type'] === 'archives') {
+            $query = $this->archivedInventoryQuery($query);
+        } else {
+            $query = $this->overrideInventoryQuery($query, $params['dealer_id']);
+        }
+
+        $query = $this->filterInventoryQuery($query, $params);
+
+        if (isset($params['sort'])) {
+            $query = $this->addSortQuery($query, $params['sort']);
+        }
+
+        return $query;
+    }
+
+    private function initInventoryQuery() : GrimzyBuilder
+    {
+        return DB::table(Inventory::getTableName())->select([
+                    Inventory::getTableName().'.inventory_id', Inventory::getTableName().'.stock',
+                    Inventory::getTableName().'.title', Inventory::getTableName().'.category',
+                    Inventory::getTableName().'.manufacturer', Inventory::getTableName().'.price',
+                    Post::getTableName().'.cl_status as status',
+                    Image::getTableName().'.filename as primary_image',
+                    Post::getTableName().'.added as last_posted',
+                    Session::getTableName().'.session_scheduled as next_scheduled',
+                    Queue::getTableName().'.queue_id', Post::getTableName().'.clid',
+                    Post::getTableName().'.view_url', Post::getTableName().'.manage_url'
+                ])->leftJoin(InventoryImage::getTableName(),Image::getTableName().'.inventory_id',
+                            '=', InventoryImage::getTableName().'.inventory_id')
+                ->leftJoin(Image::getTableName(), Image::getTableName().'.image_id',
+                            '=', InventoryImage::getTableName().'.image_id')
+                ->crossJoin(Profile::getTableName())
+                ->leftJoin(Post::getTableName(), function($query) {
+                    $query->where(Inventory::getTableName().'.inventory_id', '=', Post::getTableName().'.inventory_id')
+                          ->where(Profile::getTableName().'.profile_id', '=', Post::getTableName().'.profile_id');
+                })->leftJoin(Post::getTableName(), function($query) {
+                    $query->where(Inventory::getTableName().'.inventory_id', '=', Post::getTableName().'.inventory_id')
+                          ->where(Profile::getTableName().'.profile_id', '=', Post::getTableName().'.profile_id');
+                })->leftJoin(Queue::getTableName(), function($query) {
+                    $query->where(Inventory::getTableName().'.inventory_id', '=', Queue::getTableName().'.inventory_id')
+                          ->where(Profile::getTableName().'.id', '=', Queue::getTableName().'.profile_id');
+                })->leftJoin(Session::getTableName(), function($query) {
+                    $query->where(Queue::getTableName().'.session_id', '=', Session::getTableName().'.session_id')
+                          ->where(Queue::getTableName().'.dealer_id', '=', Session::getTableName().'.session_dealer_id')
+                          ->where(Queue::getTableName().'.profile_id', '=', Session::getTableName().'.session_profile_id')
+                          ->where(Queue::getTableName().'.status', '=', self::SESSION_SCHEDULED_STATUS);
+                });
+    }
+
+    private function archivedInventoryQuery(GrimzyBuilder $query) : GrimzyBuilder
+    {
+        return $query->where(function ($query) {
+            $query->where(function ($query) {
+                $query->where(Inventory::getTableName().'.is_archived', '=', 1)
+                      ->orWhere(Inventory::getTableName().'.show_on_website', '=', 0)
+                      ->orWhere(Inventory::getTableName().'.status', '=', 2)
+                      ->orWhere(Inventory::getTableName().'.status', '=', 4)
+                      ->orWhere(Inventory::getTableName().'.status', '=', 5);
+            })->where(Inventory::getTableName().'.');
+        });
+    }
+
+    private function overrideInventoryQuery(GrimzyBuilder $query, int $dealerId) : GrimzyBuilder
+    {
         // Get Status Overrides
         $statusAll = config('marketing.cl.overrides.statusAll', '');
-        if(in_array($params['dealer_id'], explode(",", $statusAll))) {
+        if(in_array($dealerId, explode(",", $statusAll))) {
             $query = $query->where(function($query) {
                 $query = $query->where('inventory.status', 1);
 
                 // Get Status On Order Overrides
                 $statusOnOrder = config('marketing.cl.overrides.statusAll', '');
-                if(in_array($params['dealer_id'], explode(",", $statusOnOrder))) {
+                if(in_array($dealerId, explode(",", $statusOnOrder))) {
                     $query = $query->orWhere('inventory.status', 3);
                 }
             });
@@ -228,21 +275,18 @@ class InventoryRepository implements InventoryRepositoryInterface
 
         // Get Show on Website Overrides
         $showOnWebsite = config('marketing.cl.overrides.showOnWebsite', '');
-        if(in_array($params['dealer_id'], explode(",", $showOnWebsite))) {
+        if(in_array($dealerId, explode(",", $showOnWebsite))) {
             $query = $query->where('inventory.show_on_website', 1);
         }
 
+        // Return Result
+        return $query;
+    }
+
+    private function filterInventoryQuery(GrimzyBuilder $query, array $params) : GrimzyBuilder
+    {
         if (isset($params['condition'])) {
             $query = $query->where('condition', $params['condition']);
-        }
-
-        if (isset($params['dealer_location_id'])) {
-            $query = $query->where('inventory.dealer_location_id', $params['dealer_location_id']);
-        }
-
-        if (isset($params['is_archived'])) {
-            $withDefault = false;
-            $query = $query->where('inventory.is_archived', $params['is_archived']);
         }
 
         if (isset($params['search_term'])) {
@@ -257,8 +301,12 @@ class InventoryRepository implements InventoryRepositoryInterface
             });
         }
 
-        if (isset($params['sort'])) {
-            $query = $this->addSortQuery($query, $params['sort']);
+        if (isset($params['units_with_true_cost'])) {
+            if ($params['units_with_true_cost'] == self::SHOW_UNITS_WITH_TRUE_COST) {
+                $query = $query->where('true_cost', '>', 0);
+            } else if ($params['units_with_true_cost'] == self::DO_NOT_SHOW_UNITS_WITH_TRUE_COST) {
+                $query = $query->where('true_cost', 0);
+            }
         }
 
         if (isset($params['images_greater_than']) || isset($params['images_less_than'])) {
@@ -267,6 +315,7 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query->groupBy('inventory.inventory_id');
         }
 
+        // Return Query Builder
         return $query;
     }
 
@@ -277,23 +326,34 @@ class InventoryRepository implements InventoryRepositoryInterface
         return current(DB::select(DB::raw("SELECT count(*) as row_count FROM ($queryString) as inventory_count")))->row_count;
     }
 
-    private function getPaginatedResults($params, bool $withDefault = true)
+    private function getPaginatedResults($params)
     {
         $perPage = !isset($params['per_page']) ? self::DEFAULT_PAGE_SIZE : (int)$params['per_page'];
         $currentPage = !isset($params['page']) ? 1 : (int)$params['page'];
 
-        $paginatedQuery = $this->buildInventoryQuery($params, $withDefault);
+        $paginatedQuery = $this->buildInventoryQuery($params);
         $resultsCount = $this->getResultsCountFromQuery($paginatedQuery);
 
         $paginatedQuery->skip(($currentPage - 1) * $perPage);
         $paginatedQuery->take($perPage);
 
         return (new LengthAwarePaginator(
-            $paginatedQuery->get(),
+            $this->createCollection($paginatedQuery),
             $resultsCount,
             $perPage,
             $currentPage,
-            ["path" => URL::to('/')."/api/inventory"]
+            ["path" => URL::to('/')."/api/marketing/clapp/inventory"]
         ))->appends($params);
+    }
+
+    private function createCollection(GrimzyBuilder $query): Collection {
+        // Create Collection
+        $collection = new Collection();
+        foreach($query->get() as $item) {
+            $collection->push(ClappInventory::build($item));
+        }
+
+        // Return Collection
+        return $collection;
     }
 }

@@ -48,7 +48,7 @@ class InventoryController extends RestfulControllerV2
         $request = new GetInventoryRequest($request->all());
         if ($request->validate()) {
             // Get Inventory
-            return $this->response->paginator($this->repository->getAll($request->all()), $this->transformer);
+            return $this->response->paginator($this->repository->getAll($request->all(), true), $this->transformer);
         }
         
         return $this->response->errorBadRequest();
