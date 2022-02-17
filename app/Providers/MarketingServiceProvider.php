@@ -18,6 +18,8 @@ use App\Services\Dispatch\Facebook\MarketplaceService as MarketplaceDispatchServ
 use App\Services\Dispatch\Facebook\MarketplaceServiceInterface as MarketplaceDispatchServiceInterface;
 use App\Repositories\Marketing\Craigslist\ActivePostRepository;
 use App\Repositories\Marketing\Craigslist\ActivePostRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\InventoryRepository;
+use App\Repositories\Marketing\Craigslist\InventoryRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\SchedulerRepository;
 use App\Repositories\Marketing\Craigslist\SchedulerRepositoryInterface;
 use Illuminate\Support\ServiceProvider;
@@ -36,6 +38,7 @@ class MarketingServiceProvider extends ServiceProvider
 
         // Marketing Repositories
         $this->app->bind(ActivePostRepositoryInterface::class, ActivePostRepository::class);
+        $this->app->bind(InventoryRepositoryInterface::class, InventoryRepository::class);
         $this->app->bind(SchedulerRepositoryInterface::class, SchedulerRepository::class);
         $this->app->bind(MarketplaceRepositoryInterface::class, MarketplaceRepository::class);
         $this->app->bind(FilterRepositoryInterface::class, FilterRepository::class);
