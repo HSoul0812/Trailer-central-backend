@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Craigslist;
+namespace App\Http\Requests\Marketing\Craigslist;
 
 use App\Http\Requests\Request;
 use App\Models\Inventory\Inventory;
