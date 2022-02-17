@@ -3,8 +3,14 @@
 namespace App\Repositories\Marketing\Craigslist;
 
 use App\Models\Inventory\Inventory;
-use App\Models\Marketing\Craigslist\ActivePost;
+use App\Models\Inventory\InventoryImage;
+use App\Models\Inventory\Image;
+use App\Models\Marketing\Craigslist\Post;
+use App\Models\Marketing\Craigslist\Profile;
+use App\Models\Marketing\Craigslist\Queue;
+use App\Models\Marketing\Craigslist\Session;
 use App\Repositories\Traits\SortTrait;
+use App\Traits\Repository\Transaction;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
