@@ -38,6 +38,7 @@ return [
     'trailercentral' => [
         'api'          => env('TC_API_URL', 'https://api.v1.staging.trailercentral.com/api/'),
         'access_token' => env('TC_API_ACCESS_TOKEN', 'f3c74ad00f954cc698face16ff78d791'),
+        'tt_website_id' => env('TC_API_TT_ID', '284'),
     ],
 
     'tomtom' => [
