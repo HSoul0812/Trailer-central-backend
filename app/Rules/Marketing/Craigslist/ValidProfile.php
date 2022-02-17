@@ -36,7 +36,7 @@ class ValidProfile implements Rule
         }
 
         // Does CL Profile Belong to Dealer?!
-        if($profile->dealer_id !== $user->dealer_id) {
+        if($profile->user_id !== $user->newDealerUser->user_id) {
             return false;
         }
 
