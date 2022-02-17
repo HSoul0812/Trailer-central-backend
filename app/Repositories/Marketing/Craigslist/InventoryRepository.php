@@ -177,7 +177,7 @@ class InventoryRepository implements InventoryRepositoryInterface
 
         $query = $this->buildInventoryQuery($params);
 
-        return $this->createCollection($query);
+        return $this->createCollection($query, $params['type']);
     }
 
     protected function getSortOrders() {
@@ -338,7 +338,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         $paginatedQuery->take($perPage);
 
         return (new LengthAwarePaginator(
-            $this->createCollection($paginatedQuery),
+            $this->createCollection($paginatedQuery, $params['type']),
             $resultsCount,
             $perPage,
             $currentPage,
@@ -346,11 +346,11 @@ class InventoryRepository implements InventoryRepositoryInterface
         ))->appends($params);
     }
 
-    private function createCollection(Builder $query): Collection {
+    private function createCollection(Builder $query, ?string $type): Collection {
         // Create Collection
         $collection = new Collection();
         foreach($query->get() as $item) {
-            $collection->push(ClappInventory::fill($item));
+            $collection->push(ClappInventory::fill($item, $type));
         }
 
         // Return Collection

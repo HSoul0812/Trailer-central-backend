@@ -38,7 +38,7 @@ class InventoryTransformer extends TransformerAbstract
         ];
 
         // Is Scheduler?
-        if($inventory->isScheduler) {
+        if($inventory->isScheduler()) {
             unset($return['status']);
         } else {
             unset($return['next_scheduled']);
