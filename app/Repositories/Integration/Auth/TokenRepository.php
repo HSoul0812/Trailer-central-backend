@@ -265,15 +265,20 @@ class TokenRepository implements TokenRepositoryInterface {
      */
     public function refresh(int $tokenId, CommonToken $newToken): AccessToken {
         // Refresh Access Token
-        return $this->update([
-            'id' => $tokenId,
-            'access_token' => $newToken->accessToken,
-            'refresh_token' => $newToken->refreshToken,
-            'id_token' => $newToken->idToken,
-            'expires_in' => $newToken->expiresIn,
-            'expires_at' => $newToken->expiresAt,
-            'issued_at' => $newToken->issuedAt
-        ]);
+        if($newToken->exists()) {
+            return $this->update([
+                'id' => $tokenId,
+                'access_token' => $newToken->accessToken,
+                'refresh_token' => $newToken->refreshToken,
+                'id_token' => $newToken->idToken,
+                'expires_in' => $newToken->expiresIn,
+                'expires_at' => $newToken->expiresAt,
+                'issued_at' => $newToken->issuedAt
+            ]);
+        }
+
+        // Return Original
+        return $this->get(['id' => $tokenId]);
     }
 
 

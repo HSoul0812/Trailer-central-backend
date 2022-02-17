@@ -15,19 +15,20 @@ class RemoveBrokenCharactersInWebsiteLeadTable extends Migration
     public function up()
     {
         $lead = DB::table('website_lead')->where(['identifier' => self::LEAD_ID])->first(['comments', 'email_address']);
+        if(!empty($lead->comments)) {
+            $sanitizedComments = html_entity_decode(mb_convert_encoding(stripslashes($lead->comments), 'HTML-ENTITIES', 'UTF-8'));
+            $sanitizedComments = preg_replace('/&#(\d+);/i', '', $sanitizedComments);
 
-        $sanitizedComments = html_entity_decode(mb_convert_encoding(stripslashes($lead->comments), 'HTML-ENTITIES', 'UTF-8'));
-        $sanitizedComments = preg_replace('/&#(\d+);/i', '', $sanitizedComments);
+            $sanitizedEmail = html_entity_decode(mb_convert_encoding(stripslashes($lead->email_address), 'HTML-ENTITIES', 'UTF-8'));
+            $sanitizedEmail = preg_replace('/&#(\d+);/i', '', $sanitizedEmail);
 
-        $sanitizedEmail = html_entity_decode(mb_convert_encoding(stripslashes($lead->email_address), 'HTML-ENTITIES', 'UTF-8'));
-        $sanitizedEmail = preg_replace('/&#(\d+);/i', '', $sanitizedEmail);
-
-        DB::table('website_lead')
-            ->where(['identifier' => self::LEAD_ID])
-            ->update([
-                'comments' => $sanitizedComments,
-                'email_address' => $sanitizedEmail,
-            ]);
+            DB::table('website_lead')
+                ->where(['identifier' => self::LEAD_ID])
+                ->update([
+                    'comments' => $sanitizedComments,
+                    'email_address' => $sanitizedEmail,
+                ]);
+        }
     }
 
     /**

@@ -221,10 +221,10 @@ class GoogleService implements GoogleServiceInterface
     /**
      * Validate ID Token
      *
-     * @param string $idToken
+     * @param null|string $idToken
      * @return boolean
      */
-    private function validateIdToken(string $idToken) {
+    private function validateIdToken(?string $idToken) {
         // Invalid
         $validate = false;
 
