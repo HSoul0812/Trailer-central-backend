@@ -1007,7 +1007,14 @@ $api->version('v1', function ($route) {
             $route->group([
                 'prefix' => 'clapp'
             ], function ($route) {
-                // Craigslist
+                // Inventory
+                $route->group([
+                    'prefix' => 'inventory'
+                ], function ($route) {
+                    $route->get('/', 'App\Http\Controllers\v1\Marketing\Craigslist\InventoryController@index');
+                });
+
+                // Posts
                 $route->group([
                     'prefix' => 'posts'
                 ], function ($route) {
@@ -1016,6 +1023,13 @@ $api->version('v1', function ($route) {
 
                 // Upcoming Scheduler Posts
                 $route->get('upcoming', 'App\Http\Controllers\v1\Marketing\Craigslist\SchedulerController@upcoming');
+
+                // Profile
+                $route->group([
+                    'prefix' => 'profile'
+                ], function ($route) {
+                    $route->get('/', 'App\Http\Controllers\v1\Marketing\Craigslist\ProfileController@index');
+                });
             });
 
             // Facebook Marketplace
