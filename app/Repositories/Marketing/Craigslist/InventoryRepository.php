@@ -310,10 +310,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         if (isset($params['images_greater_than']) || isset($params['images_less_than'])) {
-            $query = $query->leftJoin(InventoryImage::getTableName(),
-                    InventoryImage::getTableName().'.inventory_id', '=',
-                    Inventory::getTableName().'.inventory_id');
-            $query->selectRaw('count('.InventoryImage::getTableName().'.inventory_id) as image_count');
+            $query = $query->selectRaw('count('.InventoryImage::getTableName().'.inventory_id) as image_count');
         }
 
         // Return Query Builder
