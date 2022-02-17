@@ -102,7 +102,7 @@ class ClappInventory
             'status' => $inventory->cl_status,
             'primary_image' => $inventory->primary_image,
             'last_posted' => $inventory->added,
-            'next_scheduled' => $inventory->next_scheduled,
+            'next_scheduled' => $inventory->session_scheduled,
             'queue_id' => $inventory->queue_id,
             'craigslist_id' => $inventory->clid,
             'view_url' => $inventory->view_url,
