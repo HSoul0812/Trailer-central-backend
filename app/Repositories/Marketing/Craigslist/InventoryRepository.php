@@ -15,7 +15,6 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Grimzy\LaravelMysqlSpatial\Eloquent\Builder as GrimzyBuilder;
 
 /**
  * Class InventoryRepository
@@ -189,7 +188,7 @@ class InventoryRepository implements InventoryRepositoryInterface
      *
      * @return Builder
      */
-    private function buildInventoryQuery(array $params): GrimzyBuilder {
+    private function buildInventoryQuery(array $params): Grimzy {
         /** @var Builder $query */
         $query = $this->initInventoryQuery()
                       ->where(Inventory::getTableName().'.dealer_id', '=', $params['dealer_id'])
@@ -218,7 +217,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         return $query;
     }
 
-    private function initInventoryQuery() : GrimzyBuilder
+    private function initInventoryQuery() : Grimzy
     {
         return DB::table(Inventory::getTableName())->select([
                     Inventory::getTableName().'.inventory_id', Inventory::getTableName().'.stock',
@@ -252,7 +251,7 @@ class InventoryRepository implements InventoryRepositoryInterface
                 });
     }
 
-    private function archivedInventoryQuery(GrimzyBuilder $query) : GrimzyBuilder
+    private function archivedInventoryQuery(Grimzy $query) : Grimzy
     {
         return $query->where(function ($query) {
             $query->where(function ($query) {
@@ -265,7 +264,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         });
     }
 
-    private function overrideInventoryQuery(GrimzyBuilder $query, int $dealerId) : GrimzyBuilder
+    private function overrideInventoryQuery(Grimzy $query, int $dealerId) : Grimzy
     {
         // Get Status Overrides
         $statusAll = config('marketing.cl.overrides.statusAll', '');
@@ -291,7 +290,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         return $query;
     }
 
-    private function filterInventoryQuery(GrimzyBuilder $query, array $params) : GrimzyBuilder
+    private function filterInventoryQuery(Grimzy $query, array $params) : Grimzy
     {
         if (isset($params['condition'])) {
             $query = $query->where('condition', $params['condition']);
@@ -327,7 +326,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         return $query;
     }
 
-    private function getResultsCountFromQuery(GrimzyBuilder $query) : int
+    private function getResultsCountFromQuery(Grimzy $query) : int
     {
         $queryString = str_replace(array('?'), array('\'%s\''), $query->toSql());
         $queryString = vsprintf($queryString, $query->getBindings());
@@ -354,7 +353,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         ))->appends($params);
     }
 
-    private function createCollection(GrimzyBuilder $query): Collection {
+    private function createCollection(Grimzy $query): Collection {
         // Create Collection
         $collection = new Collection();
         foreach($query->get() as $item) {
