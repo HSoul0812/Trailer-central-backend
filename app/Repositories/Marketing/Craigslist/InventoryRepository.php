@@ -236,16 +236,16 @@ class InventoryRepository implements InventoryRepositoryInterface
                             '=', InventoryImage::getTableName().'.image_id')
                 ->crossJoin(Profile::getTableName())
                 ->leftJoin(Post::getTableName(), function($query) {
-                    $query->where(Inventory::getTableName().'.inventory_id', '=', Post::getTableName().'.inventory_id')
-                          ->where(Profile::getTableName().'.id', '=', Post::getTableName().'.profile_id');
+                    $query->on(Inventory::getTableName().'.inventory_id', '=', Post::getTableName().'.inventory_id')
+                          ->on(Profile::getTableName().'.id', '=', Post::getTableName().'.profile_id');
                 })->leftJoin(Queue::getTableName(), function($query) {
-                    $query->where(Inventory::getTableName().'.inventory_id', '=', Queue::getTableName().'.inventory_id')
-                          ->where(Profile::getTableName().'.id', '=', Queue::getTableName().'.profile_id');
+                    $query->on(Inventory::getTableName().'.inventory_id', '=', Queue::getTableName().'.inventory_id')
+                          ->on(Profile::getTableName().'.id', '=', Queue::getTableName().'.profile_id');
                 })->leftJoin(Session::getTableName(), function($query) {
-                    $query->where(Queue::getTableName().'.session_id', '=', Session::getTableName().'.session_id')
-                          ->where(Queue::getTableName().'.dealer_id', '=', Session::getTableName().'.session_dealer_id')
-                          ->where(Queue::getTableName().'.profile_id', '=', Session::getTableName().'.session_profile_id')
-                          ->where(Queue::getTableName().'.status', '=', self::SESSION_SCHEDULED_STATUS);
+                    $query->on(Queue::getTableName().'.session_id', '=', Session::getTableName().'.session_id')
+                          ->on(Queue::getTableName().'.dealer_id', '=', Session::getTableName().'.session_dealer_id')
+                          ->on(Queue::getTableName().'.profile_id', '=', Session::getTableName().'.session_profile_id')
+                          ->on(Queue::getTableName().'.status', '=', self::SESSION_SCHEDULED_STATUS);
                 });
     }
 
