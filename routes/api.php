@@ -711,6 +711,7 @@ $api->version('v1', function ($route) {
         ], function ($route) {
             $route->put('create', 'App\Http\Controllers\v1\CRM\Leads\InquiryController@create');
             $route->put('send', 'App\Http\Controllers\v1\CRM\Leads\InquiryController@send');
+            $route->put('text', 'App\Http\Controllers\v1\CRM\Leads\InquiryController@text');
             // TO DO: Create Endpoint to Combine Send Text + Inquiry
             //$route->post('text', 'App\Http\Controllers\v1\CRM\Leads\InquiryController@text');
         });
@@ -991,6 +992,46 @@ $api->version('v1', function ($route) {
                 });
             });
         });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Marketing
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->group([
+            'prefix' => 'marketing'
+        ], function ($route) {
+            // Craigslist
+            $route->group([
+                'prefix' => 'clapp'
+            ], function ($route) {
+                // Craigslist
+                $route->group([
+                    'prefix' => 'posts'
+                ], function ($route) {
+                    $route->get('/', 'App\Http\Controllers\v1\Marketing\Craigslist\ActivePostController@index');
+                });
+
+                // Upcoming Scheduler Posts
+                $route->get('upcoming', 'App\Http\Controllers\v1\Marketing\Craigslist\SchedulerController@upcoming');
+            });
+
+            // Facebook Marketplace
+            $route->group([
+                'prefix' => 'pagetab',
+                'middleware' => 'marketing.facebook.pagetab'
+            ], function ($route) {
+                $route->get('/', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@index');
+                $route->post('/', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@create');
+                $route->put('/', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@update'); // requires page_id instead
+                $route->get('{id}', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@show')->where('id', '[0-9]+');
+                $route->put('{id}', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@update')->where('id', '[0-9]+');
+                $route->delete('{id}', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@destroy')->where('id', '[0-9]+');
+            });
+        });
     });
 
 
@@ -1246,31 +1287,4 @@ $api->version('v1', function ($route) {
     $route->put('bills/{id}', 'App\Http\Controllers\v1\Dms\Quickbooks\BillController@update')->where('id', '[0-9]+');
     $route->get('bills/{id}', 'App\Http\Controllers\v1\Dms\Quickbooks\BillController@show')->where('id', '[0-9]+');
     $route->get('bills', 'App\Http\Controllers\v1\Dms\Quickbooks\BillController@index');
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Marketing
-    |--------------------------------------------------------------------------
-    |
-    |
-    |
-    */
-    $route->group([
-        'prefix' => 'marketing',
-        'middleware' => 'accesstoken.validate'
-    ], function ($route) {
-        // Facebook Marketplace
-        $route->group([
-            'prefix' => 'pagetab',
-            'middleware' => 'marketing.facebook.pagetab'
-        ], function ($route) {
-            $route->get('/', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@index');
-            $route->post('/', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@create');
-            $route->put('/', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@update'); // requires page_id instead
-            $route->get('{id}', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@show')->where('id', '[0-9]+');
-            $route->put('{id}', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@update')->where('id', '[0-9]+');
-            $route->delete('{id}', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@destroy')->where('id', '[0-9]+');
-        });
-    });
 });

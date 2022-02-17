@@ -36,7 +36,7 @@ class PartsController extends RestfulController
     /**
      * @var PartsTransformer
      */
-    private $partsTransformer;
+    protected $partsTransformer;
 
     /**
      * Create a new controller instance.
