@@ -350,7 +350,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         // Create Collection
         $collection = new Collection();
         foreach($query->get() as $item) {
-            $collection->push(ClappInventory::build($item));
+            $collection->push(ClappInventory::fill($item));
         }
 
         // Return Collection

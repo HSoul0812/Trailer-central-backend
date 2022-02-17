@@ -26,17 +26,20 @@ class InventoryTransformer extends TransformerAbstract
     public function transform(ClappInventory $inventory)
     {
         $return = [
-            'id' => $inventory->inventory_id,
+            'id' => $inventory->inventoryId,
             'stock' => $inventory->stock,
             'title' => $inventory->title,
             'category' => $inventory->category,
             'manufacturer' => $inventory->manufacturer,
             'price' => $inventory->price,
-            'status' => '',
-            'primary_image' => !empty($inventory->primary_image) ?
-                config('app.cdn_url') . $this->inventory->primary_image->image->filename : '',
-            'last_posted' => '',
-            'next_scheduled' => ''
+            'status' => $inventory->status,
+            'primary_image' => $inventory->getPrimaryImage(),
+            'last_posted' => $inventory->lastPosted,
+            'next_scheduled' => $inventory->nextScheduled,
+            'queue_id' => $inventory->queueId,
+            'craigslist_id' => $inventory->craigslistId,
+            'view_url' => $inventory->viewUrl,
+            'manage_url' => $inventory->manageUrl
         ];
 
         // Is Scheduler?
