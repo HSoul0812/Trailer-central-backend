@@ -44,6 +44,9 @@ class InventoryTransformer extends TransformerAbstract
             unset($return['next_scheduled']);
             unset($return['queue_id']);
         }
+
+        // Return Result
+        return $return;
     }
 
 }
