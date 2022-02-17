@@ -229,15 +229,12 @@ class InventoryRepository implements InventoryRepositoryInterface
                     Session::getTableName().'.session_scheduled as next_scheduled',
                     Queue::getTableName().'.queue_id', Post::getTableName().'.clid',
                     Post::getTableName().'.view_url', Post::getTableName().'.manage_url'
-                ])->leftJoin(InventoryImage::getTableName(),Image::getTableName().'.inventory_id',
+                ])->leftJoin(InventoryImage::getTableName(), Inventory::getTableName().'.inventory_id',
                             '=', InventoryImage::getTableName().'.inventory_id')
                 ->leftJoin(Image::getTableName(), Image::getTableName().'.image_id',
                             '=', InventoryImage::getTableName().'.image_id')
                 ->crossJoin(Profile::getTableName())
                 ->leftJoin(Post::getTableName(), function($query) {
-                    $query->where(Inventory::getTableName().'.inventory_id', '=', Post::getTableName().'.inventory_id')
-                          ->where(Profile::getTableName().'.profile_id', '=', Post::getTableName().'.profile_id');
-                })->leftJoin(Post::getTableName(), function($query) {
                     $query->where(Inventory::getTableName().'.inventory_id', '=', Post::getTableName().'.inventory_id')
                           ->where(Profile::getTableName().'.profile_id', '=', Post::getTableName().'.profile_id');
                 })->leftJoin(Queue::getTableName(), function($query) {
