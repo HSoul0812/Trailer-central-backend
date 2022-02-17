@@ -212,8 +212,10 @@ class InventoryRepository implements InventoryRepositoryInterface
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
         }
+        echo $query->toSql();
+        die;
 
-        return $query;
+        //return $query;
     }
 
     private function initInventoryQuery() : Builder
