@@ -212,10 +212,8 @@ class InventoryRepository implements InventoryRepositoryInterface
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
         }
-        echo $query->toSql();
-        die;
 
-        //return $query;
+        return $query;
     }
 
     private function initInventoryQuery() : Builder
@@ -226,8 +224,7 @@ class InventoryRepository implements InventoryRepositoryInterface
                     Inventory::getTableName().'.manufacturer', Inventory::getTableName().'.price',
                     Post::getTableName().'.cl_status as status',
                     Image::getTableName().'.filename as primary_image',
-                    Post::getTableName().'.added as last_posted',
-                    Session::getTableName().'.session_scheduled as next_scheduled',
+                    Post::getTableName().'.added', Session::getTableName().'.session_scheduled',
                     Queue::getTableName().'.queue_id', Post::getTableName().'.clid',
                     Post::getTableName().'.view_url', Post::getTableName().'.manage_url'
                 ])->leftJoin(InventoryImage::getTableName(), Inventory::getTableName().'.inventory_id',
@@ -245,7 +242,7 @@ class InventoryRepository implements InventoryRepositoryInterface
                     $query->on(Queue::getTableName().'.session_id', '=', Session::getTableName().'.session_id')
                           ->on(Queue::getTableName().'.dealer_id', '=', Session::getTableName().'.session_dealer_id')
                           ->on(Queue::getTableName().'.profile_id', '=', Session::getTableName().'.session_profile_id')
-                          ->on(Queue::getTableName().'.status', '=', self::SESSION_SCHEDULED_STATUS);
+                          ->where(Queue::getTableName().'.status', '=', self::SESSION_SCHEDULED_STATUS);
                 });
     }
 
