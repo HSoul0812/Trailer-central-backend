@@ -177,7 +177,7 @@ class InventoryRepository implements InventoryRepositoryInterface
 
         $query = $this->buildInventoryQuery($params);
 
-        return $this->createCollection($query, $params['type']);
+        return $this->createCollection($query, $params['type'] ?? null);
     }
 
     protected function getSortOrders() {
@@ -338,7 +338,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         $paginatedQuery->take($perPage);
 
         return (new LengthAwarePaginator(
-            $this->createCollection($paginatedQuery, $params['type']),
+            $this->createCollection($paginatedQuery, $params['type'] ?? null),
             $resultsCount,
             $perPage,
             $currentPage,
