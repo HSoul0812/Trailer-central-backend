@@ -14,6 +14,7 @@ use App\Traits\Repository\Transaction;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class InventoryRepository
