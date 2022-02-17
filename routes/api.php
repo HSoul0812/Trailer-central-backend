@@ -1023,6 +1023,13 @@ $api->version('v1', function ($route) {
 
                 // Upcoming Scheduler Posts
                 $route->get('upcoming', 'App\Http\Controllers\v1\Marketing\Craigslist\SchedulerController@upcoming');
+
+                // Profile
+                $route->group([
+                    'prefix' => 'profile'
+                ], function ($route) {
+                    $route->get('/', 'App\Http\Controllers\v1\Marketing\Craigslist\ProfileController@index');
+                });
             });
 
             // Facebook Marketplace
