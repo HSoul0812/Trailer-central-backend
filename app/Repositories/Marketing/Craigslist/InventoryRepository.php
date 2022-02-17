@@ -188,7 +188,7 @@ class InventoryRepository implements InventoryRepositoryInterface
      *
      * @return Builder
      */
-    private function buildInventoryQuery(array $params): Grimzy {
+    private function buildInventoryQuery(array $params): Builder {
         /** @var Builder $query */
         $query = $this->initInventoryQuery()
                       ->where(Inventory::getTableName().'.dealer_id', '=', $params['dealer_id'])
@@ -217,7 +217,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         return $query;
     }
 
-    private function initInventoryQuery() : Grimzy
+    private function initInventoryQuery() : Builder
     {
         return DB::table(Inventory::getTableName())->select([
                     Inventory::getTableName().'.inventory_id', Inventory::getTableName().'.stock',
@@ -251,7 +251,7 @@ class InventoryRepository implements InventoryRepositoryInterface
                 });
     }
 
-    private function archivedInventoryQuery(Grimzy $query) : Grimzy
+    private function archivedInventoryQuery(Builder $query) : Builder
     {
         return $query->where(function ($query) {
             $query->where(function ($query) {
@@ -264,7 +264,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         });
     }
 
-    private function overrideInventoryQuery(Grimzy $query, int $dealerId) : Grimzy
+    private function overrideInventoryQuery(Builder $query, int $dealerId) : Builder
     {
         // Get Status Overrides
         $statusAll = config('marketing.cl.overrides.statusAll', '');
@@ -290,7 +290,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         return $query;
     }
 
-    private function filterInventoryQuery(Grimzy $query, array $params) : Grimzy
+    private function filterInventoryQuery(Builder $query, array $params) : Builder
     {
         if (isset($params['condition'])) {
             $query = $query->where('condition', $params['condition']);
@@ -326,7 +326,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         return $query;
     }
 
-    private function getResultsCountFromQuery(Grimzy $query) : int
+    private function getResultsCountFromQuery(Builder $query) : int
     {
         $queryString = str_replace(array('?'), array('\'%s\''), $query->toSql());
         $queryString = vsprintf($queryString, $query->getBindings());
@@ -353,7 +353,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         ))->appends($params);
     }
 
-    private function createCollection(Grimzy $query): Collection {
+    private function createCollection(Builder $query): Collection {
         // Create Collection
         $collection = new Collection();
         foreach($query->get() as $item) {
