@@ -59,9 +59,13 @@ return [
     'before_send' => function (Event $event): ?Event {
         if (auth()->check()) {
             $dealer = auth()->user();
+            $dealer->load('website');
+
             $event->setTags([
                 'dealer_id' => $dealer->dealer_id,
-                'dealer_name' => $dealer->name
+                'dealer_name' => $dealer->name,
+                'website_id' => $dealer->website->id,
+                'website_domain' => $dealer->website->domain,
             ]);
         }
         return $event;
