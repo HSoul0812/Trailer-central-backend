@@ -10,6 +10,7 @@ use App\Models\Marketing\Craigslist\Profile;
 use App\Models\Marketing\Craigslist\Queue;
 use App\Models\Marketing\Craigslist\Session;
 use App\Repositories\Traits\SortTrait;
+use App\Services\Marketing\Craigslist\DTOs\ClappInventory;
 use App\Traits\Repository\Transaction;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\Builder;

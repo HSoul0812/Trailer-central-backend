@@ -3,12 +3,7 @@
 namespace App\Transformers\Marketing\Craigslist;
 
 use League\Fractal\TransformerAbstract;
-use App\Models\Inventory\Inventory;
-use App\Models\Inventory\InventoryImage;
-use App\Models\Inventory\Image;
-use App\Transformers\User\UserTransformer;
-use App\Transformers\User\DealerLocationTransformer;
-use App\Transformers\Website\WebsiteTransformer;
+use App\Services\Marketing\Craigslist\DTOs\ClappInventory;
 
 /**
  * Class InventoryTransformer
