@@ -57,6 +57,11 @@ class ClappInventory
     /**
      * @var string
      */
+    private $title;
+
+    /**
+     * @var string
+     */
     private $category;
 
     /**
