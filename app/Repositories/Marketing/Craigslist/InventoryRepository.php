@@ -15,6 +15,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Grimzy\LaravelMysqlSpatial\Eloquent\Builder as GrimzyBuilder;
 
 /**
  * Class InventoryRepository
