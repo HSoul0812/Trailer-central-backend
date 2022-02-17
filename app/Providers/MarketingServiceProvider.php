@@ -21,7 +21,7 @@ class MarketingServiceProvider extends ServiceProvider
     {
         // Marketing Repositories
         $this->app->bind(ActivePostRepositoryInterface::class, ActivePostRepository::class);
-        $this->app->bind(InventoryRepositoryInterface::class, ActivePostRepository::class);
+        $this->app->bind(InventoryRepositoryInterface::class, InventoryRepository::class);
         $this->app->bind(SchedulerRepositoryInterface::class, SchedulerRepository::class);
     }
 
