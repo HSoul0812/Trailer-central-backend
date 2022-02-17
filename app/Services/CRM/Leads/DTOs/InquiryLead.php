@@ -105,6 +105,19 @@ class InquiryLead
     /**
      * @const array
      */
+    const INQUIRY_EMAIL_TYPES = [
+        'general',
+        'cta',
+        'inventory',
+        'part',
+        'showroom',
+        'call',
+        'bestprice',
+    ];
+
+    /**
+     * @const array
+     */
     const NON_INVENTORY_TYPES = ['part', 'showroom'];
 
 
