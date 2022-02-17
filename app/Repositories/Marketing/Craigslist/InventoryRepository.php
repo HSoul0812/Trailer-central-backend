@@ -194,12 +194,8 @@ class InventoryRepository implements InventoryRepositoryInterface
                       ->where(Inventory::getTableName().'.dealer_id', '=', $params['dealer_id'])
                       ->where(Profile::getTableName().'.id', '=', $params['profile_id']);
 
-        if (isset($params['include']) && is_string($params['include'])) {
-            $query = $query->with(explode(',', $params['include']));
-        }
-
         if (isset($params['dealer_location_id'])) {
-            $query = $query->where('inventory.dealer_location_id', $params['dealer_location_id']);
+            $query = $query->where(Inventory::getTableName().'.dealer_location_id', $params['dealer_location_id']);
         }
 
         if (isset($params['type']) && $params['type'] === 'archives') {
@@ -210,6 +206,9 @@ class InventoryRepository implements InventoryRepositoryInterface
 
         $query = $this->filterInventoryQuery($query, $params);
 
+        if (empty($params['sort'])) {
+            $params['sort'] = 'created_at';
+        }
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
         }
@@ -257,7 +256,7 @@ class InventoryRepository implements InventoryRepositoryInterface
                       ->orWhere(Inventory::getTableName().'.status', '=', 2)
                       ->orWhere(Inventory::getTableName().'.status', '=', 4)
                       ->orWhere(Inventory::getTableName().'.status', '=', 5);
-            })->where(Inventory::getTableName().'.');
+            })->whereNotNull(Post::getTableName().'.clid');
         });
     }
 
@@ -267,12 +266,12 @@ class InventoryRepository implements InventoryRepositoryInterface
         $statusAll = config('marketing.cl.overrides.statusAll', '');
         if(in_array($dealerId, explode(",", $statusAll))) {
             $query = $query->where(function($query) {
-                $query = $query->where('inventory.status', 1);
+                $query = $query->where(Inventory::getTableName().'.status', 1);
 
                 // Get Status On Order Overrides
                 $statusOnOrder = config('marketing.cl.overrides.statusAll', '');
                 if(in_array($dealerId, explode(",", $statusOnOrder))) {
-                    $query = $query->orWhere('inventory.status', 3);
+                    $query = $query->orWhere(Inventory::getTableName().'.status', 3);
                 }
             });
         }
@@ -280,7 +279,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         // Get Show on Website Overrides
         $showOnWebsite = config('marketing.cl.overrides.showOnWebsite', '');
         if(in_array($dealerId, explode(",", $showOnWebsite))) {
-            $query = $query->where('inventory.show_on_website', 1);
+            $query = $query->where(Inventory::getTableName().'.show_on_website', 1);
         }
 
         // Return Result
@@ -290,7 +289,7 @@ class InventoryRepository implements InventoryRepositoryInterface
     private function filterInventoryQuery(Builder $query, array $params) : Builder
     {
         if (isset($params['condition'])) {
-            $query = $query->where('condition', $params['condition']);
+            $query = $query->where(Inventory::getTableName().'.condition', $params['condition']);
         }
 
         if (isset($params['search_term'])) {
@@ -298,10 +297,7 @@ class InventoryRepository implements InventoryRepositoryInterface
                 $q->where(Inventory::getTableName().'.stock', 'LIKE', '%' . $params['search_term'] . '%')
                   ->orWhere(Inventory::getTableName().'.title', 'LIKE', '%' . $params['search_term'] . '%')
                   ->orWhere(Inventory::getTableName().'.description', 'LIKE', '%' . $params['search_term'] . '%')
-                  ->orWhere(Inventory::getTableName().'.vin', 'LIKE', '%' . $params['search_term'] . '%')
-                  ->orWhereHas('floorplanVendor', function ($query) use ($params) {
-                    $query->where('name', 'LIKE', '%' . $params['search_term'] . '%');
-                  });
+                  ->orWhere(Inventory::getTableName().'.vin', 'LIKE', '%' . $params['search_term'] . '%');
             });
         }
 
@@ -314,13 +310,14 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         if (isset($params['images_greater_than']) || isset($params['images_less_than'])) {
-            $query = $query->leftJoin('inventory_image', 'inventory_image.inventory_id', '=', 'inventory.inventory_id');
-            $query->selectRaw('count(inventory_image.inventory_id) as image_count');
-            $query->groupBy('inventory.inventory_id');
+            $query = $query->leftJoin(InventoryImage::getTableName(),
+                    InventoryImage::getTableName().'.inventory_id', '=',
+                    Inventory::getTableName().'.inventory_id');
+            $query->selectRaw('count('.InventoryImage::getTableName().'.inventory_id) as image_count');
         }
 
         // Return Query Builder
-        return $query;
+        return $query->groupBy(Inventory::getTableName().'.inventory_id');;
     }
 
     private function getResultsCountFromQuery(Builder $query) : int
