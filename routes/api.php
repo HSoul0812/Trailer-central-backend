@@ -414,6 +414,15 @@ $api->version('v1', function ($route) {
         $route->delete('', 'App\Http\Controllers\v1\Website\User\WebsiteUserFavoriteInventoryController@delete');
     });
 
+    /**
+     * Website User Search Result
+     */
+    $route->group(['prefix' => 'website/user/search-result', 'middleware' => 'api.auth', 'providers' => ['website_auth']], function ($route) {
+        $route->get('', 'App\Http\Controllers\v1\Website\User\WebsiteUserSearchResultController@index');
+        $route->post('', 'App\Http\Controllers\v1\Website\User\WebsiteUserSearchResultController@create');
+        $route->delete('', 'App\Http\Controllers\v1\Website\User\WebsiteUserSearchResultController@delete');
+    });
+
     /*
     |--------------------------------------------------------------------------
     | Interactions
@@ -644,6 +653,27 @@ $api->version('v1', function ($route) {
 
         /*
         |--------------------------------------------------------------------------
+        | Dealer Website Images
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('website/{websiteId}/images', 'App\Http\Controllers\v1\Website\Image\WebsiteImagesController@index')->where('websiteId', '[0-9]+');
+        $route->post('website/{websiteId}/image/{imageId}', 'App\Http\Controllers\v1\Website\Image\WebsiteImagesController@update')->where(['websiteId' => '[0-9]+', 'imageId' => '[0-9]+']);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Dealer integrations
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('user/integrations/{id}', 'App\Http\Controllers\v1\User\DealerIntegrationController@show');
+
+        /*
+        |--------------------------------------------------------------------------
         | Customers
         |--------------------------------------------------------------------------
         |
@@ -681,6 +711,7 @@ $api->version('v1', function ($route) {
         ], function ($route) {
             $route->put('create', 'App\Http\Controllers\v1\CRM\Leads\InquiryController@create');
             $route->put('send', 'App\Http\Controllers\v1\CRM\Leads\InquiryController@send');
+            $route->put('text', 'App\Http\Controllers\v1\CRM\Leads\InquiryController@text');
             // TO DO: Create Endpoint to Combine Send Text + Inquiry
             //$route->post('text', 'App\Http\Controllers\v1\CRM\Leads\InquiryController@text');
         });
@@ -961,6 +992,58 @@ $api->version('v1', function ($route) {
                 });
             });
         });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Marketing
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->group([
+            'prefix' => 'marketing'
+        ], function ($route) {
+            // Craigslist
+            $route->group([
+                'prefix' => 'clapp'
+            ], function ($route) {
+                // Craigslist
+                $route->group([
+                    'prefix' => 'posts'
+                ], function ($route) {
+                    $route->get('/', 'App\Http\Controllers\v1\Marketing\Craigslist\ActivePostController@index');
+                });
+
+                // Upcoming Scheduler Posts
+                $route->get('upcoming', 'App\Http\Controllers\v1\Marketing\Craigslist\SchedulerController@upcoming');
+            });
+
+            // Facebook Marketplace
+            $route->group([
+                'prefix' => 'pagetab',
+                'middleware' => 'marketing.facebook.pagetab'
+            ], function ($route) {
+                $route->get('/', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@index');
+                $route->post('/', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@create');
+                $route->put('/', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@update'); // requires page_id instead
+                $route->get('{id}', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@show')->where('id', '[0-9]+');
+                $route->put('{id}', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@update')->where('id', '[0-9]+');
+                $route->delete('{id}', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@destroy')->where('id', '[0-9]+');
+            });
+
+            // Facebook Marketplace
+            $route->group([
+                'prefix' => 'facebook',
+                'middleware' => 'marketing.facebook.marketplace'
+            ], function ($route) {
+                $route->get('/', 'App\Http\Controllers\v1\Marketing\FacebookController@index');
+                $route->post('/', 'App\Http\Controllers\v1\Marketing\FacebookController@create');
+                $route->get('{id}', 'App\Http\Controllers\v1\Marketing\FacebookController@show')->where('id', '[0-9]+');
+                $route->put('{id}', 'App\Http\Controllers\v1\Marketing\FacebookController@update')->where('id', '[0-9]+');
+                $route->delete('{id}', 'App\Http\Controllers\v1\Marketing\FacebookController@destroy')->where('id', '[0-9]+');
+            });
+        });
     });
 
 
@@ -1220,27 +1303,31 @@ $api->version('v1', function ($route) {
 
     /*
     |--------------------------------------------------------------------------
-    | Marketing
+    | Dispatch
     |--------------------------------------------------------------------------
     |
     |
     |
     */
     $route->group([
-        'prefix' => 'marketing',
-        'middleware' => 'accesstoken.validate'
+        'prefix' => 'dispatch'
     ], function ($route) {
-        // Facebook Marketplace
+        // Facebook Marketplace Extension
         $route->group([
-            'prefix' => 'pagetab',
-            'middleware' => 'marketing.facebook.pagetab'
+            'prefix' => 'facebook'
         ], function ($route) {
-            $route->get('/', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@index');
-            $route->post('/', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@create');
-            $route->put('/', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@update'); // requires page_id instead
-            $route->get('{id}', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@show')->where('id', '[0-9]+');
-            $route->put('{id}', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@update')->where('id', '[0-9]+');
-            $route->delete('{id}', 'App\Http\Controllers\v1\Marketing\Facebook\PagetabController@destroy')->where('id', '[0-9]+');
+            // Login to Facebook Dispatch
+            $route->post('/', 'App\Http\Controllers\v1\Dispatch\FacebookController@login');
+
+            // Facebook Marketplace
+            $route->group([
+                'middleware' => 'dispatch.facebook'
+            ], function ($route) {
+                $route->get('/', 'App\Http\Controllers\v1\Dispatch\FacebookController@index');
+                $route->get('{id}', 'App\Http\Controllers\v1\Dispatch\FacebookController@show')->where('id', '[0-9]+');
+                $route->post('{id}', 'App\Http\Controllers\v1\Dispatch\FacebookController@create')->where('id', '[0-9]+');
+                $route->put('{id}', 'App\Http\Controllers\v1\Dispatch\FacebookController@update')->where('id', '[0-9]+');
+            });
         });
     });
 });

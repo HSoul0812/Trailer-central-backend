@@ -11,7 +11,7 @@ use App\Repositories\Inventory\InventoryRepositoryInterface;
 use Dingo\Api\Exception\ResourceException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * @property int $dealer_id
@@ -59,7 +59,7 @@ class DeleteImagesRequest extends WithDealerRequest
 
             if ($user) {
                 if ($inventory->dealer_id !== $user->dealer_id) {
-                    throw new UnauthorizedHttpException(
+                    throw new AccessDeniedHttpException(
                         'You are not allowed to delete images from this inventory'
                     );
                 }
@@ -71,8 +71,8 @@ class DeleteImagesRequest extends WithDealerRequest
                 });
 
                 if (!$allImagesBelongsToCurrentUser) {
-                    throw new UnauthorizedHttpException(
-                        'You are not allowed to delete images these images'
+                    throw new AccessDeniedHttpException(
+                        'You are not allowed to delete those images'
                     );
                 }
             }

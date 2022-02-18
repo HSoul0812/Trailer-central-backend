@@ -75,12 +75,12 @@ class InquiryLead
     /**
      * @const string
      */
-    const TT_EMAIL_BODY = '#ffff00';
+    const TT_EMAIL_BODY = '#ffffff';
 
     /**
      * @const string
      */
-    const TT_EMAIL_HEADER = '#00003d';
+    const TT_EMAIL_HEADER = '#F8F9FA';
 
 
     /**
@@ -396,6 +396,14 @@ class InquiryLead
      * @return array{array{name: string, email: string}, ...etc}
      */
     public function getInquiryToArray(): array {
+      
+        // Normal, support to many emails for leads on dealer location email field
+        $normalTo = [];
+        $inquiryEmail = preg_split('/,|;|\s/', $this->inquiryEmail, null, PREG_SPLIT_NO_EMPTY);
+
+        foreach ($inquiryEmail as $key => $value) {
+          $normalTo[$key] = ['name' =>$this->inquiryName, 'email' => $value];
+        }
         // If Dev, Only Return Specific Entries
         if(!empty($this->isDev())) {
             $to = self::INQUIRY_DEV_TO;
@@ -407,9 +415,10 @@ class InquiryLead
         // Normal, Return Proper Inquiry
         else {
             if ($this->websiteDomain == self::TT_SIMPLE_DOMAIN) {
-              return [['name' => $this->inquiryName, 'email' => $this->inquiryEmail], ['name' => $this->firstName, 'email' => $this->emailAddress]];
+              $normalTo[] = ['name' => $this->firstName, 'email' => $this->emailAddress];
+              return $normalTo;
             } else {
-              return [['name' => $this->inquiryName, 'email' => $this->inquiryEmail]];
+              return $normalTo;;
             }
             
         }
@@ -472,7 +481,7 @@ class InquiryLead
      */
     public function isTrailerTrader(): bool
     {
-        return $this->websiteDomain === self::TT_DOMAIN;
+        return $this->websiteDomain === self::TT_SIMPLE_DOMAIN;
     }
 
     /**

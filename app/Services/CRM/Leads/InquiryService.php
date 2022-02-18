@@ -14,6 +14,7 @@ use App\Services\CRM\Leads\DTOs\InquiryLead;
 use App\Services\CRM\Leads\InquiryServiceInterface;
 use App\Services\CRM\Leads\Export\ADFServiceInterface;
 use App\Services\CRM\Email\InquiryEmailServiceInterface;
+use App\Services\CRM\Text\InquiryTextServiceInterface;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use App\Transformers\CRM\Leads\LeadTransformer;
 use App\Transformers\CRM\Interactions\InteractionTransformer;
@@ -24,7 +25,7 @@ use League\Fractal\Resource\Item;
 
 /**
  * Class LeadService
- * 
+ *
  * @package App\Services\CRM\Leads
  */
 class InquiryService implements InquiryServiceInterface
@@ -57,6 +58,11 @@ class InquiryService implements InquiryServiceInterface
     protected $inquiryEmail;
 
     /**
+     * @var App\Services\CRM\Text\InquiryTextServiceInterface;
+     */
+    protected $inquiryText;
+
+    /**
      * @var App\Services\CRM\Leads\Export\ADFServiceInterface
      */
     protected $adf;
@@ -86,6 +92,7 @@ class InquiryService implements InquiryServiceInterface
         TrackingUnitRepositoryInterface $trackingUnit,
         LeadServiceInterface $leads,
         InquiryEmailServiceInterface $inquiryEmail,
+        InquiryTextServiceInterface $inquiryText,
         ADFServiceInterface $adf,
         LeadTransformer $leadTransformer,
         InteractionTransformer $interactionTransformer,
@@ -94,6 +101,7 @@ class InquiryService implements InquiryServiceInterface
         // Initialize Services
         $this->leads = $leads;
         $this->inquiryEmail = $inquiryEmail;
+        $this->inquiryText = $inquiryText;
         $this->adf = $adf;
 
         // Initialize Repositories
@@ -111,7 +119,7 @@ class InquiryService implements InquiryServiceInterface
 
     /**
      * Create Inquiry
-     * 
+     *
      * @param array $params
      * @return array{data: Lead,
      *               merge: null|Interaction}
@@ -132,7 +140,7 @@ class InquiryService implements InquiryServiceInterface
 
     /**
      * Send Inquiry
-     * 
+     *
      * @param array $params
      * @return array{data: Lead,
      *               merge: null|Interaction}
@@ -155,8 +163,27 @@ class InquiryService implements InquiryServiceInterface
     }
 
     /**
+     * Text Inquiry
+     *
+     * @param array $params
+     * @return array{data: Lead,
+     *               merge: null|Interaction}
+     */
+    public function text(array $params): array {
+        $params = $this->inquiryText->merge($params);
+
+        $inquiry = new InquiryLead($params);
+
+        // Send Inquiry Text
+        $this->inquiryText->send($params);
+
+        // Merge or Create Lead
+        return $this->mergeOrCreate($inquiry, $params);
+    }
+
+    /**
      * Merge or Create Lead
-     * 
+     *
      * @param InquiryLead $inquiry
      * @param array $params
      * @return array{data: Lead,
@@ -196,7 +223,7 @@ class InquiryService implements InquiryServiceInterface
 
     /**
      * Return Response
-     * 
+     *
      * @param Lead $lead
      * @param null|Interaction $interaction
      * @return array{data: Lead,
@@ -222,7 +249,7 @@ class InquiryService implements InquiryServiceInterface
 
     /**
      * Queue Up Inquiry Jobs
-     * 
+     *
      * @param Lead $lead
      * @param InquiryLead $inquiry
      */
@@ -258,7 +285,7 @@ class InquiryService implements InquiryServiceInterface
 
     /**
      * Choose Matching Lead
-     * 
+     *
      * @param Collection<Lead> $matches
      * @param array $params
      * @return null|Lead
@@ -292,7 +319,7 @@ class InquiryService implements InquiryServiceInterface
 
     /**
      * Filter Matching Lead
-     * 
+     *
      * @param Collection<Lead> $leads
      * @param InquiryLead $inquiry
      * @return null|Lead
