@@ -289,6 +289,17 @@ class DealerLocation extends Model
         self::observe(app()->make(DealerLocationObserver::class));
     }
 
+    public function getCityRegionAttribute(): string
+    {
+        $locationAddr = $this->city;
+
+        if (!empty($locationAddr) && !empty($this->region)) {
+            $locationAddr .= ', ';
+        }
+
+        return $locationAddr . $this->region;
+    }
+
     public function getLocationTitleAttribute(): string
     {
         $locationAddr = $this->city;

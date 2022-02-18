@@ -119,9 +119,23 @@ return [
             'days' => 3,
         ],
 
+        'dispatch-fb' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/dispatch/facebook.log'),
+            'level' => 'debug',
+            'days' => 7,
+        ],
+
         'azure' => [
             'driver' => 'daily',
             'path' => storage_path('logs/services/azure.log'),
+            'level' => 'debug',
+            'days' => 3,
+        ],
+
+        'tunnels' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/repositories/tunnels.log'),
             'level' => 'debug',
             'days' => 3,
         ],

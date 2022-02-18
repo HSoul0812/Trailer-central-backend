@@ -12,6 +12,6 @@ namespace App\Exceptions\CRM\Email;
 class ExceededTotalAttachmentSizeException extends \Exception
 {
 
-    protected $message = 'Total upload size must be less than 8 MB'; 
+    protected $message = 'Total upload size must be less than 256 MB';
 
 }
