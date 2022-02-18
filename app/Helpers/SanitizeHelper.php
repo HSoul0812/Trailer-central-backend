@@ -359,4 +359,14 @@ END;
     {
         return (int)str_replace(['(', ')', '-', '+', '.'], '', $phoneNumber);
     }
+
+    /**
+     * @param string $str
+     * @return string
+     */
+    public function removeBrokenCharacters(string $str): string
+    {
+        $sanitizedComments = html_entity_decode(mb_convert_encoding(stripslashes($str), 'HTML-ENTITIES', 'UTF-8'));
+        return preg_replace('/&#(\d+);/i', '', $sanitizedComments);
+    }
 }

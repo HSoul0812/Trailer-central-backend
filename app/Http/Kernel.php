@@ -28,11 +28,13 @@ use App\Http\Middleware\CRM\Text\TemplateValidate as TextTemplateValidate;
 use App\Http\Middleware\CRM\Text\BlastValidate as TextBlastValidate;
 use App\Http\Middleware\CRM\Text\CampaignValidate as TextCampaignValidate;
 use App\Http\Middleware\CRM\User\SalesPersonValidate;
+use App\Http\Middleware\Dispatch\FacebookValidate;
 use App\Http\Middleware\Dms\Printer\FormValidate as PrinterFormValidate;
 use App\Http\Middleware\Dms\Printer\InstructionValidate as PrinterInstructionValidate;
 use App\Http\Middleware\Integration\AuthValidate;
 use App\Http\Middleware\Integration\Facebook\CatalogValidate;
 use App\Http\Middleware\Integration\Facebook\ChatValidate;
+use App\Http\Middleware\Marketing\Facebook\MarketplaceValidate;
 use App\Http\Middleware\Marketing\Facebook\PagetabValidate;
 use App\Http\Middleware\Parts\PartOrderValidate;
 
@@ -124,7 +126,9 @@ class Kernel extends HttpKernel
         'inventory.create.permission' => CreateInventoryPermissionMiddleware::class,
         'stripe.webhook.validate' => StripeWebhookValidate::class,
         'textrail.webhook.validate' => TexTrailWebhookValidate::class,
-        'marketing.facebook.pagetab' => PagetabValidate::class
+        'marketing.facebook.marketplace' => MarketplaceValidate::class,
+        'marketing.facebook.pagetab' => PagetabValidate::class,
+        'dispatch.facebook' => FacebookValidate::class
     ];
 
     /**

@@ -110,7 +110,11 @@
         "preferred-install": "dist",
         "sort-packages": true,
         "optimize-autoloader": true,
-        "discard-changes": true
+        "discard-changes": true,
+        "platform": {
+            "ext-pcntl": "7.1",
+            "ext-posix": "7.1"
+        }
     },
     "repositories": [
         {
