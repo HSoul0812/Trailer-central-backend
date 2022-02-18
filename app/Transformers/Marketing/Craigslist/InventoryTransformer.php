@@ -33,11 +33,18 @@ class InventoryTransformer extends TransformerAbstract
             'next_scheduled' => $inventory->nextScheduled,
             'queue_id' => $inventory->queueId,
             'clid' => $inventory->craigslistId,
-            'links' => [
-                ['url' => $inventory->viewUrl, 'type' => 'view'],
-                ['url' => $inventory->manageUrl, 'type' => 'manage']
-            ]
+            'links' => []
         ];
+
+        // View URL Exists?
+        if($inventory->viewUrl) {
+            $return['links'][] = ['url' => $inventory->viewUrl, 'type' => 'view'];
+        }
+
+        // Manage URL Exists?
+        if($inventory->manageUrl) {
+            $return['links'][] = ['url' => $inventory->manageUrl, 'type' => 'manage'];
+        }
 
         // Is Scheduler?
         if($inventory->isScheduler()) {
