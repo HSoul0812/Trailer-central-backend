@@ -15,7 +15,7 @@ class AddSuppressDescriptionFromSearchSortingByRelevanceToGreatamericanrvWebsite
         WebsiteConfig::setKeyValueByDealerId(
             9088,
             'inventory/include_description_on_search',
-            1
+            0
         );
 
         WebsiteConfig::setKeyValueByDealerId(
@@ -35,7 +35,7 @@ class AddSuppressDescriptionFromSearchSortingByRelevanceToGreatamericanrvWebsite
         WebsiteConfig::setKeyValueByDealerId(
             9088,
             'inventory/include_description_on_search',
-            0
+            1
         );
 
         WebsiteConfig::setKeyValueByDealerId(
