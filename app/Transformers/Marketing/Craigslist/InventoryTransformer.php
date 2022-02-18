@@ -32,9 +32,11 @@ class InventoryTransformer extends TransformerAbstract
             'last_posted' => $inventory->lastPosted,
             'next_scheduled' => $inventory->nextScheduled,
             'queue_id' => $inventory->queueId,
-            'craigslist_id' => $inventory->craigslistId,
-            'view_url' => $inventory->viewUrl,
-            'manage_url' => $inventory->manageUrl
+            'clid' => $inventory->craigslistId,
+            'links' => [
+                ['url' => $inventory->viewUrl, 'type' => 'view'],
+                ['url' => $inventory->manageUrl, 'type' => 'manage']
+            ]
         ];
 
         // Is Scheduler?
