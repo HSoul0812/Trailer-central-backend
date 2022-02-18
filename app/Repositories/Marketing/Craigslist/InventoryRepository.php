@@ -271,7 +271,7 @@ class InventoryRepository implements InventoryRepositoryInterface
     {
         // Get Status Overrides
         $statusAll = config('marketing.cl.overrides.statusAll', '');
-        if(in_array($dealerId, explode(",", $statusAll))) {
+        if(!in_array($dealerId, explode(",", $statusAll))) {
             $query = $query->where(function($query) {
                 $query = $query->where(Inventory::getTableName().'.status', 1);
 
