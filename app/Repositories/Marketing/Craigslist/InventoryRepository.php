@@ -172,7 +172,7 @@ class InventoryRepository implements InventoryRepositoryInterface
      */
     public function getAll($params, bool $paginated = false)
     {
-        if ($paginated) {
+        if ($paginated && $params['per_page'] !== -1) {
             return $this->getPaginatedResults($params);
         }
 
