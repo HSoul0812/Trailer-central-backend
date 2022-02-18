@@ -13,11 +13,19 @@
             <!-- begin wrapper -->
             <table bgcolor="{{ $bgColor }}" cellpadding="10" cellspacing="0" border="0" width="650" style="border:1px solid #E0E0E0;">
                 <tr style="background:{{ $bgHeader }}">
-                    <td valign="top">
-                        <a href="{{ $logoUrl }}">
-                            <img src="{{ $logo }}" alt="{{ $fromName }}" style="margin-bottom:10px;" border="0"/>
-                        </a>
-                    </td>
+                    <?php if ($website == $simpleDomain): ?>
+                      <td valign="top" style="text-align:center">
+                          <a href="{{ $logoUrl }}">
+                            <img src="{{ $logo }}" alt="{{ $fromName }}" style="margin-bottom:10px;margin-top:10px;height:20px;" border="0"/>
+                          </a>
+                      </td>
+                    <?php else: ?>
+                      <td valign="top">
+                          <a href="{{ $logoUrl }}">
+                            <img src="{{ $logo }}" alt="{{ $fromName }}" style="margin-bottom:10px;margin-top:10px;height:20px;" border="0"/>              
+                          </a>
+                      </td>
+                    <?php endif; ?>
                 </tr>
                 <tr>
                     <td valign="top">

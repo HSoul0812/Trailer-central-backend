@@ -17,27 +17,27 @@ use Illuminate\Foundation\Bus\DispatchesJobs;
 class ADFService implements ADFServiceInterface
 {
     use DispatchesJobs;
-    
-    /**     
-     * @var App\Repositories\CRM\Leads\Export\LeadEmailRepositoryInterface 
+
+    /**
+     * @var App\Repositories\CRM\Leads\Export\LeadEmailRepositoryInterface
      */
     protected $leadEmailRepository;
-    
-    /**     
-     * @var App\Repositories\CRM\Inventory\InventoryRepositoryInterface 
+
+    /**
+     * @var App\Repositories\CRM\Inventory\InventoryRepositoryInterface
      */
     protected $inventoryRepository;
-    
-    /**     
-     * @var App\Repositories\User\UserRepositoryInterface 
+
+    /**
+     * @var App\Repositories\User\UserRepositoryInterface
      */
     protected $userRepository;
-    
-    /**     
-     * @var App\Repositories\User\DealerLocationRepositoryInterface 
+
+    /**
+     * @var App\Repositories\User\DealerLocationRepositoryInterface
      */
     protected $dealerLocationRepository;
-    
+
     public function __construct(
         LeadEmailRepositoryInterface $leadEmailRepository,
         InventoryRepositoryInterface $inventoryRepository,
@@ -52,12 +52,13 @@ class ADFService implements ADFServiceInterface
 
     /**
      * Takes a lead and export it to ADF in XML format
-     * 
+     *
      * @param InquiryLead $inquiry lead to export to IDS
      * @param Lead $lead lead to export to IDS
      * @return bool
      */
-    public function export(InquiryLead $inquiry, Lead $lead) : bool {
+    public function export(InquiryLead $inquiry, Lead $lead): bool
+    {
         $leadEmail = $this->leadEmailRepository->find($inquiry->dealerId, $inquiry->dealerLocationId);
         if (!$leadEmail || $leadEmail->export_format !== LeadEmail::EXPORT_FORMAT_ADF) {
             return false;
@@ -70,19 +71,20 @@ class ADFService implements ADFServiceInterface
         // Dispatch ADF Export Job
         $job = new ADFJob($adf, $lead, $leadEmail->to_emails, $leadEmail->copied_emails, $hiddenCopiedEmails);
         $this->dispatch($job->onQueue('mails'));
-        
+
         return true;
     }
 
 
     /**
      * Create ADF Lead From InquiryLead
-     * 
+     *
      * @param InquiryLead $inquiry
      * @param int $leadId
      * @return ADFLead
      */
-    private function getAdfLead(InquiryLead $inquiry, int $leadId): ADFLead {
+    private function getAdfLead(InquiryLead $inquiry, int $leadId): ADFLead
+    {
         // Initialize ADF Lead Params
         $params = [
             'leadId' => $leadId,
@@ -110,7 +112,7 @@ class ADFService implements ADFServiceInterface
 
     /**
      * Get ADF Vehicle Params From Inventory
-     * 
+     *
      * @param array<int> $inventory
      * @return array{vehicleYear: int,
      *               vehicleMake: string,
@@ -118,7 +120,8 @@ class ADFService implements ADFServiceInterface
      *               vehicleStock: string,
      *               vehicleVin: string}
      */
-    private function getAdfVehicle(array $inventory): array {
+    private function getAdfVehicle(array $inventory): array
+    {
         // Get Inventory
         $item = $this->inventoryRepository->get(['id' => reset($inventory)]);
 
@@ -134,7 +137,7 @@ class ADFService implements ADFServiceInterface
 
     /**
      * Get ADF Vendor Params From Dealer/DealerLocation
-     * 
+     *
      * @param InquiryLead $inquiry
      * @return array{dealerId: int,
      *               locationId: int,
@@ -149,7 +152,8 @@ class ADFService implements ADFServiceInterface
      *               vendorAddrZip: string,
      *               vendorAddrCountry: string}
      */
-    private function getAdfVendor(InquiryLead $inquiry): array {
+    private function getAdfVendor(InquiryLead $inquiry): array
+    {
         // Get Dealer & Location
         $dealer = $this->userRepository->get(['dealer_id' => $inquiry->dealerId]);
         $location = $this->dealerLocationRepository->get(['id' => $inquiry->dealerLocationId]);

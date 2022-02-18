@@ -82,7 +82,17 @@ trait SortTrait {
             return $query;
         }
 
-        return $query->orderBy($this->getSortOrders()[$sort]['field'], $this->getSortOrders()[$sort]['direction']);
+        // Get Sort Order(s)
+        $orders = $this->getSortOrders()[$sort];
+        if(isset($orders['field'])) {
+            return $query->orderByRaw($orders['field'] . ' ' . $orders['direction']);
+        }
+
+        // Handle Multi-Column Orders
+        foreach($orders as $order) {
+            $query = $query->orderByRaw($order['field'] . ' ' . $order['direction']);
+        }
+        return $query;
     }
     
     protected function getSortOrderNames() {
