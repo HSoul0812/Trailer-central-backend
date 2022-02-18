@@ -203,6 +203,13 @@ class InventoryRepository implements InventoryRepositoryInterface
         if (isset($params['type']) && $params['type'] === 'archives') {
             $query = $this->archivedInventoryQuery($query);
         } else {
+            // Skip Archived
+            $query->where(function ($query) {
+                $query->where(Inventory::getTableName().'.is_archived', '<>', 1)
+                      ->orWhereNull(Inventory::getTableName().'.is_archived');
+            });
+
+            // Override Inventory Query
             $query = $this->overrideInventoryQuery($query, $params['dealer_id']);
         }
 

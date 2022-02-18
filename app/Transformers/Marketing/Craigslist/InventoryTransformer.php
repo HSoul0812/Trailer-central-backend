@@ -21,7 +21,7 @@ class InventoryTransformer extends TransformerAbstract
     public function transform(ClappInventory $inventory)
     {
         $return = [
-            'id' => $inventory->inventoryId,
+            'identifier' => $inventory->inventoryId,
             'stock' => $inventory->stock,
             'title' => $inventory->title,
             'category' => $inventory->category,
