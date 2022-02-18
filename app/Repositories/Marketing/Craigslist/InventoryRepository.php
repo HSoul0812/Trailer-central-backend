@@ -172,7 +172,7 @@ class InventoryRepository implements InventoryRepositoryInterface
      */
     public function getAll($params, bool $paginated = false)
     {
-        if ($paginated && $params['per_page'] !== -1) {
+        if ($paginated) {
             return $this->getPaginatedResults($params);
         }
 
@@ -332,8 +332,10 @@ class InventoryRepository implements InventoryRepositoryInterface
         $paginatedQuery = $this->buildInventoryQuery($params);
         $resultsCount = $this->getResultsCountFromQuery($paginatedQuery);
 
-        $paginatedQuery->skip(($currentPage - 1) * $perPage);
-        $paginatedQuery->take($perPage);
+        if((int) $params['per_page'] !== -1) {
+            $paginatedQuery->skip(($currentPage - 1) * $perPage);
+            $paginatedQuery->take($perPage);
+        }
 
         return (new LengthAwarePaginator(
             $this->createCollection($paginatedQuery, $params['type'] ?? null),
