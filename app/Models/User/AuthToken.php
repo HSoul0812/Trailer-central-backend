@@ -23,13 +23,15 @@ class AuthToken extends Model
 
     const USER_TYPE_DEALER = 'dealer';
     const USER_TYPE_DEALER_USER = 'dealer_user';
+    const USER_TYPE_INTEGRATION = 'integration';
 
     /**
      * @var array
      */
     const USER_TYPES = [
         self::USER_TYPE_DEALER,
-        self::USER_TYPE_DEALER_USER
+        self::USER_TYPE_DEALER_USER,
+        self::USER_TYPE_INTEGRATION
     ];
 
     /**
@@ -93,7 +95,7 @@ class AuthToken extends Model
     }
 
     /**
-     * Get Dealer User
+     * Get Interaction Integration
      *
      * @return HasOne
      */
