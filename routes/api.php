@@ -711,6 +711,7 @@ $api->version('v1', function ($route) {
         ], function ($route) {
             $route->put('create', 'App\Http\Controllers\v1\CRM\Leads\InquiryController@create');
             $route->put('send', 'App\Http\Controllers\v1\CRM\Leads\InquiryController@send');
+            $route->put('text', 'App\Http\Controllers\v1\CRM\Leads\InquiryController@text');
             // TO DO: Create Endpoint to Combine Send Text + Inquiry
             //$route->post('text', 'App\Http\Controllers\v1\CRM\Leads\InquiryController@text');
         });
