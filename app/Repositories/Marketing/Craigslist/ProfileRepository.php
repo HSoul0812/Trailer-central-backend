@@ -18,6 +18,14 @@ class ProfileRepository implements ProfileRepositoryInterface
     use SortTrait, Pagination;
 
     private $sortOrders = [
+        'profile' => [
+            'field' => 'profile',
+            'direction' => 'DESC'
+        ],
+        '-profile' => [
+            'field' => 'profile',
+            'direction' => 'ASC'
+        ],
         'username' => [
             'field' => 'username',
             'direction' => 'DESC'
@@ -25,7 +33,7 @@ class ProfileRepository implements ProfileRepositoryInterface
         '-username' => [
             'field' => 'username',
             'direction' => 'ASC'
-        ],
+        ]
     ];
 
     /**
@@ -86,10 +94,11 @@ class ProfileRepository implements ProfileRepositoryInterface
             $query = $query->where('dealer_id', $params['dealer_id']);
         }
 
+        if (!isset($params['sort'])) {
+            $params['sort'] = '-profile';
+        }
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
-        } else {
-            $query = $query->orderBy('username', 'ASC');
         }
 
         return $query->get();

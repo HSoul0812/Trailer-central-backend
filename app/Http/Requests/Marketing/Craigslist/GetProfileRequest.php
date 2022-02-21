@@ -11,7 +11,7 @@ class GetProfileRequest extends Request {
     
     protected $rules = [
         'type' => 'in:inventory',
-        'sort' => 'in:username,-username',
+        'sort' => 'in:profile,-profile,username,-username',
         'dealer_id' => 'integer'
     ];
 }
