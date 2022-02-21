@@ -562,6 +562,10 @@ class LeadRepository implements LeadRepositoryInterface {
      * @return Builder|Relation
      */
     private function addIsArchivedToQuery($query, bool $isArchived) {
+        if (!$isArchived) {
+            return $query->where(Lead::getTableName().'.is_archived', '!=', 1);
+        }
+
         return $query->where(Lead::getTableName().'.is_archived', $isArchived);
     }
 
@@ -591,6 +595,10 @@ class LeadRepository implements LeadRepositoryInterface {
      * @return Builder|Relation
      */
     private function addSalesPersonIdToQuery($query, int $salesPersonId) {
+        if ($salesPersonId === 0) {
+            return $query->whereNull(LeadStatus::getTableName().'.sales_person_id');
+        }
+
         return $query->where(LeadStatus::getTableName().'.sales_person_id', $salesPersonId);
     }
 
