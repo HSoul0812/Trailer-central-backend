@@ -20,6 +20,7 @@ use App\Transformers\CRM\Leads\LeadTransformer;
 use App\Transformers\CRM\Interactions\InteractionTransformer;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Bus\DispatchesJobs;
+use Illuminate\Support\Facades\Log;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
 
@@ -66,6 +67,11 @@ class InquiryService implements InquiryServiceInterface
      * @var App\Services\CRM\Leads\Export\ADFServiceInterface
      */
     protected $adf;
+
+    /**
+     * @var Illuminate\Support\Facades\Log
+     */
+    protected $log;
 
 
     /**
@@ -114,6 +120,9 @@ class InquiryService implements InquiryServiceInterface
         $this->interactionTransformer = $interactionTransformer;
         $this->fractal = $fractal;
         $this->fractal->setSerializer(new NoDataArraySerializer());
+
+        // Get Logger
+        $this->log = Log::channel('inquiry');
     }
 
 
@@ -133,6 +142,7 @@ class InquiryService implements InquiryServiceInterface
 
         // Get Inquiry Lead
         $inquiry = $this->inquiryEmail->fill($params);
+        $this->log->info('Creating ' . $inquiry->inquiryType . ' inquiry email for ' . $inquiry->getInquiryTo());
 
         // Create or Merge Lead
         return $this->mergeOrCreate($inquiry, $params);
@@ -156,6 +166,7 @@ class InquiryService implements InquiryServiceInterface
         $inquiry = $this->inquiryEmail->fill($params);
 
         // Send Inquiry Email
+        $this->log->info('Sending ' . $inquiry->inquiryType . ' inquiry email for ' . $inquiry->getInquiryTo());
         $this->inquiryEmail->send($inquiry);
 
         // Merge or Create Lead
@@ -201,6 +212,7 @@ class InquiryService implements InquiryServiceInterface
 
             // Merge Lead!
             if(!empty($lead->identifier)) {
+                $this->log->info('Merged lead inquiry into #' . $lead->identifier);
                 $interaction = $this->leads->merge($lead, $params);
             }
         }
@@ -208,11 +220,13 @@ class InquiryService implements InquiryServiceInterface
         // Create Lead!
         if(empty($lead->identifier)) {
             $lead = $this->leads->create($params);
+            $this->log->info('Created new lead #' . $lead->identifier);
         }
 
         // Lead Exists?!
         if(!empty($lead->identifier)) {
             // Queue Up Inquiry Jobs
+            $this->log->info('Handling jobs on lead #' . $lead->identifier);
             $this->queueInquiryJobs($lead, $inquiry);
         }
 
@@ -257,22 +271,21 @@ class InquiryService implements InquiryServiceInterface
         // Create Auto Assign Job
         if(empty($lead->leadStatus->sales_person_id)) {
             // Dispatch Auto Assign Job
+            $this->log->info('Handling auto assign on lead #' . $lead->identifier);
             $job = new AutoAssignJob($lead);
-            $this->dispatch($job->onQueue('mails'));
+            $this->dispatch($job->onQueue('inquiry'));
         }
-
-        // Dispatch Auto Responder Job
-        $job = new AutoResponderJob($lead);
-        $this->dispatch($job->onQueue('mails'));
 
         // Export ADF if Possible
         if(!in_array(LeadType::TYPE_FINANCING, $inquiry->leadTypes)) {
+            $this->log->info('Handling ADF export on lead #' . $lead->identifier);
             $this->adf->export($inquiry, $lead);
         }
 
         // Tracking Cookie Exists?
         if($inquiry->cookieSessionId) {
             // Set Tracking to Current Lead
+            $this->log->info('Handling lead tracking on lead #' . $lead->identifier);
             $this->tracking->updateTrackLead($inquiry->cookieSessionId, $lead->identifier);
 
             // Mark Track Unit as Inquired for Unit

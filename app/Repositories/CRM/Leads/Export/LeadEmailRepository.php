@@ -45,13 +45,13 @@ class LeadEmailRepository implements LeadEmailRepositoryInterface
      * Find a Lead Email If Exists
      * 
      * @param int $dealerId
-     * @param int $dealerLocationId
+     * @param null|int $dealerLocationId
      * @return null|LeadEmail
      */
-    public function find(int $dealerId, int $dealerLocationId = 0): ?LeadEmail
+    public function find(int $dealerId, ?int $dealerLocationId = 0): ?LeadEmail
     {
         // Get Lead Email for Location
-        $leadEmail = LeadEmail::where('dealer_location_id', $dealerLocationId)->where('dealer_id', $dealerId)->first();
+        $leadEmail = LeadEmail::where('dealer_location_id', $dealerLocationId ?? 0)->where('dealer_id', $dealerId)->first();
         if(!empty($leadEmail->to_emails)) {
             return $leadEmail;
         }
