@@ -15,24 +15,54 @@ use Illuminate\Support\Facades\DB;
 class CategoryAndTypeSeeder extends Seeder
 {
     private const TYPES_CATEGORIES = [
-        'Equipment Trailers' => ['Cargo Trailers (Enclosed)', 'Flatbed Trailers', 'Car Haulers', 'Tilt Trailers', 'Utility Trailers', 'Equipment Trailers', 'Dump Trailers', 'Car / Racing Trailers', 'Snowmobile', 'ATV Trailers', 'Watercraft Trailers', 'Vending / Concession Trailers', 'Tow Dollys', 'Fiber Optic Trailers', 'Motorcycle Trailers', 'Other Trailers', 'Cycle Trailers'],
-        'Horse & Livestock'  => ['Horse Trailers', 'Livestock Trailers', 'Stock Trailers'],
-        'Travel Trailers'    => ['Travel Trailers', 'Fifth Wheels', 'Toy Haulers', 'Camper Trailers'],
-        'Semi Trailers'      => ['Day Cab Trucks', 'Sleeper Cab Trucks', 'Dump Trucks', 'Lowboy Trailers', 'Drop Deck Trailers', 'Dry Van Trailers', 'Flatbed Semi Trailers', 'Grain Trailers', 'Reefer Trailers', 'Semi Stock Trailers', 'Tank Trailers', 'Other Trucks'],
-        'Truck Beds'         => ['Truck Beds'],
+        'Equipment Trailers' => [
+          ['name' => 'Cargo (Enclosed)', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/cargo-trailers-enclosed.png', 'description' => 'Transport goods, livestock, or other items from one location to another in a covered trailer.'],
+          ['name' => 'Flatbed', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/flatbed-trailers.png', 'description' => 'A flat trailer with no roof or sides that typically transports heavy, oversized, or wide goods including machinery, supplies, or equipment.'],
+          ['name' => 'Car Haulers / racing', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/car-haulers.png', 'description' => 'A type of trailer used to transport vehicles.'],
+          ['name' => 'Tow Dollys', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/tow-dolly.jpg', 'description' => 'An auxiliary axle assembly equipped with a tow bar that is used to tow a motor vehicle behind another motor vehicle.'],
+          ['name' => 'Tilt', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/tilt-trailers.png', 'description' => 'A flat trailer that tilts allowing users to easily load and unload.'],
+          ['name' => 'Motorcycle / Cycle', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/cycle-trailers.png', 'description' => 'Trailers used to transport motorcycles or one to be pulled by a motorcycle in order to carry additional gear.'],
+          ['name' => 'ATV', 'image_url' => 'https://crm-trailercentral-dev.s3.amazonaws.com/placeholder.png', 'description' => 'Designed to haul ATVs, side by sides, small utility vehicles, and dirt bikes.'],
+          ['name' => 'Watercraft', 'image_url' => 'https://crm-trailercentral-dev.s3.amazonaws.com/placeholder.png', 'description' => 'Used for hauling or transporting power boats, sailboats, wave runners, jet skis, or other type of vehicle that is used in or on water.'],
+          ['name' => 'Snowmobile', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/snowmobile.png', 'description' => 'Trailers used to transport snowmobiles. They can be open, hybrid, or enclosed.'],
+          ['name' => 'Utility', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/utility-trailers.png', 'description' => 'Trailers used to carry equipment and that can generally be used to handle several functions.'],
+          ['name' => 'Dump', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/dump-trailers.png', 'description' => 'An open-box bed used to transport materials such as dirt or gravel for construction purposes.'],
+          ['name' => 'Vending / Concession', 'image_url' => 'https://crm-trailercentral-dev.s3.amazonaws.com/placeholder.png', 'description' => 'Stalls, stand-alone kiosks, or stands that are used to sell beverages and foods.'],
+          ['name' => 'Office / Fiber Optic', 'image_url' => 'https://crm-trailercentral-dev.s3.amazonaws.com/placeholder.png', 'description' => 'A mobile office or workshop usually with necessary amenities to carry activities.'],
+          ['name' => 'Other', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/other-trailers.png', 'description' => 'A variety of specialised trailers and trailer components.'],
+      ],
+        'Horse & Livestock'  => [
+          ['name' => 'Horse Trailers', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/horse-trailers.png', 'description' => 'Trailers ranging in size that are used to transport horses.'],
+          ['name' => 'Livestock Trailers', 'image_url' => 'https://crm-trailercentral-dev.s3.amazonaws.com/placeholder.png', 'description' => 'Trailers used to transport live animals, including cattle, sheep, goats, horses, rabbits, and more.'],
+          ['name' => 'Stock / Stock Combo', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/stock-trailers.png', 'description' => 'Trailers combine the rugged aspects of a livestock trailer with the conveniences of a horse trailer.'],
+        ],
+        'Travel Trailers'    => [
+          ['name' => 'Travel', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/travel-trailers.png', 'description' => 'A vehicle designed to be towed and used as living quarters for travel or recreation.'],
+          ['name' => 'Fifth Wheels', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/fifth-wheels-trailers.png', 'description' => 'A fifth wheel is a large RV that tows in the bed of pickup truck. '],
+          ['name' => 'Toy Haulers', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/toy-haulers.png', 'description' => 'A type of RV that features a garage in the rear with a large ramp-door for access.'],
+          ['name' => 'Camper / RV', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/camper-trailers.png', 'description' => 'A trailer designed to be drawn by a motor vehicle used for temporary living or sleeping accommodations'],
+        ],
+        'Semi Trailers'      => [
+          ['name' => 'Low Boy / Drop Deck', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/drop-deck-trailers.png', 'description' => 'A flat bed platform semi-trailer with no roof, sides and doors, and it has two deck levels. The lower deck allows for hauling taller loads than a regular straight floor flatbed.'],
+          ['name' => 'Dry Van', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/dry-van-trailers.png', 'description' => 'A semi-trailer that\'s fully enclosed to protect shipments from outside elements.'],
+          ['name' => 'Flatbed', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/flatbed-semi-trailers.png', 'description' => 'A semi-trailer with no roof or sides that typically transports heavy, oversized, or wide goods including machinery, supplies, or equipment.'],
+          ['name' => 'Grain', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/grain-trailers.png', 'description' => 'A semi trailer that is used to haul bulk commodity products, such as grain, for agricultural purposes.'],
+          ['name' => 'Reefer', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/reefer-trailers.png', 'description' => 'A refrigerated trailer that is attached to a semi-truck in order to transport perishables and other temperature-sensitive goods.'],
+          ['name' => 'Livestock', 'image_url' => 'https://crm-trailercentral-dev.s3.amazonaws.com/placeholder.png', 'description' => 'Semi-trailers used to transport live animals, including cattle, sheep, goats, horses, rabbits, and more.'],
+          ['name' => 'Tank / Bulk', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/tank-trailers.png', 'description' => 'Semi-trailers equipped with a tank body that is used to transport gases or liquids such as oil, gasoline, or milk, in bulk.'],
+          ['name' => 'Dump', 'image_url' => 'https://crm-trailercentral-dev.s3.amazonaws.com/placeholder.png', 'description' => 'Open-box bed used to transport materials such as dirt or gravel for construction purposes.'],
+          ['name' => 'Other', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/other-trucks.png', 'description' => 'A variety of specialised semi-trailers and trailer components.'],
+          ['name' => 'Day Cab Trucks', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/day-cab-trucks.png', 'description' => 'A truck with no sleeper cabin on its back and includes only a single compartment that is located over the engine portion of the truck.'],
+          ['name' => 'Dump Trucks', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/dump-trucks.png', 'description' => 'A truck with a body that tilts or opens at the back for unloading.'],
+          ['name' => 'Sleeper Cap Trucks', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/sleeper-cab-trucks.png', 'description' => 'A compartment attached behind the cabin of a tractor unit used for rest or sleeping.'],
+          ['name' => 'Other Trucks', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/other-trucks.png', 'description' => 'A list of other available truck inventory.'],
+        ],
+        'Truck Beds'         => [
+          ['name' => 'Truck Beds', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/truck-beds-trailers.png', 'description' => 'A variety of specialised and flatbed floors for trucks.']
+        ],
     ];
 
     private const PLACEHOLDER_IMG_URL = 'https://crm-trailercentral-dev.s3.amazonaws.com/placeholder.png';
-
-    private const UNIQUE_PLACEHOLDER_IMAGES = [
-      'Equipment Trailers' => ['https://s3.amazonaws.com/crm-trailercentral-dev/cargo-trailers-enclosed.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/flatbed-trailers.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/car-haulers.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/tilt-trailers.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/utility-trailers.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/equipment-trailers.png',
-      'https://s3.amazonaws.com/crm-trailercentral-dev/dump-trailers.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/car-racing.jpg', 'https://s3.amazonaws.com/crm-trailercentral-dev/snowmobile.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/atv-trailer.jpg', 'https://s3.amazonaws.com/crm-trailercentral-dev/watercraft-trailer.jpeg', 'https://s3.amazonaws.com/crm-trailercentral-dev/concession-trailers.jpeg', 'https://s3.amazonaws.com/crm-trailercentral-dev/tow-dolly.jpg',
-      'https://s3.amazonaws.com/crm-trailercentral-dev/fiber-trailer.jpeg', 'https://s3.amazonaws.com/crm-trailercentral-dev/motorcycle-trailer.jpeg', 'https://s3.amazonaws.com/crm-trailercentral-dev/other-trailers.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/cycle-trailers.png', ],
-      'Horse & Livestock' => ['https://s3.amazonaws.com/crm-trailercentral-dev/horse-trailers.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/livestock-trailers.jpeg', 'https://s3.amazonaws.com/crm-trailercentral-dev/stock-trailers.png'],
-      'Travel Trailers'   => ['https://s3.amazonaws.com/crm-trailercentral-dev/travel-trailers.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/fifth-wheels-trailers.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/toy-haulers.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/camper-trailers.png'],
-      'Semi Trailers'     => ['https://s3.amazonaws.com/crm-trailercentral-dev/day-cab-trucks.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/sleeper-cab-trucks.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/dump-trucks.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/low-boy-trailers.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/drop-deck-trailers.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/dry-van-trailers.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/flatbed-semi-trailers.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/grain-trailers.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/reefer-trailers.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/semi-stock-trailers.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/tank-trailers.png', 'https://s3.amazonaws.com/crm-trailercentral-dev/other-trucks.png'],
-      'Truck Beds'        => ['https://s3.amazonaws.com/crm-trailercentral-dev/truck-beds-trailers.png'],
-    ];
 
     /**
      * Run the database seeds.
@@ -48,12 +78,12 @@ class CategoryAndTypeSeeder extends Seeder
 
             foreach ($categories as $key => $category) {
                 $new_category = Category::create([
-                  'name'        => $category,
-                  'description' => $category . ' is the best trailer in the world.',
+                  'name'        => $category['name'],
+                  'description' => $category['description'],
                 ]);
 
                 $new_image = CategoryImage::create([
-                  'image_url'   => self::UNIQUE_PLACEHOLDER_IMAGES[$type][$key],
+                  'image_url'   => $category['image_url'],
                   'category_id' => $new_category->id,
                 ]);
 

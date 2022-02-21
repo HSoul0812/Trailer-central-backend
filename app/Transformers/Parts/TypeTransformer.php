@@ -14,7 +14,6 @@ class TypeTransformer extends TransformerAbstract
              'id'         => (int) $type->id,
              'name'       => $type->name,
              'categories' => $type->categories,
-             'image'      => $type->image,
          ];
     }
 }
