@@ -70,12 +70,17 @@ class InquiryLead
     /**
      * @const string
      */
-    const TT_EMAIL_BODY = '#ffff00';
+    const TT_SIMPLE_DOMAIN = 'trailertrader.com';
 
     /**
      * @const string
      */
-    const TT_EMAIL_HEADER = '#00003d';
+    const TT_EMAIL_BODY = '#ffffff';
+
+    /**
+     * @const string
+     */
+    const TT_EMAIL_HEADER = '#F8F9FA';
 
 
     /**
@@ -95,6 +100,19 @@ class InquiryLead
         'call',
         'sms',
         'bestprice'
+    ];
+
+    /**
+     * @const array
+     */
+    const INQUIRY_EMAIL_TYPES = [
+        'general',
+        'cta',
+        'inventory',
+        'part',
+        'showroom',
+        'call',
+        'bestprice',
     ];
 
     /**
@@ -172,6 +190,10 @@ class InquiryLead
      */
     private $fromName;
 
+    /**
+     * @var string Simple TrailerTrader Domain Name
+     */
+    private $simpleDomain;
 
     /**
      * @var array<string> Lead Types to Insert to Lead Inquiry
@@ -381,6 +403,20 @@ class InquiryLead
     }
 
 
+
+    /**
+     * Get Inquiry To
+     * 
+     * @return string
+     */
+    public function getInquiryTo(): string {
+        // Get Inquiry
+        if(is_array($this->inquiryEmail)) {
+            return implode(";", $this->inquiryEmail);
+        }
+        return $this->inquiryEmail;
+    }
+
     /**
      * Get Inquiry To Array
      * 
@@ -397,7 +433,21 @@ class InquiryLead
         }
         // Normal, Return Proper Inquiry
         else {
-            return [['name' => $this->inquiryName, 'email' => $this->inquiryEmail]];
+            // Get To Emails
+            $to = [];
+            if(is_array($this->inquiryEmail)) {
+                foreach($this->inquiryEmail as $toEmail) {
+                    $to[] = ['name' => $this->inquiryName, 'email' => $toEmail];
+                }
+            } else {
+                $to[] = ['name' => $this->inquiryName, 'email' => $this->inquiryEmail];   
+            }
+
+            // Append for TT
+            if ($this->websiteDomain == self::TT_SIMPLE_DOMAIN) {
+                $to[] = ['name' => $this->firstName, 'email' => $this->emailAddress];
+            }
+            return $to;
         }
 
         // Return With Merged CC To
@@ -458,7 +508,7 @@ class InquiryLead
      */
     public function isTrailerTrader(): bool
     {
-        return $this->websiteDomain === self::TT_DOMAIN;
+        return $this->websiteDomain === self::TT_SIMPLE_DOMAIN;
     }
 
     /**
@@ -636,7 +686,8 @@ class InquiryLead
             'phone'            => $this->phoneNumber,
             'postal'           => $this->zip,
             'preferred'        => $this->getPreferredContact(),
-            'comments'         => $this->comments
+            'comments'         => $this->comments,
+            'simpleDomain'     => self::TT_SIMPLE_DOMAIN
         ], $this->getAdminMsg());
     }
 

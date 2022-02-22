@@ -228,13 +228,21 @@ class AzureService implements AzureServiceInterface
         $client = $this->getClient(null, $accessToken->scopes);
 
         // Get New Token
-        $newToken = $client->getAccessToken('refresh_token', [
-            'refresh_token' => $accessToken->refreshToken
-        ]);
+        try {
+            $newToken = $client->getAccessToken('refresh_token', [
+                'refresh_token' => $accessToken->refreshToken
+            ]);
 
-        // Return Updated EmailToken
-        $emailToken = EmailToken::fillFromLeague($newToken);
-        $this->log->info('Got refreshed access token: ' . print_r($emailToken->toArray(), true));
+            // Return Updated EmailToken
+            $emailToken = EmailToken::fillFromLeague($newToken);
+            $this->log->info('Got refreshed access token: ' . print_r($emailToken->toArray(), true));
+        } catch(\Exception $ex) {
+            // Get Exception
+            $this->log->error('Failed to refresh access token, response returned: ' . $ex->getMessage());
+            $emailToken = new EmailToken();
+        }
+
+        // Return Token
         return $emailToken;
     }
 

@@ -52,7 +52,7 @@ class MarketplaceService implements MarketplaceServiceInterface
             $marketplace = $this->marketplace->create($params);
 
             // Create All Filters
-            if($params['filters'] && is_array($params['filters'])) {
+            if(isset($params['filters']) && is_array($params['filters'])) {
                 foreach($params['filters'] as $filter) {
                     $this->filters->create([
                         'marketplace_id' => $marketplace->id,

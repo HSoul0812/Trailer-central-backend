@@ -414,6 +414,15 @@ $api->version('v1', function ($route) {
         $route->delete('', 'App\Http\Controllers\v1\Website\User\WebsiteUserFavoriteInventoryController@delete');
     });
 
+    /**
+     * Website User Search Result
+     */
+    $route->group(['prefix' => 'website/user/search-result', 'middleware' => 'api.auth', 'providers' => ['website_auth']], function ($route) {
+        $route->get('', 'App\Http\Controllers\v1\Website\User\WebsiteUserSearchResultController@index');
+        $route->post('', 'App\Http\Controllers\v1\Website\User\WebsiteUserSearchResultController@create');
+        $route->delete('', 'App\Http\Controllers\v1\Website\User\WebsiteUserSearchResultController@delete');
+    });
+
     /*
     |--------------------------------------------------------------------------
     | Interactions
@@ -646,6 +655,27 @@ $api->version('v1', function ($route) {
 
         /*
         |--------------------------------------------------------------------------
+        | Dealer Website Images
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('website/{websiteId}/images', 'App\Http\Controllers\v1\Website\Image\WebsiteImagesController@index')->where('websiteId', '[0-9]+');
+        $route->post('website/{websiteId}/image/{imageId}', 'App\Http\Controllers\v1\Website\Image\WebsiteImagesController@update')->where(['websiteId' => '[0-9]+', 'imageId' => '[0-9]+']);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Dealer integrations
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('user/integrations/{id}', 'App\Http\Controllers\v1\User\DealerIntegrationController@show');
+
+        /*
+        |--------------------------------------------------------------------------
         | Customers
         |--------------------------------------------------------------------------
         |
@@ -683,6 +713,7 @@ $api->version('v1', function ($route) {
         ], function ($route) {
             $route->put('create', 'App\Http\Controllers\v1\CRM\Leads\InquiryController@create');
             $route->put('send', 'App\Http\Controllers\v1\CRM\Leads\InquiryController@send');
+            $route->put('text', 'App\Http\Controllers\v1\CRM\Leads\InquiryController@text');
             // TO DO: Create Endpoint to Combine Send Text + Inquiry
             //$route->post('text', 'App\Http\Controllers\v1\CRM\Leads\InquiryController@text');
         });
@@ -979,7 +1010,14 @@ $api->version('v1', function ($route) {
             $route->group([
                 'prefix' => 'clapp'
             ], function ($route) {
-                // Craigslist
+                // Inventory
+                $route->group([
+                    'prefix' => 'inventory'
+                ], function ($route) {
+                    $route->get('/', 'App\Http\Controllers\v1\Marketing\Craigslist\InventoryController@index');
+                });
+
+                // Posts
                 $route->group([
                     'prefix' => 'posts'
                 ], function ($route) {
@@ -988,6 +1026,13 @@ $api->version('v1', function ($route) {
 
                 // Upcoming Scheduler Posts
                 $route->get('upcoming', 'App\Http\Controllers\v1\Marketing\Craigslist\SchedulerController@upcoming');
+
+                // Profile
+                $route->group([
+                    'prefix' => 'profile'
+                ], function ($route) {
+                    $route->get('/', 'App\Http\Controllers\v1\Marketing\Craigslist\ProfileController@index');
+                });
             });
 
             // Facebook Marketplace

@@ -11,7 +11,7 @@ class ImageTransformer extends TransformerAbstract
     {
         return [
             'id' => $image->id,
-            'file' => $image->image->filename,
+            'file' => !empty($image->image) ? $image->image->filename : null,
             'created_at' => $image->created_at,
             'updated_at' => $image->updated_at
         ];

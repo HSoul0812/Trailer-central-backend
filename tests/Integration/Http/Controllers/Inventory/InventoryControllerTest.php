@@ -4,28 +4,36 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Http\Controllers\Inventory;
 
+use App\Http\Controllers\v1\Inventory\InventoryController;
 use App\Http\Middleware\Inventory\CreateInventoryPermissionMiddleware;
 use App\Http\Requests\Inventory\GetInventoryHistoryRequest;
+use App\Models\CRM\Dms\Customer\CustomerInventory;
+use App\Models\CRM\User\Customer;
 use App\Models\Inventory\Inventory;
 use App\Models\User\AuthToken;
 use App\Models\User\Interfaces\PermissionsInterface;
-use Tests\database\seeds\User\GeolocationSeeder;
+use App\Models\User\User;
 use Dingo\Api\Exception\ResourceException;
+use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Illuminate\Contracts\Container\BindingResolutionException;
-use Tests\database\seeds\Inventory\InventorySeeder;
 use Tests\database\seeds\Inventory\InventoryHistorySeeder;
-use App\Http\Controllers\v1\Inventory\InventoryController;
+use Tests\database\seeds\Inventory\InventorySeeder;
+use Tests\database\seeds\User\GeolocationSeeder;
 use Tests\TestCase;
 use TypeError;
 
 /**
  * Class InventoryControllerTest
+ *
  * @package Tests\Integration\Http\Controllers\Inventory
  *
  * @coversDefaultClass \App\Http\Controllers\v1\Inventory\InventoryController
  */
 class InventoryControllerTest extends TestCase
 {
+    const API_INVENTORY_TITLES = '/api/inventory/get_all_titles';
+    const API_INVENTORY_EXISTS = '/api/inventory/exists';
+
     /**
      * Tests that SUT is throwing the correct exception when some query parameter is invalid
      *
@@ -46,8 +54,7 @@ class InventoryControllerTest extends TestCase
         string $expectedException,
         string $expectedExceptionMessage,
         ?string $firstExpectedErrorMessage
-    ): void
-    {
+    ): void {
         $inventoryHistorySeeder = new InventoryHistorySeeder();
 
         // Given I have a collection of inventory transactions
@@ -64,12 +71,10 @@ class InventoryControllerTest extends TestCase
         try {
             $controller->history($params['inventory_id'] ?? null, $request);
         } catch (TypeError $exception) {
-
             self::assertStringContainsString($expectedExceptionMessage, $exception->getMessage());
 
             throw $exception;
         } catch (ResourceException $exception) {
-
             self::assertSame($firstExpectedErrorMessage, $exception->getErrors()->first());
 
             throw $exception;
@@ -97,7 +102,7 @@ class InventoryControllerTest extends TestCase
         $inventoryParams['brand'] = $seeder->brand->name;
         $inventoryParams['category'] = $seeder->category->legacy_category;
 
-        $response = $this->json('PUT', '/api/inventory', $inventoryParams, ['access-token' => $seeder->authToken->access_token]);
+        $response = $this->json('PUT', '/api/inventory', $inventoryParams, $this->getSeederAccessToken($seeder));
 
         $response->assertStatus(200);
 
@@ -126,7 +131,7 @@ class InventoryControllerTest extends TestCase
             'permissions' => [[
                 'feature' => PermissionsInterface::INVENTORY,
                 'permission_level' => PermissionsInterface::SUPER_ADMIN_PERMISSION,
-            ]]
+            ]],
         ];
 
         $seeder = new InventorySeeder($seederParams);
@@ -141,7 +146,7 @@ class InventoryControllerTest extends TestCase
         $inventoryParams['brand'] = $seeder->brand->name;
         $inventoryParams['category'] = $seeder->category->legacy_category;
 
-        $response = $this->json('PUT', '/api/inventory', $inventoryParams, ['access-token' => $seeder->authToken->access_token]);
+        $response = $this->json('PUT', '/api/inventory', $inventoryParams, $this->getSeederAccessToken($seeder));
 
         $response->assertStatus(200);
 
@@ -170,7 +175,7 @@ class InventoryControllerTest extends TestCase
             'permissions' => [[
                 'feature' => PermissionsInterface::INVENTORY,
                 'permission_level' => PermissionsInterface::CAN_SEE_AND_CHANGE_PERMISSION,
-            ]]
+            ]],
         ];
 
         $seeder = new InventorySeeder($seederParams);
@@ -191,7 +196,7 @@ class InventoryControllerTest extends TestCase
             unset($expectedInventoryParams[$field]);
         }
 
-        $response = $this->json('PUT', '/api/inventory', $inventoryParams, ['access-token' => $seeder->authToken->access_token]);
+        $response = $this->json('PUT', '/api/inventory', $inventoryParams, $this->getSeederAccessToken($seeder));
 
         $response->assertStatus(200);
 
@@ -231,7 +236,6 @@ class InventoryControllerTest extends TestCase
             ->assertSee('Invalid access token.');
     }
 
-
     /**
      * @covers ::exists
      */
@@ -245,9 +249,9 @@ class InventoryControllerTest extends TestCase
         // Get Exists Params
         $existsParams = [
             'dealer_id' => $seeder->dealer->dealer_id,
-            'stock' => $seeder->inventory->stock
+            'stock' => $seeder->inventory->stock,
         ];
-        $response = $this->json('GET', '/api/inventory/exists', $existsParams, ['access-token' => $seeder->authToken->access_token]);
+        $response = $this->json('GET', self::API_INVENTORY_EXISTS, $existsParams, $this->getSeederAccessToken($seeder));
 
         $response->assertStatus(200);
 
@@ -277,9 +281,9 @@ class InventoryControllerTest extends TestCase
         // Get Exists Params
         $existsParams = [
             'dealer_id' => $seeder->dealer->dealer_id,
-            'stock' => $seeder->inventory->stock . '_unused'
+            'stock' => $seeder->inventory->stock . '_unused',
         ];
-        $response = $this->json('GET', '/api/inventory/exists', $existsParams, ['access-token' => $seeder->authToken->access_token]);
+        $response = $this->json('GET', self::API_INVENTORY_EXISTS, $existsParams, $this->getSeederAccessToken($seeder));
 
         $response->assertStatus(200);
 
@@ -321,14 +325,13 @@ class InventoryControllerTest extends TestCase
         $inventory2 = factory(Inventory::class)->create($inventoryParams);
         $this->assertDatabaseHas('inventory', ['inventory_id' => $inventory2->inventory_id]);
 
-
         // Get Exists Params
         $existsParams = [
             'dealer_id' => $inventoryParams['dealer_id'],
             'inventory_id' => $inventory->inventory_id,
-            'stock' => $inventoryParams['stock']
+            'stock' => $inventoryParams['stock'],
         ];
-        $response = $this->json('GET', '/api/inventory/exists', $existsParams, ['access-token' => $seeder->authToken->access_token]);
+        $response = $this->json('GET', self::API_INVENTORY_EXISTS, $existsParams, $this->getSeederAccessToken($seeder));
 
         $response->assertStatus(200);
 
@@ -364,9 +367,9 @@ class InventoryControllerTest extends TestCase
         $existsParams = [
             'dealer_id' => $seeder->dealer->dealer_id,
             'inventory_id' => $inventory->inventory_id,
-            'stock' => $inventoryParams['stock'] . '_unused'
+            'stock' => $inventoryParams['stock'] . '_unused',
         ];
-        $response = $this->json('GET', '/api/inventory/exists', $existsParams, ['access-token' => $seeder->authToken->access_token]);
+        $response = $this->json('GET', self::API_INVENTORY_EXISTS, $existsParams, $this->getSeederAccessToken($seeder));
 
         $response->assertStatus(200);
 
@@ -383,21 +386,23 @@ class InventoryControllerTest extends TestCase
         $seeder->cleanUp();
     }
 
-    public function testDeliveryPrice() {
+    public function testDeliveryPrice()
+    {
         $seeder = new InventorySeeder(['withInventory' => true]);
         $seeder->seed();
         $inventoryId = $seeder->inventory->getKey();
-        $response = $this->json('GET', "/api/inventory/$inventoryId/delivery_price", [], ['access-token' => $seeder->authToken->access_token]);
+        $response = $this->json('GET', "/api/inventory/$inventoryId/delivery_price", [], $this->getSeederAccessToken($seeder));
         $response->assertJson([
             'response' => [
                 'status' => 'success',
-                'fee' => $seeder->dealerLocationMileageFee->fee_per_mile * 96.893
-            ]
+                'fee' => $seeder->dealerLocationMileageFee->fee_per_mile * 96.893,
+            ],
         ]);
         $seeder->cleanUp();
     }
 
-    public function testDeliveryPriceToZip() {
+    public function testDeliveryPriceToZip()
+    {
         $seeder = new InventorySeeder(['withInventory' => true]);
         $locationSeeder = new GeolocationSeeder([
             'latitude' => 11,
@@ -407,12 +412,12 @@ class InventoryControllerTest extends TestCase
         $seeder->seed();
         $locationSeeder->seed();
         $inventoryId = $seeder->inventory->getKey();
-        $response = $this->json('GET', "/api/inventory/$inventoryId/delivery_price?tozip=" . $locationSeeder->location->zip, [], ['access-token' => $seeder->authToken->access_token]);
+        $response = $this->json('GET', "/api/inventory/$inventoryId/delivery_price?tozip=" . $locationSeeder->location->zip, [], $this->getSeederAccessToken($seeder));
         $response->assertJson([
             'response' => [
                 'status' => 'success',
-                'fee' => $seeder->dealerLocationMileageFee->fee_per_mile * 96.893
-            ]
+                'fee' => $seeder->dealerLocationMileageFee->fee_per_mile * 96.893,
+            ],
         ]);
 
         $locationSeeder->cleanUp();
@@ -432,7 +437,7 @@ class InventoryControllerTest extends TestCase
             'Search term invalid'            => [['inventory_id' => 666999, 'search_term' => ['Truck']], ResourceException::class, 'Validation Failed', 'The search term must be a string.'],
             'Sort invalid'                   => [['inventory_id' => 666999, 'sort' => '-with'], ResourceException::class, 'Validation Failed', 'The selected sort is invalid.'],
             'Per page invalid (min)'         => [['inventory_id' => 666999, 'per_page' => -10], ResourceException::class, 'Validation Failed', 'The per page must be at least 1.'],
-            'Per page invalid (max)'         => [['inventory_id' => 666999, 'per_page' => 5000000], ResourceException::class, 'Validation Failed', 'The per page may not be greater than 2000.']
+            'Per page invalid (max)'         => [['inventory_id' => 666999, 'per_page' => 5000000], ResourceException::class, 'Validation Failed', 'The per page may not be greater than 2000.'],
         ];
     }
 
@@ -525,7 +530,96 @@ class InventoryControllerTest extends TestCase
                 'non_serialized' => true,
                 'hidden_price' => 9911.22,
                 'has_stock_images' => true,
-            ]
+            ],
         ]];
+    }
+
+    public function testGetAllInventoryTitlesWithoutCustomerId()
+    {
+        $seeder = $this->seedInventory();
+        $inventory = $seeder->inventory;
+
+        $response = $this->json('GET', self::API_INVENTORY_TITLES, [], $this->getSeederAccessToken($seeder));
+        $response->assertJson([
+            [
+                'children' => [],
+                'text' => 'Customer Owned Inventories',
+            ],
+            [
+                'children' => [
+                    $this->prepareTitleApiChildrenResponse($inventory),
+                ],
+                'text' => 'All Inventories',
+            ],
+        ]);
+
+        $this->cleanUpSeeder($seeder);
+    }
+
+    public function testGetAllInventoryTitlesWithCustomerId()
+    {
+        $seeder = $this->seedInventory();
+        $inventory = $seeder->inventory;
+        $customer = factory(Customer::class)->create([
+            'dealer_id' => $inventory->dealer_id,
+        ]);
+        CustomerInventory::create(['customer_id' => $customer->getKey(), 'inventory_id' => $inventory->getKey()]);
+        $seeder2 = $this->seedInventory();
+        $inventory2 = factory(Inventory::class)->create([
+            'dealer_id' => $inventory->dealer_id,
+            'geolocation' => new Point(0, 0),
+        ]);
+
+        $apiUrl = self::API_INVENTORY_TITLES . '?customer_id=' . $customer->getKey();
+
+        $response = $this->json('GET', $apiUrl, [], $this->getSeederAccessToken($seeder));
+        $response->assertJson([
+            [
+                'children' => [
+                    $this->prepareTitleApiChildrenResponse($inventory),
+                ],
+                'text' => 'Customer Owned Inventories',
+            ],
+            [
+                'children' => [
+                    $this->prepareTitleApiChildrenResponse($inventory),
+                    $this->prepareTitleApiChildrenResponse($inventory2),
+                ],
+                'text' => 'All Inventories',
+            ],
+        ]);
+
+        $this->cleanUpSeeder($seeder);
+        Customer::where('dealer_id', $inventory->dealer_id)->delete();
+        $this->cleanUpSeeder($seeder2);
+    }
+
+    private function seedInventory(bool $withInventory = true): InventorySeeder
+    {
+        $seeder = new InventorySeeder(['withInventory' => $withInventory]);
+        $seeder->seed();
+
+        return $seeder;
+    }
+
+    private function cleanUpSeeder($seeder)
+    {
+        method_exists($seeder, 'cleanUp') ? $seeder->cleanUp() : null;
+    }
+
+    private function getSeederAccessToken($seeder): array
+    {
+        return [
+            'access-token' => $seeder->authToken->access_token ?? '',
+        ];
+    }
+
+    public function prepareTitleApiChildrenResponse(Inventory $inventory)
+    {
+        return [
+            'id' => $inventory->getKey(),
+            'title' => $inventory->title,
+            'vin' => $inventory->vin,
+        ];
     }
 }
