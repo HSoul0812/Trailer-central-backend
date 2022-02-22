@@ -14,7 +14,7 @@ class AddIsClosedToCrmInteractionTable extends Migration
     public function up()
     {
         Schema::table('crm_interaction', function (Blueprint $table) {
-            $table->boolean('is_closed')->default(false)->after('interaction_time');
+            $table->boolean('is_closed')->default(false)->after('interaction_time')->index();
         });
     }
 
