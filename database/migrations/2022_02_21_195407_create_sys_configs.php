@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateFilterConfig extends Migration
+class CreateSysConfigs extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateFilterConfig extends Migration
      */
     public function up()
     {
-        Schema::create('sys_config', function (Blueprint $table) {
+        Schema::create('sys_configs', function (Blueprint $table) {
             $table->id();
             $table->string('key');
             $table->text('value');
@@ -30,6 +30,6 @@ class CreateFilterConfig extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('filter_config');
+        Schema::dropIfExists('sys_configs');
     }
 }
