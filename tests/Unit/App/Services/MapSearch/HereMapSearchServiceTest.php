@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\App\Services\MapSearch;
 
 use App\Services\MapSearch\HereMapSearchClient;
+use App\Services\MapSearch\HereMapSearchService;
 use App\Services\MapSearch\MapSearchServiceInterface;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
@@ -224,6 +225,7 @@ class HereMapSearchServiceTest extends TestCase
      */
     private function getConcreteService()
     {
+        app()->bind(MapSearchServiceInterface::class, HereMapSearchService::class);
         return app()->make(MapSearchServiceInterface::class);
     }
 }

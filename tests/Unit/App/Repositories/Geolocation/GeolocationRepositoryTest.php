@@ -9,6 +9,7 @@ use Tests\Common\TestCase;
 class GeolocationRepositoryTest extends TestCase
 {
     public function testGet() {
+        $this->markTestSkipped('Should connect trailercentral database before testing');
         $repository = $this->getConcreteRepository();
         $location = $repository->get(['city' => 'AIBONITO', 'state' => 'PR']);
         $this->assertEquals('00705', $location->zip);
