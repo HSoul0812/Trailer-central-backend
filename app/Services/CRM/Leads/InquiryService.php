@@ -3,7 +3,6 @@
 namespace App\Services\CRM\Leads;
 
 use App\Jobs\CRM\Leads\AutoAssignJob;
-use App\Jobs\Email\AutoResponderJob;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadType;
 use App\Models\CRM\Interactions\Interaction;
@@ -13,6 +12,7 @@ use App\Repositories\Website\Tracking\TrackingUnitRepositoryInterface;
 use App\Services\CRM\Leads\DTOs\InquiryLead;
 use App\Services\CRM\Leads\InquiryServiceInterface;
 use App\Services\CRM\Leads\Export\ADFServiceInterface;
+use App\Services\CRM\Leads\Export\IDSServiceInterface;
 use App\Services\CRM\Email\InquiryEmailServiceInterface;
 use App\Services\CRM\Text\InquiryTextServiceInterface;
 use App\Utilities\Fractal\NoDataArraySerializer;
@@ -69,6 +69,11 @@ class InquiryService implements InquiryServiceInterface
     protected $adf;
 
     /**
+     * @var App\Services\CRM\Leads\Export\IDSServiceInterface
+     */
+    protected $ids;
+
+    /**
      * @var Illuminate\Support\Facades\Log
      */
     protected $log;
@@ -100,6 +105,7 @@ class InquiryService implements InquiryServiceInterface
         InquiryEmailServiceInterface $inquiryEmail,
         InquiryTextServiceInterface $inquiryText,
         ADFServiceInterface $adf,
+        IDSServiceInterface $ids,
         LeadTransformer $leadTransformer,
         InteractionTransformer $interactionTransformer,
         Manager $fractal
@@ -109,6 +115,7 @@ class InquiryService implements InquiryServiceInterface
         $this->inquiryEmail = $inquiryEmail;
         $this->inquiryText = $inquiryText;
         $this->adf = $adf;
+        $this->ids = $ids;
 
         // Initialize Repositories
         $this->leadRepo = $leadRepo;
@@ -280,6 +287,9 @@ class InquiryService implements InquiryServiceInterface
         if(!in_array(LeadType::TYPE_FINANCING, $inquiry->leadTypes)) {
             $this->log->info('Handling ADF export on lead #' . $lead->identifier);
             $this->adf->export($inquiry, $lead);
+
+            $this->log->info('Handling IDS export on lead #' . $lead->identifier);
+            $this->adf->export($lead);
         }
 
         // Tracking Cookie Exists?

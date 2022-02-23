@@ -41,4 +41,32 @@ class IDSService implements IDSServiceInterface {
         
         return true;
     }
+
+    /**
+     * Takes a lead and export it to IDS format
+     *
+     * @param Lead $lead lead to export to IDS
+     * @return bool
+     */
+    public function exportInquiry(Lead $lead) : bool {
+        try {
+            $leadEmail = $this->leadEmailRepository->getLeadEmailByLead($lead);
+        } catch (ModelNotFoundException $ex) {
+            $lead->ids_exported = 1;
+            $lead->save();
+            return false;
+        }
+        
+        
+        if ($leadEmail->export_format !== LeadEMail::EXPORT_FORMAT_IDS) {
+            return false;
+        }
+        
+        $hiddenCopiedEmails = explode(',', config('ids.copied_emails'));
+        
+        // Dispatch IDS Export Job
+        $job = new ADFJob($lead, $leadEmail->to_emails, $leadEmail->copied_emails, $hiddenCopiedEmails);
+        $this->dispatch($job->onQueue('inquiry'));
+        return true;
+    }
 }
