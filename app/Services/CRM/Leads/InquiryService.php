@@ -289,7 +289,7 @@ class InquiryService implements InquiryServiceInterface
             $this->adf->export($inquiry, $lead);
 
             $this->log->info('Handling IDS export on lead #' . $lead->identifier);
-            $this->adf->export($lead);
+            $this->ids->export($lead);
         }
 
         // Tracking Cookie Exists?
