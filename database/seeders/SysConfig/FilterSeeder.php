@@ -53,7 +53,7 @@ class FilterSeeder extends Seeder
     {
         $this->cleanTable();
         foreach(self::FILTER_CONFIGS as $config) {
-            DB::table('sys_config')->insert([
+            DB::table('sys_configs')->insert([
                 'key' => $config[0],
                 'value' => $config[1]
             ]);
@@ -61,6 +61,6 @@ class FilterSeeder extends Seeder
     }
 
     private function cleanTable() {
-        DB::table('sys_config')->where('key', 'LIKE', 'filter/%')->delete();
+        DB::table('sys_configs')->where('key', 'LIKE', 'filter/%')->delete();
     }
 }

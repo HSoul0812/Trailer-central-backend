@@ -8,6 +8,7 @@ use App\Transformers\Inventory\InventoryListResponseTransformer;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Tests\Common\UnitTestCase;
 
+require('app/Helpers/System/helper.php');
 class InventoryListResponseTransformerTest extends UnitTestCase
 {
     public function testTransform() {
@@ -108,6 +109,7 @@ class InventoryListResponseTransformerTest extends UnitTestCase
         $response = new TcEsResponseInventoryList();
         $response->inventories = $paginator;
         $response->aggregations = [];
+        $response->limits = [];
 
         $transformer = new InventoryListResponseTransformer();
         $json = $transformer->transform($response);
@@ -117,6 +119,6 @@ class InventoryListResponseTransformerTest extends UnitTestCase
         $this->assertEquals('1000022125', $json['inventories'][0]['id']);
         $this->assertEquals('https://dealer-cdn.com/blog/blog.jpg', $json['inventories'][0]['image']);
         $this->assertEquals('https://dealer-cdn.com/blog/blog.jpg', $json['inventories'][0]['images'][0]);
-        $this->assertEquals('', $json['inventories'][0]['imagesSecondary'][0]);
+        $this->assertEquals('', $json['inventories'][0]['images_secondary'][0]);
     }
 }

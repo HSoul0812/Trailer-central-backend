@@ -3,12 +3,15 @@
 namespace Tests\Unit\App\Services\Inventory;
 
 use App\Models\Geolocation\Geolocation;
+use App\Models\SysConfig\SysConfig;
 use App\Repositories\Geolocation\GeolocationRepositoryInterface;
+use App\Repositories\SysConfig\SysConfigRepositoryInterface;
 use App\Services\Inventory\InventoryService;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use PHPUnit\Framework\MockObject\MockObject;
 use Tests\Common\TestCase;
@@ -17,7 +20,8 @@ class InventoryServiceTest extends TestCase
 {
     private InventoryService $service;
     private Client $httpClient;
-    private MockObject $repository;
+    private MockObject $geoLocationRepository;
+    private MockObject $sysConfigRepository;
 
     public function setUp(): void
     {
@@ -26,10 +30,12 @@ class InventoryServiceTest extends TestCase
     }
 
     public function testListWithNoLocation() {
-        $this->repository->expects($this->once())
+        $this->geoLocationRepository->expects($this->once())
             ->method('get')
             ->will($this->throwException(new ModelNotFoundException()));
-
+        $this->sysConfigRepository->expects($this->once())
+            ->method('getAll')
+            ->will($this->returnValue($this->sysConfigFixture()));
         $response = $this->service->list([
             'location_type' => 'region',
             'location_region' => 'CA',
@@ -40,6 +46,9 @@ class InventoryServiceTest extends TestCase
         $this->assertEquals('1000022126', $response->inventories->items()[0]->id);
         $this->assertEquals('1001', $response->inventories->items()[0]->dealer_id);
         $this->assertEquals('9437', $response->inventories->items()[0]->dealer_location_id);
+        $this->assertEquals([
+            'size' => ['length' => ['min' => 3, 'max' => 100]]
+        ], $response->limits);
     }
 
     public function testListWithValidLocation() {
@@ -47,11 +56,13 @@ class InventoryServiceTest extends TestCase
         $geolocation->latitude = 30.00;
         $geolocation->longitude = -30.00;
 
-        $this->repository->expects($this->once())
+        $this->geoLocationRepository->expects($this->once())
             ->method('get')
             ->with(['city' => '123', 'state' => 'CA', 'country' => 'USA'])
             ->will($this->returnValue($geolocation));
-
+        $this->sysConfigRepository->expects($this->once())
+            ->method('getAll')
+            ->will($this->returnValue($this->sysConfigFixture()));
         $response = $this->service->list([
             'location_type' => 'region',
             'location_region' => 'CA',
@@ -60,17 +71,25 @@ class InventoryServiceTest extends TestCase
         $this->assertEquals(154, $response->inventories->total());
         $this->assertEquals(1, $response->inventories->count());
         $this->assertEquals('1000022126', $response->inventories->items()[0]->id);
+        $this->assertEquals([
+            'size' => ['length' => ['min' => 3, 'max' => 100]]
+        ], $response->limits);
     }
 
     private function getConcreteService(): InventoryService
     {
         $this->httpClient = $this->mockHttpClient();
-        $this->repository = $this->mockRepository();
-        return new InventoryService($this->httpClient, $this->repository);
+        $this->geoLocationRepository = $this->mockGeolocationRepository();
+        $this->sysConfigRepository = $this->mockSysConfigRepository();
+        return new InventoryService($this->httpClient, $this->geoLocationRepository, $this->sysConfigRepository);
     }
 
-    private function mockRepository(): MockObject {
+    private function mockGeolocationRepository(): MockObject {
         return $this->createMock(GeolocationRepositoryInterface::class);
+    }
+
+    private function mockSysConfigRepository(): MockObject {
+        return $this->createMock(SysConfigRepositoryInterface::class);
     }
 
     private function mockHttpClient(): Client {
@@ -493,5 +512,18 @@ class InventoryServiceTest extends TestCase
         $stack = HandlerStack::create($mock);
 
         return new Client(['handler' => $stack]);
+    }
+
+    private function sysConfigFixture() {
+        return new Collection([
+            new SysConfig([
+               'key' => 'filter/size/length/min',
+               'value' => '3'
+            ]),
+            new SysConfig([
+                'key' => 'filter/size/length/max',
+                'value' => '100'
+            ])
+        ]);
     }
 }

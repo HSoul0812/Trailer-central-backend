@@ -129,10 +129,10 @@ class InventoryService implements InventoryServiceInterface
         $this->buildPaginateQuery($queryBuilder, $params);
         $this->buildFilter($queryBuilder, $params);
 
-//        $location = $this->getGeolocation($params);
-//        if($location) {
-//            $this->buildGeoScoring($queryBuilder, $location);
-//        }
+        $location = $this->getGeolocation($params);
+        if($location) {
+            $this->buildGeoScoring($queryBuilder, $location);
+        }
 
         $queryBuilder->orderBy(self::FIELD_UPDATED_AT, self::ORDER_DESC);
         return $queryBuilder;
