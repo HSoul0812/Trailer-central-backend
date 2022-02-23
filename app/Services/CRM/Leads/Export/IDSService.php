@@ -9,9 +9,12 @@ use Illuminate\Support\Facades\Log;
 use App\Models\CRM\Leads\Export\LeadEmail;
 use App\Repositories\CRM\Leads\Export\LeadEmailRepositoryInterface;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Foundation\Bus\DispatchesJobs;
 
-class IDSService implements IDSServiceInterface {
-    
+class IDSService implements IDSServiceInterface
+{    
+    use DispatchesJobs;
+
     /**     
      * @var App\Repositories\CRM\Leads\Export\LeadEmailRepositoryInterface 
      */
