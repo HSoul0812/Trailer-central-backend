@@ -65,7 +65,7 @@ class IDSService implements IDSServiceInterface {
         $hiddenCopiedEmails = explode(',', config('ids.copied_emails'));
         
         // Dispatch IDS Export Job
-        $job = new ADFJob($lead, $leadEmail->to_emails, $leadEmail->copied_emails, $hiddenCopiedEmails);
+        $job = new IDSJob($lead, $leadEmail->to_emails, $leadEmail->copied_emails, $hiddenCopiedEmails);
         $this->dispatch($job->onQueue('inquiry'));
         return true;
     }
