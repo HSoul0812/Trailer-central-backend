@@ -71,6 +71,7 @@ Update git hooks:
 5. Add screenshots of the new behavior.
 6. Add a description including the context and the chosen implementation strategy.
 7. Make sure the code follows the code guidelines.
+8. Make sure all items in the template are filled in either with the relevant info or N/A
 
 ## Code Guidelines: General
 
