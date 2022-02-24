@@ -16,6 +16,6 @@ return [
     
     'export_start_date' => env('IDS_EXPORT_START_DATE', '2021-01-13 00:00:00'),
 
-    'copied_emails' => env('COPIED_EMAILS', 'alberto@trailercentrail.com')
+    'copied_emails' => env('COPIED_EMAILS', 'alberto@trailercentral.com')
 
 ];
