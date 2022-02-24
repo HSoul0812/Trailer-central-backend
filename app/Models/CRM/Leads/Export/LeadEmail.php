@@ -2,6 +2,8 @@
 namespace App\Models\CRM\Leads\Export;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\User\User;
 
 class LeadEmail extends Model
 {
@@ -43,6 +45,11 @@ class LeadEmail extends Model
     ];
     
     public $timestamps = false;
+    
+    public function dealer() : BelongsTo
+    {
+        return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
+    }
     
     public function getToEmailsAttribute() : array
     {
