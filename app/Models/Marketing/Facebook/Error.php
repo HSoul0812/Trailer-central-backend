@@ -6,17 +6,17 @@ use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Class Marketplace
+ * Class Error
  * 
  * @package App\Models\Marketing\Facebook\Marketplace
  */
-class Marketplace extends Model
+class Error extends Model
 {
     use TableAware;
 
 
     // Define Table Name Constant
-    const TABLE_NAME = 'fbapp_marketplace';
+    const TABLE_NAME = 'fbapp_errors';
 
 
     /**

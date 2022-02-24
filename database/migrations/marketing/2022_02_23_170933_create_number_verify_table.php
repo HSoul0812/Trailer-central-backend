@@ -13,7 +13,7 @@ class CreateNumberVerifyTable extends Migration
      */
     public function up()
     {
-        Schema::create('number_verify', function (Blueprint $table) {
+        Schema::create('dealer_texts_verify', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('dealer_number', 12)->index();
             $table->string('twilio_number', 12);
@@ -29,6 +29,6 @@ class CreateNumberVerifyTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('number_verify');
+        Schema::dropIfExists('dealer_texts_verify');
     }
 }
