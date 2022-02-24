@@ -15,6 +15,9 @@ class CreateNumberVerifyTable extends Migration
     {
         Schema::create('number_verify', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->string('dealer_number', 12)->index();
+            $table->string('twilio_number', 12);
+            $table->enum('verify_type', array_keys(NumberVerify::VERIFY_TYPES))->index();
             $table->timestamps();
         });
     }

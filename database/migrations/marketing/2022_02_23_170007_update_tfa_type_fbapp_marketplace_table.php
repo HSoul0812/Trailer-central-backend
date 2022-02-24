@@ -1,8 +1,8 @@
 <?php
 
+use App\Models\Marketing\Facebook\Marketplace;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 
 class UpdateTfaTypeFbappMarketplaceTable extends Migration
 {
@@ -13,7 +13,10 @@ class UpdateTfaTypeFbappMarketplaceTable extends Migration
      */
     public function up()
     {
-        //
+        DB::statement(
+            "ALTER TABLE `fbapp_marketplace`
+                CHANGE `tfa_type` `tfa_type` ENUM('" . implode("','", array_keys(Marketplace::TFA_TYPES)) . "') CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL;"
+        );
     }
 
     /**

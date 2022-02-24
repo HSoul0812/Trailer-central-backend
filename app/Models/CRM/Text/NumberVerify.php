@@ -20,6 +20,13 @@ class NumberVerify extends Model
      */
     const TABLE_NAME = 'dealer_texts_verify';
 
+    /**
+     * @const array SMS Verification Types
+     */
+    const VERIFY_TYPES = [
+        'facebook' => 'Facebook'
+    ];
+
     protected $table = self::TABLE_NAME;
 
     /**

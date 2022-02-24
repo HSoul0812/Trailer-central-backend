@@ -15,6 +15,10 @@ class CreateFbappVerifyTable extends Migration
     {
         Schema::create('fbapp_verify', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->string('twilio_number', 12)->index();
+            $table->string('response');
+            $table->string('code');
+            $table->boolean('success')->nullable();
             $table->timestamps();
         });
     }
