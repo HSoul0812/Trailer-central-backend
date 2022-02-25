@@ -220,7 +220,6 @@ class InquiryService implements InquiryServiceInterface
         if(!in_array(LeadType::TYPE_FINANCING, $params['lead_types'])) {
             // Check merge is enabled for given website.
             $configData = $this->webConfigService->getConfigByWebsite($params['website_id'], WebsiteConfig::LEADS_MERGE_ENABLED);
-            var_dump($configData);
             if (!empty($configData[WebsiteConfig::LEADS_MERGE_ENABLED]) && $configData[WebsiteConfig::LEADS_MERGE_ENABLED] === "1") {
                 // Get Matches
                 $leads = $this->leadRepo->findAllMatches($params);
