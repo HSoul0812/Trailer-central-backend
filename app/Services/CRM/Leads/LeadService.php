@@ -275,12 +275,17 @@ class LeadService implements LeadServiceInterface
         $this->types->delete(['lead_id' => $lead->identifier]);
 
         // Loop Lead Types
+        $added = [];
         $types = new Collection();
         foreach($leadTypes as $leadType) {
+            if(in_array($added, $leadType)) {
+                continue;
+            }
             $type = $this->types->create([
                 'lead_id' => $lead->identifier,
                 'lead_type' => $leadType
             ]);
+            $added[] = $leadType;
             $types->push($type);
         }
 
@@ -308,12 +313,17 @@ class LeadService implements LeadServiceInterface
         $this->units->delete(['website_lead_id' => $lead->identifier]);
 
         // Loop Lead Types
+        $added = [];
         $units = new Collection();
         foreach($inventoryIds as $inventoryId) {
+            if(in_array($added, $inventoryId)) {
+                continue;
+            }
             $unit = $this->units->create([
                 'website_lead_id' => $lead->identifier,
                 'inventory_id' => $inventoryId
             ]);
+            $added[] = $inventoryId;
             $units->push($unit);
         }
 
