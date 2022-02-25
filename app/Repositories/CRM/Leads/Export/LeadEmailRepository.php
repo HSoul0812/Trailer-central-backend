@@ -24,7 +24,13 @@ class LeadEmailRepository implements LeadEmailRepositoryInterface
     }
 
     public function getAll($params) {
-        return LeadEmail::where('dealer_id', $params['dealer_id'])->get();
+        $query = LeadEmail::where('id', '>', 0);
+        
+        if (isset($params['dealer_id'])) {
+            $query = $query->where('dealer_id', $params['dealer_id']);
+        }
+        
+        return $query->get();
     }
 
     public function update($params) {
