@@ -17,10 +17,10 @@ class WebsiteConfigDefault extends Model
 
     /**
      * Get JSON-Decoded Values Map
-     * 
-     * @return array{mixed}
+     *
+     * @return array{mixed}|null
      */
-    public function getValuesMapAttribute(): array {
+    public function getValuesMapAttribute(): ?array {
         return json_decode($this->values_mapping, true);
     }
 }
