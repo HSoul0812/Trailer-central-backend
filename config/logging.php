@@ -242,7 +242,8 @@ return [
             'permission' => 0664,
         ],
         'sentry' => [
-            'driver' => 'sentry'
+            'driver' => 'sentry',
+            'level' => env('SENTRY_LOG_LEVEL', 'error')
         ],
     ],
 
