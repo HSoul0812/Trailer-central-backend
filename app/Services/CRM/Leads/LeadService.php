@@ -278,7 +278,7 @@ class LeadService implements LeadServiceInterface
         $added = [];
         $types = new Collection();
         foreach($leadTypes as $leadType) {
-            if(in_array($added, $leadType)) {
+            if(in_array($leadType, $added)) {
                 continue;
             }
             $type = $this->types->create([
@@ -316,7 +316,7 @@ class LeadService implements LeadServiceInterface
         $added = [];
         $units = new Collection();
         foreach($inventoryIds as $inventoryId) {
-            if(in_array($added, $inventoryId)) {
+            if(in_array($inventoryId, $added)) {
                 continue;
             }
             $unit = $this->units->create([
