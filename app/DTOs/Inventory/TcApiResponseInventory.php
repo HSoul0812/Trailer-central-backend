@@ -11,6 +11,7 @@ class TcApiResponseInventory
     public int $id;
     public ?string $url;
     public ?array $features;
+    public ?array $attributes;
     public ?string $description;
     public ?float $payload_capacity;
     public ?float $gvwr;
@@ -33,6 +34,7 @@ class TcApiResponseInventory
      $obj->id = $data['id'];
      $obj->url = $data['url'];
      $obj->features = $data['features'];
+     $obj->attributes = $data['attributes'];
      $obj->description = $data['description'];
      $obj->payload_capacity = $data['payload_capacity'];
      $obj->gvwr = $data['gvwr'];

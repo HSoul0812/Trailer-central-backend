@@ -236,7 +236,7 @@ class InventoryService implements InventoryServiceInterface
      */
     public function show(int $id): TcApiResponseInventory
     {
-        $url = config('services.trailercentral.api') . 'inventory/' . $id . '?include=features';
+        $url = config('services.trailercentral.api') . 'inventory/' . $id . '?include=features,attributes';
         $inventory = $this->handleHttpRequest('GET', $url);
 
         return TcApiResponseInventory::fromData($inventory['data']);

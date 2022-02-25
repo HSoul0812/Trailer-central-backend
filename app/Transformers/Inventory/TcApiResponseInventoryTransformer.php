@@ -15,6 +15,7 @@ class TcApiResponseInventoryTransformer extends TransformerAbstract
              'id'               => (int) $type->id,
              'url'              => $type->url,
              'features'         => $type->features,
+             'attributes'       => $type->attributes,
              'description'      => $type->description,
              'payload_capacity' => $type->payload_capacity,
              'gvwr'             => $type->gvwr,
