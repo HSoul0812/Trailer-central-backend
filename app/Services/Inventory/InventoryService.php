@@ -3,6 +3,7 @@
 namespace App\Services\Inventory;
 
 use App\DTOs\Inventory\TcApiResponseInventory;
+use App\Repositories\SysConfig\SysConfigRepositoryInterface;
 use GuzzleHttp\Exception\GuzzleException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use App\DTOs\Inventory\TcEsInventory;
@@ -48,7 +49,11 @@ class InventoryService implements InventoryServiceInterface
         'payload_capacity' => 'payloadCapacity'
     ];
 
-    public function __construct(private GuzzleHttpClient $httpClient, private GeolocationRepositoryInterface $geolocationRepository)
+    public function __construct(
+        private GuzzleHttpClient $httpClient,
+        private GeolocationRepositoryInterface $geolocationRepository,
+        private SysConfigRepositoryInterface $sysConfigRepository,
+    )
     {}
 
     /**
@@ -82,10 +87,36 @@ class InventoryService implements InventoryServiceInterface
             $response = new TcEsResponseInventoryList();
             $response->aggregations = $resJson['aggregations'];
             $response->inventories = $paginator;
+            $response->limits = \Cache::remember('filter/limits', 1, function () {
+                return $this->getFilterLimits();
+            });
             return $response;
         } else {
             throw new \Exception('Elastic search API responded with http code: ' . $res->getStatusCode());
         }
+    }
+
+    private function getFilterLimits(): array {
+        $configs = $this->sysConfigRepository->getAll(['key' => 'filter/']);
+        $filter = [];
+        foreach($configs as $config) {
+            $keyParts = explode('/', $config['key']);
+            array_shift($keyParts);
+            $end = array_pop($keyParts);
+            if(!in_array($end, ['min', 'max'])) {
+                continue;
+            }
+
+            $subProp = &$filter;
+            foreach($keyParts as $part) {
+                if(!isset($subProp[$part])) {
+                    $subProp[$part] = [];
+                }
+                $subProp = &$subProp[$part];
+            }
+            $subProp[$end] = intval($config['value']);
+        }
+        return $filter;
     }
 
     #[ArrayShape(['from' => "int", 'size' => "int", 'query' => "array[]", 'aggregations' => "array"])]

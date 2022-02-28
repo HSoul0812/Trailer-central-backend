@@ -16,6 +16,8 @@ use App\Repositories\Parts\TypeRepository;
 use App\Repositories\Parts\TypeRepositoryInterface;
 use App\Repositories\SyncProcessRepository;
 use App\Repositories\SyncProcessRepositoryInterface;
+use App\Repositories\SysConfig\SysConfigRepository;
+use App\Repositories\SysConfig\SysConfigRepositoryInterface;
 use App\Services\Integrations\TrailerCentral\Console\Inventory\LogService as InventoryLogService;
 use App\Services\Integrations\TrailerCentral\Console\Inventory\LogServiceInterface as InventoryLogServiceInterface;
 use App\Services\Integrations\TrailerCentral\Console\Inventory\SyncService as InventorySyncService;
@@ -55,6 +57,7 @@ class TrailerCentralIntegrationServiceProvider extends ServiceProvider
 
         $this->app->bind(InventoryServiceInterface::class, InventoryService::class);
         $this->app->bind(GeolocationRepositoryInterface::class, GeolocationRepository::class);
+        $this->app->bind(SysConfigRepositoryInterface::class, SysConfigRepository::class);
         TomTomMapSearchService::register();
     }
 }

@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\App\Transformers\MapSearch;
 
-use App\DTOs\MapSearch\HereResponse;
 use App\DTOs\MapSearch\TomTomGeocodeResponse;
 use App\DTOs\MapSearch\TomTomReverseGeocodeResponse;
-use App\Transformers\MapSearch\HereResponseTransformer;
 use App\Transformers\MapSearch\TomTomGeocodeResponseTransformer;
 use App\Transformers\MapSearch\TomTomReverseGeocodeResponseTransformer;
 use Tests\Common\UnitTestCase;
