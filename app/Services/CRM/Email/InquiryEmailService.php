@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Class InquiryEmailService
- * 
+ *
  * @package App\Services\CRM\Leads
  */
 class InquiryEmailService implements InquiryEmailServiceInterface
@@ -100,7 +100,7 @@ class InquiryEmailService implements InquiryEmailServiceInterface
 
     /**
      * Send Email for Lead
-     * 
+     *
      * @param LeadInquiry $inquiry
      * @throws SendInquiryFailedException
      * @return bool
@@ -131,7 +131,7 @@ class InquiryEmailService implements InquiryEmailServiceInterface
 
     /**
      * Fill Inquiry Lead Details From Request Params
-     * 
+     *
      * @param array $params
      * @return InquiryLead
      */
@@ -160,10 +160,13 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         // Get Data By Inquiry Type
         $vars = $this->getInquiryTypeVars($details);
 
+        // Check Overrided Email
+        $params = $this->checkOverrideEmail($vars);
+
         // Create Inquiry Lead
-        return new InquiryLead($vars);
+        return new InquiryLead($params);
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -184,28 +187,28 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         $params['last_name'] = $lead->last_name;
         $params['email_address'] = $lead->email_address;
         $params['phone_number'] = $lead->phone_number;
-        $params['preferred_contact'] = $lead->preferred_contact;        
+        $params['preferred_contact'] = $lead->preferred_contact;
         $params['address'] = $lead->address;
         $params['city'] = $lead->city;
         $params['state'] = $lead->state;
         $params['zip'] = $lead->zip;
         $params['comments'] = $lead->comments;
-        $params['note'] = $lead->note;        
+        $params['note'] = $lead->note;
         $params['metadata'] = $lead->metadata;
         $params['date_submitted'] = $lead->date_submitted;
         $params['contact_email_sent'] = $lead->contact_email_sent;
         $params['adf_email_sent'] = $lead->adf_email_sent;
         $params['cdk_email_sent'] = $lead->cdk_email_sent;
-        $params['is_spam'] = $lead->is_spam;        
+        $params['is_spam'] = $lead->is_spam;
         $params['lead_source'] = $lead->getSource();
         $params['lead_status'] = $lead->leadStatus ? $lead->leadStatus->status : null;
-        return $this->fill($params);        
+        return $this->fill($params);
     }
 
 
     /**
      * Get Inquiry Name/Email Details
-     * 
+     *
      * @param array $params
      * @return array_merge($params, array{'inquiry_email': string,
      *                                    'inquiry_name': string})
@@ -240,7 +243,7 @@ class InquiryEmailService implements InquiryEmailServiceInterface
 
     /**
      * Get Inquiry Type Specific Vars
-     * 
+     *
      * @param array $params
      * @return array_merge($params, array{'stock': string,
      *                                    'title': string})
@@ -274,5 +277,25 @@ class InquiryEmailService implements InquiryEmailServiceInterface
 
         // Return Updated Params Array
         return $params;
+    }
+
+    /**
+     * Check override email is applied. If applied change email to config variable.
+     *
+     * @param array $vars
+     * @return array
+     */
+    private function checkOverrideEmail(array $vars): array
+    {
+        $config = $this->websiteConfig->getValueOfConfig($vars['website_id'], 'contact/email/' . $vars['inquiry_type']);
+        if (empty($config)) {
+            $config = $this->websiteConfig->getValueOfConfig($vars['website_id'], 'contact/email');
+
+            if (!empty($config->value)) {
+                $vars['inquiry_email'] = $config->value;
+            }
+        }
+
+        return $vars;
     }
 }
