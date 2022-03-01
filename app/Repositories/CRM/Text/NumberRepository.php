@@ -7,7 +7,9 @@ use App\Repositories\CRM\Text\NumberRepositoryInterface;
 use App\Repositories\CRM\Text\DealerLocationRepositoryInterface;
 use App\Models\CRM\Text\Number;
 use App\Models\CRM\Text\NumberTwilio;
+use App\Models\CRM\Text\VerifyTwilio;
 use App\Services\CRM\Text\TextServiceInterface;
+use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
 
 class NumberRepository implements NumberRepositoryInterface {
@@ -129,6 +131,23 @@ class NumberRepository implements NumberRepositoryInterface {
     }
 
     /**
+     * Is Active Twilio Number?
+     * 
+     * @param string $twilioNumber
+     * @param string $maskedNumber
+     * @return Number
+     */
+    public function isActiveTwilioNumber(string $twilioNumber, string $maskedNumber): Number {
+        // Return Number
+        return Number::where('twilio_number', $twilioNumber)
+                     ->where(function(Builder $query) use($maskedNumber) {
+                        $query = $query->where('customer_number', $maskedNumber)
+                                       ->orWhere('dealer_number', $maskedNumber);
+                     })->first();
+    }
+
+
+    /**
      * Delete Twilio Number
      * 
      * @param string $phone
@@ -157,5 +176,75 @@ class NumberRepository implements NumberRepositoryInterface {
                 ->orWhere(Number::getTableName() . '.expiration_time', '<', $toDate)
                 ->groupBy(NumberTwilio::getTableName() . '.phone_number')
                 ->chunk($chunkSize, $callable);
+    }
+
+
+    /**
+     * Is Verify Number?
+     * 
+     * @param string $twilioNumber
+     * @param string $dealerNumber
+     * @return NumberVerify
+     */
+    public function isVerifyNumber(string $twilioNumber, string $dealerNumber): NumberVerify {
+        // Return NumberVerify
+        return NumberVerify::where('twilio_number', $twilioNumber)
+                           ->where('dealer_number', $dealerNumber)->first();
+    }
+
+
+    /**
+     * Create Verify Code in DB
+     * 
+     * @param string $twilioNumber
+     * @param string $response
+     * @param string $code
+     * @param null|bool $success
+     * @return NumberVerifyCode
+     */
+    public function createVerifyCode(string $twilioNumber, string $response,
+                                     string $code, ?bool $success = null): NumberVerifyCode {
+        // Initialize Verify Code Params
+        $params = [
+            'twilio_number' => $twilioNumber,
+            'response' => $response,
+            'code' => $code
+        ];
+
+        // Success Is Not NULL?!
+        if($success !== null) {
+            $params['success'] = $success;
+        }
+
+        // Return NumberVerifyCode
+        return NumberVerifyCode::create($params);
+    }
+
+    /**
+     * Create Verify Code in DB
+     * 
+     * @param string $twilioNumber
+     * @param string $response
+     * @param string $code
+     * @param boolean $success
+     * @return NumberVerify
+     */
+    public function updateVerifyCode(string $twilioNumber, string $response,
+                                     string $code, bool $success = false): NumberVerify {
+        // Get NumberVerifyCode
+        $verify = NumberVerifyCode::where('twilio_number', $twilioNumber)->whereNull('success')
+                                  ->orderBy('created_at', 'DESC')->firstOrFail();
+
+        DB::transaction(function() use (&$verify, $response, $code, $success) {
+            // Update Number
+            $verify->fill([
+                'response' => $response,
+                'code' => $code,
+                'success' => $success
+            ])->save();
+        });
+
+        // Return NumberVerifyCode
+        return $verify;
     }
 }

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateFbappVerifyTable extends Migration
+class CreateNumberVerifyCodeTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateFbappVerifyTable extends Migration
      */
     public function up()
     {
-        Schema::create('fbapp_verify', function (Blueprint $table) {
+        Schema::create('number_verify_code', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('twilio_number', 12)->index();
             $table->string('response');
@@ -30,6 +30,6 @@ class CreateFbappVerifyTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('fbapp_verify');
+        Schema::dropIfExists('number_verify_code');
     }
 }

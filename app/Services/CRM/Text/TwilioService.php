@@ -11,6 +11,7 @@ use App\Exceptions\CRM\Text\SendTwilioTextFailedException;
 use App\Repositories\CRM\Text\NumberRepositoryInterface;
 use App\Services\CRM\Text\TextServiceInterface;
 use App\Models\CRM\Text\NumberTwilio;
+use App\Models\CRM\Text\VerifyTwilio;
 use Twilio\Rest\Client;
 use Twilio\Rest\Api\V2010\Account\MessageInstance;
 use Illuminate\Support\Facades\Log;
@@ -22,6 +23,14 @@ use Illuminate\Support\Facades\Log;
  */
 class TwilioService implements TextServiceInterface
 {
+    /**
+     * @const Code Lengths By Type
+     */
+    const CODE_LENGTHS = [
+        'facebook' => [0, 6]
+    ];
+
+
     /**
      * @var Twilio Client
      */
@@ -199,6 +208,62 @@ class TwilioService implements TextServiceInterface
             return true;
         }
         return $success;
+    }
+
+
+    /**
+     * Verify Twilio SMS
+     * 
+     * @param string $body
+     * @param string $from
+     * @param string $to
+     * @return null|SmsVerify
+     */
+    public function verify(string $body, string $from, string $to): ?SmsVerify {
+        // Is Verification Number?
+        $number = $this->textNumber->isVerifyNumber($from, $to);
+        if(empty($number->id)) {
+            $this->log->error($to . ' is not a valid twilio sms verification number!');
+            return null;
+        }
+
+        // Return Verification Code
+        $code = substr($body, self::CODE_LENGTHS[$number->verify_type][0], self::CODE_LENGTHS[$number->verify_type][1]);
+
+        // Return Sms Verify
+        return $this->textNumber->createVerifyCode($number->twilio_number, $body, $code);
+    }
+
+    /**
+     * Create And Return Verification Twilio Number
+     * 
+     * @param string $dealerNo
+     * @param null|string $type
+     * @return null|NumberVerify
+     */
+    public function getVerifyNumber(string $dealerNo, ?string $type = null): ?NumberVerify {
+        // Get Next Available Number
+        if (!empty($this->twilio)) {
+            $phoneNumber = current($this->twilio->availablePhoneNumbers("US")->local->read(array('smsEnabled' => true), 1))->phoneNumber;
+
+            try {
+                $phone = $this->twilio->incomingPhoneNumbers
+                                ->create(["phoneNumber" => $phoneNumber]);
+
+                $this->twilio->incomingPhoneNumbers($phone->sid)
+                                ->update(["smsUrl" => config('vendor.twilio.verify')]);
+            } catch (\Exception $ex) {
+                $this->log->error('Error occurred getting verification twilio number: ' . $ex->getMessage());
+                throw new NoTwilioNumberAvailableException();
+            }
+
+            // Insert New Verify Number
+            return $this->textNumber->createVerifyNumber($dealerNo, $phoneNumber,
+                                $type ?? array_keys(reset(NumberVerify::VERIFY_TYPES)));
+        }
+
+        // Return Null
+        return null;
     }
 
 

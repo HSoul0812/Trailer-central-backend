@@ -5,6 +5,8 @@ namespace App\Services\Marketing\Facebook;
 use App\Models\Marketing\Facebook\Marketplace;
 use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
 use App\Repositories\Marketing\Facebook\FilterRepositoryInterface;
+use App\Repositories\CRM\Text\NumberRepositoryInterface;
+use App\Services\CRM\Text\TwilioServiceInterface;
 
 /**
  * Class MarketplaceService
@@ -24,17 +26,33 @@ class MarketplaceService implements MarketplaceServiceInterface
     protected $filters;
 
     /**
+     * @var NumberRepositoryInterface
+     */
+    protected $textNumber;
+
+    /**
+     * @var TwilioServiceInterface
+     */
+    protected $twilio;
+
+    /**
      * Construct Facebook Marketplace Service
      * 
      * @param MarketplaceRepositoryInterface $marketplace
      * @param FilterRepositoryInterface $filters
+     * @param NumberRepositoryInterface $textNumber
+     * @param TwilioServiceInterface $twilio
      */
     public function __construct(
         MarketplaceRepositoryInterface $marketplace,
-        FilterRepositoryInterface $filters
+        FilterRepositoryInterface $filters,
+        NumberRepositoryInterface $textNumber,
+        TwilioServiceInterface $twilio
     ) {
         $this->marketplace = $marketplace;
         $this->filters = $filters;
+        $this->textNumber = $textNumber;
+        $this->twilio = $twilio;
     }
 
     /**
@@ -149,5 +167,36 @@ class MarketplaceService implements MarketplaceServiceInterface
 
             throw $e;
         }
+    }
+
+    /**
+     * Get Two-Factor Auth Types Array
+     * 
+     * @return Collection<TfaType>
+     */
+    public function tfa(): Collection {
+        // Get Existing Verify Number?
+        
+    }
+
+    /**
+     * Get Two-Factor Twilio Number for Marketplace
+     * 
+     * @param string $dealerNo
+     * @param null|string $type
+     * @return NumberVerify
+     */
+    public function sms(string $dealerNo, ?string $type = null): NumberVerify {
+        // Get Existing Verify Number?
+        $verify = $this->textNumber->getVerifyNumber($dealerNo, $type);
+
+        // No Existing Number
+        if(empty($verify->id)) {
+            // Get New Verification Number
+            $verify = $this->twilio->getVerifyNumber($dealerNo, $type);
+        }
+
+        // Return Response
+        return $verify;
     }
 }

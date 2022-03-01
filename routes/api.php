@@ -1347,4 +1347,24 @@ $api->version('v1', function ($route) {
             });
         });
     });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Webhooks
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+    $route->group([
+        'prefix' => 'webhook'
+    ], function ($route) {
+        // Twilio Webhooks
+        $route->group([
+            'prefix' => 'twilio'
+        ], function ($route) {
+            $route->post('verify', 'App\Http\Controllers\v1\Webhook\TwilioController@verify');
+        });
+    });
 });

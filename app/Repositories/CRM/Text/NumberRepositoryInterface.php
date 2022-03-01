@@ -3,6 +3,8 @@
 namespace App\Repositories\CRM\Text;
 
 use App\Repositories\Repository;
+use App\Models\CRM\Text\Number;
+use App\Models\CRM\Text\NumberVerify;
 
 interface NumberRepositoryInterface extends Repository {
     /**
@@ -43,6 +45,24 @@ interface NumberRepositoryInterface extends Repository {
     public function findAllTwilioNumbers($dealerNo, $customerNo);
 
     /**
+     * Is Active Twilio Number?
+     * 
+     * @param string $twilioNumber
+     * @param string $maskedNumber
+     * @return Number
+     */
+    public function isActiveTwilioNumber(string $twilioNumber, string $maskedNumber): Number;
+
+
+    /**
+     * Delete Twilio Number
+     * 
+     * @param string $phone
+     * @return bool
+     */
+    public function deleteTwilioNumber(string $phone): bool;
+
+    /**
      * Find All Expired Numbers (Chunked)
      * 
      * @param Closure $callable
@@ -51,4 +71,14 @@ interface NumberRepositoryInterface extends Repository {
      * @return void
      */
     public function getAllExpiredChunked(\Closure $callable, int $toDate, int $chunkSize = 500): void;
+
+
+    /**
+     * Is Verify Twilio Number?
+     * 
+     * @param string $twilioNumber
+     * @param string $dealerNumber
+     * @return NumberVerify
+     */
+    public function isVerifyNumber(string $twilioNumber, string $dealerNumber): NumberVerify;
 }
