@@ -9,4 +9,6 @@ interface WebsiteConfigServiceInterface
     public function createShowroomConfig(array $requestData);
 
     public function updateShowroomConfig(array $requestData);
+
+    public function getConfigByWebsite(int $website_id, string $key): array;
 }
