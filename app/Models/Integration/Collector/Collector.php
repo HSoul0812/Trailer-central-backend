@@ -57,6 +57,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $motility
  * @property string|null $generic_json
  * @property string|null $bish
+ * @property string|null $csvs
  * @property string|null $zero_msrp
  * @property string|null $only_types
  * @property string|null $linebreak_characters
@@ -88,6 +89,7 @@ class Collector extends Model implements Filterable
         self::FILE_FORMAT_MOTILITY,
         self::FILE_FORMAT_JSON,
         self::FILE_FORMAT_BISH,
+        self::FILE_FORMAT_CSV_SIMPLE,
     ];
 
     public const FILE_FORMAT_CDK = 'cdk';
@@ -99,6 +101,7 @@ class Collector extends Model implements Filterable
     public const FILE_FORMAT_MOTILITY = 'motility';
     public const FILE_FORMAT_JSON = 'json';
     public const FILE_FORMAT_BISH = 'bish';
+    public const FILE_FORMAT_CSV_SIMPLE = 'csvs';
 
     public const MSRP_ZEROED_OUT_ON_USED = 1;
     public const MSRP_NOT_ZEROED_OUT_ON_USED = 0;

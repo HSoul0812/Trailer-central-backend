@@ -30,12 +30,12 @@ trait HasPermissionsStub
         $permissions = DealerUserPermission::where('id', '>', 0)
                                 ->groupBy('feature')
                                 ->get();
-        
+
         foreach($permissions as $perm) {
-            $perm->permission_level = PermissionsInterface::CAN_SEE_AND_CHANGE_PERMISSION;
+            $perm->permission_level = PermissionsInterface::SUPER_ADMIN_PERMISSION;
             $perms[] = $perm;
         }
-        
+
         return collect($perms);
     }
 
