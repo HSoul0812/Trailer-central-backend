@@ -29,6 +29,6 @@ class CreateCategoryMappingsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('map_categories');
+        Schema::dropIfExists('category_mappings');
     }
 }
