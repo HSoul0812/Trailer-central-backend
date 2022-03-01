@@ -16,7 +16,7 @@ class AddMappingsToCategoryMappingsTable extends Migration
         ['map_from' => 'Tow Dollys', 'map_to' => 'tow_dolly'],
         ['map_from' => 'Motorcycle / Cycle', 'map_to' => 'motorcycle'],
         ['map_from' => 'ATV', 'map_to' => 'atv'],
-        ['map_from' => 'Watercraft', 'map_to' => 'watercraft;boat_trailerpersonal_watercraft'],
+        ['map_from' => 'Watercraft', 'map_to' => 'watercraft;boat_trailer;personal_watercraft'],
         ['map_from' => 'Snowmobile', 'map_to' => 'snowmobile'],
         ['map_from' => 'Utility', 'map_to' => 'utility;equipment;multisport;rollster'],
         ['map_from' => 'Dump', 'map_to' => 'dump;dump_bin'],
@@ -45,7 +45,7 @@ class AddMappingsToCategoryMappingsTable extends Migration
         ['map_from' => 'Grain', 'map_to' => 'semi_grain-hopper;semi_hopper_trailers'],
         ['map_from' => 'Reefer', 'map_to' => 'semi_reefer'],
         ['map_from' => 'Livestock', 'map_to' => 'semi_livestock;stock_stock-combo'],
-        ['map_from' => 'Tank / Bulk', 'map_to' => 'tank_trailerDump'],
+        ['map_from' => 'Tank / Bulk', 'map_to' => 'tank_trailer'],
         ['map_from' => 'Dump', 'map_to' => 'semi_dump'],
         ['map_from' => 'Other', 'map_to' => 'semi_other'],
         ['map_from' => 'Other Trucks', 'map_to' => 'vehicle_truck']

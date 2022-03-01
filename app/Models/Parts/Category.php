@@ -44,4 +44,12 @@ class Category extends Model
     {
         return $this->hasOne(CategoryImage::class)->select('id', 'image_url', 'category_id');
     }
+
+    /**
+     * Get the category mapping associated with the category.
+     */
+    public function category_mappings(): HasOne
+    {
+        return $this->hasOne(CategoryMappings ::class);
+    }
 }

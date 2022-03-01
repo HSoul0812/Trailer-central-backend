@@ -9,6 +9,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use App\DTOs\Inventory\TcEsInventory;
 use App\DTOs\Inventory\TcEsResponseInventoryList;
 use App\Models\Geolocation\Geolocation;
+use App\Models\Parts\Type;
 use App\Repositories\Geolocation\GeolocationRepositoryInterface;
 use GuzzleHttp\Client as GuzzleHttpClient;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -191,6 +192,20 @@ class InventoryService implements InventoryServiceInterface
         ]);
     }
 
+    private function getMappedCategories(int $type_id, ?string $categories_string) {
+      $type = Type::find($type_id);
+      if ($categories_string) {
+        $categories_array = explode(';',$categories_string);
+      }
+      $categories = $type->categories()->whereIn('name', $categories_array)->get();
+      $mapped_categories = "";
+      foreach ($categories as $category) {
+        $mapped_categories = $mapped_categories . $category->category_mappings->map_to . ';';
+      }
+      $mapped_categories = rtrim($mapped_categories, ";");
+      return $mapped_categories;
+    }
+
     private function buildPaginateQuery(InventorySearchQueryBuilder $queryBuilder, array $params) {
         $currentPage = LengthAwarePaginator::resolveCurrentPage();
         $queryBuilder->paginate($currentPage, $params['per_page'] ?? self::PAGE_SIZE);
@@ -199,7 +214,13 @@ class InventoryService implements InventoryServiceInterface
     private function buildTermQueries(InventorySearchQueryBuilder $queryBuilder, array $params) {
         $queryBuilder->termQuery('isRental', false);
         foreach(self::TERM_SEARCH_KEY_MAP as $field => $searchField) {
-            $queryBuilder->termQueries($searchField, $params[$field] ?? null);
+            if (isset($params['type_id']) && $searchField == 'category') {
+              $mapped_categories = $this->getMappedCategories($params['type_id'], $params[$field]);
+              $queryBuilder->termQueries($searchField, $mapped_categories);
+            } else {
+              $queryBuilder->termQueries($searchField, $params[$field] ?? null);
+            }
+            
         }
     }
 
