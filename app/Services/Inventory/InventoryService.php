@@ -194,13 +194,19 @@ class InventoryService implements InventoryServiceInterface
 
     private function getMappedCategories(int $type_id, ?string $categories_string) {
       $type = Type::find($type_id);
+      $mapped_categories = "";
       if ($categories_string) {
         $categories_array = explode(';',$categories_string);
+        $categories = $type->categories()->whereIn('name', $categories_array)->get();
+        
+      } else {
+        $categories = $type->categories;
       }
-      $categories = $type->categories()->whereIn('name', $categories_array)->get();
-      $mapped_categories = "";
+
       foreach ($categories as $category) {
-        $mapped_categories = $mapped_categories . $category->category_mappings->map_to . ';';
+        if ($category->category_mappings) {
+          $mapped_categories = $mapped_categories . $category->category_mappings->map_to . ';';
+        }
       }
       $mapped_categories = rtrim($mapped_categories, ";");
       return $mapped_categories;
