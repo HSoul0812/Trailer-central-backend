@@ -11,5 +11,7 @@ use App\Http\Requests\Request;
  * @author David A Conway Jr.
  */
 class TfaMarketplaceRequest extends Request {
-    protected $rules = [];
+    protected $rules = [
+        'dealer_id' => 'required|int'
+    ];
 }
