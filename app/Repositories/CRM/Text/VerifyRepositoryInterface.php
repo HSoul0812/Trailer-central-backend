@@ -30,10 +30,10 @@ interface VerifyRepositoryInterface extends GenericRepository {
      * Is Verify Number?
      * 
      * @param string $twilioNumber
-     * @param string $dealerNumber
-     * @return NumberVerify
+     * @param null|string $dealerNumber
+     * @return null|NumberVerify
      */
-    public function exists(string $twilioNumber, string $dealerNumber): NumberVerify;
+    public function exists(string $twilioNumber, ?string $dealerNumber = null): ?NumberVerify;
 
 
     /**
