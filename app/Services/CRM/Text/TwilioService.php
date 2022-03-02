@@ -172,7 +172,8 @@ class TwilioService implements TextServiceInterface
         $list = [];
         $numbers = $this->numbers($max);
         foreach($numbers as $number) {
-            if(!$this->textNumber->existsTwilioNumber($number)) {
+            if(!$this->textNumber->existsTwilioNumber($number) &&
+               !$this->verifyNumber->exists($number)) {
                 $list[] = $number;
             }
         }
@@ -230,7 +231,7 @@ class TwilioService implements TextServiceInterface
      */
     public function verify(string $body, string $from, string $to): ?SmsVerify {
         // Is Verification Number?
-        $number = $this->verifyNumber->exists($from, $to);
+        $number = $this->verifyNumber->exists($to, $from);
         if(empty($number->id)) {
             $this->log->error($to . ' is not a valid twilio sms verification number!');
             return null;

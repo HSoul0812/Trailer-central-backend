@@ -86,13 +86,20 @@ class VerifyRepository implements VerifyRepositoryInterface {
      * Verify Number Exists?
      * 
      * @param string $twilioNumber
-     * @param string $dealerNumber
-     * @return NumberVerify
+     * @param null|string $dealerNumber
+     * @return null|NumberVerify
      */
-    public function exists(string $twilioNumber, string $dealerNumber): NumberVerify {
+    public function exists(string $twilioNumber, ?string $dealerNumber = null): ?NumberVerify {
         // Return NumberVerify
-        return NumberVerify::where('twilio_number', $twilioNumber)
-                           ->where('dealer_number', $dealerNumber)->first();
+        $verify = NumberVerify::where('twilio_number', $twilioNumber);
+
+        // Also Match Dealer Number
+        if($dealerNumber !== null) {
+            $verify = $verify->where('dealer_number', $dealerNumber);
+        }
+
+        // Return Verify Number
+        return $verify->first();
     }
 
 
