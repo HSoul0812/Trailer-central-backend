@@ -2,43 +2,11 @@
 
 namespace App\Transformers\Marketing\Facebook;
 
-use App\Models\Marketing\Facebook\Marketplace;
-use App\Transformers\Marketing\Facebook\FilterTransformer;
-use App\Transformers\User\UserTransformer;
-use App\Transformers\User\DealerLocationTransformer;
+use App\Services\Marketing\Facebook\DTOs\TfaType;
 use League\Fractal\TransformerAbstract;
 
-class MarketplaceTransformer extends TransformerAbstract
+class TFATransformer extends TransformerAbstract
 {
-    protected $defaultIncludes = [
-        'filters'
-    ];
-
-    /**
-     * @var FilterTransformer
-     */
-    protected $filterTransformer;
-
-    /**
-     * @var UserTransformer
-     */
-    protected $userTransformer;
-
-    /**
-     * @var DealerLocationTransformer
-     */
-    protected $dealerLocationTransformer;
-
-    public function __construct(
-        FilterTransformer $filterTransformer,
-        UserTransformer $userTransformer,
-        DealerLocationTransformer $dealerLocationTransformer
-    ) {
-        $this->filterTransformer = $filterTransformer;
-        $this->userTransformer = $userTransformer;
-        $this->dealerLocationTransformer = $dealerLocationTransformer;
-    }
-
     public function transform(TfaType $type)
     {
         // Return Array
