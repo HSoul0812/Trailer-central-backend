@@ -8,6 +8,7 @@ use App\Repositories\Marketing\Facebook\FilterRepositoryInterface;
 use App\Repositories\CRM\Text\NumberRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Services\CRM\Text\TextServiceInterface;
+use Illuminate\Support\Collection;
 
 /**
  * Class MarketplaceService
