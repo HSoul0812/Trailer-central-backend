@@ -11,9 +11,9 @@ use App\Http\Requests\Marketing\Facebook\UpdateMarketplaceRequest;
 use App\Http\Requests\Marketing\Facebook\DeleteMarketplaceRequest;
 use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
 use App\Services\Marketing\Facebook\MarketplaceServiceInterface;
+use App\Transformers\CRM\Text\NumberVerifyTransformer;
 use App\Transformers\Marketing\Facebook\MarketplaceTransformer;
 use App\Transformers\Marketing\Facebook\TFATransformer;
-use App\Transformers\Marketing\Facebook\SMSTransformer;
 
 class MarketplaceController extends RestfulControllerV2 {
     /**
@@ -26,12 +26,27 @@ class MarketplaceController extends RestfulControllerV2 {
      */
     private $service;
 
+    /**
+     * @var App\Transformers\Marketing\Facebook\MarketplaceTransformer
+     */
+    private $transformer;
+
+    /**
+     * @var App\Transformers\Marketing\Facebook\TFATransformer
+     */
+    private $tfaTransformer;
+
+    /**
+     * @var App\Transformers\CRM\Text\NumberVerifyTransformer
+     */
+    private $verifyTransformer;
+
     public function __construct(
         MarketplaceRepositoryInterface $repository,
         MarketplaceServiceInterface $service,
         MarketplaceTransformer $transformer,
         TFATransformer $tfaTransformer,
-        SMSTransformer $smsTransformer
+        NumberVerifyTransformer $verifyTransformer
     ) {
         $this->middleware('setDealerIdOnRequest')->only(['create', 'update', 'index', 'tfa']);
 
@@ -39,7 +54,7 @@ class MarketplaceController extends RestfulControllerV2 {
         $this->service = $service;
         $this->transformer = $transformer;
         $this->tfaTransformer = $tfaTransformer;
-        $this->smsTransformer = $smsTransformer;
+        $this->verifyTransformer = $verifyTransformer;
     }
 
     /**
@@ -167,7 +182,7 @@ class MarketplaceController extends RestfulControllerV2 {
         $request = new SmsMarketplaceRequest($requestData);
         if ($request->validate()) {
             // Return Auth
-            return $this->response->item($this->service->sms($request->sms_number), $this->smsTransformer);
+            return $this->response->item($this->service->sms($request->sms_number), $this->verifyTransformer);
         }
         
         return $this->response->errorBadRequest();
