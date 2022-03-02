@@ -9,6 +9,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use App\DTOs\Inventory\TcEsInventory;
 use App\DTOs\Inventory\TcEsResponseInventoryList;
 use App\Models\Geolocation\Geolocation;
+use App\Models\Parts\CategoryMappings;
 use App\Models\Parts\Type;
 use App\Repositories\Geolocation\GeolocationRepositoryInterface;
 use GuzzleHttp\Client as GuzzleHttpClient;
@@ -84,6 +85,17 @@ class InventoryService implements InventoryServiceInterface
                 $queryBuilder->getPageSize(),
                 $queryBuilder->getPage()
             );
+
+            foreach ($resJson['aggregations']['category']['buckets'] as $key => $value) {
+              $old_category = $value['key'];
+              if ($old_category) {
+                $mapped_category = CategoryMappings::where('map_to', 'like', '%' . $old_category . '%')->first();
+                if ($mapped_category) {
+                  $resJson['aggregations']['category']['buckets'][$key]['key'] = $mapped_category->map_from;
+                  $resJson['aggregations']['category']['buckets'][$key]['type_id'] = $mapped_category->category->types[0]->id;
+                }
+              }
+            }
 
             $response = new TcEsResponseInventoryList();
             $response->aggregations = $resJson['aggregations'];
