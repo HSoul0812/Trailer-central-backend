@@ -184,13 +184,20 @@ class NumberRepository implements NumberRepositoryInterface {
      * Get Verify Number
      * 
      * @param string $dealerNumber
-     * @param string $type
+     * @param null|string $type
      * @return null|NumberVerify
      */
-    public function getVerifyNumber(string $dealerNumber, string $type): ?NumberVerify {
+    public function getVerifyNumber(string $dealerNumber, ?string $type = null): ?NumberVerify {
         // Return NumberVerify
-        return NumberVerify::where('twilio_number', $twilioNumber)
-                           ->where('verify_type', $type)->first();
+        $number = NumberVerify::where('dealer_number', $dealerNumber);
+
+        // Filter By Type
+        if($type !== null) {
+            $number = $number->where('verify_type', $type);
+        }
+
+        // Return First Item
+        return $number->first();
     }
 
     /**
