@@ -8,13 +8,32 @@ use App\Models\CRM\Text\NumberVerifyCode;
 
 interface VerifyRepositoryInterface extends GenericRepository {
     /**
+     * Create Verify Number
+     * 
+     * @param string $dealerNumber
+     * @param string $twilioNumber
+     * @param string $type
+     * @return NumberVerify
+     */
+    public function create(string $dealerNumber, string $twilioNumber, string $type): NumberVerify;
+
+    /**
+     * Get Verify Number
+     * 
+     * @param string $dealerNumber
+     * @param null|string $type
+     * @return null|NumberVerify
+     */
+    public function get(string $dealerNumber, ?string $type = null): ?NumberVerify;
+
+    /**
      * Is Verify Number?
      * 
      * @param string $twilioNumber
      * @param string $dealerNumber
      * @return NumberVerify
      */
-    public function isVerifyNumber(string $twilioNumber, string $dealerNumber): NumberVerify;
+    public function exists(string $twilioNumber, string $dealerNumber): NumberVerify;
 
 
     /**

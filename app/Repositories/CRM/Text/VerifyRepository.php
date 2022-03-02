@@ -83,13 +83,13 @@ class VerifyRepository implements VerifyRepositoryInterface {
     }
 
     /**
-     * Is Verify Number?
+     * Verify Number Exists?
      * 
      * @param string $twilioNumber
      * @param string $dealerNumber
      * @return NumberVerify
      */
-    public function isVerifyNumber(string $twilioNumber, string $dealerNumber): NumberVerify {
+    public function exists(string $twilioNumber, string $dealerNumber): NumberVerify {
         // Return NumberVerify
         return NumberVerify::where('twilio_number', $twilioNumber)
                            ->where('dealer_number', $dealerNumber)->first();
