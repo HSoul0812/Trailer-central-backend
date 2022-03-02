@@ -71,14 +71,4 @@ interface NumberRepositoryInterface extends Repository {
      * @return void
      */
     public function getAllExpiredChunked(\Closure $callable, int $toDate, int $chunkSize = 500): void;
-
-
-    /**
-     * Is Verify Twilio Number?
-     * 
-     * @param string $twilioNumber
-     * @param string $dealerNumber
-     * @return NumberVerify
-     */
-    public function isVerifyNumber(string $twilioNumber, string $dealerNumber): NumberVerify;
 }

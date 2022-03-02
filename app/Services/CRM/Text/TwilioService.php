@@ -9,6 +9,7 @@ use App\Exceptions\CRM\Text\NoTwilioNumberAvailableException;
 use App\Exceptions\CRM\Text\TooManyNumbersTriedException;
 use App\Exceptions\CRM\Text\SendTwilioTextFailedException;
 use App\Repositories\CRM\Text\NumberRepositoryInterface;
+use App\Repositories\CRM\Text\VerifyRepositoryInterface;
 use App\Services\CRM\Text\TextServiceInterface;
 use App\Models\CRM\Text\NumberTwilio;
 use App\Models\CRM\Text\VerifyTwilio;
@@ -42,6 +43,11 @@ class TwilioService implements TextServiceInterface
     private $textNumber;
 
     /**
+     * @var VerifyRepositoryInterface
+     */
+    private $verifyNumber;
+
+    /**
      * @var Log
      */
     private $log;
@@ -70,8 +76,10 @@ class TwilioService implements TextServiceInterface
     /**
      * TwilioService constructor.
      */
-    public function __construct(NumberRepositoryInterface $numberRepo)
-    {
+    public function __construct(
+        NumberRepositoryInterface $numberRepo,
+        VerifyRepositoryInterface $verifyRepo
+    ) {
         // Get API Keys
         $appId = config('vendor.twilio.sid');
         $authToken = config('vendor.twilio.token');
@@ -87,6 +95,7 @@ class TwilioService implements TextServiceInterface
 
         // Initialize Number Repository
         $this->textNumber = $numberRepo;
+        $this->verifyNumber = $verifyRepo;
 
         // Get From/To Numbers if Exist
         $this->from = config('vendor.twilio.numbers.from');
@@ -221,7 +230,7 @@ class TwilioService implements TextServiceInterface
      */
     public function verify(string $body, string $from, string $to): ?SmsVerify {
         // Is Verification Number?
-        $number = $this->textNumber->isVerifyNumber($from, $to);
+        $number = $this->verifyNumber->isVerifyNumber($from, $to);
         if(empty($number->id)) {
             $this->log->error($to . ' is not a valid twilio sms verification number!');
             return null;
@@ -231,7 +240,7 @@ class TwilioService implements TextServiceInterface
         $code = substr($body, self::CODE_LENGTHS[$number->verify_type][0], self::CODE_LENGTHS[$number->verify_type][1]);
 
         // Return Sms Verify
-        return $this->textNumber->createVerifyCode($number->twilio_number, $body, $code);
+        return $this->verifyNumber->createCode($number->twilio_number, $body, $code);
     }
 
     /**
@@ -259,7 +268,7 @@ class TwilioService implements TextServiceInterface
             }
 
             // Insert New Verify Number
-            return $this->textNumber->createVerifyNumber($dealerNo, $phoneNumber,
+            return $this->verifyNumber->createVerifyNumber($dealerNo, $phoneNumber,
                                 $type ?? array_keys(reset(NumberVerify::VERIFY_TYPES)));
         }
 

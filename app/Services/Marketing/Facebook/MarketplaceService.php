@@ -5,7 +5,7 @@ namespace App\Services\Marketing\Facebook;
 use App\Models\Marketing\Facebook\Marketplace;
 use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
 use App\Repositories\Marketing\Facebook\FilterRepositoryInterface;
-use App\Repositories\CRM\Text\NumberRepositoryInterface;
+use App\Repositories\CRM\Text\VerifyRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Services\CRM\Text\TextServiceInterface;
 use App\Services\Marketing\Facebook\DTOs\TfaType;
@@ -29,9 +29,9 @@ class MarketplaceService implements MarketplaceServiceInterface
     protected $filters;
 
     /**
-     * @var NumberRepositoryInterface
+     * @var VerifyRepositoryInterface
      */
-    protected $textNumber;
+    protected $verifyNumber;
 
     /**
      * @var DealerLocationRepositoryInterface
@@ -48,20 +48,20 @@ class MarketplaceService implements MarketplaceServiceInterface
      * 
      * @param MarketplaceRepositoryInterface $marketplace
      * @param FilterRepositoryInterface $filters
-     * @param NumberRepositoryInterface $textNumber
+     * @param VerifyRepositoryInterface $verifyNumber
      * @param DealerLocationRepositoryInterface $dealerLocation
      * @param TextServiceInterface $twilio
      */
     public function __construct(
         MarketplaceRepositoryInterface $marketplace,
         FilterRepositoryInterface $filters,
-        NumberRepositoryInterface $textNumber,
+        VerifyRepositoryInterface $verifyNumber,
         DealerLocationRepositoryInterface $dealerLocation,
         TextServiceInterface $twilio
     ) {
         $this->marketplace = $marketplace;
         $this->filters = $filters;
-        $this->textNumber = $textNumber;
+        $this->verifyNumber = $verifyNumber;
         $this->dealerLocation = $dealerLocation;
         $this->twilio = $twilio;
     }
@@ -219,7 +219,7 @@ class MarketplaceService implements MarketplaceServiceInterface
      */
     public function sms(string $dealerNo, ?string $type = null): NumberVerify {
         // Get Existing Verify Number?
-        $verify = $this->textNumber->getVerifyNumber($dealerNo, $type);
+        $verify = $this->verifyNumber->getVerifyNumber($dealerNo, $type);
 
         // No Existing Number
         if(empty($verify->id)) {
