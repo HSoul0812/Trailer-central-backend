@@ -7,7 +7,7 @@ use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
 use App\Repositories\Marketing\Facebook\FilterRepositoryInterface;
 use App\Repositories\CRM\Text\NumberRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
-use App\Services\CRM\Text\TwilioServiceInterface;
+use App\Services\CRM\Text\TextServiceInterface;
 
 /**
  * Class MarketplaceService
@@ -37,7 +37,7 @@ class MarketplaceService implements MarketplaceServiceInterface
     protected $dealerLocation;
 
     /**
-     * @var TwilioServiceInterface
+     * @var TextServiceInterface
      */
     protected $twilio;
 
@@ -48,14 +48,14 @@ class MarketplaceService implements MarketplaceServiceInterface
      * @param FilterRepositoryInterface $filters
      * @param NumberRepositoryInterface $textNumber
      * @param DealerLocationRepositoryInterface $dealerLocation
-     * @param TwilioServiceInterface $twilio
+     * @param TextServiceInterface $twilio
      */
     public function __construct(
         MarketplaceRepositoryInterface $marketplace,
         FilterRepositoryInterface $filters,
         NumberRepositoryInterface $textNumber,
         DealerLocationRepositoryInterface $dealerLocation,
-        TwilioServiceInterface $twilio
+        TextServiceInterface $twilio
     ) {
         $this->marketplace = $marketplace;
         $this->filters = $filters;
