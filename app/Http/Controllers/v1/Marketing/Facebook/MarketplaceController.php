@@ -9,6 +9,8 @@ use App\Http\Requests\Marketing\Facebook\ShowMarketplaceRequest;
 use App\Http\Requests\Marketing\Facebook\CreateMarketplaceRequest;
 use App\Http\Requests\Marketing\Facebook\UpdateMarketplaceRequest;
 use App\Http\Requests\Marketing\Facebook\DeleteMarketplaceRequest;
+use App\Http\Requests\Marketing\Facebook\TfaMarketplaceRequest;
+use App\Http\Requests\Marketing\Facebook\SmsMarketplaceRequest;
 use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
 use App\Services\Marketing\Facebook\MarketplaceServiceInterface;
 use App\Transformers\CRM\Text\NumberVerifyTransformer;
