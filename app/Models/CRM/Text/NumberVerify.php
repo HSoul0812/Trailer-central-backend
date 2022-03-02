@@ -16,9 +16,14 @@ class NumberVerify extends Model
     use TableAware;
 
     /**
-     * @var string
+     * @const string
      */
     const TABLE_NAME = 'dealer_texts_verify';
+
+    /**
+     * @const string
+     */
+    const VERIFY_DEFAULT = 'facebook';
 
     /**
      * @const array SMS Verification Types

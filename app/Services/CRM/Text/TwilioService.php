@@ -254,7 +254,7 @@ class TwilioService implements TextServiceInterface
     public function getVerifyNumber(string $dealerNo, ?string $type = null): ?NumberVerify {
         // Default Type
         if($type === null) {
-            $type = reset(array_keys(NumberVerify::VERIFY_TYPES));
+            $type = NumberVerify::VERIFY_DEFAULT;
         }
 
         // Get Next Available Number
