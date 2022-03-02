@@ -100,8 +100,12 @@ class TfaType
         // Get Autocomplete
         $autocomplete = [];
         if(!empty($this->autocomplete)) {
-            foreach($this->autocomplete as $single) {
-                $autocomplete[] = $single;
+            foreach($this->autocomplete as $single) { 
+                if($this->code === self::TYPE_SMS) {
+                    $autocomplete[] = $single->sms_phone;
+                } else {
+                    $autocomplete[] = $single;
+                }
             }
         }
 
