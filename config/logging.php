@@ -56,6 +56,13 @@ return [
             'permission' => 0664,
         ],
 
+        'inquiry' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/services/inquiry.log'),
+            'level' => 'debug',
+            'days' => 3,
+        ],
+
         'autoassign' => [
             'driver' => 'daily',
             'path' => storage_path('logs/commands/auto-assign.log'),
