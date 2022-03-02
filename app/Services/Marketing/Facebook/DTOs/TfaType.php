@@ -99,8 +99,10 @@ class TfaType
     public function getAutocomplete(): array {
         // Get Autocomplete
         $autocomplete = [];
-        foreach($this->autocomplete as $single) {
-            $autocomplete[] = $single;
+        if(!empty($this->autocomplete)) {
+            foreach($this->autocomplete as $single) {
+                $autocomplete[] = $single;
+            }
         }
 
         // Return Array
