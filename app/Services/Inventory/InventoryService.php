@@ -97,6 +97,25 @@ class InventoryService implements InventoryServiceInterface
               }
             }
 
+            $newArr = [];
+            $finalArr = [];
+            foreach($resJson['aggregations']['category']['buckets'] as $arr) {
+                if (isset($newArr[$arr['key']])) {
+                  $newArr[$arr['key']] += $arr['doc_count'];
+                } else {
+                  $newArr[$arr['key']] = $arr['doc_count'];
+                }
+            }
+            
+            foreach($resJson['aggregations']['category']['buckets'] as $arr) {
+                if (isset($newArr[$arr['key']])) {
+                  $finalArr[] = ['key' => $arr['key'], 'doc_count' => $newArr[$arr['key']], 'type_id' => $arr['type_id']];
+                }
+            }
+
+            $resJson['aggregations']['category']['buckets'] = array_values(array_unique($finalArr, SORT_REGULAR));
+
+
             $response = new TcEsResponseInventoryList();
             $response->aggregations = $resJson['aggregations'];
             $response->inventories = $paginator;
