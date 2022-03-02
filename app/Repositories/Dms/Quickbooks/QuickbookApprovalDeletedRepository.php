@@ -101,7 +101,8 @@ class QuickbookApprovalDeletedRepository extends RepositoryAbstract implements Q
         throw new NotImplementedException;
     }
 
-    public function getAll($params) {
+    public function getAll($params)
+    {
         if (isset($params['dealer_id'])) {
             $query = QuickbookApprovalDeleted::where('quickbook_approval_deleted.dealer_id', '=', $params['dealer_id']);
         } else {
@@ -121,7 +122,7 @@ class QuickbookApprovalDeletedRepository extends RepositoryAbstract implements Q
             $search_term = $params['search_term'];
             $query = $query->where(function ($q) use ($params, $search_term) {
                 $q->where('action_type', 'LIKE', "%$search_term%")
-                    ->orWhere('created_at', 'LIKE', "%$search_term%")
+                    ->orWhere(QuickbookApprovalDeleted::TABLE_NAME . '.created_at', 'LIKE', "%$search_term%")
                     ->orWhere('qb_obj', 'LIKE', "%TotalAmt%$search_term%Line%") // ticket total
                     ->orWhere('qb_obj', 'LIKE', "%CustomerRef%\"name\"%$search_term%TxnDate%") // customer name
                     ->orWhere('qb_obj', 'LIKE', "%DisplayName%$search_term%PrimaryEmailAddr%") // customer name
@@ -133,13 +134,16 @@ class QuickbookApprovalDeletedRepository extends RepositoryAbstract implements Q
                         $query->filterByTableName($params['search_term']);
                     });
 
-                if (!is_numeric($search_term) && (isset($params['status']) && $params['status'] === QuickbookApproval::TO_SEND)) {
-                    $q->orWhere('qb_obj', 'LIKE', "%$search_term%");
-                }
+                $status = $params['status'] ?? null;
+                if (!empty($status)) {
+                    if (!is_numeric($search_term) && $status === QuickbookApproval::TO_SEND) {
+                        $q->orWhere('qb_obj', 'LIKE', "%$search_term%");
+                    }
 
-                if (isset($params['status']) && $params['status'] === QuickbookApproval::FAILED) {
-                    $q->orWhere('qb_obj', 'LIKE', '%' . $params['search_term'] . '%')
-                        ->orWhere('error_result', 'LIKE', '%' . $params['search_term'] . '%');
+                    if ($status === QuickbookApproval::FAILED) {
+                        $q->orWhere('error_result', 'LIKE', "%$search_term%")
+                            ->orWhere('qb_obj', 'LIKE', "%$search_term%");
+                    }
                 }
             });
         }
