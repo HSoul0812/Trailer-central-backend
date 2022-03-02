@@ -10,6 +10,9 @@ class TFATransformer extends TransformerAbstract
     public function transform(TfaType $type)
     {
         // Return Array
+        var_dump($type->getFields());
+        var_dump($type->getAutocomplete());
+        var_dump($type->getNote());
         return [
             'code' => $type->code,
             'name' => $type->name,
