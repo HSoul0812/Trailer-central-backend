@@ -165,7 +165,7 @@ class MarketplaceController extends RestfulControllerV2 {
         $request = new TfaMarketplaceRequest($requestData);
         if ($request->validate()) {
             // Return Auth
-            return $this->response->collection($this->service->tfa($request->dealerId), $this->tfaTransformer);
+            return $this->response->collection($this->service->tfa($request->dealer_id), $this->tfaTransformer);
         }
         
         return $this->response->errorBadRequest();
