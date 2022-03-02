@@ -60,4 +60,18 @@ class WebsiteConfigService implements WebsiteConfigServiceInterface
     {
         return $this->webConfigRepository->createOrUpdateShowroomConfig($requestData);
     }
+
+    /**
+     * @param int $website_id Website ID
+     * @param string $key Config Key
+     * @return array
+     */
+    public function getConfigByWebsite(int $website_id, string $key): array
+    {
+        if (empty($key)) {
+            throw new \InvalidArgumentException("Config key must be provided.");
+        }
+
+        return $this->webConfigRepository->getValueOrDefault($website_id, $key);
+    }
 }

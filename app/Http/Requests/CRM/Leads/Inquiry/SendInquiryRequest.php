@@ -10,7 +10,7 @@ class SendInquiryRequest extends Request {
         'dealer_id' => 'required|exists:dealer,dealer_id',
         'website_id' => 'required|website_exists',
         'dealer_location_id' => 'nullable|dealer_location_valid',
-        'inquiry_type' => 'required|inquiry_type_valid',
+        'inquiry_type' => 'required|inquiry_email_valid',
         'lead_types' => 'required|array',
         'lead_types.*' => 'lead_type_valid',
         'inventory' => 'array',

@@ -31,6 +31,8 @@ use App\Repositories\Inventory\CategoryRepository;
 use App\Repositories\Inventory\CategoryRepositoryInterface;
 use App\Repositories\Inventory\AttributeRepository;
 use App\Repositories\Inventory\AttributeRepositoryInterface;
+use App\Repositories\Inventory\CustomOverlay\CustomOverlayRepository;
+use App\Repositories\Inventory\CustomOverlay\CustomOverlayRepositoryInterface;
 use App\Repositories\Inventory\FileRepository;
 use App\Repositories\Inventory\FileRepositoryInterface;
 use App\Repositories\Inventory\ImageRepository;
@@ -110,6 +112,8 @@ use App\Services\Dms\Pos\RegisterServiceInterface;
 use App\Services\File\FileService;
 use App\Services\File\FileServiceInterface;
 use App\Services\File\ImageService;
+use App\Services\Inventory\CustomOverlay\CustomOverlayService;
+use App\Services\Inventory\CustomOverlay\CustomOverlayServiceInterface;
 use App\Services\User\DealerIntegrationService;
 use App\Services\User\DealerIntegrationServiceInterface;
 use App\Services\Inventory\Packages\PackageService;
@@ -181,6 +185,7 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('lead_status_valid', 'App\Rules\CRM\Leads\ValidLeadStatus@passes');
         \Validator::extend('lead_source_valid', 'App\Rules\CRM\Leads\ValidLeadSource@passes');
         \Validator::extend('inquiry_type_valid', 'App\Rules\CRM\Leads\ValidInquiryType@passes');
+        \Validator::extend('inquiry_email_valid', 'App\Rules\CRM\Leads\ValidInquiryEmail@passes');
         \Validator::extend('sales_person_valid', 'App\Rules\CRM\User\ValidSalesPerson@passes');
         \Validator::extend('sales_security_type', 'App\Rules\CRM\User\ValidSecurityType@passes');
         \Validator::extend('sales_auth_type', 'App\Rules\CRM\User\ValidAuthType@passes');
@@ -367,5 +372,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(AttributeValueRepositoryInterface::class, AttributeValueRepository::class);
         $this->app->bind(InventoryAttributeServiceInterface::class, InventoryAttributeService::class);
+        $this->app->bind(CustomOverlayServiceInterface::class, CustomOverlayService::class);
+        $this->app->bind(CustomOverlayRepositoryInterface::class, CustomOverlayRepository::class);
     }
 }
