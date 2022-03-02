@@ -252,6 +252,11 @@ class TwilioService implements TextServiceInterface
      * @return null|NumberVerify
      */
     public function getVerifyNumber(string $dealerNo, ?string $type = null): ?NumberVerify {
+        // Default Type
+        if($type === null) {
+            $type = reset(array_keys(NumberVerify::VERIFY_TYPES));
+        }
+
         // Get Next Available Number
         if (!empty($this->twilio)) {
             $phoneNumber = current($this->twilio->availablePhoneNumbers("US")->local->read(array('smsEnabled' => true), 1))->phoneNumber;
@@ -268,8 +273,7 @@ class TwilioService implements TextServiceInterface
             }
 
             // Insert New Verify Number
-            return $this->verifyNumber->create($dealerNo, $phoneNumber,
-                                $type ?? array_keys(reset(NumberVerify::VERIFY_TYPES)));
+            return $this->verifyNumber->create($dealerNo, $phoneNumber, $type);
         }
 
         // Return Null
