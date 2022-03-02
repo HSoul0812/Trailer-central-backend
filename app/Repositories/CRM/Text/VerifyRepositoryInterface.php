@@ -2,11 +2,11 @@
 
 namespace App\Repositories\CRM\Text;
 
-use App\Repositories\Repository;
+use App\Repositories\GenericRepository;
 use App\Models\CRM\Text\NumberVerify;
 use App\Models\CRM\Text\NumberVerifyCode;
 
-interface VerifyRepositoryInterface extends Repository {
+interface VerifyRepositoryInterface extends GenericRepository {
     /**
      * Is Verify Number?
      * 
