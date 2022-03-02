@@ -230,7 +230,7 @@ class TwilioService implements TextServiceInterface
      */
     public function verify(string $body, string $from, string $to): ?SmsVerify {
         // Is Verification Number?
-        $number = $this->verifyNumber->isVerifyNumber($from, $to);
+        $number = $this->verifyNumber->exists($from, $to);
         if(empty($number->id)) {
             $this->log->error($to . ' is not a valid twilio sms verification number!');
             return null;

@@ -219,7 +219,7 @@ class MarketplaceService implements MarketplaceServiceInterface
      */
     public function sms(string $dealerNo, ?string $type = null): NumberVerify {
         // Get Existing Verify Number?
-        $verify = $this->verifyNumber->getVerifyNumber($dealerNo, $type);
+        $verify = $this->verifyNumber->get($dealerNo, $type);
 
         // No Existing Number
         if(empty($verify->id)) {
