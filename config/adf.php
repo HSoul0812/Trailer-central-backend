@@ -39,6 +39,6 @@ return [
     |
     */
     'exports' => [
-        'copied_emails' => env('COPIED_EMAILS', 'alberto@trailercentrail.com')
+        'copied_emails' => env('COPIED_EMAILS', 'alberto@trailercentral.com')
     ]
 ];
