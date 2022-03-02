@@ -25,6 +25,18 @@ class TfaType
      */
     const FIELD_PASS = 'password';
 
+
+    /**
+     * Type Authy
+     */
+    const TYPE_AUTHY = 'authy';
+
+    /**
+     * Type SMS
+     */
+    const TYPE_SMS = 'sms';
+
+
     /**
      * @const array<array<string>> TFA Input Methods
      */

@@ -194,7 +194,7 @@ class MarketplaceService implements MarketplaceServiceInterface
         foreach(Marketplace::TFA_TYPES as $code => $name) {
             // Get Autocomplete
             $autocomplete = null;
-            if($code === TfaType::TFA_SMS) {
+            if($code === TfaType::TYPE_SMS) {
                 $autocomplete = $this->dealerLocation->findAllDealerSmsNumbers($dealerId);
             }
 
