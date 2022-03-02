@@ -362,7 +362,6 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query->where('inventory_id', '<>', $params['inventory_id']);
         }
 
-        return false;
         return $query->exists();
     }
 
