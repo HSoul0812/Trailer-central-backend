@@ -6,6 +6,7 @@ use App\Models\Marketing\Facebook\Marketplace;
 use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
 use App\Repositories\Marketing\Facebook\FilterRepositoryInterface;
 use App\Repositories\CRM\Text\NumberRepositoryInterface;
+use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Services\CRM\Text\TwilioServiceInterface;
 
 /**
@@ -31,6 +32,11 @@ class MarketplaceService implements MarketplaceServiceInterface
     protected $textNumber;
 
     /**
+     * @var DealerLocationRepositoryInterface
+     */
+    protected $dealerLocation;
+
+    /**
      * @var TwilioServiceInterface
      */
     protected $twilio;
@@ -41,17 +47,20 @@ class MarketplaceService implements MarketplaceServiceInterface
      * @param MarketplaceRepositoryInterface $marketplace
      * @param FilterRepositoryInterface $filters
      * @param NumberRepositoryInterface $textNumber
+     * @param DealerLocationRepositoryInterface $dealerLocation
      * @param TwilioServiceInterface $twilio
      */
     public function __construct(
         MarketplaceRepositoryInterface $marketplace,
         FilterRepositoryInterface $filters,
         NumberRepositoryInterface $textNumber,
+        DealerLocationRepositoryInterface $dealerLocation,
         TwilioServiceInterface $twilio
     ) {
         $this->marketplace = $marketplace;
         $this->filters = $filters;
         $this->textNumber = $textNumber;
+        $this->dealerLocation = $dealerLocation;
         $this->twilio = $twilio;
     }
 
@@ -172,11 +181,31 @@ class MarketplaceService implements MarketplaceServiceInterface
     /**
      * Get Two-Factor Auth Types Array
      * 
+     * @param int $dealerId
      * @return Collection<TfaType>
      */
-    public function tfa(): Collection {
-        // Get Existing Verify Number?
-        
+    public function tfa(int $dealerId): Collection {
+        // Initialize Collection
+        $tfaTypes = new Collection();
+
+        // Loop Through TFA Types
+        foreach(Marketplace::TFA_TYPES as $code => $name) {
+            // Get Autocomplete
+            $autocomplete = null;
+            if($code === TfaType::TFA_SMS) {
+                $autocomplete = $this->dealerLocation->findAllDealerSmsNumbers($dealerId);
+            }
+
+            // Append TFA Types
+            $tfaTypes->push(new TfaType([
+                'code' => $code,
+                'name' => $name,
+                'autocomplete' => $autocomplete
+            ]));
+        }
+
+        // Return Collection<TfaType>
+        return $tfaTypes;
     }
 
     /**

@@ -33,7 +33,7 @@ class MarketplaceController extends RestfulControllerV2 {
         TFATransformer $tfaTransformer,
         SMSTransformer $smsTransformer
     ) {
-        $this->middleware('setDealerIdOnRequest')->only(['create', 'update', 'index']);
+        $this->middleware('setDealerIdOnRequest')->only(['create', 'update', 'index', 'tfa']);
 
         $this->repository = $repository;
         $this->service = $service;
@@ -148,7 +148,7 @@ class MarketplaceController extends RestfulControllerV2 {
         $request = new TfaMarketplaceRequest($requestData);
         if ($request->validate()) {
             // Return Auth
-            return $this->response->collection($this->service->tfa(), $this->tfaTransformer);
+            return $this->response->collection($this->service->tfa($request->dealerId), $this->tfaTransformer);
         }
         
         return $this->response->errorBadRequest();

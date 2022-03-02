@@ -7,7 +7,8 @@ use App\Repositories\CRM\Text\NumberRepositoryInterface;
 use App\Repositories\CRM\Text\DealerLocationRepositoryInterface;
 use App\Models\CRM\Text\Number;
 use App\Models\CRM\Text\NumberTwilio;
-use App\Models\CRM\Text\VerifyTwilio;
+use App\Models\CRM\Text\NumberVerify;
+use App\Models\CRM\Text\NumberVerifyCode;
 use App\Services\CRM\Text\TextServiceInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
@@ -180,6 +181,19 @@ class NumberRepository implements NumberRepositoryInterface {
 
 
     /**
+     * Get Verify Number
+     * 
+     * @param string $dealerNumber
+     * @param string $type
+     * @return null|NumberVerify
+     */
+    public function getVerifyNumber(string $dealerNumber, string $type): ?NumberVerify {
+        // Return NumberVerify
+        return NumberVerify::where('twilio_number', $twilioNumber)
+                           ->where('verify_type', $type)->first();
+    }
+
+    /**
      * Is Verify Number?
      * 
      * @param string $twilioNumber
@@ -190,6 +204,23 @@ class NumberRepository implements NumberRepositoryInterface {
         // Return NumberVerify
         return NumberVerify::where('twilio_number', $twilioNumber)
                            ->where('dealer_number', $dealerNumber)->first();
+    }
+
+    /**
+     * Create Verify Number
+     * 
+     * @param string $dealerNumber
+     * @param string $twilioNumber
+     * @param string $type
+     * @return NumberVerify
+     */
+    public function createVerifyNumber(string $dealerNumber, string $twilioNumber, string $type): NumberVerify {
+        // Return New NumberVerify
+        return NumberVerify::create([
+            'dealer_number' => $dealerNumber,
+            'twilio_number' => $twilioNumber,
+            'verify_type' => $type
+        ]);
     }
 
 

@@ -25,13 +25,6 @@ class Listings extends Model
 
 
     /**
-     * @const array Two-Factor Auth Types
-     */
-    const TFA_TYPES = [
-        'sms' => 'SMS'
-    ];
-
-    /**
      * @const array Listing Types
      */
     const LISTING_TYPES = [
