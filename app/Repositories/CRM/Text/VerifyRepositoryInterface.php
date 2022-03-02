@@ -3,8 +3,8 @@
 namespace App\Repositories\CRM\Text;
 
 use App\Repositories\Repository;
-use App\Models\CRM\Text\Number;
 use App\Models\CRM\Text\NumberVerify;
+use App\Models\CRM\Text\NumberVerifyCode;
 
 interface VerifyRepositoryInterface extends Repository {
     /**
@@ -36,8 +36,8 @@ interface VerifyRepositoryInterface extends Repository {
      * @param string $response
      * @param string $code
      * @param boolean $success
-     * @return NumberVerify
+     * @return NumberVerifyCode
      */
     public function updateCode(string $twilioNumber, string $response,
-                                     string $code, bool $success = false): NumberVerify;
+                                     string $code, bool $success = false): NumberVerifyCode;
 }

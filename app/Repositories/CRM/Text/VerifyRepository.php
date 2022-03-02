@@ -130,10 +130,10 @@ class VerifyRepository implements VerifyRepositoryInterface {
      * @param string $response
      * @param string $code
      * @param boolean $success
-     * @return NumberVerify
+     * @return NumberVerifyCode
      */
     public function updateCode(string $twilioNumber, string $response,
-                                     string $code, bool $success = false): NumberVerify {
+                                     string $code, bool $success = false): NumberVerifyCode {
         // Get NumberVerifyCode
         $verify = NumberVerifyCode::where('twilio_number', $twilioNumber)->whereNull('success')
                                   ->orderBy('created_at', 'DESC')->firstOrFail();
