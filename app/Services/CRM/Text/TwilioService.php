@@ -268,7 +268,7 @@ class TwilioService implements TextServiceInterface
             }
 
             // Insert New Verify Number
-            return $this->verifyNumber->createVerifyNumber($dealerNo, $phoneNumber,
+            return $this->verifyNumber->create($dealerNo, $phoneNumber,
                                 $type ?? array_keys(reset(NumberVerify::VERIFY_TYPES)));
         }
 
