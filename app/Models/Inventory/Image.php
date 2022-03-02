@@ -2,6 +2,7 @@
 
 namespace App\Models\Inventory;
 
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -18,6 +19,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Image extends Model
 {
+    use TableAware;
+
     /**
      * The table associated with the model.
      *

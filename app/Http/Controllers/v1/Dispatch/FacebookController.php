@@ -125,7 +125,7 @@ class FacebookController extends RestfulControllerV2 {
             $data = $this->itemResponse($this->service->dealer($request->id, $request->all(), $startTime),
                                 $this->dealerTransformer, 'data');
             Log::channel('dispatch-fb')->info('Debug time after calling service: ' . (microtime(true) - $startTime));
-            return $this->response->array($response);
+            return $data;
         }
         
         return $this->response->errorBadRequest();
