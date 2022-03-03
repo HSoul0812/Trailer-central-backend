@@ -24,6 +24,8 @@ use App\Repositories\Marketing\Craigslist\SchedulerRepository;
 use App\Repositories\Marketing\Craigslist\SchedulerRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\ProfileRepository;
 use App\Repositories\Marketing\Craigslist\ProfileRepositoryInterface;
+use App\Repositories\Marketing\PostingRedisRepository;
+use App\Repositories\Marketing\PostingRepositoryInterface;
 use Illuminate\Support\ServiceProvider;
 
 class MarketingServiceProvider extends ServiceProvider
@@ -50,6 +52,7 @@ class MarketingServiceProvider extends ServiceProvider
 
         // Dispatch (Redis) Repositories
         $this->app->bind(TunnelRepositoryInterface::class, TunnelRedisRepository::class);
+        $this->app->bind(PostingRepositoryInterface::class, PostingRedisRepository::class);
 
         // Dispatch Services
         $this->app->bind(MarketplaceDispatchServiceInterface::class, MarketplaceDispatchService::class);

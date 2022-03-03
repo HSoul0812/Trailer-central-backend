@@ -147,6 +147,13 @@ return [
             'days' => 3,
         ],
 
+        'posting' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/repositories/posting.log'),
+            'level' => 'debug',
+            'days' => 3,
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),
