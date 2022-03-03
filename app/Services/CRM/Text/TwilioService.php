@@ -231,16 +231,18 @@ class TwilioService implements TextServiceInterface
      */
     public function verify(string $body, string $from, string $to): ?SmsVerify {
         // Is Verification Number?
-        $number = $this->verifyNumber->exists($to, $from);
+        $number = $this->verifyNumber->exists($to);
         if(empty($number->id)) {
             $this->log->error($to . ' is not a valid twilio sms verification number!');
             return null;
         }
 
         // Return Verification Code
+        $this->log->info('Received sms from twilio: ', ['from' => $from, 'to' => $to, 'body' => $body]);
         $code = substr($body, self::CODE_LENGTHS[$number->verify_type][0], self::CODE_LENGTHS[$number->verify_type][1]);
 
         // Return Sms Verify
+        $this->log->info('Received sms verification code: ', ['to' => $to, 'code' => $code]);
         return $this->verifyNumber->createCode($number->twilio_number, $body, $code);
     }
 

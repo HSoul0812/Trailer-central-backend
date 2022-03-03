@@ -65,6 +65,9 @@ class MarketplaceService implements MarketplaceServiceInterface
         $this->verifyNumber = $verifyNumber;
         $this->dealerLocation = $dealerLocation;
         $this->twilio = $twilio;
+
+        // Create Marketplace Logger
+        $this->log = Log::channel('marketplace');
     }
 
     /**
@@ -97,7 +100,7 @@ class MarketplaceService implements MarketplaceServiceInterface
             // Return Response
             return $marketplace;
         } catch (Exception $e) {
-            $this->logger->error('Marketplace Integration update error. params=' .
+            $this->log->error('Marketplace Integration update error. params=' .
                 json_encode($params + ['marketplace_id' => $params['id']]),
                 $e->getTrace());
 
@@ -140,7 +143,7 @@ class MarketplaceService implements MarketplaceServiceInterface
             // Return Response
             return $marketplace;
         } catch (Exception $e) {
-            $this->logger->error('Marketplace Integration update error. params=' .
+            $this->log->error('Marketplace Integration update error. params=' .
                 json_encode($params + ['marketplace_id' => $params['id']]),
                 $e->getTrace());
 
@@ -172,7 +175,7 @@ class MarketplaceService implements MarketplaceServiceInterface
             // Return Result
             return $success;
         } catch (Exception $e) {
-            $this->logger->error('Marketplace Integration update error. params=' .
+            $this->log->error('Marketplace Integration update error. params=' .
                 json_encode(['id' => $id]), $e->getTrace());
 
             $this->marketplace->rollbackTransaction();
@@ -192,7 +195,7 @@ class MarketplaceService implements MarketplaceServiceInterface
         $tfaTypes = new Collection();
 
         // Loop Through TFA Types
-        foreach(Marketplace::TFA_TYPES as $code => $name) {
+        foreach(Marketplace::TFA_TYPES_ACTIVE as $code) {
             // Get Autocomplete
             $autocomplete = null;
             if($code === TfaType::TYPE_SMS) {
@@ -202,7 +205,7 @@ class MarketplaceService implements MarketplaceServiceInterface
             // Append TFA Types
             $tfaTypes->push(new TfaType([
                 'code' => $code,
-                'name' => $name,
+                'name' => Marketplace::TFA_TYPES[$code],
                 'autocomplete' => $autocomplete
             ]));
         }

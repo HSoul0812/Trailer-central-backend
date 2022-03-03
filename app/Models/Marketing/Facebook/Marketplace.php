@@ -40,6 +40,13 @@ class Marketplace extends Model
         'sms' => 'SMS'
     ];
 
+    /**
+     * @const array Active Two-Factor Auth Types
+     */
+    const TFA_TYPES_ACTIVE = [
+        'sms'
+    ];
+
 
     /**
      * @var string
