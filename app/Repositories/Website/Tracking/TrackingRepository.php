@@ -118,7 +118,7 @@ class TrackingRepository implements TrackingRepositoryInterface
      * @param array $params
      * @return Tracking
      */
-    public function updateTrackLead(string $sessionId, int $leadId): Tracking
+    public function updateTrackLead(string $sessionId, int $leadId): ?Tracking
     {
         // Update Lead on Tracking
         return $this->update([
