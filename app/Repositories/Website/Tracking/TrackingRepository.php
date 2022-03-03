@@ -57,7 +57,9 @@ class TrackingRepository implements TrackingRepositoryInterface
 
         DB::transaction(function() use (&$tracking, $params) {
             // Updating Tracking Details
-            $tracking->fill($params)->save();
+            if ($tracking) {
+                $tracking->fill($params)->save();
+            }
         });
 
         return $tracking;
