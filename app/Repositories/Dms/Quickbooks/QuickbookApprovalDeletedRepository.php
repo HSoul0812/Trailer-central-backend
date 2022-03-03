@@ -130,8 +130,8 @@ class QuickbookApprovalDeletedRepository extends RepositoryAbstract implements Q
                     ->orWhere('qb_obj', 'LIKE', "%PaymentMethodRef%name%$search_term%") // payment method
                     ->orWhere('qb_obj', 'LIKE', "%PaymentRefNum%$search_term%TotalAmt%") // sales ticket
                     ->orWhere('qb_obj', 'LIKE', "%DocNumber%$search_term%PrivateNote%") // sales ticket
-                    ->orWhere(function ($query) use ($params) {
-                        $query->filterByTableName($params['search_term']);
+                    ->orWhere(function ($query) use ($search_term) {
+                        $query->filterByTableName($search_term);
                     });
 
                 $status = $params['status'] ?? null;
