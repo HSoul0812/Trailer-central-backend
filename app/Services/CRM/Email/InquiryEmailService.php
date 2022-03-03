@@ -94,8 +94,8 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         $this->user = $user;
         $this->dealerLocation = $dealerLocation;
 
-        // Initialize Logger
-        $this->log = Log::channel('leads');
+        // Get Logger
+        $this->log = Log::channel('inquiry');
     }
 
     /**
@@ -124,7 +124,7 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         }
 
         // Returns True on Success
-        $this->log->info('Inquiry Email Sent to ' . $inquiry->inquiryEmail .
+        $this->log->info('Inquiry Email Sent to ' . $inquiry->getInquiryTo() .
                             ' for the Lead ' . $inquiry->getFullName());
         return true;
     }
@@ -157,8 +157,11 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         // Get Inquiry Name/Email
         $details = $this->getInquiryDetails($params);
 
+        // Get Overrides
+        $overrides = $this->getInquiryOverrides($details);
+
         // Get Data By Inquiry Type
-        $vars = $this->getInquiryTypeVars($details);
+        $vars = $this->getInquiryTypeVars($overrides);
 
         // Check Overrided Email
         $params = $this->checkOverrideEmail($vars);
@@ -242,6 +245,32 @@ class InquiryEmailService implements InquiryEmailServiceInterface
     }
 
     /**
+     * Get Inquiry Overrides
+     *
+     * @param array $params
+     * @return array
+     */
+    private function getInquiryOverrides(array $params) {
+        // Get Lead Type
+        $leadType = reset($params['lead_types']);
+
+        // Get Inquiry From Details For Website
+        $toEmails = $this->websiteConfig->getValueOfConfig($params['website_id'], 'contact/email/' . $leadType);
+        if(empty($toEmails->value)) {
+            $toEmails = $this->websiteConfig->getValueOfConfig($params['website_id'], 'contact/email');
+        }
+
+        // Return Original, No Updates
+        if(empty($toEmails->value)) {
+            return $params;
+        }
+
+        // Return Inquiry Email Override
+        $params['inquiry_email'] = preg_split('/,|;|\s/', $toEmails->value, null, PREG_SPLIT_NO_EMPTY);
+        return $params;
+    }
+
+    /**
      * Get Inquiry Type Specific Vars
      *
      * @param array $params
@@ -292,7 +321,7 @@ class InquiryEmailService implements InquiryEmailServiceInterface
             $config = $this->websiteConfig->getValueOfConfig($vars['website_id'], 'contact/email');
 
             if (!empty($config->value)) {
-                $vars['inquiry_email'] = $config->value;
+                $vars['inquiry_email'] = preg_split('/,|;|\s/', $config->value, null, PREG_SPLIT_NO_EMPTY);
             }
         }
 
