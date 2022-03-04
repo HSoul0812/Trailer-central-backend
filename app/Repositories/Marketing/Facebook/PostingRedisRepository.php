@@ -25,7 +25,7 @@ class PostingRedisRepository implements PostingRepositoryInterface
     /**
      * @const Redis Prefix Key
      */
-    const REDIS_NAMESPACE = 'posting:';
+    const REDIS_NAMESPACE = 'fb:posting:';
 
     /**
      * @const Default Sort Order
@@ -77,8 +77,8 @@ class PostingRedisRepository implements PostingRepositoryInterface
 
     public function __construct()
     {
-        $this->log = Log::channel('posting');
-        $this->redis = Redis::connection('dealer-posting');
+        $this->log = Log::channel('dispatch-fb');
+        $this->redis = Redis::connection('fb-posting');
         $this->log->info('Initialized Redis on for Posting Using ' . $this->redis->getName());
         $this->log->info('Found Keys: ', $this->redis->keys(self::REDIS_NAMESPACE .'*'));
     }

@@ -12,10 +12,8 @@ use App\Repositories\Marketing\Facebook\ListingRepository;
 use App\Repositories\Marketing\Facebook\ListingRepositoryInterface;
 use App\Repositories\Marketing\Facebook\ImageRepository;
 use App\Repositories\Marketing\Facebook\ImageRepositoryInterface;
-use App\Services\Marketing\Facebook\MarketplaceService;
-use App\Services\Marketing\Facebook\MarketplaceServiceInterface;
-use App\Services\Dispatch\Facebook\MarketplaceService as MarketplaceDispatchService;
-use App\Services\Dispatch\Facebook\MarketplaceServiceInterface as MarketplaceDispatchServiceInterface;
+use App\Repositories\Marketing\Facebook\PostingRedisRepository;
+use App\Repositories\Marketing\Facebook\PostingRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\ActivePostRepository;
 use App\Repositories\Marketing\Craigslist\ActivePostRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\InventoryRepository;
@@ -24,8 +22,10 @@ use App\Repositories\Marketing\Craigslist\SchedulerRepository;
 use App\Repositories\Marketing\Craigslist\SchedulerRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\ProfileRepository;
 use App\Repositories\Marketing\Craigslist\ProfileRepositoryInterface;
-use App\Repositories\Marketing\PostingRedisRepository;
-use App\Repositories\Marketing\PostingRepositoryInterface;
+use App\Services\Marketing\Facebook\MarketplaceService;
+use App\Services\Marketing\Facebook\MarketplaceServiceInterface;
+use App\Services\Dispatch\Facebook\MarketplaceService as MarketplaceDispatchService;
+use App\Services\Dispatch\Facebook\MarketplaceServiceInterface as MarketplaceDispatchServiceInterface;
 use Illuminate\Support\ServiceProvider;
 
 class MarketingServiceProvider extends ServiceProvider
