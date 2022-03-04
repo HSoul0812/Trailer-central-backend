@@ -40,6 +40,10 @@ class LeadRepository implements LeadRepositoryInterface {
             'field' => 'website_lead.date_submitted',
             'direction' => 'DESC'
         ],
+        '-created_at' => [
+            'field' => 'website_lead.date_submitted',
+            'direction' => 'ASC'
+        ],
         'future_due_past_due_no_due' => [
             'field' => 'crm_tc_lead_status.next_contact_date',
             'direction' => 'DESC'
@@ -64,6 +68,9 @@ class LeadRepository implements LeadRepositoryInterface {
         ],
         'created_at' => [
             'name' => 'Most Recently Created'
+        ],
+        '-created_at' => [
+            'name' => 'Least Recently Created'
         ],
         'future_due_past_due_no_due' => [
             'name' => 'Future Due Dates, Past Due Dates, No Due Date'
@@ -105,14 +112,13 @@ class LeadRepository implements LeadRepositoryInterface {
         /**
          * Filters
          */
-        $query = $this->addFiltersToQuery($query, $params, false, isset($params['sort']));
+        $query = $this->addFiltersToQuery($query, $params);
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
         }
 
         if (isset($params['sort'])) {
-            $query = $query->leftJoin(Interaction::getTableName(), Interaction::getTableName().'.tc_lead_id',  '=', Lead::getTableName().'.identifier');
             $query = $query->orderByRaw($this->sortOrders[$params['sort']]['field'] . ' ' . $this->sortOrders[$params['sort']]['direction']);
         }
 
@@ -135,7 +141,7 @@ class LeadRepository implements LeadRepositoryInterface {
         /**
          * Filters
          */
-        $query = $this->addFiltersToQuery($query, $params, false, isset($params['sort']));
+        $query = $this->addFiltersToQuery($query, $params);
         return $query->first();
     }
 
@@ -399,6 +405,10 @@ class LeadRepository implements LeadRepositoryInterface {
             $query = $query->leftJoin(LeadStatus::getTableName(), Lead::getTableName().'.identifier', '=', LeadStatus::getTableName().'.tc_lead_identifier');
         }
 
+        if (!$noInteractionJoin) {
+            $this->joinInteraction($query);
+        }
+
         if (isset($filters['search_term'])) {
             $query = $this->addSearchToQuery($query, $filters['search_term']);
         }
@@ -417,10 +427,6 @@ class LeadRepository implements LeadRepositoryInterface {
 
         if (isset($filters['next_contact_to'])) {
             $query = $this->addNextContactToToQuery($query, TimeUtil::convertTimeFormat($filters['next_contact_to'], TimeUtil::REQUEST_TIME_FORMAT, TimeUtil::MYSQL_TIME_FORMAT));
-        }
-
-        if((isset($filters['interacted_from']) || isset($filters['interacted_to'])) && !$noInteractionJoin) {
-            $this->joinInteraction($query);
         }
 
         if (isset($filters['interacted_from'])) {
