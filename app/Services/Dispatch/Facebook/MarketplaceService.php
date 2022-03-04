@@ -20,6 +20,7 @@ use League\Fractal\Pagination\IlluminatePaginatorAdapter;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use League\Fractal\Resource\Collection as Pagination;
+use App\Repositories\Marketing\PostingRepositoryInterface;
 
 /**
  * Class MarketplaceService
@@ -45,24 +46,32 @@ class MarketplaceService implements MarketplaceServiceInterface
     protected $tunnels;
 
     /**
+     * @var PostingRepositoryInterface
+     */
+    protected $postingSession;
+
+    /**
      * Construct Facebook Marketplace Service
      * 
      * @param MarketplaceRepositoryInterface $marketplace
      * @param TunnelRepositoryInterface $tunnels
      * @param ListingRepositoryInterfaces $listings
      * @param ImageRepositoryInterfaces $images
+     * @param PostingRepositoryInterface $postingSession
      */
     public function __construct(
         MarketplaceRepositoryInterface $marketplace,
         TunnelRepositoryInterface $tunnels,
         ListingRepositoryInterface $listings,
         ImageRepositoryInterface $images,
-        InventoryTransformer $inventoryTransformer
+        InventoryTransformer $inventoryTransformer,
+        PostingRepositoryInterface $postingSession
     ) {
         $this->marketplace = $marketplace;
         $this->tunnels = $tunnels;
         $this->listings = $listings;
         $this->images = $images;
+        $this->postingSession = $postingSession;
 
         // Initialize Inventory Transformer
         $this->inventoryTransformer = $inventoryTransformer;
@@ -240,6 +249,20 @@ class MarketplaceService implements MarketplaceServiceInterface
             }
         }
 
+        // add marketplace_id to session
+        if ($step->isLogin()) {
+            $this->postingSession->create([
+                'id' => $step->marketplaceId
+            ]);
+        }
+
+        // remove marketplace_id from session
+        if ($step->isStop()) {
+            $this->postingSession->delete([
+                'id' => $step->marketplaceId
+            ]);
+        }
+
         // Return Listing
         return $step;
     }
@@ -251,8 +274,12 @@ class MarketplaceService implements MarketplaceServiceInterface
      * @return Collection<DealerFacebook>
      */
     private function getIntegrations(): Collection {
+        
+        $runningIntegrationIds = $this->postingSession->getIntegrationIds();
+
         $integrations = $this->marketplace->getAll([
-            'sort' => '-imported'
+            'sort' => '-imported',
+            'exclude' => $runningIntegrationIds
         ]);
 
         // Loop Facebook Integrations
