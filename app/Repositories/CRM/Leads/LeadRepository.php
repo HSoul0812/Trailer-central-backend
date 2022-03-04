@@ -92,6 +92,17 @@ class LeadRepository implements LeadRepositoryInterface {
         return Lead::findOrFail($params['id']);
     }
 
+    public function first(array $params): ?Lead
+    {
+        if (empty($params['dealer_id'])) {
+            throw new RepositoryInvalidArgumentException('Dealer Id is required');
+        }
+
+        $query = Lead::query();
+
+        return $query->where('dealer_id', '=', $params['dealer_id'])->orderBy('date_submitted')->first();
+    }
+
     public function getAll($params)
     {
         $query = Lead::where([
