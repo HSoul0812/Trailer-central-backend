@@ -57,7 +57,9 @@ class TrackingRepository implements TrackingRepositoryInterface
 
         DB::transaction(function() use (&$tracking, $params) {
             // Updating Tracking Details
-            $tracking->fill($params)->save();
+            if ($tracking) {
+                $tracking->fill($params)->save();
+            }
         });
 
         return $tracking;
@@ -116,7 +118,7 @@ class TrackingRepository implements TrackingRepositoryInterface
      * @param array $params
      * @return Tracking
      */
-    public function updateTrackLead(string $sessionId, int $leadId): Tracking
+    public function updateTrackLead(string $sessionId, int $leadId): ?Tracking
     {
         // Update Lead on Tracking
         return $this->update([
