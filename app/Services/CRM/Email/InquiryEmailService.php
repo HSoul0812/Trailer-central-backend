@@ -267,6 +267,7 @@ class InquiryEmailService implements InquiryEmailServiceInterface
 
         // Return Inquiry Email Override
         $params['inquiry_email'] = preg_split('/,|;|\s/', $toEmails->value, null, PREG_SPLIT_NO_EMPTY);
+
         return $params;
     }
 

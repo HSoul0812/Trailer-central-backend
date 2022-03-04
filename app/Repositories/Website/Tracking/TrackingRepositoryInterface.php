@@ -23,5 +23,5 @@ interface TrackingRepositoryInterface extends Repository
      * @param array $params
      * @return Tracking
      */
-    public function updateTrackLead(string $sessionId, int $leadId): Tracking;
+    public function updateTrackLead(string $sessionId, int $leadId): ?Tracking;
 }
