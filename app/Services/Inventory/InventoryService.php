@@ -106,7 +106,7 @@ class InventoryService implements InventoryServiceInterface
                   $newArr[$arr['key']] = $arr['doc_count'];
                 }
             }
-            
+
             foreach($resJson['aggregations']['category']['buckets'] as $arr) {
                 if (isset($newArr[$arr['key']])) {
                   $finalArr[] = ['key' => $arr['key'], 'doc_count' => $newArr[$arr['key']], 'type_id' => $arr['type_id']];
@@ -163,7 +163,7 @@ class InventoryService implements InventoryServiceInterface
 
         $location = $this->getGeolocation($params);
         if($location) {
-            $this->buildGeoScoring($queryBuilder, $location);
+            $this->buildGeoFiltering($queryBuilder, $location, $params['distance']);
         }
 
         $queryBuilder->orderBy(self::FIELD_UPDATED_AT, self::ORDER_DESC);
@@ -177,11 +177,18 @@ class InventoryService implements InventoryServiceInterface
             && doc['salesPrice'].value > 0.0 && doc['salesPrice'].value < doc['websitePrice'].value
             ";
         }
-        $queryBuilder->setFilterScript($filter);
+        $queryBuilder->setFilterScript([
+            'source' => $filter,
+            'lang' => 'painless'
+        ]);
     }
 
-    private function buildGeoScoring(InventorySearchQueryBuilder $queryBuilder, Geolocation $location) {
-        $queryBuilder->geoScoring($location->latitude, $location->longitude);
+    private function buildGeoFiltering(
+        InventorySearchQueryBuilder $queryBuilder,
+        Geolocation $location,
+        string $distance
+    ) {
+        $queryBuilder->geoFiltering(['lat' => $location->latitude, 'lon' => $location->longitude], $distance);
     }
 
     private function buildAggregations(InventorySearchQueryBuilder $queryBuilder, array $params) {
@@ -229,7 +236,7 @@ class InventoryService implements InventoryServiceInterface
       if ($categories_string) {
         $categories_array = explode(';',$categories_string);
         $categories = $type->categories()->whereIn('name', $categories_array)->get();
-        
+
       } else {
         $categories = $type->categories;
       }
@@ -257,7 +264,7 @@ class InventoryService implements InventoryServiceInterface
             } else {
               $queryBuilder->termQueries($searchField, $params[$field] ?? null);
             }
-            
+
         }
     }
 
@@ -271,22 +278,13 @@ class InventoryService implements InventoryServiceInterface
     }
 
     private function getGeolocation(array $params): ?Geolocation {
-        $locationType = $params['location_type'] ?? null;
-        $location = null;
-        try {
-            if ($locationType === 'region') {
-                $location = $this->geolocationRepository->get([
-                    'city' => $params['location_city'] ?? null,
-                    'state' => $params['location_region'] ?? null,
-                    'country' => $params['location_country'] ?? self::DEFAULT_COUNTRY
-                ]);
-            } else if ($locationType === 'range') {
-                $location = $this->geolocationRepository->get([
-                    'zip' => $params['zip'] ?? null,
-                ]);
-            }
-        } catch(ModelNotFoundException) {}
-        return $location;
+        if(isset($params['lat']) && isset($params['lon'])) {
+            return new Geolocation([
+                'latitude' => (float)$params['lat'],
+                'longitude' => (float)$params['lon']
+            ]);
+        }
+        return null;
     }
 
     /**

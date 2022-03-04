@@ -11,8 +11,9 @@ class InventorySearchQueryBuilder
     private ?int $pageSize = null;
     private ?array $globalAggregations = null;
     private ?array $filterAggregations = null;
-    private ?array $geoScore = null;
-    private ?string $filterScript = null;
+    private ?array $location = null;
+    private ?string $distance = null;
+    private ?array $filterScript = null;
 
     public function getWillPaginate(): bool
     {
@@ -76,7 +77,7 @@ class InventorySearchQueryBuilder
         return $this;
     }
 
-    public function setFilterScript(string $script) {
+    public function setFilterScript(array $script) {
         $this->filterScript = $script;
     }
 
@@ -92,12 +93,10 @@ class InventorySearchQueryBuilder
         return null;
     }
 
-    public function geoScoring(float $lat, float $lng)
+    public function geoFiltering(array $location, string $distance)
     {
-        $this->geoScore = [
-            'lat' => $lat,
-            'lon' => $lng
-        ];
+        $this->location = $location;
+        $this->distance = $distance;
         return $this;
     }
 
@@ -133,31 +132,46 @@ class InventorySearchQueryBuilder
             $result['size'] = $this->pageSize;
         }
 
-        if (count($this->queries) > 0) {
+        if (!empty($this->queries)) {
             $query = [
                 'bool' => [
                     'must' => $this->queries
                 ]
             ];
+
+            // building filters
+            $filters = [];
             if($this->filterScript) {
-                $query['bool']['filter'] = [
+                $filters[] = [
                     'script' => [
                         'script' => $this->filterScript
                     ]
                 ];
             }
-
-            if ($this->geoScore) {
+            if($this->location) {
+                $filters[] = [
+                    'geo_distance' => [
+                        'distance' => $this->distance,
+                        'location.geo' => $this->location
+                    ]
+                ];
+            }
+            if(!empty($filters)) {
+                $query['bool']['filter'] = $filters;
+            }
+            if ($this->location) {
                 $result['query'] = [
                     'function_score' => [
                         'query' => $query,
                         'script_score' => [
-                            'source' => "double d; if(doc['location.geo'].value != null) { d = doc['location.geo'].planeDistance(params.lat, params.lng) * 0.000621371; } else { return 0.1; } if(d >= (params.grouping*params.fromScore)) { return 0.2; } else { return params.fromScore - Math.floor(d\/params.grouping); ",
-                            'params' => [
-                                "lat" => $this->geoScore['lat'],
-                                "lng" => $this->geoScore['lon'],
-                                "fromScore" => 100,
-                                "grouping" => 60
+                            'script' => [
+                                'source' => "double d; if(doc['location.geo'].value != null) { d = doc['location.geo'].planeDistance(params.lat, params.lon) * 0.000621371; } else { return 0.1; } if(d >= (params.grouping*params.fromScore)) { return 0.2; } else { return params.fromScore - Math.floor(d/params.grouping);} ",
+                                'params' => [
+                                    "lat" => $this->location['lat'],
+                                    "lon" => $this->location['lon'],
+                                    "fromScore" => 100,
+                                    "grouping" => 60
+                                ]
                             ]
                         ]
                     ]
