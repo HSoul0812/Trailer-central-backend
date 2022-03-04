@@ -7,7 +7,7 @@ use Carbon\Carbon;
 
 class AddCargurusIntegration extends Migration
 {
-    private const CARGURUS_ID = 87;
+    private const CARGURUS_ID = 100;
     private const ALL_SEASONS_POWERSPORTS_ID = 8755;
 
     private const CARGURUS_PARAMS = [
