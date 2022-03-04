@@ -550,20 +550,15 @@ class LeadRepository implements LeadRepositoryInterface {
     private function addSearchToQuery($query, string $search) {
         $query = $query->leftJoin(Inventory::getTableName(), Inventory::getTableName().'.inventory_id',  '=', Lead::getTableName().'.inventory_id');
 
-        $leadTableName = Lead::getTableName();
-
-        return $query->where(function($q) use ($search, $leadTableName) {
+        return $query->where(function($q) use ($search) {
             $q->where(Lead::getTableName().'.title', 'LIKE', '%' . $search . '%')
                     ->orWhere(Lead::getTableName().'.first_name', 'LIKE', '%' . $search . '%')
                     ->orWhere(Lead::getTableName().'.last_name', 'LIKE', '%' . $search . '%')
-                    ->orWhereRaw("CONCAT_WS('', REPLACE({$leadTableName}.first_name, ' ', ''), REPLACE({$leadTableName}.last_name, ' ', '')) LIKE ?", '%' . str_replace(' ', '', $search) . '%')
                     ->orWhere(Lead::getTableName().'.email_address', 'LIKE', '%' . $search . '%')
+                    ->orWhere(Lead::getTableName().'.phone_number', 'LIKE', '%' . $search . '%')
                     ->orWhere(Inventory::getTableName().'.title', 'LIKE', '%' . $search . '%')
                     ->orWhere(Inventory::getTableName().'.stock', 'LIKE', '%' . $search . '%');
 
-            if (preg_match('/[0-9]{6,}/', str_replace([' ', '-', '(', ')'], '', $search))) {
-                $q->orWhereRaw("REPLACE(REPLACE(REPLACE(REPLACE($leadTableName.phone_number, ' ', ''), '-', ''), '(', ''), ')', '') LIKE ?", '%' . str_replace([' ', '-', '(', ')'], '', $search) . '%');
-            }
         });
     }
 

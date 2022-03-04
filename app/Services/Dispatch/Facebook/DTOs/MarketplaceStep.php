@@ -49,15 +49,7 @@ class MarketplaceStep
      */
     const DEFAULT_SELECTORS = 'common';
 
-    /**
-     * @const string
-     */
-    const STEP_LOGIN = 'login-fb';
 
-    /**
-     * @const string
-     */
-    const STEP_STOP = 'stop-script';
 
     /**
      * @var string
@@ -73,11 +65,6 @@ class MarketplaceStep
      * @var int
      */
     private $inventoryId;
-
-    /**
-     * @var int
-     */
-    private $marketplaceId;
 
     /**
      * @var string<json>
@@ -158,15 +145,5 @@ class MarketplaceStep
      */
     public function isError(): bool {
         return ($this->step === self::STEP_ERROR);
-    }
-
-    public function isLogin()
-    {
-        return ($this->step === self::STEP_LOGIN);
-    }
-
-    public function isStop()
-    {
-        return ($this->step === self::STEP_STOP);
     }
 }
