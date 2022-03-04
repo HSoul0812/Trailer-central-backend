@@ -175,7 +175,7 @@ class InventoryService implements InventoryServiceInterface
             'length' => ['stats' => ['field' => 'length']],
             'height_inches' => ['stats' => ['field' => 'heightInches']],
             'axles' => ['terms' => ['field' => 'numAxles']],
-            'manufacturer' => ['terms' => ['field' => 'manufacturer']],
+            'manufacturer' => ['terms' => ['field' => 'manufacturer', 'size' => 50]],
             'gvwr' => ['stats' => ['field' => 'gvwr']],
             'payload_capacity' => ['stats' => ['field' => 'payloadCapacity']],
         ]);
@@ -210,7 +210,7 @@ class InventoryService implements InventoryServiceInterface
       if ($categories_string) {
         $categories_array = explode(';',$categories_string);
         $categories = $type->categories()->whereIn('name', $categories_array)->get();
-        
+
       } else {
         $categories = $type->categories;
       }
@@ -238,7 +238,7 @@ class InventoryService implements InventoryServiceInterface
             } else {
               $queryBuilder->termQueries($searchField, $params[$field] ?? null);
             }
-            
+
         }
     }
 
