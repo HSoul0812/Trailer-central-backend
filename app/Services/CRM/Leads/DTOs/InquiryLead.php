@@ -440,7 +440,20 @@ class InquiryLead
                     $to[] = ['name' => $this->inquiryName, 'email' => $toEmail];
                 }
             } else {
-                $to[] = ['name' => $this->inquiryName, 'email' => $this->inquiryEmail];   
+                if (strpos($this->inquiryEmail, ';') !== false) {
+                    $toemails = explode(';', $this->inquiryEmail);
+                    foreach($toemails as $toemail) {
+                        $to[] = ['name' => $this->inquiryName, 'email' => $toemail]; 
+                    }                    
+                } else if (strpos($this->inquiryEmail, ',') !== false) {
+                    $toemails = explode(',', $this->inquiryEmail);
+                    foreach($toemails as $toemail) {
+                        $to[] = ['name' => $this->inquiryName, 'email' => $toemail]; 
+                    }    
+                } else {
+                    $to[] = ['name' => $this->inquiryName, 'email' => $this->inquiryEmail]; 
+                }
+                  
             }
 
             // Append for TT
