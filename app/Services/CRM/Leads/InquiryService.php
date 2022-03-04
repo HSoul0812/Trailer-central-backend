@@ -180,7 +180,7 @@ class InquiryService implements InquiryServiceInterface
         $inquiry = $this->inquiryEmail->fill($params);
 
         // Send Inquiry Email
-        $this->log->info('Sending ' . $inquiry->inquiryType . ' inquiry email for ' . $inquiry->getInquiryTo());
+//        $this->log->info('Sending ' . $inquiry->inquiryType . ' inquiry email for ' . $inquiry->getInquiryTo());
         $this->inquiryEmail->send($inquiry);
 
         // Merge or Create Lead
@@ -304,7 +304,7 @@ class InquiryService implements InquiryServiceInterface
         // Export ADF if Possible
         if(!in_array(LeadType::TYPE_FINANCING, $inquiry->leadTypes)) {
             $this->log->info('Handling ADF export on lead #' . $lead->identifier);
-            $this->adf->export($inquiry, $lead);
+//            $this->adf->export($inquiry, $lead);
 
             $this->log->info('Handling IDS export on lead #' . $lead->identifier);
             $this->ids->exportInquiry($lead);
