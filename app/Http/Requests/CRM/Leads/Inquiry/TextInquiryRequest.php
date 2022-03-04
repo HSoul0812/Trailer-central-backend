@@ -16,7 +16,7 @@ class TextInquiryRequest extends Request
             'phone_number' => 'required|min:10',
             'sms_message' => 'required',
             'customer_name' => 'required',
-            'inventory_name' => 'required',
+            'inventory_name' => 'nullable|string',
             'cookie_session_id' => 'nullable|string',
             'referral' => 'required',
             'is_from_classifieds' => 'required|boolean'
