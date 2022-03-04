@@ -51,6 +51,11 @@ class InventoryService implements InventoryServiceInterface
         'payload_capacity' => 'payloadCapacity'
     ];
 
+    const DEFAULT_CATEGORY = [
+      'name'      => 'Other',
+      'type_id'   => 1,
+    ];
+
     public function __construct(
         private GuzzleHttpClient $httpClient,
         private GeolocationRepositoryInterface $geolocationRepository,
@@ -93,7 +98,10 @@ class InventoryService implements InventoryServiceInterface
                 if ($mapped_category) {
                   $resJson['aggregations']['category']['buckets'][$key]['key'] = $mapped_category->map_from;
                   $resJson['aggregations']['category']['buckets'][$key]['type_id'] = $mapped_category->category->types[0]->id;
-                }
+                } else {
+                 $resJson['aggregations']['category']['buckets'][$key]['key'] = self::DEFAULT_CATEGORY['name'];
+                 $resJson['aggregations']['category']['buckets'][$key]['type_id'] = self::DEFAULT_CATEGORY['type_id'];
+               }
               }
             }
 
