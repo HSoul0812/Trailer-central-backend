@@ -30,9 +30,6 @@ class InventoryServiceTest extends TestCase
     }
 
     public function testListWithNoLocation() {
-        $this->geoLocationRepository->expects($this->once())
-            ->method('get')
-            ->will($this->throwException(new ModelNotFoundException()));
         $this->sysConfigRepository->expects($this->once())
             ->method('getAll')
             ->will($this->returnValue($this->sysConfigFixture()));
@@ -55,11 +52,6 @@ class InventoryServiceTest extends TestCase
         $geolocation = new Geolocation();
         $geolocation->latitude = 30.00;
         $geolocation->longitude = -30.00;
-
-        $this->geoLocationRepository->expects($this->once())
-            ->method('get')
-            ->with(['city' => '123', 'state' => 'CA', 'country' => 'USA'])
-            ->will($this->returnValue($geolocation));
         $this->sysConfigRepository->expects($this->once())
             ->method('getAll')
             ->will($this->returnValue($this->sysConfigFixture()));
@@ -81,7 +73,7 @@ class InventoryServiceTest extends TestCase
         $this->httpClient = $this->mockHttpClient();
         $this->geoLocationRepository = $this->mockGeolocationRepository();
         $this->sysConfigRepository = $this->mockSysConfigRepository();
-        return new InventoryService($this->httpClient, $this->geoLocationRepository, $this->sysConfigRepository);
+        return new InventoryService($this->httpClient, $this->sysConfigRepository);
     }
 
     private function mockGeolocationRepository(): MockObject {
@@ -203,10 +195,10 @@ class InventoryServiceTest extends TestCase
                 }
               }
             ]
-          },
+          }
+        }';
+        $mockAggregateData = '{
           "aggregations": {
-            "filter_aggs": {
-              "doc_count": 154,
               "pull_type": {
                 "doc_count_error_upper_bound": 0,
                 "sum_other_doc_count": 0,
@@ -408,105 +400,11 @@ class InventoryServiceTest extends TestCase
               "doc_count_error_upper_bound": 0,
               "sum_other_doc_count": 0,
               "buckets": []
-            },
-            "slideouts": {
-              "doc_count_error_upper_bound": 0,
-              "sum_other_doc_count": 0,
-              "buckets": []
-            },
-            "configuration": {
-              "doc_count_error_upper_bound": 0,
-              "sum_other_doc_count": 0,
-              "buckets": []
-            },
-            "year": {
-              "doc_count_error_upper_bound": 0,
-              "sum_other_doc_count": 0,
-              "buckets": [
-                {
-                  "key": 22,
-                  "doc_count": 151
-                },
-                {
-                  "key": 2020,
-                  "doc_count": 2
-                },
-                {
-                  "key": 2021,
-                  "doc_count": 1
-                }
-              ]
-            },
-            "length": {
-              "count": 154,
-              "min": 0.0,
-              "max": 0.0,
-              "avg": 0.0,
-              "sum": 0.0
-            },
-            "height_inches": {
-              "count": 154,
-              "min": 0.0,
-              "max": 0.0,
-              "avg": 0.0,
-              "sum": 0.0
-            },
-            "axles": {
-              "doc_count_error_upper_bound": 0,
-              "sum_other_doc_count": 0,
-              "buckets": []
-            },
-            "manufacturer": {
-              "doc_count_error_upper_bound": 0,
-              "sum_other_doc_count": 25,
-              "buckets": [
-                {
-                  "key": "grey wolf",
-                  "doc_count": 65
-                },
-                {
-                  "key": "other",
-                  "doc_count": 17
-                },
-                {
-                  "key": "reflection",
-                  "doc_count": 10
-                },
-                {
-                  "key": "skyline",
-                  "doc_count": 8
-                },
-                {
-                  "key": "magnum",
-                  "doc_count": 6
-                },
-                {
-                  "key": "minnie winnie",
-                  "doc_count": 5
-                },
-                {
-                  "key": "montana",
-                  "doc_count": 5
-                },
-                {
-                  "key": "travalong",
-                  "doc_count": 5
-                },
-                {
-                  "key": "cherokee",
-                  "doc_count": 4
-                },
-                {
-                  "key": "solesbee",
-                  "doc_count": 4
-                }
-              ]
             }
-          }
         }';
-
         $mock = new MockHandler([
             new Response(200, [], $mockData),
+            new Response(200, [], $mockAggregateData),
         ]);
 
         $stack = HandlerStack::create($mock);
