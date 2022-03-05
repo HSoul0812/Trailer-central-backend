@@ -149,7 +149,6 @@ class InventoryService implements InventoryServiceInterface
                 'json' => $query
             ]);
             $resJson = json_decode($res->getBody()->getContents(), true);
-            var_dump($resJson);
             $resJson['aggregations']['category']['buckets'] = $this->mapCategoryBuckets(
                 $resJson['aggregations']['category']['buckets']
             );
