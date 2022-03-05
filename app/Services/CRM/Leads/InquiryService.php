@@ -228,14 +228,11 @@ class InquiryService implements InquiryServiceInterface
      */
     public function mergeOrCreate(InquiryLead $inquiry, array $params): array {
         // Lead Type is NOT Financing?
-        $isCrmActive = true;
         $interaction = null;
 
-        if (!empty($inquiry->dealerId)) {
-            /** @var User $dealer */
-            $dealer = $this->userRepo->get(['dealer_id' => $inquiry->dealerId]);
-            $isCrmActive = $dealer->isCrmActive;
-        }
+        /** @var User $dealer */
+        $dealer = $this->userRepo->get(['dealer_id' => (int)$inquiry->dealerId]);
+        $isCrmActive = $dealer && $dealer->isCrmActive;
 
         if($isCrmActive && !in_array(LeadType::TYPE_FINANCING, $params['lead_types'])) {
             // Check merge is enabled for given website.
