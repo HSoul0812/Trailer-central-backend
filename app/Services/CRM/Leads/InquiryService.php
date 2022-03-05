@@ -232,7 +232,7 @@ class InquiryService implements InquiryServiceInterface
 
         /** @var User $dealer */
         $dealer = $this->userRepo->get(['dealer_id' => (int)$inquiry->dealerId]);
-        $isCrmActive = $dealer && $dealer->isCrmActive;
+        $isCrmActive = $dealer && $dealer->isCrmActive; // when the dealer does not have active the CRM, then it should not merge leads
 
         if($isCrmActive && !in_array(LeadType::TYPE_FINANCING, $params['lead_types'])) {
             // Check merge is enabled for given website.
