@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schema;
 use App\Models\Parts\Type;
 use App\Models\Parts\CategoryMappings;
@@ -41,7 +42,7 @@ class AddMappingsToCategoryMappingsTable extends Migration
       'Semi Trailers' => [
         ['map_from' => 'Low Boy / Drop Deck', 'map_to' => 'semi_lowboy;semi_drop'],
         ['map_from' => 'Dry Van', 'map_to' => 'semi_dryvan'],
-        ['map_from' => 'Flatbed', 'map_to' => 'semi_flatbed;car_racing;equipment'],    
+        ['map_from' => 'Flatbed', 'map_to' => 'semi_flatbed;car_racing;equipment'],
         ['map_from' => 'Grain', 'map_to' => 'semi_grain-hopper;semi_hopper_trailers'],
         ['map_from' => 'Reefer', 'map_to' => 'semi_reefer'],
         ['map_from' => 'Livestock', 'map_to' => 'semi_livestock;stock_stock-combo'],
@@ -58,6 +59,9 @@ class AddMappingsToCategoryMappingsTable extends Migration
      */
     public function up()
     {
+        Artisan::call('db:seed', [
+            '--class' => 'Database\Seeders\Parts\CategoryAndTypeSeeder',
+        ]);
         foreach (self::CATEGORY_MAPPINGS as $type => $categories) {
           $current_type = Type::where('name', $type)->first();
           foreach ($categories as $category) {

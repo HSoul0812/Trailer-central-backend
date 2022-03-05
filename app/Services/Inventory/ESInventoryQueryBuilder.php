@@ -2,7 +2,7 @@
 
 namespace App\Services\Inventory;
 
-class InventorySearchQueryBuilder
+class ESInventoryQueryBuilder
 {
     private array $queries = [];
     private array $fieldSorts = [];
@@ -187,7 +187,7 @@ class InventorySearchQueryBuilder
             $result['sort'] = $sorts;
         }
 
-        $result['aggregations'] = array_merge(
+        $aggregations = array_merge(
             [],
             $this->globalAggregations ? [
                 "all_inventories" => [
@@ -197,6 +197,9 @@ class InventorySearchQueryBuilder
             ] : [],
             $this->filterAggregations ?? []
         );
+        if(!empty($aggregations)) {
+            $result['aggregations'] = $aggregations;
+        }
         return $result;
     }
 }

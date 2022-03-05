@@ -11,9 +11,7 @@ use App\DTOs\Inventory\TcEsResponseInventoryList;
 use App\Models\Geolocation\Geolocation;
 use App\Models\Parts\CategoryMappings;
 use App\Models\Parts\Type;
-use App\Repositories\Geolocation\GeolocationRepositoryInterface;
 use GuzzleHttp\Client as GuzzleHttpClient;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Pagination\LengthAwarePaginator;
 use JetBrains\PhpStorm\ArrayShape;
 use JetBrains\PhpStorm\Pure;
@@ -22,6 +20,7 @@ class InventoryService implements InventoryServiceInterface
 {
     const ES_INDEX = 'inventoryclsf';
     const HTTP_SUCCESS = 200;
+    const ES_CACHE_EXPIRY = 300;
     const FIELD_UPDATED_AT = 'updatedAt';
     const ORDER_DESC = 'desc';
     const ORDER_ASC = 'asc';
@@ -58,7 +57,6 @@ class InventoryService implements InventoryServiceInterface
 
     public function __construct(
         private GuzzleHttpClient $httpClient,
-        private GeolocationRepositoryInterface $geolocationRepository,
         private SysConfigRepositoryInterface $sysConfigRepository,
     )
     {}
@@ -69,11 +67,10 @@ class InventoryService implements InventoryServiceInterface
      */
     public function list(array $params): TcEsResponseInventoryList
     {
-        $esIndex = self::ES_INDEX;
-        $elasticSearchUrl = config('trailercentral.elasticsearch.url') . "/$esIndex/_search";
+        $esSearchUrl = $this->esSearchUrl();
 
         $queryBuilder = $this->buildSearchQuery($params);
-        $res = $this->httpClient->post($elasticSearchUrl, [
+        $res = $this->httpClient->post($esSearchUrl, [
             'json' => $queryBuilder->build()
         ]);
 
@@ -91,49 +88,73 @@ class InventoryService implements InventoryServiceInterface
                 $queryBuilder->getPage()
             );
 
-            foreach ($resJson['aggregations']['category']['buckets'] as $key => $value) {
-              $old_category = $value['key'];
-              if ($old_category) {
-                $mapped_category = CategoryMappings::where('map_to', 'like', '%' . $old_category . '%')->first();
-                if ($mapped_category) {
-                  $resJson['aggregations']['category']['buckets'][$key]['key'] = $mapped_category->map_from;
-                  $resJson['aggregations']['category']['buckets'][$key]['type_id'] = $mapped_category->category->types[0]->id;
-                } else {
-                 $resJson['aggregations']['category']['buckets'][$key]['key'] = self::DEFAULT_CATEGORY['name'];
-                 $resJson['aggregations']['category']['buckets'][$key]['type_id'] = self::DEFAULT_CATEGORY['type_id'];
-               }
-              }
-            }
-
-            $newArr = [];
-            $finalArr = [];
-            foreach($resJson['aggregations']['category']['buckets'] as $arr) {
-                if (isset($newArr[$arr['key']])) {
-                  $newArr[$arr['key']] += $arr['doc_count'];
-                } else {
-                  $newArr[$arr['key']] = $arr['doc_count'];
-                }
-            }
-
-            foreach($resJson['aggregations']['category']['buckets'] as $arr) {
-                if (isset($newArr[$arr['key']])) {
-                  $finalArr[] = ['key' => $arr['key'], 'doc_count' => $newArr[$arr['key']], 'type_id' => $arr['type_id']];
-                }
-            }
-
-            $resJson['aggregations']['category']['buckets'] = array_values(array_unique($finalArr, SORT_REGULAR));
-
-
             $response = new TcEsResponseInventoryList();
-            $response->aggregations = $resJson['aggregations'];
+            $response->aggregations = $this->getCategorizedAggregations($params);
             $response->inventories = $paginator;
-            $response->limits = \Cache::remember('filter/limits', 1, function () {
+            $response->limits = \Cache::remember('filter/limits', self::ES_CACHE_EXPIRY, function () {
                 return $this->getFilterLimits();
             });
             return $response;
         } else {
             throw new \Exception('Elastic search API responded with http code: ' . $res->getStatusCode());
         }
+    }
+    private function esSearchUrl(): string {
+        $esIndex = self::ES_INDEX;
+        return config('trailercentral.elasticsearch.url') . "/$esIndex/_search";
+    }
+    private function mapCategoryBuckets(array $buckets): array {
+        foreach ($buckets as $key => &$value) {
+            $old_category = $value['key'];
+            if ($old_category) {
+                $mapped_category = CategoryMappings::where('map_to', 'like', '%' . $old_category . '%')->first();
+                if ($mapped_category) {
+                    $value['key'] = $mapped_category->map_from;
+                    $value['type_id'] = $mapped_category->category->types[0]->id;
+                } else {
+                    $value['key'] = self::DEFAULT_CATEGORY['name'];
+                    $value['type_id'] = self::DEFAULT_CATEGORY['type_id'];
+                }
+            }
+        }
+
+        $newArr = [];
+        $finalArr = [];
+        foreach($buckets as $arr) {
+            if (isset($newArr[$arr['key']])) {
+                $newArr[$arr['key']] += $arr['doc_count'];
+            } else {
+                $newArr[$arr['key']] = $arr['doc_count'];
+            }
+        }
+
+        foreach($buckets as $arr) {
+            if (isset($newArr[$arr['key']])) {
+                $finalArr[] = ['key' => $arr['key'], 'doc_count' => $newArr[$arr['key']], 'type_id' => $arr['type_id']];
+            }
+        }
+
+        return array_values(array_unique($finalArr, SORT_REGULAR));
+    }
+
+    private function getCategorizedAggregations($params) {
+        $esSearchUrl = $this->esSearchUrl();
+        $queryBuilder = new ESInventoryQueryBuilder();
+        $this->buildCategoryQuery($queryBuilder, $params);
+        $this->buildAggregations($queryBuilder, $params);
+        $query = $queryBuilder->build();
+
+        return \Cache::remember(json_encode($query), self::ES_CACHE_EXPIRY, function () use($esSearchUrl, $query){
+            $res = $this->httpClient->post($esSearchUrl, [
+                'json' => $query
+            ]);
+            $resJson = json_decode($res->getBody()->getContents(), true);
+            var_dump($resJson);
+            $resJson['aggregations']['category']['buckets'] = $this->mapCategoryBuckets(
+                $resJson['aggregations']['category']['buckets']
+            );
+            return $resJson['aggregations'];
+        });
     }
 
     private function getFilterLimits(): array {
@@ -160,12 +181,11 @@ class InventoryService implements InventoryServiceInterface
     }
 
     #[ArrayShape(['from' => "int", 'size' => "int", 'query' => "array[]", 'aggregations' => "array"])]
-    private function buildSearchQuery(array $params): InventorySearchQueryBuilder {
-        $queryBuilder = new InventorySearchQueryBuilder();
+    private function buildSearchQuery(array $params): ESInventoryQueryBuilder {
+        $queryBuilder = new ESInventoryQueryBuilder();
 
         $this->buildTermQueries($queryBuilder, $params);
         $this->buildRangeQueries($queryBuilder, $params);
-        $this->buildAggregations($queryBuilder, $params);
         $this->buildPaginateQuery($queryBuilder, $params);
         $this->buildFilter($queryBuilder, $params);
 
@@ -178,7 +198,7 @@ class InventoryService implements InventoryServiceInterface
         return $queryBuilder;
     }
 
-    private function buildFilter(InventorySearchQueryBuilder $queryBuilder, array $params) {
+    private function buildFilter(ESInventoryQueryBuilder $queryBuilder, array $params) {
         $filter = "doc['location.address'].value != '---' && doc['websitePrice'].value != 0";
         if(!empty($params['is_sale'])) {
             $filter .= "
@@ -192,27 +212,14 @@ class InventoryService implements InventoryServiceInterface
     }
 
     private function buildGeoFiltering(
-        InventorySearchQueryBuilder $queryBuilder,
-        Geolocation $location,
-        string $distance
+        ESInventoryQueryBuilder $queryBuilder,
+        Geolocation             $location,
+        string                  $distance
     ) {
         $queryBuilder->geoFiltering(['lat' => $location->latitude, 'lon' => $location->longitude], $distance);
     }
 
-    private function buildAggregations(InventorySearchQueryBuilder $queryBuilder, array $params) {
-        $queryBuilder->globalAggregate([
-            'pull_type' => ['terms' => ['field' => 'pullType']],
-            'color' =>  ['terms' => ['field' => 'color']],
-            'year' => ['terms' => ['field' => 'year']],
-            'configuration' => ['terms' => ['field' => 'loadType']],
-            'slideouts' => ['terms' => ['field' => 'numSlideouts']],
-            'length' => ['stats' => ['field' => 'length']],
-            'height_inches' => ['stats' => ['field' => 'heightInches']],
-            'axles' => ['terms' => ['field' => 'numAxles']],
-            'manufacturer' => ['terms' => ['field' => 'manufacturer', 'size' => 50]],
-            'gvwr' => ['stats' => ['field' => 'gvwr']],
-            'payload_capacity' => ['stats' => ['field' => 'payloadCapacity']],
-        ]);
+    private function buildAggregations(ESInventoryQueryBuilder $queryBuilder, array $params) {
         $queryBuilder->filterAggregate([
             'pull_type' => ['terms' => ['field' => 'pullType']],
             'color' => ['terms' => ['field' => 'color']],
@@ -238,32 +245,32 @@ class InventoryService implements InventoryServiceInterface
         ]);
     }
 
-    private function getMappedCategories(int $type_id, ?string $categories_string) {
-      $type = Type::find($type_id);
-      $mapped_categories = "";
-      if ($categories_string) {
-        $categories_array = explode(';',$categories_string);
-        $categories = $type->categories()->whereIn('name', $categories_array)->get();
+    private function getMappedCategories(int $type_id, ?string $categories_string): string
+    {
+        $type = Type::find($type_id);
+        $mapped_categories = "";
+        if ($categories_string) {
+            $categories_array = explode(';',$categories_string);
+            $categories = $type->categories()->whereIn('name', $categories_array)->get();
 
-      } else {
-        $categories = $type->categories;
-      }
-
-      foreach ($categories as $category) {
-        if ($category->category_mappings) {
-          $mapped_categories = $mapped_categories . $category->category_mappings->map_to . ';';
+        } else {
+            $categories = $type->categories;
         }
-      }
-      $mapped_categories = rtrim($mapped_categories, ";");
-      return $mapped_categories;
+
+        foreach ($categories as $category) {
+            if ($category->category_mappings) {
+                $mapped_categories = $mapped_categories . $category->category_mappings->map_to . ';';
+            }
+        }
+        return rtrim($mapped_categories, ";");
     }
 
-    private function buildPaginateQuery(InventorySearchQueryBuilder $queryBuilder, array $params) {
+    private function buildPaginateQuery(ESInventoryQueryBuilder $queryBuilder, array $params) {
         $currentPage = LengthAwarePaginator::resolveCurrentPage();
         $queryBuilder->paginate($currentPage, $params['per_page'] ?? self::PAGE_SIZE);
     }
 
-    private function buildTermQueries(InventorySearchQueryBuilder $queryBuilder, array $params) {
+    private function buildTermQueries(ESInventoryQueryBuilder $queryBuilder, array $params) {
         $queryBuilder->termQuery('isRental', false);
         foreach(self::TERM_SEARCH_KEY_MAP as $field => $searchField) {
             if (isset($params['type_id']) && $searchField == 'category') {
@@ -272,11 +279,19 @@ class InventoryService implements InventoryServiceInterface
             } else {
               $queryBuilder->termQueries($searchField, $params[$field] ?? null);
             }
-
         }
     }
 
-    private function buildRangeQueries(InventorySearchQueryBuilder $queryBuilder, array $params)
+    private function buildCategoryQuery(ESInventoryQueryBuilder $queryBuilder, array $params) {
+        if(isset($params['type_id'])) {
+            $mapped_categories = $this->getMappedCategories($params['type_id'], $params['category']);
+            $queryBuilder->termQueries('category', $mapped_categories);
+        } else {
+            $queryBuilder->termQueries('category', $params['category'] ?? null);
+        }
+    }
+
+    private function buildRangeQueries(ESInventoryQueryBuilder $queryBuilder, array $params)
     {
         foreach (self::RANGE_SEARCH_KEY_MAP as $field => $searchField) {
             $minFieldKey = "{$field}_min";
