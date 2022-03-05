@@ -51,6 +51,11 @@ class InventoryService implements InventoryServiceInterface
         'payload_capacity' => 'payloadCapacity'
     ];
 
+    const DEFAULT_CATEGORY = [
+      'name'      => 'Other',
+      'type_id'   => 1,
+    ];
+
     public function __construct(
         private GuzzleHttpClient $httpClient,
         private GeolocationRepositoryInterface $geolocationRepository,
@@ -93,9 +98,31 @@ class InventoryService implements InventoryServiceInterface
                 if ($mapped_category) {
                   $resJson['aggregations']['category']['buckets'][$key]['key'] = $mapped_category->map_from;
                   $resJson['aggregations']['category']['buckets'][$key]['type_id'] = $mapped_category->category->types[0]->id;
-                }
+                } else {
+                 $resJson['aggregations']['category']['buckets'][$key]['key'] = self::DEFAULT_CATEGORY['name'];
+                 $resJson['aggregations']['category']['buckets'][$key]['type_id'] = self::DEFAULT_CATEGORY['type_id'];
+               }
               }
             }
+
+            $newArr = [];
+            $finalArr = [];
+            foreach($resJson['aggregations']['category']['buckets'] as $arr) {
+                if (isset($newArr[$arr['key']])) {
+                  $newArr[$arr['key']] += $arr['doc_count'];
+                } else {
+                  $newArr[$arr['key']] = $arr['doc_count'];
+                }
+            }
+
+            foreach($resJson['aggregations']['category']['buckets'] as $arr) {
+                if (isset($newArr[$arr['key']])) {
+                  $finalArr[] = ['key' => $arr['key'], 'doc_count' => $newArr[$arr['key']], 'type_id' => $arr['type_id']];
+                }
+            }
+
+            $resJson['aggregations']['category']['buckets'] = array_values(array_unique($finalArr, SORT_REGULAR));
+
 
             $response = new TcEsResponseInventoryList();
             $response->aggregations = $resJson['aggregations'];
@@ -144,7 +171,7 @@ class InventoryService implements InventoryServiceInterface
 
         $location = $this->getGeolocation($params);
         if($location) {
-            $this->buildGeoScoring($queryBuilder, $location);
+            $this->buildGeoFiltering($queryBuilder, $location, $params['distance']);
         }
 
         $queryBuilder->orderBy(self::FIELD_UPDATED_AT, self::ORDER_DESC);
@@ -158,11 +185,18 @@ class InventoryService implements InventoryServiceInterface
             && doc['salesPrice'].value > 0.0 && doc['salesPrice'].value < doc['websitePrice'].value
             ";
         }
-        $queryBuilder->setFilterScript($filter);
+        $queryBuilder->setFilterScript([
+            'source' => $filter,
+            'lang' => 'painless'
+        ]);
     }
 
-    private function buildGeoScoring(InventorySearchQueryBuilder $queryBuilder, Geolocation $location) {
-        $queryBuilder->geoScoring($location->latitude, $location->longitude);
+    private function buildGeoFiltering(
+        InventorySearchQueryBuilder $queryBuilder,
+        Geolocation $location,
+        string $distance
+    ) {
+        $queryBuilder->geoFiltering(['lat' => $location->latitude, 'lon' => $location->longitude], $distance);
     }
 
     private function buildAggregations(InventorySearchQueryBuilder $queryBuilder, array $params) {
@@ -252,22 +286,13 @@ class InventoryService implements InventoryServiceInterface
     }
 
     private function getGeolocation(array $params): ?Geolocation {
-        $locationType = $params['location_type'] ?? null;
-        $location = null;
-        try {
-            if ($locationType === 'region') {
-                $location = $this->geolocationRepository->get([
-                    'city' => $params['location_city'] ?? null,
-                    'state' => $params['location_region'] ?? null,
-                    'country' => $params['location_country'] ?? self::DEFAULT_COUNTRY
-                ]);
-            } else if ($locationType === 'range') {
-                $location = $this->geolocationRepository->get([
-                    'zip' => $params['zip'] ?? null,
-                ]);
-            }
-        } catch(ModelNotFoundException) {}
-        return $location;
+        if(isset($params['lat']) && isset($params['lon'])) {
+            return new Geolocation([
+                'latitude' => (float)$params['lat'],
+                'longitude' => (float)$params['lon']
+            ]);
+        }
+        return null;
     }
 
     /**
