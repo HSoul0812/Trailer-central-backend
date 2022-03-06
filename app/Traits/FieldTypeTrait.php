@@ -70,6 +70,11 @@ trait FieldTypeTrait {
 
     private function getFieldType(String $field, ReflectionClass $reflectedClass)
     {
+        return $reflectedClass->getProperty($field)->getType()->getName();
+    }
+
+    private function getFieldTypeFromDoc(String $field, ReflectionClass $reflectedClass)
+    {
         $docComment = $reflectedClass->getProperty($field)->getDocComment();
         $type = $this->getFieldTypeByFieldDocComment($docComment);
 
