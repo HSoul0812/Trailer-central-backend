@@ -19,15 +19,17 @@ trait TypedPropertyTrait
             $this->_reflectionClass = new \ReflectionClass($this);
         }
 
-        $this->$field = $value;
-
         if($value !== null) {
             $fieldType = $this->getType($field);
             if($fieldType === 'int') {
                 $this->$field = intval($value);
             } else if ($fieldType === 'float') {
                 $this->$field = floatval($value);
+            } else {
+                $this->$field = $value;
             }
+        } else {
+            $this->$field = null;
         }
     }
 }
