@@ -220,7 +220,7 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         // Get Inquiry Details From Dealer Location?
         if(!empty($params['dealer_location_id'])) {
             $dealerLocation = $this->dealerLocation->get(['id' => $params['dealer_location_id']]);
-            if(!empty($dealerLocation->name)) {
+            if(!empty($dealerLocation->name) && !empty($dealerLocation->email)) {
                 $params['inquiry_name'] = $dealerLocation->name;
                 $params['inquiry_email'] = $dealerLocation->email;
                 return $params;
