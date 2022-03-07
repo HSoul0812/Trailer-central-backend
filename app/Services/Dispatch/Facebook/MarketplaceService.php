@@ -10,6 +10,7 @@ use App\Repositories\Marketing\TunnelRepositoryInterface;
 use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
 use App\Repositories\Marketing\Facebook\ListingRepositoryInterface;
 use App\Repositories\Marketing\Facebook\ImageRepositoryInterface;
+use App\Repositories\Marketing\Facebook\PostingRepositoryInterface;
 use App\Services\Dispatch\Facebook\DTOs\DealerFacebook;
 use App\Services\Dispatch\Facebook\DTOs\InventoryFacebook;
 use App\Services\Dispatch\Facebook\DTOs\MarketplaceInventory;
@@ -20,7 +21,6 @@ use League\Fractal\Pagination\IlluminatePaginatorAdapter;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use League\Fractal\Resource\Collection as Pagination;
-use App\Repositories\Marketing\PostingRepositoryInterface;
 
 /**
  * Class MarketplaceService
@@ -249,18 +249,32 @@ class MarketplaceService implements MarketplaceServiceInterface
             }
         }
 
-        // add marketplace_id to session
-        if ($step->isLogin()) {
-            $this->postingSession->create([
-                'id' => $step->marketplaceId
-            ]);
-        }
+        try {
+            // add marketplace_id to session
+            if ($step->isLogin()) {
+                $this->postingSession->create([
+                    'id' => $step->marketplaceId
+                ]);
+            }
+            // remove marketplace_id from session
+            elseif ($step->isStop()) {
+                $this->postingSession->delete([
+                    'id' => $step->marketplaceId
+                ]);
+            }
+            // update marketplace_id on session
+            else {
+                $this->postingSession->update([
+                    'id' => $step->marketplaceId
+                ]);
+            }
+        } catch (Exception $e) {
+            $this->logger->error('Error occurred during ' .
+                                    json_encode($params), $e->getTrace());
 
-        // remove marketplace_id from session
-        if ($step->isStop()) {
-            $this->postingSession->delete([
-                'id' => $step->marketplaceId
-            ]);
+            $this->listings->rollbackTransaction();
+
+            throw $e;
         }
 
         // Return Listing
