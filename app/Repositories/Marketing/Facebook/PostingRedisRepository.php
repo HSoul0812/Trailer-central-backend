@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories\Marketing;
+namespace App\Repositories\Marketing\Facebook;
 
 use App\DTO\Marketing\DealerPosting;
 use App\Exceptions\NotImplementedException;
@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Class PostingRedisRepository
  * 
- * @package App\Repositories\Marketing
+ * @package App\Repositories\Marketing\Facebook
  */
 class PostingRedisRepository implements PostingRepositoryInterface
 {
