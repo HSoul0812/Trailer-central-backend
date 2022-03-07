@@ -6,8 +6,11 @@ use App\Jobs\CRM\Leads\AutoAssignJob;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadType;
 use App\Models\CRM\Interactions\Interaction;
+use App\Models\User\User;
 use App\Models\Website\Config\WebsiteConfig;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
+use App\Repositories\User\UserRepository;
+use App\Repositories\User\UserRepositoryInterface;
 use App\Repositories\Website\Tracking\TrackingRepositoryInterface;
 use App\Repositories\Website\Tracking\TrackingUnitRepositoryInterface;
 use App\Services\CRM\Leads\DTOs\InquiryLead;
@@ -100,6 +103,11 @@ class InquiryService implements InquiryServiceInterface
     private $webConfigService;
 
     /**
+     * @var UserRepositoryInterface
+     */
+    private $userRepo;
+
+    /**
      * LeadService constructor.
      */
     public function __construct(
@@ -114,7 +122,8 @@ class InquiryService implements InquiryServiceInterface
         LeadTransformer $leadTransformer,
         InteractionTransformer $interactionTransformer,
         Manager $fractal,
-        WebsiteConfigServiceInterface $webConfigService
+        WebsiteConfigServiceInterface $webConfigService,
+        UserRepositoryInterface $userRepo
     ) {
         // Initialize Services
         $this->leads = $leads;
@@ -128,6 +137,7 @@ class InquiryService implements InquiryServiceInterface
         $this->leadRepo = $leadRepo;
         $this->tracking = $tracking;
         $this->trackingUnit = $trackingUnit;
+        $this->userRepo = $userRepo;
 
         // Set Up Fractal
         $this->leadTransformer = $leadTransformer;
@@ -195,6 +205,8 @@ class InquiryService implements InquiryServiceInterface
      *               merge: null|Interaction}
      */
     public function text(array $params): array {
+        $params['inventory'] = isset($params['inventory']) ? $params['inventory'] : [];
+
         $params = $this->inquiryText->merge($params);
 
         $inquiry = new InquiryLead($params);
@@ -217,7 +229,12 @@ class InquiryService implements InquiryServiceInterface
     public function mergeOrCreate(InquiryLead $inquiry, array $params): array {
         // Lead Type is NOT Financing?
         $interaction = null;
-        if(!in_array(LeadType::TYPE_FINANCING, $params['lead_types'])) {
+
+        /** @var User $dealer */
+        $dealer = $this->userRepo->get(['dealer_id' => (int)$inquiry->dealerId]);
+        $isCrmActive = $dealer && $dealer->isCrmActive; // when the dealer does not have active the CRM, then it should not merge leads
+
+        if($isCrmActive && !in_array(LeadType::TYPE_FINANCING, $params['lead_types'])) {
             // Check merge is enabled for given website.
             $configData = $this->webConfigService->getConfigByWebsite($params['website_id'], WebsiteConfig::LEADS_MERGE_ENABLED);
             if (!empty($configData[WebsiteConfig::LEADS_MERGE_ENABLED]) && $configData[WebsiteConfig::LEADS_MERGE_ENABLED] === "1") {

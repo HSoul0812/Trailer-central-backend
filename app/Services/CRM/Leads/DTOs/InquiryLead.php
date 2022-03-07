@@ -437,15 +437,28 @@ class InquiryLead
             $to = [];
             if(is_array($this->inquiryEmail)) {
                 foreach($this->inquiryEmail as $toEmail) {
-                    $to[] = ['name' => $this->inquiryName, 'email' => $toEmail];
+                    $to[] = ['name' => $this->inquiryName, 'email' => trim($toEmail)];
                 }
             } else {
-                $to[] = ['name' => $this->inquiryName, 'email' => $this->inquiryEmail];   
+                if (strpos($this->inquiryEmail, ';') !== false) {
+                    $toemails = explode(';', $this->inquiryEmail);
+                    foreach($toemails as $toemail) {
+                        $to[] = ['name' => $this->inquiryName, 'email' => trim($toemail)]; 
+                    }                    
+                } else if (strpos($this->inquiryEmail, ',') !== false) {
+                    $toemails = explode(',', $this->inquiryEmail);
+                    foreach($toemails as $toemail) {
+                        $to[] = ['name' => $this->inquiryName, 'email' => trim($toemail)]; 
+                    }    
+                } else {
+                    $to[] = ['name' => $this->inquiryName, 'email' => trim($this->inquiryEmail)]; 
+                }
+                  
             }
 
             // Append for TT
             if ($this->websiteDomain == self::TT_SIMPLE_DOMAIN) {
-                $to[] = ['name' => $this->firstName, 'email' => $this->emailAddress];
+                $to[] = ['name' => $this->firstName, 'email' => trim($this->emailAddress)];
             }
             return $to;
         }
