@@ -46,7 +46,6 @@ class InquiryTextService implements InquiryTextServiceInterface
      * @throws \InvalidArgumentException if `dealer_location_id` is not provided
      * @throws \InvalidArgumentException if `customer_name` is not provided
      * @throws \InvalidArgumentException if `phone_number` is not provided
-     * @throws \InvalidArgumentException if `inventory_name` is not provided
      * @throws \InvalidArgumentException if `referral` is not provided
      * @throws \InvalidArgumentException if `sms_message` is not provided
      * @return MessageInstance
@@ -58,7 +57,6 @@ class InquiryTextService implements InquiryTextServiceInterface
             'dealer_location_id',
             'customer_name',
             'phone_number',
-            'inventory_name',
             'referral',
             'sms_message'
         ])->each(function ($key) use ($params) {
@@ -72,7 +70,12 @@ class InquiryTextService implements InquiryTextServiceInterface
         $customerName = $params['customer_name'];
         $customerNumber = $params['phone_number'];
 
-        $messageBody = 'A customer has made an inquiry about model with stock #: ' . $params['inventory_name'] .
+        $messageTitle = 'General Inquiry';
+        if (isset($params['inventory_name'])) {
+            $messageTitle = 'A customer has made an inquiry about model with stock #: ' . $params['inventory_name'];
+        }
+
+        $messageBody =  $messageTitle .
             "\nSent From: $customerNumber\nCustomer Name: " . $customerName . "\nUnit link: " . $params['referral'] . "\n\n" . $params['sms_message'];
 
         return $this->textService->send($customerNumber, $dealerNumber, $messageBody, $customerName);
@@ -83,7 +86,6 @@ class InquiryTextService implements InquiryTextServiceInterface
      *
      * @param array $params
      * @throws \InvalidArgumentException if `customer_name` is not provided
-     * @throws \InvalidArgumentException if `inventory_name` is not provided
      * @throws \InvalidArgumentException if `sms_message` is not provided
      * @return array
      */
@@ -91,7 +93,6 @@ class InquiryTextService implements InquiryTextServiceInterface
     {
         collect([
             'customer_name',
-            'inventory_name',
             'sms_message'
         ])->each(function ($key) use ($params) {
             if (!isset($params[$key])) {
@@ -109,9 +110,13 @@ class InquiryTextService implements InquiryTextServiceInterface
             $params['last_name'] = '';
         }
 
+        if (!isset($params['inventory_id'])) {
+            $params['inventory'] = [];
+        }
+
         return $params +  [
             'lead_types'          => [LeadType::TYPE_TEXT],
-            'title'               => $params['inventory_name'],
+            'title'               => $params['inventory_name'] ?? '',
             'preferred_contact'   => 'phone',
             'comments'            => $params['sms_message']
         ];

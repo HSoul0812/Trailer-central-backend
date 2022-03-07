@@ -266,7 +266,8 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         }
 
         // Return Inquiry Email Override
-        $params['inquiry_email'] = preg_split('/,|;|\s/', $toEmails->value, null, PREG_SPLIT_NO_EMPTY);;
+        $params['inquiry_email'] = preg_split('/,|;|\s/', $toEmails->value, null, PREG_SPLIT_NO_EMPTY);
+
         return $params;
     }
 
@@ -321,7 +322,7 @@ class InquiryEmailService implements InquiryEmailServiceInterface
             $config = $this->websiteConfig->getValueOfConfig($vars['website_id'], 'contact/email');
 
             if (!empty($config->value)) {
-                $vars['inquiry_email'] = $config->value;
+                $vars['inquiry_email'] = preg_split('/,|;|\s/', $config->value, null, PREG_SPLIT_NO_EMPTY);
             }
         }
 
