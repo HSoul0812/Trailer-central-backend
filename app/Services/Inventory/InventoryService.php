@@ -89,7 +89,10 @@ class InventoryService implements InventoryServiceInterface
             );
 
             $response = new TcEsResponseInventoryList();
-            $response->aggregations = $this->getCategorizedAggregations($params);
+            $response->aggregations = [
+                'category' => $this->getCategorizedAggregations($params),
+                'type' => $this->getTypedAggregations($params)
+            ];
             $response->inventories = $paginator;
             $response->limits = \Cache::remember('filter/limits', self::ES_CACHE_EXPIRY, function () {
                 return $this->getFilterLimits();
@@ -137,11 +140,11 @@ class InventoryService implements InventoryServiceInterface
         return array_values(array_unique($finalArr, SORT_REGULAR));
     }
 
-    private function getCategorizedAggregations($params) {
+    private function getTypedAggregations($params) {
         $esSearchUrl = $this->esSearchUrl();
         $queryBuilder = new ESInventoryQueryBuilder();
-        $this->buildCategoryQuery($queryBuilder, $params);
-        $this->buildAggregations($queryBuilder, $params);
+        $this->buildTypeQuery($queryBuilder, $params);
+        $this->buildTypeAggregations($queryBuilder, $params);
         $query = $queryBuilder->build();
 
         return \Cache::remember(json_encode($query), self::ES_CACHE_EXPIRY, function () use($esSearchUrl, $query){
@@ -149,9 +152,22 @@ class InventoryService implements InventoryServiceInterface
                 'json' => $query
             ]);
             $resJson = json_decode($res->getBody()->getContents(), true);
-            $resJson['aggregations']['category']['buckets'] = $this->mapCategoryBuckets(
-                $resJson['aggregations']['category']['buckets']
-            );
+            return $resJson['aggregations'];
+        });
+    }
+
+    private function getCategorizedAggregations($params) {
+        $esSearchUrl = $this->esSearchUrl();
+        $queryBuilder = new ESInventoryQueryBuilder();
+        $this->buildCategoryQuery($queryBuilder, $params);
+        $this->buildCategoryAggregations($queryBuilder, $params);
+        $query = $queryBuilder->build();
+
+        return \Cache::remember(json_encode($query), self::ES_CACHE_EXPIRY, function () use($esSearchUrl, $query){
+            $res = $this->httpClient->post($esSearchUrl, [
+                'json' => $query
+            ]);
+            $resJson = json_decode($res->getBody()->getContents(), true);
             return $resJson['aggregations'];
         });
     }
@@ -218,7 +234,7 @@ class InventoryService implements InventoryServiceInterface
         $queryBuilder->geoFiltering(['lat' => $location->latitude, 'lon' => $location->longitude], $distance);
     }
 
-    private function buildAggregations(ESInventoryQueryBuilder $queryBuilder, array $params) {
+    private function buildTypeAggregations(ESInventoryQueryBuilder $queryBuilder, array $params) {
         $queryBuilder->filterAggregate([
             'pull_type' => ['terms' => ['field' => 'pullType']],
             'color' => ['terms' => ['field' => 'color']],
@@ -228,7 +244,6 @@ class InventoryService implements InventoryServiceInterface
             'length' => ['stats' => ['field' => 'length']],
             'height_inches' => ['stats' => ['field' => 'heightInches']],
             'axles' => ['terms' => ['field' => 'numAxles']],
-            'manufacturer' => ['terms' => ['field' => 'manufacturer']],
             'condition' => ['terms' => ['field' => 'condition']],
             'length_inches' => ['stats' => ['field' => 'lengthInches']],
             'price' => ['stats' => ['field' => 'existingPrice']],
@@ -241,6 +256,11 @@ class InventoryService implements InventoryServiceInterface
             'height' => ['stats' => ['field' => 'height']],
             'gvwr' => ['stats' => ['field' => 'gvwr']],
             'payload_capacity' => ['stats' => ['field' => 'payloadCapacity']],
+        ]);
+    }
+    private function buildCategoryAggregations(ESInventoryQueryBuilder $queryBuilder, array $params) {
+        $queryBuilder->filterAggregate([
+            'manufacturer' => ['terms' => ['field' => 'manufacturer']],
         ]);
     }
 
@@ -273,7 +293,10 @@ class InventoryService implements InventoryServiceInterface
         $queryBuilder->termQuery('isRental', false);
         foreach(self::TERM_SEARCH_KEY_MAP as $field => $searchField) {
             if (isset($params['type_id']) && $searchField == 'category') {
-              $mapped_categories = $this->getMappedCategories($params['type_id'], $params[$field]);
+              $mapped_categories = $this->getMappedCategories(
+                  $params['type_id'],
+                  $params[$field] ?? null
+              );
               $queryBuilder->termQueries($searchField, $mapped_categories);
             } else {
               $queryBuilder->termQueries($searchField, $params[$field] ?? null);
@@ -282,12 +305,19 @@ class InventoryService implements InventoryServiceInterface
     }
 
     private function buildCategoryQuery(ESInventoryQueryBuilder $queryBuilder, array $params) {
-        if(isset($params['type_id'])) {
-            $mapped_categories = $this->getMappedCategories($params['type_id'], $params['category']);
-            $queryBuilder->termQueries('category', $mapped_categories);
-        } else {
-            $queryBuilder->termQueries('category', $params['category'] ?? null);
-        }
+        $mapped_categories = $this->getMappedCategories(
+            $params['type_id'],
+            $params['category'] ?? null
+        );
+        $queryBuilder->termQueries('category', $mapped_categories);
+    }
+
+    private function buildTypeQuery(ESInventoryQueryBuilder $queryBuilder, array $params) {
+        $mapped_categories = $this->getMappedCategories(
+            $params['type_id'],
+            null
+        );
+        $queryBuilder->termQueries('category', $mapped_categories);
     }
 
     private function buildRangeQueries(ESInventoryQueryBuilder $queryBuilder, array $params)
