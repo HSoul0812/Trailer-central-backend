@@ -182,7 +182,7 @@ class PostingRedisRepository implements PostingRepositoryInterface
 
         foreach ($allKeys as $key) {
             // extract out Integration ID from key string format
-            list(, $integrationId) = explode(':', $key);
+            list(, , $integrationId) = explode(':', $key);
             $integrationIds[] = $integrationId;
         }
         $this->log->info('Found all active integration ID\'s: ' . implode(", ", $integrationIds));
