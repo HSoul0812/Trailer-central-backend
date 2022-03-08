@@ -134,6 +134,11 @@ class MarketplaceRepository implements MarketplaceRepositoryInterface {
             $query = $query->whereIn(Marketplace::getTableName() . '.id', $params['id']);
         }
 
+        // Exclude Integration ID's
+        if (isset($params['exclude'])) {
+            $query = $query->whereNotIn(Marketplace::getTableName() . '.id', $params['exclude']);
+        }
+
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
         }
