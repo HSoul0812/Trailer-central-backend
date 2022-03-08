@@ -5,13 +5,15 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
 
+use App\Traits\Migrations\Integrations\SetupAndCheckNew;
+
 class AddCargurusIntegration extends Migration
 {
-    private const CARGURUS_ID = 100;
+    use SetupAndCheckNew;
+
     private const ALL_SEASONS_POWERSPORTS_ID = 8755;
 
-    private const CARGURUS_PARAMS = [
-        'integration_id' => self::CARGURUS_ID,
+    private $cargurusIntegration = [
         'code' => 'cargurus',
         'module_name' => 'cargurus',
         'module_status' => 'idle',
@@ -28,8 +30,7 @@ class AddCargurusIntegration extends Migration
         'show_for_integrated' => 0
     ];
 
-    private const ALL_SEASONS_POWERSPORTS = [
-        'integration_id' => self::CARGURUS_ID,
+    private $allSeasonsPowersports = [
         'dealer_id' => self::ALL_SEASONS_POWERSPORTS_ID,
         'active' => 1,
         'settings' => [],
@@ -41,22 +42,31 @@ class AddCargurusIntegration extends Migration
     ];
 
     /**
-     * Run the migrations.
+     * Run the migrations if the integration doesn't exist.
      *
      * @return void
      */
     public function up()
     {
-        DB::transaction(function ()
-        {
-            DB::table('integration')->insert(self::CARGURUS_PARAMS);
+        // Gets new integrationId if integration doesn't exist.
+        $integrationId = $this->getNextId($this->cargurusIntegration['code']);
 
-            $dealer = self::ALL_SEASONS_POWERSPORTS;
-            $dealer['created_at'] = Carbon::now()->setTimezone('UTC')->toDateTimeString();
-            $dealer['settings'] = serialize($dealer['settings']);
+        if($integrationId) {
+            $this->cargurusIntegration['integration_id'] = $integrationId;
+            $this->allSeasonsPowersports['integration_id'] = $integrationId;
 
-            DB::table('integration_dealer')->insert($dealer);
-        });
+            DB::transaction(function () {
+                DB::table('integration')->insert($this->cargurusIntegration);
+
+                $dealer = $this->allSeasonsPowersports;
+                $dealer['created_at'] = Carbon::now()->setTimezone('UTC')->toDateTimeString();
+                $dealer['settings'] = serialize($dealer['settings']);
+
+                if ($this->dealerExists()) {
+                    DB::table('integration_dealer')->insert($dealer);
+                }
+            });
+        }
     }
 
     /**
@@ -66,15 +76,44 @@ class AddCargurusIntegration extends Migration
      */
     public function down()
     {
-        DB::transaction(function ()
-        {
-            DB::table('integration_dealer')
-                ->where('integration_id', self::CARGURUS_ID)
-                ->delete();
+        $integrationId = $this->getIntegrationIdFromCode();
 
-            DB::table('integration')
-                ->where('integration_id', self::CARGURUS_ID)
-                ->delete();
-        });
+        if($integrationId) {
+            DB::transaction(function () use ($integrationId) {
+                DB::table('integration_dealer')
+                    ->where('integration_id', $integrationId)
+                    ->delete();
+
+                DB::table('integration')
+                    ->where('integration_id', $integrationId)
+                    ->delete();
+            });
+        }
+    }
+
+    /**
+     * Verify if the dealer already exists
+     *
+     * @return bool
+     */
+    private function dealerExists(): bool
+    {
+        return DB::table('dealer')->where('dealer_id', self::ALL_SEASONS_POWERSPORTS_ID)->exists();
+    }
+
+    /**
+     * Get integration id from db based on integration code
+     *
+     * @return int
+     */
+    private function getIntegrationIdFromCode(): int
+    {
+        $integration = DB::table('integration')->where('code', $this->cargurusIntegration['code'])->first();
+
+        if ($integration) {
+            return $integration->integration_id;
+        }
+
+        return 0;
     }
 }
