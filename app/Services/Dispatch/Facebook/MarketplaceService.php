@@ -10,6 +10,7 @@ use App\Repositories\Marketing\TunnelRepositoryInterface;
 use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
 use App\Repositories\Marketing\Facebook\ListingRepositoryInterface;
 use App\Repositories\Marketing\Facebook\ImageRepositoryInterface;
+use App\Repositories\Marketing\Facebook\PostingRepositoryInterface;
 use App\Services\Dispatch\Facebook\DTOs\DealerFacebook;
 use App\Services\Dispatch\Facebook\DTOs\InventoryFacebook;
 use App\Services\Dispatch\Facebook\DTOs\MarketplaceInventory;
@@ -45,24 +46,32 @@ class MarketplaceService implements MarketplaceServiceInterface
     protected $tunnels;
 
     /**
+     * @var PostingRepositoryInterface
+     */
+    protected $postingSession;
+
+    /**
      * Construct Facebook Marketplace Service
      * 
      * @param MarketplaceRepositoryInterface $marketplace
      * @param TunnelRepositoryInterface $tunnels
      * @param ListingRepositoryInterfaces $listings
      * @param ImageRepositoryInterfaces $images
+     * @param PostingRepositoryInterface $postingSession
      */
     public function __construct(
         MarketplaceRepositoryInterface $marketplace,
         TunnelRepositoryInterface $tunnels,
         ListingRepositoryInterface $listings,
         ImageRepositoryInterface $images,
-        InventoryTransformer $inventoryTransformer
+        InventoryTransformer $inventoryTransformer,
+        PostingRepositoryInterface $postingSession
     ) {
         $this->marketplace = $marketplace;
         $this->tunnels = $tunnels;
         $this->listings = $listings;
         $this->images = $images;
+        $this->postingSession = $postingSession;
 
         // Initialize Inventory Transformer
         $this->inventoryTransformer = $inventoryTransformer;
@@ -203,7 +212,7 @@ class MarketplaceService implements MarketplaceServiceInterface
             // Return Listing
             return $listing;
         } catch (Exception $e) {
-            $this->logger->error('Marketplace Listing create error. params=' .
+            $this->log->error('Marketplace Listing create error. params=' .
                                     json_encode($params), $e->getTrace());
 
             $this->listings->rollbackTransaction();
@@ -240,6 +249,30 @@ class MarketplaceService implements MarketplaceServiceInterface
             }
         }
 
+        try {
+            // add marketplace_id to session
+            if ($step->isLogin()) {
+                $this->postingSession->create([
+                    'id' => $step->marketplaceId
+                ]);
+            }
+            // remove marketplace_id from session
+            elseif ($step->isLogout() || $step->isStop()) {
+                $this->postingSession->delete([
+                    'id' => $step->marketplaceId
+                ]);
+            }
+            // update marketplace_id on session
+            else {
+                $this->postingSession->update([
+                    'id' => $step->marketplaceId
+                ]);
+            }
+        } catch (\Exception $e) {
+            $this->log->error('Error occurred during updating step for fb marketplace ' .
+                                    '#' . $step->marketplaceId, $e->getTrace());
+        }
+
         // Return Listing
         return $step;
     }
@@ -251,8 +284,12 @@ class MarketplaceService implements MarketplaceServiceInterface
      * @return Collection<DealerFacebook>
      */
     private function getIntegrations(): Collection {
+        
+        $runningIntegrationIds = $this->postingSession->getIntegrationIds();
+
         $integrations = $this->marketplace->getAll([
-            'sort' => '-imported'
+            'sort' => '-imported',
+            'exclude' => $runningIntegrationIds
         ]);
 
         // Loop Facebook Integrations

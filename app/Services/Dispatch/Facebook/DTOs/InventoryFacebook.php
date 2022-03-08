@@ -477,6 +477,18 @@ class InventoryFacebook
     }
 
     /**
+     * Get Description With HTML Removed
+     * 
+     * @return string
+     */
+    public function getPlainDescription(): string {
+        $html = $this->getMarkdownDescription();
+
+        // Return Strip Tags
+        return strip_tags($html);
+    }
+
+    /**
      * Get Account Type
      * 
      * @return string
