@@ -170,6 +170,11 @@ class MarketplaceStep
         return ($this->step === self::STEP_LOGIN);
     }
 
+    public function isLogout()
+    {
+        return ($this->step === self::STEP_LOGOUT);
+    }
+
     public function isStop()
     {
         return ($this->step === self::STEP_STOP);
