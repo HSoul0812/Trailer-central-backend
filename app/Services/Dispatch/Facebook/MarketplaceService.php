@@ -212,7 +212,7 @@ class MarketplaceService implements MarketplaceServiceInterface
             // Return Listing
             return $listing;
         } catch (Exception $e) {
-            $this->logger->error('Marketplace Listing create error. params=' .
+            $this->log->error('Marketplace Listing create error. params=' .
                                     json_encode($params), $e->getTrace());
 
             $this->listings->rollbackTransaction();

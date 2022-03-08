@@ -79,7 +79,7 @@ class PostingRedisRepository implements PostingRepositoryInterface
     {
         $this->log = Log::channel('dispatch-fb');
         $this->redis = Redis::connection('fb-posting');
-        $this->log->info('Initialized Redis on for Posting Using ' . $this->redis->getName());
+        $this->log->info('Initialized Redis FB Posting Using ' . $this->redis->getName());
         $this->log->info('Found Keys: ', $this->redis->keys(self::REDIS_NAMESPACE .'*'));
     }
 
@@ -185,7 +185,9 @@ class PostingRedisRepository implements PostingRepositoryInterface
             list(, $integrationId) = explode(':', $key);
             $integrationIds[] = $integrationId;
         }
+        $this->log->info('Found all active integration ID\'s: ' . implode(", ", $integrationIds));
 
+        // Return Array of Active Integration ID's
         return $integrationIds;
     }
 
