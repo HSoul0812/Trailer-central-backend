@@ -11,11 +11,9 @@ class AddCargurusIntegration extends Migration
 {
     use SetupAndCheckNew;
 
-    private const CARGURUS_ID = 100;
     private const ALL_SEASONS_POWERSPORTS_ID = 8755;
 
     private $cargurusIntegration = [
-        'integration_id' => self::CARGURUS_ID,
         'code' => 'cargurus',
         'module_name' => 'cargurus',
         'module_status' => 'idle',
@@ -33,7 +31,6 @@ class AddCargurusIntegration extends Migration
     ];
 
     private $allSeasonsPowersports = [
-        'integration_id' => self::CARGURUS_ID,
         'dealer_id' => self::ALL_SEASONS_POWERSPORTS_ID,
         'active' => 1,
         'settings' => [],
@@ -51,11 +48,12 @@ class AddCargurusIntegration extends Migration
      */
     public function up()
     {
-        if(!$this->integrationCodeExists()) {
-            if($this->integrationIdExists()) {
-                $this->cargurusIntegration['integration_id'] = $this->getNextIdFromDb();
-                $this->allSeasonsPowersports['integration_id'] = $this->getNextIdFromDb();
-            }
+        // Gets new integrationId if integration doesn't exist.
+        $integrationId = $this->getNextId($this->cargurusIntegration['code']);
+
+        if($integrationId) {
+            $this->cargurusIntegration['integration_id'] = $integrationId;
+            $this->allSeasonsPowersports['integration_id'] = $integrationId;
 
             DB::transaction(function () {
                 DB::table('integration')->insert($this->cargurusIntegration);
@@ -91,26 +89,6 @@ class AddCargurusIntegration extends Migration
                     ->delete();
             });
         }
-    }
-
-    /**
-     * Verify if the integrationId already exists
-     *
-     * @return bool
-     */
-    private function integrationIdExists(): bool
-    {
-        return DB::table('integration')->where('integration_id', $this->cargurusIntegration['integration_id'])->exists();
-    }
-
-    /**
-     * Verify if the integration already exists
-     *
-     * @return bool
-     */
-    private function integrationCodeExists(): bool
-    {
-        return DB::table('integration')->where('code', $this->cargurusIntegration['code'])->exists();
     }
 
     /**
