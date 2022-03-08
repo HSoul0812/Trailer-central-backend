@@ -93,7 +93,9 @@ class PostingRedisRepository implements PostingRepositoryInterface
             throw new RepositoryInvalidArgumentException;
         }
 
-        $this->redis->setex(self::REDIS_NAMESPACE . $params['id'], self::TTL, $params['dealerId'] ?? time());
+        $this->log->info('Creating ' . self::REDIS_NAMESPACE . $params['id'] . ' expiring in ' . self::getTtl() . ' seconds');
+
+        $this->redis->setex(self::REDIS_NAMESPACE . $params['id'], self::getTtl(), $params['dealerId'] ?? time());
     }
 
     /**
@@ -102,7 +104,17 @@ class PostingRedisRepository implements PostingRepositoryInterface
      */
     public function update($params)
     {
-        throw new NotImplementedException;
+        if (!isset($params['id'])) {
+            throw new RepositoryInvalidArgumentException;
+        }
+
+        $this->log->info('Check if ' . self::REDIS_NAMESPACE . $params['id'] . ' has not yet expired');
+
+        // Check if Not Yet Expired
+        $key = $this->redis->get(self::REDIS_NAMESPACE . $params['id']);
+        if(!empty($key)) {
+            $this->create($params);
+        }
     }
 
     /**
@@ -229,5 +241,23 @@ class PostingRedisRepository implements PostingRepositoryInterface
 
         // Return Result After Sort
         return $collections;
+    }
+
+
+
+    /**
+     * Get TTL From Constant or Config Vars
+     * 
+     * @return int
+     */
+    public static function getTtl(): int {
+        // Find Config
+        $ttl = config('marketing.fb.settings.ttl');
+        if(!empty($ttl)) {
+            return (int) $ttl;
+        }
+
+        // Return Constant
+        return self::TTL;
     }
 }
