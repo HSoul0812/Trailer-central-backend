@@ -20,7 +20,7 @@ class PostingRedisRepository implements PostingRepositoryInterface
     /**
      * @const Time To Live in Seconds
      */
-    const TTL = 60 * 60;
+    const TTL = 60 * 5;
 
     /**
      * @const Redis Prefix Key
