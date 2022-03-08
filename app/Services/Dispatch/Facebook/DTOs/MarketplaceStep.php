@@ -57,6 +57,11 @@ class MarketplaceStep
     /**
      * @const string
      */
+    const STEP_LOGOUT = 'logout-and-close';
+
+    /**
+     * @const string
+     */
     const STEP_STOP = 'stop-script';
 
     /**
