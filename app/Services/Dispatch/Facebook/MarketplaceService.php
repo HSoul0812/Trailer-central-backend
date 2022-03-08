@@ -264,9 +264,9 @@ class MarketplaceService implements MarketplaceServiceInterface
             }
             // update marketplace_id on session
             else {
-                /*$this->postingSession->update([
+                $this->postingSession->update([
                     'id' => $step->marketplaceId
-                ]);*/
+                ]);
             }
         } catch (\Exception $e) {
             $this->log->error('Error occurred during updating step for fb marketplace ' .
