@@ -260,7 +260,7 @@ class InventoryService implements InventoryServiceInterface
     }
     private function buildCategoryAggregations(ESInventoryQueryBuilder $queryBuilder, array $params) {
         $queryBuilder->filterAggregate([
-            'manufacturer' => ['terms' => ['field' => 'manufacturer']],
+            'manufacturer' => ['terms' => ['field' => 'manufacturer', 'size' => 50]],
         ]);
     }
 
