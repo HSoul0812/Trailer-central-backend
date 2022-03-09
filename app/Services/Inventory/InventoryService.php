@@ -89,10 +89,10 @@ class InventoryService implements InventoryServiceInterface
             );
 
             $response = new TcEsResponseInventoryList();
-            $response->aggregations = [
-                'category' => $this->getCategorizedAggregations($params),
-                'type' => $this->getTypedAggregations($params)
-            ];
+            $response->aggregations = array_merge(
+                $this->getCategorizedAggregations($params),
+                $this->getTypedAggregations($params)
+            );
             $response->inventories = $paginator;
             $response->limits = \Cache::remember('filter/limits', self::ES_CACHE_EXPIRY, function () {
                 return $this->getFilterLimits();
