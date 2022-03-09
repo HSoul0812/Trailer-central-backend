@@ -30,7 +30,7 @@ class CategoryAndTypeSeeder extends Seeder
           ['name' => 'Vending / Concession', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/vending-concession', 'description' => 'Stalls, stand-alone kiosks, or stands that are used to sell beverages and foods.'],
           ['name' => 'Office / Fiber Optic', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/office-fiberoptic', 'description' => 'A mobile office or workshop usually with necessary amenities to carry activities.'],
           ['name' => 'Other', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/other-trailers', 'description' => 'A variety of specialised trailers and trailer components.'],
-      ],
+        ],
         'Horse & Livestock'  => [
           ['name' => 'Horse Trailers', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/horse-trailers', 'description' => 'Trailers ranging in size that are used to transport horses.'],
           ['name' => 'Livestock Trailers', 'image_url' => 'https://s3.amazonaws.com/crm-trailercentral-dev/livestock-trailers', 'description' => 'Trailers used to transport live animals, including cattle, sheep, goats, horses, rabbits, and more.'],
