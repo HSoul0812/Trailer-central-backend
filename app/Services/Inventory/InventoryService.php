@@ -238,7 +238,7 @@ class InventoryService implements InventoryServiceInterface
         $queryBuilder->filterAggregate([
             'pull_type' => ['terms' => ['field' => 'pullType']],
             'color' => ['terms' => ['field' => 'color']],
-            'year' => ['terms' => ['field' => 'year']],
+            'year' => ['terms' => ['field' => 'year', 'size' => 50]],
             'configuration' => ['terms' => ['field' => 'loadType']],
             'slideouts' => ['terms' => ['field' => 'numSlideouts']],
             'length' => ['stats' => ['field' => 'length']],
