@@ -6,11 +6,13 @@ use App\Models\CRM\Dms\PurchaseOrder\PurchaseOrderPart;
 use League\Fractal\Resource\Collection;
 use League\Fractal\TransformerAbstract;
 use App\Models\Parts\Part;
+use League\Fractal\Resource\Primitive;
 
 class PartsTransformer extends TransformerAbstract implements PartsTransformerInterface
 {
     protected $availableIncludes = [
         'purchaseOrders',
+        'qty'
     ];
 
     public function transform(Part $part): array
@@ -71,5 +73,16 @@ class PartsTransformer extends TransformerAbstract implements PartsTransformerIn
                     return !$poPart->purchaseOrder->isCompleted();
                 })->isNotEmpty()
             ]);
+    }
+
+    /**
+     * Include total qty
+     *
+     * @param Part $part
+     * @return Primitive
+     */
+    public function includeQty(Part $part): Primitive
+    {
+        return $this->primitive($part->total_qty);
     }
 }
