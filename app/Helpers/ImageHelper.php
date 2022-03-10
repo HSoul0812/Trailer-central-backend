@@ -29,7 +29,7 @@ class ImageHelper
 
         $info = getimagesize($file);
 
-        list($height_old, $width_old) = $info;
+        list($width_old, $height_old) = $info;
 
         if($proportional) {
             if($width == 0) {
@@ -63,10 +63,8 @@ class ImageHelper
         }
 
         if($width_old < $width && $height_old < $height) {
-
             $final_width  = $width_old;
             $final_height = $height_old;
-
         }
 
         $image_resized = imagecreatetruecolor($final_width, $final_height);
@@ -109,8 +107,8 @@ class ImageHelper
 
         imagecopyresampled($image_resized, $image, 0, 0, 0, 0, $final_width, $final_height, $width_old, $height_old);
 
-        if ($height_old > $width_old) {
-            imagerotate($image_resized, 270, 0);
+        if ($width_old > $height_old) {
+            $image_resized = imagerotate($image_resized, 270, 0);
         }
 
         @unlink($file);

@@ -20,7 +20,7 @@ class PostingRedisRepository implements PostingRepositoryInterface
     /**
      * @const Time To Live in Seconds
      */
-    const TTL = 60 * 60;
+    const TTL = 60 * 5;
 
     /**
      * @const Redis Prefix Key
@@ -79,7 +79,7 @@ class PostingRedisRepository implements PostingRepositoryInterface
     {
         $this->log = Log::channel('dispatch-fb');
         $this->redis = Redis::connection('fb-posting');
-        $this->log->info('Initialized Redis on for Posting Using ' . $this->redis->getName());
+        $this->log->info('Initialized Redis FB Posting Using ' . $this->redis->getName());
         $this->log->info('Found Keys: ', $this->redis->keys(self::REDIS_NAMESPACE .'*'));
     }
 
@@ -93,7 +93,9 @@ class PostingRedisRepository implements PostingRepositoryInterface
             throw new RepositoryInvalidArgumentException;
         }
 
-        $this->redis->setex(self::REDIS_NAMESPACE . $params['id'], self::TTL, $params['dealerId'] ?? time());
+        $this->log->info('Creating ' . self::REDIS_NAMESPACE . $params['id'] . ' expiring in ' . self::getTtl() . ' seconds');
+
+        $this->redis->setex(self::REDIS_NAMESPACE . $params['id'], self::getTtl(), $params['dealerId'] ?? time());
     }
 
     /**
@@ -102,7 +104,17 @@ class PostingRedisRepository implements PostingRepositoryInterface
      */
     public function update($params)
     {
-        throw new NotImplementedException;
+        if (!isset($params['id'])) {
+            throw new RepositoryInvalidArgumentException;
+        }
+
+        $this->log->info('Check if ' . self::REDIS_NAMESPACE . $params['id'] . ' has not yet expired');
+
+        // Check if Not Yet Expired
+        $key = $this->redis->get(self::REDIS_NAMESPACE . $params['id']);
+        if(!empty($key)) {
+            $this->create($params);
+        }
     }
 
     /**
@@ -182,10 +194,12 @@ class PostingRedisRepository implements PostingRepositoryInterface
 
         foreach ($allKeys as $key) {
             // extract out Integration ID from key string format
-            list(, $integrationId) = explode(':', $key);
+            list(, , $integrationId) = explode(':', $key);
             $integrationIds[] = $integrationId;
         }
+        $this->log->info('Found all active integration ID\'s: ' . implode(", ", $integrationIds));
 
+        // Return Array of Active Integration ID's
         return $integrationIds;
     }
 
@@ -227,5 +241,23 @@ class PostingRedisRepository implements PostingRepositoryInterface
 
         // Return Result After Sort
         return $collections;
+    }
+
+
+
+    /**
+     * Get TTL From Constant or Config Vars
+     * 
+     * @return int
+     */
+    public static function getTtl(): int {
+        // Find Config
+        $ttl = config('marketing.fb.settings.ttl');
+        if(!empty($ttl)) {
+            return 60 * (int) $ttl;
+        }
+
+        // Return Constant
+        return self::TTL;
     }
 }

@@ -212,7 +212,7 @@ class MarketplaceService implements MarketplaceServiceInterface
             // Return Listing
             return $listing;
         } catch (Exception $e) {
-            $this->logger->error('Marketplace Listing create error. params=' .
+            $this->log->error('Marketplace Listing create error. params=' .
                                     json_encode($params), $e->getTrace());
 
             $this->listings->rollbackTransaction();
@@ -257,7 +257,7 @@ class MarketplaceService implements MarketplaceServiceInterface
                 ]);
             }
             // remove marketplace_id from session
-            elseif ($step->isStop()) {
+            elseif ($step->isLogout() || $step->isStop()) {
                 $this->postingSession->delete([
                     'id' => $step->marketplaceId
                 ]);
@@ -268,13 +268,9 @@ class MarketplaceService implements MarketplaceServiceInterface
                     'id' => $step->marketplaceId
                 ]);
             }
-        } catch (Exception $e) {
-            $this->logger->error('Error occurred during ' .
-                                    json_encode($params), $e->getTrace());
-
-            $this->listings->rollbackTransaction();
-
-            throw $e;
+        } catch (\Exception $e) {
+            $this->log->error('Error occurred during updating step for fb marketplace ' .
+                                    '#' . $step->marketplaceId, $e->getTrace());
         }
 
         // Return Listing

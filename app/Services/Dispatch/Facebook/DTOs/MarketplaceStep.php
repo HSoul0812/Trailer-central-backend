@@ -57,6 +57,11 @@ class MarketplaceStep
     /**
      * @const string
      */
+    const STEP_LOGOUT = 'logout-and-close';
+
+    /**
+     * @const string
+     */
     const STEP_STOP = 'stop-script';
 
     /**
@@ -141,8 +146,8 @@ class MarketplaceStep
         $logging = new Collection();
         foreach($logs as $log) {
             $logging->push(new MarketplaceLog([
-                'psr' => $log->loggerName,
-                'message' => $log->logMessage,
+                'psr' => $log->loggerName ?? 'debug',
+                'message' => is_array($log->logMessage) ? print_r($log->logMessage, true) : $log->logMessage,
                 'date' => $log->date
             ]));
         }
@@ -163,6 +168,11 @@ class MarketplaceStep
     public function isLogin()
     {
         return ($this->step === self::STEP_LOGIN);
+    }
+
+    public function isLogout()
+    {
+        return ($this->step === self::STEP_LOGOUT);
     }
 
     public function isStop()
