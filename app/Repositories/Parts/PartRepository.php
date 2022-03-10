@@ -552,11 +552,11 @@ class PartRepository implements PartRepositoryInterface {
                       'query' => [
                         'multi_match' => [
                           'query' => $query['query'],
-                          'fields' => ['title^1.3', 'part_id^3', 'sku^3', 'brand', 'manufacturer', 'type', 'category', 'alternative_part_number^2', 'description^0.5'],
+                          'fields' => ['title^1.3', 'part_id^3', 'sku^3', 'alternative_part_number^2'],
                           'operator' => 'and'
                         ]
                       ],
-                      'boost' => 2,
+                      'boost' => 3,
                     ]
                   ],
                   [
@@ -565,7 +565,7 @@ class PartRepository implements PartRepositoryInterface {
                         'multi_match' => [
                           'query' => $query['query'],
                           'fields' => ['title^1.3', 'part_id^3', 'sku^3', 'brand', 'manufacturer', 'type', 'category', 'alternative_part_number^2', 'description^0.5'],
-                          'fuzziness' => 1,
+                          'fuzziness' => 'AUTO',
                           'operator' => 'and'
                         ],
                       ],
