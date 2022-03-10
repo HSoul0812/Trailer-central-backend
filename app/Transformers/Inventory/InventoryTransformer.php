@@ -181,7 +181,10 @@ class InventoryTransformer extends TransformerAbstract
              'cost_of_ros' => $inventory->cost_of_ros,
              'quote_url' => config('app.new_design_crm_url') . $inventory->user->getCrmLoginUrl('bill-of-sale/new?inventory_id=' . $inventory->identifier),
              'age' => $age,
-             'use_website_price' => $inventory->use_website_price
+             'use_website_price' => $inventory->use_website_price,
+             'minimum_selling_price' => $inventory->minimum_selling_price,
+             'pac_type' => $inventory->pac_type,
+             'pac_amount' => $inventory->pac_amount
          ];
     }
 
