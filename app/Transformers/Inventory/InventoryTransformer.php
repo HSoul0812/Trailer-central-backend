@@ -243,7 +243,7 @@ class InventoryTransformer extends TransformerAbstract
      */
     private function transformImages(Collection $images): array
     {
-        return $images->map(function (InventoryImage $image) {
+        return $images->sortBy('position')->values()->map(function (InventoryImage $image) {
             return $this->inventoryImageTransformer->transform($image);
         })->toArray();
     }
