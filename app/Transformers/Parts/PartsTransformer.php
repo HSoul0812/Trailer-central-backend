@@ -13,7 +13,7 @@ class PartsTransformer extends TransformerAbstract implements PartsTransformerIn
 {
     protected $availableIncludes = [
         'purchaseOrders',
-        'qty'
+        'total_qty'
     ];
 
     public function transform(Part $part): array
@@ -82,7 +82,7 @@ class PartsTransformer extends TransformerAbstract implements PartsTransformerIn
      * @param Part $part
      * @return Primitive
      */
-    public function includeQty(Part $part): Primitive
+    public function includeTotalQty(Part $part): Primitive
     {
         return $this->primitive($part->total_qty);
     }
