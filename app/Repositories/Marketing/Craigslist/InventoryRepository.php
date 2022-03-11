@@ -229,6 +229,7 @@ class InventoryRepository implements InventoryRepositoryInterface
     {
         return DB::table(Inventory::getTableName())->select([
                     Inventory::getTableName().'.inventory_id', Inventory::getTableName().'.stock',
+                    Inventory::getTableName().'.dealer_location_id',
                     Inventory::getTableName().'.title', Inventory::getTableName().'.category',
                     Inventory::getTableName().'.manufacturer', Inventory::getTableName().'.price',
                     Post::getTableName().'.cl_status', Image::getTableName().'.filename as primary_image',
