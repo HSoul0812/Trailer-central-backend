@@ -50,6 +50,11 @@ class ClappInventory
     private $inventoryId;
 
     /**
+     * @var int
+     */
+    private $dealerLocationId;
+
+    /**
      * @var string
      */
     private $stock;
