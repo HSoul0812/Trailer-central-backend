@@ -52,7 +52,7 @@ class ClappInventory
     /**
      * @var int
      */
-    private $dealerLocationId;
+    private $locationId;
 
     /**
      * @var string
@@ -139,6 +139,7 @@ class ClappInventory
         // Create Inventory Mapping
         return new self([
             'inventory_id' => $inventory->inventory_id,
+            'location_id' => $inventory->dealer_location_id,
             'stock' => $inventory->stock,
             'title' => $inventory->title,
             'category' => $inventory->category,
