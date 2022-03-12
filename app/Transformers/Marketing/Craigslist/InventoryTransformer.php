@@ -22,7 +22,7 @@ class InventoryTransformer extends TransformerAbstract
     {
         $return = [
             'identifier' => $inventory->inventoryId,
-            'location_id' => $inventory->dealerLocationId,
+            'location_id' => $inventory->locationId,
             'stock' => $inventory->stock,
             'title' => $inventory->title,
             'category' => $inventory->category,
