@@ -2,11 +2,11 @@
 
 namespace App\Repositories\Website\PaymentCalculator;
 
-use App\Repositories\Website\PaymentCalculator\SettingsRepositoryInterface;
 use App\Models\Website\PaymentCalculator\Settings;
+use Illuminate\Database\Query\Builder;
 
 class SettingsRepository implements SettingsRepositoryInterface {
-    
+
     public function create($params) {
         return Settings::create($params);
     }
@@ -19,33 +19,56 @@ class SettingsRepository implements SettingsRepositoryInterface {
         return Settings::where('website_id', $params['website_id'])->firstOrFail();
     }
 
+    /**
+     * Usually, it should return a config payment calculator list, However, when the inventory price has been provided,
+     * it should determine which is the correct config payment calculator
+     *
+     * @param $params
+     * @return \Illuminate\Support\Collection
+     */
     public function getAll($params) {
+        /** @var Builder $query */
         $query = Settings::where('website_id', $params['website_id']);
-        
-        if (isset($params['inventory_price'])) {
-            $query->where(function($q) use ($params) {
-                $q->where(function($q) use ($params) {
-                    $q->where('operator', Settings::OPERATOR_LESS_THAN)
-                            ->where('inventory_price', '>', $params['inventory_price']);
-                })->orWhere(function($q) use ($params) {
-                    $q->where('operator', Settings::OPERATOR_OVER)
-                            ->where('inventory_price', '<', $params['inventory_price']);
-                });
-            });
-        }
-        
+
         if (isset($params['entity_type_id'])) {
             $query->where('entity_type_id', $params['entity_type_id']);
         }
-        
+
         if (isset($params['inventory_condition'])) {
             $query->where('inventory_condition', $params['inventory_condition']);
         }
-        
+
         if (isset($params['financing'])) {
             $query->where('financing', $params['financing']);
         }
-        
+
+        if (isset($params['inventory_price'])) {
+            /** @var \Illuminate\Database\Eloquent\Builder $queryOver */
+            /** @var \Illuminate\Database\Eloquent\Builder $queryLessThan */
+            $queryOver = clone $query;
+            $queryLessThan = clone $query;
+
+            // our MySQL version doesn't allow LIMIT & IN/ALL/ANY/SOME sub-query, so we need to get the ids
+            $queryOver->select('id')
+                ->where('operator', Settings::OPERATOR_OVER)
+                ->where('inventory_price', '<', $params['inventory_price'])
+                ->orderBy('inventory_price', 'desc')
+                ->limit(1);
+
+            $queryLessThan->select('id')
+                ->where('id', Settings::OPERATOR_LESS_THAN)
+                ->where('inventory_price', '>', $params['inventory_price'])
+                ->orderBy('inventory_price', 'desc')
+                ->limit(1);
+
+            $leftAndRightIdBounds = array_merge($queryOver->get()->toArray(), $queryLessThan->get()->toArray());
+
+            $query->whereIn('id', $leftAndRightIdBounds);
+
+            // when we have a discrepancy, then we need to pick the most profitable loan for the company
+            $query->limit(1)->orderBy('months', 'desc');
+        }
+
         return $query->get();
     }
 
@@ -53,7 +76,7 @@ class SettingsRepository implements SettingsRepositoryInterface {
         $settings = Settings::findOrFail($params['id']);
         $settings->fill($params);
         $settings->save();
+
         return $settings;
     }
-    
 }
