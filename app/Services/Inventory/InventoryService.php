@@ -143,9 +143,7 @@ class InventoryService implements InventoryServiceInterface
     private function getTypedAggregations($params) {
         $esSearchUrl = $this->esSearchUrl();
         $queryBuilder = new ESInventoryQueryBuilder();
-        if (isset($params['type_id'])) {
-          $this->buildTypeQuery($queryBuilder, $params);
-        }
+        $this->buildTypeQuery($queryBuilder, $params);
         $this->buildTypeAggregations($queryBuilder, $params);
         $query = $queryBuilder->build();
 
@@ -161,9 +159,7 @@ class InventoryService implements InventoryServiceInterface
     private function getCategorizedAggregations($params) {
         $esSearchUrl = $this->esSearchUrl();
         $queryBuilder = new ESInventoryQueryBuilder();
-          if (isset($params['type_id'])) {
-            $this->buildCategoryQuery($queryBuilder, $params);
-          }
+        $this->buildCategoryQuery($queryBuilder, $params);
         $this->buildCategoryAggregations($queryBuilder, $params);
         $query = $queryBuilder->build();
 
