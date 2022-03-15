@@ -48,7 +48,7 @@ class InventoryTransformer extends TransformerAbstract
 
             // Manage URL Exists?
             if($inventory->craigslistId) {
-                $return['links'][] = ['url' => ClapInventory::CLAPP_LINK_NOTICE, 'type' => 'edit'];
+                $return['links'][] = ['url' => ClappInventory::CLAPP_LINK_NOTICE, 'type' => 'edit'];
             }
         } else {
             unset($return['next_scheduled']);
