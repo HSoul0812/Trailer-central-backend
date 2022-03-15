@@ -39,10 +39,10 @@ class ESInventoryQueryBuilder
                 ]
             ];
             if ($min != null) {
-                $rangeQuery['range'][$fieldKey]['gte'] = $min;
+                $rangeQuery['range'][$fieldKey]['gt'] = $min;
             }
             if ($max != null) {
-                $rangeQuery['range'][$fieldKey]['lte'] = $max;
+                $rangeQuery['range'][$fieldKey]['lt'] = $max;
             }
 
             $this->queries[] = $rangeQuery;
