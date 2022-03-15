@@ -336,10 +336,6 @@ class InventoryRepository implements InventoryRepositoryInterface
             }]);
         }
 
-        if (in_array('repair_orders', $include)) {
-            $query = $query->with(['repairOrders']);
-        }
-
         return $query->firstOrFail();
     }
 
