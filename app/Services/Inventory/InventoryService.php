@@ -310,6 +310,8 @@ class InventoryService implements InventoryServiceInterface
             $params['category'] ?? null
         );
         $queryBuilder->termQueries('category', $mapped_categories);
+        $queryBuilder->termQuery('isRental', false);
+        $this->buildFilter($queryBuilder, []);
     }
 
     private function buildTypeQuery(ESInventoryQueryBuilder $queryBuilder, array $params) {
@@ -318,6 +320,8 @@ class InventoryService implements InventoryServiceInterface
             null
         );
         $queryBuilder->termQueries('category', $mapped_categories);
+        $queryBuilder->termQuery('isRental', false);
+        $this->buildFilter($queryBuilder, []);
     }
 
     private function buildRangeQueries(ESInventoryQueryBuilder $queryBuilder, array $params)
