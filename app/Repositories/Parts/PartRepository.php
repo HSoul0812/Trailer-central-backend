@@ -546,11 +546,33 @@ class PartRepository implements PartRepositoryInterface {
         $search = $this->model->boolSearch();
 
         if ($query['query'] ?? null) { // if a query is specified
-            $search->must('multi_match', [
-                'query' => $query['query'],
-                'fuzziness' => 'AUTO',
-                'fields' => ['title^1.3', 'part_id^3', 'sku^3', 'brand', 'manufacturer', 'type', 'category', 'alternative_part_number^2', 'description^0.5']
-            ]);
+            $search->should(
+                [
+                    'function_score' => [
+                      'query' => [
+                        'multi_match' => [
+                          'query' => $query['query'],
+                          'fields' => ['title^1.3', 'part_id^3', 'sku^3', 'alternative_part_number^2'],
+                          'operator' => 'and'
+                        ]
+                      ],
+                      'boost' => 3,
+                    ]
+                  ],
+                  [
+                    'function_score' => [
+                      'query' => [
+                        'multi_match' => [
+                          'query' => $query['query'],
+                          'fields' => ['title^1.3', 'part_id^3', 'sku^3', 'brand', 'manufacturer', 'type', 'category', 'alternative_part_number^2', 'description^0.5'],
+                          'fuzziness' => 'AUTO',
+                          'operator' => 'and'
+                        ],
+                      ],
+                      'boost' => 1,
+                    ]
+                  ]
+            );
 
         } else if ($options['allowAll'] ?? false) { // if no query supplied but is allowed
             $search->must('match_all', []);
