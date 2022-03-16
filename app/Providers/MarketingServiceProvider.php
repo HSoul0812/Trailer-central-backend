@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Repositories\CRM\Text\VerifyRepository;
+use App\Repositories\CRM\Text\VerifyRepositoryInterface;
 use App\Repositories\Marketing\TunnelRedisRepository;
 use App\Repositories\Marketing\TunnelRepositoryInterface;
 use App\Repositories\Marketing\Facebook\MarketplaceRepository;
@@ -49,6 +51,7 @@ class MarketingServiceProvider extends ServiceProvider
         $this->app->bind(ListingRepositoryInterface::class, ListingRepository::class);
         $this->app->bind(ImageRepositoryInterface::class, ImageRepository::class);
         $this->app->bind(ProfileRepositoryInterface::class, ProfileRepository::class);
+        $this->app->bind(VerifyRepositoryInterface::class, VerifyRepository::class);
 
         // Dispatch (Redis) Repositories
         $this->app->bind(TunnelRepositoryInterface::class, TunnelRedisRepository::class);

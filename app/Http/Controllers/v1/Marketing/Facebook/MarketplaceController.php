@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\v1\Marketing;
+namespace App\Http\Controllers\v1\Marketing\Facebook;
 
 use App\Http\Controllers\RestfulControllerV2;
 use Dingo\Api\Http\Request;
@@ -9,11 +9,15 @@ use App\Http\Requests\Marketing\Facebook\ShowMarketplaceRequest;
 use App\Http\Requests\Marketing\Facebook\CreateMarketplaceRequest;
 use App\Http\Requests\Marketing\Facebook\UpdateMarketplaceRequest;
 use App\Http\Requests\Marketing\Facebook\DeleteMarketplaceRequest;
+use App\Http\Requests\Marketing\Facebook\TfaMarketplaceRequest;
+use App\Http\Requests\Marketing\Facebook\SmsMarketplaceRequest;
 use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
 use App\Services\Marketing\Facebook\MarketplaceServiceInterface;
+use App\Transformers\CRM\Text\NumberVerifyTransformer;
 use App\Transformers\Marketing\Facebook\MarketplaceTransformer;
+use App\Transformers\Marketing\Facebook\TFATransformer;
 
-class FacebookController extends RestfulControllerV2 {
+class MarketplaceController extends RestfulControllerV2 {
     /**
      * @var App\Services\Marketing\MarketplaceRepositoryInterface
      */
@@ -24,16 +28,35 @@ class FacebookController extends RestfulControllerV2 {
      */
     private $service;
 
+    /**
+     * @var App\Transformers\Marketing\Facebook\MarketplaceTransformer
+     */
+    private $transformer;
+
+    /**
+     * @var App\Transformers\Marketing\Facebook\TFATransformer
+     */
+    private $tfaTransformer;
+
+    /**
+     * @var App\Transformers\CRM\Text\NumberVerifyTransformer
+     */
+    private $verifyTransformer;
+
     public function __construct(
         MarketplaceRepositoryInterface $repository,
         MarketplaceServiceInterface $service,
-        MarketplaceTransformer $transformer
+        MarketplaceTransformer $transformer,
+        TFATransformer $tfaTransformer,
+        NumberVerifyTransformer $verifyTransformer
     ) {
-        $this->middleware('setDealerIdOnRequest')->only(['create', 'update', 'index']);
+        $this->middleware('setDealerIdOnRequest')->only(['create', 'update', 'index', 'tfa']);
 
         $this->repository = $repository;
         $this->service = $service;
         $this->transformer = $transformer;
+        $this->tfaTransformer = $tfaTransformer;
+        $this->verifyTransformer = $verifyTransformer;
     }
 
     /**
@@ -124,6 +147,44 @@ class FacebookController extends RestfulControllerV2 {
         $request = new DeleteMarketplaceRequest(['id' => $id]);
         if ($request->validate() && $this->service->delete($id)) {
             return $this->successResponse();
+        }
+        
+        return $this->response->errorBadRequest();
+    }
+
+    /**
+     * Return TFA Types for Marketplace
+     * 
+     * @param Request $request
+     * @return type
+     */
+    public function tfa(Request $request)
+    {
+        // Handle Facebook Marketplace TFA Request
+        $requestData = $request->all();
+        $request = new TfaMarketplaceRequest($requestData);
+        if ($request->validate()) {
+            // Return Auth
+            return $this->response->collection($this->service->tfa($request->dealer_id), $this->tfaTransformer);
+        }
+        
+        return $this->response->errorBadRequest();
+    }
+
+    /**
+     * Return SMS Number From Twilio
+     * 
+     * @param Request $request
+     * @return type
+     */
+    public function sms(Request $request)
+    {
+        // Handle Facebook Marketplace Request
+        $requestData = $request->all();
+        $request = new SmsMarketplaceRequest($requestData);
+        if ($request->validate()) {
+            // Return Auth
+            return $this->response->item($this->service->sms($request->sms_number), $this->verifyTransformer);
         }
         
         return $this->response->errorBadRequest();
