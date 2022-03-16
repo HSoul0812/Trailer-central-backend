@@ -607,6 +607,7 @@ $api->version('v1', function ($route) {
 
         $route->get('leads', 'App\Http\Controllers\v1\CRM\Leads\LeadController@index');
         $route->post('leads/assign/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@assign');
+        $route->get('leads/first', 'App\Http\Controllers\v1\CRM\Leads\LeadController@first');
         $route->get('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@show')->where('id', '[0-9]+');
         $route->post('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@update')->where('id', '[0-9]+');
         $route->put('leads', 'App\Http\Controllers\v1\CRM\Leads\LeadController@create');
@@ -745,13 +746,13 @@ $api->version('v1', function ($route) {
             |
             |
             */
-            $route->group([
+            /*$route->group([
                 'prefix' => 'import'
             ], function ($route) {
                 $route->get('/', 'App\Http\Controllers\v1\CRM\Leads\LeadImportController@index');
                 $route->put('/', 'App\Http\Controllers\v1\CRM\Leads\LeadImportController@update');
                 $route->delete('/', 'App\Http\Controllers\v1\CRM\Leads\LeadImportController@delete');
-            });
+            });*/
         });
 
         $route->group([
