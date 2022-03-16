@@ -9,13 +9,13 @@ use App\Http\Requests\Marketing\Facebook\ShowMarketplaceRequest;
 use App\Http\Requests\Marketing\Facebook\CreateMarketplaceRequest;
 use App\Http\Requests\Marketing\Facebook\UpdateMarketplaceRequest;
 use App\Http\Requests\Marketing\Facebook\DeleteMarketplaceRequest;
-use App\Http\Requests\Marketing\Facebook\TfaMarketplaceRequest;
+use App\Http\Requests\Marketing\Facebook\StatusMarketplaceRequest;
 use App\Http\Requests\Marketing\Facebook\SmsMarketplaceRequest;
 use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
 use App\Services\Marketing\Facebook\MarketplaceServiceInterface;
 use App\Transformers\CRM\Text\NumberVerifyTransformer;
 use App\Transformers\Marketing\Facebook\MarketplaceTransformer;
-use App\Transformers\Marketing\Facebook\TFATransformer;
+use App\Transformers\Marketing\Facebook\StatusTransformer;
 
 class MarketplaceController extends RestfulControllerV2 {
     /**
@@ -34,9 +34,9 @@ class MarketplaceController extends RestfulControllerV2 {
     private $transformer;
 
     /**
-     * @var App\Transformers\Marketing\Facebook\TFATransformer
+     * @var App\Transformers\Marketing\Facebook\StatusTransformer
      */
-    private $tfaTransformer;
+    private $statusTransformer;
 
     /**
      * @var App\Transformers\CRM\Text\NumberVerifyTransformer
@@ -47,7 +47,7 @@ class MarketplaceController extends RestfulControllerV2 {
         MarketplaceRepositoryInterface $repository,
         MarketplaceServiceInterface $service,
         MarketplaceTransformer $transformer,
-        TFATransformer $tfaTransformer,
+        StatusTransformer $statusTransformer,
         NumberVerifyTransformer $verifyTransformer
     ) {
         $this->middleware('setDealerIdOnRequest')->only(['create', 'update', 'index', 'tfa']);
@@ -55,7 +55,7 @@ class MarketplaceController extends RestfulControllerV2 {
         $this->repository = $repository;
         $this->service = $service;
         $this->transformer = $transformer;
-        $this->tfaTransformer = $tfaTransformer;
+        $this->statusTransformer = $statusTransformer;
         $this->verifyTransformer = $verifyTransformer;
     }
 
@@ -153,19 +153,19 @@ class MarketplaceController extends RestfulControllerV2 {
     }
 
     /**
-     * Return TFA Types for Marketplace
+     * Return Status for Marketplace
      * 
      * @param Request $request
      * @return type
      */
-    public function tfa(Request $request)
+    public function status(Request $request)
     {
-        // Handle Facebook Marketplace TFA Request
+        // Handle Facebook Marketplace Status Request
         $requestData = $request->all();
-        $request = new TfaMarketplaceRequest($requestData);
+        $request = new StatusMarketplaceRequest($requestData);
         if ($request->validate()) {
             // Return Auth
-            return $this->response->collection($this->service->tfa($request->dealer_id), $this->tfaTransformer);
+            return $this->response->collection($this->service->status($request->dealer_id), $this->statusTransformer);
         }
         
         return $this->response->errorBadRequest();
