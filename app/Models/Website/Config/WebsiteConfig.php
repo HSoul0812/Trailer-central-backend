@@ -20,6 +20,7 @@ class WebsiteConfig extends Model
     const GENERAL_HEAD_SCRIPT_KEY = 'general/head_script';
     const CALL_TO_ACTION = 'call-to-action';
     const SHOWROOM_USE_SERIES = 'showroom/use_series';
+    const LEADS_MERGE_ENABLED = 'leads/merge/enabled';
 
     protected $table = 'website_config';
 

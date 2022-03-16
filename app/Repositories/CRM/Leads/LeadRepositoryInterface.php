@@ -2,6 +2,7 @@
 
 namespace App\Repositories\CRM\Leads;
 
+use App\Models\CRM\Leads\Lead;
 use App\Repositories\Repository;
 
 use Illuminate\Database\Eloquent\Collection;
@@ -83,4 +84,10 @@ interface LeadRepositoryInterface extends Repository {
      * @return mixed
      */
     public function getUniqueFullNames(array $params);
+
+    /**
+     * @param array $params
+     * @return Lead|null
+     */
+    public function first(array $params): ?Lead;
 }

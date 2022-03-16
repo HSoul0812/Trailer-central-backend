@@ -20,6 +20,10 @@ return [
     'action' => env('FB_MARKETING_SETTING_ACTION', 'start-script'),
 
 
+    // TTL to Expire for Posting
+    'ttl' => env('FB_MARKETING_SETTING_TTL', ''),
+
+
     // Define Facebook URL's
     'urls' => [
         'cookie' => env('FB_MARKETING_SETTING_URL_COOKIE', 'https://www.facebook.com'),

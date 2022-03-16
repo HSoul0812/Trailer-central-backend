@@ -40,6 +40,10 @@ class LeadRepository implements LeadRepositoryInterface {
             'field' => 'website_lead.date_submitted',
             'direction' => 'DESC'
         ],
+        '-created_at' => [
+            'field' => 'website_lead.date_submitted',
+            'direction' => 'ASC'
+        ],
         'future_due_past_due_no_due' => [
             'field' => 'crm_tc_lead_status.next_contact_date',
             'direction' => 'DESC'
@@ -64,6 +68,9 @@ class LeadRepository implements LeadRepositoryInterface {
         ],
         'created_at' => [
             'name' => 'Most Recently Created'
+        ],
+        '-created_at' => [
+            'name' => 'Least Recently Created'
         ],
         'future_due_past_due_no_due' => [
             'name' => 'Future Due Dates, Past Due Dates, No Due Date'
@@ -92,6 +99,17 @@ class LeadRepository implements LeadRepositoryInterface {
         return Lead::findOrFail($params['id']);
     }
 
+    public function first(array $params): ?Lead
+    {
+        if (empty($params['dealer_id'])) {
+            throw new RepositoryInvalidArgumentException('Dealer Id is required');
+        }
+
+        $query = Lead::query();
+
+        return $query->where('dealer_id', '=', $params['dealer_id'])->orderBy('date_submitted')->first();
+    }
+
     public function getAll($params)
     {
         $query = Lead::where([
@@ -105,14 +123,13 @@ class LeadRepository implements LeadRepositoryInterface {
         /**
          * Filters
          */
-        $query = $this->addFiltersToQuery($query, $params, false, isset($params['sort']));
+        $query = $this->addFiltersToQuery($query, $params);
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
         }
 
         if (isset($params['sort'])) {
-            $query = $query->leftJoin(Interaction::getTableName(), Interaction::getTableName().'.tc_lead_id',  '=', Lead::getTableName().'.identifier');
             $query = $query->orderByRaw($this->sortOrders[$params['sort']]['field'] . ' ' . $this->sortOrders[$params['sort']]['direction']);
         }
 
@@ -135,7 +152,7 @@ class LeadRepository implements LeadRepositoryInterface {
         /**
          * Filters
          */
-        $query = $this->addFiltersToQuery($query, $params, false, isset($params['sort']));
+        $query = $this->addFiltersToQuery($query, $params);
         return $query->first();
     }
 
@@ -399,6 +416,10 @@ class LeadRepository implements LeadRepositoryInterface {
             $query = $query->leftJoin(LeadStatus::getTableName(), Lead::getTableName().'.identifier', '=', LeadStatus::getTableName().'.tc_lead_identifier');
         }
 
+        if (!$noInteractionJoin) {
+            $this->joinInteraction($query);
+        }
+
         if (isset($filters['search_term'])) {
             $query = $this->addSearchToQuery($query, $filters['search_term']);
         }
@@ -417,10 +438,6 @@ class LeadRepository implements LeadRepositoryInterface {
 
         if (isset($filters['next_contact_to'])) {
             $query = $this->addNextContactToToQuery($query, TimeUtil::convertTimeFormat($filters['next_contact_to'], TimeUtil::REQUEST_TIME_FORMAT, TimeUtil::MYSQL_TIME_FORMAT));
-        }
-
-        if((isset($filters['interacted_from']) || isset($filters['interacted_to'])) && !$noInteractionJoin) {
-            $this->joinInteraction($query);
         }
 
         if (isset($filters['interacted_from'])) {
@@ -544,15 +561,20 @@ class LeadRepository implements LeadRepositoryInterface {
     private function addSearchToQuery($query, string $search) {
         $query = $query->leftJoin(Inventory::getTableName(), Inventory::getTableName().'.inventory_id',  '=', Lead::getTableName().'.inventory_id');
 
-        return $query->where(function($q) use ($search) {
+        $leadTableName = Lead::getTableName();
+
+        return $query->where(function($q) use ($search, $leadTableName) {
             $q->where(Lead::getTableName().'.title', 'LIKE', '%' . $search . '%')
                     ->orWhere(Lead::getTableName().'.first_name', 'LIKE', '%' . $search . '%')
                     ->orWhere(Lead::getTableName().'.last_name', 'LIKE', '%' . $search . '%')
+                    ->orWhereRaw("CONCAT_WS('', REPLACE({$leadTableName}.first_name, ' ', ''), REPLACE({$leadTableName}.last_name, ' ', '')) LIKE ?", '%' . str_replace(' ', '', $search) . '%')
                     ->orWhere(Lead::getTableName().'.email_address', 'LIKE', '%' . $search . '%')
-                    ->orWhere(Lead::getTableName().'.phone_number', 'LIKE', '%' . $search . '%')
                     ->orWhere(Inventory::getTableName().'.title', 'LIKE', '%' . $search . '%')
                     ->orWhere(Inventory::getTableName().'.stock', 'LIKE', '%' . $search . '%');
 
+            if (preg_match('/[0-9]{6,}/', str_replace([' ', '-', '(', ')'], '', $search))) {
+                $q->orWhereRaw("REPLACE(REPLACE(REPLACE(REPLACE($leadTableName.phone_number, ' ', ''), '-', ''), '(', ''), ')', '') LIKE ?", '%' . str_replace([' ', '-', '(', ')'], '', $search) . '%');
+            }
         });
     }
 

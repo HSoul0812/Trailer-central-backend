@@ -95,7 +95,7 @@ class MarketplaceService implements MarketplaceServiceInterface
             $this->filters->deleteAll($marketplace->id);
 
             // Create All Filters
-            if($params['filters'] && is_array($params['filters'])) {
+            if(isset($params['filters']) && is_array($params['filters'])) {
                 foreach($params['filters'] as $filter) {
                     $this->filters->create([
                         'marketplace_id' => $marketplace->id,
