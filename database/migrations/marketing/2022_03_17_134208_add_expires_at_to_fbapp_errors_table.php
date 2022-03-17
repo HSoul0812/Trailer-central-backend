@@ -35,6 +35,7 @@ class AddExpiresAtToFbappErrorsTable extends Migration
     public function down()
     {
         Schema::table('fbapp_errors', function (Blueprint $table) {
+            $table->dropIndex('fbapp_errors_marketplace_id_dismissed_index');
             $table->dropColumn('dismissed');
             $table->dropColumn('expires_at');
         });
