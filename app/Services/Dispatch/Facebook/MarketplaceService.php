@@ -6,6 +6,7 @@ use App\Models\User\AuthToken;
 use App\Models\User\Integration\Integration;
 use App\Models\Marketing\Facebook\Marketplace;
 use App\Models\Marketing\Facebook\Listings;
+use App\Models\Marketing\Facebook\Error;
 use App\Repositories\Marketing\TunnelRepositoryInterface;
 use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
 use App\Repositories\Marketing\Facebook\ListingRepositoryInterface;
