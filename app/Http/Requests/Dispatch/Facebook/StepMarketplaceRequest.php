@@ -14,9 +14,10 @@ class StepMarketplaceRequest extends Request {
 
     protected $rules = [
         'step' => 'required|string',
-        'action' => 'required|in:choose,create,update,delete',
+        'action' => 'required|in:choose,create,update,delete,error',
         'inventory_id' => 'nullable|inventory_valid',
         'logs' => 'nullable|json',
+        'msg' => 'nullable|string'
     ];
 
 }

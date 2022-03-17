@@ -23,11 +23,46 @@ class Error extends Model
      * @const array Account Types
      */
     const ERROR_TYPES = [
-        'login' => 'Invalid Credentials',
-        'blocked-account' => 'Account Blocked',
-        'blocked-marketplace' => 'Marketplace Blocked',
-        'failed-post' => 'Inventory Failed to Post'
+        'unknown' => 'Unknown Error',
+        'login-invalid' => 'Invalid Credentials',
+        'email-verification' => 'Email Verification',
+        'two-factor-auth' => 'Invalid Two-Factor Credentials',
+        'two-factor-failed' => 'Two-Factor Failed',
+        'account-disabled' => 'Account Disabled',
+        'marketplace-blocked' => 'Marketplace Blocked',
+        'final-account-review' => 'Marketplace Permanently Blocked',
+        'failed-post' => 'Inventory Failed to Post',
+        'flagged-post' => 'Inventory Post Was Flagged'
     ];
+
+    /**
+     * @const Error Type Default
+     */
+    const ERROR_TYPE_DEFAULT = 'unknown';
+
+
+    /**
+     * @const Expiry Hours
+     */
+    const EXPIRY_HOURS = [
+        'email-verification' => 2,
+        'two-factor-auth' => 1,
+        'two-factor-failed' => 1,
+        'account-disabled' => 24 * 7,
+        'marketplace-blocked' => 24 * 7,
+        'final-account-review' => 24 * 30 * 12 * 7
+    ];
+
+    /**
+     * @const Expiry Hours Default
+     */
+    const EXPIRY_HOURS_DEFAULT = 24;
+
+
+    /**
+     * @const Ignore Expired Status
+     */
+    const EXPIRED_IGNORE = '0';
 
 
     /**
@@ -51,6 +86,8 @@ class Error extends Model
         'action',
         'step',
         'error_type',
-        'error_message'
+        'error_message',
+        'dismissed',
+        'expires_at'
     ];
 }

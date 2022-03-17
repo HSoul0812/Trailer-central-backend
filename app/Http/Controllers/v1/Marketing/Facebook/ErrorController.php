@@ -4,20 +4,15 @@ namespace App\Http\Controllers\v1\Marketing\Facebook;
 
 use App\Http\Controllers\RestfulControllerV2;
 use Dingo\Api\Http\Request;
-use App\Http\Requests\Marketing\Facebook\GetMarketplaceRequest;
-use App\Http\Requests\Marketing\Facebook\ShowMarketplaceRequest;
-use App\Http\Requests\Marketing\Facebook\CreateMarketplaceRequest;
+use App\Http\Requests\Marketing\Facebook\CreateMarketplaceErrorRequest;
 use App\Http\Requests\Marketing\Facebook\UpdateMarketplaceRequest;
 use App\Http\Requests\Marketing\Facebook\DeleteMarketplaceRequest;
 use App\Http\Requests\Marketing\Facebook\StatusMarketplaceRequest;
 use App\Http\Requests\Marketing\Facebook\SmsMarketplaceRequest;
-use App\Http\Requests\Marketing\Facebook\DismissErrorRequest;
 use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
-use App\Repositories\Marketing\Facebook\ErrorRepositoryInterface;
 use App\Services\Marketing\Facebook\MarketplaceServiceInterface;
 use App\Transformers\CRM\Text\NumberVerifyTransformer;
 use App\Transformers\Marketing\Facebook\MarketplaceTransformer;
-use App\Transformers\Marketing\Facebook\ErrorTransformer;
 use App\Transformers\Marketing\Facebook\StatusTransformer;
 
 class MarketplaceController extends RestfulControllerV2 {
@@ -42,11 +37,6 @@ class MarketplaceController extends RestfulControllerV2 {
     private $statusTransformer;
 
     /**
-     * @var App\Transformers\Marketing\Facebook\ErrorTransformer
-     */
-    private $errorTransformer;
-
-    /**
      * @var App\Transformers\CRM\Text\NumberVerifyTransformer
      */
     private $verifyTransformer;
@@ -54,20 +44,16 @@ class MarketplaceController extends RestfulControllerV2 {
     public function __construct(
         MarketplaceRepositoryInterface $repository,
         MarketplaceServiceInterface $service,
-        ErrorRepositoryInterface $errors,
         MarketplaceTransformer $transformer,
         StatusTransformer $statusTransformer,
-        ErrorTransformer $errorTransformer,
         NumberVerifyTransformer $verifyTransformer
     ) {
         $this->middleware('setDealerIdOnRequest')->only(['create', 'update', 'index', 'tfa']);
 
         $this->repository = $repository;
         $this->service = $service;
-        $this->errors = $errors;
         $this->transformer = $transformer;
         $this->statusTransformer = $statusTransformer;
-        $this->errorTransformer = $errorTransformer;
         $this->verifyTransformer = $verifyTransformer;
     }
 
@@ -197,25 +183,6 @@ class MarketplaceController extends RestfulControllerV2 {
         if ($request->validate()) {
             // Return Auth
             return $this->response->item($this->service->sms($request->sms_number), $this->verifyTransformer);
-        }
-        
-        return $this->response->errorBadRequest();
-    }
-
-    /**
-     * Dismiss Error for Marketplace
-     * 
-     * @param Request $request
-     * @return type
-     */
-    public function dismiss(Request $request)
-    {
-        // Handle Dismiss Facebook Marketplace Error Request
-        $requestData = $request->all();
-        $request = new DismissErrorRequest($requestData);
-        if ($request->validate()) {
-            // Return Auth
-            return $this->response->item($this->errors->dismiss($request->marketplace_id, $request->error_id), $this->errorTransformer);
         }
         
         return $this->response->errorBadRequest();

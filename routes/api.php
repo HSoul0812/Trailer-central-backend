@@ -1059,6 +1059,7 @@ $api->version('v1', function ($route) {
                 $route->get('{id}', 'App\Http\Controllers\v1\Marketing\Facebook\MarketplaceController@show')->where('id', '[0-9]+');
                 $route->put('{id}', 'App\Http\Controllers\v1\Marketing\Facebook\MarketplaceController@update')->where('id', '[0-9]+');
                 $route->delete('{id}', 'App\Http\Controllers\v1\Marketing\Facebook\MarketplaceController@destroy')->where('id', '[0-9]+');
+                $route->put('{id}/dismiss', 'App\Http\Controllers\v1\Marketing\Facebook\MarketplaceController@dismiss')->where('id', '[0-9]+');
             });
         });
     });
