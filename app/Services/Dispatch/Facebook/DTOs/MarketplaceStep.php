@@ -5,6 +5,7 @@ namespace App\Services\Dispatch\Facebook\DTOs;
 use App\Models\Marketing\Facebook\Error;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
 /**
