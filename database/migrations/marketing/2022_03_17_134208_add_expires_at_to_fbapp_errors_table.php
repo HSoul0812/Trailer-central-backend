@@ -24,7 +24,7 @@ class AddExpiresAtToFbappErrorsTable extends Migration
         });
 
         // Update Columns
-        DB::statement("ALTER TABLE `fbapp_errors` MODIFY COLUMN `error_type` ENUM(" . array_keys(Error::ERROR_TYPES) . ")");     
+        DB::statement("ALTER TABLE `fbapp_errors` MODIFY COLUMN `error_type` ENUM(" . implode(", ", array_keys(Error::ERROR_TYPES)) . ")");
     }
 
     /**
