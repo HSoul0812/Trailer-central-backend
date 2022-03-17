@@ -20,7 +20,7 @@ class AddExpiresAtToFbappErrorsTable extends Migration
             $table->timestamp('expires_at')->nullable()->index()->after('dismissed');
 
             // Create Index
-            $this->index(['marketplace_id', 'dismissed']);
+            $table->index(['marketplace_id', 'dismissed']);
         });
 
         // Update Columns
