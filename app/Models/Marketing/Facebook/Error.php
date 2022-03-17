@@ -90,4 +90,16 @@ class Error extends Model
         'dismissed',
         'expires_at'
     ];
+
+
+    public function getErrorDescAttribute(): string {
+        // Get Error Description
+        $type = $this->error_type;
+        if(!isset(self::ERROR_TYPES[$type])) {
+            $type = self::ERROR_TYPE_DEFAULT;
+        }
+
+        // Return Error Type Description
+        return self::ERROR_TYPES[$type];
+    }
 }
