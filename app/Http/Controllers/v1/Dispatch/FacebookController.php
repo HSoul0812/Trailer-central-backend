@@ -15,7 +15,6 @@ use App\Services\Dispatch\Facebook\DTOs\MarketplaceStep;
 use App\Services\Dispatch\Facebook\MarketplaceServiceInterface;
 use App\Transformers\Marketing\Facebook\MarketplaceTransformer;
 use App\Transformers\Marketing\Facebook\ListingTransformer;
-use App\Transformers\Dispatch\Facebook\VerifyTransformer;
 use App\Transformers\Dispatch\Facebook\DealerTransformer;
 use App\Transformers\Dispatch\Facebook\StatusTransformer;
 use App\Transformers\Dispatch\Facebook\StepTransformer;
@@ -51,11 +50,6 @@ class FacebookController extends RestfulControllerV2 {
     private $listingTransformer;
 
     /**
-     * @var VerifyTransformer
-     */
-    private $verifyTransformer;
-
-    /**
      * @var StatusTransformer
      */
     private $statusTransformer;
@@ -75,7 +69,6 @@ class FacebookController extends RestfulControllerV2 {
         MarketplaceServiceInterface $service,
         MarketplaceTransformer $transformer,
         DealerTransformer $dealerTransformer,
-        VerifyTransformer $verifyTransformer,
         ListingTransformer $listingTransformer,
         StatusTransformer $statusTransformer,
         StepTransformer $stepTransformer,
@@ -86,7 +79,6 @@ class FacebookController extends RestfulControllerV2 {
 
         $this->transformer = $transformer;
         $this->dealerTransformer = $dealerTransformer;
-        $this->verifyTransformer = $verifyTransformer;
         $this->listingTransformer = $listingTransformer;
         $this->statusTransformer = $statusTransformer;
         $this->stepTransformer = $stepTransformer;
