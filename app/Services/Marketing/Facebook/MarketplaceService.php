@@ -11,6 +11,7 @@ use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Services\CRM\Text\TextServiceInterface; 
 use App\Services\Marketing\Facebook\DTOs\TfaType;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class MarketplaceService
