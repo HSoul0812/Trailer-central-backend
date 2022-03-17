@@ -12,7 +12,7 @@ use App\Http\Requests\Request;
  */
 class DismissErrorRequest extends Request {
     protected $rules = [
-        'marketplace_id' => 'required|int',
+        'id' => 'required|int',
         'error_id' => 'nullable|int'
     ];
 }

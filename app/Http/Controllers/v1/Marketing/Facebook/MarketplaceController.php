@@ -205,13 +205,15 @@ class MarketplaceController extends RestfulControllerV2 {
     /**
      * Dismiss Error for Marketplace
      * 
+     * @param int $id
      * @param Request $request
      * @return type
      */
-    public function dismiss(Request $request)
+    public function dismiss(int $id, Request $request)
     {
         // Handle Dismiss Facebook Marketplace Error Request
         $requestData = $request->all();
+        $requestData['id'] = $id;
         $request = new DismissErrorRequest($requestData);
         if ($request->validate()) {
             // Return Auth
