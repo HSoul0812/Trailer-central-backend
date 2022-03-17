@@ -217,7 +217,7 @@ class MarketplaceController extends RestfulControllerV2 {
         $request = new DismissErrorRequest($requestData);
         if ($request->validate()) {
             // Return Auth
-            return $this->response->item($this->errors->dismiss($request->marketplace_id, $request->error_id), $this->errorTransformer);
+            return $this->response->item($this->errors->dismiss($request->id, $request->error_id), $this->errorTransformer);
         }
         
         return $this->response->errorBadRequest();
