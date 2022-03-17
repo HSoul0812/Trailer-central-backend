@@ -17,7 +17,8 @@ class StepMarketplaceRequest extends Request {
         'action' => 'required|in:choose,create,update,delete,error',
         'inventory_id' => 'nullable|inventory_valid',
         'logs' => 'nullable|json',
-        'msg' => 'nullable|string'
+        'error' => 'nullable|string',
+        'message' => 'nullable|string'
     ];
 
 }
