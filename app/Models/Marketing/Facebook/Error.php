@@ -64,6 +64,11 @@ class Error extends Model
      */
     const EXPIRED_IGNORE = '0';
 
+    /**
+     * @const Follow Expired Status
+     */
+    const EXPIRED_FOLLOW = '1';
+
 
     /**
      * @var string

@@ -89,8 +89,13 @@ class ErrorRepository implements ErrorRepositoryInterface {
         }
         $query = $query->where('dismissed', $params['dismissed']);
 
-        // Get Expired At Limit?
-        if(isset($params['expired_status']) || $params['expired_status'] !== Error::EXPIRED_IGNORE) {
+        // Get Expired At Default
+        if(!isset($params['expired_status'])) {
+            $params['expired_status'] = Error::EXPIRED_FOLLOW;
+        }
+
+        // Include Expired Check?
+        if($params['expired_status'] !== Error::EXPIRED_IGNORE) {
             $query = $query->where('expires_at', '<', DB::raw('NOW()'));
         }
 
