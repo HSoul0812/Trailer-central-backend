@@ -42,17 +42,22 @@ class InventoryTransformer extends TransformerAbstract
             $return['links'][] = ['url' => $inventory->viewUrl, 'type' => 'view'];
         }
 
-        // Manage URL Exists?
-        if($inventory->manageUrl) {
-            $return['links'][] = ['url' => $inventory->manageUrl, 'type' => 'manage'];
-        }
-
         // Is Scheduler?
         if($inventory->isScheduler()) {
             unset($return['status']);
+
+            // Manage URL Exists?
+            if($inventory->craigslistId) {
+                $return['links'][] = ['url' => ClappInventory::CLAPP_LINK_NOTICE, 'type' => 'edit'];
+            }
         } else {
             unset($return['next_scheduled']);
             unset($return['queue_id']);
+
+            // Manage URL Exists?
+            if($inventory->manageUrl) {
+                $return['links'][] = ['url' => $inventory->manageUrl, 'type' => 'manage'];
+            }
         }
 
         // Return Result
