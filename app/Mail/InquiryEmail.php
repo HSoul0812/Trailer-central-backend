@@ -43,6 +43,8 @@ class InquiryEmail extends Mailable
         $from = config('mail.from.address', 'noreply@trailercentral.com');
 
         $build = $this->from($from, $this->data['fromName']);
+            
+        $build->replyTo($this->data['email'], $this->data['fullName']);
 
         $build->view('emails.leads.inquiry.' . $this->data['inquiryView'])
               ->text('emails.leads.inquiry.' . $this->data['inquiryView'] . '-plain');
