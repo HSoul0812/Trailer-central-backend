@@ -3,6 +3,7 @@
 namespace App\Repositories\Marketing\Facebook;
 
 use App\Exceptions\NotImplementedException;
+use App\Models\Marketing\Facebook\Error;
 use App\Models\Marketing\Facebook\Listings;
 use App\Models\Marketing\Facebook\Marketplace;
 use App\Repositories\Traits\SortTrait;
@@ -117,7 +118,7 @@ class MarketplaceRepository implements MarketplaceRepositoryInterface {
                             ->leftJoin(Listings::getTableName(),
                                         Listings::getTableName() . '.marketplace_id', '=',
                                         Marketplace::getTableName() . '.id');
-var_dump($params);
+
         if (!isset($params['per_page'])) {
             $params['per_page'] = 100;
         }
