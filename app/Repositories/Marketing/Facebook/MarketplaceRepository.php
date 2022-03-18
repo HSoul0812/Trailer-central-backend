@@ -140,7 +140,7 @@ class MarketplaceRepository implements MarketplaceRepositoryInterface {
         }
 
         // Skip Integrations With Non-Expired Errors
-        if (!empty($params['skip_errors'])) {
+        if (isset($params['skip_errors'])) {
             $query = $query->leftJoin(Error::getTableName(),
                                         Error::getTableName() . '.marketplace_id', '=',
                                         Marketplace::getTableName() . '.id')
