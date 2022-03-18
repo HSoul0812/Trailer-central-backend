@@ -9,6 +9,7 @@ use App\Models\Marketing\Facebook\Marketplace;
 use App\Repositories\Traits\SortTrait;
 use App\Traits\Repository\Transaction;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Builder;
 
 class MarketplaceRepository implements MarketplaceRepositoryInterface {
     use SortTrait, Transaction;
