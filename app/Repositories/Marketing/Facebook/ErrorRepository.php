@@ -3,6 +3,7 @@
 namespace App\Repositories\Marketing\Facebook;
 
 use App\Exceptions\NotImplementedException;
+use App\Exceptions\Marketing\Facebook\NoMarketplaceErrorToDismissException;
 use App\Models\Marketing\Facebook\Error;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Support\Facades\DB;
@@ -129,7 +130,8 @@ class ErrorRepository implements ErrorRepositoryInterface {
      * 
      * @param int $marketplaceId
      * @param int|null $errorId
-     * @param Error|null
+     * @return Error|null
+     * @throw NoMarketplaceErrorToDismissException
      */
     public function dismiss(int $marketplaceId, ?int $errorId = null): ?Error {
         // Get Single Error
@@ -157,7 +159,9 @@ class ErrorRepository implements ErrorRepositoryInterface {
                 'dismissed' => 1
             ]);
         }
-        return null;
+
+        // Throw Exception
+        throw new NoMarketplaceErrorToDismissException;
     }
 
     protected function getSortOrders() {
