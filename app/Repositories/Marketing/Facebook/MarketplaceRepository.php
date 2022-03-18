@@ -117,7 +117,7 @@ class MarketplaceRepository implements MarketplaceRepositoryInterface {
                             ->leftJoin(Listings::getTableName(),
                                         Listings::getTableName() . '.marketplace_id', '=',
                                         Marketplace::getTableName() . '.id');
-
+var_dump($params);
         if (!isset($params['per_page'])) {
             $params['per_page'] = 100;
         }
