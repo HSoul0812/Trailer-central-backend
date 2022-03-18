@@ -97,7 +97,7 @@ class ErrorRepository implements ErrorRepositoryInterface {
 
         // Include Expired Check?
         if($params['expired_status'] !== Error::EXPIRED_IGNORE) {
-            $query = $query->where('expires_at', '<', DB::raw('NOW()'));
+            $query = $query->where('expires_at', '>', DB::raw('NOW()'));
         }
 
         // Set Sort Query
