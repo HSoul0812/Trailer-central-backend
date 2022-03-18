@@ -139,6 +139,20 @@ class MarketplaceRepository implements MarketplaceRepositoryInterface {
             $query = $query->whereNotIn(Marketplace::getTableName() . '.id', $params['exclude']);
         }
 
+        // Skip Integrations With Non-Expired Errors
+        if (!empty($params['skip_errors'])) {
+            $query = $query->leftJoin(Error::getTableName(),
+                                        Error::getTableName() . '.marketplace_id', '=',
+                                        Marketplace::getTableName() . '.id')
+            ->where(function(Builder $query) {
+                return $query->whereNull(Error::getTableName().'.id')
+                              ->orWhere(function(Builder $query) {
+                    return $query->where(Error::getTableName().'.dismissed', 0)
+                                 ->where(Error::getTableName().'.expires_at', '>', DB::raw('NOW()'));
+                });
+            });
+        }
+
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
         }

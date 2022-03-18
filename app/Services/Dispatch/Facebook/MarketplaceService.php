@@ -283,7 +283,8 @@ class MarketplaceService implements MarketplaceServiceInterface
 
         $integrations = $this->marketplace->getAll([
             'sort' => '-imported',
-            'exclude' => $runningIntegrationIds
+            'exclude' => $runningIntegrationIds,
+            'skip_errors' => 1
         ]);
 
         // Loop Facebook Integrations
