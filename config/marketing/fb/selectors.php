@@ -19,8 +19,10 @@ return [
     // Login Selectors
     'login' => [
         'email' => env('FB_MARKETING_SELECTORS_LOGIN_EMAIL', '#email'),
-        'password' => env('FB_MARKETING_SELECTORS_LOGIN_PASS', '#password'),
-        'loginButton' => env('FB_MARKETING_SELECTORS_LOGIN_BTN', '#loginButton')
+        'password' => env('FB_MARKETING_SELECTORS_LOGIN_PASS', '#pass'),
+        'loginButton' => env('FB_MARKETING_SELECTORS_LOGIN_BTN', '#loginbutton'),
+        'detectIncorrectPassText' => env('FB_MARKETING_SELECTORS_DETECT_INVALID_PASS', 'div:contains(\'The password you\'ve entered is incorrect.\')'),
+        'detectEmaiilValidationText' =>  env('FB_MARKETING_SELECTORS_DETECT_EMAIL_VERIFY', 'div:contains(\'Enter security code\')')
     ],
 
     // Listing
