@@ -151,6 +151,11 @@ class MarketplaceStep
      * @return Collection<MarketplaceLog>
      */
     public function getLogs(): Collection {
+        // No Logs to Send
+        if(empty($this->logs)) {
+            return new Collection();
+        }
+
         // Get Logs Array
         $logs = json_decode($this->logs);
 
