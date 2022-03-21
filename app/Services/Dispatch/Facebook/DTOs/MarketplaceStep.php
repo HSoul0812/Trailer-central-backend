@@ -51,10 +51,16 @@ class MarketplaceStep
      */
     const DEFAULT_SELECTORS = 'common';
 
+
     /**
      * @const string
      */
     const STEP_LOGIN = 'login-fb';
+
+    /**
+     * @const string
+     */
+    const STEP_LOGGED_IN = 'goto-marketing';
 
     /**
      * @const string
@@ -224,13 +230,23 @@ class MarketplaceStep
     }
 
     /**
-     * Is a Login Step?
+     * Is Login Step?
      * 
      * @return bool
      */
     public function isLogin(): bool
     {
         return ($this->step === self::STEP_LOGIN);
+    }
+
+    /**
+     * Is Logged In?
+     * 
+     * @return bool
+     */
+    public function isLoggedIn(): bool
+    {
+        return ($this->step === self::STEP_LOGGED_IN);
     }
 
     /**

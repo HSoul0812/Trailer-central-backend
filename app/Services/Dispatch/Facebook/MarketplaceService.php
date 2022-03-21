@@ -245,7 +245,7 @@ class MarketplaceService implements MarketplaceServiceInterface
 
         try {
             // add marketplace_id to session
-            if ($step->isLogin()) {
+            if ($step->isLoggedIn()) {
                 $this->postingSession->create([
                     'id' => $step->marketplaceId
                 ]);
