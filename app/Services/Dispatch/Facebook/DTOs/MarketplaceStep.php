@@ -163,7 +163,7 @@ class MarketplaceStep
         $logging = new Collection();
         foreach($logs as $log) {
             $logging->push(new MarketplaceLog([
-                'psr' => $log->loggerName ?? 'debug',
+                'psr' => $log->loggerType ?? 'debug',
                 'message' => is_array($log->logMessage) ? print_r($log->logMessage, true) : $log->logMessage,
                 'date' => $log->date
             ]));
