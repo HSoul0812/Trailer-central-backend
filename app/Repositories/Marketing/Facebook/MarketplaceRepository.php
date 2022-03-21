@@ -150,7 +150,7 @@ class MarketplaceRepository implements MarketplaceRepositoryInterface {
                 return $query->whereNull(Error::getTableName().'.id')
                               ->orWhere(function(Builder $query) {
                     return $query->where(Error::getTableName().'.dismissed', 0)
-                                 ->where(Error::getTableName().'.expires_at', '>', DB::raw('NOW()'));
+                                 ->where(Error::getTableName().'.expires_at', '<', DB::raw('NOW()'));
                 });
             });
         }
