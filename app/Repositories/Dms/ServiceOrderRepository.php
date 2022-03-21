@@ -137,7 +137,11 @@ class ServiceOrderRepository implements ServiceOrderRepositoryInterface
 
                     break;
                 case ServiceOrder::SERVICE_ORDER_COMPLETED:
-                    $query = $query->whereIn('status', ['picked_up', 'ready_for_pickup']);
+                    $query = $query->whereIn('status', [
+                        'picked_up',
+                        'ready_for_pickup',
+                        ServiceOrder::STATUS_ONLY_READY_FOR_PICKUP
+                    ]);
 
                     break;
                 case ServiceOrder::SERVICE_ORDER_NOT_COMPLETED:
