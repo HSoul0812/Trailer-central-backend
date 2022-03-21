@@ -24,6 +24,7 @@ class Error extends Model
      */
     const ERROR_TYPES = [
         'unknown' => 'Unknown Error',
+        'missing-inventory' => 'Missing Inventory on Integration',
         'login-invalid' => 'Invalid Credentials',
         'email-verification' => 'Email Verification',
         'two-factor-auth' => 'Invalid Two-Factor Credentials',
@@ -45,6 +46,7 @@ class Error extends Model
      * @const Expiry Hours
      */
     const EXPIRY_HOURS = [
+        'missing-inventory' => 6,
         'email-verification' => 2,
         'two-factor-auth' => 1,
         'two-factor-failed' => 1,
