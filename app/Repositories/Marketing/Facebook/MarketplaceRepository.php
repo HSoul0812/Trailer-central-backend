@@ -10,6 +10,7 @@ use App\Repositories\Traits\SortTrait;
 use App\Traits\Repository\Transaction;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class MarketplaceRepository implements MarketplaceRepositoryInterface {
     use SortTrait, Transaction;
