@@ -393,6 +393,9 @@ class MarketplaceService implements MarketplaceServiceInterface
     private function reportError(MarketplaceStep $step): ?Error {
         // Create New FB Error From Returned Step Details
         if($step->isError()) {
+            // Dismiss Existing Errors
+            $this->errors->dismissAll($step->marketplaceId);
+
             // Return Error
             return $this->errors->create([
                 'marketplace_id' => $step->marketplaceId,

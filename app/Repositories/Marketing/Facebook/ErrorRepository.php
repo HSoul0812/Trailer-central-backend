@@ -164,6 +164,29 @@ class ErrorRepository implements ErrorRepositoryInterface {
         throw new NoMarketplaceErrorToDismissException;
     }
 
+    /**
+     * Dismiss All Errors on Marketplace Integration
+     * 
+     * @param int $marketplaceId
+     * @return Collection<Error>
+     */
+    public function dismissAll(int $marketplaceId): Collection {
+        // Get Errors
+        $errors = $this->getAll(['marketplace_id' => $marketplaceId]);
+
+        // Get First
+        $collection = new Collection();
+        foreach($errors as $error) {
+            $collection->push($this->update([
+                'id' => $error->id,
+                'dismissed' => 1
+            ]));
+        }
+
+        // Return Error
+        return $collection;
+    }
+
     protected function getSortOrders() {
         return $this->sortOrders;
     }
