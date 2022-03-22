@@ -143,10 +143,11 @@ class MarketplaceRepository implements MarketplaceRepositoryInterface {
 
         // Skip Integrations With Non-Expired Errors
         if (isset($params['skip_errors'])) {
-            $query = $query->leftJoin(Error::getTableName(),
-                                        Error::getTableName() . '.marketplace_id', '=',
+            $query = $query->leftJoin(Error::getTableName(), function($join) {
+                $join->on(Error::getTableName() . '.marketplace_id', '=',
                                         Marketplace::getTableName() . '.id')
-            ->where(function(Builder $query) {
+                     ->whereNull(Error::getTableName().'.inventory_id');
+            })->where(function(Builder $query) {
                 return $query->whereNull(Error::getTableName().'.id')
                               ->orWhere(function(Builder $query) {
                     return $query->where(Error::getTableName().'.dismissed', 0)
