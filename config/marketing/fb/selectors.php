@@ -42,10 +42,17 @@ return [
 
     // Posting
     'posting' => [
+        // Common Selectors for Posting
+        'common' => [
+            'closeFormButton' => env('FB_MARKETING_SELECTORS_POSTING_CLOSE_BUTTON', '[aria-label="Close"]'),
+            'leavePageButton' => env('FB_MARKETING_SELECTORS_POSTING_LEAVE_BUTTON', '[aria-label="Leave Page"]')
+        ],
+
         // Vehicle Posting
         'vehicle' => [
             'vehicleTypeDropdown' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_TYPE', '[aria-label="Vehicle type"]'),
             'vehicleTypeOptionsParent' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_MENU', 'div[role="menu"] span'),
+            'vehicleTypeOptions' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_TYPES', 'div[role="option"] span'),
             'vehicleType1' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_TYPE_1', 'div[role="option"]:nth-child(1) span'),
             'vehicleType2' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_TYPE_2', 'div[role="option"]:nth-child(2) span'),
             'vehicleType3' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_TYPE_3', 'div[role="option"]:nth-child(3) span'),
@@ -77,6 +84,7 @@ return [
             'vehicleLocationInput' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_LOCATION_INPUT', '[aria-label="Location"] input'),
             'vehicleSearchFirstOption' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_LOCATION_FIRST_OPTION', '[role="option"] span'),
 
+            'vehicleNextDisabledButton' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_NEXT_DISABLED_BUTTON', '[aria-label="Next"][aria-disabled="true"]'),
             'vehicleNextButton' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_NEXT_BUTTON', '[aria-label="Next"]'),
             'vehiclePublishButton' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_PUBLISH_BUTTON', '[aria-label="Publish"]'),
 

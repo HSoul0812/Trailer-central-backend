@@ -20,6 +20,7 @@ return [
         'goto-marketing',
         'goto-new-listing',
         'start-posting',
+        'skip-posting',
         'get-listing-id',
         'close-and-clear-cookies'
     ])),
@@ -34,7 +35,8 @@ return [
         'login-validate' => env('FB_MARKETING_STEP_SELECTORS_LOGIN_VALIDATE', 'common,login'),
         'goto-marketing' => env('FB_MARKETING_STEP_SELECTORS_MARKETPLACE', 'common,listings'),
         'goto-new-listing' => env('FB_MARKETING_STEP_SELECTORS_NEW_LISTING', 'common,listings'),
-        'start-posting' => env('FB_MARKETING_STEP_SELECTORS_POSTING', 'common,posting.vehicle'),
+        'start-posting' => env('FB_MARKETING_STEP_SELECTORS_POSTING', 'common,posting.common,posting.vehicle'),
+        'skip-posting' => env('FB_MARKETING_STEP_SELECTORS_POSTING_SKIP', 'common,posting.common'),
         'get-listing-id' => env('FB_MARKETING_STEP_SELECTORS_LISTING_ID', 'common,listings'),
         'close-and-clear-cookies' => env('FB_MARKETING_STEP_SELECTORS_CLOSE', 'common')
     ],
@@ -50,6 +52,7 @@ return [
         'goto-marketing' => env('FB_MARKETING_STEP_LOG_MARKETING', 'Validating we can posting to Facebook Marketplace.'),
         'goto-new-listing' => env('FB_MARKETING_STEP_LOG_NEW_LISTING', 'Preparing to create a new listing with the ID #:inventoryId.'),
         'start-posting' => env('FB_MARKETING_STEP_LOG_POSTING', 'Starting posting to :action a listing with the ID #:inventoryId.'),
+        'skip-posting' => env('FB_MARKETING_STEP_LOG_POSTING_SKIP', 'An error occured trying to :action a listing with the ID #:inventoryId, skipping to next item.'),
         'get-listing-id' => env('FB_MARKETING_STEP_LOG_LISTING_ID', 'Successfully :actiond a listing with the ID #:inventoryId, getting facebook listing id.'),
         'close-and-clear-cookies' => env('FB_MARKETING_STEP_LOG_CLOSE', 'Finished posting all inventory for the current dealer integration, moving to next one.')
     ]

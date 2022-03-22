@@ -191,12 +191,18 @@ class MarketplaceService implements MarketplaceServiceInterface
      * @param int $dealerId
      * @return Collection<TfaType>
      */
-    public function tfa(int $dealerId): Collection {
+    public function status(int $dealerId): Collection {
         // Initialize Collection
         $tfaTypes = new Collection();
 
         // Loop Through TFA Types
+        $types = explode(",", config('marketing.fb.settings.fields.tfa_types', ''));
         foreach(Marketplace::TFA_TYPES_ACTIVE as $code) {
+            // Skip If Not in Active TFA Types
+            if(!in_array($code, $types)) {
+                continue;
+            }
+
             // Get Autocomplete
             $autocomplete = null;
             if($code === TfaType::TYPE_SMS) {
@@ -211,8 +217,11 @@ class MarketplaceService implements MarketplaceServiceInterface
             ]));
         }
 
-        // Return Collection<TfaType>
-        return $tfaTypes;
+        // Return MarketplaceStatus
+        return new MarketplaceStatus([
+            'page_url' => config('marketing.fb.settings.fields.page_url', false),
+            'tfa_types' => new Collection($tfaTypes)
+        ]);
     }
 
     /**

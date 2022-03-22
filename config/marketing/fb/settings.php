@@ -29,5 +29,14 @@ return [
         'cookie' => env('FB_MARKETING_SETTING_URL_COOKIE', 'https://www.facebook.com'),
         'login' => env('FB_MARKETING_SETTING_URL_LOGIN', 'https://www.facebook.com/login'),
         'createVehicle' => env('FB_MARKETING_SETTING_URL_VEHICLE', 'https://www.facebook.com/marketplace/create/vehicle')
+    ],
+
+
+    // Active Fields
+    'fields' => [
+        'page_url' => env('FB_MARKETING_SETTING_FIELDS_PAGE_URL', false),
+        'tfa_types' => env('FB_MARKETING_SETTING_FIELDS_TFA_TYPES', implode(",", [
+            'default', 'sms'
+        ]))
     ]
 ];
