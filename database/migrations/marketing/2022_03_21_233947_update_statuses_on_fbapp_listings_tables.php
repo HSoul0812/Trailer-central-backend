@@ -15,7 +15,7 @@ class UpdateStatusesOnFbappListingsTables extends Migration
     public function up()
     {
         // Update Columns
-        DB::statement("ALTER TABLE `fbapp_listings` MODIFY COLUMN `statuses` ENUM('" . implode("', '", Listings::STATUSES) . "')");
+        DB::statement("ALTER TABLE `fbapp_listings` MODIFY COLUMN `status` ENUM('" . implode("', '", Listings::STATUSES) . "')");
     }
 
     /**
