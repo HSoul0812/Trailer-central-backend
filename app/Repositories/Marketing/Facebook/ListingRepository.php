@@ -165,7 +165,7 @@ class ListingRepository implements ListingRepositoryInterface {
 
         // Skip Integrations With Non-Expired Errors
         $query = $query->leftJoin(Error::getTableName(), Error::getTableName() . '.inventory_id',
-                                        '=', Listings::getTableName() . '.inventory_id')
+                                        '=', Inventory::getTableName() . '.inventory_id')
         ->where(function(Builder $query) {
             return $query->whereNull(Error::getTableName().'.id')
                           ->orWhere(function(Builder $query) {
