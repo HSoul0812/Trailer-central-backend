@@ -42,11 +42,11 @@ SQL;
 
     private const QueryUpdateInv = <<<'SQL'
 UPDATE
-	inventory AS ii
+	inventory
 SET
-	ii.category = 'gooseneck_bodies'
+	category = 'gooseneck_bodies'
 WHERE
-	ii.inventory_id in(
+	inventory_id in(
 		SELECT
 			i.inventory_id FROM inventory AS i
 			JOIN ( SELECT DISTINCT
