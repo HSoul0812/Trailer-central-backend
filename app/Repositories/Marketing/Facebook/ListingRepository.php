@@ -7,6 +7,7 @@ use App\Models\Inventory\Inventory;
 use App\Models\Marketing\Facebook\Filter;
 use App\Models\Marketing\Facebook\Listings;
 use App\Models\Marketing\Facebook\Marketplace;
+use App\Models\Marketing\Facebook\Error;
 use App\Repositories\Traits\SortTrait;
 use App\Traits\Repository\Transaction;
 use Illuminate\Database\Eloquent\Builder;
@@ -160,6 +161,21 @@ class ListingRepository implements ListingRepositoryInterface {
             $query = $query->whereNull(Listings::getTableName() . '.facebook_id')
                            ->orWhere(Listings::getTableName() . '.status', Listings::STATUS_DELETED)
                            ->orWhere(Listings::getTableName() . '.status', Listings::STATUS_EXPIRED);
+        });
+
+        // Skip Integrations With Non-Expired Errors
+        $query = $query->leftJoin(Error::getTableName(), function($join) {
+            $join->on(Error::getTableName() . '.marketplace_id', '=',
+                                    Marketplace::getTableName() . '.id')
+                 ->on(Error::getTableName() . '.inventory_id', '=',
+                                    Inventory::getTableName() . '.inventory_id');
+        })
+        ->where(function(Builder $query) {
+            return $query->whereNull(Error::getTableName().'.id')
+                          ->orWhere(function(Builder $query) {
+                return $query->where(Error::getTableName().'.dismissed', 0)
+                             ->where(Error::getTableName().'.expires_at', '<', DB::raw('NOW()'));
+            });
         });
 
         // Append Location

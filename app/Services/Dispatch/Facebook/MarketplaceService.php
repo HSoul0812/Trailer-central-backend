@@ -209,7 +209,7 @@ class MarketplaceService implements MarketplaceServiceInterface
                         'image_id' => $imageId
                     ]);
                 }
-                $this->log->info('Saved ' . count($params['images']) . ' for ' .
+                $this->log->info('Saved ' . count($params['images']) . ' Images for ' .
                                     'Listing #' . $params['id']);
             }
 
