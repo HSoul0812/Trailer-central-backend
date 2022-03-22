@@ -86,7 +86,7 @@ class ErrorRepository implements ErrorRepositoryInterface {
         $query = Error::where('marketplace_id', '=', $params['marketplace_id']);
 
         // Get Inventory ID Match
-        if(!isset($params['inventory_id'])) {
+        if(isset($params['inventory_id'])) {
             $query = $query->where('inventory_id', $params['inventory_id']);
         }
 
