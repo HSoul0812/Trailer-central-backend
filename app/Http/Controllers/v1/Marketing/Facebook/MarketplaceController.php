@@ -177,7 +177,7 @@ class MarketplaceController extends RestfulControllerV2 {
         $request = new StatusMarketplaceRequest($requestData);
         if ($request->validate()) {
             // Return Auth
-            return $this->response->collection($this->service->status($request->dealer_id), $this->statusTransformer);
+            return $this->response->item($this->service->status($request->dealer_id), $this->statusTransformer);
         }
         
         return $this->response->errorBadRequest();
