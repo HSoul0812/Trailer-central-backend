@@ -7,6 +7,7 @@ use App\Exceptions\Marketing\Facebook\NoMarketplaceErrorToDismissException;
 use App\Models\Marketing\Facebook\Error;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Collection;
 
 class ErrorRepository implements ErrorRepositoryInterface {
     use SortTrait;
