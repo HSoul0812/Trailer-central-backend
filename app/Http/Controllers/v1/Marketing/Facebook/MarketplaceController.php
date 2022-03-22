@@ -60,7 +60,7 @@ class MarketplaceController extends RestfulControllerV2 {
         ErrorTransformer $errorTransformer,
         NumberVerifyTransformer $verifyTransformer
     ) {
-        $this->middleware('setDealerIdOnRequest')->only(['create', 'update', 'index', 'tfa']);
+        $this->middleware('setDealerIdOnRequest')->only(['create', 'update', 'index', 'status']);
 
         $this->repository = $repository;
         $this->service = $service;
