@@ -190,9 +190,9 @@ class MarketplaceService implements MarketplaceServiceInterface
      * Get Two-Factor Auth Types Array
      * 
      * @param int $dealerId
-     * @return Collection<TfaType>
+     * @return MarketplaceStatus
      */
-    public function status(int $dealerId): Collection {
+    public function status(int $dealerId): MarketplaceStatus {
         // Initialize Collection
         $tfaTypes = new Collection();
 
