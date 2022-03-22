@@ -56,9 +56,9 @@ class MarketplaceStatus
     /**
      * Get Default Action
      * 
-     * @return array
+     * @return string
      */
-    public function getAction(): array {
+    public function getAction(): string {
         return config('marketing.fb.settings.action', self::DEFAULT_ACTION);
     }
 
