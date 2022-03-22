@@ -1054,7 +1054,7 @@ $api->version('v1', function ($route) {
             ], function ($route) {
                 $route->get('/', 'App\Http\Controllers\v1\Marketing\Facebook\MarketplaceController@index');
                 $route->post('/', 'App\Http\Controllers\v1\Marketing\Facebook\MarketplaceController@create');
-                $route->get('tfa', 'App\Http\Controllers\v1\Marketing\Facebook\MarketplaceController@tfa');
+                $route->get('status', 'App\Http\Controllers\v1\Marketing\Facebook\MarketplaceController@tfa');
                 $route->put('sms', 'App\Http\Controllers\v1\Marketing\Facebook\MarketplaceController@sms');
                 $route->get('{id}', 'App\Http\Controllers\v1\Marketing\Facebook\MarketplaceController@show')->where('id', '[0-9]+');
                 $route->put('{id}', 'App\Http\Controllers\v1\Marketing\Facebook\MarketplaceController@update')->where('id', '[0-9]+');
