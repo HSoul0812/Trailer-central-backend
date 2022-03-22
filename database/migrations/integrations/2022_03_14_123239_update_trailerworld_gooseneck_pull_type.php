@@ -53,7 +53,7 @@ UPDATE
 				AND `data` LIKE '%"category":"Gooseneck%')
 			AND queued_at > '2021-12-31') AS teq ON ii.vin = teq.vin
 		AND ii.dealer_id = 11320
-SET ii.category = ii.category = 'gooseneck_bodies';
+SET ii.category = 'gooseneck_bodies';
 SQL;
 
 
