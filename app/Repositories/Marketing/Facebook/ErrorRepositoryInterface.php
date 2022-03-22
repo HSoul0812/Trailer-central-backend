@@ -20,7 +20,8 @@ interface ErrorRepositoryInterface extends Repository {
      * Dismiss All Errors on Marketplace Integration
      * 
      * @param int $marketplaceId
+     * @param int $inventoryId
      * @return Collection<Error>
      */
-    public function dismissAll(int $marketplaceId): Collection;
+    public function dismissAll(int $marketplaceId, int $inventoryId = 0): Collection;
 }

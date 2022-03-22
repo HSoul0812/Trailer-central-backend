@@ -85,6 +85,11 @@ class ErrorRepository implements ErrorRepositoryInterface {
     public function getAll($params) {
         $query = Error::where('marketplace_id', '=', $params['marketplace_id']);
 
+        // Get Inventory ID Match
+        if(!isset($params['inventory_id'])) {
+            $query = $query->where('inventory_id', $params['inventory_id']);
+        }
+
         // Get Dismissed
         if(!isset($params['dismissed'])) {
             $params['dismissed'] = 0;
@@ -169,11 +174,12 @@ class ErrorRepository implements ErrorRepositoryInterface {
      * Dismiss All Errors on Marketplace Integration
      * 
      * @param int $marketplaceId
+     * @param int $inventoryId
      * @return Collection<Error>
      */
-    public function dismissAll(int $marketplaceId): Collection {
+    public function dismissAll(int $marketplaceId, int $inventoryId = 0): Collection {
         // Get Errors
-        $errors = $this->getAll(['marketplace_id' => $marketplaceId]);
+        $errors = $this->getAll(['marketplace_id' => $marketplaceId, 'inventory_id' => $inventoryId]);
 
         // Get First
         $collection = new Collection();

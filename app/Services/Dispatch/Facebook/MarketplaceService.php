@@ -394,7 +394,7 @@ class MarketplaceService implements MarketplaceServiceInterface
         // Create New FB Error From Returned Step Details
         if($step->isError()) {
             // Dismiss Existing Errors
-            $this->errors->dismissAll($step->marketplaceId);
+            $this->errors->dismissAll($step->marketplaceId, $step->inventoryId ?? 0);
 
             // Return Error
             return $this->errors->create([
