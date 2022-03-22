@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Marketing\Facebook\Listings;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,7 +14,8 @@ class UpdateStatusesOnFbappListingsTables extends Migration
      */
     public function up()
     {
-        //
+        // Update Columns
+        DB::statement("ALTER TABLE `fbapp_listings` MODIFY COLUMN `statuses` ENUM('" . implode("', '", Listings::STATUSES) . "')");
     }
 
     /**

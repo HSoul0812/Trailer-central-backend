@@ -56,6 +56,8 @@ class Listings extends Model
      */
     const STATUSES = [
         'active',
+        'invalid',
+        'failed',
         'deleted',
         'expired'
     ];
