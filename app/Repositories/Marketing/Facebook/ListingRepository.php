@@ -7,6 +7,7 @@ use App\Models\Inventory\Inventory;
 use App\Models\Marketing\Facebook\Filter;
 use App\Models\Marketing\Facebook\Listings;
 use App\Models\Marketing\Facebook\Marketplace;
+use App\Models\Marketing\Facebook\Error;
 use App\Repositories\Traits\SortTrait;
 use App\Traits\Repository\Transaction;
 use Illuminate\Database\Eloquent\Builder;
@@ -136,7 +137,6 @@ class ListingRepository implements ListingRepositoryInterface {
         // Initialize Inventory Query
         $query = Inventory::select(Inventory::getTableName().'.*')
                           ->where('dealer_id', '=', $integration->dealer_id)
-                          ->where('dealer_location_id', '=', $integration->dealer_location_id)
                           ->where('show_on_website', 1)
                           ->where(Inventory::getTableName().'.description', '<>', '')
                           ->has('orderedImages')
@@ -162,6 +162,22 @@ class ListingRepository implements ListingRepositoryInterface {
                            ->orWhere(Listings::getTableName() . '.status', Listings::STATUS_DELETED)
                            ->orWhere(Listings::getTableName() . '.status', Listings::STATUS_EXPIRED);
         });
+
+        // Skip Integrations With Non-Expired Errors
+        $query = $query->leftJoin(Error::getTableName(), Error::getTableName() . '.inventory_id',
+                                        '=', Inventory::getTableName() . '.inventory_id')
+        ->where(function(Builder $query) {
+            return $query->whereNull(Error::getTableName().'.id')
+                          ->orWhere(function(Builder $query) {
+                return $query->where(Error::getTableName().'.dismissed', 0)
+                             ->where(Error::getTableName().'.expires_at', '<', DB::raw('NOW()'));
+            });
+        });
+
+        // Append Location
+        if (!empty($integration->dealer_location_id)) {
+            $query = $query->where('dealer_location_id', '=', $integration->dealer_location_id);
+        }
 
         // Append Filters
         if (!empty($integration->filter_map)) {
