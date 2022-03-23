@@ -43,18 +43,17 @@ SQL;
     private const QueryUpdateInv = <<<'SQL'
 UPDATE
 	inventory AS ii
-SET
-	ii.category = 'gooseneck_bodies'
-WHERE
-	ii.inventory_id in(
-		SELECT
-			i.inventory_id FROM inventory AS i
-			JOIN ( SELECT DISTINCT
-					TRIM(substring_index(substring_index(`data`, '"vin":"', -1), '","description"', 1)) AS `vin` FROM transaction_execute_queue
-				WHERE
-					`api` = 'trailerworld'
-					AND(`data` LIKE '%"hitch_type":"Gooseneck"%' AND `data` LIKE '%"category":"Gooseneck%')
-					AND queued_at > '2021-12-31') AS teq ON teq.vin = i.vin AND i.dealer_id = 11320);
+	JOIN ( SELECT DISTINCT
+			TRIM(substring_index(substring_index(`data`, '"vin":"', - 1), '","description"', 1)) AS `vin`
+		FROM
+			transaction_execute_queue
+		WHERE
+			`api` = 'trailerworld'
+			AND(`data` LIKE '%"hitch_type":"Gooseneck"%'
+				AND `data` LIKE '%"category":"Gooseneck%')
+			AND queued_at > '2021-12-31') AS teq ON ii.vin = teq.vin
+		AND ii.dealer_id = 11320
+SET ii.category = 'gooseneck_bodies';
 SQL;
 
 
