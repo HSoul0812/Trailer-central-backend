@@ -133,7 +133,11 @@ class ServiceOrderRepository implements ServiceOrderRepositoryInterface
                 case ServiceOrder::SERVICE_ORDER_SCHEDULED:
                     $query = $query
                         ->where('type', '<>', 'estimate')
-                        ->whereNotIn('status', ['picked_up', 'ready_for_pickup']);
+                        ->whereNotIn('status', [
+                            'picked_up',
+                            'ready_for_pickup',
+                            ServiceOrder::STATUS_ONLY_READY_FOR_PICKUP,
+                        ]);
 
                     break;
                 case ServiceOrder::SERVICE_ORDER_COMPLETED:
