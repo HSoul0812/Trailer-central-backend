@@ -27,7 +27,18 @@ return [
     // Define Facebook URL's
     'urls' => [
         'cookie' => env('FB_MARKETING_SETTING_URL_COOKIE', 'https://www.facebook.com'),
+        'root' => env('FB_MARKETING_SETTING_URL_ROOT', 'https://www.facebook.com'),
         'login' => env('FB_MARKETING_SETTING_URL_LOGIN', 'https://www.facebook.com/login'),
-        'createVehicle' => env('FB_MARKETING_SETTING_URL_VEHICLE', 'https://www.facebook.com/marketplace/create/vehicle')
+        'createVehicle' => env('FB_MARKETING_SETTING_URL_VEHICLE', 'https://www.facebook.com/marketplace/create/vehicle'),
+        'marketplaceListing' => env('FB_MARKETING_SETTING_URL_LISTINGS', 'https://www.facebook.com/marketplace/you/selling')
+    ],
+
+
+    // Active Fields
+    'fields' => [
+        'page_url' => env('FB_MARKETING_SETTING_FIELDS_PAGE_URL', false),
+        'tfa_types' => env('FB_MARKETING_SETTING_FIELDS_TFA_TYPES', implode(",", [
+            'default', 'sms'
+        ]))
     ]
 ];
