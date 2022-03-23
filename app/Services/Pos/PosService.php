@@ -26,11 +26,32 @@ class PosService
 
         // if a query is specified
         if ($queryTerm) {
-            $search->must('multi_match', [
-                'query' => $queryTerm,
-                'fuzziness' => 'AUTO',
-                'fields' => ['title^1.3', 'part_id^3', 'sku^3', 'model', 'brand', 'manufacturer', 'type', 'category', 'alternative_part_number^2', 'description^0.5']
-            ]);
+            $search->should(
+                [
+                  'function_score' => [
+                    'query' => [
+                      'query_string' => [
+                          "query" => "*${queryTerm}*",
+                          'fields' => ['title^1.3', 'part_id^3', 'sku^3', 'alternative_part_number^2'],
+                      ]
+                    ],
+                    'boost' => 10,
+                  ]
+                ],
+                [
+                  'function_score' => [
+                    'query' => [
+                      'multi_match' => [
+                        'query' => $queryTerm,
+                        'fields' => ['title^1.3', 'part_id^3', 'sku^3', 'brand', 'manufacturer', 'type', 'category', 'alternative_part_number^2', 'description^0.5'],
+                        'fuzziness' => 'AUTO',
+                        'operator' => 'and'
+                      ],
+                    ],
+                    'boost' => 1,
+                  ]
+                ]
+          );
 
         // if no query supplied but is allowed
         } else if (!$queryTerm && ($options['allowAll'] ?? false)) {
