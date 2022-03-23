@@ -64,7 +64,8 @@
         "symfony/dom-crawler": "^5.1",
         "tijsverkoyen/css-to-inline-styles": "^2.2.1",
         "twilio/sdk": "^5.31",
-        "webklex/laravel-imap": "~2.4"
+        "webklex/laravel-imap": "~2.4",
+        "showroom/bulkconfiguration": "*"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.4",
@@ -109,12 +110,7 @@
     "config": {
         "preferred-install": "dist",
         "sort-packages": true,
-        "optimize-autoloader": true,
-        "discard-changes": true,
-        "platform": {
-            "ext-pcntl": "7.1",
-            "ext-posix": "7.1"
-        }
+        "optimize-autoloader": true
     },
     "repositories": [
         {
@@ -124,6 +120,10 @@
         {
             "type": "path",
             "url": "./nova-components/EditMapping"
+        },
+        {
+            "type": "path",
+            "url": "./nova-components/BulkConfiguration"
         }
     ],
     "minimum-stability": "dev",
