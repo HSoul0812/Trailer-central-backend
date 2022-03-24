@@ -51,8 +51,9 @@ UPDATE
 			`api` = 'trailerworld'
 			AND(`data` LIKE '%"hitch_type":"Gooseneck"%'
 				AND `data` LIKE '%"category":"Gooseneck%')
-			AND queued_at > '2021-12-31') AS teq ON ii.vin = teq.vin AND ii.dealer_id = 11320
-SET ii.category = ii.category = 'gooseneck_bodies';
+			AND queued_at > '2021-12-31') AS teq ON ii.vin = teq.vin
+		AND ii.dealer_id = 11320
+SET ii.category = 'gooseneck_bodies';
 SQL;
 
 
