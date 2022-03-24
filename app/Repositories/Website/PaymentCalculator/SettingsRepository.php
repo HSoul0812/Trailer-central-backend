@@ -11,8 +11,22 @@ class SettingsRepository implements SettingsRepositoryInterface {
         return Settings::create($params);
     }
 
-    public function delete($params) {
-        throw new NotImplementedException;
+    /**
+     * @param array $params `id` parameter is required
+     * @return bool
+     *
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     */
+    public function delete($params): bool
+    {
+        if (!isset($params['id'])) {
+            throw new \InvalidArgumentException(__CLASS__ . ' require `id` param');
+        }
+
+        /** @var Settings $settings */
+        $settings = Settings::findOrFail($params['id']);
+
+        return (bool)$settings->delete();
     }
 
     public function get($params) {

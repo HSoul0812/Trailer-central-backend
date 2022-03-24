@@ -230,7 +230,7 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         // Get Inquiry Details From Inventory Item?
         if(!empty($params['item_id']) && !in_array($params['inquiry_type'], InquiryLead::NON_INVENTORY_TYPES)) {
             $inventory = $this->inventory->get(['id' => $params['item_id']]);
-            if(!empty($inventory->dealerLocation->name)) {
+            if(!empty($inventory->dealerLocation->name) && !empty($inventory->dealerLocation->email)) {
                 $params['inquiry_name'] = $inventory->dealerLocation->name;
                 $params['inquiry_email'] = $inventory->dealerLocation->email;
                 return $params;

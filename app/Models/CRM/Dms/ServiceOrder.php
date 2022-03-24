@@ -31,10 +31,13 @@ class ServiceOrder extends Model
 {
     use TableAware;
 
+    public const STATUS_ONLY_READY_FOR_PICKUP = 'only_ready_for_pickup';
+
     const SERVICE_ORDER_STATUS = [
         'picked_up' => 'Closed / Picked Up',
         'closed_quote' => 'Closed / Quote',
         'ready_for_pickup' => 'Closed / Ready for Pickup',
+        self::STATUS_ONLY_READY_FOR_PICKUP => 'Ready for Pickup',
         'on_tech_clipboard' => 'On Tech Clipboard',
         'waiting_custom' => 'Waiting on Custom',
         'waiting_parts' => 'Waiting on Part(s)',
