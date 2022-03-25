@@ -4,20 +4,28 @@ declare(strict_types=1);
 
 namespace App\DTOs\Inventory;
 
+use App\Traits\TypedPropertyTrait;
+use Illuminate\Contracts\Support\Arrayable;
 use JetBrains\PhpStorm\Pure;
 
 class TcApiResponseInventory
 {
+    use \App\DTOs\Arrayable;
+    use TypedPropertyTrait;
+
     public int $id;
     public ?string $url;
     public ?array $features;
     public ?string $description;
     public ?float $payload_capacity;
     public ?float $gvwr;
+    public ?string $condition;
     public ?float $weight;
     public ?float $width;
     public ?float $height;
     public ?float $length;
+    public ?string $stock;
+    public ?string $vin;
     public ?string $manufacturer;
     public array $dealer;
     public string $listing_date;
@@ -36,10 +44,13 @@ class TcApiResponseInventory
      $obj->description = $data['description'];
      $obj->payload_capacity = $data['payload_capacity'];
      $obj->gvwr = $data['gvwr'];
+     $obj->condition = $data['condition'];
      $obj->weight = $data['weight'];
      $obj->width = $data['width'];
      $obj->height = $data['height'];
      $obj->length = $data['length'];
+     $obj->stock = $data['stock'];
+     $obj->vin = $data['vin'];
      $obj->manufacturer = $data['manufacturer'];
      $obj->dealer = $data['dealer'];
      $obj->listing_date = $data['created_at'];
@@ -50,6 +61,10 @@ class TcApiResponseInventory
      $obj->photos = $data['images'];
      $obj->dealer_location = $data['dealer_location'];
      $obj->primary_image = $data['primary_image'];
+
+     foreach($data['attributes'] as $attribute) {
+       $obj->setTypedProperty($attribute['code'], $attribute['value']);
+     }
 
      return $obj;
  }
