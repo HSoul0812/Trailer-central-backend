@@ -114,6 +114,7 @@ class InquiryService implements InquiryServiceInterface
         LeadRepositoryInterface $leadRepo,
         TrackingRepositoryInterface $tracking,
         TrackingUnitRepositoryInterface $trackingUnit,
+        TextRepositoryInterface $texts,
         LeadServiceInterface $leads,
         InquiryEmailServiceInterface $inquiryEmail,
         InquiryTextServiceInterface $inquiryText,
@@ -138,6 +139,7 @@ class InquiryService implements InquiryServiceInterface
         $this->tracking = $tracking;
         $this->trackingUnit = $trackingUnit;
         $this->userRepo = $userRepo;
+        $this->texts = $texts;
 
         // Set Up Fractal
         $this->leadTransformer = $leadTransformer;
@@ -212,10 +214,21 @@ class InquiryService implements InquiryServiceInterface
         $inquiry = new InquiryLead($params);
 
         // Send Inquiry Text
-        $this->inquiryText->send($params);
+        $sent = $this->inquiryText->send($params);
 
         // Merge or Create Lead
-        return $this->mergeOrCreate($inquiry, $params);
+        $lead = $this->mergeOrCreate($inquiry, $params);
+
+        // Create Text In DB
+        $this->texts->create([
+            'lead_id'     => $lead['data']['id'],
+            'from_number' => $sent->from,
+            'to_number'   => $sent->to,
+            'log_message' => $params['sms_message']
+        ]);
+
+        // Return Lead Data
+        return $lead;
     }
 
     /**
