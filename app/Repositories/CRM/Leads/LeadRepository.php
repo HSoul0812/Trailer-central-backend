@@ -640,8 +640,10 @@ class LeadRepository implements LeadRepositoryInterface {
             $leadTypeTableName . '.lead_id',
             '=',
             Lead::getTableName() . '.identifier'
-        )
-        ->whereIn($leadTypeTableName . '.lead_type', $leadType);
+        )->where(function ($query) use ($leadType, $leadTypeTableName) {
+            $query->whereIn($leadTypeTableName . '.lead_type', $leadType)
+                  ->orWhere(Lead::getTableName().'.lead_type', $leadType);
+        });
     }
 
     /**
