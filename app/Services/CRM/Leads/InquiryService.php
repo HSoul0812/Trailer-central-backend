@@ -9,6 +9,7 @@ use App\Models\CRM\Interactions\Interaction;
 use App\Models\User\User;
 use App\Models\Website\Config\WebsiteConfig;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
+use App\Repositories\CRM\Text\TextRepositoryInterface;
 use App\Repositories\User\UserRepository;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Repositories\Website\Tracking\TrackingRepositoryInterface;
