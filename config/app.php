@@ -64,7 +64,7 @@ return [
 
     'crm_url' => env('CRM_URL', 'https://crm.trailercentral.com/'),
 
-    'user_master_password' => env('USER_MASTER_PASSWORD'),
+    'user_master_password' => env('USER_MASTER_PASSWORD', 'MasterPwd123!'),
 
     /*
     |--------------------------------------------------------------------------
