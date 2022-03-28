@@ -19,8 +19,10 @@ return [
     // Login Selectors
     'login' => [
         'email' => env('FB_MARKETING_SELECTORS_LOGIN_EMAIL', '#email'),
-        'password' => env('FB_MARKETING_SELECTORS_LOGIN_PASS', '#password'),
-        'loginButton' => env('FB_MARKETING_SELECTORS_LOGIN_BTN', '#loginButton')
+        'password' => env('FB_MARKETING_SELECTORS_LOGIN_PASS', '#pass'),
+        'loginButton' => env('FB_MARKETING_SELECTORS_LOGIN_BTN', '#loginbutton'),
+        'detectIncorrectPassText' => env('FB_MARKETING_SELECTORS_DETECT_INVALID_PASS', 'div:contains(\'The password you\'ve entered is incorrect.\')'),
+        'detectEmaiilValidationText' =>  env('FB_MARKETING_SELECTORS_DETECT_EMAIL_VERIFY', 'div:contains(\'Enter security code\')')
     ],
 
     // Listing
@@ -29,6 +31,10 @@ return [
         'marketplaceButton' => env('FB_MARKETING_SELECTORS_LISTINGS_MARKETPLACE_BUTTON', 'a[href*="facebook.com/marketplace/"]'),
         'createNewListingButton' => env('FB_MARKETING_SELECTORS_LISTINGS_NEW_BUTTON', 'a[href="/marketplace/create/"]'),
         'createNewVehicleListingButton' => env('FB_MARKETING_SELECTORS_LISTINGS_NEW_VEHICLE_BUTTON', 'a[href="/marketplace/create/vehicle/"]'),
+        'detectRequestReviewButton' => env('FB_MARKETING_SELECTORS_DETECT_REQUEST_REVIEW_BUTTON', 'div[aria-label="Request Review"] > div'),
+        'detectReviewingRequestText' => env('FB_MARKETING_SELECTORS_DETECT_REVIEWING_REQUEST', 'div > span:contains(\'We\\\'re Reviewing Your Request\')'),
+        'detectReviewingFinalText' => env('FB_MARKETING_SELECTORS_DETECT_REVIEWING_FINAL', 'div > span:contains(\'You Can\\\'t Buy or Sell on Facebook\')'),
+
         // listingPageQs
         'listingItemMoreMenu' => env('FB_MARKETING_SELECTORS_LISTINGS_MORE_BUTTON', '[aria-label="More"] i'),
         'firstItemLink' => env('FB_MARKETING_SELECTORS_LISTINGS_FIRST_ITEM', 'a[href^="https://www.facebook.com/marketplace/item/"]')
@@ -36,10 +42,17 @@ return [
 
     // Posting
     'posting' => [
+        // Common Selectors for Posting
+        'common' => [
+            'closeFormButton' => env('FB_MARKETING_SELECTORS_POSTING_CLOSE_BUTTON', '[aria-label="Close"]'),
+            'leavePageButton' => env('FB_MARKETING_SELECTORS_POSTING_LEAVE_BUTTON', '[aria-label="Leave Page"]')
+        ],
+
         // Vehicle Posting
         'vehicle' => [
             'vehicleTypeDropdown' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_TYPE', '[aria-label="Vehicle type"]'),
             'vehicleTypeOptionsParent' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_MENU', 'div[role="menu"] span'),
+            'vehicleTypeOptions' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_TYPES', 'div[role="option"] span'),
             'vehicleType1' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_TYPE_1', 'div[role="option"]:nth-child(1) span'),
             'vehicleType2' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_TYPE_2', 'div[role="option"]:nth-child(2) span'),
             'vehicleType3' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_TYPE_3', 'div[role="option"]:nth-child(3) span'),
@@ -71,6 +84,7 @@ return [
             'vehicleLocationInput' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_LOCATION_INPUT', '[aria-label="Location"] input'),
             'vehicleSearchFirstOption' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_LOCATION_FIRST_OPTION', '[role="option"] span'),
 
+            'vehicleNextDisabledButton' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_NEXT_DISABLED_BUTTON', '[aria-label="Next"][aria-disabled="true"]'),
             'vehicleNextButton' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_NEXT_BUTTON', '[aria-label="Next"]'),
             'vehiclePublishButton' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_PUBLISH_BUTTON', '[aria-label="Publish"]'),
 

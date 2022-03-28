@@ -46,6 +46,7 @@ return [
             'path' => storage_path('logs/laravel.log'),
             'level' => 'debug',
             'permission' => 0664,
+            'tap' => [\App\Logging\DailyLogWithUsername::class],
         ],
 
         'daily' => [
@@ -54,6 +55,7 @@ return [
             'level' => 'debug',
             'days' => 7,
             'permission' => 0664,
+            'tap' => [\App\Logging\DailyLogWithUsername::class],
         ],
 
         'inquiry' => [
@@ -122,6 +124,13 @@ return [
         'texts' => [
             'driver' => 'daily',
             'path' => storage_path('logs/services/texts.log'),
+            'level' => 'debug',
+            'days' => 3,
+        ],
+
+        'marketplace' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/services/marketplace.log'),
             'level' => 'debug',
             'days' => 3,
         ],

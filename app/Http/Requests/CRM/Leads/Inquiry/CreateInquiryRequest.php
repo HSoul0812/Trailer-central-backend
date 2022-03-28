@@ -20,7 +20,7 @@ class CreateInquiryRequest extends Request {
         'url' => 'nullable|string',
         'referral' => 'nullable|string',
         'first_name' => 'required|string',
-        'last_name' => 'required|string',
+        'last_name' => 'nullable|string',
         'email_address' => 'nullable|email',
         'phone_number' => 'nullable|regex:/(0-9)?[0-9]{10}/',
         'preferred_contact' => 'nullable|in:phone,email',
