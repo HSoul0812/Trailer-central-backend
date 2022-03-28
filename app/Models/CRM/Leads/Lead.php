@@ -167,6 +167,10 @@ class Lead extends Model
         'next_followup',
     ];
 
+    protected $casts = [
+        'is_archived' => 'boolean',
+    ];
+
     /**
      * Get the email history for the lead.
      */

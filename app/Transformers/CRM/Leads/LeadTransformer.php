@@ -3,7 +3,11 @@
 namespace App\Transformers\CRM\Leads;
 
 use App\Models\CRM\Leads\Lead;
+use App\Traits\CompactHelper;
+use App\Transformers\CRM\Interactions\EmailHistoryTransformer;
 use App\Transformers\CRM\Interactions\InteractionTransformer;
+use App\Transformers\CRM\Text\TextTransformer;
+use App\Transformers\CRM\User\SalesPersonTransformer;
 use App\Transformers\Inventory\InventoryTransformer;
 use App\Transformers\User\DealerLocationTransformer;
 use League\Fractal\TransformerAbstract;
@@ -21,7 +25,9 @@ class LeadTransformer extends TransformerAbstract
 
     protected $availableIncludes = [
         'interactions',
+        'textLogs',
         'otherLeadProperties',
+        'leadStatus',
     ];
 
     protected $inventoryTransformer;
@@ -42,6 +48,7 @@ class LeadTransformer extends TransformerAbstract
     {
         $transformedLead =  [
             'id' => $lead->identifier,
+            'identifier' => CompactHelper::expand($lead->identifier),
             'website_id' => $lead->website_id,
             'dealer_id' => $lead->dealer_id,
             'name' => $lead->full_name,
@@ -60,6 +67,7 @@ class LeadTransformer extends TransformerAbstract
             'contact_type' => ($lead->leadStatus) ? $lead->leadStatus->contact_type : null,
             'created_at' => $lead->date_submitted,
             'zip' => $lead->zip,
+            'is_archived' => $lead->is_archived,
         ];
 
         if (!empty($lead->pretty_phone_number)) {
@@ -84,7 +92,19 @@ class LeadTransformer extends TransformerAbstract
             return [];
         }
 
-        return $this->collection($lead->interactions, new InteractionTransformer());
+        $salesPersonTransformer = app()->make(SalesPersonTransformer::class);
+        $emailHistoryTransformer = app()->make(EmailHistoryTransformer::class);
+
+        return $this->collection($lead->interactions, new InteractionTransformer($salesPersonTransformer, $emailHistoryTransformer));
+    }
+
+    public function includeTextLogs(Lead $lead)
+    {
+        if (empty($lead->textLogs)) {
+            return [];
+        }
+
+        return $this->collection($lead->textLogs, new TextTransformer());
     }
 
     public function includeInventoryInterestedIn(Lead $lead)
@@ -94,6 +114,15 @@ class LeadTransformer extends TransformerAbstract
         }
 
         return $this->collection($lead->units, new InventoryTransformer());
+    }
+
+    /**
+     * @param Lead $lead
+     * @return Item
+     */
+    public function includeLeadStatus(Lead $lead): Item
+    {
+        return $this->item($lead->leadStatus, new LeadStatusTransformer());
     }
 
     public function includeOtherLeadProperties(Lead $lead): Item
