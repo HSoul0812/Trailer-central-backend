@@ -109,7 +109,7 @@ class RefundRepository implements RefundRepositoryInterface
             }
 
             foreach ($orderParts as $orderPart) {
-               if (in_array($orderPart['sku'], $partsQty)) {
+               if (array_key_exists($orderPart['sku'], $partsQty)) {
                    $refundQty = $partsQty[$orderPart['sku']];
                    $totalQty = $orderPart['qty'];
 
