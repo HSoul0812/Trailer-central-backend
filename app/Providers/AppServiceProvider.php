@@ -61,6 +61,8 @@ use App\Repositories\Inventory\InventoryRepository;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\Inventory\ManufacturerRepository;
 use App\Repositories\Inventory\ManufacturerRepositoryInterface;
+use App\Repositories\Showroom\ShowroomBulkUpdateRepository;
+use App\Repositories\Showroom\ShowroomBulkUpdateRepositoryInterface;
 use App\Repositories\Showroom\ShowroomFieldsMappingRepository;
 use App\Repositories\Showroom\ShowroomFieldsMappingRepositoryInterface;
 use App\Repositories\Pos\SalesReportRepository;
@@ -373,5 +375,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(InventoryAttributeServiceInterface::class, InventoryAttributeService::class);
         $this->app->bind(CustomOverlayServiceInterface::class, CustomOverlayService::class);
         $this->app->bind(CustomOverlayRepositoryInterface::class, CustomOverlayRepository::class);
+
+        $this->app->bind(ShowroomBulkUpdateRepositoryInterface::class, ShowroomBulkUpdateRepository::class);
     }
 }
