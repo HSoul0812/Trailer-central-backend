@@ -195,7 +195,7 @@ class ErrorRepository implements ErrorRepositoryInterface {
         $errors = $this->getAll([
             'marketplace_id' => $marketplaceId,
             'inventory_id' => $inventoryId,
-            'expires_status' => Error::EXPIRED_ALREADY
+            'expired_status' => Error::EXPIRED_ALREADY
         ]);
 
         // Get First
