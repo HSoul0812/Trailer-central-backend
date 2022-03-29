@@ -13,7 +13,7 @@ class AddUseProximityDistanceSelectorToBishsWebsiteConfigTable extends Migration
     public function up(): void
     {
         WebsiteConfig::setKeyValueByDealerId(
-            1322,
+            9638,
             'website/use_proximity_distance_selector',
             1
         );
@@ -27,7 +27,7 @@ class AddUseProximityDistanceSelectorToBishsWebsiteConfigTable extends Migration
     public function down(): void
     {
         WebsiteConfig::setKeyValueByDealerId(
-            1322,
+            9638,
             'website/use_proximity_distance_selector',
             0
         );
