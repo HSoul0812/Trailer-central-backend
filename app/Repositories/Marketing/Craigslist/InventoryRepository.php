@@ -271,13 +271,13 @@ class InventoryRepository implements InventoryRepositoryInterface
     private function overrideInventoryQuery(Builder $query, int $dealerId) : Builder
     {
         // Get Status Overrides
-        $statusAll = config('marketing.cl.overrides.statusAll', '');
+        $statusAll = config('marketing.cl.settings.overrides.statusAll', '');
         if(!in_array($dealerId, explode(",", $statusAll))) {
             $query = $query->where(function($query) use($dealerId) {
                 $query = $query->where(Inventory::getTableName().'.status', 1);
 
                 // Get Status On Order Overrides
-                $statusOnOrder = config('marketing.cl.overrides.statusAll', '');
+                $statusOnOrder = config('marketing.cl.settings.overrides.statusAll', '');
                 if(in_array($dealerId, explode(",", $statusOnOrder))) {
                     $query = $query->orWhere(Inventory::getTableName().'.status', 3);
                 }
@@ -285,7 +285,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         // Get Show on Website Overrides
-        $showOnWebsite = config('marketing.cl.overrides.showOnWebsite', '');
+        $showOnWebsite = config('marketing.cl.settings.overrides.showOnWebsite', '');
         if(!in_array($dealerId, explode(",", $showOnWebsite))) {
             $query = $query->where(Inventory::getTableName().'.show_on_website', 1);
         }

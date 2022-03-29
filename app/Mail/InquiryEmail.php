@@ -44,6 +44,10 @@ class InquiryEmail extends Mailable
 
         $build = $this->from($from, $this->data['fromName']);
 
+        if(!empty($this->data['email'])) {
+            $build->replyTo($this->data['email'], $this->data['fullName']);
+        }
+
         $build->view('emails.leads.inquiry.' . $this->data['inquiryView'])
               ->text('emails.leads.inquiry.' . $this->data['inquiryView'] . '-plain');
 
