@@ -71,6 +71,11 @@ class Error extends Model
      */
     const EXPIRED_FOLLOW = '1';
 
+    /**
+     * @const Only Get Already Expired Status
+     */
+    const EXPIRED_ALREADY = '-1';
+
 
     /**
      * @var string
