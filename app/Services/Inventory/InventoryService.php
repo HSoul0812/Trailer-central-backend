@@ -110,16 +110,18 @@ class InventoryService implements InventoryServiceInterface
     #[ArrayShape(["key" => "string", "type_id" => "int"])]
     private function mapOldCategoryToNew($oldCategory): array
     {
-        $value = [];
-        $mappedCategory = CategoryMappings::where('map_to', 'like', '%' . $oldCategory . '%')->first();
-        if ($mappedCategory) {
-            $value['key'] = $mappedCategory->map_from;
-            $value['type_id'] = $mappedCategory->category->types[0]->id;
-        } else {
-            $value['key'] = self::DEFAULT_CATEGORY['name'];
-            $value['type_id'] = self::DEFAULT_CATEGORY['type_id'];
-        }
-        return $value;
+        return \Cache::remember('category/' . $oldCategory, self::ES_CACHE_EXPIRY, function() use ($oldCategory) {
+            $value = [];
+            $mappedCategory = CategoryMappings::where('map_to', 'like', '%' . $oldCategory . '%')->first();
+            if ($mappedCategory) {
+                $value['key'] = $mappedCategory->map_from;
+                $value['type_id'] = $mappedCategory->category->types[0]->id;
+            } else {
+                $value['key'] = self::DEFAULT_CATEGORY['name'];
+                $value['type_id'] = self::DEFAULT_CATEGORY['type_id'];
+            }
+            return $value;
+        });
     }
 
     private function mapCategoryBuckets(array $buckets): array {
