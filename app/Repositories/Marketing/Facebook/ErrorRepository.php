@@ -8,6 +8,7 @@ use App\Models\Marketing\Facebook\Error;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection as DbCollection;
 
 class ErrorRepository implements ErrorRepositoryInterface {
     use SortTrait;
@@ -192,6 +193,19 @@ class ErrorRepository implements ErrorRepositoryInterface {
 
         // Return Error
         return $collection;
+    }
+
+    /**
+     * Get All Active Errors on Dealer
+     * 
+     * @param int $dealerId
+     * @return Collection<Error>
+     */
+    public function getAllActive(int $dealerId): DbCollection {
+        return Error::where('dealer_id', '=', $dealerId)
+                    ->where('dismissed', 0)
+                    ->whereNull('inventory_id')
+                    ->get();
     }
 
     protected function getSortOrders() {

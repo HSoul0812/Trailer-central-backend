@@ -3,14 +3,21 @@
 namespace App\Transformers\Marketing\Facebook;
 
 use App\Services\Marketing\Facebook\DTOs\MarketplaceStatus;
+use App\Transformers\Marketing\Facebook\ErrorTransformer;
 use App\Transformers\Marketing\Facebook\TFATransformer;
 use League\Fractal\TransformerAbstract;
 
 class StatusTransformer extends TransformerAbstract
 {
     protected $defaultIncludes = [
+        'errors',
         'tfaTypes',
     ];
+
+    /**
+     * @var ErrorTransformer
+     */
+    protected $errorTransformer;
 
     /**
      * @var TFATransformer
@@ -18,8 +25,10 @@ class StatusTransformer extends TransformerAbstract
     protected $tfaTransformer;
 
     public function __construct(
+        ErrorTransformer $errorTransformer,
         TFATransformer $tfaTransformer
     ) {
+        $this->errorTransformer = $errorTransformer;
         $this->tfaTransformer = $tfaTransformer;
     }
 
@@ -29,6 +38,11 @@ class StatusTransformer extends TransformerAbstract
         return [
             'page_url' => $status->pageUrl
         ];
+    }
+
+    public function includeErrors(MarketplaceStatus $status)
+    {
+        return $this->collection($status->errors, $this->errorTransformer);
     }
 
     public function includeTfaTypes(MarketplaceStatus $status)
