@@ -208,8 +208,13 @@ class InquiryService implements InquiryServiceInterface
      *               merge: null|Interaction}
      */
     public function text(array $params): array {
+        // Fix Units of Interest
         $params['inventory'] = isset($params['inventory']) ? $params['inventory'] : [];
+        if(!empty($params['inventory_id'])) {
+            $params['inventory'][] = $params['inventory_id'];
+        }
 
+        // Clean Up Inquiry Text Response
         $params = $this->inquiryText->merge($params);
 
         $inquiry = new InquiryLead($params);
