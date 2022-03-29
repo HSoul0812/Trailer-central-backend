@@ -33,7 +33,7 @@ class ServiceOrder extends Model
 
     public const STATUS_ONLY_READY_FOR_PICK_UP = 'only_ready_for_pickup';
     public const STATUS_READY_FOR_PICK_UP = 'ready_for_pickup';
-    public const STATUS_PICKED_UP = 'ready_for_pickup';
+    public const STATUS_PICKED_UP = 'picked_up';
 
     const SERVICE_ORDER_STATUS = [
         self::STATUS_PICKED_UP => 'Closed / Picked Up',
