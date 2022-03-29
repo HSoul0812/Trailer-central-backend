@@ -89,7 +89,13 @@ class ErrorRepository implements ErrorRepositoryInterface {
 
         // Get Inventory ID Match
         if(isset($params['inventory_id'])) {
-            $query = $query->where('inventory_id', $params['inventory_id']);
+            if(empty($params['inventory_id'])) {
+                $query = $query->where(function(Builder $query) {
+                    $query->where('inventory_id', 0)->orWhereNull('inventory_id');
+                });
+            } else {
+                $query = $query->where('inventory_id', $params['inventory_id']);
+            }
         }
 
         // Get Dismissed
