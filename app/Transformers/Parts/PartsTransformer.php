@@ -23,7 +23,6 @@ class PartsTransformer extends TransformerAbstract implements PartsTransformerIn
              'dealer_id' => $part->dealer_id ? (int)$part->dealer_id : null,
              'vendor' => $part->vendor,
              'manufacturer' => $part->manufacturer,
-             'brand' => $part->brand,
              'type' => $part->type,
              'category' => $part->category,
              'sku' => $part->sku,
