@@ -33,7 +33,8 @@ class TcApiResponseInventory
     public ?float $sales_price;
     public ?string $inventory_title;
     public ?array $photos;
-
+    public ?int $type_id;
+    public ?string $category;
     #[Pure]
  public static function fromData(array $data): self
  {
@@ -61,6 +62,7 @@ class TcApiResponseInventory
      $obj->photos = $data['images'];
      $obj->dealer_location = $data['dealer_location'];
      $obj->primary_image = $data['primary_image'];
+     $obj->category = $data['category'];
 
      foreach($data['attributes'] as $attribute) {
        $obj->setTypedProperty($attribute['code'], $attribute['value']);

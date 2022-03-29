@@ -36,6 +36,8 @@ class TcApiResponseInventoryTransformer extends TransformerAbstract
              'photos'           => $type->photos,
              'dealer_location'  => $type->dealer_location,
              'primary_image'    => $type->primary_image,
+             'type_id' => $type->type_id,
+             'category' => $type->category,
          ];
     }
 }

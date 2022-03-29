@@ -106,18 +106,31 @@ class InventoryService implements InventoryServiceInterface
         $esIndex = self::ES_INDEX;
         return config('trailercentral.elasticsearch.url') . "/$esIndex/_search";
     }
+
+    #[ArrayShape(["key" => "string", "type_id" => "int"])]
+    private function mapOldCategoryToNew($oldCategory): array
+    {
+        return \Cache::remember('category/' . $oldCategory, self::ES_CACHE_EXPIRY, function() use ($oldCategory) {
+            $value = [];
+            $mappedCategory = CategoryMappings::where('map_to', 'like', '%' . $oldCategory . '%')->first();
+            if ($mappedCategory) {
+                $value['key'] = $mappedCategory->map_from;
+                $value['type_id'] = $mappedCategory->category->types[0]->id;
+            } else {
+                $value['key'] = self::DEFAULT_CATEGORY['name'];
+                $value['type_id'] = self::DEFAULT_CATEGORY['type_id'];
+            }
+            return $value;
+        });
+    }
+
     private function mapCategoryBuckets(array $buckets): array {
         foreach ($buckets as $key => &$value) {
-            $old_category = $value['key'];
-            if ($old_category) {
-                $mapped_category = CategoryMappings::where('map_to', 'like', '%' . $old_category . '%')->first();
-                if ($mapped_category) {
-                    $value['key'] = $mapped_category->map_from;
-                    $value['type_id'] = $mapped_category->category->types[0]->id;
-                } else {
-                    $value['key'] = self::DEFAULT_CATEGORY['name'];
-                    $value['type_id'] = self::DEFAULT_CATEGORY['type_id'];
-                }
+            $oldCategory = $value['key'];
+            if ($oldCategory) {
+                $mappedCategory = $this->mapOldCategoryToNew($oldCategory);
+                $value['key'] = $mappedCategory['key'];
+                $value['type_id'] = $mappedCategory['type_id'];
             }
         }
 
@@ -354,7 +367,11 @@ class InventoryService implements InventoryServiceInterface
         $url = config('services.trailercentral.api') . 'inventory/' . $id . '?include=features,attributes';
         $inventory = $this->handleHttpRequest('GET', $url);
 
-        return TcApiResponseInventory::fromData($inventory['data']);
+        $respObj = TcApiResponseInventory::fromData($inventory['data']);
+        $newCategory = $this->mapOldCategoryToNew($respObj->category);
+        $respObj->category = $newCategory['key'];
+        $respObj->type_id = $newCategory['type_id'];
+        return $respObj;
     }
 
     /**
