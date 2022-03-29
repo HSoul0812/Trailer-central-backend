@@ -5,9 +5,11 @@ namespace App\Repositories\Marketing\Facebook;
 use App\Exceptions\NotImplementedException;
 use App\Exceptions\Marketing\Facebook\NoMarketplaceErrorToDismissException;
 use App\Models\Marketing\Facebook\Error;
+use App\Models\Marketing\Facebook\Marketplace;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection as DbCollection;
 
 class ErrorRepository implements ErrorRepositoryInterface {
     use SortTrait;
@@ -192,6 +194,19 @@ class ErrorRepository implements ErrorRepositoryInterface {
 
         // Return Error
         return $collection;
+    }
+
+    /**
+     * Get All Active Errors on Dealer
+     * 
+     * @param int $dealerId
+     * @return Collection<Error>
+     */
+    public function getAllActive(int $dealerId): DbCollection {
+        return Error::leftJoin(Marketplace::getTableName(), Marketplace::getTableName() . '.id',
+                                        '=', Error::getTableName() . '.marketplace_id')
+                    ->where(Marketplace::getTableName() . '.dealer_id', '=', $dealerId)
+                    ->where('dismissed', 0)->whereNull('inventory_id')->get();
     }
 
     protected function getSortOrders() {
