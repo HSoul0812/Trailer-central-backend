@@ -112,7 +112,11 @@ class ErrorRepository implements ErrorRepositoryInterface {
 
         // Include Expired Check?
         if($params['expired_status'] !== Error::EXPIRED_IGNORE) {
-            $query = $query->where('expires_at', '>', DB::raw('NOW()'));
+            if($params['expired_status'] === Error::EXPIRED_FOLLOW) {
+                $query = $query->where('expires_at', '>', DB::raw('NOW()'));
+            } else {
+                $query = $query->where('expires_at', '<', DB::raw('NOW()'));
+            }
         }
 
         // Set Sort Query
@@ -188,7 +192,11 @@ class ErrorRepository implements ErrorRepositoryInterface {
      */
     public function dismissAll(int $marketplaceId, int $inventoryId = 0): Collection {
         // Get Errors
-        $errors = $this->getAll(['marketplace_id' => $marketplaceId, 'inventory_id' => $inventoryId]);
+        $errors = $this->getAll([
+            'marketplace_id' => $marketplaceId,
+            'inventory_id' => $inventoryId,
+            'expires_status' => Error::EXPIRED_ALREADY
+        ]);
 
         // Get First
         $collection = new Collection();
