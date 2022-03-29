@@ -26,6 +26,7 @@ class TcApiResponseInventory
     public ?float $length;
     public ?string $stock;
     public ?string $vin;
+    public ?string $pull_type;
     public ?string $manufacturer;
     public array $dealer;
     public string $listing_date;
@@ -52,6 +53,7 @@ class TcApiResponseInventory
      $obj->length = $data['length'];
      $obj->stock = $data['stock'];
      $obj->vin = $data['vin'];
+     $obj->pull_type = '';
      $obj->manufacturer = $data['manufacturer'];
      $obj->dealer = $data['dealer'];
      $obj->listing_date = $data['created_at'];
