@@ -5,9 +5,12 @@ namespace App\Repositories\Marketing\Facebook;
 use App\Exceptions\NotImplementedException;
 use App\Exceptions\Marketing\Facebook\NoMarketplaceErrorToDismissException;
 use App\Models\Marketing\Facebook\Error;
+use App\Models\Marketing\Facebook\Marketplace;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection as DbCollection;
 
 class ErrorRepository implements ErrorRepositoryInterface {
     use SortTrait;
@@ -87,7 +90,13 @@ class ErrorRepository implements ErrorRepositoryInterface {
 
         // Get Inventory ID Match
         if(isset($params['inventory_id'])) {
-            $query = $query->where('inventory_id', $params['inventory_id']);
+            if(empty($params['inventory_id'])) {
+                $query = $query->where(function(Builder $query) {
+                    $query->where('inventory_id', 0)->orWhereNull('inventory_id');
+                });
+            } else {
+                $query = $query->where('inventory_id', $params['inventory_id']);
+            }
         }
 
         // Get Dismissed
@@ -103,7 +112,11 @@ class ErrorRepository implements ErrorRepositoryInterface {
 
         // Include Expired Check?
         if($params['expired_status'] !== Error::EXPIRED_IGNORE) {
-            $query = $query->where('expires_at', '>', DB::raw('NOW()'));
+            if($params['expired_status'] === Error::EXPIRED_FOLLOW) {
+                $query = $query->where('expires_at', '>', DB::raw('NOW()'));
+            } else {
+                $query = $query->where('expires_at', '<', DB::raw('NOW()'));
+            }
         }
 
         // Set Sort Query
@@ -179,7 +192,11 @@ class ErrorRepository implements ErrorRepositoryInterface {
      */
     public function dismissAll(int $marketplaceId, int $inventoryId = 0): Collection {
         // Get Errors
-        $errors = $this->getAll(['marketplace_id' => $marketplaceId, 'inventory_id' => $inventoryId]);
+        $errors = $this->getAll([
+            'marketplace_id' => $marketplaceId,
+            'inventory_id' => $inventoryId,
+            'expired_status' => Error::EXPIRED_ALREADY
+        ]);
 
         // Get First
         $collection = new Collection();
@@ -192,6 +209,19 @@ class ErrorRepository implements ErrorRepositoryInterface {
 
         // Return Error
         return $collection;
+    }
+
+    /**
+     * Get All Active Errors on Dealer
+     * 
+     * @param int $dealerId
+     * @return Collection<Error>
+     */
+    public function getAllActive(int $dealerId): DbCollection {
+        return Error::leftJoin(Marketplace::getTableName(), Marketplace::getTableName() . '.id',
+                                        '=', Error::getTableName() . '.marketplace_id')
+                    ->where(Marketplace::getTableName() . '.dealer_id', '=', $dealerId)
+                    ->where('dismissed', 0)->whereNull('inventory_id')->get();
     }
 
     protected function getSortOrders() {
