@@ -44,4 +44,8 @@ return [
     'tomtom' => [
         'key' => env('TOMTOM_API_KEY', ''),
     ],
+
+    'google' => [
+        'key' => env('GOOGLE_API_KEY', ''),
+    ]
 ];
