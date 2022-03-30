@@ -8,7 +8,7 @@ class GoogleGeocodeResponseTransformer
 {
     public function transform(GoogleGeocodeResponse $response): array
     {
-        $itemTransformer = new TomTomGeocodeResponseItemTransformer();
+        $itemTransformer = new GoogleGeocodeResponseItemTransformer();
         $data = [];
         foreach ($response->results as $result) {
             $data[] = $itemTransformer->transform($result);
