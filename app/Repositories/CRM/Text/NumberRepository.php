@@ -8,6 +8,7 @@ use App\Repositories\CRM\Text\DealerLocationRepositoryInterface;
 use App\Models\CRM\Text\Number;
 use App\Models\CRM\Text\NumberTwilio;
 use App\Services\CRM\Text\TextServiceInterface;
+use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
 
 class NumberRepository implements NumberRepositoryInterface {
@@ -127,6 +128,23 @@ class NumberRepository implements NumberRepositoryInterface {
                      ->orWhere('customer_number', $customerNo)
                      ->all();
     }
+
+    /**
+     * Is Active Twilio Number?
+     * 
+     * @param string $twilioNumber
+     * @param string $maskedNumber
+     * @return Number
+     */
+    public function isActiveTwilioNumber(string $twilioNumber, string $maskedNumber): Number {
+        // Return Number
+        return Number::where('twilio_number', $twilioNumber)
+                     ->where(function(Builder $query) use($maskedNumber) {
+                        $query = $query->where('customer_number', $maskedNumber)
+                                       ->orWhere('dealer_number', $maskedNumber);
+                     })->first();
+    }
+
 
     /**
      * Delete Twilio Number

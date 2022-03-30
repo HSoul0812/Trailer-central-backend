@@ -128,6 +128,13 @@ return [
             'days' => 3,
         ],
 
+        'marketplace' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/services/marketplace.log'),
+            'level' => 'debug',
+            'days' => 3,
+        ],
+
         'dispatch-fb' => [
             'driver' => 'daily',
             'path' => storage_path('logs/dispatch/facebook.log'),

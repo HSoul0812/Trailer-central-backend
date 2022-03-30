@@ -36,7 +36,15 @@ class Marketplace extends Model
      * @const array Two-Factor Auth Types
      */
     const TFA_TYPES = [
-        'authy' => 'Authy'
+        'authy' => 'Authy',
+        'sms' => 'SMS'
+    ];
+
+    /**
+     * @const array Active Two-Factor Auth Types
+     */
+    const TFA_TYPES_ACTIVE = [
+        'sms'
     ];
 
 
