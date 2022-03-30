@@ -2,7 +2,10 @@
 
 namespace App\Services\MapSearch;
 
+use App\DTOs\MapSearch\GoogleAutocompleteResponse;
 use App\DTOs\MapSearch\GoogleGeocodeResponse;
+use App\Transformers\MapSearch\GoogleAutocompleteResponseTransformer;
+use App\Transformers\MapSearch\GoogleGeocodeResponseTransformer;
 use GuzzleHttp\Exception\GuzzleException;
 use JetBrains\PhpStorm\Pure;
 use League\Fractal\TransformerAbstract;
@@ -10,13 +13,14 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class GoogleMapSearchService implements MapSearchServiceInterface
 {
-    private const AUTOCOMPLETE_API_URL = 'https://maps.googleapis.com/maps/api/geocode/json';
-    private const REVERSE_API_URL = 'https://api.tomtom.com/search/2/reverseGeocode/';
+    private const GEOCODE_API_URL = 'https://maps.googleapis.com/maps/api/geocode/json';
+    private const AUTOCOMPLETE_API_URL = 'https://maps.googleapis.com/maps/api/place/autocomplete/json';
     private array $transformers;
     public function __construct(private GoogleMapSearchClient $httpClient)
     {
         $this->transformers = [
             GoogleGeocodeResponse::class => GoogleGeocodeResponseTransformer::class,
+            GoogleAutocompleteResponse::class => GoogleAutocompleteResponseTransformer::class
         ];
     }
 
@@ -28,13 +32,16 @@ class GoogleMapSearchService implements MapSearchServiceInterface
         });
     }
 
-    public function autocomplete(string $searchText): GoogleGeocodeResponse
+    public function autocomplete(string $searchText): GoogleAutocompleteResponse
     {
         $url = self::AUTOCOMPLETE_API_URL;
-        return GoogleGeocodeResponse::fromData(
+
+        return GoogleAutocompleteResponse::fromData(
             $this->handleHttpRequest('GET', $url, [
                 'query' => [
-                    'address' => $searchText
+                    'input' => $searchText,
+                    'types' => 'geocode',
+                    'components' => 'country:US|country:CA'
                 ]
             ])
         );
@@ -42,17 +49,28 @@ class GoogleMapSearchService implements MapSearchServiceInterface
 
     public function geocode(string $address): GoogleGeocodeResponse
     {
-        return $this->autocomplete($address);
+        $url = self::GEOCODE_API_URL;
+        return GoogleGeocodeResponse::fromData(
+            $this->handleHttpRequest('GET', $url, [
+                'query' => [
+                    'address' => $address,
+                    'components' => 'country:US|country:CA'
+                ]
+            ])
+        );
     }
 
-//    public function reverse(float $lat, float $lng): TomTomReverseGeocodeResponse
-//    {
-//        $url = self::REVERSE_API_URL . "$lat,$lng" . ".json";
-//
-//        return TomTomReverseGeocodeResponse::fromData(
-//            $this->handleHttpRequest('GET', $url, [])
-//        );
-//    }
+    public function reverse(float $lat, float $lng): GoogleGeocodeResponse
+    {
+        $url = self::GEOCODE_API_URL;
+        return GoogleGeocodeResponse::fromData(
+            $this->handleHttpRequest('GET', $url, [
+                'query' => [
+                    'latlng'=>"$lat,$lng",
+                ]
+            ])
+        );
+    }
 
     /**
      * @param string $class

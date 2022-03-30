@@ -3,8 +3,9 @@
 namespace App\Transformers\MapSearch;
 
 use App\DTOs\MapSearch\GoogleGeocodeResponse;
+use League\Fractal\TransformerAbstract;
 
-class GoogleGeocodeResponseTransformer
+class GoogleGeocodeResponseTransformer extends TransformerAbstract
 {
     public function transform(GoogleGeocodeResponse $response): array
     {

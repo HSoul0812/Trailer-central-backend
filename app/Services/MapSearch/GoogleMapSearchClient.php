@@ -19,8 +19,7 @@ class GoogleMapSearchClient extends Client
             return $request->withUri(Uri::withQueryValues(
                 $request->getUri(),
                 [
-                    'key' => config('services.google.key'),
-                    'components' => 'country:US|country:CA'
+                    'key' => config('services.google.key')
                 ]
             ));
         }));
