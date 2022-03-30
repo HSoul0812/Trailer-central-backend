@@ -14,7 +14,7 @@ class TomTomAddress
     public ?string $municipality;
     public ?string $countrySecondarySubdivision;
     public ?string $countryTertiarySubdivision;
-    public string $countrySubdivision;
+    public ?string $countrySubdivision;
     public ?string $countrySubdivisionName;
     public ?string $postalCode;
     public ?string $postalName;
@@ -35,7 +35,7 @@ class TomTomAddress
      $obj->municipality = $data['municipality'] ?? null;
      $obj->countrySecondarySubdivision = $data['countrySecondarySubdivision'] ?? null;
      $obj->countryTertiarySubdivision = $data['countryTertiarySubdivision'] ?? null;
-     $obj->countrySubdivision = $data['countrySubdivision'];
+     $obj->countrySubdivision = $data['countrySubdivision'] ?? null;
      $obj->countrySubdivisionName = $data['countrySubdivisionName'] ?? null;
      $obj->postalCode = $data['postalCode'] ?? null;
      $obj->postalName = $data['postalName'] ?? null;
