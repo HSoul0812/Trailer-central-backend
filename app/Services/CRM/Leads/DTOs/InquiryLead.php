@@ -400,14 +400,17 @@ class InquiryLead
      * @return string
      */
     public function getInquiryUrl(): string {
-        // Return URL With Website Domain
-        if(!empty($this->url)) {
-            return $this->websiteDomain . $this->url;
-        }
+        // Only Append If Domain Exists
+        if($this->websiteDomain) {
+            // Return URL With Website Domain
+            if(!empty($this->url)) {
+                return $this->websiteDomain . $this->url;
+            }
 
-        // Return Referral URL Instead
-        if(!empty($this->referral)) {
-            return $this->websiteDomain . $this->referral;
+            // Return Referral URL Instead
+            if(!empty($this->referral)) {
+                return $this->websiteDomain . $this->referral;
+            }
         }
 
         // Return Blank

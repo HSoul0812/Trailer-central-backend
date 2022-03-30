@@ -138,7 +138,7 @@ class InquiryEmailService implements InquiryEmailServiceInterface
     public function fill(array $params): InquiryLead {
         // Get Website
         $website = $this->website->get(['id' => $params['website_id']]);
-        $params['website_domain'] = 'https://' . $website->domain;
+        $params['website_domain'] = !empty($website->domain) ? 'https://' . $website->domain : '';
 
         // Get Inquiry From Details For Website
         $config = $this->websiteConfig->getValueOrDefault($params['website_id'], 'general/item_email_from');
