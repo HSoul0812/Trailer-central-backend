@@ -400,7 +400,18 @@ class InquiryLead
      * @return string
      */
     public function getInquiryUrl(): string {
-        return !empty($this->url) ? $this->url : $this->websiteDomain . $this->referral;
+        // Return URL With Website Domain
+        if(!empty($this->url)) {
+            return $this->websiteDomain . $this->url;
+        }
+
+        // Return Referral URL Instead
+        if(!empty($this->referral)) {
+            return $this->websiteDomain . $this->referral;
+        }
+
+        // Return Blank
+        return '';
     }
 
 
@@ -415,7 +426,7 @@ class InquiryLead
         if(is_array($this->inquiryEmail)) {
             return implode(";", $this->inquiryEmail);
         }
-        return $this->inquiryEmail;
+        return $this->inquiryEmail ?? '';
     }
 
     /**

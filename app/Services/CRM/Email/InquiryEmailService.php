@@ -147,8 +147,8 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         $params['from_name'] = $config['fromName'];
 
         // GetInquiry Stock/Url/Title from the Inventory ID
-        if(!empty($params['inventory']['inventory_id'])) {
-          $inventory = $this->inventory->get(['id' => $params['inventory']['inventory_id']]);
+        if(!empty($params['inventory'][0])) {
+          $inventory = $this->inventory->get(['id' => $params['inventory'][0]]);
           $params['stock'] = $inventory->stock;
           $params['url'] = $inventory ? $inventory->getUrl() : '';
           $params['title'] = $inventory->title;
