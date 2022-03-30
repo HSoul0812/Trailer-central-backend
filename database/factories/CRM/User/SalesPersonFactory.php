@@ -7,9 +7,9 @@ use App\Models\CRM\User\SalesPerson;
 use App\Models\User\NewDealerUser;
 use Faker\Generator as Faker;
 
-$factory->define(SalesPerson::class, function (Faker $faker) {
+$factory->define(SalesPerson::class, function (Faker $faker, array $attributes): array {
     // Get Dealer User
-    $newDealerUser = NewDealerUser::findOrFail(TestCase::getTestDealerId());
+    $newDealerUser = NewDealerUser::findOrFail($attributes['user_id'] ?? TestCase::getTestDealerId());
 
     // Initialize Email
     $email = $faker->unique()->safeEmail;
@@ -19,7 +19,7 @@ $factory->define(SalesPerson::class, function (Faker $faker) {
     // Return Overrides
     return [
         'user_id' => $newDealerUser->crmUser->user_id,
-        'dealer_location_id' => TestCase::getTestDealerLocationRandom(),
+        'dealer_location_id' => $attributes['dealer_location_id'] ?? TestCase::getTestDealerLocationRandom(),
         'perms' => 'user',
         'first_name' => $faker->firstName,
         'last_name' => $faker->lastName,
