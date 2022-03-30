@@ -15,6 +15,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::post('/stock-average-by-manufacturer-insights', [\App\Nova\Dashboards\Inventory\StockAverageByManufacturerInsights::class, 'cards']);
-Route::post('/price-average-by-manufacturer-insights', [\App\Nova\Dashboards\Inventory\PriceAverageByManufacturerInsights::class, 'cards']);
-Route::post('/leads-average-by-manufacturer-insights', [\App\Nova\Dashboards\Leads\LeadsAverageByManufacturerInsights::class, 'cards']);
+Route::post('/stock-average-by-manufacturer-insights', [\App\Nova\Dashboards\Inventory\StockAverageByManufacturerInsights::class, 'data']);
+Route::post('/price-average-by-manufacturer-insights', [\App\Nova\Dashboards\Inventory\PriceAverageByManufacturerInsights::class, 'data']);
+Route::post('/leads-average-by-manufacturer-insights', [\App\Nova\Dashboards\Leads\LeadsAverageByManufacturerInsights::class, 'data']);

@@ -29,4 +29,8 @@ return [
     'leads' => [
         'records_per_chunk' => env('TC_SYNCHRONIZATION_LEADS_RECORDS_PER_CHUNK', 16000),
     ],
+
+    'elasticsearch' => [
+        'url' => env('TC_ES_URL', 'http://localhost:9200'),
+    ]
 ];

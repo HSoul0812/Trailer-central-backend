@@ -34,6 +34,34 @@ abstract class AbstractAverageByManufacturerInsights extends Dashboard
      */
     public function cards(InsightRequestInterface $request): array
     {
+        $data = $this->data($request);
+
+        return [
+            (new AreaChart())
+                ->title('YOY % CHANGE')
+                ->uriKey(static::uriKey())
+                ->animations([
+                    'enabled' => true,
+                    'easing'  => 'easeinout',
+                ])
+                ->series($data['series'])
+                ->filters($data['filters'])
+                ->options([
+                    'xAxis' => [
+                        'categories' => $data['legends'],
+                    ],
+                ]),
+        ];
+    }
+
+    /**
+     * @throws \Dingo\Api\Exception\ResourceException                when some validation error has appeared
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException when some unknown error has appeared
+     *
+     * @return array{series: array<array>, legends: array<string>, filters: array<array>}
+     */
+    public function data(InsightRequestInterface $request): array
+    {
         if ($request->validate()) {
             $criteriaBuilder = new CriteriaBuilder([
                 'period'       => $request->getPeriod(),
@@ -91,42 +119,31 @@ abstract class AbstractAverageByManufacturerInsights extends Dashboard
                 ->toArray();
 
             return [
-                (new AreaChart())
-                    ->title('YOY % CHANGE')
-                    ->uriKey(static::uriKey())
-                    ->animations([
-                        'enabled' => true,
-                        'easing'  => 'easeinout',
-                    ])
-                    ->series($series)
-                    ->filters([
-                        'subset' => [
-                            'show'        => true,
-                            'list'        => $manufacturerList,
-                            'selected'    => $request->getSubset(),
-                            'placeholder' => 'Select a manufacturer',
+                'series'  => $series,
+                'legends' => $insights->legends,
+                'filters' => [
+                    'subset' => [
+                        'show'        => true,
+                        'list'        => $manufacturerList,
+                        'selected'    => $request->getSubset(),
+                        'placeholder' => 'Select a manufacturer',
+                    ],
+                    'category' => [
+                        'show'     => true,
+                        'list'     => $categoryList,
+                        'selected' => $request->getCategory(),
+                    ],
+                    'period' => [
+                        'selected' => $request->getPeriod(),
+                    ],
+                    'datePicker' => [
+                        'show'      => true,
+                        'dateRange' => [
+                            'startDate' => $request->getFrom(),
+                            'endDate'   => $request->getTo(),
                         ],
-                        'category' => [
-                            'show'     => true,
-                            'list'     => $categoryList,
-                            'selected' => $request->getSubset(),
-                        ],
-                        'period' => [
-                            'selected' => $request->getPeriod(),
-                        ],
-                        'datePicker' => [
-                            'show'      => true,
-                            'dateRange' => [
-                                'startDate' => $request->getFrom(),
-                                'endDate'   => $request->getTo(),
-                            ],
-                        ],
-                    ])
-                    ->options([
-                        'xAxis' => [
-                            'categories' => $insights->legends,
-                        ],
-                    ]),
+                    ],
+                ],
             ];
         }
 

@@ -9,6 +9,7 @@ use App\Nova\Http\Requests\InsightRequestInterface;
 use App\Nova\Http\Requests\Leads\LeadsAverageRequest;
 use App\Nova\Http\Requests\Leads\LeadsAverageRequestInterface;
 use App\Services\Leads\LeadsAverageByManufacturerServiceInterface;
+use TrailerTrader\Insights\AreaChart;
 
 class LeadsAverageByManufacturerInsights extends AbstractAverageByManufacturerInsights
 {
@@ -17,6 +18,34 @@ class LeadsAverageByManufacturerInsights extends AbstractAverageByManufacturerIn
         $this->constructRequestBindings();
 
         parent::__construct($this->service, self::uriKey());
+    }
+
+    /**
+     * Get the cards for the dashboard.
+     *
+     * @throws \Dingo\Api\Exception\ResourceException                when some validation error has appeared
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException when some unknown error has appeared
+     */
+    public function cards(InsightRequestInterface $request): array
+    {
+        $data = $this->data($request);
+
+        $chartCard = (new AreaChart())
+            ->title('YOY % CHANGE')
+            ->uriKey(static::uriKey())
+            ->animations([
+                'enabled' => true,
+                'easing'  => 'easeinout',
+            ])
+            ->series($data['series'])
+            ->filters($data['filters'])
+            ->options([
+                'xAxis' => [
+                    'categories' => $data['legends'],
+                ],
+            ]);
+
+        return [$chartCard, $chartCard];
     }
 
     /**

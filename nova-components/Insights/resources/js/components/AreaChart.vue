@@ -209,14 +209,10 @@ export default {
                 from: this.dateFormat(this.filters.datePicker.dateRange.startDate),
                 to: this.dateFormat(this.filters.datePicker.dateRange.endDate)
             }).then(({data}) => {
-                const chartData = data[0];
+                this.fillData(data.legends, data.series);
 
-                if (chartData) {
-                    this.fillData(chartData.options.xAxis.categories, chartData.series);
-                }
-
-                this.filters.subset.list = chartData.filters.subset.list;
-                this.filters.category.list = chartData.filters.category.list;
+                this.filters.subset.list = data.filters.subset.list;
+                this.filters.category.list = data.filters.category.list;
             }).catch((error) => console.warn(error));
         },
         fillData(labels, datasets) {
