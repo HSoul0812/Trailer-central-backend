@@ -32,11 +32,10 @@ class GoogleMapSearchService implements MapSearchServiceInterface
         });
     }
 
-    public function autocomplete(string $searchText): GoogleAutocompleteResponse
+    public function autocomplete(string $searchText): GoogleGeocodeResponse
     {
         $url = self::AUTOCOMPLETE_API_URL;
-
-        return GoogleAutocompleteResponse::fromData(
+        $autocomplete = GoogleAutocompleteResponse::fromData(
             $this->handleHttpRequest('GET', $url, [
                 'query' => [
                     'input' => $searchText,
@@ -45,6 +44,16 @@ class GoogleMapSearchService implements MapSearchServiceInterface
                 ]
             ])
         );
+
+        $geocodeResponse = new GoogleGeocodeResponse();
+        $geocodeResponse->results = [];
+        foreach($autocomplete->predictions as $p) {
+            $geocode = $this->geocode($p->description);
+            if(count($geocode->results) > 0) {
+                $geocodeResponse->results[] = $geocode->results[0];
+            }
+        }
+        return $geocodeResponse;
     }
 
     public function geocode(string $address): GoogleGeocodeResponse
@@ -86,7 +95,6 @@ class GoogleMapSearchService implements MapSearchServiceInterface
     {
         try {
             $response = $this->httpClient->request($method, $url, $options);
-
             return json_decode($response->getBody()->getContents(), true);
         } catch (GuzzleException $e) {
             \Log::info('Exception was thrown while calling here API.');
