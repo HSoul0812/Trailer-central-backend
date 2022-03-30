@@ -14,14 +14,14 @@ class TomTomGeocodeResponseItem
     public ?TomTomPosition $position;
 
     #[Pure]
- public static function fromData(array $data): self
- {
-     $obj = new self();
-     $obj->type = $data['type'];
-     $obj->entityType = $data['entityType'] ?? null;
-     $obj->address = TomTomAddress::fromData($data['address']);
-     $obj->position = isset($data['position']) ? TomTomPosition::fromData($data['position']) : null;
+    public static function fromData(array $data): self
+    {
+        $obj = new self();
+        $obj->type = $data['type'];
+        $obj->entityType = $data['entityType'] ?? null;
+        $obj->address = TomTomAddress::fromData($data['address']);
+        $obj->position = isset($data['position']) ? TomTomPosition::fromData($data['position']) : null;
 
-     return $obj;
- }
+        return $obj;
+    }
 }
