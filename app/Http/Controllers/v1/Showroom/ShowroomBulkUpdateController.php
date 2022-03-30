@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\v1\Showroom;
 
+use Exception;
 use Dingo\Api\Http\Request;
 
 use App\Http\Controllers\RestfulController;
@@ -69,7 +70,7 @@ class ShowroomBulkUpdateController extends RestfulController
                     'status' => 'success',
                     'message' => 'Updating Showrooms'
                 ]);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 return $this->response->array([
                     'status' => 'error',
                     'message' => $e->getMessage()
@@ -98,7 +99,7 @@ class ShowroomBulkUpdateController extends RestfulController
                     'status' => 'success',
                     'message' => 'Updating Showrooms'
                 ]);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 return $this->response->array([
                     'status' => 'error',
                     'message' => $e->getMessage()
