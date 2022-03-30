@@ -13,7 +13,7 @@ class UpdateDoubleJTrailersArchivedUnits extends Migration
      */
     public function up() {
         DB::transaction(function () {
-            Inventory::where('dealer_id', 1099)
+            Inventory::where('dealer_id', '=',1099)
                 ->where('archived_at', '<', '2021')
                 ->update(['status' => inventory::STATUS_SOLD]);
         });
