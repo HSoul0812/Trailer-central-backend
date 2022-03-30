@@ -30,7 +30,6 @@ use App\Services\Inventory\InventoryService;
 use App\Services\Inventory\InventoryServiceInterface;
 use App\Services\Leads\LeadService;
 use App\Services\Leads\LeadServiceInterface;
-use App\Services\MapSearch\GoogleMapSearchService;
 use App\Services\MapSearch\TomTomMapSearchService;
 use Illuminate\Support\ServiceProvider;
 
@@ -59,6 +58,6 @@ class TrailerCentralIntegrationServiceProvider extends ServiceProvider
         $this->app->bind(InventoryServiceInterface::class, InventoryService::class);
         $this->app->bind(GeolocationRepositoryInterface::class, GeolocationRepository::class);
         $this->app->bind(SysConfigRepositoryInterface::class, SysConfigRepository::class);
-        GoogleMapSearchService::register();
+        TomTomMapSearchService::register();
     }
 }
