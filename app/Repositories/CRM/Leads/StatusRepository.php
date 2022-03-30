@@ -89,9 +89,6 @@ class StatusRepository implements StatusRepositoryInterface {
             }
 
             // Override Status
-            if(!isset($params['status'])) {
-                $params['status'] = LeadStatus::STATUS_UNCONTACTED;
-            }
             if (isset($params['lead_status'])) {
                 $params['status'] = $params['lead_status'];
             }
