@@ -75,8 +75,8 @@ class QuickBooksErrors extends Resource
                 // Cast first letter to uppercase so 'add' becomes 'Add'
                 return ucfirst($this->action_type);
             }),
-            Text::make('Quickbooks Response Errors', 'error_result'),
-            Code::make('TC Quickbooks Payload', 'qb_obj')->json()->onlyOnDetail(),
+            Code::make('Quickbooks Response Errors', 'error_result')->language('xml'),
+            Code::make('TC Quickbooks Payload', 'qb_obj')->json(),
             Text::make('Customer', 'customer_name'),
             Text::make('Payment Method', 'payment_method')->onlyOnDetail(),
             Text::make('Sales Ticket #', 'sales_ticket_num')->onlyOnDetail(),
