@@ -2,13 +2,20 @@
 
 namespace App\Repositories\CRM\Customer;
 
+use App\Domains\QuickBooks\Actions\CreateAddCustomerQbObjFromCustomerAction;
+use App\Domains\QuickBooks\Actions\CreateAddCustomerQuickBookApprovalAction;
 use App\Exceptions\RepositoryInvalidArgumentException;
+use App\Models\CRM\Dms\Quickbooks\QuickbookApproval;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\User\Customer;
 use App\Traits\Repository\ElasticSearch;
+use Exception;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
+use InvalidArgumentException;
+use Log;
+use Throwable;
 
 class CustomerRepository implements CustomerRepositoryInterface
 {
@@ -44,17 +51,17 @@ class CustomerRepository implements CustomerRepositoryInterface
 
     /**
      * @param array DeleteCustomerRequest
-     * @throws \InvalidArgumentException when the dealer id `dealer_id` is not provided
-     * @throws \InvalidArgumentException when the customer id `id` is not provided
+     * @throws InvalidArgumentException when the dealer id `dealer_id` is not provided
+     * @throws InvalidArgumentException when the customer id `id` is not provided
      */
     public function delete($params) {
 
         if (empty($params['dealer_id'])) {
-            throw new \InvalidArgumentException('Dealer Id is required');
+            throw new InvalidArgumentException('Dealer Id is required');
         }
 
         if (empty($params['id'])) {
-            throw new \InvalidArgumentException('Customer Id is required');
+            throw new InvalidArgumentException('Customer Id is required');
         }
 
         return Customer::where([
@@ -100,12 +107,12 @@ class CustomerRepository implements CustomerRepositoryInterface
      * @param  Lead  $lead
      * @param  bool  $useExisting Force use an existing customer record
      * @return Customer
-     * @throws \Exception
+     * @throws Exception
      */
     public function createFromLead(Lead $lead, $useExisting = true)
     {
         if (empty($lead->first_name) || empty($lead->last_name)) {
-            throw new \Exception('Lead first name or last name is empty');
+            throw new Exception('Lead first name or last name is empty');
         }
 
         if ($useExisting) {
@@ -160,6 +167,9 @@ class CustomerRepository implements CustomerRepositoryInterface
         $customer->dealer_id = $lead->dealer_id;
         $customer->save();
 
+        // Create a quickbook_approval record
+        resolve(CreateAddCustomerQuickBookApprovalAction::class)->execute($customer);
+
         return $customer;
     }
 
@@ -169,12 +179,12 @@ class CustomerRepository implements CustomerRepositoryInterface
      * @param  array  $options Options: allowAll
      * @param  LengthAwarePaginator|null  $paginator Put a avr here, it will be given a paginator if `page` param is set
      * @return mixed
-     * @throws \Exception
+     * @throws Exception
      */
     public function search($query, $dealerId, $options = [], &$paginator = null)
     {
         if (empty($query['query']) && empty($options['allowAll'])) {
-            throw new \Exception('Query is required');
+            throw new Exception('Query is required');
         }
 
         $search = Customer::boolSearch();
