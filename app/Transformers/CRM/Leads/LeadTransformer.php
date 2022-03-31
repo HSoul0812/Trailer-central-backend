@@ -28,6 +28,7 @@ class LeadTransformer extends TransformerAbstract
         'textLogs',
         'otherLeadProperties',
         'leadStatus',
+        'inventory',
     ];
 
     protected $inventoryTransformer;
@@ -120,9 +121,26 @@ class LeadTransformer extends TransformerAbstract
      * @param Lead $lead
      * @return Item
      */
-    public function includeLeadStatus(Lead $lead): Item
+    public function includeLeadStatus(Lead $lead): ?Item
     {
+        if (empty($lead->leadStatus)) {
+            return null;
+        }
+
         return $this->item($lead->leadStatus, new LeadStatusTransformer());
+    }
+
+    /**
+     * @param Lead $lead
+     * @return Item
+     */
+    public function includeInventory(Lead $lead): ?Item
+    {
+        if (empty($lead->inventory)) {
+            return null;
+        }
+
+        return $this->item($lead->inventory, $this->inventoryTransformer);
     }
 
     public function includeOtherLeadProperties(Lead $lead): Item

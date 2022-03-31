@@ -21,6 +21,7 @@ class LeadStatusTransformer extends TransformerAbstract
             'sales_person_id' => $leadStatus->sales_person_id,
             'status' => $leadStatus->status,
             'contact_type' => $leadStatus->contact_type,
+            'next_contact_date' => $leadStatus->next_contact_date,
         ];
     }
 }

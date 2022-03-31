@@ -757,6 +757,16 @@ $api->version('v1', function ($route) {
             });*/
         });
 
+        /*
+        |--------------------------------------------------------------------------
+        | Lead Products
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('leads/products', 'App\Http\Controllers\v1\CRM\Leads\ProductController@index');
+
         $route->group([
             'prefix' => 'integration'
         ], function ($route) {

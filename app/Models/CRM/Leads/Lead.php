@@ -67,6 +67,7 @@ use App\Models\CRM\Leads\Facebook\Lead as FbLead;
  * @property Website $website
  * @property LeadStatus $leadStatus
  * @property FbLead $fbLead
+ * @property Inventory $inventory
  */
 class Lead extends Model
 {

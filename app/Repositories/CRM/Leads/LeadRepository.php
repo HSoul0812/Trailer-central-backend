@@ -35,6 +35,7 @@ class LeadRepository implements LeadRepositoryInterface {
         'leadStatus',
         'interactions',
         'textLogs',
+        'inventory',
     ];
 
     private $sortOrders = [
