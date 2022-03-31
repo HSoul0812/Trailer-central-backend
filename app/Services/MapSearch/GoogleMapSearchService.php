@@ -39,7 +39,7 @@ class GoogleMapSearchService implements MapSearchServiceInterface
             $this->handleHttpRequest('GET', $url, [
                 'query' => [
                     'input' => $searchText,
-                    'types' => 'geocode',
+                    'types' => '(regions)',
                     'components' => 'country:US|country:CA'
                 ]
             ])
