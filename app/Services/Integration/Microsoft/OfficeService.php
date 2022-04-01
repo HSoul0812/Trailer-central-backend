@@ -6,6 +6,7 @@ use App\Exceptions\Common\MissingFolderException;
 use App\Exceptions\Integration\Microsoft\MissingAzureIdTokenException;
 use App\Models\Integration\Auth\AccessToken;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
+use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Services\Integration\Common\DTOs\AttachmentFile;
 use App\Services\Integration\Common\DTOs\CommonToken;
 use App\Services\Integration\Common\DTOs\EmailToken;
@@ -57,9 +58,17 @@ class OfficeService extends AzureService implements OfficeServiceInterface
 
     /**
      * Create Microsoft Azure Log
+     * 
+     * @param InteractionEmailServiceInterface $interactionEmail
+     * @param Manager $fractal
      */
-    public function __construct(Manager $fractal)
-    {
+    public function __construct(
+        InteractionEmailServiceInterface $interactionEmail,
+        Manager $fractal
+    ) {
+        // Set Interfaces
+        $this->interactionEmail = $interactionEmail;
+
         // Initialize Services
         $this->fractal = $fractal;
         $this->fractal->setSerializer(new NoDataArraySerializer());
@@ -162,6 +171,11 @@ class OfficeService extends AzureService implements OfficeServiceInterface
 
         // Get Messages From Microsoft Account
         $email = $graph->createRequest('POST', '/me/sendMail')->attachBody(['Message' => $message])->execute();
+
+        // Store Attachments
+        if(!empty($parsedEmail->getAttachments())) {
+            $parsedEmail->setAttachments($this->interactionEmail->storeAttachments($smtpConfig->getAccessToken()->dealer_id, $parsedEmail));
+        }
 
         // Return Email
         return $parsedEmail;
