@@ -9,8 +9,8 @@ class GoogleMapPlusCode
 
     public static function fromData(array $data): self {
         $obj = new self();
-        $obj->compound_code = $data['compound_code'];
-        $obj->global_code = $data['global_code'];
+        $obj->compound_code = $data['compound_code'] ?? null;
+        $obj->global_code = $data['global_code'] ?? null;
         return $obj;
     }
 }
