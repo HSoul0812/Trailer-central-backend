@@ -231,16 +231,13 @@ class InventoryService implements InventoryServiceInterface
     }
 
     private function buildFilter(ESInventoryQueryBuilder $queryBuilder, array $params) {
-        $filter = "doc['location.address'].value != '---'";
         if(!empty($params['sale'])) {
-            $filter .= "
-            && doc['salesPrice'].value > 0.0 && doc['salesPrice'].value < doc['websitePrice'].value
-            ";
-        }
-        $queryBuilder->setFilterScript([
-            'source' => $filter,
-            'lang' => 'painless'
-        ]);
+            $filter = "doc['salesPrice'].value > 0.0 && doc['salesPrice'].value < doc['websitePrice'].value";
+            $queryBuilder->setFilterScript([
+                'source' => $filter,
+                'lang' => 'painless'
+            ]);
+        }  
     }
 
     private function buildGeoFiltering(
