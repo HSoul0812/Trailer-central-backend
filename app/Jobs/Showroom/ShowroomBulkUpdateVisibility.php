@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Log;
 
 class ShowroomBulkUpdateVisibility extends Job {
 
-    public $timeout = 0;
+    //public $timeout = 0;
     public $tries = 2;
 
     /**
