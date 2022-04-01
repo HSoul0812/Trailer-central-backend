@@ -153,7 +153,7 @@ class TwilioService implements TextServiceInterface
 
             // Retrieved Phone Numbers!
             $this->log->info('Found ' . count($list) . ' Phone Numbers from Twilio');
-        } catch (Exception $ex) {
+        } catch (\Exception $ex) {
             $this->log->error('Error occurred trying to get Twilio Numbers: ' . $ex->getMessage());
         }
 
