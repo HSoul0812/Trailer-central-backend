@@ -767,6 +767,16 @@ $api->version('v1', function ($route) {
         */
         $route->get('leads/products', 'App\Http\Controllers\v1\CRM\Leads\ProductController@index');
 
+        /*
+        |--------------------------------------------------------------------------
+        | Dealer Documents
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('user/documents', 'App\Http\Controllers\v1\CRM\Documents\DealerDocumentsController@index');
+
         $route->group([
             'prefix' => 'integration'
         ], function ($route) {
