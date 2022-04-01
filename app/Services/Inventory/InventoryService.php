@@ -55,6 +55,9 @@ class InventoryService implements InventoryServiceInterface
       'type_id'   => 1,
     ];
 
+    const INVENTORY_SOLD = 'sold';
+    const INVENTORY_AVAILABLE = 'available';
+
     public function __construct(
         private GuzzleHttpClient $httpClient,
         private SysConfigRepositoryInterface $sysConfigRepository,
@@ -157,7 +160,7 @@ class InventoryService implements InventoryServiceInterface
     private function getTypedAggregations($params) {
         $esSearchUrl = $this->esSearchUrl();
         $queryBuilder = new ESInventoryQueryBuilder();
-        $this->buildTypeQuery($queryBuilder, $params);
+        $this->buildSearchTypeQuery($queryBuilder, $params);
         $this->buildTypeAggregations($queryBuilder, $params);
         $query = $queryBuilder->build();
 
@@ -176,7 +179,7 @@ class InventoryService implements InventoryServiceInterface
     private function getCategorizedAggregations($params) {
         $esSearchUrl = $this->esSearchUrl();
         $queryBuilder = new ESInventoryQueryBuilder();
-        $this->buildCategoryQuery($queryBuilder, $params);
+        $this->buildSearchCategoryQuery($queryBuilder, $params);
         $this->buildCategoryAggregations($queryBuilder, $params);
         $query = $queryBuilder->build();
 
@@ -308,6 +311,7 @@ class InventoryService implements InventoryServiceInterface
 
     private function buildTermQueries(ESInventoryQueryBuilder $queryBuilder, array $params) {
         $queryBuilder->termQuery('isRental', false);
+        $queryBuilder->termQuery('availability',self::INVENTORY_AVAILABLE);
         foreach(self::TERM_SEARCH_KEY_MAP as $field => $searchField) {
             if (isset($params['type_id']) && $searchField == 'category') {
               $mapped_categories = $this->getMappedCategories(
@@ -321,23 +325,25 @@ class InventoryService implements InventoryServiceInterface
         }
     }
 
-    private function buildCategoryQuery(ESInventoryQueryBuilder $queryBuilder, array $params) {
+    private function buildSearchCategoryQuery(ESInventoryQueryBuilder $queryBuilder, array $params) {
         $mapped_categories = $this->getMappedCategories(
             $params['type_id'],
             $params['category'] ?? null
         );
         $queryBuilder->termQueries('category', $mapped_categories);
         $queryBuilder->termQuery('isRental', false);
+        $queryBuilder->termQuery('availability',self::INVENTORY_AVAILABLE);
         $this->buildFilter($queryBuilder, []);
     }
 
-    private function buildTypeQuery(ESInventoryQueryBuilder $queryBuilder, array $params) {
+    private function buildSearchTypeQuery(ESInventoryQueryBuilder $queryBuilder, array $params) {
         $mapped_categories = $this->getMappedCategories(
             $params['type_id'],
             null
         );
         $queryBuilder->termQueries('category', $mapped_categories);
         $queryBuilder->termQuery('isRental', false);
+        $queryBuilder->termQuery('availability',self::INVENTORY_AVAILABLE);
         $this->buildFilter($queryBuilder, []);
     }
 
