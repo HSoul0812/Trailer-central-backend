@@ -97,7 +97,7 @@ $api->version('v1', function ($route) {
      */
     $route->get('parts/bins', 'App\Http\Controllers\v1\Parts\BinController@index');
     $route->put('parts/bins', 'App\Http\Controllers\v1\Parts\BinController@create');
-    $route->post('parts/bins/{id}', 'App\Http\Controllers\v1\Parts\BinController@create')->where('id', '[0-9]+');
+    $route->post('parts/bins/{id}', 'App\Http\Controllers\v1\Parts\BinController@update')->where('id', '[0-9]+');
     $route->delete('parts/bins/{id}', 'App\Http\Controllers\v1\Parts\BinController@destroy')->where('id', '[0-9]+');
 
     /**
