@@ -32,28 +32,18 @@ class GoogleMapSearchService implements MapSearchServiceInterface
         });
     }
 
-    public function autocomplete(string $searchText): GoogleGeocodeResponse
+    public function autocomplete(string $searchText): GoogleAutocompleteResponse
     {
         $url = self::AUTOCOMPLETE_API_URL;
-        $autocomplete = GoogleAutocompleteResponse::fromData(
+        return GoogleAutocompleteResponse::fromData(
             $this->handleHttpRequest('GET', $url, [
                 'query' => [
                     'input' => $searchText,
-                    'types' => 'geocode',
+                    'types' => '(regions)',
                     'components' => 'country:US|country:CA'
                 ]
             ])
         );
-
-        $geocodeResponse = new GoogleGeocodeResponse();
-        $geocodeResponse->results = [];
-        foreach($autocomplete->predictions as $p) {
-            $geocode = $this->geocode($p->description);
-            if(count($geocode->results) > 0) {
-                $geocodeResponse->results[] = $geocode->results[0];
-            }
-        }
-        return $geocodeResponse;
     }
 
     public function geocode(string $address): GoogleGeocodeResponse
