@@ -184,7 +184,10 @@ class InventoryTransformer extends TransformerAbstract
              'use_website_price' => $inventory->use_website_price,
              'minimum_selling_price' => $inventory->minimum_selling_price,
              'pac_type' => $inventory->pac_type,
-             'pac_amount' => $inventory->pac_amount
+             'pac_amount' => $inventory->pac_amount,
+             'show_on_ksl' => $inventory->show_on_ksl,
+             'show_on_racingjunk' => $inventory->show_on_racingjunk,
+             'show_on_rvtrader' => $inventory->show_on_rvtrader
          ];
     }
 
