@@ -10,6 +10,8 @@ use App\Models\Observers\CRM\Lead\LeadObserver;
 use App\Models\Observers\CRM\Lead\LeadStatusObserver;
 use App\Repositories\CRM\Documents\DealerDocumentsRepository;
 use App\Repositories\CRM\Documents\DealerDocumentsRepositoryInterface;
+use App\Repositories\CRM\Leads\LeadTradeRepository;
+use App\Repositories\CRM\Leads\LeadTradeRepositoryInterface;
 use App\Repositories\CRM\Refund\RefundRepository;
 use App\Repositories\CRM\Refund\RefundRepositoryInterface;
 use App\Services\CRM\Email\InquiryEmailService;
@@ -87,6 +89,7 @@ class CrmServiceProvider extends ServiceProvider
         $this->app->bind(CustomerRepositoryInterface::class, CustomerRepository::class);
         $this->app->bind(CustomerInventoryRepositoryInterface::class, CustomerInventoryRepository::class);
         $this->app->bind(DealerDocumentsRepositoryInterface::class, DealerDocumentsRepository::class);
+        $this->app->bind(LeadTradeRepositoryInterface::class, LeadTradeRepository::class);
 
         $this->app->bind(RefundRepositoryInterface::class, function () {
             return new RefundRepository(Refund::query());
