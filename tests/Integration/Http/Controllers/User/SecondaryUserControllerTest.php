@@ -8,9 +8,16 @@ use App\Models\User\AuthToken;
 use App\Models\User\User;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\User\DealerLocation;
+use App\Models\User\NewUser;
 use App\Models\User\Interfaces\PermissionsInterface;
 
-class SecondaryUserTest extends TestCase {
+/**
+  * Class SecondaryUserControllerTest
+  * @package Tests\Integration\Http\Controllers\User\SecondaryUser
+  *
+  * @coversDefaultClass \App\Http\Controllers\v1\Inventory\SecondaryUsersController
+  */
+class SecondaryUserControllerTest extends TestCase {
     use WithFaker;
 
     /** @var User */
@@ -25,6 +32,8 @@ class SecondaryUserTest extends TestCase {
     /** @var DealerLocation */
     protected $location;
 
+    protected $newUser;
+
     const apiEndpoint = '/api/user/secondary-users';
 
     public function getAccessToken()
@@ -34,8 +43,7 @@ class SecondaryUserTest extends TestCase {
 
     public function getDealerId()
     {
-        // return $this->dealer->dealer_id;
-        return self::getTestDealerId();
+        return $this->dealer->dealer_id;
     }
 
     public function getDealerLocationId()
@@ -52,10 +60,10 @@ class SecondaryUserTest extends TestCase {
     {
         parent::setUp();
 
-        // $this->dealer = factory(User::class)->create([
-        //     'type' => User::TYPE_DEALER,
-        //     'state' => User::STATUS_ACTIVE
-        // ]);
+        $this->dealer = factory(User::class)->create([
+            'type' => User::TYPE_DEALER,
+            'state' => User::STATUS_ACTIVE
+        ]);
 
         $this->token = factory(AuthToken::class)->create([
             'user_id' => $this->getDealerId(),
@@ -66,8 +74,12 @@ class SecondaryUserTest extends TestCase {
             'dealer_id' => $this->getDealerId()
         ]);
 
+        $this->newUser = factory(NewUser::class)->create([
+            'user_id' => $this->dealer->dealer_id
+        ]);
+
         $this->salesPerson = factory(SalesPerson::class)->create([
-            // 'user_id' => $this->getDealerId(),
+            'user_id' => $this->newUser->user_id,
             'dealer_location_id' => $this->getDealerLocationId()
         ]);
     }
@@ -239,7 +251,12 @@ class SecondaryUserTest extends TestCase {
                 ]
             ]);
 
-        return $response->decodeResponseJson()['data']['id'];
+        $newSecondaryUserId = $response->decodeResponseJson()['data']['id'];
+
+        $this->assertDatabaseHas('dealer_users', ['dealer_user_id' => $newSecondaryUserId]);
+        $this->assertDatabaseHas('dealer_user_permissions', ['dealer_user_id' => $newSecondaryUserId]);
+
+        return $newSecondaryUserId;
     }
 
     /**
@@ -320,12 +337,16 @@ class SecondaryUserTest extends TestCase {
 
         $jsonResponse = $response->decodeResponseJson();
 
-        // $userIndex = array_search($dependedData['userId'], array_column($jsonResponse['data'], 'id'));
-        $actualPermissions = $jsonResponse['data'][$dependedData['userIndex']]['permissions'];
-        foreach ($actualPermissions as $feature => $actualPermissionLevel) {
-            // 
-            if (in_array($feature, [PermissionsInterface::CRM, PermissionsInterface::LOCATIONS, PermissionsInterface::INVENTORY]))
+        $actualPermissions = $jsonResponse['data'][$dependedData['userIndex']]['permissions']['data'];
+        foreach ($actualPermissions as $actualPermission) {
+             
+            $feature = $actualPermission['feature'];
+            $actualPermissionLevel = $actualPermission['permission_level'];
+
+            if (in_array($feature, [PermissionsInterface::CRM, PermissionsInterface::LOCATIONS, PermissionsInterface::INVENTORY])) {
                 $this->assertTrue($expectedPermissionLevel === $actualPermissionLevel);
+                $this->assertDatabaseHas('dealer_user_permissions', ['dealer_user_id' => $dependedData['userId'], 'feature' => $feature, 'permission_level' => $expectedPermissionLevel]);
+            }
         }
     }
 
@@ -489,6 +510,8 @@ class SecondaryUserTest extends TestCase {
                 ]
             ])
             ->assertJsonMissingExact(['data.*.id', $data['userId']]);
+
+        $this->assertDatabaseMissing('dealer_users', ['dealer_user_id' => $data['userId']]);
     }
 
     public function tearDown(): void
@@ -499,7 +522,9 @@ class SecondaryUserTest extends TestCase {
 
         $this->location->delete();
 
-        // $this->dealer->delete();
+        $this->newUser->delete();
+
+        $this->dealer->delete();
 
         parent::tearDown();
     }
