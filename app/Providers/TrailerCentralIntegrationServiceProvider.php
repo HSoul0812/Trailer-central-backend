@@ -14,6 +14,8 @@ use App\Repositories\Inventory\InventoryLogRepository;
 use App\Repositories\Inventory\InventoryLogRepositoryInterface;
 use App\Repositories\Parts\TypeRepository;
 use App\Repositories\Parts\TypeRepositoryInterface;
+use App\Repositories\Glossary\GlossaryRepository;
+use App\Repositories\Glossary\GlossaryRepositoryInterface;
 use App\Repositories\SyncProcessRepository;
 use App\Repositories\SyncProcessRepositoryInterface;
 use App\Repositories\SysConfig\SysConfigRepository;
@@ -49,6 +51,7 @@ class TrailerCentralIntegrationServiceProvider extends ServiceProvider
         $this->app->bind(LeadServiceInterface::class, LeadService::class);
 
         $this->app->bind(TypeRepositoryInterface::class, TypeRepository::class);
+        $this->app->bind(GlossaryRepositoryInterface::class, GlossaryRepository::class);
 
         $this->app->bind(LeadRepositoryInterface::class, LeadRepository::class);
         $this->app->bind(LeadSyncServiceInterface::class, LeadSyncService::class);
