@@ -4,7 +4,17 @@ namespace App\Services\Inventory;
 
 class ESInventoryQueryBuilder
 {
-    private array $queries = [];
+    const OCCUR_MUST = 'must';
+    const OCCUR_SHOULD = 'should';
+    const OCCUR_MUST_NOT = 'must_not';
+
+    private array $queries = [
+        'must' => [],
+        'should' => [],
+        'must_not' => [],
+        'filter' => []
+    ];
+
     private array $fieldSorts = [];
     private bool $willPaginate = false;
     private ?int $page = null;
@@ -30,7 +40,7 @@ class ESInventoryQueryBuilder
         return $this->pageSize;
     }
 
-    public function rangeQuery(string $fieldKey, $min, $max)
+    public function rangeQuery(string $fieldKey, $min, $max, $context = self::OCCUR_MUST)
     {
         if ($min != null || $max != null) {
             $rangeQuery = [
@@ -45,21 +55,21 @@ class ESInventoryQueryBuilder
                 $rangeQuery['range'][$fieldKey]['lt'] = $max;
             }
 
-            $this->queries[] = $rangeQuery;
+            $this->queries[$context][] = $rangeQuery;
         }
         return $this;
     }
 
-    public function termQuery(string $fieldKey, $value)
+    public function termQuery(string $fieldKey, $value, $context = self::OCCUR_MUST)
     {
         $query = $this->_termQuery($fieldKey, $value);
         if ($query != null) {
-            $this->queries[] = $query;
+            $this->queries[$context][] = $query;
         }
         return $this;
     }
 
-    public function termQueries(string $fieldKey, ?string $valueString)
+    public function termQueries(string $fieldKey, ?string $valueString, $context = self::OCCUR_MUST)
     {
         if ($valueString != null) {
             $valueArr = explode(';', $valueString);
@@ -68,7 +78,7 @@ class ESInventoryQueryBuilder
                 $queries[] = $this->_termQuery($fieldKey, $value);
             }
 
-            $this->queries[] = [
+            $this->queries[$context][] = [
                 'bool' => [
                     'should' => $queries
                 ]
@@ -132,11 +142,17 @@ class ESInventoryQueryBuilder
             $result['size'] = $this->pageSize;
         }
 
-        if (!empty($this->queries)) {
+        // Collect valid query context
+        $queries = [];
+        foreach($this->queries as $context => $query) {
+            if(!empty($query)) {
+                $queries[$context] = $query;
+            }
+        }
+
+        if (!empty($queries)) {
             $query = [
-                'bool' => [
-                    'must' => $this->queries
-                ]
+                'bool' => $queries
             ];
 
             // building filters
