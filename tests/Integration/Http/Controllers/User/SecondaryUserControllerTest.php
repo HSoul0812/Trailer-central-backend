@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\User;
+namespace Tests\Integration\Http\Controllers\User;
 
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
