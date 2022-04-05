@@ -14,7 +14,6 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use App\Models\CRM\Dms\Printer\Settings;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\Builder;
-use App\Models\User\DealerLocation;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Services\User\UserService;
 use App\Traits\CompactHelper;
@@ -268,7 +267,7 @@ class User extends Model implements Authenticatable, PermissionsInterface
     public function getIsEcommerceActiveAttribute(): bool
     {
         $website = $this->website;
-        
+
         if ($website) {
           $isWebsiteConfigEcommerce = WebsiteConfig::where('website_id', $website->id)->where('key', WebsiteConfig::ECOMMERCE_KEY_ENABLE)->where('value', 1)->exists();
         } else {
@@ -330,5 +329,10 @@ class User extends Model implements Authenticatable, PermissionsInterface
 
     public static function getTableName() {
         return self::TABLE_NAME;
+    }
+
+    public function getDealerId(): int
+    {
+        return $this->dealer_id;
     }
 }
