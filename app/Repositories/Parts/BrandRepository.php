@@ -13,17 +13,6 @@ use App\Models\Parts\Part;
  */
 class BrandRepository implements BrandRepositoryInterface {
 
-    private $sortOrders = [
-        'name' => [
-            'field' => 'name',
-            'direction' => 'DESC'
-        ],
-        '-name' => [
-            'field' => 'name',
-            'direction' => 'ASC'
-        ],
-    ];
-
     public function create($params) {
         throw new NotImplementedException;
     }
@@ -60,19 +49,7 @@ class BrandRepository implements BrandRepositoryInterface {
             });
         }
 
-        if (isset($params['sort'])) {
-            $query = $this->addSortQuery($query, $params['sort']);
-        }
-
         return $query->paginate($params['per_page'])->appends($params);
-    }
-
-    private function addSortQuery($query, $sort) {
-        if (!isset($this->sortOrders[$sort])) {
-            return;
-        }
-
-        return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
     }
 
     public function update($params) {
