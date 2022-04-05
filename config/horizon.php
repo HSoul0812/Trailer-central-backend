@@ -156,7 +156,7 @@ return [
         'local' => [
             'supervisor-1' => [
                 'connection' => 'redis',
-                'queue' => ['default', 'parts', 'parts-export-new', 'factory-feeds', 'mails', 'files', 'cvr-send-file', 'scout', 'ids-export', 'reports', 'emailbuilder', 'blog-posts'],
+                'queue' => ['default', 'parts', 'parts-export-new', 'factory-feeds', 'mails', 'files', 'cvr-send-file', 'scout', 'ids-export', 'reports', 'emailbuilder', 'blog-posts', 'manufacturers'],
                 'balance' => 'simple',
                 'processes' => 3,
                 'tries' => 1,

@@ -64,7 +64,8 @@
         "symfony/dom-crawler": "^5.1",
         "tijsverkoyen/css-to-inline-styles": "^2.2.1",
         "twilio/sdk": "^5.31",
-        "webklex/laravel-imap": "~2.4"
+        "webklex/laravel-imap": "~2.4",
+        "showroom/bulkconfiguration": "*"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.4",
@@ -124,6 +125,10 @@
         {
             "type": "path",
             "url": "./nova-components/EditMapping"
+        },
+        {
+            "type": "path",
+            "url": "./nova-components/BulkConfiguration"
         }
     ],
     "minimum-stability": "dev",

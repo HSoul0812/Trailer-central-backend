@@ -217,6 +217,7 @@ return [
          * Nova stuff
          */
         \Feed\EditMapping\ToolServiceProvider::class,
+        \Showroom\BulkConfiguration\ToolServiceProvider::class,
     ],
 
     /*
