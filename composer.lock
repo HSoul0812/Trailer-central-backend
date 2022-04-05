@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a083cd17e8abbbb0d4b27bb9f911f0f9",
+    "content-hash": "06b1f8fb04aa04b7209a21a97d74a838",
     "packages": [
         {
             "name": "algolia/algoliasearch-client-php",
@@ -2276,11 +2276,11 @@
         },
         {
             "name": "feed/edit-mapping",
-            "version": "dev-feature/CRM-257",
+            "version": "dev-forked/develop-ro-taxes-new-ui",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/EditMapping",
-                "reference": "8fd7d56324ac0c7c64f8886e4ff46e0991f75b69"
+                "reference": "b43729ad6fdf37df73dbc44aa30beefbf5e3c2a4"
             },
             "require": {
                 "php": ">=7.1.0"
@@ -3653,7 +3653,7 @@
                 "type": "zip",
                 "url": "https://nova.laravel.com/dist/laravel/nova/laravel-nova-46e5ebbb36e56de0a0b4d87b9db63b1083da3365-zip-8fcd64.zip",
                 "reference": "46e5ebbb36e56de0a0b4d87b9db63b1083da3365",
-                "shasum": "ce6ec1192f55ccbc9ed02f880cd10c959b608aa2"
+                "shasum": "177c96ea319b525a565f8d21a9ee59d14a1a0dd5"
             },
             "require": {
                 "brick/money": "^0.4.2",
@@ -8047,16 +8047,16 @@
         },
         {
             "name": "symfony/intl",
-            "version": "v5.4.3",
+            "version": "v5.4.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/intl.git",
-                "reference": "29e326276b2455bcfa4ce02abcf7689e884acdac"
+                "reference": "47a1413da15ff840d7c419fa704d32caba3276ac"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/intl/zipball/29e326276b2455bcfa4ce02abcf7689e884acdac",
-                "reference": "29e326276b2455bcfa4ce02abcf7689e884acdac",
+                "url": "https://api.github.com/repos/symfony/intl/zipball/47a1413da15ff840d7c419fa704d32caba3276ac",
+                "reference": "47a1413da15ff840d7c419fa704d32caba3276ac",
                 "shasum": ""
             },
             "require": {
@@ -8115,7 +8115,7 @@
                 "localization"
             ],
             "support": {
-                "source": "https://github.com/symfony/intl/tree/v5.4.3"
+                "source": "https://github.com/symfony/intl/tree/v5.4.5"
             },
             "funding": [
                 {
@@ -8131,7 +8131,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2022-01-02T09:53:40+00:00"
+            "time": "2022-02-25T13:55:17+00:00"
         },
         {
             "name": "symfony/mime",
@@ -12400,5 +12400,5 @@
         "ext-pcntl": "7.1",
         "ext-posix": "7.1"
     },
-    "plugin-api-version": "1.1.0"
+    "plugin-api-version": "2.2.0"
 }
