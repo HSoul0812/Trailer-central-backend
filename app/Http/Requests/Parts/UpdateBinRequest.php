@@ -7,12 +7,20 @@ use App\Http\Requests\Request;
 /**
  * @author Marcel
  */
-class UpdateBinRequest extends Request {
-    
+class UpdateBinRequest extends Request
+{
     protected $rules = [
-        'location' => 'required|integer|cycle_count_exists',
-        'bin_name' => 'required',
-        'bin_id' => 'required'
+        'id' => 'required|integer|bin_exists|bin_belongs_to_dealer',
+        'location' => 'required|integer|location_belongs_to_dealer',
+        'bin_name' => 'required'
     ];
-    
+
+    public function validate(): bool
+    {
+        $this->merge([
+            'id' => (int) request()->route('id'),
+        ]);
+
+        return parent::validate();
+    }
 }

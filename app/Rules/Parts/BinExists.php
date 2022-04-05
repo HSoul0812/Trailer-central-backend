@@ -17,7 +17,7 @@ class BinExists implements Rule
      */
     public function passes($attribute, $value)
     {
-        return Bin::find($value);
+        return Bin::find($value) !== null;
     }
 
     /**
