@@ -114,6 +114,13 @@ class InquiryTextService implements InquiryTextServiceInterface
             $params['inventory'] = [];
         }
 
+        // GetInquiry Stock/Url/Title from the Inventory ID
+        if(!empty($params['inventory'][0]) && isset($params['inventory_name']) &&
+                $params['inventory_name'] === 'not_set') {
+            $inventory = $this->inventory->get(['id' => $params['inventory'][0]]);
+            $params['inventory_name'] = $inventory->stock;
+        }
+
         return $params +  [
             'lead_types'          => [LeadType::TYPE_TEXT],
             'title'               => $params['inventory_name'] ?? '',
