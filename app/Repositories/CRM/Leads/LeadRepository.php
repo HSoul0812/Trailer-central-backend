@@ -623,6 +623,15 @@ class LeadRepository implements LeadRepositoryInterface {
      */
     private function addLeadStatusToQuery($query, array $leadStatus)
     {
+        // If Uncontacted, add whereNull
+        if(in_array(Lead::STATUS_UNCONTACTED, $leadStatus)) {
+            return $query->where(function(Builder $q) use ($leadStatus) {
+                return $q->whereIn(LeadStatus::getTableName() . '.status', $leadStatus)
+                         ->orWhereNull(LeadStatus::getTableName() . '.status');
+            });
+        }
+
+        // Return Normal Standalone IN
         return $query->whereIn(LeadStatus::getTableName() . '.status', $leadStatus);
     }
 
