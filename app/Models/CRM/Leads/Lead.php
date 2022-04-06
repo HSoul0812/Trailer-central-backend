@@ -20,9 +20,11 @@ use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Traits\CompactHelper;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use App\Models\CRM\Leads\Facebook\Lead as FbLead;
+use App\Models\CRM\Leads\Facebook\User as FbUser;
 
 /**
  * Class Lead
@@ -66,7 +68,7 @@ use App\Models\CRM\Leads\Facebook\Lead as FbLead;
  *
  * @property Website $website
  * @property LeadStatus $leadStatus
- * @property FbLead $fbLead
+ * @property FbUser $fbUsers
  * @property Inventory $inventory
  */
 class Lead extends Model
@@ -297,11 +299,11 @@ class Lead extends Model
     }
 
     /**
-     * @return HasOne
+     * @return BelongsToMany
      */
-    public function fbLead(): HasOne
+    public function fbUsers(): BelongsToMany
     {
-        return $this->hasOne(FbLead::class, 'lead_id', 'identifier');
+        return $this->belongsToMany(FbUser::class, FbLead::class, 'lead_id', 'user_id', 'identifier', 'user_id');
     }
 
     /**

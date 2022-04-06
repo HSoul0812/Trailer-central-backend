@@ -31,11 +31,12 @@ class LeadRepository implements LeadRepositoryInterface {
     private const LEAD_SOURCE_CLASSIFIEDS = 'classifieds';
     private const HAS_PRODUCT = 'has_product';
 
-    private const AVAILABLE_INCLUDE = [
+    private const AVAILABLE_INCLUDES = [
         'leadStatus',
         'interactions',
         'textLogs',
         'inventory',
+        'fbUsers',
     ];
 
     private $sortOrders = [
@@ -141,7 +142,7 @@ class LeadRepository implements LeadRepositoryInterface {
         }
 
         if (isset($params['include']) && is_string($params['include'])) {
-            foreach (array_intersect(self::AVAILABLE_INCLUDE, explode(',', $params['include'])) as $include) {
+            foreach (array_intersect(self::AVAILABLE_INCLUDES, explode(',', $params['include'])) as $include) {
                 if ($include === 'interactions') {
                     $query = $query->with(['interactions' => function ($query) {
                         $query->with(['lead', 'emailHistory', 'leadStatus' => function ($query) {

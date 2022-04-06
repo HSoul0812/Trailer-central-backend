@@ -37,6 +37,7 @@ class LeadTradeTransformer extends TransformerAbstract
             'type' => $leadTrade->type,
             'make' => $leadTrade->make,
             'model' => $leadTrade->model,
+            'year' => $leadTrade->year,
             'price' => $leadTrade->price,
             'length' => $leadTrade->length,
             'width' => $leadTrade->width,

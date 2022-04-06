@@ -10,8 +10,10 @@ use App\Transformers\CRM\Text\TextTransformer;
 use App\Transformers\CRM\User\SalesPersonTransformer;
 use App\Transformers\Inventory\InventoryTransformer;
 use App\Transformers\User\DealerLocationTransformer;
+use League\Fractal\Resource\Collection;
 use League\Fractal\TransformerAbstract;
 use League\Fractal\Resource\Item;
+use App\Transformers\CRM\Leads\Facebook\UserTransformer as FbUserTransformer;
 
 class LeadTransformer extends TransformerAbstract
 {
@@ -29,13 +31,23 @@ class LeadTransformer extends TransformerAbstract
         'otherLeadProperties',
         'leadStatus',
         'inventory',
+        'fbUsers',
     ];
 
+    /**
+     * @var InventoryTransformer
+     */
     protected $inventoryTransformer;
+
+    /**
+     * @var FbUserTransformer
+     */
+    protected $fbUserTransformer;
 
     public function __construct()
     {
         $this->inventoryTransformer = new InventoryTransformer();
+        $this->fbUserTransformer = new FbUserTransformer();
     }
 
     /**
@@ -141,6 +153,19 @@ class LeadTransformer extends TransformerAbstract
         }
 
         return $this->item($lead->inventory, $this->inventoryTransformer);
+    }
+
+    /**
+     * @param Lead $lead
+     * @return Collection|array
+     */
+    public function includeFbUsers(Lead $lead)
+    {
+        if (empty($lead->fbUsers)) {
+            return [];
+        }
+
+        return $this->collection($lead->fbUsers, $this->fbUserTransformer);
     }
 
     public function includeOtherLeadProperties(Lead $lead): Item

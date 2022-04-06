@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $type
  * @property string $make
  * @property string $model
+ * @property int $year
  * @property float|null $price
  * @property float|null $length
  * @property float|null $width
