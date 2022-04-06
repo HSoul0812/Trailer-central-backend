@@ -24,16 +24,6 @@ class UpdateWebsitesTypeConfigForGolfcartForsale extends Migration
         ]
     ];
 
-    private $websiteConfig;
-
-    public function __construct()
-    {
-        $this->websiteConfig = DB::table('website')
-            ->select('type_config')
-            ->where('id', self::GOLF_CART_FOR_SALE_WEBSITE_ID)
-            ->first();
-    }
-
     /**
      * Run the migrations.
      *
@@ -41,11 +31,18 @@ class UpdateWebsitesTypeConfigForGolfcartForsale extends Migration
      */
     public function up()
     {
-        $config = unserialize($this->websiteConfig->type_config);
+        $websiteConfig = DB::table('website')
+            ->select('type_config')
+            ->where('id', self::GOLF_CART_FOR_SALE_WEBSITE_ID)
+            ->first();
+
+        $config = unserialize($websiteConfig->type_config);
 
         $config['filters'] = self::GOLF_CART_FOR_SALE_CUSTOM_CONFIG;
 
-        $this->websiteConfig->update(['type_config' => serialize($config)]);
+        DB::table('website')
+            ->where('id', self::GOLF_CART_FOR_SALE_WEBSITE_ID)
+            ->update(['type_config' => serialize($config)]);
     }
 
     /**
@@ -55,11 +52,18 @@ class UpdateWebsitesTypeConfigForGolfcartForsale extends Migration
      */
     public function down()
     {
-        $config = unserialize($this->websiteConfig->type_config);
+        $websiteConfig = DB::table('website')
+            ->select('type_config')
+            ->where('id', self::GOLF_CART_FOR_SALE_WEBSITE_ID)
+            ->first();
+
+        $config = unserialize($websiteConfig->type_config);
 
         unset($config['filters']['category']);
         unset($config['filters']['typeLabel']);
 
-        $this->websiteConfig->update(['type_config' => serialize($config)]);
+        DB::table('website')
+            ->where('id', self::GOLF_CART_FOR_SALE_WEBSITE_ID)
+            ->update(['type_config' => serialize($config)]);
     }
 }
