@@ -939,7 +939,6 @@ $api->version('v1', function ($route) {
                     $route->get('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@show')->where('id', '[0-9]+');
                     $route->post('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@update')->where('id', '[0-9]+');
                     $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@destroy')->where('id', '[0-9]+');*/
-                    $route->post('{id}/send', 'App\Http\Controllers\v1\CRM\Email\BlastController@send')->where('id', '[0-9]+');
                 });
             });
 
