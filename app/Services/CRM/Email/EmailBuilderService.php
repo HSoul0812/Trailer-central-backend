@@ -190,16 +190,12 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     /**
      * Send Lead Emails for Blast
      *
-     * @param int $id ID of Blast to Send Emails For
-     * @param string Comma-Delimited String of Lead ID's to Send Emails For Blast
+     * @param Blast $blast Model of Blast to Send Emails For
      * @throws FromEmailMissingSmtpConfigException
      * @throws SendBlastEmailsFailedException
      * @return array response
      */
-    public function sendBlast(int $id, string $leads): array {
-        // Get Blast Details
-        $blast = $this->blasts->get(['id' => $id]);
-
+    public function sendBlast(Blast $blast): array {
         // Get Sales Person
         if(!empty($blast->from_email_address)) {
             $salesPerson = $this->salespeople->getBySmtpEmail($blast->user_id, $blast->from_email_address);
@@ -224,11 +220,11 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         // Send Emails and Return Response
         try {
             // Dispatch Send EmailBuilder Job
-            $job = new EmailBuilderJob($builder, $leads);
+            $job = new EmailBuilderJob($builder, $blast->lead_ids);
             $this->dispatch($job->onQueue('emailbuilder'));
 
             // Return Array of Queued Leads
-            return $this->response($builder, $leads);
+            return $this->response($builder, $blast->lead_ids);
         } catch(\Exception $ex) {
             throw new SendBlastEmailsFailedException($ex);
         }
