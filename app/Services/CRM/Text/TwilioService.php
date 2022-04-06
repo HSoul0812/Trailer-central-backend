@@ -196,6 +196,14 @@ class TwilioService implements TextServiceInterface
                 $number = '+' . $number;
             }
 
+            // Is Env Var Number for Staging/Dev?
+            if($number === $this->from) {
+                // Do NOT Delete!
+                $this->log->info('Can NOT Delete Number ' + $this->from +
+                                    '! Number is forced by dev/staging environment!');
+                return false;
+            }
+
             // Get All Incoming Phone Numbers Matching Provided Number
             $success = true;
             $numbers = $this->twilio->incomingPhoneNumbers
