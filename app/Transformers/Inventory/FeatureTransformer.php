@@ -19,7 +19,7 @@ class FeatureTransformer extends TransformerAbstract
     {
         return [
             'feature_list_id' => $feature->feature_list_id,
-            'value' => $feature->value,
+            'value' => trim($feature->value),
             'feature_name' => $feature->featureList->feature_name,
         ];
     }

@@ -3,11 +3,13 @@
 namespace App\Repositories\Marketing\Facebook;
 
 use App\Exceptions\NotImplementedException;
+use App\Models\Marketing\Facebook\Error;
 use App\Models\Marketing\Facebook\Listings;
 use App\Models\Marketing\Facebook\Marketplace;
 use App\Repositories\Traits\SortTrait;
 use App\Traits\Repository\Transaction;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Builder;
 
 class MarketplaceRepository implements MarketplaceRepositoryInterface {
     use SortTrait, Transaction;
@@ -132,6 +134,26 @@ class MarketplaceRepository implements MarketplaceRepositoryInterface {
 
         if (isset($params['id'])) {
             $query = $query->whereIn(Marketplace::getTableName() . '.id', $params['id']);
+        }
+
+        // Exclude Integration ID's
+        if (isset($params['exclude'])) {
+            $query = $query->whereNotIn(Marketplace::getTableName() . '.id', $params['exclude']);
+        }
+
+        // Skip Integrations With Non-Expired Errors
+        if (isset($params['skip_errors'])) {
+            $query = $query->leftJoin(Error::getTableName(), function($join) {
+                $join->on(Error::getTableName() . '.marketplace_id', '=',
+                                        Marketplace::getTableName() . '.id')
+                     ->whereNull(Error::getTableName().'.inventory_id');
+            })->where(function(Builder $query) {
+                return $query->whereNull(Error::getTableName().'.id')
+                              ->orWhere(function(Builder $query) {
+                    return $query->where(Error::getTableName().'.dismissed', 0)
+                                 ->where(Error::getTableName().'.expires_at', '<', DB::raw('NOW()'));
+                });
+            });
         }
 
         if (isset($params['sort'])) {

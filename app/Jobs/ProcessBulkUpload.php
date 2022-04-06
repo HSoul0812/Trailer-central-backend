@@ -13,6 +13,9 @@ use Illuminate\Support\Facades\Log;
  */
 class ProcessBulkUpload extends Job {
 
+    public $timeout = 0;
+    public $tries = 2;
+
     /**
      * @var BulkUpload
      */

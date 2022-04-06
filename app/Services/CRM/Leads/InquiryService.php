@@ -3,17 +3,20 @@
 namespace App\Services\CRM\Leads;
 
 use App\Jobs\CRM\Leads\AutoAssignJob;
-use App\Jobs\Email\AutoResponderJob;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadType;
 use App\Models\CRM\Interactions\Interaction;
+use App\Models\User\User;
 use App\Models\Website\Config\WebsiteConfig;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
+use App\Repositories\User\UserRepository;
+use App\Repositories\User\UserRepositoryInterface;
 use App\Repositories\Website\Tracking\TrackingRepositoryInterface;
 use App\Repositories\Website\Tracking\TrackingUnitRepositoryInterface;
 use App\Services\CRM\Leads\DTOs\InquiryLead;
 use App\Services\CRM\Leads\InquiryServiceInterface;
 use App\Services\CRM\Leads\Export\ADFServiceInterface;
+use App\Services\CRM\Leads\Export\IDSServiceInterface;
 use App\Services\CRM\Email\InquiryEmailServiceInterface;
 use App\Services\CRM\Text\InquiryTextServiceInterface;
 use App\Services\Website\WebsiteConfigServiceInterface;
@@ -22,6 +25,7 @@ use App\Transformers\CRM\Leads\LeadTransformer;
 use App\Transformers\CRM\Interactions\InteractionTransformer;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Bus\DispatchesJobs;
+use Illuminate\Support\Facades\Log;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
 
@@ -69,6 +73,16 @@ class InquiryService implements InquiryServiceInterface
      */
     protected $adf;
 
+    /**
+     * @var App\Services\CRM\Leads\Export\IDSServiceInterface
+     */
+    protected $ids;
+
+    /**
+     * @var Illuminate\Support\Facades\Log
+     */
+    protected $log;
+
 
     /**
      * @var App\Transformers\CRM\Leads\LeadTransformer
@@ -89,6 +103,11 @@ class InquiryService implements InquiryServiceInterface
     private $webConfigService;
 
     /**
+     * @var UserRepositoryInterface
+     */
+    private $userRepo;
+
+    /**
      * LeadService constructor.
      */
     public function __construct(
@@ -99,21 +118,26 @@ class InquiryService implements InquiryServiceInterface
         InquiryEmailServiceInterface $inquiryEmail,
         InquiryTextServiceInterface $inquiryText,
         ADFServiceInterface $adf,
+        IDSServiceInterface $ids,
         LeadTransformer $leadTransformer,
         InteractionTransformer $interactionTransformer,
         Manager $fractal,
-        WebsiteConfigServiceInterface $webConfigService
+        WebsiteConfigServiceInterface $webConfigService,
+        UserRepositoryInterface $userRepo
     ) {
         // Initialize Services
         $this->leads = $leads;
         $this->inquiryEmail = $inquiryEmail;
         $this->inquiryText = $inquiryText;
         $this->adf = $adf;
+        $this->ids = $ids;
+        $this->webConfigService = $webConfigService;
 
         // Initialize Repositories
         $this->leadRepo = $leadRepo;
         $this->tracking = $tracking;
         $this->trackingUnit = $trackingUnit;
+        $this->userRepo = $userRepo;
 
         // Set Up Fractal
         $this->leadTransformer = $leadTransformer;
@@ -121,7 +145,8 @@ class InquiryService implements InquiryServiceInterface
         $this->fractal = $fractal;
         $this->fractal->setSerializer(new NoDataArraySerializer());
 
-        $this->webConfigService = $webConfigService;
+        // Get Logger
+        $this->log = Log::channel('inquiry');
     }
 
 
@@ -141,6 +166,7 @@ class InquiryService implements InquiryServiceInterface
 
         // Get Inquiry Lead
         $inquiry = $this->inquiryEmail->fill($params);
+        $this->log->info('Creating ' . $inquiry->inquiryType . ' inquiry email for ' . $inquiry->getInquiryTo());
 
         // Create or Merge Lead
         return $this->mergeOrCreate($inquiry, $params);
@@ -164,6 +190,7 @@ class InquiryService implements InquiryServiceInterface
         $inquiry = $this->inquiryEmail->fill($params);
 
         // Send Inquiry Email
+//        $this->log->info('Sending ' . $inquiry->inquiryType . ' inquiry email for ' . $inquiry->getInquiryTo());
         $this->inquiryEmail->send($inquiry);
 
         // Merge or Create Lead
@@ -178,6 +205,8 @@ class InquiryService implements InquiryServiceInterface
      *               merge: null|Interaction}
      */
     public function text(array $params): array {
+        $params['inventory'] = isset($params['inventory']) ? $params['inventory'] : [];
+
         $params = $this->inquiryText->merge($params);
 
         $inquiry = new InquiryLead($params);
@@ -200,8 +229,12 @@ class InquiryService implements InquiryServiceInterface
     public function mergeOrCreate(InquiryLead $inquiry, array $params): array {
         // Lead Type is NOT Financing?
         $interaction = null;
-        if(!in_array(LeadType::TYPE_FINANCING, $params['lead_types'])) {
 
+        /** @var User $dealer */
+        $dealer = $this->userRepo->get(['dealer_id' => (int)$inquiry->dealerId]);
+        $isCrmActive = $dealer && $dealer->isCrmActive; // when the dealer does not have active the CRM, then it should not merge leads
+
+        if($isCrmActive && !in_array(LeadType::TYPE_FINANCING, $params['lead_types'])) {
             // Check merge is enabled for given website.
             $configData = $this->webConfigService->getConfigByWebsite($params['website_id'], WebsiteConfig::LEADS_MERGE_ENABLED);
             if (!empty($configData[WebsiteConfig::LEADS_MERGE_ENABLED]) && $configData[WebsiteConfig::LEADS_MERGE_ENABLED] === "1") {
@@ -213,7 +246,15 @@ class InquiryService implements InquiryServiceInterface
 
                 // Merge Lead!
                 if (!empty($lead->identifier)) {
+                    $this->log->info('Merged lead inquiry into #' . $lead->identifier);
                     $interaction = $this->leads->merge($lead, $params);
+
+                    // Update Existing Lead
+                    $lead = $this->leads->update([
+                        'id' => $lead->identifier,
+                        'inventory' => array_merge($lead->inventory_ids, $params['inventory']),
+                        'lead_types' => array_merge($lead->lead_types, $params['lead_types'])
+                    ]);
                 }
             }
         }
@@ -221,11 +262,13 @@ class InquiryService implements InquiryServiceInterface
         // Create Lead!
         if(empty($lead->identifier)) {
             $lead = $this->leads->create($params);
+            $this->log->info('Created new lead #' . $lead->identifier);
         }
 
         // Lead Exists?!
         if(!empty($lead->identifier)) {
             // Queue Up Inquiry Jobs
+            $this->log->info('Handling jobs on lead #' . $lead->identifier);
             $this->queueInquiryJobs($lead, $inquiry);
         }
 
@@ -270,22 +313,24 @@ class InquiryService implements InquiryServiceInterface
         // Create Auto Assign Job
         if(empty($lead->leadStatus->sales_person_id)) {
             // Dispatch Auto Assign Job
+            $this->log->info('Handling auto assign on lead #' . $lead->identifier);
             $job = new AutoAssignJob($lead);
-            $this->dispatch($job->onQueue('mails'));
+            $this->dispatch($job->onQueue('inquiry'));
         }
-
-        // Dispatch Auto Responder Job
-        $job = new AutoResponderJob($lead);
-        $this->dispatch($job->onQueue('mails'));
 
         // Export ADF if Possible
         if(!in_array(LeadType::TYPE_FINANCING, $inquiry->leadTypes)) {
+            $this->log->info('Handling ADF export on lead #' . $lead->identifier);
             $this->adf->export($inquiry, $lead);
+
+            $this->log->info('Handling IDS export on lead #' . $lead->identifier);
+            $this->ids->exportInquiry($lead);
         }
 
         // Tracking Cookie Exists?
         if($inquiry->cookieSessionId) {
             // Set Tracking to Current Lead
+            $this->log->info('Handling lead tracking on lead #' . $lead->identifier);
             $this->tracking->updateTrackLead($inquiry->cookieSessionId, $lead->identifier);
 
             // Mark Track Unit as Inquired for Unit

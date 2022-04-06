@@ -6,10 +6,13 @@ use App\Models\User\AuthToken;
 use App\Models\User\Integration\Integration;
 use App\Models\Marketing\Facebook\Marketplace;
 use App\Models\Marketing\Facebook\Listings;
+use App\Models\Marketing\Facebook\Error;
 use App\Repositories\Marketing\TunnelRepositoryInterface;
 use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
 use App\Repositories\Marketing\Facebook\ListingRepositoryInterface;
 use App\Repositories\Marketing\Facebook\ImageRepositoryInterface;
+use App\Repositories\Marketing\Facebook\ErrorRepositoryInterface;
+use App\Repositories\Marketing\Facebook\PostingRepositoryInterface;
 use App\Services\Dispatch\Facebook\DTOs\DealerFacebook;
 use App\Services\Dispatch\Facebook\DTOs\InventoryFacebook;
 use App\Services\Dispatch\Facebook\DTOs\MarketplaceInventory;
@@ -45,24 +48,36 @@ class MarketplaceService implements MarketplaceServiceInterface
     protected $tunnels;
 
     /**
+     * @var PostingRepositoryInterface
+     */
+    protected $postingSession;
+
+    /**
      * Construct Facebook Marketplace Service
      * 
      * @param MarketplaceRepositoryInterface $marketplace
      * @param TunnelRepositoryInterface $tunnels
      * @param ListingRepositoryInterfaces $listings
      * @param ImageRepositoryInterfaces $images
+     * @param ErrorRepositoryInterfaces $errors
+     * @param PostingRepositoryInterface $postingSession
+     * @param InventoryTransformer $inventoryTransformer
      */
     public function __construct(
         MarketplaceRepositoryInterface $marketplace,
         TunnelRepositoryInterface $tunnels,
         ListingRepositoryInterface $listings,
         ImageRepositoryInterface $images,
+        ErrorRepositoryInterface $errors,
+        PostingRepositoryInterface $postingSession,
         InventoryTransformer $inventoryTransformer
     ) {
         $this->marketplace = $marketplace;
         $this->tunnels = $tunnels;
         $this->listings = $listings;
         $this->images = $images;
+        $this->errors = $errors;
+        $this->postingSession = $postingSession;
 
         // Initialize Inventory Transformer
         $this->inventoryTransformer = $inventoryTransformer;
@@ -194,7 +209,7 @@ class MarketplaceService implements MarketplaceServiceInterface
                         'image_id' => $imageId
                     ]);
                 }
-                $this->log->info('Saved ' . count($params['images']) . ' for ' .
+                $this->log->info('Saved ' . count($params['images']) . ' Images for ' .
                                     'Listing #' . $params['id']);
             }
 
@@ -203,7 +218,7 @@ class MarketplaceService implements MarketplaceServiceInterface
             // Return Listing
             return $listing;
         } catch (Exception $e) {
-            $this->logger->error('Marketplace Listing create error. params=' .
+            $this->log->error('Marketplace Listing create error. params=' .
                                     json_encode($params), $e->getTrace());
 
             $this->listings->rollbackTransaction();
@@ -219,25 +234,37 @@ class MarketplaceService implements MarketplaceServiceInterface
      * @return MarketplaceStep
      */
     public function step(MarketplaceStep $step): MarketplaceStep {
-        // Log
+        // Log Step Response
         $this->log->info($step->getResponse());
 
-        // Catch Logs From Extension
-        foreach($step->getLogs() as $log) {
-            // Get Step
-            if($step->isError() && !$log->isError()) {
-                continue;
-            }
+        // Handle Logs
+        $this->saveLogs($step->getLogs(), $step->isError());
 
-            // Add to Log File
-            $this->log->{$log->psr}($log->getLogString());
+        // Create Error
+        $this->reportError($step);
 
-            // Send Error to Slack
-            if($log->isError()) {
-                // TO DO: Send to Slack
-                // Create a Service to Handle Slack Messages and Toggle Type
-                //$this->notifySlack($msg, $psr);
+        try {
+            // add marketplace_id to session
+            if ($step->isLogin()) {
+                $this->postingSession->create([
+                    'id' => $step->marketplaceId
+                ]);
             }
+            // remove marketplace_id from session
+            elseif ($step->isLogout() || $step->isStop()) {
+                $this->postingSession->delete([
+                    'id' => $step->marketplaceId
+                ]);
+            }
+            // update marketplace_id on session
+            else {
+                $this->postingSession->update([
+                    'id' => $step->marketplaceId
+                ]);
+            }
+        } catch (\Exception $e) {
+            $this->log->error('Error occurred during updating step for fb marketplace ' .
+                                    '#' . $step->marketplaceId, $e->getTrace());
         }
 
         // Return Listing
@@ -251,8 +278,13 @@ class MarketplaceService implements MarketplaceServiceInterface
      * @return Collection<DealerFacebook>
      */
     private function getIntegrations(): Collection {
+        
+        $runningIntegrationIds = $this->postingSession->getIntegrationIds();
+
         $integrations = $this->marketplace->getAll([
-            'sort' => '-imported'
+            'sort' => '-imported',
+            'exclude' => $runningIntegrationIds,
+            'skip_errors' => 1
         ]);
 
         // Loop Facebook Integrations
@@ -321,5 +353,62 @@ class MarketplaceService implements MarketplaceServiceInterface
             'paginator' => new IlluminatePaginatorAdapter($inventory)
         ]);
         return $response;
+    }
+
+    /**
+     * Save Logs to Dispatch Logs
+     * 
+     * @param Marketplace $integration
+     * @param string $type missing|updates|sold
+     * @param array $params
+     * @return Pagination<InventoryFacebook>
+     */
+    private function saveLogs(Collection $logs, bool $isError = false) {
+        // Catch Logs From Extension
+        foreach($logs as $log) {
+            // Get Step
+            if($isError && !$log->isError()) {
+                continue;
+            }
+
+            // Add to Log File
+            $this->log->{$log->psr}($log->getLogString());
+            $logs++;
+
+            // Send Error to Slack
+            if($log->isError()) {
+                // TO DO: Send to Slack
+                // Create a Service to Handle Slack Messages and Toggle Type
+                //$this->notifySlack($msg, $psr);
+            }
+        }
+    }
+
+    /**
+     * Save Logs to Dispatch Logs
+     * 
+     * @param MarketplaceStep $step
+     * @return null|Error
+     */
+    private function reportError(MarketplaceStep $step): ?Error {
+        // Create New FB Error From Returned Step Details
+        if($step->isError()) {
+            // Dismiss Existing Errors
+            $this->errors->dismissAll($step->marketplaceId, $step->inventoryId ?? 0);
+
+            // Return Error
+            return $this->errors->create([
+                'marketplace_id' => $step->marketplaceId,
+                'inventory_id' => $step->inventoryId,
+                'action' => $step->action,
+                'step' => $step->step,
+                'error_type' => $step->getErrorType(),
+                'error_message' => $step->message,
+                'expires_at' => $step->getExpiryTime()
+            ]);
+        }
+
+        // No Error, Return Null
+        return null;
     }
 }
