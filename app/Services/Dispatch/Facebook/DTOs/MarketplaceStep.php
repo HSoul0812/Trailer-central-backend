@@ -2,8 +2,10 @@
 
 namespace App\Services\Dispatch\Facebook\DTOs;
 
+use App\Models\Marketing\Facebook\Error;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
 /**
@@ -19,7 +21,7 @@ class MarketplaceStep
      * @const array
      */
     const ACTIONS = [
-        'choose', 'create', 'update', 'delete'
+        'choose', 'create', 'update', 'delete', 'error'
     ];
 
     /**
@@ -50,6 +52,25 @@ class MarketplaceStep
     const DEFAULT_SELECTORS = 'common';
 
 
+    /**
+     * @const string
+     */
+    const STEP_LOGIN = 'login-fb';
+
+    /**
+     * @const string
+     */
+    const STEP_LOGGED_IN = 'goto-marketing';
+
+    /**
+     * @const string
+     */
+    const STEP_LOGOUT = 'logout-and-close';
+
+    /**
+     * @const string
+     */
+    const STEP_STOP = 'stop-script';
 
     /**
      * @var string
@@ -67,9 +88,24 @@ class MarketplaceStep
     private $inventoryId;
 
     /**
+     * @var int
+     */
+    private $marketplaceId;
+
+    /**
      * @var string<json>
      */
     private $logs;
+
+    /**
+     * @var string
+     */
+    private $error;
+
+    /**
+     * @var string
+     */
+    private $message;
 
 
     /**
@@ -121,6 +157,11 @@ class MarketplaceStep
      * @return Collection<MarketplaceLog>
      */
     public function getLogs(): Collection {
+        // No Logs to Send
+        if(empty($this->logs)) {
+            return new Collection();
+        }
+
         // Get Logs Array
         $logs = json_decode($this->logs);
 
@@ -128,8 +169,8 @@ class MarketplaceStep
         $logging = new Collection();
         foreach($logs as $log) {
             $logging->push(new MarketplaceLog([
-                'psr' => $log->loggerName,
-                'message' => $log->logMessage,
+                'psr' => $log->loggerType ?? 'debug',
+                'message' => is_array($log->logMessage) ? print_r($log->logMessage, true) : $log->logMessage,
                 'date' => $log->date
             ]));
         }
@@ -139,11 +180,93 @@ class MarketplaceStep
     }
 
     /**
+     * Get Error Type
+     * 
+     * @return string
+     */
+    public function getErrorType(): string {
+        // Step is Error?
+        if($this->step === self::STEP_ERROR) {
+            return Error::ERROR_TYPE_DEFAULT;
+        }
+
+        // Return Error
+        return $this->error;
+    }
+
+    /**
+     * Calculate Time Using Carbon Based on Error Type
+     * 
+     * @return string
+     */
+    public function getExpiryTime(): string {
+        // Get Expiry Time Default
+        $expires = Error::EXPIRY_HOURS_DEFAULT;
+
+        // Get Based on Error Type
+        $error = $this->getErrorType();
+        if(isset(Error::EXPIRY_HOURS[$error])) {
+            $expires = Error::EXPIRY_HOURS[$error];
+        }
+
+        // Calculate Expiry Time From Now
+        return Carbon::now()->addHours($expires)->setTimezone('UTC')->toDateTimeString();
+    }
+
+
+    /**
      * Is an Error Step?
      * 
      * @return bool
      */
     public function isError(): bool {
+        // Is Step Type an Error?
+        if(!empty($this->error) && isset(Error::ERROR_TYPES[$this->error])) {
+            return true;
+        }
+
+        // Step is Error?
         return ($this->step === self::STEP_ERROR);
+    }
+
+    /**
+     * Is Login Step?
+     * 
+     * @return bool
+     */
+    public function isLogin(): bool
+    {
+        return ($this->step === self::STEP_LOGIN);
+    }
+
+    /**
+     * Is Logged In?
+     * 
+     * @return bool
+     */
+    public function isLoggedIn(): bool
+    {
+        return ($this->step === self::STEP_LOGGED_IN);
+    }
+
+    /**
+     * Is a Logout Step?
+     * 
+     * @return bool
+     */
+    public function isLogout(): bool
+    {
+        return ($this->step === self::STEP_LOGOUT);
+    }
+
+
+    /**
+     * Is Stopping Process?
+     * 
+     * @return bool
+     */
+    public function isStop(): bool
+    {
+        return ($this->step === self::STEP_STOP);
     }
 }

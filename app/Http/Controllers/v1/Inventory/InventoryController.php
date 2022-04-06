@@ -158,7 +158,7 @@ class InventoryController extends RestfulControllerV2
         $inventoryRequest = new ExistsInventoryRequest($request->all());
 
         if (!$inventoryRequest->validate()) {
-            $this->response->errorBadRequest();
+            return $this->response->errorBadRequest();
         }
 
         $isExists = $this->inventoryRepository->exists($inventoryRequest->all());

@@ -550,10 +550,10 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             $this->log->info('Attempting to Replace Message ID ' . $messageId . ' on ' . $type . ' #' . $id);
             switch($type) {
                 case "campaign":
-                    $sent = $this->campaigns->updateSent($id, $lead, $messageId);
+                    $sent = $this->campaigns->updateSent($id, $lead, $messageId, $emailHistoryId);
                 break;
                 case "blast":
-                    $sent = $this->blasts->updateSent($id, $lead, $messageId);
+                    $sent = $this->blasts->updateSent($id, $lead, $messageId, $emailHistoryId);
                 break;
             }
 

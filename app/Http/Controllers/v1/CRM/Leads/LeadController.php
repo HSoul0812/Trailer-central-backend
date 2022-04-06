@@ -6,6 +6,7 @@ use App\Exceptions\Requests\Validation\NoObjectIdValueSetException;
 use App\Exceptions\Requests\Validation\NoObjectTypeSetException;
 use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\CRM\Leads\AssignLeadRequest;
+use App\Http\Requests\CRM\Leads\FirstLeadRequest;
 use App\Http\Requests\CRM\Leads\MergeLeadsRequest;
 use App\Http\Requests\CRM\Leads\GetLeadsSortFieldsRequest;
 use App\Http\Requests\CRM\Leads\GetUniqueFullNamesRequest;
@@ -45,7 +46,7 @@ class LeadController extends RestfulControllerV2
      */
     public function __construct(LeadRepositoryInterface $leads, LeadServiceInterface $service)
     {
-        $this->middleware('setDealerIdOnRequest')->only(['index', 'update', 'create', 'show', 'assign', 'getMatches', 'mergeLeads', 'uniqueFullNames']);
+        $this->middleware('setDealerIdOnRequest')->only(['index', 'update', 'create', 'show', 'first', 'assign', 'getMatches', 'mergeLeads', 'uniqueFullNames']);
         $this->middleware('setWebsiteIdOnRequest')->only(['index', 'update', 'create']);
         $this->leads = $leads;
         $this->service = $service;
@@ -76,6 +77,21 @@ class LeadController extends RestfulControllerV2
 
         if ($request->validate()) {
             return $this->response->item($this->leads->get(['id' => $id]), $this->transformer);
+        }
+
+        return $this->response->errorBadRequest();
+    }
+
+    /**
+     * @throws NoObjectTypeSetException
+     * @throws NoObjectIdValueSetException
+     */
+    public function first(Request $request): Response
+    {
+        $request = new FirstLeadRequest($request->all());
+
+        if ($request->validate()) {
+            return $this->response->item($this->leads->first($request->all()), $this->transformer);
         }
 
         return $this->response->errorBadRequest();

@@ -25,7 +25,9 @@ use Illuminate\Database\Eloquent\Model;
  */
 class QuickbookApprovalDeleted extends QuickbookApproval
 {
-    protected $table = 'quickbook_approval_deleted';
+    public const TABLE_NAME = 'quickbook_approval_deleted';
+
+    protected $table = self::TABLE_NAME;
 
     /**
      * @param QuickbookApproval $obj

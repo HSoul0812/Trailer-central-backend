@@ -29,5 +29,8 @@ return [
     ],
 
     // Reply URL
-    'reply' => env('TWILIO_REPLY_ENDPOINT', 'https://crm.trailercentral.com/twilio/reply-twilio-message')
+    'reply' => env('TWILIO_REPLY_ENDPOINT', 'https://crm.trailercentral.com/twilio/reply-twilio-message'),
+
+    // Verify URL
+    'verify' => env('TWILIO_VERIFY_ENDPOINT', env('APP_URL') . '/webhooks/twilio/reply')
 ];

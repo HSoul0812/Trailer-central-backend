@@ -94,8 +94,8 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         $this->user = $user;
         $this->dealerLocation = $dealerLocation;
 
-        // Initialize Logger
-        $this->log = Log::channel('leads');
+        // Get Logger
+        $this->log = Log::channel('inquiry');
     }
 
     /**
@@ -124,7 +124,7 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         }
 
         // Returns True on Success
-        $this->log->info('Inquiry Email Sent to ' . $inquiry->inquiryEmail .
+        $this->log->info('Inquiry Email Sent to ' . $inquiry->getInquiryTo() .
                             ' for the Lead ' . $inquiry->getFullName());
         return true;
     }
@@ -157,8 +157,11 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         // Get Inquiry Name/Email
         $details = $this->getInquiryDetails($params);
 
+        // Get Overrides
+        $overrides = $this->getInquiryOverrides($details);
+
         // Get Data By Inquiry Type
-        $vars = $this->getInquiryTypeVars($details);
+        $vars = $this->getInquiryTypeVars($overrides);
 
         // Check Overrided Email
         $params = $this->checkOverrideEmail($vars);
@@ -217,7 +220,7 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         // Get Inquiry Details From Dealer Location?
         if(!empty($params['dealer_location_id'])) {
             $dealerLocation = $this->dealerLocation->get(['id' => $params['dealer_location_id']]);
-            if(!empty($dealerLocation->name)) {
+            if(!empty($dealerLocation->name) && !empty($dealerLocation->email)) {
                 $params['inquiry_name'] = $dealerLocation->name;
                 $params['inquiry_email'] = $dealerLocation->email;
                 return $params;
@@ -227,7 +230,7 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         // Get Inquiry Details From Inventory Item?
         if(!empty($params['item_id']) && !in_array($params['inquiry_type'], InquiryLead::NON_INVENTORY_TYPES)) {
             $inventory = $this->inventory->get(['id' => $params['item_id']]);
-            if(!empty($inventory->dealerLocation->name)) {
+            if(!empty($inventory->dealerLocation->name) && !empty($inventory->dealerLocation->email)) {
                 $params['inquiry_name'] = $inventory->dealerLocation->name;
                 $params['inquiry_email'] = $inventory->dealerLocation->email;
                 return $params;
@@ -238,6 +241,33 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         $dealer = $this->user->get(['dealer_id' => $params['dealer_id']]);
         $params['inquiry_name'] = $dealer->name;
         $params['inquiry_email'] = $dealer->email;
+        return $params;
+    }
+
+    /**
+     * Get Inquiry Overrides
+     *
+     * @param array $params
+     * @return array
+     */
+    private function getInquiryOverrides(array $params) {
+        // Get Lead Type
+        $leadType = reset($params['lead_types']);
+
+        // Get Inquiry From Details For Website
+        $toEmails = $this->websiteConfig->getValueOfConfig($params['website_id'], 'contact/email/' . $leadType);
+        if(empty($toEmails->value)) {
+            $toEmails = $this->websiteConfig->getValueOfConfig($params['website_id'], 'contact/email');
+        }
+
+        // Return Original, No Updates
+        if(empty($toEmails->value)) {
+            return $params;
+        }
+
+        // Return Inquiry Email Override
+        $params['inquiry_email'] = preg_split('/,|;|\s/', $toEmails->value, null, PREG_SPLIT_NO_EMPTY);
+
         return $params;
     }
 
@@ -292,7 +322,7 @@ class InquiryEmailService implements InquiryEmailServiceInterface
             $config = $this->websiteConfig->getValueOfConfig($vars['website_id'], 'contact/email');
 
             if (!empty($config->value)) {
-                $vars['inquiry_email'] = $config->value;
+                $vars['inquiry_email'] = preg_split('/,|;|\s/', $config->value, null, PREG_SPLIT_NO_EMPTY);
             }
         }
 

@@ -36,6 +36,9 @@ class StatusTransformer extends TransformerAbstract
     {
         return [
             'config' => [
+                'action' => $status->getAction(),
+                'interval' => $status->getInterval(),
+                'urls' => $status->getAllUrls(),
                 'selectors' => $status->getAllSelectors()
             ]
         ];
