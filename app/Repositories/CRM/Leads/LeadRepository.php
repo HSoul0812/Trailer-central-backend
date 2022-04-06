@@ -627,6 +627,8 @@ class LeadRepository implements LeadRepositoryInterface {
         if(in_array(Lead::STATUS_UNCONTACTED, $leadStatus)) {
             return $query->where(function(Builder $q) use ($leadStatus) {
                 return $q->whereIn(LeadStatus::getTableName() . '.status', $leadStatus)
+                         ->orWhere(LeadStatus::getTableName() . '.status', 'open')
+                         ->orWhere(LeadStatus::getTableName() . '.status', '')
                          ->orWhereNull(LeadStatus::getTableName() . '.status');
             });
         }
