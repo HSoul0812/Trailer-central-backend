@@ -253,8 +253,17 @@ class SecondaryUserControllerTest extends TestCase {
 
         $newSecondaryUserId = $response->decodeResponseJson()['data']['id'];
 
-        $this->assertDatabaseHas('dealer_users', ['dealer_user_id' => $newSecondaryUserId]);
-        $this->assertDatabaseHas('dealer_user_permissions', ['dealer_user_id' => $newSecondaryUserId]);
+        $this->assertDatabaseHas('dealer_users', [
+            'dealer_user_id' => $newSecondaryUserId,
+            'email' => $userData['email']
+        ]);
+
+        foreach ($userData['user_permissions'] as $userPermission)
+            $this->assertDatabaseHas('dealer_user_permissions', [
+                'dealer_user_id' => $newSecondaryUserId,
+                'feature' => $userPermission['feature'],
+                'permission_level' => $userPermission['permission_level']
+            ]);
 
         return $newSecondaryUserId;
     }
@@ -440,6 +449,12 @@ class SecondaryUserControllerTest extends TestCase {
                     ]
                 ]
         ]);
+
+        $this->assertDatabaseHas('dealer_user_permissions', [
+            'dealer_user_id' => $data['userId'],
+            'feature' => PermissionsInterface::CRM,
+            'permission_level' => $this->getSalesPersonId()
+        ]);
     }
 
     /**
@@ -477,6 +492,12 @@ class SecondaryUserControllerTest extends TestCase {
                     ]
                 ]
         ]);
+
+        $this->assertDatabaseHas('dealer_user_permissions', [
+            'dealer_user_id' => $data['userId'],
+            'feature' => PermissionsInterface::LOCATIONS,
+            'permission_level' => $this->getDealerLocationId()
+        ]);
     }
 
     /**
@@ -488,6 +509,9 @@ class SecondaryUserControllerTest extends TestCase {
     {
         // empty out email of the newly created user from the first test
         $updatedFormData = $this->updateSecondaryUserFormData($data['formData'], $data['userId'], ['email' => '']);
+        // checking if data exists before deleting
+        $this->assertDatabaseHas('dealer_users', ['dealer_user_id' => $data['userId']]);
+        $this->assertDatabaseHas('dealer_user_permissions', ['dealer_user_id' => $data['userId']]);
 
         $this->withHeaders(['access-token' => $this->getAccessToken()])
             ->json('PUT', self::apiEndpoint, $updatedFormData) 
@@ -512,6 +536,7 @@ class SecondaryUserControllerTest extends TestCase {
             ->assertJsonMissingExact(['data.*.id', $data['userId']]);
 
         $this->assertDatabaseMissing('dealer_users', ['dealer_user_id' => $data['userId']]);
+        $this->assertDatabaseMissing('dealer_user_permissions', ['dealer_user_id' => $data['userId']]);
     }
 
     public function tearDown(): void
