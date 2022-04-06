@@ -223,11 +223,7 @@ class InventoryService implements InventoryServiceInterface
         $this->buildRangeQueries($queryBuilder, $params);
         $this->buildPaginateQuery($queryBuilder, $params);
         $this->buildFilter($queryBuilder, $params);
-
-        $location = $this->getGeolocation($params);
-        if($location) {
-            $this->buildGeoFiltering($queryBuilder, $location, $params['distance']);
-        }
+        $this->buildGeoFiltering($queryBuilder, $params);
 
         $queryBuilder->orderBy(self::FIELD_UPDATED_AT, self::ORDER_DESC);
         return $queryBuilder;
@@ -240,15 +236,23 @@ class InventoryService implements InventoryServiceInterface
                 'source' => $filter,
                 'lang' => 'painless'
             ]);
-        }  
+        }
     }
 
     private function buildGeoFiltering(
         ESInventoryQueryBuilder $queryBuilder,
-        Geolocation             $location,
-        string                  $distance
+        array $params,
     ) {
-        $queryBuilder->geoFiltering(['lat' => $location->latitude, 'lon' => $location->longitude], $distance);
+        if(isset($params['country'])) {
+            $queryBuilder->termQuery('location.country', strtolower($params['country']));
+        } else {
+            $location = $this->getGeolocation($params);
+            $distance = $params['distance'] ?? '300mi';
+            if($location !== null) {
+                $queryBuilder->geoFiltering(['lat' => $location->latitude, 'lon' => $location->longitude], $distance);
+            }
+        }
+
     }
 
     private function buildTypeAggregations(ESInventoryQueryBuilder $queryBuilder, array $params) {
