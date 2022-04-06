@@ -243,7 +243,6 @@ class CatalogService implements CatalogServiceInterface
     /**
      * Process Payload
      * 
-     * @param string $type
      * @param string $payload
      * @return Fractal
      */
@@ -289,7 +288,7 @@ class CatalogService implements CatalogServiceInterface
             }
 
             // Dispatching Job
-            $this->log->info('Dispatching a ' . $integration->catalog_type . ' Catalog Job');
+            $this->log->info('Dispatching a ' . $integration->catalog_type . ' Catalog Job for Catalog ID #' . $integration->catalog_id);
             $this->dispatch($job->onQueue('fb-catalog'));
         }
 
@@ -336,7 +335,7 @@ class CatalogService implements CatalogServiceInterface
                 $feed = $this->sdk->validateFeed($accessToken, $catalogId, $feedId);
                 $feedId = $feed['id'];
             } catch(\Exception $ex) {
-                $this->log->error("Exception returned during validate feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+                $this->log->error("Exception returned during validate feed: " . $ex->getMessage());
             }
         }
 
@@ -348,7 +347,7 @@ class CatalogService implements CatalogServiceInterface
                 $feed = $this->sdk->scheduleFeed($accessToken, $catalogId, $feedUrl, $feedName);
                 $feedId = $feed['id'];
             } catch(\Exception $ex) {
-                $this->log->error("Exception returned during schedule feed: " . $ex->getMessage() . ': ' . $ex->getTraceAsString());
+                $this->log->error("Exception returned during schedule feed: " . $ex->getMessage());
                 $feedId = 0;
             }
         }
