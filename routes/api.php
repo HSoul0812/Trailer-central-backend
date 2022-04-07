@@ -97,7 +97,7 @@ $api->version('v1', function ($route) {
      */
     $route->get('parts/bins', 'App\Http\Controllers\v1\Parts\BinController@index');
     $route->put('parts/bins', 'App\Http\Controllers\v1\Parts\BinController@create');
-    $route->post('parts/bins/{id}', 'App\Http\Controllers\v1\Parts\BinController@create')->where('id', '[0-9]+');
+    $route->post('parts/bins/{id}', 'App\Http\Controllers\v1\Parts\BinController@update')->where('id', '[0-9]+');
     $route->delete('parts/bins/{id}', 'App\Http\Controllers\v1\Parts\BinController@destroy')->where('id', '[0-9]+');
 
     /**
@@ -746,13 +746,13 @@ $api->version('v1', function ($route) {
             |
             |
             */
-            $route->group([
+            /*$route->group([
                 'prefix' => 'import'
             ], function ($route) {
                 $route->get('/', 'App\Http\Controllers\v1\CRM\Leads\LeadImportController@index');
                 $route->put('/', 'App\Http\Controllers\v1\CRM\Leads\LeadImportController@update');
                 $route->delete('/', 'App\Http\Controllers\v1\CRM\Leads\LeadImportController@delete');
-            });
+            });*/
         });
 
         $route->group([
@@ -1052,11 +1052,14 @@ $api->version('v1', function ($route) {
                 'prefix' => 'facebook',
                 'middleware' => 'marketing.facebook.marketplace'
             ], function ($route) {
-                $route->get('/', 'App\Http\Controllers\v1\Marketing\FacebookController@index');
-                $route->post('/', 'App\Http\Controllers\v1\Marketing\FacebookController@create');
-                $route->get('{id}', 'App\Http\Controllers\v1\Marketing\FacebookController@show')->where('id', '[0-9]+');
-                $route->put('{id}', 'App\Http\Controllers\v1\Marketing\FacebookController@update')->where('id', '[0-9]+');
-                $route->delete('{id}', 'App\Http\Controllers\v1\Marketing\FacebookController@destroy')->where('id', '[0-9]+');
+                $route->get('/', 'App\Http\Controllers\v1\Marketing\Facebook\MarketplaceController@index');
+                $route->post('/', 'App\Http\Controllers\v1\Marketing\Facebook\MarketplaceController@create');
+                $route->get('status', 'App\Http\Controllers\v1\Marketing\Facebook\MarketplaceController@status');
+                $route->put('sms', 'App\Http\Controllers\v1\Marketing\Facebook\MarketplaceController@sms');
+                $route->get('{id}', 'App\Http\Controllers\v1\Marketing\Facebook\MarketplaceController@show')->where('id', '[0-9]+');
+                $route->put('{id}', 'App\Http\Controllers\v1\Marketing\Facebook\MarketplaceController@update')->where('id', '[0-9]+');
+                $route->delete('{id}', 'App\Http\Controllers\v1\Marketing\Facebook\MarketplaceController@destroy')->where('id', '[0-9]+');
+                $route->put('{id}/dismiss', 'App\Http\Controllers\v1\Marketing\Facebook\MarketplaceController@dismiss')->where('id', '[0-9]+');
             });
         });
     });
@@ -1339,10 +1342,31 @@ $api->version('v1', function ($route) {
                 'middleware' => 'dispatch.facebook'
             ], function ($route) {
                 $route->get('/', 'App\Http\Controllers\v1\Dispatch\FacebookController@index');
+                $route->put('verify', 'App\Http\Controllers\v1\Dispatch\FacebookController@verify');
                 $route->get('{id}', 'App\Http\Controllers\v1\Dispatch\FacebookController@show')->where('id', '[0-9]+');
                 $route->post('{id}', 'App\Http\Controllers\v1\Dispatch\FacebookController@create')->where('id', '[0-9]+');
                 $route->put('{id}', 'App\Http\Controllers\v1\Dispatch\FacebookController@update')->where('id', '[0-9]+');
             });
+        });
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Webhooks
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+    $route->group([
+        'prefix' => 'webhook'
+    ], function ($route) {
+        // Twilio Webhooks
+        $route->group([
+            'prefix' => 'twilio'
+        ], function ($route) {
+            $route->post('verify', 'App\Http\Controllers\v1\Webhook\TwilioController@verify');
         });
     });
 });

@@ -28,7 +28,12 @@ class Payment extends Model
     ];
 
     protected $casts = [
-        'amount' => 'float'
+        'amount' => 'float',
+        'total_refund' => 'float',
+    ];
+
+    protected $appends = [
+        'total_refund',
     ];
 
     public $timestamps = false;
@@ -66,5 +71,12 @@ class Payment extends Model
     public function getReceiptsAttribute()
     {
         return DealerSalesReceipt::where('tb_name', 'qb_payment')->where('tb_primary_id', $this->id)->get();
+    }
+
+    public function getTotalRefundAttribute()
+    {
+        return (float) $this->refunds()
+            ->where('tb_primary_id', $this->id)
+            ->sum('amount');
     }
 }

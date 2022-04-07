@@ -27,9 +27,19 @@ class ImageHelper
             return false;
         }
 
-        $info = getimagesize($file);
+        $size = @getimagesize($file);
 
-        list($height_old, $width_old) = $info;
+        list($width_old, $height_old) = $size;
+
+        $orientation = 0;
+        if ($size[2] == IMAGETYPE_JPEG) {
+            $exifData = exif_read_data($file);
+            if (!empty($exifData['Orientation']) && ($exifData['Orientation'] == 6 || $exifData['Orientation'] == 8)) {
+                $width_old = $exifData['ExifImageWidth'];
+                $height_old = $exifData['ExifImageLength'];
+                $orientation = $exifData['Orientation'];
+            }
+        }
 
         if($proportional) {
             if($width == 0) {
@@ -48,7 +58,7 @@ class ImageHelper
             $final_height = ($height <= 0) ? $height_old : $height;
         }
 
-        switch($info[2]) {
+        switch($size[2]) {
             case IMAGETYPE_GIF:
                 $image = imagecreatefromgif($file);
                 break;
@@ -63,15 +73,13 @@ class ImageHelper
         }
 
         if($width_old < $width && $height_old < $height) {
-
             $final_width  = $width_old;
             $final_height = $height_old;
-
         }
 
         $image_resized = imagecreatetruecolor($final_width, $final_height);
 
-        if(($info[2] == IMAGETYPE_GIF) || ($info[2] == IMAGETYPE_PNG)) {
+        if(($size[2] == IMAGETYPE_GIF) || ($size[2] == IMAGETYPE_PNG)) {
             $trnprt_indx = imagecolortransparent($image);
 
             // If we have a specific transparent color
@@ -91,7 +99,7 @@ class ImageHelper
 
 
             } // Always make a transparent background color for PNGs that don't have one allocated already
-            elseif($info[2] == IMAGETYPE_PNG) {
+            elseif($size[2] == IMAGETYPE_PNG) {
 
                 // Turn off transparency blending (temporarily)
                 imagealphablending($image_resized, false);
@@ -109,15 +117,21 @@ class ImageHelper
 
         imagecopyresampled($image_resized, $image, 0, 0, 0, 0, $final_width, $final_height, $width_old, $height_old);
 
-        if ($height_old > $width_old) {
-            imagerotate($image_resized, 270, 0);
+        switch($orientation) {
+            case 3:
+                $image_resized = imagerotate($image_resized, 180, 0);
+                break;
+            case 6:
+            case 8:
+                $image_resized = imagerotate($image_resized, -90, 0);
+                break;
         }
 
         @unlink($file);
 
         switch(strtolower($output)) {
             case 'browser':
-                $mime = image_type_to_mime_type($info[2]);
+                $mime = image_type_to_mime_type($size[2]);
                 header("Content-type: $mime");
                 $output = null;
                 break;
@@ -130,7 +144,7 @@ class ImageHelper
                 break;
         }
 
-        switch($info[2]) {
+        switch($size[2]) {
             case IMAGETYPE_GIF:
                 imagegif($image_resized, $output);
                 break;

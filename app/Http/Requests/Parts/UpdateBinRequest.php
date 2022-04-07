@@ -8,11 +8,10 @@ use App\Http\Requests\Request;
  * @author Marcel
  */
 class UpdateBinRequest extends Request {
-    
+
     protected $rules = [
         'location' => 'required|integer|cycle_count_exists',
-        'bin_name' => 'required',
-        'bin_id' => 'required'
+        'bin_name' => 'required'
     ];
-    
+
 }

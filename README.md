@@ -12,6 +12,7 @@ Update git hooks:
 
 
 ## Swagger Documentation
+
  - Extend RestfulController class
  - Inside each of controllers, you should have the appropriate annotations above each public method
 ```
