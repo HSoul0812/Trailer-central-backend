@@ -9,5 +9,5 @@ use Illuminate\Database\Eloquent\Collection;
 
 interface GlossaryRepositoryInterface
 {
-    public function getAll(IndexGlossaryRequest $params): Collection;
+    public function getAll(array $params): Collection;
 }
