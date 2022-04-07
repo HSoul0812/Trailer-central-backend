@@ -15,7 +15,6 @@ class ESInventoryQueryBuilder
         'filter' => []
     ];
 
-    private array $fieldSorts = [];
     private bool $willPaginate = false;
     private ?int $page = null;
     private ?int $pageSize = null;
@@ -24,6 +23,9 @@ class ESInventoryQueryBuilder
     private ?array $location = null;
     private ?string $distance = null;
     private ?array $filterScript = null;
+
+    private ?string $orderField = null;
+    private ?string $orderDir = null;
 
     public function getWillPaginate(): bool
     {
@@ -130,7 +132,8 @@ class ESInventoryQueryBuilder
     }
 
     public function orderBy(string $field, string $direction) {
-        $this->fieldSorts[] = [$field => $direction];
+        $this->orderField = $field;
+        $this->orderDir = $direction;
     }
 
     public function build(): array
@@ -175,32 +178,60 @@ class ESInventoryQueryBuilder
             if(!empty($filters)) {
                 $query['bool']['filter'] = $filters;
             }
-            if ($this->location) {
-                $result['query'] = [
-                    'function_score' => [
-                        'query' => $query,
-                        'script_score' => [
-                            'script' => [
-                                'source' => "double d; if(doc['location.geo'].value != null) { d = doc['location.geo'].planeDistance(params.lat, params.lon) * 0.000621371; } else { return 0.1; } if(d >= (params.grouping*params.fromScore)) { return 0.2; } else { return params.fromScore - Math.floor(d/params.grouping);} ",
-                                'params' => [
-                                    "lat" => $this->location['lat'],
-                                    "lon" => $this->location['lon'],
-                                    "fromScore" => 100,
-                                    "grouping" => 60
-                                ]
-                            ]
-                        ]
-                    ]
-
-                ];
-            } else {
-                $result['query'] = $query;
-            }
+            $result['query'] = $query;
+            /*
+             $result['query'] = [
+                 'function_score' => [
+                     'query' => $query,
+                     'script_score' => [
+                         'script' => [
+                             'source' => "double d; if(doc['location.geo'].value != null) { d = doc['location.geo'].planeDistance(params.lat, params.lon) * 0.000621371; } else { return 0.1; } if(d >= (params.grouping*params.fromScore)) { return 0.2; } else { return params.fromScore - Math.floor(d/params.grouping);} ",
+                             'params' => [
+                                 "lat" => $this->location['lat'],
+                                 "lon" => $this->location['lon'],
+                                 "fromScore" => 100,
+                                 "grouping" => 60
+                             ]
+                         ]
+                     ]
+                 ]
+             ];
+             */
         }
 
-        if(!empty($this->fieldSorts)) {
-            $sorts = array_merge($this->fieldSorts, ["_score"]);
-            $result['sort'] = $sorts;
+        if ($this->orderField === 'distance') {
+            $result['sort'] = [[
+                '_geo_distance' => [
+                    'location.geo' => $this->location,
+                    'order' => $this->orderDir
+                ]
+            ]];
+        } else if($this->orderField === 'createdAt') {
+            $result['sort'] = [[
+                'createdAt' => $this->orderDir
+            ]];
+        } else if($this->orderField === 'price') {
+            $result['sort'] = [[
+                'websitePrice' => $this->orderDir
+            ], [
+                'price' => $this->orderDir
+            ], [
+                'salesPrice' => $this->orderDir
+            ]];
+        } else if($this->orderField === 'numFeatures') {
+            $result['sort'] = [[
+                '_script' => [
+                    'type' => 'number',
+                    'script' => [
+                        'lang' => 'painless',
+                        'source' => 'if(doc[\'featureList\'] != null){ return doc[\'featureList\'].size(); } else { return 0; }'
+                    ],
+                    'order' => $this->orderDir
+                ]
+            ]];
+        }
+        if(!empty($result['sort'])) {
+            $result['sort'] = array_merge($result['sort'], ["_score"]);
         }
 
         $aggregations = array_merge(
