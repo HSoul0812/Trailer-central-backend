@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Inventory;
+namespace App\Services\Inventory\ESQuery;
 
 class ESInventoryQueryBuilder
 {
