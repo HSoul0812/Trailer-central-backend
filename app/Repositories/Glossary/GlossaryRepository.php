@@ -20,7 +20,7 @@ class GlossaryRepository implements GlossaryRepositoryInterface
         $this->model = $model;
     }
 
-    public function getAll(array $params): Collection
+    public function getAll(): Collection
     {
         return $this->model->all();
     }
