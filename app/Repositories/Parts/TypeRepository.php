@@ -20,7 +20,7 @@ class TypeRepository implements TypeRepositoryInterface
         $this->model = $model;
     }
 
-    public function getAll(IndexTypeRequest $params): Collection
+    public function getAll(): Collection
     {
         return $this->model->all();
     }

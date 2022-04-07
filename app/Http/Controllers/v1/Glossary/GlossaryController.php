@@ -51,7 +51,7 @@ class GlossaryController extends AbstractRestfulController
     public function index(IndexRequestInterface $request): Response
     {
         if ($request->validate()) {
-            return $this->response->collection($this->glossaryRepo->getAll($request), $this->glossaryTransformer);
+            return $this->response->collection($this->glossaryRepo->getAll(), $this->glossaryTransformer);
         }
 
         return $this->response->errorBadRequest();
