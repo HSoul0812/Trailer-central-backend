@@ -7,11 +7,10 @@ use App\Http\Requests\Request;
 /**
  * @author Marcel
  */
-class CreateBinRequest extends Request {
-    
+class CreateBinRequest extends Request
+{
     protected $rules = [
-        'location' => 'required|integer|cycle_count_exists',
+        'location' => 'required|integer|location_belongs_to_dealer',
         'bin_name' => 'required'
     ];
-    
 }
