@@ -253,7 +253,7 @@ class InventoryService implements InventoryServiceInterface
         array $params,
     ) {
         if(isset($params['country'])) {
-            $queryBuilder->termQuery('location.country', strtolower($params['country']));
+            $queryBuilder->termQuery('location.country', strtoupper($params['country']));
         } else {
             $location = $this->getGeolocation($params);
             $distance = $params['distance'] ?? '300mi';
