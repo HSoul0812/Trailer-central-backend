@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Collection;
 class GlossaryRepository implements GlossaryRepositoryInterface
 {
     /**
-     * @var App\Models\Parts\Glossary
+     * @var App\Models\Glossary\Glossary
      */
     protected $model;
 
@@ -20,7 +20,7 @@ class GlossaryRepository implements GlossaryRepositoryInterface
         $this->model = $model;
     }
 
-    public function getAll(IndexGlossaryRequest $params): Collection
+    public function getAll(): Collection
     {
         return $this->model->all();
     }

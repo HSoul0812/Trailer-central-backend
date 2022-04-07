@@ -51,7 +51,7 @@ class TypeController extends AbstractRestfulController
     public function index(IndexRequestInterface $request): Response
     {
         if ($request->validate()) {
-            return $this->response->collection($this->typeRepo->getAll($request), $this->typesTransformer);
+            return $this->response->collection($this->typeRepo->getAll(), $this->typesTransformer);
         }
 
         return $this->response->errorBadRequest();
