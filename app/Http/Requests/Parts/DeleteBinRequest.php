@@ -5,16 +5,17 @@ namespace App\Http\Requests\Parts;
 use App\Http\Requests\Request;
 use App\Models\Parts\Bin;
 
-class DeleteBinRequest extends Request {
-    
+class DeleteBinRequest extends Request
+{
     protected $rules = [
-        'bin_id' => 'required|integer'
+        'bin_id' => 'bail|required|integer|bin_exists|bin_belongs_to_dealer'
     ];
-    
+
     /**
      * @return mixed
      */
-    protected function getObject() {
+    protected function getObject()
+    {
         return new Bin;
     }
 
