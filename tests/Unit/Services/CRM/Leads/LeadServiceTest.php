@@ -166,8 +166,8 @@ class LeadServiceTest extends TestCase
 
 
     /**
+     * @group CRM
      * @covers ::create
-     * @group Lead
      *
      * @throws BindingResolutionException
      */
@@ -294,8 +294,8 @@ class LeadServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::create
-     * @group Lead
      *
      * @throws BindingResolutionException
      */
@@ -434,8 +434,8 @@ class LeadServiceTest extends TestCase
 
 
     /**
+     * @group CRM
      * @covers ::update
-     * @group Lead
      *
      * @throws BindingResolutionException
      */
@@ -554,8 +554,8 @@ class LeadServiceTest extends TestCase
     }*/
 
     /**
+     * @group CRM
      * @covers ::update
-     * @group Lead
      *
      * @throws BindingResolutionException
      */
@@ -729,8 +729,8 @@ class LeadServiceTest extends TestCase
 
 
     /**
+     * @group CRM
      * @covers ::merge
-     * @group Inquiry
      *
      * @throws BindingResolutionException
      */
@@ -800,6 +800,7 @@ class LeadServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::mergeLeads
      */
     public function testMergeLeads()
@@ -861,6 +862,7 @@ class LeadServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::mergeLeads
      */
     public function testMergeLeadsWithError()
