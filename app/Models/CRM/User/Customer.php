@@ -3,6 +3,7 @@
 namespace App\Models\CRM\User;
 
 use App\Helpers\StringHelper;
+use App\Models\Traits\TableAware;
 use ElasticScoutDriverPlus\CustomSearch;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Dms\UnitSale;
@@ -62,7 +63,7 @@ use Carbon\Carbon;
  */
 class Customer extends Model
 {
-    use Searchable, CustomSearch, SoftDeletes;
+    use Searchable, CustomSearch, SoftDeletes, TableAware;
 
     protected $table = 'dms_customer';
 
