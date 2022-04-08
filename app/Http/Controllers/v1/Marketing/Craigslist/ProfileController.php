@@ -24,6 +24,8 @@ class ProfileController extends RestfulControllerV2
         ProfileRepositoryInterface $repo
     ) {
         $this->repository = $repo;
+
+        $this->middleware('setDealerIdOnRequest')->only(['index']);
     }
 
     /**
