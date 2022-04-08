@@ -15,6 +15,7 @@ use Tests\Integration\IntegrationTestCase;
 class LeadsStatusControllerTest extends IntegrationTestCase
 {
     /**
+     * @group CRM
      * @covers ::create
      */
     public function testCreate()
@@ -49,6 +50,7 @@ class LeadsStatusControllerTest extends IntegrationTestCase
     }
 
     /**
+     * @group CRM
      * @covers ::create
      */
     public function testCreateWrongAccessToken()
@@ -79,6 +81,7 @@ class LeadsStatusControllerTest extends IntegrationTestCase
     }
 
     /**
+     * @group CRM
      * @covers ::update
      */
     public function testUpdate()
@@ -111,6 +114,7 @@ class LeadsStatusControllerTest extends IntegrationTestCase
     }
 
     /**
+     * @group CRM
      * @covers ::update
      */
     public function testUpdateWrongAccessToken()

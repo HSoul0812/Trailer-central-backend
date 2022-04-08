@@ -27,6 +27,7 @@ class CampaignRepositoryTest extends TestCase
     /**
      * Test that SUT is properly bound by the application
      *
+     * @group CRM
      * @typeOfTest IntegrationTestCase
      *
      * @throws BindingResolutionException when there is a problem with resolution
@@ -42,6 +43,7 @@ class CampaignRepositoryTest extends TestCase
     /**
      * Test that SUT is performing all desired operations (sort and filter) excepts pagination
      *
+     * @group CRM
      * @typeOfTest IntegrationTestCase
      *
      * @throws BindingResolutionException when there is a problem with resolution of concreted class
@@ -74,6 +76,7 @@ class CampaignRepositoryTest extends TestCase
     /**
      * Test that SUT is performing all desired operations (sort and filter) excepts pagination
      *
+     * @group CRM
      * @typeOfTest IntegrationTestCase
      *
      * @throws BindingResolutionException when there is a problem with resolution of concreted class
@@ -98,6 +101,7 @@ class CampaignRepositoryTest extends TestCase
     /**
      * Test that SUT is inserting correctly
      *
+     * @group CRM
      * @typeOfTest IntegrationTestCase
      *
      * @covers CampaignRepository::sent
@@ -134,6 +138,7 @@ class CampaignRepositoryTest extends TestCase
     /**
      * Test that SUT is inserting correctly
      *
+     * @group CRM
      * @typeOfTest IntegrationTestCase
      * @dataProvider invalidPropertiesProvider
      *
@@ -172,6 +177,7 @@ class CampaignRepositoryTest extends TestCase
     /**
      * Test that SUT is inserting correctly
      *
+     * @group CRM
      * @typeOfTest IntegrationTestCase
      *
      * @throws BindingResolutionException when there is a problem with resolution of concreted class
@@ -198,6 +204,7 @@ class CampaignRepositoryTest extends TestCase
     /**
      * Test that SUT is inserting correctly
      *
+     * @group CRM
      * @typeOfTest IntegrationTestCase
      *
      * @throws BindingResolutionException when there is a problem with resolution of concreted class

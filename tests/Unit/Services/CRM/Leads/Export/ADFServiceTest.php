@@ -72,8 +72,8 @@ class ADFServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::handle
-     * @group Inquiry
      *
      * @throws BindingResolutionException
      */

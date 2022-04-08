@@ -13,6 +13,9 @@ class FacebookDispatchStepTest extends TestCase
         parent::__construct();   
     }
 
+    /**
+     * @group Marketing
+     */
     public function testGetToken()
     {
         $response = $this->json('POST', self::API_ENDPOINT, [
@@ -26,6 +29,7 @@ class FacebookDispatchStepTest extends TestCase
     }
     
     /**
+     * @group Marketing
      * @depends testGetToken
      */
     public function testGettingData($fbAccessToken)
