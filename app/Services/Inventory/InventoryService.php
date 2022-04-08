@@ -254,20 +254,20 @@ class InventoryService implements InventoryServiceInterface
     ) {
         $distance = null;
         if(isset($params['country'])) {
-            $queryBuilder->termQuery('location.country', strtoupper($params['country']));
+            $queryBuilder->addTermQuery('location.country', strtoupper($params['country']));
         } else {
             $distance = $params['distance'] ?? '300mi';
         }
 
         $location = $this->getGeolocation($params);
         if($location !== null) {
-            $queryBuilder->geoFiltering(['lat' => $location->latitude, 'lon' => $location->longitude], $distance);
+            $queryBuilder->setGeoDistance(['lat' => $location->latitude, 'lon' => $location->longitude], $distance);
         }
 
     }
 
     private function buildTypeAggregations(ESInventoryQueryBuilder $queryBuilder, array $params) {
-        $queryBuilder->filterAggregate([
+        $queryBuilder->setFilterAggregate([
             'pull_type' => ['terms' => ['field' => 'pullType']],
             'color' => ['terms' => ['field' => 'color']],
             'year' => ['terms' => ['field' => 'year', 'size' => 50]],
@@ -291,7 +291,7 @@ class InventoryService implements InventoryServiceInterface
         ]);
     }
     private function buildCategoryAggregations(ESInventoryQueryBuilder $queryBuilder, array $params) {
-        $queryBuilder->filterAggregate([
+        $queryBuilder->setFilterAggregate([
             'manufacturer' => ['terms' => ['field' => 'manufacturer', 'size' => 50]],
         ]);
     }
@@ -322,17 +322,17 @@ class InventoryService implements InventoryServiceInterface
     }
 
     private function buildTermQueries(ESInventoryQueryBuilder $queryBuilder, array $params) {
-        $queryBuilder->termQuery('isRental', false);
-        $queryBuilder->termQuery('availability',self::INVENTORY_AVAILABLE);
+        $queryBuilder->addTermQuery('isRental', false);
+        $queryBuilder->addTermQuery('availability',self::INVENTORY_AVAILABLE);
         foreach(self::TERM_SEARCH_KEY_MAP as $field => $searchField) {
             if (isset($params['type_id']) && $searchField == 'category') {
               $mapped_categories = $this->getMappedCategories(
                   $params['type_id'],
                   $params[$field] ?? null
               );
-              $queryBuilder->termQueries($searchField, $mapped_categories);
+              $queryBuilder->addTermQueries($searchField, $mapped_categories);
             } else {
-              $queryBuilder->termQueries($searchField, $params[$field] ?? null);
+              $queryBuilder->addTermQueries($searchField, $params[$field] ?? null);
             }
         }
     }
@@ -342,9 +342,9 @@ class InventoryService implements InventoryServiceInterface
             $params['type_id'],
             $params['category'] ?? null
         );
-        $queryBuilder->termQueries('category', $mapped_categories);
-        $queryBuilder->termQuery('isRental', false);
-        $queryBuilder->termQuery('availability',self::INVENTORY_AVAILABLE);
+        $queryBuilder->addTermQueries('category', $mapped_categories);
+        $queryBuilder->addTermQuery('isRental', false);
+        $queryBuilder->addTermQuery('availability',self::INVENTORY_AVAILABLE);
         $this->buildFilter($queryBuilder, []);
     }
 
@@ -353,9 +353,9 @@ class InventoryService implements InventoryServiceInterface
             $params['type_id'],
             null
         );
-        $queryBuilder->termQueries('category', $mapped_categories);
-        $queryBuilder->termQuery('isRental', false);
-        $queryBuilder->termQuery('availability',self::INVENTORY_AVAILABLE);
+        $queryBuilder->addTermQueries('category', $mapped_categories);
+        $queryBuilder->addTermQuery('isRental', false);
+        $queryBuilder->addTermQuery('availability',self::INVENTORY_AVAILABLE);
         $this->buildFilter($queryBuilder, []);
     }
 
@@ -364,7 +364,7 @@ class InventoryService implements InventoryServiceInterface
         foreach (self::RANGE_SEARCH_KEY_MAP as $field => $searchField) {
             $minFieldKey = "{$field}_min";
             $maxFieldKey = "{$field}_max";
-            $queryBuilder->rangeQuery($searchField, $params[$minFieldKey] ?? null, $params[$maxFieldKey] ?? null);
+            $queryBuilder->addRangeQuery($searchField, $params[$minFieldKey] ?? null, $params[$maxFieldKey] ?? null);
         }
     }
 
