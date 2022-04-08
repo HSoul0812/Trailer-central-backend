@@ -12,7 +12,7 @@ class BulkUploadTransformer extends TransformerAbstract
         return [
             'id' => $bulkUpload->id,
             'status' => $bulkUpload->status,
-            'source_file' => $bulkUpload->source_file,
+            'import_source' => $bulkUpload->import_source,
             'validation_errors' => $bulkUpload->validation_errors
         ];
     }
