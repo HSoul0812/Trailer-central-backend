@@ -63,7 +63,22 @@ class BlastRepository implements BlastRepositoryInterface {
     }
 
     public function update($params) {
-        throw new NotImplementedException;
+        $blast = $this->get($params['id']);
+
+        DB::beginTransaction();
+
+        try {
+            // Fill Text Details
+            $blast->fill($params)->save();
+
+            DB::commit();
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            Log::error('Text blast update error. Message - ' . $ex->getMessage() , $ex->getTrace());
+            throw new \Exception('Text blast update error');
+        }
+
+        return $blast;
     }
 
     /**

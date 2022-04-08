@@ -247,6 +247,16 @@ class BuilderEmail
     }
 
     /**
+     * Get Type Name
+     * 
+     * @return string Email Blast | Email Campaign | Email Template
+     */
+    public function getTypeName(): string
+    {
+        return 'Email ' . ucfirst($this->type);
+    }
+
+    /**
      * Return Message ID or Generate New One
      * 
      * @return string

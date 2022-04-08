@@ -7,10 +7,13 @@ use App\Exceptions\CRM\Email\Builder\SendBlastEmailsFailedException;
 use App\Exceptions\CRM\Email\Builder\SendCampaignEmailsFailedException;
 use App\Exceptions\CRM\Email\Builder\SendTemplateEmailFailedException;
 use App\Exceptions\CRM\Email\Builder\FromEmailMissingSmtpConfigException;
+use App\Exceptions\CRM\Email\Builder\InvalidEmailTemplateHtmlException;
 use App\Jobs\CRM\Interactions\EmailBuilderJob;
 use App\Mail\CRM\Interactions\EmailBuilderEmail;
 use App\Models\CRM\Interactions\EmailHistory;
+use App\Models\CRM\Leads\Lead;
 use App\Models\Integration\Auth\AccessToken;
+use App\Models\User\NewUser;
 use App\Repositories\CRM\Email\BlastRepositoryInterface;
 use App\Repositories\CRM\Email\BounceRepositoryInterface;
 use App\Repositories\CRM\Email\CampaignRepositoryInterface;
@@ -216,6 +219,9 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'sales_person_id' => $salesPerson->id ?? 0,
             'from_email' => $blast->from_email_address ?: $this->getDefaultFromEmail()
         ]);
+
+        // Validate Template
+        $this->validateTemplate($builder);
 
         // Send Emails and Return Response
         try {
@@ -616,6 +622,41 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             $this->log->error($ex->getMessage());
             return BuilderStats::STATUS_ERROR;
         }
+    }
+
+    /**
+     * Handle Text Template Validation
+     *
+     * @param BuilderEmail $builder
+     * @throws InvalidEmailTemplateHtmlException
+     * @return bool
+     */
+    private function validateTemplate(BuilderEmail $builder): bool
+    {
+        // Template is Empty?!
+        if(empty($builder->template)) {
+            // Send Invalid Template Email
+            $dealer = $this->users->get(['dealer_id' => $builder->dealerId]);
+            $credential = NewUser::getDealerCredential($dealer->newDealerUser->user_id);
+            $launchUrl = Lead::getLeadCrmUrl($builder->leadId, $credential);
+            Mail::to($dealer->email)->send(new EmailBuilderEmail($builder, $launchUrl));
+
+            // Fix Blast to Remove Template ID
+            if($builder->type === BuilderEmail::TYPE_BLAST) {
+                // Remove Invalid Template ID
+                $this->blasts->update(['id' => $builder->id, 'email_template_id' => 0]);
+            }
+            // Fix Campaign to Remove Template ID
+            elseif($builder->type === BuilderEmail::TYPE_CAMPAIGN) {
+                $this->campaigns->update(['id' => $builder->id, 'email_template_id' => 0, 'is_enabled' => 0]);
+            }
+
+            // Send Email to Dealer!
+            throw new InvalidEmailTemplateHtmlException;
+        }
+
+        // Template is Valid!
+        return true;
     }
 
     /**
