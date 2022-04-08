@@ -17,7 +17,7 @@ use Dingo\Api\Http\Response;
 
 class MapSearchController extends AbstractRestfulController
 {
-    const MAP_SEARCH_CACHE_EXPIRY = 600;
+    const MAP_SEARCH_CACHE_EXPIRY = 86400;
     /**
      * @param MapSearchServiceInterface $mapSearchService
      */
@@ -33,7 +33,7 @@ class MapSearchController extends AbstractRestfulController
         }
 
         $queryText = $request->input('q');
-        $json = \Cache::remember("mapsearch/autocomplete/$queryText", self::MAP_SEARCH_CACHE_EXPIRY,
+        $json = \Cache::rememberWithNewTTL("mapsearch/autocomplete/$queryText", self::MAP_SEARCH_CACHE_EXPIRY,
             function () use ($queryText){
                 $data = $this->mapSearchService->autocomplete($queryText);
                 $transformer = $this->mapSearchService->getTransformer(get_class($data));
@@ -50,7 +50,7 @@ class MapSearchController extends AbstractRestfulController
         }
 
         $queryText = $request->input('q');
-        $json = \Cache::remember("mapsearch/geocode/$queryText", self::MAP_SEARCH_CACHE_EXPIRY,
+        $json = \Cache::rememberWithNewTTL("mapsearch/geocode/$queryText", self::MAP_SEARCH_CACHE_EXPIRY,
             function () use ($queryText) {
                 $data = $this->mapSearchService->geocode($queryText);
                 $transformer = $this->mapSearchService->getTransformer(get_class($data));
@@ -68,7 +68,7 @@ class MapSearchController extends AbstractRestfulController
 
         $lat = floatval($request->input('lat'));
         $lng = floatval($request->input('lng'));
-        $json = \Cache::remember("mapsearch/reverse/$lat,$lng", self::MAP_SEARCH_CACHE_EXPIRY,
+        $json = \Cache::rememberWithNewTTL("mapsearch/reverse/$lat,$lng", self::MAP_SEARCH_CACHE_EXPIRY,
             function () use ($lat, $lng) {
                 $data = $this->mapSearchService->reverse($lat, $lng);
                 $transformer = $this->mapSearchService->getTransformer(get_class($data));
