@@ -74,13 +74,13 @@ class InteractionEmailService implements InteractionEmailServiceInterface
                     'name' => $parsedEmail->getToName()
                 ], $interactionEmail);
             }
+
+            // Store Attachments
+            if($parsedEmail->hasAttachments()) {
+                $parsedEmail->setAttachments($this->storeAttachments($emailConfig->dealerId, $parsedEmail));
+            }
         } catch(\Exception $ex) {
             throw new SendEmailFailedException($ex->getMessage());
-        }
-
-        // Store Attachments
-        if($parsedEmail->hasAttachments()) {
-            $parsedEmail->setAttachments($this->storeAttachments($emailConfig->dealerId, $parsedEmail));
         }
 
         // Returns Params With Attachments
@@ -92,6 +92,8 @@ class InteractionEmailService implements InteractionEmailServiceInterface
      * 
      * @param int $dealerId
      * @param ParsedEmail $parsedEmail
+     * @throws ExceededSingleAttachmentSizeException
+     * @throws ExceededTotalAttachmentSizeException
      * @return Collection<Attachment>
      */
     public function storeAttachments(int $dealerId, ParsedEmail $parsedEmail): Collection {
@@ -99,29 +101,26 @@ class InteractionEmailService implements InteractionEmailServiceInterface
         $messageDir = str_replace(">", "", str_replace("<", "", $parsedEmail->getMessageId()));
 
         // Valid Attachment Size?!
-        if($parsedEmail->validateAttachmentsSize()) {
-            // Loop Attachments
-            $attachments = new Collection();
-            foreach ($parsedEmail->getAllAttachments() as $file) {
-                // Generate Path
-                $filePath = 'crm/' . $dealerId . '/' . $messageDir . '/attachments/' . $file->getFileName();
+        $parsedEmail->validateAttachmentsSize();
 
-                // Save File to S3
-                Storage::disk('ses')->put($filePath, $file->getContents());
+        // Loop Attachments
+        $attachments = new Collection();
+        foreach ($parsedEmail->getAllAttachments() as $file) {
+            // Generate Path
+            $filePath = 'crm/' . $dealerId . '/' . $messageDir . '/attachments/' . $file->getFileName();
 
-                // Set File Name/Path
-                $file->setFilePath(Attachment::AWS_PREFIX . '/' . $filePath);
-                $file->setFileName(time() . $file->getFileName());
+            // Save File to S3
+            Storage::disk('ses')->put($filePath, $file->getContents());
 
-                // Add File
-                $attachments->push($file);
-            }
+            // Set File Name/Path
+            $file->setFilePath(Attachment::AWS_PREFIX . '/' . $filePath);
+            $file->setFileName(time() . $file->getFileName());
 
-            // Return Attachment Objects
-            return $attachments;
+            // Add File
+            $attachments->push($file);
         }
 
-        // Return All Attachments
-        return $parsedEmail->getAllAttachments();
+        // Return Attachment Objects
+        return $attachments;
     }
 }

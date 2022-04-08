@@ -2,6 +2,7 @@
 
 namespace App\Services\Marketing\Facebook\DTOs;
 
+use App\Models\Marketing\Facebook\Error;
 use App\Services\Marketing\Facebook\DTOs\TfaType;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
@@ -21,6 +22,11 @@ class MarketplaceStatus
      * @var string
      */
     private $pageUrl;
+
+    /**
+     * @var Collection<Error>
+     */
+    private $errors;
 
     /**
      * @var Collection<TfaType>

@@ -30,6 +30,7 @@ class Error extends Model
         'two-factor-auth' => 'Invalid Two-Factor Credentials',
         'two-factor-failed' => 'Two-Factor Failed',
         'account-disabled' => 'Account Disabled',
+        'marketplace-inaccessible' => 'Marketplace Inaccessible',
         'marketplace-blocked' => 'Marketplace Blocked',
         'final-account-review' => 'Marketplace Permanently Blocked',
         'failed-post' => 'Inventory Failed to Post',
@@ -50,6 +51,7 @@ class Error extends Model
         'email-verification' => 2,
         'two-factor-auth' => 1,
         'two-factor-failed' => 1,
+        'marketplace-inaccessible' => 24 * 7,
         'account-disabled' => 24 * 7,
         'marketplace-blocked' => 24 * 7,
         'final-account-review' => 24 * 30 * 12 * 7
@@ -70,6 +72,11 @@ class Error extends Model
      * @const Follow Expired Status
      */
     const EXPIRED_FOLLOW = '1';
+
+    /**
+     * @const Only Get Already Expired Status
+     */
+    const EXPIRED_ALREADY = '-1';
 
 
     /**

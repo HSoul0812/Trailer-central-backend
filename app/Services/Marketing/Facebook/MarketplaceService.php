@@ -6,6 +6,7 @@ use App\Models\Marketing\Facebook\Marketplace;
 use App\Models\CRM\Text\NumberVerify;
 use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
 use App\Repositories\Marketing\Facebook\FilterRepositoryInterface;
+use App\Repositories\Marketing\Facebook\ErrorRepositoryInterface;
 use App\Repositories\CRM\Text\VerifyRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Services\CRM\Text\TextServiceInterface;
@@ -32,6 +33,11 @@ class MarketplaceService implements MarketplaceServiceInterface
     protected $filters;
 
     /**
+     * @var ErrorRepositoryInterface
+     */
+    protected $errors;
+
+    /**
      * @var VerifyRepositoryInterface
      */
     protected $verifyNumber;
@@ -51,6 +57,7 @@ class MarketplaceService implements MarketplaceServiceInterface
      * 
      * @param MarketplaceRepositoryInterface $marketplace
      * @param FilterRepositoryInterface $filters
+     * @param ErrorRepositoryInterface $errors
      * @param VerifyRepositoryInterface $verifyNumber
      * @param DealerLocationRepositoryInterface $dealerLocation
      * @param TextServiceInterface $twilio
@@ -58,12 +65,14 @@ class MarketplaceService implements MarketplaceServiceInterface
     public function __construct(
         MarketplaceRepositoryInterface $marketplace,
         FilterRepositoryInterface $filters,
+        ErrorRepositoryInterface $errors,
         VerifyRepositoryInterface $verifyNumber,
         DealerLocationRepositoryInterface $dealerLocation,
         TextServiceInterface $twilio
     ) {
         $this->marketplace = $marketplace;
         $this->filters = $filters;
+        $this->errors = $errors;
         $this->verifyNumber = $verifyNumber;
         $this->dealerLocation = $dealerLocation;
         $this->twilio = $twilio;
@@ -221,6 +230,7 @@ class MarketplaceService implements MarketplaceServiceInterface
         // Return MarketplaceStatus
         return new MarketplaceStatus([
             'page_url' => config('marketing.fb.settings.fields.page_url', false),
+            'errors' => $this->errors->getAllActive($dealerId),
             'tfa_types' => new Collection($tfaTypes)
         ]);
     }
