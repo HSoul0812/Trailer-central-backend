@@ -42,7 +42,7 @@ class ESInventoryQueryBuilder
         return $this->pageSize;
     }
 
-    public function rangeQuery(string $fieldKey, $min, $max, $context = self::OCCUR_MUST)
+    public function addRangeQuery(string $fieldKey, $min, $max, $context = self::OCCUR_MUST)
     {
         if ($min != null || $max != null) {
             $rangeQuery = [
@@ -62,22 +62,22 @@ class ESInventoryQueryBuilder
         return $this;
     }
 
-    public function termQuery(string $fieldKey, $value, $context = self::OCCUR_MUST)
+    public function addTermQuery(string $fieldKey, $value, $context = self::OCCUR_MUST)
     {
-        $query = $this->_termQuery($fieldKey, $value);
+        $query = $this->_addTermQuery($fieldKey, $value);
         if ($query != null) {
             $this->queries[$context][] = $query;
         }
         return $this;
     }
 
-    public function termQueries(string $fieldKey, ?string $valueString, $context = self::OCCUR_MUST)
+    public function addTermQueries(string $fieldKey, ?string $valueString, $context = self::OCCUR_MUST)
     {
         if ($valueString != null) {
             $valueArr = explode(';', $valueString);
             $queries = [];
             foreach($valueArr as $value) {
-                $queries[] = $this->_termQuery($fieldKey, $value);
+                $queries[] = $this->_addTermQuery($fieldKey, $value);
             }
 
             $this->queries[$context][] = [
@@ -93,7 +93,7 @@ class ESInventoryQueryBuilder
         $this->filterScript = $script;
     }
 
-    private function _termQuery(string $fieldKey, $value) {
+    private function _addTermQuery(string $fieldKey, $value) {
         if ($value !== null) {
             return
                 [
@@ -105,20 +105,20 @@ class ESInventoryQueryBuilder
         return null;
     }
 
-    public function geoFiltering(array $location, string $distance)
+    public function setGeoDistance(array $location, ?string $distance): static
     {
         $this->location = $location;
         $this->distance = $distance;
         return $this;
     }
 
-    public function globalAggregate(array $aggregations)
+    public function setGlobalAggregate(array $aggregations)
     {
         $this->globalAggregations = $aggregations;
         return $this;
     }
 
-    public function filterAggregate(array $aggregations)
+    public function setFilterAggregate(array $aggregations)
     {
         $this->filterAggregations = $aggregations;
         return $this;
