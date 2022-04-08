@@ -69,6 +69,7 @@ use App\Models\CRM\Leads\Facebook\User as FbUser;
  * @property Website $website
  * @property LeadStatus $leadStatus
  * @property FbUser $fbUsers
+ * @property FbLead $fbLead
  * @property Inventory $inventory
  */
 class Lead extends Model
@@ -296,6 +297,15 @@ class Lead extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
+    }
+
+    /**
+    * @return HasOne
+    * @return BelongsToMany
+     */
+    public function fbLead(): HasOne
+    {
+        return $this->hasOne(FbLead::class, 'lead_id', 'identifier');
     }
 
     /**
