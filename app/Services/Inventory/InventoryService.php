@@ -4,6 +4,8 @@ namespace App\Services\Inventory;
 
 use App\DTOs\Inventory\TcApiResponseInventory;
 use App\Repositories\SysConfig\SysConfigRepositoryInterface;
+use App\Services\Inventory\ESQuery\ESInventoryQueryBuilder;
+use App\Services\Inventory\ESQuery\SortOrder;
 use GuzzleHttp\Exception\GuzzleException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use App\DTOs\Inventory\TcEsInventory;
@@ -21,10 +23,8 @@ class InventoryService implements InventoryServiceInterface
     const ES_INDEX = 'inventoryclsf';
     const HTTP_SUCCESS = 200;
     const ES_CACHE_EXPIRY = 300;
-    const FIELD_UPDATED_AT = 'updatedAt';
-    const ORDER_DESC = 'desc';
-    const ORDER_ASC = 'asc';
-
+    const DEFAULT_SORT = '+distance';
+    const DEFAULT_NO_LOCATION_SORT = '-createdAt';
     const DEFAULT_COUNTRY = 'USA';
     const PAGE_SIZE = 10;
     const TERM_SEARCH_KEY_MAP = [
@@ -225,7 +225,16 @@ class InventoryService implements InventoryServiceInterface
         $this->buildFilter($queryBuilder, $params);
         $this->buildGeoFiltering($queryBuilder, $params);
 
-        $queryBuilder->orderBy(self::FIELD_UPDATED_AT, self::ORDER_DESC);
+        if(isset($params['sort'])) {
+            $sort = $params['sort'];
+        } else if($this->getGeolocation($params)) {
+            $sort = self::DEFAULT_SORT;
+        } else {
+            $sort = self::DEFAULT_NO_LOCATION_SORT;
+        }
+
+        $sortObj = new SortOrder($sort);
+        $queryBuilder->orderBy($sortObj->field, $sortObj->direction);
         return $queryBuilder;
     }
 
@@ -244,7 +253,7 @@ class InventoryService implements InventoryServiceInterface
         array $params,
     ) {
         if(isset($params['country'])) {
-            $queryBuilder->termQuery('location.country', strtolower($params['country']));
+            $queryBuilder->termQuery('location.country', strtoupper($params['country']));
         } else {
             $location = $this->getGeolocation($params);
             $distance = $params['distance'] ?? '300mi';
