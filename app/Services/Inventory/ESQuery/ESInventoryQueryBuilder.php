@@ -167,7 +167,7 @@ class ESInventoryQueryBuilder
                     ]
                 ];
             }
-            if($this->location) {
+            if($this->location && $this->distance) {
                 $filters[] = [
                     'geo_distance' => [
                         'distance' => $this->distance,

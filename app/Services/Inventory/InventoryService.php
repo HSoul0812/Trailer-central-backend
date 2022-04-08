@@ -252,14 +252,16 @@ class InventoryService implements InventoryServiceInterface
         ESInventoryQueryBuilder $queryBuilder,
         array $params,
     ) {
+        $distance = null;
         if(isset($params['country'])) {
             $queryBuilder->termQuery('location.country', strtoupper($params['country']));
         } else {
-            $location = $this->getGeolocation($params);
             $distance = $params['distance'] ?? '300mi';
-            if($location !== null) {
-                $queryBuilder->geoFiltering(['lat' => $location->latitude, 'lon' => $location->longitude], $distance);
-            }
+        }
+
+        $location = $this->getGeolocation($params);
+        if($location !== null) {
+            $queryBuilder->geoFiltering(['lat' => $location->latitude, 'lon' => $location->longitude], $distance);
         }
 
     }
