@@ -4,6 +4,7 @@ namespace App\Rules\User;
 
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
+use App\Models\User\Interfaces\PermissionsInterface;
 
 /**
  *  Validates that the given permission level is valid
@@ -20,24 +21,38 @@ class ValidPermissionLevel
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
-    public function passes(string $attribute, string $value, array $parameters = []): bool
+    public function passes(string $attribute, string $value, array $parameters, $validator): bool
     {
-        $salesPersonRepo = app(SalesPersonRepositoryInterface::class);
-        $dealerLocationRepo = app(DealerLocationRepositoryInterface::class);
+        $otherField = $parameters[0];
+        $permissionFeature = data_get($validator->getData(), $otherField);
 
-        if ( $salesPersonRepo->get(['sales_person_id' => $value]) ) {
-            return true;
+        // if it is normal permission level which is always in text string
+        if (!is_numeric($value)) {
+            return in_array($value, PermissionsInterface::PERMISSION_LEVELS);
         }
+        // else if permission level is in numeric
+        switch ($permissionFeature) {
+            case PermissionsInterface::CRM:
 
-        try {
-            if ($dealerLocationRepo->get(['dealer_location_id' => (int) $value])) {
-                return true;
-            }
-        } catch (\Exception $e) {
-            return false;
+                $salesPersonRepo = app(SalesPersonRepositoryInterface::class);
+                if ( $salesPersonRepo->get(['sales_person_id' => $value]) ) {
+                    return true;
+                }
+
+            case PermissionsInterface::LOCATIONS: 
+
+                try {
+                    $dealerLocationRepo = app(DealerLocationRepositoryInterface::class);
+                    if ($dealerLocationRepo->get(['dealer_location_id' => (int) $value])) {
+                        return true;
+                    }
+                } catch (\Exception $e) {
+                    return false;
+                }
+
+            default:
+                return false;
         }
-
-        return false;
     }
 
     /**
