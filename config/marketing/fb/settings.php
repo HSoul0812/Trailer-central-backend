@@ -26,6 +26,7 @@ return [
 
     // Posting Limits
     'limit' => [
+        'force' => env('FB_MARKETING_SETTING_LIMIT_FORCE', '1'),
         'listings' => env('FB_MARKETING_SETTING_LIMIT_LISTINGS', '3'),
         'hours' => env('FB_MARKETING_SETTING_LIMIT_HOURS', '24'),
     ],
