@@ -754,7 +754,9 @@ class InventoryRepository implements InventoryRepositoryInterface
         $featureObjs = [];
 
         foreach ($features as $feature) {
-            $featureObjs[] = new InventoryFeature($feature);
+            if (!empty ($feature['feature_list_id'])) {
+                $featureObjs[] = new InventoryFeature($feature);
+            }
         }
 
         return $featureObjs;
