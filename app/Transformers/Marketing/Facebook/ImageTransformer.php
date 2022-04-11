@@ -12,7 +12,7 @@ class ImageTransformer extends TransformerAbstract
         // Get Filename
         $file = '';
         if(!empty($image->image)) {
-            $file = $image->image->noverlay_filename ?? $image->image->filename;
+            $file = $image->image->filename_noverlay ?? $image->image->filename;
         }
 
         // Return Mapping
