@@ -19,7 +19,9 @@ class CreateRequest extends Request
             'email' => ['required', 'email',
                 Rule::unique('website_user')->where('website_id', $this->website_id)
             ],
+            'phone' => 'nullable',
             'password' => 'required|min:8',
+            'repassword' => 'required|same:password',
             'website_id' => 'required',
         ];
     }
