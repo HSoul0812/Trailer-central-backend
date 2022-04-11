@@ -153,7 +153,7 @@ class TwilioService implements TextServiceInterface
 
             // Retrieved Phone Numbers!
             $this->log->info('Found ' . count($list) . ' Phone Numbers from Twilio');
-        } catch (Exception $ex) {
+        } catch (\Exception $ex) {
             $this->log->error('Error occurred trying to get Twilio Numbers: ' . $ex->getMessage());
         }
 
@@ -194,6 +194,14 @@ class TwilioService implements TextServiceInterface
             // Prepend + to Phone
             if(strpos($number, '+') === false) {
                 $number = '+' . $number;
+            }
+
+            // Is Env Var Number for Staging/Dev?
+            if($number === $this->from) {
+                // Do NOT Delete!
+                $this->log->info('Can NOT Delete Number ' + $this->from +
+                                    '! Number is forced by dev/staging environment!');
+                return false;
             }
 
             // Get All Incoming Phone Numbers Matching Provided Number
