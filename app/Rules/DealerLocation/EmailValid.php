@@ -11,6 +11,8 @@ class EmailValid implements Rule
         if (strpos($value, ',') !== false) {
             return false;
         }
+
+        return true;
     }
 
     public function message()
