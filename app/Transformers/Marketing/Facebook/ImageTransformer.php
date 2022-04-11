@@ -9,9 +9,16 @@ class ImageTransformer extends TransformerAbstract
 {
     public function transform(Image $image)
     {
+        // Get Filename
+        $file = '';
+        if(!empty($image->image)) {
+            $file = $image->image->noverlay_filename ?? $image->image->filename;
+        }
+
+        // Return Mapping
         return [
             'id' => $image->id,
-            'file' => !empty($image->image) ? $image->image->filename : null,
+            'file' => $file,
             'created_at' => $image->created_at,
             'updated_at' => $image->updated_at
         ];
