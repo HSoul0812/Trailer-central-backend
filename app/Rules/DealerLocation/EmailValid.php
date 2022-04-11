@@ -8,8 +8,12 @@ class EmailValid implements Rule
 {
     public function passes($attribute, $value)
     {
-        if (strpos($value, ',') !== false) {
-            return false;
+        $emails = explode(';', $value);
+
+        foreach ($emails as $email) {
+            if (filter_var($email, FILTER_VALIDATE_EMAIL) === FALSE) {
+                return false;
+            }
         }
 
         return true;
