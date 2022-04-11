@@ -755,37 +755,27 @@ $api->version('v1', function ($route) {
                 $route->put('/', 'App\Http\Controllers\v1\CRM\Leads\LeadImportController@update');
                 $route->delete('/', 'App\Http\Controllers\v1\CRM\Leads\LeadImportController@delete');
             });*/
+
+            /*
+            |--------------------------------------------------------------------------
+            | Lead Products
+            |--------------------------------------------------------------------------
+            |
+            |
+            |
+            */
+            $route->get('products', 'App\Http\Controllers\v1\CRM\Leads\ProductController@index');
+
+            /*
+            |--------------------------------------------------------------------------
+            | Lead Trades
+            |--------------------------------------------------------------------------
+            |
+            |
+            |
+            */
+            $route->get('trades', 'App\Http\Controllers\v1\CRM\Leads\LeadTradeController@index');
         });
-
-        /*
-        |--------------------------------------------------------------------------
-        | Lead Products
-        |--------------------------------------------------------------------------
-        |
-        |
-        |
-        */
-        $route->get('leads/products', 'App\Http\Controllers\v1\CRM\Leads\ProductController@index');
-
-        /*
-        |--------------------------------------------------------------------------
-        | Dealer Documents
-        |--------------------------------------------------------------------------
-        |
-        |
-        |
-        */
-        $route->get('user/documents', 'App\Http\Controllers\v1\CRM\Documents\DealerDocumentsController@index');
-
-        /*
-        |--------------------------------------------------------------------------
-        | Lead Trades
-        |--------------------------------------------------------------------------
-        |
-        |
-        |
-        */
-        $route->get('leads/trades', 'App\Http\Controllers\v1\CRM\Leads\LeadTradeController@index');
 
         $route->group([
             'prefix' => 'integration'
@@ -1024,6 +1014,16 @@ $api->version('v1', function ($route) {
                     $route->post('{id}/sent', 'App\Http\Controllers\v1\CRM\Text\BlastController@sent')->where('id', '[0-9]+');
                 });
             });
+
+            /*
+            |--------------------------------------------------------------------------
+            | Dealer Documents
+            |--------------------------------------------------------------------------
+            |
+            |
+            |
+            */
+            $route->get('documents', 'App\Http\Controllers\v1\CRM\Documents\DealerDocumentsController@index');
         });
 
         /*

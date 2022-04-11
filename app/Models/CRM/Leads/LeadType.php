@@ -67,7 +67,8 @@ class LeadType extends Model
         self::TYPE_TRADE => 'Trade In',
         self::TYPE_BUILD => 'Build a Trailer',
         self::TYPE_SERVICE => 'Service',
-        self::TYPE_CRAIGSLIST => 'Craigslist'
+        self::TYPE_CRAIGSLIST => 'Craigslist',
+        self::TYPE_CALL => 'Click to Call',
     ];
 
     const TABLE_NAME = 'website_lead_types';

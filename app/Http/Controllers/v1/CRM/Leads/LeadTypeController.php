@@ -41,7 +41,7 @@ class LeadTypeController extends RestfulController
     }
 
     /**
-     *
+     * @return Response
      */
     public function publicTypes(): Response
     {
