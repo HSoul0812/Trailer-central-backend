@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * Class Lead
  * @package App\Models\CRM\Leads\Facebook
  *
+ * @property int $id
  * @property int $page_id
  * @property int $user_id
  * @property int $lead_id
@@ -32,7 +33,6 @@ class Lead extends Model
     use TableAware, Compoships;
 
     const TABLE_NAME = 'fbapp_users_leads';
-
 
     /**
      * The table associated with the model.

@@ -9,7 +9,7 @@ use App\Models\Traits\TableAware;
 class LeadType extends Model
 {
     use TableAware;
-    
+
     const TYPE_GENERAL = 'general';
     const TYPE_MANUAL = 'manual';
     const TYPE_CRAIGSLIST = 'craigslist';
@@ -58,7 +58,19 @@ class LeadType extends Model
         self::TYPE_FB,
         self::TYPE_NONLEAD
     ];
-    
+
+    const PUBLIC_TYPES = [
+        self::TYPE_GENERAL => 'General',
+        self::TYPE_INVENTORY => 'Inventory',
+        self::TYPE_FINANCING => 'Financing',
+        self::TYPE_RENTALS => 'Rentals',
+        self::TYPE_TRADE => 'Trade In',
+        self::TYPE_BUILD => 'Build a Trailer',
+        self::TYPE_SERVICE => 'Service',
+        self::TYPE_CRAIGSLIST => 'Craigslist',
+        self::TYPE_CALL => 'Click to Call',
+    ];
+
     const TABLE_NAME = 'website_lead_types';
 
     /**
@@ -74,7 +86,7 @@ class LeadType extends Model
      * @var string
      */
     protected $primaryKey = 'lead_type_id';
-    
+
     /**
      * The attributes that are mass assignable.
      *
@@ -106,7 +118,7 @@ class LeadType extends Model
     {
         return $this->hasOne(LeadType::class, 'identifier', 'lead_id');
     }
-    
+
     public static function getTableName() {
         return self::TABLE_NAME;
     }
