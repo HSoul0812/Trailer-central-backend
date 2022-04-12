@@ -168,7 +168,7 @@ class MarketplaceService implements MarketplaceServiceInterface
             'auth_password' => $integration->tfa_password,
             'auth_type' => $integration->tfa_type,
             'tunnels' => $this->tunnels->getAll(['dealer_id' => $integration->dealer_id]),
-            'inventory' => $integration->is_up_to_date ? $this->getInventory($integration, $type, $params) : null
+            'inventory' => !$integration->is_up_to_date ? $this->getInventory($integration, $type, $params) : null
         ]);
         $nowTime = microtime(true);
         $this->log->info('Debug time after creating DealerFacebook: ' . ($nowTime - $startTime));
