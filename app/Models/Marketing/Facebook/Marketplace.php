@@ -166,8 +166,8 @@ class Marketplace extends Model
         echo Carbon::now()->setTimezone('UTC')->toDateTimeString() . PHP_EOL . PHP_EOL;
         echo Carbon::parse($this->imported_at)->setTimezone('UTC')->toDateTimeString() . PHP_EOL . PHP_EOL;
         echo $hours . PHP_EOL . PHP_EOL;
+        echo time() . PHP_EOL . PHP_EOL;
         echo Carbon::now()->timestamp . PHP_EOL . PHP_EOL;
-        echo Carbon::now()->setTimezone('UTC')->timestamp . PHP_EOL . PHP_EOL;
         echo (time() - $hours) . PHP_EOL . PHP_EOL;
         echo Carbon::parse($this->imported_at)->setTimezone('UTC')->timestamp . PHP_EOL . PHP_EOL;
         return Carbon::parse($this->imported_at)->setTimezone('UTC')->timestamp > (time() - $hours);
