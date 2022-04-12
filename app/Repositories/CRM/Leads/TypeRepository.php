@@ -52,4 +52,21 @@ class TypeRepository implements TypeRepositoryInterface {
         // Return Collection of Types
         return $leadTypes;
     }
+
+    /**
+     * @return Collection<SimpleData>
+     */
+    public function getAllPublic(): Collection
+    {
+        $leadTypes = collect([]);
+
+        foreach(LeadType::PUBLIC_TYPES as $key => $type) {
+            $simple = new SimpleData();
+            $simple->setIndex($key);
+            $simple->setName($type);
+            $leadTypes->push($simple);
+        }
+
+        return $leadTypes;
+    }
 }

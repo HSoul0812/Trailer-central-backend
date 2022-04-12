@@ -35,18 +35,20 @@ class InteractionTransformer extends TransformerAbstract
      * Transform Interaction
      *
      * @param Interaction $interaction
-     * @return type
+     * @return array
      */
-    public function transform(Interaction $interaction)
+    public function transform(Interaction $interaction): array
     {
         return [
             'id' => $interaction->interaction_id,
+            'user_id' => $interaction->user_id,
             'type' => $interaction->interaction_type,
             'time' => Carbon::parse($interaction->interaction_time)->format('F d, Y g:i A'),
             'notes' => $interaction->interaction_notes,
             'contact_name' => $interaction->lead->full_name,
             'username' => $interaction->real_username,
-            'to_no' => $interaction->to_no
+            'to_no' => $interaction->to_no,
+            'interaction_time' => $interaction->interaction_time
         ];
     }
 
