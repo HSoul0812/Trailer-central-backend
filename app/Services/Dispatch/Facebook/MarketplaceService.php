@@ -217,7 +217,7 @@ class MarketplaceService implements MarketplaceServiceInterface
             // Update Imported At
             $marketplace = $this->marketplace->update([
                 'id' => $params['marketplace_id'],
-                'imported_at' => Carbon::now()->setTimestamp('UTC')->toDateTimeString()
+                'imported_at' => Carbon::now()->setTimezone('UTC')->toDateTimeString()
             ]);
 
             $this->listings->commitTransaction();
