@@ -290,6 +290,7 @@ class MarketplaceService implements MarketplaceServiceInterface
 
         $integrations = $this->marketplace->getAll([
             'sort' => '-imported',
+            'import_range' => config('marketing.fb.settings.limit.hours', 0),
             'exclude' => $runningIntegrationIds,
             'skip_errors' => 1
         ]);
