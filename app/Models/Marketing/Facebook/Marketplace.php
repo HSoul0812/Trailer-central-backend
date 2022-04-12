@@ -161,6 +161,6 @@ class Marketplace extends Model
         }
 
         // Check if Hours Limits Exceeded
-        return Carbon::parse($this->imported_at)->timestamp > (time() - $hours);
+        return Carbon::parse($this->imported_at)->setTimezone('UTC')->timestamp > (time() - $hours);
     }
 }
