@@ -482,10 +482,7 @@ class InventoryFacebook
      * @return string
      */
     public function getPlainDescription(): string {
-        $html = $this->getMarkdownDescription();
-
-        // Return Strip Tags
-        return strip_tags($html);
+        return $this->stripMarkdown($this->description);
     }
 
     /**
