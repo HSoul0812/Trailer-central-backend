@@ -155,7 +155,7 @@ class Marketplace extends Model
         }
 
         // Compare Times
-        $hours = ((int) config('marketing.fb.settings.limit.hours', 0)) * 60;
+        $hours = ((int) config('marketing.fb.settings.limit.hours', 0)) * 60 * 60;
         if(empty($hours)) {
             return false;
         }
