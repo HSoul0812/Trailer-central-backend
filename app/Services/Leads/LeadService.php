@@ -27,6 +27,7 @@ class LeadService implements LeadServiceInterface
     {
         $params['website_id'] = config('services.trailercentral.tt_website_id');
         $access_token = $this->getAccessToken($params['inventory']['inventory_id']);
+        $params['inventory'][] = $params['inventory']['inventory_id'];
         $url = config('services.trailercentral.api') . self::INQUIRY_SEND_ROUTE;
         $lead = $this->handleHttpRequest('PUT', $url, ['query' => $params, 'headers' => ['access-token' => $access_token]]);
 
