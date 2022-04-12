@@ -6,6 +6,7 @@ use App\Models\User\User;
 use App\Models\User\DealerLocation;
 use App\Models\Marketing\Facebook\Filter;
 use App\Models\Traits\TableAware;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -71,7 +72,8 @@ class Marketplace extends Model
         'fb_password',
         'tfa_username',
         'tfa_password',
-        'tfa_type'
+        'tfa_type',
+        'imported_at'
     ];
 
     /**
@@ -138,5 +140,27 @@ class Marketplace extends Model
 
         // Return Filters Map
         return $filtersMap;
+    }
+
+    /**
+     * Is Up To Date?
+     * 
+     * @return bool
+     */
+    public function getIsUpToDateAttribute(): bool
+    {
+        // Get Last Imported Date
+        if(empty($this->imported_at)) {
+            return false;
+        }
+
+        // Compare Times
+        $hours = ((int) config('marketing.fb.settings.limit.hours', 0)) * 60 * 60;
+        if(empty($hours)) {
+            return false;
+        }
+
+        // Check if Hours Limits Exceeded
+        return Carbon::parse($this->imported_at, 'UTC')->timestamp > (time() - $hours);
     }
 }

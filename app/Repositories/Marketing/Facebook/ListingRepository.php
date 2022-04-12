@@ -188,8 +188,9 @@ class ListingRepository implements ListingRepositoryInterface {
             });
         }
 
-        if (!isset($params['per_page'])) {
-            $params['per_page'] = 20;
+        $forced = config('marketing.fb.settings.limit.force', 0);
+        if (!isset($params['per_page']) || !empty($forced)) {
+            $params['per_page'] = (int) config('marketing.fb.settings.limit.listings', 20);
         }
 
         // Require Inventory Images
