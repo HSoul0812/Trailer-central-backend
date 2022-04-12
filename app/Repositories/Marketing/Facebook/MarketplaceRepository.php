@@ -143,8 +143,11 @@ class MarketplaceRepository implements MarketplaceRepositoryInterface {
 
         // Import Range Provided
         if (!empty($params['import_range'])) {
-            $query = $query->where(Marketplace::getTableName() . '.imported_at', '>',
-                                    DB::raw('DATE_SUB(NOW(), INTERVAL ' . $params['import_range'] . ' HOUR)'));
+            $query = $query->where(function(Builder $query) use($params) {
+                $query->where(Marketplace::getTableName() . '.imported_at', '<',
+                                    DB::raw('DATE_SUB(NOW(), INTERVAL ' . $params['import_range'] . ' HOUR)')
+                      ->orWhereNull(Marketplace::getTableName() . '.imported_at'));
+            });
         }
 
         // Skip Integrations With Non-Expired Errors
