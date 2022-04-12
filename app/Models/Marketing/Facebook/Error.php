@@ -25,6 +25,7 @@ class Error extends Model
     const ERROR_TYPES = [
         'unknown' => 'Unknown Error',
         'missing-inventory' => 'Missing Inventory on Integration',
+        'login-failed' => 'Failed to Login for Unknown Reason',
         'login-invalid' => 'Invalid Credentials',
         'email-verification' => 'Email Verification',
         'two-factor-auth' => 'Invalid Two-Factor Credentials',
