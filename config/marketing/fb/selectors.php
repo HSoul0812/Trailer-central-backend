@@ -13,7 +13,9 @@ return [
     // Primary Selectors (Required on All/Most Pages)
     'common' => [
         'accountMenu' => env('FB_MARKETING_SELECTORS_COMMON_ACCOUNT', '*[role=navigation] *[aria-label="Account"]'),
-        'logout' => env('FB_MARKETING_SELECTORS_COMMON_LOGOUT', '*[aria-label="Account"][role=dialog] > div > div > div > div > div > div > div > :nth-child(5) div[data-visualcompletion] > *[role=button]')
+        'logout' => env('FB_MARKETING_SELECTORS_COMMON_LOGOUT', '*[aria-label="Account"][role=dialog] > div > div > div > div > div > div > div > :nth-child(5) div[data-visualcompletion] > *[role=button]'),
+        'detectAccountDisabledText' => env('FB_MARKETING_SELECTORS_DETECT_ACCOUNT_DISABLED', 'div > span:contains(\'Your account has been disabled\')'),
+        'detectRequestAReviewButton' => env('FB_MARKETING_SELECTORS_DETECT_REQUEST_A_REVIEW_BUTTON', 'div[aria-label="Request a Review"]')
     ],
 
     // Login Selectors
@@ -32,14 +34,14 @@ return [
         'marketplaceButton' => env('FB_MARKETING_SELECTORS_LISTINGS_MARKETPLACE_BUTTON', 'a[href*="facebook.com/marketplace/"]'),
         'createNewListingButton' => env('FB_MARKETING_SELECTORS_LISTINGS_NEW_BUTTON', 'a[href="/marketplace/create/"]'),
         'createNewVehicleListingButton' => env('FB_MARKETING_SELECTORS_LISTINGS_NEW_VEHICLE_BUTTON', 'a[href="/marketplace/create/vehicle/"]'),
+        'detectMissingMobileNumber' => env('FB_MARKETING_SELECTORS_DETECT_MOBILE', '.mobileMirrorHeading:contains("Add a Mobile Number")'),
         'detectRequestReviewButton' => env('FB_MARKETING_SELECTORS_DETECT_REQUEST_REVIEW_BUTTON', 'div[aria-label="Request Review"] > div'),
         'detectReviewingRequestText' => env('FB_MARKETING_SELECTORS_DETECT_REVIEWING_REQUEST', 'div > span:contains(\'We\\\'re Reviewing Your Request\')'),
         'detectReviewingFinalText' => env('FB_MARKETING_SELECTORS_DETECT_REVIEWING_FINAL', 'div > span:contains(\'You Can\\\'t Buy or Sell on Facebook\')'),
-        'detectMissingMobileNumber' => env('FB_MARKETING_SELECTORS_DETECT_MOBILE', '.mobileMirrorHeading:contains("Add a Mobile Number")'),
 
         // listingPageQs
         'listingItemMoreMenu' => env('FB_MARKETING_SELECTORS_LISTINGS_MORE_BUTTON', '[aria-label="More"] i'),
-        'firstItemLink' => env('FB_MARKETING_SELECTORS_LISTINGS_FIRST_ITEM', 'a[href^="https://www.facebook.com/marketplace/item/"]')
+        'firstItemLink' => env('FB_MARKETING_SELECTORS_LISTINGS_FIRST_ITEM', 'a[href^="https://www.facebook.com/marketplace/item/"]'),
     ],
 
     // Posting
