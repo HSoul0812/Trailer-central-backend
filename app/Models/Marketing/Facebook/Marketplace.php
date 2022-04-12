@@ -161,8 +161,6 @@ class Marketplace extends Model
         }
 
         // Check if Hours Limits Exceeded
-        echo Carbon::now()->subDay()->setTimezone('UTC')->toDateTimeString() . PHP_EOL . PHP_EOL;
-        echo Carbon::parse($this->imported_at)->setTimezone('UTC')->toDateTimeString() . PHP_EOL . PHP_EOL;
-        return Carbon::parse($this->imported_at)->setTimezone('UTC')->timestamp > (time() - $hours);
+        return Carbon::parse($this->imported_at, 'UTC')->timestamp > (time() - $hours);
     }
 }
