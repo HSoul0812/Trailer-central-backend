@@ -168,7 +168,7 @@ class MarketplaceService implements MarketplaceServiceInterface
             'auth_password' => $integration->tfa_password,
             'auth_type' => $integration->tfa_type,
             'tunnels' => $this->tunnels->getAll(['dealer_id' => $integration->dealer_id]),
-            'inventory' => $this->getInventory($integration, $type, $params)
+            'inventory' => $integration->is_up_to_date ? $this->getInventory($integration, $type, $params) : null
         ]);
         $nowTime = microtime(true);
         $this->log->info('Debug time after creating DealerFacebook: ' . ($nowTime - $startTime));
@@ -212,6 +212,12 @@ class MarketplaceService implements MarketplaceServiceInterface
                 $this->log->info('Saved ' . count($params['images']) . ' Images for ' .
                                     'Listing #' . $params['id']);
             }
+
+            // Update Imported At
+            $marketplace = $this->marketplace->update([
+                'id' => $params['marketplace_id'],
+                'imported_at' => Carbon::now()->setTimestamp('UTC')->toDateTimeString()
+            ]);
 
             $this->listings->commitTransaction();
 

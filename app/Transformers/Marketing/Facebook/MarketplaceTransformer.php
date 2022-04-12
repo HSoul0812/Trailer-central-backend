@@ -52,6 +52,8 @@ class MarketplaceTransformer extends TransformerAbstract
             'tfa_password' => $marketplace->tfa_password,
             'tfa_type' => $marketplace->tfa_type,
             'filter_map' => $marketplace->filter_map,
+            'is_up_to_date' => $marketplace->is_up_to_date,
+            'imported_at' => $marketplace->imported_at,
             'created_at' => $marketplace->created_at,
             'updated_at' => $marketplace->updated_at
         ];
