@@ -16,5 +16,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class LeadTradeImage extends Model
 {
+    const UPDATED_AT = NULL;
+
     protected $table = 'website_lead_trade_image';
 }
