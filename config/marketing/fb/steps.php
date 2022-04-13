@@ -27,6 +27,24 @@ return [
     ])),
 
 
+    // Complete List of Available Errors
+    'errors' => env('FB_MARKETING_ERRORS', implode(",", [
+        'missing-inventory',
+        'login-failed',
+        'login-invalid',
+        'email-verification',
+        'two-factor-auth',
+        'two-factor-failed',
+        'account-disabled',
+        'marketplace-inaccessible',
+        'marketplace-blocked',
+        'final-account-review',
+        'limit-reached',
+        'failed-post',
+        'flagged-post'
+    ])),
+
+
     // Define Selectors By Step
     'selectors' => [
         'start-script' => env('FB_MARKETING_STEP_SELECTORS_START', 'common'),
