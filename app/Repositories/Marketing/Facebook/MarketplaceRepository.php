@@ -155,10 +155,10 @@ class MarketplaceRepository implements MarketplaceRepositoryInterface {
             $query = $query->leftJoin(Error::getTableName(), function($join) {
                 $join->on(Error::getTableName() . '.marketplace_id', '=',
                                         Marketplace::getTableName() . '.id')
+                     ->where(Error::getTableName().'.dismissed', 0)
                      ->whereNull(Error::getTableName().'.inventory_id');
             })->where(function(Builder $query) {
                 return $query->whereNull(Error::getTableName().'.id')
-                             ->orWhere(Error::getTableName().'.dismissed', 1)
                              ->orWhere(Error::getTableName().'.expires_at', '<', DB::raw('NOW()'));
             });
         }

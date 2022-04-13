@@ -164,11 +164,12 @@ class ListingRepository implements ListingRepositoryInterface {
         });
 
         // Skip Integrations With Non-Expired Errors
-        $query = $query->leftJoin(Error::getTableName(), Error::getTableName() . '.inventory_id',
-                                        '=', Inventory::getTableName() . '.inventory_id')
-        ->where(function(Builder $query) {
+        $query = $query->leftJoin(Error::getTableName(), function($join) {
+            $join->on(Error::getTableName() . '.marketplace_id', '=',
+                                    Inventory::getTableName() . '.inventory_id')
+                 ->where(Error::getTableName().'.dismissed', 0);
+        })->where(function(Builder $query) {
             return $query->whereNull(Error::getTableName().'.id')
-                         ->orWhere(Error::getTableName().'.dismissed', 1)
                          ->orWhere(Error::getTableName().'.expires_at', '<', DB::raw('NOW()'));
         });
 
