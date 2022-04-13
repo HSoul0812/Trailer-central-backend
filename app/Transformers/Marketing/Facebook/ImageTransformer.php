@@ -9,6 +9,7 @@ class ImageTransformer extends TransformerAbstract
 {
     public function transform(Image $image)
     {
+        // Return Mapping
         return [
             'id' => $image->id,
             'file' => !empty($image->image) ? $image->image->filename : null,
