@@ -15,6 +15,7 @@ class ProfileGetTest extends TestCase
     /**
      * Test getting profiles
      *
+     * @group Marketing
      * @return void
      */
     public function testGettingProfiles()

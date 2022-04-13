@@ -133,8 +133,8 @@ class InquiryServiceTest extends TestCase
 
 
     /**
+     * @group CRM
      * @covers ::create
-     * @group Inquiry
      *
      * @throws BindingResolutionException
      */
@@ -265,8 +265,8 @@ class InquiryServiceTest extends TestCase
 
 
     /**
+     * @group CRM
      * @covers ::send
-     * @group Inquiry
      *
      * @throws BindingResolutionException
      */
@@ -396,8 +396,8 @@ class InquiryServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::send
-     * @group Inquiry
      *
      * @throws BindingResolutionException
      */
@@ -529,8 +529,8 @@ class InquiryServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::send
-     * @group Inquiry
      *
      * @throws BindingResolutionException
      */
@@ -662,8 +662,8 @@ class InquiryServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::send
-     * @group Inquiry
      *
      * @throws BindingResolutionException
      */
@@ -795,8 +795,8 @@ class InquiryServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::send
-     * @group Inquiry
      *
      * @throws BindingResolutionException
      */
@@ -928,8 +928,8 @@ class InquiryServiceTest extends TestCase
 
 
     /**
+     * @group CRM
      * @covers ::send
-     * @group Inquiry
      *
      * @throws BindingResolutionException
      */
@@ -1080,8 +1080,8 @@ class InquiryServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::send
-     * @group Inquiry
      *
      * @throws BindingResolutionException
      */
@@ -1235,8 +1235,8 @@ class InquiryServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::send
-     * @group Inquiry
      *
      * @throws BindingResolutionException
      */
