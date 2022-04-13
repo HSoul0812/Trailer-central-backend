@@ -51,7 +51,8 @@ return [
         // Common Selectors for Posting
         'common' => [
             'closeFormButton' => env('FB_MARKETING_SELECTORS_POSTING_CLOSE_BUTTON', '[aria-label="Close"]'),
-            'leavePageButton' => env('FB_MARKETING_SELECTORS_POSTING_LEAVE_BUTTON', '[aria-label="Leave Page"]')
+            'leavePageButton' => env('FB_MARKETING_SELECTORS_POSTING_LEAVE_BUTTON', '[aria-label="Leave Page"]'),
+            'detectLimitReached' => env('FB_MARKETING_SELECTORS_POSTING_LIMIT_REACHED', 'div > span > span > span:contains(\'Limit reached\')')
         ],
 
         // Vehicle Posting

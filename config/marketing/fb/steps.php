@@ -39,6 +39,7 @@ return [
         'marketplace-inaccessible',
         'marketplace-blocked',
         'final-account-review',
+        'limit-reached',
         'failed-post',
         'flagged-post'
     ])),

@@ -34,6 +34,7 @@ class Error extends Model
         'marketplace-inaccessible' => 'Marketplace Inaccessible',
         'marketplace-blocked' => 'Marketplace Blocked',
         'final-account-review' => 'Marketplace Permanently Blocked',
+        'limit-reached' => 'Limit Reached on New Account',
         'failed-post' => 'Inventory Failed to Post',
         'flagged-post' => 'Inventory Post Was Flagged'
     ];
