@@ -22,7 +22,7 @@ class LeadTradeImageTransformer extends TransformerAbstract
             'trade_id' => $leadTradeImage->trade_id,
             'filename' => $leadTradeImage->filename,
             'path' => $leadTradeImage->path,
-            'created_at' => $leadTradeImage->created_at,
+            'created_at' => $leadTradeImage->created_at ? (new \DateTime($leadTradeImage->created_at))->format('Y-m-d H:i:s') : $leadTradeImage->created_at
         ];
     }
 }
