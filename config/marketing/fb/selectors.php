@@ -40,8 +40,10 @@ return [
         'detectReviewingFinalText' => env('FB_MARKETING_SELECTORS_DETECT_REVIEWING_FINAL', 'div > span:contains(\'You Can\\\'t Buy or Sell on Facebook\')'),
 
         // listingPageQs
-        'listingItemMoreMenu' => env('FB_MARKETING_SELECTORS_LISTINGS_MORE_BUTTON', '[aria-label="More"] i'),
+        'listingItemMoreMenu' => env('FB_MARKETING_SELECTORS_LISTINGS_MORE_BUTTON', 'div[aria-label="More"]'),
+        'listingItemMoreMenuFirst' => env('FB_MARKETING_SELECTORS_LISTINGS_MORE_BUTTON', 'div[aria-label="More"]:first'),
         'firstItemLink' => env('FB_MARKETING_SELECTORS_LISTINGS_FIRST_ITEM', 'a[href^="https://www.facebook.com/marketplace/item/"]'),
+        'gotItButton' => env('FB_MARKETING_SELECTORS_LISTINGS_GOTIT_BUTTON', 'div[aria-label="Got it"]')
     ],
 
     // Posting
