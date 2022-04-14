@@ -66,9 +66,8 @@ class ProfileController extends RestfulControllerV2
         $request = new GetProfileRequest($request->all());
         if ($request->validate()) {
             // Get Profiles
-            $paginator = $this->repository->getPaginator();
-            return $this->collectionResponse($this->service->profiles($request->all()),
-                                                $this->accountTransformer, $paginator);
+            return $this->collection($this->service->profiles($request->all()),
+                                                $this->accountTransformer);
         }
         
         return $this->response->errorBadRequest();
