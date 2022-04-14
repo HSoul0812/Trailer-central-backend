@@ -3,6 +3,7 @@
 namespace App\Transformers\Marketing\Craigslist;
 
 use App\Models\Marketing\Craigslist\Profile;
+use App\Services\Marketing\Craigslist\DTOs\ProfileAccounts;
 use App\Transformers\Marketing\Craigslist\ProfileTransformer;
 use League\Fractal\TransformerAbstract;
 
