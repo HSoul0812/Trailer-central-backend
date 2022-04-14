@@ -2,30 +2,30 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers\v1\Parts;
+namespace App\Http\Controllers\v1\Glossary;
 
 use App\Exceptions\NotImplementedException;
 use App\Http\Controllers\AbstractRestfulController;
-use App\Http\Requests\CreateRequestInterface;
 use App\Http\Requests\IndexRequestInterface;
-use App\Http\Requests\Parts\Type\IndexTypeRequest;
+use App\Http\Requests\CreateRequestInterface;
+use App\Http\Requests\Glossary\IndexGlossaryRequest;
 use App\Http\Requests\UpdateRequestInterface;
-use App\Repositories\Parts\TypeRepositoryInterface;
-use App\Transformers\Parts\TypeTransformer;
+use App\Repositories\Glossary\GlossaryRepositoryInterface;
+use App\Transformers\Glossary\GlossaryTransformer;
 use Dingo\Api\Http\Response;
 
-class TypeController extends AbstractRestfulController
+class GlossaryController extends AbstractRestfulController
 {
     /**
      * Create a new controller instance.
      *
-     * @param TypeRepositoryInterface   $type
-     * @param TypeTransformer $typesTransformer
+     * @param GlossaryRepositoryInterface   $glossary
+     * @param GlossaryTransformer $glossaryTransformer
      */
-    public function __construct(TypeRepositoryInterface $types, TypeTransformer $typesTransformer)
+    public function __construct(GlossaryRepositoryInterface $glossary, GlossaryTransformer $glossaryTransformer)
     {
-        $this->typeRepo = $types;
-        $this->typesTransformer = $typesTransformer;
+        $this->glossaryRepo = $glossary;
+        $this->glossaryTransformer = $glossaryTransformer;
         parent::__construct();
     }
 
@@ -51,7 +51,7 @@ class TypeController extends AbstractRestfulController
     public function index(IndexRequestInterface $request): Response
     {
         if ($request->validate()) {
-            return $this->response->collection($this->typeRepo->getAll(), $this->typesTransformer);
+            return $this->response->collection($this->glossaryRepo->getAll(), $this->glossaryTransformer);
         }
 
         return $this->response->errorBadRequest();
@@ -76,7 +76,7 @@ class TypeController extends AbstractRestfulController
     protected function constructRequestBindings(): void
     {
         app()->bind(IndexRequestInterface::class, function () {
-            return inject_request_data(IndexTypeRequest::class);
+            return inject_request_data(IndexGlossaryRequest::class);
         });
     }
 }
