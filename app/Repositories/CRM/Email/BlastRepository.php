@@ -9,6 +9,7 @@ use App\Models\CRM\Email\BlastSent;
 use App\Repositories\CRM\Email\BlastRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class BlastRepository implements BlastRepositoryInterface {
 
