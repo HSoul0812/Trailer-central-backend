@@ -48,7 +48,7 @@ class ProfileService implements ProfileServiceInterface
         $accounts = $this->parseAccounts($profiles);
 
         // Return Profiles + Accounts
-        return ProfileAccounts([
+        return new ProfileAccounts([
             'profiles' => $profiles,
             'accounts' => $accounts
         ]);
