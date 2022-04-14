@@ -10,6 +10,7 @@ use App\Exceptions\CRM\Email\Builder\FromEmailMissingSmtpConfigException;
 use App\Exceptions\CRM\Email\Builder\InvalidEmailTemplateHtmlException;
 use App\Jobs\CRM\Interactions\EmailBuilderJob;
 use App\Mail\CRM\Interactions\EmailBuilderEmail;
+use App\Models\CRM\Email\Blast;
 use App\Models\CRM\Interactions\EmailHistory;
 use App\Models\CRM\Leads\Lead;
 use App\Models\Integration\Auth\AccessToken;
