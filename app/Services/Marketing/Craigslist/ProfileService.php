@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Marketing\Facebook;
+namespace App\Services\Marketing\Craigslist;
 
 use App\Repositories\Marketing\Craigslist\ProfileRepositoryInterface;
 use App\Services\Marketing\Craigslist\DTOs\Account;
