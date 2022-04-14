@@ -4,6 +4,7 @@ namespace App\Http\Controllers\v1\Marketing\Craigslist;
 
 use App\Http\Controllers\RestfulControllerV2;
 use App\Repositories\Marketing\Craigslist\ProfileRepositoryInterface;
+use App\Services\Marketing\Craigslist\ProfileServiceInterface;
 use App\Transformers\Marketing\Craigslist\ProfileTransformer;
 use App\Transformers\Marketing\Craigslist\ProfileAccountTransformer;
 use Dingo\Api\Http\Request;
@@ -15,6 +16,11 @@ class ProfileController extends RestfulControllerV2
      * @var ProfileRepositoryInterface
      */
     protected $repository;
+
+    /**
+     * @var ProfileServiceInterface
+     */
+    protected $service;
 
     /**
      * @var ProfileTransformer
@@ -30,15 +36,18 @@ class ProfileController extends RestfulControllerV2
      * Create a new controller instance.
      *
      * @param ProfileRepositoryInterface $repo
+     * @param ProfileServiceInterface $service
      * @param ProfileTransformer $transformer
      * @param ProfileAccountTransformer $accountTransformer
      */
     public function __construct(
         ProfileRepositoryInterface $repo,
+        ProfileServiceInterface $service,
         ProfileTransformer $transformer,
         ProfileAccountTransformer $accountTransformer
     ) {
         $this->repository = $repo;
+        $this->service = $service;
         $this->transformer = $transformer;
         $this->accountTransformer = $accountTransformer;
 
