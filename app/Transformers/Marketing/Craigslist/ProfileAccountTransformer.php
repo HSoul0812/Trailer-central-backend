@@ -2,9 +2,9 @@
 
 namespace App\Transformers\Marketing\Craigslist;
 
-use App\Models\Marketing\Craigslist\Profile;
 use App\Services\Marketing\Craigslist\DTOs\ProfileAccounts;
 use App\Transformers\Marketing\Craigslist\ProfileTransformer;
+use App\Transformers\Marketing\Craigslist\AccountTransformer;
 use League\Fractal\TransformerAbstract;
 
 /**
@@ -15,7 +15,8 @@ use League\Fractal\TransformerAbstract;
 class ProfileAccountTransformer extends TransformerAbstract
 { 
     protected $defaultIncludes = [
-        'profiles'
+        'profiles',
+        'accounts'
     ];
 
     /**
@@ -23,25 +24,26 @@ class ProfileAccountTransformer extends TransformerAbstract
      */
     protected $profileTransformer;
 
+    /**
+     * @var AccountTransformer
+     */
+    protected $accountTransformer;
+
     public function __construct(
-        ProfileTransformer $profileTransformer
+        ProfileTransformer $profileTransformer,
+        AccountTransformer $accountTransformer
     ) {
         $this->profileTransformer = $profileTransformer;
-    }
-
-    /**
-     * @param Profile $profile
-     * @return array
-     */
-    public function transform(ProfileAccounts $account): array
-    {
-        return [
-            'username' => $account->username
-        ];
+        $this->accountTransformer = $accountTransformer;
     }
 
     public function includeProfiles(ProfileAccounts $account)
     {
         return $this->collection($account->profiles, $this->profileTransformer);
+    }
+
+    public function includeAccounts(ProfileAccounts $account)
+    {
+        return $this->collection($account->accounts, $this->accountTransformer);
     }
 }
