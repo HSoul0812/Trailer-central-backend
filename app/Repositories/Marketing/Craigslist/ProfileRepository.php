@@ -95,7 +95,7 @@ class ProfileRepository implements ProfileRepositoryInterface
             $query = $query->where('dealer_id', $params['dealer_id']);
         }
 
-        if (isset($params['slot_id']) && $params['slot_id'] === Session::SLOT_SCHEDULER) {
+        if (isset($params['slot_id']) && (int) $params['slot_id'] === Session::SLOT_SCHEDULER) {
             $query = $query->leftJoin(Category::getTableName(), Category::getTableName().'.category',
                                         '=', Profile::getTableName().'.postCategory')
                            ->where(Category::getTableName().'.grouping', Category::GROUP_BY_DEALER);

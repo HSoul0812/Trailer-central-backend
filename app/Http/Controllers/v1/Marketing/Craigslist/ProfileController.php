@@ -66,8 +66,7 @@ class ProfileController extends RestfulControllerV2
         $request = new GetProfileRequest($request->all());
         if ($request->validate()) {
             // Get Profiles
-            return $this->item($this->service->profiles($request->all()),
-                                                $this->accountTransformer);
+            return $this->item($this->service->profiles($request->all()), $this->accountTransformer);
         }
         
         return $this->response->errorBadRequest();
