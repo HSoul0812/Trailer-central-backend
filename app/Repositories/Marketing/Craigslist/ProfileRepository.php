@@ -81,7 +81,7 @@ class ProfileRepository implements ProfileRepositoryInterface
     public function getAll($params, string $type = 'inventory')
     {
         /** @var  Builder $query */
-        $query = Profile::select('id', 'profile', 'username', 'postCategory as category');
+        $query = Profile::select(Profile::getTableName().'.id', 'profile', 'username', 'postCategory as category');
 
         $query = $query->where('username', '<>', '')
             ->where('username', '<>', '0')
