@@ -89,9 +89,11 @@ class BlastRepository implements BlastRepositoryInterface {
      * @return Collection of Blast
      */
     public function getAllActive(int $userId): Collection {
-        return Blast::where('user_id', $userId)
-                    ->where('delivered', 0)->where('cancelled', 0)
-                    ->where('send_date', '<', Carbon::now()->toDateTimeString())->get();
+        return Blast::where('user_id', $userId)->where('delivered', 0)
+                    ->where(function(Builder $query) {
+                        $query->where('cancelled', 0)
+                              ->orWhereNull('cancelled');
+                    })->where('send_date', '<', DB::raw('now()'))->get();
     }
 
     /**
