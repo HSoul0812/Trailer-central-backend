@@ -2,7 +2,7 @@
 
 namespace App\Mail\CRM\Interactions;
 
-use App\Mail\CRM\CustomEmail;
+use App\Services\CRM\Interactions\DTOs\BuilderEmail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
