@@ -71,6 +71,11 @@ class BuilderEmail
     private $type = 'template'; // blast | campaign | template
 
     /**
+     * @var string Name of Template / Campaign / Template
+     */
+    private $name;
+
+    /**
      * @var string Subject of Email to Send
      */
     private $subject;
