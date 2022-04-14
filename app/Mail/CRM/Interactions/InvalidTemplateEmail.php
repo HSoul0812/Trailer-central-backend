@@ -7,7 +7,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class EmailBuilderEmail extends Mailable
+class InvalidTemplateEmail extends Mailable
 {
     use Queueable, SerializesModels;
 
