@@ -37,6 +37,11 @@ class ProfileAccountTransformer extends TransformerAbstract
         $this->accountTransformer = $accountTransformer;
     }
 
+    public function transform(ProfileAccounts $account)
+    {
+        return [];
+    }
+
     public function includeProfiles(ProfileAccounts $account)
     {
         return $this->collection($account->profiles, $this->profileTransformer);
