@@ -230,6 +230,9 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             $job = new EmailBuilderJob($builder, $blast->lead_ids);
             $this->dispatch($job->onQueue('emailbuilder'));
 
+            // Mark Blast as Delivered
+            $this->blasts->update(['id' => $builder->id, 'delivered' => 1]);
+
             // Return Array of Queued Leads
             return $this->response($builder, $blast->lead_ids);
         } catch(\Exception $ex) {
