@@ -10,6 +10,7 @@ use App\Exceptions\CRM\Email\Builder\FromEmailMissingSmtpConfigException;
 use App\Exceptions\CRM\Email\Builder\InvalidEmailTemplateHtmlException;
 use App\Jobs\CRM\Interactions\EmailBuilderJob;
 use App\Mail\CRM\Interactions\EmailBuilderEmail;
+use App\Mail\CRM\Interactions\InvalidTemplateEmail;
 use App\Models\CRM\Email\Blast;
 use App\Models\CRM\Interactions\EmailHistory;
 use App\Models\CRM\Leads\Lead;
@@ -644,7 +645,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             $dealer = $this->users->get(['dealer_id' => $builder->dealerId]);
             $credential = NewUser::getDealerCredential($dealer->newDealerUser->user_id);
             $launchUrl = Lead::getLeadCrmUrl($builder->leadId, $credential);
-            Mail::to($dealer->email)->send(new EmailBuilderEmail($builder, $launchUrl));
+            Mail::to($dealer->email)->send(new InvalidTemplateEmail($builder, $launchUrl));
 
             // Fix Blast to Remove Template ID
             if($builder->type === BuilderEmail::TYPE_BLAST) {
