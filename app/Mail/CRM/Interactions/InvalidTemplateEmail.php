@@ -29,7 +29,7 @@ class InvalidTemplateEmail extends Mailable
             'name' => $config->name,
             'toName' => $config->toName,
             'typeName' => $config->getTypeName(),
-            'launch_url' => $launchUrl
+            'launchUrl' => $launchUrl
         ];
         $this->subject  = 'Notice: Could not send template named "' . $config->name . '"!';
     }
