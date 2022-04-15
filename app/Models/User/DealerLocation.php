@@ -311,7 +311,8 @@ class DealerLocation extends Model
 
         $state = $this->region;
         if(isset(StatesController::STATES_LIST[$this->region])) {
-            $state = StatesController::STATES_LIST[$this->region];
+            $baseState = StatesController::STATES_LIST[$this->region];
+            $state = ucwords(strtolower($baseState));
         }
 
         return $locationAddr . $state;
