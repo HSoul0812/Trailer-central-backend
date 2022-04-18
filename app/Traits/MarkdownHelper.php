@@ -107,4 +107,38 @@ trait MarkdownHelper
         // Return Result
         return $underscore;
     }
+
+    /**
+     * Strip Markdown From Text
+     * 
+     * @param string $input
+     * @returun string
+     */
+    public function stripMarkdown(string $input): string {
+        // Check For Markdown Formatting
+        if($this->isMarkdown($input)) {
+            // Clean Up Multiple Lines
+            $input = preg_replace("/\R+/m", "\n", $input);
+            $input = preg_replace("/\\\\/", "", $input);
+
+            // Clean Up Strong and Em
+            $input = preg_replace("/\*{2}(\S.*?\S)\*{2}/", "$1", $input);
+            $input = preg_replace("/_(\S.*?\S)_/", "$1", $input);
+
+            // Clean Up Headers
+            $input = preg_replace("/^(\s{0,3})?\#{2,6}\s+/m", "", $input);
+
+            // Clean Up Blockquotes and Codes
+            $input = preg_replace("/^\s{4}(\S)/m", "$1", $input);
+
+            // Clean Up Links
+            $input = preg_replace("/\[(.*?)\]\[\d+\]/", "$1", $input);
+
+            // Clean Tags
+            return strip_tags($input);
+        }
+
+        // Return Result
+        return $input;
+    }
 }
