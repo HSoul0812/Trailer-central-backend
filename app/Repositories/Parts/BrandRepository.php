@@ -8,11 +8,10 @@ use App\Models\Parts\Brand;
 use App\Models\Parts\Part;
 
 /**
- *  
+ *
  * @author Eczek
  */
 class BrandRepository implements BrandRepositoryInterface {
-
 
     public function create($params) {
         throw new NotImplementedException;
@@ -26,7 +25,7 @@ class BrandRepository implements BrandRepositoryInterface {
         throw new NotImplementedException;
     }
 
-    public function getAll($params) {    
+    public function getAll($params) {
 
         if (isset($params['dealer_id'])) {
             $query = Part::with('brand');
@@ -35,13 +34,13 @@ class BrandRepository implements BrandRepositoryInterface {
                     ->groupBy('parts_v1.brand_id');
         } else {
             $query = Brand::where('id', '>', 0);
-        }        
+        }
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
         }
-        
-                
+
+
         if (isset($params['name']) && !isset($params['dealer_id'])) {
             $query = $query->where('name', 'like', '%'.$params['name'].'%');
         } else if (isset($params['name'])) {
@@ -49,7 +48,7 @@ class BrandRepository implements BrandRepositoryInterface {
                 $q->where('name', 'like', '%'.$params['name'].'%');
             });
         }
-        
+
         return $query->paginate($params['per_page'])->appends($params);
     }
 

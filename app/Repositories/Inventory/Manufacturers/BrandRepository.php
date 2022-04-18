@@ -6,8 +6,19 @@ use App\Repositories\Inventory\Manufacturers\BrandRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\Inventory\Manufacturers\Brand;
 
-class BrandRepository implements BrandRepositoryInterface 
+class BrandRepository implements BrandRepositoryInterface
 {
+    private $sortOrders = [
+        'name' => [
+            'field' => 'name',
+            'direction' => 'DESC'
+        ],
+        '-name' => [
+            'field' => 'name',
+            'direction' => 'ASC'
+        ],
+    ];
+
     /**
      *
      * @var Brand
@@ -18,7 +29,7 @@ class BrandRepository implements BrandRepositoryInterface
     {
         $this->model = $model;
     }
-    
+
     public function create($params) {
         throw new NotImplementedException;
     }
@@ -41,12 +52,24 @@ class BrandRepository implements BrandRepositoryInterface
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
         }
-        
+
+        if (isset($params['sort'])) {
+            $query = $this->addSortQuery($query, $params['sort']);
+        }
+
         return $query->paginate($params['per_page'])->appends($params);
     }
+
 
     public function update($params): bool {
         throw new NotImplementedException;
     }
 
+    private function addSortQuery($query, $sort) {
+        if (!isset($this->sortOrders[$sort])) {
+            return;
+        }
+
+        return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
+    }
 }
