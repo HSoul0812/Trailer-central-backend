@@ -42,7 +42,7 @@ class LeadTradeTransformer extends TransformerAbstract
             'length' => $leadTrade->length,
             'width' => $leadTrade->width,
             'notes' => $leadTrade->notes,
-            'created_at' => $leadTrade->created_at,
+            'created_at' => $leadTrade->created_at ? (new \DateTime($leadTrade->created_at))->format('Y-m-d H:i:s') : $leadTrade->created_at
         ];
     }
 

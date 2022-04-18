@@ -168,7 +168,7 @@ class LeadStatusController extends RestfulControllerV2
     }
 
     /**
-     *
+     * @return Response
      */
     public function publicStatuses(): Response
     {

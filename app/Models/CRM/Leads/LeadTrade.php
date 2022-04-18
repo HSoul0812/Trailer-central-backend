@@ -26,6 +26,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class LeadTrade extends Model
 {
+    const UPDATED_AT = NULL;
+
     protected $table = 'website_lead_trades';
 
     /**

@@ -23,7 +23,6 @@ class DealerDocumentsTransformer extends TransformerAbstract
             'lead_id' => $dealerDocuments->lead_id,
             'filename' => $dealerDocuments->filename,
             'full_path' => $dealerDocuments->full_path,
-            'created_at' => $dealerDocuments->created_at,
             'docusign_path' => $dealerDocuments->docusign_path,
             'docusign_data' => $dealerDocuments->docusign_data,
         ];
