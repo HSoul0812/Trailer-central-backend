@@ -424,7 +424,7 @@ class InventoryFacebook
             'model' => $inventory->model,
             'description' => $inventory->description,
             'dealer_location_id' => $inventory->dealer_location_id,
-            'location' => $inventory->dealerLocation->city_region,
+            'location' => $inventory->dealerLocation->city_state,
             'color' => $inventory->attributes->get('color'),
             'mileage' => $inventory->attributes->get('mileage'),
             'body' => $inventory->attributes->get('body'),
@@ -482,10 +482,7 @@ class InventoryFacebook
      * @return string
      */
     public function getPlainDescription(): string {
-        $html = $this->getMarkdownDescription();
-
-        // Return Strip Tags
-        return strip_tags($html);
+        return $this->stripMarkdown($this->description);
     }
 
     /**

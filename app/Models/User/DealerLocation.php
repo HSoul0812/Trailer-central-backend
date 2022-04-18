@@ -9,6 +9,7 @@ use App\Models\Observers\User\DealerLocationObserver;
 use App\Models\Traits\TableAware;
 use App\Models\CRM\Text\Number;
 use App\Models\User\Location\QboLocationMapping;
+use App\Http\Controllers\v1\CRM\StatesController;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -298,6 +299,23 @@ class DealerLocation extends Model
         }
 
         return $locationAddr . $this->region;
+    }
+
+    public function getCityStateAttribute(): string
+    {
+        $locationAddr = $this->city;
+
+        if (!empty($locationAddr) && !empty($this->region)) {
+            $locationAddr .= ', ';
+        }
+
+        $state = $this->region;
+        if(isset(StatesController::STATES_LIST[$this->region])) {
+            $baseState = StatesController::STATES_LIST[$this->region];
+            $state = ucwords(strtolower($baseState));
+        }
+
+        return $locationAddr . $state;
     }
 
     public function getLocationTitleAttribute(): string

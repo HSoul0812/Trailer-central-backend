@@ -24,6 +24,14 @@ return [
     'ttl' => env('FB_MARKETING_SETTING_TTL', ''),
 
 
+    // Posting Limits
+    'limit' => [
+        'force' => env('FB_MARKETING_SETTING_LIMIT_FORCE', '1'),
+        'listings' => env('FB_MARKETING_SETTING_LIMIT_LISTINGS', '3'),
+        'hours' => env('FB_MARKETING_SETTING_LIMIT_HOURS', '24'),
+    ],
+
+
     // Define Facebook URL's
     'urls' => [
         'cookie' => env('FB_MARKETING_SETTING_URL_COOKIE', 'https://www.facebook.com'),
