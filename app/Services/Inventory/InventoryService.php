@@ -39,6 +39,7 @@ class InventoryService implements InventoryServiceInterface
         'configuration' => 'loadType',
         'axles' => 'numAxles',
         'color' => 'color',
+        'availability' => 'availability'
     ];
 
     const RANGE_SEARCH_KEY_MAP = [
