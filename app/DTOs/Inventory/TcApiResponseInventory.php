@@ -10,6 +10,14 @@ use JetBrains\PhpStorm\Pure;
 
 class TcApiResponseInventory
 {
+    const statusToAvailabilityMap = [
+        1 => 'available',
+        2 => 'sold',
+        3 => 'on_order',
+        4 => 'pending_sale',
+        5 => 'special_order',
+    ];
+
     use \App\DTOs\Arrayable;
     use TypedPropertyTrait;
 
@@ -68,7 +76,7 @@ class TcApiResponseInventory
      $obj->dealer_location = $data['dealer_location'];
      $obj->primary_image = $data['primary_image'];
      $obj->category = $data['category'];
-     $obj->availability = $data['availability'] ?? '';
+     $obj->availability = self::statusToAvailabilityMap[$data['status_id']] ?? '';
      $obj->availability_label = $data['status'] ?? '';
      foreach($data['attributes'] as $attribute) {
        $obj->setTypedProperty($attribute['code'], $attribute['value']);
