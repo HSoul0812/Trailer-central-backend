@@ -8,7 +8,6 @@ use League\Fractal\TransformerAbstract;
 use App\Models\Parts\Part;
 use League\Fractal\Resource\Primitive;
 
-
 class PartsTransformer extends TransformerAbstract implements PartsTransformerInterface
 {
     protected $availableIncludes = [

@@ -1,10 +1,12 @@
 <?php
+
 namespace App\Models\CRM\Dms\Quickbooks;
 
 use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class QuickbookApproval
+ *
  * @package App\Models\CRM\Dms\Quickbooks
  *
  * @property $id
