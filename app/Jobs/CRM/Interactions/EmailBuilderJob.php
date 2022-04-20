@@ -34,10 +34,10 @@ class EmailBuilderJob extends Job
      * SendEmailBuilderJob constructor.
      * @param BuilderEmail $config
      */
-    public function __construct(BuilderEmail $config, string $leads)
+    public function __construct(BuilderEmail $config, array $leads)
     {
         $this->config = $config;
-        $this->leads = explode(",", $leads);
+        $this->leads = $leads;
     }
 
     /**
