@@ -175,7 +175,7 @@ class Blast extends Model
         
         // Valid Status?
         switch($blast->action) {
-            case self::STATUS_INQUIRED:
+            case self::ACTION_INQUIRED:
                 $query = $query->where(function (Builder $query) {
                     $query->where(function (Builder $query) {
                         $query->where(LeadStatus::getTableName() . '.status', '<>', Lead::STATUS_WON)
@@ -183,13 +183,13 @@ class Blast extends Model
                     })->orWhere(LeadStatus::getTableName() . '.status', NULL);
                 });
             break;
-            case self::STATUS_PURCHASED:
+            case self::ACTION_PURCHASED:
                 $query = $query->where(function (Builder $query) {
                     $query->where(LeadStatus::getTableName() . '.status', Lead::STATUS_WON)
                           ->orWhere(LeadStatus::getTableName() . '.status', Lead::STATUS_WON_CLOSED);
                 });
             break;
-            case self::STATUS_UNCONTACTED:
+            case self::ACTION_UNCONTACTED:
                 $query = $query->where(function (Builder $query) {
                     $query->whereIn(LeadStatus::getTableName() . '.status', Lead::STATUS_UNCONTACTED)
                           ->orWhere(LeadStatus::getTableName() . '.status', 'open')
@@ -197,7 +197,7 @@ class Blast extends Model
                           ->orWhereNull(LeadStatus::getTableName() . '.status');
                 });
             break;
-            case self::STATUS_CONTACTED:
+            case self::ACTION_CONTACTED:
                 $query = $query->where(function (Builder $query) {
                     $query->where(LeadStatus::getTableName() . '.status', '<>', Lead::STATUS_WON)
                           ->where(LeadStatus::getTableName() . '.status', '<>', Lead::STATUS_WON_CLOSED)
