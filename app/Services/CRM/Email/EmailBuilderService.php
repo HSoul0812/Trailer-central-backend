@@ -223,8 +223,6 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'sales_person_id' => $salesPerson->id ?? 0,
             'from_email' => $blast->from_email_address ?: $this->getDefaultFromEmail()
         ]);
-        var_dump($blast->template);
-        die;
 
         // Validate Template
         $this->validateTemplate($builder);
@@ -642,30 +640,29 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      */
     private function validateTemplate(BuilderEmail $builder): bool
     {
-        // Template is Empty?!
-        if(empty($builder->template)) {
-            // Send Invalid Template Email
-            $dealer = $this->users->get(['dealer_id' => $builder->dealerId]);
-            $credential = NewUser::getDealerCredential($dealer->newDealerUser->user_id);
-            $launchUrl = Lead::getLeadCrmUrl($builder->leadId, $credential);
-            Mail::to($dealer->email)->send(new InvalidTemplateEmail($builder, $launchUrl));
-
-            // Fix Blast to Remove Template ID
-            if($builder->type === BuilderEmail::TYPE_BLAST) {
-                // Remove Invalid Template ID
-                $this->blasts->update(['id' => $builder->id, 'email_template_id' => 0]);
-            }
-            // Fix Campaign to Remove Template ID
-            elseif($builder->type === BuilderEmail::TYPE_CAMPAIGN) {
-                $this->campaigns->update(['id' => $builder->id, 'email_template_id' => 0, 'is_enabled' => 0]);
-            }
-
-            // Send Email to Dealer!
-            throw new InvalidEmailTemplateHtmlException;
+        // Template is Valid?!
+        if($builder->template) {
+            return true;
         }
 
-        // Template is Valid!
-        return true;
+        // Send Invalid Template Email
+        $dealer = $this->users->get(['dealer_id' => $builder->dealerId]);
+        $credential = NewUser::getDealerCredential($dealer->newDealerUser->user_id);
+        $launchUrl = Lead::getLeadCrmUrl($builder->leadId, $credential);
+        Mail::to($dealer->email)->send(new InvalidTemplateEmail($builder, $launchUrl));
+
+        // Fix Blast to Remove Template ID
+        if($builder->type === BuilderEmail::TYPE_BLAST) {
+            // Remove Invalid Template ID
+            $this->blasts->update(['id' => $builder->id, 'email_template_id' => 0]);
+        }
+        // Fix Campaign to Remove Template ID
+        elseif($builder->type === BuilderEmail::TYPE_CAMPAIGN) {
+            $this->campaigns->update(['id' => $builder->id, 'email_template_id' => 0, 'is_enabled' => 0]);
+        }
+
+        // Send Email to Dealer!
+        throw new InvalidEmailTemplateHtmlException;
     }
 
     /**
