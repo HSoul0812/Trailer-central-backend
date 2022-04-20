@@ -65,7 +65,7 @@ class BlastRepository implements BlastRepositoryInterface {
     }
 
     public function update($params) {
-        $blast = $this->get($params['id']);
+        $blast = $this->get(['id' => $params['id']]);
 
         DB::beginTransaction();
 
