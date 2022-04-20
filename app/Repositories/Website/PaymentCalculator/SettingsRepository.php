@@ -70,10 +70,14 @@ class SettingsRepository implements SettingsRepositoryInterface {
                 ->limit(1);
 
             $queryLessThan->select('id')
-                ->where('id', Settings::OPERATOR_LESS_THAN)
+                ->where('operator', Settings::OPERATOR_LESS_THAN)
                 ->where('inventory_price', '>', $params['inventory_price'])
                 ->orderBy('inventory_price', 'desc')
                 ->limit(1);
+
+            if (isset($params['financing'])) {
+                $query->where('financing', $params['financing']);
+            }
 
             $leftAndRightIdBounds = array_merge($queryOver->get()->toArray(), $queryLessThan->get()->toArray());
 
