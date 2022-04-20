@@ -98,6 +98,7 @@ class ShowroomTransformer extends TransformerAbstract
         }
 
         $data['showroom_id'] = $showroom->id;
+        $data['brand'] = $showroom->brand;
 
         $select = $this->request->get('select');
 
