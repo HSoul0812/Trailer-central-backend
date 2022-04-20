@@ -74,6 +74,8 @@ SQL;
                   AND i.dealer_id = :dealer_id_inventories
                   AND i.inventory_id IS NOT NULL
                   AND ci.inventory_id IS NULL
+                  AND i.is_archived = 0
+                  AND i.status != 2
                   {$this->financialReportHelpers['searchWhereForInventories']}
                   AND NOT EXISTS (
                     SELECT d.invoice_date FROM dms_quote_inventory qi
@@ -133,10 +135,10 @@ SQL;
             $params['to_date'] = date('Y-m-d'); // default end of date range
         }
 
-        $this->financialReportHelpers['partBoundParams']['to_date_parts'] = $params['to_date'] . ' 23:59:59';
+        $this->financialReportHelpers['partBoundParams']['to_date_parts'] = $params['to_date'] . ' 12:00:00';
         $this->financialReportHelpers['inventoryBoundParams']+=[
-            'to_date_inventories_1' => $params['to_date'] . ' 23:59:59',
-            'to_date_inventories_2' => $params['to_date'] . ' 23:59:59',
+            'to_date_inventories_1' => $params['to_date'] . ' 12:00:00',
+            'to_date_inventories_2' => $params['to_date'] . ' 12:00:00',
         ];
 
         $this->financialReportHelpers['dateRangeWhereForParts'] = " AND l.created_at <= :to_date_parts";
