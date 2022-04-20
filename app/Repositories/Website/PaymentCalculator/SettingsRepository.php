@@ -77,7 +77,9 @@ class SettingsRepository implements SettingsRepositoryInterface {
 
             $leftAndRightIdBounds = array_merge($queryOver->get()->toArray(), $queryLessThan->get()->toArray());
 
-            $query->whereIn('id', $leftAndRightIdBounds);
+            if (!empty($leftAndRightIdBounds)) {
+                $query->whereIn('id', $leftAndRightIdBounds);
+            }
 
             // when we have a discrepancy, then we need to pick the most profitable loan for the company
             $query->limit(1)->orderBy('months', 'desc');
