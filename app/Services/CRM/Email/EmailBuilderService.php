@@ -223,6 +223,8 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'sales_person_id' => $salesPerson->id ?? 0,
             'from_email' => $blast->from_email_address ?: $this->getDefaultFromEmail()
         ]);
+        var_dump($blast->template);
+        die;
 
         // Validate Template
         $this->validateTemplate($builder);
