@@ -117,7 +117,7 @@ class Blast extends Model
      */
     public function brands()
     {
-        return $this->hasMany(BlastBrand::class, 'email_blast_id');
+        return $this->hasMany(BlastBrand::class, 'email_blasts_id');
     }
 
     /**
@@ -125,7 +125,7 @@ class Blast extends Model
      */
     public function categories()
     {
-        return $this->hasMany(BlastCategory::class, 'email_blast_id');
+        return $this->hasMany(BlastCategory::class, 'email_blasts_id');
     }
 
 
@@ -219,7 +219,7 @@ class Blast extends Model
 
         // Append Remaining Requirements and Return Result
         return $query->whereNull(Bounce::getTableName() . '.email_address')
-                     ->whereNull(BlastSent::getTableName() . '.email_blast_id')
+                     ->whereNull(BlastSent::getTableName() . '.email_blasts_id')
                      ->whereRaw('DATE_ADD(' . Lead::getTableName() . '.date_submitted, ' .
                                 'INTERVAL +' . $blast->send_after_days . ' DAY) >= NOW()')
                      ->pluck('identifier');
