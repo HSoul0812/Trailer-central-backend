@@ -75,10 +75,6 @@ class SettingsRepository implements SettingsRepositoryInterface {
                 ->orderBy('inventory_price', 'desc')
                 ->limit(1);
 
-            if (isset($params['financing'])) {
-                $query->where('financing', $params['financing']);
-            }
-
             $leftAndRightIdBounds = array_merge($queryOver->get()->toArray(), $queryLessThan->get()->toArray());
 
             if (!empty($leftAndRightIdBounds)) {
