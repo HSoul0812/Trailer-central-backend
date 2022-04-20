@@ -4,10 +4,14 @@ namespace App\Models\CRM\Email;
 
 use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
+use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Leads\LeadStatus;
+use App\Models\CRM\Leads\LeadType;
 use App\Models\CRM\Text\BlastBrand;
 use App\Models\CRM\Text\BlastCategory;
 use App\Models\CRM\Text\BlastSent;
 use App\Models\CRM\Email\Bounce;
+use App\Models\Inventory\Inventory;
 use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
