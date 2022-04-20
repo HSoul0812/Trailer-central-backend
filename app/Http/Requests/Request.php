@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use App\Exceptions\Requests\Validation\NoObjectIdValueSetException;
 use App\Exceptions\Requests\Validation\NoObjectTypeSetException;
+use Illuminate\Validation\ValidatesWhenResolvedTrait;
 
 /**
  *
@@ -17,6 +18,7 @@ use App\Exceptions\Requests\Validation\NoObjectTypeSetException;
  */
 class Request extends BaseRequest {
 
+    use ValidatesWhenResolvedTrait;
     /**
      * Rules to validate
      *
@@ -33,6 +35,8 @@ class Request extends BaseRequest {
      */
     public function validate(): bool
     {
+        $this->prepareForValidation();
+
         $validator = Validator::make($this->all(), $this->getRules());
 
         if ($validator->fails()) {
@@ -61,6 +65,8 @@ class Request extends BaseRequest {
 
             }
         }
+
+        $this->passedValidation();
 
         return true;
     }

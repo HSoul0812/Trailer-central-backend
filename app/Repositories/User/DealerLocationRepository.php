@@ -310,4 +310,13 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
 
         return $query->exists();
     }
+
+    /**
+     * @param int $dealerLocationId
+     * @return string country
+     */
+    public function getCountryById($dealerLocationId)
+    {
+        return DealerLocation::find($dealerLocationId)->country;
+    }
 }
