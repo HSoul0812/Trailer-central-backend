@@ -7,6 +7,7 @@ namespace App\Repositories\Dms;
 use Generator;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
+use App\Models\Inventory\Inventory;
 
 /**
  * Handles all report queries related with inventories (major units) and parts (they're commonly called stocks)
@@ -22,6 +23,7 @@ class StockRepository implements StockRepositoryInterface
         'dateRangeWhereForInventories' => '',
         'type_of_stock' => self::STOCK_TYPE_MIXED
     ];
+    private $STATUS_SOLD = Inventory::STATUS_SOLD;
 
     /**
      * Handles the financial reports
@@ -75,7 +77,7 @@ SQL;
                   AND i.inventory_id IS NOT NULL
                   AND ci.inventory_id IS NULL
                   AND i.is_archived = 0
-                  AND i.status != 2
+                  AND i.status != {$this->STATUS_SOLD}
                   {$this->financialReportHelpers['searchWhereForInventories']}
                   AND NOT EXISTS (
                     SELECT d.invoice_date FROM dms_quote_inventory qi
