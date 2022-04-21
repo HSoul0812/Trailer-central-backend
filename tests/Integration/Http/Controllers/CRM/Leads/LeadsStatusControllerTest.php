@@ -143,4 +143,27 @@ class LeadsStatusControllerTest extends IntegrationTestCase
 
         $statusSeeder->cleanUp();
     }
+
+    /**
+     * @covers ::publicStatuses
+     * @group CRM
+     */
+    public function testPublicStatuses()
+    {
+        $response = $this->json(
+            'GET',
+            '/api/leads/status/public'
+        );
+
+        $leadsStatuses = [];
+
+        foreach (LeadStatus::PUBLIC_STATUSES as $index => $statusName) {
+            $leadsStatuses[] = [
+               'id' => $index,
+               'name' => $statusName,
+            ];
+        }
+
+        $this->assertResponseDataEquals($response, $leadsStatuses, false);
+    }
 }

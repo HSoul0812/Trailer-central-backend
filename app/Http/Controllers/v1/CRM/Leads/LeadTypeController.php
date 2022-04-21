@@ -7,6 +7,7 @@ use App\Http\Requests\CRM\Leads\GetLeadsTypeRequest;
 use App\Repositories\CRM\Leads\TypeRepositoryInterface;
 use App\Transformers\SimpleTransformer;
 use Dingo\Api\Http\Request;
+use Dingo\Api\Http\Response;
 
 class LeadTypeController extends RestfulController
 {
@@ -35,7 +36,15 @@ class LeadTypeController extends RestfulController
         if ($request->validate()) {
             return $this->response->collection($this->types->getAllUnique(), $this->transformer);
         }
-        
+
         return $this->response->errorBadRequest();
+    }
+
+    /**
+     * @return Response
+     */
+    public function publicTypes(): Response
+    {
+        return $this->response->collection($this->types->getAllPublic(), $this->transformer);
     }
 }
