@@ -24,15 +24,15 @@ return [
 
     // Proxy Config
     'proxy' => [
-        'auto' => env('FB_MARKETING_SETTING_PROXY_AUTO', '0'),
-        'timeout' => env('FB_MARKETING_SETTING_PROXY_TIMEOUT', 1000),
-        'required' => env('FB_MARKETING_SETTING_PROXY_REQUIRED', '1')
+        'auto' => (int) env('FB_MARKETING_SETTING_PROXY_AUTO', 0),
+        'timeout' => (int) env('FB_MARKETING_SETTING_PROXY_TIMEOUT', 1000),
+        'required' => (int) env('FB_MARKETING_SETTING_PROXY_REQUIRED', 1)
     ],
 
     // Cookie Config
     'cookie' => [
-        'clear' => env('FB_MARKETING_SETTING_COOKIE_CLEAR', '1'),
-        'restore' => env('FB_MARKETING_SETTING_COOKIE_RESTORE', '0')
+        'clear' => (int) env('FB_MARKETING_SETTING_COOKIE_CLEAR', 1),
+        'restore' => (int) env('FB_MARKETING_SETTING_COOKIE_RESTORE', 0)
     ],
 
     // Posting Limits
