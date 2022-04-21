@@ -2,10 +2,13 @@
 
 namespace App\Models\CRM\Email;
 
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 
 class Processed extends Model
 {
+    use TableAware;
+
     /**
      * The table associated with the model.
      *
