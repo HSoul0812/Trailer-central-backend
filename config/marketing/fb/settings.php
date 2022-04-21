@@ -19,6 +19,21 @@ return [
     // Primary Action to Start With
     'action' => env('FB_MARKETING_SETTING_ACTION', 'start-script'),
 
+    // Interval to Get New Posts
+    'interval' => env('FB_MARKETING_SETTING_INTERVAL', 60 * 60),
+
+    // Proxy Config
+    'proxy' => [
+        'auto' => env('FB_MARKETING_SETTING_PROXY_AUTO', '0'),
+        'timeout' => env('FB_MARKETING_SETTING_PROXY_TIMEOUT', 1000),
+        'required' => env('FB_MARKETING_SETTING_PROXY_REQUIRED', '1')
+    ],
+
+    // Cookie Config
+    'cookie' => [
+        'clear' => env('FB_MARKETING_SETTING_COOKIE_CLEAR', '1'),
+        'restore' => env('FB_MARKETING_SETTING_COOKIE_RESTORE', '0')
+    ],
 
     // Posting Limits
     'limit' => [
