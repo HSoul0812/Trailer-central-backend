@@ -41,7 +41,6 @@ class Kernel extends ConsoleKernel
         AdjustFeetAndInches::class,
         CreateAccessToken::class,
         StocksExistsCommand::class,
-        AutoAssign::class,
         IncreaseDealerCostCommand::class,
         FixPartVendor::class,
         GenerateCVRDocumentCommand::class,

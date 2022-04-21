@@ -328,6 +328,15 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
     }
 
     /**
+     * @param int $dealerLocationId
+     * @return string country
+     */
+    public function getCountryById($dealerLocationId)
+    {
+        return DealerLocation::find($dealerLocationId)->country;
+    }
+
+    /**
      * @return string[][]
      */
     protected function getSortOrders(): array
