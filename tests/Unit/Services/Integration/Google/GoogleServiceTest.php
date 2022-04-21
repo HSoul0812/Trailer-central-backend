@@ -23,6 +23,7 @@ class GoogleServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::login
      *
      * @throws BindingResolutionException
@@ -43,6 +44,7 @@ class GoogleServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::refresh
      *
      * @throws BindingResolutionException
@@ -63,6 +65,7 @@ class GoogleServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::validate
      *
      * @throws BindingResolutionException

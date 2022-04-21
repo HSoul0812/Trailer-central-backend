@@ -42,6 +42,7 @@ class AutoAssignTest extends TestCase
     /**
      * Test round robin only by location
      * 
+     * @group CRM
      * @specs array dealer_location_id = all in TEST_LOCATION_ID
      * @specs string lead_type = general
      * @specs bool enable_assign_notification = 1
@@ -148,6 +149,7 @@ class AutoAssignTest extends TestCase
     /**
      * Test round robin with empty preferred location
      * 
+     * @group CRM
      * @specs int dealer_location_id = first in TEST_LOCATION_ID
      * @specs int last_location_id = last in TEST_LOCATION_ID
      * @specs string lead_type = inventory
@@ -296,6 +298,7 @@ class AutoAssignTest extends TestCase
     /**
      * Test round robin with some matches missing
      * 
+     * @group CRM
      * @specs int dealer_location_id = first in TEST_LOCATION_ID
      * @specs string lead_type = inventory
      * @specs bool enable_assign_notification = 1
@@ -430,6 +433,7 @@ class AutoAssignTest extends TestCase
     /**
      * Test no round robin; all entries must match exactly one thing
      * 
+     * @group CRM
      * @specs array dealer_location_id = all in TEST_LOCATION_ID
      * @specs array lead_type = general, inventory, trade
      * @specs bool enable_assign_notification = 1
@@ -585,6 +589,7 @@ class AutoAssignTest extends TestCase
     /**
      * Test round robin on consecutive runs
      * 
+     * @group CRM
      * @specs int dealer_location_id = first in TEST_LOCATION_ID
      * @specs string lead_type = inventory
      * @specs bool enable_assign_notification = 1
@@ -736,6 +741,7 @@ class AutoAssignTest extends TestCase
     /**
      * Test round robin only with no email sent
      * 
+     * @group CRM
      * @specs int dealer_location_id = first in TEST_LOCATION_ID
      * @specs string lead_type = inventory
      * @specs bool enable_assign_notification = 0
@@ -836,6 +842,7 @@ class AutoAssignTest extends TestCase
     /**
      * Refresh Unassigned Leads in DB
      * 
+     * @group CRM
      * @param type $dealer->id
      * @return void
      */
@@ -852,6 +859,7 @@ class AutoAssignTest extends TestCase
     /**
      * Preserve the Round Robin Sales Person Temporarily
      * 
+     * @group CRM
      * @param int $dealer->id
      * @param int $dealerLocationId
      * @param string $salesType

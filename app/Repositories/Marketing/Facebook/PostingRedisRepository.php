@@ -252,8 +252,8 @@ class PostingRedisRepository implements PostingRepositoryInterface
      */
     public static function getTtl(): int {
         // Find Config
-        $ttl = config('marketing.fb.settings.ttl');
-        if(!empty($ttl)) {
+        $ttl = config('marketing.fb.settings.limit.ttl');
+        if(!empty($ttl) || $ttl === '0') {
             return 60 * (int) $ttl;
         }
 
