@@ -35,8 +35,8 @@ class ImageHelper
         if ($size[2] == IMAGETYPE_JPEG) {
             $exifData = exif_read_data($file);
             if (!empty($exifData['Orientation']) && ($exifData['Orientation'] == 6 || $exifData['Orientation'] == 8)) {
-                $width_old = $exifData['ExifImageWidth'] ?? $exifData['COMPUTED']['Height'];
-                $height_old = $exifData['ExifImageLength'] ?? $exifData['COMPUTED']['Width'];
+                $width_old = $exifData['ExifImageWidth'] ?? $exifData['COMPUTED']['Width'];
+                $height_old = $exifData['ExifImageLength'] ?? $exifData['COMPUTED']['Height'];
                 $orientation = $exifData['Orientation'];
             }
         }
