@@ -7,6 +7,7 @@ use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
 use App\Models\CRM\Email\Campaign;
 use App\Models\CRM\Email\Blast;
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -17,6 +18,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Template extends Model
 {
+    use TableAware;
+
     protected $table = 'crm_email_template';
 
     /**
