@@ -20,15 +20,13 @@ return [
     'action' => env('FB_MARKETING_SETTING_ACTION', 'start-script'),
 
 
-    // TTL to Expire for Posting
-    'ttl' => env('FB_MARKETING_SETTING_TTL', ''),
-
-
     // Posting Limits
     'limit' => [
         'force' => env('FB_MARKETING_SETTING_LIMIT_FORCE', '1'),
         'listings' => env('FB_MARKETING_SETTING_LIMIT_LISTINGS', '3'),
         'hours' => env('FB_MARKETING_SETTING_LIMIT_HOURS', '24'),
+        'errors' => env('FB_MARKETING_SETTING_LIMIT_ERRORS', '1'),
+        'ttl' => env('FB_MARKETING_SETTING_LIMIT_TTL', ''),
     ],
 
 
