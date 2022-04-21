@@ -107,6 +107,7 @@ class InquiryEmailServiceTest extends TestCase
 
 
     /**
+     * @group CRM
      * @covers ::send
      * @group Inquiry
      *
@@ -163,6 +164,7 @@ class InquiryEmailServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::send
      * @group Inquiry
      *
@@ -223,6 +225,7 @@ class InquiryEmailServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::send
      * @group Inquiry
      *
@@ -283,6 +286,7 @@ class InquiryEmailServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::send
      * @group Inquiry
      *
@@ -331,6 +335,7 @@ class InquiryEmailServiceTest extends TestCase
 
 
     /**
+     * @group CRM
      * @covers ::fill
      * @group Inquiry
      *
@@ -408,6 +413,7 @@ class InquiryEmailServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::fill
      * @group Inquiry
      *
@@ -488,6 +494,7 @@ class InquiryEmailServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::fill
      * @group Inquiry
      *
@@ -579,6 +586,7 @@ class InquiryEmailServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::fill
      * @group Inquiry
      *
@@ -668,6 +676,7 @@ class InquiryEmailServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::fill
      * @group Inquiry
      *
