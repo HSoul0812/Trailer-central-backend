@@ -31,7 +31,7 @@ return [
     'listings' => [
         // getToNewVehiclePageQs
         'facebookLogoButton' => env('FB_MARKETING_SELECTORS_LISTINGS_MARKETPLACE_LOGO', 'a[title="Go to Facebook home"]'),
-        'marketplaceButton' => env('FB_MARKETING_SELECTORS_LISTINGS_MARKETPLACE_BUTTON', 'div[data-pagelet=\"LeftRail\"] a[href*=\"facebook.com/marketplace/\"]:contains(\'Marketplace\')'),
+        'marketplaceButton' => env('FB_MARKETING_SELECTORS_LISTINGS_MARKETPLACE_BUTTON', 'a[href*=\"facebook.com/marketplace/\"]:contains(\'Marketplace\')'),
         'createNewListingButton' => env('FB_MARKETING_SELECTORS_LISTINGS_NEW_BUTTON', 'a[href="/marketplace/create/"]'),
         'createNewVehicleListingButton' => env('FB_MARKETING_SELECTORS_LISTINGS_NEW_VEHICLE_BUTTON', 'a[href="/marketplace/create/vehicle/"]'),
         'detectMissingMobileNumber' => env('FB_MARKETING_SELECTORS_DETECT_MOBILE', '.mobileMirrorHeading:contains("Add a Mobile Number")'),
