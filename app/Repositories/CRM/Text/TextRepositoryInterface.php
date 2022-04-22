@@ -20,7 +20,7 @@ interface TextRepositoryInterface extends Repository {
      * @param string $textMessage
      * @return TextLog
      */
-    public function send($leadId, $textMessage);
+    public function send($leadId, $textMessage, $mediaUrl = []);
 
     /**
      * @param array $params

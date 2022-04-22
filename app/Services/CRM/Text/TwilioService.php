@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Class TwilioService
- * 
+ *
  * @package App\Services\CRM\Text
  */
 class TwilioService implements TextServiceInterface
@@ -107,19 +107,21 @@ class TwilioService implements TextServiceInterface
 
     /**
      * Send Text to Twilio
-     * 
+     *
      * @param string $from_number
      * @param string $to_number
      * @param string $textMessage
      * @param string $fullName
+     * @param array $mediaUrl
      * @return MessageInstance
+     * @throws SendTwilioTextFailedException
      */
-    public function send(string $from_number, string $to_number, string $textMessage, string $fullName): MessageInstance {
+    public function send(string $from_number, string $to_number, string $textMessage, string $fullName, array $mediaUrl = []): MessageInstance {
         try {
             // Send to Demo
             if(!empty($this->from) && !empty($this->from[0])) {
                 // Send Demo Number
-                return $this->sendDemo($to_number, $textMessage, $fullName);
+                return $this->sendDemo($to_number, $textMessage, $mediaUrl);
             }
 
             // Look Up To Number
@@ -129,7 +131,7 @@ class TwilioService implements TextServiceInterface
             }
 
             // Send Internal Number
-            return $this->sendInternal($from_number, $to_number, $textMessage, $fullName);
+            return $this->sendInternal($from_number, $to_number, $textMessage, $fullName, $mediaUrl);
         } catch (\Exception $ex) {
             $this->log->error('Exception occurred trying to send text over Twilio: ' . $ex->getMessage());
             throw new SendTwilioTextFailedException;
@@ -138,7 +140,7 @@ class TwilioService implements TextServiceInterface
 
     /**
      * Get All Twilio Phone Numbers on Account
-     * 
+     *
      * @param int $max number of results to return
      * @return array<string>
      */
@@ -163,7 +165,7 @@ class TwilioService implements TextServiceInterface
 
     /**
      * Get Twilio Numbers Missing From DB
-     * 
+     *
      * @param int $max number of results to return
      * @return array<string>
      */
@@ -185,7 +187,7 @@ class TwilioService implements TextServiceInterface
 
     /**
      * Release Twilio Number
-     * 
+     *
      * @param string $number
      * @return bool | true if successfully deleted from Twilio OR DB; false if failed to delete from both
      */
@@ -231,7 +233,7 @@ class TwilioService implements TextServiceInterface
 
     /**
      * Verify Twilio SMS
-     * 
+     *
      * @param string $body
      * @param string $from
      * @param string $to
@@ -256,7 +258,7 @@ class TwilioService implements TextServiceInterface
 
     /**
      * Create And Return Verification Twilio Number
-     * 
+     *
      * @param int $dealerId
      * @param string $dealerNo
      * @param null|string $type
@@ -294,26 +296,33 @@ class TwilioService implements TextServiceInterface
 
     /**
      * Send Demo Text
-     * 
+     *
      * @param string $toNumber
      * @param string $textMessage
      * @return MessageInstance
      * @throws InvalidTwilioInboundNumberException
      * @throws CreateTwilioMessageException
      */
-    private function sendDemo(string $toNumber, string $textMessage): MessageInstance {
+    private function sendDemo(string $toNumber, string $textMessage, array $mediaUrl = []): MessageInstance {
         // Get To Override
         $toPhone = $toNumber;
         if(!empty($this->to[0])) {
             $toPhone = in_array($toNumber, $this->to) ? $toNumber : $this->to[0];
         }
 
+        $params = [
+            'from' => $this->from[0],
+            'body' => $textMessage,
+        ];
+
+        if (count($mediaUrl) > 0) {
+            $params['mediaUrl'] = $mediaUrl;
+        }
+
         // Try Creating Twilio Message
         try {
             // Create/Send Text Message
-            $sent = $this->twilio->messages->create($toPhone,
-                        array('from' => $this->from[0], 'body' => $textMessage)
-            );
+            $sent = $this->twilio->messages->create($toPhone, $params);
         } catch (\Exception $ex) {
             // Exception occurred?!
             $this->log->error('Error occurred sending demo twilio text: ' . $ex->getMessage());
@@ -333,16 +342,24 @@ class TwilioService implements TextServiceInterface
 
     /**
      * Send Internal Text
-     * 
+     *
      * @param string $from_number
      * @param string $to_number
      * @param string $textMessage
      * @param string $fullName
+     * @param array $mediaUrl
      * @return MessageInstance
+     * @throws CreateTwilioMessageException
+     * @throws NoTwilioNumberAvailableException
      * @throws TooManyNumbersTriedException
      */
-    private function sendInternal(string $from_number, string $to_number,
-                                    string $textMessage, string $fullName): MessageInstance {
+    private function sendInternal(
+        string $from_number,
+        string $to_number,
+        string $textMessage,
+        string $fullName,
+        array $mediaUrl = []
+    ): MessageInstance {
         // Get Twilio Number
         $fromPhone = $this->getTwilioNumber($from_number, $to_number, $fullName);
 
@@ -351,7 +368,7 @@ class TwilioService implements TextServiceInterface
         $this->tried = [];
         while(true) {
             try {
-                $sent = $this->sendViaTwilio($fromPhone, $to_number, $textMessage);
+                $sent = $this->sendViaTwilio($fromPhone, $to_number, $textMessage, $mediaUrl);
             } catch (InvalidTwilioInboundNumberException $ex) {
                 // Get Next Available Number!
                 $fromPhone = $this->getNextAvailableNumber();
@@ -378,26 +395,29 @@ class TwilioService implements TextServiceInterface
 
     /**
      * Send Text Via Twilio
-     * 
+     *
      * @param string $fromPhone
      * @param string $toNumber
      * @param string $textMessage
+     * @param array $mediaUrl
      * @return MessageInstance
-     * @throws NoTwilioNumberAvailableException
-     * @throws TooManyTwilioNumbersTriedException
      * @throws CreateTwilioMessageException
+     * @throws InvalidTwilioInboundNumberException
      */
-    private function sendViaTwilio(string $fromPhone, string $toNumber, string $textMessage): MessageInstance {
+    private function sendViaTwilio(string $fromPhone, string $toNumber, string $textMessage, array $mediaUrl = []): MessageInstance {
+        $params = [
+            'from' => $fromPhone,
+            'body' => $textMessage
+        ];
+
+        if (count($mediaUrl) > 0) {
+            $params['mediaUrl'] = $mediaUrl;
+        }
+
         // Try Creating Twilio Message
         try {
             // Create/Send Text Message
-            $sent = $this->twilio->messages->create(
-                $toNumber,
-                array(
-                    'from' => $fromPhone,
-                    'body' => $textMessage
-                )
-            );
+            $sent = $this->twilio->messages->create($toNumber, $params);
         } catch (\Exception $ex) {
             // Exception occurred?!
             $this->log->error('Error occurred sending twilio text: ' . $ex->getMessage());
@@ -415,7 +435,7 @@ class TwilioService implements TextServiceInterface
 
     /**
      * Get Twilio Number
-     * 
+     *
      * @param string $from_number
      * @param string $to_number
      * @param string $customer_name
@@ -450,7 +470,7 @@ class TwilioService implements TextServiceInterface
         // Get Next Available Number
         if (!empty($this->twilio)) {
             $phoneNumber = current($this->twilio->availablePhoneNumbers("US")->local->read(array('smsEnabled' => true), 1))->phoneNumber;
-            
+
             try {
                 $phone = $this->twilio->incomingPhoneNumbers
                                 ->create(["phoneNumber" => $phoneNumber]);

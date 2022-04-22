@@ -15,7 +15,32 @@ use Illuminate\Support\Facades\Storage;
 class FileService extends AbstractFileService
 {
     private const EXTENSION_MAPPING = [
+        'image/jpeg' => 'jpeg',
+        'image/jpg' => 'jpg',
+        'image/gif' => 'gif',
+        'image/png' => 'png',
+        'image/bmp' => 'bmp',
+        'image/tiff' => 'tiff',
+
+        'audio/mp4' => 'mp4',
+        'audio/ogg' => 'oga',
+        'audio/mpeg' => 'mp3',
+        'audio/3gpp' => '3gp',
+        'audio/3gpp2' => '3g2',
+        'audio/webm' => 'weba',
+
+        'video/mpeg' => 'mpeg',
+        'video/mp4' => 'mp4',
+        'video/webm' => 'webm',
+        'video/3gpp' => '3gp',
+        'video/3gpp2' => '3g2',
+
+        'text/csv' => 'csv',
+        'text/plain' => 'csv',
+        'text/calendar' => 'ics',
+
         'application/pdf' => 'pdf',
+        'application/rtf' => 'rtf',
     ];
 
     /**
