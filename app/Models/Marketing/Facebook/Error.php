@@ -24,6 +24,8 @@ class Error extends Model
      */
     const ERROR_TYPES = [
         'unknown' => 'Unknown Error',
+        'missing-tunnel' => 'Missing Tunnel on Dealer',
+        'offline-tunnel' => 'Tunnel Temporarily Offline on Dealer',
         'missing-inventory' => 'Missing Inventory on Integration',
         'login-failed' => 'Failed to Login for Unknown Reason',
         'login-invalid' => 'Invalid Credentials',
