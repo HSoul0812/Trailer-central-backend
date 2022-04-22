@@ -30,6 +30,7 @@ class Error extends Model
         'login-failed' => 'Failed to Login for Unknown Reason',
         'login-invalid' => 'Invalid Credentials',
         'email-verification' => 'Email Verification',
+        'login-approval' => 'Approval Request Submitted',
         'two-factor-auth' => 'Invalid Two-Factor Credentials',
         'two-factor-failed' => 'Two-Factor Failed',
         'account-disabled' => 'Account Disabled',

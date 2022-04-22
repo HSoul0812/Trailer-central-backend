@@ -27,6 +27,19 @@ return [
         'detectEmaiilValidationText' =>  env('FB_MARKETING_SELECTORS_DETECT_EMAIL_VERIFY', 'div:contains(\'Enter security code\')')
     ],
 
+    // Login Validator
+    'loginValidate' => [
+        'detectMissingMobileNumber' => env('FB_MARKETING_SELECTORS_VALIDATE_DETECT_MOBILE', '.mobileMirrorHeading:contains("Add a Mobile Number")'),
+        'detectLoginValidate' => env('FB_MARKETING_SELECTORS_VALIDATE_DETECT_APPROVAL', 'div > strong:contains(\'Login approval needed\')'),
+        'detectChooseOption' => env('FB_MARKETING_SELECTORS_VALIDATE_DETECT_OPTION', 'div > strong:contains(\'Choose an option\')'),
+        'detectGetCode' => env('FB_MARKETING_SELECTORS_VALIDATE_DETECT_CODE', 'div > strong:contains(\'Get a code send to your email\')'),
+        'detectEnterCode' => env('FB_MARKETING_SELECTORS_VALIDATE_DETECT_ENTER', 'div > strong:contains(\'Enter Code\')'),
+        'continueButton' => env('FB_MARKETING_SELECTORS_VALIDATE_BUTTON_CONTINUE', 'button[value="Continue"]'),
+        'verifyMethodInput' => env('FB_MARKETING_SELECTORS_VALIDATE_INPUT_METHOD', 'input[@name=\'verification_method\' and @value=\'37\']'),
+        'codeRequestInput' => env('FB_MARKETING_SELECTORS_VALIDATE_INPUT_REQUEST', 'input[@name=\'eindex\']:first'),
+        'codeResponseInput' => env('FB_MARKETING_SELECTORS_VALIDATE_INPUT_RESPONSE', 'input[@name=\'captcha_response\']')
+    ],
+
     // Listing
     'listings' => [
         // getToNewVehiclePageQs
