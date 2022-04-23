@@ -58,8 +58,6 @@ return [
     // Active Fields
     'fields' => [
         'page_url' => env('FB_MARKETING_SETTING_FIELDS_PAGE_URL', false),
-        'tfa_types' => env('FB_MARKETING_SETTING_FIELDS_TFA_TYPES', implode(",", [
-            'sms'
-        ]))
+        'tfa_types' => env('FB_MARKETING_SETTING_FIELDS_TFA_TYPES', '')
     ]
 ];
