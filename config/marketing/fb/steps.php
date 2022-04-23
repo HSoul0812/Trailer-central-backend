@@ -29,6 +29,7 @@ return [
 
     // Complete List of Available Errors
     'errors' => env('FB_MARKETING_ERRORS', implode(",", [
+        'missing-tunnel',
         'missing-inventory',
         'login-failed',
         'login-invalid',
@@ -37,6 +38,7 @@ return [
         'two-factor-auth',
         'two-factor-failed',
         'account-disabled',
+        'temp-blocked',
         'marketplace-inaccessible',
         'marketplace-blocked',
         'final-account-review',

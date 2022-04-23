@@ -34,6 +34,7 @@ class Error extends Model
         'two-factor-auth' => 'Invalid Two-Factor Credentials',
         'two-factor-failed' => 'Two-Factor Failed',
         'account-disabled' => 'Account Disabled',
+        'temp-blocked' => 'Temporary Blocked',
         'marketplace-inaccessible' => 'Marketplace Inaccessible',
         'marketplace-blocked' => 'Marketplace Blocked',
         'final-account-review' => 'Marketplace Permanently Blocked',
