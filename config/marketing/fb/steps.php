@@ -30,6 +30,7 @@ return [
     // Complete List of Available Errors
     'errors' => env('FB_MARKETING_ERRORS', implode(",", [
         'missing-tunnel',
+        'offline-tunnel',
         'missing-inventory',
         'login-failed',
         'login-invalid',
