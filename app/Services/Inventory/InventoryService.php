@@ -240,13 +240,17 @@ class InventoryService implements InventoryServiceInterface
     }
 
     private function addScriptFilter(ESInventoryQueryBuilder $queryBuilder, array $params) {
+        $filter = "doc['status'].value != 2";
+
         if(!empty($params['sale'])) {
-            $filter = "doc['salesPrice'].value > 0.0 && doc['salesPrice'].value < doc['websitePrice'].value";
-            $queryBuilder->setFilterScript([
-                'source' => $filter,
-                'lang' => 'painless'
-            ]);
+            $filter .= " && doc['salesPrice'].value > 0.0 && doc['salesPrice'].value < doc['websitePrice'].value";
+
         }
+
+        $queryBuilder->setFilterScript([
+            'source' => $filter,
+            'lang' => 'painless'
+        ]);
     }
 
     private function addGeoFiltering(
