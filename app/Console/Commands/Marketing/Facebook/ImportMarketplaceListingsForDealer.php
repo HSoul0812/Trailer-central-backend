@@ -9,11 +9,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
 
 /**
- * Class ImportDealerMarketplaceListings
+ * Class ImportMarketplaceListingsForDealer
  * 
  * @package App\Console\Commands\CRM\Marketing\Facebook
  */
-class ImportDealerMarketplaceListings extends Command
+class ImportMarketplaceListingsForDealer extends Command
 {
     /**
      * The name and signature of the console command.
