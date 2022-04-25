@@ -57,7 +57,7 @@ class ImportMarketplaceListingsForDealer extends Command
 
         // Get Inventory Chunked
         DB::table('inventory')
-            ->select('inventory.id')
+            ->select('inventory.inventory_id')
             ->where('dealer_id', '=', $dealerId)
             ->where('is_archived', '=', 0)
             ->where('status', '<>', 2)
