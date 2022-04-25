@@ -8,6 +8,7 @@ use App\Services\CRM\Email\EmailBuilderServiceInterface;
 use App\Services\CRM\Interactions\DTOs\BuilderEmail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Bus\Queueable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
@@ -33,11 +34,12 @@ class EmailBuilderJob extends Job
     /**
      * SendEmailBuilderJob constructor.
      * @param BuilderEmail $config
+     * @param Collection<int> $leads
      */
-    public function __construct(BuilderEmail $config, string $leads)
+    public function __construct(BuilderEmail $config, Collection $leads)
     {
         $this->config = $config;
-        $this->leads = explode(",", $leads);
+        $this->leads = $leads;
     }
 
     /**

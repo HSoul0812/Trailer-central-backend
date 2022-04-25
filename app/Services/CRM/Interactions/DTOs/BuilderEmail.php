@@ -71,6 +71,11 @@ class BuilderEmail
     private $type = 'template'; // blast | campaign | template
 
     /**
+     * @var string Name of Template / Campaign / Template
+     */
+    private $name;
+
+    /**
      * @var string Subject of Email to Send
      */
     private $subject;
@@ -244,6 +249,16 @@ class BuilderEmail
 
         // Return To
         return $to;
+    }
+
+    /**
+     * Get Type Name
+     * 
+     * @return string Email Blast | Email Campaign | Email Template
+     */
+    public function getTypeName(): string
+    {
+        return 'Email ' . ucfirst($this->type);
     }
 
     /**

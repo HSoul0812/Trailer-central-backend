@@ -9,7 +9,6 @@ use App\Http\Requests\CRM\Email\CreateBlastRequest;
 use App\Http\Requests\CRM\Email\ShowBlastRequest;
 use App\Http\Requests\CRM\Email\UpdateBlastRequest;
 use App\Http\Requests\CRM\Email\DeleteBlastRequest;*/
-use App\Http\Requests\CRM\Email\SendBlastRequest;
 use App\Services\CRM\Email\EmailBuilderServiceInterface;
 use App\Transformers\CRM\Email\BlastTransformer;
 use Dingo\Api\Http\Request;
@@ -36,7 +35,7 @@ class BlastController extends RestfulControllerV2
         BlastRepositoryInterface $blasts,
         EmailBuilderServiceInterface $emailbuilder
     ) {
-        $this->middleware('setUserIdOnRequest')->only(['index', 'create', 'update', 'send']);
+        $this->middleware('setUserIdOnRequest')->only(['index', 'create', 'update']);
         $this->blasts = $blasts;
         $this->emailbuilder = $emailbuilder;
     }
@@ -247,54 +246,4 @@ class BlastController extends RestfulControllerV2
         
         return $this->response->errorBadRequest();
     }*/
-
-    /**
-     * @OA\Post(
-     *     path="/api/crm/{userId}/emails/blast/{id}/send",
-     *     description="Send Blast Email for All Provided Leads",
-     *     tags={"Email"},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         description="Email Blast ID",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Parameter(
-     *         name="leads",
-     *         in="path",
-     *         description="Array of Leads to Send Email To",
-     *         required=true,
-     *         @OA\Schema(type="array", @OA\Items(type="string"))
-     *     ),
-     *     @OA\Parameter(
-     *         name="leads.*",
-     *         in="path",
-     *         description="Lead ID to Send Blast To",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response="200",
-     *         description="Confirms email blast was sent",
-     *         @OA\JsonContent()
-     *     ),
-     *     @OA\Response(
-     *         response="422",
-     *         description="Error: Bad request.",
-     *     ),
-     * )
-     */
-    public function send(int $id, Request $request) {
-        $request = new SendBlastRequest($request->all() + ['id' => $id]);
-        
-        if ( $request->validate()) {
-            // Send Emails for Blast
-            return $this->response->array(
-                $this->emailbuilder->sendBlast($id, $request->leads)
-            );
-        }
-        
-        return $this->response->errorBadRequest();
-    }
 }

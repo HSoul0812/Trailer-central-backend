@@ -3,6 +3,8 @@
 namespace App\Http\Requests\CRM\Leads\Inquiry;
 
 use App\Http\Requests\Request;
+use Propaganistas\LaravelPhone\PhoneNumber;
+use App\Repositories\User\DealerLocationRepositoryInterface;
 
 class TextInquiryRequest extends Request
 {
@@ -13,7 +15,7 @@ class TextInquiryRequest extends Request
             'website_id' => 'required|website_exists',
             'dealer_location_id' => 'nullable|dealer_location_valid',
             'inventory_id' => 'nullable|exists:inventory,inventory_id,dealer_id,' . $this->dealer_id,
-            'phone_number' => 'required|min:10',
+            'phone_number' => 'required|min:10|phone:US,CA,CL,mobile',
             'sms_message' => 'required',
             'customer_name' => 'required',
             'inventory_name' => 'nullable|string',
@@ -21,5 +23,20 @@ class TextInquiryRequest extends Request
             'referral' => 'required',
             'is_from_classifieds' => 'required|boolean'
         ];
+    }
+
+    /**
+     * Handle a passed validation attempt.
+     *
+     * @return void
+     */
+    protected function passedValidation()
+    {
+        $dealerLocationRepo = app(DealerLocationRepositoryInterface::class);
+        $country = $dealerLocationRepo->getCountryById($this->dealer_location_id);
+
+        $this->merge([
+            'phone_number' => PhoneNumber::make($this->phone_number, $country)->formatE164()
+        ]);
     }
 }

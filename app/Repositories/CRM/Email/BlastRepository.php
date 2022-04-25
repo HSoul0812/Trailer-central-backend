@@ -7,7 +7,10 @@ use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Email\Blast;
 use App\Models\CRM\Email\BlastSent;
 use App\Repositories\CRM\Email\BlastRepositoryInterface;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class BlastRepository implements BlastRepositoryInterface {
 
@@ -24,11 +27,74 @@ class BlastRepository implements BlastRepositoryInterface {
     }
 
     public function getAll($params) {
-        throw new NotImplementedException;
+        $query = Blast::with('template')->with('brands')->with('categories');
+
+        if (!isset($params['per_page'])) {
+            $params['per_page'] = 20;
+        }
+
+        if (isset($params['user_id'])) {
+            $query = $query->where('user_id', $params['user_id']);
+        }
+
+        if (isset($params['is_delivered'])) {
+            $query = $query->where('delivered', !empty($params['is_delivered']) ? 1 : 0);
+        }
+
+        if (isset($params['is_cancelled'])) {
+            $query = $query->where('cancelled', !empty($params['is_cancelled']) ? 1 : 0);
+        }
+
+        if (isset($params['send_date'])) {
+            if($params['send_date'] === 'due_now') {
+                $query = $query->where('send_date', '<', Carbon::now()->toDateTimeString());
+            } else {
+                $query = $query->where('send_date', '<', $params['send_date']);
+            }
+        }
+
+        if (isset($params['id'])) {
+            $query = $query->whereIn('id', $params['id']);
+        }
+
+        if (isset($params['sort'])) {
+            $query = $this->addSortQuery($query, $params['sort']);
+        }
+
+        return $query->paginate($params['per_page'])->appends($params);
     }
 
     public function update($params) {
-        throw new NotImplementedException;
+        $blast = $this->get(['id' => $params['id']]);
+
+        DB::beginTransaction();
+
+        try {
+            // Fill Text Details
+            $blast->fill($params)->save();
+
+            DB::commit();
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            Log::error('Text blast update error. Message - ' . $ex->getMessage() , $ex->getTrace());
+            throw new \Exception('Text blast update error');
+        }
+
+        return $blast;
+    }
+
+    /**
+     * Get All Active Blasts For Dealer
+     *
+     * @param int $userId
+     * @return Collection of Blast
+     */
+    public function getAllActive(int $userId): Collection {
+        return Blast::where('user_id', $userId)->where('delivered', 0)
+                    ->where(function(Builder $query) {
+                        $query->where('cancelled', 0)
+                              ->orWhereNull('cancelled');
+                    })->where('send_date', '<', DB::raw('now()'))->get();
     }
 
     /**
