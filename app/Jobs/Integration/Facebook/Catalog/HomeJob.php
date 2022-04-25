@@ -99,6 +99,9 @@ class HomeJob extends Job
         // Set Feed Path/Integration to Process
         $this->feedPath = $feedPath;
         $this->integration = $integration;
+
+        // Log Construct
+        Log::channel('facebook')->info('Constructed HomeJob for Catalog #' . $this->integration->catalog_id);
     }
 
     /**
@@ -109,6 +112,7 @@ class HomeJob extends Job
     public function handle()
     {
         $log = Log::channel('facebook');
+        $log->info('Handling HomeJob for Catalog #' . $this->integration->catalog_id);
 
         // Integration Empty?
         if(empty($this->integration) || empty($this->integration->listings)) {

@@ -46,6 +46,7 @@ class AutoAssignJobTest extends TestCase
 
 
     /**
+     * @group CRM
      * @covers ::handle
      * @group Inquiry
      *
@@ -91,6 +92,7 @@ class AutoAssignJobTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::handle
      * @group Inquiry
      *

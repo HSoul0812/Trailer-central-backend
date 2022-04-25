@@ -6,7 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class CrmUser extends Model
 {
-    const TABLE_NAME = 'new_crm_user';
+    public const TABLE_NAME = 'new_crm_user';
+
+    public const STATUS_ACTIVE = 1;
 
     /**
      * The table associated with the model.
@@ -76,7 +78,7 @@ class CrmUser extends Model
 
     /**
      * Get Dealer Timezone
-     * 
+     *
      * @return string
      */
     public function getDealerTimezoneAttribute(): string {

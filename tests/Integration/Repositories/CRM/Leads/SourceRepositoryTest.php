@@ -26,6 +26,7 @@ class SourceRepositoryTest extends TestCase
     /**
      * Test that SUT is properly bound by the application
      *
+     * @group CRM
      * @typeOfTest IntegrationTestCase
      *
      * @throws BindingResolutionException when there is a problem with resolution
@@ -41,6 +42,7 @@ class SourceRepositoryTest extends TestCase
     /**
      * Test that SUT is performing all desired operations (sort and filter) excepts pagination
      *
+     * @group CRM
      * @typeOfTest IntegrationTestCase
      * @dataProvider validQueryParametersProvider
      *
@@ -73,6 +75,7 @@ class SourceRepositoryTest extends TestCase
     /**
      * Test that SUT is performing all desired operations (sort and filter) excepts pagination
      *
+     * @group CRM
      * @typeOfTest IntegrationTestCase
      * @dataProvider validFindParametersProvider
      *
@@ -109,6 +112,7 @@ class SourceRepositoryTest extends TestCase
     /**
      * Test that SUT is inserting correctly
      *
+     * @group CRM
      * @typeOfTest IntegrationTestCase
      *
      * @throws BindingResolutionException when there is a problem with resolution of concreted class
@@ -145,6 +149,7 @@ class SourceRepositoryTest extends TestCase
     /**
      * Test that SUT is inserting correctly
      *
+     * @group CRM
      * @typeOfTest IntegrationTestCase
      *
      * @throws BindingResolutionException when there is a problem with resolution of concreted class
@@ -184,6 +189,7 @@ class SourceRepositoryTest extends TestCase
     /**
      * Test that SUT is throwing a PDOException when some constraint is not being satisfied
      *
+     * @group CRM
      * @typeOfTest IntegrationTestCase
      * @dataProvider invalidPropertiesProvider
      *
@@ -225,6 +231,7 @@ class SourceRepositoryTest extends TestCase
     /**
      * Test that SUT is inserting correctly
      *
+     * @group CRM
      * @typeOfTest IntegrationTestCase
      *
      * @throws BindingResolutionException when there is a problem with resolution of concreted class
@@ -261,6 +268,7 @@ class SourceRepositoryTest extends TestCase
     /**
      * Test that SUT is inserting correctly
      *
+     * @group CRM
      * @typeOfTest IntegrationTestCase
      *
      * @throws BindingResolutionException when there is a problem with resolution of concreted class
@@ -301,6 +309,7 @@ class SourceRepositoryTest extends TestCase
     /**
      * Test that SUT is inserting correctly
      *
+     * @group CRM
      * @typeOfTest IntegrationTestCase
      *
      * @throws BindingResolutionException when there is a problem with resolution of concreted class
@@ -337,6 +346,7 @@ class SourceRepositoryTest extends TestCase
     /**
      * Test that SUT is inserting correctly
      *
+     * @group CRM
      * @typeOfTest IntegrationTestCase
      *
      * @throws BindingResolutionException when there is a problem with resolution of concreted class
@@ -376,6 +386,7 @@ class SourceRepositoryTest extends TestCase
     /**
      * Test that SUT is inserting correctly
      *
+     * @group CRM
      * @typeOfTest IntegrationTestCase
      *
      * @throws BindingResolutionException when there is a problem with resolution of concreted class
@@ -412,6 +423,7 @@ class SourceRepositoryTest extends TestCase
     /**
      * Test that SUT is inserting correctly
      *
+     * @group CRM
      * @typeOfTest IntegrationTestCase
      *
      * @throws BindingResolutionException when there is a problem with resolution of concreted class
