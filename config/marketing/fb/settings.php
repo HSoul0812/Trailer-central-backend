@@ -24,9 +24,9 @@ return [
 
     // Proxy Config
     'proxy' => [
-        'auto' => (int) env('FB_MARKETING_SETTING_PROXY_AUTO', 0),
+        'auto' => (int) env('FB_MARKETING_SETTING_PROXY_AUTO', 1),
         'timeout' => (int) env('FB_MARKETING_SETTING_PROXY_TIMEOUT', 1000),
-        'required' => (int) env('FB_MARKETING_SETTING_PROXY_REQUIRED', 1)
+        'required' => (int) env('FB_MARKETING_SETTING_PROXY_REQUIRED', 0)
     ],
 
     // Cookie Config
@@ -58,8 +58,6 @@ return [
     // Active Fields
     'fields' => [
         'page_url' => env('FB_MARKETING_SETTING_FIELDS_PAGE_URL', false),
-        'tfa_types' => env('FB_MARKETING_SETTING_FIELDS_TFA_TYPES', implode(",", [
-            'sms'
-        ]))
+        'tfa_types' => env('FB_MARKETING_SETTING_FIELDS_TFA_TYPES', '')
     ]
 ];
