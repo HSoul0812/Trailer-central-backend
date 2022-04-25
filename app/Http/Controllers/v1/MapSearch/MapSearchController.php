@@ -17,6 +17,7 @@ use Dingo\Api\Http\Response;
 
 class MapSearchController extends AbstractRestfulController
 {
+    const MAP_SEARCH_CACHE_EXPIRY = 86400;
     /**
      * @param MapSearchServiceInterface $mapSearchService
      */
@@ -31,10 +32,15 @@ class MapSearchController extends AbstractRestfulController
             $this->response->errorBadRequest();
         }
 
-        $data = $this->mapSearchService->autocomplete($request->input('q'));
-        $transformer = $this->mapSearchService->getTransformer(get_class($data));
+        $queryText = $request->input('q');
+        $json = \Cache::rememberWithNewTTL("mapsearch/autocomplete/$queryText", self::MAP_SEARCH_CACHE_EXPIRY,
+            function () use ($queryText){
+                $data = $this->mapSearchService->autocomplete($queryText);
+                $transformer = $this->mapSearchService->getTransformer(get_class($data));
 
-        return $this->response->item($data, $transformer);
+                return $this->response->item($data, $transformer)->morph()->getContent();
+            });
+        return new Response($json);
     }
 
     public function geocode(GeocodeRequest $request): Response
@@ -43,10 +49,15 @@ class MapSearchController extends AbstractRestfulController
             $this->response->errorBadRequest();
         }
 
-        $data = $this->mapSearchService->geocode($request->input('q'));
-        $transformer = $this->mapSearchService->getTransformer(get_class($data));
+        $queryText = $request->input('q');
+        $json = \Cache::rememberWithNewTTL("mapsearch/geocode/$queryText", self::MAP_SEARCH_CACHE_EXPIRY,
+            function () use ($queryText) {
+                $data = $this->mapSearchService->geocode($queryText);
+                $transformer = $this->mapSearchService->getTransformer(get_class($data));
+                return $this->response->item($data, $transformer)->morph()->getContent();
+            });
 
-        return $this->response->item($data, $transformer);
+        return new Response($json);
     }
 
     public function reverse(ReverseRequest $request): Response
@@ -57,11 +68,13 @@ class MapSearchController extends AbstractRestfulController
 
         $lat = floatval($request->input('lat'));
         $lng = floatval($request->input('lng'));
-
-        $data = $this->mapSearchService->reverse($lat, $lng);
-        $transformer = $this->mapSearchService->getTransformer(get_class($data));
-
-        return $this->response->item($data, $transformer);
+        $json = \Cache::rememberWithNewTTL("mapsearch/reverse/$lat,$lng", self::MAP_SEARCH_CACHE_EXPIRY,
+            function () use ($lat, $lng) {
+                $data = $this->mapSearchService->reverse($lat, $lng);
+                $transformer = $this->mapSearchService->getTransformer(get_class($data));
+                return $this->response->item($data, $transformer)->morph()->getContent();
+            });
+        return new Response($json);
     }
 
     public function index(IndexRequestInterface $request)

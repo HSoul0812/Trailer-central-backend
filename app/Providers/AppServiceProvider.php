@@ -27,6 +27,22 @@ class AppServiceProvider extends ServiceProvider
             Artisan::call('migrate');
             Artisan::call('db:seed');
         });
+
+        \Cache::macro('rememberWithNewTTL', function($key, $ttl, \Closure $callback) {
+            $value = $this->get($key);
+
+            // If the item exists in the cache we will just return this immediately and if
+            // not we will execute the given Closure and cache the result of that for a
+            // given number of seconds so it's available for all subsequent requests.
+            if (! is_null($value)) {
+                $this->put($key, $value, value($ttl));
+                return $value;
+            }
+
+            $this->put($key, $value = $callback(), value($ttl));
+
+            return $value;
+        });
     }
 
     /**

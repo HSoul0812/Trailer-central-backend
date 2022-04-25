@@ -14,6 +14,8 @@ use App\Repositories\Inventory\InventoryLogRepository;
 use App\Repositories\Inventory\InventoryLogRepositoryInterface;
 use App\Repositories\Parts\TypeRepository;
 use App\Repositories\Parts\TypeRepositoryInterface;
+use App\Repositories\Glossary\GlossaryRepository;
+use App\Repositories\Glossary\GlossaryRepositoryInterface;
 use App\Repositories\SyncProcessRepository;
 use App\Repositories\SyncProcessRepositoryInterface;
 use App\Repositories\SysConfig\SysConfigRepository;
@@ -30,6 +32,7 @@ use App\Services\Inventory\InventoryService;
 use App\Services\Inventory\InventoryServiceInterface;
 use App\Services\Leads\LeadService;
 use App\Services\Leads\LeadServiceInterface;
+use App\Services\MapSearch\GoogleMapSearchService;
 use App\Services\MapSearch\TomTomMapSearchService;
 use Illuminate\Support\ServiceProvider;
 
@@ -48,6 +51,7 @@ class TrailerCentralIntegrationServiceProvider extends ServiceProvider
         $this->app->bind(LeadServiceInterface::class, LeadService::class);
 
         $this->app->bind(TypeRepositoryInterface::class, TypeRepository::class);
+        $this->app->bind(GlossaryRepositoryInterface::class, GlossaryRepository::class);
 
         $this->app->bind(LeadRepositoryInterface::class, LeadRepository::class);
         $this->app->bind(LeadSyncServiceInterface::class, LeadSyncService::class);
@@ -58,6 +62,6 @@ class TrailerCentralIntegrationServiceProvider extends ServiceProvider
         $this->app->bind(InventoryServiceInterface::class, InventoryService::class);
         $this->app->bind(GeolocationRepositoryInterface::class, GeolocationRepository::class);
         $this->app->bind(SysConfigRepositoryInterface::class, SysConfigRepository::class);
-        TomTomMapSearchService::register();
+        GoogleMapSearchService::register();
     }
 }

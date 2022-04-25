@@ -56,7 +56,7 @@ class TcEsInventory implements Arrayable {
     public ?int $num_axles;
     public ?string $frame_material;
     public ?string $pull_type;
-    public ?int $num_stalls;
+    public ?string $num_stalls;
     public ?string $load_type;
     public ?string $roof_type;
     public ?string $nose_type;

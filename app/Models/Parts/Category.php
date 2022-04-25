@@ -21,6 +21,7 @@ class Category extends Model
      */
     protected $fillable = [
         'name',
+        'description'
     ];
 
     /**
@@ -34,7 +35,7 @@ class Category extends Model
 
     public function types(): BelongsToMany
     {
-        return $this->belongsToMany(Type::class, 'part_category_part_type', 'part_type_id', 'part_category_id')->select('id', 'name');
+        return $this->belongsToMany(Type::class, 'part_category_part_type', 'part_category_id', 'part_type_id')->select('id', 'name');
     }
 
     /**
@@ -43,5 +44,13 @@ class Category extends Model
     public function image(): HasOne
     {
         return $this->hasOne(CategoryImage::class)->select('id', 'image_url', 'category_id');
+    }
+
+    /**
+     * Get the category mapping associated with the category.
+     */
+    public function category_mappings(): HasOne
+    {
+        return $this->hasOne(CategoryMappings ::class);
     }
 }

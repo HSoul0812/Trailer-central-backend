@@ -10,5 +10,8 @@ use App\Http\Requests\Request;
 class IndexInventoryRequest extends Request implements IndexRequestInterface
 {
     protected array $rules = [
+        'type_id' => 'required|integer',
+        'country' => ["regex:/^(us|ca)$/i"],
+        'sort' => ["regex:/^(\+|\-)(distance|createdAt|price|numFeatures)$/"]
     ];
 }
