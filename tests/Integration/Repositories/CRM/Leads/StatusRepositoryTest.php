@@ -25,6 +25,7 @@ class StatusRepositoryTest extends TestCase
     /**
      * Test that SUT is properly bound by the application
      *
+     * @group CRM
      * @typeOfTest IntegrationTestCase
      *
      * @throws BindingResolutionException when there is a problem with resolution
@@ -40,6 +41,7 @@ class StatusRepositoryTest extends TestCase
     /**
      * Test that SUT is performing all desired operations (sort and filter) excepts pagination
      *
+     * @group CRM
      * @typeOfTest IntegrationTestCase
      *
      * @throws BindingResolutionException when there is a problem with resolution
@@ -68,6 +70,7 @@ class StatusRepositoryTest extends TestCase
     /**
      * Test that SUT is inserting correctly
      *
+     * @group CRM
      * @typeOfTest IntegrationTestCase
      *
      * @throws BindingResolutionException when there is a problem with resolution of concreted class
@@ -107,6 +110,7 @@ class StatusRepositoryTest extends TestCase
     /**
      * Test that SUT is inserting correctly
      *
+     * @group CRM
      * @typeOfTest IntegrationTestCase
      *
      * @throws BindingResolutionException when there is a problem with resolution of concreted class
@@ -146,6 +150,7 @@ class StatusRepositoryTest extends TestCase
     /**
      * Test that SUT is inserting correctly
      *
+     * @group CRM
      * @typeOfTest IntegrationTestCase
      *
      * @throws BindingResolutionException when there is a problem with resolution of concreted class
@@ -185,6 +190,7 @@ class StatusRepositoryTest extends TestCase
     /**
      * Test that SUT is inserting correctly
      *
+     * @group CRM
      * @typeOfTest IntegrationTestCase
      *
      * @throws BindingResolutionException when there is a problem with resolution of concreted class

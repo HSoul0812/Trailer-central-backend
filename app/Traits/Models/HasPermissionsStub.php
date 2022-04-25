@@ -2,9 +2,12 @@
 
 namespace App\Traits\Models;
 
+use App\Models\User\CrmUser;
+use App\Models\User\NewDealerUser;
 use Illuminate\Support\Collection;
 use App\Models\User\DealerUserPermission;
 use App\Models\User\Interfaces\PermissionsInterface;
+
 /**
  * Class HasPermissionsEmpty
  * @package App\Traits\Models
@@ -31,12 +34,24 @@ trait HasPermissionsStub
                                 ->groupBy('feature')
                                 ->get();
 
-        foreach($permissions as $perm) {
-            $perm->permission_level = PermissionsInterface::SUPER_ADMIN_PERMISSION;
-            $perms[] = $perm;
+        foreach ($permissions as $perm) {
+            if ($this->hasPermission($perm->feature, $perm->permission_level)) {
+                $perm->permission_level = PermissionsInterface::SUPER_ADMIN_PERMISSION;
+
+                $perms[] = $perm;
+            }
         }
 
         return collect($perms);
+    }
+
+    public function hasCrmPermission(): bool
+    {
+        $listOfUsers = NewDealerUser::select('user_id')->where('id', $this->getDealerId());
+
+        $query = CrmUser::whereIn('user_id', $listOfUsers)->where('active', CrmUser::STATUS_ACTIVE);
+
+        return $query->exists();
     }
 
     /**
@@ -46,6 +61,14 @@ trait HasPermissionsStub
      */
     public function hasPermission(string $feature, string $permissionLevel): bool
     {
-        return true;
+        switch ($feature) {
+            case 'crm':
+                return $this->hasCrmPermission();
+            // more permissions handlers
+            default:
+                return true;
+        }
     }
+
+    abstract public function getDealerId(): int;
 }

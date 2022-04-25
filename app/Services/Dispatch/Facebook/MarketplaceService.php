@@ -292,7 +292,7 @@ class MarketplaceService implements MarketplaceServiceInterface
             'sort' => '-imported',
             'import_range' => config('marketing.fb.settings.limit.hours', 0),
             'exclude' => $runningIntegrationIds,
-            'skip_errors' => 1
+            'skip_errors' => config('marketing.fb.settings.limit.errors', 1)
         ]);
 
         // Loop Facebook Integrations

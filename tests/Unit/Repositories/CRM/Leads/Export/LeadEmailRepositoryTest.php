@@ -23,7 +23,10 @@ class LeadEmailRepositoryTest extends TestCase
         $this->leadEmailRepository = Mockery::mock(LeadEmailRepositoryInterface::class);
         $this->app->instance(LeadEmailRepositoryInterface::class, $this->leadEmailRepository);
     }
-    
+
+    /**
+     * @group CRM
+     */
     public function testGetLeadEmailByLeadReturnsLeadEmail()
     {
         $lead = $this->getEloquentMock(Lead::class);

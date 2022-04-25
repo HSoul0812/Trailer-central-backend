@@ -78,7 +78,7 @@ class PostingRedisRepository implements PostingRepositoryInterface
     public function __construct()
     {
         $this->log = Log::channel('dispatch-fb');
-        $this->redis = Redis::connection('fb-posting');
+        $this->redis = Redis::connection('persist');
         $this->log->info('Initialized Redis FB Posting Using ' . $this->redis->getName());
         $this->log->info('Found Keys: ', $this->redis->keys(self::REDIS_NAMESPACE .'*'));
     }
@@ -252,8 +252,8 @@ class PostingRedisRepository implements PostingRepositoryInterface
      */
     public static function getTtl(): int {
         // Find Config
-        $ttl = config('marketing.fb.settings.ttl');
-        if(!empty($ttl)) {
+        $ttl = config('marketing.fb.settings.limit.ttl');
+        if(!empty($ttl) || $ttl === '0') {
             return 60 * (int) $ttl;
         }
 

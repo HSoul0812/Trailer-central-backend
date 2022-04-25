@@ -16,6 +16,7 @@ use Tests\Integration\IntegrationTestCase;
 class InteractionMessageControllerTest extends IntegrationTestCase
 {
     /**
+     * @group CRM
      * @covers ::search
      */
     public function testSearch()
@@ -81,6 +82,7 @@ class InteractionMessageControllerTest extends IntegrationTestCase
     }
 
     /**
+     * @group CRM
      * @covers ::search
      */
     public function testSearchWithWrongAccessToken()
@@ -100,6 +102,7 @@ class InteractionMessageControllerTest extends IntegrationTestCase
     }
 
     /**
+     * @group CRM
      * @covers ::search
      */
     public function testSearchWithoutPageParam()
@@ -120,6 +123,7 @@ class InteractionMessageControllerTest extends IntegrationTestCase
     }
 
     /**
+     * @group CRM
      * @covers ::searchCountOf
      */
     public function testSearchCountOf()
@@ -172,6 +176,7 @@ class InteractionMessageControllerTest extends IntegrationTestCase
     }
 
     /**
+     * @group CRM
      * @covers ::searchCountOf
      */
     public function testSearchCountOfWithWrongAccessToken()
@@ -189,6 +194,7 @@ class InteractionMessageControllerTest extends IntegrationTestCase
     }
 
     /**
+     * @group CRM
      * @covers ::update
      */
     public function testUpdate()
@@ -234,6 +240,7 @@ class InteractionMessageControllerTest extends IntegrationTestCase
     }
 
     /**
+     * @group CRM
      * @covers ::update
      */
     public function testUpdateWithWrongAccessToken()
@@ -260,6 +267,7 @@ class InteractionMessageControllerTest extends IntegrationTestCase
     }
 
     /**
+     * @group CRM
      * @covers ::bulkUpdate
      */
     public function testBulkUpdate()
@@ -295,6 +303,7 @@ class InteractionMessageControllerTest extends IntegrationTestCase
     }
 
     /**
+     * @group CRM
      * @covers ::bulkUpdate
      */
     public function testBulkUpdateWithWrongAccessToken()
