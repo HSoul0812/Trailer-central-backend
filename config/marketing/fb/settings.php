@@ -25,7 +25,7 @@ return [
     // Proxy Config
     'proxy' => [
         'auto' => (int) env('FB_MARKETING_SETTING_PROXY_AUTO', 1),
-        'timeout' => (int) env('FB_MARKETING_SETTING_PROXY_TIMEOUT', 2000),
+        'timeout' => (int) env('FB_MARKETING_SETTING_PROXY_TIMEOUT', 1000),
         'required' => (int) env('FB_MARKETING_SETTING_PROXY_REQUIRED', 0)
     ],
 
