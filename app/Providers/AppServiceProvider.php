@@ -154,6 +154,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Nova\Nova;
 
+use Illuminate\Support\Facades\Schema;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -223,6 +225,9 @@ class AppServiceProvider extends ServiceProvider
         Nova::serving(function () {
             DealerIncomingMapping::observe(DealerIncomingMappingObserver::class);
         });
+
+        // Increase default database character set length (Specified key was too long)
+        Schema::defaultStringLength(191);
 
         // Add Migration Directories Recursively
         $mainPath = database_path('migrations');
