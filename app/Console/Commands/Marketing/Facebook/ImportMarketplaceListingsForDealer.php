@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands\CRM\Marketing\Facebook;
+namespace App\Console\Commands\Marketing\Facebook;
 
 use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
 use Illuminate\Console\Command;
@@ -11,7 +11,7 @@ use Illuminate\Support\Collection;
 /**
  * Class ImportMarketplaceListingsForDealer
  * 
- * @package App\Console\Commands\CRM\Marketing\Facebook
+ * @package App\Console\Commands\Marketing\Facebook
  */
 class ImportMarketplaceListingsForDealer extends Command
 {
