@@ -48,20 +48,20 @@ class LeadRepository implements LeadRepositoryInterface {
             'field' => 'website_lead.identifier',
             'direction' => 'ASC'
         ],
-        'firstname' => [
-            'field' => 'website_lead.firstname',
+        'first_name' => [
+            'field' => 'website_lead.first_name',
             'direction' => 'DESC'
         ],
-        '-firstname' => [
-            'field' => 'website_lead.firstname',
+        '-first_name' => [
+            'field' => 'website_lead.first_name',
             'direction' => 'ASC'
         ],
-        'lastname' => [
-            'field' => 'website_lead.lastname',
+        'last_name' => [
+            'field' => 'website_lead.last_name',
             'direction' => 'DESC'
         ],
-        '-lastname' => [
-            'field' => 'website_lead.lastname',
+        '-last_name' => [
+            'field' => 'website_lead.last_name',
             'direction' => 'ASC'
         ],
         'email' => [
