@@ -40,8 +40,36 @@ class LeadRepository implements LeadRepositoryInterface {
     ];
 
     private $sortOrders = [
-        'no_due_past_due_future_due' => [
-            'field' => 'crm_tc_lead_status.next_contact_date',
+        'identifier' => [
+            'field' => 'website_lead.identifier',
+            'direction' => 'DESC'
+        ],
+        '-identifier' => [
+            'field' => 'website_lead.identifier',
+            'direction' => 'ASC'
+        ],
+        'firstname' => [
+            'field' => 'website_lead.firstname',
+            'direction' => 'DESC'
+        ],
+        '-firstname' => [
+            'field' => 'website_lead.firstname',
+            'direction' => 'ASC'
+        ],
+        'lastname' => [
+            'field' => 'website_lead.lastname',
+            'direction' => 'DESC'
+        ],
+        '-lastname' => [
+            'field' => 'website_lead.lastname',
+            'direction' => 'ASC'
+        ],
+        'email' => [
+            'field' => 'website_lead.email_address',
+            'direction' => 'DESC'
+        ],
+        '-email' => [
+            'field' => 'website_lead.email_address',
             'direction' => 'ASC'
         ],
         'created_at' => [
@@ -50,6 +78,10 @@ class LeadRepository implements LeadRepositoryInterface {
         ],
         '-created_at' => [
             'field' => 'website_lead.date_submitted',
+            'direction' => 'ASC'
+        ],
+        'no_due_past_due_future_due' => [
+            'field' => 'crm_tc_lead_status.next_contact_date',
             'direction' => 'ASC'
         ],
         'future_due_past_due_no_due' => [
