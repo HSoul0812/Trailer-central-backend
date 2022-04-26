@@ -19,7 +19,7 @@ class GetLeadsRequest extends Request
         'location' => 'exists:dealer_location,dealer_location_id',
         'date_from' => 'date',
         'date_to' => 'date',
-        'sort' => 'in:identifier,-identifier,first_name,-first_name,last_name,-last_name,' .
+        'sort' => 'in:id,-id,first_name,-first_name,last_name,-last_name,' .
                         'email,-email,created_at,-created_at,no_due_past_due_future_due,' .
                         'future_due_past_due_no_due,-most_recent,most_recent,status',
         'per_page' => 'integer',

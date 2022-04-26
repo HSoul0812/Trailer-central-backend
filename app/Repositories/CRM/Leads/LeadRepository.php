@@ -40,11 +40,11 @@ class LeadRepository implements LeadRepositoryInterface {
     ];
 
     private $sortOrders = [
-        'identifier' => [
+        'id' => [
             'field' => 'website_lead.identifier',
             'direction' => 'DESC'
         ],
-        '-identifier' => [
+        '-id' => [
             'field' => 'website_lead.identifier',
             'direction' => 'ASC'
         ],
