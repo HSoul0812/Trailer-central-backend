@@ -1,8 +1,7 @@
 <?php
 
-use App\Models\Marketing\Facebook\Error;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Migrations\Migration;
+use Grimzy\LaravelMysqlSpatial\Schema\Blueprint;
 
 class RemoveIndexFacebookIdUniqueFbappListingsTable extends Migration
 {
