@@ -91,10 +91,20 @@ class CustomerRepository implements CustomerRepositoryInterface
 
     public function update($params)
     {
-        $customer = Customer::find($params['id']);
+        /** @var Customer $customer */
+        $customer = Customer::findOrFail($params['id']);
+
         $customer->fill(Arr::except($params, 'id'));
         $customer->dealer_id = $params['dealer_id'];
         $customer->save();
+
+        // If there is a deleted_at in the param, and it's
+        // not null, we want to remove the customer index
+        // from ElasticSearch
+        if (data_get($params, 'deleted_at') !== null) {
+            $customer->unsearchable();
+        }
+
         return $customer;
     }
 
