@@ -4,8 +4,10 @@ namespace App\Services\File;
 
 use App\Exceptions\File\FileUploadException;
 use App\Services\File\DTOs\FileDto;
+use App\Traits\S3\S3Helper;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -14,6 +16,8 @@ use Illuminate\Support\Facades\Storage;
  */
 class FileService extends AbstractFileService
 {
+    use S3Helper;
+
     private const EXTENSION_MAPPING = [
         'image/jpeg' => 'jpeg',
         'image/jpg' => 'jpg',
@@ -44,8 +48,25 @@ class FileService extends AbstractFileService
     ];
 
     /**
+     * @param array $files
+     * @param int|null $dealerId
+     * @return Collection|null
+     * @throws FileUploadException
+     */
+    public function bulkUpload(array $files, ?int $dealerId = null): ?Collection
+    {
+        $result = new Collection();
+
+        foreach ($files as $file) {
+            $result->push($this->upload($file, null, $dealerId));
+        }
+
+        return $result;
+    }
+
+    /**
      * @param string $url
-     * @param string $title
+     * @param string|null $title
      * @param int|null $dealerId
      * @param int|null $identifier
      * @param array $params
@@ -53,7 +74,7 @@ class FileService extends AbstractFileService
      *
      * @throws FileUploadException
      */
-    public function upload(string $url, string $title, ?int $dealerId = null, ?int $identifier = null, array $params = []): ?FileDto
+    public function upload(string $url, ?string $title = null, ?int $dealerId = null, ?int $identifier = null, array $params = []): ?FileDto
     {
         $skipNotExisting = $params['skipNotExisting'] ?? false;
 
@@ -72,11 +93,15 @@ class FileService extends AbstractFileService
             return null;
         }
 
+        if (!$title) {
+            $title = basename(parse_url($url, PHP_URL_PATH));
+        }
+
         $s3Filename = $this->sanitizeHelper->cleanFilename($title);
 
         $s3Path = $this->uploadToS3($localFilename, $s3Filename, $dealerId, $identifier, ['mimetype' => $mimeType]);
 
-        return new FileDto($s3Path, null, $mimeType);
+        return new FileDto($s3Path, null, $mimeType, $this->getS3Url($s3Path));
     }
 
     /**
