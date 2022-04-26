@@ -161,7 +161,7 @@ class SaveInventoryTransformer implements TransformerInterface
                 $defaultAttributes = [];
             }
 
-            if (isset($params['manual']) && (bool)$params['manual']) {
+            if (isset($params['manual'])) {
                 $changed = collect(Arr::except($params, array('inventory_id', 'dealer_id', 'manual')))->keys()->toArray();
                 $params['changed_fields_in_dashboard'] = $changed;
             }
