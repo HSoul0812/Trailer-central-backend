@@ -3,6 +3,7 @@
 namespace App\Services\Parts\Textrail;
 
 
+use App\Repositories\Parts\Textrail\AttributeRepositoryInterface;
 use GuzzleHttp\Client as GuzzleHttpClient;
 use App\Repositories\Parts\Textrail\PartRepository;
 use App\Repositories\Parts\Textrail\BrandRepositoryInterface;
@@ -28,21 +29,25 @@ class TextrailPartImporterService implements TextrailPartImporterServiceInterfac
      */
     protected $partRepo;
 
+    /** @var AttributeRepositoryInterface */
+    protected $partAttributeRepo;
+
     /**
      * @var GuzzleHttp\Client
      */
     protected $httpClient;
 
    public function __construct(
-     PartRepository $partRepository,
-     TextrailPartServiceInterface $textrailPartService,
-     CategoryRepositoryInterface $categoryRepository,
-     BrandRepositoryInterface $brandRepository,
-     ManufacturerRepositoryInterface $manufacturerRepository,
-     TypeRepositoryInterface $typeRepository,
-     ImageRepositoryInterface $imageRepository,
-     TextrailPartsTransformer $textrailPartsTransformer,
-     Manager $manager
+       PartRepository                   $partRepository,
+       TextrailPartServiceInterface     $textrailPartService,
+       CategoryRepositoryInterface      $categoryRepository,
+       BrandRepositoryInterface         $brandRepository,
+       ManufacturerRepositoryInterface  $manufacturerRepository,
+       TypeRepositoryInterface          $typeRepository,
+       ImageRepositoryInterface         $imageRepository,
+       TextrailPartsTransformer         $textrailPartsTransformer,
+       Manager                          $manager,
+       AttributeRepositoryInterface $partAttributeRepository
      )
    {
        $this->partRepo = $partRepository;
@@ -55,6 +60,7 @@ class TextrailPartImporterService implements TextrailPartImporterServiceInterfac
        $this->imageRepository = $imageRepository;
        $this->textrailPartsTransformer = $textrailPartsTransformer;
        $this->manager = $manager;
+       $this->partAttributeRepo = $partAttributeRepository;
    }
 
     public function run()
@@ -63,6 +69,7 @@ class TextrailPartImporterService implements TextrailPartImporterServiceInterfac
 
         $parts = $this->textrailPartService->getAllParts();
         $parts_sku = [];
+        $partAttributes = [];
 
         foreach ($parts as $item) {
             $parts_sku[] = $item->sku;
@@ -132,6 +139,27 @@ class TextrailPartImporterService implements TextrailPartImporterServiceInterfac
             $newTextrailPart = $this->partRepo->createOrUpdateBySku($partsParams);
 
             $newTextrailPart->images()->delete();
+
+            foreach ($item->custom_attributes as $key => $partAttribute) {
+                $code = $key;
+
+                if (!array_key_exists($code, $partAttributes)) {
+                    $attribute = $this->textrailPartService->getAttribute($code);
+                    $partAttributes[$code] = $attribute;
+                } else {
+                    $attribute = $partAttributes[$code];
+                }
+
+                $attributeLabel = $attribute['default_frontend_label'] ?? $code;
+
+                $dbAttribute = $this->partAttributeRepo->firstOrCreate([
+                    'name' => $attributeLabel,
+                    'code' => $code,
+                ]);
+
+                $this->partRepo->addAttribute($newTextrailPart, $dbAttribute, $partAttribute);
+            }
+
 
             if (count($item->images) > 0) {
                 foreach ($item->images as $img) {
