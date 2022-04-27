@@ -207,11 +207,14 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         if(!empty($blast->from_email_address)) {
             $salesPerson = $this->salespeople->getBySmtpEmail($blast->user_id, $blast->from_email_address);
             if(empty($salesPerson->id)) {
+                $this->log->error("From Email Address " . $blast->from_email_address .
+                                    " does not exist for Email Blast #" . $blast->email_blasts_id);
                 throw new FromEmailMissingSmtpConfigException;
             }
         }
 
         // Create Email Builder Email!
+        $this->log->info("Sending Email Blast last #" . $blast->email_blasts_id);
         $builder = new BuilderEmail([
             'id' => $blast->email_blasts_id,
             'type' => BuilderEmail::TYPE_BLAST,
