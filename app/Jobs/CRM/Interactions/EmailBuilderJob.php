@@ -8,7 +8,6 @@ use App\Services\CRM\Email\EmailBuilderServiceInterface;
 use App\Services\CRM\Interactions\DTOs\BuilderEmail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Bus\Queueable;
-use Illuminate\Support\Collection;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Collection;
 use Illuminate\Queue\InteractsWithQueue;
