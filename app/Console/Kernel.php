@@ -102,6 +102,10 @@ class Kernel extends ConsoleKernel
                 ->weeklyOn(7, '4:00')
                 ->runInBackground();
 
+        $schedule->command('email:deliver-blast')
+                ->withoutOverlapping()
+                ->runInBackground();
+
 
 
         /**
