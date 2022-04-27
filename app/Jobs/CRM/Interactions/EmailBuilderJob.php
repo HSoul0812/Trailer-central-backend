@@ -61,7 +61,7 @@ class EmailBuilderJob extends Job
                         $this->config->type . '(s) for Dealer #' . $this->config->userId);
             $log->info('Skipped ' . $stats->noSkipped . ' Email ' .
                         $this->config->type . '(s) for Dealer #' . $this->config->userId);
-            $log->info('Errors Occurring Trying to Queue ' . $stats->noErrors . ' Email ' .
+            $log->info($stats->noErrors . ' Errors Occurred Trying to Queue Email ' .
                         $this->config->type . '(s) for Dealer #' . $this->config->userId);
             return true;
         } catch (\Exception $e) {
