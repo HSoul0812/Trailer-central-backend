@@ -42,6 +42,7 @@ use App\Transformers\CRM\Email\BuilderEmailTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Foundation\Bus\DispatchesJobs;
