@@ -10,11 +10,6 @@ use League\Fractal\TransformerAbstract;
 
 class PartsTransformer extends TransformerAbstract implements PartsTransformerInterface
 {
-    protected $availableIncludes = [
-        'partAttributes'
-    ];
-
-
     public function transform(Part $part): array
     {
 	 return [
@@ -46,19 +41,5 @@ class PartsTransformer extends TransformerAbstract implements PartsTransformerIn
              'is_vehicle_specific' => (bool)$part->is_vehicle_specific,
              'images' => $part->images->pluck('image_url')
          ];
-    }
-
-    /**
-     * Include part attributes.
-     *
-     * @param \App\Models\Parts\Part $part
-     * @return Collection
-     */
-    public function includePartAttributes(Part $part): Collection
-    {
-        return $this->collection(
-            $part->partAttributes,
-            new PartAttributeTransformer()
-        );
     }
 }

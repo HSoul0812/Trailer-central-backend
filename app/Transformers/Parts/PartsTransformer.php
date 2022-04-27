@@ -14,7 +14,7 @@ class PartsTransformer extends TransformerAbstract implements PartsTransformerIn
     protected $availableIncludes = [
         'purchaseOrders',
         'total_qty',
-        'attributes'
+        'partAttributes'
     ];
 
     public function transform(Part $part): array
@@ -57,6 +57,19 @@ class PartsTransformer extends TransformerAbstract implements PartsTransformerIn
          ];
     }
 
+    /**
+     * Include part attributes.
+     *
+     * @param \App\Models\Parts\Part $part
+     * @return Collection
+     */
+    public function includePartAttributes(\App\Models\Parts\Textrail\Part $part): Collection
+    {
+        return $this->collection(
+            $part->partAttributes,
+            new PartAttributeTransformer()
+        );
+    }
     /**
      * Include purchases resource object
      *
