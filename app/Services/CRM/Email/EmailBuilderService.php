@@ -279,12 +279,15 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
         // Send Emails and Return Response
         try {
+            // Get Lead ID's
+            $leadIds = new Collection(explode(",", $leads));
+
             // Dispatch Send EmailBuilder Job
-            $job = new EmailBuilderJob($builder, $leads);
+            $job = new EmailBuilderJob($builder, $leadIds);
             $this->dispatch($job->onQueue('emailbuilder'));
 
             // Return Array of Queued Leads
-            return $this->response($builder, $leads);
+            return $this->response($builder, $leadIds);
         } catch(\Exception $ex) {
             throw new SendCampaignEmailsFailedException($ex);
         }
@@ -352,11 +355,11 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * Send Emails for Builder Config
      *
      * @param BuilderEmail $builder
-     * @param array $leads
+     * @param Collection<int> $leads
      * @throws SendBuilderEmailsFailedException
      * @return BuilderStats
      */
-    public function sendEmails(BuilderEmail $builder, array $leads): BuilderStats
+    public function sendEmails(BuilderEmail $builder, Collection $leads): BuilderStats
     {
         // Initialize Counts
         $stats = new BuilderStats();
@@ -743,16 +746,16 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * Return Send Emails Response
      *
      * @param BuilderEmail $builder
-     * @param string $leads
+     * @param Collection<int> $leads
      * @return array response
      */
-    private function response(BuilderEmail $builder, string $leads): array {
+    private function response(BuilderEmail $builder, Collection $leads): array {
         // Convert Builder Email to Fractal
         $data = new Item($builder, new BuilderEmailTransformer(), 'data');
         $response = $this->fractal->createData($data)->toArray();
 
         // Convert Builder Email to Fractal
-        $response['leads'] = count(explode(",", $leads));
+        $response['leads'] = $leads->toArray();
 
         // Return Response
         return $response;

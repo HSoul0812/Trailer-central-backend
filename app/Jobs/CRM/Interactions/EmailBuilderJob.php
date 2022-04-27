@@ -8,6 +8,7 @@ use App\Services\CRM\Email\EmailBuilderServiceInterface;
 use App\Services\CRM\Interactions\DTOs\BuilderEmail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Bus\Queueable;
+use Illuminate\Support\Collection;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Collection;
 use Illuminate\Queue\InteractsWithQueue;
@@ -50,7 +51,7 @@ class EmailBuilderJob extends Job
     public function handle(EmailBuilderServiceInterface $service) {
         // Initialize Logger
         $log = Log::channel('emailbuilder');
-        $log->info('Processing ' . count($this->leads) . ' Email Builder Emails', $this->config->getLogParams());
+        $log->info('Processing ' . $this->leads->count() . ' Email Builder Emails', $this->config->getLogParams());
 
         try {
             // Send Email Via SMTP, Gmail, or NTLM
