@@ -2,6 +2,7 @@
 
 namespace App\Models\User;
 
+use App\Http\Controllers\v1\CRM\StatesController;
 use App\Models\Feed\Mapping\Incoming\ApiEntityReference;
 use App\Models\Inventory\Inventory;
 use App\Models\Region;
@@ -9,7 +10,6 @@ use App\Models\Observers\User\DealerLocationObserver;
 use App\Models\Traits\TableAware;
 use App\Models\CRM\Text\Number;
 use App\Models\User\Location\QboLocationMapping;
-use App\Http\Controllers\v1\CRM\StatesController;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

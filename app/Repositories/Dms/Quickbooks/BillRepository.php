@@ -267,6 +267,10 @@ class BillRepository implements BillRepositoryInterface
             $query = $query->where('qb_bills.dealer_location_id', $params['dealer_location_id']);
         }
 
+        if (isset($params['search_term'])) {
+            $query = $query->where('qb_bills.doc_num', 'LIKE', '%'.$params['search_term'].'%');
+        }
+
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
         }

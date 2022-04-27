@@ -72,6 +72,24 @@ class MarketplaceStatus
     }
 
     /**
+     * Get Proxy Settings
+     * 
+     * @return array
+     */
+    public function getProxyConfig(): array {
+        return config('marketing.fb.settings.proxy', []);
+    }
+
+    /**
+     * Get Cookie Settings
+     * 
+     * @return array
+     */
+    public function getCookieConfig(): array {
+        return config('marketing.fb.settings.cookie', []);
+    }
+
+    /**
      * Get All URL's
      * 
      * @return array

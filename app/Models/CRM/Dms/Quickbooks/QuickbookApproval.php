@@ -1,6 +1,7 @@
 <?php
 namespace App\Models\CRM\Dms\Quickbooks;
 
+use App\Models\Traits\TableAware;
 use App\Models\User\Location\QboLocationMapping;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -31,6 +32,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class QuickbookApproval extends Model
 {
+    use TableAware;
+
     // Statuses of Quickbook Approvals
     const TO_SEND = 'to_send';
     const SENT = 'sent';
