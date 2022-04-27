@@ -249,7 +249,7 @@ class Blast extends Model
                                     '=', Bounce::getTableName() . '.email_address')
                    ->where(Lead::getTableName() . '.lead_type', '<>', LeadType::TYPE_NONLEAD)
                    ->where(Lead::getTableName() . '.dealer_id', $blast->newDealerUser->id)
-                   ->where(Lead::getTableName() . '.phone_number', '<>', '')
-                   ->whereNotNull(Lead::getTableName() . '.phone_number');
+                   ->where(Lead::getTableName() . '.email_address', '<>', '')
+                   ->whereNotNull(Lead::getTableName() . '.email_address');
     }
 }

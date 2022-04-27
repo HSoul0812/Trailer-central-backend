@@ -214,7 +214,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         }
 
         // Create Email Builder Email!
-        $this->log->info("Sending Email Blast last #" . $blast->email_blasts_id);
+        $this->log->info("Sending Email Blast #" . $blast->email_blasts_id);
         $builder = new BuilderEmail([
             'id' => $blast->email_blasts_id,
             'type' => BuilderEmail::TYPE_BLAST,
@@ -236,6 +236,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             // Dispatch Send EmailBuilder Job
             $job = new EmailBuilderJob($builder, $blast->lead_ids);
             $this->dispatch($job->onQueue('emailbuilder'));
+            $this->log->info("Dispatched Email Builder Job for Blast #" . $blast->email_blasts_id);
 
             // Mark Blast as Delivered
             $this->blasts->update(['id' => $builder->id, 'delivered' => 1]);
