@@ -103,7 +103,6 @@ use App\Repositories\Parts\CostModifierRepository;
 use App\Repositories\Parts\CostModifierRepositoryInterface;
 use App\Repositories\User\DealerPasswordResetRepositoryInterface;
 use App\Repositories\User\DealerPasswordResetRepository;
-use App\Services\CRM\Text\TwilioService;
 use App\Services\CRM\User\TimeClockService;
 use App\Services\CRM\User\TimeClockServiceInterface;
 use App\Services\Dms\Bills\BillService;
@@ -332,12 +331,6 @@ class AppServiceProvider extends ServiceProvider
             ->needs(FileServiceInterface::class)
             ->give(function () {
                 return new ImageService(app()->make(Client::class), app()->make(SanitizeHelper::class), app()->make(ImageHelper::class));
-            });
-
-        $this->app->when(TwilioService::class)
-            ->needs(FileServiceInterface::class)
-            ->give(function () {
-                return new FileService(app()->make(Client::class), app()->make(SanitizeHelper::class));
             });
 
         $this->app->bind(TimeClockRepositoryInterface::class, TimeClockRepository::class);

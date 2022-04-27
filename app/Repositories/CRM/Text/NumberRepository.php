@@ -7,14 +7,14 @@ use App\Repositories\CRM\Text\NumberRepositoryInterface;
 use App\Repositories\CRM\Text\DealerLocationRepositoryInterface;
 use App\Models\CRM\Text\Number;
 use App\Models\CRM\Text\NumberTwilio;
-use App\Services\CRM\Text\TextServiceInterface;
+use App\Services\CRM\Text\TwilioServiceInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
 
 class NumberRepository implements NumberRepositoryInterface {
 
     /**
-     * @var TextServiceInterface
+     * @var TwilioServiceInterface
      */
     private $service;
 
@@ -33,7 +33,7 @@ class NumberRepository implements NumberRepositoryInterface {
             'direction' => 'ASC'
         ]
     ];
-    
+
     public function create($params) {
         return Number::create($params);
     }
@@ -57,7 +57,7 @@ class NumberRepository implements NumberRepositoryInterface {
 
     /**
      * Set Phone as Used
-     * 
+     *
      * @param string $dealerNo
      * @param string $usedNo
      * @param string $customerNo
@@ -80,7 +80,7 @@ class NumberRepository implements NumberRepositoryInterface {
 
     /**
      * Twilio Number Exists?
-     * 
+     *
      * @param string $phoneNumber
      * @return bool
      */
@@ -93,7 +93,7 @@ class NumberRepository implements NumberRepositoryInterface {
 
     /**
      * Create Twilio Number
-     * 
+     *
      * @param string $phoneNumber
      * @return NumberTwilio
      */
@@ -103,7 +103,7 @@ class NumberRepository implements NumberRepositoryInterface {
 
     /**
      * Find Active Twilio Number
-     * 
+     *
      * @param string $dealerNo
      * @param string $customerNo
      * @return Number
@@ -117,7 +117,7 @@ class NumberRepository implements NumberRepositoryInterface {
 
     /**
      * Find All Twilio Numbers
-     * 
+     *
      * @param string $dealerNo
      * @param string $customerNo
      * @return array Number
@@ -131,7 +131,7 @@ class NumberRepository implements NumberRepositoryInterface {
 
     /**
      * Is Active Twilio Number?
-     * 
+     *
      * @param string $twilioNumber
      * @param string $maskedNumber
      * @return Number
@@ -148,7 +148,7 @@ class NumberRepository implements NumberRepositoryInterface {
 
     /**
      * Delete Twilio Number
-     * 
+     *
      * @param string $phone
      * @return bool
      */
@@ -162,7 +162,7 @@ class NumberRepository implements NumberRepositoryInterface {
 
     /**
      * Find All Expired Numbers (Chunked)
-     * 
+     *
      * @param Closure $callable
      * @param int $toDate
      * @param int $chunkSize
