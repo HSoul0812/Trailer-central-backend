@@ -8,7 +8,6 @@ use GuzzleHttp\Client as GuzzleHttpClient;
 use Illuminate\Support\Facades\Config;
 use App\Services\Parts\Textrail\DTO\TextrailPartDTO;
 use GuzzleHttp\Exception\ClientException;
-use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response as BaseResponse;
 use App\Exceptions\Ecommerce\TextrailException;
 use App\Exceptions\NotImplementedException;
@@ -19,9 +18,9 @@ class TextrailMagento implements DataProviderInterface,
                                  TextrailRefundsInterface
 {
     private const TEXTRAIL_CATEGORY_URL = 'rest/V1/categories/';
-    private const TEXTRAIL_CATEGORY_LIST_URL = 'rest/V1/categories/list/';
     private const TEXTRAIL_ATTRIBUTES_MANUFACTURER_URL = 'rest/V1/products/attributes/manufacturer/options/';
     private const TEXTRAIL_ATTRIBUTES_BRAND_NAME_URL = 'rest/V1/products/attributes/brand_name/options/';
+    private const TEXTRAIL_ATTRIBUTES_GENERIC_URL = 'rest/V1/products/attributes/';
     private const TEXTRAIL_ATTRIBUTES_MEDIA_URL = 'media/catalog/product';
     private const TEXTRAIL_ATTRIBUTES_PLACEHOLDER_URL = 'placeholder/default/TexTrail-LogoVertical_4_3.png';
     private const TEXTRAIL_DUMP_STOCK_URL = 'rest/:view/V1/inventory/dump-stock-index-data/website/trailer_central_t1';
@@ -49,12 +48,6 @@ class TextrailMagento implements DataProviderInterface,
 
     /** @var boolean */
     private $isGuestCheckout;
-
-    /** @var object */
-    private $allCategories;
-
-    /** @var array */
-    private $parentMemory = [];
 
     public function __construct()
     {
@@ -388,24 +381,36 @@ class TextrailMagento implements DataProviderInterface,
           $brand_id = '';
           $images = [];
 
+          $customAttributes = [];
+
+          $isCustomAttribute = true;
           foreach ($item->custom_attributes as $custom_attribute) {
 
             if ($custom_attribute->attribute_code == 'short_description') {
               $description = $custom_attribute->value;
+                $isCustomAttribute = false;
             }
 
             if ($custom_attribute->attribute_code == 'category_ids' && !empty($custom_attribute->value[0])) {
               $category_id = $custom_attribute->value[0];
+                $isCustomAttribute = false;
             }
 
             if ($custom_attribute->attribute_code == 'manufacturer' && ($custom_attribute->value  > 0)) {
               $manufacturer_id = $custom_attribute->value;
+                $isCustomAttribute = false;
             }
 
             if ($custom_attribute->attribute_code == 'brand_name' && ($custom_attribute->value  > 0)) {
               $brand_id = $custom_attribute->value;
+                $isCustomAttribute = false;
             }
 
+            if ($isCustomAttribute) {
+                $customAttributes[$custom_attribute->attribute_code] = $custom_attribute->value;
+            }
+
+              $isCustomAttribute = true;
           }
 
           foreach ($item->media_gallery_entries as $img) {
@@ -423,7 +428,8 @@ class TextrailMagento implements DataProviderInterface,
             'manufacturer_id' =>  isset($manufacturer_id) ? $manufacturer_id : '',
             'brand_id' => $brand_id,
             'show_on_website' => 1,
-            'images' => $images
+            'images' => $images,
+            'custom_attributes' => $customAttributes
           ]);
           array_push($Allparts, $dtoTextrail);
         }
@@ -681,37 +687,13 @@ class TextrailMagento implements DataProviderInterface,
         return $availableStocks;
     }
 
-    public function getTextrailCategories(): array
+    public function getAttributes(): array
     {
-        $categories = json_decode($this->httpClient->get(self::TEXTRAIL_CATEGORY_LIST_URL . '?searchCriteria[page_size]=10000', ['headers' => $this->getHeaders()])->getBody()->getContents(), true);
 
-        $this->allCategories = $categories;
-
-        return $categories;
     }
 
-    /**
-     * @param int $category_id
-     * @return array
-     */
-    public function getTextrailParentCategory(int $category_id): array
+    public function getAttribute(string $code): array
     {
-        $category = json_decode($this->httpClient->get(self::TEXTRAIL_CATEGORY_URL . $category_id, ['headers' => $this->getHeaders()])->getBody()->getContents(), true);
-        $path = $category['path'];
-
-        $breadcrumb = explode('/', $path);
-
-        $parent = [];
-        // 0 = Root, 1 = Shop By, 2 = Available Master Parent ID
-        if (!empty($breadcrumb[2])) {
-            if (empty($this->parentMemory[$breadcrumb[2]])) {
-                $parent = json_decode($this->httpClient->get(self::TEXTRAIL_CATEGORY_URL . $breadcrumb[2], ['headers' => $this->getHeaders()])->getBody()->getContents(), true);
-                $this->parentMemory[$breadcrumb[2]] = $parent;
-            } else {
-                $parent = $this->parentMemory[$breadcrumb[2]];
-            }
-        }
-
-        return [$parent, $category];
+        return json_decode($this->httpClient->get(self::TEXTRAIL_ATTRIBUTES_GENERIC_URL . $code, ['headers' => $this->getHeaders()])->getBody()->getContents(), true);
     }
 }

@@ -12,7 +12,8 @@ class PartsTransformer extends TransformerAbstract implements PartsTransformerIn
 {
     protected $availableIncludes = [
         'purchaseOrders',
-        'total_qty'
+        'total_qty',
+        'attributes'
     ];
 
     public function transform(Part $part): array
@@ -51,7 +52,7 @@ class PartsTransformer extends TransformerAbstract implements PartsTransformerIn
              'stock_min' => $part->stock_min,
              'stock_max' => $part->stock_max,
              'bins' => $part->bins,
-             'disabled' => count($part->bins) === 0
+             'disabled' => count($part->bins) === 0,
          ];
     }
 
