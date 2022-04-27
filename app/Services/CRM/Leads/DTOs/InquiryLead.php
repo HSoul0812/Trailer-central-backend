@@ -71,7 +71,7 @@ class InquiryLead
     /**
      * @const string
      */
-    const TT_SIMPLE_DOMAIN = 'trailertrader.com';
+    const TT_SIMPLE_DOMAIN = 'https://trailertrader.com';
 
     /**
      * @const string

@@ -151,6 +151,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Nova\Nova;
+use Propaganistas\LaravelPhone\PhoneServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -222,44 +223,12 @@ class AppServiceProvider extends ServiceProvider
             DealerIncomingMapping::observe(DealerIncomingMappingObserver::class);
         });
 
-        // add other migration directories
-        $this->loadMigrationsFrom([
-            // old directory
-            __DIR__ . '/../../database/migrations',
+        // Add Migration Directories Recursively
+        $mainPath = database_path('migrations');
+        $directories = glob($mainPath . '/*' , GLOB_ONLYDIR);
+        $paths = array_merge([$mainPath], $directories);
 
-            // dms migrations
-            __DIR__ . '/../../database/migrations/dms',
-
-            // integrations migrations
-            __DIR__ . '/../../database/migrations/integrations',
-
-            // inventory migrations
-            __DIR__ . '/../../database/migrations/inventory',
-
-            // website migrations
-            __DIR__ . '/../../database/migrations/website',
-
-            // parts migrations
-            __DIR__ . '/../../database/migrations/parts',
-
-            // parts crm
-            __DIR__ . '/../../database/migrations/crm',
-
-            // dealer migrations
-            __DIR__ . '/../../database/migrations/dealer',
-
-            // utilities
-            __DIR__ . '/../../database/migrations/utilities',
-
-            // configuration tables
-            __DIR__ . '/../../database/migrations/config',
-
-            // invoicing
-            __DIR__ . '/../../database/migrations/invoicing',
-
-            // ecommerce
-            __DIR__ . '/../../database/migrations/ecommerce',
-        ]);
+        $this->loadMigrationsFrom($paths);
 
         // log all queries
         if (env('APP_LOG_QUERIES')) {
@@ -374,5 +343,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(InventoryAttributeServiceInterface::class, InventoryAttributeService::class);
         $this->app->bind(CustomOverlayServiceInterface::class, CustomOverlayService::class);
         $this->app->bind(CustomOverlayRepositoryInterface::class, CustomOverlayRepository::class);
+
+        $this->app->register(PhoneServiceProvider::class);
     }
 }

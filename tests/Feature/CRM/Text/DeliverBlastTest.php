@@ -57,6 +57,7 @@ class DeliverBlastTest extends TestCase
     /**
      * Test simple blast
      * 
+     * @group CRM
      * @specs string action = inquired
      * @specs array location_id = null
      * @specs int send_after_days = 15
@@ -169,6 +170,7 @@ class DeliverBlastTest extends TestCase
     /**
      * Test blast on purchases
      * 
+     * @group CRM
      * @specs string action = purchased
      * @specs array location_id = null
      * @specs int send_after_days = 15
@@ -285,6 +287,7 @@ class DeliverBlastTest extends TestCase
     /**
      * Test blast by location
      * 
+     * @group CRM
      * @specs string action = inquired
      * @specs array location_id = first
      * @specs int send_after_days = 15
@@ -407,6 +410,7 @@ class DeliverBlastTest extends TestCase
     /**
      * Test blast by archived status
      * 
+     * @group CRM
      * @specs string action = inquired
      * @specs array location_id = any
      * @specs int send_after_days = 15
@@ -523,6 +527,7 @@ class DeliverBlastTest extends TestCase
     /**
      * Test blast with brands
      * 
+     * @group CRM
      * @specs string action = inquired
      * @specs array location_id = any
      * @specs int send_after_days = 15
@@ -650,6 +655,7 @@ class DeliverBlastTest extends TestCase
     /**
      * Test blast with categories
      * 
+     * @group CRM
      * @specs string action = inquired
      * @specs array location_id = any
      * @specs int send_after_days = 15
@@ -779,6 +785,7 @@ class DeliverBlastTest extends TestCase
     /**
      * Refresh Blasts in DB
      * 
+     * @group CRM
      * @param int $userId
      * @return void
      */
@@ -792,6 +799,7 @@ class DeliverBlastTest extends TestCase
     /**
      * Refresh Blast Leads in DB
      * 
+     * @group CRM
      * @param int $blastId
      * @param array $filters
      * @return array of leads outside of range

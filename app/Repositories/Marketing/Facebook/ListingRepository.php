@@ -164,14 +164,13 @@ class ListingRepository implements ListingRepositoryInterface {
         });
 
         // Skip Integrations With Non-Expired Errors
-        $query = $query->leftJoin(Error::getTableName(), Error::getTableName() . '.inventory_id',
-                                        '=', Inventory::getTableName() . '.inventory_id')
-        ->where(function(Builder $query) {
+        $query = $query->leftJoin(Error::getTableName(), function($join) {
+            $join->on(Error::getTableName() . '.marketplace_id', '=',
+                                    Inventory::getTableName() . '.inventory_id')
+                 ->where(Error::getTableName().'.dismissed', 0);
+        })->where(function(Builder $query) {
             return $query->whereNull(Error::getTableName().'.id')
-                          ->orWhere(function(Builder $query) {
-                return $query->where(Error::getTableName().'.dismissed', 0)
-                             ->where(Error::getTableName().'.expires_at', '<', DB::raw('NOW()'));
-            });
+                         ->orWhere(Error::getTableName().'.expires_at', '<', DB::raw('NOW()'));
         });
 
         // Append Location
@@ -188,8 +187,9 @@ class ListingRepository implements ListingRepositoryInterface {
             });
         }
 
-        if (!isset($params['per_page'])) {
-            $params['per_page'] = 20;
+        $forced = config('marketing.fb.settings.limit.force', 0);
+        if (!isset($params['per_page']) || !empty($forced)) {
+            $params['per_page'] = (int) config('marketing.fb.settings.limit.listings', 20);
         }
 
         // Require Inventory Images

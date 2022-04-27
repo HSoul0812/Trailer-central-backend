@@ -15,6 +15,7 @@ use Tests\Integration\IntegrationTestCase;
 class LeadsStatusControllerTest extends IntegrationTestCase
 {
     /**
+     * @group CRM
      * @covers ::create
      */
     public function testCreate()
@@ -49,6 +50,7 @@ class LeadsStatusControllerTest extends IntegrationTestCase
     }
 
     /**
+     * @group CRM
      * @covers ::create
      */
     public function testCreateWrongAccessToken()
@@ -79,6 +81,7 @@ class LeadsStatusControllerTest extends IntegrationTestCase
     }
 
     /**
+     * @group CRM
      * @covers ::update
      */
     public function testUpdate()
@@ -111,6 +114,7 @@ class LeadsStatusControllerTest extends IntegrationTestCase
     }
 
     /**
+     * @group CRM
      * @covers ::update
      */
     public function testUpdateWrongAccessToken()
@@ -138,5 +142,28 @@ class LeadsStatusControllerTest extends IntegrationTestCase
             ->assertSee('Invalid access token.');
 
         $statusSeeder->cleanUp();
+    }
+
+    /**
+     * @covers ::publicStatuses
+     * @group CRM
+     */
+    public function testPublicStatuses()
+    {
+        $response = $this->json(
+            'GET',
+            '/api/leads/status/public'
+        );
+
+        $leadsStatuses = [];
+
+        foreach (LeadStatus::PUBLIC_STATUSES as $index => $statusName) {
+            $leadsStatuses[] = [
+               'id' => $index,
+               'name' => $statusName,
+            ];
+        }
+
+        $this->assertResponseDataEquals($response, $leadsStatuses, false);
     }
 }

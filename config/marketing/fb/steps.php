@@ -27,13 +27,36 @@ return [
     ])),
 
 
+    // Complete List of Available Errors
+    'errors' => env('FB_MARKETING_ERRORS', implode(",", [
+        'missing-tunnel',
+        'offline-tunnel',
+        'missing-inventory',
+        'login-failed',
+        'login-invalid',
+        'email-verification',
+        'login-approval',
+        'two-factor-auth',
+        'two-factor-failed',
+        'account-disabled',
+        'temp-blocked',
+        'marketplace-inaccessible',
+        'marketplace-blocked',
+        'final-account-review',
+        'limit-reached',
+        'failed-post',
+        'flagged-post'
+    ])),
+
+
     // Define Selectors By Step
     'selectors' => [
         'start-script' => env('FB_MARKETING_STEP_SELECTORS_START', 'common'),
         'stop-script' => env('FB_MARKETING_STEP_SELECTORS_STOP', 'common'),
         'verify-inventory' => env('FB_MARKETING_STEP_SELECTORS_INVENTORY', 'common'),
         'login-fb' => env('FB_MARKETING_STEP_SELECTORS_LOGIN', 'common,login'),
-        'login-validate' => env('FB_MARKETING_STEP_SELECTORS_LOGIN_VALIDATE', 'common,login'),
+        'login-validate' => env('FB_MARKETING_STEP_SELECTORS_LOGIN_VALIDATE', 'common,login,loginValidate'),
+        'code-validate' => env('FB_MARKETING_STEP_SELECTORS_LOGIN_VALIDATE', 'common,login,loginValidate'),
         'goto-marketing' => env('FB_MARKETING_STEP_SELECTORS_MARKETPLACE', 'common,listings'),
         'goto-new-listing' => env('FB_MARKETING_STEP_SELECTORS_NEW_LISTING', 'common,listings'),
         'choose-vehicle-type' => env('FB_MARKETING_STEP_SELECTORS_VEHICLE', 'common,posting.common,posting.vehicle'),
@@ -51,6 +74,7 @@ return [
         'verify-inventory' => env('FB_MARKETING_STEP_LOG_INVENTORY', 'Verify current dealer integration has inventory to post.'),
         'login-fb' => env('FB_MARKETING_STEP_LOG_LOGIN', 'Logging in to Facebook.'),
         'login-validate' => env('FB_MARKETING_STEP_LOG_LOGIN_VALIDATE', 'Validating dealer account successfully logged in.'),
+        'code-validate' => env('FB_MARKETING_STEP_LOG_LOGIN_VALIDATE', 'Filling out request approval form for dealer after login.'),
         'goto-marketing' => env('FB_MARKETING_STEP_LOG_MARKETING', 'Validating we can posting to Facebook Marketplace.'),
         'goto-new-listing' => env('FB_MARKETING_STEP_LOG_NEW_LISTING', 'Preparing to create a new listing with the ID #:inventoryId.'),
         'choose-vehicle-type' => env('FB_MARKETING_STEP_LOG_VEHICLE', 'Choosing vehicle type to :action a listing with the ID #:inventoryId.'),

@@ -35,8 +35,8 @@ class ImageHelper
         if ($size[2] == IMAGETYPE_JPEG) {
             $exifData = exif_read_data($file);
             if (!empty($exifData['Orientation']) && ($exifData['Orientation'] == 6 || $exifData['Orientation'] == 8)) {
-                $width_old = $exifData['ExifImageWidth'];
-                $height_old = $exifData['ExifImageLength'];
+                $width_old = $exifData['ExifImageWidth'] ?? $exifData['COMPUTED']['Height'];
+                $height_old = $exifData['ExifImageLength'] ?? $exifData['COMPUTED']['Width'];
                 $orientation = $exifData['Orientation'];
             }
         }
@@ -119,11 +119,16 @@ class ImageHelper
 
         switch($orientation) {
             case 3:
+            case 4:
                 $image_resized = imagerotate($image_resized, 180, 0);
                 break;
+            case 5:
             case 6:
-            case 8:
                 $image_resized = imagerotate($image_resized, -90, 0);
+                break;
+            case 7:
+            case 8:
+                $image_resized = imagerotate($image_resized, 90, 0);
                 break;
         }
 

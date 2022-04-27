@@ -13,7 +13,10 @@ return [
     // Primary Selectors (Required on All/Most Pages)
     'common' => [
         'accountMenu' => env('FB_MARKETING_SELECTORS_COMMON_ACCOUNT', '*[role=navigation] *[aria-label="Account"]'),
-        'logout' => env('FB_MARKETING_SELECTORS_COMMON_LOGOUT', '*[aria-label="Account"][role=dialog] > div > div > div > div > div > div > div > :nth-child(5) div[data-visualcompletion] > *[role=button]')
+        'logout' => env('FB_MARKETING_SELECTORS_COMMON_LOGOUT', '*[aria-label="Account"][role=dialog] > div > div > div > div > div > div > div > :nth-child(5) div[data-visualcompletion] > *[role=button]'),
+        'detectAccountDisabledText' => env('FB_MARKETING_SELECTORS_DETECT_ACCOUNT_DISABLED', 'div > span:contains(\'Your account has been disabled\')'),
+        'detectRequestAReviewButton' => env('FB_MARKETING_SELECTORS_DETECT_REQUEST_A_REVIEW_BUTTON', 'div[aria-label="Request a Review"]'),
+        'detectTempBlock' => env('FB_MARKETING_SELECTORS_DETECT_BLOCK', 'div > h3:contains("You\'re Temporarily Blocked")')
     ],
 
     // Login Selectors
@@ -25,19 +28,38 @@ return [
         'detectEmaiilValidationText' =>  env('FB_MARKETING_SELECTORS_DETECT_EMAIL_VERIFY', 'div:contains(\'Enter security code\')')
     ],
 
+    // Login Validator
+    'loginValidate' => [
+        'detectTwoFactor' => env('FB_MARKETING_SELECTORS_VALIDATE_DETECT_TWO_FACTOR', 'div > strong:contains(\'Two-Factor Authentication Required\')'),
+        'detectMissingMobileNumber' => env('FB_MARKETING_SELECTORS_VALIDATE_DETECT_MOBILE', '.mobileMirrorHeading:contains("Add a Mobile Number")'),
+        'detectLoginValidate' => env('FB_MARKETING_SELECTORS_VALIDATE_DETECT_APPROVAL', 'div > strong:contains(\'Login approval needed\')'),
+        'detectChooseOption' => env('FB_MARKETING_SELECTORS_VALIDATE_DETECT_OPTION', 'div > strong:contains(\'Choose an option\')'),
+        'detectGetCode' => env('FB_MARKETING_SELECTORS_VALIDATE_DETECT_CODE', 'div > strong:contains(\'Get a code send to your email\')'),
+        'detectEnterCode' => env('FB_MARKETING_SELECTORS_VALIDATE_DETECT_ENTER', 'div > strong:contains(\'Enter Code\')'),
+        'twoFactorInput' => env('FB_MARKETING_SELECTORS_VALIDATE_INPUT_APPROVAL', 'input[@name=\'approvals_code\']'),
+        'continueButton' => env('FB_MARKETING_SELECTORS_VALIDATE_BUTTON_CONTINUE', 'button[value="Continue"]'),
+        'verifyMethodInput' => env('FB_MARKETING_SELECTORS_VALIDATE_INPUT_METHOD', 'input[@name=\'verification_method\' and @value=\'37\']'),
+        'codeRequestInput' => env('FB_MARKETING_SELECTORS_VALIDATE_INPUT_REQUEST', 'input[@name=\'eindex\']:first'),
+        'codeResponseInput' => env('FB_MARKETING_SELECTORS_VALIDATE_INPUT_RESPONSE', 'input[@name=\'captcha_response\']')
+    ],
+
     // Listing
     'listings' => [
         // getToNewVehiclePageQs
-        'marketplaceButton' => env('FB_MARKETING_SELECTORS_LISTINGS_MARKETPLACE_BUTTON', 'a[href*="facebook.com/marketplace/"]'),
+        'facebookLogoButton' => env('FB_MARKETING_SELECTORS_LISTINGS_MARKETPLACE_LOGO', 'a[title="Go to Facebook home"]'),
+        'marketplaceButton' => env('FB_MARKETING_SELECTORS_LISTINGS_MARKETPLACE_BUTTON', 'a[href*=\"facebook.com/marketplace/\"]:contains(\'Marketplace\')'),
         'createNewListingButton' => env('FB_MARKETING_SELECTORS_LISTINGS_NEW_BUTTON', 'a[href="/marketplace/create/"]'),
         'createNewVehicleListingButton' => env('FB_MARKETING_SELECTORS_LISTINGS_NEW_VEHICLE_BUTTON', 'a[href="/marketplace/create/vehicle/"]'),
+        'detectMissingMobileNumber' => env('FB_MARKETING_SELECTORS_DETECT_MOBILE', '.mobileMirrorHeading:contains("Add a Mobile Number")'),
         'detectRequestReviewButton' => env('FB_MARKETING_SELECTORS_DETECT_REQUEST_REVIEW_BUTTON', 'div[aria-label="Request Review"] > div'),
         'detectReviewingRequestText' => env('FB_MARKETING_SELECTORS_DETECT_REVIEWING_REQUEST', 'div > span:contains(\'We\\\'re Reviewing Your Request\')'),
         'detectReviewingFinalText' => env('FB_MARKETING_SELECTORS_DETECT_REVIEWING_FINAL', 'div > span:contains(\'You Can\\\'t Buy or Sell on Facebook\')'),
 
         // listingPageQs
-        'listingItemMoreMenu' => env('FB_MARKETING_SELECTORS_LISTINGS_MORE_BUTTON', '[aria-label="More"] i'),
-        'firstItemLink' => env('FB_MARKETING_SELECTORS_LISTINGS_FIRST_ITEM', 'a[href^="https://www.facebook.com/marketplace/item/"]')
+        'listingItemMoreMenu' => env('FB_MARKETING_SELECTORS_LISTINGS_MORE_BUTTON', 'div[aria-label="More"]'),
+        'listingItemMoreMenuFirst' => env('FB_MARKETING_SELECTORS_LISTINGS_MORE_BUTTON', 'div[aria-label="More"]:first'),
+        'firstItemLink' => env('FB_MARKETING_SELECTORS_LISTINGS_FIRST_ITEM', 'a[href^="https://www.facebook.com/marketplace/item/"]:first'),
+        'gotItButton' => env('FB_MARKETING_SELECTORS_LISTINGS_GOTIT_BUTTON', 'div[aria-label="Got it"]')
     ],
 
     // Posting
@@ -45,7 +67,8 @@ return [
         // Common Selectors for Posting
         'common' => [
             'closeFormButton' => env('FB_MARKETING_SELECTORS_POSTING_CLOSE_BUTTON', '[aria-label="Close"]'),
-            'leavePageButton' => env('FB_MARKETING_SELECTORS_POSTING_LEAVE_BUTTON', '[aria-label="Leave Page"]')
+            'leavePageButton' => env('FB_MARKETING_SELECTORS_POSTING_LEAVE_BUTTON', '[aria-label="Leave Page"]'),
+            'detectLimitReached' => env('FB_MARKETING_SELECTORS_POSTING_LIMIT_REACHED', 'div > span > span > span:contains(\'Limit reached\')')
         ],
 
         // Vehicle Posting

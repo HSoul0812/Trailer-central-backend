@@ -77,6 +77,7 @@ class CatalogServiceTest extends TestCase
     }
 
     /**
+     * @group Marketing
      * @covers ::show
      *
      * @throws BindingResolutionException
@@ -112,6 +113,7 @@ class CatalogServiceTest extends TestCase
     }
 
     /**
+     * @group Marketing
      * @covers ::create
      *
      * @throws BindingResolutionException
@@ -207,6 +209,7 @@ class CatalogServiceTest extends TestCase
     }
 
     /**
+     * @group Marketing
      * @covers ::update
      *
      * @throws BindingResolutionException
@@ -288,6 +291,7 @@ class CatalogServiceTest extends TestCase
     }
 
     /**
+     * @group Marketing
      * @covers ::delete
      *
      * @throws BindingResolutionException
@@ -338,6 +342,7 @@ class CatalogServiceTest extends TestCase
     }
 
     /**
+     * @group Marketing
      * @covers ::payload
      *
      * @throws BindingResolutionException

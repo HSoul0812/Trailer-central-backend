@@ -161,6 +161,7 @@ class EmailBuilderServiceTest extends TestCase
 
 
     /**
+     * @group CRM
      * @covers ::sendBlast
      * @group EmailBuilder
      *
@@ -257,6 +258,7 @@ class EmailBuilderServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::sendBlast
      * @group EmailBuilder
      *
@@ -320,6 +322,7 @@ class EmailBuilderServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::sendBlast
      * @group EmailBuilder
      *
@@ -419,6 +422,7 @@ class EmailBuilderServiceTest extends TestCase
 
 
     /**
+     * @group CRM
      * @covers ::sendCampaign
      * @group EmailBuilder
      *
@@ -515,6 +519,7 @@ class EmailBuilderServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::sendCampaign
      * @group EmailBuilder
      *
@@ -578,6 +583,7 @@ class EmailBuilderServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::sendCampaign
      * @group EmailBuilder
      *
@@ -677,6 +683,7 @@ class EmailBuilderServiceTest extends TestCase
 
 
     /**
+     * @group CRM
      * @covers ::sendTemplate
      * @group EmailBuilder
      *
@@ -749,6 +756,7 @@ class EmailBuilderServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::sendTemplate
      * @group EmailBuilder
      *
@@ -828,6 +836,7 @@ class EmailBuilderServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::sendTemplate
      * @group EmailBuilder
      *
@@ -888,6 +897,7 @@ class EmailBuilderServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::sendTemplate
      * @group EmailBuilder
      *
@@ -964,6 +974,7 @@ class EmailBuilderServiceTest extends TestCase
 
 
     /**
+     * @group CRM
      * @covers ::saveToDb
      * @group EmailBuilder
      *
@@ -1021,6 +1032,7 @@ class EmailBuilderServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::saveToDb
      * @group EmailBuilder
      *
@@ -1076,6 +1088,7 @@ class EmailBuilderServiceTest extends TestCase
 
 
     /**
+     * @group CRM
      * @covers ::sendEmail
      * @group EmailBuilder
      *
@@ -1137,6 +1150,7 @@ class EmailBuilderServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::sendEmail
      * @group EmailBuilder
      *
@@ -1193,6 +1207,7 @@ class EmailBuilderServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::sendEmail
      * @group EmailBuilder
      *
@@ -1265,6 +1280,7 @@ class EmailBuilderServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::sendEmail
      * @group EmailBuilder
      *
@@ -1344,6 +1360,7 @@ class EmailBuilderServiceTest extends TestCase
 
 
     /**
+     * @group CRM
      * @covers ::markSent
      * @group EmailBuilder
      *
@@ -1412,6 +1429,7 @@ class EmailBuilderServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::markSent
      * @group EmailBuilder
      *
@@ -1480,6 +1498,7 @@ class EmailBuilderServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::markSent
      * @group EmailBuilder
      *

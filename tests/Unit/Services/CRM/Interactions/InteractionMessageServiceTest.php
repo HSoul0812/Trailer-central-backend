@@ -33,6 +33,7 @@ class InteractionMessageServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @dataProvider bulkUpdateParamsProvider
      * @covers ::bulkUpdate
      */
@@ -57,6 +58,7 @@ class InteractionMessageServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @dataProvider bulkUpdateParamsProvider
      * @covers ::bulkUpdate
      */
@@ -87,6 +89,7 @@ class InteractionMessageServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @dataProvider bulkUpdateParamsProvider
      * @covers ::bulkUpdate
      */
@@ -113,6 +116,7 @@ class InteractionMessageServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @dataProvider bulkUpdateParamsProvider
      * @covers ::bulkUpdate
      */
@@ -143,6 +147,7 @@ class InteractionMessageServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @dataProvider bulkUpdateParamsProvider
      * @covers ::bulkSearchable
      */
@@ -175,6 +180,7 @@ class InteractionMessageServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @dataProvider bulkUpdateParamsProvider
      * @covers ::bulkSearchable
      */
@@ -213,6 +219,7 @@ class InteractionMessageServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @dataProvider bulkUpdateParamsProvider
      * @covers ::bulkSearchable
      */
@@ -246,6 +253,7 @@ class InteractionMessageServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @dataProvider bulkUpdateParamsProvider
      * @covers ::bulkSearchable
      */

@@ -59,8 +59,8 @@ class InquiryTextServiceTest extends TestCase
 
 
     /**
+     * @group CRM
      * @covers ::send
-     * @group Inquiry
      *
      * @throws BindingResolutionException
      */
@@ -91,8 +91,8 @@ class InquiryTextServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::merge
-     * @group Inquiry
      */
     public function testMerge()
     {
