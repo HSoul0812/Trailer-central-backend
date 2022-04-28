@@ -122,9 +122,12 @@ class TextRepository implements TextRepositoryInterface {
      *
      * @param int $leadId
      * @param string $textMessage
+     * @param array $mediaUrl
      * @return TextLog
+     * @throws NoDealerSmsNumberAvailableException
+     * @throws NoLeadSmsNumberAvailableException
      */
-    public function send($leadId, $textMessage) {
+    public function send($leadId, $textMessage, $mediaUrl = []) {
         // Get Lead/User
         $lead = Lead::findOrFail($leadId);
         $fullName = $lead->newDealerUser()->first()->crmUser->full_name;
@@ -142,7 +145,7 @@ class TextRepository implements TextRepositoryInterface {
         }
 
         // Send Text
-        $this->service->send($from_number, $to_number, $textMessage, $fullName);
+        $this->service->send($from_number, $to_number, $textMessage, $fullName, $mediaUrl);
 
         // Save Lead Status
         $this->leadStatus->createOrUpdate([

@@ -362,7 +362,7 @@ class TextController extends RestfulControllerV2
 
         if ( $request->validate()) {
             // Get Results
-            $result = $this->texts->send($leadId, $params['log_message']);
+            $result = $this->texts->send($leadId, $params['log_message'], $params['mediaUrl'] ?? []);
 
             // Send Text
             return $this->response->item($result, new TextTransformer());
