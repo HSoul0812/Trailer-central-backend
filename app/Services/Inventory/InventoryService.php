@@ -54,6 +54,7 @@ class InventoryService implements InventoryServiceInterface
     const DEFAULT_CATEGORY = [
       'name'      => 'Other',
       'type_id'   => 1,
+      'type_label' => 'Equipment Trailers'
     ];
 
     const INVENTORY_SOLD = 'sold';
@@ -121,9 +122,11 @@ class InventoryService implements InventoryServiceInterface
             if ($mappedCategory && $mappedCategory->category) {
                 $value['key'] = $mappedCategory->map_from;
                 $value['type_id'] = $mappedCategory->category->types[0]->id;
+                $value['type_label'] = $mappedCategory->category->types[0]->name;
             } else {
                 $value['key'] = self::DEFAULT_CATEGORY['name'];
                 $value['type_id'] = self::DEFAULT_CATEGORY['type_id'];
+                $value['type_label'] = self::DEFAULT_CATEGORY['type_label'];
             }
             return $value;
         });
@@ -392,6 +395,7 @@ class InventoryService implements InventoryServiceInterface
         $newCategory = $this->mapOldCategoryToNew($respObj->category);
         $respObj->category = $newCategory['key'];
         $respObj->type_id = $newCategory['type_id'];
+        $respObj->type_label = $newCategory['type_label'];
         return $respObj;
     }
 
