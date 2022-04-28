@@ -24,6 +24,7 @@ class StockRepository implements StockRepositoryInterface
         'type_of_stock' => self::STOCK_TYPE_MIXED
     ];
     private $STATUS_SOLD = Inventory::STATUS_SOLD;
+    private $STATUS_QUOTE = Inventory::STATUS_QUOTE;
 
     /**
      * Handles the financial reports
@@ -78,6 +79,7 @@ SQL;
                   AND ci.inventory_id IS NULL
                   AND i.is_archived = 0
                   AND i.status != {$this->STATUS_SOLD}
+                  AND i.status != {$this->STATUS_QUOTE}
                   {$this->financialReportHelpers['searchWhereForInventories']}
                   AND NOT EXISTS (
                     SELECT d.invoice_date FROM dms_quote_inventory qi
