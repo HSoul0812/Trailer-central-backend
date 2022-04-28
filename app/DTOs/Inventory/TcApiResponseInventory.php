@@ -44,6 +44,7 @@ class TcApiResponseInventory
     public ?string $inventory_title;
     public ?array $photos;
     public ?int $type_id;
+    public ?string $type_label;
     public ?string $category;
     public ?string $availability;
     public ?string $availability_label;

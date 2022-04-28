@@ -39,8 +39,9 @@ class TcApiResponseInventoryTransformer extends TransformerAbstract
             'primary_image'    => $type->primary_image,
             'availability'     => $type->availability,
             'availability_label' => $type->availability_label,
-             'type_id' => $type->type_id,
-             'category' => $type->category,
+            'type_id'          => $type->type_id,
+            'type_label'       => $type->type_label,
+            'category'         => $type->category,
          ];
     }
 }
