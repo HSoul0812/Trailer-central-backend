@@ -12,6 +12,7 @@ use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Services\File\DTOs\FileDto;
 use App\Services\File\FileServiceInterface;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 
 /**
  * Class TextService
@@ -80,6 +81,7 @@ class TextService implements TextServiceInterface
         // Get Lead/User
         $lead = Lead::findOrFail($leadId);
         $fullName = $lead->newDealerUser()->first()->crmUser->full_name;
+        $fileDtos = new Collection();
 
         // Get To Numbers
         $to_number = $lead->text_phone;
@@ -111,12 +113,20 @@ class TextService implements TextServiceInterface
             'next_contact_date' => Carbon::now()->addDay()->toDateTimeString()
         ]);
 
+        $files = $fileDtos->map(function (FileDto $fileDto) {
+            return [
+                'path' => $fileDto->getPath(),
+                'type' => $fileDto->getMimeType(),
+            ];
+        })->toArray();
+
         // Log SMS
         return $this->textRepository->create([
             'lead_id'     => $leadId,
             'from_number' => $from_number,
             'to_number'   => $to_number,
-            'log_message' => $textMessage
+            'log_message' => $textMessage,
+            'files'       => $files
         ]);
     }
 }

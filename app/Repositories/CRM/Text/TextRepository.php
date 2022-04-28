@@ -3,6 +3,7 @@
 namespace App\Repositories\CRM\Text;
 
 use App\Exceptions\RepositoryInvalidArgumentException;
+use App\Models\CRM\Interactions\TextLogFile;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
@@ -28,8 +29,30 @@ class TextRepository implements TextRepositoryInterface
         ]
     ];
 
-    public function create($params) {
-        return TextLog::create($params);
+    /**
+     * @param $params
+     * @return TextLog
+     */
+    public function create($params): TextLog
+    {
+        $fileObjs = [];
+
+        foreach ($params['files'] ?? [] as $file) {
+            $fileObjs[] = new TextLogFile($file);
+        }
+
+        unset($params['files']);
+
+        $textLog = new TextLog($params);
+        $textLog->save();
+
+        if (!empty($fileObjs)) {
+            $textLog->files()->saveMany($fileObjs);
+        }
+
+        $textLog->interactionMessage->searchable();
+
+        return $textLog;
     }
 
     public function delete($params) {
