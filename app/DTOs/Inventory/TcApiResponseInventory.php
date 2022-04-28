@@ -10,12 +10,21 @@ use JetBrains\PhpStorm\Pure;
 
 class TcApiResponseInventory
 {
+    const statusToAvailabilityMap = [
+        1 => 'available',
+        2 => 'sold',
+        3 => 'on_order',
+        4 => 'pending_sale',
+        5 => 'special_order',
+    ];
+
     use \App\DTOs\Arrayable;
     use TypedPropertyTrait;
 
     public int $id;
     public ?string $url;
     public ?array $features;
+    public ?array $attributes;
     public ?string $description;
     public ?float $payload_capacity;
     public ?float $gvwr;
@@ -35,7 +44,11 @@ class TcApiResponseInventory
     public ?string $inventory_title;
     public ?array $photos;
     public ?int $type_id;
+    public ?string $type_label;
     public ?string $category;
+    public ?string $availability;
+    public ?string $availability_label;
+
     #[Pure]
  public static function fromData(array $data): self
  {
@@ -43,6 +56,7 @@ class TcApiResponseInventory
      $obj->id = $data['id'];
      $obj->url = $data['url'];
      $obj->features = $data['features'];
+     $obj->attributes = $data['attributes'];
      $obj->description = $data['description'];
      $obj->payload_capacity = $data['payload_capacity'];
      $obj->gvwr = $data['gvwr'];
@@ -65,7 +79,8 @@ class TcApiResponseInventory
      $obj->dealer_location = $data['dealer_location'];
      $obj->primary_image = $data['primary_image'];
      $obj->category = $data['category'];
-
+     $obj->availability = self::statusToAvailabilityMap[$data['status_id']] ?? '';
+     $obj->availability_label = $data['status'] ?? '';
      foreach($data['attributes'] as $attribute) {
        $obj->setTypedProperty($attribute['code'], $attribute['value']);
      }

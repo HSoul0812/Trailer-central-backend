@@ -39,6 +39,7 @@ class InventoryService implements InventoryServiceInterface
         'configuration' => 'loadType',
         'axles' => 'numAxles',
         'color' => 'color',
+        'availability' => 'availability'
     ];
 
     const RANGE_SEARCH_KEY_MAP = [
@@ -53,6 +54,7 @@ class InventoryService implements InventoryServiceInterface
     const DEFAULT_CATEGORY = [
       'name'      => 'Other',
       'type_id'   => 1,
+      'type_label' => 'Equipment Trailers'
     ];
 
     const INVENTORY_SOLD = 'sold';
@@ -120,9 +122,11 @@ class InventoryService implements InventoryServiceInterface
             if ($mappedCategory && $mappedCategory->category) {
                 $value['key'] = $mappedCategory->map_from;
                 $value['type_id'] = $mappedCategory->category->types[0]->id;
+                $value['type_label'] = $mappedCategory->category->types[0]->name;
             } else {
                 $value['key'] = self::DEFAULT_CATEGORY['name'];
                 $value['type_id'] = self::DEFAULT_CATEGORY['type_id'];
+                $value['type_label'] = self::DEFAULT_CATEGORY['type_label'];
             }
             return $value;
         });
@@ -160,8 +164,8 @@ class InventoryService implements InventoryServiceInterface
     private function getTypedAggregations($params) {
         $esSearchUrl = $this->esSearchUrl();
         $queryBuilder = new ESInventoryQueryBuilder();
-        $this->buildSearchTypeQuery($queryBuilder, $params);
-        $this->buildTypeAggregations($queryBuilder, $params);
+        $this->addTypeQuery($queryBuilder, $params);
+        $this->addTypeAggregations($queryBuilder, $params);
         $query = $queryBuilder->build();
 
         return \Cache::remember(json_encode($query), self::ES_CACHE_EXPIRY, function () use($esSearchUrl, $query){
@@ -179,8 +183,8 @@ class InventoryService implements InventoryServiceInterface
     private function getCategorizedAggregations($params) {
         $esSearchUrl = $this->esSearchUrl();
         $queryBuilder = new ESInventoryQueryBuilder();
-        $this->buildSearchCategoryQuery($queryBuilder, $params);
-        $this->buildCategoryAggregations($queryBuilder, $params);
+        $this->addCategoryQuery($queryBuilder, $params);
+        $this->addCategoryAggregations($queryBuilder, $params);
         $query = $queryBuilder->build();
 
         return \Cache::remember(json_encode($query), self::ES_CACHE_EXPIRY, function () use($esSearchUrl, $query){
@@ -219,11 +223,11 @@ class InventoryService implements InventoryServiceInterface
     private function buildSearchQuery(array $params): ESInventoryQueryBuilder {
         $queryBuilder = new ESInventoryQueryBuilder();
 
-        $this->buildTermQueries($queryBuilder, $params);
-        $this->buildRangeQueries($queryBuilder, $params);
-        $this->buildPaginateQuery($queryBuilder, $params);
-        $this->buildFilter($queryBuilder, $params);
-        $this->buildGeoFiltering($queryBuilder, $params);
+        $this->addTermQueries($queryBuilder, $params);
+        $this->addRangeQueries($queryBuilder, $params);
+        $this->addPaginateQuery($queryBuilder, $params);
+        $this->addScriptFilter($queryBuilder, $params);
+        $this->addGeoFiltering($queryBuilder, $params);
 
         if(isset($params['sort'])) {
             $sort = $params['sort'];
@@ -238,17 +242,21 @@ class InventoryService implements InventoryServiceInterface
         return $queryBuilder;
     }
 
-    private function buildFilter(ESInventoryQueryBuilder $queryBuilder, array $params) {
+    private function addScriptFilter(ESInventoryQueryBuilder $queryBuilder, array $params) {
+        $filter = "doc['status'].value != 2";
+
         if(!empty($params['sale'])) {
-            $filter = "doc['salesPrice'].value > 0.0 && doc['salesPrice'].value < doc['websitePrice'].value";
-            $queryBuilder->setFilterScript([
-                'source' => $filter,
-                'lang' => 'painless'
-            ]);
+            $filter .= " && doc['salesPrice'].value > 0.0 && doc['salesPrice'].value < doc['websitePrice'].value";
+
         }
+
+        $queryBuilder->setFilterScript([
+            'source' => $filter,
+            'lang' => 'painless'
+        ]);
     }
 
-    private function buildGeoFiltering(
+    private function addGeoFiltering(
         ESInventoryQueryBuilder $queryBuilder,
         array $params,
     ) {
@@ -266,7 +274,7 @@ class InventoryService implements InventoryServiceInterface
 
     }
 
-    private function buildTypeAggregations(ESInventoryQueryBuilder $queryBuilder, array $params) {
+    private function addTypeAggregations(ESInventoryQueryBuilder $queryBuilder, array $params) {
         $queryBuilder->setFilterAggregate([
             'pull_type' => ['terms' => ['field' => 'pullType']],
             'color' => ['terms' => ['field' => 'color']],
@@ -290,7 +298,7 @@ class InventoryService implements InventoryServiceInterface
             'payload_capacity' => ['stats' => ['field' => 'payloadCapacity']],
         ]);
     }
-    private function buildCategoryAggregations(ESInventoryQueryBuilder $queryBuilder, array $params) {
+    private function addCategoryAggregations(ESInventoryQueryBuilder $queryBuilder, array $params) {
         $queryBuilder->setFilterAggregate([
             'manufacturer' => ['terms' => ['field' => 'manufacturer', 'size' => 50]],
         ]);
@@ -316,14 +324,13 @@ class InventoryService implements InventoryServiceInterface
         return rtrim($mapped_categories, ";");
     }
 
-    private function buildPaginateQuery(ESInventoryQueryBuilder $queryBuilder, array $params) {
+    private function addPaginateQuery(ESInventoryQueryBuilder $queryBuilder, array $params) {
         $currentPage = LengthAwarePaginator::resolveCurrentPage();
         $queryBuilder->paginate($currentPage, $params['per_page'] ?? self::PAGE_SIZE);
     }
 
-    private function buildTermQueries(ESInventoryQueryBuilder $queryBuilder, array $params) {
+    private function addTermQueries(ESInventoryQueryBuilder $queryBuilder, array $params) {
         $queryBuilder->addTermQuery('isRental', false);
-        $queryBuilder->addTermQuery('availability',self::INVENTORY_AVAILABLE);
         foreach(self::TERM_SEARCH_KEY_MAP as $field => $searchField) {
             if (isset($params['type_id']) && $searchField == 'category') {
               $mapped_categories = $this->getMappedCategories(
@@ -337,29 +344,27 @@ class InventoryService implements InventoryServiceInterface
         }
     }
 
-    private function buildSearchCategoryQuery(ESInventoryQueryBuilder $queryBuilder, array $params) {
+    private function addCategoryQuery(ESInventoryQueryBuilder $queryBuilder, array $params) {
         $mapped_categories = $this->getMappedCategories(
             $params['type_id'],
             $params['category'] ?? null
         );
         $queryBuilder->addTermQueries('category', $mapped_categories);
         $queryBuilder->addTermQuery('isRental', false);
-        $queryBuilder->addTermQuery('availability',self::INVENTORY_AVAILABLE);
-        $this->buildFilter($queryBuilder, []);
+        $this->addScriptFilter($queryBuilder, []);
     }
 
-    private function buildSearchTypeQuery(ESInventoryQueryBuilder $queryBuilder, array $params) {
+    private function addTypeQuery(ESInventoryQueryBuilder $queryBuilder, array $params) {
         $mapped_categories = $this->getMappedCategories(
             $params['type_id'],
             null
         );
         $queryBuilder->addTermQueries('category', $mapped_categories);
         $queryBuilder->addTermQuery('isRental', false);
-        $queryBuilder->addTermQuery('availability',self::INVENTORY_AVAILABLE);
-        $this->buildFilter($queryBuilder, []);
+        $this->addScriptFilter($queryBuilder, []);
     }
 
-    private function buildRangeQueries(ESInventoryQueryBuilder $queryBuilder, array $params)
+    private function addRangeQueries(ESInventoryQueryBuilder $queryBuilder, array $params)
     {
         foreach (self::RANGE_SEARCH_KEY_MAP as $field => $searchField) {
             $minFieldKey = "{$field}_min";
@@ -390,6 +395,7 @@ class InventoryService implements InventoryServiceInterface
         $newCategory = $this->mapOldCategoryToNew($respObj->category);
         $respObj->category = $newCategory['key'];
         $respObj->type_id = $newCategory['type_id'];
+        $respObj->type_label = $newCategory['type_label'];
         return $respObj;
     }
 
