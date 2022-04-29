@@ -159,7 +159,7 @@ use Laravel\Scout\Searchable;
  */
 class Inventory extends Model
 {
-    use TableAware, SpatialTrait, GeospatialHelper, Searchable, CustomSearch;
+    use TableAware, SpatialTrait, GeospatialHelper;
 
     const CONSTRUCTION_ATTRIBUTE_ID = 2;
     const COLOR_ATTRIBUTE_ID = 11;
