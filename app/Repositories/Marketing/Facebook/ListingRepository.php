@@ -49,9 +49,11 @@ class ListingRepository implements ListingRepositoryInterface {
      */
     public function create($params) {
         // Already Exists?!
-        $listing = Listings::where('facebook_id', $params['facebook_id'])->first();
-        if(!empty($listing->id)) {
-            return $this->update($params);
+        if(!empty($params['facebook_id'])) {
+            $listing = Listings::where('facebook_id', $params['facebook_id'])->first();
+            if(!empty($listing->id)) {
+                return $this->update($params);
+            }
         }
 
         // Create Listing
@@ -111,7 +113,11 @@ class ListingRepository implements ListingRepositoryInterface {
      * @return Listings
      */
     public function update($params) {
-        $listing = Listings::where('facebook_id', $params['facebook_id'])->firstOrFail();
+        if(!empty($params['facebook_id'])) {
+            $listing = Listings::where('facebook_id', $params['facebook_id'])->firstOrFail();
+        } else {
+            $listing = Listings::where('id', $params['id'])->firstOrFail();
+        }
 
         DB::transaction(function() use (&$listing, $params) {
             // Fill Listing Details
