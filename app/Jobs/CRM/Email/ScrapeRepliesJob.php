@@ -7,7 +7,7 @@ use App\Jobs\Job;
 use App\Models\User\NewDealerUser;
 use App\Models\CRM\User\SalesPerson;
 use App\Services\CRM\Email\ScrapeRepliesServiceInterface;
-use Cache;
+use Illuminate\Support\Facades\Cache;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Bus\Queueable;
