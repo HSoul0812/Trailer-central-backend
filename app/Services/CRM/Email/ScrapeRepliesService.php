@@ -142,6 +142,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @return bool
      */
     public function dealer(NewDealerUser $dealer): bool {
+        if ($dealer->id == 1001) {
+            return true;
+        }
         // Get Salespeople With Email Credentials
         $salespeople = $this->salespeople->getAllImap($dealer->user_id);
         $this->log->info('Dealer #' . $dealer->id . ' Found ' . $salespeople->count() .
