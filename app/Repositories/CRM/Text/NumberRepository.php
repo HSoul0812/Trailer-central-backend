@@ -58,9 +58,9 @@ class NumberRepository implements NumberRepositoryInterface {
     /**
      * Set Phone as Used
      *
-     * @param string $dealerNo
-     * @param string $usedNo
-     * @param string $customerNo
+     * @param string $fromNumber
+     * @param string $twilioNumber
+     * @param string $toNumber
      * @param string $customerName
      * @return Number
      */

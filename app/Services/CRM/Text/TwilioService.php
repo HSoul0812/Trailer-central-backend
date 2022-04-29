@@ -113,7 +113,7 @@ class TwilioService implements TwilioServiceInterface
      * @throws SendTwilioTextFailedException
      */
     public function send(string $from_number, string $to_number, string $textMessage, string $fullName, array $mediaUrl = []): MessageInstance {
-        //try {
+        try {
             // Send to Demo
             if(!empty($this->from) && !empty($this->from[0])) {
                 // Send Demo Number
@@ -128,10 +128,10 @@ class TwilioService implements TwilioServiceInterface
 
             // Send Internal Number
             return $this->sendInternal($from_number, $to_number, $textMessage, $fullName, $mediaUrl);
-/*        } catch (\Exception $ex) {
+        } catch (\Exception $ex) {
             $this->log->error('Exception occurred trying to send text over Twilio: ' . $ex->getMessage());
             throw new SendTwilioTextFailedException;
-        }*/
+        }
     }
 
     /**
