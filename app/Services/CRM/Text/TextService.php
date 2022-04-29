@@ -6,6 +6,7 @@ use App\Exceptions\CRM\Text\NoDealerSmsNumberAvailableException;
 use App\Exceptions\CRM\Text\NoLeadSmsNumberAvailableException;
 use App\Models\CRM\Interactions\TextLog;
 use App\Models\CRM\Leads\Lead;
+use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
@@ -46,6 +47,11 @@ class TextService implements TextServiceInterface
     private $textRepository;
 
     /**
+     * @var LeadRepositoryInterface
+     */
+    private $leadRepository;
+
+    /**
      * @param TwilioServiceInterface $twilioService
      * @param DealerLocationRepositoryInterface $dealerLocationRepository
      * @param StatusRepositoryInterface $statusRepository
@@ -57,13 +63,15 @@ class TextService implements TextServiceInterface
         DealerLocationRepositoryInterface $dealerLocationRepository,
         StatusRepositoryInterface $statusRepository,
         TextRepositoryInterface $textRepository,
-        FileServiceInterface $fileService
+        FileServiceInterface $fileService,
+        LeadRepositoryInterface $leadRepository
     ) {
         $this->twilioService = $twilioService;
         $this->dealerLocationRepository = $dealerLocationRepository;
         $this->statusRepository = $statusRepository;
         $this->textRepository = $textRepository;
         $this->fileService = $fileService;
+        $this->leadRepository = $leadRepository;
     }
 
     /**
@@ -79,7 +87,8 @@ class TextService implements TextServiceInterface
     public function send(int $leadId, string $textMessage, array $mediaUrl = []): TextLog
     {
         // Get Lead/User
-        $lead = Lead::findOrFail($leadId);
+        /** @var Lead $lead */
+        $lead = $this->leadRepository->get(['id' => $leadId]);
         $fullName = $lead->newDealerUser()->first()->crmUser->full_name;
         $fileDtos = new Collection();
 
