@@ -38,6 +38,8 @@ class StatusTransformer extends TransformerAbstract
             'config' => [
                 'action' => $status->getAction(),
                 'interval' => $status->getInterval(),
+                'proxy' => $status->getProxyConfig(),
+                'cookie' => $status->getCookieConfig(),
                 'urls' => $status->getAllUrls(),
                 'selectors' => $status->getAllSelectors()
             ]

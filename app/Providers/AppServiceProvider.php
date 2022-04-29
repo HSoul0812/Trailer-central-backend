@@ -151,6 +151,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Nova\Nova;
+use Propaganistas\LaravelPhone\PhoneServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -343,5 +344,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(InventoryAttributeServiceInterface::class, InventoryAttributeService::class);
         $this->app->bind(CustomOverlayServiceInterface::class, CustomOverlayService::class);
         $this->app->bind(CustomOverlayRepositoryInterface::class, CustomOverlayRepository::class);
+
+        $this->app->register(PhoneServiceProvider::class);
     }
 }

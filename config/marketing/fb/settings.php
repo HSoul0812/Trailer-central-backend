@@ -19,16 +19,29 @@ return [
     // Primary Action to Start With
     'action' => env('FB_MARKETING_SETTING_ACTION', 'start-script'),
 
+    // Interval to Get New Posts
+    'interval' => env('FB_MARKETING_SETTING_INTERVAL', 60 * 60),
 
-    // TTL to Expire for Posting
-    'ttl' => env('FB_MARKETING_SETTING_TTL', ''),
+    // Proxy Config
+    'proxy' => [
+        'auto' => (int) env('FB_MARKETING_SETTING_PROXY_AUTO', 1),
+        'timeout' => (int) env('FB_MARKETING_SETTING_PROXY_TIMEOUT', 1000),
+        'required' => (int) env('FB_MARKETING_SETTING_PROXY_REQUIRED', 0)
+    ],
 
+    // Cookie Config
+    'cookie' => [
+        'clear' => (int) env('FB_MARKETING_SETTING_COOKIE_CLEAR', 1),
+        'restore' => (int) env('FB_MARKETING_SETTING_COOKIE_RESTORE', 0)
+    ],
 
     // Posting Limits
     'limit' => [
         'force' => env('FB_MARKETING_SETTING_LIMIT_FORCE', '1'),
         'listings' => env('FB_MARKETING_SETTING_LIMIT_LISTINGS', '3'),
         'hours' => env('FB_MARKETING_SETTING_LIMIT_HOURS', '24'),
+        'errors' => env('FB_MARKETING_SETTING_LIMIT_ERRORS', '1'),
+        'ttl' => env('FB_MARKETING_SETTING_LIMIT_TTL', ''),
     ],
 
 
@@ -45,8 +58,6 @@ return [
     // Active Fields
     'fields' => [
         'page_url' => env('FB_MARKETING_SETTING_FIELDS_PAGE_URL', false),
-        'tfa_types' => env('FB_MARKETING_SETTING_FIELDS_TFA_TYPES', implode(",", [
-            'sms'
-        ]))
+        'tfa_types' => env('FB_MARKETING_SETTING_FIELDS_TFA_TYPES', '')
     ]
 ];

@@ -578,8 +578,10 @@ $api->version('v1', function ($route) {
 
     $route->get('leads/status', 'App\Http\Controllers\v1\CRM\Leads\LeadStatusController@index');
     $route->put('leads/status', 'App\Http\Controllers\v1\CRM\Leads\LeadStatusController@create');
+    $route->get('leads/status/public', 'App\Http\Controllers\v1\CRM\Leads\LeadStatusController@publicStatuses');
     $route->post('leads/status/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadStatusController@update');
     $route->get('leads/types', 'App\Http\Controllers\v1\CRM\Leads\LeadTypeController@index');
+    $route->get('leads/types/public', 'App\Http\Controllers\v1\CRM\Leads\LeadTypeController@publicTypes');
     $route->get('leads/sources', 'App\Http\Controllers\v1\CRM\Leads\LeadSourceController@index');
     $route->get('leads/sort-fields', 'App\Http\Controllers\v1\CRM\Leads\LeadController@sortFields');
     $route->get('leads/unique-full-names', 'App\Http\Controllers\v1\CRM\Leads\LeadController@uniqueFullNames');
@@ -753,6 +755,26 @@ $api->version('v1', function ($route) {
                 $route->put('/', 'App\Http\Controllers\v1\CRM\Leads\LeadImportController@update');
                 $route->delete('/', 'App\Http\Controllers\v1\CRM\Leads\LeadImportController@delete');
             });*/
+
+            /*
+            |--------------------------------------------------------------------------
+            | Lead Products
+            |--------------------------------------------------------------------------
+            |
+            |
+            |
+            */
+            $route->get('products', 'App\Http\Controllers\v1\CRM\Leads\ProductController@index');
+
+            /*
+            |--------------------------------------------------------------------------
+            | Lead Trades
+            |--------------------------------------------------------------------------
+            |
+            |
+            |
+            */
+            $route->get('trades', 'App\Http\Controllers\v1\CRM\Leads\LeadTradeController@index');
         });
 
         $route->group([
@@ -939,7 +961,6 @@ $api->version('v1', function ($route) {
                     $route->get('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@show')->where('id', '[0-9]+');
                     $route->post('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@update')->where('id', '[0-9]+');
                     $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@destroy')->where('id', '[0-9]+');*/
-                    $route->post('{id}/send', 'App\Http\Controllers\v1\CRM\Email\BlastController@send')->where('id', '[0-9]+');
                 });
             });
 
@@ -992,6 +1013,16 @@ $api->version('v1', function ($route) {
                     $route->post('{id}/sent', 'App\Http\Controllers\v1\CRM\Text\BlastController@sent')->where('id', '[0-9]+');
                 });
             });
+
+            /*
+            |--------------------------------------------------------------------------
+            | Dealer Documents
+            |--------------------------------------------------------------------------
+            |
+            |
+            |
+            */
+            $route->get('documents', 'App\Http\Controllers\v1\CRM\Documents\DealerDocumentsController@index');
         });
 
         /*

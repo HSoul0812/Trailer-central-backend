@@ -18,7 +18,7 @@ class SaveMarketplaceRequest extends Request
     {
         // Get Rules
         return [
-            'dealer_location_id' => 'dealer_location_valid',
+            'dealer_location_id' => 'nullable|dealer_location_valid',
             'page_url' => 'string',
             'fb_username' => 'required|string',
             'fb_password' => 'required|string',

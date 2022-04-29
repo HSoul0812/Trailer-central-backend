@@ -228,8 +228,8 @@ class InquiryService implements InquiryServiceInterface
         // Create Text In DB
         $this->texts->create([
             'lead_id'     => $lead['data']['id'],
-            'from_number' => $sent->from,
-            'to_number'   => $sent->to,
+            'from_number' => $params['phone_number'], // customer number
+            'to_number'   => $sent->to, // dealer number
             'log_message' => $params['sms_message']
         ]);
 
