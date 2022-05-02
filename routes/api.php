@@ -1356,7 +1356,6 @@ $api->version('v1', function ($route) {
         });
     });
 
-
     /*
     |--------------------------------------------------------------------------
     | Webhooks
@@ -1365,6 +1364,12 @@ $api->version('v1', function ($route) {
     |
     |
     */
+
+    $route->post(
+        'stripe/webhook',
+        'App\Http\Controllers\v1\Webhook\SubscriptionController@handleWebhook'
+    );
+
     $route->group([
         'prefix' => 'webhook'
     ], function ($route) {
