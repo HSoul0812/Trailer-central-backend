@@ -1371,6 +1371,16 @@ $api->version('v1', function ($route) {
     );
 
     $route->group([
+        'prefix' => 'subscriptions'
+    ], function ($route) {
+        $route->get(
+            'customer',
+            'App\Http\Controllers\v1\Subscription\SubscriptionController@getCustomer'
+        );
+    });
+
+
+    $route->group([
         'prefix' => 'webhook'
     ], function ($route) {
         // Twilio Webhooks
