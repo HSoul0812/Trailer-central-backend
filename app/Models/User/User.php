@@ -18,6 +18,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Services\User\UserService;
 use App\Traits\CompactHelper;
 
+use Laravel\Cashier\Billable;
+
 /**
  * Class User
  *
@@ -37,7 +39,7 @@ use App\Traits\CompactHelper;
  */
 class User extends Model implements Authenticatable, PermissionsInterface
 {
-    use HasPermissionsStub;
+    use HasPermissionsStub, Billable;
 
     const TABLE_NAME = 'dealer';
 
