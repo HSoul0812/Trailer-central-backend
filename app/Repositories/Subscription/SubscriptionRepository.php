@@ -49,6 +49,15 @@ class SubscriptionRepository implements SubscriptionRepositoryInterface {
     }
 
     /**
+     * Retrieves plans
+     *
+     * @return mixed
+     */
+    public function getPlans() {
+        return $this->service->getPlans();
+    }
+
+    /**
      * @param $params
      * @return void
      */
