@@ -224,8 +224,8 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         // Send Emails and Return Response
         try {
             // Dispatch Send EmailBuilder Job
-            $job = new EmailBuilderJob($builder, $leads);
-            $this->dispatch($job->onQueue('emailbuilder'));
+            // $job = new EmailBuilderJob($builder, $leads);
+            // $this->dispatch($job->onQueue('emailbuilder'));
 
             // Return Array of Queued Leads
             return $this->response($builder, $leads);
@@ -271,8 +271,8 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         // Send Emails and Return Response
         try {
             // Dispatch Send EmailBuilder Job
-            $job = new EmailBuilderJob($builder, $leads);
-            $this->dispatch($job->onQueue('emailbuilder'));
+            // $job = new EmailBuilderJob($builder, $leads);
+            // $this->dispatch($job->onQueue('emailbuilder'));
 
             // Return Array of Queued Leads
             return $this->response($builder, $leads);
