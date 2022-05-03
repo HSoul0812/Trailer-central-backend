@@ -1333,6 +1333,7 @@ $api->version('v1', function ($route) {
     |
     */
     $route->post('files/local', 'App\Http\Controllers\v1\File\FileController@uploadLocal');
+    $route->post('files/local/twilio', 'App\Http\Controllers\v1\File\FileController@twilioUploadLocal');
     $route->post('images/local', 'App\Http\Controllers\v1\File\ImageController@uploadLocal');
 
     /*
