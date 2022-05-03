@@ -243,7 +243,7 @@ class InventoryService implements InventoryServiceInterface
     }
 
     private function addScriptFilter(ESInventoryQueryBuilder $queryBuilder, array $params) {
-        $filter = "doc['status'].value != 2";
+        $filter = "doc['status'].value != 2 && doc['dealer.name'].value != 'Operate Beyond'";
 
         if(!empty($params['sale'])) {
             $filter .= " && doc['salesPrice'].value > 0.0 && doc['salesPrice'].value < doc['websitePrice'].value";
