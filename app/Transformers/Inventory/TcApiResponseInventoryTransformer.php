@@ -39,6 +39,7 @@ class TcApiResponseInventoryTransformer extends TransformerAbstract
             'primary_image'    => $type->primary_image,
             'availability'     => $type->availability,
             'availability_label' => $type->availability_label,
+            'is_archived'      => $type->is_archived,
             'type_id'          => $type->type_id,
             'type_label'       => $type->type_label,
             'category'         => $type->category,

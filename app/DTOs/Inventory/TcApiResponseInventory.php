@@ -81,6 +81,7 @@ class TcApiResponseInventory
      $obj->category = $data['category'];
      $obj->availability = self::statusToAvailabilityMap[$data['status_id']] ?? '';
      $obj->availability_label = $data['status'] ?? '';
+     $obj->is_archived = $data['is_archived'];
      foreach($data['attributes'] as $attribute) {
        $obj->setTypedProperty($attribute['code'], $attribute['value']);
      }
