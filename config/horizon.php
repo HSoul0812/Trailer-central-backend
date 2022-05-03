@@ -156,7 +156,7 @@ return [
         'local' => [
             'supervisor-1' => [
                 'connection' => 'redis',
-                'queue' => ['default', 'parts', 'parts-export-new', 'factory-feeds', 'mails', 'files', 'cvr-send-file', 'scout', 'ids-export', 'reports', 'emailbuilder', 'blog-posts', 'scrapereplies', 'inquiry'],
+                'queue' => ['default', 'parts', 'parts-export-new', 'factory-feeds', 'mails', 'files', 'cvr-send-file', 'scout', 'ids-export', 'reports', 'emailbuilder', 'blog-posts', 'scrapereplies', 'inquiry', 'fb-catalog', 'fb-messenger', 'ecommerce'],
                 'balance' => 'simple',
                 'processes' => 3,
                 'tries' => 1,
