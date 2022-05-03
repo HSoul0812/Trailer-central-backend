@@ -21,7 +21,13 @@ class StripeService implements StripeServiceInterface
      */
     private $customer;
 
+    /**
+     * @var $user
+     */
+    private $user;
+
     public function __construct($user) {
+        $this->user = $user;
         $this->customer = $user->createOrGetStripeCustomer();
         $this->stripe = new StripeClient(env('STRIPE_SECRET'));
     }
@@ -68,5 +74,45 @@ class StripeService implements StripeServiceInterface
         }
 
         return $plans;
+    }
+
+    /**
+     * Subscribe to a selected plan
+     *
+     */
+    public function subscribe($request): array
+    {
+        try {
+            if ($this->user->hasPaymentMethod()) {
+                $paymentMethod = $this->user->defaultPaymentMethod();
+
+                $this->user
+                    ->newSubscription('default', $request->plan)
+                    ->create($paymentMethod->id, [
+                        'email' => $this->customer->email,
+                    ]);
+            } else {
+                return [
+                    'response' => [
+                        'status' => 'error',
+                        'message' => 'No payment method for this customer.'
+                    ]
+                ];
+            }
+
+            return [
+                'response' => [
+                    'status' => 'success',
+                    'message' => 'Customer subscription successfully.'
+                ]
+            ];
+        } catch (Exception $e) {
+            return [
+                'response' => [
+                    'status' => 'error',
+                    'message' => $e->getMessage()
+                ]
+            ];
+        }
     }
 }
