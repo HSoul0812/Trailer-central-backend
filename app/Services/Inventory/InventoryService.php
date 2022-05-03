@@ -337,11 +337,11 @@ class InventoryService implements InventoryServiceInterface
             $result = $this->inventoryRepository->delete($deleteInventoryParams);
 
             if (isset($imagesFilenames) && $result) {
-                $this->dispatch((new DeleteS3FilesJob($imagesFilenames))->onQueue('files'));
+                // $this->dispatch((new DeleteS3FilesJob($imagesFilenames))->onQueue('files'));
             }
 
             if (isset($filesFilenames) && $result) {
-                $this->dispatch((new DeleteS3FilesJob($filesFilenames))->onQueue('files'));
+                // $this->dispatch((new DeleteS3FilesJob($filesFilenames))->onQueue('files'));
             }
 
             Log::info('Item has been successfully deleted', ['inventoryId' => $inventoryId]);
@@ -742,7 +742,7 @@ class InventoryService implements InventoryServiceInterface
                 ImageRepositoryInterface::CONDITION_AND_WHERE_IN => ['image_id' => $imageIds]
             ]);
 
-            $this->dispatch((new DeleteS3FilesJob($imagesFilenames))->onQueue('files'));
+            // $this->dispatch((new DeleteS3FilesJob($imagesFilenames))->onQueue('files'));
 
             $this->inventoryRepository->commitTransaction();
 
