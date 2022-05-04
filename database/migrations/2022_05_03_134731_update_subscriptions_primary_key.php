@@ -13,7 +13,7 @@ class UpdateSubscriptionsPrimaryKey extends Migration
      */
     public function up()
     {
-        if ($this->checkTable()) {
+        if ($this->checkTable() && $this->checkColumnUp()) {
             Schema::table('subscriptions', function (Blueprint $table) {
                 $table->renameColumn('user_id', 'user_dealer_id');
             });
@@ -27,7 +27,7 @@ class UpdateSubscriptionsPrimaryKey extends Migration
      */
     public function down()
     {
-        if ($this->checkTable()) {
+        if ($this->checkTable() && $this->checkColumnDown()) {
             Schema::table('subscriptions', function (Blueprint $table) {
                 $table->renameColumn('user_dealer_id', 'user_id');
             });
@@ -41,5 +41,23 @@ class UpdateSubscriptionsPrimaryKey extends Migration
     private function checkTable(): bool
     {
         return Schema::hasTable('subscriptions');
+    }
+
+    /**
+     * Validate column existence on migrate
+     * @return bool
+     */
+    private function checkColumnUp(): bool
+    {
+        return Schema::hasColumn('subscriptions', 'user_id');
+    }
+
+    /**
+     * Validate column existence on rollback
+     * @return bool
+     */
+    private function checkColumnDown(): bool
+    {
+        return Schema::hasColumn('subscriptions', 'user_dealer_id');
     }
 }
