@@ -6,6 +6,7 @@ use App\Repositories\Subscription\SubscriptionRepository;
 use App\Repositories\Subscription\SubscriptionRepositoryInterface;
 use Exception;
 use Dingo\Api\Http\Request;
+use Dingo\Api\Http\Response;
 use App\Services\Subscription\StripeService;
 use App\Services\Subscription\StripeServiceInterface;
 
@@ -74,5 +75,22 @@ class SubscriptionController extends RestfulControllerV2
      */
     public function getCustomer(Request $request) {
         return $this->response->item($this->subscriptionRepository->getCustomer(), new CustomerTransformer());
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/subscriptions/plans",
+     *     description="Retrieves plans",
+     *     tags={"Subscriptions"},
+     *     @OA\Response(
+     *         response="200",
+     *         description="Retrieves plans",
+     *         @OA\JsonContent()
+     *     )
+     * )
+     */
+    public function getPlans(Request $request): Response
+    {
+        return $this->response->array($this->subscriptionRepository->getPlans());
     }
 }
