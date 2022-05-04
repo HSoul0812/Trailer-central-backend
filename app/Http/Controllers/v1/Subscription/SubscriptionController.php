@@ -6,6 +6,7 @@ use App\Repositories\Subscription\SubscriptionRepository;
 use App\Repositories\Subscription\SubscriptionRepositoryInterface;
 use Exception;
 use Dingo\Api\Http\Request;
+use Dingo\Api\Http\Response;
 use App\Services\Subscription\StripeService;
 use App\Services\Subscription\StripeServiceInterface;
 
@@ -88,7 +89,8 @@ class SubscriptionController extends RestfulControllerV2
      *     )
      * )
      */
-    public function getPlans(Request $request) {
+    public function getPlans(Request $request): Response
+    {
         return $this->response->array($this->subscriptionRepository->getPlans());
     }
 }

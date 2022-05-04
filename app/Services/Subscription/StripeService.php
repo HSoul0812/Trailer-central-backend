@@ -56,7 +56,8 @@ class StripeService implements StripeServiceInterface
      * Retrieves all existing plans
      *
      */
-    public function getPlans() {
+    public function getPlans(): array
+    {
         $plansRaw = $this->stripe->plans->all();
         $plans = $plansRaw->data;
 

@@ -51,9 +51,10 @@ class SubscriptionRepository implements SubscriptionRepositoryInterface {
     /**
      * Retrieves plans
      *
-     * @return mixed
+     * @return array
      */
-    public function getPlans() {
+    public function getPlans(): array
+    {
         return $this->service->getPlans();
     }
 
