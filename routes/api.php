@@ -1378,6 +1378,11 @@ $api->version('v1', function ($route) {
             'App\Http\Controllers\v1\Subscription\SubscriptionController@getCustomer'
         );
 
+        $route->get(
+            'plans',
+            'App\Http\Controllers\v1\Subscription\SubscriptionController@getPlans'
+        );
+
         $route->post(
             'subscribe',
             'App\Http\Controllers\v1\Subscription\SubscriptionController@subscribe'
