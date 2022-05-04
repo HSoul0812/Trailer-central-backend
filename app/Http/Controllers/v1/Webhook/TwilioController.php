@@ -6,7 +6,7 @@ use App\Http\Controllers\RestfulControllerV2;
 use Dingo\Api\Http\Request;
 use App\Http\Requests\Webhook\Twilio\VerifySmsRequest;
 use App\Services\CRM\Text\TextServiceInterface;
-use App\Transformers\CRM\Text\VerifyTransformer;
+use App\Transformers\CRM\Text\NumberVerifyTransformer;
 
 class TwilioController extends RestfulControllerV2 {
     /**
@@ -15,13 +15,13 @@ class TwilioController extends RestfulControllerV2 {
     private $service;
 
     /**
-     * @var App\Transformers\CRM\Text\VerifyTransformer
+     * @var App\Transformers\CRM\Text\NumberVerifyTransformer
      */
     private $verifyTransformer;
 
     public function __construct(
         TextServiceInterface $service,
-        VerifyTransformer $verifyTransformer
+        NumberVerifyTransformer $verifyTransformer
     ) {
         $this->service = $service;
         $this->verifyTransformer = $verifyTransformer;
