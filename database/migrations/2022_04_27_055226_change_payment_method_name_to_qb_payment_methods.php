@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddPosDisclaimerToDealerDisclaimer extends Migration
+class ChangePaymentMethodNameToQbPaymentMethods extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,7 @@ class AddPosDisclaimerToDealerDisclaimer extends Migration
      */
     public function up()
     {
-        Schema::table('dealer_disclaimer', function (Blueprint $table) {
-            $table->text('pos_disclaimer')->nullable();
-        });
+	    DB::table('qb_payment_methods')->where('name', '=', 'PO')->update(['name' => 'A/R']);
     }
 
     /**
@@ -25,8 +23,6 @@ class AddPosDisclaimerToDealerDisclaimer extends Migration
      */
     public function down()
     {
-        Schema::table('dealer_disclaimer', function (Blueprint $table) {
-            $table->dropColumn('pos_disclaimer');
-        });
+	    DB::table('qb_payment_methods')->where('name', '=', 'A/R')->update(['name' => 'PO']);
     }
 }

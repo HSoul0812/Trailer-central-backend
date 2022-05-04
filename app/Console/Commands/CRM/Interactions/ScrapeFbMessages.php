@@ -117,8 +117,9 @@ class ScrapeFbMessages extends Command
 			if(empty($chat->page->accessToken)) {
                             throw new \Exception('Missing Page Access Token, Cannot Start MessageJob');
 			}
-                        // $this->dispatch(new MessageJob($chat->page->accessToken, $chat->page_id));
-                        // $this->info("{$this->command} started message job for facebook page #{$chat->page_id} on dealer #{$dealer->id}");
+                        $job = new MessageJob($chat->page->accessToken, $chat->page_id);
+                        $this->dispatch($job->onQueue('fb-messenger'));
+                        $this->info("{$this->command} started message job for facebook page #{$chat->page_id} on dealer #{$dealer->id}");
                     } catch (\Exception $ex) {
                         $this->error("{$this->command} message job for facebook page #{$chat->page_id} on dealer #{$dealer->id} returned exception {$ex->getMessage()}");
                     }
