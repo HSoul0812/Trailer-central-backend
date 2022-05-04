@@ -116,4 +116,29 @@ class StripeService implements StripeServiceInterface
             ];
         }
     }
+
+    /**
+     * Updates a customer card
+     *
+     */
+    public function updateCard(Request $request): array
+    {
+        try {
+            $this->user->updateDefaultPaymentMethod($request->paymentMethod);
+
+            return [
+                'response' => [
+                    'status' => 'success',
+                    'message' => 'Customer card updated successfully.'
+                ]
+            ];
+        } catch (Exception $e) {
+            return [
+                'response' => [
+                    'status' => 'error',
+                    'message' => $e->getMessage()
+                ]
+            ];
+        }
+    }
 }

@@ -1387,6 +1387,11 @@ $api->version('v1', function ($route) {
             'subscribe',
             'App\Http\Controllers\v1\Subscription\SubscriptionController@subscribe'
         );
+
+        $route->post(
+            'update-card',
+            'App\Http\Controllers\v1\Subscription\SubscriptionController@updateCard'
+        );
     });
 
 

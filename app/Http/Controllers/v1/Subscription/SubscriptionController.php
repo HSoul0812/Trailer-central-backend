@@ -110,4 +110,21 @@ class SubscriptionController extends RestfulControllerV2
     {
         return $this->response->array($this->subscriptionRepository->subscribe($request));
     }
+
+    /**
+     * @OA\Get(
+     *     path="/api/subscriptions/update-card",
+     *     description="Updates a customer card",
+     *     tags={"Subscriptions"},
+     *     @OA\Response(
+     *         response="200",
+     *         description="Updates a customer card",
+     *         @OA\JsonContent()
+     *     )
+     * )
+     */
+    public function updateCard(Request $request): Response
+    {
+        return $this->response->array($this->subscriptionRepository->updateCard($request));
+    }
 }
