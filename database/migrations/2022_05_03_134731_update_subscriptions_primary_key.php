@@ -13,9 +13,11 @@ class UpdateSubscriptionsPrimaryKey extends Migration
      */
     public function up()
     {
-        Schema::table('subscriptions', function (Blueprint $table) {
-            $table->renameColumn('user_id', 'user_dealer_id');
-        });
+        if ($this->checkTable()) {
+            Schema::table('subscriptions', function (Blueprint $table) {
+                $table->renameColumn('user_id', 'user_dealer_id');
+            });
+        }
     }
 
     /**
@@ -25,8 +27,19 @@ class UpdateSubscriptionsPrimaryKey extends Migration
      */
     public function down()
     {
-        Schema::table('subscriptions', function (Blueprint $table) {
-            $table->renameColumn('user_dealer_id', 'user_id');
-        });
+        if ($this->checkTable()) {
+            Schema::table('subscriptions', function (Blueprint $table) {
+                $table->renameColumn('user_dealer_id', 'user_id');
+            });
+        }
+    }
+
+    /**
+     * Validate Table existence
+     * @return bool
+     */
+    private function checkTable(): bool
+    {
+        return Schema::hasTable('subscriptions');
     }
 }
