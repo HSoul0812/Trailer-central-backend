@@ -52,9 +52,9 @@ class SubscriptionRepository implements SubscriptionRepositoryInterface {
      * Subscribe to a selected plan
      *
      * @param Request $request
-     * @return mixed
+     * @return array[]
      */
-    public function subscribe(Request $request)
+    public function subscribe(Request $request): array
     {
         return $this->service->subscribe($request);
     }
