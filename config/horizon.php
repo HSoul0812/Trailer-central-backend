@@ -157,9 +157,10 @@ return [
             'supervisor-1' => [
                 'connection' => 'redis',
                 'queue' => ['parts', 'parts-export-new', 'factory-feeds', 'cvr-send-file', 'scout', 'reports', 'emailbuilder', 'blog-posts', 'scrapereplies', 'inquiry', 'fb-catalog', 'fb-messenger', 'ecommerce'],
-                'balance' => 'simple',
-                'processes' => 3,
-                'tries' => 1,
+                'balance' => 'auto',
+                'minProcesses' => 3,
+                'maxProcesses' => 120, // The maximum number of processes across all queues
+                'tries' => 3,
             ],
         ],
     ],
