@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddPosDisclaimerToDealerDisclaimer extends Migration
+class Dmss468BillsAddSearchIndex extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class AddPosDisclaimerToDealerDisclaimer extends Migration
      */
     public function up()
     {
-        Schema::table('dealer_disclaimer', function (Blueprint $table) {
-            $table->text('pos_disclaimer')->nullable();
+        Schema::table('qb_bills', function (Blueprint $table) {
+            $table->index(['dealer_id'], 'qb_bills_dealer_index');
         });
     }
 
@@ -25,8 +25,8 @@ class AddPosDisclaimerToDealerDisclaimer extends Migration
      */
     public function down()
     {
-        Schema::table('dealer_disclaimer', function (Blueprint $table) {
-            $table->dropColumn('pos_disclaimer');
+        Schema::table('qb_bills', function (Blueprint $table) {
+            $table->dropIndex('qb_bills_dealer_index');
         });
     }
 }

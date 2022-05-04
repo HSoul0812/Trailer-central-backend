@@ -156,6 +156,8 @@ class QuoteRepository implements QuoteRepositoryInterface
         }
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
+        } else {
+            $query = $this->addSortQuery($query, 'created_at');
         }
 
         return $query->paginate($params['per_page'])->appends($params);

@@ -325,15 +325,11 @@ class InventoryRepository implements InventoryRepositoryInterface
         $include = (isset($params['include']) && is_string($params['include'])) ? explode(',', $params['include']) : [];
 
         if (in_array('attributes', $include)) {
-            $query = $query->with(['attributeValues' => function ($query) {
-                $query->with('attribute');
-            }]);
+            $query = $query->with('attributeValues.attribute');
         }
 
         if (in_array('features', $include)) {
-            $query = $query->with(['inventoryFeatures' => function ($query) {
-                $query->with('featureList');
-            }]);
+            $query = $query->with('inventoryFeatures.featureList');
         }
 
         return $query->firstOrFail();
@@ -759,7 +755,9 @@ class InventoryRepository implements InventoryRepositoryInterface
         $featureObjs = [];
 
         foreach ($features as $feature) {
-            $featureObjs[] = new InventoryFeature($feature);
+            if (!empty($feature['feature_list_id'])) {
+                $featureObjs[] = new InventoryFeature($feature);
+            }
         }
 
         return $featureObjs;
