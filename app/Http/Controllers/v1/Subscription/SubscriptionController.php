@@ -93,4 +93,21 @@ class SubscriptionController extends RestfulControllerV2
     {
         return $this->response->array($this->subscriptionRepository->getPlans());
     }
+
+    /**
+     * @OA\Get(
+     *     path="/api/subscriptions/subscribe",
+     *     description="Subscribe to a selected plan",
+     *     tags={"Subscriptions"},
+     *     @OA\Response(
+     *         response="200",
+     *         description="Retrieves plans",
+     *         @OA\JsonContent()
+     *     )
+     * )
+     */
+    public function subscribe(Request $request): Response
+    {
+        return $this->response->array($this->subscriptionRepository->subscribe($request));
+    }
 }
