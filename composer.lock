@@ -192,16 +192,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.222.5",
+            "version": "3.222.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "26596820b043db985bf7c9deb98aa2234f6054cb"
+                "reference": "17713594c2c7971424c02bd5048aa996fe442264"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/26596820b043db985bf7c9deb98aa2234f6054cb",
-                "reference": "26596820b043db985bf7c9deb98aa2234f6054cb",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/17713594c2c7971424c02bd5048aa996fe442264",
+                "reference": "17713594c2c7971424c02bd5048aa996fe442264",
                 "shasum": ""
             },
             "require": {
@@ -274,7 +274,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2022-05-04T20:25:34+00:00"
+            "time": "2022-05-05T18:42:07+00:00"
         },
         {
             "name": "babenkoivan/elastic-adapter",
