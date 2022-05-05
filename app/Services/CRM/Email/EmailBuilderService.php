@@ -288,13 +288,8 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             $leadIds = new Collection(explode(",", $leads));
 
             // Dispatch Send EmailBuilder Job
-<<<<<<< HEAD
             $job = new EmailBuilderJob($builder, $leadIds);
             $this->dispatch($job->onQueue('emailbuilder'));
-=======
-             $job = new EmailBuilderJob($builder, $leads);
-             $this->dispatch($job->onQueue('emailbuilder'));
->>>>>>> 2cdcd6ba35f005ecb48986c21b620a0803158ff0
 
             // Return Array of Queued Leads
             return $this->response($builder, $leadIds);
