@@ -94,6 +94,9 @@ class BlastRepository implements BlastRepositoryInterface {
                     ->where(function(Builder $query) {
                         $query->where('cancelled', 0)
                               ->orWhereNull('cancelled');
+                    })->where(function(Builder $query) {
+                        $query->where('email_template_id', 0)
+                              ->orWhereNull('email_template_id');
                     })->where('send_date', '<', DB::raw('now()'))->get();
     }
 

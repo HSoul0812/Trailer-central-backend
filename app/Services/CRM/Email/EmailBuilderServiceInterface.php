@@ -7,6 +7,7 @@ use App\Models\CRM\Interactions\EmailHistory;
 use App\Services\CRM\Interactions\DTOs\BuilderEmail;
 use App\Services\CRM\Interactions\DTOs\BuilderStats;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
+use Illuminate\Support\Collection;
 
 interface EmailBuilderServiceInterface {
     /**
@@ -48,11 +49,11 @@ interface EmailBuilderServiceInterface {
      * Send Emails for Builder Config
      * 
      * @param BuilderEmail $builder
-     * @param array $leads
+     * @param Collection<int> $leads
      * @throws SendBuilderEmailsFailedException
      * @return BuilderStats
      */
-    public function sendEmails(BuilderEmail $builder, array $leads): BuilderStats;
+    public function sendEmails(BuilderEmail $builder, Collection $leads): BuilderStats;
 
     
     /**

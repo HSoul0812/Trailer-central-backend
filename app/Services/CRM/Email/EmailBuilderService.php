@@ -42,6 +42,7 @@ use App\Transformers\CRM\Email\BuilderEmailTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Foundation\Bus\DispatchesJobs;
@@ -206,11 +207,14 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         if(!empty($blast->from_email_address)) {
             $salesPerson = $this->salespeople->getBySmtpEmail($blast->user_id, $blast->from_email_address);
             if(empty($salesPerson->id)) {
+                $this->log->error("From Email Address " . $blast->from_email_address .
+                                    " does not exist for Email Blast #" . $blast->email_blasts_id);
                 throw new FromEmailMissingSmtpConfigException;
             }
         }
 
         // Create Email Builder Email!
+        $this->log->info("Sending Email Blast #" . $blast->email_blasts_id);
         $builder = new BuilderEmail([
             'id' => $blast->email_blasts_id,
             'type' => BuilderEmail::TYPE_BLAST,
@@ -232,6 +236,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             // Dispatch Send EmailBuilder Job
             $job = new EmailBuilderJob($builder, $blast->lead_ids);
             $this->dispatch($job->onQueue('emailbuilder'));
+            $this->log->info("Dispatched Email Builder Job for Blast #" . $blast->email_blasts_id);
 
             // Mark Blast as Delivered
             $this->blasts->update(['id' => $builder->id, 'delivered' => 1]);
@@ -279,12 +284,15 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
         // Send Emails and Return Response
         try {
+            // Get Lead ID's
+            $leadIds = new Collection(explode(",", $leads));
+
             // Dispatch Send EmailBuilder Job
-            $job = new EmailBuilderJob($builder, $leads);
+            $job = new EmailBuilderJob($builder, $leadIds);
             $this->dispatch($job->onQueue('emailbuilder'));
 
             // Return Array of Queued Leads
-            return $this->response($builder, $leads);
+            return $this->response($builder, $leadIds);
         } catch(\Exception $ex) {
             throw new SendCampaignEmailsFailedException($ex);
         }
@@ -352,11 +360,11 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * Send Emails for Builder Config
      *
      * @param BuilderEmail $builder
-     * @param array $leads
+     * @param Collection<int> $leads
      * @throws SendBuilderEmailsFailedException
      * @return BuilderStats
      */
-    public function sendEmails(BuilderEmail $builder, array $leads): BuilderStats
+    public function sendEmails(BuilderEmail $builder, Collection $leads): BuilderStats
     {
         // Initialize Counts
         $stats = new BuilderStats();
@@ -743,16 +751,16 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * Return Send Emails Response
      *
      * @param BuilderEmail $builder
-     * @param string $leads
+     * @param Collection<int> $leads
      * @return array response
      */
-    private function response(BuilderEmail $builder, string $leads): array {
+    private function response(BuilderEmail $builder, Collection $leads): array {
         // Convert Builder Email to Fractal
         $data = new Item($builder, new BuilderEmailTransformer(), 'data');
         $response = $this->fractal->createData($data)->toArray();
 
         // Convert Builder Email to Fractal
-        $response['leads'] = count(explode(",", $leads));
+        $response['leads'] = $leads->toArray();
 
         // Return Response
         return $response;
