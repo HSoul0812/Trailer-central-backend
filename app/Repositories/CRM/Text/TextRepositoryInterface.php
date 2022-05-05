@@ -14,15 +14,6 @@ interface TextRepositoryInterface extends Repository {
     public function stop($params);
 
     /**
-     * Send Text
-     *
-     * @param int $leadId
-     * @param string $textMessage
-     * @return TextLog
-     */
-    public function send($leadId, $textMessage);
-
-    /**
      * @param array $params
      * @return mixed
      */

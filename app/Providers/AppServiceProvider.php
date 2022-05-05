@@ -321,6 +321,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(PackageServiceInterface::class, PackageService::class);
         $this->app->bind(RegisterRepositoryInterface::class, RegisterRepository::class);
         $this->app->bind(RegisterServiceInterface::class, RegisterService::class);
+
         $this->app->when(FileController::class)
             ->needs(FileServiceInterface::class)
             ->give(function () {

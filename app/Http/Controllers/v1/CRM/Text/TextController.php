@@ -4,6 +4,7 @@ namespace App\Http\Controllers\v1\CRM\Text;
 
 use App\Http\Controllers\RestfulControllerV2;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
+use App\Services\CRM\Text\TextServiceInterface;
 use Dingo\Api\Http\Request;
 use App\Http\Requests\CRM\Text\GetTextsRequest;
 use App\Http\Requests\CRM\Text\CreateTextRequest;
@@ -15,18 +16,27 @@ use App\Transformers\CRM\Text\TextTransformer;
 
 class TextController extends RestfulControllerV2
 {
+    /**
+     * @var TextRepositoryInterface
+     */
     protected $texts;
+
+    /**
+     * @var TextServiceInterface
+     */
+    private $textService;
 
     /**
      * Create a new controller instance.
      *
-     * @param Repository $texts
+     * @param TextRepositoryInterface $texts
+     * @param TextServiceInterface $textService
      */
-    public function __construct(TextRepositoryInterface $texts)
+    public function __construct(TextRepositoryInterface $texts, TextServiceInterface $textService)
     {
         $this->texts = $texts;
+        $this->textService = $textService;
     }
-
 
     /**
      * @OA\Get(
@@ -362,7 +372,7 @@ class TextController extends RestfulControllerV2
 
         if ( $request->validate()) {
             // Get Results
-            $result = $this->texts->send($leadId, $params['log_message']);
+            $result = $this->textService->send($leadId, $params['log_message'], $params['mediaUrl'] ?? []);
 
             // Send Text
             return $this->response->item($result, new TextTransformer());
