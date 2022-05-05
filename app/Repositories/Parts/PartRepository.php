@@ -554,7 +554,7 @@ class PartRepository implements PartRepositoryInterface {
                     'function_score' => [
                         'query' => [
                             'query_string' => [
-                                "query" => "*${queryText}*",
+                                "query" => $queryText,
                                 'fields' => ['title^1.3', 'part_id^3', 'sku^3', 'alternative_part_number^2'],
                             ]
                         ],
