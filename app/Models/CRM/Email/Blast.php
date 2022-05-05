@@ -218,10 +218,9 @@ class Blast extends Model
         }
 
         // Append Remaining Requirements and Return Result
-        return $query->whereNull(Bounce::getTableName() . '.email_address')
-                     ->whereNull(BlastSent::getTableName() . '.email_blasts_id')
+        return $query->whereNull(BlastSent::getTableName() . '.email_blasts_id')
                      ->whereRaw('DATE_ADD(' . Lead::getTableName() . '.date_submitted, ' .
-                                'INTERVAL +' . $blast->send_after_days . ' DAY) >= NOW()')
+                                'INTERVAL ' . $blast->send_after_days . ' DAY) >= NOW()')
                      ->pluck('identifier');
     }
 
@@ -245,11 +244,10 @@ class Blast extends Model
                    })
                    ->leftJoin(LeadStatus::getTableName(), Lead::getTableName() . '.identifier',
                                 '=', LeadStatus::getTableName() . '.tc_lead_identifier')
-                   ->leftJoin(Bounce::getTableName(), Lead::getTableName() . '.email_address',
-                                    '=', Bounce::getTableName() . '.email_address')
                    ->where(Lead::getTableName() . '.lead_type', '<>', LeadType::TYPE_NONLEAD)
                    ->where(Lead::getTableName() . '.dealer_id', $blast->newDealerUser->id)
                    ->where(Lead::getTableName() . '.email_address', '<>', '')
-                   ->whereNotNull(Lead::getTableName() . '.email_address');
+                   ->whereNotNull(Lead::getTableName() . '.email_address')
+                   ->groupBy(Lead::getTableName() . '.identifier');
     }
 }
