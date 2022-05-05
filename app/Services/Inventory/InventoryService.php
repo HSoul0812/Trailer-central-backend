@@ -99,9 +99,6 @@ class InventoryService implements InventoryServiceInterface
                 $this->getTypedAggregations($params)
             );
             $response->inventories = $paginator;
-            $response->limits = \Cache::remember('filter/limits', self::ES_CACHE_EXPIRY, function () {
-                return $this->getFilterLimits();
-            });
             return $response;
         } else {
             throw new \Exception('Elastic search API responded with http code: ' . $res->getStatusCode());
@@ -194,29 +191,6 @@ class InventoryService implements InventoryServiceInterface
             $resJson = json_decode($res->getBody()->getContents(), true);
             return $resJson['aggregations'];
         });
-    }
-
-    private function getFilterLimits(): array {
-        $configs = $this->sysConfigRepository->getAll(['key' => 'filter/']);
-        $filter = [];
-        foreach($configs as $config) {
-            $keyParts = explode('/', $config['key']);
-            array_shift($keyParts);
-            $end = array_pop($keyParts);
-            if(!in_array($end, ['min', 'max'])) {
-                continue;
-            }
-
-            $subProp = &$filter;
-            foreach($keyParts as $part) {
-                if(!isset($subProp[$part])) {
-                    $subProp[$part] = [];
-                }
-                $subProp = &$subProp[$part];
-            }
-            $subProp[$end] = intval($config['value']);
-        }
-        return $filter;
     }
 
     #[ArrayShape(['from' => "int", 'size' => "int", 'query' => "array[]", 'aggregations' => "array"])]
