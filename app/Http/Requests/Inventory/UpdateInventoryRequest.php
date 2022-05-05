@@ -44,6 +44,9 @@ class UpdateInventoryRequest extends SaveInventoryRequest
 
         'unlock_images' => 'bool',
         'unlock_video' => 'bool',
+
+        'changed_fields_in_dashboard' => 'array|nullable',
+        'manual' => 'sometimes|bool',
     ];
 
     /**

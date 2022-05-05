@@ -211,6 +211,8 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('unit_sale_exists', 'App\Rules\Dms\UnitSaleExists@passes');
         \Validator::extend('valid_clapp_profile', 'App\Rules\Marketing\Craigslist\ValidProfile@passes');
         \Validator::extend('valid_include', 'App\Rules\ValidInclude@validate');
+        \Validator::extend('location_belongs_to_dealer', 'App\Rules\Locations\LocationBelongsToDealer@passes');
+        \Validator::extend('bin_belongs_to_dealer', 'App\Rules\Bins\BinBelongsToDealer@passes');
 
         Builder::macro('whereLike', function($attributes, string $searchTerm) {
             foreach(array_wrap($attributes) as $attribute) {

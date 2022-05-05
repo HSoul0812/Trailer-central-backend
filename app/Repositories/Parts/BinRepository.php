@@ -55,11 +55,7 @@ class BinRepository implements BinRepositoryInterface
 
     public function getAll($params)
     {
-        if (isset($params['dealer_id'])) {
-            $query = Bin::whereIn('dealer_id', $params['dealer_id']);
-        } else {
-            $query = Bin::where('id', '>', 0);
-        }
+        $query = Bin::where('dealer_id', $params['dealer_id']);
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
