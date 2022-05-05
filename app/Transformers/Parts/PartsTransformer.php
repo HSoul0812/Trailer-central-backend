@@ -8,7 +8,6 @@ use League\Fractal\TransformerAbstract;
 use App\Models\Parts\Part;
 use League\Fractal\Resource\Primitive;
 
-
 class PartsTransformer extends TransformerAbstract implements PartsTransformerInterface
 {
     protected $availableIncludes = [
@@ -43,7 +42,7 @@ class PartsTransformer extends TransformerAbstract implements PartsTransformerIn
              'weight' => (double)$part->weight,
              'weight_rating' => $part->weight_rating,
              'description' => $part->description,
-             'qty' => (int)$part->qty,
+             'qty' => ($part->qty <= 0) ? 0 : $part->qty,
              'show_on_website' => (bool)$part->show_on_website,
              'is_vehicle_specific' => (bool)$part->is_vehicle_specific,
              'images' => $part->images->pluck('image_url'),

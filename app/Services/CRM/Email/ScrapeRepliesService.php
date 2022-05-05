@@ -22,6 +22,7 @@ use App\Services\Integration\AuthServiceInterface;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Google\GmailServiceInterface;
 use App\Services\Integration\Microsoft\OfficeServiceInterface;
+use Cache;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -157,9 +158,20 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 $this->log->info('Dealer #' . $dealer->id . ', Sales Person #' .
                                     $salesperson->id . ' - Starting Importing Email');
 
-                // Dispatch ScrapeReplies Job
                 $job = new ScrapeRepliesJob($dealer, $salesperson);
-                $this->dispatch($job->onQueue('scrapereplies'));
+
+                // Dispatch ScrapeReplies Job only if there is no pending job
+                // for this dealer id and saleperson id
+                if ($job->hasNoPending()) {
+                    $this->dispatch($job->onQueue('scrapereplies'));
+
+                    // After the job is being dispatched, put it in the cache
+                    // so the next command won't create another job until it's finished
+                    // we set expiration time to the next one hour to be safe
+                    Cache::put($job->cacheKey(), [
+                        'created_at' => now(),
+                    ], now()->addHours(1));
+                }
             } catch(\Exception $e) {
                 $this->log->error('Dealer #' . $dealer->id . ' Sales Person #' .
                                     $salesperson->id . ' - Exception returned: ' .
