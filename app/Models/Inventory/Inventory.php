@@ -370,6 +370,17 @@ class Inventory extends Model
      */
     private $attributesCollection;
 
+    /**
+     * Boot the trait.
+     *
+     * @return void
+     */
+    public static function bootSearchable()
+    {
+        // We don't want to do anything with searchable for this model
+        // If we remove Searchable, it will remove parts index as well
+        // from ES, so for now we'll just rewrite it to nothing
+    }
 
     public function user(): BelongsTo
     {

@@ -53,8 +53,9 @@ class Error extends Model
      * @const Expiry Hours
      */
     const EXPIRY_HOURS = [
-        'missing-inventory' => 6,
+        'missing-inventory' => 1,
         'email-verification' => 2,
+        'missing-tunnel' => 1,
         'two-factor-auth' => 1,
         'two-factor-failed' => 1,
         'marketplace-inaccessible' => 24 * 7,
