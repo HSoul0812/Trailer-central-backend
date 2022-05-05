@@ -117,7 +117,17 @@ class InventoryService implements InventoryServiceInterface
     {
         return \Cache::remember('category/' . $oldCategory, self::ES_CACHE_EXPIRY, function() use ($oldCategory) {
             $value = [];
-            $mappedCategory = CategoryMappings::where('map_to', 'like', '%' . $oldCategory . '%')->first();
+            $mappedCategories = CategoryMappings::where('map_to', 'like', '%' . $oldCategory . '%')->get();
+            $mappedCategory = null;
+
+            foreach ($mappedCategories as $currentCategory) {
+              $mapToCategories = explode(';', $currentCategory->map_to);
+              foreach ($mapToCategories as $mapToCategory) {  
+                if ($mapToCategory == $oldCategory) {
+                  $mappedCategory = $currentCategory;
+                }
+              }
+            }
 
             if ($mappedCategory && $mappedCategory->category) {
                 $value['key'] = $mappedCategory->map_from;
