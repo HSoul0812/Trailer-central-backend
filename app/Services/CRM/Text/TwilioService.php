@@ -10,22 +10,19 @@ use App\Exceptions\CRM\Text\TooManyNumbersTriedException;
 use App\Exceptions\CRM\Text\SendTwilioTextFailedException;
 use App\Repositories\CRM\Text\NumberRepositoryInterface;
 use App\Repositories\CRM\Text\VerifyRepositoryInterface;
-use App\Services\CRM\Text\TextServiceInterface;
+use App\Services\CRM\Text\TwilioServiceInterface;
 use App\Models\CRM\Text\NumberTwilio;
 use App\Models\CRM\Text\NumberVerify;
-use App\Services\File\DTOs\FileDto;
-use App\Services\File\FileServiceInterface;
 use Twilio\Rest\Client;
 use Twilio\Rest\Api\V2010\Account\MessageInstance;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
 
 /**
  * Class TwilioService
  *
  * @package App\Services\CRM\Text
  */
-class TwilioService implements TextServiceInterface
+class TwilioService implements TwilioServiceInterface
 {
     /**
      * @const Code Lengths By Type
@@ -41,11 +38,6 @@ class TwilioService implements TextServiceInterface
     private $twilio;
 
     /**
-     * @var int|null
-     */
-    private $dealerId;
-
-    /**
      * @var NumberRepositoryInterface
      */
     private $textNumber;
@@ -59,11 +51,6 @@ class TwilioService implements TextServiceInterface
      * @var Log
      */
     private $log;
-
-    /**
-     * @var FileServiceInterface
-     */
-    private $fileService;
 
     /**
      * @var array
@@ -88,11 +75,7 @@ class TwilioService implements TextServiceInterface
     /**
      * TwilioService constructor.
      */
-    public function __construct(
-        NumberRepositoryInterface $numberRepo,
-        VerifyRepositoryInterface $verifyRepo,
-        FileServiceInterface $fileService
-    ) {
+    public function __construct(NumberRepositoryInterface $numberRepo, VerifyRepositoryInterface $verifyRepo) {
         // Get API Keys
         $appId = config('vendor.twilio.sid');
         $authToken = config('vendor.twilio.token');
@@ -114,12 +97,8 @@ class TwilioService implements TextServiceInterface
         $this->from = config('vendor.twilio.numbers.from');
         $this->to = config('vendor.twilio.numbers.to');
 
-        $this->dealerId = Auth::user() ? Auth::user()->dealer_id : null;
-
         // Initialize Logger
         $this->log = Log::channel('texts');
-
-        $this->fileService = $fileService;
     }
 
     /**
@@ -135,14 +114,6 @@ class TwilioService implements TextServiceInterface
      */
     public function send(string $from_number, string $to_number, string $textMessage, string $fullName, array $mediaUrl = []): MessageInstance {
         try {
-            if (!empty($mediaUrl)) {
-                $fileDtos = $this->fileService->bulkUpload($mediaUrl, $this->dealerId);
-
-                $mediaUrl =  $fileDtos->map(function (FileDto $fileDto) {
-                    return $fileDto->getUrl();
-                })->toArray();
-            }
-
             // Send to Demo
             if(!empty($this->from) && !empty($this->from[0])) {
                 // Send Demo Number
