@@ -290,6 +290,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             // Dispatch Send EmailBuilder Job
             $job = new EmailBuilderJob($builder, $leadIds);
             $this->dispatch($job->onQueue('emailbuilder'));
+            $this->log->info("Dispatched Email Builder Job for Campaign #" . $campaign->drip_campaigns_id);
 
             // Return Array of Queued Leads
             return $this->response($builder, $leadIds);
