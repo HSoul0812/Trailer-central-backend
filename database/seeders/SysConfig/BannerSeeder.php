@@ -10,18 +10,18 @@ class BannerSeeder extends Seeder
     const BANNER_CONFIGS = [
         ['banner/lamar/desktop', 'https://s3.amazonaws.com/crm-trailercentral-dev/new-cargo-enclosed'],
         ['banner/lamar/mobile', 'https://s3.amazonaws.com/crm-trailercentral-dev/new-cargo-enclosed'],
-        ['banner/carry-on_trailer/desktop', 'https://s3.amazonaws.com/crm-trailercentral-dev/new-cargo-enclosed'],
-        ['banner/carry-on_trailer/mobile', 'https://s3.amazonaws.com/crm-trailercentral-dev/new-cargo-enclosed'],
+        ['banner/carry-on/desktop', 'https://s3.amazonaws.com/crm-trailercentral-dev/new-cargo-enclosed'],
+        ['banner/carry-on/mobile', 'https://s3.amazonaws.com/crm-trailercentral-dev/new-cargo-enclosed'],
         ['banner/haulmark/desktop', 'https://s3.amazonaws.com/crm-trailercentral-dev/new-cargo-enclosed'],
         ['banner/haulmark/mobile', 'https://s3.amazonaws.com/crm-trailercentral-dev/new-cargo-enclosed'],
-        ['banner/wells_cargo/desktop', 'https://s3.amazonaws.com/crm-trailercentral-dev/new-cargo-enclosed'],
-        ['banner/wells_cargo/mobile', 'https://s3.amazonaws.com/crm-trailercentral-dev/new-cargo-enclosed'],
-        ['banner/american_hauler/desktop', 'https://s3.amazonaws.com/crm-trailercentral-dev/new-cargo-enclosed'],
-        ['banner/american_hauler/mobile', 'https://s3.amazonaws.com/crm-trailercentral-dev/new-cargo-enclosed'],
-        ['banner/big_tex_trailers/desktop', 'https://s3.amazonaws.com/crm-trailercentral-dev/new-cargo-enclosed'],
-        ['banner/big_tex_trailers/mobile', 'https://s3.amazonaws.com/crm-trailercentral-dev/new-cargo-enclosed'],
-        ['banner/pj_trailers/desktop', 'https://s3.amazonaws.com/crm-trailercentral-dev/new-cargo-enclosed'],
-        ['banner/pj_trailers/mobile', 'https://s3.amazonaws.com/crm-trailercentral-dev/new-cargo-enclosed'],
+        ['banner/wells cargo/desktop', 'https://s3.amazonaws.com/crm-trailercentral-dev/new-cargo-enclosed'],
+        ['banner/wells cargo/mobile', 'https://s3.amazonaws.com/crm-trailercentral-dev/new-cargo-enclosed'],
+        ['banner/american hauler/desktop', 'https://s3.amazonaws.com/crm-trailercentral-dev/new-cargo-enclosed'],
+        ['banner/american hauler/mobile', 'https://s3.amazonaws.com/crm-trailercentral-dev/new-cargo-enclosed'],
+        ['banner/big tex trailers/desktop', 'https://s3.amazonaws.com/crm-trailercentral-dev/new-cargo-enclosed'],
+        ['banner/big tex trailers/mobile', 'https://s3.amazonaws.com/crm-trailercentral-dev/new-cargo-enclosed'],
+        ['banner/pj trailers/desktop', 'https://s3.amazonaws.com/crm-trailercentral-dev/new-cargo-enclosed'],
+        ['banner/pj trailers/mobile', 'https://s3.amazonaws.com/crm-trailercentral-dev/new-cargo-enclosed'],
     ];
 
     /**
