@@ -7,6 +7,7 @@ use App\Console\Commands\CRM\Interactions\ResetInteractionMessages;
 use App\Console\Commands\CRM\Leads\RemoveBrokenCharacters;
 use App\Console\Commands\Files\ClearLocalTmpFolder;
 use App\Console\Commands\Inventory\AutoArchiveSoldItems;
+use App\Console\Commands\MyScheduleWorkCommand;
 use App\Console\Commands\Website\AddSitemaps;
 use App\Console\Commands\Website\GenerateDealerSpecificSiteUrls;
 use Illuminate\Console\Scheduling\Schedule;
@@ -54,7 +55,8 @@ class Kernel extends ConsoleKernel
         GetTextrailParts::class,
         ResetInteractionMessages::class,
         ReimportInteractionMessages::class,
-        RemoveBrokenCharacters::class
+        RemoveBrokenCharacters::class,
+        MyScheduleWorkCommand::class,
     ];
 
     /**
