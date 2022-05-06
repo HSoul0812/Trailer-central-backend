@@ -49,7 +49,7 @@ class PriceAverageByManufacturerInsightsTest extends IntegrationTestCase
 
         $series = collect($meta['series'][0]['data']);
 
-        self::assertGreaterThanOrEqual(39, $series->count());
+        self::assertGreaterThanOrEqual(19, $series->count());
         self::assertEquals(779.1666666666666667, $series->first());
         self::assertEquals(729.1666666666666667, $series->last());
 
@@ -82,7 +82,7 @@ class PriceAverageByManufacturerInsightsTest extends IntegrationTestCase
 
         $series = collect($meta['series'][0]['data']);
 
-        self::assertGreaterThanOrEqual(278, $series->count());
+        self::assertGreaterThanOrEqual(125, $series->count());
         self::assertEquals(779.1666666666666667, $series->first());
         self::assertEquals(729.1666666666666667, $series->last());
 
@@ -93,7 +93,7 @@ class PriceAverageByManufacturerInsightsTest extends IntegrationTestCase
         $categories = collect($meta['options']->xAxis['categories']);
 
         self::assertArrayHasKey('categories', $meta['options']->xAxis);
-        self::assertGreaterThanOrEqual(278, $categories->count());
+        self::assertGreaterThanOrEqual(125, $categories->count());
         self::assertSame('2021-01-01', $categories->first());
     }
 }
