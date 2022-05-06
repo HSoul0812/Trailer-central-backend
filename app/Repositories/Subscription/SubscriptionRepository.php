@@ -70,6 +70,17 @@ class SubscriptionRepository implements SubscriptionRepositoryInterface {
     }
 
     /**
+     * Updates a customer card
+     *
+     * @param Request $request
+     * @return array[]
+     */
+    public function updateCard(Request $request): array
+    {
+        return $this->service->updateCard($request);
+    }
+
+    /**
      * @param $params
      * @return void
      */
