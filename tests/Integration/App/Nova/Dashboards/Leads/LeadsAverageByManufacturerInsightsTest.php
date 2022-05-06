@@ -55,7 +55,7 @@ class LeadsAverageByManufacturerInsightsTest extends IntegrationTestCase
         $categories = collect($meta['options']->xAxis['categories']);
 
         self::assertArrayHasKey('categories', $meta['options']->xAxis);
-        self::assertGreaterThanOrEqual(0, $categories->count());
+        self::assertGreaterThanOrEqual(39, $categories->count());
         self::assertSame('2020-53', $categories->first());
     }
 
@@ -89,7 +89,7 @@ class LeadsAverageByManufacturerInsightsTest extends IntegrationTestCase
         $categories = collect($meta['options']->xAxis['categories']);
 
         self::assertArrayHasKey('categories', $meta['options']->xAxis);
-        self::assertGreaterThanOrEqual(0, $categories->count());
+        self::assertGreaterThanOrEqual(278, $categories->count());
         self::assertSame('2021-01-01', $categories->first());
     }
 }

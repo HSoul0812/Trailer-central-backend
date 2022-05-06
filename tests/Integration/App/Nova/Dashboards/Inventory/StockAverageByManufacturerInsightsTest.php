@@ -87,7 +87,7 @@ class StockAverageByManufacturerInsightsTest extends IntegrationTestCase
         $categories = collect($meta['options']->xAxis['categories']);
 
         self::assertArrayHasKey('categories', $meta['options']->xAxis);
-        self::assertGreaterThanOrEqual(19, $categories->count());
+        self::assertGreaterThanOrEqual(39, $categories->count());
         self::assertSame('2020-53', $categories->first());
     }
 }
