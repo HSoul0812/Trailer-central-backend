@@ -164,7 +164,7 @@ return [
             'port' => env('REDIS_PERSIST_PORT', '6379'),
             'database' => env('REDIS_PERSIST_CACHE_DB', '0'),
             'options' => [
-                'database' => env('REDIS_PERSIST_PREFIX', '')
+                'prefix' => env('REDIS_PERSIST_PREFIX', '')
             ]
         ],
     ],
