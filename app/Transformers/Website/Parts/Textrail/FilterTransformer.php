@@ -196,10 +196,7 @@ class FilterTransformer extends TransformerAbstract
 
                 $parent = '';
                 if ($filter->attribute === 'category') {
-                    $type = Type::find($part->{$filter->attribute}->parent_id);
-                    if (!empty($type)) {
-                        $parent = Type::find($part->{$filter->attribute}->parent_id)->name;
-                    }
+                    $parent = Type::find($part->{$filter->attribute}->parent_id)->name;
                 }
 
                 $values[] = [
@@ -210,7 +207,7 @@ class FilterTransformer extends TransformerAbstract
                     'count' => $count,
                     'base' => 0, // What is this?
                     'status' => $status,
-                    'action' => $queryString,
+                    'action' => $queryString
                 ];
             }
 
