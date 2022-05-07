@@ -470,7 +470,7 @@ class TextrailMagento implements DataProviderInterface,
               'image_url' => $img_url,
           ]);
 
-          return ['imageData' => '', 'fileName' => ''];
+          return null;
       }
 
       return null;
