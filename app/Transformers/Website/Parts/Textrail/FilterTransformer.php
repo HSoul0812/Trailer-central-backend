@@ -194,7 +194,10 @@ class FilterTransformer extends TransformerAbstract
 
                 $parent = '';
                 if ($filter->attribute === 'category') {
-                    $parent = Type::find($part->{$filter->attribute}->parent_id)->name;
+                    $type = Type::find($part->{$filter->attribute}->parent_id);
+                    if (!empty($type)) {
+                        $parent = Type::find($part->{$filter->attribute}->parent_id)->name;
+                    }
                 }
 
                 $values[] = [
