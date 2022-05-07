@@ -8,6 +8,7 @@ use GuzzleHttp\Client as GuzzleHttpClient;
 use Illuminate\Support\Facades\Config;
 use App\Services\Parts\Textrail\DTO\TextrailPartDTO;
 use GuzzleHttp\Exception\ClientException;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response as BaseResponse;
 use App\Exceptions\Ecommerce\TextrailException;
 use App\Exceptions\NotImplementedException;
@@ -447,14 +448,22 @@ class TextrailMagento implements DataProviderInterface,
     public function getTextrailImage(array $img): ?array
     {
       $img_url = $this->getTextrailImagesBaseUrl() . $img['file'];
-      $checkFile = get_headers($img_url);
+      try {
+          $checkFile = get_headers($img_url);
 
-      if ($checkFile[0] == "HTTP/1.1 200 OK") {
-        $imageData = file_get_contents($img_url, false, stream_context_create(['ssl' => ['verify_peer' => false, 'verify_peer_name' => false]]));
-        $explodedImage = explode('/', $img['file']);
-        $fileName = $explodedImage[count($explodedImage) - 1];
+          if ($checkFile[0] == "HTTP/1.1 200 OK") {
+              $imageData = file_get_contents($img_url, false, stream_context_create(['ssl' => ['verify_peer' => false, 'verify_peer_name' => false]]));
+              $explodedImage = explode('/', $img['file']);
+              $fileName = $explodedImage[count($explodedImage) - 1];
 
-        return ['imageData' => $imageData, 'fileName' => $fileName];
+              return ['imageData' => $imageData, 'fileName' => $fileName];
+          }
+      } catch (\Exception $exception) {
+          Log::error('Part image read failed', [
+              'image_url' => $img_url,
+          ]);
+
+          return ['imageData' => '', 'fileName' => ''];
       }
 
       return null;
