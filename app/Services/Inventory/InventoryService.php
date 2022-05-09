@@ -341,6 +341,11 @@ class InventoryService implements InventoryServiceInterface
 
     private function addTermQueries(ESInventoryQueryBuilder $queryBuilder, array $params) {
         $queryBuilder->addTermQuery('isRental', false);
+        $queryBuilder->addTermQuery(
+            'availability',
+            self::INVENTORY_SOLD,
+            ESInventoryQueryBuilder::OCCUR_MUST_NOT
+        );
         foreach(self::TERM_SEARCH_KEY_MAP as $field => $searchField) {
             if (isset($params['type_id']) && $searchField == 'category') {
               $mapped_categories = $this->getMappedCategories(
@@ -361,6 +366,11 @@ class InventoryService implements InventoryServiceInterface
         );
         $queryBuilder->addTermQueries('category', $mapped_categories);
         $queryBuilder->addTermQuery('isRental', false);
+        $queryBuilder->addTermQuery(
+            'availability',
+            self::INVENTORY_SOLD,
+            ESInventoryQueryBuilder::OCCUR_MUST_NOT
+        );
         $this->addScriptFilter($queryBuilder, []);
     }
 
@@ -371,6 +381,11 @@ class InventoryService implements InventoryServiceInterface
         );
         $queryBuilder->addTermQueries('category', $mapped_categories);
         $queryBuilder->addTermQuery('isRental', false);
+        $queryBuilder->addTermQuery(
+            'availability',
+            self::INVENTORY_SOLD,
+            ESInventoryQueryBuilder::OCCUR_MUST_NOT
+        );
         $this->addScriptFilter($queryBuilder, []);
     }
 
