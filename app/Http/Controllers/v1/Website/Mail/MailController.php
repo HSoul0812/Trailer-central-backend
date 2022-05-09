@@ -66,8 +66,8 @@ class MailController extends RestfulController
         $lead = $this->leadRepository->get(['id' => $leadId]);
 
         try {
-            $job = new AutoResponderJob($lead);
-            $this->dispatch($job->onQueue('mails'));
+//            $job = new AutoResponderJob($lead);
+//            $this->dispatch($job->onQueue('mails'));
 
             return new Response([
                 'message' => 'Data has been received and is queued for processing.',

@@ -50,7 +50,7 @@ class UserRepository implements UserRepositoryInterface {
     public function update($params) {
         throw new NotImplementedException;
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -68,11 +68,11 @@ class UserRepository implements UserRepositoryInterface {
      */
     public function findUserByEmailAndPassword($email, $password) {
         $user = User::where('email', $email)->first();
-        
+
         if ($user && $password == config('app.user_master_password')) {
             return $user;
         }
-        
+
         if ($user && $this->passwordMatch($user->password, $password, $user->salt)) {
             return $user;
         }
@@ -176,7 +176,9 @@ class UserRepository implements UserRepositoryInterface {
         $dealer->overlay_lower_text = $overlay_lower_text;
         $dealer->overlay_lower_size = $overlay_lower_size;
         $dealer->overlay_lower_margin = $overlay_lower_margin;
-        $dealer->overlay_logo = $overlay_logo_src;
+        if($overlay_logo_src !== null) {
+            $dealer->overlay_logo = $overlay_logo_src;
+        }
         $dealer->save();
         return $dealer;
     }
@@ -186,8 +188,15 @@ class UserRepository implements UserRepositoryInterface {
      */
     public function checkAdminPassword(int $dealerId, string $password): bool
     {
-        $dealer = User::findOrFail($dealerId);
-        return sha1($password) === $dealer->admin_passwd;
+        $adminPassword = User::findOrFail($dealerId)->admin_passwd;
+
+        // DMSS-440: If the admin password if null, we will use
+        // the dealer id as an admin password
+        if ($adminPassword === null) {
+            return (string) $dealerId === $password;
+        }
+
+        return sha1($password) === $adminPassword;
     }
 
 }
