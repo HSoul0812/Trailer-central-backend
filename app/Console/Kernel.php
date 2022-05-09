@@ -167,6 +167,10 @@ class Kernel extends ConsoleKernel
         $schedule->command('command:get-textrail-parts')
            ->dailyAt('1:00')
            ->runInBackground();
+
+        $schedule->command('horizon:snapshot')
+            ->everyFiveMinutes()
+            ->runInBackground();
     }
 
     /**
