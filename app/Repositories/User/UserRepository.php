@@ -176,7 +176,9 @@ class UserRepository implements UserRepositoryInterface {
         $dealer->overlay_lower_text = $overlay_lower_text;
         $dealer->overlay_lower_size = $overlay_lower_size;
         $dealer->overlay_lower_margin = $overlay_lower_margin;
-        $dealer->overlay_logo = $overlay_logo_src;
+        if($overlay_logo_src !== null) {
+            $dealer->overlay_logo = $overlay_logo_src;
+        }
         $dealer->save();
         return $dealer;
     }
