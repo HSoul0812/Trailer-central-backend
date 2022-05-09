@@ -10,7 +10,7 @@ class AddDestinationTrailersCategoryMappingsTable extends Migration
 {
     const CATEGORY_NEW_MAPPINGS = [
         'Travel Trailers' => [
-            ['map_from' => 'Travel', 'map_to' => 'tiny_house;ice-fish_houseice_shack;tent-camper;camping_rv;tent-camper;camper_popup;destination_trailers'],
+            ['map_from' => 'Travel', 'map_to' => 'tiny_house;ice-fish_houseice_shack;tent-camper;camping_rv;tent-camper;camper_popup;destination_trailer'],
             ['map_from' => 'Camper / RV', 'map_to' => 'class_a;offroad;class_b;class_bplus;class_c'],
         ]
     ];
