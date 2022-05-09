@@ -33,15 +33,19 @@ class StripeService implements StripeServiceInterface
     }
 
     /**
-     * Retrieves all subscriptions from a given user
+     * Retrieves a customer with subscriptions and card information
      *
      */
     public function getCustomer() {
+        $customer = $this->customer;
+        $transactions = $this->getTransactions();
+        $customer["transactions"] = $transactions["data"];
+
         return $this->customer;
     }
 
     /**
-     * Retrieves a customer with subscriptions and card information
+     * Retrieves all subscriptions from a given user
      *
      */
     public function getSubscriptions() {
@@ -121,10 +125,15 @@ class StripeService implements StripeServiceInterface
      * Updates a customer card
      *
      */
-    public function updateCard(Request $request): array
+    public function updateCard($request): array
     {
         try {
-            $this->user->updateDefaultPaymentMethod($request->paymentMethod);
+            $paymentMethod = $this->stripe->customers->createSource(
+                $this->customer->id,
+                ['source' => $request->token]
+            );
+
+            $this->user->updateDefaultPaymentMethod($paymentMethod->id);
 
             return [
                 'response' => [
