@@ -23,7 +23,7 @@ $api->version('v1', function ($api) {
     $api->delete('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@destroy');
 
     $api->group(['prefix' => 'interactions'], function($api) {
-        $api->get('/', 'App\Http\Controllers\v1\Interactions\InteractionsController@index');
-        $api->post('send-email', 'App\Http\Controllers\v1\Interactions\InteractionsController@sendEmail');
+        $api->get('/', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@index');
+        $api->post('send-email', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@sendEmail');
     });
 });
