@@ -180,7 +180,12 @@ class Collector extends Model implements Filterable
         'api_max_records',
         'api_pagination',
         'ignore_manually_added_units',
-        'is_bdv_enabled'
+        'is_bdv_enabled',
+        'last_run'
+    ];
+
+    protected $casts = [
+        'last_run' => 'datetime',
     ];
 
     public function dealers(): BelongsTo
