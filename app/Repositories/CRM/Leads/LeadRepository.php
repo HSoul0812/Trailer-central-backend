@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
 use App\Utilities\TimeUtil;
+use League\Csv\Writer;
 
 class LeadRepository implements LeadRepositoryInterface {
 
@@ -884,5 +885,74 @@ class LeadRepository implements LeadRepositoryInterface {
         // Update website_lead_id of this customer
         $customer->website_lead_id = $lead->identifier;
         $customer->save();
+    }
+
+    public function output($params)
+    {
+        $query = DB::table(Lead::getTableName());
+
+        $query = $query->select([
+            Lead::getTableName().'.email_address',
+            Lead::getTableName().'.phone_number',
+            Lead::getTableName().'.preferred_contact',
+            Lead::getTableName().'.first_name',
+            Lead::getTableName().'.last_name',
+            Lead::getTableName().'.lead_type',
+            Lead::getTableName().'.address',
+            Lead::getTableName().'.city',
+            Lead::getTableName().'.state',
+            Lead::getTableName().'.zip',
+            LeadStatus::getTableName().'.status',
+            Lead::getTableName().'.comments',
+            Lead::getTableName().'.date_submitted',
+            LeadStatus::getTableName().'.closed_at',
+        ]);
+
+        $query = $query->leftJoin(Website::getTableName(), Lead::getTableName().'.website_id', '=', Website::getTableName().'.id');
+        $query = $query->leftJoin(Inventory::getTableName(), Lead::getTableName().'.inventory_id', '=', Inventory::getTableName().'.inventory_id');
+
+        $query = $query->where(Lead::getTableName().'.identifier', '>', 0);
+        // add filters if any
+        $query = $this->addFiltersToQuery($query, $params);
+        
+        if (isset($params['dealer_id'])) {
+            $query = $query->where(Lead::getTableName().'.dealer_id', $params['dealer_id']);
+        }
+
+        $query = $query->groupBy(Lead::getTableName().'.identifier');
+        // sorting
+        $sort = 'created_at';
+        if (isset($params['sort'])) {
+            $sort = $params['sort'];
+        }
+        $query = $query->orderByRaw($this->sortOrders[$sort]['field'] . ' ' . $this->sortOrders[$sort]['direction']);
+
+        $records = $query->get();
+
+        $csv = Writer::createFromString();
+
+        // insert the header
+        $csv->insertOne([
+            'Email',
+            'Phone',
+            'Preferred Contact',
+            'First Name',
+            'Last Name',
+            'Lead Type',
+            'Address',
+            'City',
+            'State',
+            'Zip',
+            'Status',
+            'Comments',
+            'Submission Date',
+            'Closed Date'
+        ]);
+
+        foreach ($records as $record) {
+            $csv->insertOne((array) $record);
+        }
+
+        return $csv->toString(); //returns the CSV document as a string
     }
 }
