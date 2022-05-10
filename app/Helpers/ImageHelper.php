@@ -33,6 +33,7 @@ class ImageHelper
         $height_old = 0;
         $orientation = 0;
 
+        // We using imagick because php size method doesn't get proper w/h if images are rotated in iOS / Mac
         try {
             $imagick = new \Imagick($file);
 
