@@ -402,17 +402,4 @@ class InventoryServiceTest extends TestCase
 
         return new Client(['handler' => $stack]);
     }
-
-//    private function sysConfigFixture() {
-//        return new Collection([
-//            new SysConfig([
-//               'key' => 'filter/size/length/min',
-//               'value' => '3'
-//            ]),
-//            new SysConfig([
-//                'key' => 'filter/size/length/max',
-//                'value' => '100'
-//            ])
-//        ]);
-//    }
 }
