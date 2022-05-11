@@ -33,26 +33,36 @@ class StripeService implements StripeServiceInterface
     }
 
     /**
-     * Retrieves all subscriptions from a given user
+     * Retrieves a customer with subscriptions and card information
      *
+     * @return object
      */
-    public function getCustomer() {
+    public function getCustomer(): object
+    {
+        $customer = $this->customer;
+        $transactions = $this->getTransactions();
+        $customer["transactions"] = $transactions["data"];
+
         return $this->customer;
     }
 
     /**
-     * Retrieves a customer with subscriptions and card information
+     * Retrieves all subscriptions from a given user
      *
+     * @return object
      */
-    public function getSubscriptions() {
+    public function getSubscriptions(): object
+    {
         return $this->customer->subscriptions;
     }
 
     /**
      * Retrieves all the customer transactions
      *
+     * @return object
      */
-    public function getTransactions() {
+    public function getTransactions(): object
+    {
         return $this->stripe->paymentIntents->all(
             ['customer' => $this->customer->id]
         );
@@ -61,6 +71,7 @@ class StripeService implements StripeServiceInterface
     /**
      * Retrieves all existing plans
      *
+     * @return array
      */
     public function getPlans(): array
     {
@@ -80,8 +91,10 @@ class StripeService implements StripeServiceInterface
     /**
      * Subscribe to a selected plan
      *
+     * @param Request $request
+     * @return array
      */
-    public function subscribe($request): array
+    public function subscribe(Request $request): array
     {
         try {
             if ($this->user->hasPaymentMethod()) {
@@ -120,11 +133,18 @@ class StripeService implements StripeServiceInterface
     /**
      * Updates a customer card
      *
+     * @param Request $request
+     * @return array
      */
     public function updateCard(Request $request): array
     {
         try {
-            $this->user->updateDefaultPaymentMethod($request->paymentMethod);
+            $paymentMethod = $this->stripe->customers->createSource(
+                $this->customer->id,
+                ['source' => $request->token]
+            );
+
+            $this->user->updateDefaultPaymentMethod($paymentMethod->id);
 
             return [
                 'response' => [
