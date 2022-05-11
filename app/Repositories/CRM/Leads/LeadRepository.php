@@ -898,14 +898,15 @@ class LeadRepository implements LeadRepositoryInterface {
             Lead::getTableName().'.first_name',
             Lead::getTableName().'.last_name',
             Lead::getTableName().'.lead_type',
+            LeadStatus::getTableName().'.source',
             Lead::getTableName().'.address',
             Lead::getTableName().'.city',
             Lead::getTableName().'.state',
             Lead::getTableName().'.zip',
             LeadStatus::getTableName().'.status',
+            LeadStatus::getTableName().'.closed_at',
             Lead::getTableName().'.comments',
             Lead::getTableName().'.date_submitted',
-            LeadStatus::getTableName().'.closed_at',
         ]);
 
         $query = $query->leftJoin(Website::getTableName(), Lead::getTableName().'.website_id', '=', Website::getTableName().'.id');
@@ -939,14 +940,15 @@ class LeadRepository implements LeadRepositoryInterface {
             'First Name',
             'Last Name',
             'Lead Type',
+            'Lead Source',
             'Address',
             'City',
             'State',
             'Zip',
             'Status',
+            'Closed Date',
             'Comments',
-            'Submission Date',
-            'Closed Date'
+            'Submission Date'
         ]);
 
         foreach ($records as $record) {
