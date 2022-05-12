@@ -3,8 +3,6 @@
 namespace App\Providers;
 
 use Feed\EditMapping\EditMapping;
-use Showroom\BulkConfiguration\BulkConfiguration;
-
 use Illuminate\Support\Facades\Gate;
 use Laravel\Nova\Cards\Help;
 use Laravel\Nova\Nova;
@@ -44,10 +42,10 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
      * @return void
      */
     protected function gate()
-    {
+    {        
         Gate::define('viewNova', function ($user) {
             return in_array($user->email, [
-                //
+                'testingo@testingo.com'
             ]);
         });
     }
@@ -82,8 +80,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     public function tools()
     {
         return [
-            new EditMapping(),
-            new BulkConfiguration()
+            new EditMapping()
         ];
     }
 
@@ -96,7 +93,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     {
         //
     }
-
+    
     protected function resources()
     {
         Nova::resourcesIn(app_path('Nova'));

@@ -8,6 +8,8 @@ use App\Nova\Actions\Dealer\ActivateCrm;
 use App\Nova\Actions\Dealer\DeactivateCrm;
 use App\Nova\Actions\Dealer\ActivateECommerce;
 use App\Nova\Actions\Dealer\DeactivateECommerce;
+use Laravel\Nova\Fields\Password;
+use Laravel\Nova\Fields\PasswordConfirmation;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Text;
@@ -66,7 +68,16 @@ class Dealer extends Resource
             Boolean::make('ECommerce', 'IsEcommerceActive')->hideWhenCreating()->hideWhenUpdating(),
 
             Boolean::make('User Accounts', 'isUserAccountsActive')->hideWhenCreating()->hideWhenUpdating(),
-
+            
+            Password::make('Password')
+                ->onlyOnForms()
+                ->creationRules('required', 'string', 'min:6')
+                ->updateRules('nullable', 'string', 'min:6')
+                ->fillUsing(function($request, $model, $attribute, $requestAttribute) {
+                    if (!empty($request[$requestAttribute])) {
+                        $model->{$attribute} = $request[$requestAttribute];
+                    }
+                })
         ];
     }
 
