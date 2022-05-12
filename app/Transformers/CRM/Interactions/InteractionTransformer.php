@@ -16,9 +16,12 @@ class InteractionTransformer extends TransformerAbstract
     private $salesPersonTransformer;
 
     protected $defaultIncludes = [
-        'lead',
         'salesPerson',
         'emailHistory'
+    ];
+
+    protected $availableIncludes = [
+        'lead'
     ];
 
     /**
