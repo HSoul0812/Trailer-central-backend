@@ -151,7 +151,7 @@ class Blast extends Model
         if(!empty($blast->categories)) {
             $categories = array();
             foreach($blast->categories as $category) {
-                $categories[] = $category->category;
+                $categories[] = $category->unit_category;
             }
 
             // Add IN
