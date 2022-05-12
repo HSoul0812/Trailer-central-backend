@@ -15,10 +15,12 @@ class CreateDmsResourcePublicLinksTable extends Migration
     {
 	    Schema::create('dms_resource_public_links', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->unsignedBigInteger('dealer_id')->nullable();
             $table->string('token', 64);
             $table->enum('resource_type', ['print_quote']);
             $table->unsignedBigInteger('resource_id')->nullable();
             
+            $table->index(['dealer_id']);
             $table->index(['token']);
         });
     }
