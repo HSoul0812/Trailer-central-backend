@@ -39,7 +39,7 @@ class LeadRepository implements LeadRepositoryInterface {
         'fbUsers',
     ];
 
-    private $sorts = [
+    private $sortOrders = [
         'id' => [
             'field' => 'website_lead.identifier',
             'direction' => 'DESC'
