@@ -39,7 +39,7 @@ class LeadRepository implements LeadRepositoryInterface {
         'fbUsers',
     ];
 
-    private $sortOrders = [
+    private $sorts = [
         'id' => [
             'field' => 'website_lead.identifier',
             'direction' => 'DESC'
@@ -73,12 +73,24 @@ class LeadRepository implements LeadRepositoryInterface {
             'direction' => 'ASC'
         ],
         'created_at' => [
-            'field' => 'website_lead.date_submitted',
-            'direction' => 'DESC'
+            [
+                'field' => 'website_lead.dealer_id',
+                'direction' => 'DESC'
+            ],
+            [
+                'field' => 'website_lead.date_submitted',
+                'direction' => 'DESC'
+            ]
         ],
         '-created_at' => [
-            'field' => 'website_lead.date_submitted',
-            'direction' => 'ASC'
+            [
+                'field' => 'website_lead.dealer_id',
+                'direction' => 'ASC'
+            ],
+            [
+                'field' => 'website_lead.date_submitted',
+                'direction' => 'ASC'
+            ]
         ],
         'no_due_past_due_future_due' => [
             'field' => 'crm_tc_lead_status.next_contact_date',
@@ -170,14 +182,14 @@ class LeadRepository implements LeadRepositoryInterface {
         }
 
         if (isset($params['sort'])) {
-            $query = $query->orderByRaw($this->sortOrders[$params['sort']]['field'] . ' ' . $this->sortOrders[$params['sort']]['direction']);
+            $query = $this->addSortQuery($query, $params['sort']);
         }
 
         if (isset($params['include']) && is_string($params['include'])) {
             foreach (array_intersect(self::AVAILABLE_INCLUDES, explode(',', $params['include'])) as $include) {
                 if ($include === 'interactions') {
                     $query = $query->with(['interactions' => function ($query) {
-                        $query->with(['lead', 'emailHistory', 'leadStatus' => function ($query) {
+                        $query->with(['emailHistory', 'leadStatus' => function ($query) {
                             $query->with(['salesPerson']);
                         }]);
                     }]);
@@ -245,7 +257,7 @@ class LeadRepository implements LeadRepositoryInterface {
 
         if (isset($params['sort'])) {
             $query = $query->leftJoin(Interaction::getTableName(), Interaction::getTableName() . '.tc_lead_id',  '=', Lead::getTableName() . '.identifier');
-            $query = $query->orderByRaw($this->sortOrders[$params['sort']]['field'] . ' ' . $this->sortOrders[$params['sort']]['direction']);
+            $query = $this->addSortQuery($query, $params['sort']);
         }
 
         $query = $query->groupBy(Lead::getTableName() . '.identifier');
@@ -884,5 +896,9 @@ class LeadRepository implements LeadRepositoryInterface {
         // Update website_lead_id of this customer
         $customer->website_lead_id = $lead->identifier;
         $customer->save();
+    }
+
+    protected function getSortOrders() {
+        return $this->sortOrders;
     }
 }
