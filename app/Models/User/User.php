@@ -362,12 +362,10 @@ class User extends Model implements Authenticatable, PermissionsInterface
     {
         $salt = $this->salt;
         $encrypterService = app(EncrypterServiceInterface::class);
-//        if (empty($salt)) {
-            $salt = '123123';
-            $this->salt = $salt;
-            $this->save();
+        if (empty($salt)) {
+            $salt = uniqid;
             $this->attributes['salt'] = $salt;
-//        }
+        }
         $this->attributes['password'] = $encrypterService->encryptBySalt($value, $salt);
     }
 }

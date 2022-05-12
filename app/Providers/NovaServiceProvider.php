@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Gate;
 use Laravel\Nova\Cards\Help;
 use Laravel\Nova\Nova;
 use Laravel\Nova\NovaApplicationServiceProvider;
+use Showroom\BulkConfiguration\BulkConfiguration;
 use App\Nova\Resources\Dealer\Dealer;
 
 class NovaServiceProvider extends NovaApplicationServiceProvider
@@ -45,7 +46,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     {        
         Gate::define('viewNova', function ($user) {
             return in_array($user->email, [
-                'testingo@testingo.com'
+                
             ]);
         });
     }
@@ -80,6 +81,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     public function tools()
     {
         return [
+            new BulkConfiguration(),
             new EditMapping()
         ];
     }
