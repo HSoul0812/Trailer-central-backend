@@ -746,7 +746,7 @@ class PartsController extends RestfulController
             // We want to make sure that the query string is escaped
             // If we don't do this we will get error when we try to search
             // with special characters like '/', '(', etc.
-            $escapedQuery = resolve(EscapeElasticSearchReservedCharactersAction::class)->execute($request->get('query', ''));
+            $escapedQuery = resolve(EscapeElasticSearchReservedCharactersAction::class)->execute($request->get('query', '') ?? '');
             $request->merge(['query' => $escapedQuery]);
 
             $query = $request->only('query', 'vendor_id', 'with_cost', 'in_stock', 'sort');
