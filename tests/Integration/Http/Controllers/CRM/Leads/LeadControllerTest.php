@@ -72,7 +72,7 @@ class LeadControllerTest extends IntegrationTestCase
 
         $output = $response->getContent();
 
-        $this->assertStringContainsString('Email,Phone,"Preferred Contact","First Name","Last Name","Lead Type",Address,City,State,Zip,Status,Comments,"Submission Date","Closed Date"',
+        $this->assertStringContainsString('Email,Phone,"Preferred Contact","First Name","Last Name","Lead Type","Lead Source",Address,City,State,Zip,Status,"Closed Date",Comments,"Submission Date"',
             $output);
         $this->assertStringContainsString($this->lead->first_name, $output);
         $this->assertStringContainsString($this->lead->last_name, $output);
