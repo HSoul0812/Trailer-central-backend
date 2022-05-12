@@ -19,9 +19,16 @@ class CreateDmsResourcePublicLinksTable extends Migration
             $table->string('token', 64);
             $table->enum('resource_type', ['print_quote']);
             $table->unsignedBigInteger('resource_id')->nullable();
+            $table->unsignedInteger('visit_count')->default(0);
+            $table->timestamps();
             
             $table->index(['dealer_id']);
             $table->index(['token']);
+            
+            // Just in case we want to do a quick clean table
+            // where visit count is 0 and created_at is between
+            // some date
+            $table->index(['visit_count', 'created_at']);
         });
     }
 
