@@ -400,7 +400,7 @@ class TwilioService implements TwilioServiceInterface
      * @throws CreateTwilioMessageException
      * @throws InvalidTwilioInboundNumberException
      */
-    private function sendViaTwilio(string $fromPhone, string $toNumber, string $textMessage, array $mediaUrl = []): MessageInstance {
+    public function sendViaTwilio(string $fromPhone, string $toNumber, string $textMessage, array $mediaUrl = []): MessageInstance {
         $params = [
             'from' => $fromPhone,
             'body' => $textMessage

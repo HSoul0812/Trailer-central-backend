@@ -459,6 +459,8 @@ $api->version('v1', function ($route) {
 
     // Stop Text!
     $route->post('leads/texts/stop', 'App\Http\Controllers\v1\CRM\Text\StopController@index');
+    // Reply
+    $route->put('leads/texts/reply', 'App\Http\Controllers\v1\CRM\Text\TextController@reply')->middleware(['accesstoken.validate', 'replytext.validate']);;
 
     /**
      * Facebook Webhooks

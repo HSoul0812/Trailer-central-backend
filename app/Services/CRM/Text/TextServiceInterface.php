@@ -19,4 +19,10 @@ interface TextServiceInterface
      * @return TextLog
      */
     public function send(int $leadId, string $textMessage, array $mediaUrl = []): TextLog;
+
+    /**
+     * @param array $params
+     * @return bool
+     */
+    public function reply(array $params): bool;
 }

@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers\v1\CRM\Text;
 
+use App\Exceptions\Requests\Validation\NoObjectIdValueSetException;
+use App\Exceptions\Requests\Validation\NoObjectTypeSetException;
 use App\Http\Controllers\RestfulControllerV2;
+use App\Http\Requests\CRM\Text\ReplyTextRequest;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
 use App\Services\CRM\Text\TextServiceInterface;
 use Dingo\Api\Http\Request;
@@ -13,6 +16,7 @@ use App\Http\Requests\CRM\Text\UpdateTextRequest;
 use App\Http\Requests\CRM\Text\DeleteTextRequest;
 use App\Http\Requests\CRM\Text\SendTextRequest;
 use App\Transformers\CRM\Text\TextTransformer;
+use Dingo\Api\Http\Response;
 
 class TextController extends RestfulControllerV2
 {
@@ -365,17 +369,71 @@ class TextController extends RestfulControllerV2
      *      ),
      * )
      */
-    public function send(int $leadId, Request $request)
+    public function send(int $leadId, Request $request): Response
     {
         $params = $request->all();
         $request = new SendTextRequest($params);
 
-        if ( $request->validate()) {
+        if ($request->validate()) {
             // Get Results
             $result = $this->textService->send($leadId, $params['log_message'], $params['mediaUrl'] ?? []);
 
             // Send Text
             return $this->response->item($result, new TextTransformer());
+        }
+
+        return $this->response->errorBadRequest();
+    }
+
+    /**
+     * @OA\Put(
+     *     path="/api/leads/texts/reply",
+     *     description="Reply",
+     *
+     *     @OA\Parameter(
+     *         name="From",
+     *         in="query",
+     *         description="From",
+     *         required=true,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="To",
+     *         in="query",
+     *         description="To",
+     *         required=true,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="Body",
+     *         in="query",
+     *         description="Body",
+     *         required=true,
+     *         @OA\Schema(type="string")
+     *     ),
+     *
+     *     @OA\Response(
+     *         response="200",
+     *         description="Success Response",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
+     *     ),
+     * )
+     *
+     * @param Request $request
+     * @return Response
+     * @throws NoObjectIdValueSetException
+     * @throws NoObjectTypeSetException
+     */
+    public function reply(Request $request): Response
+    {
+        $request = new ReplyTextRequest($request->all());
+
+        if ($request->validate() && $this->textService->reply($request->all())) {
+            return $this->successResponse();
         }
 
         return $this->response->errorBadRequest();
