@@ -24,7 +24,6 @@ class InventoryListResponseTransformer extends TransformerAbstract
             'inventories' => $paginatedArray['data'],
             'meta' => $paginatedArray['meta'],
             'aggregations' => $response->aggregations,
-            'limits' => $response->limits,
         ];
     }
 }
