@@ -6,6 +6,7 @@ use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
+use Dingo\Api\Http\Request;
 use App\Models\User\User;
 use Stripe\StripeClient;
 
