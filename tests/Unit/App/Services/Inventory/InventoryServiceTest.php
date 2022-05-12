@@ -30,10 +30,8 @@ class InventoryServiceTest extends TestCase
     }
 
     public function testListWithNoLocation() {
-        $this->sysConfigRepository->expects($this->once())
-            ->method('getAll')
-            ->will($this->returnValue($this->sysConfigFixture()));
         $response = $this->service->list([
+            'type_id' => 1,
             'location_type' => 'region',
             'location_region' => 'CA',
             'location_city' => '123'
@@ -43,19 +41,14 @@ class InventoryServiceTest extends TestCase
         $this->assertEquals('1000022126', $response->inventories->items()[0]->id);
         $this->assertEquals('1001', $response->inventories->items()[0]->dealer_id);
         $this->assertEquals('9437', $response->inventories->items()[0]->dealer_location_id);
-        $this->assertEquals([
-            'size' => ['length' => ['min' => 3, 'max' => 100]]
-        ], $response->limits);
     }
 
     public function testListWithValidLocation() {
         $geolocation = new Geolocation();
         $geolocation->latitude = 30.00;
         $geolocation->longitude = -30.00;
-        $this->sysConfigRepository->expects($this->once())
-            ->method('getAll')
-            ->will($this->returnValue($this->sysConfigFixture()));
         $response = $this->service->list([
+            'type_id' => 1,
             'location_type' => 'region',
             'location_region' => 'CA',
             'location_city' => '123'
@@ -63,9 +56,6 @@ class InventoryServiceTest extends TestCase
         $this->assertEquals(154, $response->inventories->total());
         $this->assertEquals(1, $response->inventories->count());
         $this->assertEquals('1000022126', $response->inventories->items()[0]->id);
-        $this->assertEquals([
-            'size' => ['length' => ['min' => 3, 'max' => 100]]
-        ], $response->limits);
     }
 
     private function getConcreteService(): InventoryService
@@ -405,23 +395,11 @@ class InventoryServiceTest extends TestCase
         $mock = new MockHandler([
             new Response(200, [], $mockData),
             new Response(200, [], $mockAggregateData),
+            new Response(200, [], $mockAggregateData),
         ]);
 
         $stack = HandlerStack::create($mock);
 
         return new Client(['handler' => $stack]);
-    }
-
-    private function sysConfigFixture() {
-        return new Collection([
-            new SysConfig([
-               'key' => 'filter/size/length/min',
-               'value' => '3'
-            ]),
-            new SysConfig([
-                'key' => 'filter/size/length/max',
-                'value' => '100'
-            ])
-        ]);
     }
 }

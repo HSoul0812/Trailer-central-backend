@@ -34,6 +34,8 @@ use App\Services\Leads\LeadService;
 use App\Services\Leads\LeadServiceInterface;
 use App\Services\MapSearch\GoogleMapSearchService;
 use App\Services\MapSearch\TomTomMapSearchService;
+use App\Services\SysConfig\SysConfigService;
+use App\Services\SysConfig\SysConfigServiceInterface;
 use Illuminate\Support\ServiceProvider;
 
 class TrailerCentralIntegrationServiceProvider extends ServiceProvider
@@ -57,9 +59,10 @@ class TrailerCentralIntegrationServiceProvider extends ServiceProvider
         $this->app->bind(LeadSyncServiceInterface::class, LeadSyncService::class);
         $this->app->bind(LeadLogServiceInterface::class, LeadLogService::class);
 
-        $this->app->bind(SyncProcessRepositoryInterface::class, SyncProcessRepository::class);
-
         $this->app->bind(InventoryServiceInterface::class, InventoryService::class);
+        $this->app->bind(SysConfigServiceInterface::class, SysConfigService::class);
+
+        $this->app->bind(SyncProcessRepositoryInterface::class, SyncProcessRepository::class);
         $this->app->bind(GeolocationRepositoryInterface::class, GeolocationRepository::class);
         $this->app->bind(SysConfigRepositoryInterface::class, SysConfigRepository::class);
         GoogleMapSearchService::register();
