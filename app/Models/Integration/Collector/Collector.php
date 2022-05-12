@@ -181,7 +181,8 @@ class Collector extends Model implements Filterable
         'api_pagination',
         'ignore_manually_added_units',
         'is_bdv_enabled',
-        'last_run'
+        'last_run',
+        'run_errors'
     ];
 
     protected $casts = [
