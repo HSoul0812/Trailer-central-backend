@@ -166,7 +166,9 @@ class TextService implements TextServiceInterface
 
             $this->textRepository->commitTransaction();
         } catch (\Exception $e) {
+            $this->log->error('Send text error. Message' .  $e->getMessage() . " Params - leadId: $leadId, textMessage: - $textMessage");
             $this->textRepository->rollbackTransaction();
+
             throw $e;
         }
 
@@ -196,18 +198,18 @@ class TextService implements TextServiceInterface
             throw new ReplyInvalidArgumentException('The number is not active. Params - ' . json_encode($params));
         }
 
-        $isDealer = true;
+        $sendToDealer = true;
         $toNumber = $activeNumber->dealer_number;
         $customerName = $activeNumber->customer_name;
         $mediaUrl = [];
         $expirationTime = time() + self::EXPIRATION_TIME;
 
         if ($from === $activeNumber->customer_number) {
-            $isDealer = false;
+            $sendToDealer = false;
             $toNumber = $activeNumber->customer_number;
         }
 
-        $messageBody = ((!$isDealer) ? "Sent From: " . $from . "\nCustomer Name: $customerName\n\n" : '') . $body;
+        $messageBody = ((!$sendToDealer) ? "Sent From: " . $from . "\nCustomer Name: $customerName\n\n" : '') . $body;
 
         for ($i = 0; $i < self::NUM_MEDIA; $i++) {
             if (!isset($params["MediaUrl$i"])) {
@@ -222,7 +224,7 @@ class TextService implements TextServiceInterface
 
             $this->numberRepository->updateExpirationDate($expirationTime, $to, $activeNumber->dealer_number);
 
-            //$this->twilioService->sendViaTwilio($to, $toNumber, $messageBody, $mediaUrl);
+            $this->twilioService->sendViaTwilio($to, $toNumber, $messageBody, $mediaUrl);
 
             $textLogs = $this->textRepository->findByFromNumberToNumber($toNumber, $from);
 
