@@ -19,6 +19,7 @@ class TextrailMagento implements DataProviderInterface,
                                  TextrailRefundsInterface
 {
     private const TEXTRAIL_CATEGORY_URL = 'rest/V1/categories/';
+    private const TEXTRAIL_CATEGORY_LIST_URL = 'rest/V1/categories/list/';
     private const TEXTRAIL_ATTRIBUTES_MANUFACTURER_URL = 'rest/V1/products/attributes/manufacturer/options/';
     private const TEXTRAIL_ATTRIBUTES_BRAND_NAME_URL = 'rest/V1/products/attributes/brand_name/options/';
     private const TEXTRAIL_ATTRIBUTES_MEDIA_URL = 'media/catalog/product';
@@ -48,6 +49,12 @@ class TextrailMagento implements DataProviderInterface,
 
     /** @var boolean */
     private $isGuestCheckout;
+
+    /** @var object */
+    private $allCategories;
+
+    /** @var array */
+    private $parentMemory = [];
 
     public function __construct()
     {
@@ -672,5 +679,39 @@ class TextrailMagento implements DataProviderInterface,
         }
 
         return $availableStocks;
+    }
+
+    public function getTextrailCategories(): array
+    {
+        $categories = json_decode($this->httpClient->get(self::TEXTRAIL_CATEGORY_LIST_URL . '?searchCriteria[page_size]=10000', ['headers' => $this->getHeaders()])->getBody()->getContents(), true);
+
+        $this->allCategories = $categories;
+
+        return $categories;
+    }
+
+    /**
+     * @param int $category_id
+     * @return array
+     */
+    public function getTextrailParentCategory(int $category_id): array
+    {
+        $category = json_decode($this->httpClient->get(self::TEXTRAIL_CATEGORY_URL . $category_id, ['headers' => $this->getHeaders()])->getBody()->getContents(), true);
+        $path = $category['path'];
+
+        $breadcrumb = explode('/', $path);
+
+        $parent = [];
+        // 0 = Root, 1 = Shop By, 2 = Available Master Parent ID
+        if (!empty($breadcrumb[2])) {
+            if (empty($this->parentMemory[$breadcrumb[2]])) {
+                $parent = json_decode($this->httpClient->get(self::TEXTRAIL_CATEGORY_URL . $breadcrumb[2], ['headers' => $this->getHeaders()])->getBody()->getContents(), true);
+                $this->parentMemory[$breadcrumb[2]] = $parent;
+            } else {
+                $parent = $this->parentMemory[$breadcrumb[2]];
+            }
+        }
+
+        return [$parent, $category];
     }
 }

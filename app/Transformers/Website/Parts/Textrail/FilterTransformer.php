@@ -83,6 +83,8 @@ class FilterTransformer extends TransformerAbstract
              'is_visible' => (int)$filter->is_visible,
              'global' => false,
              'state' => $this->getFilterState($filter),
+             'ecommerce' => true,
+             'toggle' => ($filter->attribute == 'category') ? 'true' : 'false',
          ];
 
         if ($filter->type == 'select' || $filter->attribute == 'brand') {
@@ -183,7 +185,7 @@ class FilterTransformer extends TransformerAbstract
                     'count' => $count,
                     'base' => 0, // What is this?
                     'status' => $status,
-                    'action' => $queryString
+                    'action' => $queryString,
                 ];
             } else {
                 if (isset($hiddenFilters[$this->attributeModelIdMapping[$filter->attribute]])) {
@@ -208,7 +210,7 @@ class FilterTransformer extends TransformerAbstract
                     'count' => $count,
                     'base' => 0, // What is this?
                     'status' => $status,
-                    'action' => $queryString
+                    'action' => $queryString,
                 ];
             }
 
