@@ -80,7 +80,7 @@ class TextrailPartImporterService implements TextrailPartImporterServiceInterfac
             list($parentCategory, $textrailCategory) = $this->textrailPartService->getParentAndCategory($item->category_id);
 
             $categoryParams = [
-                'name' => $textrailCategory->name,
+                'name' => $textrailCategory['name'],
             ];
 
             $category = $this->categoryRepository->firstOrCreate($categoryParams);
