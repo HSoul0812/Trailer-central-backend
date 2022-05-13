@@ -154,6 +154,11 @@ class QuoteRepository implements QuoteRepositoryInterface
                     break;
             }
         }
+
+        if (isset($params['lead_id'])) {
+            $query->where('lead_id', '=', $params['lead_id']);
+        }
+
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
         } else {

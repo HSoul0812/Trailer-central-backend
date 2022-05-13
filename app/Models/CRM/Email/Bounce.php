@@ -2,6 +2,7 @@
 
 namespace App\Models\CRM\Email;
 
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -11,6 +12,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Bounce extends Model
 {
+    use TableAware;
+
     /**
      * The table associated with the model.
      *

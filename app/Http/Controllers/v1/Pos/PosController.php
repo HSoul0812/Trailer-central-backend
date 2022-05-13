@@ -4,6 +4,7 @@
 namespace App\Http\Controllers\v1\Pos;
 
 
+use App\Domains\ElasticSearch\Actions\EscapeElasticSearchReservedCharactersAction;
 use App\Http\Controllers\RestfulControllerV2;
 use App\Repositories\Parts\PartRepositoryInterface;
 use App\Services\Pos\PosService;
@@ -44,6 +45,13 @@ class PosController extends RestfulControllerV2
         try {
             $this->fractal->setSerializer(new NoDataArraySerializer());
             $this->fractal->parseIncludes($request->query('with', ['images']));
+
+            // We want to make sure that the query string is escaped
+            // If we don't do this we will get error when we try to search
+            // with special characters like '/', '(', etc.
+            $escapedQuery = resolve(EscapeElasticSearchReservedCharactersAction::class)->execute($request->get('query', '') ?? '');
+            $request->merge(['query' => $escapedQuery]);
+
             $query = $request->get('query');
 
             /** @var \Illuminate\Database\Eloquent\Collection $result */
