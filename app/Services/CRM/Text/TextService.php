@@ -112,19 +112,16 @@ class TextService implements TextServiceInterface
      */
     public function send(int $leadId, string $textMessage, array $mediaUrl = []): TextLog
     {
-        // Get Lead/User
         /** @var Lead $lead */
         $lead = $this->leadRepository->get(['id' => $leadId]);
         $fullName = $lead->newDealerUser()->first()->crmUser->full_name;
         $fileDtos = new Collection();
 
-        // Get To Numbers
         $to_number = $lead->text_phone;
         if(empty($to_number)) {
             throw new NoLeadSmsNumberAvailableException();
         }
 
-        // Get From Number
         $from_number = $this->dealerLocationRepository->findDealerNumber($lead->dealer_id, $lead->preferred_location);
         if(empty($from_number)) {
             throw new NoDealerSmsNumberAvailableException();
@@ -202,6 +199,7 @@ class TextService implements TextServiceInterface
         $toNumber = $activeNumber->dealer_number;
         $customerName = $activeNumber->customer_name;
         $mediaUrl = [];
+        $fileDtos = new Collection();
         $expirationTime = time() + self::EXPIRATION_TIME;
 
         if ($from === $activeNumber->customer_number) {
@@ -219,6 +217,14 @@ class TextService implements TextServiceInterface
             $mediaUrl[] = $params["MediaUrl$i"];
         }
 
+        if (!empty($mediaUrl)) {
+            $fileDtos = $this->fileService->bulkUpload($mediaUrl, 0);
+
+            $mediaUrl =  $fileDtos->map(function (FileDto $fileDto) {
+                return $fileDto->getUrl();
+            })->toArray();
+        }
+
         try {
             $this->textRepository->beginTransaction();
 
@@ -230,6 +236,13 @@ class TextService implements TextServiceInterface
 
             $leadId = $this->findLeadId($textLogs);
 
+            $files = $fileDtos->map(function (FileDto $fileDto) {
+                return [
+                    'path' => $fileDto->getPath(),
+                    'type' => $fileDto->getMimeType(),
+                ];
+            })->toArray();
+
             /** @var TextLog $textLog */
             $textLog = $this->textRepository->create([
                 'lead_id'     => $leadId,
@@ -237,6 +250,7 @@ class TextService implements TextServiceInterface
                 'to_number'   => $toNumber,
                 'log_message' => $messageBody,
                 'date_sent'   => date('Y-m-d H:i:s'),
+                'files'       => $files,
             ]);
 
             if(trim($body) === 'STOP') {
