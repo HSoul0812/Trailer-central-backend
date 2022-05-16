@@ -14,9 +14,9 @@ class TextrailMagentoSandbox implements TextrailPartsInterface
 
     $dtoTextrail = TextrailPartDTO::from([
       'id' => 1,
-      'sku' => 1111,
+      'sku' => 7950481,
       'title' => 'item 1',
-      'price' => 1,
+      'price' => 2,
       'weight' => 10,
       'description' => 'description 1',
       'category_id' => 1,
@@ -27,7 +27,7 @@ class TextrailMagentoSandbox implements TextrailPartsInterface
 
     $dtoTextrail2 = TextrailPartDTO::from([
       'id' => 2,
-      'sku' => 2222,
+      'sku' => 7950481,
       'title' => 'item 2',
       'price' => 2,
       'weight' => 20,
@@ -92,7 +92,7 @@ class TextrailMagentoSandbox implements TextrailPartsInterface
   public function getTextrailPlaceholderImage(): ?array
   {
     $img_url = $this->getTextrailImagesBaseUrl() . self::TEXTRAIL_ATTRIBUTES_PLACEHOLDER_URL;
-    
+
     $checkFile = get_headers($img_url);
 
     if ($checkFile[0] == "HTTP/1.1 200 OK") {
@@ -114,4 +114,32 @@ class TextrailMagentoSandbox implements TextrailPartsInterface
   {
    return 0;
   }
+
+    public function getTextrailDumpStock(): array
+    {
+        $stocks['7950084'] = [
+            "qty" => 10,
+            "is_salable" => true
+        ];
+
+        $stocks['7950481'] = [
+            "qty" => 10,
+            "is_salable" => true
+        ];
+
+        return $stocks;
+    }
+
+    public function getTextrailCategories(): array
+    {
+       return [];
+    }
+
+    public function getTextrailParentCategory(int $category_id): array
+    {
+        $categoryJson = '{"name": "test category", "parent_id": 2}';
+        $parentJson =  '{"name": "parent category", "parent_id": 1}';
+
+        return [['name' => 'parent category'], ['name' => 'category']];
+    }
 }
