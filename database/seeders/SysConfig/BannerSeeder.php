@@ -8,8 +8,8 @@ use Illuminate\Support\Facades\DB;
 class BannerSeeder extends Seeder
 {
     const BANNER_CONFIGS = [
-        ['banner/lamar/desktop', 'https://trailertrader.s3.amazonaws.com/banners/TC-LamarBanners-v1_Desktop-20220505-113050.png'],
-        ['banner/lamar/mobile', 'https://trailertrader.s3.amazonaws.com/banners/TC-LamarBanners-v1_Mobile-20220505-113050.png'],
+        ['banner/lamar trailers/desktop', 'https://trailertrader.s3.amazonaws.com/banners/TC-LamarBanners-v1_Desktop-20220505-113050.png'],
+        ['banner/lamar trailers/mobile', 'https://trailertrader.s3.amazonaws.com/banners/TC-LamarBanners-v1_Mobile-20220505-113050.png'],
         ['banner/carry-on/desktop', 'https://trailertrader.s3.amazonaws.com/banners/TC-CarryOnBanners-v1_Desktop-20220505-113414.png'],
         ['banner/carry-on/mobile', 'https://trailertrader.s3.amazonaws.com/banners/TC-CarryOnBanners-v1_Mobile-20220505-113414.png'],
         ['banner/haulmark/desktop', 'https://trailertrader.s3.amazonaws.com/banners/TC-HaulmarkBanners-v1_Desktop-20220505-115252.png'],
