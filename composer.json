@@ -66,7 +66,7 @@
         "tijsverkoyen/css-to-inline-styles": "^2.2.1",
         "twilio/sdk": "^5.31",
         "webklex/laravel-imap": "~2.4",
-        "showroom/bulkconfiguration": "*"
+        "trailercentral/passwordless-login-url": "*"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.4",
@@ -130,6 +130,10 @@
         {
             "type": "path",
             "url": "./nova-components/BulkConfiguration"
+        },
+        {
+            "type": "path",
+            "url": "./nova-components/PasswordlessLoginUrl"
         }
     ],
     "minimum-stability": "dev",
