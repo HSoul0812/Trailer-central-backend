@@ -3,6 +3,7 @@
 namespace App\Repositories\CRM\Text;
 
 use App\Exceptions\RepositoryInvalidArgumentException;
+use App\Models\CRM\Interactions\TextLogFile;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
@@ -12,26 +13,11 @@ use App\Exceptions\CRM\Text\NoDealerSmsNumberAvailableException;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Interactions\TextLog;
 use App\Models\CRM\Text\Stop;
-use App\Services\CRM\Text\TextServiceInterface;
+use App\Services\CRM\Text\TwilioServiceInterface;
 use Carbon\Carbon;
 
-class TextRepository implements TextRepositoryInterface {
-
-    /**
-     * @var TextServiceInterface
-     */
-    private $service;
-
-    /**
-     * @var StatusRepositoryInterface
-     */
-    private $leadStatus;
-
-    /**
-     * @var DealerLocationRepositoryInterface
-     */
-    private $dealerLocation;
-
+class TextRepository implements TextRepositoryInterface
+{
     private $sortOrders = [
         'date_sent' => [
             'field' => 'date_sent',
@@ -44,19 +30,29 @@ class TextRepository implements TextRepositoryInterface {
     ];
 
     /**
-     * TextRepository constructor.
-     *
-     * @param TextServiceInterface $service
+     * @param $params
+     * @return TextLog
      */
-    public function __construct(TextServiceInterface $service, StatusRepositoryInterface $leadStatus, DealerLocationRepositoryInterface $dealerLocation)
+    public function create($params): TextLog
     {
-        $this->service = $service;
-        $this->leadStatus = $leadStatus;
-        $this->dealerLocation = $dealerLocation;
-    }
+        $fileObjs = [];
 
-    public function create($params) {
-        return TextLog::create($params);
+        foreach ($params['files'] ?? [] as $file) {
+            $fileObjs[] = new TextLogFile($file);
+        }
+
+        unset($params['files']);
+
+        $textLog = new TextLog($params);
+        $textLog->save();
+
+        if (!empty($fileObjs)) {
+            $textLog->files()->saveMany($fileObjs);
+        }
+
+        $textLog->interactionMessage->searchable();
+
+        return $textLog;
     }
 
     public function delete($params) {
@@ -116,50 +112,6 @@ class TextRepository implements TextRepositoryInterface {
         // Insert Stop
         return Stop::create($params);
     }
-
-    /**
-     * Send Text
-     *
-     * @param int $leadId
-     * @param string $textMessage
-     * @return TextLog
-     */
-    public function send($leadId, $textMessage) {
-        // Get Lead/User
-        $lead = Lead::findOrFail($leadId);
-        $fullName = $lead->newDealerUser()->first()->crmUser->full_name;
-
-        // Get To Numbers
-        $to_number = $lead->text_phone;
-        if(empty($to_number)) {
-            throw new NoLeadSmsNumberAvailableException();
-        }
-
-        // Get From Number
-        $from_number = $this->dealerLocation->findDealerNumber($lead->dealer_id, $lead->preferred_location);
-        if(empty($from_number)) {
-            throw new NoDealerSmsNumberAvailableException();
-        }
-
-        // Send Text
-        $this->service->send($from_number, $to_number, $textMessage, $fullName);
-
-        // Save Lead Status
-        $this->leadStatus->createOrUpdate([
-            'lead_id' => $lead->identifier,
-            'status' => Lead::STATUS_MEDIUM,
-            'next_contact_date' => Carbon::now()->addDay()->toDateTimeString()
-        ]);
-
-        // Log SMS
-        return $this->create([
-            'lead_id'     => $leadId,
-            'from_number' => $from_number,
-            'to_number'   => $to_number,
-            'log_message' => $textMessage
-        ]);
-    }
-
 
     /**
      * Add Sort Query

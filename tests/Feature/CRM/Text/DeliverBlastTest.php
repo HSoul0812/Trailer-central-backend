@@ -3,7 +3,7 @@
 namespace Tests\Feature\CRM\Text;
 
 use App\Exceptions\CRM\Text\NoLeadsDeliverBlastException;
-use App\Services\CRM\Text\TextServiceInterface;
+use App\Services\CRM\Text\TwilioServiceInterface;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\Inventory\Inventory;
@@ -56,7 +56,7 @@ class DeliverBlastTest extends TestCase
 
     /**
      * Test simple blast
-     * 
+     *
      * @group CRM
      * @specs string action = inquired
      * @specs array location_id = null
@@ -95,7 +95,7 @@ class DeliverBlastTest extends TestCase
         }
 
         // Mock Text Service
-        $this->mock(TextServiceInterface::class, function ($mock) use($leads, $unused, $dealer, $blast) {
+        $this->mock(TwilioServiceInterface::class, function ($mock) use($leads, $unused, $dealer, $blast) {
             // Loop Leads to Mock Text Sent
             foreach($leads as $lead) {
                 // Get From Number
@@ -169,7 +169,7 @@ class DeliverBlastTest extends TestCase
 
     /**
      * Test blast on purchases
-     * 
+     *
      * @group CRM
      * @specs string action = purchased
      * @specs array location_id = null
@@ -212,7 +212,7 @@ class DeliverBlastTest extends TestCase
         }
 
         // Mock Text Service
-        $this->mock(TextServiceInterface::class, function ($mock) use($leads, $unused, $dealer, $blast) {
+        $this->mock(TwilioServiceInterface::class, function ($mock) use($leads, $unused, $dealer, $blast) {
             // Loop Leads to Mock Text Sent
             foreach($leads as $lead) {
                 // Get From Number
@@ -286,7 +286,7 @@ class DeliverBlastTest extends TestCase
 
     /**
      * Test blast by location
-     * 
+     *
      * @group CRM
      * @specs string action = inquired
      * @specs array location_id = first
@@ -335,7 +335,7 @@ class DeliverBlastTest extends TestCase
         }
 
         // Mock Text Service
-        $this->mock(TextServiceInterface::class, function ($mock) use($leads, $unused, $dealer, $blast) {
+        $this->mock(TwilioServiceInterface::class, function ($mock) use($leads, $unused, $dealer, $blast) {
             // Loop Leads to Mock Text Sent
             foreach($leads as $lead) {
                 // Get From Number
@@ -409,7 +409,7 @@ class DeliverBlastTest extends TestCase
 
     /**
      * Test blast by archived status
-     * 
+     *
      * @group CRM
      * @specs string action = inquired
      * @specs array location_id = any
@@ -452,7 +452,7 @@ class DeliverBlastTest extends TestCase
         }
 
         // Mock Text Service
-        $this->mock(TextServiceInterface::class, function ($mock) use($leads, $unused, $dealer, $blast) {
+        $this->mock(TwilioServiceInterface::class, function ($mock) use($leads, $unused, $dealer, $blast) {
             // Loop Leads to Mock Text Sent
             foreach($leads as $lead) {
                 // Get From Number
@@ -526,7 +526,7 @@ class DeliverBlastTest extends TestCase
 
     /**
      * Test blast with brands
-     * 
+     *
      * @group CRM
      * @specs string action = inquired
      * @specs array location_id = any
@@ -580,7 +580,7 @@ class DeliverBlastTest extends TestCase
         }
 
         // Mock Text Service
-        $this->mock(TextServiceInterface::class, function ($mock) use($leads, $unused, $dealer, $blast) {
+        $this->mock(TwilioServiceInterface::class, function ($mock) use($leads, $unused, $dealer, $blast) {
             // Loop Leads to Mock Text Sent
             foreach($leads as $lead) {
                 // Get From Number
@@ -654,7 +654,7 @@ class DeliverBlastTest extends TestCase
 
     /**
      * Test blast with categories
-     * 
+     *
      * @group CRM
      * @specs string action = inquired
      * @specs array location_id = any
@@ -709,7 +709,7 @@ class DeliverBlastTest extends TestCase
         }
 
         // Mock Text Service
-        $this->mock(TextServiceInterface::class, function ($mock) use($leads, $unused, $dealer, $blast) {
+        $this->mock(TwilioServiceInterface::class, function ($mock) use($leads, $unused, $dealer, $blast) {
             // Loop Leads to Mock Text Sent
             foreach($leads as $lead) {
                 // Get From Number
@@ -784,7 +784,7 @@ class DeliverBlastTest extends TestCase
 
     /**
      * Refresh Blasts in DB
-     * 
+     *
      * @group CRM
      * @param int $userId
      * @return void
@@ -798,7 +798,7 @@ class DeliverBlastTest extends TestCase
 
     /**
      * Refresh Blast Leads in DB
-     * 
+     *
      * @group CRM
      * @param int $blastId
      * @param array $filters
