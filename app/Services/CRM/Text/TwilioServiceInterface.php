@@ -40,4 +40,13 @@ interface TwilioServiceInterface {
      * @return bool | true if successfully deleted from Twilio OR DB; false if failed to delete from both
      */
     public function delete(string $number): bool;
+
+    /**
+     * @param string $fromPhone
+     * @param string $toNumber
+     * @param string $textMessage
+     * @param array $mediaUrl
+     * @return MessageInstance
+     */
+    public function sendViaTwilio(string $fromPhone, string $toNumber, string $textMessage, array $mediaUrl = []): MessageInstance;
 }

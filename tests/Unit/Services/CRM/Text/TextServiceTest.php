@@ -4,12 +4,15 @@ namespace Tests\Unit\Services\CRM\Text;
 
 use App\Exceptions\CRM\Text\NoDealerSmsNumberAvailableException;
 use App\Exceptions\CRM\Text\NoLeadSmsNumberAvailableException;
+use App\Exceptions\CRM\Text\ReplyInvalidArgumentException;
 use App\Models\CRM\Interactions\TextLog;
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Text\Number;
 use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
+use App\Repositories\CRM\Text\NumberRepositoryInterface;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Services\CRM\Text\TextService;
@@ -19,6 +22,7 @@ use App\Services\File\DTOs\FileDto;
 use App\Services\File\FileService;
 use App\Services\File\FileServiceInterface;
 use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection as DbCollection;
 use Mockery;
 use ReflectionProperty;
 use Tests\TestCase;
@@ -34,10 +38,12 @@ class TextServiceTest extends TestCase
     private const TEST_FULL_NAME = 'test_full_name';
     private const TEST_TO_NUMBER = '123456';
     private const TEST_FROM_NUMBER = '654321';
+    private const TEST_FROM_NUMBER_2 = '159753';
     private const TEST_DEALER_ID = PHP_INT_MAX;
     private const TEST_PREFERRED_LOCATION = PHP_INT_MAX - 1;
     private const TEST_LEAD_IDENTIFIER = PHP_INT_MAX - 2;
     private const TEST_MESSAGE = 'some_message';
+    private const TEST_TEXT_LOG_ID = PHP_INT_MAX - 3;
 
     /**
      * @var TwilioServiceInterface|Mockery\LegacyMockInterface|Mockery\MockInterface
@@ -69,6 +75,11 @@ class TextServiceTest extends TestCase
      */
     private $leadRepositoryMock;
 
+    /**
+     * @var NumberRepositoryInterface|Mockery\LegacyMockInterface|Mockery\MockInterface
+     */
+    private $numberRepositoryMock;
+
     public function setUp(): void
     {
         parent::setUp();
@@ -89,12 +100,15 @@ class TextServiceTest extends TestCase
 
         $this->leadRepositoryMock = Mockery::mock(LeadRepositoryInterface::class);
         $this->app->instance(LeadRepositoryInterface::class, $this->leadRepositoryMock);
+
+        $this->numberRepositoryMock = Mockery::mock(NumberRepositoryInterface::class);
+        $this->app->instance(NumberRepositoryInterface::class, $this->numberRepositoryMock);
     }
 
     /**
      * @group CRM
      * @covers ::send
-     * @dataProvider leadParamsProvider
+     * @dataProvider sendParamsProvider
      *
      * @param Lead|Mockery\MockInterface|Mockery\LegacyMockInterface $lead
      * @param NewDealerUser|Mockery\MockInterface|Mockery\LegacyMockInterface $newDealerUser
@@ -143,6 +157,11 @@ class TextServiceTest extends TestCase
             ->shouldReceive('bulkUpload')
             ->never();
 
+        $this->textRepositoryMock
+            ->shouldReceive('beginTransaction')
+            ->once()
+            ->withNoArgs();
+
         $this->twilioServiceMock
             ->shouldReceive('send')
             ->once()
@@ -169,6 +188,11 @@ class TextServiceTest extends TestCase
             ])
             ->andReturn($textLogMock);
 
+        $this->textRepositoryMock
+            ->shouldReceive('commitTransaction')
+            ->once()
+            ->withNoArgs();
+
         /** @var TextServiceInterface $service */
         $service = $this->app->make(TextServiceInterface::class);
         $this->prepareFileService($service);
@@ -181,7 +205,7 @@ class TextServiceTest extends TestCase
     /**
      * @group CRM
      * @covers ::send
-     * @dataProvider leadParamsProvider
+     * @dataProvider sendParamsProvider
      *
      * @param Lead|Mockery\MockInterface|Mockery\LegacyMockInterface $lead
      * @param NewDealerUser|Mockery\MockInterface|Mockery\LegacyMockInterface $newDealerUser
@@ -245,7 +269,12 @@ class TextServiceTest extends TestCase
             ->shouldReceive('bulkUpload')
             ->once()
             ->with($mediaUrl, self::TEST_DEALER_ID)
-            ->andReturn($fileDtos);;
+            ->andReturn($fileDtos);
+
+        $this->textRepositoryMock
+            ->shouldReceive('beginTransaction')
+            ->once()
+            ->withNoArgs();
 
         $this->twilioServiceMock
             ->shouldReceive('send')
@@ -282,6 +311,11 @@ class TextServiceTest extends TestCase
             ])
             ->andReturn($textLogMock);
 
+        $this->textRepositoryMock
+            ->shouldReceive('commitTransaction')
+            ->once()
+            ->withNoArgs();
+
         /** @var TextServiceInterface $service */
         $service = $this->app->make(TextServiceInterface::class);
         $this->prepareFileService($service);
@@ -294,7 +328,7 @@ class TextServiceTest extends TestCase
     /**
      * @group CRM
      * @covers ::send
-     * @dataProvider leadParamsProvider
+     * @dataProvider sendParamsProvider
      *
      * @param Lead|Mockery\MockInterface|Mockery\LegacyMockInterface $lead
      * @param NewDealerUser|Mockery\MockInterface|Mockery\LegacyMockInterface $newDealerUser
@@ -355,7 +389,7 @@ class TextServiceTest extends TestCase
     /**
      * @group CRM
      * @covers ::send
-     * @dataProvider leadParamsProvider
+     * @dataProvider sendParamsProvider
      *
      * @param Lead|Mockery\MockInterface|Mockery\LegacyMockInterface $lead
      * @param NewDealerUser|Mockery\MockInterface|Mockery\LegacyMockInterface $newDealerUser
@@ -424,9 +458,608 @@ class TextServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
+     * @covers ::send
+     * @dataProvider sendParamsProvider
+     *
+     * @param Lead|Mockery\MockInterface|Mockery\LegacyMockInterface $lead
+     * @param NewDealerUser|Mockery\MockInterface|Mockery\LegacyMockInterface $newDealerUser
+     * @param CrmUser|Mockery\MockInterface|Mockery\LegacyMockInterface $crmUser
+     * @return void
+     */
+    public function testSendWithError($lead, $newDealerUser, $crmUser)
+    {
+        $exception = new \Exception();
+
+        $this->expectException(\Exception::class);
+
+        $this->leadRepositoryMock
+            ->shouldReceive('get')
+            ->once()
+            ->with(['id' => self::TEST_LEAD_IDENTIFIER])
+            ->andReturn($lead);
+
+        $lead->shouldReceive('newDealerUser')
+            ->once()
+            ->withNoArgs()
+            ->andReturn($newDealerUser);
+
+        $newDealerUser->shouldReceive('first')
+            ->once()
+            ->withNoArgs()
+            ->andReturn($newDealerUser);
+
+        $crmUser->shouldReceive('getFullNameAttribute')
+            ->once()
+            ->andReturn(self::TEST_FULL_NAME);
+
+        $lead->shouldReceive('getTextPhoneAttribute')
+            ->once()
+            ->andReturn(self::TEST_TO_NUMBER);
+
+        $lead->shouldReceive('getPreferredLocationAttribute')
+            ->once()
+            ->andReturn(self::TEST_PREFERRED_LOCATION);
+
+        $this->dealerLocationRepositoryMock
+            ->shouldReceive('findDealerNumber')
+            ->once()
+            ->with(self::TEST_DEALER_ID, self::TEST_PREFERRED_LOCATION)
+            ->andReturn(self::TEST_FROM_NUMBER);
+
+        $this->fileServiceMock
+            ->shouldReceive('bulkUpload')
+            ->never();
+
+        $this->textRepositoryMock
+            ->shouldReceive('beginTransaction')
+            ->once()
+            ->withNoArgs();
+
+        $this->twilioServiceMock
+            ->shouldReceive('send')
+            ->once()
+            ->with(self::TEST_FROM_NUMBER, self::TEST_TO_NUMBER, self::TEST_MESSAGE, self::TEST_FULL_NAME, [])
+            ->andThrow($exception);
+
+        $this->statusRepositoryMock
+            ->shouldReceive('createOrUpdate')
+            ->never();
+
+        $this->textRepositoryMock
+            ->shouldReceive('create')
+            ->never();
+
+        $this->textRepositoryMock
+            ->shouldReceive('commitTransaction')
+            ->never();
+
+        $this->textRepositoryMock
+            ->shouldReceive('rollbackTransaction')
+            ->once()
+            ->withNoArgs();
+
+        /** @var TextServiceInterface $service */
+        $service = $this->app->make(TextServiceInterface::class);
+        $this->prepareFileService($service);
+
+        $service->send(self::TEST_LEAD_IDENTIFIER, self::TEST_MESSAGE);
+    }
+
+    /**
+     * @group CRM
+     * @covers ::reply
+     * @dataProvider replyParamsProvider
+     *
+     * @param array $params
+     * @param Lead|Mockery\MockInterface|Mockery\LegacyMockInterface $lead
+     * @param Number|Mockery\MockInterface|Mockery\LegacyMockInterface $activeNumber
+     * @param DbCollection $textLogs
+     * @return void
+     */
+    public function testReply(array $params, $lead, $activeNumber, DbCollection $textLogs)
+    {
+        $this->numberRepositoryMock
+            ->shouldReceive('activeTwilioNumber')
+            ->with($params['To'], $params['From'])
+            ->once()
+            ->andReturn($activeNumber);
+
+        $this->textRepositoryMock
+            ->shouldReceive('beginTransaction')
+            ->once()
+            ->withNoArgs();
+
+        $this->numberRepositoryMock
+            ->shouldReceive('updateExpirationDate')
+            ->once()
+            ->with(Mockery::on(function($expirationDate) {
+                return is_int($expirationDate);
+            }), $params['To'], $activeNumber->dealer_number);
+
+        $this->twilioServiceMock
+            ->shouldReceive('sendViaTwilio')
+            ->once()
+            ->with($params['To'], $activeNumber->dealer_number, $params['Body'], []);
+
+        $this->textRepositoryMock
+            ->shouldReceive('findByFromNumberToNumber')
+            ->once()
+            ->with($activeNumber->dealer_number, $params['From'])
+            ->andReturn($textLogs);
+
+        $this->textRepositoryMock
+            ->shouldReceive('create')
+            ->with(Mockery::on(function($creatParams) use ($activeNumber, $params) {
+                return isset($creatParams['from_number']) && $creatParams['from_number'] === $params['From']
+                    && isset($creatParams['to_number']) && $creatParams['to_number'] === $activeNumber->dealer_number
+                    && isset($creatParams['log_message']) && $creatParams['log_message'] === $params['Body']
+                    && isset($creatParams['date_sent']) && strtotime($creatParams['date_sent']);
+            }))
+            ->once();
+
+        $this->textRepositoryMock
+            ->shouldReceive('stop')
+            ->never();
+
+        $this->textRepositoryMock
+            ->shouldReceive('commitTransaction')
+            ->once();
+
+        $this->textRepositoryMock
+            ->shouldReceive('rollbackTransaction')
+            ->never();
+
+        /** @var TextServiceInterface $service */
+        $service = $this->app->make(TextServiceInterface::class);
+        $result = $service->reply($params);
+
+        $this->assertTrue($result);
+    }
+
+    /**
+     * @group CRM
+     * @covers ::reply
+     * @dataProvider replyParamsProvider
+     *
+     * @param array $params
+     * @param Lead|Mockery\MockInterface|Mockery\LegacyMockInterface $lead
+     * @param Number|Mockery\MockInterface|Mockery\LegacyMockInterface $activeNumber
+     * @param DbCollection $textLogs
+     * @return void
+     */
+    public function testReplyWithStop(array $params, $lead, $activeNumber, DbCollection $textLogs)
+    {
+        $params['Body'] = 'STOP';
+
+        /** @var TextLog $textLogMock */
+        $textLogMock = $this->getEloquentMock(TextLog::class);
+        $textLogMock->id = self::TEST_TEXT_LOG_ID;
+
+        $this->numberRepositoryMock
+            ->shouldReceive('activeTwilioNumber')
+            ->with($params['To'], $params['From'])
+            ->once()
+            ->andReturn($activeNumber);
+
+        $this->textRepositoryMock
+            ->shouldReceive('beginTransaction')
+            ->once()
+            ->withNoArgs();
+
+        $this->numberRepositoryMock
+            ->shouldReceive('updateExpirationDate')
+            ->once()
+            ->with(Mockery::on(function($expirationDate) {
+                return is_int($expirationDate);
+            }), $params['To'], $activeNumber->dealer_number);
+
+        $this->twilioServiceMock
+            ->shouldReceive('sendViaTwilio')
+            ->once()
+            ->with($params['To'], $activeNumber->dealer_number, $params['Body'], []);
+
+        $this->textRepositoryMock
+            ->shouldReceive('findByFromNumberToNumber')
+            ->once()
+            ->with($activeNumber->dealer_number, $params['From'])
+            ->andReturn($textLogs);
+
+        $this->textRepositoryMock
+            ->shouldReceive('create')
+            ->with(Mockery::on(function($creatParams) use ($activeNumber, $params) {
+                return isset($creatParams['from_number']) && $creatParams['from_number'] === $params['From']
+                    && isset($creatParams['to_number']) && $creatParams['to_number'] === $activeNumber->dealer_number
+                    && isset($creatParams['log_message']) && $creatParams['log_message'] === $params['Body']
+                    && isset($creatParams['date_sent']) && strtotime($creatParams['date_sent']);
+            }))
+            ->once()
+            ->andReturn($textLogMock);
+
+        $this->textRepositoryMock
+            ->shouldReceive('stop')
+            ->once()
+            ->with(Mockery::on(function($creatParams) use ($activeNumber, $params, $lead, $textLogMock) {
+                return isset($creatParams['sms_number']) && $creatParams['sms_number'] === $params['From']
+                    && isset($creatParams['lead_id']) && $creatParams['lead_id'] === $lead->identifier
+                    && isset($creatParams['text_id']) && $creatParams['text_id'] === $textLogMock->id;
+            }));
+
+        $this->textRepositoryMock
+            ->shouldReceive('commitTransaction')
+            ->once();
+
+        $this->textRepositoryMock
+            ->shouldReceive('rollbackTransaction')
+            ->never();
+
+        /** @var TextServiceInterface $service */
+        $service = $this->app->make(TextServiceInterface::class);
+        $result = $service->reply($params);
+
+        $this->assertTrue($result);
+    }
+
+    /**
+     * @group CRM
+     * @covers ::reply
+     * @dataProvider replyParamsProvider
+     *
+     * @param array $params
+     * @param Lead|Mockery\MockInterface|Mockery\LegacyMockInterface $lead
+     * @param Number|Mockery\MockInterface|Mockery\LegacyMockInterface $activeNumber
+     * @param DbCollection $textLogs
+     * @return void
+     */
+    public function testReplyFromCustomer(array $params, $lead, $activeNumber, DbCollection $textLogs)
+    {
+        $activeNumber->dealer_number = self::TEST_FROM_NUMBER_2;
+        $activeNumber->customer_number = self::TEST_FROM_NUMBER;
+
+        $expectedMessages = "Sent From: " . $params['From'] . "\nCustomer Name: $activeNumber->customer_name\n\n" . $params['Body'];
+
+        /** @var TextLog $textLogMock */
+        $textLogMock = $this->getEloquentMock(TextLog::class);
+        $textLogMock->id = self::TEST_TEXT_LOG_ID;
+
+        $this->numberRepositoryMock
+            ->shouldReceive('activeTwilioNumber')
+            ->with($params['To'], $params['From'])
+            ->once()
+            ->andReturn($activeNumber);
+
+        $this->textRepositoryMock
+            ->shouldReceive('beginTransaction')
+            ->once()
+            ->withNoArgs();
+
+        $this->numberRepositoryMock
+            ->shouldReceive('updateExpirationDate')
+            ->once()
+            ->with(Mockery::on(function($expirationDate) {
+                return is_int($expirationDate);
+            }), $params['To'], $activeNumber->dealer_number);
+
+        $this->twilioServiceMock
+            ->shouldReceive('sendViaTwilio')
+            ->once()
+            ->with($params['To'], $activeNumber->customer_number, $expectedMessages, []);
+
+        $this->textRepositoryMock
+            ->shouldReceive('findByFromNumberToNumber')
+            ->once()
+            ->with($activeNumber->customer_number, $params['From'])
+            ->andReturn($textLogs);
+
+        $this->textRepositoryMock
+            ->shouldReceive('create')
+            ->with(Mockery::on(function($creatParams) use ($activeNumber, $params, $expectedMessages) {
+                return isset($creatParams['from_number']) && $creatParams['from_number'] === $params['From']
+                    && isset($creatParams['to_number']) && $creatParams['to_number'] === $activeNumber->customer_number
+                    && isset($creatParams['log_message']) && $creatParams['log_message'] === $expectedMessages
+                    && isset($creatParams['date_sent']) && strtotime($creatParams['date_sent']);
+            }))
+            ->once()
+            ->andReturn($textLogMock);
+
+        $this->textRepositoryMock
+            ->shouldReceive('stop')
+            ->never();
+
+        $this->textRepositoryMock
+            ->shouldReceive('commitTransaction')
+            ->once();
+
+        $this->textRepositoryMock
+            ->shouldReceive('rollbackTransaction')
+            ->never();
+
+        /** @var TextServiceInterface $service */
+        $service = $this->app->make(TextServiceInterface::class);
+        $result = $service->reply($params);
+
+        $this->assertTrue($result);
+    }
+
+    /**
+     * @group CRM
+     * @covers ::reply
+     * @dataProvider replyParamsProvider
+     *
+     * @param array $params
+     * @param Lead|Mockery\MockInterface|Mockery\LegacyMockInterface $lead
+     * @param Number|Mockery\MockInterface|Mockery\LegacyMockInterface $activeNumber
+     * @param DbCollection $textLogs
+     * @return void
+     */
+    public function testReplyWithException(array $params, $lead, $activeNumber, DbCollection $textLogs)
+    {
+        $exception = new \Exception();
+
+        $this->expectException(\Exception::class);
+
+        $this->numberRepositoryMock
+            ->shouldReceive('activeTwilioNumber')
+            ->with($params['To'], $params['From'])
+            ->once()
+            ->andReturn($activeNumber);
+
+        $this->textRepositoryMock
+            ->shouldReceive('beginTransaction')
+            ->once()
+            ->withNoArgs();
+
+        $this->numberRepositoryMock
+            ->shouldReceive('updateExpirationDate')
+            ->once()
+            ->with(Mockery::on(function($expirationDate) {
+                return is_int($expirationDate);
+            }), $params['To'], $activeNumber->dealer_number)
+            ->andThrow($exception);
+
+        $this->twilioServiceMock
+            ->shouldReceive('sendViaTwilio')
+            ->never();
+
+        $this->textRepositoryMock
+            ->shouldReceive('findByFromNumberToNumber')
+            ->never();
+
+        $this->textRepositoryMock
+            ->shouldReceive('create')
+            ->never();
+
+        $this->textRepositoryMock
+            ->shouldReceive('stop')
+            ->never();
+
+        $this->textRepositoryMock
+            ->shouldReceive('commitTransaction')
+            ->never();
+
+        $this->textRepositoryMock
+            ->shouldReceive('rollbackTransaction')
+            ->once();
+
+        /** @var TextServiceInterface $service */
+        $service = $this->app->make(TextServiceInterface::class);
+        $result = $service->reply($params);
+
+        $this->assertTrue($result);
+    }
+
+    /**
+     * @group CRM
+     * @covers ::reply
+     * @dataProvider replyParamsProvider
+     *
+     * @param array $params
+     * @param Lead|Mockery\MockInterface|Mockery\LegacyMockInterface $lead
+     * @param Number|Mockery\MockInterface|Mockery\LegacyMockInterface $activeNumber
+     * @param TextLog|Mockery\MockInterface|Mockery\LegacyMockInterface $textLog
+     * @return void
+     */
+    public function testReplyWithoutFrom(array $params, $lead, $activeNumber, $textLog)
+    {
+        $this->expectException(ReplyInvalidArgumentException::class);
+
+        unset($params['From']);
+
+        $this->textRepositoryMock
+            ->shouldReceive('beginTransaction')
+            ->never();
+
+        $this->numberRepositoryMock
+            ->shouldReceive('updateExpirationDate')
+            ->never();
+
+        $this->twilioServiceMock
+            ->shouldReceive('sendViaTwilio')
+            ->never();
+
+        $this->textRepositoryMock
+            ->shouldReceive('create')
+            ->never();
+
+        $this->textRepositoryMock
+            ->shouldReceive('stop')
+            ->never();
+
+        $this->textRepositoryMock
+            ->shouldReceive('commitTransaction')
+            ->never();
+
+        $this->textRepositoryMock
+            ->shouldReceive('rollbackTransaction')
+            ->never();
+
+        /** @var TextServiceInterface $service */
+        $service = $this->app->make(TextServiceInterface::class);
+
+        $service->reply($params);
+    }
+
+    /**
+     * @group CRM
+     * @covers ::reply
+     * @dataProvider replyParamsProvider
+     *
+     * @param array $params
+     * @param Lead|Mockery\MockInterface|Mockery\LegacyMockInterface $lead
+     * @param Number|Mockery\MockInterface|Mockery\LegacyMockInterface $activeNumber
+     * @param TextLog|Mockery\MockInterface|Mockery\LegacyMockInterface $textLog
+     * @return void
+     */
+    public function testReplyWithoutTo(array $params, $lead, $activeNumber, $textLog)
+    {
+        $this->expectException(ReplyInvalidArgumentException::class);
+
+        unset($params['To']);
+
+        $this->textRepositoryMock
+            ->shouldReceive('beginTransaction')
+            ->never();
+
+        $this->numberRepositoryMock
+            ->shouldReceive('updateExpirationDate')
+            ->never();
+
+        $this->twilioServiceMock
+            ->shouldReceive('sendViaTwilio')
+            ->never();
+
+        $this->textRepositoryMock
+            ->shouldReceive('create')
+            ->never();
+
+        $this->textRepositoryMock
+            ->shouldReceive('stop')
+            ->never();
+
+        $this->textRepositoryMock
+            ->shouldReceive('commitTransaction')
+            ->never();
+
+        $this->textRepositoryMock
+            ->shouldReceive('rollbackTransaction')
+            ->never();
+
+        /** @var TextServiceInterface $service */
+        $service = $this->app->make(TextServiceInterface::class);
+
+        $service->reply($params);
+    }
+
+    /**
+     * @group CRM
+     * @covers ::reply
+     * @dataProvider replyParamsProvider
+     *
+     * @param array $params
+     * @param Lead|Mockery\MockInterface|Mockery\LegacyMockInterface $lead
+     * @param Number|Mockery\MockInterface|Mockery\LegacyMockInterface $activeNumber
+     * @param TextLog|Mockery\MockInterface|Mockery\LegacyMockInterface $textLog
+     * @return void
+     */
+    public function testReplyWithoutBody(array $params, $lead, $activeNumber, $textLog)
+    {
+        $this->expectException(ReplyInvalidArgumentException::class);
+
+        unset($params['Body']);
+
+        $this->textRepositoryMock
+            ->shouldReceive('beginTransaction')
+            ->never();
+
+        $this->numberRepositoryMock
+            ->shouldReceive('updateExpirationDate')
+            ->never();
+
+        $this->twilioServiceMock
+            ->shouldReceive('sendViaTwilio')
+            ->never();
+
+        $this->textRepositoryMock
+            ->shouldReceive('create')
+            ->never();
+
+        $this->textRepositoryMock
+            ->shouldReceive('stop')
+            ->never();
+
+        $this->textRepositoryMock
+            ->shouldReceive('commitTransaction')
+            ->never();
+
+        $this->textRepositoryMock
+            ->shouldReceive('rollbackTransaction')
+            ->never();
+
+        /** @var TextServiceInterface $service */
+        $service = $this->app->make(TextServiceInterface::class);
+
+        $service->reply($params);
+    }
+
+    /**
+     * @group CRM
+     * @covers ::reply
+     * @dataProvider replyParamsProvider
+     *
+     * @param array $params
+     * @param Lead|Mockery\MockInterface|Mockery\LegacyMockInterface $lead
+     * @param Number|Mockery\MockInterface|Mockery\LegacyMockInterface $activeNumber
+     * @param TextLog|Mockery\MockInterface|Mockery\LegacyMockInterface $textLog
+     * @return void
+     */
+    public function testReplyWithoutActiveNumber(array $params, $lead, $activeNumber, $textLog)
+    {
+        $this->expectException(ReplyInvalidArgumentException::class);
+
+        $this->numberRepositoryMock
+            ->shouldReceive('activeTwilioNumber')
+            ->with($params['To'], $params['From'])
+            ->once()
+            ->andReturn(null);
+
+        $this->textRepositoryMock
+            ->shouldReceive('beginTransaction')
+            ->never();
+
+        $this->numberRepositoryMock
+            ->shouldReceive('updateExpirationDate')
+            ->never();
+
+        $this->twilioServiceMock
+            ->shouldReceive('sendViaTwilio')
+            ->never();
+
+        $this->textRepositoryMock
+            ->shouldReceive('create')
+            ->never();
+
+        $this->textRepositoryMock
+            ->shouldReceive('stop')
+            ->never();
+
+        $this->textRepositoryMock
+            ->shouldReceive('commitTransaction')
+            ->never();
+
+        $this->textRepositoryMock
+            ->shouldReceive('rollbackTransaction')
+            ->never();
+
+        /** @var TextServiceInterface $service */
+        $service = $this->app->make(TextServiceInterface::class);
+
+        $service->reply($params);
+    }
+
+    /**
      * @return object[][][]
      */
-    public function leadParamsProvider(): array
+    public function sendParamsProvider(): array
     {
         /** @var Lead|Mockery\MockInterface|Mockery\LegacyMockInterface $lead */
         $lead = $this->getEloquentMock(Lead::class);
@@ -443,6 +1076,39 @@ class TextServiceTest extends TestCase
         $newDealerUser->crmUser = $crmUser;
 
         return [[$lead, $newDealerUser, $crmUser]];
+    }
+
+    /**
+     * @return object[][][]
+     */
+    public function replyParamsProvider(): array
+    {
+        $params = [
+            'From' => self::TEST_FROM_NUMBER,
+            'To' => self::TEST_TO_NUMBER,
+            'Body' => self::TEST_MESSAGE
+        ];
+
+        /** @var Lead|Mockery\MockInterface|Mockery\LegacyMockInterface $lead */
+        $lead = $this->getEloquentMock(Lead::class);
+
+        $lead->dealer_id = self::TEST_DEALER_ID;
+        $lead->identifier = self::TEST_LEAD_IDENTIFIER;
+
+        /** @var Number|Mockery\MockInterface|Mockery\LegacyMockInterface $activeNumber */
+        $activeNumber = $this->getEloquentMock(Number::class);
+
+        $activeNumber->dealer_number = self::TEST_FROM_NUMBER;
+        $activeNumber->customer_number = self::TEST_FROM_NUMBER_2;
+        $activeNumber->customer_name = self::TEST_FULL_NAME;
+
+        /** @var TextLog|Mockery\MockInterface|Mockery\LegacyMockInterface $textLog */
+        $textLog = $this->getEloquentMock(TextLog::class);
+
+        $textLog->lead = $lead;
+        $textLog->lead_id = $lead->identifier;
+
+        return [[$params, $lead, $activeNumber, new DbCollection([$textLog])]];
     }
 
     /**

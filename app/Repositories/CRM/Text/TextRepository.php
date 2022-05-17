@@ -4,6 +4,7 @@ namespace App\Repositories\CRM\Text;
 
 use App\Exceptions\RepositoryInvalidArgumentException;
 use App\Models\CRM\Interactions\TextLogFile;
+use App\Traits\Repository\Transaction;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
@@ -18,6 +19,8 @@ use Carbon\Carbon;
 
 class TextRepository implements TextRepositoryInterface
 {
+    use Transaction;
+
     private $sortOrders = [
         'date_sent' => [
             'field' => 'date_sent',
@@ -50,7 +53,9 @@ class TextRepository implements TextRepositoryInterface
             $textLog->files()->saveMany($fileObjs);
         }
 
-        $textLog->interactionMessage->searchable();
+        if ($textLog->interactionMessage) {
+            $textLog->interactionMessage->searchable();
+        }
 
         return $textLog;
     }
@@ -158,5 +163,24 @@ class TextRepository implements TextRepositoryInterface
         }
 
         return true;
+    }
+
+    /**
+     * @param string $fromNumber
+     * @param string $toNumber
+     * @return Collection
+     */
+    public function findByFromNumberToNumber(string $fromNumber, string $toNumber): Collection
+    {
+        $query = TextLog::query();
+
+        $query->where([
+            'from_number' => $fromNumber,
+            'to_number' => $toNumber,
+        ]);
+
+        $query->with('lead');
+
+        return $query->get();
     }
 }

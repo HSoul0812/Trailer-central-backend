@@ -144,15 +144,19 @@ class NumberRepository implements NumberRepositoryInterface {
      *
      * @param string $twilioNumber
      * @param string $maskedNumber
-     * @return Number
+     * @return Number|null
      */
-    public function isActiveTwilioNumber(string $twilioNumber, string $maskedNumber): Number {
-        // Return Number
-        return Number::where('twilio_number', $twilioNumber)
-                     ->where(function(Builder $query) use($maskedNumber) {
-                        $query = $query->where('customer_number', $maskedNumber)
-                                       ->orWhere('dealer_number', $maskedNumber);
-                     })->first();
+    public function activeTwilioNumber(string $twilioNumber, string $maskedNumber): ?Number
+    {
+        $query = Number::query();
+
+        $query->where('twilio_number', $twilioNumber)
+            ->where(function(Builder $query) use($maskedNumber) {
+                $query->where('customer_number', $maskedNumber)
+                    ->orWhere('dealer_number', $maskedNumber);
+            });
+
+        return $query->first();
     }
 
 
@@ -198,5 +202,32 @@ class NumberRepository implements NumberRepositoryInterface {
         $phoneNumber = (string) PhoneNumber::make($phoneNumber, $countryCode);
 
         return DealerLocation::where('sms_phone', $phoneNumber)->exists();
+    }
+
+    /**
+     * @param int $expirationTime
+     * @param string $twilioNumber
+     * @param string $dealerNumber
+     * @return bool
+     */
+    public function updateExpirationDate(int $expirationTime, string $twilioNumber, string $dealerNumber): bool
+    {
+        $query = Number::query();
+
+        $query = $query->where([
+            'dealer_number' => $dealerNumber,
+            'twilio_number' => $twilioNumber,
+        ]);
+
+        /** @var Number $number */
+        $number = $query->first();
+
+        if (!$number instanceof Number) {
+            return false;
+        }
+
+        $number->expiration_time = $expirationTime;
+
+        return $number->save();
     }
 }
