@@ -20,6 +20,10 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     public function boot()
     {
         parent::boot();
+
+        Nova::userTimezone(function () {
+            return config('app.db_timezone');
+        });
     }
 
     /**
