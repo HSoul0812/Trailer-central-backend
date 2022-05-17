@@ -8,6 +8,8 @@ use App\Nova\Actions\Dealer\ActivateCrm;
 use App\Nova\Actions\Dealer\DeactivateCrm;
 use App\Nova\Actions\Dealer\ActivateECommerce;
 use App\Nova\Actions\Dealer\DeactivateECommerce;
+use Laravel\Nova\Fields\Password;
+use Laravel\Nova\Fields\PasswordConfirmation;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Text;
@@ -69,7 +71,16 @@ class Dealer extends Resource
             Boolean::make('ECommerce', 'IsEcommerceActive')->hideWhenCreating()->hideWhenUpdating(),
 
             Boolean::make('User Accounts', 'isUserAccountsActive')->hideWhenCreating()->hideWhenUpdating(),
-
+            
+            Password::make('Password')
+                ->onlyOnForms()
+                ->creationRules('required', 'string', 'min:12', 'regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[\d\x])(?=.*[!$#%]).*$/')
+                ->updateRules('nullable', 'string', 'min:12', 'regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[\d\x])(?=.*[!$#%]).*$/')
+                ->fillUsing(function($request, $model, $attribute, $requestAttribute) {
+                    if (!empty($request[$requestAttribute])) {
+                        $model->{$attribute} = $request[$requestAttribute];
+                    }
+                })->help("Password must contain 3 of the following: Uppercase letter, lowercase letter, 0-9 number, non-alphanumeric character, unicode character")
         ];
     }
 
