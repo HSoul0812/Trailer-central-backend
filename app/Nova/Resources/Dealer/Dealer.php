@@ -71,13 +71,13 @@ class Dealer extends Resource
             
             Password::make('Password')
                 ->onlyOnForms()
-                ->creationRules('required', 'string', 'min:6')
-                ->updateRules('nullable', 'string', 'min:6')
+                ->creationRules('required', 'string', 'min:12', 'regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[\d\x])(?=.*[!$#%]).*$/')
+                ->updateRules('nullable', 'string', 'min:12', 'regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[\d\x])(?=.*[!$#%]).*$/')
                 ->fillUsing(function($request, $model, $attribute, $requestAttribute) {
                     if (!empty($request[$requestAttribute])) {
                         $model->{$attribute} = $request[$requestAttribute];
                     }
-                })
+                })->help("Password must contain 3 of the following: Uppercase letter, lowercase letter, 0-9 number, non-alphanumeric character, unicode character")
         ];
     }
 
