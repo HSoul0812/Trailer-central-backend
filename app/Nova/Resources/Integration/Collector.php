@@ -16,6 +16,7 @@ use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Panel;
+use Laravel\Nova\Fields\DateTime;
 use App\Models\Integration\Collector\Collector as CollectorModel;
 
 /**
@@ -62,6 +63,8 @@ class Collector extends Resource
                 Text::make('Process Name')->sortable()->rules('required', 'max:128'),
                 BelongsTo::make('Dealer', 'dealers', Dealer::class)->sortable()->rules('required'),
                 BelongsTo::make('Default Dealer Location', 'dealerLocation', Location::class)->sortable()->rules('required'),
+                DateTime::make('Last Run', 'last_run')->sortable()->format('DD MMM, YYYY - LT')->readonly(true)->onlyOnIndex(),
+                Boolean::make('Run without Errors', 'run_without_errors')->readonly(true)->onlyOnIndex()
             ]),
 
             new Panel('Source', [
