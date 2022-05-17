@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Text;
 use App\Nova\Resource;
+use Trailercentral\PasswordlessLoginUrl\PasswordlessLoginUrl;
 
 class Dealer extends Resource
 {
@@ -51,7 +52,9 @@ class Dealer extends Resource
     public function fields(Request $request): array
     {
         return [
-            Text::make('Dealer ID')->sortable(),
+            Text::make('Dealer ID')->hideFromIndex(),
+
+            PasswordlessLoginUrl::make('Dealer ID', 'dealer_id')->onlyOnIndex()->sortable(),
 
             Text::make('Name')
                 ->sortable()
@@ -62,7 +65,7 @@ class Dealer extends Resource
                 ->rules('required', 'email', 'max:254'),
 
             Boolean::make('CRM', 'isCrmActive')->hideWhenCreating()->hideWhenUpdating(),
-            
+
             Boolean::make('ECommerce', 'IsEcommerceActive')->hideWhenCreating()->hideWhenUpdating(),
 
             Boolean::make('User Accounts', 'isUserAccountsActive')->hideWhenCreating()->hideWhenUpdating(),
