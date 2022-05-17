@@ -365,7 +365,7 @@ class Inventory extends Model
 
     /**
      * Custom Attributes Collection
-     * 
+     *
      * @var Collection
      */
     private $attributesCollection;
@@ -474,10 +474,14 @@ class Inventory extends Model
         return $this->hasMany(CustomerInventory::class, 'inventory_id', 'inventory_id');
     }
 
+    public function entityType(): BelongsTo
+    {
+        return $this->belongsTo(EntityType::class,'entity_type_id');
+    }
 
     /**
      * Get Attributes Map
-     * 
+     *
      * @return Collection<code: value>
      */
     public function getAttributesAttribute(): Collection
