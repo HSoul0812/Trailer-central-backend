@@ -31,7 +31,7 @@ class StripeService implements StripeServiceInterface
     public function __construct($user) {
         $this->user = $user;
         $this->customer = $user->createOrGetStripeCustomer();
-        $this->stripe = new StripeClient(env('STRIPE_SECRET'));
+        $this->stripe = new StripeClient(config('services.stripe.secret_key'));
     }
 
     /**
