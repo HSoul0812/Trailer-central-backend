@@ -44,8 +44,8 @@ class SubscriptionRepository implements SubscriptionRepositoryInterface {
      *
      * @return mixed
      */
-    public function getCustomer() {
-        return $this->service->getCustomer();
+    public function getCustomer(Request $request) {
+        return $this->service->getCustomer($request);
     }
 
     /**

@@ -20,5 +20,5 @@ interface SubscriptionRepositoryInterface extends Repository {
      *
      * @return mixed
      */
-    public function getCustomer();
+    public function getCustomer(Request $request);
 }
