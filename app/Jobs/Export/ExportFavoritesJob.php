@@ -28,37 +28,12 @@ class ExportFavoritesJob implements ShouldQueue
     const EXPORT_MONTHLY = 3;
 
     /**
-     * @var WebsiteConfigRepositoryInterface
-     */
-    private $websiteConfigRepository;
-
-    /**
-     * @var FavoritesRepositoryInterface
-     */
-    private $favoritesRepository;
-
-    /**
-     * @var CustomerCsvExporterInterface
-     */
-    private $customerExporter;
-
-    /**
-     * @var InventoryCsvExporterInterface
-     */
-    private $inventoryExporter;
-
-    /**
      * Create a new job instance.
      *
      * @return void
-     * @throws BindingResolutionException
      */
     public function __construct()
     {
-        $this->websiteConfigRepository = app()->make(WebsiteConfigRepositoryInterface::class);
-        $this->favoritesRepository = app()->make(FavoritesRepositoryInterface::class);
-        $this->customerExporter = app()->make(CustomerCsvExporterInterface::class);
-        $this->inventoryExporter = app()->make(InventoryCsvExporterInterface::class);
     }
 
     /**
@@ -99,19 +74,25 @@ class ExportFavoritesJob implements ShouldQueue
      * @return void
      * @throws BindingResolutionException
      */
-    public function handle()
+    public function handle(WebsiteConfigRepositoryInterface $websiteConfigRepository, FavoritesRepositoryInterface $favoritesRepository, CustomerCsvExporterInterface $customerExporter, InventoryCsvExporterInterface $inventoryExporter)
     {
-        $websites = $this->websiteConfigRepository->getAll([
+        $websites = $websiteConfigRepository->getAll([
             'key' => 'general/favorites_export_schedule'
         ]);
 
-        $websiteEmails = $this->websiteConfigRepository->getAll([
+        $websiteEmails = $websiteConfigRepository->getAll([
             'key' => 'general/favorites_export_emails'
         ]);
 
         $history = WebsiteFavoritesExport::all();
 
-        $websites->each(function ($websiteConfig) use ($history, $websiteEmails) {
+        $websites->each(function ($websiteConfig) use (
+            $history,
+            $websiteEmails,
+            $customerExporter,
+            $inventoryExporter,
+            $favoritesRepository
+        ) {
             $shouldExportNow = false;
             $websiteHistory = $history->firstWhere('website_id', $websiteConfig->website_id);
             if ($websiteHistory) {
@@ -120,7 +101,7 @@ class ExportFavoritesJob implements ShouldQueue
             if (!$websiteHistory || $shouldExportNow) {
                 $emails = $websiteEmails->firstWhere('website_id', $websiteConfig->website_id);
                 if ($emails) {
-                    $data = $this->favoritesRepository->get(['website_id' => $websiteConfig->website_id]);
+                    $data = $favoritesRepository->get(['website_id' => $websiteConfig->website_id]);
 
                     $inventoryData = $data->map(function ($user) {
                         return $user->favoriteInventories->map(function ($favorite) {
@@ -128,8 +109,8 @@ class ExportFavoritesJob implements ShouldQueue
                         });
                     })->flatten();
 
-                    $customerCsv = $this->customerExporter->export($data);
-                    $inventoryCsv = $this->inventoryExporter->export($inventoryData);
+                    $customerCsv = $customerExporter->export($data);
+                    $inventoryCsv = $inventoryExporter->export($inventoryData);
 
                     Mail::send(new FavoritesExportMail($this->sanitizeEmails($emails), $customerCsv, $inventoryCsv));
 

@@ -10,6 +10,10 @@ use App\Models\Website\Config\WebsiteConfig;
 use App\Models\Website\User\WebsiteUser;
 use App\Models\Website\User\WebsiteUserFavoriteInventory;
 use App\Models\Website\Website;
+use App\Repositories\Export\FavoritesRepositoryInterface;
+use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
+use App\Services\Export\Favorites\CustomerCsvExporterInterface;
+use App\Services\Export\Favorites\InventoryCsvExporterInterface;
 use Illuminate\Contracts\Container\BindingResolutionException as BindingResolutionExceptionAlias;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Mail;
@@ -59,7 +63,7 @@ class ExportFavoritesJobTest extends AbstractMonitoredJobsTest
 
         $queueableJob = new ExportFavoritesJob();
 
-        $queueableJob->handle();
+        $queueableJob->handle(app(WebsiteConfigRepositoryInterface::class), app(FavoritesRepositoryInterface::class), app(CustomerCsvExporterInterface::class), app(InventoryCsvExporterInterface::class));
 
         Mail::assertQueued(FavoritesExportMail::class);
 
