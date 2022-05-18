@@ -51,7 +51,7 @@ class ListingRepository implements ListingRepositoryInterface {
         // Already Exists?!
         if(!empty($params['facebook_id'])) {
             $listing = Listings::where('facebook_id', $params['facebook_id'])->first();
-            if(!empty($listing->id)) {                
+            if(!empty($listing->id)) {
                 if($listing->facebook_id !== $params['facebook_id']) {
                     return $this->update($params);
                 } elseif($listing->facebook_id === $params['facebook_id']) {
