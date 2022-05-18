@@ -6,6 +6,8 @@ use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
+use Dingo\Api\Http\Request;
+
 use App\Models\User\User;
 use Stripe\StripeClient;
 
@@ -35,12 +37,13 @@ class StripeService implements StripeServiceInterface
     /**
      * Retrieves a customer with subscriptions and card information
      *
+     * @param Request $request
      * @return object
      */
-    public function getCustomer(): object
+    public function getCustomer(Request $request): object
     {
         $customer = $this->customer;
-        $transactions = $this->getTransactions();
+        $transactions = isset($request->transactions_limit) ? $this->getTransactions($request->transactions_limit) : $this->getTransactions();
         $customer["transactions"] = $transactions["data"];
 
         return $this->customer;
@@ -59,13 +62,20 @@ class StripeService implements StripeServiceInterface
     /**
      * Retrieves all the customer transactions
      *
+     * @param $per_page
      * @return object
      */
-    public function getTransactions(): object
+    public function getTransactions($per_page = null): object
     {
-        return $this->stripe->paymentIntents->all(
-            ['customer' => $this->customer->id]
-        );
+        $params = [
+            'customer' => $this->customer->id
+        ];
+
+        if ($per_page) {
+            $params['limit'] = $per_page;
+        }
+
+        return $this->stripe->paymentIntents->all($params);
     }
 
     /**
