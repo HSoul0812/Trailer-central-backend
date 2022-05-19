@@ -3617,7 +3617,7 @@
                 "type": "zip",
                 "url": "https://nova.laravel.com/dist/laravel/nova/laravel-nova-46e5ebbb36e56de0a0b4d87b9db63b1083da3365-zip-8fcd64.zip",
                 "reference": "46e5ebbb36e56de0a0b4d87b9db63b1083da3365",
-                "shasum": "ce6ec1192f55ccbc9ed02f880cd10c959b608aa2"
+                "shasum": "177c96ea319b525a565f8d21a9ee59d14a1a0dd5"
             },
             "require": {
                 "brick/money": "^0.4.2",
