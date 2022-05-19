@@ -48,7 +48,7 @@ class TcApiResponseInventory
     public ?string $category;
     public ?string $availability;
     public ?string $availability_label;
-
+    public bool $show_on_website;
     #[Pure]
  public static function fromData(array $data): self
  {
@@ -82,6 +82,7 @@ class TcApiResponseInventory
      $obj->availability = self::statusToAvailabilityMap[$data['status_id']] ?? '';
      $obj->availability_label = $data['status'] ?? '';
      $obj->is_archived = $data['is_archived'];
+     $obj->show_on_website = isset($data['show_on_website']) && !!$data['show_on_website'];
      foreach($data['attributes'] as $attribute) {
        $obj->setTypedProperty($attribute['code'], $attribute['value']);
      }
