@@ -111,7 +111,7 @@ class QuickBooksErrors extends Resource
             })
             ->whereNotNull('error_result')
             ->whereNotIn('tb_name', ['qb_items', 'qb_item_category'])
-            ->orderByDesc('created_at');
+            ->orderByDesc('dealer_id');
     }
 
     /**
