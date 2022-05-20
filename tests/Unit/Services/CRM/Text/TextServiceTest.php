@@ -594,7 +594,113 @@ class TextServiceTest extends TestCase
                 return isset($creatParams['from_number']) && $creatParams['from_number'] === $params['From']
                     && isset($creatParams['to_number']) && $creatParams['to_number'] === $activeNumber->dealer_number
                     && isset($creatParams['log_message']) && $creatParams['log_message'] === $params['Body']
-                    && isset($creatParams['date_sent']) && strtotime($creatParams['date_sent']);
+                    && isset($creatParams['date_sent']) && strtotime($creatParams['date_sent'])
+                    && isset($creatParams['files']) && $creatParams['files'] === [];
+            }))
+            ->once();
+
+        $this->textRepositoryMock
+            ->shouldReceive('stop')
+            ->never();
+
+        $this->fileServiceMock
+            ->shouldReceive('bulkUpload')
+            ->never();
+
+        $this->textRepositoryMock
+            ->shouldReceive('commitTransaction')
+            ->once();
+
+        $this->textRepositoryMock
+            ->shouldReceive('rollbackTransaction')
+            ->never();
+
+        /** @var TextServiceInterface $service */
+        $service = $this->app->make(TextServiceInterface::class);
+        $this->prepareFileService($service);
+
+        $result = $service->reply($params);
+
+        $this->assertTrue($result);
+    }
+
+    /**
+     * @group CRM
+     * @covers ::reply
+     * @dataProvider replyParamsProvider
+     *
+     * @param array $params
+     * @param Lead|Mockery\MockInterface|Mockery\LegacyMockInterface $lead
+     * @param Number|Mockery\MockInterface|Mockery\LegacyMockInterface $activeNumber
+     * @param DbCollection $textLogs
+     * @return void
+     */
+    public function testReplyWithFiles(array $params, $lead, $activeNumber, DbCollection $textLogs)
+    {
+        $params['MediaUrl0'] = 'media_url1';
+        $params['MediaUrl1'] = 'media_url2';
+
+        $url1 = 'some_url1';
+        $path1 = 'some_path1';
+        $type1 = 'some_type1';
+
+        $url2 = 'some_url2';
+        $path2 = 'some_path2';
+        $type2 = 'some_type2';
+
+        $expectedFilesArray = [
+            ['path' => $path1, 'type' => $type1],
+            ['path' => $path2, 'type' => $type2],
+        ];
+
+        $fileDtos = new Collection([
+            new FileDto($path1, null, $type1, $url1),
+            new FileDto($path2, null, $type2, $url2),
+        ]);
+
+        $this->numberRepositoryMock
+            ->shouldReceive('activeTwilioNumber')
+            ->with($params['To'], $params['From'])
+            ->once()
+            ->andReturn($activeNumber);
+
+        $this->fileServiceMock
+            ->shouldReceive('bulkUpload')
+            ->once()
+            ->with(['media_url1', 'media_url2'], 0)
+            ->andReturn($fileDtos);
+
+        $this->textRepositoryMock
+            ->shouldReceive('beginTransaction')
+            ->once()
+            ->withNoArgs();
+
+        $this->numberRepositoryMock
+            ->shouldReceive('updateExpirationDate')
+            ->once()
+            ->with(Mockery::on(function($expirationDate) {
+                return is_int($expirationDate);
+            }), $params['To'], $activeNumber->dealer_number);
+
+        $this->twilioServiceMock
+            ->shouldReceive('sendViaTwilio')
+            ->once()
+            ->with($params['To'], $activeNumber->dealer_number, $params['Body'], [$url1, $url2]);
+
+        $this->textRepositoryMock
+            ->shouldReceive('findByFromNumberToNumber')
+            ->once()
+            ->with($activeNumber->dealer_number, $params['From'])
+            ->andReturn($textLogs);
+
+        $this->textRepositoryMock
+            ->shouldReceive('create')
+            ->with(Mockery::on(function($creatParams) use ($activeNumber, $params, $expectedFilesArray) {
+                return isset($creatParams['from_number']) && $creatParams['from_number'] === $params['From']
+                    && isset($creatParams['to_number']) && $creatParams['to_number'] === $activeNumber->dealer_number
+                    && isset($creatParams['log_message']) && $creatParams['log_message'] === $params['Body']
+                    && isset($creatParams['date_sent']) && strtotime($creatParams['date_sent'])
+                    && isset($creatParams['files']) && $creatParams['files'] === $expectedFilesArray;
             }))
             ->once();
 
@@ -612,6 +718,8 @@ class TextServiceTest extends TestCase
 
         /** @var TextServiceInterface $service */
         $service = $this->app->make(TextServiceInterface::class);
+        $this->prepareFileService($service);
+
         $result = $service->reply($params);
 
         $this->assertTrue($result);
@@ -671,7 +779,8 @@ class TextServiceTest extends TestCase
                 return isset($creatParams['from_number']) && $creatParams['from_number'] === $params['From']
                     && isset($creatParams['to_number']) && $creatParams['to_number'] === $activeNumber->dealer_number
                     && isset($creatParams['log_message']) && $creatParams['log_message'] === $params['Body']
-                    && isset($creatParams['date_sent']) && strtotime($creatParams['date_sent']);
+                    && isset($creatParams['date_sent']) && strtotime($creatParams['date_sent'])
+                    && isset($creatParams['files']) && $creatParams['files'] === [];
             }))
             ->once()
             ->andReturn($textLogMock);
@@ -689,12 +798,18 @@ class TextServiceTest extends TestCase
             ->shouldReceive('commitTransaction')
             ->once();
 
+        $this->fileServiceMock
+            ->shouldReceive('bulkUpload')
+            ->never();
+
         $this->textRepositoryMock
             ->shouldReceive('rollbackTransaction')
             ->never();
 
         /** @var TextServiceInterface $service */
         $service = $this->app->make(TextServiceInterface::class);
+        $this->prepareFileService($service);
+
         $result = $service->reply($params);
 
         $this->assertTrue($result);
@@ -757,7 +872,8 @@ class TextServiceTest extends TestCase
                 return isset($creatParams['from_number']) && $creatParams['from_number'] === $params['From']
                     && isset($creatParams['to_number']) && $creatParams['to_number'] === $activeNumber->customer_number
                     && isset($creatParams['log_message']) && $creatParams['log_message'] === $expectedMessages
-                    && isset($creatParams['date_sent']) && strtotime($creatParams['date_sent']);
+                    && isset($creatParams['date_sent']) && strtotime($creatParams['date_sent'])
+                    && isset($creatParams['files']) && $creatParams['files'] === [];
             }))
             ->once()
             ->andReturn($textLogMock);
@@ -770,12 +886,18 @@ class TextServiceTest extends TestCase
             ->shouldReceive('commitTransaction')
             ->once();
 
+        $this->fileServiceMock
+            ->shouldReceive('bulkUpload')
+            ->never();
+
         $this->textRepositoryMock
             ->shouldReceive('rollbackTransaction')
             ->never();
 
         /** @var TextServiceInterface $service */
         $service = $this->app->make(TextServiceInterface::class);
+        $this->prepareFileService($service);
+
         $result = $service->reply($params);
 
         $this->assertTrue($result);
@@ -837,12 +959,18 @@ class TextServiceTest extends TestCase
             ->shouldReceive('commitTransaction')
             ->never();
 
+        $this->fileServiceMock
+            ->shouldReceive('bulkUpload')
+            ->never();
+
         $this->textRepositoryMock
             ->shouldReceive('rollbackTransaction')
             ->once();
 
         /** @var TextServiceInterface $service */
         $service = $this->app->make(TextServiceInterface::class);
+        $this->prepareFileService($service);
+
         $result = $service->reply($params);
 
         $this->assertTrue($result);
@@ -889,12 +1017,17 @@ class TextServiceTest extends TestCase
             ->shouldReceive('commitTransaction')
             ->never();
 
+        $this->fileServiceMock
+            ->shouldReceive('bulkUpload')
+            ->never();
+
         $this->textRepositoryMock
             ->shouldReceive('rollbackTransaction')
             ->never();
 
         /** @var TextServiceInterface $service */
         $service = $this->app->make(TextServiceInterface::class);
+        $this->prepareFileService($service);
 
         $service->reply($params);
     }
@@ -940,12 +1073,17 @@ class TextServiceTest extends TestCase
             ->shouldReceive('commitTransaction')
             ->never();
 
+        $this->fileServiceMock
+            ->shouldReceive('bulkUpload')
+            ->never();
+
         $this->textRepositoryMock
             ->shouldReceive('rollbackTransaction')
             ->never();
 
         /** @var TextServiceInterface $service */
         $service = $this->app->make(TextServiceInterface::class);
+        $this->prepareFileService($service);
 
         $service->reply($params);
     }
@@ -991,12 +1129,17 @@ class TextServiceTest extends TestCase
             ->shouldReceive('commitTransaction')
             ->never();
 
+        $this->fileServiceMock
+            ->shouldReceive('bulkUpload')
+            ->never();
+
         $this->textRepositoryMock
             ->shouldReceive('rollbackTransaction')
             ->never();
 
         /** @var TextServiceInterface $service */
         $service = $this->app->make(TextServiceInterface::class);
+        $this->prepareFileService($service);
 
         $service->reply($params);
     }
@@ -1046,12 +1189,17 @@ class TextServiceTest extends TestCase
             ->shouldReceive('commitTransaction')
             ->never();
 
+        $this->fileServiceMock
+            ->shouldReceive('bulkUpload')
+            ->never();
+
         $this->textRepositoryMock
             ->shouldReceive('rollbackTransaction')
             ->never();
 
         /** @var TextServiceInterface $service */
         $service = $this->app->make(TextServiceInterface::class);
+        $this->prepareFileService($service);
 
         $service->reply($params);
     }
