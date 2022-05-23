@@ -26,6 +26,7 @@ class LeadService implements LeadServiceInterface
     public function create(array $params): TcApiResponseLead
     {
         $params['website_id'] = config('services.trailercentral.tt_website_id');
+        $params['is_from_classifieds'] = 1;
         $access_token = $this->getAccessToken($params['inventory']['inventory_id']);
         $params['inventory'][] = $params['inventory']['inventory_id'];
         $url = config('services.trailercentral.api') . self::INQUIRY_SEND_ROUTE;
