@@ -166,4 +166,12 @@ class LeadStatusController extends RestfulControllerV2
 
         return $this->updatedResponse($status->id);
     }
+
+    /**
+     * @return Response
+     */
+    public function publicStatuses(): Response
+    {
+        return $this->response->collection($this->statusRepository->getAllPublic(), $this->transformer);
+    }
 }
