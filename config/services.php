@@ -38,6 +38,11 @@ return [
         ]
     ],
 
+    'stripe' => [
+        'public_key' => env('STRIPE_KEY'),
+        'secret_key' => env('STRIPE_SECRET')
+    ],
+
     'aws' => [
         'url' => env('AWS_URL'),
         'app_key' => env('APP_KEY'),
