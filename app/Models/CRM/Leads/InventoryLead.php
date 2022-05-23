@@ -1,8 +1,23 @@
 <?php
+
 namespace App\Models\CRM\Leads;
 
+use App\Models\Inventory\Inventory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * Class InventoryLead
+ * @package App\Models\CRM\Leads
+ *
+ * @property int $id
+ * @property int|null $crm_lead_id
+ * @property int|null $website_lead_id
+ * @property int $inventory_id
+ *
+ * @property Inventory $inventory
+ * @property Lead $lead
+ */
 class InventoryLead extends Model
 {
     /**
@@ -25,7 +40,7 @@ class InventoryLead extends Model
      * @var string
      */
     protected $primaryKey = 'id';
-    
+
     /**
      * The attributes that are mass assignable.
      *
@@ -36,4 +51,20 @@ class InventoryLead extends Model
         'website_lead_id',
         'inventory_id'
     ];
+
+    /**
+     * @return BelongsTo
+     */
+    public function inventory(): BelongsTo
+    {
+        return $this->belongsTo(Inventory::class, 'inventory_id', 'inventory_id');
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function lead(): BelongsTo
+    {
+        return $this->belongsTo(Lead::class, 'website_lead_id', 'identifier');
+    }
 }
