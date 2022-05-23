@@ -6,6 +6,10 @@ use Illuminate\Support\Facades\Schema;
 
 class AddLastRunColumnToCollector extends Migration
 {
+
+    private $table = 'collector';
+    private $column = 'last_run';
+
     /**
      * Run the migrations.
      *
@@ -13,9 +17,11 @@ class AddLastRunColumnToCollector extends Migration
      */
     public function up()
     {
-        Schema::table('collector', function (Blueprint $table) {
-            $table->dateTime('last_run')->nullable();
-        });
+        if (!Schema::hasColumn($this->table, $this->column)) {
+            Schema::table($this->table, function (Blueprint $table) {
+                $table->dateTime($this->column)->nullable();
+            });
+        }
     }
 
     /**
@@ -25,8 +31,10 @@ class AddLastRunColumnToCollector extends Migration
      */
     public function down()
     {
-        Schema::table('collector', function (Blueprint $table) {
-            $table->removeColumn('last_run');
-        });
+        if (!Schema::hasColumn($this->table, $this->column)) {
+            Schema::table($this->table, function (Blueprint $table) {
+                $table->removeColumn($this->column);
+            });
+        }
     }
 }

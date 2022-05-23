@@ -47,11 +47,9 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
      * @return void
      */
     protected function gate()
-    {        
-        Gate::define('viewNova', function ($user) {
-            return in_array($user->email, [
-                
-            ]);
+    {
+        Gate::define('viewNova', function ($user = null) {
+            return request()->user('nova') !== null;
         });
     }
 
@@ -99,7 +97,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     {
         //
     }
-    
+
     protected function resources()
     {
         Nova::resourcesIn(app_path('Nova'));

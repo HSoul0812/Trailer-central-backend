@@ -2,22 +2,23 @@
 
 namespace App\Services\CRM\Email;
 
+use App\Models\CRM\Email\Blast;
 use App\Models\CRM\Interactions\EmailHistory;
 use App\Services\CRM\Interactions\DTOs\BuilderEmail;
 use App\Services\CRM\Interactions\DTOs\BuilderStats;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
+use Illuminate\Support\Collection;
 
 interface EmailBuilderServiceInterface {
     /**
      * Send Lead Emails for Blast
-     * 
-     * @param int $id ID of Blast to Send Emails For
-     * @param string Comma-Delimited String of Lead ID's to Send Emails For Blast
+     *
+     * @param Blast $blast Model of Blast to Send Emails For
      * @throws FromEmailMissingSmtpConfigException
      * @throws SendBlastEmailsFailedException
      * @return array response
      */
-    public function sendBlast(int $id, string $leads): array;
+    public function sendBlast(Blast $blast): array;
 
     /**
      * Send Lead Emails for Campaign
@@ -48,11 +49,11 @@ interface EmailBuilderServiceInterface {
      * Send Emails for Builder Config
      * 
      * @param BuilderEmail $builder
-     * @param array $leads
+     * @param Collection<int> $leads
      * @throws SendBuilderEmailsFailedException
      * @return BuilderStats
      */
-    public function sendEmails(BuilderEmail $builder, array $leads): BuilderStats;
+    public function sendEmails(BuilderEmail $builder, Collection $leads): BuilderStats;
 
     
     /**

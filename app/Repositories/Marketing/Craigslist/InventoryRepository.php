@@ -91,19 +91,27 @@ class InventoryRepository implements InventoryRepositoryInterface
             'field' => 'clapp_posts.status',
             'direction' => 'ASC'
         ],
-        'posted_at' => [
+        'queue_id' => [
+            'field' => 'clapp_queue.queue_id',
+            'direction' => 'DESC'
+        ],
+        '-queue_id' => [
+            'field' => 'clapp_queue.queue_id',
+            'direction' => 'ASC'
+        ],
+        'last_posted' => [
             'field' => 'clapp_posts.added',
             'direction' => 'DESC'
         ],
-        '-posted_at' => [
+        '-last_posted' => [
             'field' => 'clapp_posts.added',
             'direction' => 'ASC'
         ],
-        'scheduled_at' => [
+        'next_scheduled' => [
             'field' => 'clapp_session.session_scheduled',
             'direction' => 'DESC'
         ],
-        '-scheduled_at' => [
+        '-next_scheduled' => [
             'field' => 'clapp_session.session_scheduled',
             'direction' => 'ASC'
         ],
