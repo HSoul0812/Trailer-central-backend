@@ -6,6 +6,10 @@ use Illuminate\Support\Facades\Schema;
 
 class AddRunWithoutErrorsColumnToCollector extends Migration
 {
+
+    private $table = 'collector';
+    private $column = 'run_without_errors';
+
     /**
      * Run the migrations.
      *
@@ -13,9 +17,11 @@ class AddRunWithoutErrorsColumnToCollector extends Migration
      */
     public function up()
     {
-        Schema::table('collector', function (Blueprint $table) {
-            $table->boolean('run_without_errors')->default(1);
-        });
+        if (!Schema::hasColumn($this->table, $this->column)) {
+            Schema::table($this->table, function (Blueprint $tb) {
+                $tb->boolean($this->column)->default(1);
+            });
+        }
     }
 
     /**
@@ -25,8 +31,10 @@ class AddRunWithoutErrorsColumnToCollector extends Migration
      */
     public function down()
     {
-        Schema::table('collector', function (Blueprint $table) {
-            $table->removeColumn('run_without_errors');
-        });
+        if (!Schema::hasColumn($this->table, $this->column)) {
+            Schema::table($this->table, function (Blueprint $tb) {
+                $tb->removeColumn($this->column);
+            });
+        };
     }
 }
