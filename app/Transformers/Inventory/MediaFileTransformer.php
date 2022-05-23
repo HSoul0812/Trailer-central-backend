@@ -10,8 +10,8 @@ abstract class MediaFileTransformer extends TransformerAbstract
 {
     protected function getBaseUrl(): string
     {
-        $urlMetadata = parse_url(env('AWS_URL'));
+        $urlMetadata = parse_url(config('services.aws.url'));
 
-        return $urlMetadata['scheme'] . '://' . $urlMetadata['host'] . '/'.env('AWS_BUCKET');
+        return $urlMetadata['scheme'] . '://' . $urlMetadata['host'] . '/'. config('services.aws.bucket');
     }
 }

@@ -153,6 +153,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Nova\Nova;
+use Propaganistas\LaravelPhone\PhoneServiceProvider;
 
 use Illuminate\Support\Facades\Schema;
 
@@ -353,5 +354,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(CustomOverlayRepositoryInterface::class, CustomOverlayRepository::class);
 
         $this->app->bind(ShowroomBulkUpdateRepositoryInterface::class, ShowroomBulkUpdateRepository::class);
+
+        $this->app->register(PhoneServiceProvider::class);
     }
 }

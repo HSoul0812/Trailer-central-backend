@@ -3,12 +3,11 @@
 namespace App\Providers;
 
 use Feed\EditMapping\EditMapping;
-use Showroom\BulkConfiguration\BulkConfiguration;
-
 use Illuminate\Support\Facades\Gate;
 use Laravel\Nova\Cards\Help;
 use Laravel\Nova\Nova;
 use Laravel\Nova\NovaApplicationServiceProvider;
+use Showroom\BulkConfiguration\BulkConfiguration;
 use App\Nova\Resources\Dealer\Dealer;
 
 class NovaServiceProvider extends NovaApplicationServiceProvider
@@ -21,6 +20,10 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     public function boot()
     {
         parent::boot();
+
+        Nova::userTimezone(function () {
+            return config('app.db_timezone');
+        });
     }
 
     /**
@@ -45,10 +48,8 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
      */
     protected function gate()
     {
-        Gate::define('viewNova', function ($user) {
-            return in_array($user->email, [
-                //
-            ]);
+        Gate::define('viewNova', function ($user = null) {
+            return request()->user('nova') !== null;
         });
     }
 
@@ -82,8 +83,8 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     public function tools()
     {
         return [
-            new EditMapping(),
-            new BulkConfiguration()
+            new BulkConfiguration(),
+            new EditMapping()
         ];
     }
 

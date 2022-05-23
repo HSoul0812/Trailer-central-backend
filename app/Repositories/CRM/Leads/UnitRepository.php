@@ -2,35 +2,68 @@
 
 namespace App\Repositories\CRM\Leads;
 
-use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Leads\InventoryLead;
-use App\Repositories\CRM\Leads\UnitRepositoryInterface;
+use App\Repositories\RepositoryAbstract;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 
-class UnitRepository implements UnitRepositoryInterface {
+/**
+ * Class UnitRepository
+ * @package App\Repositories\CRM\Leads
+ */
+class UnitRepository extends RepositoryAbstract implements UnitRepositoryInterface
+{
+    private const AVAILABLE_INCLUDE = [
+        'inventory',
+    ];
 
-    public function create($params): InventoryLead {
+    /**
+     * @param $params
+     * @return InventoryLead
+     */
+    public function create($params): InventoryLead
+    {
         // Create Inventory Lead
         return InventoryLead::create($params);
     }
 
-    public function delete($params) {
+    /**
+     * @param $params
+     * @return bool
+     */
+    public function delete($params): bool
+    {
         // Delete Inventory Lead
         return InventoryLead::where('website_lead_id', $params['website_lead_id'])->delete();
     }
 
-    public function get($params): InventoryLead {
+    /**
+     * @param $params
+     * @return InventoryLead
+     */
+    public function get($params): InventoryLead
+    {
         return InventoryLead::where('website_lead_id', $params['website_lead_id'])
                             ->where('inventory_id', $params['inventory_id'])->first();
     }
 
-    public function getAll($params): Collection {
-        // Return Lead Sources
-        return InventoryLead::where('website_lead_id', $params['website_lead_id'])->get();
-    }
+    /**
+     * @param $params
+     * @return Collection
+     */
+    public function getAll($params): Collection
+    {
+        $query = InventoryLead::query();
 
-    public function update($params) {
-        throw new NotImplementedException;
+        if (isset($params['website_lead_id'])) {
+            $query->where('website_lead_id', $params['website_lead_id']);
+        }
+
+        if (isset($params['include']) && is_string($params['include'])) {
+            foreach (array_intersect(self::AVAILABLE_INCLUDE, explode(',', $params['include'])) as $include) {
+                $query = $query->with($include);
+            }
+        }
+
+        return $query->get();
     }
 }

@@ -79,6 +79,8 @@ return [
 
     'timezone' => env('APP_TIMEZONE', 'UTC'),
 
+    'db_timezone' => env('DB_TIMEZONE', 'America/Indiana/Indianapolis'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Locale Configuration
