@@ -15,9 +15,17 @@ class AddStripeCustomerDealer extends Migration
     {
         // Add stripe columns to dealer table
         Schema::table('dealer', function (Blueprint $table) {
-            $table->string('card_brand')->nullable();
-            $table->string('card_last_four', 4)->nullable();
-            $table->timestamp('trial_ends_at')->nullable();
+            if (!Schema::hasColumn($table, 'card_brand')) {
+                $table->string('card_brand')->nullable();
+            }
+
+            if (!Schema::hasColumn($table, 'card_last_four')) {
+                $table->string('card_last_four', 4)->nullable();
+            }
+
+            if (!Schema::hasColumn($table, 'trial_ends_at')) {
+                $table->timestamp('trial_ends_at')->nullable();
+            }
         });
     }
 
