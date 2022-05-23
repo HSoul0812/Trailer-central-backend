@@ -66,6 +66,13 @@ class SubscriptionController extends RestfulControllerV2
      *     path="/api/subscriptions/customer",
      *     description="Retrieves a customer information like subscriptions and card",
      *     tags={"Subscriptions"},
+     *     @OA\Parameter(
+     *         name="transactions_limit",
+     *         in="query",
+     *         description="Transactions Limit",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
      *     @OA\Response(
      *         response="200",
      *         description="Retrieves a customer information like subscriptions and card",
@@ -74,7 +81,7 @@ class SubscriptionController extends RestfulControllerV2
      * )
      */
     public function getCustomer(Request $request) {
-        return $this->response->item($this->subscriptionRepository->getCustomer(), new CustomerTransformer());
+        return $this->response->item($this->subscriptionRepository->getCustomer($request), new CustomerTransformer());
     }
 
     /**
