@@ -2,6 +2,7 @@
 
 namespace App\Repositories\User;
 
+use App\Repositories\Traits\SortTrait;
 use App\Traits\Repository\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Models\User\DealerLocation;
@@ -13,7 +14,18 @@ use InvalidArgumentException;
 
 class DealerLocationRepository implements DealerLocationRepositoryInterface
 {
-    use Transaction;
+    use Transaction, SortTrait;
+
+    private $sortOrders = [
+        'name' => [
+            'field' => 'name',
+            'direction' => 'DESC'
+        ],
+        '-name' => [
+            'field' => 'name',
+            'direction' => 'ASC'
+        ]
+    ];
 
     /**
      * @param array $params
@@ -78,6 +90,10 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
+        }
+
+        if (isset($params['sort'])) {
+            $query = $this->addSortQuery($query, $params['sort']);
         }
 
         return $query->with('salesTax')->paginate($params['per_page'])->appends($params);
@@ -309,5 +325,22 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
         $query->whereRaw('LOWER(name) = ?', ['name' => Str::lower($name)]);
 
         return $query->exists();
+    }
+
+    /**
+     * @param int $dealerLocationId
+     * @return string country
+     */
+    public function getCountryById($dealerLocationId)
+    {
+        return DealerLocation::find($dealerLocationId)->country;
+    }
+
+    /**
+     * @return string[][]
+     */
+    protected function getSortOrders(): array
+    {
+        return $this->sortOrders;
     }
 }

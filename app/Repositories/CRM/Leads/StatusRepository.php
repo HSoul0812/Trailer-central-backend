@@ -6,6 +6,7 @@ use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Services\Common\DTOs\SimpleData;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class StatusRepository implements StatusRepositoryInterface {
@@ -123,5 +124,22 @@ class StatusRepository implements StatusRepositoryInterface {
 
         // Create Status!
         return $this->create($params);
+    }
+
+    /**
+     * @return Collection<SimpleData>
+     */
+    public function getAllPublic(): Collection
+    {
+        $statuses = collect([]);
+
+        foreach(LeadStatus::PUBLIC_STATUSES as $key => $status) {
+            $simple = new SimpleData();
+            $simple->setIndex($key);
+            $simple->setName($status);
+            $statuses->push($simple);
+        }
+
+        return $statuses;
     }
 }
