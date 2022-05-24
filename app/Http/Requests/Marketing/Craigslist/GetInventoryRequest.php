@@ -11,7 +11,10 @@ class GetInventoryRequest extends Request {
         'dealer_id' => 'required|integer',
         'profile_id' => 'required|integer|valid_clapp_profile',
         'per_page' => 'integer',
-        'sort' => 'in:title,-title,stock,-stock,manufacturer,-manufacturer,category,-category,price,-price,status,-status,posted_at,-posted_at,scheduled_at,-scheduled_at,created_at,-created_at,updated_at,-updated_at',
+        'sort' => 'in:title,-title,stock,-stock,manufacturer,-manufacturer,' .
+                    'category,-category,price,-price,status,-status,queue_id,-queue_id,' .
+                    'last_posted,-last_posted,next_scheduled,-next_scheduled,' .
+                    'created_at,-created_at,updated_at,-updated_at',
         'search_term' => 'string',
         'images_greater_than' => 'integer',
         'images_less_than' => 'integer',

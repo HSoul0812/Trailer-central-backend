@@ -2,7 +2,7 @@
 
 namespace App\Models\User;
 
-use App\Http\Controllers\v1\CRM\StatesController;
+use App\Helpers\GeographyHelper;
 use App\Models\Feed\Mapping\Incoming\ApiEntityReference;
 use App\Models\Inventory\Inventory;
 use App\Models\Region;
@@ -310,8 +310,8 @@ class DealerLocation extends Model
         }
 
         $state = $this->region;
-        if(isset(StatesController::STATES_LIST[$this->region])) {
-            $baseState = StatesController::STATES_LIST[$this->region];
+        if(isset(GeographyHelper::STATES_LIST[$this->region])) {
+            $baseState = GeographyHelper::STATES_LIST[$this->region];
             $state = ucwords(strtolower($baseState));
         }
 
