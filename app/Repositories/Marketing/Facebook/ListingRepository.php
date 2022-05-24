@@ -197,6 +197,10 @@ class ListingRepository implements ListingRepositoryInterface {
             });
         }
 
+        // Set Sort By
+        $query = $this->addSortQuery($query, '-created_at');
+
+        // Update Page Limit From Settings
         $forced = config('marketing.fb.settings.limit.force', 0);
         if (!isset($params['per_page']) || !empty($forced)) {
             $params['per_page'] = (int) config('marketing.fb.settings.limit.listings', 20);
