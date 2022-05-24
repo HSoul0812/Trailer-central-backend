@@ -15,7 +15,7 @@ class AddCsvUrlToCollectorTable extends Migration
      * @return void
      */
     public function up(): void {
-        if (Schema::hasColumn(self::tableName, self::columnName)) {
+        if (!Schema::hasColumn(self::tableName, self::columnName)) {
             Schema::table(self::tableName, function (Blueprint $table) {
                 $table->string(self::columnName)->nullable();
             });
