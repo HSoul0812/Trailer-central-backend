@@ -16,6 +16,8 @@ use App\Repositories\Parts\TypeRepository;
 use App\Repositories\Parts\TypeRepositoryInterface;
 use App\Repositories\Glossary\GlossaryRepository;
 use App\Repositories\Glossary\GlossaryRepositoryInterface;
+use App\Repositories\SubscribeEmailSearch\SubscribeEmailSearchRepository;
+use App\Repositories\SubscribeEmailSearch\SubscribeEmailSearchRepositoryInterface;
 use App\Repositories\SyncProcessRepository;
 use App\Repositories\SyncProcessRepositoryInterface;
 use App\Repositories\SysConfig\SysConfigRepository;
@@ -32,6 +34,8 @@ use App\Services\Inventory\InventoryService;
 use App\Services\Inventory\InventoryServiceInterface;
 use App\Services\Leads\LeadService;
 use App\Services\Leads\LeadServiceInterface;
+use App\Services\SubscribeEmailSearch\SubscribeEmailSearchService;
+use App\Services\SubscribeEmailSearch\SubscribeEmailSearchServiceInterface;
 use App\Services\MapSearch\GoogleMapSearchService;
 use App\Services\MapSearch\TomTomMapSearchService;
 use App\Services\SysConfig\SysConfigService;
@@ -51,9 +55,11 @@ class TrailerCentralIntegrationServiceProvider extends ServiceProvider
         $this->app->bind(InventoryLogServiceInterface::class, InventoryLogService::class);
         $this->app->bind(InventoryServiceInterface::class, InventoryService::class);
         $this->app->bind(LeadServiceInterface::class, LeadService::class);
+        $this->app->bind(SubscribeEmailSearchServiceInterface::class, SubscribeEmailSearchService::class);
 
         $this->app->bind(TypeRepositoryInterface::class, TypeRepository::class);
         $this->app->bind(GlossaryRepositoryInterface::class, GlossaryRepository::class);
+        $this->app->bind(SubscribeEmailSearchRepositoryInterface::class, SubscribeEmailSearchRepository::class);
 
         $this->app->bind(LeadRepositoryInterface::class, LeadRepository::class);
         $this->app->bind(LeadSyncServiceInterface::class, LeadSyncService::class);
