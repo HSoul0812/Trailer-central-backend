@@ -125,6 +125,6 @@ class AddSitemaps extends Command
 
         echo $filePath . PHP_EOL;
 
-        return Storage::disk('s3')->put($filePath, file_get_contents($tmpFile), 'public');
+        return Storage::disk('s3')->put($filePath, file_get_contents($tmpFile));
     }
 }

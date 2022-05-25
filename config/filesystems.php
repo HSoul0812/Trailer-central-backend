@@ -83,6 +83,7 @@ return [
             'region' => env('AWS_DEFAULT_REGION'),
             'bucket' => env('MAIL_BUCKET'),
             'url' => env('AWS_URL'),
+            'visibility' => env('AWS_ACL', 'private'),
         ],
 
         'ses' => [

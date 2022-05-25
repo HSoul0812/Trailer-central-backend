@@ -506,7 +506,7 @@ class PartRepository implements PartRepositoryInterface {
             throw new ImageNotDownloadedException('Image not accessible: '.$image['url']);
         }
 
-        Storage::disk('s3')->put($fileName, $imageData, 'public');
+        Storage::disk('s3')->put($fileName, $imageData);
         $s3ImageUrl = Storage::disk('s3')->url($fileName);
 
         PartImage::create([

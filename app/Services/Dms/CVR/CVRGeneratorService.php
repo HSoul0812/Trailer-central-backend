@@ -446,7 +446,7 @@ class CVRGeneratorService implements CVRGeneratorServiceInterface
         }
         
         $fileName = "CVR/{$unitSale->id}_{$mappedDealerId}.gen";
-        Storage::disk('s3')->put($fileName, $xml, ['visibility' => 'public']);
+        Storage::disk('s3')->put($fileName, $xml);
         return new CVRFileDTO('https://'.env('AWS_BUCKET').'.s3.amazonaws.com/'.$fileName);
     }
     

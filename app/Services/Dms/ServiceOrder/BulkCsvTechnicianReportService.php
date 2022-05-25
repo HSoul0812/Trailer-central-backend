@@ -106,7 +106,7 @@ class BulkCsvTechnicianReportService extends AbstractMonitoredJobService impleme
         }
         $this->repository->updateProgress($job->token, 95);
 
-        Storage::disk('s3')->put(FilesystemPdfExporter::PDF_EXPORT_S3_PREFIX . $job->payload->filename, $csv_data, 'public');
+        Storage::disk('s3')->put(FilesystemPdfExporter::PDF_EXPORT_S3_PREFIX . $job->payload->filename, $csv_data);
 
         $this->repository->setCompleted($job->token);
     }
