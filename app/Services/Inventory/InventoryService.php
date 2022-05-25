@@ -4,6 +4,7 @@ namespace App\Services\Inventory;
 
 use App\DTOs\Inventory\TcApiResponseInventory;
 use App\Repositories\SysConfig\SysConfigRepositoryInterface;
+use App\Services\Inventory\ESQuery\ESBoolQueryBuilder;
 use App\Services\Inventory\ESQuery\ESInventoryQueryBuilder;
 use App\Services\Inventory\ESQuery\SortOrder;
 use GuzzleHttp\Exception\GuzzleException;
@@ -31,7 +32,6 @@ class InventoryService implements InventoryServiceInterface
         'stalls' => 'numStalls',
         'pull_type' => 'pullType',
         'manufacturer' => 'manufacturer',
-        'category' => 'category',
         'condition' => 'condition',
         'construction' => 'frameMaterial',
         'year' => 'year',
@@ -119,7 +119,7 @@ class InventoryService implements InventoryServiceInterface
 
             foreach ($mappedCategories as $currentCategory) {
               $mapToCategories = explode(';', $currentCategory->map_to);
-              foreach ($mapToCategories as $mapToCategory) {  
+              foreach ($mapToCategories as $mapToCategory) {
                 if ($mapToCategory == $oldCategory) {
                   $mappedCategory = $currentCategory;
                 }
@@ -171,8 +171,7 @@ class InventoryService implements InventoryServiceInterface
     private function getTypedAggregations($params) {
         $esSearchUrl = $this->esSearchUrl();
         $queryBuilder = new ESInventoryQueryBuilder();
-        $this->addTypeQuery($queryBuilder, $params);
-        $this->addTypeAggregations($queryBuilder, $params);
+        $this->addTypeAggregationQuery($queryBuilder, $params);
         $query = $queryBuilder->build();
 
         return \Cache::remember(json_encode($query), self::ES_CACHE_EXPIRY, function () use($esSearchUrl, $query){
@@ -190,8 +189,7 @@ class InventoryService implements InventoryServiceInterface
     private function getCategorizedAggregations($params) {
         $esSearchUrl = $this->esSearchUrl();
         $queryBuilder = new ESInventoryQueryBuilder();
-        $this->addCategoryQuery($queryBuilder, $params);
-        $this->addCategoryAggregations($queryBuilder, $params);
+        $this->addCategoryAggregationQuery($queryBuilder, $params);
         $query = $queryBuilder->build();
 
         return \Cache::remember(json_encode($query), self::ES_CACHE_EXPIRY, function () use($esSearchUrl, $query){
@@ -206,8 +204,9 @@ class InventoryService implements InventoryServiceInterface
     #[ArrayShape(['from' => "int", 'size' => "int", 'query' => "array[]", 'aggregations' => "array"])]
     private function buildSearchQuery(array $params): ESInventoryQueryBuilder {
         $queryBuilder = new ESInventoryQueryBuilder();
-
-        $this->addTermQueries($queryBuilder, $params);
+        $this->addCommonFilter($queryBuilder);
+        $this->addCategoryQuery($queryBuilder, $params);
+        $this->addTermSearchQueries($queryBuilder, $params);
         $this->addRangeQueries($queryBuilder, $params);
         $this->addPaginateQuery($queryBuilder, $params);
         $this->addScriptFilter($queryBuilder, $params);
@@ -258,7 +257,23 @@ class InventoryService implements InventoryServiceInterface
 
     }
 
-    private function addTypeAggregations(ESInventoryQueryBuilder $queryBuilder, array $params) {
+    private function addCategoryAggregationQuery(ESInventoryQueryBuilder $queryBuilder, array $params) {
+        $this->addCategoryQuery($queryBuilder, $params);
+        $this->addCommonFilter($queryBuilder);
+        $this->addScriptFilter($queryBuilder, []);
+        $queryBuilder->setFilterAggregate([
+            'manufacturer' => ['terms' => ['field' => 'manufacturer', 'size' => 50]],
+        ]);
+    }
+
+    private function addTypeAggregationQuery(ESInventoryQueryBuilder $queryBuilder, array $params) {
+        $mappedCategories = $this->getMappedCategories(
+            $params['type_id'],
+            null
+        );
+        $queryBuilder->addTermInValuesQuery('category', $mappedCategories);
+        $this->addCommonFilter($queryBuilder);
+        $this->addScriptFilter($queryBuilder, []);
         $queryBuilder->setFilterAggregate([
             'pull_type' => ['terms' => ['field' => 'pullType']],
             'color' => ['terms' => ['field' => 'color']],
@@ -280,11 +295,6 @@ class InventoryService implements InventoryServiceInterface
             'height' => ['stats' => ['field' => 'height']],
             'gvwr' => ['stats' => ['field' => 'gvwr']],
             'payload_capacity' => ['stats' => ['field' => 'payloadCapacity']],
-        ]);
-    }
-    private function addCategoryAggregations(ESInventoryQueryBuilder $queryBuilder, array $params) {
-        $queryBuilder->setFilterAggregate([
-            'manufacturer' => ['terms' => ['field' => 'manufacturer', 'size' => 50]],
         ]);
     }
 
@@ -313,55 +323,47 @@ class InventoryService implements InventoryServiceInterface
         $queryBuilder->paginate($currentPage, $params['per_page'] ?? self::PAGE_SIZE);
     }
 
-    private function addTermQueries(ESInventoryQueryBuilder $queryBuilder, array $params) {
-        $queryBuilder->addTermQuery('isRental', false);
-        $queryBuilder->addTermQuery(
-            'availability',
-            self::INVENTORY_SOLD,
-            ESInventoryQueryBuilder::OCCUR_MUST_NOT
-        );
+    private function addTermSearchQueries(ESInventoryQueryBuilder $queryBuilder, array $params) {
         foreach(self::TERM_SEARCH_KEY_MAP as $field => $searchField) {
-            if (isset($params['type_id']) && $searchField == 'category') {
-              $mapped_categories = $this->getMappedCategories(
-                  $params['type_id'],
-                  $params[$field] ?? null
-              );
-              $queryBuilder->addTermQueries($searchField, $mapped_categories);
-            } else {
-              $queryBuilder->addTermQueries($searchField, $params[$field] ?? null);
-            }
+          $queryBuilder->addTermInValuesQuery($searchField, $params[$field] ?? null);
         }
     }
 
-    private function addCategoryQuery(ESInventoryQueryBuilder $queryBuilder, array $params) {
-        $mapped_categories = $this->getMappedCategories(
+    private function addCommonFilter(ESInventoryQueryBuilder $queryBuilder) {
+        $queryBuilder->addTermQuery('isRental', false);
+        $queryBuilder->addTermQuery(
+            'availability',
+            self::INVENTORY_SOLD,
+            ESInventoryQueryBuilder::OCCUR_MUST_NOT
+        );
+    }
+
+    private function addCategoryQuery(ESInventoryQueryBuilder $queryBuilder, array $params)
+    {
+        $mappedCategories = $this->getMappedCategories(
             $params['type_id'],
             $params['category'] ?? null
         );
-        $queryBuilder->addTermQueries('category', $mapped_categories);
-        $queryBuilder->addTermQuery('isRental', false);
-        $queryBuilder->addTermQuery(
-            'availability',
-            self::INVENTORY_SOLD,
-            ESInventoryQueryBuilder::OCCUR_MUST_NOT
-        );
-        $this->addScriptFilter($queryBuilder, []);
+
+        $categoryQueries = $queryBuilder->buildTermInValuesQuery('category', $mappedCategories);
+        if(isset($params['category']) && $params['category'] === 'Tilt') {
+            $mappedTypeCategories = $this->getMappedCategories(
+                $params['type_id'],
+                null
+            );
+
+            $tiltQuery = (new ESBoolQueryBuilder())
+                ->must($queryBuilder->buildTermQuery("tilt", 1))
+                ->should($queryBuilder->buildTermInValuesQuery("category", $mappedTypeCategories))
+                ->build();
+            $categoryQueries[] = $tiltQuery;
+        }
+        $queryBuilder
+            ->addQueryToContext(
+                (new ESBoolQueryBuilder())->should($categoryQueries)->build()
+            );
     }
 
-    private function addTypeQuery(ESInventoryQueryBuilder $queryBuilder, array $params) {
-        $mapped_categories = $this->getMappedCategories(
-            $params['type_id'],
-            null
-        );
-        $queryBuilder->addTermQueries('category', $mapped_categories);
-        $queryBuilder->addTermQuery('isRental', false);
-        $queryBuilder->addTermQuery(
-            'availability',
-            self::INVENTORY_SOLD,
-            ESInventoryQueryBuilder::OCCUR_MUST_NOT
-        );
-        $this->addScriptFilter($queryBuilder, []);
-    }
 
     private function addRangeQueries(ESInventoryQueryBuilder $queryBuilder, array $params)
     {
