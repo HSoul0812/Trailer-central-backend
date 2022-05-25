@@ -14,7 +14,7 @@ class AddNewColumnToDealerLocationSalesTaxItemV2 extends Migration
     public function up()
     {
         Schema::table('dealer_location_sales_tax_item_v2', function (Blueprint $table) {
-            $table->string('registration_title', 50);
+            $table->string('registration_title', 50)->after('settngs')->nullable();
         });
     }
 

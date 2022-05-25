@@ -28,7 +28,6 @@ class DealerLocationSalesTaxItemV1 extends DealerLocationSalesTaxItem
         "standard",
         "tax_exempt",
         "out_of_state_reciprocal",
-        "out_of_state_non_reciprocal",
-        "registration_title"
+        "out_of_state_non_reciprocal"
     ];
 }
