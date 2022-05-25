@@ -13,13 +13,9 @@ class AddNewColumnToDealerLocationSalesTaxItemV2 extends Migration
      */
     public function up()
     {
-        DB::statement(<<<SQL
-            ALTER TABLE `dealer_location_sales_tax_item_v2` ADD `registration_title`
-                text
-                NULL
-                AFTER `settngs`;
-            SQL
-        );
+        Schema::table('dealer_location_sales_tax_item_v2', function (Blueprint $table) {
+            $table->string('registration_title', 50);
+        });
     }
 
     /**
