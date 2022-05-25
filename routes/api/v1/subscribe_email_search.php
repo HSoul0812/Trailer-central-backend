@@ -10,6 +10,7 @@ $api->version('v1', function ($api) {
     | API Glossary
     |--------------------------------------------------------------------------
     */
-
-    $api->put('subscribe/sent', 'App\Http\Controllers\v1\SubscribeEmailSearch\SubscribeEmailSearchController@create');
+    $api->group(['prefix' => '/email_search'], function ($api) {
+      $api->put('subscribe', 'App\Http\Controllers\v1\SubscribeEmailSearch\SubscribeEmailSearchController@create');
+    });
 });
