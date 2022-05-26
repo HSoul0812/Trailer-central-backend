@@ -262,7 +262,7 @@ class InventoryService implements InventoryServiceInterface
         $this->addCommonFilter($queryBuilder);
         $this->addScriptFilter($queryBuilder, []);
         $queryBuilder->setFilterAggregate([
-            'manufacturer' => ['terms' => ['field' => 'manufacturer', 'size' => 50]],
+            'manufacturer' => ['terms' => ['field' => 'manufacturer', 'size' => 10000]],
         ]);
     }
 
