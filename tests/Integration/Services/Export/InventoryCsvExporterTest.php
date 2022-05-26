@@ -2,8 +2,6 @@
 
 namespace Tests\Integration\Services\Export;
 
-use App\Services\Export\Favorites\CustomerCsvExporter;
-use App\Services\Export\Favorites\CustomerCsvExporterInterface;
 use App\Services\Export\Favorites\InventoryCsvExporter;
 use App\Services\Export\Favorites\InventoryCsvExporterInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -32,7 +30,7 @@ class InventoryCsvExporterTest extends TestCase
     public function testItGeneratesTheDesiredHeadings()
     {
         $headings = <<<HEADINGS
-"Stock #",Vin,Location,Condition,Type,Category,Title,Year,Manufacturer,Status,MSRP,Model,Price,"Sales Price","Hidden Price"
+"First Name","Last Name","Phone Number","Email Address","Terms and Conditions Accepted","Count of Favorites","Date Created","Last Login","Last Update","Stock #",Vin,Location,Condition,Type,Category,Title,Year,Manufacturer,Status,MSRP,Model,Price,"Sales Price","Hidden Price"
 
 HEADINGS;
 

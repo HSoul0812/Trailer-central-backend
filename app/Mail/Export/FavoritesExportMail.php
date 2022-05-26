@@ -14,11 +14,6 @@ class FavoritesExportMail extends Mailable implements ShouldQueue
     /**
      * @var string
      */
-    private $customerCsv;
-
-    /**
-     * @var string
-     */
     private $inventoryCsv;
 
     /**
@@ -31,9 +26,8 @@ class FavoritesExportMail extends Mailable implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(array $recipients, string $customerCsv, string $inventoryCsv)
+    public function __construct(array $recipients, string $inventoryCsv)
     {
-        $this->customerCsv = $customerCsv;
         $this->inventoryCsv = $inventoryCsv;
         $this->recipients = $recipients;
     }
@@ -52,9 +46,7 @@ class FavoritesExportMail extends Mailable implements ShouldQueue
             ->to($this->recipients)
             ->subject('Inventory Favorites Data Export')
             ->view('emails.export.inventory-favorites')
-            ->attachData($this->customerCsv, 'customer-data.csv', [
-                'mime' => 'text/csv',
-            ])->attachData($this->inventoryCsv, 'inventory-data.csv', [
+            ->attachData($this->inventoryCsv, 'inventory-data.csv', [
                 'mime' => 'text/csv',
             ]);
     }

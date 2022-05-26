@@ -4,8 +4,6 @@ namespace App\Providers;
 
 use App\Repositories\Export\FavoritesRepository;
 use App\Repositories\Export\FavoritesRepositoryInterface;
-use App\Services\Export\Favorites\CustomerCsvExporter;
-use App\Services\Export\Favorites\CustomerCsvExporterInterface;
 use App\Services\Export\Favorites\InventoryCsvExporter;
 use App\Services\Export\Favorites\InventoryCsvExporterInterface;
 use Illuminate\Support\ServiceProvider;
@@ -20,7 +18,6 @@ class FavoritesExportServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->bind(FavoritesRepositoryInterface::class, FavoritesRepository::class);
-        $this->app->bind(CustomerCsvExporterInterface::class, CustomerCsvExporter::class);
         $this->app->bind(InventoryCsvExporterInterface::class, InventoryCsvExporter::class);
     }
 

@@ -7,7 +7,6 @@ use App\Models\Export\WebsiteFavoritesExport;
 use App\Models\Website\Config\WebsiteConfig;
 use App\Repositories\Export\FavoritesRepositoryInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
-use App\Services\Export\Favorites\CustomerCsvExporterInterface;
 use App\Services\Export\Favorites\InventoryCsvExporterInterface;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
@@ -74,7 +73,7 @@ class ExportFavoritesJob implements ShouldQueue
      * @return void
      * @throws BindingResolutionException
      */
-    public function handle(WebsiteConfigRepositoryInterface $websiteConfigRepository, FavoritesRepositoryInterface $favoritesRepository, CustomerCsvExporterInterface $customerExporter, InventoryCsvExporterInterface $inventoryExporter)
+    public function handle(WebsiteConfigRepositoryInterface $websiteConfigRepository, FavoritesRepositoryInterface $favoritesRepository)
     {
         $websites = $websiteConfigRepository->getAll([
             'key' => 'general/favorites_export_schedule'
@@ -89,10 +88,10 @@ class ExportFavoritesJob implements ShouldQueue
         $websites->each(function ($websiteConfig) use (
             $history,
             $websiteEmails,
-            $customerExporter,
-            $inventoryExporter,
             $favoritesRepository
         ) {
+            $inventoryExporter = app()->make(InventoryCsvExporterInterface::class);
+
             $shouldExportNow = false;
             $websiteHistory = $history->firstWhere('website_id', $websiteConfig->website_id);
             if ($websiteHistory) {
@@ -104,15 +103,16 @@ class ExportFavoritesJob implements ShouldQueue
                     $data = $favoritesRepository->get(['website_id' => $websiteConfig->website_id]);
 
                     $inventoryData = $data->map(function ($user) {
-                        return $user->favoriteInventories->map(function ($favorite) {
-                            return $favorite->inventory;
+                        return $user->favoriteInventories->map(function ($favorite) use ($user) {
+                            $inventory = $favorite->inventory;
+                            $inventory->setAttribute('user', $user);
+                            return $inventory;
                         });
                     })->flatten();
 
-                    $customerCsv = $customerExporter->export($data);
                     $inventoryCsv = $inventoryExporter->export($inventoryData);
 
-                    Mail::send(new FavoritesExportMail($this->sanitizeEmails($emails), $customerCsv, $inventoryCsv));
+                    Mail::send(new FavoritesExportMail($this->sanitizeEmails($emails), $inventoryCsv));
 
                     WebsiteFavoritesExport::logRun($websiteConfig->website_id);
                 }

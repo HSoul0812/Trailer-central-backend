@@ -26,6 +26,15 @@ class InventoryCsvExporter implements InventoryCsvExporterInterface
     private function setCsvHeaders()
     {
         $this->writer->insertOne([
+            'First Name',
+            'Last Name',
+            'Phone Number',
+            'Email Address',
+            'Terms and Conditions Accepted',
+            'Count of Favorites',
+            'Date Created',
+            'Last Login',
+            'Last Update',
             'Stock #',
             'Vin',
             'Location',
