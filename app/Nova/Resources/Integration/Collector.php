@@ -261,6 +261,7 @@ class Collector extends Resource
                 Boolean::make('Ignore Manually Added Units', 'ignore_manually_added_units')->hideFromIndex()->help(
                     'If active any manually added units will be ignored by the feed'
                 ),
+                Boolean::make('Show On Auction 123', 'show_on_auction123')->hideFromIndex(),
             ]),
 
             HasMany::make('Specifications', 'specifications', CollectorSpecification::class)
