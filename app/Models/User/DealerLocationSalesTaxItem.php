@@ -24,6 +24,7 @@ class DealerLocationSalesTaxItem extends Model
     const TYPE_DISTRICT4 = 'district4';
     const TYPE_DMV = 'dmv';
     const TYPE_REGISTRATION = 'registration';
+    const REGISTRATION_TITLE = 'Registration Pct';
 
     public static $types = [
         self::TYPE_STATE => 'State',

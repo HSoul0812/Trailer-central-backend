@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use League\Fractal\Manager;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use League\Fractal\Resource\Item;
+use App\Models\User\DealerLocationSalesTaxItem;
 
 class DealerLocationController extends RestfulControllerV2 {
 
@@ -174,6 +175,22 @@ class DealerLocationController extends RestfulControllerV2 {
         }
 
         $this->response->errorBadRequest();
+    }
+
+    /**
+     * @param Request $request
+     * @return Response
+     */
+    public function getRegistrationTitle(int $id, Request $request): Response
+    {
+        $request = DealerLocationSalesTaxItem::where([['dealer_location_id',"=", $id], ['item_type',"=", DealerLocationSalesTaxItem::TYPE_REGISTRATION]])->first();
+        return $this->response->array([
+            'data' => [
+                'status' => 'success',
+                'registration_title' => $request->registration_title ?? DealerLocationSalesTaxItem::REGISTRATION_TITLE,
+                'dealer_location_id' => $id
+            ]
+        ]);
     }
 
     /**
