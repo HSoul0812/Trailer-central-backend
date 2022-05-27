@@ -29,6 +29,9 @@ use Carbon\Carbon;
 class DealerOptionsService implements DealerOptionsServiceInterface
 {
     private const ECOMMERCE_KEY_ENABLE = "parts/ecommerce/enabled";
+
+    private const TEXTRAIL_PARTS_ENTITY_TYPE = '51';
+
     /**
      * @var UserRepositoryInterface
      */
@@ -248,7 +251,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
           }
 
           $this->websiteEntityRepository->update([
-              'entity_type' => '51',
+              'entity_type' => self::TEXTRAIL_PARTS_ENTITY_TYPE,
               'website_id' => $webiste->id,
               'entity_view' => 'textrail-parts-list',
               'template' => '2columns-left',
@@ -297,7 +300,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
           }
 
           $this->websiteEntityRepository->update([
-              'entity_type' => '51',
+              'entity_type' => self::TEXTRAIL_PARTS_ENTITY_TYPE,
               'website_id' => $webiste->id,
               'is_active' => 0
           ]);
