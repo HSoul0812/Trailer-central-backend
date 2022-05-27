@@ -2,6 +2,7 @@
 
 namespace App\Models\CRM\Dms\Quickbooks;
 
+use App\Models\Inventory\Inventory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -54,5 +55,10 @@ class Bill extends Model
     public function payments(): HasMany
     {
         return $this->hasMany(BillPayment::class, 'bill_id', 'id');
+    }
+
+    public function inventories(): HasMany
+    {
+        return $this->hasMany(Inventory::class, 'bill_id', 'id');
     }
 }

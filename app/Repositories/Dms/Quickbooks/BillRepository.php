@@ -7,11 +7,14 @@ use App\Models\CRM\Dms\Quickbooks\Bill;
 use App\Models\CRM\Dms\Quickbooks\BillCategory;
 use App\Models\CRM\Dms\Quickbooks\BillItem;
 use App\Models\CRM\Dms\Quickbooks\BillPayment;
+use App\Models\Inventory\Inventory;
+use App\Repositories\Dms\Customer\InventoryRepositoryInterface;
 use App\Repositories\Traits\SortTrait;
 use App\Traits\Repository\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 
@@ -186,9 +189,11 @@ class BillRepository implements BillRepositoryInterface
      */
     public function get($params)
     {
-        $bill = Bill::findOrFail($params['id']);
-
-        return $bill;
+        $with = Arr::get($params, 'with', []);
+        
+        return Bill::query()
+            ->with($with)
+            ->findOrFail($params['id']);
     }
 
     /**
@@ -197,7 +202,43 @@ class BillRepository implements BillRepositoryInterface
      */
     public function delete($params)
     {
-        throw new NotImplementedException;
+        /** @var Bill $bill */
+        $bill = $this->get([
+            'id' => $params['id'],
+            'with' => [
+                'inventories',
+                'items',
+                'categories',
+                'payments'
+            ],
+        ]);
+        
+        // Note: The logic below is taken from https://operatebeyond.atlassian.net/browse/DMSS-645?focusedCommentId=30120
+        // First, we want to make sure to remove bill related data on the
+        // inventories that use this bill
+        $bill->inventories()->update([
+            'fp_committed' => null,
+            'fp_vendor' => null,
+            'fp_balance' => 0,
+            'fp_paid' => 0,
+            'fp_interest_paid' => 0,
+            'bill_id' => null,
+            'send_to_quickbooks' => 0,
+            'is_floorplan_bill' => 0,
+            'qb_sync_processed' => 0
+        ]);
+
+        // Next, we delete the bill items
+        $bill->items()->delete();
+
+        // After that, we remove the bill categories
+        $bill->categories()->delete();
+
+        // Then, we remove any payments from the bill
+        $bill->payments()->delete();
+        
+        // Lastly, we delete the bill itself
+        $bill->delete();
     }
 
     /**
