@@ -15,6 +15,7 @@
         "dingo/api": "^3.0",
         "fruitcake/laravel-cors": "^2.0",
         "guzzlehttp/guzzle": "^7.0.1",
+        "hybridauth/hybridauth": "^3.8",
         "laravel/framework": "^8.54",
         "laravel/nova": "~3.0",
         "laravel/sanctum": "^2.11",
