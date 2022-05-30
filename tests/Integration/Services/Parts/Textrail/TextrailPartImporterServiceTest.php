@@ -63,7 +63,8 @@ class TextrailPartImporterServiceTest extends TestCase
 
       // updated one part to other price
       $getDatabasePart = $partRepository->getBySku($getOnePart->sku);
-      $partUpdated = $partRepository->update(['id' => $getDatabasePart->id, 'price' => 144]);
+
+      $partRepository->update(['id' => $getDatabasePart->id, 'price' => 144]);
 
       // run again to check the importer service update back the price
       $service->run();
