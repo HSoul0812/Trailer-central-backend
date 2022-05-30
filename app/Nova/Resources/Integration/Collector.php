@@ -90,8 +90,11 @@ class Collector extends Resource
                 Text::make('IDS Default Location', 'ids_default_location')->rules('max:256')->hideFromIndex()->help(
                     "Only needed if file format is IDS"
                 ),
-                Text::make('XML URL', 'xml_url')->hideFromIndex()->help(
-                    "Only needed if file format is xml_url"
+                Text::make('XML URL', 'xml_url')->rules('required_if:file_format,xml_url')->hideFromIndex()->help(
+                    "Only needed if file format is <strong>xml_url</strong>"
+                ),
+                Text::make('CSV URL', 'csv_url')->rules('required_if:file_format,csv_url')->hideFromIndex()->help(
+                    "Only needed if file format is <strong>csv_url</strong>"
                 ),
                 Text::make('Motility Account Number', 'motility_account_no')->hideFromIndex()->help(
                     "Only needed if file format is motility"
