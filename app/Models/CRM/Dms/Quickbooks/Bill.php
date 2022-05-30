@@ -61,4 +61,11 @@ class Bill extends Model
     {
         return $this->hasMany(Inventory::class, 'bill_id', 'id');
     }
+    
+    public function approvals(): HasMany
+    {
+        return $this
+            ->hasMany(QuickbookApproval::class, 'tb_primary_id', 'id')
+            ->where('tb_name', $this->table);
+    }
 }

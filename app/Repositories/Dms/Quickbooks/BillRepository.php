@@ -199,6 +199,7 @@ class BillRepository implements BillRepositoryInterface
     /**
      * @param $params
      * @throws NotImplementedException
+     * @throws \Exception
      */
     public function delete($params)
     {
@@ -227,18 +228,13 @@ class BillRepository implements BillRepositoryInterface
             'is_floorplan_bill' => 0,
             'qb_sync_processed' => 0
         ]);
-
-        // Next, we delete the bill items
-        $bill->items()->delete();
-
-        // After that, we remove the bill categories
-        $bill->categories()->delete();
-
-        // Then, we remove any payments from the bill
-        $bill->payments()->delete();
         
-        // Lastly, we delete the bill itself
-        $bill->delete();
+        // Then, delete related records from the quickbook_approval table
+        // We need to do this before deleting all those data
+        $this->deleteRelatedQuickbookApprovals($bill);
+        
+        // After that, we start delete the related models
+        $this->deleteRelatedModels($bill);
     }
 
     /**
@@ -324,5 +320,29 @@ class BillRepository implements BillRepositoryInterface
         $queryString = str_replace(array('?'), array('\'%s\''), $query->toSql());
         $queryString = vsprintf($queryString, $query->getBindings());
         return current(DB::select(DB::raw("SELECT count(*) as row_count FROM ($queryString) as bill_count")))->row_count;
+    }
+
+    private function deleteRelatedQuickbookApprovals(Bill $bill)
+    {
+        /** @var BillPayment $payment */
+        foreach ($bill->payments as $payment) {
+            $payment->approvals()->delete();
+        }
+        
+        $bill->approvals()->delete();
+    }
+
+    /**
+     * @throws \Exception
+     */
+    private function deleteRelatedModels(Bill $bill)
+    {
+        // Here, we delete all the related models from the database
+        $bill->items()->delete();
+        $bill->categories()->delete();
+        $bill->payments()->delete();
+        
+        // After that, we delete the bill itself
+        $bill->delete();
     }
 }
