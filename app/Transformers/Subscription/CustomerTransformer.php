@@ -14,7 +14,7 @@ class CustomerTransformer extends TransformerAbstract
             'email' => $params->email,
             'phone' => $params->phone,
             'subscriptions' => $params->subscriptions->data ?? [],
-            'card' => $params->sources->data ?? [],
+            'card' => $params->card ?? [],
             'transactions' => $params->transactions ?? []
         ];
     }
