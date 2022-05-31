@@ -52,7 +52,11 @@ class ListingRepository implements ListingRepositoryInterface {
         if(!empty($params['facebook_id'])) {
             $listing = Listings::where('facebook_id', $params['facebook_id'])->first();
             if(!empty($listing->id)) {
-                return $this->update($params);
+                if($listing->facebook_id !== $params['facebook_id']) {
+                    return $this->update($params);
+                } elseif($listing->facebook_id === $params['facebook_id']) {
+                    $params['facebook_id'] = 0;
+                }
             }
         }
 
@@ -193,6 +197,10 @@ class ListingRepository implements ListingRepositoryInterface {
             });
         }
 
+        // Set Sort By
+        $query = $this->addSortQuery($query, '-created_at');
+
+        // Update Page Limit From Settings
         $forced = config('marketing.fb.settings.limit.force', 0);
         if (!isset($params['per_page']) || !empty($forced)) {
             $params['per_page'] = (int) config('marketing.fb.settings.limit.listings', 20);

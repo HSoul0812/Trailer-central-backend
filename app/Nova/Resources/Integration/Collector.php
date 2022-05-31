@@ -16,6 +16,7 @@ use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Panel;
+use Laravel\Nova\Fields\DateTime;
 use App\Models\Integration\Collector\Collector as CollectorModel;
 
 /**
@@ -62,6 +63,8 @@ class Collector extends Resource
                 Text::make('Process Name')->sortable()->rules('required', 'max:128'),
                 BelongsTo::make('Dealer', 'dealers', Dealer::class)->sortable()->rules('required'),
                 BelongsTo::make('Default Dealer Location', 'dealerLocation', Location::class)->sortable()->rules('required'),
+                DateTime::make('Last Run', 'last_run')->sortable()->format('DD MMM, YYYY - LT')->readonly(true)->onlyOnIndex(),
+                Boolean::make('Run without Errors', 'run_without_errors')->readonly(true)->onlyOnIndex()
             ]),
 
             new Panel('Source', [
@@ -87,8 +90,11 @@ class Collector extends Resource
                 Text::make('IDS Default Location', 'ids_default_location')->rules('max:256')->hideFromIndex()->help(
                     "Only needed if file format is IDS"
                 ),
-                Text::make('XML URL', 'xml_url')->hideFromIndex()->help(
-                    "Only needed if file format is xml_url"
+                Text::make('XML URL', 'xml_url')->rules('required_if:file_format,xml_url')->hideFromIndex()->help(
+                    "Only needed if file format is <strong>xml_url</strong>"
+                ),
+                Text::make('CSV URL', 'csv_url')->rules('required_if:file_format,csv_url')->hideFromIndex()->help(
+                    "Only needed if file format is <strong>csv_url</strong>"
                 ),
                 Text::make('Motility Account Number', 'motility_account_no')->hideFromIndex()->help(
                     "Only needed if file format is motility"

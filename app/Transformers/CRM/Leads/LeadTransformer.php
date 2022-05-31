@@ -2,6 +2,7 @@
 
 namespace App\Transformers\CRM\Leads;
 
+use App\Helpers\SanitizeHelper;
 use App\Models\CRM\Leads\Lead;
 use App\Traits\CompactHelper;
 use App\Transformers\CRM\Interactions\EmailHistoryTransformer;
@@ -44,10 +45,16 @@ class LeadTransformer extends TransformerAbstract
      */
     protected $fbUserTransformer;
 
+    /**
+     * @var SanitizeHelper
+     */
+    protected $sanitizeHelper;
+
     public function __construct()
     {
         $this->inventoryTransformer = new InventoryTransformer();
         $this->fbUserTransformer = new FbUserTransformer();
+        $this->sanitizeHelper = new SanitizeHelper();
     }
 
     /**
@@ -66,12 +73,12 @@ class LeadTransformer extends TransformerAbstract
             'dealer_id' => $lead->dealer_id,
             'name' => $lead->full_name,
             'lead_types' => $lead->lead_types,
-            'email' => $lead->email_address,
+            'email' => $this->sanitizeHelper->removeBrokenCharacters($lead->email_address),
             'phone' => $lead->phone_number,
             'preferred_contact' => $lead->preferred_contact,
             'address' => $lead->full_address,
-            'comments' => $lead->comments,
-            'note' => $lead->note,
+            'comments' => $this->sanitizeHelper->removeBrokenCharacters($lead->comments),
+            'note' => $this->sanitizeHelper->removeBrokenCharacters($lead->note),
             'referral' => $lead->referral,
             'title' => $lead->title,
             'status' => ($lead->leadStatus) ? $lead->leadStatus->status : Lead::STATUS_UNCONTACTED,
