@@ -6,6 +6,7 @@ use App\Jobs\Job;
 use App\Models\Integration\Auth\AccessToken;
 use App\Services\CRM\Interactions\Facebook\MessageServiceInterface;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Support\Facades\Log;
 
 class MessageJob extends Job
 {
