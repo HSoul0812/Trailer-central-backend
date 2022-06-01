@@ -938,7 +938,7 @@ class LeadRepository implements LeadRepositoryInterface {
         if (isset($params['sort'])) {
             $sort = $params['sort'];
         }
-        $query = $query->orderByRaw($this->sortOrders[$sort]['field'] . ' ' . $this->sortOrders[$sort]['direction']);
+        $query = $this->addSortQuery($query, $sort);
 
         $records = $query->get();
 
