@@ -180,7 +180,16 @@ class InventoryTransformer extends TransformerAbstract
              'overlay_enabled' => $inventory->overlay_enabled,
              'cost_of_ros' => $inventory->cost_of_ros,
              'quote_url' => config('app.new_design_crm_url') . $inventory->user->getCrmLoginUrl('bill-of-sale/new?inventory_id=' . $inventory->identifier),
-             'age' => $age
+             'age' => $age,
+             'use_website_price' => $inventory->use_website_price,
+             'minimum_selling_price' => $inventory->minimum_selling_price,
+             'pac_type' => $inventory->pac_type,
+             'pac_amount' => $inventory->pac_amount,
+             'show_on_ksl' => $inventory->show_on_ksl,
+             'show_on_racingjunk' => $inventory->show_on_racingjunk,
+             'show_on_rvtrader' => $inventory->show_on_rvtrader,
+             'changed_fields_in_dashboard' => $inventory->changed_fields_in_dashboard,
+             'show_on_auction123' => $inventory->show_on_auction123
          ];
     }
 
@@ -239,7 +248,7 @@ class InventoryTransformer extends TransformerAbstract
      */
     private function transformImages(Collection $images): array
     {
-        return $images->map(function (InventoryImage $image) {
+        return $images->sortBy('position')->values()->map(function (InventoryImage $image) {
             return $this->inventoryImageTransformer->transform($image);
         })->toArray();
     }

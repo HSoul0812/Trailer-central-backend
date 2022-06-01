@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\v1\Parts;
 
+use App\Domains\ElasticSearch\Actions\EscapeElasticSearchReservedCharactersAction;
 use App\Http\Controllers\RestfulController;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use Dingo\Api\Http\Request;
@@ -741,7 +742,15 @@ class PartsController extends RestfulController
         try {
             $this->fractal->setSerializer(new NoDataArraySerializer());
             $this->fractal->parseIncludes($request->query('with', ''));
+
+            // We want to make sure that the query string is escaped
+            // If we don't do this we will get error when we try to search
+            // with special characters like '/', '(', etc.
+            $escapedQuery = resolve(EscapeElasticSearchReservedCharactersAction::class)->execute($request->get('query', '') ?? '');
+            $request->merge(['query' => $escapedQuery]);
+
             $query = $request->only('query', 'vendor_id', 'with_cost', 'in_stock', 'sort');
+
             $paginator = new \stdClass(); // this will hold the paginator produced by search
             $dealerId = $this->getRequestDealerId($request, Auth::user());
 

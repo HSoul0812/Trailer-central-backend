@@ -8,6 +8,10 @@ use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\Observers\CRM\Lead\LeadObserver;
 use App\Models\Observers\CRM\Lead\LeadStatusObserver;
+use App\Repositories\CRM\Documents\DealerDocumentsRepository;
+use App\Repositories\CRM\Documents\DealerDocumentsRepositoryInterface;
+use App\Repositories\CRM\Leads\LeadTradeRepository;
+use App\Repositories\CRM\Leads\LeadTradeRepositoryInterface;
 use App\Repositories\CRM\Refund\RefundRepository;
 use App\Repositories\CRM\Refund\RefundRepositoryInterface;
 use App\Services\CRM\Email\InquiryEmailService;
@@ -84,6 +88,8 @@ class CrmServiceProvider extends ServiceProvider
         $this->app->bind(LeadEmailRepositoryInterface::class, LeadEmailRepository::class);
         $this->app->bind(CustomerRepositoryInterface::class, CustomerRepository::class);
         $this->app->bind(CustomerInventoryRepositoryInterface::class, CustomerInventoryRepository::class);
+        $this->app->bind(DealerDocumentsRepositoryInterface::class, DealerDocumentsRepository::class);
+        $this->app->bind(LeadTradeRepositoryInterface::class, LeadTradeRepository::class);
 
         $this->app->bind(RefundRepositoryInterface::class, function () {
             return new RefundRepository(Refund::query());
@@ -105,6 +111,7 @@ class CrmServiceProvider extends ServiceProvider
         \Validator::extend('valid_lead', 'App\Rules\CRM\Leads\ValidLead@passes');
         \Validator::extend('non_lead_exists', 'App\Rules\CRM\Leads\NonLeadExists@passes');
         \Validator::extend('valid_texts_log', 'App\Rules\CRM\Text\ValidTextsLog@passes');
+        \Validator::extend('jotform_enabled', 'App\Rules\CRM\Leads\JotformEnabled@passes');
         \Validator::extend('unique_text_blast_campaign_name', 'App\Rules\CRM\Text\UniqueTextBlastCampaignName@passes');
         \Validator::extend('unique_text_campaign_name', 'App\Rules\CRM\Text\UniqueTextCampaignName@passes');
 

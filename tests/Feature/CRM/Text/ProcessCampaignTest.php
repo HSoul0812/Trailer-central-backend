@@ -57,6 +57,7 @@ class ProcessCampaignTest extends TestCase
     /**
      * Test simple campaign
      * 
+     * @group CRM
      * @specs string action = inquired
      * @specs array location_id = null
      * @specs int send_after_days = 15
@@ -169,6 +170,7 @@ class ProcessCampaignTest extends TestCase
     /**
      * Test campaign on purchases
      * 
+     * @group CRM
      * @specs string action = purchased
      * @specs array location_id = null
      * @specs int send_after_days = 15
@@ -285,6 +287,7 @@ class ProcessCampaignTest extends TestCase
     /**
      * Test campaign by location
      * 
+     * @group CRM
      * @specs string action = inquired
      * @specs array location_id = first
      * @specs int send_after_days = 15
@@ -407,6 +410,7 @@ class ProcessCampaignTest extends TestCase
     /**
      * Test campaign for archived leads
      * 
+     * @group CRM
      * @specs string action = inquired
      * @specs array location_id = any
      * @specs int send_after_days = 15
@@ -523,6 +527,7 @@ class ProcessCampaignTest extends TestCase
     /**
      * Test campaign with brands
      * 
+     * @group CRM
      * @specs string action = inquired
      * @specs array location_id = any
      * @specs int send_after_days = 15
@@ -650,6 +655,7 @@ class ProcessCampaignTest extends TestCase
     /**
      * Test campaign with categories
      * 
+     * @group CRM
      * @specs string action = inquired
      * @specs array location_id = any
      * @specs int send_after_days = 15
@@ -779,6 +785,7 @@ class ProcessCampaignTest extends TestCase
     /**
      * Refresh Campaigns in DB
      * 
+     * @group CRM
      * @param int $userId
      * @return void
      */
@@ -792,6 +799,7 @@ class ProcessCampaignTest extends TestCase
     /**
      * Refresh Campaign Leads in DB
      * 
+     * @group CRM
      * @param int $campaignId
      * @param array $filters
      * @return array of leads outside of range

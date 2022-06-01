@@ -69,7 +69,7 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
     public function __construct()
     {
         $this->log = Log::channel('tunnels');
-        $this->redis = Redis::connection('dealer-tunnels');
+        $this->redis = Redis::connection('persist');
         $this->log->info('Initialized Redis on for Tunnels Using ' . $this->redis->getName());
         $this->log->info('Found Keys: ', $this->redis->keys('tunnels:*'));
     }
@@ -133,7 +133,7 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
             'id' => $params['id'],
             'dealer_id' => $dealerId,
             'port' => $tunnelData['port'],
-            'last_ping' => $tunnelData['lastPingTime']
+            'last_ping' => $tunnelData['lastPingTime'] ?? 0
         ]);
     }
 

@@ -138,7 +138,7 @@ class InquiryEmailService implements InquiryEmailServiceInterface
     public function fill(array $params): InquiryLead {
         // Get Website
         $website = $this->website->get(['id' => $params['website_id']]);
-        $params['website_domain'] = $website->domain;
+        $params['website_domain'] = !empty($website->domain) ? 'https://' . $website->domain : '';
 
         // Get Inquiry From Details For Website
         $config = $this->websiteConfig->getValueOrDefault($params['website_id'], 'general/item_email_from');
@@ -147,11 +147,11 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         $params['from_name'] = $config['fromName'];
 
         // GetInquiry Stock/Url/Title from the Inventory ID
-        if(!empty($params['inventory']['inventory_id'])) {
-          $inventory = $this->inventory->get(['id' => $params['inventory']['inventory_id']]);
-          $params['stock'] = $inventory->stock;
-          $params['url'] = $inventory ? $inventory->getUrl() : '';
-          $params['title'] = $inventory->title;
+        if(!empty($params['inventory'][0])) {
+            $inventory = $this->inventory->get(['id' => $params['inventory'][0]]);
+            $params['stock'] = $inventory->stock;
+            $params['url'] = $inventory ? $inventory->getUrl() : '';
+            $params['title'] = $inventory->title;
         }
 
         // Get Inquiry Name/Email
@@ -230,7 +230,7 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         // Get Inquiry Details From Inventory Item?
         if(!empty($params['item_id']) && !in_array($params['inquiry_type'], InquiryLead::NON_INVENTORY_TYPES)) {
             $inventory = $this->inventory->get(['id' => $params['item_id']]);
-            if(!empty($inventory->dealerLocation->name)) {
+            if(!empty($inventory->dealerLocation->name) && !empty($inventory->dealerLocation->email)) {
                 $params['inquiry_name'] = $inventory->dealerLocation->name;
                 $params['inquiry_email'] = $inventory->dealerLocation->email;
                 return $params;

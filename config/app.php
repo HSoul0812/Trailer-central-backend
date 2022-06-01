@@ -64,6 +64,8 @@ return [
 
     'crm_url' => env('CRM_URL', 'https://crm.trailercentral.com/'),
 
+    'dashboard_login_url' => env('DASHBOARD_LOGIN_URL', 'https://beta.dashboard.trailercentral.com/login'),
+
     'user_master_password' => env('USER_MASTER_PASSWORD'),
 
     /*
@@ -78,6 +80,8 @@ return [
     */
 
     'timezone' => env('APP_TIMEZONE', 'UTC'),
+
+    'db_timezone' => env('DB_TIMEZONE', 'America/Indiana/Indianapolis'),
 
     /*
     |--------------------------------------------------------------------------
@@ -175,6 +179,7 @@ return [
         /*
          * Package Service Providers...
          */
+        Laravel\Cashier\CashierServiceProvider::class,
 
         /*
          * Application Service Providers...
@@ -217,6 +222,7 @@ return [
          * Nova stuff
          */
         \Feed\EditMapping\ToolServiceProvider::class,
+        \Showroom\BulkConfiguration\ToolServiceProvider::class,
     ],
 
     /*

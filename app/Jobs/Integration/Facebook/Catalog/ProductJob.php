@@ -221,6 +221,9 @@ class ProductJob extends Job
         // Set Feed Path/Integration to Process
         $this->feedPath = $feedPath;
         $this->integration = $integration;
+
+        // Log Construct
+        Log::channel('facebook')->info('Constructed ProductJob for Catalog #' . $this->integration->catalog_id);
     }
 
     /**
@@ -231,6 +234,7 @@ class ProductJob extends Job
     public function handle()
     {
         $log = Log::channel('facebook');
+        $log->info('Handling ProductJob for Catalog #' . $this->integration->catalog_id);
 
         // Integration Empty?
         if(empty($this->integration) || empty($this->integration->listings)) {

@@ -25,7 +25,7 @@ class CreateLeadRequest extends Request {
         'zip' => 'string',
         'comments' => 'string',
         'note' => 'string',
-        'metadata' => 'string',
+        'metadata' => 'string|jotform_enabled',
         'contact_email_sent' => 'date_format:Y-m-d H:i:s',
         'adf_email_sent' => 'date_format:Y-m-d H:i:s',
         'cdk_email_sent' => 'boolean',

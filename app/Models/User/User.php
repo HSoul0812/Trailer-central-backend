@@ -14,10 +14,12 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use App\Models\CRM\Dms\Printer\Settings;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\Builder;
-use App\Models\User\DealerLocation;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Services\User\UserService;
 use App\Traits\CompactHelper;
+use App\Services\Common\EncrypterServiceInterface;
+use App\Models\User\AuthToken;
+use Laravel\Cashier\Billable;
 
 /**
  * Class User
@@ -38,7 +40,7 @@ use App\Traits\CompactHelper;
  */
 class User extends Model implements Authenticatable, PermissionsInterface
 {
-    use HasPermissionsStub;
+    use HasPermissionsStub, Billable;
 
     const TABLE_NAME = 'dealer';
 
@@ -182,6 +184,19 @@ class User extends Model implements Authenticatable, PermissionsInterface
     protected $hidden = [
 
     ];
+    
+    public static function boot()
+    {
+        parent::boot();
+
+        self::created(function($model){
+            AuthToken::create([
+                'user_id' => $model->dealer_id,
+                'user_type' => 'dealer',
+                'access_token' => md5($model->dealer_id.uniqid())
+            ]);
+        });
+    }
 
     /**
      * Get the name of the unique identifier for the user.
@@ -268,7 +283,7 @@ class User extends Model implements Authenticatable, PermissionsInterface
     public function getIsEcommerceActiveAttribute(): bool
     {
         $website = $this->website;
-        
+
         if ($website) {
           $isWebsiteConfigEcommerce = WebsiteConfig::where('website_id', $website->id)->where('key', WebsiteConfig::ECOMMERCE_KEY_ENABLE)->where('value', 1)->exists();
         } else {
@@ -330,5 +345,27 @@ class User extends Model implements Authenticatable, PermissionsInterface
 
     public static function getTableName() {
         return self::TABLE_NAME;
+    }
+
+    public function getDealerId(): int
+    {
+        return $this->dealer_id;
+    }
+    
+    /**
+     * Set the user's password encryption method
+     *
+     * @param  string  $value
+     * @return void
+     */
+    public function setPasswordAttribute(string $value): void
+    {
+        $salt = $this->salt;
+        $encrypterService = app(EncrypterServiceInterface::class);
+        if (empty($salt)) {
+            $salt = uniqid();
+            $this->attributes['salt'] = $salt;
+        }
+        $this->attributes['password'] = $encrypterService->encryptBySalt($value, $salt);
     }
 }

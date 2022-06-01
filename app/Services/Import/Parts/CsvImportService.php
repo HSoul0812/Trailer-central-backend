@@ -103,7 +103,7 @@ class CsvImportService implements CsvImportServiceInterface
         $this->binRepository = $binRepository;
     }
 
-    public function run()
+    public function run(): bool
     {
         echo "Running...".PHP_EOL;
         Log::info('Starting import for bulk upload ID: ' . $this->bulkUpload->id);
@@ -115,14 +115,20 @@ class CsvImportService implements CsvImportServiceInterface
                 return false;
             }
         } catch (\Exception $ex) {
-             Log::info('Invalid bulk upload ID: ' . $this->bulkUpload->id . ' setting validation_errors...');
+            $this->validationErrors[] = $ex->getMessage();
+
+            Log::info('Invalid bulk upload ID: ' . $this->bulkUpload->id . ' setting validation_errors...');
             $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => $this->outputValidationErrors()]);
             return false;
         }
 
-        echo "Data Valid... Importing...".PHP_EOL;
-        Log::info('Validation passed for bulk upload ID: ' . $this->bulkUpload->id . ' proceeding with import...');
-        $this->import();
+        if (empty($this->validationErrors)) {
+            $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::COMPLETE]);
+        } else {
+            $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::COMPLETE, 'validation_errors' => json_encode($this->validationErrors)]);
+        }
+
+        Log::info('Validation passed for bulk upload ID: ' . $this->bulkUpload->id . ' import success...');
         return true;
     }
 
@@ -136,50 +142,42 @@ class CsvImportService implements CsvImportServiceInterface
      *
      * @throws \Exception
      */
-    protected function import()
+    protected function import($csvData, $lineNumber)
     {
         echo "Importing.... 123".PHP_EOL;
-        $this->streamCsv(function($csvData, $lineNumber) {
-            if ($lineNumber === 1) {
-                return;
-            }
 
-            echo 'Importing bulk uploaded part on bulk upload : ' . $this->bulkUpload->id . ' with data ' . json_encode($csvData).PHP_EOL;
-            Log::info('Importing bulk uploaded part on bulk upload : ' . $this->bulkUpload->id . ' with data ' . json_encode($csvData));
-
-            try {
-                // Get Part Data
-                $partData = $this->csvToPartData($csvData);
-
-                echo "Importing ".json_encode($partData).PHP_EOL;
-                $part = $this->partsRepository->createOrUpdate($partData);
-                if (!$part) {
-                    $this->validationErrors[] = "Image inaccesible";
-                    $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
-                    Log::info('Error found on part for bulk upload : ' . $this->bulkUpload->id . ' : ' . $ex->getTraceAsString());
-                    throw new \Exception("Image inaccesible");
-                }
-
-                event(new PartQtyUpdated($part, null, [
-                    'description' => 'Created/updated using bulk uploader'
-                ]));
-
-            } catch (\Exception $ex) {
-                $this->validationErrors[] = $ex->getTraceAsString();
-                $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
-                Log::info('Error found on part for bulk upload : ' . $this->bulkUpload->id . ' : ' . $ex->getTraceAsString() . json_encode($this->validationErrors));
-                Log::info("Index to header mapping: {$this->indexToheaderMapping}");
-//                throw new \Exception("Image inaccesible");
-            }
-
-        });
-        
-        if (empty($this->validationErrors)) {
-            $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::COMPLETE]);
-        } else {
-             $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::COMPLETE, 'validation_errors' => json_encode($this->validationErrors)]);            
+        if ($lineNumber === 1) {
+            return;
         }
-        
+
+        //echo 'Importing bulk uploaded part on bulk upload : ' . $this->bulkUpload->id . ' with data ' . json_encode($csvData).PHP_EOL;
+        Log::info('Importing bulk uploaded part on bulk upload : ' . $this->bulkUpload->id . ' with data ' . json_encode($csvData));
+
+        try {
+            // Get Part Data
+            $partData = $this->csvToPartData($csvData);
+
+            echo "Importing Stock: ".$partData['sku'].PHP_EOL;
+            $part = $this->partsRepository->createOrUpdate($partData);
+            if (!$part) {
+                $this->validationErrors[] = "Image inaccesible";
+                $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
+                //Log::info('Error found on part for bulk upload : ' . $this->bulkUpload->id . ' : ' . $ex->getTraceAsString());
+                throw new \Exception("Image inaccesible");
+            }
+
+            event(new PartQtyUpdated($part, null, [
+                'description' => 'Created/updated using bulk uploader'
+            ]));
+
+        } catch (\Exception $ex) {
+            $this->validationErrors[] = $ex->getTraceAsString();
+            $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
+            Log::info('Error found on part for bulk upload : ' . $this->bulkUpload->id . ' : ' . $ex->getTraceAsString() . json_encode($this->validationErrors));
+            Log::info("Index to header mapping: {$this->indexToheaderMapping}");
+            //throw new \Exception("Image inaccesible");
+        }
+
     }
 
     /**
@@ -188,7 +186,7 @@ class CsvImportService implements CsvImportServiceInterface
      * @return bool
      * @throws \Exception
      */
-    protected function validate()
+    protected function validate(): bool
     {
         $this->streamCsv(function($csvData, $lineNumber) {
             // for each column
@@ -217,18 +215,21 @@ class CsvImportService implements CsvImportServiceInterface
                     }
                 }
             }
-        });
 
-        // see if any headers are flagged, return false if so
-        foreach($this->allowedHeaderValues as $header => $headerValue) {
-            if ($headerValue !== 'allowed') {
-                $this->validationErrors[] = $this->printError(1, $header, "Header ".$header." not present.");
+            // validate allowed headers
+            foreach($this->allowedHeaderValues as $header => $headerValue) {
+                if ($headerValue !== 'allowed') {
+                    $this->validationErrors[] = $this->printError(1, $header, "Header ".$header." not present.");
+                }
             }
-        }
 
-        if (count($this->validationErrors) > 0) {
-            return false;
-        }
+            // if there's an return false, if not, import part
+            if (count($this->validationErrors) > 0) {
+                return false;
+            } else {
+                $this->import($csvData, $lineNumber);
+            }
+        });
 
         return true;
     }
@@ -253,35 +254,35 @@ class CsvImportService implements CsvImportServiceInterface
         // iterate through all lines
         $lineNumber = 1;
         while (!feof($stream)) {
-             $isEmptyRow = true;
-             $csvData = fgetcsv($stream);
+            $isEmptyRow = true;
+            $csvData = fgetcsv($stream);
 
-             // see if the row is empty,
-             // one value is enough to indicate non empty row
-             foreach($csvData as $value) {
-                 if (!empty($value)) {
-                     $isEmptyRow = false;
-                     break;
-                 }
-             }
+            // see if the row is empty,
+            // one value is enough to indicate non empty row
+            foreach($csvData as $value) {
+                if (!empty($value)) {
+                    $isEmptyRow = false;
+                    break;
+                }
+            }
 
-             // skip empty rows
-             if ($isEmptyRow) {
-                 continue;
-             }
+            // skip empty rows
+            if ($isEmptyRow) {
+                continue;
+            }
 
-             // apply $callback to the row
-             $callback($csvData, $lineNumber++);
-             flush();
+            // apply $callback to the row
+            $callback($csvData, $lineNumber++);
+            flush();
         }
     }
 
-    private function isAllowedHeader($val)
+    private function isAllowedHeader($val): bool
     {
         return isset($this->allowedHeaderValues[$val]);
     }
 
-    private function isOptionalHeader($val)
+    private function isOptionalHeader($val): bool
     {
         // In Optional Headers?
         if(isset($this->optionalHeaderValues[$val])) {
@@ -300,12 +301,12 @@ class CsvImportService implements CsvImportServiceInterface
         return false;
     }
 
-    private function printError($line, $column, $errorMessage)
+    private function printError($line, $column, $errorMessage): string
     {
         return "$errorMessage in line $line at column $column";
     }
 
-    private function csvToPartData($csvData)
+    private function csvToPartData($csvData): array
     {
         $formattedImages = [];
 
@@ -332,13 +333,13 @@ class CsvImportService implements CsvImportServiceInterface
         $part['msrp'] = empty($csvData[$keyToIndexMapping[self::MSRP]]) ? 0 : $csvData[$keyToIndexMapping[self::MSRP]];
         $part['weight'] = $csvData[$keyToIndexMapping[self::WEIGHT]];
         $part['weight_rating'] = $csvData[$keyToIndexMapping[self::WEIGHT_RATING]];
-        $part['description'] = $csvData[$keyToIndexMapping[self::DESCRIPTION]];
-        $part['show_on_website'] = strtolower($csvData[$keyToIndexMapping[self::SHOW_ON_WEBSITE]]) === 'yes' ? true : false;
-        $part['title'] = $csvData[$keyToIndexMapping[self::TITLE]];
-        $part['stock_min'] = isset($csvData[$keyToIndexMapping[self::STOCK_MIN]]) ? $csvData[$keyToIndexMapping[self::STOCK_MIN]] : null;
-        $part['stock_max'] = isset($csvData[$keyToIndexMapping[self::STOCK_MAX]]) ? $csvData[$keyToIndexMapping[self::STOCK_MAX]] : null;
-        $part['alternative_part_number'] = isset($csvData[$keyToIndexMapping[self::ALTERNATE_PART_NUMBER]]) ? $csvData[$keyToIndexMapping[self::ALTERNATE_PART_NUMBER]] : null;
-        
+        $part['description'] = $this->sanitizeValue($csvData[$keyToIndexMapping[self::DESCRIPTION]]);
+        $part['show_on_website'] = strtolower($csvData[$keyToIndexMapping[self::SHOW_ON_WEBSITE]]) === 'yes';
+        $part['title'] = $this->sanitizeValue($csvData[$keyToIndexMapping[self::TITLE]]);
+        $part['stock_min'] = $csvData[$keyToIndexMapping[self::STOCK_MIN]] ?? null;
+        $part['stock_max'] = $csvData[$keyToIndexMapping[self::STOCK_MAX]] ?? null;
+        $part['alternative_part_number'] = $csvData[$keyToIndexMapping[self::ALTERNATE_PART_NUMBER]] ?? null;
+
         if (isset($keyToIndexMapping[self::PART_ID]) && isset($csvData[$keyToIndexMapping[self::PART_ID]])) {
             $part['id'] = $csvData[$keyToIndexMapping[self::PART_ID]];
         }
@@ -366,13 +367,24 @@ class CsvImportService implements CsvImportServiceInterface
     }
 
     /**
+     * Sanitize string Value
+     *
+     * @param string $value
+     * @return bool|string
+     */
+    private function sanitizeValue(string $value)
+    {
+        return filter_var($value, FILTER_SANITIZE_STRING, array('flags' => FILTER_FLAG_NO_ENCODE_QUOTES | FILTER_FLAG_STRIP_HIGH));;
+    }
+
+    /**
      * Returns true if valid or error message if invalid
      *
      * @param string $type
      * @param string $value
      * @return bool|string
      */
-    private function isDataInvalid($type, $value)
+    private function isDataInvalid(string $type, string $value)
     {
         switch($type) {
             case self::VENDOR:

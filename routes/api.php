@@ -97,7 +97,7 @@ $api->version('v1', function ($route) {
      */
     $route->get('parts/bins', 'App\Http\Controllers\v1\Parts\BinController@index');
     $route->put('parts/bins', 'App\Http\Controllers\v1\Parts\BinController@create');
-    $route->post('parts/bins/{id}', 'App\Http\Controllers\v1\Parts\BinController@create')->where('id', '[0-9]+');
+    $route->post('parts/bins/{id}', 'App\Http\Controllers\v1\Parts\BinController@update')->where('id', '[0-9]+');
     $route->delete('parts/bins/{id}', 'App\Http\Controllers\v1\Parts\BinController@destroy')->where('id', '[0-9]+');
 
     /**
@@ -315,6 +315,8 @@ $api->version('v1', function ($route) {
 
     $route->put('website/{websiteId}/enable-proxied-domain-ssl', 'App\Http\Controllers\v1\Website\WebsiteController@enableProxiedDomainSsl');
 
+    $route->get('website/default-config', 'App\Http\Controllers\v1\Website\Config\DefaultWebsiteConfigController@index');
+
     $route->get('website/{websiteId}/website-config', 'App\Http\Controllers\v1\Website\Config\WebsiteConfigController@index');
     $route->put('website/{websiteId}/website-config', 'App\Http\Controllers\v1\Website\Config\WebsiteConfigController@createOrUpdate')->where('websiteId', '[0-9]+');
 
@@ -325,6 +327,12 @@ $api->version('v1', function ($route) {
     $route->put('website/{websiteId}/showroom', 'App\Http\Controllers\v1\Website\Config\ShowroomController@update')->where('websiteId', '[0-9]+');
     $route->post('website/{websiteId}/showroom', 'App\Http\Controllers\v1\Website\Config\ShowroomController@create')->where('websiteId', '[0-9]+');
 
+    /**
+     * Manufacturers
+     */
+    $route->get('manufacturers', 'App\Http\Controllers\v1\Showroom\ShowroomBulkUpdateController@index');
+    $route->post('manufacturers/bulk_year', 'App\Http\Controllers\v1\Showroom\ShowroomBulkUpdateController@bulkUpdateYear');
+    $route->post('manufacturers/bulk_visibility', 'App\Http\Controllers\v1\Showroom\ShowroomBulkUpdateController@bulkUpdateVisibility');
 
     /**
      * Log
@@ -533,6 +541,7 @@ $api->version('v1', function ($route) {
     |
     */
 
+    $route->post('user/passwordless', 'App\Http\Controllers\v1\User\SignInController@passwordless');
     $route->post('user/password-reset/start', 'App\Http\Controllers\v1\User\SignInController@initPasswordReset');
     $route->post('user/password-reset/finish', 'App\Http\Controllers\v1\User\SignInController@finishPasswordReset');
     $route->post('user/login', 'App\Http\Controllers\v1\User\SignInController@signIn');
@@ -578,8 +587,10 @@ $api->version('v1', function ($route) {
 
     $route->get('leads/status', 'App\Http\Controllers\v1\CRM\Leads\LeadStatusController@index');
     $route->put('leads/status', 'App\Http\Controllers\v1\CRM\Leads\LeadStatusController@create');
+    $route->get('leads/status/public', 'App\Http\Controllers\v1\CRM\Leads\LeadStatusController@publicStatuses');
     $route->post('leads/status/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadStatusController@update');
     $route->get('leads/types', 'App\Http\Controllers\v1\CRM\Leads\LeadTypeController@index');
+    $route->get('leads/types/public', 'App\Http\Controllers\v1\CRM\Leads\LeadTypeController@publicTypes');
     $route->get('leads/sources', 'App\Http\Controllers\v1\CRM\Leads\LeadSourceController@index');
     $route->get('leads/sort-fields', 'App\Http\Controllers\v1\CRM\Leads\LeadController@sortFields');
     $route->get('leads/unique-full-names', 'App\Http\Controllers\v1\CRM\Leads\LeadController@uniqueFullNames');
@@ -746,13 +757,33 @@ $api->version('v1', function ($route) {
             |
             |
             */
-            $route->group([
+            /*$route->group([
                 'prefix' => 'import'
             ], function ($route) {
                 $route->get('/', 'App\Http\Controllers\v1\CRM\Leads\LeadImportController@index');
                 $route->put('/', 'App\Http\Controllers\v1\CRM\Leads\LeadImportController@update');
                 $route->delete('/', 'App\Http\Controllers\v1\CRM\Leads\LeadImportController@delete');
-            });
+            });*/
+
+            /*
+            |--------------------------------------------------------------------------
+            | Lead Products
+            |--------------------------------------------------------------------------
+            |
+            |
+            |
+            */
+            $route->get('products', 'App\Http\Controllers\v1\CRM\Leads\ProductController@index');
+
+            /*
+            |--------------------------------------------------------------------------
+            | Lead Trades
+            |--------------------------------------------------------------------------
+            |
+            |
+            |
+            */
+            $route->get('trades', 'App\Http\Controllers\v1\CRM\Leads\LeadTradeController@index');
         });
 
         $route->group([
@@ -939,7 +970,6 @@ $api->version('v1', function ($route) {
                     $route->get('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@show')->where('id', '[0-9]+');
                     $route->post('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@update')->where('id', '[0-9]+');
                     $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@destroy')->where('id', '[0-9]+');*/
-                    $route->post('{id}/send', 'App\Http\Controllers\v1\CRM\Email\BlastController@send')->where('id', '[0-9]+');
                 });
             });
 
@@ -992,6 +1022,16 @@ $api->version('v1', function ($route) {
                     $route->post('{id}/sent', 'App\Http\Controllers\v1\CRM\Text\BlastController@sent')->where('id', '[0-9]+');
                 });
             });
+
+            /*
+            |--------------------------------------------------------------------------
+            | Dealer Documents
+            |--------------------------------------------------------------------------
+            |
+            |
+            |
+            */
+            $route->get('documents', 'App\Http\Controllers\v1\CRM\Documents\DealerDocumentsController@index');
         });
 
         /*
@@ -1052,11 +1092,14 @@ $api->version('v1', function ($route) {
                 'prefix' => 'facebook',
                 'middleware' => 'marketing.facebook.marketplace'
             ], function ($route) {
-                $route->get('/', 'App\Http\Controllers\v1\Marketing\FacebookController@index');
-                $route->post('/', 'App\Http\Controllers\v1\Marketing\FacebookController@create');
-                $route->get('{id}', 'App\Http\Controllers\v1\Marketing\FacebookController@show')->where('id', '[0-9]+');
-                $route->put('{id}', 'App\Http\Controllers\v1\Marketing\FacebookController@update')->where('id', '[0-9]+');
-                $route->delete('{id}', 'App\Http\Controllers\v1\Marketing\FacebookController@destroy')->where('id', '[0-9]+');
+                $route->get('/', 'App\Http\Controllers\v1\Marketing\Facebook\MarketplaceController@index');
+                $route->post('/', 'App\Http\Controllers\v1\Marketing\Facebook\MarketplaceController@create');
+                $route->get('status', 'App\Http\Controllers\v1\Marketing\Facebook\MarketplaceController@status');
+                $route->put('sms', 'App\Http\Controllers\v1\Marketing\Facebook\MarketplaceController@sms');
+                $route->get('{id}', 'App\Http\Controllers\v1\Marketing\Facebook\MarketplaceController@show')->where('id', '[0-9]+');
+                $route->put('{id}', 'App\Http\Controllers\v1\Marketing\Facebook\MarketplaceController@update')->where('id', '[0-9]+');
+                $route->delete('{id}', 'App\Http\Controllers\v1\Marketing\Facebook\MarketplaceController@destroy')->where('id', '[0-9]+');
+                $route->put('{id}/dismiss', 'App\Http\Controllers\v1\Marketing\Facebook\MarketplaceController@dismiss')->where('id', '[0-9]+');
             });
         });
     });
@@ -1339,10 +1382,61 @@ $api->version('v1', function ($route) {
                 'middleware' => 'dispatch.facebook'
             ], function ($route) {
                 $route->get('/', 'App\Http\Controllers\v1\Dispatch\FacebookController@index');
+                $route->put('verify', 'App\Http\Controllers\v1\Dispatch\FacebookController@verify');
                 $route->get('{id}', 'App\Http\Controllers\v1\Dispatch\FacebookController@show')->where('id', '[0-9]+');
                 $route->post('{id}', 'App\Http\Controllers\v1\Dispatch\FacebookController@create')->where('id', '[0-9]+');
                 $route->put('{id}', 'App\Http\Controllers\v1\Dispatch\FacebookController@update')->where('id', '[0-9]+');
             });
+        });
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Webhooks
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+
+    $route->post(
+        'stripe/webhook',
+        'App\Http\Controllers\v1\Webhook\SubscriptionController@handleWebhook'
+    );
+
+    $route->group([
+        'prefix' => 'subscriptions'
+    ], function ($route) {
+        $route->get(
+            'customer',
+            'App\Http\Controllers\v1\Subscription\SubscriptionController@getCustomer'
+        );
+
+        $route->get(
+            'plans',
+            'App\Http\Controllers\v1\Subscription\SubscriptionController@getPlans'
+        );
+
+        $route->post(
+            'subscribe',
+            'App\Http\Controllers\v1\Subscription\SubscriptionController@subscribe'
+        );
+
+        $route->post(
+            'update-card',
+            'App\Http\Controllers\v1\Subscription\SubscriptionController@updateCard'
+        );
+    });
+
+
+    $route->group([
+        'prefix' => 'webhook'
+    ], function ($route) {
+        // Twilio Webhooks
+        $route->group([
+            'prefix' => 'twilio'
+        ], function ($route) {
+            $route->post('verify', 'App\Http\Controllers\v1\Webhook\TwilioController@verify');
         });
     });
 });

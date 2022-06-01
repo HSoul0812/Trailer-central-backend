@@ -23,6 +23,8 @@ class EntityTypeAttribute extends Model
 
     protected $primaryKey = ['attribute_id', 'entity_type_id'];
 
+    public $timestamps = false;
+
     public function attribute()
     {
         return $this->belongsTo(Attribute::class, 'attribute_id', 'attribute_id');

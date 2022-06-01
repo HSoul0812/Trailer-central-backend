@@ -22,6 +22,7 @@ class UserTransformer extends TransformerAbstract
              'created_at' => $user->created_at ?? $user->user->created_at,
              'name' => $user->name ?? $user->user->name,
              'email' => $user->email ?? $user->user->email,
+             'primary_email' => $user->user ? $user->user->email : $user->email,
              'profile_image' => config('user.profile.image'),
              'website' => $user->website
         ];

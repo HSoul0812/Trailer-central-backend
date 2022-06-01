@@ -9,8 +9,10 @@ use App\Exceptions\CRM\Text\NoTwilioNumberAvailableException;
 use App\Exceptions\CRM\Text\TooManyNumbersTriedException;
 use App\Exceptions\CRM\Text\SendTwilioTextFailedException;
 use App\Repositories\CRM\Text\NumberRepositoryInterface;
+use App\Repositories\CRM\Text\VerifyRepositoryInterface;
 use App\Services\CRM\Text\TextServiceInterface;
 use App\Models\CRM\Text\NumberTwilio;
+use App\Models\CRM\Text\NumberVerify;
 use Twilio\Rest\Client;
 use Twilio\Rest\Api\V2010\Account\MessageInstance;
 use Illuminate\Support\Facades\Log;
@@ -23,6 +25,14 @@ use Illuminate\Support\Facades\Log;
 class TwilioService implements TextServiceInterface
 {
     /**
+     * @const Code Lengths By Type
+     */
+    const CODE_LENGTHS = [
+        'facebook' => [0, 6]
+    ];
+
+
+    /**
      * @var Twilio Client
      */
     private $twilio;
@@ -31,6 +41,11 @@ class TwilioService implements TextServiceInterface
      * @var NumberRepositoryInterface
      */
     private $textNumber;
+
+    /**
+     * @var VerifyRepositoryInterface
+     */
+    private $verifyNumber;
 
     /**
      * @var Log
@@ -61,8 +76,10 @@ class TwilioService implements TextServiceInterface
     /**
      * TwilioService constructor.
      */
-    public function __construct(NumberRepositoryInterface $numberRepo)
-    {
+    public function __construct(
+        NumberRepositoryInterface $numberRepo,
+        VerifyRepositoryInterface $verifyRepo
+    ) {
         // Get API Keys
         $appId = config('vendor.twilio.sid');
         $authToken = config('vendor.twilio.token');
@@ -78,6 +95,7 @@ class TwilioService implements TextServiceInterface
 
         // Initialize Number Repository
         $this->textNumber = $numberRepo;
+        $this->verifyNumber = $verifyRepo;
 
         // Get From/To Numbers if Exist
         $this->from = config('vendor.twilio.numbers.from');
@@ -135,7 +153,7 @@ class TwilioService implements TextServiceInterface
 
             // Retrieved Phone Numbers!
             $this->log->info('Found ' . count($list) . ' Phone Numbers from Twilio');
-        } catch (Exception $ex) {
+        } catch (\Exception $ex) {
             $this->log->error('Error occurred trying to get Twilio Numbers: ' . $ex->getMessage());
         }
 
@@ -154,7 +172,8 @@ class TwilioService implements TextServiceInterface
         $list = [];
         $numbers = $this->numbers($max);
         foreach($numbers as $number) {
-            if(!$this->textNumber->existsTwilioNumber($number)) {
+            if(!$this->textNumber->existsTwilioNumber($number) &&
+               !$this->verifyNumber->exists($number)) {
                 $list[] = $number;
             }
         }
@@ -175,6 +194,14 @@ class TwilioService implements TextServiceInterface
             // Prepend + to Phone
             if(strpos($number, '+') === false) {
                 $number = '+' . $number;
+            }
+
+            // Is Env Var Number for Staging/Dev?
+            if($number === $this->from) {
+                // Do NOT Delete!
+                $this->log->info('Can NOT Delete Number ' + $this->from +
+                                    '! Number is forced by dev/staging environment!');
+                return false;
             }
 
             // Get All Incoming Phone Numbers Matching Provided Number
@@ -199,6 +226,69 @@ class TwilioService implements TextServiceInterface
             return true;
         }
         return $success;
+    }
+
+
+    /**
+     * Verify Twilio SMS
+     * 
+     * @param string $body
+     * @param string $from
+     * @param string $to
+     * @return null|SmsVerify
+     */
+    public function verify(string $body, string $from, string $to): ?SmsVerify {
+        // Is Verification Number?
+        $number = $this->verifyNumber->exists($to);
+        if(empty($number->id)) {
+            $this->log->error($to . ' is not a valid twilio sms verification number!');
+            return null;
+        }
+
+        // Return Verification Code
+        $this->log->info('Received sms from twilio: ', ['from' => $from, 'to' => $to, 'body' => $body]);
+        $code = substr($body, self::CODE_LENGTHS[$number->verify_type][0], self::CODE_LENGTHS[$number->verify_type][1]);
+
+        // Return Sms Verify
+        $this->log->info('Received sms verification code: ', ['to' => $to, 'code' => $code]);
+        return $this->verifyNumber->createCode($number->twilio_number, $body, $code);
+    }
+
+    /**
+     * Create And Return Verification Twilio Number
+     * 
+     * @param int $dealerId
+     * @param string $dealerNo
+     * @param null|string $type
+     * @return null|NumberVerify
+     */
+    public function getVerifyNumber(string $dealerNo, ?string $type = null): ?NumberVerify {
+        // Default Type
+        if($type === null) {
+            $type = NumberVerify::VERIFY_DEFAULT;
+        }
+
+        // Get Next Available Number
+        if (!empty($this->twilio)) {
+            $phoneNumber = current($this->twilio->availablePhoneNumbers("US")->local->read(array('smsEnabled' => true), 1))->phoneNumber;
+
+            try {
+                $phone = $this->twilio->incomingPhoneNumbers
+                                ->create(["phoneNumber" => $phoneNumber]);
+
+                $this->twilio->incomingPhoneNumbers($phone->sid)
+                                ->update(["smsUrl" => config('vendor.twilio.verify')]);
+            } catch (\Exception $ex) {
+                $this->log->error('Error occurred getting verification twilio number: ' . $ex->getMessage());
+                throw new NoTwilioNumberAvailableException();
+            }
+
+            // Insert New Verify Number
+            return $this->verifyNumber->create($dealerNo, $phoneNumber, $type);
+        }
+
+        // Return Null
+        return null;
     }
 
 

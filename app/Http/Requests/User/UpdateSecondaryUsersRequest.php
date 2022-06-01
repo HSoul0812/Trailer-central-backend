@@ -18,7 +18,7 @@ class UpdateSecondaryUsersRequest extends Request
             'users.*.email' => 'nullable|email',
             'users.*.password' => 'nullable|string',
             'users.*.user_permissions' => 'array',
-//            'users.*.user_permissions.*.permission_level' => Rule::in(PermissionsInterface::PERMISSION_LEVELS),
+            'users.*.user_permissions.*.permission_level' => 'permission_level_valid:users.*.user_permissions.*.feature',
             'users.*.user_permissions.*.feature' => Rule::in(PermissionsInterface::FEATURES)
         ];
     }

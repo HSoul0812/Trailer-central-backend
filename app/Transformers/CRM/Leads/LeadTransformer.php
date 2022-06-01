@@ -2,12 +2,19 @@
 
 namespace App\Transformers\CRM\Leads;
 
+use App\Helpers\SanitizeHelper;
 use App\Models\CRM\Leads\Lead;
+use App\Traits\CompactHelper;
+use App\Transformers\CRM\Interactions\EmailHistoryTransformer;
 use App\Transformers\CRM\Interactions\InteractionTransformer;
+use App\Transformers\CRM\Text\TextTransformer;
+use App\Transformers\CRM\User\SalesPersonTransformer;
 use App\Transformers\Inventory\InventoryTransformer;
 use App\Transformers\User\DealerLocationTransformer;
+use League\Fractal\Resource\Collection;
 use League\Fractal\TransformerAbstract;
 use League\Fractal\Resource\Item;
+use App\Transformers\CRM\Leads\Facebook\UserTransformer as FbUserTransformer;
 
 class LeadTransformer extends TransformerAbstract
 {
@@ -21,14 +28,33 @@ class LeadTransformer extends TransformerAbstract
 
     protected $availableIncludes = [
         'interactions',
+        'textLogs',
         'otherLeadProperties',
+        'leadStatus',
+        'inventory',
+        'fbUsers',
     ];
 
+    /**
+     * @var InventoryTransformer
+     */
     protected $inventoryTransformer;
+
+    /**
+     * @var FbUserTransformer
+     */
+    protected $fbUserTransformer;
+
+    /**
+     * @var SanitizeHelper
+     */
+    protected $sanitizeHelper;
 
     public function __construct()
     {
         $this->inventoryTransformer = new InventoryTransformer();
+        $this->fbUserTransformer = new FbUserTransformer();
+        $this->sanitizeHelper = new SanitizeHelper();
     }
 
     /**
@@ -42,16 +68,17 @@ class LeadTransformer extends TransformerAbstract
     {
         $transformedLead =  [
             'id' => $lead->identifier,
+            'identifier' => CompactHelper::expand($lead->identifier),
             'website_id' => $lead->website_id,
             'dealer_id' => $lead->dealer_id,
             'name' => $lead->full_name,
             'lead_types' => $lead->lead_types,
-            'email' => $lead->email_address,
+            'email' => $this->sanitizeHelper->removeBrokenCharacters($lead->email_address),
             'phone' => $lead->phone_number,
             'preferred_contact' => $lead->preferred_contact,
             'address' => $lead->full_address,
-            'comments' => $lead->comments,
-            'note' => $lead->note,
+            'comments' => $this->sanitizeHelper->removeBrokenCharacters($lead->comments),
+            'note' => $this->sanitizeHelper->removeBrokenCharacters($lead->note),
             'referral' => $lead->referral,
             'title' => $lead->title,
             'status' => ($lead->leadStatus) ? $lead->leadStatus->status : Lead::STATUS_UNCONTACTED,
@@ -60,6 +87,7 @@ class LeadTransformer extends TransformerAbstract
             'contact_type' => ($lead->leadStatus) ? $lead->leadStatus->contact_type : null,
             'created_at' => $lead->date_submitted,
             'zip' => $lead->zip,
+            'is_archived' => $lead->is_archived,
         ];
 
         if (!empty($lead->pretty_phone_number)) {
@@ -84,7 +112,19 @@ class LeadTransformer extends TransformerAbstract
             return [];
         }
 
-        return $this->collection($lead->interactions, new InteractionTransformer());
+        $salesPersonTransformer = app()->make(SalesPersonTransformer::class);
+        $emailHistoryTransformer = app()->make(EmailHistoryTransformer::class);
+
+        return $this->collection($lead->interactions, new InteractionTransformer($salesPersonTransformer, $emailHistoryTransformer));
+    }
+
+    public function includeTextLogs(Lead $lead)
+    {
+        if (empty($lead->textLogs)) {
+            return [];
+        }
+
+        return $this->collection($lead->textLogs, new TextTransformer());
     }
 
     public function includeInventoryInterestedIn(Lead $lead)
@@ -94,6 +134,45 @@ class LeadTransformer extends TransformerAbstract
         }
 
         return $this->collection($lead->units, new InventoryTransformer());
+    }
+
+    /**
+     * @param Lead $lead
+     * @return Item
+     */
+    public function includeLeadStatus(Lead $lead): ?Item
+    {
+        if (empty($lead->leadStatus)) {
+            return null;
+        }
+
+        return $this->item($lead->leadStatus, new LeadStatusTransformer());
+    }
+
+    /**
+     * @param Lead $lead
+     * @return Item
+     */
+    public function includeInventory(Lead $lead): ?Item
+    {
+        if (empty($lead->inventory)) {
+            return null;
+        }
+
+        return $this->item($lead->inventory, $this->inventoryTransformer);
+    }
+
+    /**
+     * @param Lead $lead
+     * @return Collection|array
+     */
+    public function includeFbUsers(Lead $lead)
+    {
+        if (empty($lead->fbUsers)) {
+            return [];
+        }
+
+        return $this->collection($lead->fbUsers, $this->fbUserTransformer);
     }
 
     public function includeOtherLeadProperties(Lead $lead): Item

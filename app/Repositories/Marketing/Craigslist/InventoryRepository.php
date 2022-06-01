@@ -91,19 +91,27 @@ class InventoryRepository implements InventoryRepositoryInterface
             'field' => 'clapp_posts.status',
             'direction' => 'ASC'
         ],
-        'posted_at' => [
+        'queue_id' => [
+            'field' => 'clapp_queue.queue_id',
+            'direction' => 'DESC'
+        ],
+        '-queue_id' => [
+            'field' => 'clapp_queue.queue_id',
+            'direction' => 'ASC'
+        ],
+        'last_posted' => [
             'field' => 'clapp_posts.added',
             'direction' => 'DESC'
         ],
-        '-posted_at' => [
+        '-last_posted' => [
             'field' => 'clapp_posts.added',
             'direction' => 'ASC'
         ],
-        'scheduled_at' => [
+        'next_scheduled' => [
             'field' => 'clapp_session.session_scheduled',
             'direction' => 'DESC'
         ],
-        '-scheduled_at' => [
+        '-next_scheduled' => [
             'field' => 'clapp_session.session_scheduled',
             'direction' => 'ASC'
         ],
@@ -229,6 +237,7 @@ class InventoryRepository implements InventoryRepositoryInterface
     {
         return DB::table(Inventory::getTableName())->select([
                     Inventory::getTableName().'.inventory_id', Inventory::getTableName().'.stock',
+                    Inventory::getTableName().'.dealer_location_id',
                     Inventory::getTableName().'.title', Inventory::getTableName().'.category',
                     Inventory::getTableName().'.manufacturer', Inventory::getTableName().'.price',
                     Post::getTableName().'.cl_status', Image::getTableName().'.filename as primary_image',
@@ -270,13 +279,13 @@ class InventoryRepository implements InventoryRepositoryInterface
     private function overrideInventoryQuery(Builder $query, int $dealerId) : Builder
     {
         // Get Status Overrides
-        $statusAll = config('marketing.cl.overrides.statusAll', '');
+        $statusAll = config('marketing.cl.settings.overrides.statusAll', '');
         if(!in_array($dealerId, explode(",", $statusAll))) {
             $query = $query->where(function($query) use($dealerId) {
                 $query = $query->where(Inventory::getTableName().'.status', 1);
 
                 // Get Status On Order Overrides
-                $statusOnOrder = config('marketing.cl.overrides.statusAll', '');
+                $statusOnOrder = config('marketing.cl.settings.overrides.statusAll', '');
                 if(in_array($dealerId, explode(",", $statusOnOrder))) {
                     $query = $query->orWhere(Inventory::getTableName().'.status', 3);
                 }
@@ -284,7 +293,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         // Get Show on Website Overrides
-        $showOnWebsite = config('marketing.cl.overrides.showOnWebsite', '');
+        $showOnWebsite = config('marketing.cl.settings.overrides.showOnWebsite', '');
         if(!in_array($dealerId, explode(",", $showOnWebsite))) {
             $query = $query->where(Inventory::getTableName().'.show_on_website', 1);
         }

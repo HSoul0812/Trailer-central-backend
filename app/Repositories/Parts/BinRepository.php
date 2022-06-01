@@ -26,11 +26,15 @@ class BinRepository implements BinRepositoryInterface
         return $bin->delete();
     }
 
+    /**
+     * @param array $params
+     * @return Bin
+     */
     public function get($params)
     {
         // Bin ID Exists?
         if (isset($params['bin_id'])) {
-            return Bin::first($params['bin_id']);
+            return Bin::find($params['bin_id']);
         }
 
         // Initialize Bin Query
@@ -44,18 +48,14 @@ class BinRepository implements BinRepositoryInterface
         if (isset($params['location'])) {
             $query = $query->where('location', $params['location']);
         }
-       
+
         // Return First Value
         return $query->first();
     }
 
     public function getAll($params)
     {
-        if (isset($params['dealer_id'])) {
-            $query = Bin::whereIn('dealer_id', $params['dealer_id']);
-        } else {
-            $query = Bin::where('id', '>', 0);
-        }
+        $query = Bin::where('dealer_id', $params['dealer_id']);
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
@@ -64,7 +64,7 @@ class BinRepository implements BinRepositoryInterface
         if (isset($params['bin_name'])) {
             $query = $query->where('bin_name', 'like', '%' . $params['bin_name'] . '%');
         }
-        
+
         // Added for consistency
         if (isset($params['search_term'])) {
             $query = $query->where('bin_name', 'LIKE', "%{$params['search_term']}%");

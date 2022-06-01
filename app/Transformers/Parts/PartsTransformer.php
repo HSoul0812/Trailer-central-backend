@@ -6,11 +6,13 @@ use App\Models\CRM\Dms\PurchaseOrder\PurchaseOrderPart;
 use League\Fractal\Resource\Collection;
 use League\Fractal\TransformerAbstract;
 use App\Models\Parts\Part;
+use League\Fractal\Resource\Primitive;
 
 class PartsTransformer extends TransformerAbstract implements PartsTransformerInterface
 {
     protected $availableIncludes = [
         'purchaseOrders',
+        'total_qty'
     ];
 
     public function transform(Part $part): array
@@ -40,7 +42,7 @@ class PartsTransformer extends TransformerAbstract implements PartsTransformerIn
              'weight' => (double)$part->weight,
              'weight_rating' => $part->weight_rating,
              'description' => $part->description,
-             'qty' => (int)$part->qty,
+             'qty' => ($part->qty <= 0) ? 0 : $part->qty,
              'show_on_website' => (bool)$part->show_on_website,
              'is_vehicle_specific' => (bool)$part->is_vehicle_specific,
              'images' => $part->images->pluck('image_url'),
@@ -71,5 +73,16 @@ class PartsTransformer extends TransformerAbstract implements PartsTransformerIn
                     return !$poPart->purchaseOrder->isCompleted();
                 })->isNotEmpty()
             ]);
+    }
+
+    /**
+     * Include total qty
+     *
+     * @param Part $part
+     * @return Primitive
+     */
+    public function includeTotalQty(Part $part): Primitive
+    {
+        return $this->primitive($part->total_qty);
     }
 }

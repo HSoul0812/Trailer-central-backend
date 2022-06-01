@@ -24,6 +24,15 @@ class HorizonServiceProvider extends HorizonApplicationServiceProvider
         // Horizon::night();
     }
 
+    protected function authorization()
+    {
+        $this->gate();
+
+        Horizon::auth(function () {
+            return Gate::check('viewHorizon');
+        });
+    }
+
     /**
      * Register the Horizon gate.
      *
@@ -33,11 +42,8 @@ class HorizonServiceProvider extends HorizonApplicationServiceProvider
      */
     protected function gate()
     {
-        Gate::define('viewHorizon', function ($user) {
-            return true;
-            // Old validation method: in case we want to restrict certain users
-            /*return in_array($user->email, [
-            ]);*/
+        Gate::define('viewHorizon', function ($user = null) {
+            return request()->user('nova') !== null;
         });
     }
 }

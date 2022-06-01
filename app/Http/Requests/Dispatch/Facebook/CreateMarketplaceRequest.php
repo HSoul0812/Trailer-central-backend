@@ -16,7 +16,7 @@ class CreateMarketplaceRequest extends Request {
         'marketplace_id' => 'required|int',
         'inventory_id' => 'required|integer|min:1|required|exists:inventory,inventory_id',
         'facebook_id' => 'required|int',
-        'status' => 'required|in:active,deleted,expired',
+        'status' => 'required|in:active,invalid,failed,deleted,expired',
         'account_type' => 'in:page,user',
         'page_id' => 'nullable|int',
         'username' => 'required|string',

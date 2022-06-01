@@ -3,8 +3,17 @@
 namespace App\Services\Marketing\Facebook;
 
 use App\Models\Marketing\Facebook\Marketplace;
+use App\Models\CRM\Text\NumberVerify;
 use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
 use App\Repositories\Marketing\Facebook\FilterRepositoryInterface;
+use App\Repositories\Marketing\Facebook\ErrorRepositoryInterface;
+use App\Repositories\CRM\Text\VerifyRepositoryInterface;
+use App\Repositories\User\DealerLocationRepositoryInterface;
+use App\Services\CRM\Text\TextServiceInterface;
+use App\Services\Marketing\Facebook\DTOs\MarketplaceStatus;
+use App\Services\Marketing\Facebook\DTOs\TfaType;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class MarketplaceService
@@ -24,17 +33,52 @@ class MarketplaceService implements MarketplaceServiceInterface
     protected $filters;
 
     /**
+     * @var ErrorRepositoryInterface
+     */
+    protected $errors;
+
+    /**
+     * @var VerifyRepositoryInterface
+     */
+    protected $verifyNumber;
+
+    /**
+     * @var DealerLocationRepositoryInterface
+     */
+    protected $dealerLocation;
+
+    /**
+     * @var TextServiceInterface
+     */
+    protected $twilio;
+
+    /**
      * Construct Facebook Marketplace Service
      * 
      * @param MarketplaceRepositoryInterface $marketplace
      * @param FilterRepositoryInterface $filters
+     * @param ErrorRepositoryInterface $errors
+     * @param VerifyRepositoryInterface $verifyNumber
+     * @param DealerLocationRepositoryInterface $dealerLocation
+     * @param TextServiceInterface $twilio
      */
     public function __construct(
         MarketplaceRepositoryInterface $marketplace,
-        FilterRepositoryInterface $filters
+        FilterRepositoryInterface $filters,
+        ErrorRepositoryInterface $errors,
+        VerifyRepositoryInterface $verifyNumber,
+        DealerLocationRepositoryInterface $dealerLocation,
+        TextServiceInterface $twilio
     ) {
         $this->marketplace = $marketplace;
         $this->filters = $filters;
+        $this->errors = $errors;
+        $this->verifyNumber = $verifyNumber;
+        $this->dealerLocation = $dealerLocation;
+        $this->twilio = $twilio;
+
+        // Create Marketplace Logger
+        $this->log = Log::channel('marketplace');
     }
 
     /**
@@ -67,7 +111,7 @@ class MarketplaceService implements MarketplaceServiceInterface
             // Return Response
             return $marketplace;
         } catch (Exception $e) {
-            $this->logger->error('Marketplace Integration update error. params=' .
+            $this->log->error('Marketplace Integration update error. params=' .
                 json_encode($params + ['marketplace_id' => $params['id']]),
                 $e->getTrace());
 
@@ -110,7 +154,7 @@ class MarketplaceService implements MarketplaceServiceInterface
             // Return Response
             return $marketplace;
         } catch (Exception $e) {
-            $this->logger->error('Marketplace Integration update error. params=' .
+            $this->log->error('Marketplace Integration update error. params=' .
                 json_encode($params + ['marketplace_id' => $params['id']]),
                 $e->getTrace());
 
@@ -142,12 +186,73 @@ class MarketplaceService implements MarketplaceServiceInterface
             // Return Result
             return $success;
         } catch (Exception $e) {
-            $this->logger->error('Marketplace Integration update error. params=' .
+            $this->log->error('Marketplace Integration update error. params=' .
                 json_encode(['id' => $id]), $e->getTrace());
 
             $this->marketplace->rollbackTransaction();
 
             throw $e;
         }
+    }
+
+    /**
+     * Get Two-Factor Auth Types Array
+     * 
+     * @param int $dealerId
+     * @return MarketplaceStatus
+     */
+    public function status(int $dealerId): MarketplaceStatus {
+        // Initialize Collection
+        $tfaTypes = new Collection();
+
+        // Loop Through TFA Types
+        $types = explode(",", config('marketing.fb.settings.fields.tfa_types', ''));
+        foreach(Marketplace::TFA_TYPES_ACTIVE as $code) {
+            // Skip If Not in Active TFA Types
+            if(!in_array($code, $types)) {
+                continue;
+            }
+
+            // Get Autocomplete
+            $autocomplete = null;
+            if($code === TfaType::TYPE_SMS) {
+                $autocomplete = $this->dealerLocation->findAllDealerSmsNumbers($dealerId);
+            }
+
+            // Append TFA Types
+            $tfaTypes->push(new TfaType([
+                'code' => $code,
+                'name' => Marketplace::TFA_TYPES[$code],
+                'autocomplete' => $autocomplete
+            ]));
+        }
+
+        // Return MarketplaceStatus
+        return new MarketplaceStatus([
+            'page_url' => config('marketing.fb.settings.fields.page_url', false),
+            'errors' => $this->errors->getAllActive($dealerId),
+            'tfa_types' => new Collection($tfaTypes)
+        ]);
+    }
+
+    /**
+     * Get Two-Factor Twilio Number for Marketplace
+     * 
+     * @param string $dealerNo
+     * @param null|string $type
+     * @return NumberVerify
+     */
+    public function sms(string $dealerNo, ?string $type = null): NumberVerify {
+        // Get Existing Verify Number?
+        $verify = $this->verifyNumber->get($dealerNo, $type);
+
+        // No Existing Number
+        if(empty($verify->id)) {
+            // Get New Verification Number
+            $verify = $this->twilio->getVerifyNumber($dealerNo, $type);
+        }
+
+        // Return Response
+        return $verify;
     }
 }

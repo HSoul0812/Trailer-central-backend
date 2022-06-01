@@ -31,7 +31,7 @@ class ServiceItem extends Model
 
     public function technicians()
     {
-        return $this->hasMany(ServiceItemTechnician::class, 'id', 'service_item_id');
+        return $this->hasMany(ServiceItemTechnician::class);
     }
 
     public function serviceOrder()

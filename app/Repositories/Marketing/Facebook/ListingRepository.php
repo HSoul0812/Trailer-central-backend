@@ -7,6 +7,7 @@ use App\Models\Inventory\Inventory;
 use App\Models\Marketing\Facebook\Filter;
 use App\Models\Marketing\Facebook\Listings;
 use App\Models\Marketing\Facebook\Marketplace;
+use App\Models\Marketing\Facebook\Error;
 use App\Repositories\Traits\SortTrait;
 use App\Traits\Repository\Transaction;
 use Illuminate\Database\Eloquent\Builder;
@@ -48,9 +49,15 @@ class ListingRepository implements ListingRepositoryInterface {
      */
     public function create($params) {
         // Already Exists?!
-        $listing = Listings::where('facebook_id', $params['facebook_id'])->first();
-        if(!empty($listing->id)) {
-            return $this->update($params);
+        if(!empty($params['facebook_id'])) {
+            $listing = Listings::where('facebook_id', $params['facebook_id'])->first();
+            if(!empty($listing->id)) {
+                if($listing->facebook_id !== $params['facebook_id']) {
+                    return $this->update($params);
+                } elseif($listing->facebook_id === $params['facebook_id']) {
+                    $params['facebook_id'] = 0;
+                }
+            }
         }
 
         // Create Listing
@@ -110,7 +117,11 @@ class ListingRepository implements ListingRepositoryInterface {
      * @return Listings
      */
     public function update($params) {
-        $listing = Listings::where('facebook_id', $params['facebook_id'])->firstOrFail();
+        if(!empty($params['facebook_id'])) {
+            $listing = Listings::where('facebook_id', $params['facebook_id'])->firstOrFail();
+        } else {
+            $listing = Listings::where('id', $params['id'])->firstOrFail();
+        }
 
         DB::transaction(function() use (&$listing, $params) {
             // Fill Listing Details
@@ -136,7 +147,6 @@ class ListingRepository implements ListingRepositoryInterface {
         // Initialize Inventory Query
         $query = Inventory::select(Inventory::getTableName().'.*')
                           ->where('dealer_id', '=', $integration->dealer_id)
-                          ->where('dealer_location_id', '=', $integration->dealer_location_id)
                           ->where('show_on_website', 1)
                           ->where(Inventory::getTableName().'.description', '<>', '')
                           ->has('orderedImages')
@@ -163,6 +173,21 @@ class ListingRepository implements ListingRepositoryInterface {
                            ->orWhere(Listings::getTableName() . '.status', Listings::STATUS_EXPIRED);
         });
 
+        // Skip Integrations With Non-Expired Errors
+        $query = $query->leftJoin(Error::getTableName(), function($join) {
+            $join->on(Error::getTableName() . '.marketplace_id', '=',
+                                    Inventory::getTableName() . '.inventory_id')
+                 ->where(Error::getTableName().'.dismissed', 0);
+        })->where(function(Builder $query) {
+            return $query->whereNull(Error::getTableName().'.id')
+                         ->orWhere(Error::getTableName().'.expires_at', '<', DB::raw('NOW()'));
+        });
+
+        // Append Location
+        if (!empty($integration->dealer_location_id)) {
+            $query = $query->where('dealer_location_id', '=', $integration->dealer_location_id);
+        }
+
         // Append Filters
         if (!empty($integration->filter_map)) {
             $query = $query->where(function(Builder $query) use($integration) {
@@ -172,8 +197,13 @@ class ListingRepository implements ListingRepositoryInterface {
             });
         }
 
-        if (!isset($params['per_page'])) {
-            $params['per_page'] = 20;
+        // Set Sort By
+        $query = $this->addSortQuery($query, '-created_at');
+
+        // Update Page Limit From Settings
+        $forced = config('marketing.fb.settings.limit.force', 0);
+        if (!isset($params['per_page']) || !empty($forced)) {
+            $params['per_page'] = (int) config('marketing.fb.settings.limit.listings', 20);
         }
 
         // Require Inventory Images

@@ -7,10 +7,15 @@ use App\Exceptions\CRM\Email\Builder\SendBlastEmailsFailedException;
 use App\Exceptions\CRM\Email\Builder\SendCampaignEmailsFailedException;
 use App\Exceptions\CRM\Email\Builder\SendTemplateEmailFailedException;
 use App\Exceptions\CRM\Email\Builder\FromEmailMissingSmtpConfigException;
+use App\Exceptions\CRM\Email\Builder\InvalidEmailTemplateHtmlException;
 use App\Jobs\CRM\Interactions\EmailBuilderJob;
 use App\Mail\CRM\Interactions\EmailBuilderEmail;
+use App\Mail\CRM\Interactions\InvalidTemplateEmail;
+use App\Models\CRM\Email\Blast;
 use App\Models\CRM\Interactions\EmailHistory;
+use App\Models\CRM\Leads\Lead;
 use App\Models\Integration\Auth\AccessToken;
+use App\Models\User\NewUser;
 use App\Repositories\CRM\Email\BlastRepositoryInterface;
 use App\Repositories\CRM\Email\BounceRepositoryInterface;
 use App\Repositories\CRM\Email\CampaignRepositoryInterface;
@@ -37,6 +42,8 @@ use App\Transformers\CRM\Email\BuilderEmailTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Carbon\Carbon;
@@ -190,28 +197,28 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     /**
      * Send Lead Emails for Blast
      *
-     * @param int $id ID of Blast to Send Emails For
-     * @param string Comma-Delimited String of Lead ID's to Send Emails For Blast
+     * @param Blast $blast Model of Blast to Send Emails For
      * @throws FromEmailMissingSmtpConfigException
      * @throws SendBlastEmailsFailedException
      * @return array response
      */
-    public function sendBlast(int $id, string $leads): array {
-        // Get Blast Details
-        $blast = $this->blasts->get(['id' => $id]);
-
+    public function sendBlast(Blast $blast): array {
         // Get Sales Person
         if(!empty($blast->from_email_address)) {
             $salesPerson = $this->salespeople->getBySmtpEmail($blast->user_id, $blast->from_email_address);
             if(empty($salesPerson->id)) {
+                $this->log->error("From Email Address " . $blast->from_email_address .
+                                    " does not exist for Email Blast #" . $blast->email_blasts_id);
                 throw new FromEmailMissingSmtpConfigException;
             }
         }
 
         // Create Email Builder Email!
+        $this->log->info("Sending Email Blast #" . $blast->email_blasts_id);
         $builder = new BuilderEmail([
             'id' => $blast->email_blasts_id,
             'type' => BuilderEmail::TYPE_BLAST,
+            'name' => $blast->campaign_name,
             'subject' => $blast->campaign_subject,
             'template' => $blast->template->html,
             'template_id' => $blast->template->template_id,
@@ -221,14 +228,21 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'from_email' => $blast->from_email_address ?: $this->getDefaultFromEmail()
         ]);
 
+        // Validate Template
+        $this->validateTemplate($builder);
+
         // Send Emails and Return Response
         try {
             // Dispatch Send EmailBuilder Job
-            $job = new EmailBuilderJob($builder, $leads);
+            $job = new EmailBuilderJob($builder, $blast->lead_ids);
             $this->dispatch($job->onQueue('emailbuilder'));
+            $this->log->info("Dispatched Email Builder Job for Blast #" . $blast->email_blasts_id);
+
+            // Mark Blast as Delivered
+            $this->blasts->update(['id' => $builder->id, 'delivered' => 1]);
 
             // Return Array of Queued Leads
-            return $this->response($builder, $leads);
+            return $this->response($builder, $blast->lead_ids);
         } catch(\Exception $ex) {
             throw new SendBlastEmailsFailedException($ex);
         }
@@ -270,12 +284,16 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
         // Send Emails and Return Response
         try {
+            // Get Lead ID's
+            $leadIds = new Collection(explode(",", $leads));
+
             // Dispatch Send EmailBuilder Job
-            $job = new EmailBuilderJob($builder, $leads);
+            $job = new EmailBuilderJob($builder, $leadIds);
             $this->dispatch($job->onQueue('emailbuilder'));
+            $this->log->info("Dispatched Email Builder Job for Campaign #" . $campaign->drip_campaigns_id);
 
             // Return Array of Queued Leads
-            return $this->response($builder, $leads);
+            return $this->response($builder, $leadIds);
         } catch(\Exception $ex) {
             throw new SendCampaignEmailsFailedException($ex);
         }
@@ -343,11 +361,11 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * Send Emails for Builder Config
      *
      * @param BuilderEmail $builder
-     * @param array $leads
+     * @param Collection<int> $leads
      * @throws SendBuilderEmailsFailedException
      * @return BuilderStats
      */
-    public function sendEmails(BuilderEmail $builder, array $leads): BuilderStats
+    public function sendEmails(BuilderEmail $builder, Collection $leads): BuilderStats
     {
         // Initialize Counts
         $stats = new BuilderStats();
@@ -623,6 +641,40 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     }
 
     /**
+     * Handle Text Template Validation
+     *
+     * @param BuilderEmail $builder
+     * @throws InvalidEmailTemplateHtmlException
+     * @return bool
+     */
+    private function validateTemplate(BuilderEmail $builder): bool
+    {
+        // Template is Valid?!
+        if($builder->template) {
+            return true;
+        }
+
+        // Send Invalid Template Email
+        $dealer = $this->users->get(['dealer_id' => $builder->dealerId]);
+        $credential = NewUser::getDealerCredential($dealer->newDealerUser->user_id);
+        $launchUrl = Lead::getLeadCrmUrl($builder->leadId, $credential);
+        Mail::to($dealer->email)->send(new InvalidTemplateEmail($builder, $launchUrl));
+
+        // Fix Blast to Remove Template ID
+        if($builder->type === BuilderEmail::TYPE_BLAST) {
+            // Remove Invalid Template ID
+            $this->blasts->update(['id' => $builder->id, 'email_template_id' => 0]);
+        }
+        // Fix Campaign to Remove Template ID
+        elseif($builder->type === BuilderEmail::TYPE_CAMPAIGN) {
+            $this->campaigns->update(['id' => $builder->id, 'email_template_id' => 0, 'is_enabled' => 0]);
+        }
+
+        // Send Email to Dealer!
+        throw new InvalidEmailTemplateHtmlException;
+    }
+
+    /**
      * Send Email Manually for Builder Config
      *
      * @param BuilderEmail $builder
@@ -700,16 +752,16 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * Return Send Emails Response
      *
      * @param BuilderEmail $builder
-     * @param string $leads
+     * @param Collection<int> $leads
      * @return array response
      */
-    private function response(BuilderEmail $builder, string $leads): array {
+    private function response(BuilderEmail $builder, Collection $leads): array {
         // Convert Builder Email to Fractal
         $data = new Item($builder, new BuilderEmailTransformer(), 'data');
         $response = $this->fractal->createData($data)->toArray();
 
         // Convert Builder Email to Fractal
-        $response['leads'] = count(explode(",", $leads));
+        $response['leads'] = $leads->toArray();
 
         // Return Response
         return $response;
