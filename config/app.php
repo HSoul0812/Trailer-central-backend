@@ -64,6 +64,8 @@ return [
 
     'crm_url' => env('CRM_URL', 'https://crm.trailercentral.com/'),
 
+    'dashboard_login_url' => env('DASHBOARD_LOGIN_URL', 'https://beta.dashboard.trailercentral.com/login'),
+
     'user_master_password' => env('USER_MASTER_PASSWORD'),
 
     /*
