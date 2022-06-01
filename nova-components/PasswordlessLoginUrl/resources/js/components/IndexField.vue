@@ -19,7 +19,7 @@ export default {
                     const token = response.data
                     const encrypted = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(token))
 
-                    window.open('http://localhost:3000/login?session=' + encrypted, '_blank')
+                    window.open(this.$props.field.dashboard_url + '?session=' + encrypted, '_blank')
                 });
         },
     }

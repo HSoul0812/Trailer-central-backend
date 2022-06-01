@@ -56,7 +56,7 @@ class Dealer extends Resource
         return [
             Text::make('Dealer ID')->hideFromIndex(),
 
-            PasswordlessLoginUrl::make('Dealer ID', 'dealer_id')->onlyOnIndex()->sortable(),
+            PasswordlessLoginUrl::make('Dealer ID', 'dealer_id')->withMeta(['dashboard_url' => config('app.dashboard_login_url')])->onlyOnIndex()->sortable(),
 
             Text::make('Name')
                 ->sortable()
@@ -71,7 +71,7 @@ class Dealer extends Resource
             Boolean::make('ECommerce', 'IsEcommerceActive')->hideWhenCreating()->hideWhenUpdating(),
 
             Boolean::make('User Accounts', 'isUserAccountsActive')->hideWhenCreating()->hideWhenUpdating(),
-            
+
             Password::make('Password')
                 ->onlyOnForms()
                 ->creationRules('required', 'string', 'min:12', 'regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[\d\x])(?=.*[!$#%]).*$/')
