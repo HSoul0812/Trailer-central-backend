@@ -43,6 +43,7 @@ class StripeService implements StripeServiceInterface
     public function getCustomer(Request $request): object
     {
         $customer = $this->customer;
+        $customer["card"] = $this->user->defaultPaymentMethod()->card;
         $transactions = isset($request->transactions_limit) ? $this->getTransactions($request->transactions_limit) : $this->getTransactions();
         $customer["transactions"] = $transactions["data"];
 
