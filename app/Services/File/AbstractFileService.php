@@ -3,10 +3,12 @@
 namespace App\Services\File;
 
 use App\Exceptions\File\FileUploadException;
+use App\Exceptions\NotImplementedException;
 use App\Helpers\SanitizeHelper;
 use App\Traits\CompactHelper;
 use GuzzleHttp\Client;
 use Illuminate\Contracts\Filesystem\Filesystem;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -47,6 +49,16 @@ abstract class AbstractFileService implements FileServiceInterface
     {
         $this->httpClient = $httpClient;
         $this->sanitizeHelper = $sanitizeHelper;
+    }
+
+    /**
+     * @param array $files
+     * @param int|null $dealerId
+     * @return Collection|null
+     */
+    public function bulkUpload(array $files, ?int $dealerId = null): ?Collection
+    {
+        throw new NotImplementedException();
     }
 
     /**

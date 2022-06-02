@@ -4,8 +4,10 @@ namespace App\Models\CRM\Interactions;
 
 use App\Models\CRM\Leads\Lead;
 use App\Models\Traits\TableAware;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 /**
@@ -22,6 +24,8 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
  * @property \DateTimeInterface $updated_at
  *
  * @property Lead $lead
+ * @property InteractionMessage $interactionMessage
+ * @property Collection<TextLogFile> $files
  */
 class TextLog extends Model
 {
@@ -82,5 +86,13 @@ class TextLog extends Model
     public function interactionMessage(): MorphOne
     {
         return $this->morphOne(InteractionMessage::class, 'interactionMessage', 'tb_name', 'tb_primary_id');
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function files(): HasMany
+    {
+        return $this->hasMany(TextLogFile::class, 'dealer_texts_log_id', 'id');
     }
 }
