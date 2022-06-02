@@ -2,6 +2,8 @@
 
 namespace App\Services\Inventory\ESQuery;
 
+use JetBrains\PhpStorm\ArrayShape;
+
 class ESInventoryQueryBuilder
 {
     const OCCUR_MUST = 'must';
@@ -64,21 +66,17 @@ class ESInventoryQueryBuilder
 
     public function addTermQuery(string $fieldKey, $value, $context = self::OCCUR_MUST)
     {
-        $query = $this->_addTermQuery($fieldKey, $value);
+        $query = $this->buildTermQuery($fieldKey, $value);
         if ($query != null) {
             $this->queries[$context][] = $query;
         }
         return $this;
     }
 
-    public function addTermQueries(string $fieldKey, ?string $valueString, $context = self::OCCUR_MUST)
+    public function addTermInValuesQuery(string $fieldKey, ?string $valueString, $context = self::OCCUR_MUST)
     {
         if ($valueString != null) {
-            $valueArr = explode(';', $valueString);
-            $queries = [];
-            foreach($valueArr as $value) {
-                $queries[] = $this->_addTermQuery($fieldKey, $value);
-            }
+            $queries = $this->buildTermInValuesQuery($fieldKey, $valueString);
 
             $this->queries[$context][] = [
                 'bool' => [
@@ -89,16 +87,36 @@ class ESInventoryQueryBuilder
         return $this;
     }
 
+    public function addQueryToContext(array $query, $context = self::OCCUR_MUST) {
+        $this->queries[$context][] = $query;
+        return $this;
+    }
+
     public function setFilterScript(array $script) {
         $this->filterScript = $script;
     }
 
-    private function _addTermQuery(string $fieldKey, $value) {
+    public function buildTermInValuesQuery(string $fieldKey, ?string $valueString, $context = self::OCCUR_MUST)
+    {
+        if ($valueString != null) {
+            $valueArr = explode(';', $valueString);
+            $queries = [];
+            foreach($valueArr as $value) {
+                $queries[] = $this->buildTermQuery($fieldKey, $value);
+            }
+            return $queries;
+        }
+        return null;
+    }
+
+    public function buildTermQuery(string $fieldKey, $value) {
         if ($value !== null) {
             return
                 [
                     'match_phrase' => [
-                        $fieldKey => is_bool($value) ? $value : str_replace("+", " ", $value)
+                        $fieldKey => (is_bool($value) || is_numeric($value))
+                            ? $value
+                            : str_replace("+", " ", $value)
                     ]
                 ];
         }

@@ -26,6 +26,16 @@ class BannerSeeder extends Seeder
         ['banner/norstar/mobile', 'https://trailertrader.s3.amazonaws.com/banners/TC-NorstarBanners-v1_Mobile-20220505-132316.png'],
         ['banner/bwise/desktop', 'https://trailertrader.s3.amazonaws.com/banners/TC-BWiseBanners-v1_Desktop-20220505-131302.png'],
         ['banner/bwise/mobile', 'https://trailertrader.s3.amazonaws.com/banners/TC-BWiseBanners-v1_Mobile-20220505-131302.png'],
+        ['banner/h and h trailer/desktop', 'https://trailertrader.s3.amazonaws.com/banners/TC-HHBanners-v1_Desktop-20220510-150132.png'],
+        ['banner/h and h trailer/mobile', 'https://trailertrader.s3.amazonaws.com/banners/TC-HHBanners-v1_Mobile-20220510-150132.png'],
+        ['banner/sure-trac/desktop', 'https://trailertrader.s3.amazonaws.com/banners/TC-SureTracBanners-v1_Desktop-20220510-144334.png'],
+        ['banner/sure-trac/mobile', 'https://trailertrader.s3.amazonaws.com/banners/TC-SureTracBanners-v1_Mobile-20220510-144334.png'],
+        ['banner/cam superline/desktop', 'https://trailertrader.s3.amazonaws.com/banners/TC-SuperlineBanners-v1_Desktop-20220510-151114.png'],
+        ['banner/cam superline/mobile', 'https://trailertrader.s3.amazonaws.com/banners/TC-SuperlineBanners-v1_Mobile-20220510-151114.png'],
+        ['banner/trailerman trailers inc./desktop', 'https://trailertrader.s3.amazonaws.com/banners/TC-TrailermanBanners-v1_Desktop-20220510-151711.png'],
+        ['banner/trailerman trailers inc./mobile', 'https://trailertrader.s3.amazonaws.com/banners/TC-TrailermanBanners-v1_Mobile-20220510-151711.png'],
+        ['banner/midsota/desktop', 'https://trailertrader.s3.amazonaws.com/banners/TC-MidsotaBanners-v1_Desktop-20220510-152906.png'],
+        ['banner/midsota/mobile', 'https://trailertrader.s3.amazonaws.com/banners/TC-MidsotaBanners-v1_Mobile-20220510-152906.png'],
     ];
 
     /**
