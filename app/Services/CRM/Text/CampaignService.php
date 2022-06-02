@@ -11,7 +11,7 @@ use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Text\Campaign;
 use App\Models\CRM\Text\CampaignSent;
 use App\Models\User\NewDealerUser;
-use App\Services\CRM\Text\TextServiceInterface;
+use App\Services\CRM\Text\TwilioServiceInterface;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
 use App\Repositories\CRM\Text\CampaignRepositoryInterface;
@@ -24,13 +24,13 @@ use Carbon\Carbon;
 
 /**
  * Class CampaignService
- * 
+ *
  * @package App\Services\CRM\Text
  */
 class CampaignService implements CampaignServiceInterface
 {
     /**
-     * @var App\Services\CRM\Text\TextServiceInterface
+     * @var TwilioServiceInterface
      */
     protected $textService;
 
@@ -67,11 +67,11 @@ class CampaignService implements CampaignServiceInterface
     /**
      * CampaignService constructor.
      */
-    public function __construct(TextServiceInterface $text,
-                                StatusRepositoryInterface $leadStatus,
-                                TextRepositoryInterface $textRepo,
-                                CampaignRepositoryInterface $campaignRepo,
-                                TemplateRepositoryInterface $templateRepo,
+    public function __construct(TwilioServiceInterface            $text,
+                                StatusRepositoryInterface         $leadStatus,
+                                TextRepositoryInterface           $textRepo,
+                                CampaignRepositoryInterface       $campaignRepo,
+                                TemplateRepositoryInterface       $templateRepo,
                                 DealerLocationRepositoryInterface $dealerLocationRepo)
     {
         // Initialize Text Service
@@ -90,7 +90,7 @@ class CampaignService implements CampaignServiceInterface
 
     /**
      * Send Campaign Text
-     * 
+     *
      * @param NewDealerUser $dealer
      * @param Campaign $campaign
      * @throws NoCampaignSmsFromNumberException
@@ -130,7 +130,7 @@ class CampaignService implements CampaignServiceInterface
 
     /**
      * Get From Number
-     * 
+     *
      * @param int $dealerId
      * @param Campaign $campaign
      * @throw NoCampaignSmsFromNumberException
@@ -156,7 +156,7 @@ class CampaignService implements CampaignServiceInterface
 
     /**
      * Send Text to Lead
-     * 
+     *
      * @param string $from_number sms from number
      * @param NewDealerUser $dealer
      * @param Campaign $campaign
@@ -201,7 +201,7 @@ class CampaignService implements CampaignServiceInterface
 
     /**
      * Update Lead Status
-     * 
+     *
      * @param Lead $lead
      * @return LeadStatus
      */
@@ -216,7 +216,7 @@ class CampaignService implements CampaignServiceInterface
 
     /**
      * Save Text to DB
-     * 
+     *
      * @param string $from_number sms from number
      * @param Lead $lead
      * @param string $textMessage filled text message
@@ -234,7 +234,7 @@ class CampaignService implements CampaignServiceInterface
 
     /**
      * Mark Lead as Sent
-     * 
+     *
      * @param Campaign $campaign
      * @param Lead $lead
      * @param string $status

@@ -214,4 +214,5 @@ return [
     'valid_include' => 'The :attribute is not valid',
     'unique_text_blast_campaign_name' => 'You already have a blast campaign with this name',
     'unique_text_campaign_name' => 'You already have a campaign with this name',
+    'active_interaction' => 'The number is not active',
 ];

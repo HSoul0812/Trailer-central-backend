@@ -467,6 +467,8 @@ $api->version('v1', function ($route) {
 
     // Stop Text!
     $route->post('leads/texts/stop', 'App\Http\Controllers\v1\CRM\Text\StopController@index');
+    // Reply
+    $route->put('leads/texts/reply', 'App\Http\Controllers\v1\CRM\Text\TextController@reply')->middleware(['accesstoken.validate', 'replytext.validate']);;
 
     /**
      * Facebook Webhooks
@@ -624,6 +626,7 @@ $api->version('v1', function ($route) {
         $route->put('leads', 'App\Http\Controllers\v1\CRM\Leads\LeadController@create');
         $route->post('leads/find-matches', 'App\Http\Controllers\v1\CRM\Leads\LeadController@getMatches');
         $route->post('leads/{id}/merge', 'App\Http\Controllers\v1\CRM\Leads\LeadController@mergeLeads');
+        $route->get('leads/output', 'App\Http\Controllers\v1\CRM\Leads\LeadController@output');
 
         /*
         |--------------------------------------------------------------------------
@@ -1342,6 +1345,7 @@ $api->version('v1', function ($route) {
     |
     */
     $route->post('files/local', 'App\Http\Controllers\v1\File\FileController@uploadLocal');
+    $route->post('files/local/twilio', 'App\Http\Controllers\v1\File\FileController@twilioUploadLocal');
     $route->post('images/local', 'App\Http\Controllers\v1\File\ImageController@uploadLocal');
 
     /*
