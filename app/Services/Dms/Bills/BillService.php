@@ -37,4 +37,9 @@ class BillService implements BillServiceInterface
     {
         return $this->billRepository->getAll($params, $paginated);
     }
+
+    public function delete(array $params)
+    {
+        return $this->billRepository->delete($params);
+    }
 }

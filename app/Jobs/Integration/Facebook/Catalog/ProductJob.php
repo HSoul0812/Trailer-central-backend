@@ -380,7 +380,7 @@ class ProductJob extends Job
 
         // Return Stored File
         try {
-            $saved = Storage::disk('s3')->put($filePath, $csv, 'public');
+            $saved = Storage::disk('s3')->put($filePath, $csv);
         } catch(\Exception $e) {
             $log->error('Exception returned sending file ' . $filePath . ' to S3: ' . $e->getMessage());
         }
