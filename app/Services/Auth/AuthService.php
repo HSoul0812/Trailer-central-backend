@@ -3,15 +3,19 @@
 namespace App\Services\Auth;
 
 use Hybridauth\Hybridauth;
+use Laravel\Socialite\Facades\Socialite;
 
 class AuthService implements AuthServiceInterface
 {
-    private Hybridauth $hybridauth;
+    public function authenticateSocialCallback($social) {
+        $user = Socialite::driver($social)->stateless()->user();
+        \Log::info(json_encode($user));
+    }
 
-    /**
-     * @throws \Hybridauth\Exception\InvalidArgumentException
-     */
-    public function __construct() {
-        $this->hybridauth = new Hybridauth([]);
+    public function authenticateSocial($social) {
+        return Socialite::driver($social)->stateless()->redirect();
+    }
+
+    public function authenticate() {
     }
 }
