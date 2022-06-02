@@ -54,7 +54,7 @@ class BulkRepository implements BulkRepositoryInterface {
      * @return string
      */
     private function storeCsv($file) {
-        $fileKey = Storage::disk('s3')->putFile(uniqid().'/'.$file->getClientOriginalName(), $file, 'public');
+        $fileKey = Storage::disk('s3')->putFile(uniqid().'/'.$file->getClientOriginalName(), $file);
         return $fileKey;
     }
 }

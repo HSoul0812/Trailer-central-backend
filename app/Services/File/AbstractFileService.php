@@ -221,8 +221,6 @@ abstract class AbstractFileService implements FileServiceInterface
 
         $s3Filename = DIRECTORY_SEPARATOR . $this->getS3Path($newFilename, [$dealerId, $identifier]);
 
-        $uploadParams = array_merge(['visibility' => 'public'], $uploadParams);
-
         $result = Storage::disk('s3')->put($s3Filename, file_get_contents($localFilename), $uploadParams);
 
         if (!$result) {

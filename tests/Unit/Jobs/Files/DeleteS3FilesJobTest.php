@@ -27,8 +27,8 @@ class DeleteS3FilesJobTest extends TestCase
 
         Storage::fake('s3');
 
-        Storage::disk('s3')->put($files[0], 'some_content', 'public');
-        Storage::disk('s3')->put($files[1], 'some_content', 'public');
+        Storage::disk('s3')->put($files[0], 'some_content');
+        Storage::disk('s3')->put($files[1], 'some_content');
 
         Storage::disk('s3')->assertExists($files);
 
