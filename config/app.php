@@ -199,6 +199,7 @@ return [
         App\Providers\QuickbooksServiceProvider::class,
         App\Providers\MarketingServiceProvider::class,
         App\Providers\EcommerceProvider::class,
+        App\Providers\FavoritesExportServiceProvider::class,
         /*
          * 3rd party stuff
          */
