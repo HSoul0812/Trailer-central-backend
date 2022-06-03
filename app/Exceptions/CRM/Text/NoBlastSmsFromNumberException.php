@@ -9,9 +9,7 @@ namespace App\Exceptions\CRM\Text;
  *
  * @package App\Exceptions\CRM\Text
  */
-class NoBlastSmsFromNumberException extends \Exception
+class NoBlastSmsFromNumberException extends BlastException
 {
-    
-    protected $message = 'Could not find from sms number for blast!';
-
+    protected $message = 'No From SMS Number Available';
 }
