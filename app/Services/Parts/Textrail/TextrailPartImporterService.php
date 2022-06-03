@@ -77,24 +77,25 @@ class TextrailPartImporterService implements TextrailPartImporterServiceInterfac
                 $trashed_item->restore();
             }
 
-            $textrailCategory = $this->textrailPartService->getTextrailCategory($item->category_id);
+            list($parentCategory, $textrailCategory) = $this->textrailPartService->getParentAndCategory($item->category_id);
 
             $categoryParams = [
-                'name' => $textrailCategory->name
+                'name' => $textrailCategory['name'],
             ];
 
             $category = $this->categoryRepository->firstOrCreate($categoryParams);
 
             $item->category_id = $category->id;
 
-            $textrailCategoryForType = $this->textrailPartService->getTextrailCategory($textrailCategory->parent_id);
-
             $typeParams = [
-                'name' => $textrailCategoryForType->name
+                'name' => $parentCategory['name']
             ];
 
             $type = $this->typeRepository->firstOrCreate($typeParams);
             $item->type_id = $type->id;
+
+            $category->parent_id = $type->id;
+            $category->save();
 
             $textrailManufacturers = $this->textrailPartService->getTextrailManufacturers();
 
