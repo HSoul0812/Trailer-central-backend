@@ -40,6 +40,7 @@ class TcApiResponseInventory
     public array $dealer;
     public string $listing_date;
     public ?float $price;
+    public ?float $basic_price;
     public ?float $sales_price;
     public ?string $inventory_title;
     public ?array $photos;
@@ -72,6 +73,7 @@ class TcApiResponseInventory
      $obj->dealer = $data['dealer'];
      $obj->listing_date = $data['created_at'];
      $obj->price = $data['price'];
+     $obj->basic_price = $data['price'];
      $obj->sales_price = $data['sales_price'];
      $obj->website_price = $data['use_website_price'] ? $data['website_price'] : $data['price'];
      $obj->inventory_title = $data['title'];
