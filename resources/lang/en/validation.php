@@ -197,6 +197,7 @@ return [
                             Lead::STATUS_UNCONTACTED . ',' .
                             Lead::STATUS_WON . ',' .
                             Lead::STATUS_WON_CLOSED,
+    'jotform_enabled' => 'JotForm Disabled or Doesn\'t exist.',
     'interaction_type_valid' => 'Interaction type needs to be: '. implode(',', Interaction::INTERACTION_TYPES),
     'sales_person_valid' => 'Sales person ID must exist or be 0',
     'sales_auth_type' => 'SMTP auth needs to be: ' . implode(", ", SalesPerson::SMTP_AUTH),
