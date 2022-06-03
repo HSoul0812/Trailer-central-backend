@@ -6,13 +6,14 @@ use App\Http\Controllers\AbstractRestfulController;
 use App\Http\Requests\CreateRequestInterface;
 use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\UpdateRequestInterface;
+use App\Http\Requests\WebsiteUser\RegisterUserRequest;
+use App\Repositories\WebsiteUser\WebsiteUserRepositoryInterface;
 use App\Services\Auth\AuthServiceInterface;
 use Dingo\Api\Http\Request;
-use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends AbstractRestfulController
 {
-    public function __construct(private AuthServiceInterface $authService)
+    public function __construct(private AuthServiceInterface $authService, private WebsiteUserRepositoryInterface $websiteUserRepository)
     {}
 
     public function index(IndexRequestInterface $request)
@@ -22,7 +23,9 @@ class AuthController extends AbstractRestfulController
 
     public function create(CreateRequestInterface $request)
     {
-        // TODO: Implement create() method.
+        if($request->validate()) {
+
+        }
     }
 
     public function social(string $social, Request $request) {
@@ -50,6 +53,8 @@ class AuthController extends AbstractRestfulController
 
     protected function constructRequestBindings(): void
     {
-
+        app()->bind(CreateRequestInterface::class, function () {
+            return inject_request_data(RegisterUserRequest::class);
+        });
     }
 }

@@ -15,15 +15,19 @@ class CreateWebsiteUsersTable extends Migration
     {
         Schema::create('website_users', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->nullable();
-            $table->string('first_name')->nullable();
-            $table->string('last_name')->nullable();
-            $table->string('zipcode');
-            $table->string('city');
-            $table->string('state');
+            $table->string('first_name');
+            $table->string('last_name');
+            $table->string('address')->nullable();
+            $table->string('zipcode')->nullable();
+            $table->string('city')->nullable();
+            $table->string('state')->nullable();
             $table->string('email')->unique();
             $table->string('phone_number')->nullable();
+            $table->string('mobile_number')->nullable();
             $table->string('password');
+            $table->string('registration_source')->nullable();
+            $table->boolean('is_active')->default(false);
+            $table->rememberToken();
             $table->timestamps();
         });
     }

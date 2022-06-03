@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Models\WebsitePasswordReset;
 use App\Repositories\Geolocation\GeolocationRepository;
 use App\Repositories\Geolocation\GeolocationRepositoryInterface;
 use App\Repositories\Integrations\TrailerCentral\InventoryRepository;
@@ -22,6 +23,9 @@ use App\Repositories\SyncProcessRepository;
 use App\Repositories\SyncProcessRepositoryInterface;
 use App\Repositories\SysConfig\SysConfigRepository;
 use App\Repositories\SysConfig\SysConfigRepositoryInterface;
+use App\Repositories\WebsiteUser\WebsitePasswordResetRepositoryInterface;
+use App\Repositories\WebsiteUser\WebsiteUserRepository;
+use App\Repositories\WebsiteUser\WebsiteUserRepositoryInterface;
 use App\Services\Integrations\TrailerCentral\Console\Inventory\LogService as InventoryLogService;
 use App\Services\Integrations\TrailerCentral\Console\Inventory\LogServiceInterface as InventoryLogServiceInterface;
 use App\Services\Integrations\TrailerCentral\Console\Inventory\SyncService as InventorySyncService;
@@ -71,6 +75,10 @@ class TrailerCentralIntegrationServiceProvider extends ServiceProvider
         $this->app->bind(SyncProcessRepositoryInterface::class, SyncProcessRepository::class);
         $this->app->bind(GeolocationRepositoryInterface::class, GeolocationRepository::class);
         $this->app->bind(SysConfigRepositoryInterface::class, SysConfigRepository::class);
+
+        $this->app->bind(WebsiteUserRepositoryInterface::class, WebsiteUserRepository::class);
+        $this->app->bind(WebsitePasswordResetRepositoryInterface::class, WebsitePasswordReset::class);
+
         GoogleMapSearchService::register();
     }
 }
