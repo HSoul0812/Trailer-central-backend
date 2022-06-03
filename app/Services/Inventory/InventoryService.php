@@ -226,21 +226,24 @@ class InventoryService implements InventoryServiceInterface
     }
 
     private function addScriptFilter(ESInventoryQueryBuilder $queryBuilder, array $params) {
+        $priceDef = "double price;
+                        if(doc[\'websitePrice\'] != null){ price = doc[\'websitePrice\'].value; }
+                        if(0 < doc[\'salesPrice\'].value && doc[\'salesPrice\'].value < price) { price = doc[\'salesPrice\'].value; }";
+
         $filter = "doc['status'].value != 2 && doc['dealer.name'].value != 'Operate Beyond'";
-        $filterPrice = $filter;
 
         if(!empty($params['sale'])) {
             $filter .= " && doc['salesPrice'].value > 0.0 && doc['salesPrice'].value < doc['websitePrice'].value";
-            $filterPrice = $filter;
         }
 
         if(!empty($params['price_min']) && $params['price_min'] > 0 && !empty($params['price_max'])) {
-            $filterPrice .= " && doc['salesPrice'].value > " . $params['price_min'] . "&& doc['salesPrice'].value < " . $params['price_max'];
-            $filter .= " && doc['basicPrice'].value != 0.00";
+            $filter = $priceDef . $filter;
+
+            $filter .= " && price  > " . $params['price_min'] . "&& price < " . $params['price_max'];
         }
 
         $queryBuilder->setFilterScript([
-            'source' => "if(doc['salesPrice'].value > 0.0){ return $filterPrice; } else { return $filter; }",
+            'source' => $filter,
             'lang' => 'painless'
         ]);
     }
