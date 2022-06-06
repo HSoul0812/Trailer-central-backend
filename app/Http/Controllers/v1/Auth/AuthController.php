@@ -9,12 +9,18 @@ use App\Http\Requests\UpdateRequestInterface;
 use App\Http\Requests\WebsiteUser\RegisterUserRequest;
 use App\Repositories\WebsiteUser\WebsiteUserRepositoryInterface;
 use App\Services\Auth\AuthServiceInterface;
+use App\Transformers\WebsiteUser\WebsiteUserTransformer;
 use Dingo\Api\Http\Request;
 
 class AuthController extends AbstractRestfulController
 {
-    public function __construct(private AuthServiceInterface $authService, private WebsiteUserRepositoryInterface $websiteUserRepository)
-    {}
+    public function __construct(
+        private AuthServiceInterface $authService,
+        private WebsiteUserTransformer $transformer
+    )
+    {
+        parent::__construct();
+    }
 
     public function index(IndexRequestInterface $request)
     {
@@ -24,8 +30,10 @@ class AuthController extends AbstractRestfulController
     public function create(CreateRequestInterface $request)
     {
         if($request->validate()) {
-
+            $user = $this->authService->register($request->all());
+            return $this->response->item($user, $this->transformer);
         }
+        return $this->response->errorBadRequest();
     }
 
     public function social(string $social, Request $request) {

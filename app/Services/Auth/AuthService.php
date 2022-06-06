@@ -4,6 +4,8 @@ namespace App\Services\Auth;
 
 use App\Repositories\WebsiteUser\WebsiteUserRepository;
 use App\Repositories\WebsiteUser\WebsiteUserRepositoryInterface;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Facades\Hash;
 use Laravel\Socialite\Facades\Socialite;
 
 class AuthService implements AuthServiceInterface
@@ -24,7 +26,12 @@ class AuthService implements AuthServiceInterface
     public function authenticate() {
     }
 
-    public function register(array $data) {
-        $this->websiteUserRepository->create($request->all());
+    public function register(array $attributes) {
+        $attributes['password'] = Hash::make($attributes['password']);
+        $user = $this->websiteUserRepository->create($attributes);
+        $user->save();
+
+//        event(new Registered($user));
+        return $user;
     }
 }

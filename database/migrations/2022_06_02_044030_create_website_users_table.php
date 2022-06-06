@@ -26,7 +26,7 @@ class CreateWebsiteUsersTable extends Migration
             $table->string('mobile_number')->nullable();
             $table->string('password');
             $table->string('registration_source')->nullable();
-            $table->boolean('is_active')->default(false);
+            $table->dateTime('email_verified_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

@@ -9,7 +9,9 @@ class WebsiteUserRepository implements WebsiteUserRepositoryInterface
 
     public function create(array $attributes): WebsiteUser
     {
-        $websiteUser = new WebsiteUser($attributes);
+        $websiteUser = new WebsiteUser();
+        $websiteUser->fill($attributes);
+        $websiteUser->password = $attributes['password'];
         $websiteUser->save();
         return $websiteUser;
     }
