@@ -41,7 +41,7 @@ class WebsiteUserService implements WebsiteUserServiceInterface {
      * @return WebsiteUser
      */
     public function createUser(array $userInfo): WebsiteUser {
-        $userInfo = array_replace([], $userInfo, ['token' => $this->generateUserToken()]);
+        $userInfo = array_replace([], $userInfo, ['token' => $this->generateUserToken(),'last_login' => now()]);
         return $this->websiteUserRepository->create($userInfo);
     }
 
@@ -53,6 +53,7 @@ class WebsiteUserService implements WebsiteUserServiceInterface {
     public function loginUser(array $userInfo): WebsiteUser {
         $user = $this->websiteUserRepository->get($userInfo);
         if($user && $user->checkPassword($userInfo['password'])) {
+            $user->update(['last_login' => now()]);
             return $user;
         } else {
             abort(401, 'Failed to authenticate the user');

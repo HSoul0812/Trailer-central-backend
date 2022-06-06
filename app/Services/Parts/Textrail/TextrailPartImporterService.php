@@ -94,6 +94,9 @@ class TextrailPartImporterService implements TextrailPartImporterServiceInterfac
             $type = $this->typeRepository->firstOrCreate($typeParams);
             $item->type_id = $type->id;
 
+            $category->parent_id = $type->id;
+            $category->save();
+
             $textrailManufacturers = $this->textrailPartService->getTextrailManufacturers();
 
             foreach ($textrailManufacturers as $textrailManufacturer) {
