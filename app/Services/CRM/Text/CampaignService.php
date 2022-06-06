@@ -98,33 +98,46 @@ class CampaignService implements CampaignServiceInterface
      * @return Collection<CampaignSent>
      */
     public function send(NewDealerUser $dealer, Campaign $campaign): Collection {
-        // Get From Number
-        $from_number = $this->getFromNumber($dealer->id, $campaign);
+        try {
+            // Get From Number
+            $from_number = $this->getFromNumber($dealer->id, $campaign);
 
-        // Get Unsent Campaign Leads
-        if(count($campaign->leads) < 1) {
-            $this->log->error('No Leads found for Campaign #' . $campaign->id . ' for Dealer #: ' . $dealer->id);
-            throw new NoLeadsProcessCampaignException;
-        }
-
-        // Loop Leads for Current Dealer
-        $sent = new Collection();
-        $this->log->debug('Found ' . $campaign->leads->count() . ' Leads for Campaign #' . $campaign->id);
-        foreach($campaign->leads as $lead) {
-            // Not a Valid To Number?!
-            if(empty($lead->text_phone)) {
-                continue;
+            // Get Unsent Campaign Leads
+            if (count($campaign->leads) < 1) {
+                $this->log->error('No Leads found for Campaign #' . $campaign->id . ' for Dealer #: ' . $dealer->id);
+                throw new NoLeadsProcessCampaignException;
             }
 
-            // Send Lead
-            $leadSent = $this->sendToLead($from_number, $dealer, $campaign, $lead);
-            if($leadSent !== null) {
-                $sent->push($leadSent);
-            }
-        }
+            // Loop Leads for Current Dealer
+            $sent = new Collection();
+            $this->log->debug('Found ' . $campaign->leads->count() . ' Leads for Campaign #' . $campaign->id);
+            foreach ($campaign->leads as $lead) {
+                // Not a Valid To Number?!
+                if (empty($lead->text_phone)) {
+                    continue;
+                }
 
-        // Return Campaign Sent Entries
-        return $sent;
+                // Send Lead
+                $leadSent = $this->sendToLead($from_number, $dealer, $campaign, $lead);
+                if ($leadSent !== null) {
+                    $sent->push($leadSent);
+                }
+            }
+
+            $this->saveLog($campaign, 'success', 'Successfully Delivered');
+
+            // Return Campaign Sent Entries
+            return $sent;
+        } catch (NoLeadsProcessCampaignException $e) {
+            $this->saveLog($campaign, 'warning', $e->getMessage());
+            throw $e;
+        } catch (NoCampaignSmsFromNumberException $e) {
+            $this->saveLog($campaign, 'error', $e->getMessage(), true);
+            throw $e;
+        } catch (\Exception $e) {
+            $this->saveLog($campaign, 'error', 'An Unknown Error Has Occurred, Please Contact Support', true);
+            throw $e;
+        }
     }
 
 
@@ -229,6 +242,26 @@ class CampaignService implements CampaignServiceInterface
             'from_number' => $from_number,
             'to_number'   => $lead->text_phone,
             'log_message' => $textMessage
+        ]);
+    }
+
+    /**
+     * @param Campaign $campaign
+     * @param string $status
+     * @param string $message
+     * @param bool $isError
+     * @return void
+     */
+    private function saveLog(Campaign $campaign, string $status, string $message, bool $isError = false)
+    {
+        return $this->campaigns->update([
+            'id' => $campaign->id,
+            'is_error' => $isError,
+            'log' => [
+                'status' => $status,
+                'message' => $message,
+                'date' => (new \DateTime())->format('Y-m-d H:i:s'),
+            ]
         ]);
     }
 
