@@ -15,6 +15,7 @@ class WebsiteUser extends Model implements Authenticatable
         'email',
         'password',
         'website_id',
+        'last_login'
     ];
 
     protected $table = 'website_user';
