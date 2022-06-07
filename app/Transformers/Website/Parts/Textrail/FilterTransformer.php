@@ -179,6 +179,7 @@ class FilterTransformer extends TransformerAbstract
 
                 $values[] = [
                     'id' => 0,
+                    'parent' => '',
                     'label' => $part->{$filter->attribute},
                     'value' => $part->{$filter->attribute},
                     'count' => $count,
@@ -193,8 +194,17 @@ class FilterTransformer extends TransformerAbstract
                     }
                 }
 
+                $parent = '';
+                if ($filter->attribute === 'category') {
+                    $type = Type::find($part->{$filter->attribute}->parent_id);
+                    if (!empty($type)) {
+                        $parent = Type::find($part->{$filter->attribute}->parent_id)->name;
+                    }
+                }
+
                 $values[] = [
                     'id' => $part->{$filter->attribute}->id,
+                    'parent' => $parent,
                     'label' => $part->{$filter->attribute}->name,
                     'value' => $part->{$filter->attribute}->name,
                     'count' => $count,
