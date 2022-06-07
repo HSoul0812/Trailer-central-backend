@@ -6,6 +6,15 @@ use App\Models\WebsiteUser\WebsiteUser;
 
 class WebsiteUserRepository implements WebsiteUserRepositoryInterface
 {
+    public function get($attributes)
+    {
+        return WebsiteUser::where($attributes)->get();
+    }
+
+    public function findOrFail($userId): WebsiteUser
+    {
+        return WebsiteUser::findOrFail($userId);
+    }
 
     public function create(array $attributes): WebsiteUser
     {

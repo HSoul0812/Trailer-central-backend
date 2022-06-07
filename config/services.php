@@ -55,6 +55,6 @@ return [
         ],
         'client_id' => env('GOOGLE_AUTH_CLIENT_ID', ''),
         'client_secret' => env('GOOGLE_AUTH_CLIENT_SECRET', ''),
-        'redirect' => '/api/auth/google/callback'
+        'redirect' => '/api/user/auth/google/callback'
     ]
 ];

@@ -2,10 +2,10 @@
 
 namespace App\Services\Auth;
 
-use App\Repositories\WebsiteUser\WebsiteUserRepository;
 use App\Repositories\WebsiteUser\WebsiteUserRepositoryInterface;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Hash;
+use JetBrains\PhpStorm\ArrayShape;
 use Laravel\Socialite\Facades\Socialite;
 
 class AuthService implements AuthServiceInterface
@@ -15,8 +15,21 @@ class AuthService implements AuthServiceInterface
     }
 
     public function authenticateSocialCallback($social) {
-        $user = Socialite::driver($social)->stateless()->user();
-        \Log::info(json_encode($user));
+        $socialUser = Socialite::driver($social)->stateless()->user();
+        $users = $this->websiteUserRepository->get(['email' => $socialUser->email]);
+        if($users->count() > 0) {
+
+        } else {
+            if($social === 'google') {
+                $attributes = $this->extractGoogleUserAttributes($socialUser);
+                $user = $this->websiteUserRepository->create($attributes);
+            }
+
+            if(isset($user)) {
+                $user->registration_source = $social;
+                $user->save();
+            }
+        }
     }
 
     public function authenticateSocial($social) {
@@ -31,7 +44,16 @@ class AuthService implements AuthServiceInterface
         $user = $this->websiteUserRepository->create($attributes);
         $user->save();
 
-//        event(new Registered($user));
+        event(new Registered($user));
         return $user;
+    }
+
+    #[ArrayShape(['email' => "mixed", 'first_name' => "mixed", 'last_name' => "mixed"])]
+    protected function extractGoogleUserAttributes($googleUser): array {
+        return [
+            'email' => $googleUser->email,
+            'first_name' => $googleUser->user->given_name,
+            'last_name' => $googleUser->user->family_name
+        ];
     }
 }
