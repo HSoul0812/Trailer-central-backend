@@ -20,13 +20,6 @@ class PasswordResetController extends AbstractRestfulController
         return $this->response->errorBadRequest();
     }
 
-    protected function constructRequestBindings(): void
-    {
-        app()->bind(CreateRequestInterface::class, function () {
-            return inject_request_data(PasswordResetRequest::class);
-        });
-    }
-
     public function index(IndexRequestInterface $request)
     {
         // TODO: Implement index() method.
@@ -50,5 +43,12 @@ class PasswordResetController extends AbstractRestfulController
     public function destroy(int $id)
     {
         // TODO: Implement destroy() method.
+    }
+
+    protected function constructRequestBindings(): void
+    {
+        app()->bind(CreateRequestInterface::class, function () {
+            return inject_request_data(PasswordResetRequest::class);
+        });
     }
 }
