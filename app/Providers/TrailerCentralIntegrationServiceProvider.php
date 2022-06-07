@@ -32,6 +32,8 @@ use App\Services\Integrations\TrailerCentral\Console\Leads\SyncService as LeadSy
 use App\Services\Integrations\TrailerCentral\Console\Leads\SyncServiceInterface as LeadSyncServiceInterface;
 use App\Services\Inventory\InventoryService;
 use App\Services\Inventory\InventoryServiceInterface;
+use App\Services\IpInfo\IpInfoService;
+use App\Services\IpInfo\IpInfoServiceInterface;
 use App\Services\Leads\LeadService;
 use App\Services\Leads\LeadServiceInterface;
 use App\Services\SubscribeEmailSearch\SubscribeEmailSearchService;
@@ -71,6 +73,9 @@ class TrailerCentralIntegrationServiceProvider extends ServiceProvider
         $this->app->bind(SyncProcessRepositoryInterface::class, SyncProcessRepository::class);
         $this->app->bind(GeolocationRepositoryInterface::class, GeolocationRepository::class);
         $this->app->bind(SysConfigRepositoryInterface::class, SysConfigRepository::class);
+
+        $this->app->bind(IpInfoServiceInterface::class, IpInfoService::class);
+
         GoogleMapSearchService::register();
     }
 }
