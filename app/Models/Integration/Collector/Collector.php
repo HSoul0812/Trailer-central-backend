@@ -77,6 +77,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property DealerLocation $dealerLocation
  * @property bool $ignore_manually_added_units
  * @property bool $is_bdv_enabled
+ * @property bool $show_on_auction123
  */
 class Collector extends Model implements Filterable
 {
@@ -185,7 +186,8 @@ class Collector extends Model implements Filterable
         'ignore_manually_added_units',
         'is_bdv_enabled',
         'last_run',
-        'run_errors'
+        'run_errors',
+        'show_on_auction123',
     ];
 
     protected $casts = [
