@@ -5,15 +5,29 @@ namespace App\Http\Controllers\v1\IpInfo;
 use App\Http\Controllers\AbstractRestfulController;
 use App\Http\Requests\CreateRequestInterface;
 use App\Http\Requests\IndexRequestInterface;
+use App\Http\Requests\IpInfo\IpInfoRequest;
 use App\Http\Requests\UpdateRequestInterface;
+use App\Services\IpInfo\IpInfoServiceInterface;
 use Illuminate\Http\Request;
 
 class IpInfoController extends AbstractRestfulController
 {
+    public function __construct(private IpInfoServiceInterface $service)
+    {
+        parent::__construct();
+    }
+
     //
     public function index(IndexRequestInterface $request)
     {
-        // TODO: Implement index() method.
+        if($request->validate()) {
+            $ip = $request->get('ip', $this->service->getRemoteIPAddress());
+            if(!$ip) {
+                $this->response->errorBadRequest('No IP was detected');
+            }
+            $this->service->city($ip);
+        }
+        return $this->response->errorBadRequest();
     }
 
     public function create(CreateRequestInterface $request)
@@ -38,6 +52,8 @@ class IpInfoController extends AbstractRestfulController
 
     protected function constructRequestBindings(): void
     {
-        // TODO: Implement constructRequestBindings() method.
+        app()->bind(IndexRequestInterface::class, function() {
+            return inject_request_data(IpInfoRequest::class);
+        });
     }
 }
