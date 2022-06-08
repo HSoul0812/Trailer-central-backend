@@ -157,7 +157,7 @@ class UserRepository implements UserRepositoryInterface {
         return $dealer;
     }
 
-    public function updateOverlaySettings(int $dealerId, bool $overlayEnabled = null, bool $overlay_default = null, string $overlay_logo_position = null, int $overlay_logo_width = null, int $overlay_logo_height = null, string $overlay_upper = null, string $overlay_upper_bg = null, int $overlay_upper_alpha = null, string $overlay_upper_text = null, int $overlay_upper_size = null, int $overlay_upper_margin = null, string $overlay_lower = null, string $overlay_lower_bg = null, int $overlay_lower_alpha = null, string $overlay_lower_text = null, int $overlay_lower_size = null, int $overlay_lower_margin = null, string $overlay_logo_src = null): User {
+    public function updateOverlaySettings(int $dealerId, bool $overlayEnabled = null, bool $overlay_default = null, string $overlay_logo_position = null, string $overlay_logo_width = null, string $overlay_logo_height = null, string $overlay_upper = null, string $overlay_upper_bg = null, int $overlay_upper_alpha = null, string $overlay_upper_text = null, int $overlay_upper_size = null, int $overlay_upper_margin = null, string $overlay_lower = null, string $overlay_lower_bg = null, int $overlay_lower_alpha = null, string $overlay_lower_text = null, int $overlay_lower_size = null, int $overlay_lower_margin = null, string $overlay_logo_src = null): User {
         $dealer = User::findOrFail($dealerId);
         $dealer->overlay_enabled = $overlayEnabled;
         $dealer->overlay_default = $overlay_default;
