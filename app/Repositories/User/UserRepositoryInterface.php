@@ -75,7 +75,7 @@ interface UserRepositoryInterface extends Repository, TransactionalRepository {
      * @return User
      */
     public function updateOverlaySettings(int $dealerId,
-                                          bool $overlayEnabled = null,
+                                          int $overlayEnabled = null,
                                           bool $overlay_default = null,
                                           string $overlay_logo_position = null,
                                           string $overlay_logo_width = null,

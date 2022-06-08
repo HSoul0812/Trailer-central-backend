@@ -9,7 +9,7 @@ class UpdateOverlaySettingsRequest extends Request
     protected $rules = [
         'dealer_id' => 'integer|min:1|required|exists:dealer,dealer_id',
         'overlay_logo' => 'mimes:png,jpg,jpeg',
-        'overlay_enabled' => 'integer',
+        'overlay_enabled' => ['integer', 'in:0,1,2'],
         'overlay_default' => 'integer',
         'overlay_logo_position' => 'string',
         'overlay_logo_width' => 'regex:/^[0-9]+%?$/',
