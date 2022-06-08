@@ -87,6 +87,8 @@ class FilterTransformer extends TransformerAbstract
              'is_visible' => (int)$filter->is_visible,
              'global' => false,
              'state' => $this->getFilterState($filter),
+             'ecommerce' => false,
+             'toggle' => 'false',
          ];
 
         if ($filter->type == 'select' || $filter->attribute == 'brand') {
