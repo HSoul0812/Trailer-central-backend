@@ -9,4 +9,5 @@ interface BillServiceInterface
     public function update(array $params): Bill;
     public function get(array $params): Bill;
     public function getAll(array $params, bool $paginated);
+    public function delete(array $params);
 }

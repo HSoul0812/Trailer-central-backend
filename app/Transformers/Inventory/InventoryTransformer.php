@@ -163,6 +163,7 @@ class InventoryTransformer extends TransformerAbstract
              'width_second' => $widthSecond ?? null,
              'width_inches_second' => $widthInchesSecond ?? null,
              'year' => $inventory->year,
+             'chassis_year' => $inventory->chassis_year,
              'color' => $inventory->color,
              'floorplan_payments' => $inventory->floorplanPayments,
              'url' => $inventory->getUrl(),

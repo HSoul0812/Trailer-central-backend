@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Inventory;
 
+use App\Domains\QuickBooks\Constraints\DocNumConstraint;
 use App\Http\Requests\Request;
 use App\Transformers\TransformerInterface;
 
@@ -42,6 +43,7 @@ class SaveInventoryRequest extends Request
         'dealer_price' => 'numeric|nullable',
         'monthly_payment' => 'numeric|nullable',
         'year' => 'integer',
+        'chassis_year' => 'integer|nullable',
         'condition' => 'in:new,used,remfg|nullable',
         'length' => 'numeric|nullable',
         'width' => 'numeric|nullable',
@@ -143,7 +145,7 @@ class SaveInventoryRequest extends Request
         'b_id' => 'int|exists:qb_bills|nullable',
         'b_vendorId' => 'int|nullable',
         'b_status' => 'string|in:due,paid|nullable',
-        'b_docNum' => 'string|nullable',
+        'b_docNum' => 'string|nullable|max:' . DocNumConstraint::MAX_LENGTH,
         'b_receivedDate' => 'date|nullable',
         'b_dueDate' => 'date|nullable',
         'b_memo' => 'string|nullable',

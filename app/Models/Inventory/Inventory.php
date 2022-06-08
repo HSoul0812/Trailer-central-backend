@@ -60,6 +60,7 @@ use Laravel\Scout\Searchable;
  * @property double $dealer_price,
  * @property double $monthly_payment,
  * @property int $year,
+ * @property int $chassis_year,
  * @property string $condition,
  * @property double $length,
  * @property double $width,
@@ -267,6 +268,7 @@ class Inventory extends Model
         'dealer_price',
         'monthly_payment',
         'year',
+        'chassis_year',
         'condition',
         'length',
         'width',
@@ -365,7 +367,7 @@ class Inventory extends Model
 
     /**
      * Custom Attributes Collection
-     * 
+     *
      * @var Collection
      */
     private $attributesCollection;
@@ -474,10 +476,14 @@ class Inventory extends Model
         return $this->hasMany(CustomerInventory::class, 'inventory_id', 'inventory_id');
     }
 
+    public function entityType(): BelongsTo
+    {
+        return $this->belongsTo(EntityType::class,'entity_type_id');
+    }
 
     /**
      * Get Attributes Map
-     * 
+     *
      * @return Collection<code: value>
      */
     public function getAttributesAttribute(): Collection
