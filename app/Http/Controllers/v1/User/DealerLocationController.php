@@ -186,22 +186,6 @@ class DealerLocationController extends RestfulControllerV2 {
     }
 
     /**
-     * @param Request $request
-     * @return Response
-     */
-    public function getRegistrationTitle(int $id, Request $request): Response
-    {
-        $request = DealerLocationSalesTaxItem::where([['dealer_location_id',"=", $id], ['item_type',"=", DealerLocationSalesTaxItem::TYPE_REGISTRATION]])->first();
-        return $this->response->array([
-            'data' => [
-                'status' => 'success',
-                'registration_title' => $request->registration_title ?? DealerLocationSalesTaxItem::REGISTRATION_TITLE,
-                'dealer_location_id' => $id
-            ]
-        ]);
-    }
-
-    /**
      * @param  Request  $request
      * @return Response
      */
