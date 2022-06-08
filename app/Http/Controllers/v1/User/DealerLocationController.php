@@ -23,7 +23,6 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use League\Fractal\Manager;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use League\Fractal\Resource\Item;
-use App\Models\User\DealerLocationSalesTaxItem;
 
 class DealerLocationController extends RestfulControllerV2 {
 
