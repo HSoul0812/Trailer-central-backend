@@ -8,12 +8,12 @@ class City implements Arrayable
 {
     use \App\DTOs\Arrayable;
 
-    public string $city;
-    public string $postalcode;
-    public string $state;
-    public string $stateISO;
-    public string $latitude;
-    public string $longitude;
+    public ?string $city;
+    public ?string $postalcode;
+    public ?string $state;
+    public ?string $stateISO;
+    public ?string $latitude;
+    public ?string $longitude;
     public string $country;
     public string $countryISO;
     public string $network;
