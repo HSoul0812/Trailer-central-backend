@@ -31,4 +31,8 @@ interface TextrailPartServiceInterface
     public function getTextrailTotalPartsCount(int $pageSize = 1, int $currentPage = 1): int;
 
     public function getTextrailDumpStock(): array;
+
+    public function getAllCategories(): array;
+
+    public function getParentAndCategory(int $category_id): array;
 }
