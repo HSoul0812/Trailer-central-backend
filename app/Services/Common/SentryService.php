@@ -7,7 +7,7 @@ use Sentry\Event;
 
 class SentryService
 {
-    public function beforeSend(Event $event): ?Event
+    public static function beforeSend(Event $event): ?Event
     {
         $tags = [];
 
