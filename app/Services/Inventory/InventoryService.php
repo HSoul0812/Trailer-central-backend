@@ -30,6 +30,7 @@ use Illuminate\Support\Facades\Log;
 use League\Fractal\Resource\Collection as FractalResourceCollection;
 use League\Fractal\Manager as FractalManager;
 use App\Repositories\Dms\Customer\InventoryRepository as DmsCustomerInventoryRepository;
+use App\Services\Export\Inventory\PdfExporter;
 
 /**
  * Class InventoryService
@@ -40,6 +41,8 @@ class InventoryService implements InventoryServiceInterface
     use DispatchesJobs;
 
     const SOURCE_DASHBOARD = 'dashboard';
+
+    const PDF_EXPORT = 'pdf';
 
     private const RESOURCE_KEY = 'children';
     private const OPTION_GROUP_TEXT_CUSTOMER_OWNED = 'Customer Owned Inventories';
@@ -798,5 +801,20 @@ class InventoryService implements InventoryServiceInterface
         return array_merge($resultantArray, [
             'text' => $text,
         ]);
+    }
+
+    /**
+     * Exports an inventory and returns the url to the export
+     *
+     * @param int $inventoryId
+     * @param string $format
+     * @return string
+     */
+    public function export(int $inventoryId, string $format): string
+    {
+        $instance = [
+            self::PDF_EXPORT => PdfExporter::class
+        ][$format];
+        return (new $instance)->export($this->inventoryRepository->get(['id' => $inventoryId]));
     }
 }
