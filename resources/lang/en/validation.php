@@ -213,4 +213,5 @@ return [
     'valid_include' => 'The :attribute is not valid',
     'unique_text_blast_campaign_name' => 'You already have a blast campaign with this name',
     'unique_text_campaign_name' => 'You already have a campaign with this name',
+    'valid_password' => 'Password should be at least 1 Capital letter, 1 Number and min 8 chars.',
 ];

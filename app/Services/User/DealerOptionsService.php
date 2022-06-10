@@ -29,6 +29,9 @@ use Carbon\Carbon;
 class DealerOptionsService implements DealerOptionsServiceInterface
 {
     private const ECOMMERCE_KEY_ENABLE = "parts/ecommerce/enabled";
+
+    private const TEXTRAIL_PARTS_ENTITY_TYPE = '51';
+
     /**
      * @var UserRepositoryInterface
      */
@@ -43,7 +46,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
      * @var CrmUserRoleRepositoryInterface
      */
     private $crmUserRoleRepository;
-    
+
     /**
      * @var WebsiteConfigRepositoryInterface
      */
@@ -218,19 +221,19 @@ class DealerOptionsService implements DealerOptionsServiceInterface
       try {
           $user = $this->userRepository->get(['dealer_id' => $dealerId]);
           $webiste = $user->website;
-          
+
           $websiteConfigParams = [
               'website_id' => $webiste->id,
               'key' => self::ECOMMERCE_KEY_ENABLE
           ];
 
           $websiteConfigall = $this->websiteConfigRepository->getall($websiteConfigParams);
-          
+
           foreach ($websiteConfigall as $key => $websiteConfig) {
-            
+
             $this->websiteConfigRepository->delete(['id' => $websiteConfig->id]);
-            
-          } 
+
+          }
 
           $newWebsiteConfigActiveParams = [
             'website_id' => $webiste->id,
@@ -239,14 +242,30 @@ class DealerOptionsService implements DealerOptionsServiceInterface
           ];
 
           if($this->isAllowedParts($dealerId)) {
-                
+
             $this->websiteConfigRepository->create($newWebsiteConfigActiveParams);
           } else {
             $this->activateParts($dealerId);
-            
+
             $this->websiteConfigRepository->create($newWebsiteConfigActiveParams);
           }
-          
+
+          $this->websiteEntityRepository->update([
+              'entity_type' => self::TEXTRAIL_PARTS_ENTITY_TYPE,
+              'website_id' => $webiste->id,
+              'entity_view' => 'textrail-parts-list',
+              'template' => '2columns-left',
+              'parent' => 0,
+              'title' => 'Parts Direct Shipping',
+              'url_path' => 'parts-direct-shipping',
+              'meta_keywords' => 'trailer, parts, shipping, order, cart, ship, direct',
+              'meta_description' => 'Trailer parts can be added to your cart, ordered, and shipped directly to your door!',
+              'url_path_external' => 0,
+              'in_nav' => 0,
+              'is_active' => 0,
+              'deleted' => 0
+          ]);
+
           Log::info('E-Commerce has been successfully deactivated', ['user_id' => $user->user_id]);
 
           return true;
@@ -266,19 +285,25 @@ class DealerOptionsService implements DealerOptionsServiceInterface
       try {
           $user = $this->userRepository->get(['dealer_id' => $dealerId]);
           $webiste = $user->website;
-          
+
           $websiteConfigParams = [
               'website_id' => $webiste->id,
               'key' => self::ECOMMERCE_KEY_ENABLE
           ];
 
           $websiteConfigall = $this->websiteConfigRepository->getall($websiteConfigParams);
-          
+
           foreach ($websiteConfigall as $key => $websiteConfig) {
-            
+
             $this->websiteConfigRepository->delete(['id' => $websiteConfig->id]);
-            
-          }  
+
+          }
+
+          $this->websiteEntityRepository->update([
+              'entity_type' => self::TEXTRAIL_PARTS_ENTITY_TYPE,
+              'website_id' => $webiste->id,
+              'is_active' => 0
+          ]);
 
           Log::info('E-Commerce has been successfully deactivated', ['user_id' => $user->user_id]);
 
@@ -301,7 +326,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
         'since' => Carbon::now()->format('Y-m-d')
       ];
       $dealerParts = $this->dealerPartRepository->create($dealerPartsParams);
-      
+
       return (bool)$dealerParts;
     }
 

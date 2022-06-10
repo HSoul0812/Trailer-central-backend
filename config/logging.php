@@ -37,7 +37,7 @@ return [
     'channels' => [
         'stack' => [
             'driver' => 'stack',
-            'channels' => ['single', 'slack'],
+            'channels' => ['single', 'slack', 'sentry'],
             'ignore_exceptions' => false,
         ],
 
@@ -218,6 +218,10 @@ return [
             'path' => storage_path('logs/services/blog.log'),
             'level' => 'debug',
             'days' => 3,
+        ],
+        'sentry' => [
+            'driver' => 'sentry',
+            'level' => env('SENTRY_LOG_LEVEL', 'error')
         ],
     ],
 

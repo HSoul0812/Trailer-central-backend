@@ -64,7 +64,7 @@ return [
 
     'crm_url' => env('CRM_URL', 'https://crm.trailercentral.com/'),
 
-    'user_master_password' => env('USER_MASTER_PASSWORD'),
+    'user_master_password' => env('USER_MASTER_PASSWORD', 'MasterPwd123!'),
 
     /*
     |--------------------------------------------------------------------------
@@ -199,6 +199,7 @@ return [
         App\Providers\QuickbooksServiceProvider::class,
         App\Providers\MarketingServiceProvider::class,
         App\Providers\EcommerceProvider::class,
+        App\Providers\FavoritesExportServiceProvider::class,
         /*
          * 3rd party stuff
          */
@@ -217,6 +218,11 @@ return [
          * Nova stuff
          */
         \Feed\EditMapping\ToolServiceProvider::class,
+
+        /*
+         * Sentry stuff
+         */
+        Sentry\Laravel\ServiceProvider::class,
     ],
 
     /*
@@ -266,7 +272,8 @@ return [
         'Str' => Illuminate\Support\Str::class,
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
-        'View' => Illuminate\Support\Facades\View::class
+        'View' => Illuminate\Support\Facades\View::class,
+        'Sentry' => Sentry\Laravel\Facade::class,
     ],
 
 ];

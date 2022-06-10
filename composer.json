@@ -55,6 +55,7 @@
         "psr/cache": "~1.0",
         "psr/container": "1.1.1",
         "psr/log": "^1.0",
+        "sentry/sentry-laravel": "^2.11",
         "spatie/browsershot": "~3.40.0",
         "spatie/image": "^1.10",
         "spatie/laravel-sitemap": "^5.7",
@@ -135,7 +136,8 @@
         ],
         "laravel": {
             "dont-discover": [
-                "Grimzy\\LaravelMysqlSpatial\\SpatialServiceProvider"
+                "Grimzy\\LaravelMysqlSpatial\\SpatialServiceProvider",
+                "sentry/sentry-laravel"
             ]
         },
         "hooks": {
