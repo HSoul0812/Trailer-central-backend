@@ -185,7 +185,7 @@ class FilterTransformer extends TransformerAbstract
                     'count' => $count,
                     'base' => 0, // What is this?
                     'status' => $status,
-                    'action' => $queryString
+                    'action' => $queryString,
                 ];
             } else {
                 if (isset($hiddenFilters[$this->attributeModelIdMapping[$filter->attribute]])) {
@@ -210,7 +210,7 @@ class FilterTransformer extends TransformerAbstract
                     'count' => $count,
                     'base' => 0, // What is this?
                     'status' => $status,
-                    'action' => $queryString
+                    'action' => $queryString,
                 ];
             }
 
