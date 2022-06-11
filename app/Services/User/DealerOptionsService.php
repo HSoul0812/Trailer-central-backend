@@ -302,7 +302,8 @@ class DealerOptionsService implements DealerOptionsServiceInterface
           $this->websiteEntityRepository->update([
               'entity_type' => self::TEXTRAIL_PARTS_ENTITY_TYPE,
               'website_id' => $webiste->id,
-              'is_active' => 0
+              'is_active' => 0,
+              'in_nav' => 0
           ]);
 
           Log::info('E-Commerce has been successfully deactivated', ['user_id' => $user->user_id]);
