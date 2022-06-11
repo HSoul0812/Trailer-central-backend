@@ -111,6 +111,7 @@ class CrmServiceProvider extends ServiceProvider
         \Validator::extend('valid_lead', 'App\Rules\CRM\Leads\ValidLead@passes');
         \Validator::extend('non_lead_exists', 'App\Rules\CRM\Leads\NonLeadExists@passes');
         \Validator::extend('valid_texts_log', 'App\Rules\CRM\Text\ValidTextsLog@passes');
+        \Validator::extend('jotform_enabled', 'App\Rules\CRM\Leads\JotformEnabled@passes');
         \Validator::extend('unique_text_blast_campaign_name', 'App\Rules\CRM\Text\UniqueTextBlastCampaignName@passes');
         \Validator::extend('unique_text_campaign_name', 'App\Rules\CRM\Text\UniqueTextCampaignName@passes');
 

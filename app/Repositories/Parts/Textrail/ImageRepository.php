@@ -39,7 +39,7 @@ class ImageRepository implements ImageRepositoryInterface
 
     public function firstOrCreate(array $params, string $fileName, string $imageData) : Image
     {
-        Storage::disk('s3')->put($fileName, $imageData, 'public');
+        Storage::disk('s3')->put($fileName, $imageData);
         $s3ImageUrl = Storage::disk('s3')->url($fileName);
         $params['image_url'] = $s3ImageUrl;
   

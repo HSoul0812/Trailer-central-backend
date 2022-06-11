@@ -61,6 +61,8 @@ use App\Repositories\Inventory\InventoryRepository;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\Inventory\ManufacturerRepository;
 use App\Repositories\Inventory\ManufacturerRepositoryInterface;
+use App\Repositories\Showroom\ShowroomBulkUpdateRepository;
+use App\Repositories\Showroom\ShowroomBulkUpdateRepositoryInterface;
 use App\Repositories\Showroom\ShowroomFieldsMappingRepository;
 use App\Repositories\Showroom\ShowroomFieldsMappingRepositoryInterface;
 use App\Repositories\Pos\SalesReportRepository;
@@ -153,6 +155,8 @@ use Illuminate\Support\ServiceProvider;
 use Laravel\Nova\Nova;
 use Propaganistas\LaravelPhone\PhoneServiceProvider;
 
+use Illuminate\Support\Facades\Schema;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -224,6 +228,9 @@ class AppServiceProvider extends ServiceProvider
         Nova::serving(function () {
             DealerIncomingMapping::observe(DealerIncomingMappingObserver::class);
         });
+
+        // Increase default database character set length (Specified key was too long)
+        Schema::defaultStringLength(191);
 
         // Add Migration Directories Recursively
         $mainPath = database_path('migrations');
@@ -323,6 +330,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(PackageServiceInterface::class, PackageService::class);
         $this->app->bind(RegisterRepositoryInterface::class, RegisterRepository::class);
         $this->app->bind(RegisterServiceInterface::class, RegisterService::class);
+
         $this->app->when(FileController::class)
             ->needs(FileServiceInterface::class)
             ->give(function () {
@@ -345,6 +353,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(InventoryAttributeServiceInterface::class, InventoryAttributeService::class);
         $this->app->bind(CustomOverlayServiceInterface::class, CustomOverlayService::class);
         $this->app->bind(CustomOverlayRepositoryInterface::class, CustomOverlayRepository::class);
+
+        $this->app->bind(ShowroomBulkUpdateRepositoryInterface::class, ShowroomBulkUpdateRepository::class);
 
         $this->app->register(PhoneServiceProvider::class);
     }
