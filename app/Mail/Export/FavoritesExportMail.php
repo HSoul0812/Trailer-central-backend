@@ -3,11 +3,10 @@
 namespace App\Mail\Export;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class FavoritesExportMail extends Mailable implements ShouldQueue
+class FavoritesExportMail extends Mailable
 {
     use Queueable, SerializesModels;
 
