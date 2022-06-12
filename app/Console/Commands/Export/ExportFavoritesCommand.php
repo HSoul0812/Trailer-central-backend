@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs\Export;
+namespace App\Console\Commands\Export;
 
 use App\Mail\Export\FavoritesExportMail;
 use App\Models\Export\WebsiteFavoritesExport;
@@ -9,31 +9,30 @@ use App\Repositories\Export\FavoritesRepositoryInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Services\Export\Favorites\InventoryCsvExporterInterface;
 use Carbon\Carbon;
-use Illuminate\Bus\Queueable;
+use Illuminate\Console\Command;
 use Illuminate\Contracts\Container\BindingResolutionException;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Mail;
 
-class ExportFavoritesJob implements ShouldQueue
+class ExportFavoritesCommand extends Command
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
     const EXPORT_DAILY = 0;
     const EXPORT_WEEKLY = 1;
     const EXPORT_BI_WEEKLY = 2;
     const EXPORT_MONTHLY = 3;
 
     /**
-     * Create a new job instance.
+     * The name and signature of the console command.
      *
-     * @return void
+     * @var string
      */
-    public function __construct()
-    {
-    }
+    protected $signature = 'export:inventory-favorites';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'This command will export and send favorite inventory data to the setup emails';
 
     /**
      * @param WebsiteConfig $config
@@ -119,4 +118,5 @@ class ExportFavoritesJob implements ShouldQueue
             }
         });
     }
+
 }

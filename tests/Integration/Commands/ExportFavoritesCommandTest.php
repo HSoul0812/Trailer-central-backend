@@ -1,8 +1,8 @@
 <?php
 
-namespace Tests\Integration\Jobs\Export;
+namespace Tests\Integration\Commands;
 
-use App\Jobs\Export\ExportFavoritesJob;
+use App\Console\Commands\Export\ExportFavoritesCommand;
 use App\Mail\Export\FavoritesExportMail;
 use App\Models\Inventory\Category;
 use App\Models\Inventory\Inventory;
@@ -15,9 +15,9 @@ use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use Illuminate\Contracts\Container\BindingResolutionException as BindingResolutionExceptionAlias;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Mail;
-use Tests\Integration\AbstractMonitoredJobsTest;
+use Tests\TestCase;
 
-class ExportFavoritesJobTest extends AbstractMonitoredJobsTest
+class ExportFavoritesCommandTest extends TestCase
 {
     /**
      * @var Website
@@ -59,11 +59,11 @@ class ExportFavoritesJobTest extends AbstractMonitoredJobsTest
 
         $this->createTestData();
 
-        $queueableJob = new ExportFavoritesJob();
+        $command = new ExportFavoritesCommand();
 
-        $queueableJob->handle(app(WebsiteConfigRepositoryInterface::class), app(FavoritesRepositoryInterface::class));
+        $command->handle(app(WebsiteConfigRepositoryInterface::class), app(FavoritesRepositoryInterface::class));
 
-        Mail::assertQueued(FavoritesExportMail::class);
+        Mail::assertSent(FavoritesExportMail::class);
 
         $this->destroyTestData();
     }
