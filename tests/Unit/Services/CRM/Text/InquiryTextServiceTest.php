@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Services\CRM\Leads;
 
-use App\Services\CRM\Text\TextServiceInterface;
+use App\Services\CRM\Text\TwilioServiceInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use App\Services\CRM\Text\InquiryTextServiceInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
@@ -20,7 +20,7 @@ use Tests\TestCase;
 class InquiryTextServiceTest extends TestCase
 {
     /**
-     * @var LegacyMockInterface|TextServiceInterface
+     * @var LegacyMockInterface|TwilioServiceInterface
      */
     private $twillioServiceMock;
 
@@ -35,9 +35,9 @@ class InquiryTextServiceTest extends TestCase
     {
         parent::setUp();
 
-        $this->twillioServiceMock = Mockery::mock(TextServiceInterface::class);
+        $this->twillioServiceMock = Mockery::mock(TwilioServiceInterface::class);
 
-        $this->app->instance(TextServiceInterface::class, $this->twillioServiceMock);
+        $this->app->instance(TwilioServiceInterface::class, $this->twillioServiceMock);
 
         $this->dealerLocationRepositoryMock = Mockery::mock(DealerLocationRepositoryInterface::class);
         $this->app->instance(DealerLocationRepositoryInterface::class, $this->dealerLocationRepositoryMock);

@@ -8,6 +8,7 @@ use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\Inventory\CreateInventoryRequest;
 use App\Http\Requests\Inventory\DeleteInventoryRequest;
 use App\Http\Requests\Inventory\ExistsInventoryRequest;
+use App\Http\Requests\Inventory\ExportInventoryRequest;
 use App\Http\Requests\Inventory\GetAllInventoryTitlesRequest;
 use App\Http\Requests\Inventory\GetInventoryHistoryRequest;
 use App\Http\Requests\Inventory\GetInventoryItemRequest;
@@ -412,5 +413,48 @@ class InventoryController extends RestfulControllerV2
         }
 
         return $this->response->errorBadRequest();
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/inventory/{id}/export",
+     *     description="Exports an inventory",
+     *     tags={"Inventory"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Inventory ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns an inventory exported in a given format",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
+     *     ),
+     * )
+     *
+     * @param int $inventoryId
+     * @param Request $request
+     * @return Response
+     */
+    public function export(int $inventoryId, Request $request): Response
+    {
+        $inventoryExportRequest = new ExportInventoryRequest($request->all() + ['inventory_id' => $inventoryId]);
+
+        if (!$inventoryExportRequest->validate()) {
+            $this->response->errorBadRequest();
+        }
+
+        return $this->response->array([
+            'response' => [
+                'status' => 'success',
+                'url' => $this->inventoryService->export($inventoryExportRequest->get('inventory_id'), $inventoryExportRequest->get('format'))
+            ]
+        ]);
     }
 }
