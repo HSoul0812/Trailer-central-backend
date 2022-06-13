@@ -18,4 +18,7 @@ $api->version('v1', function ($api) {
     $api->get('user/auth/{social}/callback', 'App\Http\Controllers\v1\Auth\AuthController@socialCallback')
         ->name('SocialAuthCallback')
         ->where('social', 'google|facebook');
+    $api->post('user/forget-password', 'App\Http\Controllers\v1\Auth\PasswordResetController@forgetPassword');
+    $api->post('user/reset-password', 'App\Http\Controllers\v1\Auth\PasswordResetController@resetPassword')
+        ->name('');
 });

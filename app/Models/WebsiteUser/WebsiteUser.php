@@ -2,6 +2,7 @@
 
 namespace App\Models\WebsiteUser;
 
+use App\Notifications\WebsiteUserPasswordReset;
 use App\Notifications\WebsiteUserVerifyEmail;
 use Illuminate\Auth\MustVerifyEmail;
 use Illuminate\Auth\Notifications\ResetPassword as ResetPasswordNotification;
@@ -42,7 +43,7 @@ class WebsiteUser extends Model implements CanResetPasswordContract, MustVerifyE
 
     public function sendPasswordResetNotification($token)
     {
-        $this->notify(new ResetPasswordNotification($token));
+        $this->notify(new WebsiteUserPasswordReset($token));
     }
 
     public function sendEmailVerificationNotification()

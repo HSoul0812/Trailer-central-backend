@@ -2,53 +2,68 @@
 
 namespace App\Http\Controllers\v1\Auth;
 
+use App\Exceptions\NotImplementedException;
 use App\Http\Controllers\AbstractRestfulController;
 use App\Http\Requests\UpdateRequestInterface;
+use App\Http\Requests\WebsiteUser\ForgetPasswordRequest;
+use App\Http\Requests\WebsiteUser\ForgetPasswordRequestInterface;
 use App\Http\Requests\WebsiteUser\PasswordResetRequest;
 use App\Http\Requests\CreateRequestInterface;
-use App\Http\Requests\Glossary\IndexGlossaryRequest;
 use App\Http\Requests\IndexRequestInterface;
-use Dingo\Api\Http\Request;
+use App\Http\Requests\WebsiteUser\PasswordResetRequestInterface;
 
 class PasswordResetController extends AbstractRestfulController
 {
     //
-    public function postEmail(CreateRequestInterface $request) {
-        if($request->validate()) {
-
-        }
-        return $this->response->errorBadRequest();
-    }
-
     public function index(IndexRequestInterface $request)
     {
-        // TODO: Implement index() method.
+        throw new NotImplementedException();
     }
 
     public function create(CreateRequestInterface $request)
     {
-        // TODO: Implement create() method.
+        throw new NotImplementedException();
     }
 
     public function show(int $id)
     {
-        // TODO: Implement show() method.
+        throw new NotImplementedException();
     }
 
     public function update(int $id, UpdateRequestInterface $request)
     {
-        // TODO: Implement update() method.
+        throw new NotImplementedException();
     }
 
     public function destroy(int $id)
     {
-        // TODO: Implement destroy() method.
+        throw new NotImplementedException();
+    }
+
+    public function forgetPassword(ForgetPasswordRequestInterface $request) {
+        if($request->validate()) {
+
+        }
+
+        $this->response->errorBadRequest();
+    }
+
+    public function resetPassword(PasswordResetRequestInterface $request) {
+        if($request->validate()) {
+
+        }
+
+        $this->response->errorBadRequest();
     }
 
     protected function constructRequestBindings(): void
     {
-        app()->bind(CreateRequestInterface::class, function () {
-            return inject_request_data(PasswordResetRequest::class);
+        app()->bind(ForgetPasswordRequestInterface::class, function () {
+            return inject_request_data(ForgetPasswordRequest::class);
+        });
+
+        app()->bind(PasswordResetRequestInterface::class, function () {
+           return inject_request_data(PasswordResetRequest::class);
         });
     }
 }

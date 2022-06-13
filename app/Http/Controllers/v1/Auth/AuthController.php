@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\v1\Auth;
 
+use App\Exceptions\NotImplementedException;
 use App\Http\Controllers\AbstractRestfulController;
 use App\Http\Requests\CreateRequestInterface;
 use App\Http\Requests\IndexRequestInterface;
@@ -24,7 +25,7 @@ class AuthController extends AbstractRestfulController
 
     public function index(IndexRequestInterface $request)
     {
-        // TODO: Implement index() method.
+        throw new NotImplementedException();
     }
 
     public function create(CreateRequestInterface $request)
@@ -46,17 +47,17 @@ class AuthController extends AbstractRestfulController
 
     public function show(int $id)
     {
-        // TODO: Implement show() method.
+        throw new NotImplementedException();
     }
 
     public function update(int $id, UpdateRequestInterface $request)
     {
-        // TODO: Implement update() method.
+        throw new NotImplementedException();
     }
 
     public function destroy(int $id)
     {
-        // TODO: Implement destroy() method.
+        throw new NotImplementedException();
     }
 
     protected function constructRequestBindings(): void
