@@ -192,6 +192,7 @@ return [
         App\Providers\NovaServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         App\Providers\PartsServiceProvider::class,
+        App\Providers\InventoryServiceProvider::class,
         App\Providers\DmsServiceProvider::class,
         App\Providers\CrmServiceProvider::class,
         App\Providers\IntegrationServiceProvider::class,
