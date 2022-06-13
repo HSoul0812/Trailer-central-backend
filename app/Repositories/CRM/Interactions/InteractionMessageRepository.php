@@ -68,11 +68,11 @@ class InteractionMessageRepository extends RepositoryAbstract implements Interac
         }
 
         if (isset($params['hidden'])) {
-            $search->filter('term', ['hidden' => $params['hidden']]);
+            $search->filter('term', ['hidden' => (bool)$params['hidden']]);
         }
 
         if (isset($params['is_read'])) {
-            $search->filter('term', ['is_read' => $params['is_read']]);
+            $search->filter('term', ['is_read' => (bool)$params['is_read']]);
         }
 
         if (isset($params['unassigned'])) {
@@ -155,7 +155,7 @@ class InteractionMessageRepository extends RepositoryAbstract implements Interac
         }
 
         if (isset($params['hidden'])) {
-            $search->filter('term', ['hidden' => $params['hidden']]);
+            $search->filter('term', ['hidden' => (bool)$params['hidden']]);
         }
 
         if (isset($params['dispatched'])) {
@@ -163,7 +163,7 @@ class InteractionMessageRepository extends RepositoryAbstract implements Interac
         }
 
         if (isset($params['is_read'])) {
-            $search->filter('term', ['is_read' => $params['is_read']]);
+            $search->filter('term', ['is_read' => (bool)$params['is_read']]);
         }
 
         $search->size(0);

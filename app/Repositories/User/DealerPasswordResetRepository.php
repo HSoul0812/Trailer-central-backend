@@ -69,16 +69,25 @@ class DealerPasswordResetRepository implements DealerPasswordResetRepositoryInte
         return $dealerPasswordReset->save();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function getByCode(string $code) : DealerPasswordReset
     {
         return DealerPasswordReset::where('code', $code)->where('status', DealerPasswordReset::STATUS_PASSWORD_RESET_INITIATED)->firstOrFail();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function updateDealerPassword(User $dealer, string $password) : void
     {
         DB::statement("UPDATE dealer SET password = ENCRYPT('{$password}', salt) WHERE dealer_id = {$dealer->dealer_id}");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function updateDealerUserPassword(DealerUser $user, string $password) : void
     {
         DB::statement("UPDATE dealer_users SET password = ENCRYPT('{$password}', salt) WHERE dealer_user_id = {$user->dealer_user_id}");

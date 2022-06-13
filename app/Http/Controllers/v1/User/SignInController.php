@@ -19,6 +19,10 @@ use App\Http\Requests\User\CheckAdminPasswordRequest;
 use App\Http\Requests\User\UpdatePasswordRequest;
 use App\Repositories\User\DealerPasswordResetRepositoryInterface;
 
+use App\Models\User\User;
+use Grosv\LaravelPasswordlessLogin\LoginUrl;
+use Grosv\LaravelPasswordlessLogin\PasswordlessLoginService;
+
 class SignInController extends RestfulController
 {
 
@@ -158,5 +162,9 @@ class SignInController extends RestfulController
             'id' => $request->dealer_id,
             'type' => UserAuthenticatable::TYPE_DEALER
         ]);
+    }
+
+    public function passwordless(Request $request) {
+        return AuthToken::where('user_id', $request->dealer_id)->first()->access_token;
     }
 }

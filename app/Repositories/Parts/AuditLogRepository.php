@@ -73,7 +73,7 @@ class AuditLogRepository extends RepositoryAbstract implements AuditLogRepositor
             }
         });
         fclose($fp);
-        $result = Storage::disk('s3')->put($fileName, file_get_contents($fileExport), ['visibility' => 'public']);
+        $result = Storage::disk('s3')->put($fileName, file_get_contents($fileExport));
         if ($result){
             return [
                 'export_file' => 'https://'.env('AWS_BUCKET').'.s3.amazonaws.com'.$fileName
