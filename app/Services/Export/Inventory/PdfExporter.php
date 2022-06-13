@@ -47,7 +47,7 @@ class PdfExporter implements ExporterInterface
         $engine = app('snappy.pdf.wrapper');
         $engine->loadHTML($content);
         $output = $engine->output();
-        Storage::disk('s3')->put($path, $output, 'public');
+        Storage::disk('s3')->put($path, $output);
         return Storage::disk('s3')->url($path);
     }
 }
