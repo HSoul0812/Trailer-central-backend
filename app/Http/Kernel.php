@@ -2,6 +2,7 @@
 
 namespace App\Http;
 
+use App\Http\Middleware\CRM\Text\ReplyTextValidate;
 use App\Http\Middleware\Ecommerce\StripeWebhookValidate;
 use App\Http\Middleware\Ecommerce\TexTrailWebhookValidate;
 use App\Http\Middleware\Ecommerce\ValidHookIpMiddleware;
@@ -128,7 +129,8 @@ class Kernel extends HttpKernel
         'textrail.webhook.validate' => TexTrailWebhookValidate::class,
         'marketing.facebook.marketplace' => MarketplaceValidate::class,
         'marketing.facebook.pagetab' => PagetabValidate::class,
-        'dispatch.facebook' => FacebookValidate::class
+        'dispatch.facebook' => FacebookValidate::class,
+        'replytext.validate' => ReplyTextValidate::class,
     ];
 
     /**

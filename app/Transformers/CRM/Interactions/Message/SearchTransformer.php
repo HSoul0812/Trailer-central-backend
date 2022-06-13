@@ -41,6 +41,7 @@ class SearchTransformer extends TransformerAbstract
             'is_read' => $interactionMessage['is_read'],
             'unassigned' => $interactionMessage['unassigned'],
             'is_incoming' => $interactionMessage['is_incoming'],
+            'files' => $interactionMessage['files'],
         ];
     }
 }

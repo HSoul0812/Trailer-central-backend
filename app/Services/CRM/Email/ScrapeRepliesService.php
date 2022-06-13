@@ -631,7 +631,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
         // Upload Image
         $key = 'crm/' . $dealerId . '/' . $messageDir . '/attachments/' . $filename . '.' . $ext;
-        Storage::disk('s3email')->put($key, $contents, 'public');
+        Storage::disk('s3email')->put($key, $contents);
         return Storage::disk('s3email')->url(env('MAIL_BUCKET') . '/' . $key);
     }
 

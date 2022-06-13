@@ -121,7 +121,7 @@ class ShowroomRepository implements ShowroomRepositoryInterface {
             throw new ImageNotDownloadedException('Image not accessible: '.$image);
         }
 
-        Storage::disk('s3')->put($fileName, $imageData, 'public');
+        Storage::disk('s3')->put($fileName, $imageData);
 
         ShowroomImage::create([
             'showroom_id' => $showroomId,
@@ -142,7 +142,7 @@ class ShowroomRepository implements ShowroomRepositoryInterface {
             throw new ImageNotDownloadedException('Image not accessible: '.$file);
         }
 
-        Storage::disk('s3')->put($fileName, $fileData, 'public');
+        Storage::disk('s3')->put($fileName, $fileData);
 
         ShowroomFile::create([
             'showroom_id' => $showroomId,

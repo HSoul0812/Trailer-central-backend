@@ -6,7 +6,7 @@ use App\Exceptions\CRM\Leads\SendInquiryFailedException;
 use App\Models\CRM\Leads\LeadType;
 use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
-use App\Services\CRM\Text\TextServiceInterface;
+use App\Services\CRM\Text\TwilioServiceInterface;
 use Twilio\Rest\Api\V2010\Account\MessageInstance;
 
 /**
@@ -17,7 +17,7 @@ use Twilio\Rest\Api\V2010\Account\MessageInstance;
 class InquiryTextService implements InquiryTextServiceInterface
 {
     /**
-     * @var App\Services\CRM\Text\TextServiceInterface
+     * @var TwilioServiceInterface
      */
     protected $textService;
 
@@ -32,14 +32,14 @@ class InquiryTextService implements InquiryTextServiceInterface
     protected $inventory;
 
     /**
-     * @param TextServiceInterface $textService
+     * @param TwilioServiceInterface $textService
      * @param DealerLocationRepositoryInterface $dealerLocation
      * @param InventoryRepositoryInterface $inventory
      */
     public function __construct(
-        TextServiceInterface $textService,
+        TwilioServiceInterface            $textService,
         DealerLocationRepositoryInterface $dealerLocation,
-        InventoryRepositoryInterface $inventory
+        InventoryRepositoryInterface      $inventory
     ){
         $this->textService = $textService;
         $this->dealerLocation = $dealerLocation;
