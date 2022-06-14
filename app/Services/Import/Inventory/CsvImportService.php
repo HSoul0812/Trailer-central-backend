@@ -89,7 +89,8 @@ class CsvImportService implements CsvImportServiceInterface
         "is_featured" => true,
         'is_archived' => true,
         'append_images' => true,
-        'replace_images' => true
+        'replace_images' => true,
+        'video_embed_code' => true
     ];
 
     // mapping between import column names and field names in database:
@@ -135,6 +136,7 @@ class CsvImportService implements CsvImportServiceInterface
         'append_images'         => array('append images on import', 'append image', 'append images', 'use images', 'use image'),
         'replace_images'        => array('replace images', 'replace_images'),
         'image_mode'            => array('image mode', 'images mode', 'img mode'),
+        'video_embed_code'      => array('video_embed_code', 'video embed code')
     );
 
     static private $_columnValidation = array(
@@ -637,6 +639,7 @@ class CsvImportService implements CsvImportServiceInterface
                         $this->inventoryUpdate = true;
                         $inventoryId = $inventoryByStock->inventory_id;
                         $this->inventory["inventory_id"] = $inventoryId;
+                        $this->inventory["is_archived"] = 0;
 
                         Log::debug("Updating inventory stock '{$value}' (Id: {$inventoryId}) via import.");
                     }
