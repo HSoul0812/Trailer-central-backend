@@ -41,7 +41,6 @@ use App\Services\Leads\LeadServiceInterface;
 use App\Services\SubscribeEmailSearch\SubscribeEmailSearchService;
 use App\Services\SubscribeEmailSearch\SubscribeEmailSearchServiceInterface;
 use App\Services\MapSearch\GoogleMapSearchService;
-use App\Services\MapSearch\TomTomMapSearchService;
 use App\Services\SysConfig\SysConfigService;
 use App\Services\SysConfig\SysConfigServiceInterface;
 use App\Services\WebsiteUser\PasswordResetService as WebsitePasswordResetService;
