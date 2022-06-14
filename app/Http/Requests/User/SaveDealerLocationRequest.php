@@ -30,7 +30,7 @@ class SaveDealerLocationRequest extends Request
             'phone' => 'required|string|max:20|phone:country',
             'is_default' => 'checkbox|in:0,1',
             'sms' => 'checkbox|in:0,1',
-            'sms_phone' => 'nullable|string|max:20|phone:country|required_if:sms,1',
+            'sms_phone' => 'nullable|string|max:20|phone:US,CA|required_if:sms,1',
             'permanent_phone' => 'checkbox|in:0,1|required_if:sms,==,1',
             'show_on_website_locations' => 'checkbox|in:0,1',
             'county_issued' => 'nullable|min:0,max:50',
