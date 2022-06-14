@@ -38,4 +38,18 @@ return [
         ]
     ],
 
+    'stripe' => [
+        'public_key' => env('STRIPE_KEY'),
+        'secret_key' => env('STRIPE_SECRET')
+    ],
+
+    'aws' => [
+        'url' => env('AWS_URL'),
+        'app_key' => env('APP_KEY'),
+        'bucket' => env('AWS_BUCKET'),
+        'access_key' => env('AWS_ACCESS_KEY_ID'),
+        'secret_key' => env('AWS_SECRET_ACCESS_KEY'),
+        'default_region' => env('AWS_DEFAULT_REGION'),
+    ]
+
 ];
