@@ -236,7 +236,6 @@ class ESInventoryQueryBuilder
                         'lang' => 'painless',
                         'source' => 'double price;
                         if(doc[\'websitePrice\'] != null){ price = doc[\'websitePrice\'].value; }
-                        else if(doc[\'basicPrice\'] != null) { price=doc[\'basicPrice\'].value; }
                         if(0 < doc[\'salesPrice\'].value && doc[\'salesPrice\'].value < price) { price = doc[\'salesPrice\'].value; }
                         return price;
                         '

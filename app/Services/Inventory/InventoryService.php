@@ -226,11 +226,20 @@ class InventoryService implements InventoryServiceInterface
     }
 
     private function addScriptFilter(ESInventoryQueryBuilder $queryBuilder, array $params) {
+        $priceDef = "double price;
+                        if(doc['websitePrice'] != null){ price = doc['websitePrice'].value; }
+                        if(0 < doc['salesPrice'].value && doc['salesPrice'].value < price) { price = doc['salesPrice'].value; }";
+
         $filter = "doc['status'].value != 2 && doc['dealer.name'].value != 'Operate Beyond'";
 
         if(!empty($params['sale'])) {
             $filter .= " && doc['salesPrice'].value > 0.0 && doc['salesPrice'].value < doc['websitePrice'].value";
+        }
 
+        if(!empty($params['price_min']) && $params['price_min'] > 0 && !empty($params['price_max'])) {
+            $filter = $priceDef . $filter;
+
+            $filter .= " && price  > " . $params['price_min'] . "&& price < " . $params['price_max'];
         }
 
         $queryBuilder->setFilterScript([

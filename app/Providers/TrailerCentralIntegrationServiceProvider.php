@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use App\Models\WebsitePasswordReset;
 use App\Repositories\Geolocation\GeolocationRepository;
 use App\Repositories\Geolocation\GeolocationRepositoryInterface;
 use App\Repositories\Integrations\TrailerCentral\InventoryRepository;
@@ -35,6 +34,8 @@ use App\Services\Integrations\TrailerCentral\Console\Leads\SyncService as LeadSy
 use App\Services\Integrations\TrailerCentral\Console\Leads\SyncServiceInterface as LeadSyncServiceInterface;
 use App\Services\Inventory\InventoryService;
 use App\Services\Inventory\InventoryServiceInterface;
+use App\Services\IpInfo\IpInfoService;
+use App\Services\IpInfo\IpInfoServiceInterface;
 use App\Services\Leads\LeadService;
 use App\Services\Leads\LeadServiceInterface;
 use App\Services\SubscribeEmailSearch\SubscribeEmailSearchService;
@@ -79,6 +80,8 @@ class TrailerCentralIntegrationServiceProvider extends ServiceProvider
 
         $this->app->bind(WebsiteUserRepositoryInterface::class, WebsiteUserRepository::class);
         $this->app->bind(WebsitePasswordResetServiceInterface::class, WebsitePasswordResetService::class);
+
+        $this->app->bind(IpInfoServiceInterface::class, IpInfoService::class);
 
         GoogleMapSearchService::register();
     }
