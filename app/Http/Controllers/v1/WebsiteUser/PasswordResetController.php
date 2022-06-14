@@ -51,7 +51,7 @@ class PasswordResetController extends AbstractRestfulController
     public function forgetPassword(ForgetPasswordRequestInterface $request) {
         if($request->validate()) {
             $token = $this->passwordResetService->forgetPassword($request->all()['email']);
-            $this->response->array([
+            return $this->response->array([
                 'token' => $token
             ]);
         }
@@ -62,7 +62,7 @@ class PasswordResetController extends AbstractRestfulController
     public function resetPassword(PasswordResetRequestInterface $request) {
         if($request->validate()) {
             $user = $this->passwordResetService->resetPassword($request->all());
-            $this->response->item($user, new WebsiteUserTransformer());
+            return $this->response->item($user, new WebsiteUserTransformer());
         }
 
         $this->response->errorBadRequest();
