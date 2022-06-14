@@ -27,7 +27,7 @@ class SaveDealerLocationRequest extends Request
             'country' => 'required|string|min:2,max:255|in:US,CA,CL',
             'postalcode' => 'required|string',
             'fax' => 'nullable|string|min:1,max:20',
-            'phone' => 'required|string|max:20|phone:country',
+            'phone' => 'required|string|max:20|phone:US,CA',
             'is_default' => 'checkbox|in:0,1',
             'sms' => 'checkbox|in:0,1',
             'sms_phone' => 'nullable|string|max:20|phone:US,CA|required_if:sms,1',
