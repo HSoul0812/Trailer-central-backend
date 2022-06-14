@@ -94,6 +94,11 @@ return [
             'expire'   => 60,
             'throttle' => 60,
         ],
+        'website_users' => [
+            'table'     => 'website_users',
+            'expire'    => 60,
+            'throttle'  => 60
+        ]
     ],
 
     /*

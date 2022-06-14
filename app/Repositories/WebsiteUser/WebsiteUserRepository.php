@@ -3,10 +3,11 @@
 namespace App\Repositories\WebsiteUser;
 
 use App\Models\WebsiteUser\WebsiteUser;
+use Illuminate\Database\Eloquent\Collection;
 
 class WebsiteUserRepository implements WebsiteUserRepositoryInterface
 {
-    public function get($attributes)
+    public function get($attributes): Collection
     {
         return WebsiteUser::where($attributes)->get();
     }

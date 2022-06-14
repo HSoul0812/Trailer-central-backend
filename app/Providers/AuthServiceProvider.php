@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use App\Services\Auth\AuthService;
-use App\Services\Auth\AuthServiceInterface;
+use App\Services\WebsiteUser\AuthService;
+use App\Services\WebsiteUser\AuthServiceInterface;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\v1\Auth;
+namespace App\Http\Controllers\v1\WebsiteUser;
 
 use App\Http\Controllers\AbstractRestfulController;
 use App\Http\Controllers\Controller;

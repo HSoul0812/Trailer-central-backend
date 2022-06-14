@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\v1\Auth;
+namespace App\Http\Controllers\v1\WebsiteUser;
 
 use App\Exceptions\NotImplementedException;
 use App\Http\Controllers\AbstractRestfulController;
@@ -11,9 +11,17 @@ use App\Http\Requests\WebsiteUser\PasswordResetRequest;
 use App\Http\Requests\CreateRequestInterface;
 use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\WebsiteUser\PasswordResetRequestInterface;
+use App\Services\WebsiteUser\PasswordResetServiceInterface;
+use App\Transformers\WebsiteUser\WebsiteUserTransformer;
+use Illuminate\Support\Facades\Password;
 
 class PasswordResetController extends AbstractRestfulController
 {
+    public function __construct(private PasswordResetServiceInterface $passwordResetService)
+    {
+        parent::__construct();
+    }
+
     //
     public function index(IndexRequestInterface $request)
     {
@@ -42,7 +50,10 @@ class PasswordResetController extends AbstractRestfulController
 
     public function forgetPassword(ForgetPasswordRequestInterface $request) {
         if($request->validate()) {
-
+            $token = $this->passwordResetService->forgetPassword($request->all()['email']);
+            $this->response->array([
+                'token' => $token
+            ]);
         }
 
         $this->response->errorBadRequest();
@@ -50,7 +61,8 @@ class PasswordResetController extends AbstractRestfulController
 
     public function resetPassword(PasswordResetRequestInterface $request) {
         if($request->validate()) {
-
+            $user = $this->passwordResetService->resetPassword($request->all());
+            $this->response->item($user, new WebsiteUserTransformer());
         }
 
         $this->response->errorBadRequest();

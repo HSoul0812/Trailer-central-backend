@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Auth;
+namespace App\Services\WebsiteUser;
 
 use App\Repositories\WebsiteUser\WebsiteUserRepositoryInterface;
 use Illuminate\Auth\Events\Registered;
@@ -11,8 +11,7 @@ use Laravel\Socialite\Facades\Socialite;
 class AuthService implements AuthServiceInterface
 {
     public function __construct(private WebsiteUserRepositoryInterface $websiteUserRepository)
-    {
-    }
+    {}
 
     public function authenticateSocialCallback($social) {
         $socialUser = Socialite::driver($social)->stateless()->user();

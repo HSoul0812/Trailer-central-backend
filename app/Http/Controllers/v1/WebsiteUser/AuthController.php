@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\v1\Auth;
+namespace App\Http\Controllers\v1\WebsiteUser;
 
 use App\Exceptions\NotImplementedException;
 use App\Http\Controllers\AbstractRestfulController;
@@ -9,7 +9,7 @@ use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\UpdateRequestInterface;
 use App\Http\Requests\WebsiteUser\RegisterUserRequest;
 use App\Repositories\WebsiteUser\WebsiteUserRepositoryInterface;
-use App\Services\Auth\AuthServiceInterface;
+use App\Services\WebsiteUser\AuthServiceInterface;
 use App\Transformers\WebsiteUser\WebsiteUserTransformer;
 use Dingo\Api\Http\Request;
 
