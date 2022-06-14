@@ -3,6 +3,7 @@
 namespace App\Services\Inventory;
 
 use App\DTOs\Inventory\TcApiResponseInventory;
+use App\DTOs\Inventory\TcApiResponseInventoryCreate;
 use App\Repositories\SysConfig\SysConfigRepositoryInterface;
 use App\Services\Inventory\ESQuery\ESBoolQueryBuilder;
 use App\Services\Inventory\ESQuery\ESInventoryQueryBuilder;
@@ -107,6 +108,20 @@ class InventoryService implements InventoryServiceInterface
     private function esSearchUrl(): string {
         $esIndex = self::ES_INDEX;
         return config('trailercentral.elasticsearch.url') . "/$esIndex/_search";
+    }
+
+    /**
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Exception
+     */
+    public function create(array $params): TcApiResponseInventoryCreate
+    {
+      $access_token = getallheaders()['access-token'];
+      $url = config('services.trailercentral.api') . 'inventory/';
+      $inventory = $this->handleHttpRequest('PUT', $url, ['query' => $params, 'headers' => ['access-token' => 'f3c74ad00f954cc698face16ff78d791']]);
+      $respObj = TcApiResponseInventoryCreate::fromData($inventory['response']['data']);
+
+      return $respObj;
     }
 
     #[ArrayShape(["key" => "string", "type_id" => "int"])]
@@ -478,10 +493,10 @@ class InventoryService implements InventoryServiceInterface
             ],
         ]],
     ])]
-    private function handleHttpRequest(string $method, string $url): array
+    private function handleHttpRequest(string $method, string $url, array $options): array
     {
         try {
-            $response = $this->httpClient->request($method, $url);
+            $response = $this->httpClient->request($method, $url, $options);
 
             return json_decode($response->getBody()->getContents(), true);
         } catch (GuzzleException $e) {
