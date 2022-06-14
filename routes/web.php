@@ -18,3 +18,13 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     redirect('/api');
 });
+
+Route::get(
+    '/email/verify/{id}/{hash}',
+    'App\Http\Controllers\v1\Auth\VerificationController@verify'
+)->name('verification.verify');
+
+Route::post(
+    '/email/verification-notification',
+    'App\Http\Controllers\v1\Auth\VerificationController@resend'
+)->middleware(['auth', 'throttle:6,1'])->name('verification.send');
