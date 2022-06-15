@@ -4,6 +4,7 @@ namespace App\Services\Inventory;
 
 use App\DTOs\Inventory\TcApiResponseInventory;
 use App\DTOs\Inventory\TcApiResponseInventoryCreate;
+use App\DTOs\Inventory\TcApiResponseInventoryDelete;
 use App\Repositories\SysConfig\SysConfigRepositoryInterface;
 use App\Services\Inventory\ESQuery\ESBoolQueryBuilder;
 use App\Services\Inventory\ESQuery\ESInventoryQueryBuilder;
@@ -118,7 +119,36 @@ class InventoryService implements InventoryServiceInterface
     {
       $access_token = getallheaders()['access-token'];
       $url = config('services.trailercentral.api') . 'inventory/';
-      $inventory = $this->handleHttpRequest('PUT', $url, ['query' => $params, 'headers' => ['access-token' => 'f3c74ad00f954cc698face16ff78d791']]);
+      $inventory = $this->handleHttpRequest('PUT', $url, ['query' => $params, 'headers' => ['access-token' => $access_token]]);
+      $respObj = TcApiResponseInventoryCreate::fromData($inventory['response']['data']);
+
+      return $respObj;
+    }
+
+    /**
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Exception
+     */
+    public function delete(int $id): TcApiResponseInventoryDelete
+    {
+      $access_token = getallheaders()['access-token'];
+      $url = config('services.trailercentral.api') . 'inventory/' . $id;
+      $response = $this->handleHttpRequest('DELETE', $url, ['headers' => ['access-token' => $access_token]]);
+
+      $respObj = TcApiResponseInventoryDelete::fromData($response['response']);
+
+      return $respObj;
+    }
+
+    /**
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Exception
+     */
+    public function update(array $params): TcApiResponseInventoryCreate
+    {
+      $access_token = getallheaders()['access-token'];
+      $url = config('services.trailercentral.api') . 'inventory/' . $params['inventory_id'];
+      $inventory = $this->handleHttpRequest('POST', $url, ['query' => $params, 'headers' => ['access-token' => $access_token]]);
       $respObj = TcApiResponseInventoryCreate::fromData($inventory['response']['data']);
 
       return $respObj;
