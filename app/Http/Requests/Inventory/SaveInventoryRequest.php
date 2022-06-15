@@ -43,6 +43,7 @@ class SaveInventoryRequest extends Request
         'dealer_price' => 'numeric|nullable',
         'monthly_payment' => 'numeric|nullable',
         'year' => 'integer',
+        'chassis_year' => 'integer|nullable',
         'condition' => 'in:new,used,remfg|nullable',
         'length' => 'numeric|nullable',
         'width' => 'numeric|nullable',
