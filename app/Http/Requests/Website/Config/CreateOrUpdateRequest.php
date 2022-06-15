@@ -10,6 +10,7 @@ class CreateOrUpdateRequest extends Request
 {
     protected function getRules(): array
     {
+        //@todo this should validate that `website_id` belongs to the dealer (then legacy www should provide an access token)
         return [
             'home/bargain_listings/title' => 'string',
             'home/bargain_listings/count' => 'integer',
