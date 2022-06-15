@@ -38,7 +38,7 @@ class AuthService implements AuthServiceInterface
     }
 
     public function authenticate(array $credential): string {
-        if(!$token = auth()->attempt($credential)) {
+        if(!$token = auth('api')->attempt($credential)) {
             throw new UnauthorizedException("Username or password doesn't match");
         }
         return $token;
