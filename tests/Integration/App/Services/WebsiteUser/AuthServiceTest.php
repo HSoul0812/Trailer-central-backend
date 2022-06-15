@@ -6,10 +6,12 @@ use App\Models\WebsiteUser\WebsiteUser;
 use App\Repositories\WebsiteUser\WebsiteUserRepository;
 use App\Repositories\WebsiteUser\WebsiteUserRepositoryInterface;
 use App\Services\WebsiteUser\AuthService;
+use Doctrine\DBAL\Driver\PDO\Exception;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\UnauthorizedException;
 use JetBrains\PhpStorm\Pure;
 use PHPUnit\Framework\MockObject\MockObject;
 use Tests\Common\IntegrationTestCase;
@@ -57,5 +59,18 @@ class AuthServiceTest extends IntegrationTestCase
         $service = $this->getConcreteService();
         $token = $service->authenticate($credentials);
         $this->assertTrue((new TokenValidator)->isValid($token));
+    }
+
+    public function testAuthenticateWithWrongPassword() {
+        $user = WebsiteUser::factory()->create(['password' => Hash::make('12345678')]);
+
+        $credentials = [
+            'email' => $user->email,
+            'password' => '1234567'
+        ];
+
+        $service = $this->getConcreteService();
+        $this->expectException(UnauthorizedException::class);
+        $service->authenticate($credentials);
     }
 }
