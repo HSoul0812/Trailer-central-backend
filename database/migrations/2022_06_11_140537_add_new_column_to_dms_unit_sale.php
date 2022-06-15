@@ -14,9 +14,10 @@ class AddNewColumnLocalTaxToDMSUnitSale extends Migration
      */
     public function up()
     {
-        Schema::table('dms_unit_sale', function (Blueprint $table) {
-            $table->string('use_local_tax', 2)->after('title')->default(0);
-        });
+        DB::statement("
+            ALTER TABLE `dms_unit_sale`
+            ADD COLUMN `use_local_tax` VARCHAR(1) NOT NULL DEFAULT 0 AFTER `title`
+        ");
 
         DB::statement("
             UPDATE `dms_unit_sale`, `dealer_location_sales_tax`
