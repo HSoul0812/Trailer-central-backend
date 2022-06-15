@@ -97,7 +97,8 @@ return [
         'website_users' => [
             'table'     => 'website_password_resets',
             'expire'    => 60,
-            'throttle'  => 60
+            'throttle'  => 60,
+            'reset_password_url' => env('RESET_PASSWORD_URL')
         ]
     ],
 

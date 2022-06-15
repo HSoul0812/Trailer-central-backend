@@ -22,7 +22,8 @@ $api->version('v1', function ($api) {
             ->name('SocialAuthCallback')
             ->where('social', 'google|facebook');
         $api->post('/forget-password', [PasswordResetController::class, 'forgetPassword']);
-        $api->post('/reset-password', [PasswordResetController::class, 'resetPassword'])
+        $api->get('/reset-password', [PasswordResetController::class, 'showReset'])
             ->name('password.reset');
+        $api->post('/reset-password', [PasswordResetController::class, 'resetPassword']);
     });
 });
