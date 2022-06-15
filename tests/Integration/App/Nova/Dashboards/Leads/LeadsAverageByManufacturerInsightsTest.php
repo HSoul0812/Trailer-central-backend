@@ -26,6 +26,7 @@ class LeadsAverageByManufacturerInsightsTest extends IntegrationTestCase
 
     public function testByWeeks(): void
     {
+        $this->fail();
         $request = new LeadsAverageRequest();
 
         $response = $this->dashboard->cards($request);
@@ -61,6 +62,7 @@ class LeadsAverageByManufacturerInsightsTest extends IntegrationTestCase
 
     public function testByDays(): void
     {
+        $this->fail();
         $request = new LeadsAverageRequest(['period' => InsightRequestInterface::PERIOD_PER_DAY]);
         $response = $this->dashboard->cards($request);
 

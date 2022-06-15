@@ -26,6 +26,7 @@ class StockAverageByManufacturerInsightsTest extends IntegrationTestCase
 
     public function testByDays(): void
     {
+        $this->fail();
         $request = new StockAverageRequest(['period' => InsightRequestInterface::PERIOD_PER_DAY]);
         $response = $this->dashboard->cards($request);
 
@@ -59,6 +60,7 @@ class StockAverageByManufacturerInsightsTest extends IntegrationTestCase
 
     public function testByWeeks(): void
     {
+        $this->fail();
         $request = new StockAverageRequest();
 
         $response = $this->dashboard->cards($request);

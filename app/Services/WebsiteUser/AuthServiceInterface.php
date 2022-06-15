@@ -8,7 +8,7 @@ interface AuthServiceInterface
 
     public function authenticateSocialCallback($social);
 
-    public function authenticate();
+    public function authenticate(array $credential);
 
     public function register(array $attributes);
 }

@@ -35,13 +35,12 @@ class AuthService implements AuthServiceInterface
         return Socialite::driver($social)->stateless()->redirect();
     }
 
-    public function authenticate() {
+    public function authenticate($credential) {
     }
 
     public function register(array $attributes) {
         $attributes['password'] = Hash::make($attributes['password']);
         $user = $this->websiteUserRepository->create($attributes);
-        $user->save();
 
         event(new Registered($user));
         return $user;

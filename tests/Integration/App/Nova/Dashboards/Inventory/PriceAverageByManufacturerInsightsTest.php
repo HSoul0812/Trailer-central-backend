@@ -32,6 +32,7 @@ class PriceAverageByManufacturerInsightsTest extends IntegrationTestCase
 
     public function testByWeeks(): void
     {
+        $this->fail();
         $request = new PriceAverageRequest();
 
         $response = $this->dashboard->cards($request);
@@ -66,6 +67,7 @@ class PriceAverageByManufacturerInsightsTest extends IntegrationTestCase
 
     public function testByDays(): void
     {
+        $this->fail();
         $request = new PriceAverageRequest(['period' => InsightRequestInterface::PERIOD_PER_DAY]);
         $response = $this->dashboard->cards($request);
 
