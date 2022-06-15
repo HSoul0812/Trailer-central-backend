@@ -7,13 +7,13 @@ use App\Repositories\CRM\Text\VerifyRepositoryInterface;
 use App\Repositories\CRM\Text\DealerLocationRepositoryInterface;
 use App\Models\CRM\Text\NumberVerify;
 use App\Models\CRM\Text\NumberVerifyCode;
-use App\Services\CRM\Text\TextServiceInterface;
+use App\Services\CRM\Text\TwilioServiceInterface;
 use Carbon\Carbon;
 
 class VerifyRepository implements VerifyRepositoryInterface {
 
     /**
-     * @var TextServiceInterface
+     * @var TwilioServiceInterface
      */
     private $service;
 
@@ -35,7 +35,7 @@ class VerifyRepository implements VerifyRepositoryInterface {
 
     /**
      * Create Verify Number
-     * 
+     *
      * @param string $dealerNumber
      * @param string $twilioNumber
      * @param string $type
@@ -56,7 +56,7 @@ class VerifyRepository implements VerifyRepositoryInterface {
 
     /**
      * Get Verify Number
-     * 
+     *
      * @param string $dealerNumber
      * @param null|string $type
      * @return null|NumberVerify
@@ -84,7 +84,7 @@ class VerifyRepository implements VerifyRepositoryInterface {
 
     /**
      * Verify Number Exists?
-     * 
+     *
      * @param string $twilioNumber
      * @param null|string $dealerNumber
      * @return null|NumberVerify
@@ -105,7 +105,7 @@ class VerifyRepository implements VerifyRepositoryInterface {
 
     /**
      * Create Verify Code in DB
-     * 
+     *
      * @param string $twilioNumber
      * @param string $response
      * @param string $code
@@ -132,7 +132,7 @@ class VerifyRepository implements VerifyRepositoryInterface {
 
     /**
      * Create Verify Code in DB
-     * 
+     *
      * @param string $twilioNumber
      * @param string $response
      * @param string $code

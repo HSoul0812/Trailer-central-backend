@@ -54,4 +54,13 @@ interface InventoryServiceInterface
      * @return bool
      */
     public function imageBulkDelete(int $inventoryId, array $imageIds): bool;
+
+    /**
+     * Exports an inventory and returns the url to the export
+     *
+     * @param int $inventoryId
+     * @param string $format
+     * @return string
+     */
+    public function export(int $inventoryId, string $format): string;
 }

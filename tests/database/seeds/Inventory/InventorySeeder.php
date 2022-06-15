@@ -12,6 +12,7 @@ use App\Models\User\DealerLocationMileageFee;
 use App\Models\User\DealerUser;
 use App\Models\User\DealerUserPermission;
 use App\Models\User\User;
+use App\Models\Website\Website;
 use App\Traits\WithGetter;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Tests\database\seeds\Seeder;
@@ -93,6 +94,16 @@ class InventorySeeder extends Seeder
     private $withInventory;
 
     /**
+     * @var boolean
+     */
+    private $withWebsite;
+
+    /**
+     * @var Website
+     */
+    private $website;
+
+    /**
      * @var Inventory|null
      */
     private $inventory;
@@ -107,6 +118,7 @@ class InventorySeeder extends Seeder
         $this->userType = $params['userType'] ?? AuthToken::USER_TYPE_DEALER;
         $this->permissions = $params['permissions'] ?? [];
         $this->withInventory = $params['withInventory'] ?? false;
+        $this->withWebsite = $params['withWebsite'] ?? false;
     }
 
     public function seed(): void
@@ -165,6 +177,12 @@ class InventorySeeder extends Seeder
             ];
             $this->inventory = factory(Inventory::class)->create($inventoryParams);
         }
+
+        if($this->withWebsite){
+            $this->website = factory(Website::class)->create([
+                'dealer_id' => $this->dealer->dealer_id
+            ]);
+        }
     }
 
     public function cleanUp(): void
@@ -183,5 +201,9 @@ class InventorySeeder extends Seeder
         }
 
         User::destroy($this->dealer->dealer_id);
+
+        if($this->withWebsite){
+            Website::destroy($this->website->id);
+        }
     }
 }

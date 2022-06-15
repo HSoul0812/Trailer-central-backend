@@ -16,6 +16,7 @@ use App\Models\User\User;
 use Dingo\Api\Exception\ResourceException;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Support\Facades\Storage;
 use Tests\database\seeds\Inventory\InventoryHistorySeeder;
 use Tests\database\seeds\Inventory\InventorySeeder;
 use Tests\database\seeds\User\GeolocationSeeder;
@@ -50,11 +51,12 @@ class InventoryControllerTest extends TestCase
      * @covers       InventoryController::history
      */
     public function testHistoryInvalidParameters(
-        array $params,
-        string $expectedException,
-        string $expectedExceptionMessage,
+        array   $params,
+        string  $expectedException,
+        string  $expectedExceptionMessage,
         ?string $firstExpectedErrorMessage
-    ): void {
+    ): void
+    {
         $inventoryHistorySeeder = new InventoryHistorySeeder();
 
         // Given I have a collection of inventory transactions
@@ -434,10 +436,10 @@ class InventoryControllerTest extends TestCase
         return [                                // array $parameters, int $expectedTotal, int $expectedLastPage, string $expectedCustomerName
             'InventoryId must be an integer' => [[], TypeError::class, 'Argument 1 passed to App\Http\Controllers\v1\Inventory\InventoryController::history() must be of the type int, null given', null],
             'Customer must to be an integer' => [['inventory_id' => 666999, 'customer_id' => [666999]], ResourceException::class, 'Validation Failed', 'The customer id needs to be an integer.'],
-            'Search term invalid'            => [['inventory_id' => 666999, 'search_term' => ['Truck']], ResourceException::class, 'Validation Failed', 'The search term must be a string.'],
-            'Sort invalid'                   => [['inventory_id' => 666999, 'sort' => '-with'], ResourceException::class, 'Validation Failed', 'The selected sort is invalid.'],
-            'Per page invalid (min)'         => [['inventory_id' => 666999, 'per_page' => -10], ResourceException::class, 'Validation Failed', 'The per page must be at least 1.'],
-            'Per page invalid (max)'         => [['inventory_id' => 666999, 'per_page' => 5000000], ResourceException::class, 'Validation Failed', 'The per page may not be greater than 2000.'],
+            'Search term invalid' => [['inventory_id' => 666999, 'search_term' => ['Truck']], ResourceException::class, 'Validation Failed', 'The search term must be a string.'],
+            'Sort invalid' => [['inventory_id' => 666999, 'sort' => '-with'], ResourceException::class, 'Validation Failed', 'The selected sort is invalid.'],
+            'Per page invalid (min)' => [['inventory_id' => 666999, 'per_page' => -10], ResourceException::class, 'Validation Failed', 'The per page must be at least 1.'],
+            'Per page invalid (max)' => [['inventory_id' => 666999, 'per_page' => 5000000], ResourceException::class, 'Validation Failed', 'The per page may not be greater than 2000.'],
         ];
     }
 
@@ -622,5 +624,22 @@ class InventoryControllerTest extends TestCase
             'title' => $inventory->title,
             'vin' => $inventory->vin,
         ];
+    }
+
+    public function testExport()
+    {
+        Storage::fake('s3');
+
+        $seeder = new InventorySeeder(['withInventory' => true, 'withWebsite' => true]);
+        $seeder->seed();
+        $inventoryId = $seeder->inventory->getKey();
+        $response = $this->json('POST', "/api/inventory/$inventoryId/export", [
+            'format' => 'pdf'
+        ], $this->getSeederAccessToken($seeder));
+        $response->assertJsonPath('response.status', 'success');
+
+        Storage::disk('s3')->exists("inventory-exports/$inventoryId");
+        
+        $seeder->cleanUp();
     }
 }

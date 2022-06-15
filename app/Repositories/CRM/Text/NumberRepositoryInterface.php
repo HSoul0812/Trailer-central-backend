@@ -9,7 +9,7 @@ use App\Models\CRM\Text\NumberVerify;
 interface NumberRepositoryInterface extends Repository {
     /**
      * Set Phone as Used
-     * 
+     *
      * @param string $dealerNo
      * @param string $usedNo
      * @param string $customerNo
@@ -20,7 +20,7 @@ interface NumberRepositoryInterface extends Repository {
 
     /**
      * Create Twilio Number
-     * 
+     *
      * @param string $phoneNumber
      * @return NumberTwilio
      */
@@ -28,7 +28,7 @@ interface NumberRepositoryInterface extends Repository {
 
     /**
      * Find Active Twilio Number
-     * 
+     *
      * @param type $dealerNo
      * @param type $customerNo
      * @return Number
@@ -37,7 +37,7 @@ interface NumberRepositoryInterface extends Repository {
 
     /**
      * Find All Twilio Numbers
-     * 
+     *
      * @param type $dealerNo
      * @param type $customerNo
      * @return array Number
@@ -46,17 +46,17 @@ interface NumberRepositoryInterface extends Repository {
 
     /**
      * Is Active Twilio Number?
-     * 
+     *
      * @param string $twilioNumber
      * @param string $maskedNumber
-     * @return Number
+     * @return Number|null
      */
-    public function isActiveTwilioNumber(string $twilioNumber, string $maskedNumber): Number;
+    public function activeTwilioNumber(string $twilioNumber, string $maskedNumber): ?Number;
 
 
     /**
      * Delete Twilio Number
-     * 
+     *
      * @param string $phone
      * @return bool
      */
@@ -64,11 +64,19 @@ interface NumberRepositoryInterface extends Repository {
 
     /**
      * Find All Expired Numbers (Chunked)
-     * 
+     *
      * @param Closure $callable
      * @param int $toDate
      * @param int $chunkSize
      * @return void
      */
     public function getAllExpiredChunked(\Closure $callable, int $toDate, int $chunkSize = 500): void;
+
+    /**
+     * @param int $expirationTime
+     * @param string $twilioNumber
+     * @param string $dealerNumber
+     * @return bool
+     */
+    public function updateExpirationDate(int $expirationTime, string $twilioNumber, string $dealerNumber): bool;
 }

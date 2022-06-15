@@ -272,4 +272,13 @@ class LeadController extends RestfulControllerV2
 
         return $this->updatedResponse();
     }
+
+    public function output(Request $request)
+    {
+        $request = new GetLeadsRequest($request->all());
+        
+        if ($request->validate()) {
+            return $this->leads->output($request->all());
+        }
+    }
 }

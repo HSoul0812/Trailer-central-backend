@@ -13,8 +13,8 @@ class AddUseProximityDistanceSelectorToWebsiteConfigDefaultTable extends Migrati
         'note' => null,
         'grouping' => 'Home Page Display',
         'values' => '{"0":"No","1":"Yes"}',
-        'default_label' => 'No',
-        'default_value' => null,
+        'default_label' => 'Yes',
+        'default_value' => '1',
         'sort_order' => 1322,
     ];
 
