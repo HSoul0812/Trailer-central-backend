@@ -26,7 +26,10 @@ class AuthController extends AbstractRestfulController
     public function index(IndexRequestInterface $request)
     {
         if($request->validate()) {
-            $user = $this->authService->authenticate($request->all());
+            $token = $this->authService->authenticate($request->all());
+            return $this->response->array([
+                'token' => $token
+            ]);
         }
         return $this->response->errorBadRequest();
     }

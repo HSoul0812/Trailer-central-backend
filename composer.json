@@ -24,7 +24,8 @@
         "nesbot/carbon": "^2.53",
         "psr/log": "^1.0",
         "sentry/sentry-laravel": "^2.11",
-        "trailer-trader/insights": "*"
+        "trailer-trader/insights": "*",
+        "tymon/jwt-auth": "1.0.*"
     },
     "require-dev": {
         "brianium/paratest": "^6.3",

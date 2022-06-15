@@ -6,9 +6,13 @@ use App\Models\WebsiteUser\WebsiteUser;
 use App\Repositories\WebsiteUser\WebsiteUserRepositoryInterface;
 use App\Services\WebsiteUser\AuthService;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Hash;
 use PHPUnit\Framework\MockObject\MockObject;
 use Tests\Common\TestCase;
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Tymon\JWTAuth\Validators\TokenValidator;
 
 class AuthServiceTest extends TestCase
 {
@@ -37,7 +41,7 @@ class AuthServiceTest extends TestCase
             "zipcode" => "",
             "city" => "",
             "state" => "",
-            "email" => "songxunzhao1992@gmail.com",
+            "email" => "test@test.com",
             "phone_number" => "",
             "mobile_number" => "",
             "password" => "12345678"
@@ -51,6 +55,20 @@ class AuthServiceTest extends TestCase
     }
 
     public function testAuthenticate() {
-
+        $credentials = [
+            'email' => 'test@test.com',
+            'password' => '12345678'
+        ];
+        $service = $this->getConcreteService();
+        $this->websiteUserRepository->expects($this->once())
+            ->method('get')
+            ->will($this->returnValue(new Collection(new WebsiteUser(
+                [
+                    'email' => $credentials['email'],
+                    'password' => Hash::make($credentials['password'])
+                ]
+            ))));
+        $token = $service->authenticate($credentials);
+        $this->assertTrue((new TokenValidator)->isValid($token));
     }
 }
