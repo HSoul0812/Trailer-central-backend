@@ -9,12 +9,15 @@ use App\Http\Controllers\AbstractRestfulController;
 use App\Http\Requests\CreateRequestInterface;
 use App\Http\Requests\Inventory\IndexInventoryRequest;
 use App\Http\Requests\Inventory\CreateInventoryRequest;
+use App\Http\Requests\Inventory\UpdateInventoryRequest;
+use App\Http\Requests\Inventory\DeleteInventoryRequest;
 use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\UpdateRequestInterface;
 use App\Services\Inventory\InventoryServiceInterface;
 use App\Transformers\Inventory\InventoryListResponseTransformer;
 use App\Transformers\Inventory\TcApiResponseInventoryTransformer;
 use App\Transformers\Inventory\TcApiResponseInventoryCreateTransformer;
+use App\Transformers\Inventory\TcApiResponseInventoryDeleteTransformer;
 use Dingo\Api\Http\Response;
 
 class InventoryController extends AbstractRestfulController
@@ -48,7 +51,13 @@ class InventoryController extends AbstractRestfulController
      */
     public function destroy(int $id)
     {
-        throw new NotImplementedException();
+      $inventoryRequest = new DeleteInventoryRequest(['inventory_id' => $id]);
+      
+      if ($inventoryRequest->validate()) {
+            return $this->response->item($this->inventoryService->delete($id), new TcApiResponseInventoryDeleteTransformer());
+        }
+
+        return $this->response->errorBadRequest();
     }
 
     /**
@@ -79,7 +88,13 @@ class InventoryController extends AbstractRestfulController
      */
     public function update(int $id, UpdateRequestInterface $request)
     {
-        throw new NotImplementedException();
+      $inventoryRequest = new UpdateInventoryRequest(array_merge($request->all(), ['inventory_id' => $id]));
+      
+      if ($inventoryRequest->validate()) {
+          return $this->response->item($this->inventoryService->update($inventoryRequest->all()), new TcApiResponseInventoryCreateTransformer());
+      }
+
+      return $thqis->response->errorBadRequest();
     }
 
     protected function constructRequestBindings(): void
@@ -90,6 +105,10 @@ class InventoryController extends AbstractRestfulController
         
         app()->bind(CreateRequestInterface::class, function () {
             return inject_request_data(CreateInventoryRequest::class);
+        });
+        
+        app()->bind(UpdateRequestInterface::class, function () {
+            return inject_request_data(UpdateInventoryRequest::class);
         });
     }
 }
