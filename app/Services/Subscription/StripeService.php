@@ -18,19 +18,7 @@ class StripeService implements StripeServiceInterface
      */
     private $stripe;
 
-    /**
-     * @var $customer
-     */
-    private $customer;
-
-    /**
-     * @var $user
-     */
-    private $user;
-
-    public function __construct($user) {
-        $this->user = $user;
-        $this->customer = $user->createOrGetStripeCustomer();
+    public function __construct() {
         $this->stripe = new StripeClient(config('services.stripe.secret_key'));
     }
 
@@ -42,22 +30,32 @@ class StripeService implements StripeServiceInterface
      */
     public function getCustomer(Request $request): object
     {
-        $customer = $this->customer;
-        $customer["card"] = $this->user->defaultPaymentMethod()->card;
-        $transactions = isset($request->transactions_limit) ? $this->getTransactions($request->transactions_limit) : $this->getTransactions();
+        $user = User::find($request->dealer_id);
+        $customer = $user->createOrGetStripeCustomer();
+
+        if ($user->defaultPaymentMethod()) {
+            $customer["card"] = $user->defaultPaymentMethod()->card;
+        }
+
+        $per_page = $request->transactions_limit ?? 0;
+        $transactions = $this->getTransactions($customer, $per_page);
         $customer["transactions"] = $transactions["data"];
 
-        return $this->customer;
+        return $customer;
     }
 
     /**
      * Retrieves all subscriptions from a given user
      *
+     * @param $request
      * @return object
      */
-    public function getSubscriptions(): object
+    public function getSubscriptions($request): object
     {
-        return $this->customer->subscriptions;
+        $user = User::find($request->dealer_id);
+        $customer = $user->createOrGetStripeCustomer();
+
+        return $customer->subscriptions;
     }
 
     /**
@@ -66,10 +64,10 @@ class StripeService implements StripeServiceInterface
      * @param $per_page
      * @return object
      */
-    public function getTransactions($per_page = null): object
+    public function getTransactions($customer, $per_page): object
     {
         $params = [
-            'customer' => $this->customer->id
+            'customer' => $customer->id
         ];
 
         if ($per_page) {
@@ -107,14 +105,17 @@ class StripeService implements StripeServiceInterface
      */
     public function subscribe(Request $request): array
     {
-        try {
-            if ($this->user->hasPaymentMethod()) {
-                $paymentMethod = $this->user->defaultPaymentMethod();
+        $user = User::find($request->dealer_id);
+        $customer = $user->createOrGetStripeCustomer();
 
-                $this->user
+        try {
+            if ($user->hasPaymentMethod()) {
+                $paymentMethod = $user->defaultPaymentMethod();
+
+                $user
                     ->newSubscription('default', $request->plan)
                     ->create($paymentMethod->id, [
-                        'email' => $this->customer->email,
+                        'email' => $customer->email,
                     ]);
             } else {
                 return [
@@ -149,13 +150,16 @@ class StripeService implements StripeServiceInterface
      */
     public function updateCard(Request $request): array
     {
+        $user = User::find($request->dealer_id);
+        $customer = $user->createOrGetStripeCustomer();
+
         try {
             $paymentMethod = $this->stripe->customers->createSource(
-                $this->customer->id,
+                $customer->id,
                 ['source' => $request->token]
             );
 
-            $this->user->updateDefaultPaymentMethod($paymentMethod->id);
+            $user->updateDefaultPaymentMethod($paymentMethod->id);
 
             return [
                 'response' => [

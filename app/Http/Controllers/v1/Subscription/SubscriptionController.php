@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\v1\Subscription;
 
+use App\Models\User\User;
 use App\Repositories\Subscription\SubscriptionRepository;
 use App\Repositories\Subscription\SubscriptionRepositoryInterface;
 use Exception;
@@ -27,7 +28,6 @@ class SubscriptionController extends RestfulControllerV2
      * @var StripeService
      */
     protected $stripe;
-    private $user;
     private $subscriptionRepository;
 
 
@@ -35,14 +35,10 @@ class SubscriptionController extends RestfulControllerV2
      * Create a new controller instance.
      *
      */
-    public function __construct()
+    public function __construct(SubscriptionRepositoryInterface $subscriptionRepository)
     {
-        $this->middleware(function ($request, $next) {
-            $this->user = Auth::user();
-            $this->subscriptionRepository = new SubscriptionRepository($this->user);
-
-            return $next($request);
-        });
+        $this->middleware('validateDealerIdOnRequest');
+        $this->subscriptionRepository = $subscriptionRepository;
     }
 
     /**
