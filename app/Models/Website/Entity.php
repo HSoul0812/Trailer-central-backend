@@ -29,7 +29,9 @@ class Entity extends Model {
         'sort_order',
         'in_nav',
         'is_active',
-        'deleted'
+        'deleted',
+        'meta_description',
+        'meta_keywords'
     ];
 
     public function website()
