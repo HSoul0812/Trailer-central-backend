@@ -58,11 +58,11 @@ class ScrapeReplies extends Command
 
         $this->service = $service;
         $this->users = $users;
-        
-        date_default_timezone_set(env('DB_TIMEZONE'));
-        
+
+        date_default_timezone_set(config('app.db_timezone'));
+
         $this->datetime = new \DateTime();
-        $this->datetime->setTimezone(new \DateTimeZone(env('DB_TIMEZONE')));
+        $this->datetime->setTimezone(new \DateTimeZone(config('app.db_timezone')));
     }
 
     /**
@@ -112,7 +112,7 @@ class ScrapeReplies extends Command
 
         // Log End
         $datetime = new \DateTime();
-        $datetime->setTimezone(new \DateTimeZone(env('DB_TIMEZONE')));
+        $datetime->setTimezone(new \DateTimeZone(config('app.db_timezone')));
         $this->info("{$this->command} finished on " . $datetime->format("l, F jS, Y H:i:s"));
     }
 }
