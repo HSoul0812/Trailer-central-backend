@@ -798,17 +798,25 @@ class CsvImportService implements CsvImportServiceInterface
 
             case 'location_phone':
                 // lookup location by phone number
-                // strip any abnormal characters
-                $phone = str_replace(array('(', ')', ' ', '-'), '', $value);
                 $dealerLocation = DealerLocation::where([
-                    'phone' => $phone,
+                    'phone' => $value,
                     'dealer_id' => $this->bulkUpload->dealer_id
                 ])->first();
 
                 if($dealerLocation) {
                     $this->inventory['dealer_location_id'] = $dealerLocation->dealer_location_id;
                 } else {
-                    return "Location based on phone number '{$value}' not found.";
+                    $phone = str_replace(array('(', ')', ' ', '-'), '', $value);
+                    $dealerLocation = DealerLocation::where([
+                        'phone' => $phone,
+                        'dealer_id' => $this->bulkUpload->dealer_id
+                    ])->first();
+
+                    if ($dealerLocation) {
+                        $this->inventory['dealer_location_id'] = $dealerLocation->dealer_location_id;
+                    } else {
+                        return "Location based on phone number '{$value}' not found.";
+                    }
                 }
                 break;
 
