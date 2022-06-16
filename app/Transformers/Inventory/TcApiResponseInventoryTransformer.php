@@ -13,6 +13,12 @@ class TcApiResponseInventoryTransformer extends TransformerAbstract
     {
         return [
             'id'               => (int) $type->id,
+            'identifier'       => $type->identifier,
+            'active'           => $type->active,
+            'archived_at'      => $type->archived_at,
+            'brand'            => $type->brand,
+            'category_label'   => $type->category_label,
+            'entity_type_id'   => $type->entity_type_id ,
             'url'              => $type->url,
             'features'         => $type->features,
             'attributes'       => $type->attributes,
@@ -44,7 +50,13 @@ class TcApiResponseInventoryTransformer extends TransformerAbstract
             'type_id'          => $type->type_id,
             'type_label'       => $type->type_label,
             'category'         => $type->category,
-            'show_on_website'  => $type->show_on_website
+            'show_on_website'  => $type->show_on_website,
+            'times_viewed'     => $type->times_viewed,
+            'sold_at'          => $type->sold_at,
+            'is_featured'      => $type->is_featured,
+            'is_special'       => $type->is_special,
+            'use_website_price' => $type->use_website_price,
+            'notes' => $type->notes,
          ];
     }
 }

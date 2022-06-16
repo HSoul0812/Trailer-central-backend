@@ -55,6 +55,12 @@ class TcApiResponseInventory
  {
      $obj = new self();
      $obj->id = $data['id'];
+     $obj->identifier = $data['identifier'];
+     $obj->active = $data['active'];
+     $obj->archived_at = $data['archived_at'];
+     $obj->brand = $data['brand'];
+     $obj->category_label = $data['category_label'];
+     $obj->entity_type_id = $data['entity_type_id'];
      $obj->url = $data['url'];
      $obj->features = $data['features'];
      $obj->attributes = $data['attributes'];
@@ -85,6 +91,12 @@ class TcApiResponseInventory
      $obj->availability_label = $data['status'] ?? '';
      $obj->is_archived = $data['is_archived'];
      $obj->show_on_website = $data['show_on_website'];
+     $obj->times_viewed = $data['times_viewed'];
+     $obj->sold_at = $data['sold_at'];
+     $obj->is_featured = $data['is_featured'];
+     $obj->is_special = $data['is_special'];
+     $obj->use_website_price = $data['use_website_price'];
+     $obj->notes = $data['notes'];
      foreach($data['attributes'] as $attribute) {
        $obj->setTypedProperty($attribute['code'], $attribute['value']);
      }
