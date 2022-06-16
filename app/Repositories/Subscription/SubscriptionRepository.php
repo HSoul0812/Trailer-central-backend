@@ -5,14 +5,9 @@ namespace App\Repositories\Subscription;
 use App\Services\Subscription\StripeService;
 use Dingo\Api\Http\Request;
 
-use Illuminate\Support\Facades\Auth;
+use App\Models\User\User;
 
 class SubscriptionRepository implements SubscriptionRepositoryInterface {
-
-    /**
-     * @var Auth $user
-     */
-    private $user;
 
     /**
      * @var StripeService $service
@@ -23,10 +18,9 @@ class SubscriptionRepository implements SubscriptionRepositoryInterface {
      * Create a new SubscriptionRepository instance.
      *
      */
-    public function __construct($user)
+    public function __construct()
     {
-        $this->user = $user;
-        $this->service = new StripeService($this->user);
+        $this->service = new StripeService();
     }
 
     /**
@@ -36,7 +30,7 @@ class SubscriptionRepository implements SubscriptionRepositoryInterface {
      * @return mixed
      */
     public function getAll($params) {
-        return $this->service->getSubscriptions()->data;
+        return $this->service->getSubscriptions($params)->data;
     }
 
     /**
