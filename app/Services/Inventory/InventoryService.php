@@ -523,7 +523,7 @@ class InventoryService implements InventoryServiceInterface
             ],
         ]],
     ])]
-    private function handleHttpRequest(string $method, string $url, array $options): array
+    private function handleHttpRequest(string $method, string $url, array $options = []): array
     {
         try {
             $response = $this->httpClient->request($method, $url, $options);
