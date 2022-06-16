@@ -14,12 +14,13 @@ class LeadTest extends FeatureTestCase
 
     public function testCreateValidInventory(): void
     {
+        $this->fail();
       $client = new GuzzleHttpClient(['headers' => ['access-token' => config('services.trailercentral.access_token')]]);
       $this->setUpFaker();
 
       $urlInventory = config('services.trailercentral.api') . 'inventory/';
       $urlDealerLocation = config('services.trailercentral.api') . 'user/dealer-location';
-      
+
       $newDealerLocationParams = [
         'dealer_id' => 1004,
         'contact' => 'test contact',
@@ -34,9 +35,9 @@ class LeadTest extends FeatureTestCase
       ];
 
       $responseDealerLocation = $client->request('PUT', $urlDealerLocation, ['query' => $newDealerLocationParams]);
-      
+
       $responseDealerLocation = json_decode($responseDealerLocation->getBody()->getContents(), true);
-      
+
       $newInventoryParams = [
         'entity_type_id' => 1,
         'dealer_id'      => 1004,
@@ -45,10 +46,10 @@ class LeadTest extends FeatureTestCase
         'dealer_location_identifier' => $responseDealerLocation['data']['id'],
         'title' => 'test title 2'
       ];
-      
+
       $responseInventory = $client->request('PUT', $urlInventory, ['query' => $newInventoryParams]);
       $responseInventory = json_decode($responseInventory->getBody()->getContents(), true);
-      
+
       $responseShowInventory = $this->get('/api/inventory/' . $responseInventory['response']['data']['id']);
       $responseShowInventory = json_decode($responseShowInventory->getContent(), true);
 
@@ -82,6 +83,7 @@ class LeadTest extends FeatureTestCase
 
     public function testCreateInvalidInventory(): void
     {
+        $this->fail();
       $params = [
         'lead_types' => ['status' => ''],
         'first_name' => 'test name',

@@ -5,8 +5,10 @@ namespace App\Services\WebsiteUser;
 use App\Repositories\WebsiteUser\WebsiteUserRepositoryInterface;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\UnauthorizedException;
 use JetBrains\PhpStorm\ArrayShape;
 use Laravel\Socialite\Facades\Socialite;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthService implements AuthServiceInterface
 {
@@ -35,13 +37,16 @@ class AuthService implements AuthServiceInterface
         return Socialite::driver($social)->stateless()->redirect();
     }
 
-    public function authenticate() {
+    public function authenticate(array $credential): string {
+        if(!$token = auth('api')->attempt($credential)) {
+            throw new UnauthorizedException("Username or password doesn't match");
+        }
+        return $token;
     }
 
     public function register(array $attributes) {
         $attributes['password'] = Hash::make($attributes['password']);
         $user = $this->websiteUserRepository->create($attributes);
-        $user->save();
 
         event(new Registered($user));
         return $user;

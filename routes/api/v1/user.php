@@ -12,16 +12,18 @@ $api->version('v1', function ($api) {
     | API Auth
     |--------------------------------------------------------------------------
     */
-
-    $api->post('user/register', [AuthController::class, 'create']);
-    $api->get('user/auth', [AuthController::class, 'index']);
-    $api->get('user/auth/{social}', [AuthController::class, 'social'])
-        ->name('SocialAuth')
-        ->where('social', 'google|facebook');
-    $api->get('user/auth/{social}/callback', [AuthController::class, 'socialCallback'])
-        ->name('SocialAuthCallback')
-        ->where('social', 'google|facebook');
-    $api->post('user/forget-password', [PasswordResetController::class, 'forgetPassword']);
-    $api->post('user/reset-password', [PasswordResetController::class, 'resetPassword'])
-        ->name('password.reset');
+    $api->group(['prefix' => '/user'], function ($api) {
+        $api->post('/register', [AuthController::class, 'create']);
+        $api->get('/auth', [AuthController::class, 'index']);
+        $api->get('/auth/{social}', [AuthController::class, 'social'])
+            ->name('SocialAuth')
+            ->where('social', 'google|facebook');
+        $api->get('/auth/{social}/callback', [AuthController::class, 'socialCallback'])
+            ->name('SocialAuthCallback')
+            ->where('social', 'google|facebook');
+        $api->post('/forget-password', [PasswordResetController::class, 'forgetPassword']);
+        $api->get('/reset-password', [PasswordResetController::class, 'showReset'])
+            ->name('password.reset');
+        $api->post('/reset-password', [PasswordResetController::class, 'resetPassword']);
+    });
 });

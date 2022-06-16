@@ -13,6 +13,7 @@ use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\WebsiteUser\PasswordResetRequestInterface;
 use App\Services\WebsiteUser\PasswordResetServiceInterface;
 use App\Transformers\WebsiteUser\WebsiteUserTransformer;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 
 class PasswordResetController extends AbstractRestfulController
@@ -66,6 +67,10 @@ class PasswordResetController extends AbstractRestfulController
         }
 
         $this->response->errorBadRequest();
+    }
+
+    public function showReset(Request $request) {
+        return view('auth.reset-password', ['token' => $request->get('token')]);
     }
 
     protected function constructRequestBindings(): void

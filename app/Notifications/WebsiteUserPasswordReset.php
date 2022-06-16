@@ -42,9 +42,16 @@ class WebsiteUserPasswordReset extends Notification
 
     protected function resetUrl($notifiable)
     {
-        return url(route('password.reset', [
-            'token' => $this->token,
-            'email' => $notifiable->getEmailForPasswordReset(),
-        ], false));
+        $resetPasswordUrl = config('auth.passwords.website_users.reset_password_url');
+        $token = $this->token;
+        $email = $notifiable->getEmailForPasswordReset();
+        if($resetPasswordUrl) {
+            return "$resetPasswordUrl?token=$token&email=$email";
+        } else {
+            return url(route('password.reset', [
+                'token' => $this->token,
+                'email' => $notifiable->getEmailForPasswordReset(),
+            ], false));
+        }
     }
 }

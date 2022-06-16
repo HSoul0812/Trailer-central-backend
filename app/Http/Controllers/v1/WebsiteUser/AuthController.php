@@ -7,8 +7,8 @@ use App\Http\Controllers\AbstractRestfulController;
 use App\Http\Requests\CreateRequestInterface;
 use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\UpdateRequestInterface;
+use App\Http\Requests\WebsiteUser\AuthenticateUserRequest;
 use App\Http\Requests\WebsiteUser\RegisterUserRequest;
-use App\Repositories\WebsiteUser\WebsiteUserRepositoryInterface;
 use App\Services\WebsiteUser\AuthServiceInterface;
 use App\Transformers\WebsiteUser\WebsiteUserTransformer;
 use Dingo\Api\Http\Request;
@@ -25,7 +25,13 @@ class AuthController extends AbstractRestfulController
 
     public function index(IndexRequestInterface $request)
     {
-        throw new NotImplementedException();
+        if($request->validate()) {
+            $token = $this->authService->authenticate($request->all());
+            return $this->response->array([
+                'token' => $token
+            ]);
+        }
+        return $this->response->errorBadRequest();
     }
 
     public function create(CreateRequestInterface $request)
@@ -62,6 +68,10 @@ class AuthController extends AbstractRestfulController
 
     protected function constructRequestBindings(): void
     {
+        app()->bind(IndexRequestInterface::class, function () {
+            return inject_request_data(AuthenticateUserRequest::class);
+        });
+
         app()->bind(CreateRequestInterface::class, function () {
             return inject_request_data(RegisterUserRequest::class);
         });
