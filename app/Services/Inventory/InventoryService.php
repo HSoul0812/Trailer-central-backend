@@ -117,7 +117,8 @@ class InventoryService implements InventoryServiceInterface
      */
     public function create(array $params): TcApiResponseInventoryCreate
     {
-      $access_token = getallheaders()['access-token'];
+      $headers = array_change_key_case(getallheaders(), CASE_LOWER);
+      $access_token = $headers['access-token'];
       $url = config('services.trailercentral.api') . 'inventory/';
       $inventory = $this->handleHttpRequest('PUT', $url, ['query' => $params, 'headers' => ['access-token' => $access_token]]);
       $respObj = TcApiResponseInventoryCreate::fromData($inventory['response']['data']);
@@ -131,7 +132,8 @@ class InventoryService implements InventoryServiceInterface
      */
     public function delete(int $id): TcApiResponseInventoryDelete
     {
-      $access_token = getallheaders()['access-token'];
+      $headers = array_change_key_case(getallheaders(), CASE_LOWER);
+      $access_token = $headers['access-token'];
       $url = config('services.trailercentral.api') . 'inventory/' . $id;
       $response = $this->handleHttpRequest('DELETE', $url, ['headers' => ['access-token' => $access_token]]);
 
@@ -146,7 +148,8 @@ class InventoryService implements InventoryServiceInterface
      */
     public function update(array $params): TcApiResponseInventoryCreate
     {
-      $access_token = getallheaders()['access-token'];
+      $headers = array_change_key_case(getallheaders(), CASE_LOWER);
+      $access_token = $headers['access-token'];
       $url = config('services.trailercentral.api') . 'inventory/' . $params['inventory_id'];
       $inventory = $this->handleHttpRequest('POST', $url, ['query' => $params, 'headers' => ['access-token' => $access_token]]);
       $respObj = TcApiResponseInventoryCreate::fromData($inventory['response']['data']);
