@@ -10,7 +10,6 @@ use App\Console\Commands\Inventory\AutoArchiveSoldItems;
 use App\Console\Commands\MyScheduleWorkCommand;
 use App\Console\Commands\Website\AddSitemaps;
 use App\Console\Commands\Website\GenerateDealerSpecificSiteUrls;
-use App\Jobs\Export\ExportFavoritesJob;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use App\Console\Commands\SyncPartsCommand;
@@ -151,7 +150,7 @@ class Kernel extends ConsoleKernel
             ->everyFiveMinutes()
             ->runInBackground();
 
-        $schedule->job(new ExportFavoritesJob())
+        $schedule->command('export:inventory-favorites')
             ->daily()
             ->runInBackground();
     }

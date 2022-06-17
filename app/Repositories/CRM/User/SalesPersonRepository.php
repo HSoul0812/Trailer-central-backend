@@ -357,10 +357,14 @@ SQL;
         $result = DB::select($sql, $dbParams);
 
         $unitSaleIds = array_filter(array_column($result, 'unit_sale_id'));
-        $unitSaleIdsQuestionMarks = implode(',', array_fill(0, count($unitSaleIds), '?'));
 
-        // For down payment invoices
-        $sql2 = <<<SQL
+        $paidAmounts = [];
+
+        if (!empty($unitSaleIds)) {
+            $unitSaleIdsQuestionMarks = implode(',', array_fill(0, count($unitSaleIds), '?'));
+
+            // For down payment invoices
+            $sql2 = <<<SQL
              SELECT qb_invoices.unit_sale_id,
                   COALESCE(SUM(qb_payment.amount), 0) paid_amount
              FROM qb_payment
@@ -369,10 +373,9 @@ SQL;
              GROUP BY qb_invoices.unit_sale_id
 SQL;
 
-        $paidAmounts = [];
-
-        foreach (DB::select($sql2, $unitSaleIds) as $paidAmount) {
-            $paidAmounts[$paidAmount->unit_sale_id] = $paidAmount;
+            foreach (DB::select($sql2, $unitSaleIds) as $paidAmount) {
+                $paidAmounts[$paidAmount->unit_sale_id] = $paidAmount;
+            }
         }
 
         foreach ($result as $item) {
