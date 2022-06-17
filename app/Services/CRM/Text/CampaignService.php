@@ -5,6 +5,7 @@ namespace App\Services\CRM\Text;
 use App\Exceptions\CRM\Text\CustomerLandlineNumberException;
 use App\Exceptions\CRM\Text\NoCampaignSmsFromNumberException;
 use App\Exceptions\CRM\Text\NoLeadsProcessCampaignException;
+use App\Exceptions\CRM\Text\NotValidFromNumberCampaignException;
 use App\Models\CRM\Interactions\TextLog;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadStatus;
@@ -102,6 +103,11 @@ class CampaignService implements CampaignServiceInterface
             // Get From Number
             $from_number = $this->getFromNumber($dealer->id, $campaign);
 
+            if (!$this->textService->isValidPhoneNumber($from_number)) {
+                $this->log->error('From SMS Number is Invalid #: ' . $dealer->id);
+                throw new NotValidFromNumberCampaignException();
+            }
+
             // Get Unsent Campaign Leads
             if (count($campaign->leads) < 1) {
                 $this->log->error('No Leads found for Campaign #' . $campaign->id . ' for Dealer #: ' . $dealer->id);
@@ -132,6 +138,9 @@ class CampaignService implements CampaignServiceInterface
             $this->saveLog($campaign, 'warning', $e->getMessage());
             throw $e;
         } catch (NoCampaignSmsFromNumberException $e) {
+            $this->saveLog($campaign, 'error', $e->getMessage(), true);
+            throw $e;
+        } catch (NotValidFromNumberCampaignException $e) {
             $this->saveLog($campaign, 'error', $e->getMessage(), true);
             throw $e;
         } catch (\Exception $e) {
