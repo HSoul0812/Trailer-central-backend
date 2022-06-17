@@ -105,7 +105,7 @@ return [
             'table'     => 'website_password_resets',
             'expire'    => 60,
             'throttle'  => 60,
-            'reset_password_url' => env('RESET_PASSWORD_URL')
+            'reset_password_url' => env('RESET_PASSWORD_URL'),
         ]
     ],
 
@@ -119,6 +119,6 @@ return [
     | confirmation screen. By default, the timeout lasts for three hours.
     |
     */
-
+    'login_url' => env('LOGIN_URL'),
     'password_timeout' => 10800,
 ];
