@@ -659,16 +659,16 @@ class Lead extends Model
     }
 
     public static function getLeadCrmUrl($leadId, $credential) {
-        $config_login_url = "app.new_design_crm_login_url";
+        $config_url = 'app.new_design_crm_url';
 
         if (!config('app.new_design_lead_force')) {
             $lead = Lead::with('user')->findOrFail($leadId);
 
             if ($lead->user->is_dms_active) {
-                $config_login_url = "app.crm_login_url";
+                $config_url = 'app.crm_url';
             }
         }
 
-        return config($config_login_url) . $credential . '&r=' . urlencode(config('app.crm_lead_url') . CompactHelper::expand($leadId));
+        return config($config_url) . 'user/login?e=' . $credential . '&r=' . urlencode(config('app.crm_lead_url') . CompactHelper::expand($leadId));
     }
 }

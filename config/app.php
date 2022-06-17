@@ -62,15 +62,11 @@ return [
 
     'new_design_crm_url' => env('NEW_DESIGN_CRM_URL', 'https://design-prod.crm.trailercentral.com/'),
 
-    'new_design_crm_login_url' => env('NEW_DESIGN_CRM_LOGIN_URL', 'https://design-prod.crm.trailercentral.com/user/login?e='),
-
     'new_design_lead_force' => env('NEW_DESIGN_LEAD_FORCE', false),
 
     'crm_url' => env('CRM_URL', 'https://crm.trailercentral.com/'),
 
     'crm_lead_url' => env('CRM_LEAD_ROUTE', '/leads/lead/'),
-
-    'crm_login_url' => env('CRM_LOGIN_URL', 'https://crm.trailercentral.com/user/login?e='),
 
     'dashboard_login_url' => env('DASHBOARD_LOGIN_URL', 'https://beta.dashboard.trailercentral.com/login'),
 
