@@ -44,13 +44,18 @@ class AuthController extends AbstractRestfulController
     }
 
     public function social(string $social, Request $request) {
-        return $this->authService->authenticateSocial($social);
+        $callback = $request->input('callback');
+        return $this->authService->authenticateSocial($social, $callback);
     }
 
     public function socialCallback(string $social, Request $request) {
+        $params = [];
+        parse_str($request->input('state'), $params);
+        $callback = $params['callback'] ?? config('auth.login_url');
+
         $token = $this->authService->authenticateSocialCallback($social);
-        $redirectUrl = config('auth.login_url');
-        return redirect("$redirectUrl?token=$token");
+
+        return redirect("$callback?token=$token");
     }
 
     public function show(int $id)

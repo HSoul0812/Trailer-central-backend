@@ -4,7 +4,7 @@ namespace App\Services\WebsiteUser;
 
 interface AuthServiceInterface
 {
-    public function authenticateSocial($social);
+    public function authenticateSocial($social, $callback);
 
     public function authenticateSocialCallback($social): string;
 

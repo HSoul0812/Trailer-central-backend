@@ -11,7 +11,12 @@ class WebsiteUserPasswordReset extends Notification
 {
     use Queueable;
 
-    public $token;
+    public string $token;
+    private static ?string $resetUrl;
+
+    public static function setResetUrl($resetUrl) {
+        self::$resetUrl = $resetUrl;
+    }
 
     public function __construct($token)
     {
@@ -42,7 +47,7 @@ class WebsiteUserPasswordReset extends Notification
 
     protected function resetUrl($notifiable)
     {
-        $resetPasswordUrl = config('auth.passwords.website_users.reset_password_url');
+        $resetPasswordUrl = self::$resetUrl ?? config('auth.reset_password_url');
         $token = $this->token;
         $email = $notifiable->getEmailForPasswordReset();
         if($resetPasswordUrl) {

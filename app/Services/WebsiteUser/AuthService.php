@@ -37,8 +37,14 @@ class AuthService implements AuthServiceInterface
         return auth('api')->fromUser($user);
     }
 
-    public function authenticateSocial($social) {
-        return Socialite::driver($social)->stateless()->redirect();
+    public function authenticateSocial($social, $callback) {
+        $socialite = Socialite::driver($social);
+        if($callback) {
+            $socialite->with([
+                'state' => "callback=$callback"
+            ]);
+        }
+        return $socialite->stateless()->redirect();
     }
 
     public function authenticate(array $credential): string {

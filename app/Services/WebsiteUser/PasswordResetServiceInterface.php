@@ -6,6 +6,6 @@ use App\Models\WebsiteUser\WebsiteUser;
 
 interface PasswordResetServiceInterface
 {
-    public function forgetPassword(string $email): string;
+    public function forgetPassword(string $email, string $callback): string;
     public function resetPassword(array $credentials): WebsiteUser;
 }

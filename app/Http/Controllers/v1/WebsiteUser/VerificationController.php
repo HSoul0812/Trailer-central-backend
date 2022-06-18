@@ -32,7 +32,7 @@ class VerificationController extends AbstractRestfulController
             $user->markEmailAsVerified();
         }
 
-        return redirect()->to('/');
+        return view('auth.verified');
     }
 
     public function resend() {
