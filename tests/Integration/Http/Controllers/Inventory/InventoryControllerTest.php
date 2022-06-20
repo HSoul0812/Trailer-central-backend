@@ -532,6 +532,7 @@ class InventoryControllerTest extends TestCase
                 'non_serialized' => true,
                 'hidden_price' => 9911.22,
                 'has_stock_images' => true,
+                'show_on_auction123' => false,
             ],
         ]];
     }

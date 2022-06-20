@@ -11,7 +11,7 @@ use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Text\Blast;
 use App\Models\CRM\Text\BlastSent;
 use App\Models\User\NewDealerUser;
-use App\Services\CRM\Text\TextServiceInterface;
+use App\Services\CRM\Text\TwilioServiceInterface;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
 use App\Repositories\CRM\Text\BlastRepositoryInterface;
@@ -24,13 +24,13 @@ use Carbon\Carbon;
 
 /**
  * Class BlastService
- * 
+ *
  * @package App\Services\CRM\Text
  */
 class BlastService implements BlastServiceInterface
 {
     /**
-     * @var App\Services\CRM\Text\TextServiceInterface
+     * @var TwilioServiceInterface
      */
     protected $textService;
 
@@ -68,11 +68,11 @@ class BlastService implements BlastServiceInterface
     /**
      * BlastService constructor.
      */
-    public function __construct(TextServiceInterface $text,
-                                StatusRepositoryInterface $leadStatus,
-                                TextRepositoryInterface $textRepo,
-                                BlastRepositoryInterface $blastRepo,
-                                TemplateRepositoryInterface $templateRepo,
+    public function __construct(TwilioServiceInterface            $text,
+                                StatusRepositoryInterface         $leadStatus,
+                                TextRepositoryInterface           $textRepo,
+                                BlastRepositoryInterface          $blastRepo,
+                                TemplateRepositoryInterface       $templateRepo,
                                 DealerLocationRepositoryInterface $dealerLocationRepo)
     {
         // Initialize Text Service
@@ -91,7 +91,7 @@ class BlastService implements BlastServiceInterface
 
     /**
      * Send Blast Text
-     * 
+     *
      * @param NewDealerUser $dealer
      * @param Blast $blast
      * @throws NoBlastSmsFromNumberException
@@ -134,7 +134,7 @@ class BlastService implements BlastServiceInterface
 
     /**
      * Get From Number
-     * 
+     *
      * @param int $dealerId
      * @param Blast $blast
      * @throw NoBlastSmsFromNumberException
@@ -160,7 +160,7 @@ class BlastService implements BlastServiceInterface
 
     /**
      * Send Text to Lead
-     * 
+     *
      * @param string $from_number sms from number
      * @param NewDealerUser $dealer
      * @param Blast $blast
@@ -206,7 +206,7 @@ class BlastService implements BlastServiceInterface
 
     /**
      * Update Lead Status
-     * 
+     *
      * @param Lead $lead
      * @return LeadStatus
      */
@@ -221,7 +221,7 @@ class BlastService implements BlastServiceInterface
 
     /**
      * Save Text to DB
-     * 
+     *
      * @param string $from_number sms from number
      * @param Lead $lead
      * @param string $textMessage filled text message
@@ -239,7 +239,7 @@ class BlastService implements BlastServiceInterface
 
     /**
      * Mark Lead as Sent
-     * 
+     *
      * @param Blast $blast
      * @param Lead $lead
      * @param string $status
@@ -264,7 +264,7 @@ class BlastService implements BlastServiceInterface
 
     /**
      * Mark Blast as Delivered
-     * 
+     *
      * @param Blast $blast
      * @return Blast
      */

@@ -58,7 +58,7 @@ class OverlaySettingsController extends RestfulController
             {
                 $overlayLogo = $request->overlay_logo;
                 $filePath = 'media/'.$overlayLogo->getClientOriginalName();
-                Storage::disk('s3')->put($filePath, file_get_contents($overlayLogo), 'public');
+                Storage::disk('s3')->put($filePath, file_get_contents($overlayLogo));
                 $logoUrl = Storage::disk('s3')->url($filePath);
             }
                         

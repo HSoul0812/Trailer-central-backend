@@ -70,7 +70,7 @@ class QuickBooksErrors extends Resource
         return [
             Text::make('Create Time', 'created_at'),
             Text::make('Export Time', 'exported_at'),
-            Text::make('Dealer Id'),
+            Text::make('Dealer Id')->sortable(),
             Text::make('Table Primary Id', 'tb_primary_id'),
             Text::make('QBO Type', 'tb_label'),
             Text::make('Action', 'action_type', function () {

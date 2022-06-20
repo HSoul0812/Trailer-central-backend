@@ -109,7 +109,7 @@ class ImportBlogPages extends Command {
         foreach($result as $img) {
             $explodedImage = explode('/', $img);
             $imageName = 'blog-files/'.$explodedImage[count($explodedImage) - 1];
-            $result = Storage::disk('s3')->put($imageName, file_get_contents($img), ['visibility' => 'public']);
+            $result = Storage::disk('s3')->put($imageName, file_get_contents($img));
             if ($result) {
                 $replace[$img] = 'https://'.env('AWS_BUCKET').'.s3.amazonaws.com/'.$imageName;
             }            
