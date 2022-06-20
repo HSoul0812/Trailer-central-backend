@@ -33,6 +33,7 @@ class Error extends Model
         'login-approval' => 'Approval Request Submitted',
         'two-factor-auth' => 'Invalid Two-Factor Credentials',
         'two-factor-failed' => 'Two-Factor Failed',
+        'account-locked' => 'Account Locked',
         'account-disabled' => 'Account Disabled',
         'temp-blocked' => 'Temporary Blocked',
         'marketplace-inaccessible' => 'Marketplace Inaccessible',
@@ -59,6 +60,7 @@ class Error extends Model
         'two-factor-auth' => 1,
         'two-factor-failed' => 1,
         'marketplace-inaccessible' => 24 * 7,
+        'account-locked' => 24 * 7,
         'account-disabled' => 24 * 7,
         'marketplace-blocked' => 24 * 7,
         'final-account-review' => 24 * 30 * 12 * 7
