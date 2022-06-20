@@ -51,7 +51,11 @@ class PasswordResetController extends AbstractRestfulController
 
     public function forgetPassword(ForgetPasswordRequestInterface $request) {
         if($request->validate()) {
-            $token = $this->passwordResetService->forgetPassword($request->all()['email']);
+            $attributes = $request->all();
+            $token = $this->passwordResetService->forgetPassword(
+                $attributes['email'],
+                $attributes['callback'] ?? null
+            );
             return $this->response->array([
                 'token' => $token
             ]);

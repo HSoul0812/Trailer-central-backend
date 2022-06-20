@@ -7,6 +7,7 @@ use App\Http\Requests\Request;
 class ForgetPasswordRequest extends Request implements ForgetPasswordRequestInterface
 {
     protected array $rules = [
-        'email' => 'required|email'
+        'email' => 'required|email',
+        'callback' => 'url',
     ];
 }

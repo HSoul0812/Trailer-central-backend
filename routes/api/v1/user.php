@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\v1\WebsiteUser\AuthController;
 use App\Http\Controllers\v1\WebsiteUser\PasswordResetController;
+use App\Http\Controllers\v1\WebsiteUser\VerificationController;
 
 $api = app(Dingo\Api\Routing\Router::class);
 
@@ -25,5 +26,17 @@ $api->version('v1', function ($api) {
         $api->get('/reset-password', [PasswordResetController::class, 'showReset'])
             ->name('password.reset');
         $api->post('/reset-password', [PasswordResetController::class, 'resetPassword']);
+
+        $api->get(
+            '/email/verify/{id}/{hash}',
+            [VerificationController::class, 'verify']
+        )->name('verification.verify');
+
+        $api->post(
+            '/email/verification-notification',
+            [VerificationController::class, 'resend']
+        )->middleware(['auth', 'throttle:6,1'])->name('verification.send');
+
+
     });
 });

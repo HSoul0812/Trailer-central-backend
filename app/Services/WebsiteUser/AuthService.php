@@ -4,6 +4,7 @@ namespace App\Services\WebsiteUser;
 
 use App\Repositories\WebsiteUser\WebsiteUserRepositoryInterface;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\UnauthorizedException;
 use JetBrains\PhpStorm\ArrayShape;
@@ -15,11 +16,11 @@ class AuthService implements AuthServiceInterface
     public function __construct(private WebsiteUserRepositoryInterface $websiteUserRepository)
     {}
 
-    public function authenticateSocialCallback($social) {
+    public function authenticateSocialCallback($social): string {
         $socialUser = Socialite::driver($social)->stateless()->user();
         $users = $this->websiteUserRepository->get(['email' => $socialUser->email]);
         if($users->count() > 0) {
-
+            $user = $users->first();
         } else {
             if($social === 'google') {
                 $attributes = $this->extractGoogleUserAttributes($socialUser);
@@ -27,14 +28,23 @@ class AuthService implements AuthServiceInterface
             }
 
             if(isset($user)) {
+                $user->email_verified_at = Carbon::now();
                 $user->registration_source = $social;
                 $user->save();
             }
         }
+
+        return auth('api')->fromUser($user);
     }
 
-    public function authenticateSocial($social) {
-        return Socialite::driver($social)->stateless()->redirect();
+    public function authenticateSocial($social, $callback) {
+        $socialite = Socialite::driver($social);
+        if($callback) {
+            $socialite->with([
+                'state' => "callback=$callback"
+            ]);
+        }
+        return $socialite->stateless()->redirect();
     }
 
     public function authenticate(array $credential): string {
@@ -56,8 +66,8 @@ class AuthService implements AuthServiceInterface
     protected function extractGoogleUserAttributes($googleUser): array {
         return [
             'email' => $googleUser->email,
-            'first_name' => $googleUser->user->given_name,
-            'last_name' => $googleUser->user->family_name
+            'first_name' => $googleUser->user["given_name"],
+            'last_name' => $googleUser->user["family_name"]
         ];
     }
 }

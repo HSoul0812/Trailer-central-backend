@@ -3,6 +3,7 @@
 namespace App\Services\WebsiteUser;
 
 use App\Models\WebsiteUser\WebsiteUser;
+use App\Notifications\WebsiteUserPasswordReset;
 use App\Repositories\WebsiteUser\WebsiteUserRepositoryInterface;
 use Illuminate\Auth\Passwords\DatabaseTokenRepository;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
@@ -33,7 +34,7 @@ class PasswordResetService implements PasswordResetServiceInterface
         );
     }
 
-    public function forgetPassword(string $email): string {
+    public function forgetPassword(string $email, ?string $callback): string {
 
         $users = $this->userRepository->get(['email' => $email]);
         if($users->isEmpty()) {
@@ -45,7 +46,9 @@ class PasswordResetService implements PasswordResetServiceInterface
         }
 
         $token = $this->tokenRepository->create($user);
+        WebsiteUserPasswordReset::setResetUrl($callback);
         $user->sendPasswordResetNotification($token);
+
         return $token;
     }
 
