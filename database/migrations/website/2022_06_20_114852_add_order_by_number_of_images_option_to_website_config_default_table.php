@@ -17,7 +17,8 @@ class AddOrderByNumberOfImagesOptionToWebsiteConfigDefaultTable extends Migratio
         '7' => 'Length (Desc)',
         '8' => 'Stock (Asc)',
         '9' => 'Stock (Desc)',
-        '10' => 'Photo counter (Desc)'
+        '10' => 'Photo counter (Asc)',
+        '11' => 'Photo counter (Desc)'
     ];
 
     /**
