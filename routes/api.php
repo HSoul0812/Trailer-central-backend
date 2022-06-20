@@ -327,6 +327,12 @@ $api->version('v1', function ($route) {
     $route->put('website/{websiteId}/showroom', 'App\Http\Controllers\v1\Website\Config\ShowroomController@update')->where('websiteId', '[0-9]+');
     $route->post('website/{websiteId}/showroom', 'App\Http\Controllers\v1\Website\Config\ShowroomController@create')->where('websiteId', '[0-9]+');
 
+    /**
+     * Manufacturers
+     */
+    $route->get('manufacturers', 'App\Http\Controllers\v1\Showroom\ShowroomBulkUpdateController@index');
+    $route->post('manufacturers/bulk_year', 'App\Http\Controllers\v1\Showroom\ShowroomBulkUpdateController@bulkUpdateYear');
+    $route->post('manufacturers/bulk_visibility', 'App\Http\Controllers\v1\Showroom\ShowroomBulkUpdateController@bulkUpdateVisibility');
 
     /**
      * Log
@@ -461,6 +467,8 @@ $api->version('v1', function ($route) {
 
     // Stop Text!
     $route->post('leads/texts/stop', 'App\Http\Controllers\v1\CRM\Text\StopController@index');
+    // Reply
+    $route->put('leads/texts/reply', 'App\Http\Controllers\v1\CRM\Text\TextController@reply')->middleware(['accesstoken.validate', 'replytext.validate']);;
 
     /**
      * Facebook Webhooks
@@ -535,6 +543,7 @@ $api->version('v1', function ($route) {
     |
     */
 
+    $route->post('user/passwordless', 'App\Http\Controllers\v1\User\SignInController@passwordless');
     $route->post('user/password-reset/start', 'App\Http\Controllers\v1\User\SignInController@initPasswordReset');
     $route->post('user/password-reset/finish', 'App\Http\Controllers\v1\User\SignInController@finishPasswordReset');
     $route->post('user/login', 'App\Http\Controllers\v1\User\SignInController@signIn');
@@ -617,6 +626,7 @@ $api->version('v1', function ($route) {
         $route->put('leads', 'App\Http\Controllers\v1\CRM\Leads\LeadController@create');
         $route->post('leads/find-matches', 'App\Http\Controllers\v1\CRM\Leads\LeadController@getMatches');
         $route->post('leads/{id}/merge', 'App\Http\Controllers\v1\CRM\Leads\LeadController@mergeLeads');
+        $route->get('leads/output', 'App\Http\Controllers\v1\CRM\Leads\LeadController@output');
 
         /*
         |--------------------------------------------------------------------------
@@ -1336,6 +1346,7 @@ $api->version('v1', function ($route) {
     |
     */
     $route->post('files/local', 'App\Http\Controllers\v1\File\FileController@uploadLocal');
+    $route->post('files/local/twilio', 'App\Http\Controllers\v1\File\FileController@twilioUploadLocal');
     $route->post('images/local', 'App\Http\Controllers\v1\File\ImageController@uploadLocal');
 
     /*
@@ -1384,7 +1395,6 @@ $api->version('v1', function ($route) {
         });
     });
 
-
     /*
     |--------------------------------------------------------------------------
     | Webhooks
@@ -1393,6 +1403,37 @@ $api->version('v1', function ($route) {
     |
     |
     */
+
+    $route->post(
+        'stripe/webhook',
+        'App\Http\Controllers\v1\Webhook\SubscriptionController@handleWebhook'
+    );
+
+    $route->group([
+        'prefix' => 'subscriptions'
+    ], function ($route) {
+        $route->get(
+            'customer',
+            'App\Http\Controllers\v1\Subscription\SubscriptionController@getCustomer'
+        );
+
+        $route->get(
+            'plans',
+            'App\Http\Controllers\v1\Subscription\SubscriptionController@getPlans'
+        );
+
+        $route->post(
+            'subscribe',
+            'App\Http\Controllers\v1\Subscription\SubscriptionController@subscribe'
+        );
+
+        $route->post(
+            'update-card',
+            'App\Http\Controllers\v1\Subscription\SubscriptionController@updateCard'
+        );
+    });
+
+
     $route->group([
         'prefix' => 'webhook'
     ], function ($route) {

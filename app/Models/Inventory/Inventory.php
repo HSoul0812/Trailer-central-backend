@@ -131,6 +131,7 @@ use Laravel\Scout\Searchable;
  * @property bool $is_archived
  * @property \DateTimeInterface $created_at
  * @property \DateTimeInterface $updated_at
+ * @property bool $show_on_auction123
  *
  * @property string $category_label
  * @property string $status_label
@@ -336,7 +337,8 @@ class Inventory extends Model
         'changed_fields_in_dashboard',
         'is_archived',
         'times_viewed',
-        'trailerworld_store_id'
+        'trailerworld_store_id',
+        'show_on_auction123',
     ];
 
     protected $casts = [

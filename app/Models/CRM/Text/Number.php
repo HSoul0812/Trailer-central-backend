@@ -2,14 +2,22 @@
 
 namespace App\Models\CRM\Text;
 
-use App\Models\CRM\Dealer\DealerLocation;
 use App\Models\Traits\TableAware;
+use App\Models\User\DealerLocation;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Class Text Number
  *
  * @package App\Models\CRM\Text
+ *
+ * @property int $id
+ * @property string $dealer_number
+ * @property string $customer_number
+ * @property string $twilio_number
+ * @property string $customer_name
+ * @property int $expiration_time
  */
 class Number extends Model
 {
@@ -42,9 +50,9 @@ class Number extends Model
     public $timestamps = false;
 
     /**
-     * @return type
+     * @return BelongsTo
      */
-    public function dealerLocation()
+    public function dealerLocation(): BelongsTo
     {
         return $this->belongsTo(DealerLocation::class, 'dealer_number', 'sms_phone');
     }

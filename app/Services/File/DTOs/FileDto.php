@@ -33,6 +33,7 @@ class FileDto
      * @param string $path
      * @param string|null $hash
      * @param string|null $mimeType
+     * @param string|null $url
      */
     public function __construct(string $path, ?string $hash = null, ?string $mimeType = null, ?string $url = null)
     {
