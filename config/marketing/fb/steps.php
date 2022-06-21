@@ -38,6 +38,7 @@ return [
         'login-approval',
         'two-factor-auth',
         'two-factor-failed',
+        'account-locked',
         'account-disabled',
         'temp-blocked',
         'marketplace-inaccessible',
