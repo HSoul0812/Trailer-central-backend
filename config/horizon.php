@@ -255,7 +255,7 @@ return [
             ],
             'supervisor-5' => [
                 'connection' => 'redis',
-                'queue' => ['reports', 'emailbuilder', 'scrapereplies'],
+                'queue' => ['reports', 'emailbuilder'],
                 'balance' => 'auto',
                 'minProcesses' => 3,
                 'maxProcesses' => 30,
@@ -264,7 +264,7 @@ return [
             ],
             'supervisor-6' => [
                 'connection' => 'redis',
-                'queue' => ['parts', 'parts-export-new'],
+                'queue' => ['parts', 'parts-export-new', 'scrapereplies'],
                 'balance' => 'auto',
                 'minProcesses' => 5,
                 'maxProcesses' => 10,
