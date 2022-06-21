@@ -608,6 +608,17 @@ $api->version('v1', function ($route) {
     */
     $route->get('user/interactions/tasks/sort-fields', 'App\Http\Controllers\v1\CRM\Interactions\TasksController@sortFields');
 
+    /*
+    |--------------------------------------------------------------------------
+    | Dealers
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+    $route->get('users', 'App\Http\Controllers\v1\User\UserController@index');
+    $route->post('users', 'App\Http\Controllers\v1\User\UserController@create');
+
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
         /*
         |--------------------------------------------------------------------------

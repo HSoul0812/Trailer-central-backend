@@ -27,7 +27,7 @@ class UserRepository implements UserRepositoryInterface {
     }
 
     public function create($params) {
-        throw new NotImplementedException;
+        return User::create($params);
     }
 
     public function delete($params) {
