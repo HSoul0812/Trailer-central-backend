@@ -229,7 +229,9 @@ return [
         ],
 
         'showroom-imports' => [
+            'driver' => 'daily',
             'path' => storage_path('logs/showroom-imports.log'),
+            'days' => 3,
             'permission' => 0664,
         ],
         'blog' => [
