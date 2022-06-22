@@ -52,9 +52,9 @@ class CustomerRepository implements CustomerRepositoryInterface
         $customer->dealer_id = $params['dealer_id'];
         
         $displayName = Arr::get($params, 'display_name');
-        if ($displayName !== null) {
+        if (!empty($displayName)) {
             if ($this->displayNameExists($customer->dealer_id, $displayName)) {
-                throw new Exception("The display name has already been taken.");
+                throw new Exception('The display name has already been taken.');
             }
         }
         
@@ -114,9 +114,9 @@ class CustomerRepository implements CustomerRepositoryInterface
         $customer->dealer_id = $params['dealer_id'];
         
         $displayName = Arr::get($params, 'display_name');
-        if ($displayName !== null) {
+        if (!empty($displayName)) {
             if ($this->displayNameExists($customer->dealer_id, $displayName, $customer->id)) {
-                throw new Exception("The display name has already been taken.");
+                throw new Exception('The display name has already been taken.');
             }
         }
         
