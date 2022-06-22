@@ -73,6 +73,7 @@ class AuthService implements AuthServiceInterface
         ];
     }
 
+    #[ArrayShape(['email' => "mixed", 'first_name' => "mixed", 'last_name' => "mixed"])]
     protected function extractFacebookUserAttributes($facebookUser): array {
         $names = explode(' ', $facebookUser->name);
         $firstName = $names[0];
