@@ -25,8 +25,10 @@ class AuthService implements AuthServiceInterface
             if($social === 'google') {
                 $attributes = $this->extractGoogleUserAttributes($socialUser);
                 $user = $this->websiteUserRepository->create($attributes);
+            } else if($social === 'facebook') {
+                $attributes = $this->extractFacebookUserAttributes($socialUser);
+                $user = $this->websiteUserRepository->create($attributes);
             }
-
             if(isset($user)) {
                 $user->email_verified_at = Carbon::now();
                 $user->registration_source = $social;
@@ -68,6 +70,18 @@ class AuthService implements AuthServiceInterface
             'email' => $googleUser->email,
             'first_name' => $googleUser->user["given_name"],
             'last_name' => $googleUser->user["family_name"]
+        ];
+    }
+
+    protected function extractFacebookUserAttributes($facebookUser): array {
+        $names = explode(' ', $facebookUser->name);
+        $firstName = $names[0];
+        array_shift($names);
+        $lastName = implode(" ", $names);
+        return [
+            'email' => $facebookUser->email,
+            'first_name' => $firstName,
+            'last_name' => $lastName
         ];
     }
 }

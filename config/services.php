@@ -49,12 +49,13 @@ return [
         'map' => [
             'key' => env('GOOGLE_MAP_API_KEY', '')
         ],
-        'auth' => [
-            'client_id' => env('GOOGLE_AUTH_CLIENT_ID', ''),
-            'client_secret' => env('GOOGLE_AUTH_CLIENT_SECRET', '')
-        ],
         'client_id' => env('GOOGLE_AUTH_CLIENT_ID', ''),
         'client_secret' => env('GOOGLE_AUTH_CLIENT_SECRET', ''),
         'redirect' => '/api/user/auth/google/callback'
-    ]
+    ],
+    'facebook' => [
+        'client_id' => env('FACEBOOK_AUTH_CLIENT_ID', ''),
+        'client_secret' => env('FACEBOOK_AUTH_CLIENT_SECRET', ''),
+        'redirect' => '/api/user/auth/facebook/callback'
+    ],
 ];
