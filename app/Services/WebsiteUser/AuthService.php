@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\UnauthorizedException;
 use JetBrains\PhpStorm\ArrayShape;
 use Laravel\Socialite\Facades\Socialite;
-use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthService implements AuthServiceInterface
 {
