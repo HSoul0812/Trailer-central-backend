@@ -202,7 +202,7 @@ class TextService implements TextServiceInterface
         $fileDtos = new Collection();
         $expirationTime = time() + self::EXPIRATION_TIME;
 
-        if ($from === $activeNumber->customer_number) {
+        if ($from !== $activeNumber->customer_number) {
             $sendToDealer = false;
             $toNumber = $activeNumber->customer_number;
         }
