@@ -3,25 +3,26 @@
 namespace App\Http\Controllers\v1\Dms\Customer;
 
 use App\Http\Controllers\RestfulControllerV2;
+use App\Http\Requests\Dms\CreateCustomerRequest;
 use App\Http\Requests\Dms\DeleteCustomerRequest;
-use App\Models\CRM\User\Customer;
+use App\Http\Requests\Dms\GetCustomersRequest;
+use App\Http\Requests\Dms\UpdateCustomerRequest;
 use App\Repositories\CRM\Customer\CustomerRepositoryInterface;
+use App\Repositories\CRM\Leads\LeadRepositoryInterface;
+use App\Transformers\Dms\Customer\CustomerDetailTransformer;
+use App\Transformers\Dms\CustomerTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use Dingo\Api\Exception\DeleteResourceFailedException;
 use Dingo\Api\Exception\ResourceException;
 use Dingo\Api\Exception\StoreResourceFailedException;
 use Dingo\Api\Exception\UpdateResourceFailedException;
 use Dingo\Api\Http\Request;
-use App\Repositories\CRM\Leads\LeadRepositoryInterface;
-use App\Http\Requests\Dms\GetCustomersRequest;
-use App\Http\Requests\Dms\CreateCustomerRequest;
-use App\Transformers\Dms\CustomerTransformer;
-use App\Transformers\Dms\Customer\CustomerDetailTransformer;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use League\Fractal\Manager;
 use League\Fractal\Pagination\IlluminatePaginatorAdapter;
 use League\Fractal\Resource\Collection;
-use Illuminate\Support\Facades\Auth;
 
 class CustomerController extends RestfulControllerV2
 {
@@ -96,8 +97,14 @@ class CustomerController extends RestfulControllerV2
         } catch (\Exception $e) {
             Log::error($e->getMessage());
             Log::error($e->getTraceAsString());
+            
+            $message = $e->getMessage();
+            
+            if ($e instanceof ResourceException) {
+                $message = collect(Arr::flatten($e->getErrors()->messages()))->implode(', ');
+            }
 
-            throw new StoreResourceFailedException('Unable to create customer: ' . $e->getMessage());
+            throw new StoreResourceFailedException("Unable to create customer: $message");
         }
     }
 
@@ -133,14 +140,24 @@ class CustomerController extends RestfulControllerV2
         $customerData['id'] = $id;
 
         try {
-            $customer = $this->customerRepository->update($customerData);
+            $request = new UpdateCustomerRequest($customerData);
+            
+            if ($request->validate()) {
+                $customer = $this->customerRepository->update($customerData);
 
-            return $this->response->item($customer, $this->transformer);
+                return $this->response->item($customer, $this->transformer);
+            }
         } catch (\Exception $e) {
             Log::error($e->getMessage());
             Log::error($e->getTraceAsString());
 
-            throw new UpdateResourceFailedException('Unable to update customer: ' . $e->getMessage());
+            $message = $e->getMessage();
+            
+            if ($e instanceof ResourceException) {
+                $message = collect(Arr::flatten($e->getErrors()->messages()))->implode(', ');
+            }
+
+            throw new UpdateResourceFailedException("Unable to update customer: $message");
         }
     }
 
