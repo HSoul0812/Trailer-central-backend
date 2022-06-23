@@ -35,7 +35,7 @@ $api->version('v1', function ($api) {
         $api->post(
             '/email/verification-notification',
             [VerificationController::class, 'resend']
-        )->middleware(['auth', 'throttle:6,1'])->name('verification.send');
+        )->middleware(['auth:api', 'throttle:6,1'])->name('verification.send');
 
 
     });
