@@ -22,8 +22,6 @@ use App\Repositories\SyncProcessRepository;
 use App\Repositories\SyncProcessRepositoryInterface;
 use App\Repositories\SysConfig\SysConfigRepository;
 use App\Repositories\SysConfig\SysConfigRepositoryInterface;
-use App\Repositories\WebsiteUser\WebsiteUserRepository;
-use App\Repositories\WebsiteUser\WebsiteUserRepositoryInterface;
 use App\Services\Integrations\TrailerCentral\Console\Inventory\LogService as InventoryLogService;
 use App\Services\Integrations\TrailerCentral\Console\Inventory\LogServiceInterface as InventoryLogServiceInterface;
 use App\Services\Integrations\TrailerCentral\Console\Inventory\SyncService as InventorySyncService;
@@ -43,8 +41,6 @@ use App\Services\SubscribeEmailSearch\SubscribeEmailSearchServiceInterface;
 use App\Services\MapSearch\GoogleMapSearchService;
 use App\Services\SysConfig\SysConfigService;
 use App\Services\SysConfig\SysConfigServiceInterface;
-use App\Services\WebsiteUser\PasswordResetService as WebsitePasswordResetService;
-use App\Services\WebsiteUser\PasswordResetServiceInterface as WebsitePasswordResetServiceInterface;
 use Illuminate\Support\ServiceProvider;
 
 class TrailerCentralIntegrationServiceProvider extends ServiceProvider
@@ -76,9 +72,6 @@ class TrailerCentralIntegrationServiceProvider extends ServiceProvider
         $this->app->bind(SyncProcessRepositoryInterface::class, SyncProcessRepository::class);
         $this->app->bind(GeolocationRepositoryInterface::class, GeolocationRepository::class);
         $this->app->bind(SysConfigRepositoryInterface::class, SysConfigRepository::class);
-
-        $this->app->bind(WebsiteUserRepositoryInterface::class, WebsiteUserRepository::class);
-        $this->app->bind(WebsitePasswordResetServiceInterface::class, WebsitePasswordResetService::class);
 
         $this->app->bind(IpInfoServiceInterface::class, IpInfoService::class);
 

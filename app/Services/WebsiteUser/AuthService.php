@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\UnauthorizedException;
 use JetBrains\PhpStorm\ArrayShape;
 use Laravel\Socialite\Facades\Socialite;
-use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthService implements AuthServiceInterface
 {
@@ -25,8 +24,10 @@ class AuthService implements AuthServiceInterface
             if($social === 'google') {
                 $attributes = $this->extractGoogleUserAttributes($socialUser);
                 $user = $this->websiteUserRepository->create($attributes);
+            } else if($social === 'facebook') {
+                $attributes = $this->extractFacebookUserAttributes($socialUser);
+                $user = $this->websiteUserRepository->create($attributes);
             }
-
             if(isset($user)) {
                 $user->email_verified_at = Carbon::now();
                 $user->registration_source = $social;
@@ -68,6 +69,19 @@ class AuthService implements AuthServiceInterface
             'email' => $googleUser->email,
             'first_name' => $googleUser->user["given_name"],
             'last_name' => $googleUser->user["family_name"]
+        ];
+    }
+
+    #[ArrayShape(['email' => "mixed", 'first_name' => "mixed", 'last_name' => "mixed"])]
+    protected function extractFacebookUserAttributes($facebookUser): array {
+        $names = explode(' ', $facebookUser->name);
+        $firstName = $names[0];
+        array_shift($names);
+        $lastName = implode(" ", $names);
+        return [
+            'email' => $facebookUser->email,
+            'first_name' => $firstName,
+            'last_name' => $lastName
         ];
     }
 }
