@@ -20,6 +20,7 @@ class WebsiteUserTransformer extends TransformerAbstract
             'email' => $user->email,
             'phone_number' => $user->phone_number,
             'mobile_number' => $user->mobile_number,
+            'email_verified_at' => $user->email_verified_at,
             'registration_source' => $user->registration_source,
             'created_at' => $user->created_at,
             'updated_at' => $user->updated_at

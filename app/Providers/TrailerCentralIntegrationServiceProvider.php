@@ -54,7 +54,6 @@ class TrailerCentralIntegrationServiceProvider extends ServiceProvider
         $this->app->bind(InventorySyncServiceInterface::class, InventorySyncService::class);
         $this->app->bind(InventoryLogRepositoryInterface::class, InventoryLogRepository::class);
         $this->app->bind(InventoryLogServiceInterface::class, InventoryLogService::class);
-        $this->app->bind(InventoryServiceInterface::class, InventoryService::class);
         $this->app->bind(LeadServiceInterface::class, LeadService::class);
         $this->app->bind(SubscribeEmailSearchServiceInterface::class, SubscribeEmailSearchService::class);
 

@@ -27,6 +27,11 @@ $api->version('v1', function ($api) {
             ->name('password.reset');
         $api->post('/reset-password', [PasswordResetController::class, 'resetPassword']);
 
+        /*
+        |--------------------------------------------------------------------------
+        | Email verification
+        |--------------------------------------------------------------------------
+        */
         $api->get(
             '/email/verify/{id}/{hash}',
             [VerificationController::class, 'verify']
