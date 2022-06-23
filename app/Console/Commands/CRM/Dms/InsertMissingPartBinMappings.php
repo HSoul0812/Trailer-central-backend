@@ -56,7 +56,7 @@ class InsertMissingPartBinMappings extends Command
         
         $this->info("Command runtime: $runTime seconds.");
         $this->info("Peak memory usage: " . memory_get_peak_usage(true) / 1024 / 1024 . "MB.");
-        $this->info("Total Insert: $totalInsert records!");
+        $this->info("Total insert: $totalInsert records!");
 
         return 0;
     }
