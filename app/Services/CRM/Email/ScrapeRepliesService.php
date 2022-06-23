@@ -170,7 +170,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                     // we set expiration time to the next one hour to be safe
                     Cache::put($job->cacheKey(), [
                         'created_at' => now(),
-                    ], now()->addHours(1));
+                    ], now()->addSeconds(7200));
                 }
             } catch(\Exception $e) {
                 $this->log->error('Dealer #' . $dealer->id . ' Sales Person #' .
