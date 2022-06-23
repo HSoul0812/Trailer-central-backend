@@ -11,6 +11,7 @@ use App\Nova\Actions\Dealer\DeactivateECommerce;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Fields\DateTime;
 use App\Nova\Resource;
 
 class FBMarketplaceAccounts extends Resource
@@ -22,14 +23,14 @@ class FBMarketplaceAccounts extends Resource
      *
      * @var string
      */
-    public static $model = 'App\Models\User\User';
+    public static $model = 'App\Models\CRM\Dealer\DealerFBMOverview';
 
     /**
      * The single value that should be used to represent the resource when being displayed.
      *
      * @var string
      */
-    public static $title = 'name';
+    public static $title = 'dealer_name';
 
     /**
      * The columns that should be searched.
@@ -37,7 +38,7 @@ class FBMarketplaceAccounts extends Resource
      * @var array
      */
     public static $search = [
-        'dealer_id', 'name', 'email',
+        'id', 'dealer_name', 'fb_username', 'units_posted'
     ];
 
     public static function label()
@@ -45,7 +46,6 @@ class FBMarketplaceAccounts extends Resource
         return 'FB Marketplace Accounts';
     }
 
-    public static $with = ['crmUser'];
 
 
     /**
@@ -57,21 +57,28 @@ class FBMarketplaceAccounts extends Resource
     public function fields(Request $request): array
     {
         return [
-            Text::make('Dealer ID')->sortable(),
+            Text::make('Dealer ID', 'id')->sortable(),
 
-            Text::make('Name')
+            Text::make('Dealer Name')
                 ->sortable()
                 ->rules('required', 'max:255'),
 
-            Text::make('Email')
-                ->sortable()
-                ->rules('required', 'email', 'max:254'),
+            Text::make('FB Username')
+            ->sortable(),
 
-            Boolean::make('CRM', 'isCrmActive')->hideWhenCreating()->hideWhenUpdating(),
-            
-            Boolean::make('ECommerce', 'IsEcommerceActive')->hideWhenCreating()->hideWhenUpdating(),
+            Text::make('Location')
+            ->sortable(),
 
-            Boolean::make('User Accounts', 'isUserAccountsActive')->hideWhenCreating()->hideWhenUpdating(),
+            DateTime::make('Last Run', 'last_run_ts')
+            ->sortable(),
+
+            Text::make('Status', 'last_run_status')
+            ->sortable(),
+
+            Text::make('Units Posted'),
+
+            Text::make('Last Error')
+            ->sortable()
 
         ];
     }
@@ -118,8 +125,6 @@ class FBMarketplaceAccounts extends Resource
      */
     public function actions(Request $request): array
     {
-        return [
-
-        ];
+        return [];
     }
 }
