@@ -71,7 +71,7 @@ class FBMarketplaceAccounts extends Resource
             DateTime::make('Last Run', 'last_run_ts')
                 ->sortable(),
 
-            Text::make('Status', 'last_run_status')
+            Boolean::make('Status', 'last_run_status')
                 ->sortable(),
 
             Text::make('Units Posted', 'units_posted'),

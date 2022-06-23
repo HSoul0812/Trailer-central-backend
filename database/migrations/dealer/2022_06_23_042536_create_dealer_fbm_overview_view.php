@@ -43,8 +43,8 @@ class CreateDealerFbmOverviewView extends Migration
             d.name AS name,
             IFNULL(fbm.fb_username, 'n/a') AS fb_username,
             IF(ISNULL(fbm.dealer_location_id),'ALL',(SELECT name FROM dealer_location WHERE dealer_location_id = fbm.dealer_location_id )) as location,
-            IFNULL((SELECT MAX(date_posted) FROM fbapp_inventory WHERE dealer_id=d.dealer_id), 'never') AS last_run_ts,
-            'n/a' AS last_run_status,
+            (SELECT MAX(date_posted) FROM fbapp_inventory WHERE dealer_id=d.dealer_id) AS last_run_ts,
+            true AS last_run_status,
             IFNULL(GROUP_CONCAT(i.stock SEPARATOR '\n'), 'none') AS units_posted,
             IFNULL((SELECT CONCAT(`action`, ' - ', step, ' - ', error_message) FROM fbapp_errors WHERE marketplace_id=fbm.id ORDER BY id DESC LIMIT 1), 'no error') AS last_error
 
