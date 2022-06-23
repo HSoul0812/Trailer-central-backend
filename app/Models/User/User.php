@@ -169,7 +169,8 @@ class User extends Model implements Authenticatable, PermissionsInterface
         'auto_import_hide',
         'import_config',
         'auto_msrp',
-        'auto_msrp_percent'
+        'auto_msrp_percent',
+        'from'
     ];
 
     protected $casts = [
