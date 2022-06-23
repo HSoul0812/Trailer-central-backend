@@ -28,12 +28,13 @@ class AuthController extends AbstractRestfulController
         if($request->validate()) {
             $token = $this->authService->authenticate($request->all());
             $user = auth('api')->user();
-            $transformer = new WebsiteUserTransformer();
+
             return $this->response->array([
                 'token' => $token,
-                'user' => $transformer->transform($user)
+                'user' => $this->transformer->transform($user)
             ]);
         }
+
         return $this->response->errorBadRequest();
     }
 
