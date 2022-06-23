@@ -13,10 +13,12 @@ class AddFromToDealerTable extends Migration
      */
     public function up()
     {
-        Schema::table('dealer', function (Blueprint $table) {
-            $table->enum('from', ['trailertrader', 'trailercentral'])
-                ->default('trailercentral');
-        });
+        if (!Schema::hasColumn('dealer', 'from')) {
+            Schema::table('dealer', function (Blueprint $table) {
+                $table->enum('from', ['trailertrader', 'trailercentral'])
+                    ->default('trailercentral');
+            });
+        }
     }
 
     /**

@@ -8,6 +8,7 @@ class CreateUserRequest extends Request
     protected $rules = [
         'name' => 'required',
         'email' => 'required|email',
-        'password' => 'required|string|min:8',
+        'password' => 'required|alpha_num|min:12',
+        'from' => 'in:trailercentral,trailertrader'
     ];
 }
