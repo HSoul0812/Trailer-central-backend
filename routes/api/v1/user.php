@@ -27,16 +27,19 @@ $api->version('v1', function ($api) {
             ->name('password.reset');
         $api->post('/reset-password', [PasswordResetController::class, 'resetPassword']);
 
+        /*
+        |--------------------------------------------------------------------------
+        | Email verification
+        |--------------------------------------------------------------------------
+        */
         $api->get(
             '/email/verify/{id}/{hash}',
             [VerificationController::class, 'verify']
         )->name('verification.verify');
 
-        $api->post(
+        $api->get(
             '/email/verification-notification',
             [VerificationController::class, 'resend']
-        )->middleware(['auth', 'throttle:6,1'])->name('verification.send');
-
-
+        )->middleware(['auth:api', 'throttle:6,1'])->name('verification.send');
     });
 });
