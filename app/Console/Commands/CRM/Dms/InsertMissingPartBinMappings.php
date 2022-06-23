@@ -2,14 +2,9 @@
 
 namespace App\Console\Commands\CRM\Dms;
 
-use App\Models\Parts\Bin;
-use App\Models\Parts\BinQuantity;
-use App\Models\Parts\Part;
-use App\Models\User\User;
+use App\Domains\Parts\Actions\InsertMissingPartBinMappingsAction;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 
 class InsertMissingPartBinMappings extends Command
 {
@@ -34,61 +29,34 @@ class InsertMissingPartBinMappings extends Command
      *
      * @return mixed
      */
-    public function handle()
+    public function handle(InsertMissingPartBinMappingsAction $insertMissingPartBinMappings)
     {
+        $start = now();
+        
+        $totalInsert = 0;
+        
         try {
-            $dealer = User::findOrFail($this->argument('dealerId'));
+            $insertMissingPartBinMappings
+                ->withOnFoundMappingToInsert(function (int $partId, int $binId) use (&$totalInsert) {
+                    // Only print out the debug line if the user runs
+                    // this command with -v or --verbose option
+                    if ($this->option('verbose')) {
+                        $this->info("Insert: part_id = $partId, bin_id = $binId");
+                    }
+                    
+                    $totalInsert++;
+                })
+                ->execute($this->argument('dealerId'));
         } catch (ModelNotFoundException $exception) {
             $this->error($exception->getMessage());
             return 1;
         }
-
-        $binIds = Bin::query()
-            ->where('dealer_id', $dealer->dealer_id)
-            ->pluck('id');
         
-        DB::beginTransaction();
-
-        DB::table(Part::getTableName())
-            ->select(['id', 'dealer_id'])
-            ->where('dealer_id', $dealer->dealer_id)
-            ->chunkById(self::CHUNK_SIZE, function (Collection $parts) use ($binIds) {
-                $inserts = collect([]);
-                
-                $partIds = $parts->pluck('id');
-                
-                $partBins = DB::table(BinQuantity::getTableName())
-                    ->whereIn('part_id', $partIds)
-                    ->get(['id', 'part_id', 'bin_id'])
-                    ->groupBy('part_id');
-                
-                /**
-                 * @var int $partId
-                 * @var Collection $bins
-                 */
-                foreach ($partBins as $partId => $bins) {
-                    $partBinIds = $bins->pluck('bin_id');
-                    
-                    $diffIds = $binIds->diff($partBinIds);
-                    
-                    $insertPayloads = $diffIds->map(function (int $binId) use ($partId) {
-                        $this->info("Insert: part_id = $partId, bin_id = $binId");
-                        
-                        return [
-                            'part_id' => $partId, 
-                            'bin_id' => $binId, 
-                            'created_at' => now(), 
-                            'updated_at' => now()
-                        ];
-                    })->values();
-                    
-                    $inserts = $inserts->merge($insertPayloads);
-                }
-                
-                DB::table(BinQuantity::getTableName())->insert($inserts->toArray());
-            });
+        $runTime = now()->diffInRealMilliseconds($start) / 1000;
         
-        DB::commit();
+        $this->info("Command runtime: $runTime seconds.");
+        $this->info("Peak memory usage: " . memory_get_peak_usage(true) / 1024 / 1024 . "MB.");
+        $this->info("Total Insert: $totalInsert records!");
 
         return 0;
     }
