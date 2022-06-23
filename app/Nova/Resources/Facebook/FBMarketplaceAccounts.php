@@ -30,7 +30,7 @@ class FBMarketplaceAccounts extends Resource
      *
      * @var string
      */
-    public static $title = 'dealer_name';
+    public static $title = 'name';
 
     /**
      * The columns that should be searched.
@@ -38,7 +38,7 @@ class FBMarketplaceAccounts extends Resource
      * @var array
      */
     public static $search = [
-        'id', 'dealer_name', 'fb_username', 'units_posted'
+        'id', 'name', 'fb_username', 'units_posted'
     ];
 
     public static function label()
@@ -59,26 +59,25 @@ class FBMarketplaceAccounts extends Resource
         return [
             Text::make('Dealer ID', 'id')->sortable(),
 
-            Text::make('Dealer Name')
-                ->sortable()
-                ->rules('required', 'max:255'),
+            Text::make('Dealer Name', 'name')
+                ->sortable(),
 
             Text::make('FB Username')
-            ->sortable(),
+                ->sortable(),
 
             Text::make('Location')
-            ->sortable(),
+                ->sortable(),
 
             DateTime::make('Last Run', 'last_run_ts')
-            ->sortable(),
+                ->sortable(),
 
             Text::make('Status', 'last_run_status')
-            ->sortable(),
+                ->sortable(),
 
-            Text::make('Units Posted'),
+            Text::make('Units Posted', 'units_posted'),
 
             Text::make('Last Error')
-            ->sortable()
+                ->sortable()
 
         ];
     }
