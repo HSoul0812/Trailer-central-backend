@@ -147,6 +147,9 @@ return [
             'password' => env('REDIS_PASSWORD_PROXY', null),
             'port' => env('REDIS_PORT_PROXY', '6379'),
             'database' => env('DEALER_PROXY_REDIS_DB', '0'),
+            'options' => [
+                'prefix' => ''
+            ]
         ],
 
         'dealer-tunnels' => [
