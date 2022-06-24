@@ -42,6 +42,12 @@ class PrintQuickbooksDuplicatedDisplayNames extends Command
         return 0;
     }
 
+    /**
+     * Print the stats to stdout
+     * 
+     * @param Collection $stats
+     * @return void
+     */
     private function printStats(Collection $stats): void
     {
         $this->info("Found {$stats->count()} duplicated display names!");
@@ -51,22 +57,22 @@ class PrintQuickbooksDuplicatedDisplayNames extends Command
             return;
         }
 
-        foreach ($stats as $index => $stat) {
+        $stats->each(function (Collection $stat, int $index) {
             $segments = collect([]);
 
             $no = $index + 1;
 
             $segments->push("$no. {$stat['display_name']}: {$stat['duplicated_count']}");
 
-            foreach (['customers', 'employees', 'vendors'] as $modelType) {
+            collect(['customers', 'employees', 'vendors'])->each(function (string $modelType) use ($stat, &$segments) {
                 $typeTitle = ucfirst($modelType);
 
                 if ($stat[$modelType]->isNotEmpty()) {
                     $segments->push("$typeTitle IDs: " . $stat[$modelType]->implode(', '));
                 }
-            }
+            });
 
             $this->info($segments->implode(' | '));
-        }
+        });
     }
 }
