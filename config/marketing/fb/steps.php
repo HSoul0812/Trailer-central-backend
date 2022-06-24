@@ -41,6 +41,7 @@ return [
         'account-locked',
         'account-disabled',
         'temp-blocked',
+        'page-unavailable',
         'marketplace-inaccessible',
         'marketplace-blocked',
         'final-account-review',
