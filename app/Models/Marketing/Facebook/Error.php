@@ -36,6 +36,7 @@ class Error extends Model
         'account-locked' => 'Account Locked',
         'account-disabled' => 'Account Disabled',
         'temp-blocked' => 'Temporary Blocked',
+        'page-unavailable' => 'This Page Isn\'t Available',
         'marketplace-inaccessible' => 'Marketplace Inaccessible',
         'marketplace-blocked' => 'Marketplace Blocked',
         'final-account-review' => 'Marketplace Permanently Blocked',
@@ -57,11 +58,12 @@ class Error extends Model
         'missing-inventory' => 1,
         'email-verification' => 2,
         'missing-tunnel' => 1,
-        'two-factor-auth' => 1,
+        'two-factor-auth' => 24,
         'two-factor-failed' => 1,
         'marketplace-inaccessible' => 24 * 7,
         'account-locked' => 24 * 7,
         'account-disabled' => 24 * 7,
+        'page-unavailable' => 1,
         'marketplace-blocked' => 24 * 7,
         'final-account-review' => 24 * 30 * 12 * 7
     ];
