@@ -17,7 +17,9 @@ return [
         'detectAccountDisabledText' => env('FB_MARKETING_SELECTORS_DETECT_ACCOUNT_DISABLED', 'div > span:contains(\'Your account has been disabled\')'),
         'detectRequestAReviewButton' => env('FB_MARKETING_SELECTORS_DETECT_REQUEST_A_REVIEW_BUTTON', 'div[aria-label="Request a Review"]'),
         'detectTempBlock' => env('FB_MARKETING_SELECTORS_DETECT_BLOCK', 'div > h3:contains("You\'re Temporarily Blocked")'),
-        'detectAccountLocked' => env('FB_MARKETING_SELECTORS_DETECT_ACCOUNT_LOCKED', 'div > span:contains("your account has been locked")')
+        'detectAccountLocked' => env('FB_MARKETING_SELECTORS_DETECT_ACCOUNT_LOCKED', 'div > span:contains("your account has been locked")'),
+        'detectPageUnavailable' => env('FB_MARKETING_SELECTORS_DETECT_PAGE_UNAVAILABLE', 'div > span:contains("This Page Isn\'t Available Right Now")'),
+        'reloadPageButton' => env('FB_MARKETING_SELECTORS_DETECT_PAGE_UNAVAILABLE', 'div > span > span:contains("Reload Page")')
     ],
 
     // Login Selectors
