@@ -844,4 +844,13 @@ class InventoryRepository implements InventoryRepositoryInterface
 
         return $query->get();
     }
+
+    /**
+     * @param int $dealerId
+     * @param array $params
+     * @return int
+     */
+    public function archiveInventory(int $dealerId, array $inventoryParams): int {
+        return Inventory::where('dealer_id', $dealerId)->update($inventoryParams);
+    }
 }
