@@ -58,7 +58,6 @@ class UserController extends RestfulControllerV2
         $createRequest = new CreateUserRequest($request->all());
         if($createRequest->validate()) {
             $user = $this->userRepository->create($createRequest->all());
-            $user->clsf_active = 1;
             $user->save();
             return $this->response->item(
                 $user,
