@@ -12,9 +12,9 @@ use App\Models\Traits\Parts\Cache;
 class FilterController extends RestfulController
 {
     use Cache;
-    
+
     protected $filters;
-    
+
     /**
      * Create a new controller instance.
      *
@@ -24,12 +24,12 @@ class FilterController extends RestfulController
     {
         $this->filters = $filters;
     }
-    
+
      /**
      * @OA\Get(
-     *     path="/api/website/parts/filters",
-     *     description="Retrieve a list of filters",     
-     *     tags={"Website Part Filters"},  
+     *     path="/api/website/parts/textrail/filters",
+     *     description="Retrieve a list of filters",
+     *     tags={"Website Part Filters"},
      *     @OA\Response(
      *         response="200",
      *         description="Returns a list of parts",
@@ -41,19 +41,19 @@ class FilterController extends RestfulController
      *     ),
      * )
      */
-    public function index(Request $request) 
+    public function index(Request $request)
     {
         $request = new GetFiltersRequest($request->all());
-        
+
         if ($request->validate()) {
             return $this->response->collection($this->filters->getAll($request->all()), new FilterTransformer);
         }
-        
+
         return $this->response->errorBadRequest();
     }
-    
+
     protected function getCacheName() {
         return 'parts_filter_cache';
     }
-    
+
 }
