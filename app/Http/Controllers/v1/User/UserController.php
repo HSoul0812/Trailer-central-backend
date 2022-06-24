@@ -57,10 +57,8 @@ class UserController extends RestfulControllerV2
     public function create(Request $request): Response {
         $createRequest = new CreateUserRequest($request->all());
         if($createRequest->validate()) {
-            $user = $this->userRepository->create($createRequest->all());
-            $user->save();
             return $this->response->item(
-                $user,
+                $this->userRepository->create($createRequest->all()),
                 new UserTransformer()
             )->setStatusCode(201);
         }
