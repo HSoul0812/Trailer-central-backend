@@ -7,7 +7,7 @@ class CreateUserRequest extends Request
 {
     protected $rules = [
         'name' => 'required',
-        'email' => 'required|email',
+        'email' => 'required|email|unique:App\Models\User\User,email',
         'password' => 'required|alpha_num|min:12',
         'from' => 'in:trailercentral,trailertrader'
     ];
