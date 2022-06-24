@@ -146,7 +146,7 @@ return [
         'local' => [
             'supervisor-1' => [
                 'connection' => 'redis',
-                'queue' => ['parts', 'parts-export-new', 'factory-feeds', 'cvr-send-file', 'scout', 'reports', 'emailbuilder', 'blog-posts', 'scrapereplies', 'inquiry', 'fb-catalog', 'fb-messenger', 'ecommerce'],
+                'queue' => ['inventory', 'parts', 'parts-export-new', 'factory-feeds', 'cvr-send-file', 'scout', 'reports', 'emailbuilder', 'blog-posts', 'scrapereplies', 'inquiry', 'fb-catalog', 'fb-messenger', 'ecommerce'],
                 'balance' => 'simple',
                 'processes' => 3,
                 'tries' => 3,
@@ -157,7 +157,7 @@ return [
         'dev' => [
             'supervisor-1' => [
                 'connection' => 'redis',
-                'queue' => ['parts', 'parts-export-new', 'factory-feeds', 'cvr-send-file', 'scout', 'reports', 'emailbuilder', 'blog-posts', 'scrapereplies', 'inquiry', 'fb-catalog', 'fb-messenger', 'ecommerce'],
+                'queue' => ['inventory', 'parts', 'parts-export-new', 'factory-feeds', 'cvr-send-file', 'scout', 'reports', 'emailbuilder', 'blog-posts', 'scrapereplies', 'inquiry', 'fb-catalog', 'fb-messenger', 'ecommerce'],
                 'balance' => 'simple',
                 'processes' => 10,
                 'tries' => 3,

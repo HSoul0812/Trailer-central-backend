@@ -216,6 +216,15 @@ $api->version('v1', function ($route) {
     */
 
     /**
+     * Inventory Bulk
+     */
+    $route->get('inventory/bulk', 'App\Http\Controllers\v1\Bulk\Inventory\BulkUploadController@index');
+    $route->post('inventory/bulk', 'App\Http\Controllers\v1\Bulk\Inventory\BulkUploadController@create');
+    $route->get('inventory/bulk/{id}', 'App\Http\Controllers\v1\Bulk\Inventory\BulkUploadController@show');
+    $route->put('inventory/bulk/{id}', 'App\Http\Controllers\v1\Bulk\Inventory\BulkUploadController@update');
+    $route->delete('inventory/bulk/{id}', 'App\Http\Controllers\v1\Bulk\Inventory\BulkUploadController@destroy');
+
+    /**
      * Inventory Overlay
      */
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
