@@ -39,18 +39,19 @@ class CreateDealerFbmOverviewView extends Migration
         CREATE VIEW `trailercentral`.`dealer_fbm_overview` AS
 
         SELECT 
+        
             d.dealer_id AS id,
             d.name AS name,
             IFNULL(fbm.fb_username, 'n/a') AS fb_username,
             IF(ISNULL(fbm.dealer_location_id),'ALL',(SELECT name FROM dealer_location WHERE dealer_location_id = fbm.dealer_location_id )) as location,
-            IFNULL(GREATEST(
-				(SELECT created_at FROM fbapp_listings WHERE marketplace_id = fbm.id ORDER BY id DESC LIMIT 1),
-                (SELECT created_at FROM fbapp_errors WHERE marketplace_id = fbm.id ORDER BY id DESC LIMIT 1)
-			), 'never') AS last_run_ts,
+            GREATEST(
+                (IFNULL((SELECT created_at FROM fbapp_listings WHERE marketplace_id = fbm.id ORDER BY id DESC LIMIT 1),'1000-01-01 00:00:00')),
+                (IFNULL((SELECT created_at FROM fbapp_errors WHERE marketplace_id = fbm.id ORDER BY id DESC LIMIT 1),'1000-01-01 00:00:00'))
+            ) AS last_run_ts,
             (
-				IFNULL((SELECT created_at FROM fbapp_listings WHERE marketplace_id = fbm.id ORDER BY id DESC LIMIT 1),0) >
-				IFNULL((SELECT created_at FROM fbapp_errors WHERE marketplace_id = fbm.id ORDER BY id DESC LIMIT 1), 0)
-			) AS last_run_status,
+                (IFNULL((SELECT created_at FROM fbapp_listings WHERE marketplace_id = fbm.id ORDER BY id DESC LIMIT 1),'1000-01-01 00:00:00')) >
+                (IFNULL((SELECT created_at FROM fbapp_errors WHERE marketplace_id = fbm.id ORDER BY id DESC LIMIT 1),'1000-01-01 00:00:00'))
+            ) AS last_run_status,
             IFNULL(GROUP_CONCAT(DISTINCT i.stock SEPARATOR '\n'), 'none') AS units_posted,
             IFNULL((SELECT CONCAT(`action`, ' - ', step, ' - ', error_message) FROM fbapp_errors WHERE marketplace_id=fbm.id ORDER BY id DESC LIMIT 1), 'no error') AS last_error
 
@@ -62,7 +63,7 @@ class CreateDealerFbmOverviewView extends Migration
         GROUP BY d.dealer_id, d.name, fbm.fb_username
 
         ORDER BY d.dealer_id DESC 
-        
+
         ";
     }
 }

@@ -107,19 +107,32 @@ class FacebookMarketplaceSeeder extends Seeder
             DB::table('fbapp_listings')->insert($inventoryListing);
         });
 
+        $integrations = $repo->getAll(['dealer_id' => self::DEALER_FAIL_ID]);
         //insert FB_errors
-        DB::table('fbapp_errors')->insertGetId([
-            'marketplace_id' => $marketPlace2Id,
-            'inventory_id' => $failedInvetoryId,
-            'action' => 'action',
-            'step' => 'login',
-            'error_type' => 1,
-            'error_message' => 'Incorrent credentials',
-            'created_at' => Carbon::now()->toDateTimeString(),
-            'expires_at' => Carbon::now()->addMonth()->toDateTimeString()
-        ]);
-
-
+        DB::table('inventory')
+        ->select('inventory.inventory_id')
+        ->where('dealer_id', '=', self::DEALER_FAIL_ID)
+        ->where('is_archived', '=', 0)
+        ->where('status', '<>', 2)
+        ->where('status', '<>', 6)
+        ->where('show_on_website', '=', 1)
+        ->orderBy('created_at', 'ASC')
+        ->chunk(5, function (Collection $inventory) use($integrations) {
+            foreach ($inventory as $inventory) {
+                foreach ($integrations as $integration) {
+                    DB::table('fbapp_errors')->insertGetId([
+                        'marketplace_id' => $integration->id,
+                        'inventory_id' => $inventory->inventory_id,
+                        'action' => 'action',
+                        'step' => 'login',
+                        'error_type' => 1,
+                        'error_message' => 'Incorrent credentials',
+                        'created_at' => Carbon::now()->toDateTimeString(),
+                        'expires_at' => Carbon::now()->addMonth()->toDateTimeString()
+                    ]);
+                }
+            }
+        });
     }
 
     private function bigRandomNumber($min, $max) {
