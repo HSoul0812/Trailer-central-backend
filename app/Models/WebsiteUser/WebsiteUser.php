@@ -63,4 +63,8 @@ class WebsiteUser extends Model implements
     {
         return [];
     }
+
+    public function setPasswordAttribute(string $password) {
+        $this->attributes['password'] = \Hash::make($password);
+    }
 }

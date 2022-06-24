@@ -12,6 +12,7 @@ class TcApiResponseUser
 
     #[Pure] public static function fromData(array $data): self {
         $obj = new self;
+        \Log::info($data);
         $obj->id = $data['id'];
         $obj->name = $data['name'];
         $obj->email = $data['email'];

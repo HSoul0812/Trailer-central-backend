@@ -19,20 +19,20 @@ class UsersService implements UsersServiceInterface
 
     public function create(array $attributes): TcApiResponseUser
     {
-        $data = $this->handleHttpRequest('POST', $this->endpointUrl, [
+        $responseContent = $this->handleHttpRequest('POST', $this->endpointUrl, [
             'json' => $attributes
         ]);
-        return TcApiResponseUser::fromData($data);
+        return TcApiResponseUser::fromData($responseContent['data']);
     }
 
     public function get(string $email): TcApiResponseUser
     {
-        $data = $this->handleHttpRequest('GET', $this->endpointUrl, [
+        $responseContent = $this->handleHttpRequest('GET', $this->endpointUrl, [
             'query' => [
                 'email' => $email
             ]
         ]);
-        return TcApiResponseUser::fromData($data);
+        return TcApiResponseUser::fromData($responseContent);
     }
 
     private function handleHttpRequest(string $method, string $url, array $options): array
