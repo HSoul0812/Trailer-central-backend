@@ -43,9 +43,15 @@ class CreateDealerFbmOverviewView extends Migration
             d.name AS name,
             IFNULL(fbm.fb_username, 'n/a') AS fb_username,
             IF(ISNULL(fbm.dealer_location_id),'ALL',(SELECT name FROM dealer_location WHERE dealer_location_id = fbm.dealer_location_id )) as location,
-            (SELECT MAX(date_posted) FROM fbapp_inventory WHERE dealer_id=d.dealer_id) AS last_run_ts,
-            true AS last_run_status,
-            IFNULL(GROUP_CONCAT(i.stock SEPARATOR '\n'), 'none') AS units_posted,
+            IFNULL(GREATEST(
+				(SELECT created_at FROM fbapp_listings WHERE marketplace_id = fbm.id ORDER BY id DESC LIMIT 1),
+                (SELECT created_at FROM fbapp_errors WHERE marketplace_id = fbm.id ORDER BY id DESC LIMIT 1)
+			), 'never') AS last_run_ts,
+            (
+				IFNULL((SELECT created_at FROM fbapp_listings WHERE marketplace_id = fbm.id ORDER BY id DESC LIMIT 1),0) >
+				IFNULL((SELECT created_at FROM fbapp_errors WHERE marketplace_id = fbm.id ORDER BY id DESC LIMIT 1), 0)
+			) AS last_run_status,
+            IFNULL(GROUP_CONCAT(DISTINCT i.stock SEPARATOR '\n'), 'none') AS units_posted,
             IFNULL((SELECT CONCAT(`action`, ' - ', step, ' - ', error_message) FROM fbapp_errors WHERE marketplace_id=fbm.id ORDER BY id DESC LIMIT 1), 'no error') AS last_error
 
         FROM dealer AS d
@@ -55,6 +61,8 @@ class CreateDealerFbmOverviewView extends Migration
 
         GROUP BY d.dealer_id, d.name, fbm.fb_username
 
+        ORDER BY d.dealer_id DESC 
+        
         ";
     }
 }

@@ -2,12 +2,6 @@
 
 namespace App\Nova\Resources\Facebook;
 
-use App\Nova\Actions\ActivateUserAccounts;
-use App\Nova\Actions\DeactivateUserAccounts;
-use App\Nova\Actions\Dealer\ActivateCrm;
-use App\Nova\Actions\Dealer\DeactivateCrm;
-use App\Nova\Actions\Dealer\ActivateECommerce;
-use App\Nova\Actions\Dealer\DeactivateECommerce;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Text;
@@ -45,8 +39,6 @@ class FBMarketplaceAccounts extends Resource
     {
         return 'FB Marketplace Accounts';
     }
-
-
 
     /**
      * Get the fields displayed by the resource.
