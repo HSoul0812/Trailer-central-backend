@@ -70,6 +70,7 @@ class AuthService implements AuthServiceInterface
         $attributes['name'] = implode(
             ' ', [$attributes['first_name'], $attributes['last_name']]
         );
+        $attributes['clsf_active'] = 1;
         $tcUser = $this->tcUsersService->create($attributes);
 
         $attributes['tc_user_id'] = $tcUser->id;
