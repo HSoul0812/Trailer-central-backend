@@ -33,6 +33,7 @@ class UserRepository implements UserRepositoryInterface {
     public function create($params): User {
         $user = new User($params);
         $user->password = $params['password'];
+        $user->clsf_active = $params['clsf_active'] ?? 0;
         $user->save();
         return $user;
     }
