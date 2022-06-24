@@ -31,13 +31,7 @@ class GetQuickBooksDuplicatedDisplayNamesAction
 
         $this->populateGroupedDisplayNames($dealer->dealer_id);
 
-        $displayNames = $this->customers->keys()
-            ->merge($this->employees->keys())
-            ->merge($this->vendors->keys());
-
-        $duplicatedDisplayNames = collect(array_count_values($displayNames->toArray()))->filter(function (int $count) {
-            return $count > 1;
-        });
+        $duplicatedDisplayNames = $this->getDuplicatedDisplayNames();
 
         return $this->getStatsFromDuplicatedDisplayNames($duplicatedDisplayNames);
     }
@@ -64,6 +58,25 @@ class GetQuickBooksDuplicatedDisplayNamesAction
             ->where('dealer_id', $dealerId)
             ->get(['id', 'dealer_id', 'name'])
             ->groupBy('name');
+    }
+
+    /**
+     * Use the information of display names, figure out the
+     * duplicated ones
+     * 
+     * @return Collection
+     */
+    private function getDuplicatedDisplayNames(): Collection
+    {
+        $displayNames = $this->customers->keys()
+            ->merge($this->employees->keys())
+            ->merge($this->vendors->keys());
+
+        $countDuplicatedDisplayNames = array_count_values($displayNames->toArray());
+
+        return collect($countDuplicatedDisplayNames)->filter(function (int $count) {
+            return $count > 1;
+        });
     }
 
     /**
