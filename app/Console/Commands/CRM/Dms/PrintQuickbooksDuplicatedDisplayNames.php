@@ -2,11 +2,9 @@
 
 namespace App\Console\Commands\CRM\Dms;
 
-use App\Models\CRM\User\Customer;
-use App\Models\CRM\User\Employee;
-use App\Models\Parts\Vendor;
-use App\Models\User\User;
+use App\Domains\QuickBooks\Actions\GetQuickBooksDuplicatedDisplayNamesAction;
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Collection;
 
 class PrintQuickbooksDuplicatedDisplayNames extends Command
@@ -30,76 +28,45 @@ class PrintQuickbooksDuplicatedDisplayNames extends Command
      *
      * @return mixed
      */
-    public function handle()
+    public function handle(GetQuickBooksDuplicatedDisplayNamesAction $getQuickBooksDuplicatedDisplayNames)
     {
-        $dealer = User::findOrFail($this->argument('dealer_id'));
-        
-        /** @var Collection $customers */
-        $customers = Customer::where('dealer_id', $dealer->dealer_id)->get(['id', 'dealer_id', 'display_name'])->groupBy('display_name');
-        
-        /** @var Collection $employees */
-        $employees = Employee::where('dealer_id', $dealer->dealer_id)->get(['id', 'dealer_id', 'display_name'])->groupBy('display_name');
-        
-        /** @var Collection $vendors */
-        $vendors = Vendor::where('dealer_id', $dealer->dealer_id)->get(['id', 'dealer_id', 'name'])->groupBy('name');
-        
-        /** @var Collection $displayNames */
-        $displayNames = $customers->keys()
-            ->merge($employees->keys())
-            ->merge($vendors->keys());
-        
-        $duplicatedDisplayNames = array_filter(array_count_values($displayNames->toArray()), function($value) {
-            return $value > 1;
-        });
-        
-        $stats = collect([]);
-        
-        foreach ($duplicatedDisplayNames as $displayName => $dupTypeCount) {
-            /** @var Collection $customersList */
-            $customersList = $customers->get($displayName, collect([]));
-            
-            /** @var Collection $employeesList */
-            $employeesList = $employees->get($displayName, collect([]));
-            
-            /** @var Collection $vendorsList */
-            $vendorsList = $vendors->get($displayName, collect());
-            
-            $stats->push([
-                'display_name' => $displayName,
-                'customers' => $customersList->pluck('id'),
-                'employees' => $employeesList->pluck('id'),
-                'vendors' => $vendorsList->pluck('id'),
-                'duplicated_count' => $customersList->count() + $employeesList->count() + $vendorsList->count(),
-            ]);
+        try {
+            $stats = $getQuickBooksDuplicatedDisplayNames->execute($this->argument('dealer_id'));
+        } catch (ModelNotFoundException $exception) {
+            $this->error($exception->getMessage());
+            return 1;
         }
-        
-        $stats = $stats->sortByDesc('duplicated_count')->values();
-        
+
+        $this->printStats($stats);
+
+        return 0;
+    }
+
+    private function printStats(Collection $stats): void
+    {
         $this->info("Found {$stats->count()} duplicated display names!");
-        
+
         if ($stats->isEmpty()) {
             $this->info("Hooray!");
-            return 0;
+            return;
         }
-        
+
         foreach ($stats as $index => $stat) {
             $segments = collect([]);
-            
+
             $no = $index + 1;
-            
+
             $segments->push("$no. {$stat['display_name']}: {$stat['duplicated_count']}");
-            
+
             foreach (['customers', 'employees', 'vendors'] as $modelType) {
                 $typeTitle = ucfirst($modelType);
-                
+
                 if ($stat[$modelType]->isNotEmpty()) {
                     $segments->push("$typeTitle IDs: " . $stat[$modelType]->implode(', '));
                 }
             }
-            
+
             $this->info($segments->implode(' | '));
         }
-        
-        return 0;
     }
 }
