@@ -3,14 +3,15 @@
 namespace App\Nova\Policies;
 
 use App\Models\User\NovaUser;
-use App\Models\CRM\Leads\LeadAssign;
+use Spatie\Permission\Models\Role;
+use App\Models\Marketing\Craigslist\Balance;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 /**
- * Class LeadAssignPolicy
- * @package App\Nova\Policies
+ * Class BalancePolicy
+ * @package App\Nova\Polices
  */
-class LeadAssignPolicy
+class BalancePolicy
 {
     use HandlesAuthorization;
 
@@ -25,7 +26,7 @@ class LeadAssignPolicy
     }
 
     /**
-     * Determine whether the user can view any lead.
+     * Determine whether the user can view any balances.
      *
      * @param  NovaUser $user
      * @return bool
@@ -36,19 +37,19 @@ class LeadAssignPolicy
     }
 
     /**
-     * Determine whether the user can view the lead.
+     * Determine whether the user can view the balance.
      *
      * @param NovaUser|null $user
-     * @param LeadAssign $lead
+     * @param Balance $balance
      * @return bool
      */
-    public function view(?NovaUser $user, LeadAssign $lead): bool
+    public function view(?NovaUser $user, Balance $balance): bool
     {
         return $user->hasAnyRole('Admin', 'Support');
     }
 
     /**
-     * Determine whether the user can create leads.
+     * Determine whether the user can create balances.
      *
      * @param  NovaUser  $user
      * @return bool
@@ -59,51 +60,50 @@ class LeadAssignPolicy
     }
 
     /**
-     * Determine whether the user can update the lead.
+     * Determine whether the user can update the balance.
      *
      * @param NovaUser $user
-     * @param LeadAssign $lead
+     * @param Balance $balance
      * @return bool
      */
-    public function update(NovaUser $user, LeadAssign $lead): bool
+    public function update(NovaUser $user, Balance $balance): bool
     {
         return $user->hasAnyRole('Admin', 'Support');
     }
 
     /**
-     * Determine whether the user can delete the lead.
+     * Determine whether the user can delete the balance.
      *
      * @param NovaUser $user
-     * @param LeadAssign $lead
+     * @param Balance $balance
      * @return bool
      */
-    public function delete(NovaUser $user, LeadAssign $lead): bool
+    public function delete(NovaUser $user, Balance $balance): bool
     {
         return $user->hasAnyRole('Admin', 'Support');
     }
 
     /**
-     * Determine whether the user can restore the lead.
+     * Determine whether the user can restore the balance.
      *
      * @param NovaUser $user
-     * @param LeadAssign $lead
+     * @param Balance $balance
      * @return void
      */
-    public function restore(NovaUser $user, LeadAssign $lead): void
+    public function restore(NovaUser $user, Balance $balance): void
     {
         //
     }
 
     /**
-     * Determine whether the user can permanently delete the lead.
+     * Determine whether the user can permanently delete the balance.
      *
      * @param NovaUser $user
-     * @param LeadAssign $lead
+     * @param Balance $balance
      * @return void
      */
-    public function forceDelete(NovaUser $user, LeadAssign $lead): void
+    public function forceDelete(NovaUser $user, Balance $balance): void
     {
         //
     }
 }
-
