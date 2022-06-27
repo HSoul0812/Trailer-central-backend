@@ -11,6 +11,10 @@ use Dingo\Api\Http\Request;
 use App\Models\User\User;
 use Stripe\StripeClient;
 
+/**
+ * Class StripeService
+ * @package App\Services\Subscription
+ */
 class StripeService implements StripeServiceInterface
 {
     /**
@@ -18,19 +22,19 @@ class StripeService implements StripeServiceInterface
      */
     private $stripe;
 
+    /**
+     * Create a new StripeClient instance.
+     */
     public function __construct() {
         $this->stripe = new StripeClient(config('services.stripe.secret_key'));
     }
 
     /**
-     * Retrieves a customer with subscriptions and card information
-     *
-     * @param Request $request
-     * @return object
+     * @inheritDoc
      */
-    public function getCustomer(Request $request): object
+    public function getCustomerByDealerId($dealerId, int $transactions_limit = 0): object
     {
-        $user = User::find($request->dealer_id);
+        $user = User::find($dealerId);
         $customer = $user->createOrGetStripeCustomer();
 
         if ($user->defaultPaymentMethod()) {
@@ -38,34 +42,31 @@ class StripeService implements StripeServiceInterface
         }
 
         $per_page = $request->transactions_limit ?? 0;
-        $transactions = $this->getTransactions($customer, $per_page);
+        $transactions = $this->getTransactionsByDealerId($dealerId, $per_page);
         $customer["transactions"] = $transactions["data"];
 
         return $customer;
     }
 
     /**
-     * Retrieves all subscriptions from a given user
-     *
-     * @param $request
-     * @return object
+     * @inheritDoc
      */
-    public function getSubscriptions($request): object
+    public function getSubscriptionsByDealerId($dealerId): object
     {
-        $user = User::find($request->dealer_id);
+        $user = User::find($dealerId);
         $customer = $user->createOrGetStripeCustomer();
 
         return $customer->subscriptions;
     }
 
     /**
-     * Retrieves all the customer transactions
-     *
-     * @param $per_page
-     * @return object
+     * @inheritDoc
      */
-    public function getTransactions($customer, $per_page): object
+    public function getTransactionsByDealerId($dealerId, $per_page): object
     {
+        $user = User::find($dealerId);
+        $customer = $user->createOrGetStripeCustomer();
+
         $params = [
             'customer' => $customer->id
         ];
@@ -78,11 +79,9 @@ class StripeService implements StripeServiceInterface
     }
 
     /**
-     * Retrieves all existing plans
-     *
-     * @return array
+     * @inheritDoc
      */
-    public function getPlans(): array
+    public function getExistingPlans(): array
     {
         $plansRaw = $this->stripe->plans->all();
         $plans = $plansRaw->data;
@@ -98,82 +97,38 @@ class StripeService implements StripeServiceInterface
     }
 
     /**
-     * Subscribe to a selected plan
-     *
-     * @param Request $request
-     * @return array
+     * @inheritDoc
      */
-    public function subscribe(Request $request): array
+    public function subscribeToPlanByDealerId($dealerId, $planId): bool
     {
-        $user = User::find($request->dealer_id);
+        $user = User::find($dealerId);
         $customer = $user->createOrGetStripeCustomer();
 
-        try {
-            if ($user->hasPaymentMethod()) {
-                $paymentMethod = $user->defaultPaymentMethod();
+        $paymentMethod = $user->defaultPaymentMethod();
 
-                $user
-                    ->newSubscription('default', $request->plan)
-                    ->create($paymentMethod->id, [
-                        'email' => $customer->email,
-                    ]);
-            } else {
-                return [
-                    'response' => [
-                        'status' => 'error',
-                        'message' => 'No payment method for this customer.'
-                    ]
-                ];
-            }
-
-            return [
-                'response' => [
-                    'status' => 'success',
-                    'message' => 'Customer subscription successfully.'
-                ]
-            ];
-        } catch (Exception $e) {
-            return [
-                'response' => [
-                    'status' => 'error',
-                    'message' => $e->getMessage()
-                ]
-            ];
+        if ($paymentMethod) {
+            return $user->newSubscription('default', $planId)
+                ->create($paymentMethod->id, [
+                    'email' => $customer->email,
+                ]);
+        } else {
+            return false;
         }
     }
 
     /**
-     * Updates a customer card
-     *
-     * @param Request $request
-     * @return array
+     * @inheritDoc
      */
-    public function updateCard(Request $request): array
+    public function updateCardByDealerId($dealerId, $token): bool
     {
-        $user = User::find($request->dealer_id);
+        $user = User::find($dealerId);
         $customer = $user->createOrGetStripeCustomer();
 
-        try {
-            $paymentMethod = $this->stripe->customers->createSource(
-                $customer->id,
-                ['source' => $request->token]
-            );
+        $paymentMethod = $this->stripe->customers->createSource(
+            $customer->id,
+            ['source' => $token]
+        );
 
-            $user->updateDefaultPaymentMethod($paymentMethod->id);
-
-            return [
-                'response' => [
-                    'status' => 'success',
-                    'message' => 'Customer card updated successfully.'
-                ]
-            ];
-        } catch (Exception $e) {
-            return [
-                'response' => [
-                    'status' => 'error',
-                    'message' => $e->getMessage()
-                ]
-            ];
-        }
+        return $user->updateDefaultPaymentMethod($paymentMethod->id);
     }
 }
