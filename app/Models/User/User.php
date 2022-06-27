@@ -2,6 +2,7 @@
 
 namespace App\Models\User;
 
+use App\Models\Parts\Bin;
 use App\Models\User\Interfaces\PermissionsInterface;
 use App\Traits\Models\HasPermissionsStub;
 use Illuminate\Contracts\Auth\Authenticatable;
@@ -327,6 +328,11 @@ class User extends Model implements Authenticatable, PermissionsInterface
     public function printerSettings() : HasOne
     {
         return $this->hasOne(Settings::class, 'dealer_id', 'dealer_id');
+    }
+    
+    public function bins() : HasMany
+    {
+        return $this->hasMany(Bin::class, 'dealer_id', 'dealer_id');
     }
 
     public function getCrmLoginUrl(string $route = '')

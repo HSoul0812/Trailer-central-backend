@@ -10,6 +10,7 @@ use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\User\Customer;
 use App\Traits\Repository\ElasticSearch;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
@@ -41,11 +42,24 @@ class CustomerRepository implements CustomerRepositoryInterface
         $this->model = $customer;
     }
 
+    /**
+     * @throws Exception
+     */
     public function create($params)
     {
         $customer = new Customer($params);
+        
         $customer->dealer_id = $params['dealer_id'];
+        
+        $displayName = Arr::get($params, 'display_name');
+        if (!empty($displayName)) {
+            if ($this->displayNameExists($customer->dealer_id, $displayName)) {
+                throw new Exception('The display name has already been taken.');
+            }
+        }
+        
         $customer->save();
+        
         return $customer;
     }
 
@@ -89,13 +103,24 @@ class CustomerRepository implements CustomerRepositoryInterface
         throw NotImplementedException;
     }
 
+    /**
+     * @throws Exception
+     */
     public function update($params)
     {
         /** @var Customer $customer */
         $customer = Customer::findOrFail($params['id']);
 
-        $customer->fill(Arr::except($params, 'id'));
         $customer->dealer_id = $params['dealer_id'];
+        
+        $displayName = Arr::get($params, 'display_name');
+        if (!empty($displayName)) {
+            if ($this->displayNameExists($customer->dealer_id, $displayName, $customer->id)) {
+                throw new Exception('The display name has already been taken.');
+            }
+        }
+        
+        $customer->fill(Arr::except($params, 'id'));
         $customer->save();
 
         // If there is a deleted_at in the param, and it's
@@ -320,5 +345,24 @@ class CustomerRepository implements CustomerRepositoryInterface
             ->with($with)
             ->whereNull('website_lead_id')
             ->chunkById($chunkSize, $callback);
+    }
+
+    /**
+     * Check if the given display name exists or not
+     * 
+     * @param int $dealerId
+     * @param string $displayName
+     * @param int|null $ignoreId
+     * @return bool
+     */
+    public function displayNameExists(int $dealerId, string $displayName, int $ignoreId = null): bool
+    {
+        return Customer::query()
+            ->where('dealer_id', $dealerId)
+            ->where('display_name', $displayName)
+            ->when($ignoreId !== null, function(Builder $query) use ($ignoreId) {
+                $query->where('id', '!=', $ignoreId);
+            })
+            ->exists();
     }
 }
