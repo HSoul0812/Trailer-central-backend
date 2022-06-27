@@ -205,6 +205,8 @@ return [
         App\Providers\MarketingServiceProvider::class,
         App\Providers\EcommerceProvider::class,
         App\Providers\FavoritesExportServiceProvider::class,
+        App\Providers\SubscriptionServiceProvider::class,
+        App\Providers\StripeServiceProvider::class,
         /*
          * 3rd party stuff
          */
