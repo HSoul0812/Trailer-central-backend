@@ -4,7 +4,6 @@ namespace App\Http\Requests\Dms\Bill;
 use App\Domains\QuickBooks\Constraints\DocNumConstraint;
 use App\Http\Requests\Request;
 use Illuminate\Validation\Rule;
-use function Aws\map;
 
 class UpdateBillRequest extends Request
 {
@@ -26,8 +25,8 @@ class UpdateBillRequest extends Request
     protected function getRules(): array
     {
         $this->rules['doc_num'] = [
-            'string',
             'nullable',
+            'string',
             'max:' . DocNumConstraint::MAX_LENGTH,
             Rule::unique('qb_bills', 'doc_num')->ignore($this->get('id')),
         ];

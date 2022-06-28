@@ -26,8 +26,8 @@ class CreateBillRequest extends Request
     protected function getRules(): array
     {
         $this->rules['doc_num'] = [
-            'string',
             'nullable',
+            'string',
             'max:' . DocNumConstraint::MAX_LENGTH,
             Rule::unique('qb_bills', 'doc_num'),
         ];
