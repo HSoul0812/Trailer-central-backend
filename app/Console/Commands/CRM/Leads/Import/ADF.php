@@ -3,17 +3,16 @@
 namespace App\Console\Commands\CRM\Leads\Import;
 
 use Illuminate\Console\Command;
-use App\Services\CRM\Leads\Import\ADFServiceInterface;
 
 /**
  * Import leads in the ADF format
  */
 class ADF extends Command
-{    
+{
 
     /**
      * The name and signature of the console command.
-     * 
+     *
      * @var string
      */
     protected $signature = 'leads:import:adf';

@@ -5,6 +5,7 @@ namespace App\Services\CRM\Leads\Import;
 use App\Exceptions\CRM\Leads\Import\InvalidAdfImportFormatException;
 use App\Exceptions\CRM\Leads\Import\InvalidAdfDealerIdException;
 use App\Exceptions\CRM\Leads\Import\MissingAdfEmailAccessTokenException;
+use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\System\EmailRepositoryInterface;
@@ -21,55 +22,58 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\DomCrawler\Crawler;
 
-class ADFService implements ADFServiceInterface {
+class ADFService extends AbstractImportService
+{
     /**
-     * @var App\Repositories\CRM\Leads\LeadRepositoryInterface
+     * @var LeadRepositoryInterface
      */
     protected $leads;
 
-    /**     
-     * @var App\Repositories\System\EmailRepositoryInterface
+    /**
+     * @var EmailRepositoryInterface
      */
     protected $emails;
 
     /**
-     * @var App\Repositories\Integration\Auth\TokenRepositoryInterface
+     * @var TokenRepositoryInterface
      */
     protected $tokens;
 
     /**
-     * @var App\Repositories\Inventory\InventoryRepositoryInterface
+     * @var InventoryRepositoryInterface
      */
     protected $inventory;
 
     /**
-     * @var App\Repositories\User\UserRepositoryInterface
+     * @var UserRepositoryInterface
      */
     protected $dealers;
 
     /**
-     * @var App\Repositories\User\DealerLocationRepositoryInterface
+     * @var DealerLocationRepositoryInterface
      */
     protected $locations;
 
-    /**     
-     * @var App\Services\Integration\Google\GoogleServiceInterface
+    /**
+     * @var GoogleServiceInterface
      */
     protected $google;
 
-    /**     
-     * @var App\Services\Integration\Google\GmailServiceInterface
+    /**
+     * @var GmailServiceInterface
      */
     protected $gmail;
-    
-    public function __construct(LeadServiceInterface $leads,
-                                EmailRepositoryInterface $emails,
-                                TokenRepositoryInterface $tokens,
-                                InventoryRepositoryInterface $inventory,
-                                UserRepositoryInterface $dealers,
-                                DealerLocationRepositoryInterface $locations,
-                                GoogleServiceInterface $google,
-                                GmailServiceInterface $gmail) {
+
+    public function __construct(
+        LeadServiceInterface $leads,
+        EmailRepositoryInterface $emails,
+        TokenRepositoryInterface $tokens,
+        InventoryRepositoryInterface $inventory,
+        UserRepositoryInterface $dealers,
+        DealerLocationRepositoryInterface $locations,
+        GoogleServiceInterface $google,
+        GmailServiceInterface $gmail
+    ) {
         $this->leads = $leads;
         $this->emails = $emails;
         $this->tokens = $tokens;
@@ -82,7 +86,7 @@ class ADFService implements ADFServiceInterface {
 
     /**
      * Takes a lead and export it to the IDS system in XML format
-     * 
+     *
      * @throws InvalidAdfDealerIdException
      * @return int total number of imported adf leads
      */
@@ -141,14 +145,19 @@ class ADFService implements ADFServiceInterface {
         return $total;
     }
 
+    public function isSatisfiedBy(string $body): bool
+    {
+        // TODO: Implement isSatisfiedBy() method.
+    }
+
     /**
      * Validate ADF and Return Result
-     * 
+     *
      * @param string $body
      * @throws InvalidAdfImportFormatException
      * @return Crawler
      */
-    public function validateAdf(string $body): Crawler {
+    private function validateAdf(string $body): Crawler {
         // Get XML Parsed Data
         $fixed = $this->fixCdata($body);
         $crawler = new Crawler($fixed);
@@ -166,12 +175,12 @@ class ADFService implements ADFServiceInterface {
 
     /**
      * Get ADF and Return Result
-     * 
+     *
      * @param User $dealer
      * @param Crawler $adf
      * @return ADFLead
      */
-    public function parseAdf(User $dealer, Crawler $adf): ADFLead {
+    private function parseAdf(User $dealer, Crawler $adf): ADFLead {
         // Create ADF Lead
         $adfLead = new ADFLead();
 
@@ -201,7 +210,7 @@ class ADFService implements ADFServiceInterface {
 
     /**
      * Import ADF as Lead
-     * 
+     *
      * @param ADFLead $adfLead
      * @return Lead
      */
@@ -233,48 +242,9 @@ class ADFService implements ADFServiceInterface {
         ]);
     }
 
-
-    /**
-     * Get Access Token for ADF
-     * 
-     * @throws MissingAdfEmailAccessTokenException
-     * @return AccessToken
-     */
-    private function getAccessToken(): AccessToken {
-        // Get Email
-        $email = config('adf.imports.gmail.email');
-
-        // Get System Email With Access Token
-        $systemEmail = $this->emails->find(['email' => $email]);
-
-        // No Access Token?
-        if(empty($systemEmail->googleToken)) {
-            throw new MissingAdfEmailAccessTokenException;
-        }
-
-        // Refresh Token
-        $accessToken = $systemEmail->googleToken;
-        $validate = $this->google->validate($accessToken);
-        if(!empty($validate->newToken)) {
-            // Refresh Access Token
-            $time = CarbonImmutable::now();
-            $accessToken = $this->tokens->update([
-                'id' => $accessToken->id,
-                'access_token' => $validate->newToken['access_token'],
-                'id_token' => $validate->newToken['id_token'],
-                'expires_in' => $validate->newToken['expires_in'],
-                'expires_at' => $time->addSeconds($validate->newToken['expires_in'])->toDateTimeString(),
-                'issued_at' => $time->toDateTimeString()
-            ]);
-        }
-
-        // Return Access Token for Google
-        return $accessToken;
-    }
-
     /**
      * Set ADF Contact Details to ADF Lead
-     * 
+     *
      * @param ADFLead $adfLead
      * @param Crawler $contact
      * @return ADFLead
@@ -303,7 +273,7 @@ class ADFService implements ADFServiceInterface {
 
     /**
      * Set ADF Contact Details to ADF Lead
-     * 
+     *
      * @param ADFLead $adfLead
      * @param Crawler $vehicle
      * @param int $dealerId
@@ -336,7 +306,7 @@ class ADFService implements ADFServiceInterface {
 
     /**
      * Set ADF Vendor Details
-     * 
+     *
      * @param ADFLead $adfLead
      * @param Crawler $vendor
      * @return ADFLead
@@ -366,7 +336,7 @@ class ADFService implements ADFServiceInterface {
 
     /**
      * Set ADF Vendor Location Details
-     * 
+     *
      * @param ADFLead $adfLead
      * @param Crawler $vendor
      * @return ADFLead
@@ -397,7 +367,7 @@ class ADFService implements ADFServiceInterface {
 
     /**
      * Strip All CData From XML
-     * 
+     *
      * @param string $xml
      * @return string
      */
