@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs\CRM\User;
+namespace App\Jobs\User;
 
 use App\Helpers\StringHelper;
 use App\Jobs\Job;
