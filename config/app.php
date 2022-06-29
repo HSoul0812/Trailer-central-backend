@@ -228,6 +228,12 @@ return [
          */
         \Feed\EditMapping\ToolServiceProvider::class,
         \Showroom\BulkConfiguration\ToolServiceProvider::class,
+        \Showroom\BulkConfiguration\ToolServiceProvider::class,
+
+        /*
+         * Sentry stuff
+         */
+        Sentry\Laravel\ServiceProvider::class,
     ],
 
     /*
@@ -277,7 +283,8 @@ return [
         'Str' => Illuminate\Support\Str::class,
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
-        'View' => Illuminate\Support\Facades\View::class
+        'View' => Illuminate\Support\Facades\View::class,
+        'Sentry' => Sentry\Laravel\Facade::class,
     ],
 
 ];

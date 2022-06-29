@@ -663,6 +663,7 @@ $api->version('v1', function ($route) {
         $route->group(['prefix' => 'user/dealer-location/{locationId}'], function ($route) {
             $route->get('/mileage-fee', 'App\Http\Controllers\v1\User\DealerLocationMileageFeeController@index');
             $route->post('/mileage-fee', 'App\Http\Controllers\v1\User\DealerLocationMileageFeeController@create');
+            $route->post('/mileage-fee/all', 'App\Http\Controllers\v1\User\DealerLocationMileageFeeController@bulkCreate');
             $route->delete('/mileage-fee/{feeId}', 'App\Http\Controllers\v1\User\DealerLocationMileageFeeController@delete');
         });
 
