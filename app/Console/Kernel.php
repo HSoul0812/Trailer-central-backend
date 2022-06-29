@@ -81,9 +81,9 @@ class Kernel extends ConsoleKernel
                 ->hourly()
                 ->runInBackground();
 
-        /*$schedule->command('user:generate-crm-users')
+        $schedule->command('user:generate-crm-users')
                 ->hourly()
-                ->runInBackground();*/
+                ->runInBackground();
 
         $schedule->command('crm:dms:update-po-num-ref')
                 ->daily()

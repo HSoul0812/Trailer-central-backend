@@ -49,10 +49,6 @@ class GenerateCrmUserJob extends Job
         CrmUserRepositoryInterface $crmUsers,
         StringHelper $stringHelper
     ) {
-        // Initialize Logger
-        $log = Log::channel('emailbuilder');
-        $log->info('Processing ' . $this->leads->count() . ' Email Builder Emails', $this->config->getLogParams());
-
         try {
             $users->beginTransaction();
 
