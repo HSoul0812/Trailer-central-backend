@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\Artisan;
 
 class GenerateDealerCrmUsers extends Migration
 {
@@ -11,7 +12,7 @@ class GenerateDealerCrmUsers extends Migration
      */
     public function up()
     {
-        \Artisan::call('user:generate-crm-users');
+        Artisan::call('user:generate-crm-users');
     }
 
     /**
