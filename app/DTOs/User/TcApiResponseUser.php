@@ -15,6 +15,7 @@ class TcApiResponseUser
         $obj->id = $data['id'];
         $obj->name = $data['name'];
         $obj->email = $data['email'];
+
         return $obj;
     }
 }
