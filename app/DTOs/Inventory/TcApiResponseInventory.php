@@ -81,7 +81,9 @@ class TcApiResponseInventory
      $obj->price = $data['price'];
      $obj->basic_price = $data['price'];
      $obj->sales_price = $data['sales_price'];
-     $obj->website_price = $data['use_website_price'] ? $data['website_price'] : $data['price'];
+     $obj->website_price = isset($data['use_website_price']) && $data['use_website_price']
+         ? $data['website_price']
+         : $data['price'];
      $obj->inventory_title = $data['title'];
      $obj->photos = $data['images'];
      $obj->dealer_location = $data['dealer_location'];
@@ -95,7 +97,7 @@ class TcApiResponseInventory
      $obj->sold_at = $data['sold_at'];
      $obj->is_featured = $data['is_featured'];
      $obj->is_special = $data['is_special'];
-     $obj->use_website_price = $data['use_website_price'];
+     $obj->use_website_price = $data['use_website_price'] ?? false;
      $obj->notes = $data['notes'];
      foreach($data['attributes'] as $attribute) {
        $obj->setTypedProperty($attribute['code'], $attribute['value']);

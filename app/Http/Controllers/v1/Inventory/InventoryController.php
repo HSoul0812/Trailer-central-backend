@@ -28,7 +28,6 @@ class InventoryController extends AbstractRestfulController
      */
     public function __construct(
         private InventoryServiceInterface $inventoryService,
-        private InventoryServiceInterface $inventoryRepository,
         private TcApiResponseInventoryTransformer $transformer)
     {
         parent::__construct();
@@ -43,7 +42,7 @@ class InventoryController extends AbstractRestfulController
           return $this->response->item($this->inventoryService->create($request->all()), new TcApiResponseInventoryCreateTransformer());
       }
 
-      return $thqis->response->errorBadRequest();
+      return $this->response->errorBadRequest();
     }
 
     /**
@@ -52,7 +51,7 @@ class InventoryController extends AbstractRestfulController
     public function destroy(int $id)
     {
       $inventoryRequest = new DeleteInventoryRequest(['inventory_id' => $id]);
-      
+
       if ($inventoryRequest->validate()) {
             return $this->response->item($this->inventoryService->delete($id), new TcApiResponseInventoryDeleteTransformer());
         }
@@ -70,7 +69,7 @@ class InventoryController extends AbstractRestfulController
             return $this->response->item($result, new InventoryListResponseTransformer());
         }
 
-        $this->response->errorBadRequest();
+        return $this->response->errorBadRequest();
     }
 
     /**
@@ -78,7 +77,7 @@ class InventoryController extends AbstractRestfulController
      */
     public function show(int $id): Response
     {
-        $data = $this->inventoryRepository->show($id);
+        $data = $this->inventoryService->show($id);
 
         return $this->response->item($data, $this->transformer);
     }
@@ -89,12 +88,12 @@ class InventoryController extends AbstractRestfulController
     public function update(int $id, UpdateRequestInterface $request)
     {
       $inventoryRequest = new UpdateInventoryRequest(array_merge($request->all(), ['inventory_id' => $id]));
-      
+
       if ($inventoryRequest->validate()) {
           return $this->response->item($this->inventoryService->update($inventoryRequest->all()), new TcApiResponseInventoryCreateTransformer());
       }
 
-      return $thqis->response->errorBadRequest();
+      return $this->response->errorBadRequest();
     }
 
     protected function constructRequestBindings(): void
@@ -102,11 +101,11 @@ class InventoryController extends AbstractRestfulController
         app()->bind(IndexRequestInterface::class, function () {
             return inject_request_data(IndexInventoryRequest::class);
         });
-        
+
         app()->bind(CreateRequestInterface::class, function () {
             return inject_request_data(CreateInventoryRequest::class);
         });
-        
+
         app()->bind(UpdateRequestInterface::class, function () {
             return inject_request_data(UpdateInventoryRequest::class);
         });
