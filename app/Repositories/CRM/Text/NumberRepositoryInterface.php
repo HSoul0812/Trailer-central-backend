@@ -53,6 +53,11 @@ interface NumberRepositoryInterface extends Repository {
      */
     public function activeTwilioNumber(string $twilioNumber, string $maskedNumber): ?Number;
 
+    /**
+     * @param string $customerNumber
+     * @return Number|null
+     */
+    public function activeTwilioNumberByCustomerNumber(string $customerNumber): ?Number;
 
     /**
      * Delete Twilio Number
