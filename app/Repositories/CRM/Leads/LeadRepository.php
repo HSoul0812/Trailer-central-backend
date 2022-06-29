@@ -165,7 +165,7 @@ class LeadRepository implements LeadRepositoryInterface {
 
     public function getAll($params)
     {
-        $query = Lead::where([
+        $query = Lead::query()->where([
                 ['identifier', '>', 0],
                 [Lead::getTableName().'.lead_type', '<>', LeadType::TYPE_NONLEAD],
         ]);
@@ -177,6 +177,11 @@ class LeadRepository implements LeadRepositoryInterface {
          * Filters
          */
         $query = $this->addFiltersToQuery($query, $params);
+
+        /*
+         * Due to several joins, some Lead fields are overwritten. That's why only necessary fields are specified in the select. Be careful with join
+         */
+        $query->select(Lead::getTableName() . '.*', LeadStatus::getTableName() . '.*', Interaction::getTableName() . '.*');
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
@@ -927,7 +932,7 @@ class LeadRepository implements LeadRepositoryInterface {
         $query = $query->where(Lead::getTableName().'.identifier', '>', 0);
         // add filters if any
         $query = $this->addFiltersToQuery($query, $params);
-        
+
         if (isset($params['dealer_id'])) {
             $query = $query->where(Lead::getTableName().'.dealer_id', $params['dealer_id']);
         }

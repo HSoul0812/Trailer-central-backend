@@ -122,7 +122,14 @@ class TextService implements TextServiceInterface
             throw new NoLeadSmsNumberAvailableException();
         }
 
-        $from_number = $this->dealerLocationRepository->findDealerNumber($lead->dealer_id, $lead->preferred_location);
+        $activeNumber = $this->numberRepository->activeTwilioNumberByCustomerNumber($to_number);
+
+        if (!empty($activeNumber)) {
+            $from_number = $activeNumber->dealer_number;
+        } else {
+            $from_number = $this->dealerLocationRepository->findDealerNumber($lead->dealer_id, $lead->preferred_location);
+        }
+
         if(empty($from_number)) {
             throw new NoDealerSmsNumberAvailableException();
         }
@@ -195,19 +202,19 @@ class TextService implements TextServiceInterface
             throw new ReplyInvalidArgumentException('The number is not active. Params - ' . json_encode($params));
         }
 
-        $sendToDealer = true;
+        $sendFromDealer = false;
         $toNumber = $activeNumber->dealer_number;
         $customerName = $activeNumber->customer_name;
         $mediaUrl = [];
         $fileDtos = new Collection();
         $expirationTime = time() + self::EXPIRATION_TIME;
 
-        if ($from === $activeNumber->customer_number) {
-            $sendToDealer = false;
+        if ($from !== $activeNumber->customer_number) {
+            $sendFromDealer = true;
             $toNumber = $activeNumber->customer_number;
         }
 
-        $messageBody = ((!$sendToDealer) ? "Sent From: " . $from . "\nCustomer Name: $customerName\n\n" : '') . $body;
+        $messageBody = ((!$sendFromDealer) ? "Sent From: " . $from . "\nCustomer Name: $customerName\n\n" : '') . $body;
 
         for ($i = 0; $i < self::NUM_MEDIA; $i++) {
             if (!isset($params["MediaUrl$i"])) {
