@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands\User;
 
-use App\Console\Commands\User\GenerateCrmUserJob;
 use App\Jobs\CRM\User\GenerateCrmUserJob;
 use App\Models\User\User;
 use Illuminate\Console\Command;
