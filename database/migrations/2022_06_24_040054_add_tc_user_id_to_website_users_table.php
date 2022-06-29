@@ -15,7 +15,7 @@ class AddTcUserIdToWebsiteUsersTable extends Migration
     {
         if(!Schema::hasColumn('website_users', 'tc_user_id')) {
             Schema::table('website_users', function (Blueprint $table) {
-                $table->unsignedInteger('tc_user_id');
+                $table->unsignedInteger('tc_user_id')->nullable();
             });
         }
     }
