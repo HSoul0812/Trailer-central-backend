@@ -9,6 +9,12 @@ class TcEsInventory implements Arrayable {
     use TypedPropertyTrait;
 
     const IMAGE_BASE_URL = 'https://dealer-cdn.com';
+    const FEATURE_LIST_MAP = [
+        'floor_plan' => ['feature_name' => 'Floor Plans', 'feature_list_id' => 10],
+        'stall_tack' => ['feature_name' => 'Stall & Tack Features', 'feature_list_id' => 9],
+        'lq' => ['feature_name' => 'LQ Features', 'feature_list_id' => 8],
+        'doors_windows_ramps' => ['feature_name' => 'Doors, Windows and Ramps', 'feature_list_id' => 7]
+    ];
 
     public string $id;
     public ?bool $is_active;
@@ -95,10 +101,13 @@ class TcEsInventory implements Arrayable {
         $obj = new self();
         $dealerData = [];
         $locationData = [];
+        $featureList = [];;
         foreach($data as $key => $value) {
             $uKey = camel_case_2_underscore($key);
             if(str_starts_with($uKey, 'dealer.')) {
                 $dealerData[substr($uKey, 7)] = $value;
+            } else if(str_starts_with($uKey, 'feature_list.')) {
+                $featureList[substr($uKey, 13)] = $value;
             } else if(str_starts_with($uKey, 'location.')) {
                 $locationData[substr($uKey, 9)] = $value;
             } else if($uKey === 'image') {
@@ -112,9 +121,21 @@ class TcEsInventory implements Arrayable {
                 $obj->setTypedProperty($uKey, $value);
             }
         }
-
+        $obj->feature_list = self::expandCategorizedFeatureList($featureList);
         $obj->dealer = TcEsInventoryDealer::fromData($dealerData);
         $obj->location = TcEsInventoryLocation::fromData($locationData);
         return $obj;
+    }
+
+    private static function expandCategorizedFeatureList(array $featureList): array
+    {
+        $result = [];
+        foreach($featureList as $category => $sub) {
+            $featureCategory = self::FEATURE_LIST_MAP[$category];
+            foreach($sub as $feature) {
+                $result[] = array_merge($featureCategory, ['value' => $feature]);
+            }
+        }
+        return $result;
     }
 }
