@@ -27,6 +27,7 @@ use App\Console\Commands\Inventory\FixFloorplanBillStatus;
 use App\Console\Commands\Parts\Import\GetTextrailParts;
 use App\Console\Commands\Export\ExportFavoritesCommand;
 use App\Console\Commands\User\GenerateCrmUsers;
+use App\Console\Commands\Website\HideExpiredImages;
 
 class Kernel extends ConsoleKernel
 {
@@ -58,7 +59,8 @@ class Kernel extends ConsoleKernel
         RemoveBrokenCharacters::class,
         MyScheduleWorkCommand::class,
         ExportFavoritesCommand::class,
-        GenerateCrmUsers::class
+        GenerateCrmUsers::class,
+        HideExpiredImages::class
     ];
 
     /**
@@ -156,6 +158,10 @@ class Kernel extends ConsoleKernel
             ->runInBackground();
 
         $schedule->command('export:inventory-favorites')
+            ->daily()
+            ->runInBackground();
+
+        $schedule->command('website:hide-expired-images')
             ->daily()
             ->runInBackground();
     }
