@@ -32,8 +32,13 @@ class GenerateCrmUsers extends Command {
     {
         // Get All Users
         $addCount = 0;
-        $users = User::doesntHave('dealerUsers')->get();
+        $users = User::doesntHave('newDealerUser')->get();
         foreach ($users as $user) {
+            // Skip, Already Has New Dealer User
+            if(!empty($user->newDealerUser)) {
+                continue;
+            }
+
             // Dispatch Generate CRM User Job
             $job = new GenerateCrmUserJob($user);
             $this->dispatch($job->onQueue('crm-users'));
