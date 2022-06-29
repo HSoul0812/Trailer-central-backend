@@ -955,8 +955,8 @@ $api->version('v1', function ($route) {
                     'prefix' => 'campaign',
                     'middleware' => 'emailbuilder.campaign.validate'
                 ], function ($route) {
-                    /*$route->get('/', 'App\Http\Controllers\v1\CRM\Email\CampaignController@index');
-                    $route->put('/', 'App\Http\Controllers\v1\CRM\Email\CampaignController@create');
+                    $route->get('/', 'App\Http\Controllers\v1\CRM\Email\CampaignController@index');
+                    /*$route->put('/', 'App\Http\Controllers\v1\CRM\Email\CampaignController@create');
                     $route->get('{id}', 'App\Http\Controllers\v1\CRM\Email\CampaignController@show')->where('id', '[0-9]+');
                     $route->post('{id}', 'App\Http\Controllers\v1\CRM\Email\CampaignController@update')->where('id', '[0-9]+');
                     $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Email\CampaignController@destroy')->where('id', '[0-9]+');*/
