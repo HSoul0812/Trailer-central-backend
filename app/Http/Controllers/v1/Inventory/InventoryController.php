@@ -69,7 +69,7 @@ class InventoryController extends AbstractRestfulController
             return $this->response->item($result, new InventoryListResponseTransformer());
         }
 
-        $this->response->errorBadRequest();
+        return $this->response->errorBadRequest();
     }
 
     /**

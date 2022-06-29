@@ -56,6 +56,12 @@ class InventoryServiceTest extends TestCase
         $this->assertEquals(154, $response->inventories->total());
         $this->assertEquals(1, $response->inventories->count());
         $this->assertEquals('1000022126', $response->inventories->items()[0]->id);
+
+        $featureList = $response->inventories->items()[0]->feature_list;
+        $this->assertArrayHasKey('floor_plan', $featureList);
+        $this->assertArrayHasKey('stall_tack', $featureList);
+        $this->assertArrayHasKey('lq', $featureList);
+        $this->assertArrayHasKey('doors_windows_ramps', $featureList);
     }
 
     private function getConcreteService(): InventoryService
@@ -174,7 +180,10 @@ class InventoryServiceTest extends TestCase
                   "driveTrail": null,
                   "floorplan": null,
                   "propulsion": null,
-                  "featureList": [],
+                  "featureList.floorPlan": [],
+                  "featureList.stallTack": [],
+                  "featureList.lq": [],
+                  "featureList.doorsWindowsRamps": [],
                   "image": "",
                   "images": [
                     ""
