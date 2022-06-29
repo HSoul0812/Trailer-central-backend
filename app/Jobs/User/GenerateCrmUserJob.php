@@ -4,6 +4,7 @@ namespace App\Jobs\User;
 
 use App\Helpers\StringHelper;
 use App\Jobs\Job;
+use App\Models\User\User;
 use App\Repositories\User\NewUserRepositoryInterface;
 use App\Repositories\User\NewDealerUserRepositoryInterface;
 use App\Repositories\User\UserRepositoryInterface;
