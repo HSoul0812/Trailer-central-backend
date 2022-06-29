@@ -7,7 +7,7 @@ use App\Models\User\User;
 use Illuminate\Console\Command;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 
-class GenerateCrmUserJob extends Command {    
+class GenerateCrmUsers extends Command {    
     use DispatchesJobs;
 
     /**
