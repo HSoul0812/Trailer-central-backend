@@ -18,7 +18,6 @@ use App\Console\Commands\ReplaceYoutubeEmbeds;
 use App\Console\Commands\Inventory\AdjustFeetAndInches;
 use App\Console\Commands\User\CreateAccessToken;
 use App\Console\Commands\Parts\Import\StocksExistsCommand;
-use App\Console\Commands\CRM\Leads\AutoAssign;
 use App\Console\Commands\Parts\IncreaseDealerCostCommand;
 use App\Console\Commands\Parts\FixPartVendor;
 use App\Console\Commands\CRM\Dms\CVR\GenerateCVRDocumentCommand;
@@ -79,6 +78,10 @@ class Kernel extends ConsoleKernel
         $schedule->command('user:create-access-token')
                 ->hourly()
                 ->runInBackground();
+
+        /*$schedule->command('user:generate-crm-users')
+                ->hourly()
+                ->runInBackground();*/
 
         $schedule->command('crm:dms:update-po-num-ref')
                 ->daily()
