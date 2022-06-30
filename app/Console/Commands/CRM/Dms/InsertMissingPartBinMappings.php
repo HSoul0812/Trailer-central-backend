@@ -8,14 +8,12 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class InsertMissingPartBinMappings extends Command
 {
-    const CHUNK_SIZE = 5000;
-
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'crm:dms:insert-missing-part-bin-mappings {dealerId : Dealer ID to run this command on.}';
+    protected $signature = 'crm:dms:insert-missing-part-bin-mappings {dealerId : Dealer ID to run this command on} {--chunk=1000 : The chunk size to process}';
 
     /**
      * The console command description.
@@ -37,6 +35,7 @@ class InsertMissingPartBinMappings extends Command
         
         try {
             $insertMissingPartBinMappings
+                ->withChunkSize($this->option('chunk'))
                 ->withOnFoundMappingToInsert(function (int $partId, int $binId) use (&$totalInsert) {
                     // Only print out the debug line if the user runs
                     // this command with -v or --verbose option
