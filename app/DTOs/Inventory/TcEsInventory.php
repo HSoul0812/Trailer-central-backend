@@ -130,11 +130,8 @@ class TcEsInventory implements Arrayable {
     private static function expandCategorizedFeatureList(array $featureList): array
     {
         $result = [];
-        foreach($featureList as $category => $sub) {
-            $featureCategory = self::FEATURE_LIST_MAP[$category];
-            foreach($sub as $feature) {
-                $result[] = array_merge($featureCategory, ['value' => $feature]);
-            }
+        foreach($featureList as $sub) {
+            $result = array_merge($result, $sub);
         }
         return $result;
     }
