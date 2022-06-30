@@ -249,7 +249,13 @@ class ESInventoryQueryBuilder
                     'type' => 'number',
                     'script' => [
                         'lang' => 'painless',
-                        'source' => 'if(doc[\'featureList\'] != null){ return doc[\'featureList\'].size(); } else { return 0; }'
+                        'source' => 'int numFeature = 0;
+                        if(doc[\'featureList.floorPlan\'] != null){ numFeature += doc[\'featureList.floorPlan\'].size(); }
+                        if(doc[\'featureList.stallTack\'] != null){ numFeature += doc[\'featureList.stallTack\'].size(); }
+                        if(doc[\'featureList.lq\'] != null){ numFeature += doc[\'featureList.lq\'].size(); }
+                        if(doc[\'featureList.doorsWindowsRamps\'] != null){ numFeature += doc[\'featureList.doorsWindowsRamps\'].size(); }
+                        return numFeature;
+                        '
                     ],
                     'order' => $this->orderDir
                 ]
