@@ -63,7 +63,7 @@ class SubscriptionController extends RestfulControllerV2
      *     )
      * )
      */
-    public function getCustomerByDealerId(Request $request) {
+    public function getCustomerByDealerId(Request $request): Response {
         $request = new GetCustomerByDealerIdRequest(
             $request->all()
         );
