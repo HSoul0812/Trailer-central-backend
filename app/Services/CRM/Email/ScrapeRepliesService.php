@@ -167,7 +167,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
                     // After the job is being dispatched, put it in the cache
                     // so the next command won't create another job until it's finished
-                    // we set expiration time to the next one hour to be safe
+                    // we set expiration time to the next two hours to be safe
                     Cache::put($job->cacheKey(), [
                         'created_at' => now(),
                     ], now()->addSeconds(7200));
