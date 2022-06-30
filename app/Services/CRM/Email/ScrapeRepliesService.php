@@ -102,6 +102,13 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      */
     protected $log;
 
+
+    /**
+     * @var int
+     */
+    protected $runtime = 0;
+
+
     /**
      * ScrapeRepliesService constructor.
      */
@@ -142,6 +149,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @return bool
      */
     public function dealer(NewDealerUser $dealer): bool {
+        // Start Time Tracking
+        $this->runtime = microtime(true); 
+
         // Get Salespeople With Email Credentials
         $salespeople = $this->salespeople->getAllImap($dealer->user_id);
         $this->log->info('Dealer #' . $dealer->id . ' Found ' . $salespeople->count() .
@@ -150,20 +160,24 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             return false;
         }
 
+        // Start Time Tracking
+        $this->log->info('Found ' . $salespeople->count() . ' Sales People in ' . 
+                (microtime(true) - time()) . ' Seconds');
+
         // Loop Campaigns for Current Dealer
         foreach($salespeople as $salesperson) {
             // Try Catching Error for Sales Person
             try {
                 // Import Emails
-                $this->log->info('Dealer #' . $dealer->id . ', Sales Person #' .
-                                    $salesperson->id . ' - Starting Importing Email');
-
                 $job = new ScrapeRepliesJob($dealer, $salesperson);
 
                 // Dispatch ScrapeReplies Job only if there is no pending job
                 // for this dealer id and saleperson id
                 if ($job->hasNoPending()) {
                     $this->dispatch($job->onQueue('scrapereplies'));
+                    $this->log->info('Dealer #' . $dealer->id . ', Sales Person #' .
+                                        $salesperson->id . ' - Started Importing Email in ' . 
+                                        (microtime(true) - time()) . ' Seconds');
 
                     // After the job is being dispatched, put it in the cache
                     // so the next command won't create another job until it's finished
@@ -171,15 +185,21 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                     Cache::put($job->cacheKey(), [
                         'created_at' => now(),
                     ], now()->addSeconds(7200));
+                } else {
+                    $this->log->info('Dealer #' . $dealer->id . ', Sales Person #' .
+                                        $salesperson->id . ' - Already Active Job in ' . 
+                                        (microtime(true) - time()) . ' Seconds');
                 }
             } catch(\Exception $e) {
                 $this->log->error('Dealer #' . $dealer->id . ' Sales Person #' .
                                     $salesperson->id . ' - Exception returned: ' .
-                                    $e->getMessage() . PHP_EOL . $e->getTraceAsString());
+                                    $e->getMessage() . ' in ' . (microtime(true) - time()) . ' Seconds');
             }
         }
 
-        // Return Imported Email Count for Dealer
+        // End Time Tracking
+        $this->log->info('Queued ' . $salespeople->count() . ' Sales People in ' . 
+                (microtime(true) - time()) . ' Seconds');
         return true;
     }
 
@@ -191,6 +211,9 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @return int total number of imported emails
      */
     public function salesperson(NewDealerUser $dealer, SalesPerson $salesperson): int {
+        // Start Time Tracking
+        $this->runtime = microtime(true); 
+
         // Token Exists?
         if(!empty($salesperson->active_token)) {
             // Refresh Token
@@ -201,7 +224,8 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
         // Process Messages
         $this->log->info('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
-                            ' - Processing Getting Emails');
+                            ' - Processing Getting Emails in ' . 
+                            (microtime(true) - time()) . ' Seconds');
         $imported = 0;
         foreach($salesperson->email_folders as $folder) {
             // Try Catching Error for Sales Person Folder
@@ -210,16 +234,21 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 $imports = $this->folder($dealer, $salesperson, $folder);
                 $this->log->info('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
                                     ' - Finished Importing ' . $imports .
-                                    ' Replies for Folder' . $folder->name);
+                                    ' Replies for Folder' . $folder->name . ' in ' . 
+                                    (microtime(true) - time()) . ' Seconds');
                 $imported += $imports;
             } catch(\Exception $e) {
-                $this->log->error('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
-                                    ' - Error Importing Folder ' . $folder->name . ': ' .
-                                    $e->getMessage() . PHP_EOL . $e->getTraceAsString());
+                $this->log->error('Dealer #' . $dealer->id . ', Sales Person #' .
+                                    $salesperson->id .  ' - Error Importing Folder ' .
+                                    $folder->name . ': ' . $e->getMessage() . ' in ' . 
+                                    (microtime(true) - time()) . ' Seconds');
             }
         }
 
         // Return Campaign Sent Entries
+        $this->log->info('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
+                            ' - Imported ' . $imported . ' Emails in ' . 
+                            (microtime(true) - time()) . ' Seconds');
         return $imported;
     }
 
