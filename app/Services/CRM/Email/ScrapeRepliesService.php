@@ -162,7 +162,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
         // Start Time Tracking
         $this->log->info('Found ' . $salespeople->count() . ' Sales People in ' . 
-                (microtime(true) - microtime(true)) . ' Seconds');
+                (microtime(true) - $this->runtime) . ' Seconds');
 
         // Loop Campaigns for Current Dealer
         foreach($salespeople as $salesperson) {
@@ -177,7 +177,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                     $this->dispatch($job->onQueue('scrapereplies'));
                     $this->log->info('Dealer #' . $dealer->id . ', Sales Person #' .
                                         $salesperson->id . ' - Started Importing Email in ' . 
-                                        (microtime(true) - microtime(true)) . ' Seconds');
+                                        (microtime(true) - $this->runtime) . ' Seconds');
 
                     // After the job is being dispatched, put it in the cache
                     // so the next command won't create another job until it's finished
@@ -188,18 +188,18 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 } else {
                     $this->log->info('Dealer #' . $dealer->id . ', Sales Person #' .
                                         $salesperson->id . ' - Already Active Job in ' . 
-                                        (microtime(true) - microtime(true)) . ' Seconds');
+                                        (microtime(true) - $this->runtime) . ' Seconds');
                 }
             } catch(\Exception $e) {
                 $this->log->error('Dealer #' . $dealer->id . ' Sales Person #' .
                                     $salesperson->id . ' - Exception returned: ' .
-                                    $e->getMessage() . ' in ' . (microtime(true) - microtime(true)) . ' Seconds');
+                                    $e->getMessage() . ' in ' . (microtime(true) - $this->runtime) . ' Seconds');
             }
         }
 
         // End Time Tracking
         $this->log->info('Queued ' . $salespeople->count() . ' Sales People in ' . 
-                (microtime(true) - microtime(true)) . ' Seconds');
+                (microtime(true) - $this->runtime) . ' Seconds');
         return true;
     }
 
@@ -225,7 +225,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         // Process Messages
         $this->log->info('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
                             ' - Processing Getting Emails in ' . 
-                            (microtime(true) - microtime(true)) . ' Seconds');
+                            (microtime(true) - $this->runtime) . ' Seconds');
         $imported = 0;
         foreach($salesperson->email_folders as $folder) {
             // Try Catching Error for Sales Person Folder
@@ -235,20 +235,20 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 $this->log->info('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
                                     ' - Finished Importing ' . $imports .
                                     ' Replies for Folder' . $folder->name . ' in ' . 
-                                    (microtime(true) - microtime(true)) . ' Seconds');
+                                    (microtime(true) - $this->runtime) . ' Seconds');
                 $imported += $imports;
             } catch(\Exception $e) {
                 $this->log->error('Dealer #' . $dealer->id . ', Sales Person #' .
                                     $salesperson->id .  ' - Error Importing Folder ' .
                                     $folder->name . ': ' . $e->getMessage() . ' in ' . 
-                                    (microtime(true) - microtime(true)) . ' Seconds');
+                                    (microtime(true) - $this->runtime) . ' Seconds');
             }
         }
 
         // Return Campaign Sent Entries
         $this->log->info('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
                             ' - Imported ' . $imported . ' Emails in ' . 
-                            (microtime(true) - microtime(true)) . ' Seconds');
+                            (microtime(true) - $this->runtime) . ' Seconds');
         return $imported;
     }
 
