@@ -232,8 +232,9 @@ return [
             'supervisor-2' => [
                 'connection' => 'redis',
                 'queue' => ['scout'],
-                'balance' => false,
-                'processes' => 55,
+                'balance' => 'auto',
+                'minProcesses' => 15,
+                'maxProcesses' => 55,
                 'tries' => 3,
                 'timeout' => 300,
             ],
