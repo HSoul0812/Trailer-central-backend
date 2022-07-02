@@ -1,7 +1,5 @@
 <?php
 
-use Sentry\Event;
-
 return [
 
     'dsn' => env('SENTRY_LARAVEL_DSN', env('SENTRY_DSN')),
@@ -56,34 +54,6 @@ return [
 
     'controllers_base_namespace' => env('SENTRY_CONTROLLERS_BASE_NAMESPACE', 'App\\Http\\Controllers'),
 
-    'before_send' => function (Event $event): ?Event {
-        $tags = [];
-
-        $isDealerSitesProject = collect([
-            'ecommerce',
-            'inventory',
-            'textrail',
-            'website'
-        ])->contains(function ($route) {
-            return request()->is("api/$route/*");
-        });
-
-        if ($isDealerSitesProject) {
-            $tags['project'] = 'dealer-sites';
-        }
-
-        if (auth()->check()) {
-            $dealer = auth()->user();
-            $dealer->load('website');
-
-            $event->setTags($tags + [
-                'dealer_id' => $dealer->dealer_id,
-                'dealer_name' => $dealer->name,
-                'website_id' => $dealer->website->id,
-                'website_domain' => $dealer->website->domain,
-            ]);
-        }
-        return $event;
-    },
+    'before_send' => [\App\Services\Common\SentryService::class, 'beforeSend']
 
 ];
