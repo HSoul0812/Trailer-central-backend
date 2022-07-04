@@ -56,6 +56,9 @@ class TcApiResponseInventoryTransformer extends TransformerAbstract
             'is_featured'      => $type->is_featured,
             'is_special'       => $type->is_special,
             'use_website_price' => $type->use_website_price,
+            'year' => $type->year,
+            'status' => $type->status,
+            'axle_capacity' => $type->axle_capacity,
             'notes' => $type->notes,
          ];
     }
