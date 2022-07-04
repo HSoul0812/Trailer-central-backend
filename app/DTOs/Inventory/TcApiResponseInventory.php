@@ -50,6 +50,9 @@ class TcApiResponseInventory
     public ?string $availability;
     public ?string $availability_label;
     public ?int $show_on_website;
+    public ?int $year;
+    public ?string $status;
+    public ?string $axle_capacity;
     #[Pure]
  public static function fromData(array $data): self
  {
@@ -99,6 +102,10 @@ class TcApiResponseInventory
      $obj->is_special = $data['is_special'];
      $obj->use_website_price = $data['use_website_price'] ?? false;
      $obj->notes = $data['notes'];
+     $obj->year = $data['year'];
+     $obj->status = $data['status'];
+     $obj->axle_capacity = $data['axle_capacity'];
+
      foreach($data['attributes'] as $attribute) {
        $obj->setTypedProperty($attribute['code'], $attribute['value']);
      }
