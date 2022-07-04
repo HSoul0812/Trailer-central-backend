@@ -430,6 +430,21 @@ class TwilioService implements TwilioServiceInterface
     }
 
     /**
+     * @param string $phoneNumber
+     * @return bool
+     */
+    public function isValidPhoneNumber(string $phoneNumber): bool
+    {
+        try {
+            $result = $this->twilio->lookups->v1->phoneNumbers($phoneNumber)->fetch();
+        } catch (\Exception $e) {
+            return false;
+        }
+
+        return $result->countryCode === 'US';
+    }
+
+    /**
      * Get Twilio Number
      *
      * @param string $from_number
