@@ -20,6 +20,7 @@ class GenerateDealerAdminPasswd extends Command
      * @var string
      */
     protected $description = 'Sets the admin_passwd field of a dealer';
+
     /**
      * @var UserService
      */
