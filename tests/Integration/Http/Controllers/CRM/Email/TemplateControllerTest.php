@@ -87,5 +87,17 @@ class TemplateControllerTest extends IntegrationTestCase {
                     ]
                 ]
             ]);
+
+        $expectedData = [];
+        foreach ($this->seeder->createdTemplates as $template) {
+            $expectedData[] = [
+                'id' => (int)$template->id,
+                'user_id' => (int)$template->user_id,
+                'name' => $template->custom_template_name,
+                'key' => $template->template_key,
+                'created_at' => (string)$template->date,
+            ];
+        }
+        $this->assertResponseDataEquals($response, $expectedData, false);
     }
 }

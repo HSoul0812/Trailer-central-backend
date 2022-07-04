@@ -14,7 +14,7 @@ class TemplateTransformer extends TransformerAbstract
              'user_id' => (int)$template->user_id,
              'name' => $template->custom_template_name,
              'key' => $template->template_key,
-             'created_at' => $template->date,
+             'created_at' => (string)$template->date,
          ];
     }
 }
