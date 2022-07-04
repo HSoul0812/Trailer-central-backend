@@ -49,4 +49,10 @@ interface TwilioServiceInterface {
      * @return MessageInstance
      */
     public function sendViaTwilio(string $fromPhone, string $toNumber, string $textMessage, array $mediaUrl = []): MessageInstance;
+
+    /**
+     * @param string $phoneNumber
+     * @return bool
+     */
+    public function isValidPhoneNumber(string $phoneNumber): bool;
 }

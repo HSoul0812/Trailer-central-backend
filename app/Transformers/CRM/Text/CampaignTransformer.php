@@ -26,7 +26,7 @@ class CampaignTransformer extends TransformerAbstract
 
     /**
      * CampaignTransformer constructor.
-     * 
+     *
      * @param LeadTransformer $leadTransformer
      * @param CampaignReportTransformer $reportTransformer
      */
@@ -54,9 +54,11 @@ class CampaignTransformer extends TransformerAbstract
             'brands' => $campaign->brands,
             'include_archived' => (int)$campaign->include_archived,
             'is_enabled' => (int)$campaign->is_enabled,
+            'is_error' => (int)$campaign->is_error,
             'created_at' => $campaign->created_at,
             'updated_at' => $campaign->updated_at,
             'deleted' => (int)$campaign->deleted,
+            'log' => $campaign->log,
         ];
     }
 

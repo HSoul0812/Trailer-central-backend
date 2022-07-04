@@ -159,6 +159,15 @@ class NumberRepository implements NumberRepositoryInterface {
         return $query->first();
     }
 
+    /**
+     * @param string $customerNumber
+     * @return Number|null
+     */
+    public function activeTwilioNumberByCustomerNumber(string $customerNumber): ?Number
+    {
+        return Number::query()->where('customer_number', $customerNumber)->first();
+    }
+
 
     /**
      * Delete Twilio Number
