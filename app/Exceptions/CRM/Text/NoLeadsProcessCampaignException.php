@@ -11,7 +11,5 @@ namespace App\Exceptions\CRM\Text;
  */
 class NoLeadsProcessCampaignException extends \Exception
 {
-    
-    protected $message = 'Cannot proceed with processing campaign, campaign did not return any leads!';
-
+    protected $message = 'No Leads to Send to Based on Your Chosen Criteria';
 }
