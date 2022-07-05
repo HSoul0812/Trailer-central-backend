@@ -8,7 +8,6 @@ use App\Models\User\NewDealerUser;
 use App\Models\CRM\User\SalesPerson;
 use App\Services\CRM\Email\ScrapeRepliesServiceInterface;
 use Illuminate\Support\Facades\Cache;
-use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Bus\Queueable;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -70,11 +69,13 @@ class ScrapeRepliesJob extends Job
             Cache::forget($this->cacheKey());
 
             return $imports;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $log->error('Dealer #' . $this->dealer->id . ' Sales Person #' .
                                 $this->salesperson->id . ' - Exception returned: ' .
                                 $e->getMessage() . PHP_EOL . $e->getTraceAsString());
-            throw new ScrapeRepliesJobFailedException;
+
+            // Delete the cache when the job is finished
+            Cache::forget($this->cacheKey());
         }
     }
 

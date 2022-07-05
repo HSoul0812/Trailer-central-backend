@@ -29,14 +29,15 @@ class SentryService
             $dealer = auth()->user();
             $dealer->load('website');
 
-            $event->setTags($tags + [
-                    'dealer_id' => $dealer->dealer_id,
-                    'dealer_name' => $dealer->name,
-                    'website_id' => $dealer->website->id,
-                    'website_domain' => $dealer->website->domain,
-                ]);
+            $tags = array_merge($tags, [
+                'dealer_id' => $dealer->dealer_id,
+                'dealer_name' => $dealer->name,
+                'website_id' => $dealer->website->id,
+                'website_domain' => $dealer->website->domain,
+            ]);
         }
 
+        $event->setTags($tags);
         return $event;
     }
 }
