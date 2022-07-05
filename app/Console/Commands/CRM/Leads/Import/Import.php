@@ -2,34 +2,34 @@
 
 namespace App\Console\Commands\CRM\Leads\Import;
 
+use App\Services\CRM\Leads\Import\ImportServiceInterface;
 use Illuminate\Console\Command;
 
 /**
  * Import leads in the ADF format
  */
-class ADF extends Command
+class Import extends Command
 {
-
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'leads:import:adf';
+    protected $signature = 'leads:import';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Import leads using ADF.';
+    protected $description = 'Import leads.';
 
     /**
-     * @var App\Services\CRM\Leads\Import\ADFImportServiceInterface
+     * @var ImportServiceInterface
      */
     protected $service;
 
-    public function __construct(ADFServiceInterface $service)
+    public function __construct(ImportServiceInterface $service)
     {
         parent::__construct();
 
@@ -47,7 +47,7 @@ class ADF extends Command
         $imported = $this->service->import();
 
         // Return Result
-        $this->info("Imported " . $imported . " leads from ADF import service");
+        $this->info("Imported " . $imported . " leads from import service");
 
         // Sleep for a Second to Prevent Rate Limiting
         sleep(1);

@@ -2,27 +2,19 @@
 
 namespace App\Services\CRM\Leads\Import;
 
-use App\Exceptions\CRM\Leads\Import\InvalidAdfImportFormatException;
-use App\Exceptions\CRM\Leads\Import\InvalidAdfDealerIdException;
-use App\Exceptions\CRM\Leads\Import\MissingAdfEmailAccessTokenException;
+use App\Exceptions\CRM\Leads\Import\InvalidImportFormatException;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
-use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
-use App\Repositories\System\EmailRepositoryInterface;
-use App\Repositories\User\UserRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Models\CRM\Leads\Lead;
-use App\Models\Integration\Auth\AccessToken;
 use App\Models\User\User;
 use App\Services\CRM\Leads\DTOs\ADFLead;
 use App\Services\CRM\Leads\LeadServiceInterface;
-use App\Services\Integration\Google\GoogleServiceInterface;
-use App\Services\Integration\Google\GmailServiceInterface;
-use Carbon\CarbonImmutable;
+use App\Services\Integration\Common\DTOs\ParsedEmail;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\DomCrawler\Crawler;
 
-class ADFService extends AbstractImportService
+class ADFService implements ImportTypeInterface
 {
     /**
      * @var LeadRepositoryInterface
@@ -30,134 +22,65 @@ class ADFService extends AbstractImportService
     protected $leads;
 
     /**
-     * @var EmailRepositoryInterface
-     */
-    protected $emails;
-
-    /**
-     * @var TokenRepositoryInterface
-     */
-    protected $tokens;
-
-    /**
      * @var InventoryRepositoryInterface
      */
     protected $inventory;
-
-    /**
-     * @var UserRepositoryInterface
-     */
-    protected $dealers;
 
     /**
      * @var DealerLocationRepositoryInterface
      */
     protected $locations;
 
-    /**
-     * @var GoogleServiceInterface
-     */
-    protected $google;
-
-    /**
-     * @var GmailServiceInterface
-     */
-    protected $gmail;
-
     public function __construct(
         LeadServiceInterface $leads,
-        EmailRepositoryInterface $emails,
-        TokenRepositoryInterface $tokens,
         InventoryRepositoryInterface $inventory,
-        UserRepositoryInterface $dealers,
-        DealerLocationRepositoryInterface $locations,
-        GoogleServiceInterface $google,
-        GmailServiceInterface $gmail
+        DealerLocationRepositoryInterface $locations
     ) {
         $this->leads = $leads;
-        $this->emails = $emails;
-        $this->tokens = $tokens;
         $this->inventory = $inventory;
-        $this->dealers = $dealers;
         $this->locations = $locations;
-        $this->google = $google;
-        $this->gmail = $gmail;
     }
 
     /**
      * Takes a lead and export it to the IDS system in XML format
      *
-     * @throws InvalidAdfDealerIdException
-     * @return int total number of imported adf leads
+     * @param User $dealer
+     * @param ParsedEmail $parsedEmail
+     * @return Lead
+     * @throws InvalidImportFormatException
      */
-    public function import(): int {
-        // Get Emails From Service
-        $accessToken = $this->getAccessToken();
-        $inbox = config('adf.imports.gmail.inbox');
-        $messages = $this->gmail->messages($accessToken, $inbox);
+    public function import(User $dealer, ParsedEmail $parsedEmail): Lead
+    {
+        $crawler = $this->validateAdf($parsedEmail->getBody());
 
-        // Checking Each Message
-        $total = 0;
-        foreach($messages as $mailId) {
-            // Get Message Overview
-            $email = $this->gmail->message($mailId);
+        $adf = $this->parseAdf($dealer, $crawler);
+        Log::info('Parsed ADF Lead ' . $adf->getFullName() . ' For Dealer ID #' . $adf->getDealerId());
 
-            // Find Exceptions
-            try {
-                // Validate ADF
-                $crawler = $this->validateAdf($email->getBody());
-
-                // Find Dealer ID
-                $dealerId = str_replace('@' . config('adf.imports.gmail.domain'), '', $email->getToEmail());
-                try {
-                    $dealer = $this->dealers->get(['dealer_id' => $dealerId]);
-                } catch(\Exception $e) {
-                    throw new InvalidAdfDealerIdException;
-                }
-
-                // Validate ADF
-                $adf = $this->parseAdf($dealer, $crawler);
-                Log::info('Parsed ADF Lead ' . $adf->getFullName() . ' For Dealer ID #' . $adf->getDealerId());
-
-                // Process Further
-                $result = $this->importLead($adf);
-                if(!empty($result->identifier)) {
-                    Log::info('Imported ADF Lead ' . $result->identifier . ' and Moved to Processed');
-                    $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.processed')], [$inbox]);
-                    $total++;
-                }
-            } catch(InvalidAdfDealerIdException $e) {
-                if(!empty($dealerId) && is_numeric($dealerId)) {
-                    $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.unmapped')], [$inbox]);
-                } else {
-                    $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.invalid')], [$inbox]);
-                }
-                Log::error("Exception returned on ADF Import Message #{$mailId} {$e->getMessage()}: {$e->getTraceAsString()}");
-            } catch(InvalidAdfImportFormatException $e) {
-                $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.invalid')], [$inbox]);
-                Log::error("Exception returned on ADF Import Message #{$mailId} {$e->getMessage()}: {$e->getTraceAsString()}");
-            } catch(\Exception $e) {
-                Log::error("Exception returned on ADF Import Message #{$mailId} {$e->getMessage()}: {$e->getTraceAsString()}");
-            }
-        }
-
-        // Return Total
-        return $total;
+        return $this->importLead($adf);
     }
 
-    public function isSatisfiedBy(string $body): bool
+    /**
+     * @param ParsedEmail $parsedEmail
+     * @return bool
+     */
+    public function isSatisfiedBy(ParsedEmail $parsedEmail): bool
     {
-        // TODO: Implement isSatisfiedBy() method.
+        $fixed = $this->fixCdata($parsedEmail->getBody());
+        $crawler = new Crawler($fixed);
+        $adf = $crawler->filter('adf')->first();
+
+        return $adf->count() >= 1 && !empty($adf->nodeName()) && ($adf->nodeName() === 'adf');
     }
 
     /**
      * Validate ADF and Return Result
      *
      * @param string $body
-     * @throws InvalidAdfImportFormatException
      * @return Crawler
+     * @throws InvalidImportFormatException
      */
-    private function validateAdf(string $body): Crawler {
+    private function validateAdf(string $body): Crawler
+{
         // Get XML Parsed Data
         $fixed = $this->fixCdata($body);
         $crawler = new Crawler($fixed);
@@ -166,7 +89,7 @@ class ADFService extends AbstractImportService
         // Valid XML?
         if($adf->count() < 1 || empty($adf->nodeName()) || ($adf->nodeName() !== 'adf')) {
             Log::error("Body text failed to parse ADF correctly:\r\n\r\n" . $body);
-            throw new InvalidAdfImportFormatException;
+            throw new InvalidImportFormatException;
         }
 
         // Return True

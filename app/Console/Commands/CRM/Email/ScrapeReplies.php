@@ -58,9 +58,9 @@ class ScrapeReplies extends Command
 
         $this->service = $service;
         $this->users = $users;
-        
+
         date_default_timezone_set(env('DB_TIMEZONE'));
-        
+
         $this->datetime = new \DateTime();
         $this->datetime->setTimezone(new \DateTimeZone(env('DB_TIMEZONE')));
     }
@@ -74,10 +74,10 @@ class ScrapeReplies extends Command
     {
         // Get Dealer ID
         $this->dealerId = $this->argument('dealer');
-        
+
         $this->boundLower = $this->argument('boundLower');
-        $this->boundUpper = $this->argument('boundUpper');        
-        
+        $this->boundUpper = $this->argument('boundUpper');
+
         $now = $this->datetime->format("l, F jS, Y H:i:s");
         $this->command = str_replace(['{boundLower?}', '{boundUpper?}', '{dealer?}'], [$this->boundLower, $this->boundUpper, $this->dealerId], $this->signature);
 
