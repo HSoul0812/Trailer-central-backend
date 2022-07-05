@@ -4,8 +4,8 @@ namespace App\Http\Controllers\v1\CRM\Email;
 
 use App\Http\Controllers\RestfulControllerV2;
 use App\Repositories\CRM\Email\TemplateRepositoryInterface;
-/*use App\Http\Requests\CRM\Email\GetTemplatesRequest;
-use App\Http\Requests\CRM\Email\CreateTemplateRequest;
+use App\Http\Requests\CRM\Email\GetTemplatesRequest;
+/*use App\Http\Requests\CRM\Email\CreateTemplateRequest;
 use App\Http\Requests\CRM\Email\ShowTemplateRequest;
 use App\Http\Requests\CRM\Email\UpdateTemplateRequest;
 use App\Http\Requests\CRM\Email\DeleteTemplateRequest;*/
@@ -73,7 +73,7 @@ class TemplateController extends RestfulControllerV2
      *     ),
      * )
      */
-    /*public function index(Request $request) {
+    public function index(Request $request) {
         $request = new GetTemplatesRequest($request->all());
         
         if ($request->validate()) {
@@ -81,7 +81,7 @@ class TemplateController extends RestfulControllerV2
         }
         
         return $this->response->errorBadRequest();
-    }*/
+    }
     
     /**
      * @OA\Put(
