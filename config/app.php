@@ -62,7 +62,11 @@ return [
 
     'new_design_crm_url' => env('NEW_DESIGN_CRM_URL', 'https://design-prod.crm.trailercentral.com/'),
 
+    'new_design_lead_force' => env('NEW_DESIGN_LEAD_FORCE', false),
+
     'crm_url' => env('CRM_URL', 'https://crm.trailercentral.com/'),
+
+    'crm_lead_url' => env('CRM_LEAD_ROUTE', '/leads/lead/'),
 
     'dashboard_login_url' => env('DASHBOARD_LOGIN_URL', 'https://beta.dashboard.trailercentral.com/login'),
 
@@ -225,6 +229,11 @@ return [
          */
         \Feed\EditMapping\ToolServiceProvider::class,
         \Showroom\BulkConfiguration\ToolServiceProvider::class,
+
+        /*
+         * Sentry stuff
+         */
+        Sentry\Laravel\ServiceProvider::class,
     ],
 
     /*
@@ -274,7 +283,8 @@ return [
         'Str' => Illuminate\Support\Str::class,
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
-        'View' => Illuminate\Support\Facades\View::class
+        'View' => Illuminate\Support\Facades\View::class,
+        'Sentry' => Sentry\Laravel\Facade::class,
     ],
 
 ];

@@ -9,9 +9,7 @@ namespace App\Exceptions\CRM\Text;
  *
  * @package App\Exceptions\CRM\Text
  */
-class NoLeadsDeliverBlastException extends \Exception
+class NoLeadsDeliverBlastException extends BlastException
 {
-    
-    protected $message = 'Cannot proceed with delivering blast, blast did not return any leads!';
-
+    protected $message = 'No Leads to Send to Based on Your Chosen Criteria';
 }

@@ -163,6 +163,12 @@ class BlastRepository implements BlastRepositoryInterface {
                 unset($params['brand']);
             }
 
+            if (isset($params['log']) && is_array($params['log'])) {
+                $log = $blast->log ? json_decode($blast->log, true) : [];
+                $log[] = $params['log'];
+                $params['log'] = json_encode($log);
+            }
+
             // Update Blasts
             $this->updateBrands($blast->id, $brands);
 

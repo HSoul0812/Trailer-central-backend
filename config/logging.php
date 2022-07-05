@@ -37,7 +37,7 @@ return [
     'channels' => [
         'stack' => [
             'driver' => 'stack',
-            'channels' => ['single', 'slack'],
+            'channels' => ['single', 'slack', 'sentry'],
             'ignore_exceptions' => false,
         ],
 
@@ -229,7 +229,9 @@ return [
         ],
 
         'showroom-imports' => [
+            'driver' => 'daily',
             'path' => storage_path('logs/showroom-imports.log'),
+            'days' => 3,
             'permission' => 0664,
         ],
         'blog' => [
@@ -238,6 +240,10 @@ return [
             'level' => 'debug',
             'days' => 3,
             'permission' => 0664,
+        ],
+        'sentry' => [
+            'driver' => 'sentry',
+            'level' => env('SENTRY_LOG_LEVEL', 'error')
         ],
     ],
 
