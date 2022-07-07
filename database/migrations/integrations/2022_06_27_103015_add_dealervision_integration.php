@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\User\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
@@ -83,7 +84,8 @@ class AddDealervisionIntegration extends Migration
      *
      * @return void
      */
-    public function up(): void {
+    public function up(): void
+    {
         if (!$this->checkIntegration()) {
             DB::transaction(static function () {
                 $integration = self::INTEGRATION_PARAMS;
@@ -95,9 +97,15 @@ class AddDealervisionIntegration extends Migration
         if ($this->checkIntegration() && !$this->checkIntegrationDealer()) {
             DB::transaction(static function () {
                 $integration_dealer = self::INTEGRATION_DEALER_YOUNGBLOODS;
-                $integration_dealer['created_at'] = (new \DateTime())->format('Y:m:d H:i:s');
+                $integration_dealer['created_at'] = (new DateTime())->format('Y:m:d H:i:s');
                 $integration_dealer['settings'] = serialize(self::DEALER_SETTINGS);
-                DB::table(self::DEALER_INTEGRATION_TABLE_NAME)->insert($integration_dealer);
+
+                $dealerExists = User::where('dealer_id', $integration_dealer['dealer_id'])->exists();
+
+                // We only insert the record if this dealer exists in the database
+                if ($dealerExists) {
+                    DB::table(self::DEALER_INTEGRATION_TABLE_NAME)->insert($integration_dealer);
+                }
             });
         }
     }
@@ -107,32 +115,35 @@ class AddDealervisionIntegration extends Migration
      *
      * @return void
      */
-    public function down(): void {
-        DB::table('integration_dealer')->delete(self::INTEGRATION_PARAMS['integration_id']);
-        DB::table('integration')->delete(self::INTEGRATION_PARAMS['integration_id']);
+    public function down(): void
+    {
+        DB::table('integration_dealer')
+            ->where('integration_id', self::INTEGRATION_PARAMS['integration_id'])
+            ->delete();
+
+        DB::table('integration')
+            ->where('integration_id', self::INTEGRATION_PARAMS['integration_id'])
+            ->delete();
     }
 
     /**
      * @return bool
      */
-    private function checkIntegration(): bool {
-        $checkIntegration = DB::table(self::TABLE_NAME)->where('integration_id', self::INTEGRATION_PARAMS['integration_id'])->exists();
-
-        if ($checkIntegration) {
-            return true;
-        }
-        return false;
+    private function checkIntegration(): bool
+    {
+        return DB::table(self::TABLE_NAME)
+            ->where('integration_id', self::INTEGRATION_PARAMS['integration_id'])
+            ->exists();
     }
 
     /**
      * @return bool
      */
-    private function checkIntegrationDealer(): bool {
-        $checkIntegrationDealer = DB::table(self::DEALER_INTEGRATION_TABLE_NAME)->where('integration_id', self::INTEGRATION_PARAMS['integration_id'])->where('dealer_id', self::INTEGRATION_DEALER_YOUNGBLOODS['dealer_id'])->exists();
-
-        if ($checkIntegrationDealer) {
-            return true;
-        }
-        return false;
+    private function checkIntegrationDealer(): bool
+    {
+        return DB::table(self::DEALER_INTEGRATION_TABLE_NAME)
+            ->where('integration_id', self::INTEGRATION_PARAMS['integration_id'])
+            ->where('dealer_id', self::INTEGRATION_DEALER_YOUNGBLOODS['dealer_id'])
+            ->exists();
     }
 }
