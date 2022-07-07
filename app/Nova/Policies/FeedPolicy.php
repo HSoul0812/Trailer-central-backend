@@ -2,15 +2,15 @@
 
 namespace App\Nova\Policies;
 
+use App\Models\Feed\Feed;
 use App\Models\User\NovaUser;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use App\Models\Feed\Mapping\Incoming\DealerIncomingPendingMapping;
 
 /**
- * Class DealerIncomingPendingMappingPolicy
+ * Class FeedPolicy
  * @package App\Nova\Policies
  */
-class DealerIncomingPendingMappingPolicy
+class FeedPolicy
 {
     use HandlesAuthorization;
 
@@ -25,7 +25,7 @@ class DealerIncomingPendingMappingPolicy
     }
 
     /**
-     * Determine whether the user can view any mappings.
+     * Determine whether the user can view any feed.
      *
      * @param  NovaUser $user
      * @return bool
@@ -36,19 +36,19 @@ class DealerIncomingPendingMappingPolicy
     }
 
     /**
-     * Determine whether the user can view the mapping.
+     * Determine whether the user can view the feed.
      *
      * @param NovaUser|null $user
-     * @param DealerIncomingPendingMapping $mapping
+     * @param Feed $feed
      * @return bool
      */
-    public function view(?NovaUser $user, DealerIncomingPendingMapping $mapping): bool
+    public function view(?NovaUser $user, Feed $feed): bool
     {
         return $user->hasAnyRole('Admin', 'Support');
     }
 
     /**
-     * Determine whether the user can create mappings.
+     * Determine whether the user can create feeds.
      *
      * @param  NovaUser  $user
      * @return bool
@@ -59,49 +59,49 @@ class DealerIncomingPendingMappingPolicy
     }
 
     /**
-     * Determine whether the user can update the mapping.
+     * Determine whether the user can update the feed.
      *
      * @param NovaUser $user
-     * @param DealerIncomingPendingMapping $mapping
+     * @param Feed $feed
      * @return bool
      */
-    public function update(NovaUser $user, DealerIncomingPendingMapping $mapping): bool
+    public function update(NovaUser $user, Feed $feed): bool
     {
         return $user->hasAnyRole('Admin', 'Support');
     }
 
     /**
-     * Determine whether the user can delete the mapping.
+     * Determine whether the user can delete the feed.
      *
      * @param NovaUser $user
-     * @param DealerIncomingPendingMapping $mapping
+     * @param Feed $feed
      * @return bool
      */
-    public function delete(NovaUser $user, DealerIncomingPendingMapping $mapping): bool
+    public function delete(NovaUser $user, Feed $feed): bool
     {
         return $user->hasAnyRole('Admin', 'Support');
     }
 
     /**
-     * Determine whether the user can restore the mapping.
+     * Determine whether the user can restore the feed.
      *
      * @param NovaUser $user
-     * @param DealerIncomingPendingMapping $mapping
+     * @param Feed $feed
      * @return void
      */
-    public function restore(NovaUser $user, DealerIncomingPendingMapping $mapping): void
+    public function restore(NovaUser $user, Feed $feed): void
     {
         //
     }
 
     /**
-     * Determine whether the user can permanently delete the mapping.
+     * Determine whether the user can permanently delete the feed.
      *
      * @param NovaUser $user
-     * @param DealerIncomingPendingMapping $mapping
+     * @param Feed $feed
      * @return void
      */
-    public function forceDelete(NovaUser $user, DealerIncomingPendingMapping $mapping): void
+    public function forceDelete(NovaUser $user, Feed $feed): void
     {
         //
     }

@@ -59,6 +59,7 @@
         "sentry/sentry-laravel": "^2.11",
         "spatie/browsershot": "~3.40.0",
         "spatie/image": "^1.10",
+        "spatie/laravel-permission": "^3.0",
         "spatie/laravel-sitemap": "^5.7",
         "staudenmeir/belongs-to-through": "^2.5",
         "stripe/stripe-php": "^7.100",
@@ -67,6 +68,7 @@
         "symfony/dom-crawler": "^5.1",
         "tijsverkoyen/css-to-inline-styles": "^2.2.1",
         "twilio/sdk": "^5.31",
+        "vyuldashev/nova-permission": "^2.11",
         "webklex/laravel-imap": "~2.4",
         "showroom/bulkconfiguration": "*",
         "trailercentral/passwordless-login-url": "*"

@@ -2,15 +2,15 @@
 
 namespace App\Nova\Policies;
 
+use App\Models\Parts\Vendor;
 use App\Models\User\NovaUser;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use App\Models\Feed\Mapping\Incoming\DealerIncomingPendingMapping;
 
 /**
- * Class DealerIncomingPendingMappingPolicy
+ * Class PartTypePolicy
  * @package App\Nova\Policies
  */
-class DealerIncomingPendingMappingPolicy
+class PartVendorPolicy
 {
     use HandlesAuthorization;
 
@@ -25,7 +25,7 @@ class DealerIncomingPendingMappingPolicy
     }
 
     /**
-     * Determine whether the user can view any mappings.
+     * Determine whether the user can view any vendor.
      *
      * @param  NovaUser $user
      * @return bool
@@ -36,19 +36,19 @@ class DealerIncomingPendingMappingPolicy
     }
 
     /**
-     * Determine whether the user can view the mapping.
+     * Determine whether the user can view the vendor.
      *
      * @param NovaUser|null $user
-     * @param DealerIncomingPendingMapping $mapping
+     * @param Vendor $vendor
      * @return bool
      */
-    public function view(?NovaUser $user, DealerIncomingPendingMapping $mapping): bool
+    public function view(?NovaUser $user, Vendor $vendor): bool
     {
         return $user->hasAnyRole('Admin', 'Support');
     }
 
     /**
-     * Determine whether the user can create mappings.
+     * Determine whether the user can create vendors.
      *
      * @param  NovaUser  $user
      * @return bool
@@ -59,49 +59,49 @@ class DealerIncomingPendingMappingPolicy
     }
 
     /**
-     * Determine whether the user can update the mapping.
+     * Determine whether the user can update the vendor.
      *
      * @param NovaUser $user
-     * @param DealerIncomingPendingMapping $mapping
+     * @param Vendor $vendor
      * @return bool
      */
-    public function update(NovaUser $user, DealerIncomingPendingMapping $mapping): bool
+    public function update(NovaUser $user, Vendor $vendor): bool
     {
         return $user->hasAnyRole('Admin', 'Support');
     }
 
     /**
-     * Determine whether the user can delete the mapping.
+     * Determine whether the user can delete the vendor.
      *
      * @param NovaUser $user
-     * @param DealerIncomingPendingMapping $mapping
+     * @param Vendor $vendor
      * @return bool
      */
-    public function delete(NovaUser $user, DealerIncomingPendingMapping $mapping): bool
+    public function delete(NovaUser $user, Vendor $vendor): bool
     {
         return $user->hasAnyRole('Admin', 'Support');
     }
 
     /**
-     * Determine whether the user can restore the mapping.
+     * Determine whether the user can restore the vendor.
      *
      * @param NovaUser $user
-     * @param DealerIncomingPendingMapping $mapping
+     * @param Vendor $vendor
      * @return void
      */
-    public function restore(NovaUser $user, DealerIncomingPendingMapping $mapping): void
+    public function restore(NovaUser $user, Vendor $vendor): void
     {
         //
     }
 
     /**
-     * Determine whether the user can permanently delete the mapping.
+     * Determine whether the user can permanently delete the vendor.
      *
      * @param NovaUser $user
-     * @param DealerIncomingPendingMapping $mapping
+     * @param Vendor $vendor
      * @return void
      */
-    public function forceDelete(NovaUser $user, DealerIncomingPendingMapping $mapping): void
+    public function forceDelete(NovaUser $user, Vendor $vendor): void
     {
         //
     }

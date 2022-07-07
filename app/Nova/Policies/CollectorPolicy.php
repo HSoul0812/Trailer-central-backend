@@ -4,13 +4,13 @@ namespace App\Nova\Policies;
 
 use App\Models\User\NovaUser;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use App\Models\Feed\Mapping\Incoming\DealerIncomingPendingMapping;
+use App\Models\Integration\Collector\Collector;
 
 /**
- * Class DealerIncomingPendingMappingPolicy
+ * Class CollectorPolicy
  * @package App\Nova\Policies
  */
-class DealerIncomingPendingMappingPolicy
+class CollectorPolicy
 {
     use HandlesAuthorization;
 
@@ -25,7 +25,7 @@ class DealerIncomingPendingMappingPolicy
     }
 
     /**
-     * Determine whether the user can view any mappings.
+     * Determine whether the user can view any collectors.
      *
      * @param  NovaUser $user
      * @return bool
@@ -36,19 +36,19 @@ class DealerIncomingPendingMappingPolicy
     }
 
     /**
-     * Determine whether the user can view the mapping.
+     * Determine whether the user can view the collector.
      *
      * @param NovaUser|null $user
-     * @param DealerIncomingPendingMapping $mapping
+     * @param Collector $collector
      * @return bool
      */
-    public function view(?NovaUser $user, DealerIncomingPendingMapping $mapping): bool
+    public function view(?NovaUser $user, Collector $collector): bool
     {
         return $user->hasAnyRole('Admin', 'Support');
     }
 
     /**
-     * Determine whether the user can create mappings.
+     * Determine whether the user can create collectors.
      *
      * @param  NovaUser  $user
      * @return bool
@@ -59,49 +59,49 @@ class DealerIncomingPendingMappingPolicy
     }
 
     /**
-     * Determine whether the user can update the mapping.
+     * Determine whether the user can update the collector.
      *
      * @param NovaUser $user
-     * @param DealerIncomingPendingMapping $mapping
+     * @param Collector $collector
      * @return bool
      */
-    public function update(NovaUser $user, DealerIncomingPendingMapping $mapping): bool
+    public function update(NovaUser $user, Collector $collector): bool
     {
         return $user->hasAnyRole('Admin', 'Support');
     }
 
     /**
-     * Determine whether the user can delete the mapping.
+     * Determine whether the user can delete the collector.
      *
      * @param NovaUser $user
-     * @param DealerIncomingPendingMapping $mapping
+     * @param Collector $collector
      * @return bool
      */
-    public function delete(NovaUser $user, DealerIncomingPendingMapping $mapping): bool
+    public function delete(NovaUser $user, Collector $collector): bool
     {
         return $user->hasAnyRole('Admin', 'Support');
     }
 
     /**
-     * Determine whether the user can restore the mapping.
+     * Determine whether the user can restore the collector.
      *
      * @param NovaUser $user
-     * @param DealerIncomingPendingMapping $mapping
+     * @param Collector $collector
      * @return void
      */
-    public function restore(NovaUser $user, DealerIncomingPendingMapping $mapping): void
+    public function restore(NovaUser $user, Collector $collector): void
     {
         //
     }
 
     /**
-     * Determine whether the user can permanently delete the mapping.
+     * Determine whether the user can permanently delete the collector.
      *
      * @param NovaUser $user
-     * @param DealerIncomingPendingMapping $mapping
+     * @param Collector $collector
      * @return void
      */
-    public function forceDelete(NovaUser $user, DealerIncomingPendingMapping $mapping): void
+    public function forceDelete(NovaUser $user, Collector $collector): void
     {
         //
     }

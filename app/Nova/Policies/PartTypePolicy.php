@@ -3,14 +3,14 @@
 namespace App\Nova\Policies;
 
 use App\Models\User\NovaUser;
+use App\Nova\Resources\Parts\PartType;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use App\Models\Feed\Mapping\Incoming\DealerIncomingPendingMapping;
 
 /**
- * Class DealerIncomingPendingMappingPolicy
+ * Class PartTypePolicy
  * @package App\Nova\Policies
  */
-class DealerIncomingPendingMappingPolicy
+class PartTypePolicy
 {
     use HandlesAuthorization;
 
@@ -25,7 +25,7 @@ class DealerIncomingPendingMappingPolicy
     }
 
     /**
-     * Determine whether the user can view any mappings.
+     * Determine whether the user can view any types.
      *
      * @param  NovaUser $user
      * @return bool
@@ -36,19 +36,19 @@ class DealerIncomingPendingMappingPolicy
     }
 
     /**
-     * Determine whether the user can view the mapping.
+     * Determine whether the user can view the type.
      *
      * @param NovaUser|null $user
-     * @param DealerIncomingPendingMapping $mapping
+     * @param PartType $type
      * @return bool
      */
-    public function view(?NovaUser $user, DealerIncomingPendingMapping $mapping): bool
+    public function view(?NovaUser $user, PartType $type): bool
     {
         return $user->hasAnyRole('Admin', 'Support');
     }
 
     /**
-     * Determine whether the user can create mappings.
+     * Determine whether the user can create types.
      *
      * @param  NovaUser  $user
      * @return bool
@@ -59,49 +59,49 @@ class DealerIncomingPendingMappingPolicy
     }
 
     /**
-     * Determine whether the user can update the mapping.
+     * Determine whether the user can update the type.
      *
      * @param NovaUser $user
-     * @param DealerIncomingPendingMapping $mapping
+     * @param PartType $type
      * @return bool
      */
-    public function update(NovaUser $user, DealerIncomingPendingMapping $mapping): bool
+    public function update(NovaUser $user, PartType $type): bool
     {
         return $user->hasAnyRole('Admin', 'Support');
     }
 
     /**
-     * Determine whether the user can delete the mapping.
+     * Determine whether the user can delete the type.
      *
      * @param NovaUser $user
-     * @param DealerIncomingPendingMapping $mapping
+     * @param PartType $type
      * @return bool
      */
-    public function delete(NovaUser $user, DealerIncomingPendingMapping $mapping): bool
+    public function delete(NovaUser $user, PartType $type): bool
     {
         return $user->hasAnyRole('Admin', 'Support');
     }
 
     /**
-     * Determine whether the user can restore the mapping.
+     * Determine whether the user can restore the type.
      *
      * @param NovaUser $user
-     * @param DealerIncomingPendingMapping $mapping
+     * @param PartType $type
      * @return void
      */
-    public function restore(NovaUser $user, DealerIncomingPendingMapping $mapping): void
+    public function restore(NovaUser $user, PartType $type): void
     {
         //
     }
 
     /**
-     * Determine whether the user can permanently delete the mapping.
+     * Determine whether the user can permanently delete the type.
      *
      * @param NovaUser $user
-     * @param DealerIncomingPendingMapping $mapping
+     * @param PartType $type
      * @return void
      */
-    public function forceDelete(NovaUser $user, DealerIncomingPendingMapping $mapping): void
+    public function forceDelete(NovaUser $user, PartType $type): void
     {
         //
     }

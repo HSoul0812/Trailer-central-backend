@@ -4,13 +4,13 @@ namespace App\Nova\Policies;
 
 use App\Models\User\NovaUser;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use App\Models\Feed\Mapping\Incoming\DealerIncomingPendingMapping;
+use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping;
 
 /**
- * Class DealerIncomingPendingMappingPolicy
+ * Class DealerIncomingMapping
  * @package App\Nova\Policies
  */
-class DealerIncomingPendingMappingPolicy
+class DealerIncomingMappingPolicy
 {
     use HandlesAuthorization;
 
@@ -39,10 +39,10 @@ class DealerIncomingPendingMappingPolicy
      * Determine whether the user can view the mapping.
      *
      * @param NovaUser|null $user
-     * @param DealerIncomingPendingMapping $mapping
+     * @param DealerIncomingMapping $mapping
      * @return bool
      */
-    public function view(?NovaUser $user, DealerIncomingPendingMapping $mapping): bool
+    public function view(?NovaUser $user, DealerIncomingMapping $mapping): bool
     {
         return $user->hasAnyRole('Admin', 'Support');
     }
@@ -62,10 +62,10 @@ class DealerIncomingPendingMappingPolicy
      * Determine whether the user can update the mapping.
      *
      * @param NovaUser $user
-     * @param DealerIncomingPendingMapping $mapping
+     * @param DealerIncomingMapping $mapping
      * @return bool
      */
-    public function update(NovaUser $user, DealerIncomingPendingMapping $mapping): bool
+    public function update(NovaUser $user, DealerIncomingMapping $mapping): bool
     {
         return $user->hasAnyRole('Admin', 'Support');
     }
@@ -74,10 +74,10 @@ class DealerIncomingPendingMappingPolicy
      * Determine whether the user can delete the mapping.
      *
      * @param NovaUser $user
-     * @param DealerIncomingPendingMapping $mapping
+     * @param DealerIncomingMapping $mapping
      * @return bool
      */
-    public function delete(NovaUser $user, DealerIncomingPendingMapping $mapping): bool
+    public function delete(NovaUser $user, DealerIncomingMapping $mapping): bool
     {
         return $user->hasAnyRole('Admin', 'Support');
     }
@@ -86,10 +86,10 @@ class DealerIncomingPendingMappingPolicy
      * Determine whether the user can restore the mapping.
      *
      * @param NovaUser $user
-     * @param DealerIncomingPendingMapping $mapping
+     * @param DealerIncomingMapping $mapping
      * @return void
      */
-    public function restore(NovaUser $user, DealerIncomingPendingMapping $mapping): void
+    public function restore(NovaUser $user, DealerIncomingMapping $mapping): void
     {
         //
     }
@@ -98,10 +98,10 @@ class DealerIncomingPendingMappingPolicy
      * Determine whether the user can permanently delete the mapping.
      *
      * @param NovaUser $user
-     * @param DealerIncomingPendingMapping $mapping
+     * @param DealerIncomingMapping $mapping
      * @return void
      */
-    public function forceDelete(NovaUser $user, DealerIncomingPendingMapping $mapping): void
+    public function forceDelete(NovaUser $user, DealerIncomingMapping $mapping): void
     {
         //
     }
