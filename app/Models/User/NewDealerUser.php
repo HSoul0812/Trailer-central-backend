@@ -16,6 +16,7 @@ class NewDealerUser extends Model
 {
     const TABLE_NAME = 'new_dealer_user';
 
+
     /**
      * The table associated with the model.
      *

@@ -262,7 +262,7 @@ class GoogleService implements GoogleServiceInterface
             // Refresh the token if possible, else fetch a new one.
             $refreshToken = $client->getRefreshToken();
             $newToken = $client->fetchAccessTokenWithRefreshToken($refreshToken);
-            if(!empty($newToken)) {
+            if(!empty($newToken) && isset($newToken['access_token'])) {
                 $emailToken = EmailToken::fillFromArray($newToken);
             }
         } catch (\Exception $e) {
