@@ -164,6 +164,14 @@ class InventoryRepository implements InventoryRepositoryInterface
         '-archived_at' => [
             'field' => 'archived_at',
             'direction' => 'ASC'
+        ],
+        'model' => [
+            'field' => 'model',
+            'direction' => 'DESC'
+        ],
+        '-model' => [
+            'field' => 'model',
+            'direction' => 'ASC'
         ]
     ];
 
@@ -632,6 +640,10 @@ class InventoryRepository implements InventoryRepositoryInterface
 
         if (isset($params['floorplan_vendor'])) {
             $query = $query->where('fp_vendor', $params['floorplan_vendor']);
+        }
+
+        if (isset($params['model'])) {
+            $query = $query->where('model', $params['model']);
         }
 
         if (isset($params['search_term'])) {
