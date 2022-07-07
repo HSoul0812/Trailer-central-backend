@@ -642,10 +642,6 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query = $query->where('fp_vendor', $params['floorplan_vendor']);
         }
 
-        if (isset($params['model'])) {
-            $query = $query->where('model', $params['model']);
-        }
-
         if (isset($params['search_term'])) {
             if(preg_match(self::DIMENSION_SEARCH_TERM_PATTERN, $params['search_term'])){
                 $params['search_term'] = floatval(trim($params['search_term'],' \'"'));
@@ -664,6 +660,7 @@ class InventoryRepository implements InventoryRepositoryInterface
                         ->orWhere('inventory.description', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('vin', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('price', 'LIKE', '%' . $params['search_term'] . '%')
+                        ->orWhere('model', 'LIKE', '%' . $params['model'] . '%')
                         ->orWhereHas('floorplanVendor', function ($query) use ($params) {
                             $query->where('name', 'LIKE', '%' . $params['search_term'] . '%');
                         });
