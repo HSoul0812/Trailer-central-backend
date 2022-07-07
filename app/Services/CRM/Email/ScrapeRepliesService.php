@@ -139,6 +139,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
         // Initialize Logger
         $this->log = Log::channel('scrapereplies');
+        $this->jobLog = Log::channel('scraperepliesjob');
     }
 
 
@@ -154,14 +155,14 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
         // Get Salespeople With Email Credentials
         $salespeople = $this->salespeople->getAllImap($dealer->user_id);
-        $this->log->info('Dealer #' . $dealer->id . ' Found ' . $salespeople->count() .
+        $this->jobLog->info('Dealer #' . $dealer->id . ' Found ' . $salespeople->count() .
                             ' Active Salespeople with IMAP Credentials to Process');
         if($salespeople->count() < 1) {
             return false;
         }
 
         // Start Time Tracking
-        $this->log->info('Found ' . $salespeople->count() . ' Sales People in ' . 
+        $this->jobLog->info('Found ' . $salespeople->count() . ' Sales People in ' . 
                 (microtime(true) - $this->runtime) . ' Seconds');
 
         // Loop Campaigns for Current Dealer
@@ -175,7 +176,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 // for this dealer id and saleperson id
                 if ($job->hasNoPending()) {
                     $this->dispatch($job->onQueue('scrapereplies'));
-                    $this->log->info('Dealer #' . $dealer->id . ', Sales Person #' .
+                    $this->jobLog->info('Dealer #' . $dealer->id . ', Sales Person #' .
                                         $salesperson->id . ' - Started Importing Email in ' . 
                                         (microtime(true) - $this->runtime) . ' Seconds');
 
@@ -186,19 +187,19 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                         'created_at' => now(),
                     ], now()->addSeconds(7200));
                 } else {
-                    $this->log->info('Dealer #' . $dealer->id . ', Sales Person #' .
+                    $this->jobLog->info('Dealer #' . $dealer->id . ', Sales Person #' .
                                         $salesperson->id . ' - Already Active Job in ' . 
                                         (microtime(true) - $this->runtime) . ' Seconds');
                 }
             } catch(\Exception $e) {
-                $this->log->error('Dealer #' . $dealer->id . ' Sales Person #' .
+                $this->jobLog->error('Dealer #' . $dealer->id . ' Sales Person #' .
                                     $salesperson->id . ' - Exception returned: ' .
                                     $e->getMessage() . ' in ' . (microtime(true) - $this->runtime) . ' Seconds');
             }
         }
 
         // End Time Tracking
-        $this->log->info('Queued ' . $salespeople->count() . ' Sales People in ' . 
+        $this->jobLog->info('Queued ' . $salespeople->count() . ' Sales People in ' . 
                 (microtime(true) - $this->runtime) . ' Seconds');
         return true;
     }
