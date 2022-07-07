@@ -22,6 +22,17 @@ class Session extends Model
     use TableAware, Compoships;
 
 
+    /**
+     * @const int
+     */
+    const SLOT_EDITOR = 97;
+
+    /**
+     * @const int
+     */
+    const SLOT_SCHEDULER = 99;
+
+
     // Define Table Name Constant
     const TABLE_NAME = 'clapp_session';
 

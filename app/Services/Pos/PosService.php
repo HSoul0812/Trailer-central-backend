@@ -4,6 +4,7 @@
 namespace App\Services\Pos;
 
 
+use App\Domains\Parts\Actions\GetCriteriaToSearchPartInEsAction;
 use App\Models\Inventory\Inventory;
 use App\Models\Parts\Part;
 use Illuminate\Support\Facades\Log;
@@ -26,12 +27,9 @@ class PosService
 
         // if a query is specified
         if ($queryTerm) {
-            $search->must('multi_match', [
-                'query' => $queryTerm,
-                'fuzziness' => 'AUTO',
-                'fields' => ['title^1.3', 'part_id^3', 'sku^3', 'model', 'brand', 'manufacturer', 'type', 'category', 'alternative_part_number^2', 'description^0.5']
-            ]);
+            $searchCriteria = resolve(GetCriteriaToSearchPartInEsAction::class)->execute($queryTerm);
 
+            $search->should(...$searchCriteria);
         // if no query supplied but is allowed
         } else if (!$queryTerm && ($options['allowAll'] ?? false)) {
             $search->must('match_all', []);

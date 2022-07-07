@@ -59,6 +59,6 @@ class FilesystemPdfExporter extends PdfExporter implements ExporterInterface
         $this->engine->loadHTML($content);
         $output = $this->engine->output();
         ($this->afterLoadHtmlHandler)();
-        Storage::disk('s3')->put(self::PDF_EXPORT_S3_PREFIX . $this->filename, $output, 'public');
+        Storage::disk('s3')->put(self::PDF_EXPORT_S3_PREFIX . $this->filename, $output);
     }
 }

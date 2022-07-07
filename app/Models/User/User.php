@@ -2,6 +2,7 @@
 
 namespace App\Models\User;
 
+use App\Models\Parts\Bin;
 use App\Models\User\Interfaces\PermissionsInterface;
 use App\Traits\Models\HasPermissionsStub;
 use Illuminate\Contracts\Auth\Authenticatable;
@@ -17,6 +18,9 @@ use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Services\User\UserService;
 use App\Traits\CompactHelper;
+use App\Services\Common\EncrypterServiceInterface;
+use App\Models\User\AuthToken;
+use Laravel\Cashier\Billable;
 
 /**
  * Class User
@@ -37,7 +41,7 @@ use App\Traits\CompactHelper;
  */
 class User extends Model implements Authenticatable, PermissionsInterface
 {
-    use HasPermissionsStub;
+    use HasPermissionsStub, Billable;
 
     const TABLE_NAME = 'dealer';
 
@@ -182,6 +186,19 @@ class User extends Model implements Authenticatable, PermissionsInterface
 
     ];
 
+    public static function boot()
+    {
+        parent::boot();
+
+        self::created(function($model){
+            AuthToken::create([
+                'user_id' => $model->dealer_id,
+                'user_type' => 'dealer',
+                'access_token' => md5($model->dealer_id.uniqid())
+            ]);
+        });
+    }
+
     /**
      * Get the name of the unique identifier for the user.
      *
@@ -312,6 +329,11 @@ class User extends Model implements Authenticatable, PermissionsInterface
         return $this->hasOne(Settings::class, 'dealer_id', 'dealer_id');
     }
 
+    public function bins() : HasMany
+    {
+        return $this->hasMany(Bin::class, 'dealer_id', 'dealer_id');
+    }
+
     public function getCrmLoginUrl(string $route = '')
     {
         $userService = app(UserService::class);
@@ -334,5 +356,22 @@ class User extends Model implements Authenticatable, PermissionsInterface
     public function getDealerId(): int
     {
         return $this->dealer_id;
+    }
+
+    /**
+     * Set the user's password encryption method
+     *
+     * @param  string  $value
+     * @return void
+     */
+    public function setPasswordAttribute(string $value): void
+    {
+        $salt = $this->salt;
+        $encrypterService = app(EncrypterServiceInterface::class);
+        if (empty($salt)) {
+            $salt = uniqid();
+            $this->attributes['salt'] = $salt;
+        }
+        $this->attributes['password'] = $encrypterService->encryptBySalt($value, $salt);
     }
 }

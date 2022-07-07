@@ -37,6 +37,7 @@ class ScrapeRepliesTest extends TestCase
     /**
      * Test Scraping Gmail Emails
      *
+     * @group CRM
      * @return void
      */
     public function testScrapeRepliesGmail()
@@ -226,6 +227,7 @@ class ScrapeRepliesTest extends TestCase
     /**
      * Test Scraping IMAP Emails
      *
+     * @group CRM
      * @return void
      */
     public function testScrapeRepliesImap()
@@ -422,6 +424,7 @@ class ScrapeRepliesTest extends TestCase
     /**
      * Test Scraping Attachment Emails From Gmail
      *
+     * @group CRM
      * @return void
      */
     public function testScrapeAttachmentsGmail()
@@ -598,6 +601,7 @@ class ScrapeRepliesTest extends TestCase
     /**
      * Test Scraping Attachment Emails From IMAP
      *
+     * @group CRM
      * @return void
      */
     public function testScrapeAttachmentsImap()
@@ -770,6 +774,7 @@ class ScrapeRepliesTest extends TestCase
     /**
      * Delete Sales People
      * 
+     * @group CRM
      * @return Collection<SalesPerson>
      */
     private function disableSalesPeople($userId) {
@@ -792,6 +797,7 @@ class ScrapeRepliesTest extends TestCase
     /**
      * Restore Sales People
      * 
+     * @group CRM
      * @return Collection<SalesPerson>
      */
     private function restoreSalesPeople($salesIds) {
@@ -809,6 +815,7 @@ class ScrapeRepliesTest extends TestCase
     /**
      * Get Parsed Email
      * 
+     * @group CRM
      * @param string $id
      * @param EmailHistory $email
      * @return ParsedEmail
@@ -849,6 +856,7 @@ class ScrapeRepliesTest extends TestCase
     /**
      * Generate Fake Attachment Files
      * 
+     * @group CRM
      * @param int $min
      * @param int $max
      * @return Collection<AttachmentFile>

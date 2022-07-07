@@ -25,13 +25,6 @@ class Listings extends Model
 
 
     /**
-     * @const array Two-Factor Auth Types
-     */
-    const TFA_TYPES = [
-        'authy' => 'Authy'
-    ];
-
-    /**
      * @const array Listing Types
      */
     const LISTING_TYPES = [
@@ -63,6 +56,8 @@ class Listings extends Model
      */
     const STATUSES = [
         'active',
+        'invalid',
+        'failed',
         'deleted',
         'expired'
     ];

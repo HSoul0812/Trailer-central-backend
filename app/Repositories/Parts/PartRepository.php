@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Parts;
 
+use App\Domains\Parts\Actions\GetCriteriaToSearchPartInEsAction;
 use App\Models\Parts\Brand;
 use App\Models\Parts\Category;
 use App\Models\Parts\Type;
@@ -505,7 +506,7 @@ class PartRepository implements PartRepositoryInterface {
             throw new ImageNotDownloadedException('Image not accessible: '.$image['url']);
         }
 
-        Storage::disk('s3')->put($fileName, $imageData, 'public');
+        Storage::disk('s3')->put($fileName, $imageData);
         $s3ImageUrl = Storage::disk('s3')->url($fileName);
 
         PartImage::create([
@@ -546,15 +547,11 @@ class PartRepository implements PartRepositoryInterface {
         $search = $this->model->boolSearch();
 
         if ($query['query'] ?? null) { // if a query is specified
-            $search->must('multi_match', [
-                'query' => $query['query'],
-                'fuzziness' => 'AUTO',
-                'fields' => ['title^1.3', 'part_id^3', 'sku^3', 'brand', 'manufacturer', 'type', 'category', 'alternative_part_number^2', 'description^0.5']
-            ]);
+            $searchCriteria = resolve(GetCriteriaToSearchPartInEsAction::class)->execute($query['query']);
 
+            $search->should(...$searchCriteria);
         } else if ($options['allowAll'] ?? false) { // if no query supplied but is allowed
             $search->must('match_all', []);
-
         } else {
             throw new \Exception('Query is required');
         }

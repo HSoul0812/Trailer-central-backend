@@ -6,6 +6,7 @@ namespace App\Http\Requests\User;
 
 use App\Http\Requests\Request;
 use App\Services\User\DealerLocationServiceInterface;
+use Propaganistas\LaravelPhone\PhoneNumber;
 
 class SaveDealerLocationRequest extends Request
 {
@@ -26,11 +27,11 @@ class SaveDealerLocationRequest extends Request
             'country' => 'required|string|min:2,max:255|in:US,CA,CL',
             'postalcode' => 'required|string',
             'fax' => 'nullable|string|min:1,max:20',
-            'phone' => 'required|string|max:20',
+            'phone' => 'required|string|max:20|phone:country',
             'is_default' => 'checkbox|in:0,1',
             'sms' => 'checkbox|in:0,1',
-            'sms_phone' => 'nullable|string|max:20',
-            'permanent_phone' => 'checkbox|in:0,1',
+            'sms_phone' => 'nullable|string|max:20|phone:country|required_if:sms,1',
+            'permanent_phone' => 'checkbox|in:0,1|required_if:sms,==,1',
             'show_on_website_locations' => 'checkbox|in:0,1',
             'county_issued' => 'nullable|min:0,max:50',
             'state_issued' => 'nullable|min:0,max:50',
@@ -110,5 +111,19 @@ class SaveDealerLocationRequest extends Request
             'required_with:sales_tax_items|integer|in:%s',
             implode(',', array_keys(DealerLocationServiceInterface::AVAILABLE_TAX_CATEGORIES))
         );
+    }
+
+    /**
+     * Handle a passed validation attempt.
+     *
+     * @return void
+     */
+    protected function passedValidation()
+    {
+        if ($this->filled('sms_phone')) {
+            $this->merge([
+                'sms_phone' => PhoneNumber::make($this->sms_phone, $this->country)->formatE164()
+            ]);
+        }
     }
 }

@@ -107,6 +107,7 @@ class InquiryEmailServiceTest extends TestCase
 
 
     /**
+     * @group CRM
      * @covers ::send
      * @group Inquiry
      *
@@ -125,7 +126,10 @@ class InquiryEmailServiceTest extends TestCase
             'inquiry_name' => self::TEST_INQUIRY_NAME,
             'inquiry_email' => self::TEST_INQUIRY_EMAIL,
             'device' => self::TEST_DEVICE,
-            'is_spam' => 0
+            'is_spam' => 0,
+            'first_name' => self::TEST_FIRST_NAME,
+            'last_name' => self::TEST_LAST_NAME,
+            'email_address' => self::TEST_EMAIL,
         ];
 
         // Get Inquiry Lead
@@ -143,21 +147,16 @@ class InquiryEmailServiceTest extends TestCase
 
         // Assert a message was sent to the dealer...
         Mail::assertSent(InquiryEmail::class, function ($mail) use ($inquiry) {
-            // Check Multiple Things for Successes!
-            $successes = 0;
 
+            $mail->build();
             // Inquiry Email Exists?
-            if($inquiry->inquiryEmail && $mail->hasTo($inquiry->inquiryEmail)) {
-                $successes++;
-            }
+            return ($inquiry->inquiryEmail && $mail->hasTo($inquiry->inquiryEmail))
 
             // BCC Exists?
-            if($mail->hasBcc(InquiryLead::INQUIRY_BCC_TO[0]['email'])) {
-                $successes++;
-            }
+            && $mail->hasBcc(InquiryLead::INQUIRY_BCC_TO[0]['email'])
 
-            // Must Be 2!
-            return ($successes === 2);
+            // Reply-To Exists?
+            && $mail->hasreplyTo($inquiry->emailAddress, $inquiry->getFullName());
         });
 
         // Result = true
@@ -165,6 +164,7 @@ class InquiryEmailServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::send
      * @group Inquiry
      *
@@ -225,6 +225,7 @@ class InquiryEmailServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::send
      * @group Inquiry
      *
@@ -285,6 +286,7 @@ class InquiryEmailServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::send
      * @group Inquiry
      *
@@ -333,6 +335,7 @@ class InquiryEmailServiceTest extends TestCase
 
 
     /**
+     * @group CRM
      * @covers ::fill
      * @group Inquiry
      *
@@ -410,6 +413,7 @@ class InquiryEmailServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::fill
      * @group Inquiry
      *
@@ -490,6 +494,7 @@ class InquiryEmailServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::fill
      * @group Inquiry
      *
@@ -581,6 +586,7 @@ class InquiryEmailServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::fill
      * @group Inquiry
      *
@@ -670,6 +676,7 @@ class InquiryEmailServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::fill
      * @group Inquiry
      *

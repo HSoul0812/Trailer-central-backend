@@ -57,7 +57,7 @@ class BigTex extends Command
      */
     public function handle()
     {
-        $exportStartDate = Carbon::now()->subDays(1)->toDateTimeString();
+        $exportStartDate = Carbon::now()->subDays(40)->toDateTimeString();
 
         $this->info("Starting leads export...");
 

@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
 use App\Utilities\TimeUtil;
+use League\Csv\Writer;
 
 class LeadRepository implements LeadRepositoryInterface {
 
@@ -31,17 +32,69 @@ class LeadRepository implements LeadRepositoryInterface {
     private const LEAD_SOURCE_CLASSIFIEDS = 'classifieds';
     private const HAS_PRODUCT = 'has_product';
 
+    private const AVAILABLE_INCLUDES = [
+        'leadStatus',
+        'interactions',
+        'textLogs',
+        'inventory',
+        'fbUsers',
+    ];
+
     private $sortOrders = [
-        'no_due_past_due_future_due' => [
-            'field' => 'crm_tc_lead_status.next_contact_date',
+        'id' => [
+            'field' => 'website_lead.identifier',
+            'direction' => 'DESC'
+        ],
+        '-id' => [
+            'field' => 'website_lead.identifier',
+            'direction' => 'ASC'
+        ],
+        'first_name' => [
+            'field' => 'website_lead.first_name',
+            'direction' => 'DESC'
+        ],
+        '-first_name' => [
+            'field' => 'website_lead.first_name',
+            'direction' => 'ASC'
+        ],
+        'last_name' => [
+            'field' => 'website_lead.last_name',
+            'direction' => 'DESC'
+        ],
+        '-last_name' => [
+            'field' => 'website_lead.last_name',
+            'direction' => 'ASC'
+        ],
+        'email' => [
+            'field' => 'website_lead.email_address',
+            'direction' => 'DESC'
+        ],
+        '-email' => [
+            'field' => 'website_lead.email_address',
             'direction' => 'ASC'
         ],
         'created_at' => [
-            'field' => 'website_lead.date_submitted',
-            'direction' => 'DESC'
+            [
+                'field' => 'website_lead.dealer_id',
+                'direction' => 'DESC'
+            ],
+            [
+                'field' => 'website_lead.date_submitted',
+                'direction' => 'DESC'
+            ]
         ],
         '-created_at' => [
-            'field' => 'website_lead.date_submitted',
+            [
+                'field' => 'website_lead.dealer_id',
+                'direction' => 'ASC'
+            ],
+            [
+                'field' => 'website_lead.date_submitted',
+                'direction' => 'ASC'
+            ]
+        ],
+        'no_due_past_due_future_due' => [
+            'field' => 'crm_tc_lead_status.next_contact_date',
             'direction' => 'ASC'
         ],
         'future_due_past_due_no_due' => [
@@ -112,7 +165,7 @@ class LeadRepository implements LeadRepositoryInterface {
 
     public function getAll($params)
     {
-        $query = Lead::where([
+        $query = Lead::query()->where([
                 ['identifier', '>', 0],
                 [Lead::getTableName().'.lead_type', '<>', LeadType::TYPE_NONLEAD],
         ]);
@@ -125,12 +178,31 @@ class LeadRepository implements LeadRepositoryInterface {
          */
         $query = $this->addFiltersToQuery($query, $params);
 
+        /*
+         * Due to several joins, some Lead fields are overwritten. That's why only necessary fields are specified in the select. Be careful with join
+         */
+        $query->select(Lead::getTableName() . '.*', LeadStatus::getTableName() . '.*', Interaction::getTableName() . '.*');
+
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
         }
 
         if (isset($params['sort'])) {
-            $query = $query->orderByRaw($this->sortOrders[$params['sort']]['field'] . ' ' . $this->sortOrders[$params['sort']]['direction']);
+            $query = $this->addSortQuery($query, $params['sort']);
+        }
+
+        if (isset($params['include']) && is_string($params['include'])) {
+            foreach (array_intersect(self::AVAILABLE_INCLUDES, explode(',', $params['include'])) as $include) {
+                if ($include === 'interactions') {
+                    $query = $query->with(['interactions' => function ($query) {
+                        $query->with(['emailHistory', 'leadStatus' => function ($query) {
+                            $query->with(['salesPerson']);
+                        }]);
+                    }]);
+                } else {
+                    $query = $query->with($include);
+                }
+            }
         }
 
         $query = $query->groupBy(Lead::getTableName().'.identifier');
@@ -191,7 +263,7 @@ class LeadRepository implements LeadRepositoryInterface {
 
         if (isset($params['sort'])) {
             $query = $query->leftJoin(Interaction::getTableName(), Interaction::getTableName() . '.tc_lead_id',  '=', Lead::getTableName() . '.identifier');
-            $query = $query->orderByRaw($this->sortOrders[$params['sort']]['field'] . ' ' . $this->sortOrders[$params['sort']]['direction']);
+            $query = $this->addSortQuery($query, $params['sort']);
         }
 
         $query = $query->groupBy(Lead::getTableName() . '.identifier');
@@ -584,6 +656,10 @@ class LeadRepository implements LeadRepositoryInterface {
      * @return Builder|Relation
      */
     private function addIsArchivedToQuery($query, bool $isArchived) {
+        if (!$isArchived) {
+            return $query->where(Lead::getTableName().'.is_archived', '!=', 1);
+        }
+
         return $query->where(Lead::getTableName().'.is_archived', $isArchived);
     }
 
@@ -613,6 +689,10 @@ class LeadRepository implements LeadRepositoryInterface {
      * @return Builder|Relation
      */
     private function addSalesPersonIdToQuery($query, int $salesPersonId) {
+        if ($salesPersonId === 0) {
+            return $query->whereNull(LeadStatus::getTableName().'.sales_person_id');
+        }
+
         return $query->where(LeadStatus::getTableName().'.sales_person_id', $salesPersonId);
     }
 
@@ -623,6 +703,17 @@ class LeadRepository implements LeadRepositoryInterface {
      */
     private function addLeadStatusToQuery($query, array $leadStatus)
     {
+        // If Uncontacted, add whereNull
+        if(in_array(Lead::STATUS_UNCONTACTED, $leadStatus)) {
+            return $query->where(function(Builder $q) use ($leadStatus) {
+                return $q->whereIn(LeadStatus::getTableName() . '.status', $leadStatus)
+                         ->orWhere(LeadStatus::getTableName() . '.status', 'open')
+                         ->orWhere(LeadStatus::getTableName() . '.status', '')
+                         ->orWhereNull(LeadStatus::getTableName() . '.status');
+            });
+        }
+
+        // Return Normal Standalone IN
         return $query->whereIn(LeadStatus::getTableName() . '.status', $leadStatus);
     }
 
@@ -640,8 +731,10 @@ class LeadRepository implements LeadRepositoryInterface {
             $leadTypeTableName . '.lead_id',
             '=',
             Lead::getTableName() . '.identifier'
-        )
-        ->whereIn($leadTypeTableName . '.lead_type', $leadType);
+        )->where(function ($query) use ($leadType, $leadTypeTableName) {
+            $query->whereIn($leadTypeTableName . '.lead_type', $leadType)
+                  ->orWhereIn(Lead::getTableName().'.lead_type', $leadType);
+        });
     }
 
     /**
@@ -716,10 +809,18 @@ class LeadRepository implements LeadRepositoryInterface {
                     ['lead_type', '!=', LeadType::TYPE_NONLEAD],
                     ['is_spam', '=', 0],
                 ])
+
                 ->where(function ($query) use ($paramsCollect) {
-                    $query->whereIn('email_address', $paramsCollect->where('type', '=', 'email')->unique())
-                        ->orWhereIn('phone_number', $paramsCollect->where('type', '=', 'phone')->unique())
-                        ->orWhereIn('last_name', $paramsCollect->where('type', '=', 'last_name'));
+                    $query
+                        ->whereIn('email_address', $paramsCollect->where('type', '=', 'email')->unique()->map(function ($c) {
+                            return collect($c)->forget('type');
+                        }))
+                        ->orWhereIn('phone_number', $paramsCollect->where('type', '=', 'phone')->unique()->map(function ($c) {
+                            return collect($c)->forget('type');
+                        }))
+                        ->orWhereIn('last_name', $paramsCollect->where('type', '=', 'last_name')->map(function ($c) {
+                            return collect($c)->forget('type');
+                        }));
                 });
 
             return $query->get();
@@ -801,5 +902,80 @@ class LeadRepository implements LeadRepositoryInterface {
         // Update website_lead_id of this customer
         $customer->website_lead_id = $lead->identifier;
         $customer->save();
+    }
+
+    public function output($params)
+    {
+        $query = DB::table(Lead::getTableName());
+
+        $query = $query->select([
+            Lead::getTableName().'.email_address',
+            Lead::getTableName().'.phone_number',
+            Lead::getTableName().'.preferred_contact',
+            Lead::getTableName().'.first_name',
+            Lead::getTableName().'.last_name',
+            Lead::getTableName().'.lead_type',
+            LeadStatus::getTableName().'.source',
+            Lead::getTableName().'.address',
+            Lead::getTableName().'.city',
+            Lead::getTableName().'.state',
+            Lead::getTableName().'.zip',
+            LeadStatus::getTableName().'.status',
+            LeadStatus::getTableName().'.closed_at',
+            Lead::getTableName().'.comments',
+            Lead::getTableName().'.date_submitted',
+        ]);
+
+        $query = $query->leftJoin(Website::getTableName(), Lead::getTableName().'.website_id', '=', Website::getTableName().'.id');
+        $query = $query->leftJoin(Inventory::getTableName(), Lead::getTableName().'.inventory_id', '=', Inventory::getTableName().'.inventory_id');
+
+        $query = $query->where(Lead::getTableName().'.identifier', '>', 0);
+        // add filters if any
+        $query = $this->addFiltersToQuery($query, $params);
+
+        if (isset($params['dealer_id'])) {
+            $query = $query->where(Lead::getTableName().'.dealer_id', $params['dealer_id']);
+        }
+
+        $query = $query->groupBy(Lead::getTableName().'.identifier');
+        // sorting
+        $sort = 'created_at';
+        if (isset($params['sort'])) {
+            $sort = $params['sort'];
+        }
+        $query = $this->addSortQuery($query, $sort);
+
+        $records = $query->get();
+
+        $csv = Writer::createFromString();
+
+        // insert the header
+        $csv->insertOne([
+            'Email',
+            'Phone',
+            'Preferred Contact',
+            'First Name',
+            'Last Name',
+            'Lead Type',
+            'Lead Source',
+            'Address',
+            'City',
+            'State',
+            'Zip',
+            'Status',
+            'Closed Date',
+            'Comments',
+            'Submission Date'
+        ]);
+
+        foreach ($records as $record) {
+            $csv->insertOne((array) $record);
+        }
+
+        return $csv->toString(); //returns the CSV document as a string
+    }
+
+    protected function getSortOrders() {
+        return $this->sortOrders;
     }
 }

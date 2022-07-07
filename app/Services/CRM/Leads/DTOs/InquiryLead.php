@@ -8,7 +8,7 @@ use App\Traits\WithGetter;
 
 /**
  * Class InquiryLead
- * 
+ *
  * @package App\Services\CRM\Leads\DTOs
  */
 class InquiryLead
@@ -36,7 +36,8 @@ class InquiryLead
     const INQUIRY_DEV_TO = [
         ['email' => 'ben+dev-contact-forms@trailercentral.com'],
         ['email' => 'judson@trailercentral.com'],
-        ['email' => 'david@trailercentral.com']
+        ['email' => 'david@trailercentral.com'],
+        ['email' => 'tuan@trailercentral.com'],
     ];
 
 
@@ -70,7 +71,7 @@ class InquiryLead
     /**
      * @const string
      */
-    const TT_SIMPLE_DOMAIN = 'trailertrader.com';
+    const TT_SIMPLE_DOMAIN = 'https://trailertrader.com';
 
     /**
      * @const string
@@ -312,7 +313,7 @@ class InquiryLead
 
     /**
      * @var ?bool CDK Export Sent for Lead Inquiry?
-     * 
+     *
      * 1 = mark CDK as sent automatically
      * 0 = wait for CDK script to send out the email on its own
      */
@@ -358,7 +359,7 @@ class InquiryLead
 
     /**
      * Get Inquiry Type
-     * 
+     *
      * @return string
      */
     public function getInquiryType(): string {
@@ -373,7 +374,7 @@ class InquiryLead
 
     /**
      * Get Inquiry View
-     * 
+     *
      * @return string
      */
     public function getInquiryView(): string {
@@ -382,7 +383,7 @@ class InquiryLead
 
     /**
      * Get Unit Type
-     * 
+     *
      * @return string
      */
     public function getUnitType(): string {
@@ -395,18 +396,32 @@ class InquiryLead
 
     /**
      * Get Inquiry URL
-     * 
+     *
      * @return string
      */
     public function getInquiryUrl(): string {
-        return !empty($this->url) ? $this->url : $this->websiteDomain . $this->referral;
+        // Only Append If Domain Exists
+        if($this->websiteDomain) {
+            // Return URL With Website Domain
+            if(!empty($this->url)) {
+                return $this->websiteDomain . $this->url;
+            }
+
+            // Return Referral URL Instead
+            if(!empty($this->referral)) {
+                return $this->websiteDomain . $this->referral;
+            }
+        }
+
+        // Return Blank
+        return '';
     }
 
 
 
     /**
      * Get Inquiry To
-     * 
+     *
      * @return string
      */
     public function getInquiryTo(): string {
@@ -414,12 +429,12 @@ class InquiryLead
         if(is_array($this->inquiryEmail)) {
             return implode(";", $this->inquiryEmail);
         }
-        return $this->inquiryEmail;
+        return $this->inquiryEmail ?? '';
     }
 
     /**
      * Get Inquiry To Array
-     * 
+     *
      * @return array{array{name: string, email: string}, ...etc}
      */
     public function getInquiryToArray(): array {
@@ -443,17 +458,17 @@ class InquiryLead
                 if (strpos($this->inquiryEmail, ';') !== false) {
                     $toemails = explode(';', $this->inquiryEmail);
                     foreach($toemails as $toemail) {
-                        $to[] = ['name' => $this->inquiryName, 'email' => trim($toemail)]; 
-                    }                    
+                        $to[] = ['name' => $this->inquiryName, 'email' => trim($toemail)];
+                    }
                 } else if (strpos($this->inquiryEmail, ',') !== false) {
                     $toemails = explode(',', $this->inquiryEmail);
                     foreach($toemails as $toemail) {
-                        $to[] = ['name' => $this->inquiryName, 'email' => trim($toemail)]; 
-                    }    
+                        $to[] = ['name' => $this->inquiryName, 'email' => trim($toemail)];
+                    }
                 } else {
-                    $to[] = ['name' => $this->inquiryName, 'email' => trim($this->inquiryEmail)]; 
+                    $to[] = ['name' => $this->inquiryName, 'email' => trim($this->inquiryEmail)];
                 }
-                  
+
             }
 
             // Append for TT
@@ -469,7 +484,7 @@ class InquiryLead
 
     /**
      * Get Inquiry BCC Array
-     * 
+     *
      * @return array{array{name: string, email: string}, ...etc}
      */
     public function getInquiryBccArray(): array {
@@ -483,7 +498,7 @@ class InquiryLead
 
     /**
      * Return Full Name
-     * 
+     *
      * @return string $this->firstName $this->lastName
      */
     public function getFullName(): string
@@ -494,7 +509,7 @@ class InquiryLead
 
     /**
      * Return Preferred Contact
-     * 
+     *
      * @return string $this->preferredContact || 'phone' if phone exists || 'email' otherwise
      */
     public function getPreferredContact(): string
@@ -516,7 +531,7 @@ class InquiryLead
 
     /**
      * Is Trailer Trader?
-     * 
+     *
      * @return bool
      */
     public function isTrailerTrader(): bool
@@ -526,7 +541,7 @@ class InquiryLead
 
     /**
      * Is Dev?
-     * 
+     *
      * @return bool
      */
     public function isDev(): bool
@@ -541,7 +556,7 @@ class InquiryLead
 
     /**
      * Decode Metadata and Convert Into Array
-     * 
+     *
      * // DEALER SITES ONLY
      * @return array{'contact-address': array,
      *               'adf-contact-address': null,
@@ -555,7 +570,7 @@ class InquiryLead
      *               'IS_DEV': bool?,
      *               'REAL_TO': array,
      *               'adf-contact-address': string}
-     * 
+     *
      * // JOTFORM ONLY
      * @return array{'jotformId': int, 'submissionId': int}
      */
@@ -573,7 +588,7 @@ class InquiryLead
 
     /**
      * Build Subject
-     * 
+     *
      * @return string
      */
     public function getSubject(): string {
@@ -611,7 +626,7 @@ class InquiryLead
 
     /**
      * Get Email BG Color
-     * 
+     *
      * @return string
      */
     public function getBgColor(): string {
@@ -620,7 +635,7 @@ class InquiryLead
 
     /**
      * Get Email Header BG Color
-     * 
+     *
      * @return string
      */
     public function getHeaderBgColor(): string {
@@ -629,7 +644,7 @@ class InquiryLead
 
     /**
      * Get Admin Message for Inquiry Email
-     * 
+     *
      * @return array{allFailures: string,
      *               remoteAddr: string,
      *               forwardedFor: string,
@@ -654,7 +669,7 @@ class InquiryLead
 
     /**
      * Get Email Vars For Inquiry Email Templates
-     * 
+     *
      * @return array{year: int,
      *               bgColor: string,
      *               bgHeader: string,
@@ -707,7 +722,7 @@ class InquiryLead
 
     /**
      * Find Matches to Existing Lead
-     * 
+     *
      * @param Lead $lead
      * @return int 0-3
      */

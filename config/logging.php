@@ -46,6 +46,7 @@ return [
             'path' => storage_path('logs/laravel.log'),
             'level' => 'debug',
             'permission' => 0664,
+            'tap' => [\App\Logging\DailyLogWithUsername::class],
         ],
 
         'daily' => [
@@ -54,6 +55,7 @@ return [
             'level' => 'debug',
             'days' => 7,
             'permission' => 0664,
+            'tap' => [\App\Logging\DailyLogWithUsername::class],
         ],
 
         'inquiry' => [
@@ -61,6 +63,7 @@ return [
             'path' => storage_path('logs/services/inquiry.log'),
             'level' => 'debug',
             'days' => 3,
+            'permission' => 0664,
         ],
 
         'autoassign' => [
@@ -68,6 +71,7 @@ return [
             'path' => storage_path('logs/commands/auto-assign.log'),
             'level' => 'debug',
             'days' => 3,
+            'permission' => 0664,
         ],
 
         'scrapereplies' => [
@@ -75,6 +79,7 @@ return [
             'path' => storage_path('logs/commands/scrape-replies.log'),
             'level' => 'debug',
             'days' => 3,
+            'permission' => 0664,
         ],
 
         'textcampaign' => [
@@ -82,6 +87,7 @@ return [
             'path' => storage_path('logs/commands/text-campaigns.log'),
             'level' => 'debug',
             'days' => 3,
+            'permission' => 0664,
         ],
 
         'auth' => [
@@ -89,6 +95,7 @@ return [
             'path' => storage_path('logs/services/auth.log'),
             'level' => 'debug',
             'days' => 3,
+            'permission' => 0664,
         ],
 
         'google' => [
@@ -96,6 +103,7 @@ return [
             'path' => storage_path('logs/services/google.log'),
             'level' => 'debug',
             'days' => 7,
+            'permission' => 0664,
         ],
 
         'facebook' => [
@@ -103,6 +111,7 @@ return [
             'path' => storage_path('logs/services/facebook.log'),
             'level' => 'debug',
             'days' => 3,
+            'permission' => 0664,
         ],
 
         'leads' => [
@@ -110,6 +119,7 @@ return [
             'path' => storage_path('logs/services/leads.log'),
             'level' => 'debug',
             'days' => 3,
+            'permission' => 0664,
         ],
 
         'emailbuilder' => [
@@ -117,6 +127,7 @@ return [
             'path' => storage_path('logs/services/emailbuilder.log'),
             'level' => 'debug',
             'days' => 3,
+            'permission' => 0664,
         ],
 
         'texts' => [
@@ -124,6 +135,15 @@ return [
             'path' => storage_path('logs/services/texts.log'),
             'level' => 'debug',
             'days' => 3,
+            'permission' => 0664,
+        ],
+
+        'marketplace' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/services/marketplace.log'),
+            'level' => 'debug',
+            'days' => 3,
+            'permission' => 0664,
         ],
 
         'dispatch-fb' => [
@@ -131,6 +151,7 @@ return [
             'path' => storage_path('logs/dispatch/facebook.log'),
             'level' => 'debug',
             'days' => 7,
+            'permission' => 0664,
         ],
 
         'azure' => [
@@ -138,6 +159,7 @@ return [
             'path' => storage_path('logs/services/azure.log'),
             'level' => 'debug',
             'days' => 3,
+            'permission' => 0664,
         ],
 
         'tunnels' => [
@@ -145,6 +167,7 @@ return [
             'path' => storage_path('logs/repositories/tunnels.log'),
             'level' => 'debug',
             'days' => 3,
+            'permission' => 0664,
         ],
 
         'slack' => [
@@ -198,17 +221,29 @@ return [
         ],
 
         'emergency' => [
-            'path' => storage_path('logs/laravel.log'),
+            'driver' => 'daily',
+            'path' => storage_path('logs/emergency.log'),
+            'days' => 7,
+            'permission' => 0664,
+            'tap' => [\App\Logging\DailyLogWithUsername::class],
         ],
 
         'showroom-imports' => [
+            'driver' => 'daily',
             'path' => storage_path('logs/showroom-imports.log'),
+            'days' => 3,
+            'permission' => 0664,
         ],
         'blog' => [
             'driver' => 'daily',
             'path' => storage_path('logs/services/blog.log'),
             'level' => 'debug',
             'days' => 3,
+            'permission' => 0664,
+        ],
+        'sentry' => [
+            'driver' => 'sentry',
+            'level' => env('SENTRY_LOG_LEVEL', 'error')
         ],
         'sentry' => [
             'driver' => 'sentry',

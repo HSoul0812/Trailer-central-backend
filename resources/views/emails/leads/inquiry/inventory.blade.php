@@ -13,34 +13,34 @@
             <!-- begin wrapper -->
             <table bgcolor="{{ $bgColor }}" cellpadding="10" cellspacing="0" border="0" width="650" style="border:1px solid #E0E0E0;">
                 <tr style="background:{{ $bgHeader }}">
-                    <?php if ($website == $simpleDomain): ?>
+                    @if ($website == $simpleDomain)
                       <td valign="top" style="text-align:center">
                           <a href="{{ $logoUrl }}">
                             <img src="{{ $logo }}" alt="{{ $fromName }}" style="margin-bottom:10px;margin-top:10px;height:20px;" border="0"/>
                           </a>
                       </td>
-                    <?php else: ?>
+                    @else
                       <td valign="top">
                           <a href="{{ $logoUrl }}">
                             <img src="{{ $logo }}" alt="{{ $fromName }}" style="margin-bottom:10px;margin-top:10px;height:20px;" border="0"/>              
                           </a>
                       </td>
-                    <?php endif; ?>
+                    @endif
                 </tr>
                 <tr>
                     <td valign="top">
                         <!-- begin content -->
-                        <?php if ($website == $simpleDomain): ?>
+                        @if ($website == $simpleDomain)
                           <h3 style="font-size:16px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">TrailerTrader.com / A customer is interested in {{ $title }} “</h3>
-                        <?php else: ?>
+                        @else
                           <h3 style="font-size:16px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">New Inventory Information Request on {{ $website }}</h3>
-                        <?php endif; ?>
+                        @endif
                         
 
                         <p style="font-size:12px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">Inventory Stock: <strong>{{ $stock }}</strong></p>
 
                         <p style="font-size:12px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">Inventory Item: <a href="{{ $url }}"><strong>{{ $title }}</strong></a></p>
-
+  
                         <p style="font-size:12px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">Full Name: <strong>{{ $fullName }}</strong></p>
 
                         <p style="font-size:12px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">Preferred Contact: <strong>{{ $preferred }}</strong></p>

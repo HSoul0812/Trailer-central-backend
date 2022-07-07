@@ -66,4 +66,14 @@ class TextrailPartService implements TextrailPartServiceInterface
     {
         return $this->provider->getAttribute($code);
     }
+
+    public function getAllCategories(): array
+    {
+        return $this->provider->getTextrailCategories();
+    }
+
+    public function getParentAndCategory(int $category_id): array
+    {
+        return $this->provider->getTextrailParentCategory($category_id);
+    }
 }

@@ -12,6 +12,12 @@ use Illuminate\Support\Facades\DB;
  */
 class ServiceOrderRepository implements ServiceOrderRepositoryInterface
 {
+    private const SERVICE_ORDER_STATUS = [
+        ServiceOrder::STATUS_PICKED_UP,
+        ServiceOrder::STATUS_READY_FOR_PICK_UP,
+        ServiceOrder::STATUS_ONLY_READY_FOR_PICK_UP,
+    ];
+
     private const SORT_ORDERS = [
         'user_defined_id' => [
             'field' => 'user_defined_id',
@@ -127,21 +133,21 @@ class ServiceOrderRepository implements ServiceOrderRepositoryInterface
                 case ServiceOrder::TYPE_ESTIMATE:
                     $query = $query
                         ->where('type', '=', 'estimate')
-                        ->whereNotIn('status', ['picked_up', 'ready_for_pickup']);
+                        ->whereNotIn('status', self::SERVICE_ORDER_STATUS);
 
                     break;
                 case ServiceOrder::SERVICE_ORDER_SCHEDULED:
                     $query = $query
                         ->where('type', '<>', 'estimate')
-                        ->whereNotIn('status', ['picked_up', 'ready_for_pickup']);
+                        ->whereNotIn('status', self::SERVICE_ORDER_STATUS);
 
                     break;
                 case ServiceOrder::SERVICE_ORDER_COMPLETED:
-                    $query = $query->whereIn('status', ['picked_up', 'ready_for_pickup']);
+                    $query = $query->whereIn('status', self::SERVICE_ORDER_STATUS);
 
                     break;
                 case ServiceOrder::SERVICE_ORDER_NOT_COMPLETED:
-                    $query = $query->whereNotIn('status', ['picked_up', 'ready_for_pickup']);
+                    $query = $query->whereNotIn('status', self::SERVICE_ORDER_STATUS);
 
                     break;
             }

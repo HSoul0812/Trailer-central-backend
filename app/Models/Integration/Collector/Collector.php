@@ -53,6 +53,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $ids_token
  * @property string|null $ids_default_location
  * @property string|null $xml_url
+ * @property string|null $csv_url
  * @property string|null $pipe_delimited
  * @property string|null $motility
  * @property string|null $generic_json
@@ -76,6 +77,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property DealerLocation $dealerLocation
  * @property bool $ignore_manually_added_units
  * @property bool $is_bdv_enabled
+ * @property bool $show_on_auction123
  */
 class Collector extends Model implements Filterable
 {
@@ -90,6 +92,7 @@ class Collector extends Model implements Filterable
         self::FILE_FORMAT_JSON,
         self::FILE_FORMAT_BISH,
         self::FILE_FORMAT_CSV_SIMPLE,
+        self::FILE_FORMAT_CSV_URL,
     ];
 
     public const FILE_FORMAT_CDK = 'cdk';
@@ -102,6 +105,7 @@ class Collector extends Model implements Filterable
     public const FILE_FORMAT_JSON = 'json';
     public const FILE_FORMAT_BISH = 'bish';
     public const FILE_FORMAT_CSV_SIMPLE = 'csvs';
+    public const FILE_FORMAT_CSV_URL = 'csv_url';
 
     public const MSRP_ZEROED_OUT_ON_USED = 1;
     public const MSRP_NOT_ZEROED_OUT_ON_USED = 0;
@@ -180,7 +184,14 @@ class Collector extends Model implements Filterable
         'api_max_records',
         'api_pagination',
         'ignore_manually_added_units',
-        'is_bdv_enabled'
+        'is_bdv_enabled',
+        'last_run',
+        'run_errors',
+        'show_on_auction123',
+    ];
+
+    protected $casts = [
+        'last_run' => 'datetime',
     ];
 
     public function dealers(): BelongsTo

@@ -41,7 +41,7 @@ class ADFEmail extends Mailable
 
         $build->subject($this->subject);
 
-        $build->view('emails.leads.adf');
+        $build->text('emails.leads.adf');
 
         $build->with($this->data);
 

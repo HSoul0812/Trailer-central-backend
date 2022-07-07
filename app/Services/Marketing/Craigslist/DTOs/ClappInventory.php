@@ -44,6 +44,13 @@ class ClappInventory
         self::CLAPP_TYPE_ARCHIVES,
     ];
 
+
+    /**
+     * @const string Link Notice Category
+     */
+    const CLAPP_LINK_NOTICE = 'NOTICE';
+
+
     /**
      * @var int
      */

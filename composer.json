@@ -36,6 +36,7 @@
         "illuminate/redis": "^6.3",
         "illuminate/support": "^6.0",
         "inspheric/nova-defaultable": "^1.2",
+        "laravel/cashier": "^12.0",
         "laravel/framework": "^6.0",
         "laravel/horizon": "~3.0",
         "laravel/lumen-framework": "^6.0",
@@ -51,6 +52,7 @@
         "php-ews/php-ews": "~1.0",
         "pixel418/markdownify": "^2.3",
         "predis/predis": "^1.1",
+        "propaganistas/laravel-phone": "4.2.7",
         "psr/cache": "~1.0",
         "psr/container": "1.1.1",
         "psr/log": "^1.0",
@@ -65,7 +67,9 @@
         "symfony/dom-crawler": "^5.1",
         "tijsverkoyen/css-to-inline-styles": "^2.2.1",
         "twilio/sdk": "^5.31",
-        "webklex/laravel-imap": "~2.4"
+        "webklex/laravel-imap": "~2.4",
+        "showroom/bulkconfiguration": "*",
+        "trailercentral/passwordless-login-url": "*"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.4",
@@ -125,6 +129,14 @@
         {
             "type": "path",
             "url": "./nova-components/EditMapping"
+        },
+        {
+            "type": "path",
+            "url": "./nova-components/BulkConfiguration"
+        },
+        {
+            "type": "path",
+            "url": "./nova-components/PasswordlessLoginUrl"
         }
     ],
     "minimum-stability": "dev",

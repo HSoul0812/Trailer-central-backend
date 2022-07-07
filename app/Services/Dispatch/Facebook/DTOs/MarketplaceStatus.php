@@ -21,6 +21,11 @@ class MarketplaceStatus
      */
     const DEFAULT_ACTION = 'start-script';
 
+    /**
+     * @const Default Interval
+     */
+    const DEFAULT_INTERVAL = 60 * 60;
+
 
     /**
      * @const Inventory Methods
@@ -51,10 +56,37 @@ class MarketplaceStatus
     /**
      * Get Default Action
      * 
+     * @return string
+     */
+    public function getAction(): string {
+        return config('marketing.fb.settings.action', self::DEFAULT_ACTION);
+    }
+
+    /**
+     * Get Default Interval
+     * 
+     * @return int
+     */
+    public function getInterval(): int {
+        return (int) config('marketing.fb.settings.interval', self::DEFAULT_INTERVAL);
+    }
+
+    /**
+     * Get Proxy Settings
+     * 
      * @return array
      */
-    public function getAction() {
-        return config('marketing.fb.settings.action', self::DEFAULT_ACTION);
+    public function getProxyConfig(): array {
+        return config('marketing.fb.settings.proxy', []);
+    }
+
+    /**
+     * Get Cookie Settings
+     * 
+     * @return array
+     */
+    public function getCookieConfig(): array {
+        return config('marketing.fb.settings.cookie', []);
     }
 
     /**
@@ -62,7 +94,7 @@ class MarketplaceStatus
      * 
      * @return array
      */
-    public function getAllUrls() {
+    public function getAllUrls(): array {
         return config('marketing.fb.settings.urls', []);
     }
 
@@ -71,7 +103,7 @@ class MarketplaceStatus
      * 
      * @return array
      */
-    public function getAllSelectors() {
+    public function getAllSelectors(): array {
         return config('marketing.fb.selectors', []);
     }
 }

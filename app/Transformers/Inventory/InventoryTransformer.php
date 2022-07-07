@@ -163,6 +163,7 @@ class InventoryTransformer extends TransformerAbstract
              'width_second' => $widthSecond ?? null,
              'width_inches_second' => $widthInchesSecond ?? null,
              'year' => $inventory->year,
+             'chassis_year' => $inventory->chassis_year,
              'color' => $inventory->color,
              'floorplan_payments' => $inventory->floorplanPayments,
              'url' => $inventory->getUrl(),
@@ -187,7 +188,9 @@ class InventoryTransformer extends TransformerAbstract
              'pac_amount' => $inventory->pac_amount,
              'show_on_ksl' => $inventory->show_on_ksl,
              'show_on_racingjunk' => $inventory->show_on_racingjunk,
-             'show_on_rvtrader' => $inventory->show_on_rvtrader
+             'show_on_rvtrader' => $inventory->show_on_rvtrader,
+             'changed_fields_in_dashboard' => $inventory->changed_fields_in_dashboard,
+             'show_on_auction123' => $inventory->show_on_auction123
          ];
     }
 

@@ -12,8 +12,6 @@ class GetBinsRequest extends Request
 {
 
     protected $rules = [
-        'dealer_id' => 'array',
-        'dealer_id.*' => 'integer',
         'search_term' => 'string'
     ];
 

@@ -3,11 +3,13 @@
 namespace App\Repositories\Marketing\Facebook;
 
 use App\Exceptions\NotImplementedException;
+use App\Models\Marketing\Facebook\Error;
 use App\Models\Marketing\Facebook\Listings;
 use App\Models\Marketing\Facebook\Marketplace;
 use App\Repositories\Traits\SortTrait;
 use App\Traits\Repository\Transaction;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Builder;
 
 class MarketplaceRepository implements MarketplaceRepositoryInterface {
     use SortTrait, Transaction;
@@ -137,6 +139,28 @@ class MarketplaceRepository implements MarketplaceRepositoryInterface {
         // Exclude Integration ID's
         if (isset($params['exclude'])) {
             $query = $query->whereNotIn(Marketplace::getTableName() . '.id', $params['exclude']);
+        }
+
+        // Import Range Provided
+        if (!empty($params['import_range'])) {
+            $query = $query->where(function(Builder $query) use($params) {
+                $query->where(Marketplace::getTableName() . '.imported_at', '<',
+                                    DB::raw('DATE_SUB(NOW(), INTERVAL ' . $params['import_range'] . ' HOUR)'))
+                      ->orWhereNull(Marketplace::getTableName() . '.imported_at');
+            });
+        }
+
+        // Skip Integrations With Non-Expired Errors
+        if (!empty($params['skip_errors'])) {
+            $query = $query->leftJoin(Error::getTableName(), function($join) {
+                $join->on(Error::getTableName() . '.marketplace_id', '=',
+                                        Marketplace::getTableName() . '.id')
+                     ->where(Error::getTableName().'.dismissed', 0)
+                     ->whereNull(Error::getTableName().'.inventory_id');
+            })->where(function(Builder $query) {
+                return $query->whereNull(Error::getTableName().'.id')
+                             ->orWhere(Error::getTableName().'.expires_at', '<', DB::raw('NOW()'));
+            });
         }
 
         if (isset($params['sort'])) {

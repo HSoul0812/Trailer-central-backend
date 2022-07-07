@@ -7,6 +7,7 @@ use App\Helpers\SanitizeHelper;
 use App\Repositories\Inventory\AttributeRepositoryInterface;
 use App\Transformers\TransformerInterface;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Arr;
 
 /**
  * Class SaveInventoryTransformer
@@ -158,6 +159,12 @@ class SaveInventoryTransformer implements TransformerInterface
                     ->toArray();
             } else {
                 $defaultAttributes = [];
+            }
+
+            if (isset($params['manual'])) {
+                $changed = collect(Arr::except($params, array('inventory_id', 'dealer_id', 'manual')))->keys()->toArray();
+                $params['changed_fields_in_dashboard'] = $changed;
+
             }
 
             $createParams = $params;

@@ -2,16 +2,18 @@
 
 namespace App\Services\CRM\Text;
 
+use App\Exceptions\CRM\Text\BlastException;
 use App\Exceptions\CRM\Text\CustomerLandlineNumberException;
 use App\Exceptions\CRM\Text\NoBlastSmsFromNumberException;
 use App\Exceptions\CRM\Text\NoLeadsDeliverBlastException;
+use App\Exceptions\CRM\Text\NotValidFromNumberException;
 use App\Models\CRM\Interactions\TextLog;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Text\Blast;
 use App\Models\CRM\Text\BlastSent;
 use App\Models\User\NewDealerUser;
-use App\Services\CRM\Text\TextServiceInterface;
+use App\Services\CRM\Text\TwilioServiceInterface;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
 use App\Repositories\CRM\Text\BlastRepositoryInterface;
@@ -24,13 +26,13 @@ use Carbon\Carbon;
 
 /**
  * Class BlastService
- * 
+ *
  * @package App\Services\CRM\Text
  */
 class BlastService implements BlastServiceInterface
 {
     /**
-     * @var App\Services\CRM\Text\TextServiceInterface
+     * @var TwilioServiceInterface
      */
     protected $textService;
 
@@ -68,11 +70,11 @@ class BlastService implements BlastServiceInterface
     /**
      * BlastService constructor.
      */
-    public function __construct(TextServiceInterface $text,
-                                StatusRepositoryInterface $leadStatus,
-                                TextRepositoryInterface $textRepo,
-                                BlastRepositoryInterface $blastRepo,
-                                TemplateRepositoryInterface $templateRepo,
+    public function __construct(TwilioServiceInterface            $text,
+                                StatusRepositoryInterface         $leadStatus,
+                                TextRepositoryInterface           $textRepo,
+                                BlastRepositoryInterface          $blastRepo,
+                                TemplateRepositoryInterface       $templateRepo,
                                 DealerLocationRepositoryInterface $dealerLocationRepo)
     {
         // Initialize Text Service
@@ -91,53 +93,83 @@ class BlastService implements BlastServiceInterface
 
     /**
      * Send Blast Text
-     * 
+     *
      * @param NewDealerUser $dealer
      * @param Blast $blast
-     * @throws NoBlastSmsFromNumberException
-     * @throws NoLeadsDeliverBlastException
      * @return Collection<BlastSent>
+     * @throws NoLeadsDeliverBlastException
+     * @throws \Exception
+     * @throws NoBlastSmsFromNumberException
      */
     public function send(NewDealerUser $dealer, Blast $blast): Collection {
-        // Get From Number
-        $from_number = $this->getFromNumber($dealer->id, $blast);
+        try {
+            // Get From Number
+            $from_number = $this->getFromNumber($dealer->id, $blast);
 
-        // Get Unsent Blast Leads
-        if(count($blast->leads) < 1) {
-            $this->log->error('No Leads found for Blast #' . $blast->id . ' for Dealer #: ' . $dealer->id);
-            throw new NoLeadsDeliverBlastException();
-        }
-
-        // Loop Leads for Current Dealer
-        $sent = new Collection();
-        $this->log->debug('Found ' . $blast->leads->count() . ' Leads for Blast #' . $blast->id);
-        foreach($blast->leads as $lead) {
-            // Not a Valid To Number?!
-            if(empty($lead->text_phone)) {
-                continue;
+            if (empty($from_number)) {
+                $this->log->error('No Blast SMS From Number for Dealer #: ' . $dealer->id);
+                throw new NoBlastSmsFromNumberException;
             }
 
-            // Send Lead
-            $leadSent = $this->sendToLead($from_number, $dealer, $blast, $lead);
-            if($leadSent !== null) {
-                $sent->push($leadSent);
+            if (!$this->textService->isValidPhoneNumber($from_number)) {
+                $this->log->error('From SMS Number is Invalid #: ' . $dealer->id);
+                throw new NotValidFromNumberException();
             }
+
+            // Get Unsent Blast Leads
+            if (count($blast->leads) < 1) {
+                $this->log->error('No Leads found for Blast #' . $blast->id . ' for Dealer #: ' . $dealer->id);
+                throw new NoLeadsDeliverBlastException();
+            }
+
+            // Loop Leads for Current Dealer
+            $sent = new Collection();
+            $this->log->debug('Found ' . $blast->leads->count() . ' Leads for Blast #' . $blast->id);
+
+            foreach ($blast->leads as $lead) {
+                // Not a Valid To Number?!
+                if (empty($lead->text_phone)) {
+                    continue;
+                }
+
+                // Send Lead
+                $leadSent = $this->sendToLead($from_number, $dealer, $blast, $lead);
+                if ($leadSent !== null) {
+                    $sent->push($leadSent);
+                }
+            }
+
+            // Mark Blast as Delivered
+            $this->markDelivered($blast);
+
+            $this->saveLog($blast, 'success', 'Successfully Delivered');
+
+            // Return Blast Sent Entries
+            return $sent;
+        } catch (NoLeadsDeliverBlastException $e) {
+            $this->saveLog($blast, 'warning', $e->getMessage());
+            $this->markDelivered($blast);
+
+            throw $e;
+        } catch (BlastException $e) {
+            $this->saveLog($blast, 'error', $e->getMessage());
+            $this->markDelivered($blast, true);
+
+            throw $e;
+        } catch (\Exception $e) {
+            $this->saveLog($blast, 'error', 'An Unknown Error Has Occurred, Please Contact Support');
+            $this->markDelivered($blast, true);
+
+            throw $e;
         }
-
-        // Mark Blast as Delivered
-        $this->markDelivered($blast);
-
-        // Return Blast Sent Entries
-        return $sent;
     }
 
 
     /**
      * Get From Number
-     * 
+     *
      * @param int $dealerId
      * @param Blast $blast
-     * @throw NoBlastSmsFromNumberException
      * @return string
      */
     private function getFromNumber(int $dealerId, Blast $blast): string {
@@ -148,19 +180,12 @@ class BlastService implements BlastServiceInterface
         }
 
         // Get First Available Number From Dealer Location
-        $defaultNumber = $this->dealerLocation->findDealerSmsNumber($dealerId);
-        if(!empty($defaultNumber)) {
-            return $defaultNumber;
-        }
-
-        // Throw Exception
-        $this->log->error('No Blast SMS From Number for Dealer #: ' . $dealerId);
-        throw new NoBlastSmsFromNumberException;
+        return $this->dealerLocation->findDealerSmsNumber($dealerId);
     }
 
     /**
      * Send Text to Lead
-     * 
+     *
      * @param string $from_number sms from number
      * @param NewDealerUser $dealer
      * @param Blast $blast
@@ -206,7 +231,7 @@ class BlastService implements BlastServiceInterface
 
     /**
      * Update Lead Status
-     * 
+     *
      * @param Lead $lead
      * @return LeadStatus
      */
@@ -221,7 +246,7 @@ class BlastService implements BlastServiceInterface
 
     /**
      * Save Text to DB
-     * 
+     *
      * @param string $from_number sms from number
      * @param Lead $lead
      * @param string $textMessage filled text message
@@ -239,7 +264,7 @@ class BlastService implements BlastServiceInterface
 
     /**
      * Mark Lead as Sent
-     * 
+     *
      * @param Blast $blast
      * @param Lead $lead
      * @param string $status
@@ -264,15 +289,36 @@ class BlastService implements BlastServiceInterface
 
     /**
      * Mark Blast as Delivered
-     * 
+     *
      * @param Blast $blast
+     * @param bool $isError
      * @return Blast
      */
-    private function markDelivered(Blast $blast): Blast {
+    private function markDelivered(Blast $blast, bool $isError = false): Blast
+    {
         // Mark as Delivered
         return $this->blasts->update([
             'id' => $blast->id,
-            'is_delivered' => 1
+            'is_delivered' => 1,
+            'is_error' => $isError,
+        ]);
+    }
+
+    /**
+     * @param Blast $blast
+     * @param string $status
+     * @param string $message
+     * @return Blast
+     */
+    private function saveLog(Blast $blast, string $status, string $message): Blast
+    {
+        return $this->blasts->update([
+            'id' => $blast->id,
+            'log' => [
+                'status' => $status,
+                'message' => $message,
+                'date' => (new \DateTime())->format('Y-m-d H:i:s'),
+            ]
         ]);
     }
 }

@@ -20,9 +20,11 @@ use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Traits\CompactHelper;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use App\Models\CRM\Leads\Facebook\Lead as FbLead;
+use App\Models\CRM\Leads\Facebook\User as FbUser;
 
 /**
  * Class Lead
@@ -66,7 +68,9 @@ use App\Models\CRM\Leads\Facebook\Lead as FbLead;
  *
  * @property Website $website
  * @property LeadStatus $leadStatus
+ * @property FbUser $fbUsers
  * @property FbLead $fbLead
+ * @property Inventory $inventory
  */
 class Lead extends Model
 {
@@ -165,6 +169,10 @@ class Lead extends Model
         'is_from_classifieds',
         'bigtex_exported',
         'next_followup',
+    ];
+
+    protected $casts = [
+        'is_archived' => 'boolean',
     ];
 
     /**
@@ -292,11 +300,20 @@ class Lead extends Model
     }
 
     /**
-     * @return HasOne
+    * @return HasOne
+    * @return BelongsToMany
      */
     public function fbLead(): HasOne
     {
         return $this->hasOne(FbLead::class, 'lead_id', 'identifier');
+    }
+
+    /**
+     * @return BelongsToMany
+     */
+    public function fbUsers(): BelongsToMany
+    {
+        return $this->belongsToMany(FbUser::class, FbLead::class, 'lead_id', 'user_id', 'identifier', 'user_id');
     }
 
     /**
@@ -642,6 +659,16 @@ class Lead extends Model
     }
 
     public static function getLeadCrmUrl($leadId, $credential) {
-        return env('CRM_LOGIN_URL') . $credential . '&r=' . urlencode(env('CRM_LEAD_ROUTE') . CompactHelper::expand($leadId));
+        $config_url = 'app.new_design_crm_url';
+
+        if (!config('app.new_design_lead_force')) {
+            $lead = Lead::with('user')->findOrFail($leadId);
+
+            if ($lead->user->is_dms_active) {
+                $config_url = 'app.crm_url';
+            }
+        }
+
+        return config($config_url) . 'user/login?e=' . $credential . '&r=' . urlencode(config('app.crm_lead_url') . CompactHelper::expand($leadId));
     }
 }

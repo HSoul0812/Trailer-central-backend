@@ -25,6 +25,7 @@ class BusinessServiceTest extends TestCase
     }
 
     /**
+     * @group Marketing
      * @covers ::validate
      *
      * @throws BindingResolutionException

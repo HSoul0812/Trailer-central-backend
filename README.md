@@ -12,6 +12,7 @@ Update git hooks:
 
 
 ## Swagger Documentation
+
  - Extend RestfulController class
  - Inside each of controllers, you should have the appropriate annotations above each public method
 ```
@@ -128,3 +129,8 @@ We use [composer-git-hooks](https://github.com/BrainMaestro/composer-git-hooks#c
 
 * `pre-commit`
     * `l5-swagger:generate` - check if swagger documentation doesn't have syntax errors
+
+## Log rotation
+
+**IMPORTANT**: If you create a new log stack that does not use log rotation by default you
+must add it to the above list and notify #devops

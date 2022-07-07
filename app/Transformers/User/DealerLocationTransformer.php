@@ -46,7 +46,7 @@ class DealerLocationTransformer extends TransformerAbstract
             'latitude' => $dealerLocation->latitude,
             'longitude' => $dealerLocation->longitude,
             'coordinates_updated' => $dealerLocation->coordinates_updated,
-            'sms' => $dealerLocation->sms_phone,
+            'sms' => $dealerLocation->sms,
             'sms_phone' => $dealerLocation->sms_phone,
             'permanent_phone' => $dealerLocation->permanent_phone,
             'show_on_website_locations' => $dealerLocation->show_on_website_locations,

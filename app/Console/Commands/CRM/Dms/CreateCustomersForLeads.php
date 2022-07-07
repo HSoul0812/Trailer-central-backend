@@ -43,8 +43,8 @@ class CreateCustomersForLeads extends Command
                 $leadId = $item->identifier;
                 $batch[] = $leadId;
             }
-            $job = new CustomerCreateBatchJob($batch);
-            dispatch($job);
+            // $job = new CustomerCreateBatchJob($batch);
+            // dispatch($job);
         });
 
         return true;

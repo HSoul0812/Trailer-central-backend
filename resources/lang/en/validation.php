@@ -122,6 +122,7 @@ return [
     'uploaded' => 'The :attribute failed to upload.',
 //    'url' => 'The :attribute format is invalid.',
     'uuid' => 'The :attribute must be a valid UUID.',
+    'phone' => 'The :attribute field contains an invalid phone number.',
 
     /*
     |--------------------------------------------------------------------------
@@ -196,6 +197,7 @@ return [
                             Lead::STATUS_UNCONTACTED . ',' .
                             Lead::STATUS_WON . ',' .
                             Lead::STATUS_WON_CLOSED,
+    'jotform_enabled' => 'JotForm Disabled or Doesn\'t exist.',
     'interaction_type_valid' => 'Interaction type needs to be: '. implode(',', Interaction::INTERACTION_TYPES),
     'sales_person_valid' => 'Sales person ID must exist or be 0',
     'sales_auth_type' => 'SMTP auth needs to be: ' . implode(", ", SalesPerson::SMTP_AUTH),
@@ -212,4 +214,6 @@ return [
     'valid_include' => 'The :attribute is not valid',
     'unique_text_blast_campaign_name' => 'You already have a blast campaign with this name',
     'unique_text_campaign_name' => 'You already have a campaign with this name',
+    'active_interaction' => 'The number is not active',
+    'valid_password' => 'Password should be at least 1 Capital letter, 1 Number and min 8 chars.',
 ];

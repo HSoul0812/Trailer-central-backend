@@ -29,16 +29,19 @@ class ImageHelper
 
         $size = @getimagesize($file);
 
-        list($width_old, $height_old) = $size;
-
+        $width_old = 0;
+        $height_old = 0;
         $orientation = 0;
-        if ($size[2] == IMAGETYPE_JPEG) {
-            $exifData = exif_read_data($file);
-            if (!empty($exifData['Orientation']) && ($exifData['Orientation'] == 6 || $exifData['Orientation'] == 8)) {
-                $width_old = $exifData['ExifImageWidth'] ?? $exifData['COMPUTED']['Width'];
-                $height_old = $exifData['ExifImageLength'] ?? $exifData['COMPUTED']['Height'];
-                $orientation = $exifData['Orientation'];
-            }
+
+        // We using imagick because php size method doesn't get proper w/h if images are rotated in iOS / Mac
+        try {
+            $imagick = new \Imagick($file);
+
+            $width_old = $imagick->getImageWidth();
+            $height_old = $imagick->getImageHeight();
+            $orientation = $imagick->getImageOrientation();
+        } catch (\Exception $exception) {
+            list($width_old, $height_old) = $size;
         }
 
         if($proportional) {

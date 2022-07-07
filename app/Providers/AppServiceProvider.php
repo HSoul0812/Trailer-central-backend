@@ -61,6 +61,8 @@ use App\Repositories\Inventory\InventoryRepository;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\Inventory\ManufacturerRepository;
 use App\Repositories\Inventory\ManufacturerRepositoryInterface;
+use App\Repositories\Showroom\ShowroomBulkUpdateRepository;
+use App\Repositories\Showroom\ShowroomBulkUpdateRepositoryInterface;
 use App\Repositories\Showroom\ShowroomFieldsMappingRepository;
 use App\Repositories\Showroom\ShowroomFieldsMappingRepositoryInterface;
 use App\Repositories\Pos\SalesReportRepository;
@@ -151,6 +153,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Nova\Nova;
+use Propaganistas\LaravelPhone\PhoneServiceProvider;
+
+use Illuminate\Support\Facades\Schema;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -164,7 +169,7 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('price_format', 'App\Rules\PriceFormat@passes');
         \Validator::extend('checkbox', 'App\Rules\Checkbox@passes');
         \Validator::extend('dealer_location_valid', 'App\Rules\User\ValidDealerLocation@passes');
-        \Validator::extend('permission_level_valid', 'App\Rules\User\ValidPermissionLevel@passes');
+        \Validator::extendDependent('permission_level_valid', 'App\Rules\User\ValidPermissionLevel@passes');
         \Validator::extend('unique_dealer_location_name', 'App\Rules\User\ValidDealerLocationName@passes');
         \Validator::extend('tax_calculator_valid', 'App\Rules\User\ValidTaxCalculator@passes');
         \Validator::extend('website_valid', 'App\Rules\Website\ValidWebsite@passes');
@@ -209,7 +214,10 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('unit_sale_exists', 'App\Rules\Dms\UnitSaleExists@passes');
         \Validator::extend('valid_clapp_profile', 'App\Rules\Marketing\Craigslist\ValidProfile@passes');
         \Validator::extend('valid_include', 'App\Rules\ValidInclude@validate');
+        \Validator::extend('location_belongs_to_dealer', 'App\Rules\Locations\LocationBelongsToDealer@passes');
+        \Validator::extend('bin_belongs_to_dealer', 'App\Rules\Bins\BinBelongsToDealer@passes');
         \Validator::extend('valid_location_email', 'App\Rules\DealerLocation\EmailValid@passes');
+        \Validator::extend('valid_password', 'App\Rules\User\ValidPassword@passes');
 
         Builder::macro('whereLike', function($attributes, string $searchTerm) {
             foreach(array_wrap($attributes) as $attribute) {
@@ -223,44 +231,15 @@ class AppServiceProvider extends ServiceProvider
             DealerIncomingMapping::observe(DealerIncomingMappingObserver::class);
         });
 
-        // add other migration directories
-        $this->loadMigrationsFrom([
-            // old directory
-            __DIR__ . '/../../database/migrations',
+        // Increase default database character set length (Specified key was too long)
+        Schema::defaultStringLength(191);
 
-            // dms migrations
-            __DIR__ . '/../../database/migrations/dms',
+        // Add Migration Directories Recursively
+        $mainPath = database_path('migrations');
+        $directories = glob($mainPath . '/*' , GLOB_ONLYDIR);
+        $paths = array_merge([$mainPath], $directories);
 
-            // integrations migrations
-            __DIR__ . '/../../database/migrations/integrations',
-
-            // inventory migrations
-            __DIR__ . '/../../database/migrations/inventory',
-
-            // website migrations
-            __DIR__ . '/../../database/migrations/website',
-
-            // parts migrations
-            __DIR__ . '/../../database/migrations/parts',
-
-            // parts crm
-            __DIR__ . '/../../database/migrations/crm',
-
-            // dealer migrations
-            __DIR__ . '/../../database/migrations/dealer',
-
-            // utilities
-            __DIR__ . '/../../database/migrations/utilities',
-
-            // configuration tables
-            __DIR__ . '/../../database/migrations/config',
-
-            // invoicing
-            __DIR__ . '/../../database/migrations/invoicing',
-
-            // ecommerce
-            __DIR__ . '/../../database/migrations/ecommerce',
-        ]);
+        $this->loadMigrationsFrom($paths);
 
         // log all queries
         if (env('APP_LOG_QUERIES')) {
@@ -353,6 +332,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(PackageServiceInterface::class, PackageService::class);
         $this->app->bind(RegisterRepositoryInterface::class, RegisterRepository::class);
         $this->app->bind(RegisterServiceInterface::class, RegisterService::class);
+
         $this->app->when(FileController::class)
             ->needs(FileServiceInterface::class)
             ->give(function () {
@@ -375,5 +355,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(InventoryAttributeServiceInterface::class, InventoryAttributeService::class);
         $this->app->bind(CustomOverlayServiceInterface::class, CustomOverlayService::class);
         $this->app->bind(CustomOverlayRepositoryInterface::class, CustomOverlayRepository::class);
+
+        $this->app->bind(ShowroomBulkUpdateRepositoryInterface::class, ShowroomBulkUpdateRepository::class);
+
+        $this->app->register(PhoneServiceProvider::class);
     }
 }

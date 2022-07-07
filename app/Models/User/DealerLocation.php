@@ -2,6 +2,7 @@
 
 namespace App\Models\User;
 
+use App\Helpers\GeographyHelper;
 use App\Models\Feed\Mapping\Incoming\ApiEntityReference;
 use App\Models\Inventory\Inventory;
 use App\Models\Region;
@@ -298,6 +299,23 @@ class DealerLocation extends Model
         }
 
         return $locationAddr . $this->region;
+    }
+
+    public function getCityStateAttribute(): string
+    {
+        $locationAddr = $this->city;
+
+        if (!empty($locationAddr) && !empty($this->region)) {
+            $locationAddr .= ', ';
+        }
+
+        $state = $this->region;
+        if(isset(GeographyHelper::STATES_LIST[$this->region])) {
+            $baseState = GeographyHelper::STATES_LIST[$this->region];
+            $state = ucwords(strtolower($baseState));
+        }
+
+        return $locationAddr . $state;
     }
 
     public function getLocationTitleAttribute(): string

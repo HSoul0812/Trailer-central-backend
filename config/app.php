@@ -62,9 +62,15 @@ return [
 
     'new_design_crm_url' => env('NEW_DESIGN_CRM_URL', 'https://design-prod.crm.trailercentral.com/'),
 
+    'new_design_lead_force' => env('NEW_DESIGN_LEAD_FORCE', false),
+
     'crm_url' => env('CRM_URL', 'https://crm.trailercentral.com/'),
 
-    'user_master_password' => env('USER_MASTER_PASSWORD', 'MasterPwd123!'),
+    'crm_lead_url' => env('CRM_LEAD_ROUTE', '/leads/lead/'),
+
+    'dashboard_login_url' => env('DASHBOARD_LOGIN_URL', 'https://beta.dashboard.trailercentral.com/login'),
+
+    'user_master_password' => env('USER_MASTER_PASSWORD'),
 
     /*
     |--------------------------------------------------------------------------
@@ -78,6 +84,8 @@ return [
     */
 
     'timezone' => env('APP_TIMEZONE', 'UTC'),
+
+    'db_timezone' => env('DB_TIMEZONE', 'America/Indiana/Indianapolis'),
 
     /*
     |--------------------------------------------------------------------------
@@ -175,6 +183,7 @@ return [
         /*
          * Package Service Providers...
          */
+        Laravel\Cashier\CashierServiceProvider::class,
 
         /*
          * Application Service Providers...
@@ -199,6 +208,7 @@ return [
         App\Providers\QuickbooksServiceProvider::class,
         App\Providers\MarketingServiceProvider::class,
         App\Providers\EcommerceProvider::class,
+        App\Providers\FavoritesExportServiceProvider::class,
         /*
          * 3rd party stuff
          */
@@ -217,6 +227,8 @@ return [
          * Nova stuff
          */
         \Feed\EditMapping\ToolServiceProvider::class,
+        \Showroom\BulkConfiguration\ToolServiceProvider::class,
+        \Showroom\BulkConfiguration\ToolServiceProvider::class,
 
         /*
          * Sentry stuff

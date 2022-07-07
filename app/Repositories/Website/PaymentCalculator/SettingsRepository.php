@@ -70,14 +70,16 @@ class SettingsRepository implements SettingsRepositoryInterface {
                 ->limit(1);
 
             $queryLessThan->select('id')
-                ->where('id', Settings::OPERATOR_LESS_THAN)
+                ->where('operator', Settings::OPERATOR_LESS_THAN)
                 ->where('inventory_price', '>', $params['inventory_price'])
-                ->orderBy('inventory_price', 'desc')
+                ->orderBy('inventory_price')
                 ->limit(1);
 
             $leftAndRightIdBounds = array_merge($queryOver->get()->toArray(), $queryLessThan->get()->toArray());
 
-            $query->whereIn('id', $leftAndRightIdBounds);
+            if (!empty($leftAndRightIdBounds)) {
+                $query->whereIn('id', $leftAndRightIdBounds);
+            }
 
             // when we have a discrepancy, then we need to pick the most profitable loan for the company
             $query->limit(1)->orderBy('months', 'desc');

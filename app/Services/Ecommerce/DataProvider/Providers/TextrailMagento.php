@@ -8,6 +8,7 @@ use GuzzleHttp\Client as GuzzleHttpClient;
 use Illuminate\Support\Facades\Config;
 use App\Services\Parts\Textrail\DTO\TextrailPartDTO;
 use GuzzleHttp\Exception\ClientException;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response as BaseResponse;
 use App\Exceptions\Ecommerce\TextrailException;
 use App\Exceptions\NotImplementedException;
@@ -18,6 +19,7 @@ class TextrailMagento implements DataProviderInterface,
                                  TextrailRefundsInterface
 {
     private const TEXTRAIL_CATEGORY_URL = 'rest/V1/categories/';
+    private const TEXTRAIL_CATEGORY_LIST_URL = 'rest/V1/categories/list/';
     private const TEXTRAIL_ATTRIBUTES_MANUFACTURER_URL = 'rest/V1/products/attributes/manufacturer/options/';
     private const TEXTRAIL_ATTRIBUTES_BRAND_NAME_URL = 'rest/V1/products/attributes/brand_name/options/';
     private const TEXTRAIL_ATTRIBUTES_GENERIC_URL = 'rest/V1/products/attributes/';
@@ -48,6 +50,12 @@ class TextrailMagento implements DataProviderInterface,
 
     /** @var boolean */
     private $isGuestCheckout;
+
+    /** @var object */
+    private $allCategories;
+
+    /** @var array */
+    private $parentMemory = [];
 
     public function __construct()
     {
@@ -461,14 +469,22 @@ class TextrailMagento implements DataProviderInterface,
     public function getTextrailImage(array $img): ?array
     {
       $img_url = $this->getTextrailImagesBaseUrl() . $img['file'];
-      $checkFile = get_headers($img_url);
+      try {
+          $checkFile = get_headers($img_url);
 
-      if ($checkFile[0] == "HTTP/1.1 200 OK") {
-        $imageData = file_get_contents($img_url, false, stream_context_create(['ssl' => ['verify_peer' => false, 'verify_peer_name' => false]]));
-        $explodedImage = explode('/', $img['file']);
-        $fileName = $explodedImage[count($explodedImage) - 1];
+          if ($checkFile[0] == "HTTP/1.1 200 OK") {
+              $imageData = file_get_contents($img_url, false, stream_context_create(['ssl' => ['verify_peer' => false, 'verify_peer_name' => false]]));
+              $explodedImage = explode('/', $img['file']);
+              $fileName = $explodedImage[count($explodedImage) - 1];
 
-        return ['imageData' => $imageData, 'fileName' => $fileName];
+              return ['imageData' => $imageData, 'fileName' => $fileName];
+          }
+      } catch (\Exception $exception) {
+          Log::error('Part image read failed', [
+              'image_url' => $img_url,
+          ]);
+
+          return null;
       }
 
       return null;
@@ -687,5 +703,39 @@ class TextrailMagento implements DataProviderInterface,
     public function getAttribute(string $code): array
     {
         return json_decode($this->httpClient->get(self::TEXTRAIL_ATTRIBUTES_GENERIC_URL . $code, ['headers' => $this->getHeaders()])->getBody()->getContents(), true);
+    }
+
+    public function getTextrailCategories(): array
+    {
+        $categories = json_decode($this->httpClient->get(self::TEXTRAIL_CATEGORY_LIST_URL . '?searchCriteria[page_size]=10000', ['headers' => $this->getHeaders()])->getBody()->getContents(), true);
+
+        $this->allCategories = $categories;
+
+        return $categories;
+    }
+
+    /**
+     * @param int $category_id
+     * @return array
+     */
+    public function getTextrailParentCategory(int $category_id): array
+    {
+        $category = json_decode($this->httpClient->get(self::TEXTRAIL_CATEGORY_URL . $category_id, ['headers' => $this->getHeaders()])->getBody()->getContents(), true);
+        $path = $category['path'];
+
+        $breadcrumb = explode('/', $path);
+
+        $parent = [];
+        // 0 = Root, 1 = Shop By, 2 = Available Master Parent ID
+        if (!empty($breadcrumb[2])) {
+            if (empty($this->parentMemory[$breadcrumb[2]])) {
+                $parent = json_decode($this->httpClient->get(self::TEXTRAIL_CATEGORY_URL . $breadcrumb[2], ['headers' => $this->getHeaders()])->getBody()->getContents(), true);
+                $this->parentMemory[$breadcrumb[2]] = $parent;
+            } else {
+                $parent = $this->parentMemory[$breadcrumb[2]];
+            }
+        }
+
+        return [$parent, $category];
     }
 }
