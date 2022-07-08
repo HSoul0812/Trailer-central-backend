@@ -5,6 +5,8 @@ namespace App\Domains\UnitSale\Actions;
 use App\Domains\Shared\Traits\WhenAble;
 use App\Models\CRM\Dms\Refund;
 use App\Models\CRM\Dms\UnitSale;
+use Carbon\Carbon;
+use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -23,9 +25,15 @@ class GetUnitSaleRefundsAction
 
     /** @var string */
     private $sort = '-created_at';
-    
+
     /** @var int|null */
     private $registerId;
+
+    /** @var int|null */
+    private $customerId;
+
+    /** @var array|null */
+    private $createdAtBetween;
 
     /**
      * Fetch the refunds Collection
@@ -40,20 +48,50 @@ class GetUnitSaleRefundsAction
         return Refund::query()
             ->with($this->relations)
             ->where('dealer_id', $dealerId)
-            ->where(function (Builder $builder) use ($unitSaleId) {
-                $builder
-                    ->where(function (Builder $builder) use ($unitSaleId) {
-                        $builder
-                            ->where('tb_name', UnitSale::getTableName())
-                            ->where('tb_primary_id', $unitSaleId);
-                    })
-                    ->orWhereHas('invoice', function (Builder $builder) use ($unitSaleId) {
-                        $builder->where('unit_sale_id', $unitSaleId);
-                    });
-            })
-            ->when(!empty($this->registerId), function(Builder $builder) {
+
+            // Normal filter fields, we only add the where clause if
+            // they're not empty
+            ->when(!empty($this->registerId), function (Builder $builder) {
                 $builder->where('register_id', $this->registerId);
             })
+            ->when(!empty($this->createdAtBetween), function (Builder $builder) {
+                $builder->whereBetween('created_at', $this->createdAtBetween);
+            })
+
+            // The main condition to match the unit sale id, here we try to
+            // match the refund where the invoice for the refund has the unit same
+            // unit sale with the one that's provided in this method
+            ->where(function (Builder $builder) use ($unitSaleId) {
+                $builder->where(function (Builder $builder) use ($unitSaleId) {
+                    $builder
+                        ->where(function (Builder $builder) use ($unitSaleId) {
+                            $builder
+                                ->where('tb_name', UnitSale::getTableName())
+                                ->where('tb_primary_id', $unitSaleId);
+                        })
+                        ->orWhereHas('invoice', function (Builder $builder) use ($unitSaleId) {
+                            $builder->where('unit_sale_id', $unitSaleId);
+                        });
+                });
+            })
+
+            // If the customerId isn't empty, we will find it from the invoice
+            // table order the unit_sale table
+            ->when(!empty($this->customerId), function (Builder $builder) use ($dealerId) {
+                $builder->where(function (Builder $builder) use ($dealerId) {
+                    $builder
+                        ->whereHas('invoice', function (Builder $builder) {
+                            $builder->where('customer_id', $this->customerId);
+                        })
+                        ->orWhereHas('unitSale', function (Builder $builder) use ($dealerId) {
+                            $builder
+                                ->where('dealer_id', $dealerId)
+                                ->where('buyer_id', $this->customerId);
+                        });
+                });
+            })
+
+            // Order and paginate
             ->orderBy(...$this->orderBy())
             ->paginate($this->perPage, ['*'], 'page', $this->page);
     }
@@ -112,7 +150,40 @@ class GetUnitSaleRefundsAction
 
         return $this;
     }
-    
+
+    /**
+     * @param int|null $customerId
+     * @return GetUnitSaleRefundsAction
+     */
+    public function withCustomerId(?int $customerId): GetUnitSaleRefundsAction
+    {
+        $this->customerId = $customerId;
+
+        return $this;
+    }
+
+    /**
+     * @param array|null $createdAtBetween Needs to be in [$from, $to] format with both being Carbon objects
+     * @return GetUnitSaleRefundsAction
+     * @throws Exception
+     */
+    public function withCreatedAtBetween(?array $createdAtBetween): GetUnitSaleRefundsAction
+    {
+        if (count($createdAtBetween) !== 2) {
+            throw new Exception("The createdAtBetween must has 2 Carbon values.");
+        }
+
+        foreach ($createdAtBetween as $index => $createdAt) {
+            if (!$createdAt instanceof Carbon) {
+                throw new Exception("The $index element in the createdAtBetween must be an instance of Carbon object.");
+            }
+        }
+
+        $this->createdAtBetween = $createdAtBetween;
+
+        return $this;
+    }
+
     /**
      * Get the orderBy clause
      * @return array
