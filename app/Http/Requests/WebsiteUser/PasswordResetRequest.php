@@ -18,13 +18,7 @@ class PasswordResetRequest extends Request implements PasswordResetRequestInterf
         return [
             'token' => 'required',
             'email' => 'required|email',
-            'password' => ['required', 'confirmed',
-                Password::min(8)
-                    ->letters()
-                    ->mixedCase()
-                    ->numbers()
-                    ->symbols()
-            ],
+            'password' => ['required', 'confirmed', Password::min(8)],
         ];
     }
 }
