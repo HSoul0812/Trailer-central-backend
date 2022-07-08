@@ -40,8 +40,9 @@ class NumberRepository implements NumberRepositoryInterface {
         return Number::create($params);
     }
 
-    public function delete($params) {
-        throw new NotImplementedException();
+    public function delete($params): bool
+    {
+        return Number::query()->where('id', $params['id'])->delete();
     }
 
     public function get($params) {
@@ -66,7 +67,7 @@ class NumberRepository implements NumberRepositoryInterface {
      * @param string $customerName
      * @return Number
      */
-    public function setPhoneAsUsed($fromNumber, $twilioNumber, $toNumber, $customerName) {
+    public function setPhoneAsUsed($fromNumber, $twilioNumber, $toNumber, $customerName, ?int $dealerId = null) {
         // Calculate Expiration
         $expirationTime = time() + (Number::EXPIRATION_TIME * 60 * 60);
 
@@ -84,7 +85,8 @@ class NumberRepository implements NumberRepositoryInterface {
             'twilio_number'   => $twilioNumber,
             'customer_number' => $customerNumber,
             'customer_name'   => $customerName,
-            'expiration_time' => $expirationTime
+            'expiration_time' => $expirationTime,
+            'dealer_id'       => $dealerId
         ]);
     }
 
@@ -161,11 +163,14 @@ class NumberRepository implements NumberRepositoryInterface {
 
     /**
      * @param string $customerNumber
+     * @param int $dealerId
      * @return Number|null
      */
-    public function activeTwilioNumberByCustomerNumber(string $customerNumber): ?Number
+    public function activeTwilioNumberByCustomerNumber(string $customerNumber, int $dealerId): ?Number
     {
-        return Number::query()->where('customer_number', $customerNumber)->first();
+        return Number::query()->where('customer_number', $customerNumber)
+            ->where('dealer_id', $dealerId)
+            ->first();
     }
 
 
