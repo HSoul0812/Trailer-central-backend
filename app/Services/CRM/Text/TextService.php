@@ -147,6 +147,10 @@ class TextService implements TextServiceInterface
 
             $this->twilioService->send($from_number, $to_number, $textMessage, $fullName, $mediaUrl, $lead->dealer_id);
 
+            if ($this->twilioService->getIsNumberInvalid() && !empty($activeNumber)) {
+                $this->numberRepository->delete(['id' => $activeNumber->id]);
+            }
+
             $this->statusRepository->createOrUpdate([
                 'lead_id' => $lead->identifier,
                 'status' => Lead::STATUS_MEDIUM,

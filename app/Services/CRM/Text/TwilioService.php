@@ -425,6 +425,7 @@ class TwilioService implements TwilioServiceInterface
             // Exception occurred?!
             $this->log->error('Error occurred sending twilio text: ' . $ex->getMessage());
             if (strpos($ex->getMessage(), 'is not a valid, SMS-capable inbound phone number')) {
+                $this->isNumberInvalid = true;
                 throw new InvalidTwilioInboundNumberException;
             }
 
