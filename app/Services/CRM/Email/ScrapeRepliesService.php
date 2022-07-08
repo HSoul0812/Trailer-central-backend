@@ -283,6 +283,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             $this->folders->delete($folder->folder_id);
         } catch (\Exception $e) {
             $this->folders->markFailed($folder->folder_id);
+            $this->salespeople->update(['id' => $salesperson->id, 'imap_failed' => 1]);
         }
 
         // Return Nothing
