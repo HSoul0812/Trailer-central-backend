@@ -4,6 +4,7 @@ namespace App\Http\Requests\WebsiteUser;
 
 use App\Http\Requests\Request;
 use App\Http\Requests\CreateRequestInterface;
+use Illuminate\Validation\Rules\Password;
 
 class RegisterUserRequest extends Request implements CreateRequestInterface
 {
@@ -17,6 +18,28 @@ class RegisterUserRequest extends Request implements CreateRequestInterface
         'email' => 'email|required|unique:App\Models\WebsiteUser\WebsiteUser,email',
         'phone_number' => 'nullable|regex:/^([0-9\s\-\+\(\)]*)$/|min:10',
         'mobile_number' => 'nullable|regex:/^([0-9\s\-\+\(\)]*)$/|min:10',
-        'password' => 'required|alpha_num|min:12',
+        'password' => 'required|alpha_num|min:8',
     ];
+
+    protected function getRules(): array
+    {
+        return [
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'address' => 'nullable|string',
+            'zipcode' => 'nullable|string',
+            'city' => 'nullable|string',
+            'state' => 'nullable|string',
+            'email' => 'email|required|unique:App\Models\WebsiteUser\WebsiteUser,email',
+            'phone_number' => 'nullable|regex:/^([0-9\s\-\+\(\)]*)$/|min:10',
+            'mobile_number' => 'nullable|regex:/^([0-9\s\-\+\(\)]*)$/|min:10',
+            'password' => ['required', 'confirmed',
+                Password::min(8)
+                    ->letters()
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols()
+            ],
+        ];
+    }
 }
