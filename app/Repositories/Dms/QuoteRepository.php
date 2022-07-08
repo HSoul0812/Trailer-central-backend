@@ -293,4 +293,9 @@ class QuoteRepository implements QuoteRepositoryInterface
 
         return (bool)$query->update($params);
     }
+
+    public function getRefunds(array $params): array
+    {
+        return [];
+    }
 }
