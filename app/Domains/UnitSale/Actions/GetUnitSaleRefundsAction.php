@@ -102,9 +102,9 @@ class GetUnitSaleRefundsAction
      */
     private function orderBy(): array
     {
-        $direction = $this->sort[0] === '-' ? 'desc' : 'asc';
-
         $column = str_replace('-', '', $this->sort);
+
+        $direction = $this->sort[0] === '-' ? 'desc' : 'asc';
 
         return [$column, $direction];
     }
