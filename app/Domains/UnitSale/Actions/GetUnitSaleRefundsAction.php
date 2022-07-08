@@ -62,17 +62,20 @@ class GetUnitSaleRefundsAction
             // match the refund where the invoice for the refund has the unit same
             // unit sale with the one that's provided in this method
             ->where(function (Builder $builder) use ($unitSaleId) {
-                $builder->where(function (Builder $builder) use ($unitSaleId) {
-                    $builder
-                        ->where(function (Builder $builder) use ($unitSaleId) {
-                            $builder
-                                ->where('tb_name', UnitSale::getTableName())
-                                ->where('tb_primary_id', $unitSaleId);
-                        })
-                        ->orWhereHas('invoice', function (Builder $builder) use ($unitSaleId) {
-                            $builder->where('unit_sale_id', $unitSaleId);
-                        });
-                });
+                $builder
+                    // We start by looking at the refund table, match the tb_name
+                    // and tb_primary_id to fund the matched unit sale id
+                    ->where(function (Builder $builder) use ($unitSaleId) {
+                        $builder
+                            ->where('tb_name', UnitSale::getTableName())
+                            ->where('tb_primary_id', $unitSaleId);
+                    })
+
+                    // OR, we'll look for the one that has invoice with the matched unit_sale_id
+                    // this is usual for those refund that has qb_payment as a tb_name
+                    ->orWhereHas('invoice', function (Builder $builder) use ($unitSaleId) {
+                        $builder->where('unit_sale_id', $unitSaleId);
+                    });
             })
 
             // If the customerId isn't empty, we will find it from the invoice
@@ -80,9 +83,13 @@ class GetUnitSaleRefundsAction
             ->when(!empty($this->customerId), function (Builder $builder) use ($dealerId) {
                 $builder->where(function (Builder $builder) use ($dealerId) {
                     $builder
+                        // We start by looking at the invoice and find the invoice that has this customer
                         ->whereHas('invoice', function (Builder $builder) {
                             $builder->where('customer_id', $this->customerId);
                         })
+
+                        // OR, we will look into the dms_unit_sale table, but we also need to filter
+                        // by dealer_id too, so we don't accidentally pick other dealer unit_sale 
                         ->orWhereHas('unitSale', function (Builder $builder) use ($dealerId) {
                             $builder
                                 ->where('dealer_id', $dealerId)
