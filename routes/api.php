@@ -654,9 +654,17 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('user/quotes', 'App\Http\Controllers\v1\Dms\UnitSaleController@index');
-        $route->get('user/quotes/{id}/refunds', 'App\Http\Controllers\v1\Dms\UnitSaleController@refunds');
-
         $route->put('user/quotes/bulk-archive', 'App\Http\Controllers\v1\Dms\UnitSaleController@bulkArchive');
+        
+        /*
+        |--------------------------------------------------------------------------
+        | Quotes Refunds
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('user/quotes/{id}/refunds', 'App\Http\Controllers\v1\Dms\UnitSale\UnitSaleRefundsController@index');
 
         /*
         |--------------------------------------------------------------------------

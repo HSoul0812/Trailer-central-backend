@@ -4,17 +4,12 @@ namespace App\Http\Controllers\v1\Dms;
 
 use App\Http\Controllers\RestfulController;
 use App\Http\Requests\Dms\GetQuotesRequest;
-use App\Http\Requests\Dms\Quotes\GetQuoteRefundsRequest;
 use App\Http\Requests\Dms\UnitSale\BulkArchiveUpdateRequest;
-use App\Models\CRM\Dms\Refund;
-use App\Models\CRM\Dms\UnitSale;
-use App\Repositories\CRM\Refund\RefundRepositoryInterface;
 use App\Repositories\Dms\QuoteRepositoryInterface;
 use App\Services\Dms\UnitSale\UnitSaleServiceInterface;
 use App\Transformers\Dms\QuoteTotalsTransformer;
 use App\Transformers\Dms\QuoteTransformer;
 use Dingo\Api\Http\Request;
-use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @author Marcel
@@ -37,7 +32,7 @@ class UnitSaleController extends RestfulController
         QuoteRepositoryInterface $quotes,
         UnitSaleServiceInterface $unitSaleService
     ) {
-        $this->middleware('setDealerIdOnRequest')->only(['index', 'bulkArchive', 'refunds']);
+        $this->middleware('setDealerIdOnRequest')->only(['index', 'bulkArchive']);
         $this->quotes = $quotes;
         $this->service = $unitSaleService;
     }
@@ -145,37 +140,5 @@ class UnitSaleController extends RestfulController
         }
 
         return $this->response->errorBadRequest();
-    }
-
-    public function refunds(Request $request, int $quoteId)
-    {
-        $request = new GetQuoteRefundsRequest($request->all());
-        
-        return Refund::query()
-            ->when($request->has('with'), function (Builder $builder) use ($request, $quoteId) {
-                $relations = explode(',', $request->get('with'));
-            
-                $builder->with($relations);
-            })
-            ->where('dealer_id', $request->get('dealer_id'))
-            ->where(function (Builder $builder) use ($request, $quoteId) {
-                $builder
-                    ->where(function (Builder $builder) use ($request, $quoteId) {
-                        $builder
-                            ->where('tb_name', UnitSale::getTableName())
-                            ->where('tb_primary_id', $quoteId);
-                    })
-                    ->orWhereHas('invoice', function(Builder $builder) use ($request, $quoteId) {
-                        $builder->where('unit_sale_id', $quoteId);
-                    });
-            })
-            ->when($request->has('sort'), function (Builder $builder) use ($request) {
-                $column = $request->get('sort');
-                $direction = $column[0] === '-' ? 'desc' : 'asc';
-                $column = str_replace('-', '', $column);
-
-                $builder->orderBy($column, $direction);
-            })
-            ->paginate($request->get('per_page'));
     }
 }
