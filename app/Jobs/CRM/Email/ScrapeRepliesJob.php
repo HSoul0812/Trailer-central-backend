@@ -52,7 +52,7 @@ class ScrapeRepliesJob extends Job
      */
     public function handle(ScrapeRepliesServiceInterface $service): int {
         // Initialize Logger
-        $log = Log::channel('scrapereplies');
+        $log = Log::channel('scraperepliesjob');
 
         // Try Catching Error for Sales Person
         try {
