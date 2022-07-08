@@ -36,6 +36,8 @@ class BannerSeeder extends Seeder
         ['banner/trailerman trailers inc./mobile', 'https://trailertrader.s3.amazonaws.com/banners/TC-TrailermanBanners-v1_Mobile-20220510-151711.png'],
         ['banner/midsota/desktop', 'https://trailertrader.s3.amazonaws.com/banners/TC-MidsotaBanners-v1_Desktop-20220510-152906.png'],
         ['banner/midsota/mobile', 'https://trailertrader.s3.amazonaws.com/banners/TC-MidsotaBanners-v1_Mobile-20220510-152906.png'],
+        ['banner/diamond c trailers/desktop', 'https://trailertrader.s3.amazonaws.com/banners/TC-DiamondCBanners_v1_Desktop.png'],
+        ['banner/diamond c trailers/mobile', 'https://trailertrader.s3.amazonaws.com/banners/TC-DiamondCBanners_v1_Mobile.png'],
     ];
 
     /**
