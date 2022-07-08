@@ -23,6 +23,9 @@ class GetUnitSaleRefundsAction
 
     /** @var string */
     private $sort = '-created_at';
+    
+    /** @var int|null */
+    private $registerId;
 
     /**
      * Fetch the refunds Collection
@@ -47,6 +50,9 @@ class GetUnitSaleRefundsAction
                     ->orWhereHas('invoice', function (Builder $builder) use ($unitSaleId) {
                         $builder->where('unit_sale_id', $unitSaleId);
                     });
+            })
+            ->when(!empty($this->registerId), function(Builder $builder) {
+                $builder->where('register_id', $this->registerId);
             })
             ->orderBy(...$this->orderBy())
             ->paginate($this->perPage, ['*'], 'page', $this->page);
@@ -96,6 +102,17 @@ class GetUnitSaleRefundsAction
         return $this;
     }
 
+    /**
+     * @param int|null $registerId
+     * @return GetUnitSaleRefundsAction
+     */
+    public function withRegisterId(?int $registerId): GetUnitSaleRefundsAction
+    {
+        $this->registerId = $registerId;
+
+        return $this;
+    }
+    
     /**
      * Get the orderBy clause
      * @return array

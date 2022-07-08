@@ -38,6 +38,7 @@ class UnitSaleRefundsController extends RestfulControllerV2
             ->when($request->has('sort'), function(GetUnitSaleRefundsAction $action) use ($request) {
                 $action->withSort($request->get('sort'));
             })
+            ->withRegisterId($request->get('register_id'))
             ->execute($unitSaleId);
         
         return $this->collectionResponse($paginator->items(), new RefundTransformer(), $paginator);

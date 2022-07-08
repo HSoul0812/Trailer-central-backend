@@ -11,5 +11,6 @@ class GetQuoteRefundsRequest extends Request
         'with' => 'string',
         'per_page' => 'required|int|max:500',
         'page' => 'required|int',
+        'register_id' => 'int',
     ];
 }
