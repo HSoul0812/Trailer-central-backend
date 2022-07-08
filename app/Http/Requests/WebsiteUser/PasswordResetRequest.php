@@ -8,11 +8,6 @@ use Illuminate\Validation\Rules\Password;
 
 class PasswordResetRequest extends Request implements PasswordResetRequestInterface
 {
-    protected array $rules = [
-        'token' => 'required',
-        'email' => 'required|email',
-        'password' => 'required|min:8|confirmed',
-    ];
     protected function getRules(): array
     {
         return [
