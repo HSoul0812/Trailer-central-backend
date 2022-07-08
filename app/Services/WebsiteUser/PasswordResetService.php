@@ -62,7 +62,7 @@ class PasswordResetService implements PasswordResetServiceInterface
         if(!$this->tokenRepository->exists($user, $credentials['token'])) {
             throw new NotFoundHttpException("Token not found");
         }
-        $user->password = Hash::make($credentials['password']);
+        $user->password = $credentials['password'];
         $user->save();
         $this->tokenRepository->delete($user);
         return $user;
