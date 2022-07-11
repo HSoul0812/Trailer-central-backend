@@ -24,8 +24,6 @@ class DefaultWebsiteConfigValueTransformer extends TransformerAbstract
 
     public function transform(WebsiteConfigDefault $config): array
     {
-        $value = $this->repository->getValueOfConfig($this->websiteId, $config->key);
-
         return [
             'key' => $config->key,
             'grouping' => $config->grouping ?: 'No group',
@@ -37,7 +35,19 @@ class DefaultWebsiteConfigValueTransformer extends TransformerAbstract
             'values' => $config->values,
             'values_mapping' => $config->values_mapping,
             'default_value' => $config->default_value,
-            'current_value' => $value ? $value->value : $config->default_value
+            'current_value' => $this->getCurrentValue($config)
         ];
+    }
+
+    /**
+     * @param WebsiteConfigDefault $config
+     * @return bool|string
+     */
+    private function getCurrentValue(WebsiteConfigDefault $config)
+    {
+        $value = $this->repository->getValueOfConfig($this->websiteId, $config->key);
+        $currentValue = $value ? $value->value : $config->default_value;
+
+        return $config->isCheckBoxType() ? (bool)$currentValue : $currentValue;
     }
 }
