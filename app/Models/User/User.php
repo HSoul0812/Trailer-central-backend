@@ -169,7 +169,8 @@ class User extends Model implements Authenticatable, PermissionsInterface
         'auto_import_hide',
         'import_config',
         'auto_msrp',
-        'auto_msrp_percent'
+        'auto_msrp_percent',
+        'from'
     ];
 
     protected $casts = [
@@ -185,7 +186,7 @@ class User extends Model implements Authenticatable, PermissionsInterface
     protected $hidden = [
 
     ];
-    
+
     public static function boot()
     {
         parent::boot();
@@ -357,7 +358,7 @@ class User extends Model implements Authenticatable, PermissionsInterface
     {
         return $this->dealer_id;
     }
-    
+
     /**
      * Set the user's password encryption method
      *
