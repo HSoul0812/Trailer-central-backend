@@ -45,7 +45,7 @@ class FixShowroomVariablesForWebsiteConfigDefaultTable extends Migration
     {
         DB::table('website_config_default')->where('key', 'showroom/show_brands')->update([
             'private' => self::IS_PRIVATE_VARIABLE,
-            'grouping' => '',
+            'grouping' => self::NO_GROUP,
         ]);
 
         DB::table('website_config_default')->where('key', 'showroom/brands')->update([
