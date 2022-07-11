@@ -182,4 +182,43 @@ class WebsiteImageTest extends TestCase
         self::assertArrayHasKey('id', $json['errors']);
         self::assertArrayHasKey('expires_at', $json['errors']);
     }
+
+    public function testUpdatingAnImageWithAnExpiredDateChangesTheActiveStatus()
+    {
+        $image = $this->images->first();
+
+        $data = [
+            'expires_at' => now()->subDays(5)->toDateTimeString(),
+            'is_active' => 1
+        ];
+
+        $response = $this
+            ->withHeaders(['access-token' => $this->accessToken()])
+            ->post('/api/website/' . $this->website->id . '/image/' . $image->identifier, $data);
+
+        $response->assertStatus(200);
+
+        $this->assertDatabaseHas(WebsiteImage::getTableName(), [
+            'identifier' => $image->identifier,
+            'website_id' => $this->website->id,
+            'is_active' => 0
+        ]);
+
+        $data = [
+            'expires_at' => now()->addDay()->toDateTimeString(),
+            'is_active' => 0
+        ];
+
+        $response = $this
+            ->withHeaders(['access-token' => $this->accessToken()])
+            ->post('/api/website/' . $this->website->id . '/image/' . $image->identifier, $data);
+
+        $response->assertStatus(200);
+
+        $this->assertDatabaseHas(WebsiteImage::getTableName(), [
+            'identifier' => $image->identifier,
+            'website_id' => $this->website->id,
+            'is_active' => 1
+        ]);
+    }
 }
