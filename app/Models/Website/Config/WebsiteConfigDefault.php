@@ -2,7 +2,9 @@
 
 namespace App\Models\Website\Config;
 
+use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use Illuminate\Database\Eloquent\Model;
+use App;
 
 /**
  * Class WebsiteConfigDefault
@@ -29,6 +31,9 @@ class WebsiteConfigDefault extends Model
 
     protected $table = 'website_config_default';
 
+    /** @var WebsiteConfigRepositoryInterface */
+    private $currentValueRepository;
+
     /**
      * Get JSON-Decoded Values Map
      *
@@ -41,5 +46,29 @@ class WebsiteConfigDefault extends Model
     public function isCheckBoxType(): bool
     {
         return $this->type === self::CHECKBOX_TYPE;
+    }
+
+    /**
+     * @param int $websiteId
+     * @param WebsiteConfigDefault $config
+     * @return mixed
+     */
+    public function getValueAccordingRulesAndWebsite(int $websiteId, self $config)
+    {
+        $value = $this->getCurrentValueRepository()->getValueOfConfig($websiteId, $config->key);
+        $currentValue = $value ? $value->value : $config->default_value;
+
+        return $config->isCheckBoxType() ? (bool)$currentValue : $currentValue;
+    }
+
+    protected function getCurrentValueRepository(): WebsiteConfigRepositoryInterface
+    {
+        if ($this->currentValueRepository) {
+            return $this->currentValueRepository;
+        }
+
+        $this->currentValueRepository = App::make(WebsiteConfigRepositoryInterface::class);
+
+        return $this->currentValueRepository;
     }
 }
