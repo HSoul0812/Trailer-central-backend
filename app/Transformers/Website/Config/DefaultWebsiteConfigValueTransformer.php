@@ -5,20 +5,15 @@ declare(strict_types=1);
 namespace App\Transformers\Website\Config;
 
 use App\Models\Website\Config\WebsiteConfigDefault;
-use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use League\Fractal\TransformerAbstract;
 
 class DefaultWebsiteConfigValueTransformer extends TransformerAbstract
 {
-    /** @var WebsiteConfigRepositoryInterface */
-    private $repository;
-
     /** @var int */
     private $websiteId;
 
-    public function __construct(WebsiteConfigRepositoryInterface $repository, int $websiteId)
+    public function __construct(int $websiteId)
     {
-        $this->repository = $repository;
         $this->websiteId = $websiteId;
     }
 
@@ -29,25 +24,14 @@ class DefaultWebsiteConfigValueTransformer extends TransformerAbstract
             'grouping' => $config->grouping ?: 'No group',
             'private' => (bool)$config->private,
             'type' => $config->type,
+            'sort_order' => $config->sort_order,
             'label' => $config->label,
             'default_label' => $config->default_label,
             'note' => $config->note,
             'values' => $config->values,
             'values_mapping' => $config->values_mapping,
             'default_value' => $config->default_value,
-            'current_value' => $this->getCurrentValue($config)
+            'current_value' => $config->getValueAccordingRulesAndWebsite($this->websiteId, $config)
         ];
-    }
-
-    /**
-     * @param WebsiteConfigDefault $config
-     * @return bool|string
-     */
-    private function getCurrentValue(WebsiteConfigDefault $config)
-    {
-        $value = $this->repository->getValueOfConfig($this->websiteId, $config->key);
-        $currentValue = $value ? $value->value : $config->default_value;
-
-        return $config->isCheckBoxType() ? (bool)$currentValue : $currentValue;
     }
 }
