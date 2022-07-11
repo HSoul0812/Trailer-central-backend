@@ -25,6 +25,7 @@ use Illuminate\Database\Eloquent\Model;
 class WebsiteConfigDefault extends Model
 {
     const CONFIG_INCLUDE_ARCHIVING_INVENTORY = 'inventory/include_archived_inventory';
+    const CHECKBOX_TYPE = 'checkbox';
 
     protected $table = 'website_config_default';
 
@@ -35,5 +36,10 @@ class WebsiteConfigDefault extends Model
      */
     public function getValuesMapAttribute(): ?array {
         return json_decode($this->values_mapping, true);
+    }
+
+    public function isCheckBoxType(): bool
+    {
+        return $this->type === self::CHECKBOX_TYPE;
     }
 }
