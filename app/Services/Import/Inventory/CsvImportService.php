@@ -8,29 +8,62 @@ use App\Models\Inventory\Attribute;
 use App\Models\Inventory\Category;
 use App\Models\Inventory\Inventory;
 use App\Models\User\DealerLocation;
+use App\Repositories\Inventory\ImageRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
+use App\Services\File\ImageService;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
 use App\Models\Bulk\Inventory\BulkUpload;
 use App\Repositories\Bulk\Inventory\BulkUploadRepositoryInterface;
-use App\Services\Import\Inventory\CsvImportServiceInterface;
 
+/**
+ * Class CSVImportService
+ * @package App\Services\Import\Inventory
+ */
 class CsvImportService implements CsvImportServiceInterface
 {
-
     const MAX_VALIDATION_ERROR_CHAR_COUNT = 3072;
-
     private const S3_VALIDATION_ERRORS_PATH = 'inventory/validation-errors/%s';
 
+    /**
+     * @var BulkUploadRepositoryInterface
+     */
     protected $bulkUploadRepository;
+
+    /**
+     * @var InventoryRepositoryInterface
+     */
     protected $inventoryRepository;
+
+    /**
+     * @var ImageService
+     */
+    private $imageService;
+
+    /**
+     * @var
+     */
     protected $bulkUpload;
 
+    /**
+     * @var array
+     */
     static private $_categoryToEntityTypeId = array();
+
+    /**
+     * @var array
+     */
     static private $_attributes = array();
+
+    /**
+     * @var array
+     */
     static private $_labels = array();
 
+    /**
+     * @var ConvertHelper
+     */
     private $convertHelper;
 
     /**
@@ -48,10 +81,19 @@ class CsvImportService implements CsvImportServiceInterface
      */
     const IM_APPEND = 2;
 
+    /**
+     * @var int
+     */
     protected $imageMode = 0;
 
+    /**
+     * @var bool
+     */
     protected $inventoryUpdate = false;
 
+    /**
+     * @var array
+     */
     protected $allowedHeaderValues = [
         "inventory_id" => false,
         "stock" => true,
@@ -96,128 +138,134 @@ class CsvImportService implements CsvImportServiceInterface
     // mapping between import column names and field names in database:
     // array keys are field names in the database
     // array values are column names in the import file
+    /**
+     * @var array
+     */
     static private $_columnMap = array(
-        "inventory_id"          => "identifier",
-        "stock"                 => array("stock", "stock #", "stock#", "stock nr", "stock number"),
-        "title"                 => "title",
-        "model"                 => array("model", "model#", "model no", "model no."),
-        "brand"                 => "brand",
-        "manufacturer"          => array("manufacturer", "mfg"),
-        "location_phone"        => array("location", "location_phone", "location phone"),
-        "location_zip"          => array("location zip"),
-        "description"           => array("description", "desc", "info"),
-        "vin"                   => array("vin", "vin#"),
-        "category"              => "category",
-        "price"                 => array("price", "sellingprice"),
-        "sales_price"           => array("sales price", "sale price", "sales only price", "sale only price"),
-        "website_price"         => array("website price", "website only price"),
-        "msrp"                  => array("msrp", "mfg price"),
-        "year"                  => "year",
-        "condition"             => "condition",
-        "length"                => array("length", "length (ft)", "length ft", "floor length", "floor length (ft)", "floor length ft"),
-        "width"                 => array("width", "width (ft)", "width ft"),
-        "height"                => array("height", "height (ft)", "height ft"),
-        "weight"                => array("weight", "weight (lbs)", "weight lbs", "curb weight"),
-        "status"                => "status",
+        "inventory_id" => "identifier",
+        "stock" => array("stock", "stock #", "stock#", "stock nr", "stock number"),
+        "title" => "title",
+        "model" => array("model", "model#", "model no", "model no."),
+        "brand" => "brand",
+        "manufacturer" => array("manufacturer", "mfg"),
+        "location_phone" => array("location", "location_phone", "location phone"),
+        "location_zip" => array("location zip"),
+        "description" => array("description", "desc", "info"),
+        "vin" => array("vin", "vin#"),
+        "category" => "category",
+        "price" => array("price", "sellingprice"),
+        "sales_price" => array("sales price", "sale price", "sales only price", "sale only price"),
+        "website_price" => array("website price", "website only price"),
+        "msrp" => array("msrp", "mfg price"),
+        "year" => "year",
+        "condition" => "condition",
+        "length" => array("length", "length (ft)", "length ft", "floor length", "floor length (ft)", "floor length ft"),
+        "width" => array("width", "width (ft)", "width ft"),
+        "height" => array("height", "height (ft)", "height ft"),
+        "weight" => array("weight", "weight (lbs)", "weight lbs", "curb weight"),
+        "status" => "status",
 
-        'cost_of_unit'          => array('unit cost', 'admin-unit cost', 'cost of unit', 'admin-cost of unit'),
-        'cost_of_shipping'      => array('shipping cost', 'admin-shipping cost', 'cost of shipping', 'admin-cost of shipping'),
-        'cost_of_prep'          => array('prep cost', 'admin-prep cost', 'cost of prep', 'admin-cost of prep'),
-        'total_of_cost'         => array('total cost', 'admin-total cost'),
-        'minimum_selling_price' => array('min sell price','admin-min sell price', 'msp'),
-        "notes"                 => "notes",
-        "images"                => array("images", "photourls", "images (comma seperated)", "images (comma separated)"),
-        "gvwr"                  => array("gvwr", "gvwr (lbs)", "gvwr lbs", "gross weight"),
-        "axle_capacity"         => array("axle capacity", "axle weight", "axle capacity (lbs)", "axle capacity lbs", "axle (lbs)", "axle lbs"),
-        "payload_capacity"      => array("payload capacity", "payload weight", "payload capacity (lbs)", "payload capacity lbs", "payload (lbs)", "payload lbs"),
-        "is_special"            => array("is_special", "is special", "is on special", "special", "website special"),
-        "is_featured"           => array("is_featured", "is featured", "featured", "website featured"),
-        'is_archived'           => array('archived', 'is archived'),
-        'append_images'         => array('append images on import', 'append image', 'append images', 'use images', 'use image'),
-        'replace_images'        => array('replace images', 'replace_images'),
-        'image_mode'            => array('image mode', 'images mode', 'img mode'),
-        'video_embed_code'      => array('video_embed_code', 'video embed code')
+        'cost_of_unit' => array('unit cost', 'admin-unit cost', 'cost of unit', 'admin-cost of unit'),
+        'cost_of_shipping' => array('shipping cost', 'admin-shipping cost', 'cost of shipping', 'admin-cost of shipping'),
+        'cost_of_prep' => array('prep cost', 'admin-prep cost', 'cost of prep', 'admin-cost of prep'),
+        'total_of_cost' => array('total cost', 'admin-total cost'),
+        'minimum_selling_price' => array('min sell price', 'admin-min sell price', 'msp'),
+        "notes" => "notes",
+        "images" => array("images", "photourls", "images (comma seperated)", "images (comma separated)"),
+        "gvwr" => array("gvwr", "gvwr (lbs)", "gvwr lbs", "gross weight"),
+        "axle_capacity" => array("axle capacity", "axle capacity (lbs)", "axle capacity lbs", "axle (lbs)", "axle lbs"),
+        "payload_capacity" => array("payload capacity", "payload weight", "payload capacity (lbs)", "payload capacity lbs", "payload (lbs)", "payload lbs"),
+        "is_special" => array("is_special", "is special", "is on special", "special", "website special"),
+        "is_featured" => array("is_featured", "is featured", "featured", "website featured"),
+        'is_archived' => array('archived', 'is archived'),
+        'append_images' => array('append images on import', 'append image', 'append images', 'use images', 'use image'),
+        'replace_images' => array('replace images', 'replace_images'),
+        'image_mode' => array('image mode', 'images mode', 'img mode'),
+        'video_embed_code' => array('video_embed_code', 'video embed code')
     );
 
+    /**
+     * @var array
+     */
     static private $_columnValidation = array(
-        "inventory_id"          => array("type" => "string", "regex" => "([a-zA-Z0-9]+)"),
-        "stock"                 => array("type" => "string", "unique" => true),
-        "title"                 => array("type" => "string", "length" => 255, "regex" => "[\w\s\d\.'\"\\/\*\+\?]*"),
-        "manufacturer"          => array("type" => "string"),
-        "model"                 => array("type" => "string", "length" => 255, "regex" => "[\w\s\d\.'\"\\/\*\+\?]*"),
-        "description"           => array("type" => "string"),
-        "location"              => array("type" => "string"),
-        "category"              => array(
+        "inventory_id" => array("type" => "string", "regex" => "([a-zA-Z0-9]+)"),
+        "stock" => array("type" => "string", "unique" => true),
+        "title" => array("type" => "string", "length" => 255, "regex" => "[\w\s\d\.'\"\\/\*\+\?]*"),
+        "manufacturer" => array("type" => "string"),
+        "model" => array("type" => "string", "length" => 255, "regex" => "[\w\s\d\.'\"\\/\*\+\?]*"),
+        "description" => array("type" => "string"),
+        "location" => array("type" => "string"),
+        "category" => array(
             "type" => "enum",
             /**
              * These are ONLY specialized aliases that have existed for one reason or another.  Do NOT modify this list.  Preferably, do not ADD anymore to
              * this list.  The real categories are added via query in _configure() below... in which the categories and legacy categories are added.
              */
             "list" => array(
-                'camping'                   => 'camping_rv',
-                'rv'                        => 'camping_rv',
-                'camping rv'                => 'camping_rv',
-                'cargo'                     => 'cargo_enclosed',
-                'enclosed'                  => 'cargo_enclosed',
-                'cargo enclosed'            => 'cargo_enclosed',
-                'car'                       => 'car_racing',
-                'racing'                    => 'car_racing',
-                'car racing'                => 'car_racing',
-                'carhauler'                 => 'car_racing',
-                'car hauler'                => 'car_racing',
-                'flatbed trailer'           => 'flatbed',
-                'part'                      => 'other',
-                'stock'                     => 'stock_stock-combo',
-                'stock trailer'             => 'stock_stock-combo',
-                'stock_trailer'             => 'stock_stock-combo',
-                'stock stock-combo'         => 'stock_stock-combo',
-                'vending'                   => 'vending_concession',
-                'vending concession'        => 'vending_concession',
-                'vending_consession'        => 'vending_concession',
-                'class a'                   => 'class_a',
-                'class b'                   => 'class_b',
-                'class c'                   => 'class_c',
-                'truck bed'                 => 'bed_equipment',
-                'bed equipment'             => 'bed_equipment',
-                'tow dolly'                 => 'tow_dolly',
-                'equipment trailer'         => 'equipment',
-                'dolly'                     => 'tow_dolly',
-                'vehicle atv'               => 'vehicle_atv',
-                'vehicle car'               => 'vehicle_car',
-                'vehicle golf cart'         => 'golf_cart',
-                'vehicle motorcycle'        => 'vehicle_motorcycle',
-                'vehicle truck'             => 'vehicle_truck',
-                'vehicle suv'               => 'vehicle_suv',
-                'sport side-by-side'        => 'sport_side-by-side',
-                'utility side-by-side'      => 'utility_side-by-side',
+                'camping' => 'camping_rv',
+                'rv' => 'camping_rv',
+                'camping rv' => 'camping_rv',
+                'cargo' => 'cargo_enclosed',
+                'enclosed' => 'cargo_enclosed',
+                'cargo enclosed' => 'cargo_enclosed',
+                'car' => 'car_racing',
+                'racing' => 'car_racing',
+                'car racing' => 'car_racing',
+                'carhauler' => 'car_racing',
+                'car hauler' => 'car_racing',
+                'flatbed trailer' => 'flatbed',
+                'part' => 'other',
+                'stock' => 'stock_stock-combo',
+                'stock trailer' => 'stock_stock-combo',
+                'stock_trailer' => 'stock_stock-combo',
+                'stock stock-combo' => 'stock_stock-combo',
+                'vending' => 'vending_concession',
+                'vending concession' => 'vending_concession',
+                'vending_consession' => 'vending_concession',
+                'class a' => 'class_a',
+                'class b' => 'class_b',
+                'class c' => 'class_c',
+                'truck bed' => 'bed_equipment',
+                'bed equipment' => 'bed_equipment',
+                'tow dolly' => 'tow_dolly',
+                'equipment trailer' => 'equipment',
+                'dolly' => 'tow_dolly',
+                'vehicle atv' => 'vehicle_atv',
+                'vehicle car' => 'vehicle_car',
+                'vehicle golf cart' => 'golf_cart',
+                'vehicle motorcycle' => 'vehicle_motorcycle',
+                'vehicle truck' => 'vehicle_truck',
+                'vehicle suv' => 'vehicle_suv',
+                'sport side-by-side' => 'sport_side-by-side',
+                'utility side-by-side' => 'utility_side-by-side',
                 'Utility Side-by-Side (UTV)' => 'utility_side-by-side',
-                'snowmobile vehicle'        => 'vehicle_snowmobile',
-                'personal watercraft'       => 'personal_watercraft',
-                'canoe'                     => 'canoe-kayak',
-                'kayak'                     => 'canoe-kayak',
-                'power boat'                => 'powerboat',
-                'equip tractor'             => 'equip_tractor',
-                'equip attachment'          => 'equip_attachment',
-                'equip farm'                => 'equip_farm-ranch',
-                'equip ranch'               => 'equip_farm-ranch',
-                'equip lawn'                => 'equip_lawn',
-                'rv.class-a'                => 'class_a',
-                'rv.class-b'                => 'class_b',
-                'rv.class-c'                => 'class_c',
-                'semi-trailer_reefer'       => 'semi_reefer',
+                'snowmobile vehicle' => 'vehicle_snowmobile',
+                'personal watercraft' => 'personal_watercraft',
+                'canoe' => 'canoe-kayak',
+                'kayak' => 'canoe-kayak',
+                'power boat' => 'powerboat',
+                'equip tractor' => 'equip_tractor',
+                'equip attachment' => 'equip_attachment',
+                'equip farm' => 'equip_farm-ranch',
+                'equip ranch' => 'equip_farm-ranch',
+                'equip lawn' => 'equip_lawn',
+                'rv.class-a' => 'class_a',
+                'rv.class-b' => 'class_b',
+                'rv.class-c' => 'class_c',
+                'semi-trailer_reefer' => 'semi_reefer',
                 'semi-trailer_grain-hopper' => 'semi_grain-hopper',
-                'semi-trailer_livestock'    => 'semi_livestock',
+                'semi-trailer_livestock' => 'semi_livestock',
             )
         ),
-        "vin"                   => array(
+        "vin" => array(
             "type" => "string"
         ),
-        "price"                 => array("type" => "decimal"),
-        "year"                  => array("type" => "date", "format" => "Y"),
-        "condition"             => array(
+        "price" => array("type" => "decimal"),
+        "year" => array("type" => "date", "format" => "Y"),
+        "condition" => array(
             "type" => "enum",
             "list" => array(
-                'new'  => 'new',
+                'new' => 'new',
                 'used' => 'used',
 
                 'remanufactured' => 'remanufactured',
@@ -226,10 +274,10 @@ class CsvImportService implements CsvImportServiceInterface
                 'remfg' => 'remanufactured',
             )
         ),
-        "length"                => array("type" => "measurement"),
-        "width"                 => array("type" => "measurement"),
-        "height"                => array("type" => "measurement"),
-        "weight"                => array("type" => "string"),
+        "length" => array("type" => "measurement"),
+        "width" => array("type" => "measurement"),
+        "height" => array("type" => "measurement"),
+        "weight" => array("type" => "string"),
         /*"type"                  => array(
             "type" => "enum",
             "list" => array(
@@ -244,55 +292,61 @@ class CsvImportService implements CsvImportServiceInterface
                 'sportsvehicle' => '8',
             )
         ),*/
-        "status"                => array(
+        "status" => array(
             "type" => "enum",
             "list" => array(
                 'available' => 1,
-                'sold'      => 2,
-                'on order'  => 3,
+                'sold' => 2,
+                'on order' => 3,
                 'pending sale' => 4,
                 'special order' => 5
             )
         ),
-        "is_special"            => array(
+        "is_special" => array(
             "type" => "enum",
             "list" => array(
                 'yes' => '1',
-                'no'  => '0'
+                'no' => '0'
             )
         ),
-        "is_archived"           => array(
+        "is_archived" => array(
             "type" => "enum",
             "list" => array(
                 'yes' => '1',
-                'no'  => '0',
+                'no' => '0',
             )
         ),
-        "cost_of_unit"          => array("type" => "decimal"),
-        "cost_of_shipping"      => array("type" => "decimal"),
-        "cost_of_prep"          => array("type" => "decimal"),
-        "total_of_cost"         => array("type" => "decimal"),
+        "cost_of_unit" => array("type" => "decimal"),
+        "cost_of_shipping" => array("type" => "decimal"),
+        "cost_of_prep" => array("type" => "decimal"),
+        "total_of_cost" => array("type" => "decimal"),
         "minimum_selling_price" => array("type" => "decimal"),
-        "notes"                 => array("type" => "string"),
-        "images"                => array("type" => "string"),
-        "gvwr"                  => array("type" => "string"),
-        'axle_capacity'         => array("type" => "string"),
-        'msrp'                  => array("type" => "msrp"),
-        "location_phone"        => array("type" => "location_phone")
+        "notes" => array("type" => "string"),
+        "images" => array("type" => "string"),
+        "gvwr" => array("type" => "string"),
+        'axle_capacity' => array("type" => "string"),
+        'msrp' => array("type" => "msrp"),
+        "location_phone" => array("type" => "location_phone")
     );
 
+    /**
+     * @var array
+     */
     static private $_columnRequired = array(
-        "inventory_id"          => false,
-        "stock"                 => true,
-        "title"                 => true,
-        "manufacturer"          => true,
-        "model"                 => true,
-        "category"              => true,
-        "price"                 => true,
-        "year"                  => true,
-        "condition"             => true,
+        "inventory_id" => false,
+        "stock" => true,
+        "title" => true,
+        "manufacturer" => true,
+        "model" => true,
+        "category" => true,
+        "price" => true,
+        "year" => true,
+        "condition" => true,
     );
 
+    /**
+     * @var string[]
+     */
     static $locationColumns = array(
         'location city',
         'location country',
@@ -301,11 +355,17 @@ class CsvImportService implements CsvImportServiceInterface
         'location name'
     );
 
+    /**
+     * @var string[]
+     */
     static $ignorableColumns = array(
         'admin-notes',
         'created at date'
     );
 
+    /**
+     * @var array
+     */
     protected $inventory = [];
 
     /**
@@ -318,14 +378,23 @@ class CsvImportService implements CsvImportServiceInterface
      */
     private $indexToheaderMapping = [];
 
-    public function __construct(BulkUploadRepositoryInterface $bulkUploadRepository, InventoryRepositoryInterface $inventoryRepository)
+    /**
+     * @param BulkUploadRepositoryInterface $bulkUploadRepository
+     * @param InventoryRepositoryInterface $inventoryRepository
+     * @param ImageService $imageService
+     */
+    public function __construct(BulkUploadRepositoryInterface $bulkUploadRepository, InventoryRepositoryInterface $inventoryRepository, ImageService $imageService)
     {
         $this->bulkUploadRepository = $bulkUploadRepository;
         $this->inventoryRepository = $inventoryRepository;
+        $this->imageService = $imageService;
 
         $this->convertHelper = new ConvertHelper();
     }
 
+    /**
+     * @return bool
+     */
     public function run(): bool
     {
         Log::info('Starting import for inventory bulk upload ID: ' . $this->bulkUpload->id);
@@ -342,8 +411,8 @@ class CsvImportService implements CsvImportServiceInterface
         Log::debug("Mapping: " . json_encode(self::$_columnMap));
 
         try {
-           if (!$this->validate()) {
-               Log::info('Invalid bulk upload ID: ' . $this->bulkUpload->id . ' setting validation_errors...');
+            if (!$this->validate()) {
+                Log::info('Invalid bulk upload ID: ' . $this->bulkUpload->id . ' setting validation_errors...');
                 $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => $this->outputValidationErrors()]);
                 return false;
             }
@@ -365,6 +434,10 @@ class CsvImportService implements CsvImportServiceInterface
         return true;
     }
 
+    /**
+     * @param BulkUpload $bulkUpload
+     * @return void
+     */
     public function setBulkUpload(BulkUpload $bulkUpload)
     {
         $this->bulkUpload = $bulkUpload;
@@ -388,7 +461,7 @@ class CsvImportService implements CsvImportServiceInterface
             $this->inventory['dealer_id'] = $this->bulkUpload->dealer_id;
 
             if ($this->inventoryUpdate) {
-                $inventory = $this->inventoryRepository->update($this->inventory);
+                $inventory = $this->inventoryRepository->update($this->inventory, ['updateAttributes' => true]);
             } else {
                 $inventory = $this->inventoryRepository->create($this->inventory);
             }
@@ -419,22 +492,24 @@ class CsvImportService implements CsvImportServiceInterface
      */
     protected function validate(): bool
     {
-        $this->streamCsv(function($csvData, $lineNumber) {
+        $this->streamCsv(function ($csvData, $lineNumber) {
             // for each column
-            foreach($csvData as $index => $value) {
+            foreach ($csvData as $index => $value) {
                 // for the header line
                 if ($lineNumber === 1) {
                     // if column header is not allowed
                     if (!$this->isAllowedHeader($value)) {
-                        $this->validationErrors[] = $this->printError($lineNumber, $index + 1, "Invalid Header: ".$value);
+                        $this->validationErrors[] = $this->printError($lineNumber, $index + 1, "Invalid Header: " . $value);
                         Log::info("Invalid Header: " . $value);
-                    // else, the column header is allowed
+                        // else, the column header is allowed
                     } else {
                         $this->indexToheaderMapping[$index] = $value;
                     }
-                // for lines > 1
+                    // for lines > 1
                 } else {
                     $header = array_search($this->indexToheaderMapping[$index], self::$_labels);
+                    Log::debug(array("header" => $header, 'headerMapping' => $this->indexToheaderMapping[$index]));
+
                     if ($header) {
                         if ($errorMessage = $this->isDataInvalid($header, $value)) {
                             $this->validationErrors[] = $this->printError($lineNumber, $index + 1, $errorMessage);
@@ -479,7 +554,7 @@ class CsvImportService implements CsvImportServiceInterface
 
         // open the file from s3
         if (!($stream = fopen("s3://{$adapter->getBucket()}/{$this->bulkUpload->import_source}", 'r'))) {
-            throw new \Exception('Could not open stream for reading file: ['.$this->bulkUpload->import_source.']');
+            throw new \Exception('Could not open stream for reading file: [' . $this->bulkUpload->import_source . ']');
         }
 
         // iterate through all lines
@@ -490,7 +565,7 @@ class CsvImportService implements CsvImportServiceInterface
 
             // see if the row is empty,
             // one value is enough to indicate non empty row
-            foreach($csvData as $value) {
+            foreach ($csvData as $value) {
                 if (!empty($value)) {
                     $isEmptyRow = false;
                     break;
@@ -508,17 +583,21 @@ class CsvImportService implements CsvImportServiceInterface
         }
     }
 
-    private function setAttributes() {
+    /**
+     * @return void
+     */
+    private function setAttributes()
+    {
         $attributes = Attribute::all();
         foreach ($attributes as $attribute) {
-            self::$_attributes[] = $attribute->code;
+            self::$_attributes[$attribute->code] = $attribute->attribute_id;
             self::$_columnRequired[$attribute->code] = false;
             $this->allowedHeaderValues[$attribute->code] = true;
             self::$_columnMap[$attribute->code] = array($attribute->code, strtolower($attribute->name), $attribute->name);
 
             // If aliases are available
             if ($attribute->aliases) {
-                foreach(explode(",", $attribute->aliases) as $alias) {
+                foreach (explode(",", $attribute->aliases) as $alias) {
                     self::$_columnMap[$attribute->code][] = $alias;
                 }
             }
@@ -527,7 +606,7 @@ class CsvImportService implements CsvImportServiceInterface
                 $list = array();
                 $values = explode(',', $attribute->values);
 
-                foreach($values as $value) {
+                foreach ($values as $value) {
                     $group = explode(':', $value);
                     @$list[strtolower($group[1])] = $group[0];
                 }
@@ -542,14 +621,18 @@ class CsvImportService implements CsvImportServiceInterface
         }
     }
 
-    private function setCategories() {
+    /**
+     * @return void
+     */
+    private function setCategories()
+    {
         $categories = Category::all();
 
         foreach ($categories as $category) {
             self::$_columnValidation['category']['list'][$category->category] = $category->legacy_category;
             self::$_columnValidation['category']['list'][$category->legacy_category] = $category->legacy_category;
 
-            if(!empty($category->alt_category)) {
+            if (!empty($category->alt_category)) {
                 self::$_columnValidation['category']['list'][$category->alt_category] = $category->legacy_category;
             }
 
@@ -557,13 +640,17 @@ class CsvImportService implements CsvImportServiceInterface
         }
     }
 
+    /**
+     * @param $val
+     * @return bool
+     */
     private function isAllowedHeader($val): bool
     {
         if (in_array($val, self::$locationColumns) || in_array($val, self::$ignorableColumns)) {
             return true;
         }
 
-        foreach($this->allowedHeaderValues as $columnName => $required) {
+        foreach ($this->allowedHeaderValues as $columnName => $required) {
             $mapKey = self::$_columnMap[$columnName];
 
             if (is_array($mapKey) && in_array($val, $mapKey)) {
@@ -573,7 +660,7 @@ class CsvImportService implements CsvImportServiceInterface
             } else {
                 $columnIndex = array_search($val, self::$_columnMap);
 
-                if($columnIndex == $columnName) {
+                if ($columnIndex == $columnName) {
                     //Log::info("Setting B: " . $val . " on " . $columnName);
                     self::$_labels[$columnName] = $val;
                     return true;
@@ -590,6 +677,12 @@ class CsvImportService implements CsvImportServiceInterface
         return false;
     }
 
+    /**
+     * @param $line
+     * @param $column
+     * @param $errorMessage
+     * @return string
+     */
     private function printError($line, $column, $errorMessage): string
     {
         return "$errorMessage in line $line at column $column";
@@ -623,7 +716,7 @@ class CsvImportService implements CsvImportServiceInterface
 
         Log::info('Type: ' . $type . ' Value: ' . $value);
 
-        switch($type) {
+        switch ($type) {
             case 'stock':
                 $this->inventoryUpdate = false;
 
@@ -632,10 +725,10 @@ class CsvImportService implements CsvImportServiceInterface
                     'dealer_id' => $this->bulkUpload->dealer_id
                 ]);
 
-                if($inventories->count() == 1) {
+                if ($inventories->count() == 1) {
                     $inventoryByStock = $inventories->first();
 
-                    if($inventoryByStock) {
+                    if ($inventoryByStock) {
                         $this->inventoryUpdate = true;
                         $inventoryId = $inventoryByStock->inventory_id;
                         $this->inventory["inventory_id"] = $inventoryId;
@@ -644,21 +737,21 @@ class CsvImportService implements CsvImportServiceInterface
                         Log::debug("Updating inventory stock '{$value}' (Id: {$inventoryId}) via import.");
                     }
                 } else {
-                    if($inventories->count() > 1) {
+                    if ($inventories->count() > 1) {
                         return "Duplicate Stock # '{$value}' found in database.";
                     }
                 }
 
                 $this->inventory[$type] = $value;
-            break;
+                break;
 
             case 'category':
-                if(isset(self::$_columnValidation[$type]['list'][strtolower($value)])) {
+                if (isset(self::$_columnValidation[$type]['list'][strtolower($value)])) {
                     $this->inventory[$type] = self::$_columnValidation[$type]['list'][strtolower($value)];
                 }
 
-                if(isset(self::$_categoryToEntityTypeId[$value])) {
-                    $this->inventory["entity_type_id"] = self::$_categoryToEntityTypeId[$value];
+                if (isset(self::$_categoryToEntityTypeId[$this->inventory[$type]])) {
+                    $this->inventory["entity_type_id"] = self::$_categoryToEntityTypeId[$this->inventory[$type]];
                 } else {
                     // this should really fail further up the line
                     $this->inventory["entity_type_id"] = 1;
@@ -668,7 +761,7 @@ class CsvImportService implements CsvImportServiceInterface
             case 'status':
             case 'is_special':
             case 'is_featured':
-                if(isset(self::$_columnValidation[$type]['list'][strtolower($value)])) {
+                if (isset(self::$_columnValidation[$type]['list'][strtolower($value)])) {
                     $this->inventory[$type] = self::$_columnValidation[$type]['list'][strtolower($value)];
                 }
                 break;
@@ -676,9 +769,9 @@ class CsvImportService implements CsvImportServiceInterface
             case 'append_images':
                 $value = self::handleBoolean($value);
 
-                if($value === true) {
+                if ($value === true) {
                     $this->imageMode = self::IM_APPEND;
-                } elseif($value === false) {
+                } elseif ($value === false) {
                     // this would normally set it to normal, so just leave it alone since it already defaults to that
                     // this also allows the inverse (append_images) to set a mode...
                 } else {
@@ -689,9 +782,9 @@ class CsvImportService implements CsvImportServiceInterface
             case 'replace_images':
                 $value = self::handleBoolean($value);
 
-                if($value === true) {
+                if ($value === true) {
                     $this->imageMode = self::IM_REPLACE;
-                } elseif($value === false) {
+                } elseif ($value === false) {
                     // this would normally set it to normal, so just leave it alone since it already defaults to that
                     // this also allows the inverse (append_images) to set a mode...
                 } else {
@@ -702,14 +795,14 @@ class CsvImportService implements CsvImportServiceInterface
             case 'image_mode':
                 $value = trim(strtolower($value));
 
-                if($this->imageMode !== self::IM_IGNORE) {
+                if ($this->imageMode !== self::IM_IGNORE) {
                     return "If you specify 'image mode' column, you must NOT specify append or replace image columns. These cannot be combined; use one or the other.";
                 } else {
                     if ($value === 'ignore' || $value === 'i') {
                         $this->imageMode = self::IM_IGNORE;
-                    } elseif($value === 'replace' || $value === 'r') {
+                    } elseif ($value === 'replace' || $value === 'r') {
                         $this->imageMode = self::IM_REPLACE;
-                    } elseif($value === 'append' || $value === 'a') {
+                    } elseif ($value === 'append' || $value === 'a') {
                         $this->imageMode = self::IM_APPEND;
                     } else {
                         return "Value for image mode column must be one of 'ignore', 'append' or 'replace'";
@@ -719,16 +812,32 @@ class CsvImportService implements CsvImportServiceInterface
 
             case 'images':
                 $images = explode(',', $value);
+                $images = array_map('trim', $images);
 
-                if(count($images) > 0) {
-                    $this->inventory[$type] = array_map('trim', $images);
+                if (count($images) > 0) {
+                    foreach ($images as $image) {
+                        $fileDto = $this->imageService->upload($image, $this->inventory['stock'], null, null, ['skipNotExisting' => true]);
+
+                        if ($this->imageMode == self::IM_APPEND) {
+                            $this->inventory['new_images'][] = array(
+                                'filename' => $fileDto->getPath(),
+                                'hash' => $fileDto->getHash()
+                            );
+                        } elseif ($this->imageMode == self::IM_REPLACE) {
+                            $this->inventory['existing_images'][] = array(
+                                'filename' => $fileDto->getPath(),
+                                'hash' => $fileDto->getHash()
+                            );
+                        }
+                    }
                 }
+
                 break;
 
             case 'inventory_id':
                 $inventory = Inventory::find($value);
 
-                if($inventory) {
+                if ($inventory) {
                     Logger::getLogger('import')->debug("Updating inventory '{$value}' (Id: {$inventory->inventory_id}) via import.");
                     $this->inventory = $inventory;
                 } else {
@@ -740,23 +849,23 @@ class CsvImportService implements CsvImportServiceInterface
             case 'height':
             case 'length':
                 $unitSuffix = array(
-                    '"'      => 'inches',
-                    'inch'   => 'inches',
+                    '"' => 'inches',
+                    'inch' => 'inches',
                     'inches' => 'inches',
-                    'in'     => 'inches',
-                    'in.'    => 'inches',
-                    '\''     => 'feet',
-                    'feet'   => 'feet',
-                    'foot'   => 'feet',
-                    'ft'     => 'feet',
-                    'ft.'    => 'feet'
+                    'in' => 'inches',
+                    'in.' => 'inches',
+                    '\'' => 'feet',
+                    'feet' => 'feet',
+                    'foot' => 'feet',
+                    'ft' => 'feet',
+                    'ft.' => 'feet'
                 );
 
                 // convert "3 feet" etc into proper display modes
-                if(preg_match("/^([0-9\.,]*) ?('|\"|feet|foot|ft|ft\.|inch|inches|in|in\.)?$/", $value, $matches)) {
-                    $parsedValue  = $matches[1];
+                if (preg_match("/^([0-9\.,]*) ?('|\"|feet|foot|ft|ft\.|inch|inches|in|in\.)?$/", $value, $matches)) {
+                    $parsedValue = $matches[1];
 
-                    if(isset($matches[2])) {
+                    if (isset($matches[2])) {
                         $suffix = $matches[2];
                         $parsedSuffix = $unitSuffix[$suffix];
                     } else {
@@ -768,7 +877,7 @@ class CsvImportService implements CsvImportServiceInterface
                 } else {
                     // width & length => convert to decimal feet (e.g. 4.66 rather than 4' 8")
                     // Logger::getLogger('import')->debug("[{$filename}, {$row}, {$columnIndex}] - converting '{$value}' to feet (decimal)");
-                    $this->inventory[$type] =  round($this->convertHelper->toFeetDecimal(str_replace(',', '', $value)), 2);
+                    $this->inventory[$type] = round($this->convertHelper->toFeetDecimal(str_replace(',', '', $value)), 2);
                     $this->inventory[$type . '_display_mode'] = 'feet';
                 }
 
@@ -803,7 +912,7 @@ class CsvImportService implements CsvImportServiceInterface
                     'dealer_id' => $this->bulkUpload->dealer_id
                 ])->first();
 
-                if($dealerLocation) {
+                if ($dealerLocation) {
                     $this->inventory['dealer_location_id'] = $dealerLocation->dealer_location_id;
                 } else {
                     $phone = str_replace(array('(', ')', ' ', '-'), '', $value);
@@ -821,7 +930,7 @@ class CsvImportService implements CsvImportServiceInterface
                 break;
 
             case 'axles':
-                if($value >= 3) {
+                if ($value >= 3) {
                     $this->inventory[$type] = '3 or more';
                 } else {
                     $this->inventory[$type] = $value;
@@ -833,11 +942,17 @@ class CsvImportService implements CsvImportServiceInterface
                 break;
         }
 
-        if(in_array($type, self::$_attributes)) {
-            if(isset(self::$_columnValidation[$type]['list'][strtolower($value)])) {
-                $this->inventory['attributes'][$type]  = self::$_columnValidation[$type]['list'][strtolower($value)];
-            } elseif (!isset(self::$_columnValidation[$type]['list'])) {
-                $this->inventory['attributes'][$type] = $value;
+        if (key_exists($type, self::$_attributes)) {
+            if (isset(self::$_columnValidation[$type]['list'][strtolower($value)]) && !empty($value)) {
+                $this->inventory['attributes'][] = array(
+                    'attribute_id' => self::$_attributes[$type],
+                    'value' => self::$_columnValidation[$type]['list'][strtolower($value)]
+                );
+            } elseif (!isset(self::$_columnValidation[$type]['list']) && !empty($value)) {
+                $this->inventory['attributes'][] = array(
+                    'attribute_id' => self::$_attributes[$type],
+                    'value' => $value
+                );
             }
         } else {
             if (!isset($this->inventory[$type])) {
@@ -848,26 +963,33 @@ class CsvImportService implements CsvImportServiceInterface
         return false;
     }
 
+    /**
+     * @return false|string
+     */
     private function outputValidationErrors()
     {
         $jsonEncodedValidationErrors = json_encode($this->validationErrors);
         if (strlen($jsonEncodedValidationErrors) > self::MAX_VALIDATION_ERROR_CHAR_COUNT) {
-            $filePath = sprintf(self::S3_VALIDATION_ERRORS_PATH, uniqid().'.txt');
+            $filePath = sprintf(self::S3_VALIDATION_ERRORS_PATH, uniqid() . '.txt');
             Storage::disk('s3')->put($filePath, implode(PHP_EOL, $this->validationErrors));
             return json_encode(Storage::disk('s3')->url($filePath));
         }
         return $jsonEncodedValidationErrors;
     }
 
+    /**
+     * @param $value
+     * @return bool|null
+     */
     private static function handleBoolean($value): ?bool
     {
-        if(trim($value) == "1" || trim(strtolower($value)) === 'yes' || trim(strtolower($value)) === 'y') {
+        if (trim($value) == "1" || trim(strtolower($value)) === 'yes' || trim(strtolower($value)) === 'y') {
             return true;
-        } elseif(trim($value) == "0" || trim(strtolower($value)) === 'no' || trim(strtolower($value)) === 'n') {
+        } elseif (trim($value) == "0" || trim(strtolower($value)) === 'no' || trim(strtolower($value)) === 'n') {
             return false;
         } else {
             $length = strlen(trim($value));
-            if($length === 0) {
+            if ($length === 0) {
                 return false;
             }
         }
