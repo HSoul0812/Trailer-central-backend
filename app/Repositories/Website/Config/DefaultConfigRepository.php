@@ -4,6 +4,7 @@ namespace App\Repositories\Website\Config;
 
 use App\Exceptions\NotImplementedException;
 use App\Models\Website\Config\WebsiteConfigDefault;
+use Illuminate\Database\Eloquent\Collection;
 
 class DefaultConfigRepository implements DefaultConfigRepositoryInterface {
 
@@ -55,5 +56,4 @@ class DefaultConfigRepository implements DefaultConfigRepositoryInterface {
     public function update($params) {
         throw new NotImplementedException;
     }
-
 }
