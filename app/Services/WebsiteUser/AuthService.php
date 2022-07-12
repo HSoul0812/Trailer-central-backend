@@ -67,11 +67,13 @@ class AuthService implements AuthServiceInterface
     }
 
     private function createUser(array $attributes) {
-        $attributes['name'] = implode(
-            ' ', [$attributes['first_name'], $attributes['last_name']]
+        $tcAttributes = array_merge([], $attributes);
+        $tcAttributes['name'] = implode(
+            ' ', [$tcAttributes['first_name'], $tcAttributes['last_name']]
         );
-        $attributes['clsf_active'] = 1;
-        $tcUser = $this->tcUsersService->create($attributes);
+        $tcAttributes['clsf_active'] = 1;
+        $tcAttributes['password'] = \Str::random(12);
+        $tcUser = $this->tcUsersService->create($tcAttributes);
 
         $attributes['tc_user_id'] = $tcUser->id;
         return  $this->websiteUserRepository->create($attributes);
