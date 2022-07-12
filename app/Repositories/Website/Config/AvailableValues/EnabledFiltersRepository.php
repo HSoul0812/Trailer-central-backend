@@ -17,6 +17,12 @@ class EnabledFiltersRepository implements AvailableValuesRepositoryInterface
         $this->db = $db;
     }
 
+    /**
+     * List of available filters
+     *
+     * @param int $websiteId
+     * @return Collection
+     */
     public function pull(int $websiteId): Collection
     {
         return $this->db->table('inventory_filter')
