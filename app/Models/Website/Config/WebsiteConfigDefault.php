@@ -17,7 +17,7 @@ use App;
  * @property string $label
  * @property string $note
  * @property string $grouping 'General', 'Home Page Display', 'Inventory Display', 'Contact Forms',
- *                            'Call to Action Pop-Up', 'Payment Calculator'
+ *                            'Call to Action Pop-Up', 'Payment Calculator', 'Showroom Setup'
  * @property string $values
  * @property string $values_mapping
  * @property string $default_label
@@ -50,15 +50,19 @@ class WebsiteConfigDefault extends Model
 
     /**
      * @param int $websiteId
-     * @param WebsiteConfigDefault $config
      * @return mixed
      */
-    public function getValueAccordingRulesAndWebsite(int $websiteId, self $config)
+    public function getValueAccordingWebsite(int $websiteId)
     {
-        $value = $this->getCurrentValueRepository()->getValueOfConfig($websiteId, $config->key);
-        $currentValue = $value ? $value->value : $config->default_value;
+        if(!$this->exists){
+            throw new \RuntimeException('`WebsiteConfigDefault::getValueAccordingWebsite` There is not a loaded active record');
+        }
 
-        return $config->isCheckBoxType() ? (bool)$currentValue : $currentValue;
+        $value = $this->getCurrentValueRepository()->getValueOfConfig($websiteId, $this->key);
+        $currentValue = $value ? $value->value : $this->default_value;
+
+        // when it is checkbox type, it should always return a boolean value
+        return $this->isCheckBoxType() ? (bool)$currentValue : $currentValue;
     }
 
     protected function getCurrentValueRepository(): WebsiteConfigRepositoryInterface
