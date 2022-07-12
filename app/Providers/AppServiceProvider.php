@@ -105,6 +105,8 @@ use App\Repositories\Parts\CostModifierRepository;
 use App\Repositories\Parts\CostModifierRepositoryInterface;
 use App\Repositories\User\DealerPasswordResetRepositoryInterface;
 use App\Repositories\User\DealerPasswordResetRepository;
+use App\Services\CRM\Leads\LeadStatusService;
+use App\Services\CRM\Leads\LeadStatusServiceInterface;
 use App\Services\CRM\User\TimeClockService;
 use App\Services\CRM\User\TimeClockServiceInterface;
 use App\Services\Dms\Bills\BillService;
@@ -357,5 +359,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ShowroomBulkUpdateRepositoryInterface::class, ShowroomBulkUpdateRepository::class);
 
         $this->app->register(PhoneServiceProvider::class);
+
+        $this->app->bind(LeadStatusServiceInterface::class, LeadStatusService::class);
     }
 }

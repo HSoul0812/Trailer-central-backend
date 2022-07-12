@@ -104,7 +104,7 @@ class LeadStatus extends Model
      */
     public function lead(): BelongsTo
     {
-        return $this->belongsTo(Lead::class, 'identifier', 'tc_lead_identifier');
+        return $this->belongsTo(Lead::class, 'tc_lead_identifier', 'identifier');
     }
 
     /**
