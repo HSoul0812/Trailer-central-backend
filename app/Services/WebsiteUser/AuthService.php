@@ -2,11 +2,14 @@
 
 namespace App\Services\WebsiteUser;
 
+use App\DTOs\User\TcApiResponseUser;
 use App\Repositories\WebsiteUser\WebsiteUserRepositoryInterface;
 use App\Services\Integrations\TrailerCentral\Api\Users\UsersServiceInterface;
+use GuzzleHttp\Exception\BadResponseException;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\UnauthorizedException;
+use Illuminate\Validation\ValidationException;
 use JetBrains\PhpStorm\ArrayShape;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -67,16 +70,33 @@ class AuthService implements AuthServiceInterface
     }
 
     private function createUser(array $attributes) {
-        $tcAttributes = array_merge([], $attributes);
+        $tcUser = $this->createTcUser($attributes);
+
+        $attributes['tc_user_id'] = $tcUser->id;
+        return  $this->websiteUserRepository->create($attributes);
+    }
+
+    private function createTcUser(array $data): TcApiResponseUser {
+        $tcAttributes = array_merge([], $data);
         $tcAttributes['name'] = implode(
             ' ', [$tcAttributes['first_name'], $tcAttributes['last_name']]
         );
         $tcAttributes['clsf_active'] = 1;
         $tcAttributes['password'] = \Str::random(12);
-        $tcUser = $this->tcUsersService->create($tcAttributes);
 
-        $attributes['tc_user_id'] = $tcUser->id;
-        return  $this->websiteUserRepository->create($attributes);
+        try {
+            return $this->tcUsersService->create($tcAttributes);
+        } catch(BadResponseException $e) {
+            if($e->getCode() === 422) {
+                $tcResponse = json_decode($e->getResponse()->getBody());
+                if(str_contains($tcResponse->errors->email[0], 'has already')) {
+                    throw ValidationException::withMessages([
+                        'email' => 'The email has already been taken in TrailerCentral'
+                    ]);
+                }
+            }
+            throw $e;
+        }
     }
 
     #[ArrayShape(['email' => "mixed", 'first_name' => "mixed", 'last_name' => "mixed"])]
