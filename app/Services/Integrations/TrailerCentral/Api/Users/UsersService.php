@@ -5,7 +5,6 @@ namespace App\Services\Integrations\TrailerCentral\Api\Users;
 use App\DTOs\User\TcApiResponseUser;
 use GuzzleHttp\Client as GuzzleHttpClient;
 use GuzzleHttp\Exception\GuzzleException;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class UsersService implements UsersServiceInterface
 {
@@ -45,7 +44,7 @@ class UsersService implements UsersServiceInterface
             \Log::info('Exception was thrown while calling TrailerCentral API.');
             \Log::info($e->getCode() . ': ' . $e->getMessage());
 
-            throw new HttpException(422, $e->getMessage());
+            throw $e;
         }
     }
 }
