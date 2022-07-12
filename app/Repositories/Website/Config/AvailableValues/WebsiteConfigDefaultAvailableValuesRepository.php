@@ -10,7 +10,8 @@ use App;
 class WebsiteConfigDefaultAvailableValuesRepository implements WebsiteConfigDefaultAvailableValuesRepositoryInterface
 {
     private const VARIABLES_WITH_CUSTOM_AVAILABLE_VALUES = [
-        'inventory/filters/enable_filters' => EnabledFiltersRepository::class
+        'inventory/filters/enable_filters' => EnabledFiltersRepository::class,
+        'showroom/brands' => ShowRoomRepository::class
     ];
 
     /**
