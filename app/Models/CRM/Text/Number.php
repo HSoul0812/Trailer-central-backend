@@ -43,7 +43,8 @@ class Number extends Model
         'customer_number',
         'twilio_number',
         'customer_name',
-        'expiration_time'
+        'expiration_time',
+        'dealer_id',
     ];
 
     // No Timestamps

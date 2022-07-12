@@ -26,8 +26,16 @@ class UserRepository implements UserRepositoryInterface {
         $this->encrypterService = $encrypterService;
     }
 
-    public function create($params) {
-        throw new NotImplementedException;
+    /**
+     * @param array $params
+     * @return User
+     */
+    public function create($params): User {
+        $user = new User($params);
+        $user->password = $params['password'];
+        $user->clsf_active = $params['clsf_active'] ?? 0;
+        $user->save();
+        return $user;
     }
 
     public function delete($params) {
