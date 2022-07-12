@@ -13,6 +13,7 @@ use App\Http\Requests\Website\Config\CreateOrUpdateRequest;
 use App\Transformers\Website\Config\DefaultWebsiteConfigValueTransformer;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
+use Illuminate\Support\Facades\App;
 
 class WebsiteConfigController extends RestfulControllerV2
 {
@@ -42,7 +43,8 @@ class WebsiteConfigController extends RestfulControllerV2
         $request = new GetWebsiteConfigRequest(array_merge(['website_id' => $websiteId], $request->all()));
 
         if ($request->validate()) {
-            $transformer = new DefaultWebsiteConfigValueTransformer($websiteId);
+            /** @var DefaultWebsiteConfigValueTransformer $transformer */
+            $transformer = App::make(DefaultWebsiteConfigValueTransformer::class, ['websiteId' => $websiteId]);
 
             $list = $this->defaultConfigRepository
                 ->getAll($request->all())
