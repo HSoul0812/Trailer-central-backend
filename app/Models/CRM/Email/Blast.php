@@ -128,6 +128,22 @@ class Blast extends Model
         return $this->hasMany(BlastCategory::class, 'email_blast_id');
     }
 
+    /**
+     * @return HasMany
+     */
+    public function sents()
+    {
+        return $this->hasMany(BlastSent::class, 'email_blasts_id');
+    }
+
+    /**
+     * @return belongsTo
+     */
+    public function factory()
+    {
+        return $this->belongsTo(CampaignFactory::class, 'blast_id');
+    }
+
 
     /**
      * Get Lead ID's for Text Blast
@@ -191,7 +207,7 @@ class Blast extends Model
             break;
             case self::ACTION_UNCONTACTED:
                 $query = $query->where(function (Builder $query) {
-                    $query->whereIn(LeadStatus::getTableName() . '.status', Lead::STATUS_UNCONTACTED)
+                    $query->where(LeadStatus::getTableName() . '.status', Lead::STATUS_UNCONTACTED)
                           ->orWhere(LeadStatus::getTableName() . '.status', 'open')
                           ->orWhere(LeadStatus::getTableName() . '.status', '')
                           ->orWhereNull(LeadStatus::getTableName() . '.status');

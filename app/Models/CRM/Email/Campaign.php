@@ -93,4 +93,28 @@ class Campaign extends Model
     {
         return $this->belongsTo(Template::class, 'email_template_id', 'id');
     }
+
+    /**
+     * @return HasMany
+     */
+    public function brands()
+    {
+        return $this->hasMany(CampaignBrand::class, 'email_campaign_id');
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function categories()
+    {
+        return $this->hasMany(CampaignCategory::class, 'email_campaign_id');
+    }
+
+    /**
+     * @return belongsTo
+     */
+    public function factory()
+    {
+        return $this->belongsTo(CampaignFactory::class, 'drip_campaigns_id');
+    }
 }
