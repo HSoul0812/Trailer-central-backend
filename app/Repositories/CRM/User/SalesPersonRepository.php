@@ -161,12 +161,11 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                           ->whereNotNull('imap_server')
                           ->where('imap_server', '<>', '')
                           ->whereNotNull('imap_port')
-                          ->where('imap_port', '<>', '')
-                          ->where(function($query) {
-                            $query->whereNull('imap_failed')
-                                  ->orWhere('imap_failed', 0);
-                          });
+                          ->where('imap_port', '<>', '');
             });
+        })->where(function($query) {
+            $query->whereNull('imap_failed')
+                  ->orWhere('imap_failed', 0);
         })->groupBy(SalesPerson::getTableName().'.id')->get();
     }
 

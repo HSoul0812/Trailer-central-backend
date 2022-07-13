@@ -104,7 +104,7 @@ return [
             'vehicleInteriorColor' => explode(',', env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_INTERIOR_COLOR', '[aria-label="Interior color"],[aria-label="Interior colour"]')),
             'vehicleInteriorColorList' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_INTERIOR_COLOR_LIST', '[role="option"]'),
 
-            'vehicleFuelType' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_FUEL_TYPE', '[aria-label="Fuel typeello'),
+            'vehicleFuelType' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_FUEL_TYPE', '[aria-label="Fuel type"]'),
             'vehicleFuelTypeList' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_FUEL_TYPE_LIST', '[role="option"]'),
 
             'vehicleDescription' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_DESCRIPTION', '[aria-label="Description"] textarea'),

@@ -704,7 +704,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
                     $builder->id . ' to Email: ' . $toEmail);
 
             // Return Response Array
-            return $this->response($builder, $toEmail);
+            return $this->response($builder, new Collection([$toEmail]));
         } catch(\Exception $ex) {
             $this->log->error($ex->getMessage(), $ex->getTrace());
             throw new SendBuilderEmailsFailedException;
