@@ -11,6 +11,17 @@ use Illuminate\Support\Facades\DB;
 
 class CampaignRepository implements CampaignRepositoryInterface {
 
+    private $sortOrders = [
+        'name' => [
+            'field' => 'campaign_name',
+            'direction' => 'DESC'
+        ],
+        '-name' => [
+            'field' => 'campaign_name',
+            'direction' => 'ASC'
+        ]
+    ];
+
     public function create($params) {
         throw new NotImplementedException;
     }
@@ -24,7 +35,30 @@ class CampaignRepository implements CampaignRepositoryInterface {
     }
 
     public function getAll($params) {
-        throw new NotImplementedException;
+        
+        $query = Campaign::with('template');
+
+        if (!isset($params['per_page'])) {
+            $params['per_page'] = 20;
+        }
+
+        if (isset($params['user_id'])) {
+            $query = $query->where('user_id', $params['user_id']);
+        }
+
+        if (isset($params['is_enabled'])) {
+            $query = $query->where('is_enabled', !empty($params['is_enabled']) ? 1 : 0);
+        }
+
+        if (isset($params['id'])) {
+            $query = $query->whereIn('id', $params['id']);
+        }
+
+        if (isset($params['sort'])) {
+            $query = $this->addSortQuery($query, $params['sort']);
+        }
+
+        return $query->paginate($params['per_page'])->appends($params);
     }
 
     public function update($params) {
@@ -141,5 +175,20 @@ class CampaignRepository implements CampaignRepositoryInterface {
 
         // Successful?
         return !empty($sent->drip_campaigns_id);
+    }
+
+    /**
+     * Add Sort Query
+     *
+     * @param type $query
+     * @param type $sort
+     * @return type
+     */
+    private function addSortQuery($query, $sort) {
+        if (!isset($this->sortOrders[$sort])) {
+            return;
+        }
+
+        return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
     }
 }
