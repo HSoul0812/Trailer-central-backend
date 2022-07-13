@@ -122,7 +122,7 @@ class TextService implements TextServiceInterface
             throw new NoLeadSmsNumberAvailableException();
         }
 
-        $activeNumber = $this->numberRepository->activeTwilioNumberByCustomerNumber($to_number);
+        $activeNumber = $this->numberRepository->activeTwilioNumberByCustomerNumber($to_number, $lead->dealer_id);
 
         if (!empty($activeNumber)) {
             $from_number = $activeNumber->dealer_number;
@@ -145,7 +145,11 @@ class TextService implements TextServiceInterface
         try {
             $this->textRepository->beginTransaction();
 
-            $this->twilioService->send($from_number, $to_number, $textMessage, $fullName, $mediaUrl);
+            $this->twilioService->send($from_number, $to_number, $textMessage, $fullName, $mediaUrl, $lead->dealer_id);
+
+            if ($this->twilioService->getIsNumberInvalid() && !empty($activeNumber)) {
+                $this->numberRepository->delete(['id' => $activeNumber->id]);
+            }
 
             $this->statusRepository->createOrUpdate([
                 'lead_id' => $lead->identifier,
@@ -235,13 +239,17 @@ class TextService implements TextServiceInterface
         try {
             $this->textRepository->beginTransaction();
 
-            $this->numberRepository->updateExpirationDate($expirationTime, $to, $activeNumber->dealer_number);
-
             $this->twilioService->sendViaTwilio($to, $toNumber, $messageBody, $mediaUrl);
 
             $textLogs = $this->textRepository->findByFromNumberToNumber($toNumber, $from);
 
             $leadId = $this->findLeadId($textLogs);
+
+            if ($this->twilioService->getIsNumberInvalid()) {
+                $this->numberRepository->delete(['id' => $activeNumber->id]);
+            } else {
+                $this->numberRepository->updateExpirationDate($expirationTime, $to, $activeNumber->dealer_number);
+            }
 
             $files = $fileDtos->map(function (FileDto $fileDto) {
                 return [
