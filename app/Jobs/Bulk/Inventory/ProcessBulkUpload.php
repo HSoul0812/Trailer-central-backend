@@ -13,10 +13,7 @@ class ProcessBulkUpload extends Job {
     public $timeout = 0;
     public $tries = 2;
 
-    /**
-     * @var BulkUpload
-     */
-    protected $bulk;
+    protected $bulkId;
 
     /**
      * @var CsvImportServiceInterface
@@ -26,13 +23,11 @@ class ProcessBulkUpload extends Job {
     /**
      * Create a new job instance.
      *
-     * @param BulkUpload $bulk
+     * @param int $bulkId
      */
-    public function __construct(BulkUpload $bulk)
+    public function __construct(int $bulkId)
     {
-        $this->bulk = $bulk;
-        $this->csvImportService = app('App\Services\Import\Inventory\CsvImportServiceInterface');
-        $this->csvImportService->setBulkUpload($bulk);
+        $this->bulkId = $bulkId;
     }
 
     /**
@@ -40,13 +35,16 @@ class ProcessBulkUpload extends Job {
      *
      * @return void
      */
-    public function handle()
+    public function handle(CsvImportServiceInterface $service)
     {
         Log::info('Starting inventory bulk upload');
         try {
-            $this->csvImportService->run();
+            $bulk = BulkUpload::find($this->bulkId);
+            $service->setBulkUpload($bulk);
+
+            $service->run();
         } catch (\Exception $ex) {
-            Log::info($ex->getMessage());
+            Log::error($ex->getMessage());
         }
     }
 }
