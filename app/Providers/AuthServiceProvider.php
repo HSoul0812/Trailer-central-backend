@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\CRM\Dealer\DealerFBMOverview;
 use App\Models\CRM\Dms\Quickbooks\QuickbookApproval;
 use App\Models\CRM\Leads\Jotform\WebsiteForms;
 use App\Models\CRM\Leads\Lead;
@@ -27,11 +28,15 @@ use App\Models\User\User;
 use App\Models\Website\Forms\FieldMap;
 use App\Models\Website\Website;
 use App\Nova\Policies\ApiEntityReferencePolicy;
+use App\Nova\Policies\BalancePolicy;
+use App\Nova\Policies\CollectorPolicy;
+use App\Nova\Policies\FeedPolicy;
 use App\Nova\Policies\FieldMapPolicy;
+use App\Nova\Policies\InventoryPolicy;
 use App\Nova\Policies\JotformPolicy;
 use App\Nova\Policies\LeadAssignPolicy;
 use App\Nova\Policies\DealerIncomingPendingMappingPolicy;
-use App\Nova\Policies\DealerPolicy;
+use App\Nova\Policies\DealerFBPolicy;
 use App\Nova\Policies\CategoryPolicy;
 use App\Nova\Policies\EntityTypePolicy;
 use App\Nova\Policies\BrandPolicy;
@@ -67,12 +72,13 @@ class AuthServiceProvider extends ServiceProvider
      * @var array
      */
     protected $policies = [
-        Balance::class => InventoryMfgPolicy::class,
-        User::class => DealerPolicy::class,
+        Balance::class => BalancePolicy::class,
+        DealerFBMOverview::class => DealerFBPolicy::class,
+        User::class => DealerFBPolicy::class,
         DealerLocation::class => LocationPolicy::class,
         ApiEntityReference::class => ApiEntityReferencePolicy::class,
-        Collector::class => LeadAssignPolicy::class,
-        Inventory::class => CategoryPolicy::class,
+        Collector::class => CollectorPolicy::class,
+        Inventory::class => InventoryPolicy::class,
         Category::class => CategoryPolicy::class,
         InventoryMfg::class => InventoryMfgPolicy::class,
         EntityType::class => EntityTypePolicy::class,
@@ -83,7 +89,7 @@ class AuthServiceProvider extends ServiceProvider
         Lead::class => LeadPolicy::class,
         Brand::class => BrandPolicy::class,
         Manufacturers::class => ManufacturersPolicy::class,
-        Feed::class => FieldMapPolicy::class,
+        Feed::class => FeedPolicy::class,
         FieldMap::class => FieldMapPolicy::class,
         NovaUser::class => UserPolicy::class,
         \App\Models\Parts\Brand::class => PartBrandPolicy::class,
