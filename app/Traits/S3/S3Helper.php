@@ -13,13 +13,13 @@ trait S3Helper
      */
     protected function getS3BaseUrl(): string
     {
-        if (!empty(env('CDN_URL_STORAGE'))) {
-            return env('CDN_URL_STORAGE');
+        if (!empty(config('app.cdn_storage_url'))) {
+            return config('app.cdn_storage_url');
         }
 
-        $urlMetadata = parse_url(env('AWS_URL'));
+        $urlMetadata = parse_url(config('services.aws.url'));
 
-        return $urlMetadata['scheme'] . '://' . $urlMetadata['host'] . '/'.env('AWS_BUCKET');
+        return $urlMetadata['scheme'] . '://' . $urlMetadata['host'] . '/'.config('services.aws.bucket');
     }
 
     /**

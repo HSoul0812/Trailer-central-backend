@@ -72,6 +72,8 @@ return [
 
     'user_master_password' => env('USER_MASTER_PASSWORD'),
 
+    'cdn_storage_url' => env('CDN_URL_STORAGE'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone
