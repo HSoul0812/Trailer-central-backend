@@ -40,6 +40,11 @@ class Interaction extends Model
      */
     const TYPE_FB = 'FB';
 
+    /**
+     * @const string
+     */
+    const TYPE_CONTACT = 'CONTACT';
+
 
     /**
      * The table associated with the model.
@@ -69,7 +74,8 @@ class Interaction extends Model
         "interaction_notes",
         "interaction_time",
         "from_email",
-        "sent_by"
+        "sent_by",
+        "is_closed"
     ];
 
     /**

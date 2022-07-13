@@ -145,5 +145,6 @@ class InteractionServiceProvider extends ServiceProvider
         \Validator::extend('messaging_type_valid', 'App\Rules\CRM\Interactions\Facebook\ValidMessagingType@passes');
         \Validator::extend('interaction_message_valid', 'App\Rules\CRM\Interactions\ValidInteractionMessage@passes');
         \Validator::extend('active_interaction', 'App\Rules\CRM\Text\ActiveInteraction@validate');
+        \Validator::extend('interaction_note_valid', 'App\Rules\CRM\Interactions\ValidInteractionNote@passes');
     }
 }
