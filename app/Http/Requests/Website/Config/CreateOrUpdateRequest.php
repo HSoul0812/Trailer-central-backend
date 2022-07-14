@@ -76,7 +76,7 @@ class CreateOrUpdateRequest extends Request
             'inventory/times_viewed' => ['string', self::SHOWING_RANGE],
             'inventory/images_configuration' => ['string', self::SHOWING_RANGE],
             'inventory/compare' => ['string', self::SHOWING_RANGE],
-            'call-to-action/recaptcha' => ['integer', self::YES_NO],
+            'call-to-action/recaptcha' => ['integer', 'in:0,1,on,off'],
             'home/custom_carousel_lists' => 'string',
             'contact-as-form/captcha_public_key' => 'string',
             'contact-as-form/captcha_secret_key' => 'string',
