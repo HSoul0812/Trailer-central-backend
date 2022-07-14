@@ -36,6 +36,8 @@ use Laravel\Cashier\Billable;
  * @property bool $isCrmActive
  * @property bool $is_dms_active
  * @property string $identifier
+ * @property integer $showroom
+ * @property string $showroom_dealers a PHP serialized object
  *
  * @method static Builder whereIn($column, $values, $boolean = 'and', $not = false)
  */
@@ -329,7 +331,7 @@ class User extends Model implements Authenticatable, PermissionsInterface
     {
         return $this->hasOne(Settings::class, 'dealer_id', 'dealer_id');
     }
-    
+
     public function bins() : HasMany
     {
         return $this->hasMany(Bin::class, 'dealer_id', 'dealer_id');
