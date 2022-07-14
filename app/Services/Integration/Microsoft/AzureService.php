@@ -2,6 +2,8 @@
 
 namespace App\Services\Integration\Microsoft;
 
+use App\Exceptions\Integration\Microsoft\CannotReceiveAzureProfileException;
+use App\Exceptions\Integration\Microsoft\CannotReceiveAzureFoldersException;
 use App\Exceptions\Integration\Microsoft\InvalidAzureAuthCodeException;
 use App\Exceptions\Integration\Microsoft\MissingAzureIdTokenException;
 use App\Models\Integration\Auth\AccessToken;
@@ -157,6 +159,7 @@ class AzureService implements AzureServiceInterface
         } catch (\Exception $e) {
             // Log Error
             $this->log->error('Exception returned on getting azure profile email; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
+            throw new CannotReceiveAzureProfileException;
         }
 
         // Return Azure Token
@@ -197,6 +200,7 @@ class AzureService implements AzureServiceInterface
         } catch (\Exception $e) {
             // Log Error
             $this->log->error('Exception returned on getting azure profile email; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
+            throw new CannotReceiveAzureFoldersException;
         }
 
         // Return Collection of ImapMailbox
