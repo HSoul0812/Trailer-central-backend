@@ -45,11 +45,11 @@ class UnitSaleRefundsController extends RestfulControllerV2
                 $action->withSort($request->input('sort'));
             })
             ->when($request->has('created_at_between'), function (GetUnitSaleRefundsAction $action) use ($request) {
-                $segments = explode(', ', $request->input('created_at_between'));
+                $segments = explode(',', $request->input('created_at_between'));
 
                 $createdAtBetween = collect($segments)
                     ->map(function (string $dateTime) {
-                        return Carbon::parse($dateTime);
+                        return Carbon::parse(trim($dateTime));
                     })
                     ->toArray();
 
