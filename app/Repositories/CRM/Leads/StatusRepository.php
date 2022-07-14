@@ -113,7 +113,7 @@ class StatusRepository implements StatusRepositoryInterface {
      * @param array $params
      * @return LeadStatus
      */
-    public function createOrUpdate($params) {
+    public function createOrUpdate(array $params): LeadStatus {
         // Status Exists?
         $status = $this->get($params);
 
