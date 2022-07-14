@@ -3,6 +3,7 @@
 namespace App\Services\Integration\Microsoft;
 
 use App\Exceptions\Common\MissingFolderException;
+use App\Exceptions\Integration\Microsoft\CannotReceiveOffice365MessagesException;
 use App\Exceptions\Integration\Microsoft\MissingAzureIdTokenException;
 use App\Models\Integration\Auth\AccessToken;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
@@ -211,6 +212,7 @@ class OfficeService extends AzureService implements OfficeServiceInterface
         } catch (\Exception $e) {
             // Log Error
             $this->log->error('Exception returned on getting office 365 messages; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
+            throw new CannotReceiveOffice365MessagesException;
         }
 
         // Return Empty Collection of Message
