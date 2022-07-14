@@ -32,8 +32,8 @@ class GetUnitSaleRefundsAction
     /** @var int|null */
     private $customerId;
 
-    /** @var array|null */
-    private $createdAtBetween;
+    /** @var array */
+    private $createdAtBetween = [];
 
     /**
      * Fetch the refunds Collection
@@ -79,7 +79,7 @@ class GetUnitSaleRefundsAction
             })
 
             // If the customerId isn't empty, we will find it from the invoice
-            // table order the unit_sale table
+            // table or the unit_sale table
             ->when(!empty($this->customerId), function (Builder $builder) use ($dealerId) {
                 $builder->where(function (Builder $builder) use ($dealerId) {
                     $builder
@@ -170,16 +170,17 @@ class GetUnitSaleRefundsAction
     }
 
     /**
-     * @param array|null $createdAtBetween Needs to be in [$from, $to] format with both being Carbon objects
+     * @param array $createdAtBetween Needs to be in [$from, $to] format with both being Carbon objects
      * @return GetUnitSaleRefundsAction
      * @throws Exception
      */
-    public function withCreatedAtBetween(?array $createdAtBetween): GetUnitSaleRefundsAction
+    public function withCreatedAtBetween(array $createdAtBetween): GetUnitSaleRefundsAction
     {
         if (count($createdAtBetween) !== 2) {
             throw new Exception("The createdAtBetween must has 2 Carbon values.");
         }
 
+        // Make sure that both values are Carbon object
         foreach ($createdAtBetween as $index => $createdAt) {
             if (!$createdAt instanceof Carbon) {
                 throw new Exception("The $index element in the createdAtBetween must be an instance of Carbon object.");

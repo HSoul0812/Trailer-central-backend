@@ -14,6 +14,9 @@ use Exception;
 
 class UnitSaleRefundsController extends RestfulControllerV2
 {
+    /** @var int The default per_page value if not provided */
+    const PER_PAGE = 10;
+    
     public function __construct()
     {
         $this->middleware('setDealerIdOnRequest')->only(['index']);
@@ -31,18 +34,18 @@ class UnitSaleRefundsController extends RestfulControllerV2
         $request->validate();
 
         $paginator = $getUnitSale
-            ->withPage($request->get('page'))
-            ->withPerPage($request->get('per_page'))
+            ->withPage($request->input('page'))
+            ->withPerPage($request->input('per_page', self::PER_PAGE))
             ->when($request->has('with'), function (GetUnitSaleRefundsAction $action) use ($request) {
-                $relations = explode(',', $request->get('with'));
+                $relations = explode(',', $request->input('with'));
 
                 $action->withRelations($relations);
             })
             ->when($request->has('sort'), function (GetUnitSaleRefundsAction $action) use ($request) {
-                $action->withSort($request->get('sort'));
+                $action->withSort($request->input('sort'));
             })
             ->when($request->has('created_at_between'), function (GetUnitSaleRefundsAction $action) use ($request) {
-                $segments = explode(', ', $request->get('created_at_between'));
+                $segments = explode(', ', $request->input('created_at_between'));
 
                 $createdAtBetween = collect($segments)
                     ->map(function (string $dateTime) {
@@ -52,8 +55,8 @@ class UnitSaleRefundsController extends RestfulControllerV2
 
                 $action->withCreatedAtBetween($createdAtBetween);
             })
-            ->withCustomerId($request->get('customer_id'))
-            ->withRegisterId($request->get('register_id'))
+            ->withCustomerId($request->input('customer_id'))
+            ->withRegisterId($request->input('register_id'))
             ->execute($unitSaleId);
 
         return $this->collectionResponse($paginator->items(), new RefundTransformer(), $paginator);
