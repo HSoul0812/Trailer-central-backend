@@ -211,7 +211,7 @@ class OfficeService extends AzureService implements OfficeServiceInterface
             return $emails;
         } catch (\Exception $e) {
             // Log Error
-            $this->log->error('Exception returned on getting office 365 messages; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
+            $this->log->error('Exception returned on getting office 365 messages; ' . $e->getMessage());
             throw new CannotReceiveOffice365MessagesException;
         }
 
@@ -416,7 +416,7 @@ class OfficeService extends AzureService implements OfficeServiceInterface
             return $folderId;
         } catch (\Exception $e) {
             // Log Error
-            $this->log->error('Exception returned on getting office 365 folder ID; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
+            $this->log->error('Exception returned on getting office 365 folder ID; ' . $e->getMessage());
             return self::DEFAULT_FOLDER;
         }
     }
