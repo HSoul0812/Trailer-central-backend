@@ -29,4 +29,12 @@ interface StatusRepositoryInterface extends Repository {
      * @return LeadStatus
      */
     public function update($params): LeadStatus;
+
+    /**
+     * Find Lead Status by id.
+     *
+     * @param $id
+     * @return LeadStatus
+     */
+    public function find($id): LeadStatus;
 }
