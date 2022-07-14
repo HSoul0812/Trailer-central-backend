@@ -55,6 +55,10 @@ class StatusRepository implements StatusRepositoryInterface {
         return LeadStatus::where('tc_lead_identifier', $params['lead_id'])->first();
     }
 
+    public function find($id): LeadStatus {
+        return LeadStatus::find($id);
+    }
+
     /**
      * Get All Statuses
      *
