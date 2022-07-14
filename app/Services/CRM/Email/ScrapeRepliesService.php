@@ -220,7 +220,11 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             // Refresh Token
             $this->log->info('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
                                 ' - Validating token #' . $salesperson->active_token->id);
-            $this->auth->validate($salesperson->active_token);
+            try {
+                $this->auth->validate($salesperson->active_token);
+            } catch (\Exception $e) {
+                $this->salespeople->update(['id' => $salesperson->id, 'imap_failed' => 1]);
+            }
         }
 
         // Process Messages
@@ -235,7 +239,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 $imports = $this->folder($dealer, $salesperson, $folder);
                 $this->log->info('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
                                     ' - Finished Importing ' . $imports .
-                                    ' Replies for Folder' . $folder->name . ' in ' . 
+                                    ' Replies for Folder ' . $folder->name . ' in ' . 
                                     (microtime(true) - $this->runtime) . ' Seconds');
                 $imported += $imports;
             } catch(\Exception $e) {
