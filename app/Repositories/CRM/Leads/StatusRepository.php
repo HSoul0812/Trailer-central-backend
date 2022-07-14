@@ -11,7 +11,13 @@ use Illuminate\Support\Facades\DB;
 
 class StatusRepository implements StatusRepositoryInterface {
 
-    public function create($params) {
+    /**
+     * Create Lead Status
+     *
+     * @param array $params
+     * @return LeadStatus
+     */
+    public function create($params): LeadStatus {
         // Override Lead ID
         if (isset($params['lead_id'])) {
             $params['tc_lead_identifier'] = $params['lead_id'];
@@ -69,7 +75,13 @@ class StatusRepository implements StatusRepositoryInterface {
         return $statuses;
     }
 
-    public function update($params) {
+    /**
+     * Update Lead Status
+     *
+     * @param array $params
+     * @return LeadStatus
+     */
+    public function update($params): LeadStatus {
         if (isset($params['id'])) {
             $status = LeadStatus::findOrFail($params['id']);
         } else {
@@ -113,7 +125,7 @@ class StatusRepository implements StatusRepositoryInterface {
      * @param array $params
      * @return LeadStatus
      */
-    public function createOrUpdate($params) {
+    public function createOrUpdate(array $params): LeadStatus {
         // Status Exists?
         $status = $this->get($params);
 
