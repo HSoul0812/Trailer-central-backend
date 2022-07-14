@@ -43,10 +43,14 @@ class LeadStatusService implements LeadStatusServiceInterface
      */
     public function update(array $rawParams): LeadStatus
     {
-        $oldStatus = $this->status->get(['lead_id' => $rawParams['id']]);
+        $oldStatus = $this->status->find($rawParams['id']);
         $status = $this->status->update($rawParams);
 
-        if ($status->salesPerson && $oldStatus->sales_person_id !== $status->sales_person_id && $status->salesPerson->crmUser->enable_assign_notification) {
+        if ($status->salesPerson && $status->salesPerson->crmUser->enable_assign_notification) {
+            if ($oldStatus->salesPerson && $oldStatus->sales_person_id == $status->sales_person_id) {
+                return $status;
+            }
+
             $this->sendAssignLeadEmail($status);
         }
 
