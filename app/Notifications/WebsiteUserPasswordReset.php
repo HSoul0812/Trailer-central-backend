@@ -45,8 +45,7 @@ class WebsiteUserPasswordReset extends Notification
             that you have initially set.'))
             ->line(Lang::get('If you have forgotten your password,click on the following link to create a new password: '))
             ->action(Lang::get('Reset Password'), $url)
-            ->line(Lang::get('This password reset link will expire in :count minutes.', ['count' => config('auth.passwords.'.config('auth.defaults.passwords').'.expire')]))
-            ->line(Lang::get('If you did not request a password reset, no further action is required.'));
+            ->line(Lang::get('This password reset link will expire in :count minutes.', ['count' => config('auth.passwords.'.config('auth.defaults.passwords').'.expire')]));
     }
 
     protected function resetUrl($notifiable)
