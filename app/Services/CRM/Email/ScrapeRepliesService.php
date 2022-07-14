@@ -311,7 +311,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $this->log->info('Dealer #' . $dealerId . ', Sales Person #' . $salesperson->id . 
                             ' - Connecting to Gmail with Email: ' . $salesperson->smtp_email);
         $messages = $this->gmail->messages($salesperson->active_token, $emailFolder->name, [
-            'after' => Carbon::parse($emailFolder->date_imported)->isoFormat('YYYY/M/D')
+            'after' => Carbon::parse($emailFolder->date_imported)->subDay()->isoFormat('YYYY/M/D')
         ]);
         $folder = $this->updateFolder($salesperson, $emailFolder);
 
@@ -357,7 +357,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $this->log->info('Dealer #' . $dealerId . ', Sales Person #' . $salesperson->id . 
                                 ' - Connecting to Office 365 with Email: ' . $salesperson->smtp_email);
         $messages = $this->office->messages($salesperson->active_token, $emailFolder->name, [
-            'SentDateTime ge ' . Carbon::parse($emailFolder->date_imported)->isoFormat('YYYY-MM-DD')
+            'SentDateTime ge ' . Carbon::parse($emailFolder->date_imported)->subDay()->isoFormat('YYYY-MM-DD')
         ]);
         $folder = $this->updateFolder($salesperson, $emailFolder);
 
