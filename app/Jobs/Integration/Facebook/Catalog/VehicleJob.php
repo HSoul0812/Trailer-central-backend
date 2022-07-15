@@ -274,7 +274,7 @@ class VehicleJob extends Job
         $this->integration = $integration;
 
         // Log Construct
-        Log::channel('facebook')->info('Constructed VehicleJob for Catalog #' . $this->integration->catalog_id);
+        Log::channel('fb-catalog')->info('Constructed VehicleJob for Catalog #' . $this->integration->catalog_id);
     }
 
     /**
@@ -284,7 +284,7 @@ class VehicleJob extends Job
      */
     public function handle()
     {
-        $log = Log::channel('facebook');
+        $log = Log::channel('fb-catalog');
         $log->info('Handling VehicleJob for Catalog #' . $this->integration->catalog_id);
 
         // Integration Empty?
@@ -451,7 +451,7 @@ class VehicleJob extends Job
      * @return string
      */
     private function storeCsv($file, $filePath) {
-        $log = Log::channel('facebook');
+        $log = Log::channel('fb-catalog');
         try {
             // Get Temp File Contents
             rewind($file);
