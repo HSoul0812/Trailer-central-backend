@@ -164,6 +164,14 @@ class InventoryRepository implements InventoryRepositoryInterface
         '-archived_at' => [
             'field' => 'archived_at',
             'direction' => 'ASC'
+        ],
+        'model' => [
+            'field' => 'model',
+            'direction' => 'DESC'
+        ],
+        '-model' => [
+            'field' => 'model',
+            'direction' => 'ASC'
         ]
     ];
 
@@ -293,8 +301,37 @@ class InventoryRepository implements InventoryRepositoryInterface
         unset($params['clapps']);
 
         $item->fill($params)->save();
+        
+        $this->updateQbInvoiceItems($item);
 
         return $item;
+    }
+    
+    /**
+     * Update the qb_invoice_item_inventories table for sales person report updation.
+     * 
+     * @param Inventory $item
+     * @return void
+     */
+    private function updateQbInvoiceItems(Inventory $item)
+    {
+        $newTotalTrueCost = $item->true_cost + $item->cost_of_shipping;
+        $newTotalCost = $item->cost_of_unit + $item->cost_of_shipping;
+        $newFinalCost = 0;
+        
+        if ($item->pac_type === "percent") {
+            $priceAdj = ($newTotalCost * $item->pac_amount) / 100;
+            $newFinalCost = $newTotalCost + $priceAdj;
+        } else {
+            $newFinalCost = $newTotalCost + $item->pac_amount;
+        }
+
+        DB::table('qb_invoice_item_inventories')
+            ->where('inventory_id', '=', $item->id)
+            ->update([
+                'cost_overhead' => $newFinalCost,
+                'true_total_cost' => $newTotalTrueCost
+            ]);
     }
 
     public function moveLocationId(int $from, int $to): int
@@ -652,6 +689,7 @@ class InventoryRepository implements InventoryRepositoryInterface
                         ->orWhere('inventory.description', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('vin', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('price', 'LIKE', '%' . $params['search_term'] . '%')
+                        ->orWhere('model', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhereHas('floorplanVendor', function ($query) use ($params) {
                             $query->where('name', 'LIKE', '%' . $params['search_term'] . '%');
                         });
