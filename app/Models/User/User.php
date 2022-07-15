@@ -276,6 +276,13 @@ class User extends Model implements Authenticatable, PermissionsInterface
         return $this->hasOneThrough(CrmUser::class, NewDealerUser::class, 'id', 'user_id', 'dealer_id', 'user_id');
     }
 
+    public function authToken(): HasOne
+    {
+        return $this
+            ->hasOne(AuthToken::class, 'user_id', 'dealer_id')
+            ->where('user_type', 'dealer');
+    }
+
     public function getIsCrmActiveAttribute(): bool
     {
         $crmUser = $this->crmUser()->first();

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\User\SalesPerson;
 use App\Services\User\UserService;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class DealerUser extends Model implements Authenticatable, PermissionsInterface
 {
@@ -119,6 +120,13 @@ class DealerUser extends Model implements Authenticatable, PermissionsInterface
     public function newDealerUser()
     {
         return $this->hasOne(NewDealerUser::class, 'id', 'dealer_id');
+    }
+    
+    public function authToken(): HasOne
+    {
+        return $this
+            ->hasOne(AuthToken::class, 'user_id', 'dealer_user_id')
+            ->where('user_type', 'dealer_user');
     }
     
     public function getWebsiteAttribute()

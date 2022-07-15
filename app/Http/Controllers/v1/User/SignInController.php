@@ -44,7 +44,8 @@ class SignInController extends RestfulController
     {
         $this->middleware('setDealerIdOnRequest')->only([
             'updatePassword',
-            'checkAdminPassword'
+            'checkAdminPassword',
+            'signIn',
         ]);
 
         $this->users = $userRepo;
@@ -79,7 +80,7 @@ class SignInController extends RestfulController
         $request = new SignInRequest($request->all());
         if ($request->validate()) {
             try {
-                return $this->response->item($this->users->findUserByEmailAndPassword($request->email, $request->password), $this->transformer);
+                return $this->response->item($this->users->findUserByEmailAndPassword($request->email, $request->password, $request->dealer_id), $this->transformer);
             } catch (\Exception $ex) {
                 return $this->response->errorBadRequest();
             }
