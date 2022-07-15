@@ -3,12 +3,13 @@
 namespace App\Repositories\Website\Parts;
 
 use App\Repositories\Repository;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
- * 
+ *
  *
  * @author Eczek
  */
 interface FilterRepositoryInterface extends Repository {
-    //put your code here
+    public function getAllEcomm(): Collection;
 }

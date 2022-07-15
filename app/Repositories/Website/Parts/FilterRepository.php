@@ -5,6 +5,7 @@ namespace App\Repositories\Website\Parts;
 use App\Repositories\Website\Parts\FilterRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\Parts\Filter;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
  *
@@ -32,7 +33,7 @@ class FilterRepository implements FilterRepositoryInterface {
         return Filter::where('is_visible', 1)->orderBy('position', 'asc')->get();
     }
 
-    public function getAllEcomm() {
+    public function getAllEcomm(): Collection {
         return Filter::where('is_visible', 1)->whereNotIn('attribute', self::EXCLUDED_ATTRIBUTES)->orderBy('position')->get();
     }
 
