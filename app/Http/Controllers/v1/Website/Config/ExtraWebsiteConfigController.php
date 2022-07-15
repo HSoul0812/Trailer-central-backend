@@ -50,7 +50,7 @@ class ExtraWebsiteConfigController extends RestfulControllerV2
      */
     public function createOrUpdate(int $websiteId, Request $request): Response
     {
-        $request = new PutExtraWebsiteConfigRequest($request->all());
+        $request = new PutExtraWebsiteConfigRequest(array_merge(['website_id' => $websiteId], $request->all()));
 
         if ($request->validate()) {
             return $this->response->array([
