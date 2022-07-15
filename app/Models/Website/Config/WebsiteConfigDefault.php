@@ -2,7 +2,9 @@
 
 namespace App\Models\Website\Config;
 
+use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use Illuminate\Database\Eloquent\Model;
+use App;
 
 /**
  * Class WebsiteConfigDefault
@@ -15,7 +17,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $label
  * @property string $note
  * @property string $grouping 'General', 'Home Page Display', 'Inventory Display', 'Contact Forms',
- *                            'Call to Action Pop-Up', 'Payment Calculator'
+ *                            'Call to Action Pop-Up', 'Payment Calculator', 'Showroom Setup'
  * @property string $values
  * @property string $values_mapping
  * @property string $default_label
@@ -25,8 +27,12 @@ use Illuminate\Database\Eloquent\Model;
 class WebsiteConfigDefault extends Model
 {
     const CONFIG_INCLUDE_ARCHIVING_INVENTORY = 'inventory/include_archived_inventory';
+    const CHECKBOX_TYPE = 'checkbox';
 
     protected $table = 'website_config_default';
+
+    /** @var WebsiteConfigRepositoryInterface */
+    private $currentValueRepository;
 
     /**
      * Get JSON-Decoded Values Map
@@ -35,5 +41,38 @@ class WebsiteConfigDefault extends Model
      */
     public function getValuesMapAttribute(): ?array {
         return json_decode($this->values_mapping, true);
+    }
+
+    public function isCheckBoxType(): bool
+    {
+        return $this->type === self::CHECKBOX_TYPE;
+    }
+
+    /**
+     * @param int $websiteId
+     * @return mixed
+     */
+    public function getValueAccordingWebsite(int $websiteId)
+    {
+        if(!$this->exists){
+            throw new \RuntimeException('`WebsiteConfigDefault::getValueAccordingWebsite` There is not a loaded active record');
+        }
+
+        $value = $this->getCurrentValueRepository()->getValueOfConfig($websiteId, $this->key);
+        $currentValue = $value ? $value->value : $this->default_value;
+
+        // when it is checkbox type, it should always return a boolean value
+        return $this->isCheckBoxType() ? (bool)$currentValue : $currentValue;
+    }
+
+    protected function getCurrentValueRepository(): WebsiteConfigRepositoryInterface
+    {
+        if ($this->currentValueRepository) {
+            return $this->currentValueRepository;
+        }
+
+        $this->currentValueRepository = App::make(WebsiteConfigRepositoryInterface::class);
+
+        return $this->currentValueRepository;
     }
 }
