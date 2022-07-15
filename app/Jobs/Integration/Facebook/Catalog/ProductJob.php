@@ -223,7 +223,7 @@ class ProductJob extends Job
         $this->integration = $integration;
 
         // Log Construct
-        Log::channel('facebook')->info('Constructed ProductJob for Catalog #' . $this->integration->catalog_id);
+        Log::channel('fb-catalog')->info('Constructed ProductJob for Catalog #' . $this->integration->catalog_id);
     }
 
     /**
@@ -233,7 +233,7 @@ class ProductJob extends Job
      */
     public function handle()
     {
-        $log = Log::channel('facebook');
+        $log = Log::channel('fb-catalog');
         $log->info('Handling ProductJob for Catalog #' . $this->integration->catalog_id);
 
         // Integration Empty?
@@ -368,7 +368,7 @@ class ProductJob extends Job
      * @return string
      */
     private function storeCsv($file, $filePath) {
-        $log = Log::channel('facebook');
+        $log = Log::channel('fb-catalog');
         try {
             // Get Temp File Contents
             rewind($file);

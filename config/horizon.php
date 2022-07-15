@@ -186,7 +186,7 @@ return [
             'supervisor-3' => [
                 'connection' => 'redis',
                 'queue' => ['fb-catalog'],
-                'balance' => false,
+                'balance' => 'auto',
                 'processes' => 1,
                 'tries' => 3,
                 'timeout' => 360,
@@ -241,7 +241,7 @@ return [
             'supervisor-3' => [
                 'connection' => 'redis',
                 'queue' => ['fb-catalog'],
-                'balance' => false,
+                'balance' => 'auto',
                 'processes' => 3,
                 'tries' => 3,
                 'timeout' => 360,
