@@ -304,7 +304,6 @@ class SaveInventoryTransformer implements TransformerInterface
 
             return $createParams;
         } catch (\Exception $e) {
-            var_dump($e->getLine()); die;
             Log::error('Item transform error.', $e->getTrace());
 
             return null;
