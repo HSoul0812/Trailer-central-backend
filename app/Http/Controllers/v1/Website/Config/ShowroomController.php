@@ -8,6 +8,11 @@ use App\Services\Website\WebsiteConfigServiceInterface;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
 
+/**
+ * @deprecated This should be removed due we have an extra website config API which should handle any non-regular
+ *             website variable e.g. call to action and showroom, both of them are regular website variables, so they
+ *             should be ALWAYS handled by regular website variables API
+ */
 class ShowroomController extends RestfulControllerV2
 {
 

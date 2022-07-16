@@ -81,9 +81,9 @@ class WebsiteConfigRepository implements WebsiteConfigRepositoryInterface {
       $query = WebsiteConfig::select('*');
 
       $query = $query->where('website_id', $websiteId);
-      
+
       $query->where('key', 'LIKE', '%'.WebsiteConfig::CALL_TO_ACTION.'%');
-      
+
       return $query->get();
     }
 
@@ -179,6 +179,15 @@ class WebsiteConfigRepository implements WebsiteConfigRepositoryInterface {
         return [$key => $value];
     }
 
+    /**
+     * @deprecated This should be removed due we have an extra website config API which should handle any non-regular
+     *             website variable e.g. call to action and showroom, both of them are regular website variables, so they
+     *             should be ALWAYS handled by regular website variables API
+     *
+     * @param array $params
+     * @return array
+     * @throws \Exception
+     */
     public function createOrUpdateShowroomConfig(array $params): array
     {
         try {
