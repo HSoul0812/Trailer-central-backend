@@ -9,6 +9,10 @@ use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
 
 /**
+ * @deprecated This should be removed due we have an extra website config API which should handle any non-regular
+ *             website variable e.g. call to action and showroom, both of them are regular website variables, so they
+ *             should be ALWAYS handled by regular website variables API
+ *
  * Class CallToActionController
  * @package App\Http\Controllers\v1\Website\Config
  */
@@ -27,7 +31,7 @@ class CallToActionController extends RestfulControllerV2
     {
         $this->websiteConfigRepository = $websiteConfigRepository;
     }
-    
+
     /**
      * @param int $websiteId
      */
