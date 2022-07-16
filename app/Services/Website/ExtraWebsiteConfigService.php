@@ -83,16 +83,6 @@ class ExtraWebsiteConfigService implements ExtraWebsiteConfigServiceInterface
      */
     public function updateByWebsiteId(int $websiteId, array $params): void
     {
-        $this->updateShowroomConfig($websiteId, $params);
-    }
-
-    /**
-     * @param int $websiteId
-     * @param array{include_showroom: boolean, showroom_dealers: array<string>} $params
-     * @throws \Exception when something goes wrong at saving time
-     */
-    private function updateShowroomConfig(int $websiteId, array $params): void
-    {
         $website = $this->getWebsiteById($websiteId);
         $dealer = $this->getDealerById($website->dealer_id);
 
@@ -103,8 +93,8 @@ class ExtraWebsiteConfigService implements ExtraWebsiteConfigServiceInterface
                 $dealer->showroom = (int)$params['include_showroom'];
 
                 // this has disabled on the legacy dashboard codebase, but it seems the developer intention is clear
-                // so, when we should need to enable this again this will be already implemented
-                // $this->updateWebsiteEntityByWebsiteId($websiteId, $dealer->showroom);
+                // so, when we should need to enable this again then this will be already implemented
+                // $this->updateWebsiteEntityByWebsiteId($website->id, $dealer->showroom);
             }
 
             if (isset($params['showroom_dealers'])) {
@@ -113,10 +103,16 @@ class ExtraWebsiteConfigService implements ExtraWebsiteConfigServiceInterface
 
             $dealer->save();
 
+            if (array_key_exists('global_filter', $params)) {
+                $website->type_config = (string) $params['global_filter'];
+                $website->save();
+            }
+
             $this->connection->commit();
         } catch (\Exception $exception) {
             $this->connection->rollBack();
-            $this->logger->error('`ExtraWebsiteConfigService::createOrUpdateShowroomConfig` ' . $exception->getMessage());
+
+            $this->logger->error('`ExtraWebsiteConfigService::updateByWebsiteId` ' . $exception->getMessage());
 
             throw $exception;
         }
