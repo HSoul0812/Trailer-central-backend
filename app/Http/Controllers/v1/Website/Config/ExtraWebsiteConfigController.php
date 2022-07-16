@@ -35,7 +35,7 @@ class ExtraWebsiteConfigController extends RestfulControllerV2
 
         if ($request->validate()) {
             return $this->response->array([
-                'data' => $this->service->getAll($request->website_id)
+                'data' => $this->service->getAllByWebsiteId($request->website_id)
             ]);
         }
 
@@ -47,15 +47,16 @@ class ExtraWebsiteConfigController extends RestfulControllerV2
      * @return Response|void
      * @throws \Dingo\Api\Exception\ResourceException when there were some validation error
      * @throws \Symfony\Component\HttpKernel\Exception\HttpException when there was a bad request
+     * @throws \Exception when something goes wrong at saving time
      */
     public function createOrUpdate(int $websiteId, Request $request): Response
     {
         $request = new PutExtraWebsiteConfigRequest(array_merge(['website_id' => $websiteId], $request->all()));
 
         if ($request->validate()) {
-            return $this->response->array([
-                'data' => $this->service->createOrUpdate($request->all())
-            ]);
+            $this->service->updateByWebsiteId($request->website_id, $request->all());
+
+            return $this->updatedResponse();
         }
 
         $this->response->errorBadRequest();
