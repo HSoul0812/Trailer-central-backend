@@ -28,7 +28,7 @@ class PutExtraWebsiteConfigRequest extends WithDealerRequest
                 'string',
                 Rule::in($this->dealerList())
             ],
-            'global_filter'=> 'string' // too complex to be validated, maybe in the near future this could be validated
+            'global_filter'=> ['nullable', 'string'] // too complex to be validated, maybe in the near future this could be validated
         ]);
     }
 
