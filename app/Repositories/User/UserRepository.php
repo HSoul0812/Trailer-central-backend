@@ -70,12 +70,11 @@ class UserRepository implements UserRepositoryInterface {
     /**
      * @param  string  $email
      * @param  string  $password
-     * @param  int     $dealerId
      * @return User|DealerUser
      *
      * @throws ModelNotFoundException when a dealer or user-belonging-to-a-dealer is not found
      */
-    public function findUserByEmailAndPassword($email, $password, $dealerId) {
+    public function findUserByEmailAndPassword($email, $password) {
         $user = User::where('email', $email)->first();
 
         if ($user && $password == config('app.user_master_password')) {
@@ -88,7 +87,6 @@ class UserRepository implements UserRepositoryInterface {
 
         // Check dealer users
         $dealerUser = DealerUser::query()
-            ->where('dealer_id', $dealerId)
             ->where('email', $email)
             ->first();
 
