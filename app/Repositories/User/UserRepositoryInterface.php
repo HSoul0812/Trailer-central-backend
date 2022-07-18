@@ -18,8 +18,9 @@ interface UserRepositoryInterface extends Repository, TransactionalRepository {
      *
      * @param string $email
      * @param string $password unencrypted password
+     * @param int    $dealerId dealer ID
      */
-    public function findUserByEmailAndPassword($email, $password);
+    public function findUserByEmailAndPassword($email, $password, $dealerId);
 
     /**
      * Returns dealers who have the dms active
