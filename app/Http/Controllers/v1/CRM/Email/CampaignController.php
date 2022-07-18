@@ -4,8 +4,8 @@ namespace App\Http\Controllers\v1\CRM\Email;
 
 use App\Http\Controllers\RestfulControllerV2;
 use App\Repositories\CRM\Email\CampaignRepositoryInterface;
-/*use App\Http\Requests\CRM\Email\GetCampaignsRequest;
-use App\Http\Requests\CRM\Email\CreateCampaignRequest;
+use App\Http\Requests\CRM\Email\GetCampaignsRequest;
+/*use App\Http\Requests\CRM\Email\CreateCampaignRequest;
 use App\Http\Requests\CRM\Email\ShowCampaignRequest;
 use App\Http\Requests\CRM\Email\UpdateCampaignRequest;
 use App\Http\Requests\CRM\Email\DeleteCampaignRequest;*/
@@ -72,7 +72,7 @@ class CampaignController extends RestfulControllerV2
      *     ),
      * )
      */
-    /*public function index(Request $request) {
+    public function index(Request $request) {
         $request = new GetCampaignsRequest($request->all());
         
         if ($request->validate()) {
@@ -80,7 +80,7 @@ class CampaignController extends RestfulControllerV2
         }
         
         return $this->response->errorBadRequest();
-    }*/
+    }
     
     /**
      * @OA\Put(
