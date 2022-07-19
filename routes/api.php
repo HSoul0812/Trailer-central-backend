@@ -326,6 +326,8 @@ $api->version('v1', function ($route) {
     $route->get('website/{websiteId}/website-config', 'App\Http\Controllers\v1\Website\Config\WebsiteConfigController@index');
     $route->put('website/{websiteId}/website-config', 'App\Http\Controllers\v1\Website\Config\WebsiteConfigController@createOrUpdate')->where('websiteId', '[0-9]+');
 
+    $route->get('website/{websiteId}/extra-website-config', 'App\Http\Controllers\v1\Website\Config\ExtraWebsiteConfigController@index');
+
     $route->get('website/{websiteId}/call-to-action', 'App\Http\Controllers\v1\Website\Config\CallToActionController@index');
     $route->put('website/{websiteId}/call-to-action', 'App\Http\Controllers\v1\Website\Config\CallToActionController@createOrUpdate')->where('websiteId', '[0-9]+');
 
@@ -613,6 +615,17 @@ $api->version('v1', function ($route) {
     |
     */
     $route->get('user/interactions/tasks/sort-fields', 'App\Http\Controllers\v1\CRM\Interactions\TasksController@sortFields');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Dealers
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+    $route->get('users', 'App\Http\Controllers\v1\User\UserController@index');
+    $route->post('users', 'App\Http\Controllers\v1\User\UserController@create');
 
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
         /*

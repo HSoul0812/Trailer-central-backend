@@ -8,8 +8,8 @@ use App\Http\Requests\Dispatch\Facebook\GetMarketplaceRequest;
 use App\Http\Requests\Dispatch\Facebook\ShowMarketplaceRequest;
 use App\Http\Requests\Dispatch\Facebook\CreateMarketplaceRequest;
 use App\Http\Requests\Dispatch\Facebook\StepMarketplaceRequest;
-use App\Http\Requests\Dispatch\Facebook\DeleteMarketplaceRequest;
 use App\Http\Requests\Dispatch\Facebook\LoginMarketplaceRequest;
+use App\Http\Requests\Marketing\Facebook\DeleteMarketplaceRequest;
 use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
 use App\Services\Dispatch\Facebook\DTOs\MarketplaceStep;
 use App\Services\Dispatch\Facebook\MarketplaceServiceInterface;
@@ -90,7 +90,7 @@ class FacebookController extends RestfulControllerV2 {
 
     /**
      * Get Facebook Marketplace Integrations
-     * 
+     *
      * @param Request $request
      * @return type
      */
@@ -102,13 +102,13 @@ class FacebookController extends RestfulControllerV2 {
             // Get Marketplaces
             return $this->response->item($this->service->status(), $this->statusTransformer);
         }
-        
+
         return $this->response->errorBadRequest();
     }
 
     /**
      * Get Facebook Marketplace Integration
-     * 
+     *
      * @param Request $request
      * @return type
      */
@@ -127,13 +127,13 @@ class FacebookController extends RestfulControllerV2 {
             Log::channel('dispatch-fb')->info('Debug time after calling service: ' . (microtime(true) - $startTime));
             return $data;
         }
-        
+
         return $this->response->errorBadRequest();
     }
 
     /**
      * Create Facebook Marketplace Inventory
-     * 
+     *
      * @param int $id
      * @param Request $request
      * @return type
@@ -148,13 +148,13 @@ class FacebookController extends RestfulControllerV2 {
             // Return Auth
             return $this->response->item($this->service->create($request->all()), $this->listingTransformer);
         }
-        
+
         return $this->response->errorBadRequest();
     }
 
     /**
      * Log Step on Facebook Marketplace
-     * 
+     *
      * @param Request $request
      * @return type
      */
@@ -168,13 +168,13 @@ class FacebookController extends RestfulControllerV2 {
             // Return Auth
             return $this->response->item($this->service->step(new MarketplaceStep($request->all())), $this->stepTransformer);
         }
-        
+
         return $this->response->errorBadRequest();
     }
 
     /**
      * Delete Facebook Marketplace Integration
-     * 
+     *
      * @param int $id
      * @return type
      */
@@ -185,13 +185,13 @@ class FacebookController extends RestfulControllerV2 {
         if ($request->validate() && $this->service->delete($id)) {
             return $this->successResponse();
         }
-        
+
         return $this->response->errorBadRequest();
     }
 
     /**
      * Login to Facebook Marketplace Integration
-     * 
+     *
      * @param Request $request
      * @return type
      */
@@ -207,7 +207,7 @@ class FacebookController extends RestfulControllerV2 {
                                                 $request->version)
             ]);
         }
-        
+
         return $this->response->errorBadRequest();
     }
 }

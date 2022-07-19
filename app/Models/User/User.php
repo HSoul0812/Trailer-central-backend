@@ -36,6 +36,8 @@ use Laravel\Cashier\Billable;
  * @property bool $isCrmActive
  * @property bool $is_dms_active
  * @property string $identifier
+ * @property integer $showroom
+ * @property string $showroom_dealers a PHP serialized object
  *
  * @method static Builder whereIn($column, $values, $boolean = 'and', $not = false)
  */
@@ -169,7 +171,8 @@ class User extends Model implements Authenticatable, PermissionsInterface
         'auto_import_hide',
         'import_config',
         'auto_msrp',
-        'auto_msrp_percent'
+        'auto_msrp_percent',
+        'from'
     ];
 
     protected $casts = [

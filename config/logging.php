@@ -74,6 +74,14 @@ return [
             'permission' => 0664,
         ],
 
+        'scraperepliesjob' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/commands/scrape-replies-job.log'),
+            'level' => 'debug',
+            'days' => 3,
+            'permission' => 0664,
+        ],
+
         'scrapereplies' => [
             'driver' => 'daily',
             'path' => storage_path('logs/commands/scrape-replies.log'),
