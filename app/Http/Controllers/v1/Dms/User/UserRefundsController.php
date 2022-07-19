@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\v1\Dms\UnitSale;
+namespace App\Http\Controllers\v1\Dms\User;
 
 use App\Domains\UnitSale\Actions\GetUnitSaleRefundsAction;
 use App\Exceptions\Requests\Validation\NoObjectIdValueSetException;
@@ -12,11 +12,11 @@ use Carbon\Carbon;
 use Dingo\Api\Http\Request;
 use Exception;
 
-class UnitSaleRefundsController extends RestfulControllerV2
+class UserRefundsController extends RestfulControllerV2
 {
     /** @var int The default per_page value if not provided */
     const PER_PAGE = 10;
-    
+
     public function __construct()
     {
         $this->middleware('setDealerIdOnRequest')->only(['index']);
@@ -27,13 +27,15 @@ class UnitSaleRefundsController extends RestfulControllerV2
      * @throws NoObjectIdValueSetException
      * @throws Exception
      */
-    public function index(Request $request, GetUnitSaleRefundsAction $getUnitSale, int $unitSaleId)
+    public function index(Request $request, GetUnitSaleRefundsAction $getUnitSale)
     {
         $request = new GetQuoteRefundsRequest($request->all());
 
         $request->validate();
 
         $paginator = $getUnitSale
+            ->withTbName($request->input('tb_name'))
+            ->withTbPrimaryId($request->input('tb_primary_id'))
             ->withPage($request->input('page'))
             ->withPerPage($request->input('per_page', self::PER_PAGE))
             ->when($request->has('with'), function (GetUnitSaleRefundsAction $action) use ($request) {
@@ -57,7 +59,7 @@ class UnitSaleRefundsController extends RestfulControllerV2
             })
             ->withCustomerId($request->input('customer_id'))
             ->withRegisterId($request->input('register_id'))
-            ->execute($unitSaleId);
+            ->execute($request->input('dealer_id'));
 
         return $this->collectionResponse($paginator->items(), new RefundTransformer(), $paginator);
     }

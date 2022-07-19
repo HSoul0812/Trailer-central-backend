@@ -666,7 +666,7 @@ $api->version('v1', function ($route) {
         |
         |
         */
-        $route->get('user/quotes/{id}/refunds', 'App\Http\Controllers\v1\Dms\UnitSale\UnitSaleRefundsController@index');
+        $route->get('user/refunds', 'App\Http\Controllers\v1\Dms\User\UserRefundsController@index');
 
         /*
         |--------------------------------------------------------------------------

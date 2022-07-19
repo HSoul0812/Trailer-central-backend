@@ -42,6 +42,8 @@ class Refund extends Model implements Filterable
 {
     use BelongsToThroughTrait, TableAware;
 
+    const TB_NAME_DMS_UNIT_SALE = 'dms_unit_sale';
+
     protected $table = "dealer_refunds";
 
     protected $casts = [
