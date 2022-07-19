@@ -6,6 +6,8 @@ namespace App\Repositories\User;
 
 use App\Models\User\DealerLocationMileageFee;
 use App\Exceptions\NotImplementedException;
+use App\Repositories\Inventory\CategoryRepositoryInterface;
+use Illuminate\Support\Facades\DB;
 
 class DealerLocationMileageFeeRepository implements DealerLocationMileageFeeRepositoryInterface
 {
@@ -15,8 +17,15 @@ class DealerLocationMileageFeeRepository implements DealerLocationMileageFeeRepo
      */
     private $locationMileageFee;
 
-    public function __construct(DealerLocationMileageFee $locationMileageFee) {
+    /**
+     * @var CategoryRepositoryInterface $inventoryCategoryRepository
+     */
+    private $inventoryCategoryRepository;
+
+    public function __construct(DealerLocationMileageFee $locationMileageFee, CategoryRepositoryInterface $inventoryCategoryRepository)
+    {
         $this->locationMileageFee = $locationMileageFee;
+        $this->inventoryCategoryRepository = $inventoryCategoryRepository;
     }
 
     /**
@@ -46,7 +55,11 @@ class DealerLocationMileageFeeRepository implements DealerLocationMileageFeeRepo
      */
     public function getAll($params)
     {
-        throw new NotImplementedException();
+        $query = $this->locationMileageFee->query();
+        if (isset($params['dealer_location_id'])) {
+            $query->where('dealer_location_id', $params['dealer_location_id']);
+        }
+        return $query->get();
     }
 
     /**
@@ -68,5 +81,18 @@ class DealerLocationMileageFeeRepository implements DealerLocationMileageFeeRepo
     public function update($params)
     {
         throw new NotImplementedException();
+    }
+
+    /**
+     * Create Mileage Fee for all Inventory Categories
+     */
+    public function bulkCreate($params)
+    {
+        //upsert is not available for Laravel 6
+        $values = $this->inventoryCategoryRepository->getAll($params)->map(function ($locationMileageFee) use ($params) {
+            return sprintf("(%d,%d,%d)", $params['dealer_location_id'], $locationMileageFee->inventory_category_id, $params['fee_per_mile']);
+        })->join(",");
+        DB::insert(sprintf('INSERT INTO dealer_location_mileage_fee (dealer_location_id, inventory_category_id, fee_per_mile) VALUES %s ON DUPLICATE KEY UPDATE fee_per_mile=%d', $values, $params['fee_per_mile']));
+        return $this->getAll($params);
     }
 }

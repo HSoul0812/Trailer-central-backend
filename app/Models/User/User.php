@@ -36,6 +36,8 @@ use Laravel\Cashier\Billable;
  * @property bool $isCrmActive
  * @property bool $is_dms_active
  * @property string $identifier
+ * @property integer $showroom
+ * @property string $showroom_dealers a PHP serialized object
  *
  * @method static Builder whereIn($column, $values, $boolean = 'and', $not = false)
  */
@@ -274,6 +276,13 @@ class User extends Model implements Authenticatable, PermissionsInterface
     public function crmUser(): HasOneThrough
     {
         return $this->hasOneThrough(CrmUser::class, NewDealerUser::class, 'id', 'user_id', 'dealer_id', 'user_id');
+    }
+
+    public function authToken(): HasOne
+    {
+        return $this
+            ->hasOne(AuthToken::class, 'user_id', 'dealer_id')
+            ->where('user_type', 'dealer');
     }
 
     public function getIsCrmActiveAttribute(): bool

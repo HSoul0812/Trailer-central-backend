@@ -32,19 +32,23 @@ class GetUnitSaleRefundsAction
     /** @var int|null */
     private $customerId;
 
+    /** @var string|null */
+    private $tbName;
+
+    /** @var int|null */
+    private $tbPrimaryId;
+
     /** @var array */
     private $createdAtBetween = [];
 
     /**
      * Fetch the refunds Collection
      *
-     * @param int $unitSaleId
+     * @param int $dealerId
      * @return LengthAwarePaginator
      */
-    public function execute(int $unitSaleId): LengthAwarePaginator
+    public function execute(int $dealerId): LengthAwarePaginator
     {
-        $dealerId = UnitSale::findOrFail($unitSaleId, ['dealer_id'])->dealer_id;
-
         return Refund::query()
             ->with($this->relations)
             ->where('dealer_id', $dealerId)
@@ -57,25 +61,20 @@ class GetUnitSaleRefundsAction
             ->when(!empty($this->createdAtBetween), function (Builder $builder) {
                 $builder->whereBetween('created_at', $this->createdAtBetween);
             })
+            ->when(!empty($this->tbName), function (Builder $builder) {
+                $builder->where('tb_name', $this->tbName);
+            })
+            ->when(!empty($this->tbPrimaryId), function (Builder $builder) {
+                $builder->where('tb_primary_id', $this->tbPrimaryId);
+            })
 
-            // The main condition to match the unit sale id, here we try to
+            // If the API consumer try to match the unit sale id, here we try to
             // match the refund where the invoice for the refund has the unit same
             // unit sale with the one that's provided in this method
-            ->where(function (Builder $builder) use ($unitSaleId) {
-                $builder
-                    // We start by looking at the refund table, match the tb_name
-                    // and tb_primary_id to fund the matched unit sale id
-                    ->where(function (Builder $builder) use ($unitSaleId) {
-                        $builder
-                            ->where('tb_name', UnitSale::getTableName())
-                            ->where('tb_primary_id', $unitSaleId);
-                    })
-
-                    // OR, we'll look for the one that has invoice with the matched unit_sale_id
-                    // this is usual for those refund that has qb_payment as a tb_name
-                    ->orWhereHas('invoice', function (Builder $builder) use ($unitSaleId) {
-                        $builder->where('unit_sale_id', $unitSaleId);
-                    });
+            ->when($this->searchForUnitSale(), function (Builder $builder) {
+                $builder->orWhereHas('invoice', function (Builder $builder) {
+                    $builder->where('unit_sale_id', $this->tbPrimaryId);
+                });
             })
 
             // If the customerId isn't empty, we will find it from the invoice
@@ -89,7 +88,7 @@ class GetUnitSaleRefundsAction
                         })
 
                         // OR, we will look into the dms_unit_sale table, but we also need to filter
-                        // by dealer_id too, so we don't accidentally pick other dealer unit_sale 
+                        // by dealer_id too, so we don't accidentally pick other dealer unit_sale
                         ->orWhereHas('unitSale', function (Builder $builder) use ($dealerId) {
                             $builder
                                 ->where('dealer_id', $dealerId)
@@ -193,6 +192,28 @@ class GetUnitSaleRefundsAction
     }
 
     /**
+     * @param string|null $tbName
+     * @return GetUnitSaleRefundsAction
+     */
+    public function withTbName(?string $tbName): GetUnitSaleRefundsAction
+    {
+        $this->tbName = $tbName;
+
+        return $this;
+    }
+
+    /**
+     * @param int|null $tbPrimaryId
+     * @return GetUnitSaleRefundsAction
+     */
+    public function withTbPrimaryId(?int $tbPrimaryId): GetUnitSaleRefundsAction
+    {
+        $this->tbPrimaryId = $tbPrimaryId;
+
+        return $this;
+    }
+
+    /**
      * Get the orderBy clause
      * @return array
      */
@@ -203,5 +224,13 @@ class GetUnitSaleRefundsAction
         $direction = $this->sort[0] === '-' ? 'desc' : 'asc';
 
         return [$column, $direction];
+    }
+
+    /**
+     * @return bool
+     */
+    private function searchForUnitSale(): bool
+    {
+        return $this->tbName === Refund::TB_NAME_DMS_UNIT_SALE && !empty($this->tbPrimaryId);
     }
 }

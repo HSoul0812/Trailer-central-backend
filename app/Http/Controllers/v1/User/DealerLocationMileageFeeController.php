@@ -6,6 +6,7 @@ namespace App\Http\Controllers\v1\User;
 
 use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\User\CreateDealerLocationMileageFeeRequest;
+use App\Http\Requests\User\CreateBulkDealerLocationMileageFeeRequest;
 use App\Repositories\User\DealerLocationMileageFeeRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Transformers\User\DealerLocationMileageFeeTransformer;
@@ -68,6 +69,24 @@ class DealerLocationMileageFeeController extends RestfulControllerV2
                 $requestData
             );
             return $this->response->item($mileageFee, $this->transformer);
+        }
+        $this->response->errorBadRequest();
+    }
+
+    /**
+     * @param int $locationId
+     * @param Request $request
+     * @return Response
+     */
+    public function bulkCreate(int $locationId, Request $request): Response {
+        $requestData = ['dealer_location_id' => $locationId] + $request->all();
+        $request = new CreateBulkDealerLocationMileageFeeRequest($requestData);
+
+        if($request->validate()) {
+            $mileageFees = $this->dealerLocationMileageFeeRepository->bulkCreate(
+                $requestData
+            );
+            return $this->response->collection($mileageFees, $this->transformer);
         }
         $this->response->errorBadRequest();
     }

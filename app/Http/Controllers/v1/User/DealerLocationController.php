@@ -78,7 +78,7 @@ class DealerLocationController extends RestfulControllerV2 {
                 $params['search_term'] = urldecode($params['search_term']);
             }
             
-            return $this->response->paginator($this->dealerLocation->getAll($params), $this->transformer);
+            return $this->response->paginator($this->service->getAll($params), $this->transformer);
         }
 
         $this->response->errorBadRequest();

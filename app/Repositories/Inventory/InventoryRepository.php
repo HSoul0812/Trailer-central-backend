@@ -164,6 +164,14 @@ class InventoryRepository implements InventoryRepositoryInterface
         '-archived_at' => [
             'field' => 'archived_at',
             'direction' => 'ASC'
+        ],
+        'model' => [
+            'field' => 'model',
+            'direction' => 'DESC'
+        ],
+        '-model' => [
+            'field' => 'model',
+            'direction' => 'ASC'
         ]
     ];
 
@@ -681,6 +689,7 @@ class InventoryRepository implements InventoryRepositoryInterface
                         ->orWhere('inventory.description', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('vin', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('price', 'LIKE', '%' . $params['search_term'] . '%')
+                        ->orWhere('model', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhereHas('floorplanVendor', function ($query) use ($params) {
                             $query->where('name', 'LIKE', '%' . $params['search_term'] . '%');
                         });
