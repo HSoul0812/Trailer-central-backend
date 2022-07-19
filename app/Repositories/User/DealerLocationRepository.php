@@ -277,6 +277,8 @@ class DealerLocationRepository implements DealerLocationRepositoryInterface
 
         if (isset($params['dealer_id'])) {
             $query = $query->where('dealer_id', $params['dealer_id']);
+        } elseif (isset($params['dealer_ids']) && is_array($params['dealer_ids'])) {
+            $query = $query->whereIn('dealer_id', $params['dealer_ids']);
         }
 
         if (isset($params['search_term'])) {

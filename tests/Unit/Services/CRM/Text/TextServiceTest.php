@@ -147,6 +147,12 @@ class TextServiceTest extends TestCase
             ->once()
             ->andReturn(self::TEST_PREFERRED_LOCATION);
 
+        $this->numberRepositoryMock
+            ->shouldReceive('activeTwilioNumberByCustomerNumber')
+            ->once()
+            ->with(self::TEST_TO_NUMBER)
+            ->andReturn(null);
+
         $this->dealerLocationRepositoryMock
             ->shouldReceive('findDealerNumber')
             ->once()
@@ -182,6 +188,111 @@ class TextServiceTest extends TestCase
             ->with([
                 'lead_id'     => self::TEST_LEAD_IDENTIFIER,
                 'from_number' => self::TEST_FROM_NUMBER,
+                'to_number'   => self::TEST_TO_NUMBER,
+                'log_message' => self::TEST_MESSAGE,
+                'files'       => []
+            ])
+            ->andReturn($textLogMock);
+
+        $this->textRepositoryMock
+            ->shouldReceive('commitTransaction')
+            ->once()
+            ->withNoArgs();
+
+        /** @var TextServiceInterface $service */
+        $service = $this->app->make(TextServiceInterface::class);
+        $this->prepareFileService($service);
+
+        $result = $service->send(self::TEST_LEAD_IDENTIFIER, self::TEST_MESSAGE);
+
+        $this->assertEquals($textLogMock, $result);
+    }
+
+    /**
+     * @group CRM
+     * @covers ::send
+     * @dataProvider sendParamsProvider
+     *
+     * @param Lead|Mockery\MockInterface|Mockery\LegacyMockInterface $lead
+     * @param NewDealerUser|Mockery\MockInterface|Mockery\LegacyMockInterface $newDealerUser
+     * @param CrmUser|Mockery\MockInterface|Mockery\LegacyMockInterface $crmUser
+     * @return void
+     */
+    public function testSendWithActiveNumber($lead, $newDealerUser, $crmUser)
+    {
+        /** @var Number $activeNumber */
+        $activeNumber = $this->getEloquentMock(Number::class);
+        $activeNumber->dealer_number = 99999999;
+
+        $textLogMock = $this->getEloquentMock(TextLog::class);
+
+        $this->leadRepositoryMock
+            ->shouldReceive('get')
+            ->once()
+            ->with(['id' => self::TEST_LEAD_IDENTIFIER])
+            ->andReturn($lead);
+
+        $lead->shouldReceive('newDealerUser')
+            ->once()
+            ->withNoArgs()
+            ->andReturn($newDealerUser);
+
+        $newDealerUser->shouldReceive('first')
+            ->once()
+            ->withNoArgs()
+            ->andReturn($newDealerUser);
+
+        $crmUser->shouldReceive('getFullNameAttribute')
+            ->once()
+            ->andReturn(self::TEST_FULL_NAME);
+
+        $lead->shouldReceive('getTextPhoneAttribute')
+            ->once()
+            ->andReturn(self::TEST_TO_NUMBER);
+
+        $lead->shouldReceive('getPreferredLocationAttribute')
+            ->once()
+            ->andReturn(self::TEST_PREFERRED_LOCATION);
+
+        $this->numberRepositoryMock
+            ->shouldReceive('activeTwilioNumberByCustomerNumber')
+            ->once()
+            ->with(self::TEST_TO_NUMBER)
+            ->andReturn($activeNumber);
+
+        $this->dealerLocationRepositoryMock
+            ->shouldReceive('findDealerNumber')
+            ->never();
+
+        $this->fileServiceMock
+            ->shouldReceive('bulkUpload')
+            ->never();
+
+        $this->textRepositoryMock
+            ->shouldReceive('beginTransaction')
+            ->once()
+            ->withNoArgs();
+
+        $this->twilioServiceMock
+            ->shouldReceive('send')
+            ->once()
+            ->with($activeNumber->dealer_number, self::TEST_TO_NUMBER, self::TEST_MESSAGE, self::TEST_FULL_NAME, []);
+
+        $this->statusRepositoryMock
+            ->shouldReceive('createOrUpdate')
+            ->once()
+            ->with(Mockery::on(function($params) {
+                return isset($params['lead_id']) && $params['lead_id'] === self::TEST_LEAD_IDENTIFIER
+                    && isset($params['status']) && $params['status'] === Lead::STATUS_MEDIUM
+                    && isset($params['next_contact_date']) && strtotime($params['next_contact_date']);
+            }));
+
+        $this->textRepositoryMock
+            ->shouldReceive('create')
+            ->once()
+            ->with([
+                'lead_id'     => self::TEST_LEAD_IDENTIFIER,
+                'from_number' => $activeNumber->dealer_number,
                 'to_number'   => self::TEST_TO_NUMBER,
                 'log_message' => self::TEST_MESSAGE,
                 'files'       => []
@@ -258,6 +369,12 @@ class TextServiceTest extends TestCase
         $lead->shouldReceive('getPreferredLocationAttribute')
             ->once()
             ->andReturn(self::TEST_PREFERRED_LOCATION);
+
+        $this->numberRepositoryMock
+            ->shouldReceive('activeTwilioNumberByCustomerNumber')
+            ->once()
+            ->with(self::TEST_TO_NUMBER)
+            ->andReturn(null);
 
         $this->dealerLocationRepositoryMock
             ->shouldReceive('findDealerNumber')
@@ -428,6 +545,12 @@ class TextServiceTest extends TestCase
             ->once()
             ->andReturn(self::TEST_PREFERRED_LOCATION);
 
+        $this->numberRepositoryMock
+            ->shouldReceive('activeTwilioNumberByCustomerNumber')
+            ->once()
+            ->with(self::TEST_TO_NUMBER)
+            ->andReturn(null);
+
         $this->dealerLocationRepositoryMock
             ->shouldReceive('findDealerNumber')
             ->once()
@@ -500,6 +623,12 @@ class TextServiceTest extends TestCase
         $lead->shouldReceive('getPreferredLocationAttribute')
             ->once()
             ->andReturn(self::TEST_PREFERRED_LOCATION);
+
+        $this->numberRepositoryMock
+            ->shouldReceive('activeTwilioNumberByCustomerNumber')
+            ->once()
+            ->with(self::TEST_TO_NUMBER)
+            ->andReturn(null);
 
         $this->dealerLocationRepositoryMock
             ->shouldReceive('findDealerNumber')
@@ -580,19 +709,19 @@ class TextServiceTest extends TestCase
         $this->twilioServiceMock
             ->shouldReceive('sendViaTwilio')
             ->once()
-            ->with($params['To'], $activeNumber->dealer_number, $params['Body'], []);
+            ->with($params['To'], $activeNumber->customer_number, $params['Body'], []);
 
         $this->textRepositoryMock
             ->shouldReceive('findByFromNumberToNumber')
             ->once()
-            ->with($activeNumber->dealer_number, $params['From'])
+            ->with($activeNumber->customer_number, $params['From'])
             ->andReturn($textLogs);
 
         $this->textRepositoryMock
             ->shouldReceive('create')
             ->with(Mockery::on(function($creatParams) use ($activeNumber, $params) {
                 return isset($creatParams['from_number']) && $creatParams['from_number'] === $params['From']
-                    && isset($creatParams['to_number']) && $creatParams['to_number'] === $activeNumber->dealer_number
+                    && isset($creatParams['to_number']) && $creatParams['to_number'] === $activeNumber->customer_number
                     && isset($creatParams['log_message']) && $creatParams['log_message'] === $params['Body']
                     && isset($creatParams['date_sent']) && strtotime($creatParams['date_sent'])
                     && isset($creatParams['files']) && $creatParams['files'] === [];
@@ -685,19 +814,19 @@ class TextServiceTest extends TestCase
         $this->twilioServiceMock
             ->shouldReceive('sendViaTwilio')
             ->once()
-            ->with($params['To'], $activeNumber->dealer_number, $params['Body'], [$url1, $url2]);
+            ->with($params['To'], $activeNumber->customer_number, $params['Body'], [$url1, $url2]);
 
         $this->textRepositoryMock
             ->shouldReceive('findByFromNumberToNumber')
             ->once()
-            ->with($activeNumber->dealer_number, $params['From'])
+            ->with($activeNumber->customer_number, $params['From'])
             ->andReturn($textLogs);
 
         $this->textRepositoryMock
             ->shouldReceive('create')
             ->with(Mockery::on(function($creatParams) use ($activeNumber, $params, $expectedFilesArray) {
                 return isset($creatParams['from_number']) && $creatParams['from_number'] === $params['From']
-                    && isset($creatParams['to_number']) && $creatParams['to_number'] === $activeNumber->dealer_number
+                    && isset($creatParams['to_number']) && $creatParams['to_number'] === $activeNumber->customer_number
                     && isset($creatParams['log_message']) && $creatParams['log_message'] === $params['Body']
                     && isset($creatParams['date_sent']) && strtotime($creatParams['date_sent'])
                     && isset($creatParams['files']) && $creatParams['files'] === $expectedFilesArray;
@@ -765,19 +894,19 @@ class TextServiceTest extends TestCase
         $this->twilioServiceMock
             ->shouldReceive('sendViaTwilio')
             ->once()
-            ->with($params['To'], $activeNumber->dealer_number, $params['Body'], []);
+            ->with($params['To'], $activeNumber->customer_number, $params['Body'], []);
 
         $this->textRepositoryMock
             ->shouldReceive('findByFromNumberToNumber')
             ->once()
-            ->with($activeNumber->dealer_number, $params['From'])
+            ->with($activeNumber->customer_number, $params['From'])
             ->andReturn($textLogs);
 
         $this->textRepositoryMock
             ->shouldReceive('create')
             ->with(Mockery::on(function($creatParams) use ($activeNumber, $params) {
                 return isset($creatParams['from_number']) && $creatParams['from_number'] === $params['From']
-                    && isset($creatParams['to_number']) && $creatParams['to_number'] === $activeNumber->dealer_number
+                    && isset($creatParams['to_number']) && $creatParams['to_number'] === $activeNumber->customer_number
                     && isset($creatParams['log_message']) && $creatParams['log_message'] === $params['Body']
                     && isset($creatParams['date_sent']) && strtotime($creatParams['date_sent'])
                     && isset($creatParams['files']) && $creatParams['files'] === [];
@@ -858,19 +987,19 @@ class TextServiceTest extends TestCase
         $this->twilioServiceMock
             ->shouldReceive('sendViaTwilio')
             ->once()
-            ->with($params['To'], $activeNumber->customer_number, $expectedMessages, []);
+            ->with($params['To'], $activeNumber->dealer_number, $expectedMessages, []);
 
         $this->textRepositoryMock
             ->shouldReceive('findByFromNumberToNumber')
             ->once()
-            ->with($activeNumber->customer_number, $params['From'])
+            ->with($activeNumber->dealer_number, $params['From'])
             ->andReturn($textLogs);
 
         $this->textRepositoryMock
             ->shouldReceive('create')
             ->with(Mockery::on(function($creatParams) use ($activeNumber, $params, $expectedMessages) {
                 return isset($creatParams['from_number']) && $creatParams['from_number'] === $params['From']
-                    && isset($creatParams['to_number']) && $creatParams['to_number'] === $activeNumber->customer_number
+                    && isset($creatParams['to_number']) && $creatParams['to_number'] === $activeNumber->dealer_number
                     && isset($creatParams['log_message']) && $creatParams['log_message'] === $expectedMessages
                     && isset($creatParams['date_sent']) && strtotime($creatParams['date_sent'])
                     && isset($creatParams['files']) && $creatParams['files'] === [];

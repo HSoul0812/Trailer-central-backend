@@ -2,8 +2,8 @@
 
 namespace App\Services\CRM\Leads\Import;
 
-use App\Models\CRM\Leads\Lead;
 use App\Models\User\User;
+use App\Services\CRM\Leads\DTOs\ADFLead;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 
 /**
@@ -21,7 +21,7 @@ interface ImportTypeInterface
     /**
      * @param User $dealer
      * @param ParsedEmail $parsedEmail
-     * @return Lead
+     * @return ADFLead
      */
-    public function import(User $dealer, ParsedEmail $parsedEmail): Lead;
+    public function getLead(User $dealer, ParsedEmail $parsedEmail): ADFLead;
 }

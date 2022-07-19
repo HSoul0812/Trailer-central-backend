@@ -11,6 +11,8 @@ use App\Models\Observers\CRM\Interactions\FbMessageObserver;
 use App\Models\Observers\CRM\Interactions\TextLogObserver;
 use App\Repositories\CRM\Interactions\InteractionMessageRepository;
 use App\Repositories\CRM\Interactions\InteractionMessageRepositoryInterface;
+use App\Repositories\CRM\Text\TextLogFileRepository;
+use App\Repositories\CRM\Text\TextLogFileRepositoryInterface;
 use App\Services\CRM\Interactions\InteractionMessageService;
 use App\Services\CRM\Interactions\InteractionMessageServiceInterface;
 use App\Services\CRM\Text\TextService;
@@ -107,9 +109,9 @@ class InteractionServiceProvider extends ServiceProvider
         $this->app->bind(WebhookServiceInterface::class, WebhookService::class);
         $this->app->bind(InteractionMessageServiceInterface::class, InteractionMessageService::class);
 
-
         // Text Repositories
         $this->app->bind(TextRepositoryInterface::class, TextRepository::class);
+        $this->app->bind(TextLogFileRepositoryInterface::class, TextLogFileRepository::class);
         $this->app->bind(TextTemplateRepositoryInterface::class, TextTemplateRepository::class);
         $this->app->bind(TextCampaignRepositoryInterface::class, TextCampaignRepository::class);
         $this->app->bind(TextBlastRepositoryInterface::class, TextBlastRepository::class);

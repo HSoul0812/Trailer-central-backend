@@ -94,9 +94,16 @@ return [
             'vehicleyearDropdown' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_YEAR', '[aria-label="Year"]'),
             'vehicleYearList' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_YEAR_LIST', '[role="option"]'),
 
-            'vehicleMake' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_MAKE', '[aria-label="Make"] input'),
-            'vehicleModel' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_MODEL', '[aria-label="Model"] input'),
+            'vehicleMakeText' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_MAKE', '[aria-label="Make"] input'),
+            'vehicleMakeDropdown' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_MAKE_DROPDOWN', '[aria-label="Make"]'),
+            'vehicleMakeDropdownList' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_MAKE_DROPDOWN_LIST', '[role="option"]'),
+            'vehicleModelText' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_MODEL', '[aria-label="Model"] input'),
+            'vehicleModelDropdown' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_MODEL_DROPDOWN', '[aria-label="Model"]'),
+            'vehicleModelDropdownList' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_MODEL_DROPDOWN_LIST', '[role="option"]'),
+
             'vehiclePrice' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_PRICE', '[aria-label="Price"] input'),
+
+            'vehicleMileage' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_MILEAGE', '[aria-label="Mileage"] input'),
 
             'vehicleExteriorColor' => explode(',', env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_EXTERIOR_COLOR', '[aria-label="Exterior color"],[aria-label="Exterior colour"]')),
             'vehicleExteriorColorList' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_EXTERIOR_COLOR_LIST', '[role="option"]'),
@@ -104,7 +111,7 @@ return [
             'vehicleInteriorColor' => explode(',', env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_INTERIOR_COLOR', '[aria-label="Interior color"],[aria-label="Interior colour"]')),
             'vehicleInteriorColorList' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_INTERIOR_COLOR_LIST', '[role="option"]'),
 
-            'vehicleFuelType' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_FUEL_TYPE', '[aria-label="Fuel typeello'),
+            'vehicleFuelType' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_FUEL_TYPE', '[aria-label="Fuel type"]'),
             'vehicleFuelTypeList' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_FUEL_TYPE_LIST', '[role="option"]'),
 
             'vehicleDescription' => env('FB_MARKETING_SELECTORS_POSTING_VEHICLE_DESCRIPTION', '[aria-label="Description"] textarea'),

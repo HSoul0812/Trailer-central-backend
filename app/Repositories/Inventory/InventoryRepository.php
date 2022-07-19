@@ -33,6 +33,8 @@ class InventoryRepository implements InventoryRepositoryInterface
     private const SHOW_UNITS_WITH_TRUE_COST = 1;
     private const DO_NOT_SHOW_UNITS_WITH_TRUE_COST = 0;
 
+    private const DIMENSION_SEARCH_TERM_PATTERN = '/\d+\.?\d*\s*[\'|\"]/m';
+
 
     private $sortOrders = [
         'title' => [
@@ -467,15 +469,27 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         if (isset($params['search_term'])) {
-            $query = $query->where(function ($q) use ($params) {
-                $q->where('stock', 'LIKE', '%' . $params['search_term'] . '%')
+            if(preg_match(self::DIMENSION_SEARCH_TERM_PATTERN, $params['search_term'])){
+                $params['search_term'] = floatval(trim($params['search_term'],' \'"'));
+                $query = $query->where(function ($q) use ($params) {
+                    $q->where('length', $params['search_term'])
+                        ->orWhere('width', $params['search_term'])
+                        ->orWhere('height', $params['search_term'])
+                        ->orWhere('length_inches', $params['search_term'])
+                        ->orWhere('width_inches', $params['search_term'])
+                        ->orWhere('height_inches', $params['search_term']);
+                });
+            }else {
+                $query = $query->where(function ($q) use ($params) {
+                    $q->where('stock', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('title', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('description', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('vin', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhereHas('floorplanVendor', function ($query) use ($params) {
                             $query->where('name', 'LIKE', '%' . $params['search_term'] . '%');
                         });
-            });
+                });
+            }
         }
 
         if (isset($params['sort'])) {
@@ -621,8 +635,19 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         if (isset($params['search_term'])) {
-            $query = $query->where(function ($q) use ($params) {
-                $q->where('stock', 'LIKE', '%' . $params['search_term'] . '%')
+            if(preg_match(self::DIMENSION_SEARCH_TERM_PATTERN, $params['search_term'])){
+                $params['search_term'] = floatval(trim($params['search_term'],' \'"'));
+                $query = $query->where(function ($q) use ($params) {
+                    $q->where('length', $params['search_term'])
+                        ->orWhere('width', $params['search_term'])
+                        ->orWhere('height', $params['search_term'])
+                        ->orWhere('length_inches', $params['search_term'])
+                        ->orWhere('width_inches', $params['search_term'])
+                        ->orWhere('height_inches', $params['search_term']);
+                });
+            }else{
+                $query = $query->where(function ($q) use ($params) {
+                    $q->where('stock', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('title', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('inventory.description', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('vin', 'LIKE', '%' . $params['search_term'] . '%')
@@ -630,7 +655,8 @@ class InventoryRepository implements InventoryRepositoryInterface
                         ->orWhereHas('floorplanVendor', function ($query) use ($params) {
                             $query->where('name', 'LIKE', '%' . $params['search_term'] . '%');
                         });
-            });
+                });
+            }
         }
 
         if (isset($params['images_greater_than'])) {

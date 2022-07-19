@@ -37,7 +37,7 @@ return [
     'channels' => [
         'stack' => [
             'driver' => 'stack',
-            'channels' => ['single', 'slack'],
+            'channels' => ['single', 'slack', 'sentry'],
             'ignore_exceptions' => false,
         ],
 
@@ -69,6 +69,14 @@ return [
         'autoassign' => [
             'driver' => 'daily',
             'path' => storage_path('logs/commands/auto-assign.log'),
+            'level' => 'debug',
+            'days' => 3,
+            'permission' => 0664,
+        ],
+
+        'scraperepliesjob' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/commands/scrape-replies-job.log'),
             'level' => 'debug',
             'days' => 3,
             'permission' => 0664,
@@ -229,7 +237,9 @@ return [
         ],
 
         'showroom-imports' => [
+            'driver' => 'daily',
             'path' => storage_path('logs/showroom-imports.log'),
+            'days' => 3,
             'permission' => 0664,
         ],
         'blog' => [
@@ -238,6 +248,10 @@ return [
             'level' => 'debug',
             'days' => 3,
             'permission' => 0664,
+        ],
+        'sentry' => [
+            'driver' => 'sentry',
+            'level' => env('SENTRY_LOG_LEVEL', 'error')
         ],
     ],
 

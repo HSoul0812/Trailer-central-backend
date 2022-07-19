@@ -46,17 +46,17 @@ class ADFService implements ImportTypeInterface
      *
      * @param User $dealer
      * @param ParsedEmail $parsedEmail
-     * @return Lead
+     * @return ADFLead
      * @throws InvalidImportFormatException
      */
-    public function import(User $dealer, ParsedEmail $parsedEmail): Lead
+    public function getLead(User $dealer, ParsedEmail $parsedEmail): ADFLead
     {
         $crawler = $this->validateAdf($parsedEmail->getBody());
 
         $adf = $this->parseAdf($dealer, $crawler);
         Log::info('Parsed ADF Lead ' . $adf->getFullName() . ' For Dealer ID #' . $adf->getDealerId());
 
-        return $this->importLead($adf);
+        return $adf;
     }
 
     /**
@@ -69,7 +69,7 @@ class ADFService implements ImportTypeInterface
         $crawler = new Crawler($fixed);
         $adf = $crawler->filter('adf')->first();
 
-        return $adf->count() >= 1 && !empty($adf->nodeName()) && ($adf->nodeName() === 'adf');
+        return $adf->count() >= 1 && !empty($adf->nodeName()) && $adf->nodeName() === 'adf';
     }
 
     /**
@@ -129,40 +129,6 @@ class ADFService implements ImportTypeInterface
 
         // Get ADF Lead
         return $adfLead;
-    }
-
-    /**
-     * Import ADF as Lead
-     *
-     * @param ADFLead $adfLead
-     * @return Lead
-     */
-    public function importLead(ADFLead $adfLead): Lead {
-        // Save Lead From ADF Data
-        return $this->leads->create([
-            'website_id' => $adfLead->getWebsiteId(),
-            'dealer_id' => $adfLead->getDealerId(),
-            'dealer_location_id' => $adfLead->getLocationId(),
-            'inventory_id' => $adfLead->getVehicleId(),
-            'lead_type' => $adfLead->getLeadType(),
-            'referral' => 'adf',
-            'title' => 'ADF Import',
-            'first_name' => $adfLead->getFirstName(),
-            'last_name' => $adfLead->getLastName(),
-            'email_address' => $adfLead->getEmail(),
-            'phone_number' => $adfLead->getPhone(),
-            'preferred_contact' => $adfLead->getPreferredContact(),
-            'address' => $adfLead->getAddrStreet(),
-            'city' => $adfLead->getAddrCity(),
-            'state' => $adfLead->getAddrState(),
-            'zip' => $adfLead->getAddrZip(),
-            'comments' => $adfLead->getComments(),
-            'contact_email_sent' => $adfLead->getRequestDate(),
-            'adf_email_sent' => $adfLead->getRequestDate(),
-            'cdk_email_sent' => 1,
-            'date_submitted' => $adfLead->getRequestDate(),
-            'lead_source' => $adfLead->getVendorProvider()
-        ]);
     }
 
     /**

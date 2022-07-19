@@ -18,6 +18,8 @@ use App\Services\CRM\Email\InquiryEmailService;
 use App\Services\CRM\Email\InquiryEmailServiceInterface;
 use App\Services\CRM\Leads\Import\ImportService;
 use App\Services\CRM\Leads\Import\ImportServiceInterface;
+use App\Services\CRM\Leads\LeadStatusService;
+use App\Services\CRM\Leads\LeadStatusServiceInterface;
 use App\Services\CRM\Text\InquiryTextService;
 use App\Services\CRM\Text\InquiryTextServiceInterface;
 use App\Services\CRM\Leads\InquiryServiceInterface;
@@ -90,6 +92,7 @@ class CrmServiceProvider extends ServiceProvider
         $this->app->bind(CustomerInventoryRepositoryInterface::class, CustomerInventoryRepository::class);
         $this->app->bind(DealerDocumentsRepositoryInterface::class, DealerDocumentsRepository::class);
         $this->app->bind(LeadTradeRepositoryInterface::class, LeadTradeRepository::class);
+        $this->app->bind(LeadStatusServiceInterface::class, LeadStatusService::class);
 
         $this->app->bind(RefundRepositoryInterface::class, function () {
             return new RefundRepository(Refund::query());

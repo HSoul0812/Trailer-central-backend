@@ -46,6 +46,12 @@ $api->version('v1', function ($route) {
         $route->post('ecommerce/orders', 'App\Http\Controllers\v1\Ecommerce\CompletedOrderController@create');
     });
 
+    // Utils
+    $route->group([
+        'prefix' => 'utils',
+    ], function($route) {
+        $route->get('/ip', 'App\Http\Controllers\v1\Marketing\Utils\NetworkController@getIp');
+    });
 
     $route->group(['middleware' => 'textrail.webhook.validate'], function ($route) {
         $route->post('ecommerce/orders/{textrail_order_id}/approve', 'App\Http\Controllers\v1\Ecommerce\CompletedOrderController@markAsApproved')->where('textrail_order_id', '[0-9]+');
@@ -608,6 +614,17 @@ $api->version('v1', function ($route) {
     */
     $route->get('user/interactions/tasks/sort-fields', 'App\Http\Controllers\v1\CRM\Interactions\TasksController@sortFields');
 
+    /*
+    |--------------------------------------------------------------------------
+    | Dealers
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+    $route->get('users', 'App\Http\Controllers\v1\User\UserController@index');
+    $route->post('users', 'App\Http\Controllers\v1\User\UserController@create');
+
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
         /*
         |--------------------------------------------------------------------------
@@ -942,8 +959,8 @@ $api->version('v1', function ($route) {
                     'prefix' => 'template',
                     'middleware' => 'emailbuilder.template.validate'
                 ], function ($route) {
-                    /*$route->get('/', 'App\Http\Controllers\v1\CRM\Email\TemplateController@index');
-                    $route->put('/', 'App\Http\Controllers\v1\CRM\Email\TemplateController@create');
+                    $route->get('/', 'App\Http\Controllers\v1\CRM\Email\TemplateController@index');
+                    /*$route->put('/', 'App\Http\Controllers\v1\CRM\Email\TemplateController@create');
                     $route->get('{id}', 'App\Http\Controllers\v1\CRM\Email\TemplateController@show')->where('id', '[0-9]+');
                     $route->post('{id}', 'App\Http\Controllers\v1\CRM\Email\TemplateController@update')->where('id', '[0-9]+');
                     $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Email\TemplateController@destroy')->where('id', '[0-9]+');*/
@@ -955,8 +972,8 @@ $api->version('v1', function ($route) {
                     'prefix' => 'campaign',
                     'middleware' => 'emailbuilder.campaign.validate'
                 ], function ($route) {
-                    /*$route->get('/', 'App\Http\Controllers\v1\CRM\Email\CampaignController@index');
-                    $route->put('/', 'App\Http\Controllers\v1\CRM\Email\CampaignController@create');
+                    $route->get('/', 'App\Http\Controllers\v1\CRM\Email\CampaignController@index');
+                    /*$route->put('/', 'App\Http\Controllers\v1\CRM\Email\CampaignController@create');
                     $route->get('{id}', 'App\Http\Controllers\v1\CRM\Email\CampaignController@show')->where('id', '[0-9]+');
                     $route->post('{id}', 'App\Http\Controllers\v1\CRM\Email\CampaignController@update')->where('id', '[0-9]+');
                     $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Email\CampaignController@destroy')->where('id', '[0-9]+');*/
@@ -968,8 +985,8 @@ $api->version('v1', function ($route) {
                     'prefix' => 'blast',
                     'middleware' => 'emailbuilder.blast.validate'
                 ], function ($route) {
-                    /*$route->get('/', 'App\Http\Controllers\v1\CRM\Email\BlastController@index');
-                    $route->put('/', 'App\Http\Controllers\v1\CRM\Email\BlastController@create');
+                    $route->get('/', 'App\Http\Controllers\v1\CRM\Email\BlastController@index');
+                    /*$route->put('/', 'App\Http\Controllers\v1\CRM\Email\BlastController@create');
                     $route->get('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@show')->where('id', '[0-9]+');
                     $route->post('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@update')->where('id', '[0-9]+');
                     $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@destroy')->where('id', '[0-9]+');*/
@@ -1104,6 +1121,7 @@ $api->version('v1', function ($route) {
                 $route->delete('{id}', 'App\Http\Controllers\v1\Marketing\Facebook\MarketplaceController@destroy')->where('id', '[0-9]+');
                 $route->put('{id}/dismiss', 'App\Http\Controllers\v1\Marketing\Facebook\MarketplaceController@dismiss')->where('id', '[0-9]+');
             });
+
         });
     });
 
@@ -1443,4 +1461,5 @@ $api->version('v1', function ($route) {
             $route->post('verify', 'App\Http\Controllers\v1\Webhook\TwilioController@verify');
         });
     });
+
 });
