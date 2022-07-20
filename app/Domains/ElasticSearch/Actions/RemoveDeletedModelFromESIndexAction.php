@@ -192,7 +192,12 @@ class RemoveDeletedModelFromESIndexAction
         $toRemoveDocumentIds = [];
 
         foreach ($searchResult as $result) {
-            if ($result['model'] !== null) {
+            // We want to keep only the result that has model record
+            // AND that model record need to have deleted_at = null
+            // we'll use data_get here so if the model doesn't have soft-delete
+            // then it'd still work, basically no need to check for array
+            // key existence
+            if ($result['model'] !== null && data_get($result, 'model.deleted_at') === null) {
                 continue;
             }
 

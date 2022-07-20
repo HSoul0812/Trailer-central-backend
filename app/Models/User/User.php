@@ -36,6 +36,8 @@ use Laravel\Cashier\Billable;
  * @property bool $isCrmActive
  * @property bool $is_dms_active
  * @property string $identifier
+ * @property integer $showroom
+ * @property string $showroom_dealers a PHP serialized object
  *
  * @method static Builder whereIn($column, $values, $boolean = 'and', $not = false)
  */
@@ -276,6 +278,13 @@ class User extends Model implements Authenticatable, PermissionsInterface
         return $this->hasOneThrough(CrmUser::class, NewDealerUser::class, 'id', 'user_id', 'dealer_id', 'user_id');
     }
 
+    public function authToken(): HasOne
+    {
+        return $this
+            ->hasOne(AuthToken::class, 'user_id', 'dealer_id')
+            ->where('user_type', 'dealer');
+    }
+
     public function getIsCrmActiveAttribute(): bool
     {
         $crmUser = $this->crmUser()->first();
@@ -329,20 +338,20 @@ class User extends Model implements Authenticatable, PermissionsInterface
     {
         return $this->hasOne(Settings::class, 'dealer_id', 'dealer_id');
     }
-    
+
     public function bins() : HasMany
     {
         return $this->hasMany(Bin::class, 'dealer_id', 'dealer_id');
     }
 
-    public function getCrmLoginUrl(string $route = '')
+    public function getCrmLoginUrl(string $route = '', bool $useNewDesign = false): string
     {
         $userService = app(UserService::class);
         $crmLoginString = $userService->getUserCrmLoginUrl($this->getAuthIdentifier());
         if ($route) {
             $crmLoginString .= '&r='.$route;
         }
-        return $crmLoginString;
+        return ($useNewDesign ? config('app.new_design_crm_url') : '') . $crmLoginString;
     }
 
     public function isSecondaryUser() : bool
