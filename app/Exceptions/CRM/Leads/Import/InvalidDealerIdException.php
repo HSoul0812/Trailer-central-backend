@@ -3,7 +3,7 @@
 namespace App\Exceptions\CRM\Leads\Import;
 
 /**
- * Class InvalidAdfDealerIdException
+ * Class InvalidDealerIdException
  *
  * Use this instead of \Exception to throw any kind of missing adf Dealer ID exception
  *

@@ -3,7 +3,7 @@
 namespace App\Exceptions\CRM\Leads\Import;
 
 /**
- * Class InvalidAdfImportFormatException
+ * Class InvalidImportFormatException
  *
  * Use this instead of \Exception to throw any kind of missing adf email access token
  *
