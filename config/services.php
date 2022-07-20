@@ -46,6 +46,19 @@ return [
     ],
 
     'google' => [
-        'key' => env('GOOGLE_API_KEY', ''),
-    ]
+        'map' => [
+            'key' => env('GOOGLE_MAP_API_KEY', '')
+        ],
+        'captcha' => [
+            'key' => env('GOOGLE_CAPTCHA_API_KEY', '')
+        ],
+        'client_id' => env('GOOGLE_AUTH_CLIENT_ID', ''),
+        'client_secret' => env('GOOGLE_AUTH_CLIENT_SECRET', ''),
+        'redirect' => '/api/user/auth/google/callback'
+    ],
+    'facebook' => [
+        'client_id' => env('FACEBOOK_AUTH_CLIENT_ID', ''),
+        'client_secret' => env('FACEBOOK_AUTH_CLIENT_SECRET', ''),
+        'redirect' => '/api/user/auth/facebook/callback'
+    ],
 ];

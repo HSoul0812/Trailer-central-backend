@@ -9,7 +9,7 @@ class GoogleCaptchaService implements CaptchaServiceInterface
 {
     const API_URL = "https://www.google.com/recaptcha/api/siteverify";
     public function validate(string $response, string $remoteIp = null): bool {
-        $secret = config('');
+        $secret = config('google.captcha.key');
         $httpClient = new Client();
         $response = $httpClient->post(self::API_URL, [
             'form_params' => [
