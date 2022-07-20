@@ -107,7 +107,7 @@ class ImportService implements ImportServiceInterface
             $email->setBody($mailId->getHTMLBody());
             //---------------------------------------------------------------------------------------
 
-            try {
+            //try {
                 $neededService = null;
 
                 foreach ($this->services as $service) {
@@ -141,7 +141,7 @@ class ImportService implements ImportServiceInterface
                     $total++;
                 }
 
-            } catch(InvalidDealerIdException $e) {
+/*            } catch(InvalidDealerIdException $e) {
                 if(!empty($dealerId) && is_numeric($dealerId)) {
                     //$this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.unmapped')], [$inbox]);
                 } else {
@@ -153,7 +153,7 @@ class ImportService implements ImportServiceInterface
                 Log::error("Exception returned on Import Message #{$mailId} {$e->getMessage()}: {$e->getTraceAsString()}");
             } catch(\Exception $e) {
                 Log::error("Exception returned on Import Message #{$mailId} {$e->getMessage()}: {$e->getTraceAsString()}");
-            }
+            }*/
         }
 
         return $total;
