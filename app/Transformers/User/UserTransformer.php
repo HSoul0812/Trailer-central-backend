@@ -23,9 +23,9 @@ class UserTransformer extends TransformerAbstract
              'name' => $user->name ?? $user->user->name,
              'email' => $user->email ?? $user->user->email,
              'primary_email' => $user->user ? $user->user->email : $user->email,
-             'is_crm_active' => $user->is_crm_active,
-             'is_parts_active' => $user->is_parts_active,
-             'is_marketing_active' => $user->is_marketing_active,
+             'is_crm_active' => $user->is_crm_active ?? $user->user->is_crm_active,
+             'is_parts_active' => $user->is_parts_active ?? $user->user->is_parts_active,
+             'is_marketing_active' => $user->is_marketing_active ?? $user->user->is_marketing_active,
              'profile_image' => config('user.profile.image'),
              'website' => $user->website
         ];
