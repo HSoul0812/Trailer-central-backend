@@ -2,10 +2,10 @@
 
 namespace App\Nova\Resources\Facebook;
 
+use App\Nova\Actions\Dealer\ClearFBMEErrors;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Text;
-use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Fields\DateTime;
 use App\Nova\Resource;
 
@@ -111,13 +111,14 @@ class FBMarketplaceAccounts extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param Request $request
      * @return array
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
-    public function actions(Request $request): array
+    public function actions(Request $request)
     {
-        return [];
+        return [
+            app()->make(ClearFBMEErrors::class),
+        ];
     }
 
     public static function authorizedToCreate(Request $request)

@@ -3,6 +3,7 @@
 namespace App\Models\CRM\Dealer;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Marketing\Facebook\Error as FBError;
 
 class DealerFBMOverview extends Model
 {
@@ -11,4 +12,8 @@ class DealerFBMOverview extends Model
     protected $dates = [
         'last_run_ts'
     ];
+
+    public function clearErrors() {
+        FBError::where('markeplace_id', $this->marketplace_id)->where('dismissed', false)->update(['dismissed'=>true]);
+    }
 }
