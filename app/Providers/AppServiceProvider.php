@@ -216,6 +216,8 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('valid_include', 'App\Rules\ValidInclude@validate');
         \Validator::extend('location_belongs_to_dealer', 'App\Rules\Locations\LocationBelongsToDealer@passes');
         \Validator::extend('bin_belongs_to_dealer', 'App\Rules\Bins\BinBelongsToDealer@passes');
+        \Validator::extend('valid_location_email', 'App\Rules\DealerLocation\EmailValid@passes');
+        \Validator::extend('valid_password', 'App\Rules\User\ValidPassword@passes');
 
         Builder::macro('whereLike', function($attributes, string $searchTerm) {
             foreach(array_wrap($attributes) as $attribute) {

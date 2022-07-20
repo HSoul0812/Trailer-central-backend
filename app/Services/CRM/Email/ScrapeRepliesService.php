@@ -220,7 +220,11 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             // Refresh Token
             $this->log->info('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
                                 ' - Validating token #' . $salesperson->active_token->id);
-            $this->auth->validate($salesperson->active_token);
+            try {
+                $this->auth->validate($salesperson->active_token);
+            } catch (\Exception $e) {
+                $this->salespeople->update(['id' => $salesperson->id, 'imap_failed' => 1]);
+            }
         }
 
         // Process Messages
@@ -235,7 +239,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 $imports = $this->folder($dealer, $salesperson, $folder);
                 $this->log->info('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
                                     ' - Finished Importing ' . $imports .
-                                    ' Replies for Folder' . $folder->name . ' in ' . 
+                                    ' Replies for Folder ' . $folder->name . ' in ' . 
                                     (microtime(true) - $this->runtime) . ' Seconds');
                 $imported += $imports;
             } catch(\Exception $e) {
@@ -307,7 +311,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $this->log->info('Dealer #' . $dealerId . ', Sales Person #' . $salesperson->id . 
                             ' - Connecting to Gmail with Email: ' . $salesperson->smtp_email);
         $messages = $this->gmail->messages($salesperson->active_token, $emailFolder->name, [
-            'after' => Carbon::parse($emailFolder->date_imported)->isoFormat('YYYY/M/D')
+            'after' => Carbon::parse($emailFolder->date_imported)->subDay()->isoFormat('YYYY/M/D')
         ]);
         $folder = $this->updateFolder($salesperson, $emailFolder);
 
@@ -353,7 +357,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $this->log->info('Dealer #' . $dealerId . ', Sales Person #' . $salesperson->id . 
                                 ' - Connecting to Office 365 with Email: ' . $salesperson->smtp_email);
         $messages = $this->office->messages($salesperson->active_token, $emailFolder->name, [
-            'SentDateTime ge ' . Carbon::parse($emailFolder->date_imported)->isoFormat('YYYY-MM-DD')
+            'SentDateTime ge ' . Carbon::parse($emailFolder->date_imported)->subDay()->isoFormat('YYYY-MM-DD')
         ]);
         $folder = $this->updateFolder($salesperson, $emailFolder);
 

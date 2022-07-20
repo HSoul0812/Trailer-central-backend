@@ -84,7 +84,7 @@ class CatalogService implements CatalogServiceInterface
         $this->fractal->setSerializer(new NoDataArraySerializer());
 
         // Initialize Logger
-        $this->log = Log::channel('facebook');
+        $this->log = Log::channel('fb-catalog');
     }
 
     /**

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Query\Builder;
 
 /**
  * Class Showroom
@@ -15,6 +16,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  *
  * @property Category $category
  * @property InventoryFeatureList[] $features
+ *
+ * @method Builder select($columns = ['*'])
  */
 class Showroom extends Model
 {

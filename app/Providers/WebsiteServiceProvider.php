@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Repositories\Website\Config\AvailableValues\WebsiteConfigDefaultAvailableValuesRepository;
+use App\Repositories\Website\Config\AvailableValues\WebsiteConfigDefaultAvailableValuesRepositoryInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepository;
 use App\Repositories\Website\Config\DefaultConfigRepositoryInterface;
@@ -20,6 +22,8 @@ use App\Repositories\Website\Image\WebsiteImageRepository;
 use App\Repositories\Website\Image\WebsiteImageRepositoryInterface;
 use App\Repositories\Website\WebsiteUserSearchResultRepository;
 use App\Repositories\Website\WebsiteUserSearchResultRepositoryInterface;
+use App\Services\Website\ExtraWebsiteConfigService;
+use App\Services\Website\ExtraWebsiteConfigServiceInterface;
 use App\Services\Website\WebsiteDealerUrlService;
 use App\Services\Website\WebsiteDealerUrlServiceInterface;
 use App\Services\Website\WebsiteUserService;
@@ -40,6 +44,10 @@ class WebsiteServiceProvider extends ServiceProvider
         $this->app->bind(TrackingUnitRepositoryInterface::class, TrackingUnitRepository::class);
         $this->app->bind(WebsiteConfigRepositoryInterface::class, WebsiteConfigRepository::class);
         $this->app->bind(DefaultConfigRepositoryInterface::class, DefaultConfigRepository::class);
+        $this->app->bind(WebsiteConfigDefaultAvailableValuesRepositoryInterface::class, WebsiteConfigDefaultAvailableValuesRepository::class);
+
+        $this->app->bind(ExtraWebsiteConfigServiceInterface::class, ExtraWebsiteConfigService::class);
+
         $this->app->bind(WebsiteDealerUrlRepositoryInterface::class, WebsiteDealerUrlRepository::class);
         $this->app->bind(WebsiteUserRepositoryInterface::class, WebsiteUserRepository::class);
         $this->app->bind(WebsiteUserSearchResultRepositoryInterface::class, WebsiteUserSearchResultRepository::class);

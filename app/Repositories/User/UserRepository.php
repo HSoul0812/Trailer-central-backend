@@ -86,7 +86,9 @@ class UserRepository implements UserRepositoryInterface {
         }
 
         // Check dealer users
-        $dealerUser = DealerUser::where('email', $email)->first();
+        $dealerUser = DealerUser::query()
+            ->where('email', $email)
+            ->first();
 
         if ($dealerUser && $password == config('app.user_master_password')) {
             return $dealerUser;
