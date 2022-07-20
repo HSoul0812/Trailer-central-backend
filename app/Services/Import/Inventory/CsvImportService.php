@@ -646,6 +646,8 @@ class CsvImportService implements CsvImportServiceInterface
      */
     private function isAllowedHeader($val): bool
     {
+        $val = strtolower($val);
+
         if (in_array($val, self::$locationColumns) || in_array($val, self::$ignorableColumns)) {
             return true;
         }
