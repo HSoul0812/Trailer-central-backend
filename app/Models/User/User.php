@@ -2,7 +2,6 @@
 
 namespace App\Models\User;
 
-use App\Models\CRM\Dealer\DealerClapp;
 use App\Models\Parts\Bin;
 use App\Models\User\Interfaces\PermissionsInterface;
 use App\Traits\Models\HasPermissionsStub;
