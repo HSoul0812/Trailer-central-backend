@@ -590,7 +590,7 @@ class InventoryService implements InventoryServiceInterface
             } else {
                 $bill = $this->billRepository->update($billInfo);
 
-                $this->quickbookApprovalRepository->deleteByTbPrimaryId($bill->id, 'qb_bills');
+                $this->quickbookApprovalRepository->deleteByTbPrimaryId($bill->id, 'qb_bills', $inventory->dealer_id);
 
                 $inventoryParams = [
                     'inventory_id' => $inventory->inventory_id,
