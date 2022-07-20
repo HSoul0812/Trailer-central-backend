@@ -84,30 +84,16 @@ class ImportService implements ImportServiceInterface
 
     public function import(): int
     {
-/*        $accessToken = $this->getAccessToken();
+        $accessToken = $this->getAccessToken();
         $inbox = config('adf.imports.gmail.inbox');
-        $messages = $this->gmail->messages($accessToken, $inbox);*/
-
-        //---------------------------------------------------------------------------------------
-        $salesPerson = SalesPerson::query()->where('id', '=', 998)->first();
-        $imapConfig = ImapConfig::fillFromSalesPerson($salesPerson);
-        $imapConfig->setFolderName('TEST');
-
-        $imapService = new ImapService();
-        $messages = $imapService->messages($imapConfig);
-        //---------------------------------------------------------------------------------------
+        $messages = $this->gmail->messages($accessToken, $inbox);
 
         $total = 0;
         foreach($messages as $mailId) {
             /** @var ParsedEmail $email */
-            //$email = $this->gmail->message($mailId);
+            $email = $this->gmail->message($mailId);
 
-            //---------------------------------------------------------------------------------------
-            $email = new ParsedEmail();
-            $email->setBody($mailId->getHTMLBody());
-            //---------------------------------------------------------------------------------------
-
-            //try {
+            try {
                 $neededService = null;
 
                 foreach ($this->services as $service) {
@@ -122,9 +108,6 @@ class ImportService implements ImportServiceInterface
                 }
 
                 $dealerId = str_replace('@' . config('adf.imports.gmail.domain'), '', $email->getToEmail());
-                //---------------------------------------------------------------------------------------
-                $dealerId = 1001;
-                //---------------------------------------------------------------------------------------
                 try {
                     $dealer = $this->dealers->get(['dealer_id' => $dealerId]);
                 } catch (\Exception $e) {
@@ -137,23 +120,23 @@ class ImportService implements ImportServiceInterface
 
                 if (!empty($result)) {
                     Log::info('Imported ADF Lead ' . $result->identifier . ' and Moved to Processed');
-                    //$this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.processed')], [$inbox]);
+                    $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.processed')], [$inbox]);
                     $total++;
                 }
 
-/*            } catch(InvalidDealerIdException $e) {
+            } catch(InvalidDealerIdException $e) {
                 if(!empty($dealerId) && is_numeric($dealerId)) {
-                    //$this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.unmapped')], [$inbox]);
+                    $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.unmapped')], [$inbox]);
                 } else {
-                    //$this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.invalid')], [$inbox]);
+                    $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.invalid')], [$inbox]);
                 }
                 Log::error("Exception returned on Import Message #{$mailId} {$e->getMessage()}: {$e->getTraceAsString()}");
             } catch(InvalidImportFormatException $e) {
-                //$this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.invalid')], [$inbox]);
+                $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.invalid')], [$inbox]);
                 Log::error("Exception returned on Import Message #{$mailId} {$e->getMessage()}: {$e->getTraceAsString()}");
             } catch(\Exception $e) {
                 Log::error("Exception returned on Import Message #{$mailId} {$e->getMessage()}: {$e->getTraceAsString()}");
-            }*/
+            }
         }
 
         return $total;
