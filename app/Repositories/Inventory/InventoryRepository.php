@@ -188,6 +188,11 @@ class InventoryRepository implements InventoryRepositoryInterface
 
         $item = new Inventory($params);
 
+        // If there is an associated bill, we will set send_to_quickbooks to 1
+        // so the cronjob can create the add bill approval record and also the
+        // bill category record, allowing the dealer to update the bill later on
+        $item->send_to_quickbooks = !empty($item->bill_id);
+
         $item->save();
 
         if (!empty($attributeObjs)) {
@@ -227,6 +232,11 @@ class InventoryRepository implements InventoryRepositoryInterface
 
         /** @var Inventory $item */
         $item = Inventory::findOrFail($params['inventory_id']);
+
+        // If there is an associated bill, we will set send_to_quickbooks to 1
+        // so the cronjob can create the add bill approval record and also the
+        // bill category record, allowing the dealer to update the bill later on
+        $item->send_to_quickbooks = !empty($item->bill_id);
 
         $inventoryImageObjs = $this->createImages($params['new_images'] ?? []);
 
