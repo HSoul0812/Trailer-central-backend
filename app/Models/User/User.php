@@ -2,6 +2,7 @@
 
 namespace App\Models\User;
 
+use App\Models\CRM\Dealer\DealerClapp;
 use App\Models\Parts\Bin;
 use App\Models\User\Interfaces\PermissionsInterface;
 use App\Traits\Models\HasPermissionsStub;
@@ -276,10 +277,30 @@ class User extends Model implements Authenticatable, PermissionsInterface
         return $this->hasOneThrough(CrmUser::class, NewDealerUser::class, 'id', 'user_id', 'dealer_id', 'user_id');
     }
 
+    public function dealerParts(): HasOne
+    {
+        return $this->hasOne(DealerPart::class, 'dealer_id', 'dealer_id');
+    }
+
+    public function dealerClapp(): HasOne
+    {
+        return $this->hasOne(DealerClapp::class, 'dealer_id', 'dealer_id');
+    }
+
     public function getIsCrmActiveAttribute(): bool
     {
         $crmUser = $this->crmUser()->first();
         return $crmUser instanceof CrmUser ? (bool)$crmUser->active : false;
+    }
+
+    public function getIsPartsActiveAttribute(): bool
+    {
+        return !empty($this->dealerParts);
+    }
+
+    public function getIsMarketingActiveAttribute(): bool
+    {
+        return !empty($this->dealerClapp);
     }
 
     public function getIsEcommerceActiveAttribute(): bool
