@@ -11,6 +11,7 @@ use App\Services\Inventory\ESQuery\ESBoolQueryBuilder;
 use App\Services\Inventory\ESQuery\ESInventoryQueryBuilder;
 use App\Services\Inventory\ESQuery\SortOrder;
 use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Support\Collection;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use App\DTOs\Inventory\TcEsInventory;
 use App\DTOs\Inventory\TcEsResponseInventoryList;
@@ -456,14 +457,14 @@ class InventoryService implements InventoryServiceInterface
         return $respObj;
     }
 
-    public function attributes(int $entityTypeId): array
+    public function attributes(int $entityTypeId): Collection
     {
-        $results = [];
+        $results = new Collection();
         $url = config('services.trailercentral.api') . 'inventory/attributes' . "?entity_type_id=$entityTypeId";
         $attributes = $this->handleHttpRequest('GET', $url);
         foreach($attributes['data'] as $attribute) {
             $attributeObj = TcApiResponseAttribute::fromData($attribute);
-            $results[] = $attributeObj;
+            $results->add($attributeObj);
         }
         return $results;
     }
