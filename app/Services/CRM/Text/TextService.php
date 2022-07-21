@@ -218,6 +218,16 @@ class TextService implements TextServiceInterface
             $toNumber = $activeNumber->customer_number;
         }
 
+        $textLogs = $this->textRepository->findByFromNumberToNumber($toNumber, $from);
+
+        $leadId = $this->findLeadId($textLogs);
+
+        if (empty($customerName) && !empty($leadId)) {
+            /** @var Lead $lead */
+            $lead = $this->leadRepository->get(['id' => $leadId]);
+            $customerName = $lead->full_name;
+        }
+
         $messageBody = ((!$sendFromDealer) ? "Sent From: " . $from . "\nCustomer Name: $customerName\n\n" : '') . $body;
 
         for ($i = 0; $i < self::NUM_MEDIA; $i++) {
@@ -240,10 +250,6 @@ class TextService implements TextServiceInterface
             $this->textRepository->beginTransaction();
 
             $this->twilioService->sendViaTwilio($to, $toNumber, $messageBody, $mediaUrl);
-
-            $textLogs = $this->textRepository->findByFromNumberToNumber($toNumber, $from);
-
-            $leadId = $this->findLeadId($textLogs);
 
             if ($this->twilioService->getIsNumberInvalid()) {
                 $this->numberRepository->delete(['id' => $activeNumber->id]);

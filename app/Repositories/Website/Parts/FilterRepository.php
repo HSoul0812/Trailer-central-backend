@@ -5,13 +5,17 @@ namespace App\Repositories\Website\Parts;
 use App\Repositories\Website\Parts\FilterRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\Parts\Filter;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
- *  
+ *
  * @author Eczek
  */
 class FilterRepository implements FilterRepositoryInterface {
 
+    const EXCLUDED_ATTRIBUTES = [
+        'type',
+    ];
 
     public function create($params) {
         throw new NotImplementedException;
@@ -27,6 +31,10 @@ class FilterRepository implements FilterRepositoryInterface {
 
     public function getAll($params) {
         return Filter::where('is_visible', 1)->orderBy('position', 'asc')->get();
+    }
+
+    public function getAllEcomm(): Collection {
+        return Filter::where('is_visible', 1)->whereNotIn('attribute', self::EXCLUDED_ATTRIBUTES)->orderBy('position')->get();
     }
 
     public function update($params) {

@@ -44,7 +44,7 @@ class SignInController extends RestfulController
     {
         $this->middleware('setDealerIdOnRequest')->only([
             'updatePassword',
-            'checkAdminPassword'
+            'checkAdminPassword',
         ]);
 
         $this->users = $userRepo;
