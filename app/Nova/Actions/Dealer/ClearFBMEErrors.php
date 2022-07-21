@@ -29,7 +29,7 @@ class ClearFBMEErrors extends Action
      */
     public function handle(ActionFields $fields, Collection $models): array
     {
-        $errors=new ErrorRepository();
+        $errors = new ErrorRepository();
         $nrErrorsCleared = 0;
         /** @var DealerFBMOverview $model */
         foreach ($models as $model) {
