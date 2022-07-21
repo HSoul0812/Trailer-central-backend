@@ -59,7 +59,7 @@ class TextrailPartService implements TextrailPartServiceInterface
 
     public function getAttributes(): array
     {
-        $attributes =  $this->provider->getAttributes();
+        return  $this->provider->getAttributes();
     }
 
     public function getAttribute(string $code): array
