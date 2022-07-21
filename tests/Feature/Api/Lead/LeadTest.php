@@ -30,7 +30,8 @@ class LeadTest extends FeatureTestCase
         'country' => 'US',
         'postalcode' => 'postal code test',
         'phone' => '112346',
-        'name'  => $this->faker->word()
+        'name'  => $this->faker->word(),
+        'captcha' => 'captcha test'
       ];
 
       $responseDealerLocation = $client->request('PUT', $urlDealerLocation, ['query' => $newDealerLocationParams]);
