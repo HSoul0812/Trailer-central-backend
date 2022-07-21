@@ -4,7 +4,7 @@ namespace App\Services\CRM\Leads\Import;
 
 use App\Exceptions\CRM\Leads\Import\InvalidDealerIdException;
 use App\Exceptions\CRM\Leads\Import\InvalidImportFormatException;
-use App\Exceptions\CRM\Leads\Import\MissingAdfEmailAccessTokenException;
+use App\Exceptions\CRM\Leads\Import\MissingEmailAccessTokenException;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\Integration\Auth\AccessToken;
@@ -145,8 +145,8 @@ class ImportService implements ImportServiceInterface
     /**
      * Get Access Token for ADF
      *
-     * @throws MissingAdfEmailAccessTokenException
      * @return AccessToken
+     * @throws MissingEmailAccessTokenException
      */
     private function getAccessToken(): AccessToken
     {
@@ -158,7 +158,7 @@ class ImportService implements ImportServiceInterface
 
         // No Access Token?
         if(empty($systemEmail->googleToken)) {
-            throw new MissingAdfEmailAccessTokenException;
+            throw new MissingEmailAccessTokenException;
         }
 
         // Refresh Token
