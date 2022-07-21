@@ -69,7 +69,19 @@ class TextrailPartImporterService implements TextrailPartImporterServiceInterfac
 
         $parts = $this->textrailPartService->getAllParts();
         $parts_sku = [];
+
         $partAttributes = [];
+
+        // Fetch all `visible for front` attributes and group them to use option/values.
+        $textrailAttributes = $this->textrailPartService->getAttributes();
+        $formattedTextrailAttributes = [];
+
+        // Use attribute code as key to fetch easily later.
+        foreach ($textrailAttributes['items'] as $textrailAttribute) {
+            if (!empty($textrailAttribute['attribute_code']) && $textrailAttribute['is_visible_on_front'] === "1") {
+                $formattedTextrailAttributes[$textrailAttribute['attribute_code']] = $textrailAttribute;
+            }
+        }
 
         foreach ($parts as $item) {
             $parts_sku[] = $item->sku;
@@ -142,6 +154,25 @@ class TextrailPartImporterService implements TextrailPartImporterServiceInterfac
             $newTextrailPart->images()->delete();
 
             foreach ($item->custom_attributes as $key => $partAttribute) {
+
+                // That validates attribute is not available to show in front_end based on `is_visible_on_front` already applied to getAttributes().
+                if (empty($formattedTextrailAttributes[$key])) {
+                    continue;
+                }
+
+                // Get attribute detail from cached attributes array.
+                $attributeMeta = $formattedTextrailAttributes[$key];
+
+                if ($attributeMeta['frontend_input'] === 'select') {
+                   foreach ($attributeMeta['options'] as $option) {
+                       if ($partAttribute === $option['value']) {
+                           $value = $option['label'];
+                       }
+                   }
+                } else {
+                    $value = $partAttribute;
+                }
+
                 $code = $key;
 
                 if (!array_key_exists($code, $partAttributes)) {
@@ -158,7 +189,7 @@ class TextrailPartImporterService implements TextrailPartImporterServiceInterfac
                     'code' => $code,
                 ]);
 
-                $this->partRepo->addAttribute($newTextrailPart, $dbAttribute, $partAttribute);
+                $this->partRepo->addAttribute($newTextrailPart, $dbAttribute, $value);
             }
 
 

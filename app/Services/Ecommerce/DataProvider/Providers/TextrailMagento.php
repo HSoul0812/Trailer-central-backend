@@ -57,6 +57,8 @@ class TextrailMagento implements DataProviderInterface,
     /** @var array */
     private $parentMemory = [];
 
+    private $partAttributes = [];
+
     public function __construct()
     {
         $this->apiUrl = config('ecommerce.textrail.api_url');
@@ -697,7 +699,7 @@ class TextrailMagento implements DataProviderInterface,
 
     public function getAttributes(): array
     {
-
+        return json_decode($this->httpClient->get(self::TEXTRAIL_ATTRIBUTES_GENERIC_URL . '?searchCriteria[page_size]=1000&fields=items[attribute_code,default_frontend_label,is_visible_on_front,frontend_input,options],total_count&searchCriteria[currentPage]=1', ['headers' => $this->getHeaders()])->getBody()->getContents(), true);
     }
 
     public function getAttribute(string $code): array
