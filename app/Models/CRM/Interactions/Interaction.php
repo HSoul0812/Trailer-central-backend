@@ -45,6 +45,10 @@ class Interaction extends Model
      */
     const TYPE_CONTACT = 'CONTACT';
 
+    /**
+     * @const string
+     */
+    const TYPE_TASK = 'TASK';
 
     /**
      * The table associated with the model.
