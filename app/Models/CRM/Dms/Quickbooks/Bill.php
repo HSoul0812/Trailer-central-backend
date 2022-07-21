@@ -3,6 +3,7 @@
 namespace App\Models\CRM\Dms\Quickbooks;
 
 use App\Models\Inventory\Inventory;
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -23,6 +24,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Bill extends Model
 {
+    use TableAware;
+
     const STATUS_DUE = 'due';
     const STATUS_PAID = 'paid';
 

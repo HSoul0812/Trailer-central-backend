@@ -3,6 +3,7 @@
 namespace App\Repositories\Inventory;
 
 use App\Exceptions\RepositoryInvalidArgumentException;
+use App\Models\CRM\Dms\Quickbooks\Bill;
 use App\Models\Inventory\AttributeValue;
 use App\Models\Inventory\File;
 use App\Models\Inventory\Image;
@@ -11,6 +12,7 @@ use App\Models\Inventory\InventoryClapp;
 use App\Models\Inventory\InventoryFeature;
 use App\Models\Inventory\InventoryFile;
 use App\Models\Inventory\InventoryImage;
+use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
 use App\Traits\Repository\Transaction;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -178,6 +180,7 @@ class InventoryRepository implements InventoryRepositoryInterface
     /**
      * @param array $params
      * @return Inventory
+     * @throws \Exception
      */
     public function create($params): Inventory
     {
@@ -223,6 +226,8 @@ class InventoryRepository implements InventoryRepositoryInterface
             $item->clapps()->saveMany($clappObjs);
         }
 
+        $this->handleFloorplanAndBill($item);
+
         return $item;
     }
 
@@ -231,6 +236,7 @@ class InventoryRepository implements InventoryRepositoryInterface
      * @param array $options
      *
      * @return Inventory
+     * @throws \Exception
      */
     public function update($params, array $options = []): Inventory
     {
@@ -924,5 +930,48 @@ class InventoryRepository implements InventoryRepositoryInterface
         $query = $this->buildInventoryQuery($params, false, ['inventory_id', 'title', 'vin']);
 
         return $query->get();
+    }
+
+    /**
+     * This method will handle the creation of floorplan and bill data
+     * we will let the crm project handle the actual approval creation
+     * for this project, we'll just prepare the data so the the InventorySync
+     * command can do its job properly
+     *
+     * @param Inventory $inventory
+     * @return void
+     * @throws \Exception
+     */
+    private function handleFloorplanAndBill(Inventory $inventory): void
+    {
+        if (empty($inventory->bill_id)) {
+            return;
+        }
+
+        // We only want to process floorplan data if the inventory
+        // is not a floorplan bill yet
+        if ($inventory->is_floorplan_bill) {
+            return;
+        }
+
+        $shouldAddFloorplanData = !empty($inventory->true_cost)
+            && !empty($inventory->fp_vendor)
+            && !empty($inventory->fp_balance);
+
+        if (!$shouldAddFloorplanData) {
+            return;
+        }
+
+        // This will make sure the tc-crm cron can capture this inventory
+        // and try to create new bill and bill payment approval records
+        $inventory->qb_sync_processed = false;
+        $inventory->is_floorplan_bill = true;
+        $inventory->save();
+
+        resolve(QuickbookApprovalRepositoryInterface::class)->deleteByTbPrimaryId($inventory->bill_id, Bill::getTableName());
+
+        $inventory->bill()->update([
+            'status' => Bill::STATUS_PAID,
+        ]);
     }
 }
