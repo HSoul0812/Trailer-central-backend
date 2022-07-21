@@ -52,8 +52,6 @@ class UpdateDealerFbmOverview extends Migration
 
         CREATE VIEW `trailercentral`.`dealer_fbm_overview` AS
 
-        CREATE VIEW `trailercentral`.`dealer_fbm_overview` AS
-
         SELECT 
             d.dealer_id AS id,
             fbm.id AS marketplace_id,
