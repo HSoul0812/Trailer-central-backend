@@ -262,6 +262,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind('App\Repositories\Bulk\Inventory\BulkUploadRepositoryInterface', 'App\Repositories\Bulk\Inventory\BulkUploadRepository');
         $this->app->bind('App\Repositories\Website\Parts\FilterRepositoryInterface', 'App\Repositories\Website\Parts\FilterRepository');
         $this->app->bind('App\Repositories\Website\Blog\PostRepositoryInterface', 'App\Repositories\Website\Blog\PostRepository');
+        $this->app->bind('App\Repositories\Subscription\SubscriptionRepositoryInterface', 'App\Repositories\Subscription\SubscriptionRepository');
         $this->app->bind(BulkUploadRepositoryInterface::class, BulkUploadRepository::class);
         $this->app->bind('App\Repositories\Inventory\Floorplan\PaymentRepositoryInterface', 'App\Repositories\Inventory\Floorplan\PaymentRepository');
         $this->app->bind(ShowroomRepositoryInterface::class, ShowroomRepository::class);

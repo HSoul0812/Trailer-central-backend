@@ -1440,22 +1440,22 @@ $api->version('v1', function ($route) {
     ], function ($route) {
         $route->get(
             'customer',
-            'App\Http\Controllers\v1\Subscription\SubscriptionController@getCustomer'
+            'App\Http\Controllers\v1\Subscription\SubscriptionController@getCustomerByDealerId'
         );
 
         $route->get(
             'plans',
-            'App\Http\Controllers\v1\Subscription\SubscriptionController@getPlans'
+            'App\Http\Controllers\v1\Subscription\SubscriptionController@getExistingPlans'
         );
 
         $route->post(
             'subscribe',
-            'App\Http\Controllers\v1\Subscription\SubscriptionController@subscribe'
+            'App\Http\Controllers\v1\Subscription\SubscriptionController@subscribeToPlanByDealerId'
         );
 
         $route->post(
             'update-card',
-            'App\Http\Controllers\v1\Subscription\SubscriptionController@updateCard'
+            'App\Http\Controllers\v1\Subscription\SubscriptionController@updateCardByDealerId'
         );
     });
 
