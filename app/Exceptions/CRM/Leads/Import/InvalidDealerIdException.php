@@ -12,6 +12,6 @@ namespace App\Exceptions\CRM\Leads\Import;
 class InvalidDealerIdException extends \Exception
 {
 
-    protected $message = 'Could not match adf import email address to dealer.';
+    protected $message = 'Could not match import email address to dealer.';
 
 }
