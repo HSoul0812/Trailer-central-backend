@@ -125,6 +125,17 @@ abstract class TestCase extends BaseTestCase
     }
 
     /**
+     * @param string $property
+     * @param string $class
+     * @return void
+     */
+    protected function instanceMock(string $property, string $class)
+    {
+        $this->{$property} = Mockery::mock($class);
+        $this->app->instance($class, $this->{$property});
+    }
+
+    /**
      * @return CallbackInterface
      */
     public static function getCallback(): CallbackInterface
