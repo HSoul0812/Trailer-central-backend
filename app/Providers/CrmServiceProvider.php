@@ -16,6 +16,8 @@ use App\Repositories\CRM\Refund\RefundRepository;
 use App\Repositories\CRM\Refund\RefundRepositoryInterface;
 use App\Services\CRM\Email\InquiryEmailService;
 use App\Services\CRM\Email\InquiryEmailServiceInterface;
+use App\Services\CRM\Leads\Import\ImportService;
+use App\Services\CRM\Leads\Import\ImportServiceInterface;
 use App\Services\CRM\Leads\LeadStatusService;
 use App\Services\CRM\Leads\LeadStatusServiceInterface;
 use App\Services\CRM\Text\InquiryTextService;
@@ -32,8 +34,6 @@ use App\Services\CRM\Leads\Export\IDSServiceInterface;
 use App\Services\CRM\Leads\Export\IDSService;
 use App\Services\CRM\Leads\Export\BigTexServiceInterface;
 use App\Services\CRM\Leads\Export\BigTexService;
-use App\Services\CRM\Leads\Import\ADFServiceInterface as ADFImportServiceInterface;
-use App\Services\CRM\Leads\Import\ADFService as ADFImportService;
 use App\Repositories\CRM\Leads\LeadRepository;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\Leads\SourceRepository;
@@ -76,7 +76,7 @@ class CrmServiceProvider extends ServiceProvider
         $this->app->bind(IDSServiceInterface::class, IDSService::class);
         $this->app->bind(BigTexServiceInterface::class, BigTexService::class);
         $this->app->bind(ADFExportServiceInterface::class, ADFExportService::class);
-        $this->app->bind(ADFImportServiceInterface::class, ADFImportService::class);
+        $this->app->bind(ImportServiceInterface::class, ImportService::class);
 
         // Repositories
         $this->app->bind(LeadRepositoryInterface::class, LeadRepository::class);
