@@ -4,7 +4,6 @@ namespace App\Repositories\Inventory;
 
 use App\Exceptions\RepositoryInvalidArgumentException;
 use App\Models\CRM\Dms\Quickbooks\Bill;
-use App\Models\CRM\Dms\Quickbooks\QuickbookApproval;
 use App\Models\Inventory\AttributeValue;
 use App\Models\Inventory\File;
 use App\Models\Inventory\Image;
@@ -13,7 +12,7 @@ use App\Models\Inventory\InventoryClapp;
 use App\Models\Inventory\InventoryFeature;
 use App\Models\Inventory\InventoryFile;
 use App\Models\Inventory\InventoryImage;
-use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepository;
+use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
 use App\Traits\Repository\Transaction;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -914,7 +913,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         $inventory->is_floorplan_bill = true;
         $inventory->save();
 
-        resolve(QuickbookApprovalRepository::class)->deleteByTbPrimaryId($inventory->bill_id, Bill::getTableName());
+        resolve(QuickbookApprovalRepositoryInterface::class)->deleteByTbPrimaryId($inventory->bill_id, Bill::getTableName());
 
         $inventory->bill()->update([
             'status' => Bill::STATUS_PAID,
