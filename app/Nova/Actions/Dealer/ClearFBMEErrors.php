@@ -6,7 +6,9 @@ use Illuminate\Support\Collection;
 use Laravel\Nova\Actions\Action;
 use Laravel\Nova\Fields\ActionFields;
 use App\Models\CRM\Dealer\DealerFBMOverview;
-use App\Repositories\Marketing\Facebook\ErrorRepository;
+use App\Models\Marketing\Facebook\Error;
+use App\Repositories\Marketing\Facebook\ErrorRepositoryInterface;
+use App\Services\Dispatch\Facebook\MarketplaceServiceInterface;
 
 class ClearFBMEErrors extends Action
 {
@@ -19,6 +21,15 @@ class ClearFBMEErrors extends Action
 
     public $confirmText = 'Are you sure you want to clear all Facebook Marketplace Extension errors for this integration?';
 
+    /**
+     * @var ErrorRepositoryInterface
+     */
+    private $fbErrors;
+
+    public function __construct(ErrorRepositoryInterface $fbErrors)
+    {
+        $this->fbErrors = $fbErrors;
+    }
 
     /**
      * Perform the action on the given models.
@@ -29,11 +40,10 @@ class ClearFBMEErrors extends Action
      */
     public function handle(ActionFields $fields, Collection $models): array
     {
-        $errors = new ErrorRepository();
         $nrErrorsCleared = 0;
         /** @var DealerFBMOverview $model */
         foreach ($models as $model) {
-            $nrErrorsCleared += ($errors->dismissAllActiveForIntegration($model->marketplace_id))->count();
+            $nrErrorsCleared += $this->fbErrors->dismissAllActiveForIntegration($model->marketplace_id)->count();
         }
 
         return self::message(($nrErrorsCleared > 0) ? "Errors cleared!" : "There are no errors to clear!");

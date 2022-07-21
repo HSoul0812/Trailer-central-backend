@@ -117,7 +117,7 @@ class FBMarketplaceAccounts extends Resource
     public function actions(Request $request)
     {
         return [
-            (new ClearFBMEErrors)->canSee(function ($request) {
+            (app()->make(ClearFBMEErrors::class))->canSee(function ($request) {
                 return true;
             })->canRun(function ($request) {
                 return true;

@@ -8,6 +8,7 @@ use App\Helpers\SanitizeHelper;
 use App\Http\Controllers\v1\File\FileController;
 use App\Http\Controllers\v1\File\ImageController;
 use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping;
+use App\Models\Marketing\Facebook\Error;
 use App\Nova\Observer\DealerIncomingMappingObserver;
 use App\Repositories\Bulk\Parts\BulkUploadRepository;
 use App\Repositories\Bulk\Parts\BulkUploadRepositoryInterface;
@@ -139,6 +140,7 @@ use App\Services\Inventory\InventoryService;
 use App\Services\Inventory\InventoryServiceInterface;
 use App\Repositories\Inventory\Manufacturers\BrandRepositoryInterface;
 use App\Repositories\Inventory\Manufacturers\BrandRepository;
+use App\Repositories\Marketing\Facebook\ErrorRepositoryInterface;
 use App\Services\Inventory\InventoryAttributeService;
 use App\Services\Inventory\InventoryAttributeServiceInterface;
 use App\Services\Pos\CustomSalesReportExporterService;
@@ -355,6 +357,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(CustomOverlayRepositoryInterface::class, CustomOverlayRepository::class);
 
         $this->app->bind(ShowroomBulkUpdateRepositoryInterface::class, ShowroomBulkUpdateRepository::class);
+
+        $this->app->bind(ErrorRepositoryInterface::class, ErrorRepository::class);
 
         $this->app->register(PhoneServiceProvider::class);
     }
