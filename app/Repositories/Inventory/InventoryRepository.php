@@ -4,6 +4,7 @@ namespace App\Repositories\Inventory;
 
 use App\Exceptions\RepositoryInvalidArgumentException;
 use App\Models\CRM\Dms\Quickbooks\Bill;
+use App\Models\CRM\Dms\Quickbooks\BillCategory;
 use App\Models\Inventory\AttributeValue;
 use App\Models\Inventory\File;
 use App\Models\Inventory\Image;
@@ -970,7 +971,13 @@ class InventoryRepository implements InventoryRepositoryInterface
         $inventory->is_floorplan_bill = true;
         $inventory->save();
 
+        // Delete the bill approval records
         resolve(QuickbookApprovalRepositoryInterface::class)->deleteByTbPrimaryId($inventory->bill_id, Bill::getTableName());
+
+        // Delete all the bill categories for this bill
+        BillCategory::query()
+            ->where('bill_id', $inventory->bill_id)
+            ->delete();
 
         $inventory->bill()->update([
             'status' => Bill::STATUS_PAID,
