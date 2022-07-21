@@ -310,8 +310,15 @@ class InventoryRepository implements InventoryRepositoryInterface
         unset($params['files_to_delete']);
         unset($params['clapps']);
 
-        $item->fill($params)->save();
-        
+        $item->fill($params);
+
+        // If there is an associated bill, we will set send_to_quickbooks to 1
+        // so the cronjob can create the add bill approval record and also the
+        // bill category record, allowing the dealer to update the bill later on
+        $item->send_to_quickbooks = !empty($item->bill_id);
+
+        $item->save();
+
         $this->updateQbInvoiceItems($item);
 
         return $item;
