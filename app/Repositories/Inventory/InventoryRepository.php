@@ -325,6 +325,8 @@ class InventoryRepository implements InventoryRepositoryInterface
 
         $item->save();
 
+        $this->handleFloorplanAndBill($item);
+
         $this->updateQbInvoiceItems($item);
 
         return $item;
