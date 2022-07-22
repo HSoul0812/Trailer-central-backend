@@ -176,6 +176,7 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\NovaServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        App\Providers\CaptchaServiceProvider::class,
         App\Providers\TrailerCentralIntegrationServiceProvider::class,
     ],
 
