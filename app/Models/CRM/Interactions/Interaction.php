@@ -41,6 +41,11 @@ class Interaction extends Model
     /**
      * @const string
      */
+    const TYPE_TASK = 'TASK';
+
+    /**
+     * @const string
+     */
     const TYPE_TEXT = 'TEXT';
 
     /**
