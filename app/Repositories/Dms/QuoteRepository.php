@@ -143,23 +143,25 @@ class QuoteRepository implements QuoteRepositoryInterface
                         });
                     break;
                 case UnitSale::QUOTE_STATUS_COMPLETED:
-                    $query = $query
-                        ->where('is_sold', '=', 1)
-                        ->orWhere(function (Builder $query) {
-                            $query
-                                ->where('is_archived', '=', 0)
-                                ->where(function (Builder $query) {
-                                    $query->where('is_po', '=', 1)
-                                        ->orWhereHas('payments', function (Builder $query) {
-                                            $query->select(DB::raw('sum(calculated_payments.balance) as calculated_amount'))
-                                                ->leftJoinSub($this->calculatedPayments(), 'calculated_payments', function (JoinClause $join) {
-                                                    $join->on('qb_payment.id', '=', 'calculated_payments.id');
-                                                })
-                                                ->groupBy('unit_sale_id')
-                                                ->havingRaw('calculated_amount >= dms_unit_sale.total_price');
-                                        });
-                                });
-                        });
+                    $query = $query->where(function (Builder $query) {
+                        $query
+                            ->where('is_sold', '=', 1)
+                            ->orWhere(function (Builder $query) {
+                                $query
+                                    ->where('is_archived', '=', 0)
+                                    ->where(function (Builder $query) {
+                                        $query->where('is_po', '=', 1)
+                                            ->orWhereHas('payments', function (Builder $query) {
+                                                $query->select(DB::raw('sum(calculated_payments.balance) as calculated_amount'))
+                                                    ->leftJoinSub($this->calculatedPayments(), 'calculated_payments', function (JoinClause $join) {
+                                                        $join->on('qb_payment.id', '=', 'calculated_payments.id');
+                                                    })
+                                                    ->groupBy('unit_sale_id')
+                                                    ->havingRaw('calculated_amount >= dms_unit_sale.total_price');
+                                            });
+                                    });
+                            });
+                    });
                     break;
             }
         }
