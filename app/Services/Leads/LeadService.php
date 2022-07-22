@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Services\Leads;
 
 use App\DTOs\Lead\TcApiResponseLead;
+use App\Services\Captcha\CaptchaServiceInterface;
 use GuzzleHttp\Client as GuzzleHttpClient;
 use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Illuminate\Support\Facades\DB;
 
@@ -16,7 +18,7 @@ class LeadService implements LeadServiceInterface
 
     private const INQUIRY_SEND_ROUTE = 'inquiry/send/';
 
-    public function __construct(public GuzzleHttpClient $httpClient)
+    public function __construct(public GuzzleHttpClient $httpClient, private CaptchaServiceInterface $captchaService)
     {
     }
 
@@ -25,6 +27,12 @@ class LeadService implements LeadServiceInterface
      */
     public function create(array $params): TcApiResponseLead
     {
+        if(!$this->captchaService->validate($params['captcha'])) {
+            throw ValidationException::withMessages([
+                'captcha' => 'The captcha token is not valid'
+            ]);
+        }
+
         $params['website_id'] = config('services.trailercentral.tt_website_id');
         $params['is_from_classifieds'] = 1;
         $access_token = $this->getAccessToken($params['inventory']['inventory_id']);
@@ -39,7 +47,7 @@ class LeadService implements LeadServiceInterface
     {
       $inventory = DB::connection('mysql')->table('inventory')->where('inventory_id', $inventoryId)->first();
       $auth_token = DB::connection('mysql')->table('auth_token')->where('user_id', $inventory->dealer_id)->first();
-      
+
       return $auth_token->access_token;
     }
 

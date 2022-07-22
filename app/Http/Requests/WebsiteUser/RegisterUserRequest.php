@@ -21,6 +21,7 @@ class RegisterUserRequest extends Request implements CreateRequestInterface
             'phone_number' => 'nullable|regex:/^([0-9\s\-\+\(\)]*)$/|min:10',
             'mobile_number' => 'nullable|regex:/^([0-9\s\-\+\(\)]*)$/|min:10',
             'password' => ['required', 'confirmed', Password::min(8)],
+            'captcha' => 'required|string'
         ];
     }
 }

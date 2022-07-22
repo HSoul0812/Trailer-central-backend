@@ -4,6 +4,7 @@ namespace App\Services\WebsiteUser;
 
 use App\DTOs\User\TcApiResponseUser;
 use App\Repositories\WebsiteUser\WebsiteUserRepositoryInterface;
+use App\Services\Captcha\CaptchaServiceInterface;
 use App\Services\Integrations\TrailerCentral\Api\Users\UsersServiceInterface;
 use GuzzleHttp\Exception\BadResponseException;
 use Illuminate\Auth\Events\Registered;
@@ -16,6 +17,7 @@ use Laravel\Socialite\Facades\Socialite;
 class AuthService implements AuthServiceInterface
 {
     public function __construct(
+        private CaptchaServiceInterface $captchaService,
         private WebsiteUserRepositoryInterface $websiteUserRepository,
         private UsersServiceInterface $tcUsersService
     )
@@ -63,6 +65,12 @@ class AuthService implements AuthServiceInterface
     }
 
     public function register(array $attributes) {
+        if(!$this->captchaService->validate($attributes['captcha'])) {
+            throw ValidationException::withMessages([
+                'captcha' => 'The captcha token is not valid'
+            ]);
+        }
+
         $user = $this->createUser($attributes);
 
         event(new Registered($user));

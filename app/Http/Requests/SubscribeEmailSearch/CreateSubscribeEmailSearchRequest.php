@@ -12,5 +12,6 @@ class CreateSubscribeEmailSearchRequest extends Request implements CreateRequest
     protected array $rules = [
         'email' => 'required|email',
         'url' => 'required|url',
+        'captcha' => 'required|string',
     ];
 }

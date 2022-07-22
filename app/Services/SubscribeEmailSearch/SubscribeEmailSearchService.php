@@ -8,47 +8,47 @@ use App\Repositories\SubscribeEmailSearch\SubscribeEmailSearchRepositoryInterfac
 use App\Mail\SubscribeEmailSearch\SubscribeEmailSearchMail;
 use App\DTOs\SubscribeEmailSearch\SubscribeEmailSearchDTO;
 use App\Models\SubscribeEmailSearch\SubscribeEmailSearch;
+use App\Services\Captcha\CaptchaServiceInterface;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
+use Illuminate\Validation\ValidationException;
 
 class SubscribeEmailSearchService implements SubscribeEmailSearchServiceInterface
 {
-      /**
-       * @var SubscribeEmailSearchRepositoryInterface
-       */
-      private $subscribeEmailSearchRepository;
+     public function __construct(
+         private CaptchaServiceInterface $captchaService,
+         private SubscribeEmailSearchRepositoryInterface $subscribeEmailSearchRepository
+     ) {}
 
-     public function __construct(SubscribeEmailSearchRepositoryInterface $subscribeEmailSearchRepository)
-     {
-       $this->subscribeEmailSearchRepository = $subscribeEmailSearchRepository;
-       
-     }
-     
      public function send(array $params): SubscribeEmailSearch
      {
-       
+         if(!$this->captchaService->validate($params['captcha'])) {
+             throw ValidationException::withMessages([
+                 'captcha' => 'The captcha token is not valid'
+             ]);
+         }
        $email = Mail::to([$params['email']]);
 
        $subscribeEmailSearchDTO = $this->fill($params);
-       
+
        $subscribeEmailSearch = $this->subscribeEmailSearchRepository->create($params);
 
        $email->send(new SubscribeEmailSearchMail($subscribeEmailSearchDTO));
-       
+
        $subscribeEmailSearch->subscribe_email_sent = Carbon::now()->setTimezone('UTC')->toDateTimeString();
-       
+
        $subscribeEmailSearch->save();
-       
+
        return $subscribeEmailSearch;
      }
-     
+
      public function fill(array $params): SubscribeEmailSearchDTO
      {
-       
+
        $params['subject'] = 'TrailerTrader.com | Your saved search on ' . Carbon::now()->format('Y-m-d H:i:s');
 
        $subscribeEmailSearchDTO = SubscribeEmailSearchDTO::fromData($params);
-   
+
        return $subscribeEmailSearchDTO;
      }
 }
