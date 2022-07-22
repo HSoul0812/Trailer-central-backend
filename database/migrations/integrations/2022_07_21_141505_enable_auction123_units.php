@@ -31,7 +31,7 @@ class EnableAuction123Units extends Migration
      */
     public function up(): void {
         DB::transaction(static function () {
-            DB::table('integration')->whereIn('integration_id', self::DEALERS)->where(self::FILTERS)->update(self::PARAMS_ON);
+            DB::table(self::TABLE_NAME)->whereIn('dealer_id', self::DEALERS)->where(self::FILTERS)->update(self::PARAMS_ON);
         });
     }
 
@@ -42,7 +42,7 @@ class EnableAuction123Units extends Migration
      */
     public function down(): void {
         DB::transaction(static function () {
-            DB::table('integration')->whereIn('integration_id', self::DEALERS)->where(self::FILTERS)->update(self::PARAMS_OFF);
+            DB::table(self::TABLE_NAME)->whereIn('dealer_id', self::DEALERS)->where(self::FILTERS)->update(self::PARAMS_OFF);
         });
     }
 
