@@ -669,7 +669,15 @@ class InventoryService implements InventoryServiceInterface
             $fromLng = $geolocation->longitude;
         }
 
-        $distance = $this->calculateDistanceBetweenTwoPoints($fromLat, $fromLng, $inventory->latitude, $inventory->longitude, 'ML');
+        $toLat  = $inventory->latitude;
+        $toLong = $inventory->longitude;
+
+        if (empty($toLat) || empty($toLong)) {
+            $toLat  = $dealerLocation->latitude;
+            $toLong = $dealerLocation->longitude;
+        }
+
+        $distance = $this->calculateDistanceBetweenTwoPoints($fromLat, $fromLng, $toLat, $toLong, 'ML');
         return $feePerMile * $distance;
     }
 
