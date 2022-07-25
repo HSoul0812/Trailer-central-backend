@@ -2,14 +2,19 @@
 
 namespace App\Http\Controllers\v1\Inventory\Floorplan;
 
-use App\Http\Controllers\RestfulController;
 use Dingo\Api\Http\Request;
-use App\Repositories\Inventory\Floorplan\PaymentRepositoryInterface;
-use App\Transformers\Inventory\Floorplan\PaymentTransformer;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\RestfulController;
 use App\Transformers\Quickbooks\ExpenseTransformer;
-use App\Http\Requests\Inventory\Floorplan\CreatePaymentRequest;
+use App\Http\Requests\Inventory\GetInventoryRequest;
+use App\Transformers\Inventory\InventoryTransformer;
+use App\Transformers\Inventory\Floorplan\PaymentTransformer;
 use App\Http\Requests\Inventory\Floorplan\GetPaymentRequest;
+use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Services\Inventory\Floorplan\PaymentServiceInterface;
+use App\Http\Requests\Inventory\Floorplan\CreatePaymentRequest;
+use App\Repositories\Inventory\Floorplan\PaymentRepositoryInterface;
 
 class PaymentController extends RestfulController
 {
@@ -20,16 +25,26 @@ class PaymentController extends RestfulController
      * @var PaymentServiceInterface
      */
     private $paymentService;
+
+    /**
+     * @var InventoryRepositoryInterface
+     */
+    protected $inventoryRepository;
     
     /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct(PaymentRepositoryInterface $payment, PaymentServiceInterface $paymentService)
+    public function __construct(
+        PaymentRepositoryInterface $payment, 
+        PaymentServiceInterface $paymentService,
+        InventoryRepositoryInterface $inventoryRepository
+    )
     {
         $this->payment = $payment;
         $this->paymentService = $paymentService;
+        $this->inventoryRepository = $inventoryRepository;
 
         $this->middleware('setDealerIdOnRequest')->only(['create']);
     }
@@ -163,6 +178,54 @@ class PaymentController extends RestfulController
             return $this->response->item($expense, new ExpenseTransformer());
         }  
         
+        return $this->response->errorBadRequest();
+    }
+
+    public function downloadcsv(Request $request)
+    {
+        $request = new GetInventoryRequest($request->all());
+
+        if ($request->validate()) {
+            $requestArray = $request->all();
+            $inventories = $this->inventoryRepository->getFloorplannedInventory($requestArray, false);
+
+            $headers = [
+                "Content-type" => "text/csv",
+                "Content-Disposition" => "attachment; filename=floorplans.csv",
+                "Pragma" => "no-cache",
+                "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+                "Expires" => "0"
+            ];
+            $columns = array('Date Floorplan', 'Date Sold', 'Location', 'Stock #', 'VIN', 'Status', 'Make', 'Title', 'Cost', 'Balance Remaining', 'Interest Paid', 'Balance Payment', 'Interest Payment', 'Floorplan Vendor');
+
+            $callback = function() use ($columns, $inventories ) {
+                $file = fopen('php://output', 'w');
+                fputcsv($file, $columns);
+
+                foreach ($inventories as $inventory) {
+                    fputcsv($file, [
+                        date('d M, Y', strtotime($inventory->created_at)),
+                        date('d M, Y', strtotime($inventory->sold_at)),
+                        $inventory->dealerLocation ? trim($inventory->dealerLocation->name) : null,
+                        $inventory->stock,
+                        $inventory->vin,
+                        $inventory->status,
+                        $inventory->model,
+                        $inventory->title,
+                        $inventory->price ?? 0,
+                        $inventory->fp_balance,
+                        $inventory->pac_amount ?? '0.00',
+                        '',
+                        '',
+                        $inventory->floorplanVendor->name,
+                    ]);
+                }
+                fclose($file);
+            };
+
+            return response()->stream($callback, 200, $headers);
+        }
+
         return $this->response->errorBadRequest();
     }
 
