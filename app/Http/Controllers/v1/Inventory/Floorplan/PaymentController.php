@@ -181,7 +181,7 @@ class PaymentController extends RestfulController
         return $this->response->errorBadRequest();
     }
 
-    public function downloadcsv(Request $request)
+    public function downloadCsv(Request $request)
     {
         $request = new GetInventoryRequest($request->all());
 
