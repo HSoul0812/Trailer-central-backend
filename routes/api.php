@@ -98,7 +98,7 @@ $api->version('v1', function ($route) {
 
             $route->get(
                 'download/csv',
-                'App\Http\Controllers\v1\Inventory\Floorplan\PaymentController@downloadcsv'
+                'App\Http\Controllers\v1\Inventory\Floorplan\PaymentController@downloadCsv'
             );
         });
     });
