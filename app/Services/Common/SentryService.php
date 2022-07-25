@@ -36,7 +36,7 @@ class SentryService
                 'website_domain' => $dealer->website->domain,
             ]);
         }
-        
+
         $event->setTags($tags);
         return $event;
     }

@@ -42,6 +42,8 @@ class Refund extends Model implements Filterable
 {
     use BelongsToThroughTrait, TableAware;
 
+    const TB_NAME_DMS_UNIT_SALE = 'dms_unit_sale';
+
     protected $table = "dealer_refunds";
 
     protected $casts = [
@@ -82,6 +84,14 @@ class Refund extends Model implements Filterable
     public function receipt(): MorphOne
     {
         return $this->morphOne(DealerSalesReceipt::class, 'receipt', 'tb_name', 'tb_primary_id');
+    }
+    
+    /**
+     * @return BelongsTo
+     */
+    public function unitSale(): BelongsTo
+    {
+        return $this->belongsTo(UnitSale::class, 'tb_primary_id', 'id');
     }
 
     /**

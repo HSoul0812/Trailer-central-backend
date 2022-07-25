@@ -3,6 +3,8 @@
 namespace App\Repositories\Inventory;
 
 use App\Exceptions\RepositoryInvalidArgumentException;
+use App\Models\CRM\Dms\Quickbooks\Bill;
+use App\Models\CRM\Dms\Quickbooks\BillCategory;
 use App\Models\Inventory\AttributeValue;
 use App\Models\Inventory\File;
 use App\Models\Inventory\Image;
@@ -11,6 +13,7 @@ use App\Models\Inventory\InventoryClapp;
 use App\Models\Inventory\InventoryFeature;
 use App\Models\Inventory\InventoryFile;
 use App\Models\Inventory\InventoryImage;
+use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
 use App\Traits\Repository\Transaction;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -164,12 +167,21 @@ class InventoryRepository implements InventoryRepositoryInterface
         '-archived_at' => [
             'field' => 'archived_at',
             'direction' => 'ASC'
+        ],
+        'model' => [
+            'field' => 'model',
+            'direction' => 'DESC'
+        ],
+        '-model' => [
+            'field' => 'model',
+            'direction' => 'ASC'
         ]
     ];
 
     /**
      * @param array $params
      * @return Inventory
+     * @throws \Exception
      */
     public function create($params): Inventory
     {
@@ -187,6 +199,11 @@ class InventoryRepository implements InventoryRepositoryInterface
         unset($params['clapps']);
 
         $item = new Inventory($params);
+
+        // If there is an associated bill, we will set send_to_quickbooks to 1
+        // so the cronjob can create the add bill approval record and also the
+        // bill category record, allowing the dealer to update the bill later on
+        $item->send_to_quickbooks = !empty($item->bill_id);
 
         $item->save();
 
@@ -210,6 +227,8 @@ class InventoryRepository implements InventoryRepositoryInterface
             $item->clapps()->saveMany($clappObjs);
         }
 
+        $this->handleFloorplanAndBill($item);
+
         return $item;
     }
 
@@ -218,6 +237,7 @@ class InventoryRepository implements InventoryRepositoryInterface
      * @param array $options
      *
      * @return Inventory
+     * @throws \Exception
      */
     public function update($params, array $options = []): Inventory
     {
@@ -227,6 +247,11 @@ class InventoryRepository implements InventoryRepositoryInterface
 
         /** @var Inventory $item */
         $item = Inventory::findOrFail($params['inventory_id']);
+
+        // If there is an associated bill, we will set send_to_quickbooks to 1
+        // so the cronjob can create the add bill approval record and also the
+        // bill category record, allowing the dealer to update the bill later on
+        $item->send_to_quickbooks = !empty($item->bill_id);
 
         $inventoryImageObjs = $this->createImages($params['new_images'] ?? []);
 
@@ -292,9 +317,47 @@ class InventoryRepository implements InventoryRepositoryInterface
         unset($params['files_to_delete']);
         unset($params['clapps']);
 
-        $item->fill($params)->save();
+        $item->fill($params);
+
+        // If there is an associated bill, we will set send_to_quickbooks to 1
+        // so the cronjob can create the add bill approval record and also the
+        // bill category record, allowing the dealer to update the bill later on
+        $item->send_to_quickbooks = !empty($item->bill_id);
+
+        $item->save();
+
+        $this->handleFloorplanAndBill($item);
+
+        $this->updateQbInvoiceItems($item);
 
         return $item;
+    }
+    
+    /**
+     * Update the qb_invoice_item_inventories table for sales person report updation.
+     * 
+     * @param Inventory $item
+     * @return void
+     */
+    private function updateQbInvoiceItems(Inventory $item)
+    {
+        $newTotalTrueCost = $item->true_cost + $item->cost_of_shipping;
+        $newTotalCost = $item->cost_of_unit + $item->cost_of_shipping;
+        $newFinalCost = 0;
+        
+        if ($item->pac_type === "percent") {
+            $priceAdj = ($newTotalCost * $item->pac_amount) / 100;
+            $newFinalCost = $newTotalCost + $priceAdj;
+        } else {
+            $newFinalCost = $newTotalCost + $item->pac_amount;
+        }
+
+        DB::table('qb_invoice_item_inventories')
+            ->where('inventory_id', '=', $item->id)
+            ->update([
+                'cost_overhead' => $newFinalCost,
+                'true_total_cost' => $newTotalTrueCost
+            ]);
     }
 
     public function moveLocationId(int $from, int $to): int
@@ -652,6 +715,7 @@ class InventoryRepository implements InventoryRepositoryInterface
                         ->orWhere('inventory.description', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('vin', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('price', 'LIKE', '%' . $params['search_term'] . '%')
+                        ->orWhere('model', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhereHas('floorplanVendor', function ($query) use ($params) {
                             $query->where('name', 'LIKE', '%' . $params['search_term'] . '%');
                         });
@@ -869,5 +933,54 @@ class InventoryRepository implements InventoryRepositoryInterface
         $query = $this->buildInventoryQuery($params, false, ['inventory_id', 'title', 'vin']);
 
         return $query->get();
+    }
+
+    /**
+     * This method will handle the creation of floorplan and bill data
+     * we will let the crm project handle the actual approval creation
+     * for this project, we'll just prepare the data so the the InventorySync
+     * command can do its job properly
+     *
+     * @param Inventory $inventory
+     * @return void
+     * @throws \Exception
+     */
+    private function handleFloorplanAndBill(Inventory $inventory): void
+    {
+        if (empty($inventory->bill_id)) {
+            return;
+        }
+
+        // We only want to process floorplan data if the inventory
+        // is not a floorplan bill yet
+        if ($inventory->is_floorplan_bill) {
+            return;
+        }
+
+        $shouldAddFloorplanData = !empty($inventory->true_cost)
+            && !empty($inventory->fp_vendor)
+            && !empty($inventory->fp_balance);
+
+        if (!$shouldAddFloorplanData) {
+            return;
+        }
+
+        // This will make sure the tc-crm cron can capture this inventory
+        // and try to create new bill and bill payment approval records
+        $inventory->qb_sync_processed = false;
+        $inventory->is_floorplan_bill = true;
+        $inventory->save();
+
+        // Delete the bill approval records
+        resolve(QuickbookApprovalRepositoryInterface::class)->deleteByTbPrimaryId($inventory->bill_id, Bill::getTableName());
+
+        // Delete all the bill categories for this bill
+        BillCategory::query()
+            ->where('bill_id', $inventory->bill_id)
+            ->delete();
+
+        $inventory->bill()->update([
+            'status' => Bill::STATUS_PAID,
+        ]);
     }
 }
