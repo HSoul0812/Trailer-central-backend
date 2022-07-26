@@ -19,7 +19,7 @@ class RestoreRemovedUnwantedEavEntityTypeAttributes extends Migration
      */
     public function up()
     {
-        DB::table('eav_entity_type_attribute')->insert([
+        DB::table('eav_entity_type_attribute')->insertOrIgnore([
             [
                 'entity_type_id' => EntityType::where('name', 'rv')->value('entity_type_id'),
                 'attribute_id' => Attribute::where('code', 'livingquarters')->value('attribute_id')
