@@ -204,8 +204,8 @@ class PaymentController extends RestfulController
 
                 foreach ($inventories as $inventory) {
                     fputcsv($file, [
-                        $inventory->created_at ? date('d M, Y', strtotime($inventory->created_at)) : '',
-                        $inventory->sold_at ? date('d M, Y', strtotime($inventory->sold_at)) : '',
+                        $inventory->created_at ? $inventory->created_at->format('d M, Y') : '',
+                        $inventory->sold_at ? $inventory->sold_at->format('d M, Y') : '',
                         $inventory->dealerLocation ? trim($inventory->dealerLocation->name) : '',
                         $inventory->stock ?? '',
                         $inventory->vin ?? '',
