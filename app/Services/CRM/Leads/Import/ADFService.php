@@ -80,7 +80,7 @@ class ADFService implements ImportTypeInterface
      * @throws InvalidImportFormatException
      */
     private function validateAdf(string $body): Crawler
-{
+    {
         // Get XML Parsed Data
         $fixed = $this->fixCdata($body);
         $crawler = new Crawler($fixed);

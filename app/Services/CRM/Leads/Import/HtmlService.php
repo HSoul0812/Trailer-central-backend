@@ -178,7 +178,7 @@ class HtmlService implements ImportTypeInterface
             $block = str_replace($leadBlockName, '', substr($block, 0, $blockEndPosition));
 
             if ($leadBlockName === self::CUSTOMER_COMMENTS_BLOCK) {
-                $data[$leadBlockName] = trim(trim($this->sanitizeHelper->removeBrokenCharacters($block ?? ''), ':'));
+                $data[$leadBlockName] = $this->sanitizeHelper->removeBrokenCharacters(trim(trim($block ?? '', ':')));
             }
 
             foreach (self::LEAD_BLOCKS[$leadBlockName] as $leadField) {
