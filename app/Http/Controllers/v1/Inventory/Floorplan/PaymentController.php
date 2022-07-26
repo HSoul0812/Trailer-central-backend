@@ -46,7 +46,7 @@ class PaymentController extends RestfulController
         $this->paymentService = $paymentService;
         $this->inventoryRepository = $inventoryRepository;
 
-        $this->middleware('setDealerIdOnRequest')->only(['create']);
+        $this->middleware('setDealerIdOnRequest')->only(['create', 'downloadCsv']);
     }
    
 
