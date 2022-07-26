@@ -57,6 +57,16 @@ class TextrailPartService implements TextrailPartServiceInterface
         return $this->provider->getTextrailDumpStock();
     }
 
+    public function getAttributes(): array
+    {
+        return  $this->provider->getAttributes();
+    }
+
+    public function getAttribute(string $code): array
+    {
+        return $this->provider->getAttribute($code);
+    }
+
     public function getAllCategories(): array
     {
         return $this->provider->getTextrailCategories();

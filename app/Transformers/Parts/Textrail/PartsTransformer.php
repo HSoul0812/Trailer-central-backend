@@ -3,7 +3,9 @@
 namespace App\Transformers\Parts\Textrail;
 
 use App\Models\Parts\Textrail\Part;
+use App\Transformers\Parts\PartAttributeTransformer;
 use App\Transformers\Parts\PartsTransformerInterface;
+use League\Fractal\Resource\Collection;
 use League\Fractal\TransformerAbstract;
 
 class PartsTransformer extends TransformerAbstract implements PartsTransformerInterface
