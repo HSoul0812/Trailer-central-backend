@@ -995,4 +995,14 @@ class InventoryRepository implements InventoryRepositoryInterface
             'status' => Bill::STATUS_PAID,
         ]);
     }
+
+
+    /**
+     * @param int $dealerId
+     * @param array $params
+     * @return int
+     */
+    public function archiveInventory(int $dealerId, array $inventoryParams): int {
+        return Inventory::where('dealer_id', $dealerId)->update($inventoryParams);
+    }
 }
