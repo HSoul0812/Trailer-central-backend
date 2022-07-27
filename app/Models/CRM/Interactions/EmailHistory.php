@@ -2,10 +2,12 @@
 
 namespace App\Models\CRM\Interactions;
 
+use App\Models\CRM\Email\Attachment;
 use App\Models\CRM\Leads\Lead;
 use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 /**
@@ -141,5 +143,13 @@ class EmailHistory extends Model
     public function interactionMessage(): MorphOne
     {
         return $this->morphOne(InteractionMessage::class, 'interactionMessage', 'tb_name', 'tb_primary_id');
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(Attachment::class, 'message_id', 'message_id');
     }
 }

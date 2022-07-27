@@ -335,6 +335,8 @@ $api->version('v1', function ($route) {
     $route->get('website/{websiteId}/website-config', 'App\Http\Controllers\v1\Website\Config\WebsiteConfigController@index');
     $route->put('website/{websiteId}/website-config', 'App\Http\Controllers\v1\Website\Config\WebsiteConfigController@createOrUpdate')->where('websiteId', '[0-9]+');
 
+    $route->get('website/{websiteId}/extra-website-config', 'App\Http\Controllers\v1\Website\Config\ExtraWebsiteConfigController@index');
+
     $route->get('website/{websiteId}/call-to-action', 'App\Http\Controllers\v1\Website\Config\CallToActionController@index');
     $route->put('website/{websiteId}/call-to-action', 'App\Http\Controllers\v1\Website\Config\CallToActionController@createOrUpdate')->where('websiteId', '[0-9]+');
 
@@ -663,8 +665,17 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('user/quotes', 'App\Http\Controllers\v1\Dms\UnitSaleController@index');
-
         $route->put('user/quotes/bulk-archive', 'App\Http\Controllers\v1\Dms\UnitSaleController@bulkArchive');
+        
+        /*
+        |--------------------------------------------------------------------------
+        | Quotes Refunds
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('user/refunds', 'App\Http\Controllers\v1\Dms\User\UserRefundsController@index');
 
         /*
         |--------------------------------------------------------------------------
@@ -689,6 +700,7 @@ $api->version('v1', function ($route) {
         $route->group(['prefix' => 'user/dealer-location/{locationId}'], function ($route) {
             $route->get('/mileage-fee', 'App\Http\Controllers\v1\User\DealerLocationMileageFeeController@index');
             $route->post('/mileage-fee', 'App\Http\Controllers\v1\User\DealerLocationMileageFeeController@create');
+            $route->post('/mileage-fee/all', 'App\Http\Controllers\v1\User\DealerLocationMileageFeeController@bulkCreate');
             $route->delete('/mileage-fee/{feeId}', 'App\Http\Controllers\v1\User\DealerLocationMileageFeeController@delete');
         });
 
@@ -968,8 +980,8 @@ $api->version('v1', function ($route) {
                     'prefix' => 'template',
                     'middleware' => 'emailbuilder.template.validate'
                 ], function ($route) {
-                    /*$route->get('/', 'App\Http\Controllers\v1\CRM\Email\TemplateController@index');
-                    $route->put('/', 'App\Http\Controllers\v1\CRM\Email\TemplateController@create');
+                    $route->get('/', 'App\Http\Controllers\v1\CRM\Email\TemplateController@index');
+                    /*$route->put('/', 'App\Http\Controllers\v1\CRM\Email\TemplateController@create');
                     $route->get('{id}', 'App\Http\Controllers\v1\CRM\Email\TemplateController@show')->where('id', '[0-9]+');
                     $route->post('{id}', 'App\Http\Controllers\v1\CRM\Email\TemplateController@update')->where('id', '[0-9]+');
                     $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Email\TemplateController@destroy')->where('id', '[0-9]+');*/
@@ -981,8 +993,8 @@ $api->version('v1', function ($route) {
                     'prefix' => 'campaign',
                     'middleware' => 'emailbuilder.campaign.validate'
                 ], function ($route) {
-                    /*$route->get('/', 'App\Http\Controllers\v1\CRM\Email\CampaignController@index');
-                    $route->put('/', 'App\Http\Controllers\v1\CRM\Email\CampaignController@create');
+                    $route->get('/', 'App\Http\Controllers\v1\CRM\Email\CampaignController@index');
+                    /*$route->put('/', 'App\Http\Controllers\v1\CRM\Email\CampaignController@create');
                     $route->get('{id}', 'App\Http\Controllers\v1\CRM\Email\CampaignController@show')->where('id', '[0-9]+');
                     $route->post('{id}', 'App\Http\Controllers\v1\CRM\Email\CampaignController@update')->where('id', '[0-9]+');
                     $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Email\CampaignController@destroy')->where('id', '[0-9]+');*/
@@ -994,8 +1006,8 @@ $api->version('v1', function ($route) {
                     'prefix' => 'blast',
                     'middleware' => 'emailbuilder.blast.validate'
                 ], function ($route) {
-                    /*$route->get('/', 'App\Http\Controllers\v1\CRM\Email\BlastController@index');
-                    $route->put('/', 'App\Http\Controllers\v1\CRM\Email\BlastController@create');
+                    $route->get('/', 'App\Http\Controllers\v1\CRM\Email\BlastController@index');
+                    /*$route->put('/', 'App\Http\Controllers\v1\CRM\Email\BlastController@create');
                     $route->get('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@show')->where('id', '[0-9]+');
                     $route->post('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@update')->where('id', '[0-9]+');
                     $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@destroy')->where('id', '[0-9]+');*/

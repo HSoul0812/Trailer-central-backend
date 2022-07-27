@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\User\User;
 use App\Models\CRM\Dms\UnitSale\TradeIn;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 /**
  * Class UnitSale
@@ -106,21 +107,31 @@ class UnitSale extends Model implements GenericSaleInterface
 
     public function getStatusAttribute()
     {
+        // A simple closure to use locally to convert status
+        // to Title Case
+        $statusToTitle = function(string $status): string {
+            return Str::title(str_replace('_', ' ', $status));
+        };
+        
+        if ($this->is_sold || $this->is_po) {
+            return $statusToTitle(self::QUOTE_STATUS_COMPLETED);
+        }
+
         if (!empty($this->is_archived)) {
-            return 'Archived';
+            return $statusToTitle(self::QUOTE_STATUS_ARCHIVED);
         }
-        if ($this->is_po === 1) {
-            return 'Completed Deal';
-        }
+
         if (empty($this->paid_amount)) {
-            return 'Open';
+            return $statusToTitle(self::QUOTE_STATUS_OPEN);
         }
 
         $balance = (float) $this->total_price - (float) $this->paid_amount;
+
         if ($balance > 0) {
-            return 'Deal';
+            return $statusToTitle(self::QUOTE_STATUS_DEAL);
         }
-        return 'Completed Deal';
+
+        return $statusToTitle(self::QUOTE_STATUS_COMPLETED);
     }
 
     public function salesPerson()

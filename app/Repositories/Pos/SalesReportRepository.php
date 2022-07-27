@@ -22,11 +22,9 @@ class SalesReportRepository implements SalesReportRepositoryInterface
     public const MIXED_PARTS_LABORS_REPORT_TYPE = 'parts_labors';
 
     public const CUSTOM_REPORT_TYPES = [
-        self::MIXED_REPORT_TYPE,
         self::PARTS_REPORT_TYPE,
         self::UNITS_REPORT_TYPE,
         self::LABORS_REPORT_TYPE,
-        self::MIXED_PARTS_LABORS_REPORT_TYPE,
     ];
 
     private const CUSTOM_PARAMS_LABOR = 'labor';
@@ -103,15 +101,15 @@ class SalesReportRepository implements SalesReportRepositoryInterface
         }
 
         if (empty($params['report_type'])) {
-            $params['report_type'] = self::MIXED_REPORT_TYPE;
+            $params['report_type'][] = self::MIXED_REPORT_TYPE;
         }
-
+        
         // to prevent mix queries when there are exclusive filters
-        if ($params['report_type'] === self::PARTS_REPORT_TYPE) {
+        if (in_array(self::PARTS_REPORT_TYPE, $params['report_type'])) {
             $params['major_unit_category'] = '';
             $params['model'] = '';
             $params['year'] = '';
-        } elseif ($params['report_type'] === self::UNITS_REPORT_TYPE) {
+        } elseif (in_array(self::UNITS_REPORT_TYPE, $params['report_type'])) {
             $params['part_category'] = '';
         }
 
@@ -207,8 +205,8 @@ SQL;
                     DATE_FORMAT(qi.invoice_date, '%M') AS month,
                     DATE_FORMAT(qi.invoice_date, '%d') AS day,
                     DATE_FORMAT(qi.invoice_date, '%Y-%m-%d') AS date,
-                    IFNULL(i.title, i.stock) AS title,
-                    i.stock AS reference,
+                    IFNULL(i.title, i.stock) COLLATE utf8_general_ci AS title,
+                    i.stock COLLATE utf8_general_ci AS reference,
                     @cost:=IFNULL(iitem.cost,0) * ii.qty AS cost,
                     ROUND(IFNULL(qi.discount, 0), 2) AS invoice_discount,
                     @actual_price:=IFNULL(ii.unit_price,0) * ii.qty AS price,
@@ -253,8 +251,8 @@ SQL;
                         DATE_FORMAT(ps.created_at, '%M') AS month,
                         DATE_FORMAT(ps.created_at, '%d') AS day,
                         DATE_FORMAT(ps.created_at, '%Y-%m-%d') AS date,
-                        IFNULL(i.title, i.stock) AS title,
-                        i.stock AS reference,
+                        IFNULL(i.title, i.stock) COLLATE utf8_general_ci AS title,
+                        i.stock COLLATE utf8_general_ci AS reference,
                         @cost:=IFNULL(iitem.cost,0) * psp.qty AS cost,
                         ROUND(IFNULL(ps.discount, 0), 2) AS invoice_discount,
                         @actual_price:=IFNULL(psp.price,0) * psp.qty AS price,
@@ -285,45 +283,48 @@ SQL;
                           {$this->customReportHelpers['inventoryWhere']['inventory_pos']}
 SQL;
 
-        switch ($params['report_type']) {
-            case self::MIXED_REPORT_TYPE:
+                            
+        if (in_array(self::PARTS_REPORT_TYPE, $params['report_type'])
+            && in_array(self::UNITS_REPORT_TYPE, $params['report_type']) 
+            && in_array(self::LABORS_REPORT_TYPE, $params['report_type'])) {
                 $boundParams = array_merge(
                     $this->getCustomInventoryParams($params),
-                    $this->getCustomPartParams($params)
+                    $this->getCustomPartParams($params),
+                    $this->getCustomLaborParams($params)
                 );
-
-                $sql = "$partsSQL \nUNION\n $inventorySQL";
-
-                break;
-            case self::PARTS_REPORT_TYPE:
-                $boundParams = $this->getCustomPartParams($params);
-
-                $sql = $partsSQL;
-
-                break;
-            case self::LABORS_REPORT_TYPE:
-                $boundParams = $this->getCustomLaborParams($params);
-
-                $sql = $this->getCustomSaleReportLaborQuery();
-
-                break;
-            case self::MIXED_PARTS_LABORS_REPORT_TYPE:
+                $sql = "$partsSQL \nUNION\n $inventorySQL \nUNION\n " . $this->getCustomSaleReportLaborQuery();
+        } elseif (in_array(self::PARTS_REPORT_TYPE, $params['report_type'])
+            && in_array(self::LABORS_REPORT_TYPE, $params['report_type'])) {
                 $boundParams = array_merge(
                     $this->getCustomLaborParams($params),
                     $this->getCustomPartParams($params)
                 );
-
                 $sql = "$partsSQL \nUNION\n " . $this->getCustomSaleReportLaborQuery();
-
-                break;
-            default:
-                $boundParams = $this->getCustomInventoryParams($params);
-
-                $sql = $inventorySQL;
-
-                break;
+        } elseif (in_array(self::PARTS_REPORT_TYPE, $params['report_type'])
+            && in_array(self::UNITS_REPORT_TYPE, $params['report_type'])) {
+                $boundParams = array_merge(
+                    $this->getCustomInventoryParams($params),
+                    $this->getCustomPartParams($params)
+                );
+                $sql = "$partsSQL \nUNION\n $inventorySQL";
+        } elseif (in_array(self::LABORS_REPORT_TYPE, $params['report_type'])
+            && in_array(self::UNITS_REPORT_TYPE, $params['report_type'])) {
+                $boundParams = array_merge(
+                    $this->getCustomLaborParams($params),
+                    $this->getCustomInventoryParams($params)
+                );
+                $sql = "$inventorySQL \nUNION\n " . $this->getCustomSaleReportLaborQuery();
+        } elseif (count($params['report_type']) == 1 && in_array(self::PARTS_REPORT_TYPE, $params['report_type'])) {
+            $boundParams = $this->getCustomPartParams($params);
+            $sql = $partsSQL;
+        } elseif (count($params['report_type']) == 1 && in_array(self::LABORS_REPORT_TYPE, $params['report_type'])) {
+            $boundParams = $this->getCustomLaborParams($params);
+            $sql = $this->getCustomSaleReportLaborQuery();
+        } else {
+            $boundParams = $this->getCustomInventoryParams($params);
+            $sql = $inventorySQL;
         }
-
+        
         return ['sql' => $sql, 'params' => $boundParams];
     }
 

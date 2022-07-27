@@ -9,6 +9,7 @@ class GetDealerLocationRequest extends Request
     use DealerLocationRequestTrait;
 
     protected $rules = [
-        'dealer_id' => 'integer|min:1|required|exists:dealer,dealer_id'
+        'dealer_id' => 'integer|min:1|required|exists:dealer,dealer_id',
+        'with_linked_accounts' => 'integer',
     ];
 }

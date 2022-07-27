@@ -112,10 +112,7 @@ class LeadTransformer extends TransformerAbstract
             return [];
         }
 
-        $salesPersonTransformer = app()->make(SalesPersonTransformer::class);
-        $emailHistoryTransformer = app()->make(EmailHistoryTransformer::class);
-
-        return $this->collection($lead->interactions, new InteractionTransformer($salesPersonTransformer, $emailHistoryTransformer));
+        return $this->collection($lead->interactions, app()->make(InteractionTransformer::class));
     }
 
     public function includeTextLogs(Lead $lead)

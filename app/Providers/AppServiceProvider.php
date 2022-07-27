@@ -139,6 +139,8 @@ use App\Services\Inventory\InventoryService;
 use App\Services\Inventory\InventoryServiceInterface;
 use App\Repositories\Inventory\Manufacturers\BrandRepositoryInterface;
 use App\Repositories\Inventory\Manufacturers\BrandRepository;
+use App\Repositories\Marketing\Facebook\ErrorRepository;
+use App\Repositories\Marketing\Facebook\ErrorRepositoryInterface;
 use App\Services\Inventory\InventoryAttributeService;
 use App\Services\Inventory\InventoryAttributeServiceInterface;
 use App\Services\Pos\CustomSalesReportExporterService;
@@ -216,6 +218,8 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('valid_include', 'App\Rules\ValidInclude@validate');
         \Validator::extend('location_belongs_to_dealer', 'App\Rules\Locations\LocationBelongsToDealer@passes');
         \Validator::extend('bin_belongs_to_dealer', 'App\Rules\Bins\BinBelongsToDealer@passes');
+        \Validator::extend('valid_location_email', 'App\Rules\DealerLocation\EmailValid@passes');
+        \Validator::extend('valid_password', 'App\Rules\User\ValidPassword@passes');
 
         Builder::macro('whereLike', function($attributes, string $searchTerm) {
             foreach(array_wrap($attributes) as $attribute) {
@@ -357,6 +361,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(CustomOverlayRepositoryInterface::class, CustomOverlayRepository::class);
 
         $this->app->bind(ShowroomBulkUpdateRepositoryInterface::class, ShowroomBulkUpdateRepository::class);
+
+        $this->app->bind(ErrorRepositoryInterface::class, ErrorRepository::class);
 
         $this->app->register(PhoneServiceProvider::class);
     }
