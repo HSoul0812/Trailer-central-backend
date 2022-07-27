@@ -26,6 +26,7 @@ class QuoteTransformer extends TransformerAbstract
             'inventory_vin' => $quote->inventory_vin,
             'status' => $quote->status,
             'location' => json_decode(json_encode($quote->location, JSON_PARTIAL_OUTPUT_ON_ERROR)),
+            'completed_at' => $quote->completed_at,
         ];
     }
 }

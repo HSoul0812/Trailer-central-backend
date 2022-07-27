@@ -27,6 +27,14 @@ interface ErrorRepositoryInterface extends Repository {
     public function dismissAll(int $marketplaceId, int $inventoryId = 0): Collection;
 
     /**
+     * Dismiss All Active Errors on Marketplace Integration
+     * 
+     * @param int $marketplaceId
+     * @return Collection<Error>
+     */
+    public function dismissAllActiveForIntegration(int $marketplaceId): Collection;
+
+    /**
      * Get All Active Errors on Dealer
      * 
      * @param int $dealerId

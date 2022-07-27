@@ -46,7 +46,7 @@ class FilterController extends RestfulController
         $request = new GetFiltersRequest($request->all());
 
         if ($request->validate()) {
-            return $this->response->collection($this->filters->getAll($request->all()), new FilterTransformer);
+            return $this->response->collection($this->filters->getAllEcomm(), new FilterTransformer);
         }
 
         return $this->response->errorBadRequest();

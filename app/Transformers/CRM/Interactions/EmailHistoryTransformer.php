@@ -10,9 +10,9 @@ class EmailHistoryTransformer extends TransformerAbstract {
 
     /**
      * Transform Interaction
-     * 
-     * @param Interaction $emailHistory
-     * @return type
+     *
+     * @param EmailHistory $emailHistory
+     * @return array
      */
     public function transform(EmailHistory $emailHistory)
     {
