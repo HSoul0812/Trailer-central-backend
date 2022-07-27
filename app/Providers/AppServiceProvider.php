@@ -67,6 +67,8 @@ use App\Repositories\Showroom\ShowroomFieldsMappingRepository;
 use App\Repositories\Showroom\ShowroomFieldsMappingRepositoryInterface;
 use App\Repositories\Pos\SalesReportRepository;
 use App\Repositories\Pos\SalesReportRepositoryInterface;
+use App\Repositories\Subscription\SubscriptionRepository;
+use App\Repositories\Subscription\SubscriptionRepositoryInterface;
 use App\Repositories\User\DealerLocationMileageFeeRepository;
 use App\Repositories\User\DealerLocationMileageFeeRepositoryInterface;
 use App\Repositories\User\DealerLocationQuoteFeeRepository;
@@ -116,6 +118,8 @@ use App\Services\File\FileServiceInterface;
 use App\Services\File\ImageService;
 use App\Services\Inventory\CustomOverlay\CustomOverlayService;
 use App\Services\Inventory\CustomOverlay\CustomOverlayServiceInterface;
+use App\Services\Subscription\StripeService;
+use App\Services\Subscription\StripeServiceInterface;
 use App\Services\User\DealerIntegrationService;
 use App\Services\User\DealerIntegrationServiceInterface;
 use App\Services\Inventory\Packages\PackageService;
@@ -363,6 +367,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ShowroomBulkUpdateRepositoryInterface::class, ShowroomBulkUpdateRepository::class);
 
         $this->app->bind(ErrorRepositoryInterface::class, ErrorRepository::class);
+
+        $this->app->bind(SubscriptionRepositoryInterface::class, SubscriptionRepository::class);
+        $this->app->bind(StripeServiceInterface::class, StripeService::class);
 
         $this->app->register(PhoneServiceProvider::class);
     }
