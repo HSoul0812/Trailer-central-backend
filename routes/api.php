@@ -222,6 +222,15 @@ $api->version('v1', function ($route) {
     */
 
     /**
+     * Inventory Bulk
+     */
+    $route->get('inventory/bulk', 'App\Http\Controllers\v1\Bulk\Inventory\BulkUploadController@index');
+    $route->post('inventory/bulk', 'App\Http\Controllers\v1\Bulk\Inventory\BulkUploadController@create');
+    $route->get('inventory/bulk/{id}', 'App\Http\Controllers\v1\Bulk\Inventory\BulkUploadController@show');
+    $route->put('inventory/bulk/{id}', 'App\Http\Controllers\v1\Bulk\Inventory\BulkUploadController@update');
+    $route->delete('inventory/bulk/{id}', 'App\Http\Controllers\v1\Bulk\Inventory\BulkUploadController@destroy');
+
+    /**
      * Inventory Overlay
      */
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
@@ -327,6 +336,7 @@ $api->version('v1', function ($route) {
     $route->put('website/{websiteId}/website-config', 'App\Http\Controllers\v1\Website\Config\WebsiteConfigController@createOrUpdate')->where('websiteId', '[0-9]+');
 
     $route->get('website/{websiteId}/extra-website-config', 'App\Http\Controllers\v1\Website\Config\ExtraWebsiteConfigController@index');
+    $route->put('website/{websiteId}/extra-website-config', 'App\Http\Controllers\v1\Website\Config\ExtraWebsiteConfigController@createOrUpdate');
 
     $route->get('website/{websiteId}/call-to-action', 'App\Http\Controllers\v1\Website\Config\CallToActionController@index');
     $route->put('website/{websiteId}/call-to-action', 'App\Http\Controllers\v1\Website\Config\CallToActionController@createOrUpdate')->where('websiteId', '[0-9]+');

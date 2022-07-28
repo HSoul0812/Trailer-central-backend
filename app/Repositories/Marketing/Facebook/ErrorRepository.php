@@ -212,6 +212,32 @@ class ErrorRepository implements ErrorRepositoryInterface {
     }
 
     /**
+     * Dismiss All Active Errors on Marketplace Integration
+     * 
+     * @param int $marketplaceId
+     * @return Collection<Error>
+     */
+    public function dismissAllActiveForIntegration(int $marketplaceId): Collection
+    {
+        // Get Errors
+        $errors = $this->getAll([
+            'marketplace_id' => $marketplaceId,
+            'dismissed' => false,
+        ]);
+
+        // Get First
+        $collection = new Collection();
+        foreach ($errors as $error) {
+            $collection->push($this->update([
+                'id' => $error->id,
+                'dismissed' => true
+            ]));
+        }
+
+        return $collection;
+    }
+
+    /**
      * Get All Active Errors on Dealer
      * 
      * @param int $dealerId

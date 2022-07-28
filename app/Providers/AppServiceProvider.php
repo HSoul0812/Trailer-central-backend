@@ -139,6 +139,8 @@ use App\Services\Inventory\InventoryService;
 use App\Services\Inventory\InventoryServiceInterface;
 use App\Repositories\Inventory\Manufacturers\BrandRepositoryInterface;
 use App\Repositories\Inventory\Manufacturers\BrandRepository;
+use App\Repositories\Marketing\Facebook\ErrorRepository;
+use App\Repositories\Marketing\Facebook\ErrorRepositoryInterface;
 use App\Services\Inventory\InventoryAttributeService;
 use App\Services\Inventory\InventoryAttributeServiceInterface;
 use App\Services\Pos\CustomSalesReportExporterService;
@@ -261,6 +263,7 @@ class AppServiceProvider extends ServiceProvider
     public function register()
     {
         //
+        $this->app->bind('App\Repositories\Bulk\Inventory\BulkUploadRepositoryInterface', 'App\Repositories\Bulk\Inventory\BulkUploadRepository');
         $this->app->bind('App\Repositories\Website\Parts\FilterRepositoryInterface', 'App\Repositories\Website\Parts\FilterRepository');
         $this->app->bind('App\Repositories\Website\Blog\PostRepositoryInterface', 'App\Repositories\Website\Blog\PostRepository');
         $this->app->bind(BulkUploadRepositoryInterface::class, BulkUploadRepository::class);
@@ -357,6 +360,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(CustomOverlayRepositoryInterface::class, CustomOverlayRepository::class);
 
         $this->app->bind(ShowroomBulkUpdateRepositoryInterface::class, ShowroomBulkUpdateRepository::class);
+
+        $this->app->bind(ErrorRepositoryInterface::class, ErrorRepository::class);
 
         $this->app->register(PhoneServiceProvider::class);
     }
