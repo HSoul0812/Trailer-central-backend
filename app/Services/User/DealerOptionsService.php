@@ -410,7 +410,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
      */
     public function isAllowedParts(int $dealerId): bool
     {
-      return $this->dealerPartRepository->get(['dealer_id' => $dealerId])->exists();
+      return !is_null($this->dealerPartRepository->get(['dealer_id' => $dealerId]));
     }
 
     public function deactivateUserAccounts(int $dealerId): bool {
