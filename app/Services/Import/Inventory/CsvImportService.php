@@ -125,14 +125,14 @@ class CsvImportService implements CsvImportServiceInterface
         "notes" => true,
         "images" => true,
         "gvwr" => true,
-        'axle_capacity' => true,
-        'payload_capacity' => true,
+        "axle_capacity" => true,
+        "payload_capacity" => true,
         "is_special" => true,
         "is_featured" => true,
-        'is_archived' => true,
-        'append_images' => true,
-        'replace_images' => true,
-        'video_embed_code' => true
+        "is_archived" => true,
+        "append_images" => true,
+        "replace_images" => true,
+        "video_embed_code" => true
     ];
 
     // mapping between import column names and field names in database:
@@ -165,11 +165,11 @@ class CsvImportService implements CsvImportServiceInterface
         "weight" => array("weight", "weight (lbs)", "weight lbs", "curb weight"),
         "status" => "status",
 
-        'cost_of_unit' => array('unit cost', 'admin-unit cost', 'cost of unit', 'admin-cost of unit'),
-        'cost_of_shipping' => array('shipping cost', 'admin-shipping cost', 'cost of shipping', 'admin-cost of shipping'),
-        'cost_of_prep' => array('prep cost', 'admin-prep cost', 'cost of prep', 'admin-cost of prep'),
-        'total_of_cost' => array('total cost', 'admin-total cost'),
-        'minimum_selling_price' => array('min sell price', 'admin-min sell price', 'msp'),
+        "cost_of_unit" => array("unit cost", "admin-unit cost", "cost of unit", "admin-cost of unit"),
+        "cost_of_shipping" => array("shipping cost", "admin-shipping cost", "cost of shipping", "admin-cost of shipping"),
+        "cost_of_prep" => array("prep cost", "admin-prep cost", "cost of prep", "admin-cost of prep"),
+        "total_of_cost" => array("total cost", "admin-total cost"),
+        "minimum_selling_price" => array("min sell price", "admin-min sell price", "msp"),
         "notes" => "notes",
         "images" => array("images", "photourls", "images (comma seperated)", "images (comma separated)"),
         "gvwr" => array("gvwr", "gvwr (lbs)", "gvwr lbs", "gross weight"),
@@ -177,11 +177,11 @@ class CsvImportService implements CsvImportServiceInterface
         "payload_capacity" => array("payload capacity", "payload weight", "payload capacity (lbs)", "payload capacity lbs", "payload (lbs)", "payload lbs"),
         "is_special" => array("is_special", "is special", "is on special", "special", "website special"),
         "is_featured" => array("is_featured", "is featured", "featured", "website featured"),
-        'is_archived' => array('archived', 'is archived'),
-        'append_images' => array('append images on import', 'append image', 'append images', 'use images', 'use image'),
-        'replace_images' => array('replace images', 'replace_images'),
-        'image_mode' => array('image mode', 'images mode', 'img mode'),
-        'video_embed_code' => array('video_embed_code', 'video embed code')
+        "is_archived" => array("archived", "is archived"),
+        "append_images" => array("append images on import", "append image", "append images", "use images", "use image"),
+        "replace_images" => array("replace images", "replace_images"),
+        "image_mode" => array("image mode", "images mode", "img mode"),
+        "video_embed_code" => array("video_embed_code", "video embed code")
     );
 
     /**
@@ -202,59 +202,59 @@ class CsvImportService implements CsvImportServiceInterface
              * this list.  The real categories are added via query in _configure() below... in which the categories and legacy categories are added.
              */
             "list" => array(
-                'camping' => 'camping_rv',
-                'rv' => 'camping_rv',
-                'camping rv' => 'camping_rv',
-                'cargo' => 'cargo_enclosed',
-                'enclosed' => 'cargo_enclosed',
-                'cargo enclosed' => 'cargo_enclosed',
-                'car' => 'car_racing',
-                'racing' => 'car_racing',
-                'car racing' => 'car_racing',
-                'carhauler' => 'car_racing',
-                'car hauler' => 'car_racing',
-                'flatbed trailer' => 'flatbed',
-                'part' => 'other',
-                'stock' => 'stock_stock-combo',
-                'stock trailer' => 'stock_stock-combo',
-                'stock_trailer' => 'stock_stock-combo',
-                'stock stock-combo' => 'stock_stock-combo',
-                'vending' => 'vending_concession',
-                'vending concession' => 'vending_concession',
-                'vending_consession' => 'vending_concession',
-                'class a' => 'class_a',
-                'class b' => 'class_b',
-                'class c' => 'class_c',
-                'truck bed' => 'bed_equipment',
-                'bed equipment' => 'bed_equipment',
-                'tow dolly' => 'tow_dolly',
-                'equipment trailer' => 'equipment',
-                'dolly' => 'tow_dolly',
-                'vehicle atv' => 'vehicle_atv',
-                'vehicle car' => 'vehicle_car',
-                'vehicle golf cart' => 'golf_cart',
-                'vehicle motorcycle' => 'vehicle_motorcycle',
-                'vehicle truck' => 'vehicle_truck',
-                'vehicle suv' => 'vehicle_suv',
-                'sport side-by-side' => 'sport_side-by-side',
-                'utility side-by-side' => 'utility_side-by-side',
-                'Utility Side-by-Side (UTV)' => 'utility_side-by-side',
-                'snowmobile vehicle' => 'vehicle_snowmobile',
-                'personal watercraft' => 'personal_watercraft',
-                'canoe' => 'canoe-kayak',
-                'kayak' => 'canoe-kayak',
-                'power boat' => 'powerboat',
-                'equip tractor' => 'equip_tractor',
-                'equip attachment' => 'equip_attachment',
-                'equip farm' => 'equip_farm-ranch',
-                'equip ranch' => 'equip_farm-ranch',
-                'equip lawn' => 'equip_lawn',
-                'rv.class-a' => 'class_a',
-                'rv.class-b' => 'class_b',
-                'rv.class-c' => 'class_c',
-                'semi-trailer_reefer' => 'semi_reefer',
-                'semi-trailer_grain-hopper' => 'semi_grain-hopper',
-                'semi-trailer_livestock' => 'semi_livestock',
+                "camping" => "camping_rv",
+                "rv" => "camping_rv",
+                "camping rv" => "camping_rv",
+                "cargo" => "cargo_enclosed",
+                "enclosed" => "cargo_enclosed",
+                "cargo enclosed" => "cargo_enclosed",
+                "car" => "car_racing",
+                "racing" => "car_racing",
+                "car racing" => "car_racing",
+                "carhauler" => "car_racing",
+                "car hauler" => "car_racing",
+                "flatbed trailer" => "flatbed",
+                "part" => "other",
+                "stock" => "stock_stock-combo",
+                "stock trailer" => "stock_stock-combo",
+                "stock_trailer" => "stock_stock-combo",
+                "stock stock-combo" => "stock_stock-combo",
+                "vending" => "vending_concession",
+                "vending concession" => "vending_concession",
+                "vending_consession" => "vending_concession",
+                "class a" => "class_a",
+                "class b" => "class_b",
+                "class c" => "class_c",
+                "truck bed" => "bed_equipment",
+                "bed equipment" => "bed_equipment",
+                "tow dolly" => "tow_dolly",
+                "equipment trailer" => "equipment",
+                "dolly" => "tow_dolly",
+                "vehicle atv" => "vehicle_atv",
+                "vehicle car" => "vehicle_car",
+                "vehicle golf cart" => "golf_cart",
+                "vehicle motorcycle" => "vehicle_motorcycle",
+                "vehicle truck" => "vehicle_truck",
+                "vehicle suv" => "vehicle_suv",
+                "sport side-by-side" => "sport_side-by-side",
+                "utility side-by-side" => "utility_side-by-side",
+                "Utility Side-by-Side (UTV)" => "utility_side-by-side",
+                "snowmobile vehicle" => "vehicle_snowmobile",
+                "personal watercraft" => "personal_watercraft",
+                "canoe" => "canoe-kayak",
+                "kayak" => "canoe-kayak",
+                "power boat" => "powerboat",
+                "equip tractor" => "equip_tractor",
+                "equip attachment" => "equip_attachment",
+                "equip farm" => "equip_farm-ranch",
+                "equip ranch" => "equip_farm-ranch",
+                "equip lawn" => "equip_lawn",
+                "rv.class-a" => "class_a",
+                "rv.class-b" => "class_b",
+                "rv.class-c" => "class_c",
+                "semi-trailer_reefer" => "semi_reefer",
+                "semi-trailer_grain-hopper" => "semi_grain-hopper",
+                "semi-trailer_livestock" => "semi_livestock",
             )
         ),
         "vin" => array(
@@ -265,13 +265,13 @@ class CsvImportService implements CsvImportServiceInterface
         "condition" => array(
             "type" => "enum",
             "list" => array(
-                'new' => 'new',
-                'used' => 'used',
+                "new" => "new",
+                "used" => "used",
 
-                'remanufactured' => 'remanufactured',
+                "remanufactured" => "remanufactured",
                 // is the dashed version necessary?
-                're-manufactured' => 'remanufactured',
-                'remfg' => 'remanufactured',
+                "re-manufactured" => "remanufactured",
+                "remfg" => "remanufactured",
             )
         ),
         "length" => array("type" => "measurement"),
@@ -281,39 +281,39 @@ class CsvImportService implements CsvImportServiceInterface
         /*"type"                  => array(
             "type" => "enum",
             "list" => array(
-                'trailer'       => '1',
-                'other'         => '1',
-                'horsetrailer'  => '2',
-                'rv'            => '3',
-                'vehicle'       => '4',
-                'watercraft'    => '5',
-                'equipment'     => '6',
-                'semitrailer'   => '7',
-                'sportsvehicle' => '8',
+                "trailer"       => "1",
+                "other"         => "1",
+                "horsetrailer"  => "2",
+                "rv"            => "3",
+                "vehicle"       => "4",
+                "watercraft"    => "5",
+                "equipment"     => "6",
+                "semitrailer"   => "7",
+                "sportsvehicle" => "8",
             )
         ),*/
         "status" => array(
             "type" => "enum",
             "list" => array(
-                'available' => 1,
-                'sold' => 2,
-                'on order' => 3,
-                'pending sale' => 4,
-                'special order' => 5
+                "available" => 1,
+                "sold" => 2,
+                "on order" => 3,
+                "pending sale" => 4,
+                "special order" => 5
             )
         ),
         "is_special" => array(
             "type" => "enum",
             "list" => array(
-                'yes' => '1',
-                'no' => '0'
+                "yes" => "1",
+                "no" => "0"
             )
         ),
         "is_archived" => array(
             "type" => "enum",
             "list" => array(
-                'yes' => '1',
-                'no' => '0',
+                "yes" => "1",
+                "no" => "0",
             )
         ),
         "cost_of_unit" => array("type" => "decimal"),
@@ -324,8 +324,8 @@ class CsvImportService implements CsvImportServiceInterface
         "notes" => array("type" => "string"),
         "images" => array("type" => "string"),
         "gvwr" => array("type" => "string"),
-        'axle_capacity' => array("type" => "string"),
-        'msrp' => array("type" => "msrp"),
+        "axle_capacity" => array("type" => "string"),
+        "msrp" => array("type" => "msrp"),
         "location_phone" => array("type" => "location_phone")
     );
 
@@ -348,19 +348,19 @@ class CsvImportService implements CsvImportServiceInterface
      * @var string[]
      */
     static $locationColumns = array(
-        'location city',
-        'location country',
-        'location postal code',
-        'location region',
-        'location name'
+        "location city",
+        "location country",
+        "location postal code",
+        "location region",
+        "location name"
     );
 
     /**
      * @var string[]
      */
     static $ignorableColumns = array(
-        'admin-notes',
-        'created at date'
+        "admin-notes",
+        "created at date"
     );
 
     /**

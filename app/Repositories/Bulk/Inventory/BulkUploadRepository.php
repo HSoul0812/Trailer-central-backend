@@ -17,9 +17,10 @@ class BulkUploadRepository implements BulkUploadRepositoryInterface {
 
     /**
      * @param $params
-     * @return mixed
+     * @return BulkUpload
      */
-    public function create($params) {
+    public function create($params): BulkUpload
+    {
         $csvKey = $this->storeCsv($params['csv_file']);
 
         $params['status'] = BulkUpload::PROCESSING;
@@ -43,15 +44,16 @@ class BulkUploadRepository implements BulkUploadRepositoryInterface {
      * @param $params
      * @return \App\Models\Bulk\Parts\BulkUpload|\Illuminate\Database\Query\Builder|null
      */
-    public function get($params) {
+    public function get($params): BulkUpload {
         return BulkUpload::where(array_key_first($params), current($params))->first();
     }
 
     /**
      * @param $params
-     * @return mixed
+     * @return \App\Models\Bulk\Parts\BulkUpload[]|\Illuminate\Database\Query\Builder|null
      */
-    public function getAll($params) {
+    public function getAll($params): BulkUpload
+    {
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 100;
@@ -76,7 +78,7 @@ class BulkUploadRepository implements BulkUploadRepositoryInterface {
      * @param $file
      * @return string
      */
-    private function storeCsv($file) {
+    private function storeCsv($file): string {
         $fileKey = Storage::disk('s3')->putFile(uniqid().'/'.$file->getClientOriginalName(), $file, 'public');
         return $fileKey;
     }

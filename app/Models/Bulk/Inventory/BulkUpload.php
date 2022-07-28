@@ -35,6 +35,9 @@ class BulkUpload extends Model {
 
     ];
 
+    /**
+     * @return mixed|null
+     */
     public function getValidationErrors()
     {
         if (empty($this->validation_errors)) {
