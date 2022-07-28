@@ -7,11 +7,14 @@ use App\Models\CRM\Dms\Quickbooks\Bill;
 use App\Models\CRM\Dms\Quickbooks\BillCategory;
 use App\Models\CRM\Dms\Quickbooks\BillItem;
 use App\Models\CRM\Dms\Quickbooks\BillPayment;
+use App\Models\Inventory\Inventory;
+use App\Repositories\Dms\Customer\InventoryRepositoryInterface;
 use App\Repositories\Traits\SortTrait;
 use App\Traits\Repository\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 
@@ -186,18 +189,52 @@ class BillRepository implements BillRepositoryInterface
      */
     public function get($params)
     {
-        $bill = Bill::findOrFail($params['id']);
-
-        return $bill;
+        $with = Arr::get($params, 'with', []);
+        
+        return Bill::query()
+            ->with($with)
+            ->findOrFail($params['id']);
     }
 
     /**
      * @param $params
      * @throws NotImplementedException
+     * @throws \Exception
      */
     public function delete($params)
     {
-        throw new NotImplementedException;
+        /** @var Bill $bill */
+        $bill = $this->get([
+            'id' => $params['id'],
+            'with' => [
+                'inventories',
+                'items',
+                'categories',
+                'payments'
+            ],
+        ]);
+        
+        // Note: The logic below is taken from https://operatebeyond.atlassian.net/browse/DMSS-645?focusedCommentId=30120
+        // First, we want to make sure to remove bill related data on the
+        // inventories that use this bill
+        $bill->inventories()->update([
+            'fp_committed' => null,
+            'fp_vendor' => null,
+            'fp_balance' => 0,
+            'fp_paid' => 0,
+            'fp_interest_paid' => 0,
+            'bill_id' => null,
+            'send_to_quickbooks' => 0,
+            'is_floorplan_bill' => 0,
+            'qb_sync_processed' => 0
+        ]);
+        
+        // Then, delete related records from the quickbook_approval table
+        // We need to do this before deleting all those data
+        $this->deleteRelatedQuickbookApprovals($bill);
+        
+        // After that, we start delete the related models
+        $this->deleteRelatedModels($bill);
     }
 
     /**
@@ -283,5 +320,29 @@ class BillRepository implements BillRepositoryInterface
         $queryString = str_replace(array('?'), array('\'%s\''), $query->toSql());
         $queryString = vsprintf($queryString, $query->getBindings());
         return current(DB::select(DB::raw("SELECT count(*) as row_count FROM ($queryString) as bill_count")))->row_count;
+    }
+
+    private function deleteRelatedQuickbookApprovals(Bill $bill)
+    {
+        /** @var BillPayment $payment */
+        foreach ($bill->payments as $payment) {
+            $payment->approvals()->delete();
+        }
+        
+        $bill->approvals()->delete();
+    }
+
+    /**
+     * @throws \Exception
+     */
+    private function deleteRelatedModels(Bill $bill)
+    {
+        // Here, we delete all the related models from the database
+        $bill->items()->delete();
+        $bill->categories()->delete();
+        $bill->payments()->delete();
+        
+        // After that, we delete the bill itself
+        $bill->delete();
     }
 }

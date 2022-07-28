@@ -73,12 +73,12 @@ class LeadTransformer extends TransformerAbstract
             'dealer_id' => $lead->dealer_id,
             'name' => $lead->full_name,
             'lead_types' => $lead->lead_types,
-            'email' => $this->sanitizeHelper->removeBrokenCharacters($lead->email_address),
+            'email' => is_string($lead->email_address) ? $this->sanitizeHelper->removeBrokenCharacters($lead->email_address) : $lead->email_address,
             'phone' => $lead->phone_number,
             'preferred_contact' => $lead->preferred_contact,
             'address' => $lead->full_address,
-            'comments' => $this->sanitizeHelper->removeBrokenCharacters($lead->comments),
-            'note' => $this->sanitizeHelper->removeBrokenCharacters($lead->note),
+            'comments' => is_string($lead->comments) ? $this->sanitizeHelper->removeBrokenCharacters($lead->comments) : $lead->comments,
+            'note' => is_string($lead->note) ? $this->sanitizeHelper->removeBrokenCharacters($lead->note) : $lead->note,
             'referral' => $lead->referral,
             'title' => $lead->title,
             'status' => ($lead->leadStatus) ? $lead->leadStatus->status : Lead::STATUS_UNCONTACTED,
@@ -112,10 +112,7 @@ class LeadTransformer extends TransformerAbstract
             return [];
         }
 
-        $salesPersonTransformer = app()->make(SalesPersonTransformer::class);
-        $emailHistoryTransformer = app()->make(EmailHistoryTransformer::class);
-
-        return $this->collection($lead->interactions, new InteractionTransformer($salesPersonTransformer, $emailHistoryTransformer));
+        return $this->collection($lead->interactions, app()->make(InteractionTransformer::class));
     }
 
     public function includeTextLogs(Lead $lead)

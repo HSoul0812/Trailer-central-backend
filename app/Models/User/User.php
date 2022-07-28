@@ -2,6 +2,7 @@
 
 namespace App\Models\User;
 
+use App\Models\Parts\Bin;
 use App\Models\User\Interfaces\PermissionsInterface;
 use App\Traits\Models\HasPermissionsStub;
 use Illuminate\Contracts\Auth\Authenticatable;
@@ -35,6 +36,8 @@ use Laravel\Cashier\Billable;
  * @property bool $isCrmActive
  * @property bool $is_dms_active
  * @property string $identifier
+ * @property integer $showroom
+ * @property string $showroom_dealers a PHP serialized object
  *
  * @method static Builder whereIn($column, $values, $boolean = 'and', $not = false)
  */
@@ -168,7 +171,8 @@ class User extends Model implements Authenticatable, PermissionsInterface
         'auto_import_hide',
         'import_config',
         'auto_msrp',
-        'auto_msrp_percent'
+        'auto_msrp_percent',
+        'from'
     ];
 
     protected $casts = [
@@ -184,7 +188,7 @@ class User extends Model implements Authenticatable, PermissionsInterface
     protected $hidden = [
 
     ];
-    
+
     public static function boot()
     {
         parent::boot();
@@ -274,10 +278,37 @@ class User extends Model implements Authenticatable, PermissionsInterface
         return $this->hasOneThrough(CrmUser::class, NewDealerUser::class, 'id', 'user_id', 'dealer_id', 'user_id');
     }
 
+    public function dealerParts(): HasOne
+    {
+        return $this->hasOne(DealerPart::class, 'dealer_id', 'dealer_id');
+    }
+
+    public function dealerClapp(): HasOne
+    {
+        return $this->hasOne(DealerClapp::class, 'dealer_id', 'dealer_id');
+    }
+
+    public function authToken(): HasOne
+    {
+        return $this
+            ->hasOne(AuthToken::class, 'user_id', 'dealer_id')
+            ->where('user_type', 'dealer');
+    }
+
     public function getIsCrmActiveAttribute(): bool
     {
         $crmUser = $this->crmUser()->first();
         return $crmUser instanceof CrmUser ? (bool)$crmUser->active : false;
+    }
+
+    public function getIsPartsActiveAttribute(): bool
+    {
+        return !empty($this->dealerParts);
+    }
+
+    public function getIsMarketingActiveAttribute(): bool
+    {
+        return !empty($this->dealerClapp);
     }
 
     public function getIsEcommerceActiveAttribute(): bool
@@ -328,14 +359,19 @@ class User extends Model implements Authenticatable, PermissionsInterface
         return $this->hasOne(Settings::class, 'dealer_id', 'dealer_id');
     }
 
-    public function getCrmLoginUrl(string $route = '')
+    public function bins() : HasMany
+    {
+        return $this->hasMany(Bin::class, 'dealer_id', 'dealer_id');
+    }
+
+    public function getCrmLoginUrl(string $route = '', bool $useNewDesign = false): string
     {
         $userService = app(UserService::class);
         $crmLoginString = $userService->getUserCrmLoginUrl($this->getAuthIdentifier());
         if ($route) {
             $crmLoginString .= '&r='.$route;
         }
-        return $crmLoginString;
+        return ($useNewDesign ? config('app.new_design_crm_url') : '') . $crmLoginString;
     }
 
     public function isSecondaryUser() : bool
@@ -351,7 +387,7 @@ class User extends Model implements Authenticatable, PermissionsInterface
     {
         return $this->dealer_id;
     }
-    
+
     /**
      * Set the user's password encryption method
      *

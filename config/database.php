@@ -143,10 +143,13 @@ return [
         ],
 
         'dealer-proxy' => [
-            'host' => env('REDIS_HOST', '127.0.0.1'),
-            'password' => env('REDIS_PASSWORD', null),
-            'port' => env('REDIS_PORT', '6379'),
-            'database' => env('DEALER_PROXY_REDIS_DB', '2'),
+            'host' => env('REDIS_HOST_PROXY', '127.0.0.1'),
+            'password' => env('REDIS_PASSWORD_PROXY', null),
+            'port' => env('REDIS_PORT_PROXY', '6379'),
+            'database' => env('DEALER_PROXY_REDIS_DB', '0'),
+            'options' => [
+                'prefix' => ''
+            ]
         ],
 
         'dealer-tunnels' => [

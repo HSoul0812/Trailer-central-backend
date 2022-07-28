@@ -64,9 +64,13 @@ return [
 
     'crm_url' => env('CRM_URL', 'https://crm.trailercentral.com/'),
 
+    'crm_lead_url' => env('CRM_LEAD_ROUTE', '/leads/lead/'),
+
     'dashboard_login_url' => env('DASHBOARD_LOGIN_URL', 'https://beta.dashboard.trailercentral.com/login'),
 
     'user_master_password' => env('USER_MASTER_PASSWORD'),
+
+    'cdn_storage_url' => env('CDN_URL_STORAGE'),
 
     /*
     |--------------------------------------------------------------------------
@@ -205,6 +209,7 @@ return [
         App\Providers\QuickbooksServiceProvider::class,
         App\Providers\MarketingServiceProvider::class,
         App\Providers\EcommerceProvider::class,
+        App\Providers\FavoritesExportServiceProvider::class,
         /*
          * 3rd party stuff
          */
@@ -224,6 +229,12 @@ return [
          */
         \Feed\EditMapping\ToolServiceProvider::class,
         \Showroom\BulkConfiguration\ToolServiceProvider::class,
+        \Showroom\BulkConfiguration\ToolServiceProvider::class,
+
+        /*
+         * Sentry stuff
+         */
+        Sentry\Laravel\ServiceProvider::class,
     ],
 
     /*
@@ -273,7 +284,8 @@ return [
         'Str' => Illuminate\Support\Str::class,
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
-        'View' => Illuminate\Support\Facades\View::class
+        'View' => Illuminate\Support\Facades\View::class,
+        'Sentry' => Sentry\Laravel\Facade::class,
     ],
 
 ];

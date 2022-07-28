@@ -50,6 +50,11 @@ class InteractionMessage extends Model
         'is_read',
     ];
 
+    protected $casts = [
+        'is_read' => 'boolean',
+        'hidden' => 'boolean'
+    ];
+
     /**
      * @return string
      */
@@ -91,6 +96,7 @@ class InteractionMessage extends Model
             $array['from_number'] = $message->from_number;
             $array['to_number'] = $message->to_number;
             $array['is_incoming'] = $helper->sanitizePhoneNumber($message->from_number) === $helper->sanitizePhoneNumber($lead->phone_number);
+            $array['files'] = $message->files->toArray();
 
             $array['interaction_id'] = null;
             $array['parent_message_id'] = null;
@@ -123,6 +129,7 @@ class InteractionMessage extends Model
             $array['from_number'] = null;
             $array['to_number'] = null;
             $array['user_name'] = null;
+            $array['files'] = [];
         }
 
         if ($this->tb_name === FbMessage::getTableName()) {
@@ -150,6 +157,7 @@ class InteractionMessage extends Model
             $array['to_name'] = null;
             $array['from_number'] = null;
             $array['to_number'] = null;
+            $array['files'] = [];
         }
 
         if (empty($dateSent)) {

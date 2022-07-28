@@ -6,6 +6,7 @@ use App\Models\Website\Image\WebsiteImage;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use App\Exceptions\NotImplementedException;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use InvalidArgumentException;
 
@@ -49,6 +50,10 @@ class WebsiteImageRepository implements WebsiteImageRepositoryInterface
     {
         if (!isset($params['id'])) {
             throw new InvalidArgumentException("Website Image ID is required");
+        }
+
+        if (isset($params['expires_at'])) {
+            $params['is_active'] = intval(Carbon::parse($params['expires_at'])->isFuture());
         }
 
         $image = WebsiteImage::findOrFail($params['id']);

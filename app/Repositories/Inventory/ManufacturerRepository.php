@@ -63,13 +63,16 @@ class ManufacturerRepository implements ManufacturerRepositoryInterface
         }
 
         if (isset($params['search_term'])) {
-            $query = $query->where('label', 'LIKE', '%' . $params['search_term'] . '%');
+            $query = $query->where(function ($q) use ($params) {
+                $q->where('label', 'LIKE', '%' . $params['search_term'] . '%')
+                    ->orWhere('name', 'LIKE', '%' . $params['search_term'] . '%');
+            });
         }
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
         }
-        
+
         return $query->paginate($params['per_page'])->appends($params);
     }
 

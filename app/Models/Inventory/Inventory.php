@@ -3,6 +3,7 @@ namespace App\Models\Inventory;
 
 use App\Helpers\SanitizeHelper;
 use App\Models\CRM\Dms\Customer\CustomerInventory;
+use App\Models\CRM\Dms\Quickbooks\Bill;
 use App\Models\CRM\Dms\ServiceOrder;
 use App\Models\Integration\LotVantage\DealerInventory;
 use App\Models\Inventory\Floorplan\Payment;
@@ -60,6 +61,7 @@ use Laravel\Scout\Searchable;
  * @property double $dealer_price,
  * @property double $monthly_payment,
  * @property int $year,
+ * @property int $chassis_year,
  * @property string $condition,
  * @property double $length,
  * @property double $width,
@@ -268,6 +270,7 @@ class Inventory extends Model
         'dealer_price',
         'monthly_payment',
         'year',
+        'chassis_year',
         'condition',
         'length',
         'width',
@@ -353,7 +356,9 @@ class Inventory extends Model
         'msrp' => 'float',
         'gvwr' => 'float',
         'fp_balance' => 'float',
-        'changed_fields_in_dashboard' => 'array'
+        'changed_fields_in_dashboard' => 'array',
+        'qb_sync_processed' => 'boolean',
+        'is_floorplan_bill' => 'boolean',
     ];
 
     protected $hidden = [
@@ -476,6 +481,15 @@ class Inventory extends Model
         return $this->hasMany(CustomerInventory::class, 'inventory_id', 'inventory_id');
     }
 
+    public function entityType(): BelongsTo
+    {
+        return $this->belongsTo(EntityType::class,'entity_type_id');
+    }
+
+    public function bill(): HasOne
+    {
+        return $this->hasOne(Bill::class, 'id', 'bill_id');
+    }
 
     /**
      * Get Attributes Map

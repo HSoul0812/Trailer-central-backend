@@ -7,7 +7,7 @@ use App\Repositories\CRM\Text\NumberRepositoryInterface;
 use App\Repositories\CRM\Text\DealerLocationRepositoryInterface;
 use App\Models\CRM\Text\Number;
 use App\Models\CRM\Text\NumberTwilio;
-use App\Services\CRM\Text\TextServiceInterface;
+use App\Services\CRM\Text\TwilioServiceInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
 use Propaganistas\LaravelPhone\PhoneNumber;
@@ -16,7 +16,7 @@ use App\Models\User\DealerLocation;
 class NumberRepository implements NumberRepositoryInterface {
 
     /**
-     * @var TextServiceInterface
+     * @var TwilioServiceInterface
      */
     private $service;
 
@@ -35,13 +35,14 @@ class NumberRepository implements NumberRepositoryInterface {
             'direction' => 'ASC'
         ]
     ];
-    
+
     public function create($params) {
         return Number::create($params);
     }
 
-    public function delete($params) {
-        throw new NotImplementedException();
+    public function delete($params): bool
+    {
+        return Number::query()->where('id', $params['id'])->delete();
     }
 
     public function get($params) {
@@ -59,14 +60,14 @@ class NumberRepository implements NumberRepositoryInterface {
 
     /**
      * Set Phone as Used
-     * 
+     *
      * @param string $fromNumber
      * @param string $twilioNumber
      * @param string $toNumber
      * @param string $customerName
      * @return Number
      */
-    public function setPhoneAsUsed($fromNumber, $twilioNumber, $toNumber, $customerName) {
+    public function setPhoneAsUsed($fromNumber, $twilioNumber, $toNumber, $customerName, ?int $dealerId = null) {
         // Calculate Expiration
         $expirationTime = time() + (Number::EXPIRATION_TIME * 60 * 60);
 
@@ -84,13 +85,14 @@ class NumberRepository implements NumberRepositoryInterface {
             'twilio_number'   => $twilioNumber,
             'customer_number' => $customerNumber,
             'customer_name'   => $customerName,
-            'expiration_time' => $expirationTime
+            'expiration_time' => $expirationTime,
+            'dealer_id'       => $dealerId
         ]);
     }
 
     /**
      * Twilio Number Exists?
-     * 
+     *
      * @param string $phoneNumber
      * @return bool
      */
@@ -103,7 +105,7 @@ class NumberRepository implements NumberRepositoryInterface {
 
     /**
      * Create Twilio Number
-     * 
+     *
      * @param string $phoneNumber
      * @return NumberTwilio
      */
@@ -113,7 +115,7 @@ class NumberRepository implements NumberRepositoryInterface {
 
     /**
      * Find Active Twilio Number
-     * 
+     *
      * @param string $dealerNo
      * @param string $customerNo
      * @return Number
@@ -127,7 +129,7 @@ class NumberRepository implements NumberRepositoryInterface {
 
     /**
      * Find All Twilio Numbers
-     * 
+     *
      * @param string $dealerNo
      * @param string $customerNo
      * @return array Number
@@ -141,24 +143,40 @@ class NumberRepository implements NumberRepositoryInterface {
 
     /**
      * Is Active Twilio Number?
-     * 
+     *
      * @param string $twilioNumber
      * @param string $maskedNumber
-     * @return Number
+     * @return Number|null
      */
-    public function isActiveTwilioNumber(string $twilioNumber, string $maskedNumber): Number {
-        // Return Number
-        return Number::where('twilio_number', $twilioNumber)
-                     ->where(function(Builder $query) use($maskedNumber) {
-                        $query = $query->where('customer_number', $maskedNumber)
-                                       ->orWhere('dealer_number', $maskedNumber);
-                     })->first();
+    public function activeTwilioNumber(string $twilioNumber, string $maskedNumber): ?Number
+    {
+        $query = Number::query();
+
+        $query->where('twilio_number', $twilioNumber)
+            ->where(function(Builder $query) use($maskedNumber) {
+                $query->where('customer_number', $maskedNumber)
+                    ->orWhere('dealer_number', $maskedNumber);
+            });
+
+        return $query->first();
+    }
+
+    /**
+     * @param string $customerNumber
+     * @param int $dealerId
+     * @return Number|null
+     */
+    public function activeTwilioNumberByCustomerNumber(string $customerNumber, int $dealerId): ?Number
+    {
+        return Number::query()->where('customer_number', $customerNumber)
+            ->where('dealer_id', $dealerId)
+            ->first();
     }
 
 
     /**
      * Delete Twilio Number
-     * 
+     *
      * @param string $phone
      * @return bool
      */
@@ -172,7 +190,7 @@ class NumberRepository implements NumberRepositoryInterface {
 
     /**
      * Find All Expired Numbers (Chunked)
-     * 
+     *
      * @param Closure $callable
      * @param int $toDate
      * @param int $chunkSize
@@ -189,7 +207,7 @@ class NumberRepository implements NumberRepositoryInterface {
 
     /**
      * Is Phone Number is a Dealer Number?
-     * 
+     *
      * @param string $phoneNumber
      * @return bool
      */
@@ -198,5 +216,32 @@ class NumberRepository implements NumberRepositoryInterface {
         $phoneNumber = (string) PhoneNumber::make($phoneNumber, $countryCode);
 
         return DealerLocation::where('sms_phone', $phoneNumber)->exists();
+    }
+
+    /**
+     * @param int $expirationTime
+     * @param string $twilioNumber
+     * @param string $dealerNumber
+     * @return bool
+     */
+    public function updateExpirationDate(int $expirationTime, string $twilioNumber, string $dealerNumber): bool
+    {
+        $query = Number::query();
+
+        $query = $query->where([
+            'dealer_number' => $dealerNumber,
+            'twilio_number' => $twilioNumber,
+        ]);
+
+        /** @var Number $number */
+        $number = $query->first();
+
+        if (!$number instanceof Number) {
+            return false;
+        }
+
+        $number->expiration_time = $expirationTime;
+
+        return $number->save();
     }
 }

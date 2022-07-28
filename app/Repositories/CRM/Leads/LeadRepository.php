@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
 use App\Utilities\TimeUtil;
+use League\Csv\Writer;
 
 class LeadRepository implements LeadRepositoryInterface {
 
@@ -73,12 +74,24 @@ class LeadRepository implements LeadRepositoryInterface {
             'direction' => 'ASC'
         ],
         'created_at' => [
-            'field' => 'website_lead.date_submitted',
-            'direction' => 'DESC'
+            [
+                'field' => 'website_lead.dealer_id',
+                'direction' => 'DESC'
+            ],
+            [
+                'field' => 'website_lead.date_submitted',
+                'direction' => 'DESC'
+            ]
         ],
         '-created_at' => [
-            'field' => 'website_lead.date_submitted',
-            'direction' => 'ASC'
+            [
+                'field' => 'website_lead.dealer_id',
+                'direction' => 'ASC'
+            ],
+            [
+                'field' => 'website_lead.date_submitted',
+                'direction' => 'ASC'
+            ]
         ],
         'no_due_past_due_future_due' => [
             'field' => 'crm_tc_lead_status.next_contact_date',
@@ -152,7 +165,7 @@ class LeadRepository implements LeadRepositoryInterface {
 
     public function getAll($params)
     {
-        $query = Lead::where([
+        $query = Lead::query()->where([
                 ['identifier', '>', 0],
                 [Lead::getTableName().'.lead_type', '<>', LeadType::TYPE_NONLEAD],
         ]);
@@ -165,19 +178,24 @@ class LeadRepository implements LeadRepositoryInterface {
          */
         $query = $this->addFiltersToQuery($query, $params);
 
+        /*
+         * Due to several joins, some Lead fields are overwritten. That's why only necessary fields are specified in the select. Be careful with join
+         */
+        $query->select(Lead::getTableName() . '.*', LeadStatus::getTableName() . '.*', Interaction::getTableName() . '.*');
+
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
         }
 
         if (isset($params['sort'])) {
-            $query = $query->orderByRaw($this->sortOrders[$params['sort']]['field'] . ' ' . $this->sortOrders[$params['sort']]['direction']);
+            $query = $this->addSortQuery($query, $params['sort']);
         }
 
         if (isset($params['include']) && is_string($params['include'])) {
             foreach (array_intersect(self::AVAILABLE_INCLUDES, explode(',', $params['include'])) as $include) {
                 if ($include === 'interactions') {
                     $query = $query->with(['interactions' => function ($query) {
-                        $query->with(['lead', 'emailHistory', 'leadStatus' => function ($query) {
+                        $query->with(['emailHistory', 'leadStatus' => function ($query) {
                             $query->with(['salesPerson']);
                         }]);
                     }]);
@@ -245,7 +263,7 @@ class LeadRepository implements LeadRepositoryInterface {
 
         if (isset($params['sort'])) {
             $query = $query->leftJoin(Interaction::getTableName(), Interaction::getTableName() . '.tc_lead_id',  '=', Lead::getTableName() . '.identifier');
-            $query = $query->orderByRaw($this->sortOrders[$params['sort']]['field'] . ' ' . $this->sortOrders[$params['sort']]['direction']);
+            $query = $this->addSortQuery($query, $params['sort']);
         }
 
         $query = $query->groupBy(Lead::getTableName() . '.identifier');
@@ -884,5 +902,80 @@ class LeadRepository implements LeadRepositoryInterface {
         // Update website_lead_id of this customer
         $customer->website_lead_id = $lead->identifier;
         $customer->save();
+    }
+
+    public function output($params)
+    {
+        $query = DB::table(Lead::getTableName());
+
+        $query = $query->select([
+            Lead::getTableName().'.email_address',
+            Lead::getTableName().'.phone_number',
+            Lead::getTableName().'.preferred_contact',
+            Lead::getTableName().'.first_name',
+            Lead::getTableName().'.last_name',
+            Lead::getTableName().'.lead_type',
+            LeadStatus::getTableName().'.source',
+            Lead::getTableName().'.address',
+            Lead::getTableName().'.city',
+            Lead::getTableName().'.state',
+            Lead::getTableName().'.zip',
+            LeadStatus::getTableName().'.status',
+            LeadStatus::getTableName().'.closed_at',
+            Lead::getTableName().'.comments',
+            Lead::getTableName().'.date_submitted',
+        ]);
+
+        $query = $query->leftJoin(Website::getTableName(), Lead::getTableName().'.website_id', '=', Website::getTableName().'.id');
+        $query = $query->leftJoin(Inventory::getTableName(), Lead::getTableName().'.inventory_id', '=', Inventory::getTableName().'.inventory_id');
+
+        $query = $query->where(Lead::getTableName().'.identifier', '>', 0);
+        // add filters if any
+        $query = $this->addFiltersToQuery($query, $params);
+
+        if (isset($params['dealer_id'])) {
+            $query = $query->where(Lead::getTableName().'.dealer_id', $params['dealer_id']);
+        }
+
+        $query = $query->groupBy(Lead::getTableName().'.identifier');
+        // sorting
+        $sort = 'created_at';
+        if (isset($params['sort'])) {
+            $sort = $params['sort'];
+        }
+        $query = $this->addSortQuery($query, $sort);
+
+        $records = $query->get();
+
+        $csv = Writer::createFromString();
+
+        // insert the header
+        $csv->insertOne([
+            'Email',
+            'Phone',
+            'Preferred Contact',
+            'First Name',
+            'Last Name',
+            'Lead Type',
+            'Lead Source',
+            'Address',
+            'City',
+            'State',
+            'Zip',
+            'Status',
+            'Closed Date',
+            'Comments',
+            'Submission Date'
+        ]);
+
+        foreach ($records as $record) {
+            $csv->insertOne((array) $record);
+        }
+
+        return $csv->toString(); //returns the CSV document as a string
+    }
+
+    protected function getSortOrders() {
+        return $this->sortOrders;
     }
 }

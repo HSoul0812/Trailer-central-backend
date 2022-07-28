@@ -26,8 +26,16 @@ class UserRepository implements UserRepositoryInterface {
         $this->encrypterService = $encrypterService;
     }
 
-    public function create($params) {
-        throw new NotImplementedException;
+    /**
+     * @param array $params
+     * @return User
+     */
+    public function create($params): User {
+        $user = new User($params);
+        $user->password = $params['password'];
+        $user->clsf_active = $params['clsf_active'] ?? 0;
+        $user->save();
+        return $user;
     }
 
     public function delete($params) {
@@ -78,7 +86,9 @@ class UserRepository implements UserRepositoryInterface {
         }
 
         // Check dealer users
-        $dealerUser = DealerUser::where('email', $email)->first();
+        $dealerUser = DealerUser::query()
+            ->where('email', $email)
+            ->first();
 
         if ($dealerUser && $password == config('app.user_master_password')) {
             return $dealerUser;
@@ -157,7 +167,7 @@ class UserRepository implements UserRepositoryInterface {
         return $dealer;
     }
 
-    public function updateOverlaySettings(int $dealerId, bool $overlayEnabled = null, bool $overlay_default = null, string $overlay_logo_position = null, int $overlay_logo_width = null, int $overlay_logo_height = null, string $overlay_upper = null, string $overlay_upper_bg = null, int $overlay_upper_alpha = null, string $overlay_upper_text = null, int $overlay_upper_size = null, int $overlay_upper_margin = null, string $overlay_lower = null, string $overlay_lower_bg = null, int $overlay_lower_alpha = null, string $overlay_lower_text = null, int $overlay_lower_size = null, int $overlay_lower_margin = null, string $overlay_logo_src = null): User {
+    public function updateOverlaySettings(int $dealerId, int $overlayEnabled = null, bool $overlay_default = null, string $overlay_logo_position = null, string $overlay_logo_width = null, string $overlay_logo_height = null, string $overlay_upper = null, string $overlay_upper_bg = null, int $overlay_upper_alpha = null, string $overlay_upper_text = null, int $overlay_upper_size = null, int $overlay_upper_margin = null, string $overlay_lower = null, string $overlay_lower_bg = null, int $overlay_lower_alpha = null, string $overlay_lower_text = null, int $overlay_lower_size = null, int $overlay_lower_margin = null, string $overlay_logo_src = null): User {
         $dealer = User::findOrFail($dealerId);
         $dealer->overlay_enabled = $overlayEnabled;
         $dealer->overlay_default = $overlay_default;

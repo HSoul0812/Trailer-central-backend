@@ -2,6 +2,8 @@
 
 namespace App\Models\CRM\Dms\Quickbooks;
 
+use App\Models\Inventory\Inventory;
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -22,6 +24,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Bill extends Model
 {
+    use TableAware;
+
     const STATUS_DUE = 'due';
     const STATUS_PAID = 'paid';
 
@@ -54,5 +58,17 @@ class Bill extends Model
     public function payments(): HasMany
     {
         return $this->hasMany(BillPayment::class, 'bill_id', 'id');
+    }
+
+    public function inventories(): HasMany
+    {
+        return $this->hasMany(Inventory::class, 'bill_id', 'id');
+    }
+    
+    public function approvals(): HasMany
+    {
+        return $this
+            ->hasMany(QuickbookApproval::class, 'tb_primary_id', 'id')
+            ->where('tb_name', $this->table);
     }
 }
