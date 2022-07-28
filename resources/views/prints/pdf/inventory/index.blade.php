@@ -41,6 +41,7 @@
 
     .print-inventory .inventory-info .label,
     .print-inventory .inventory-info .data {
+        word-wrap: break-word;
         font-size: 20px;
     }
 
