@@ -51,10 +51,9 @@ class FBMarketplaceAccounts extends Resource
     public function fields(Request $request): array
     {
         return [
-
             new Panel('FB Integration Details', $this->panelIntegration()),
 
-            new Panel("Status", $this->panelStatus()),
+            new Panel("FBME Run Status", $this->panelStatus()),
 
             new Panel("Results " . date("m-d-Y", strtotime("-1 day")), $this->panelResults(1)),
             new Panel("Results " . date("m-d-Y", strtotime("-2 day")), $this->panelResults(2)),
@@ -98,7 +97,7 @@ class FBMarketplaceAccounts extends Resource
         ];
     }
 
-    protected function panelResults($nrDaysAgo)
+    protected function panelResults(int $nrDaysAgo)
     {
         return [
             Text::make('Units Posted', "units_posted_{$nrDaysAgo}dayago")->onlyOnDetail(),
