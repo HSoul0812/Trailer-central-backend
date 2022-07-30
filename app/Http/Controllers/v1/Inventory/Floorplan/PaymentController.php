@@ -203,21 +203,24 @@ class PaymentController extends RestfulController
                 fputcsv($file, $columns);
 
                 foreach ($inventories as $inventory) {
+                    $inventoryTransformer = new InventoryTransformer();
+                    $floorPlanInventory = $inventoryTransformer->transform($inventory);
+
                     fputcsv($file, [
-                        $inventory->created_at ? $inventory->created_at->format('d M, Y') : '',
-                        $inventory->sold_at ? $inventory->sold_at->format('d M, Y') : '',
-                        $inventory->dealerLocation ? trim($inventory->dealerLocation->name) : '',
-                        $inventory->stock ?? '',
-                        $inventory->vin ?? '',
-                        $inventory->status ?? '',
-                        $inventory->model ?? '',
-                        $inventory->title ?? '',
-                        $inventory->price ?? '0.00',
-                        $inventory->fp_balance ?? '0.00',
-                        $inventory->pac_amount ?? '0.00',
+                        $floorPlanInventory['created_at'] ? $floorPlanInventory['created_at']->format('d M, Y') : '',
+                        $floorPlanInventory['sold_at'] ? $floorPlanInventory['sold_at']->format('d M, Y') : '',
+                        $floorPlanInventory['dealer_location'] ? trim($floorPlanInventory['dealer_location']['name']) : '',
+                        $floorPlanInventory['stock'] ?? '',
+                        $floorPlanInventory['vin'] ?? '',
+                        $floorPlanInventory['status'] ?? '',
+                        $floorPlanInventory['model'] ?? '',
+                        $floorPlanInventory['title'] ?? '',
+                        $floorPlanInventory['true_cost'] ?? '0.00',
+                        $floorPlanInventory['fp_balance'] ?? '0.00',
+                        $floorPlanInventory['fp_interest_paid'] ?? '0.00',
                         '',
                         '',
-                        $inventory->floorplanVendor ? $inventory->floorplanVendor->name : '',
+                        $floorPlanInventory['floorplan_vendor'] ? $floorPlanInventory['floorplan_vendor']->name : '',
                     ]);
                 }
                 fclose($file);
