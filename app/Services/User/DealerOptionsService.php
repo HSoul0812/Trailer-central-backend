@@ -82,6 +82,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
      */
     private $websiteRepository;
 
+
     /**
      * @var WebsiteEntityRepositoryInterface
      */
@@ -411,7 +412,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
             }
 
             return true;
-        } catch (\Exception $e) {
+        } catch(\Exception $e) {
             \Log::error($e->getMessage());
             return false;
         }
@@ -423,7 +424,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
      */
     public function isAllowedParts(int $dealerId): bool
     {
-        return $this->dealerPartRepository->get(['dealer_id' => $dealerId])->exists();
+      return !is_null($this->dealerPartRepository->get(['dealer_id' => $dealerId]));
     }
 
     public function deactivateUserAccounts(int $dealerId): bool {
@@ -434,7 +435,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
                 ]
             ], false);
 
-            foreach ($websites as $website) {
+            foreach($websites as $website) {
                 $this->websiteConfigRepository->setValue($website->getKey(), 'general/user_accounts', 0);
 
                 $this->websiteEntityRepository->delete([

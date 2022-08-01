@@ -347,15 +347,15 @@ class InventoryRepository implements InventoryRepositoryInterface
      */
     private function updateQbInvoiceItems(Inventory $item)
     {
-        $newTotalTrueCost = $item->true_cost + $item->cost_of_shipping;
-        $newTotalCost = $item->cost_of_unit + $item->cost_of_shipping;
+        $newTotalTrueCost = floatval($item->true_cost) + floatval($item->cost_of_shipping);
+        $newTotalCost = floatval($item->cost_of_unit) + floatval($item->cost_of_shipping);
         $newFinalCost = 0;
 
         if ($item->pac_type === "percent") {
-            $priceAdj = ($newTotalCost * $item->pac_amount) / 100;
+            $priceAdj = ($newTotalCost * floatval($item->pac_amount)) / 100;
             $newFinalCost = $newTotalCost + $priceAdj;
         } else {
-            $newFinalCost = $newTotalCost + $item->pac_amount;
+            $newFinalCost = $newTotalCost + floatval($item->pac_amount);
         }
 
         DB::table('qb_invoice_item_inventories')

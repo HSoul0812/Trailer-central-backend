@@ -5,9 +5,15 @@ namespace App\Http\Controllers\v1\Bulk\Inventory;
 use Dingo\Api\Http\Request;
 use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\Bulk\Inventory\CreateBulkUploadRequest;
+use App\Repositories\Bulk\Inventory\BulkUploadRepository;
+
 use App\Http\Requests\Bulk\Inventory\GetBulkUploadRequest;
 use App\Transformers\Bulk\Inventory\BulkUploadTransformer;
 
+/**
+ * Class BulkUploadController
+ * @package App\Http\Controllers\v1\Bulk\Inventory
+ */
 class BulkUploadController extends RestfulControllerV2
 {
 
@@ -24,6 +30,10 @@ class BulkUploadController extends RestfulControllerV2
         $this->bulkUploads = \app('App\Repositories\Bulk\Inventory\BulkUploadRepository');
     }
 
+    /**
+     * @param Request $request
+     * @return Response
+     */
     public function index(Request $request)
     {
         $request = new GetBulkUploadRequest($request->all());
@@ -36,6 +46,10 @@ class BulkUploadController extends RestfulControllerV2
     }
 
 
+    /**
+     * @param Request $request
+     * @return Response
+     */
     public function create(Request $request)
     {
         $request = new CreateBulkUploadRequest($request->all());
