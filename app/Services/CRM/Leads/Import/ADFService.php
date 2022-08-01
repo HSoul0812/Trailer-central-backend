@@ -78,6 +78,9 @@ class ADFService implements ADFServiceInterface {
         $this->locations = $locations;
         $this->google = $google;
         $this->gmail = $gmail;
+
+        // Create Log
+        $this->log = Log::channel('import');
     }
 
     /**
@@ -89,14 +92,17 @@ class ADFService implements ADFServiceInterface {
     public function import(): int {
         // Get Emails From Service
         $accessToken = $this->getAccessToken();
+        $address = config('adf.imports.gmail.email');
         $inbox = config('adf.imports.gmail.inbox');
         $messages = $this->gmail->messages($accessToken, $inbox);
+        $this->log->info('Parsing ' . count($messages) . ' Email Messages From Email Address ' . $address);
 
         // Checking Each Message
         $total = 0;
         foreach($messages as $mailId) {
             // Get Message Overview
             $email = $this->gmail->message($mailId);
+            $this->log->info('Parsing Email Message #' . $mailId . ' From Email Address ' . $address);
 
             // Find Exceptions
             try {
@@ -107,37 +113,43 @@ class ADFService implements ADFServiceInterface {
                 $dealerId = str_replace('@' . config('adf.imports.gmail.domain'), '', $email->getToEmail());
                 try {
                     $dealer = $this->dealers->get(['dealer_id' => $dealerId]);
+                    $this->log->info('Parsing Email #' . $mailId . ' Import for Dealer #' . $dealerId);
                 } catch(\Exception $e) {
                     throw new InvalidAdfDealerIdException;
                 }
 
                 // Validate ADF
                 $adf = $this->parseAdf($dealer, $crawler);
-                Log::info('Parsed ADF Lead ' . $adf->getFullName() . ' For Dealer ID #' . $adf->getDealerId());
+                $this->log->info('Parsed ADF Lead ' . $adf->getFullName() . ' For Dealer ID #' . $adf->getDealerId());
 
                 // Process Further
                 $result = $this->importLead($adf);
                 if(!empty($result->identifier)) {
-                    Log::info('Imported ADF Lead ' . $result->identifier . ' and Moved to Processed');
+                    $this->log->info('Imported ADF Lead ' . $result->identifier . ' and Moved to Processed');
                     $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.processed')], [$inbox]);
                     $total++;
                 }
             } catch(InvalidAdfDealerIdException $e) {
                 if(!empty($dealerId) && is_numeric($dealerId)) {
                     $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.unmapped')], [$inbox]);
+                    $this->log->error("Exception returned on ADF Import Message #{$mailId}: " .
+                                        $e->getMessage() . " and moved to Unmapped");
                 } else {
                     $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.invalid')], [$inbox]);
+                    $this->log->error("Exception returned on ADF Import Message #{$mailId}: " .
+                                        $e->getMessage() . " and moved to Invalid");
                 }
-                Log::error("Exception returned on ADF Import Message #{$mailId} {$e->getMessage()}: {$e->getTraceAsString()}");
             } catch(InvalidAdfImportFormatException $e) {
                 $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.invalid')], [$inbox]);
-                Log::error("Exception returned on ADF Import Message #{$mailId} {$e->getMessage()}: {$e->getTraceAsString()}");
+                $this->log->error("Exception returned on ADF Import Message #{$mailId}: " .
+                                        $e->getMessage() . " and moved to Invalid");
             } catch(\Exception $e) {
-                Log::error("Exception returned on ADF Import Message #{$mailId} {$e->getMessage()}: {$e->getTraceAsString()}");
+                $this->log->error("Exception returned on ADF Import Message #{$mailId} {$e->getMessage()}");
             }
         }
 
         // Return Total
+        $this->log->info('Imported ' . $total . ' Email Messages From Email Address ' . $address);
         return $total;
     }
 
@@ -156,7 +168,7 @@ class ADFService implements ADFServiceInterface {
 
         // Valid XML?
         if($adf->count() < 1 || empty($adf->nodeName()) || ($adf->nodeName() !== 'adf')) {
-            Log::error("Body text failed to parse ADF correctly:\r\n\r\n" . $body);
+            $this->log->error("Body text failed to parse ADF correctly:\r\n\r\n" . $body);
             throw new InvalidAdfImportFormatException;
         }
 
