@@ -19,7 +19,6 @@ class VerificationController extends AbstractRestfulController
 
     public function verify($userId, $hash, Request $request) {
         if (!$request->hasValidSignature() ) {
-            \Log::info("has verified email");
             $this->response->error("Invalid/Expired url provided", 401);
         }
 
@@ -32,7 +31,9 @@ class VerificationController extends AbstractRestfulController
             $user->markEmailAsVerified();
         }
 
-        return view('auth.verified');
+        $email = $user->email;
+        $verifyUrl = config('auth.verify_url') . "?email=$email";
+        return redirect($verifyUrl);
     }
 
     public function resend() {

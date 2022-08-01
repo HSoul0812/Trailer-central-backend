@@ -10,6 +10,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\HtmlString;
 
 class WebsiteUserVerifyEmail extends Notification
 {
@@ -27,7 +28,6 @@ class WebsiteUserVerifyEmail extends Notification
     public function toMail($notifiable): MailMessage
     {
         $verificationUrl = $this->verificationUrl($notifiable);
-
         return $this->buildMailMessage($verificationUrl);
     }
 
@@ -45,10 +45,12 @@ class WebsiteUserVerifyEmail extends Notification
 
     protected function buildMailMessage($url): MailMessage
     {
+        $siteUrl = config('auth.site_url');
+
         return (new MailMessage)
-            ->subject(Lang::get('Verify Email Address'))
-            ->line(Lang::get('Please click the button below to verify your email address.'))
-            ->action(Lang::get('Verify Email Address'), $url)
-            ->line(Lang::get('If you did not create an account, no further action is required.'));
+            ->subject(Lang::get('TrailerTrader | Confirm your registration to TrailerTrader'))
+            ->line(new HtmlString("Thank you for registering to TrailerTrader.com. We need you to confirm your email address in order to activate your account. Please click on the following link to complete the registration process."))
+            ->action('Verify Email Address', $url)
+            ->line(new HtmlString("Please note that we are regularly adding features to improve your experience on the TrailerTrader platform. If you have remarks or recommendations, we’ll be happy to consider them. You can use <a href='$siteUrl/about#contact_trailertrader'>this form</a> to share them with us. "));
     }
 }

@@ -118,7 +118,9 @@ return [
     | confirmation screen. By default, the timeout lasts for three hours.
     |
     */
+    'site_url' => env('SITE_URL'),
     'reset_password_url' => env('SITE_URL') . env('RESET_PASSWORD_ROUTE'),
     'login_url' => env('SITE_URL') . env('LOGIN_ROUTE'),
+    'verify_url' => env('SITE_URL') . env('VERIFY_ROUTE'),
     'password_timeout' => 10800,
 ];
