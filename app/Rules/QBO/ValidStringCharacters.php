@@ -46,7 +46,7 @@ class ValidStringCharacters implements Rule
     {
         switch ($this->section) {
             case self::PARTS_SECTION:
-                return "/^[-@.,!'~*_;?:()\"\/#&+\w\s]\*$/";
+                return "/^[-@.,!'~*_;?:()\"\/#&+\w\s]*$/";
             case self::MISC_PARTS_SECTION:
                 return "/^[\w]\*$/";
             default:
