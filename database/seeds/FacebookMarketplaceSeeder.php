@@ -51,7 +51,7 @@ class FacebookMarketplaceSeeder extends Seeder
             DB::table('inventory')->insert([
                 'dealer_id' => self::DEALER_SUCCESS_ID,
                 'dealer_location_id' => $location1Id,
-                'title' => 'Title-'.$i,
+                'title' => 'Title-Success-' . $i,
                 'status' => 1,
                 'is_archived' => 0,
                 'show_on_website' =>1,
@@ -63,7 +63,7 @@ class FacebookMarketplaceSeeder extends Seeder
         $failedInvetoryId = DB::table('inventory')->insertGetId([
             'dealer_id' => self::DEALER_FAIL_ID,
             'dealer_location_id' => $location2Id,
-            'title' => 'Title',
+            'title' => 'Title-Fail-' . $i,
             'status' => 1,
             'is_archived' => 0,
             'show_on_website' =>1,
@@ -82,24 +82,25 @@ class FacebookMarketplaceSeeder extends Seeder
         ->where('status', '<>', 6)
         ->where('show_on_website', '=', 1)
         ->orderBy('created_at', 'ASC')
-        ->chunk(5, function (Collection $inventory) use($integrations) {
+        ->chunk(10, function (Collection $inventory) use($integrations) {
             $inventoryListing = [];
             $countOfInventory = 0;
 
-            foreach ($inventory as $inventory) {
-                foreach ($integrations as $integration) {
+            foreach ($integrations as $integration) {
+                $i = 0;
+                foreach ($inventory as $inventoryItem) {
                     $inventoryListing[] = [
                         'marketplace_id' => $integration->id,
-                        'inventory_id' => $inventory->inventory_id,
+                        'inventory_id' => $inventoryItem->inventory_id,
                         'facebook_id' => $this->bigRandomNumber(0, 999999999),
                         'account_type' => 'user',
                         'page_id' => 0,
                         'username' => $integration->fb_username,
                         'status' => 'active',
-                        'created_at' => Carbon::now()->toDateTimeString(),
-                        'updated_at' => Carbon::now()->toDateTimeString()
+                        'created_at' => Carbon::now()->subDays(11-$i)->toDateTimeString(),
+                        'updated_at' => Carbon::now()->subDays(11-$i)->toDateTimeString()
                     ];
-
+                    $i++;
                     $countOfInventory++;
                 }
             }
@@ -117,19 +118,22 @@ class FacebookMarketplaceSeeder extends Seeder
         ->where('status', '<>', 6)
         ->where('show_on_website', '=', 1)
         ->orderBy('created_at', 'ASC')
-        ->chunk(5, function (Collection $inventory) use($integrations) {
-            foreach ($inventory as $inventory) {
-                foreach ($integrations as $integration) {
+        ->chunk(10, function (Collection $inventory) use ($integrations) {
+            foreach ($integrations as $integration) {
+                foreach ($inventory as $inventoryItem) {
+                    $i = 0;
+                
                     DB::table('fbapp_errors')->insertGetId([
                         'marketplace_id' => $integration->id,
-                        'inventory_id' => $inventory->inventory_id,
+                        'inventory_id' => $inventoryItem->inventory_id,
                         'action' => 'action',
                         'step' => 'login',
                         'error_type' => 1,
                         'error_message' => 'Incorrent credentials',
-                        'created_at' => Carbon::now()->toDateTimeString(),
+                        'created_at' => Carbon::now()->subDays(11-$i)->toDateTimeString(),
                         'expires_at' => Carbon::now()->addMonth()->toDateTimeString()
                     ]);
+                    $i++;
                 }
             }
         });
