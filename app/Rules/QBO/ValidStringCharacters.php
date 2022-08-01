@@ -7,8 +7,11 @@ use Illuminate\Contracts\Validation\Rule;
 class ValidStringCharacters implements Rule
 {
     const PARTS_SECTION = 'parts';
+    const PARTS_REGEX = "/^[-@.,!'~*_;?:()\"\/#&+\w\s]*$/";
     const MISC_PARTS_SECTION = 'misc_parts';
+    const MISC_PARTS_REGEX = "/^[\w]\*$/";
     const CUSTOMERS_SECTION = 'customers';
+    const CUSTOMERS_REGEX = "/^[\w]\*$/";
 
     /**
      * @var string
@@ -46,10 +49,10 @@ class ValidStringCharacters implements Rule
     {
         switch ($this->section) {
             case self::PARTS_SECTION:
-                return "/^[-@.,!'~*_;?:()\"\/#&+\w\s]*$/";
+                return self::PARTS_REGEX;
             case self::MISC_PARTS_SECTION:
             default:
-                return "/^[\w]\*$/";
+                return self::MISC_PARTS_REGEX;
         };
     }
 }
