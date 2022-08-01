@@ -3,6 +3,7 @@
 namespace App\Console\Commands\CRM\Leads\Import;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 use App\Services\CRM\Leads\Import\ADFServiceInterface;
 
 /**
@@ -45,10 +46,17 @@ class ADF extends Command
     public function handle(): void
     {
         // Start Importing Leads
-        $imported = $this->service->import();
+        $log = Log::channel('import');
+        try {
+            $imported = $this->service->import();
 
-        // Return Result
-        $this->info("Imported " . $imported . " leads from ADF import service");
+            // Return Result
+            $this->info('Imported ' . $imported . ' leads from ADF import service');
+            $log->info('Imported ' . $imported . ' leads from ADF import service');
+        } catch (\Exception $e) {
+            $this->error('Exception thrown parsing ADF import: ' . $e->getMessage());
+            $log->error('Exception thrown parsing ADF import: ' . $e->getMessage());
+        }
 
         // Sleep for a Second to Prevent Rate Limiting
         sleep(1);
