@@ -15,7 +15,7 @@ class ValidStringCharacters implements Rule
      */
     protected $section = '';
 
-    public function __construct(string $section = 'parts')
+    public function __construct(string $section = self::PARTS_SECTION)
     {
         $this->section = $section;
     }
