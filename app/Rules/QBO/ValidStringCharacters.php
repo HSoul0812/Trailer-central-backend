@@ -48,7 +48,6 @@ class ValidStringCharacters implements Rule
             case self::PARTS_SECTION:
                 return "/^[-@.,!'~*_;?:()\"\/#&+\w\s]*$/";
             case self::MISC_PARTS_SECTION:
-                return "/^[\w]\*$/";
             default:
                 return "/^[\w]\*$/";
         };
