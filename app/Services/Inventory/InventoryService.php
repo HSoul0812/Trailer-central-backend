@@ -253,6 +253,7 @@ class InventoryService implements InventoryServiceInterface
     private function buildSearchQuery(array $params): ESInventoryQueryBuilder {
         $queryBuilder = new ESInventoryQueryBuilder();
         $this->addCommonFilter($queryBuilder);
+        $this->addConditionalFilter($queryBuilder, $params);
         $this->addCategoryQuery($queryBuilder, $params);
         $this->addTermSearchQueries($queryBuilder, $params);
         $this->addRangeQueries($queryBuilder, $params);
@@ -393,6 +394,13 @@ class InventoryService implements InventoryServiceInterface
             self::INVENTORY_SOLD,
             ESInventoryQueryBuilder::OCCUR_MUST_NOT
         );
+    }
+
+    private function addConditionalFilter(ESInventoryQueryBuilder $queryBuilder, array $params) {
+        if(isset($params['has_image']) && $params['has_image']) {
+            $queryBuilder->addTermQuery('image', '', ESInventoryQueryBuilder::OCCUR_MUST_NOT);
+            $queryBuilder->addExistsQuery('image');
+        }
     }
 
     private function addCategoryQuery(ESInventoryQueryBuilder $queryBuilder, array $params)
