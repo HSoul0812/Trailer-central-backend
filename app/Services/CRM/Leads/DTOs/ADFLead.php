@@ -9,7 +9,7 @@ use Carbon\Carbon;
 
 /**
  * Class ADFLead
- * 
+ *
  * @package App\Services\CRM\Leads\DTOs
  */
 class ADFLead
@@ -201,7 +201,7 @@ class ADFLead
 
     /**
      * Return Dealer ID
-     * 
+     *
      * @return int $this->dealerId
      */
     public function getDealerId(): int
@@ -211,7 +211,7 @@ class ADFLead
 
     /**
      * Set Dealer ID
-     * 
+     *
      * @param int $dealerId
      * @return void
      */
@@ -223,7 +223,7 @@ class ADFLead
 
     /**
      * Return Location ID
-     * 
+     *
      * @return int $this->locationId
      */
     public function getLocationId(): int
@@ -233,7 +233,7 @@ class ADFLead
 
     /**
      * Set Dealer Location ID
-     * 
+     *
      * @param int $locationId
      * @return void
      */
@@ -245,7 +245,7 @@ class ADFLead
 
     /**
      * Return Website ID
-     * 
+     *
      * @return int $this->websiteId
      */
     public function getWebsiteId(): int
@@ -255,7 +255,7 @@ class ADFLead
 
     /**
      * Set Website ID
-     * 
+     *
      * @param int $websiteId
      * @return void
      */
@@ -267,7 +267,7 @@ class ADFLead
 
     /**
      * Return Request Date
-     * 
+     *
      * @return string $this->requestDate
      */
     public function getRequestDate(): string
@@ -277,7 +277,7 @@ class ADFLead
 
     /**
      * Set Request Date
-     * 
+     *
      * @param string $requestDate
      * @return void
      */
@@ -289,7 +289,7 @@ class ADFLead
 
     /**
      * Return Lead Type
-     * 
+     *
      * @return string $this->leadType || calculate lead type
      */
     public function getLeadType(): string
@@ -309,7 +309,7 @@ class ADFLead
 
     /**
      * Set Lead Type
-     * 
+     *
      * @param string $leadType
      * @return void
      */
@@ -322,7 +322,7 @@ class ADFLead
 
     /**
      * Return First Name
-     * 
+     *
      * @return string $this->firstName
      */
     public function getFirstName(): string
@@ -332,7 +332,7 @@ class ADFLead
 
     /**
      * Set First Name
-     * 
+     *
      * @param string $firstName
      * @return void
      */
@@ -344,7 +344,7 @@ class ADFLead
 
     /**
      * Return Last Name
-     * 
+     *
      * @return string $this->lastName
      */
     public function getLastName(): string
@@ -354,7 +354,7 @@ class ADFLead
 
     /**
      * Set Last Name
-     * 
+     *
      * @param string $lastName
      * @return void
      */
@@ -366,7 +366,7 @@ class ADFLead
 
     /**
      * Return Full Name
-     * 
+     *
      * @return string $this->firstName $this->lastName
      */
     public function getFullName(): string
@@ -377,7 +377,7 @@ class ADFLead
 
     /**
      * Return Email
-     * 
+     *
      * @return string $this->email
      */
     public function getEmail(): string
@@ -387,7 +387,7 @@ class ADFLead
 
     /**
      * Set Email
-     * 
+     *
      * @param string $email
      * @return void
      */
@@ -399,7 +399,7 @@ class ADFLead
 
     /**
      * Return Preferred Contact
-     * 
+     *
      * @return string 'phone' if phone exists, 'email' otherwise
      */
     public function getPreferredContact(): string
@@ -410,7 +410,7 @@ class ADFLead
 
     /**
      * Return Phone
-     * 
+     *
      * @return string $this->phone
      */
     public function getPhone(): string
@@ -420,7 +420,7 @@ class ADFLead
 
     /**
      * Set Phone
-     * 
+     *
      * @param string $phone
      * @return void
      */
@@ -432,7 +432,7 @@ class ADFLead
 
     /**
      * Return Comments
-     * 
+     *
      * @return string $this->comments
      */
     public function getComments(): string
@@ -442,7 +442,7 @@ class ADFLead
 
     /**
      * Set Comments
-     * 
+     *
      * @param string $comments
      * @return void
      */
@@ -455,7 +455,7 @@ class ADFLead
 
     /**
      * Return Street Address
-     * 
+     *
      * @return string $this->addrStreet
      */
     public function getAddrStreet(): string
@@ -465,7 +465,7 @@ class ADFLead
 
     /**
      * Set Street Address
-     * 
+     *
      * @param string $addrStreet
      * @return void
      */
@@ -477,7 +477,7 @@ class ADFLead
 
     /**
      * Return City Address
-     * 
+     *
      * @return string $this->addrCity
      */
     public function getAddrCity(): string
@@ -487,7 +487,7 @@ class ADFLead
 
     /**
      * Set City Address
-     * 
+     *
      * @param string $addrCity
      * @return void
      */
@@ -499,7 +499,7 @@ class ADFLead
 
     /**
      * Return State Address
-     * 
+     *
      * @return string $this->addrState
      */
     public function getAddrState(): string
@@ -509,7 +509,7 @@ class ADFLead
 
     /**
      * Set State Address
-     * 
+     *
      * @param string $addrState
      * @return void
      */
@@ -521,7 +521,7 @@ class ADFLead
 
     /**
      * Return Zip Address
-     * 
+     *
      * @return string $this->addrZip
      */
     public function getAddrZip(): string
@@ -531,7 +531,7 @@ class ADFLead
 
     /**
      * Set Zip Address
-     * 
+     *
      * @param string $addrZip
      * @return void
      */
@@ -544,7 +544,7 @@ class ADFLead
 
     /**
      * Return Vehicle ID
-     * 
+     *
      * @return int $this->vehicleId
      */
     public function getVehicleId(): int
@@ -554,7 +554,7 @@ class ADFLead
 
     /**
      * Set Vehicle ID
-     * 
+     *
      * @param int $vehicleId
      * @return void
      */
@@ -566,7 +566,7 @@ class ADFLead
 
     /**
      * Return Vehicle Year
-     * 
+     *
      * @return string $this->vehicleYear
      */
     public function getVehicleYear(): string
@@ -576,7 +576,7 @@ class ADFLead
 
     /**
      * Set Vehicle Year
-     * 
+     *
      * @param string $vehicleYear
      * @return void
      */
@@ -588,7 +588,7 @@ class ADFLead
 
     /**
      * Return Vehicle Make
-     * 
+     *
      * @return string $this->vehicleMake
      */
     public function getVehicleMake(): string
@@ -598,7 +598,7 @@ class ADFLead
 
     /**
      * Set Vehicle Make
-     * 
+     *
      * @param string $vehicleMake
      * @return void
      */
@@ -610,7 +610,7 @@ class ADFLead
 
     /**
      * Return Vehicle Model
-     * 
+     *
      * @return string $this->vehicleModel
      */
     public function getVehicleModel(): string
@@ -620,7 +620,7 @@ class ADFLead
 
     /**
      * Set Vehicle Model
-     * 
+     *
      * @param string $vehicleModel
      * @return void
      */
@@ -632,17 +632,17 @@ class ADFLead
 
     /**
      * Return Vehicle Stock
-     * 
+     *
      * @return string $this->vehicleStock
      */
-    public function getVehicleStock(): string
+    public function getVehicleStock(): ?string
     {
         return $this->vehicleStock;
     }
 
     /**
      * Set Vehicle ID
-     * 
+     *
      * @param string $vehicleStock
      * @return void
      */
@@ -654,17 +654,17 @@ class ADFLead
 
     /**
      * Return Vehicle VIN
-     * 
+     *
      * @return string $this->vehicleVin
      */
-    public function getVehicleVin(): string
+    public function getVehicleVin(): ?string
     {
         return $this->vehicleVin;
     }
 
     /**
      * Set Vehicle VIN
-     * 
+     *
      * @param string $vehicleVin
      * @return void
      */
@@ -676,7 +676,7 @@ class ADFLead
 
     /**
      * Return Vehicle Filters
-     * 
+     *
      * @return array filters for inventory model
      */
     public function getVehicleFilters(): array
@@ -709,7 +709,7 @@ class ADFLead
 
     /**
      * Return Vendor ID's Array
-     * 
+     *
      * @return array $this->vendorIds Vendor ID's Mapped As [source => text]
      */
     public function getVendorIds(): string
@@ -719,7 +719,7 @@ class ADFLead
 
     /**
      * Set Vendor ID's
-     * 
+     *
      * @param array $vendorIds Vendor ID's Mapped As [source => text]
      * @return void
      */
@@ -730,7 +730,7 @@ class ADFLead
 
     /**
      * Add Vendor ID
-     * 
+     *
      * @param string $source Key for the Vendor ID
      * @param int $vendorId ID to set to vendor
      * @return void
@@ -743,7 +743,7 @@ class ADFLead
 
     /**
      * Return Vendor Provider
-     * 
+     *
      * @return string $this->vendorProvider
      */
     public function getVendorProvider(): string
@@ -753,7 +753,7 @@ class ADFLead
 
     /**
      * Set Vendor Provider
-     * 
+     *
      * @param string $vendorProvider
      * @return void
      */
@@ -765,7 +765,7 @@ class ADFLead
 
     /**
      * Return Vendor Name
-     * 
+     *
      * @return string $this->vendorName
      */
     public function getVendorName(): string
@@ -775,7 +775,7 @@ class ADFLead
 
     /**
      * Set Vendor Name
-     * 
+     *
      * @param string $vendorName
      * @return void
      */
@@ -787,7 +787,7 @@ class ADFLead
 
     /**
      * Return Vendor Contact Name
-     * 
+     *
      * @return string $this->vendorContact
      */
     public function getVendorContact(): string
@@ -797,7 +797,7 @@ class ADFLead
 
     /**
      * Set Vendor Contact Name
-     * 
+     *
      * @param string $vendorContact
      * @return void
      */
@@ -809,7 +809,7 @@ class ADFLead
 
     /**
      * Return Vendor URL
-     * 
+     *
      * @return string $this->vendorUrl
      */
     public function getVendorUrl(): string
@@ -819,7 +819,7 @@ class ADFLead
 
     /**
      * Set Vendor URL
-     * 
+     *
      * @param string $vendorUrl
      * @return void
      */
@@ -831,7 +831,7 @@ class ADFLead
 
     /**
      * Return Vendor Email
-     * 
+     *
      * @return string $this->vendorEmail
      */
     public function getVendorEmail(): string
@@ -841,7 +841,7 @@ class ADFLead
 
     /**
      * Set Vendor Email
-     * 
+     *
      * @param string $vendorEmail
      * @return void
      */
@@ -853,7 +853,7 @@ class ADFLead
 
     /**
      * Return Vendor Phone
-     * 
+     *
      * @return string $this->vendorPhone
      */
     public function getVendorPhone(): string
@@ -863,7 +863,7 @@ class ADFLead
 
     /**
      * Set Vendor Phone
-     * 
+     *
      * @param string $vendorPhone
      * @return void
      */
@@ -876,7 +876,7 @@ class ADFLead
 
     /**
      * Return Vendor Street Address
-     * 
+     *
      * @return string $this->vendorAddrStreet
      */
     public function getVendorAddrStreet(): string
@@ -886,7 +886,7 @@ class ADFLead
 
     /**
      * Set Vendor Street Address
-     * 
+     *
      * @param string $addrStreet
      * @return void
      */
@@ -898,7 +898,7 @@ class ADFLead
 
     /**
      * Return Vendor City Address
-     * 
+     *
      * @return string $this->vendorAddrCity
      */
     public function getVendorAddrCity(): string
@@ -908,7 +908,7 @@ class ADFLead
 
     /**
      * Set Vendor City Address
-     * 
+     *
      * @param string $addrCity
      * @return void
      */
@@ -920,7 +920,7 @@ class ADFLead
 
     /**
      * Return Vendor State Address
-     * 
+     *
      * @return string $this->vendorAddrState
      */
     public function getVendorAddrState(): string
@@ -930,7 +930,7 @@ class ADFLead
 
     /**
      * Set Vendor State Address
-     * 
+     *
      * @param string $addrState
      * @return void
      */
@@ -942,7 +942,7 @@ class ADFLead
 
     /**
      * Return Vendor Zip Address
-     * 
+     *
      * @return string $this->vendorAddrZip
      */
     public function getVendorAddrZip(): string
@@ -952,7 +952,7 @@ class ADFLead
 
     /**
      * Set Vendor Zip Address
-     * 
+     *
      * @param string $addrZip
      * @return void
      */
@@ -964,7 +964,7 @@ class ADFLead
 
     /**
      * Return Vendor Country Address
-     * 
+     *
      * @return string $this->vendorAddrCountry
      */
     public function getVendorAddrCountry(): string
@@ -974,7 +974,7 @@ class ADFLead
 
     /**
      * Set Vendor Country Address
-     * 
+     *
      * @param string $addrCountry
      * @return void
      */
@@ -986,7 +986,7 @@ class ADFLead
 
     /**
      * Return Vendor Addrss Filters
-     * 
+     *
      * @return array filters for inventory model
      */
     public function getVendorAddrFilters(): array
@@ -1014,7 +1014,7 @@ class ADFLead
 
     /**
      * Get Email Params for ADF
-     * 
+     *
      * @return array{requestDate: string,
      *               vehicleYear: int,
      *               vehicleManufacturer: string,

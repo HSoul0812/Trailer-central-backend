@@ -11,6 +11,7 @@ use App\Models\CRM\Interactions\InteractionEmail;
 use App\Models\CRM\Interactions\TextLog;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\User\SalesPerson;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -183,18 +184,42 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
     }
 
     public function getTasksByDealerId($dealerId, $sort = '-created_at', $perPage = 15) {
-        $query = Interaction::select('*');       
+        $query = Interaction::select('*');
 
-        $query->leftJoin(LeadStatus::getTableName(), LeadStatus::getTableName().'.tc_lead_identifier', '=', Interaction::getTableName().'.tc_lead_id');
-        $query->join(Lead::getTableName(), Lead::getTableName().'.identifier', '=', Interaction::getTableName().'.tc_lead_id');
+        $query->leftJoin(Lead::getTableName(), Interaction::getTableName().".tc_lead_id", "=", Lead::getTableName().".identifier");
+        $query->leftJoin(LeadStatus::getTableName(), LeadStatus::getTableName(). ".tc_lead_identifier", "=", Interaction::getTableName().".tc_lead_id");
         
         $query->where(Lead::getTableName().'.dealer_id', $dealerId);
         $query->where('interaction_time', 'not like', "0000%");
         $query->whereRaw(Interaction::getTableName().'.interaction_type =' . LeadStatus::getTableName() . '.contact_type');
+        $query->where(Interaction::getTableName(). ".is_closed", 0);
+        $query->where(Lead::getTableName(). ".is_archived", 0);
         
-        $query = $this->addSortQuery($query, $sort);        
+        $query = $this->addSortQuery($query, $sort);
 
-        return $query->paginate($perPage)->appends(['per_page' => $perPage]);        
+        return $query->paginate($perPage)->appends(['per_page' => $perPage]);       
+    }
+
+    public function getTasksBySalespersonId($salespersonId, $sort = '-created_at', $perPage = 15) {
+
+        $query = Interaction::select('*');
+
+        $query->leftJoin(Lead::getTableName(), Interaction::getTableName().".tc_lead_id", "=", Lead::getTableName().".identifier");
+        $query->leftJoin(LeadStatus::getTableName(), LeadStatus::getTableName(). ".tc_lead_identifier", "=", Interaction::getTableName().".tc_lead_id");
+        $query->leftJoin(SalesPerson::getTableName(), function($join) {
+            $join->on(LeadStatus::getTableName().".sales_person_id", "=", SalesPerson::getTableName().".id")
+                ->whereNull(SalesPerson::getTableName().".deleted_at");
+        });
+
+        $query->where(SalesPerson::getTableName(). ".id", $salespersonId);
+        $query->where('interaction_time', 'not like', "0000%");
+        $query->whereRaw(Interaction::getTableName(). ".interaction_type = ". LeadStatus::getTableName() .".contact_type");
+        $query->where(Interaction::getTableName(). ".is_closed", 0);
+        $query->where(Lead::getTableName(). ".is_archived", 0);
+
+        $query = $this->addSortQuery($query, $sort);
+        
+        return $query->paginate($perPage)->appends(['per_page' => $perPage]);  
     }
     
     public function getTasksSortFields() {
