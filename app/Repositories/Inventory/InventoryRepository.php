@@ -509,7 +509,7 @@ class InventoryRepository implements InventoryRepositoryInterface
      * @param $params
      * @return Collection
      */
-    public function getFloorplannedInventory($params)
+    public function getFloorplannedInventory($params, $paginate = true)
     {
         $query = Inventory::select('*');
 
@@ -524,9 +524,11 @@ class InventoryRepository implements InventoryRepositoryInterface
         if (isset($params['dealer_id'])) {
             $query = $query->where('inventory.dealer_id', $params['dealer_id']);
         }
-
-        if (!isset($params['per_page'])) {
+        
+        if ($paginate && !isset($params['per_page'])) {
             $params['per_page'] = 15;
+        } else if (!$paginate && isset($params['per_page'])) {
+            unset($params['per_page']);
         }
 
         if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
@@ -570,7 +572,11 @@ class InventoryRepository implements InventoryRepositoryInterface
             }
         }
 
-        return $query->paginate($params['per_page'])->appends($params);
+        if ($paginate) {
+            return $query->paginate($params['per_page'])->appends($params);
+        }
+
+        return $query->get();
     }
 
     /**

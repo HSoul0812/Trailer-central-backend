@@ -73,6 +73,13 @@ interface LeadRepositoryInterface extends Repository {
     public function getLeadsSortFields();
 
     /**
+     * Returns list of public sort fields for the CRM
+     *
+     * @return array
+     */
+    public function getLeadsSortFieldsCrm(): array;
+
+    /**
      * @param callable|null $callback
      * @param int $chunkSize
      * @return mixed
