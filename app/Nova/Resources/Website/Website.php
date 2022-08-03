@@ -117,10 +117,9 @@ class Website extends Resource
               gt (is greater than)<br>
               gte (is greater than or equal)<br>
               lte (is less than or equal)<br>"
-
             ),
 
-            Text::make('Head Scripts', 'HeadScripts')->sortable(),
+            Text::make('Head Scripts', 'HeadScripts')->hideFromIndex(),
 
         ];
     }
