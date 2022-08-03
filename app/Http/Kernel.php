@@ -9,6 +9,7 @@ use App\Http\Middleware\Ecommerce\ValidHookIpMiddleware;
 use App\Http\Middleware\Inventory\CreateInventoryPermissionMiddleware;
 use App\Http\Middleware\SetDealerIdFilterOnRequest;
 use App\Http\Middleware\SetDealerIdWhenAuthenticatedOnRequest;
+use App\Http\Middleware\ValidateDealerIdOnRequest;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 use App\Http\Middleware\CorsMiddleware;
 use App\Http\Middleware\AccessToken;
@@ -131,6 +132,7 @@ class Kernel extends HttpKernel
         'marketing.facebook.pagetab' => PagetabValidate::class,
         'dispatch.facebook' => FacebookValidate::class,
         'replytext.validate' => ReplyTextValidate::class,
+        'validateDealerIdOnRequest' => ValidateDealerIdOnRequest::class,
     ];
 
     /**
