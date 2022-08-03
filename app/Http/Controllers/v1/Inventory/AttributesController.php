@@ -23,7 +23,7 @@ class AttributesController extends AbstractRestfulController
     public function index(IndexRequestInterface $request): Response {
         if($request->validate()) {
             $result = $this->inventoryService->attributes($request->entity_type_id);
-            $this->response->array($result, $this->transformer);
+            return $this->response->array($result, $this->transformer);
         }
         return $this->response->errorBadRequest();
     }
