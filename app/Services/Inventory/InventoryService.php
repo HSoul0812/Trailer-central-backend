@@ -2,6 +2,7 @@
 
 namespace App\Services\Inventory;
 
+use App\DTOs\Inventory\TcApiResponseAttribute;
 use App\DTOs\Inventory\TcApiResponseInventory;
 use App\DTOs\Inventory\TcApiResponseInventoryCreate;
 use App\DTOs\Inventory\TcApiResponseInventoryDelete;
@@ -121,9 +122,7 @@ class InventoryService implements InventoryServiceInterface
       $access_token = $headers['access-token'];
       $url = config('services.trailercentral.api') . 'inventory/';
       $inventory = $this->handleHttpRequest('PUT', $url, ['query' => $params, 'headers' => ['access-token' => $access_token]]);
-      $respObj = TcApiResponseInventoryCreate::fromData($inventory['response']['data']);
-
-      return $respObj;
+      return TcApiResponseInventoryCreate::fromData($inventory['response']['data']);
     }
 
     /**
@@ -455,6 +454,18 @@ class InventoryService implements InventoryServiceInterface
         $respObj->type_id = $newCategory['type_id'];
         $respObj->type_label = $newCategory['type_label'];
         return $respObj;
+    }
+
+    public function attributes(int $entityTypeId): array
+    {
+        $results = [];
+        $url = config('services.trailercentral.api') . 'inventory/attributes' . "?entity_type_id=$entityTypeId";
+        $attributes = $this->handleHttpRequest('GET', $url);
+        foreach($attributes['data'] as $attribute) {
+            $attributeObj = TcApiResponseAttribute::fromData($attribute);
+            $results[] = $attributeObj;
+        }
+        return $results;
     }
 
     /**
