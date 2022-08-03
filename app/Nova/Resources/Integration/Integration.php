@@ -2,6 +2,8 @@
 
 namespace App\Nova\Resources\Integration;
 
+use Illuminate\Database\Eloquent\Model;
+
 use App\Nova\Actions\Integration\HideIntegration;
 use App\Nova\Actions\Integration\UnhideIntegration;
 
@@ -9,6 +11,7 @@ use App\Nova\Resource;
 use Illuminate\Http\Request;
 
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Laravel\Nova\Http\Requests\ActionRequest;
 
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
@@ -124,8 +127,20 @@ class Integration extends Resource
     public function actions(Request $request)
     {
         return [
-            app()->make(HideIntegration::class),
-            app()->make(UnhideIntegration::class),
+            app()->make(HideIntegration::class)->canSee(function ($request) {
+                if ($request instanceof ActionRequest) {
+                    return true;
+                }
+
+                return $this->resource instanceof Model && !$this->resource->isHidden;
+            }),
+            app()->make(UnhideIntegration::class)->canSee(function ($request) {
+                if ($request instanceof ActionRequest) {
+                    return true;
+                }
+
+                return $this->resource instanceof Model && $this->resource->isHidden;
+            }),
         ];
     }
 }

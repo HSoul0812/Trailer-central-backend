@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * Class Integration
  * @package App\Models\Integration
  *
+ * * @property bool $isHidden
+ *
  * @property int $integration_id
  * @property string $name
  * @property string $description
