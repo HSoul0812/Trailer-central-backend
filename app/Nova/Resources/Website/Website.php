@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Nova\Resources\Websites;
+namespace App\Nova\Resources\Website;
 
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Text;
@@ -12,9 +12,9 @@ use App\Models\Website\Config\WebsiteConfig;
 use App\Nova\Resource;
 
 class Website extends Resource
-{ 
+{
     public static $group = 'Websites';
-    
+
     /**
      * The model the resource corresponds to.
      *
@@ -49,16 +49,18 @@ class Website extends Resource
     public function fields(Request $request)
     {
         return [
+            Text::make('Dealer ID', 'dealer_id')->sortable(),
+
+            Text::make('App ID', 'identifier')->exceptOnForms(),
+
             Text::make('Domain')
                 ->sortable(),
-            
+
             Text::make('Type')
                 ->sortable(),
 
-            Text::make('Dealer ID', 'dealer_id')->sortable(),
-            
             Boolean::make('Active', 'is_active')->sortable(),
-            
+
             Textarea::make('Global Filter', 'type_config')->sortable()->help(
               "Usage:<br>
               {field}|{operator}|{value} - Each in a new line<br>
@@ -117,7 +119,7 @@ class Website extends Resource
               lte (is less than or equal)<br>"
 
             ),
-            
+
             Text::make('Head Scripts', 'HeadScripts')->sortable(),
 
         ];

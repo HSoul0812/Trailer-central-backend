@@ -4,6 +4,7 @@ namespace App\Models\Website;
 
 use App\Models\Traits\TableAware;
 use App\Models\Website\Config\WebsiteConfig;
+use App\Traits\CompactHelper;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Website\Blog\Post;
 use App\Models\User\User;
@@ -193,5 +194,16 @@ class Website extends Model
     public function websiteConfigByKey(string $key)
     {
         return $this->websiteConfigs()->where('key', $key)->take(1)->value('value');
+    }
+
+
+    /**
+     * Get website shorten identifier
+     *
+     * @return false|string
+     */
+    public function getIdentifierAttribute()
+    {
+        return CompactHelper::shorten($this->id);
     }
 }
