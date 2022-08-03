@@ -53,6 +53,12 @@ class TcApiResponseInventory
     public ?int $year;
     public ?string $status;
     public ?string $axle_capacity;
+
+    public ?string $l_address;
+    public ?string $l_city;
+    public ?string $l_state;
+    public ?string $l_zip_code;
+
     #[Pure]
  public static function fromData(array $data): self
  {
@@ -105,6 +111,11 @@ class TcApiResponseInventory
      $obj->year = $data['year'];
      $obj->status = $data['status'];
      $obj->axle_capacity = $data['axle_capacity'];
+
+     $obj->l_address = $data['l_address'];
+     $obj->l_city = $data['l_city'];
+     $obj->l_state = $data['l_state'];
+     $obj->l_zip_code = $data['l_zip_code'];
 
      foreach($data['attributes'] as $attribute) {
        $obj->setTypedProperty($attribute['code'], $attribute['value']);

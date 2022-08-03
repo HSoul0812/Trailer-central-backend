@@ -121,9 +121,7 @@ class InventoryService implements InventoryServiceInterface
       $access_token = $headers['access-token'];
       $url = config('services.trailercentral.api') . 'inventory/';
       $inventory = $this->handleHttpRequest('PUT', $url, ['query' => $params, 'headers' => ['access-token' => $access_token]]);
-      $respObj = TcApiResponseInventoryCreate::fromData($inventory['response']['data']);
-
-      return $respObj;
+      return TcApiResponseInventoryCreate::fromData($inventory['response']['data']);
     }
 
     /**
