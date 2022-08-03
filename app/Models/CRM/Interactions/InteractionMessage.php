@@ -89,14 +89,15 @@ class InteractionMessage extends Model
         if ($this->tb_name === TextLog::getTableName()) {
             $lead = $message->lead;
             $leadId = $message->lead_id;
+            $leadPhone = !empty($lead->phone_number) ? $lead->phone_number : '';
             $dateSent = $message->date_sent;
             $salesPersonIds = [];
 
             $array['text'] = $message->log_message;
             $array['from_number'] = $message->from_number;
             $array['to_number'] = $message->to_number;
-            $array['is_incoming'] = $helper->sanitizePhoneNumber($message->from_number) === $helper->sanitizePhoneNumber($lead->phone_number);
-            $array['files'] = $message->files->toArray();
+            $array['is_incoming'] = $helper->sanitizePhoneNumber($message->from_number) === $helper->sanitizePhoneNumber($leadPhone);
+            $array['files'] = $message->files ? $message->files->toArray() : [];
 
             $array['interaction_id'] = null;
             $array['parent_message_id'] = null;
@@ -112,6 +113,7 @@ class InteractionMessage extends Model
         if ($this->tb_name === EmailHistory::getTableName()) {
             $lead = $message->lead;
             $leadId = $message->lead_id;
+            $leadEmail = !empty($lead->email_address) ? $lead->email_address : '';
             $dateSent = $message->date_sent;
             $salesPersonIds = [];
 
@@ -124,7 +126,7 @@ class InteractionMessage extends Model
             $array['from_name'] = $message->from_name;
             $array['to_name'] = $message->to_name;
             $array['date_delivered'] = $message->date_delivered;
-            $array['is_incoming'] = strcasecmp($lead->email_address, $message->from_email) === 0;
+            $array['is_incoming'] = strcasecmp($leadEmail, $message->from_email) === 0;
 
             $array['from_number'] = null;
             $array['to_number'] = null;
@@ -171,14 +173,14 @@ class InteractionMessage extends Model
         $array['message_created_at'] = $message->created_at;
         $array['message_updated_at'] = $message->updated_at;
 
-        $array['lead_first_name'] = $lead->first_name;
-        $array['lead_last_name'] = $lead->last_name;
+        $array['lead_first_name'] = !empty($lead->first_name) ? $lead->first_name : '';
+        $array['lead_last_name'] = !empty($lead->last_name) ? $lead->last_name : '';
 
-        $array['unassigned'] = $lead->lead_type === LeadType::TYPE_NONLEAD;
+        $array['unassigned'] = !empty($lead->lead_type) ? ($lead->lead_type === LeadType::TYPE_NONLEAD) : true;
 
-        $array['dealer_id'] = $lead->website->dealer_id ?? $lead->dealer_id;
+        $array['dealer_id'] = $lead ? ($lead->website->dealer_id ?? $lead->dealer_id) : 0;
 
-        if ($lead->leadStatus) {
+        if (!empty($lead->leadStatus)) {
             $salesPersonIds[] = $lead->leadStatus->sales_person_id;
         }
 
