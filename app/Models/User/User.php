@@ -2,6 +2,10 @@
 
 namespace App\Models\User;
 
+use App\Models\Integration\Collector\Collector;
+use App\Models\Integration\Integration;
+use App\Models\Integration\IntegrationDealer;
+use App\Models\Inventory\Inventory;
 use App\Models\Parts\Bin;
 use App\Models\User\Interfaces\PermissionsInterface;
 use App\Traits\Models\HasPermissionsStub;
@@ -12,6 +16,7 @@ use App\Models\CRM\Leads\LeadType;
 use App\Models\Website\Website;
 use App\Models\Website\Config\WebsiteConfig;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use App\Models\CRM\Dms\Printer\Settings;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\Builder;
@@ -35,6 +40,7 @@ use Laravel\Cashier\Billable;
  *
  * @property bool $isCrmActive
  * @property bool $is_dms_active
+ * @property bool $is_scheduler_active
  * @property string $identifier
  * @property integer $showroom
  * @property string $showroom_dealers a PHP serialized object
@@ -178,6 +184,9 @@ class User extends Model implements Authenticatable, PermissionsInterface
     protected $casts = [
         'autoresponder_enable' => 'boolean',
         'is_dms_active' => 'boolean',
+        'is_scheduler_active' => 'boolean',
+        'clsf_active' => 'boolean',
+        'is_quote_manager_active' => 'boolean'
     ];
 
     /**
@@ -249,6 +258,11 @@ class User extends Model implements Authenticatable, PermissionsInterface
      */
     public function getRememberTokenName() {}
 
+    /**
+     * Get dealer shorten identifier
+     *
+     * @return false|string
+     */
     public function getIdentifierAttribute()
     {
         return CompactHelper::shorten($this->dealer_id);
@@ -295,10 +309,28 @@ class User extends Model implements Authenticatable, PermissionsInterface
             ->where('user_type', 'dealer');
     }
 
+    public function getIsCdkActiveAttribute(): bool
+    {
+        return (bool) $this->getCdkAttribute();
+    }
+
+    public function getCdkAttribute()
+    {
+        $cdk = $this->adminSettings()->where([
+            ['setting', '=', 'website_leads_cdk_source_id']
+        ])->first();
+
+        if ($cdk) {
+            return $cdk->setting_value;
+        } else {
+            return false;
+        }
+    }
+
     public function getIsCrmActiveAttribute(): bool
     {
         $crmUser = $this->crmUser()->first();
-        return $crmUser instanceof CrmUser ? (bool)$crmUser->active : false;
+        return $crmUser instanceof CrmUser && $crmUser->active;
     }
 
     public function getIsPartsActiveAttribute(): bool
@@ -311,22 +343,58 @@ class User extends Model implements Authenticatable, PermissionsInterface
         return !empty($this->dealerClapp);
     }
 
+    public function getIsMobileActiveAttribute(): bool
+    {
+        if(isset($this->website)) {
+            return (bool) $this->website->websiteConfigByKey(WebsiteConfig::MOBILE_KEY_ENABLED);
+        } else {
+            return false;
+        }
+    }
+
     public function getIsEcommerceActiveAttribute(): bool
     {
-        $website = $this->website;
-
-        if ($website) {
-          $isWebsiteConfigEcommerce = WebsiteConfig::where('website_id', $website->id)->where('key', WebsiteConfig::ECOMMERCE_KEY_ENABLE)->where('value', 1)->exists();
+        if(isset($this->website)) {
+            return (bool) $this->website->websiteConfigByKey(WebsiteConfig::ECOMMERCE_KEY_ENABLE);
         } else {
-          $isWebsiteConfigEcommerce = false;
+            return false;
         }
-        return $isWebsiteConfigEcommerce;
+    }
+
+    public function getIsAutoConxActiveAttribute(): bool
+    {
+        $integration = $this->integrations()->where('integration.integration_id', 33)->first();
+        return $integration ? $integration->pivot->active : false;
+    }
+
+    public function getIsCarbaseActiveAttribute(): bool
+    {
+        $integration = $this->integrations()->where('integration.integration_id', 50)->first();
+        return $integration ? $integration->pivot->active : false;
+    }
+
+    public function getIsDP360ActiveAttribute(): bool
+    {
+        $integration = $this->integrations()->where('integration.integration_id', 62)->first();
+        return $integration ? $integration->pivot->active : false;
+    }
+
+    public function getIsTrailerUsaActiveAttribute(): bool
+    {
+        $integration = $this->integrations()->where('integration.integration_id', 31)->first();
+        return $integration ? $integration->pivot->active : false;
+    }
+
+    public function getIsELeadsActiveAttribute(): bool
+    {
+        $integration = $this->integrations()->where('integration.integration_id', 54)->first();
+        return $integration ? $integration->pivot->active : false;
     }
 
     public function getIsUserAccountsActiveAttribute(): ?bool
     {
         if(isset($this->website)) {
-            return $this->website->websiteConfigByKey('general/user_accounts');
+            return (bool) $this->website->websiteConfigByKey(WebsiteConfig::USER_ACCOUNTS_KEY);
         } else {
             return false;
         }
@@ -345,6 +413,11 @@ class User extends Model implements Authenticatable, PermissionsInterface
         return $this->hasMany(DealerLocation::class, 'dealer_id', 'dealer_id');
     }
 
+    public function adminSettings(): HasMany
+    {
+        return $this->hasMany(DealerAdminSetting::class, 'dealer_id', 'dealer_id');
+    }
+
     /**
      * Get leads
      */
@@ -352,6 +425,30 @@ class User extends Model implements Authenticatable, PermissionsInterface
     {
         return $this->hasMany(Lead::class, 'dealer_id', 'dealer_id')->where('is_spam', 0)
                     ->where(Lead::getTableName() . '.lead_type', '<>', LeadType::TYPE_NONLEAD);
+    }
+
+    /**
+     * Get Inventories
+     */
+    public function inventories(): HasMany
+    {
+        return $this->hasMany(Inventory::class, 'dealer_id', 'dealer_id');
+    }
+
+    /**
+     * Get Integrations
+     */
+    public function integrations(): BelongsToMany
+    {
+        return $this->belongsToMany(Integration::class, 'integration_dealer', 'dealer_id', 'integration_id')->withPivot(['active']);
+    }
+
+    /**
+     * Get Collector
+     */
+    public function collector()
+    {
+        return $this->hasOne(Collector::class, 'dealer_id', 'dealer_id');
     }
 
     public function printerSettings() : HasOne

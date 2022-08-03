@@ -2,7 +2,9 @@
 
 namespace App\Models\Integration;
 
+use App\Models\User\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * Class Integration
@@ -71,5 +73,29 @@ class Integration extends Model
     public function decodeSettings(): \Illuminate\Support\Collection
     {
         return collect($this->settings ? unserialize($this->settings, ['allowed_classes' => false]) : []);
+    }
+
+    /**
+     * If is a hidden integration
+     *
+     * @return bool
+     */
+    public function getIsHiddenAttribute(): bool
+    {
+        $integration = HiddenIntegration::where('integration_id', $this->integration_id)->first();
+
+        if ($integration) {
+            return $integration->is_hidden;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Get Dealers
+     */
+    public function dealers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'integration_dealer', 'integration_id', 'dealer_id')->withPivot(['active']);
     }
 }

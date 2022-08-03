@@ -2,22 +2,21 @@
 
 namespace App\Models\User;
 
-use App\Models\Upload\Upload;
 use Illuminate\Database\Eloquent\Model;
 
-class DealerPart extends Model
+class DealerAdminSetting extends Model
 {
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'dealer_parts';
+    protected $table = 'dealer_admin_settings';
 
     /**
      * @var int
      */
-    protected $primaryKey = 'dealer_id';
+    protected $primaryKey = 'id';
 
     public $timestamps = false;
     /**
@@ -27,12 +26,17 @@ class DealerPart extends Model
      */
     protected $fillable = [
         "dealer_id",
-        "since"
+        "setting",
+        "setting_value"
     ];
 
+    /**
+     * Get dealer information
+     * @return BelongsTo
+     */
     public function dealer(): BelongsTo
     {
-        return $this->hasOne(User::class, 'dealer_id', 'user_id');
+        return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
     }
 
 }
