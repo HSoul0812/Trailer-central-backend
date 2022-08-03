@@ -50,6 +50,7 @@ class UpdateCustomerRequest extends Request
             Rule::unique('dms_customer', 'display_name')
                 ->ignore($this->get('id'))
                 ->where('dealer_id', $this->get('dealer_id'))
+                ->whereNull('deleted_at'),
         ];
 
         return parent::getRules();

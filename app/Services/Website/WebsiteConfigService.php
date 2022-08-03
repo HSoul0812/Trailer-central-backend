@@ -32,6 +32,10 @@ class WebsiteConfigService implements WebsiteConfigServiceInterface
     }
 
     /**
+     * @deprecated This should be removed due we have an extra website config API which should handle any non-regular
+     *             website variable e.g. call to action and showroom, both of them are regular website variables, so they
+     *             should be ALWAYS handled by regular website variables API
+     *
      * @param array $params
      * @return array
      */
@@ -51,6 +55,15 @@ class WebsiteConfigService implements WebsiteConfigServiceInterface
         ];
     }
 
+    /**
+     * @deprecated This should be removed due we have an extra website config API which should handle any non-regular
+     *             website variable e.g. call to action and showroom, both of them are regular website variables, so they
+     *             should be ALWAYS handled by regular website variables API
+     *
+     * @param array $requestData
+     * @return array
+     * @throws \Exception
+     */
     public function createShowroomConfig(array $requestData): array
     {
         return $this->webConfigRepository->createOrUpdateShowroomConfig($requestData);
