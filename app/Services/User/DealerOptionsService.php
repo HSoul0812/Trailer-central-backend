@@ -16,7 +16,6 @@ use App\Repositories\User\UserRepositoryInterface;
 use App\Exceptions\Nova\Actions\Dealer\EcommerceActivationException;
 use App\Exceptions\Nova\Actions\Dealer\EcommerceDeactivationException;
 use App\Repositories\Repository;
-use App\Repositories\Website\Config\WebsiteConfigRepository;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Repositories\Website\EntityRepositoryInterface as WebsiteEntityRepositoryInterface;
 use App\Repositories\Website\WebsiteRepositoryInterface;
@@ -99,8 +98,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
      * @param CrmUserRoleRepositoryInterface $crmUserRoleRepository
      * @param WebsiteConfigRepositoryInterface $websiteConfigRepository
      * @param DealerPartRepositoryInterface $dealerPartRepository
-     * @param WebsiteConfigRepositoryInterface $websiteConfigRepository
-     * * @param NewDealerUserRepositoryInterface $newDealerUserRepository
+     * @param NewDealerUserRepositoryInterface $newDealerUserRepository
      * @param NewUserRepositoryInterface $newUserRepository
      * @param StringHelper $stringHelper
      * @param WebsiteRepositoryInterface $websiteRepository
@@ -133,6 +131,271 @@ class DealerOptionsService implements DealerOptionsServiceInterface
         $this->websiteEntityRepository = $websiteEntityRepository;
 
         $this->inventoryRepository = $inventoryRepository;
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateDealer(int $dealerId): bool {
+        try {
+
+            $inventoryParams = [
+                'active' => self::INACTIVE,
+                'is_archived' => self::ARCHIVED_ON,
+                'archived_at' => Carbon::now()->format('Y-m-d H:i:s')
+            ];
+
+            $this->userRepository->deactivateDealer($dealerId);
+            $this->inventoryRepository->archiveInventory($dealerId, $inventoryParams);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("Dealer deactivation error. dealer_id - {$dealerId}", $e->getTrace());
+
+            return false;
+        }
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function activateDealerClassifieds(int $dealerId): bool
+    {
+        try {
+            $this->userRepository->activateDealerClassifieds($dealerId);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("DealerClassifieds activation error. dealer_id - {$dealerId}", $e->getTrace());
+
+            return false;
+        }
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateDealerClassifieds(int $dealerId): bool
+    {
+        try {
+            $this->userRepository->deactivateDealerClassifieds($dealerId);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("DealerClassifieds deactivation error. dealer_id - {$dealerId}", $e->getTrace());
+
+            return false;
+        }
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function activateDms(int $dealerId): bool
+    {
+        try {
+            $this->userRepository->activateDms($dealerId);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("DMS activation error. dealer_id - {$dealerId}", $e->getTrace());
+
+            return false;
+        }
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateDms(int $dealerId): bool
+    {
+        try {
+            $this->userRepository->deactivateDms($dealerId);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("DMS deactivation error. dealer_id - {$dealerId}", $e->getTrace());
+
+            return false;
+        }
+    }
+
+    /**
+     * @param int $dealerId
+     * @param string $sourceId
+     * @return bool
+     */
+    public function activateCdk(int $dealerId, string $sourceId): bool
+    {
+        try {
+            $this->userRepository->activateCdk($dealerId, $sourceId);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("E-Leads activation error. dealer_id - {$dealerId}", $e->getTrace());
+
+            return false;
+        }
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateCdk(int $dealerId): bool
+    {
+        try {
+            $this->userRepository->deactivateCdk($dealerId);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("E-Leads deactivation error. dealer_id - {$dealerId}", $e->getTrace());
+
+            return false;
+        }
+    }
+
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function activateMarketing(int $dealerId): bool
+    {
+        try {
+            $this->userRepository->activateMarketing($dealerId);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("Marketing activation error. dealer_id - {$dealerId}", $e->getTrace());
+
+            return false;
+        }
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateMarketing(int $dealerId): bool
+    {
+        try {
+            $this->userRepository->deactivateMarketing($dealerId);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("Marketing deactivation error. dealer_id - {$dealerId}", $e->getTrace());
+
+            return false;
+        }
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function activateMobile(int $dealerId): bool
+    {
+        try {
+            $this->userRepository->activateMobile($dealerId);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("Mobile activation error. dealer_id - {$dealerId}", $e->getTrace());
+
+            return false;
+        }
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateMobile(int $dealerId): bool
+    {
+        try {
+            $this->userRepository->deactivateMobile($dealerId);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("Mobile deactivation error. dealer_id - {$dealerId}", $e->getTrace());
+
+            return false;
+        }
+    }
+
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function activateScheduler(int $dealerId): bool
+    {
+        try {
+            $this->userRepository->activateScheduler($dealerId);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("Scheduler activation error. dealer_id - {$dealerId}", $e->getTrace());
+
+            return false;
+        }
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateScheduler(int $dealerId): bool
+    {
+        try {
+            $this->userRepository->deactivateScheduler($dealerId);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("Scheduler deactivation error. dealer_id - {$dealerId}", $e->getTrace());
+
+            return false;
+        }
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function activateELeads(int $dealerId): bool
+    {
+        try {
+            $this->userRepository->activateELeads($dealerId);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("E-Leads activation error. dealer_id - {$dealerId}", $e->getTrace());
+
+            return false;
+        }
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateELeads(int $dealerId): bool
+    {
+        try {
+            $this->userRepository->deactivateELeads($dealerId);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("E-Leads deactivation error. dealer_id - {$dealerId}", $e->getTrace());
+
+            return false;
+        }
     }
 
     /**
@@ -292,6 +555,7 @@ class DealerOptionsService implements DealerOptionsServiceInterface
     /**
      * @param int $dealerId
      * @return bool
+     * @throws EcommerceDeactivationException
      */
     public function deactivateECommerce(int $dealerId): bool
     {
@@ -335,13 +599,75 @@ class DealerOptionsService implements DealerOptionsServiceInterface
      */
     public function activateParts(int $dealerId): bool
     {
-        $dealerPartsParams = [
-            'dealer_id' => $dealerId,
-            'since' => Carbon::now()->format('Y-m-d')
-        ];
-        $dealerParts = $this->dealerPartRepository->create($dealerPartsParams);
+        try {
+            $dealerPartsParams = [
+                'dealer_id' => $dealerId,
+                'since' => Carbon::now()->format('Y-m-d')
+            ];
 
-        return (bool)$dealerParts;
+            $this->dealerPartRepository->create($dealerPartsParams);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("Parts activation error. dealer_id - {$dealerId}", $e->getTrace());
+
+            return false;
+        }
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateParts(int $dealerId): bool
+    {
+        try {
+            $dealerPartsParams = [
+                'dealer_id' => $dealerId
+            ];
+
+            $this->dealerPartRepository->delete($dealerPartsParams);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("Parts deactivation error. dealer_id - {$dealerId}", $e->getTrace());
+
+            return false;
+        }
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function activateQuoteManager(int $dealerId): bool
+    {
+        try {
+            $this->userRepository->activateQuoteManager($dealerId);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("QuoteManager activation error. dealer_id - {$dealerId}", $e->getTrace());
+
+            return false;
+        }
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateQuoteManager(int $dealerId): bool
+    {
+        try {
+            $this->userRepository->deactivateQuoteManager($dealerId);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("QuoteManager deactivation error. dealer_id - {$dealerId}", $e->getTrace());
+
+            return false;
+        }
     }
 
     public function activateUserAccounts(int $dealerId): bool {
@@ -491,29 +817,5 @@ class DealerOptionsService implements DealerOptionsServiceInterface
         $user->newDealerUser()->save($newDealerUser);
 
         return $newDealerUser;
-    }
-
-    /**
-     * @param int $dealerId
-     * @return bool
-     */
-    public function deactivateDealer(int $dealerId): bool {
-        try {
-
-            $inventoryParams = [
-                'active' => self::INACTIVE,
-                'is_archived' => self::ARCHIVED_ON,
-                'archived_at' => Carbon::now()->format('Y-m-d H:i:s')
-            ];
-
-            $this->userRepository->deactivateDealer($dealerId);
-            $this->inventoryRepository->archiveInventory($dealerId, $inventoryParams);
-
-            return true;
-        } catch (\Exception $e) {
-            Log::error("Dealer deactivation error. dealer_id - {$dealerId}", $e->getTrace());
-
-            return false;
-        }
     }
 }
