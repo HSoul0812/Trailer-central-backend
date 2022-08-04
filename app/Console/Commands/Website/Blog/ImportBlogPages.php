@@ -45,7 +45,7 @@ class ImportBlogPages extends Command {
     protected $httpClient;
     
     /**     
-     * @var string
+     * @var array
      */
     private $oldBlogDomain;
     
@@ -73,6 +73,12 @@ class ImportBlogPages extends Command {
         $this->s3Bucket = $this->argument('s3-bucket');
         $this->oldBlogDomain = $this->argument('old-blog-domain');
         
+        if (strpos($this->oldBlogDomain, ',') !== false) {
+            $this->oldBlogDomain = explode(',', $this->oldBlogDomain);
+        } else {
+            $this->oldBlogDomain = [$this->oldBlogDomain];
+        }
+        
         $website = $this->websiteRepo->get(['id' => $this->websiteId]);
         
         $this->streamCsv(function($csvData, $lineNumber) {
@@ -81,12 +87,25 @@ class ImportBlogPages extends Command {
             }   
             
             list($title, $body, $url) = $csvData;
-            
-            $title = strip_tags($title);        
-            $url = str_replace("{$this->oldBlogDomain}/", '', $url);
-            
-            $body = $this->uploadBlogImagesToS3($body);
 
+            $title = strip_tags($title);
+            foreach($this->oldBlogDomain as $blogDomain) {
+                $newUrl = str_replace("https://www.{$blogDomain}/", '', $url);
+                
+                if ($url != $newUrl) {
+                    $url = $newUrl;
+                    break;
+                }
+            }
+            
+            try {
+                $body = $this->uploadBlogImagesToS3($body);
+            } catch (\Exception $ex) {
+
+            }
+            
+            $title = explode('-', $title)[0];
+            
             $this->postRepo->create([
                 'title' => $title,
                 'url_path' => $url,
@@ -94,6 +113,8 @@ class ImportBlogPages extends Command {
                 'post_content' => $body,
                 'website_id' => $this->websiteId
             ]);
+            
+            $this->info($url . " entry inserted");
             
         });   
     }
@@ -109,6 +130,9 @@ class ImportBlogPages extends Command {
         foreach($result as $img) {
             $explodedImage = explode('/', $img);
             $imageName = 'blog-files/'.$explodedImage[count($explodedImage) - 1];
+            if ( strpos($img, 'https') === false ) {
+                $img = "https:".$img;
+            }
             $result = Storage::disk('s3')->put($imageName, file_get_contents($img));
             if ($result) {
                 $replace[$img] = 'https://'.env('AWS_BUCKET').'.s3.amazonaws.com/'.$imageName;

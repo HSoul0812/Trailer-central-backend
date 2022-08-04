@@ -222,7 +222,7 @@ return [
         'production' => [
             'supervisor-1' => [
                 'connection' => 'redis',
-                'queue' => ['factory-feeds', 'fb-messenger', 'inquiry', 'blog-posts', 'ecommerce'],
+                'queue' => ['factory-feeds', 'fb-messenger', 'inquiry', 'blog-posts', 'ecommerce', 'crm-users'],
                 'balance' => 'auto',
                 'minProcesses' => 1,
                 'maxProcesses' => 8,

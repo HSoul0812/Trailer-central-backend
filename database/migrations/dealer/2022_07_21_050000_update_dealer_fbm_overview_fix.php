@@ -1,8 +1,6 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
 class UpdateDealerFbmOverviewFix extends Migration
@@ -14,10 +12,12 @@ class UpdateDealerFbmOverviewFix extends Migration
      */
     public function up()
     {
-        DB::statement($this->dropView1());
-        DB::statement($this->dropView2());
-        DB::statement($this->createView1());
-        DB::statement($this->createView2());
+        $conn = DB::connection()->getDoctrineConnection();
+        $conn->executeStatement($this->dropView1());
+        $conn->executeStatement($this->dropView2());
+        $conn->executeStatement($this->createView1());
+        $conn->executeStatement($this->createView2());
+        $conn->close();
     }
 
     /**
@@ -27,24 +27,26 @@ class UpdateDealerFbmOverviewFix extends Migration
      */
     public function down()
     {
-        DB::statement($this->dropView1());
-        DB::statement($this->dropView2());
+        $conn = DB::connection()->getDoctrineConnection();
+        $conn->executeStatement($this->dropView1());
+        $conn->executeStatement($this->dropView2());
+        $conn->close();
     }
 
     private function dropView1(): string
     {
-        return "DROP VIEW IF EXISTS `trailercentral`.`dealer_fbm_overview`;";
+        return "DROP VIEW IF EXISTS dealer_fbm_overview;";
     }
 
     private function dropView2(): string
     {
-        return "DROP VIEW IF EXISTS `trailercentral`.`fbme_listings`;";
+        return "DROP VIEW IF EXISTS fbme_listings;";
     }
 
     private function createView1(): string
     {
         return "
-        CREATE VIEW `trailercentral`.`fbme_listings` AS 
+        CREATE VIEW fbme_listings AS 
 
         SELECT 
             inv.stock AS SKU, 
@@ -64,7 +66,7 @@ class UpdateDealerFbmOverviewFix extends Migration
     private function createView2(): string
     {
         return "
-        CREATE VIEW `trailercentral`.`dealer_fbm_overview` AS
+        CREATE VIEW dealer_fbm_overview AS
 
         SELECT 
             d.dealer_id AS id,
