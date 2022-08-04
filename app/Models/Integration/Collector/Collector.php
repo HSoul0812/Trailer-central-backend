@@ -193,7 +193,17 @@ class Collector extends Model implements Filterable
     protected $casts = [
         'last_run' => 'datetime',
         'scheduled_for' => 'datetime',
+        'overridable_fields' => 'array'
     ];
+
+    public function getOverridableFieldsListAttribute(): string
+    {
+        $overridable_fields = array_keys(array_filter($this->overridable_fields, function($v){
+            return $v;
+        }));
+
+        return implode(",", $overridable_fields);
+    }
 
     public function dealers(): BelongsTo
     {
