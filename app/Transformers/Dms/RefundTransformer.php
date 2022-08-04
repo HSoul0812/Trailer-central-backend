@@ -19,6 +19,7 @@ class RefundTransformer extends TransformerAbstract
         'invoice',
         'receipt',
         'customer',
+        'unitSale',
     ];
 
     /**
@@ -87,5 +88,14 @@ class RefundTransformer extends TransformerAbstract
         }
 
         return null;
+    }
+
+    public function includeUnitSale(Refund $refund): ?Item
+    {
+        if (!$refund->unitSale) {
+            return null;
+        }
+
+        return $this->item($refund->unitSale, new QuoteTransformer());;
     }
 }
