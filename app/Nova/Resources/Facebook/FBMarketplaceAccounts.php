@@ -67,6 +67,8 @@ class FBMarketplaceAccounts extends Resource
     protected function panelIntegration()
     {
         return [
+            Text::make('Integration ID', 'id')->onlyOnDetail(),
+            
             Text::make('Dealer ID', 'dealer_id')->sortable(),
 
             Text::make('Dealer Name', 'dealer_name')
