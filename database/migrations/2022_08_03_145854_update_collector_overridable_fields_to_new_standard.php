@@ -18,14 +18,16 @@ class UpdateCollectorOverridableFieldsToNewStandard extends Migration
      */
     public function up()
     {
-        $result = DB::select(
-            DB::raw("SELECT id, overridable_fields FROM collector")
-        );
+        if ($this->checkColumn()) {
+            $result = DB::select(
+                DB::raw("SELECT id, overridable_fields FROM collector")
+            );
 
-        foreach ($result as $item) {
-            DB::table('collector')
-                ->where(['id' => $item->id])
-                ->update(['overridable_fields' => $this->transformToNewStandard($item->overridable_fields)]);
+            foreach ($result as $item) {
+                DB::table('collector')
+                    ->where(['id' => $item->id])
+                    ->update(['overridable_fields' => $this->transformToNewStandard($item->overridable_fields)]);
+            }
         }
     }
 
@@ -37,14 +39,16 @@ class UpdateCollectorOverridableFieldsToNewStandard extends Migration
      */
     public function down()
     {
-        $result = DB::select(
-            DB::raw("SELECT id, overridable_fields FROM collector")
-        );
+        if ($this->checkColumn()) {
+            $result = DB::select(
+                DB::raw("SELECT id, overridable_fields FROM collector")
+            );
 
-        foreach ($result as $item) {
-            DB::table('collector')
-                ->where(['id' => $item->id])
-                ->update(['overridable_fields' => $this->transformToOldStandard($item->overridable_fields)]);
+            foreach ($result as $item) {
+                DB::table('collector')
+                    ->where(['id' => $item->id])
+                    ->update(['overridable_fields' => $this->transformToOldStandard($item->overridable_fields)]);
+            }
         }
     }
 
@@ -79,5 +83,14 @@ class UpdateCollectorOverridableFieldsToNewStandard extends Migration
         }));
 
         return implode(",", $old_fields);
+    }
+
+    /**
+     * Validate column existence on migrate
+     * @return bool
+     */
+    private function checkColumn(): bool
+    {
+        return Schema::hasColumn('collector', 'overridable_fields');
     }
 }

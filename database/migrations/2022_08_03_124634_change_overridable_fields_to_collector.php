@@ -14,7 +14,9 @@ class ChangeOverridableFieldsToCollector extends Migration
     public function up()
     {
         Schema::table('collector', function (Blueprint $table) {
-            $table->text('overridable_fields')->change();
+            if ($this->checkColumn()) {
+                $table->text('overridable_fields')->change();
+            }
         });
     }
 
@@ -26,7 +28,18 @@ class ChangeOverridableFieldsToCollector extends Migration
     public function down()
     {
         Schema::table('collector', function (Blueprint $table) {
-            $table->string('overridable_fields', 254)->change();
+            if ($this->checkColumn()) {
+                $table->string('overridable_fields', 254)->change();
+            }
         });
+    }
+
+    /**
+     * Validate column existence on migrate
+     * @return bool
+     */
+    private function checkColumn(): bool
+    {
+        return Schema::hasColumn('collector', 'overridable_fields');
     }
 }
