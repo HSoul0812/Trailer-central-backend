@@ -34,7 +34,7 @@ class FBMarketplaceAccounts extends Resource
      * @var array
      */
     public static $search = [
-        'id', 'name', 'fb_username', 'units_posted'
+        'dealer_id', 'dealer_name', 'fb_username', 'units_posted_today'
     ];
 
     public static function label()
@@ -67,9 +67,9 @@ class FBMarketplaceAccounts extends Resource
     protected function panelIntegration()
     {
         return [
-            Text::make('Dealer ID', 'id')->sortable(),
+            Text::make('Dealer ID', 'dealer_id')->sortable(),
 
-            Text::make('Dealer Name', 'name')
+            Text::make('Dealer Name', 'dealer_name')
                 ->sortable(),
 
             Text::make('FB Username')
