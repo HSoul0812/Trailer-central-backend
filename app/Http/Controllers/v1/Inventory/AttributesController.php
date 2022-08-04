@@ -10,13 +10,14 @@ use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\Inventory\Attributes\IndexAttributesRequest;
 use App\Http\Requests\UpdateRequestInterface;
 use App\Services\Inventory\InventoryServiceInterface;
+use App\Transformers\Inventory\TcApiResponseAttributeTransformer;
 use Dingo\Api\Http\Response;
 
 class AttributesController extends AbstractRestfulController
 {
     public function __construct(
         private InventoryServiceInterface $inventoryService,
-        private TcApiResponseAttribute $transformer)
+        private TcApiResponseAttributeTransformer $transformer)
     {
         parent::__construct();
     }
