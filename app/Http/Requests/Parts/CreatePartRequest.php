@@ -24,7 +24,7 @@ class CreatePartRequest extends Request {
             'category_id' => 'required|integer',
             'qb_id' => 'nullable|integer',
             'subcategory' => ['nullable', 'string', new ValidStringCharacters(ValidStringCharacters::PARTS_SECTION)],
-            'title' => ['required', 'string', 'filled'],
+            'title' => ['required', 'string', 'filled', new ValidStringCharacters(ValidStringCharacters::PARTS_SECTION)],
             'alternative_part_number' => 'nullable|string',
             'sku' => ['required', 'string', 'parts_sku_unique', new ValidStringCharacters(ValidStringCharacters::PARTS_SECTION)],
             'price' => 'numeric',
