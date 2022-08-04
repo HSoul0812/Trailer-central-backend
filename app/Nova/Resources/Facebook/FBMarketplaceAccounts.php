@@ -8,6 +8,7 @@ use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\DateTime;
 use App\Nova\Resource;
+use Laravel\Nova\Panel;
 
 class FBMarketplaceAccounts extends Resource
 {
@@ -50,6 +51,22 @@ class FBMarketplaceAccounts extends Resource
     public function fields(Request $request): array
     {
         return [
+            new Panel('FB Integration Details', $this->panelIntegration()),
+
+            new Panel("FBME Run Status", $this->panelStatus()),
+
+            new Panel("Results " . date("m-d-Y", strtotime("-1 day")), $this->panelResults(1)),
+            new Panel("Results " . date("m-d-Y", strtotime("-2 day")), $this->panelResults(2)),
+            new Panel("Results " . date("m-d-Y", strtotime("-3 day")), $this->panelResults(3)),
+            new Panel("Results " . date("m-d-Y", strtotime("-4 day")), $this->panelResults(4)),
+            new Panel("Results " . date("m-d-Y", strtotime("-5 day")), $this->panelResults(5)),
+
+        ];
+    }
+
+    protected function panelIntegration()
+    {
+        return [
             Text::make('Dealer ID', 'id')->sortable(),
 
             Text::make('Dealer Name', 'name')
@@ -61,17 +78,30 @@ class FBMarketplaceAccounts extends Resource
             Text::make('Location')
                 ->sortable(),
 
+
+        ];
+    }
+
+    protected function panelStatus()
+    {
+        return [
             DateTime::make('Last Run', 'last_run_ts')
                 ->sortable(),
 
             Boolean::make('Status', 'last_run_status')
                 ->sortable(),
 
-            Text::make('Units Posted', 'units_posted'),
+            Text::make('Units Posted Today', 'units_posted_today'),
 
-            Text::make('Last Error')
-                ->sortable()
+            Text::make('Error Today', 'error_today'),
+        ];
+    }
 
+    protected function panelResults(int $nrDaysAgo)
+    {
+        return [
+            Text::make('Units Posted', "units_posted_{$nrDaysAgo}dayago")->onlyOnDetail(),
+            Text::make('Last Error', "error_{$nrDaysAgo}dayago")->onlyOnDetail(),
         ];
     }
 

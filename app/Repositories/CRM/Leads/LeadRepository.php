@@ -40,6 +40,16 @@ class LeadRepository implements LeadRepositoryInterface {
         'fbUsers',
     ];
 
+    private $sortOrdersCrm = [
+        'no_due_past_due_future_due',
+        'created_at',
+        'future_due_past_due_no_due',
+        'most_recent',
+        '-most_recent',
+        'status',
+        '-created_at',
+    ];
+
     private $sortOrders = [
         'id' => [
             'field' => 'website_lead.identifier',
@@ -116,6 +126,30 @@ class LeadRepository implements LeadRepositoryInterface {
     ];
 
     private $sortOrdersNames = [
+        'id' => [
+            'name' => 'Identifier (A-Z)'
+        ],
+        '-id' => [
+            'name' => 'Identifier (Z-A)'
+        ],
+        'first_name' => [
+            'name' => 'First Name (A-Z)'
+        ],
+        '-first_name' => [
+            'name' => 'First Name (Z-A)'
+        ],
+        'last_name' => [
+            'name' => 'Last Name (A-Z)'
+        ],
+        '-last_name' => [
+            'name' => 'Last Name (Z-A)'
+        ],
+        'email' => [
+            'name' => 'E-Mail: (A-Z)'
+        ],
+        '-email' => [
+            'name' => 'E-Mail: (Z-A)'
+        ],
         'no_due_past_due_future_due' => [
             'name' => 'No Due Date, Past Due Dates, Future Due Date'
         ],
@@ -408,6 +442,13 @@ class LeadRepository implements LeadRepositoryInterface {
 
     public function getLeadsSortFields() {
         return $this->getSortFields();
+    }
+
+    public function getLeadsSortFieldsCrm(): array
+    {
+        return array_values(array_filter($this->getSortFields(), function ($item) {
+            return in_array($item['param'], $this->sortOrdersCrm);
+        }));
     }
 
     protected function getSortOrderNames() {
