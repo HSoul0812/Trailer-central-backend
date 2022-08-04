@@ -78,10 +78,14 @@ class RefundTransformer extends TransformerAbstract
      */
     public function includeCustomer(Refund $refund): ?Item
     {
-        if (!$refund->invoice || !$refund->invoice->customer) {
-            return null;
+        if (optional($refund->invoice)->customer) {
+            return $this->item($refund->invoice->customer, new CustomerTransformer());
         }
 
-        return $this->item($refund->invoice->customer, new CustomerTransformer());
+        if (optional($refund->unitSale)->customer) {
+            return $this->item($refund->unitSale->customer, new CustomerTransformer());
+        }
+
+        return null;
     }
 }
