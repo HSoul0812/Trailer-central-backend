@@ -97,6 +97,7 @@ class BillRepository implements BillRepositoryInterface
      * @return Bill
      *
      * @throws ModelNotFoundException
+     * @throws \Exception
      */
     public function update($params): Bill
     {
@@ -116,6 +117,8 @@ class BillRepository implements BillRepositoryInterface
             return $bill;
         } catch (\Exception $exception) {
             $this->rollbackTransaction();
+
+            throw $exception;
         }
     }
 
