@@ -27,7 +27,8 @@ return [
             'inbox' => env('ADF_IMPORT_INBOX', 'INBOX'),
             'invalid' => env('ADF_IMPORT_INVALID', 'Invalid'),
             'unmapped' => env('ADF_IMPORT_UNMAPPED', 'Unmapped'),
-            'processed' => env('ADF_IMPORT_PROCESSED', 'Processed')
+            'processed' => env('ADF_IMPORT_PROCESSED', 'Processed'),
+            'move' => env('ADF_IMPORT_MOVE_LABEL', true)
         ]
     ],
     /*

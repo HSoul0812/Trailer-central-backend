@@ -94,11 +94,10 @@ class ADFService implements ADFServiceInterface {
         // Get Emails From Service
         $accessToken = $this->getAccessToken();
         $address = config('adf.imports.gmail.email');
-        $inbox = config('adf.imports.gmail.inbox');
-	$this->log->info('Getting Messages With Access Token ' . print_r($accessToken));
+	$this->log->info('Getting Messages With Access Token ' . print_r($accessToken, true));
 
 	// Get Messages for Access Token
-        $messages = $this->gmail->messages($accessToken, $inbox);
+        $messages = $this->gmail->messages($accessToken, config('adf.imports.gmail.inbox'));
         $this->log->info('Parsing ' . count($messages) . ' Email Messages From Email Address ' . $address);
 
         // Checking Each Message
@@ -130,21 +129,21 @@ class ADFService implements ADFServiceInterface {
                 $result = $this->importLead($adf);
                 if(!empty($result->identifier)) {
                     $this->log->info('Imported ADF Lead ' . $result->identifier . ' and Moved to Processed');
-                    $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.processed')], [$inbox]);
+                    $this->tryMove($accessToken, $mailId, 'processed');
                     $total++;
                 }
             } catch(InvalidAdfDealerIdException $e) {
                 if(!empty($dealerId) && is_numeric($dealerId)) {
-                    $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.unmapped')], [$inbox]);
+                    $this->tryMove($accessToken, $mailId, 'unmapped');
                     $this->log->error("Exception returned on ADF Import Message #{$mailId}: " .
                                         $e->getMessage() . " and moved to Unmapped");
                 } else {
-                    $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.invalid')], [$inbox]);
+                    $this->tryMove($accessToken, $mailId, 'invalid');
                     $this->log->error("Exception returned on ADF Import Message #{$mailId}: " .
                                         $e->getMessage() . " and moved to Invalid");
                 }
             } catch(InvalidAdfImportFormatException $e) {
-                $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.invalid')], [$inbox]);
+                $this->tryMove($accessToken, $mailId, 'invalid');
                 $this->log->error("Exception returned on ADF Import Message #{$mailId}: " .
                                         $e->getMessage() . " and moved to Invalid");
             } catch(\Exception $e) {
@@ -420,5 +419,29 @@ class ADFService implements ADFServiceInterface {
      */
     private function fixCdata($xml): string {
         return preg_replace('/<!\[CDATA\[(.*?)\]\]>/', '$1', $xml);
+    }
+
+    /**
+     * Try Moving Email
+     * 
+     * @param AccessToken $accessToken
+     * @param string $mailId
+     * @param string $add ; label to add from config
+     */
+    private function tryMove(AccessToken $accessToken, string $mailId, string $add) {
+        // Are We Moving Labels Right Now?!
+        $move = config('adf.imports.gmail.move', true);
+
+        // Get Inbox Label
+        $inbox = config('adf.imports.gmail.inbox');
+
+        // Yes?
+        if($move) {
+            $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.' . $add)], [$inbox]);
+            return true;
+        }
+
+        // Just Skip for Now
+        return false;
     }
 }
