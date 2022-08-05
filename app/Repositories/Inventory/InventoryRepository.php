@@ -927,6 +927,7 @@ class InventoryRepository implements InventoryRepositoryInterface
     {
         $inventory = $this->get($params);
         $inventory->times_viewed += 1;
+        $inventory->timestamps = false;
         $inventory->save();
         return $inventory;
     }
