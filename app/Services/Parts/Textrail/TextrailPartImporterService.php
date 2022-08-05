@@ -172,6 +172,10 @@ class TextrailPartImporterService implements TextrailPartImporterServiceInterfac
                     $value = $partAttribute;
                 }
 
+                if (empty($value)) {
+                    continue;
+                }
+
                 $code = $key;
 
                 if (!array_key_exists($code, $partAttributes)) {
