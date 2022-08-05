@@ -257,6 +257,13 @@ class InventoryRepository implements InventoryRepositoryInterface
         // if we need to delete the bill approval record
         $firstTimeAttachBill = empty($item->bill_id) && !empty(data_get($params, 'bill_id'));
 
+        $hasFloorplanInfo = !empty(data_get($params, 'true_cost'))
+            && !empty(data_get($params, 'fp_vendor'))
+            && !empty(data_get($params, 'fp_balance'));
+
+        // We also note this down for now, we'll use it later
+        $firstTimeAttachFloorplan = empty($item->is_floorplan_bill) && $hasFloorplanInfo;
+
         $inventoryImageObjs = $this->createImages($params['new_images'] ?? []);
 
         if (!empty($inventoryImageObjs)) {
@@ -332,7 +339,7 @@ class InventoryRepository implements InventoryRepositoryInterface
 
         // We only want to delete the bill approval record if this is the
         // first time that we attach the bill to this inventory
-        $this->handleFloorplanAndBill($item, $firstTimeAttachBill);
+        $this->handleFloorplanAndBill($item, $firstTimeAttachBill || $firstTimeAttachFloorplan);
 
         $this->updateQbInvoiceItems($item);
 
@@ -968,6 +975,8 @@ class InventoryRepository implements InventoryRepositoryInterface
         // approval record if the inventory has the bill attached to it
         // 2. In the update inventory case, we only want to delete the bill
         // approval record if the inventory has the bill attached for the first time
+        // we do this because more than one inventory can use the same bill, if we don't do this
+        // then the cronjob won't create a new bill approval record
         if ($deleteBillApproval) {
             resolve(QuickbookApprovalRepositoryInterface::class)->deleteByTbPrimaryId($inventory->bill_id, Bill::getTableName(), $inventory->dealer_id);
         }
