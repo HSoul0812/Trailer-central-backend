@@ -434,7 +434,7 @@ class ADFService implements ADFServiceInterface {
 
         // Yes?
         if($move) {
-            $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.' . $add)], [$inbox]);
+            //$this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.' . $add)], [$inbox]);
             $this->log->info('Moved ADF Email #' . $mailId . ' to ' . ucfirst($add));
             return true;
         }
