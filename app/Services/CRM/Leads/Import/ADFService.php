@@ -15,6 +15,7 @@ use App\Models\Integration\Auth\AccessToken;
 use App\Models\User\User;
 use App\Services\CRM\Leads\DTOs\ADFLead;
 use App\Services\CRM\Leads\LeadServiceInterface;
+use App\Services\Integration\Google\GoogleService;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
 use Carbon\CarbonImmutable;
@@ -269,6 +270,7 @@ class ADFService implements ADFServiceInterface {
 
         // Refresh Token
         $accessToken = $systemEmail->googleToken;
+        $this->google->setKey(GoogleService::AUTH_TYPE_SYSTEM);
         $validate = $this->google->validate($accessToken);
         if(!empty($validate->newToken)) {
             // Refresh Access Token
