@@ -968,7 +968,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         // 2. In the update inventory case, we only want to delete the bill
         // approval record if the inventory has the bill attached for the first time
         if ($deleteBillApproval) {
-            resolve(QuickbookApprovalRepositoryInterface::class)->deleteByTbPrimaryId($inventory->bill_id, Bill::getTableName());
+            resolve(QuickbookApprovalRepositoryInterface::class)->deleteByTbPrimaryId($inventory->bill_id, Bill::getTableName(), $inventory->dealer_id);
         }
 
         // We only want to process floorplan data if the inventory
