@@ -128,26 +128,23 @@ class ADFService implements ADFServiceInterface {
                 // Process Further
                 $result = $this->importLead($adf);
                 if(!empty($result->identifier)) {
-                    $this->log->info('Imported ADF Lead ' . $result->identifier . ' and Moved to Processed');
+                    $this->log->info('Imported ADF Lead ' . $result->identifier);
                     $this->tryMove($accessToken, $mailId, 'processed');
                     $total++;
                 }
             } catch(InvalidAdfDealerIdException $e) {
                 if(!empty($dealerId) && is_numeric($dealerId)) {
                     $this->tryMove($accessToken, $mailId, 'unmapped');
-                    $this->log->error("Exception returned on ADF Import Message #{$mailId}: " .
-                                        $e->getMessage() . " and moved to Unmapped");
+                    $this->log->error("Exception returned on ADF Import Message #{$mailId}: {$e->getMessage()}");
                 } else {
                     $this->tryMove($accessToken, $mailId, 'invalid');
-                    $this->log->error("Exception returned on ADF Import Message #{$mailId}: " .
-                                        $e->getMessage() . " and moved to Invalid");
+                    $this->log->error("Exception returned on ADF Import Message #{$mailId}: {$e->getMessage()}");
                 }
             } catch(InvalidAdfImportFormatException $e) {
                 $this->tryMove($accessToken, $mailId, 'invalid');
-                $this->log->error("Exception returned on ADF Import Message #{$mailId}: " .
-                                        $e->getMessage() . " and moved to Invalid");
+                $this->log->error("Exception returned on ADF Import Message #{$mailId}: {$e->getMessage()}");
             } catch(\Exception $e) {
-                $this->log->error("Exception returned on ADF Import Message #{$mailId} {$e->getMessage()}");
+                $this->log->error("Exception returned on ADF Import Message #{$mailId}: {$e->getMessage()}");
             }
         }
 
@@ -438,6 +435,7 @@ class ADFService implements ADFServiceInterface {
         // Yes?
         if($move) {
             $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.' . $add)], [$inbox]);
+            $this->log->info('Moved ADF Email #' . $mailId . ' to ' . ucfirst($add));
             return true;
         }
 
