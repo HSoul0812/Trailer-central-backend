@@ -137,7 +137,7 @@ class CreateInventoryRequest extends Request implements CreateRequestInterface
 
         'attributes' => 'array|nullable',
         'attributes.*' => 'array',
-        'attributes.*.attribute_id' => 'required|int|exists:App\Models\Inventory\Attribute,attribute_id',
+        'attributes.*.attribute_id' => 'required|int',
         'attribute.*.value' => 'string|nullable',
 
         'features' => 'array|nullable',
