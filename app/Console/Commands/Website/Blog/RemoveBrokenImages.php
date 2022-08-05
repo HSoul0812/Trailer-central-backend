@@ -12,7 +12,7 @@ use GuzzleHttp\Client as GuzzleHttpClient;
  */
 class RemoveBrokenImages extends Command {
     
-    const REPLACE_IMAGE = 'https://dealer-cdn.com/colton/colton-logo-pl.png';
+    const REPLACE_IMAGE = 'https://dealer-cdn.com/bishs_logo.jpg';
     
     /**
      * The console command name.
@@ -62,9 +62,15 @@ class RemoveBrokenImages extends Command {
             $result = $crawler->filter('img')->extract(array('src'));
             
             foreach($result as $img) {
-                if ($this->isImageBroken($img)) {
+                try {
+                    if ($this->isImageBroken($img)) {
+                        $post->post_content = str_replace($img, self::REPLACE_IMAGE, $post->post_content);
+                    } 
+                } catch (\Exception $ex) {
+                    // Assume broken
                     $post->post_content = str_replace($img, self::REPLACE_IMAGE, $post->post_content);
-                } 
+                }
+                
             }
             
             $post->save();
