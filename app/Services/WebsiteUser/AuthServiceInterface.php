@@ -11,4 +11,6 @@ interface AuthServiceInterface
     public function authenticate(array $credential): string;
 
     public function register(array $attributes);
+
+    public function update(int $id, array $attributes): bool;
 }

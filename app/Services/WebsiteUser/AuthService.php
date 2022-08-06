@@ -3,6 +3,7 @@
 namespace App\Services\WebsiteUser;
 
 use App\DTOs\User\TcApiResponseUser;
+use App\Models\WebsiteUser\WebsiteUser;
 use App\Repositories\WebsiteUser\WebsiteUserRepositoryInterface;
 use App\Services\Captcha\CaptchaServiceInterface;
 use App\Services\Integrations\TrailerCentral\Api\Users\UsersServiceInterface;
@@ -75,6 +76,10 @@ class AuthService implements AuthServiceInterface
 
         event(new Registered($user));
         return $user;
+    }
+
+    public function update(int $id, array $attributes): bool {
+        return $this->websiteUserRepository->update($id, $attributes);
     }
 
     private function createUser(array $attributes) {
