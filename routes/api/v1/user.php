@@ -16,7 +16,7 @@ $api->version('v1', function ($api) {
     */
     $api->group(['prefix' => '/user'], function ($api) {
         $api->post('/register', [AuthController::class, 'create']);
-        $api->get('/auth', [AuthController::class, 'auth']);
+        $api->get('/auth', [AuthController::class, 'authenticate']);
         $api->get('/auth/{social}', [AuthController::class, 'social'])
             ->name('SocialAuth')
             ->where('social', 'google|facebook');

@@ -3,6 +3,7 @@
 namespace App\Services\Integrations\TrailerCentral\Api\Users;
 
 use App\DTOs\User\TcApiResponseUser;
+use App\DTOs\User\TcApiResponseUserLocation;
 use GuzzleHttp\Client as GuzzleHttpClient;
 use GuzzleHttp\Exception\GuzzleException;
 
@@ -32,6 +33,22 @@ class UsersService implements UsersServiceInterface
             ]
         ]);
         return TcApiResponseUser::fromData($responseContent);
+    }
+
+    public function createLocation(array $location): TcApiResponseUserLocation {
+        $responseContent = $this->handleHttpRequest('PUT', $this->endpointUrl . "/dealer-location", [
+            'json' => $location
+        ]);
+        return TcApiResponseUserLocation::fromData($responseContent);
+    }
+
+    public function updateLocation(int $locationId, array $location): TcApiResponseUserLocation {
+        $responseContent = $this->handleHttpRequest('POST', $this->endpointUrl . "/dealer-location/$locationId",
+            [
+                'json' => $location
+            ]
+        );
+        return TcApiResponseUserLocation::fromData($responseContent);
     }
 
     private function handleHttpRequest(string $method, string $url, array $options): array

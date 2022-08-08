@@ -7,6 +7,7 @@ use App\Models\WebsiteUser\WebsiteUser;
 use App\Repositories\WebsiteUser\WebsiteUserRepositoryInterface;
 use App\Services\Captcha\CaptchaServiceInterface;
 use App\Services\Integrations\TrailerCentral\Api\Users\UsersServiceInterface;
+use App\Services\MapSearch\MapSearchServiceInterface;
 use GuzzleHttp\Exception\BadResponseException;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Carbon;
@@ -20,7 +21,8 @@ class AuthService implements AuthServiceInterface
     public function __construct(
         private CaptchaServiceInterface $captchaService,
         private WebsiteUserRepositoryInterface $websiteUserRepository,
-        private UsersServiceInterface $tcUsersService
+        private UsersServiceInterface $tcUsersService,
+        private MapSearchServiceInterface $mapSearchService
     )
     {}
 
@@ -78,8 +80,37 @@ class AuthService implements AuthServiceInterface
         return $user;
     }
 
-    public function update(int $id, array $attributes): bool {
-        return $this->websiteUserRepository->update($id, $attributes);
+    public function update(WebsiteUser $user, array $attributes): bool {
+        $geocode = $this->mapSearchService->geocode($attributes['zipcode']);
+        $tcLocationData = [];
+        $tcLocationData['dealer_id'] = $user->tc_user_id;
+        $tcLocationData['name'] = "{$attributes['first_name']} {$attributes['last_name']}";
+        $tcLocationData['contact'] = "{$attributes['first_name']} {$attributes['last_name']}";
+        $tcLocationData['address'] = $attributes['address'];
+        $tcLocationData['city'] = $attributes['city'];
+        $tcLocationData['region'] = $attributes['state'];
+        $tcLocationData['county'] = $attributes['state'];
+        $tcLocationData['country'] = $attributes['country'];
+        $tcLocationData['postalCode'] = $attributes['zipcode'];
+        $tcLocationData['phone'] = $attributes['phone_number'];
+        $tcLocationData['is_default'] = 1;
+
+        if(count($geocode->results) > 0) {
+            /* @var $geocodeItem \App\DTOs\MapSearch\GoogleGeocodeResponseItem */
+            $geocodeItem = $geocode->results[0];
+
+            $tcLocationData['latitude'] = $geocodeItem->geometry->location->lat;
+            $tcLocationData['longitude'] = $geocodeItem->geometry->location->lng;
+        }
+
+        if(!$user->tc_user_location_id) {
+            $tcLocation = $this->tcUsersService->createLocation($tcLocationData);
+        } else {
+            $tcLocation = $this->tcUsersService->updateLocation($user->tc_user_location_id, $tcLocationData);
+        }
+
+        $attributes['tc_user_location_id'] = $tcLocation->id;
+        return $this->websiteUserRepository->update($user->id, $attributes);
     }
 
     private function createUser(array $attributes) {

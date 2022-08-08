@@ -26,7 +26,7 @@ class AuthController extends AbstractRestfulController
         parent::__construct();
     }
 
-    public function auth(AuthenticateRequestInterface $request)
+    public function authenticate(AuthenticateRequestInterface $request)
     {
         if($request->validate()) {
             $token = $this->authService->authenticate($request->all());

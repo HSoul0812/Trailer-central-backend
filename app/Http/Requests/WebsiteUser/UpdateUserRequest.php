@@ -4,7 +4,6 @@ namespace App\Http\Requests\WebsiteUser;
 
 use App\Http\Requests\Request;
 use App\Http\Requests\UpdateRequestInterface;
-use Illuminate\Validation\Rules\Password;
 
 class UpdateUserRequest extends Request implements UpdateRequestInterface
 {
