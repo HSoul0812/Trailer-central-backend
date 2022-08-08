@@ -14,6 +14,6 @@ class CreateTemplateRequest extends Request
     protected $rules = [
         'name' => 'string',
         'template' => 'string',
-        'template_key' => 'string'
+        'template_key' => 'required|string'
     ];
 }

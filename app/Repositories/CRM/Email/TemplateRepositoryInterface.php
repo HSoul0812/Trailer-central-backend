@@ -7,5 +7,4 @@ use App\Repositories\Repository;
 
 interface TemplateRepositoryInterface extends Repository
 {
-    public function update($params): Template;
 }

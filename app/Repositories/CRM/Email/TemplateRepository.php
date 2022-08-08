@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\DB;
 
 class TemplateRepository implements TemplateRepositoryInterface
 {
+    private $model;
+
     private $sortOrders = [
         'name' => [
             'field' => 'custom_template_name',
@@ -26,24 +28,29 @@ class TemplateRepository implements TemplateRepositoryInterface
         ]
     ];
 
-    public function create($params): Template
+    public function __construct(Template $template)
     {
-        return Template::create($params);
+        $this->model = $template;
+    }
+
+    public function create($params)
+    {
+        return $this->model::create($params);
     }
 
     public function delete($params)
     {
-        return Template::destroy($params['id']);
+        return $this->model::destroy($params['id']);
     }
 
     public function get($params)
     {
-        return Template::findOrFail($params['id']);
+        return $this->model::findOrFail($params['id']);
     }
 
     public function getAll($params)
     {
-        $query = Template::where('id', '>', 0);
+        $query = $this->model::where('id', '>', 0);
         
         if (!isset($params['per_page'])) {
             $params['per_page'] = 100;
@@ -64,10 +71,10 @@ class TemplateRepository implements TemplateRepositoryInterface
         return $query->paginate($params['per_page'])->appends($params);
     }
 
-    public function update($params): Template
+    public function update($params)
     {
         // Get Template
-        $template = Template::findOrFail($params['id']);
+        $template = $this->model::findOrFail($params['id']);
 
         // Update Template
         DB::transaction(function () use (&$template, $params) {
