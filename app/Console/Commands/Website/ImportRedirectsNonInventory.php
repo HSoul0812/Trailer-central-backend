@@ -6,19 +6,8 @@ use Illuminate\Console\Command;
 use App\Repositories\Website\RedirectRepositoryInterface;
 use App\Traits\StreamCSVTrait;
 use App\Models\Website\Website;
-use Illuminate\Support\Facades\Log;
 
-/**
- * Takes the data from a CSV in the following format:
- * 
- * redirect_from,redirect_to
- * google.com,google.com/a
- * google.com/b,google.com/c
- * google.com/d,google.com/e
- * 
- * And imports it into the website_redirect table
- */
-class ImportRedirects extends Command {
+class ImportRedirectsNonInventory extends Command {
     
     use StreamCSVTrait;
     
@@ -27,7 +16,7 @@ class ImportRedirects extends Command {
      *
      * @var string
      */
-    protected $signature = "website:import:redirects {s3-bucket} {s3-key} {website-id} {srp-url}";
+    protected $signature = "website:import:redirects-non-inventory {s3-bucket} {s3-key} {website-id}";
     
     /**
      * @var App\Repositories\Website\RedirectRepository
@@ -59,25 +48,26 @@ class ImportRedirects extends Command {
         $this->s3Bucket = $this->argument('s3-bucket');
         $this->s3Key = $this->argument('s3-key');   
         $this->websiteId = $this->argument('website-id');
-        $srpUrl = $this->argument('srp-url');
         $this->website = Website::findOrFail($this->websiteId);
         
-        $this->streamCsv(function($csvData, $lineNumber) use ($srpUrl) {
+        $this->streamCsv(function($csvData, $lineNumber) {
             if ($lineNumber == 1) {
                 return;
             }            
 
-            $urlFrom = $this->removeUrlRoot($csvData[0]);
-            $urlTo = $this->removeUrlRoot($csvData[1]);
+            $urlFrom = $this->removeUrlRoot(current($csvData));
+            $urlTo = $this->removeUrlRoot(end($csvData));
             
-            $urlTo = "/{$srpUrl}?stock=".$csvData[1];
-                        
+            if (empty($urlFrom) || empty($urlTo)) {
+                return;
+            }
+                                    
             try {
                 $redirect = $this->websiteRedirectRepo->get(['from' => $urlFrom, 'to' => $urlTo, 'website_id' => $this->websiteId]);
             } catch (\Exception $ex) {                
                 // Doesn't exist so create it
                 $redirect = $this->addRedirect($urlFrom, $urlTo);
-                \Log::info("Added redirect to {$this->websiteId} with id: {$redirect->identifier}");
+                $this->info("Added redirect to {$this->websiteId} $urlFrom to $urlTo");
             }
             
         });        
@@ -96,31 +86,15 @@ class ImportRedirects extends Command {
     private function removeUrlRoot($url)
     {
         $decomposedUrl = parse_url($url);
+        
+        if (!isset($decomposedUrl['path'])) {
+            return '';
+        }
+        
         $finalUrl = $decomposedUrl['path'];
         if (isset($decomposedUrl['query'])) {
             $finalUrl .= '?' . $decomposedUrl['query'];
         }
         return $finalUrl;
-//        $finalUrl = $url;
-//        $websiteRootUrls = $this->getWebsiteRootUrls();
-//        
-//        foreach($websiteRootUrls as $websiteRootUrl) {            
-//            $finalUrl = str_replace($websiteRootUrl, '', $url);
-//            if ($finalUrl != $url) {
-//                break;
-//            }
-//        }
-//        
-//        return $finalUrl;
-    }
-    
-    private function getWebsiteRootUrls()
-    {
-        return [
-            "https://{$this->website->domain}",
-            "http://{$this->website->domain}",
-            "https://www.{$this->website->domain}",
-            "http://www.{$this->website->domain}",
-        ];
     }
 }
