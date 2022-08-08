@@ -5,14 +5,15 @@ namespace App\Http\Controllers\v1\CRM\Email;
 use App\Http\Controllers\RestfulControllerV2;
 use App\Repositories\CRM\Email\TemplateRepositoryInterface;
 use App\Http\Requests\CRM\Email\GetTemplatesRequest;
-/*use App\Http\Requests\CRM\Email\CreateTemplateRequest;
+use App\Http\Requests\CRM\Email\CreateTemplateRequest;
 use App\Http\Requests\CRM\Email\ShowTemplateRequest;
 use App\Http\Requests\CRM\Email\UpdateTemplateRequest;
-use App\Http\Requests\CRM\Email\DeleteTemplateRequest;*/
+use App\Http\Requests\CRM\Email\DeleteTemplateRequest;
 use App\Http\Requests\CRM\Email\SendTemplateRequest;
 use App\Services\CRM\Email\EmailBuilderServiceInterface;
 use App\Transformers\CRM\Email\TemplateTransformer;
 use Dingo\Api\Http\Request;
+use Dingo\Api\Http\Response;
 
 class TemplateController extends RestfulControllerV2
 {
@@ -73,7 +74,8 @@ class TemplateController extends RestfulControllerV2
      *     ),
      * )
      */
-    public function index(Request $request) {
+    public function index(Request $request): ?Response
+    {
         $request = new GetTemplatesRequest($request->all());
         
         if ($request->validate()) {
@@ -109,7 +111,7 @@ class TemplateController extends RestfulControllerV2
      *         required=false,
      *         @OA\Schema(type="string")
      *     ),
-     * 
+     *
      *     @OA\Response(
      *         response="200",
      *         description="Returns a list of emails",
@@ -121,21 +123,21 @@ class TemplateController extends RestfulControllerV2
      *     ),
      * )
      */
-    /*public function create(Request $request) {
+    public function create(Request $request): ?Response
+    {
         $request = new CreateTemplateRequest($request->all());
-        if ( $request->validate() ) {
-            // Create Email
+        if ($request->validate()) {
             return $this->response->item($this->templates->create($request->all()), new TemplateTransformer());
-        }  
+        }
         
         return $this->response->errorBadRequest();
-    }*/
+    }
 
     /**
      * @OA\Get(
      *     path="/api/crm/{userId}/emails/template/{id}",
      *     description="Retrieve a template",
-     
+
      *     tags={"Post"},
      *     @OA\Parameter(
      *         name="id",
@@ -155,21 +157,22 @@ class TemplateController extends RestfulControllerV2
      *     ),
      * )
      */
-    /*public function show(int $id) {
+    public function show(int $id): ?Response
+    {
         $request = new ShowTemplateRequest(['id' => $id]);
         
-        if ( $request->validate() ) {
+        if ($request->validate()) {
             return $this->response->item($this->templates->get(['id' => $id]), new TemplateTransformer());
         }
         
         return $this->response->errorBadRequest();
-    }*/
+    }
     
     /**
      * @OA\Put(
      *     path="/api/crm/{userId}/emails/template/{id}",
      *     description="Update a template",
-     * 
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="query",
@@ -191,7 +194,7 @@ class TemplateController extends RestfulControllerV2
      *         required=false,
      *         @OA\Schema(type="string")
      *     ),
-     * 
+     *
      *     @OA\Response(
      *         response="200",
      *         description="Returns a list of emails",
@@ -203,17 +206,18 @@ class TemplateController extends RestfulControllerV2
      *     ),
      * )
      */
-    /*public function update(int $id, Request $request) {
+    public function update(int $id, Request $request): ?Response
+    {
         $requestData = $request->all();
         $requestData['id'] = $id;
         $request = new UpdateTemplateRequest($requestData);
         
-        if ( $request->validate() ) {
+        if ($request->validate()) {
             return $this->response->item($this->templates->update($request->all()), new TemplateTransformer());
         }
         
         return $this->response->errorBadRequest();
-    }*/
+    }
 
     /**
      * @OA\Delete(
@@ -238,22 +242,23 @@ class TemplateController extends RestfulControllerV2
      *     ),
      * )
      */
-    /*public function destroy(int $id) {
+    public function destroy(int $id): ?Response
+    {
         $request = new DeleteTemplateRequest(['id' => $id]);
         
-        if ( $request->validate()) {
+        if ($request->validate() && $this->templates->delete(['id' => $id])) {
             // Create Email
-            return $this->response->item($this->templates->delete(['id' => $id]), new TemplateTransformer());
+            return $this->response->noContent();
         }
         
         return $this->response->errorBadRequest();
-    }*/
+    }
     
     /**
      * @OA\Post(
      *     path="/api/crm/{userId}/emails/template/{id}/send",
      *     description="Send Template as Email",
-     * 
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="query",
@@ -261,7 +266,7 @@ class TemplateController extends RestfulControllerV2
      *         required=true,
      *         @OA\Schema(@OA\Schema(type="integer"))
      *     ),
-     * 
+     *
      *     @OA\Response(
      *         response="200",
      *         description="Returns Email Sent",
@@ -273,12 +278,14 @@ class TemplateController extends RestfulControllerV2
      *     ),
      * )
      */
-    public function send(int $id, Request $request) {
+    public function send(int $id, Request $request): ?Response
+    {
         $request = new SendTemplateRequest($request->all() + ['id' => $id]);
         
-        if ( $request->validate() ) {
+        if ($request->validate()) {
             return $this->response->array(
-                $this->emailbuilder->sendTemplate($id,
+                $this->emailbuilder->sendTemplate(
+                    $id,
                     $request->subject,
                     $request->to_email,
                     $request->sales_person_id ?? 0,
