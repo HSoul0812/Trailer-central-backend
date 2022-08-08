@@ -15,6 +15,8 @@ class QuoteSetting extends Model
 
     protected $table = 'dealer_quote_settings';
 
+    public $timestamps = false;
+
     protected $fillable = [
         'include_inventory_for_sales_tax',
         'include_part_for_sales_tax',
