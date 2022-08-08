@@ -12,14 +12,16 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
-class BlastRepository implements BlastRepositoryInterface {
-
-    public function create($params) {
-        throw new NotImplementedException;
+class BlastRepository implements BlastRepositoryInterface
+{
+    public function create($params)
+    {
+        return Blast::create($params);
     }
 
-    public function delete($params) {
-        throw new NotImplementedException;
+    public function delete($params)
+    {
+        return Blast::destroy($params['id']);
     }
 
     public function get($params) {
@@ -64,7 +66,8 @@ class BlastRepository implements BlastRepositoryInterface {
         return $query->paginate($params['per_page'])->appends($params);
     }
 
-    public function update($params) {
+    public function update($params): Blast
+    {
         $blast = $this->get(['id' => $params['id']]);
 
         DB::beginTransaction();

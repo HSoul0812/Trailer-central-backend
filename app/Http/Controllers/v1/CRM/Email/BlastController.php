@@ -5,13 +5,14 @@ namespace App\Http\Controllers\v1\CRM\Email;
 use App\Http\Controllers\RestfulControllerV2;
 use App\Repositories\CRM\Email\BlastRepositoryInterface;
 use App\Http\Requests\CRM\Email\GetBlastsRequest;
-/*use App\Http\Requests\CRM\Email\CreateBlastRequest;
+use App\Http\Requests\CRM\Email\CreateBlastRequest;
 use App\Http\Requests\CRM\Email\ShowBlastRequest;
 use App\Http\Requests\CRM\Email\UpdateBlastRequest;
-use App\Http\Requests\CRM\Email\DeleteBlastRequest;*/
+use App\Http\Requests\CRM\Email\DeleteBlastRequest;
 use App\Services\CRM\Email\EmailBuilderServiceInterface;
 use App\Transformers\CRM\Email\BlastTransformer;
 use Dingo\Api\Http\Request;
+use Dingo\Api\Http\Response;
 
 class BlastController extends RestfulControllerV2
 {
@@ -119,15 +120,16 @@ class BlastController extends RestfulControllerV2
      *     ),
      * )
      */
-    /*public function create(Request $request) {
+    public function create(Request $request): ?Response
+    {
         $request = new CreateBlastRequest($request->all());
-        if ( $request->validate() ) {
+        if ($request->validate()) {
             // Create Email
             return $this->response->item($this->blasts->create($request->all()), new BlastTransformer());
-        }  
-        
+        }
+
         return $this->response->errorBadRequest();
-    }*/
+    }
 
     /**
      * @OA\Get(
@@ -153,15 +155,16 @@ class BlastController extends RestfulControllerV2
      *     ),
      * )
      */
-    /*public function show(int $id) {
+    public function show(int $id): ?Response
+    {
         $request = new ShowBlastRequest(['id' => $id]);
-        
-        if ( $request->validate() ) {
+
+        if ($request->validate()) {
             return $this->response->item($this->blasts->get(['id' => $id]), new BlastTransformer());
         }
-        
+
         return $this->response->errorBadRequest();
-    }*/
+    }
     
     /**
      * @OA\Put(
@@ -201,17 +204,18 @@ class BlastController extends RestfulControllerV2
      *     ),
      * )
      */
-    /*public function update(int $id, Request $request) {
+    public function update(int $id, Request $request): ?Response
+    {
         $requestData = $request->all();
         $requestData['id'] = $id;
         $request = new UpdateBlastRequest($requestData);
-        
-        if ( $request->validate() ) {
+
+        if ($request->validate()) {
             return $this->response->item($this->blasts->update($request->all()), new BlastTransformer());
         }
-        
+
         return $this->response->errorBadRequest();
-    }*/
+    }
 
     /**
      * @OA\Delete(
@@ -236,14 +240,15 @@ class BlastController extends RestfulControllerV2
      *     ),
      * )
      */
-    /*public function destroy(int $id) {
+    public function destroy(int $id): ?Response
+    {
         $request = new DeleteBlastRequest(['id' => $id]);
-        
-        if ( $request->validate()) {
-            // Create Email
-            return $this->response->item($this->blasts->delete(['id' => $id]), new BlastTransformer());
+
+        if ($request->validate() && $this->blasts->delete(['id' => $id])) {
+            // Delete blast
+            return $this->response->noContent();
         }
-        
+
         return $this->response->errorBadRequest();
-    }*/
+    }
 }
