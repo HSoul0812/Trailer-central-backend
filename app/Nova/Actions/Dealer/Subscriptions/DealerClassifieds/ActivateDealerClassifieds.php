@@ -1,21 +1,24 @@
 <?php
 
-namespace App\Nova\Actions\Dealer;
+namespace App\Nova\Actions\Dealer\Subscriptions\DealerClassifieds;
 
 use App\Models\User\User;
 use App\Services\User\DealerOptionsServiceInterface;
+use Illuminate\Bus\Queueable;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Collection;
 use Laravel\Nova\Actions\Action;
 use Laravel\Nova\Fields\ActionFields;
 
-class ActivateECommerce extends Action
+class ActivateDealerClassifieds extends Action
 {
+    use InteractsWithQueue, Queueable;
 
     public $showOnTableRow = true;
 
     public $confirmButtonText = 'Activate';
 
-    public $confirmText = 'Are you sure you want to activate E-Commerce?';
+    public $confirmText = 'Are you sure you want to activate DealerClassifieds?';
 
     /**
      * @var DealerOptionsServiceInterface
@@ -37,7 +40,11 @@ class ActivateECommerce extends Action
     {
         /** @var User $model */
         foreach ($models as $model) {
-            $this->dealerOptionsService->activateECommerce($model->dealer_id);
+            $result = $this->dealerOptionsService->activateDealerClassifieds($model->dealer_id);
+
+            if (!$result) {
+                throw new \InvalidArgumentException('DealerClassifieds activation error', 500);
+            }
         }
     }
 
