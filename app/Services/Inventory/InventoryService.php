@@ -635,7 +635,7 @@ class InventoryService implements InventoryServiceInterface
     private function getChangedFields(Inventory $inventory, array $params): array
     {
         $changedFields = array_values(array_unique(array_merge(
-            $inventory->changed_fields_in_dashboard ?? [], array_keys($inventory->getChanges())
+            $inventory->changed_fields_in_dashboard ?? [], $params['changed_fields_in_dashboard']
         )));
 
         if ($params['unlock_images'] ?? false) {
