@@ -212,7 +212,6 @@ class BlastControllerTest extends IntegrationTestCase
         // Check if we have a valid response from the API
         $response->assertStatus(200)
             ->assertJsonStructure(self::SINGLE_JSON_STRUCTURE);
-
         // Check that the data was assigned correctly
         $this->assertSame(
             $this->seeder->dealer->newDealerUser->user_id,
@@ -225,6 +224,34 @@ class BlastControllerTest extends IntegrationTestCase
         $this->assertDatabaseHas(Blast::getTableName(), [
             'email_blasts_id' => $response['data']['id']
         ]);
+    }
+
+    /**
+     * @group CRM
+     * @covers ::create
+     * @dataProvider badArgumentsProvider
+     */
+    public function testCreateWithBadArguments(
+        array $parameters,
+        int $expectedHttpStatusCode,
+        string $expectedMessage,
+        array $expectedErrorMessages
+    ) {
+        // PUT the data into the API
+        $response = $this->json(
+            'PUT',
+            self::API_ENDPOINT,
+            $parameters,
+            ['access-token' => $this->accessToken]
+        );
+
+        // Check if we got the expected response from the API
+        $response->assertStatus($expectedHttpStatusCode);
+        $json = json_decode($response->getContent(), true);
+        $this->assertArrayHasKey('message', $json);
+        $this->assertArrayHasKey('errors', $json);
+        $this->assertSame($expectedMessage, $json['message']);
+        $this->assertSame($expectedErrorMessages, $json['errors']);
     }
 
     /**
@@ -299,8 +326,47 @@ class BlastControllerTest extends IntegrationTestCase
 
         // Corroborate the record was deleted in the database
         $this->assertDatabaseMissing(Blast::getTableName(), [
-           'email_blasts_id' => $blast->id
+            'email_blasts_id' => $blast->id
         ]);
+    }
+
+    public function badArgumentsProvider(): array
+    {
+        $this->refreshApplication();
+        $this->setUpTraits();
+
+        return [
+            'Not enought data' => [
+                [
+                    'name' => 'Test template',
+                ],
+                422,
+                'Validation Failed',
+                [
+                    'email_template_id' => ['The email template id field is required.'],
+                    'campaign_name' => ['The campaign name field is required.'],
+                    'send_date' => ['The send date field is required.'],
+                    'action' => ['The action field is required.'],
+                    'send_after_days' => ['The send after days field is required.'],
+                ]
+            ],
+            'Invalid data' => [
+                [
+                    'email_template_id' => null,
+                    'campaign_name' => 123,
+                    'send_date' => '1969-30-30',
+                    'action' => Blast::ACTION_UNCONTACTED,
+                    'send_after_days' => 1,
+                ],
+                422,
+                'Validation Failed',
+                [
+                    'email_template_id' => ['The email template id field is required.'],
+                    'campaign_name' => ['The campaign name must be a string.'],
+                    'send_date' => ['The send date does not match the format Y-m-d H:i:s.'],
+                ]
+            ]
+        ];
     }
 
     private function expectedDataFormat($blast): array
