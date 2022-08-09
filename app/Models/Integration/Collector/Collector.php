@@ -78,6 +78,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property bool $ignore_manually_added_units
  * @property bool $is_bdv_enabled
  * @property bool $show_on_auction123
+ * @property string|null $motility_username
+ * @property string|null $motility_password
+ * @property string|null $motility_account_no
+ * @property string|null $motility_integration_id
+ * @property string|null $local_image_directory_address
+ * @property string|null $video_source_fields
+ *
  */
 class Collector extends Model implements Filterable
 {
@@ -188,6 +195,7 @@ class Collector extends Model implements Filterable
         'last_run',
         'run_errors',
         'show_on_auction123',
+        'video_source_fields',
     ];
 
     protected $casts = [
