@@ -113,7 +113,7 @@ class InteractionEmailService implements InteractionEmailServiceInterface
             Storage::disk('ses')->put($filePath, $file->getContents());
 
             // Set File Name/Path
-            $file->setFilePath(Attachment::AWS_PREFIX . '/' . $filePath);
+            $file->setFilePath(Attachment::AWS_PREFIX . '/' . urlencode($filePath));
             $file->setFileName(time() . $file->getFileName());
 
             // Add File

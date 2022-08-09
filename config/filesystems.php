@@ -93,6 +93,7 @@ return [
             'region' => env('AWS_DEFAULT_REGION'),
             'bucket' => env('MAIL_BUCKET'),
             'url' => env('AWS_URL'),
+            'visibility' => 'public'
         ],
 
         // use the same creds as default s3, use this separate config to make it easier to separate
