@@ -15,30 +15,70 @@ class CreateDefaultPermissionUsersSeeder extends Seeder
             [
                 'name' => 'Admin',
                 'email' => 'admin@operatebeyond.com',
-                'password' => 'The-Ben2022!*',
+                'password' => bcrypt('The-Ben2022!*'),
             ],
             [
                 'name' => 'Support',
-                'email' => 'admin@operatebeyond.com',
-                'password' => 'sWIThLEfulON',
+                'email' => 'support@operatebeyond.com',
+                'password' => bcrypt('sWIThLEfulON'),
             ],
             [
                 'name' => 'Sales',
-                'email' => 'admin@operatebeyond.com',
-                'password' => 'eRtFuSEcKWHE',
+                'email' => 'sales@operatebeyond.com',
+                'password' => bcrypt('eRtFuSEcKWHE'),
             ]
         ];
 
         foreach ($users as $user) {
-            $exists = DB::table('users')->where('email', $user["email"])->first();
+            $exists = DB::table('users')->where("email", $user["email"])->first();
 
             if (!$exists) {
-                DB::table('users')->insert([
-                    'name' => $user["name"],
-                    'email' => $user["email"],
-                    'password' => bcrypt($user["password"]),
-                ]);
+                $userId = DB::table('users')->insertGetId($user);
+            } else {
+                $userId = $exists->id;
             }
+
+            $this->mergeAdminRole($user['name'], $userId);
+        }
+    }
+
+    /**
+     * Verify if the role already exist and return his id
+     *
+     * @param string $role
+     * @return bool
+     */
+    private function roleExistAndReturnId(string $role): bool
+    {
+        $role = DB::table('roles')->where('name', $role);
+
+        if ($role->exists()) {
+            return $role->first()->id;
+        }
+
+        return false;
+    }
+
+    /**
+     * Verify if the dealer already exist
+     *
+     * @param string $role
+     * @param int $userId
+     * @return void
+     */
+    private function mergeAdminRole(string $role, int $userId): void
+    {
+        $roleId = $this->roleExistAndReturnId($role);
+        $table = DB::table("model_has_roles");
+
+        $data = [
+            "role_id" => $roleId,
+            "model_type" => "App\Models\User\NovaUser",
+            "model_id" => $userId
+        ];
+
+        if (!$table->where($data)->exists()) {
+            $table->insert($data);
         }
     }
 }
