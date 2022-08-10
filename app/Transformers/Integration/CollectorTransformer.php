@@ -80,6 +80,7 @@ class CollectorTransformer extends TransformerAbstract
             'ignore_manually_added_units' => $collector->ignore_manually_added_units,
             'is_bdv_enabled' => $collector->is_bdv_enabled,
             'show_on_auction123' => $collector->show_on_auction123,
+            'video_source_fields' => $collector->video_source_fields,
         ];
     }
 }
