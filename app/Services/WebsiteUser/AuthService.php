@@ -57,8 +57,14 @@ class AuthService implements AuthServiceInterface
         return $socialite->stateless()->redirect();
     }
 
-    public function authenticate(array $credential): string {
-        if(!$token = auth('api')->attempt($credential)) {
+    public function authenticate(array $attributes): string {
+        if(!$this->captchaService->validate($attributes['captcha'])) {
+            throw ValidationException::withMessages([
+                'captcha' => 'The captcha token is not valid'
+            ]);
+        }
+
+        if(!$token = auth('api')->attempt($attributes)) {
             throw new UnauthorizedException("Username or password doesn't match");
         }
         return $token;
