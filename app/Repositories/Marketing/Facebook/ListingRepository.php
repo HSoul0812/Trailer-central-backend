@@ -3,6 +3,7 @@
 namespace App\Repositories\Marketing\Facebook;
 
 use App\Exceptions\NotImplementedException;
+use App\Models\Inventory\EntityType;
 use App\Models\Inventory\Inventory;
 use App\Models\Marketing\Facebook\Filter;
 use App\Models\Marketing\Facebook\Listings;
@@ -148,7 +149,9 @@ class ListingRepository implements ListingRepositoryInterface {
         $query = Inventory::select(Inventory::getTableName().'.*')
                           ->where('dealer_id', '=', $integration->dealer_id)
                           ->where('show_on_website', 1)
-                          ->where(Inventory::getTableName().'.description', '<>', '')
+            ->where(Inventory::getTableName() . '.entity_type_id', '<>', EntityType::ENTITY_TYPE_BUILDING)
+            ->where('LENGTH(' . Inventory::getTableName() . '.description)', '>', 50)
+            ->where(Inventory::getTableName() . '.price', '>', 0)
                           ->has('orderedImages')
                           ->where(function(Builder $query) {
                               $query->where('is_archived', 0)
