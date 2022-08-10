@@ -9,6 +9,7 @@ use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\UpdateRequestInterface;
 use App\Http\Requests\WebsiteUser\AuthenticateRequestInterface;
 use App\Http\Requests\WebsiteUser\AuthenticateUserRequest;
+use App\Http\Requests\WebsiteUser\GetUserProfileRequest;
 use App\Http\Requests\WebsiteUser\RegisterUserRequest;
 use App\Http\Requests\WebsiteUser\UpdateUserRequest;
 use App\Services\WebsiteUser\AuthServiceInterface;
@@ -65,10 +66,27 @@ class AuthController extends AbstractRestfulController
         return $this->response->errorBadRequest();
     }
 
-    public function index(IndexRequestInterface $request): Response
+    public function getProfile(IndexRequestInterface $request): Response
     {
         $user = auth('api')->user();
         return $this->response->item($user, $this->transformer);
+    }
+
+    public function updateProfile(UpdateRequestInterface $request)
+    {
+        $user = auth('api')->user();
+        if($request->validate()) {
+            $this->authService->update($user, $request->all());
+            return $this->response->array(
+                ['success' => true]
+            );
+        }
+        return $this->response->errorBadRequest();
+    }
+
+    public function index(IndexRequestInterface $request)
+    {
+        // TODO: Implement index() method.
     }
 
     public function show(int $id)
@@ -78,14 +96,7 @@ class AuthController extends AbstractRestfulController
 
     public function update(int $id, UpdateRequestInterface $request)
     {
-        $user = auth('api')->user();
-        if($request->validate()) {
-            $this->authService->update($user->id, $request->all());
-            return $this->response->array(
-                ['success' => true]
-            );
-        }
-        return $this->response->errorBadRequest();
+        // TODO: Implement update() method.
     }
 
     public function destroy(int $id)
@@ -95,6 +106,10 @@ class AuthController extends AbstractRestfulController
 
     protected function constructRequestBindings(): void
     {
+        app()->bind(IndexRequestInterface::class, function () {
+            return inject_request_data(GetUserProfileRequest::class);
+        });
+
         app()->bind(AuthenticateRequestInterface::class, function () {
             return inject_request_data(AuthenticateUserRequest::class);
         });

@@ -12,10 +12,11 @@ class UpdateUserRequest extends Request implements UpdateRequestInterface
         return [
             'first_name' => 'required|string',
             'last_name' => 'required|string',
-            'address' => 'nullable|string',
-            'zipcode' => 'nullable|string',
-            'city' => 'nullable|string',
-            'state' => 'nullable|string',
+            'address' => 'required|string',
+            'zipcode' => 'required|string',
+            'city' => 'required|string',
+            'state' => 'required|string',
+            'country' => 'required|string',
             'phone_number' => 'nullable|regex:/^([0-9\s\-\+\(\)]*)$/|min:10',
             'mobile_number' => 'nullable|regex:/^([0-9\s\-\+\(\)]*)$/|min:10',
         ];

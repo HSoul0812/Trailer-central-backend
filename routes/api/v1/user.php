@@ -45,7 +45,7 @@ $api->version('v1', function ($api) {
     });
 
     $api->group(['prefix' => '/user', 'middleware' => 'auth:api'], function ($api) {
-        $api->get('', [AuthController::class, 'index']);
-        $api->put('', [AuthController::class, 'update']);
+        $api->get('', [AuthController::class, 'getProfile']);
+        $api->put('', [AuthController::class, 'updateProfile']);
     });
 });
