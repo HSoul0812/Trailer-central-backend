@@ -359,6 +359,7 @@ class Inventory extends Model
         'changed_fields_in_dashboard' => 'array',
         'qb_sync_processed' => 'boolean',
         'is_floorplan_bill' => 'boolean',
+        'sold_at' => 'datetime',
     ];
 
     protected $hidden = [

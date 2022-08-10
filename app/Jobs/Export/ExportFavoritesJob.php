@@ -99,7 +99,7 @@ class ExportFavoritesJob implements ShouldQueue
             }
             if (!$websiteHistory || $shouldExportNow) {
                 $emails = $websiteEmails->firstWhere('website_id', $websiteConfig->website_id);
-                if ($emails) {
+                if ($emails && $emails->value) {
                     $data = $favoritesRepository->get(['website_id' => $websiteConfig->website_id]);
 
                     $inventoryData = $data->map(function ($user) {

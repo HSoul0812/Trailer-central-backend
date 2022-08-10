@@ -43,7 +43,7 @@ class ClearFBMEErrors extends Action
         $nrErrorsCleared = 0;
         /** @var DealerFBMOverview $model */
         foreach ($models as $model) {
-            $nrErrorsCleared += $this->fbErrors->dismissAllActiveForIntegration($model->marketplace_id)->count();
+            $nrErrorsCleared += $this->fbErrors->dismissAllActiveForIntegration($model->id)->count();
         }
 
         return self::message(($nrErrorsCleared > 0) ? "Errors cleared!" : "There are no errors to clear!");
