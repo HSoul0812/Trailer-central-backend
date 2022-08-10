@@ -27,7 +27,7 @@ class WebsiteUser extends Model implements
         'state',
         'email',
         'phone_number',
-        'mobile_number'
+        'mobile_number',
     ];
 
     protected $hidden = [

@@ -7,11 +7,15 @@ use App\Http\Controllers\AbstractRestfulController;
 use App\Http\Requests\CreateRequestInterface;
 use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\UpdateRequestInterface;
+use App\Http\Requests\WebsiteUser\AuthenticateRequestInterface;
 use App\Http\Requests\WebsiteUser\AuthenticateUserRequest;
+use App\Http\Requests\WebsiteUser\GetUserProfileRequest;
 use App\Http\Requests\WebsiteUser\RegisterUserRequest;
+use App\Http\Requests\WebsiteUser\UpdateUserRequest;
 use App\Services\WebsiteUser\AuthServiceInterface;
 use App\Transformers\WebsiteUser\WebsiteUserTransformer;
 use Dingo\Api\Http\Request;
+use Dingo\Api\Http\Response;
 
 class AuthController extends AbstractRestfulController
 {
@@ -23,7 +27,7 @@ class AuthController extends AbstractRestfulController
         parent::__construct();
     }
 
-    public function index(IndexRequestInterface $request)
+    public function authenticate(AuthenticateRequestInterface $request)
     {
         if($request->validate()) {
             $token = $this->authService->authenticate($request->all());
@@ -35,15 +39,6 @@ class AuthController extends AbstractRestfulController
             ]);
         }
 
-        return $this->response->errorBadRequest();
-    }
-
-    public function create(CreateRequestInterface $request)
-    {
-        if($request->validate()) {
-            $user = $this->authService->register($request->all());
-            return $this->response->item($user, $this->transformer);
-        }
         return $this->response->errorBadRequest();
     }
 
@@ -62,6 +57,38 @@ class AuthController extends AbstractRestfulController
         return redirect("$callback?token=$token");
     }
 
+    public function create(CreateRequestInterface $request)
+    {
+        if($request->validate()) {
+            $user = $this->authService->register($request->all());
+            return $this->response->item($user, $this->transformer);
+        }
+        return $this->response->errorBadRequest();
+    }
+
+    public function getProfile(IndexRequestInterface $request): Response
+    {
+        $user = auth('api')->user();
+        return $this->response->item($user, $this->transformer);
+    }
+
+    public function updateProfile(UpdateRequestInterface $request)
+    {
+        $user = auth('api')->user();
+        if($request->validate()) {
+            $this->authService->update($user, $request->all());
+            return $this->response->array(
+                ['success' => true]
+            );
+        }
+        return $this->response->errorBadRequest();
+    }
+
+    public function index(IndexRequestInterface $request)
+    {
+        // TODO: Implement index() method.
+    }
+
     public function show(int $id)
     {
         throw new NotImplementedException();
@@ -69,7 +96,7 @@ class AuthController extends AbstractRestfulController
 
     public function update(int $id, UpdateRequestInterface $request)
     {
-        throw new NotImplementedException();
+        // TODO: Implement update() method.
     }
 
     public function destroy(int $id)
@@ -80,11 +107,19 @@ class AuthController extends AbstractRestfulController
     protected function constructRequestBindings(): void
     {
         app()->bind(IndexRequestInterface::class, function () {
+            return inject_request_data(GetUserProfileRequest::class);
+        });
+
+        app()->bind(AuthenticateRequestInterface::class, function () {
             return inject_request_data(AuthenticateUserRequest::class);
         });
 
         app()->bind(CreateRequestInterface::class, function () {
             return inject_request_data(RegisterUserRequest::class);
+        });
+
+        app()->bind(UpdateRequestInterface::class, function () {
+            return inject_request_data(UpdateUserRequest::class);
         });
     }
 }

@@ -16,7 +16,7 @@ $api->version('v1', function ($api) {
     */
     $api->group(['prefix' => '/user'], function ($api) {
         $api->post('/register', [AuthController::class, 'create']);
-        $api->get('/auth', [AuthController::class, 'index']);
+        $api->get('/auth', [AuthController::class, 'authenticate']);
         $api->get('/auth/{social}', [AuthController::class, 'social'])
             ->name('SocialAuth')
             ->where('social', 'google|facebook');
@@ -45,6 +45,7 @@ $api->version('v1', function ($api) {
     });
 
     $api->group(['prefix' => '/user', 'middleware' => 'auth:api'], function ($api) {
-        $api->get('/profile', [ProfileController::class, 'get']);
+        $api->get('', [AuthController::class, 'getProfile']);
+        $api->put('', [AuthController::class, 'updateProfile']);
     });
 });
