@@ -114,7 +114,7 @@ class InteractionMessage extends Model
             $lead = $message->lead;
             $leadId = $message->lead_id;
             $leadEmail = !empty($lead->email_address) ? $lead->email_address : '';
-            $dateSent = $message->date_sent;
+            $dateSent = $message->date_sent ?? $message->created_at;
             $salesPersonIds = [];
 
             $array['interaction_id'] = $message->interaction_id;
@@ -162,9 +162,7 @@ class InteractionMessage extends Model
             $array['files'] = [];
         }
 
-        if (empty($dateSent)) {
-            $dateSent = null;
-        } elseif (!$dateSent instanceof \DateTimeInterface)  {
+        if (!$dateSent instanceof \DateTimeInterface)  {
             $dateSent = new Carbon($dateSent);
         }
 
