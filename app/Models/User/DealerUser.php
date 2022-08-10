@@ -210,7 +210,7 @@ class DealerUser extends Model implements Authenticatable, PermissionsInterface
      */
     public function setEmailAttribute(?string $value = null)
     {
-        $this->email = !empty($value) ? strtolower($value) : null;
+        $this->attributes['email'] = !empty($value) ? strtolower($value) : null;
     }
 
     /**
