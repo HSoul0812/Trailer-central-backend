@@ -9,6 +9,7 @@ class AuthenticateUserRequest extends Request implements IndexRequestInterface
 {
     protected array $rules = [
         'email' => 'required|email',
-        'password' => 'required|string'
+        'password' => 'required|string',
+        'captcha' => 'required|string'
     ];
 }
