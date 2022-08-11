@@ -94,7 +94,8 @@ class AuthServiceTest extends IntegrationTestCase
 
         $credentials = [
             'email' => $user->email,
-            'password' => '12345678'
+            'password' => '12345678',
+            'captcha' => 'test_captcha_token'
         ];
 
         $service = $this->getConcreteService();
@@ -107,10 +108,13 @@ class AuthServiceTest extends IntegrationTestCase
 
         $credentials = [
             'email' => $user->email,
-            'password' => '1234567'
+            'password' => '1234567',
+            'captcha' => 'test_captcha_token'
         ];
 
         $service = $this->getConcreteService();
+
+        $this->captchaServiceMock->expects($this->once())->method('validate')->willReturn(true);
         $this->expectException(UnauthorizedException::class);
         $service->authenticate($credentials);
     }

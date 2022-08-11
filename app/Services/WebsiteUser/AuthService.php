@@ -65,7 +65,7 @@ class AuthService implements AuthServiceInterface
         }
 
         if(!$token = auth('api')->attempt([
-            'email' => $attributes['emai'],
+            'email' => $attributes['email'],
             'password' => $attributes['password']
         ])) {
             throw new UnauthorizedException("Username or password doesn't match");
