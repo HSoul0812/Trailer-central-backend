@@ -2,6 +2,8 @@
 
 namespace App\Models\CRM\Dms\PurchaseOrder;
 
+use App\Models\User\NewDealerUser;
+use App\Models\User\User;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -37,11 +39,16 @@ class PurchaseOrder extends Model
         return $this->status === self::STATUS_COMPLETED;
     }
 
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
+    }
+
     public function getReceivePurchaseOrderCrmUrl(): bool
     {
         return $this->status === self::STATUS_COMPLETED
             ? ''
-            : $inventory->user->getCrmLoginUrl(
+            : $this->user->getCrmLoginUrl(
                 self::CRM_RECEIVE_PO_URL . '?receive_po_id=' . $this->id,
                 true
             );
