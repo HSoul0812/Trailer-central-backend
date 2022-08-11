@@ -67,6 +67,4 @@ class PopulateMissingDealerUserPermissionsAction
 
         return $this;
     }
-
-
 }
