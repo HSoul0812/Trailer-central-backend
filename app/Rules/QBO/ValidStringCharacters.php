@@ -17,6 +17,8 @@ class ValidStringCharacters implements Rule
     const CUSTOMERS_POSTAL_CODE_REGEX = "/^[\d-]{0,10}$/";
     const CUSTOMERS_REGION_SECTION = 'customer_region';
     const CUSTOMERS_REGION_REGEX = "/^[A-Za-z]+$/";
+    const CUSTOMERS_PHONE_SECTION = 'customer_phone';
+    const CUSTOMERS_PHONE_REGEX = "/^(\+\d{1,2})?\d+$/";
 
     const MISC_PARTS_SECTION = 'misc_parts';
     const MISC_PARTS_REGEX = "/^[\w]\*$/";
@@ -64,6 +66,8 @@ class ValidStringCharacters implements Rule
                 return self::CUSTOMERS_POSTAL_CODE_REGEX;
             case self::CUSTOMERS_REGION_SECTION:
                 return self::CUSTOMERS_REGION_REGEX;
+            case self::CUSTOMERS_PHONE_SECTION:
+                return self::CUSTOMERS_PHONE_REGEX;
             case self::MISC_PARTS_SECTION:
             default:
                 return self::MISC_PARTS_REGEX;
