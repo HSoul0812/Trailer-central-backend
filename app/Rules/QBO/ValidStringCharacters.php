@@ -32,6 +32,10 @@ class ValidStringCharacters implements Rule
      */
     public function passes($attribute, $value)
     {
+        if ($attribute === 'description' and !is_null($value)) {
+            $value = $this->getUnEscapedString($value);
+        }
+
         return preg_match($this->getValidStringRegex(), $value);
     }
 
@@ -54,5 +58,14 @@ class ValidStringCharacters implements Rule
             default:
                 return self::MISC_PARTS_REGEX;
         };
+    }
+
+    protected function getUnEscapedString($value): string
+    {
+        return str_replace(
+            ['\\*', '\\_'],
+            ['*', '_'],
+            $value
+        );
     }
 }
