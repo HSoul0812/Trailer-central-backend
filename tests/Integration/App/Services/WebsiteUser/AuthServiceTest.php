@@ -99,6 +99,9 @@ class AuthServiceTest extends IntegrationTestCase
         ];
 
         $service = $this->getConcreteService();
+
+        $this->captchaServiceMock->expects($this->once())->method('validate')->willReturn(true);
+
         $token = $service->authenticate($credentials);
         $this->assertTrue((new TokenValidator)->isValid($token));
     }
