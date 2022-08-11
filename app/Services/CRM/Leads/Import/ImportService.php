@@ -184,7 +184,9 @@ class ImportService implements ImportServiceInterface
 
         // Refresh Token
         $accessToken = $systemEmail->googleToken;
+        var_dump($accessToken);
         $this->google->setKey(GoogleService::AUTH_TYPE_SYSTEM);
+        var_dump(GoogleService::AUTH_TYPE_SYSTEM);
         $validate = $this->google->validate($accessToken);
         if(!empty($validate->newToken)) {
             // Refresh Access Token
