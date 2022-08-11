@@ -44,7 +44,7 @@ class PurchaseOrder extends Model
         return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
     }
 
-    public function getReceivePurchaseOrderCrmUrl(): bool
+    public function getReceivePurchaseOrderCrmUrl(): string
     {
         return $this->status === self::STATUS_COMPLETED
             ? ''
