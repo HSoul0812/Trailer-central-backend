@@ -13,6 +13,7 @@ use App\Repositories\User\UserRepositoryInterface;
 use App\Services\CRM\Leads\DTOs\ADFLead;
 use App\Services\CRM\Leads\LeadServiceInterface;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
+use App\Services\Integration\Google\GoogleService;
 use App\Services\Integration\Google\GmailServiceInterface;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use Carbon\CarbonImmutable;

@@ -11,8 +11,6 @@ use App\Models\User\User;
 use App\Services\CRM\Leads\DTOs\ADFLead;
 use App\Services\CRM\Leads\LeadServiceInterface;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
-use App\Services\Integration\Google\GoogleService;
-use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\DomCrawler\Crawler;
 
