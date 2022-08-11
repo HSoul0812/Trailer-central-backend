@@ -16,6 +16,8 @@ class PurchaseOrder extends Model
 
     public const TABLE_NAME = 'dms_purchase_order';
 
+    const CRM_RECEIVE_PO_URL = '/accounting/purchase-order'
+
     /**
      * The table associated with the model.
      *
@@ -33,5 +35,15 @@ class PurchaseOrder extends Model
     public function isCompleted(): bool
     {
         return $this->status === self::STATUS_COMPLETED;
+    }
+
+    public function getReceivePurchaseOrderCrmUrl(): bool
+    {
+        return $this->status === self::STATUS_COMPLETED
+            ? ''
+            : $inventory->user->getCrmLoginUrl(
+                self::CRM_RECEIVE_PO_URL . '?receive_po_id=' . $this->id,
+                true
+            );
     }
 }
