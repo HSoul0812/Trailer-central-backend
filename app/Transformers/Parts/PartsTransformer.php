@@ -12,7 +12,8 @@ class PartsTransformer extends TransformerAbstract implements PartsTransformerIn
 {
     protected $availableIncludes = [
         'purchaseOrders',
-        'total_qty'
+        'total_qty',
+        'partAttributes'
     ];
 
     public function transform(Part $part): array
@@ -51,10 +52,23 @@ class PartsTransformer extends TransformerAbstract implements PartsTransformerIn
              'stock_min' => $part->stock_min,
              'stock_max' => $part->stock_max,
              'bins' => $part->bins,
-             'disabled' => count($part->bins) === 0
+             'disabled' => count($part->bins) === 0,
          ];
     }
 
+    /**
+     * Include part attributes.
+     *
+     * @param \App\Models\Parts\Part $part
+     * @return Collection
+     */
+    public function includePartAttributes(\App\Models\Parts\Textrail\Part $part): Collection
+    {
+        return $this->collection(
+            $part->partAttributes,
+            new PartAttributeTransformer()
+        );
+    }
     /**
      * Include purchases resource object
      *

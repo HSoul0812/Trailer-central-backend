@@ -67,6 +67,8 @@ use App\Repositories\Showroom\ShowroomFieldsMappingRepository;
 use App\Repositories\Showroom\ShowroomFieldsMappingRepositoryInterface;
 use App\Repositories\Pos\SalesReportRepository;
 use App\Repositories\Pos\SalesReportRepositoryInterface;
+use App\Repositories\Subscription\SubscriptionRepository;
+use App\Repositories\Subscription\SubscriptionRepositoryInterface;
 use App\Repositories\User\DealerLocationMileageFeeRepository;
 use App\Repositories\User\DealerLocationMileageFeeRepositoryInterface;
 use App\Repositories\User\DealerLocationQuoteFeeRepository;
@@ -105,6 +107,7 @@ use App\Repositories\Parts\CostModifierRepository;
 use App\Repositories\Parts\CostModifierRepositoryInterface;
 use App\Repositories\User\DealerPasswordResetRepositoryInterface;
 use App\Repositories\User\DealerPasswordResetRepository;
+use App\Services\CRM\Interactions\InteractionEmailService;
 use App\Services\CRM\User\TimeClockService;
 use App\Services\CRM\User\TimeClockServiceInterface;
 use App\Services\Dms\Bills\BillService;
@@ -116,6 +119,8 @@ use App\Services\File\FileServiceInterface;
 use App\Services\File\ImageService;
 use App\Services\Inventory\CustomOverlay\CustomOverlayService;
 use App\Services\Inventory\CustomOverlay\CustomOverlayServiceInterface;
+use App\Services\Subscription\StripeService;
+use App\Services\Subscription\StripeServiceInterface;
 use App\Services\User\DealerIntegrationService;
 use App\Services\User\DealerIntegrationServiceInterface;
 use App\Services\Inventory\Packages\PackageService;
@@ -266,6 +271,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind('App\Repositories\Bulk\Inventory\BulkUploadRepositoryInterface', 'App\Repositories\Bulk\Inventory\BulkUploadRepository');
         $this->app->bind('App\Repositories\Website\Parts\FilterRepositoryInterface', 'App\Repositories\Website\Parts\FilterRepository');
         $this->app->bind('App\Repositories\Website\Blog\PostRepositoryInterface', 'App\Repositories\Website\Blog\PostRepository');
+        $this->app->bind('App\Repositories\Subscription\SubscriptionRepositoryInterface', 'App\Repositories\Subscription\SubscriptionRepository');
         $this->app->bind(BulkUploadRepositoryInterface::class, BulkUploadRepository::class);
         $this->app->bind('App\Repositories\Inventory\Floorplan\PaymentRepositoryInterface', 'App\Repositories\Inventory\Floorplan\PaymentRepository');
         $this->app->bind(ShowroomRepositoryInterface::class, ShowroomRepository::class);
@@ -348,6 +354,12 @@ class AppServiceProvider extends ServiceProvider
                 return new ImageService(app()->make(Client::class), app()->make(SanitizeHelper::class), app()->make(ImageHelper::class));
             });
 
+        $this->app->when(InteractionEmailService::class)
+            ->needs(FileServiceInterface::class)
+            ->give(function () {
+                return new FileService(app()->make(Client::class), app()->make(SanitizeHelper::class));
+            });
+
         $this->app->bind(TimeClockRepositoryInterface::class, TimeClockRepository::class);
         $this->app->bind(EmployeeRepositoryInterface::class, EmployeeRepository::class);
         $this->app->bind(TimeClockServiceInterface::class, TimeClockService::class);
@@ -362,6 +374,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ShowroomBulkUpdateRepositoryInterface::class, ShowroomBulkUpdateRepository::class);
 
         $this->app->bind(ErrorRepositoryInterface::class, ErrorRepository::class);
+
+        $this->app->bind(SubscriptionRepositoryInterface::class, SubscriptionRepository::class);
+        $this->app->bind(StripeServiceInterface::class, StripeService::class);
 
         $this->app->register(PhoneServiceProvider::class);
     }

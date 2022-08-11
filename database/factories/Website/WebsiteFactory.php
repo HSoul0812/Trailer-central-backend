@@ -39,7 +39,6 @@ $factory->define(Website::class, static function (Faker $faker, array $attribute
         'is_active' => 0,
         'is_live' => 0,
         'parts_email' => '',
-        'additional_dealers' => '',
         'force_elastic' => 1
     ];
 });

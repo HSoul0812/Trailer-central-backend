@@ -101,4 +101,10 @@ interface UserRepositoryInterface extends Repository, TransactionalRepository {
      * @param string $password
      */
     public function checkAdminPassword(int $dealerId, string $password): bool;
+
+    /**
+     * @param int $dealerId
+     * @return mixed
+     */
+    public function deactivateDealer(int $dealerId): User;
 }

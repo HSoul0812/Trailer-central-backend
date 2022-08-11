@@ -12,7 +12,7 @@ use App\Models\CRM\Dms\Quickbooks\Account;
 class AccountRepository implements AccountRepositoryInterface {
 
     private $sortOrders = [
-        'name' => [ 
+        'name' => [
             'field' => 'name',
             'direction' => 'DESC'
         ],
@@ -70,7 +70,7 @@ class AccountRepository implements AccountRepositoryInterface {
         if (isset($params['dealer_id'])) {
             $query = Account::where('dealer_id', '=', $params['dealer_id']);
         } else {
-            $query = Account::where('id', '>', 0);  
+            $query = Account::where('id', '>', 0);
         }
         if (isset($params['type'])) {
             $query = $query->whereIn('type', $params['type']);
@@ -92,7 +92,7 @@ class AccountRepository implements AccountRepositoryInterface {
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
         }
-        
+
         return $query->paginate($params['per_page'])->appends($params);
     }
 
@@ -106,5 +106,4 @@ class AccountRepository implements AccountRepositoryInterface {
         }
         return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
     }
-
 }
