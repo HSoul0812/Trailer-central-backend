@@ -131,6 +131,7 @@ class ImportService implements ImportServiceInterface
                     $dealer = $this->dealers->get(['dealer_id' => $dealerId]);
                     $this->log->info('Parsing Email #' . $mailId . ' Import for Dealer #' . $dealerId);
                 } catch (\Exception $e) {
+                    $this->log->error("Exception occurred Parsing Email #{$mailId} for Dealer #{$dealerId}: {$e->getMessage()}");
                     throw new InvalidDealerIdException;
                 }
 
@@ -151,12 +152,13 @@ class ImportService implements ImportServiceInterface
                 } else {
                     $this->tryMove($accessToken, $mailId, 'invalid');
                 }
-                $this->log->error("Exception returned on Import Message #{$mailId}: {$e->getMessage()}");
+                $this->log->error("Invalid Dealer Exception on Import Message #{$mailId}: {$e->getMessage()}");
             } catch(InvalidImportFormatException $e) {
                 $this->tryMove($accessToken, $mailId, 'invalid');
-                $this->log->error("Exception returned on ADF Import Message #{$mailId}: {$e->getMessage()}");
+                $this->log->error("Invalid Import Exception on Message #{$mailId}: {$e->getMessage()}");
             } catch(\Exception $e) {
-                $this->log->error("Exception returned on ADF Import Message #{$mailId}: {$e->getMessage()}");
+                $this->log->error("Exception returned on ADF Import Message #{$mailId}: " .
+                                    "{$e->getMessage()}: {$e->getTraceAsString()}");
             }
         }
 
@@ -184,9 +186,7 @@ class ImportService implements ImportServiceInterface
 
         // Refresh Token
         $accessToken = $systemEmail->googleToken;
-        var_dump($accessToken);
         $this->google->setKey(GoogleService::AUTH_TYPE_SYSTEM);
-        var_dump(GoogleService::AUTH_TYPE_SYSTEM);
         $validate = $this->google->validate($accessToken);
         if(!empty($validate->newToken)) {
             // Refresh Access Token
