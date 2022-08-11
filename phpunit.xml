@@ -29,5 +29,6 @@
         <server name="SESSION_DRIVER" value="array"/>
         <server name="TELESCOPE_ENABLED" value="false"/>
         <server name="DB_DATABASE" value="trailertrader_test"/>
+        <env name="GOOGLE_CAPTCHA_API_KEY" value="6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe" />
     </php>
 </phpunit>
