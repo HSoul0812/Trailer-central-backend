@@ -405,7 +405,7 @@ class InventoryService implements InventoryServiceInterface
 
         $categoryQueries = $queryBuilder->buildTermInValuesQuery('category', $mappedCategories);
         if($categoryQueries === NULL) {
-            throw new BadRequestException('At least one category should be selected');
+            throw new BadRequestException('No category was selected');
         }
 
         if(isset($params['category']) && $params['category'] === 'Tilt') {
