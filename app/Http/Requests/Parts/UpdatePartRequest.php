@@ -35,7 +35,7 @@ class UpdatePartRequest extends Request {
             'fulfillment_type' => 'nullable|numeric',
             'weight' => 'nullable|numeric',
             'weight_rating' => 'string|nullable',
-            'description' => ['nullable', new ValidStringCharacters(ValidStringCharacters::PARTS_SECTION)],
+            'description' => ['nullable'],
             'qty' => 'nullable|integer',
             'show_on_website' => 'boolean',
             'is_vehicle_specific' => 'boolean',
