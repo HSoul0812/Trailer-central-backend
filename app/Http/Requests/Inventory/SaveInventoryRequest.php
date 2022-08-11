@@ -109,6 +109,7 @@ class SaveInventoryRequest extends Request
         'utc_integration_updated_at' => 'date',
         'has_stock_images' => 'boolean|nullable',
         'show_on_auction123' => 'boolean|nullable',
+        'show_on_rvt' => 'boolean|nullable',
 
         'dealer_identifier' => 'required_without_all:dealer_id|integer|exists:App\Models\User\User,dealer_id',
         'entity_type' => 'required_without_all:entity_type_id|integer',
