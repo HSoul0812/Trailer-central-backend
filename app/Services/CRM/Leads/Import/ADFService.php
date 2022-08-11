@@ -41,8 +41,6 @@ class ADFService implements ImportTypeInterface
         $this->leads = $leads;
         $this->inventory = $inventory;
         $this->locations = $locations;
-        $this->google = $google;
-        $this->gmail = $gmail;
 
         // Create Log
         $this->log = Log::channel('import');
