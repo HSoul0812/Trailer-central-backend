@@ -11,7 +11,7 @@ use App\Rules\QBO\ValidStringCharacters;
  */
 class UpdatePartRequest extends Request {
 
-    public function getRules()
+    protected function getRules(): array
     {
         return [
             'id' => 'required|integer',
