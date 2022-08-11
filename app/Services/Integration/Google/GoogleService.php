@@ -74,9 +74,6 @@ class GoogleService implements GoogleServiceInterface
         }
 
         // Initialize Client
-        var_dump(config('oauth.' . $type . '.app.name'));
-        var_dump(config('oauth.' . $type . '.app.id'));
-        var_dump(config('oauth.' . $type . '.app.secret'));
         $client = new Google_Client();
         $client->setApplicationName(config('oauth.' . $type . '.app.name'));
         $client->setClientId(config('oauth.' . $type . '.app.id'));
@@ -166,7 +163,6 @@ class GoogleService implements GoogleServiceInterface
                 'created' => strtotime($accessToken->issued_at)
             ]);
             $client->setScopes($accessToken->scope);
-            var_dump($accessToken);
 
             // Valid/Expired
             $isValid = $this->validateIdToken($accessToken->id_token);

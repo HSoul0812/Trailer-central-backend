@@ -151,12 +151,12 @@ class ImportService implements ImportServiceInterface
                 } else {
                     $this->tryMove($accessToken, $mailId, 'invalid');
                 }
-                $this->log->error("Exception returned on Import Message #{$mailId}");
+                $this->log->error("Exception returned on Import Message #{$mailId}: {$e->getMessage()}");
             } catch(InvalidImportFormatException $e) {
                 $this->tryMove($accessToken, $mailId, 'invalid');
-                $this->log->error("Exception returned on ADF Import Message #{$mailId}");
+                $this->log->error("Exception returned on ADF Import Message #{$mailId}: {$e->getMessage()}");
             } catch(\Exception $e) {
-                $this->log->error("Exception returned on ADF Import Message #{$mailId}");
+                $this->log->error("Exception returned on ADF Import Message #{$mailId}: {$e->getMessage()}");
             }
         }
 
