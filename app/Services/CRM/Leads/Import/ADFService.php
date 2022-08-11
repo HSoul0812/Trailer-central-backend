@@ -119,7 +119,7 @@ class ADFService implements ImportTypeInterface
         // Get Date
         $adfLead->setRequestDate($adf->filter('requestdate')->text());
         $adfLead->setDealerId($dealer->dealer_id);
-        $adfLead->setWebsiteId($dealer->website->id);
+        $adfLead->setWebsiteId($dealer->website->id ?? 0);
 
         // Get Vendor Location
         $this->getAdfVendorLocation($adfLead, $adf->filter('vendor'));
