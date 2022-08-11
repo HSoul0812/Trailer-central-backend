@@ -12,6 +12,7 @@ use App\Services\Inventory\ESQuery\ESInventoryQueryBuilder;
 use App\Services\Inventory\ESQuery\SortOrder;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Collection;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use App\DTOs\Inventory\TcEsInventory;
 use App\DTOs\Inventory\TcEsResponseInventoryList;
@@ -403,6 +404,10 @@ class InventoryService implements InventoryServiceInterface
         );
 
         $categoryQueries = $queryBuilder->buildTermInValuesQuery('category', $mappedCategories);
+        if($categoryQueries === NULL) {
+            throw new BadRequestException('At least one category should be selected');
+        }
+
         if(isset($params['category']) && $params['category'] === 'Tilt') {
             $mappedTypeCategories = $this->getMappedCategories(
                 $params['type_id'],
@@ -415,6 +420,7 @@ class InventoryService implements InventoryServiceInterface
                 ->build();
             $categoryQueries[] = $tiltQuery;
         }
+
         $queryBuilder
             ->addQueryToContext(
                 (new ESBoolQueryBuilder())->should($categoryQueries)->build()
