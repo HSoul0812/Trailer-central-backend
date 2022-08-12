@@ -39,6 +39,9 @@ class ADFService implements ImportTypeInterface
         $this->leads = $leads;
         $this->inventory = $inventory;
         $this->locations = $locations;
+
+        // Create Log
+        $this->log = Log::channel('import');
     }
 
     /**
@@ -88,7 +91,7 @@ class ADFService implements ImportTypeInterface
 
         // Valid XML?
         if($adf->count() < 1 || empty($adf->nodeName()) || ($adf->nodeName() !== 'adf')) {
-            Log::error("Body text failed to parse ADF correctly:\r\n\r\n" . $body);
+            $this->log->error("Body text failed to parse ADF correctly:\r\n\r\n" . $body);
             throw new InvalidImportFormatException;
         }
 
@@ -116,7 +119,7 @@ class ADFService implements ImportTypeInterface
         // Get Date
         $adfLead->setRequestDate($adf->filter('requestdate')->text());
         $adfLead->setDealerId($dealer->dealer_id);
-        $adfLead->setWebsiteId($dealer->website->id);
+        $adfLead->setWebsiteId($dealer->website->id ?? 0);
 
         // Get Vendor Location
         $this->getAdfVendorLocation($adfLead, $adf->filter('vendor'));
@@ -130,6 +133,7 @@ class ADFService implements ImportTypeInterface
         // Get ADF Lead
         return $adfLead;
     }
+
 
     /**
      * Set ADF Contact Details to ADF Lead
