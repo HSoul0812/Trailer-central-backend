@@ -3,7 +3,6 @@ namespace App\Models\Inventory;
 
 use App\Helpers\SanitizeHelper;
 use App\Models\CRM\Dms\Customer\CustomerInventory;
-use App\Models\CRM\Dms\Quickbooks\Bill;
 use App\Models\CRM\Dms\ServiceOrder;
 use App\Models\Integration\LotVantage\DealerInventory;
 use App\Models\Inventory\Floorplan\Payment;
@@ -227,6 +226,9 @@ class Inventory extends Model
         self::OVERLAY_ENABLED_ALL,
     ];
 
+    public const MIN_DESCRIPTION_LENGTH_FOR_FACEBOOK = 50;
+    public const MIN_PRICE_FOR_FACEBOOK = 0;
+
     /**
      * The table associated with the model.
      *
@@ -356,10 +358,7 @@ class Inventory extends Model
         'msrp' => 'float',
         'gvwr' => 'float',
         'fp_balance' => 'float',
-        'changed_fields_in_dashboard' => 'array',
-        'qb_sync_processed' => 'boolean',
-        'is_floorplan_bill' => 'boolean',
-        'sold_at' => 'datetime',
+        'changed_fields_in_dashboard' => 'array'
     ];
 
     protected $hidden = [
@@ -485,11 +484,6 @@ class Inventory extends Model
     public function entityType(): BelongsTo
     {
         return $this->belongsTo(EntityType::class,'entity_type_id');
-    }
-
-    public function bill(): HasOne
-    {
-        return $this->hasOne(Bill::class, 'id', 'bill_id');
     }
 
     /**
