@@ -27,6 +27,10 @@ class PurchaseOrder extends Model
      */
     protected $table = self::TABLE_NAME;
 
+    protected $appends = [
+        'receive_purchase_order_crm_url',
+    ];
+
     public $timestamps = false;
 
     public function receipts()
@@ -44,7 +48,7 @@ class PurchaseOrder extends Model
         return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
     }
 
-    public function getReceivePurchaseOrderCrmUrl(): string
+    public function getReceivePurchaseOrderCrmUrlAttribute(): string
     {
         return $this->status === self::STATUS_COMPLETED
             ? ''
