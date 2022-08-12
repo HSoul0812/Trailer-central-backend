@@ -163,10 +163,12 @@ class GoogleService implements GoogleServiceInterface
                 'created' => strtotime($accessToken->issued_at)
             ]);
             $client->setScopes($accessToken->scope);
+            $this->log->info("Validating access token for {$accessToken->relation_type} #{$accessToken->relation_id}");
 
             // Valid/Expired
             $isValid = $this->validateIdToken($accessToken->id_token);
             $isExpired = $client->isAccessTokenExpired();
+            $this->log->info("Value ID token? {$isValid} | Token ExpireD? {$isExpired}");
 
             // Try to Refresh Access Token!
             if(!empty($accessToken->refresh_token) && (!$isValid || $isExpired)) {
@@ -180,7 +182,7 @@ class GoogleService implements GoogleServiceInterface
                 $isExpired = true;
             }
         } catch (\Exception $e) {
-            Log::channel('google')->error('Exception returned validating google oauth: ' . $e->getMessage());
+            $this->log->error('Exception returned validating google oauth: ' . $e->getMessage());
             $isValid = false;
             $isExpired = true;
         }
@@ -230,7 +232,7 @@ class GoogleService implements GoogleServiceInterface
                 $isExpired = true;
             }
         } catch (\Exception $e) {
-            Log::channel('google')->error('Exception returned validating custom google oauth: ' . $e->getMessage());
+            $this->log->error('Exception returned validating custom google oauth: ' . $e->getMessage());
             $isValid = false;
             $isExpired = true;
         }
