@@ -134,40 +134,6 @@ class ADFService implements ImportTypeInterface
         return $adfLead;
     }
 
-    /**
-     * Import ADF as Lead
-     * 
-     * @param ADFLead $adfLead
-     * @return Lead
-     */
-    public function importLead(ADFLead $adfLead): Lead {
-        // Save Lead From ADF Data
-        return $this->leads->create([
-            'website_id' => $adfLead->getWebsiteId(),
-            'dealer_id' => $adfLead->getDealerId(),
-            'dealer_location_id' => $adfLead->getLocationId(),
-            'inventory_id' => $adfLead->getVehicleId(),
-            'lead_type' => $adfLead->getLeadType(),
-            'referral' => 'adf',
-            'title' => 'ADF Import',
-            'first_name' => $adfLead->getFirstName(),
-            'last_name' => $adfLead->getLastName(),
-            'email_address' => $adfLead->getEmail(),
-            'phone_number' => $adfLead->getPhone(),
-            'preferred_contact' => $adfLead->getPreferredContact(),
-            'address' => $adfLead->getAddrStreet(),
-            'city' => $adfLead->getAddrCity(),
-            'state' => $adfLead->getAddrState(),
-            'zip' => $adfLead->getAddrZip(),
-            'comments' => $adfLead->getComments(),
-            'contact_email_sent' => $adfLead->getRequestDate(),
-            'adf_email_sent' => $adfLead->getRequestDate(),
-            'cdk_email_sent' => 1,
-            'date_submitted' => $adfLead->getRequestDate(),
-            'lead_source' => $adfLead->getVendorProvider()
-        ]);
-    }
-
 
     /**
      * Set ADF Contact Details to ADF Lead
