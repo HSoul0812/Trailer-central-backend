@@ -188,7 +188,7 @@ class ImportService implements ImportServiceInterface
         $accessToken = $systemEmail->googleToken;
         $this->google->setKey(GoogleService::AUTH_TYPE_SYSTEM);
         $validate = $this->google->validate($accessToken);
-        if(!empty($validate->newToken)) {
+        if($validate->newToken && $validate->newToken->exists()) {
             // Refresh Access Token
             $time = CarbonImmutable::now();
             $accessToken = $this->tokens->update([
