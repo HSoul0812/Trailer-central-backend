@@ -5,6 +5,7 @@ namespace App\Models\CRM\Dms\PurchaseOrder;
 use App\Models\User\NewDealerUser;
 use App\Models\User\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Class PurchaseOrder
