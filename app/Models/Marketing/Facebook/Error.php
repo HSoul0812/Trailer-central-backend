@@ -29,6 +29,7 @@ class Error extends Model
         'missing-inventory' => 'Missing Inventory on Integration',
         'login-failed' => 'Failed to Login for Unknown Reason',
         'login-invalid' => 'Invalid Credentials',
+        'login-approval' => 'Login requires manual aproval',
         'email-verification' => 'Email Verification',
         'login-approval' => 'Approval Request Submitted',
         'two-factor-auth' => 'Invalid Two-Factor Credentials',
