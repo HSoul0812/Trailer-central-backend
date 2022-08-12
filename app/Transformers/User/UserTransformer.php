@@ -16,6 +16,11 @@ class UserTransformer extends TransformerAbstract
 
     public function transform($user): array
     {
+        // We always want to use the user's email
+        // if the access-token belongs to the dealer, then we use the dealer email
+        // if it belongs to the secondary user, then we use the secondary user email
+        $email = $user->email;
+
         // We'll make sure that the $user variable is the instance
         // of the User model (the dealer)
         if ($user instanceof DealerUser) {
@@ -27,7 +32,7 @@ class UserTransformer extends TransformerAbstract
              'identifier' => $user->identifier,
              'created_at' => $user->created_at,
              'name' => $user->name,
-             'email' => $user->email,
+             'email' => $email,
              'primary_email' => $user->email,
              'is_dms_active' => $user->is_dms_active,
              'is_crm_active' => $user->is_crm_active,
