@@ -191,14 +191,7 @@ class ImportService implements ImportServiceInterface
         if($validate->newToken && $validate->newToken->exists()) {
             // Refresh Access Token
             $time = CarbonImmutable::now();
-            $accessToken = $this->tokens->update([
-                'id' => $accessToken->id,
-                'access_token' => $validate->newToken['access_token'],
-                'id_token' => $validate->newToken['id_token'],
-                'expires_in' => $validate->newToken['expires_in'],
-                'expires_at' => $time->addSeconds($validate->newToken['expires_in'])->toDateTimeString(),
-                'issued_at' => $time->toDateTimeString()
-            ]);
+            $accessToken = $this->tokens->refresh($accessToken->id, $validate->newToken);
         }
 
         // Return Access Token for Google
