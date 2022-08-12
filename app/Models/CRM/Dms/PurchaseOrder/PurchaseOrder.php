@@ -18,7 +18,7 @@ class PurchaseOrder extends Model
 
     public const TABLE_NAME = 'dms_purchase_order';
 
-    const CRM_RECEIVE_PO_URL = '/accounting/purchase-order'
+    const CRM_RECEIVE_PO_URL = '/accounting/purchase-order';
 
     /**
      * The table associated with the model.
