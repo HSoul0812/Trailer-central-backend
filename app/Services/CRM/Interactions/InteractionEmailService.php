@@ -116,10 +116,12 @@ class InteractionEmailService implements InteractionEmailServiceInterface
         // Loop Attachments
         $attachments = new Collection();
         foreach ($parsedEmail->getAllAttachments() as $file) {
+            $fileDto = $this->fileService->uploadLocal(['file' => $file]);
+            $fileDtoS3 = $this->fileService->upload($fileDto->getUrl(), null, $dealerId);
 
             // Set File Name/Path
-            $file->setFilePath(Attachment::AWS_PREFIX . '/' . urlencode($filePath));
-            $file->setFileName(time() . $file->getFileName());
+            $file->setFilePath($fileDtoS3->getUrl());
+            $file->setFileName($fileDtoS3->getPath());
 
             // Add File
             $attachments->push($file);
