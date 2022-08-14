@@ -23,6 +23,7 @@ class UpdatePartRequest extends Request {
             'category_id' => 'required|integer',
             'qb_id' => 'nullable|integer',
             'subcategory' => ['nullable', 'string', new ValidStringCharacters(ValidStringCharacters::PARTS_SECTION)],
+            'sku' => ['required', 'string', 'parts_sku_unique:' . $this->input('id'), new ValidStringCharacters(ValidStringCharacters::PARTS_SECTION)],
             'title' => ['nullable', 'string', new ValidStringCharacters(ValidStringCharacters::PARTS_SECTION)],
             'alternative_part_number' => 'nullable|string',
             'price' => 'numeric',
@@ -52,10 +53,5 @@ class UpdatePartRequest extends Request {
             'bins.*.bin_id' => 'required|integer',
             'bins.*.quantity' => 'required|numeric'
         ];
-    }
-
-    public function __construct(array $query = array(), array $request = array(), array $attributes = array(), array $cookies = array(), array $files = array(), array $server = array(), $content = null) {
-        parent::__construct($query, $request, $attributes, $cookies, $files, $server, $content);
-        $this->rules['sku'] = ['required', 'string', 'parts_sku_unique:' . $this->input('id'), new ValidStringCharacters(ValidStringCharacters::PARTS_SECTION)];
     }
 }
