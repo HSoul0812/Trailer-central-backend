@@ -153,7 +153,7 @@ class SubscriptionController extends RestfulControllerV2
      *     )
      * )
      */
-    public function updateCardByDealerId(Request $request)
+    public function updateCardByDealerId(Request $request): Response
     {
         $request = new UpdateCardByDealerIdRequest(
             $request->all()
