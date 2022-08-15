@@ -164,7 +164,7 @@ class SubscriptionController extends RestfulControllerV2
                 $this->subscriptionRepository->updateCardByDealerId(
                     $request->dealer_id,
                     $request->token
-                )
+                )->toArray()
             )
         ) {
             return $this->response->array([

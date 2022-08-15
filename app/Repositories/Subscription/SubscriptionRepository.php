@@ -43,7 +43,7 @@ class SubscriptionRepository implements SubscriptionRepositoryInterface {
     /**
      * @inheritDoc
      */
-    public function subscribeToPlanByDealerId($dealerId, $planId): bool
+    public function subscribeToPlanByDealerId($dealerId, $planId): object
     {
         return $this->service->subscribeToPlanByDealerId($dealerId, $planId);
     }
@@ -51,7 +51,7 @@ class SubscriptionRepository implements SubscriptionRepositoryInterface {
     /**
      * @inheritDoc
      */
-    public function updateCardByDealerId($dealerId, $token): bool
+    public function updateCardByDealerId($dealerId, $token): object
     {
         return $this->service->updateCardByDealerId($dealerId, $token);
     }
