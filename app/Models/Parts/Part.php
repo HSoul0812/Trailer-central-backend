@@ -11,6 +11,7 @@ use Laravel\Scout\Searchable;
 use App\Repositories\Parts\CostModifierRepositoryInterface;
 use Carbon\Carbon;
 use App\Models\CRM\Dms\PurchaseOrder\PurchaseOrderPart;
+use App\Models\User\User;
 
 /**
  * Class Part
@@ -268,5 +269,15 @@ class Part extends Model
 
         // Return Standard
         return !empty($this->shipping_fee) ? $this->shipping_fee : '0.00';
+    }
+
+    /**
+     * Get User
+     *
+     * @return BelongsTo
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
     }
 }
