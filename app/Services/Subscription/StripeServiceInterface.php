@@ -46,7 +46,7 @@ interface StripeServiceInterface {
      * @param $dealerId
      * @param $planId
      */
-    public function subscribeToPlanByDealerId($dealerId, $planId): bool;
+    public function subscribeToPlanByDealerId($dealerId, $planId): object;
 
     /**
      * Updates a customer card
@@ -54,5 +54,5 @@ interface StripeServiceInterface {
      * @param $dealerId
      * @param $token
      */
-    public function updateCardByDealerId($dealerId, $token): bool;
+    public function updateCardByDealerId($dealerId, $token): object;
 }
