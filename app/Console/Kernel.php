@@ -93,7 +93,7 @@ class Kernel extends ConsoleKernel
 
         //$schedule->command('leads:assign:hotpotato')->withoutOverlapping();
 
-        $schedule->command('leads:import:adf')
+        $schedule->command('leads:import')
                 ->everyFiveMinutes()
                 ->runInBackground();
 

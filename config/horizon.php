@@ -146,7 +146,7 @@ return [
         'local' => [
             'supervisor-1' => [
                 'connection' => 'redis',
-                'queue' => ['parts', 'parts-export-new', 'factory-feeds', 'cvr-send-file', 'scout', 'reports', 'emailbuilder', 'blog-posts', 'scrapereplies', 'inquiry', 'fb-catalog', 'fb-messenger', 'ecommerce', 'crm-users'],
+                'queue' => ['inventory', 'parts', 'parts-export-new', 'factory-feeds', 'cvr-send-file', 'scout', 'reports', 'emailbuilder', 'blog-posts', 'scrapereplies', 'inquiry', 'fb-catalog', 'fb-messenger', 'ecommerce', 'crm-users'],
                 'balance' => 'simple',
                 'processes' => 3,
                 'tries' => 3,
@@ -157,7 +157,7 @@ return [
         'dev' => [
             'supervisor-1' => [
                 'connection' => 'redis',
-                'queue' => ['parts', 'parts-export-new', 'factory-feeds', 'cvr-send-file', 'scout', 'reports', 'emailbuilder', 'blog-posts', 'scrapereplies', 'inquiry', 'fb-catalog', 'fb-messenger', 'ecommerce', 'crm-users'],
+                'queue' => ['inventory', 'parts', 'parts-export-new', 'factory-feeds', 'cvr-send-file', 'scout', 'reports', 'emailbuilder', 'blog-posts', 'scrapereplies', 'inquiry', 'fb-catalog', 'fb-messenger', 'ecommerce', 'crm-users'],
                 'balance' => 'simple',
                 'processes' => 10,
                 'tries' => 3,
@@ -186,7 +186,7 @@ return [
             'supervisor-3' => [
                 'connection' => 'redis',
                 'queue' => ['fb-catalog'],
-                'balance' => false,
+                'balance' => 'auto',
                 'processes' => 1,
                 'tries' => 3,
                 'timeout' => 360,
@@ -222,7 +222,7 @@ return [
         'production' => [
             'supervisor-1' => [
                 'connection' => 'redis',
-                'queue' => ['factory-feeds', 'fb-messenger', 'inquiry', 'blog-posts', 'ecommerce'],
+                'queue' => ['factory-feeds', 'fb-messenger', 'inquiry', 'blog-posts', 'ecommerce', 'crm-users'],
                 'balance' => 'auto',
                 'minProcesses' => 1,
                 'maxProcesses' => 8,
@@ -241,7 +241,7 @@ return [
             'supervisor-3' => [
                 'connection' => 'redis',
                 'queue' => ['fb-catalog'],
-                'balance' => false,
+                'balance' => 'auto',
                 'processes' => 3,
                 'tries' => 3,
                 'timeout' => 360,

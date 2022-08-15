@@ -95,6 +95,11 @@ $api->version('v1', function ($route) {
                 $route->delete('{id}', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@destroy')
                     ->where('id', '[0-9]+');
             });
+
+            $route->get(
+                'download/csv',
+                'App\Http\Controllers\v1\Inventory\Floorplan\PaymentController@downloadCsv'
+            );
         });
     });
 
@@ -220,6 +225,15 @@ $api->version('v1', function ($route) {
     |
     |
     */
+
+    /**
+     * Inventory Bulk
+     */
+    $route->get('inventory/bulk', 'App\Http\Controllers\v1\Bulk\Inventory\BulkUploadController@index');
+    $route->post('inventory/bulk', 'App\Http\Controllers\v1\Bulk\Inventory\BulkUploadController@create');
+    $route->get('inventory/bulk/{id}', 'App\Http\Controllers\v1\Bulk\Inventory\BulkUploadController@show');
+    $route->put('inventory/bulk/{id}', 'App\Http\Controllers\v1\Bulk\Inventory\BulkUploadController@update');
+    $route->delete('inventory/bulk/{id}', 'App\Http\Controllers\v1\Bulk\Inventory\BulkUploadController@destroy');
 
     /**
      * Inventory Overlay
@@ -604,6 +618,7 @@ $api->version('v1', function ($route) {
     $route->get('leads/types/public', 'App\Http\Controllers\v1\CRM\Leads\LeadTypeController@publicTypes');
     $route->get('leads/sources', 'App\Http\Controllers\v1\CRM\Leads\LeadSourceController@index');
     $route->get('leads/sort-fields', 'App\Http\Controllers\v1\CRM\Leads\LeadController@sortFields');
+    $route->get('leads/sort-fields/crm', 'App\Http\Controllers\v1\CRM\Leads\LeadController@sortFieldsCrm');
     $route->get('leads/unique-full-names', 'App\Http\Controllers\v1\CRM\Leads\LeadController@uniqueFullNames');
     $route->get('crm/states', 'App\Http\Controllers\v1\CRM\StatesController@index');
 
@@ -657,8 +672,17 @@ $api->version('v1', function ($route) {
         |
         */
         $route->get('user/quotes', 'App\Http\Controllers\v1\Dms\UnitSaleController@index');
-
         $route->put('user/quotes/bulk-archive', 'App\Http\Controllers\v1\Dms\UnitSaleController@bulkArchive');
+        
+        /*
+        |--------------------------------------------------------------------------
+        | Quotes Refunds
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('user/refunds', 'App\Http\Controllers\v1\Dms\User\UserRefundsController@index');
 
         /*
         |--------------------------------------------------------------------------
@@ -963,8 +987,8 @@ $api->version('v1', function ($route) {
                     'prefix' => 'template',
                     'middleware' => 'emailbuilder.template.validate'
                 ], function ($route) {
-                    /*$route->get('/', 'App\Http\Controllers\v1\CRM\Email\TemplateController@index');
-                    $route->put('/', 'App\Http\Controllers\v1\CRM\Email\TemplateController@create');
+                    $route->get('/', 'App\Http\Controllers\v1\CRM\Email\TemplateController@index');
+                    /*$route->put('/', 'App\Http\Controllers\v1\CRM\Email\TemplateController@create');
                     $route->get('{id}', 'App\Http\Controllers\v1\CRM\Email\TemplateController@show')->where('id', '[0-9]+');
                     $route->post('{id}', 'App\Http\Controllers\v1\CRM\Email\TemplateController@update')->where('id', '[0-9]+');
                     $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Email\TemplateController@destroy')->where('id', '[0-9]+');*/
@@ -976,8 +1000,8 @@ $api->version('v1', function ($route) {
                     'prefix' => 'campaign',
                     'middleware' => 'emailbuilder.campaign.validate'
                 ], function ($route) {
-                    /*$route->get('/', 'App\Http\Controllers\v1\CRM\Email\CampaignController@index');
-                    $route->put('/', 'App\Http\Controllers\v1\CRM\Email\CampaignController@create');
+                    $route->get('/', 'App\Http\Controllers\v1\CRM\Email\CampaignController@index');
+                    /*$route->put('/', 'App\Http\Controllers\v1\CRM\Email\CampaignController@create');
                     $route->get('{id}', 'App\Http\Controllers\v1\CRM\Email\CampaignController@show')->where('id', '[0-9]+');
                     $route->post('{id}', 'App\Http\Controllers\v1\CRM\Email\CampaignController@update')->where('id', '[0-9]+');
                     $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Email\CampaignController@destroy')->where('id', '[0-9]+');*/
@@ -989,8 +1013,8 @@ $api->version('v1', function ($route) {
                     'prefix' => 'blast',
                     'middleware' => 'emailbuilder.blast.validate'
                 ], function ($route) {
-                    /*$route->get('/', 'App\Http\Controllers\v1\CRM\Email\BlastController@index');
-                    $route->put('/', 'App\Http\Controllers\v1\CRM\Email\BlastController@create');
+                    $route->get('/', 'App\Http\Controllers\v1\CRM\Email\BlastController@index');
+                    /*$route->put('/', 'App\Http\Controllers\v1\CRM\Email\BlastController@create');
                     $route->get('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@show')->where('id', '[0-9]+');
                     $route->post('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@update')->where('id', '[0-9]+');
                     $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@destroy')->where('id', '[0-9]+');*/
@@ -1435,22 +1459,22 @@ $api->version('v1', function ($route) {
     ], function ($route) {
         $route->get(
             'customer',
-            'App\Http\Controllers\v1\Subscription\SubscriptionController@getCustomer'
+            'App\Http\Controllers\v1\Subscription\SubscriptionController@getCustomerByDealerId'
         );
 
         $route->get(
             'plans',
-            'App\Http\Controllers\v1\Subscription\SubscriptionController@getPlans'
+            'App\Http\Controllers\v1\Subscription\SubscriptionController@getExistingPlans'
         );
 
         $route->post(
             'subscribe',
-            'App\Http\Controllers\v1\Subscription\SubscriptionController@subscribe'
+            'App\Http\Controllers\v1\Subscription\SubscriptionController@subscribeToPlanByDealerId'
         );
 
         $route->post(
             'update-card',
-            'App\Http\Controllers\v1\Subscription\SubscriptionController@updateCard'
+            'App\Http\Controllers\v1\Subscription\SubscriptionController@updateCardByDealerId'
         );
     });
 

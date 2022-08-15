@@ -278,10 +278,37 @@ class User extends Model implements Authenticatable, PermissionsInterface
         return $this->hasOneThrough(CrmUser::class, NewDealerUser::class, 'id', 'user_id', 'dealer_id', 'user_id');
     }
 
+    public function dealerParts(): HasOne
+    {
+        return $this->hasOne(DealerPart::class, 'dealer_id', 'dealer_id');
+    }
+
+    public function dealerClapp(): HasOne
+    {
+        return $this->hasOne(DealerClapp::class, 'dealer_id', 'dealer_id');
+    }
+
+    public function authToken(): HasOne
+    {
+        return $this
+            ->hasOne(AuthToken::class, 'user_id', 'dealer_id')
+            ->where('user_type', 'dealer');
+    }
+
     public function getIsCrmActiveAttribute(): bool
     {
         $crmUser = $this->crmUser()->first();
         return $crmUser instanceof CrmUser ? (bool)$crmUser->active : false;
+    }
+
+    public function getIsPartsActiveAttribute(): bool
+    {
+        return !empty($this->dealerParts);
+    }
+
+    public function getIsMarketingActiveAttribute(): bool
+    {
+        return !empty($this->dealerClapp);
     }
 
     public function getIsEcommerceActiveAttribute(): bool
@@ -337,14 +364,14 @@ class User extends Model implements Authenticatable, PermissionsInterface
         return $this->hasMany(Bin::class, 'dealer_id', 'dealer_id');
     }
 
-    public function getCrmLoginUrl(string $route = '')
+    public function getCrmLoginUrl(string $route = '', bool $useNewDesign = false): string
     {
         $userService = app(UserService::class);
         $crmLoginString = $userService->getUserCrmLoginUrl($this->getAuthIdentifier());
         if ($route) {
             $crmLoginString .= '&r='.$route;
         }
-        return $crmLoginString;
+        return ($useNewDesign ? config('app.new_design_crm_url') : '') . $crmLoginString;
     }
 
     public function isSecondaryUser() : bool

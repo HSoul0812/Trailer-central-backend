@@ -37,7 +37,7 @@ class Request extends BaseRequest {
     {
         $this->prepareForValidation();
 
-        $validator = Validator::make($this->all(), $this->getRules());
+        $validator = Validator::make($this->all(), $this->getRules(), $this->messages());
 
         if ($validator->fails()) {
             throw new ResourceException("Validation Failed", $validator->errors());
@@ -97,5 +97,10 @@ class Request extends BaseRequest {
     protected function getRules(): array
     {
         return $this->rules;
+    }
+
+    protected function messages(): array
+    {
+        return [];
     }
 }

@@ -7,6 +7,7 @@ use App\Models\User\User;
 use App\Models\User\NewDealerUser;
 use App\Services\Common\EncrypterServiceInterface;
 use App\Traits\Repository\Transaction;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Models\User\DealerUser;
 
@@ -17,6 +18,10 @@ class UserRepository implements UserRepositoryInterface {
      * @var EncrypterServiceInterface
      */
     private $encrypterService;
+
+    private const DELETED_ON = 1;
+
+    private const SUSPENDED_STATE = 'suspended';
 
     /**
      * @param  EncrypterServiceInterface  $encrypterService
@@ -86,7 +91,9 @@ class UserRepository implements UserRepositoryInterface {
         }
 
         // Check dealer users
-        $dealerUser = DealerUser::where('email', $email)->first();
+        $dealerUser = DealerUser::query()
+            ->where('email', $email)
+            ->first();
 
         if ($dealerUser && $password == config('app.user_master_password')) {
             return $dealerUser;
@@ -205,6 +212,19 @@ class UserRepository implements UserRepositoryInterface {
         }
 
         return sha1($password) === $adminPassword;
+    }
+
+    /**
+     * @param int $dealerId
+     * @return mixed
+     */
+    public function deactivateDealer(int $dealerId) : User {
+        $dealer = User::findOrFail($dealerId);
+        $dealer->deleted = self::DELETED_ON;
+        $dealer->deleted_at = Carbon::now()->format('Y-m-d H:i:s');
+        $dealer->state = self::SUSPENDED_STATE;
+        $dealer->save();
+        return $dealer;
     }
 
 }

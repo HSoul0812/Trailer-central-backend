@@ -63,8 +63,7 @@ class CollectorSpecificationRule extends Resource
                 ),
 
             Text::make('Incoming Value', 'value')
-                ->sortable()
-                ->rules('required'),
+                ->sortable(),
         ];
     }
 

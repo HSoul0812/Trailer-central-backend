@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Nova\Filters;
+namespace App\Nova\Filters\Feeds;
 
 use App\Models\Feed\Feed;
 use Illuminate\Http\Request;
 use Laravel\Nova\Filters\Filter;
 
-class FeedType extends Filter
+class FeedStatus extends Filter
 {
     /**
      * The filter's component.
@@ -25,7 +25,7 @@ class FeedType extends Filter
      */
     public function apply(Request $request, $query, $value)
     {
-        return $query->where('type', $value);
+        return $query->where('status', $value);
     }
 
     /**
@@ -37,9 +37,8 @@ class FeedType extends Filter
     public function options(Request $request)
     {
         return [
-            'Dealer Outgoing Feed' => Feed::TYPE_DEALER_OUTGOING_FEED,
-            'Dealer Incoming Feed' => Feed::TYPE_DEALER_INCOMING_FEED,
-            'Factory Feed' => Feed::TYPE_FACTORY_FEED,
+            'Active' => Feed::STATUS_ACTIVE,
+            'Disabled' => Feed::STATUS_DISABLED
         ];
     }
 }

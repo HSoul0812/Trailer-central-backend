@@ -69,7 +69,6 @@ class TextrailPartImporterService implements TextrailPartImporterServiceInterfac
 
         $parts = $this->textrailPartService->getAllParts();
         $parts_sku = [];
-
         $partAttributes = [];
 
         // Fetch all `visible for front` attributes and group them to use option/values.
@@ -171,6 +170,10 @@ class TextrailPartImporterService implements TextrailPartImporterServiceInterfac
                    }
                 } else {
                     $value = $partAttribute;
+                }
+
+                if (empty($value)) {
+                    continue;
                 }
 
                 $code = $key;

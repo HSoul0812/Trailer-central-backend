@@ -68,25 +68,18 @@ class PartRepository extends BaseRepository implements PartRepositoryInterface
      */
     public function addAttribute(Part $part, Attribute $dbAttribute, $value): PartAttribute
     {
-        try {
-            $partAttribute = PartAttribute::where('attribute_id', '=', $dbAttribute->id)->where('part_id', '=', $part->id)->first();
+        $partAttribute = PartAttribute::where('attribute_id', '=', $dbAttribute->id)->where('part_id', '=', $part->id)->first();
 
-            if (!$partAttribute) {
-                $partAttribute = PartAttribute::firstOrCreate(
-                    [
-                        'attribute_id' => $dbAttribute->id,
-                        'part_id' => $part->id,
-                        'attribute_value' => $value
-                    ]
-                );
-            }
-
-            return $partAttribute;
-        } catch (\Exception $exception) {
-            var_dump([
-                'value' => $value,
-                'message' => $exception->getMessage()
-            ]);
+        if (!$partAttribute) {
+            $partAttribute = PartAttribute::firstOrCreate(
+                [
+                    'attribute_id' => $dbAttribute->id,
+                    'part_id' => $part->id,
+                    'attribute_value' => $value
+                ]
+            );
         }
+
+        return $partAttribute;
     }
 }

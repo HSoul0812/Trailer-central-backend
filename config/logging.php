@@ -122,6 +122,14 @@ return [
             'permission' => 0664,
         ],
 
+        'fb-catalog' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/services/fb-catalog.log'),
+            'level' => 'debug',
+            'days' => 3,
+            'permission' => 0664,
+        ],
+
         'leads' => [
             'driver' => 'daily',
             'path' => storage_path('logs/services/leads.log'),

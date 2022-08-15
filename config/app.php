@@ -62,8 +62,6 @@ return [
 
     'new_design_crm_url' => env('NEW_DESIGN_CRM_URL', 'https://design-prod.crm.trailercentral.com/'),
 
-    'new_design_lead_force' => env('NEW_DESIGN_LEAD_FORCE', false),
-
     'crm_url' => env('CRM_URL', 'https://crm.trailercentral.com/'),
 
     'crm_lead_url' => env('CRM_LEAD_ROUTE', '/leads/lead/'),
@@ -198,6 +196,7 @@ return [
         App\Providers\NovaServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         App\Providers\PartsServiceProvider::class,
+        App\Providers\InventoryServiceProvider::class,
         App\Providers\DmsServiceProvider::class,
         App\Providers\CrmServiceProvider::class,
         App\Providers\IntegrationServiceProvider::class,
@@ -211,6 +210,8 @@ return [
         App\Providers\MarketingServiceProvider::class,
         App\Providers\EcommerceProvider::class,
         App\Providers\FavoritesExportServiceProvider::class,
+        App\Providers\SubscriptionServiceProvider::class,
+        App\Providers\StripeServiceProvider::class,
         /*
          * 3rd party stuff
          */
@@ -224,6 +225,7 @@ return [
         ElasticMigrations\ServiceProvider::class,
         App\Providers\SpatialServiceProvider::class,
         Barryvdh\Snappy\ServiceProvider::class,
+        Spatie\Permission\PermissionServiceProvider::class,
 
         /*
          * Nova stuff

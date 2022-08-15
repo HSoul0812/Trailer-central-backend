@@ -64,7 +64,8 @@ class Collector extends Resource
                 BelongsTo::make('Dealer', 'dealers', Dealer::class)->sortable()->rules('required'),
                 BelongsTo::make('Default Dealer Location', 'dealerLocation', Location::class)->sortable()->rules('required'),
                 DateTime::make('Last Run', 'last_run')->sortable()->format('DD MMM, YYYY - LT')->readonly(true)->onlyOnIndex(),
-                Boolean::make('Run without Errors', 'run_without_errors')->readonly(true)->onlyOnIndex()
+                Boolean::make('Run without Errors', 'run_without_errors')->readonly(true)->onlyOnIndex(),
+                DateTime::make('Scheduled For', 'scheduled_for')->sortable()->format('DD MMM, YYYY - LT')->readonly(true)->onlyOnIndex()
             ]),
 
             new Panel('Source', [

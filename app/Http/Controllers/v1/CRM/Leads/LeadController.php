@@ -7,6 +7,7 @@ use App\Exceptions\Requests\Validation\NoObjectTypeSetException;
 use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\CRM\Leads\AssignLeadRequest;
 use App\Http\Requests\CRM\Leads\FirstLeadRequest;
+use App\Http\Requests\CRM\Leads\GetLeadsSortFieldsCrmRequest;
 use App\Http\Requests\CRM\Leads\MergeLeadsRequest;
 use App\Http\Requests\CRM\Leads\GetLeadsSortFieldsRequest;
 use App\Http\Requests\CRM\Leads\GetUniqueFullNamesRequest;
@@ -125,6 +126,17 @@ class LeadController extends RestfulControllerV2
 
         if ($request->validate()) {
             return $this->response->array([ 'data' => $this->leads->getLeadsSortFields() ]);
+        }
+
+        return $this->response->errorBadRequest();
+    }
+
+    public function sortFieldsCrm(Request $request) : Response
+    {
+        $request = new GetLeadsSortFieldsCrmRequest($request->all());
+
+        if ($request->validate()) {
+            return $this->response->array([ 'data' => $this->leads->getLeadsSortFieldsCrm() ]);
         }
 
         return $this->response->errorBadRequest();
