@@ -14,7 +14,8 @@ class PurchaseOrderPartTransformer extends TransformerAbstract
         return $poPart->purchaseOrder->only([
             'status',
             'user_defined_id',
-            'id'
+            'id',
+            'receive_purchase_order_crm_url',
         ]);
     }
 }
