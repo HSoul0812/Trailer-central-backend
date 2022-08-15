@@ -215,7 +215,7 @@ class Collector extends Resource
                 ),
                 Boolean::make('Append Floorplan Image', 'append_floorplan_image')->withMeta(['value' => $this->active ?? true])->hideFromIndex(),
                 Heading::make('<p class="text-primary"">Video Section</p>')->asHtml(),
-                Text::make('Image Directory Address', 'video_source_fields')->hideFromIndex()->help(
+                Text::make('Video Source Fields', 'video_source_fields')->hideFromIndex()->help(
                     'Please Add with <strong>, separated values without spaces!</strong> all the source file fields that are related to <code>video_embed_code</code><br />
                     <strong>Example:</strong> <code class="font-weight-bold">videourl,virtualtour,alternatevideo,etc</code> '
                 ),
