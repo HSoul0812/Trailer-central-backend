@@ -28,15 +28,15 @@ interface SubscriptionRepositoryInterface extends Repository {
      * Subscribe to a selected plan
      * @param $dealerId
      * @param $planId
-     * @return bool
+     * @return object
      */
-    public function subscribeToPlanByDealerId($dealerId, $planId): bool;
+    public function subscribeToPlanByDealerId($dealerId, $planId): object;
 
     /**
      * Updates a customer card
      * @param $dealerId
      * @param $token
-     * @return bool
+     * @return object
      */
-    public function updateCardByDealerId($dealerId, $token): bool;
+    public function updateCardByDealerId($dealerId, $token): object;
 }
