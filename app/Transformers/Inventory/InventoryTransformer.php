@@ -120,7 +120,7 @@ class InventoryTransformer extends TransformerAbstract
              'dealer' => $this->userTransformer->transform($inventory->user),
              'dealer_location_id' => $inventory->dealer_location_id,
              'dealer_location' => $inventory->dealerLocation ? $this->dealerLocationTransformer->transform($inventory->dealerLocation) : null,
-            'description' => $this->fixWrongChars($inventory->description),
+             'description' => $this->fixWrongChars($inventory->description),
              'entity_type_id' => $inventory->entity_type_id,
              'fp_balance' => $inventory->fp_balance,
              'fp_interest_paid' => $inventory->interest_paid,
