@@ -49,6 +49,8 @@ class Website extends Resource
     public function fields(Request $request)
     {
         return [
+            Text::make('Website ID', 'id')->exceptOnForms(),
+
             Text::make('Dealer ID', 'dealer_id')->sortable(),
 
             Text::make('App ID', 'identifier')->exceptOnForms(),
