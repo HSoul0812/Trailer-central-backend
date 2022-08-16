@@ -12,6 +12,7 @@ use App\Repositories\Parts\CostModifierRepositoryInterface;
 use Carbon\Carbon;
 use App\Models\CRM\Dms\PurchaseOrder\PurchaseOrderPart;
 use App\Models\User\User;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Class Part
@@ -271,12 +272,7 @@ class Part extends Model
         return !empty($this->shipping_fee) ? $this->shipping_fee : '0.00';
     }
 
-    /**
-     * Get User
-     *
-     * @return BelongsTo
-     */
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
     }
