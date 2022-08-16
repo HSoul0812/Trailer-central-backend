@@ -14,6 +14,7 @@ class UpdateQuoteSettingsRequest extends FormRequest
             'include_part_for_sales_tax' => 'boolean',
             'include_labor_for_sales_tax' => 'boolean',
             'include_fees_for_sales_tax' => 'boolean',
+            'local_calculation_enabled' => 'boolean',
             'default_sales_location_id' => [
                 'nullable',
                 Rule::exists('dealer_location', 'dealer_location_id')

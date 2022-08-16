@@ -23,6 +23,7 @@ class QuoteSetting extends Model
         'include_labor_for_sales_tax',
         'include_fees_for_sales_tax',
         'default_sales_location_id',
+        'local_calculation_enabled',
     ];
 
     protected $casts = [
