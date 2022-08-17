@@ -79,6 +79,11 @@ class Part extends BasePart
         return $this->hasMany(Image::class);
     }
 
+    public function partAttributes()
+    {
+        return $this->hasMany(PartAttribute::class, 'part_id', 'id');
+    }
+
     public function searchableAs()
     {
         return env('INDEX_PARTS_TEXTRAIL', 'parts_textrail');

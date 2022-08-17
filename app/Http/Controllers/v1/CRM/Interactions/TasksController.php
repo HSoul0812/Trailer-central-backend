@@ -23,15 +23,21 @@ class TasksController extends RestfulController
     public function __construct(InteractionsRepositoryInterface $interactions, TaskTransformer $transformer)
     {
         $this->middleware('setDealerIdOnRequest')->only(['index']);
+        $this->middleware('setSalesPersonIdOnRequest')->only(['index']);
         $this->interactions = $interactions;
         $this->transformer = $transformer;
     }
 
-    public function index(Request $request) {
+    public function index(Request $request) 
+    {
         $request = new GetTasksRequest($request->all());
 
-        if ($request->validate()) {             
-            return $this->response->paginator($this->interactions->getTasksByDealerId($request->dealer_id, $request->sort, $request->per_page), $this->transformer);
+        if ($request->validate()) {
+            if ($request->sales_person_id) {
+                return $this->response->paginator($this->interactions->getTasksBySalespersonId($request->sales_person_id, $request->sort, $request->per_page), $this->transformer);
+            } else {
+                return $this->response->paginator($this->interactions->getTasksByDealerId($request->dealer_id, $request->sort, $request->per_page), $this->transformer);
+            }
         }
         
         return $this->response->errorBadRequest();
