@@ -9,9 +9,6 @@ use App\Http\Requests\CRM\Email\UpdateCampaignRequest;
 use App\Repositories\CRM\Email\CampaignRepositoryInterface;
 use App\Http\Requests\CRM\Email\GetCampaignsRequest;
 use App\Http\Requests\CRM\Email\CreateCampaignRequest;
-/*use App\Http\Requests\CRM\Email\ShowCampaignRequest;
-use App\Http\Requests\CRM\Email\UpdateCampaignRequest;
-use App\Http\Requests\CRM\Email\DeleteCampaignRequest;*/
 use App\Http\Requests\CRM\Email\SendCampaignRequest;
 use App\Services\CRM\Email\CampaignServiceInterface;
 use App\Services\CRM\Email\EmailBuilderServiceInterface;
@@ -84,7 +81,8 @@ class CampaignController extends RestfulControllerV2
      *     ),
      * )
      */
-    public function index(Request $request) {
+    public function index(Request $request)
+    {
         $request = new GetCampaignsRequest($request->all());
 
         if ($request->validate()) {
@@ -216,9 +214,10 @@ class CampaignController extends RestfulControllerV2
      *     ),
      * )
      */
-    public function update(int $id, Request $request) {
+    public function update(int $id, Request $request)
+    {
         $requestData = $request->all();
-        $requestData['id'] = $id;
+        $requestData['drip_campaigns_id'] = $id;
         $request = new UpdateCampaignRequest($requestData);
 
         if ($request->validate()) {
@@ -251,7 +250,8 @@ class CampaignController extends RestfulControllerV2
      *     ),
      * )
      */
-    public function destroy(int $id) {
+    public function destroy(int $id)
+    {
         $request = new DeleteCampaignRequest(['drip_campaigns_id' => $id]);
 
         if ($request->validate()) {
@@ -299,7 +299,8 @@ class CampaignController extends RestfulControllerV2
      *     ),
      * )
      */
-    public function send(int $id, Request $request) {
+    public function send(int $id, Request $request)
+    {
         $request = new SendCampaignRequest($request->all() + ['id' => $id]);
 
         if ( $request->validate()) {
