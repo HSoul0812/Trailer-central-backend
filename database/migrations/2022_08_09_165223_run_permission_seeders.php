@@ -1,8 +1,6 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 
 class RunPermissionSeeders extends Migration
 {
@@ -19,6 +17,10 @@ class RunPermissionSeeders extends Migration
         ];
 
         foreach ($seeders as $seed) {
+            // Need to add this otherwise the migration will stuck
+            // on the production environment
+            $seed['--force'] = true;
+
             \Artisan::call('db:seed', $seed);
         }
     }
