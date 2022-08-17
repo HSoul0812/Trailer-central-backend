@@ -10,8 +10,6 @@
     }
 
     .dealership {
-        width: 298px;
-        float: right;
         margin-top: 20px;
     }
 
@@ -67,7 +65,6 @@
 
     .inventory-info .label {
         font-weight: bold;
-        width: 131px;
         display: inline-block;
     }
 
