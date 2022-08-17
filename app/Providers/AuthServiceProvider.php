@@ -30,6 +30,7 @@ use App\Models\Website\Website;
 use App\Nova\Policies\ApiEntityReferencePolicy;
 use App\Nova\Policies\BalancePolicy;
 use App\Nova\Policies\CollectorPolicy;
+use App\Nova\Policies\DealerPolicy;
 use App\Nova\Policies\FeedPolicy;
 use App\Nova\Policies\FieldMapPolicy;
 use App\Nova\Policies\InventoryPolicy;
@@ -74,7 +75,7 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         Balance::class => BalancePolicy::class,
         DealerFBMOverview::class => DealerFBPolicy::class,
-        User::class => DealerFBPolicy::class,
+        User::class => DealerPolicy::class,
         DealerLocation::class => LocationPolicy::class,
         ApiEntityReference::class => ApiEntityReferencePolicy::class,
         Collector::class => CollectorPolicy::class,
