@@ -199,6 +199,7 @@ class Collector extends Model implements Filterable
 
     protected $casts = [
         'last_run' => 'datetime',
+        'scheduled_for' => 'datetime',
     ];
 
     public function dealers(): BelongsTo

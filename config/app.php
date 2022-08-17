@@ -210,6 +210,8 @@ return [
         App\Providers\MarketingServiceProvider::class,
         App\Providers\EcommerceProvider::class,
         App\Providers\FavoritesExportServiceProvider::class,
+        App\Providers\SubscriptionServiceProvider::class,
+        App\Providers\StripeServiceProvider::class,
         /*
          * 3rd party stuff
          */
@@ -223,6 +225,7 @@ return [
         ElasticMigrations\ServiceProvider::class,
         App\Providers\SpatialServiceProvider::class,
         Barryvdh\Snappy\ServiceProvider::class,
+        Spatie\Permission\PermissionServiceProvider::class,
 
         /*
          * Nova stuff

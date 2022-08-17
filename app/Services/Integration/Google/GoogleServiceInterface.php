@@ -51,4 +51,12 @@ interface GoogleServiceInterface {
      * @return ValidateToken
      */
     public function validateCustom(CommonToken $accessToken): ValidateToken;
+
+    /**
+     * Set Key for Google Service
+     * 
+     * @param string $key
+     * @return string
+     */
+    public function setKey(string $key = ''): string;
 }

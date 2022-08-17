@@ -2,23 +2,41 @@
 
 namespace App\Repositories\Subscription;
 
-use Dingo\Api\Http\Request;
 use App\Repositories\Repository;
 
+/**
+ * Interface SubscriptionRepositoryInterface
+ * @package App\Repositories\Subscription
+ */
 interface SubscriptionRepositoryInterface extends Repository {
 
     /**
-     * Retrieves a list of subscriptions
-     *
-     * @param $params
-     * @return mixed
+     * Retrieves a customer from a given dealer id
+     * @param $dealerId
+     * @return object
      */
-    public function getAll($params);
+    public function getCustomerByDealerId($dealerId): object;
 
     /**
-     * Retrieves a customer
+     * Retrieve all plans
      *
-     * @return mixed
+     * @return array
      */
-    public function getCustomer(Request $request);
+    public function getExistingPlans(): array;
+
+    /**
+     * Subscribe to a selected plan
+     * @param $dealerId
+     * @param $planId
+     * @return object
+     */
+    public function subscribeToPlanByDealerId($dealerId, $planId): object;
+
+    /**
+     * Updates a customer card
+     * @param $dealerId
+     * @param $token
+     * @return object
+     */
+    public function updateCardByDealerId($dealerId, $token): object;
 }

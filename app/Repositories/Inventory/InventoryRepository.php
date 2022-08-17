@@ -934,6 +934,7 @@ class InventoryRepository implements InventoryRepositoryInterface
     {
         $inventory = $this->get($params);
         $inventory->times_viewed += 1;
+        $inventory->timestamps = false;
         $inventory->save();
         return $inventory;
     }
@@ -1009,5 +1010,15 @@ class InventoryRepository implements InventoryRepositoryInterface
         $inventory->bill()->update([
             'status' => Bill::STATUS_PAID,
         ]);
+    }
+
+
+    /**
+     * @param int $dealerId
+     * @param array $params
+     * @return int
+     */
+    public function archiveInventory(int $dealerId, array $inventoryParams): int {
+        return Inventory::where('dealer_id', $dealerId)->update($inventoryParams);
     }
 }

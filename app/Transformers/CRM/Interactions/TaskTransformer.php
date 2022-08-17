@@ -30,7 +30,10 @@ class TaskTransformer extends TransformerAbstract
            'notes' => $interaction->interaction_notes,
            'id' => $interaction->interaction_id,
            'contact_name' => $interaction->lead->getFullNameAttribute(),
-           'sales_person' => $interaction->leadStatus->salesPerson ? $this->salesPersonTransformer->transform($interaction->leadStatus->salesPerson) : null
+           'sales_person' => $interaction->leadStatus->salesPerson ? $this->salesPersonTransformer->transform($interaction->leadStatus->salesPerson) : null,
+           'lead_id' => $interaction->tc_lead_id,
+           'sales_name' => $interaction->leadStatus->salesPerson ? $interaction->leadStatus->salesPerson->first_name .' '. $interaction->leadStatus->salesPerson->last_name : null,
+           'sales_person_id' => $interaction->sales_person_id
         ];
     }
 }
