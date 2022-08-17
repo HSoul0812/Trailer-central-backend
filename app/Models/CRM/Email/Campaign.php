@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Class Email Campaign
@@ -86,7 +87,7 @@ class Campaign extends Model
 
     /**
      * Get Template
-     * 
+     *
      * @return BelongsTo
      */
     public function template(): BelongsTo
@@ -97,7 +98,7 @@ class Campaign extends Model
     /**
      * @return HasMany
      */
-    public function brands()
+    public function brands(): HasMany
     {
         return $this->hasMany(CampaignBrand::class, 'email_campaign_id');
     }
@@ -105,7 +106,7 @@ class Campaign extends Model
     /**
      * @return HasMany
      */
-    public function categories()
+    public function categories(): HasMany
     {
         return $this->hasMany(CampaignCategory::class, 'email_campaign_id');
     }

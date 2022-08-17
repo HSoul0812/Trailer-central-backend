@@ -14,6 +14,8 @@ use App\Repositories\CRM\Leads\LeadTradeRepository;
 use App\Repositories\CRM\Leads\LeadTradeRepositoryInterface;
 use App\Repositories\CRM\Refund\RefundRepository;
 use App\Repositories\CRM\Refund\RefundRepositoryInterface;
+use App\Services\CRM\Email\CampaignService;
+use App\Services\CRM\Email\CampaignServiceInterface;
 use App\Services\CRM\Email\InquiryEmailService;
 use App\Services\CRM\Email\InquiryEmailServiceInterface;
 use App\Services\CRM\Leads\Import\ImportService;
@@ -77,6 +79,7 @@ class CrmServiceProvider extends ServiceProvider
         $this->app->bind(BigTexServiceInterface::class, BigTexService::class);
         $this->app->bind(ADFExportServiceInterface::class, ADFExportService::class);
         $this->app->bind(ImportServiceInterface::class, ImportService::class);
+        $this->app->bind(CampaignServiceInterface::class, CampaignService::class);
 
         // Repositories
         $this->app->bind(LeadRepositoryInterface::class, LeadRepository::class);
@@ -117,6 +120,7 @@ class CrmServiceProvider extends ServiceProvider
         \Validator::extend('jotform_enabled', 'App\Rules\CRM\Leads\JotformEnabled@passes');
         \Validator::extend('unique_text_blast_campaign_name', 'App\Rules\CRM\Text\UniqueTextBlastCampaignName@passes');
         \Validator::extend('unique_text_campaign_name', 'App\Rules\CRM\Text\UniqueTextCampaignName@passes');
+        \Validator::extend('unique_email_campaign_name', 'App\Rules\CRM\Email\UniqueEmailCampaignName@passes');
 
         LeadStatus::observe(LeadStatusObserver::class);
         Lead::observe(LeadObserver::class);
