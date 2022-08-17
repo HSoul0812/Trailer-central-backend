@@ -55,7 +55,7 @@ class PartsTransformer extends TransformerAbstract implements PartsTransformerIn
              'stock_max' => $part->stock_max,
              'bins' => $part->bins,
              'disabled' => count($part->bins) === 0,
-             'new_po_url' => $part->user->getCrmLoginUrl(
+             'new_po_url' => optional($part->user)->getCrmLoginUrl(
                 $this->getNewPORoute($part->id),
                 true
             )
