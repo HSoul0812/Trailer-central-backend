@@ -110,7 +110,7 @@ class MarketplaceService implements MarketplaceServiceInterface
 
             // Return Response
             return $marketplace;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->log->error('Marketplace Integration update error. params=' .
                 json_encode($params + ['marketplace_id' => $params['id']]),
                 $e->getTrace());
@@ -153,7 +153,7 @@ class MarketplaceService implements MarketplaceServiceInterface
 
             // Return Response
             return $marketplace;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->log->error('Marketplace Integration update error. params=' .
                 json_encode($params + ['marketplace_id' => $params['id']]),
                 $e->getTrace());
@@ -185,7 +185,7 @@ class MarketplaceService implements MarketplaceServiceInterface
 
             // Return Result
             return $success;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->log->error('Marketplace Integration update error. params=' .
                 json_encode(['id' => $id]), $e->getTrace());
 

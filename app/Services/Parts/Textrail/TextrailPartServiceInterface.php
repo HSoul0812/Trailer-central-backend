@@ -32,7 +32,7 @@ interface TextrailPartServiceInterface
 
     public function getTextrailDumpStock(): array;
 
-    public function getAllCategories(): array;
+    public function getAttributes(): array;
 
-    public function getParentAndCategory(int $category_id): array;
+    public function getAttribute(string $code): array;
 }

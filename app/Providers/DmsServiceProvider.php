@@ -60,6 +60,8 @@ use App\Repositories\Dms\Printer\SettingsRepository as PrinterSettingsRepository
 use App\Repositories\Dms\Printer\SettingsRepositoryInterface as PrinterSettingsRepositoryInterface;
 use App\Repositories\Dms\Printer\FormRepository as PrinterFormRepository;
 use App\Repositories\Dms\Printer\FormRepositoryInterface as PrinterFormRepositoryInterface;
+use App\Repositories\Dms\Quickbooks\BillPaymentRepository;
+use App\Repositories\Dms\Quickbooks\BillPaymentRepositoryInterface;
 use App\Services\CRM\User\SalesPersonService;
 use App\Services\CRM\User\SalesPersonServiceInterface;
 use App\Services\Dms\Customer\CustomerService;
@@ -89,6 +91,7 @@ class DmsServiceProvider extends ServiceProvider
         $this->app->bind(SettingsRepositoryInterface::class, SettingsRepository::class);
         $this->app->bind(UnitSaleLaborRepositoryInterface::class, UnitSaleLaborRepository::class);
         $this->app->bind(BillRepositoryInterface::class, BillRepository::class);
+        $this->app->bind(BillPaymentRepositoryInterface::class, BillPaymentRepository::class);
         $this->app->bind(PrinterSettingsRepositoryInterface::class, PrinterSettingsRepository::class);
         $this->app->bind(PrinterFormRepositoryInterface::class, PrinterFormRepository::class);
         $this->app->bind(SalesPersonServiceInterface::class, SalesPersonService::class);
