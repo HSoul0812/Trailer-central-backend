@@ -146,7 +146,7 @@ return [
         'local' => [
             'supervisor-1' => [
                 'connection' => 'redis',
-                'queue' => ['inventory', 'parts', 'parts-export-new', 'factory-feeds', 'cvr-send-file', 'scout', 'reports', 'emailbuilder', 'blog-posts', 'scrapereplies', 'inquiry', 'fb-catalog', 'fb-messenger', 'ecommerce', 'crm-users'],
+                'queue' => ['inventory', 'parts', 'parts-export-new', 'factory-feeds', 'cvr-send-file', 'default', 'reports', 'emailbuilder', 'blog-posts', 'scrapereplies', 'inquiry', 'fb-catalog', 'fb-messenger', 'ecommerce', 'crm-users'],
                 'balance' => 'simple',
                 'processes' => 3,
                 'tries' => 3,
@@ -157,7 +157,7 @@ return [
         'dev' => [
             'supervisor-1' => [
                 'connection' => 'redis',
-                'queue' => ['inventory', 'parts', 'parts-export-new', 'factory-feeds', 'cvr-send-file', 'scout', 'reports', 'emailbuilder', 'blog-posts', 'scrapereplies', 'inquiry', 'fb-catalog', 'fb-messenger', 'ecommerce', 'crm-users'],
+                'queue' => ['inventory', 'parts', 'parts-export-new', 'factory-feeds', 'cvr-send-file', 'default', 'reports', 'emailbuilder', 'blog-posts', 'scrapereplies', 'inquiry', 'fb-catalog', 'fb-messenger', 'ecommerce', 'crm-users'],
                 'balance' => 'simple',
                 'processes' => 10,
                 'tries' => 3,
@@ -177,7 +177,7 @@ return [
             ],
             'supervisor-2' => [
                 'connection' => 'redis',
-                'queue' => ['scout'],
+                'queue' => ['default'],
                 'balance' => false,
                 'processes' => 1,
                 'tries' => 3,
@@ -231,7 +231,7 @@ return [
             ],
             'supervisor-2' => [
                 'connection' => 'redis',
-                'queue' => ['scout'],
+                'queue' => ['default'],
                 'balance' => 'auto',
                 'minProcesses' => 15,
                 'maxProcesses' => 55,

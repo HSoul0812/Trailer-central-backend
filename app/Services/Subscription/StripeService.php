@@ -99,7 +99,7 @@ class StripeService implements StripeServiceInterface
     /**
      * @inheritDoc
      */
-    public function subscribeToPlanByDealerId($dealerId, $planId): object
+    public function subscribeToPlanByDealerId($dealerId, $planId)
     {
         $user = User::find($dealerId);
         $customer = $user->createOrGetStripeCustomer();

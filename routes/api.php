@@ -95,6 +95,11 @@ $api->version('v1', function ($route) {
                 $route->delete('{id}', 'App\Http\Controllers\v1\Inventory\Floorplan\VendorController@destroy')
                     ->where('id', '[0-9]+');
             });
+
+            $route->get(
+                'download/csv',
+                'App\Http\Controllers\v1\Inventory\Floorplan\PaymentController@downloadCsv'
+            );
         });
     });
 

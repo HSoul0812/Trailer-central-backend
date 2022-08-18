@@ -225,6 +225,7 @@ return [
         ElasticMigrations\ServiceProvider::class,
         App\Providers\SpatialServiceProvider::class,
         Barryvdh\Snappy\ServiceProvider::class,
+        Spatie\Permission\PermissionServiceProvider::class,
 
         /*
          * Nova stuff

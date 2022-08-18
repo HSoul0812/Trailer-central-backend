@@ -45,8 +45,9 @@ interface StripeServiceInterface {
      *
      * @param $dealerId
      * @param $planId
+     * @return boolean|\Laravel\Cashier\Subscription
      */
-    public function subscribeToPlanByDealerId($dealerId, $planId): object;
+    public function subscribeToPlanByDealerId($dealerId, $planId);
 
     /**
      * Updates a customer card

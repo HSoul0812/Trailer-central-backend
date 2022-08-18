@@ -4,6 +4,7 @@ namespace App\Services\File;
 
 use App\Exceptions\File\FileUploadException;
 use App\Services\File\DTOs\FileDto;
+use App\Services\Integration\Common\DTOs\AttachmentFile;
 use App\Traits\S3\S3Helper;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Http\UploadedFile;
@@ -113,7 +114,7 @@ class FileService extends AbstractFileService
      */
     public function uploadLocal(array $data): FileDto
     {
-        if (!isset($data['file']) || !$data['file'] instanceof UploadedFile) {
+        if (!isset($data['file']) || (!$data['file'] instanceof UploadedFile && !$data['file'] instanceof AttachmentFile)) {
             throw new FileUploadException("file has been missed");
         }
 
@@ -123,7 +124,7 @@ class FileService extends AbstractFileService
             throw new FileUploadException("Not expected mime type");
         }
 
-        $content = $file->get();
+        $content = $file instanceof UploadedFile ? $file->get() : $file->getContents();
 
         $params['dealer_id'] = $data['dealer_id'] ?? null;
         $params['extension'] = self::EXTENSION_MAPPING[$file->getMimeType()];

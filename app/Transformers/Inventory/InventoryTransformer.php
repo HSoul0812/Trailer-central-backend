@@ -183,7 +183,7 @@ class InventoryTransformer extends TransformerAbstract
              'show_on_website' => $inventory->show_on_website,
              'overlay_enabled' => $inventory->overlay_enabled,
              'cost_of_ros' => $inventory->cost_of_ros,
-             'quote_url' => $inventory->user->getCrmLoginUrl(
+             'quote_url' => optional($inventory->user)->getCrmLoginUrl(
                  $this->getNewQuoteRoute($inventory->identifier),
                  true
              ),
