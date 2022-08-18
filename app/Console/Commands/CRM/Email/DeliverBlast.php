@@ -99,12 +99,12 @@ class DeliverBlast extends Command
                         $this->service->sendBlast($blast);
                         $this->info("{$command} dealer #{$dealer->id} sent email blast #" . $blast->email_blasts_id);
                     } catch(\Exception $e) {
-                        $this->error("{$command} exception returned on email blast #{$blast->email_blasts_id} {$e->getMessage()}: {$e->getTraceAsString()}");
+                        $this->error("{$command} exception returned on email blast #{$blast->email_blasts_id} {$e->getMessage()}");
                     }
                 }
             }
         } catch(\Exception $e) {
-            $this->error("{$command} exception returned {$e->getMessage()}: {$e->getTraceAsString()}");
+            $this->error("{$command} exception returned {$e->getMessage()}");
         }
 
         // Log End

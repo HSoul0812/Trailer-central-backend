@@ -15,7 +15,8 @@ class CreateInteractionRequest extends Request {
         'lead_id' => 'required|int',
         'lead_product_id' => 'nullable|int',
         'interaction_type' => 'interaction_type_valid',
-        'interaction_notes' => 'required|string',
+        'interaction_notes' => 'interaction_note_valid:interaction_type',
         'interaction_time' => 'date_format:Y-m-d H:i:s',
+        'is_closed' => 'in:0,1',
     ];
 }

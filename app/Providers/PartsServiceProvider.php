@@ -13,6 +13,8 @@ use App\Repositories\Bulk\Parts\BulkDownloadRepository;
 use App\Repositories\Bulk\Parts\BulkUploadRepository;
 use App\Repositories\Parts\CostHistoryRepository;
 use App\Repositories\Parts\CostHistoryRepositoryInterface;
+use App\Repositories\Parts\Textrail\AttributeRepository;
+use App\Repositories\Parts\Textrail\AttributeRepositoryInterface;
 use App\Services\Dms\ServiceOrder\BulkCsvTechnicianReportServiceInterface;
 use App\Services\Dms\ServiceOrder\BulkCsvTechnicianReportService;
 use App\Repositories\Parts\PartRepositoryInterface;
@@ -72,6 +74,7 @@ class PartsServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->bind(PartRepositoryInterface::class, PartRepository::class);
+        $this->app->bind(AttributeRepositoryInterface::class, AttributeRepository::class);
         $this->app->bind('App\Repositories\Parts\BinRepositoryInterface', 'App\Repositories\Parts\BinRepository');
         $this->app->bind('App\Repositories\Parts\CycleCountRepositoryInterface', 'App\Repositories\Parts\CycleCountRepository');
         $this->app->bind('App\Repositories\Parts\BrandRepositoryInterface', 'App\Repositories\Parts\BrandRepository');

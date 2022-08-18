@@ -2,87 +2,70 @@
 
 namespace App\Repositories\Subscription;
 
-use App\Services\Subscription\StripeService;
+use App\Services\Subscription\StripeServiceInterface;
 use Dingo\Api\Http\Request;
 
-use Illuminate\Support\Facades\Auth;
-
+/**
+ * Class SubscriptionRepository
+ * @oackage App\Repositories\Subscription;
+ */
 class SubscriptionRepository implements SubscriptionRepositoryInterface {
 
     /**
-     * @var Auth $user
-     */
-    private $user;
-
-    /**
-     * @var StripeService $service
+     * @var StripeServiceInterface $service
      */
     private $service;
 
     /**
-     * Create a new SubscriptionRepository instance.
-     *
+     * Create a new StripeServiceInterface instance.
+     * @param StripeServiceInterface $stripeService
      */
-    public function __construct($user)
+    public function __construct(StripeServiceInterface $stripeService)
     {
-        $this->user = $user;
-        $this->service = new StripeService($this->user);
+        $this->service = $stripeService;
     }
 
     /**
-     * Retrieves all subscriptions from a given user
-     *
-     * @param array $params
-     * @return mixed
+     * @inheritDoc
      */
-    public function getAll($params) {
-        return $this->service->getSubscriptions()->data;
+    public function getCustomerByDealerId($dealerId): object {
+        return $this->service->getCustomerByDealerId($dealerId);
     }
 
     /**
-     * Retrieves a customer with subscriptions and card information
-     *
-     * @return mixed
+     * @inheritDoc
      */
-    public function getCustomer(Request $request) {
-        return $this->service->getCustomer($request);
-    }
-
-    /**
-     * Retrieves plans
-     *
-     * @return array
-     */
-    public function getPlans(): array
+    public function getExistingPlans(): array
     {
-        return $this->service->getPlans();
+        return $this->service->getExistingPlans();
     }
 
     /**
-     * Subscribe to a selected plan
-     *
-     * @param Request $request
-     * @return array[]
+     * @inheritDoc
      */
-    public function subscribe(Request $request): array
+    public function subscribeToPlanByDealerId($dealerId, $planId): object
     {
-        return $this->service->subscribe($request);
+        return $this->service->subscribeToPlanByDealerId($dealerId, $planId);
     }
 
     /**
-     * Updates a customer card
-     *
-     * @param Request $request
-     * @return array[]
+     * @inheritDoc
      */
-    public function updateCard(Request $request): array
+    public function updateCardByDealerId($dealerId, $token): object
     {
-        return $this->service->updateCard($request);
+        return $this->service->updateCardByDealerId($dealerId, $token);
     }
 
     /**
-     * @param $params
-     * @return void
+     * @inheritDoc
+     */
+    public function getAll($params)
+    {
+        // TODO: Implement getAll() method.
+    }
+
+    /**
+     * @inheritDoc
      */
     public function create($params)
     {
@@ -90,8 +73,7 @@ class SubscriptionRepository implements SubscriptionRepositoryInterface {
     }
 
     /**
-     * @param $params
-     * @return void
+     * @inheritDoc
      */
     public function update($params)
     {
@@ -99,8 +81,7 @@ class SubscriptionRepository implements SubscriptionRepositoryInterface {
     }
 
     /**
-     * @param $params
-     * @return void
+     * @inheritDoc
      */
     public function get($params)
     {
@@ -108,8 +89,7 @@ class SubscriptionRepository implements SubscriptionRepositoryInterface {
     }
 
     /**
-     * @param $params
-     * @return void
+     * @inheritDoc
      */
     public function delete($params)
     {

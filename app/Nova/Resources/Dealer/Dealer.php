@@ -7,6 +7,7 @@ use App\Nova\Actions\DeactivateUserAccounts;
 use App\Nova\Actions\Dealer\ActivateCrm;
 use App\Nova\Actions\Dealer\DeactivateCrm;
 use App\Nova\Actions\Dealer\ActivateECommerce;
+use App\Nova\Actions\Dealer\DeactivateDealer;
 use App\Nova\Actions\Dealer\DeactivateECommerce;
 use Laravel\Nova\Fields\Password;
 use Laravel\Nova\Fields\PasswordConfirmation;
@@ -72,6 +73,10 @@ class Dealer extends Resource
 
             Boolean::make('User Accounts', 'isUserAccountsActive')->hideWhenCreating()->hideWhenUpdating(),
 
+            Boolean::make('Deleted?', 'deleted')->hideWhenCreating()->hideWhenUpdating(),
+
+            Text::make('State', 'state')->hideWhenCreating()->hideWhenUpdating(),
+
             Password::make('Password')
                 ->onlyOnForms()
                 ->creationRules('required', 'string', 'min:12', 'regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[\d\x])(?=.*[!$#%]).*$/')
@@ -133,6 +138,7 @@ class Dealer extends Resource
             app()->make(DeactivateECommerce::class),
             app()->make(ActivateUserAccounts::class),
             app()->make(DeactivateUserAccounts::class),
+            app()->make(DeactivateDealer::class),
         ];
     }
 }

@@ -3,16 +3,23 @@
 namespace App\Nova;
 
 use App\Models\Feed\Feed as FeedModel;
+
 use App\Nova\Actions\StartDealerIncomingFeed;
 use App\Nova\Actions\StartDealerOutgoingFeed;
 use App\Nova\Actions\StartFactoryFeed;
-use App\Nova\Filters\FeedType;
+
 use Illuminate\Http\Request;
+
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\KeyValue;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
+use Laravel\Nova\Fields\DateTime;
+
+use App\Nova\Filters\Feeds\FeedType;
+use App\Nova\Filters\Feeds\FeedStatus;
+
 
 class Feed extends Resource
 {
@@ -63,6 +70,7 @@ class Feed extends Resource
 
             Select::make('Status', 'status')
                 ->options(\App\Models\Feed\Feed::$statuses)
+                ->sortable()
                 ->showOnDetail(), // status
 
             Select::make('Frequency', 'frequency')->options([
@@ -104,15 +112,13 @@ class Feed extends Resource
             KeyValue::make('Other Settings', 'settings')
                 ->hideFromIndex(),
 
-            Text::make('Last Run Start', 'last_run_start')
-                ->hideFromIndex()
+            DateTime::make('Last Run Start', 'last_run_start')
                 ->hideWhenCreating()
                 ->hideWhenUpdating()
                 ->readonly()
                 ->sortable(), // last run
 
-            Text::make('Last Run Start', 'last_run_end')
-                ->hideFromIndex()
+            DateTime::make('Last Run End', 'last_run_end')
                 ->hideWhenCreating()
                 ->hideWhenUpdating()
                 ->readonly()
@@ -141,7 +147,8 @@ class Feed extends Resource
     public function filters(Request $request)
     {
         return [
-            new FeedType()
+            new FeedType(),
+            new FeedStatus(),
         ];
     }
 

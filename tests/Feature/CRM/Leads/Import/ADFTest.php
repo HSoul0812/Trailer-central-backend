@@ -205,7 +205,7 @@ class ADFTest extends TestCase
         });
 
         // Call Import ADF Leads
-        $this->artisan('leads:import:adf')->assertExitCode(0);
+        $this->artisan('leads:import')->assertExitCode(0);
 
         // Assert Leads Exist
         foreach($leadsVehicleLocation as $lead) {
@@ -303,13 +303,13 @@ class ADFTest extends TestCase
      */
     /*public function testADFImportWithSource(): void
     {
-        
+
     }*/
 
 
     /**
      * Get ADF Formatted XML Data
-     * 
+     *
      * @group CRM
      * @param Lead $lead
      * @param User $dealer
@@ -373,7 +373,7 @@ class ADFTest extends TestCase
 
     /**
      * Get Non-ADF Formatted XML Data
-     * 
+     *
      * @group CRM
      * @param Lead $lead
      * @param User $dealer
@@ -436,7 +436,7 @@ class ADFTest extends TestCase
 
     /**
      * Get Parsed Email
-     * 
+     *
      * @group CRM
      * @param int $id
      * @param string $from
@@ -469,7 +469,7 @@ class ADFTest extends TestCase
 
     /**
      * Get System Email
-     * 
+     *
      * @group CRM
      * @return Email
      */
@@ -498,7 +498,7 @@ class ADFTest extends TestCase
 
     /**
      * Get Access Token
-     * 
+     *
      * @group CRM
      * @param int $emailId
      * @return AccessToken

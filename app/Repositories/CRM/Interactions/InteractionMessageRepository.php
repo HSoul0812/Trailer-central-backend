@@ -92,7 +92,7 @@ class InteractionMessageRepository extends RepositoryAbstract implements Interac
         }
 
         if ($params['latest_messages'] ?? null) {
-            $search->sort('date_sent', "desc");
+            $search->sort("date_sent", "desc");
 
             $search->collapseRaw([
                 "field" => "lead_id",

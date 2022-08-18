@@ -318,6 +318,16 @@ class GmailService implements GmailServiceInterface
         return $labels;
     }
 
+    /**
+     * Set Key for Google Service
+     * 
+     * @param string $key
+     * @return string
+     */
+    public function setKey(string $key = ''): string {
+        return $this->google->setKey($key);
+    }
+
 
     /**
      * Set Access Token on Client
