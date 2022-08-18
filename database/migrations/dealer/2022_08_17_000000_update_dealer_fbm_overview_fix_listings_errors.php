@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
-class UpdateDealerFbmOverviewFixErrors extends Migration
+class UpdateDealerFbmOverviewFixListingsErrors extends Migration
 {
     /**
      * Run the migrations.
@@ -73,11 +73,11 @@ class UpdateDealerFbmOverviewFixErrors extends Migration
             IFNULL((SELECT name FROM dealer_location WHERE dealer_location_id = fbm.dealer_location_id ), 'ALL') as location,
             GREATEST(
                 (IFNULL((SELECT fbme_listings.listed_at FROM fbme_listings WHERE integration_id = fbm.id ORDER BY id DESC LIMIT 1),'1000-01-01 00:00:00')),
-                (IFNULL((SELECT created_at FROM fbapp_errors WHERE marketplace_id = fbm.id AND fbme_listings.inventory_id IS NULL ORDER BY id DESC LIMIT 1),'1000-01-01 00:00:00'))
+                (IFNULL((SELECT created_at FROM fbapp_errors WHERE marketplace_id = fbm.id AND fbapp_errors.inventory_id IS NULL ORDER BY id DESC LIMIT 1),'1000-01-01 00:00:00'))
             ) AS last_run_ts,
             (
                 (IFNULL((SELECT fbme_listings.listed_at FROM fbme_listings WHERE integration_id = fbm.id ORDER BY id DESC LIMIT 1),'1000-01-01 00:00:00')) >
-                (IFNULL((SELECT created_at FROM fbapp_errors WHERE marketplace_id = fbm.id AND fbme_listings.inventory_id IS NULL ORDER BY id DESC LIMIT 1),'1000-01-01 00:00:00'))
+                (IFNULL((SELECT created_at FROM fbapp_errors WHERE marketplace_id = fbm.id AND fbapp_errors.inventory_id IS NULL ORDER BY id DESC LIMIT 1),'1000-01-01 00:00:00'))
             ) AS last_run_status,
             IFNULL((SELECT GROUP_CONCAT(fbme_l0.SKU SEPARATOR ' | ') FROM fbme_listings AS fbme_l0 WHERE fbme_l0.integration_id=fbm.id AND DATE(fbme_l0.listed_at) = DATE(DATE_SUB(curdate(), INTERVAL 4 HOUR)), 'none') AS units_posted_today,
             IFNULL((SELECT GROUP_CONCAT(fbme_l1.SKU SEPARATOR ' | ') FROM fbme_listings AS fbme_l1 WHERE fbme_l1.integration_id=fbm.id AND DATE(fbme_l1.listed_at) = DATE(DATE_SUB(DATE_SUB(curdate(), INTERVAL 4 HOUR), INTERVAL 1 DAY)), 'none') AS units_posted_1dayago,
