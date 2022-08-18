@@ -93,6 +93,12 @@ class CategoryRepository implements CategoryRepositoryInterface
                 Category::getTableName().'.entity_type_id',
                 $params['entity_type_id']
             );
+        } elseif (isset($params['exclude_entity_type_id'])) {
+            $query = $query->where(
+                Category::getTableName().'.entity_type_id',
+                '<>',
+                $params['entity_type_id']
+            );
         }
 
         if (!isset($params['per_page'])) {
