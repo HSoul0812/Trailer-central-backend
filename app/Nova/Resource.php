@@ -21,7 +21,7 @@ abstract class Resource extends NovaResource
      */
     public static function indexQuery(NovaRequest $request, $query)
     {
-        if (static::$defaultSort && empty($request->get('orderBy'))) {
+        if (!empty(static::$defaultSort) && empty($request->get('orderBy'))) {
             $query->getQuery()->orders = [];
             return $query->orderBy(static::$defaultSort);
         }
