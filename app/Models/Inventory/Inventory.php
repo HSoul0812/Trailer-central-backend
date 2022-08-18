@@ -132,6 +132,7 @@ use Laravel\Scout\Searchable;
  * @property \DateTimeInterface $created_at
  * @property \DateTimeInterface $updated_at
  * @property bool $show_on_auction123
+ * @property bool $show_on_rvt
  *
  * @property string $category_label
  * @property string $status_label
@@ -225,6 +226,9 @@ class Inventory extends Model
         self::OVERLAY_ENABLED_PRIMARY,
         self::OVERLAY_ENABLED_ALL,
     ];
+
+    public const MIN_DESCRIPTION_LENGTH_FOR_FACEBOOK = 50;
+    public const MIN_PRICE_FOR_FACEBOOK = 0;
 
     /**
      * The table associated with the model.
@@ -339,6 +343,7 @@ class Inventory extends Model
         'times_viewed',
         'trailerworld_store_id',
         'show_on_auction123',
+        'show_on_rvt'
     ];
 
     protected $casts = [

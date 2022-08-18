@@ -3,6 +3,8 @@
 namespace App\Repositories\Inventory;
 
 use App\Exceptions\RepositoryInvalidArgumentException;
+use App\Models\CRM\Dms\Quickbooks\Bill;
+use App\Models\CRM\Dms\Quickbooks\BillCategory;
 use App\Models\Inventory\AttributeValue;
 use App\Models\Inventory\File;
 use App\Models\Inventory\Image;
@@ -11,6 +13,7 @@ use App\Models\Inventory\InventoryClapp;
 use App\Models\Inventory\InventoryFeature;
 use App\Models\Inventory\InventoryFile;
 use App\Models\Inventory\InventoryImage;
+use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
 use App\Traits\Repository\Transaction;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -32,6 +35,8 @@ class InventoryRepository implements InventoryRepositoryInterface
 
     private const SHOW_UNITS_WITH_TRUE_COST = 1;
     private const DO_NOT_SHOW_UNITS_WITH_TRUE_COST = 0;
+
+    private const DIMENSION_SEARCH_TERM_PATTERN = '/\d+\.?\d*\s*[\'|\"]/m';
 
 
     private $sortOrders = [
@@ -162,12 +167,21 @@ class InventoryRepository implements InventoryRepositoryInterface
         '-archived_at' => [
             'field' => 'archived_at',
             'direction' => 'ASC'
+        ],
+        'model' => [
+            'field' => 'model',
+            'direction' => 'DESC'
+        ],
+        '-model' => [
+            'field' => 'model',
+            'direction' => 'ASC'
         ]
     ];
 
     /**
      * @param array $params
      * @return Inventory
+     * @throws \Exception
      */
     public function create($params): Inventory
     {
@@ -185,6 +199,11 @@ class InventoryRepository implements InventoryRepositoryInterface
         unset($params['clapps']);
 
         $item = new Inventory($params);
+
+        // If there is an associated bill, we will set send_to_quickbooks to 1
+        // so the cronjob can create the add bill approval record and also the
+        // bill category record, allowing the dealer to update the bill later on
+        $item->send_to_quickbooks = !empty($item->bill_id);
 
         $item->save();
 
@@ -208,6 +227,8 @@ class InventoryRepository implements InventoryRepositoryInterface
             $item->clapps()->saveMany($clappObjs);
         }
 
+        $this->handleFloorplanAndBill($item);
+
         return $item;
     }
 
@@ -216,6 +237,7 @@ class InventoryRepository implements InventoryRepositoryInterface
      * @param array $options
      *
      * @return Inventory
+     * @throws \Exception
      */
     public function update($params, array $options = []): Inventory
     {
@@ -225,6 +247,22 @@ class InventoryRepository implements InventoryRepositoryInterface
 
         /** @var Inventory $item */
         $item = Inventory::findOrFail($params['inventory_id']);
+
+        // If there is an associated bill, we will set send_to_quickbooks to 1
+        // so the cronjob can create the add bill approval record and also the
+        // bill category record, allowing the dealer to update the bill later on
+        $item->send_to_quickbooks = !empty($item->bill_id);
+
+        // We'll note down this variable for now, we need this information, so we know
+        // if we need to delete the bill approval record
+        $firstTimeAttachBill = empty($item->bill_id) && !empty(data_get($params, 'bill_id'));
+
+        $hasFloorplanInfo = !empty(data_get($params, 'true_cost'))
+            && !empty(data_get($params, 'fp_vendor'))
+            && !empty(data_get($params, 'fp_balance'));
+
+        // We also note this down for now, we'll use it later
+        $firstTimeAttachFloorplan = empty($item->is_floorplan_bill) && $hasFloorplanInfo;
 
         $inventoryImageObjs = $this->createImages($params['new_images'] ?? []);
 
@@ -290,9 +328,49 @@ class InventoryRepository implements InventoryRepositoryInterface
         unset($params['files_to_delete']);
         unset($params['clapps']);
 
-        $item->fill($params)->save();
+        $item->fill($params);
+
+        // If there is an associated bill, we will set send_to_quickbooks to 1
+        // so the cronjob can create the add bill approval record and also the
+        // bill category record, allowing the dealer to update the bill later on
+        $item->send_to_quickbooks = !empty($item->bill_id);
+
+        $item->save();
+
+        // We only want to delete the bill approval record if this is the
+        // first time that we attach the bill to this inventory
+        $this->handleFloorplanAndBill($item, $firstTimeAttachBill || $firstTimeAttachFloorplan);
+
+        $this->updateQbInvoiceItems($item);
 
         return $item;
+    }
+
+    /**
+     * Update the qb_invoice_item_inventories table for sales person report updation.
+     *
+     * @param Inventory $item
+     * @return void
+     */
+    private function updateQbInvoiceItems(Inventory $item)
+    {
+        $newTotalTrueCost = floatval($item->true_cost) + floatval($item->cost_of_shipping);
+        $newTotalCost = floatval($item->cost_of_unit) + floatval($item->cost_of_shipping);
+        $newFinalCost = 0;
+
+        if ($item->pac_type === "percent") {
+            $priceAdj = ($newTotalCost * floatval($item->pac_amount)) / 100;
+            $newFinalCost = $newTotalCost + $priceAdj;
+        } else {
+            $newFinalCost = $newTotalCost + floatval($item->pac_amount);
+        }
+
+        DB::table('qb_invoice_item_inventories')
+            ->where('inventory_id', '=', $item->id)
+            ->update([
+                'cost_overhead' => $newFinalCost,
+                'true_total_cost' => $newTotalTrueCost
+            ]);
     }
 
     public function moveLocationId(int $from, int $to): int
@@ -438,7 +516,7 @@ class InventoryRepository implements InventoryRepositoryInterface
      * @param $params
      * @return Collection
      */
-    public function getFloorplannedInventory($params)
+    public function getFloorplannedInventory($params, $paginate = true)
     {
         $query = Inventory::select('*');
 
@@ -453,9 +531,11 @@ class InventoryRepository implements InventoryRepositoryInterface
         if (isset($params['dealer_id'])) {
             $query = $query->where('inventory.dealer_id', $params['dealer_id']);
         }
-
-        if (!isset($params['per_page'])) {
+        
+        if ($paginate && !isset($params['per_page'])) {
             $params['per_page'] = 15;
+        } else if (!$paginate && isset($params['per_page'])) {
+            unset($params['per_page']);
         }
 
         if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
@@ -467,15 +547,27 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         if (isset($params['search_term'])) {
-            $query = $query->where(function ($q) use ($params) {
-                $q->where('stock', 'LIKE', '%' . $params['search_term'] . '%')
+            if(preg_match(self::DIMENSION_SEARCH_TERM_PATTERN, $params['search_term'])){
+                $params['search_term'] = floatval(trim($params['search_term'],' \'"'));
+                $query = $query->where(function ($q) use ($params) {
+                    $q->where('length', $params['search_term'])
+                        ->orWhere('width', $params['search_term'])
+                        ->orWhere('height', $params['search_term'])
+                        ->orWhere('length_inches', $params['search_term'])
+                        ->orWhere('width_inches', $params['search_term'])
+                        ->orWhere('height_inches', $params['search_term']);
+                });
+            }else {
+                $query = $query->where(function ($q) use ($params) {
+                    $q->where('stock', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('title', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('description', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('vin', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhereHas('floorplanVendor', function ($query) use ($params) {
                             $query->where('name', 'LIKE', '%' . $params['search_term'] . '%');
                         });
-            });
+                });
+            }
         }
 
         if (isset($params['sort'])) {
@@ -487,7 +579,11 @@ class InventoryRepository implements InventoryRepositoryInterface
             }
         }
 
-        return $query->paginate($params['per_page'])->appends($params);
+        if ($paginate) {
+            return $query->paginate($params['per_page'])->appends($params);
+        }
+
+        return $query->get();
     }
 
     /**
@@ -621,16 +717,29 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         if (isset($params['search_term'])) {
-            $query = $query->where(function ($q) use ($params) {
-                $q->where('stock', 'LIKE', '%' . $params['search_term'] . '%')
+            if(preg_match(self::DIMENSION_SEARCH_TERM_PATTERN, $params['search_term'])){
+                $params['search_term'] = floatval(trim($params['search_term'],' \'"'));
+                $query = $query->where(function ($q) use ($params) {
+                    $q->where('length', $params['search_term'])
+                        ->orWhere('width', $params['search_term'])
+                        ->orWhere('height', $params['search_term'])
+                        ->orWhere('length_inches', $params['search_term'])
+                        ->orWhere('width_inches', $params['search_term'])
+                        ->orWhere('height_inches', $params['search_term']);
+                });
+            }else{
+                $query = $query->where(function ($q) use ($params) {
+                    $q->where('stock', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('title', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('inventory.description', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('vin', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('price', 'LIKE', '%' . $params['search_term'] . '%')
+                        ->orWhere('model', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhereHas('floorplanVendor', function ($query) use ($params) {
                             $query->where('name', 'LIKE', '%' . $params['search_term'] . '%');
                         });
-            });
+                });
+            }
         }
 
         if (isset($params['images_greater_than'])) {
@@ -825,6 +934,7 @@ class InventoryRepository implements InventoryRepositoryInterface
     {
         $inventory = $this->get($params);
         $inventory->times_viewed += 1;
+        $inventory->timestamps = false;
         $inventory->save();
         return $inventory;
     }
@@ -843,5 +953,72 @@ class InventoryRepository implements InventoryRepositoryInterface
         $query = $this->buildInventoryQuery($params, false, ['inventory_id', 'title', 'vin']);
 
         return $query->get();
+    }
+
+    /**
+     * This method will handle the creation of floorplan and bill data
+     * we will let the crm project handle the actual approval creation
+     * for this project, we'll just prepare the data so the the InventorySync
+     * command can do its job properly
+     *
+     * @param Inventory $inventory
+     * @param bool $deleteBillApproval Set to true to delete the bill approval
+     * @return void
+     */
+    private function handleFloorplanAndBill(Inventory $inventory, bool $deleteBillApproval = true): void
+    {
+        if (empty($inventory->bill_id)) {
+            return;
+        }
+
+        // 1. In the create inventory case, we always want to delete the bill
+        // approval record if the inventory has the bill attached to it
+        // 2. In the update inventory case, we only want to delete the bill
+        // approval record if the inventory has the bill attached for the first time
+        // we do this because more than one inventory can use the same bill, if we don't do this
+        // then the cronjob won't create a new bill approval record
+        if ($deleteBillApproval) {
+            resolve(QuickbookApprovalRepositoryInterface::class)->deleteByTbPrimaryId($inventory->bill_id, Bill::getTableName(), $inventory->dealer_id);
+        }
+
+        // We only want to process floorplan data if the inventory
+        // is not a floorplan bill yet
+        if ($inventory->is_floorplan_bill) {
+            return;
+        }
+
+        $shouldAddFloorplanData = !empty($inventory->true_cost)
+            && !empty($inventory->fp_vendor)
+            && !empty($inventory->fp_balance);
+
+        if (!$shouldAddFloorplanData) {
+            return;
+        }
+
+        // This will make sure the tc-crm cron can capture this inventory
+        // and try to create new bill and bill payment approval records
+        $inventory->qb_sync_processed = false;
+        $inventory->is_floorplan_bill = true;
+        $inventory->save();
+
+        // Delete all the bill categories for this bill if we add a floorplan
+        // payment to this inventory, the behavior is the same with the old UI
+        BillCategory::query()
+            ->where('bill_id', $inventory->bill_id)
+            ->delete();
+
+        $inventory->bill()->update([
+            'status' => Bill::STATUS_PAID,
+        ]);
+    }
+
+
+    /**
+     * @param int $dealerId
+     * @param array $params
+     * @return int
+     */
+    public function archiveInventory(int $dealerId, array $inventoryParams): int {
+        return Inventory::where('dealer_id', $dealerId)->update($inventoryParams);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Models\Website;
 
 use App\Models\Traits\TableAware;
 use App\Models\Website\Config\WebsiteConfig;
+use App\Traits\CompactHelper;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Website\Blog\Post;
 use App\Models\User\User;
@@ -58,7 +59,7 @@ class Website extends Model
     /**
      * Get the website type config.
      *
-     * @param  string  $value
+     * @param  string|null  $value
      * @return string
      */
     public function getTypeConfigAttribute(?string $value) : string
@@ -82,16 +83,15 @@ class Website extends Model
       }
     }
 
-    public function unserializeDealerFilter(?array $dealer_ids) : string
+    public function unserializeDealerFilter(array $dealer_ids): string
     {
-      if (is_array($dealer_ids)) {
-          foreach($dealer_ids as $dealer_id) {
-              $printData = 'dealer_id|eq|'.$dealer_id.PHP_EOL;
-          }
-      } else {
-          $printData = 'dealer_id|eq|'.$dealer_ids.PHP_EOL;
-      }
-      return $printData;
+        $printData = '';
+
+        foreach ($dealer_ids as $dealer_id) {
+            $printData = 'dealer_id|eq|' . $dealer_id . PHP_EOL;
+        }
+
+        return $printData;
     }
 
     public function unserializeAllFilter(array $unserializedFilters) : string
@@ -114,40 +114,40 @@ class Website extends Model
       return $printData;
     }
 
-    public function setTypeConfigAttribute($value)
+    public function setTypeConfigAttribute(?string $value)
     {
+        $globalFilter = explode(\PHP_EOL, (string)$value);
 
-      $filterData = '';
-      $globalFilter = explode(\PHP_EOL, $value);
+        $filterLineData = [];
+        $filterLineData['filters'] = [];
 
-      $filterLineData = [];
-      $filterLineData['filters'] = [];
-      foreach ($globalFilter as $filterLine) {
-        $filterLine = trim($filterLine);
+        foreach ($globalFilter as $filterLine) {
+            $filterLine = trim($filterLine);
 
-        if (strlen($filterLine) > 0  && $filterLine[0] !== '#' ) {
-          if (substr($filterLine, 0, 16) === 'classic filter: ') {
-              $filterMode = 'classic';
-              $this->attributes['type_config'] = substr($filterLine, 16);
-              return;
-          } else {
-              $filterLineTmp = explode('|', $filterLine);
-              if($filterLineTmp[0] == 'dealer_id') {
-                  if(!isset($filterLineData['dealer_id'])) {
-                      $filterLineData['dealer_id'] = [];
-                  }
-                  $filterLineData['dealer_id'][] = $filterLineTmp[2];
-              } else {
-                  if(!isset($filterLineData['filters'][$filterLineTmp[0]][$filterLineTmp[1]])) {
-                      $filterLineData['filters'][$filterLineTmp[0]][$filterLineTmp[1]] = [];
-                  }
-                  $filterLineData['filters'][$filterLineTmp[0]][$filterLineTmp[1]][] = array($filterLineTmp[2]);
-              }
-          }
+            if (strlen($filterLine) > 0 && $filterLine[0] !== '#') {
+                if (substr($filterLine, 0, 16) === 'classic filter: ') {
+                    $filterMode = 'classic';
+                    $this->attributes['type_config'] = substr($filterLine, 16);
+
+                    return;
+                }
+
+                $filterLineTmp = explode('|', $filterLine);
+                if ($filterLineTmp[0] == 'dealer_id') {
+                    if (!isset($filterLineData['dealer_id'])) {
+                        $filterLineData['dealer_id'] = [];
+                    }
+                    $filterLineData['dealer_id'][] = $filterLineTmp[2];
+                } else {
+                    if (!isset($filterLineData['filters'][$filterLineTmp[0]][$filterLineTmp[1]])) {
+                        $filterLineData['filters'][$filterLineTmp[0]][$filterLineTmp[1]] = [];
+                    }
+                    $filterLineData['filters'][$filterLineTmp[0]][$filterLineTmp[1]][] = [$filterLineTmp[2]];
+                }
+            }
         }
-      }
 
-      $this->attributes['type_config'] = serialize($filterLineData);
+        $this->attributes['type_config'] = serialize($filterLineData);
     }
 
     public function getHeadScriptsAttribute() : string
@@ -193,5 +193,16 @@ class Website extends Model
     public function websiteConfigByKey(string $key)
     {
         return $this->websiteConfigs()->where('key', $key)->take(1)->value('value');
+    }
+
+
+    /**
+     * Get website shorten identifier
+     *
+     * @return false|string
+     */
+    public function getIdentifierAttribute()
+    {
+        return CompactHelper::shorten($this->id);
     }
 }

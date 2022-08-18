@@ -199,6 +199,7 @@ return [
                             Lead::STATUS_WON_CLOSED,
     'jotform_enabled' => 'JotForm Disabled or Doesn\'t exist.',
     'interaction_type_valid' => 'Interaction type needs to be: '. implode(',', Interaction::INTERACTION_TYPES),
+    'interaction_note_valid' => 'Interaction note is required',
     'sales_person_valid' => 'Sales person ID must exist or be 0',
     'sales_auth_type' => 'SMTP auth needs to be: ' . implode(", ", SalesPerson::SMTP_AUTH),
     'sales_security_type' => 'Security type needs to be: ' . implode(", ", SalesPerson::SECURITY_TYPES),
@@ -215,4 +216,5 @@ return [
     'unique_text_blast_campaign_name' => 'You already have a blast campaign with this name',
     'unique_text_campaign_name' => 'You already have a campaign with this name',
     'active_interaction' => 'The number is not active',
+    'valid_password' => 'Password should be at least 1 Capital letter, 1 Number and min 8 chars.',
 ];

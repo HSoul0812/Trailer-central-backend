@@ -658,7 +658,11 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         $dealer = $this->users->get(['dealer_id' => $builder->dealerId]);
         $credential = NewUser::getDealerCredential($dealer->newDealerUser->user_id);
         $launchUrl = Lead::getLeadCrmUrl($builder->leadId, $credential);
-        Mail::to($dealer->email)->send(new InvalidTemplateEmail($builder, $launchUrl));
+        try {
+            Mail::to($dealer->email)->send(new InvalidTemplateEmail($builder, $launchUrl));
+        } catch(\Exception $e) {
+            $this->log->error('Exception trying to send invalid template email: ' . $e->getMessage());
+        }
 
         // Fix Blast to Remove Template ID
         if($builder->type === BuilderEmail::TYPE_BLAST) {
@@ -704,7 +708,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
                     $builder->id . ' to Email: ' . $toEmail);
 
             // Return Response Array
-            return $this->response($builder, $toEmail);
+            return $this->response($builder, new Collection([$toEmail]));
         } catch(\Exception $ex) {
             $this->log->error($ex->getMessage(), $ex->getTrace());
             throw new SendBuilderEmailsFailedException;

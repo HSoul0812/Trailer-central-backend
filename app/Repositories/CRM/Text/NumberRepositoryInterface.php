@@ -16,7 +16,7 @@ interface NumberRepositoryInterface extends Repository {
      * @param string $customerName
      * @return Number
      */
-    public function setPhoneAsUsed($dealerNo, $usedNo, $customerNo, $customerName);
+    public function setPhoneAsUsed($dealerNo, $usedNo, $customerNo, $customerName, ?int $dealerId = null);
 
     /**
      * Create Twilio Number
@@ -53,6 +53,12 @@ interface NumberRepositoryInterface extends Repository {
      */
     public function activeTwilioNumber(string $twilioNumber, string $maskedNumber): ?Number;
 
+    /**
+     * @param string $customerNumber
+     * @param int $dealerId
+     * @return Number|null
+     */
+    public function activeTwilioNumberByCustomerNumber(string $customerNumber, int $dealerId): ?Number;
 
     /**
      * Delete Twilio Number

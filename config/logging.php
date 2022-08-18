@@ -37,7 +37,7 @@ return [
     'channels' => [
         'stack' => [
             'driver' => 'stack',
-            'channels' => ['single', 'slack'],
+            'channels' => ['single', 'slack', 'sentry'],
             'ignore_exceptions' => false,
         ],
 
@@ -74,6 +74,14 @@ return [
             'permission' => 0664,
         ],
 
+        'scraperepliesjob' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/commands/scrape-replies-job.log'),
+            'level' => 'debug',
+            'days' => 3,
+            'permission' => 0664,
+        ],
+
         'scrapereplies' => [
             'driver' => 'daily',
             'path' => storage_path('logs/commands/scrape-replies.log'),
@@ -85,6 +93,14 @@ return [
         'textcampaign' => [
             'driver' => 'daily',
             'path' => storage_path('logs/commands/text-campaigns.log'),
+            'level' => 'debug',
+            'days' => 3,
+            'permission' => 0664,
+        ],
+
+        'import' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/commands/import.log'),
             'level' => 'debug',
             'days' => 3,
             'permission' => 0664,
@@ -109,6 +125,14 @@ return [
         'facebook' => [
             'driver' => 'daily',
             'path' => storage_path('logs/services/facebook.log'),
+            'level' => 'debug',
+            'days' => 3,
+            'permission' => 0664,
+        ],
+
+        'fb-catalog' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/services/fb-catalog.log'),
             'level' => 'debug',
             'days' => 3,
             'permission' => 0664,
@@ -229,7 +253,9 @@ return [
         ],
 
         'showroom-imports' => [
+            'driver' => 'daily',
             'path' => storage_path('logs/showroom-imports.log'),
+            'days' => 3,
             'permission' => 0664,
         ],
         'blog' => [
@@ -238,6 +264,10 @@ return [
             'level' => 'debug',
             'days' => 3,
             'permission' => 0664,
+        ],
+        'sentry' => [
+            'driver' => 'sentry',
+            'level' => env('SENTRY_LOG_LEVEL', 'error')
         ],
     ],
 

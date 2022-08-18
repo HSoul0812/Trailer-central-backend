@@ -18,6 +18,8 @@ use League\Fractal\Resource\Collection as FractalCollection;
 
 class InventoryTransformer extends TransformerAbstract
 {
+    protected const CRM_NEW_QUOTE_URL = '/bill-of-sale/new';
+
     protected $availableIncludes = [
         'website',
         'repairOrders',
@@ -66,7 +68,8 @@ class InventoryTransformer extends TransformerAbstract
      */
     private $convertHelper;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->userTransformer = new UserTransformer;
         $this->dealerLocationTransformer = new DealerLocationTransformer;
         $this->inventoryImageTransformer = new InventoryImageTransformer;
@@ -98,7 +101,7 @@ class InventoryTransformer extends TransformerAbstract
 
         $age = now()->diffInDays(Carbon::parse($inventory->created_at));
 
-        if($dateSoldOrArchived = $inventory->archived_at ?? $inventory->sold_at){
+        if ($dateSoldOrArchived = $inventory->archived_at ?? $inventory->sold_at) {
             $age = Carbon::parse($dateSoldOrArchived)->diffInDays(Carbon::parse($inventory->created_at));
         }
 
@@ -117,8 +120,8 @@ class InventoryTransformer extends TransformerAbstract
              'dealer' => $this->userTransformer->transform($inventory->user),
              'dealer_location_id' => $inventory->dealer_location_id,
              'dealer_location' => $inventory->dealerLocation ? $this->dealerLocationTransformer->transform($inventory->dealerLocation) : null,
-             'description' => $inventory->description,
-             'entity_type_id' => $inventory->entity_type_id ,
+             'description' => $this->fixWrongChars($inventory->description),
+             'entity_type_id' => $inventory->entity_type_id,
              'fp_balance' => $inventory->fp_balance,
              'fp_interest_paid' => $inventory->interest_paid,
              'fp_committed' => $inventory->fp_committed,
@@ -180,7 +183,10 @@ class InventoryTransformer extends TransformerAbstract
              'show_on_website' => $inventory->show_on_website,
              'overlay_enabled' => $inventory->overlay_enabled,
              'cost_of_ros' => $inventory->cost_of_ros,
-             'quote_url' => config('app.new_design_crm_url') . $inventory->user->getCrmLoginUrl('bill-of-sale/new?inventory_id=' . $inventory->identifier),
+             'quote_url' => optional($inventory->user)->getCrmLoginUrl(
+                 $this->getNewQuoteRoute($inventory->identifier),
+                 true
+             ),
              'age' => $age,
              'use_website_price' => $inventory->use_website_price,
              'minimum_selling_price' => $inventory->minimum_selling_price,
@@ -190,8 +196,9 @@ class InventoryTransformer extends TransformerAbstract
              'show_on_racingjunk' => $inventory->show_on_racingjunk,
              'show_on_rvtrader' => $inventory->show_on_rvtrader,
              'changed_fields_in_dashboard' => $inventory->changed_fields_in_dashboard,
-             'show_on_auction123' => $inventory->show_on_auction123
-         ];
+             'show_on_auction123' => $inventory->show_on_auction123,
+             'show_on_rvt' => $inventory->show_on_rvt,
+        ];
     }
 
     /**
@@ -263,5 +270,26 @@ class InventoryTransformer extends TransformerAbstract
         return $files->map(function (File $file) {
             return $this->fileTransformer->transform($file);
         })->toArray();
+    }
+
+    /**
+     * @param string $inventoryIdentifier
+     * @return string
+     */
+    private function getNewQuoteRoute(string $inventoryIdentifier): string
+    {
+        return self::CRM_NEW_QUOTE_URL . '?inventory_id=' . $inventoryIdentifier;
+    }
+
+    /**
+     * Due we have some malformed text values like description, this is a mitigation fix while we found a way to fix it
+     * in the importers processes
+     *
+     * @param string|null $rawInput
+     * @return string
+     */
+    private function fixWrongChars(?string $rawInput): string
+    {
+        return str_replace(['\\' . PHP_EOL . 'n', '\n', '\\' . PHP_EOL], PHP_EOL, $rawInput);
     }
 }

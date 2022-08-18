@@ -40,6 +40,16 @@ class LeadRepository implements LeadRepositoryInterface {
         'fbUsers',
     ];
 
+    private $sortOrdersCrm = [
+        'no_due_past_due_future_due',
+        'created_at',
+        'future_due_past_due_no_due',
+        'most_recent',
+        '-most_recent',
+        'status',
+        '-created_at',
+    ];
+
     private $sortOrders = [
         'id' => [
             'field' => 'website_lead.identifier',
@@ -116,6 +126,30 @@ class LeadRepository implements LeadRepositoryInterface {
     ];
 
     private $sortOrdersNames = [
+        'id' => [
+            'name' => 'Identifier (A-Z)'
+        ],
+        '-id' => [
+            'name' => 'Identifier (Z-A)'
+        ],
+        'first_name' => [
+            'name' => 'First Name (A-Z)'
+        ],
+        '-first_name' => [
+            'name' => 'First Name (Z-A)'
+        ],
+        'last_name' => [
+            'name' => 'Last Name (A-Z)'
+        ],
+        '-last_name' => [
+            'name' => 'Last Name (Z-A)'
+        ],
+        'email' => [
+            'name' => 'E-Mail: (A-Z)'
+        ],
+        '-email' => [
+            'name' => 'E-Mail: (Z-A)'
+        ],
         'no_due_past_due_future_due' => [
             'name' => 'No Due Date, Past Due Dates, Future Due Date'
         ],
@@ -165,7 +199,7 @@ class LeadRepository implements LeadRepositoryInterface {
 
     public function getAll($params)
     {
-        $query = Lead::where([
+        $query = Lead::query()->where([
                 ['identifier', '>', 0],
                 [Lead::getTableName().'.lead_type', '<>', LeadType::TYPE_NONLEAD],
         ]);
@@ -177,6 +211,11 @@ class LeadRepository implements LeadRepositoryInterface {
          * Filters
          */
         $query = $this->addFiltersToQuery($query, $params);
+
+        /*
+         * Due to several joins, some Lead fields are overwritten. That's why only necessary fields are specified in the select. Be careful with join
+         */
+        $query->select(Lead::getTableName() . '.*', LeadStatus::getTableName() . '.*', Interaction::getTableName() . '.*');
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
@@ -403,6 +442,13 @@ class LeadRepository implements LeadRepositoryInterface {
 
     public function getLeadsSortFields() {
         return $this->getSortFields();
+    }
+
+    public function getLeadsSortFieldsCrm(): array
+    {
+        return array_values(array_filter($this->getSortFields(), function ($item) {
+            return in_array($item['param'], $this->sortOrdersCrm);
+        }));
     }
 
     protected function getSortOrderNames() {
@@ -927,7 +973,7 @@ class LeadRepository implements LeadRepositoryInterface {
         $query = $query->where(Lead::getTableName().'.identifier', '>', 0);
         // add filters if any
         $query = $this->addFiltersToQuery($query, $params);
-        
+
         if (isset($params['dealer_id'])) {
             $query = $query->where(Lead::getTableName().'.dealer_id', $params['dealer_id']);
         }

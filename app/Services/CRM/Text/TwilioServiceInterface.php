@@ -13,9 +13,10 @@ interface TwilioServiceInterface {
      * @param string $textMessage
      * @param string $fullName
      * @param array $mediaUrl
+     * @param int|null $dealerId
      * @return MessageInstance
      */
-    public function send(string $from_number, string $to_number, string $textMessage, string $fullName, array $mediaUrl = []): MessageInstance;
+    public function send(string $from_number, string $to_number, string $textMessage, string $fullName, array $mediaUrl = [], ?int $dealerId = null): MessageInstance;
 
     /**
      * Get All Twilio Phone Numbers on Account
@@ -49,4 +50,15 @@ interface TwilioServiceInterface {
      * @return MessageInstance
      */
     public function sendViaTwilio(string $fromPhone, string $toNumber, string $textMessage, array $mediaUrl = []): MessageInstance;
+
+    /**
+     * @param string $phoneNumber
+     * @return bool
+     */
+    public function isValidPhoneNumber(string $phoneNumber): bool;
+
+    /**
+     * @return bool
+     */
+    public function getIsNumberInvalid(): bool;
 }

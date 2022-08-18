@@ -6,7 +6,7 @@ namespace App\Repositories\User\Integration\Specific;
 
 use App\Models\Inventory\Inventory;
 
-class Auction123Repository
+class Auction123Repository implements SpecificIntegrationRepositoryInterface
 {
     use WithUsedSlotsGetter;
 

@@ -85,7 +85,7 @@ class LeadTransformer extends TransformerAbstract
             'source' => ($lead->leadStatus) ? $lead->leadStatus->source : '',
             'next_contact_date' => ($lead->leadStatus) ? $lead->leadStatus->next_contact_date : null,
             'contact_type' => ($lead->leadStatus) ? $lead->leadStatus->contact_type : null,
-            'created_at' => $lead->date_submitted,
+            'created_at' => (string) $lead->date_submitted,
             'zip' => $lead->zip,
             'is_archived' => $lead->is_archived,
         ];
@@ -112,10 +112,7 @@ class LeadTransformer extends TransformerAbstract
             return [];
         }
 
-        $salesPersonTransformer = app()->make(SalesPersonTransformer::class);
-        $emailHistoryTransformer = app()->make(EmailHistoryTransformer::class);
-
-        return $this->collection($lead->interactions, new InteractionTransformer($salesPersonTransformer, $emailHistoryTransformer));
+        return $this->collection($lead->interactions, app()->make(InteractionTransformer::class));
     }
 
     public function includeTextLogs(Lead $lead)

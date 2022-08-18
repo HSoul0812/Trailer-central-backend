@@ -4,8 +4,8 @@ namespace App\Http\Controllers\v1\CRM\Email;
 
 use App\Http\Controllers\RestfulControllerV2;
 use App\Repositories\CRM\Email\BlastRepositoryInterface;
-/*use App\Http\Requests\CRM\Email\GetBlastsRequest;
-use App\Http\Requests\CRM\Email\CreateBlastRequest;
+use App\Http\Requests\CRM\Email\GetBlastsRequest;
+/*use App\Http\Requests\CRM\Email\CreateBlastRequest;
 use App\Http\Requests\CRM\Email\ShowBlastRequest;
 use App\Http\Requests\CRM\Email\UpdateBlastRequest;
 use App\Http\Requests\CRM\Email\DeleteBlastRequest;*/
@@ -71,7 +71,7 @@ class BlastController extends RestfulControllerV2
      *     ),
      * )
      */
-    /*public function index(Request $request) {
+    public function index(Request $request) {
         $request = new GetBlastsRequest($request->all());
         
         if ($request->validate()) {
@@ -79,7 +79,7 @@ class BlastController extends RestfulControllerV2
         }
         
         return $this->response->errorBadRequest();
-    }*/
+    }
     
     /**
      * @OA\Put(

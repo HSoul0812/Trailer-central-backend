@@ -11,7 +11,5 @@ namespace App\Exceptions\CRM\Text;
  */
 class NoCampaignSmsFromNumberException extends \Exception
 {
-    
-    protected $message = 'Could not find find from sms number for campaign!';
-
+    protected $message = 'No From SMS Number Available';
 }

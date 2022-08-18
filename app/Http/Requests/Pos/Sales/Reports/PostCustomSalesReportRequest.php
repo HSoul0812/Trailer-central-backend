@@ -35,8 +35,8 @@ class PostCustomSalesReportRequest extends Request
             'model' => 'nullable|string',
             'query' => 'nullable|string',
             'report_type' => [
-                'required',
-                'string',
+                'nullable',
+                'array',
                 Rule::in(SalesReportRepository::CUSTOM_REPORT_TYPES),
             ],
             'from_date' => [

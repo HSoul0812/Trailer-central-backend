@@ -3,8 +3,8 @@
 
 namespace App\Http\Requests\Dms;
 
-
 use App\Http\Requests\Request;
+use Illuminate\Validation\Rule;
 
 class CreateCustomerRequest extends Request
 {
@@ -44,8 +44,16 @@ class CreateCustomerRequest extends Request
         'shipping_county' => 'string|nullable',
     ];
 
-    public function __construct(array $query = array(), array $request = array(), array $attributes = array(), array $cookies = array(), array $files = array(), array $server = array(), $content = null) {
-        parent::__construct($query, $request, $attributes, $cookies, $files, $server, $content);
-        $this->rules['display_name'] = 'required|string';
+    protected function getRules(): array
+    {
+        $this->rules['display_name'] = [
+            'required',
+            'string',
+            Rule::unique('dms_customer', 'display_name')
+                ->where('dealer_id', $this->get('dealer_id'))
+                ->whereNull('deleted_at'),
+        ];
+
+        return parent::getRules();
     }
-} 
+}

@@ -7,12 +7,14 @@ namespace App\Services\User;
 use App\Contracts\LoggerServiceInterface;
 use App\Models\Feed\Mapping\Incoming\ApiEntityReference;
 use App\Models\User\DealerLocation;
+use App\Models\Website\Website;
 use App\Repositories\Feed\Mapping\Incoming\ApiEntityReferenceRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\User\DealerLocationQuoteFeeRepository;
 use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Repositories\User\DealerLocationSalesTaxItemRepositoryInterface;
 use App\Repositories\User\DealerLocationSalesTaxRepositoryInterface;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use InvalidArgumentException;
 use DomainException;
 use Exception;
@@ -58,6 +60,47 @@ class DealerLocationService implements DealerLocationServiceInterface
         $this->salesTaxItemRepo = $salesTaxItemRepo;
         $this->quoteFeeRepo = $quoteFeeRepo;
         $this->loggerService = $loggerService;
+    }
+
+    /**
+     * @param $params
+     * @return LengthAwarePaginator
+     */
+    public function getAll($params): LengthAwarePaginator
+    {
+        if (isset($params['with_linked_accounts'])) {
+            $website = Website::where('dealer_id', $params['dealer_id'])->first();
+
+            if (!empty($website)) {
+                $typeConfig = $website->getOriginal('type_config');
+                $dealerIds = [$params['dealer_id']];
+
+                if (substr($typeConfig, 0, 2) === 'a:') {
+                    $filter = unserialize($typeConfig);
+
+                    // Return Just Default Dealer ID
+                    if (isset($filter['dealer_id'])) {
+                        // Add Dealer ID's
+                        if (is_array($filter['dealer_id'])) {
+                            foreach ($filter['dealer_id'] as $dealer_id) {
+                                $dealerIds[] = $dealer_id;
+                            }
+                        } else {
+                            $dealerIds[] = $filter['dealer_id'];
+                        }
+                    }
+                }
+            } else {
+                $dealerIds[] = $params['dealer_id'];
+            }
+
+            $params['dealer_ids'] = $dealerIds;
+            unset($params['dealer_id']);
+
+            return $this->locationRepo->getAll($params);
+        }
+
+        return $this->locationRepo->getAll($params);
     }
 
     /**

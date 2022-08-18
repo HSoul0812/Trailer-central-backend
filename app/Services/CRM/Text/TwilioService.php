@@ -62,7 +62,6 @@ class TwilioService implements TwilioServiceInterface
      */
     private $to = [];
 
-
     /**
      * @var int
      * @var int
@@ -71,6 +70,11 @@ class TwilioService implements TwilioServiceInterface
     private $maxTries = 15;
     private $retries = 0;
     private $tried = [];
+
+    /**
+     * @var bool
+     */
+    private $isNumberInvalid = false;
 
     /**
      * TwilioService constructor.
@@ -112,7 +116,7 @@ class TwilioService implements TwilioServiceInterface
      * @return MessageInstance
      * @throws SendTwilioTextFailedException
      */
-    public function send(string $from_number, string $to_number, string $textMessage, string $fullName, array $mediaUrl = []): MessageInstance {
+    public function send(string $from_number, string $to_number, string $textMessage, string $fullName, array $mediaUrl = [], ?int $dealerId = null): MessageInstance {
         try {
             // Send to Demo
             if(!empty($this->from) && !empty($this->from[0])) {
@@ -127,7 +131,7 @@ class TwilioService implements TwilioServiceInterface
             }
 
             // Send Internal Number
-            return $this->sendInternal($from_number, $to_number, $textMessage, $fullName, $mediaUrl);
+            return $this->sendInternal($from_number, $to_number, $textMessage, $fullName, $mediaUrl, $dealerId);
         } catch (\Exception $ex) {
             $this->log->error('Exception occurred trying to send text over Twilio: ' . $ex->getMessage());
             throw new SendTwilioTextFailedException;
@@ -354,7 +358,8 @@ class TwilioService implements TwilioServiceInterface
         string $to_number,
         string $textMessage,
         string $fullName,
-        array $mediaUrl = []
+        array $mediaUrl = [],
+        ?int $dealerId = null
     ): MessageInstance {
         // Get Twilio Number
         $fromPhone = $this->getTwilioNumber($from_number, $to_number, $fullName);
@@ -366,6 +371,8 @@ class TwilioService implements TwilioServiceInterface
             try {
                 $sent = $this->sendViaTwilio($fromPhone, $to_number, $textMessage, $mediaUrl);
             } catch (InvalidTwilioInboundNumberException $ex) {
+                $this->isNumberInvalid = true;
+
                 // Get Next Available Number!
                 $fromPhone = $this->getNextAvailableNumber();
 
@@ -378,7 +385,7 @@ class TwilioService implements TwilioServiceInterface
                 }
 
                 // Set New Number!
-                $this->textNumber->setPhoneAsUsed($from_number, $fromPhone, $to_number, $fullName);
+                $this->textNumber->setPhoneAsUsed($from_number, $fromPhone, $to_number, $fullName, $dealerId);
                 continue;
             }
 
@@ -418,6 +425,7 @@ class TwilioService implements TwilioServiceInterface
             // Exception occurred?!
             $this->log->error('Error occurred sending twilio text: ' . $ex->getMessage());
             if (strpos($ex->getMessage(), 'is not a valid, SMS-capable inbound phone number')) {
+                $this->isNumberInvalid = true;
                 throw new InvalidTwilioInboundNumberException;
             }
 
@@ -427,6 +435,21 @@ class TwilioService implements TwilioServiceInterface
 
         // Return Successful Result
         return $sent;
+    }
+
+    /**
+     * @param string $phoneNumber
+     * @return bool
+     */
+    public function isValidPhoneNumber(string $phoneNumber): bool
+    {
+        try {
+            $result = $this->twilio->lookups->v1->phoneNumbers($phoneNumber)->fetch();
+        } catch (\Exception $e) {
+            return false;
+        }
+
+        return $result->countryCode === 'US';
     }
 
     /**
@@ -487,5 +510,13 @@ class TwilioService implements TwilioServiceInterface
 
         // Return Null
         return null;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getIsNumberInvalid(): bool
+    {
+        return $this->isNumberInvalid;
     }
 }

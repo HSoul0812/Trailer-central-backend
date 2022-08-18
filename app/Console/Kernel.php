@@ -10,7 +10,6 @@ use App\Console\Commands\Inventory\AutoArchiveSoldItems;
 use App\Console\Commands\MyScheduleWorkCommand;
 use App\Console\Commands\Website\AddSitemaps;
 use App\Console\Commands\Website\GenerateDealerSpecificSiteUrls;
-use App\Jobs\Export\ExportFavoritesJob;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use App\Console\Commands\SyncPartsCommand;
@@ -19,7 +18,6 @@ use App\Console\Commands\ReplaceYoutubeEmbeds;
 use App\Console\Commands\Inventory\AdjustFeetAndInches;
 use App\Console\Commands\User\CreateAccessToken;
 use App\Console\Commands\Parts\Import\StocksExistsCommand;
-use App\Console\Commands\CRM\Leads\AutoAssign;
 use App\Console\Commands\Parts\IncreaseDealerCostCommand;
 use App\Console\Commands\Parts\FixPartVendor;
 use App\Console\Commands\CRM\Dms\CVR\GenerateCVRDocumentCommand;
@@ -27,6 +25,9 @@ use App\Console\Commands\CRM\Dms\UnitSale\GetCompletedSaleWithNoFullInvoice;
 use App\Console\Commands\CRM\Dms\UnitSale\FixEmptyManufacturerUnitSale;
 use App\Console\Commands\Inventory\FixFloorplanBillStatus;
 use App\Console\Commands\Parts\Import\GetTextrailParts;
+use App\Console\Commands\Export\ExportFavoritesCommand;
+use App\Console\Commands\User\GenerateCrmUsers;
+use App\Console\Commands\Website\HideExpiredImages;
 
 class Kernel extends ConsoleKernel
 {
@@ -57,6 +58,9 @@ class Kernel extends ConsoleKernel
         ReimportInteractionMessages::class,
         RemoveBrokenCharacters::class,
         MyScheduleWorkCommand::class,
+        ExportFavoritesCommand::class,
+        GenerateCrmUsers::class,
+        HideExpiredImages::class
     ];
 
     /**
@@ -79,13 +83,17 @@ class Kernel extends ConsoleKernel
                 ->hourly()
                 ->runInBackground();
 
+        $schedule->command('user:generate-crm-users')
+                ->hourly()
+                ->runInBackground();
+
         $schedule->command('crm:dms:update-po-num-ref')
                 ->daily()
                 ->runInBackground();
 
         //$schedule->command('leads:assign:hotpotato')->withoutOverlapping();
 
-        $schedule->command('leads:import:adf')
+        $schedule->command('leads:import')
                 ->everyFiveMinutes()
                 ->runInBackground();
 
@@ -149,7 +157,11 @@ class Kernel extends ConsoleKernel
             ->everyFiveMinutes()
             ->runInBackground();
 
-        $schedule->job(new ExportFavoritesJob())
+        $schedule->command('export:inventory-favorites')
+            ->daily()
+            ->runInBackground();
+
+        $schedule->command('website:hide-expired-images')
             ->daily()
             ->runInBackground();
     }

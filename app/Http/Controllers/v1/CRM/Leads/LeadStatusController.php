@@ -9,6 +9,7 @@ use App\Http\Requests\CRM\Leads\CreateLeadStatusRequest;
 use App\Http\Requests\CRM\Leads\GetLeadsStatusRequest;
 use App\Http\Requests\CRM\Leads\UpdateLeadStatusRequest;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
+use App\Services\CRM\Leads\LeadStatusServiceInterface;
 use App\Transformers\SimpleTransformer;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
@@ -21,6 +22,11 @@ class LeadStatusController extends RestfulControllerV2
     protected $statusRepository;
 
     /**
+     * @var LeadStatusServiceInterface
+     */
+    protected $service;
+
+    /**
      * @var SimpleTransformer
      */
     protected $transformer;
@@ -29,11 +35,13 @@ class LeadStatusController extends RestfulControllerV2
      * Create a new controller instance.
      *
      * @param StatusRepositoryInterface $status
+     * @param LeadStatusServiceInterface $service
      */
-    public function __construct(StatusRepositoryInterface $status)
+    public function __construct(StatusRepositoryInterface $status, LeadStatusServiceInterface $service)
     {
         $this->statusRepository = $status;
         $this->transformer = new SimpleTransformer;
+        $this->service = $service;
 
         $this->middleware('setDealerIdOnRequest')->only(['create', 'update']);
     }
@@ -97,7 +105,7 @@ class LeadStatusController extends RestfulControllerV2
     {
         $request = new CreateLeadStatusRequest($request->all());
 
-        if (!$request->validate() || !($status = $this->statusRepository->create($request->all()))) {
+        if (!$request->validate() || !($status = $this->service->create($request->all()))) {
             return $this->response->errorBadRequest();
         }
 
@@ -160,7 +168,7 @@ class LeadStatusController extends RestfulControllerV2
     {
         $request = new UpdateLeadStatusRequest(array_merge($request->all(), ['id' => $id]));
 
-        if (!$request->validate() || !($status = $this->statusRepository->update($request->all()))) {
+        if (!$request->validate() || !($status = $this->service->update($request->all()))) {
             return $this->response->errorBadRequest();
         }
 

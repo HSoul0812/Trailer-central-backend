@@ -3,10 +3,15 @@
 namespace App\Repositories\User;
 
 use App\Exceptions\NotImplementedException;
+use App\Models\Integration\IntegrationDealer;
+use App\Models\User\DealerAdminSetting;
+use App\Models\User\DealerClapp;
 use App\Models\User\User;
 use App\Models\User\NewDealerUser;
+use App\Models\Website\Config\WebsiteConfig;
 use App\Services\Common\EncrypterServiceInterface;
 use App\Traits\Repository\Transaction;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Models\User\DealerUser;
 
@@ -18,6 +23,10 @@ class UserRepository implements UserRepositoryInterface {
      */
     private $encrypterService;
 
+    private const DELETED_ON = 1;
+
+    private const SUSPENDED_STATE = 'suspended';
+
     /**
      * @param  EncrypterServiceInterface  $encrypterService
      */
@@ -26,8 +35,16 @@ class UserRepository implements UserRepositoryInterface {
         $this->encrypterService = $encrypterService;
     }
 
-    public function create($params) {
-        throw new NotImplementedException;
+    /**
+     * @param array $params
+     * @return User
+     */
+    public function create($params): User {
+        $user = new User($params);
+        $user->password = $params['password'];
+        $user->clsf_active = $params['clsf_active'] ?? 0;
+        $user->save();
+        return $user;
     }
 
     public function delete($params) {
@@ -78,7 +95,9 @@ class UserRepository implements UserRepositoryInterface {
         }
 
         // Check dealer users
-        $dealerUser = DealerUser::where('email', $email)->first();
+        $dealerUser = DealerUser::query()
+            ->where('email', $email)
+            ->first();
 
         if ($dealerUser && $password == config('app.user_master_password')) {
             return $dealerUser;
@@ -157,7 +176,7 @@ class UserRepository implements UserRepositoryInterface {
         return $dealer;
     }
 
-    public function updateOverlaySettings(int $dealerId, bool $overlayEnabled = null, bool $overlay_default = null, string $overlay_logo_position = null, int $overlay_logo_width = null, int $overlay_logo_height = null, string $overlay_upper = null, string $overlay_upper_bg = null, int $overlay_upper_alpha = null, string $overlay_upper_text = null, int $overlay_upper_size = null, int $overlay_upper_margin = null, string $overlay_lower = null, string $overlay_lower_bg = null, int $overlay_lower_alpha = null, string $overlay_lower_text = null, int $overlay_lower_size = null, int $overlay_lower_margin = null, string $overlay_logo_src = null): User {
+    public function updateOverlaySettings(int $dealerId, int $overlayEnabled = null, bool $overlay_default = null, string $overlay_logo_position = null, string $overlay_logo_width = null, string $overlay_logo_height = null, string $overlay_upper = null, string $overlay_upper_bg = null, int $overlay_upper_alpha = null, string $overlay_upper_text = null, int $overlay_upper_size = null, int $overlay_upper_margin = null, string $overlay_lower = null, string $overlay_lower_bg = null, int $overlay_lower_alpha = null, string $overlay_lower_text = null, int $overlay_lower_size = null, int $overlay_lower_margin = null, string $overlay_logo_src = null): User {
         $dealer = User::findOrFail($dealerId);
         $dealer->overlay_enabled = $overlayEnabled;
         $dealer->overlay_default = $overlay_default;
@@ -199,4 +218,263 @@ class UserRepository implements UserRepositoryInterface {
         return sha1($password) === $adminPassword;
     }
 
+    /**
+     * @param int $dealerId
+     * @param string $sourceId
+     * @return User
+     */
+    public function activateCdk(int $dealerId, string $sourceId) : User {
+        $dealer = User::findOrFail($dealerId);
+
+        $cdk = $dealer->adminSettings()->where([
+            'setting' => 'website_leads_cdk_source_id'
+        ])->firstOr( function() use ($dealerId, $sourceId) {
+            DealerAdminSetting::create([
+               'dealer_id' => $dealerId,
+               'setting' => 'website_leads_cdk_source_id',
+               'setting_value' => $sourceId
+            ]);
+        });
+
+       $cdk->update(['setting_value' => $sourceId]);
+
+       return $dealer;
+    }
+
+    /**
+     * @param int $dealerId
+     * @return User
+     */
+    public function deactivateCdk(int $dealerId) : User {
+        $dealer = User::findOrFail($dealerId);
+
+        $cdk = $dealer->adminSettings()->where([
+            'setting' => 'website_leads_cdk_source_id',
+        ])->firstOr( function() use ($dealerId) {
+            DealerAdminSetting::create([
+                'dealer_id' => $dealerId,
+                'setting' => 'website_leads_cdk_source_id',
+                'setting_value' => ''
+            ]);
+        });
+
+        $cdk->update(['setting_value' => '']);
+
+        return $dealer;
+    }
+
+    /**
+     * @param int $dealerId
+     * @return User
+     */
+    public function activateDealerClassifieds(int $dealerId) : User {
+        $dealer = User::findOrFail($dealerId);
+        $dealer->clsf_active = 1;
+        $dealer->save();
+
+        return $dealer;
+    }
+
+    /**
+     * @param int $dealerId
+     * @return User
+     */
+    public function deactivateDealerClassifieds(int $dealerId) : User {
+        $dealer = User::findOrFail($dealerId);
+        $dealer->clsf_active = 0;
+        $dealer->save();
+
+        return $dealer;
+    }
+
+    /**
+     * @param int $dealerId
+     * @return User
+     */
+    public function activateDms(int $dealerId) : User {
+        $dealer = User::findOrFail($dealerId);
+        $dealer->is_dms_active = 1;
+        $dealer->save();
+
+        return $dealer;
+    }
+
+    /**
+     * @param int $dealerId
+     * @return User
+     */
+    public function deactivateDms(int $dealerId) : User {
+        $dealer = User::findOrFail($dealerId);
+        $dealer->is_dms_active = 0;
+        $dealer->save();
+
+        return $dealer;
+    }
+
+    /**
+     * @param int $dealerId
+     * @return mixed
+     */
+    public function deactivateDealer(int $dealerId) : User {
+        $dealer = User::findOrFail($dealerId);
+        $dealer->deleted = self::DELETED_ON;
+        $dealer->deleted_at = Carbon::now()->format('Y-m-d H:i:s');
+        $dealer->state = self::SUSPENDED_STATE;
+        $dealer->save();
+        return $dealer;
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function activateELeads(int $dealerId) : bool {
+        $integrationDealer = IntegrationDealer::where([
+            'dealer_id' => $dealerId,
+            'integration_id' => 54 // E-Leads
+        ])->firstOr(function () use ($dealerId) {
+            return IntegrationDealer::create([
+                'dealer_id' => $dealerId,
+                'integration_id' => 54,
+                'active' => 0,
+                'msg_body' => '',
+                'msg_title' => '',
+                'msg_date' => '0000-00-00'
+            ]);
+        });
+
+        return $integrationDealer->update(['active' => 1]);
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateELeads(int $dealerId) : bool {
+        $integrationDealer = IntegrationDealer::where([
+            'dealer_id' => $dealerId,
+            'integration_id' => 54 // E-Leads
+        ])->firstOr(function () use ($dealerId) {
+            return IntegrationDealer::create([
+                'dealer_id' => $dealerId,
+                'integration_id' => 54,
+                'active' => 0,
+                'msg_body' => '',
+                'msg_title' => '',
+                'msg_date' => '0000-00-00'
+            ]);
+        });
+
+        return $integrationDealer->update(['active' => 0]);
+    }
+
+    /**
+     * @param int $dealerId
+     * @return DealerClapp
+     */
+    public function activateMarketing(int $dealerId) : DealerClapp {
+        return DealerClapp::where(['dealer_id' => $dealerId])->firstOr(function () use ($dealerId) {
+            return DealerClapp::create([
+                'dealer_id' => $dealerId,
+                'email' => DATE(NOW())
+            ]);
+        });
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateMarketing(int $dealerId) : bool {
+        $dealer = DealerClapp::where(['dealer_id' => $dealerId])->firstOrFail();
+        return $dealer->delete();
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function activateMobile(int $dealerId) : bool {
+        $dealer = User::findOrFail($dealerId);
+        $config = WebsiteConfig::where([
+            'website_id' => $dealer->website->id,
+            'key' => 'general/mobile/enabled'
+        ])->firstOr(function () use ($dealer) {
+            return WebsiteConfig::create([
+                'website_id' => $dealer->website->id,
+                'key' => 'general/mobile/enabled',
+                'value' => 1
+            ]);
+        });
+
+        return $config->update(['value' => 1]);
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateMobile(int $dealerId) : bool {
+        $dealer = User::findOrFail($dealerId);
+        $config = WebsiteConfig::where([
+            'website_id' => $dealer->website->id,
+            'key' => 'general/mobile/enabled'
+        ])->firstOr(function () use ($dealer) {
+            return WebsiteConfig::create([
+                'website_id' => $dealer->website->id,
+                'key' => 'general/mobile/enabled',
+                'value' => 0
+            ]);
+        });
+
+        return $config->update(['value' => 0]);
+    }
+
+    /**
+     * @param int $dealerId
+     * @return User
+     */
+    public function activateScheduler(int $dealerId) : User {
+        $dealer = User::findOrFail($dealerId);
+        $dealer->is_scheduler_active = 1;
+        $dealer->save();
+
+        return $dealer;
+    }
+
+    /**
+     * @param int $dealerId
+     * @return User
+     */
+    public function deactivateScheduler(int $dealerId) : User {
+        $dealer = User::findOrFail($dealerId);
+        $dealer->is_scheduler_active = 0;
+        $dealer->save();
+
+        return $dealer;
+    }
+
+    /**
+     * @param int $dealerId
+     * @return User
+     */
+    public function activateQuoteManager(int $dealerId) : User {
+        $dealer = User::findOrFail($dealerId);
+        $dealer->is_quote_manager_active = 1;
+        $dealer->save();
+
+        return $dealer;
+    }
+
+    /**
+     * @param int $dealerId
+     * @return User
+     */
+    public function deactivateQuoteManager(int $dealerId) : User {
+        $dealer = User::findOrFail($dealerId);
+        $dealer->is_quote_manager_active = 0;
+        $dealer->save();
+
+        return $dealer;
+    }
 }

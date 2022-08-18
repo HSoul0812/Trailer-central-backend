@@ -10,6 +10,7 @@ use App\Models\Showroom\ShowroomImage;
 use App\Models\Showroom\ShowroomFile;
 use App\Exceptions\ImageNotDownloadedException;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Collection;
 
 class ShowroomRepository implements ShowroomRepositoryInterface {
 
@@ -108,6 +109,20 @@ class ShowroomRepository implements ShowroomRepositoryInterface {
 
     public function update($params) {
         throw new NotImplementedException;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function distinctByManufacturers(): Collection
+    {
+        return Showroom::select('manufacturer')
+            ->distinct()
+            ->where('manufacturer', '!=', '')
+            ->whereNotNull('manufacturer')
+            ->orderBy('manufacturer')
+            ->get()
+            ->pluck('manufacturer');
     }
 
     private function storeImage($showroomId, $image, $isFloorplan) {
