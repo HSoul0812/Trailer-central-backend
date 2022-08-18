@@ -673,7 +673,7 @@ $api->version('v1', function ($route) {
         */
         $route->get('user/quotes', 'App\Http\Controllers\v1\Dms\UnitSaleController@index');
         $route->put('user/quotes/bulk-archive', 'App\Http\Controllers\v1\Dms\UnitSaleController@bulkArchive');
-
+        
         /*
         |--------------------------------------------------------------------------
         | Quotes Refunds
