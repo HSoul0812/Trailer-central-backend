@@ -162,7 +162,7 @@ class ADFService implements ImportTypeInterface
         $adfLead->setAddrZip($contact->filterXPath('//address/postalcode')->text(''));
 
         // Set Comments
-        $adfLead->setComments($contact->filter('comments')->text());
+        $adfLead->setComments($contact->filter('comments')->text(''));
 
         // Return ADF Lead
         return $adfLead;
