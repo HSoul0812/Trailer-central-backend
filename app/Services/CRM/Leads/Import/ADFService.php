@@ -68,11 +68,15 @@ class ADFService implements ImportTypeInterface
      */
     public function isSatisfiedBy(ParsedEmail $parsedEmail): bool
     {
-        $fixed = $this->fixCdata($parsedEmail->getBody());
-        $crawler = new Crawler($fixed);
-        $adf = $crawler->filter('adf')->first();
+        try {
+            $fixed = $this->fixCdata($parsedEmail->getBody());
+            $crawler = new Crawler($fixed);
+            $adf = $crawler->filter('adf')->first();
 
-        return $adf->count() >= 1 && !empty($adf->nodeName()) && $adf->nodeName() === 'adf';
+            return $adf->count() >= 1 && !empty($adf->nodeName()) && $adf->nodeName() === 'adf';
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 
     /**
