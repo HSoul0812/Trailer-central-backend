@@ -219,7 +219,7 @@ class ADFService implements ImportTypeInterface
         $adfLead->setVendorIds($vendorIdMap);
 
         // Parse Vendor Details
-        $adfLead->setVendorName($vendor->filter('vendorname')->text());
+        $adfLead->setVendorName($vendor->filter('vendorname')->text(''));
 
         // Parse Vendor Contact Details
         $adfLead->setVendorContact($vendor->filterXPath('//contact/name')->text(''));
