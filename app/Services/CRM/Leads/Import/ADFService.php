@@ -148,12 +148,12 @@ class ADFService implements ImportTypeInterface
      */
     private function getAdfContact(ADFLead $adfLead, Crawler $contact): ADFLead {
         // Set First Name
-        $adfLead->setFirstName($contact->filterXPath('//contact/name[@part="first"]')->text());
-        $adfLead->setLastName($contact->filterXPath('//contact/name[@part="last"]')->text());
+        $adfLead->setFirstName($contact->filterXPath('//contact/name[@part="first"]')->text(''));
+        $adfLead->setLastName($contact->filterXPath('//contact/name[@part="last"]')->text(''));
 
         // Set Contact Details
-        $adfLead->setEmail($contact->filterXPath('//contact/email')->text());
-        $adfLead->setPhone($contact->filterXPath('//contact/phone')->text());
+        $adfLead->setEmail($contact->filterXPath('//contact/email')->text(''));
+        $adfLead->setPhone($contact->filterXPath('//contact/phone')->text(''));
 
         // Set Address Details
         $adfLead->setAddrStreet($contact->filterXPath('//address/street')->text(''));
@@ -162,7 +162,7 @@ class ADFService implements ImportTypeInterface
         $adfLead->setAddrZip($contact->filterXPath('//address/postalcode')->text(''));
 
         // Set Comments
-        $adfLead->setComments($contact->filter('comments')->text());
+        $adfLead->setComments($contact->filter('comments')->text(''));
 
         // Return ADF Lead
         return $adfLead;
