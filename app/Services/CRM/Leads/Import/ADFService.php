@@ -57,7 +57,7 @@ class ADFService implements ImportTypeInterface
         $crawler = $this->validateAdf($parsedEmail->getBody());
 
         $adf = $this->parseAdf($dealer, $crawler);
-        Log::info('Parsed ADF Lead ' . $adf->getFullName() . ' For Dealer ID #' . $adf->getDealerId());
+        $this->log->info('Parsed ADF Lead ' . $adf->getFullName() . ' For Dealer ID #' . $adf->getDealerId());
 
         return $adf;
     }
