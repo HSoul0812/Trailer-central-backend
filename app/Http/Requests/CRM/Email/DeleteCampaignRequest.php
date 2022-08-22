@@ -9,10 +9,9 @@ use App\Http\Requests\Request;
  *
  * @author David A Conway Jr.
  */
-class DeleteCampaignRequest extends Request {
-    
+class DeleteCampaignRequest extends Request
+{
     protected $rules = [
-        'id' => 'integer'
+        'drip_campaigns_id' => 'required|integer|exists:App\Models\CRM\Email\Campaign,drip_campaigns_id',
     ];
-    
 }
