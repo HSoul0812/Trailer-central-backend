@@ -9,13 +9,13 @@ use App\Models\Inventory\Inventory;
 use App\Models\Inventory\Floorplan\Payment;
 
 /**
- *  
+ *
  * @author Marcel
  */
 class PaymentRepository implements PaymentRepositoryInterface {
 
     private $sortOrders = [
-        'type' => [ 
+        'type' => [
             'field' => 'type',
             'direction' => 'DESC'
         ],
@@ -64,12 +64,12 @@ class PaymentRepository implements PaymentRepositoryInterface {
 
         return $floorplanPayment;
     }
-    
+
     public function createBulk($payments) {
         // Should probably queue this
         $floorplanPayments = [];
         DB::beginTransaction();
-        
+
         try {
             foreach($payments as $paymentData) {
                 $floorplanPayment = Payment::create($paymentData);
@@ -81,7 +81,7 @@ class PaymentRepository implements PaymentRepositoryInterface {
             DB::rollBack();
             throw new \Exception($ex->getMessage());
         }
-        
+
         return collect($floorplanPayments);
     }
 
@@ -92,7 +92,7 @@ class PaymentRepository implements PaymentRepositoryInterface {
     public function get($params) {
         throw new NotImplementedException;
     }
-    
+
     public function getByInventory($params)
     {
         if (isset($params['inventory_id'])) {
@@ -101,9 +101,9 @@ class PaymentRepository implements PaymentRepositoryInterface {
                     $q->where('inventory.inventory_id', $params['inventory_id']);
                 });
         } else {
-            $query = Payment::where('id', '>', 0);  
+            $query = Payment::where('id', '>', 0);
         }
-        
+
         if (isset($params['search_term'])) {
             $query = $query->where(function($q) use($params) {
                 $q->where('type', 'LIKE', '%' . $params['search_term'] . '%')
@@ -115,15 +115,15 @@ class PaymentRepository implements PaymentRepositoryInterface {
                     });
             });
         }
-        
+
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
         }
-        
+
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
-        } 
-        
+        }
+
         return $query->paginate($params['per_page'])->appends($params);
     }
 
@@ -134,7 +134,7 @@ class PaymentRepository implements PaymentRepositoryInterface {
                     $q->whereIn('dealer_id', $params['dealer_id']);
                 });
         } else {
-            $query = Payment::where('id', '>', 0);  
+            $query = Payment::where('id', '>', 0);
         }
         if (isset($params['search_term'])) {
             $query = $query->where(function($q) use($params) {
@@ -147,15 +147,22 @@ class PaymentRepository implements PaymentRepositoryInterface {
                     });
             });
         }
-        
+
+        if (!empty($params['exact_check_number'])) {
+            $query->where([
+                'payment_type' => Payment::PAYMENT_TYPES_CHECK,
+                'check_number' => $params['exact_check_number'],
+            ]);
+        }
+
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
         }
-        
+
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
-        } 
-        
+        }
+
         return $query->paginate($params['per_page'])->appends($params);
     }
 
@@ -169,7 +176,7 @@ class PaymentRepository implements PaymentRepositoryInterface {
         }
         return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
     }
-    
+
     /**
      * If type is balance, decrease floorplan balance of the inventory
      * If type is interest, increase interest amount of the inventory
@@ -180,7 +187,7 @@ class PaymentRepository implements PaymentRepositoryInterface {
         if ($params['type'] === Payment::PAYMENT_CATEGORIES['Balance']) {
             $amount *= -1;
         }
-        
+
         if ($params['type'] === Payment::PAYMENT_CATEGORIES['Balance']) {
             Inventory::find($params['inventory_id'])
                 ->update(['fp_balance' => (float) $payment['inventory']['fp_balance'] - (float) $params['amount']]);
@@ -189,5 +196,4 @@ class PaymentRepository implements PaymentRepositoryInterface {
                 ->update(['fp_interest_paid' => (float) $payment['inventory']['fp_interest_paid'] + (float) $params['amount']]);
         }
     }
-
 }
