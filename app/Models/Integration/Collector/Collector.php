@@ -48,6 +48,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $cdk_password
  * @property string $cdk_username
  * @property bool $use_factory_mapping
+ * @property bool is_mfg_brand_mapping_enabled
  * @property string $skip_categories
  * @property string $skip_locations
  * @property string|null $ids_token
@@ -175,6 +176,7 @@ class Collector extends Model implements Filterable
         'motility_account_no',
         'motility_integration_id',
         'use_factory_mapping',
+        'is_mfg_brand_mapping_enabled',
         'skip_categories',
         'skip_locations',
         'zero_msrp',

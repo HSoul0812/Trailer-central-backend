@@ -180,6 +180,9 @@ class Collector extends Resource
                 Boolean::make('Use Factory Mapping', 'use_factory_mapping')->hideFromIndex()->help(
                     'Whether or not to use the data from FV to populate these units'
                 ),
+                Boolean::make('Enable MFG and Brand Mapping', 'is_mfg_brand_mapping_enabled')->hideFromIndex()->help(
+                    'If enabled will map unit MFG to MFG and unit Brand to Brand.'
+                ),
             ]),
 
             new Panel('Actions With Items', [
