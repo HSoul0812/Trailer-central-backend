@@ -83,6 +83,9 @@ class HtmlService implements ImportTypeInterface
         $this->locationRepository = $locationRepository;
         $this->inventoryRepository = $inventoryRepository;
         $this->sanitizeHelper = $sanitizeHelper;
+
+        // Create Log
+        $this->log = Log::channel('import');
     }
 
     /**
@@ -94,12 +97,12 @@ class HtmlService implements ImportTypeInterface
     public function getLead(User $dealer, ParsedEmail $parsedEmail): ADFLead
     {
         if (!$this->isSatisfiedBy($parsedEmail)) {
-            Log::error("Body text failed to parse HTML correctly:\r\n\r\n" . $parsedEmail->getBody());
+            $this->log->error("Body text failed to parse HTML correctly:\r\n\r\n" . $parsedEmail->getBody());
             throw new InvalidImportFormatException;
         }
 
         $lead = $this->parseHtml($dealer, $parsedEmail->getBody());
-        Log::info('Parsed ADF Lead ' . $lead->getFullName() . ' For Dealer ID #' . $lead->getDealerId());
+        $this->log->info('Parsed ADF Lead ' . $lead->getFullName() . ' For Dealer ID #' . $lead->getDealerId());
 
         return $lead;
     }
@@ -131,7 +134,7 @@ class HtmlService implements ImportTypeInterface
         $lead = new ADFLead();
 
         $lead->setDealerId($dealer->dealer_id);
-        $lead->setWebsiteId($dealer->website->id);
+        $lead->setWebsiteId($dealer->website->id ?? 0);
 
         $data = $this->getData($html);
 
