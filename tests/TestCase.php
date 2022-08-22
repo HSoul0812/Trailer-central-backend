@@ -9,6 +9,7 @@ use App\Exceptions\Tests\MissingTestDealerIdException;
 use App\Exceptions\Tests\MissingTestDealerLocationIdException;
 use App\Exceptions\Tests\MissingTestWebsiteIdException;
 use Mockery;
+use ReflectionProperty;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -208,5 +209,19 @@ abstract class TestCase extends BaseTestCase
         }
 
         self::assertFalse($callback->isCalled(), $message);
+    }
+
+    /**
+     * @param $object
+     * @param $property
+     * @param $value
+     * @return void
+     * @throws \ReflectionException
+     */
+    public function setToPrivateProperty($object, $property, $value)
+    {
+        $reflector = new ReflectionProperty(get_class($object), $property);
+        $reflector->setAccessible(true);
+        $reflector->setValue($object, $value);
     }
 }
