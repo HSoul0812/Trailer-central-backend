@@ -449,7 +449,6 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                     crm_sales_person.id AS sales_person_id,
                     dms_customer.display_name AS customer_name,
                     0 AS remaining,
-                    /* TODO: Add the cost_overhead */
                     (
                         SELECT cost_overhead
                         FROM (
