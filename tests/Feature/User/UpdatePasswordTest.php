@@ -88,7 +88,7 @@ class UpdatePasswordTest extends TestCase
         self::assertArrayHasKey('password', $json['errors']);
 
         $this->assertSame('Validation Failed', $json['message']);
-        $this->assertContains('The password may not be greater than 8 characters.', $json['errors']['password']);
+        $this->assertContains('The password should not be greater than 8 characters.', $json['errors']['password']);
     }
 
     public function testUpdatePasswordForUserWithDealerUserType(): void
@@ -139,7 +139,7 @@ class UpdatePasswordTest extends TestCase
         self::assertArrayHasKey('password', $json['errors']);
 
         $this->assertSame('Validation Failed', $json['message']);
-        $this->assertContains('The password may not be greater than 8 characters.', $json['errors']['password']);
+        $this->assertContains('The password should not be greater than 8 characters.', $json['errors']['password']);
     }
 
     public function setUp(): void
