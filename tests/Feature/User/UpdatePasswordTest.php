@@ -25,7 +25,7 @@ class UpdatePasswordTest extends TestCase
 
     public function testUpdatePasswordUsingWrongVerb(): void
     {
-        $response = $this->json('PUT', '/api/user/password/update', ['password' => $this->faker->password()]);
+        $response = $this->json('PUT', '/api/user/password/update', ['password' => $this->faker->password(6,8)]);
 
         $response->assertStatus(403);
     }
@@ -41,7 +41,7 @@ class UpdatePasswordTest extends TestCase
 
         $response = $this->json(
             'PUT', '/api/user/password/update',
-            ['password' => $this->faker->password()],
+            ['password' => $this->faker->password(6,8)],
             ['access-token' => $this->token->access_token]
         );
 
@@ -57,13 +57,38 @@ class UpdatePasswordTest extends TestCase
 
         $response = $this->json(
             'PUT', '/api/user/password/update',
-            ['password' => $this->faker->password()],
+            ['password' => $this->faker->password(6,8)],
             ['access-token' => $this->token->access_token]
         );
 
         $response->assertStatus(200);
 
         $this->assertNotSame($this->dealer->password, $this->dealer->fresh()->password);
+    }
+
+    public function testUpdatePasswordForUserWithDealerTypeWithTooLongPassword(): void
+    {
+        $this->token = factory(AuthToken::class)->create([
+            'user_id' => $this->dealer->dealer_id,
+            'user_type' => AuthToken::USER_TYPE_DEALER,
+        ]);
+
+        $response = $this->json(
+            'PUT', '/api/user/password/update',
+            ['password' => $this->faker->password(9, 10)],
+            ['access-token' => $this->token->access_token]
+        );
+
+        $response->assertStatus(422);
+
+        $json = json_decode($response->getContent(), true);
+
+        self::assertArrayHasKey('message', $json);
+        self::assertArrayHasKey('errors', $json);
+        self::assertArrayHasKey('password', $json['errors']);
+
+        $this->assertSame('Validation Failed', $json['message']);
+        $this->assertContains('The password should not be greater than 8 characters.', $json['errors']['password']);
     }
 
     public function testUpdatePasswordForUserWithDealerUserType(): void
@@ -79,13 +104,42 @@ class UpdatePasswordTest extends TestCase
 
         $response = $this->json(
             'PUT', '/api/user/password/update',
-            ['password' => $this->faker->password()],
+            ['password' => $this->faker->password(6,8)],
             ['access-token' => $this->token->access_token]
         );
 
         $response->assertStatus(200);
 
         $this->assertNotSame($this->dealer->password, $this->dealerUser->fresh()->password);
+    }
+
+    public function testUpdatePasswordForUserWithDealerUserTypeWithTooLongPassword(): void
+    {
+        $this->dealerUser = factory(DealerUser::class)->create([
+            'dealer_id' => $this->dealer->dealer_id
+        ]);
+
+        $this->token = factory(AuthToken::class)->create([
+            'user_id' => $this->dealerUser->dealer_user_id,
+            'user_type' => AuthToken::USER_TYPE_DEALER_USER
+        ]);
+
+        $response = $this->json(
+            'PUT', '/api/user/password/update',
+            ['password' => $this->faker->password(9, 10)],
+            ['access-token' => $this->token->access_token]
+        );
+
+        $response->assertStatus(422);
+
+        $json = json_decode($response->getContent(), true);
+
+        self::assertArrayHasKey('message', $json);
+        self::assertArrayHasKey('errors', $json);
+        self::assertArrayHasKey('password', $json['errors']);
+
+        $this->assertSame('Validation Failed', $json['message']);
+        $this->assertContains('The password should not be greater than 8 characters.', $json['errors']['password']);
     }
 
     public function setUp(): void
