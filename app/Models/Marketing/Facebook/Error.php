@@ -61,7 +61,7 @@ class Error extends Model
         'missing-tunnel' => 1,
         'two-factor-auth' => 24,
         'two-factor-failed' => 1,
-        'marketplace-inaccessible' => 24 * 7,
+        'marketplace-inaccessible' => 24,
         'account-locked' => 24 * 7,
         'account-disabled' => 24 * 7,
         'page-unavailable' => 1,
