@@ -202,6 +202,8 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
      */
     public function salesReport($params): array
     {
+        $dealerId = $params['dealer_id'];
+
         $dbParams = [
             'posSalesDealerId' => $params['dealer_id'],
             'otherSalesDealerId' => $params['dealer_id'],
@@ -384,7 +386,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                     (
                       qb_invoices.total - payments.paid_amount
                     ) AS remaining,
-                    qb_invoice_item_inventories.cost_overhead,
+                    qb_invoice_item_inventories.cost_overhead * -1 as cost_overhead,
                     qb_invoice_item_inventories.true_total_cost,
                     qb_invoice_items.unit_price AS unit_sale_amount,
                     COALESCE(qb_items.cost,0) AS unit_cost_amount,
@@ -448,7 +450,40 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                     dms_customer.display_name AS customer_name,
                     0 AS remaining,
                     /* TODO: Add the cost_overhead */
-                    '' AS cost_overhead,
+                    (
+                        SELECT cost_overhead
+                        FROM (
+                            SELECT
+                                cost_overhead_inventory.inventory_id,
+                                @total_of_cost := (
+                                    coalesce(nullif(trim(cost_overhead_inventory.cost_of_shipping), ''), 0) +
+                                    coalesce(nullif(trim(cost_overhead_inventory.cost_of_prep), ''), 0) +
+                                    coalesce(nullif(trim(cost_overhead_inventory.cost_of_unit), ''), 0) +
+                                    coalesce((
+                                      SELECT
+                                        sum(dms_repair_order.total_price) AS total_price
+                                      FROM
+                                        dms_repair_order
+                                      WHERE
+                                        dms_repair_order.inventory_id = cost_overhead_inventory.inventory_id
+                                        AND dms_repair_order.type = 'internal'
+                                        AND dms_repair_order.dealer_id = $dealerId
+                                      GROUP BY
+                                        dms_repair_order.inventory_id
+                                    ), 0)
+                                ) AS total_of_cost,
+                                @pac_total_amount := coalesce(
+                                  if(strcmp(cost_overhead_inventory.pac_type, 'percent') = 0, (@total_of_cost * cost_overhead_inventory.pac_amount) / 100, cost_overhead_inventory.pac_amount),
+                                  0
+                                ) AS pac_total_amount,
+                                (@total_of_cost + @pac_total_amount) AS cost_overhead
+                            FROM
+                                inventory AS cost_overhead_inventory
+                            WHERE
+                                cost_overhead_inventory.dealer_id = $dealerId
+                        ) as cost_overhead_result
+                        where cost_overhead_result.inventory_id = inventory.inventory_id
+                    ) AS cost_overhead,
                     (
                       SELECT 
                         (
@@ -483,7 +518,7 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                     ) AS true_total_cost,
                     qb_items.unit_price AS unit_sale_amount,
                     qb_items.cost AS unit_cost_amount,
-                    qb_items.unit_price * -1 AS retail_price,
+                    qb_items.unit_price AS retail_price,
                     (
                       SELECT 
                         sales_refund_qb_items.unit_price * -1 
