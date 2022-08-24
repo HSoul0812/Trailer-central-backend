@@ -531,7 +531,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         if (isset($params['dealer_id'])) {
             $query = $query->where('inventory.dealer_id', $params['dealer_id']);
         }
-        
+
         if ($paginate && !isset($params['per_page'])) {
             $params['per_page'] = 15;
         } else if (!$paginate && isset($params['per_page'])) {
@@ -558,9 +558,18 @@ class InventoryRepository implements InventoryRepositoryInterface
                         ->orWhere('height_inches', $params['search_term']);
                 });
             }else {
+                /**
+                 * This converts strings like 4 Star Trailers to 4%Star%Trailers
+                 * so it matches inventories with all words included in the search query
+                 * with this, inventories with titles like `2023 4-Star Trailers dd BBQ Trailer`
+                 * can be found with `Star BBQ Trailer` because Star%BBQ%Trailer would match.
+                 */
+                $params['search_term'] = preg_replace('/\s+/', '%', $params['search_term']);
+
                 $query = $query->where(function ($q) use ($params) {
                     $q->where('stock', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('title', 'LIKE', '%' . $params['search_term'] . '%')
+                        ->orWhere('manufacturer', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('description', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('vin', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhereHas('floorplanVendor', function ($query) use ($params) {
@@ -728,9 +737,18 @@ class InventoryRepository implements InventoryRepositoryInterface
                         ->orWhere('height_inches', $params['search_term']);
                 });
             }else{
+                /**
+                 * This converts strings like 4 Star Trailers to 4%Star%Trailers
+                 * so it matches inventories with all words included in the search query
+                 * with this, inventories with titles like `2023 4-Star Trailers dd BBQ Trailer`
+                 * can be found with `Star BBQ Trailer` because Star%BBQ%Trailer would match.
+                 */
+                $params['search_term'] = preg_replace('/\s+/', '%', $params['search_term']);
+
                 $query = $query->where(function ($q) use ($params) {
                     $q->where('stock', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('title', 'LIKE', '%' . $params['search_term'] . '%')
+                        ->orWhere('manufacturer', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('inventory.description', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('vin', 'LIKE', '%' . $params['search_term'] . '%')
                         ->orWhere('price', 'LIKE', '%' . $params['search_term'] . '%')
