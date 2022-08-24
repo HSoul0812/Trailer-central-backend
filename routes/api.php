@@ -1358,6 +1358,17 @@ $api->version('v1', function ($route) {
 
         /*
         |--------------------------------------------------------------------------
+        | QZ Tray
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('qz-tray/digital-cert', 'App\Http\Controllers\v1\Dms\QzTray\QzTrayController@digitalCert');
+        $route->post('qz-tray/signature', 'App\Http\Controllers\v1\Dms\QzTray\QzTrayController@signature');
+
+        /*
+        |--------------------------------------------------------------------------
         | Others
         |--------------------------------------------------------------------------
         |
