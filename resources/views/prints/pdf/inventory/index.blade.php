@@ -35,10 +35,6 @@
         line-height: 25px;
     }
 
-    .inventory-description {
-        font-size: 22px;
-    }
-
     .print-inventory p {
         margin: 4px 0;
     }
@@ -291,6 +287,6 @@
     <div class="clear"></div>
     <h2>Description</h2>
     @if($inventory['description'])
-        <p class="inventory-description">{!! $inventory['description'] !!}</p>
+        <div>{!! $inventory['description'] !!}</div>
     @endif
 </div>
