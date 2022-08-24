@@ -120,7 +120,7 @@ class QuickbookApprovalRepository implements QuickbookApprovalRepositoryInterfac
         $dealerId = $params['dealer_id'];
 
         // Remove existing approval object
-        $this->deleteByTbPrimaryId($params['tb_primary_id'], $params['tb_name']);
+        $this->deleteByTbPrimaryId($params['tb_primary_id'], $params['tb_name'], $dealerId);
 
         // not sure what this is for yet; just copied from original
         if (empty($params['qb_id']) && isset($params['qb_info']['Active']) && !$params['qb_info']['Active']) return;
@@ -271,13 +271,17 @@ class QuickbookApprovalRepository implements QuickbookApprovalRepositoryInterfac
     /**
      * @param int $tbPrimaryId
      * @param string $tableName
+     * @param int $dealerId
      * @return bool
      * @throws \Exception
      */
-    public function deleteByTbPrimaryId(int $tbPrimaryId, string $tableName)
+    public function deleteByTbPrimaryId(int $tbPrimaryId, string $tableName, int $dealerId)
     {
         $quickbookApproval = QuickbookApproval::where('tb_primary_id', '=', $tbPrimaryId)
-            ->where('tb_name', '=', $tableName)
+            ->where([
+                'tb_name' => $tableName,
+                'dealer_id' => $dealerId,
+            ])
             ->first();
 
         if ($quickbookApproval instanceof QuickbookApproval) {

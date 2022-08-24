@@ -55,6 +55,9 @@ class TextrailPartDTO implements DTO
     /** @var int */
     public $qty = 0;
 
+    /** @var array */
+    public $custom_attributes = [];
+
     public static function result(array $properties): self
     {
         return self::from($properties);
@@ -76,6 +79,7 @@ class TextrailPartDTO implements DTO
             'show_on_website' => $this->show_on_website,
             'images' => $this->images,
             'qty' => $this->qty,
+            'custom_attributes' => $this->custom_attributes,
         ];
     }
 }

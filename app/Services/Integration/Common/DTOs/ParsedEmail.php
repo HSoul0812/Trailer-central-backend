@@ -683,7 +683,8 @@ class ParsedEmail
      */
     public function setDate(string $date): void
     {
-        $this->date = Carbon::parse($date)->setTimezone('UTC')->toDateTimeString();
+        $validDate = preg_replace('/\s+\(.*?\)/', '', $date);
+        $this->date = Carbon::parse($validDate)->setTimezone('UTC')->toDateTimeString();
     }
 
     /**

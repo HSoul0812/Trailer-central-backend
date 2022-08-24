@@ -3,16 +3,18 @@
 namespace App\Http\Controllers\v1\CRM\Email;
 
 use App\Http\Controllers\RestfulControllerV2;
-use App\Repositories\CRM\Email\CampaignRepositoryInterface;
-use App\Http\Requests\CRM\Email\GetCampaignsRequest;
-/*use App\Http\Requests\CRM\Email\CreateCampaignRequest;
+use App\Http\Requests\CRM\Email\DeleteCampaignRequest;
 use App\Http\Requests\CRM\Email\ShowCampaignRequest;
 use App\Http\Requests\CRM\Email\UpdateCampaignRequest;
-use App\Http\Requests\CRM\Email\DeleteCampaignRequest;*/
+use App\Repositories\CRM\Email\CampaignRepositoryInterface;
+use App\Http\Requests\CRM\Email\GetCampaignsRequest;
+use App\Http\Requests\CRM\Email\CreateCampaignRequest;
 use App\Http\Requests\CRM\Email\SendCampaignRequest;
+use App\Services\CRM\Email\CampaignServiceInterface;
 use App\Services\CRM\Email\EmailBuilderServiceInterface;
 use App\Transformers\CRM\Email\CampaignTransformer;
 use Dingo\Api\Http\Request;
+use Dingo\Api\Http\Response;
 
 class CampaignController extends RestfulControllerV2
 {
@@ -27,6 +29,11 @@ class CampaignController extends RestfulControllerV2
     protected $emailbuilder;
 
     /**
+     * @var CampaignServiceInterface
+     */
+    protected $campaignService;
+
+    /**
      * Create a new controller instance.
      *
      * @param CampaignRepositoryInterface $campaigns
@@ -34,11 +41,13 @@ class CampaignController extends RestfulControllerV2
      */
     public function __construct(
         CampaignRepositoryInterface $campaigns,
-        EmailBuilderServiceInterface $emailbuilder
+        EmailBuilderServiceInterface $emailbuilder,
+        CampaignServiceInterface $campaignService
     ) {
-        $this->middleware('setUserIdOnRequest')->only(['index', 'create', 'update', 'send']);
+        $this->middleware('setUserIdOnRequest')->only(['index', 'create', 'update', 'send', 'show', 'destroy']);
         $this->campaigns = $campaigns;
         $this->emailbuilder = $emailbuilder;
+        $this->campaignService = $campaignService;
     }
 
 
@@ -72,16 +81,17 @@ class CampaignController extends RestfulControllerV2
      *     ),
      * )
      */
-    public function index(Request $request) {
+    public function index(Request $request)
+    {
         $request = new GetCampaignsRequest($request->all());
-        
+
         if ($request->validate()) {
             return $this->response->paginator($this->campaigns->getAll($request->all()), new CampaignTransformer());
         }
-        
+
         return $this->response->errorBadRequest();
     }
-    
+
     /**
      * @OA\Put(
      *     path="/api/crm/{userId}/emails/campaign",
@@ -108,7 +118,7 @@ class CampaignController extends RestfulControllerV2
      *         required=false,
      *         @OA\Schema(type="string")
      *     ),
-     * 
+     *
      *     @OA\Response(
      *         response="200",
      *         description="Returns a list of emails",
@@ -120,21 +130,22 @@ class CampaignController extends RestfulControllerV2
      *     ),
      * )
      */
-    /*public function create(Request $request) {
+    public function create(Request $request): Response
+    {
         $request = new CreateCampaignRequest($request->all());
-        if ( $request->validate() ) {
-            // Create Email
-            return $this->response->item($this->campaigns->create($request->all()), new CampaignTransformer());
-        }  
-        
+
+        if ($request->validate()) {
+            return $this->response->item($this->campaignService->create($request->all()), new CampaignTransformer());
+        }
+
         return $this->response->errorBadRequest();
-    }*/
+    }
 
     /**
      * @OA\Get(
      *     path="/api/crm/{userId}/emails/campaign/{id}",
      *     description="Retrieve a campaign",
-     
+
      *     tags={"Post"},
      *     @OA\Parameter(
      *         name="id",
@@ -154,21 +165,22 @@ class CampaignController extends RestfulControllerV2
      *     ),
      * )
      */
-    /*public function show(int $id) {
+    public function show(int $id)
+    {
         $request = new ShowCampaignRequest(['id' => $id]);
-        
-        if ( $request->validate() ) {
+
+        if ($request->validate()) {
             return $this->response->item($this->campaigns->get(['id' => $id]), new CampaignTransformer());
         }
-        
+
         return $this->response->errorBadRequest();
-    }*/
-    
+    }
+
     /**
      * @OA\Put(
      *     path="/api/crm/{userId}/emails/campaign/{id}",
      *     description="Update a campaign",
-     * 
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="query",
@@ -190,7 +202,7 @@ class CampaignController extends RestfulControllerV2
      *         required=false,
      *         @OA\Schema(type="string")
      *     ),
-     * 
+     *
      *     @OA\Response(
      *         response="200",
      *         description="Returns a list of emails",
@@ -202,17 +214,18 @@ class CampaignController extends RestfulControllerV2
      *     ),
      * )
      */
-    /*public function update(int $id, Request $request) {
+    public function update(int $id, Request $request)
+    {
         $requestData = $request->all();
-        $requestData['id'] = $id;
+        $requestData['drip_campaigns_id'] = $id;
         $request = new UpdateCampaignRequest($requestData);
-        
-        if ( $request->validate() ) {
-            return $this->response->item($this->campaigns->update($request->all()), new CampaignTransformer());
+
+        if ($request->validate()) {
+            return $this->response->item($this->campaignService->update($request->all()), new CampaignTransformer());
         }
-        
+
         return $this->response->errorBadRequest();
-    }*/
+    }
 
     /**
      * @OA\Delete(
@@ -237,16 +250,17 @@ class CampaignController extends RestfulControllerV2
      *     ),
      * )
      */
-    /*public function destroy(int $id) {
-        $request = new DeleteCampaignRequest(['id' => $id]);
-        
-        if ( $request->validate()) {
-            // Create Email
-            return $this->response->item($this->campaigns->delete(['id' => $id]), new CampaignTransformer());
+    public function destroy(int $id)
+    {
+        $request = new DeleteCampaignRequest(['drip_campaigns_id' => $id]);
+
+        if ($request->validate()) {
+            $this->campaignService->delete(['drip_campaigns_id' => $id]);
+            return $this->deletedResponse();
         }
-        
+
         return $this->response->errorBadRequest();
-    }*/
+    }
 
     /**
      * @OA\Post(
@@ -285,16 +299,17 @@ class CampaignController extends RestfulControllerV2
      *     ),
      * )
      */
-    public function send(int $id, Request $request) {
+    public function send(int $id, Request $request)
+    {
         $request = new SendCampaignRequest($request->all() + ['id' => $id]);
-        
+
         if ( $request->validate()) {
             // Send Emails for Campaign
             return $this->response->array(
                 $this->emailbuilder->sendCampaign($id, $request->leads)
             );
         }
-        
+
         return $this->response->errorBadRequest();
     }
 }

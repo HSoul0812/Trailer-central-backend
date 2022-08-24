@@ -3,6 +3,7 @@
 namespace App\Services\Parts\Textrail;
 
 
+use App\Repositories\Parts\Textrail\AttributeRepositoryInterface;
 use GuzzleHttp\Client as GuzzleHttpClient;
 use App\Repositories\Parts\Textrail\PartRepository;
 use App\Repositories\Parts\Textrail\BrandRepositoryInterface;
@@ -28,21 +29,25 @@ class TextrailPartImporterService implements TextrailPartImporterServiceInterfac
      */
     protected $partRepo;
 
+    /** @var AttributeRepositoryInterface */
+    protected $partAttributeRepo;
+
     /**
      * @var GuzzleHttp\Client
      */
     protected $httpClient;
 
    public function __construct(
-     PartRepository $partRepository,
-     TextrailPartServiceInterface $textrailPartService,
-     CategoryRepositoryInterface $categoryRepository,
-     BrandRepositoryInterface $brandRepository,
-     ManufacturerRepositoryInterface $manufacturerRepository,
-     TypeRepositoryInterface $typeRepository,
-     ImageRepositoryInterface $imageRepository,
-     TextrailPartsTransformer $textrailPartsTransformer,
-     Manager $manager
+       PartRepository                   $partRepository,
+       TextrailPartServiceInterface     $textrailPartService,
+       CategoryRepositoryInterface      $categoryRepository,
+       BrandRepositoryInterface         $brandRepository,
+       ManufacturerRepositoryInterface  $manufacturerRepository,
+       TypeRepositoryInterface          $typeRepository,
+       ImageRepositoryInterface         $imageRepository,
+       TextrailPartsTransformer         $textrailPartsTransformer,
+       Manager                          $manager,
+       AttributeRepositoryInterface $partAttributeRepository
      )
    {
        $this->partRepo = $partRepository;
@@ -55,6 +60,7 @@ class TextrailPartImporterService implements TextrailPartImporterServiceInterfac
        $this->imageRepository = $imageRepository;
        $this->textrailPartsTransformer = $textrailPartsTransformer;
        $this->manager = $manager;
+       $this->partAttributeRepo = $partAttributeRepository;
    }
 
     public function run()
@@ -63,6 +69,18 @@ class TextrailPartImporterService implements TextrailPartImporterServiceInterfac
 
         $parts = $this->textrailPartService->getAllParts();
         $parts_sku = [];
+        $partAttributes = [];
+
+        // Fetch all `visible for front` attributes and group them to use option/values.
+        $textrailAttributes = $this->textrailPartService->getAttributes();
+        $formattedTextrailAttributes = [];
+
+        // Use attribute code as key to fetch easily later.
+        foreach ($textrailAttributes['items'] as $textrailAttribute) {
+            if (!empty($textrailAttribute['attribute_code']) && $textrailAttribute['is_visible_on_front'] === "1") {
+                $formattedTextrailAttributes[$textrailAttribute['attribute_code']] = $textrailAttribute;
+            }
+        }
 
         foreach ($parts as $item) {
             $parts_sku[] = $item->sku;
@@ -133,6 +151,50 @@ class TextrailPartImporterService implements TextrailPartImporterServiceInterfac
             $newTextrailPart = $this->partRepo->createOrUpdateBySku($partsParams);
 
             $newTextrailPart->images()->delete();
+
+            foreach ($item->custom_attributes as $key => $partAttribute) {
+
+                // That validates attribute is not available to show in front_end based on `is_visible_on_front` already applied to getAttributes().
+                if (empty($formattedTextrailAttributes[$key])) {
+                    continue;
+                }
+
+                // Get attribute detail from cached attributes array.
+                $attributeMeta = $formattedTextrailAttributes[$key];
+
+                if ($attributeMeta['frontend_input'] === 'select') {
+                   foreach ($attributeMeta['options'] as $option) {
+                       if ($partAttribute === $option['value']) {
+                           $value = $option['label'];
+                       }
+                   }
+                } else {
+                    $value = $partAttribute;
+                }
+
+                if (empty($value)) {
+                    continue;
+                }
+
+                $code = $key;
+
+                if (!array_key_exists($code, $partAttributes)) {
+                    $attribute = $this->textrailPartService->getAttribute($code);
+                    $partAttributes[$code] = $attribute;
+                } else {
+                    $attribute = $partAttributes[$code];
+                }
+
+                $attributeLabel = $attribute['default_frontend_label'] ?? $code;
+
+                $dbAttribute = $this->partAttributeRepo->firstOrCreate([
+                    'name' => $attributeLabel,
+                    'code' => $code,
+                ]);
+
+                $this->partRepo->addAttribute($newTextrailPart, $dbAttribute, $value);
+            }
+
 
             if (count($item->images) > 0) {
                 foreach ($item->images as $img) {

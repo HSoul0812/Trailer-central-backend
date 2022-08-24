@@ -257,6 +257,13 @@ class InventoryRepository implements InventoryRepositoryInterface
         // if we need to delete the bill approval record
         $firstTimeAttachBill = empty($item->bill_id) && !empty(data_get($params, 'bill_id'));
 
+        $hasFloorplanInfo = !empty(data_get($params, 'true_cost'))
+            && !empty(data_get($params, 'fp_vendor'))
+            && !empty(data_get($params, 'fp_balance'));
+
+        // We also note this down for now, we'll use it later
+        $firstTimeAttachFloorplan = empty($item->is_floorplan_bill) && $hasFloorplanInfo;
+
         $inventoryImageObjs = $this->createImages($params['new_images'] ?? []);
 
         if (!empty($inventoryImageObjs)) {
@@ -332,7 +339,7 @@ class InventoryRepository implements InventoryRepositoryInterface
 
         // We only want to delete the bill approval record if this is the
         // first time that we attach the bill to this inventory
-        $this->handleFloorplanAndBill($item, $firstTimeAttachBill);
+        $this->handleFloorplanAndBill($item, $firstTimeAttachBill || $firstTimeAttachFloorplan);
 
         $this->updateQbInvoiceItems($item);
 
@@ -509,7 +516,7 @@ class InventoryRepository implements InventoryRepositoryInterface
      * @param $params
      * @return Collection
      */
-    public function getFloorplannedInventory($params)
+    public function getFloorplannedInventory($params, $paginate = true)
     {
         $query = Inventory::select('*');
 
@@ -524,9 +531,11 @@ class InventoryRepository implements InventoryRepositoryInterface
         if (isset($params['dealer_id'])) {
             $query = $query->where('inventory.dealer_id', $params['dealer_id']);
         }
-
-        if (!isset($params['per_page'])) {
+        
+        if ($paginate && !isset($params['per_page'])) {
             $params['per_page'] = 15;
+        } else if (!$paginate && isset($params['per_page'])) {
+            unset($params['per_page']);
         }
 
         if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
@@ -570,7 +579,11 @@ class InventoryRepository implements InventoryRepositoryInterface
             }
         }
 
-        return $query->paginate($params['per_page'])->appends($params);
+        if ($paginate) {
+            return $query->paginate($params['per_page'])->appends($params);
+        }
+
+        return $query->get();
     }
 
     /**
@@ -921,6 +934,7 @@ class InventoryRepository implements InventoryRepositoryInterface
     {
         $inventory = $this->get($params);
         $inventory->times_viewed += 1;
+        $inventory->timestamps = false;
         $inventory->save();
         return $inventory;
     }
@@ -961,8 +975,10 @@ class InventoryRepository implements InventoryRepositoryInterface
         // approval record if the inventory has the bill attached to it
         // 2. In the update inventory case, we only want to delete the bill
         // approval record if the inventory has the bill attached for the first time
+        // we do this because more than one inventory can use the same bill, if we don't do this
+        // then the cronjob won't create a new bill approval record
         if ($deleteBillApproval) {
-            resolve(QuickbookApprovalRepositoryInterface::class)->deleteByTbPrimaryId($inventory->bill_id, Bill::getTableName());
+            resolve(QuickbookApprovalRepositoryInterface::class)->deleteByTbPrimaryId($inventory->bill_id, Bill::getTableName(), $inventory->dealer_id);
         }
 
         // We only want to process floorplan data if the inventory
@@ -994,5 +1010,15 @@ class InventoryRepository implements InventoryRepositoryInterface
         $inventory->bill()->update([
             'status' => Bill::STATUS_PAID,
         ]);
+    }
+
+
+    /**
+     * @param int $dealerId
+     * @param array $params
+     * @return int
+     */
+    public function archiveInventory(int $dealerId, array $inventoryParams): int {
+        return Inventory::where('dealer_id', $dealerId)->update($inventoryParams);
     }
 }
