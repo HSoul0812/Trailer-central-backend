@@ -207,6 +207,7 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('campaign_action_valid', 'App\Rules\CRM\Email\CampaignActionValid@passes');
         \Validator::extend('text_exists', 'App\Rules\CRM\Text\TextExists@passes');
         \Validator::extend('text_template_exists', 'App\Rules\CRM\Text\TemplateExists@passes');
+        \Validator::extend('email_template_exists', 'App\Rules\CRM\Email\TemplateExists@passes');
         \Validator::extend('parts_sku_unique', 'App\Rules\Parts\SkuUnique@validate');
         \Validator::extend('vendor_exists', 'App\Rules\Inventory\VendorExists@passes');
         \Validator::extend('valid_form_map_type', 'App\Rules\Website\Forms\ValidMapType@passes');

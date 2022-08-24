@@ -215,6 +215,20 @@ abstract class TestCase extends BaseTestCase
     /**
      * @param $object
      * @param $property
+     * @param $value
+     * @return void
+     * @throws \ReflectionException
+     */
+    public function setToPrivateProperty($object, $property, $value)
+    {
+        $reflector = new ReflectionProperty(get_class($object), $property);
+        $reflector->setAccessible(true);
+        $reflector->setValue($object, $value);
+    }
+
+    /**
+     * @param $object
+     * @param $property
      * @return mixed
      * @throws ReflectionException
      */
