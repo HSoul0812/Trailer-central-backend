@@ -130,6 +130,7 @@ class CsvImportService implements CsvImportServiceInterface
         "is_special" => true,
         "is_featured" => true,
         "is_archived" => true,
+        "show_on_website" => true,
         "append_images" => true,
         "replace_images" => true,
         "video_embed_code" => true
@@ -178,6 +179,7 @@ class CsvImportService implements CsvImportServiceInterface
         "is_special" => array("is_special", "is special", "is on special", "special", "website special"),
         "is_featured" => array("is_featured", "is featured", "featured", "website featured"),
         "is_archived" => array("archived", "is archived"),
+        "show_on_website" => array("show on website" , "hidden", "is hidden"),
         "append_images" => array("append images on import", "append image", "append images", "use images", "use image"),
         "replace_images" => array("replace images", "replace_images"),
         "image_mode" => array("image mode", "images mode", "img mode"),
@@ -314,6 +316,13 @@ class CsvImportService implements CsvImportServiceInterface
             "list" => array(
                 "yes" => "1",
                 "no" => "0",
+            )
+        ),
+        "show_on_website" => array(
+            "type" => "enum",
+            "list" => array(
+                "yes" => "1",
+                "no" => "0"
             )
         ),
         "cost_of_unit" => array("type" => "decimal"),
@@ -763,6 +772,7 @@ class CsvImportService implements CsvImportServiceInterface
             case 'status':
             case 'is_special':
             case 'is_featured':
+            case 'show_on_website':
                 if (isset(self::$_columnValidation[$type]['list'][strtolower($value)])) {
                     $this->inventory[$type] = self::$_columnValidation[$type]['list'][strtolower($value)];
                 }
