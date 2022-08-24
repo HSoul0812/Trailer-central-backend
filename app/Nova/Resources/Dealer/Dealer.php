@@ -111,8 +111,14 @@ class Dealer extends Resource
             Text::make('CDK Source ID', 'cdk')->onlyOnDetail(),
 
             Text::make('Inventories', function () {
-                return count($this->inventories) . ' units' . '<br>' .
-                       count($this->locations) . ' locations';
+                $inventories = \DB::selectOne("select count(inventory_id) as count from inventory where dealer_id = " . $this->dealer_id . " group by dealer_id");
+                $inventories = $inventories ? $inventories->count : 0;
+
+                $locations = \DB::selectOne("select count(dealer_location_id) as count from dealer_location where dealer_id = " . $this->dealer_id . " group by dealer_id");
+                $locations = $locations ? $locations->count : 0;
+
+                return $inventories . ' units' . '<br>' .
+                       $locations . ' locations';
             })->asHtml()->exceptOnForms(),
 
             new Panel('Subscriptions', $this->subscriptions()),
