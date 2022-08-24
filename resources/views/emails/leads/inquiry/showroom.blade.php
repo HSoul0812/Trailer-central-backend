@@ -69,9 +69,9 @@
 @if (!empty($isSpam))
     <div style='width: 650px; margin: 0 auto; background: #ffeb3b; color: #000; border: 1px solid #333; padding: 10px; font-family: monospace'>
 
-        <strong style='text-align: right; display: block; margin: 0; padding: 0;'>SPAM MESSAGE -- SCORE: {{ $allFailuresCount }}</strong><br />
+        <strong style='text-align: right; display: block; margin: 0; padding: 0;'>SPAM MESSAGE</strong><br />
 
-        <strong>Remote IP:</strong> {{ $remoteIp }}
+
         @if (!empty($forwardedFor))
             / Visible Proxy: {{ $forwardedFor }}
         @endif

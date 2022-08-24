@@ -2,6 +2,7 @@
 
 namespace App\Models\User;
 
+use App\Models\CRM\Dms\Quote\QuoteSetting;
 use App\Models\Parts\Bin;
 use App\Models\User\Interfaces\PermissionsInterface;
 use App\Traits\Models\HasPermissionsStub;
@@ -293,6 +294,11 @@ class User extends Model implements Authenticatable, PermissionsInterface
         return $this
             ->hasOne(AuthToken::class, 'user_id', 'dealer_id')
             ->where('user_type', 'dealer');
+    }
+
+    public function quoteSetting(): HasOne
+    {
+        return $this->hasOne(QuoteSetting::class, 'dealer_id', 'dealer_id');
     }
 
     public function getIsCrmActiveAttribute(): bool
