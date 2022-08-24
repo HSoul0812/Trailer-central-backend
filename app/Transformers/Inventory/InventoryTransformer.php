@@ -289,6 +289,14 @@ class InventoryTransformer extends TransformerAbstract
      */
     private function fixWrongChars(?string $rawInput): string
     {
-        return str_replace(['\\' . PHP_EOL . 'n', '\n', '\\' . PHP_EOL], PHP_EOL, $rawInput);
+        return str_replace([
+            '\n',
+            '\\' . PHP_EOL,
+            '\\' . PHP_EOL . 'n'
+        ], [
+            PHP_EOL,
+            PHP_EOL . PHP_EOL,
+            PHP_EOL . PHP_EOL . PHP_EOL
+        ], $rawInput);
     }
 }
