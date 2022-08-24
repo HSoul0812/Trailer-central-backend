@@ -174,6 +174,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         \URL::forceScheme('https');
+        $this->app['request']->server->set('HTTPS', true);
         \Validator::extend('price_format', 'App\Rules\PriceFormat@passes');
         \Validator::extend('checkbox', 'App\Rules\Checkbox@passes');
         \Validator::extend('dealer_location_valid', 'App\Rules\User\ValidDealerLocation@passes');
