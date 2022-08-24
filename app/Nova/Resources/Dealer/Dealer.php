@@ -89,6 +89,14 @@ class Dealer extends Resource
 
             Text::make('Stripe ID', 'stripe_id')->exceptOnForms(),
 
+            Text::make('Website', function () {
+                if ($this->website) {
+                    return $this->website->id;
+                } else {
+                    return null;
+                }
+            })->asHtml()->exceptOnForms(),
+
             Text::make('Websites', function () {
                 if ($this->website) {
                     return '<a class="text-primary font-bold" href="http://www.' . $this->website->domain . '" target="_blank">www.' . $this->website->domain . '</a><br>' .
