@@ -120,7 +120,8 @@ class InventoryTransformer extends TransformerAbstract
              'dealer' => $this->userTransformer->transform($inventory->user),
              'dealer_location_id' => $inventory->dealer_location_id,
              'dealer_location' => $inventory->dealerLocation ? $this->dealerLocationTransformer->transform($inventory->dealerLocation) : null,
-             'description' => $this->fixWrongChars($inventory->description),
+             'description' => $inventory->description,
+             'description_html' => $inventory->description_html,
              'entity_type_id' => $inventory->entity_type_id,
              'fp_balance' => $inventory->fp_balance,
              'fp_interest_paid' => $inventory->interest_paid,
@@ -278,25 +279,5 @@ class InventoryTransformer extends TransformerAbstract
     private function getNewQuoteRoute(string $inventoryIdentifier): string
     {
         return self::CRM_NEW_QUOTE_URL . '?inventory_id=' . $inventoryIdentifier;
-    }
-
-    /**
-     * Due we have some malformed text values like description, this is a mitigation fix while we found a way to fix it
-     * in the importers processes
-     *
-     * @param string|null $rawInput
-     * @return string
-     */
-    private function fixWrongChars(?string $rawInput): string
-    {
-        return str_replace([
-            '\n',
-            '\\' . PHP_EOL,
-            '\\' . PHP_EOL . 'n'
-        ], [
-            PHP_EOL,
-            PHP_EOL . PHP_EOL,
-            PHP_EOL . PHP_EOL . PHP_EOL
-        ], $rawInput);
     }
 }

@@ -185,6 +185,10 @@ class InventoryService implements InventoryServiceInterface
                 $params['clapps']['default-image'] = $clappImage['path'];
             }
 
+            if (!empty($params['description'])) {
+                $params['description_html'] = $params['description'];
+            }
+
             $inventory = $this->inventoryRepository->create($params);
 
             if (!$inventory instanceof Inventory) {
@@ -250,6 +254,10 @@ class InventoryService implements InventoryServiceInterface
             if (!empty($clappsDefaultImage)) {
                 $clappImage = $this->imageService->upload($clappsDefaultImage, $params['title'], $params['dealer_id']);
                 $params['clapps']['default-image'] = $clappImage['path'];
+            }
+
+            if (!empty($params['description'])) {
+                $params['description_html'] = $params['description'];
             }
 
             $inventory = $this->inventoryRepository->update($params, $options);
