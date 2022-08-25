@@ -59,6 +59,11 @@ return [
             'root' => base_path('tests/resources'),
         ],
 
+        'qz_tray' => [
+            'driver' => 'local',
+            'root' => storage_path('qz-tray'),
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
