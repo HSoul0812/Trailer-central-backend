@@ -16,6 +16,5 @@ class GetPaymentRequest extends Request
         'dealer_id' => 'array',
         'dealer_id.*' => 'integer',
         'inventory_id' => 'integer',
-        'exact_check_number' => 'string'
     ];
 }

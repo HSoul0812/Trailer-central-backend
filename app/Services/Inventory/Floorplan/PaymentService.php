@@ -136,4 +136,20 @@ class PaymentService implements PaymentServiceInterface
 
         return $expense;
     }
+
+    /**
+     * @param int $dealerId
+     * @param string $checkNumber
+     *
+     * @return bool
+     */
+    public function checkNumberExists(int $dealerId, string $checkNumber): bool
+    {
+        $data = [
+            'entity_type' => Expense::ENTITY_VENDOR,
+            'tb_name' => Expense::TABLE_FLOORPLAN_PAYMENT,
+        ];
+
+        return $this->expenseRepo->checkNumberExists($dealerId, $checkNumber, $data);
+    }
 }

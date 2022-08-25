@@ -116,13 +116,6 @@ class PaymentRepository implements PaymentRepositoryInterface {
             });
         }
 
-        if (!empty($params['exact_check_number'])) {
-            $query->where([
-                'payment_type' => Payment::PAYMENT_TYPES_CHECK,
-                'check_number' => $params['exact_check_number'],
-            ]);
-        }
-
         if (!isset($params['per_page'])) {
             $params['per_page'] = 15;
         }
@@ -153,13 +146,6 @@ class PaymentRepository implements PaymentRepositoryInterface {
                         $q->where('title', 'LIKE', '%' . $params['search_term'] . '%');
                     });
             });
-        }
-
-        if (!empty($params['exact_check_number'])) {
-            $query->where([
-                'payment_type' => Payment::PAYMENT_TYPES_CHECK,
-                'check_number' => $params['exact_check_number'],
-            ]);
         }
 
         if (!isset($params['per_page'])) {

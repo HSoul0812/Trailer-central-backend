@@ -6,6 +6,7 @@ use Dingo\Api\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\RestfulController;
+use App\Http\Requests\Inventory\Floorplan\CheckNumberPaymentRequest;
 use App\Transformers\Quickbooks\ExpenseTransformer;
 use App\Http\Requests\Inventory\GetInventoryRequest;
 use App\Transformers\Inventory\InventoryTransformer;
@@ -18,7 +19,6 @@ use App\Repositories\Inventory\Floorplan\PaymentRepositoryInterface;
 
 class PaymentController extends RestfulController
 {
-    
     protected $payment;
 
     /**
@@ -30,7 +30,7 @@ class PaymentController extends RestfulController
      * @var InventoryRepositoryInterface
      */
     protected $inventoryRepository;
-    
+
     /**
      * Create a new controller instance.
      *
@@ -46,9 +46,9 @@ class PaymentController extends RestfulController
         $this->paymentService = $paymentService;
         $this->inventoryRepository = $inventoryRepository;
 
-        $this->middleware('setDealerIdOnRequest')->only(['create', 'downloadCsv']);
+        $this->middleware('setDealerIdOnRequest')->only(['create', 'downloadCsv', 'checkNumberExists']);
     }
-   
+
 
     /**
      * @OA\Get(
@@ -232,4 +232,46 @@ class PaymentController extends RestfulController
         return $this->response->errorBadRequest();
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/inventory/floorplan/payments/checkNumberExists",
+     *     description="Checks whether an check number payment exists",
+     *     tags={"Inventory"},
+     *     @OA\Parameter(
+     *         name="check_number",
+     *         in="query",
+     *         description="Check Number",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns a result",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
+     *     ),
+     * )
+     *
+     * @param CheckNumberPaymentRequest $request
+     * @return Response
+     * @throws NoObjectIdValueSetException|NoObjectTypeSetException
+     */
+    public function checkNumberExists(Request $request): Response
+    {
+        $checkNumberPaymentRequest = new CheckNumberPaymentRequest($request->all());
+
+        if (!$checkNumberPaymentRequest->validate()) {
+            return $this->response->errorBadRequest();
+        }
+
+        $isExists = $this->paymentService->checkNumberExists(
+            $request->input('dealer_id'),
+            $request->input('checkNumber')
+        );
+
+        return $this->existsResponse($isExists);
+    }
 }
