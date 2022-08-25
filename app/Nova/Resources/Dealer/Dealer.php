@@ -127,7 +127,7 @@ class Dealer extends Resource
 
             Text::make('State', 'state')->exceptOnForms(),
 
-            Boolean::make('Deleted', 'deleted')->exceptOnForms(),
+            Boolean::make('Active', 'deleted')->exceptOnForms(),
 
             BelongsTo::make('Collector', 'collector', 'App\Nova\Resources\Integration\Collector')->exceptOnForms(),
 
