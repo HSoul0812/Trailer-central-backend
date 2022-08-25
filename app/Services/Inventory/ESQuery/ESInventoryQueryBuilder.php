@@ -64,6 +64,14 @@ class ESInventoryQueryBuilder
         return $this;
     }
 
+    public function addExistsQuery(string $fieldKey, $context = self::OCCUR_MUST) {
+        $query = $this->buildExistsQuery($fieldKey);
+        if($query != null) {
+            $this->queries[$context][] = $query;
+        }
+        return $this;
+    }
+
     public function addTermQuery(string $fieldKey, $value, $context = self::OCCUR_MUST)
     {
         $query = $this->buildTermQuery($fieldKey, $value);
@@ -121,6 +129,14 @@ class ESInventoryQueryBuilder
                 ];
         }
         return null;
+    }
+
+    public function buildExistsQuery(string $fieldKey) {
+        return [
+            'exists' => [
+                'field' => $fieldKey
+            ]
+        ];
     }
 
     public function setGeoDistance(array $location, ?string $distance): static
