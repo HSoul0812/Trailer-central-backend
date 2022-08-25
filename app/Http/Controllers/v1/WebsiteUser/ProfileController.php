@@ -9,48 +9,23 @@ use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\Request;
 use App\Http\Requests\UpdateRequestInterface;
 use App\Http\Requests\WebsiteUser\AuthenticateUserRequest;
+use App\Http\Requests\WebsiteUser\UpdateUserRequest;
+use App\Http\Requests\WithRequestBindings;
 use App\Transformers\WebsiteUser\WebsiteUserTransformer;
+use Dingo\Api\Routing\Helpers;
+use Sentry\Response;
 
-class ProfileController extends AbstractRestfulController
+class ProfileController
 {
-    public function __construct(
-        private WebsiteUserTransformer $transformer
-    )
-    {
-        parent::__construct();
-    }
-    public function get(): \Dingo\Api\Http\Response
-    {
-        $user = auth('api')->user();
-        return $this->response->item($user, $this->transformer);
-    }
+    use Helpers;
+    use WithRequestBindings;
 
-    public function index(IndexRequestInterface $request)
-    {
-        throw new NotImplementedException();
-    }
+    public function __construct(private WebsiteUserTransformer $transformer) {}
 
-    public function create(CreateRequestInterface $request)
-    {
-        throw new NotImplementedException();
-    }
 
-    public function show(int $id)
-    {
-        throw new NotImplementedException();
-    }
-
-    public function update(int $id, UpdateRequestInterface $request)
-    {
-        throw new NotImplementedException();
-    }
-
-    public function destroy(int $id)
-    {
-        throw new NotImplementedException();
-    }
 
     protected function constructRequestBindings(): void
     {
+
     }
 }

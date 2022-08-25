@@ -53,6 +53,7 @@ class TcApiResponseInventory
     public ?int $year;
     public ?string $status;
     public ?string $axle_capacity;
+
     #[Pure]
  public static function fromData(array $data): self
  {

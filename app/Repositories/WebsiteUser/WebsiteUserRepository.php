@@ -30,7 +30,11 @@ class WebsiteUserRepository implements WebsiteUserRepositoryInterface
     public function update($id, array $newAttributes): bool
     {
         $websiteUser = WebsiteUser::find($id);
-        return $websiteUser->update($newAttributes);
+        $websiteUser->fill($newAttributes);
+        if(isset($newAttributes['tc_user_location_id'])) {
+            $websiteUser->tc_user_location_id = $newAttributes['tc_user_location_id'];
+        }
+        return $websiteUser->save();
     }
 
     public function delete($id): bool

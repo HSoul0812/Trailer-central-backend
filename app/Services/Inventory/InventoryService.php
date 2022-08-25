@@ -2,6 +2,7 @@
 
 namespace App\Services\Inventory;
 
+use App\DTOs\Inventory\TcApiResponseAttribute;
 use App\DTOs\Inventory\TcApiResponseInventory;
 use App\DTOs\Inventory\TcApiResponseInventoryCreate;
 use App\DTOs\Inventory\TcApiResponseInventoryDelete;
@@ -10,6 +11,8 @@ use App\Services\Inventory\ESQuery\ESBoolQueryBuilder;
 use App\Services\Inventory\ESQuery\ESInventoryQueryBuilder;
 use App\Services\Inventory\ESQuery\SortOrder;
 use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Support\Collection;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use App\DTOs\Inventory\TcEsInventory;
 use App\DTOs\Inventory\TcEsResponseInventoryList;
@@ -121,9 +124,7 @@ class InventoryService implements InventoryServiceInterface
       $access_token = $headers['access-token'];
       $url = config('services.trailercentral.api') . 'inventory/';
       $inventory = $this->handleHttpRequest('PUT', $url, ['query' => $params, 'headers' => ['access-token' => $access_token]]);
-      $respObj = TcApiResponseInventoryCreate::fromData($inventory['response']['data']);
-
-      return $respObj;
+      return TcApiResponseInventoryCreate::fromData($inventory['response']['data']);
     }
 
     /**
@@ -411,6 +412,10 @@ class InventoryService implements InventoryServiceInterface
         );
 
         $categoryQueries = $queryBuilder->buildTermInValuesQuery('category', $mappedCategories);
+        if($categoryQueries === NULL) {
+            throw new BadRequestException('No category was selected');
+        }
+
         if(isset($params['category']) && $params['category'] === 'Tilt') {
             $mappedTypeCategories = $this->getMappedCategories(
                 $params['type_id'],
@@ -423,6 +428,7 @@ class InventoryService implements InventoryServiceInterface
                 ->build();
             $categoryQueries[] = $tiltQuery;
         }
+
         $queryBuilder
             ->addQueryToContext(
                 (new ESBoolQueryBuilder())->should($categoryQueries)->build()
@@ -463,6 +469,18 @@ class InventoryService implements InventoryServiceInterface
         $respObj->type_id = $newCategory['type_id'];
         $respObj->type_label = $newCategory['type_label'];
         return $respObj;
+    }
+
+    public function attributes(int $entityTypeId): Collection
+    {
+        $results = new Collection();
+        $url = config('services.trailercentral.api') . 'inventory/attributes' . "?entity_type_id=$entityTypeId";
+        $attributes = $this->handleHttpRequest('GET', $url);
+        foreach($attributes['data'] as $attribute) {
+            $attributeObj = TcApiResponseAttribute::fromData($attribute);
+            $results->add($attributeObj);
+        }
+        return $results;
     }
 
     /**
