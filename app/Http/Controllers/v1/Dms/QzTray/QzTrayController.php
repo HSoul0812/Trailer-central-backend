@@ -56,7 +56,7 @@ class QzTrayController extends RestfulControllerV2
             $this->response->error('Private key file does not exist.', SymfonyResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
 
-        $success = openssl_sign($request->input('toSign'), $signature, $privateKey);
+        $success = openssl_sign($request->input('to_sign'), $signature, $privateKey);
 
         if (!$success) {
             $this->response->error('Cannot generate the signature from the given data.', SymfonyResponse::HTTP_BAD_REQUEST);
