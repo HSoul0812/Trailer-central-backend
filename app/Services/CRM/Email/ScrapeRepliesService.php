@@ -224,6 +224,8 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 $this->auth->validate($salesperson->active_token);
             } catch (\Exception $e) {
                 $this->salespeople->update(['id' => $salesperson->id, 'imap_failed' => 1]);
+                $this->log->error('Exception thrown validating active access token: ' .
+                                    $e->getMessage() . '; marking IMAP connection as failed');
             }
         }
 
@@ -288,6 +290,8 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         } catch (\Exception $e) {
             $this->folders->markFailed($folder->folder_id);
             $this->salespeople->update(['id' => $salesperson->id, 'imap_failed' => 1]);
+            $this->log->error('General exception thrown retrieving email messages: ' .
+                                $e->getMessage() . '; marking IMAP connection as failed');
         }
 
         // Return Nothing
