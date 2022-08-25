@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\v1\User;
 
+use App\Exceptions\User\TooLongPasswordException;
 use App\Http\Controllers\RestfulController;
 use App\Models\User\UserAuthenticatable;
 use App\Repositories\User\UserRepositoryInterface;
@@ -108,6 +109,10 @@ class SignInController extends RestfulController
         if ($request->validate()) {
             try {
                 $this->passwordResetService->finishReset($request->code, $request->password);
+            } catch (TooLongPasswordException $ex) {
+                // the request validation is preventing this, but just in case anyone remove that rule
+                // we're going to handle it here
+                return $this->response->errorBadRequest($ex->getMessage());
             } catch (\Exception $ex) {
                 return $this->response->errorForbidden();
             }
@@ -125,7 +130,13 @@ class SignInController extends RestfulController
         if ($request->validate()) {
             $user = $this->extractUserFromRequest($request);
 
-            $this->passwordResetService->updatePassword($user, $request->password);
+            try {
+                $this->passwordResetService->updatePassword($user, $request->password);
+            } catch (TooLongPasswordException $ex) {
+                // the request validation is preventing this, but just in case anyone remove that rule
+                // we're going to handle it here
+                return $this->response->errorBadRequest($ex->getMessage());
+            }
 
             return $this->successResponse();
         }
