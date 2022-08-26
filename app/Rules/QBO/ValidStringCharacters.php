@@ -18,7 +18,7 @@ class ValidStringCharacters implements Rule
     const CUSTOMERS_REGION_SECTION = 'customer_region';
     const CUSTOMERS_REGION_REGEX = "/^[A-Za-z ]+$/";
     const CUSTOMERS_PHONE_SECTION = 'customer_phone';
-    const CUSTOMERS_PHONE_REGEX = "/^(\+\d{1,2})?\d()- +$/";
+    const CUSTOMERS_PHONE_REGEX = "/^[(\+\d{1,2})?\d\s()-]+$/";
 
     const MISC_PARTS_SECTION = 'misc_parts';
     const MISC_PARTS_REGEX = "/^[\w]\*$/";

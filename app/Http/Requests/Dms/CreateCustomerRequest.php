@@ -49,7 +49,7 @@ class CreateCustomerRequest extends Request
             'shipping_address' => ['string', 'nullable', new ValidStringCharacters(ValidStringCharacters::CUSTOMERS_SECTION)],
             'shipping_city' => ['string', 'nullable', new ValidStringCharacters(ValidStringCharacters::CUSTOMERS_SECTION)],
             'shipping_region' => ['string', 'nullable', new ValidStringCharacters(ValidStringCharacters::CUSTOMERS_REGION_SECTION)],
-            'shipping_postal_code' => ['string', 'nullable', new ValidStringCharacters(ValidStringCharacters::CUSTOMERS_POSTAL_CODE_SECTION)],
+            'shipping_postal_code' => ['string', 'nullable', new ValidStringCharacters(ValidStringCharacters::CUSTOMERS_POSTAL_CODE_SECTION), 'max:10'],
             'shipping_country' => 'string|nullable',
             'county' => ['string', 'nullable', new ValidStringCharacters(ValidStringCharacters::CUSTOMERS_SECTION)],
             'shipping_county' => ['string', 'nullable', new ValidStringCharacters(ValidStringCharacters::CUSTOMERS_SECTION)],
