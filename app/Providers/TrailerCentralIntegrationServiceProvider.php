@@ -22,6 +22,8 @@ use App\Repositories\SyncProcessRepository;
 use App\Repositories\SyncProcessRepositoryInterface;
 use App\Repositories\SysConfig\SysConfigRepository;
 use App\Repositories\SysConfig\SysConfigRepositoryInterface;
+use App\Services\Integrations\TrailerCentral\Api\Image\ImageService;
+use App\Services\Integrations\TrailerCentral\Api\Image\ImageServiceInterface;
 use App\Services\Integrations\TrailerCentral\Api\Users\UsersService;
 use App\Services\Integrations\TrailerCentral\Api\Users\UsersServiceInterface;
 use App\Services\Integrations\TrailerCentral\Console\Inventory\LogService as InventoryLogService;
@@ -77,6 +79,8 @@ class TrailerCentralIntegrationServiceProvider extends ServiceProvider
         $this->app->bind(IpInfoServiceInterface::class, IpInfoService::class);
 
         $this->app->bind(UsersServiceInterface::class, UsersService::class);
+
+        $this->app->bind(ImageServiceInterface::class, ImageService::class);
 
         GoogleMapSearchService::register();
     }

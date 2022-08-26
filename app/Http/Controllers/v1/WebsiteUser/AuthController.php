@@ -76,7 +76,7 @@ class AuthController extends AbstractRestfulController
     {
         $user = auth('api')->user();
         if($request->validate()) {
-            $this->authService->update($user, $request->all());
+            $this->authService->update($user->tc_user_id, $request->all());
             return $this->response->array(
                 ['success' => true]
             );
