@@ -4,6 +4,7 @@ namespace Tests\Integration\Http\Controllers\CRM\Email;
 
 use App\Models\CRM\Email\Blast;
 use App\Transformers\CRM\Email\BlastTransformer;
+use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Carbon;
 use Tests\Integration\IntegrationTestCase;
 use Laravel\Lumen\Testing\DatabaseTransactions;
@@ -19,7 +20,7 @@ use App\Models\User\NewDealerUser;
  */
 class BlastControllerTest extends IntegrationTestCase
 {
-    use DatabaseTransactions;
+    use DatabaseTransactions, WithFaker;
 
     /**
      * @var BlastSeeder
@@ -110,16 +111,6 @@ class BlastControllerTest extends IntegrationTestCase
         $this->seeder = new BlastSeeder();
         $this->seeder->seed();
         $this->accessToken = $this->seeder->dealer->access_token;
-
-        // Fixing Invalid User Id
-        $newDealerUserRepo = app(NewDealerUserRepositoryInterface::class);
-        $newDealerUser = $newDealerUserRepo->create([
-            'user_id' => $this->seeder->user->user_id,
-            'salt' => md5((string)$this->seeder->user->user_id),
-            'auto_import_hide' => 0,
-            'auto_msrp' => 0
-        ]);
-        $this->seeder->dealer->newDealerUser()->save($newDealerUser);
     }
 
     public function tearDown(): void
@@ -189,11 +180,13 @@ class BlastControllerTest extends IntegrationTestCase
      */
     public function testCreate()
     {
+        $dealerId = $this->seeder->dealer->getKey();
         // Grab a template from the seeder
         $template = $this->seeder->template;
 
         // Initialize the required data for the blast
         $rawBlast = [
+            'user_id' => $dealerId,
             'email_template_id' => $template->id,
             'campaign_name' => 'Test Campaign',
             'send_date' => Carbon::tomorrow()->format('Y-m-d H:i:s'),
@@ -212,6 +205,7 @@ class BlastControllerTest extends IntegrationTestCase
         // Check if we have a valid response from the API
         $response->assertStatus(200)
             ->assertJsonStructure(self::SINGLE_JSON_STRUCTURE);
+
         // Check that the data was assigned correctly
         $this->assertSame(
             $this->seeder->dealer->newDealerUser->user_id,
@@ -220,9 +214,13 @@ class BlastControllerTest extends IntegrationTestCase
         );
         $this->assertSame($template->id, $response['data']['template_id'], "The template id doesn't match");
 
-        // Corroborate the record was inserted in the database
+        // Corroborate the record was inserted correctly in the database
         $this->assertDatabaseHas(Blast::getTableName(), [
-            'email_blasts_id' => $response['data']['id']
+            'email_blasts_id' => $response['data']['id'],
+            'campaign_name' => $rawBlast['campaign_name'],
+            'email_template_id' => $rawBlast['email_template_id'],
+            'action' => $rawBlast['action'],
+            'user_id' => $rawBlast['user_id'],
         ]);
     }
 
@@ -260,17 +258,25 @@ class BlastControllerTest extends IntegrationTestCase
      */
     public function testUpdate()
     {
-        // Grab a template and a blast from the seeder
-        $template = $this->seeder->template;
+        // Grab a blast from the seeder
         $blast = $this->seeder->createdBlasts[0];
+        $randomDigit = $this->faker->unique()->randomDigit;
 
-        // Inivialize some data for the updated blast
+        // Initialize some data for the updated blast
         $updatedInfo = [
-            'email_template_id' => $template->id,
-            'campaign_name' => 'Updated Campaign',
-            'send_date' => Carbon::tomorrow()->format('Y-m-d H:i:s'),
+            'user_id' => $this->seeder->dealer->getKey(),
+            'email_template_id' => $this->seeder->template->id,
+            'campaign_name' => $this->faker->unique()->word,
+            'send_date' => now()->addDays($randomDigit)->format('Y-m-d H:i:s'),
             'action' => Blast::ACTION_CONTACTED,
-            'send_after_days' => '2',
+            'send_after_days' => $randomDigit,
+            'unit_category' => null,
+            'location_id' => null,
+            'from_email_address' => $this->faker->email,
+            'delivered' => 0,
+            'cancelled' => 0,
+            'campaign_subject' => $this->faker->sentence(5),
+            'include_archived' => 1,
         ];
 
         // POST the data into de API
@@ -281,27 +287,28 @@ class BlastControllerTest extends IntegrationTestCase
             ['access-token' => $this->accessToken]
         );
 
+        // Add the ID for validation
+        $updatedInfo['email_blasts_id'] = $blast->email_blasts_id;
+
+        // Check we are getting a date and then remove it to avoid mismatches due to API times
+        $this->assertNotFalse(strtotime($response['data']['send_date']));
+        unset($updatedInfo['send_date']);
+
         // Check if we have a valid response from the API
         $response->assertStatus(200)
             ->assertJsonStructure(self::SINGLE_JSON_STRUCTURE);
 
-        // Check the data was assigned correctly
-        $this->assertSame(
-            $this->seeder->dealer->newDealerUser->user_id,
-            $response['data']['user_id'],
-            "The user doesn't match"
-        );
-        $this->assertSame(
-            $updatedInfo['campaign_name'],
-            $response['data']['campaign_name'],
-            "The blast campaign's name doesn't match"
-        );
-
         // Corroborate the record was updated in the database
-        $this->assertDatabaseHas(Blast::getTableName(), [
-            'email_blasts_id' => $response['data']['id'],
-            'campaign_name' => $updatedInfo['campaign_name']
-        ]);
+        $this->assertDatabaseHas(Blast::getTableName(), $updatedInfo);
+
+        // Update the info sent to match the transformer
+        $updatedInfo['template_id'] = $updatedInfo['email_template_id'];
+        $updatedInfo['id'] = $updatedInfo['email_blasts_id'];
+        unset($updatedInfo['email_template_id']);
+        unset($updatedInfo['email_blasts_id']);
+        $updatedInfo['action'] = strtoupper($updatedInfo['action']);
+
+        $this->assertResponseDataEquals($response, $updatedInfo, false);
     }
 
     /**

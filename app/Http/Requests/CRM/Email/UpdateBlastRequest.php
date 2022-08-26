@@ -13,7 +13,8 @@ class UpdateBlastRequest extends Request {
     
     protected $rules = [
         'id' => 'required|integer',
-        'email_template_id' => 'email_template_exists',
+        'user_id' => 'required|exists:App\Models\User\NewDealerUser,user_id',
+        'email_template_id' => 'required|email_template_exists',
         'campaign_name' => 'string',
         'send_date' => 'date_format:Y-m-d H:i:s',
         'from_sms_number' => 'nullable|regex:/(0-9)?[0-9]{10}/',

@@ -12,6 +12,7 @@ use App\Http\Requests\Request;
 class CreateBlastRequest extends Request {
 
     protected $rules = [
+        'user_id' => 'required|exists:App\Models\User\NewDealerUser,user_id',
         'email_template_id' => 'required|email_template_exists',
         'campaign_name' => 'required|string',
         'send_date' => 'required|date_format:Y-m-d H:i:s',
