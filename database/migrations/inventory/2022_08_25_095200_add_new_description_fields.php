@@ -14,8 +14,8 @@ class AddNewDescriptionFields extends Migration
     public function up()
     {
         Schema::table('inventory', function (Blueprint $table) {
-            $table->text('description_old')->nullable();
-            $table->text('description_html_old')->nullable();
+            $table->text('description_old')->collation('utf8_general_ci')->nullable();
+            $table->text('description_html_old')->collation('utf8_general_ci')->nullable();
         });
 
         \Illuminate\Support\Facades\DB::statement("UPDATE `inventory` SET `description_old` = `description` WHERE `description` IS NOT NULL AND `description` != ''");

@@ -24,6 +24,7 @@
         "dingo/api": "^2.4",
         "doctrine/dbal": "^2.9",
         "epartment/nova-dependency-container": "^1.2",
+        "erusev/parsedown": "^1.7",
         "facebook/php-business-sdk": "5.0.5",
         "feed/edit-mapping": "*",
         "fideloper/proxy": "^4.0",
@@ -57,6 +58,7 @@
         "psr/container": "1.1.1",
         "psr/log": "^1.0",
         "sentry/sentry-laravel": "^2.11",
+        "showroom/bulkconfiguration": "*",
         "spatie/browsershot": "~3.40.0",
         "spatie/image": "^1.10",
         "spatie/laravel-permission": "^3.0",
@@ -67,11 +69,10 @@
         "symfony/css-selector": "^5.1",
         "symfony/dom-crawler": "^5.1",
         "tijsverkoyen/css-to-inline-styles": "^2.2.1",
+        "trailercentral/passwordless-login-url": "*",
         "twilio/sdk": "^5.31",
         "vyuldashev/nova-permission": "^2.11",
-        "webklex/laravel-imap": "~2.4",
-        "showroom/bulkconfiguration": "*",
-        "trailercentral/passwordless-login-url": "*"
+        "webklex/laravel-imap": "~2.4"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.4",

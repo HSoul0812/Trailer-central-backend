@@ -106,6 +106,9 @@ class InventoryService implements InventoryServiceInterface
      */
     private $logService;
 
+    /** @var \Parsedown */
+    private $markdownHelper;
+
     /**
      * InventoryService constructor.
      * @param InventoryRepositoryInterface $inventoryRepository
@@ -119,6 +122,7 @@ class InventoryService implements InventoryServiceInterface
      * @param DealerLocationRepositoryInterface $dealerLocationRepository
      * @param DealerLocationMileageFeeRepositoryInterface $dealerLocationMileageFeeRepository
      * @param CategoryRepositoryInterface $categoryRepository
+     * @param \Parsedown $parsedown
      * @param GeoLocationRepositoryInterface $geolocationRepository
      */
     public function __construct(
@@ -134,6 +138,7 @@ class InventoryService implements InventoryServiceInterface
         DealerLocationMileageFeeRepositoryInterface $dealerLocationMileageFeeRepository,
         CategoryRepositoryInterface $categoryRepository,
         GeoLocationRepositoryInterface $geolocationRepository,
+        \Parsedown $parsedown,
         ?LoggerServiceInterface $logService = null
     ) {
         $this->inventoryRepository = $inventoryRepository;
@@ -149,6 +154,7 @@ class InventoryService implements InventoryServiceInterface
         $this->categoryRepository = $categoryRepository;
         $this->geolocationRepository = $geolocationRepository;
         $this->logService = $logService ?? app()->make(LoggerServiceInterface::class);
+        $this->markdownHelper = $parsedown;
     }
 
     /**
@@ -186,7 +192,7 @@ class InventoryService implements InventoryServiceInterface
             }
 
             if (!empty($params['description'])) {
-                $params['description_html'] = $params['description'];
+                $params['description_html'] = $this->markdownHelper->text($params['description']);
             }
 
             $inventory = $this->inventoryRepository->create($params);
@@ -257,7 +263,7 @@ class InventoryService implements InventoryServiceInterface
             }
 
             if (!empty($params['description'])) {
-                $params['description_html'] = $params['description'];
+                $params['description_html'] = $this->markdownHelper->text($params['description']);
             }
 
             $inventory = $this->inventoryRepository->update($params, $options);
@@ -287,6 +293,7 @@ class InventoryService implements InventoryServiceInterface
             Log::error('Item update error. Message - ' . $e->getMessage(), $e->getTrace());
             $this->inventoryRepository->rollbackTransaction();
 
+            echo $e->getMessage(); die;
             throw new InventoryException('Inventory item update error');
         }
 
