@@ -33,7 +33,7 @@ class UniqueCheckNumberPaymentRule implements Rule
     {
         $paymentService = resolve(PaymentService::class);
 
-        return !($paymentService->checkNumberExists($this->dealerId, $value));
+        return !$paymentService->checkNumberExists($this->dealerId, $value);
     }
 
     /**
