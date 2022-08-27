@@ -3,5 +3,8 @@
 return [
     'hosts' => [
         env('ELASTIC_HOST', 'localhost:9200'),
+    ],
+    'indices' => [
+        'inventory' => env('INDEX_INVENTORY', 'inventory')
     ]
 ];
