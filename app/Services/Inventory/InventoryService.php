@@ -293,7 +293,6 @@ class InventoryService implements InventoryServiceInterface
             Log::error('Item update error. Message - ' . $e->getMessage(), $e->getTrace());
             $this->inventoryRepository->rollbackTransaction();
 
-            echo $e->getMessage(); die;
             throw new InventoryException('Inventory item update error');
         }
 
