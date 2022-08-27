@@ -578,8 +578,6 @@ class Inventory extends Model
                 } else {
                     $this->featuresIndexedById->put($feature->feature_list_id, new Collection($value));
                 }
-
-                // $featureGroup;
             }
         }
 
