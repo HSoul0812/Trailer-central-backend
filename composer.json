@@ -32,10 +32,11 @@
         "guzzlehttp/guzzle": "^6.5",
         "illuminate/container": "^6.0",
         "illuminate/contracts": "^6.0",
-        "illuminate/mail": "6.18.3",
+        "illuminate/mail": "^6.0",
         "illuminate/redis": "^6.3",
         "illuminate/support": "^6.0",
         "inspheric/nova-defaultable": "^1.2",
+        "laravel/cashier": "^12.0",
         "laravel/framework": "^6.0",
         "laravel/horizon": "~3.0",
         "laravel/lumen-framework": "^6.0",
@@ -51,12 +52,15 @@
         "php-ews/php-ews": "~1.0",
         "pixel418/markdownify": "^2.3",
         "predis/predis": "^1.1",
-        "psr/log": "^1.0",
+        "propaganistas/laravel-phone": "4.2.7",
         "psr/cache": "~1.0",
         "psr/container": "1.1.1",
-        "spatie/laravel-sitemap": "^5.7",
+        "psr/log": "^1.0",
+        "sentry/sentry-laravel": "^2.11",
         "spatie/browsershot": "~3.40.0",
         "spatie/image": "^1.10",
+        "spatie/laravel-permission": "^3.0",
+        "spatie/laravel-sitemap": "^5.7",
         "staudenmeir/belongs-to-through": "^2.5",
         "stripe/stripe-php": "^7.100",
         "swiftmailer/swiftmailer": "^6.0",
@@ -64,7 +68,10 @@
         "symfony/dom-crawler": "^5.1",
         "tijsverkoyen/css-to-inline-styles": "^2.2.1",
         "twilio/sdk": "^5.31",
-        "webklex/laravel-imap": "~2.4"
+        "vyuldashev/nova-permission": "^2.11",
+        "webklex/laravel-imap": "~2.4",
+        "showroom/bulkconfiguration": "*",
+        "trailercentral/passwordless-login-url": "*"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.4",
@@ -124,6 +131,14 @@
         {
             "type": "path",
             "url": "./nova-components/EditMapping"
+        },
+        {
+            "type": "path",
+            "url": "./nova-components/BulkConfiguration"
+        },
+        {
+            "type": "path",
+            "url": "./nova-components/PasswordlessLoginUrl"
         }
     ],
     "minimum-stability": "dev",
@@ -134,7 +149,8 @@
         ],
         "laravel": {
             "dont-discover": [
-                "Grimzy\\LaravelMysqlSpatial\\SpatialServiceProvider"
+                "Grimzy\\LaravelMysqlSpatial\\SpatialServiceProvider",
+                "sentry/sentry-laravel"
             ]
         },
         "hooks": {

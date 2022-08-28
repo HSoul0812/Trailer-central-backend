@@ -9,7 +9,7 @@ use App\Repositories\Marketing\Facebook\FilterRepositoryInterface;
 use App\Repositories\Marketing\Facebook\ErrorRepositoryInterface;
 use App\Repositories\CRM\Text\VerifyRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
-use App\Services\CRM\Text\TextServiceInterface;
+use App\Services\CRM\Text\TwilioServiceInterface;
 use App\Services\Marketing\Facebook\DTOs\MarketplaceStatus;
 use App\Services\Marketing\Facebook\DTOs\TfaType;
 use Illuminate\Support\Collection;
@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Class MarketplaceService
- * 
+ *
  * @package App\Services\Marketing\Facebook
  */
 class MarketplaceService implements MarketplaceServiceInterface
@@ -48,19 +48,19 @@ class MarketplaceService implements MarketplaceServiceInterface
     protected $dealerLocation;
 
     /**
-     * @var TextServiceInterface
+     * @var TwilioServiceInterface
      */
     protected $twilio;
 
     /**
      * Construct Facebook Marketplace Service
-     * 
+     *
      * @param MarketplaceRepositoryInterface $marketplace
      * @param FilterRepositoryInterface $filters
      * @param ErrorRepositoryInterface $errors
      * @param VerifyRepositoryInterface $verifyNumber
      * @param DealerLocationRepositoryInterface $dealerLocation
-     * @param TextServiceInterface $twilio
+     * @param TwilioServiceInterface $twilio
      */
     public function __construct(
         MarketplaceRepositoryInterface $marketplace,
@@ -68,7 +68,7 @@ class MarketplaceService implements MarketplaceServiceInterface
         ErrorRepositoryInterface $errors,
         VerifyRepositoryInterface $verifyNumber,
         DealerLocationRepositoryInterface $dealerLocation,
-        TextServiceInterface $twilio
+        TwilioServiceInterface $twilio
     ) {
         $this->marketplace = $marketplace;
         $this->filters = $filters;
@@ -83,7 +83,7 @@ class MarketplaceService implements MarketplaceServiceInterface
 
     /**
      * Create Marketplace
-     * 
+     *
      * @param array $params
      * @return Marketplace
      */
@@ -110,7 +110,7 @@ class MarketplaceService implements MarketplaceServiceInterface
 
             // Return Response
             return $marketplace;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->log->error('Marketplace Integration update error. params=' .
                 json_encode($params + ['marketplace_id' => $params['id']]),
                 $e->getTrace());
@@ -123,7 +123,7 @@ class MarketplaceService implements MarketplaceServiceInterface
 
     /**
      * Update Marketplace
-     * 
+     *
      * @param array $params
      * @return Marketplace
      */
@@ -153,7 +153,7 @@ class MarketplaceService implements MarketplaceServiceInterface
 
             // Return Response
             return $marketplace;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->log->error('Marketplace Integration update error. params=' .
                 json_encode($params + ['marketplace_id' => $params['id']]),
                 $e->getTrace());
@@ -166,7 +166,7 @@ class MarketplaceService implements MarketplaceServiceInterface
 
     /**
      * Delete Marketplace
-     * 
+     *
      * @param int $id
      * @return boolean
      */
@@ -185,7 +185,7 @@ class MarketplaceService implements MarketplaceServiceInterface
 
             // Return Result
             return $success;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->log->error('Marketplace Integration update error. params=' .
                 json_encode(['id' => $id]), $e->getTrace());
 
@@ -197,7 +197,7 @@ class MarketplaceService implements MarketplaceServiceInterface
 
     /**
      * Get Two-Factor Auth Types Array
-     * 
+     *
      * @param int $dealerId
      * @return MarketplaceStatus
      */
@@ -237,7 +237,7 @@ class MarketplaceService implements MarketplaceServiceInterface
 
     /**
      * Get Two-Factor Twilio Number for Marketplace
-     * 
+     *
      * @param string $dealerNo
      * @param null|string $type
      * @return NumberVerify

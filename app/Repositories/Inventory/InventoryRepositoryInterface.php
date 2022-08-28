@@ -31,13 +31,22 @@ interface InventoryRepositoryInterface extends Repository, TransactionalReposito
      * @return int number of touched records
      */
     public function moveLocationId(int $from, int $to): int;
-    
+
     /**
      * Returns data about an inventory item and increments its times viewed
      * counter
-     * 
+     *
      * @param array $params
      * @return Inventory
      */
     public function getAndIncrementTimesViewed(array $params): Inventory;
+
+    /**
+     * Archived Inventory units from specific dealer id
+     *
+     * @param int $dealerId
+     * @param array $inventoryParams
+     * @return mixed
+     */
+    public function archiveInventory(int $dealerId, array $inventoryParams);
 }

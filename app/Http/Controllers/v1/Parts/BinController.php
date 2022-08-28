@@ -23,7 +23,7 @@ class BinController extends RestfulController
      */
     public function __construct(BinRepositoryInterface $bins)
     {
-        $this->middleware('setDealerIdOnRequest')->only(['create', 'update']);
+        $this->middleware('setDealerIdOnRequest');
         $this->bins = $bins;
     }
 
@@ -80,11 +80,14 @@ class BinController extends RestfulController
      *
      * @param Request $request
      */
-    public function create(Request $request) {
+    public function create(Request $request)
+    {
         $request = new CreateBinRequest($request->all());
+
         if ($request->validate()) {
             return $this->response->item($this->bins->create($request->all()), new BinTransformer);
         }
+
         return $this->response->errorBadRequest();
     }
 
@@ -94,19 +97,25 @@ class BinController extends RestfulController
      * @param int $id
      * @param Request $request
      */
-    public function update(int $id, Request $request) {
+    public function update(int $id, Request $request)
+    {
         $request = new UpdateBinRequest($request->all());
+
         if ($request->validate()) {
             return $this->response->item($this->bins->update(['bin_id' => $id] + $request->all()), new BinTransformer);
         }
+
         return $this->response->errorBadRequest();
     }
 
-    public function destroy(int $id) {
+    public function destroy(int $id)
+    {
         $request = new DeleteBinRequest(['bin_id' => $id]);
+
         if ($request->validate() && $this->bins->delete($request->all())) {
-            return $this->response->created();
+            return $this->response->noContent();
         }
+
         return $this->response->errorBadRequest();
     }
 

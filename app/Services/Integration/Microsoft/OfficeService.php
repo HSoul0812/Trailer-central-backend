@@ -3,9 +3,11 @@
 namespace App\Services\Integration\Microsoft;
 
 use App\Exceptions\Common\MissingFolderException;
+use App\Exceptions\Integration\Microsoft\CannotReceiveOffice365MessagesException;
 use App\Exceptions\Integration\Microsoft\MissingAzureIdTokenException;
 use App\Models\Integration\Auth\AccessToken;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
+use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Services\Integration\Common\DTOs\AttachmentFile;
 use App\Services\Integration\Common\DTOs\CommonToken;
 use App\Services\Integration\Common\DTOs\EmailToken;
@@ -57,9 +59,17 @@ class OfficeService extends AzureService implements OfficeServiceInterface
 
     /**
      * Create Microsoft Azure Log
+     * 
+     * @param InteractionEmailServiceInterface $interactionEmail
+     * @param Manager $fractal
      */
-    public function __construct(Manager $fractal)
-    {
+    public function __construct(
+        InteractionEmailServiceInterface $interactionEmail,
+        Manager $fractal
+    ) {
+        // Set Interfaces
+        $this->interactionEmail = $interactionEmail;
+
         // Initialize Services
         $this->fractal = $fractal;
         $this->fractal->setSerializer(new NoDataArraySerializer());
@@ -163,6 +173,11 @@ class OfficeService extends AzureService implements OfficeServiceInterface
         // Get Messages From Microsoft Account
         $email = $graph->createRequest('POST', '/me/sendMail')->attachBody(['Message' => $message])->execute();
 
+        // Store Attachments
+        if(!empty($parsedEmail->getAttachments())) {
+            $parsedEmail->setAttachments($this->interactionEmail->storeAttachments($smtpConfig->getAccessToken()->dealer_id, $parsedEmail));
+        }
+
         // Return Email
         return $parsedEmail;
     }
@@ -196,7 +211,8 @@ class OfficeService extends AzureService implements OfficeServiceInterface
             return $emails;
         } catch (\Exception $e) {
             // Log Error
-            $this->log->error('Exception returned on getting office 365 messages; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
+            $this->log->error('Exception returned on getting office 365 messages; ' . $e->getMessage());
+            throw new CannotReceiveOffice365MessagesException;
         }
 
         // Return Empty Collection of Message
@@ -400,7 +416,7 @@ class OfficeService extends AzureService implements OfficeServiceInterface
             return $folderId;
         } catch (\Exception $e) {
             // Log Error
-            $this->log->error('Exception returned on getting office 365 folder ID; ' . $e->getMessage() . ': ' . $e->getTraceAsString());
+            $this->log->error('Exception returned on getting office 365 folder ID; ' . $e->getMessage());
             return self::DEFAULT_FOLDER;
         }
     }

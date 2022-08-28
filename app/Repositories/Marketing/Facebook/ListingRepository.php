@@ -3,6 +3,7 @@
 namespace App\Repositories\Marketing\Facebook;
 
 use App\Exceptions\NotImplementedException;
+use App\Models\Inventory\EntityType;
 use App\Models\Inventory\Inventory;
 use App\Models\Marketing\Facebook\Filter;
 use App\Models\Marketing\Facebook\Listings;
@@ -49,9 +50,15 @@ class ListingRepository implements ListingRepositoryInterface {
      */
     public function create($params) {
         // Already Exists?!
-        $listing = Listings::where('facebook_id', $params['facebook_id'])->first();
-        if(!empty($listing->id)) {
-            return $this->update($params);
+        if(!empty($params['facebook_id'])) {
+            $listing = Listings::where('facebook_id', $params['facebook_id'])->first();
+            if(!empty($listing->id)) {
+                if($listing->inventory_id === (int) $params['inventory_id']) {
+                    return $this->update($params);
+                } elseif($listing->inventory_id !== (int) $params['inventory_id']) {
+                    $params['facebook_id'] = 0;
+                }
+            }
         }
 
         // Create Listing
@@ -111,7 +118,11 @@ class ListingRepository implements ListingRepositoryInterface {
      * @return Listings
      */
     public function update($params) {
-        $listing = Listings::where('facebook_id', $params['facebook_id'])->firstOrFail();
+        if(!empty($params['facebook_id'])) {
+            $listing = Listings::where('facebook_id', $params['facebook_id'])->firstOrFail();
+        } else {
+            $listing = Listings::where('id', $params['id'])->firstOrFail();
+        }
 
         DB::transaction(function() use (&$listing, $params) {
             // Fill Listing Details
@@ -138,7 +149,9 @@ class ListingRepository implements ListingRepositoryInterface {
         $query = Inventory::select(Inventory::getTableName().'.*')
                           ->where('dealer_id', '=', $integration->dealer_id)
                           ->where('show_on_website', 1)
-                          ->where(Inventory::getTableName().'.description', '<>', '')
+            ->where(Inventory::getTableName() . '.entity_type_id', '<>', EntityType::ENTITY_TYPE_BUILDING)
+            ->whereRaw('LENGTH(' . Inventory::getTableName() . '.description) >= '. INVENTORY::MIN_DESCRIPTION_LENGTH_FOR_FACEBOOK)
+            ->where(Inventory::getTableName() . '.price', '>', INVENTORY::MIN_PRICE_FOR_FACEBOOK)
                           ->has('orderedImages')
                           ->where(function(Builder $query) {
                               $query->where('is_archived', 0)
@@ -164,14 +177,13 @@ class ListingRepository implements ListingRepositoryInterface {
         });
 
         // Skip Integrations With Non-Expired Errors
-        $query = $query->leftJoin(Error::getTableName(), Error::getTableName() . '.inventory_id',
-                                        '=', Inventory::getTableName() . '.inventory_id')
-        ->where(function(Builder $query) {
+        $query = $query->leftJoin(Error::getTableName(), function($join) {
+            $join->on(Error::getTableName() . '.marketplace_id', '=',
+                                    Inventory::getTableName() . '.inventory_id')
+                 ->where(Error::getTableName().'.dismissed', 0);
+        })->where(function(Builder $query) {
             return $query->whereNull(Error::getTableName().'.id')
-                          ->orWhere(function(Builder $query) {
-                return $query->where(Error::getTableName().'.dismissed', 0)
-                             ->where(Error::getTableName().'.expires_at', '<', DB::raw('NOW()'));
-            });
+                         ->orWhere(Error::getTableName().'.expires_at', '<', DB::raw('NOW()'));
         });
 
         // Append Location
@@ -188,8 +200,13 @@ class ListingRepository implements ListingRepositoryInterface {
             });
         }
 
-        if (!isset($params['per_page'])) {
-            $params['per_page'] = 20;
+        // Set Sort By
+        $query = $this->addSortQuery($query, '-created_at');
+
+        // Update Page Limit From Settings
+        $forced = config('marketing.fb.settings.limit.force', 0);
+        if (!isset($params['per_page']) || !empty($forced)) {
+            $params['per_page'] = (int) config('marketing.fb.settings.limit.listings', 20);
         }
 
         // Require Inventory Images

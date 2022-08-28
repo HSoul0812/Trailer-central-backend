@@ -7,12 +7,18 @@ use PHPUnit\Framework\TestCase;
 
 class SalesPersonTest extends TestCase
 {
+    /**
+     * @group CRM
+     */
     public function testCanInstantiate()
     {
         $salesPerson = new SalesPerson();
         $this->assertInstanceOf(SalesPerson::class, $salesPerson);
     }
 
+    /**
+     * @group CRM
+     */
     public function testCanCreateByFill()
     {
         // this will throw an error now because first_name is not mass-assignable

@@ -60,6 +60,7 @@ use Laravel\Scout\Searchable;
  * @property double $dealer_price,
  * @property double $monthly_payment,
  * @property int $year,
+ * @property int $chassis_year,
  * @property string $condition,
  * @property double $length,
  * @property double $width,
@@ -130,6 +131,7 @@ use Laravel\Scout\Searchable;
  * @property bool $is_archived
  * @property \DateTimeInterface $created_at
  * @property \DateTimeInterface $updated_at
+ * @property bool $show_on_auction123
  *
  * @property string $category_label
  * @property string $status_label
@@ -224,6 +226,9 @@ class Inventory extends Model
         self::OVERLAY_ENABLED_ALL,
     ];
 
+    public const MIN_DESCRIPTION_LENGTH_FOR_FACEBOOK = 50;
+    public const MIN_PRICE_FOR_FACEBOOK = 0;
+
     /**
      * The table associated with the model.
      *
@@ -267,6 +272,7 @@ class Inventory extends Model
         'dealer_price',
         'monthly_payment',
         'year',
+        'chassis_year',
         'condition',
         'length',
         'width',
@@ -334,7 +340,8 @@ class Inventory extends Model
         'changed_fields_in_dashboard',
         'is_archived',
         'times_viewed',
-        'trailerworld_store_id'
+        'trailerworld_store_id',
+        'show_on_auction123',
     ];
 
     protected $casts = [
@@ -365,11 +372,22 @@ class Inventory extends Model
 
     /**
      * Custom Attributes Collection
-     * 
+     *
      * @var Collection
      */
     private $attributesCollection;
 
+    /**
+     * Boot the trait.
+     *
+     * @return void
+     */
+    public static function bootSearchable()
+    {
+        // We don't want to do anything with searchable for this model
+        // If we remove Searchable, it will remove parts index as well
+        // from ES, so for now we'll just rewrite it to nothing
+    }
 
     public function user(): BelongsTo
     {
@@ -463,10 +481,14 @@ class Inventory extends Model
         return $this->hasMany(CustomerInventory::class, 'inventory_id', 'inventory_id');
     }
 
+    public function entityType(): BelongsTo
+    {
+        return $this->belongsTo(EntityType::class,'entity_type_id');
+    }
 
     /**
      * Get Attributes Map
-     * 
+     *
      * @return Collection<code: value>
      */
     public function getAttributesAttribute(): Collection

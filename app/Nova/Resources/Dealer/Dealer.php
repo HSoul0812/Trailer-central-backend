@@ -7,11 +7,15 @@ use App\Nova\Actions\DeactivateUserAccounts;
 use App\Nova\Actions\Dealer\ActivateCrm;
 use App\Nova\Actions\Dealer\DeactivateCrm;
 use App\Nova\Actions\Dealer\ActivateECommerce;
+use App\Nova\Actions\Dealer\DeactivateDealer;
 use App\Nova\Actions\Dealer\DeactivateECommerce;
+use Laravel\Nova\Fields\Password;
+use Laravel\Nova\Fields\PasswordConfirmation;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Text;
 use App\Nova\Resource;
+use Trailercentral\PasswordlessLoginUrl\PasswordlessLoginUrl;
 
 class Dealer extends Resource
 {
@@ -51,7 +55,9 @@ class Dealer extends Resource
     public function fields(Request $request): array
     {
         return [
-            Text::make('Dealer ID')->sortable(),
+            Text::make('Dealer ID')->hideFromIndex(),
+
+            PasswordlessLoginUrl::make('Dealer ID', 'dealer_id')->withMeta(['dashboard_url' => config('app.dashboard_login_url')])->onlyOnIndex()->sortable(),
 
             Text::make('Name')
                 ->sortable()
@@ -62,11 +68,24 @@ class Dealer extends Resource
                 ->rules('required', 'email', 'max:254'),
 
             Boolean::make('CRM', 'isCrmActive')->hideWhenCreating()->hideWhenUpdating(),
-            
+
             Boolean::make('ECommerce', 'IsEcommerceActive')->hideWhenCreating()->hideWhenUpdating(),
 
             Boolean::make('User Accounts', 'isUserAccountsActive')->hideWhenCreating()->hideWhenUpdating(),
 
+            Boolean::make('Deleted?', 'deleted')->hideWhenCreating()->hideWhenUpdating(),
+
+            Text::make('State', 'state')->hideWhenCreating()->hideWhenUpdating(),
+
+            Password::make('Password')
+                ->onlyOnForms()
+                ->creationRules('required', 'string', 'min:12', 'regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[\d\x])(?=.*[!$#%]).*$/')
+                ->updateRules('nullable', 'string', 'min:12', 'regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[\d\x])(?=.*[!$#%]).*$/')
+                ->fillUsing(function($request, $model, $attribute, $requestAttribute) {
+                    if (!empty($request[$requestAttribute])) {
+                        $model->{$attribute} = $request[$requestAttribute];
+                    }
+                })->help("Password must contain 3 of the following: Uppercase letter, lowercase letter, 0-9 number, non-alphanumeric character, unicode character")
         ];
     }
 
@@ -119,6 +138,7 @@ class Dealer extends Resource
             app()->make(DeactivateECommerce::class),
             app()->make(ActivateUserAccounts::class),
             app()->make(DeactivateUserAccounts::class),
+            app()->make(DeactivateDealer::class),
         ];
     }
 }

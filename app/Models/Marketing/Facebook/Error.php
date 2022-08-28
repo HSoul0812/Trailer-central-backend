@@ -24,15 +24,24 @@ class Error extends Model
      */
     const ERROR_TYPES = [
         'unknown' => 'Unknown Error',
+        'missing-tunnel' => 'Missing Tunnel on Dealer',
+        'offline-tunnel' => 'Tunnel Temporarily Offline on Dealer',
         'missing-inventory' => 'Missing Inventory on Integration',
+        'login-failed' => 'Failed to Login for Unknown Reason',
         'login-invalid' => 'Invalid Credentials',
+        'login-approval' => 'Login requires manual aproval',
         'email-verification' => 'Email Verification',
+        'login-approval' => 'Approval Request Submitted',
         'two-factor-auth' => 'Invalid Two-Factor Credentials',
         'two-factor-failed' => 'Two-Factor Failed',
+        'account-locked' => 'Account Locked',
         'account-disabled' => 'Account Disabled',
+        'temp-blocked' => 'Temporary Blocked',
+        'page-unavailable' => 'This Page Isn\'t Available',
         'marketplace-inaccessible' => 'Marketplace Inaccessible',
         'marketplace-blocked' => 'Marketplace Blocked',
         'final-account-review' => 'Marketplace Permanently Blocked',
+        'limit-reached' => 'Limit Reached on New Account',
         'failed-post' => 'Inventory Failed to Post',
         'flagged-post' => 'Inventory Post Was Flagged'
     ];
@@ -47,12 +56,15 @@ class Error extends Model
      * @const Expiry Hours
      */
     const EXPIRY_HOURS = [
-        'missing-inventory' => 6,
+        'missing-inventory' => 1,
         'email-verification' => 2,
-        'two-factor-auth' => 1,
+        'missing-tunnel' => 1,
+        'two-factor-auth' => 24,
         'two-factor-failed' => 1,
-        'marketplace-inaccessible' => 24 * 7,
+        'marketplace-inaccessible' => 24,
+        'account-locked' => 24 * 7,
         'account-disabled' => 24 * 7,
+        'page-unavailable' => 1,
         'marketplace-blocked' => 24 * 7,
         'final-account-review' => 24 * 30 * 12 * 7
     ];

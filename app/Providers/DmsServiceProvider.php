@@ -36,6 +36,8 @@ use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepository;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
 use App\Repositories\Dms\QuoteRepository;
 use App\Repositories\Dms\QuoteRepositoryInterface;
+use App\Repositories\Dms\QuoteSettingRepository;
+use App\Repositories\Dms\QuoteSettingRepositoryInterface;
 use App\Repositories\Dms\ServiceOrder\ServiceItemTechnicianRepository;
 use App\Repositories\Dms\ServiceOrder\ServiceItemTechnicianRepositoryInterface;
 use App\Repositories\Dms\ServiceOrder\ServiceReportRepository;
@@ -60,6 +62,8 @@ use App\Repositories\Dms\Printer\SettingsRepository as PrinterSettingsRepository
 use App\Repositories\Dms\Printer\SettingsRepositoryInterface as PrinterSettingsRepositoryInterface;
 use App\Repositories\Dms\Printer\FormRepository as PrinterFormRepository;
 use App\Repositories\Dms\Printer\FormRepositoryInterface as PrinterFormRepositoryInterface;
+use App\Repositories\Dms\Quickbooks\BillPaymentRepository;
+use App\Repositories\Dms\Quickbooks\BillPaymentRepositoryInterface;
 use App\Services\CRM\User\SalesPersonService;
 use App\Services\CRM\User\SalesPersonServiceInterface;
 use App\Services\Dms\Customer\CustomerService;
@@ -70,6 +74,8 @@ use App\Services\Dms\Printer\InstructionsServiceInterface;
 use App\Services\Dms\Printer\ZPL\InstructionsService;
 use App\Services\Dms\Printer\FormServiceInterface as PrinterFormServiceInterface;
 use App\Services\Dms\Printer\ESCP\FormService as PrinterFormService;
+use App\Services\Dms\Quote\QuoteSettingService;
+use App\Services\Dms\Quote\QuoteSettingServiceInterface;
 use App\Services\Dms\UnitSale\UnitSaleService;
 use App\Services\Dms\UnitSale\UnitSaleServiceInterface;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -80,6 +86,7 @@ class DmsServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->bind(QuoteRepositoryInterface::class, QuoteRepository::class);
+        $this->app->bind(QuoteSettingRepositoryInterface::class, QuoteSettingRepository::class);
         $this->app->bind(PaymentRepositoryInterface::class, PaymentRepository::class);
         $this->app->bind(PurchaseOrderReceiptRepositoryInterface::class, PurchaseOrderReceiptRepository::class);
         $this->app->bind(ServiceOrderRepositoryInterface::class, ServiceOrderRepository::class);
@@ -89,6 +96,7 @@ class DmsServiceProvider extends ServiceProvider
         $this->app->bind(SettingsRepositoryInterface::class, SettingsRepository::class);
         $this->app->bind(UnitSaleLaborRepositoryInterface::class, UnitSaleLaborRepository::class);
         $this->app->bind(BillRepositoryInterface::class, BillRepository::class);
+        $this->app->bind(BillPaymentRepositoryInterface::class, BillPaymentRepository::class);
         $this->app->bind(PrinterSettingsRepositoryInterface::class, PrinterSettingsRepository::class);
         $this->app->bind(PrinterFormRepositoryInterface::class, PrinterFormRepository::class);
         $this->app->bind(SalesPersonServiceInterface::class, SalesPersonService::class);
@@ -135,6 +143,7 @@ class DmsServiceProvider extends ServiceProvider
         });
 
         $this->app->bind(UnitSaleServiceInterface::class, UnitSaleService::class);
+        $this->app->bind(QuoteSettingServiceInterface::class, QuoteSettingService::class);
     }
 
     public function boot()

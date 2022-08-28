@@ -2,12 +2,13 @@
 
 namespace App\Providers;
 
+use App\Nova\Resources\Dealer\Dealer;
 use Feed\EditMapping\EditMapping;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Nova\Cards\Help;
 use Laravel\Nova\Nova;
 use Laravel\Nova\NovaApplicationServiceProvider;
-use App\Nova\Resources\Dealer\Dealer;
+use Showroom\BulkConfiguration\BulkConfiguration;
 
 class NovaServiceProvider extends NovaApplicationServiceProvider
 {
@@ -19,6 +20,10 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     public function boot()
     {
         parent::boot();
+
+        Nova::userTimezone(function () {
+            return config('app.db_timezone');
+        });
     }
 
     /**
@@ -43,10 +48,8 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
      */
     protected function gate()
     {
-        Gate::define('viewNova', function ($user) {
-            return in_array($user->email, [
-                //
-            ]);
+        Gate::define('viewNova', function ($user = null) {
+            return request()->user('nova') !== null;
         });
     }
 
@@ -80,6 +83,9 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     public function tools()
     {
         return [
+            (new BulkConfiguration())->canSee(function ($request) {
+                return $request->user()->hasAnyRole('Admin', 'Support');
+            }),
             new EditMapping()
         ];
     }
@@ -93,7 +99,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     {
         //
     }
-    
+
     protected function resources()
     {
         Nova::resourcesIn(app_path('Nova'));

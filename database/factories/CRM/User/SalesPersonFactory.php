@@ -6,20 +6,21 @@ use Tests\TestCase;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\User\NewDealerUser;
 use Faker\Generator as Faker;
+use App\Models\User\NewUser;
 
-$factory->define(SalesPerson::class, function (Faker $faker) {
-    // Get Dealer User
-    $newDealerUser = NewDealerUser::findOrFail(TestCase::getTestDealerId());
+$factory->define(SalesPerson::class, function (Faker $faker, array $attributes): array {
 
     // Initialize Email
     $email = $faker->unique()->safeEmail;
     $password = $faker->password;
     $server = $faker->freeEmailDomain;
 
+    $user_id = $attributes['user_id'] ?? factory(NewUser::class)->create()->getKey();
+
     // Return Overrides
     return [
-        'user_id' => $newDealerUser->crmUser->user_id,
-        'dealer_location_id' => TestCase::getTestDealerLocationRandom(),
+        'user_id' => $user_id,
+        'dealer_location_id' => $attributes['dealer_location_id'] ?? TestCase::getTestDealerLocationRandom(),
         'perms' => 'user',
         'first_name' => $faker->firstName,
         'last_name' => $faker->lastName,

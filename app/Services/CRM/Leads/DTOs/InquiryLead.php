@@ -71,7 +71,7 @@ class InquiryLead
     /**
      * @const string
      */
-    const TT_SIMPLE_DOMAIN = 'trailertrader.com';
+    const TT_SIMPLE_DOMAIN = 'https://trailertrader.com';
 
     /**
      * @const string
@@ -400,7 +400,21 @@ class InquiryLead
      * @return string
      */
     public function getInquiryUrl(): string {
-        return !empty($this->url) ? $this->url : $this->websiteDomain . $this->referral;
+        // Only Append If Domain Exists
+        if($this->websiteDomain) {
+            // Return URL With Website Domain
+            if(!empty($this->url)) {
+                return $this->websiteDomain . $this->url;
+            }
+
+            // Return Referral URL Instead
+            if(!empty($this->referral)) {
+                return $this->websiteDomain . $this->referral;
+            }
+        }
+
+        // Return Blank
+        return '';
     }
 
 
@@ -415,7 +429,7 @@ class InquiryLead
         if(is_array($this->inquiryEmail)) {
             return implode(";", $this->inquiryEmail);
         }
-        return $this->inquiryEmail;
+        return $this->inquiryEmail ?? '';
     }
 
     /**

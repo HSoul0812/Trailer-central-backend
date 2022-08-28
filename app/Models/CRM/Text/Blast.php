@@ -52,8 +52,14 @@ class Blast extends Model
         'include_archived',
         'is_delivered',
         'is_cancelled',
+        'is_error',
         'send_date',
         'deleted',
+        'log',
+    ];
+
+    protected $casts = [
+        'is_error' => 'bool',
     ];
 
     /**
@@ -123,7 +129,7 @@ class Blast extends Model
 
     /**
      * Get Cleaned Include Archived Status
-     * 
+     *
      * @return int version of include_archived
      */
     public function getArchivedStatusAttribute()
@@ -134,7 +140,7 @@ class Blast extends Model
 
     /**
      * Get Leads for Text Blast
-     * 
+     *
      * @return Collection<Lead>
      */
     public function getLeadsAttribute()
@@ -175,7 +181,7 @@ class Blast extends Model
                 $query = $query->whereIn('inventory.manufacturer', $brands);
             }
         }
-        
+
         // Toggle Action
         if($blast->action === 'purchased') {
             $query = $query->where(function (Builder $query) {
@@ -209,7 +215,7 @@ class Blast extends Model
 
     /**
      * Get Status for Text Blast
-     * 
+     *
      * @return BlastStats
      */
     public function getStatsAttribute(): BlastStats
@@ -224,7 +230,7 @@ class Blast extends Model
 
     /**
      * Get Skipped Leads for Text Blast
-     * 
+     *
      * @return int
      */
     public function getSkippedAttribute(): int
@@ -237,7 +243,7 @@ class Blast extends Model
 
     /**
      * Get Unsubscribed Leads for Campaign
-     * 
+     *
      * @return int
      */
     public function getUnsubscribedAttribute(): int
@@ -251,7 +257,7 @@ class Blast extends Model
 
     /**
      * Get Builder Object for Blast Leads
-     * 
+     *
      * @return Builder
      */
     private function leadsBase(): Builder {

@@ -19,9 +19,10 @@ use App\Services\Dispatch\Facebook\DTOs\MarketplaceInventory;
 use App\Services\Dispatch\Facebook\DTOs\MarketplaceStatus;
 use App\Services\Dispatch\Facebook\DTOs\MarketplaceStep;
 use App\Transformers\Dispatch\Facebook\InventoryTransformer;
-use League\Fractal\Pagination\IlluminatePaginatorAdapter;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use League\Fractal\Pagination\IlluminatePaginatorAdapter;
 use League\Fractal\Resource\Collection as Pagination;
 
 /**
@@ -168,7 +169,7 @@ class MarketplaceService implements MarketplaceServiceInterface
             'auth_password' => $integration->tfa_password,
             'auth_type' => $integration->tfa_type,
             'tunnels' => $this->tunnels->getAll(['dealer_id' => $integration->dealer_id]),
-            'inventory' => $this->getInventory($integration, $type, $params)
+            'inventory' => !$integration->is_up_to_date ? $this->getInventory($integration, $type, $params) : null
         ]);
         $nowTime = microtime(true);
         $this->log->info('Debug time after creating DealerFacebook: ' . ($nowTime - $startTime));
@@ -212,6 +213,12 @@ class MarketplaceService implements MarketplaceServiceInterface
                 $this->log->info('Saved ' . count($params['images']) . ' Images for ' .
                                     'Listing #' . $params['id']);
             }
+
+            // Update Imported At
+            $marketplace = $this->marketplace->update([
+                'id' => $params['marketplace_id'],
+                'imported_at' => Carbon::now()->setTimezone('UTC')->toDateTimeString()
+            ]);
 
             $this->listings->commitTransaction();
 
@@ -283,8 +290,9 @@ class MarketplaceService implements MarketplaceServiceInterface
 
         $integrations = $this->marketplace->getAll([
             'sort' => '-imported',
+            'import_range' => config('marketing.fb.settings.limit.hours', 0),
             'exclude' => $runningIntegrationIds,
-            'skip_errors' => 1
+            'skip_errors' => config('marketing.fb.settings.limit.errors', 1)
         ]);
 
         // Loop Facebook Integrations

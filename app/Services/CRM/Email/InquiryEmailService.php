@@ -138,7 +138,7 @@ class InquiryEmailService implements InquiryEmailServiceInterface
     public function fill(array $params): InquiryLead {
         // Get Website
         $website = $this->website->get(['id' => $params['website_id']]);
-        $params['website_domain'] = $website->domain;
+        $params['website_domain'] = !empty($website->domain) ? 'https://' . $website->domain : '';
 
         // Get Inquiry From Details For Website
         $config = $this->websiteConfig->getValueOrDefault($params['website_id'], 'general/item_email_from');
@@ -147,11 +147,11 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         $params['from_name'] = $config['fromName'];
 
         // GetInquiry Stock/Url/Title from the Inventory ID
-        if(!empty($params['inventory']['inventory_id'])) {
-          $inventory = $this->inventory->get(['id' => $params['inventory']['inventory_id']]);
-          $params['stock'] = $inventory->stock;
-          $params['url'] = $inventory ? $inventory->getUrl() : '';
-          $params['title'] = $inventory->title;
+        if(!empty($params['inventory'][0])) {
+            $inventory = $this->inventory->get(['id' => $params['inventory'][0]]);
+            $params['stock'] = $inventory->stock;
+            $params['url'] = $inventory ? $inventory->getUrl() : '';
+            $params['title'] = $inventory->title;
         }
 
         // Get Inquiry Name/Email
@@ -162,9 +162,6 @@ class InquiryEmailService implements InquiryEmailServiceInterface
 
         // Get Data By Inquiry Type
         $vars = $this->getInquiryTypeVars($overrides);
-
-        // Check Overrided Email
-        $params = $this->checkOverrideEmail($vars);
 
         // Create Inquiry Lead
         return new InquiryLead($params);
@@ -267,7 +264,7 @@ class InquiryEmailService implements InquiryEmailServiceInterface
 
         // Return Inquiry Email Override
         $params['inquiry_email'] = preg_split('/,|;|\s/', $toEmails->value, null, PREG_SPLIT_NO_EMPTY);
-
+        $this->log->info('Parsed inquiry email overrides to send to: ' . print_r($params['inquiry_email'], true));
         return $params;
     }
 
@@ -307,25 +304,5 @@ class InquiryEmailService implements InquiryEmailServiceInterface
 
         // Return Updated Params Array
         return $params;
-    }
-
-    /**
-     * Check override email is applied. If applied change email to config variable.
-     *
-     * @param array $vars
-     * @return array
-     */
-    private function checkOverrideEmail(array $vars): array
-    {
-        $config = $this->websiteConfig->getValueOfConfig($vars['website_id'], 'contact/email/' . $vars['inquiry_type']);
-        if (empty($config)) {
-            $config = $this->websiteConfig->getValueOfConfig($vars['website_id'], 'contact/email');
-
-            if (!empty($config->value)) {
-                $vars['inquiry_email'] = preg_split('/,|;|\s/', $config->value, null, PREG_SPLIT_NO_EMPTY);
-            }
-        }
-
-        return $vars;
     }
 }

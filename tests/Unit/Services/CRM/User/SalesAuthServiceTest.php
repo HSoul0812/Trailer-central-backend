@@ -52,6 +52,7 @@ class SalesAuthServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::show
      *
      * @throws BindingResolutionException
@@ -118,6 +119,7 @@ class SalesAuthServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::create
      *
      * @throws BindingResolutionException
@@ -191,6 +193,7 @@ class SalesAuthServiceTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::update
      *
      * @throws BindingResolutionException

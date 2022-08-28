@@ -38,6 +38,14 @@ class LeadStatus extends Model
     const STATUS_UNCONTACTED = 'Uncontacted';
     const STATUS_NEW_INQUIRY = 'New Inquiry';
 
+    const STATUS_ID_HOT = 0;
+    const STATUS_ID_MEDIUM = 1;
+    const STATUS_ID_COLD = 2;
+    const STATUS_ID_CLOSED = 3;
+    const STATUS_ID_UNCONTACTED = 4;
+    const STATUS_ID_LOST = 5;
+    const STATUS_ID_INQUIRY = 6;
+
     const STATUS_ARRAY = [
         self::STATUS_HOT,
         self::STATUS_COLD,
@@ -47,6 +55,16 @@ class LeadStatus extends Model
         self::STATUS_UNCONTACTED,
         self::STATUS_WON_CLOSED,
         self::STATUS_WON
+    ];
+
+    const PUBLIC_STATUSES = [
+        self::STATUS_ID_UNCONTACTED => self::STATUS_UNCONTACTED,
+        self::STATUS_ID_INQUIRY => self::STATUS_NEW_INQUIRY,
+        self::STATUS_ID_HOT => self::STATUS_HOT,
+        self::STATUS_ID_MEDIUM => self::STATUS_MEDIUM,
+        self::STATUS_ID_COLD => self::STATUS_COLD,
+        self::STATUS_ID_CLOSED => self::STATUS_WON_CLOSED,
+        self::STATUS_ID_LOST => self::STATUS_LOST,
     ];
 
     const TABLE_NAME = 'crm_tc_lead_status';
@@ -86,7 +104,7 @@ class LeadStatus extends Model
      */
     public function lead(): BelongsTo
     {
-        return $this->belongsTo(Lead::class, 'identifier', 'tc_lead_identifier');
+        return $this->belongsTo(Lead::class, 'tc_lead_identifier', 'identifier');
     }
 
     /**

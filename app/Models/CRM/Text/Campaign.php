@@ -51,7 +51,9 @@ class Campaign extends Model
         'send_after_days',
         'include_archived',
         'is_enabled',
+        'is_error',
         'deleted',
+        'log',
     ];
 
     /**
@@ -121,7 +123,7 @@ class Campaign extends Model
 
     /**
      * Get Cleaned Include Archived Status
-     * 
+     *
      * @return int version of include_archived
      */
     public function getArchivedStatusAttribute()
@@ -132,7 +134,7 @@ class Campaign extends Model
 
     /**
      * Get Leads for Campaign
-     * 
+     *
      * @return Collection<Lead>
      */
     public function getLeadsAttribute()
@@ -173,7 +175,7 @@ class Campaign extends Model
                 $query = $query->whereIn('inventory.manufacturer', $brands);
             }
         }
-        
+
         // Toggle Action
         if($campaign->action === 'purchased') {
             $query = $query->where(function (Builder $query) {
@@ -208,7 +210,7 @@ class Campaign extends Model
 
     /**
      * Get Status for Text Campaign
-     * 
+     *
      * @return CampaignStats
      */
     public function getStatsAttribute(): CampaignStats
@@ -223,7 +225,7 @@ class Campaign extends Model
 
     /**
      * Get Skipped Leads for Campaign
-     * 
+     *
      * @return int
      */
     public function getSkippedAttribute(): int
@@ -236,7 +238,7 @@ class Campaign extends Model
 
     /**
      * Get Unsubscribed Leads for Campaign
-     * 
+     *
      * @return int
      */
     public function getUnsubscribedAttribute(): int

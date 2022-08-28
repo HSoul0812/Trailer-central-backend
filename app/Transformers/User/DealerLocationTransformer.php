@@ -14,6 +14,7 @@ class DealerLocationTransformer extends TransformerAbstract
         'salesTaxItems',
         'salesTaxItemsV1',
         'mileageFees',
+        'user',
     ];
 
     public function transform(DealerLocation $dealerLocation): array
@@ -46,7 +47,7 @@ class DealerLocationTransformer extends TransformerAbstract
             'latitude' => $dealerLocation->latitude,
             'longitude' => $dealerLocation->longitude,
             'coordinates_updated' => $dealerLocation->coordinates_updated,
-            'sms' => $dealerLocation->sms_phone,
+            'sms' => $dealerLocation->sms,
             'sms_phone' => $dealerLocation->sms_phone,
             'permanent_phone' => $dealerLocation->permanent_phone,
             'show_on_website_locations' => $dealerLocation->show_on_website_locations,
@@ -87,6 +88,15 @@ class DealerLocationTransformer extends TransformerAbstract
         }
 
         return $this->primitive($location->mileageFees);
+    }
+
+    public function includeUser(DealerLocation  $location): Primitive
+    {
+        if (empty($location->user)) {
+            return new Primitive([]);
+        }
+
+        return $this->primitive((new UserTransformer())->transform($location->user));
     }
 
     /**

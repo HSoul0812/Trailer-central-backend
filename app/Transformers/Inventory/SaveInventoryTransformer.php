@@ -7,6 +7,7 @@ use App\Helpers\SanitizeHelper;
 use App\Repositories\Inventory\AttributeRepositoryInterface;
 use App\Transformers\TransformerInterface;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Arr;
 
 /**
  * Class SaveInventoryTransformer
@@ -320,14 +321,16 @@ class SaveInventoryTransformer implements TransformerInterface
             $paramsImages = $params[$imagesField];
             $images[$imagesField] = $paramsImages;
 
-            foreach ($paramsImages as $imageKey => $image) {
-                foreach (self::IMAGE_FIELDS_MAPPING as $paramsImageField => $modelImageField) {
-                    if (isset($paramsImages[$imageKey][$modelImageField]) || !isset($paramsImages[$imageKey][$paramsImageField])) {
-                        continue;
-                    }
+            if (is_array($paramsImages)) {
+                foreach ($paramsImages as $imageKey => $image) {
+                    foreach (self::IMAGE_FIELDS_MAPPING as $paramsImageField => $modelImageField) {
+                        if (isset($paramsImages[$imageKey][$modelImageField]) || !isset($paramsImages[$imageKey][$paramsImageField])) {
+                            continue;
+                        }
 
-                    $images[$imagesField][$imageKey][$modelImageField] = $paramsImages[$imageKey][$paramsImageField];
-                    unset($images[$imagesField][$imageKey][$paramsImageField]);
+                        $images[$imagesField][$imageKey][$modelImageField] = $paramsImages[$imageKey][$paramsImageField];
+                        unset($images[$imagesField][$imageKey][$paramsImageField]);
+                    }
                 }
             }
         }
@@ -352,19 +355,21 @@ class SaveInventoryTransformer implements TransformerInterface
             $paramsFiles = $params[$filesField];
             $files[$filesField] = $paramsFiles;
 
-            foreach ($paramsFiles as $fileKey => $file) {
-                if (empty($file[self::FILE_TITLE])) {
-                    $bits = explode('/', $file[self::FILE_URL]);
-                    $title = $bits[count($bits) - 1];
-                } else {
-                    $title = $file[self::FILE_TITLE];
-                }
+            if (is_array($paramsFiles)) {
+                foreach ($paramsFiles as $fileKey => $file) {
+                    if (empty($file[self::FILE_TITLE])) {
+                        $bits = explode('/', $file[self::FILE_URL]);
+                        $title = $bits[count($bits) - 1];
+                    } else {
+                        $title = $file[self::FILE_TITLE];
+                    }
 
-                if ($filesField === 'hidden_files') {
-                    $title = strpos($title, 'hidden') === false ? 'hidden-' . $title : $title;
-                }
+                    if ($filesField === 'hidden_files') {
+                        $title = strpos($title, 'hidden') === false ? 'hidden-' . $title : $title;
+                    }
 
-                $files[$filesField][$fileKey][self::FILE_TITLE] = $title;
+                    $files[$filesField][$fileKey][self::FILE_TITLE] = $title;
+                }
             }
         }
 

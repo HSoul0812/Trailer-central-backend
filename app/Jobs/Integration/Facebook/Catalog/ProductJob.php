@@ -221,6 +221,9 @@ class ProductJob extends Job
         // Set Feed Path/Integration to Process
         $this->feedPath = $feedPath;
         $this->integration = $integration;
+
+        // Log Construct
+        Log::channel('fb-catalog')->info('Constructed ProductJob for Catalog #' . $this->integration->catalog_id);
     }
 
     /**
@@ -230,7 +233,8 @@ class ProductJob extends Job
      */
     public function handle()
     {
-        $log = Log::channel('facebook');
+        $log = Log::channel('fb-catalog');
+        $log->info('Handling ProductJob for Catalog #' . $this->integration->catalog_id);
 
         // Integration Empty?
         if(empty($this->integration) || empty($this->integration->listings)) {
@@ -364,7 +368,7 @@ class ProductJob extends Job
      * @return string
      */
     private function storeCsv($file, $filePath) {
-        $log = Log::channel('facebook');
+        $log = Log::channel('fb-catalog');
         try {
             // Get Temp File Contents
             rewind($file);
@@ -376,7 +380,7 @@ class ProductJob extends Job
 
         // Return Stored File
         try {
-            $saved = Storage::disk('s3')->put($filePath, $csv, 'public');
+            $saved = Storage::disk('s3')->put($filePath, $csv);
         } catch(\Exception $e) {
             $log->error('Exception returned sending file ' . $filePath . ' to S3: ' . $e->getMessage());
         }

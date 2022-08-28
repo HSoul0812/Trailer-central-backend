@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Helpers\SanitizeHelper;
 use App\Models\CRM\Interactions\EmailHistory;
 use App\Models\CRM\Interactions\Facebook\Message;
 use App\Models\CRM\Interactions\TextLog;
@@ -10,8 +11,15 @@ use App\Models\Observers\CRM\Interactions\FbMessageObserver;
 use App\Models\Observers\CRM\Interactions\TextLogObserver;
 use App\Repositories\CRM\Interactions\InteractionMessageRepository;
 use App\Repositories\CRM\Interactions\InteractionMessageRepositoryInterface;
+use App\Repositories\CRM\Text\TextLogFileRepository;
+use App\Repositories\CRM\Text\TextLogFileRepositoryInterface;
 use App\Services\CRM\Interactions\InteractionMessageService;
 use App\Services\CRM\Interactions\InteractionMessageServiceInterface;
+use App\Services\CRM\Text\TextService;
+use App\Services\CRM\Text\TextServiceInterface;
+use App\Services\File\FileService;
+use App\Services\File\FileServiceInterface;
+use GuzzleHttp\Client;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 use App\Repositories\CRM\Email\BounceRepository;
@@ -53,7 +61,7 @@ use App\Services\CRM\Text\BlastServiceInterface as TextBlastServiceInterface;
 use App\Services\CRM\Text\CampaignService as TextCampaignService;
 use App\Services\CRM\Text\CampaignServiceInterface as TextCampaignServiceInterface;
 use App\Services\CRM\Text\TwilioService;
-use App\Services\CRM\Text\TextServiceInterface;
+use App\Services\CRM\Text\TwilioServiceInterface;
 use App\Services\CRM\Interactions\Facebook\MessageService;
 use App\Services\CRM\Interactions\Facebook\MessageServiceInterface;
 use App\Services\CRM\Interactions\Facebook\WebhookService;
@@ -75,9 +83,16 @@ class InteractionServiceProvider extends ServiceProvider
     public function register()
     {
         // Text Services
-        $this->app->bind(TextServiceInterface::class, TwilioService::class);
+        $this->app->bind(TwilioServiceInterface::class, TwilioService::class);
+        $this->app->bind(TextServiceInterface::class, TextService::class);
         $this->app->bind(TextBlastServiceInterface::class, TextBlastService::class);
         $this->app->bind(TextCampaignServiceInterface::class, TextCampaignService::class);
+
+        $this->app->when(TextService::class)
+            ->needs(FileServiceInterface::class)
+            ->give(function () {
+                return new FileService(app()->make(Client::class), app()->make(SanitizeHelper::class));
+            });
 
         // Campaign Services
         $this->app->bind(EmailBuilderServiceInterface::class, EmailBuilderService::class);
@@ -94,9 +109,9 @@ class InteractionServiceProvider extends ServiceProvider
         $this->app->bind(WebhookServiceInterface::class, WebhookService::class);
         $this->app->bind(InteractionMessageServiceInterface::class, InteractionMessageService::class);
 
-
         // Text Repositories
         $this->app->bind(TextRepositoryInterface::class, TextRepository::class);
+        $this->app->bind(TextLogFileRepositoryInterface::class, TextLogFileRepository::class);
         $this->app->bind(TextTemplateRepositoryInterface::class, TextTemplateRepository::class);
         $this->app->bind(TextCampaignRepositoryInterface::class, TextCampaignRepository::class);
         $this->app->bind(TextBlastRepositoryInterface::class, TextBlastRepository::class);
@@ -131,5 +146,7 @@ class InteractionServiceProvider extends ServiceProvider
 
         \Validator::extend('messaging_type_valid', 'App\Rules\CRM\Interactions\Facebook\ValidMessagingType@passes');
         \Validator::extend('interaction_message_valid', 'App\Rules\CRM\Interactions\ValidInteractionMessage@passes');
+        \Validator::extend('active_interaction', 'App\Rules\CRM\Text\ActiveInteraction@validate');
+        \Validator::extend('interaction_note_valid', 'App\Rules\CRM\Interactions\ValidInteractionNote@passes');
     }
 }

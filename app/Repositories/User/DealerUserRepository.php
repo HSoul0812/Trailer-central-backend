@@ -167,7 +167,7 @@ class DealerUserRepository extends RepositoryAbstract implements DealerUserRepos
     public function delete($params)
     {
         $dealerUser = DealerUser::findOrFail($params['dealer_user_id']);
-        return $dealerUser->delete();
+        return $dealerUser->perms()->delete() && $dealerUser->delete();
     }
 
     private function dealerUserExists(string $email, int $dealerId, int $dealerUserId = null)

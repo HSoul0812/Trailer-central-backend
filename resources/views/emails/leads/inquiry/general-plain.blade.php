@@ -18,8 +18,8 @@ Trailer Central. Copyright {{ $year }}, All rights reserved.
 
 
 @if (!empty($isSpam))
-    SPAM MESSAGE -- SCORE: {{ $allFailuresCount }}
-    Remote IP: {{ $remoteIp }} @if (!empty($forwardedFor)) / Visible Proxy: {{ $forwardedFor }} @endif
+    SPAM MESSAGE 
+    @if (!empty($forwardedFor)) / Visible Proxy: {{ $forwardedFor }} @endif
     Matched Rules: {{ $allFailures }}
     Original Recipients: {{ $originalContactList }}
 

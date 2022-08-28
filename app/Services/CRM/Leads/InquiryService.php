@@ -9,6 +9,7 @@ use App\Models\CRM\Interactions\Interaction;
 use App\Models\User\User;
 use App\Models\Website\Config\WebsiteConfig;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
+use App\Repositories\CRM\Text\TextRepositoryInterface;
 use App\Repositories\User\UserRepository;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Repositories\Website\Tracking\TrackingRepositoryInterface;
@@ -114,6 +115,7 @@ class InquiryService implements InquiryServiceInterface
         LeadRepositoryInterface $leadRepo,
         TrackingRepositoryInterface $tracking,
         TrackingUnitRepositoryInterface $trackingUnit,
+        TextRepositoryInterface $texts,
         LeadServiceInterface $leads,
         InquiryEmailServiceInterface $inquiryEmail,
         InquiryTextServiceInterface $inquiryText,
@@ -138,6 +140,7 @@ class InquiryService implements InquiryServiceInterface
         $this->tracking = $tracking;
         $this->trackingUnit = $trackingUnit;
         $this->userRepo = $userRepo;
+        $this->texts = $texts;
 
         // Set Up Fractal
         $this->leadTransformer = $leadTransformer;
@@ -190,7 +193,7 @@ class InquiryService implements InquiryServiceInterface
         $inquiry = $this->inquiryEmail->fill($params);
 
         // Send Inquiry Email
-//        $this->log->info('Sending ' . $inquiry->inquiryType . ' inquiry email for ' . $inquiry->getInquiryTo());
+        $this->log->info('Sending ' . $inquiry->inquiryType . ' inquiry email for ' . $inquiry->getInquiryTo());
         $this->inquiryEmail->send($inquiry);
 
         // Merge or Create Lead
@@ -205,17 +208,33 @@ class InquiryService implements InquiryServiceInterface
      *               merge: null|Interaction}
      */
     public function text(array $params): array {
+        // Fix Units of Interest
         $params['inventory'] = isset($params['inventory']) ? $params['inventory'] : [];
+        if(!empty($params['inventory_id'])) {
+            $params['inventory'][] = $params['inventory_id'];
+        }
 
+        // Clean Up Inquiry Text Response
         $params = $this->inquiryText->merge($params);
 
         $inquiry = new InquiryLead($params);
 
         // Send Inquiry Text
-        $this->inquiryText->send($params);
+        $sent = $this->inquiryText->send($params);
 
         // Merge or Create Lead
-        return $this->mergeOrCreate($inquiry, $params);
+        $lead = $this->mergeOrCreate($inquiry, $params);
+
+        // Create Text In DB
+        $this->texts->create([
+            'lead_id'     => $lead['data']['id'],
+            'from_number' => $params['phone_number'], // customer number
+            'to_number'   => $sent->to, // dealer number
+            'log_message' => $params['sms_message']
+        ]);
+
+        // Return Lead Data
+        return $lead;
     }
 
     /**

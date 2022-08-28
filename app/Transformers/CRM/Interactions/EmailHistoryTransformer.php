@@ -10,9 +10,9 @@ class EmailHistoryTransformer extends TransformerAbstract {
 
     /**
      * Transform Interaction
-     * 
-     * @param Interaction $emailHistory
-     * @return type
+     *
+     * @param EmailHistory $emailHistory
+     * @return array
      */
     public function transform(EmailHistory $emailHistory)
     {
@@ -24,7 +24,7 @@ class EmailHistoryTransformer extends TransformerAbstract {
             'from_email' => $emailHistory->from_email,
             'from_name' => $emailHistory->from_name,
             'subject' => $emailHistory->subject,
-            'body' => $emailHistory->body,
+            'body' => utf8_encode($emailHistory->body),
             'is_html' => !empty($emailHistory->use_html) ? true : false,
             'sent' => $emailHistory->date_sent ? Carbon::parse($emailHistory->date_sent) : 'Never',
             'delivered' => $emailHistory->date_delivered ? Carbon::parse($emailHistory->date_delivered) : 'Never',

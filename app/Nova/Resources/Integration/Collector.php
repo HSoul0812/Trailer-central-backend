@@ -16,6 +16,7 @@ use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Panel;
+use Laravel\Nova\Fields\DateTime;
 use App\Models\Integration\Collector\Collector as CollectorModel;
 
 /**
@@ -62,6 +63,9 @@ class Collector extends Resource
                 Text::make('Process Name')->sortable()->rules('required', 'max:128'),
                 BelongsTo::make('Dealer', 'dealers', Dealer::class)->sortable()->rules('required'),
                 BelongsTo::make('Default Dealer Location', 'dealerLocation', Location::class)->sortable()->rules('required'),
+                DateTime::make('Last Run', 'last_run')->sortable()->format('DD MMM, YYYY - LT')->readonly(true)->onlyOnIndex(),
+                Boolean::make('Run without Errors', 'run_without_errors')->readonly(true)->onlyOnIndex(),
+                DateTime::make('Scheduled For', 'scheduled_for')->sortable()->format('DD MMM, YYYY - LT')->readonly(true)->onlyOnIndex()
             ]),
 
             new Panel('Source', [
@@ -87,8 +91,11 @@ class Collector extends Resource
                 Text::make('IDS Default Location', 'ids_default_location')->rules('max:256')->hideFromIndex()->help(
                     "Only needed if file format is IDS"
                 ),
-                Text::make('XML URL', 'xml_url')->hideFromIndex()->help(
-                    "Only needed if file format is xml_url"
+                Text::make('XML URL', 'xml_url')->rules('required_if:file_format,xml_url')->hideFromIndex()->help(
+                    "Only needed if file format is <strong>xml_url</strong>"
+                ),
+                Text::make('CSV URL', 'csv_url')->rules('required_if:file_format,csv_url')->hideFromIndex()->help(
+                    "Only needed if file format is <strong>csv_url</strong>"
                 ),
                 Text::make('Motility Account Number', 'motility_account_no')->hideFromIndex()->help(
                     "Only needed if file format is motility"
@@ -188,9 +195,11 @@ class Collector extends Resource
                 ),
             ]),
 
-            new Panel('Images And Files', [
-                Boolean::make('Update Images', 'update_images')->hideFromIndex(),
+            new Panel('Images, Video and Files', [
+                Heading::make('<p class="text-primary"">Files Section</p>')->asHtml(),
                 Boolean::make('Update Files', 'update_files')->hideFromIndex(),
+                Heading::make('<p class="text-primary"">Images Section</p>')->asHtml(),
+                Boolean::make('Update Images', 'update_images')->hideFromIndex(),
                 Text::make('Image Directory Address', 'local_image_directory_address')->hideFromIndex()->help(
                     'If the images in the feed are not a URL and instead are uploaded to the FTP include the address to the images here. **Example 1:
                     / -> This would mean the images are in the root directory**
@@ -203,6 +212,11 @@ class Collector extends Resource
                     'Images in the file are marked as secondary'
                 ),
                 Boolean::make('Append Floorplan Image', 'append_floorplan_image')->withMeta(['value' => $this->active ?? true])->hideFromIndex(),
+                Heading::make('<p class="text-primary"">Video Section</p>')->asHtml(),
+                Text::make('Video Source Fields', 'video_source_fields')->hideFromIndex()->help(
+                    'Please Add with <strong>, separated values without spaces!</strong> all the source file fields that are related to <code>video_embed_code</code><br />
+                    <strong>Example:</strong> <code class="font-weight-bold">videourl,virtualtour,alternatevideo,etc</code> '
+                ),
             ]),
 
             new Panel('Title And Description', [
@@ -255,6 +269,7 @@ class Collector extends Resource
                 Boolean::make('Ignore Manually Added Units', 'ignore_manually_added_units')->hideFromIndex()->help(
                     'If active any manually added units will be ignored by the feed'
                 ),
+                Boolean::make('Show On Auction 123', 'show_on_auction123')->hideFromIndex(),
             ]),
 
             HasMany::make('Specifications', 'specifications', CollectorSpecification::class)

@@ -8,12 +8,14 @@ use League\Fractal\TransformerAbstract;
 use App\Models\Parts\Part;
 use League\Fractal\Resource\Primitive;
 
-
 class PartsTransformer extends TransformerAbstract implements PartsTransformerInterface
 {
+    const CRM_NEW_PO_URL = '/accounting/purchase-order';
+
     protected $availableIncludes = [
         'purchaseOrders',
-        'total_qty'
+        'total_qty',
+        'partAttributes'
     ];
 
     public function transform(Part $part): array
@@ -43,7 +45,7 @@ class PartsTransformer extends TransformerAbstract implements PartsTransformerIn
              'weight' => (double)$part->weight,
              'weight_rating' => $part->weight_rating,
              'description' => $part->description,
-             'qty' => (int)$part->qty,
+             'qty' => ($part->qty <= 0) ? 0 : $part->qty,
              'show_on_website' => (bool)$part->show_on_website,
              'is_vehicle_specific' => (bool)$part->is_vehicle_specific,
              'images' => $part->images->pluck('image_url'),
@@ -52,10 +54,27 @@ class PartsTransformer extends TransformerAbstract implements PartsTransformerIn
              'stock_min' => $part->stock_min,
              'stock_max' => $part->stock_max,
              'bins' => $part->bins,
-             'disabled' => count($part->bins) === 0
+             'disabled' => count($part->bins) === 0,
+             'new_po_url' => optional($part->user)->getCrmLoginUrl(
+                $this->getNewPORoute($part->id),
+                true
+            )
          ];
     }
 
+    /**
+     * Include part attributes.
+     *
+     * @param \App\Models\Parts\Part $part
+     * @return Collection
+     */
+    public function includePartAttributes(\App\Models\Parts\Textrail\Part $part): Collection
+    {
+        return $this->collection(
+            $part->partAttributes,
+            new PartAttributeTransformer()
+        );
+    }
     /**
      * Include purchases resource object
      *
@@ -85,5 +104,10 @@ class PartsTransformer extends TransformerAbstract implements PartsTransformerIn
     public function includeTotalQty(Part $part): Primitive
     {
         return $this->primitive($part->total_qty);
+    }
+
+    private function getNewPORoute(string $partId): string
+    {
+        return self::CRM_NEW_PO_URL . '?part_id=' . $partId;
     }
 }

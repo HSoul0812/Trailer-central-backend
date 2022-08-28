@@ -141,18 +141,25 @@ class MarketplaceRepository implements MarketplaceRepositoryInterface {
             $query = $query->whereNotIn(Marketplace::getTableName() . '.id', $params['exclude']);
         }
 
+        // Import Range Provided
+        if (!empty($params['import_range'])) {
+            $query = $query->where(function(Builder $query) use($params) {
+                $query->where(Marketplace::getTableName() . '.imported_at', '<',
+                                    DB::raw('DATE_SUB(NOW(), INTERVAL ' . $params['import_range'] . ' HOUR)'))
+                      ->orWhereNull(Marketplace::getTableName() . '.imported_at');
+            });
+        }
+
         // Skip Integrations With Non-Expired Errors
-        if (isset($params['skip_errors'])) {
+        if (!empty($params['skip_errors'])) {
             $query = $query->leftJoin(Error::getTableName(), function($join) {
                 $join->on(Error::getTableName() . '.marketplace_id', '=',
                                         Marketplace::getTableName() . '.id')
+                     ->where(Error::getTableName().'.dismissed', 0)
                      ->whereNull(Error::getTableName().'.inventory_id');
             })->where(function(Builder $query) {
                 return $query->whereNull(Error::getTableName().'.id')
-                              ->orWhere(function(Builder $query) {
-                    return $query->where(Error::getTableName().'.dismissed', 0)
-                                 ->where(Error::getTableName().'.expires_at', '<', DB::raw('NOW()'));
-                });
+                             ->orWhere(Error::getTableName().'.expires_at', '<', DB::raw('NOW()'));
             });
         }
 

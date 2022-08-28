@@ -58,6 +58,7 @@ class CollectorTransformer extends TransformerAbstract
             'ids_default_location' => $collector->ids_default_location,
             'use_factory_mapping' => $collector->use_factory_mapping,
             'xml_url' => $collector->xml_url,
+            'csv_url' => $collector->csv_url,
             'motility_username' => $collector->motility_username,
             'motility_password' => $collector->motility_password,
             'motility_account_no' => $collector->motility_account_no,
@@ -77,7 +78,9 @@ class CollectorTransformer extends TransformerAbstract
             'api_max_records' => $collector->api_max_records,
             'api_pagination' => $collector->api_pagination,
             'ignore_manually_added_units' => $collector->ignore_manually_added_units,
-            'is_bdv_enabled' => $collector->is_bdv_enabled
+            'is_bdv_enabled' => $collector->is_bdv_enabled,
+            'show_on_auction123' => $collector->show_on_auction123,
+            'video_source_fields' => $collector->video_source_fields,
         ];
     }
 }

@@ -2,11 +2,15 @@
 
 namespace Tests;
 
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use App\Exceptions\Tests\MissingTestDealerIdException;
 use App\Exceptions\Tests\MissingTestDealerLocationIdException;
 use App\Exceptions\Tests\MissingTestWebsiteIdException;
 use Mockery;
+use ReflectionException;
+use ReflectionProperty;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -125,6 +129,33 @@ abstract class TestCase extends BaseTestCase
     }
 
     /**
+     * @param Model $model
+     * @param string $methodName
+     * @param Model $relation
+     * @return void
+     */
+    protected function initHasOneRelation(Model $model, string $methodName, Model $relation)
+    {
+        $hasOne = Mockery::mock(HasOne::class);
+
+        $model->shouldReceive('setRelation')->passthru();
+        $model->shouldReceive($methodName)->andReturn($hasOne);
+
+        $hasOne->shouldReceive('getResults')->andReturn($relation);
+    }
+
+    /**
+     * @param string $property
+     * @param string $class
+     * @return void
+     */
+    protected function instanceMock(string $property, string $class)
+    {
+        $this->{$property} = Mockery::mock($class);
+        $this->app->instance($class, $this->{$property});
+    }
+
+    /**
      * @return CallbackInterface
      */
     public static function getCallback(): CallbackInterface
@@ -179,5 +210,33 @@ abstract class TestCase extends BaseTestCase
         }
 
         self::assertFalse($callback->isCalled(), $message);
+    }
+
+    /**
+     * @param $object
+     * @param $property
+     * @param $value
+     * @return void
+     * @throws \ReflectionException
+     */
+    public function setToPrivateProperty($object, $property, $value)
+    {
+        $reflector = new ReflectionProperty(get_class($object), $property);
+        $reflector->setAccessible(true);
+        $reflector->setValue($object, $value);
+    }
+
+    /**
+     * @param $object
+     * @param $property
+     * @return mixed
+     * @throws ReflectionException
+     */
+    public function getFromPrivateProperty($object, $property)
+    {
+        $reflector = new ReflectionProperty(get_class($object), $property);
+        $reflector->setAccessible(true);
+
+        return $reflector->getValue($object);
     }
 }

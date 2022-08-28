@@ -61,10 +61,14 @@ use App\Repositories\Inventory\InventoryRepository;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\Inventory\ManufacturerRepository;
 use App\Repositories\Inventory\ManufacturerRepositoryInterface;
+use App\Repositories\Showroom\ShowroomBulkUpdateRepository;
+use App\Repositories\Showroom\ShowroomBulkUpdateRepositoryInterface;
 use App\Repositories\Showroom\ShowroomFieldsMappingRepository;
 use App\Repositories\Showroom\ShowroomFieldsMappingRepositoryInterface;
 use App\Repositories\Pos\SalesReportRepository;
 use App\Repositories\Pos\SalesReportRepositoryInterface;
+use App\Repositories\Subscription\SubscriptionRepository;
+use App\Repositories\Subscription\SubscriptionRepositoryInterface;
 use App\Repositories\User\DealerLocationMileageFeeRepository;
 use App\Repositories\User\DealerLocationMileageFeeRepositoryInterface;
 use App\Repositories\User\DealerLocationQuoteFeeRepository;
@@ -103,6 +107,7 @@ use App\Repositories\Parts\CostModifierRepository;
 use App\Repositories\Parts\CostModifierRepositoryInterface;
 use App\Repositories\User\DealerPasswordResetRepositoryInterface;
 use App\Repositories\User\DealerPasswordResetRepository;
+use App\Services\CRM\Interactions\InteractionEmailService;
 use App\Services\CRM\User\TimeClockService;
 use App\Services\CRM\User\TimeClockServiceInterface;
 use App\Services\Dms\Bills\BillService;
@@ -114,6 +119,8 @@ use App\Services\File\FileServiceInterface;
 use App\Services\File\ImageService;
 use App\Services\Inventory\CustomOverlay\CustomOverlayService;
 use App\Services\Inventory\CustomOverlay\CustomOverlayServiceInterface;
+use App\Services\Subscription\StripeService;
+use App\Services\Subscription\StripeServiceInterface;
 use App\Services\User\DealerIntegrationService;
 use App\Services\User\DealerIntegrationServiceInterface;
 use App\Services\Inventory\Packages\PackageService;
@@ -137,6 +144,8 @@ use App\Services\Inventory\InventoryService;
 use App\Services\Inventory\InventoryServiceInterface;
 use App\Repositories\Inventory\Manufacturers\BrandRepositoryInterface;
 use App\Repositories\Inventory\Manufacturers\BrandRepository;
+use App\Repositories\Marketing\Facebook\ErrorRepository;
+use App\Repositories\Marketing\Facebook\ErrorRepositoryInterface;
 use App\Services\Inventory\InventoryAttributeService;
 use App\Services\Inventory\InventoryAttributeServiceInterface;
 use App\Services\Pos\CustomSalesReportExporterService;
@@ -151,6 +160,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Nova\Nova;
+use Propaganistas\LaravelPhone\PhoneServiceProvider;
+
+use Illuminate\Support\Facades\Schema;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -161,10 +173,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        \URL::forceScheme('https');
+        $this->app['request']->server->set('HTTPS', true);
         \Validator::extend('price_format', 'App\Rules\PriceFormat@passes');
         \Validator::extend('checkbox', 'App\Rules\Checkbox@passes');
         \Validator::extend('dealer_location_valid', 'App\Rules\User\ValidDealerLocation@passes');
-        \Validator::extend('permission_level_valid', 'App\Rules\User\ValidPermissionLevel@passes');
+        \Validator::extendDependent('permission_level_valid', 'App\Rules\User\ValidPermissionLevel@passes');
         \Validator::extend('unique_dealer_location_name', 'App\Rules\User\ValidDealerLocationName@passes');
         \Validator::extend('tax_calculator_valid', 'App\Rules\User\ValidTaxCalculator@passes');
         \Validator::extend('website_valid', 'App\Rules\Website\ValidWebsite@passes');
@@ -194,6 +208,7 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('campaign_action_valid', 'App\Rules\CRM\Email\CampaignActionValid@passes');
         \Validator::extend('text_exists', 'App\Rules\CRM\Text\TextExists@passes');
         \Validator::extend('text_template_exists', 'App\Rules\CRM\Text\TemplateExists@passes');
+        \Validator::extend('email_template_exists', 'App\Rules\CRM\Email\TemplateExists@passes');
         \Validator::extend('parts_sku_unique', 'App\Rules\Parts\SkuUnique@validate');
         \Validator::extend('vendor_exists', 'App\Rules\Inventory\VendorExists@passes');
         \Validator::extend('valid_form_map_type', 'App\Rules\Website\Forms\ValidMapType@passes');
@@ -209,6 +224,10 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('unit_sale_exists', 'App\Rules\Dms\UnitSaleExists@passes');
         \Validator::extend('valid_clapp_profile', 'App\Rules\Marketing\Craigslist\ValidProfile@passes');
         \Validator::extend('valid_include', 'App\Rules\ValidInclude@validate');
+        \Validator::extend('location_belongs_to_dealer', 'App\Rules\Locations\LocationBelongsToDealer@passes');
+        \Validator::extend('bin_belongs_to_dealer', 'App\Rules\Bins\BinBelongsToDealer@passes');
+        \Validator::extend('valid_location_email', 'App\Rules\DealerLocation\EmailValid@passes');
+        \Validator::extend('valid_password', 'App\Rules\User\ValidPassword@passes');
 
         Builder::macro('whereLike', function($attributes, string $searchTerm) {
             foreach(array_wrap($attributes) as $attribute) {
@@ -222,44 +241,15 @@ class AppServiceProvider extends ServiceProvider
             DealerIncomingMapping::observe(DealerIncomingMappingObserver::class);
         });
 
-        // add other migration directories
-        $this->loadMigrationsFrom([
-            // old directory
-            __DIR__ . '/../../database/migrations',
+        // Increase default database character set length (Specified key was too long)
+        Schema::defaultStringLength(191);
 
-            // dms migrations
-            __DIR__ . '/../../database/migrations/dms',
+        // Add Migration Directories Recursively
+        $mainPath = database_path('migrations');
+        $directories = glob($mainPath . '/*' , GLOB_ONLYDIR);
+        $paths = array_merge([$mainPath], $directories);
 
-            // integrations migrations
-            __DIR__ . '/../../database/migrations/integrations',
-
-            // inventory migrations
-            __DIR__ . '/../../database/migrations/inventory',
-
-            // website migrations
-            __DIR__ . '/../../database/migrations/website',
-
-            // parts migrations
-            __DIR__ . '/../../database/migrations/parts',
-
-            // parts crm
-            __DIR__ . '/../../database/migrations/crm',
-
-            // dealer migrations
-            __DIR__ . '/../../database/migrations/dealer',
-
-            // utilities
-            __DIR__ . '/../../database/migrations/utilities',
-
-            // configuration tables
-            __DIR__ . '/../../database/migrations/config',
-
-            // invoicing
-            __DIR__ . '/../../database/migrations/invoicing',
-
-            // ecommerce
-            __DIR__ . '/../../database/migrations/ecommerce',
-        ]);
+        $this->loadMigrationsFrom($paths);
 
         // log all queries
         if (env('APP_LOG_QUERIES')) {
@@ -281,8 +271,10 @@ class AppServiceProvider extends ServiceProvider
     public function register()
     {
         //
+        $this->app->bind('App\Repositories\Bulk\Inventory\BulkUploadRepositoryInterface', 'App\Repositories\Bulk\Inventory\BulkUploadRepository');
         $this->app->bind('App\Repositories\Website\Parts\FilterRepositoryInterface', 'App\Repositories\Website\Parts\FilterRepository');
         $this->app->bind('App\Repositories\Website\Blog\PostRepositoryInterface', 'App\Repositories\Website\Blog\PostRepository');
+        $this->app->bind('App\Repositories\Subscription\SubscriptionRepositoryInterface', 'App\Repositories\Subscription\SubscriptionRepository');
         $this->app->bind(BulkUploadRepositoryInterface::class, BulkUploadRepository::class);
         $this->app->bind('App\Repositories\Inventory\Floorplan\PaymentRepositoryInterface', 'App\Repositories\Inventory\Floorplan\PaymentRepository');
         $this->app->bind(ShowroomRepositoryInterface::class, ShowroomRepository::class);
@@ -352,6 +344,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(PackageServiceInterface::class, PackageService::class);
         $this->app->bind(RegisterRepositoryInterface::class, RegisterRepository::class);
         $this->app->bind(RegisterServiceInterface::class, RegisterService::class);
+
         $this->app->when(FileController::class)
             ->needs(FileServiceInterface::class)
             ->give(function () {
@@ -364,6 +357,12 @@ class AppServiceProvider extends ServiceProvider
                 return new ImageService(app()->make(Client::class), app()->make(SanitizeHelper::class), app()->make(ImageHelper::class));
             });
 
+        $this->app->when(InteractionEmailService::class)
+            ->needs(FileServiceInterface::class)
+            ->give(function () {
+                return new FileService(app()->make(Client::class), app()->make(SanitizeHelper::class));
+            });
+
         $this->app->bind(TimeClockRepositoryInterface::class, TimeClockRepository::class);
         $this->app->bind(EmployeeRepositoryInterface::class, EmployeeRepository::class);
         $this->app->bind(TimeClockServiceInterface::class, TimeClockService::class);
@@ -374,5 +373,14 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(InventoryAttributeServiceInterface::class, InventoryAttributeService::class);
         $this->app->bind(CustomOverlayServiceInterface::class, CustomOverlayService::class);
         $this->app->bind(CustomOverlayRepositoryInterface::class, CustomOverlayRepository::class);
+
+        $this->app->bind(ShowroomBulkUpdateRepositoryInterface::class, ShowroomBulkUpdateRepository::class);
+
+        $this->app->bind(ErrorRepositoryInterface::class, ErrorRepository::class);
+
+        $this->app->bind(SubscriptionRepositoryInterface::class, SubscriptionRepository::class);
+        $this->app->bind(StripeServiceInterface::class, StripeService::class);
+
+        $this->app->register(PhoneServiceProvider::class);
     }
 }

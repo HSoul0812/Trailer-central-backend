@@ -75,11 +75,11 @@ interface UserRepositoryInterface extends Repository, TransactionalRepository {
      * @return User
      */
     public function updateOverlaySettings(int $dealerId,
-                                          bool $overlayEnabled = null,
+                                          int $overlayEnabled = null,
                                           bool $overlay_default = null,
                                           string $overlay_logo_position = null,
-                                          int $overlay_logo_width = null,
-                                          int $overlay_logo_height = null,
+                                          string $overlay_logo_width = null,
+                                          string $overlay_logo_height = null,
                                           string $overlay_upper = null,
                                           string $overlay_upper_bg = null,
                                           int $overlay_upper_alpha = null,
@@ -101,4 +101,10 @@ interface UserRepositoryInterface extends Repository, TransactionalRepository {
      * @param string $password
      */
     public function checkAdminPassword(int $dealerId, string $password): bool;
+
+    /**
+     * @param int $dealerId
+     * @return mixed
+     */
+    public function deactivateDealer(int $dealerId): User;
 }

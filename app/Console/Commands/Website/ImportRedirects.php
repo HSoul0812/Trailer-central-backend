@@ -27,7 +27,7 @@ class ImportRedirects extends Command {
      *
      * @var string
      */
-    protected $signature = "website:import:redirects {s3-bucket} {s3-key} {website-id}";
+    protected $signature = "website:import:redirects {s3-bucket} {s3-key} {website-id} {srp-url}";
     
     /**
      * @var App\Repositories\Website\RedirectRepository
@@ -59,9 +59,10 @@ class ImportRedirects extends Command {
         $this->s3Bucket = $this->argument('s3-bucket');
         $this->s3Key = $this->argument('s3-key');   
         $this->websiteId = $this->argument('website-id');
+        $srpUrl = $this->argument('srp-url');
         $this->website = Website::findOrFail($this->websiteId);
         
-        $this->streamCsv(function($csvData, $lineNumber) {
+        $this->streamCsv(function($csvData, $lineNumber) use ($srpUrl) {
             if ($lineNumber == 1) {
                 return;
             }            
@@ -69,8 +70,8 @@ class ImportRedirects extends Command {
             $urlFrom = $this->removeUrlRoot($csvData[0]);
             $urlTo = $this->removeUrlRoot($csvData[1]);
             
-            $urlTo = '/search-rvs?stock='.$csvData[1];
-            
+            $urlTo = "/{$srpUrl}?stock=".$csvData[1];
+                        
             try {
                 $redirect = $this->websiteRedirectRepo->get(['from' => $urlFrom, 'to' => $urlTo, 'website_id' => $this->websiteId]);
             } catch (\Exception $ex) {                
@@ -94,17 +95,23 @@ class ImportRedirects extends Command {
     
     private function removeUrlRoot($url)
     {
-        $finalUrl = $url;
-        $websiteRootUrls = $this->getWebsiteRootUrls();
-        
-        foreach($websiteRootUrls as $websiteRootUrl) {            
-            $finalUrl = str_replace($websiteRootUrl, '', $url);
-            if ($finalUrl != $url) {
-                break;
-            }
+        $decomposedUrl = parse_url($url);
+        $finalUrl = $decomposedUrl['path'];
+        if (isset($decomposedUrl['query'])) {
+            $finalUrl .= '?' . $decomposedUrl['query'];
         }
-        
         return $finalUrl;
+//        $finalUrl = $url;
+//        $websiteRootUrls = $this->getWebsiteRootUrls();
+//        
+//        foreach($websiteRootUrls as $websiteRootUrl) {            
+//            $finalUrl = str_replace($websiteRootUrl, '', $url);
+//            if ($finalUrl != $url) {
+//                break;
+//            }
+//        }
+//        
+//        return $finalUrl;
     }
     
     private function getWebsiteRootUrls()

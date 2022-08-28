@@ -9,6 +9,7 @@ use App\Services\CRM\Interactions\DTOs\BuilderEmail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Bus\Queueable;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Support\Collection;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
@@ -33,11 +34,12 @@ class EmailBuilderJob extends Job
     /**
      * SendEmailBuilderJob constructor.
      * @param BuilderEmail $config
+     * @param Collection<int> $leads
      */
-    public function __construct(BuilderEmail $config, string $leads)
+    public function __construct(BuilderEmail $config, Collection $leads)
     {
         $this->config = $config;
-        $this->leads = explode(",", $leads);
+        $this->leads = $leads;
     }
 
     /**
@@ -48,7 +50,7 @@ class EmailBuilderJob extends Job
     public function handle(EmailBuilderServiceInterface $service) {
         // Initialize Logger
         $log = Log::channel('emailbuilder');
-        $log->info('Processing ' . count($this->leads) . ' Email Builder Emails', $this->config->getLogParams());
+        $log->info('Processing ' . $this->leads->count() . ' Email Builder Emails', $this->config->getLogParams());
 
         try {
             // Send Email Via SMTP, Gmail, or NTLM
@@ -59,7 +61,7 @@ class EmailBuilderJob extends Job
                         $this->config->type . '(s) for Dealer #' . $this->config->userId);
             $log->info('Skipped ' . $stats->noSkipped . ' Email ' .
                         $this->config->type . '(s) for Dealer #' . $this->config->userId);
-            $log->info('Errors Occurring Trying to Queue ' . $stats->noErrors . ' Email ' .
+            $log->info($stats->noErrors . ' Errors Occurred Trying to Queue Email ' .
                         $this->config->type . '(s) for Dealer #' . $this->config->userId);
             return true;
         } catch (\Exception $e) {

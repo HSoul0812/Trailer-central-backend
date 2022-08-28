@@ -64,7 +64,13 @@ return [
 
     'crm_url' => env('CRM_URL', 'https://crm.trailercentral.com/'),
 
+    'crm_lead_url' => env('CRM_LEAD_ROUTE', '/leads/lead/'),
+
+    'dashboard_login_url' => env('DASHBOARD_LOGIN_URL', 'https://beta.dashboard.trailercentral.com/login'),
+
     'user_master_password' => env('USER_MASTER_PASSWORD'),
+
+    'cdn_storage_url' => env('CDN_URL_STORAGE'),
 
     /*
     |--------------------------------------------------------------------------
@@ -78,6 +84,8 @@ return [
     */
 
     'timezone' => env('APP_TIMEZONE', 'UTC'),
+
+    'db_timezone' => env('DB_TIMEZONE', 'America/Indiana/Indianapolis'),
 
     /*
     |--------------------------------------------------------------------------
@@ -175,6 +183,7 @@ return [
         /*
          * Package Service Providers...
          */
+        Laravel\Cashier\CashierServiceProvider::class,
 
         /*
          * Application Service Providers...
@@ -187,6 +196,7 @@ return [
         App\Providers\NovaServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         App\Providers\PartsServiceProvider::class,
+        App\Providers\InventoryServiceProvider::class,
         App\Providers\DmsServiceProvider::class,
         App\Providers\CrmServiceProvider::class,
         App\Providers\IntegrationServiceProvider::class,
@@ -199,6 +209,9 @@ return [
         App\Providers\QuickbooksServiceProvider::class,
         App\Providers\MarketingServiceProvider::class,
         App\Providers\EcommerceProvider::class,
+        App\Providers\FavoritesExportServiceProvider::class,
+        App\Providers\SubscriptionServiceProvider::class,
+        App\Providers\StripeServiceProvider::class,
         /*
          * 3rd party stuff
          */
@@ -212,11 +225,19 @@ return [
         ElasticMigrations\ServiceProvider::class,
         App\Providers\SpatialServiceProvider::class,
         Barryvdh\Snappy\ServiceProvider::class,
+        Spatie\Permission\PermissionServiceProvider::class,
 
         /*
          * Nova stuff
          */
         \Feed\EditMapping\ToolServiceProvider::class,
+        \Showroom\BulkConfiguration\ToolServiceProvider::class,
+        \Showroom\BulkConfiguration\ToolServiceProvider::class,
+
+        /*
+         * Sentry stuff
+         */
+        Sentry\Laravel\ServiceProvider::class,
     ],
 
     /*
@@ -266,7 +287,8 @@ return [
         'Str' => Illuminate\Support\Str::class,
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
-        'View' => Illuminate\Support\Facades\View::class
+        'View' => Illuminate\Support\Facades\View::class,
+        'Sentry' => Sentry\Laravel\Facade::class,
     ],
 
 ];

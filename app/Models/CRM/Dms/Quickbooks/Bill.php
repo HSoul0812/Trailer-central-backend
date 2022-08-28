@@ -2,7 +2,12 @@
 
 namespace App\Models\CRM\Dms\Quickbooks;
 
+use App\Models\Inventory\Inventory;
+use App\Models\Parts\Vendor;
+use App\Models\User\DealerLocation;
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
@@ -22,10 +27,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Bill extends Model
 {
+    use TableAware;
+
     const STATUS_DUE = 'due';
     const STATUS_PAID = 'paid';
 
-    protected $table = 'qb_bills';
+    public const TABLE_NAME = 'qb_bills';
+
+    protected $table = self::TABLE_NAME;
 
     public $timestamps = false;
 
@@ -41,6 +50,11 @@ class Bill extends Model
         'dealer_location_id'
     ];
 
+    protected $dates = [
+        'received_date',
+        'due_date',
+    ];
+
     public function items(): HasMany
     {
         return $this->hasMany(BillItem::class, 'bill_id', 'id');
@@ -54,5 +68,27 @@ class Bill extends Model
     public function payments(): HasMany
     {
         return $this->hasMany(BillPayment::class, 'bill_id', 'id');
+    }
+
+    public function inventories(): HasMany
+    {
+        return $this->hasMany(Inventory::class, 'bill_id', 'id');
+    }
+
+    public function approvals(): HasMany
+    {
+        return $this
+            ->hasMany(QuickbookApproval::class, 'tb_primary_id', 'id')
+            ->where('tb_name', $this->table);
+    }
+
+    public function vendor(): BelongsTo
+    {
+        return $this->belongsTo(Vendor::class);
+    }
+
+    public function dealerLocation(): BelongsTo
+    {
+        return $this->belongsTo(DealerLocation::class, 'dealer_location_id', 'dealer_location_id');
     }
 }

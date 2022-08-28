@@ -143,10 +143,13 @@ return [
         ],
 
         'dealer-proxy' => [
-            'host' => env('REDIS_HOST', '127.0.0.1'),
-            'password' => env('REDIS_PASSWORD', null),
-            'port' => env('REDIS_PORT', '6379'),
-            'database' => env('DEALER_PROXY_REDIS_DB', '2'),
+            'host' => env('REDIS_HOST_PROXY', '127.0.0.1'),
+            'password' => env('REDIS_PASSWORD_PROXY', null),
+            'port' => env('REDIS_PORT_PROXY', '6379'),
+            'database' => env('DEALER_PROXY_REDIS_DB', '0'),
+            'options' => [
+                'prefix' => ''
+            ]
         ],
 
         'dealer-tunnels' => [
@@ -157,12 +160,15 @@ return [
             'database' => env('REDIS_CACHE_DB', '0')
         ],
 
-        'fb-posting' => [
-            'url' => env('REDIS_URL'),
-            'host' => env('REDIS_HOST', '127.0.0.1'),
-            'password' => env('REDIS_PASSWORD', null),
-            'port' => env('REDIS_PORT', '6379'),
-            'database' => env('REDIS_CACHE_DB', '0')
+        'persist' => [
+            'url' => env('REDIS_PERSIST_URL'),
+            'host' => env('REDIS_PERSIST_HOST', '127.0.0.1'),
+            'password' => env('REDIS_PERSIST_PASSWORD', null),
+            'port' => env('REDIS_PERSIST_PORT', '6379'),
+            'database' => env('REDIS_PERSIST_CACHE_DB', '0'),
+            'options' => [
+                'prefix' => env('REDIS_PERSIST_PREFIX', '')
+            ]
         ],
     ],
 ];

@@ -2,7 +2,11 @@
 
 namespace App\Models\CRM\Dms\Quickbooks;
 
+use App\Constants\Date;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Class BillPayment
@@ -21,7 +25,9 @@ use Illuminate\Database\Eloquent\Model;
  */
 class BillPayment extends Model
 {
-    protected $table = 'qb_bill_payment';
+    public const TABLE_NAME = 'qb_bill_payment';
+
+    protected $table = self::TABLE_NAME;
 
     public $timestamps = false;
 
@@ -36,4 +42,26 @@ class BillPayment extends Model
         'memo',
         'qb_id',
     ];
+
+    public function approvals(): HasMany
+    {
+        return $this
+            ->hasMany(QuickbookApproval::class, 'tb_primary_id', 'id')
+            ->where('tb_name', $this->table);
+    }
+
+    public function account(): BelongsTo
+    {
+        return $this->belongsTo(Account::class);
+    }
+
+    public function bill(): BelongsTo
+    {
+        return $this->belongsTo(Bill::class);
+    }
+
+    public function getTransactionDateAttribute(): Carbon
+    {
+        return $this->date ? Carbon::createFromFormat(Date::FORMAT_Y_M_D, $this->date) : null;
+    }
 }

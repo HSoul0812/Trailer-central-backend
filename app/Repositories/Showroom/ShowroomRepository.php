@@ -10,6 +10,7 @@ use App\Models\Showroom\ShowroomImage;
 use App\Models\Showroom\ShowroomFile;
 use App\Exceptions\ImageNotDownloadedException;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Collection;
 
 class ShowroomRepository implements ShowroomRepositoryInterface {
 
@@ -110,6 +111,20 @@ class ShowroomRepository implements ShowroomRepositoryInterface {
         throw new NotImplementedException;
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function distinctByManufacturers(): Collection
+    {
+        return Showroom::select('manufacturer')
+            ->distinct()
+            ->where('manufacturer', '!=', '')
+            ->whereNotNull('manufacturer')
+            ->orderBy('manufacturer')
+            ->get()
+            ->pluck('manufacturer');
+    }
+
     private function storeImage($showroomId, $image, $isFloorplan) {
         $explodedImage = explode('.', $image);
         $imageExtension = $explodedImage[count($explodedImage) - 1];
@@ -121,7 +136,7 @@ class ShowroomRepository implements ShowroomRepositoryInterface {
             throw new ImageNotDownloadedException('Image not accessible: '.$image);
         }
 
-        Storage::disk('s3')->put($fileName, $imageData, 'public');
+        Storage::disk('s3')->put($fileName, $imageData);
 
         ShowroomImage::create([
             'showroom_id' => $showroomId,
@@ -142,7 +157,7 @@ class ShowroomRepository implements ShowroomRepositoryInterface {
             throw new ImageNotDownloadedException('Image not accessible: '.$file);
         }
 
-        Storage::disk('s3')->put($fileName, $fileData, 'public');
+        Storage::disk('s3')->put($fileName, $fileData);
 
         ShowroomFile::create([
             'showroom_id' => $showroomId,

@@ -12,6 +12,7 @@ use App\Traits\Repository\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 
@@ -21,10 +22,17 @@ use Illuminate\Support\Facades\URL;
  */
 class BillRepository implements BillRepositoryInterface
 {
-
     use SortTrait, Transaction;
 
     private const DEFAULT_PAGE_SIZE = 15;
+
+    private const ACTION_ADD = 'add';
+    private const ACTION_UPDATE = 'update';
+
+    /**
+     * @var BillPaymentRepositoryInterface
+     */
+    private $billPaymentRepository;
 
     private $sortOrders = [
         'status' => [
@@ -54,128 +62,160 @@ class BillRepository implements BillRepositoryInterface
     ];
 
     /**
+     * @param BillPaymentRepositoryInterface $billPaymentRepository
+     */
+    public function __construct(BillPaymentRepositoryInterface $billPaymentRepository)
+    {
+        $this->billPaymentRepository = $billPaymentRepository;
+    }
+
+    /**
      * @param $params
+     *
      * @return Bill
      */
     public function create($params): Bill
     {
-        $items = [];
-        $categories = [];
-        $payments = [];
-
-        if (isset($params['items'])) {
-            $items = $params['items'];
-            unset($params['items']);
-        }
-
-        if (isset($params['categories'])) {
-            $categories = $params['categories'];
-            unset($params['categories']);
-        }
-
-        if (isset($params['payments'])) {
-            $payments = $params['payments'];
-            unset($params['payments']);
-        }
-
-        $this->beginTransaction();
-
         try {
-            $bill = new Bill($params);
+            $this->beginTransaction();
+
+            $bill = new Bill(Arr::except($params, ['items', 'categories', 'payments']));
             $bill->save();
 
-            foreach ($items as $item) {
-                $item['bill_id'] = $bill->id;
-                $billItem = new BillItem($item);
-                $billItem->save();
-            }
-
-            foreach ($categories as $category) {
-                $category['bill_id'] = $bill->id;
-                $billCategory = new BillCategory($category);
-                $billCategory->save();
-            }
-
-            foreach ($payments as $payment) {
-                $payment['bill_id'] = $bill->id;
-                $billPayment = new BillPayment($payment);
-                $billPayment->save();
-            }
+            $this->save($params, $bill);
 
             $this->commitTransaction();
-        }
-        catch (\Exception $exception)
-        {
+            return $bill;
+        } catch (\Exception $exception) {
             $this->rollbackTransaction();
         }
-
-        return $bill;
     }
 
     /**
      * @param array $params
+     *
      * @return Bill
      *
      * @throws ModelNotFoundException
+     * @throws \Exception
      */
     public function update($params): Bill
     {
-        $items = [];
-        $categories = [];
-        $payments = [];
-
-        if (isset($params['items'])) {
-            $items = $params['items'];
-            unset($params['items']);
-        }
-
-        if (isset($params['categories'])) {
-            $categories = $params['categories'];
-            unset($params['categories']);
-        }
-
-        if (isset($params['payments'])) {
-            $payments = $params['payments'];
-            unset($params['payments']);
-        }
-
-        $bill = Bill::findOrFail($params['id']);
-        $bill->fill($params)->save();
-
-        $this->beginTransaction();
         try {
-            if (!empty($items)) {
-                DB::statement("DELETE FROM qb_bill_items WHERE bill_id = " . $bill->id);
-                foreach ($items as $item) {
-                    $item['bill_id'] = $bill->id;
-                    $billItem = new BillItem($item);
-                    $billItem->save();
-                }
-            }
+            $this->beginTransaction();
 
-            if (!empty($categories)) {
-                DB::statement("DELETE FROM qb_bill_categories WHERE bill_id = " . $bill->id);
-                foreach ($categories as $category) {
-                    $category['bill_id'] = $bill->id;
-                    $billCategory = new BillCategory($category);
-                    $billCategory->save();
-                }
-            }
+            $bill = Bill::findOrFail($params['id']);
 
+            $bill->fill(
+                Arr::except($params, ['items', 'categories', 'payments'])
+            )->save();
 
-            if (!empty($payments)) {
-                DB::statement("DELETE FROM qb_bill_payment WHERE bill_id = " . $bill->id);
-                foreach ($payments as $payment) {
-                    $payment['bill_id'] = $bill->id;
-                    $billPayment = new BillPayment($payment);
-                    $billPayment->save();
-                }
-            }
+            $this->save($params, $bill, self::ACTION_UPDATE);
 
             $this->commitTransaction();
+
+            return $bill;
         } catch (\Exception $exception) {
             $this->rollbackTransaction();
+
+            throw $exception;
         }
+    }
+
+    /**
+     * @param array $categories
+     * @param Bill $bill
+     * @param string $action
+     *
+     * @return void
+     */
+    public function saveCategories(array $categories, Bill $bill, string $action = self::ACTION_ADD): void
+    {
+        $data = [
+            'bill_id' => $bill->getKey(),
+        ];
+
+        if (!empty($categories)) {
+            if ($action === self::ACTION_UPDATE) {
+                $bill->categories()->delete();
+            }
+
+            foreach ($categories as $category) {
+                $billCategory = new BillCategory($data + $category);
+                $billCategory->save();
+            }
+        }
+    }
+
+    /**
+     * @param array $items
+     * @param Bill $bill
+     * @param string $action
+     *
+     * @return void
+     */
+    public function saveItems(array $items, Bill $bill, string $action = self::ACTION_ADD): void
+    {
+        $data = [
+            'bill_id' => $bill->getKey(),
+        ];
+
+        if (!empty($items)) {
+            if ($action === self::ACTION_UPDATE) {
+                $bill->items()->delete();
+            }
+
+            foreach ($items as $item) {
+                $billItem = new BillItem($data + $item);
+                $billItem->save();
+            }
+        }
+    }
+
+    /**
+     * @param array $payments
+     * @param Bill $bill
+     * @param string $action
+     *
+     * @return void
+     */
+    public function saveBillPayment(array $payments, Bill $bill, string $action = self::ACTION_ADD): void
+    {
+        $data = [
+            'bill_id' => $bill->getKey(),
+            'dealer_id' => $bill->dealer_id,
+        ];
+
+        if (!empty($payments)) {
+            if ($action === self::ACTION_UPDATE) {
+                $bill->payments()->delete();
+            }
+
+            foreach ($payments as $payment) {
+                $this->billPaymentRepository->create($data + $payment);
+            }
+        }
+    }
+
+    /**
+     * @param array $params
+     * @param Bill $bill
+     *
+     * @return Bill
+     */
+    private function save(
+        array $params,
+        Bill $bill,
+        string $action = self::ACTION_ADD
+    ): Bill {
+        // Bill Line Items
+        $this->saveItems($params['items'] ?? [], $bill, $action);
+
+        // Bill Categories
+        $this->saveCategories($params['categories'] ?? [], $bill, $action);
+
+        // Bill Payments
+        $this->saveBillPayment($params['payments'] ?? [], $bill, $action);
 
         return $bill;
     }
@@ -186,18 +226,52 @@ class BillRepository implements BillRepositoryInterface
      */
     public function get($params)
     {
-        $bill = Bill::findOrFail($params['id']);
+        $with = Arr::get($params, 'with', []);
 
-        return $bill;
+        return Bill::query()
+            ->with($with)
+            ->findOrFail($params['id']);
     }
 
     /**
      * @param $params
      * @throws NotImplementedException
+     * @throws \Exception
      */
     public function delete($params)
     {
-        throw new NotImplementedException;
+        /** @var Bill $bill */
+        $bill = $this->get([
+            'id' => $params['id'],
+            'with' => [
+                'inventories',
+                'items',
+                'categories',
+                'payments'
+            ],
+        ]);
+
+        // Note: The logic below is taken from https://operatebeyond.atlassian.net/browse/DMSS-645?focusedCommentId=30120
+        // First, we want to make sure to remove bill related data on the
+        // inventories that use this bill
+        $bill->inventories()->update([
+            'fp_committed' => null,
+            'fp_vendor' => null,
+            'fp_balance' => 0,
+            'fp_paid' => 0,
+            'fp_interest_paid' => 0,
+            'bill_id' => null,
+            'send_to_quickbooks' => 0,
+            'is_floorplan_bill' => 0,
+            'qb_sync_processed' => 0
+        ]);
+
+        // Then, delete related records from the quickbook_approval table
+        // We need to do this before deleting all those data
+        $this->deleteRelatedQuickbookApprovals($bill);
+
+        // After that, we start delete the related models
+        $this->deleteRelatedModels($bill);
     }
 
     /**
@@ -232,7 +306,7 @@ class BillRepository implements BillRepositoryInterface
             $resultsCount,
             $perPage,
             $currentPage,
-            ["path" => URL::to('/')."/api/bills"]
+            ["path" => URL::to('/') . "/api/bills"]
         ))->appends($params);
     }
 
@@ -267,6 +341,10 @@ class BillRepository implements BillRepositoryInterface
             $query = $query->where('qb_bills.dealer_location_id', $params['dealer_location_id']);
         }
 
+        if (isset($params['search_term'])) {
+            $query = $query->where('qb_bills.doc_num', 'LIKE', '%' . $params['search_term'] . '%');
+        }
+
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
         }
@@ -274,10 +352,34 @@ class BillRepository implements BillRepositoryInterface
         return $query;
     }
 
-    private function getResultsCountFromQuery(Builder $query) : int
+    private function getResultsCountFromQuery(Builder $query): int
     {
         $queryString = str_replace(array('?'), array('\'%s\''), $query->toSql());
         $queryString = vsprintf($queryString, $query->getBindings());
         return current(DB::select(DB::raw("SELECT count(*) as row_count FROM ($queryString) as bill_count")))->row_count;
+    }
+
+    private function deleteRelatedQuickbookApprovals(Bill $bill)
+    {
+        /** @var BillPayment $payment */
+        foreach ($bill->payments as $payment) {
+            $payment->approvals()->delete();
+        }
+
+        $bill->approvals()->delete();
+    }
+
+    /**
+     * @throws \Exception
+     */
+    private function deleteRelatedModels(Bill $bill)
+    {
+        // Here, we delete all the related models from the database
+        $bill->items()->delete();
+        $bill->categories()->delete();
+        $bill->payments()->delete();
+
+        // After that, we delete the bill itself
+        $bill->delete();
     }
 }

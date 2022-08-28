@@ -3,6 +3,8 @@
 namespace App\Repositories\Marketing\Craigslist;
 
 use App\Exceptions\NotImplementedException;
+use App\Models\Marketing\Craigslist\Session;
+use App\Models\Marketing\Craigslist\Category;
 use App\Repositories\Traits\SortTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -79,7 +81,7 @@ class ProfileRepository implements ProfileRepositoryInterface
     public function getAll($params, string $type = 'inventory')
     {
         /** @var  Builder $query */
-        $query = Profile::select('id', 'profile', 'username', 'postCategory as category');
+        $query = Profile::select(Profile::getTableName().'.id', 'profile', 'username', 'postCategory as category');
 
         $query = $query->where('username', '<>', '')
             ->where('username', '<>', '0')
@@ -92,6 +94,12 @@ class ProfileRepository implements ProfileRepositoryInterface
 
         if (isset($params['dealer_id'])) {
             $query = $query->where('dealer_id', $params['dealer_id']);
+        }
+
+        if (isset($params['slot_id']) && (int) $params['slot_id'] === Session::SLOT_SCHEDULER) {
+            $query = $query->leftJoin(Category::getTableName(), Category::getTableName().'.category',
+                                        '=', Profile::getTableName().'.postCategory')
+                           ->where(Category::getTableName().'.grouping', Category::GROUP_BY_DEALER);
         }
 
         if (!isset($params['sort'])) {

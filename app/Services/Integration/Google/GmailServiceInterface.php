@@ -77,4 +77,12 @@ interface GmailServiceInterface {
      * @return array of labels
      */
     public function labels(AccessToken $accessToken, array $search = []);
+
+    /**
+     * Set Key for Google Service
+     * 
+     * @param string $key
+     * @return string
+     */
+    public function setKey(string $key = ''): string;
 }

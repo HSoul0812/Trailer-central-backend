@@ -149,6 +149,12 @@ class CampaignRepository implements CampaignRepositoryInterface {
                 unset($params['brand']);
             }
 
+            if (isset($params['log']) && is_array($params['log'])) {
+                $log = $campaign->log ? json_decode($campaign->log, true) : [];
+                $log[] = $params['log'];
+                $params['log'] = json_encode($log);
+            }
+
             // Update Brands
             $this->updateBrands($campaign->id, $brands);
 

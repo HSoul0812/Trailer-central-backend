@@ -9,7 +9,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Category extends BaseCategory
 {
     protected $table = 'textrail_categories';
-    
+
+    protected $fillable = [
+        'name',
+        'parent_id'
+    ];
+
     public function parts(): HasMany
     {
         return $this->hasMany(Part::class);

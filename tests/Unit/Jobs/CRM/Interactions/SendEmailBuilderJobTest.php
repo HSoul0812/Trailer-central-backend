@@ -37,6 +37,7 @@ class SendEmailBuilderJobTest extends TestCase
 
 
     /**
+     * @group CRM
      * @covers ::handle
      * @group EmailBuilder
      *
@@ -106,6 +107,7 @@ class SendEmailBuilderJobTest extends TestCase
     }
 
     /**
+     * @group CRM
      * @covers ::handle
      * @group EmailBuilder
      *

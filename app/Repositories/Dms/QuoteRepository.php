@@ -4,6 +4,7 @@ namespace App\Repositories\Dms;
 
 use App\Exceptions\RepositoryInvalidArgumentException;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\DB;
 use App\Repositories\Dms\QuoteRepositoryInterface;
 use App\Exceptions\NotImplementedException;
@@ -116,19 +117,23 @@ class QuoteRepository implements QuoteRepositoryInterface
         if (isset($params['status'])) {
             switch ($params['status']) {
                 case UnitSale::QUOTE_STATUS_ARCHIVED:
-                    $query = $query->where('is_archived', '=', 1);
+                    $query = $query
+                        ->where('is_sold', '=', 0)
+                        ->where('is_archived', '=', 1);
                     break;
                 case UnitSale::QUOTE_STATUS_OPEN:
                     $query = $query
+                        ->where('is_sold', '=', 0)
                         ->where('is_archived', '=', 0)
                         ->where('is_po', '=', 0)
                         ->doesntHave('payments');
                     break;
                 case UnitSale::QUOTE_STATUS_DEAL:
                     $query = $query
+                        ->where('is_sold', '=', 0)
                         ->where('is_archived', '=', 0)
                         ->where('is_po', '=', 0)
-                        ->whereHas('payments', function($query) {
+                        ->whereHas('payments', function(Builder $query) {
                             $query->select(DB::raw('sum(calculated_payments.balance) as calculated_amount'))
                             ->leftJoinSub($this->calculatedPayments(), 'calculated_payments', function ($join) {
                                 $join->on('qb_payment.id', '=', 'calculated_payments.id');
@@ -138,24 +143,37 @@ class QuoteRepository implements QuoteRepositoryInterface
                         });
                     break;
                 case UnitSale::QUOTE_STATUS_COMPLETED:
-                    $query = $query
-                        ->where('is_archived', '=', 0)
-                        ->where(function ($query) {
-                            $query->where('is_po', '=', 1)
-                                ->orWhereHas('payments', function ($query) {
-                                    $query->select(DB::raw('sum(calculated_payments.balance) as calculated_amount'))
-                                    ->leftJoinSub($this->calculatedPayments(), 'calculated_payments', function ($join) {
-                                      $join->on('qb_payment.id', '=', 'calculated_payments.id');
-                                    })
-                                    ->groupBy('unit_sale_id')
-                                    ->havingRaw('calculated_amount >= dms_unit_sale.total_price');
-                                });
-                        });
+                    $query = $query->where(function (Builder $query) {
+                        $query
+                            ->where('is_sold', '=', 1)
+                            ->orWhere(function (Builder $query) {
+                                $query
+                                    ->where('is_archived', '=', 0)
+                                    ->where(function (Builder $query) {
+                                        $query->where('is_po', '=', 1)
+                                            ->orWhereHas('payments', function (Builder $query) {
+                                                $query->select(DB::raw('sum(calculated_payments.balance) as calculated_amount'))
+                                                    ->leftJoinSub($this->calculatedPayments(), 'calculated_payments', function (JoinClause $join) {
+                                                        $join->on('qb_payment.id', '=', 'calculated_payments.id');
+                                                    })
+                                                    ->groupBy('unit_sale_id')
+                                                    ->havingRaw('calculated_amount >= dms_unit_sale.total_price');
+                                            });
+                                    });
+                            });
+                    });
                     break;
             }
         }
+
+        if (isset($params['lead_id'])) {
+            $query->where('lead_id', '=', $params['lead_id']);
+        }
+
         if (isset($params['sort'])) {
             $query = $this->addSortQuery($query, $params['sort']);
+        } else {
+            $query = $this->addSortQuery($query, 'created_at');
         }
 
         return $query->paginate($params['per_page'])->appends($params);
@@ -276,5 +294,10 @@ class QuoteRepository implements QuoteRepositoryInterface
         }
 
         return (bool)$query->update($params);
+    }
+
+    public function getRefunds(array $params): array
+    {
+        return [];
     }
 }

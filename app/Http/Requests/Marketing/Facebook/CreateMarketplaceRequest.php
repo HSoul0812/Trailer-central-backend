@@ -14,8 +14,7 @@ class CreateMarketplaceRequest extends SaveMarketplaceRequest {
     protected function getRules(): array
     {
         return array_merge([
-            'dealer_id' => 'required|integer',
-            'dealer_location_id' => 'required|integer',
+            'dealer_id' => 'required|integer'
         ], parent::getRules());
     }
 }

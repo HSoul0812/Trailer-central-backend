@@ -10,6 +10,7 @@ use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Services\CRM\Email\DTOs\SmtpConfig;
 use App\Services\CRM\Interactions\InteractionEmailServiceInterface;
 use App\Services\CRM\User\DTOs\EmailSettings;
+use App\Services\File\FileServiceInterface;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Traits\CustomerHelper;
 use App\Traits\MailHelper;
@@ -20,17 +21,29 @@ use Illuminate\Support\Collection;
 
 /**
  * Class InteractionEmailService
- * 
+ *
  * @package App\Services\CRM\Interactions
  */
 class InteractionEmailService implements InteractionEmailServiceInterface
 {
     use CustomerHelper, MailHelper;
 
+    /**
+     * @var FileServiceInterface
+     */
+    private $fileService;
+
+    /**
+     * @param FileServiceInterface $fileService
+     */
+    public function __construct(FileServiceInterface $fileService)
+    {
+        $this->fileService = $fileService;
+    }
 
     /**
      * Send Email With Params
-     * 
+     *
      * @param EmailSettings $emailConfig
      * @param null|SmtpConfig $smtpConfig
      * @param ParsedEmail $parsedEmail
@@ -74,13 +87,13 @@ class InteractionEmailService implements InteractionEmailServiceInterface
                     'name' => $parsedEmail->getToName()
                 ], $interactionEmail);
             }
+
+            // Store Attachments
+            if($parsedEmail->hasAttachments()) {
+                $parsedEmail->setAttachments($this->storeAttachments($emailConfig->dealerId, $parsedEmail));
+            }
         } catch(\Exception $ex) {
             throw new SendEmailFailedException($ex->getMessage());
-        }
-
-        // Store Attachments
-        if($parsedEmail->hasAttachments()) {
-            $parsedEmail->setAttachments($this->storeAttachments($emailConfig->dealerId, $parsedEmail));
         }
 
         // Returns Params With Attachments
@@ -89,39 +102,32 @@ class InteractionEmailService implements InteractionEmailServiceInterface
 
     /**
      * Store Uploaded Attachments
-     * 
+     *
      * @param int $dealerId
      * @param ParsedEmail $parsedEmail
+     * @throws ExceededSingleAttachmentSizeException
+     * @throws ExceededTotalAttachmentSizeException
      * @return Collection<Attachment>
      */
     public function storeAttachments(int $dealerId, ParsedEmail $parsedEmail): Collection {
-        // Calculate Directory
-        $messageDir = str_replace(">", "", str_replace("<", "", $parsedEmail->getMessageId()));
-
         // Valid Attachment Size?!
-        if($parsedEmail->validateAttachmentsSize()) {
-            // Loop Attachments
-            $attachments = new Collection();
-            foreach ($parsedEmail->getAllAttachments() as $file) {
-                // Generate Path
-                $filePath = 'crm/' . $dealerId . '/' . $messageDir . '/attachments/' . $file->getFileName();
+        $parsedEmail->validateAttachmentsSize();
 
-                // Save File to S3
-                Storage::disk('ses')->put($filePath, $file->getContents());
+        // Loop Attachments
+        $attachments = new Collection();
+        foreach ($parsedEmail->getAllAttachments() as $file) {
+            $fileDto = $this->fileService->uploadLocal(['file' => $file]);
+            $fileDtoS3 = $this->fileService->upload($fileDto->getUrl(), null, $dealerId);
 
-                // Set File Name/Path
-                $file->setFilePath(Attachment::AWS_PREFIX . '/' . $filePath);
-                $file->setFileName(time() . $file->getFileName());
+            // Set File Name/Path
+            $file->setFilePath($fileDtoS3->getUrl());
+            $file->setFileName($fileDtoS3->getPath());
 
-                // Add File
-                $attachments->push($file);
-            }
-
-            // Return Attachment Objects
-            return $attachments;
+            // Add File
+            $attachments->push($file);
         }
 
-        // Return All Attachments
-        return $parsedEmail->getAllAttachments();
+        // Return Attachment Objects
+        return $attachments;
     }
 }

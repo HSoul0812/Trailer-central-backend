@@ -11,6 +11,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @package App\Models\Website\Config
  *
  * @property Website $website
+ * @property string $website_id
+ * @property string $key
+ * @property string $value
  */
 class WebsiteConfig extends Model
 {

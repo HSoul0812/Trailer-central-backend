@@ -25,6 +25,7 @@ class TemplateRepositoryTest extends TestCase
     /**
      * Test that SUT is properly bound by the application
      *
+     * @group CRM
      * @typeOfTest IntegrationTestCase
      *
      * @throws BindingResolutionException when there is a problem with resolution
@@ -40,6 +41,7 @@ class TemplateRepositoryTest extends TestCase
     /**
      * Test that SUT is performing all desired operations (sort and filter) excepts pagination
      *
+     * @group CRM
      * @typeOfTest IntegrationTestCase
      *
      * @covers TemplateRepository::get
@@ -70,6 +72,7 @@ class TemplateRepositoryTest extends TestCase
     /**
      * Test that SUT is performing all desired operations (sort and filter) excepts pagination
      *
+     * @group CRM
      * @typeOfTest IntegrationTestCase
      *
      * @throws BindingResolutionException when there is a problem with resolution of concreted class

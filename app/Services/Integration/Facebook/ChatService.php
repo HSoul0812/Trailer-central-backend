@@ -147,8 +147,8 @@ class ChatService implements ChatServiceInterface
             ]);
 
             // Dispatch Send Message Job
-            $job = new MessageJob($pageAccessToken, $page->page_id);
-            $this->dispatch($job->onQueue('fb-messenger'));
+            // $job = new MessageJob($pageAccessToken, $page->page_id);
+            // $this->dispatch($job->onQueue('fb-messenger'));
         }
 
         // Return Response

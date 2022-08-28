@@ -5,13 +5,14 @@ namespace App\Services\CRM\Text;
 use App\Exceptions\CRM\Text\CustomerLandlineNumberException;
 use App\Exceptions\CRM\Text\NoCampaignSmsFromNumberException;
 use App\Exceptions\CRM\Text\NoLeadsProcessCampaignException;
+use App\Exceptions\CRM\Text\NotValidFromNumberCampaignException;
 use App\Models\CRM\Interactions\TextLog;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Text\Campaign;
 use App\Models\CRM\Text\CampaignSent;
 use App\Models\User\NewDealerUser;
-use App\Services\CRM\Text\TextServiceInterface;
+use App\Services\CRM\Text\TwilioServiceInterface;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
 use App\Repositories\CRM\Text\CampaignRepositoryInterface;
@@ -24,13 +25,13 @@ use Carbon\Carbon;
 
 /**
  * Class CampaignService
- * 
+ *
  * @package App\Services\CRM\Text
  */
 class CampaignService implements CampaignServiceInterface
 {
     /**
-     * @var App\Services\CRM\Text\TextServiceInterface
+     * @var TwilioServiceInterface
      */
     protected $textService;
 
@@ -67,11 +68,11 @@ class CampaignService implements CampaignServiceInterface
     /**
      * CampaignService constructor.
      */
-    public function __construct(TextServiceInterface $text,
-                                StatusRepositoryInterface $leadStatus,
-                                TextRepositoryInterface $textRepo,
-                                CampaignRepositoryInterface $campaignRepo,
-                                TemplateRepositoryInterface $templateRepo,
+    public function __construct(TwilioServiceInterface            $text,
+                                StatusRepositoryInterface         $leadStatus,
+                                TextRepositoryInterface           $textRepo,
+                                CampaignRepositoryInterface       $campaignRepo,
+                                TemplateRepositoryInterface       $templateRepo,
                                 DealerLocationRepositoryInterface $dealerLocationRepo)
     {
         // Initialize Text Service
@@ -90,7 +91,7 @@ class CampaignService implements CampaignServiceInterface
 
     /**
      * Send Campaign Text
-     * 
+     *
      * @param NewDealerUser $dealer
      * @param Campaign $campaign
      * @throws NoCampaignSmsFromNumberException
@@ -98,39 +99,60 @@ class CampaignService implements CampaignServiceInterface
      * @return Collection<CampaignSent>
      */
     public function send(NewDealerUser $dealer, Campaign $campaign): Collection {
-        // Get From Number
-        $from_number = $this->getFromNumber($dealer->id, $campaign);
+        try {
+            // Get From Number
+            $from_number = $this->getFromNumber($dealer->id, $campaign);
 
-        // Get Unsent Campaign Leads
-        if(count($campaign->leads) < 1) {
-            $this->log->error('No Leads found for Campaign #' . $campaign->id . ' for Dealer #: ' . $dealer->id);
-            throw new NoLeadsProcessCampaignException;
-        }
-
-        // Loop Leads for Current Dealer
-        $sent = new Collection();
-        $this->log->debug('Found ' . $campaign->leads->count() . ' Leads for Campaign #' . $campaign->id);
-        foreach($campaign->leads as $lead) {
-            // Not a Valid To Number?!
-            if(empty($lead->text_phone)) {
-                continue;
+            if (!$this->textService->isValidPhoneNumber($from_number)) {
+                $this->log->error('From SMS Number is Invalid #: ' . $dealer->id);
+                throw new NotValidFromNumberCampaignException();
             }
 
-            // Send Lead
-            $leadSent = $this->sendToLead($from_number, $dealer, $campaign, $lead);
-            if($leadSent !== null) {
-                $sent->push($leadSent);
+            // Get Unsent Campaign Leads
+            if (count($campaign->leads) < 1) {
+                $this->log->error('No Leads found for Campaign #' . $campaign->id . ' for Dealer #: ' . $dealer->id);
+                throw new NoLeadsProcessCampaignException;
             }
-        }
 
-        // Return Campaign Sent Entries
-        return $sent;
+            // Loop Leads for Current Dealer
+            $sent = new Collection();
+            $this->log->debug('Found ' . $campaign->leads->count() . ' Leads for Campaign #' . $campaign->id);
+            foreach ($campaign->leads as $lead) {
+                // Not a Valid To Number?!
+                if (empty($lead->text_phone)) {
+                    continue;
+                }
+
+                // Send Lead
+                $leadSent = $this->sendToLead($from_number, $dealer, $campaign, $lead);
+                if ($leadSent !== null) {
+                    $sent->push($leadSent);
+                }
+            }
+
+            $this->saveLog($campaign, 'success', 'Successfully Delivered');
+
+            // Return Campaign Sent Entries
+            return $sent;
+        } catch (NoLeadsProcessCampaignException $e) {
+            $this->saveLog($campaign, 'warning', $e->getMessage());
+            throw $e;
+        } catch (NoCampaignSmsFromNumberException $e) {
+            $this->saveLog($campaign, 'error', $e->getMessage(), true);
+            throw $e;
+        } catch (NotValidFromNumberCampaignException $e) {
+            $this->saveLog($campaign, 'error', $e->getMessage(), true);
+            throw $e;
+        } catch (\Exception $e) {
+            $this->saveLog($campaign, 'error', 'An Unknown Error Has Occurred, Please Contact Support', true);
+            throw $e;
+        }
     }
 
 
     /**
      * Get From Number
-     * 
+     *
      * @param int $dealerId
      * @param Campaign $campaign
      * @throw NoCampaignSmsFromNumberException
@@ -156,7 +178,7 @@ class CampaignService implements CampaignServiceInterface
 
     /**
      * Send Text to Lead
-     * 
+     *
      * @param string $from_number sms from number
      * @param NewDealerUser $dealer
      * @param Campaign $campaign
@@ -201,7 +223,7 @@ class CampaignService implements CampaignServiceInterface
 
     /**
      * Update Lead Status
-     * 
+     *
      * @param Lead $lead
      * @return LeadStatus
      */
@@ -216,7 +238,7 @@ class CampaignService implements CampaignServiceInterface
 
     /**
      * Save Text to DB
-     * 
+     *
      * @param string $from_number sms from number
      * @param Lead $lead
      * @param string $textMessage filled text message
@@ -233,8 +255,28 @@ class CampaignService implements CampaignServiceInterface
     }
 
     /**
+     * @param Campaign $campaign
+     * @param string $status
+     * @param string $message
+     * @param bool $isError
+     * @return void
+     */
+    private function saveLog(Campaign $campaign, string $status, string $message, bool $isError = false)
+    {
+        return $this->campaigns->update([
+            'id' => $campaign->id,
+            'is_error' => $isError,
+            'log' => [
+                'status' => $status,
+                'message' => $message,
+                'date' => (new \DateTime())->format('Y-m-d H:i:s'),
+            ]
+        ]);
+    }
+
+    /**
      * Mark Lead as Sent
-     * 
+     *
      * @param Campaign $campaign
      * @param Lead $lead
      * @param string $status

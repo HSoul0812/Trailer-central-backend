@@ -26,4 +26,8 @@ interface TextrailPartsInterface
     public function getTextrailTotalPartsCount(int $pageSize = 1, int $currentPage = 1): int;
 
     public function getTextrailDumpStock(): array;
+
+    public function getAttributes(): array;
+
+    public function getAttribute(string $code): array;
 }

@@ -70,7 +70,15 @@ class DealerLocationController extends RestfulControllerV2 {
         $request = new GetDealerLocationRequest($request->all());
 
         if ($request->validate()) {
-            return $this->response->paginator($this->dealerLocation->getAll($request->all()), $this->transformer);
+            $params = $request->all();
+            
+            // We should decode the URL, otherwise we're searching for
+            // string like "Pond%20Shop" instead of "Pond Shop"
+            if (array_key_exists('search_term', $params)) {
+                $params['search_term'] = urldecode($params['search_term']);
+            }
+            
+            return $this->response->paginator($this->service->getAll($params), $this->transformer);
         }
 
         $this->response->errorBadRequest();

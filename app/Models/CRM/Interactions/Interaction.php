@@ -30,16 +30,23 @@ class Interaction extends Model
         'FB'
     ];
 
-    /**
-     * @const string
-     */
     const TYPE_EMAIL = 'EMAIL';
-
-    /**
-     * @const string
-     */
     const TYPE_FB = 'FB';
 
+    /**
+     * @const string
+     */
+    const TYPE_CONTACT = 'CONTACT';
+
+    /**
+     * @const string
+     */
+    const TYPE_TASK = 'TASK';
+
+    /**
+     * @const string
+     */
+    const TYPE_TEXT = 'TEXT';
 
     /**
      * The table associated with the model.
@@ -69,7 +76,8 @@ class Interaction extends Model
         "interaction_notes",
         "interaction_time",
         "from_email",
-        "sent_by"
+        "sent_by",
+        "is_closed"
     ];
 
     /**
@@ -94,38 +102,38 @@ class Interaction extends Model
     {
         return $this->belongsTo(Lead::class, 'tc_lead_id', 'identifier');
     }
-    
+
     public function leadStatus()
     {
         return $this->belongsTo(LeadStatus::class, 'tc_lead_id', 'tc_lead_identifier');
     }
-    
+
     public function newUser()
     {
         return $this->belongsTo(NewUser::class, 'user_id', 'user_id');
     }
-    
-    public function getRealUsernameAttribute() 
+
+    public function getRealUsernameAttribute()
     {
        /**
         *  If there's only one email history record associated to this interaction.
-        *  I.e there are no scraped replies associated to this record take the username from the from_email from the history 
+        *  I.e there are no scraped replies associated to this record take the username from the from_email from the history
         */
        if ($this->emailHistory->count() === 1) {
            return $this->emailHistory->first()->from_email;
        }
-       
+
        if (!empty($this->sent_by)) {
            return $this->sent_by;
        }
-                      
+
        if (!empty($this->from_email)) {
            return $this->from_email;
        }
-       
-       return $this->newUser->username;                        
+
+       return $this->newUser->username;
     }
-    
+
     public static function getTableName() {
         return self::TABLE_NAME;
     }

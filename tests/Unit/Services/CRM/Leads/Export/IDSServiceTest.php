@@ -42,7 +42,10 @@ class IDSServiceTest extends TestCase
         $this->leadEmailRepository = Mockery::mock(LeadEmailRepositoryInterface::class);
         $this->app->instance(LeadEmailRepository::class, $this->leadEmailRepository);
     }
-        
+
+    /**
+     * @group CRM
+     */
     public function testExportIDSLead()
     {
         $dealerLocation = $this->getEloquentMock(DealerLocation::class);

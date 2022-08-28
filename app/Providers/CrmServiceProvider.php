@@ -8,10 +8,20 @@ use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\Observers\CRM\Lead\LeadObserver;
 use App\Models\Observers\CRM\Lead\LeadStatusObserver;
+use App\Repositories\CRM\Documents\DealerDocumentsRepository;
+use App\Repositories\CRM\Documents\DealerDocumentsRepositoryInterface;
+use App\Repositories\CRM\Leads\LeadTradeRepository;
+use App\Repositories\CRM\Leads\LeadTradeRepositoryInterface;
 use App\Repositories\CRM\Refund\RefundRepository;
 use App\Repositories\CRM\Refund\RefundRepositoryInterface;
+use App\Services\CRM\Email\CampaignService;
+use App\Services\CRM\Email\CampaignServiceInterface;
 use App\Services\CRM\Email\InquiryEmailService;
 use App\Services\CRM\Email\InquiryEmailServiceInterface;
+use App\Services\CRM\Leads\Import\ImportService;
+use App\Services\CRM\Leads\Import\ImportServiceInterface;
+use App\Services\CRM\Leads\LeadStatusService;
+use App\Services\CRM\Leads\LeadStatusServiceInterface;
 use App\Services\CRM\Text\InquiryTextService;
 use App\Services\CRM\Text\InquiryTextServiceInterface;
 use App\Services\CRM\Leads\InquiryServiceInterface;
@@ -26,8 +36,6 @@ use App\Services\CRM\Leads\Export\IDSServiceInterface;
 use App\Services\CRM\Leads\Export\IDSService;
 use App\Services\CRM\Leads\Export\BigTexServiceInterface;
 use App\Services\CRM\Leads\Export\BigTexService;
-use App\Services\CRM\Leads\Import\ADFServiceInterface as ADFImportServiceInterface;
-use App\Services\CRM\Leads\Import\ADFService as ADFImportService;
 use App\Repositories\CRM\Leads\LeadRepository;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\Leads\SourceRepository;
@@ -70,7 +78,8 @@ class CrmServiceProvider extends ServiceProvider
         $this->app->bind(IDSServiceInterface::class, IDSService::class);
         $this->app->bind(BigTexServiceInterface::class, BigTexService::class);
         $this->app->bind(ADFExportServiceInterface::class, ADFExportService::class);
-        $this->app->bind(ADFImportServiceInterface::class, ADFImportService::class);
+        $this->app->bind(ImportServiceInterface::class, ImportService::class);
+        $this->app->bind(CampaignServiceInterface::class, CampaignService::class);
 
         // Repositories
         $this->app->bind(LeadRepositoryInterface::class, LeadRepository::class);
@@ -84,6 +93,9 @@ class CrmServiceProvider extends ServiceProvider
         $this->app->bind(LeadEmailRepositoryInterface::class, LeadEmailRepository::class);
         $this->app->bind(CustomerRepositoryInterface::class, CustomerRepository::class);
         $this->app->bind(CustomerInventoryRepositoryInterface::class, CustomerInventoryRepository::class);
+        $this->app->bind(DealerDocumentsRepositoryInterface::class, DealerDocumentsRepository::class);
+        $this->app->bind(LeadTradeRepositoryInterface::class, LeadTradeRepository::class);
+        $this->app->bind(LeadStatusServiceInterface::class, LeadStatusService::class);
 
         $this->app->bind(RefundRepositoryInterface::class, function () {
             return new RefundRepository(Refund::query());
@@ -105,8 +117,10 @@ class CrmServiceProvider extends ServiceProvider
         \Validator::extend('valid_lead', 'App\Rules\CRM\Leads\ValidLead@passes');
         \Validator::extend('non_lead_exists', 'App\Rules\CRM\Leads\NonLeadExists@passes');
         \Validator::extend('valid_texts_log', 'App\Rules\CRM\Text\ValidTextsLog@passes');
+        \Validator::extend('jotform_enabled', 'App\Rules\CRM\Leads\JotformEnabled@passes');
         \Validator::extend('unique_text_blast_campaign_name', 'App\Rules\CRM\Text\UniqueTextBlastCampaignName@passes');
         \Validator::extend('unique_text_campaign_name', 'App\Rules\CRM\Text\UniqueTextCampaignName@passes');
+        \Validator::extend('unique_email_campaign_name', 'App\Rules\CRM\Email\UniqueEmailCampaignName@passes');
 
         LeadStatus::observe(LeadStatusObserver::class);
         Lead::observe(LeadObserver::class);
