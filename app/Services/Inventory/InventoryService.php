@@ -843,60 +843,44 @@ class InventoryService implements InventoryServiceInterface
     public function convertMarkdown($input): string
     {
         $input = strip_tags($input);
-        // Check if Using Older Format
-        preg_match('/\*{2}\S(.*?)\S\*{2}/', $input, $str);
-        preg_match('/_\S(.*?)\S_/', $input, $em);
-        preg_match('/^\s{4}\S/m', $input, $code);
-        preg_match('/^(\s{0,3})?\#{2,6}\s+/m', $input, $head);
-        preg_match('/\\\\/', $input, $eol);
-        preg_match('/\[.*?\]\[\d+\]/', $input, $link);
 
-        // Check For Markdown Formatting
-        if(!empty($str[0]) || !empty($em[0]) || !empty($code[0]) ||
-            !empty($head[0]) || !empty($eol[0]) || !empty($link[0])) {
-            // Clean Up Miscellaneous Extra Lines
+        $input = str_replace('\n', PHP_EOL, $input);
+        $input = str_replace('\\' . PHP_EOL, PHP_EOL . PHP_EOL, $input); // to fix CDW-824 problems
+        $input = str_replace('\\' . PHP_EOL . 'n', PHP_EOL . PHP_EOL . PHP_EOL, $input);
 
-            $input = str_replace('\n', PHP_EOL, $input);
-            $input = str_replace('\\' . PHP_EOL, PHP_EOL . PHP_EOL, $input); // to fix CDW-824 problems
-            $input = str_replace('\\' . PHP_EOL . 'n', PHP_EOL . PHP_EOL . PHP_EOL, $input);
+        $input = str_replace('\\\\', '', $input);
+        $input = str_replace('\\,', ',', $input);
+        $input = str_replace('****', '', $input);
+        $input = str_replace('__', '', $input);
 
-            $input = str_replace('\\\\', '', $input);
-            $input = str_replace('\\,', ',', $input);
-            $input = str_replace('****', '', $input);
-            $input = str_replace('__', '', $input);
-
-            // Try/Catch Errors
-            $converted = '';
-            $exception = '';
-            try {
-                // Initialize Markdown Converter
-                $converter = new \Parsedown(); // This parser is 10x faster than the CommonMarkConverter
-                $converted = $converter->text($input);
-            } catch(\Exception $e) {
-                $exception = $e->getMessage();
-            }
-
-            // Convert Markdown to HTML
-            $description = preg_replace('/\\\\/', '<br>', $converted);
-
-            // to fix CDW-824 problems
-            $description = nl2br($description);
-
-            // taken from previous CDW-824 solution
-            $description = str_replace('<code>', '', $description);
-            $description = str_replace('</code>', '', $description);
-            $description = str_replace('<pre>', '', $description);
-            $description = str_replace('</pre>', '', $description);
-
-            if(strpos($description, '<br>') === FALSE && strpos($description, '<p>') === FALSE) {
-                $description = preg_replace('/(.)\R(.)/m', '$1<br>$2', $description);
-            }
-
-            // Return
-            return $description.PHP_EOL;
+        // Try/Catch Errors
+        $converted = '';
+        $exception = '';
+        try {
+            // Initialize Markdown Converter
+            $converter = new \Parsedown(); // This parser is 10x faster than the CommonMarkConverter
+            $converted = $converter->text($input);
+        } catch(\Exception $e) {
+            $exception = $e->getMessage();
         }
 
-        // Add New Line to BR Instead
-        return nl2br($input);
+        // Convert Markdown to HTML
+        $description = preg_replace('/\\\\/', '<br>', $converted);
+
+        // to fix CDW-824 problems
+        $description = nl2br($description);
+
+        // taken from previous CDW-824 solution
+        $description = str_replace('<code>', '', $description);
+        $description = str_replace('</code>', '', $description);
+        $description = str_replace('<pre>', '', $description);
+        $description = str_replace('</pre>', '', $description);
+
+        if(strpos($description, '<br>') === FALSE && strpos($description, '<p>') === FALSE) {
+            $description = preg_replace('/(.)\R(.)/m', '$1<br>$2', $description);
+        }
+
+        // Return
+        return $description.PHP_EOL;
     }
 }
