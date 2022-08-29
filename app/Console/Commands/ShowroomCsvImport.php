@@ -52,7 +52,7 @@ class ShowroomCsvImport extends Command {
             $showroomData = $this->mapShowroomValueToKey($csvData);
             $showroomData['images'] = $this->convertAssetToUrlArray($showroomData['images']);
             $showroomData['files'] = $this->convertAssetToUrlArray($showroomData['pdfs']);
-            
+
             if (empty($showroomData['msrp'])) {
                 unset($showroomData['msrp']);
             } else {
@@ -60,7 +60,7 @@ class ShowroomCsvImport extends Command {
             }
             
             if (!empty($showroomData['floorplan'])) {
-                $showroomData['floorplan'] = 'http:' . $showroomData['floorplan'];
+                $showroomData['floorplan'] = $showroomData['floorplan'];
                 if (!in_array($showroomData['floorplan'], $showroomData['images'])) {
                     $showroomData['images'][] = $showroomData['floorplan'];    
                 }
@@ -75,7 +75,7 @@ class ShowroomCsvImport extends Command {
             $showroomData['model_merge'] = "AUTO-IMPORTED";
             
             try {
-                $this->showroomRepo->create($showroomData);
+                die(var_dump($this->showroomRepo->create($showroomData)));
             } catch (\Exception $ex) {
                 Log::info("showroom-imports: issue importing line number {$lineNumber}");
             }            
@@ -115,22 +115,24 @@ class ShowroomCsvImport extends Command {
     
     private function convertAssetToUrlArray($assets)
     {
-        if (!empty($assets)) {
-            $assets = explode(',', $assets); 
-            $urlAssets = [];
-            
-            foreach($assets as $asset) {
-                $asset = trim($asset);
-                
-                if (empty($asset)) {
-                    continue;
-                }
-                
-                $urlAssets[] = 'http:' . $asset;                
-            }
-            
-            $assets = $urlAssets;            
+        if (empty($assets)) {
+            return [];
         }
+        
+        $assets = explode(',', $assets); 
+        $urlAssets = [];
+
+        foreach($assets as $asset) {
+            $asset = trim($asset);
+
+            if (empty($asset)) {
+                continue;
+            }
+
+            $urlAssets[] = $asset;                
+        }
+
+        $assets = $urlAssets;    
         
         return $assets;
     }
