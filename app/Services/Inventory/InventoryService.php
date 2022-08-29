@@ -192,7 +192,8 @@ class InventoryService implements InventoryServiceInterface
             }
 
             if (!empty($params['description'])) {
-                $params['description_html'] = $this->markdownHelper->text($params['description']);
+                $cleared_description = strip_tags($params['description']);
+                $params['description_html'] = $this->markdownHelper->text($cleared_description);
             }
 
             $inventory = $this->inventoryRepository->create($params);
@@ -263,7 +264,8 @@ class InventoryService implements InventoryServiceInterface
             }
 
             if (!empty($params['description'])) {
-                $params['description_html'] = $this->markdownHelper->text($params['description']);
+                $cleared_description = strip_tags($params['description']);
+                $params['description_html'] = $this->markdownHelper->text($cleared_description);
             }
 
             $inventory = $this->inventoryRepository->update($params, $options);
