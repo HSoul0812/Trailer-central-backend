@@ -10,6 +10,7 @@ use App\Repositories\SysConfig\SysConfigRepositoryInterface;
 use App\Services\Inventory\ESQuery\ESBoolQueryBuilder;
 use App\Services\Inventory\ESQuery\ESInventoryQueryBuilder;
 use App\Services\Inventory\ESQuery\SortOrder;
+use Dingo\Api\Routing\Helpers;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Collection;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
@@ -26,6 +27,8 @@ use JetBrains\PhpStorm\Pure;
 
 class InventoryService implements InventoryServiceInterface
 {
+    use Helpers;
+
     const ES_INDEX = 'inventoryclsf';
     const HTTP_SUCCESS = 200;
     const ES_CACHE_EXPIRY = 300;
@@ -260,7 +263,6 @@ class InventoryService implements InventoryServiceInterface
         $this->addPaginateQuery($queryBuilder, $params);
         $this->addScriptFilter($queryBuilder, $params);
         $this->addGeoFiltering($queryBuilder, $params);
-
         if(isset($params['sort'])) {
             $sort = $params['sort'];
         } else if($this->getGeolocation($params)) {
@@ -443,6 +445,18 @@ class InventoryService implements InventoryServiceInterface
                 'latitude' => (float)$params['lat'],
                 'longitude' => (float)$params['lon']
             ]);
+        } else if(isset($params['location'])) {
+            $response = json_decode(
+                $this->api->get('map_search/geocode', ['q' => $params['location']]),
+                true
+            );
+            if(count($response['data']) > 0) {
+                $position = $response['data'][0]['position'];
+                return new Geolocation([
+                    'latitude' => (float)$position['lat'],
+                    'longitude' => (float)$position['lng']
+                ]);
+            }
         }
         return null;
     }
