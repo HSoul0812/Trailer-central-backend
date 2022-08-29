@@ -71,8 +71,6 @@ class DescriptionChecker extends Command
             }
 
             $inventory->save();
-            echo $inventory->inventory_id; die;
-
         }
     }
 }
