@@ -83,7 +83,7 @@ $api->version('v1', function ($route) {
                 'App\Http\Controllers\v1\Inventory\Floorplan\Bulk\PaymentController@create'
             );
             $route->get(
-                'payments/checkNumberExists',
+                'payments/check-number-exists',
                 'App\Http\Controllers\v1\Inventory\Floorplan\PaymentController@checkNumberExists'
             );
 
