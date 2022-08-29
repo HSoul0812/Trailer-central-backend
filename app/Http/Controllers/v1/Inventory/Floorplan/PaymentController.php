@@ -37,7 +37,7 @@ class PaymentController extends RestfulController
      * @return void
      */
     public function __construct(
-        PaymentRepositoryInterface $payment, 
+        PaymentRepositoryInterface $payment,
         PaymentServiceInterface $paymentService,
         InventoryRepositoryInterface $inventoryRepository
     )
@@ -97,17 +97,17 @@ class PaymentController extends RestfulController
      */
     public function index(Request $request) {
         $request = new GetPaymentRequest($request->all());
-        
+
         if ( $request->validate() ) {
             if ($request->inventory_id) {
                 $payments = $this->payment->getByInventory($request->all());
             } else {
                 $payments = $this->payment->getAll($request->all());
             }
-            
+
             return $this->response->paginator($payments, new PaymentTransformer());
         }
-        
+
         return $this->response->errorBadRequest();
     }
 
@@ -171,13 +171,13 @@ class PaymentController extends RestfulController
      */
     public function create(Request $request) {
         $request = new CreatePaymentRequest($request->all());
-        
+
         if ( $request->validate() ) {
             $expense = $this->paymentService->create($request->all());
 
             return $this->response->item($expense, new ExpenseTransformer());
-        }  
-        
+        }
+
         return $this->response->errorBadRequest();
     }
 
@@ -234,7 +234,7 @@ class PaymentController extends RestfulController
 
     /**
      * @OA\Get(
-     *     path="/api/inventory/floorplan/payments/checkNumberExists",
+     *     path="/api/inventory/floorplan/payments/check-number-exists",
      *     description="Checks whether an check number payment exists",
      *     tags={"Inventory"},
      *     @OA\Parameter(
