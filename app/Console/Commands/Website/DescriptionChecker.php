@@ -2,6 +2,7 @@
 namespace App\Console\Commands\Website;
 
 use App\Repositories\Inventory\InventoryRepositoryInterface;
+use App\Services\Inventory\InventoryServiceInterface;
 use Illuminate\Console\Command;
 use League\HTMLToMarkdown\HtmlConverter;
 use League\HTMLToMarkdown\HtmlConverterInterface;
@@ -19,6 +20,9 @@ class DescriptionChecker extends Command
     /** @var HtmlConverterInterface */
     protected $htmlToMarkdown;
 
+    /** @var InventoryServiceInterface */
+    protected $inventoryService;
+
     /**
      * The console command name.
      *
@@ -29,14 +33,22 @@ class DescriptionChecker extends Command
     /**
      * @param InventoryRepositoryInterface $inventoryRepository
      * @param \Parsedown $markdownParser
+     * @param HtmlConverterInterface $htmlConverter
+     * @param InventoryServiceInterface $inventoryService
      */
-    public function __construct(InventoryRepositoryInterface $inventoryRepository, \Parsedown $markdownParser, HtmlConverterInterface $htmlConverter)
+    public function __construct(
+        InventoryRepositoryInterface $inventoryRepository,
+        \Parsedown $markdownParser,
+        HtmlConverterInterface $htmlConverter,
+        InventoryServiceInterface $inventoryService
+    )
     {
         parent::__construct();
 
         $this->inventoryRepository = $inventoryRepository;
         $this->markdownParser = $markdownParser;
         $this->htmlToMarkdown = $htmlConverter;
+        $this->inventoryService = $inventoryService;
     }
 
     public function handle() {
@@ -49,20 +61,18 @@ class DescriptionChecker extends Command
                 continue;
             }
 
-            if (!empty($inventory->description) && empty($inventory->description_html)) {
-                $inventory->description_html = $this->markdownParser->text($inventory->description);
+            if (!empty($inventory->description)) {
+                $inventory->description = strip_tags($inventory->description);
+                $inventory->description_html = $this->inventoryService->convertMarkdown($inventory->description);
             }
 
             if (empty($inventory->description) && !empty($inventory->description_html)) {
                 $inventory->description = $this->htmlToMarkdown->convert($inventory->description_html);
             }
 
-            if (!empty($inventory->description) && !empty($inventory->description_html)) {
-                $inventory->description_html = $this->markdownParser->text($inventory->description);
-                $inventory->description = $this->htmlToMarkdown->convert($inventory->description_html);
-            }
-
             $inventory->save();
+            echo $inventory->inventory_id; die;
+
         }
     }
 }
