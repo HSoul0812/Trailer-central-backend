@@ -16,6 +16,24 @@ class BlastRepository implements BlastRepositoryInterface
     private $blastModel;
     private $blastSentModel;
     private $leadModel;
+    private $sortOrders = [
+        'id' => [
+            'field' => 'email_blasts_id',
+            'direction' => 'ASC'
+        ],
+        '-id' => [
+            'field' => 'email_blasts_id',
+            'direction' => 'DESC'
+        ],
+        'name' => [
+            'field' => 'campaign_name',
+            'direction' => 'ASC'
+        ],
+        '-name' => [
+            'field' => 'campaign_name',
+            'direction' => 'DESC'
+        ],
+    ];
 
     public function __construct(Blast $blast, BlastSent $blastSent, Lead $lead)
     {
@@ -231,5 +249,23 @@ class BlastRepository implements BlastRepositoryInterface
 
         // Successful?
         return !empty($sent->email_blasts_id);
+    }
+
+
+
+    /**
+     * Add Sort Query
+     *
+     * @param Builder $query
+     * @param string $sort
+     * @return Builder
+     */
+    private function addSortQuery(Builder $query, string $sort): ?Builder
+    {
+        if (!isset($this->sortOrders[$sort])) {
+            return null;
+        }
+
+        return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
     }
 }
