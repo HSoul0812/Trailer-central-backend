@@ -19,7 +19,7 @@ class InquiryLead
      * @const string
      */
     const INQUIRY_SPAM_TO = [
-        ['email' => 'josh+spam-notify@trailercentral.com']
+        ['email' => 'alberto@trailercentral.com']
     ];
 
     /**
