@@ -24,6 +24,16 @@
         -webkit-box-pack: justify;
     }
 
+    .print-inventory > div > div > div {
+        max-width: 70%;
+    }
+
+    .print-inventory > div > div > img {
+        max-width: 30%;
+        max-height: 250px;
+        margin:10px;
+    }
+
     .dealership {
         margin-top: 20px;
     }
@@ -103,34 +113,38 @@
 
     .dealer-email {
         word-wrap: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
     }
 </style>
 
 <div
     id="singlePrint"
+    style="max-width: 100%"
     class="d-none d-sm-block printTable print-inventory"
 >
     <div style="border-top: 2px solid #000; border-bottom: 2px solid #000">
         <div class="print-inventory-image-container">
             <div>
-                <div class="dealership">
-                    <p class="dealer-name">
-                        <strong>{{ $inventory['dealer_location']['name'] }}</strong>
-                    </p>
-                    <p class="dealer-phone">
-                        Phone: {{ $inventory['dealer_location']['phone'] }}
-                    </p>
-                    <div class="clear"></div>
-                    <p class="dealer-address">
-                        {{ $inventory['dealer_location']['address'] }}<br>{{
-                    $inventory['dealer_location']['city']
-                }}, {{ $inventory['dealer_location']['region'] }}
-                        {{ $inventory['dealer_location']['postal'] }}
-                    </p>
-                    <p class="dealer-email">
-                        Email: {{ $inventory['dealer_location']['email'] }}
-                    </p>
-                    <div class="clear"></div>
+                <div>
+                    <div class="dealership">
+                        <p class="dealer-name">
+                            <strong>{{ $inventory['dealer_location']['name'] }}</strong>
+                        </p>
+                        <p class="dealer-phone">
+                            Phone: {{ $inventory['dealer_location']['phone'] }}
+                        </p>
+                        <div class="clear"></div>
+                        <p class="dealer-address">
+                            {{ $inventory['dealer_location']['address'] }}<br>{{
+                        $inventory['dealer_location']['city']
+                    }}, {{ $inventory['dealer_location']['region'] }}
+                            {{ $inventory['dealer_location']['postal'] }}
+                        </p>
+                        <p class="dealer-email">
+                            Email: {{ $inventory['dealer_location']['email'] }}
+                        </p>
+                    </div>
                 </div>
                 <div class="clear"></div>
                 @if(count($inventory['images']))
@@ -141,16 +155,16 @@
                         >
                     </div>
                 @endif
-                <h2 style="border: none" class="inventory-title">
-                    {{ $inventory['title'] }}
-                </h2>
             </div>
             @if($logo = $inventory['dealer_logo'])
-             <img src="{{ $logo }}" style="max-width: 250px; max-height: 250px;margin:10px"/>
+                <img src="{{ $logo }}"/>
             @endif
         </div>
-        <div class="clear"></div>
+        <h2 style="border: none" class="inventory-title">
+            {{ $inventory['title'] }}
+        </h2>
     </div>
+    <div class="clear"></div>
     <table class="inventory-info">
         <tr>
             <td>
