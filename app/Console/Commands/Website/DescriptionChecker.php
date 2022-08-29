@@ -1,6 +1,7 @@
 <?php
 namespace App\Console\Commands\Website;
 
+use App\Models\Inventory\Inventory;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Services\Inventory\InventoryServiceInterface;
 use Illuminate\Console\Command;
@@ -53,24 +54,29 @@ class DescriptionChecker extends Command
 
     public function handle() {
 
-        $inventories = $this->inventoryRepository->getAll([], true, false, ['inventory.inventory_id', 'inventory.description', 'inventory.description_html']);
+        $chunkSize = 500;
+        $start = $chunkSize;
+        Inventory::chunk($chunkSize, function ($inventories) use (&$start, &$chunkSize) {
+            $this->info('Fetching ' . $start . ' inventories to check..');
+            foreach ($inventories as $inventory) {
 
-        foreach ($inventories as $inventory) {
+                if (empty($inventory->description) && empty($inventory->description_html)) {
+                    continue;
+                }
 
-            if (empty($inventory->description) && empty($inventory->description_html)) {
-                continue;
+                if (!empty($inventory->description)) {
+                    $inventory->description = strip_tags($inventory->description);
+                    $inventory->description_html = $this->inventoryService->convertMarkdown($inventory->description);
+                }
+
+                if (empty($inventory->description) && !empty($inventory->description_html)) {
+                    $inventory->description = $this->htmlToMarkdown->convert($inventory->description_html);
+                }
+
+                $inventory->save();
             }
-
-            if (!empty($inventory->description)) {
-                $inventory->description = strip_tags($inventory->description);
-                $inventory->description_html = $this->inventoryService->convertMarkdown($inventory->description);
-            }
-
-            if (empty($inventory->description) && !empty($inventory->description_html)) {
-                $inventory->description = $this->htmlToMarkdown->convert($inventory->description_html);
-            }
-
-            $inventory->save();
-        }
+            $this->info($start . ' inventories checked successfully..');
+            $start += $chunkSize;
+        });
     }
 }
