@@ -276,7 +276,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             $this->folders->delete($folder->folder_id);
         } catch (\Exception $e) {
             $this->folders->markFailed($folder->folder_id);
-            $this->salespeople->update(['id' => $salesperson->id, 'imap_failed' => 1]);
+//            $this->salespeople->update(['id' => $salesperson->id, 'imap_failed' => 1]);
             $this->jobLog->error('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
                                 ' - General exception thrown retrieving email messages: ' .
                                 $e->getMessage() . '; marking IMAP connection as failed');
