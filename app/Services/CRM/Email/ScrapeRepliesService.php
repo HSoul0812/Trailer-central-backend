@@ -227,7 +227,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             // Try Catching Error for Sales Person Folder
             try {
                 // Import Folder
-                $imports = $this->folder($dealer, $salesperson, $accessToken, $folder);
+                $imports = $this->folder($dealer, $salesperson, $folder, $accessToken);
                 $this->jobLog->info('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
                                     ' - Finished Importing ' . $imports .
                                     ' Replies for Folder ' . $folder->name . ' in ' . 
@@ -253,12 +253,12 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * 
      * @param NewDealerUser $dealer
      * @param SalesPerson $salesperson
-     * @param AccessToken $accessToken
      * @param Folder $folder
+     * @param null|AccessToken $accessToken
      * @return int total number of imported emails
      */
     public function folder(NewDealerUser $dealer, SalesPerson $salesperson,
-                            AccessToken $accessToken, EmailFolder $folder): int {
+                            EmailFolder $folder, ?AccessToken $accessToken = null): int {
         // Try Importing
         try {
             // Get From Google?

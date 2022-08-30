@@ -31,8 +31,9 @@ interface ScrapeRepliesServiceInterface {
      * @param NewDealerUser $dealer
      * @param SalesPerson $salesperson
      * @param Folder $folder
+     * @param AccessToken null|$accessToken
      * @return int total number of imported emails
      */
     public function folder(NewDealerUser $dealer, SalesPerson $salesperson,
-                            AccessToken $accessToken, EmailFolder $folder): int;
+                            EmailFolder $folder, ?AccessToken $accessToken = null): int;
 }
