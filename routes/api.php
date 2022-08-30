@@ -82,6 +82,10 @@ $api->version('v1', function ($route) {
                 'bulk/payments',
                 'App\Http\Controllers\v1\Inventory\Floorplan\Bulk\PaymentController@create'
             );
+            $route->get(
+                'payments/check-number-exists',
+                'App\Http\Controllers\v1\Inventory\Floorplan\PaymentController@checkNumberExists'
+            );
 
             $route->group([
                 'prefix' => 'vendors',
