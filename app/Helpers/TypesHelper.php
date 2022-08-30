@@ -2,10 +2,11 @@
 
 namespace App\Helpers;
 
+use App\Constants\Date;
 use Illuminate\Support\Carbon;
 use DateTimeInterface;
 
-class Types
+class TypesHelper
 {
     /**
      * Ensures a numeric value is integer or null
@@ -88,15 +89,15 @@ class Types
      */
     public static function ensureDateString($date): ?string
     {
-        if ($date instanceof Carbon) {
+        if ($date instanceof Carbon && $date->timestamp > 0) {
             return $date->toDateTimeString();
         }
 
         if ($date instanceof DateTimeInterface) {
-            return $date->format('Y-m-d H:i:s');
+            return $date->format(Date::FORMAT_Y_M_D_T);
         }
 
-        if (!empty($date) && is_string($date)) {
+        if (!empty($date) && is_string($date) && $date !== '0000-00-00 00:00:00') {
             return Carbon::parse($date)->toDateTimeString();
         }
 
