@@ -215,7 +215,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     public function salesperson(NewDealerUser $dealer, SalesPerson $salesperson): int {
         // Start Time Tracking
         $this->runtime = microtime(true);
-        $this->refreshToken($dealer, $salesperson);
+        $accessToken = $this->refreshToken($dealer, $salesperson);
 
         // Process Messages
         $this->jobLog->info('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
@@ -226,7 +226,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             // Try Catching Error for Sales Person Folder
             try {
                 // Import Folder
-                $imports = $this->folder($dealer, $salesperson, $folder);
+                $imports = $this->folder($dealer, $salesperson, $accessToken, $folder);
                 $this->jobLog->info('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
                                     ' - Finished Importing ' . $imports .
                                     ' Replies for Folder ' . $folder->name . ' in ' . 
@@ -252,19 +252,21 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * 
      * @param NewDealerUser $dealer
      * @param SalesPerson $salesperson
+     * @param AccessToken $accessToken
      * @param Folder $folder
      * @return int total number of imported emails
      */
-    public function folder(NewDealerUser $dealer, SalesPerson $salesperson, EmailFolder $folder): int {
+    public function folder(NewDealerUser $dealer, SalesPerson $salesperson,
+                            AccessToken $accessToken, EmailFolder $folder): int {
         // Try Importing
         try {
             // Get From Google?
-            if(!empty($salesperson->active_token->access_token) && $salesperson->active_token->token_type === 'google') {
-                $total = $this->importGmail($dealer->id, $salesperson, $folder);
-            } elseif(!empty($salesperson->active_token->access_token) && $salesperson->active_token->token_type === 'office365') {
+            if(!empty($accessToken->access_token) && $accessToken->token_type === 'google') {
+                $total = $this->importGmail($dealer->id, $salesperson, $accessToken, $folder);
+            } elseif(!empty($accessToken->access_token) && $accessToken->token_type === 'office365') {
                 // Get From Office 365?
-                $total = $this->importOffice($dealer->id, $salesperson, $folder);
-            } elseif(!empty($salesperson->active_token) && empty($salesperson->active_token->access_token)) {
+                $total = $this->importOffice($dealer->id, $salesperson, $accessToken, $folder);
+            } elseif(!empty($accessToken) && empty($accessToken->access_token)) {
                 throw new MissingAccessTokenImportFolderException;
             } else {
                 // Get From IMAP Instead
@@ -299,14 +301,16 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * 
      * @param int $dealerId
      * @param SalesPerson $salesperson
+     * @param AccessToken $accessToken
      * @param EmailFolder $emailFolder
      * @return int total number of imported emails
      */
-    private function importGmail(int $dealerId, SalesPerson $salesperson, EmailFolder $emailFolder): int {
+    private function importGmail(int $dealerId, SalesPerson $salesperson,
+                                    AccessToken $accessToken, EmailFolder $emailFolder): int {
         // Get Emails From Gmail
         $this->jobLog->info('Dealer #' . $dealerId . ', Sales Person #' . $salesperson->id . 
                             ' - Connecting to Gmail with Email: ' . $salesperson->smtp_email);
-        $messages = $this->gmail->messages($salesperson->active_token, $emailFolder->name, [
+        $messages = $this->gmail->messages($accessToken, $emailFolder->name, [
             'after' => Carbon::parse($emailFolder->date_imported)->subDay()->isoFormat('YYYY/M/D')
         ]);
         $folder = $this->updateFolder($salesperson, $emailFolder);
@@ -345,14 +349,16 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * 
      * @param int $dealerId
      * @param SalesPerson $salesperson
+     * @param AccessToken $accessToken
      * @param EmailFolder $emailFolder
      * @return int total number of imported emails
      */
-    private function importOffice(int $dealerId, SalesPerson $salesperson, EmailFolder $emailFolder): int {
+    private function importOffice(int $dealerId, SalesPerson $salesperson, 
+                                    AccessToken $accessToken, EmailFolder $emailFolder): int {
         // Get Emails From Gmail
         $this->jobLog->info('Dealer #' . $dealerId . ', Sales Person #' . $salesperson->id . 
                                 ' - Connecting to Office 365 with Email: ' . $salesperson->smtp_email);
-        $messages = $this->office->messages($salesperson->active_token, $emailFolder->name, [
+        $messages = $this->office->messages($accessToken, $emailFolder->name, [
             'SentDateTime ge ' . Carbon::parse($emailFolder->date_imported)->subDay()->isoFormat('YYYY-MM-DD')
         ]);
         $folder = $this->updateFolder($salesperson, $emailFolder);
@@ -707,17 +713,18 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * 
      * @param NewDealerUser $dealer
      * @param SalesPerson $salesperson
-     * @return SalesPerson
+     * @return null|AccessToken
      */
-    private function refreshToken(NewDealerUser $dealer, SalesPerson $salesperson): SalesPerson {
+    private function refreshToken(NewDealerUser $dealer, SalesPerson $salesperson): ?AccessToken {
         // Token Exists?
         if(!empty($salesperson->active_token)) {
             // Refresh Token
+            $accessToken = $salesperson->active_token;
             $this->jobLog->info('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
                                 ' - Validating token #' . $salesperson->active_token->id);
             try {
                 $validate = $this->auth->validate($salesperson->active_token);
-                $salesperson->active_token = $validate->accessToken;
+                $accessToken = $validate->accessToken;
                 $this->jobLog->info('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
                                     ' - Found access token: ' . $salesperson->active_token);
             } catch (\Exception $e) {
@@ -729,6 +736,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         }
 
         // Return Sales Person With Updated Access Token
-        return $salesperson;
+        return $accessToken ?? null;
     }
 }
