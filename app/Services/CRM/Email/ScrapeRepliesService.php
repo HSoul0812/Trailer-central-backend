@@ -403,7 +403,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     private function importImap(int $dealerId, SalesPerson $salesperson, EmailFolder $emailFolder): int {
         // Get Emails From IMAP
         $this->jobLog->info('Dealer #' . $dealerId . ', Sales Person #' . $salesperson->id . 
-                                ' - Connecting to Office 365 with Email: ' . $salesperson->imap_email);
+                                ' - Connecting to IMAP with Email: ' . $salesperson->imap_email);
         $imapConfig = ImapConfig::fillFromSalesPerson($salesperson, $emailFolder);
         $messages = $this->imap->messages($imapConfig);
         $folder = $this->updateFolder($salesperson, $emailFolder);
