@@ -57,7 +57,7 @@ class ImapService implements ImapServiceInterface
         }
 
         // Initialize Logger
-        $this->log = Log::channel('scrapereplies');
+        $this->log = Log::channel('imap');
     }
 
     /**
