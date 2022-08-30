@@ -5,6 +5,7 @@ namespace App\Services\CRM\Email;
 use App\Models\User\NewDealerUser;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\CRM\User\EmailFolder;
+use App\Models\Integration\Auth\AccessToken;
 
 interface ScrapeRepliesServiceInterface {
     /**
@@ -32,5 +33,6 @@ interface ScrapeRepliesServiceInterface {
      * @param Folder $folder
      * @return int total number of imported emails
      */
-    public function folder(NewDealerUser $dealer, SalesPerson $salesperson, EmailFolder $folder): int;
+    public function folder(NewDealerUser $dealer, SalesPerson $salesperson,
+                            AccessToken $accessToken, EmailFolder $folder): int;
 }
