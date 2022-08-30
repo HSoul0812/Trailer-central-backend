@@ -123,6 +123,8 @@ class ImapService implements ImapServiceInterface
         try {
             // Get Messages
             return $this->getMessages($imapConfig->folderName, $imapConfig->getStartDate());
+        } catch (MissingFolderException $e) {
+            throw new MissingFolderException;
         } catch (ConnectionException $e) {
             throw new ImapFolderConnectionFailedException($e->getMessage());
         } catch (\Exception $e) {

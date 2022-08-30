@@ -3,6 +3,7 @@
 namespace App\Services\CRM\Email;
 
 use App\Exceptions\CRM\Email\MissingAccessTokenImportFolderException;
+use App\Exceptions\Common\InvalidEmailCredentialsException;
 use App\Exceptions\Common\MissingFolderException;
 use App\Jobs\CRM\Email\ScrapeRepliesJob;
 use App\Models\User\NewDealerUser;
@@ -272,20 +273,23 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
             // Return Total
             return $total;
+        } catch (InvalidEmailCredentialsException $e) {
+            $this->salespeople->update(['id' => $salesperson->id, 'imap_failed' => 1]);
+            $this->jobLog->error('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
+                                ' - Invalid email credentials retrieving email messages: ' .
+                                $e->getMessage() . '; marking connection as failed');
         } catch (MissingFolderException $e) {
             $this->folders->delete($folder->folder_id);
+            $this->jobLog->error('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
+                                ' - Folder ' . $folder->name . ' does not exist on ' .
+                                'dealer, deleting folder #' . $folder->folder_id);
         } catch (\Exception $e) {
             $this->folders->markFailed($folder->folder_id);
-//            $this->salespeople->update(['id' => $salesperson->id, 'imap_failed' => 1]);
             $this->jobLog->error('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
-                                ' - General exception thrown retrieving email messages: ' .
-                                $e->getMessage() . '; marking IMAP connection as failed');
+                                ' - Unknown exception thrown retrieving email messages: ' . $e->getMessage());
         }
 
         // Return Nothing
-        $this->jobLog->error('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
-                            ' - Failed to Connect to Folder ' . $folder->name .
-                            ': ' . $e->getMessage() . PHP_EOL . $e->getTraceAsString());
         return 0;
     }
 
@@ -401,7 +405,12 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $total = $skipped = 0;
         foreach($messages as $message) {
             // Get Message Overview
-            $email = $this->imap->overview($message);
+            try {
+                $email = $this->imap->overview($message);
+            } catch (\Exception $e) {
+                $this->jobLog->error('Dealer #' . $dealerId . ', Sales Person #' . $salesperson->id . 
+                                    ' - Exception thrown retrieving email message: ' . $e->getMessage());
+            }
             if(empty($email)) { continue; }
 
             // Import Message
@@ -715,7 +724,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 $this->salespeople->update(['id' => $salesperson->id, 'imap_failed' => 1]);
                 $this->jobLog->error('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
                                     ' - Exception thrown validating active access token: ' .
-                                    $e->getMessage() . '; marking IMAP connection as failed');
+                                    $e->getMessage() . '; marking connection as failed');
             }
         }
 
