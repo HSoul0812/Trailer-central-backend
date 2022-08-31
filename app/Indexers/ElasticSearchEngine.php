@@ -49,7 +49,7 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
         try {
             parent::update($models);
         } catch (BulkRequestException $exception) {
-            // we will need to handle in a better way each item which were not able to be sent
+            // we will need to handle in a better way for each item which was not able to be sent
             throw $exception;
         }
     }
