@@ -69,7 +69,7 @@
         "tijsverkoyen/css-to-inline-styles": "^2.2.1",
         "twilio/sdk": "^5.31",
         "vyuldashev/nova-permission": "^2.11",
-        "webklex/laravel-imap": "~2.4",
+        "webklex/laravel-imap": "~4.0",
         "showroom/bulkconfiguration": "*",
         "trailercentral/passwordless-login-url": "*"
     },
