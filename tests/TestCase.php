@@ -9,6 +9,7 @@ use App\Exceptions\Tests\MissingTestDealerIdException;
 use App\Exceptions\Tests\MissingTestDealerLocationIdException;
 use App\Exceptions\Tests\MissingTestWebsiteIdException;
 use Mockery;
+use ReflectionException;
 use ReflectionProperty;
 
 abstract class TestCase extends BaseTestCase
@@ -223,5 +224,19 @@ abstract class TestCase extends BaseTestCase
         $reflector = new ReflectionProperty(get_class($object), $property);
         $reflector->setAccessible(true);
         $reflector->setValue($object, $value);
+    }
+
+    /**
+     * @param $object
+     * @param $property
+     * @return mixed
+     * @throws ReflectionException
+     */
+    public function getFromPrivateProperty($object, $property)
+    {
+        $reflector = new ReflectionProperty(get_class($object), $property);
+        $reflector->setAccessible(true);
+
+        return $reflector->getValue($object);
     }
 }
