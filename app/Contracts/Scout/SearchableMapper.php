@@ -8,5 +8,5 @@ use ElasticAdapter\Indices\Mapping;
 
 interface SearchableMapper
 {
-    public function mapping(): Mapping;
+    public function mapping(): ?Mapping;
 }

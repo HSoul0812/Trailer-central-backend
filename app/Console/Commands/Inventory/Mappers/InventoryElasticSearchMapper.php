@@ -2,12 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Repositories\Inventory;
+namespace App\Console\Commands\Inventory\Mappers;
 
-use App\Contracts\Scout\SearchableMapper;
-use ElasticAdapter\Indices\Mapping;
+use App\Utilities\Scout\SearchableMapper;
 
-class InventoryElasticSearchMapper implements SearchableMapper
+class InventoryElasticSearchMapper extends SearchableMapper
 {
     public const FIELDS = [
         'id'                   => ['type' => 'long'],
@@ -224,17 +223,4 @@ class InventoryElasticSearchMapper implements SearchableMapper
         'tilt'                 => ['type' => 'integer'],
         'entity_type_id'       => ['type' => 'integer'],
     ];
-
-    public function mapping(): Mapping
-    {
-        $mapper = new Mapping();
-
-        foreach (self::FIELDS as $field => $settings) {
-            // we need to find a way to set the normalizer, or use another ES7 feature which works like the `case_normal` normalizer
-            unset($settings['normalizer']);
-            $mapper->{$settings['type']}($field, $settings);
-        }
-
-        return $mapper;
-    }
 }
