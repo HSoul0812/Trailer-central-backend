@@ -182,8 +182,12 @@ class PaymentRepository implements PaymentRepositoryInterface {
         }
         
         if ($params['type'] === Payment::PAYMENT_CATEGORIES['Balance']) {
-            Inventory::find($params['inventory_id'])
-                ->update(['fp_balance' => (float) $payment['inventory']['fp_balance'] - (float) $params['amount']]);
+            $paymentData = ['fp_balance' => (float) $payment['inventory']['fp_balance'] - (float) $params['amount']];
+            if ($paymentData['fp_balance'] <= 0) {
+                $paymentData['fp_paid'] = true;
+            }
+
+            Inventory::find($params['inventory_id'])->update($paymentData);
         } else {
             Inventory::find($params['inventory_id'])
                 ->update(['fp_interest_paid' => (float) $payment['inventory']['fp_interest_paid'] + (float) $params['amount']]);
