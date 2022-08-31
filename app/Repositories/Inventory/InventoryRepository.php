@@ -474,13 +474,13 @@ class InventoryRepository implements InventoryRepositoryInterface
      * @param bool $paginated
      * @return Collection|LengthAwarePaginator
      */
-    public function getAll($params, bool $withDefault = true, bool $paginated = false)
+    public function getAll($params, bool $withDefault = true, bool $paginated = false, $select = ['inventory.*'])
     {
         if ($paginated) {
             return $this->getPaginatedResults($params, $withDefault);
         }
 
-        $query = $this->buildInventoryQuery($params, $withDefault);
+        $query = $this->buildInventoryQuery($params, $withDefault, $select);
 
         return $query->get();
     }
@@ -764,7 +764,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         } elseif (isset($params['images_less_than'])) {
             $query->havingRaw('image_count <= '. $params['images_less_than']);
         } else {
-            $query->select(['inventory.*']);
+            $query->select($select);
         }
 
         if (isset($params['sort'])) {
