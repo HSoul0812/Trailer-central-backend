@@ -23,7 +23,7 @@ class CreateIndex extends Command
      *
      * @var string
      */
-    protected $description = 'Create the index using the proper mapping given a model';
+    protected $description = 'Create an index using the proper mapping given a model';
 
     /**
      * Execute the console command.
