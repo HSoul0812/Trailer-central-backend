@@ -2,27 +2,31 @@
 
 namespace App\Models\Inventory;
 
+use App\Console\Commands\Inventory\Mappers\InventoryElasticSearchMapper;
+use App\Contracts\Scout\SearchableMapper;
 use App\Helpers\SanitizeHelper;
+use App\Helpers\TypesHelper;
 use App\Models\CRM\Dms\Customer\CustomerInventory;
 use App\Models\CRM\Dms\Quickbooks\Bill;
 use App\Models\CRM\Dms\ServiceOrder;
-use App\Models\Integration\LotVantage\DealerInventory;
-use App\Models\Inventory\Floorplan\Payment;
-use App\Models\User\DealerLocation;
 use App\Models\CRM\Leads\InventoryLead;
 use App\Models\CRM\Leads\Lead;
+use App\Models\Integration\LotVantage\DealerInventory;
+use App\Models\Inventory\Floorplan\Payment;
+use App\Models\Inventory\Geolocation\Point as GeolocationPoint;
+use App\Models\Parts\Vendor;
+use App\Models\Traits\TableAware;
+use App\Models\User\DealerLocation;
+use App\Models\User\User;
 use App\Traits\CompactHelper;
 use App\Traits\GeospatialHelper;
+use App\Traits\Scout\WithSearchableCustomMapper;
 use App\Transformers\Inventory\InventoryElasticSearchTransformer;
 use ElasticScoutDriverPlus\CustomSearch;
 use Grimzy\LaravelMysqlSpatial\Eloquent\SpatialTrait;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
-use App\Models\Inventory\Geolocation\Point as GeolocationPoint;
-use Illuminate\Database\Eloquent\Model;
-use App\Models\Parts\Vendor;
-use App\Models\User\User;
-use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
@@ -179,10 +183,13 @@ use Laravel\Scout\Searchable;
  */
 class Inventory extends Model
 {
-    use TableAware, SpatialTrait, GeospatialHelper, Searchable, CustomSearch;
+    use TableAware, SpatialTrait, GeospatialHelper, Searchable, WithSearchableCustomMapper, CustomSearch;
 
     /** @var InventoryElasticSearchTransformer */
     private $searchableTransformer;
+
+    /** @var SearchableMapper */
+    private $searchableMapper;
 
     const TABLE_NAME = 'inventory';
 
@@ -569,7 +576,7 @@ class Inventory extends Model
             $this->featuresIndexedById = new Collection();
 
             foreach ($this->inventoryFeatures as $feature) {
-                $value = trim($feature->value);
+                $value = is_numeric($feature->value) ? TypesHelper::ensureNumeric($feature->value) : trim($feature->value);
 
                 if ($this->featuresIndexedById->has($feature->inventory_feature_id)) {
                     $this->featuresIndexedById
@@ -802,7 +809,7 @@ class Inventory extends Model
 
     public function searchableAs()
     {
-        return config('elastic.client.indices.inventory');
+        return config('elastic.scout_driver.indices.inventory');
     }
 
     public function toSearchableArray(): array
@@ -832,7 +839,11 @@ class Inventory extends Model
     {
         $value = $this->getAttributesIndexedByIdAttribute()->get($id);
 
-        return is_null($value) ? $default : $value; // to avoid the native default value returned by `Collection::get` method
+        if (is_null($value)) {
+            return $default;
+        }
+
+        return $value; // to avoid the native default value returned by `Collection::get` method
     }
 
     public function getFeatureById(int $id): Collection
@@ -853,5 +864,16 @@ class Inventory extends Model
             self::STATUS_PENDING_SALE => Str::snake(self::STATUS_PENDING_SALE_LABEL),
             self::STATUS_SPECIAL_ORDER => Str::snake(self::STATUS_SPECIAL_ORDER_LABEL)
         ];
+    }
+
+    public function searchableMapper(): SearchableMapper
+    {
+        if ($this->searchableMapper) {
+            return $this->searchableMapper;
+        }
+
+        $this->searchableMapper = new InventoryElasticSearchMapper();
+
+        return $this->searchableMapper;
     }
 }
