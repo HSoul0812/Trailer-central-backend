@@ -114,6 +114,14 @@ return [
             'permission' => 0664,
         ],
 
+        'imap' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/services/imap.log'),
+            'level' => 'debug',
+            'days' => 3,
+            'permission' => 0664,
+        ],
+
         'google' => [
             'driver' => 'daily',
             'path' => storage_path('logs/services/google.log'),
