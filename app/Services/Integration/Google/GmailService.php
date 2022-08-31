@@ -320,7 +320,7 @@ class GmailService implements GmailServiceInterface
 
     /**
      * Set Key for Google Service
-     * 
+     *
      * @param string $key
      * @return string
      */
@@ -335,7 +335,7 @@ class GmailService implements GmailServiceInterface
      * @param type $accessToken
      * @return void
      */
-    private function setAccessToken(AccessToken $accessToken) {
+    public function setAccessToken(AccessToken $accessToken) {
         // ID Token Exists?
         if(empty($accessToken->id_token)) {
             throw new MissingGapiIdTokenException;
@@ -362,7 +362,7 @@ class GmailService implements GmailServiceInterface
      * @param EmailToken $emailToken
      * @return void
      */
-    private function setEmailToken(EmailToken $emailToken) {
+    public function setEmailToken(EmailToken $emailToken) {
         // ID Token Exists?
         if(empty($emailToken->getIdToken())) {
             throw new MissingGapiIdTokenException;
@@ -428,7 +428,7 @@ class GmailService implements GmailServiceInterface
 
     /**
      * Send Gmail Message
-     * 
+     *
      * @param \Google_Service_Gmail_Message $message
      * @return ParsedEmail
      */
