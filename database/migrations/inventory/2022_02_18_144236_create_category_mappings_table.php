@@ -18,7 +18,7 @@ class CreateCategoryMappingsTable extends Migration
             $table->integer('category_id')->unsigned()->index('category_mappings_i_category_id');
             $table->string('map_from');
             $table->string('map_to');
-            $table->string('type')->nullable();;
+            $table->string('type')->nullable();
         });
     }
 

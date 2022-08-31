@@ -6,6 +6,7 @@ use App\DTOs\Inventory\TcApiResponseAttribute;
 use App\DTOs\Inventory\TcApiResponseInventory;
 use App\DTOs\Inventory\TcApiResponseInventoryCreate;
 use App\DTOs\Inventory\TcApiResponseInventoryDelete;
+use App\Repositories\Parts\ListingCategoryMappingsRepositoryInterface;
 use App\Repositories\SysConfig\SysConfigRepositoryInterface;
 use App\Services\Inventory\ESQuery\ESBoolQueryBuilder;
 use App\Services\Inventory\ESQuery\ESInventoryQueryBuilder;
@@ -67,6 +68,7 @@ class InventoryService implements InventoryServiceInterface
 
     public function __construct(
         private GuzzleHttpClient $httpClient,
+        private ListingCategoryMappingsRepositoryInterface $listingCategoryMappingsRepository,
         private SysConfigRepositoryInterface $sysConfigRepository,
     )
     {}
@@ -123,6 +125,17 @@ class InventoryService implements InventoryServiceInterface
       $headers = array_change_key_case(getallheaders(), CASE_LOWER);
       $access_token = $headers['access-token'];
       $url = config('services.trailercentral.api') . 'inventory/';
+
+        if(isset($params['category'])) {
+            $categoryMapping = $this->listingCategoryMappingsRepository->get([
+                'map_from' => $params['category']
+            ]);
+            if($categoryMapping === null) {
+                throw new BadRequestException('Corresponding category mapping was not found');
+            }
+            $params['category'] = $categoryMapping->map_to;
+        }
+
       $inventory = $this->handleHttpRequest('PUT', $url, ['query' => $params, 'headers' => ['access-token' => $access_token]]);
       return TcApiResponseInventoryCreate::fromData($inventory['response']['data']);
     }
@@ -136,6 +149,7 @@ class InventoryService implements InventoryServiceInterface
       $headers = array_change_key_case(getallheaders(), CASE_LOWER);
       $access_token = $headers['access-token'];
       $url = config('services.trailercentral.api') . 'inventory/' . $id;
+
       $response = $this->handleHttpRequest('DELETE', $url, ['headers' => ['access-token' => $access_token]]);
 
       $respObj = TcApiResponseInventoryDelete::fromData($response['response']);
@@ -152,6 +166,17 @@ class InventoryService implements InventoryServiceInterface
       $headers = array_change_key_case(getallheaders(), CASE_LOWER);
       $access_token = $headers['access-token'];
       $url = config('services.trailercentral.api') . 'inventory/' . $params['inventory_id'];
+
+        if(isset($params['category'])) {
+            $categoryMapping = $this->listingCategoryMappingsRepository->get([
+                'map_from' => $params['category']
+            ]);
+            if($categoryMapping === null) {
+                throw new BadRequestException('Corresponding category mapping was not found');
+            }
+            $params['category'] = $categoryMapping->map_to;
+        }
+
       $inventory = $this->handleHttpRequest('POST', $url, ['query' => $params, 'headers' => ['access-token' => $access_token]]);
       $respObj = TcApiResponseInventoryCreate::fromData($inventory['response']['data']);
 
