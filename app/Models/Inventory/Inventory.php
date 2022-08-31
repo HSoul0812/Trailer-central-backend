@@ -2,10 +2,10 @@
 
 namespace App\Models\Inventory;
 
-use App\Console\Commands\Inventory\Mappers\InventoryElasticSearchMapper;
-use App\Contracts\Scout\SearchableMapper;
 use App\Helpers\SanitizeHelper;
 use App\Helpers\TypesHelper;
+use App\Indexers\Inventory\InventoryElasticSearchConfigurator;
+use App\Indexers\WithIndexConfigurator;
 use App\Models\CRM\Dms\Customer\CustomerInventory;
 use App\Models\CRM\Dms\Quickbooks\Bill;
 use App\Models\CRM\Dms\ServiceOrder;
@@ -20,8 +20,6 @@ use App\Models\User\DealerLocation;
 use App\Models\User\User;
 use App\Traits\CompactHelper;
 use App\Traits\GeospatialHelper;
-use App\Traits\Scout\WithSearchableCustomMapper;
-use App\Transformers\Inventory\InventoryElasticSearchTransformer;
 use ElasticScoutDriverPlus\CustomSearch;
 use Grimzy\LaravelMysqlSpatial\Eloquent\SpatialTrait;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
@@ -183,13 +181,10 @@ use Laravel\Scout\Searchable;
  */
 class Inventory extends Model
 {
-    use TableAware, SpatialTrait, GeospatialHelper, Searchable, WithSearchableCustomMapper, CustomSearch;
+    use TableAware, SpatialTrait, GeospatialHelper, Searchable, WithIndexConfigurator, CustomSearch;
 
-    /** @var InventoryElasticSearchTransformer */
-    private $searchableTransformer;
-
-    /** @var SearchableMapper */
-    private $searchableMapper;
+    /** @var InventoryElasticSearchConfigurator */
+    private $indexConfigurator;
 
     const TABLE_NAME = 'inventory';
 
@@ -807,25 +802,14 @@ class Inventory extends Model
         return self::TABLE_NAME;
     }
 
-    public function searchableAs()
+    public function searchableAs(): string
     {
-        return config('elastic.scout_driver.indices.inventory');
+        return $this->indexConfigurator()->name();
     }
 
     public function toSearchableArray(): array
     {
-        return $this->getSearchableTransformer()->transform($this);
-    }
-
-    private function getSearchableTransformer(): InventoryElasticSearchTransformer
-    {
-        if ($this->searchableTransformer) {
-            return $this->searchableTransformer;
-        }
-
-        $this->searchableTransformer = new InventoryElasticSearchTransformer();
-
-        return $this->searchableTransformer;
+        return $this->indexConfigurator()->transformer()->transform($this);
     }
 
     /**
@@ -866,14 +850,14 @@ class Inventory extends Model
         ];
     }
 
-    public function searchableMapper(): SearchableMapper
+    public function indexConfigurator(): InventoryElasticSearchConfigurator
     {
-        if ($this->searchableMapper) {
-            return $this->searchableMapper;
+        if ($this->indexConfigurator) {
+            return $this->indexConfigurator;
         }
 
-        $this->searchableMapper = new InventoryElasticSearchMapper();
+        $this->indexConfigurator = new InventoryElasticSearchConfigurator();
 
-        return $this->searchableMapper;
+        return $this->indexConfigurator;
     }
 }
