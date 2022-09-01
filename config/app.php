@@ -220,7 +220,7 @@ return [
         \Dingo\Api\Provider\LaravelServiceProvider::class,
         Spatie\Sitemap\SitemapServiceProvider::class,
         ElasticClient\ServiceProvider::class,
-        ElasticScoutDriver\ServiceProvider::class,
+        \App\Providers\ElasticScoutProvider::class,
         ElasticScoutDriverPlus\ServiceProvider::class,
         ElasticMigrations\ServiceProvider::class,
         App\Providers\SpatialServiceProvider::class,

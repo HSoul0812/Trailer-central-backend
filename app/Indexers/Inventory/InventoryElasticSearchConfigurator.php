@@ -1,14 +1,16 @@
 <?php
 
-declare(strict_types=1);
+namespace App\Indexers\Inventory;
 
-namespace App\Console\Commands\Inventory\Mappers;
+use App\Indexers\IndexConfigurator;
+use App\Transformers\Inventory\InventoryElasticSearchTransformer;
 
-use App\Utilities\Scout\SearchableMapper;
-
-class InventoryElasticSearchMapper extends SearchableMapper
+/**
+ * @method InventoryElasticSearchTransformer transformer()
+ */
+class InventoryElasticSearchConfigurator extends IndexConfigurator
 {
-    public const FIELDS = [
+    public const PROPERTIES = [
         'id'                   => ['type' => 'long'],
         'dealerId'             => ['type' => 'integer'],
         'dealerLocationId'     => ['type' => 'integer'],
@@ -223,4 +225,14 @@ class InventoryElasticSearchMapper extends SearchableMapper
         'tilt'                 => ['type' => 'integer'],
         'entity_type_id'       => ['type' => 'integer'],
     ];
+
+    public function name(): string
+    {
+        return config('elastic.scout_driver.indices.inventory');
+    }
+
+    public function __construct()
+    {
+        $this->transformer = new InventoryElasticSearchTransformer();
+    }
 }
