@@ -172,7 +172,7 @@ class ClappInventory
      */
     public function getPrimaryImage(): string {
         if($this->primaryImage) {
-            return $this->getS3BaseUrl($this->primaryImage);
+            return $this->getS3Url($this->primaryImage);
         }
         return '';
     }
