@@ -222,7 +222,7 @@ return [
                 'queue' => ['scrapereplies'],
                 'balance' => 'auto',
                 'minProcesses' => 1,
-                'maxProcesses' => 100,
+                'maxProcesses' => 5,
                 'tries' => 1,
                 'timeout' => 600,
             ],
