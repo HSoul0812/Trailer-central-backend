@@ -5,7 +5,7 @@ namespace App\Services\Marketing\Craigslist\DTOs;
 use App\Models\Inventory\Inventory;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
-use App\Traits\S3Helper;
+use App\Traits\S3\S3Helper;
 
 /**
  * Class InventoryFacebook
@@ -172,7 +172,7 @@ class ClappInventory
      */
     public function getPrimaryImage(): string {
         if($this->primaryImage) {
-            return $this->getS3BaseUrl($this->primaryImage);
+            return $this->getS3Url($this->primaryImage);
         }
         return '';
     }
