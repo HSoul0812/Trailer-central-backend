@@ -125,9 +125,11 @@ class Dealer extends Resource
 
             new Panel('Integrations', $this->hiddenIntegrations()),
 
-            Text::make('State', 'state')->exceptOnForms(),
+            Text::make('Status', 'state')->exceptOnForms(),
 
-            Boolean::make('Active', 'deleted')->exceptOnForms(),
+            Boolean::make('Active', function () {
+                return !$this->deleted;
+            })->exceptOnForms(),
 
             BelongsTo::make('Collector', 'collector', 'App\Nova\Resources\Integration\Collector')->exceptOnForms(),
 
