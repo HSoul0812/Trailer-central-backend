@@ -277,7 +277,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
             // Return Total
             return $total;
         } catch (InvalidEmailCredentialsException $e) {
-            $this->salespeople->update(['id' => $salesperson->id, 'imap_failed' => 1]);
+            //$this->salespeople->update(['id' => $salesperson->id, 'imap_failed' => 1]);
             $this->jobLog->error('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
                                 ' - Invalid email credentials retrieving email messages: ' .
                                 $e->getMessage() . '; marking connection as failed');
@@ -729,7 +729,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 $this->jobLog->info('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
                                     ' - Found access token: ' . $salesperson->active_token);
             } catch (\Exception $e) {
-                $this->salespeople->update(['id' => $salesperson->id, 'imap_failed' => 1]);
+                //$this->salespeople->update(['id' => $salesperson->id, 'imap_failed' => 1]);
                 $this->jobLog->error('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
                                     ' - Exception thrown validating active access token: ' .
                                     $e->getMessage() . '; marking connection as failed');
