@@ -3,10 +3,10 @@
 namespace App\Indexers\Inventory;
 
 use App\Indexers\IndexConfigurator;
-use App\Transformers\Inventory\InventoryElasticSearchTransformer;
+use App\Transformers\Inventory\InventoryElasticSearchInputTransformer;
 
 /**
- * @method InventoryElasticSearchTransformer transformer()
+ * @method InventoryElasticSearchInputTransformer transformer()
  */
 class InventoryElasticSearchConfigurator extends IndexConfigurator
 {
@@ -233,6 +233,6 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
 
     public function __construct()
     {
-        $this->transformer = new InventoryElasticSearchTransformer();
+        $this->transformer = new InventoryElasticSearchInputTransformer();
     }
 }

@@ -304,6 +304,7 @@ $api->version('v1', function ($route) {
     $route->delete('inventory/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@destroy')->where('id', '[0-9]+');
     $route->get('inventory/exists', 'App\Http\Controllers\v1\Inventory\InventoryController@exists');
     $route->post('inventory/{id}/export', 'App\Http\Controllers\v1\Inventory\InventoryController@export')->where('id', '[0-9]+');
+    $route->get('inventory/search', 'App\Http\Controllers\v1\Inventory\InventoryController@search');
     /**
      * Inventory images
      */
@@ -673,7 +674,7 @@ $api->version('v1', function ($route) {
         */
         $route->get('user/quotes', 'App\Http\Controllers\v1\Dms\UnitSaleController@index');
         $route->put('user/quotes/bulk-archive', 'App\Http\Controllers\v1\Dms\UnitSaleController@bulkArchive');
-        
+
         /*
         |--------------------------------------------------------------------------
         | Quotes Refunds

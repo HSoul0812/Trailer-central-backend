@@ -11,7 +11,7 @@ use App\Models\Inventory\Inventory;
 use App\Models\Inventory\InventoryFeature;
 use App\Models\Inventory\InventoryImage;
 
-class InventoryElasticSearchTransformer implements Transformer
+class InventoryElasticSearchInputTransformer implements Transformer
 {
     /**
      * @param Inventory $model

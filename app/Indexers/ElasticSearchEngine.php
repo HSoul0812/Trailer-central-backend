@@ -2,6 +2,7 @@
 
 namespace App\Indexers;
 
+use App\Models\Inventory\Inventory;
 use ElasticAdapter\Exceptions\BulkRequestException;
 use ElasticAdapter\Indices\Index;
 use ElasticAdapter\Indices\Mapping;
