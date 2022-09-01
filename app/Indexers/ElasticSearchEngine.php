@@ -4,7 +4,6 @@ namespace App\Indexers;
 
 use ElasticAdapter\Exceptions\BulkRequestException;
 use ElasticAdapter\Indices\Index;
-use Illuminate\Support\Facades\Cache;
 
 class ElasticSearchEngine extends \ElasticScoutDriver\Engine
 {
@@ -26,7 +25,6 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
         if ($first &&
             method_exists($first, 'indexConfigurator') &&
             $first->indexConfigurator() &&
-            !Cache::get('is_' . $first->indexConfigurator()->name() . '_created', false) &&
             !$this->indexManager->exists($first->indexConfigurator()->name()
             )
         ) {
@@ -37,12 +35,6 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
                     $first->indexConfigurator()->mapping(),
                     $first->indexConfigurator()->settings()
                 )
-            );
-
-            Cache::put(
-                'is_' . $first->indexConfigurator()->name() . '_created',
-                true,
-                config('elastic.scout_driver.expiration_index_check_time')
             );
         }
 
