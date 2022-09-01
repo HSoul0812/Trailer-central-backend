@@ -5,6 +5,7 @@ namespace App\Services\Marketing\Craigslist\DTOs;
 use App\Models\Inventory\Inventory;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
+use App\Traits\S3Helper;
 
 /**
  * Class InventoryFacebook
@@ -13,7 +14,7 @@ use App\Traits\WithGetter;
  */
 class ClappInventory
 {
-    use WithConstructor, WithGetter;
+    use WithConstructor, WithGetter, S3Helper;
 
     /**
      * @const string Craigslist Type Scheduler
@@ -171,7 +172,7 @@ class ClappInventory
      */
     public function getPrimaryImage(): string {
         if($this->primaryImage) {
-            return config('app.cdn_url') . $this->primaryImage;
+            return $this->getS3BaseUrl($this->primaryImage);
         }
         return '';
     }
