@@ -207,7 +207,7 @@ $api->version('v1', function ($route) {
     $route->get('parts', 'App\Http\Controllers\v1\Parts\PartsController@index');
     $route->put('parts', 'App\Http\Controllers\v1\Parts\PartsController@create');
     $route->get('parts/search', 'App\Http\Controllers\v1\Parts\PartsController@search');
-    $route->get('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@show')->where('id', '[0-9]+');
+    $route->get('parts/{part}', 'App\Http\Controllers\v1\Parts\PartsController@display')->where('id', '[0-9]+');
     $route->post('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@update')->where('id', '[0-9]+');
     $route->delete('parts/{id}', 'App\Http\Controllers\v1\Parts\PartsController@destroy')->where('id', '[0-9]+');
 
@@ -1355,6 +1355,17 @@ $api->version('v1', function ($route) {
         $route->get('docupilot/document-templates', 'App\Http\Controllers\v1\Dms\Docupilot\DocumentTemplatesController@index');
         $route->get('docupilot/document-templates/{id}', 'App\Http\Controllers\v1\Dms\Docupilot\DocumentTemplatesController@show');
         $route->post('docupilot/document-templates/{id}', 'App\Http\Controllers\v1\Dms\Docupilot\DocumentTemplatesController@update');
+
+        /*
+        |--------------------------------------------------------------------------
+        | QZ Tray
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->get('qz-tray/digital-cert', 'App\Http\Controllers\v1\Dms\QzTray\QzTrayController@digitalCert');
+        $route->post('qz-tray/signature', 'App\Http\Controllers\v1\Dms\QzTray\QzTrayController@signature');
 
         /*
         |--------------------------------------------------------------------------

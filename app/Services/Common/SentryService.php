@@ -32,8 +32,8 @@ class SentryService
             $tags = array_merge($tags, [
                 'dealer_id' => $dealer->dealer_id,
                 'dealer_name' => $dealer->name,
-                'website_id' => $dealer->website->id,
-                'website_domain' => $dealer->website->domain,
+                'website_id' => (!empty($dealer->website)) ? $dealer->website->id : 0,
+                'website_domain' => (!empty($dealer->website)) ? $dealer->website->domain : '',
             ]);
         }
 
