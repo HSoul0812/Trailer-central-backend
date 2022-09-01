@@ -164,7 +164,7 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         $vars = $this->getInquiryTypeVars($overrides);
 
         // Create Inquiry Lead
-        return new InquiryLead($params);
+        return new InquiryLead($vars);
     }
 
     /**
