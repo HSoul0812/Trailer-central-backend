@@ -188,6 +188,9 @@ class OfficeService extends AzureService implements OfficeServiceInterface
      * @param AccessToken $accessToken
      * @param string $folder folder name to get messages from; defaults to inbox
      * @param array<string> $filters
+     * @throws MissingFolderException
+     * @throws InvalidEmailCredentialsException
+     * @throws CannotReceiveOffice365MessagesException
      * @return Collection<Message>
      */
     public function messages(AccessToken $accessToken, string $folder = 'Inbox',
@@ -212,11 +215,11 @@ class OfficeService extends AzureService implements OfficeServiceInterface
         } catch (\Exception $e) {
             // Log Error
             $this->log->error('Exception returned on getting office 365 messages; ' . $e->getMessage());
+            if(strpos($e->getMessage(), 'Access token has expired or is not yet valid')) {
+                throw new InvalidEmailCredentialsException;
+            }
             throw new CannotReceiveOffice365MessagesException;
         }
-
-        // Return Empty Collection of Message
-        return new Collection();
     }
 
     /**
@@ -417,6 +420,9 @@ class OfficeService extends AzureService implements OfficeServiceInterface
         } catch (\Exception $e) {
             // Log Error
             $this->log->error('Exception returned on getting office 365 folder ID; ' . $e->getMessage());
+            if(strpos($e->getMessage(), 'Access token has expired or is not yet valid')) {
+                throw new InvalidEmailCredentialsException;
+            }
             return self::DEFAULT_FOLDER;
         }
     }
