@@ -356,6 +356,64 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         }
     }
 
+    /**
+     * Send Test Email for Template
+     *
+     * @param int $dealerId ID of Dealer to Handle Test for
+     * @param int $userId ID of CRM User to Handle Test for
+     * @param string $subject Subject of Email to Send
+     * @param string $html HTML Content of Email to Send
+     * @param string $toEmail Email Address to Send To
+     * @param int $salesPersonId ID of Sales Person to Send From
+     * @param string $fromEmail Email to Send From
+     * @throws FromEmailMissingSmtpConfigException
+     * @throws SendTemplateEmailFailedException
+     * @return array response
+     */
+    public function testTemplate(
+        int $dealerId,
+        int $userId,
+        string $subject,
+        string $html,
+        string $toEmail,
+        int $salesPersonId = 0,
+        string $fromEmail = ''
+    ): array {
+        // Get Sales Person
+        if(!empty($fromEmail) || !empty($salesPersonId)) {
+            if(!empty($fromEmail)) {
+                $salesPerson = $this->salespeople->getBySmtpEmail($userId, $fromEmail);
+            }
+            if(empty($salesPerson->id)) {
+                $salesPerson = $this->salespeople->get(['sales_person_id' => $salesPersonId]);
+            }
+            if(empty($salesPerson->id)) {
+                throw new FromEmailMissingSmtpConfigException;
+            }
+            $fromEmail = $salesPerson->smtp_email;
+        }
+
+        // Create Email Builder Email!
+        $builder = new BuilderEmail([
+            'id' => 1,
+            'type' => BuilderEmail::TYPE_TEMPLATE,
+            'subject' => $subject,
+            'template' => $html,
+            'template_id' => 1,
+            'dealer_id' => $dealerId,
+            'user_id' => $userId,
+            'sales_person_id' => $salesPerson->id ?? 0,
+            'from_email' => $fromEmail ?: $this->getDefaultFromEmail(),
+        ]);
+
+        // Send Email and Return Response
+        try {
+            return $this->sendManual($builder, $toEmail);
+        } catch(\Exception $ex) {
+            throw new SendTemplateEmailFailedException($ex);
+        }
+    }
+
 
     /**
      * Send Emails for Builder Config
@@ -780,9 +838,8 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     private function refreshAccessToken(AccessToken $accessToken): AccessToken {
         // Refresh Token
         $validate = $this->auth->validate($accessToken);
-        if($validate->newToken && $validate->newToken->exists()) {
-            $this->log->info('Refreshed access token with ID #' . $accessToken->id . ' with replacement!');
-            $accessToken = $this->tokens->refresh($accessToken->id, $validate->newToken);
+        if($validate->accessToken) {
+            $accessToken = $validate->accessToken;
         }
 
         // Return New Token
