@@ -316,9 +316,10 @@ class GoogleService implements GoogleServiceInterface
             // Refresh the token if possible, else fetch a new one.
             $refreshToken = $client->getRefreshToken();
             $newToken = $client->fetchAccessTokenWithRefreshToken($refreshToken);
-            $this->log->info('Refreshed Access Token With Result: ' . print_r($newToken, true));
             if(!empty($newToken) && isset($newToken['access_token'])) {
                 $emailToken = EmailToken::fillFromArray($newToken);
+            } elseif(isset($newToken['error'])) {
+                $this->log->error('FATAL ERROR refreshing access token: ' . $newToken['error_description']);
             }
         } catch (\Exception $e) {
             // We actually just want to verify this is true or false
