@@ -780,9 +780,8 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     private function refreshAccessToken(AccessToken $accessToken): AccessToken {
         // Refresh Token
         $validate = $this->auth->validate($accessToken);
-        if($validate->newToken && $validate->newToken->exists()) {
-            $this->log->info('Refreshed access token with ID #' . $accessToken->id . ' with replacement!');
-            $accessToken = $this->tokens->refresh($accessToken->id, $validate->newToken);
+        if($validate->accessToken) {
+            $accessToken = $validate->accessToken;
         }
 
         // Return New Token

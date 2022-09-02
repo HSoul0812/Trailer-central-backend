@@ -720,23 +720,33 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         // Token Exists?
         if(!empty($salesperson->active_token)) {
             // Refresh Token
-            $accessToken = $salesperson->active_token;
+            $activeToken = $salesperson->active_token;
             $this->jobLog->info('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
-                                ' - Validating token #' . $salesperson->active_token->id);
+                                ' - Validating token #' . $activeToken->id);
+
+            // Try Running OAuth Validate and Refresh Token
             try {
-                $validate = $this->auth->validate($salesperson->active_token);
-                $accessToken = $validate->accessToken;
-                $this->jobLog->info('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
-                                    ' - Found access token: ' . $salesperson->active_token);
+                $validate = $this->auth->validate($activeToken);
             } catch (\Exception $e) {
                 //$this->salespeople->update(['id' => $salesperson->id, 'imap_failed' => 1]);
                 $this->jobLog->error('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
                                     ' - Exception thrown validating active access token: ' .
                                     $e->getMessage() . '; marking connection as failed');
+                return $activeToken;
             }
+
+            // Access Token Exists?
+            if($validate->accessToken) {
+                $accessToken = $validate->accessToken;
+                $this->jobLog->info('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
+                                    ' - Found access token: ' . $accessToken);
+            }
+
+            // Return Updated Access Token, Otherwise Return Active Token
+            return $accessToken ?? $activeToken;
         }
 
-        // Return Sales Person With Updated Access Token
-        return $accessToken ?? null;
+        // No Access Token
+        return null;
     }
 }
