@@ -123,7 +123,8 @@ $api->version('v1', function ($route) {
     $route->get('parts/brands/{id}', 'App\Http\Controllers\v1\Parts\BrandController@show')->where('id', '[0-9]+');
     $route->post('parts/brands/{id}', 'App\Http\Controllers\v1\Parts\BrandController@update')->where('id', '[0-9]+');
     $route->delete('parts/brands/{id}', 'App\Http\Controllers\v1\Parts\BrandController@destroy')->where('id', '[0-9]+');
-    $route->post('reports/financials-stock-export', 'App\Http\Controllers\v1\Bulk\Parts\BulkReportsController@financialsExport');
+    $route->post('reports/financials-stock-export/pdf', 'App\Http\Controllers\v1\Bulk\Parts\BulkReportsController@financialsExportPdf');
+    $route->post('reports/financials-stock-export/csv', 'App\Http\Controllers\v1\Bulk\Parts\BulkReportsController@financialsExportCsv');
     $route->post('reports/financials-stock', 'App\Http\Controllers\v1\Bulk\Parts\BulkReportsController@financials');
     $route->get('reports/read', 'App\Http\Controllers\v1\Bulk\Parts\BulkReportsController@read');
 
