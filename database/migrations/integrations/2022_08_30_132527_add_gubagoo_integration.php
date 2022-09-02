@@ -49,7 +49,7 @@ class AddGubagooIntegration extends Migration
     public function up()
     {
         // Gets new integrationId if integration doesn't exist.
-        $integrationId = $this->getNextId($this->integration['code']);
+        $integrationId = 94; //$this->getNextId($this->integration['code']);
 
         if ($integrationId) {
             $this->integration['integration_id'] = $integrationId;
