@@ -9,7 +9,7 @@ use App\Http\Requests\Request;
  * 
  * @author David A Conway Jr.
  */
-class SendTemplateRequest extends Request {
+class TestTemplateRequest extends Request {
 
     protected $rules = [
         'dealer_id' => 'required|integer',
