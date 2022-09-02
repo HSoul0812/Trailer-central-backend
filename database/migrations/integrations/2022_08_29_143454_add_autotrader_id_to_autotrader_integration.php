@@ -8,7 +8,7 @@ class AddAutotraderIdToAutotraderIntegration extends Migration
 {
     private const INTEGRATION_ID = 68;
 
-    private const OLD_SETTINGS = array(
+    private const FILTERS = array(
         array(
             "filter" => array(
                 "field" => "category",
@@ -19,15 +19,7 @@ class AddAutotraderIdToAutotraderIntegration extends Migration
         )
     );
 
-    private const NEW_SETTINGS = array(
-        array(
-            "filter" => array(
-                "field" => "category",
-                "value" => "horse",
-                "operator" => "or"
-            ),
-            "operator" => "and"
-        ),
+    private const SETTINGS = array(
         array(
             "name" => "autotrader_id",
             "label" => "AutoTrader ID",
@@ -44,7 +36,10 @@ class AddAutotraderIdToAutotraderIntegration extends Migration
      */
     public function up()
     {
-        DB::table('integration')->where('integration_id', self::INTEGRATION_ID)->update(['settings' => serialize(self::NEW_SETTINGS)]);
+        DB::table('integration')->where('integration_id', self::INTEGRATION_ID)->update([
+            'filters' => serialize(self::FILTERS),
+            'settings' => serialize(self::SETTINGS)
+        ]);
     }
 
     /**
@@ -54,6 +49,9 @@ class AddAutotraderIdToAutotraderIntegration extends Migration
      */
     public function down()
     {
-        DB::table('integration')->where('integration_id', self::INTEGRATION_ID)->update(['settings' => serialize(self::OLD_SETTINGS)]);
+        DB::table('integration')->where('integration_id', self::INTEGRATION_ID)->update([
+            'filters' => serialize(array()),
+            'settings' => serialize(array())
+        ]);
     }
 }
