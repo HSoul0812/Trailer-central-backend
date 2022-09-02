@@ -8,8 +8,34 @@ class AddAutotraderIdToAutotraderIntegration extends Migration
 {
     private const INTEGRATION_ID = 68;
 
-    private const OLD_SETTINGS = 'a:1:{i:0;a:2:{s:6:"filter";a:1:{i:0;a:3:{s:5:"field";s:8:"category";s:5:"value";s:5:"horse";s:8:"operator";s:2:"or";}}s:8:"operator";s:3:"and";}}';
-    private const NEW_SETTINGS = 'a:1:{i:0;a:5:{s:4:"name";s:13:"autotrader_id";s:5:"label";s:13:"AutoTrader ID";s:11:"description";s:20:"Your AutroTrader ID.";s:4:"type";s:4:"text";s:8:"required";b:1;}}';
+    private const OLD_SETTINGS = array(
+        array(
+            "filter" => array(
+                "field" => "category",
+                "value" => "horse",
+                "operator" => "or"
+            ),
+            "operator" => "and"
+        )
+    );
+
+    private const NEW_SETTINGS = array(
+        array(
+            "filter" => array(
+                "field" => "category",
+                "value" => "horse",
+                "operator" => "or"
+            ),
+            "operator" => "and"
+        ),
+        array(
+            "name" => "autotrader_id",
+            "label" => "AutoTrader ID",
+            "description" => "Your AutroTrader ID.",
+            "type" => "text",
+            "required" => true
+        )
+    );
 
     /**
      * Run the migrations.
@@ -18,7 +44,7 @@ class AddAutotraderIdToAutotraderIntegration extends Migration
      */
     public function up()
     {
-        DB::table('integration')->where('integration_id', self::INTEGRATION_ID)->update(['settings' => self::NEW_SETTINGS]);
+        DB::table('integration')->where('integration_id', self::INTEGRATION_ID)->update(['settings' => serialize(self::NEW_SETTINGS)]);
     }
 
     /**
@@ -28,6 +54,6 @@ class AddAutotraderIdToAutotraderIntegration extends Migration
      */
     public function down()
     {
-        DB::table('integration')->where('integration_id', self::INTEGRATION_ID)->update(['settings' => self::OLD_SETTINGS]);
+        DB::table('integration')->where('integration_id', self::INTEGRATION_ID)->update(['settings' => serialize(self::OLD_SETTINGS)]);
     }
 }
