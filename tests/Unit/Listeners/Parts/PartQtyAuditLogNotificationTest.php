@@ -15,6 +15,7 @@ class PartQtyAuditLogNotificationTest extends TestCase
     /**
      * @group DMS
      * @group DMS_PARTS
+     *
      * @return void
      */
     public function testNotificationCallsRepositoryCorrectly()
@@ -54,6 +55,12 @@ class PartQtyAuditLogNotificationTest extends TestCase
         $notification->handle($event);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_PARTS
+     *
+     * @return void
+     */
     public function testNotificationPartOnlyCallsRepositoryCorrectly()
     {
         // test data
