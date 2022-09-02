@@ -49,6 +49,9 @@ class InventoryControllerTest extends TestCase
      * @throws BindingResolutionException when there is a problem with resolution of concreted class
      *
      * @covers       InventoryController::history
+     *
+     * @group DMS
+     * @group DMS_INVENTORY
      */
     public function testHistoryInvalidParameters(
         array   $params,
@@ -87,6 +90,10 @@ class InventoryControllerTest extends TestCase
 
     /**
      * @covers ::create
+     *
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
      * @dataProvider inventoryDataProvider
      *
      * @param array $inventoryParams
@@ -122,6 +129,10 @@ class InventoryControllerTest extends TestCase
 
     /**
      * @covers ::create
+     *
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
      * @dataProvider inventoryDataProvider
      *
      * @param array $inventoryParams
@@ -166,6 +177,10 @@ class InventoryControllerTest extends TestCase
 
     /**
      * @covers ::create
+     *
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
      * @dataProvider inventoryDataProvider
      *
      * @param array $inventoryParams
@@ -216,6 +231,9 @@ class InventoryControllerTest extends TestCase
 
     /**
      * @covers ::create
+     *
+     * @group DMS
+     * @group DMS_INVENTORY
      */
     public function testCreateWithWrongAccessToken()
     {
@@ -228,6 +246,8 @@ class InventoryControllerTest extends TestCase
 
     /**
      * @covers ::create
+     * @group DMS
+     * @group DMS_INVENTORY
      */
     public function testCreateWithoutAccessToken()
     {
@@ -240,6 +260,9 @@ class InventoryControllerTest extends TestCase
 
     /**
      * @covers ::exists
+     *
+     * @group DMS
+     * @group DMS_INVENTORY
      */
     public function testExists()
     {
@@ -271,6 +294,9 @@ class InventoryControllerTest extends TestCase
 
     /**
      * @covers ::exists
+     *
+     * @group DMS
+     * @group DMS_INVENTORY
      */
     public function testExistsFalse()
     {
@@ -303,6 +329,10 @@ class InventoryControllerTest extends TestCase
 
     /**
      * @covers ::exists
+     *
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
      * @dataProvider inventoryDataProvider
      *
      * @param array $inventoryParams
@@ -352,6 +382,10 @@ class InventoryControllerTest extends TestCase
 
     /**
      * @covers ::exists
+     *
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
      * @dataProvider inventoryDataProvider
      *
      * @param array $inventoryParams
@@ -388,6 +422,12 @@ class InventoryControllerTest extends TestCase
         $seeder->cleanUp();
     }
 
+    /**
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
+     * @return void
+     */
     public function testDeliveryPrice()
     {
         $seeder = new InventorySeeder(['withInventory' => true]);
@@ -403,6 +443,12 @@ class InventoryControllerTest extends TestCase
         $seeder->cleanUp();
     }
 
+    /**
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
+     * @return void
+     */
     public function testDeliveryPriceToZip()
     {
         $seeder = new InventorySeeder(['withInventory' => true]);
@@ -537,6 +583,12 @@ class InventoryControllerTest extends TestCase
         ]];
     }
 
+    /**
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
+     * @return void
+     */
     public function testGetAllInventoryTitlesWithoutCustomerId()
     {
         $seeder = $this->seedInventory();
@@ -559,6 +611,12 @@ class InventoryControllerTest extends TestCase
         $this->cleanUpSeeder($seeder);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
+     * @return void
+     */
     public function testGetAllInventoryTitlesWithCustomerId()
     {
         $seeder = $this->seedInventory();
@@ -626,6 +684,12 @@ class InventoryControllerTest extends TestCase
         ];
     }
 
+    /**
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
+     * @return void
+     */
     public function testExport()
     {
         Storage::fake('s3');

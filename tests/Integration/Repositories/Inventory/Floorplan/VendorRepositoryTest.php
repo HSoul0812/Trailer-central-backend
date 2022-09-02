@@ -16,6 +16,9 @@ class VendorRepositoryTest extends TestCase
     /**
      * Test that SUT is properly bound by the application
      *
+     * @group DMS
+     * @group DMS_INVENTORY_FLOORPLAN
+     *
      * @throws BindingResolutionException when there is a problem with resolution
      *                                    of concreted class
      * @note IntegrationTestCase
@@ -29,6 +32,9 @@ class VendorRepositoryTest extends TestCase
 
     /**
      * @dataProvider queryParametersAndSummariesForShowOnFloorPlanProvider
+     *
+     * @group DMS
+     * @group DMS_INVENTORY_FLOORPLAN
      *
      * @param  array  $params  list of query parameters
      * @param  int  $expectedTotal

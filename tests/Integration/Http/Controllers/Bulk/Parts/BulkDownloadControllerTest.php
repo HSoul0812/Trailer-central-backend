@@ -33,6 +33,10 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
      *
      * @covers ::create
      *
+     * @group DMS
+     * @group DMS_BULK
+     * @group DMS_BULK_DOWNLOAD
+     *
      * @param array $params
      * @param string $expectedException
      * @param string $expectedExceptionMessage
@@ -88,6 +92,10 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
      *
      * @covers ::create
      *
+     * @group DMS
+     * @group DMS_BULK
+     * @group DMS_BULK_DOWNLOAD
+     *
      * @param array $params
      *
      * @throws BusyJobException
@@ -118,6 +126,10 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
      * there is not job working on it, it will response a 500 http status code
      *
      * @covers ::create
+     *
+     * @group DMS
+     * @group DMS_BULK
+     * @group DMS_BULK_DOWNLOAD
      *
      * @throws BusyJobException
      */
@@ -152,6 +164,10 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
      * @param string|null $firstExpectedErrorMessage
      *
      * @covers ::read
+     *
+     * @group DMS
+     * @group DMS_BULK
+     * @group DMS_BULK_DOWNLOAD
      */
     public function testReadWithInvalidParameters(array $params,
                                                   string $expectedException,
@@ -191,6 +207,10 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
      * @param array $expectedPayloadResponse
      *
      * @covers ::status
+     *
+     * @group DMS
+     * @group DMS_BULK
+     * @group DMS_BULK_DOWNLOAD
      */
     public function testReadWithDifferentResponseStatuses(array $params,
                                                           string $jobStatus,

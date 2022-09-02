@@ -27,6 +27,10 @@ class BulkUploadControllerTest extends AbstractMonitoredJobsTest
      *
      * @covers ::create
      *
+     * @group DMS
+     * @group DMS_BULK
+     * @group DMS_BULK_UPLOAD
+     *
      * @param array $params
      * @param string $expectedException
      * @param string $expectedExceptionMessage
@@ -68,6 +72,10 @@ class BulkUploadControllerTest extends AbstractMonitoredJobsTest
      * @dataProvider validParametersForCreationProvider
      *
      * @covers ::create
+     *
+     * @group DMS
+     * @group DMS_BULK
+     * @group DMS_BULK_UPLOAD
      *
      * @param array $params
      *

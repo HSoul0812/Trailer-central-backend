@@ -12,6 +12,11 @@ use Tests\TestCase;
 
 class PartQtyAuditLogNotificationTest extends TestCase
 {
+    /**
+     * @group DMS
+     * @group DMS_PARTS
+     * @return void
+     */
     public function testNotificationCallsRepositoryCorrectly()
     {
         // data

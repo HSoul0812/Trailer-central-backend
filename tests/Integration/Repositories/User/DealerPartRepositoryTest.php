@@ -17,6 +17,9 @@ class DealerPartRepositoryTest extends TestCase
   /**
    * Test that SUT is properly bound by the application
    *
+   * @group DMS
+   * @group DMS_PARTS
+   *
    * @throws BindingResolutionException when there is a problem with resolution
    *                                    of concreted class
    * @note IntegrationTestCase
@@ -30,6 +33,10 @@ class DealerPartRepositoryTest extends TestCase
 
   /**
    * @covers ::get
+   *
+   * @group DMS
+   * @group DMS_PARTS
+   *
    * @throws BindingResolutionException
    * @throws Exception when Uuid::uuid4()->toString() could not generate a uuid
    */
@@ -53,6 +60,13 @@ class DealerPartRepositoryTest extends TestCase
     self::assertSame($updatedDealerPart->dealer_id, $dealerPartParams['dealer_id']);
   }
 
+    /**
+     * @group DMS
+     * @group DMS_PARTS
+     *
+     * @return void
+     * @throws BindingResolutionException
+     */
   public function testCreateIsWorkingProperly(): void
   {
     $this->seeder->seedDealer();
