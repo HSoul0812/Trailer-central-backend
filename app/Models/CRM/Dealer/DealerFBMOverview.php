@@ -10,6 +10,7 @@ class DealerFBMOverview extends Model
     protected $table = 'dealer_fbm_overview';
 
     protected $dates = [
-        'last_run_ts'
+        'last_attempt_ts',
+        'last_success_ts',
     ];
 }
