@@ -27,9 +27,11 @@ class SentryService
 
         $dealer = auth()->user();
 
-        if ($dealer instanceof NovaUser) {
-            return $event;
-        } else {
+        if (isset($dealer)) {
+            if ($dealer instanceof NovaUser) {
+                return $event;
+            }
+
             $dealer->load('website');
 
             $tags = array_merge($tags, [
