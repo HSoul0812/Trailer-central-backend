@@ -399,7 +399,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'type' => BuilderEmail::TYPE_TEMPLATE,
             'subject' => $subject,
             'template' => $html,
-            'template_id' => $key,
+            'template_id' => 1,
             'dealer_id' => $dealerId,
             'user_id' => $userId,
             'sales_person_id' => $salesPerson->id ?? 0,
