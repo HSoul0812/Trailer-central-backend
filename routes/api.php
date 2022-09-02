@@ -993,6 +993,7 @@ $api->version('v1', function ($route) {
                     $route->post('{id}', 'App\Http\Controllers\v1\CRM\Email\TemplateController@update')->where('id', '[0-9]+');
                     $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Email\TemplateController@destroy')->where('id', '[0-9]+');*/
                     $route->post('{id}/send', 'App\Http\Controllers\v1\CRM\Email\TemplateController@send')->where('id', '[0-9]+');
+                    $route->post('test', 'App\Http\Controllers\v1\CRM\Email\TemplateController@test');
                 });
 
                 // Email Builder Campaign
