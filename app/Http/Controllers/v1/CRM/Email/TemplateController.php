@@ -316,7 +316,6 @@ class TemplateController extends RestfulControllerV2
                 $this->emailbuilder->testTemplate(
                     $request->dealer_id,
                     $request->user_id,
-                    $request->key,
                     $request->subject,
                     $request->html,
                     $request->to_email,

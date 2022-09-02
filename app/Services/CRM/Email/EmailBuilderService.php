@@ -373,7 +373,6 @@ class EmailBuilderService implements EmailBuilderServiceInterface
     public function testTemplate(
         int $dealerId,
         int $userId,
-        string $key,
         string $subject,
         string $html,
         string $toEmail,
@@ -396,7 +395,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
         // Create Email Builder Email!
         $builder = new BuilderEmail([
-            'id' => $key,
+            'id' => 1,
             'type' => BuilderEmail::TYPE_TEMPLATE,
             'subject' => $subject,
             'template' => $html,

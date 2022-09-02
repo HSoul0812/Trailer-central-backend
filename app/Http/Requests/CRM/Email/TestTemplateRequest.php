@@ -14,7 +14,6 @@ class TestTemplateRequest extends Request {
     protected $rules = [
         'dealer_id' => 'required|integer',
         'user_id' => 'required|integer',
-        'key' => 'required|string',
         'subject' => 'required|string',
         'html' => 'required|string',
         'to_email' => 'required|email',
