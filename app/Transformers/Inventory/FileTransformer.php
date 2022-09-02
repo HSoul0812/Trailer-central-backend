@@ -13,6 +13,7 @@ class FileTransformer extends MediaFileTransformer
         $metadata = $this->getTitleMedata($file->title);
 
         return [
+            'file_id' => $file->id,
             'title' => $metadata['title'],
             'hidden' => $metadata['hidden'],
             'mime_type' => $file->type,
