@@ -4,7 +4,7 @@ declare(strict_types=1);
 use App\Http\Controllers\v1\WebsiteUser\AuthController;
 use App\Http\Controllers\v1\WebsiteUser\PasswordResetController;
 use App\Http\Controllers\v1\WebsiteUser\VerificationController;
-use App\Http\Controllers\v1\WebsiteUser\ProfileController;
+use App\Http\Controllers\v1\Image\ImageController;
 
 $api = app(Dingo\Api\Routing\Router::class);
 
@@ -47,5 +47,6 @@ $api->version('v1', function ($api) {
     $api->group(['prefix' => '/user', 'middleware' => 'auth:api'], function ($api) {
         $api->get('', [AuthController::class, 'getProfile']);
         $api->put('', [AuthController::class, 'updateProfile']);
+        $api->post('/images', [ImageController::class, 'create']);
     });
 });

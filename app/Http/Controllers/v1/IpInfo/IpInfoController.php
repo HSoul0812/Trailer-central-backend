@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\v1\IpInfo;
 
+use App\Exceptions\NotImplementedException;
 use App\Http\Controllers\AbstractRestfulController;
 use App\Http\Requests\CreateRequestInterface;
 use App\Http\Requests\IndexRequestInterface;
@@ -39,22 +40,22 @@ class IpInfoController extends AbstractRestfulController
 
     public function create(CreateRequestInterface $request)
     {
-        // TODO: Implement create() method.
+        throw new NotImplementedException();
     }
 
     public function show(int $id)
     {
-        // TODO: Implement show() method.
+        throw new NotImplementedException();
     }
 
     public function update(int $id, UpdateRequestInterface $request)
     {
-        // TODO: Implement update() method.
+        throw new NotImplementedException();
     }
 
     public function destroy(int $id)
     {
-        // TODO: Implement destroy() method.
+        throw new NotImplementedException();
     }
 
     protected function constructRequestBindings(): void
