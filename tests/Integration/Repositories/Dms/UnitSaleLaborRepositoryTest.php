@@ -14,6 +14,7 @@ use App\Repositories\Dms\UnitSaleLaborRepository;
 use App\Models\CRM\Dms\UnitSale;
 use App\Models\User\DealerLocation;
 use App\Models\User\User;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
@@ -50,6 +51,9 @@ class UnitSaleLaborRepositoryTest extends TestCase
 
     /**
      * @covers ::getTechnicians
+     *
+     * @group DMS
+     * @group DMS_UNIT_SALE_LABOR
      */
     public function testGetTechnicians()
     {
@@ -87,9 +91,13 @@ class UnitSaleLaborRepositoryTest extends TestCase
      * @covers ::serviceReport
      * @dataProvider serviceReportProvider
      *
+     * @group DMS
+     * @group DMS_UNIT_SALE_LABOR
+     *
      * @param array $unitSaleLabor11
      * @param array $unitSaleLabor12
      * @param array $unitSaleLabor21
+     * @throws BindingResolutionException
      */
     public function testServiceReport(array $unitSaleLabor11, array $unitSaleLabor12, array $unitSaleLabor21)
     {
@@ -414,9 +422,13 @@ class UnitSaleLaborRepositoryTest extends TestCase
      * @covers ::serviceReport
      * @dataProvider serviceReportProvider
      *
+     * @group DMS
+     * @group DMS_UNIT_SALE_LABOR
+     *
      * @param array $unitSaleLabor11
      * @param array $unitSaleLabor12
      * @param array $unitSaleLabor21
+     * @throws BindingResolutionException
      */
     public function testServiceReportWithDates(array $unitSaleLabor11, array $unitSaleLabor12, array $unitSaleLabor21)
     {
@@ -476,6 +488,9 @@ class UnitSaleLaborRepositoryTest extends TestCase
 
     /**
      * @covers ::serviceReport
+     *
+     * @group DMS
+     * @group DMS_UNIT_SALE_LABOR
      */
     public function testServiceReportWithTechnician()
     {
@@ -617,13 +632,16 @@ class UnitSaleLaborRepositoryTest extends TestCase
     }
 
 
-
     /**
      * @covers ::serviceReport
      * @dataProvider serviceReportPaymentLaborProvider
      *
+     * @group DMS
+     * @group DMS_UNIT_SALE_LABOR
+     *
      * @param array $paymentLabor31
      * @param array $paymentLabor32
+     * @throws BindingResolutionException
      */
     public function testServiceReportPaymentLabor(
         array $paymentLabor31,
@@ -736,8 +754,12 @@ class UnitSaleLaborRepositoryTest extends TestCase
      * @covers ::serviceReport
      * @dataProvider serviceReportPaymentLaborProvider
      *
+     * @group DMS
+     * @group DMS_UNIT_SALE_LABOR
+     *
      * @param array $paymentLabor31
      * @param array $paymentLabor32
+     * @throws BindingResolutionException
      */
     public function testServiceReportPaymentLaborWithDate(
         array $paymentLabor31,

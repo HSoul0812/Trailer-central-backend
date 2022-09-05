@@ -12,6 +12,12 @@ class BulkDestroyInventoryImageTest extends EndpointInventoryImageTest
     protected const VERB = 'DELETE';
     protected const ENDPOINT = '/api/inventory/:id/images';
 
+    /**
+     * @group DMS
+     * @group DMS_INVENTORY_IMAGE
+     *
+     * @return void
+     */
     public function testItShouldPreventAccessingWithoutAuthentication(): void
     {
         $this->itShouldPreventAccessingWithoutAuthentication();
@@ -19,6 +25,9 @@ class BulkDestroyInventoryImageTest extends EndpointInventoryImageTest
 
     /**
      * @dataProvider badArgumentsProvider
+     *
+     * @group DMS
+     * @group DMS_INVENTORY_IMAGE
      *
      * @param array $arguments
      * @param string $expectedFieldNameWithError
@@ -72,7 +81,12 @@ class BulkDestroyInventoryImageTest extends EndpointInventoryImageTest
         $this->tearDownSeed($otherSeed['dealer']->dealer_id);
     }
 
-
+    /**
+     * @group DMS
+     * @group DMS_INVENTORY_IMAGE
+     *
+     * @return void
+     */
     public function testItShouldUpdateWhenTheArgumentsAreFine(): void
     {
         Bus::fake();

@@ -16,6 +16,9 @@ class PackageControllerTest extends TestCase
 {
     /**
      * @covers ::index
+     *
+     * @group DMS
+     * @group DMS_PACKAGE
      */
     public function testIndex()
     {
@@ -56,6 +59,8 @@ class PackageControllerTest extends TestCase
 
     /**
      * @covers ::index
+     * @group DMS
+     * @group DMS_PACKAGE
      */
     public function testIndexWithoutAccessToken()
     {
@@ -66,6 +71,9 @@ class PackageControllerTest extends TestCase
 
     /**
      * @covers ::show
+     *
+     * @group DMS
+     * @group DMS_PACKAGE
      */
     public function testShow()
     {
@@ -107,6 +115,9 @@ class PackageControllerTest extends TestCase
 
     /**
      * @covers ::show
+     *
+     * @group DMS
+     * @group DMS_PACKAGE
      */
     public function testShowWithoutAccessToken()
     {
@@ -117,6 +128,9 @@ class PackageControllerTest extends TestCase
 
     /**
      * @covers ::create
+     *
+     * @group DMS
+     * @group DMS_PACKAGE
      */
     public function testCreate()
     {
@@ -162,6 +176,9 @@ class PackageControllerTest extends TestCase
 
     /**
      * @covers ::create
+     *
+     * @group DMS
+     * @group DMS_PACKAGE
      */
     public function testCreateWithoutAccessToken()
     {
@@ -199,6 +216,9 @@ class PackageControllerTest extends TestCase
 
     /**
      * @covers ::update
+     *
+     * @group DMS
+     * @group DMS_PACKAGE
      */
     public function testUpdate()
     {
@@ -272,6 +292,9 @@ class PackageControllerTest extends TestCase
 
     /**
      * @covers ::update
+     *
+     * @group DMS
+     * @group DMS_PACKAGE
      */
     public function testUpdateWithoutAccessToken()
     {
@@ -282,6 +305,8 @@ class PackageControllerTest extends TestCase
 
     /**
      * @covers ::destroy
+     * @group DMS
+     * @group DMS_PACKAGE
      */
     public function testDestroy()
     {

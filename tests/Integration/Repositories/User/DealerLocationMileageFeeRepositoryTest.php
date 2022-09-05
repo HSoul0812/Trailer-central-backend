@@ -23,6 +23,9 @@ class DealerLocationMileageFeeRepositoryTest extends TestCase
     /**
      * Test that SUT is properly bound by the application
      *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION_MILEAGE_FEE
+     *
      * @throws BindingResolutionException when there is a problem with resolution
      *                                    of concreted class
      * @note IntegrationTestCase
@@ -36,6 +39,10 @@ class DealerLocationMileageFeeRepositoryTest extends TestCase
 
     /**
      * @covers ::getAll
+     *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION_MILEAGE_FEE
+     *
      * @throws BindingResolutionException
      */
     public function testGetAllIsWorkingProperly(): void
@@ -55,6 +62,10 @@ class DealerLocationMileageFeeRepositoryTest extends TestCase
 
     /**
      * @covers ::bulkCreate
+     *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION_MILEAGE_FEE
+     *
      * @throws BindingResolutionException
      */
     public function testBulkCreateIsWorkingProperly(): void

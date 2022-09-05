@@ -174,6 +174,10 @@ class SecondaryUserControllerTest extends TestCase {
 
     /**
      * @dataProvider failedAddSecondaryUserProvider
+     *
+     * @group DMS
+     * @group DMS_SECONDARY_USER
+     *
      * @return void
      */
     public function testFailedAddSecondaryUser($feature, $permissionLevel)
@@ -225,6 +229,9 @@ class SecondaryUserControllerTest extends TestCase {
     }
 
     /**
+     * @group DMS
+     * @group DMS_SECONDARY_USER
+     *
      * @return int of userId
      */
     public function testAddSecondayUser()
@@ -271,6 +278,10 @@ class SecondaryUserControllerTest extends TestCase {
     /**
      * @depends testAddSecondayUser
      * @param int of new userId from previous test
+     *
+     * @group DMS
+     * @group DMS_SECONDARY_USER
+     *
      * @return array of the same userId & formData of the API response
      */
     public function testGetSecondayUser($newSecondaryUserId)
@@ -308,6 +319,10 @@ class SecondaryUserControllerTest extends TestCase {
     /**
      * @depends testGetSecondayUser
      * @param array of data from previous test
+     *
+     * @group DMS
+     * @group DMS_SECONDARY_USER
+     *
      * @return void
      */
     public function testUpdateSecondaryUser($dependedData)
@@ -392,6 +407,10 @@ class SecondaryUserControllerTest extends TestCase {
     /**
      * @dataProvider failedUpdateSecondaryUserProvider
      * @depends testGetSecondayUser
+     *
+     * @group DMS
+     * @group DMS_SECONDARY_USER
+     *
      * @return void
      */
     public function testFailedUpdateSecondaryUser($feature, $permissionLevel, $data)
@@ -417,6 +436,10 @@ class SecondaryUserControllerTest extends TestCase {
     /**
      * @depends testGetSecondayUser
      * @param array of data from previous test
+     *
+     * @group DMS
+     * @group DMS_SECONDARY_USER
+     *
      * @return void
      */
     public function testUpdateCrmPermissionWithId($data)
@@ -460,6 +483,10 @@ class SecondaryUserControllerTest extends TestCase {
     /**
      * @depends testGetSecondayUser
      * @param array of data from previous test
+     *
+     * @group DMS
+     * @group DMS_SECONDARY_USER
+     *
      * @return void
      */
     public function testUpdateLocationPermissionWithId($data)
@@ -503,6 +530,10 @@ class SecondaryUserControllerTest extends TestCase {
     /**
      * @depends testGetSecondayUser
      * @param array of data from previous test
+     *
+     * @group DMS
+     * @group DMS_SECONDARY_USER
+     *
      * @return void
      */
     public function testDeleteSecondaryUser($data)
