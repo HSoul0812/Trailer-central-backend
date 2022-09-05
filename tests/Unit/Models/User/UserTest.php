@@ -20,6 +20,9 @@ class UserTest extends TestCase
 {
     /**
      * @covers ::getPermissions
+     *
+     * @group DMS
+     * @group DMS_USER
      */
     public function testGetPermissions()
     {
@@ -38,6 +41,9 @@ class UserTest extends TestCase
 
     /**
      * @covers ::hasPermission
+     *
+     * @group DMS
+     * @group DMS_USER
      */
     public function testHasPermission()
     {

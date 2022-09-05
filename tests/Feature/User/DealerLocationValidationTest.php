@@ -42,6 +42,12 @@ class DealerLocationValidationTest extends TestCase {
         $this->dealerLocationRepo = app(DealerLocationRepositoryInterface::class);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_DEALER_LOCATION
+     *
+     * @return void
+     */
     public function testDealerLocation()
     {
         // PUT /api/user/dealer-location
@@ -149,6 +155,9 @@ class DealerLocationValidationTest extends TestCase {
 
     /**
      * @dataProvider validationDataProvider
+     *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION
      */
     public function testValidation($testFormData, $failedValidationField)
     {

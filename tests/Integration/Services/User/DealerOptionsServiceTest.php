@@ -26,6 +26,12 @@ class DealerOptionsServiceTest extends \Tests\TestCase
         parent::tearDown();
     }
 
+    /**
+     * @group DMS
+     * @group DMS_DEALER
+     *
+     * @return void
+     */
     public function testActivateUserAccounts() {
         $service = $this->getConcreteService();
         $service->activateUserAccounts($this->seeder->dealer->getKey());
@@ -36,6 +42,12 @@ class DealerOptionsServiceTest extends \Tests\TestCase
         ]);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_DEALER
+     *
+     * @return void
+     */
     public function testDeactivateUserAccounts() {
         $service = $this->getConcreteService();
         $service->deactivateUserAccounts($this->seeder->dealer->getKey());

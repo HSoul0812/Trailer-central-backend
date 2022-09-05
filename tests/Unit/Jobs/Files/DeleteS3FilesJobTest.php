@@ -19,6 +19,9 @@ class DeleteS3FilesJobTest extends TestCase
 {
     /**
      * @covers ::handle
+     *
+     * @group DMS
+     * @group DMS_FILES
      */
     public function testHandle()
     {
@@ -43,6 +46,9 @@ class DeleteS3FilesJobTest extends TestCase
 
     /**
      * @covers ::handle
+     *
+     * @group DMS
+     * @group DMS_FILES
      */
     public function testHandleWithException()
     {
