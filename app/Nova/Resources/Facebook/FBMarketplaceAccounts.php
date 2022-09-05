@@ -53,7 +53,9 @@ class FBMarketplaceAccounts extends Resource
         return [
             new Panel('FB Integration Details', $this->panelIntegration()),
 
-            new Panel("FBME Run Status", $this->panelStatus()),
+            new Panel("FBME Status", $this->panelStatus()),
+
+            new Panel("Today's status", $this->panelTodaysResults()),
 
             new Panel("Results " . date("m-d-Y", strtotime("-1 day")), $this->panelResults(1)),
             new Panel("Results " . date("m-d-Y", strtotime("-2 day")), $this->panelResults(2)),
@@ -68,7 +70,7 @@ class FBMarketplaceAccounts extends Resource
     {
         return [
             Text::make('Integration ID', 'id')->onlyOnDetail(),
-            
+
             Text::make('Dealer ID', 'dealer_id')->sortable(),
 
             Text::make('Dealer Name', 'dealer_name')
@@ -87,15 +89,27 @@ class FBMarketplaceAccounts extends Resource
     protected function panelStatus()
     {
         return [
-            DateTime::make('Last Run', 'last_run_ts')
+            DateTime::make('Last Run Attempt', 'last_attempt_ts')
+            ->sortable(),
+            
+            Boolean::make('Last Run Status', 'last_run_status')
                 ->sortable(),
 
-            Boolean::make('Status', 'last_run_status')
-                ->sortable(),
+            Text::make('Last Known Error', 'last_known_error'),
 
-            Text::make('Units Posted Today', 'units_posted_today'),
+            DateTime::make('Last Successful Run', 'last_success_ts')
+            ->sortable(),
 
-            Text::make('Error Today', 'error_today'),
+            Text::make('Last Units Posted', 'last_units_posted'),
+
+        ];
+    }
+
+    protected function panelTodaysResults()
+    {
+        return [
+            Text::make('Units Posted', "units_posted_today")->onlyOnDetail(),
+            Text::make('Last Error', "error_today")->onlyOnDetail(),
         ];
     }
 
