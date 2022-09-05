@@ -189,6 +189,7 @@ class BlastControllerTest extends IntegrationTestCase
             'user_id' => $dealerId,
             'email_template_id' => $template->id,
             'campaign_name' => 'Test Campaign',
+            'campaign_subject' => 'Test Campaign',
             'send_date' => Carbon::tomorrow()->format('Y-m-d H:i:s'),
             'action' => Blast::ACTION_UNCONTACTED,
             'send_after_days' => '3',
@@ -248,8 +249,8 @@ class BlastControllerTest extends IntegrationTestCase
         $json = json_decode($response->getContent(), true);
         $this->assertArrayHasKey('message', $json);
         $this->assertArrayHasKey('errors', $json);
-        $this->assertSame($expectedMessage, $json['message']);
-        $this->assertSame($expectedErrorMessages, $json['errors']);
+        $this->assertEquals($expectedMessage, $json['message']);
+        $this->assertEquals($expectedErrorMessages, $json['errors']);
     }
 
     /**
@@ -320,6 +321,10 @@ class BlastControllerTest extends IntegrationTestCase
         // Grab a blast from the seeder
         $blast = $this->seeder->createdBlasts[0];
 
+        $this->assertDatabaseHas(Blast::getTableName(), [
+            'email_blasts_id' => $blast->email_blasts_id
+        ]);
+
         // Send a DELETE request to the API
         $response = $this->json(
             'DELETE',
@@ -333,7 +338,7 @@ class BlastControllerTest extends IntegrationTestCase
 
         // Corroborate the record was deleted in the database
         $this->assertDatabaseMissing(Blast::getTableName(), [
-            'email_blasts_id' => $blast->id
+            'email_blasts_id' => $blast->email_blasts_id
         ]);
     }
 
@@ -352,6 +357,7 @@ class BlastControllerTest extends IntegrationTestCase
                 [
                     'email_template_id' => ['The email template id field is required.'],
                     'campaign_name' => ['The campaign name field is required.'],
+                    'campaign_subject' => ['The campaign subject field is required.'],
                     'send_date' => ['The send date field is required.'],
                     'action' => ['The action field is required.'],
                     'send_after_days' => ['The send after days field is required.'],
@@ -361,6 +367,7 @@ class BlastControllerTest extends IntegrationTestCase
                 [
                     'email_template_id' => null,
                     'campaign_name' => 123,
+                    'campaign_subject' => 123,
                     'send_date' => '1969-30-30',
                     'action' => Blast::ACTION_UNCONTACTED,
                     'send_after_days' => 1,
@@ -370,6 +377,7 @@ class BlastControllerTest extends IntegrationTestCase
                 [
                     'email_template_id' => ['The email template id field is required.'],
                     'campaign_name' => ['The campaign name must be a string.'],
+                    'campaign_subject' => ['The campaign subject must be a string.'],
                     'send_date' => ['The send date does not match the format Y-m-d H:i:s.'],
                 ]
             ]
