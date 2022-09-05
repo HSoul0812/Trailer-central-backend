@@ -9,6 +9,7 @@ use App\Http\Requests\CRM\Email\CreateBlastRequest;
 use App\Http\Requests\CRM\Email\ShowBlastRequest;
 use App\Http\Requests\CRM\Email\UpdateBlastRequest;
 use App\Http\Requests\CRM\Email\DeleteBlastRequest;
+use App\Services\CRM\Email\BlastServiceInterface;
 use App\Services\CRM\Email\EmailBuilderServiceInterface;
 use App\Transformers\CRM\Email\BlastTransformer;
 use Dingo\Api\Http\Request;
@@ -22,6 +23,11 @@ class BlastController extends RestfulControllerV2
     protected $blasts;
 
     /**
+     * @var BlastServiceInterface
+     */
+    protected $blastService;
+
+    /**
      * @var EmailBuilderServiceInterface
      */
     protected $emailbuilder;
@@ -30,14 +36,17 @@ class BlastController extends RestfulControllerV2
      * Create a new controller instance.
      *
      * @param BlastRepositoryInterface $blasts
+     * @param BlastServiceInterface $blastService
      * @param EmailBuilderServiceInterface $emailbuilder
      */
     public function __construct(
         BlastRepositoryInterface $blasts,
+        BlastServiceInterface $blastService,
         EmailBuilderServiceInterface $emailbuilder
     ) {
-        $this->middleware('setUserIdOnRequest')->only(['index', 'create', 'update']);
+        $this->middleware('setUserIdOnRequest')->only(['index', 'create', 'update', 'delete']);
         $this->blasts = $blasts;
+        $this->blastService = $blastService;
         $this->emailbuilder = $emailbuilder;
     }
 
@@ -74,14 +83,14 @@ class BlastController extends RestfulControllerV2
      */
     public function index(Request $request) {
         $request = new GetBlastsRequest($request->all());
-        
+
         if ($request->validate()) {
             return $this->response->paginator($this->blasts->getAll($request->all()), new BlastTransformer());
         }
-        
+
         return $this->response->errorBadRequest();
     }
-    
+
     /**
      * @OA\Put(
      *     path="/api/crm/{userId}/emails/blast",
@@ -108,7 +117,7 @@ class BlastController extends RestfulControllerV2
      *         required=false,
      *         @OA\Schema(type="string")
      *     ),
-     * 
+     *
      *     @OA\Response(
      *         response="200",
      *         description="Returns a list of emails",
@@ -124,8 +133,7 @@ class BlastController extends RestfulControllerV2
     {
         $request = new CreateBlastRequest($request->all());
         if ($request->validate()) {
-            // Create Email
-            return $this->response->item($this->blasts->create($request->all()), new BlastTransformer());
+            return $this->response->item($this->blastService->create($request->all()), new BlastTransformer());
         }
 
         return $this->response->errorBadRequest();
@@ -135,7 +143,7 @@ class BlastController extends RestfulControllerV2
      * @OA\Get(
      *     path="/api/crm/{userId}/emails/blast/{id}",
      *     description="Retrieve a blast",
-     
+
      *     tags={"Post"},
      *     @OA\Parameter(
      *         name="id",
@@ -165,12 +173,12 @@ class BlastController extends RestfulControllerV2
 
         return $this->response->errorBadRequest();
     }
-    
+
     /**
      * @OA\Put(
      *     path="/api/crm/{userId}/emails/blast/{id}",
      *     description="Update a blast",
-     * 
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="query",
@@ -192,7 +200,7 @@ class BlastController extends RestfulControllerV2
      *         required=false,
      *         @OA\Schema(type="string")
      *     ),
-     * 
+     *
      *     @OA\Response(
      *         response="200",
      *         description="Returns a list of emails",
@@ -211,7 +219,7 @@ class BlastController extends RestfulControllerV2
         $request = new UpdateBlastRequest($requestData);
 
         if ($request->validate()) {
-            return $this->response->item($this->blasts->update($request->all()), new BlastTransformer());
+            return $this->response->item($this->blastService->update($request->all()), new BlastTransformer());
         }
 
         return $this->response->errorBadRequest();
@@ -244,7 +252,7 @@ class BlastController extends RestfulControllerV2
     {
         $request = new DeleteBlastRequest(['id' => $id]);
 
-        if ($request->validate() && $this->blasts->delete(['id' => $id])) {
+        if ($request->validate() && $this->blastService->delete(['id' => $id])) {
             // Delete blast
             return $this->response->noContent();
         }

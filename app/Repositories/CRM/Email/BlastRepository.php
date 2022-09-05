@@ -2,9 +2,13 @@
 
 namespace App\Repositories\CRM\Email;
 
+use App\Exceptions\RepositoryInvalidArgumentException;
+use App\Models\CRM\Email\BlastBrand;
+use App\Models\CRM\Email\BlastCategory;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Email\Blast;
 use App\Models\CRM\Email\BlastSent;
+use App\Traits\Repository\Transaction;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -13,6 +17,8 @@ use Carbon\Carbon;
 
 class BlastRepository implements BlastRepositoryInterface
 {
+    use Transaction;
+
     private $blastModel;
     private $blastSentModel;
     private $leadModel;
@@ -42,9 +48,30 @@ class BlastRepository implements BlastRepositoryInterface
         $this->leadModel = $lead;
     }
 
-    public function create($params)
+    /**
+     * @param array $params
+     * @return Blast
+     */
+    public function create($params): Blast
     {
-        return $this->blastModel::create($params);
+        $brandObjs = $this->createBrands($params['brands'] ?? []);
+        $categoryObjs = $this->createUnitCategories($params['unit_categories'] ?? []);
+
+        unset($params['brands']);
+        unset($params['unit_categories']);
+
+        /** @var Blast $item */
+        $item = $this->blastModel::query()->create($params);
+
+        if (!empty($brandObjs)) {
+            $item->brands()->saveMany($brandObjs);
+        }
+
+        if (!empty($categoryObjs)) {
+            $item->categories()->saveMany($categoryObjs);
+        }
+
+        return $item;
     }
 
     public function delete($params)
@@ -98,20 +125,36 @@ class BlastRepository implements BlastRepositoryInterface
 
     public function update($params): Blast
     {
+        if (!isset($params['id'])) {
+            throw new RepositoryInvalidArgumentException('id has been missed. Params - ' . json_encode($params));
+        }
+
         $blast = $this->get(['id' => $params['id']]);
 
-        DB::beginTransaction();
+        if ($params['update_brands'] ?? false) {
+            $blast->brands()->delete();
 
-        try {
-            // Fill Text Details
-            $blast->fill($params)->save();
+            $brandObjs = $this->createBrands($params['brands'] ?? []);
 
-            DB::commit();
-        } catch (Exception $ex) {
-            DB::rollBack();
-            Log::error('Text blast update error. Message - ' . $ex->getMessage(), $ex->getTrace());
-            throw new Exception('Text blast update error');
+            if (!empty($brandObjs)) {
+                $blast->brands()->saveMany($brandObjs);
+            }
         }
+
+        if ($params['update_categories'] ?? false) {
+            $blast->categories()->delete();
+
+            $categoryObjs = $this->createUnitCategories($params['unit_categories'] ?? []);
+
+            if (!empty($categoryObjs)) {
+                $blast->categories()->saveMany($categoryObjs);
+            }
+        }
+
+        unset($params['brands']);
+        unset($params['unit_categories']);
+
+        $blast->fill($params)->save();
 
         return $blast;
     }
@@ -267,5 +310,39 @@ class BlastRepository implements BlastRepositoryInterface
         }
 
         return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
+    }
+
+    /**
+     * @param array $brands
+     * @return array
+     */
+    private function createBrands(array $brands): array
+    {
+        $brandObjs = [];
+
+        foreach ($brands as $brand) {
+            $brandObj = new BlastBrand();
+            $brandObj->brand = $brand;
+            $brandObjs[] = $brandObj;
+        }
+
+        return $brandObjs;
+    }
+
+    /**
+     * @param array $unitCategories
+     * @return array
+     */
+    private function createUnitCategories(array $unitCategories): array
+    {
+        $categoryObjs = [];
+
+        foreach ($unitCategories as $unitCategory) {
+            $brandObj = new BlastCategory();
+            $brandObj->unit_category = $unitCategory;
+            $categoryObjs[] = $brandObj;
+        }
+
+        return $categoryObjs;
     }
 }
