@@ -29,6 +29,9 @@ class PartsUpdateTest extends TestCase
     /**
      * Test creating a part with all fields populated
      *
+     * @group DMS
+     * @group DMS_PARTS
+     *
      * @return void
      */
     public function testUpdateAllFields()
@@ -101,7 +104,13 @@ class PartsUpdateTest extends TestCase
                 "alternative_part_number" => 'Test Alternative Part Number',
             ]);             
     }
-    
+
+    /**
+     * @group DMS
+     * @group DMS_PARTS
+     *
+     * @return void
+     */
     public function testUpdateImages()
     {
         $this->initializeTestData();
