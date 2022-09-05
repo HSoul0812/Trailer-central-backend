@@ -12,7 +12,7 @@ class IndexInventoryRequest extends Request implements IndexRequestInterface
     protected array $rules = [
         'type_id' => 'required|integer',
         'country' => ["regex:/^(us|ca)$/i"],
-        'location' => 'string',
+        'location' => 'nullable|string',
         'sort' => ["regex:/^(\+|\-){0,1}(distance|createdAt|price|numFeatures)$/"]
     ];
 }
