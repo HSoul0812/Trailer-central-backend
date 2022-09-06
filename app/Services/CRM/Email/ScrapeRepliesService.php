@@ -106,12 +106,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
 
     /**
-     * @var int
-     */
-    protected $runtime = 0;
-
-
-    /**
      * ScrapeRepliesService constructor.
      */
     public function __construct(GmailServiceInterface $gmail,
@@ -152,9 +146,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @return bool
      */
     public function dealer(NewDealerUser $dealer): bool {
-        // Start Time Tracking
-        $this->runtime = microtime(true); 
-
         // Get Salespeople With Email Credentials
         $salespeople = $this->salespeople->getAllImap($dealer->user_id);
         $this->log->info('Dealer #' . $dealer->id . ' Found ' . $salespeople->count() .
@@ -164,8 +155,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         }
 
         // Start Time Tracking
-        $this->log->info('Found ' . $salespeople->count() . ' Sales People in ' . 
-                (microtime(true) - $this->runtime) . ' Seconds');
+        $this->log->info('Found ' . $salespeople->count() . ' Sales People');
 
         // Loop Campaigns for Current Dealer
         foreach($salespeople as $salesperson) {
@@ -179,8 +169,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 if ($job->hasNoPending()) {
                     $this->dispatch($job->onQueue('scrapereplies'));
                     $this->log->info('Dealer #' . $dealer->id . ', Sales Person #' .
-                                        $salesperson->id . ' - Started Importing Email in ' . 
-                                        (microtime(true) - $this->runtime) . ' Seconds');
+                                        $salesperson->id . ' - Started Importing Email');
 
                     // After the job is being dispatched, put it in the cache
                     // so the next command won't create another job until it's finished
@@ -190,19 +179,16 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                     ], now()->addSeconds(7200));
                 } else {
                     $this->log->info('Dealer #' . $dealer->id . ', Sales Person #' .
-                                        $salesperson->id . ' - Already Active Job in ' . 
-                                        (microtime(true) - $this->runtime) . ' Seconds');
+                                        $salesperson->id . ' - Already Active Job');
                 }
             } catch(\Exception $e) {
                 $this->log->error('Dealer #' . $dealer->id . ' Sales Person #' .
-                                    $salesperson->id . ' - Exception returned: ' .
-                                    $e->getMessage() . ' in ' . (microtime(true) - $this->runtime) . ' Seconds');
+                                    $salesperson->id . ' - Exception returned: ' . $e->getMessage());
             }
         }
 
         // End Time Tracking
-        $this->log->info('Queued ' . $salespeople->count() . ' Sales People in ' . 
-                (microtime(true) - $this->runtime) . ' Seconds');
+        $this->log->info('Queued ' . $salespeople->count() . ' Sales People');
         return true;
     }
 
@@ -215,13 +201,11 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      */
     public function salesperson(NewDealerUser $dealer, SalesPerson $salesperson): int {
         // Start Time Tracking
-        $this->runtime = microtime(true);
-        $accessToken = $this->refreshToken($dealer, $salesperson);
+        $accessToken = $this->getAccessToken($dealer, $salesperson);
 
         // Process Messages
         $this->jobLog->info('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
-                            ' - Processing Getting Emails in ' . 
-                            (microtime(true) - $this->runtime) . ' Seconds');
+                            ' - Processing Getting Emails');
         $imported = 0;
         foreach($salesperson->email_folders as $folder) {
             // Try Catching Error for Sales Person Folder
@@ -230,21 +214,18 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 $imports = $this->folder($dealer, $salesperson, $folder, $accessToken);
                 $this->jobLog->info('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
                                     ' - Finished Importing ' . $imports .
-                                    ' Replies for Folder ' . $folder->name . ' in ' . 
-                                    (microtime(true) - $this->runtime) . ' Seconds');
+                                    ' Replies for Folder ' . $folder->name);
                 $imported += $imports;
             } catch(\Exception $e) {
                 $this->jobLog->error('Dealer #' . $dealer->id . ', Sales Person #' .
                                     $salesperson->id .  ' - Error Importing Folder ' .
-                                    $folder->name . ': ' . $e->getMessage() . ' in ' . 
-                                    (microtime(true) - $this->runtime) . ' Seconds');
+                                    $folder->name . ': ' . $e->getMessage());
             }
         }
 
         // Return Campaign Sent Entries
         $this->jobLog->info('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
-                            ' - Imported ' . $imported . ' Emails in ' . 
-                            (microtime(true) - $this->runtime) . ' Seconds');
+                            ' - Imported ' . $imported . ' Emails');
         return $imported;
     }
 
@@ -716,27 +697,37 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @param SalesPerson $salesperson
      * @return null|AccessToken
      */
-    private function refreshToken(NewDealerUser $dealer, SalesPerson $salesperson): ?AccessToken {
+    private function getAccessToken(NewDealerUser $dealer, SalesPerson $salesperson): ?AccessToken {
         // Token Exists?
         if(!empty($salesperson->active_token)) {
             // Refresh Token
-            $accessToken = $salesperson->active_token;
+            $activeToken = $salesperson->active_token;
             $this->jobLog->info('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
-                                ' - Validating token #' . $salesperson->active_token->id);
+                                ' - Validating token #' . $activeToken->id);
+
+            // Try Running OAuth Validate and Refresh Token
             try {
-                $validate = $this->auth->validate($salesperson->active_token);
-                $accessToken = $validate->accessToken;
-                $this->jobLog->info('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
-                                    ' - Found access token: ' . $salesperson->active_token);
+                $validate = $this->auth->validate($activeToken);
             } catch (\Exception $e) {
                 //$this->salespeople->update(['id' => $salesperson->id, 'imap_failed' => 1]);
                 $this->jobLog->error('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
                                     ' - Exception thrown validating active access token: ' .
                                     $e->getMessage() . '; marking connection as failed');
+                return $activeToken;
             }
+
+            // Access Token Exists?
+            if($validate->accessToken) {
+                $accessToken = $validate->accessToken;
+                $this->jobLog->info('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
+                                    ' - Found access token: ' . $accessToken);
+            }
+
+            // Return Updated Access Token, Otherwise Return Active Token
+            return $accessToken ?? $activeToken;
         }
 
-        // Return Sales Person With Updated Access Token
-        return $accessToken ?? null;
+        // No Access Token
+        return null;
     }
 }
