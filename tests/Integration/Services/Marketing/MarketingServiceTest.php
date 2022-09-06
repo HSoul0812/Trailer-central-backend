@@ -279,7 +279,8 @@ class MarketingServiceTest extends IntegrationTestCase
         // Check that the view has the correct info
         $this->assertDatabaseHas('dealer_fbm_overview', [
             'id' => $marketplace->getKey(),
-            'error_today' => "{$requiredParams['step']}: {$requiredParams['message']}"
+            [ 'last_known_error', 'LIKE', "%: {$requiredParams['message']}" ],
+            'error_today' => $requiredParams['message'],
         ]);
     }
 
@@ -353,7 +354,8 @@ class MarketingServiceTest extends IntegrationTestCase
         // Check that the view has the correct info
         $this->assertDatabaseHas('dealer_fbm_overview', [
             'id' => $marketplace->getKey(),
-            'error_today' => "{$requiredParams['step']}: {$requiredParams['message']}"
+            [ 'last_known_error', 'LIKE', "%: {$requiredParams['message']}" ],
+            'error_today' => $requiredParams['message'],
         ]);
     }
 
