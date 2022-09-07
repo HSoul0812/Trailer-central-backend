@@ -14,6 +14,8 @@ use App\Repositories\CRM\Leads\LeadTradeRepository;
 use App\Repositories\CRM\Leads\LeadTradeRepositoryInterface;
 use App\Repositories\CRM\Refund\RefundRepository;
 use App\Repositories\CRM\Refund\RefundRepositoryInterface;
+use App\Services\CRM\Email\BlastService;
+use App\Services\CRM\Email\BlastServiceInterface;
 use App\Services\CRM\Email\CampaignService;
 use App\Services\CRM\Email\CampaignServiceInterface;
 use App\Services\CRM\Email\InquiryEmailService;
@@ -80,6 +82,7 @@ class CrmServiceProvider extends ServiceProvider
         $this->app->bind(ADFExportServiceInterface::class, ADFExportService::class);
         $this->app->bind(ImportServiceInterface::class, ImportService::class);
         $this->app->bind(CampaignServiceInterface::class, CampaignService::class);
+        $this->app->bind(BlastServiceInterface::class, BlastService::class);
 
         // Repositories
         $this->app->bind(LeadRepositoryInterface::class, LeadRepository::class);
@@ -121,6 +124,7 @@ class CrmServiceProvider extends ServiceProvider
         \Validator::extend('unique_text_blast_campaign_name', 'App\Rules\CRM\Text\UniqueTextBlastCampaignName@passes');
         \Validator::extend('unique_text_campaign_name', 'App\Rules\CRM\Text\UniqueTextCampaignName@passes');
         \Validator::extend('unique_email_campaign_name', 'App\Rules\CRM\Email\UniqueEmailCampaignName@passes');
+        \Validator::extend('unique_email_blast_name', 'App\Rules\CRM\Email\UniqueEmailBlastName@passes');
 
         LeadStatus::observe(LeadStatusObserver::class);
         Lead::observe(LeadObserver::class);
