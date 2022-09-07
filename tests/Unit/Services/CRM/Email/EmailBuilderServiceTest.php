@@ -1,12 +1,13 @@
 <?php
 
-namespace Tests\Unit\Services\CRM\Leads;
+namespace Tests\Unit\Services\CRM\Email;
 
 use App\Exceptions\CRM\Email\Builder\SendBuilderEmailsFailedException;
 use App\Exceptions\CRM\Email\Builder\SendBlastEmailsFailedException;
 use App\Exceptions\CRM\Email\Builder\SendCampaignEmailsFailedException;
 use App\Exceptions\CRM\Email\Builder\SendTemplateEmailFailedException;
 use App\Exceptions\CRM\Email\Builder\FromEmailMissingSmtpConfigException;
+use App\Jobs\CRM\Interactions\EmailBuilderJob;
 use App\Jobs\CRM\Interactions\SendEmailBuilderJob;
 use App\Mail\CRM\Interactions\EmailBuilderEmail;
 use App\Models\CRM\Email\Blast;
@@ -19,6 +20,7 @@ use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\CRM\Interactions\EmailHistory;
 use App\Models\Integration\Auth\AccessToken;
+use App\Models\User\NewDealerUser;
 use App\Repositories\CRM\Email\BlastRepositoryInterface;
 use App\Repositories\CRM\Email\CampaignRepositoryInterface;
 use App\Repositories\CRM\Email\TemplateRepositoryInterface;
@@ -34,16 +36,18 @@ use App\Services\CRM\Interactions\DTOs\BuilderEmail;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Mockery;
+use Mockery\LegacyMockInterface;
 use Tests\TestCase;
 
 /**
- * Test for App\Services\CRM\Leads\LeadService
+ * Test for App\Services\CRM\Email\EmailBuilderService
  *
- * Class LeadServiceTest
- * @package Tests\Unit\Services\CRM\Leads
+ * Class EmailBuilderServiceTest
+ * @package Tests\Unit\Services\CRM\Email
  *
  * @coversDefaultClass \App\Services\CRM\Email\EmailBuilderService
  */
@@ -64,7 +68,20 @@ class EmailBuilderServiceTest extends TestCase
      */
     const DUMMY_LEAD_DUP = 2;
 
+    private const TEMPLATE_ID = PHP_INT_MAX;
 
+    private const NEW_DEALER_USER_ID = PHP_INT_MAX - 5;
+
+    private const BLAST_ID = PHP_INT_MAX - 1;
+    private const BLAST_CAMPAIGN_NAME = 'blast_campaign_name';
+    private const BLAST_CAMPAIGN_SUBJECT = 'blast_campaign_subject';
+    private const BLAST_USER_ID = PHP_INT_MAX - 2;
+    private const BLAST_USER_FROM_EMAIL_ADDRESS = 'blast_from_email_address@test.com';
+
+    private const SALES_PERSON_ID = PHP_INT_MAX - 3;
+
+    private const FIRST_LEAD_ID = PHP_INT_MAX - 6;
+    private const SECOND_LEAD_ID = PHP_INT_MAX - 7;
 
     /**
      * @var LegacyMockInterface|BlastRepositoryInterface
@@ -165,96 +182,55 @@ class EmailBuilderServiceTest extends TestCase
      * @covers ::sendBlast
      * @group EmailBuilder
      *
+     * @dataProvider sendBlastDataProvider
+     *
+     * @param Blast|LegacyMockInterface $blast
+     * @param SalesPerson|LegacyMockInterface $salesPerson
+     *
      * @throws BindingResolutionException
      */
-    public function testSendBlast()
+    public function testSendBlast(Blast $blast, SalesPerson $salesPerson)
     {
-        // Mock Template
-        $template = $this->getEloquentMock(Template::class);
-        $template->template_id = 1;
-        $template->html = $this->getTemplate();
+        $leadIds = new Collection([self::FIRST_LEAD_ID, self::SECOND_LEAD_ID]);
 
-        // Mock Blast
-        $blast = $this->getEloquentMock(Blast::class);
-        $blast->email_blasts_id = 1;
-        $blast->campaign_subject = 'Test Blast';
-        $blast->template = $template;
-        $blast->user_id = 1;
-        $blast->from_email_address = 'admin@operatebeyond.com';
-
-        // Mock Sales Person
-        $salesperson = $this->getEloquentMock(SalesPerson::class);
-        $salesperson->id = 1;
-        $salesperson->smtp_email = $blast->from_email_address;
-        $salesperson->shouldReceive('getFullNameAttribute')
-                    ->once()
-                    ->andReturn('Operate Beyond');
-
-        // Mock Access Token
-        $accessToken = $this->getEloquentMock(AccessToken::class);
-        $salesperson->googleToken = $accessToken;
-
-        // Blast Relations
-        $blast->shouldReceive('setRelation')->passthru();
-        $blast->shouldReceive('newDealerUser')->passthru();
-        $blast->shouldReceive('belongsTo')->passthru();
-        $blast->shouldReceive('hasOne')->passthru();
-
-        // Sales Person Relations
-        $salesperson->shouldReceive('setRelation')->passthru();
-        $salesperson->shouldReceive('belongsTo')->passthru();
-        $salesperson->shouldReceive('hasOne')->passthru();
-
-
-        // Return Blast
-        $this->blastRepositoryMock
-             ->shouldReceive('get')
-             ->with(['id' => $blast->email_blasts_id])
-             ->once()
-             ->andReturn($blast);
-
-        // Get Sales Person For Email Address
         $this->salesPersonRepositoryMock
              ->shouldReceive('getBySmtpEmail')
              ->withArgs([$blast->user_id, $blast->from_email_address])
              ->once()
-             ->andReturn($salesperson);
+             ->andReturn($salesPerson);
 
-        // For Each Lead!
-        $leads = [];
-        $leadMocks = $this->getLeadMocks();
-        foreach($leadMocks as $lead) {
-            // Blast Was Sent?
-            $this->blastRepositoryMock
-                 ->shouldReceive('wasSent')
-                 ->withArgs([$blast->email_blasts_id, $lead->identifier])
-                 ->once()
-                 ->andReturn(false);
+        $blast
+            ->shouldReceive('getLeadIdsAttribute')
+            ->twice()
+            ->andReturn($leadIds);
 
-            // Get Lead
-            $this->leadRepositoryMock
-                 ->shouldReceive('get')
-                 ->with(['id' => $lead->identifier])
-                 ->once()
-                 ->andReturn($lead);
+        $this->expectsJobs(EmailBuilderJob::class);
 
-            // Append Leads
-            $leads[] = $lead->identifier;
-        }
+        $this->blastRepositoryMock
+            ->shouldReceive('update')
+            ->with(['id' => $blast->email_blasts_id, 'delivered' => 1])
+            ->once();
 
-        // Expect Jobs
-        $this->expectsJobs(SendEmailBuilderJob::class);
-
-        // @var EmailBuilderServiceInterface $service
         $service = $this->app->make(EmailBuilderServiceInterface::class);
 
-        // Validate Send Blast Result
-        $result = $service->sendBlast($blast->email_blasts_id, $leads);
+        $result = $service->sendBlast($blast);
 
-        // Assert Same
+        $this->assertIsArray($result);
+
+        $this->assertArrayHasKey('data', $result);
+        $this->assertArrayHasKey('leads', $result);
+
         $this->assertSame($result['data']['id'], $blast->email_blasts_id);
-        $this->assertSame($result['data']['type'], BuilderEmail::TYPE_BLAST);
-        $this->assertSame(count($result['sent']), 3);
+        $this->assertSame($result['data']['type'], 'blast');
+        $this->assertSame($result['data']['subject'], $blast->campaign_subject);
+        $this->assertSame($result['data']['template'], $this->getTemplate());
+        $this->assertSame($result['data']['template_id'], $blast->template->template_id);
+        $this->assertSame($result['data']['user_id'], $blast->user_id);
+        $this->assertSame($result['data']['sales_person_id'], $salesPerson->id);
+        $this->assertSame($result['data']['from_email'], $blast->from_email_address);
+
+        $this->assertIsArray($result['leads']);
+        $this->assertEquals($result['leads'], $leadIds->toArray());
     }
 
     /**
@@ -1545,7 +1521,7 @@ class EmailBuilderServiceTest extends TestCase
 
     /**
      * Get Template for Type
-     * 
+     *
      * @return string
      */
     private function getTemplate() {
@@ -1562,7 +1538,7 @@ class EmailBuilderServiceTest extends TestCase
 
     /**
      * Get Lead Mocks
-     * 
+     *
      * @return array<LeadMock>
      */
     private function getLeadMocks() {
@@ -1595,5 +1571,33 @@ class EmailBuilderServiceTest extends TestCase
 
         // Return Lead Mocks
         return $leadMocks;
+    }
+
+    /**
+     * @return array[]
+     */
+    public function sendBlastDataProvider(): array
+    {
+        $template = $this->getEloquentMock(Template::class);
+        $template->template_id = self::TEMPLATE_ID;
+        $template->html = $this->getTemplate();
+
+        $newDealerUser = $this->getEloquentMock(NewDealerUser::class);
+        $newDealerUser->id = self::NEW_DEALER_USER_ID;
+
+        $blast = $this->getEloquentMock(Blast::class);
+        $blast->email_blasts_id = self::BLAST_ID;
+        $blast->campaign_subject = self::BLAST_CAMPAIGN_SUBJECT;
+        $blast->campaign_name = self::BLAST_CAMPAIGN_NAME;
+        $blast->user_id = self::BLAST_USER_ID;
+        $blast->from_email_address = self::BLAST_USER_FROM_EMAIL_ADDRESS;
+
+        $this->initBelongsToRelation($blast, 'template', $template);
+        $this->initBelongsToRelation($blast, 'newDealerUser', $newDealerUser);
+
+        $salesperson = $this->getEloquentMock(SalesPerson::class);
+        $salesperson->id = self::SALES_PERSON_ID;
+
+        return [[$blast, $salesperson]];
     }
 }

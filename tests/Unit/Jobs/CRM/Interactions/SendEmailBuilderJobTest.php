@@ -14,10 +14,10 @@ use Mockery\LegacyMockInterface;
 use Tests\TestCase;
 
 /**
- * Test for App\Jobs\CRM\Leads\AutoAssignJob
+ * Test for App\Jobs\CRM\Interactions\SendEmailBuilderJob
  *
- * Class AutoAssignJobTest
- * @package Tests\Unit\Jobs\Files
+ * Class SendEmailBuilderJobTest
+ * @package ests\Unit\Jobs\CRM\Interactions
  *
  * @coversDefaultClass \App\Jobs\CRM\Interactions\SendEmailBuilderJob
  */
