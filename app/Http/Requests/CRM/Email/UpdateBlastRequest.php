@@ -32,4 +32,14 @@ class UpdateBlastRequest extends Request
         'update_categories' => 'boolean|nullable',
     ];
 
+    /**
+     * @return string[]
+     */
+    protected function getAttributeNames(): array
+    {
+        return [
+            'campaign_name' => 'blast name',
+            'campaign_subject' => 'blast subject',
+        ];
+    }
 }

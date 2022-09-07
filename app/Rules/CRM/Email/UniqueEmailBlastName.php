@@ -38,6 +38,6 @@ class UniqueEmailBlastName
      */
     public function message(): string
     {
-        return 'Campaign Name must be unique';
+        return 'Blast Name must be unique';
     }
 }

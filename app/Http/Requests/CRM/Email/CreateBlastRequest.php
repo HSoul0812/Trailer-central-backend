@@ -28,4 +28,15 @@ class CreateBlastRequest extends Request
         'brands' => 'nullable|array',
         'brands.*' => 'inventory_mfg_valid',
     ];
+
+    /**
+     * @return string[]
+     */
+    protected function getAttributeNames(): array
+    {
+        return [
+            'campaign_name' => 'blast name',
+            'campaign_subject' => 'blast subject',
+        ];
+    }
 }

@@ -356,8 +356,8 @@ class BlastControllerTest extends IntegrationTestCase
                 'Validation Failed',
                 [
                     'email_template_id' => ['The email template id field is required.'],
-                    'campaign_name' => ['The campaign name field is required.'],
-                    'campaign_subject' => ['The campaign subject field is required.'],
+                    'campaign_name' => ['The blast name field is required.'],
+                    'campaign_subject' => ['The blast subject field is required.'],
                     'send_date' => ['The send date field is required.'],
                     'action' => ['The action field is required.'],
                     'send_after_days' => ['The send after days field is required.'],
@@ -376,8 +376,8 @@ class BlastControllerTest extends IntegrationTestCase
                 'Validation Failed',
                 [
                     'email_template_id' => ['The email template id field is required.'],
-                    'campaign_name' => ['The campaign name must be a string.'],
-                    'campaign_subject' => ['The campaign subject must be a string.'],
+                    'campaign_name' => ['The blast name must be a string.'],
+                    'campaign_subject' => ['The blast subject must be a string.'],
                     'send_date' => ['The send date does not match the format Y-m-d H:i:s.'],
                 ]
             ]
