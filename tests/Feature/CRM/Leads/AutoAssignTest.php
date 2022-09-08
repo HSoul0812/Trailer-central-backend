@@ -42,8 +42,9 @@ class AutoAssignTest extends TestCase
         // Detect What Sales People Will be Assigned!
         $leadSalesPeople = array();
         foreach($leads as $lead) {
+            $status = $this->seeder->statuses[$lead->identifier];
             $salesType = 'trade';
-            if(empty($lead->dealer_location_id) && $lead->lead_type !== $salesType) {
+            if(empty($lead->dealer_location_id) && $lead->lead_type !== $salesType && empty($status->sales_person_id)) {
                 continue;
             }
 
