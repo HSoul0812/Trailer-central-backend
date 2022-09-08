@@ -69,4 +69,9 @@ class DealerFacebook
      * @var Collection<InventoryFacebook>
      */
     private $inventory;
+
+    /**
+     * @var $string
+     */
+    private $last_attempt_ts;
 }
