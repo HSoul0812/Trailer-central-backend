@@ -3,9 +3,7 @@
 namespace Tests\Feature\CRM\Leads;
 
 use Illuminate\Support\Facades\Mail;
-use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\User\SalesPerson;
-use App\Models\User\NewDealerUser;
 use App\Mail\AutoAssignEmail;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
@@ -38,7 +36,7 @@ class AutoAssignTest extends TestCase
     {
         // Given I have a collection of leads
         $leads = $this->seeder->leads;
-        $dealerId = $this->dealer->getKey();
+        $dealerId = $this->seeder->dealer->getKey();
 
 
         // Detect What Sales People Will be Assigned!
@@ -114,7 +112,7 @@ class AutoAssignTest extends TestCase
     {
         // Given I have a collection of leads
         $leads = $this->seeder->leads;
-        $dealerId = $this->dealer->getKey();
+        $dealerId = $this->seeder->dealer->getKey();
 
 
         // Detect What Sales People Will be Assigned!
@@ -191,7 +189,7 @@ class AutoAssignTest extends TestCase
     {
         // Given I have a collection of leads
         $leads = $this->seeder->leads;
-        $dealerId = $this->dealer->getKey();
+        $dealerId = $this->seeder->dealer->getKey();
 
 
         // Detect What Sales People Will be Assigned!
@@ -271,7 +269,7 @@ class AutoAssignTest extends TestCase
     {
         // Given I have a collection of leads
         $leads = $this->seeder->leads;
-        $dealerId = $this->dealer->getKey();
+        $dealerId = $this->seeder->dealer->getKey();
 
 
         // Detect What Sales People Will be Assigned!
@@ -333,7 +331,7 @@ class AutoAssignTest extends TestCase
     {
         // Given I have a collection of leads
         $leads = $this->seeder->leads;
-        $dealerId = $this->dealer->getKey();
+        $dealerId = $this->seeder->dealer->getKey();
 
 
         // Detect What Sales People Will be Assigned!
