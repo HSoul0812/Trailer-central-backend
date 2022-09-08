@@ -176,8 +176,13 @@ class GoogleService implements GoogleServiceInterface
                 if($refresh->exists()) {
                     $isValid = $this->validateIdToken($refresh->idToken);
                     $isExpired = false;
-                }
+                    $this->log->info("Successfully refreshed access token for {$accessToken->relation_type} #{$accessToken->relation_id}");
+                } else {
+	            $this->log->error("Failed to refresh access token for {$accessToken->relation_type} #{$accessToken->relation_id}");
+		}
             }
+
+            // Not Valid? Mark Expired
             if(empty($isValid)) {
                 $isExpired = true;
             }
@@ -219,6 +224,7 @@ class GoogleService implements GoogleServiceInterface
             // Valid/Expired
             $isValid = $this->validateIdToken($accessToken->getIdToken());
             $isExpired = $client->isAccessTokenExpired();
+            $this->log->info("Value ID token? {$isValid} | Token Expired? {$isExpired}");
 
             // Try to Refresh Access Token!
             if(!empty($accessToken->getRefreshToken()) && (!$isValid || $isExpired)) {
@@ -226,7 +232,10 @@ class GoogleService implements GoogleServiceInterface
                 if($refresh->exists()) {
                     $isValid = $this->validateIdToken($refresh->idToken);
                     $isExpired = false;
-                }
+                    $this->log->info("Successfully refreshed access token for {$accessToken->relation_type} #{$accessToken->relation_id}");
+                } else {
+	            $this->log->error("Failed to refresh access token for {$accessToken->relation_type} #{$accessToken->relation_id}");
+		}
             }
             if(!$isValid) {
                 $isExpired = true;
@@ -309,6 +318,8 @@ class GoogleService implements GoogleServiceInterface
             $newToken = $client->fetchAccessTokenWithRefreshToken($refreshToken);
             if(!empty($newToken) && isset($newToken['access_token'])) {
                 $emailToken = EmailToken::fillFromArray($newToken);
+            } elseif(isset($newToken['error'])) {
+                $this->log->error('FATAL ERROR refreshing access token: ' . $newToken['error_description']);
             }
         } catch (\Exception $e) {
             // We actually just want to verify this is true or false

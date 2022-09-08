@@ -2,6 +2,7 @@
 
 namespace App\Services\Common;
 
+use App\Models\User\NovaUser;
 use App\Models\User\User;
 use Sentry\Event;
 
@@ -24,9 +25,13 @@ class SentryService
             $tags['project'] = 'dealer-sites';
         }
 
-        if (auth()->check()) {
-            /** @var User $dealer */
-            $dealer = auth()->user();
+        $dealer = auth()->user();
+
+        if (isset($dealer)) {
+            if ($dealer instanceof NovaUser) {
+                return $event;
+            }
+
             $dealer->load('website');
 
             $tags = array_merge($tags, [
