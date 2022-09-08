@@ -46,7 +46,7 @@ class AutoAssignTest extends TestCase
             ['source' => 'HorseTrailerWorld', 'type' => 'inventory', 'dealer_location_id' => $locationId],
             ['source' => '', 'type' => 'trade', 'dealer_location_id' => $locationId]
         ];
-        $this->seeder->seedAutoAssign($seeds);
+        $this->seeder->seed($seeds);
 
         // Given I have a collection of leads
         $leads = $this->seeder->leads;

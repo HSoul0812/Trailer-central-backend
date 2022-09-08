@@ -110,7 +110,7 @@ class LeadSeeder extends Seeder
         $this->sales4 = factory(SalesPerson::class)->create(array_merge($salesParams, ['dealer_location_id' => 0, 'is_trade' => 0]));
     }
 
-    public function seedAutoAssign($seeds): void
+    public function seed($seeds): void
     {
         collect($seeds)->each(function (array $seed): void {
             $leadParams = [
