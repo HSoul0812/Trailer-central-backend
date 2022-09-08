@@ -61,9 +61,9 @@ class InventoryService implements InventoryServiceInterface
     ];
 
     const DEFAULT_CATEGORY = [
-      'name'      => 'Other',
-      'type_id'   => 1,
-      'type_label' => 'Equipment Trailers'
+        'name'      => 'Other',
+        'type_id'   => 1,
+        'type_label' => 'Equipment Trailers'
     ];
 
     const INVENTORY_SOLD = 'sold';
@@ -125,22 +125,22 @@ class InventoryService implements InventoryServiceInterface
      */
     public function create(array $params): TcApiResponseInventoryCreate
     {
-      $headers = array_change_key_case(getallheaders(), CASE_LOWER);
-      $access_token = $headers['access-token'];
-      $url = config('services.trailercentral.api') . 'inventory/';
+        $headers = array_change_key_case(getallheaders(), CASE_LOWER);
+        $access_token = $headers['access-token'];
+        $url = config('services.trailercentral.api') . 'inventory/';
 
-        if(isset($params['category'])) {
-            $categoryMapping = $this->listingCategoryMappingsRepository->get([
-                'map_from' => $params['category']
-            ]);
-            if($categoryMapping === null) {
-                throw new BadRequestException('Corresponding category mapping was not found');
-            }
-            $params['category'] = $categoryMapping->map_to;
+        $categoryMapping = $this->listingCategoryMappingsRepository->get([
+            'type_id' => $params['type_id'],
+            'map_from' => $params['category']
+        ]);
+        if($categoryMapping === null) {
+            throw new BadRequestException('Corresponding category mapping was not found');
         }
+        $params['category'] = $categoryMapping->map_to;
+        $params['entity_type_id'] = $categoryMapping->entity_type_id;
 
-      $inventory = $this->handleHttpRequest('PUT', $url, ['query' => $params, 'headers' => ['access-token' => $access_token]]);
-      return TcApiResponseInventoryCreate::fromData($inventory['response']['data']);
+        $inventory = $this->handleHttpRequest('PUT', $url, ['query' => $params, 'headers' => ['access-token' => $access_token]]);
+        return TcApiResponseInventoryCreate::fromData($inventory['response']['data']);
     }
 
     /**
@@ -149,15 +149,15 @@ class InventoryService implements InventoryServiceInterface
      */
     public function delete(int $id): TcApiResponseInventoryDelete
     {
-      $headers = array_change_key_case(getallheaders(), CASE_LOWER);
-      $access_token = $headers['access-token'];
-      $url = config('services.trailercentral.api') . 'inventory/' . $id;
+        $headers = array_change_key_case(getallheaders(), CASE_LOWER);
+        $access_token = $headers['access-token'];
+        $url = config('services.trailercentral.api') . 'inventory/' . $id;
 
-      $response = $this->handleHttpRequest('DELETE', $url, ['headers' => ['access-token' => $access_token]]);
+        $response = $this->handleHttpRequest('DELETE', $url, ['headers' => ['access-token' => $access_token]]);
 
-      $respObj = TcApiResponseInventoryDelete::fromData($response['response']);
+        $respObj = TcApiResponseInventoryDelete::fromData($response['response']);
 
-      return $respObj;
+        return $respObj;
     }
 
     /**
@@ -166,9 +166,9 @@ class InventoryService implements InventoryServiceInterface
      */
     public function update(array $params): TcApiResponseInventoryCreate
     {
-      $headers = array_change_key_case(getallheaders(), CASE_LOWER);
-      $access_token = $headers['access-token'];
-      $url = config('services.trailercentral.api') . 'inventory/' . $params['inventory_id'];
+        $headers = array_change_key_case(getallheaders(), CASE_LOWER);
+        $access_token = $headers['access-token'];
+        $url = config('services.trailercentral.api') . 'inventory/' . $params['inventory_id'];
 
         if(isset($params['category'])) {
             $categoryMapping = $this->listingCategoryMappingsRepository->get([
@@ -180,10 +180,10 @@ class InventoryService implements InventoryServiceInterface
             $params['category'] = $categoryMapping->map_to;
         }
 
-      $inventory = $this->handleHttpRequest('POST', $url, ['query' => $params, 'headers' => ['access-token' => $access_token]]);
-      $respObj = TcApiResponseInventoryCreate::fromData($inventory['response']['data']);
+        $inventory = $this->handleHttpRequest('POST', $url, ['query' => $params, 'headers' => ['access-token' => $access_token]]);
+        $respObj = TcApiResponseInventoryCreate::fromData($inventory['response']['data']);
 
-      return $respObj;
+        return $respObj;
     }
 
     #[ArrayShape(["key" => "string", "type_id" => "int"])]
@@ -195,12 +195,12 @@ class InventoryService implements InventoryServiceInterface
             $mappedCategory = null;
 
             foreach ($mappedCategories as $currentCategory) {
-              $mapToCategories = explode(';', $currentCategory->map_to);
-              foreach ($mapToCategories as $mapToCategory) {
-                if ($mapToCategory == $oldCategory) {
-                  $mappedCategory = $currentCategory;
+                $mapToCategories = explode(';', $currentCategory->map_to);
+                foreach ($mapToCategories as $mapToCategory) {
+                    if ($mapToCategory == $oldCategory) {
+                        $mappedCategory = $currentCategory;
+                    }
                 }
-              }
             }
 
             if ($mappedCategory && $mappedCategory->category) {
@@ -411,7 +411,7 @@ class InventoryService implements InventoryServiceInterface
 
     private function addTermSearchQueries(ESInventoryQueryBuilder $queryBuilder, array $params) {
         foreach(self::TERM_SEARCH_KEY_MAP as $field => $searchField) {
-          $queryBuilder->addTermInValuesQuery($searchField, $params[$field] ?? null);
+            $queryBuilder->addTermInValuesQuery($searchField, $params[$field] ?? null);
         }
     }
 
@@ -510,10 +510,15 @@ class InventoryService implements InventoryServiceInterface
         return $respObj;
     }
 
-    public function attributes(int $entityTypeId): Collection
+    public function attributes(array $params): Collection
     {
+        $mapping = $this->listingCategoryMappingsRepository->get([
+            'map_from' => $params['category'],
+            'type_id' => $params['type_id']
+        ]);
+
         $results = new Collection();
-        $url = config('services.trailercentral.api') . 'inventory/attributes' . "?entity_type_id=$entityTypeId";
+        $url = config('services.trailercentral.api') . 'inventory/attributes' . "?entity_type_id=$mapping->entity_type_id";
         $attributes = $this->handleHttpRequest('GET', $url);
         foreach($attributes['data'] as $attribute) {
             $attributeObj = TcApiResponseAttribute::fromData($attribute);

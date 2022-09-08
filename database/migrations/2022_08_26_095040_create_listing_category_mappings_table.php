@@ -1,10 +1,10 @@
 <?php
 
-use App\Models\Parts\ListingCategoryMappings;
 use App\Models\Parts\Type;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 class CreateListingCategoryMappingsTable extends Migration
 {
@@ -68,7 +68,7 @@ class CreateListingCategoryMappingsTable extends Migration
             $current_type = Type::where('name', $type)->first();
             foreach ($categories as $category) {
                 $current_category = $current_type->categories()->where('name', $category['map_from'])->first();
-                ListingCategoryMappings::create([
+                DB::table('listing_category_mappings')->insert([
                     'category_id' => $current_category->id,
                     'map_from' => $category['map_from'],
                     'map_to'   => $category['map_to'],
