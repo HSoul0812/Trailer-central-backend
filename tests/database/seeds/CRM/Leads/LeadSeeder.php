@@ -65,6 +65,16 @@ class LeadSeeder extends Seeder
     private $sales;
 
     /**
+     * @var SalesPerson
+     */
+    private $sales2;
+
+    /**
+     * @var SalesPerson
+     */
+    private $sales3;
+
+    /**
      * @var Lead[]
      */
     private $leads;
@@ -91,7 +101,12 @@ class LeadSeeder extends Seeder
         $this->user = factory(NewUser::class)->create(['user_id' => $this->dealer->dealer_id]);
         $this->newDealer = factory(NewDealerUser::class)->create(['id' => $this->dealer->dealer_id, 'user_id' => $this->dealer->dealer_id]);
         $this->crmUser = factory(CrmUser::class)->create(['user_id' => $this->dealer->dealer_id, 'enable_assign_notification' => 1]);
-        $this->sales = factory(SalesPerson::class)->create(['user_id' => $this->dealer->dealer_id]);
+
+        // Create Sales People
+        $salesParams = ['user_id' => $this->dealer->dealer_id, 'dealer_location_id' => $this->location->getKey(), 'is_general' => 1, 'is_inventory' => 1, 'is_trade' => 1];
+        $this->sales = factory(SalesPerson::class)->create(array_merge($salesParams, ['dealer_location_id' => 0]));
+        $this->sales2 = factory(SalesPerson::class)->create(array_merge($salesParams, ['is_inventory' => 0]));
+        $this->sales3 = factory(SalesPerson::class)->create(array_merge($salesParams, ['is_trade' => 0]));
     }
 
     public function seed(): void
@@ -102,11 +117,11 @@ class LeadSeeder extends Seeder
         $seeds = [
             ['type' => 'inventory', 'dealer_location_id' => $locationId],
             ['source' => 'Facebook - Podium', 'type' => 'trade', 'dealer_location_id' => $locationId],
-            ['source' => '', 'type' => 'inventory', 'sales_id' => $salesId, 'dealer_location_id' => 0],
-            ['source' => 'RVTrader.com', 'type' => 'trade', 'sales_id' => $salesId, 'dealer_location_id' => $locationId],
+            ['source' => '', 'type' => 'inventory', 'dealer_location_id' => 0],
+            ['source' => 'RVTrader.com', 'type' => 'trade', 'dealer_location_id' => $locationId],
             ['source' => 'TrailerCentral', 'type' => 'inventory', 'dealer_location_id' => 0],
             ['type' => 'inventory', 'dealer_location_id' => 0],
-            ['source' => 'HorseTrailerWorld', 'type' => 'inventory', 'sales_id' => $salesId, 'dealer_location_id' => $locationId],
+            ['source' => 'HorseTrailerWorld', 'type' => 'inventory', 'dealer_location_id' => $locationId],
             ['source' => '', 'type' => 'trade', 'dealer_location_id' => $locationId]
         ];
 
@@ -123,12 +138,11 @@ class LeadSeeder extends Seeder
             $this->leads[$leadId] = $lead;
 
             // Include Status
-            if(isset($seed['source']) || isset($seed['sales_id'])) {
+            if(isset($seed['source'])) {
                 // Make Status
                 $status = factory(LeadStatus::class)->make([
                     'tc_lead_identifier' => $leadId,
-                    'source' => $seed['source'],
-                    'sales_person_id' => $seed['sales_id'] ?? 0
+                    'source' => $seed['source']
                 ]);
 
                 $this->statuses[$leadId] = $status;
@@ -139,7 +153,6 @@ class LeadSeeder extends Seeder
     public function cleanUp(): void
     {
         $dealerId = $this->dealer->getKey();
-        $salesId = $this->sales->getKey();
 
         // Database clean up
         if(!empty($this->leads) && count($this->leads)) {
@@ -149,7 +162,7 @@ class LeadSeeder extends Seeder
                 Lead::destroy($leadId);
             }
         }
-        SalesPerson::destroy($salesId);
+        SalesPerson::where(['user_id' => $dealerId])->delete();
         CrmUser::destroy($dealerId);
         NewUser::destroy($dealerId);
         DealerLocation::where('dealer_id', $dealerId)->delete();
