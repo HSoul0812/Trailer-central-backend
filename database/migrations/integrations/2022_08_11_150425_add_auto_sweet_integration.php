@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 use Carbon\Carbon;
@@ -12,6 +13,9 @@ class AddAutoSweetIntegration extends Migration
     use SetupAndCheckNew;
 
     private const DEALER_ID = 5305;
+    private const INTEGRATION_ID = 93;
+    private const TABLE_NAME = 'integration';
+    private const DEALER_INTEGRATION_TABLE_NAME = 'integration_dealer';
 
     private $integration = [
         'code' => 'autosweet',
@@ -49,21 +53,22 @@ class AddAutoSweetIntegration extends Migration
     public function up()
     {
         // Gets new integrationId if integration doesn't exist.
-        $integrationId = $this->getNextId($this->integration['code']);
+        // add static based id number
+        $integrationId = self::INTEGRATION_ID;
 
-        if ($integrationId) {
+        if (!$this->checkIntegration()) {
             $this->integration['integration_id'] = $integrationId;
             $this->dealer['integration_id'] = $integrationId;
 
             DB::transaction(function () {
-                DB::table('integration')->insert($this->integration);
+                DB::table(self::TABLE_NAME)->insert($this->integration);
 
                 $dealer = $this->dealer;
                 $dealer['created_at'] = Carbon::now()->setTimezone('UTC')->toDateTimeString();
                 $dealer['settings'] = serialize($dealer['settings']);
 
-                if ($this->dealerExists()) {
-                    DB::table('integration_dealer')->insert($dealer);
+                if ($this->dealerExists() && !$this->checkIntegrationDealer()) {
+                    DB::table(self::DEALER_INTEGRATION_TABLE_NAME)->insert($dealer);
                 }
             });
         }
@@ -76,9 +81,9 @@ class AddAutoSweetIntegration extends Migration
      */
     public function down()
     {
-        $integrationId = $this->getIntegrationIdFromCode();
+        $integrationId = self::INTEGRATION_ID;
 
-        if ($integrationId) {
+        if ($this->checkIntegration()) {
             DB::transaction(function () use ($integrationId) {
                 DB::table('integration_dealer')
                     ->where('integration_id', $integrationId)
@@ -115,5 +120,26 @@ class AddAutoSweetIntegration extends Migration
         }
 
         return 0;
+    }
+
+    /**
+     * @return bool
+     */
+    private function checkIntegration(): bool
+    {
+        return DB::table(self::TABLE_NAME)
+            ->where('integration_id', self::INTEGRATION_ID)
+            ->exists();
+    }
+
+    /**
+     * @return bool
+     */
+    private function checkIntegrationDealer(): bool
+    {
+        return DB::table(self::DEALER_INTEGRATION_TABLE_NAME)
+            ->where('integration_id', self::INTEGRATION_ID)
+            ->where('dealer_id', self::DEALER_ID)
+            ->exists();
     }
 }
