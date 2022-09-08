@@ -42,9 +42,8 @@ class AutoAssignTest extends TestCase
         // Detect What Sales People Will be Assigned!
         $leadSalesPeople = array();
         foreach($leads as $lead) {
-            $status = $this->seeder->statuses[$lead->identifier] ?? null;
             $salesType = 'trade';
-            if(empty($lead->dealer_location_id) && $lead->lead_type !== $salesType && empty($status->sales_person_id)) {
+            if(empty($lead->dealer_location_id) && $lead->lead_type !== $salesType) {
                 continue;
             }
 
@@ -120,8 +119,7 @@ class AutoAssignTest extends TestCase
         $leadSalesPeople = array();
         foreach($leads as $lead) {
             $salesType = 'inventory';
-            $status = $this->seeder->statuses[$lead->identifier] ?? null;
-            if($lead->lead_type !== $salesType && empty($status->sales_person_id)) {
+            if($lead->lead_type !== $salesType) {
                 continue;
             }
 
@@ -142,7 +140,7 @@ class AutoAssignTest extends TestCase
             // Find Next!
             $salesPerson = $this->getSalesPersonRepository()->roundRobinSalesPerson($this->seeder->newDealer, $dealerLocationId, $salesType, $newestSalesPerson);
             $leadSalesPeople[$lead->identifier] = !empty($salesPerson->id) ? $salesPerson->id : 0;
-            $this->setRoundRobinSalesPerson($dealerId, $dealerLocationId, $salesType, $salesPerson->id);
+            $this->setRoundRobinSalesPerson($dealerId, $dealerLocationId, $salesType, $leadSalesPeople[$lead->identifier]);
         }
 
         // Fake Mail
@@ -353,7 +351,7 @@ class AutoAssignTest extends TestCase
             // Find Next!
             $salesPerson = $this->getSalesPersonRepository()->roundRobinSalesPerson($this->seeder->newDealer, $locationId, $salesType, $newestSalesPerson);
             $leadSalesPeople[$lead->identifier] = !empty($salesPerson->id) ? $salesPerson->id : 0;
-            $this->setRoundRobinSalesPerson($dealerId, $locationId, $salesType, $salesPerson->id);
+            $this->setRoundRobinSalesPerson($dealerId, $locationId, $salesType, $leadSalesPeople[$lead->identifier]);
         }
 
         // Fake Mail
