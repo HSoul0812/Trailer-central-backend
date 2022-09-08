@@ -9,6 +9,7 @@ use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\User\AuthToken;
 use App\Models\User\User;
+use App\Models\User\CrmUser;
 use App\Models\User\NewUser;
 use App\Models\User\DealerLocation;
 use App\Models\Website\Website;
@@ -72,7 +73,8 @@ class LeadSeeder extends Seeder
             'user_type' => AuthToken::USER_TYPE_DEALER,
         ]);
         $this->website = factory(Website::class)->create(['dealer_id' => $this->dealer->dealer_id]);
-        $this->user = factory(NewUser::class)->create(['user_id' => $this->dealer->dealer_id, 'enable_assign_notification' => 1]);
+        $this->user = factory(NewUser::class)->create(['user_id' => $this->dealer->dealer_id]);
+        $this->crmUser = factory(CrmUser::class)->create(['user_id' => $this->dealer->dealer_id, 'enable_assign_notification' => 1]);
         $this->sales = factory(SalesPerson::class)->create(['user_id' => $this->dealer->dealer_id]);
     }
 
@@ -132,6 +134,7 @@ class LeadSeeder extends Seeder
             }
         }
         SalesPerson::destroy($salesId);
+        CrmUser::destroy($dealerId);
         NewUser::destroy($dealerId);
         DealerLocation::where('dealer_id', $dealerId)->delete();
         Website::where('dealer_id', $dealerId)->delete();
