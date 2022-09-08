@@ -133,7 +133,7 @@ class AutoAssignSeeder extends Seeder
             }
             $lead = factory(Lead::class)->create($leadParams);
             $leadId = $lead->getKey();
-            $this->leads[$leadId] = $lead;
+            $this->leads = $lead;
 
             // Include Status
             if(isset($seed['source'])) {
