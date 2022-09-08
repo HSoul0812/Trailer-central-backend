@@ -5,6 +5,7 @@ namespace Tests\Unit\App\Services\Inventory;
 use App\Models\Geolocation\Geolocation;
 use App\Models\SysConfig\SysConfig;
 use App\Repositories\Geolocation\GeolocationRepositoryInterface;
+use App\Repositories\Parts\ListingCategoryMappingsRepositoryInterface;
 use App\Repositories\SysConfig\SysConfigRepositoryInterface;
 use App\Services\Inventory\InventoryService;
 use GuzzleHttp\Client;
@@ -20,8 +21,8 @@ class InventoryServiceTest extends TestCase
 {
     private InventoryService $service;
     private Client $httpClient;
-    private MockObject $geoLocationRepository;
     private MockObject $sysConfigRepository;
+    private MockObject $listingMappingRepository;
 
     public function setUp(): void
     {
@@ -58,26 +59,25 @@ class InventoryServiceTest extends TestCase
         $this->assertEquals('1000022126', $response->inventories->items()[0]->id);
 
         $featureList = $response->inventories->items()[0]->feature_list;
-        $this->assertArrayHasKey('floor_plan', $featureList);
-        $this->assertArrayHasKey('stall_tack', $featureList);
-        $this->assertArrayHasKey('lq', $featureList);
-        $this->assertArrayHasKey('doors_windows_ramps', $featureList);
+        $this->assertCount(8, $featureList);
+        $this->assertContains("aaaa", $featureList);
+        $this->assertContains("hhhh", $featureList);
     }
 
     private function getConcreteService(): InventoryService
     {
         $this->httpClient = $this->mockHttpClient();
-        $this->geoLocationRepository = $this->mockGeolocationRepository();
         $this->sysConfigRepository = $this->mockSysConfigRepository();
-        return new InventoryService($this->httpClient, $this->sysConfigRepository);
-    }
-
-    private function mockGeolocationRepository(): MockObject {
-        return $this->createMock(GeolocationRepositoryInterface::class);
+        $this->listingMappingRepository = $this->mockListingMappingRepository();
+        return new InventoryService($this->httpClient, $this->sysConfigRepository, $this->listingMappingRepository);
     }
 
     private function mockSysConfigRepository(): MockObject {
         return $this->createMock(SysConfigRepositoryInterface::class);
+    }
+
+    private function mockListingMappingRepository(): MockObject {
+        return $this->createMock(ListingCategoryMappingsRepositoryInterface::class);
     }
 
     private function mockHttpClient(): Client {
@@ -180,10 +180,10 @@ class InventoryServiceTest extends TestCase
                   "driveTrail": null,
                   "floorplan": null,
                   "propulsion": null,
-                  "featureList.floorPlan": [],
-                  "featureList.stallTack": [],
-                  "featureList.lq": [],
-                  "featureList.doorsWindowsRamps": [],
+                  "featureList.floorPlan": ["aaaa", "bbbb"],
+                  "featureList.stallTack": ["cccc", "dddd"],
+                  "featureList.lq": ["eeee", "ffff"],
+                  "featureList.doorsWindowsRamps": ["gggg", "hhhh"],
                   "image": "",
                   "images": [
                     ""
@@ -402,6 +402,9 @@ class InventoryServiceTest extends TestCase
             }
         }';
         $mock = new MockHandler([
+            new Response(200, [], $mockData),
+            new Response(200, [], $mockAggregateData),
+            new Response(200, [], $mockAggregateData),
             new Response(200, [], $mockData),
             new Response(200, [], $mockAggregateData),
             new Response(200, [], $mockAggregateData),

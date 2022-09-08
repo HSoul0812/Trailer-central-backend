@@ -71,8 +71,8 @@ class InventoryService implements InventoryServiceInterface
 
     public function __construct(
         private GuzzleHttpClient $httpClient,
-        private ListingCategoryMappingsRepositoryInterface $listingCategoryMappingsRepository,
         private SysConfigRepositoryInterface $sysConfigRepository,
+        private ListingCategoryMappingsRepositoryInterface $listingCategoryMappingsRepository
     )
     {}
 
