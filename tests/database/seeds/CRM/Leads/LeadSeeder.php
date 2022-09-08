@@ -104,27 +104,14 @@ class LeadSeeder extends Seeder
 
         // Create Sales People
         $salesParams = ['user_id' => $this->dealer->dealer_id, 'dealer_location_id' => $this->location->getKey(), 'is_default' => 1, 'is_inventory' => 1, 'is_trade' => 1];
-        $this->sales = factory(SalesPerson::class)->create(array_merge($salesParams, ['dealer_location_id' => 0]));
+        $this->sales1 = factory(SalesPerson::class)->create(array_merge($salesParams, ['dealer_location_id' => 0, 'is_inventory' => 0]));
         $this->sales2 = factory(SalesPerson::class)->create(array_merge($salesParams, ['is_inventory' => 0]));
         $this->sales3 = factory(SalesPerson::class)->create(array_merge($salesParams, ['is_trade' => 0]));
+        $this->sales4 = factory(SalesPerson::class)->create(array_merge($salesParams, ['dealer_location_id' => 0, 'is_trade' => 0]));
     }
 
-    public function seed(): void
+    public function seedAutoAssign($seeds): void
     {
-        $locationId = $this->location->getKey();
-        $salesId = $this->sales->getKey();
-
-        $seeds = [
-            ['type' => 'inventory', 'dealer_location_id' => $locationId],
-            ['source' => 'Facebook - Podium', 'type' => 'trade', 'dealer_location_id' => $locationId],
-            ['source' => '', 'type' => 'inventory', 'dealer_location_id' => 0],
-            ['source' => 'RVTrader.com', 'type' => 'trade', 'dealer_location_id' => $locationId],
-            ['source' => 'TrailerCentral', 'type' => 'inventory', 'dealer_location_id' => 0],
-            ['type' => 'inventory', 'dealer_location_id' => 0],
-            ['source' => 'HorseTrailerWorld', 'type' => 'inventory', 'dealer_location_id' => $locationId],
-            ['source' => '', 'type' => 'trade', 'dealer_location_id' => $locationId]
-        ];
-
         collect($seeds)->each(function (array $seed): void {
             $leadParams = [
                 'dealer_id' => $this->dealer->getKey(),
