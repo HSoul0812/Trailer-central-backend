@@ -100,13 +100,13 @@ class LeadSeeder extends Seeder
         $salesId = $this->sales->getKey();
 
         $seeds = [
-            ['dealer_location_id' => $locationId],
+            ['type' => 'inventory', 'dealer_location_id' => $locationId],
             ['source' => 'Facebook - Podium', 'type' => 'trade', 'dealer_location_id' => $locationId],
-            ['source' => '', 'sales_id' => $salesId, 'dealer_location_id' => 0],
+            ['source' => '', 'type' => 'inventory', 'sales_id' => $salesId, 'dealer_location_id' => 0],
             ['source' => 'RVTrader.com', 'type' => 'trade', 'sales_id' => $salesId, 'dealer_location_id' => $locationId],
-            ['source' => 'TrailerCentral', 'dealer_location_id' => 0],
-            ['dealer_location_id' => 0],
-            ['source' => 'HorseTrailerWorld', 'sales_id' => $salesId, 'dealer_location_id' => $locationId],
+            ['source' => 'TrailerCentral', 'type' => 'inventory', 'dealer_location_id' => 0],
+            ['type' => 'inventory', 'dealer_location_id' => 0],
+            ['source' => 'HorseTrailerWorld', 'type' => 'inventory', 'sales_id' => $salesId, 'dealer_location_id' => $locationId],
             ['source' => '', 'type' => 'trade', 'dealer_location_id' => $locationId]
         ];
 

@@ -120,7 +120,8 @@ class AutoAssignTest extends TestCase
         $leadSalesPeople = array();
         foreach($leads as $lead) {
             $salesType = 'inventory';
-            if($lead->lead_type !== $salesType) {
+            $status = $this->seeder->statuses[$lead->identifier] ?? null;
+            if($lead->lead_type !== $salesType && empty($status->sales_person_id)) {
                 continue;
             }
 
