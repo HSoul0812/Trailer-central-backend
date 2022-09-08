@@ -5,12 +5,14 @@ namespace Tests\Unit\App\Services\Inventory;
 use App\Models\Geolocation\Geolocation;
 use App\Models\SysConfig\SysConfig;
 use App\Repositories\Geolocation\GeolocationRepositoryInterface;
+use App\Repositories\Parts\ListingCategoryMappingsRepository;
 use App\Repositories\Parts\ListingCategoryMappingsRepositoryInterface;
 use App\Repositories\SysConfig\SysConfigRepositoryInterface;
 use App\Services\Inventory\InventoryService;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -22,15 +24,15 @@ class InventoryServiceTest extends TestCase
     private InventoryService $service;
     private Client $httpClient;
     private MockObject $sysConfigRepository;
-    private MockObject $listingMappingRepository;
-
+    private ListingCategoryMappingsRepositoryInterface $listingMappingRepository;
+    private $httpHistory = [];
     public function setUp(): void
     {
         parent::setUp();
-        $this->service = $this->getConcreteService();
     }
 
     public function testListWithNoLocation() {
+        $this->service = $this->getInventoryService();
         $response = $this->service->list([
             'type_id' => 1,
             'location_type' => 'region',
@@ -45,6 +47,7 @@ class InventoryServiceTest extends TestCase
     }
 
     public function testListWithValidLocation() {
+        $this->service = $this->getInventoryService();
         $geolocation = new Geolocation();
         $geolocation->latitude = 30.00;
         $geolocation->longitude = -30.00;
@@ -64,12 +67,36 @@ class InventoryServiceTest extends TestCase
         $this->assertContains("hhhh", $featureList);
     }
 
-    private function getConcreteService(): InventoryService
+    public function testListAttributes() {
+        $this->service = $this->getAttributesService();
+        $attributes = $this->service->attributes(['type_id' => 1, 'category' => 'Cargo (Enclosed)']);
+        $this->assertCount(1, $attributes);
+        $this->assertEquals(1, $attributes[0]->attribute_id);
+        $this->assertStringEndsWith("entity_type_id=1", $this->httpHistory[0]['request']->getUri());
+    }
+
+    private function getInventoryService(): InventoryService
     {
-        $this->httpClient = $this->mockHttpClient();
+        $this->httpClient = $this->mockInventoryHttpClient();
         $this->sysConfigRepository = $this->mockSysConfigRepository();
-        $this->listingMappingRepository = $this->mockListingMappingRepository();
-        return new InventoryService($this->httpClient, $this->sysConfigRepository, $this->listingMappingRepository);
+        $this->listingMappingRepository = new ListingCategoryMappingsRepository();
+        return new InventoryService(
+            $this->httpClient,
+            $this->sysConfigRepository,
+            $this->listingMappingRepository
+        );
+    }
+
+    private function getAttributesService(): InventoryService
+    {
+        $this->httpClient = $this->mockAttributesHttpClient();
+        $this->sysConfigRepository = $this->mockSysConfigRepository();
+        $this->listingMappingRepository = new ListingCategoryMappingsRepository();
+        return new InventoryService(
+            $this->httpClient,
+            $this->sysConfigRepository,
+            $this->listingMappingRepository
+        );
     }
 
     private function mockSysConfigRepository(): MockObject {
@@ -80,7 +107,34 @@ class InventoryServiceTest extends TestCase
         return $this->createMock(ListingCategoryMappingsRepositoryInterface::class);
     }
 
-    private function mockHttpClient(): Client {
+    private function mockAttributesHttpClient(): Client {
+        $this->httpHistory = [];
+        $history = Middleware::history($this->httpHistory);
+        $mockAttributes = '{
+            "data": [
+                {
+                "attribute_id": 1,
+                "code": "111",
+                "name": "111",
+                "type": "111",
+                "values": "111",
+                "extra_values": null,
+                "description": null,
+                "default_value": null,
+                "aliases": null
+                }
+            ]
+        }';
+        $mock = new MockHandler([
+            new Response(200, [], $mockAttributes),
+        ]);
+
+        $stack = HandlerStack::create($mock);
+        $stack->push($history);
+        return new Client(['handler' => $stack]);
+    }
+
+    private function mockInventoryHttpClient(): Client {
         $mockData = '{
           "took": 8,
           "timed_out": false,
@@ -401,10 +455,9 @@ class InventoryServiceTest extends TestCase
               "buckets": []
             }
         }';
+
+
         $mock = new MockHandler([
-            new Response(200, [], $mockData),
-            new Response(200, [], $mockAggregateData),
-            new Response(200, [], $mockAggregateData),
             new Response(200, [], $mockData),
             new Response(200, [], $mockAggregateData),
             new Response(200, [], $mockAggregateData),
