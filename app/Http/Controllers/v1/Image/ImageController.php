@@ -27,7 +27,9 @@ class ImageController extends AbstractRestfulController
     {
         if($request->validate()) {
             $user = auth('api')->user();
-            return $this->response->array($this->imageService->uploadImage($user->tc_user_id, $request->file));
+            return $this->response->array($this->imageService->uploadImage(
+                $user->tc_user_id, $user->tc_access_token, $request->file
+            ));
         }
         return $this->response->errorBadRequest();
     }
