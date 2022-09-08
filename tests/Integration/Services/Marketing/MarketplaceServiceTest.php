@@ -16,7 +16,7 @@ use Tests\Integration\IntegrationTestCase;
  *
  * @coversDefaultClass \App\Services\Dispatch\Facebook\MarketplaceService
  */
-class MarketingServiceTest extends IntegrationTestCase
+class MarketplaceServiceTest extends IntegrationTestCase
 {
     use DatabaseTransactions;
 
