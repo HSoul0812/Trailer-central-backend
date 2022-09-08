@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 
-class InventoryOverview extends Model
+class PostingHistory extends Model
 {
     use TableAware;
 
@@ -16,7 +16,7 @@ class InventoryOverview extends Model
      *
      * @var string
      */
-    const TABLE_NAME = 'fme_inventory_overview';
+    const TABLE_NAME = 'fme_posting_history';
 
     /**
      * Types of overview records in view.
@@ -39,10 +39,21 @@ class InventoryOverview extends Model
      * @param $id
      * @return Builder
      */
-    public static function getAllByIntegrationId($id): Builder
+    public static function getAllByIntegrationIdQuery($id): Builder
     {
         return DB::table(self::TABLE_NAME)
-            ->orderBy('created_at', 'desc')
+            ->orderBy('created_at', 'DESC')
             ->where('marketplace_id', $id);
+    }
+
+    /**
+     * Get the query to generate an overview report for all integrations.
+     * @return Builder
+     */
+    public static function getAllQuery(): Builder
+    {
+        return DB::table(self::TABLE_NAME)
+            ->orderBy('created_at', 'DESC')
+            ->select('*');
     }
 }

@@ -26,8 +26,8 @@ use App\Repositories\Marketing\Craigslist\SchedulerRepository;
 use App\Repositories\Marketing\Craigslist\SchedulerRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\ProfileRepository;
 use App\Repositories\Marketing\Craigslist\ProfileRepositoryInterface;
-use App\Services\Dispatch\Facebook\InventoryOverviewService;
-use App\Services\Dispatch\Facebook\InventoryOverviewServiceInterface;
+use App\Services\Dispatch\Facebook\PostingHistoryService;
+use App\Services\Dispatch\Facebook\PostingHistoryServiceInterface;
 use App\Services\Marketing\Facebook\MarketplaceService;
 use App\Services\Marketing\Facebook\MarketplaceServiceInterface;
 use App\Services\Marketing\Craigslist\ProfileService;
@@ -48,7 +48,7 @@ class MarketingServiceProvider extends ServiceProvider
         // Marketing Services
         $this->app->bind(MarketplaceServiceInterface::class, MarketplaceService::class);
         $this->app->bind(ProfileServiceInterface::class, ProfileService::class);
-        $this->app->bind(InventoryOverviewServiceInterface::class, InventoryOverviewService::class);
+        $this->app->bind(PostingHistoryServiceInterface::class, PostingHistoryService::class);
 
         // Marketing Repositories
         $this->app->bind(ActivePostRepositoryInterface::class, ActivePostRepository::class);

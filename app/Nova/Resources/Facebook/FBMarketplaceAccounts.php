@@ -3,6 +3,7 @@
 namespace App\Nova\Resources\Facebook;
 
 use App\Nova\Actions\Dealer\ClearFBMEErrors;
+use App\Nova\Actions\FME\DownloadIntegrationRunHistory;
 use App\Nova\Actions\FME\DownloadRunHistory;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Boolean;
@@ -163,6 +164,7 @@ class FBMarketplaceAccounts extends Resource
     {
         return [
             $this->clearErrorsAction(),
+            $this->downloadIntegrationRunHistoryAction(),
             $this->downloadRunHistoryAction(),
         ];
     }
@@ -176,13 +178,22 @@ class FBMarketplaceAccounts extends Resource
         })->onlyOnTableRow();
     }
 
+    private function downloadIntegrationRunHistoryAction(): DownloadIntegrationRunHistory
+    {
+        return (app()->make(DownloadIntegrationRunHistory::class))->canSee(function ($request) {
+            return true;
+        })->canRun(function ($request) {
+            return true;
+        })->onlyOnTableRow();
+    }
+
     private function downloadRunHistoryAction(): DownloadRunHistory
     {
         return (app()->make(DownloadRunHistory::class))->canSee(function ($request) {
             return true;
         })->canRun(function ($request) {
             return true;
-        })->onlyOnTableRow();
+        })->onlyOnIndex();
     }
 
     public static function authorizedToCreate(Request $request)

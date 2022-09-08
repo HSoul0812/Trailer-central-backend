@@ -2,7 +2,7 @@
 
 namespace App\Services\Dispatch\Facebook;
 
-interface InventoryOverviewServiceInterface
+interface PostingHistoryServiceInterface
 {
     /**
      * Export and get the URL of the file for a given Integration

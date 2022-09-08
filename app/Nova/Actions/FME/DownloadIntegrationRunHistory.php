@@ -9,12 +9,12 @@ use Laravel\Nova\Fields\ActionFields;
 use App\Models\CRM\Dealer\DealerFBMOverview;
 use Exception;
 
-class DownloadRunHistory extends Action
+class DownloadIntegrationRunHistory extends Action
 {
     /**
      * @var string
      */
-    public $name = 'Download Run History for All Integrations';
+    public $name = 'Download Run History';
 
     /**
      * @var string
@@ -24,7 +24,7 @@ class DownloadRunHistory extends Action
     /**
      * @var string
      */
-    public $confirmText = 'Are you sure you want to generate and download the history for all runs for all dealers?';
+    public $confirmText = 'Are you sure you want to generate and download the history for all runs for this dealer?';
     /**
      * @var PostingHistoryServiceInterface
      */
@@ -35,7 +35,6 @@ class DownloadRunHistory extends Action
         $this->service = $service;
     }
 
-
     /**
      * Perform the action on the given models.
      *
@@ -45,10 +44,12 @@ class DownloadRunHistory extends Action
      */
     public function handle(ActionFields $fields, Collection $models): array
     {
-        $fileName = $this->getFileName();
+        // Grab the model
+        $fbmOverview = $models[0];
+        $fileName = $this->getFileName($fbmOverview->dealer_id);
 
         try {
-            $url = $this->service->exportAll($fileName);
+            $url = $this->service->export($fbmOverview->id, $fileName);
 
             return $url ? self::download($url, $fileName) : self::danger('The URL was not generated correctly.');
         } catch (Exception $exception) {
@@ -57,9 +58,9 @@ class DownloadRunHistory extends Action
         }
     }
 
-    private function getFileName(): string
+    private function getFileName($dealerId): string
     {
         $date = now()->format('Y-m-d_H-i-s');
-        return "export_postingHistory_all_{$date}.csv";
+        return "export_postingHistory_{$dealerId}_{$date}.csv";
     }
 }

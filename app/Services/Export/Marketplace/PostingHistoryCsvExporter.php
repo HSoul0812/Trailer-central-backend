@@ -6,8 +6,7 @@ namespace App\Services\Export\Marketplace;
 
 use App\Services\Export\FilesystemCsvExporter as GenericFilesystemCsvExporter;
 use stdClass;
-
-class InventoryOverviewCsvExporter extends GenericFilesystemCsvExporter
+class PostingHistoryCsvExporter extends GenericFilesystemCsvExporter
 {
     /**
      * Maps a `Marketplace` data to respective CSV columns
@@ -18,14 +17,15 @@ class InventoryOverviewCsvExporter extends GenericFilesystemCsvExporter
     public function getLineMapper($object): array
     {
         return [
-            'Type ID' => $object->type_id,
+            'Record ID' => $object->record_id,
             'Type' => $object->type,
+            'Status' => $object->status,
             'Dealer ID' => $object->dealer_id,
             'Dealer Location' => $object->location,
             'Facebook User' => $object->fb_username,
+            'Facebook ID' => $object->facebook_id,
             'Inventory ID' => $object->inventory_id,
-            'Inventory Name' => $object->title,
-            'Overview Name' => $object->name,
+            'SKU' => $object->SKU,
             'Created At' => $object->created_at
         ];
     }
@@ -36,14 +36,15 @@ class InventoryOverviewCsvExporter extends GenericFilesystemCsvExporter
     public function getHeaders(): array
     {
         return [
-            'Type ID',
+            'Record ID',
             'Type',
+            'Status',
             'Dealer ID',
             'Dealer Location',
             'Facebook User',
+            'Facebook ID',
             'Inventory ID',
-            'Inventory Name',
-            'Overview Name',
+            'SKU',
             'Created At'
         ];
     }
