@@ -59,7 +59,7 @@ class AutoAssignTest extends TestCase
             }
 
             // Find Next!
-            $salesPerson = $this->getSalesPersonRepository()->roundRobinSalesPerson($this->seeder->dealer->newDealerUser, $dealerLocationId, $salesType, $newestSalesPerson);
+            $salesPerson = $this->getSalesPersonRepository()->roundRobinSalesPerson($this->seeder->newDealerUser, $dealerLocationId, $salesType, $newestSalesPerson);
             $leadSalesPeople[$lead->identifier] = !empty($salesPerson->id) ? $salesPerson->id : 0;
             $this->setRoundRobinSalesPerson($dealerId, $dealerLocationId, $salesType, $leadSalesPeople[$lead->identifier]);
         }
@@ -138,7 +138,7 @@ class AutoAssignTest extends TestCase
             }
 
             // Find Next!
-            $salesPerson = $this->getSalesPersonRepository()->roundRobinSalesPerson($this->seeder->dealer->newDealerUser, $dealerLocationId, $salesType, $newestSalesPerson);
+            $salesPerson = $this->getSalesPersonRepository()->roundRobinSalesPerson($this->seeder->newDealerUser, $dealerLocationId, $salesType, $newestSalesPerson);
             $leadSalesPeople[$lead->identifier] = !empty($salesPerson->id) ? $salesPerson->id : 0;
             $this->setRoundRobinSalesPerson($dealerId, $dealerLocationId, $salesType, $salesPerson->id);
         }
@@ -210,7 +210,7 @@ class AutoAssignTest extends TestCase
             }
 
             // Find Next!
-            $salesPerson = $this->getSalesPersonRepository()->roundRobinSalesPerson($this->seeder->dealer->newDealerUser, $locationId, $salesType, $newestSalesPerson);
+            $salesPerson = $this->getSalesPersonRepository()->roundRobinSalesPerson($this->seeder->newDealerUser, $locationId, $salesType, $newestSalesPerson);
             $leadSalesPeople[$lead->identifier] = !empty($salesPerson->id) ? $salesPerson->id : 0;
             $this->setRoundRobinSalesPerson($dealerId, $locationId, $salesType, $leadSalesPeople[$lead->identifier]);
         }
@@ -349,7 +349,7 @@ class AutoAssignTest extends TestCase
             }
 
             // Find Next!
-            $salesPerson = $this->getSalesPersonRepository()->roundRobinSalesPerson($this->seeder->dealer->newDealerUser, $locationId, $salesType, $newestSalesPerson);
+            $salesPerson = $this->getSalesPersonRepository()->roundRobinSalesPerson($this->seeder->newDealerUser, $locationId, $salesType, $newestSalesPerson);
             $leadSalesPeople[$lead->identifier] = !empty($salesPerson->id) ? $salesPerson->id : 0;
             $this->setRoundRobinSalesPerson($dealerId, $locationId, $salesType, $salesPerson->id);
         }

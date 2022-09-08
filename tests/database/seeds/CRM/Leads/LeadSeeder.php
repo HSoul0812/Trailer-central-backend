@@ -35,6 +35,21 @@ class LeadSeeder extends Seeder
     private $dealer;
 
     /**
+     * @var DealerLocation
+     */
+    private $location;
+
+    /**
+     * @var NewDealerUser
+     */
+    private $newDealer;
+
+    /**
+     * @var CrmUser
+     */
+    private $crmUser;
+
+    /**
      * @var AuthToken
      */
     private $authToken;
@@ -74,6 +89,7 @@ class LeadSeeder extends Seeder
         ]);
         $this->website = factory(Website::class)->create(['dealer_id' => $this->dealer->dealer_id]);
         $this->user = factory(NewUser::class)->create(['user_id' => $this->dealer->dealer_id]);
+        $this->newDealer = factory(NewDealerUser::class)->create(['id' => $this->dealer->dealer_id, 'user_id' => $this->dealer->dealer_id]);
         $this->crmUser = factory(CrmUser::class)->create(['user_id' => $this->dealer->dealer_id, 'enable_assign_notification' => 1]);
         $this->sales = factory(SalesPerson::class)->create(['user_id' => $this->dealer->dealer_id]);
     }
