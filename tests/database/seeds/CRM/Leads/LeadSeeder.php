@@ -11,6 +11,7 @@ use App\Models\User\AuthToken;
 use App\Models\User\User;
 use App\Models\User\CrmUser;
 use App\Models\User\NewUser;
+use App\Models\User\NewDealerUser;
 use App\Models\User\DealerLocation;
 use App\Models\Website\Website;
 use App\Traits\WithGetter;
@@ -20,10 +21,9 @@ use Tests\database\seeds\Seeder;
  * @property-read User $dealer
  * @property-read Website $website
  * @property-read SalesPerson $sales
- * @property-read Lead $leads
  * @property-read AuthToken $authToken
- * @property-read array<LeadStatus> $missingStatus
- * @property-read array<LeadStatus> $createdStatus
+ * @property-read array<Lead> $leads
+ * @property-read array<LeadStatus> $statuses
  */
 class LeadSeeder extends Seeder
 {
@@ -139,6 +139,7 @@ class LeadSeeder extends Seeder
         DealerLocation::where('dealer_id', $dealerId)->delete();
         Website::where('dealer_id', $dealerId)->delete();
         AuthToken::where(['user_id' => $this->authToken->user_id, 'user_type' => AuthToken::USER_TYPE_DEALER])->delete();
+        NewDealerUser::destroy($dealerId);
         User::destroy($dealerId);
     }
 }
