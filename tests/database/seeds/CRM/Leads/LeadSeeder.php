@@ -103,7 +103,7 @@ class LeadSeeder extends Seeder
         $this->crmUser = factory(CrmUser::class)->create(['user_id' => $this->dealer->dealer_id, 'enable_assign_notification' => 1]);
 
         // Create Sales People
-        $salesParams = ['user_id' => $this->dealer->dealer_id, 'dealer_location_id' => $this->location->getKey(), 'is_general' => 1, 'is_inventory' => 1, 'is_trade' => 1];
+        $salesParams = ['user_id' => $this->dealer->dealer_id, 'dealer_location_id' => $this->location->getKey(), 'is_default' => 1, 'is_inventory' => 1, 'is_trade' => 1];
         $this->sales = factory(SalesPerson::class)->create(array_merge($salesParams, ['dealer_location_id' => 0]));
         $this->sales2 = factory(SalesPerson::class)->create(array_merge($salesParams, ['is_inventory' => 0]));
         $this->sales3 = factory(SalesPerson::class)->create(array_merge($salesParams, ['is_trade' => 0]));
