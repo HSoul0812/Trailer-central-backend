@@ -8,11 +8,13 @@ use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\DateTime;
 use App\Nova\Resource;
+use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
 
 class FBMarketplaceAccounts extends Resource
 {
     public static $group = 'Facebook';
+    public static $orderBy = ['last_attempt_ts' => 'asc'];
 
     /**
      * The model the resource corresponds to.
