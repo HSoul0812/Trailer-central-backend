@@ -4,6 +4,7 @@
 
 use App\Helpers\GeographyHelper;
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Leads\LeadType;
 use App\Models\Inventory\Inventory;
 use App\Models\User\User;
 use App\Models\User\DealerLocation;
@@ -27,14 +28,7 @@ $factory->define(Lead::class, function (Faker $faker, array $attributes) {
     ])->getKey();
 
     // Get Titles
-    $leadTypes = ['trade', 'financing', 'build'];
-    $formTitles = [
-        'trade' => 'Value Your Trade',
-        'financing' => 'Financing',
-        'build' => 'Build Your Trailer'
-    ];
-
-    // Select Random Values
+    $leadTypes = array_keys(LeadType::PUBLIC_TYPES);
     $typeKey = array_rand($leadTypes);
     $leadType = $attributes['lead_type'] ?? $leadTypes[$typeKey];
 
@@ -50,7 +44,7 @@ $factory->define(Lead::class, function (Faker $faker, array $attributes) {
         'dealer_location_id' => $dealer_location_id,
         'inventory_id' => $inventory_id,
         'lead_type' => $leadType,
-        'title' => $formTitles[$leadType] ?? $faker->title,
+        'title' => LeadType::PUBLIC_TYPES[$leadType] ?? $faker->title,
         'referral' => $faker->url,
         'first_name' => $faker->firstName,
         'last_name' => $faker->lastName,

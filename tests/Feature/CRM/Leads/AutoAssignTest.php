@@ -8,106 +8,59 @@ use App\Models\CRM\User\SalesPerson;
 use App\Models\Inventory\Inventory;
 use App\Models\User\NewDealerUser;
 use App\Mail\AutoAssignEmail;
+use App\Repositories\CRM\Leads\LeadRepositoryInterface;
+use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use Tests\TestCase;
 
 class AutoAssignTest extends TestCase
 {
     /**
-     * App\Repositories\CRM\Leads\LeadRepositoryInterface $leads
-     * App\Repositories\CRM\Leads\SalesPersonRepositoryInterface $salespeople
+     * @var LeadSeeder
      */
-    protected $leads;
-    protected $salespeople;
+    private $seeder;
 
     /**
      * @var array $roundRobin
      */
     protected $roundRobin = [];
 
-    /**
-     * Set Up Test
-     */
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        // Make Lead Repo
-        $this->leads = $this->app->make('App\Repositories\CRM\Leads\LeadRepositoryInterface');
-        $this->salespeople = $this->app->make('App\Repositories\CRM\User\SalesPersonRepositoryInterface');
-
-        // Reset Round Robin Array
-        $this->roundRobin = array();
-    }
 
     /**
      * Test round robin only by location
      * 
      * @group CRM
-     * @specs array dealer_location_id = all in TEST_LOCATION_ID
+     * @specs array dealer_location_id = exists
      * @specs string lead_type = general
      * @specs bool enable_assign_notification = 1
      * @return void
      */
     public function testLocationRoundRobin()
     {
-        // Get Dealer
-        $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
-        $dealer->crmUser()->update([
-            'enable_assign_notification' => 1
-        ]);
-        $websiteId = $dealer->website->id;
-
-        // Build Random Factory Salespeople
-        foreach(TestCase::getTestDealerLocationIds() as $locationId) {
-            // Force Default On Existing Items
-            $salesQuery = SalesPerson::where('user_id', $dealer->crmUser->user_id)
-                                     ->where('dealer_location_id', $locationId);
-            $salesQuery->update([
-                'is_default' => 1
-            ]);
-
-            // Get Salespeople
-            $salespeople = $salesQuery->get();
-            if(empty($salespeople) || count($salespeople) < 3) {
-                $add = (3 - count($salespeople));
-                factory(SalesPerson::class, $add)->create([
-                    'user_id' => $dealer->crmUser->user_id,
-                    'dealer_location_id' => $locationId
-                ]);
-            }
-        }
-
-
-        // Refresh Leads
-        $this->refreshLeads($dealer->id);
-
-        // Build Random Factory Leads
-        factory(Lead::class, 10)->create([
-            'website_id' => $websiteId,
-            'dealer_id' => $dealer->id,
-            'dealer_location_id' => $locationId,
-            'lead_type' => 'general'
-        ]);
-        $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
+        // Given I have a collection of leads
+        $leads = $this->seeder->leads;
 
 
         // Detect What Sales People Will be Assigned!
         $leadSalesPeople = array();
         foreach($leads as $lead) {
+            $salesType = 'trade';
+            if(empty($lead->dealer_location_id) && $lead->lead_type !== $salesType) {
+                continue;
+            }
+
             // Get Newest Sales Person
-            $salesType = 'default';
             $dealerLocationId = $lead->dealer_location_id;
 
             // Find Newest Assigned Sales Person
-            if(!isset($this->roundRobin[$dealer->id][$dealerLocationId][$salesType])) {
-                $newestSalesPerson = $this->salespeople->findNewestSalesPerson($dealer->id, $dealerLocationId, $salesType);
+            if(!isset($this->roundRobin[$lead->dealer_id][$dealerLocationId][$salesType])) {
+                $newestSalesPerson = $this->getSalesPersonRepository()->findNewestSalesPerson($lead->dealer_id, $dealerLocationId, $salesType);
             } else {
-                $newestSalesPersonId = $this->roundRobin[$dealer->id][$dealerLocationId][$salesType];
+                $newestSalesPersonId = $this->roundRobin[$lead->dealer_id][$dealerLocationId][$salesType];
                 $newestSalesPerson = SalesPerson::find($newestSalesPersonId);
             }
 
             // Find Next!
-            $salesPerson = $this->salespeople->roundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
+            $salesPerson = $this->getSalesPersonRepository()->roundRobinSalesPerson($lead->dealer_id, $dealerLocationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
             $leadSalesPeople[$lead->identifier] = !empty($salesPerson->id) ? $salesPerson->id : 0;
             $this->setRoundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $leadSalesPeople[$lead->identifier]);
         }
@@ -158,86 +111,17 @@ class AutoAssignTest extends TestCase
      */
     public function testNoPreferredLocationRoundRobin()
     {
-        // Get Dealer
-        $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
-        $dealer->crmUser()->update([
-            'enable_assign_notification' => 1
-        ]);
-        $websiteId = $dealer->website->id;
-
-        // Build Random Factory Salespeople
-        $locationIds = TestCase::getTestDealerLocationIds();
-        $locationId = reset($locationIds);
-        $lastLocationId = end($locationIds);
-
-
-        // Force Default On Existing Items
-        $salesQuery = SalesPerson::where('user_id', $dealer->crmUser->user_id)
-                                 ->where('dealer_location_id', $locationId);
-        $salesQuery->update([
-            'is_inventory' => 1
-        ]);
-
-        // Get Salespeople
-        $salespeople = $salesQuery->get();
-        if(empty($salespeople) || count($salespeople) < 3) {
-            $add = (3 - count($salespeople));
-            factory(SalesPerson::class, $add)->create([
-                'user_id' => $dealer->crmUser->user_id,
-                'dealer_location_id' => $locationId
-            ]);
-        }
-
-
-        // Get Inventory
-        $inventory = Inventory::where('dealer_id', $dealer->id)
-                              ->where('dealer_location_id', $lastLocationId)->first();
-        if(empty($inventory) || empty($inventory->inventory_id)) {
-            $inventory = factory(Inventory::class, 1)->create([
-                'dealer_id' => $dealer->id,
-                'dealer_location_id' => $lastLocationId
-            ]);
-        }
-        $inventoryId = $inventory->inventory_id;
-
-
-        // Refresh Leads
-        $this->refreshLeads($dealer->id);
-
-        // Build Random Factory Leads With Location
-        factory(Lead::class, 5)->create([
-            'website_id' => $websiteId,
-            'dealer_id' => $dealer->id,
-            'dealer_location_id' => $locationId,
-            'inventory_id' => $inventoryId,
-            'lead_type' => 'inventory'
-        ]);
-
-        // Build Random Factory Leads With No Location
-        factory(Lead::class, 5)->create([
-            'website_id' => $websiteId,
-            'dealer_id' => $dealer->id,
-            'dealer_location_id' => 0,
-            'inventory_id' => $inventoryId,
-            'lead_type' => 'inventory'
-        ]);
-
-        // Build Random Factory Leads With No Location or Inventory
-        factory(Lead::class, 5)->create([
-            'website_id' => $websiteId,
-            'dealer_id' => $dealer->id,
-            'dealer_location_id' => 0,
-            'inventory_id' => 0,
-            'lead_type' => 'inventory'
-        ]);
-        $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
+        // Given I have a collection of leads
+        $leads = $this->seeder->leads;
 
 
         // Detect What Sales People Will be Assigned!
         $leadSalesPeople = array();
         foreach($leads as $lead) {
-            // Get Newest Sales Person
             $salesType = 'inventory';
+            if(!empty($lead->dealer_location_id) && $lead->lead_type !== $salesType) {
+                continue;
+            }
 
             // Get Dealer Location
             $dealerLocationId = $locationId;
@@ -249,15 +133,15 @@ class AutoAssignTest extends TestCase
             }
 
             // Find Newest Assigned Sales Person
-            if(!isset($this->roundRobin[$dealer->id][$dealerLocationId][$salesType])) {
-                $newestSalesPerson = $this->salespeople->findNewestSalesPerson($dealer->id, $dealerLocationId, $salesType);
+            if(!isset($this->roundRobin[$lead->dealer_id][$dealerLocationId][$salesType])) {
+                $newestSalesPerson = $this->getSalesPersonRepository()->findNewestSalesPerson($lead->dealer_id, $dealerLocationId, $salesType);
             } else {
-                $newestSalesPersonId = $this->roundRobin[$dealer->id][$dealerLocationId][$salesType];
+                $newestSalesPersonId = $this->roundRobin[$lead->dealer_id][$dealerLocationId][$salesType];
                 $newestSalesPerson = SalesPerson::find($newestSalesPersonId);
             }
 
             // Find Next!
-            $salesPerson = $this->salespeople->roundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
+            $salesPerson = $this->getSalesPersonRepository()->roundRobinSalesPerson($lead->dealer_id, $dealerLocationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
             $leadSalesPeople[$lead->identifier] = !empty($salesPerson->id) ? $salesPerson->id : 0;
             $this->setRoundRobinSalesPerson($dealer->id, $dealerLocationId, $salesType, $salesPerson->id);
         }
@@ -337,9 +221,6 @@ class AutoAssignTest extends TestCase
         }
 
 
-        // Refresh Leads
-        $this->refreshLeads($dealer->id);
-
         // Build Random Factory Default Leads With Location
         factory(Lead::class, 5)->create([
             'website_id' => $websiteId,
@@ -363,7 +244,7 @@ class AutoAssignTest extends TestCase
             'dealer_location_id' => $locationId,
             'lead_type' => 'trade'
         ]);
-        $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
+        $leads = $this->getLeadRepository()->getAllUnassigned(['dealer_id' => $dealer->id]);
 
 
         // Detect What Sales People Will be Assigned!
@@ -377,14 +258,14 @@ class AutoAssignTest extends TestCase
 
             // Find Newest Assigned Sales Person
             if(!isset($this->roundRobin[$dealer->id][$locationId][$salesType])) {
-                $newestSalesPerson = $this->salespeople->findNewestSalesPerson($dealer->id, $locationId, $salesType);
+                $newestSalesPerson = $this->getSalesPersonRepository()->findNewestSalesPerson($dealer->id, $locationId, $salesType);
             } else {
                 $newestSalesPersonId = $this->roundRobin[$dealer->id][$locationId][$salesType];
                 $newestSalesPerson = SalesPerson::find($newestSalesPersonId);
             }
 
             // Find Next!
-            $salesPerson = $this->salespeople->roundRobinSalesPerson($dealer->id, $locationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
+            $salesPerson = $this->getSalesPersonRepository()->roundRobinSalesPerson($dealer->id, $locationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
             $leadSalesPeople[$lead->identifier] = !empty($salesPerson->id) ? $salesPerson->id : 0;
             $this->setRoundRobinSalesPerson($dealer->id, $locationId, $salesType, $leadSalesPeople[$lead->identifier]);
         }
@@ -507,9 +388,6 @@ class AutoAssignTest extends TestCase
         }
 
 
-        // Refresh Leads
-        $this->refreshLeads($dealer->id);
-
         // Build Random Factory Default Leads For Each Location
         foreach(TestCase::getTestDealerLocationIds() as $locationId) {
             factory(Lead::class, 2)->create([
@@ -537,7 +415,7 @@ class AutoAssignTest extends TestCase
                 'lead_type' => 'financing'
             ]);
         }
-        $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
+        $leads = $this->getLeadRepository()->getAllUnassigned(['dealer_id' => $dealer->id]);
 
 
         // Detect What Sales People Will be Assigned!
@@ -631,9 +509,6 @@ class AutoAssignTest extends TestCase
         Mail::fake();
 
 
-        // Refresh Leads
-        $this->refreshLeads($dealer->id);
-
         // Build Random Factory Leads
         factory(Lead::class, 1)->create([
             'website_id' => $websiteId,
@@ -641,16 +516,16 @@ class AutoAssignTest extends TestCase
             'dealer_location_id' => $locationId,
             'lead_type' => $salesType
         ]);
-        $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
+        $leads = $this->getLeadRepository()->getAllUnassigned(['dealer_id' => $dealer->id]);
 
         // Detect What Sales People Will be Assigned!
         $leadSalesPeople = array();
         foreach($leads as $lead) {
             // Find Newest Assigned Sales Person
-            $newestSalesPerson = $this->salespeople->findNewestSalesPerson($dealer->id, $locationId, $salesType);
+            $newestSalesPerson = $this->getSalesPersonRepository()->findNewestSalesPerson($dealer->id, $locationId, $salesType);
 
             // Find Next!
-            $salesPerson = $this->salespeople->roundRobinSalesPerson($dealer->id, $locationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
+            $salesPerson = $this->getSalesPersonRepository()->roundRobinSalesPerson($dealer->id, $locationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
             $leadSalesPeople[$lead->identifier] = !empty($salesPerson->id) ? $salesPerson->id : 0;
             $this->setRoundRobinSalesPerson($dealer->id, $locationId, $salesType, $salesPerson->id);
         }
@@ -666,7 +541,7 @@ class AutoAssignTest extends TestCase
             'dealer_location_id' => $locationId,
             'lead_type' => $salesType
         ]);
-        $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
+        $leads = $this->getLeadRepository()->getAllUnassigned(['dealer_id' => $dealer->id]);
 
         // Detect What Sales People Will be Assigned!
         $leadSalesPeople = array();
@@ -676,7 +551,7 @@ class AutoAssignTest extends TestCase
             $newestSalesPerson = SalesPerson::find($newestSalesPersonId);
 
             // Find Next!
-            $salesPerson = $this->salespeople->roundRobinSalesPerson($dealer->id, $locationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
+            $salesPerson = $this->getSalesPersonRepository()->roundRobinSalesPerson($dealer->id, $locationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
             $leadSalesPeople[$lead->identifier] = !empty($salesPerson->id) ? $salesPerson->id : 0;
             $this->setRoundRobinSalesPerson($dealer->id, $locationId, $salesType, $salesPerson->id);
         }
@@ -692,7 +567,7 @@ class AutoAssignTest extends TestCase
             'dealer_location_id' => $locationId,
             'lead_type' => $salesType
         ]);
-        $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
+        $leads = $this->getLeadRepository()->getAllUnassigned(['dealer_id' => $dealer->id]);
 
         // Detect What Sales People Will be Assigned!
         $leadSalesPeople = array();
@@ -702,7 +577,7 @@ class AutoAssignTest extends TestCase
             $newestSalesPerson = SalesPerson::find($newestSalesPersonId);
 
             // Find Next!
-            $salesPerson = $this->salespeople->roundRobinSalesPerson($dealer->id, $locationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
+            $salesPerson = $this->getSalesPersonRepository()->roundRobinSalesPerson($dealer->id, $locationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
             $leadSalesPeople[$lead->identifier] = !empty($salesPerson->id) ? $salesPerson->id : 0;
             $this->setRoundRobinSalesPerson($dealer->id, $locationId, $salesType, $salesPerson->id);
         }
@@ -778,9 +653,6 @@ class AutoAssignTest extends TestCase
         }
 
 
-        // Refresh Leads
-        $this->refreshLeads($dealer->id);
-
         // Build Random Factory Leads
         factory(Lead::class, 5)->create([
             'website_id' => $websiteId,
@@ -788,7 +660,7 @@ class AutoAssignTest extends TestCase
             'dealer_location_id' => $locationId,
             'lead_type' => 'inventory'
         ]);
-        $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealer->id]);
+        $leads = $this->getLeadRepository()->getAllUnassigned(['dealer_id' => $dealer->id]);
 
 
         // Detect What Sales People Will be Assigned!
@@ -799,14 +671,14 @@ class AutoAssignTest extends TestCase
 
             // Find Newest Assigned Sales Person
             if(!isset($this->roundRobin[$dealer->id][$locationId][$salesType])) {
-                $newestSalesPerson = $this->salespeople->findNewestSalesPerson($dealer->id, $locationId, $salesType);
+                $newestSalesPerson = $this->getSalesPersonRepository()->findNewestSalesPerson($dealer->id, $locationId, $salesType);
             } else {
                 $newestSalesPersonId = $this->roundRobin[$dealer->id][$locationId][$salesType];
                 $newestSalesPerson = SalesPerson::find($newestSalesPersonId);
             }
 
             // Find Next!
-            $salesPerson = $this->salespeople->roundRobinSalesPerson($dealer->id, $locationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
+            $salesPerson = $this->getSalesPersonRepository()->roundRobinSalesPerson($dealer->id, $locationId, $salesType, $newestSalesPerson, $dealer->salespeopleEmails);
             $leadSalesPeople[$lead->identifier] = !empty($salesPerson->id) ? $salesPerson->id : 0;
             $this->setRoundRobinSalesPerson($dealer->id, $locationId, $salesType, $salesPerson->id);
         }
@@ -840,23 +712,6 @@ class AutoAssignTest extends TestCase
 
 
     /**
-     * Refresh Unassigned Leads in DB
-     * 
-     * @group CRM
-     * @param type $dealer->id
-     * @return void
-     */
-    private function refreshLeads($dealerId) {
-        // Get Existing Unassigned Leads for Dealer ID
-        $leads = $this->leads->getAllUnassigned(['dealer_id' => $dealerId]);
-
-        // Loop Leads
-        foreach($leads as $lead) {
-            Lead::where('identifier', $lead->identifier)->delete();
-        }
-    }
-
-    /**
      * Preserve the Round Robin Sales Person Temporarily
      * 
      * @group CRM
@@ -888,5 +743,58 @@ class AutoAssignTest extends TestCase
 
         // Return Last Sales Person ID
         return $this->roundRobin[$dealerId][0][$salesType];
+    }
+
+
+
+    /**
+     * Set Up Seeder
+     * 
+     * @return void
+     */
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        // Make Lead Seeder
+        $this->seeder = new LeadSeeder();
+        $this->seeder->seed();
+    }
+
+    /**
+     * Tear Down Seeder
+     * 
+     * @return void
+     */
+    public function tearDown(): void
+    {
+        $this->seeder->cleanUp();
+
+        parent::tearDown();
+    }
+
+
+    /**
+     * @return LeadRepositoryInterface
+     *
+     * @throws BindingResolutionException when there is a problem with resolution
+     *                                    of concreted class
+     *
+     */
+    protected function getLeadRepository(): LeadRepositoryInterface
+    {
+        return $this->app->make(LeadRepositoryInterface::class);
+    }
+
+    /**
+     * @return SalesPersonRepositoryInterface
+     *
+     * @throws BindingResolutionException when there is a problem with resolution
+     *                                    of concreted class
+     *
+     */
+    protected function getSalesPersonRepository(): SalesPersonRepositoryInterface
+    {
+        return $this->app->make(SalesPersonRepositoryInterface::class);
     }
 }
