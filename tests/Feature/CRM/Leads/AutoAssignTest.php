@@ -3,11 +3,10 @@
 namespace Tests\Feature\CRM\Leads;
 
 use Illuminate\Support\Facades\Mail;
-use App\Models\CRM\User\SalesPerson;
 use App\Mail\AutoAssignEmail;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
-use Tests\database\seeds\CRM\Leads\LeadSeeder;
+use Tests\database\seeds\CRM\Leads\AutoAssignSeeder;
 use Tests\TestCase;
 
 class AutoAssignTest extends TestCase
@@ -35,33 +34,23 @@ class AutoAssignTest extends TestCase
     public function testRoundRobin()
     {
         // Seed Database With Auto Assign Leads
-        $locationId = $this->location->getKey();
-        $seeds = [
-            ['type' => 'inventory', 'dealer_location_id' => $locationId],
-            ['source' => 'Facebook - Podium', 'type' => 'trade', 'dealer_location_id' => $locationId],
-            ['source' => '', 'type' => 'inventory', 'dealer_location_id' => 0],
-            ['source' => 'RVTrader.com', 'type' => 'trade', 'dealer_location_id' => $locationId],
-            ['source' => 'TrailerCentral', 'type' => 'inventory', 'dealer_location_id' => 0],
-            ['type' => 'inventory', 'dealer_location_id' => 0],
-            ['source' => 'HorseTrailerWorld', 'type' => 'inventory', 'dealer_location_id' => $locationId],
-            ['source' => '', 'type' => 'trade', 'dealer_location_id' => $locationId]
-        ];
-        $this->seeder->seed($seeds);
+        $this->seeder->seed();
 
         // Given I have a collection of leads
         $leads = $this->seeder->leads;
+        $sales = $this->seeder->sales;
         $dealerId = $this->seeder->dealer->getKey();
 
 
         // Based on the seeder results, we should know what sales person is assigned to who:
-        $leadSalesPeople[$leads[0]->identifier] = $this->sales2->getKey();
-        $leadSalesPeople[$leads[1]->identifier] = $this->sales1->getKey();
-        $leadSalesPeople[$leads[2]->identifier] = $this->sales1->getKey();
-        $leadSalesPeople[$leads[3]->identifier] = $this->sales4->getKey();
-        $leadSalesPeople[$leads[4]->identifier] = $this->sales3->getKey();
-        $leadSalesPeople[$leads[5]->identifier] = $this->sales4->getKey();
-        $leadSalesPeople[$leads[6]->identifier] = $this->sales3->getKey();
-        $leadSalesPeople[$leads[7]->identifier] = $this->sales2->getKey();
+        $leadSalesPeople[$leads[0]->identifier] = $sales[1]->getKey();
+        $leadSalesPeople[$leads[1]->identifier] = $sales[2]->getKey();
+        $leadSalesPeople[$leads[2]->identifier] = $sales[1]->getKey();
+        $leadSalesPeople[$leads[3]->identifier] = $sales[3]->getKey();
+        $leadSalesPeople[$leads[4]->identifier] = $sales[2]->getKey();
+        $leadSalesPeople[$leads[5]->identifier] = $sales[3]->getKey();
+        $leadSalesPeople[$leads[6]->identifier] = $sales[2]->getKey();
+        $leadSalesPeople[$leads[7]->identifier] = $sales[1]->getKey();
 
 
         // Fake Mail
@@ -143,8 +132,8 @@ class AutoAssignTest extends TestCase
     {
         parent::setUp();
 
-        // Make Lead Seeder
-        $this->seeder = new LeadSeeder();
+        // Make AutoAssign Seeder
+        $this->seeder = new AutoAssignSeeder();
     }
 
     /**

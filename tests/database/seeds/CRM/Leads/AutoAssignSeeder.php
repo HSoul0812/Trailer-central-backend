@@ -25,7 +25,7 @@ use Tests\database\seeds\Seeder;
  * @property-read array<Lead> $leads
  * @property-read array<LeadStatus> $statuses
  */
-class LeadSeeder extends Seeder
+class AutoAssignSeeder extends Seeder
 {
     use WithGetter;
 
@@ -60,24 +60,14 @@ class LeadSeeder extends Seeder
     private $website;
 
     /**
-     * @var SalesPerson
+     * @var SalesPerson[]
      */
-    private $sales;
-
-    /**
-     * @var SalesPerson
-     */
-    private $sales2;
-
-    /**
-     * @var SalesPerson
-     */
-    private $sales3;
+    private $sales = [];
 
     /**
      * @var Lead[]
      */
-    private $leads;
+    private $leads = [];
 
     /**
      * @var LeadStatus[]
@@ -101,17 +91,38 @@ class LeadSeeder extends Seeder
         $this->user = factory(NewUser::class)->create(['user_id' => $this->dealer->dealer_id]);
         $this->newDealer = factory(NewDealerUser::class)->create(['id' => $this->dealer->dealer_id, 'user_id' => $this->dealer->dealer_id]);
         $this->crmUser = factory(CrmUser::class)->create(['user_id' => $this->dealer->dealer_id, 'enable_assign_notification' => 1]);
-
-        // Create Sales People
-        $salesParams = ['user_id' => $this->dealer->dealer_id, 'dealer_location_id' => $this->location->getKey(), 'is_default' => 1, 'is_inventory' => 1, 'is_trade' => 1];
-        $this->sales1 = factory(SalesPerson::class)->create(array_merge($salesParams, ['dealer_location_id' => 0, 'is_inventory' => 0]));
-        $this->sales2 = factory(SalesPerson::class)->create(array_merge($salesParams, ['is_inventory' => 0]));
-        $this->sales3 = factory(SalesPerson::class)->create(array_merge($salesParams, ['is_trade' => 0]));
-        $this->sales4 = factory(SalesPerson::class)->create(array_merge($salesParams, ['dealer_location_id' => 0, 'is_trade' => 0]));
     }
 
-    public function seed($seeds): void
+    public function seed(): void
     {
+        // Seed Leads for Auto Assign
+        $locationId = $this->location->getKey();
+        $seeds = [
+            ['type' => 'inventory', 'dealer_location_id' => $locationId],
+            ['source' => 'Facebook - Podium', 'type' => 'trade', 'dealer_location_id' => $locationId],
+            ['source' => '', 'type' => 'inventory', 'dealer_location_id' => 0],
+            ['source' => 'RVTrader.com', 'type' => 'trade', 'dealer_location_id' => $locationId],
+            ['source' => 'TrailerCentral', 'type' => 'inventory', 'dealer_location_id' => 0],
+            ['type' => 'inventory', 'dealer_location_id' => 0],
+            ['source' => 'HorseTrailerWorld', 'type' => 'inventory', 'dealer_location_id' => $locationId],
+            ['source' => '', 'type' => 'trade', 'dealer_location_id' => $locationId]
+        ];
+
+        $this->leads($seeds);
+
+
+        // Seed Sales People for Auto Assign
+        $salesSeeds = [
+            ['dealer_location_id' => 0, 'is_inventory' => 0],
+            ['is_inventory' => 0],
+            ['is_trade' => 0],
+            ['dealer_location_id' => 0, 'is_trade' => 0]
+        ];
+
+        $this->sales($salesSeeds);
+    }
+
+    private function leads($seeds): void {
         collect($seeds)->each(function (array $seed): void {
             $leadParams = [
                 'dealer_id' => $this->dealer->getKey(),
@@ -135,6 +146,16 @@ class LeadSeeder extends Seeder
                 $this->statuses[$leadId] = $status;
             }
         });
+    }
+
+    private function sales($seeds): void {
+        // Initialize Sales People Seeds
+        $params = ['user_id' => $this->dealer->dealer_id, 'dealer_location_id' => $this->location->getKey(), 'is_default' => 1, 'is_inventory' => 1, 'is_trade' => 1];
+
+        // Loop Seeds for Sales People
+        foreach($seeds as $seed) {
+            $this->sales[] = factory(SalesPerson::class)->create(array_merge($params, $seed));
+        }
     }
 
     public function cleanUp(): void
