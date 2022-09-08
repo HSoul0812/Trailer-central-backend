@@ -93,6 +93,14 @@ class QuoteRepository implements QuoteRepositoryInterface
         } else {
             $query = UnitSale::where('id', '>', 0);
         }
+
+        // Filter out service orders which location doesn't exist
+        if (isset($params['location']) && $params['location'] > 0) {
+            $query = $query->where('dealer_location_id', '=', $params['location']);
+        } else {
+            $query = $query->where('dealer_location_id', '>', 0);
+        }
+
         if (isset($params['search_term'])) {
             $query = $query->where(function($q) use($params) {
                 $q->where('title', 'LIKE', '%' . $params['search_term'] . '%')
