@@ -18,10 +18,10 @@ class ListingCategoryMappings extends Model
      * @var array
      */
     protected $fillable = [
-        'category_id',
-        'name',
+        'type_id',
         'map_from',
         'map_to',
+        'entity_type_id',
         'type'
     ];
 

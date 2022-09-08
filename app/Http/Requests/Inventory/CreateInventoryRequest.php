@@ -10,7 +10,6 @@ use App\Http\Requests\Request;
 class CreateInventoryRequest extends Request implements CreateRequestInterface
 {
     protected array $rules = [
-        'entity_type_id' => 'required_without_all:entity_type|integer',
         'dealer_id' => 'integer',
         'dealer_location_id' => 'required_without_all:dealer_location_identifier|integer',
         'active' => 'boolean|nullable',
@@ -26,7 +25,8 @@ class CreateInventoryRequest extends Request implements CreateRequestInterface
         'status_id' => 'integer|nullable',
         'availability' => 'string|nullable',
         'is_consignment' => 'boolean|nullable',
-        'category' => 'nullable',
+        'category' => 'required|string',
+        'type_id' => 'required|integer',
         'video_embed_code' => 'nullable',
         'vin' => 'string|max:17|nullable',
         'geolocation' => 'string',
@@ -84,7 +84,6 @@ class CreateInventoryRequest extends Request implements CreateRequestInterface
         'has_stock_images' => 'boolean|nullable',
 
         'dealer_identifier' => 'integer',
-        'entity_type' => 'required_without_all:entity_type_id|integer',
         'dealer_location_identifier' => 'required_without_all:dealer_location_id|integer',
 
         'length_second' => 'numeric|nullable',
