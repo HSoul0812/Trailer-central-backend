@@ -5,11 +5,11 @@ namespace Tests\Feature\CRM\Leads;
 use Illuminate\Support\Facades\Mail;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\User\SalesPerson;
-use App\Models\Inventory\Inventory;
 use App\Models\User\NewDealerUser;
 use App\Mail\AutoAssignEmail;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
+use Tests\database\seeds\CRM\Leads\LeadSeeder;
 use Tests\TestCase;
 
 class AutoAssignTest extends TestCase
