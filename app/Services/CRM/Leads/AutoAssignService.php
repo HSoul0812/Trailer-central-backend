@@ -400,7 +400,7 @@ class AutoAssignService implements AutoAssignServiceInterface {
      * 
      * @param Lead $lead
      * @param int $dealerLocationId
-     * @param SalesPerson $found
+     * @param null|SalesPerson $found
      * @param SalesPerson $chosen
      * @param string $status
      * @return LeadAssign
@@ -408,7 +408,7 @@ class AutoAssignService implements AutoAssignServiceInterface {
     private function markAssignLead(
         Lead $lead,
         int $dealerLocationId,
-        SalesPerson $found,
+        ?SalesPerson $found,
         SalesPerson $chosen,
         string $status
     ): LeadAssign {
@@ -422,7 +422,7 @@ class AutoAssignService implements AutoAssignServiceInterface {
             'lead_id' => $lead->identifier,
             'dealer_location_id' => $dealerLocationId,
             'salesperson_type' => $salesType,
-            'found_salesperson_id' => $found->id,
+            'found_salesperson_id' => $found->id ?? 0,
             'chosen_salesperson_id' => $chosen->id,
             'assigned_by' => 'autoassign',
             'status' => $status,
