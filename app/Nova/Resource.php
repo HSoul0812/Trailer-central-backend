@@ -59,4 +59,21 @@ abstract class Resource extends NovaResource
     {
         return parent::relatableQuery($request, $query);
     }
+
+    /**
+     * Allow resources to be initialized sorted and customize it on the Resource
+     * ["field" => "direction"]
+     *
+     * @param $query
+     * @param array $orderings
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    protected static function applyOrderings($query, array $orderings)
+    {
+        if (empty($orderings) && property_exists(static::class, 'orderBy')) {
+            $orderings = static::$orderBy;
+        }
+
+        return parent::applyOrderings($query, $orderings);
+    }
 }
