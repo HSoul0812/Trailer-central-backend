@@ -162,13 +162,13 @@ class AutoAssignSeeder extends Seeder
         // Loop Seeds for Sales People
         collect($seeds)->each(function (array $seed) use($params): void {
             $this->sales[] = factory(SalesPerson::class)->create(array_merge($params, $seed));
-            var_dump($this->sales);
         });
     }
 
     public function cleanUp(): void
     {
         $dealerId = $this->dealer->getKey();
+        var_dump($dealerId);
 
         // Database clean up
         if(!empty($this->leads) && count($this->leads)) {
@@ -181,7 +181,7 @@ class AutoAssignSeeder extends Seeder
         LeadAssign::where(['dealer_id' => $dealerId])->delete();
 
         // Clear Out User Data
-        //SalesPerson::where(['user_id' => $dealerId])->delete();
+        SalesPerson::where(['user_id' => $dealerId])->delete();
         CrmUser::destroy($dealerId);
         NewUser::destroy($dealerId);
         DealerLocation::where('dealer_id', $dealerId)->delete();
