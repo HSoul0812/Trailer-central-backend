@@ -152,7 +152,7 @@ class AutoAssignSeeder extends Seeder
     private function sales($seeds): void {
         // Initialize Sales People Seeds
         $params = [
-            'user_id' => $this->dealer->dealer_id,
+            'user_id' => $this->dealer->getKey(),
             'dealer_location_id' => $this->location->getKey(),
             'is_default' => 1,
             'is_inventory' => 1,
