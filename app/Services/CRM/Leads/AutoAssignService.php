@@ -22,22 +22,22 @@ class AutoAssignService implements AutoAssignServiceInterface {
     
     use MailHelper;
     
-    /**     
+    /**
      * @var App\Repositories\CRM\Leads\LeadRepositoryInterface
      */
     protected $leads;
     
-    /**     
+    /**
      * @var App\Repositories\CRM\Leads\StatusRepositoryInterface
      */
     protected $leadStatus;
     
-    /**     
+    /**
      * @var App\Repositories\CRM\User\SalesPersonRepositoryInterface
      */
     protected $salesPersonRepository;    
        
-    /**     
+    /**
      * @var array
      */
     private $leadExplanationNotes = [];

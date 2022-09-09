@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\database\seeds\CRM\Leads;
 
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Leads\LeadAssign;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\User\AuthToken;
@@ -150,7 +151,13 @@ class AutoAssignSeeder extends Seeder
 
     private function sales($seeds): void {
         // Initialize Sales People Seeds
-        $params = ['user_id' => $this->dealer->dealer_id, 'dealer_location_id' => $this->location->getKey(), 'is_default' => 1, 'is_inventory' => 1, 'is_trade' => 1];
+        $params = [
+            'user_id' => $this->dealer->dealer_id,
+            'dealer_location_id' => $this->location->getKey(),
+            'is_default' => 1,
+            'is_inventory' => 1,
+            'is_trade' => 1
+        ];
 
         // Loop Seeds for Sales People
         foreach($seeds as $seed) {
@@ -170,7 +177,10 @@ class AutoAssignSeeder extends Seeder
                 Lead::destroy($leadId);
             }
         }
-        SalesPerson::where(['user_id' => $dealerId])->delete();
+        LeadAssign::where(['dealer_id' => $dealerId])->delete();
+
+        // Clear Out User Data
+        //SalesPerson::where(['user_id' => $dealerId])->delete();
         CrmUser::destroy($dealerId);
         NewUser::destroy($dealerId);
         DealerLocation::where('dealer_id', $dealerId)->delete();
