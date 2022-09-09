@@ -160,9 +160,10 @@ class AutoAssignSeeder extends Seeder
         ];
 
         // Loop Seeds for Sales People
-        foreach($seeds as $seed) {
+        collect($seeds)->each(function (array $seed) use($params): void {
             $this->sales[] = factory(SalesPerson::class)->create(array_merge($params, $seed));
-        }
+            var_dump($this->sales);
+        });
     }
 
     public function cleanUp(): void
