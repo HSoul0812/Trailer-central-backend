@@ -318,9 +318,7 @@ class TemplateController extends RestfulControllerV2
                     $request->user_id,
                     $request->subject,
                     $request->html,
-                    $request->to_email,
-                    $request->sales_person_id ?? 0,
-                    $request->from_email ?? ''
+                    $request->to_email
                 )
             );
         }
