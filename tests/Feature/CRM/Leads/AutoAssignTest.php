@@ -143,7 +143,7 @@ class AutoAssignTest extends TestCase
      */
     public function tearDown(): void
     {
-        $this->seeder->cleanUp();
+        //$this->seeder->cleanUp();
 
         parent::tearDown();
     }
