@@ -17,7 +17,6 @@ class TestTemplateRequest extends Request {
         'subject' => 'required|string',
         'html' => 'required|string',
         'to_email' => 'required|email',
-        'sales_person_id' => 'nullable|integer|sales_person_valid',
-        'from_email' => 'nullable|email|valid_smtp_email'
+        'sales_person_id' => 'nullable|integer|sales_person_valid'
     ];
 }
