@@ -145,11 +145,11 @@ class MarketplaceRepository implements MarketplaceRepositoryInterface {
         }
 
         if (isset($params['dealer_id'])) {
-            $query = $query->where('dealer_id', $params['dealer_id']);
+            $query = $query->where(Marketplace::getTableName() . '.dealer_id', $params['dealer_id']);
         }
 
         if (isset($params['dealer_location_id'])) {
-            $query = $query->where('dealer_location_id', $params['dealer_location_id']);
+            $query = $query->where(Marketplace::getTableName() . '.dealer_location_id', $params['dealer_location_id']);
         }
 
         if (isset($params['id'])) {
