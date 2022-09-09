@@ -2,6 +2,7 @@
 
 namespace App\Services\Dispatch\Facebook;
 
+use App\Models\CRM\Dealer\DealerFBMOverview;
 use App\Models\User\AuthToken;
 use App\Models\User\Integration\Integration;
 use App\Models\Marketing\Facebook\Marketplace;
@@ -58,9 +59,9 @@ class MarketplaceService implements MarketplaceServiceInterface
      * 
      * @param MarketplaceRepositoryInterface $marketplace
      * @param TunnelRepositoryInterface $tunnels
-     * @param ListingRepositoryInterfaces $listings
-     * @param ImageRepositoryInterfaces $images
-     * @param ErrorRepositoryInterfaces $errors
+     * @param ListingRepositoryInterface $listings
+     * @param ImageRepositoryInterface $images
+     * @param ErrorRepositoryInterface $errors
      * @param PostingRepositoryInterface $postingSession
      * @param InventoryTransformer $inventoryTransformer
      */
