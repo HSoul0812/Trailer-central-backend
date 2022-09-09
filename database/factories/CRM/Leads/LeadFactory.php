@@ -18,9 +18,7 @@ $factory->define(Lead::class, function (Faker $faker, array $attributes) {
     $dealer_id = $attributes['dealer_id'] ?? factory(User::class)->create()->getKey();
 
     // Get Dealer Location ID
-    $dealer_location_id = $attributes['dealer_location_id'] ?? factory(DealerLocation::class)->create([
-        'dealer_id' => $dealer_id
-    ])->getKey();
+    $dealer_location_id = $attributes['dealer_location_id'] ?? 0;
 
     // Get Website ID
     $website_id = $attributes['website_id'] ?? factory(Website::class)->create([
