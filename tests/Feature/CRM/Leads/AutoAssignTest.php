@@ -143,7 +143,7 @@ class AutoAssignTest extends TestCase
             // Assert a lead status entry was saved...
             $this->assertDatabaseHas('crm_tc_lead_status', [
                 'tc_lead_identifier' => $leadId,
-                'sales_person_id' => !empty($salesPerson) ? $salesPerson->getKey() : 0
+                'sales_person_id' => !empty($salesPerson) ? $salesPerson->getKey() : null
             ]);
 
             // Assert a lead assign entry was saved...
