@@ -45,7 +45,7 @@ class AutoAssignTest extends TestCase
         // Based on the seeder results, we should know what sales person is assigned to who:
         $leadSalesPeople[$leads[0]->identifier] = $sales[2]->getKey();
         $leadSalesPeople[$leads[1]->identifier] = $sales[1]->getKey();
-        $leadSalesPeople[$leads[2]->identifier] = $sales[2]->getKey();
+        $leadSalesPeople[$leads[2]->identifier] = $sales[3]->getKey();
         $leadSalesPeople[$leads[3]->identifier] = $sales[1]->getKey();
         $leadSalesPeople[$leads[4]->identifier] = $sales[3]->getKey();
         $leadSalesPeople[$leads[5]->identifier] = $sales[0]->getKey();
