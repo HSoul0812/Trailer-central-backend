@@ -142,6 +142,7 @@ class AutoAssignSeeder extends Seeder
             }
 
             // Create Lead
+            $params['date_submitted'] = date('Y-m-d H:i:s');
             $lead = factory(Lead::class)->create($params);
             $leadId = $lead->getKey();
             $this->leads[] = $lead;

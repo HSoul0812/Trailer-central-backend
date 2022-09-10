@@ -45,7 +45,7 @@ $factory->define(Lead::class, function (Faker $faker, array $attributes) {
         'state' => array_keys(GeographyHelper::STATES_LIST)[array_rand(array_keys(GeographyHelper::STATES_LIST))],
         'comments' => $faker->realText,
         'note' => $faker->realText,
-        'date_submitted' => $faker->dateTimeThisMonth->format('Y-m-d H:i:s'),
+        'date_submitted' => $attributes['date_submitted'] ?? $faker->dateTimeThisMonth->format('Y-m-d H:i:s'),
         'is_archived' => $attributes['is_archived'] ?? false,
     ];
 
