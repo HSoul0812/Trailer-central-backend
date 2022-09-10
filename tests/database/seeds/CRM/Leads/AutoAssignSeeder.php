@@ -124,15 +124,25 @@ class AutoAssignSeeder extends Seeder
     }
 
     private function leads($seeds): void {
-        collect($seeds)->each(function (array $seed): void {
-            $leadParams = [
-                'dealer_id' => $this->dealer->getKey(),
-                'website_id' => $this->website->getKey()
-            ];
+        // Set Default Lead Params
+        $params = [
+            'dealer_id' => $this->dealer->getKey(),
+            'website_id' => $this->website->getKey()
+        ];
+
+        collect($seeds)->each(function (array $seed) use($params): void {
+            // Set Lead Type
             if(isset($seed['type'])) {
-                $leadParams['lead_type'] = $seed['type'];
+                $params['lead_type'] = $seed['type'];
             }
-            $lead = factory(Lead::class)->create($leadParams);
+
+            // Set Location
+            if(isset($seed['dealer_location_id'])) {
+                $params['dealer_location_id'] = $seed['dealer_location_id'];
+            }
+
+            // Create Lead
+            $lead = factory(Lead::class)->create($params);
             $leadId = $lead->getKey();
             $this->leads[] = $lead;
 
