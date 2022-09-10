@@ -147,12 +147,21 @@ class AutoAssignTest extends TestCase
             ]);
 
             // Assert a lead assign entry was saved...
-            $this->assertDatabaseHas('crm_lead_assign', [
-                'dealer_id' => $dealerId,
-                'lead_id' => $leadId,
-                'chosen_salesperson_id' => !empty($salesPerson) ? $salesPerson->getKey() : 0,
-                'status' => 'mailed'
-            ]);
+            if(!empty($salesPerson)) {
+                $this->assertDatabaseHas('crm_lead_assign', [
+                    'dealer_id' => $dealerId,
+                    'lead_id' => $leadId,
+                    'chosen_salesperson_id' => $salesPerson->getKey(),
+                    'status' => 'mailed'
+                ]);
+            } else {
+                $this->assertDatabaseHas('crm_lead_assign', [
+                    'dealer_id' => $dealerId,
+                    'lead_id' => $leadId,
+                    'chosen_salesperson_id' => 0,
+                    'status' => 'skipped'
+                ]);
+            }
         }
     }
 
