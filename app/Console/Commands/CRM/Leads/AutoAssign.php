@@ -5,6 +5,7 @@ namespace App\Console\Commands\CRM\Leads;
 use Illuminate\Console\Command;
 use App\Models\User\NewDealerUser;
 use App\Services\CRM\Leads\AutoAssignServiceInterface;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Collection;
 
 class AutoAssign extends Command
