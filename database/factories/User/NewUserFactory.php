@@ -44,7 +44,7 @@ $factory->define(CrmUser::class, static function (Faker $faker, array $attribute
         'active' => isset($attributes['active']) ? (!empty($attributes['active']) ? 1 : 0) : 1,
         'price_per_mile' => $attributes['price_per_mile'] ?? 0,
         'email_signature' => $attributes['email_signature'] ?? '',
-        'timezone' => $attributes['timezone'] ?? 'America/Indianopolis',
+        'timezone' => $attributes['timezone'] ?? env('DB_TIMEZONE'),
         'enable_hot_potato' => isset($attributes['enable_hot_potato']) ? (!empty($attributes['enable_hot_potato']) ? 1 : 0) : 0,
         'disable_daily_digest' => isset($attributes['disable_daily_digest']) ? (!empty($attributes['disable_daily_digest']) ? 1 : 0) : 0,
         'enable_assign_notification' => isset($attributes['enable_assign_notification']) ? (!empty($attributes['enable_assign_notification']) ? 1 : 0) : 1,
