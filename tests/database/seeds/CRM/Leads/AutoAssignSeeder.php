@@ -179,7 +179,6 @@ class AutoAssignSeeder extends Seeder
     public function cleanUp(): void
     {
         $dealerId = $this->dealer->getKey();
-        var_dump($dealerId);
 
         // Database clean up
         if(!empty($this->leads) && count($this->leads)) {
