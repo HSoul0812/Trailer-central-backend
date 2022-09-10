@@ -17,9 +17,6 @@ $factory->define(Lead::class, function (Faker $faker, array $attributes) {
     // Get Dealer ID
     $dealer_id = $attributes['dealer_id'] ?? factory(User::class)->create()->getKey();
 
-    // Get Dealer Location ID
-    $dealer_location_id = $attributes['dealer_location_id'] ?? 0;
-
     // Get Website ID
     $website_id = $attributes['website_id'] ?? factory(Website::class)->create([
         'dealer_id' => $dealer_id
@@ -30,17 +27,11 @@ $factory->define(Lead::class, function (Faker $faker, array $attributes) {
     $typeKey = array_rand($leadTypes);
     $leadType = $attributes['lead_type'] ?? $leadTypes[$typeKey];
 
-    // Get Random Inventory
-    $inventory_id = $attributes['inventory_id'] ?? factory(Inventory::class)->create([
-        'dealer_id' => $dealer_id,
-        'dealer_location_id' => $dealer_location_id
-    ])->getKey();
-
     $data = [
         'website_id' => $website_id,
         'dealer_id' => $dealer_id,
-        'dealer_location_id' => $dealer_location_id,
-        'inventory_id' => $inventory_id,
+        'dealer_location_id' => $attributes['dealer_location_id'] ?? 0,
+        'inventory_id' =>  $attributes['inventory_id'] ?? 0,
         'lead_type' => $leadType,
         'title' => LeadType::PUBLIC_TYPES[$leadType] ?? $faker->title,
         'referral' => $faker->url,
