@@ -104,9 +104,9 @@ class AutoAssignSeeder extends Seeder
             ['source' => '', 'type' => 'inventory', 'dealer_location_id' => 0],
             ['source' => 'RVTrader.com', 'type' => 'trade', 'dealer_location_id' => $locationId],
             ['source' => 'TrailerCentral', 'type' => 'inventory', 'dealer_location_id' => 0],
-            ['type' => 'inventory', 'dealer_location_id' => 0],
-            ['source' => 'HorseTrailerWorld', 'type' => 'inventory', 'dealer_location_id' => $locationId],
-            ['source' => '', 'type' => 'trade', 'dealer_location_id' => $locationId]
+            ['type' => 'trade', 'dealer_location_id' => 0],
+            ['source' => '', 'type' => 'inventory', 'dealer_location_id' => $locationId],
+            ['source' => 'HorseTrailerWorld', 'type' => 'inventory', 'dealer_location_id' => $locationId]
         ];
 
         $this->leads($seeds);

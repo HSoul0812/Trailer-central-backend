@@ -43,12 +43,12 @@ class AutoAssignTest extends TestCase
 
 
         // Based on the seeder results, we should know what sales person is assigned to who:
-        $leadSalesPeople[$leads[0]->identifier] = $sales[1]->getKey();
-        $leadSalesPeople[$leads[1]->identifier] = $sales[2]->getKey();
-        $leadSalesPeople[$leads[2]->identifier] = $sales[1]->getKey();
-        $leadSalesPeople[$leads[3]->identifier] = $sales[3]->getKey();
-        $leadSalesPeople[$leads[4]->identifier] = $sales[2]->getKey();
-        $leadSalesPeople[$leads[5]->identifier] = $sales[3]->getKey();
+        $leadSalesPeople[$leads[0]->identifier] = $sales[2]->getKey();
+        $leadSalesPeople[$leads[1]->identifier] = $sales[3]->getKey();
+        $leadSalesPeople[$leads[2]->identifier] = $sales[2]->getKey();
+        $leadSalesPeople[$leads[3]->identifier] = $sales[2]->getKey();
+        $leadSalesPeople[$leads[4]->identifier] = $sales[1]->getKey();
+        $leadSalesPeople[$leads[5]->identifier] = $sales[0]->getKey();
         $leadSalesPeople[$leads[6]->identifier] = $sales[2]->getKey();
         $leadSalesPeople[$leads[7]->identifier] = $sales[1]->getKey();
 
@@ -63,12 +63,12 @@ class AutoAssignTest extends TestCase
         // Loop Leads
         foreach($leadSalesPeople as $leadId => $salesPerson) {
             // Assert a message was sent to the given leads...
-            /*Mail::assertSent(AutoAssignEmail::class, function ($mail) use ($salesPerson) {
+            Mail::assertSent(AutoAssignEmail::class, function ($mail) use ($salesPerson) {
                 if(empty($salesPerson->email)) {
                     return false;
                 }                
                 return $mail->hasTo($salesPerson->email);
-            });*/
+            });
 
             // Assert a lead status entry was saved...
             $this->assertDatabaseHas('crm_tc_lead_status', [
@@ -84,41 +84,6 @@ class AutoAssignTest extends TestCase
                 'status' => 'mailed'
             ]);
         }
-    }
-
-
-    /**
-     * Preserve the Round Robin Sales Person Temporarily
-     * 
-     * @group CRM
-     * @param int $dealerId
-     * @param int $dealerLocationId
-     * @param string $salesType
-     * @param int $salesPersonId
-     * @return int last sales person ID
-     */
-    private function setRoundRobinSalesPerson($dealerId, $dealerLocationId, $salesType, $salesPersonId) {
-        // Assign to Arrays
-        if(!isset($this->roundRobin[$dealerId])) {
-            $this->roundRobin[$dealerId] = array();
-        }
-
-        // Match By Dealer Location ID!
-        if(!empty($dealerLocationId)) {
-            if(!isset($this->roundRobin[$dealerId][$dealerLocationId])) {
-                $this->roundRobin[$dealerId][$dealerLocationId] = array();
-            }
-            $this->roundRobin[$dealerId][$dealerLocationId][$salesType] = $salesPersonId;
-        }
-
-        // Always Set for 0!
-        if(!isset($this->roundRobin[$dealerId][0])) {
-            $this->roundRobin[$dealerId][0] = array();
-        }
-        $this->roundRobin[$dealerId][0][$salesType] = $salesPersonId;
-
-        // Return Last Sales Person ID
-        return $this->roundRobin[$dealerId][0][$salesType];
     }
 
 
@@ -143,7 +108,7 @@ class AutoAssignTest extends TestCase
      */
     public function tearDown(): void
     {
-        //$this->seeder->cleanUp();
+        $this->seeder->cleanUp();
 
         parent::tearDown();
     }
