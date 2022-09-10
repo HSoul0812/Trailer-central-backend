@@ -149,7 +149,7 @@ class AutoAssignSeeder extends Seeder
             // Include Status
             if(isset($seed['source'])) {
                 // Make Status
-                $status = factory(LeadStatus::class)->make([
+                $status = factory(LeadStatus::class)->create([
                     'tc_lead_identifier' => $leadId,
                     'source' => $seed['source']
                 ]);
