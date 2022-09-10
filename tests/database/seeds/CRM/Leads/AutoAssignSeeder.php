@@ -94,6 +94,10 @@ class AutoAssignSeeder extends Seeder
         $this->crmUser = factory(CrmUser::class)->create(['user_id' => $this->dealer->dealer_id, 'enable_assign_notification' => 1]);
     }
 
+    public function enableEmail($enabled = 1): void {
+        $this->crmUser->fill(['enable_assign_notification' => $enabled])->save();
+    }
+
     public function seed(): void
     {
         // Seed Leads for Auto Assign
