@@ -43,14 +43,14 @@ class AutoAssignTest extends TestCase
 
 
         // Based on the seeder results, we should know what sales person is assigned to who:
-        $leadSalesPeople[$leads[0]->identifier] = $sales[2]->getKey();
-        $leadSalesPeople[$leads[1]->identifier] = $sales[1]->getKey();
-        $leadSalesPeople[$leads[2]->identifier] = $sales[3]->getKey();
-        $leadSalesPeople[$leads[3]->identifier] = $sales[1]->getKey();
-        $leadSalesPeople[$leads[4]->identifier] = $sales[2]->getKey();
-        $leadSalesPeople[$leads[5]->identifier] = $sales[0]->getKey();
-        $leadSalesPeople[$leads[6]->identifier] = $sales[2]->getKey();
-        $leadSalesPeople[$leads[7]->identifier] = $sales[2]->getKey();
+        $leadSalesPeople[$leads[0]->identifier] = $sales[2];
+        $leadSalesPeople[$leads[1]->identifier] = $sales[1];
+        $leadSalesPeople[$leads[2]->identifier] = $sales[3];
+        $leadSalesPeople[$leads[3]->identifier] = $sales[1];
+        $leadSalesPeople[$leads[4]->identifier] = $sales[2];
+        $leadSalesPeople[$leads[5]->identifier] = $sales[0];
+        $leadSalesPeople[$leads[6]->identifier] = $sales[2];
+        $leadSalesPeople[$leads[7]->identifier] = $sales[2];
 
 
         // Fake Mail
@@ -75,14 +75,14 @@ class AutoAssignTest extends TestCase
             // Assert a lead status entry was saved...
             $this->assertDatabaseHas('crm_tc_lead_status', [
                 'tc_lead_identifier' => $leadId,
-                'sales_person_id' => $salesPerson
+                'sales_person_id' => $salesPerson->getKey()
             ]);
 
             // Assert a lead assign entry was saved...
             $this->assertDatabaseHas('crm_lead_assign', [
                 'dealer_id' => $dealerId,
                 'lead_id' => $leadId,
-                'chosen_salesperson_id' => $salesPerson,
+                'chosen_salesperson_id' => $salesPerson->getKey(),
                 'status' => 'mailed'
             ]);
         }
