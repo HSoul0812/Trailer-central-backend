@@ -123,6 +123,35 @@ class AutoAssignSeeder extends Seeder
         $this->sales($salesSeeds);
     }
 
+    public function seedNoMatches(): void
+    {
+        // Seed Leads for Auto Assign
+        $locationId = $this->location->getKey();
+        $seeds = [
+            ['type' => 'inventory', 'dealer_location_id' => $locationId],
+            ['source' => 'Facebook - Podium', 'type' => 'trade', 'dealer_location_id' => $locationId],
+            ['source' => '', 'type' => 'inventory', 'dealer_location_id' => 0],
+            ['source' => 'RVTrader.com', 'type' => 'general', 'dealer_location_id' => $locationId],
+            ['source' => 'TrailerCentral', 'type' => 'inventory', 'dealer_location_id' => 0],
+            ['type' => 'trade', 'dealer_location_id' => 0],
+            ['source' => '', 'type' => 'financing', 'dealer_location_id' => $locationId],
+            ['source' => 'HorseTrailerWorld', 'type' => 'inventory', 'dealer_location_id' => $locationId]
+        ];
+
+        $this->leads($seeds);
+
+
+        // Seed Sales People for Auto Assign
+        $salesSeeds = [
+            ['dealer_location_id' => 0, 'is_inventory' => 0],
+            ['is_inventory' => 0],
+            ['is_trade' => 0],
+            ['dealer_location_id' => 0, 'is_trade' => 0]
+        ];
+
+        $this->sales($salesSeeds);
+    }
+
     private function leads($seeds): void {
         // Set Default Lead Params
         $params = [
