@@ -131,7 +131,7 @@ class AutoAssignSeeder extends Seeder
             ['type' => 'inventory', 'dealer_location_id' => $locationId],
             ['source' => 'Facebook - Podium', 'type' => 'trade', 'dealer_location_id' => $locationId],
             ['source' => '', 'type' => 'inventory', 'dealer_location_id' => 0],
-            ['source' => 'RVTrader.com', 'type' => 'general', 'dealer_location_id' => $locationId],
+            ['source' => 'RVTrader.com', 'type' => 'financing', 'dealer_location_id' => $locationId],
             ['source' => 'TrailerCentral', 'type' => 'inventory', 'dealer_location_id' => 0],
             ['type' => 'trade', 'dealer_location_id' => 0],
             ['source' => '', 'type' => 'financing', 'dealer_location_id' => $locationId],
@@ -143,10 +143,10 @@ class AutoAssignSeeder extends Seeder
 
         // Seed Sales People for Auto Assign
         $salesSeeds = [
-            ['dealer_location_id' => 0, 'is_inventory' => 0],
-            ['is_inventory' => 0],
-            ['is_trade' => 0],
-            ['dealer_location_id' => 0, 'is_trade' => 0]
+            ['dealer_location_id' => 0, 'is_inventory' => 0, 'is_financing' => 0],
+            ['is_inventory' => 0, 'is_financing' => 0],
+            ['is_trade' => 0, 'is_financing' => 0],
+            ['dealer_location_id' => 0, 'is_trade' => 0, 'is_financing' => 0]
         ];
 
         $this->sales($salesSeeds);
