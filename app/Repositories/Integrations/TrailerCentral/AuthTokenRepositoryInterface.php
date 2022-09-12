@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 interface AuthTokenRepositoryInterface
 {
-    public function get(array $params): Model|null;
+    public function get(array $params): Model|\stdClass|null;
 }
