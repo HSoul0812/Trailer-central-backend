@@ -17,6 +17,9 @@ class ManufacturersGetTest extends TestCase
     /**
      * Test getting brands
      *
+     * @group DMS
+     * @group DMS_PARTS
+     *
      * @return void
      */
     public function testGettingManufacturersNoFilters()

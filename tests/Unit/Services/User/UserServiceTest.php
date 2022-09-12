@@ -8,7 +8,12 @@ use Tests\TestCase;
 
 class UserServiceTest extends TestCase
 {
-
+    /**
+     * @group DMS
+     * @group DMS_USER
+     *
+     * @return void
+     */
     public function testSetAdminPasswd()
     {
         /** @var UserService $service */

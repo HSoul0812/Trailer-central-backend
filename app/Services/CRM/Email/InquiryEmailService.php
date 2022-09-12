@@ -163,11 +163,8 @@ class InquiryEmailService implements InquiryEmailServiceInterface
         // Get Data By Inquiry Type
         $vars = $this->getInquiryTypeVars($overrides);
 
-        // Check Overrided Email
-        $params = $this->checkOverrideEmail($vars);
-
         // Create Inquiry Lead
-        return new InquiryLead($params);
+        return new InquiryLead($vars);
     }
 
     /**
@@ -267,7 +264,7 @@ class InquiryEmailService implements InquiryEmailServiceInterface
 
         // Return Inquiry Email Override
         $params['inquiry_email'] = preg_split('/,|;|\s/', $toEmails->value, null, PREG_SPLIT_NO_EMPTY);
-
+        $this->log->info('Parsed inquiry email overrides to send to: ' . print_r($params['inquiry_email'], true));
         return $params;
     }
 
@@ -307,25 +304,5 @@ class InquiryEmailService implements InquiryEmailServiceInterface
 
         // Return Updated Params Array
         return $params;
-    }
-
-    /**
-     * Check override email is applied. If applied change email to config variable.
-     *
-     * @param array $vars
-     * @return array
-     */
-    private function checkOverrideEmail(array $vars): array
-    {
-        $config = $this->websiteConfig->getValueOfConfig($vars['website_id'], 'contact/email/' . $vars['inquiry_type']);
-        if (empty($config)) {
-            $config = $this->websiteConfig->getValueOfConfig($vars['website_id'], 'contact/email');
-
-            if (!empty($config->value)) {
-                $vars['inquiry_email'] = preg_split('/,|;|\s/', $config->value, null, PREG_SPLIT_NO_EMPTY);
-            }
-        }
-
-        return $vars;
     }
 }

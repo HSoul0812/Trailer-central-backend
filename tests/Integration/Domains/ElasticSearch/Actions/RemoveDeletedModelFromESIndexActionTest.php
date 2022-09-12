@@ -10,6 +10,13 @@ use Tests\TestCase;
 
 class RemoveDeletedModelFromESIndexActionTest extends TestCase
 {
+    /**
+     * @group DMS
+     * @group DMS_ELASTIC_SEARCH
+     *
+     * @return void
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     */
     public function testItCanRemoveDeletedCustomerModelsFromESIndex()
     {
         /** @var Client $esClient */

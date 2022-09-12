@@ -32,6 +32,9 @@ class InventoryControllerTest extends TestCase
      * @throws BindingResolutionException when there is a problem with resolution of concreted class
      *
      * @covers InventoryController::getAll
+     *
+     * @group DMS
+     * @group DMS_INVENTORY
      */
     public function testListInvalidParameters(
         array $params,

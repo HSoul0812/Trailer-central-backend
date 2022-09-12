@@ -27,6 +27,9 @@ class SetupTest extends TestCase
     /**
      * Test that when there is another monitored job working (same dealer), it will throw a `BusyJobException`
      *
+     * @group DMS
+     * @group DMS_BULK_DOWNLOAD
+     *
      * @throws Exception
      */
     public function testWillThrowAnException(): void
@@ -65,6 +68,9 @@ class SetupTest extends TestCase
     }
 
     /**
+     * @group DMS
+     * @group DMS_BULK_DOWNLOAD
+     *
      * @throws Exception
      */
     public function testWillCreateMonitoredJob(): void

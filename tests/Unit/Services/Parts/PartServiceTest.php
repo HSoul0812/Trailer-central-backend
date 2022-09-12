@@ -15,6 +15,12 @@ use Tests\TestCase;
 
 class PartServiceTest extends TestCase
 {
+    /**
+     * @group DMS
+     * @group DMS_PARTS
+     *
+     * @return void
+     */
     public function testUpdateWillDispatchAuditLog()
     {
         // test data
@@ -90,6 +96,12 @@ class PartServiceTest extends TestCase
         });
     }
 
+    /**
+     * @group DMS
+     * @group DMS_PARTS
+     *
+     * @return void
+     */
     public function testCreateWillDispatchAuditLog()
     {
         // test data

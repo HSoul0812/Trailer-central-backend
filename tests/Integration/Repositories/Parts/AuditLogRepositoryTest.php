@@ -9,6 +9,13 @@ use Tests\TestCase;
 
 class AuditLogRepositoryTest extends TestCase
 {
+    /**
+     * @group DMS
+     * @group DMS_PARTS
+     *
+     * @return void
+     * @throws \Exception
+     */
     public function testCreatesRow()
     {
         /** @var AuditLogRepository $repo */
