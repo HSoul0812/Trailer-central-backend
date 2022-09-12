@@ -29,6 +29,10 @@ class CustomerControllerTest extends TestCase
 
     /**
      * @covers ::destroy
+     *
+     * @group DMS
+     * @group DMS_CUSTOMER
+     *
      * @throws BindingResolutionException
      */
     public function testWithValidParams(): void
@@ -64,7 +68,11 @@ class CustomerControllerTest extends TestCase
      * @param string $expectedExceptionMessage
      * @param string|null $firstExpectedErrorMessage
      *
+     * @throws Exception
      * @covers ::destroy
+     *
+     * @group DMS
+     * @group DMS_CUSTOMER
      */
     public function testWithInvalidParams(array $params,
                                           string $expectedException,

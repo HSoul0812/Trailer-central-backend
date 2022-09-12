@@ -19,7 +19,10 @@ class QuickApprovalControllerTest extends TestCase
 
     /**
      * @covers ::index
+     *
      * @group quickbook
+     * @group DMS
+     * @group DMS_QUICKBOOK
      */
     public function testIndexWithToSendStatus() {
         $response = $this->json(
@@ -60,7 +63,10 @@ class QuickApprovalControllerTest extends TestCase
 
     /**
      * @covers ::index
+     *
      * @group quickbook
+     * @group DMS
+     * @group DMS_QUICKBOOK
      */
     public function testIndexWithRemovedStatus() {
         $response = $this->json(
@@ -122,7 +128,10 @@ class QuickApprovalControllerTest extends TestCase
 
     /**
      * @covers ::destroy
+     *
      * @group quickbook
+     * @group DMS
+     * @group DMS_QUICKBOOK
      */
     public function testDestroy()
     {
@@ -149,7 +158,10 @@ class QuickApprovalControllerTest extends TestCase
      * @param string|null $firstExpectedErrorMessage
      *
      * @covers ::destroy
+     *
      * @group quickbook
+     * @group DMS
+     * @group DMS_QUICKBOOK
      */
     public function testDestroyWithoutDealerId(array $params,
                                                string $expectedException,
@@ -178,7 +190,10 @@ class QuickApprovalControllerTest extends TestCase
 
     /**
      * @covers ::moveStatus
+     *
      * @group quickbook
+     * @group DMS
+     * @group DMS_QUICKBOOK
      */
     public function testMoveStatus()
     {

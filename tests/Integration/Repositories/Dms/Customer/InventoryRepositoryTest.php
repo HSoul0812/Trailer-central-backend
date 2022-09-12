@@ -30,6 +30,9 @@ class InventoryRepositoryTest extends TestCase
      *
      * @typeOfTest IntegrationTestCase
      *
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
      * @throws BindingResolutionException when there is a problem with resolution
      *                                    of concreted class
      */
@@ -49,6 +52,8 @@ class InventoryRepositoryTest extends TestCase
      * @param array $params  list of query parameters
      * @param int $expectedTotal
      *
+     * @group DMS
+     * @group DMS_INVENTORY
      *
      * @throws BindingResolutionException when there is a problem with resolution
      *                                    of concreted class
@@ -81,6 +86,9 @@ class InventoryRepositoryTest extends TestCase
      * @param  int  $expectedTotal
      * @param  int  $expectedLastPage
      * @param  string|null  $expectedTitleName
+     *
+     * @group DMS
+     * @group DMS_INVENTORY
      *
      * @throws BindingResolutionException when there is a problem with resolution of concreted class
      *
@@ -120,6 +128,9 @@ class InventoryRepositoryTest extends TestCase
      * @throws BindingResolutionException when there is a problem with resolution of concreted class
      *
      * @covers InventoryRepository::create
+     *
+     * @group DMS
+     * @group DMS_INVENTORY
      */
     public function testCreate(): void {
         $this->seeder->seed();
@@ -154,6 +165,8 @@ class InventoryRepositoryTest extends TestCase
      * @throws BindingResolutionException when there is a problem with resolution of concreted class
      *
      * @covers InventoryRepository::create
+     * @group DMS
+     * @group DMS_INVENTORY
      */
     public function testCreateWithException(
         array $properties,
@@ -191,6 +204,8 @@ class InventoryRepositoryTest extends TestCase
      * @throws BindingResolutionException when there is a problem with resolution of concreted class
      *
      * @covers InventoryRepository::bulkDestroy
+     * @group DMS
+     * @group DMS_INVENTORY
      */
     public function testBulkDestroy(): void {
         // Given I have a collection of inventories
