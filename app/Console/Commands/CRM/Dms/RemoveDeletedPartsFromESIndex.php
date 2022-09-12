@@ -27,10 +27,9 @@ class RemoveDeletedPartsFromESIndex extends Command
 
         // Use the action class to do the heavy lifting
         $result = $action
-            ->withModel(Part::class)
-            ->withMustRaw([
-                ['match_phrase' => ['dealer_id' => $dealerId]],
-            ])
+            ->forModel(Part::class)
+            ->fromDealerId($dealerId)
+            ->withSize(3)
             ->withOnDeletedDocumentIdCallback(function (string $partId) {
                 $this->info("Deleted part id $partId from ES index.");
             })
