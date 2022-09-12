@@ -5,7 +5,7 @@ namespace App\Repositories\Integrations\TrailerCentral;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
-class AuthTokenRepository
+class AuthTokenRepository implements AuthTokenRepositoryInterface
 {
     public function get(array $params): Model|null {
         $query = DB::connection('mysql')
