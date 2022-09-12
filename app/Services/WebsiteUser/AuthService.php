@@ -126,7 +126,6 @@ class AuthService implements AuthServiceInterface
         $tcUser = $this->createTcUser($attributes);
 
         $attributes['tc_user_id'] = $tcUser->id;
-//        $attributes['tc_access_token'] = $tcUser->access_token;
         return  $this->websiteUserRepository->create($attributes);
     }
 
