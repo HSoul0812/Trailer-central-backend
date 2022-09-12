@@ -6,6 +6,8 @@ namespace App\Providers;
 
 use App\Repositories\Geolocation\GeolocationRepository;
 use App\Repositories\Geolocation\GeolocationRepositoryInterface;
+use App\Repositories\Integrations\TrailerCentral\AuthTokenRepository;
+use App\Repositories\Integrations\TrailerCentral\AuthTokenRepositoryInterface;
 use App\Repositories\Integrations\TrailerCentral\InventoryRepository;
 use App\Repositories\Integrations\TrailerCentral\InventoryRepositoryInterface;
 use App\Repositories\Integrations\TrailerCentral\LeadRepository;
@@ -71,6 +73,8 @@ class TrailerCentralIntegrationServiceProvider extends ServiceProvider
         $this->app->bind(LeadRepositoryInterface::class, LeadRepository::class);
         $this->app->bind(LeadSyncServiceInterface::class, LeadSyncService::class);
         $this->app->bind(LeadLogServiceInterface::class, LeadLogService::class);
+
+        $this->app->bind(AuthTokenRepositoryInterface::class, AuthTokenRepository::class);
 
         $this->app->bind(InventoryServiceInterface::class, InventoryService::class);
         $this->app->bind(SysConfigServiceInterface::class, SysConfigService::class);
