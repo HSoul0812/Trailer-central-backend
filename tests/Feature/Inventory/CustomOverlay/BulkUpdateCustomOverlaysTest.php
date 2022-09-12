@@ -13,6 +13,12 @@ class BulkUpdateCustomOverlaysTest extends EndpointCustomOverlaysTest
     protected const VERB = 'POST';
     protected const ENDPOINT = '/api/inventory/bulk-overlay';
 
+    /**
+     * @group DMS
+     * @group DMS_INVENTORY_CUSTOM_OVERLAY
+     *
+     * @return void
+     */
     public function testItShouldPreventAccessingWithoutAuthentication(): void
     {
         $this->itShouldPreventAccessingWithoutAuthentication();
@@ -20,6 +26,9 @@ class BulkUpdateCustomOverlaysTest extends EndpointCustomOverlaysTest
 
     /**
      * @dataProvider badArgumentsProvider
+     *
+     * @group DMS
+     * @group DMS_INVENTORY_CUSTOM_OVERLAY
      *
      * @param array $arguments
      * @param string $fieldName
@@ -51,6 +60,12 @@ class BulkUpdateCustomOverlaysTest extends EndpointCustomOverlaysTest
         $this->tearDownSeed($otherSeed['dealer']->dealer_id);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_INVENTORY_CUSTOM_OVERLAY
+     *
+     * @return void
+     */
     public function testItShouldUpdateWhenTheArgumentsAreFine(): void
     {
         $otherSeed = $this->createDealerWithCustomerOverlays();

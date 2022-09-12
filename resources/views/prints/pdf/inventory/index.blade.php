@@ -1,18 +1,25 @@
 <style>
+    html,
+    body {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        font-size: 100%;
+        font: inherit;
+        vertical-align: baseline;
+    }
+
     .printTable {
         z-index: -55;
         position: absolute;
     }
 
     .print-inventory {
-        max-width: 1024px;
         padding: 10px;
         font-size: 20px;
     }
 
     .dealership {
-        width: 298px;
-        float: right;
         margin-top: 20px;
     }
 
@@ -28,10 +35,6 @@
         line-height: 25px;
     }
 
-    .inventory-description {
-        font-size: 22px;
-    }
-
     .print-inventory p {
         margin: 4px 0;
     }
@@ -42,6 +45,7 @@
 
     .print-inventory .inventory-info .label,
     .print-inventory .inventory-info .data {
+        word-wrap: break-word;
         font-size: 20px;
     }
 
@@ -67,7 +71,6 @@
 
     .inventory-info .label {
         font-weight: bold;
-        width: 131px;
         display: inline-block;
     }
 
@@ -110,7 +113,7 @@
             <p class="dealer-phone">
                 Phone: {{ $inventory['dealer_location']['phone'] }}
             </p>
-            <div class="clear"/>
+            <div class="clear"></div>
             <p class="dealer-address">
                 {{ $inventory['dealer_location']['address'] }}<br>{{
             $inventory['dealer_location']['city']
@@ -120,9 +123,9 @@
             <p class="dealer-email">
                 Email: {{ $inventory['dealer_location']['email'] }}
             </p>
-            <div class="clear"/>
+            <div class="clear"></div>
         </div>
-        <div class="clear"/>
+        <div class="clear"></div>
         @if(count($inventory['images']))
             <div class="inventory-image">
                 <img
@@ -134,7 +137,7 @@
         <h2 style="border: none" class="inventory-title">
             {{ $inventory['title'] }}
         </h2>
-        <div class="clear"/>
+        <div class="clear"></div>
     </div>
     <table class="inventory-info">
         <tr>
@@ -227,7 +230,7 @@
             </td>
         </tr>
     </table>
-    <div class="clear"/>
+    <div class="clear"></div>
     <table class="footer-table" cellspacing="0" cellpadding="0">
         @if($inventory['msrp'])
             <tr>
@@ -254,7 +257,7 @@
             </tr>
         @endif
     </table>
-    <div class="clear"/>
+    <div class="clear"></div>
     @if(count($inventory['features']))
         <h3 class="inventory-title">
             Features
@@ -281,9 +284,9 @@
             </tr>
         @endfor
     </table>
-    <div class="clear"/>
+    <div class="clear"></div>
     <h2>Description</h2>
     @if($inventory['description'])
-        <p class="inventory-description">{!! $inventory['description'] !!}</p>
+        <div>{!! $inventory['description'] !!}</div>
     @endif
 </div>

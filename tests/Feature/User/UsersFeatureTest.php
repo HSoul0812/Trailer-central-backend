@@ -11,6 +11,12 @@ class UsersFeatureTest extends TestCase
 {
     use WithFaker;
 
+    /**
+     * @group DMS
+     * @group DMS_USER_FEATURES
+     *
+     * @return void
+     */
     public function testCreateUser() {
         $email = $this->faker->email;
         $response = $this->post( '/api/users', [
@@ -27,6 +33,12 @@ class UsersFeatureTest extends TestCase
         User::where('email', $email)->delete();
     }
 
+    /**
+     * @group DMS
+     * @group DMS_USER_FEATURES
+     *
+     * @return void
+     */
     public function testCreateUserUsingInvalidEmail() {
         $response = $this->post('/api/users', [
             'email' => 'invalid email',
@@ -36,6 +48,12 @@ class UsersFeatureTest extends TestCase
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_USER_FEATURES
+     *
+     * @return void
+     */
     public function testCreateUserUsingInvalidPassword() {
         $response = $this->post( '/api/users', [
             'email' => $this->faker->email,
@@ -45,6 +63,13 @@ class UsersFeatureTest extends TestCase
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_USER_FEATURES
+     *
+     * @return void
+     * @throws \Exception
+     */
     public function testGetUserWithExistingEmail() {
         $user = factory(User::class)->create();
         $response = $this->get('/api/users?email=' . $user->email);
@@ -58,6 +83,12 @@ class UsersFeatureTest extends TestCase
         $user->delete();
     }
 
+    /**
+     * @group DMS
+     * @group DMS_USER_FEATURES
+     *
+     * @return void
+     */
     public function testGetUserWithNonExistingEmail() {
         $email = $this->faker->unique()->email;
         $response = $this->get('/api/users?email=' . $email, [

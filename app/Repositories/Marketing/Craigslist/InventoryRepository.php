@@ -244,8 +244,13 @@ class InventoryRepository implements InventoryRepositoryInterface
                     Post::getTableName().'.added', Session::getTableName().'.session_scheduled',
                     Queue::getTableName().'.queue_id', Post::getTableName().'.clid',
                     Post::getTableName().'.view_url', Post::getTableName().'.manage_url'
-                ])->leftJoin(InventoryImage::getTableName(), Inventory::getTableName().'.inventory_id',
-                            '=', InventoryImage::getTableName().'.inventory_id')
+                ])->leftJoin(InventoryImage::getTableName(), function($join) {
+                    $join->on(Inventory::getTableName().'.inventory_id', '=', InventoryImage::getTableName().'.inventory_id');
+                    $join->on(function($join) {
+                        $join->on(InventoryImage::getTableName().'.is_default', '=', DB::raw('1'));
+                        $join->orOn(InventoryImage::getTableName().'.position', '=', DB::raw('1'));
+                    });
+                })
                 ->leftJoin(Image::getTableName(), Image::getTableName().'.image_id',
                             '=', InventoryImage::getTableName().'.image_id')
                 ->crossJoin(Profile::getTableName())
