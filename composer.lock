@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "064da849f4f110824c9de3c06ef07d87",
+    "content-hash": "2749079cdbbab6868b008bf41c97a3d6",
     "packages": [
         {
             "name": "algolia/algoliasearch-client-php",
@@ -2382,11 +2382,11 @@
         },
         {
             "name": "feed/edit-mapping",
-            "version": "dev-feature/CRM-577",
+            "version": "dev-original/feature/DMSS-943",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/EditMapping",
-                "reference": "8fd7d56324ac0c7c64f8886e4ff46e0991f75b69"
+                "reference": "b43729ad6fdf37df73dbc44aa30beefbf5e3c2a4"
             },
             "require": {
                 "php": ">=7.1.0"
@@ -8036,11 +8036,11 @@
         },
         {
             "name": "showroom/bulkconfiguration",
-            "version": "dev-feature/CRM-577",
+            "version": "dev-original/feature/DMSS-943",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/BulkConfiguration",
-                "reference": "301e74370ef2fc821398541508586d9da25cd1c6"
+                "reference": "944cbcf3c2a02da0b424cb4db08de04352e51838"
             },
             "require": {
                 "php": ">=7.1.0"
@@ -11711,11 +11711,11 @@
         },
         {
             "name": "trailercentral/passwordless-login-url",
-            "version": "dev-feature/CRM-577",
+            "version": "dev-original/feature/DMSS-943",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/PasswordlessLoginUrl",
-                "reference": "4fbc27f12cba8ed9058fbd0936433becb2a505eb"
+                "reference": "df06c93f1194ca42e1524d7406959adcbda814b4"
             },
             "require": {
                 "php": ">=7.1.0"
@@ -14724,5 +14724,5 @@
         "ext-pcntl": "7.1",
         "ext-posix": "7.1"
     },
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.2.0"
 }
