@@ -2,6 +2,7 @@
 
 namespace App\Services\Integrations\TrailerCentral\Api\Image;
 
+use App\Repositories\Integrations\TrailerCentral\AuthTokenRepositoryInterface;
 use GuzzleHttp\Client as GuzzleHttpClient;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Utils;
@@ -11,7 +12,8 @@ class ImageService implements ImageServiceInterface
     private string $endpointUrl;
 
     public function __construct(
-        private GuzzleHttpClient $httpClient
+        private GuzzleHttpClient $httpClient,
+        private AuthTokenRepositoryInterface $authTokenRepository
     ) {
         $this->endpointUrl = config('services.trailercentral.api') . 'images/local';
     }
@@ -19,12 +21,13 @@ class ImageService implements ImageServiceInterface
     /**
      * @throws GuzzleException
      */
-    public function uploadImage(int $dealerId, string $accessToken, string $imagePath)
+    public function uploadImage(int $dealerId, string $imagePath)
     {
+        $tcAuthToken = $this->authTokenRepository->get(['user_id' => $dealerId]);
         try {
             $response = $this->httpClient->post($this->endpointUrl, [
                 'headers' => [
-                    'access-token' => $accessToken
+                    'access-token' => $tcAuthToken->access_token
                 ],
                 'multipart' => [
                     [

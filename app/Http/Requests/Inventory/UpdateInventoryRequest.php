@@ -14,9 +14,8 @@ class UpdateInventoryRequest extends Request implements UpdateRequestInterface
         'title' => 'max:255',
         'dealer_location_id' => 'integer',
         'dealer_location_identifier' => 'integer',
-        'entity_type' => 'integer',
-        'entity_type_id' => 'integer',
-
+        'type_id' => 'required_with:category|integer',
+        'category' => 'required_with:type_id|string',
         'existing_images' => 'array|nullable',
         'existing_images.*.image_id' => 'integer|required',
         'existing_images.*.position' => 'integer|nullable',

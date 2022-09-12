@@ -6,6 +6,7 @@ use App\DTOs\Inventory\TcApiResponseAttribute;
 use App\DTOs\Inventory\TcApiResponseInventory;
 use App\DTOs\Inventory\TcApiResponseInventoryCreate;
 use App\DTOs\Inventory\TcApiResponseInventoryDelete;
+use App\Repositories\Integrations\TrailerCentral\AuthTokenRepositoryInterface;
 use App\Repositories\Parts\ListingCategoryMappingsRepositoryInterface;
 use App\Repositories\SysConfig\SysConfigRepositoryInterface;
 use App\Services\Inventory\ESQuery\ESBoolQueryBuilder;
@@ -72,7 +73,8 @@ class InventoryService implements InventoryServiceInterface
     public function __construct(
         private GuzzleHttpClient $httpClient,
         private SysConfigRepositoryInterface $sysConfigRepository,
-        private ListingCategoryMappingsRepositoryInterface $listingCategoryMappingsRepository
+        private ListingCategoryMappingsRepositoryInterface $listingCategoryMappingsRepository,
+        private AuthTokenRepositoryInterface $authTokenRepository
     )
     {}
 
@@ -123,11 +125,12 @@ class InventoryService implements InventoryServiceInterface
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Exception
      */
-    public function create(array $params): TcApiResponseInventoryCreate
+    public function create(int $userId, array $params): TcApiResponseInventoryCreate
     {
         $headers = array_change_key_case(getallheaders(), CASE_LOWER);
-        $access_token = $headers['access-token'];
         $url = config('services.trailercentral.api') . 'inventory/';
+
+        $authToken = $this->authTokenRepository->get(['user_id' => $userId]);
 
         $categoryMapping = $this->listingCategoryMappingsRepository->get([
             'type_id' => $params['type_id'],
@@ -139,7 +142,11 @@ class InventoryService implements InventoryServiceInterface
         $params['category'] = $categoryMapping->map_to;
         $params['entity_type_id'] = $categoryMapping->entity_type_id;
 
-        $inventory = $this->handleHttpRequest('PUT', $url, ['query' => $params, 'headers' => ['access-token' => $access_token]]);
+        $inventory = $this->handleHttpRequest(
+            'PUT',
+            $url,
+            ['query' => $params, 'headers' => ['access-token' => $authToken->access_token]]
+        );
         return TcApiResponseInventoryCreate::fromData($inventory['response']['data']);
     }
 
@@ -147,13 +154,16 @@ class InventoryService implements InventoryServiceInterface
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Exception
      */
-    public function delete(int $id): TcApiResponseInventoryDelete
+    public function delete(int $userId, int $id): TcApiResponseInventoryDelete
     {
-        $headers = array_change_key_case(getallheaders(), CASE_LOWER);
-        $access_token = $headers['access-token'];
+        $authToken = $this->authTokenRepository->get(['user_id' => $userId]);
         $url = config('services.trailercentral.api') . 'inventory/' . $id;
 
-        $response = $this->handleHttpRequest('DELETE', $url, ['headers' => ['access-token' => $access_token]]);
+        $response = $this->handleHttpRequest(
+            'DELETE',
+            $url,
+            ['headers' => ['access-token' => $authToken->access_token]]
+        );
 
         $respObj = TcApiResponseInventoryDelete::fromData($response['response']);
 
@@ -164,23 +174,28 @@ class InventoryService implements InventoryServiceInterface
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Exception
      */
-    public function update(array $params): TcApiResponseInventoryCreate
+    public function update(int $userId, array $params): TcApiResponseInventoryCreate
     {
-        $headers = array_change_key_case(getallheaders(), CASE_LOWER);
-        $access_token = $headers['access-token'];
+        $authToken = $this->authTokenRepository->get(['user_id' => $userId]);
         $url = config('services.trailercentral.api') . 'inventory/' . $params['inventory_id'];
 
-        if(isset($params['category'])) {
+        if(isset($params['type_id'])) {
             $categoryMapping = $this->listingCategoryMappingsRepository->get([
+                'type_id' => $params['type_id'],
                 'map_from' => $params['category']
             ]);
-            if($categoryMapping === null) {
+            if ($categoryMapping === null) {
                 throw new BadRequestException('Corresponding category mapping was not found');
             }
             $params['category'] = $categoryMapping->map_to;
+            $params['entity_type_id'] = $categoryMapping->entity_type_id;
         }
 
-        $inventory = $this->handleHttpRequest('POST', $url, ['query' => $params, 'headers' => ['access-token' => $access_token]]);
+        $inventory = $this->handleHttpRequest(
+            'POST',
+            $url,
+            ['query' => $params, 'headers' => ['access-token' => $authToken->access_token]]
+        );
         $respObj = TcApiResponseInventoryCreate::fromData($inventory['response']['data']);
 
         return $respObj;
