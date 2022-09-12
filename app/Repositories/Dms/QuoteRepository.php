@@ -97,8 +97,6 @@ class QuoteRepository implements QuoteRepositoryInterface
         // Filter out service orders which location doesn't exist
         if (isset($params['location']) && $params['location'] > 0) {
             $query = $query->where('dealer_location_id', '=', $params['location']);
-        } else {
-            $query = $query->where('dealer_location_id', '>', 0);
         }
 
         if (isset($params['search_term'])) {
