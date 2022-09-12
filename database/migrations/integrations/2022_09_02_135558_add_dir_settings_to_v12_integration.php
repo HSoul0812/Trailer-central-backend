@@ -83,9 +83,7 @@ class AddDirSettingsToV12Integration extends Migration
      */
     public function up()
     {
-        Schema::table('v12_integration', function (Blueprint $table) {
-            DB::table('integration')->where('integration_id', self::INTEGRATION_ID)->update(['settings' => serialize(self::NEW_SETTINGS)]);
-        });
+        $this->updateIntegration(self::INTEGRATION_ID, self::NEW_SETTINGS);
     }
 
     /**
@@ -95,8 +93,31 @@ class AddDirSettingsToV12Integration extends Migration
      */
     public function down()
     {
-        Schema::table('v12_integration', function (Blueprint $table) {
-            DB::table('integration')->where('integration_id', self::INTEGRATION_ID)->update(['settings' => serialize(self::OLD_SETTINGS)]);
-        });
+        $this->updateIntegration(self::INTEGRATION_ID, self::OLD_SETTINGS);
+    }
+
+    /**
+     * Check if integration exists
+     *
+     * @param int $integrationId
+     * @return bool
+     */
+    public function checkIntegration(int $integrationId): bool
+    {
+        return DB::table('integration')->where('integration_id', $integrationId)->exists();
+    }
+
+    /**
+     * Update integration
+     *
+     * @param int $integrationId
+     * @param array $settings
+     * @return void
+     */
+    public function updateIntegration(int $integrationId, array $settings)
+    {
+        if ($this->checkIntegration($integrationId)) {
+            DB::table('integration')->where('integration_id', $integrationId)->update(['settings' => serialize($settings)]);
+        }
     }
 }
