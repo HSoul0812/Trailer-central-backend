@@ -23,7 +23,6 @@ class WebsiteUserRepository implements WebsiteUserRepositoryInterface
         $websiteUser->fill($attributes);
         $websiteUser->password = $attributes['password'] ?? '';
         $websiteUser->tc_user_id = $attributes['tc_user_id'];
-        $websiteUser->tc_access_token = $attributes['tc_access_token'];
         $websiteUser->save();
         return $websiteUser;
     }
