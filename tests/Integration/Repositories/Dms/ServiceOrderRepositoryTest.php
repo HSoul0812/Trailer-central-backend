@@ -39,6 +39,9 @@ class ServiceOrderRepositoryTest extends TestCase
     /**
      * Test that SUT is properly bound by the application
      *
+     * @group DMS
+     * @group DMS_SERVICE_ORDER
+     *
      * @throws BindingResolutionException when there is a problem with resolution
      *                                    of concreted class
      */
@@ -51,6 +54,9 @@ class ServiceOrderRepositoryTest extends TestCase
     
     /**
      * @covers ::update
+     *
+     * @group DMS
+     * @group DMS_SERVICE_ORDER
      */
     public function testUpdateServiceOrderStatus(): void 
     {

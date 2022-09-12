@@ -22,6 +22,9 @@ class IndexTest extends AbstractDealerLocationController
     /**
      * @dataProvider invalidParametersProvider
      *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION
+     *
      * @param array $params
      * @param string $expectedException
      * @param string $expectedExceptionMessage
@@ -61,6 +64,9 @@ class IndexTest extends AbstractDealerLocationController
 
     /**
      * @dataProvider validParametersProvider
+     *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION
      *
      * @param callable|string $expectedName
      *

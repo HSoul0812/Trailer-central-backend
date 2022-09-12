@@ -9,6 +9,7 @@ use App\Services\File\DTOs\FileDto;
 use App\Services\File\FileService;
 use App\Services\Integration\Common\DTOs\AttachmentFile;
 use GuzzleHttp\Client;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Mockery;
@@ -87,9 +88,14 @@ class FileServiceTest extends TestCase
      * @covers ::upload
      * @dataProvider uploadDataProvider
      *
+     * @group DMS
+     * @group DMS_FILES
+     *
      * @param string $url
      * @param string $title
      * @param int $dealerId
+     * @throws FileUploadException
+     * @throws BindingResolutionException
      */
     public function testUpload(string $url, string $title, int $dealerId)
     {
@@ -129,9 +135,14 @@ class FileServiceTest extends TestCase
      * @covers ::upload
      * @dataProvider uploadDataProvider
      *
+     * @group DMS
+     * @group DMS_FILES
+     *
      * @param string $url
      * @param string $title
      * @param int $dealerId
+     * @throws BindingResolutionException
+     * @throws FileUploadException
      */
     public function testUploadEmptyContent(string $url, string $title, int $dealerId)
     {
@@ -163,9 +174,14 @@ class FileServiceTest extends TestCase
      * @covers ::upload
      * @dataProvider uploadDataProvider
      *
+     * @group DMS
+     * @group DMS_FILES
+     *
      * @param string $url
      * @param string $title
      * @param int $dealerId
+     * @throws BindingResolutionException
+     * @throws FileUploadException
      */
     public function testUploadEmptyContentSkip(string $url, string $title, int $dealerId)
     {
@@ -199,6 +215,9 @@ class FileServiceTest extends TestCase
 
     /**
      * @covers ::uploadLocal
+     *
+     * @group DMS
+     * @group DMS_FILES
      */
     public function testUploadLocal()
     {
@@ -220,6 +239,9 @@ class FileServiceTest extends TestCase
 
     /**
      * @covers ::uploadLocal
+     *
+     * @group DMS
+     * @group DMS_FILES
      */
     public function testUploadLocalByAttachmentFile()
     {
@@ -245,6 +267,9 @@ class FileServiceTest extends TestCase
 
     /**
      * @covers ::uploadLocal
+     *
+     * @group DMS
+     * @group DMS_FILES
      */
     public function testUploadLocalWrongMimeType()
     {
@@ -258,6 +283,9 @@ class FileServiceTest extends TestCase
 
     /**
      * @covers ::uploadLocal
+     *
+     * @group DMS
+     * @group DMS_FILES
      */
     public function testUploadLocalWithoutFile()
     {
@@ -269,6 +297,9 @@ class FileServiceTest extends TestCase
 
     /**
      * @covers ::uploadLocal
+     *
+     * @group DMS
+     * @group DMS_FILES
      */
     public function testUploadLocalWrongFile()
     {

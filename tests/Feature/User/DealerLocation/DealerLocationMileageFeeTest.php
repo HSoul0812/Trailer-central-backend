@@ -53,6 +53,12 @@ class DealerLocationMileageFeeTest extends TestCase
         $this->categories = $this->inventoryCategoriesSeeder->data();
     }
 
+    /**
+     * @group DMS
+     * @group DMS_DEALER_LOCATION_MILEAGE_FEE
+     *
+     * @return void
+     */
     public function testBulkCreateWithouthAccessToken()
     {
         $response = $this->post("/api/user/dealer-location/{$this->location->dealer_location_id}/mileage-fee/all");
@@ -60,6 +66,12 @@ class DealerLocationMileageFeeTest extends TestCase
         $response->assertStatus(403);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_DEALER_LOCATION_MILEAGE_FEE
+     *
+     * @return void
+     */
     public function testBulkCreateMileageFees()
     {
         $numberOfInventoryCategories = Category::count();
@@ -78,6 +90,12 @@ class DealerLocationMileageFeeTest extends TestCase
         $this->assertCount($numberOfInventoryCategories, $data['data']);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_DEALER_LOCATION_MILEAGE_FEE
+     *
+     * @return void
+     */
     public function testBulkCreateRequestValidation()
     {
         $response = $this

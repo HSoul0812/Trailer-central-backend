@@ -50,6 +50,12 @@ class PasswordResetTest extends TestCase
         parent::tearDown();
     }
 
+    /**
+     * @group DMS
+     * @group DMS_USER_PASSWORD
+     *
+     * @return void
+     */
     public function testStartPasswordReset()
     {
         $this->dealer = $this->dealer->fresh();
@@ -59,6 +65,12 @@ class PasswordResetTest extends TestCase
         $response->assertStatus(201);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_USER_PASSWORD
+     *
+     * @return void
+     */
     public function testStartPasswordResetNoEmail()
     {
         $this->dealer = $this->dealer->fresh();
@@ -68,6 +80,12 @@ class PasswordResetTest extends TestCase
         $response->assertStatus(422);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_USER_PASSWORD
+     *
+     * @return void
+     */
     public function testStartPasswordResetNonExistentEmail()
     {
         $this->dealer = $this->dealer->fresh();
@@ -77,6 +95,12 @@ class PasswordResetTest extends TestCase
         $response->assertStatus(201);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_USER_PASSWORD
+     *
+     * @return void
+     */
     public function testFinishPasswordReset()
     {
         $this->dealer = $this->dealer->fresh();
@@ -92,6 +116,12 @@ class PasswordResetTest extends TestCase
         $response->assertStatus(200);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_USER_PASSWORD
+     *
+     * @return void
+     */
     public function testFinishPasswordResetWrongPasswordLength(): void
     {
         $this->dealer = $this->dealer->fresh();
@@ -113,6 +143,12 @@ class PasswordResetTest extends TestCase
         $this->assertContains('The password should not be greater than 8 characters.', $json['errors']['password']);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_USER_PASSWORD
+     *
+     * @return void
+     */
     public function testFinishPasswordResetNoPassword()
     {
         $this->dealer = $this->dealer->fresh();
@@ -123,6 +159,12 @@ class PasswordResetTest extends TestCase
         $response->assertStatus(422);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_USER_PASSWORD
+     *
+     * @return void
+     */
     public function testFinishPasswordResetNoCode()
     {
         $this->dealer = $this->dealer->fresh();

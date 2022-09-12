@@ -48,6 +48,30 @@ class Marketplace extends Model
         'sms'
     ];
 
+    /**
+     * @const string
+     */
+    const STATUS_ACTIVE = 'active';
+
+    /**
+     * @const string
+     */
+    const STATUS_INVALID = 'invalid';
+
+    /**
+     * @const string
+     */
+    const STATUS_FAILED = 'failed';
+
+    /**
+     * @const string
+     */
+    const STATUS_DELETED = 'deleted';
+
+    /**
+     * @const string
+     */
+    const STATUS_EXPIRED = 'expired';
 
     /**
      * @var string
@@ -104,6 +128,16 @@ class Marketplace extends Model
     public function listings(): HasMany
     {
         return $this->hasMany(Listings::class, 'marketplace_id', 'id');
+    }
+
+    /**
+     * Get Errors
+     *
+     * @return HasMany
+     */
+    public function errors(): HasMany
+    {
+        return $this->hasMany(Error::class, 'marketplace_id', 'id');
     }
 
     /**

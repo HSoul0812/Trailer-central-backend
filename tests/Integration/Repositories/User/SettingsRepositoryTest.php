@@ -24,6 +24,9 @@ class SettingsRepositoryTest extends TestCase
      *
      * @typeOfTest IntegrationTestCase
      *
+     * @group DMS
+     * @group DMS_SETTINGS
+     *
      * @throws BindingResolutionException when there is a problem with resolution
      *                                    of concreted class
      */
@@ -40,6 +43,8 @@ class SettingsRepositoryTest extends TestCase
      * @typeOfTest IntegrationTestCase
      * @dataProvider validQueryParametersProvider
      *
+     * @group DMS
+     * @group DMS_SETTINGS
      *
      * @throws BindingResolutionException when there is a problem with resolution
      *                                    of concreted class
@@ -69,6 +74,8 @@ class SettingsRepositoryTest extends TestCase
      * @typeOfTest IntegrationTestCase
      * @dataProvider validFindParametersProvider
      *
+     * @group DMS
+     * @group DMS_SETTINGS
      *
      * @throws BindingResolutionException when there is a problem with resolution
      *                                    of concreted class
@@ -103,6 +110,9 @@ class SettingsRepositoryTest extends TestCase
      * Test that SUT is inserting correctly
      *
      * @typeOfTest IntegrationTestCase
+     *
+     * @group DMS
+     * @group DMS_SETTINGS
      *
      * @throws BindingResolutionException when there is a problem with resolution of concreted class
      *
@@ -139,6 +149,9 @@ class SettingsRepositoryTest extends TestCase
      * Test that SUT is inserting correctly
      *
      * @typeOfTest IntegrationTestCase
+     *
+     * @group DMS
+     * @group DMS_SETTINGS
      *
      * @throws BindingResolutionException when there is a problem with resolution of concreted class
      *
@@ -177,6 +190,9 @@ class SettingsRepositoryTest extends TestCase
      * Test that SUT is inserting correctly
      *
      * @typeOfTest IntegrationTestCase
+     *
+     * @group DMS
+     * @group DMS_SETTINGS
      *
      * @throws BindingResolutionException when there is a problem with resolution of concreted class
      *

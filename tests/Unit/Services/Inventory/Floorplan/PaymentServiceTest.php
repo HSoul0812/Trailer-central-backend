@@ -36,6 +36,9 @@ class PaymentServiceTest extends TestCase
     /**
      * @covers ::createBulk
      *
+     * @group DMS
+     * @group DMS_INVENTORY_FLOORPLAN
+     *
      * @throws BindingResolutionException
      */
     public function testCreateBulk()
