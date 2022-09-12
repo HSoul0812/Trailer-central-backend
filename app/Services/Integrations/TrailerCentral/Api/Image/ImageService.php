@@ -19,9 +19,8 @@ class ImageService implements ImageServiceInterface
     /**
      * @throws GuzzleException
      */
-    public function uploadImage(int $dealerId, string $imagePath)
+    public function uploadImage(int $dealerId, string $accessToken, string $imagePath)
     {
-        $accessToken = request()->header('access-token');
         try {
             $response = $this->httpClient->post($this->endpointUrl, [
                 'headers' => [
