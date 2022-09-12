@@ -37,6 +37,9 @@ class AuditLogRepositoryTest extends TestCase
     
     /**
      * @covers ::getByYear
+     *
+     * @group DMS
+     * @group DMS_PARTS
      */
     public function testGetByYear(): void 
     {

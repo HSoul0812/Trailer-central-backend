@@ -28,6 +28,9 @@ class PartServiceTest extends TestCase
     }
 
     /**
+     * @group DMS
+     * @group DMS_PARTS
+     *
      * @covers ::moveStatus
      * @group quickbook
      */

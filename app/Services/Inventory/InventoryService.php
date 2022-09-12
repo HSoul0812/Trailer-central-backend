@@ -106,6 +106,9 @@ class InventoryService implements InventoryServiceInterface
      */
     private $logService;
 
+    /** @var \Parsedown */
+    private $markdownHelper;
+
     /**
      * InventoryService constructor.
      * @param InventoryRepositoryInterface $inventoryRepository
@@ -119,6 +122,7 @@ class InventoryService implements InventoryServiceInterface
      * @param DealerLocationRepositoryInterface $dealerLocationRepository
      * @param DealerLocationMileageFeeRepositoryInterface $dealerLocationMileageFeeRepository
      * @param CategoryRepositoryInterface $categoryRepository
+     * @param \Parsedown $parsedown
      * @param GeoLocationRepositoryInterface $geolocationRepository
      */
     public function __construct(
@@ -134,6 +138,7 @@ class InventoryService implements InventoryServiceInterface
         DealerLocationMileageFeeRepositoryInterface $dealerLocationMileageFeeRepository,
         CategoryRepositoryInterface $categoryRepository,
         GeoLocationRepositoryInterface $geolocationRepository,
+        \Parsedown $parsedown,
         ?LoggerServiceInterface $logService = null
     ) {
         $this->inventoryRepository = $inventoryRepository;
@@ -149,6 +154,7 @@ class InventoryService implements InventoryServiceInterface
         $this->categoryRepository = $categoryRepository;
         $this->geolocationRepository = $geolocationRepository;
         $this->logService = $logService ?? app()->make(LoggerServiceInterface::class);
+        $this->markdownHelper = $parsedown;
     }
 
     /**
@@ -185,6 +191,10 @@ class InventoryService implements InventoryServiceInterface
                 $params['clapps']['default-image'] = $clappImage['path'];
             }
 
+            if (!empty($params['description'])) {
+                $params['description_html'] = $this->convertMarkdown($params['description']);
+            }
+
             $inventory = $this->inventoryRepository->create($params);
 
             if (!$inventory instanceof Inventory) {
@@ -205,7 +215,7 @@ class InventoryService implements InventoryServiceInterface
             Log::error('Item create error. Message - ' . $e->getMessage(), $e->getTrace());
             $this->inventoryRepository->rollbackTransaction();
 
-            throw new InventoryException('Inventory item create error');
+            throw new InventoryException('Item create error. Message - ' . $e->getMessage());
         }
 
         return $inventory;
@@ -250,6 +260,10 @@ class InventoryService implements InventoryServiceInterface
             if (!empty($clappsDefaultImage)) {
                 $clappImage = $this->imageService->upload($clappsDefaultImage, $params['title'], $params['dealer_id']);
                 $params['clapps']['default-image'] = $clappImage['path'];
+            }
+
+            if (!empty($params['description'])) {
+                $params['description_html'] = $this->convertMarkdown($params['description']);
             }
 
             $inventory = $this->inventoryRepository->update($params, $options);
@@ -635,7 +649,7 @@ class InventoryService implements InventoryServiceInterface
     private function getChangedFields(Inventory $inventory, array $params): array
     {
         $changedFields = array_values(array_unique(array_merge(
-            $inventory->changed_fields_in_dashboard ?? [], array_keys($inventory->getChanges())
+            $inventory->changed_fields_in_dashboard ?? [], $params['changed_fields_in_dashboard']
         )));
 
         if ($params['unlock_images'] ?? false) {
@@ -824,5 +838,49 @@ class InventoryService implements InventoryServiceInterface
             self::PDF_EXPORT => PdfExporter::class
         ][$format];
         return (new $instance)->export($this->inventoryRepository->get(['id' => $inventoryId]));
+    }
+
+    public function convertMarkdown($input): string
+    {
+        $input = strip_tags($input);
+
+        $input = str_replace('\n', PHP_EOL, $input);
+        $input = str_replace('\\' . PHP_EOL, PHP_EOL . PHP_EOL, $input); // to fix CDW-824 problems
+        $input = str_replace('\\' . PHP_EOL . 'n', PHP_EOL . PHP_EOL . PHP_EOL, $input);
+
+        $input = str_replace('\\\\', '', $input);
+        $input = str_replace('\\,', ',', $input);
+        $input = str_replace('****', '', $input);
+        $input = str_replace('__', '', $input);
+
+        // Try/Catch Errors
+        $converted = '';
+        $exception = '';
+        try {
+            // Initialize Markdown Converter
+            $converter = new \Parsedown(); // This parser is 10x faster than the CommonMarkConverter
+            $converted = $converter->text($input);
+        } catch(\Exception $e) {
+            $exception = $e->getMessage();
+        }
+
+        // Convert Markdown to HTML
+        $description = preg_replace('/\\\\/', '<br>', $converted);
+
+        // to fix CDW-824 problems
+        $description = nl2br($description);
+
+        // taken from previous CDW-824 solution
+        $description = str_replace('<code>', '', $description);
+        $description = str_replace('</code>', '', $description);
+        $description = str_replace('<pre>', '', $description);
+        $description = str_replace('</pre>', '', $description);
+
+        if(strpos($description, '<br>') === FALSE && strpos($description, '<p>') === FALSE) {
+            $description = preg_replace('/(.)\R(.)/m', '$1<br>$2', $description);
+        }
+
+        // Return
+        return $description.PHP_EOL;
     }
 }

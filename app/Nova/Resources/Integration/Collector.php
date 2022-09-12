@@ -195,9 +195,11 @@ class Collector extends Resource
                 ),
             ]),
 
-            new Panel('Images And Files', [
-                Boolean::make('Update Images', 'update_images')->hideFromIndex(),
+            new Panel('Images, Video and Files', [
+                Heading::make('<p class="text-primary"">Files Section</p>')->asHtml(),
                 Boolean::make('Update Files', 'update_files')->hideFromIndex(),
+                Heading::make('<p class="text-primary"">Images Section</p>')->asHtml(),
+                Boolean::make('Update Images', 'update_images')->hideFromIndex(),
                 Text::make('Image Directory Address', 'local_image_directory_address')->hideFromIndex()->help(
                     'If the images in the feed are not a URL and instead are uploaded to the FTP include the address to the images here. **Example 1:
                     / -> This would mean the images are in the root directory**
@@ -210,6 +212,11 @@ class Collector extends Resource
                     'Images in the file are marked as secondary'
                 ),
                 Boolean::make('Append Floorplan Image', 'append_floorplan_image')->withMeta(['value' => $this->active ?? true])->hideFromIndex(),
+                Heading::make('<p class="text-primary"">Video Section</p>')->asHtml(),
+                Text::make('Video Source Fields', 'video_source_fields')->hideFromIndex()->help(
+                    'Please Add with <strong>, separated values without spaces!</strong> all the source file fields that are related to <code>video_embed_code</code><br />
+                    <strong>Example:</strong> <code class="font-weight-bold">videourl,virtualtour,alternatevideo,etc</code> '
+                ),
             ]),
 
             new Panel('Title And Description', [

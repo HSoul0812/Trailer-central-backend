@@ -59,6 +59,11 @@ return [
             'root' => base_path('tests/resources'),
         ],
 
+        'qz_tray' => [
+            'driver' => 'local',
+            'root' => storage_path('qz-tray'),
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
@@ -93,6 +98,7 @@ return [
             'region' => env('AWS_DEFAULT_REGION'),
             'bucket' => env('MAIL_BUCKET'),
             'url' => env('AWS_URL'),
+            'visibility' => 'public'
         ],
 
         // use the same creds as default s3, use this separate config to make it easier to separate
@@ -108,6 +114,13 @@ return [
             'region' => env('AWS_DEFAULT_REGION'),
             'bucket' => env('AWS_BUCKET'),
             'url' => env('AWS_URL'),
+        ],
+
+        'marketplaceExports' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/tmp/exports/marketplace'),
+            'url' => env('APP_URL').'/storage/tmp/exports/marketplace',
+            'visibility' => 'public',
         ],
 
         'tmp' => [

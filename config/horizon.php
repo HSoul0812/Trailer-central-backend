@@ -146,7 +146,7 @@ return [
         'local' => [
             'supervisor-1' => [
                 'connection' => 'redis',
-                'queue' => ['inventory', 'parts', 'parts-export-new', 'factory-feeds', 'cvr-send-file', 'scout', 'reports', 'emailbuilder', 'blog-posts', 'scrapereplies', 'inquiry', 'fb-catalog', 'fb-messenger', 'ecommerce', 'crm-users'],
+                'queue' => ['inventory', 'parts', 'parts-export-new', 'factory-feeds', 'cvr-send-file', 'default', 'reports', 'emailbuilder', 'blog-posts', 'scrapereplies', 'inquiry', 'fb-catalog', 'fb-messenger', 'ecommerce', 'crm-users'],
                 'balance' => 'simple',
                 'processes' => 3,
                 'tries' => 3,
@@ -157,7 +157,7 @@ return [
         'dev' => [
             'supervisor-1' => [
                 'connection' => 'redis',
-                'queue' => ['inventory', 'parts', 'parts-export-new', 'factory-feeds', 'cvr-send-file', 'scout', 'reports', 'emailbuilder', 'blog-posts', 'scrapereplies', 'inquiry', 'fb-catalog', 'fb-messenger', 'ecommerce', 'crm-users'],
+                'queue' => ['inventory', 'parts', 'parts-export-new', 'factory-feeds', 'cvr-send-file', 'default', 'reports', 'emailbuilder', 'blog-posts', 'scrapereplies', 'inquiry', 'fb-catalog', 'fb-messenger', 'ecommerce', 'crm-users'],
                 'balance' => 'simple',
                 'processes' => 10,
                 'tries' => 3,
@@ -177,7 +177,7 @@ return [
             ],
             'supervisor-2' => [
                 'connection' => 'redis',
-                'queue' => ['scout'],
+                'queue' => ['default'],
                 'balance' => false,
                 'processes' => 1,
                 'tries' => 3,
@@ -201,7 +201,7 @@ return [
             ],
             'supervisor-5' => [
                 'connection' => 'redis',
-                'queue' => ['reports', 'emailbuilder', 'scrapereplies'],
+                'queue' => ['reports', 'emailbuilder'],
                 'balance' => 'auto',
                 'minProcesses' => 1,
                 'maxProcesses' => 3,
@@ -217,6 +217,15 @@ return [
                 'tries' => 3,
                 'timeout' => 7200,
             ],
+            'supervisor-7' => [
+                'connection' => 'redis',
+                'queue' => ['scrapereplies'],
+                'balance' => 'auto',
+                'minProcesses' => 1,
+                'maxProcesses' => 5,
+                'tries' => 1,
+                'timeout' => 600,
+            ],
         ],
 
         'production' => [
@@ -231,7 +240,7 @@ return [
             ],
             'supervisor-2' => [
                 'connection' => 'redis',
-                'queue' => ['scout'],
+                'queue' => ['default'],
                 'balance' => 'auto',
                 'minProcesses' => 15,
                 'maxProcesses' => 55,
@@ -277,9 +286,9 @@ return [
                 'queue' => ['scrapereplies'],
                 'balance' => 'auto',
                 'minProcesses' => 5,
-                'maxProcesses' => 100,
-                'tries' => 3,
-                'timeout' => 7200,
+                'maxProcesses' => 300,
+                'tries' => 1,
+                'timeout' => 3600,
             ],
         ],
     ],

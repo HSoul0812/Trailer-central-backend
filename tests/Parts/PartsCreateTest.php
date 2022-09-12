@@ -30,6 +30,9 @@ class PartsCreateTest extends TestCase
     /**
      * Test creating a part with all fields populated
      *
+     * @group DMS
+     * @group DMS_PARTS
+     *
      * @return void
      */
     public function testCreatePartAllFields()
@@ -60,7 +63,13 @@ class PartsCreateTest extends TestCase
                 'alternative_part_number' => null
             ]);             
     }
-    
+
+    /**
+     * @group DMS
+     * @group DMS_PARTS
+     *
+     * @return void
+     */
      public function testCreatePartMissingRequiredFields()
     {            
         $this->initializeTestData();
@@ -92,7 +101,14 @@ class PartsCreateTest extends TestCase
                 ]
             ]);             
     }
-    
+
+    /**
+     * @group DMS
+     * @group DMS_PARTS
+     *
+     * @return void
+     * @throws \Exception
+     */
     public function testCreatePartImageUpload()
     {
         $this->initializeTestData();

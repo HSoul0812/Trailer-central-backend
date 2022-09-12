@@ -244,6 +244,9 @@ class Inventory extends Model
         self::OVERLAY_ENABLED_ALL,
     ];
 
+    public const MIN_DESCRIPTION_LENGTH_FOR_FACEBOOK = 50;
+    public const MIN_PRICE_FOR_FACEBOOK = 0;
+
     /**
      * The table associated with the model.
      *
@@ -373,10 +376,10 @@ class Inventory extends Model
         'msrp' => 'float',
         'gvwr' => 'float',
         'fp_balance' => 'float',
-        'changed_fields_in_dashboard' => 'array',
         'qb_sync_processed' => 'boolean',
         'is_floorplan_bill' => 'boolean',
         'sold_at' => 'datetime',
+        'changed_fields_in_dashboard' => 'array'
     ];
 
     protected $hidden = [

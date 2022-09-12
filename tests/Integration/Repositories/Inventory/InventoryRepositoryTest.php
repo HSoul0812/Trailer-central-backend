@@ -39,6 +39,9 @@ class InventoryRepositoryTest extends TestCase
 
     /**
      * @covers ::getFloorplanned
+     *
+     * @group DMS
+     * @group DMS_INVENTORY
      */
     public function testGetFloorplannedInventoryWithStatus()
     {
@@ -66,6 +69,9 @@ class InventoryRepositoryTest extends TestCase
 
     /**
      * @covers ::getFloorplanned
+     *
+     * @group DMS
+     * @group DMS_INVENTORY
      */
     public function testGetFloorplannedInventoryWithoutStatus()
     {
@@ -87,5 +93,70 @@ class InventoryRepositoryTest extends TestCase
         $inventoryRepository = app()->make(InventoryRepository::class);
         $result = $inventoryRepository->getFloorplannedInventory(['dealer_id' => $this->dealerId]);
         $this->assertEquals(0, count($result));
+    }
+
+    /**
+     * @covers ::getAll
+     *
+     * @group DMS
+     * @group DMS_INVENTORY
+     */
+    public function testGetAllMatchingAllWordsInSearchTerm()
+    {
+        factory(Inventory::class)->create([
+            'dealer_id' => $this->dealerId,
+            'title' => '**some_random__** Test Inventory 2021 Trailers'
+        ]);
+        factory(Inventory::class)->create([
+            'dealer_id' => $this->dealerId,
+            'title' => '**some_random__** 2022 Green Trailers'
+        ]);
+        factory(Inventory::class)->create([
+            'dealer_id' => $this->dealerId,
+            'title' => '**some_random__** Red Trailer Made In 2020'
+        ]);
+
+        /** @var InventoryRepository $inventoryRepository */
+        $inventoryRepository = app()->make(InventoryRepository::class);
+
+        // Just to be sure we are dealing with only the inventory we created in this test
+        $inventory = $inventoryRepository->getAll([
+            'dealer_id' => $this->dealerId,
+            'search_term' => '**some_random__**'
+        ]);
+
+        $this->assertEquals(3, $inventory->count());
+
+        // This should match all inventory we created because they all have the words `**some_random__** & Trailer`
+        $inventory = $inventoryRepository->getAll([
+            'dealer_id' => $this->dealerId,
+            'search_term' => '**some_random__** Trailer'
+        ]);
+
+        $this->assertEquals(3, $inventory->count());
+
+        // This should match only 1 inventory because only 1 inventory has `Red & Made`
+        $inventory = $inventoryRepository->getAll([
+            'dealer_id' => $this->dealerId,
+            'search_term' => '**some_random__** Red Made'
+        ]);
+
+        $this->assertEquals(1, $inventory->count());
+
+        // This should match only 1 inventory because only 1 inventory has `2022 & Trailers`
+        $inventory = $inventoryRepository->getAll([
+            'dealer_id' => $this->dealerId,
+            'search_term' => '**some_random__** 2022 Trailers'
+        ]);
+
+        $this->assertEquals(1, $inventory->count());
+
+        // This should match no inventory because all the inventory start with `**some_random__**`
+        $inventory = $inventoryRepository->getAll([
+            'dealer_id' => $this->dealerId,
+            'search_term' => 'Trailers **some_random__**'
+        ]);
+
+        $this->assertEquals(0, $inventory->count());
     }
 }
