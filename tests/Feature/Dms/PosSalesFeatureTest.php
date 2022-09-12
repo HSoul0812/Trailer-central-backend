@@ -14,6 +14,12 @@ class PosSalesFeatureTest extends TestCase
     // use a known sample ID from the database with valid values
     protected $sampleId = 379;
 
+    /**
+     * @group DMS
+     * @group DMS_POS
+     *
+     * @return void
+     */
     public function testListHttpOk()
     {
         $response = $this
@@ -23,6 +29,12 @@ class PosSalesFeatureTest extends TestCase
         $response->assertStatus(200);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_POS
+     *
+     * @return void
+     */
     public function testListHasDataProperty()
     {
         $response = $this
@@ -33,6 +45,12 @@ class PosSalesFeatureTest extends TestCase
         $this->assertTrue(isset($json['data']));
     }
 
+    /**
+     * @group DMS
+     * @group DMS_POS
+     *
+     * @return void
+     */
     public function testShowHttpOk()
     {
         $response = $this
@@ -42,6 +60,12 @@ class PosSalesFeatureTest extends TestCase
         $response->assertStatus(200);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_POS
+     *
+     * @return void
+     */
     public function testShowCorrectObject()
     {
         $response = $this
@@ -58,6 +82,12 @@ class PosSalesFeatureTest extends TestCase
         $this->assertTrue($json['data']['discount'] === 0);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_POS
+     *
+     * @return void
+     */
     public function testShowRelationRefunds()
     {
         $response = $this
@@ -70,6 +100,12 @@ class PosSalesFeatureTest extends TestCase
         $this->assertTrue(isset($json['data']['refunds']));
     }
 
+    /**
+     * @group DMS
+     * @group DMS_POS
+     *
+     * @return void
+     */
     public function testShowRelationProducts()
     {
         $response = $this

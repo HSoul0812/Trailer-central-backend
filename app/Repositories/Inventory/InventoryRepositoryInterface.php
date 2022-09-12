@@ -15,7 +15,7 @@ interface InventoryRepositoryInterface extends Repository, TransactionalReposito
         ]
     ];
 
-    public function getAll($params, bool $withDefault = true, bool $paginated = false);
+    public function getAll($params, bool $withDefault = true, bool $paginated = false, $select = []);
 
     public function exists(array $params);
 
