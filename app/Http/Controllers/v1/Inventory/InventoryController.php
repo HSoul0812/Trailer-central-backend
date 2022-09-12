@@ -38,11 +38,15 @@ class InventoryController extends AbstractRestfulController
      */
     public function create(CreateRequestInterface $request)
     {
-      if ($request->validate()) {
-          return $this->response->item($this->inventoryService->create($request->all()), new TcApiResponseInventoryCreateTransformer());
-      }
+        $user = auth('api')->user();
+        if ($request->validate()) {
+            return $this->response->item(
+                $this->inventoryService->create($user->tc_user_id, $request->all()),
+                new TcApiResponseInventoryCreateTransformer()
+            );
+        }
 
-      return $this->response->errorBadRequest();
+        return $this->response->errorBadRequest();
     }
 
     /**
@@ -50,10 +54,14 @@ class InventoryController extends AbstractRestfulController
      */
     public function destroy(int $id)
     {
-      $inventoryRequest = new DeleteInventoryRequest(['inventory_id' => $id]);
+        $inventoryRequest = new DeleteInventoryRequest(['inventory_id' => $id]);
+        $user = auth('api')->user();
 
-      if ($inventoryRequest->validate()) {
-            return $this->response->item($this->inventoryService->delete($id), new TcApiResponseInventoryDeleteTransformer());
+        if ($inventoryRequest->validate()) {
+            return $this->response->item(
+                $this->inventoryService->delete($user->tc_user_id, $id),
+                new TcApiResponseInventoryDeleteTransformer()
+            );
         }
 
         return $this->response->errorBadRequest();
@@ -87,13 +95,17 @@ class InventoryController extends AbstractRestfulController
      */
     public function update(int $id, UpdateRequestInterface $request)
     {
-      $inventoryRequest = new UpdateInventoryRequest(array_merge($request->all(), ['inventory_id' => $id]));
+        $inventoryRequest = new UpdateInventoryRequest(array_merge($request->all(), ['inventory_id' => $id]));
+        $user = auth('api')->user();
 
-      if ($inventoryRequest->validate()) {
-          return $this->response->item($this->inventoryService->update($inventoryRequest->all()), new TcApiResponseInventoryCreateTransformer());
-      }
+        if ($inventoryRequest->validate()) {
+            return $this->response->item(
+                $this->inventoryService->update($user->tc_user_id, $inventoryRequest->all()),
+                new TcApiResponseInventoryCreateTransformer()
+            );
+        }
 
-      return $this->response->errorBadRequest();
+        return $this->response->errorBadRequest();
     }
 
     protected function constructRequestBindings(): void

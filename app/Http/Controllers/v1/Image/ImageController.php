@@ -15,8 +15,7 @@ use App\Services\Integrations\TrailerCentral\Api\Image\ImageServiceInterface;
 class ImageController extends AbstractRestfulController
 {
     public function __construct(
-        private ImageServiceInterface $imageService,
-        private AuthTokenRepositoryInterface $authTokenRepository
+        private ImageServiceInterface $imageService
     )
     {
         parent::__construct();
@@ -31,9 +30,8 @@ class ImageController extends AbstractRestfulController
     {
         if($request->validate()) {
             $user = auth('api')->user();
-            $tcAuthToken = $this->authTokenRepository->get(['user_id' => $user->tc_user_id]);
             return $this->response->array($this->imageService->uploadImage(
-                $user->tc_user_id, $tcAuthToken->access_token, $request->file
+                $user->tc_user_id, $request->file
             ));
         }
         return $this->response->errorBadRequest();
