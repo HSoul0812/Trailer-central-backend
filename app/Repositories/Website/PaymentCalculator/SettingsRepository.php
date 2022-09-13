@@ -42,7 +42,7 @@ class SettingsRepository implements SettingsRepositoryInterface {
      */
     public function getAll($params) {
         /** @var Builder $query */
-        $query = Settings::where('website_id', $params['website_id']);
+        $query = Settings::with('entityType')->where('website_id', $params['website_id']);
 
         if (isset($params['entity_type_id'])) {
             $query->where('entity_type_id', $params['entity_type_id']);
