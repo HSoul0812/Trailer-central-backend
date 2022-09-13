@@ -3,16 +3,20 @@
 namespace App\Nova\Resources\Facebook;
 
 use App\Nova\Actions\Dealer\ClearFBMEErrors;
+use App\Nova\Actions\FME\DownloadIntegrationRunHistory;
+use App\Nova\Actions\FME\DownloadRunHistory;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\DateTime;
 use App\Nova\Resource;
+use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
 
 class FBMarketplaceAccounts extends Resource
 {
     public static $group = 'Facebook';
+    public static $orderBy = ['last_attempt_ts' => 'asc'];
 
     /**
      * The model the resource corresponds to.
@@ -81,8 +85,6 @@ class FBMarketplaceAccounts extends Resource
 
             Text::make('Location')
                 ->sortable(),
-
-
         ];
     }
 
@@ -160,15 +162,40 @@ class FBMarketplaceAccounts extends Resource
      * @param Request $request
      * @return array
      */
-    public function actions(Request $request)
+    public function actions(Request $request): array
     {
         return [
-            (app()->make(ClearFBMEErrors::class))->canSee(function ($request) {
-                return true;
-            })->canRun(function ($request) {
-                return true;
-            })->onlyOnTableRow(),
+            $this->clearErrorsAction(),
+            $this->downloadIntegrationRunHistoryAction(),
+            $this->downloadRunHistoryAction(),
         ];
+    }
+
+    private function clearErrorsAction(): ClearFBMEErrors
+    {
+        return (app()->make(ClearFBMEErrors::class))->canSee(function ($request) {
+            return true;
+        })->canRun(function ($request) {
+            return true;
+        })->onlyOnTableRow();
+    }
+
+    private function downloadIntegrationRunHistoryAction(): DownloadIntegrationRunHistory
+    {
+        return (app()->make(DownloadIntegrationRunHistory::class))->canSee(function ($request) {
+            return true;
+        })->canRun(function ($request) {
+            return true;
+        })->onlyOnTableRow();
+    }
+
+    private function downloadRunHistoryAction(): DownloadRunHistory
+    {
+        return (app()->make(DownloadRunHistory::class))->canSee(function ($request) {
+            return true;
+        })->canRun(function ($request) {
+            return true;
+        })->onlyOnIndex();
     }
 
     public static function authorizedToCreate(Request $request)

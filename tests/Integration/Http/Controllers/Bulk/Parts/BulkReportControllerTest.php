@@ -30,6 +30,10 @@ class BulkReportControllerTest extends AbstractMonitoredJobsTest
      *
      * @covers ::financials
      *
+     * @group DMS
+     * @group DMS_BULK
+     * @group DMS_BULK_REPORT
+     *
      * @param array $params
      * @param string $expectedException
      * @param string $expectedExceptionMessage
@@ -73,6 +77,10 @@ class BulkReportControllerTest extends AbstractMonitoredJobsTest
      *
      * @covers ::financials
      *
+     * @group DMS
+     * @group DMS_BULK
+     * @group DMS_BULK_REPORT
+     *
      * @param array $params
      * @throws Exception
      */
@@ -106,6 +114,11 @@ class BulkReportControllerTest extends AbstractMonitoredJobsTest
      * @param string|null $firstExpectedErrorMessage
      *
      * @covers ::read
+     *
+     * @group DMS
+     * @group DMS_BULK
+     * @group DMS_BULK_REPORT
+     *
      * @throws Exception
      */
     public function testReadReportWithInvalidParameters(array $params,
@@ -146,6 +159,10 @@ class BulkReportControllerTest extends AbstractMonitoredJobsTest
      * @param array $expectedPayloadResponse
      *
      * @covers ::read
+     *
+     * @group DMS
+     * @group DMS_BULK
+     * @group DMS_BULK_REPORT
      */
     public function testReadReportWithDifferentResponseStatuses(array $params,
                                                           string $jobStatus,

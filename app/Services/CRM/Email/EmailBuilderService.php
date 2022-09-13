@@ -375,24 +375,8 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         int $userId,
         string $subject,
         string $html,
-        string $toEmail,
-        int $salesPersonId = 0,
-        string $fromEmail = ''
+        string $toEmail
     ): array {
-        // Get Sales Person
-        if(!empty($fromEmail) || !empty($salesPersonId)) {
-            if(!empty($fromEmail)) {
-                $salesPerson = $this->salespeople->getBySmtpEmail($userId, $fromEmail);
-            }
-            if(empty($salesPerson->id)) {
-                $salesPerson = $this->salespeople->get(['sales_person_id' => $salesPersonId]);
-            }
-            if(empty($salesPerson->id)) {
-                throw new FromEmailMissingSmtpConfigException;
-            }
-            $fromEmail = $salesPerson->smtp_email;
-        }
-
         // Create Email Builder Email!
         $builder = new BuilderEmail([
             'id' => 1,
@@ -402,8 +386,8 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'template_id' => 1,
             'dealer_id' => $dealerId,
             'user_id' => $userId,
-            'sales_person_id' => $salesPerson->id ?? 0,
-            'from_email' => $fromEmail ?: $this->getDefaultFromEmail(),
+            'sales_person_id' => 0,
+            'from_email' => $this->getDefaultFromEmail(),
         ]);
 
         // Send Email and Return Response

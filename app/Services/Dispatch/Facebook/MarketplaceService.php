@@ -2,6 +2,7 @@
 
 namespace App\Services\Dispatch\Facebook;
 
+use App\Models\CRM\Dealer\DealerFBMOverview;
 use App\Models\User\AuthToken;
 use App\Models\User\Integration\Integration;
 use App\Models\Marketing\Facebook\Marketplace;
@@ -58,9 +59,9 @@ class MarketplaceService implements MarketplaceServiceInterface
      * 
      * @param MarketplaceRepositoryInterface $marketplace
      * @param TunnelRepositoryInterface $tunnels
-     * @param ListingRepositoryInterfaces $listings
-     * @param ImageRepositoryInterfaces $images
-     * @param ErrorRepositoryInterfaces $errors
+     * @param ListingRepositoryInterface $listings
+     * @param ImageRepositoryInterface $images
+     * @param ErrorRepositoryInterface $errors
      * @param PostingRepositoryInterface $postingSession
      * @param InventoryTransformer $inventoryTransformer
      */
@@ -289,7 +290,7 @@ class MarketplaceService implements MarketplaceServiceInterface
         $runningIntegrationIds = $this->postingSession->getIntegrationIds();
 
         $integrations = $this->marketplace->getAll([
-            'sort' => '-imported',
+            'sort' => '-last_attempt_ts',
             'import_range' => config('marketing.fb.settings.limit.hours', 0),
             'exclude' => $runningIntegrationIds,
             'skip_errors' => config('marketing.fb.settings.limit.errors', 1)
@@ -308,7 +309,8 @@ class MarketplaceService implements MarketplaceServiceInterface
                 'auth_username' => $integration->tfa_username,
                 'auth_password' => $integration->tfa_password,
                 'auth_type' => $integration->tfa_type,
-                'tunnels' => $this->tunnels->getAll(['dealer_id' => $integration->dealer_id])
+                'tunnels' => $this->tunnels->getAll(['dealer_id' => $integration->dealer_id]),
+                'last_attempt_ts' => $integration->last_attempt_ts
             ]));
         }
 

@@ -17,6 +17,9 @@ class CategoryRepositoryTest extends TestCase
     /**
      * Test that SUT is properly bound by the application
      *
+     * @group DMS
+     * @group DMS_INVENTORY_CATEGORY
+     *
      * @throws BindingResolutionException when there is a problem with resolution
      *                                    of concreted class
      * @note IntegrationTestCase
@@ -50,6 +53,9 @@ class CategoryRepositoryTest extends TestCase
 
     /**
      * @dataProvider queryParametersAndSummariesProvider
+     *
+     * @group DMS
+     * @group DMS_INVENTORY_CATEGORY
      *
      * @param array $params  list of query parameters
      * @param int $expectedTotal

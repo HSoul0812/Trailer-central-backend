@@ -39,6 +39,9 @@ class InventoryRepositoryTest extends TestCase
 
     /**
      * @covers ::getFloorplanned
+     *
+     * @group DMS
+     * @group DMS_INVENTORY
      */
     public function testGetFloorplannedInventoryWithStatus()
     {
@@ -66,6 +69,9 @@ class InventoryRepositoryTest extends TestCase
 
     /**
      * @covers ::getFloorplanned
+     *
+     * @group DMS
+     * @group DMS_INVENTORY
      */
     public function testGetFloorplannedInventoryWithoutStatus()
     {
@@ -91,6 +97,9 @@ class InventoryRepositoryTest extends TestCase
 
     /**
      * @covers ::getAll
+     *
+     * @group DMS
+     * @group DMS_INVENTORY
      */
     public function testGetAllMatchingAllWordsInSearchTerm()
     {
