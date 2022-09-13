@@ -44,6 +44,13 @@ class RemoveDeletedModelFromESIndexAction
     private $dealerId;
 
     /**
+     * The search_after property that will send to ES
+     *
+     * @var array
+     */
+    private $searchAfter = [];
+
+    /**
      * The callback for when the document id is deleted
      * @var callback
      */
@@ -60,13 +67,20 @@ class RemoveDeletedModelFromESIndexAction
     /**
      * Set the ES index you want to delete the data from
      *
-     * @param Model $model
+     * @param Model|string $model
      * @return RemoveDeletedModelFromESIndexAction
      * @throws Exception
      */
-    public function forModel(Model $model): RemoveDeletedModelFromESIndexAction
+    public function forModel($model): RemoveDeletedModelFromESIndexAction
     {
-        $this->model = $model;
+        // We accept both string and Model class for the $model
+        // If they send in the model, we'll transform that to the
+        // concrete class
+        if (is_string($model)) {
+            $this->model = new $model();
+        } else {
+            $this->model = $model;
+        }
 
         if (!method_exists($this->model, 'searchableAs')) {
             throw new Exception("The method searchableAs doesn't exist in the model $this->model.");
@@ -123,38 +137,10 @@ class RemoveDeletedModelFromESIndexAction
      */
     public function execute(): array
     {
-        // $client = ClientBuilder::create()
-        //         ->setHosts(['storage.pond.dev.trailercentral.com:9201'])
-        //         ->build();
-
-        // $client->delete([
-        //     'index' => 'parts',
-        //     'id' => 306,
-        // ]);
-        //
-        // dd([]);
         $totalDelete = 0;
-        $searchAfter = [];
 
         do {
-            $searchParams = [
-                'index' => $this->index,
-                'body' => [
-                    'size' => $this->size,
-                    'query' => [
-                        'match' => [
-                            'dealer_id' => $this->dealerId,
-                        ],
-                    ],
-                    'sort' => [[
-                        'id' => 'asc',
-                    ]],
-                ],
-            ];
-
-            if (!empty($searchAfter)) {
-                $searchParams['body']['search_after'] = $searchAfter;
-            }
+            $searchParams = $this->getSearchParams();
 
             $response = $this->esClient->search($searchParams);
 
@@ -173,7 +159,7 @@ class RemoveDeletedModelFromESIndexAction
 
                 // At the same time, keep storing the last sort in the hits array
                 // as the next search_after value
-                $searchAfter = $hit['sort'];
+                $this->searchAfter = $hit['sort'];
             }
 
             // For performance’s sake, we'll fetch all the model ids at once
@@ -184,11 +170,11 @@ class RemoveDeletedModelFromESIndexAction
 
             // Then, compare it with the full list of model ids, the missing ones
             // are the one that we need to delete
-            $documentIdsToRemove = array_diff($modelIds, $modelIdsInDB);
+            $documentIdsToRemove = array_values(array_diff($modelIds, $modelIdsInDB));
 
             // No need to do anything in this loop if all the model are still exist
             // in the database
-            if (!empty($documentIdsToRemove)) {
+            if (empty($documentIdsToRemove)) {
                 continue;
             }
 
@@ -242,5 +228,37 @@ class RemoveDeletedModelFromESIndexAction
             'index' => $this->index,
             'body' => $body,
         ]);
+    }
+
+    /**
+     * Get the search param that we'll send to ES
+     *
+     * @return array
+     */
+    private function getSearchParams(): array
+    {
+        $searchParams = [
+            'index' => $this->index,
+            'body' => [
+                'size' => $this->size,
+                'query' => [
+                    'match' => [
+                        'dealer_id' => $this->dealerId,
+                    ],
+                ],
+                'sort' => [[
+                    'id' => 'asc',
+                ]],
+            ],
+        ];
+
+        // We'll use the Search After API to continue searching the data
+        // in the next pages
+        // Ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/paginate-search-results.html
+        if (!empty($this->searchAfter)) {
+            $searchParams['body']['search_after'] = $this->searchAfter;
+        }
+
+        return $searchParams;
     }
 }
