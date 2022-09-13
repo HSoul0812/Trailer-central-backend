@@ -5,6 +5,13 @@ namespace App\Models\Inventory;
 use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $entity_type_id
+ * @property string $name
+ * @property string $title
+ * @property string $title_lowercase
+ * @property string $sort_order
+ */
 class EntityType extends Model {
 
     use TableAware;
