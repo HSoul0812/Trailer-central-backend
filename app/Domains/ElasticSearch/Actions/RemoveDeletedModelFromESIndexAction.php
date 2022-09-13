@@ -155,7 +155,7 @@ class RemoveDeletedModelFromESIndexAction
             // Loop through each hit and if it doesn't exist in the database
             // add it in the id to remove
             foreach ($response['hits']['hits'] as $hit) {
-                $modelIds[] = $hit['_source']['id'];
+                $modelIds[] = (int) $hit['_id'];
 
                 // At the same time, keep storing the last sort in the hits array
                 // as the next search_after value
