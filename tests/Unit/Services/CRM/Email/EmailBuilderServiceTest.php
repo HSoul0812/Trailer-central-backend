@@ -2,15 +2,11 @@
 
 namespace Tests\Unit\Services\CRM\Email;
 
-use App\Exceptions\CRM\Email\Builder\SendBuilderEmailsFailedException;
 use App\Exceptions\CRM\Email\Builder\SendBlastEmailsFailedException;
-use App\Exceptions\CRM\Email\Builder\SendCampaignEmailsFailedException;
 use App\Exceptions\CRM\Email\Builder\SendTemplateEmailFailedException;
 use App\Exceptions\CRM\Email\Builder\FromEmailMissingSmtpConfigException;
 use App\Jobs\CRM\Interactions\EmailBuilderJob;
-use App\Jobs\CRM\Interactions\SendEmailBuilderJob;
 use App\Mail\CRM\Interactions\EmailBuilderEmail;
-use App\Mail\CRM\Interactions\InvalidTemplateEmail;
 use App\Models\CRM\Email\Blast;
 use App\Models\CRM\Email\BlastSent;
 use App\Models\CRM\Email\Campaign;
@@ -21,8 +17,8 @@ use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\CRM\Interactions\EmailHistory;
 use App\Models\Integration\Auth\AccessToken;
-use App\Models\User\AuthToken;
 use App\Models\User\NewDealerUser;
+use App\Models\User\User;
 use App\Repositories\CRM\Email\BlastRepositoryInterface;
 use App\Repositories\CRM\Email\BounceRepositoryInterface;
 use App\Repositories\CRM\Email\CampaignRepositoryInterface;
@@ -45,10 +41,8 @@ use App\Services\Integration\Common\DTOs\ValidateToken;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
 use App\Services\Integration\Microsoft\OfficeServiceInterface;
-use Illuminate\Mail\Mailable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use League\Fractal\Manager;
 use Mockery;
@@ -1078,204 +1072,7 @@ class EmailBuilderServiceTest extends TestCase
      * @param EmailHistory|LegacyMockInterface $emailHistory
      * @param ParsedEmail $parsedEmail
      */
-    public function testTestTemplateWithFromEmail(
-        Template     $template,
-        SalesPerson  $salesPerson,
-        EmailHistory $emailHistory,
-        ParsedEmail  $parsedEmail
-    ) {
-        $this->salesPersonRepositoryMock
-            ->shouldReceive('getBySmtpEmail')
-            ->once()
-            ->with(self::NEW_DEALER_USER_ID, self::SEND_TEMPLATE_FROM_EMAIL)
-            ->andReturn($salesPerson);
-
-        $this->emailBuilderServiceMock
-            ->shouldReceive('saveToDb')
-            ->once()
-            ->with(Mockery::on(function ($builder) use ($salesPerson) {
-                return $builder instanceof BuilderEmail
-                    && $builder->id === 1
-                    && $builder->type === 'template'
-                    && $builder->template === self::SEND_TEMPLATE_HTML
-                    && $builder->subject === self::SEND_TEMPLATE_SUBJECT
-                    && $builder->dealerId === self::DEALER_ID
-                    && $builder->userId === self::NEW_DEALER_USER_ID
-                    && $builder->salesPersonId === $salesPerson->id
-                    && $builder->fromEmail === $salesPerson->smtp_email
-                    && $builder->toEmail === self::SEND_TEMPLATE_TO_EMAIL
-                    && $builder->templateId === 1;
-            }))
-            ->andReturn($emailHistory);
-
-        $this->emailBuilderServiceMock
-            ->shouldReceive('sendEmail')
-            ->once()
-            ->andReturn($parsedEmail);
-
-        $this->emailBuilderServiceMock
-            ->shouldReceive('markSent')
-            ->once()
-            ->with(Mockery::on(function ($builder) use ($salesPerson) {
-                return $builder instanceof BuilderEmail
-                    && $builder->id === 1
-                    && $builder->type === 'template'
-                    && $builder->template === self::SEND_TEMPLATE_HTML
-                    && $builder->subject === self::SEND_TEMPLATE_SUBJECT
-                    && $builder->dealerId === self::DEALER_ID
-                    && $builder->userId === self::NEW_DEALER_USER_ID
-                    && $builder->salesPersonId === $salesPerson->id
-                    && $builder->fromEmail === $salesPerson->smtp_email
-                    && $builder->toEmail === self::SEND_TEMPLATE_TO_EMAIL
-                    && $builder->templateId === 1;
-            }));
-
-        $this->emailBuilderServiceMock
-            ->shouldReceive('markEmailSent')
-            ->once()
-            ->with($parsedEmail);
-
-        $this->emailBuilderServiceMock
-            ->shouldReceive('testTemplate')
-            ->passthru();
-
-        $result = $this->emailBuilderServiceMock->testTemplate(
-            self::DEALER_ID,
-            self::NEW_DEALER_USER_ID,
-            self::SEND_TEMPLATE_SUBJECT,
-            self::SEND_TEMPLATE_HTML,
-            self::SEND_TEMPLATE_TO_EMAIL,
-            self::SALES_PERSON_ID,
-            self::SEND_TEMPLATE_FROM_EMAIL
-        );
-
-        $this->assertArrayHasKey('data', $result);
-        $this->assertArrayHasKey('leads', $result);
-
-        $this->assertSame($result['data']['id'], 1);
-        $this->assertSame($result['data']['type'], 'template');
-        $this->assertSame($result['data']['template'], self::SEND_TEMPLATE_HTML);
-        $this->assertSame($result['data']['subject'], self::SEND_TEMPLATE_SUBJECT);
-        $this->assertSame($result['data']['template_id'], 1);
-        $this->assertSame($result['data']['user_id'], self::NEW_DEALER_USER_ID);
-        $this->assertSame($result['data']['sales_person_id'], $salesPerson->id);
-        $this->assertSame($result['data']['from_email'], $salesPerson->smtp_email);
-
-        $this->assertIsArray($result['leads']);
-        $this->assertEquals($result['leads'], [self::SEND_TEMPLATE_TO_EMAIL]);
-    }
-
-    /**
-     * @group CRM
-     * @covers ::testTemplate
-     * @group EmailBuilder
-     *
-     * @dataProvider templateDataProvider
-     *
-     * @param Template|LegacyMockInterface $template
-     * @param SalesPerson|LegacyMockInterface $salesPerson
-     * @param EmailHistory|LegacyMockInterface $emailHistory
-     * @param ParsedEmail $parsedEmail
-     */
-    public function testTestTemplateFromSalesperson(
-        Template     $template,
-        SalesPerson  $salesPerson,
-        EmailHistory $emailHistory,
-        ParsedEmail  $parsedEmail
-    ) {
-        $this->salesPersonRepositoryMock
-            ->shouldReceive('get')
-            ->once()
-            ->with(['sales_person_id' => self::SALES_PERSON_ID])
-            ->andReturn($salesPerson);
-
-        $this->emailBuilderServiceMock
-            ->shouldReceive('saveToDb')
-            ->once()
-            ->with(Mockery::on(function ($builder) use ($salesPerson) {
-                return $builder instanceof BuilderEmail
-                    && $builder->id === 1
-                    && $builder->type === 'template'
-                    && $builder->template === self::SEND_TEMPLATE_HTML
-                    && $builder->subject === self::SEND_TEMPLATE_SUBJECT
-                    && $builder->dealerId === self::DEALER_ID
-                    && $builder->userId === self::NEW_DEALER_USER_ID
-                    && $builder->salesPersonId === $salesPerson->id
-                    && $builder->fromEmail === $salesPerson->smtp_email
-                    && $builder->toEmail === self::SEND_TEMPLATE_TO_EMAIL
-                    && $builder->templateId === 1;
-            }))
-            ->andReturn($emailHistory);
-
-        $this->emailBuilderServiceMock
-            ->shouldReceive('sendEmail')
-            ->once()
-            ->andReturn($parsedEmail);
-
-        $this->emailBuilderServiceMock
-            ->shouldReceive('markSent')
-            ->once()
-            ->with(Mockery::on(function ($builder) use ($salesPerson) {
-                return $builder instanceof BuilderEmail
-                    && $builder->id === 1
-                    && $builder->type === 'template'
-                    && $builder->template === self::SEND_TEMPLATE_HTML
-                    && $builder->subject === self::SEND_TEMPLATE_SUBJECT
-                    && $builder->dealerId === self::DEALER_ID
-                    && $builder->userId === self::NEW_DEALER_USER_ID
-                    && $builder->salesPersonId === $salesPerson->id
-                    && $builder->fromEmail === $salesPerson->smtp_email
-                    && $builder->toEmail === self::SEND_TEMPLATE_TO_EMAIL
-                    && $builder->templateId === 1;
-            }));
-
-        $this->emailBuilderServiceMock
-            ->shouldReceive('markEmailSent')
-            ->once()
-            ->with($parsedEmail);
-
-        $this->emailBuilderServiceMock
-            ->shouldReceive('testTemplate')
-            ->passthru();
-
-        $result = $this->emailBuilderServiceMock->testTemplate(
-            self::DEALER_ID,
-            self::NEW_DEALER_USER_ID,
-            self::SEND_TEMPLATE_SUBJECT,
-            self::SEND_TEMPLATE_HTML,
-            self::SEND_TEMPLATE_TO_EMAIL,
-            self::SALES_PERSON_ID
-        );
-
-        $this->assertArrayHasKey('data', $result);
-        $this->assertArrayHasKey('leads', $result);
-
-        $this->assertSame($result['data']['id'], 1);
-        $this->assertSame($result['data']['type'], 'template');
-        $this->assertSame($result['data']['template'], self::SEND_TEMPLATE_HTML);
-        $this->assertSame($result['data']['subject'], self::SEND_TEMPLATE_SUBJECT);
-        $this->assertSame($result['data']['template_id'], 1);
-        $this->assertSame($result['data']['user_id'], self::NEW_DEALER_USER_ID);
-        $this->assertSame($result['data']['sales_person_id'], $salesPerson->id);
-        $this->assertSame($result['data']['from_email'], $salesPerson->smtp_email);
-
-        $this->assertIsArray($result['leads']);
-        $this->assertEquals($result['leads'], [self::SEND_TEMPLATE_TO_EMAIL]);
-    }
-
-    /**
-     * @group CRM
-     * @covers ::testTemplate
-     * @group EmailBuilder
-     *
-     * @dataProvider templateDataProvider
-     *
-     * @param Template|LegacyMockInterface $template
-     * @param SalesPerson|LegacyMockInterface $salesPerson
-     * @param EmailHistory|LegacyMockInterface $emailHistory
-     * @param ParsedEmail $parsedEmail
-     */
-    public function testTestTemplateWithDefaultFromEmail(
+    public function testTestTemplate(
         Template     $template,
         SalesPerson  $salesPerson,
         EmailHistory $emailHistory,
@@ -1372,85 +1169,18 @@ class EmailBuilderServiceTest extends TestCase
      * @param EmailHistory|LegacyMockInterface $emailHistory
      * @param ParsedEmail $parsedEmail
      */
-    public function testTestTemplateInvalidEmail(
+    public function testTestTemplateWithException(
         Template     $template,
         SalesPerson  $salesPerson,
         EmailHistory $emailHistory,
         ParsedEmail  $parsedEmail
     ) {
-        $this->salesPersonRepositoryMock
-            ->shouldReceive('getBySmtpEmail')
-            ->once()
-            ->with(self::NEW_DEALER_USER_ID, self::SEND_TEMPLATE_FROM_EMAIL)
-            ->andReturn(null);
-
-        $this->salesPersonRepositoryMock
-            ->shouldReceive('get')
-            ->once()
-            ->with(['sales_person_id' => self::SALES_PERSON_ID])
-            ->andReturn(null);
-
-        $this->expectException(FromEmailMissingSmtpConfigException::class);
-
-        $this->emailBuilderServiceMock
-            ->shouldReceive('saveToDb')
-            ->never();
-
-        $this->emailBuilderServiceMock
-            ->shouldReceive('sendEmail')
-            ->never();
-
-        $this->emailBuilderServiceMock
-            ->shouldReceive('markSent')
-            ->never();
-
-        $this->emailBuilderServiceMock
-            ->shouldReceive('markEmailSent')
-            ->never();
-
-        $this->emailBuilderServiceMock
-            ->shouldReceive('testTemplate')
-            ->passthru();
-
-        $this->emailBuilderServiceMock->testTemplate(
-            self::DEALER_ID,
-            self::NEW_DEALER_USER_ID,
-            self::SEND_TEMPLATE_SUBJECT,
-            self::SEND_TEMPLATE_HTML,
-            self::SEND_TEMPLATE_TO_EMAIL,
-            self::SALES_PERSON_ID,
-            self::SEND_TEMPLATE_FROM_EMAIL
-        );
-    }
-
-    /**
-     * @group CRM
-     * @covers ::testTemplate
-     * @group EmailBuilder
-     *
-     * @dataProvider templateDataProvider
-     *
-     * @param Template|LegacyMockInterface $template
-     * @param SalesPerson|LegacyMockInterface $salesPerson
-     * @param EmailHistory|LegacyMockInterface $emailHistory
-     * @param ParsedEmail $parsedEmail
-     */
-    public function testTestTemplateEmailFailed(
-        Template     $template,
-        SalesPerson  $salesPerson,
-        EmailHistory $emailHistory,
-        ParsedEmail  $parsedEmail
-    ) {
-        $this->salesPersonRepositoryMock
-            ->shouldReceive('getBySmtpEmail')
-            ->once()
-            ->with(self::NEW_DEALER_USER_ID, self::SEND_TEMPLATE_FROM_EMAIL)
-            ->andReturn($salesPerson);
+        Config::set('mail.from.address', self::DEFAULT_FROM_EMAIL);
 
         $this->emailBuilderServiceMock
             ->shouldReceive('saveToDb')
             ->once()
-            ->with(Mockery::on(function ($builder) use ($salesPerson) {
+            ->with(Mockery::on(function ($builder) {
                 return $builder instanceof BuilderEmail
                     && $builder->id === 1
                     && $builder->type === 'template'
@@ -1458,8 +1188,8 @@ class EmailBuilderServiceTest extends TestCase
                     && $builder->subject === self::SEND_TEMPLATE_SUBJECT
                     && $builder->dealerId === self::DEALER_ID
                     && $builder->userId === self::NEW_DEALER_USER_ID
-                    && $builder->salesPersonId === $salesPerson->id
-                    && $builder->fromEmail === $salesPerson->smtp_email
+                    && $builder->salesPersonId === 0
+                    && $builder->fromEmail === self::DEFAULT_FROM_EMAIL
                     && $builder->toEmail === self::SEND_TEMPLATE_TO_EMAIL
                     && $builder->templateId === 1;
             }))
@@ -1484,14 +1214,16 @@ class EmailBuilderServiceTest extends TestCase
             ->shouldReceive('testTemplate')
             ->passthru();
 
+        $this->emailBuilderServiceMock
+            ->shouldReceive('getDefaultFromEmail')
+            ->passthru();
+
         $this->emailBuilderServiceMock->testTemplate(
             self::DEALER_ID,
             self::NEW_DEALER_USER_ID,
             self::SEND_TEMPLATE_SUBJECT,
             self::SEND_TEMPLATE_HTML,
-            self::SEND_TEMPLATE_TO_EMAIL,
-            self::SALES_PERSON_ID,
-            self::SEND_TEMPLATE_FROM_EMAIL
+            self::SEND_TEMPLATE_TO_EMAIL
         );
     }
 
@@ -2513,78 +2245,143 @@ class EmailBuilderServiceTest extends TestCase
      * @covers ::sendEmail
      * @group EmailBuilder
      *
-     * @throws BindingResolutionException
+     * @dataProvider sendEmailDataProvider
+     *
+     * @param BuilderEmail $builderEmail
+     * @param ParsedEmail $parsedEmail
+     * @param SalesPerson|LegacyMockInterface $salesperson
+     * @param ValidateToken $validateToken
      */
-    public function testSendEmailGmailRefresh()
+    public function testSendEmailNotOauth(BuilderEmail $builderEmail, ParsedEmail $parsedEmail, SalesPerson $salesperson, ValidateToken $validateToken)
     {
-        // Mock Builder Email
-        $config = $this->getEloquentMock(BuilderEmail::class);
-        $config->leadId = 1;
-        $config->fromEmail = self::DUMMY_LEAD_DETAILS[0]['email'];
-        $config->toEmail = self::DUMMY_LEAD_DETAILS[1]['email'];
-        $config->toName = self::DUMMY_LEAD_DETAILS[1]['name'];
-        $config->subject = 'Test Campaign';
-        $config->shouldReceive('isAuthTypeGmail')->once()->andReturn(true);
-        $config->shouldReceive('isAuthTypeNtlm')->never();
-        $config->shouldReceive('getAuthConfig')->passthru();
+        /** @var SalesPerson|LegacyMockInterface $salesperson */
+        $salesperson = $this->getEloquentMock(SalesPerson::class);
+        $salesperson->id = self::SALES_PERSON_ID;
+        $salesperson->smtp_email = self::SALES_PERSON_SMTP_EMAIL;
+        $salesperson->smtp_password = self::SALES_PERSON_SMTP_PASSWORD;
+        $salesperson->smtp_server = self::SALES_PERSON_SMTP_SERVER;
+        $salesperson->smtp_port = self::SALES_PERSON_SMTP_PORT;
+        $salesperson->smtp_security = self::SALES_PERSON_SMTP_SECURITY;
+        $salesperson->smtp_auth = self::SALES_PERSON_SMTP_AUTH;
 
-        // Mock SmtpConfig
-        $smtpConfig = $this->getEloquentMock(SmtpConfig::class);
-        $smtpConfig->authType = SmtpConfig::AUTH_GMAIL;
-        $config->smtpConfig = $smtpConfig;
+        $salesperson
+            ->shouldReceive('getActiveTokenAttribute')
+            ->andReturn(null);
 
-        // Mock Email History
-        $emailHistory = $this->getEloquentMock(EmailHistory::class);
-        $emailHistory->email_id = 1;
-        $emailHistory->interaction_id = 1;
+        $salesperson
+            ->shouldReceive('getFullNameAttribute')
+            ->andReturn(self::SALES_PERSON_FULL_NAME);
 
-        // Mock Parsed Email
-        $parsed = $this->getEloquentMock(ParsedEmail::class);
-        $parsed->messageId = self::DUMMY_LEAD_DETAILS[3]['email'];
-        $parsed->shouldReceive('getTo')->passthru();
-        $config->shouldReceive('getParsedEmail')
-               ->with($emailHistory->email_id)
-               ->once()
-               ->andReturn($parsed);
+        $this->salesPersonRepositoryMock
+            ->shouldReceive('get')
+            ->once()
+            ->with(['sales_person_id' => $builderEmail->salesPersonId])
+            ->andReturn($salesperson);
 
-        // Mock Access Token
-        $accessToken = $this->getEloquentMock(AccessToken::class);
-        $accessToken->id = 1;
-        $smtpConfig->accessToken = $accessToken;
-        $smtpConfig->shouldReceive('setAccessToken')->never()->with($accessToken);
+        $this->emailBuilderServiceMock
+            ->shouldReceive('sendCustomEmail')
+            ->once()
+            ->with(
+                Mockery::on(function ($smtpConfig) use ($builderEmail, $salesperson) {
+                    return $smtpConfig instanceof SmtpConfig
+                        && $smtpConfig->fromName === $salesperson->full_name
+                        && $smtpConfig->password === $salesperson->smtp_password
+                        && $smtpConfig->host === $salesperson->smtp_server
+                        && $smtpConfig->port === $salesperson->smtp_port
+                        && $smtpConfig->security === $salesperson->smtp_security
+                        && $smtpConfig->authType === $salesperson->smtp_auth
+                        && $smtpConfig->accessToken === $salesperson->active_token;
+                }),
+                $builderEmail->getToEmail(),
+                Mockery::on(function ($emailBuilderEmail) use ($builderEmail) {
+                    return $emailBuilderEmail instanceof EmailBuilderEmail
+                        && $this->getFromPrivateProperty($emailBuilderEmail, 'parsedEmail') instanceof ParsedEmail
+                        && $this->getFromPrivateProperty($emailBuilderEmail, 'subject') === $builderEmail->subject;
+                })
+            );
 
-        // Create New Token Mock
-        $newToken = $this->getEloquentMock(AccessToken::class);
-        $newToken->id = 2;
-        $smtpConfig->shouldReceive('setAccessToken')->once()->with($newToken);
+        $this->emailBuilderServiceMock
+            ->shouldReceive('sendEmail')
+            ->passthru();
 
+        $result = $this->emailBuilderServiceMock->sendEmail($builderEmail);
 
-        // Validate Google
-        $this->googleServiceMock
-             ->shouldReceive('validate')
-             ->once()
-             ->andReturn(['new_token' => true]);
+        $this->assertInstanceOf(ParsedEmail::class, $result);
 
-        // Refresh Token
-        $this->tokenRepositoryMock
-             ->shouldReceive('refresh')
-             ->once()
-             ->andReturn($newToken);
+        $this->assertSame($builderEmail->emailId, $result->emailHistoryId);
+        $this->assertSame($builderEmail->leadId, $result->leadId);
+        $this->assertSame($builderEmail->toEmail, $result->to);
+        $this->assertSame($builderEmail->toName, $result->toName);
+        $this->assertSame($builderEmail->fromEmail, $result->from);
+        $this->assertSame($builderEmail->subject, $result->subject);
+        $this->assertStringContainsString($builderEmail->template, $result->body);
+        $this->assertTrue($result->isHtml);
+        $this->assertIsString($result->messageId);
+    }
 
-        // Send Gmail Email
-        $this->gmailServiceMock
-             ->shouldReceive('send')
-             ->once()
-             ->andReturn($parsed);
+    /**
+     * @group CRM
+     * @covers ::sendEmail
+     * @group EmailBuilder
+     *
+     * @dataProvider sendEmailDataProvider
+     *
+     * @param BuilderEmail $builderEmail
+     * @param ParsedEmail $parsedEmail
+     * @param SalesPerson|LegacyMockInterface $salesperson
+     * @param ValidateToken $validateToken
+     */
+    public function testSendEmailWithoutSalesPerson(BuilderEmail $builderEmail, ParsedEmail $parsedEmail, SalesPerson $salesperson, ValidateToken $validateToken)
+    {
+        $user = $this->getEloquentMock(User::class);
+        $user->dealer_id = $builderEmail->dealerId;
 
-        // @var EmailBuilderServiceInterface $service
-        $service = $this->app->make(EmailBuilderServiceInterface::class);
+        $this->salesPersonRepositoryMock
+            ->shouldReceive('get')
+            ->once()
+            ->with(['sales_person_id' => $builderEmail->salesPersonId])
+            ->andReturn(null);
 
-        // Validate Send Email Result
-        $result = $service->sendEmail($config, $emailHistory->email_id);
+        $this->authServiceMock
+            ->shouldReceive('validate')
+            ->never();
 
-        // Assert Same
-        $this->assertSame($result->messageId, self::DUMMY_LEAD_DETAILS[3]['email']);
+        $this->userRepositoryMock
+            ->shouldReceive('get')
+            ->once()
+            ->with(['dealer_id' => $builderEmail->dealerId])
+            ->andReturn($user);
+
+        $this->emailBuilderServiceMock
+            ->shouldReceive('sendCustomSesEmail')
+            ->once()
+            ->with(
+                $user,
+                $builderEmail->getToEmail(),
+                Mockery::on(function ($emailBuilderEmail) use ($builderEmail) {
+                    return $emailBuilderEmail instanceof EmailBuilderEmail
+                        && $this->getFromPrivateProperty($emailBuilderEmail, 'parsedEmail') instanceof ParsedEmail
+                        && $this->getFromPrivateProperty($emailBuilderEmail, 'subject') === $builderEmail->subject;
+                })
+            );
+
+        $this->emailBuilderServiceMock
+            ->shouldReceive('sendEmail')
+            ->passthru();
+
+        $result = $this->emailBuilderServiceMock->sendEmail($builderEmail);
+
+        $this->assertInstanceOf(ParsedEmail::class, $result);
+
+        $this->assertSame($builderEmail->emailId, $result->emailHistoryId);
+        $this->assertSame($builderEmail->leadId, $result->leadId);
+        $this->assertSame($builderEmail->toEmail, $result->to);
+        $this->assertSame($builderEmail->toName, $result->toName);
+        $this->assertSame($builderEmail->fromEmail, $result->from);
+        $this->assertSame($builderEmail->subject, $result->subject);
+        $this->assertStringContainsString($builderEmail->template, $result->body);
+        $this->assertTrue($result->isHtml);
+        $this->assertEmpty($result->messageId);
     }
 
 
@@ -2593,67 +2390,30 @@ class EmailBuilderServiceTest extends TestCase
      * @covers ::markSent
      * @group EmailBuilder
      *
-     * @throws BindingResolutionException
+     * @dataProvider markSentDataProvider
+     *
+     * @param BuilderEmail $builderEmail
+     * @param ParsedEmail $parsedEmail
+     * @param BlastSent|LegacyMockInterface $blastSent
+     * @param CampaignSent|LegacyMockInterface $campaignSent
      */
-    public function testMarkSentBlast()
+    public function testMarkSentBlast(BuilderEmail $builderEmail, ParsedEmail $parsedEmail, BlastSent $blastSent, CampaignSent $campaignSent)
     {
-        // Mock Builder Email
-        $config = $this->getEloquentMock(BuilderEmail::class);
-        $config->id = 1;
-        $config->type = BuilderEmail::TYPE_BLAST;
-        $config->leadId = 1;
-        $config->fromEmail = self::DUMMY_LEAD_DETAILS[0]['email'];
-        $config->toEmail = self::DUMMY_LEAD_DETAILS[1]['email'];
-        $config->toName = self::DUMMY_LEAD_DETAILS[1]['name'];
-        $config->subject = 'Test Blast';
+        $this->setToPrivateProperty($builderEmail, 'type', 'blast');
 
-        // Mock Email History
-        $emailHistory = $this->getEloquentMock(EmailHistory::class);
-        $emailHistory->email_id = 1;
-
-        // Mock Blast Sent
-        $blastSent = $this->getEloquentMock(BlastSent::class);
-        $blastSent->email_blasts_id = $config->id;
-        $blastSent->lead_id = $config->leadId;
-        $blastSent->message_id = self::DUMMY_LEAD_DETAILS[3]['email'];
-
-        // Mock Parsed Email
-        $parsed = $this->getEloquentMock(ParsedEmail::class);
-        $parsed->emailHistoryId = 1;
-        $parsed->messageId = self::DUMMY_LEAD_DETAILS[3]['email'];
-        $parsed->body = $this->getTemplate();
-
-
-        // Update Email History
-        $this->emailHistoryRepositoryMock
-             ->shouldReceive('update')
-             ->once()
-             ->with([
-                'id' => $parsed->emailHistoryId,
-                'message_id' => $parsed->messageId,
-                'body' => $parsed->body,
-                'date_sent' => 1
-             ])
-             ->andReturn($emailHistory);
-
-        // Mark Blast as Sent
         $this->blastRepositoryMock
              ->shouldReceive('sent')
              ->once()
-             ->with([
-                'email_blasts_id' => $config->id,
-                'lead_id' => $config->leadId,
-                'message_id' => self::DUMMY_LEAD_DETAILS[3]['email']
-             ])
+             ->with($builderEmail->id, $builderEmail->leadId)
              ->andReturn($blastSent);
 
-        // @var EmailBuilderServiceInterface $service
+        $this->campaignRepositoryMock
+            ->shouldReceive('sent')
+            ->never();
+
         $service = $this->app->make(EmailBuilderServiceInterface::class);
+        $result = $service->markSent($builderEmail);
 
-        // Validate Send Email Result
-        $result = $service->markSent($config, $parsed);
-
-        // Assert Same
         $this->assertTrue($result);
     }
 
@@ -2662,67 +2422,29 @@ class EmailBuilderServiceTest extends TestCase
      * @covers ::markSent
      * @group EmailBuilder
      *
-     * @throws BindingResolutionException
+     * @dataProvider markSentDataProvider
+     *
+     * @param BuilderEmail $builderEmail
+     * @param BlastSent|LegacyMockInterface $blastSent
+     * @param CampaignSent|LegacyMockInterface $campaignSent
      */
-    public function testMarkSentCampaign()
+    public function testMarkSentCampaign(BuilderEmail $builderEmail, ParsedEmail $parsedEmail, BlastSent $blastSent, CampaignSent $campaignSent)
     {
-        // Mock Builder Email
-        $config = $this->getEloquentMock(BuilderEmail::class);
-        $config->id = 1;
-        $config->type = BuilderEmail::TYPE_CAMPAIGN;
-        $config->leadId = 1;
-        $config->fromEmail = self::DUMMY_LEAD_DETAILS[0]['email'];
-        $config->toEmail = self::DUMMY_LEAD_DETAILS[1]['email'];
-        $config->toName = self::DUMMY_LEAD_DETAILS[1]['name'];
-        $config->subject = 'Test Campaign';
+        $this->setToPrivateProperty($builderEmail, 'type', 'campaign');
 
-        // Mock Email History
-        $emailHistory = $this->getEloquentMock(EmailHistory::class);
-        $emailHistory->email_id = 1;
-
-        // Mock Campaign Sent
-        $campaignSent = $this->getEloquentMock(CampaignSent::class);
-        $campaignSent->email_blasts_id = $config->id;
-        $campaignSent->lead_id = $config->leadId;
-        $campaignSent->message_id = self::DUMMY_LEAD_DETAILS[3]['email'];
-
-        // Mock Parsed Email
-        $parsed = $this->getEloquentMock(ParsedEmail::class);
-        $parsed->emailHistoryId = 1;
-        $parsed->messageId = self::DUMMY_LEAD_DETAILS[3]['email'];
-        $parsed->body = $this->getTemplate();
-
-
-        // Update Email History
-        $this->emailHistoryRepositoryMock
-             ->shouldReceive('update')
-             ->once()
-             ->with([
-                'id' => $parsed->emailHistoryId,
-                'message_id' => $parsed->messageId,
-                'body' => $parsed->body,
-                'date_sent' => 1
-             ])
-             ->andReturn($emailHistory);
-
-        // Mark Campaign as Sent
         $this->campaignRepositoryMock
-             ->shouldReceive('sent')
-             ->once()
-             ->with([
-                'drip_campaigns_id' => $config->id,
-                'lead_id' => $config->leadId,
-                'message_id' => self::DUMMY_LEAD_DETAILS[3]['email']
-             ])
-             ->andReturn($campaignSent);
+            ->shouldReceive('sent')
+            ->once()
+            ->with($builderEmail->id, $builderEmail->leadId)
+            ->andReturn($campaignSent);
 
-        // @var EmailBuilderServiceInterface $service
+        $this->blastRepositoryMock
+            ->shouldReceive('sent')
+            ->never();
+
         $service = $this->app->make(EmailBuilderServiceInterface::class);
+        $result = $service->markSent($builderEmail);
 
-        // Validate Send Email Result
-        $result = $service->markSent($config, $parsed);
-
-        // Assert Same
         $this->assertTrue($result);
     }
 
@@ -2731,99 +2453,295 @@ class EmailBuilderServiceTest extends TestCase
      * @covers ::markSent
      * @group EmailBuilder
      *
-     * @throws BindingResolutionException
+     * @dataProvider markSentDataProvider
+     *
+     * @param BuilderEmail $builderEmail
+     * @param BlastSent|LegacyMockInterface $blastSent
+     * @param CampaignSent|LegacyMockInterface $campaignSent
      */
-    public function testMarkSentTemplate()
+    public function testMarkSentTemplate(BuilderEmail $builderEmail, ParsedEmail $parsedEmail, BlastSent $blastSent, CampaignSent $campaignSent)
     {
-        // Mock Builder Email
-        $config = $this->getEloquentMock(BuilderEmail::class);
-        $config->id = 1;
-        $config->type = BuilderEmail::TYPE_TEMPLATE;
-        $config->fromEmail = self::DUMMY_LEAD_DETAILS[0]['email'];
-        $config->toEmail = self::DUMMY_LEAD_DETAILS[1]['email'];
-        $config->toName = self::DUMMY_LEAD_DETAILS[1]['name'];
-        $config->subject = 'Test Template';
+        $this->setToPrivateProperty($builderEmail, 'type', 'template');
 
-
-        // Email History Won't Update
-        $this->emailHistoryRepositoryMock
-             ->shouldReceive('update')
-             ->never();
-
-        // Mark Blast as Sent Won't Run
         $this->campaignRepositoryMock
-             ->shouldReceive('sent')
-             ->never();
+            ->shouldReceive('sent')
+            ->never();
 
-        // Mark Campaign as Sent Won't Run
-        $this->campaignRepositoryMock
-             ->shouldReceive('sent')
-             ->never();
+        $this->blastRepositoryMock
+            ->shouldReceive('sent')
+            ->never();
 
-        // @var EmailBuilderServiceInterface $service
         $service = $this->app->make(EmailBuilderServiceInterface::class);
+        $result = $service->markSent($builderEmail);
 
-        // Validate Send Email Result
-        $result = $service->markSent($config);
-
-        // Assert False
         $this->assertFalse($result);
     }
 
-
-
     /**
-     * Get Template for Type
+     * @group CRM
+     * @covers ::markSentMessageId
+     * @group EmailBuilder
      *
-     * @return string
+     * @dataProvider markSentDataProvider
+     *
+     * @param BuilderEmail $builderEmail
+     * @param ParsedEmail $parsedEmail
+     * @param BlastSent|LegacyMockInterface $blastSent
+     * @param CampaignSent|LegacyMockInterface $campaignSent
      */
-    private function getTemplate() {
-        return '
-<html>
-<body>
-<p>This is a test Email!</p>
-<p><strong>Full Name:</strong> {lead_name}</p>
-<p><strong>Unit Interested In:</strong> {title_of_unit_of_interest}</p>
-</body>
-</html>
-        ';
+    public function testMarkSentMessageIdBlast(BuilderEmail $builderEmail, ParsedEmail $parsedEmail, BlastSent $blastSent, CampaignSent $campaignSent)
+    {
+        $this->setToPrivateProperty($builderEmail, 'type', 'blast');
+
+        $this->blastRepositoryMock
+            ->shouldReceive('updateSent')
+            ->once()
+            ->with($builderEmail->id, $builderEmail->leadId, $parsedEmail->messageId, $parsedEmail->emailHistoryId)
+            ->andReturn($blastSent);
+
+        $this->campaignRepositoryMock
+            ->shouldReceive('updateSent')
+            ->never();
+
+        $service = $this->app->make(EmailBuilderServiceInterface::class);
+        $result = $service->markSentMessageId($builderEmail, $parsedEmail);
+
+        $this->assertTrue($result);
     }
 
     /**
-     * Get Lead Mocks
+     * @group CRM
+     * @covers ::markSentMessageId
+     * @group EmailBuilder
      *
-     * @return array<LeadMock>
+     * @dataProvider markSentDataProvider
+     *
+     * @param BuilderEmail $builderEmail
+     * @param ParsedEmail $parsedEmail
+     * @param BlastSent|LegacyMockInterface $blastSent
+     * @param CampaignSent|LegacyMockInterface $campaignSent
      */
-    private function getLeadMocks() {
-        // Get Lead Mocks
-        $leadMocks = [];
-        for($i = 0; $i < 4; $i++) {
-            $lead = $this->getEloquentMock(Lead::class);
-            $lead->identifier = $i + 1;
+    public function testMarkSentMessageIdCampaign(BuilderEmail $builderEmail, ParsedEmail $parsedEmail, BlastSent $blastSent, CampaignSent $campaignSent)
+    {
+        $this->setToPrivateProperty($builderEmail, 'type', 'campaign');
 
-            // Set Details
-            $details = self::DUMMY_LEAD_DETAILS[$i];
-            $lead->email_address = $details['email'];
-            $lead->full_name = $details['name'];
-            $lead->inventory_title = $details['inventory'];
-            $lead->shouldReceive('getFullNameAttribute')->andReturn($lead->full_name);
-            $lead->shouldReceive('getInventoryTitleAttribute')->andReturn($lead->inventory_title);
+        $this->campaignRepositoryMock
+            ->shouldReceive('updateSent')
+            ->once()
+            ->with($builderEmail->id, $builderEmail->leadId, $parsedEmail->messageId, $parsedEmail->emailHistoryId)
+            ->andReturn($campaignSent);
 
-            // Append
-            $leadMocks[$i] = $lead;
+        $this->blastRepositoryMock
+            ->shouldReceive('updateSent')
+            ->never();
 
-            // Pass Thru
-            $lead->shouldReceive('jsonSerialize')->passthru();
-            $lead->shouldReceive('toArray')->passthru();
-            $lead->shouldReceive('attributesToArray')->passthru();
-            $lead->shouldReceive('getVisible')->passthru();
-            $lead->shouldReceive('getHidden')->passthru();
-            $lead->shouldReceive('getMutatedAttributes')->passthru();
-            $lead->shouldReceive('cacheMutatedAttributes')->passthru();
-        }
+        $service = $this->app->make(EmailBuilderServiceInterface::class);
+        $result = $service->markSentMessageId($builderEmail, $parsedEmail);
 
-        // Return Lead Mocks
-        return $leadMocks;
+        $this->assertTrue($result);
+    }
+
+    /**
+     * @group CRM
+     * @covers ::markSentMessageId
+     * @group EmailBuilder
+     *
+     * @dataProvider markSentDataProvider
+     *
+     * @param BuilderEmail $builderEmail
+     * @param ParsedEmail $parsedEmail
+     * @param BlastSent|LegacyMockInterface $blastSent
+     * @param CampaignSent|LegacyMockInterface $campaignSent
+     */
+    public function testMarkSentMessageIdTemplate(BuilderEmail $builderEmail, ParsedEmail $parsedEmail, BlastSent $blastSent, CampaignSent $campaignSent)
+    {
+        $this->setToPrivateProperty($builderEmail, 'type', 'template');
+
+        $this->campaignRepositoryMock
+            ->shouldReceive('updateSent')
+            ->never();
+
+        $this->blastRepositoryMock
+            ->shouldReceive('updateSent')
+            ->never();
+
+        $service = $this->app->make(EmailBuilderServiceInterface::class);
+        $result = $service->markSentMessageId($builderEmail, $parsedEmail);
+
+        $this->assertFalse($result);
+    }
+
+    /**
+     * @group CRM
+     * @covers ::markEmailSent
+     * @group EmailBuilder
+     */
+    public function testMarkEmailSent()
+    {
+        $parsedEmail = new ParsedEmail([
+            'emailHistoryId' => self::PARSED_EMAIL_ID,
+            'messageId' => self::PARSED_EMAIL_MESSAGE_ID,
+            'body' => self::SEND_TEMPLATE_HTML,
+        ]);
+
+        $emailHistory = $this->getEloquentMock(EmailHistory::class);
+        $emailHistory->email_id = self::EMAIL_HISTORY_EMAIL_ID;
+
+        $this->emailHistoryRepositoryMock
+            ->shouldReceive('update')
+            ->once()
+            ->with([
+                'id' => $parsedEmail->emailHistoryId,
+                'message_id' => $parsedEmail->messageId,
+                'body' => $parsedEmail->body,
+                'date_sent' => 1
+            ])
+            ->andReturn($emailHistory);
+
+        /** @var EmailBuilderService $service */
+        $service = $this->app->make(EmailBuilderServiceInterface::class);
+        $result = $service->markEmailSent($parsedEmail);
+
+        $this->assertTrue($result);
+    }
+
+    /**
+     * @group CRM
+     * @covers ::replaceMessageId
+     * @group EmailBuilder
+     *
+     * @dataProvider markSentDataProvider
+     *
+     * @param BuilderEmail $builderEmail
+     * @param ParsedEmail $parsedEmail
+     * @param BlastSent|LegacyMockInterface $blastSent
+     * @param CampaignSent|LegacyMockInterface $campaignSent
+     */
+    public function testReplaceMessageIdBlast(BuilderEmail $builderEmail, ParsedEmail $parsedEmail, BlastSent $blastSent, CampaignSent $campaignSent)
+    {
+        $this->blastRepositoryMock
+            ->shouldReceive('updateSent')
+            ->once()
+            ->with($builderEmail->id, $builderEmail->leadId, $parsedEmail->messageId, $parsedEmail->emailHistoryId)
+            ->andReturn($blastSent);
+
+        $this->campaignRepositoryMock
+            ->shouldReceive('updateSent')
+            ->never();
+
+        $this->emailHistoryRepositoryMock
+            ->shouldReceive('update')
+            ->with([
+                'id' => $parsedEmail->emailHistoryId,
+                'message_id' => $parsedEmail->messageId,
+                'date_sent' => 1
+            ])
+            ->once();
+
+        /** @var EmailBuilderService $service */
+        $service = $this->app->make(EmailBuilderServiceInterface::class);
+
+        $result = $service->replaceMessageId(
+            'blast',
+            $builderEmail->id,
+            $builderEmail->leadId,
+            $parsedEmail->emailHistoryId,
+            $parsedEmail->messageId
+        );
+
+        $this->assertTrue($result);
+    }
+
+    /**
+     * @group CRM
+     * @covers ::replaceMessageId
+     * @group EmailBuilder
+     *
+     * @dataProvider markSentDataProvider
+     *
+     * @param BuilderEmail $builderEmail
+     * @param ParsedEmail $parsedEmail
+     * @param BlastSent|LegacyMockInterface $blastSent
+     * @param CampaignSent|LegacyMockInterface $campaignSent
+     */
+    public function testReplaceMessageIdCampaign(BuilderEmail $builderEmail, ParsedEmail $parsedEmail, BlastSent $blastSent, CampaignSent $campaignSent)
+    {
+        $this->campaignRepositoryMock
+            ->shouldReceive('updateSent')
+            ->once()
+            ->with($builderEmail->id, $builderEmail->leadId, $parsedEmail->messageId, $parsedEmail->emailHistoryId)
+            ->andReturn($campaignSent);
+
+        $this->blastRepositoryMock
+            ->shouldReceive('updateSent')
+            ->never();
+
+        $this->emailHistoryRepositoryMock
+            ->shouldReceive('update')
+            ->with([
+                'id' => $parsedEmail->emailHistoryId,
+                'message_id' => $parsedEmail->messageId,
+                'date_sent' => 1
+            ])
+            ->once();
+
+        /** @var EmailBuilderService $service */
+        $service = $this->app->make(EmailBuilderServiceInterface::class);
+
+        $result = $service->replaceMessageId(
+            'campaign',
+            $builderEmail->id,
+            $builderEmail->leadId,
+            $parsedEmail->emailHistoryId,
+            $parsedEmail->messageId
+        );
+
+        $this->assertTrue($result);
+    }
+
+    /**
+     * @group CRM
+     * @covers ::replaceMessageId
+     * @group EmailBuilder
+     *
+     * @dataProvider markSentDataProvider
+     *
+     * @param BuilderEmail $builderEmail
+     * @param ParsedEmail $parsedEmail
+     * @param BlastSent|LegacyMockInterface $blastSent
+     * @param CampaignSent|LegacyMockInterface $campaignSent
+     */
+    public function testReplaceMessageIdTemplate(BuilderEmail $builderEmail, ParsedEmail $parsedEmail, BlastSent $blastSent, CampaignSent $campaignSent)
+    {
+        $this->campaignRepositoryMock
+            ->shouldReceive('updateSent')
+            ->never();
+
+        $this->blastRepositoryMock
+            ->shouldReceive('updateSent')
+            ->never();
+
+        $this->emailHistoryRepositoryMock
+            ->shouldReceive('update')
+            ->with([
+                'id' => $parsedEmail->emailHistoryId,
+                'message_id' => $parsedEmail->messageId,
+                'date_sent' => 1
+            ])
+            ->once();
+
+        /** @var EmailBuilderService $service */
+        $service = $this->app->make(EmailBuilderServiceInterface::class);
+
+        $result = $service->replaceMessageId(
+            'template',
+            $builderEmail->id,
+            $builderEmail->leadId,
+            $parsedEmail->emailHistoryId,
+            $parsedEmail->messageId
+        );
+
+        $this->assertFalse($result);
     }
 
     /**
@@ -3022,8 +2940,6 @@ class EmailBuilderServiceTest extends TestCase
         $salesperson->smtp_security = self::SALES_PERSON_SMTP_SECURITY;
         $salesperson->smtp_auth = self::SALES_PERSON_SMTP_AUTH;
 
-        $salesperson->active_token = self::SALES_PERSON_SMTP_AUTH;
-
         $accessToken = $this->getEloquentMock(AccessToken::class);
         $accessToken->access_token = self::ACCESS_TOKEN_ACCESS_TOKEN;
 
@@ -3039,5 +2955,61 @@ class EmailBuilderServiceTest extends TestCase
         $validateToken->setAccessToken($accessToken);
 
         return [[$builderEmail, $parsedEmail, $salesperson, $validateToken]];
+    }
+
+    /**
+     * @return array[]
+     */
+    public function markSentDataProvider(): array
+    {
+        $builderEmail = new BuilderEmail([
+            'id' => self::TEMPLATE_ID,
+            'type' => 'template',
+            'template' => self::SEND_TEMPLATE_HTML,
+            'subject' => self::SEND_TEMPLATE_SUBJECT,
+            'dealerId' => self::DEALER_ID,
+            'userId' => self::NEW_DEALER_USER_ID,
+            'salesPersonId' => self::SALES_PERSON_ID,
+            'fromEmail' => self::SALES_PERSON_SMTP_EMAIL,
+            'toEmail' => self::SEND_TEMPLATE_TO_EMAIL,
+            'templateId' => self::TEMPLATE_ID,
+            'leadId' => self::FIRST_LEAD_ID
+        ]);
+
+        $parsedEmail = new ParsedEmail([
+            'emailHistoryId' => self::PARSED_EMAIL_ID,
+            'leadId' => self::FIRST_LEAD_ID,
+            'to' => self::SEND_TEMPLATE_TO_EMAIL,
+            'toName' => self::SALES_PERSON_FULL_NAME,
+            'from' => self::SALES_PERSON_SMTP_EMAIL,
+            'subject' => self::SEND_TEMPLATE_SUBJECT,
+            'body' => self::SEND_TEMPLATE_HTML,
+            'isHtml' => true,
+        ]);
+
+        $blastSent = $this->getEloquentMock(BlastSent::class);
+        $blastSent->lead_id = $builderEmail->leadId;
+
+        $campaignSent = $this->getEloquentMock(CampaignSent::class);
+        $campaignSent->lead_id = $builderEmail->leadId;
+
+        return [[$builderEmail, $parsedEmail, $blastSent, $campaignSent]];
+    }
+
+    /**
+     * Get Template for Type
+     *
+     * @return string
+     */
+    private function getTemplate() {
+        return '
+                <html>
+                <body>
+                <p>This is a test Email!</p>
+                <p><strong>Full Name:</strong> {lead_name}</p>
+                <p><strong>Unit Interested In:</strong> {title_of_unit_of_interest}</p>
+                </body>
+                </html>
+        ';
     }
 }
