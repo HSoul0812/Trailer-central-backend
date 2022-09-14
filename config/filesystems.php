@@ -116,6 +116,13 @@ return [
             'url' => env('AWS_URL'),
         ],
 
+        'marketplaceExports' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/tmp/exports/marketplace'),
+            'url' => env('APP_URL').'/storage/tmp/exports/marketplace',
+            'visibility' => 'public',
+        ],
+
         'tmp' => [
             'driver' => 'local',
             'root' =>  env('APP_TMP_DIR', '/tmp')

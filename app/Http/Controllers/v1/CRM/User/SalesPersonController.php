@@ -5,6 +5,7 @@ namespace App\Http\Controllers\v1\CRM\User;
 use App\Http\Controllers\RestfulController;
 use App\Http\Requests\CRM\User\ConfigSalesPeopleRequest;
 use App\Http\Requests\CRM\User\GetSalesPeopleRequest;
+use App\Http\Requests\CRM\User\GetSalesPersonRequest;
 use App\Http\Requests\CRM\User\ValidateSalesPeopleRequest;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Services\CRM\User\DTOs\SalesPersonConfig;
@@ -96,6 +97,25 @@ class SalesPersonController extends RestfulController {
         return $this->response->array(
             $response
         );
+    }
+
+    /**
+     * Get Sales Person
+     * 
+     * @param int $id
+     * @return type
+     */
+    public function show(int $id)
+    {
+        // Handle Auth Sales People Request
+        $requestData = ['sales_person_id' => $id];
+        $request = new GetSalesPersonRequest($requestData);
+        if ($request->validate()) {
+            // Return Auth
+            return $this->response->item($this->salesPerson->get($request->all()), $this->salesPersonTransformer);
+        }
+        
+        return $this->response->errorBadRequest();
     }
 
     public function salesReport(Request $request)
