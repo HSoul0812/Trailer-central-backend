@@ -35,7 +35,7 @@ class LatLongPrecisionUpdaterCommand extends Command
         $this->line('This command is going to run over all the records in the geolocation table and update the precision of each record that has two decimal points.');
 
         // Prompt user to confirm if we should begin the execution of the command
-        if (!$this->confirm('This will take a while. Press [ENTER] to begin')) {
+        if(!$this->confirm('This will take a while. Press [ENTER] to begin')) {
             return 0;
         }
 
@@ -65,17 +65,18 @@ class LatLongPrecisionUpdaterCommand extends Command
 
         // TODO: Pass the start position to the chunk method so inturrupted processes continue from where they were inturupted
 
-        $query->chunk(500, function ($data, $chunkNumber) use ($cacheKey) {
-
+        $query->chunk(500, function($data, $chunkNumber) use ($cacheKey) {
             $this->alert("Processing chunk number '{$chunkNumber}'");
 
-            $data->each(function (Geolocation $item) {
+            $data->each(function(Geolocation $item) {
                 $latLong = $this->getLongitudeAndLatitude($item->zip);
 
-                if ($latLong === null) {
+                // If the method returns null, there was an issue with getting info for that zip. Log it and move on
+                if($latLong === null) {
                     return $this->addError($item);
                 }
 
+                // Update the record in the DB
                 $item->update([
                     'latitude' => $latLong->getLatitude(),
                     'longitude' => $latLong->getLongitude()
@@ -87,6 +88,11 @@ class LatLongPrecisionUpdaterCommand extends Command
         });
     }
 
+    /**
+     * Logs an error encountered processing the specified ZIP code
+     *
+     * @return void
+     */
     protected function addError(Geolocation $item)
     {
         // Log out the error
@@ -102,8 +108,7 @@ class LatLongPrecisionUpdaterCommand extends Command
      *
      * @return LatLong|null
      */
-    protected function getLongitudeAndLatitude(string $zip)
-    {
+    protected function getLongitudeAndLatitude(string $zip) : ?LatLong {
         $url = "https://maps.googleapis.com/maps/api/geocode/json?address={$zip}&sensor=false&key=" . self::GOOGLE_API_KEY;
 
         $result_string = file_get_contents($url);
@@ -111,7 +116,7 @@ class LatLongPrecisionUpdaterCommand extends Command
         $result = json_decode($result_string, true);
 
         if (!$result || empty($result['results'])) {
-            return null;
+           return null;
         }
 
         return new LatLong(
@@ -119,10 +124,13 @@ class LatLongPrecisionUpdaterCommand extends Command
             floatval($result['results'][0]['geometry']['location']['lng'])
         );
     }
+
 }
 
-class LatLong
-{
+/**
+ * Represents a latitude / longitude pair
+ */
+class LatLong {
     private $latitude = 0;
 
     private $longitude = 0;
@@ -138,8 +146,7 @@ class LatLong
      *
      * @return float
      */
-    public function getLatitude(): float
-    {
+    public function getLatitude(): float {
         return $this->latitude;
     }
 
@@ -148,8 +155,7 @@ class LatLong
      *
      * @return float
      */
-    public function getLongitude(): float
-    {
+    public function getLongitude(): float {
         return $this->longitude;
     }
 }
