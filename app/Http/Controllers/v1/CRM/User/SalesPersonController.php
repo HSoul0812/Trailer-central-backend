@@ -98,6 +98,25 @@ class SalesPersonController extends RestfulController {
         );
     }
 
+    /**
+     * Get Sales Person
+     * 
+     * @param int $id
+     * @return type
+     */
+    public function show(int $id)
+    {
+        // Handle Auth Sales People Request
+        $requestData = ['sales_person_id' => $id];
+        $request = new ShowSalesPersonRequest($requestData);
+        if ($request->validate()) {
+            // Return Auth
+            return $this->response->array($this->salesPerson->get($request->all()));
+        }
+        
+        return $this->response->errorBadRequest();
+    }
+
     public function salesReport(Request $request)
     {
         $result = $this->salesPerson->salesReport($request->all());
