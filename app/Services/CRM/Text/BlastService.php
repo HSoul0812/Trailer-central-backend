@@ -106,11 +106,6 @@ class BlastService implements BlastServiceInterface
             // Get From Number
             $from_number = $this->getFromNumber($dealer->id, $blast);
 
-            if (empty($from_number)) {
-                $this->log->error('No Blast SMS From Number for Dealer #: ' . $dealer->id);
-                throw new NoBlastSmsFromNumberException;
-            }
-
             if (!$this->textService->isValidPhoneNumber($from_number)) {
                 $this->log->error('From SMS Number is Invalid #: ' . $dealer->id);
                 throw new NotValidFromNumberException();
@@ -150,7 +145,7 @@ class BlastService implements BlastServiceInterface
             $this->saveLog($blast, 'warning', $e->getMessage());
             $this->markDelivered($blast);
 
-            throw $e;
+            return new Collection();
         } catch (BlastException $e) {
             $this->saveLog($blast, 'error', $e->getMessage());
             $this->markDelivered($blast, true);
@@ -180,7 +175,14 @@ class BlastService implements BlastServiceInterface
         }
 
         // Get First Available Number From Dealer Location
-        return $this->dealerLocation->findDealerSmsNumber($dealerId);
+        $fromNumber = $this->dealerLocation->findDealerSmsNumber($dealerId);
+        if(!empty($fromNumber)) {
+            return $fromNumber;
+        }
+
+        // Throw Exception
+        $this->log->error('No Blast SMS From Number for Dealer #: ' . $dealerId);
+        throw new NoBlastSmsFromNumberException;
     }
 
     /**

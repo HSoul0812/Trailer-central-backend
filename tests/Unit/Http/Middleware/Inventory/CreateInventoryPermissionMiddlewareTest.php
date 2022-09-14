@@ -24,6 +24,9 @@ class CreateInventoryPermissionMiddlewareTest extends TestCase
 {
     /**
      * @covers ::handle
+     *
+     * @group DMS
+     * @group DMS_INVENTORY_PERMISSION
      */
     public function testHandleWithUser()
     {
@@ -51,6 +54,9 @@ class CreateInventoryPermissionMiddlewareTest extends TestCase
 
     /**
      * @covers ::handle
+     *
+     * @group DMS
+     * @group DMS_INVENTORY_PERMISSION
      */
     public function testHandleWithSuperAdminPermission()
     {
@@ -84,6 +90,9 @@ class CreateInventoryPermissionMiddlewareTest extends TestCase
 
     /**
      * @covers ::handle
+     *
+     * @group DMS
+     * @group DMS_INVENTORY_PERMISSION
      */
     public function testHandleWithoutSuperAdminPermission()
     {
@@ -154,6 +163,9 @@ class CreateInventoryPermissionMiddlewareTest extends TestCase
 
     /**
      * @covers ::handle
+     *
+     * @group DMS
+     * @group DMS_INVENTORY_PERMISSION
      */
     public function testHandleWithoutPermission()
     {
@@ -195,6 +207,9 @@ class CreateInventoryPermissionMiddlewareTest extends TestCase
 
     /**
      * @covers ::handle
+     *
+     * @group DMS
+     * @group DMS_INVENTORY_PERMISSION
      */
     public function testHandleWithoutUser()
     {

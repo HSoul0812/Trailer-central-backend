@@ -18,6 +18,9 @@ class DealerUserRepositoryTest extends TestCase
   /**
    * Test that SUT is properly bound by the application
    *
+   * @group DMS
+   * @group DMS_DEALER_USER
+   *
    * @throws BindingResolutionException when there is a problem with resolution
    *                                    of concreted class
    * @note IntegrationTestCase
@@ -31,6 +34,10 @@ class DealerUserRepositoryTest extends TestCase
 
   /**
    * @covers ::get
+   *
+   * @group DMS
+   * @group DMS_DEALER_USER
+   *
    * @throws BindingResolutionException
    * @throws Exception when Uuid::uuid4()->toString() could not generate a uuid
    */
@@ -81,6 +88,13 @@ class DealerUserRepositoryTest extends TestCase
     $this->seeder->cleanUp();
   }
 
+    /**
+     * @group DMS
+     * @group DMS_DEALER_USER
+     *
+     * @return void
+     * @throws BindingResolutionException
+     */
   public function testCreateWithPermissionsIsWorkingProperly(): void
   {
 

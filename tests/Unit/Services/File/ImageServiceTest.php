@@ -8,6 +8,8 @@ use App\Helpers\ImageHelper;
 use App\Helpers\SanitizeHelper;
 use App\Services\File\DTOs\FileDto;
 use App\Services\File\ImageService;
+use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Mockery;
@@ -95,9 +97,15 @@ class ImageServiceTest extends TestCase
      * @covers ::upload
      * @dataProvider uploadDataProvider
      *
+     * @group DMS
+     * @group DMS_FILES
+     *
      * @param string $url
      * @param string $title
      * @param int $dealerId
+     * @throws FileUploadException
+     * @throws ImageUploadException
+     * @throws BindingResolutionException
      */
     public function testUpload(string $url, string $title, int $dealerId)
     {
@@ -141,9 +149,15 @@ class ImageServiceTest extends TestCase
      * @covers ::upload
      * @dataProvider uploadDataProvider
      *
+     * @group DMS
+     * @group DMS_FILES
+     *
      * @param string $url
      * @param string $title
      * @param int $dealerId
+     * @throws BindingResolutionException
+     * @throws FileUploadException
+     * @throws ImageUploadException
      */
     public function testUploadWithOverlay(string $url, string $title, int $dealerId)
     {
@@ -196,9 +210,16 @@ class ImageServiceTest extends TestCase
      * @covers ::upload
      * @dataProvider uploadDataProvider
      *
+     * @group DMS
+     * @group DMS_FILES
+     *
      * @param string $url
      * @param string $title
      * @param int $dealerId
+     * @throws BindingResolutionException
+     * @throws FileUploadException
+     * @throws ImageUploadException
+     * @throws FileNotFoundException
      */
     public function testUploadWithWrongExtension(string $url, string $title, int $dealerId)
     {
@@ -232,9 +253,15 @@ class ImageServiceTest extends TestCase
      * @covers ::upload
      * @dataProvider uploadDataProvider
      *
+     * @group DMS
+     * @group DMS_FILES
+     *
      * @param string $url
      * @param string $title
      * @param int $dealerId
+     * @throws BindingResolutionException
+     * @throws FileUploadException
+     * @throws ImageUploadException
      */
     public function testUploadEmptyContent(string $url, string $title, int $dealerId)
     {
@@ -266,9 +293,15 @@ class ImageServiceTest extends TestCase
      * @covers ::upload
      * @dataProvider uploadDataProvider
      *
+     * @group DMS
+     * @group DMS_FILES
+     *
      * @param string $url
      * @param string $title
      * @param int $dealerId
+     * @throws BindingResolutionException
+     * @throws FileUploadException
+     * @throws ImageUploadException
      */
     public function testUploadEmptyContentSkip(string $url, string $title, int $dealerId)
     {
@@ -302,6 +335,9 @@ class ImageServiceTest extends TestCase
 
     /**
      * @covers ::uploadLocal
+     *
+     * @group DMS
+     * @group DMS_FILES
      */
     public function testUploadLocal()
     {
@@ -323,6 +359,9 @@ class ImageServiceTest extends TestCase
 
     /**
      * @covers ::uploadLocal
+     *
+     * @group DMS
+     * @group DMS_FILES
      */
     public function testUploadLocalWrongMimeType()
     {
@@ -336,6 +375,9 @@ class ImageServiceTest extends TestCase
 
     /**
      * @covers ::uploadLocal
+     *
+     * @group DMS
+     * @group DMS_FILES
      */
     public function testUploadLocalWithoutFile()
     {
@@ -347,6 +389,9 @@ class ImageServiceTest extends TestCase
 
     /**
      * @covers ::uploadLocal
+     *
+     * @group DMS
+     * @group DMS_FILES
      */
     public function testUploadLocalWrongFile()
     {

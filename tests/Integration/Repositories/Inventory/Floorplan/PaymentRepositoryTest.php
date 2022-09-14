@@ -23,6 +23,9 @@ class PaymentRepositoryTest extends TestCase
     /**
      * Test that SUT is properly bound by the application
      *
+     * @group DMS
+     * @group DMS_INVENTORY_FLOORPLAN
+     *
      * @throws BindingResolutionException when there is a problem with resolution
      *                                    of concreted class
      * @note IntegrationTestCase
@@ -35,6 +38,9 @@ class PaymentRepositoryTest extends TestCase
     }
 
     /**
+     * @group DMS
+     * @group DMS_INVENTORY_FLOORPLAN
+     *
      * @throws BindingResolutionException when there is a problem with resolution of concreted class
      * @note IntegrationTestCase
      */
@@ -46,6 +52,9 @@ class PaymentRepositoryTest extends TestCase
     }
 
     /**
+     * @group DMS
+     * @group DMS_INVENTORY_FLOORPLAN
+     *
      * @throws BindingResolutionException when there is a problem with resolution of concreted class
      * @note IntegrationTestCase
      */

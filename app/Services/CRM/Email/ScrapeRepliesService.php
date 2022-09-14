@@ -3,13 +3,15 @@
 namespace App\Services\CRM\Email;
 
 use App\Exceptions\CRM\Email\MissingAccessTokenImportFolderException;
+use App\Exceptions\Common\InvalidEmailCredentialsException;
 use App\Exceptions\Common\MissingFolderException;
 use App\Jobs\CRM\Email\ScrapeRepliesJob;
-use App\Models\User\NewDealerUser;
 use App\Models\CRM\Email\Attachment;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\CRM\User\EmailFolder;
 use App\Models\CRM\Interactions\EmailHistory;
+use App\Models\Integration\Auth\AccessToken;
+use App\Models\User\NewDealerUser;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
@@ -104,12 +106,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
 
     /**
-     * @var int
-     */
-    protected $runtime = 0;
-
-
-    /**
      * ScrapeRepliesService constructor.
      */
     public function __construct(GmailServiceInterface $gmail,
@@ -150,9 +146,6 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @return bool
      */
     public function dealer(NewDealerUser $dealer): bool {
-        // Start Time Tracking
-        $this->runtime = microtime(true); 
-
         // Get Salespeople With Email Credentials
         $salespeople = $this->salespeople->getAllImap($dealer->user_id);
         $this->log->info('Dealer #' . $dealer->id . ' Found ' . $salespeople->count() .
@@ -162,8 +155,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         }
 
         // Start Time Tracking
-        $this->log->info('Found ' . $salespeople->count() . ' Sales People in ' . 
-                (microtime(true) - $this->runtime) . ' Seconds');
+        $this->log->info('Found ' . $salespeople->count() . ' Sales People');
 
         // Loop Campaigns for Current Dealer
         foreach($salespeople as $salesperson) {
@@ -177,8 +169,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                 if ($job->hasNoPending()) {
                     $this->dispatch($job->onQueue('scrapereplies'));
                     $this->log->info('Dealer #' . $dealer->id . ', Sales Person #' .
-                                        $salesperson->id . ' - Started Importing Email in ' . 
-                                        (microtime(true) - $this->runtime) . ' Seconds');
+                                        $salesperson->id . ' - Started Importing Email');
 
                     // After the job is being dispatched, put it in the cache
                     // so the next command won't create another job until it's finished
@@ -188,19 +179,16 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
                     ], now()->addSeconds(7200));
                 } else {
                     $this->log->info('Dealer #' . $dealer->id . ', Sales Person #' .
-                                        $salesperson->id . ' - Already Active Job in ' . 
-                                        (microtime(true) - $this->runtime) . ' Seconds');
+                                        $salesperson->id . ' - Already Active Job');
                 }
             } catch(\Exception $e) {
                 $this->log->error('Dealer #' . $dealer->id . ' Sales Person #' .
-                                    $salesperson->id . ' - Exception returned: ' .
-                                    $e->getMessage() . ' in ' . (microtime(true) - $this->runtime) . ' Seconds');
+                                    $salesperson->id . ' - Exception returned: ' . $e->getMessage());
             }
         }
 
         // End Time Tracking
-        $this->log->info('Queued ' . $salespeople->count() . ' Sales People in ' . 
-                (microtime(true) - $this->runtime) . ' Seconds');
+        $this->log->info('Queued ' . $salespeople->count() . ' Sales People');
         return true;
     }
 
@@ -213,36 +201,31 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      */
     public function salesperson(NewDealerUser $dealer, SalesPerson $salesperson): int {
         // Start Time Tracking
-        $this->runtime = microtime(true);
-        $this->refreshToken($dealer, $salesperson);
+        $accessToken = $this->getAccessToken($dealer, $salesperson);
 
         // Process Messages
         $this->jobLog->info('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
-                            ' - Processing Getting Emails in ' . 
-                            (microtime(true) - $this->runtime) . ' Seconds');
+                            ' - Processing Getting Emails');
         $imported = 0;
         foreach($salesperson->email_folders as $folder) {
             // Try Catching Error for Sales Person Folder
             try {
                 // Import Folder
-                $imports = $this->folder($dealer, $salesperson, $folder);
+                $imports = $this->folder($dealer, $salesperson, $folder, $accessToken);
                 $this->jobLog->info('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
                                     ' - Finished Importing ' . $imports .
-                                    ' Replies for Folder ' . $folder->name . ' in ' . 
-                                    (microtime(true) - $this->runtime) . ' Seconds');
+                                    ' Replies for Folder ' . $folder->name);
                 $imported += $imports;
             } catch(\Exception $e) {
                 $this->jobLog->error('Dealer #' . $dealer->id . ', Sales Person #' .
                                     $salesperson->id .  ' - Error Importing Folder ' .
-                                    $folder->name . ': ' . $e->getMessage() . ' in ' . 
-                                    (microtime(true) - $this->runtime) . ' Seconds');
+                                    $folder->name . ': ' . $e->getMessage());
             }
         }
 
         // Return Campaign Sent Entries
         $this->jobLog->info('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
-                            ' - Imported ' . $imported . ' Emails in ' . 
-                            (microtime(true) - $this->runtime) . ' Seconds');
+                            ' - Imported ' . $imported . ' Emails');
         return $imported;
     }
 
@@ -252,18 +235,20 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * @param NewDealerUser $dealer
      * @param SalesPerson $salesperson
      * @param Folder $folder
+     * @param null|AccessToken $accessToken
      * @return int total number of imported emails
      */
-    public function folder(NewDealerUser $dealer, SalesPerson $salesperson, EmailFolder $folder): int {
+    public function folder(NewDealerUser $dealer, SalesPerson $salesperson,
+                            EmailFolder $folder, ?AccessToken $accessToken = null): int {
         // Try Importing
         try {
             // Get From Google?
-            if(!empty($salesperson->active_token->access_token) && $salesperson->active_token->token_type === 'google') {
-                $total = $this->importGmail($dealer->id, $salesperson, $folder);
-            } elseif(!empty($salesperson->active_token->access_token) && $salesperson->active_token->token_type === 'office365') {
+            if(!empty($accessToken->access_token) && $accessToken->token_type === 'google') {
+                $total = $this->importGmail($dealer->id, $salesperson, $accessToken, $folder);
+            } elseif(!empty($accessToken->access_token) && $accessToken->token_type === 'office365') {
                 // Get From Office 365?
-                $total = $this->importOffice($dealer->id, $salesperson, $folder);
-            } elseif(!empty($salesperson->active_token) && empty($salesperson->active_token->access_token)) {
+                $total = $this->importOffice($dealer->id, $salesperson, $accessToken, $folder);
+            } elseif(!empty($accessToken) && empty($accessToken->access_token)) {
                 throw new MissingAccessTokenImportFolderException;
             } else {
                 // Get From IMAP Instead
@@ -272,20 +257,23 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
 
             // Return Total
             return $total;
+        } catch (InvalidEmailCredentialsException $e) {
+            //$this->salespeople->update(['id' => $salesperson->id, 'imap_failed' => 1]);
+            $this->jobLog->error('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
+                                ' - Invalid email credentials retrieving email messages: ' .
+                                $e->getMessage() . '; marking connection as failed');
         } catch (MissingFolderException $e) {
             $this->folders->delete($folder->folder_id);
+            $this->jobLog->error('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
+                                ' - Folder ' . $folder->name . ' does not exist on ' .
+                                'dealer, deleting folder #' . $folder->folder_id);
         } catch (\Exception $e) {
             $this->folders->markFailed($folder->folder_id);
-//            $this->salespeople->update(['id' => $salesperson->id, 'imap_failed' => 1]);
             $this->jobLog->error('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
-                                ' - General exception thrown retrieving email messages: ' .
-                                $e->getMessage() . '; marking IMAP connection as failed');
+                                ' - Unknown exception thrown retrieving email messages: ' . $e->getMessage());
         }
 
         // Return Nothing
-        $this->jobLog->error('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
-                            ' - Failed to Connect to Folder ' . $folder->name .
-                            ': ' . $e->getMessage() . PHP_EOL . $e->getTraceAsString());
         return 0;
     }
 
@@ -295,14 +283,16 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * 
      * @param int $dealerId
      * @param SalesPerson $salesperson
+     * @param AccessToken $accessToken
      * @param EmailFolder $emailFolder
      * @return int total number of imported emails
      */
-    private function importGmail(int $dealerId, SalesPerson $salesperson, EmailFolder $emailFolder): int {
+    private function importGmail(int $dealerId, SalesPerson $salesperson,
+                                    AccessToken $accessToken, EmailFolder $emailFolder): int {
         // Get Emails From Gmail
         $this->jobLog->info('Dealer #' . $dealerId . ', Sales Person #' . $salesperson->id . 
                             ' - Connecting to Gmail with Email: ' . $salesperson->smtp_email);
-        $messages = $this->gmail->messages($salesperson->active_token, $emailFolder->name, [
+        $messages = $this->gmail->messages($accessToken, $emailFolder->name, [
             'after' => Carbon::parse($emailFolder->date_imported)->subDay()->isoFormat('YYYY/M/D')
         ]);
         $folder = $this->updateFolder($salesperson, $emailFolder);
@@ -341,14 +331,16 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * 
      * @param int $dealerId
      * @param SalesPerson $salesperson
+     * @param AccessToken $accessToken
      * @param EmailFolder $emailFolder
      * @return int total number of imported emails
      */
-    private function importOffice(int $dealerId, SalesPerson $salesperson, EmailFolder $emailFolder): int {
+    private function importOffice(int $dealerId, SalesPerson $salesperson, 
+                                    AccessToken $accessToken, EmailFolder $emailFolder): int {
         // Get Emails From Gmail
         $this->jobLog->info('Dealer #' . $dealerId . ', Sales Person #' . $salesperson->id . 
                                 ' - Connecting to Office 365 with Email: ' . $salesperson->smtp_email);
-        $messages = $this->office->messages($salesperson->active_token, $emailFolder->name, [
+        $messages = $this->office->messages($accessToken, $emailFolder->name, [
             'SentDateTime ge ' . Carbon::parse($emailFolder->date_imported)->subDay()->isoFormat('YYYY-MM-DD')
         ]);
         $folder = $this->updateFolder($salesperson, $emailFolder);
@@ -392,7 +384,7 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
     private function importImap(int $dealerId, SalesPerson $salesperson, EmailFolder $emailFolder): int {
         // Get Emails From IMAP
         $this->jobLog->info('Dealer #' . $dealerId . ', Sales Person #' . $salesperson->id . 
-                                ' - Connecting to Office 365 with Email: ' . $salesperson->imap_email);
+                                ' - Connecting to IMAP with Email: ' . $salesperson->imap_email);
         $imapConfig = ImapConfig::fillFromSalesPerson($salesperson, $emailFolder);
         $messages = $this->imap->messages($imapConfig);
         $folder = $this->updateFolder($salesperson, $emailFolder);
@@ -401,7 +393,12 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
         $total = $skipped = 0;
         foreach($messages as $message) {
             // Get Message Overview
-            $email = $this->imap->overview($message);
+            try {
+                $email = $this->imap->overview($message);
+            } catch (\Exception $e) {
+                $this->jobLog->error('Dealer #' . $dealerId . ', Sales Person #' . $salesperson->id . 
+                                    ' - Exception thrown retrieving email message: ' . $e->getMessage());
+            }
             if(empty($email)) { continue; }
 
             // Import Message
@@ -698,28 +695,39 @@ class ScrapeRepliesService implements ScrapeRepliesServiceInterface
      * 
      * @param NewDealerUser $dealer
      * @param SalesPerson $salesperson
-     * @return SalesPerson
+     * @return null|AccessToken
      */
-    private function refreshToken(NewDealerUser $dealer, SalesPerson $salesperson): SalesPerson {
+    private function getAccessToken(NewDealerUser $dealer, SalesPerson $salesperson): ?AccessToken {
         // Token Exists?
         if(!empty($salesperson->active_token)) {
             // Refresh Token
+            $activeToken = $salesperson->active_token;
             $this->jobLog->info('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
-                                ' - Validating token #' . $salesperson->active_token->id);
+                                ' - Validating token #' . $activeToken->id);
+
+            // Try Running OAuth Validate and Refresh Token
             try {
-                $validate = $this->auth->validate($salesperson->active_token);
-                $salesperson->active_token = $validate->accessToken;
-                $this->jobLog->info('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
-                                    ' - Found access token: ' . $salesperson->active_token);
+                $validate = $this->auth->validate($activeToken);
             } catch (\Exception $e) {
-                $this->salespeople->update(['id' => $salesperson->id, 'imap_failed' => 1]);
+                //$this->salespeople->update(['id' => $salesperson->id, 'imap_failed' => 1]);
                 $this->jobLog->error('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
                                     ' - Exception thrown validating active access token: ' .
-                                    $e->getMessage() . '; marking IMAP connection as failed');
+                                    $e->getMessage() . '; marking connection as failed');
+                return $activeToken;
             }
+
+            // Access Token Exists?
+            if($validate->accessToken) {
+                $accessToken = $validate->accessToken;
+                $this->jobLog->info('Dealer #' . $dealer->id . ', Sales Person #' . $salesperson->id . 
+                                    ' - Found access token: ' . $accessToken);
+            }
+
+            // Return Updated Access Token, Otherwise Return Active Token
+            return $accessToken ?? $activeToken;
         }
 
-        // Return Sales Person With Updated Access Token
-        return $salesperson;
+        // No Access Token
+        return null;
     }
 }

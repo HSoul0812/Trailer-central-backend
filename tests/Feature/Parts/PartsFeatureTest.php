@@ -13,6 +13,12 @@ use Tests\TestCase;
  */
 class PartsFeatureTest extends TestCase
 {
+    /**
+     * @group DMS
+     * @group DMS_PARTS
+     *
+     * @return void
+     */
     public function testIndexHttpOk(): void
     {
         $response = $this
@@ -22,6 +28,12 @@ class PartsFeatureTest extends TestCase
         $response->assertStatus(200);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_PARTS
+     *
+     * @return void
+     */
     public function testSearchHasDataProperty(): void
     {
         $response = $this
@@ -33,6 +45,12 @@ class PartsFeatureTest extends TestCase
         self::assertTrue(isset($json['data']));
     }
 
+    /**
+     * @group DMS
+     * @group DMS_PARTS
+     *
+     * @return void
+     */
     public function testPartHasNotPurchaseOrdesPropertyWhenIncludeParamIsNotPresent(): void
     {
         $response = $this
@@ -44,6 +62,12 @@ class PartsFeatureTest extends TestCase
         self::assertNotTrue(isset($json['data'][0]['purchases']));
     }
 
+    /**
+     * @group DMS
+     * @group DMS_PARTS
+     *
+     * @return void
+     */
     public function testPartHasPurchaseOrdersPropertyAndItsStructureIsWellFormed(): void
     {
         $params = [
@@ -64,6 +88,12 @@ class PartsFeatureTest extends TestCase
         self::assertArrayHasKey('has_not_completed', $json['data'][0]['purchaseOrders']['meta']);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_PARTS
+     *
+     * @return void
+     */
     public function testPartHasPurchaseOrdersNotCompleted(): void
     {
         // Given I'm a dealer
