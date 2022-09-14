@@ -199,6 +199,7 @@ class InventoryTransformer extends TransformerAbstract
              'show_on_rvtrader' => $inventory->show_on_rvtrader,
              'changed_fields_in_dashboard' => $inventory->changed_fields_in_dashboard,
              'show_on_auction123' => $inventory->show_on_auction123,
+             'show_on_rvt' => $inventory->show_on_rvt,
         ];
     }
 

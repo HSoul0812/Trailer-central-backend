@@ -2,6 +2,7 @@
 
 namespace App\Repositories\User;
 
+use App\Models\User\DealerClapp;
 use App\Repositories\Repository;
 use App\Models\User\User;
 use App\Repositories\TransactionalRepository;
@@ -104,7 +105,92 @@ interface UserRepositoryInterface extends Repository, TransactionalRepository {
 
     /**
      * @param int $dealerId
+     * @return User
+     */
+    public function activateDealerClassifieds(int $dealerId): User;
+
+    /**
+     * @param int $dealerId
+     * @return User
+     */
+    public function deactivateDealerClassifieds(int $dealerId): User;
+
+    /**
+     * @param int $dealerId
+     * @return User
+     */
+    public function activateDms(int $dealerId): User;
+
+    /**
+     * @param int $dealerId
+     * @return User
+     */
+    public function deactivateDms(int $dealerId): User;
+
+    /**
+     * @param int $dealerId
      * @return mixed
      */
     public function deactivateDealer(int $dealerId): User;
+
+    /**
+     * @param int $dealerId
+     * @param string $sourceId
+     * @return User
+     */
+    public function activateCdk(int $dealerId, string $sourceId): User;
+
+    /**
+     * @param int $dealerId
+     * @return User
+     */
+    public function deactivateCdk(int $dealerId): User;
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function activateELeads(int $dealerId): bool;
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateELeads(int $dealerId): bool;
+
+    /**
+     * @param int $dealerId
+     * @return DealerClapp
+     */
+    public function activateMarketing(int $dealerId): DealerClapp;
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateMarketing(int $dealerId): bool;
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function activateMobile(int $dealerId): bool;
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateMobile(int $dealerId): bool;
+
+    /**
+     * @param int $dealerId
+     * @return User
+     */
+    public function activateQuoteManager(int $dealerId): User;
+
+    /**
+     * @param int $dealerId
+     * @return User
+     */
+    public function deactivateQuoteManager(int $dealerId): User;
 }
