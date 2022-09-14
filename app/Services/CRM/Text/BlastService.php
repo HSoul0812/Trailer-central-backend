@@ -145,7 +145,7 @@ class BlastService implements BlastServiceInterface
             $this->saveLog($blast, 'warning', $e->getMessage());
             $this->markDelivered($blast);
 
-            throw $e;
+            return new Collection();
         } catch (BlastException $e) {
             $this->saveLog($blast, 'error', $e->getMessage());
             $this->markDelivered($blast, true);

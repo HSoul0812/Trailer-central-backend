@@ -61,6 +61,6 @@ class DownloadIntegrationRunHistory extends Action
     private function getFileName($dealerId): string
     {
         $date = now()->format('Y-m-d_H-i-s');
-        return "export_postingHistory_{$dealerId}_{$date}.csv";
+        return "fme_export_postingHistory_{$dealerId}_{$date}.csv";
     }
 }
