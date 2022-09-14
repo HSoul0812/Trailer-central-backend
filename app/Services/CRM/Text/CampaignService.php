@@ -110,8 +110,7 @@ class CampaignService implements CampaignServiceInterface
 
             // Get Unsent Campaign Leads
             if (count($campaign->leads) < 1) {
-                $this->log->error('No Leads found for Campaign #' . $campaign->id . ' for Dealer #: ' . $dealer->id);
-                throw new NoLeadsProcessCampaignException;
+                return new Collection();
             }
 
             // Loop Leads for Current Dealer
