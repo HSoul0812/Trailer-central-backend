@@ -73,8 +73,8 @@ class SalesPersonTransformer extends TransformerAbstract
     {
         return $this->item($salesPerson, function($salesPerson) {
             // Get Validate
-            $imapService = app()->make(ImapServiceInterface::class);
-            $validate = $imapService->validate($salesPerson->imap_config);
+            //$imapService = app()->make(ImapServiceInterface::class);
+            //$validate = $imapService->validate($salesPerson->imap_config);
 
             // Return Results
             return [
@@ -83,7 +83,7 @@ class SalesPersonTransformer extends TransformerAbstract
                 'host' => $salesPerson->imap_server,
                 'port' => $salesPerson->imap_port,
                 'security' => $salesPerson->imap_security,
-                'failed' => !$validate->success,
+                'failed' => true,//!$validate->success,
                 'message' => $salesPerson->imap_validate->getMessage()
             ];
         });
