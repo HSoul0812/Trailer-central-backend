@@ -43,7 +43,8 @@ class Error extends Model
         'final-account-review' => 'Marketplace Permanently Blocked',
         'limit-reached' => 'Limit Reached on New Account',
         'failed-post' => 'Inventory Failed to Post',
-        'flagged-post' => 'Inventory Post Was Flagged'
+        'flagged-post' => 'Inventory Post Was Flagged',
+        'timed-out' => 'Timeout encountered'
     ];
 
     /**
@@ -66,7 +67,8 @@ class Error extends Model
         'account-disabled' => 24 * 7,
         'page-unavailable' => 1,
         'marketplace-blocked' => 24 * 7,
-        'final-account-review' => 24 * 30 * 12 * 7
+        'final-account-review' => 24 * 30 * 12 * 7,
+        'timed-out' => 1,
     ];
 
     /**
