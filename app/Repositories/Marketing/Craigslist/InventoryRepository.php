@@ -253,10 +253,9 @@ class InventoryRepository implements InventoryRepositoryInterface
                 })
                 ->leftJoin(Image::getTableName(), Image::getTableName().'.image_id',
                             '=', InventoryImage::getTableName().'.image_id')
-                ->leftJoin(InventoryImage::getTableName() . ' as invImg2', Inventory::getTableName().'.inventory_id',
-                            '=', InventoryImage::getTableName().'.inventory_id')
-                ->leftJoin(Image::getTableName() . ' as img2', Image::getTableName().'.image_id',
-                            '=', InventoryImage::getTableName().'.image_id')
+                ->leftJoin(InventoryImage::getTableName() . ' as invImg2',
+                            Inventory::getTableName().'.inventory_id', '=', 'invImg2.inventory_id')
+                ->leftJoin(Image::getTableName() . ' as img2', 'img2.image_id', '=', 'invImg2.image_id')
                 ->crossJoin(Profile::getTableName())
                 ->leftJoin(Post::getTableName(), function($query) {
                     $query->on(Inventory::getTableName().'.inventory_id', '=', Post::getTableName().'.inventory_id')
