@@ -186,6 +186,8 @@ class Inventory extends Model
     /** @var InventoryElasticSearchConfigurator */
     private $indexConfigurator;
 
+    public static $searchableAs;
+
     const TABLE_NAME = 'inventory';
 
     const STATUS_QUOTE = 6;
@@ -804,7 +806,7 @@ class Inventory extends Model
 
     public function searchableAs(): string
     {
-        return $this->indexConfigurator()->name();
+        return self::$searchableAs ?? $this->indexConfigurator()->name();
     }
 
     public function toSearchableArray(): array
