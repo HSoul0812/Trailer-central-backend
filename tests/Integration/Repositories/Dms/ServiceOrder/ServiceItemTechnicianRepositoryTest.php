@@ -2,6 +2,7 @@
 
 namespace Tests\Integration\Repositories\Dms\ServiceOrder;
 
+use App\Exceptions\Tests\MissingTestDealerIdException;
 use App\Models\CRM\Account\Invoice;
 use App\Models\CRM\Account\InvoiceItem;
 use App\Models\CRM\Dms\Quickbooks\Item;
@@ -13,6 +14,7 @@ use App\Models\CRM\Dms\UnitSale;
 use App\Models\CRM\User\Customer;
 use App\Models\Inventory\Inventory;
 use App\Repositories\Dms\ServiceOrder\ServiceItemTechnicianRepository;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
@@ -30,9 +32,14 @@ class ServiceItemTechnicianRepositoryTest extends TestCase
      * @covers ::serviceReport
      * @dataProvider serviceReportProvider
      *
+     * @group DMS
+     * @group DMS_SERVICE_ORDER
+     *
      * @param array $serviceTechnician11
      * @param array $serviceTechnician12
      * @param array $serviceTechnician21
+     * @throws MissingTestDealerIdException
+     * @throws BindingResolutionException
      */
     public function testServiceReport(array $serviceTechnician11, array $serviceTechnician12, array $serviceTechnician21)
     {
@@ -357,11 +364,16 @@ class ServiceItemTechnicianRepositoryTest extends TestCase
     /**
      * @covers ::serviceReport
      *
+     * @group DMS
+     * @group DMS_SERVICE_ORDER
+     *
      * @dataProvider serviceReportProvider
      *
      * @param array $serviceTechnician11
      * @param array $serviceTechnician12
      * @param array $serviceTechnician21
+     * @throws BindingResolutionException
+     * @throws MissingTestDealerIdException
      */
     public function testServiceReportWithTechnician(array $serviceTechnician11, array $serviceTechnician12, array $serviceTechnician21)
     {
@@ -394,11 +406,16 @@ class ServiceItemTechnicianRepositoryTest extends TestCase
     /**
      * @covers ::serviceReport
      *
+     * @group DMS
+     * @group DMS_SERVICE_ORDER
+     *
      * @dataProvider serviceReportProvider
      *
      * @param array $serviceTechnician11
      * @param array $serviceTechnician12
      * @param array $serviceTechnician21
+     * @throws BindingResolutionException
+     * @throws MissingTestDealerIdException
      */
     public function testServiceReportWithDates(array $serviceTechnician11, array $serviceTechnician12, array $serviceTechnician21)
     {
@@ -438,11 +455,16 @@ class ServiceItemTechnicianRepositoryTest extends TestCase
     /**
      * @covers ::serviceReport
      *
+     * @group DMS
+     * @group DMS_SERVICE_ORDER
+     *
      * @dataProvider serviceReportProvider
      *
      * @param array $serviceTechnician11
      * @param array $serviceTechnician12
      * @param array $serviceTechnician21
+     * @throws BindingResolutionException
+     * @throws MissingTestDealerIdException
      */
     public function testServiceReportWithTypes(array $serviceTechnician11, array $serviceTechnician12, array $serviceTechnician21)
     {

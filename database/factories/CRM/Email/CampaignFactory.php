@@ -17,7 +17,7 @@ use Faker\Generator as Faker;
 $factory->define(Campaign::class, function (Faker $faker, array $attributes) {
     $user_id = $attributes['user_id'] ?? factory(NewUser::class)->create()->getKey();
 
-    $template_id = $attributes['template_id'] ?? factory(Template::class)->create([
+    $template_id = $attributes['email_template_id'] ?? factory(Template::class)->create([
         'user_id' => $user_id
     ])->getKey();
 

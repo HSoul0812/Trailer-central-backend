@@ -18,7 +18,13 @@ use Tests\TestCase;
  */
 class PartRepositoryTest extends TestCase
 {
-
+    /**
+     * @group DMS
+     * @group DMS_PARTS
+     *
+     * @return void
+     * @throws \Exception
+     */
     public function testCreateWillFireAuditLogEvent()
     {
         $testPart = new Part();
@@ -72,6 +78,12 @@ class PartRepositoryTest extends TestCase
         });
     }
 
+    /**
+     * @group DMS
+     * @group DMS_PARTS
+     *
+     * @return void
+     */
     public function testUpdateWillFireAuditLogEvent()
     {
         $testPart = new Part();

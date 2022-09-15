@@ -29,6 +29,9 @@ class FinancialReportExportJobTest extends AbstractMonitoredJobsTest
     /**
      * @dataProvider invalidConfigurationsProvider
      *
+     * @group DMS
+     * @group DMS_BULK_REPORT
+     *
      * @param string|callable $token
      * @param string $expectedExceptionName
      * @param string $expectedExceptionMessage
@@ -59,6 +62,9 @@ class FinancialReportExportJobTest extends AbstractMonitoredJobsTest
     }
 
     /**
+     * @group DMS
+     * @group DMS_BULK_REPORT
+     *
      * @throws Throwable
      */
     public function testWriteTheFileInDisk(): void

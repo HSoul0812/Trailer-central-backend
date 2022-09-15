@@ -23,6 +23,9 @@ class UserRepositoryTest  extends TestCase
      *
      * @typeOfTest IntegrationTestCase
      *
+     * @group DMS
+     * @group DMS_USER
+     *
      * @throws BindingResolutionException when there is a problem with resolution
      *                                    of concreted class
      */
@@ -34,6 +37,9 @@ class UserRepositoryTest  extends TestCase
     }
 
     /**
+     * @group DMS
+     * @group DMS_USER
+     *
      * @return void
      * @throws BindingResolutionException
      */
@@ -52,6 +58,9 @@ class UserRepositoryTest  extends TestCase
     }
 
     /**
+     * @group DMS
+     * @group DMS_USER
+     *
      * @return void
      * @throws BindingResolutionException
      */

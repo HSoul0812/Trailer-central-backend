@@ -9,6 +9,7 @@ use App\Transformers\CRM\Email\ImapMailboxTransformer;
 use App\Transformers\Dms\GenericSaleTransformer;
 use App\Transformers\Integration\Facebook\ChatTransformer;
 use App\Transformers\Pos\SaleTransformer;
+use Illuminate\Support\Collection;
 use League\Fractal\TransformerAbstract;
 
 class SalesPersonTransformer extends TransformerAbstract
@@ -73,8 +74,8 @@ class SalesPersonTransformer extends TransformerAbstract
     {
         return $this->item($salesPerson, function($salesPerson) {
             // Get Validate
-            $imapService = app()->make(ImapServiceInterface::class);
-            $validate = $imapService->validate($salesPerson->imap_config);
+            //$imapService = app()->make(ImapServiceInterface::class);
+            //$validate = $imapService->validate($salesPerson->imap_config);
 
             // Return Results
             return [
@@ -83,7 +84,7 @@ class SalesPersonTransformer extends TransformerAbstract
                 'host' => $salesPerson->imap_server,
                 'port' => $salesPerson->imap_port,
                 'security' => $salesPerson->imap_security,
-                'failed' => !$validate->success,
+                'failed' => false,//!$validate->success,
                 'message' => $salesPerson->imap_validate->getMessage()
             ];
         });
@@ -107,9 +108,10 @@ class SalesPersonTransformer extends TransformerAbstract
 
     public function includeDefaultFolders(SalesPerson $salesPerson)
     {
-        $imapService = app()->make(ImapServiceInterface::class);
+        /*$imapService = app()->make(ImapServiceInterface::class);
         $validate = $imapService->validate($salesPerson->imap_config);
-        $folders = $validate->getDefaultFolders();
+        $folders = $validate->getDefaultFolders();*/
+        $folders = new Collection();
         return $this->collection($folders, new ImapMailboxTransformer());
     }
 
