@@ -1021,10 +1021,10 @@ $api->version('v1', function ($route) {
                     'middleware' => 'emailbuilder.blast.validate'
                 ], function ($route) {
                     $route->get('/', 'App\Http\Controllers\v1\CRM\Email\BlastController@index');
-                    /*$route->put('/', 'App\Http\Controllers\v1\CRM\Email\BlastController@create');
+                    $route->put('/', 'App\Http\Controllers\v1\CRM\Email\BlastController@create');
                     $route->get('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@show')->where('id', '[0-9]+');
                     $route->post('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@update')->where('id', '[0-9]+');
-                    $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@destroy')->where('id', '[0-9]+');*/
+                    $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@destroy')->where('id', '[0-9]+');
                 });
             });
 
