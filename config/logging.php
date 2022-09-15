@@ -98,9 +98,25 @@ return [
             'permission' => 0664,
         ],
 
+        'import' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/commands/import.log'),
+            'level' => 'debug',
+            'days' => 3,
+            'permission' => 0664,
+        ],
+
         'auth' => [
             'driver' => 'daily',
             'path' => storage_path('logs/services/auth.log'),
+            'level' => 'debug',
+            'days' => 3,
+            'permission' => 0664,
+        ],
+
+        'imap' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/services/imap.log'),
             'level' => 'debug',
             'days' => 3,
             'permission' => 0664,

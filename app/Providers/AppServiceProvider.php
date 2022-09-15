@@ -137,6 +137,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        \URL::forceScheme('https');
+        $this->app['request']->server->set('HTTPS', true);
         \Validator::extend('price_format', 'App\Rules\PriceFormat@passes');
         \Validator::extend('checkbox', 'App\Rules\Checkbox@passes');
         \Validator::extend('dealer_location_valid', 'App\Rules\User\ValidDealerLocation@passes');
@@ -159,6 +161,7 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('campaign_action_valid', 'App\Rules\CRM\Email\CampaignActionValid@passes');
         \Validator::extend('text_exists', 'App\Rules\CRM\Text\TextExists@passes');
         \Validator::extend('text_template_exists', 'App\Rules\CRM\Text\TemplateExists@passes');
+        \Validator::extend('email_template_exists', 'App\Rules\CRM\Email\TemplateExists@passes');
         \Validator::extend('parts_sku_unique', 'App\Rules\Parts\SkuUnique@validate');
         \Validator::extend('valid_form_map_type', 'App\Rules\Website\Forms\ValidMapType@passes');
         \Validator::extend('valid_form_map_field', 'App\Rules\Website\Forms\ValidMapField@passes');

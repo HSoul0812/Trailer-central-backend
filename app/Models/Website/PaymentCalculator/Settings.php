@@ -2,23 +2,39 @@
 
 namespace App\Models\Website\PaymentCalculator;
 
+use App\Models\Inventory\EntityType;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $website_id
+ * @property int $entity_type_id
+ * @property string $inventory_condition
+ * @property int $months
+ * @property float $apr
+ * @property float $down
+ * @property string $operator
+ * @property float $inventory_price
+ * @property string $financing
+ *
+ * @property EntityType $entityType
+ */
 class Settings extends Model {
-    
+
     const CONDITION_USED = 0;
     const CONDITION_NEW = 1;
-    
+
     const FINANCING = 'financing';
     const NO_FINANCING = 'no_financing';
-    
+
     const OPERATOR_LESS_THAN = 'less_than';
     const OPERATOR_OVER = 'over';
-    
+
     protected $table = 'website_payment_calculator_settings';
-    
+
     public $timestamps = false;
-    
+
     /**
      * The attributes that are mass assignable.
      *
@@ -33,8 +49,11 @@ class Settings extends Model {
         'down',
         'operator',
         'inventory_price',
-        'inventory_condition',
         'financing'
     ];
-    
+
+    public function entityType(): BelongsTo
+    {
+        return $this->belongsTo(EntityType::class,'entity_type_id');
+    }
 }

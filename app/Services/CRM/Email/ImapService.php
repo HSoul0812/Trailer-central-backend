@@ -57,7 +57,7 @@ class ImapService implements ImapServiceInterface
         }
 
         // Initialize Logger
-        $this->log = Log::channel('scrapereplies');
+        $this->log = Log::channel('imap');
     }
 
     /**
@@ -116,6 +116,7 @@ class ImapService implements ImapServiceInterface
 
         // Error Occurred
         if($imap === null) {
+            $this->log->error('Failed to connect to IMAP using config: ' . print_r($imapConfig, true));
             throw new ImapConnectionFailedException;
         }
 
@@ -123,9 +124,15 @@ class ImapService implements ImapServiceInterface
         try {
             // Get Messages
             return $this->getMessages($imapConfig->folderName, $imapConfig->getStartDate());
+        } catch (MissingFolderException $e) {
+            throw new MissingFolderException;
         } catch (ConnectionException $e) {
+            $this->log->error('IMAP threw an exception: ' . $e->getMessage() . PHP_EOL .
+                                'Trace: ' . $e->getPrevious()->getTraceAsString());
             throw new ImapFolderConnectionFailedException($e->getMessage());
         } catch (\Exception $e) {
+            $this->log->error('Unknown Exception thrown while handling IMAP: ' . $e->getMessage() . PHP_EOL .
+                                'Trace: ' . $e->getPrevious()->getTraceAsString());
             throw new ImapFolderUnknownErrorException($e->getMessage());
         }
     }
@@ -145,6 +152,7 @@ class ImapService implements ImapServiceInterface
 
         // Error Occurred
         if($imap === null) {
+            $this->log->error('Failed to connect to IMAP using config: ' . print_r($imapConfig, true));
             throw new ImapConnectionFailedException;
         }
 
@@ -153,8 +161,12 @@ class ImapService implements ImapServiceInterface
             // Get Messages
             return $this->getMailboxes();
         } catch (ConnectionException $e) {
+            $this->log->error('IMAP threw an exception: ' . $e->getMessage() . PHP_EOL .
+                                'Trace: ' . $e->getPrevious()->getTraceAsString());
             throw new ImapMailboxesMissingException($e->getMessage());
         } catch (\Exception $e) {
+            $this->log->error('Unknown exception thrown while handling IMAP mailboxes: ' . $e->getMessage() . PHP_EOL .
+                                'Trace: ' . $e->getPrevious()->getTraceAsString());
             throw new ImapMailboxesErrorException($e->getMessage());
         }
     }
@@ -240,8 +252,7 @@ class ImapService implements ImapServiceInterface
             // Logged Exceptions
             $this->imap = null;
             $this->log->error('Cannot connect to ' . $imapConfig->username . ' via IMAP, ' .
-                                'exception returned: ' . $e->getMessage() . PHP_EOL .
-                                'Trace: ' . $e->getPrevious()->getTraceAsString());
+                                'exception returned: ' . $e->getMessage() . PHP_EOL);
         } catch (\Exception $e) {
             // Logged Exceptions
             $this->imap = null;

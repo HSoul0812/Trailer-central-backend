@@ -3,13 +3,22 @@
 namespace App\Repositories\CRM\Email;
 
 use App\Exceptions\NotImplementedException;
+use App\Exceptions\RepositoryInvalidArgumentException;
+use App\Models\CRM\Email\CampaignBrand;
+use App\Models\CRM\Email\CampaignCategory;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Email\Campaign;
 use App\Models\CRM\Email\CampaignSent;
-use App\Repositories\CRM\Email\CampaignRepositoryInterface;
+use App\Traits\Repository\Transaction;
 use Illuminate\Support\Facades\DB;
 
-class CampaignRepository implements CampaignRepositoryInterface {
+/**
+ * Class CampaignRepository
+ * @package App\Repositories\CRM\Email
+ */
+class CampaignRepository implements CampaignRepositoryInterface
+{
+    use Transaction;
 
     private $sortOrders = [
         'name' => [
@@ -22,12 +31,46 @@ class CampaignRepository implements CampaignRepositoryInterface {
         ]
     ];
 
-    public function create($params) {
-        throw new NotImplementedException;
+    /**
+     * @param $params
+     * @return Campaign
+     */
+    public function create($params): Campaign
+    {
+        $brandObjs = $this->createBrands($params['brands'] ?? []);
+        $categoryObjs = $this->createUnitCategories($params['unit_categories'] ?? []);
+
+        unset($params['brands']);
+        unset($params['unit_categories']);
+
+        $item = new Campaign($params);
+        $item->save();
+
+        if (!empty($brandObjs)) {
+            $item->brands()->saveMany($brandObjs);
+        }
+
+        if (!empty($categoryObjs)) {
+            $item->categories()->saveMany($categoryObjs);
+        }
+
+        return $item;
     }
 
-    public function delete($params) {
-        throw new NotImplementedException;
+    /**
+     * @param $params
+     * @return bool|null
+     * @throws \Exception
+     */
+    public function delete($params): ?bool
+    {
+        /** @var Campaign $item */
+        $item = Campaign::query()->findOrFail($params['drip_campaigns_id']);
+
+        $item->brands()->delete();
+        $item->categories()->delete();
+
+        return $item->delete();
     }
 
     public function get($params) {
@@ -35,7 +78,7 @@ class CampaignRepository implements CampaignRepositoryInterface {
     }
 
     public function getAll($params) {
-        
+
         $query = Campaign::with('template');
 
         if (!isset($params['per_page'])) {
@@ -61,8 +104,47 @@ class CampaignRepository implements CampaignRepositoryInterface {
         return $query->paginate($params['per_page'])->appends($params);
     }
 
-    public function update($params) {
-        throw new NotImplementedException;
+    /**
+     * @param $params
+     * @return Campaign
+     */
+    public function update($params): Campaign
+    {
+        if (!isset($params['drip_campaigns_id'])) {
+            throw new RepositoryInvalidArgumentException('drip_campaigns_id has been missed. Params - ' . json_encode($params));
+        }
+
+        /** @var Campaign $item */
+        $item = Campaign::query()->findOrFail($params['drip_campaigns_id']);
+
+        if ($params['update_brands'] ?? false) {
+            $item->brands()->delete();
+
+            $brandObjs = $this->createBrands($params['brands'] ?? []);
+
+            if (!empty($brandObjs)) {
+                $item->brands()->saveMany($brandObjs);
+            }
+        }
+
+        if ($params['update_categories'] ?? false) {
+            $item->categories()->delete();
+
+            $categoryObjs = $this->createUnitCategories($params['unit_categories'] ?? []);
+
+            if (!empty($categoryObjs)) {
+                $item->categories()->saveMany($categoryObjs);
+            }
+        }
+
+        unset($params['brands']);
+        unset($params['unit_categories']);
+
+        $item->fill($params);
+
+        $item->save();
+
+        return $item;
     }
 
     /**
@@ -190,5 +272,39 @@ class CampaignRepository implements CampaignRepositoryInterface {
         }
 
         return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
+    }
+
+    /**
+     * @param array $brands
+     * @return array
+     */
+    private function createBrands(array $brands): array
+    {
+        $brandObjs = [];
+
+        foreach ($brands as $brand) {
+            $brandObj = new CampaignBrand();
+            $brandObj->brand = $brand;
+            $brandObjs[] = $brandObj;
+        }
+
+        return $brandObjs;
+    }
+
+    /**
+     * @param array $unitCategories
+     * @return array
+     */
+    private function createUnitCategories(array $unitCategories): array
+    {
+        $categoryObjs = [];
+
+        foreach ($unitCategories as $unitCategory) {
+            $brandObj = new CampaignCategory();
+            $brandObj->unit_category = $unitCategory;
+            $categoryObjs[] = $brandObj;
+        }
+
+        return $categoryObjs;
     }
 }

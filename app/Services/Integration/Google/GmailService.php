@@ -2,12 +2,13 @@
 
 namespace App\Services\Integration\Google;
 
+use App\Exceptions\Common\InvalidEmailCredentialsException;
 use App\Exceptions\Common\MissingFolderException;
 use App\Exceptions\Integration\Google\MissingGapiIdTokenException;
+use App\Exceptions\Integration\Google\MissingGmailLabelsException;
 use App\Exceptions\Integration\Google\InvalidGmailAuthMessageException;
 use App\Exceptions\Integration\Google\InvalidGoogleAuthCodeException;
 use App\Exceptions\Integration\Google\InvalidToEmailAddressException;
-use App\Exceptions\Integration\Google\MissingGmailLabelsException;
 use App\Exceptions\Integration\Google\FailedInitializeGmailMessageException;
 use App\Exceptions\Integration\Google\FailedSendGmailMessageException;
 use App\Models\Integration\Auth\AccessToken;
@@ -198,11 +199,16 @@ class GmailService implements GmailServiceInterface
         $this->log->info('Getting Messages From Gmail Label ' . $folder . ' with filters: "' . $q . '"');
 
         // Get Messages
-        $results = $this->gmail->users_messages->listUsersMessages('me', [
-            'labelIds' => $this->getLabelIds($labels),
-            'q' => $q
-        ]);
-        $messages = $results->getMessages();
+        try {
+            $results = $this->gmail->users_messages->listUsersMessages('me', [
+                'labelIds' => $this->getLabelIds($labels),
+                'q' => $q
+            ]);
+            $messages = $results->getMessages();
+        } catch (\Exception $e) {
+            $this->log->error('Exception thrown trying to retrieve gmail messages: ' . $e->getMessage());
+            throw new InvalidEmailCredentialsException;
+        }
 
         // Return Results
         $this->log->info('Found ' . count($messages) . ' Messages to Process for Label ' . $folder);
@@ -281,7 +287,7 @@ class GmailService implements GmailServiceInterface
      * @param AccessToken $accessToken
      * @param string $search
      * @param bool $single
-     * @throws MissingGmailLabelsException
+     * @throws InvalidEmailCredentialsException
      * @throws MissingFolderException
      * @return array of labels
      */
@@ -290,9 +296,17 @@ class GmailService implements GmailServiceInterface
         $this->setAccessToken($accessToken);
 
         // Get Labels
-        $results = $this->gmail->users_labels->listUsersLabels('me');
-        $this->log->info('Found ' . count($results->getLabels()) . ' total labels on Gmail Email');
-        if(count($results->getLabels()) == 0) {
+        try {
+            $results = $this->gmail->users_labels->listUsersLabels('me');
+            $this->log->info('Found ' . count($results->getLabels()) . ' total labels on Gmail Email');
+            if(count($results->getLabels()) == 0) {
+                throw new MissingGmailLabelsException;
+            }
+        } catch (\Exception $e) {
+            $this->log->error('Exception thrown trying to retrieve labels: ' . $e->getMessage());
+            if(strpos($e->getMessage(), 'Request had invalid authentication credentials')) {
+                throw new InvalidEmailCredentialsException;
+            }
             throw new MissingGmailLabelsException;
         }
 
@@ -316,6 +330,16 @@ class GmailService implements GmailServiceInterface
 
         // Return Labels
         return $labels;
+    }
+
+    /**
+     * Set Key for Google Service
+     * 
+     * @param string $key
+     * @return string
+     */
+    public function setKey(string $key = ''): string {
+        return $this->google->setKey($key);
     }
 
 

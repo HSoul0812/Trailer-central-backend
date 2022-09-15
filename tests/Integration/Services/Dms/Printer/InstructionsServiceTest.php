@@ -39,6 +39,9 @@ class InstructionsServiceTest extends TestCase
     /**
      * Test that SUT is properly bound by the application
      *
+     * @group DMS
+     * @group DMS_PRINTER
+     *
      * @throws BindingResolutionException when there is a problem with resolution
      *                                    of concreted class
      */
@@ -51,6 +54,9 @@ class InstructionsServiceTest extends TestCase
 
     /**
      * @covers ::getPrintInstruction
+     *
+     * @group DMS
+     * @group DMS_PRINTER
      */
     public function testGetPrintInstructionFails(): void
     {
@@ -62,6 +68,9 @@ class InstructionsServiceTest extends TestCase
 
     /**
      * @covers ::getPrintInstruction
+     *
+     * @group DMS
+     * @group DMS_PRINTER
      */
     public function testGetPrintInstructionReturnsArray(): void
     {

@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Services\Inventory;
 
+use App\Exceptions\Inventory\InventoryException;
 use App\Jobs\Files\DeleteS3FilesJob;
 use App\Models\CRM\Dms\Quickbooks\Bill;
 use App\Models\Inventory\File;
@@ -138,8 +139,12 @@ class InventoryServiceTest extends TestCase
      * @covers ::create
      * @dataProvider createParamsProvider
      *
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
      * @param array $params
      * @throws BindingResolutionException
+     * @throws InventoryException
      */
     public function testCreateWithoutFilesAndBill(array $params)
     {
@@ -204,8 +209,12 @@ class InventoryServiceTest extends TestCase
      * @covers ::create
      * @dataProvider createParamsProvider
      *
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
      * @param array $params
      * @throws BindingResolutionException
+     * @throws InventoryException
      */
     public function testCreateWithImages(array $params)
     {
@@ -307,8 +316,12 @@ class InventoryServiceTest extends TestCase
      * @covers ::create
      * @dataProvider createParamsProvider
      *
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
      * @param array $params
      * @throws BindingResolutionException
+     * @throws InventoryException
      */
     public function testCreateWithFiles(array $params)
     {
@@ -400,8 +413,12 @@ class InventoryServiceTest extends TestCase
      * @covers ::create
      * @dataProvider createParamsProvider
      *
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
      * @param array $params
      * @throws BindingResolutionException
+     * @throws InventoryException
      */
     public function testCreateWithNewBillVendorAndBillExists(array $params)
     {
@@ -482,8 +499,12 @@ class InventoryServiceTest extends TestCase
      * @covers ::create
      * @dataProvider createParamsProvider
      *
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
      * @param array $params
      * @throws BindingResolutionException
+     * @throws InventoryException
      */
     public function testCreateWithNewBillVendorAndBillNotExists(array $params)
     {
@@ -566,8 +587,12 @@ class InventoryServiceTest extends TestCase
      * @covers ::create
      * @dataProvider createParamsProvider
      *
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
      * @param array $params
      * @throws BindingResolutionException
+     * @throws InventoryException
      */
     public function testCreateWithNewBillWithoutInventoryBill(array $params)
     {
@@ -664,8 +689,12 @@ class InventoryServiceTest extends TestCase
      * @covers ::create
      * @dataProvider createParamsProvider
      *
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
      * @param array $params
      * @throws BindingResolutionException
+     * @throws InventoryException
      */
     public function testCreateWithoutInventory(array $params)
     {
@@ -702,8 +731,12 @@ class InventoryServiceTest extends TestCase
      * @covers ::create
      * @dataProvider createParamsProvider
      *
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
      * @param array $params
      * @throws BindingResolutionException
+     * @throws InventoryException
      */
     public function testCreateWithException(array $params)
     {
@@ -740,6 +773,9 @@ class InventoryServiceTest extends TestCase
     /**
      * @covers ::delete
      * @dataProvider deleteParamsProvider
+     *
+     * @group DMS
+     * @group DMS_INVENTORY
      *
      * @param $imageParams
      * @param $fileParams
@@ -818,6 +854,9 @@ class InventoryServiceTest extends TestCase
      * @covers ::delete
      * @dataProvider deleteParamsProvider
      *
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
      * @param $imageParams
      * @param $fileParams
      * @throws BindingResolutionException
@@ -870,6 +909,9 @@ class InventoryServiceTest extends TestCase
      * @covers ::delete
      * @dataProvider deleteParamsProvider
      *
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
      * @param $imageParams
      * @param $fileParams
      * @throws BindingResolutionException
@@ -917,6 +959,9 @@ class InventoryServiceTest extends TestCase
     /**
      * @covers ::deleteDuplicates
      * @dataProvider deleteDuplicatesParamsProvider
+     *
+     * @group DMS
+     * @group DMS_INVENTORY
      *
      * @param array $getAllWithHavingCountParams
      * @param array $getAllParams
@@ -1048,6 +1093,9 @@ class InventoryServiceTest extends TestCase
      * @covers ::deleteDuplicates
      * @dataProvider deleteDuplicatesParamsProvider
      *
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
      * @param array $getAllWithHavingCountParams
      * @param array $getAllParams
      */
@@ -1089,6 +1137,13 @@ class InventoryServiceTest extends TestCase
         $this->assertSame($assertedResult, $result);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
+     * @return void
+     * @throws BindingResolutionException
+     */
     public function testDeliveryPrice() {
         $inventory = $this->getEloquentMock(Inventory::class);
         $inventory->id = 1;

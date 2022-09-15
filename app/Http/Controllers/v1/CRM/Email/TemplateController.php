@@ -5,6 +5,7 @@ namespace App\Http\Controllers\v1\CRM\Email;
 use App\Http\Controllers\RestfulControllerV2;
 use App\Repositories\CRM\Email\TemplateRepositoryInterface;
 use App\Http\Requests\CRM\Email\GetTemplatesRequest;
+use App\Http\Requests\CRM\Email\TestTemplateRequest;
 /*use App\Http\Requests\CRM\Email\CreateTemplateRequest;
 use App\Http\Requests\CRM\Email\ShowTemplateRequest;
 use App\Http\Requests\CRM\Email\UpdateTemplateRequest;
@@ -36,8 +37,9 @@ class TemplateController extends RestfulControllerV2
         TemplateRepositoryInterface $templates,
         EmailBuilderServiceInterface $emailbuilder
     ) {
-        $this->middleware('setUserIdOnRequest')->only(['index', 'create', 'send']);
-        $this->middleware('setSalesPersonIdOnRequest')->only(['send']);
+        $this->middleware('setDealerIdOnRequest')->only(['test']);
+        $this->middleware('setUserIdOnRequest')->only(['index', 'create', 'test', 'send']);
+        $this->middleware('setSalesPersonIdOnRequest')->only(['test', 'send']);
         $this->templates = $templates;
         $this->emailbuilder = $emailbuilder;
     }
@@ -45,7 +47,7 @@ class TemplateController extends RestfulControllerV2
 
     /**
      * @OA\Get(
-     *     path="/api/crm/{userId}/emails/template",
+     *     path="/api/user/emailbuilder/template",
      *     description="Retrieve a list of emails by lead id",
      *     tags={"Email"},
      *     @OA\Parameter(
@@ -82,10 +84,10 @@ class TemplateController extends RestfulControllerV2
         
         return $this->response->errorBadRequest();
     }
-    
+
     /**
      * @OA\Put(
-     *     path="/api/crm/{userId}/emails/template",
+     *     path="/api/user/emailbuilder/template",
      *     description="Create a template",
      *     tags={"Email"},
      *     @OA\Parameter(
@@ -133,7 +135,7 @@ class TemplateController extends RestfulControllerV2
 
     /**
      * @OA\Get(
-     *     path="/api/crm/{userId}/emails/template/{id}",
+     *     path="/api/user/emailbuilder/template/{id}",
      *     description="Retrieve a template",
      
      *     tags={"Post"},
@@ -167,7 +169,7 @@ class TemplateController extends RestfulControllerV2
     
     /**
      * @OA\Put(
-     *     path="/api/crm/{userId}/emails/template/{id}",
+     *     path="/api/user/emailbuilder/template/{id}",
      *     description="Update a template",
      * 
      *     @OA\Parameter(
@@ -217,7 +219,7 @@ class TemplateController extends RestfulControllerV2
 
     /**
      * @OA\Delete(
-     *     path="/api/crm/{userId}/emails/template/{id}",
+     *     path="/api/user/emailbuilder/template/{id}",
      *     description="Delete a template",
      *     tags={"Email"},
      *     @OA\Parameter(
@@ -251,7 +253,7 @@ class TemplateController extends RestfulControllerV2
     
     /**
      * @OA\Post(
-     *     path="/api/crm/{userId}/emails/template/{id}/send",
+     *     path="/api/user/emailbuilder/template/{id}/send",
      *     description="Send Template as Email",
      * 
      *     @OA\Parameter(
@@ -283,6 +285,40 @@ class TemplateController extends RestfulControllerV2
                     $request->to_email,
                     $request->sales_person_id ?? 0,
                     $request->from_email ?? ''
+                )
+            );
+        }
+        
+        return $this->response->errorBadRequest();
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/user/emailbuilder/template/test",
+     *     description="Send Template as Email",
+     * 
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns Email Test",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
+     *     ),
+     * )
+     */
+    public function test(Request $request) {
+        $request = new TestTemplateRequest($request->all());
+        
+        if ( $request->validate() ) {
+            return $this->response->array(
+                $this->emailbuilder->testTemplate(
+                    $request->dealer_id,
+                    $request->user_id,
+                    $request->subject,
+                    $request->html,
+                    $request->to_email
                 )
             );
         }

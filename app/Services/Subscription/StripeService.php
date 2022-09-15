@@ -99,7 +99,7 @@ class StripeService implements StripeServiceInterface
     /**
      * @inheritDoc
      */
-    public function subscribeToPlanByDealerId($dealerId, $planId): bool
+    public function subscribeToPlanByDealerId($dealerId, $planId)
     {
         $user = User::find($dealerId);
         $customer = $user->createOrGetStripeCustomer();
@@ -119,7 +119,7 @@ class StripeService implements StripeServiceInterface
     /**
      * @inheritDoc
      */
-    public function updateCardByDealerId($dealerId, $token): bool
+    public function updateCardByDealerId($dealerId, $token): object
     {
         $user = User::find($dealerId);
         $customer = $user->createOrGetStripeCustomer();

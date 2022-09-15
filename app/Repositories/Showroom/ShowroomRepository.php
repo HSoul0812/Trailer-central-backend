@@ -34,7 +34,7 @@ class ShowroomRepository implements ShowroomRepositoryInterface {
             if (isset($params['images'])) {
                 foreach ($params['images'] as $image) {
                     $isFloorplan = false;
-                    if ($image == $params['floorplan']) {
+                    if (isset($params['floorplan']) && $image == $params['floorplan']) {
                         $isFloorplan = true;
                     }
 

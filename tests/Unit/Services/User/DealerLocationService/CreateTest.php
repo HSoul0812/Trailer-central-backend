@@ -28,6 +28,9 @@ class CreateTest extends TestCase
      *
      * @dataProvider wrongParamsProvider
      *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION
+     *
      * @throws Exception when an unexpected exception has been thrown instead of the desired exception
      */
     public function testWillThrowAnExceptionBecauseSomeWrongParameter(array $params, string $expectedExceptionMessage): void
@@ -87,6 +90,9 @@ class CreateTest extends TestCase
 
     /**
      * Test that SUT will try updating to zero the "is_default" and "is_default_for_invoice" column of any dealer location
+     *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION
      *
      * @throws Exception when an unexpected exception has not been handled
      */
@@ -152,6 +158,9 @@ class CreateTest extends TestCase
 
     /**
      * Test that SUT will create certainly number of tax items
+     *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION
      *
      * @throws Exception when an unexpected exception has not been handled
      */
@@ -227,6 +236,9 @@ class CreateTest extends TestCase
 
     /**
      * Test that SUT will create certainly number of quote fees
+     *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION
      *
      * @throws Exception when an unexpected exception has not been handled
      */
