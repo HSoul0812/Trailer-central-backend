@@ -69,7 +69,7 @@ return [
         // listingPageQs
         'detectBoostListing' => env('FB_MARKETING_SELECTORS_LISTINGS_BOOST_DETECT', 'div[aria-label="Boost your listing"][role="button"]'),
         'listingItemMoreMenu' => env('FB_MARKETING_SELECTORS_LISTINGS_MORE_BUTTON', 'div[aria-label="More"][role="button"]'),
-        'listingItemMoreMenuFirst' => env('FB_MARKETING_SELECTORS_LISTINGS_MORE_BUTTON', 'div[aria-label="More"][role="button"]'),
+        'listingItemMoreMenuFirst' => env('FB_MARKETING_SELECTORS_LISTINGS_MORE_BUTTON_FIRST', 'div[aria-label="More"][role="button"]'),
         'firstItemLink' => env('FB_MARKETING_SELECTORS_LISTINGS_FIRST_ITEM', 'div > a[role="menuitem"]:contains("View Listing")'),
         'gotItButton' => env('FB_MARKETING_SELECTORS_LISTINGS_GOTIT_BUTTON', 'div[aria-label="Got it"]'),
         'closeButton' => env('FB_MARKETING_SELECTORS_LISTINGS_CLOSE_BUTTON', 'div[aria-label="Close"]')
