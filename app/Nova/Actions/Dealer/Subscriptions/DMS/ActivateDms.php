@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Nova\Actions\Dealer;
+namespace App\Nova\Actions\Dealer\Subscriptions\DMS;
 
 use App\Models\User\User;
 use App\Services\User\DealerOptionsServiceInterface;
@@ -10,7 +10,7 @@ use Illuminate\Support\Collection;
 use Laravel\Nova\Actions\Action;
 use Laravel\Nova\Fields\ActionFields;
 
-class ActivateCrm extends Action
+class ActivateDms extends Action
 {
     use InteractsWithQueue, Queueable;
 
@@ -18,7 +18,7 @@ class ActivateCrm extends Action
 
     public $confirmButtonText = 'Activate';
 
-    public $confirmText = 'Are you sure you want to activate CRM?';
+    public $confirmText = 'Are you sure you want to activate DMS?';
 
     /**
      * @var DealerOptionsServiceInterface
@@ -40,10 +40,10 @@ class ActivateCrm extends Action
     {
         /** @var User $model */
         foreach ($models as $model) {
-            $result = $this->dealerOptionsService->activateCrm($model->dealer_id);
+            $result = $this->dealerOptionsService->activateDms($model->dealer_id);
 
             if (!$result) {
-                throw new \InvalidArgumentException('CRM activation error', 500);
+                throw new \InvalidArgumentException('DMS activation error', 500);
             }
         }
     }

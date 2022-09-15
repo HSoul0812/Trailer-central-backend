@@ -3,6 +3,8 @@
 namespace App\Services\Export\Inventory;
 
 use App\Models\Inventory\Inventory;
+use App\Models\Website\Config\WebsiteConfig;
+use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Traits\MarkdownHelper;
 use App\Transformers\Inventory\InventoryTransformer;
 use Illuminate\Support\Facades\Storage;
@@ -22,6 +24,18 @@ class PdfExporter implements ExporterInterface
         return "$hash.pdf";
     }
 
+    private function getDealerLogo($websiteId)
+    {
+        $config = app(WebsiteConfigRepositoryInterface::class)->getAll([
+            'website_id' => $websiteId,
+            'key' => WebsiteConfig::INVENTORY_PRINT_LOGO_KEY
+        ]);
+        if ($logo = $config->first()) {
+            return $logo->value;
+        }
+        return null;
+    }
+
     private function getDataToBeExported(Inventory $inventory): array
     {
         $transformer = new InventoryTransformer();
@@ -29,6 +43,7 @@ class PdfExporter implements ExporterInterface
         $data['description'] = $this->convertMarkdown($data['description']);
         $data['features'] = $transformer->includeFeatures($inventory)->getData()->toArray();
         $data['website'] = $transformer->includeWebsite($inventory)->getData();
+        $data['dealer_logo'] = $this->getDealerLogo($data['website']->id);
         return $data;
     }
 

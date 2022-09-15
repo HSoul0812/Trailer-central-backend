@@ -2,6 +2,7 @@
 
 namespace App\Nova\Resources\Integration;
 
+use App\Models\Integration\Collector\CollectorFields;
 use App\Nova\Resource;
 use App\Nova\Resources\Dealer\Dealer;
 use App\Nova\Resources\Dealer\Location;
@@ -17,6 +18,7 @@ use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Panel;
 use Laravel\Nova\Fields\DateTime;
+use Laravel\Nova\Fields\BooleanGroup;
 use App\Models\Integration\Collector\Collector as CollectorModel;
 
 /**
@@ -178,6 +180,9 @@ class Collector extends Resource
                 Boolean::make('Use Factory Mapping', 'use_factory_mapping')->hideFromIndex()->help(
                     'Whether or not to use the data from FV to populate these units'
                 ),
+                Boolean::make('Enable MFG and Brand Mapping', 'is_mfg_brand_mapping_enabled')->hideFromIndex()->help(
+                    'If enabled will map unit MFG to MFG and unit Brand to Brand.'
+                ),
             ]),
 
             new Panel('Actions With Items', [
@@ -254,9 +259,10 @@ class Collector extends Resource
                 Boolean::make('Zero Out MSRP On Used Units', 'zero_msrp')->hideFromIndex(),
                 Boolean::make('Show On RV Trader', 'show_on_rvtrader')->hideFromIndex(),
                 Boolean::make('Import With Showroom Category', 'import_with_showroom_category')->hideFromIndex(),
-                Text::make('Overridable Fields', 'overridable_fields')->rules('max:254')->hideFromIndex()->help(
-                    'If certain fields shouldn\'t be overwritten after changing these fields in dashboard, it\'s required to specify a list of these fields separated by commas'
-                ),
+                Text::make('Overridable Fields', 'overridableFieldsList')->onlyOnDetail(),
+                BooleanGroup::make('Overridable Fields', 'overridable_fields')->options(
+                    CollectorFields::select(['label', 'field'])->orderBy('label')->get()->pluck('label', 'field')
+                )->onlyOnForms(),
                 Text::make('Skip Units By Category', 'skip_categories')->hideFromIndex()->help(
                     'Enter the categories (as they show in the source file) you would like to skip separated by commas. Example: trailer, vehicle, car'
                 ),
