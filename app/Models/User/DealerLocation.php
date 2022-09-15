@@ -10,6 +10,7 @@ use App\Models\Observers\User\DealerLocationObserver;
 use App\Models\Traits\TableAware;
 use App\Models\CRM\Text\Number;
 use App\Models\User\Location\QboLocationMapping;
+use App\Traits\CompactHelper;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -24,6 +25,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $dealer_location_id
  * @property int $dealer_id
  * @property string $name
+ * @property string $identifier
  * @property string $contact
  * @property string $website
  * @property string $email
@@ -195,6 +197,16 @@ class DealerLocation extends Model
     public function salesTaxItemsV1(): HasMany
     {
         return $this->HasMany(DealerLocationSalesTaxItemV1::class, 'dealer_location_id', 'dealer_location_id');
+    }
+
+    /**
+     * Returns location identifier
+     *
+     * @return false|string
+     */
+    public function getIdentifierAttribute()
+    {
+        return CompactHelper::shorten($this->dealer_location_id);
     }
 
     /**
