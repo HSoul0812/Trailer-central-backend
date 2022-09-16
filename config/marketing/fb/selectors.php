@@ -28,9 +28,11 @@ return [
         'email' => env('FB_MARKETING_SELECTORS_LOGIN_EMAIL', '#email'),
         'password' => env('FB_MARKETING_SELECTORS_LOGIN_PASS', '#pass'),
         'loginButton' => env('FB_MARKETING_SELECTORS_LOGIN_BTN', '#loginbutton'),
-        'detectIncorrectPassText' => env('FB_MARKETING_SELECTORS_DETECT_INVALID_PASS', "div:contains('The password that you've entered is incorrect.')"),
+        'detectIncorrectPassText' => env('FB_MARKETING_SELECTORS_DETECT_INVALID_PASS', "div:contains('The password you’ve entered is incorrect.'"),
         'detectInvalidCredentialsText' => env('FB_MARKETING_SELECTORS_DETECT_INVALID_USERNAME', "div:contains('The email address or mobile number you entered')"),
-        'detectEmaiilValidationText' =>  env('FB_MARKETING_SELECTORS_DETECT_EMAIL_VERIFY', 'div:contains(\'Enter security code\')')
+        'detectEmaiilValidationText' =>  env('FB_MARKETING_SELECTORS_DETECT_EMAIL_VERIFY', 'div:contains(\'Enter security code\')'),
+        'detectOldPassText' =>  env('FB_MARKETING_SELECTORS_DETECT_OLD_PASSWORD', 'div:contains(\'You Entered An Old Password\')'),
+        'somethingWentWrong' =>  env('FB_MARKETING_SELECTORS_DETECT_SOMETHING_WENT_WRONG', 'div:contains(\'Sorry, something went wrong\')')
     ],
 
     // Login Validator
@@ -53,6 +55,7 @@ return [
         // getToNewVehiclePageQs
         'facebookLogoButton' => env('FB_MARKETING_SELECTORS_LISTINGS_MARKETPLACE_LOGO', 'a[title="Go to Facebook home"]'),
         'marketplaceButton' => env('FB_MARKETING_SELECTORS_LISTINGS_MARKETPLACE_BUTTON', 'a[href*=\"facebook.com/marketplace/\"]:contains(\'Marketplace\')'),
+        'marketplaceSidebar' => env('FB_MARKETING_SELECTORS_LISTINGS_MARKETPLACE_SIDEBAR', 'div[aria-label="Marketplace Sidebar"][role="Navigation"]'),
         'createNewListingShortButton' => env('FB_MARKETING_SELECTORS_LISTINGS_NEW_BUTTON_SHORT', '*[aria-label="Create listing"]'),
         'createNewListingSingleButton' => env('FB_MARKETING_SELECTORS_LISTINGS_NEW_BUTTON_SINGLE', 'a[href="/marketplace/create/"]'),
         'createNewListingButton' => env('FB_MARKETING_SELECTORS_LISTINGS_NEW_BUTTON', 'a[aria-label="Create new listing"]'),
@@ -61,12 +64,13 @@ return [
         'detectRequestReviewButton' => env('FB_MARKETING_SELECTORS_DETECT_REQUEST_REVIEW_BUTTON', 'div[aria-label="Request Review"] > div'),
         'detectReviewingRequestText' => env('FB_MARKETING_SELECTORS_DETECT_REVIEWING_REQUEST', 'div > span:contains(\'We\\\'re Reviewing Your Request\')'),
         'detectReviewingFinalText' => env('FB_MARKETING_SELECTORS_DETECT_REVIEWING_FINAL', 'div > span:contains(\'You Can\\\'t Buy or Sell on Facebook\')'),
+        'detectReviewDisagreedText' => env('FB_MARKETING_SELECTORS_DETECT_REVIEW_DISAGREED', 'div > span:contains(\'you disagreed with the decision\')'),
 
         // listingPageQs
-        'detectBoostListing' => env('FB_MARKETING_SELECTORS_LISTINGS_BOOST_DETECT', 'div[aria-label="Boost your listing"]'),
-        'listingItemMoreMenu' => env('FB_MARKETING_SELECTORS_LISTINGS_MORE_BUTTON', 'div[aria-label="More"]'),
-        'listingItemMoreMenuFirst' => env('FB_MARKETING_SELECTORS_LISTINGS_MORE_BUTTON', 'div[role="menu"] a[role="menuitem"]:contains("View Listing")'),
-        'firstItemLink' => env('FB_MARKETING_SELECTORS_LISTINGS_FIRST_ITEM', 'div[role="menu"] a[role="menuitem"]:contains(\'View Listing\'):first'),
+        'detectBoostListing' => env('FB_MARKETING_SELECTORS_LISTINGS_BOOST_DETECT', 'div[aria-label="Boost your listing"][role="button"]'),
+        'listingItemMoreMenu' => env('FB_MARKETING_SELECTORS_LISTINGS_MORE_BUTTON', 'div[aria-label="More"][role="button"]'),
+        'listingItemMoreMenuFirst' => env('FB_MARKETING_SELECTORS_LISTINGS_MORE_BUTTON_FIRST', 'div[aria-label="More"][role="button"]'),
+        'firstItemLink' => env('FB_MARKETING_SELECTORS_LISTINGS_FIRST_ITEM', 'div > a[role="menuitem"]:contains("View Listing")'),
         'gotItButton' => env('FB_MARKETING_SELECTORS_LISTINGS_GOTIT_BUTTON', 'div[aria-label="Got it"]'),
         'closeButton' => env('FB_MARKETING_SELECTORS_LISTINGS_CLOSE_BUTTON', 'div[aria-label="Close"]')
     ],
