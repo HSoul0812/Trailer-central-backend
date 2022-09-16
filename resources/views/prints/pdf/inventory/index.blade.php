@@ -312,7 +312,7 @@
     </table>
     <div class="clear"></div>
     <h2>Description</h2>
-    @if($inventory['description'])
-        <div>{!! $inventory['description'] !!}</div>
+    @if($inventory['description_html'])
+        <div>{!! $inventory['description_html'] !!}</div>
     @endif
 </div>
