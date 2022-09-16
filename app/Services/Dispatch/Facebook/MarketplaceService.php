@@ -215,11 +215,22 @@ class MarketplaceService implements MarketplaceServiceInterface
                                     'Listing #' . $params['id']);
             }
 
-            // Update Imported At
-            $marketplace = $this->marketplace->update([
-                'id' => $params['marketplace_id'],
-                'imported_at' => Carbon::now()->setTimezone('UTC')->toDateTimeString()
-            ]);
+            //count number of listings today for this marketplace
+            $nrOfListingsToday = $this->listings::where([
+                ['created_at', '>=',  date('Y-m-d 00:00:00')],
+                ['created_at', '<=', date('Y-m-d 23:59:59')],
+                ['marketplace_id', '=', $params['marketplace_id']]
+            ])->count();
+            $inventoryRemaining = $this->getInventory(Marketplace::find($params['marketplace_id']), MarketplaceStatus::METHOD_MISSING, []);
+            $nrInventoryItemsRemaining = (isset($inventoryRemaining['inventory']))?count($inventoryRemaining['inventory']):0; 
+
+            if($nrOfListingsToday === config('marketing.fb.settings.limit.listings', 3) || $nrInventoryItemsRemaining === 0) {
+                // Update Imported At
+                $marketplace = $this->marketplace->update([
+                    'id' => $params['marketplace_id'],
+                    'imported_at' => Carbon::now()->setTimezone('UTC')->toDateTimeString()
+                ]);
+             }
 
             $this->listings->commitTransaction();
 
