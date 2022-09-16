@@ -38,7 +38,8 @@ class Marketplace extends Model
      */
     const TFA_TYPES = [
         'authy' => 'Authy',
-        'sms' => 'SMS'
+        'sms' => 'SMS',
+        'code' => 'Facebook 2FA Code',
     ];
 
     /**
