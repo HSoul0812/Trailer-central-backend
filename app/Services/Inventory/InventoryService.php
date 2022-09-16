@@ -450,6 +450,10 @@ class InventoryService implements InventoryServiceInterface
 
     private function addCategoryQuery(ESInventoryQueryBuilder $queryBuilder, array $params)
     {
+        if(!isset($params['type_id'])) {
+            return;
+        }
+
         $mappedCategories = $this->getMappedCategories(
             $params['type_id'],
             $params['category'] ?? null
