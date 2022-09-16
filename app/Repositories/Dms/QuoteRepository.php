@@ -93,6 +93,12 @@ class QuoteRepository implements QuoteRepositoryInterface
         } else {
             $query = UnitSale::where('id', '>', 0);
         }
+
+        // Filter out service orders which location doesn't exist
+        if (isset($params['location']) && $params['location'] > 0) {
+            $query = $query->where('dealer_location_id', '=', $params['location']);
+        }
+
         if (isset($params['search_term'])) {
             $query = $query->where(function($q) use($params) {
                 $q->where('title', 'LIKE', '%' . $params['search_term'] . '%')
@@ -134,12 +140,9 @@ class QuoteRepository implements QuoteRepositoryInterface
                         ->where('is_archived', '=', 0)
                         ->where('is_po', '=', 0)
                         ->whereHas('payments', function(Builder $query) {
-                            $query->select(DB::raw('sum(calculated_payments.balance) as calculated_amount'))
-                            ->leftJoinSub($this->calculatedPayments(), 'calculated_payments', function ($join) {
-                                $join->on('qb_payment.id', '=', 'calculated_payments.id');
-                            })
+                            $query->select(DB::raw('sum(amount) as paid_amount'))
                             ->groupBy('unit_sale_id')
-                            ->havingRaw('calculated_amount < dms_unit_sale.total_price');
+                            ->havingRaw('paid_amount < dms_unit_sale.total_price');
                         });
                     break;
                 case UnitSale::QUOTE_STATUS_COMPLETED:
