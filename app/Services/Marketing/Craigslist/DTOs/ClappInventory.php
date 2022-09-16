@@ -154,7 +154,7 @@ class ClappInventory
             'manufacturer' => $inventory->manufacturer,
             'price' => $inventory->price,
             'status' => $inventory->cl_status,
-            'primary_image' => $inventory->primary_image,
+            'primary_image' => $inventory->primary_image ?? $inventory->primary_image_backup,
             'last_posted' => $inventory->added,
             'next_scheduled' => $inventory->session_scheduled,
             'queue_id' => $inventory->queue_id,
