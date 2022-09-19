@@ -16,6 +16,9 @@ use App\Models\User\NewDealerUser;
 use App\Repositories\User\NewDealerUserRepositoryInterface;
 use App\Models\CRM\Leads\LeadType;
 use App\Repositories\CRM\User\CrmUserRepositoryInterface;
+use App\Models\CRM\Interactions\Interaction;
+use App\Models\Inventory\Inventory;
+use App\Models\CRM\Leads\InventoryLead;
 
 class InquirySeeder extends Seeder {
 
@@ -79,6 +82,11 @@ class InquirySeeder extends Seeder {
             'lead_type' => LeadType::TYPE_GENERAL
         ]);
 
+        $this->anotherInventory = factory(Inventory::class)->create([
+            'dealer_id' => $this->dealer->dealer_id,
+            'dealer_location_id' => $this->lead->dealer_location_id
+        ]);
+
         $this->website->websiteConfigs()->updateOrCreate(['key' => WebsiteConfig::LEADS_MERGE_ENABLED], ['value' => 1]);
     }
 
@@ -86,6 +94,8 @@ class InquirySeeder extends Seeder {
     {
         $dealerId = $this->dealer->getKey();
 
+        Interaction::where('tc_lead_id', $this->lead->getKey())->delete();
+        InventoryLead::where('website_lead_id', $this->lead->getKey())->delete();
         Lead::destroy($this->lead->getKey());
         DealerLocation::where('dealer_id', $dealerId)->delete();
         WebsiteConfig::where('website_id', $this->website->getKey())->delete();
