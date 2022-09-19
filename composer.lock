@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "064da849f4f110824c9de3c06ef07d87",
+    "content-hash": "6daf10f75edbca0ee745287aff362b49",
     "packages": [
         {
             "name": "algolia/algoliasearch-client-php",
@@ -2382,11 +2382,11 @@
         },
         {
             "name": "feed/edit-mapping",
-            "version": "dev-feature/CRM-577",
+            "version": "dev-forked/feature/DMSS-811",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/EditMapping",
-                "reference": "8fd7d56324ac0c7c64f8886e4ff46e0991f75b69"
+                "reference": "b43729ad6fdf37df73dbc44aa30beefbf5e3c2a4"
             },
             "require": {
                 "php": ">=7.1.0"
@@ -7504,6 +7504,63 @@
             "time": "2022-07-28T14:25:11+00:00"
         },
         {
+            "name": "quickbooks/v3-php-sdk",
+            "version": "6.0.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/intuit/QuickBooks-V3-PHP-SDK.git",
+                "reference": "a2cc23508c8b1c1d8c595d249e5c114917a2f65d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/intuit/QuickBooks-V3-PHP-SDK/zipball/a2cc23508c8b1c1d8c595d249e5c114917a2f65d",
+                "reference": "a2cc23508c8b1c1d8c595d249e5c114917a2f65d",
+                "shasum": ""
+            },
+            "require": {
+                "ext-dom": "*",
+                "ext-mbstring": "*",
+                "php": ">=5.6.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^5.0 || ^6.0 || ^7.0"
+            },
+            "suggest": {
+                "ext-curl": "Uses Curl to make HTTP Requests",
+                "guzzlehttp/guzzle": "Uses Guzzle to make HTTP Requests"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "QuickBooksOnline\\API\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "abisalehalliprasan",
+                    "email": "anil_kumar3@intuit.com"
+                }
+            ],
+            "description": "The Official PHP SDK for QuickBooks Online Accounting API",
+            "homepage": "http://developer.intuit.com",
+            "keywords": [
+                "api",
+                "http",
+                "quickbooks",
+                "rest",
+                "smallbusiness"
+            ],
+            "support": {
+                "issues": "https://github.com/intuit/QuickBooks-V3-PHP-SDK/issues",
+                "source": "https://github.com/intuit/QuickBooks-V3-PHP-SDK/tree/6.0.5"
+            },
+            "time": "2022-05-19T22:36:55+00:00"
+        },
+        {
             "name": "ralouphie/getallheaders",
             "version": "3.0.3",
             "source": {
@@ -8036,11 +8093,11 @@
         },
         {
             "name": "showroom/bulkconfiguration",
-            "version": "dev-feature/CRM-577",
+            "version": "dev-forked/feature/DMSS-811",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/BulkConfiguration",
-                "reference": "301e74370ef2fc821398541508586d9da25cd1c6"
+                "reference": "944cbcf3c2a02da0b424cb4db08de04352e51838"
             },
             "require": {
                 "php": ">=7.1.0"
@@ -11603,6 +11660,57 @@
             "time": "2022-01-26T16:05:39+00:00"
         },
         {
+            "name": "tcentral/qbo-sdk",
+            "version": "1.1.0",
+            "source": {
+                "type": "git",
+                "url": "git@bitbucket.org:tcentral/qbo-sdk.git",
+                "reference": "db45980e447da0381d7adab170844d7c11afb623"
+            },
+            "require": {
+                "php": ">=7.1",
+                "quickbooks/v3-php-sdk": "^6.0"
+            },
+            "require-dev": {
+                "codeception/codeception": "^4.1",
+                "codeception/module-asserts": "^1.0.0",
+                "codeception/module-phpbrowser": "^1.0.0",
+                "fakerphp/faker": "^1.19",
+                "mockery/mockery": "^1.3"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "TCentral\\QboSdk\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Tests\\": "tests/"
+                }
+            },
+            "scripts": {
+                "test": [
+                    "codecept run Unit"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Pond",
+                    "email": "pond@trailercentral.com"
+                },
+                {
+                    "name": "Vishnu",
+                    "email": "vishnu@trailercentral.com"
+                }
+            ],
+            "description": "QBO SDK library used internally by TrailerCentral",
+            "time": "2022-09-19T06:39:01+00:00"
+        },
+        {
             "name": "tightenco/collect",
             "version": "v7.26.1",
             "source": {
@@ -11711,11 +11819,11 @@
         },
         {
             "name": "trailercentral/passwordless-login-url",
-            "version": "dev-feature/CRM-577",
+            "version": "dev-forked/feature/DMSS-811",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/PasswordlessLoginUrl",
-                "reference": "4fbc27f12cba8ed9058fbd0936433becb2a505eb"
+                "reference": "df06c93f1194ca42e1524d7406959adcbda814b4"
             },
             "require": {
                 "php": ">=7.1.0"
@@ -14724,5 +14832,5 @@
         "ext-pcntl": "7.1",
         "ext-posix": "7.1"
     },
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.2.0"
 }

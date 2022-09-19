@@ -251,6 +251,8 @@ class BillRepository implements BillRepositoryInterface
             ],
         ]);
 
+        // TODO: First of all, delete the bill in QuickBooks itself
+
         // Note: The logic below is taken from https://operatebeyond.atlassian.net/browse/DMSS-645?focusedCommentId=30120
         // First, we want to make sure to remove bill related data on the
         // inventories that use this bill
