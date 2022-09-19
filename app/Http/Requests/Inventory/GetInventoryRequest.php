@@ -25,10 +25,10 @@ class GetInventoryRequest extends Request {
         'inventory_ids.*' => 'integer',
         'attribute_names' => 'array',
         'model' => 'string',
-        'exclude_status' => 'array',
-        'exclude_status.*' => [
-            'string',
-            'in:' . Inventory::STATUS_QUOTE_LABEL,
+        'exclude_status_ids' => 'array',
+        'exclude_status_ids.*' => [
+            'int',
+            'in:' . Inventory::STATUS_QUOTE,
         ],
     ];
 
