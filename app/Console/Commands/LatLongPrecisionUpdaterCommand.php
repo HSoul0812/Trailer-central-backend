@@ -108,7 +108,7 @@ class LatLongPrecisionUpdaterCommand extends Command
      * @return LatLong|null
      */
     protected function getLongitudeAndLatitude(string $zip) : ?LatLong {
-        $url = "https://maps.googleapis.com/maps/api/geocode/json?address={$zip}&sensor=false&key=" . env('GOOGLE_OAUTH_API_KEY');
+        $url = "https://maps.googleapis.com/maps/api/geocode/json?address={$zip}&sensor=false&key=" . env('GOOGLE_MAPS_API_KEY');
 
         $result_string = file_get_contents($url);
 
