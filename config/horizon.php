@@ -97,7 +97,7 @@ return [
         'recent' => 60,
         'completed' => 1,
         'recent_failed' => 10080,
-        'failed' => 10080,
+        'failed' => 1440,
         'monitored' => 10080,
     ],
 
@@ -340,7 +340,7 @@ return [
                 'minProcesses' => 5,
                 'maxProcesses' => 300,
                 'tries' => 1,
-                'timeout' => 3600,
+                'timeout' => 600,
             ],
         ],
     ],
