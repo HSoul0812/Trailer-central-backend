@@ -4,6 +4,7 @@ namespace App\Http\Requests\Inventory;
 
 use App\Http\Requests\Request;
 use App\Models\Inventory\Inventory;
+use Illuminate\Validation\Rule;
 
 class GetInventoryRequest extends Request {
 
@@ -24,6 +25,11 @@ class GetInventoryRequest extends Request {
         'inventory_ids.*' => 'integer',
         'attribute_names' => 'array',
         'model' => 'string',
+        'exclude_status' => 'array',
+        'exclude_status.*' => [
+            'string',
+            'in:' . Inventory::STATUS_QUOTE_LABEL,
+        ],
     ];
 
     public function __construct(array $query = [], array $request = [], array $attributes = [], array $cookies = [], array $files = [], array $server = [], $content = null) {
