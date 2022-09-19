@@ -278,7 +278,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'template_id' => $campaign->template->template_id,
             'dealer_id' => $campaign->newDealerUser->id,
             'user_id' => $campaign->user_id,
-            'sales_person_id' => $salesPerson->id ?? 0,
+            'sales_person_id' => $salesPerson->id ?? null,
             'from_email' => $campaign->from_email_address ?: $this->getDefaultFromEmail()
         ]);
 
@@ -344,7 +344,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'template_id' => $id,
             'dealer_id' => $template->newDealerUser->id,
             'user_id' => $template->user_id,
-            'sales_person_id' => $salesPerson->id ?? 0,
+            'sales_person_id' => $salesPerson->id ?? null,
             'from_email' => $fromEmail ?: $this->getDefaultFromEmail(),
         ]);
 
@@ -386,7 +386,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             'template_id' => 1,
             'dealer_id' => $dealerId,
             'user_id' => $userId,
-            'sales_person_id' => 0,
+            'sales_person_id' => null,
             'from_email' => $this->getDefaultFromEmail(),
         ]);
 
