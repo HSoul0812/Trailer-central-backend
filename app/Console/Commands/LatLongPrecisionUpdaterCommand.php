@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Builder;
 
 class LatLongPrecisionUpdaterCommand extends Command
 {
-    const GOOGLE_API_KEY = 'AIzaSyB0TeSO0p0hyXV6KZs3DngjseyYO-zrshU';
     /**
      * The name and signature of the console command.
      *
@@ -109,7 +108,7 @@ class LatLongPrecisionUpdaterCommand extends Command
      * @return LatLong|null
      */
     protected function getLongitudeAndLatitude(string $zip) : ?LatLong {
-        $url = "https://maps.googleapis.com/maps/api/geocode/json?address={$zip}&sensor=false&key=" . self::GOOGLE_API_KEY;
+        $url = "https://maps.googleapis.com/maps/api/geocode/json?address={$zip}&sensor=false&key=" . env('GOOGLE_OAUTH_API_KEY');
 
         $result_string = file_get_contents($url);
 
