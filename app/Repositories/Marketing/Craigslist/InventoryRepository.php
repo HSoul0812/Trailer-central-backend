@@ -237,10 +237,10 @@ class InventoryRepository implements InventoryRepositoryInterface
     {
         return DB::table(Inventory::getTableName())->select([
                     Inventory::getTableName().'.inventory_id', Inventory::getTableName().'.stock',
-                    Inventory::getTableName().'.dealer_location_id',
-                    Inventory::getTableName().'.title', Inventory::getTableName().'.category',
-                    Inventory::getTableName().'.manufacturer', Inventory::getTableName().'.price',
-                    Post::getTableName().'.cl_status', Image::getTableName().'.filename as primary_image',
+                    Inventory::getTableName().'.dealer_location_id', Inventory::getTableName().'.title',
+                    Inventory::getTableName().'.category', Inventory::getTableName().'.manufacturer',
+                    Inventory::getTableName().'.price', Post::getTableName().'.cl_status',
+                    Image::getTableName().'.filename as primary_image', 'img2.filename as primary_image_backup',
                     Post::getTableName().'.added', Session::getTableName().'.session_scheduled',
                     Queue::getTableName().'.queue_id', Post::getTableName().'.clid',
                     Post::getTableName().'.view_url', Post::getTableName().'.manage_url'
@@ -253,6 +253,9 @@ class InventoryRepository implements InventoryRepositoryInterface
                 })
                 ->leftJoin(Image::getTableName(), Image::getTableName().'.image_id',
                             '=', InventoryImage::getTableName().'.image_id')
+                ->leftJoin(InventoryImage::getTableName() . ' as invImg2',
+                            Inventory::getTableName().'.inventory_id', '=', 'invImg2.inventory_id')
+                ->leftJoin(Image::getTableName() . ' as img2', 'img2.image_id', '=', 'invImg2.image_id')
                 ->crossJoin(Profile::getTableName())
                 ->leftJoin(Post::getTableName(), function($query) {
                     $query->on(Inventory::getTableName().'.inventory_id', '=', Post::getTableName().'.inventory_id')
