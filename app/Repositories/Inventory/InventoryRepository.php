@@ -670,8 +670,8 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query = $query->where('status', $params['status']);
         }
 
-        if (!empty($params['exclude_status'])) {
-            $query = $query->whereNotIn('status', Arr::wrap($params['exclude_status']));
+        if (!empty($params['exclude_status_ids'])) {
+            $query = $query->whereNotIn('status', Arr::wrap($params['exclude_status_ids']));
         }
 
         if (isset($params['condition'])) {
