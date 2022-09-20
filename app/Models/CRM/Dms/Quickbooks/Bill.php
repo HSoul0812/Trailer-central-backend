@@ -41,14 +41,16 @@ class Bill extends Model
 
     protected $fillable = [
         'dealer_id',
-        'total',
+        'dealer_location_id',
         'vendor_id',
-        'status',
         'doc_num',
+        'total',
         'received_date',
         'due_date',
         'memo',
-        'dealer_location_id'
+        'packing_list_no',
+        'status',
+        'qb_id',
     ];
 
     protected $dates = [
