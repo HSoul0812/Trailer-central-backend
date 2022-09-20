@@ -368,11 +368,13 @@ class InventoryService implements InventoryServiceInterface
     }
 
     private function addTypeAggregationQuery(ESInventoryQueryBuilder $queryBuilder, array $params) {
-        $mappedCategories = $this->getMappedCategories(
-            $params['type_id'],
-            null
-        );
-        $queryBuilder->addTermInValuesQuery('category', $mappedCategories);
+        if(isset($params['type_id'])) {
+            $mappedCategories = $this->getMappedCategories(
+                $params['type_id'],
+                null
+            );
+            $queryBuilder->addTermInValuesQuery('category', $mappedCategories);
+        }
         $this->addCommonFilter($queryBuilder);
         $this->addScriptFilter($queryBuilder, []);
         $queryBuilder->setFilterAggregate([
@@ -448,6 +450,10 @@ class InventoryService implements InventoryServiceInterface
 
     private function addCategoryQuery(ESInventoryQueryBuilder $queryBuilder, array $params)
     {
+        if(!isset($params['type_id'])) {
+            return;
+        }
+
         $mappedCategories = $this->getMappedCategories(
             $params['type_id'],
             $params['category'] ?? null
