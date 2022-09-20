@@ -12,13 +12,17 @@ use Illuminate\Database\Eloquent\Factory;
 use Faker\Generator as Faker;
 
 $factory->define(NewUser::class, static function (Faker $faker, array $attributes): array {
-    $user_id = $attributes['user_id'] ?? factory(User::class)->create()->getKey();
 
-    return [
-        'user_id' => $user_id,
-        'email' => $user_id . '@trailercentral.com',
+    $data = [
+        'email' => $faker->email(),
         'password' => $faker->password()
     ];
+
+    if (isset($attributes['user_id'])) {
+        $data['user_id'] = $attributes['user_id'];
+    }
+
+    return $data;
 });
 
 $factory->define(NewDealerUser::class, static function (Faker $faker, array $attributes): array {
