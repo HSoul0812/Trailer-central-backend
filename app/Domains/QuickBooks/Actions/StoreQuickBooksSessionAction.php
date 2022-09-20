@@ -5,6 +5,7 @@ namespace App\Domains\QuickBooks\Actions;
 use App\Domains\CRM\Services\CRMHttpClient;
 use App\Domains\QuickBooks\QuickBooksSession;
 use App\Models\User\User;
+use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\RequestOptions;
 use Illuminate\Support\Arr;
 
@@ -20,6 +21,12 @@ class StoreQuickBooksSessionAction
         $this->client = $client;
     }
 
+    /**
+     * @param User $user
+     * @param QuickBooksSession $quickbooksSession
+     * @throws ClientException
+     * @return User
+     */
     public function execute(User $user, QuickBooksSession $quickbooksSession): User
     {
         // Make a call to CRM to decode the stored token

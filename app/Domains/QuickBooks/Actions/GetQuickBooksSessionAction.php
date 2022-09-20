@@ -4,6 +4,7 @@ namespace App\Domains\QuickBooks\Actions;
 
 use App\Domains\CRM\Services\CRMHttpClient;
 use App\Domains\QuickBooks\QuickBooksSession;
+use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\RequestOptions;
 use Illuminate\Support\Arr;
 
@@ -19,6 +20,11 @@ class GetQuickBooksSessionAction
         $this->client = $client;
     }
 
+    /**
+     * @param string $quickbooksSessionToken
+     * @throws ClientException
+     * @return QuickBooksSession|null
+     */
     public function execute(string $quickbooksSessionToken): ?QuickBooksSession
     {
         // Make a call to CRM to decode the stored token
@@ -29,6 +35,10 @@ class GetQuickBooksSessionAction
         ]);
 
         $session = Arr::get(json_decode($response->getBody(), true), 'session');
+
+        if ($session === null) {
+            return null;
+        }
 
         // Compose a new QuickBooksSession object to use in this project
         return QuickBooksSession::make(
