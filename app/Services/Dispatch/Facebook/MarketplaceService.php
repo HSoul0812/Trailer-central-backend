@@ -215,22 +215,17 @@ class MarketplaceService implements MarketplaceServiceInterface
                                     'Listing #' . $params['id']);
             }
 
-            //count number of listings today for this marketplace
-            $nrOfListingsToday = $this->listings::where([
-                ['created_at', '>=',  date('Y-m-d 00:00:00')],
-                ['created_at', '<=', date('Y-m-d 23:59:59')],
-                ['marketplace_id', '=', $params['marketplace_id']]
-            ])->count();
+            $nrOfListingsToday = $this->listings->countFacebookPostings(Marketplace::find($params['marketplace_id']));
             $inventoryRemaining = $this->getInventory(Marketplace::find($params['marketplace_id']), MarketplaceStatus::METHOD_MISSING, []);
-            $nrInventoryItemsRemaining = (isset($inventoryRemaining['inventory']))?count($inventoryRemaining['inventory']):0; 
+            $nrInventoryItemsRemaining = (isset($inventoryRemaining['inventory'])) ? count($inventoryRemaining['inventory']) : 0;
 
-            if($nrOfListingsToday === config('marketing.fb.settings.limit.listings', 3) || $nrInventoryItemsRemaining === 0) {
+            if ($nrOfListingsToday === config('marketing.fb.settings.limit.listings', 3) || $nrInventoryItemsRemaining === 0) {
                 // Update Imported At
                 $marketplace = $this->marketplace->update([
                     'id' => $params['marketplace_id'],
                     'imported_at' => Carbon::now()->setTimezone('UTC')->toDateTimeString()
                 ]);
-             }
+            }
 
             $this->listings->commitTransaction();
 
@@ -300,8 +295,7 @@ class MarketplaceService implements MarketplaceServiceInterface
         
         $runningIntegrationIds = $this->postingSession->getIntegrationIds();
 
-        $integrations = $this->marketplace->getAll([
-            'sort' => '-last_attempt_ts',
+        $integrations = $this->marketplace->getAll(['sort' => '-last_attempt_ts',
             'import_range' => config('marketing.fb.settings.limit.hours', 0),
             'exclude' => $runningIntegrationIds,
             'skip_errors' => config('marketing.fb.settings.limit.errors', 1)

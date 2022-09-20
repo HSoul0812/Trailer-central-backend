@@ -150,7 +150,7 @@ class ListingRepository implements ListingRepositoryInterface {
                           ->where('dealer_id', '=', $integration->dealer_id)
                           ->where('show_on_website', 1)
             ->where(Inventory::getTableName() . '.entity_type_id', '<>', EntityType::ENTITY_TYPE_BUILDING)
-            ->whereRaw('LENGTH(' . Inventory::getTableName() . '.description) >= '. INVENTORY::MIN_DESCRIPTION_LENGTH_FOR_FACEBOOK)
+            ->whereRaw('LENGTH(' . Inventory::getTableName() . '.description) >= ' . INVENTORY::MIN_DESCRIPTION_LENGTH_FOR_FACEBOOK)
             ->where(Inventory::getTableName() . '.price', '>', INVENTORY::MIN_PRICE_FOR_FACEBOOK)
                           ->has('orderedImages')
                           ->where(function(Builder $query) {
@@ -250,5 +250,20 @@ class ListingRepository implements ListingRepositoryInterface {
 
         // Return Paginated Inventory
         return $query->paginate($params['per_page'])->appends($params);
+    }
+
+    /**
+     * Count Inventory posted today on Facebook
+     * 
+     * @param Marketplace $integration
+     * @return int
+     */
+    public function countFacebookPostings(Marketplace $integration): int
+    {
+        return Listings::where([
+            ['created_at', '>=',  date('Y-m-d 00:00:00')],
+            ['created_at', '<=', date('Y-m-d 23:59:59')],
+            ['marketplace_id', '=', $integration->id]
+        ])->count();
     }
 }
