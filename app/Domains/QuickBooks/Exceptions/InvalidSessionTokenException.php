@@ -8,6 +8,6 @@ class InvalidSessionTokenException extends Exception
 {
     public static function make(int $dealerId): InvalidSessionTokenException
     {
-        return new static("Dealer $dealerId has in invalid session token!");
+        return new static("Dealer $dealerId has an invalid session token!");
     }
 }
