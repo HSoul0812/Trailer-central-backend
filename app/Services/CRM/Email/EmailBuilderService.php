@@ -482,6 +482,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         $parsedEmail = $builder->getParsedEmail($builder->emailId);
 
         // Get Smtp Config
+        $smtpConfig = null;
         if($builder->salesPersonId) {
             $salesPerson = $this->salespeople->get(['sales_person_id' => $builder->salesPersonId]);
             $smtpConfig = !empty($salesPerson->id) ? SmtpConfig::fillFromSalesPerson($salesPerson) : null;
