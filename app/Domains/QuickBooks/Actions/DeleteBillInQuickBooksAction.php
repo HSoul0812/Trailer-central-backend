@@ -24,14 +24,21 @@ class DeleteBillInQuickBooksAction
     }
 
     /**
+     * If this method returns nothing then it means the delete operation is a success
+     * If it throws an exception then something is wrong
+     *
      * @throws Exception
      */
-    public function execute(Bill $bill)
+    public function execute(Bill $bill): void
     {
-        $dealer = $bill->dealer;
+        // Set up the SDK
+        $this->setupQuickBooksSDKForDealerAction->execute($bill->dealer);
 
-        $this->setupQuickBooksSDKForDealerAction->execute($dealer);
-
+        // Delete the bill from QBO
         $this->deleteBillByIdAction->execute($bill->qb_id);
+
+        // Set the qb_id back to null
+        $bill->qb_id = null;
+        $bill->save();
     }
 }

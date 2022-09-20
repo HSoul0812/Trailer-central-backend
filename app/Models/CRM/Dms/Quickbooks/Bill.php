@@ -6,7 +6,7 @@ use App\Models\Inventory\Inventory;
 use App\Models\Parts\Vendor;
 use App\Models\User\DealerLocation;
 use App\Models\Traits\TableAware;
-use App\Nova\Resources\Dealer\Dealer;
+use App\Models\User\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -95,6 +95,6 @@ class Bill extends Model
 
     public function dealer(): BelongsTo
     {
-        return $this->belongsTo(Dealer::class, 'dealer_id', 'dealer_id');
+        return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
     }
 }
