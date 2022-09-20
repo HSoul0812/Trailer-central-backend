@@ -2,6 +2,7 @@
 
 namespace App\Domains\QuickBooks\Actions;
 
+use App\Domains\QuickBooks\Exceptions\InvalidSessionTokenException;
 use App\Domains\QuickBooks\QuickBooksSession;
 use App\Models\User\User;
 use Exception;
@@ -50,7 +51,7 @@ class SetupQuickBooksSDKForDealerAction
         $session = $this->getQuickBooksSessionAction->execute($dealer->quickbooks_session_token);
 
         if ($session === null) {
-            throw new Exception("Dealer $dealer->dealer_id doesn't have QuickBooks session token!");
+            throw InvalidSessionTokenException::make($dealer->dealer_id);
         }
 
         return $session;

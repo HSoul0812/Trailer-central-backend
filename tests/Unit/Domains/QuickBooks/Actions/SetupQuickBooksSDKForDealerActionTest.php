@@ -4,6 +4,7 @@ namespace Tests\Unit\Domains\QuickBooks\Actions;
 
 use App\Domains\QuickBooks\Actions\GetQuickBooksSessionAction;
 use App\Domains\QuickBooks\Actions\SetupQuickBooksSDKForDealerAction;
+use App\Domains\QuickBooks\Exceptions\InvalidSessionTokenException;
 use App\Domains\QuickBooks\QuickBooksSession;
 use App\Models\User\User;
 use Exception;
@@ -56,6 +57,37 @@ class SetupQuickBooksSDKForDealerActionTest extends TestCase
         $this->assertEquals('rid', $serviceContext->realmId);
         $this->assertEquals('atk', $oAuth2AccessToken->getAccessToken());
         $this->assertEquals('rtk', $oAuth2AccessToken->getRefreshToken());
+
+        $dealer->delete();
+    }
+
+    /**
+     * @group DMS
+     * @group DMS_QUICKBOOK
+     *
+     * @throws Exception
+     */
+    public function testItThrowsExceptionWhenDealerDoesNotHaveAToken()
+    {
+        $dealer = factory(User::class)->create([
+            'quickbooks_session_token' => '',
+        ]);
+
+        $getQuickBooksSessionAction = Mockery::mock(GetQuickBooksSessionAction::class);
+        $getQuickBooksSessionAction
+            ->expects('execute')
+            ->with('')
+            ->once()
+            ->andReturn(null);
+
+        $action = new SetupQuickBooksSDKForDealerAction(
+            $getQuickBooksSessionAction,
+            resolve(SetupQuickBooksSDKAction::class)
+        );
+
+        $this->expectException(InvalidSessionTokenException::class);
+
+        $action->execute($dealer);
 
         $dealer->delete();
     }
