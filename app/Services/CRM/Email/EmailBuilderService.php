@@ -482,8 +482,10 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         $parsedEmail = $builder->getParsedEmail($builder->emailId);
 
         // Get Smtp Config
-        $salesPerson = $this->salespeople->get(['sales_person_id' => $builder->salesPersonId]);
-        $smtpConfig = !empty($salesPerson->id) ? SmtpConfig::fillFromSalesPerson($salesPerson) : null;
+        if($builder->salesPersonId) {
+            $salesPerson = $this->salespeople->get(['sales_person_id' => $builder->salesPersonId]);
+            $smtpConfig = !empty($salesPerson->id) ? SmtpConfig::fillFromSalesPerson($salesPerson) : null;
+        }
 
         // Refresh Access Token if Exists
         if(!empty($smtpConfig) && $smtpConfig->isAuthConfigOauth()) {
