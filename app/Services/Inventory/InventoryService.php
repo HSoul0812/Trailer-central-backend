@@ -368,13 +368,11 @@ class InventoryService implements InventoryServiceInterface
     }
 
     private function addTypeAggregationQuery(ESInventoryQueryBuilder $queryBuilder, array $params) {
-        if(isset($params['type_id'])) {
-            $mappedCategories = $this->getMappedCategories(
-                $params['type_id'],
-                null
-            );
-            $queryBuilder->addTermInValuesQuery('category', $mappedCategories);
-        }
+        $mappedCategories = $this->getMappedCategories(
+            $params['type_id'] ?? null,
+            null
+        );
+        $queryBuilder->addTermInValuesQuery('category', $mappedCategories);
         $this->addCommonFilter($queryBuilder);
         $this->addScriptFilter($queryBuilder, []);
         $queryBuilder->setFilterAggregate([
@@ -401,23 +399,31 @@ class InventoryService implements InventoryServiceInterface
         ]);
     }
 
-    private function getMappedCategories(int $type_id, ?string $categories_string): string
+    private function getMappedCategories(?int $type_id, ?string $categories_string): string
     {
-        $type = Type::find($type_id);
-        $mapped_categories = "";
-        if ($categories_string) {
-            $categories_array = explode(';',$categories_string);
-            $categories = $type->categories()->whereIn('name', $categories_array)->get();
+        if(isset($type_id)) {
+            $type = Type::find($type_id);
+            $mapped_categories = "";
+            if ($categories_string) {
+                $categories_array = explode(';', $categories_string);
+                $categories = $type->categories()->whereIn('name', $categories_array)->get();
 
+            } else {
+                $categories = $type->categories;
+            }
+
+            foreach ($categories as $category) {
+                if ($category->category_mappings) {
+                    $mapped_categories = $mapped_categories . $category->category_mappings->map_to . ';';
+                }
+            }
         } else {
-            $categories = $type->categories;
-        }
-
-        foreach ($categories as $category) {
-            if ($category->category_mappings) {
-                $mapped_categories = $mapped_categories . $category->category_mappings->map_to . ';';
+            $mapped_categories = "";
+            foreach(CategoryMappings::all() as $mapping) {
+                $mapped_categories = $mapped_categories . $mapping->map_to . ';';
             }
         }
+
         return rtrim($mapped_categories, ";");
     }
 
@@ -450,12 +456,8 @@ class InventoryService implements InventoryServiceInterface
 
     private function addCategoryQuery(ESInventoryQueryBuilder $queryBuilder, array $params)
     {
-        if(!isset($params['type_id'])) {
-            return;
-        }
-
         $mappedCategories = $this->getMappedCategories(
-            $params['type_id'],
+            $params['type_id'] ?? null,
             $params['category'] ?? null
         );
 
@@ -466,7 +468,7 @@ class InventoryService implements InventoryServiceInterface
 
         if(isset($params['category']) && $params['category'] === 'Tilt') {
             $mappedTypeCategories = $this->getMappedCategories(
-                $params['type_id'],
+                $params['type_id'] ?? null,
                 null
             );
 
