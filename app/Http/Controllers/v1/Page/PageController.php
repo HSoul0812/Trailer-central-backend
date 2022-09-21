@@ -16,27 +16,17 @@ use Dingo\Api\Http\Response;
 
 class PageController extends AbstractRestfulController
 {
-
-    /**
-     * @var PageRepositoryInterface
-     */
-    private PageRepositoryInterface $pageRepo;
-
-    /**
-     * @var PageTransformer
-     */
-    private PageTransformer $pageTransformer;
-
     /**
      * Create a new controller instance.
      *
-     * @param PageRepositoryInterface   $page
+     * @param PageRepositoryInterface $pageRepo
      * @param PageTransformer $pageTransformer
      */
-    public function __construct(PageRepositoryInterface $page, PageTransformer $pageTransformer)
+    public function __construct(
+        private PageRepositoryInterface $pageRepo,
+        private PageTransformer $pageTransformer
+    )
     {
-        $this->pageRepo = $page;
-        $this->pageTransformer = $pageTransformer;
         parent::__construct();
     }
 
