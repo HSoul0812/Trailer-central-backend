@@ -12,6 +12,7 @@ use App\Models\CRM\Email\BlastCategory;
 use App\Models\CRM\Email\BlastSent;
 use App\Models\CRM\Email\Bounce;
 use App\Models\Inventory\Inventory;
+use App\Models\CRM\Leads\InventoryLead;
 use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
