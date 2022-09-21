@@ -263,7 +263,7 @@ class Blast extends Model
                    ->leftJoin(InventoryLead::getTableName(), Lead::getTableName() . '.identifier',
                                 '=', InventoryLead::getTableName() . '.website_lead_id')
                    ->leftJoin(Inventory::getTableName() . ' as unit', 'unit.inventory_id',
-                                '=', Inventory::getTableName() . '.inventory_id')
+                                '=', InventoryLead::getTableName() . '.inventory_id')
                    ->leftJoin(BlastSent::getTableName(), function($join) use($blast) {
                         return $join->on(BlastSent::getTableName() . '.lead_id',
                                             '=', Lead::getTableName() . '.identifier')
