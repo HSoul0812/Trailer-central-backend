@@ -13,15 +13,15 @@ use Illuminate\Support\Facades\DB;
 class PageSeeder extends Seeder
 {
     private const PAGES = [
-        ['name' => 'Home',            'url' => '/home',           'description' => ''],
-        ['name' => 'Private Sellers', 'url' => '/privatesellers', 'description' => ''],
-        ['name' => 'Dealers',         'url' => '/dealers',        'description' => ''],
-        ['name' => 'FAQ',             'url' => '/faq',            'description' => ''],
-        ['name' => 'About',           'url' => '/about',          'description' => ''],
-        ['name' => 'Affiliates',      'url' => '/affiliates',     'description' => ''],
-        ['name' => 'Privacy Policy',  'url' => '/privacypolicy',  'description' => ''],
-        ['name' => 'Terms of Use',    'url' => '/termsofuse',     'description' => ''],
-        ['name' => 'Affiliates',      'url' => '/affiliates',     'description' => ''],
+        ['name' => 'Home',            'url' => '/home'          ],
+        ['name' => 'Private Sellers', 'url' => '/privatesellers'],
+        ['name' => 'Dealers',         'url' => '/dealers'       ],
+        ['name' => 'FAQ',             'url' => '/faq'           ],
+        ['name' => 'About',           'url' => '/about'         ],
+        ['name' => 'Affiliates',      'url' => '/affiliates'    ],
+        ['name' => 'Privacy Policy',  'url' => '/privacypolicy' ],
+        ['name' => 'Terms of Use',    'url' => '/termsofuse'    ],
+        ['name' => 'Affiliates',      'url' => '/affiliates'    ],
     ];
 
     /**
@@ -34,8 +34,7 @@ class PageSeeder extends Seeder
         foreach (self::PAGES as $page) {
             DB::table('pages')->insert([
                 'name' => $page['name'],
-                'url' => $page['url'],
-                'description' => $page['description']
+                'url' => $page['url']
             ]);
         }
     }
