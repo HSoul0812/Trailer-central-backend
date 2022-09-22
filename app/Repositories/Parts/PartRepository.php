@@ -165,7 +165,9 @@ class PartRepository implements PartRepositoryInterface {
        return $part;
     }
 
-    public function createOrUpdate($params) {
+    public function createOrUpdate($params)
+    {
+        $part = null;
 
         if (isset($params['id'])) {
             $part = $this->model->where('id', $params['id'])->where('dealer_id', $params['dealer_id'])->first();
