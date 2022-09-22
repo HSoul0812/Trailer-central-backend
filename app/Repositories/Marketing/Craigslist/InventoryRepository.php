@@ -359,7 +359,7 @@ class InventoryRepository implements InventoryRepositoryInterface
 
         $resultsCount = $this->getResultsCountFromQuery();
 
-        $paginatedQuery = $this->buildInventoryResultsQuery($params);
+        $paginatedQuery = $this->buildInventoryQuery($params);
         if((int) $params['per_page'] !== -1) {
             $paginatedQuery->skip(($currentPage - 1) * $perPage);
             $paginatedQuery->take($perPage);
