@@ -349,7 +349,7 @@ class InventoryRepository implements InventoryRepositoryInterface
 
     private function getResultsCountFromQuery() : int
     {
-        return $this->initInventoryQuery()->select(DB::raw('count(DISTINCT' . Inventory::getTableName() . '.inventory_id' . ') AS row_count'))->row_count;
+        return $this->initInventoryQuery()->select(DB::raw('count(DISTINCT' . Inventory::getTableName() . '.inventory_id' . ') AS row_count'))->get()->row_count;
     }
 
     private function getPaginatedResults($params)
