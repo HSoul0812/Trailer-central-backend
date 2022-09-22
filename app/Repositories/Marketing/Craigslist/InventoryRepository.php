@@ -347,9 +347,35 @@ class InventoryRepository implements InventoryRepositoryInterface
         return $query->groupBy(Inventory::getTableName().'.inventory_id');;
     }
 
-    private function getResultsCountFromQuery() : int
+    private function getResultsCountFromQuery(array $params) : int
     {
-        return $this->initInventoryQuery()->select(DB::raw('count(DISTINCT ' . Inventory::getTableName() . '.inventory_id' . ') AS row_count'))->first()->row_count;
+        /** @var Builder $query */
+        $query = $this->initInventoryQuery()
+                      ->select(DB::raw('count(DISTINCT ' . Inventory::getTableName() . '.inventory_id' . ') AS row_count'))
+                      ->where(Inventory::getTableName().'.dealer_id', '=', $params['dealer_id'])
+                      ->where(Profile::getTableName().'.id', '=', $params['profile_id']);
+
+        if (isset($params['dealer_location_id'])) {
+            $query = $query->where(Inventory::getTableName().'.dealer_location_id', $params['dealer_location_id']);
+        }
+
+        if (isset($params['type']) && $params['type'] === 'archives') {
+            $query = $this->archivedInventoryQuery($query);
+        } else {
+            // Skip Archived
+            $query->where(function ($query) {
+                $query->where(Inventory::getTableName().'.is_archived', '<>', 1)
+                      ->orWhereNull(Inventory::getTableName().'.is_archived');
+            });
+
+            // Override Inventory Query
+            $query = $this->overrideInventoryQuery($query, $params['dealer_id']);
+        }
+
+        $query = $this->filterInventoryQuery($query, $params);
+
+        // Return Count
+        return $query->first()->row_count;
     }
 
     private function getPaginatedResults($params)
@@ -357,7 +383,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         $perPage = !isset($params['per_page']) ? self::DEFAULT_PAGE_SIZE : (int)$params['per_page'];
         $currentPage = !isset($params['page']) ? 1 : (int)$params['page'];
 
-        $resultsCount = $this->getResultsCountFromQuery();
+        $resultsCount = $this->getResultsCountFromQuery($params);
 
         $paginatedQuery = $this->buildInventoryQuery($params);
         if((int) $params['per_page'] !== -1) {
