@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Http\Clients\ElasticSearch\ElasticSearchClient;
+use App\Http\Clients\ElasticSearch\ElasticSearchClientInterface;
 use App\Repositories\Bulk\Inventory\BulkUploadRepository;
 use App\Repositories\Bulk\Inventory\BulkUploadRepositoryInterface;
 use App\Repositories\Inventory\AttributeRepository;
@@ -20,8 +22,8 @@ use App\Repositories\Inventory\Floorplan\VendorRepository as FloorplanVendorRepo
 use App\Repositories\Inventory\Floorplan\VendorRepositoryInterface as FloorplanVendorRepositoryInterface;
 use App\Repositories\Inventory\ImageRepository;
 use App\Repositories\Inventory\ImageRepositoryInterface;
-use App\Repositories\Inventory\InventoryElasticSearchRepository;
-use App\Repositories\Inventory\InventoryElasticSearchRepositoryInterface;
+use App\Repositories\Inventory\InventoryFilterRepository;
+use App\Repositories\Inventory\InventoryFilterRepositoryInterface;
 use App\Repositories\Inventory\InventoryHistoryRepository;
 use App\Repositories\Inventory\InventoryHistoryRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepository;
@@ -38,6 +40,7 @@ use App\Rules\Inventory\BrandExists;
 use App\Rules\Inventory\BrandValid;
 use App\Rules\Inventory\CategoryExists;
 use App\Rules\Inventory\CategoryValid;
+use App\Rules\Inventory\Floorplan\PaymentUUIDValid;
 use App\Rules\Inventory\ManufacturerExists;
 use App\Rules\Inventory\ManufacturerValid;
 use App\Rules\Inventory\MfgIdExists;
@@ -46,7 +49,10 @@ use App\Rules\Inventory\QuotesNotExist;
 use App\Rules\Inventory\UniqueStock;
 use App\Rules\Inventory\ValidInventory;
 use App\Rules\Inventory\VendorExists;
-use App\Rules\Inventory\Floorplan\PaymentUUIDValid;
+use App\Services\ElasticSearch\Inventory\Builders\QueryBuilder;
+use App\Services\ElasticSearch\Inventory\FieldMapperService;
+use App\Services\ElasticSearch\Inventory\InventoryFieldMapperServiceInterface;
+use App\Services\ElasticSearch\Inventory\InventoryQueryBuilderInterface;
 use App\Services\Import\Inventory\CsvImportService;
 use App\Services\Import\Inventory\CsvImportServiceInterface;
 use App\Services\Inventory\CustomOverlay\CustomOverlayService;
@@ -109,6 +115,15 @@ class InventoryServiceProvider extends ServiceProvider
         $this->app->bind(ManufacturerRepositoryInterface::class, ManufacturerRepository::class);
         $this->app->bind(CsvImportServiceInterface::class, CsvImportService::class);
         $this->app->bind(PaymentServiceInterface::class, PaymentService::class);
-        $this->app->bind(InventoryElasticSearchRepositoryInterface::class, InventoryElasticSearchRepository::class);
+
+        $this->app->bind(ElasticSearchClientInterface::class, ElasticSearchClient::class);
+        $this->app->bind(InventoryQueryBuilderInterface::class, QueryBuilder::class);
+        $this->app->bind(InventoryFilterRepositoryInterface::class, InventoryFilterRepository::class);
+        $this->app->bind(InventoryFieldMapperServiceInterface::class, FieldMapperService::class);
+
+        $this->app->bind(
+            \App\Services\ElasticSearch\Inventory\InventoryServiceInterface::class,
+            \App\Services\ElasticSearch\Inventory\InventoryService::class
+        );
     }
 }

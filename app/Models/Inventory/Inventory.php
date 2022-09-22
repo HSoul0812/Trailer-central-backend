@@ -863,4 +863,5 @@ class Inventory extends Model
 
         return $this->indexConfigurator;
     }
+
 }

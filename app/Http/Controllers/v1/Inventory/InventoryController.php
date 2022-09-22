@@ -14,9 +14,9 @@ use App\Http\Requests\Inventory\GetInventoryHistoryRequest;
 use App\Http\Requests\Inventory\GetInventoryItemRequest;
 use App\Http\Requests\Inventory\SearchInventoryRequest;
 use App\Http\Requests\Inventory\UpdateInventoryRequest;
-use App\Repositories\Inventory\InventoryElasticSearchRepositoryInterface;
 use App\Repositories\Inventory\InventoryHistoryRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
+use App\Services\ElasticSearch\ElasticSearchPaginator;
 use App\Services\Inventory\InventoryServiceInterface;
 use App\Transformers\Inventory\InventoryElasticSearchOutputTransformer;
 use App\Transformers\Inventory\SaveInventoryTransformer;
@@ -29,6 +29,7 @@ use Dingo\Api\Http\Response;
 use Exception;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use App\Services\ElasticSearch\Inventory\InventoryServiceInterface as InventoryElasticSearchServiceInterface;
 
 /**
  * Class InventoryController
@@ -52,9 +53,9 @@ class InventoryController extends RestfulControllerV2
     protected $inventoryHistoryRepository;
 
     /**
-     * @var InventoryElasticSearchRepositoryInterface
+     * @var InventoryElasticSearchServiceInterface
      */
-    protected $inventoryElasticSearchRepository;
+    protected $inventoryElasticSearchService;
 
     /**
      * Create a new controller instance.
@@ -62,13 +63,13 @@ class InventoryController extends RestfulControllerV2
      * @param  InventoryServiceInterface  $inventoryService
      * @param  InventoryRepositoryInterface  $inventoryRepository
      * @param  InventoryHistoryRepositoryInterface  $inventoryHistoryRepository
-     * @param  InventoryElasticSearchRepositoryInterface $inventoryElasticSearchRepository
+     * @param  InventoryElasticSearchServiceInterface $inventoryElasticSearchService
      */
     public function __construct(
         InventoryServiceInterface $inventoryService,
         InventoryRepositoryInterface $inventoryRepository,
         InventoryHistoryRepositoryInterface $inventoryHistoryRepository,
-        InventoryElasticSearchRepositoryInterface $inventoryElasticSearchRepository
+        InventoryElasticSearchServiceInterface $inventoryElasticSearchService
     )
     {
         $this->middleware('setDealerIdOnRequest')
@@ -78,7 +79,7 @@ class InventoryController extends RestfulControllerV2
         $this->inventoryService = $inventoryService;
         $this->inventoryRepository = $inventoryRepository;
         $this->inventoryHistoryRepository = $inventoryHistoryRepository;
-        $this->inventoryElasticSearchRepository = $inventoryElasticSearchRepository;
+        $this->inventoryElasticSearchService = $inventoryElasticSearchService;
     }
 
     /**
@@ -480,9 +481,18 @@ class InventoryController extends RestfulControllerV2
         $searchRequest = new SearchInventoryRequest($request->all());
 
         if ($searchRequest->validate()) {
-            $result = $this->inventoryElasticSearchRepository->search($searchRequest->all());
 
-            return $this->response->paginator($result->hints, new InventoryElasticSearchOutputTransformer());
+            $result = $this->inventoryElasticSearchService->search(
+                $searchRequest->dealerIds(),
+                $searchRequest->terms(),
+                $searchRequest->location(),
+                $searchRequest->sort(),
+                $searchRequest->pagination()
+            );
+
+            return $this->response
+                ->collection($result->hints, new InventoryElasticSearchOutputTransformer())
+                ->addMeta('aggregations',$result->aggregations);
         }
 
         $this->response->errorBadRequest();
