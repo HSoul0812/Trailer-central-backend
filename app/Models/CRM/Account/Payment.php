@@ -2,6 +2,7 @@
 
 namespace App\Models\CRM\Account;
 
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CRM\Dms\Refund;
 use App\Models\CRM\Dms\Quickbooks\PaymentMethod;
@@ -16,6 +17,8 @@ use App\Models\CRM\Dms\Payment\DealerSalesReceipt;
  */
 class Payment extends Model
 {
+    use TableAware;
+
     /**
      * The table associated with the model.
      *
