@@ -354,7 +354,10 @@ class InventoryRepository implements InventoryRepositoryInterface
         $currentPage = !isset($params['page']) ? 1 : (int)$params['page'];
 
         $paginatedQuery = $this->buildInventoryQuery($params);
-        $resultsCount = $this->getResultsCountFromQuery($paginatedQuery);
+        $unorderedParams = $params;
+        unset($unorderedParams['sort']);
+        $unorderedQuery = $this->buildInventoryQuery($unorderedParams);
+        $resultsCount = $this->getResultsCountFromQuery($unorderedQuery);
 
         if((int) $params['per_page'] !== -1) {
             $paginatedQuery->skip(($currentPage - 1) * $perPage);
