@@ -200,7 +200,7 @@ class InventoryRepository implements InventoryRepositoryInterface
      */
     private function buildInventoryQuery(array $params): Builder {
         /** @var Builder $query */
-        $query = $this->initInventoryQuery()
+        $query = $this->initInventoryResultsQuery()
                       ->where(Inventory::getTableName().'.dealer_id', '=', $params['dealer_id'])
                       ->where(Profile::getTableName().'.id', '=', $params['profile_id']);
 
@@ -233,9 +233,9 @@ class InventoryRepository implements InventoryRepositoryInterface
         return $query;
     }
 
-    private function initInventoryQuery() : Builder
+    private function initInventoryResultsQuery() : Builder
     {
-        return DB::table(Inventory::getTableName())->select([
+        return $this->initInventoryQuery()->select([
                     Inventory::getTableName().'.inventory_id', Inventory::getTableName().'.stock',
                     Inventory::getTableName().'.dealer_location_id', Inventory::getTableName().'.title',
                     Inventory::getTableName().'.category', Inventory::getTableName().'.manufacturer',
@@ -244,7 +244,13 @@ class InventoryRepository implements InventoryRepositoryInterface
                     Post::getTableName().'.added', Session::getTableName().'.session_scheduled',
                     Queue::getTableName().'.queue_id', Post::getTableName().'.clid',
                     Post::getTableName().'.view_url', Post::getTableName().'.manage_url'
-                ])->leftJoin(InventoryImage::getTableName(), function($join) {
+                ]);
+    }
+
+    private function initInventoryQuery() : Builder
+    {
+        return DB::table(Inventory::getTableName())
+                ->leftJoin(InventoryImage::getTableName(), function($join) {
                     $join->on(Inventory::getTableName().'.inventory_id', '=', InventoryImage::getTableName().'.inventory_id');
                     $join->on(function($join) {
                         $join->on(InventoryImage::getTableName().'.is_default', '=', DB::raw('1'));
@@ -341,11 +347,9 @@ class InventoryRepository implements InventoryRepositoryInterface
         return $query->groupBy(Inventory::getTableName().'.inventory_id');;
     }
 
-    private function getResultsCountFromQuery(Builder $query) : int
+    private function getResultsCountFromQuery() : int
     {
-        $queryString = str_replace(array('?'), array('\'%s\''), $query->toSql());
-        $queryString = vsprintf($queryString, $query->getBindings());
-        return current(DB::select(DB::raw("SELECT count(*) as row_count FROM ($queryString) as inventory_count")))->row_count;
+        return $this->initInventoryQuery()->select(DB::raw('count(DISTINCT' . Inventory::getTableName() . '.inventory_id' . ') AS row_count'))->row_count;
     }
 
     private function getPaginatedResults($params)
@@ -353,8 +357,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         $perPage = !isset($params['per_page']) ? self::DEFAULT_PAGE_SIZE : (int)$params['per_page'];
         $currentPage = !isset($params['page']) ? 1 : (int)$params['page'];
 
-        $paginatedQuery = $this->buildInventoryQuery($params);
-        $resultsCount = $this->getResultsCountFromQuery($paginatedQuery);
+        $resultsCount = $this->getResultsCountFromQuery();
 
         if((int) $params['per_page'] !== -1) {
             $paginatedQuery->skip(($currentPage - 1) * $perPage);
