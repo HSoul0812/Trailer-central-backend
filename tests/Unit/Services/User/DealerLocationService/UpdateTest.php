@@ -228,11 +228,6 @@ class UpdateTest extends TestCase
                 ->shouldReceive('create')
                 ->with($item + ['dealer_location_id' => $location->dealer_location_id])
                 ->once();
-
-            $dependencies->salesTaxItemRepo
-                ->shouldReceive('createV1')
-                ->with($item + ['dealer_location_id' => $location->dealer_location_id])
-                ->once();
         }
 
         // And I expect that "DealerLocationRepositoryInterface::commitTransaction" method is called once

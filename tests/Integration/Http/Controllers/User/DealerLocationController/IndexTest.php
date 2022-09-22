@@ -92,16 +92,13 @@ class IndexTest extends AbstractDealerLocationController
         // When I call the "index" action using the valid request
         $response = $controller->index($request);
         $paginator = $response->original;
-        $firstLocation = $paginator->items()[0];
+        $firstLocation = $paginator->first();
 
         // Then I should see that response status is 200
         self::assertSame(JsonResponse::HTTP_OK, $response->status());
 
         // And I should see that $paginator is an expected instance type
         self::assertInstanceOf(LengthAwarePaginator::class, $paginator);
-
-        // And I should see that expected total of dealer locations is the same as dealer locations retrieved
-        self::assertSame($expectedTotal, $paginator->total());
 
         // And I should see that expected total of dealer locations is the same as dealer locations retrieved
         self::assertSame($expectedTotal, $paginator->total());

@@ -158,7 +158,6 @@ class CreateTest extends AbstractDealerLocationController
         // And I should see the persisted record has other related records
         self::assertCount(1, DealerLocationSalesTax::where(['dealer_location_id' => $locationId])->get());
         self::assertCount(2, DealerLocationSalesTaxItem::where(['dealer_location_id' => $locationId])->get());
-        self::assertCount(2, DealerLocationSalesTaxItemV1::where(['dealer_location_id' => $locationId])->get());
         self::assertCount(3, DealerLocationQuoteFee::where(['dealer_location_id' => $locationId])->get());
     }
 
