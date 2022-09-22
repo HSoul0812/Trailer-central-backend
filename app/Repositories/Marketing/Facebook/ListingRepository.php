@@ -145,8 +145,8 @@ class ListingRepository implements ListingRepositoryInterface {
      * @param array $params
      * @return Collection<Inventory>
      */
-    public function getAllMissing(Marketplace $integration, array $params):Collection {
-        $logger = \Illuminate\Support\Facades\Log::channel('dispatch-fb');
+    public function getAllMissing(Marketplace $integration, array $params): Collection
+    {
         $inventoryTableName = Inventory::getTableName();
         $listingsTableName = Listings::getTableName();
  
@@ -163,30 +163,22 @@ class ListingRepository implements ListingRepositoryInterface {
 
         // Append Join
         $query = $query->leftJoin(Listings::getTableName(), function ($join) use ($integration) {
-            $join->on(
-                Listings::getTableName() . '.inventory_id',
-                '=',
-                Inventory::getTableName() . '.inventory_id'
-            )
-            ->where(Listings::getTableName() . '.username', '=', $integration->fb_username)
-            ->where(Listings::getTableName() . '.page_id', '=', $integration->page_id ?? '0');
+            $join->on(Listings::getTableName() . '.inventory_id', '=', Inventory::getTableName() . '.inventory_id')
+                ->where(Listings::getTableName() . '.username', '=', $integration->fb_username)
+                ->where(Listings::getTableName() . '.page_id', '=', $integration->page_id ?? '0');
         });
         $query = $query->where(function (Builder $query) use ($listingsTableName) {
             $query = $query->whereNull("{$listingsTableName}.facebook_id")
-                           ->orWhereIn("{$listingsTableName}.status", [Listings::STATUS_DELETED, Listings::STATUS_EXPIRED]);
+            ->orWhereIn("{$listingsTableName}.status", [Listings::STATUS_DELETED, Listings::STATUS_EXPIRED]);
         });
 
         // Skip Integrations With Non-Expired Errors
         $query = $query->leftJoin(Error::getTableName(), function ($join) {
-            $join->on(
-                Error::getTableName() . '.marketplace_id',
-                '=',
-                Inventory::getTableName() . '.inventory_id'
-            )
-            ->where(Error::getTableName() . '.dismissed', 0);
+            $join->on(Error::getTableName() . '.marketplace_id', '=', Inventory::getTableName() . '.inventory_id')
+                ->where(Error::getTableName() . '.dismissed', 0);
         })->where(function (Builder $query) {
             return $query->whereNull(Error::getTableName() . '.id')
-            ->orWhere(Error::getTableName() . '.expires_at', '<', DB::raw('NOW()'));
+                ->orWhere(Error::getTableName() . '.expires_at', '<', DB::raw('NOW()'));
         });
 
         // Append Location
@@ -205,9 +197,7 @@ class ListingRepository implements ListingRepositoryInterface {
 
         // Set Sort By
         $query = $query->orderBy("{$inventoryTableName}.created_at", "asc");
-        $query = $query->limit($params['per_page']??config('marketing.fb.settings.limit.listings'));
-
-        $logger->info($query->toSql());
+        $query = $query->limit($params['per_page'] ?? config('marketing.fb.settings.limit.listings'));
 
         // Return Paginated Inventory
         return $query->get();

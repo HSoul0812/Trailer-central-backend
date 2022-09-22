@@ -366,8 +366,7 @@ class MarketplaceService implements MarketplaceServiceInterface
         // Append Paginator
         $response = new MarketplaceInventory([
             'type' => $type,
-            'inventory' => $listings,
-            'paginator' => new IlluminatePaginatorAdapter($inventory)
+            'inventory' => $listings
         ]);
         return $response;
     }
