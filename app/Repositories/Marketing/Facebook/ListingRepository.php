@@ -14,6 +14,7 @@ use App\Traits\Repository\Transaction;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class ListingRepository implements ListingRepositoryInterface {
     use SortTrait, Transaction;
@@ -260,10 +261,6 @@ class ListingRepository implements ListingRepositoryInterface {
      */
     public function countFacebookPostings(Marketplace $integration): int
     {
-        return Listings::where([
-            ['created_at', '>=',  date('Y-m-d 00:00:00')],
-            ['created_at', '<=', date('Y-m-d 23:59:59')],
-            ['marketplace_id', '=', $integration->id]
-        ])->count();
+        return Listings::where('marketplace_id', '=', $integration->id)->whereDate('created_at', Carbon::today())->count();
     }
 }
