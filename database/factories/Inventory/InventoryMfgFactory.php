@@ -8,7 +8,7 @@ use Faker\Generator as Faker;
 
 $factory->define(InventoryMfg::class, static function (Faker $faker, array $attributes): array {
     return [
-        'name' => $faker->name,
+        'name' => $attributes['name'] ?? $faker->name,
         'label' => $faker->name,
         'website' => '',
         'address' => '',
