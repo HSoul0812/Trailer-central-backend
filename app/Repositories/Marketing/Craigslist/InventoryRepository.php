@@ -202,7 +202,8 @@ class InventoryRepository implements InventoryRepositoryInterface
         /** @var Builder $query */
         $query = $this->initInventoryResultsQuery()
                       ->where(Inventory::getTableName().'.dealer_id', '=', $params['dealer_id'])
-                      ->where(Profile::getTableName().'.id', '=', $params['profile_id']);
+                      ->where(Profile::getTableName().'.id', '=', $params['profile_id'])
+                      ->groupBy(Inventory::getTableName().'.inventory_id');
 
         if (isset($params['images_greater_than']) || isset($params['images_less_than'])) {
             $query = $query->selectRaw('count('.InventoryImage::getTableName().'.inventory_id) as image_count');
@@ -344,7 +345,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         // Return Query Builder
-        return $query->groupBy(Inventory::getTableName().'.inventory_id');;
+        return $query;
     }
 
     private function getResultsCountFromQuery(array $params) : int
