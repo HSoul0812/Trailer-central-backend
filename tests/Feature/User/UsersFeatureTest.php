@@ -25,7 +25,7 @@ class UsersFeatureTest extends TestCase
             'password' => $this->faker->regexify('[A-Za-z0-9]{15}'),
             'name' => $this->faker->name,
             'clsf_active' => $this->faker->randomElement([0, 1]),
-        ])->dump();
+        ]);
         $response->assertStatus(Response::HTTP_CREATED);
         $response->assertJson([
             'data' => [
