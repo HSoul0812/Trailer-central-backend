@@ -204,6 +204,10 @@ class InventoryRepository implements InventoryRepositoryInterface
                       ->where(Inventory::getTableName().'.dealer_id', '=', $params['dealer_id'])
                       ->where(Profile::getTableName().'.id', '=', $params['profile_id']);
 
+        if (isset($params['images_greater_than']) || isset($params['images_less_than'])) {
+            $query = $query->selectRaw('count('.InventoryImage::getTableName().'.inventory_id) as image_count');
+        }
+
         if (isset($params['dealer_location_id'])) {
             $query = $query->where(Inventory::getTableName().'.dealer_location_id', $params['dealer_location_id']);
         }
@@ -337,10 +341,6 @@ class InventoryRepository implements InventoryRepositoryInterface
             } else if ($params['units_with_true_cost'] == self::DO_NOT_SHOW_UNITS_WITH_TRUE_COST) {
                 $query = $query->where('true_cost', 0);
             }
-        }
-
-        if (isset($params['images_greater_than']) || isset($params['images_less_than'])) {
-            $query = $query->selectRaw('count('.InventoryImage::getTableName().'.inventory_id) as image_count');
         }
 
         // Return Query Builder
