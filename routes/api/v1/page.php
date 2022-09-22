@@ -11,5 +11,5 @@ $api->version('v1', function ($api) {
     |--------------------------------------------------------------------------
     */
 
-    $api->get('page', 'App\Http\Controllers\v1\Page\PageController@index');
+    $api->get('pages', 'App\Http\Controllers\v1\Page\PageController@index');
 });
