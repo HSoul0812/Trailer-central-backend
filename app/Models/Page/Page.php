@@ -11,7 +11,6 @@ class Page extends Model
 
     protected $fillable = [
         "name",
-        "url",
-        "description"
+        "url"
     ];
 }

@@ -13,8 +13,7 @@ class PageTransformer extends TransformerAbstract
         return [
              'id'          => (int) $page->id,
              'name'        => $page->name,
-             'url'         => $page->url,
-             'description' => $page->description,
+             'url'         => $page->url
          ];
     }
 }
