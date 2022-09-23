@@ -10,6 +10,8 @@ use App\Transformers\TransformerInterface;
  * Class CreateInventoryRequest
  *
  * @package App\Http\Requests\Inventory
+ *
+ * @property int $dealer_id
  */
 class SaveInventoryRequest extends Request
 {
