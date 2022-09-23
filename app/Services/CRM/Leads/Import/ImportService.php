@@ -96,9 +96,9 @@ class ImportService implements ImportServiceInterface
         // Get Emails From Service
         $accessToken = $this->getAccessToken();
         $address = config('adf.imports.gmail.email');
-	$this->log->info('Getting Messages With Access Token ' . print_r($accessToken, true));
+	    $this->log->info('Getting Messages With Access Token ' . print_r($accessToken, true));
 
-	// Get Messages for Access Token
+	    // Get Messages for Access Token
         $messages = $this->gmail->messages($accessToken, config('adf.imports.gmail.inbox'));
         $this->log->info('Parsing ' . count($messages) . ' Email Messages From Email Address ' . $address);
 
@@ -235,7 +235,7 @@ class ImportService implements ImportServiceInterface
 
     /**
      * Try Moving Email
-     * 
+     *
      * @param AccessToken $accessToken
      * @param string $mailId
      * @param string $add ; label to add from config
