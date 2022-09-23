@@ -6,6 +6,8 @@ use DB;
 use Elasticsearch\Client;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Database\Query\Builder;
 
 class RemoveDeletedModelFromESIndexAction
 {
@@ -162,11 +164,17 @@ class RemoveDeletedModelFromESIndexAction
                 $this->searchAfter = $hit['sort'];
             }
 
+            $table = $this->model->getTable();
+            $modelUsesSoftDelete = $this->model::hasGlobalScope(SoftDeletingScope::class);
+
             // For performance’s sake, we'll fetch all the model ids at once
-            $modelIdsInDB = DB::table($this->model->getTable())
+            $query = DB::table($table)
                 ->whereIn('id', $modelIds)
-                ->pluck('id')
-                ->toArray();
+                ->when($modelUsesSoftDelete, function(Builder $query) {
+                    $query->whereNull('deleted_at');
+                });
+
+            $modelIdsInDB = $query->pluck('id')->toArray();
 
             // Then, compare it with the full list of model ids, the missing ones
             // are the one that we need to delete

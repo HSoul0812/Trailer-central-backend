@@ -6,6 +6,7 @@ namespace App\Models\CRM\Dms\Quickbooks;
 
 use App\Models\CRM\Account\Invoice;
 use App\Models\CRM\Account\InvoiceItem;
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -16,6 +17,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Item extends Model
 {
+    use TableAware;
+
     protected $table = 'qb_items';
 
     public $timestamps = false;

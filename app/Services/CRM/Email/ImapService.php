@@ -32,11 +32,6 @@ use Carbon\Carbon;
 class ImapService implements ImapServiceInterface
 {
     /**
-     * @var PhpImap\Mailbox
-     */
-    protected $imap;
-
-    /**
      * @var string
      */
     protected $attachmentDir;
@@ -123,7 +118,7 @@ class ImapService implements ImapServiceInterface
         // Return Mailbox
         try {
             // Get Messages
-            return $this->getMessages($imapConfig->folderName, $imapConfig->getStartDate());
+            return $this->getMessages($imap, $imapConfig->folderName, $imapConfig->getStartDate());
         } catch (MissingFolderException $e) {
             throw new MissingFolderException;
         } catch (ConnectionException $e) {
@@ -159,7 +154,7 @@ class ImapService implements ImapServiceInterface
         // Return Mailbox
         try {
             // Get Messages
-            return $this->getMailboxes();
+            return $this->getMailboxes($imap);
         } catch (ConnectionException $e) {
             $this->log->error('IMAP threw an exception: ' . $e->getMessage() . PHP_EOL .
                                 'Trace: ' . $e->getPrevious()->getTraceAsString());
@@ -245,34 +240,35 @@ class ImapService implements ImapServiceInterface
                                 ' with email: ' . $imapConfig->username);
             $this->log->info('Fixed returning IMAP credentials: ' . print_r($imapConfig->getCredentials(), true));
             $client = new ClientManager();
-            $this->imap = $client->make($imapConfig->getCredentials());
-            $this->imap->connect();
+            $imap = $client->make($imapConfig->getCredentials());
+            $imap->connect();
             $this->log->info('Connected to IMAP for email address: ' . $imapConfig->username);
         } catch (ConnectionFailedException $e) {
             // Logged Exceptions
-            $this->imap = null;
+            $imap = null;
             $this->log->error('Cannot connect to ' . $imapConfig->username . ' via IMAP, ' .
                                 'exception returned: ' . $e->getMessage() . PHP_EOL);
         } catch (\Exception $e) {
             // Logged Exceptions
-            $this->imap = null;
+            $imap = null;
             $this->log->error('Cannot connect to ' . $imapConfig->username . ' via IMAP, ' .
                                 'exception returned: ' . $e->getMessage());
         }
 
         // Return IMAP Details
-        return $this->imap;
+        return $imap;
     }
 
     /**
      * Get Messages After Set Date
      *
+     * @param Client $imap
      * @param string $folderName
      * @param null|string $startTime
      * @param int $days
      * @return MessageCollection
      */
-    private function getMessages(string $folderName, ?string $startTime = null, int $days = 7): MessageCollection
+    private function getMessages(Client $imap, string $folderName, ?string $startTime = null, int $days = 7): MessageCollection
     {
         // Get Carbon From Provided Start Time
         if(!empty($startTime)) {
@@ -282,7 +278,7 @@ class ImapService implements ImapServiceInterface
         }
 
         // Get Folder
-        $folder = $this->imap->getFolder($folderName);
+        $folder = $imap->getFolder($folderName);
         if($folder === null) {
             throw new MissingFolderException;
         }
@@ -305,11 +301,12 @@ class ImapService implements ImapServiceInterface
     /**
      * Get Mailboxes From IMAP Config
      * 
+     * @param Client $imap
      * @return Collection<ImapMailbox>
      */
-    private function getMailboxes(): Collection {
+    private function getMailboxes(Client $imap): Collection {
         // Get Mailboxes
-        $folders = $this->imap->getFolders(false);
+        $folders = $imap->getFolders(false);
 
         // Create Imap Mailboxes
         $mailboxes = new Collection();
