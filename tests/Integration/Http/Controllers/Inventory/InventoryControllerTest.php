@@ -161,7 +161,7 @@ class InventoryControllerTest extends TestCase
 
         $response = $this->json('PUT', '/api/inventory', $inventoryParams, $this->getSeederAccessToken($seeder));
 
-        $response->assertStatus(200);
+        $response->assertStatus(201);
 
         $responseJson = json_decode($response->getContent(), true);
         $this->assertArrayHasKey('response', $responseJson);
@@ -215,7 +215,7 @@ class InventoryControllerTest extends TestCase
 
         $response = $this->json('PUT', '/api/inventory', $inventoryParams, $this->getSeederAccessToken($seeder));
 
-        $response->assertStatus(200);
+        $response->assertStatus(201);
 
         $responseJson = json_decode($response->getContent(), true);
         $this->assertArrayHasKey('response', $responseJson);
@@ -237,7 +237,7 @@ class InventoryControllerTest extends TestCase
      */
     public function testCreateWithWrongAccessToken()
     {
-        $response = $this->json('PUT', '/api/inventory/create', [], ['access-token' => 'wrong_access_token']);
+        $response = $this->json('PUT', '/api/inventory', [], ['access-token' => 'wrong_access_token']);
 
         $response
             ->assertStatus(403)
@@ -251,7 +251,7 @@ class InventoryControllerTest extends TestCase
      */
     public function testCreateWithoutAccessToken()
     {
-        $response = $this->json('PUT', '/api/inventory/create', []);
+        $response = $this->json('PUT', '/api/inventory', []);
 
         $response
             ->assertStatus(403)

@@ -12,6 +12,7 @@ use App\Models\CRM\Email\BlastCategory;
 use App\Models\CRM\Email\BlastSent;
 use App\Models\CRM\Email\Bounce;
 use App\Models\Inventory\Inventory;
+use App\Models\CRM\Leads\InventoryLead;
 use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -172,7 +173,10 @@ class Blast extends Model
 
             // Add IN
             if(count($categories) > 0) {
-                $query = $query->whereIn(Inventory::getTableName() . '.category', $categories);
+                $query->where(function (Builder $query) use ($categories) {
+                    $query->whereIn(Inventory::getTableName() . '.category', $categories)
+                          ->orWhereIn('unit.category', $categories);
+                });
             }
         }
 
@@ -185,7 +189,10 @@ class Blast extends Model
 
             // Add IN
             if(count($brands) > 0) {
-                $query = $query->whereIn(Inventory::getTableName() . '.manufacturer', $brands);
+                $query->where(function (Builder $query) use ($brands) {
+                    $query->whereIn(Inventory::getTableName() . '.manufacturer', $brands)
+                          ->orWhereIn('unit.manufacturer', $brands);
+                });
             }
         }
         
@@ -253,6 +260,10 @@ class Blast extends Model
         return Lead::select(Lead::getTableName() . '.*')
                    ->leftJoin(Inventory::getTableName(), Lead::getTableName() . '.inventory_id',
                                 '=', Inventory::getTableName() . '.inventory_id')
+                   ->leftJoin(InventoryLead::getTableName(), Lead::getTableName() . '.identifier',
+                                '=', InventoryLead::getTableName() . '.website_lead_id')
+                   ->leftJoin(Inventory::getTableName() . ' as unit', 'unit.inventory_id',
+                                '=', InventoryLead::getTableName() . '.inventory_id')
                    ->leftJoin(BlastSent::getTableName(), function($join) use($blast) {
                         return $join->on(BlastSent::getTableName() . '.lead_id',
                                             '=', Lead::getTableName() . '.identifier')
