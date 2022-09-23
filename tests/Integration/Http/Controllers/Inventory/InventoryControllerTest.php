@@ -922,7 +922,7 @@ HTML,
         $this->setUpTraits();
 
         return [
-            'wrong brand when watercraft' => [
+            'wrong brand when brand is watercraft or RVs' => [
                 [
                     'entity_type_id' => $this->faker->randomElement([EntityType::ENTITY_TYPE_WATERCRAFT, EntityType::ENTITY_TYPE_RV]),
                     'active' => true,
