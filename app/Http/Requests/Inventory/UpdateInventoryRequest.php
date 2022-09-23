@@ -22,7 +22,6 @@ class UpdateInventoryRequest extends SaveInventoryRequest
             'entity_type' => 'integer',
             'entity_type_id' => 'integer',
             'stock' => [
-                 'required',
                  'string',
                  'max:50', Rule::unique('inventory', 'stock')
                      ->where('dealer_id', $this->dealer_id)
