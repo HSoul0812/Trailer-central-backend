@@ -9,13 +9,14 @@ use App\Http\Middleware\Inventory\CreateInventoryPermissionMiddleware;
 use App\Http\Requests\Inventory\GetInventoryHistoryRequest;
 use App\Models\CRM\Dms\Customer\CustomerInventory;
 use App\Models\CRM\User\Customer;
+use App\Models\Inventory\EntityType;
 use App\Models\Inventory\Inventory;
 use App\Models\User\AuthToken;
 use App\Models\User\Interfaces\PermissionsInterface;
-use App\Models\User\User;
 use Dingo\Api\Exception\ResourceException;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Storage;
 use Tests\database\seeds\Inventory\InventoryHistorySeeder;
 use Tests\database\seeds\Inventory\InventorySeeder;
@@ -32,6 +33,8 @@ use TypeError;
  */
 class InventoryControllerTest extends TestCase
 {
+    use WithFaker;
+
     const API_INVENTORY_TITLES = '/api/inventory/get_all_titles';
     const API_INVENTORY_EXISTS = '/api/inventory/exists';
 
@@ -171,6 +174,50 @@ class InventoryControllerTest extends TestCase
         $this->assertSame('success', $responseJson['response']['status']);
 
         $this->assertDatabaseHas('inventory', $inventoryParams);
+
+        $seeder->cleanUp();
+    }
+
+    /**
+     * @covers ::create
+     *
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
+     * @dataProvider wrongInventoryDataProvider
+     */
+    public function testWillValidateAsExpected(array $parameters, string $expectedMessage, array $expectedErrorMessages): void
+    {
+        $seederParams = [
+            'userType' => AuthToken::USER_TYPE_DEALER_USER,
+            'permissions' => [[
+                'feature' => PermissionsInterface::INVENTORY,
+                'permission_level' => PermissionsInterface::SUPER_ADMIN_PERMISSION,
+            ]],
+        ];
+
+        $seeder = new InventorySeeder($seederParams);
+
+        $seeder->seed();
+
+        $this->assertDatabaseMissing('inventory', ['dealer_id' => $seeder->dealer->dealer_id]);
+
+        $parameters['dealer_id'] = $seeder->dealer->dealer_id;
+        $parameters['dealer_location_id'] = $seeder->dealerLocation->dealer_location_id;
+        $parameters['manufacturer'] = $seeder->inventoryMfg->name;
+        $parameters['brand'] = is_callable($parameters['brand']) ? $parameters['brand']($seeder) : $parameters['brand'];
+        $parameters['category'] = $seeder->category->legacy_category;
+
+        $response = $this->json('PUT', '/api/inventory', $parameters, $this->getSeederAccessToken($seeder));
+
+        $response->assertStatus(422);
+
+        $responseJson = json_decode($response->getContent(), true);
+
+        self::assertArrayHasKey('message', $responseJson);
+        self::assertArrayHasKey('errors', $responseJson);
+        self::assertSame($expectedMessage, $responseJson['message']);
+        self::assertSame($expectedErrorMessages, $responseJson['errors']);
 
         $seeder->cleanUp();
     }
@@ -863,6 +910,117 @@ HTML,
                 'has_stock_images' => true,
                 'show_on_auction123' => false,
             ]],
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function wrongInventoryDataProvider(): array
+    {
+        $this->refreshApplication();
+        $this->setUpTraits();
+
+        return [
+            'wrong brand when watercraft' => [
+                [
+                    'entity_type_id' => $this->faker->randomElement([EntityType::ENTITY_TYPE_WATERCRAFT, EntityType::ENTITY_TYPE_RV]),
+                    'active' => true,
+                    'title' => 'test_title',
+                    'stock' => 'test_stock',
+                    'model' => 'test_model',
+                    'brand' => 123, // a wrong brand
+                    'qb_item_category_id' => 111,
+                    'description' => <<< SQL
+#### OVERVIEW\\\\n\\\\n\\\\n2019 Forest River Grey Wolf 29BH \\\\nTravel Trailer RV / Sleeps 10 / Dry: 6336 lbs / Bunk Model \\\\n\\\\n\\\\nForest River has been a trusted name that provides reliable and affordable RVs! This pre-owned 2019 Forest River Grey Wolf 29BH appeals to a broad breadth of RV lifestyles ranging from weekend use all the way to extended use and just about every use in between. Designed to fit your family''s budget this exciting Grey Wolf provides an abundance of value. It''s time to make camping great again. So let''s schedule an appointment today to see this exciting 2019 Grey Wolf 29BH. Are you ready to go camping? So it''s time to get hitched up and on the road to your next camping adventure today. \\\\n\\\\nThis 2019 Forest River Grey Wolf 29BH is priced to sell today. Yes you get great instant savings. As well as a full 90 Day Certified Pre-Owned RV Warranty for added peace of mind. So drive a little save a lot at Central PA''s largest towable RV dealership. We are waiting to hear from you call 800-722-1236 today. Or text us at 717-667-1400\\. So fill out the contact form for more information on this exciting RV. Therefore if you have a current trailer that you enjoy camping in fill out our RV trade-in form and we will provide you with honest trade-in values. So click or call today. Financing may be available for qualified buyers. Please contact our Business Department for all financing information. Also additional extended service contracts are available for sale. RV buying made easy at Lerch RV.
+SQL,
+                    'description_html' => <<< HTML
+<h4>OVERVIEW</h4><br />
+<p>2019 Forest River Grey Wolf 29BH </p><br />
+<p>Travel Trailer RV / Sleeps 10 / Dry: 6336 lbs / Bunk Model </p><br />
+<p>Forest River has been a trusted name that provides reliable and affordable RVs! This pre-owned 2019 Forest River Grey Wolf 29BH appeals to a broad breadth of RV lifestyles ranging from weekend use all the way to extended use and just about every use in between. Designed to fit your family''s budget this exciting Grey Wolf provides an abundance of value. It''s time to make camping great again. So let''s schedule an appointment today to see this exciting 2019 Grey Wolf 29BH. Are you ready to go camping? So it''s time to get hitched up and on the road to your next camping adventure today. </p><br />
+<p>This 2019 Forest River Grey Wolf 29BH is priced to sell today. Yes you get great instant savings. As well as a full 90 Day Certified Pre-Owned RV Warranty for added peace of mind. So drive a little save a lot at Central PA''s largest towable RV dealership. We are waiting to hear from you call 800-722-1236 today. Or text us at 717-667-1400. So fill out the contact form for more information on this exciting RV. Therefore if you have a current trailer that you enjoy camping in fill out our RV trade-in form and we will provide you with honest trade-in values. So click or call today. Financing may be available for qualified buyers. Please contact our Business Department for all financing information. Also additional extended service contracts are available for sale. RV buying made easy at Lerch RV.</p>
+
+HTML,
+                    'status' => 1,
+                    'availability' => 'available',
+                    'is_consignment' => true,
+                    'video_embed_code' => 'some_code',
+                    'vin' => 'test_vin',
+                    'msrp_min' => 22,
+                    'msrp' => 33,
+                    'price' => 44,
+                    'sales_price' => 66,
+                    'use_website_price' => true,
+                    'website_price' => 77,
+                    'dealer_price' => 88,
+                    'monthly_payment' => 99,
+                    'year' => 2020,
+                    'condition' => 'new',
+                    'length' => 111,
+                    'width' => 222,
+                    'height' => 333,
+                    'weight' => 444,
+                    'gvwr' => 555,
+                    'axle_capacity' => 1,
+                    'cost_of_unit' => 100,
+                    'true_cost' => 777,
+                    'cost_of_shipping' => 'test_cost_of_shipping',
+                    'cost_of_prep' => 'test_cost_of_prep',
+                    'total_of_cost' => 'test_total_of_cost',
+                    'pac_amount' => 5555,
+                    'pac_type' => 'percent',
+                    'minimum_selling_price' => 'test_minimum_selling_price',
+                    'notes' => 'some_notes',
+                    'show_on_ksl' => true,
+                    'show_on_racingjunk' => true,
+                    'show_on_website' => true,
+                    'overlay_enabled' => true,
+                    'is_special' => true,
+                    'is_featured' => true,
+                    'is_archived' => false,
+                    'archived_at' => null,
+                    'broken_video_embed_code' => true,
+                    'showroom_id' => 454,
+                    'coordinates_updated' => 55,
+                    'payload_capacity' => 789,
+                    'height_display_mode' => 'inches',
+                    'width_display_mode' => 'inches',
+                    'length_display_mode' => 'inches',
+                    'width_inches' => 987,
+                    'height_inches' => 654,
+                    'length_inches' => 321,
+                    'show_on_rvtrader' => true,
+                    'chosen_overlay' => 'test_chosen_overlay',
+                    'fp_vendor' => 999,
+                    'fp_balance' => 22.33,
+                    'fp_paid' => true,
+                    'fp_interest_paid' => 983.22,
+                    'l_holder' => 'test_l_holder',
+                    'l_attn' => 'test_l_attn',
+                    'l_name_on_account' => 'test_l_name_on_account',
+                    'l_address' => 'test_l_address',
+                    'l_account' => 'test_l_account',
+                    'l_city' => 'test_l_city',
+                    'l_state' => 'test_l_state',
+                    'l_zip_code' => 'test_l_zip_code',
+                    'l_payoff' => 99.66,
+                    'l_phone' => 'test_l_phone',
+                    'l_paid' => true,
+                    'l_fax' => 'test_l_fax',
+                    'bill_id' => 357,
+                    'send_to_quickbooks' => true,
+                    'is_floorplan_bill' => true,
+                    'integration_item_hash' => 'test_integration_item_hash',
+                    'integration_images_hash' => 'test_integration_images_hash',
+                    'non_serialized' => true,
+                    'hidden_price' => 9911.22,
+                    'has_stock_images' => true,
+                    'show_on_auction123' => false,
+                ],
+                'Validation Failed',
+                ['brand' => ['validation.inventory_brand_valid']]
+            ]
         ];
     }
 
