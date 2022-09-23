@@ -14,7 +14,6 @@ class CreateInventoryRequest extends SaveInventoryRequest
     {
         return array_merge(parent::getRules(), [
             'stock' => [
-                'required',
                 'string',
                 'max:50', Rule::unique('inventory', 'stock')->where('dealer_id', $this->dealer_id)]
         ]);
