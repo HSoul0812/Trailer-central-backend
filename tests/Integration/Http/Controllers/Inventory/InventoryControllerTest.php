@@ -931,17 +931,6 @@ HTML,
                     'model' => 'test_model',
                     'brand' => 123, // a wrong brand
                     'qb_item_category_id' => 111,
-                    'description' => <<< SQL
-#### OVERVIEW\\\\n\\\\n\\\\n2019 Forest River Grey Wolf 29BH \\\\nTravel Trailer RV / Sleeps 10 / Dry: 6336 lbs / Bunk Model \\\\n\\\\n\\\\nForest River has been a trusted name that provides reliable and affordable RVs! This pre-owned 2019 Forest River Grey Wolf 29BH appeals to a broad breadth of RV lifestyles ranging from weekend use all the way to extended use and just about every use in between. Designed to fit your family''s budget this exciting Grey Wolf provides an abundance of value. It''s time to make camping great again. So let''s schedule an appointment today to see this exciting 2019 Grey Wolf 29BH. Are you ready to go camping? So it''s time to get hitched up and on the road to your next camping adventure today. \\\\n\\\\nThis 2019 Forest River Grey Wolf 29BH is priced to sell today. Yes you get great instant savings. As well as a full 90 Day Certified Pre-Owned RV Warranty for added peace of mind. So drive a little save a lot at Central PA''s largest towable RV dealership. We are waiting to hear from you call 800-722-1236 today. Or text us at 717-667-1400\\. So fill out the contact form for more information on this exciting RV. Therefore if you have a current trailer that you enjoy camping in fill out our RV trade-in form and we will provide you with honest trade-in values. So click or call today. Financing may be available for qualified buyers. Please contact our Business Department for all financing information. Also additional extended service contracts are available for sale. RV buying made easy at Lerch RV.
-SQL,
-                    'description_html' => <<< HTML
-<h4>OVERVIEW</h4><br />
-<p>2019 Forest River Grey Wolf 29BH </p><br />
-<p>Travel Trailer RV / Sleeps 10 / Dry: 6336 lbs / Bunk Model </p><br />
-<p>Forest River has been a trusted name that provides reliable and affordable RVs! This pre-owned 2019 Forest River Grey Wolf 29BH appeals to a broad breadth of RV lifestyles ranging from weekend use all the way to extended use and just about every use in between. Designed to fit your family''s budget this exciting Grey Wolf provides an abundance of value. It''s time to make camping great again. So let''s schedule an appointment today to see this exciting 2019 Grey Wolf 29BH. Are you ready to go camping? So it''s time to get hitched up and on the road to your next camping adventure today. </p><br />
-<p>This 2019 Forest River Grey Wolf 29BH is priced to sell today. Yes you get great instant savings. As well as a full 90 Day Certified Pre-Owned RV Warranty for added peace of mind. So drive a little save a lot at Central PA''s largest towable RV dealership. We are waiting to hear from you call 800-722-1236 today. Or text us at 717-667-1400. So fill out the contact form for more information on this exciting RV. Therefore if you have a current trailer that you enjoy camping in fill out our RV trade-in form and we will provide you with honest trade-in values. So click or call today. Financing may be available for qualified buyers. Please contact our Business Department for all financing information. Also additional extended service contracts are available for sale. RV buying made easy at Lerch RV.</p>
-
-HTML,
                     'status' => 1,
                     'availability' => 'available',
                     'is_consignment' => true,
