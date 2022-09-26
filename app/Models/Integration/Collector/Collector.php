@@ -48,6 +48,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $cdk_password
  * @property string $cdk_username
  * @property bool $use_factory_mapping
+ * @property bool is_mfg_brand_mapping_enabled
  * @property string $skip_categories
  * @property string $skip_locations
  * @property string|null $ids_token
@@ -84,6 +85,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $motility_integration_id
  * @property string|null $local_image_directory_address
  * @property string|null $video_source_fields
+ *
  */
 class Collector extends Model implements Filterable
 {
@@ -174,6 +176,7 @@ class Collector extends Model implements Filterable
         'motility_account_no',
         'motility_integration_id',
         'use_factory_mapping',
+        'is_mfg_brand_mapping_enabled',
         'skip_categories',
         'skip_locations',
         'zero_msrp',
@@ -200,7 +203,17 @@ class Collector extends Model implements Filterable
     protected $casts = [
         'last_run' => 'datetime',
         'scheduled_for' => 'datetime',
+        'overridable_fields' => 'array'
     ];
+
+    public function getOverridableFieldsListAttribute(): string
+    {
+        $overridable_fields = array_keys(array_filter($this->overridable_fields, function($v){
+            return $v;
+        }));
+
+        return implode(",", $overridable_fields);
+    }
 
     public function dealers(): BelongsTo
     {
