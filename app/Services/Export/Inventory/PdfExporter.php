@@ -5,11 +5,14 @@ namespace App\Services\Export\Inventory;
 use App\Models\Inventory\Inventory;
 use App\Models\Website\Config\WebsiteConfig;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
+use App\Traits\MarkdownHelper;
 use App\Transformers\Inventory\InventoryTransformer;
 use Illuminate\Support\Facades\Storage;
 
 class PdfExporter implements ExporterInterface
 {
+    use MarkdownHelper;
+
     private function storagePath($inventoryId, $filename): string
     {
         return "inventory-exports/$inventoryId/$filename";
@@ -37,6 +40,7 @@ class PdfExporter implements ExporterInterface
     {
         $transformer = new InventoryTransformer();
         $data = $transformer->transform($inventory);
+        $data['description'] = $this->convertMarkdown($data['description']);
         $data['features'] = $transformer->includeFeatures($inventory)->getData()->toArray();
         $data['website'] = $transformer->includeWebsite($inventory)->getData();
         $data['dealer_logo'] = $this->getDealerLogo($data['website']->id);

@@ -147,6 +147,7 @@ use Laravel\Scout\Searchable;
  * @property \DateTimeInterface|Carbon $updated_at
  * @property \DateTimeInterface|Carbon $updated_at_auto
  * @property bool $show_on_auction123
+ * @property bool $show_on_rvt
  *
  * @property string $category_label
  * @property string $status_label
@@ -360,6 +361,7 @@ class Inventory extends Model
         'times_viewed',
         'trailerworld_store_id',
         'show_on_auction123',
+        'show_on_rvt'
     ];
 
     protected $casts = [
