@@ -17,17 +17,20 @@ use Illuminate\Support\Facades\Log;
  */
 class HtmlService implements ImportTypeInterface
 {
-    const LEAD_DESTINATION_BLOCK = 'LEAD DESTINATION';
     const INDIVIDUAL_PROSPECT_BLOCK = 'INDIVIDUAL PROSPECT';
     const LEAD_INFORMATION_BLOCK = 'LEAD INFORMATION';
     const SALES_BOAT_BLOCK = 'SALES BOAT';
     const OFFICE_INFO_BLOCK = 'OFFICEINFO';
     const CUSTOMER_COMMENTS_BLOCK = 'CUSTOMER COMMENTS';
 
+    const NECESSARY_LEAD_BLOCKS = [
+        self::INDIVIDUAL_PROSPECT_BLOCK,
+        self::LEAD_INFORMATION_BLOCK,
+        self::SALES_BOAT_BLOCK,
+        self::OFFICE_INFO_BLOCK,
+    ];
+
     const LEAD_BLOCKS = [
-        self::LEAD_DESTINATION_BLOCK => [
-            'Address'
-        ],
         self::INDIVIDUAL_PROSPECT_BLOCK => [
             'Name',
             'Telephone',
@@ -37,6 +40,7 @@ class HtmlService implements ImportTypeInterface
             'Lead date',
             'Lead source',
             'Lead request type',
+            'Lead status',
         ],
         self::SALES_BOAT_BLOCK => [
             'Sale class',
@@ -45,12 +49,20 @@ class HtmlService implements ImportTypeInterface
             'Year',
             'IMT ID',
             'URI',
+            'HIN',
+            'Stock Number',
         ],
         self::OFFICE_INFO_BLOCK => [
             'Name',
+            'Address',
+            'Address 2',
+            'Address 3',
+            'Address 4',
+            'Address 5',
             'City',
             'State/Province',
-            'Zip/Postal code'
+            'Zip/Postal code',
+            'Country',
         ],
         self::CUSTOMER_COMMENTS_BLOCK => [],
     ];
@@ -113,7 +125,7 @@ class HtmlService implements ImportTypeInterface
      */
     public function isSatisfiedBy(ParsedEmail $parsedEmail): bool
     {
-        foreach (self::LEAD_BLOCKS as $leadBlockName => $leadBlock) {
+        foreach (self::NECESSARY_LEAD_BLOCKS as $leadBlockName) {
             if (strpos($parsedEmail->getBody(), $leadBlockName) === false) {
                 return false;
             }
@@ -145,9 +157,9 @@ class HtmlService implements ImportTypeInterface
         $lead->setFirstName($fullName[0] ?? '');
         $lead->setLastName($fullName[1] ?? '');
 
-        $lead->setEmail($data[self::INDIVIDUAL_PROSPECT_BLOCK]['Email']);
-        $lead->setPhone($data[self::INDIVIDUAL_PROSPECT_BLOCK]['Telephone']);
-        $lead->setAddrStreet($data[self::OFFICE_INFO_BLOCK]['Name'] ?? '');
+        $lead->setEmail($data[self::INDIVIDUAL_PROSPECT_BLOCK]['Email'] ?? '');
+        $lead->setPhone($data[self::INDIVIDUAL_PROSPECT_BLOCK]['Telephone'] ?? '');
+        $lead->setAddrStreet($data[self::OFFICE_INFO_BLOCK]['Address'] ?? '');
         $lead->setAddrCity($data[self::OFFICE_INFO_BLOCK]['City'] ?? '');
         $lead->setAddrState($data[self::OFFICE_INFO_BLOCK]['State/Province'] ?? '');
         $lead->setAddrZip($data[self::OFFICE_INFO_BLOCK]['Zip/Postal code'] ?? '');
@@ -161,7 +173,13 @@ class HtmlService implements ImportTypeInterface
         $data = [];
 
         foreach (self::LEAD_BLOCKS as $leadBlockName => $leadBlock) {
-            $block = substr($html, strpos($html, $leadBlockName));
+            $leadBlockStartPosition = strpos($html, $leadBlockName);
+
+            if ($leadBlockStartPosition === false) {
+                continue;
+            }
+
+            $block = substr($html, $leadBlockStartPosition);
             $blockEndPosition = strlen($block);
 
             foreach (self::LEAD_BLOCKS as $leadBlockName2 => $leadBlock2) {
@@ -185,7 +203,13 @@ class HtmlService implements ImportTypeInterface
             }
 
             foreach (self::LEAD_BLOCKS[$leadBlockName] as $leadField) {
-                $fieldValue = substr($block, strpos($block, $leadField));
+                $leadFieldStartPosition = strpos($block, $leadField);
+
+                if ($leadFieldStartPosition === false) {
+                    continue;
+                }
+
+                $fieldValue = substr($block, $leadFieldStartPosition);
                 $fieldEndPosition = strlen($fieldValue);
 
                 foreach (self::LEAD_BLOCKS[$leadBlockName] as $leadField2) {
@@ -251,6 +275,7 @@ class HtmlService implements ImportTypeInterface
         $adfLead->setVehicleYear($data[self::SALES_BOAT_BLOCK]['Year'] ?? '');
         $adfLead->setVehicleMake($data[self::SALES_BOAT_BLOCK]['Make'] ?? '');
         $adfLead->setVehicleModel($data[self::SALES_BOAT_BLOCK]['Model description'] ?? '');
+        $adfLead->setVehicleStock($data[self::SALES_BOAT_BLOCK]['Stock Number'] ?? '');
 
         // Find Inventory Items From DB That Match
         if(!empty($adfLead->getVehicleFilters())) {
