@@ -22,6 +22,7 @@ use Storage;
 class NewCsvImportService implements CsvImportServiceInterface
 {
     const MAX_VALIDATION_ERROR_CHAR_COUNT = 3072;
+    const S3_VALIDATION_ERRORS_PATH = 'parts/validation-errors/%s';
 
     const HEADER_VENDOR = 'Vendor';
     const HEADER_BRAND = 'Brand';
@@ -42,11 +43,10 @@ class NewCsvImportService implements CsvImportServiceInterface
     const HEADER_STOCK_MAX = 'Stock Maximum';
     const HEADER_VIDEO_EMBED_CODE = 'Video Embed Code';
     const HEADER_ALTERNATE_PART_NUMBER = 'Alternate Part Number';
+    const HEADER_SHIPPING_FEE = 'Shipping Fee';
 
     const HEADER_RULE_REQUIRED = 'required';
     const HEADER_RULE_OPTIONAL = 'optional';
-
-    const PRIMARY_IDENTIFIER_HEADER = self::HEADER_SKU;
 
     /**
      * All the valid headers. We use associative array for performance
@@ -74,6 +74,7 @@ class NewCsvImportService implements CsvImportServiceInterface
         self::HEADER_STOCK_MAX => self::HEADER_RULE_OPTIONAL,
         self::HEADER_VIDEO_EMBED_CODE => self::HEADER_RULE_OPTIONAL,
         self::HEADER_ALTERNATE_PART_NUMBER => self::HEADER_RULE_OPTIONAL,
+        self::HEADER_SHIPPING_FEE => self::HEADER_RULE_OPTIONAL,
     ];
 
     const MEMORY_CACHE_KEY_VENDORS = 'vendors';
@@ -154,20 +155,32 @@ class NewCsvImportService implements CsvImportServiceInterface
     {
         // Temp code
         if (file_exists(storage_path('logs/pond.log'))) {
-            unlink(storage_path('logs/pond.log'));
+            // unlink(storage_path('logs/pond.log'));
+            // file_put_contents(storage_path('logs/pond.log'), '');
         }
 
         config(['logging.default' => 'pond']);
 
         Log::info('Starting import for bulk upload ID: ' . $this->bulkUpload->id);
 
-        // Reason to stop processing
-        // 1. One of the required header doesn't exist
         try {
             $this->importCSV();
         } catch (Exception $exception) {
-
+            Log::info($message = $exception->getMessage());
+            $this->errors[] = $message;
+            $this->bulkUploadRepository->update([
+                'id' => $this->bulkUpload->id,
+                'status' => BulkUpload::VALIDATION_ERROR,
+                'validation_errors' => $this->getValidationErrors(),
+            ]);
+            return;
         }
+
+        $this->bulkUploadRepository->update([
+            'id' => $this->bulkUpload->id,
+            'status' => BulkUpload::COMPLETE,
+            'validation_errors' => $this->getValidationErrors(),
+        ]);
     }
 
     /**
@@ -261,7 +274,7 @@ class NewCsvImportService implements CsvImportServiceInterface
         }
 
         if (count($requiredHeaders) > 0) {
-            $message = sprintf("Missing required headers: %s.", implode(', ', array_keys($requiredHeaders)));
+            $message = sprintf("Missing required headers: %s. Action: Cancel the import!", implode(', ', array_keys($requiredHeaders)));
             throw new Exception($message);
         }
 
@@ -271,6 +284,7 @@ class NewCsvImportService implements CsvImportServiceInterface
             // If the header doesn't exist in the rule, we unset it from
             // the interested indexes
             if (!array_key_exists($header, self::HEADER_RULES)) {
+                Log::info("Found invalid headers: $header, ignore this header...");
                 unset($this->headerIndexes[$header]);
             }
         }
@@ -330,17 +344,23 @@ class NewCsvImportService implements CsvImportServiceInterface
         foreach ($this->headerIndexes as $header => $index) {
             // Don't need to do anything if we don't have a handler for this header
             if (!array_key_exists($header, $headerHandlers)) {
+                Log::info("No handler for header $header, skipping this header...");
                 continue;
             }
 
             $value = $data[$index] ?? null;
 
             try {
-                call_user_func($headerHandlers[$header], $part, $value, $line);
+                /**
+                 * @throws EmptySKUException
+                 */
+                call_user_func_array($headerHandlers[$header], [
+                    &$part,
+                    $value,
+                    $line,
+                ]);
             } catch (EmptySKUException $exception) {
-                // In the case of the SKU doesn't exist
-                // we will just skip this row
-                continue;
+                $this->errors[] = $exception->getMessage();
             }
         }
 
@@ -449,7 +469,7 @@ class NewCsvImportService implements CsvImportServiceInterface
 
         // The FILTER_SANITIZE_STRING flag inside the https://www.php.net/manual/en/filter.filters.sanitize.php
         // will be deprecated in PHP 8.1, they suggest that we use the htmlspecialchars() method instead
-        // so we're doing it now to save our future time
+        // so, we're doing it now to save our future time
         return htmlspecialchars($value);
     }
 
@@ -536,7 +556,7 @@ class NewCsvImportService implements CsvImportServiceInterface
             },
             self::HEADER_PRICE => function (array &$part, ?string $value, int $line) {
                 $this->storeErrorIfValueIsEmpty(self::HEADER_PRICE, $line, $value);
-                $part['price'] = $this->sanitizeValueToNumber($value);
+                $part['price'] = $this->sanitizeValueToNumber($value, 0);
             },
             self::HEADER_DEALER_COST => function (array &$part, ?string $value, int $line) {
                 $this->storeErrorIfValueIsEmpty(self::HEADER_DEALER_COST, $line, $value);
@@ -581,6 +601,10 @@ class NewCsvImportService implements CsvImportServiceInterface
             self::HEADER_ALTERNATE_PART_NUMBER => function (array &$part, ?string $value, int $line) {
                 $this->storeErrorIfValueIsEmpty(self::HEADER_ALTERNATE_PART_NUMBER, $line, $value);
                 $part['alternative_part_number'] = $this->sanitizeValueToString($value);
+            },
+            self::HEADER_SHIPPING_FEE => function (array &$part, ?string $value, int $line) {
+                $this->storeErrorIfValueIsEmpty(self::HEADER_SHIPPING_FEE, $line, $value);
+                $part['shipping_fee'] = $this->sanitizeValueToNumber($value);
             },
         ];
     }
@@ -659,5 +683,33 @@ class NewCsvImportService implements CsvImportServiceInterface
             $line,
             $this->getValueDoesNotExistInTheSystemMessage($header, $value)
         );
+    }
+
+    /**
+     * Get the validation errors string
+     *
+     * @return string
+     */
+    private function getValidationErrors(): string
+    {
+        $jsonEncodedValidationErrors = json_encode($this->errors);
+
+        if (strlen($jsonEncodedValidationErrors) > self::MAX_VALIDATION_ERROR_CHAR_COUNT) {
+            // Example filename: 1001-part-bulk-upload-123-20220926.txt
+            $fileName = sprintf(
+                "%d-part-bulk-upload-%d-%s.txt",
+                $this->bulkUpload->dealer_id,
+                $this->bulkUpload->id,
+                now()->format('Ymd')
+            );
+
+            $filePath = sprintf(self::S3_VALIDATION_ERRORS_PATH, $fileName);
+
+            $this->storage->put($filePath, implode(PHP_EOL, $this->errors));
+
+            return $this->storage->url($filePath);
+        }
+
+        return $jsonEncodedValidationErrors;
     }
 }

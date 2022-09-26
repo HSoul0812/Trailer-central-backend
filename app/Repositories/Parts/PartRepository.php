@@ -12,6 +12,7 @@ use App\Models\Parts\PartImage;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Parts\VehicleSpecific;
 use Illuminate\Support\Facades\DB;
@@ -530,9 +531,10 @@ class PartRepository implements PartRepositoryInterface {
 
     public function createPart($params)
     {
-        if (empty($params['latest_cost'])) {
+        if (Arr::has($params, 'dealer_cost') && empty($params['latest_cost'])) {
             $params['latest_cost'] = $params['dealer_cost'];
         }
+
         return $this->model->create($params);
     }
 
