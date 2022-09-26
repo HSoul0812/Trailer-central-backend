@@ -63,8 +63,8 @@ class Collector extends Resource
             new Panel('Main', [
                 Boolean::make('Is Active', 'active')->withMeta(['value' => $this->active ?? true]),
                 Text::make('Process Name')->sortable()->rules('required', 'max:128'),
-                BelongsTo::make('Dealer', 'dealers', Dealer::class)->sortable()->rules('required'),
-                BelongsTo::make('Default Dealer Location', 'dealerLocation', Location::class)->sortable()->rules('required'),
+                BelongsTo::make('Dealer', 'dealers', Dealer::class)->searchable()->sortable()->rules('required'),
+                BelongsTo::make('Default Dealer Location', 'dealerLocation', Location::class)->searchable()->sortable()->rules('required'),
                 DateTime::make('Last Run', 'last_run')->sortable()->format('DD MMM, YYYY - LT')->readonly(true)->onlyOnIndex(),
                 Boolean::make('Run without Errors', 'run_without_errors')->readonly(true)->onlyOnIndex(),
                 DateTime::make('Scheduled For', 'scheduled_for')->sortable()->format('DD MMM, YYYY - LT')->readonly(true)->onlyOnIndex()
