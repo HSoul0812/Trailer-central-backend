@@ -73,7 +73,7 @@ class TfaType
             ],
             self::FIELD_PASS => [
                 'label' => 'TFA Number',
-                'method' => 'locked'
+                'method' => 'password'
             ]
         ],
         self::TYPE_CODE => [
