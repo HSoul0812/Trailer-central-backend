@@ -31,8 +31,10 @@ class UpdateEquipmentTrailersInPartTypes extends Migration
      */
     public function down()
     {
-        Schema::table('part_types', function (Blueprint $table) {
-            //
-        });
+        foreach(self::TYPE_NAMES as $nameMap) {
+            DB::table('part_types')->where('name', $nameMap['to'])->update(
+                ['name' => $nameMap['from']]
+            );
+        }
     }
 }
