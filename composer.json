@@ -74,8 +74,7 @@
         "trailercentral/passwordless-login-url": "*",
         "twilio/sdk": "^5.31",
         "vyuldashev/nova-permission": "^2.11",
-        "webklex/laravel-imap": "^3.0",
-        "showroom/bulkconfiguration": "*",
+        "webklex/laravel-imap": "^3.0"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.4",
