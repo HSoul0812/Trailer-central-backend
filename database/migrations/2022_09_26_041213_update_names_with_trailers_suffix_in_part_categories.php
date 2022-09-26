@@ -20,7 +20,6 @@ class UpdateNamesWithTrailersSuffixInPartCategories extends Migration
             ['from' => 'Cargo (Enclosed)', 'to' => 'Cargo (Enclosed) Trailers'],
             ['from' => 'Flatbed', 'to' => 'Equipment / Flatbed Trailers'],
             ['from' => 'Car Haulers / racing', 'to' => 'Car Haulers / racing Trailers'],
-            ['from' => 'Tow Dollys', 'to' => 'Cargo (Enclosed) Trailers'],
             ['from' => 'Tilt', 'to' => 'Tilt Trailers'],
             ['from' => 'Motorcycle / Cycle', 'to' => 'Motorcycle / Cycle Trailers'],
             ['from' => 'ATV', 'to' => 'ATV Trailers'],
