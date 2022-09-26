@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 class LatLongDealerPrecisionUpdaterCommand extends Command
 {
+    const GOOGLE_MAPS_ENDPOINT = "https://maps.googleapis.com/maps/api/geocode/json";
+
     /**
      * The name and signature of the console command.
      *
@@ -52,7 +54,7 @@ class LatLongDealerPrecisionUpdaterCommand extends Command
         $cacheKey = self::class;
 
         // Get if we have a process that hung
-        $exists = Cache::get(self::class);
+        $exists = Cache::get($cacheKey);
 
 
         $this->process(!!$exists, $baseQuery,  $cacheKey, $exists);
@@ -118,8 +120,6 @@ class LatLongDealerPrecisionUpdaterCommand extends Command
         // Get a record for a corresponding Geolocation record for a given ZIP code
         $record = Geolocation::where('zip', $latLong->zip ?? $dealer->postalcode)->first();
 
-        Geolocation::unguard();
-
         if(!$record) {
             return Geolocation::create([
                 'zip' => $latLong->zip,
@@ -152,19 +152,39 @@ class LatLongDealerPrecisionUpdaterCommand extends Command
     }
 
 
+    protected function getGoogleMapsAttributes(string $address, $isCanadianPostcode = null)
+    {
+        $country = '';
+
+        // Add a component restriction for a ZIP code
+        if ($isCanadianPostcode !== null) {
+            $country = ($isCanadianPostcode) ? ':CA' : ':US';
+        }
+
+        return [
+            'key' => env('GOOGLE_MAPS_API_KEY'),
+            'sensor' => 'false',
+            'address' => $address,
+            'components' => implode(',', [
+                'locality', 
+                'administrative_area_level_1', 
+                'postal_code', 
+                "country{$country}"
+            ])
+        ];
+    }
+
     /**
      * Get the latitude and longitude value for a ZIP code / Address from the Geocoding API
      *
      * @return {longitude: float, latitude: float}|null
      */
     protected function getLongitudeAndLatitude(string $address, $isCanadianPostcode) : ?object {
-        $url = "https://maps.googleapis.com/maps/api/geocode/json?address={$address}&sensor=false&key=" . env('GOOGLE_MAPS_API_KEY') . '&components=locality,administrative_area_level_1,postal_code,country';
+        $query = http_build_query($this->getGoogleMapsAttributes($address, $isCanadianPostcode));
 
-        // Add a component restriction for a ZIP code
-        if($isCanadianPostcode !== null) {
-           $url .= ($isCanadianPostcode) ? ':CA' : ':US';
-        }
+        $url = self::GOOGLE_MAPS_ENDPOINT . "?{$query}";
 
+        // Make HTTP request to the GMaps API
         $result_string = file_get_contents($url);
 
         $result = json_decode($result_string, true);

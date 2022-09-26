@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 class LatLongPrecisionUpdaterCommand extends Command
 {
+    const GOOGLE_MAPS_ENDPOINT = "https://maps.googleapis.com/maps/api/geocode/json";
+
     /**
      * The name and signature of the console command.
      *
@@ -101,6 +103,15 @@ class LatLongPrecisionUpdaterCommand extends Command
         $this->error("Failed to get the lat/long value for {$item->id}");
     }
 
+    protected function getGoogleMapsAttributes(string $address)
+    {
+        return [
+            'key' => env('GOOGLE_MAPS_API_KEY'),
+            'sensor' => 'false',
+            'address' => $address
+        ];
+    }
+
 
     /**
      * Get the latitude and longitude value for a ZIP code from the Geocoding API
@@ -108,7 +119,9 @@ class LatLongPrecisionUpdaterCommand extends Command
      * @return LatLong|null
      */
     protected function getLongitudeAndLatitude(string $zip) : ?LatLong {
-        $url = "https://maps.googleapis.com/maps/api/geocode/json?address={$zip}&sensor=false&key=" . env('GOOGLE_MAPS_API_KEY');
+        $query = http_build_query($this->getGoogleMapsAttributes($zip));
+
+        $url = self::GOOGLE_MAPS_ENDPOINT . "?{$query}";
 
         $result_string = file_get_contents($url);
 
