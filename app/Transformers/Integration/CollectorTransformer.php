@@ -57,6 +57,7 @@ class CollectorTransformer extends TransformerAbstract
             'ids_token' => $collector->ids_token,
             'ids_default_location' => $collector->ids_default_location,
             'use_factory_mapping' => $collector->use_factory_mapping,
+            'is_mfg_brand_mapping_enabled' => $collector->is_mfg_brand_mapping_enabled,
             'xml_url' => $collector->xml_url,
             'csv_url' => $collector->csv_url,
             'motility_username' => $collector->motility_username,

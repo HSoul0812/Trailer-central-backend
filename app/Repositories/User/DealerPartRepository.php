@@ -7,7 +7,7 @@ use App\Models\User\DealerPart;
 use Illuminate\Support\Facades\DB;
 
 class DealerPartRepository  implements DealerPartRepositoryInterface
-{   
+{
     /**
      * @param array $params
      * @return DealerPart
@@ -39,13 +39,15 @@ class DealerPartRepository  implements DealerPartRepositoryInterface
 
     /**
      * @param $params
-     * @throws NotImplementedException
+     * @return bool
      */
-    public function delete($params)
+    public function delete($params): bool
     {
-        throw new NotImplementedException;
+        $dealerPart = DealerPart::where(['dealer_id' => $params['dealer_id']])->first();
+
+        return $dealerPart->delete();
     }
-    
+
     /**
      * @param $params
      * @throws NotImplementedException

@@ -73,8 +73,15 @@ class ADFService implements ImportTypeInterface
             $crawler = new Crawler($fixed);
             $adf = $crawler->filter('adf')->first();
 
-            return $adf->count() >= 1 && !empty($adf->nodeName()) && $adf->nodeName() === 'adf';
+            $success = ($adf->count() >= 1 && !empty($adf->nodeName()) && $adf->nodeName() === 'adf');
+            if(!$success) {
+                $this->log->error('Invalid ADF format detected: ' . $adf->count() . ' adf count, ' .
+                        $adf->nodeName() . ' node, is ' .
+                        (($adf->nodeName() !== 'adf') ? 'not' : '') . ' adf node');
+            }
+            return $success;
         } catch (\Exception $e) {
+            $this->log->error('Exception occurred trying to confirm ADF is valid format: ' . $e->getMessage());
             return false;
         }
     }

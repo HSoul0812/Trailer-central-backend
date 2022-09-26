@@ -746,7 +746,7 @@ class InquiryLead
         }
 
         // Matched Name?
-        if($this->firstName === $lead->first_name && $this->lastName === $lead->last_name) {
+        if(strtolower($this->firstName) === strtolower($lead->first_name) && strtolower($this->lastName) === strtolower($lead->last_name)) {
             $matches++;
         }
 
