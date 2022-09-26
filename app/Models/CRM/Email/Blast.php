@@ -17,6 +17,7 @@ use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Class Email Blast
@@ -85,6 +86,7 @@ class Blast extends Model
         'include_archived',
         'delivered',
         'cancelled',
+        'send_date',
     ];
 
     /**
@@ -105,7 +107,7 @@ class Blast extends Model
 
     /**
      * Get Template
-     * 
+     *
      * @return BelongsTo
      */
     public function template(): BelongsTo
@@ -114,17 +116,17 @@ class Blast extends Model
     }
 
     /**
-     * @return type
+     * @return HasMany
      */
-    public function brands()
+    public function brands(): HasMany
     {
         return $this->hasMany(BlastBrand::class, 'email_blast_id');
     }
 
     /**
-     * @return type
+     * @return HasMany
      */
-    public function categories()
+    public function categories(): HasMany
     {
         return $this->hasMany(BlastCategory::class, 'email_blast_id');
     }
@@ -148,7 +150,7 @@ class Blast extends Model
 
     /**
      * Get Lead ID's for Text Blast
-     * 
+     *
      * @return array<int>
      */
     public function getLeadIdsAttribute()
@@ -195,7 +197,7 @@ class Blast extends Model
                 });
             }
         }
-        
+
         // Valid Status?
         switch($blast->action) {
             case self::ACTION_INQUIRED:
@@ -249,7 +251,7 @@ class Blast extends Model
 
     /**
      * Get Builder Object for Blast Leads
-     * 
+     *
      * @return Builder
      */
     private function leadsBase(): Builder {

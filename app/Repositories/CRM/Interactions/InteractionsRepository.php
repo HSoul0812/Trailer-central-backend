@@ -195,6 +195,9 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
         $query->where(Interaction::getTableName(). ".is_closed", 0);
         $query->where(Lead::getTableName(). ".is_archived", 0);
         
+        if(empty($sort)) {
+            $sort = '-created_at';
+        }
         $query = $this->addSortQuery($query, $sort);
 
         return $query->paginate($perPage)->appends(['per_page' => $perPage]);       
@@ -217,6 +220,9 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
         $query->where(Interaction::getTableName(). ".is_closed", 0);
         $query->where(Lead::getTableName(). ".is_archived", 0);
 
+        if(empty($sort)) {
+            $sort = '-created_at';
+        }
         $query = $this->addSortQuery($query, $sort);
         
         return $query->paginate($perPage)->appends(['per_page' => $perPage]);  

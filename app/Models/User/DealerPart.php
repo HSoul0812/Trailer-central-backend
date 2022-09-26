@@ -13,7 +13,12 @@ class DealerPart extends Model
      * @var string
      */
     protected $table = 'dealer_parts';
-    
+
+    /**
+     * @var int
+     */
+    protected $primaryKey = 'dealer_id';
+
     public $timestamps = false;
     /**
      * The attributes that are mass assignable.
