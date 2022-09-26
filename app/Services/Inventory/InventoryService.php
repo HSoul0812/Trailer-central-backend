@@ -867,8 +867,6 @@ class InventoryService implements InventoryServiceInterface
         // Convert Markdown to HTML
         $description = preg_replace('/\\\\/', '<br>', $converted);
 
-        // to fix CDW-824 problems
-        $description = nl2br($description);
 
         // taken from previous CDW-824 solution
         $description = str_replace('<code>', '', $description);
