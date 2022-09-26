@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Marketing\Facebook\Marketplace;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\Schema;
 
@@ -12,7 +13,7 @@ class AddTfaCodeToFbAppMarketingTable extends Migration
      */
     public function up()
     {
-        Schema::table('fbapp_marketplace', function($table) {
+        Schema::table(Marketplace::TABLE_NAME, function ($table) {
             $table->string('tfa_code');
         });
     }
@@ -24,7 +25,7 @@ class AddTfaCodeToFbAppMarketingTable extends Migration
      */
     public function down()
     {
-        Schema::table('fbapp_marketplace', function($table) {
+        Schema::table(Marketplace::TABLE_NAME, function ($table) {
             $table->dropColumn('tfa_code');
         });
     }
