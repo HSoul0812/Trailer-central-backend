@@ -126,6 +126,7 @@ class InventoryTransformer extends TransformerAbstract
              'fp_balance' => $inventory->fp_balance,
              'fp_interest_paid' => $inventory->interest_paid,
              'fp_committed' => $inventory->fp_committed,
+             'fp_paid' => $inventory->fp_paid,
              'gvwr' => $inventory->gvwr,
              'axle_capacity' => $inventory->axle_capacity,
              'height' => $inventory->height,
