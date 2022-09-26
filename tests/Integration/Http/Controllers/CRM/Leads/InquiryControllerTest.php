@@ -3,6 +3,13 @@
 namespace Tests\Integration\Http\Controllers\CRM\Leads;
 
 use Tests\Integration\IntegrationTestCase;
+use Tests\database\seeds\CRM\Leads\InquirySeeder;
+use App\Models\Website\Config\WebsiteConfig;
+use App\Models\CRM\Leads\LeadType;
+use App\Services\CRM\Leads\DTOs\InquiryLead;
+use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Interactions\Interaction;
+use App\Models\CRM\Leads\InventoryLead;
 
 class InquiryControllerTest extends IntegrationTestCase
 {
@@ -58,5 +65,61 @@ class InquiryControllerTest extends IntegrationTestCase
         $response
             ->assertStatus(422)
             ->assertSee('Lead contains banned text.');
+    }
+
+    public function testCreateAutoMergeCaseInsensitiveName()
+    {
+        $seeder = new InquirySeeder;
+
+        $seeder->seed();
+
+        $params = [
+            'website_id' => $seeder->website->getKey(),
+            'inquiry_type' => InquiryLead::INQUIRY_TYPE_DEFAULT,
+            'lead_types' => [LeadType::TYPE_MANUAL],
+            'first_name' => strtoupper($seeder->lead->first_name),
+            'last_name' => strtoupper($seeder->lead->last_name),
+            'email_address' => $seeder->lead->email_address,
+            'inventory' => [$seeder->anotherInventory->getKey()]
+        ];
+
+        $response = $this->json(
+            'PUT',
+            '/api/inquiry/create',
+            $params,
+            ['access-token' => $seeder->authToken->access_token]
+        );
+
+        $response->assertStatus(200);
+
+        $this->assertEquals(1, Lead::where('dealer_id', $seeder->dealer->getKey())->count());
+
+        $this->assertEquals(1, $seeder->lead->interactions()
+            ->where('interaction_type', 'INQUIRY')
+            ->where('interaction_notes', 'like', 'Original Inquiry: '. strtoupper($seeder->lead->first_name) .' '. strtoupper($seeder->lead->last_name) .'%')->count());
+
+        // confirm lead types
+        $this->assertDatabaseHas(LeadType::getTableName(), [
+            'lead_id' => $seeder->lead->getKey(),
+            'lead_type' => LeadType::TYPE_MANUAL
+        ]);
+
+        $this->assertDatabaseHas(LeadType::getTableName(), [
+            'lead_id' => $seeder->lead->getKey(),
+            'lead_type' => LeadType::TYPE_GENERAL
+        ]);
+
+        // confirm units of interest
+        $this->assertDatabaseHas('crm_inventory_lead', [
+            'website_lead_id' => $seeder->lead->getKey(),
+            'inventory_id' => $seeder->lead->inventory_id
+        ]);
+
+        $this->assertDatabaseHas('crm_inventory_lead', [
+            'website_lead_id' => $seeder->lead->getKey(),
+            'inventory_id' => $seeder->anotherInventory->inventory_id
+        ]);
+
+        $seeder->cleanUp();
     }
 }
