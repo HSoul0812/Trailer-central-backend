@@ -132,10 +132,10 @@ abstract class TestCase extends BaseTestCase
     /**
      * @param Model $model
      * @param string $methodName
-     * @param Model $relation
+     * @param Model|null $relation
      * @return void
      */
-    protected function initHasOneRelation(Model $model, string $methodName, Model $relation)
+    protected function initHasOneRelation(Model $model, string $methodName, ?Model $relation)
     {
         $hasOne = Mockery::mock(HasOne::class);
 
@@ -148,10 +148,10 @@ abstract class TestCase extends BaseTestCase
     /**
      * @param Model $model
      * @param string $methodName
-     * @param Model $relation
+     * @param Model|null $relation
      * @return void
      */
-    protected function initBelongsToRelation(Model $model, string $methodName, Model $relation)
+    protected function initBelongsToRelation(Model $model, string $methodName, ?Model $relation)
     {
         $belongsTo = Mockery::mock(BelongsTo::class);
 

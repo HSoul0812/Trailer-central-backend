@@ -68,11 +68,11 @@ class AutoAssign extends Command
         parent::__construct();
 
         $this->autoAssignService = $autoAssignService;
-        
-        date_default_timezone_set(env('DB_TIMEZONE'));
-        
+
+        date_default_timezone_set(config('app.db_timezone'));
+
         $this->datetime = new \DateTime();
-        $this->datetime->setTimezone(new \DateTimeZone(env('DB_TIMEZONE')));
+        $this->datetime->setTimezone(new \DateTimeZone(config('app.db_timezone')));
     }
 
     /**
@@ -111,7 +111,7 @@ class AutoAssign extends Command
 
         // Log End
         $datetime = new \DateTime();
-        $datetime->setTimezone(new \DateTimeZone(env('DB_TIMEZONE')));
+        $datetime->setTimezone(new \DateTimeZone(config('app.db_timezone')));
         $this->info("{$command} finished on " . $datetime->format("l, F jS, Y"));
     }
 

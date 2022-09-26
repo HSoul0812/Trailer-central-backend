@@ -22,6 +22,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Grimzy\LaravelMysqlSpatial\Eloquent\Builder as GrimzyBuilder;
+use Illuminate\Support\Arr;
 
 /**
  * Class InventoryRepository
@@ -667,6 +668,10 @@ class InventoryRepository implements InventoryRepositoryInterface
 
         if (isset($params['status'])) {
             $query = $query->where('status', $params['status']);
+        }
+
+        if (!empty($params['exclude_status_ids'])) {
+            $query = $query->whereNotIn('status', Arr::wrap($params['exclude_status_ids']));
         }
 
         if (isset($params['condition'])) {

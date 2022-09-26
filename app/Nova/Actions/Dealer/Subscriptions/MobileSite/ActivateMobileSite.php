@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Nova\Actions\Dealer;
+namespace App\Nova\Actions\Dealer\Subscriptions\MobileSite;
 
 use App\Models\User\User;
 use App\Services\User\DealerOptionsServiceInterface;
@@ -10,19 +10,15 @@ use Illuminate\Support\Collection;
 use Laravel\Nova\Actions\Action;
 use Laravel\Nova\Fields\ActionFields;
 
-/**
- * Class DeactivateCrm
- * @package App\Nova\Actions\Dealer
- */
-class DeactivateCrm extends Action
+class ActivateMobileSite extends Action
 {
     use InteractsWithQueue, Queueable;
 
     public $showOnTableRow = true;
 
-    public $confirmButtonText = 'Deactivate';
+    public $confirmButtonText = 'Activate';
 
-    public $confirmText = 'Are you sure you want to deactivate CRM?';
+    public $confirmText = 'Are you sure you want to activate MobileSite?';
 
     /**
      * @var DealerOptionsServiceInterface
@@ -44,10 +40,10 @@ class DeactivateCrm extends Action
     {
         /** @var User $model */
         foreach ($models as $model) {
-            $result = $this->dealerOptionsService->deactivateCrm($model->dealer_id);
+            $result = $this->dealerOptionsService->activateMobile($model->dealer_id);
 
             if (!$result) {
-                throw new \InvalidArgumentException('CRM deactivation error', 500);
+                throw new \InvalidArgumentException('Mobile activation error', 500);
             }
         }
     }

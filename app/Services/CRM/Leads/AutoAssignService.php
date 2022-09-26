@@ -58,11 +58,11 @@ class AutoAssignService implements AutoAssignServiceInterface {
         $this->leads = $leads;
         $this->leadStatus = $leadStatus;
         $this->salesPersonRepository = $salesPersonRepo;
-        
-        date_default_timezone_set(env('DB_TIMEZONE'));
-        
+
+        date_default_timezone_set(config('app.db_timezone'));
+
         $this->datetime = new \DateTime();
-        $this->datetime->setTimezone(new \DateTimeZone(env('DB_TIMEZONE')));
+        $this->datetime->setTimezone(new \DateTimeZone(config('app.db_timezone')));
 
         // Initialize Logger
         $this->log = Log::channel('autoassign');
