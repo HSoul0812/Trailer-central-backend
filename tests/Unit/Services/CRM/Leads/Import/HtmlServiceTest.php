@@ -16,6 +16,7 @@ use App\Services\Integration\Common\DTOs\ParsedEmail;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
 use Mockery\LegacyMockInterface;
+use Psr\Log\LoggerInterface;
 use Tests\TestCase;
 
 /**
@@ -46,6 +47,7 @@ class HtmlServiceTest extends TestCase
     private const LEAD_ITEM_IMT_ID = 654321;
     private const LEAD_ITEM_URI = 'some_uri';
     private const OFFICE_INFO_NAME = 'office_info_name';
+    private const OFFICE_INFO_STREET = 'office_info_street';
     private const OFFICE_INFO_CITY = 'office_info_city';
     private const OFFICE_INFO_STATE = 'office_info_state';
     private const OFFICE_INFO_ZIP = 'office_info_zip';
@@ -56,7 +58,8 @@ class HtmlServiceTest extends TestCase
     <p> LEAD INFORMATION: </p><p>Lead date:%LEAD_DATE%</p><p>Lead source:%LEAD_SOURCE%</p><p>Lead request type:      %LEAD_REQUEST_TYPE%</p><br/>
     <p>SALES BOAT:</p><p>Sale class:%LEAD_ITEM_SALES_CLASS%</p><p>Make:%LEAD_ITEM_MAKE%</p><p>Model description:%LEAD_ITEM_MODEL_DESCRIPTION%</p>
     <p>Year:%LEAD_ITEM_YEAR%</p><p>IMT ID:%LEAD_ITEM_IMT_ID%</p><p>URI:%LEAD_ITEM_URI%</p><br/><p>OFFICEINFO:</p><p>Name:%OFFICE_INFO_NAME%</p>
-    <p>City:%OFFICE_INFO_CITY%</p><p>State/Province:%OFFICE_INFO_STATE%</p><p>Zip/Postal code:%OFFICE_INFO_ZIP%</p><p>CUSTOMER COMMENTS:%CUSTOMER_COMMENTS%</p>";
+    <p>Address:%OFFICE_INFO_STREET%</p><p>City:%OFFICE_INFO_CITY%</p><p>State/Province:%OFFICE_INFO_STATE%</p>
+    <p>Zip/Postal code:%OFFICE_INFO_ZIP%</p><p>CUSTOMER COMMENTS:%CUSTOMER_COMMENTS%</p>";
 
     private const NOT_VALID_HTML = "<p>LEAD DESTINATION:</p><p>Address:%LEAD_ADDRESS%</p><br/><p>INDIVIDUAL PROSPECT:</p>
     <p>Name:                   %LEAD_FIRST_NAME% %LEAD_LAST_NAME%</p><p>Telephone:%LEAD_TELEPHONE%</p><p>Email:%LEAD_EMAIL%</p><br/>
@@ -77,6 +80,11 @@ class HtmlServiceTest extends TestCase
      */
     protected $sanitizeHelper;
 
+    /**
+     * @var LoggerInterface|LegacyMockInterface
+     */
+    protected $logMock;
+
     public function setUp(): void
     {
         parent::setUp();
@@ -84,6 +92,7 @@ class HtmlServiceTest extends TestCase
         $this->instanceMock('locationRepository', DealerLocationRepositoryInterface::class);
         $this->instanceMock('inventoryRepository', InventoryRepositoryInterface::class);
         $this->instanceMock('sanitizeHelper', SanitizeHelper::class);
+        $this->instanceMock('logMock', LoggerInterface::class);
     }
 
     /**
@@ -150,7 +159,13 @@ class HtmlServiceTest extends TestCase
             ->once()
             ->andReturn($inventory);
 
-        Log::shouldReceive('info');
+        Log::shouldReceive('channel')
+            ->once()
+            ->andReturn($this->logMock);
+
+        $this->logMock
+            ->shouldReceive('info')
+            ->once();
 
         /** @var HtmlService $service */
         $service = $this->app->make(HtmlService::class);
@@ -167,7 +182,7 @@ class HtmlServiceTest extends TestCase
         $this->assertEquals(self::LEAD_LAST_NAME, $result->getLastName());
         $this->assertEquals(self::LEAD_TELEPHONE, $result->getPhone());
         $this->assertEquals(self::LEAD_EMAIL, $result->getEmail());
-        $this->assertEquals(self::OFFICE_INFO_NAME, $result->getAddrStreet());
+        $this->assertEquals(self::OFFICE_INFO_STREET, $result->getAddrStreet());
         $this->assertEquals(self::OFFICE_INFO_CITY, $result->getAddrCity());
         $this->assertEquals(self::OFFICE_INFO_STATE, $result->getAddrState());
         $this->assertEquals(self::OFFICE_INFO_ZIP, $result->getAddrZip());
@@ -201,7 +216,13 @@ class HtmlServiceTest extends TestCase
             ->once()
             ->andReturn($inventory);
 
-        Log::shouldReceive('info');
+        Log::shouldReceive('channel')
+            ->once()
+            ->andReturn($this->logMock);
+
+        $this->logMock
+            ->shouldReceive('info')
+            ->once();
 
         /** @var HtmlService $service */
         $service = $this->app->make(HtmlService::class);
@@ -218,7 +239,7 @@ class HtmlServiceTest extends TestCase
         $this->assertEquals(self::LEAD_LAST_NAME, $result->getLastName());
         $this->assertEquals(self::LEAD_TELEPHONE, $result->getPhone());
         $this->assertEquals(self::LEAD_EMAIL, $result->getEmail());
-        $this->assertEquals(self::OFFICE_INFO_NAME, $result->getAddrStreet());
+        $this->assertEquals(self::OFFICE_INFO_STREET, $result->getAddrStreet());
         $this->assertEquals(self::OFFICE_INFO_CITY, $result->getAddrCity());
         $this->assertEquals(self::OFFICE_INFO_STATE, $result->getAddrState());
         $this->assertEquals(self::OFFICE_INFO_ZIP, $result->getAddrZip());
@@ -233,7 +254,13 @@ class HtmlServiceTest extends TestCase
      */
     public function testGetLeadWithNotValidHtml($dealer, $email)
     {
-        Log::shouldReceive('error');
+        Log::shouldReceive('channel')
+            ->once()
+            ->andReturn($this->logMock);
+
+        $this->logMock
+            ->shouldReceive('error')
+            ->once();
 
         $this->expectException(InvalidImportFormatException::class);
 
