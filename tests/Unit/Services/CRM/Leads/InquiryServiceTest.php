@@ -1303,7 +1303,7 @@ class InquiryServiceTest extends TestCase
         $this->leadServiceMock
             ->shouldReceive('update')
             ->once()
-            ->andReturn($lead);
+            ->andReturn($this->mergeLead);
 
         // Mock ADF Export
         $this->adfServiceMock
@@ -1499,7 +1499,7 @@ class InquiryServiceTest extends TestCase
         $this->leadServiceMock
             ->shouldReceive('update')
             ->once()
-            ->andReturn($lead);
+            ->andReturn($this->mergeLead);
 
         // Mock ADF Export
         $this->adfServiceMock
