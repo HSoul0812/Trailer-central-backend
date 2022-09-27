@@ -9,16 +9,17 @@ use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\LeadType;
 use App\Models\CRM\Interactions\Interaction;
 use App\Models\CRM\User\SalesPerson;
+use App\Models\Website\Config\WebsiteConfig;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Services\CRM\Leads\Export\ADFServiceInterface;
 use App\Repositories\Website\Tracking\TrackingRepositoryInterface;
 use App\Repositories\Website\Tracking\TrackingUnitRepositoryInterface;
 use App\Repositories\User\UserRepositoryInterface;
-use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Services\CRM\Email\InquiryEmailServiceInterface;
 use App\Services\CRM\Leads\DTOs\InquiryLead;
 use App\Services\CRM\Leads\LeadServiceInterface;
 use App\Services\CRM\Leads\InquiryServiceInterface;
+use App\Services\Website\WebsiteConfigServiceInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Mail;
@@ -110,9 +111,9 @@ class InquiryServiceTest extends TestCase
     private $userRepositoryMock;
 
     /**
-     * @var LegacyMockInterface|DealerLocationRepositoryInterface
+     * @var LegacyMockInterface|WebsiteConfigServiceInterface
      */
-    private $dealerLocationRepositoryMock;
+    private $websiteConfigServiceMock;
 
 
     /**
@@ -145,8 +146,8 @@ class InquiryServiceTest extends TestCase
         $this->userRepositoryMock = Mockery::mock(UserRepositoryInterface::class);
         $this->app->instance(UserRepositoryInterface::class, $this->userRepositoryMock);
 
-        $this->dealerLocationRepositoryMock = Mockery::mock(DealerLocationRepositoryInterface::class);
-        $this->app->instance(DealerLocationRepositoryInterface::class, $this->dealerLocationRepositoryMock);
+        $this->websiteConfigServiceMock = Mockery::mock(WebsiteConfigServiceInterface::class);
+        $this->app->instance(WebsiteConfigServiceInterface::class, $this->websiteConfigServiceMock);
     }
 
 
@@ -158,6 +159,12 @@ class InquiryServiceTest extends TestCase
      */
     public function testCreate()
     {
+        // Mock Website
+        $website = $this->getEloquentMock(Website::class);
+        $website->id = 1;
+        $website->dealer_id = 1;
+        $website->domain = self::TEST_DOMAIN;
+
         // Mock User
         $dealer = $this->getEloquentMock(User::class);
         $dealer->dealer_id = 1;
@@ -179,6 +186,7 @@ class InquiryServiceTest extends TestCase
         // Send Request Params
         $sendRequestParams = [
             'dealer_id' => $dealer->dealer_id,
+            'website_id' => $website->id,
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[0],
             'lead_types' => [LeadType::TYPE_GENERAL],
             'device' => self::TEST_DEVICE,
@@ -227,6 +235,13 @@ class InquiryServiceTest extends TestCase
             ->once()
             ->with(['dealer_id' => $dealer->dealer_id])
             ->andReturn($dealer);
+
+        // Mock Website Config Service
+        $this->websiteConfigServiceMock
+            ->shouldReceive('getConfigByWebsite')
+            ->once()
+            ->with($website->id, WebsiteConfig::LEADS_MERGE_ENABLED)
+            ->andReturn([WebsiteConfig::LEADS_MERGE_ENABLED => '1']);
 
         // Mock Lead Repository      
         $this->leadRepositoryMock
@@ -304,6 +319,12 @@ class InquiryServiceTest extends TestCase
      */
     public function testSend()
     {
+        // Mock Website
+        $website = $this->getEloquentMock(Website::class);
+        $website->id = 1;
+        $website->dealer_id = 1;
+        $website->domain = self::TEST_DOMAIN;
+
         // Mock User
         $dealer = $this->getEloquentMock(User::class);
         $dealer->dealer_id = 1;
@@ -325,6 +346,7 @@ class InquiryServiceTest extends TestCase
         // Send Request Params
         $sendRequestParams = [
             'dealer_id' => $dealer->dealer_id,
+            'website_id' => $website->id,
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[0],
             'lead_types' => [LeadType::TYPE_GENERAL],
             'device' => self::TEST_DEVICE,
@@ -373,6 +395,13 @@ class InquiryServiceTest extends TestCase
             ->once()
             ->with(['dealer_id' => $dealer->dealer_id])
             ->andReturn($dealer);
+
+        // Mock Website Config Service
+        $this->websiteConfigServiceMock
+            ->shouldReceive('getConfigByWebsite')
+            ->once()
+            ->with($website->id, WebsiteConfig::LEADS_MERGE_ENABLED)
+            ->andReturn([WebsiteConfig::LEADS_MERGE_ENABLED => '1']);
 
         // Mock Lead Repository
         $this->leadRepositoryMock
@@ -449,6 +478,12 @@ class InquiryServiceTest extends TestCase
      */
     public function testSendInventory()
     {
+        // Mock Website
+        $website = $this->getEloquentMock(Website::class);
+        $website->id = 1;
+        $website->dealer_id = 1;
+        $website->domain = self::TEST_DOMAIN;
+
         // Mock User
         $dealer = $this->getEloquentMock(User::class);
         $dealer->dealer_id = 1;
@@ -470,6 +505,7 @@ class InquiryServiceTest extends TestCase
         // Send Request Params
         $sendRequestParams = [
             'dealer_id' => $dealer->dealer_id,
+            'website_id' => $website->id,
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[2],
             'lead_types' => [LeadType::TYPE_INVENTORY],
             'device' => self::TEST_DEVICE,
@@ -519,6 +555,13 @@ class InquiryServiceTest extends TestCase
             ->once()
             ->with(['dealer_id' => $dealer->dealer_id])
             ->andReturn($dealer);
+
+        // Mock Website Config Service
+        $this->websiteConfigServiceMock
+            ->shouldReceive('getConfigByWebsite')
+            ->once()
+            ->with($website->id, WebsiteConfig::LEADS_MERGE_ENABLED)
+            ->andReturn([WebsiteConfig::LEADS_MERGE_ENABLED => '1']);
 
         // Mock Lead Repository
         $this->leadRepositoryMock
@@ -596,6 +639,12 @@ class InquiryServiceTest extends TestCase
      */
     public function testSendPart()
     {
+        // Mock Website
+        $website = $this->getEloquentMock(Website::class);
+        $website->id = 1;
+        $website->dealer_id = 1;
+        $website->domain = self::TEST_DOMAIN;
+
         // Mock User
         $dealer = $this->getEloquentMock(User::class);
         $dealer->dealer_id = 1;
@@ -617,6 +666,7 @@ class InquiryServiceTest extends TestCase
         // Send Request Params
         $sendRequestParams = [
             'dealer_id' => $dealer->dealer_id,
+            'website_id' => $website->id,
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[3],
             'lead_types' => [LeadType::TYPE_INVENTORY],
             'device' => self::TEST_DEVICE,
@@ -666,6 +716,13 @@ class InquiryServiceTest extends TestCase
             ->once()
             ->with(['dealer_id' => $dealer->dealer_id])
             ->andReturn($dealer);
+
+        // Mock Website Config Service
+        $this->websiteConfigServiceMock
+            ->shouldReceive('getConfigByWebsite')
+            ->once()
+            ->with($website->id, WebsiteConfig::LEADS_MERGE_ENABLED)
+            ->andReturn([WebsiteConfig::LEADS_MERGE_ENABLED => '1']);
 
         // Mock Lead Repository
         $this->leadRepositoryMock
@@ -743,6 +800,12 @@ class InquiryServiceTest extends TestCase
      */
     public function testSendShowroom()
     {
+        // Mock Website
+        $website = $this->getEloquentMock(Website::class);
+        $website->id = 1;
+        $website->dealer_id = 1;
+        $website->domain = self::TEST_DOMAIN;
+
         // Mock User
         $dealer = $this->getEloquentMock(User::class);
         $dealer->dealer_id = 1;
@@ -764,6 +827,7 @@ class InquiryServiceTest extends TestCase
         // Send Request Params
         $sendRequestParams = [
             'dealer_id' => $dealer->dealer_id,
+            'website_id' => $website->id,
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[4],
             'lead_types' => [LeadType::TYPE_SHOWROOM_MODEL],
             'device' => self::TEST_DEVICE,
@@ -813,6 +877,13 @@ class InquiryServiceTest extends TestCase
             ->once()
             ->with(['dealer_id' => $dealer->dealer_id])
             ->andReturn($dealer);
+
+        // Mock Website Config Service
+        $this->websiteConfigServiceMock
+            ->shouldReceive('getConfigByWebsite')
+            ->once()
+            ->with($website->id, WebsiteConfig::LEADS_MERGE_ENABLED)
+            ->andReturn([WebsiteConfig::LEADS_MERGE_ENABLED => '1']);
 
         // Mock Lead Repository
         $this->leadRepositoryMock
@@ -890,6 +961,12 @@ class InquiryServiceTest extends TestCase
      */
     public function testSendNoAutoAssign()
     {
+        // Mock Website
+        $website = $this->getEloquentMock(Website::class);
+        $website->id = 1;
+        $website->dealer_id = 1;
+        $website->domain = self::TEST_DOMAIN;
+
         // Mock User
         $dealer = $this->getEloquentMock(User::class);
         $dealer->dealer_id = 1;
@@ -912,6 +989,7 @@ class InquiryServiceTest extends TestCase
         // Send Request Params
         $sendRequestParams = [
             'dealer_id' => $dealer->dealer_id,
+            'website_id' => $website->id,
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[0],
             'lead_types' => [LeadType::TYPE_GENERAL],
             'device' => self::TEST_DEVICE,
@@ -960,6 +1038,13 @@ class InquiryServiceTest extends TestCase
             ->once()
             ->with(['dealer_id' => $dealer->dealer_id])
             ->andReturn($dealer);
+
+        // Mock Website Config Service
+        $this->websiteConfigServiceMock
+            ->shouldReceive('getConfigByWebsite')
+            ->once()
+            ->with($website->id, WebsiteConfig::LEADS_MERGE_ENABLED)
+            ->andReturn([WebsiteConfig::LEADS_MERGE_ENABLED => '1']);
 
         // Mock Lead Repository
         $this->leadRepositoryMock
@@ -1037,6 +1122,12 @@ class InquiryServiceTest extends TestCase
      */
     public function testSendMerge()
     {
+        // Mock Website
+        $website = $this->getEloquentMock(Website::class);
+        $website->id = 1;
+        $website->dealer_id = 1;
+        $website->domain = self::TEST_DOMAIN;
+
         // Mock User
         $dealer = $this->getEloquentMock(User::class);
         $dealer->dealer_id = 1;
@@ -1068,6 +1159,7 @@ class InquiryServiceTest extends TestCase
         // Send Request Params
         $sendRequestParams = [
             'dealer_id' => $dealer->dealer_id,
+            'website_id' => $website->id,
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[0],
             'lead_types' => [LeadType::TYPE_GENERAL],
             'device' => self::TEST_DEVICE,
@@ -1121,6 +1213,13 @@ class InquiryServiceTest extends TestCase
             ->once()
             ->with(['dealer_id' => $dealer->dealer_id])
             ->andReturn($dealer);
+
+        // Mock Website Config Service
+        $this->websiteConfigServiceMock
+            ->shouldReceive('getConfigByWebsite')
+            ->once()
+            ->with($website->id, WebsiteConfig::LEADS_MERGE_ENABLED)
+            ->andReturn([WebsiteConfig::LEADS_MERGE_ENABLED => '1']);
 
         // Mock Lead Repository
         $this->leadRepositoryMock
@@ -1203,6 +1302,12 @@ class InquiryServiceTest extends TestCase
      */
     public function testSendMergeExactMatch()
     {
+        // Mock Website
+        $website = $this->getEloquentMock(Website::class);
+        $website->id = 1;
+        $website->dealer_id = 1;
+        $website->domain = self::TEST_DOMAIN;
+
         // Mock User
         $dealer = $this->getEloquentMock(User::class);
         $dealer->dealer_id = 1;
@@ -1234,6 +1339,7 @@ class InquiryServiceTest extends TestCase
         // Send Request Params
         $sendRequestParams = [
             'dealer_id' => $dealer->dealer_id,
+            'website_id' => $website->id,
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[0],
             'lead_types' => [LeadType::TYPE_GENERAL],
             'device' => self::TEST_DEVICE,
@@ -1287,6 +1393,13 @@ class InquiryServiceTest extends TestCase
             ->once()
             ->with(['dealer_id' => $dealer->dealer_id])
             ->andReturn($dealer);
+
+        // Mock Website Config Service
+        $this->websiteConfigServiceMock
+            ->shouldReceive('getConfigByWebsite')
+            ->once()
+            ->with($website->id, WebsiteConfig::LEADS_MERGE_ENABLED)
+            ->andReturn([WebsiteConfig::LEADS_MERGE_ENABLED => '1']);
 
         // Mock Lead Repository
         $this->leadRepositoryMock
@@ -1372,6 +1485,12 @@ class InquiryServiceTest extends TestCase
      */
     public function testSendMergeFinancing()
     {
+        // Mock Website
+        $website = $this->getEloquentMock(Website::class);
+        $website->id = 1;
+        $website->dealer_id = 1;
+        $website->domain = self::TEST_DOMAIN;
+
         // Mock User
         $dealer = $this->getEloquentMock(User::class);
         $dealer->dealer_id = 1;
@@ -1393,6 +1512,7 @@ class InquiryServiceTest extends TestCase
         // Send Request Params
         $sendRequestParams = [
             'dealer_id' => $dealer->dealer_id,
+            'website_id' => $website->id,
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[0],
             'lead_types' => [LeadType::TYPE_FINANCING],
             'device' => self::TEST_DEVICE,
@@ -1442,6 +1562,13 @@ class InquiryServiceTest extends TestCase
             ->once()
             ->with(['dealer_id' => $dealer->dealer_id])
             ->andReturn($dealer);
+
+        // Mock Website Config Service
+        $this->websiteConfigServiceMock
+            ->shouldReceive('getConfigByWebsite')
+            ->once()
+            ->with($website->id, WebsiteConfig::LEADS_MERGE_ENABLED)
+            ->andReturn([WebsiteConfig::LEADS_MERGE_ENABLED => '1']);
 
         // Mock Lead Repository
         $this->leadRepositoryMock
