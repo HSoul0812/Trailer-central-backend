@@ -4,9 +4,12 @@ namespace App\Nova\Resources\Dealer;
 
 use Illuminate\Http\Request;
 use App\Nova\Resource;
+use App\Models\User\LightDealer as Dealer;
 
 class LightDealer extends Resource
 {
+    public static $displayInNavigation = false;
+
     public static $group = 'Dealer';
 
     /**
@@ -14,7 +17,7 @@ class LightDealer extends Resource
      *
      * @var string
      */
-    public static $model = 'App\Models\User\LightDealer';
+    public static $model = Dealer::class;
 
     /**
      * The single value that should be used to represent the resource when being displayed.
@@ -38,7 +41,7 @@ class LightDealer extends Resource
      * @param \Illuminate\Http\Request $request
      * @return array
      */
-    public function fields(Request $request) {
+    public function fields(Request $request): array {
         return [];
     }
 
@@ -48,7 +51,7 @@ class LightDealer extends Resource
      * @param \Illuminate\Http\Request $request
      * @return array
      */
-    public function cards(Request $request) {
+    public function cards(Request $request): array {
         return [];
     }
 
@@ -58,7 +61,7 @@ class LightDealer extends Resource
      * @param \Illuminate\Http\Request $request
      * @return array
      */
-    public function filters(Request $request) {
+    public function filters(Request $request): array {
         return [];
     }
 
@@ -68,7 +71,7 @@ class LightDealer extends Resource
      * @param \Illuminate\Http\Request $request
      * @return array
      */
-    public function lenses(Request $request) {
+    public function lenses(Request $request): array {
         return [];
     }
 
@@ -78,7 +81,16 @@ class LightDealer extends Resource
      * @param \Illuminate\Http\Request $request
      * @return array
      */
-    public function actions(Request $request) {
+    public function actions(Request $request): array {
         return [];
+    }
+
+    /**
+     * Get the URI key for the resource.
+     *
+     * @return string
+     */
+    public static function uriKey(): string {
+        return 'dealers';
     }
 }
