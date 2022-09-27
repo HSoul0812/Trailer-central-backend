@@ -142,6 +142,7 @@ class CatalogServiceTest extends TestCase
         $catalog->accessToken = $accessToken;
         $catalog->page = $page;
         $catalog->user = $dealer;
+        $catalog->dealerLocation = $location;
 
 
         // Create Validation Response
@@ -227,6 +228,7 @@ class CatalogServiceTest extends TestCase
         $catalog->accessToken = $accessToken;
         $catalog->page = $page;
         $catalog->user = $dealer;
+        $catalog->dealerLocation = $location;
 
 
         // Create Validation Response
@@ -372,6 +374,7 @@ class CatalogServiceTest extends TestCase
         $catalog->accessToken = $accessToken;
         $catalog->page = $page;
         $catalog->user = $dealer;
+        $catalog->dealerLocation = $location;
 
 
         // Create Validation Response
@@ -503,6 +506,7 @@ class CatalogServiceTest extends TestCase
         $catalog->accessToken = $accessToken;
         $catalog->page = $page;
         $catalog->user = $dealer;
+        $catalog->dealerLocation = $location;
 
 
         /** @var CatalogService $service */
@@ -602,6 +606,7 @@ class CatalogServiceTest extends TestCase
         $catalog->accessToken = $accessToken;
         $catalog->page = $page;
         $catalog->user = $dealer;
+        $catalog->dealerLocation = $location;
 
 
         // Get Pre-Created Payload
