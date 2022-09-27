@@ -6,7 +6,7 @@ use App\Models\Integration\Collector\CollectorFields;
 use App\Nova\Resource;
 use App\Nova\Resources\Dealer\Dealer;
 use App\Nova\Resources\Dealer\Location;
-use App\Nova\Resources\Dealer\User;
+use App\Nova\Resources\Dealer\LightDealer;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Boolean;
@@ -64,7 +64,7 @@ class Collector extends Resource
             new Panel('Main', [
                 Boolean::make('Is Active', 'active')->withMeta(['value' => $this->active ?? true]),
                 Text::make('Process Name')->sortable()->rules('required', 'max:128'),
-                BelongsTo::make('Dealer', 'dealers', User::class)->searchable()->sortable()->rules('required'),
+                BelongsTo::make('Dealer', 'dealers', LightDealer::class)->searchable()->sortable()->rules('required'),
                 BelongsTo::make('Default Dealer Location', 'dealerLocation', Location::class)->searchable()->sortable()->rules('required'),
                 DateTime::make('Last Run', 'last_run')->sortable()->format('DD MMM, YYYY - LT')->readonly(true)->onlyOnIndex(),
                 Boolean::make('Run without Errors', 'run_without_errors')->readonly(true)->onlyOnIndex(),

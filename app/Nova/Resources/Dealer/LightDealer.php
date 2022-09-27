@@ -3,10 +3,9 @@
 namespace App\Nova\Resources\Dealer;
 
 use Illuminate\Http\Request;
-use Laravel\Nova\Fields\Text;
 use App\Nova\Resource;
 
-class User extends Resource
+class LightDealer extends Resource
 {
     public static $group = 'Dealer';
 
@@ -15,7 +14,7 @@ class User extends Resource
      *
      * @var string
      */
-    public static $model = 'App\Models\User\ExtUser';
+    public static $model = 'App\Models\User\LightDealer';
 
     /**
      * The single value that should be used to represent the resource when being displayed.
