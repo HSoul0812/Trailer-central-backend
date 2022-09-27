@@ -40,6 +40,11 @@ class CatalogServiceTest extends TestCase
     const TEST_INQUIRY_EMAIL = 'admin@operatebeyond.com';
     const TEST_INQUIRY_NAME = 'Operate Beyond';
 
+    /**
+     * @const string
+     */
+    const FB_AUTH_TYPE = 'marketing';
+
 
     /**
      * @var LegacyMockInterface|CatalogRepositoryInterface
@@ -96,7 +101,7 @@ class CatalogServiceTest extends TestCase
     {
         // Set Defaults
         $time = time();
-        $scopes = explode(' ', config('oauth.fb.' . $this->type . '.scopes'));
+        $scopes = explode(' ', config('oauth.fb.' . self::FB_AUTH_TYPE . '.scopes'));
 
         // Mock Location
         $location = $this->getEloquentMock(DealerLocation::class);
@@ -191,7 +196,7 @@ class CatalogServiceTest extends TestCase
     {
         // Set Defaults
         $time = time();
-        $scopes = explode(' ', config('oauth.fb.' . $this->type . '.scopes'));
+        $scopes = explode(' ', config('oauth.fb.' . self::FB_AUTH_TYPE . '.scopes'));
 
         // Mock Location
         $location = $this->getEloquentMock(DealerLocation::class);
@@ -346,7 +351,7 @@ class CatalogServiceTest extends TestCase
     {
         // Set Defaults
         $time = time();
-        $scopes = explode(' ', config('oauth.fb.' . $this->type . '.scopes'));
+        $scopes = explode(' ', config('oauth.fb.' . self::FB_AUTH_TYPE . '.scopes'));
 
         // Mock Location
         $location = $this->getEloquentMock(DealerLocation::class);
@@ -487,7 +492,7 @@ class CatalogServiceTest extends TestCase
     {
         // Set Defaults
         $time = time();
-        $scopes = explode(' ', config('oauth.fb.' . $this->type . '.scopes'));
+        $scopes = explode(' ', config('oauth.fb.' . self::FB_AUTH_TYPE . '.scopes'));
 
         // Mock Location
         $location = $this->getEloquentMock(DealerLocation::class);
@@ -596,7 +601,7 @@ class CatalogServiceTest extends TestCase
     {
         // Set Defaults
         $time = time();
-        $scopes = explode(' ', config('oauth.fb.' . $this->type . '.scopes'));
+        $scopes = explode(' ', config('oauth.fb.' . self::FB_AUTH_TYPE . '.scopes'));
 
         // Mock Location
         $location = $this->getEloquentMock(DealerLocation::class);
