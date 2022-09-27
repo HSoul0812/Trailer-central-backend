@@ -3,6 +3,7 @@
 namespace Tests\Unit\Services\Integration\Facebook;
 
 use App\Models\CRM\User\User;
+use App\Models\User\DealerLocation;
 use App\Models\Integration\Auth\AccessToken;
 use App\Models\Integration\Facebook\Catalog;
 use App\Models\Integration\Facebook\Page;
@@ -93,6 +94,12 @@ class CatalogServiceTest extends TestCase
      */
     public function testShow()
     {
+        // Mock Location
+        $location = $this->getEloquentMock(DealerLocation::class);
+        $location->dealer_location_id = 1;
+        $location->dealer_id = 1;
+        $location->name = 'Indianopolis';
+
         // Mock User
         $dealer = $this->getEloquentMock(User::class);
         $dealer->dealer_id = 1;
@@ -172,6 +179,12 @@ class CatalogServiceTest extends TestCase
      */
     public function testCreate()
     {
+        // Mock Location
+        $location = $this->getEloquentMock(DealerLocation::class);
+        $location->dealer_location_id = 1;
+        $location->dealer_id = 1;
+        $location->name = 'Indianopolis';
+
         // Mock User
         $dealer = $this->getEloquentMock(User::class);
         $dealer->dealer_id = 1;
@@ -311,6 +324,12 @@ class CatalogServiceTest extends TestCase
      */
     public function testUpdate()
     {
+        // Mock Location
+        $location = $this->getEloquentMock(DealerLocation::class);
+        $location->dealer_location_id = 1;
+        $location->dealer_id = 1;
+        $location->name = 'Indianopolis';
+
         // Mock User
         $dealer = $this->getEloquentMock(User::class);
         $dealer->dealer_id = 1;
@@ -436,6 +455,12 @@ class CatalogServiceTest extends TestCase
      */
     public function testDelete()
     {
+        // Mock Location
+        $location = $this->getEloquentMock(DealerLocation::class);
+        $location->dealer_location_id = 1;
+        $location->dealer_id = 1;
+        $location->name = 'Indianopolis';
+
         // Mock User
         $dealer = $this->getEloquentMock(User::class);
         $dealer->dealer_id = 1;
@@ -528,6 +553,12 @@ class CatalogServiceTest extends TestCase
      */
     public function testPayload()
     {
+        // Mock Location
+        $location = $this->getEloquentMock(DealerLocation::class);
+        $location->dealer_location_id = 1;
+        $location->dealer_id = 1;
+        $location->name = 'Indianopolis';
+
         // Mock User
         $dealer = $this->getEloquentMock(User::class);
         $dealer->dealer_id = 1;
