@@ -54,6 +54,7 @@ class InquiryEmailServiceTest extends TestCase
      */
     const TEST_INQUIRY_EMAIL = 'admin@operatebeyond.com';
     const TEST_INQUIRY_NAME = 'Operate Beyond';
+    const TEST_INQUIRY_OVERRIDE = 'operatebeyond@gmail.com';
 
     /**
      * @const string
@@ -446,6 +447,7 @@ class InquiryEmailServiceTest extends TestCase
         $location->dealer_location_id = 1;
         $location->dealer_id = 1;
         $location->name = 'Indianopolis';
+        $location->email = self::TEST_INQUIRY_OVERRIDE;
 
         // Send Request Params
         $fillInquiry = [
@@ -541,6 +543,7 @@ class InquiryEmailServiceTest extends TestCase
         $location->dealer_location_id = 1;
         $location->dealer_id = 1;
         $location->name = 'Indianopolis';
+        $location->email = self::TEST_INQUIRY_OVERRIDE;
 
         // Get Inventory
         $inventory = $this->getEloquentMock(Inventory::class);
