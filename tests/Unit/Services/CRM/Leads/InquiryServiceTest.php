@@ -249,7 +249,7 @@ class InquiryServiceTest extends TestCase
             ->shouldReceive('getConfigByWebsite')
             ->once()
             ->with($website->id, WebsiteConfig::LEADS_MERGE_ENABLED)
-            ->andReturn([]);
+            ->andReturn([WebsiteConfig::LEADS_MERGE_ENABLED => '1']);
 
         // Mock Lead Repository      
         $this->leadRepositoryMock
@@ -419,7 +419,7 @@ class InquiryServiceTest extends TestCase
             ->shouldReceive('getConfigByWebsite')
             ->once()
             ->with($website->id, WebsiteConfig::LEADS_MERGE_ENABLED)
-            ->andReturn([]);
+            ->andReturn([WebsiteConfig::LEADS_MERGE_ENABLED => '1']);
 
         // Mock Lead Repository
         $this->leadRepositoryMock
@@ -589,7 +589,7 @@ class InquiryServiceTest extends TestCase
             ->shouldReceive('getConfigByWebsite')
             ->once()
             ->with($website->id, WebsiteConfig::LEADS_MERGE_ENABLED)
-            ->andReturn([]);
+            ->andReturn([WebsiteConfig::LEADS_MERGE_ENABLED => '1']);
 
         // Mock Lead Repository
         $this->leadRepositoryMock
@@ -760,7 +760,7 @@ class InquiryServiceTest extends TestCase
             ->shouldReceive('getConfigByWebsite')
             ->once()
             ->with($website->id, WebsiteConfig::LEADS_MERGE_ENABLED)
-            ->andReturn([]);
+            ->andReturn([WebsiteConfig::LEADS_MERGE_ENABLED => '1']);
 
         // Mock Lead Repository
         $this->leadRepositoryMock
@@ -931,7 +931,7 @@ class InquiryServiceTest extends TestCase
             ->shouldReceive('getConfigByWebsite')
             ->once()
             ->with($website->id, WebsiteConfig::LEADS_MERGE_ENABLED)
-            ->andReturn([]);
+            ->andReturn([WebsiteConfig::LEADS_MERGE_ENABLED => '1']);
 
         // Mock Lead Repository
         $this->leadRepositoryMock
@@ -1102,7 +1102,7 @@ class InquiryServiceTest extends TestCase
             ->shouldReceive('getConfigByWebsite')
             ->once()
             ->with($website->id, WebsiteConfig::LEADS_MERGE_ENABLED)
-            ->andReturn([]);
+            ->andReturn([WebsiteConfig::LEADS_MERGE_ENABLED => '1']);
 
         // Mock Lead Repository
         $this->leadRepositoryMock
