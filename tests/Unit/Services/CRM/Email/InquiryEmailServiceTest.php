@@ -76,9 +76,39 @@ class InquiryEmailServiceTest extends TestCase
 
 
     /**
+     * @var LegacyMockInterface|InventoryRepositoryInterface
+     */
+    private $inventoryRepositoryMock;
+
+    /**
+     * @var LegacyMockInterface|PartRepositoryInterface
+     */
+    private $partRepositoryMock;
+
+    /**
+     * @var LegacyMockInterface|ShowroomRepositoryInterface
+     */
+    private $showroomRepositoryMock;
+
+    /**
+     * @var LegacyMockInterface|WebsiteRepositoryInterface
+     */
+    private $websiteRepositoryMock;
+
+    /**
      * @var LegacyMockInterface|WebsiteConfigRepositoryInterface
      */
     private $websiteConfigRepositoryMock;
+
+    /**
+     * @var LegacyMockInterface|UserRepositoryInterface
+     */
+    private $userRepositoryMock;
+
+    /**
+     * @var LegacyMockInterface|DealerLocationRepositoryInterface
+     */
+    private $dealerLocationRepositoryMock;
 
     public function setUp(): void
     {

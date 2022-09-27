@@ -13,6 +13,8 @@ use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Services\CRM\Leads\Export\ADFServiceInterface;
 use App\Repositories\Website\Tracking\TrackingRepositoryInterface;
 use App\Repositories\Website\Tracking\TrackingUnitRepositoryInterface;
+use App\Repositories\User\UserRepositoryInterface;
+use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Services\CRM\Email\InquiryEmailServiceInterface;
 use App\Services\CRM\Leads\DTOs\InquiryLead;
 use App\Services\CRM\Leads\LeadServiceInterface;
@@ -102,6 +104,16 @@ class InquiryServiceTest extends TestCase
      */
     private $trackingUnitRepositoryMock;
 
+    /**
+     * @var LegacyMockInterface|UserRepositoryInterface
+     */
+    private $userRepositoryMock;
+
+    /**
+     * @var LegacyMockInterface|DealerLocationRepositoryInterface
+     */
+    private $dealerLocationRepositoryMock;
+
 
     /**
      * @var Lead
@@ -129,6 +141,12 @@ class InquiryServiceTest extends TestCase
 
         $this->trackingUnitRepositoryMock = Mockery::mock(TrackingUnitRepositoryInterface::class);
         $this->app->instance(TrackingUnitRepositoryInterface::class, $this->trackingUnitRepositoryMock);
+
+        $this->userRepositoryMock = Mockery::mock(UserRepositoryInterface::class);
+        $this->app->instance(UserRepositoryInterface::class, $this->userRepositoryMock);
+
+        $this->dealerLocationRepositoryMock = Mockery::mock(DealerLocationRepositoryInterface::class);
+        $this->app->instance(DealerLocationRepositoryInterface::class, $this->dealerLocationRepositoryMock);
     }
 
 
@@ -140,9 +158,14 @@ class InquiryServiceTest extends TestCase
      */
     public function testCreate()
     {
+        // Mock User
+        $dealer = $this->getEloquentMock(User::class);
+        $dealer->dealer_id = 1;
+
         // Get Model Mocks
         $lead = $this->getEloquentMock(Lead::class);
         $lead->identifier = 1;
+        $lead->dealer_id = 1;
         $lead->first_name = self::TEST_FIRST_NAME;
         $lead->last_name = self::TEST_LAST_NAME;
         $lead->phone_number = self::TEST_PHONE;
@@ -196,7 +219,14 @@ class InquiryServiceTest extends TestCase
             ->shouldReceive('send')
             ->never();
 
-        // Mock Lead Repository
+        // Mock User Repository
+        $this->userRepositoryMock
+            ->shouldReceive('get')
+            ->once()
+            ->with(['dealer_id' => $dealer->dealer_id])
+            ->andReturn($dealer);
+
+        // Mock Lead Repository      
         $this->leadRepositoryMock
             ->shouldReceive('findAllMatches')
             ->once()
@@ -272,9 +302,14 @@ class InquiryServiceTest extends TestCase
      */
     public function testSend()
     {
+        // Mock User
+        $dealer = $this->getEloquentMock(User::class);
+        $dealer->dealer_id = 1;
+
         // Get Model Mocks
         $lead = $this->getEloquentMock(Lead::class);
         $lead->identifier = 1;
+        $lead->dealer_id = 1;
         $lead->first_name = self::TEST_FIRST_NAME;
         $lead->last_name = self::TEST_LAST_NAME;
         $lead->phone_number = self::TEST_PHONE;
@@ -327,6 +362,13 @@ class InquiryServiceTest extends TestCase
         $this->inquiryEmailServiceMock
             ->shouldReceive('send')
             ->once();
+
+        // Mock User Repository
+        $this->userRepositoryMock
+            ->shouldReceive('get')
+            ->once()
+            ->with(['dealer_id' => $dealer->dealer_id])
+            ->andReturn($dealer);
 
         // Mock Lead Repository
         $this->leadRepositoryMock
@@ -403,9 +445,14 @@ class InquiryServiceTest extends TestCase
      */
     public function testSendInventory()
     {
+        // Mock User
+        $dealer = $this->getEloquentMock(User::class);
+        $dealer->dealer_id = 1;
+
         // Get Model Mocks
         $lead = $this->getEloquentMock(Lead::class);
         $lead->identifier = 1;
+        $lead->dealer_id = 1;
         $lead->first_name = self::TEST_FIRST_NAME;
         $lead->last_name = self::TEST_LAST_NAME;
         $lead->phone_number = self::TEST_PHONE;
@@ -459,6 +506,13 @@ class InquiryServiceTest extends TestCase
         $this->inquiryEmailServiceMock
             ->shouldReceive('send')
             ->once();
+
+        // Mock User Repository
+        $this->userRepositoryMock
+            ->shouldReceive('get')
+            ->once()
+            ->with(['dealer_id' => $dealer->dealer_id])
+            ->andReturn($dealer);
 
         // Mock Lead Repository
         $this->leadRepositoryMock
@@ -536,9 +590,14 @@ class InquiryServiceTest extends TestCase
      */
     public function testSendPart()
     {
+        // Mock User
+        $dealer = $this->getEloquentMock(User::class);
+        $dealer->dealer_id = 1;
+
         // Get Model Mocks
         $lead = $this->getEloquentMock(Lead::class);
         $lead->identifier = 1;
+        $lead->dealer_id = 1;
         $lead->first_name = self::TEST_FIRST_NAME;
         $lead->last_name = self::TEST_LAST_NAME;
         $lead->phone_number = self::TEST_PHONE;
@@ -592,6 +651,13 @@ class InquiryServiceTest extends TestCase
         $this->inquiryEmailServiceMock
             ->shouldReceive('send')
             ->once();
+
+        // Mock User Repository
+        $this->userRepositoryMock
+            ->shouldReceive('get')
+            ->once()
+            ->with(['dealer_id' => $dealer->dealer_id])
+            ->andReturn($dealer);
 
         // Mock Lead Repository
         $this->leadRepositoryMock
@@ -669,9 +735,14 @@ class InquiryServiceTest extends TestCase
      */
     public function testSendShowroom()
     {
+        // Mock User
+        $dealer = $this->getEloquentMock(User::class);
+        $dealer->dealer_id = 1;
+
         // Get Model Mocks
         $lead = $this->getEloquentMock(Lead::class);
         $lead->identifier = 1;
+        $lead->dealer_id = 1;
         $lead->first_name = self::TEST_FIRST_NAME;
         $lead->last_name = self::TEST_LAST_NAME;
         $lead->phone_number = self::TEST_PHONE;
@@ -725,6 +796,13 @@ class InquiryServiceTest extends TestCase
         $this->inquiryEmailServiceMock
             ->shouldReceive('send')
             ->once();
+
+        // Mock User Repository
+        $this->userRepositoryMock
+            ->shouldReceive('get')
+            ->once()
+            ->with(['dealer_id' => $dealer->dealer_id])
+            ->andReturn($dealer);
 
         // Mock Lead Repository
         $this->leadRepositoryMock
@@ -802,9 +880,14 @@ class InquiryServiceTest extends TestCase
      */
     public function testSendNoAutoAssign()
     {
+        // Mock User
+        $dealer = $this->getEloquentMock(User::class);
+        $dealer->dealer_id = 1;
+
         // Get Model Mocks
         $lead = $this->getEloquentMock(Lead::class);
         $lead->identifier = 1;
+        $lead->dealer_id = 1;
         $lead->first_name = self::TEST_FIRST_NAME;
         $lead->last_name = self::TEST_LAST_NAME;
         $lead->phone_number = self::TEST_PHONE;
@@ -858,6 +941,13 @@ class InquiryServiceTest extends TestCase
         $this->inquiryEmailServiceMock
             ->shouldReceive('send')
             ->once();
+
+        // Mock User Repository
+        $this->userRepositoryMock
+            ->shouldReceive('get')
+            ->once()
+            ->with(['dealer_id' => $dealer->dealer_id])
+            ->andReturn($dealer);
 
         // Mock Lead Repository
         $this->leadRepositoryMock
@@ -935,9 +1025,14 @@ class InquiryServiceTest extends TestCase
      */
     public function testSendMerge()
     {
+        // Mock User
+        $dealer = $this->getEloquentMock(User::class);
+        $dealer->dealer_id = 1;
+
         // Get Model Mocks
         $lead = $this->getEloquentMock(Lead::class);
         $lead->identifier = 1;
+        $lead->dealer_id = 1;
         $lead->first_name = self::TEST_FIRST_NAME;
         $lead->last_name = self::TEST_LAST_NAME;
         $lead->phone_number = self::TEST_PHONE;
@@ -1005,6 +1100,13 @@ class InquiryServiceTest extends TestCase
         $this->inquiryEmailServiceMock
             ->shouldReceive('send')
             ->once();
+
+        // Mock User Repository
+        $this->userRepositoryMock
+            ->shouldReceive('get')
+            ->once()
+            ->with(['dealer_id' => $dealer->dealer_id])
+            ->andReturn($dealer);
 
         // Mock Lead Repository
         $this->leadRepositoryMock
@@ -1087,9 +1189,14 @@ class InquiryServiceTest extends TestCase
      */
     public function testSendMergeExactMatch()
     {
+        // Mock User
+        $dealer = $this->getEloquentMock(User::class);
+        $dealer->dealer_id = 1;
+
         // Get Model Mocks
         $lead = $this->getEloquentMock(Lead::class);
         $lead->identifier = 1;
+        $lead->dealer_id = 1;
         $lead->first_name = self::TEST_FIRST_NAME;
         $lead->last_name = self::TEST_LAST_NAME;
         $lead->phone_number = self::TEST_PHONE;
@@ -1157,6 +1264,13 @@ class InquiryServiceTest extends TestCase
         $this->inquiryEmailServiceMock
             ->shouldReceive('send')
             ->once();
+
+        // Mock User Repository
+        $this->userRepositoryMock
+            ->shouldReceive('get')
+            ->once()
+            ->with(['dealer_id' => $dealer->dealer_id])
+            ->andReturn($dealer);
 
         // Mock Lead Repository
         $this->leadRepositoryMock
@@ -1242,9 +1356,14 @@ class InquiryServiceTest extends TestCase
      */
     public function testSendMergeFinancing()
     {
+        // Mock User
+        $dealer = $this->getEloquentMock(User::class);
+        $dealer->dealer_id = 1;
+
         // Get Model Mocks
         $lead = $this->getEloquentMock(Lead::class);
         $lead->identifier = 1;
+        $lead->dealer_id = 1;
         $lead->first_name = self::TEST_FIRST_NAME;
         $lead->last_name = self::TEST_LAST_NAME;
         $lead->phone_number = self::TEST_PHONE;
@@ -1298,6 +1417,13 @@ class InquiryServiceTest extends TestCase
         $this->inquiryEmailServiceMock
             ->shouldReceive('send')
             ->once();
+
+        // Mock User Repository
+        $this->userRepositoryMock
+            ->shouldReceive('get')
+            ->once()
+            ->with(['dealer_id' => $dealer->dealer_id])
+            ->andReturn($dealer);
 
         // Mock Lead Repository
         $this->leadRepositoryMock
