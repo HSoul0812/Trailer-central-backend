@@ -161,6 +161,7 @@ class InquiryServiceTest extends TestCase
         // Mock User
         $dealer = $this->getEloquentMock(User::class);
         $dealer->dealer_id = 1;
+        $dealer->isCrmActive = 1;
 
         // Get Model Mocks
         $lead = $this->getEloquentMock(Lead::class);
@@ -306,6 +307,7 @@ class InquiryServiceTest extends TestCase
         // Mock User
         $dealer = $this->getEloquentMock(User::class);
         $dealer->dealer_id = 1;
+        $dealer->isCrmActive = 1;
 
         // Get Model Mocks
         $lead = $this->getEloquentMock(Lead::class);
@@ -450,6 +452,7 @@ class InquiryServiceTest extends TestCase
         // Mock User
         $dealer = $this->getEloquentMock(User::class);
         $dealer->dealer_id = 1;
+        $dealer->isCrmActive = 1;
 
         // Get Model Mocks
         $lead = $this->getEloquentMock(Lead::class);
@@ -596,6 +599,7 @@ class InquiryServiceTest extends TestCase
         // Mock User
         $dealer = $this->getEloquentMock(User::class);
         $dealer->dealer_id = 1;
+        $dealer->isCrmActive = 1;
 
         // Get Model Mocks
         $lead = $this->getEloquentMock(Lead::class);
@@ -742,6 +746,7 @@ class InquiryServiceTest extends TestCase
         // Mock User
         $dealer = $this->getEloquentMock(User::class);
         $dealer->dealer_id = 1;
+        $dealer->isCrmActive = 1;
 
         // Get Model Mocks
         $lead = $this->getEloquentMock(Lead::class);
@@ -888,6 +893,7 @@ class InquiryServiceTest extends TestCase
         // Mock User
         $dealer = $this->getEloquentMock(User::class);
         $dealer->dealer_id = 1;
+        $dealer->isCrmActive = 1;
 
         // Get Model Mocks
         $lead = $this->getEloquentMock(Lead::class);
@@ -1034,6 +1040,7 @@ class InquiryServiceTest extends TestCase
         // Mock User
         $dealer = $this->getEloquentMock(User::class);
         $dealer->dealer_id = 1;
+        $dealer->isCrmActive = 1;
 
         // Get Model Mocks
         $lead = $this->getEloquentMock(Lead::class);
@@ -1199,6 +1206,7 @@ class InquiryServiceTest extends TestCase
         // Mock User
         $dealer = $this->getEloquentMock(User::class);
         $dealer->dealer_id = 1;
+        $dealer->isCrmActive = 1;
 
         // Get Model Mocks
         $lead = $this->getEloquentMock(Lead::class);
@@ -1367,6 +1375,7 @@ class InquiryServiceTest extends TestCase
         // Mock User
         $dealer = $this->getEloquentMock(User::class);
         $dealer->dealer_id = 1;
+        $dealer->isCrmActive = 1;
 
         // Get Model Mocks
         $lead = $this->getEloquentMock(Lead::class);
