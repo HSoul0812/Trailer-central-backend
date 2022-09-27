@@ -177,6 +177,7 @@ class InquiryServiceTest extends TestCase
 
         // Send Request Params
         $sendRequestParams = [
+            'dealer_id' => $dealer->dealer_id,
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[0],
             'lead_types' => [LeadType::TYPE_GENERAL],
             'device' => self::TEST_DEVICE,
@@ -321,6 +322,7 @@ class InquiryServiceTest extends TestCase
 
         // Send Request Params
         $sendRequestParams = [
+            'dealer_id' => $dealer->dealer_id,
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[0],
             'lead_types' => [LeadType::TYPE_GENERAL],
             'device' => self::TEST_DEVICE,
@@ -464,6 +466,7 @@ class InquiryServiceTest extends TestCase
 
         // Send Request Params
         $sendRequestParams = [
+            'dealer_id' => $dealer->dealer_id,
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[2],
             'lead_types' => [LeadType::TYPE_INVENTORY],
             'device' => self::TEST_DEVICE,
@@ -609,6 +612,7 @@ class InquiryServiceTest extends TestCase
 
         // Send Request Params
         $sendRequestParams = [
+            'dealer_id' => $dealer->dealer_id,
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[3],
             'lead_types' => [LeadType::TYPE_INVENTORY],
             'device' => self::TEST_DEVICE,
@@ -754,6 +758,7 @@ class InquiryServiceTest extends TestCase
 
         // Send Request Params
         $sendRequestParams = [
+            'dealer_id' => $dealer->dealer_id,
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[4],
             'lead_types' => [LeadType::TYPE_SHOWROOM_MODEL],
             'device' => self::TEST_DEVICE,
@@ -900,6 +905,7 @@ class InquiryServiceTest extends TestCase
 
         // Send Request Params
         $sendRequestParams = [
+            'dealer_id' => $dealer->dealer_id,
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[0],
             'lead_types' => [LeadType::TYPE_GENERAL],
             'device' => self::TEST_DEVICE,
@@ -1054,6 +1060,7 @@ class InquiryServiceTest extends TestCase
 
         // Send Request Params
         $sendRequestParams = [
+            'dealer_id' => $dealer->dealer_id,
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[0],
             'lead_types' => [LeadType::TYPE_GENERAL],
             'device' => self::TEST_DEVICE,
@@ -1218,6 +1225,7 @@ class InquiryServiceTest extends TestCase
 
         // Send Request Params
         $sendRequestParams = [
+            'dealer_id' => $dealer->dealer_id,
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[0],
             'lead_types' => [LeadType::TYPE_GENERAL],
             'device' => self::TEST_DEVICE,
@@ -1375,6 +1383,7 @@ class InquiryServiceTest extends TestCase
 
         // Send Request Params
         $sendRequestParams = [
+            'dealer_id' => $dealer->dealer_id,
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[0],
             'lead_types' => [LeadType::TYPE_FINANCING],
             'device' => self::TEST_DEVICE,
