@@ -1360,6 +1360,14 @@ class InquiryServiceTest extends TestCase
         $salesPerson->shouldReceive('getFullNameAttribute')
             ->andReturn($salesPerson->first_name . ' ' . $salesPerson->last_name);
 
+        // Mock SalesPerson Auth Config
+        $salesPerson->shouldReceive('getAuthConfigAttribute')
+            ->andReturn('');
+
+        // Mock SalesPerson Auth Method
+        $salesPerson->shouldReceive('getAuthMethodAttribute')
+            ->andReturn('');
+
         // Expects Auto Assign/Auto Responder Jobs
         $this->expectsJobs([AutoAssignJob::class]);
 
@@ -1555,6 +1563,14 @@ class InquiryServiceTest extends TestCase
         // Mock SalesPerson
         $salesPerson->shouldReceive('getFullNameAttribute')
             ->andReturn($salesPerson->first_name . ' ' . $salesPerson->last_name);
+
+        // Mock SalesPerson Auth Config
+        $salesPerson->shouldReceive('getAuthConfigAttribute')
+            ->andReturn('');
+
+        // Mock SalesPerson Auth Method
+        $salesPerson->shouldReceive('getAuthMethodAttribute')
+            ->andReturn('');
 
         // Expects Auto Assign/Auto Responder Jobs
         $this->expectsJobs([AutoAssignJob::class]);
