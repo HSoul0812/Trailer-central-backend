@@ -22,6 +22,6 @@ class TypeRepository implements TypeRepositoryInterface
 
     public function getAll(): Collection
     {
-        return $this->model->all()->sortBy('id');
+        return $this->model->all();
     }
 }
