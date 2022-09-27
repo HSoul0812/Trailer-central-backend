@@ -101,7 +101,7 @@ class CatalogServiceTest extends TestCase
         $location->name = 'Indianopolis';
         $location->salesTax = null;
         $location->shouldReceive('inventoryCount')->andReturn(0);
-        $location->shouldReceive('referenceyCount')->andReturn(0);
+        $location->shouldReceive('referenceCount')->andReturn(0);
 
         // Mock User
         $dealer = $this->getEloquentMock(User::class);
@@ -190,7 +190,7 @@ class CatalogServiceTest extends TestCase
         $location->name = 'Indianopolis';
         $location->salesTax = null;
         $location->shouldReceive('inventoryCount')->andReturn(0);
-        $location->shouldReceive('referenceyCount')->andReturn(0);
+        $location->shouldReceive('referenceCount')->andReturn(0);
 
         // Mock User
         $dealer = $this->getEloquentMock(User::class);
@@ -339,7 +339,7 @@ class CatalogServiceTest extends TestCase
         $location->name = 'Indianopolis';
         $location->salesTax = null;
         $location->shouldReceive('inventoryCount')->andReturn(0);
-        $location->shouldReceive('referenceyCount')->andReturn(0);
+        $location->shouldReceive('referenceCount')->andReturn(0);
 
         // Mock User
         $dealer = $this->getEloquentMock(User::class);
@@ -473,7 +473,7 @@ class CatalogServiceTest extends TestCase
         $location->dealer_id = 1;
         $location->name = 'Indianopolis';
         $location->shouldReceive('inventoryCount')->andReturn(0);
-        $location->shouldReceive('referenceyCount')->andReturn(0);
+        $location->shouldReceive('referenceCount')->andReturn(0);
 
         // Mock User
         $dealer = $this->getEloquentMock(User::class);
@@ -576,7 +576,7 @@ class CatalogServiceTest extends TestCase
         $location->name = 'Indianopolis';
         $location->salesTax = null;
         $location->shouldReceive('inventoryCount')->andReturn(0);
-        $location->shouldReceive('referenceyCount')->andReturn(0);
+        $location->shouldReceive('referenceCount')->andReturn(0);
 
         // Mock User
         $dealer = $this->getEloquentMock(User::class);
