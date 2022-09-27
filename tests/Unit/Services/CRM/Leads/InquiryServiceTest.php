@@ -1679,9 +1679,7 @@ class InquiryServiceTest extends TestCase
         // Mock Website Config Service
         $this->websiteConfigServiceMock
             ->shouldReceive('getConfigByWebsite')
-            ->once()
-            ->with($website->id, WebsiteConfig::LEADS_MERGE_ENABLED)
-            ->andReturn([WebsiteConfig::LEADS_MERGE_ENABLED => '0']);
+            ->never();
 
         // Mock Lead Repository
         $this->leadRepositoryMock
@@ -1846,7 +1844,9 @@ class InquiryServiceTest extends TestCase
         // Mock Website Config Service
         $this->websiteConfigServiceMock
             ->shouldReceive('getConfigByWebsite')
-            ->never();
+            ->once()
+            ->with($website->id, WebsiteConfig::LEADS_MERGE_ENABLED)
+            ->andReturn([WebsiteConfig::LEADS_MERGE_ENABLED => '0']);
 
         // Mock Lead Repository
         $this->leadRepositoryMock
