@@ -11,12 +11,13 @@ use App\Models\CRM\Interactions\Interaction;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\Website\Config\WebsiteConfig;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
-use App\Services\CRM\Leads\Export\ADFServiceInterface;
 use App\Repositories\Website\Tracking\TrackingRepositoryInterface;
 use App\Repositories\Website\Tracking\TrackingUnitRepositoryInterface;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Services\CRM\Email\InquiryEmailServiceInterface;
 use App\Services\CRM\Leads\DTOs\InquiryLead;
+use App\Services\CRM\Leads\Export\ADFServiceInterface;
+use App\Services\CRM\Leads\Export\IDSServiceInterface;
 use App\Services\CRM\Leads\LeadServiceInterface;
 use App\Services\CRM\Leads\InquiryServiceInterface;
 use App\Services\Website\WebsiteConfigServiceInterface;
@@ -86,6 +87,11 @@ class InquiryServiceTest extends TestCase
     private $adfServiceMock;
 
     /**
+     * @var LegacyMockInterface|IDSServiceInterface
+     */
+    private $idsServiceMock;
+
+    /**
      * @var LegacyMockInterface|InquiryEmailServiceInterface
      */
     private $inquiryEmailServiceMock;
@@ -133,6 +139,9 @@ class InquiryServiceTest extends TestCase
 
         $this->adfServiceMock = Mockery::mock(ADFServiceInterface::class);
         $this->app->instance(ADFServiceInterface::class, $this->adfServiceMock);
+
+        $this->idsServiceMock = Mockery::mock(IDSServiceInterface::class);
+        $this->app->instance(IDSServiceInterface::class, $this->idsServiceMock);
 
         $this->leadRepositoryMock = Mockery::mock(LeadRepositoryInterface::class);
         $this->app->instance(LeadRepositoryInterface::class, $this->leadRepositoryMock);
@@ -260,6 +269,12 @@ class InquiryServiceTest extends TestCase
         // Mock ADF Export
         $this->adfServiceMock
             ->shouldReceive('export')
+            ->once()
+            ->andReturn(false);
+
+        // Mock IDS Export
+        $this->idsServiceMock
+            ->shouldReceive('exportInquiry')
             ->once()
             ->andReturn(false);
 
@@ -423,6 +438,12 @@ class InquiryServiceTest extends TestCase
             ->once()
             ->andReturn(false);
 
+        // Mock IDS Export
+        $this->idsServiceMock
+            ->shouldReceive('exportInquiry')
+            ->once()
+            ->andReturn(false);
+
         // Mock Sales Person Repository
         $this->trackingRepositoryMock
             ->shouldReceive('updateTrackLead')
@@ -580,6 +601,12 @@ class InquiryServiceTest extends TestCase
         // Mock ADF Export
         $this->adfServiceMock
             ->shouldReceive('export')
+            ->once()
+            ->andReturn(false);
+
+        // Mock IDS Export
+        $this->idsServiceMock
+            ->shouldReceive('exportInquiry')
             ->once()
             ->andReturn(false);
 
@@ -744,6 +771,12 @@ class InquiryServiceTest extends TestCase
             ->once()
             ->andReturn(false);
 
+        // Mock IDS Export
+        $this->idsServiceMock
+            ->shouldReceive('exportInquiry')
+            ->once()
+            ->andReturn(false);
+
         // Mock Sales Person Repository
         $this->trackingRepositoryMock
             ->shouldReceive('updateTrackLead')
@@ -905,6 +938,12 @@ class InquiryServiceTest extends TestCase
             ->once()
             ->andReturn(false);
 
+        // Mock IDS Export
+        $this->idsServiceMock
+            ->shouldReceive('exportInquiry')
+            ->once()
+            ->andReturn(false);
+
         // Mock Sales Person Repository
         $this->trackingRepositoryMock
             ->shouldReceive('updateTrackLead')
@@ -1063,6 +1102,12 @@ class InquiryServiceTest extends TestCase
         // Mock ADF Export
         $this->adfServiceMock
             ->shouldReceive('export')
+            ->once()
+            ->andReturn(false);
+
+        // Mock IDS Export
+        $this->idsServiceMock
+            ->shouldReceive('exportInquiry')
             ->once()
             ->andReturn(false);
 
@@ -1237,6 +1282,12 @@ class InquiryServiceTest extends TestCase
         // Mock ADF Export
         $this->adfServiceMock
             ->shouldReceive('export')
+            ->once()
+            ->andReturn(false);
+
+        // Mock IDS Export
+        $this->idsServiceMock
+            ->shouldReceive('exportInquiry')
             ->once()
             ->andReturn(false);
 
@@ -1420,6 +1471,12 @@ class InquiryServiceTest extends TestCase
             ->once()
             ->andReturn(false);
 
+        // Mock IDS Export
+        $this->idsServiceMock
+            ->shouldReceive('exportInquiry')
+            ->once()
+            ->andReturn(false);
+
         // Mock Sales Person Repository
         $this->trackingRepositoryMock
             ->shouldReceive('updateTrackLead')
@@ -1586,6 +1643,12 @@ class InquiryServiceTest extends TestCase
         $this->adfServiceMock
             ->shouldReceive('export')
             ->never();
+
+        // Mock IDS Export
+        $this->idsServiceMock
+            ->shouldReceive('exportInquiry')
+            ->once()
+            ->andReturn(false);
 
         // Mock Sales Person Repository
         $this->trackingRepositoryMock
