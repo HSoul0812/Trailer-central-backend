@@ -64,7 +64,7 @@ class InventoryService implements InventoryServiceInterface
     const DEFAULT_CATEGORY = [
         'name'      => 'Other',
         'type_id'   => 1,
-        'type_label' => 'General Trailers'
+        'type_label' => 'Equipment Trailers'
     ];
 
     const INVENTORY_SOLD = 'sold';
