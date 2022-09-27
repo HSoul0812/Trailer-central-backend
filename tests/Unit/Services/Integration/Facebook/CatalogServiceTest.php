@@ -99,6 +99,7 @@ class CatalogServiceTest extends TestCase
         $location->dealer_location_id = 1;
         $location->dealer_id = 1;
         $location->name = 'Indianopolis';
+        $location->shouldReceive('salesTax')->passthru();
 
         // Mock User
         $dealer = $this->getEloquentMock(User::class);
