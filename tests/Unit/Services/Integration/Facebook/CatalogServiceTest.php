@@ -103,7 +103,7 @@ class CatalogServiceTest extends TestCase
         $dealer->name = self::TEST_INQUIRY_NAME;
 
         // Mock AccessToken
-        $time = now();
+        $time = time();
         $accessToken = $this->getEloquentMock(AccessToken::class);
         $accessToken->id = 1;
         $accessToken->dealer_id = $dealer->dealer_id;
@@ -181,7 +181,7 @@ class CatalogServiceTest extends TestCase
         $dealer->name = self::TEST_INQUIRY_NAME;
 
         // Mock AccessToken
-        $time = now();
+        $time = time();
         $accessToken = $this->getEloquentMock(AccessToken::class);
         $accessToken->id = 1;
         $accessToken->dealer_id = $dealer->dealer_id;
@@ -319,7 +319,7 @@ class CatalogServiceTest extends TestCase
         $dealer->name = self::TEST_INQUIRY_NAME;
 
         // Mock AccessToken
-        $time = now();
+        $time = time();
         $accessToken = $this->getEloquentMock(AccessToken::class);
         $accessToken->id = 1;
         $accessToken->dealer_id = $dealer->dealer_id;
@@ -443,7 +443,7 @@ class CatalogServiceTest extends TestCase
         $dealer->name = self::TEST_INQUIRY_NAME;
 
         // Mock AccessToken
-        $time = now();
+        $time = time();
         $accessToken = $this->getEloquentMock(AccessToken::class);
         $accessToken->id = 1;
         $accessToken->dealer_id = $dealer->dealer_id;
@@ -534,7 +534,7 @@ class CatalogServiceTest extends TestCase
         $dealer->name = self::TEST_INQUIRY_NAME;
 
         // Mock AccessToken
-        $time = now();
+        $time = time();
         $accessToken = $this->getEloquentMock(AccessToken::class);
         $accessToken->id = 1;
         $accessToken->dealer_id = $dealer->dealer_id;
