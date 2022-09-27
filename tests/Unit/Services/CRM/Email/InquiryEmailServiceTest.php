@@ -394,7 +394,7 @@ class InquiryEmailServiceTest extends TestCase
         $this->websiteConfigRepositoryMock
             ->shouldReceive('getValueOfConfig')
             ->once()
-            ->with($inquiry->websiteId, 'contact/email/')
+            ->with($inquiry->websiteId, 'contact/email/' . $fillInquiry['lead_types'][0])
             ->andReturn(null);
 
         // Mock getValueOfConfig on Website Config Repository
@@ -489,7 +489,7 @@ class InquiryEmailServiceTest extends TestCase
         $this->websiteConfigRepositoryMock
             ->shouldReceive('getValueOfConfig')
             ->once()
-            ->with($inquiry->websiteId, 'contact/email/')
+            ->with($inquiry->websiteId, 'contact/email/' . $fillInquiry['lead_types'][0])
             ->andReturn(null);
 
         // Mock getValueOfConfig on Website Config Repository
@@ -595,7 +595,7 @@ class InquiryEmailServiceTest extends TestCase
         $this->websiteConfigRepositoryMock
             ->shouldReceive('getValueOfConfig')
             ->once()
-            ->with($inquiry->websiteId, 'contact/email/')
+            ->with($inquiry->websiteId, 'contact/email/' . $fillInquiry['lead_types'][0])
             ->andReturn(null);
 
         // Mock getValueOfConfig on Website Config Repository
@@ -692,7 +692,7 @@ class InquiryEmailServiceTest extends TestCase
         $this->websiteConfigRepositoryMock
             ->shouldReceive('getValueOfConfig')
             ->once()
-            ->with($inquiry->websiteId, 'contact/email/')
+            ->with($inquiry->websiteId, 'contact/email/' . $fillInquiry['lead_types'][0])
             ->andReturn(null);
 
         // Mock getValueOfConfig on Website Config Repository
@@ -796,7 +796,7 @@ class InquiryEmailServiceTest extends TestCase
         $this->websiteConfigRepositoryMock
             ->shouldReceive('getValueOfConfig')
             ->once()
-            ->with($inquiry->websiteId, 'contact/email/')
+            ->with($inquiry->websiteId, 'contact/email/' . $fillInquiry['lead_types'][0])
             ->andReturn(null);
 
         // Mock getValueOfConfig on Website Config Repository
