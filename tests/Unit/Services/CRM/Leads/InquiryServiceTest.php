@@ -3,7 +3,6 @@
 namespace Tests\Unit\Services\CRM\Leads;
 
 use App\Jobs\CRM\Leads\AutoAssignJob;
-use App\Jobs\Email\AutoResponderJob;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\LeadType;
@@ -250,7 +249,7 @@ class InquiryServiceTest extends TestCase
             ->shouldReceive('getConfigByWebsite')
             ->once()
             ->with($website->id, WebsiteConfig::LEADS_MERGE_ENABLED)
-            ->andReturn([WebsiteConfig::LEADS_MERGE_ENABLED => '1']);
+            ->andReturn(null);
 
         // Mock Lead Repository      
         $this->leadRepositoryMock
@@ -293,6 +292,10 @@ class InquiryServiceTest extends TestCase
         $lead->shouldReceive('getFullNameAttribute')
             ->andReturn($lead->first_name . ' ' . $lead->last_name);
 
+        // Get Inventory ID's
+        $lead->shouldReceive('getInventoryIdsAttribute')
+             ->andReturn($sendInquiryParams['inventory']);
+
         // Get Lead Types
         $lead->shouldReceive('getLeadTypesAttribute')
              ->andReturn([LeadType::TYPE_GENERAL]);
@@ -310,7 +313,7 @@ class InquiryServiceTest extends TestCase
              ->andReturn(null);
 
         // Expects Auto Assign/Auto Responder Jobs
-        $this->expectsJobs([AutoAssignJob::class, AutoResponderJob::class]);
+        $this->expectsJobs([AutoAssignJob::class]);
 
         // Fake Mail
         Mail::fake();
@@ -416,7 +419,7 @@ class InquiryServiceTest extends TestCase
             ->shouldReceive('getConfigByWebsite')
             ->once()
             ->with($website->id, WebsiteConfig::LEADS_MERGE_ENABLED)
-            ->andReturn([WebsiteConfig::LEADS_MERGE_ENABLED => '1']);
+            ->andReturn(null);
 
         // Mock Lead Repository
         $this->leadRepositoryMock
@@ -459,6 +462,10 @@ class InquiryServiceTest extends TestCase
         $lead->shouldReceive('getFullNameAttribute')
             ->andReturn($lead->first_name . ' ' . $lead->last_name);
 
+        // Get Inventory ID's
+        $lead->shouldReceive('getInventoryIdsAttribute')
+             ->andReturn($sendInquiryParams['inventory']);
+
         // Get Lead Types
         $lead->shouldReceive('getLeadTypesAttribute')
              ->andReturn([LeadType::TYPE_GENERAL]);
@@ -476,7 +483,7 @@ class InquiryServiceTest extends TestCase
              ->andReturn(null);
 
         // Expects Auto Assign/Auto Responder Jobs
-        $this->expectsJobs([AutoAssignJob::class, AutoResponderJob::class]);
+        $this->expectsJobs([AutoAssignJob::class]);
 
         // Fake Mail
         Mail::fake();
@@ -582,7 +589,7 @@ class InquiryServiceTest extends TestCase
             ->shouldReceive('getConfigByWebsite')
             ->once()
             ->with($website->id, WebsiteConfig::LEADS_MERGE_ENABLED)
-            ->andReturn([WebsiteConfig::LEADS_MERGE_ENABLED => '1']);
+            ->andReturn(null);
 
         // Mock Lead Repository
         $this->leadRepositoryMock
@@ -626,6 +633,10 @@ class InquiryServiceTest extends TestCase
         $lead->shouldReceive('getFullNameAttribute')
             ->andReturn($lead->first_name . ' ' . $lead->last_name);
 
+        // Get Inventory ID's
+        $lead->shouldReceive('getInventoryIdsAttribute')
+             ->andReturn($sendInquiryParams['inventory']);
+
         // Get Lead Types
         $lead->shouldReceive('getLeadTypesAttribute')
              ->andReturn([LeadType::TYPE_INVENTORY]);
@@ -643,7 +654,7 @@ class InquiryServiceTest extends TestCase
              ->andReturn(null);
 
         // Expects Auto Assign/Auto Responder Jobs
-        $this->expectsJobs([AutoAssignJob::class, AutoResponderJob::class]);
+        $this->expectsJobs([AutoAssignJob::class]);
 
         // Fake Mail
         Mail::fake();
@@ -749,7 +760,7 @@ class InquiryServiceTest extends TestCase
             ->shouldReceive('getConfigByWebsite')
             ->once()
             ->with($website->id, WebsiteConfig::LEADS_MERGE_ENABLED)
-            ->andReturn([WebsiteConfig::LEADS_MERGE_ENABLED => '1']);
+            ->andReturn(null);
 
         // Mock Lead Repository
         $this->leadRepositoryMock
@@ -793,6 +804,10 @@ class InquiryServiceTest extends TestCase
         $lead->shouldReceive('getFullNameAttribute')
             ->andReturn($lead->first_name . ' ' . $lead->last_name);
 
+        // Get Inventory ID's
+        $lead->shouldReceive('getInventoryIdsAttribute')
+             ->andReturn($sendInquiryParams['inventory']);
+
         // Get Lead Types
         $lead->shouldReceive('getLeadTypesAttribute')
              ->andReturn([LeadType::TYPE_INVENTORY]);
@@ -810,7 +825,7 @@ class InquiryServiceTest extends TestCase
              ->andReturn(null);
 
         // Expects Auto Assign/Auto Responder Jobs
-        $this->expectsJobs([AutoAssignJob::class, AutoResponderJob::class]);
+        $this->expectsJobs([AutoAssignJob::class]);
 
         // Fake Mail
         Mail::fake();
@@ -916,7 +931,7 @@ class InquiryServiceTest extends TestCase
             ->shouldReceive('getConfigByWebsite')
             ->once()
             ->with($website->id, WebsiteConfig::LEADS_MERGE_ENABLED)
-            ->andReturn([WebsiteConfig::LEADS_MERGE_ENABLED => '1']);
+            ->andReturn(null);
 
         // Mock Lead Repository
         $this->leadRepositoryMock
@@ -960,6 +975,10 @@ class InquiryServiceTest extends TestCase
         $lead->shouldReceive('getFullNameAttribute')
             ->andReturn($lead->first_name . ' ' . $lead->last_name);
 
+        // Get Inventory ID's
+        $lead->shouldReceive('getInventoryIdsAttribute')
+             ->andReturn($sendInquiryParams['inventory']);
+
         // Get Lead Types
         $lead->shouldReceive('getLeadTypesAttribute')
              ->andReturn([LeadType::TYPE_SHOWROOM_MODEL]);
@@ -977,7 +996,7 @@ class InquiryServiceTest extends TestCase
              ->andReturn(null);
 
         // Expects Auto Assign/Auto Responder Jobs
-        $this->expectsJobs([AutoAssignJob::class, AutoResponderJob::class]);
+        $this->expectsJobs([AutoAssignJob::class]);
 
         // Fake Mail
         Mail::fake();
@@ -1083,7 +1102,7 @@ class InquiryServiceTest extends TestCase
             ->shouldReceive('getConfigByWebsite')
             ->once()
             ->with($website->id, WebsiteConfig::LEADS_MERGE_ENABLED)
-            ->andReturn([WebsiteConfig::LEADS_MERGE_ENABLED => '1']);
+            ->andReturn(null);
 
         // Mock Lead Repository
         $this->leadRepositoryMock
@@ -1126,6 +1145,10 @@ class InquiryServiceTest extends TestCase
         $lead->shouldReceive('getFullNameAttribute')
             ->andReturn($lead->first_name . ' ' . $lead->last_name);
 
+        // Get Inventory ID's
+        $lead->shouldReceive('getInventoryIdsAttribute')
+             ->andReturn($sendInquiryParams['inventory']);
+
         // Get Lead Types
         $lead->shouldReceive('getLeadTypesAttribute')
              ->andReturn([LeadType::TYPE_GENERAL]);
@@ -1141,9 +1164,6 @@ class InquiryServiceTest extends TestCase
         // Get Pretty Phone
         $lead->shouldReceive('getPreferredDealerLocationAttribute')
              ->andReturn(null);
-
-        // Expects Auto Responder Job ONLY
-        $this->expectsJobs([AutoResponderJob::class]);
 
         // Fake Mail
         Mail::fake();
@@ -1306,6 +1326,10 @@ class InquiryServiceTest extends TestCase
         $this->mergeLead->shouldReceive('getFullNameAttribute')
             ->andReturn($this->mergeLead->first_name . ' ' . $this->mergeLead->last_name);
 
+        // Get Inventory ID's
+        $this->mergeLead->shouldReceive('getInventoryIdsAttribute')
+             ->andReturn($sendInquiryParams['inventory']);
+
         // Get Lead Types
         $this->mergeLead->shouldReceive('getLeadTypesAttribute')
              ->andReturn([LeadType::TYPE_GENERAL]);
@@ -1329,9 +1353,6 @@ class InquiryServiceTest extends TestCase
         // Mock SalesPerson
         $salesPerson->shouldReceive('getFullNameAttribute')
             ->andReturn($salesPerson->first_name . ' ' . $salesPerson->last_name);
-
-        // Expects Auto Responder Job ONLY
-        $this->expectsJobs([AutoResponderJob::class]);
 
         // Fake Mail
         Mail::fake();
@@ -1492,6 +1513,10 @@ class InquiryServiceTest extends TestCase
         $this->mergeLead->shouldReceive('getFullNameAttribute')
             ->andReturn($this->mergeLead->first_name . ' ' . $this->mergeLead->last_name);
 
+        // Get Inventory ID's
+        $this->mergeLead->shouldReceive('getInventoryIdsAttribute')
+             ->andReturn($sendInquiryParams['inventory']);
+
         // Get Lead Types
         $this->mergeLead->shouldReceive('getLeadTypesAttribute')
              ->andReturn([LeadType::TYPE_GENERAL]);
@@ -1515,9 +1540,6 @@ class InquiryServiceTest extends TestCase
         // Mock SalesPerson
         $salesPerson->shouldReceive('getFullNameAttribute')
             ->andReturn($salesPerson->first_name . ' ' . $salesPerson->last_name);
-
-        // Expects Auto Responder Job ONLY
-        $this->expectsJobs([AutoResponderJob::class]);
 
         // Fake Mail
         Mail::fake();
@@ -1647,8 +1669,7 @@ class InquiryServiceTest extends TestCase
         // Mock IDS Export
         $this->idsServiceMock
             ->shouldReceive('exportInquiry')
-            ->once()
-            ->andReturn(false);
+            ->never();
 
         // Mock Sales Person Repository
         $this->trackingRepositoryMock
@@ -1665,6 +1686,10 @@ class InquiryServiceTest extends TestCase
         $lead->shouldReceive('getFullNameAttribute')
             ->andReturn($lead->first_name . ' ' . $lead->last_name);
 
+        // Get Inventory ID's
+        $lead->shouldReceive('getInventoryIdsAttribute')
+             ->andReturn($sendInquiryParams['inventory']);
+
         // Get Lead Types
         $lead->shouldReceive('getLeadTypesAttribute')
              ->andReturn([LeadType::TYPE_GENERAL]);
@@ -1680,9 +1705,6 @@ class InquiryServiceTest extends TestCase
         // Get Pretty Phone
         $lead->shouldReceive('getPreferredDealerLocationAttribute')
              ->andReturn(null);
-
-        // Expects Auto Responder Job ONLY
-        $this->expectsJobs([AutoResponderJob::class]);
 
         // Fake Mail
         Mail::fake();
