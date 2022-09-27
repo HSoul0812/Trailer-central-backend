@@ -99,7 +99,7 @@ class CatalogServiceTest extends TestCase
         $location->dealer_location_id = 1;
         $location->dealer_id = 1;
         $location->name = 'Indianopolis';
-        $location->shouldReceive('salesTax')->passthru();
+        $location->salesTax = null;
 
         // Mock User
         $dealer = $this->getEloquentMock(User::class);
@@ -186,6 +186,7 @@ class CatalogServiceTest extends TestCase
         $location->dealer_location_id = 1;
         $location->dealer_id = 1;
         $location->name = 'Indianopolis';
+        $location->salesTax = null;
 
         // Mock User
         $dealer = $this->getEloquentMock(User::class);
@@ -332,6 +333,7 @@ class CatalogServiceTest extends TestCase
         $location->dealer_location_id = 1;
         $location->dealer_id = 1;
         $location->name = 'Indianopolis';
+        $location->salesTax = null;
 
         // Mock User
         $dealer = $this->getEloquentMock(User::class);
@@ -470,6 +472,7 @@ class CatalogServiceTest extends TestCase
         $dealer->dealer_id = 1;
         $dealer->email = self::TEST_INQUIRY_EMAIL;
         $dealer->name = self::TEST_INQUIRY_NAME;
+        $location->salesTax = null;
 
         // Mock AccessToken
         $time = time();
@@ -563,6 +566,7 @@ class CatalogServiceTest extends TestCase
         $location->dealer_location_id = 1;
         $location->dealer_id = 1;
         $location->name = 'Indianopolis';
+        $location->salesTax = null;
 
         // Mock User
         $dealer = $this->getEloquentMock(User::class);
