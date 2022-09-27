@@ -34,7 +34,7 @@ class CatalogServiceTest extends TestCase
     /**
      * @const Catalog Scopes
      */
-    const EXPIRES_IN = 60 * 60 * 24 * 60;
+    const TEST_EXPIRES_IN = 60 * 60 * 24 * 60;
 
     /**
      * @const string
@@ -113,8 +113,8 @@ class CatalogServiceTest extends TestCase
         $accessToken->access_token = 1;
         $accessToken->refresh_token = 1;
         $accessToken->id_token = 1;
-        $accessToken->expires_in = self::DEFAULT_EXPIRES_IN;
-        $accessToken->expires_at = date("Y-m-d H:i:s", $time + self::DEFAULT_EXPIRES_IN);
+        $accessToken->expires_in = self::TEST_EXPIRES_IN;
+        $accessToken->expires_at = date("Y-m-d H:i:s", $time + self::TEST_EXPIRES_IN);
         $accessToken->issued_at = date("Y-m-d H:i:s", $time);
 
         // Mock Page
@@ -191,8 +191,8 @@ class CatalogServiceTest extends TestCase
         $accessToken->access_token = 1;
         $accessToken->refresh_token = 1;
         $accessToken->id_token = 1;
-        $accessToken->expires_in = self::DEFAULT_EXPIRES_IN;
-        $accessToken->expires_at = date("Y-m-d H:i:s", $time + self::DEFAULT_EXPIRES_IN);
+        $accessToken->expires_in = self::TEST_EXPIRES_IN;
+        $accessToken->expires_at = date("Y-m-d H:i:s", $time + self::TEST_EXPIRES_IN);
         $accessToken->issued_at = date("Y-m-d H:i:s", $time);
 
         // Mock Page
@@ -329,8 +329,8 @@ class CatalogServiceTest extends TestCase
         $accessToken->access_token = 1;
         $accessToken->refresh_token = 1;
         $accessToken->id_token = 1;
-        $accessToken->expires_in = self::DEFAULT_EXPIRES_IN;
-        $accessToken->expires_at = date("Y-m-d H:i:s", $time + self::DEFAULT_EXPIRES_IN);
+        $accessToken->expires_in = self::TEST_EXPIRES_IN;
+        $accessToken->expires_at = date("Y-m-d H:i:s", $time + self::TEST_EXPIRES_IN);
         $accessToken->issued_at = date("Y-m-d H:i:s", $time);
 
         // Mock Page
@@ -453,8 +453,8 @@ class CatalogServiceTest extends TestCase
         $accessToken->access_token = 1;
         $accessToken->refresh_token = 1;
         $accessToken->id_token = 1;
-        $accessToken->expires_in = self::DEFAULT_EXPIRES_IN;
-        $accessToken->expires_at = date("Y-m-d H:i:s", $time + self::DEFAULT_EXPIRES_IN);
+        $accessToken->expires_in = self::TEST_EXPIRES_IN;
+        $accessToken->expires_at = date("Y-m-d H:i:s", $time + self::TEST_EXPIRES_IN);
         $accessToken->issued_at = date("Y-m-d H:i:s", $time);
 
         // Mock Page
@@ -544,8 +544,8 @@ class CatalogServiceTest extends TestCase
         $accessToken->access_token = 1;
         $accessToken->refresh_token = 1;
         $accessToken->id_token = 1;
-        $accessToken->expires_in = self::DEFAULT_EXPIRES_IN;
-        $accessToken->expires_at = date("Y-m-d H:i:s", $time + self::DEFAULT_EXPIRES_IN);
+        $accessToken->expires_in = self::TEST_EXPIRES_IN;
+        $accessToken->expires_at = date("Y-m-d H:i:s", $time + self::TEST_EXPIRES_IN);
         $accessToken->issued_at = date("Y-m-d H:i:s", $time);
 
         // Mock Page
