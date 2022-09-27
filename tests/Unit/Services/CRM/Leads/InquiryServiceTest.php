@@ -1860,15 +1860,17 @@ class InquiryServiceTest extends TestCase
             ->with($sendInquiryParams)
             ->andReturn($lead);
 
-        // Mock ADF Export Repository
+        // Mock ADF Export
         $this->adfServiceMock
             ->shouldReceive('export')
-            ->never();
+            ->once()
+            ->andReturn(false);
 
         // Mock IDS Export
         $this->idsServiceMock
             ->shouldReceive('exportInquiry')
-            ->never();
+            ->once()
+            ->andReturn(false);
 
         // Mock Sales Person Repository
         $this->trackingRepositoryMock
