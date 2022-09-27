@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Inventory\Geolocation\Point;
 use Log;
 use Cache;
 use Illuminate\Console\Command;
@@ -10,8 +11,6 @@ use Illuminate\Database\Eloquent\Builder;
 
 class LatLongPrecisionUpdaterCommand extends Command
 {
-    const GOOGLE_MAPS_ENDPOINT = "https://maps.googleapis.com/maps/api/geocode/json";
-
     /**
      * The name and signature of the console command.
      *
@@ -79,8 +78,8 @@ class LatLongPrecisionUpdaterCommand extends Command
 
                 // Update the record in the DB
                 $item->update([
-                    'latitude' => $latLong->getLatitude(),
-                    'longitude' => $latLong->getLongitude()
+                    'latitude' => $latLong->latitude,
+                    'longitude' => $latLong->longitude
                 ]);
             });
 
@@ -106,7 +105,7 @@ class LatLongPrecisionUpdaterCommand extends Command
     protected function getGoogleMapsAttributes(string $address)
     {
         return [
-            'key' => env('GOOGLE_MAPS_API_KEY'),
+            'key' => config('google.maps.api_key'),
             'sensor' => 'false',
             'address' => $address
         ];
@@ -116,12 +115,12 @@ class LatLongPrecisionUpdaterCommand extends Command
     /**
      * Get the latitude and longitude value for a ZIP code from the Geocoding API
      *
-     * @return LatLong|null
+     * @return Point|null
      */
-    protected function getLongitudeAndLatitude(string $zip) : ?LatLong {
+    protected function getLongitudeAndLatitude(string $zip) : ?Point {
         $query = http_build_query($this->getGoogleMapsAttributes($zip));
 
-        $url = self::GOOGLE_MAPS_ENDPOINT . "?{$query}";
+        $url = config('google.maps.url') . "?{$query}";
 
         $result_string = file_get_contents($url);
 
@@ -131,43 +130,10 @@ class LatLongPrecisionUpdaterCommand extends Command
            return null;
         }
 
-        return new LatLong(
+        return new Point(
             floatval($result['results'][0]['geometry']['location']['lat']),
             floatval($result['results'][0]['geometry']['location']['lng'])
         );
     }
 
-}
-
-/**
- * Represents a latitude / longitude pair
- */
-class LatLong {
-    private $latitude = 0;
-
-    private $longitude = 0;
-
-    public function __construct(float $latitude, float $longitude)
-    {
-        $this->latitude = $latitude;
-        $this->longitude = $longitude;
-    }
-
-    /**
-     * Get the latitude value for the record
-     *
-     * @return float
-     */
-    public function getLatitude(): float {
-        return $this->latitude;
-    }
-
-    /**
-     * Get the longitude value for the record
-     *
-     * @return float
-     */
-    public function getLongitude(): float {
-        return $this->longitude;
-    }
 }

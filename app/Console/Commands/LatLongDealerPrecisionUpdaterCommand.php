@@ -56,7 +56,6 @@ class LatLongDealerPrecisionUpdaterCommand extends Command
         // Get if we have a process that hung
         $exists = Cache::get($cacheKey);
 
-
         $this->process(!!$exists, $baseQuery,  $cacheKey, $exists);
     }
 
@@ -78,33 +77,33 @@ class LatLongDealerPrecisionUpdaterCommand extends Command
         $query->chunk(500, function($data, $chunkNumber) use ($cacheKey) {
             $this->alert("Processing chunk number '{$chunkNumber}'");
 
-            $data->each(function(DealerLocation $item) {
+            $data->each(function(DealerLocation $location) {
                 $searchQuery = "";
                 $isCanadianPostcode = null;
 
-                if($item->postalcode) {
-                    $searchQuery = $item->postalcode;
+                if($location->postalcode) {
+                    $searchQuery = $location->postalcode;
 
                     // Get a boolean value telling us whether we have a canadian or a US postcode
                     $isCanadianPostcode = !!preg_match('/^([A-Za-z]\d[A-Za-z][-]?\d[A-Za-z]\d)/i', $searchQuery);
                 } else {
-                    $searchQuery = "{$item->address}, {$item->city}, {$item->county}, {$item->region}";
+                    $searchQuery = "{$location->address}, {$location->city}, {$location->county}, {$location->region}";
                 }
                 
                 $latLong = $this->getLongitudeAndLatitude($searchQuery, $isCanadianPostcode);
 
                 // If the method returns null, there was an issue with getting info for that zip. Log it and move on
                 if($latLong === null) {
-                    return $this->addError($item, $searchQuery);
+                    return $this->addError($location, $searchQuery);
                 }
 
                 // Update the record in the DB
-                $item->update([
+                $location->update([
                     'latitude' => $latLong->latitude,
                     'longitude' => $latLong->longitude
                 ]);
 
-                $this->findCreateOrUpdateGeolocationRecord($item, $latLong);
+                $this->findCreateOrUpdateGeolocationRecord($location, $latLong);
             });
 
             // Remember current chunk number
@@ -142,13 +141,13 @@ class LatLongDealerPrecisionUpdaterCommand extends Command
      *
      * @return void
      */
-    protected function addError(DealerLocation $item, string $query)
+    protected function addError(DealerLocation $location, string $query)
     {
         // Log out the error
-        Log::error("[geolocation:dealers] Failed to get the lat/long value for {$item->dealer_location_id} q. {$query}");
+        Log::error("[geolocation:dealers] Failed to get the lat/long value for {$location->dealer_location_id} q. {$query}");
 
         // Print an error to the console
-        $this->error("Failed to get the lat/long value for {$item->dealer_location_id} q. {$query}");
+        $this->error("Failed to get the lat/long value for {$location->dealer_location_id} q. {$query}");
     }
 
 
@@ -162,7 +161,7 @@ class LatLongDealerPrecisionUpdaterCommand extends Command
         }
 
         return [
-            'key' => env('GOOGLE_MAPS_API_KEY'),
+            'key' => config('google.maps.api_key'),
             'sensor' => 'false',
             'address' => $address,
             'components' => implode(',', [
@@ -182,7 +181,7 @@ class LatLongDealerPrecisionUpdaterCommand extends Command
     protected function getLongitudeAndLatitude(string $address, $isCanadianPostcode) : ?object {
         $query = http_build_query($this->getGoogleMapsAttributes($address, $isCanadianPostcode));
 
-        $url = self::GOOGLE_MAPS_ENDPOINT . "?{$query}";
+        $url = config('google.maps.url') . "?{$query}";
 
         // Make HTTP request to the GMaps API
         $result_string = file_get_contents($url);
@@ -200,7 +199,7 @@ class LatLongDealerPrecisionUpdaterCommand extends Command
                 'city' =>  $result['results'][0]['address_components'][1]['short_name'],
                 'state' => $result['results'][0]['address_components'][3]['short_name'],
                 'zip' => $result['results'][0]['address_components'][0]['short_name'],
-                'country' => $this->getCountryShortName($result['results'][0]['address_components'][4]['short_name'])
+                'country' => $this->mapCountryIsoShortToLongCode($result['results'][0]['address_components'][4]['short_name'])
             ];
         } catch (\Exception $e) {
             return null;
@@ -212,11 +211,11 @@ class LatLongDealerPrecisionUpdaterCommand extends Command
      * 
      * @return string
      */
-    protected function getCountryShortName($country)
+    protected function mapCountryIsoShortToLongCode($shortCode): string
     {
-        $map = ['US' => 'USA', 'CA' => 'CA'];
+        $isoCodes = ['US' => 'USA', 'CA' => 'CA'];
 
-        return @$map[$country] ?? 'USA';
+        return $isoCodes[$shortCode] ?? 'USA';
     }
 
 }
