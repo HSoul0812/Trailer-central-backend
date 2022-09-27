@@ -3,7 +3,6 @@
 namespace App\Http\Requests\Website\Parts;
 
 use App\Http\Requests\Request;
-use App\Rules\ValidTypeFilterRule;
 
 /**
  *
