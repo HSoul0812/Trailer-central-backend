@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Services\Integration\Facebook;
 
+use App\Models\CRM\User\User;
 use App\Models\Integration\Auth\AccessToken;
 use App\Models\Integration\Facebook\Catalog;
 use App\Models\Integration\Facebook\Page;
@@ -9,16 +10,12 @@ use App\Jobs\Integration\Facebook\CatalogJob;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Repositories\Integration\Facebook\PageRepositoryInterface;
 use App\Repositories\Integration\Facebook\CatalogRepositoryInterface;
-use App\Repositories\Repository;
 use App\Services\Integration\AuthServiceInterface;
 use App\Services\Integration\Facebook\CatalogService;
 use App\Services\Integration\Facebook\BusinessServiceInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 use Mockery;
 use Mockery\LegacyMockInterface;
-use PHPUnit\Framework\MockObject\MockObject;
 use Tests\TestCase;
 
 /**
