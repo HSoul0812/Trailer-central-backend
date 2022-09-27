@@ -137,6 +137,7 @@ class DealerLocation extends Model
     ];
 
     protected $casts = [
+        'is_default' => 'boolean',
         'sales_tax_item_column_titles' => 'array'
     ];
 

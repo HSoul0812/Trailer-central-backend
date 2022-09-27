@@ -5,16 +5,21 @@ namespace App\Services\Import\Parts;
 use App\Events\Parts\PartQtyUpdated;
 use App\Exceptions\Services\Import\Parts\EmptySKUException;
 use App\Models\Bulk\Parts\BulkUpload;
+use App\Models\Parts\Bin;
+use App\Models\Parts\BinQuantity;
 use App\Models\Parts\Brand;
 use App\Models\Parts\Category;
+use App\Models\Parts\Part;
 use App\Models\Parts\Type;
 use App\Models\Parts\Vendor;
+use App\Models\User\DealerLocation;
 use App\Repositories\Bulk\Parts\BulkUploadRepositoryInterface;
 use App\Repositories\Parts\BinRepositoryInterface;
 use App\Repositories\Parts\PartRepositoryInterface;
 use Closure;
 use DB;
 use Exception;
+use Illuminate\Support\Arr;
 use League\Flysystem\FilesystemInterface;
 use Log;
 use Storage;
@@ -44,6 +49,9 @@ class NewCsvImportService implements CsvImportServiceInterface
     const HEADER_VIDEO_EMBED_CODE = 'Video Embed Code';
     const HEADER_ALTERNATE_PART_NUMBER = 'Alternate Part Number';
     const HEADER_SHIPPING_FEE = 'Shipping Fee';
+
+    // Example: Bin Hello World Qty, the <name> is "Hello World", this is case-sensitive
+    const HEADER_BIN_QTY_REGEX = '/Bin\s+(?<name>.+)\s+Qty/';
 
     const HEADER_RULE_REQUIRED = 'required';
     const HEADER_RULE_OPTIONAL = 'optional';
@@ -81,6 +89,8 @@ class NewCsvImportService implements CsvImportServiceInterface
     const MEMORY_CACHE_KEY_BRANDS = 'brands';
     const MEMORY_CACHE_KEY_TYPES = 'types';
     const MEMORY_CACHE_KEY_CATEGORIES = 'categories';
+    const MEMORY_CACHE_KEY_BINS = 'bins';
+    const MEMORY_CACHE_KEY_DEFAULT_LOCATION = 'default_location';
 
     /** @var BulkUploadRepositoryInterface */
     protected $bulkUploadRepository;
@@ -106,6 +116,15 @@ class NewCsvImportService implements CsvImportServiceInterface
      * @var array
      */
     protected $headerIndexes = [];
+
+    /**
+     * The $binHeaderIndexes keeps the header indexes for the bin
+     * columns, this will allow is to process the bin data
+     * separately from the other main columns
+     *
+     * @var array
+     */
+    protected $binHeaderIndexes = [];
 
     /**
      * Another integral part of this command, we'll store the
@@ -153,13 +172,19 @@ class NewCsvImportService implements CsvImportServiceInterface
      */
     public function run()
     {
-        // Temp code
         if (file_exists(storage_path('logs/pond.log'))) {
-            // unlink(storage_path('logs/pond.log'));
-            // file_put_contents(storage_path('logs/pond.log'), '');
+            unlink(storage_path('logs/pond.log'));
         }
 
         config(['logging.default' => 'pond']);
+
+        DB::listen(function($query) {
+            Log::info(
+                $query->sql,
+                $query->bindings,
+                $query->time
+            );
+        });
 
         Log::info('Starting import for bulk upload ID: ' . $this->bulkUpload->id);
 
@@ -280,14 +305,41 @@ class NewCsvImportService implements CsvImportServiceInterface
 
         $this->headerIndexes = array_flip($headers);
 
-        foreach ($headers as $header) {
+        foreach ($headers as $index => $header) {
+            // Do nothing if this header exists in the header rules array
+            if (array_key_exists($header, self::HEADER_RULES)) {
+                continue;
+            }
+
+            unset($this->headerIndexes[$header]);
+
+            // If the bin name can be extracted from the header name
+            // we'll store it in the $binHeaderIndexes variable to be
+            // processed later
+            if ($binName = $this->getBinNameFromHeader($header)) {
+                $this->binHeaderIndexes[$binName] = $index;
+
+                $this->cacheBinsInMemory();
+                continue;
+            }
+
             // If the header doesn't exist in the rule, we unset it from
             // the interested indexes
-            if (!array_key_exists($header, self::HEADER_RULES)) {
-                Log::info("Found invalid headers: $header, ignore this header...");
-                unset($this->headerIndexes[$header]);
-            }
+            Log::info("Found invalid headers: $header, ignore this header...");
         }
+    }
+
+    /**
+     * Get the bin name from the header name
+     *
+     * @param string $header
+     * @return string|null
+     */
+    private function getBinNameFromHeader(string $header): ?string
+    {
+        preg_match(self::HEADER_BIN_QTY_REGEX, $header, $matches, PREG_OFFSET_CAPTURE);
+
+        return data_get($matches, 'name.0');
     }
 
     /**
@@ -319,6 +371,8 @@ class NewCsvImportService implements CsvImportServiceInterface
         Log::info("Importing part SKU " . $partData['sku']);
 
         $part = $this->partsRepository->createOrUpdate($partData);
+
+        $this->processBinsForPart($part, $data, $line);
 
         event(new PartQtyUpdated($part, null, [
             'description' => 'Created/updated using bulk uploader'
@@ -363,8 +417,6 @@ class NewCsvImportService implements CsvImportServiceInterface
                 $this->errors[] = $exception->getMessage();
             }
         }
-
-        // TODO: Process Bins columns
 
         return $part;
     }
@@ -711,5 +763,100 @@ class NewCsvImportService implements CsvImportServiceInterface
         }
 
         return $jsonEncodedValidationErrors;
+    }
+
+    /**
+     * This method cache the dealer's bin in the memory for fast lookup
+     * @return void
+     */
+    private function cacheBinsInMemory(): void
+    {
+        // No need to rerun the query if the cache existed
+        if (array_key_exists(self::MEMORY_CACHE_KEY_BINS, $this->memoryCache)) {
+            return;
+        }
+
+        $this->memoryCache[self::MEMORY_CACHE_KEY_BINS] = DB::table(Bin::getTableName())
+            ->where('dealer_id', $this->bulkUpload->dealer_id)
+            ->get(['id', 'bin_name'])
+            ->keyBy('bin_name');
+    }
+
+    /**
+     * Process the bin association with the part
+     *
+     * @param Part $part
+     * @param array $data
+     * @param int $line
+     * @return void
+     */
+    private function processBinsForPart(Part $part, array $data, int $line): void
+    {
+        // If we don't have any bin related headers, this block won't get processed
+        foreach ($this->binHeaderIndexes as $binName => $index) {
+            // Do not process this header if the index doesn't exist in the row
+            if (!Arr::has($data, $index)) {
+                continue;
+            }
+
+            // Do not process this header if the data is an empty string
+            // this way the part bin qty can still be in DB and stays intact
+            $quantity = trim($data[$index]);
+            if ($quantity === '') {
+                continue;
+            }
+
+            // If the given data is not a float (numeric), we'll also skip this header
+            $quantity = filter_var($quantity, FILTER_VALIDATE_FLOAT);
+            if ($quantity === false) {
+                continue;
+            }
+
+            $bin = data_get($this->memoryCache[self::MEMORY_CACHE_KEY_BINS], $binName);
+
+            // If we can't find this bin from the cache, we'll create a new bin for it
+            if ($bin === null) {
+                $defaultLocation = $this->getDealerDefaultLocation();
+
+                $bin = Bin::create([
+                    'dealer_id' => $this->bulkUpload->dealer_id,
+                    'location' => $defaultLocation->dealer_location_id,
+                    'bin_name' => $binName,
+                ]);
+
+                // Make sure to add this new bin to the bin cache, so we don't need to
+                // create it again and again
+                $this->memoryCache[self::MEMORY_CACHE_KEY_BINS][$binName] = $bin;
+            }
+
+            // A simple work of associate the part and bin together
+            $partBinQty = BinQuantity::firstOrNew([
+                'part_id' => $part->id,
+                'bin_id' => $bin->id,
+            ]);
+
+            $partBinQty->qty = $quantity;
+
+            $partBinQty->save();
+        }
+    }
+
+    /**
+     * Get the default dealer location
+     *
+     * @return DealerLocation
+     */
+    private function getDealerDefaultLocation(): DealerLocation
+    {
+        if (!array_key_exists(self::MEMORY_CACHE_KEY_DEFAULT_LOCATION, $this->memoryCache)) {
+            $defaultLocation = DealerLocation::query()
+                ->where('dealer_id', $this->bulkUpload->dealer_id)
+                ->where('is_default', true)
+                ->first(['dealer_location_id']);
+
+            $this->memoryCache[self::MEMORY_CACHE_KEY_DEFAULT_LOCATION] = $defaultLocation;
+        }
+
+        return $this->memoryCache[self::MEMORY_CACHE_KEY_DEFAULT_LOCATION];
     }
 }
