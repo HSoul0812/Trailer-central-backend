@@ -28,12 +28,12 @@ class ValidTypeFilterRule implements Rule
     {
         // Iterate over the array and sequentially check if the type passed exists in the DB
         foreach($value as $type) {
-            if(Type::where('name', $type)->count() === 0) {
-                return false;
-            }
+            if(Type::where('name', $type)->count() !== 0) continue;
 
-            return true;
+            return false;
         }
+
+        return true;
     }
 
     /**

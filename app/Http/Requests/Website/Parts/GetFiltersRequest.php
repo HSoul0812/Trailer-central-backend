@@ -15,7 +15,7 @@ class GetFiltersRequest extends Request
     /**
      * Get validation rules for a request
      */
-    public function rules()
+    public function getRules()
     {
         return [
             'dealer_id' => 'required|array',
