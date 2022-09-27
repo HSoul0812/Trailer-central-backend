@@ -146,6 +146,8 @@ class CatalogServiceTest extends TestCase
         $catalog->page = $page;
         $catalog->user = $dealer;
         $catalog->dealerLocation = $location;
+        $catalog->shouldReceive('getCatalogNameIdAttribute')
+                ->andReturn($catalog->catalog_name);
 
 
         // Create Validation Response
@@ -235,6 +237,8 @@ class CatalogServiceTest extends TestCase
         $catalog->page = $page;
         $catalog->user = $dealer;
         $catalog->dealerLocation = $location;
+        $catalog->shouldReceive('getCatalogNameIdAttribute')
+                ->andReturn($catalog->catalog_name);
 
 
         // Create Validation Response
@@ -384,6 +388,8 @@ class CatalogServiceTest extends TestCase
         $catalog->page = $page;
         $catalog->user = $dealer;
         $catalog->dealerLocation = $location;
+        $catalog->shouldReceive('getCatalogNameIdAttribute')
+                ->andReturn($catalog->catalog_name);
 
 
         // Create Validation Response
@@ -506,6 +512,7 @@ class CatalogServiceTest extends TestCase
 
         // Mock Catalog
         $catalog = $this->getEloquentMock(Catalog::class);
+        $catalog->id = 1;
         $catalog->dealer_id = $dealer->dealer_id;
         $catalog->fbapp_page_id = $page->id;
         $catalog->business_id = 1;
@@ -519,6 +526,8 @@ class CatalogServiceTest extends TestCase
         $catalog->page = $page;
         $catalog->user = $dealer;
         $catalog->dealerLocation = $location;
+        $catalog->shouldReceive('getCatalogNameIdAttribute')
+                ->andReturn($catalog->catalog_name);
 
 
         /** @var CatalogService $service */
@@ -622,6 +631,8 @@ class CatalogServiceTest extends TestCase
         $catalog->page = $page;
         $catalog->user = $dealer;
         $catalog->dealerLocation = $location;
+        $catalog->shouldReceive('getCatalogNameIdAttribute')
+                ->andReturn($catalog->catalog_name);
 
 
         // Get Pre-Created Payload
@@ -671,7 +682,7 @@ class CatalogServiceTest extends TestCase
         $this->expectsJobs(CatalogJob::class);
 
         // Handle Catalog Payload Result
-        $result = $service->payload(['payload' => $payload]);
+        $result = $service->payload($payload);
 
         $this->assertSame($result, [
             'success' => true,
