@@ -1794,7 +1794,7 @@ class InquiryServiceTest extends TestCase
             'dealer_id' => $dealer->dealer_id,
             'website_id' => $website->id,
             'inquiry_type' => InquiryLead::INQUIRY_TYPES[0],
-            'lead_types' => [LeadType::TYPE_FINANCING],
+            'lead_types' => [LeadType::TYPE_GENERAL],
             'device' => self::TEST_DEVICE,
             'first_name' => $lead->first_name,
             'last_name' => $lead->last_name,
