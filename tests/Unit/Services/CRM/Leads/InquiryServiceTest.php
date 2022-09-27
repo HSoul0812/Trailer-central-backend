@@ -249,7 +249,7 @@ class InquiryServiceTest extends TestCase
             ->shouldReceive('getConfigByWebsite')
             ->once()
             ->with($website->id, WebsiteConfig::LEADS_MERGE_ENABLED)
-            ->andReturn(null);
+            ->andReturn([]);
 
         // Mock Lead Repository      
         $this->leadRepositoryMock
@@ -419,7 +419,7 @@ class InquiryServiceTest extends TestCase
             ->shouldReceive('getConfigByWebsite')
             ->once()
             ->with($website->id, WebsiteConfig::LEADS_MERGE_ENABLED)
-            ->andReturn(null);
+            ->andReturn([]);
 
         // Mock Lead Repository
         $this->leadRepositoryMock
@@ -589,7 +589,7 @@ class InquiryServiceTest extends TestCase
             ->shouldReceive('getConfigByWebsite')
             ->once()
             ->with($website->id, WebsiteConfig::LEADS_MERGE_ENABLED)
-            ->andReturn(null);
+            ->andReturn([]);
 
         // Mock Lead Repository
         $this->leadRepositoryMock
@@ -760,7 +760,7 @@ class InquiryServiceTest extends TestCase
             ->shouldReceive('getConfigByWebsite')
             ->once()
             ->with($website->id, WebsiteConfig::LEADS_MERGE_ENABLED)
-            ->andReturn(null);
+            ->andReturn([]);
 
         // Mock Lead Repository
         $this->leadRepositoryMock
@@ -931,7 +931,7 @@ class InquiryServiceTest extends TestCase
             ->shouldReceive('getConfigByWebsite')
             ->once()
             ->with($website->id, WebsiteConfig::LEADS_MERGE_ENABLED)
-            ->andReturn(null);
+            ->andReturn([]);
 
         // Mock Lead Repository
         $this->leadRepositoryMock
@@ -1102,7 +1102,7 @@ class InquiryServiceTest extends TestCase
             ->shouldReceive('getConfigByWebsite')
             ->once()
             ->with($website->id, WebsiteConfig::LEADS_MERGE_ENABLED)
-            ->andReturn(null);
+            ->andReturn([]);
 
         // Mock Lead Repository
         $this->leadRepositoryMock
@@ -1344,7 +1344,7 @@ class InquiryServiceTest extends TestCase
 
         // Get Pretty Phone
         $this->mergeLead->shouldReceive('getPreferredDealerLocationAttribute')
-             ->andReturn(null);
+             ->andReturn([]);
 
         // Get Real Username Attribute
         $interaction->shouldReceive('getRealUsernameAttribute')
@@ -1353,6 +1353,9 @@ class InquiryServiceTest extends TestCase
         // Mock SalesPerson
         $salesPerson->shouldReceive('getFullNameAttribute')
             ->andReturn($salesPerson->first_name . ' ' . $salesPerson->last_name);
+
+        // Expects Auto Assign/Auto Responder Jobs
+        $this->expectsJobs([AutoAssignJob::class]);
 
         // Fake Mail
         Mail::fake();
@@ -1531,7 +1534,7 @@ class InquiryServiceTest extends TestCase
 
         // Get Pretty Phone
         $this->mergeLead->shouldReceive('getPreferredDealerLocationAttribute')
-             ->andReturn(null);
+             ->andReturn([]);
 
         // Get Real Username Attribute
         $interaction->shouldReceive('getRealUsernameAttribute')
@@ -1540,6 +1543,9 @@ class InquiryServiceTest extends TestCase
         // Mock SalesPerson
         $salesPerson->shouldReceive('getFullNameAttribute')
             ->andReturn($salesPerson->first_name . ' ' . $salesPerson->last_name);
+
+        // Expects Auto Assign/Auto Responder Jobs
+        $this->expectsJobs([AutoAssignJob::class]);
 
         // Fake Mail
         Mail::fake();
@@ -1705,6 +1711,9 @@ class InquiryServiceTest extends TestCase
         // Get Pretty Phone
         $lead->shouldReceive('getPreferredDealerLocationAttribute')
              ->andReturn(null);
+
+        // Expects Auto Assign/Auto Responder Jobs
+        $this->expectsJobs([AutoAssignJob::class]);
 
         // Fake Mail
         Mail::fake();
