@@ -1293,11 +1293,16 @@ class InquiryServiceTest extends TestCase
             ->with($sendInquiryParams)
             ->andReturn($matches);
 
-        // Mock Create Lead
+        // Mock Merge Lead
         $this->leadServiceMock
             ->shouldReceive('merge')
             ->once()
             ->andReturn($interaction);
+
+        // Mock Update Lead
+        $this->leadServiceMock
+            ->shouldReceive('update')
+            ->once();
 
         // Mock ADF Export
         $this->adfServiceMock
@@ -1483,11 +1488,16 @@ class InquiryServiceTest extends TestCase
             ->with($sendInquiryParams)
             ->andReturn($matches);
 
-        // Mock Create Lead
+        // Mock Merge Lead
         $this->leadServiceMock
             ->shouldReceive('merge')
             ->once()
             ->andReturn($interaction);
+
+        // Mock Update Lead
+        $this->leadServiceMock
+            ->shouldReceive('update')
+            ->once();
 
         // Mock ADF Export
         $this->adfServiceMock
@@ -1651,9 +1661,7 @@ class InquiryServiceTest extends TestCase
         // Mock Website Config Service
         $this->websiteConfigServiceMock
             ->shouldReceive('getConfigByWebsite')
-            ->once()
-            ->with($website->id, WebsiteConfig::LEADS_MERGE_ENABLED)
-            ->andReturn([WebsiteConfig::LEADS_MERGE_ENABLED => '1']);
+            ->never();
 
         // Mock Lead Repository
         $this->leadRepositoryMock
