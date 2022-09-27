@@ -131,7 +131,7 @@ class CatalogServiceTest extends TestCase
         $accessToken->expires_in = self::TEST_EXPIRES_IN;
         $accessToken->expires_at = date("Y-m-d H:i:s", $time + self::TEST_EXPIRES_IN);
         $accessToken->issued_at = date("Y-m-d H:i:s", $time);
-        $accessToken->shouldReceive()->andReturn($scopes);
+        $accessToken->shouldReceive('getScopeAttribute')->andReturn($scopes);
 
         // Mock Page
         $page = $this->getEloquentMock(Page::class);
@@ -226,7 +226,7 @@ class CatalogServiceTest extends TestCase
         $accessToken->expires_in = self::TEST_EXPIRES_IN;
         $accessToken->expires_at = date("Y-m-d H:i:s", $time + self::TEST_EXPIRES_IN);
         $accessToken->issued_at = date("Y-m-d H:i:s", $time);
-        $accessToken->shouldReceive()->andReturn($scopes);
+        $accessToken->shouldReceive('getScopeAttribute')->andReturn($scopes);
 
         // Mock Page
         $page = $this->getEloquentMock(Page::class);
@@ -381,7 +381,7 @@ class CatalogServiceTest extends TestCase
         $accessToken->expires_in = self::TEST_EXPIRES_IN;
         $accessToken->expires_at = date("Y-m-d H:i:s", $time + self::TEST_EXPIRES_IN);
         $accessToken->issued_at = date("Y-m-d H:i:s", $time);
-        $accessToken->shouldReceive()->andReturn($scopes);
+        $accessToken->shouldReceive('getScopeAttribute')->andReturn($scopes);
 
         // Mock Page
         $page = $this->getEloquentMock(Page::class);
@@ -522,7 +522,7 @@ class CatalogServiceTest extends TestCase
         $accessToken->expires_in = self::TEST_EXPIRES_IN;
         $accessToken->expires_at = date("Y-m-d H:i:s", $time + self::TEST_EXPIRES_IN);
         $accessToken->issued_at = date("Y-m-d H:i:s", $time);
-        $accessToken->shouldReceive()->andReturn($scopes);
+        $accessToken->shouldReceive('getScopeAttribute')->andReturn($scopes);
 
         // Mock Page
         $page = $this->getEloquentMock(Page::class);
@@ -631,7 +631,7 @@ class CatalogServiceTest extends TestCase
         $accessToken->expires_in = self::TEST_EXPIRES_IN;
         $accessToken->expires_at = date("Y-m-d H:i:s", $time + self::TEST_EXPIRES_IN);
         $accessToken->issued_at = date("Y-m-d H:i:s", $time);
-        $accessToken->shouldReceive()->andReturn($scopes);
+        $accessToken->shouldReceive('getScopeAttribute')->andReturn($scopes);
 
         // Mock Page
         $page = $this->getEloquentMock(Page::class);
