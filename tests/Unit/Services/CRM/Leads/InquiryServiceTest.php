@@ -1302,7 +1302,8 @@ class InquiryServiceTest extends TestCase
         // Mock Update Lead
         $this->leadServiceMock
             ->shouldReceive('update')
-            ->once();
+            ->once()
+            ->andReturn($lead);
 
         // Mock ADF Export
         $this->adfServiceMock
@@ -1497,7 +1498,8 @@ class InquiryServiceTest extends TestCase
         // Mock Update Lead
         $this->leadServiceMock
             ->shouldReceive('update')
-            ->once();
+            ->once()
+            ->andReturn($lead);
 
         // Mock ADF Export
         $this->adfServiceMock
