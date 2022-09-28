@@ -142,6 +142,7 @@ class CatalogServiceTest extends TestCase
 
         // Mock Catalog
         $catalog = $this->getEloquentMock(Catalog::class);
+        $catalog->id = 1;
         $catalog->dealer_id = $dealer->dealer_id;
         $catalog->fbapp_page_id = $page->id;
         $catalog->business_id = 1;
@@ -237,6 +238,7 @@ class CatalogServiceTest extends TestCase
 
         // Mock Catalog
         $catalog = $this->getEloquentMock(Catalog::class);
+        $catalog->id = 1;
         $catalog->dealer_id = $dealer->dealer_id;
         $catalog->fbapp_page_id = $page->id;
         $catalog->business_id = 1;
@@ -392,6 +394,7 @@ class CatalogServiceTest extends TestCase
 
         // Mock Catalog
         $catalog = $this->getEloquentMock(Catalog::class);
+        $catalog->id = 1;
         $catalog->dealer_id = $dealer->dealer_id;
         $catalog->fbapp_page_id = $page->id;
         $catalog->business_id = 1;
@@ -530,6 +533,7 @@ class CatalogServiceTest extends TestCase
         $page->dealer_id = $dealer->dealer_id;
         $page->page_id = 1;
         $page->title = $dealer->name;
+        $page->user = $dealer;
 
         // Mock Catalog
         $catalog = $this->getEloquentMock(Catalog::class);
@@ -560,12 +564,6 @@ class CatalogServiceTest extends TestCase
             ->once()
             ->with(['id' => $catalog->id])
             ->andReturn($catalog);
-
-        // Mock Delete Feed
-        $this->businessServiceMock
-            ->shouldReceive('deleteFeed')
-            ->once()
-            ->with($accessToken, $catalog->catalog_id, $catalog->feed_id);
 
         // Mock Delete Access Token
         $this->tokenRepositoryMock
