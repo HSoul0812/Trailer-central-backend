@@ -460,15 +460,6 @@ class CatalogServiceTest extends TestCase
             'is_active' => 1
         ];
 
-        // Create Page Request Token Params
-        $pageAuthParams = $createRequestParams;
-        $pageAuthParams['relation_type'] = 'fbapp_page';
-
-        // Create Page Token Params
-        $createTokenParams = $createRequestParams;
-        unset($createTokenParams['id_token']);
-        unset($createTokenParams['page_token']);
-
         // Create Catalog Params
         $createCatalogParams = $createRequestParams;
         $createCatalogParams['fbapp_page_id'] = $catalog->page->id;
@@ -526,13 +517,21 @@ class CatalogServiceTest extends TestCase
         $this->tokenRepositoryMock
             ->shouldReceive('create')
             ->once()
+            ->with(Mockery::on(function ($params) use ($pageToken) {
+                return $params['relation_type'] === $pageToken->relation_type &&
+                       $params['relation_id'] === $pageToken->relation_id;
+            }))
             ->andReturn($pageToken);
 
         // Mock Validate Access Token
         $this->businessServiceMock
             ->shouldReceive('validate')
             ->once()
-            ->with($accessToken)
+            ->with(Mockery::on(function ($token) use($accessToken) {
+                return $token->access_token === $accessToken->access_token &&
+                       $token->relation_type === $accessToken->relation_type &&
+                       $token->relation_id === $accessToken->relation_id;
+            }))
             ->andReturn($validate);
 
         // Validate Create Catalog Result
