@@ -176,7 +176,7 @@ class CatalogServiceTest extends TestCase
             ->andReturn($catalog);
 
         // Mock Validate Access Token
-        $this->authServiceMock
+        $this->businessServiceMock
             ->shouldReceive('validate')
             ->once()
             ->with($accessToken)
@@ -680,35 +680,31 @@ class CatalogServiceTest extends TestCase
 
         // Mock Get Catalog
         $this->catalogRepositoryMock
-            ->shouldReceive('get')
+            ->shouldReceive('findOne')
             ->once()
-            ->with(['id' => $integration->catalog_id])
+            ->with(['catalog_id' => $catalog->catalog_id])
             ->andReturn($catalog);
 
-        // Mock Validate Feed
+        // Mock Schedule Feed
         $this->businessServiceMock
             ->shouldReceive('validateFeed')
             ->once()
-            ->with($catalog->accessToken, $catalog->catalog_id, $catalog->feed_id)
-            ->andReturn([
-                'id' => $catalog->feed_id
-            ]);
+            ->with($accessToken, $catalog->catalog_id, $catalog->feed_id);
 
         // Mock Schedule Feed
         $this->businessServiceMock
             ->shouldReceive('scheduleFeed')
-            ->never()
+            ->once()
             ->with($accessToken, $catalog->catalog_id, $catalog->feed_id);
 
-        // Mock Update Catalog
-        $this->catalogRepositoryMock
-            ->shouldReceive('update')
-            ->never()
-            ->with([
-                'id' => $catalog->id,
-                'feed' => $catalog->feed_id
-            ])
-            ->andReturn($catalog);
+        // Mock Validate Feed
+        $this->businessServiceMock
+            ->shouldReceive('updateFeed')
+            ->once()
+            ->with($catalog->accessToken, $catalog->business_id, $catalog->catalog_id, $catalog->feed_id)
+            ->andReturn([
+                'id' => $catalog->feed_id
+            ]);
 
         // Expect Catalog Job
         $this->expectsJobs(CatalogJob::class);
