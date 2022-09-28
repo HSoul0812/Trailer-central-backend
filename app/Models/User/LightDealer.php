@@ -2,6 +2,7 @@
 
 namespace App\Models\User;
 
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 
@@ -20,20 +21,19 @@ use Illuminate\Database\Query\Builder;
  */
 class LightDealer extends Model
 {
-
-    public const TABLE_NAME = 'dealer';
-
-    /**
-     * @var bool
-     */
-    public $timestamps = false;
+    use TableAware;
 
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = self::TABLE_NAME;
+    protected $table = 'dealer';
+
+    /**
+     * @var bool
+     */
+    public $timestamps = false;
 
     /**
      * @var int
@@ -72,13 +72,6 @@ class LightDealer extends Model
         'dealer_id',
         'name',
     ];
-
-    /**
-     * @return string
-     */
-    public static function getTableName(): string {
-        return self::TABLE_NAME;
-    }
 
     /**
      * @return int
