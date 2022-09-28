@@ -660,6 +660,7 @@ class CatalogServiceTest extends TestCase
         $catalog->account_id = 1;
         $catalog->is_active = 1;
         $catalog->accessToken = $accessToken;
+        $catalog->feed = null;
         $catalog->page = $page;
         $catalog->user = $dealer;
         $catalog->dealerLocation = $location;
