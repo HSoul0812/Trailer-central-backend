@@ -74,7 +74,7 @@ class Integration extends Model
      */
     public function decodeSettings(): \Illuminate\Support\Collection
     {
-        return collect($this->settings ? unserialize($this->settings, ['allowed_classes' => false]) : []);
+        return collect(!empty($this->settings) ? (@unserialize($this->settings) ? unserialize($this->settings, ['allowed_classes' => false]) : []) : []);
     }
 
     /**
