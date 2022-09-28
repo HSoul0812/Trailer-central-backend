@@ -1138,7 +1138,7 @@ class CatalogServiceTest extends TestCase
         // Mock Schedule Feed
         $this->businessServiceMock
             ->shouldReceive('validateFeed')
-            ->never()
+            ->once()
             ->andReturn(['id' => $feed->feed_id]);
 
         // Mock Schedule Feed
