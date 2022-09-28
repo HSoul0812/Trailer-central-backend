@@ -6,12 +6,13 @@ use App\Models\CRM\User\User;
 use App\Models\User\DealerLocation;
 use App\Models\Integration\Auth\AccessToken;
 use App\Models\Integration\Facebook\Catalog;
+use App\Models\Integration\Facebook\Feed;
 use App\Models\Integration\Facebook\Page;
 use App\Jobs\Integration\Facebook\CatalogJob;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Repositories\Integration\Facebook\PageRepositoryInterface;
 use App\Repositories\Integration\Facebook\CatalogRepositoryInterface;
-use App\Services\Integration\AuthServiceInterface;
+use App\Repositories\Integration\Facebook\FeedRepositoryInterface;
 use App\Services\Integration\Facebook\CatalogService;
 use App\Services\Integration\Facebook\BusinessServiceInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -47,14 +48,9 @@ class CatalogServiceTest extends TestCase
 
 
     /**
-     * @var LegacyMockInterface|CatalogRepositoryInterface
+     * @var LegacyMockInterface|BusinessServiceInterface
      */
-    private $catalogRepositoryMock;
-
-    /**
-     * @var LegacyMockInterface|PageRepositoryInterface
-     */
-    private $pageRepositoryMock;
+    private $businessServiceMock;
 
     /**
      * @var LegacyMockInterface|TokenRepositoryInterface
@@ -62,14 +58,19 @@ class CatalogServiceTest extends TestCase
     private $tokenRepositoryMock;
 
     /**
-     * @var LegacyMockInterface|AuthServiceInterface
+     * @var LegacyMockInterface|PageRepositoryInterface
      */
-    private $authServiceMock;
+    private $pageRepositoryMock;
 
     /**
-     * @var LegacyMockInterface|BusinessServiceInterface
+     * @var LegacyMockInterface|CatalogRepositoryInterface
      */
-    private $businessServiceMock;
+    private $catalogRepositoryMock;
+
+    /**
+     * @var LegacyMockInterface|FeedRepositoryInterface
+     */
+    private $feedRepositoryMock;
 
     public function setUp(): void
     {
@@ -77,9 +78,6 @@ class CatalogServiceTest extends TestCase
 
         $this->businessServiceMock = Mockery::mock(BusinessServiceInterface::class);
         $this->app->instance(BusinessServiceInterface::class, $this->businessServiceMock);
-
-        $this->authServiceMock = Mockery::mock(AuthServiceInterface::class);
-        $this->app->instance(AuthServiceInterface::class, $this->authServiceMock);
 
         $this->tokenRepositoryMock = Mockery::mock(TokenRepositoryInterface::class);
         $this->app->instance(TokenRepositoryInterface::class, $this->tokenRepositoryMock);
@@ -89,6 +87,9 @@ class CatalogServiceTest extends TestCase
 
         $this->catalogRepositoryMock = Mockery::mock(CatalogRepositoryInterface::class);
         $this->app->instance(CatalogRepositoryInterface::class, $this->catalogRepositoryMock);
+
+        $this->feedRepositoryMock = Mockery::mock(FeedRepositoryInterface::class);
+        $this->app->instance(FeedRepositoryInterface::class, $this->feedRepositoryMock);
     }
 
     /**
@@ -667,6 +668,16 @@ class CatalogServiceTest extends TestCase
         $catalog->shouldReceive('getCatalogNameIdAttribute')
                 ->andReturn($catalog->catalog_name);
 
+        // Mock Feed
+        $feed = $this->getEloquentMock(Feed::class);
+        $feed->business_id = $catalog->business_id;
+        $feed->catalog_id = $catalog->catalog_id;
+        $feed->feed_id = 1;
+        $feed->feed_title = 'Feed for Catalog #' . $catalog->catalog_id;
+        $feed->feed_url = '/' . Feed::CATALOG_URL_PREFIX . '/' . $feed->business_id . '/' . $feed->catalog_id . '.csv';
+        $feed->is_active = 1;
+        $feedUrl = config('filesystems.disks.s3.url') . $feed->feed_url;
+
 
         // Get Pre-Created Payload
         $payload = $this->getTestPayload($catalog);
@@ -692,20 +703,38 @@ class CatalogServiceTest extends TestCase
             ->once()
             ->with($accessToken, $catalog->catalog_id, $catalog->feed_id);
 
+        // Mock Get Feed URL
+        $this->feedRepositoryMock
+            ->shouldReceive('getFeedUrl')
+            ->once()
+            ->with($catalog->business_id, $catalog->catalog_id)
+            ->andReturn($feedUrl);
+
+        // Mock Get Feed Name
+        $this->feedRepositoryMock
+            ->shouldReceive('getFeedName')
+            ->twice()
+            ->with($catalog->catalog_id)
+            ->andReturn($feed->feed_name);
+
         // Mock Schedule Feed
         $this->businessServiceMock
             ->shouldReceive('scheduleFeed')
             ->once()
-            ->with($accessToken, $catalog->catalog_id, $catalog->feed_id);
+            ->with($accessToken, $catalog->catalog_id, $feed->feed_id, $feed->feed_name);
 
-        // Mock Validate Feed
-        $this->businessServiceMock
-            ->shouldReceive('updateFeed')
+        // Mock Get Second Feed URL
+        $this->feedRepositoryMock
+            ->shouldReceive('getFeedUrl')
             ->once()
-            ->with($catalog->accessToken, $catalog->business_id, $catalog->catalog_id, $catalog->feed_id)
-            ->andReturn([
-                'id' => $catalog->feed_id
-            ]);
+            ->with($catalog->business_id, $catalog->catalog_id, false)
+            ->andReturn($feedUrl);
+
+        // Mock Create or Update Feed
+        $this->feedRepositoryMock
+            ->shouldReceive('createOrUpdate')
+            ->once()
+            ->andReturn($feed);
 
         // Expect Catalog Job
         $this->expectsJobs(CatalogJob::class);
