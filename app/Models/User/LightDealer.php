@@ -2,6 +2,7 @@
 
 namespace App\Models\User;
 
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 
@@ -11,6 +12,8 @@ use Illuminate\Database\Query\Builder;
  * This LightDealer class is for Dealers on Nova
  *
  * @package App\Models\LightDealer
+ * @todo This class is a workaround to avoid an unknown Eloquent relation within
+ * App\Models\User\Dealer making the selector slowest render
  *
  * @property int $dealer_id
  * @property string $name
@@ -20,20 +23,19 @@ use Illuminate\Database\Query\Builder;
  */
 class LightDealer extends Model
 {
-
-    public const TABLE_NAME = 'dealer';
-
-    /**
-     * @var bool
-     */
-    public $timestamps = false;
+    use TableAware;
 
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = self::TABLE_NAME;
+    protected $table = 'dealer';
+
+    /**
+     * @var bool
+     */
+    public $timestamps = false;
 
     /**
      * @var int
@@ -72,13 +74,6 @@ class LightDealer extends Model
         'dealer_id',
         'name',
     ];
-
-    /**
-     * @return string
-     */
-    public static function getTableName(): string {
-        return self::TABLE_NAME;
-    }
 
     /**
      * @return int
