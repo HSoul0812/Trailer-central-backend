@@ -1139,7 +1139,6 @@ class CatalogServiceTest extends TestCase
         $this->businessServiceMock
             ->shouldReceive('validateFeed')
             ->never()
-            ->with($accessToken, $catalog->catalog_id, $catalog->feed_id)
             ->andReturn(['id' => $feed->feed_id]);
 
         // Mock Schedule Feed
