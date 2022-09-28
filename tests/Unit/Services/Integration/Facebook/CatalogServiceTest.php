@@ -1139,26 +1139,13 @@ class CatalogServiceTest extends TestCase
         $this->businessServiceMock
             ->shouldReceive('validateFeed')
             ->never()
-            ->with($accessToken, $catalog->catalog_id, $catalog->feed_id);
-
-        // Mock Get Feed URL
-        $this->feedRepositoryMock
-            ->shouldReceive('getFeedUrl')
-            ->once()
-            ->with($catalog->business_id, $catalog->catalog_id)
-            ->andReturn($feedUrl);
-
-        // Mock Get Feed Name
-        $this->feedRepositoryMock
-            ->shouldReceive('getFeedName')
-            ->twice()
-            ->with($catalog->catalog_id)
-            ->andReturn($feed->feed_title);
+            ->with($accessToken, $catalog->catalog_id, $catalog->feed_id)
+            ->andReturn(['id' => $feed->feed_id]);
 
         // Mock Schedule Feed
         $this->businessServiceMock
             ->shouldReceive('scheduleFeed')
-            ->once()
+            ->never()
             ->andReturn(['id' => $feed->feed_id]);
 
         // Mock Get Second Feed URL
@@ -1167,6 +1154,13 @@ class CatalogServiceTest extends TestCase
             ->once()
             ->with($catalog->business_id, $catalog->catalog_id, false)
             ->andReturn($feedUrl);
+
+        // Mock Get Feed Name
+        $this->feedRepositoryMock
+            ->shouldReceive('getFeedName')
+            ->once()
+            ->with($catalog->catalog_id)
+            ->andReturn($feed->feed_title);
 
         // Mock Create or Update Feed
         $this->feedRepositoryMock
