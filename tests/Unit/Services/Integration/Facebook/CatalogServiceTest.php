@@ -847,7 +847,7 @@ class CatalogServiceTest extends TestCase
 
         // Mock Create Catalog Access Token
         $this->tokenRepositoryMock
-            ->shouldReceive('create')
+            ->shouldReceive('update')
             ->once()
             ->with(Mockery::on(function ($params) use ($pageToken) {
                 return $params['relation_type'] === $pageToken->relation_type &&
