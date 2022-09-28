@@ -694,6 +694,191 @@ class CatalogServiceTest extends TestCase
 
     /**
      * @group Marketing
+     * @covers ::update
+     *
+     * @throws BindingResolutionException
+     */
+    public function testUpdatePage()
+    {
+        // Set Defaults
+        $time = time();
+        $scopes = explode(' ', config('oauth.fb.' . self::FB_AUTH_TYPE . '.scopes'));
+
+        // Mock Location
+        $location = $this->getEloquentMock(DealerLocation::class);
+        $location->dealer_location_id = 1;
+        $location->dealer_id = 1;
+        $location->name = 'Indianopolis';
+        $location->salesTax = null;
+        $location->shouldReceive('inventoryCount')->andReturn(0);
+        $location->shouldReceive('referenceCount')->andReturn(0);
+
+        // Mock User
+        $dealer = $this->getEloquentMock(User::class);
+        $dealer->dealer_id = 1;
+        $dealer->email = self::TEST_INQUIRY_EMAIL;
+        $dealer->name = self::TEST_INQUIRY_NAME;
+
+        // Mock AccessToken
+        $accessToken = $this->getEloquentMock(AccessToken::class);
+        $accessToken->id = 1;
+        $accessToken->dealer_id = $dealer->dealer_id;
+        $accessToken->token_type = 'facebook';
+        $accessToken->relation_type = 'fbapp_catalog';
+        $accessToken->relation_id = 1;
+        $accessToken->access_token = 1;
+        $accessToken->refresh_token = 1;
+        $accessToken->id_token = 1;
+        $accessToken->expires_in = self::TEST_EXPIRES_IN;
+        $accessToken->expires_at = date("Y-m-d H:i:s", $time + self::TEST_EXPIRES_IN);
+        $accessToken->issued_at = date("Y-m-d H:i:s", $time);
+        $accessToken->shouldReceive('getScopeAttribute')->andReturn($scopes);
+
+        // Mock PageToken
+        $pageToken = $this->getEloquentMock(AccessToken::class);
+        $pageToken->id = 1;
+        $pageToken->dealer_id = $dealer->dealer_id;
+        $pageToken->token_type = 'facebook';
+        $pageToken->relation_type = 'fbapp_page';
+        $pageToken->relation_id = 1;
+        $pageToken->access_token = 1;
+        $pageToken->refresh_token = 1;
+        $pageToken->id_token = 1;
+        $pageToken->expires_in = self::TEST_EXPIRES_IN;
+        $pageToken->expires_at = date("Y-m-d H:i:s", $time + self::TEST_EXPIRES_IN);
+        $pageToken->issued_at = date("Y-m-d H:i:s", $time);
+        $pageToken->shouldReceive('getScopeAttribute')->andReturn($scopes);
+
+        // Mock Page
+        $page = $this->getEloquentMock(Page::class);
+        $page->id = 1;
+        $page->dealer_id = $dealer->dealer_id;
+        $page->page_id = 1;
+        $page->title = $dealer->name;
+        $page->user = $dealer;
+        $page->accessToken = $pageToken;
+
+        // Mock Catalog
+        $catalog = $this->getEloquentMock(Catalog::class);
+        $catalog->id = 1;
+        $catalog->dealer_id = $dealer->dealer_id;
+        $catalog->fbapp_page_id = $page->id;
+        $catalog->business_id = 1;
+        $catalog->catalog_id = 1;
+        $catalog->catalog_name = $dealer->name;
+        $catalog->catalog_type = Catalog::VEHICLE_TYPE;
+        $catalog->account_name = $dealer->name;
+        $catalog->account_id = 1;
+        $catalog->is_active = 1;
+        $catalog->accessToken = $accessToken;
+        $catalog->page = $page;
+        $catalog->user = $dealer;
+        $catalog->dealerLocation = $location;
+        $catalog->shouldReceive('getCatalogNameIdAttribute')
+                ->andReturn($catalog->catalog_name);
+
+
+        // Create Validation Response
+        $validate = ['is_valid' => true, 'is_expired' => false];
+
+        // Update Request Params
+        $updateRequestParams = [
+            'id' => $catalog->id,
+            'dealer_id' => $catalog->dealer_id,
+            'dealer_location_id' => $catalog->dealer_location_id,
+            'access_token' => $catalog->accessToken->access_token,
+            'id_token' => $catalog->accessToken->id_token,
+            'refresh_token' => $catalog->accessToken->refresh_token,
+            'expires_in' => $catalog->accessToken->expires_in,
+            'expires_at' => $catalog->accessToken->expires_at,
+            'issued_at' => $catalog->accessToken->issued_at,
+            'page_token' => $pageToken->access_token,
+            'business_id' => $catalog->business_id,
+            'catalog_id' => $catalog->catalog_id,
+            'account_name' => $catalog->account_name,
+            'account_id' => $catalog->account_id,
+            'page_title' => $catalog->page->title,
+            'page_id' => $catalog->page->page_id,
+            'feed_id' => $catalog->feed_id,
+            'filters' => '',
+            'is_active' => 1
+        ];
+
+        // Relation Auth Params
+        $relationAuthParams = $updateRequestParams;
+        unset($relationAuthParams['id']);
+        $relationAuthParams['token_type'] = 'facebook';
+        $relationAuthParams['relation_type'] = 'fbapp_catalog';
+        $relationAuthParams['relation_id'] = $catalog->id;
+
+        /** @var CatalogService $service */
+        $service = $this->app->make(CatalogService::class);
+
+        // Mock Update Page
+        $this->pageRepositoryMock
+            ->shouldReceive('create')
+            ->once()
+            ->with($updateRequestParams)
+            ->andReturn($page);
+
+        // Mock Update Catalog
+        $this->catalogRepositoryMock
+            ->shouldReceive('update')
+            ->once()
+            ->with($updateRequestParams)
+            ->andReturn($catalog);
+
+        // Mock Get Relation Token
+        $this->tokenRepositoryMock
+            ->shouldReceive('getRelation')
+            ->once()
+            ->with($relationAuthParams)
+            ->andReturn($accessToken);
+
+        // Mock Get FB Refresh Token
+        $this->businessServiceMock
+            ->shouldReceive('refresh')
+            ->once()
+            ->with(Mockery::on(function ($params) use ($pageToken) {
+                return $params['relation_type'] === $pageToken->relation_type &&
+                       $params['relation_id'] === $pageToken->relation_id;
+            }))
+            ->andReturn($pageToken->refresh_token);
+
+        // Mock Create Catalog Access Token
+        $this->tokenRepositoryMock
+            ->shouldReceive('create')
+            ->once()
+            ->with(Mockery::on(function ($params) use ($pageToken) {
+                return $params['relation_type'] === $pageToken->relation_type &&
+                       $params['relation_id'] === $pageToken->relation_id;
+            }))
+            ->andReturn($pageToken);
+
+        // Mock Validate Access Token
+        $this->businessServiceMock
+            ->shouldReceive('validate')
+            ->once()
+            ->with(Mockery::on(function ($token) use($accessToken) {
+                return $token->access_token === $accessToken->access_token &&
+                       $token->relation_type === $accessToken->relation_type &&
+                       $token->relation_id === $accessToken->relation_id;
+            }))
+            ->andReturn($validate);
+
+        // Validate Update Catalog Result
+        $result = $service->update($updateRequestParams);
+
+        // Assert Match
+        $this->assertSame($result['data']['id'], $catalog->id);
+
+        // Assert Match
+        $this->assertSame($result['validate'], $validate);
+    }
+
+
+    /**
+     * @group Marketing
      * @covers ::delete
      *
      * @throws BindingResolutionException
