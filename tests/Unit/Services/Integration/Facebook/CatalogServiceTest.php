@@ -139,6 +139,7 @@ class CatalogServiceTest extends TestCase
         $page->dealer_id = $dealer->dealer_id;
         $page->page_id = 1;
         $page->title = $dealer->name;
+        $page->user = $dealer;
 
         // Mock Catalog
         $catalog = $this->getEloquentMock(Catalog::class);
@@ -235,6 +236,7 @@ class CatalogServiceTest extends TestCase
         $page->dealer_id = $dealer->dealer_id;
         $page->page_id = 1;
         $page->title = $dealer->name;
+        $page->user = $dealer;
 
         // Mock Catalog
         $catalog = $this->getEloquentMock(Catalog::class);
@@ -391,6 +393,7 @@ class CatalogServiceTest extends TestCase
         $page->dealer_id = $dealer->dealer_id;
         $page->page_id = 1;
         $page->title = $dealer->name;
+        $page->user = $dealer;
 
         // Mock Catalog
         $catalog = $this->getEloquentMock(Catalog::class);
@@ -637,6 +640,7 @@ class CatalogServiceTest extends TestCase
         $page->dealer_id = $dealer->dealer_id;
         $page->page_id = 1;
         $page->title = $dealer->name;
+        $page->user = $dealer;
 
         // Mock Catalog
         $catalog = $this->getEloquentMock(Catalog::class);
