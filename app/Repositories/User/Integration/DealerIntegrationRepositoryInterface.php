@@ -9,5 +9,7 @@ use App\Repositories\GenericRepository;
 
 interface DealerIntegrationRepositoryInterface extends GenericRepository
 {
+    public function index(array $params);
+
     public function get(array $params): DealerIntegration;
 }

@@ -23,6 +23,26 @@ class DealerIntegrationRepository implements DealerIntegrationRepositoryInterfac
 
     /**
      * @param array $params
+     * @return DealerIntegration[]
+     * @throws ModelNotFoundException when `dealer_id` was provided but there isn't any record with that id
+     * @throws InvalidArgumentException when `dealer_id` was not provided
+     */
+    public function index(array $params)
+    {
+        $query = $this->model::query()
+            ->select('integration_dealer.*')
+            ->join('integration', 'integration.integration_id', '=', 'integration_dealer.integration_id')
+            ->orderBy('integration_dealer_id', 'DESC');
+
+        if (empty($params['dealer_id'])) {
+            throw new InvalidArgumentException(sprintf("[%s] 'dealer_id' argument is required", __CLASS__));
+        }
+
+        return $query->where('dealer_id', $params['dealer_id'])->get();
+    }
+
+    /**
+     * @param array $params
      * @return DealerIntegration
      * @throws ModelNotFoundException when `integration_dealer_id` was provided but there isn't any record with that id
      * @throws InvalidArgumentException when `integration_dealer_id` was not provided and some of `integration_id`
