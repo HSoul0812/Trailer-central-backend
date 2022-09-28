@@ -504,7 +504,6 @@ class CatalogServiceTest extends TestCase
         $this->businessServiceMock
             ->shouldReceive('refresh')
             ->once()
-            ->with($refreshAuthParams)
             ->andReturn([
                 'access_token' => $accessToken->refresh_token
             ]);
