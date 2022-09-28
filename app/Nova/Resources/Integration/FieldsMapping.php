@@ -6,6 +6,7 @@ use App\Models\Integration\Collector\CollectorFields;
 use App\Nova\Filters\DealerIDMapping;
 use App\Nova\Resource;
 use App\Nova\Resources\Dealer\Dealer;
+use App\Nova\Resources\Dealer\LightDealer;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Select;
@@ -71,7 +72,7 @@ class FieldsMapping extends Resource
                     '<span style="color: red">Important! The following fields must be specified: manufacturer, category, status. If some of the fields is absent in the file, the default value should be specified. (Default Value Mappings)</span>'
                 ),
 
-            BelongsTo::make('Dealer', 'dealers', Dealer::class)->sortable()->rules('required'),
+            BelongsTo::make('Dealer', 'dealers', LightDealer::class)->searchable()->sortable()->rules('required'),
 
             Text::make('', 'type')->withMeta([
                 'type' => 'hidden',
