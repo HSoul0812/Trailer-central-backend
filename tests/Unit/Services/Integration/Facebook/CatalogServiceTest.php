@@ -699,12 +699,6 @@ class CatalogServiceTest extends TestCase
             ->with(['catalog_id' => $catalog->catalog_id])
             ->andReturn($catalog);
 
-        // Mock Schedule Feed
-        /*$this->businessServiceMock
-            ->shouldReceive('validateFeed')
-            ->never()
-            ->with($accessToken, $catalog->catalog_id, $catalog->feed_id);*/
-
         // Mock Get Feed URL
         $this->feedRepositoryMock
             ->shouldReceive('getFeedUrl')
@@ -849,12 +843,6 @@ class CatalogServiceTest extends TestCase
             ->once()
             ->with(['catalog_id' => $catalog->catalog_id])
             ->andReturn($catalog);
-
-        // Mock Schedule Feed
-        /*$this->businessServiceMock
-            ->shouldReceive('validateFeed')
-            ->never()
-            ->with($accessToken, $catalog->catalog_id, $catalog->feed_id);*/
 
         // Mock Get Feed URL
         $this->feedRepositoryMock
@@ -1001,12 +989,6 @@ class CatalogServiceTest extends TestCase
             ->with(['catalog_id' => $catalog->catalog_id])
             ->andReturn($catalog);
 
-        // Mock Schedule Feed
-        /*$this->businessServiceMock
-            ->shouldReceive('validateFeed')
-            ->never()
-            ->with($accessToken, $catalog->catalog_id, $catalog->feed_id);*/
-
         // Mock Get Feed URL
         $this->feedRepositoryMock
             ->shouldReceive('getFeedUrl')
@@ -1042,6 +1024,158 @@ class CatalogServiceTest extends TestCase
 
         // Expect Product Job
         $this->expectsJobs(ProductJob::class);
+
+        // Handle Catalog Payload Result
+        $result = $service->payload($payload);
+
+        $this->assertSame($result, [
+            'success' => true,
+            'feeds' => count($integrations)
+        ]);
+    }
+
+    /**
+     * @group Marketing
+     * @covers ::payload
+     *
+     * @throws BindingResolutionException
+     */
+    public function testPayloadUpdate()
+    {
+        // Set Defaults
+        $time = time();
+        $scopes = explode(' ', config('oauth.fb.' . self::FB_AUTH_TYPE . '.scopes'));
+
+        // Mock Location
+        $location = $this->getEloquentMock(DealerLocation::class);
+        $location->dealer_location_id = 1;
+        $location->dealer_id = 1;
+        $location->name = 'Indianopolis';
+        $location->salesTax = null;
+        $location->shouldReceive('inventoryCount')->andReturn(0);
+        $location->shouldReceive('referenceCount')->andReturn(0);
+
+        // Mock User
+        $dealer = $this->getEloquentMock(User::class);
+        $dealer->dealer_id = 1;
+        $dealer->email = self::TEST_INQUIRY_EMAIL;
+        $dealer->name = self::TEST_INQUIRY_NAME;
+
+        // Mock AccessToken
+        $accessToken = $this->getEloquentMock(AccessToken::class);
+        $accessToken->id = 1;
+        $accessToken->dealer_id = $dealer->dealer_id;
+        $accessToken->token_type = 'facebook';
+        $accessToken->relation_type = 'fbapp_catalog';
+        $accessToken->relation_id = 1;
+        $accessToken->access_token = 1;
+        $accessToken->refresh_token = 1;
+        $accessToken->id_token = 1;
+        $accessToken->expires_in = self::TEST_EXPIRES_IN;
+        $accessToken->expires_at = date("Y-m-d H:i:s", $time + self::TEST_EXPIRES_IN);
+        $accessToken->issued_at = date("Y-m-d H:i:s", $time);
+        $accessToken->shouldReceive('getScopeAttribute')->andReturn($scopes);
+
+        // Mock Page
+        $page = $this->getEloquentMock(Page::class);
+        $page->id = 1;
+        $page->dealer_id = $dealer->dealer_id;
+        $page->page_id = 1;
+        $page->title = $dealer->name;
+        $page->user = $dealer;
+        $page->accessToken = $accessToken;
+
+        // Mock Catalog
+        $catalog = $this->getEloquentMock(Catalog::class);
+        $catalog->dealer_id = $dealer->dealer_id;
+        $catalog->dealer_location_id = 1;
+        $catalog->fbapp_page_id = $page->id;
+        $catalog->business_id = 1;
+        $catalog->catalog_id = 1;
+        $catalog->catalog_name = $dealer->name;
+        $catalog->catalog_type = Catalog::VEHICLE_TYPE;
+        $catalog->account_name = $dealer->name;
+        $catalog->account_id = 1;
+        $catalog->is_active = 1;
+        $catalog->accessToken = $accessToken;
+        $catalog->page = $page;
+        $catalog->user = $dealer;
+        $catalog->dealerLocation = $location;
+        $catalog->shouldReceive('getCatalogNameIdAttribute')
+                ->andReturn($catalog->catalog_name);
+
+        // Mock Feed
+        $feed = $this->getEloquentMock(Feed::class);
+        $feed->business_id = $catalog->business_id;
+        $feed->catalog_id = $catalog->catalog_id;
+        $feed->feed_id = 1;
+        $feed->feed_title = 'Feed for Catalog #' . $catalog->catalog_id;
+        $feed->feed_url = '/' . Feed::CATALOG_URL_PREFIX . '/' . $feed->business_id . '/' . $feed->catalog_id . '.csv';
+        $feed->is_active = 1;
+        $feedUrl = config('filesystems.disks.s3.url') . $feed->feed_url;
+        $catalog->feed_id = $feed->feed_id;
+        $catalog->feed = $feed;
+
+
+        // Get Pre-Created Payload
+        $payload = $this->getTestPayload($catalog);
+
+        // Parse Payload Data
+        $integrations = (array) json_decode($payload);
+        $integration = reset($integrations);
+
+
+        /** @var CatalogService $service */
+        $service = $this->app->make(CatalogService::class);
+
+        // Mock Get Catalog
+        $this->catalogRepositoryMock
+            ->shouldReceive('findOne')
+            ->once()
+            ->with(['catalog_id' => $catalog->catalog_id])
+            ->andReturn($catalog);
+
+        // Mock Schedule Feed
+        $this->businessServiceMock
+            ->shouldReceive('validateFeed')
+            ->never()
+            ->with($accessToken, $catalog->catalog_id, $catalog->feed_id);
+
+        // Mock Get Feed URL
+        $this->feedRepositoryMock
+            ->shouldReceive('getFeedUrl')
+            ->once()
+            ->with($catalog->business_id, $catalog->catalog_id)
+            ->andReturn($feedUrl);
+
+        // Mock Get Feed Name
+        $this->feedRepositoryMock
+            ->shouldReceive('getFeedName')
+            ->twice()
+            ->with($catalog->catalog_id)
+            ->andReturn($feed->feed_title);
+
+        // Mock Schedule Feed
+        $this->businessServiceMock
+            ->shouldReceive('scheduleFeed')
+            ->once()
+            ->andReturn(['id' => $feed->feed_id]);
+
+        // Mock Get Second Feed URL
+        $this->feedRepositoryMock
+            ->shouldReceive('getFeedUrl')
+            ->once()
+            ->with($catalog->business_id, $catalog->catalog_id, false)
+            ->andReturn($feedUrl);
+
+        // Mock Create or Update Feed
+        $this->feedRepositoryMock
+            ->shouldReceive('createOrUpdate')
+            ->once()
+            ->andReturn($feed);
+
+        // Expect Vehicle Job
+        $this->expectsJobs(VehicleJob::class);
 
         // Handle Catalog Payload Result
         $result = $service->payload($payload);
