@@ -510,7 +510,10 @@ class CatalogServiceTest extends TestCase
         $this->businessServiceMock
             ->shouldReceive('refresh')
             ->once()
-            ->with($pageAuthParams)
+            ->with(Mockery::on(function ($params) use ($pageToken) {
+                return $params['relation_type'] === $pageToken->relation_type &&
+                       $params['relation_id'] === $pageToken->relation_id;
+            }))
             ->andReturn($pageToken->refresh_token);
 
         // Mock Create Catalog Access Token
