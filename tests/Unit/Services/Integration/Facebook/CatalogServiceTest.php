@@ -744,10 +744,10 @@ class CatalogServiceTest extends TestCase
         // Handle Catalog Payload Result
         $result = $service->payload($payload);
 
-        /*$this->assertSame($result, [
+        $this->assertSame($result, [
             'success' => true,
             'feeds' => count($integrations)
-        ]);*/
+        ]);
     }
 
 
