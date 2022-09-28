@@ -12,6 +12,8 @@ use Illuminate\Database\Query\Builder;
  * This LightDealer class is for Dealers on Nova
  *
  * @package App\Models\LightDealer
+ * @todo This class is a workaround to avoid an unknown Eloquent relation within
+ * App\Models\User\Dealer making the selector slowest render
  *
  * @property int $dealer_id
  * @property string $name
