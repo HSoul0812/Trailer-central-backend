@@ -512,8 +512,7 @@ class CatalogServiceTest extends TestCase
         $this->tokenRepositoryMock
             ->shouldReceive('create')
             ->once()
-            ->with($createAuthParams)
-            ->andReturn($accessToken);
+            ->andReturn($pageToken);
 
         // Mock Get FB Refresh Token
         $this->businessServiceMock
