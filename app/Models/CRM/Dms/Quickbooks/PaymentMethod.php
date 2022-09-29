@@ -2,13 +2,16 @@
 
 namespace App\Models\CRM\Dms\Quickbooks;
 
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 
 /**
  * @author Marcel
  */
 class PaymentMethod extends Model
-{ 
+{
+    use TableAware;
+
     const PAYMENT_METHOD_PO = 'po';
     const PAYMENT_METHOD_TRADE_IN = 'trade_in';
     const PAYMENT_METHOD_FINANCING = 'financing';

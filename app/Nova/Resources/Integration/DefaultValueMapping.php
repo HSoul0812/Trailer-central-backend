@@ -9,6 +9,7 @@ use App\Models\Integration\Collector\CollectorFields;
 use App\Nova\Filters\DealerIDMapping;
 use App\Nova\Resource;
 use App\Nova\Resources\Dealer\Dealer;
+use App\Nova\Resources\Dealer\LightDealer;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Select;
@@ -60,7 +61,7 @@ class DefaultValueMapping extends Resource
     public function fields(Request $request)
     {
         return [
-            BelongsTo::make('Dealer', 'dealers', Dealer::class)->sortable()->rules('required'),
+            BelongsTo::make('Dealer', 'dealers', LightDealer::class)->searchable()->sortable()->rules('required'),
 
             Select::make('Field', 'map_from')
                 ->options(CollectorFields::select(['label', 'field'])->orderBy('label')->get()->pluck('label', 'field'))

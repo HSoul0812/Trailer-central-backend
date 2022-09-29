@@ -2,7 +2,6 @@
 
 namespace App\Services\Dispatch\Facebook;
 
-use App\Models\CRM\Dealer\DealerFBMOverview;
 use App\Models\User\AuthToken;
 use App\Models\User\Integration\Integration;
 use App\Models\Marketing\Facebook\Marketplace;
@@ -25,6 +24,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use League\Fractal\Pagination\IlluminatePaginatorAdapter;
 use League\Fractal\Resource\Collection as Pagination;
+use Illuminate\Support\Arr;
 
 /**
  * Class MarketplaceService
@@ -217,7 +217,7 @@ class MarketplaceService implements MarketplaceServiceInterface
 
             $nrOfListingsToday = $this->listings->countFacebookPostings(Marketplace::find($params['marketplace_id']));
             $inventoryRemaining = $this->getInventory(Marketplace::find($params['marketplace_id']), MarketplaceStatus::METHOD_MISSING, []);
-            $nrInventoryItemsRemaining = (isset($inventoryRemaining['inventory'])) ? count($inventoryRemaining['inventory']) : 0;
+            $nrInventoryItemsRemaining = count(Arr::get($inventoryRemaining, 'inventory', []));
 
             if ($nrOfListingsToday === config('marketing.fb.settings.limit.listings', 3) || $nrInventoryItemsRemaining === 0) {
                 // Update Imported At
@@ -345,6 +345,11 @@ class MarketplaceService implements MarketplaceServiceInterface
 
         $nowTime = microtime(true);
         $this->log->info('Debug time BEFORE ' . $method . ': ' . ($nowTime - $startTime));
+
+        if ($type === MarketplaceStatus::METHOD_MISSING) {
+            $params['per_page'] = config('marketing.fb.settings.limit.listings') - $this->listings->countFacebookPostings($integration);
+        }
+
         // Get Inventory
         $inventory = $this->listings->{$method}($integration, $params);
         $nowTime = microtime(true);

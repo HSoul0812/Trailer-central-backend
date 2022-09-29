@@ -6,10 +6,10 @@ use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Text;
 use App\Nova\Resource;
 
-class Location extends Resource 
+class Location extends Resource
 {
     public static $group = 'Dealer';
-    
+
     /**
      * The model the resource corresponds to.
      *
@@ -30,7 +30,7 @@ class Location extends Resource
      * @var array
      */
     public static $search = [
-        'dealer_id', 'name', 'email',
+        'dealer_id', 'name', 'email'
     ];
 
     /**
@@ -43,19 +43,21 @@ class Location extends Resource
     {
         return [
             Text::make('Dealer Location ID')->sortable(),
-            
+
             Text::make('Dealer ID')->sortable(),
-            
+
             Text::make('Name')
                 ->sortable()
                 ->rules('required', 'max:255'),
 
+            Text::make('App ID', 'identifier')->exceptOnForms(),
+
             Text::make('Phone'),
-            
+
             Text::make('Address'),
-            
+
             Text::make('City'),
-            
+
             Text::make('Region'),
 
         ];
