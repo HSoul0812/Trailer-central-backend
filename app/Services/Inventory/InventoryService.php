@@ -842,8 +842,6 @@ class InventoryService implements InventoryServiceInterface
 
     public function convertMarkdown($input): string
     {
-        $input = strip_tags($input);
-
         $input = str_replace('\n', PHP_EOL, $input);
         $input = str_replace('\\' . PHP_EOL, PHP_EOL . PHP_EOL, $input); // to fix CDW-824 problems
         $input = str_replace('\\' . PHP_EOL . 'n', PHP_EOL . PHP_EOL . PHP_EOL, $input);
@@ -876,11 +874,34 @@ class InventoryService implements InventoryServiceInterface
         $description = str_replace('<pre>', '', $description);
         $description = str_replace('</pre>', '', $description);
 
-        if(strpos($description, '<br>') === FALSE && strpos($description, '<p>') === FALSE) {
-            $description = preg_replace('/(.)\R(.)/m', '$1<br>$2', $description);
-        }
+        $description = $this->fixNonAsciiChars($description);
 
         // Return
         return $description.PHP_EOL;
+    }
+
+    /**
+     * @param string $description
+     * @return array|string|string[]|null
+     */
+    private function fixNonAsciiChars(string $description)
+    {
+        $description = preg_replace('/\xA0/', ' ', $description);
+        $description = preg_replace('/\xBE/', '3/4', $description);
+        $description = preg_replace('/\xBC/', '1/4', $description);
+        $description = preg_replace('/\xBD/', '1/2', $description);
+
+        $description = preg_replace('/\x91/', "'", $description);
+        $description = preg_replace('/\x92/', "'", $description);
+        $description = preg_replace('/\xB4/', "'", $description);
+        $description = preg_replace('/\x27/', "'", $description);
+
+        $description = preg_replace('/\x93/', '"', $description);
+        $description = preg_replace('/\x94/', '"', $description);
+        $description = preg_replace('/”/', '"', $description);
+        $description = preg_replace('/’/', "'", $description);
+
+        $description = preg_replace('/[[:^print:]]/', '', $description);
+        return $description;
     }
 }
