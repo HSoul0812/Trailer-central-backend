@@ -8,6 +8,7 @@ use App\Repositories\WebsiteUser\WebsiteUserRepository;
 use App\Repositories\WebsiteUser\WebsiteUserRepositoryInterface;
 use App\Services\Captcha\Google\GoogleCaptchaService;
 use App\Services\Integrations\TrailerCentral\Api\Users\UsersService;
+use App\Services\MapSearch\MapSearchServiceInterface;
 use App\Services\WebsiteUser\AuthService;
 use Doctrine\DBAL\Driver\PDO\Exception;
 use Illuminate\Auth\Events\Registered;
@@ -34,7 +35,13 @@ class AuthServiceTest extends IntegrationTestCase
     #[Pure] private function getConcreteService(): AuthService {
         $this->captchaServiceMock = $this->createMock(GoogleCaptchaService::class);
         $this->usersServiceMock = $this->createMock(UsersService::class);
-        return new AuthService($this->captchaServiceMock, new WebsiteUserRepository(), $this->usersServiceMock);
+        $mapSearchService = app()->make(MapSearchServiceInterface::class);
+        return new AuthService(
+            $this->captchaServiceMock,
+            new WebsiteUserRepository(),
+            $this->usersServiceMock,
+            $mapSearchService
+        );
     }
 
     public function testRegister() {

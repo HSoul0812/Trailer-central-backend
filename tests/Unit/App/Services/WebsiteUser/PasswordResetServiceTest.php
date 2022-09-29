@@ -35,7 +35,7 @@ class PasswordResetServiceTest extends TestCase
         $this->websiteUserRepository->expects($this->once())
             ->method('get')
             ->willReturn(new Collection([new WebsiteUser(['email' => 'test@test.com'])]));
-        $service->forgetPassword('test@test.com');
+        $service->forgetPassword('test@test.com', null);
     }
 
     public function testForgetPasswordWithNoUser() {
@@ -44,7 +44,7 @@ class PasswordResetServiceTest extends TestCase
             ->method('get')
             ->willReturn(new Collection());
         $this->expectException(NotFoundHttpException::class);
-        $service->forgetPassword('test@test.com');
+        $service->forgetPassword('test@test.com', null);
     }
 
     public function testResetPassword() {

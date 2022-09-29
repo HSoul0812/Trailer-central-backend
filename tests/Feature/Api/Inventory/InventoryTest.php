@@ -21,7 +21,7 @@ class InventoryTest extends FeatureTestCase
 
         $response->assertStatus(404);
     }
-    
+
     public function testIndexInvalidId(): void
     {
 
@@ -31,15 +31,16 @@ class InventoryTest extends FeatureTestCase
 
         $response->assertStatus(422);
     }
-    
+
     public function testIndexValidId(): void
     {
+        $this->markTestSkipped("This test is skipped because TC is required");
         $client = new GuzzleHttpClient(['headers' => ['access-token' => config('services.trailercentral.access_token')]]);
         $this->setUpFaker();
 
         $urlInventory = config('services.trailercentral.api') . 'inventory/';
         $urlDealerLocation = config('services.trailercentral.api') . 'user/dealer-location';
-        
+
         $newDealerLocationParams = [
           'dealer_id' => 1004,
           'contact' => 'test contact',
@@ -54,9 +55,9 @@ class InventoryTest extends FeatureTestCase
         ];
 
         $responseDealerLocation = $client->request('PUT', $urlDealerLocation, ['query' => $newDealerLocationParams]);
-        
+
         $responseDealerLocation = json_decode($responseDealerLocation->getBody()->getContents(), true);
-        
+
         $newInventoryParams = [
           'entity_type_id' => 1,
           'dealer_id'      => 1004,
@@ -65,16 +66,16 @@ class InventoryTest extends FeatureTestCase
           'dealer_location_identifier' => $responseDealerLocation['data']['id'],
           'title' => 'test title 2'
         ];
-        
+
         $response = $client->request('PUT', $urlInventory, ['query' => $newInventoryParams]);
-        
+
 
         $statusCode = $response->getStatusCode();
-        
+
         $this->assertTrue($statusCode == 201);
-      
+
         $response = json_decode($response->getBody()->getContents(), true);
-        
+
         $responseShowInventory = $this->get('/api/inventory/' . $response['response']['data']['id']);
         $responseShowInventory = json_decode($responseShowInventory->getContent(), true);
 
@@ -86,12 +87,13 @@ class InventoryTest extends FeatureTestCase
 
     public function testWidthLengthHeightIsNull(): void
     {
+        $this->markTestSkipped("This test is skipped because TC is required");
       $client = new GuzzleHttpClient(['headers' => ['access-token' => config('services.trailercentral.access_token')]]);
       $this->setUpFaker();
 
       $urlInventory = config('services.trailercentral.api') . 'inventory/';
       $urlDealerLocation = config('services.trailercentral.api') . 'user/dealer-location';
-      
+
       $newDealerLocationParams = [
         'dealer_id' => 1004,
         'contact' => 'test contact',
@@ -106,9 +108,9 @@ class InventoryTest extends FeatureTestCase
       ];
 
       $responseDealerLocation = $client->request('PUT', $urlDealerLocation, ['query' => $newDealerLocationParams]);
-      
+
       $responseDealerLocation = json_decode($responseDealerLocation->getBody()->getContents(), true);
-      
+
       $newInventoryParams = [
         'entity_type_id' => 1,
         'dealer_id'      => 1004,
@@ -117,16 +119,16 @@ class InventoryTest extends FeatureTestCase
         'dealer_location_identifier' => $responseDealerLocation['data']['id'],
         'title' => $this->faker->text()
       ];
-      
+
       $response = $client->request('PUT', $urlInventory, ['query' => $newInventoryParams]);
-      
+
 
       $statusCode = $response->getStatusCode();
-      
+
       $this->assertTrue($statusCode == 201);
-    
+
       $response = json_decode($response->getBody()->getContents(), true);
-      
+
       $responseShowInventory = $this->get('/api/inventory/' . $response['response']['data']['id']);
       $responseShowInventory->assertStatus(200);
       $responseShowInventory = json_decode($responseShowInventory->getContent(), true);
@@ -142,12 +144,13 @@ class InventoryTest extends FeatureTestCase
 
     public function testWidthLengthHeightIsNotNull(): void
     {
+        $this->markTestSkipped("This test is skipped because TC is required");
       $client = new GuzzleHttpClient(['headers' => ['access-token' => config('services.trailercentral.access_token')]]);
       $this->setUpFaker();
 
       $urlInventory = config('services.trailercentral.api') . 'inventory/';
       $urlDealerLocation = config('services.trailercentral.api') . 'user/dealer-location';
-      
+
       $newDealerLocationParams = [
         'dealer_id' => 1004,
         'contact' => 'test contact',
@@ -162,9 +165,9 @@ class InventoryTest extends FeatureTestCase
       ];
 
       $responseDealerLocation = $client->request('PUT', $urlDealerLocation, ['query' => $newDealerLocationParams]);
-      
+
       $responseDealerLocation = json_decode($responseDealerLocation->getBody()->getContents(), true);
-      
+
       $newInventoryParams = [
         'entity_type_id' => 1,
         'dealer_id'      => 1004,
@@ -176,16 +179,16 @@ class InventoryTest extends FeatureTestCase
         'height' => 20,
         'length' => 30
       ];
-      
+
       $response = $client->request('PUT', $urlInventory, ['query' => $newInventoryParams]);
-      
+
 
       $statusCode = $response->getStatusCode();
-      
+
       $this->assertTrue($statusCode == 201);
-    
+
       $response = json_decode($response->getBody()->getContents(), true);
-      
+
       $responseShowInventory = $this->get('/api/inventory/' . $response['response']['data']['id']);
       $responseShowInventory->assertStatus(200);
       $responseShowInventory = json_decode($responseShowInventory->getContent(), true);
@@ -202,9 +205,9 @@ class InventoryTest extends FeatureTestCase
     private function cleanTcTestRecords(int $dealerLocationId)
     {
       $client = new GuzzleHttpClient(['headers' => ['access-token' => config('services.trailercentral.access_token')]]);
-  
+
       $urlDeleteDealerLocation = config('services.trailercentral.api') . 'user/dealer-location/' . $dealerLocationId;
-      
+
       $client->delete($urlDeleteDealerLocation);
 
     }
