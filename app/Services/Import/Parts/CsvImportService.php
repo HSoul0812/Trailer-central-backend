@@ -193,22 +193,19 @@ class CsvImportService implements CsvImportServiceInterface
     {
         Log::info('Starting import for bulk upload ID: ' . $this->bulkUpload->id);
 
+        $status = BulkUpload::COMPLETE;
+
         try {
             $this->importCSV();
         } catch (Exception $exception) {
             Log::info($message = $exception->getMessage());
             $this->errors[] = $message;
-            $this->bulkUploadRepository->update([
-                'id' => $this->bulkUpload->id,
-                'status' => BulkUpload::VALIDATION_ERROR,
-                'validation_errors' => $this->getValidationErrors(),
-            ]);
-            return;
+            $status = BulkUpload::VALIDATION_ERROR;
         }
 
         $this->bulkUploadRepository->update([
             'id' => $this->bulkUpload->id,
-            'status' => BulkUpload::COMPLETE,
+            'status' => $status,
             'validation_errors' => $this->getValidationErrors(),
         ]);
     }
