@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Grimzy\LaravelMysqlSpatial\Eloquent\Builder as GrimzyBuilder;
 use Illuminate\Support\Arr;
+use Illuminate\Support\LazyCollection;
 
 /**
  * Class InventoryRepository
@@ -487,6 +488,17 @@ class InventoryRepository implements InventoryRepositoryInterface
     }
 
     /**
+     * Gets the query cursor to avoid memory leaks
+     *
+     * @param array $params
+     * @return LazyCollection
+     */
+    public function getAllAsCursor(array $params): LazyCollection
+    {
+        return $this->buildInventoryQuery($params)->cursor();
+    }
+
+    /**
      * @param $params
      * @param bool $withDefault
      * @return Collection|LengthAwarePaginator
@@ -514,10 +526,52 @@ class InventoryRepository implements InventoryRepositoryInterface
     }
 
     /**
+     * Gets the query cursor to avoid memory leaks
+     *
+     * @param array $params
+     * @return LazyCollection
+     */
+    public function getFloorplannedInventoryAsCursor(array $params): LazyCollection
+    {
+        return $this->getFloorplannedQuery($params)->cursor();
+    }
+
+    /**
      * @param $params
-     * @return Collection
+     * @return Collection|\Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
     public function getFloorplannedInventory($params, $paginate = true)
+    {
+        if ($paginate && !isset($params['per_page'])) {
+            $params['per_page'] = 15;
+        } else if (!$paginate && isset($params['per_page'])) {
+            unset($params['per_page']);
+        }
+
+        $query = $this->getFloorplannedQuery($params);
+
+        if ($paginate) {
+            return $query->paginate($params['per_page'])->appends($params);
+        }
+
+        return $query->get();
+    }
+
+    /**
+     * @param int $dealer_id
+     * @return \Illuminate\Database\Eloquent\Model|Builder|object|null
+     */
+    public function getPopularInventory(int $dealer_id)
+    {
+        return DB::table('inventory')
+            ->select(DB::raw('count(*) as type_count, entity_type_id, category'))
+            ->where('dealer_id', $dealer_id)
+            ->groupBy('entity_type_id')
+            ->orderBy('type_count', 'desc')
+            ->first();
+    }
+
+    private function getFloorplannedQuery(array $params): Builder
     {
         $query = Inventory::select('*');
 
@@ -533,12 +587,6 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query = $query->where('inventory.dealer_id', $params['dealer_id']);
         }
 
-        if ($paginate && !isset($params['per_page'])) {
-            $params['per_page'] = 15;
-        } else if (!$paginate && isset($params['per_page'])) {
-            unset($params['per_page']);
-        }
-
         if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
             $query = $query->where($params[self::CONDITION_AND_WHERE]);
         }
@@ -548,8 +596,8 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         if (isset($params['search_term'])) {
-            if(preg_match(self::DIMENSION_SEARCH_TERM_PATTERN, $params['search_term'])){
-                $params['search_term'] = floatval(trim($params['search_term'],' \'"'));
+            if (preg_match(self::DIMENSION_SEARCH_TERM_PATTERN, $params['search_term'])) {
+                $params['search_term'] = floatval(trim($params['search_term'], ' \'"'));
                 $query = $query->where(function ($q) use ($params) {
                     $q->where('length', $params['search_term'])
                         ->orWhere('width', $params['search_term'])
@@ -558,7 +606,7 @@ class InventoryRepository implements InventoryRepositoryInterface
                         ->orWhere('width_inches', $params['search_term'])
                         ->orWhere('height_inches', $params['search_term']);
                 });
-            }else {
+            } else {
                 /**
                  * This converts strings like 4 Star Trailers to 4%Star%Trailers
                  * so it matches inventories with all words included in the search query
@@ -589,25 +637,7 @@ class InventoryRepository implements InventoryRepositoryInterface
             }
         }
 
-        if ($paginate) {
-            return $query->paginate($params['per_page'])->appends($params);
-        }
-
-        return $query->get();
-    }
-
-    /**
-     * @param int $dealer_id
-     * @return \Illuminate\Database\Eloquent\Model|Builder|object|null
-     */
-    public function getPopularInventory(int $dealer_id)
-    {
-        return DB::table('inventory')
-            ->select(DB::raw('count(*) as type_count, entity_type_id, category'))
-            ->where('dealer_id', $dealer_id)
-            ->groupBy('entity_type_id')
-            ->orderBy('type_count', 'desc')
-            ->first();
+        return $query;
     }
 
     protected function getSortOrders()
