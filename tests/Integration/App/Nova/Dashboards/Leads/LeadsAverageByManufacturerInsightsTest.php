@@ -26,6 +26,10 @@ class LeadsAverageByManufacturerInsightsTest extends IntegrationTestCase
 
     public function testByWeeks(): void
     {
+        $this->markTestSkipped(
+            "This test is skipped because it's not relevant to Trailertrader"
+        );
+
         $request = new LeadsAverageRequest();
 
         $response = $this->dashboard->cards($request);
@@ -61,6 +65,10 @@ class LeadsAverageByManufacturerInsightsTest extends IntegrationTestCase
 
     public function testByDays(): void
     {
+        $this->markTestSkipped(
+            "This test is skipped because it's not relevant to Trailertrader"
+        );
+
         $request = new LeadsAverageRequest(['period' => InsightRequestInterface::PERIOD_PER_DAY]);
         $response = $this->dashboard->cards($request);
 

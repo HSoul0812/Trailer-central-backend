@@ -16,14 +16,15 @@ class SysConfigRepositoryTest extends TestCase
         self::assertEquals($filters->count(), 6);
 
         $banners = $repository->getAll(['key' => 'banner/']);
-        self::assertEquals($banners->count(), 14);
+        self::assertEquals($banners->count(), 38);
     }
 
     public function testGetAllWithoutParams() {
         $repository = $this->getConcreteRepository();
         $configs = $repository->getAll([]);
-        self::assertEquals($configs->count(),48);
+        self::assertEquals($configs->count(),72);
     }
+
     public function setUp(): void
     {
         parent::setUp();

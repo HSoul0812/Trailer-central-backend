@@ -32,6 +32,10 @@ class PriceAverageByManufacturerInsightsTest extends IntegrationTestCase
 
     public function testByWeeks(): void
     {
+        $this->markTestSkipped(
+            "This test is skipped because it's not relevant to Trailertrader"
+        );
+
         $request = new PriceAverageRequest();
 
         $response = $this->dashboard->cards($request);
@@ -66,6 +70,10 @@ class PriceAverageByManufacturerInsightsTest extends IntegrationTestCase
 
     public function testByDays(): void
     {
+        $this->markTestSkipped(
+            "This test is skipped because it's not relevant to Trailertrader"
+        );
+
         $request = new PriceAverageRequest(['period' => InsightRequestInterface::PERIOD_PER_DAY]);
         $response = $this->dashboard->cards($request);
 

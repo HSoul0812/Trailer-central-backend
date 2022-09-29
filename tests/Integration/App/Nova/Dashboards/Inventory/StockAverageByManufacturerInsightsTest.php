@@ -26,6 +26,10 @@ class StockAverageByManufacturerInsightsTest extends IntegrationTestCase
 
     public function testByDays(): void
     {
+        $this->markTestSkipped(
+            "This test is skipped because it's not relevant to Trailertrader"
+        );
+
         $request = new StockAverageRequest(['period' => InsightRequestInterface::PERIOD_PER_DAY]);
         $response = $this->dashboard->cards($request);
 
@@ -59,6 +63,10 @@ class StockAverageByManufacturerInsightsTest extends IntegrationTestCase
 
     public function testByWeeks(): void
     {
+        $this->markTestSkipped(
+            "This test is skipped because it's not relevant to Trailertrader"
+        );
+
         $request = new StockAverageRequest();
 
         $response = $this->dashboard->cards($request);
