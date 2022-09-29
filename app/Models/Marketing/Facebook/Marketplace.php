@@ -39,14 +39,14 @@ class Marketplace extends Model
     const TFA_TYPES = [
         'authy' => 'Authy',
         'sms' => 'SMS',
-        'fb_code' => 'Facebook 2FA Code',
+        'code' => 'Facebook 2FA Code',
     ];
 
     /**
      * @const array Active Two-Factor Auth Types
      */
     const TFA_TYPES_ACTIVE = [
-        'sms', 'fb_code'
+        'sms', 'code'
     ];
 
     /**

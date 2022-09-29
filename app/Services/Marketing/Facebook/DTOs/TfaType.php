@@ -44,7 +44,7 @@ class TfaType
     /**
      * Type Code
      */
-    const TYPE_CODE = 'fb_code';
+    const TYPE_CODE = 'code';
 
     /**
      * Default Type
