@@ -25,12 +25,12 @@ class ScrapeReplies extends Command
     protected $description = 'Process scraping email replies from a sales person\'s email account for leads belonging to sales person\'s dealer.';
 
     /**
-     * @var App\Services\CRM\Email\ScrapeRepliesServiceInterface
+     * @var ScrapeRepliesServiceInterface
      */
     protected $service;
 
     /**
-     * @var App\Repositories\User\UserRepositoryInterface
+     * @var UserRepositoryInterface
      */
     protected $users;
 
@@ -51,8 +51,7 @@ class ScrapeReplies extends Command
      *
      * @return void
      */
-    public function __construct(UserRepositoryInterface $users,
-                                ScrapeRepliesServiceInterface $service)
+    public function __construct(UserRepositoryInterface $users, ScrapeRepliesServiceInterface $service)
     {
         parent::__construct();
 

@@ -294,6 +294,7 @@ class BlastSeeder extends Seeder
         Template::where('user_id', $userId)->delete();
         Lead::where('dealer_id', $dealerId)->delete();
         DealerLocation::where('dealer_id', $dealerId)->delete();
+        NewDealerUser::where(['user_id' => $userId])->delete();
         NewUser::destroy($userId);
         Website::where('dealer_id', $dealerId)->delete();
         User::destroy($dealerId);
