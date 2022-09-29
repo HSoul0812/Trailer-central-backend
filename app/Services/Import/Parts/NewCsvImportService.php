@@ -26,7 +26,12 @@ use Storage;
 
 class NewCsvImportService implements CsvImportServiceInterface
 {
+    // Maximum length of string that we'll keep in the validation_errors column
+    // if the error length is longer than this, we'll write the error string
+    // to S3 and store the S3 file URI on the validation_errors column instead
     const MAX_VALIDATION_ERROR_CHAR_COUNT = 3072;
+
+    // Path on S3 to store the validation error file
     const S3_VALIDATION_ERRORS_PATH = 'parts/validation-errors/%s';
 
     const HEADER_VENDOR = 'Vendor';
@@ -49,6 +54,9 @@ class NewCsvImportService implements CsvImportServiceInterface
     const HEADER_VIDEO_EMBED_CODE = 'Video Embed Code';
     const HEADER_ALTERNATE_PART_NUMBER = 'Alternate Part Number';
     const HEADER_SHIPPING_FEE = 'Shipping Fee';
+
+    // The separator to separate each images from the image header
+    const HEADER_IMAGE_SEPARATOR = ',';
 
     // Example: Bin Hello World Qty, the <name> is "Hello World", this is case-sensitive
     const HEADER_BIN_QTY_REGEX = '/Bin\s+(?<name>.+)\s+Qty/';
@@ -172,20 +180,6 @@ class NewCsvImportService implements CsvImportServiceInterface
      */
     public function run()
     {
-        if (file_exists(storage_path('logs/pond.log'))) {
-            unlink(storage_path('logs/pond.log'));
-        }
-
-        config(['logging.default' => 'pond']);
-
-        DB::listen(function($query) {
-            Log::info(
-                $query->sql,
-                $query->bindings,
-                $query->time
-            );
-        });
-
         Log::info('Starting import for bulk upload ID: ' . $this->bulkUpload->id);
 
         try {
@@ -402,7 +396,7 @@ class NewCsvImportService implements CsvImportServiceInterface
                 continue;
             }
 
-            $value = $data[$index] ?? null;
+            $value = data_get($data, $index);
 
             try {
                 /**
@@ -635,8 +629,8 @@ class NewCsvImportService implements CsvImportServiceInterface
                 $part['show_on_website'] = $this->sanitizeValueToNumber($value, 0);
             },
             self::HEADER_IMAGE => function (array &$part, ?string $value, int $line) {
-                // TODO: Implement the real logic here
-                $part['images'] = null;
+                $this->storeErrorIfValueIsEmpty(self::HEADER_IMAGE, $line, $value);
+                $part['images'] = $this->getPartImages($value);
             },
             self::HEADER_STOCK_MIN => function (array &$part, ?string $value, int $line) {
                 $this->storeErrorIfValueIsEmpty(self::HEADER_STOCK_MIN, $line, $value);
@@ -858,5 +852,38 @@ class NewCsvImportService implements CsvImportServiceInterface
         }
 
         return $this->memoryCache[self::MEMORY_CACHE_KEY_DEFAULT_LOCATION];
+    }
+
+    /**
+     * Get the part images
+     *
+     * @param string|null $value
+     * @return array|null
+     */
+    private function getPartImages(?string $value): ?array
+    {
+        if (empty($value)) {
+            return null;
+        }
+
+        $images = explode(self::HEADER_IMAGE_SEPARATOR, $value);
+
+        return collect($images)
+            // We'll transform each image by trimming it
+            ->map(function (string $image) {
+                return trim($image);
+            })
+            // As a precaution, we only use the one that's not empty
+            ->filter(function (string $image) {
+                return !empty($image);
+            })
+            // Then we map it into a proper image array
+            ->map(function (string $image, int $index) {
+                return [
+                    'url' => $image,
+                    'position' => $index,
+                ];
+            })
+            ->toArray();
     }
 }
