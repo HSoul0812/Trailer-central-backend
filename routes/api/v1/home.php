@@ -10,5 +10,5 @@ $api->version('v1', function ($api) {
     | API Home page
     |--------------------------------------------------------------------------
     */
-    $api->get('/', [App\Http\Controllers\v1\Home\HomeController::class, 'index'])->middleware('auth:api');
+    $api->get('/', [App\Http\Controllers\v1\Home\HomeController::class, 'index']);
 });

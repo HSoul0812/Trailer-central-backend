@@ -5,6 +5,7 @@ namespace Tests\Unit\App\Services\Inventory;
 use App\Models\Geolocation\Geolocation;
 use App\Models\SysConfig\SysConfig;
 use App\Repositories\Geolocation\GeolocationRepositoryInterface;
+use App\Repositories\Integrations\TrailerCentral\AuthTokenRepository;
 use App\Repositories\Parts\ListingCategoryMappingsRepository;
 use App\Repositories\Parts\ListingCategoryMappingsRepositoryInterface;
 use App\Repositories\SysConfig\SysConfigRepositoryInterface;
@@ -80,10 +81,13 @@ class InventoryServiceTest extends TestCase
         $this->httpClient = $this->mockInventoryHttpClient();
         $this->sysConfigRepository = $this->mockSysConfigRepository();
         $this->listingMappingRepository = new ListingCategoryMappingsRepository();
+        $authTokenRepository = new AuthTokenRepository();
+
         return new InventoryService(
             $this->httpClient,
             $this->sysConfigRepository,
-            $this->listingMappingRepository
+            $this->listingMappingRepository,
+            $authTokenRepository
         );
     }
 
@@ -92,10 +96,13 @@ class InventoryServiceTest extends TestCase
         $this->httpClient = $this->mockAttributesHttpClient();
         $this->sysConfigRepository = $this->mockSysConfigRepository();
         $this->listingMappingRepository = new ListingCategoryMappingsRepository();
+        $authTokenRepository = new AuthTokenRepository();
+
         return new InventoryService(
             $this->httpClient,
             $this->sysConfigRepository,
-            $this->listingMappingRepository
+            $this->listingMappingRepository,
+            $authTokenRepository
         );
     }
 
