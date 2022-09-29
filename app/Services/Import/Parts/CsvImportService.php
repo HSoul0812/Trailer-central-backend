@@ -885,6 +885,8 @@ class CsvImportService implements CsvImportServiceInterface
             ->filter(function (string $image) {
                 return !empty($image);
             })
+            // Reindex the indexes so it can be sequentially again
+            ->values()
             // Then we map it into a proper image array
             ->map(function (string $image, int $index) {
                 return [
