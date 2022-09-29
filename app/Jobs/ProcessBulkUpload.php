@@ -11,20 +11,16 @@ use Illuminate\Support\Facades\Log;
  *
  * @author Eczek
  */
-class ProcessBulkUpload extends Job {
-
+class ProcessBulkUpload extends Job
+{
     public $timeout = 0;
+
     public $tries = 2;
 
     /**
      * @var BulkUpload
      */
     protected $bulk;
-
-    /**
-     * @var CsvImportServiceInterface
-     */
-    protected $csvImportService;
 
     /**
      * Create a new job instance.
@@ -34,8 +30,6 @@ class ProcessBulkUpload extends Job {
     public function __construct(BulkUpload $bulk)
     {
         $this->bulk = $bulk;
-        $this->csvImportService = app('App\Services\Import\Parts\CsvImportServiceInterface');
-        $this->csvImportService->setBulkUpload($bulk);
     }
 
     /**
@@ -46,8 +40,11 @@ class ProcessBulkUpload extends Job {
     public function handle()
     {
         Log::info('Starting bulk upload');
+
         try {
-            $this->csvImportService->run();
+            resolve(CsvImportServiceInterface::class)
+                ->setBulkUpload($this->bulk)
+                ->run();
         } catch (\Exception $ex) {
             Log::info($ex->getMessage());
         }

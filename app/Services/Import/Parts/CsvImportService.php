@@ -24,6 +24,16 @@ use League\Flysystem\FilesystemInterface;
 use Log;
 use Storage;
 
+/**
+ * This class can be used to process the part bulk upload
+ * the importer itself is very forgiving, it will try its
+ * best to not stop the import process if something is wrong
+ * the only case that it would stop processing the import
+ * is when there is a required header missing from the CSV
+ * file, otherwise it will keep process as usual
+ *
+ * @author Pond
+ */
 class CsvImportService implements CsvImportServiceInterface
 {
     // Maximum length of string that we'll keep in the validation_errors column
@@ -163,6 +173,7 @@ class CsvImportService implements CsvImportServiceInterface
         $this->bulkUploadRepository = $bulkUploadRepository;
         $this->partsRepository = $partsRepository;
         $this->binRepository = $binRepository;
+
         $this->storage = Storage::disk('s3');
     }
 
