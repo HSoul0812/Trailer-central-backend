@@ -122,7 +122,7 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
                                                         string  $expectedExceptionMessage,
                                                         ?string $firstExpectedErrorMessage): void
     {
-        // Given I have few monitored jobs
+        // Given I have few bulk download jobs
         $this->seeder->seed();
 
         // And I'm using the "BulkDownloadController" controller

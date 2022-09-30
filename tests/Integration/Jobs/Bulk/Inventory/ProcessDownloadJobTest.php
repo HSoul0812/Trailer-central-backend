@@ -92,7 +92,7 @@ class ProcessDownloadJobTest extends AbstractMonitoredJobsTest
         /** @var BulkDownloadJobService $service */
         $service = app(BulkDownloadJobServiceInterface::class);
 
-        // And I've set up a monitored job with a right payload
+        // And I've set up a bulk download job with a right payload
         $monitoredJob = $service->setup($dealerId, $payload);
 
         // And I have a queueable job
@@ -110,7 +110,7 @@ class ProcessDownloadJobTest extends AbstractMonitoredJobsTest
     }
 
     /**
-     * Examples of parameters, expected total and last page numbers, and first monitored job name.
+     * Examples of parameters, expected total and last page numbers, and first bulk download name.
      *
      * @return array<string, array>
      * @throws Exception
@@ -128,7 +128,7 @@ class ProcessDownloadJobTest extends AbstractMonitoredJobsTest
             /** @var BulkDownloadJobService $service */
             $service = app(BulkDownloadJobServiceInterface::class);
 
-            // And I've set up a monitored job with a wrong payload
+            // And I've set up a bulk download job with a wrong payload
             return $service->setup($dealerId, $invalidPayload)->token;
         };
 
