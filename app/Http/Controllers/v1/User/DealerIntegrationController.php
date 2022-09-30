@@ -38,7 +38,7 @@ class DealerIntegrationController extends RestfulControllerV2
 
         if ($integrationRequest->validate()) {
             return $this->response->collection(
-                $this->repository->index([
+                $this->repository->getAll([
                     'dealer_id' => $integrationRequest->dealer_id
                 ]),
                 app()->make(DealerIntegrationTransformer::class)
