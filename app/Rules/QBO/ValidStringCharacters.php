@@ -71,6 +71,6 @@ class ValidStringCharacters implements Rule
             case self::MISC_PARTS_SECTION:
             default:
                 return self::MISC_PARTS_REGEX;
-        };
+        }
     }
 }
