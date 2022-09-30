@@ -54,14 +54,23 @@ class HotPotatoService extends AutoAssignService implements HotPotatoServiceInte
         $settings  = $this->settings->getByDealer($dealer->id);
         $duration  = $settings->get('round-robin/hot-potato/duration');
         $lastDate  = $this->datetime->subMinutes($duration)->toDateTimeString();
-        $startDate = Carbon::parseFromTimestamp($lastDate)->subDay()->toDateTimeString();
+        $firstDate = Carbon::parseFromTimestamp($lastDate)->subDay()->toDateTimeString();
+
+        // Use Date Submitted?
+        $params = [
+            'dealer_id'     => $dealer->id,
+            'first_contact' => $firstDate,
+            'last_contact'  => $lastDate
+        ];
+        if($settings->get('round-robin/hot-potato/use-submission-date')) {
+            $lastCreated  = $this->datetime->subMinutes($duration)->toDateTimeString();
+            $firstCreated = Carbon::parseFromTimestamp($lastCreated)->subDay()->toDateTimeString();
+            $params['last_created']  = $lastCreated;
+            $params['first_created'] = $firstCreated;
+        }
 
         // Get Unprocessed Leads
-        $leads = $this->leads->getAllUnprocessed([
-            'dealer_id'  => $dealer->id,
-            'start_date' => $startDate,
-            'last_date'  => $lastDate
-        ]);
+        $leads = $this->leads->getAllUnprocessed($params);
 
         // No Leads? Skip Dealer
         if($leads->count() < 1) {
@@ -103,11 +112,7 @@ class HotPotatoService extends AutoAssignService implements HotPotatoServiceInte
         $currentSalesPerson = $lead->leadStatus->salesPerson;
         $currentSalesPersonId = $currentSalesPerson->id ?? 0;
         $this->setRoundRobinSalesPerson($dealer->id, $dealerLocationId, $lead, $currentSalesPersonId);
-        if(!empty($dealerLocationId)) {
-            $this->addLeadExplanationNotes($lead->identifier, 'Found Newest Assigned Sales Person: ' . $currentSalesPersonId . ' for Dealer Location #' . $dealerLocationId . ' and Salesperson Type ' . $salesType);
-        } else {
-            $this->addLeadExplanationNotes($lead->identifier, 'Found Newest Assigned Sales Person: ' . $currentSalesPersonId . ' for Dealer #' . $dealer->id . ' and Salesperson Type ' . $salesType);
-        }
+        $this->addLeadExplanationNotes($lead->identifier, 'Found Current Assigned Sales Person: ' . $currentSalesPersonId);
 
         // Find Next Salesperson
         $salesPerson = $this->salesPersonRepository->roundRobinSalesPerson($dealer, $dealerLocationId, $salesType, $currentSalesPerson);
@@ -119,6 +124,7 @@ class HotPotatoService extends AutoAssignService implements HotPotatoServiceInte
         // Finish Assigning Lead and Return Result
         $this->setRoundRobinSalesPerson($dealer->id, $dealerLocationId, $lead, $salesPerson->id);
         $status = $this->handleAssignLead($lead, $salesPerson);
+        $this->pushNextContactDate($lead, $settings);
         return $this->markAssignLead($lead, $dealerLocationId, $currentSalesPerson, $salesPerson, $status);
     }
 
@@ -160,7 +166,56 @@ class HotPotatoService extends AutoAssignService implements HotPotatoServiceInte
         );
 
         // Success, Marked Mailed
-        $this->addLeadExplanationNotes($lead->identifier, 'Sent Notification Email to: ' . $salesEmail . ' for Lead: ' . $lead->id_name);
+        $this->addLeadExplanationNotes($lead->identifier, 'Sent Hot Potato Email to: ' . $salesEmail . ' for Lead: ' . $lead->id_name);
         return LeadAssign::STATUS_MAILED;
+    }
+
+    /**
+     * Push Next Contact Date Back Based on Settings
+     * 
+     * @param Lead $lead
+     * @param Collection<{key: value}> $settings
+     * @return LeadStatus
+     */
+    private function pushNextContactDate(Lead $lead, Collection $settings): LeadStatus {
+        // Set Specific Distance From Now
+        $nextHr = $settings->get('round-robin/hot-potato/delay');
+        $curHr  = $this->datetime->format("j");
+        if($this->datetime->format("i") > $settings->get('round-robin/hot-potato/end-hour')) {
+            $nextHr++;
+        }
+
+        // Increment Day if Needed
+        $salesDay = $this->datetime->format("j");
+        if($curHr > $settings->get('round-robin/hot-potato/end-hour')) {
+            $curHr = $settings->get('round-robin/hot-potato/start-hour');
+            $nextHr = 0;
+            $salesDay++;
+        } elseif($curHr < $settings->get('round-robin/hot-potato/start-hour')) {
+            $curHr = $settings->get('round-robin/hot-potato/start-hour');
+            $nextHr = 0;
+        }
+
+        // Initialize Next Contact Date
+        $nextContactTime = mktime($curHr + $nextHr, 0, 0, $this->datetime->format("n"), $salesDay);
+        $nextContactDate = new \DateTime(date("Y:m:d H:i:s", $nextContactTime), new \DateTimeZone($this->timezone));
+
+        // On Weekend?
+        $mon = 0;
+        if(!empty($settings->get('round-robin/hot-potato/skip-weekends'))) {
+            if($nextContactDate->format("N") > 5) {
+                $mon = 8 - $nextContactDate->format("N");
+                $salesDay += $mon;
+                $nextContactTime = mktime($curHr + $nextHr, $this->datetime->format("i"), 0, $this->datetime->format("n"), $salesDay);
+                $nextContactDate = new \DateTime(date("Y:m:d H:i:s", $nextContactTime), new \DateTimeZone($this->timezone));
+            }
+        }
+
+        // Set Next Contact Date
+        $nextContactGmt = gmdate("Y-m-d H:i:s", $nextContactTime);
+        $nextContact = $nextContactDate->format("Y-m-d H:i:s");
+
+        // Return Lead Status
+        return $this->leadStatusRepository->update(['lead_id' => $lead->identifier, 'next_contact_date' => $nextContact]);
     }
 }
