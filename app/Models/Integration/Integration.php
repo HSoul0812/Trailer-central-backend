@@ -93,6 +93,16 @@ class Integration extends Model
         }
     }
 
+    public function getUnserializeFiltersAttribute()
+    {
+        return !empty($this->filters) ? (@unserialize($this->filters) ? json_encode(unserialize($this->filters)) : []) : [];
+    }
+
+    public function getUnserializeSettingsAttribute()
+    {
+        return !empty($this->settings) ? (@unserialize($this->settings) ? json_encode(unserialize($this->settings)) : []) : [];
+    }
+
     /**
      * Get Dealers
      */
