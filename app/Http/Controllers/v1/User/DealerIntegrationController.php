@@ -19,10 +19,16 @@ class DealerIntegrationController extends RestfulControllerV2
      */
     protected $repository;
 
-    public function __construct(DealerIntegrationRepositoryInterface $repository)
+    private $transformer;
+
+    public function __construct(
+        DealerIntegrationRepositoryInterface $repository,
+        DealerIntegrationTransformer $transformer
+    )
     {
         $this->middleware('setDealerIdOnRequest')->only(['index','show']);
         $this->repository = $repository;
+        $this->transformer = $transformer;
     }
 
     /**
@@ -41,7 +47,7 @@ class DealerIntegrationController extends RestfulControllerV2
                 $this->repository->getAll([
                     'dealer_id' => $integrationRequest->dealer_id
                 ]),
-                app()->make(DealerIntegrationTransformer::class)
+                $this->transformer
             );
         }
 
@@ -66,7 +72,7 @@ class DealerIntegrationController extends RestfulControllerV2
                     'integration_id' => $integrationRequest->integration_id,
                     'dealer_id' => $integrationRequest->dealer_id
                 ]),
-                app()->make(DealerIntegrationTransformer::class)
+                $this->transformer
             );
         }
 
