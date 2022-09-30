@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Http\Clients\ElasticSearch\ElasticSearchClient;
 use App\Http\Clients\ElasticSearch\ElasticSearchClientInterface;
+use App\Repositories\Bulk\Inventory\BulkDownloadRepository;
+use App\Repositories\Bulk\Inventory\BulkDownloadRepositoryInterface;
 use App\Repositories\Bulk\Inventory\BulkUploadRepository;
 use App\Repositories\Bulk\Inventory\BulkUploadRepositoryInterface;
 use App\Repositories\Inventory\AttributeRepository;
@@ -53,6 +55,10 @@ use App\Services\ElasticSearch\Inventory\Builders\QueryBuilder;
 use App\Services\ElasticSearch\Inventory\FieldMapperService;
 use App\Services\ElasticSearch\Inventory\InventoryFieldMapperServiceInterface;
 use App\Services\ElasticSearch\Inventory\InventoryQueryBuilderInterface;
+use App\Services\Export\Inventory\Bulk\BulkDownloadJobService;
+use App\Services\Export\Inventory\Bulk\BulkDownloadJobServiceInterface;
+use App\Services\Export\Inventory\Bulk\BulkPdfJobService;
+use App\Services\Export\Inventory\Bulk\BulkPdfJobServiceInterface;
 use App\Services\Import\Inventory\CsvImportService;
 use App\Services\Import\Inventory\CsvImportServiceInterface;
 use App\Services\Inventory\CustomOverlay\CustomOverlayService;
@@ -125,5 +131,9 @@ class InventoryServiceProvider extends ServiceProvider
             \App\Services\ElasticSearch\Inventory\InventoryServiceInterface::class,
             \App\Services\ElasticSearch\Inventory\InventoryService::class
         );
+
+        $this->app->bind(BulkDownloadRepositoryInterface::class, BulkDownloadRepository::class);
+        $this->app->bind(BulkDownloadJobServiceInterface::class, BulkDownloadJobService::class);
+        $this->app->bind(BulkPdfJobServiceInterface::class, BulkPdfJobService::class);
     }
 }

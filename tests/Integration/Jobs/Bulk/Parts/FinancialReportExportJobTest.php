@@ -9,6 +9,7 @@ use App\Jobs\Bulk\Parts\FinancialReportExportJob;
 use App\Models\Bulk\Parts\BulkReport;
 use App\Models\Bulk\Parts\BulkReportPayload;
 use App\Repositories\Bulk\Parts\BulkReportRepositoryInterface;
+use App\Services\Export\FilesystemPdfExporter;
 use App\Services\Export\Parts\BulkReportJobService;
 use App\Services\Export\Parts\BulkReportJobServiceInterface;
 use Exception;
@@ -95,7 +96,7 @@ class FinancialReportExportJobTest extends AbstractMonitoredJobsTest
         $queueableJob->handle(app(BulkReportRepositoryInterface::class), app(BulkReportJobServiceInterface::class));
 
         // Then I expect to see an file with certain name to be stored in the disk
-        Storage::disk('tmp')->assertExists($monitoredJob->payload->filename);
+        Storage::disk('s3')->assertExists(FilesystemPdfExporter::RUNTIME_PREFIX . $monitoredJob->payload->filename);
     }
 
     /**
