@@ -31,6 +31,7 @@ class ProcessDownloadJobTest extends AbstractMonitoredJobsTest
      * @dataProvider invalidConfigurationsProvider
      *
      * @group DW
+     * @group DW_BULK
      * @group DW_BULK_INVENTORY
      *
      * @param string|callable $token
@@ -68,6 +69,7 @@ class ProcessDownloadJobTest extends AbstractMonitoredJobsTest
 
     /**
      * @group DW
+     * @group DW_BULK
      * @group DW_BULK_INVENTORY
      *
      * @throws Throwable
