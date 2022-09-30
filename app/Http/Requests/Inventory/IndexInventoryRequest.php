@@ -14,6 +14,7 @@ class IndexInventoryRequest extends Request implements IndexRequestInterface
         'dealer_id' => 'integer',
         'country' => ["regex:/^(us|ca)$/i"],
         'location' => 'nullable|string',
-        'sort' => ["regex:/^(\+|\-){0,1}(distance|createdAt|price|numFeatures)$/"]
+        'sort' => ["regex:/^(\+|\-){0,1}(distance|createdAt|price|numFeatures)$/"],
+        'is_random' => 'boolean'
     ];
 }

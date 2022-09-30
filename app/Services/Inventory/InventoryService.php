@@ -31,7 +31,7 @@ class InventoryService implements InventoryServiceInterface
 {
     use Helpers;
 
-    const ES_INDEX = 'inventoryclsf';
+    const ES_INDEX = 'inventory';
     const HTTP_SUCCESS = 200;
     const ES_CACHE_EXPIRY = 300;
     const DEFAULT_SORT = '+distance';
@@ -305,16 +305,22 @@ class InventoryService implements InventoryServiceInterface
         $this->addPaginateQuery($queryBuilder, $params);
         $this->addScriptFilter($queryBuilder, $params);
         $this->addGeoFiltering($queryBuilder, $params);
-        if(isset($params['sort'])) {
-            $sort = $params['sort'];
-        } else if($this->getGeolocation($params)) {
-            $sort = self::DEFAULT_SORT;
+
+        if(isset($params['is_random']) && $params['is_random']) {
+            $queryBuilder->orderRandom(true);
         } else {
-            $sort = self::DEFAULT_NO_LOCATION_SORT;
+            if (isset($params['sort'])) {
+                $sort = $params['sort'];
+            } else if ($this->getGeolocation($params)) {
+                $sort = self::DEFAULT_SORT;
+            } else {
+                $sort = self::DEFAULT_NO_LOCATION_SORT;
+            }
+
+            $sortObj = new SortOrder($sort);
+            $queryBuilder->orderBy($sortObj->field, $sortObj->direction);
         }
 
-        $sortObj = new SortOrder($sort);
-        $queryBuilder->orderBy($sortObj->field, $sortObj->direction);
         return $queryBuilder;
     }
 
