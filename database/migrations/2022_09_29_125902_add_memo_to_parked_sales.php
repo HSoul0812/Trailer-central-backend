@@ -7,13 +7,18 @@ use Illuminate\Support\Facades\Schema;
 class AddMemoToParkedSales extends Migration
 {
     /**
+     * @var string
+     */
+    const TABLE_NAME = 'crm_pos_parked_sales';
+
+    /**
      * Run the migrations.
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::table('crm_pos_parked_sales', function (Blueprint $table) {
+        Schema::table(self::TABLE_NAME, function (Blueprint $table) {
             $table->text('memo')->after('items')->nullable();
         });
     }
@@ -23,10 +28,10 @@ class AddMemoToParkedSales extends Migration
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
-        Schema::table('crm_pos_parked_sales', function (Blueprint $table) {
-            $table->removeColumn('memo');
+        Schema::table(self::TABLE_NAME, function (Blueprint $table) {
+            $table->dropColumn('memo');
         });
     }
 }
