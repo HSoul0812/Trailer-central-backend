@@ -465,18 +465,24 @@ class PartRepository implements PartRepositoryInterface {
             }
 
             if ($part->save()) {
+                $deleteImagesIfNoIndex = data_get($params, 'delete_images_if_no_index', true);
+
                 if (isset($params['images'])) {
                     $part->images()->delete();
                     foreach($params['images'] as $image) {
                         try {
                             $this->storeImage($part->id, $image);
-                        } catch (\ImageNotDownloadedException $ex) {
+                        } catch (ImageNotDownloadedException $ex) {
 
                         }
                     }
                 } else {
-                    $part->images()->delete();
-                } 
+                    // Only delete the existing image if the index
+                    // name delete_images_if_no_index is set to true
+                    if ($deleteImagesIfNoIndex) {
+                        $part->images()->delete();
+                    }
+                }
 
                 if (isset($params['bins'])) {
                     $part->bins()->delete();

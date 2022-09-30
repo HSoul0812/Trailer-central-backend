@@ -3,6 +3,7 @@
 namespace App\Services\Import\Parts;
 
 use App\Events\Parts\PartQtyUpdated;
+use App\Exceptions\ImageNotDownloadedException;
 use App\Exceptions\Services\Import\Parts\EmptySKUException;
 use App\Models\Bulk\Parts\BulkUpload;
 use App\Models\Parts\Bin;
@@ -81,14 +82,17 @@ class CsvImportService implements CsvImportServiceInterface
      * @var string[]
      */
     const HEADER_RULES = [
-        self::HEADER_VENDOR => self::HEADER_RULE_OPTIONAL,
-        self::HEADER_BRAND => self::HEADER_RULE_OPTIONAL,
-        self::HEADER_TYPE => self::HEADER_RULE_OPTIONAL,
-        self::HEADER_CATEGORY => self::HEADER_RULE_OPTIONAL,
-        self::HEADER_SUBCATEGORY => self::HEADER_RULE_REQUIRED,
-        self::HEADER_TITLE => self::HEADER_RULE_REQUIRED,
+        // Required headers
+        self::HEADER_TYPE => self::HEADER_RULE_REQUIRED,
         self::HEADER_SKU => self::HEADER_RULE_REQUIRED,
+        self::HEADER_BRAND => self::HEADER_RULE_REQUIRED,
+        self::HEADER_TITLE => self::HEADER_RULE_REQUIRED,
+        self::HEADER_CATEGORY => self::HEADER_RULE_REQUIRED,
         self::HEADER_PRICE => self::HEADER_RULE_REQUIRED,
+
+        // Optional headers
+        self::HEADER_VENDOR => self::HEADER_RULE_OPTIONAL,
+        self::HEADER_SUBCATEGORY => self::HEADER_RULE_OPTIONAL,
         self::HEADER_DEALER_COST => self::HEADER_RULE_OPTIONAL,
         self::HEADER_MSRP => self::HEADER_RULE_OPTIONAL,
         self::HEADER_WEIGHT => self::HEADER_RULE_OPTIONAL,
@@ -392,7 +396,12 @@ class CsvImportService implements CsvImportServiceInterface
     private function processData(array $data, int $line)
     {
         $partData = $this->getPartDataFromCsvData($data, $line);
+
         $partData['dealer_id'] = $this->bulkUpload->dealer_id;
+
+        // We set this new index so the PartRepository doesn't
+        // delete the images if there is no images index
+        $partData['delete_images_if_no_index'] = false;
 
         Log::info("Importing part SKU " . $partData['sku']);
 
@@ -887,12 +896,12 @@ class CsvImportService implements CsvImportServiceInterface
      * Get the part images
      *
      * @param string|null $value
-     * @return array|null
+     * @return array
      */
-    private function getPartImages(?string $value): ?array
+    private function getPartImages(?string $value): array
     {
         if (empty($value)) {
-            return null;
+            return [];
         }
 
         $images = explode(self::HEADER_IMAGE_SEPARATOR, $value);
