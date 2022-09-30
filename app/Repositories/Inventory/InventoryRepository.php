@@ -557,20 +557,6 @@ class InventoryRepository implements InventoryRepositoryInterface
         return $query->get();
     }
 
-    /**
-     * @param int $dealer_id
-     * @return \Illuminate\Database\Eloquent\Model|Builder|object|null
-     */
-    public function getPopularInventory(int $dealer_id)
-    {
-        return DB::table('inventory')
-            ->select(DB::raw('count(*) as type_count, entity_type_id, category'))
-            ->where('dealer_id', $dealer_id)
-            ->groupBy('entity_type_id')
-            ->orderBy('type_count', 'desc')
-            ->first();
-    }
-
     private function getFloorplannedQuery(array $params): Builder
     {
         $query = Inventory::select('*');
@@ -638,6 +624,20 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         return $query;
+    }
+
+    /**
+     * @param int $dealer_id
+     * @return \Illuminate\Database\Eloquent\Model|Builder|object|null
+     */
+    public function getPopularInventory(int $dealer_id)
+    {
+        return DB::table('inventory')
+            ->select(DB::raw('count(*) as type_count, entity_type_id, category'))
+            ->where('dealer_id', $dealer_id)
+            ->groupBy('entity_type_id')
+            ->orderBy('type_count', 'desc')
+            ->first();
     }
 
     protected function getSortOrders()
