@@ -24,14 +24,14 @@ class BulkDownloadPayload extends MonitoredJobPayload
     /**
      * @var array
      */
-    protected $filters;
+    protected $filters = [];
 
     public function asArray(): array
     {
         return [
             'filename' => $this->filename,
             'output' => $this->output,
-            'filters' => $this->filters,
+            'filters' => $this->filters ?? [],
         ];
     }
 }
