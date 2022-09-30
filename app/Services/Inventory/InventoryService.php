@@ -39,6 +39,7 @@ class InventoryService implements InventoryServiceInterface
     const DEFAULT_COUNTRY = 'USA';
     const PAGE_SIZE = 10;
     const TERM_SEARCH_KEY_MAP = [
+        'dealer_id' => 'dealerId',
         'stalls' => 'numStalls',
         'pull_type' => 'pullType',
         'manufacturer' => 'manufacturer',
