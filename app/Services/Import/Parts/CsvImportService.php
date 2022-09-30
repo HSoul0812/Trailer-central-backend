@@ -164,6 +164,15 @@ class CsvImportService implements CsvImportServiceInterface
     protected $errors = [];
 
     /**
+     * We'll keep the list of processed SKU in this list
+     * we'll use this information to skip the duplicate
+     * SKU records in the CSV file
+     *
+     * @var string[]
+     */
+    protected $processedSKU = [];
+
+    /**
      * @param BulkUploadRepositoryInterface $bulkUploadRepository
      * @param PartRepositoryInterface $partsRepository
      * @param BinRepositoryInterface $binRepository
@@ -223,6 +232,21 @@ class CsvImportService implements CsvImportServiceInterface
         $this->streamCsv(function (array $data, int $line) {
             if ($line === 1) {
                 $this->processHeaders($data);
+
+                return;
+            }
+
+            $sku = data_get($data, $this->headerIndexes[self::HEADER_SKU]);
+
+            if (empty($sku)) {
+                $this->errors[] = "Issue with line #$line: SKU is empty, skipping this line.";
+
+                return;
+            }
+
+            // Skip this line if we've processed this SKU already
+            if (array_key_exists($sku, $this->processedSKU)) {
+                $this->errors[] = "Issue with line #$line: duplicate SKU $sku, skipping this line.";
 
                 return;
             }
@@ -372,9 +396,13 @@ class CsvImportService implements CsvImportServiceInterface
 
         Log::info("Importing part SKU " . $partData['sku']);
 
+        /** @var Part $part */
         $part = $this->partsRepository->createOrUpdate($partData);
 
         $this->processBinsForPart($part, $data, $line);
+
+        // Note that we've processed this SKU
+        $this->processedSKU[$part->sku] = true;
 
         event(new PartQtyUpdated($part, null, [
             'description' => 'Created/updated using bulk uploader'
@@ -597,15 +625,8 @@ class CsvImportService implements CsvImportServiceInterface
                 $this->storeErrorIfValueIsEmpty(self::HEADER_TITLE, $line, $value);
                 $part['title'] = $this->sanitizeValueToString($value, '');
             },
-            /**
-             * @throws EmptySKUException
-             */
             self::HEADER_SKU => function (array &$part, ?string $value, int $line) {
-                if (empty($value)) {
-                    throw new EmptySKUException("Issue with line #$line: SKU is empty, skipping to skip this line.");
-                }
-
-                $this->storeErrorIfValueIsEmpty(self::HEADER_SKU, $line, $value);
+                // To reach this point, SKU must be a non-empty value already
                 $part['sku'] = $this->sanitizeValueToString($value);
             },
             self::HEADER_PRICE => function (array &$part, ?string $value, int $line) {
