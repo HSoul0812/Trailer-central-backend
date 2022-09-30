@@ -46,7 +46,7 @@ class PartsFeatureTest extends TestCase
             ->withHeaders(['access-token' => $this->accessToken()])
             ->get('/api/parts');
 
-        $response->assertStatus(200);
+        $response->assertOk();
     }
 
     /**
@@ -61,9 +61,9 @@ class PartsFeatureTest extends TestCase
             ->withHeaders(['access-token' => $this->accessToken()])
             ->get('/api/parts');
 
-        $json = json_decode($response->getContent(), true);
-
-        self::assertTrue(isset($json['data']));
+        $response->assertJsonStructure([
+            'data'
+        ]);
     }
 
     /**
@@ -78,9 +78,9 @@ class PartsFeatureTest extends TestCase
             ->withHeaders(['access-token' => $this->accessToken()])
             ->get('/api/parts');
 
-        $json = json_decode($response->getContent(), true);
-
-        self::assertNotTrue(isset($json['data'][0]['purchases']));
+        $response->assertJsonMissing([
+            'purchaseOrders'
+        ]);
     }
 
     /**
@@ -99,14 +99,18 @@ class PartsFeatureTest extends TestCase
             ->withHeaders(['access-token' => $this->accessToken()])
             ->get('/api/parts?' . http_build_query($params));
 
-        $json = json_decode($response->getContent(), true);
-
-        self::assertTrue(isset($json['data'][0]['purchaseOrders']));
-        self::assertIsArray($json['data'][0]['purchaseOrders']);
-        self::assertArrayHasKey('data', $json['data'][0]['purchaseOrders']);
-        self::assertIsArray($json['data'][0]['purchaseOrders']['data']);
-        self::assertArrayHasKey('meta', $json['data'][0]['purchaseOrders']);
-        self::assertArrayHasKey('has_not_completed', $json['data'][0]['purchaseOrders']['meta']);
+        $response->assertJsonStructure([
+            'data' => [
+                '*' => [
+                    'purchaseOrders' => [
+                        'data',
+                        'meta' => [
+                            'has_not_completed'
+                        ]
+                    ]
+                ]
+            ]
+        ]);
     }
 
     /**
@@ -143,7 +147,5 @@ class PartsFeatureTest extends TestCase
         $response
             ->assertSuccessful()
             ->assertJsonPath('data.0.purchaseOrders.meta.has_not_completed', true);
-
-        $seeder->cleanUp();
     }
 }
