@@ -9,6 +9,8 @@ use App\Models\User\Integration\DealerIntegration;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use InvalidArgumentException;
 
+use Illuminate\Database\Eloquent\Collection;
+
 class DealerIntegrationRepository implements DealerIntegrationRepositoryInterface
 {
     /**
@@ -19,6 +21,26 @@ class DealerIntegrationRepository implements DealerIntegrationRepositoryInterfac
     public function __construct(DealerIntegration $model)
     {
         $this->model = $model;
+    }
+
+    /**
+     * @param array $params
+     * @return Collection|DealerIntegration[]
+     * @throws ModelNotFoundException when `dealer_id` was provided but there isn't any record with that id
+     * @throws InvalidArgumentException when `dealer_id` was not provided
+     */
+    public function getAll(array $params): Collection
+    {
+        if (empty($params['dealer_id'])) {
+            throw new InvalidArgumentException(sprintf("[%s] 'dealer_id' argument is required", __CLASS__));
+        }
+
+        $query = $this->model::query()
+            ->select('integration_dealer.*')
+            ->join('integration', 'integration.integration_id', '=', 'integration_dealer.integration_id')
+            ->orderBy('integration_dealer_id', 'DESC');
+
+        return $query->where('dealer_id', $params['dealer_id'])->get();
     }
 
     /**
