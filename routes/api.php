@@ -241,6 +241,15 @@ $api->version('v1', function ($route) {
     $route->delete('inventory/bulk/{id}', 'App\Http\Controllers\v1\Bulk\Inventory\BulkUploadController@destroy');
 
     /**
+     * Inventory Bulk download
+     */
+    $route->post('inventory/bulk/create', 'App\Http\Controllers\v1\Bulk\Inventory\BulkDownloadController@create');
+    $route->get('inventory/bulk/output/{token}', 'App\Http\Controllers\v1\Bulk\Inventory\BulkDownloadController@readByToken');
+    $route->get('inventory/bulk/output', 'App\Http\Controllers\v1\Bulk\Inventory\BulkDownloadController@read');
+    $route->get('inventory/bulks', 'App\Http\Controllers\v1\Bulk\Inventory\BulkDownloadController@index');
+    $route->get('inventory/bulk/status/{token}', 'App\Http\Controllers\v1\Bulk\Inventory\BulkDownloadController@statusByToken');
+
+    /**
      * Inventory Overlay
      */
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
