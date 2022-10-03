@@ -31,7 +31,7 @@ class InventoryService implements InventoryServiceInterface
 {
     use Helpers;
 
-    const ES_INDEX = 'inventory';
+    const ES_INDEX = 'inventoryclsf';
     const HTTP_SUCCESS = 200;
     const ES_CACHE_EXPIRY = 300;
     const DEFAULT_SORT = '+distance';
