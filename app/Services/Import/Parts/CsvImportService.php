@@ -315,14 +315,21 @@ class CsvImportService implements CsvImportServiceInterface
      */
     private function processHeaders(array $headers)
     {
-        $headerAsKeys = array_flip($headers);
+        // Ensure that the header is unique, we only want the first
+        // header index if the header is duplicated.
+        //
+        // According to the doc if array_unique https://www.php.net/manual/en/function.array-unique.php
+        // the method will retain the key and value of the first found element
+        $headers = array_unique($headers);
+
+        $this->headerIndexes = array_flip($headers);
         $requiredHeaders = $this->getRequiredHeaders();
 
         // When we found a required headers, we'll remove them one by one
         // from the $requiredHeaders array, then we can use it later to
         // check if all the required headers are present in the file or not
         foreach ($requiredHeaders as $header => $ignore) {
-            if (array_key_exists($header, $headerAsKeys)) {
+            if (array_key_exists($header, $this->headerIndexes)) {
                 unset($requiredHeaders[$header]);
             }
         }
@@ -331,8 +338,6 @@ class CsvImportService implements CsvImportServiceInterface
             $message = sprintf("Missing required headers: %s. Action: Cancel the import!", implode(', ', array_keys($requiredHeaders)));
             throw new Exception($message);
         }
-
-        $this->headerIndexes = array_flip($headers);
 
         foreach ($headers as $index => $header) {
             // Do nothing if this header exists in the header rules array
