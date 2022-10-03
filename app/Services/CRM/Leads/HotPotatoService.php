@@ -2,6 +2,7 @@
 
 namespace App\Services\CRM\Leads;
 
+use App\Mail\AutoAssignEmail;
 use App\Mail\HotPotatoEmail;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadAssign;
@@ -125,6 +126,7 @@ class HotPotatoService extends AutoAssignService implements HotPotatoServiceInte
         $this->setRoundRobinSalesPerson($dealer->id, $dealerLocationId, $lead, $salesPerson->id);
         $status = $this->handleAssignLead($lead, $salesPerson);
         $this->pushNextContactDate($lead, $settings);
+        $this->sendHotPotatoEmail($lead, $salesPerson);
         return $this->markAssignLead($lead, $dealerLocationId, $currentSalesPerson, $salesPerson, $status);
     }
 
@@ -151,7 +153,7 @@ class HotPotatoService extends AutoAssignService implements HotPotatoServiceInte
 
         // Send Email to Sales Person
         Mail::to($salesEmail ?? "" )->send(
-            new HotPotatoEmail([
+            new AutoAssignEmail([
                 'date' => Carbon::now()->toDateTimeString(),
                 'salesperson_name' => $salesPerson->getFullNameAttribute(),
                 'launch_url' => Lead::getLeadCrmUrl($lead->identifier, $credential),
@@ -168,6 +170,52 @@ class HotPotatoService extends AutoAssignService implements HotPotatoServiceInte
         // Success, Marked Mailed
         $this->addLeadExplanationNotes($lead->identifier, 'Sent Hot Potato Email to: ' . $salesEmail . ' for Lead: ' . $lead->id_name);
         return LeadAssign::STATUS_MAILED;
+    }
+
+
+    /**
+     * Prepare Hot Potato Email
+     * 
+     * @param Lead $lead
+     * @param SalesPerson $salesPerson
+     * @return string status of assign
+     */
+    protected function sendHotPotatoEmail(Lead $lead, SalesPerson $salesPerson): string {
+        // Initialize Next Contact Date
+        $date = Carbon::parse($lead->leadStatus->next_contact_date)->timezone($lead->crmUser->dealer_timezone);
+        $credential = NewUser::getDealerCredential($lead->newDealerUser->user_id, $salesPerson->id);
+        $nextContactText  = ' on ' . $date->format("l, F jS, Y") . ' at ' . $date->format("g:i A T");
+
+
+        // Try Processing Admin Email
+        $this->addLeadExplanationNotes($lead->identifier, 'Found Next Matching Sales Person: ' . $salesPerson->id . ' for Lead: ' . $lead->id_name);
+        try {
+            // Send Admin Email
+            Mail::to($lead->dealer_emails)->send(
+                new HotPotatoEmail([
+                    'date' => Carbon::now()->toDateTimeString(),
+                    'new_contact_name' => $salesPerson->getFullNameAttribute(),
+                    'launch_url' => Lead::getLeadCrmUrl($lead->identifier, $credential),
+                    'lead_name' => $lead->id_name,
+                    'lead_email' => $lead->email_address,
+                    'lead_phone' => $lead->phone_number,
+                    'lead_address' => $lead->full_address,
+                    'lead_status' => !empty($lead->leadStatus->status) ? $lead->leadStatus->status : LeadStatus::STATUS_UNCONTACTED,
+                    'lead_comments' => $lead->comments,
+                    'next_contact_date' => $nextContactText
+                ])
+            );
+        } catch(\Exception $e) {
+            // Add Error
+            if(empty($status)) {
+                $status = 'error';
+            }
+            $this->addLeadExplanationNotes($lead->identifier, 'Exception Returned! ' . $e->getMessage() . ': ' . $e->getTraceAsString());
+            $this->log->error("AutoAssignService exception returned on update or email {$e->getMessage()}: {$e->getTraceAsString()}");
+        }
+
+        // Mark Lead as Assign
+        return $status;
     }
 
     /**
