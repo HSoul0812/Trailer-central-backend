@@ -11,6 +11,8 @@ use App\Models\User\DealerLocation;
 use App\Repositories\Inventory\ImageRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Services\File\ImageService;
+use App\Services\Inventory\InventoryService;
+use App\Services\Inventory\InventoryServiceInterface;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
@@ -388,15 +390,26 @@ class CsvImportService implements CsvImportServiceInterface
     private $indexToheaderMapping = [];
 
     /**
+     * @var InventoryServiceInterface $inventoryService
+     */
+    private $inventoryService;
+
+    /**
      * @param BulkUploadRepositoryInterface $bulkUploadRepository
      * @param InventoryRepositoryInterface $inventoryRepository
      * @param ImageService $imageService
      */
-    public function __construct(BulkUploadRepositoryInterface $bulkUploadRepository, InventoryRepositoryInterface $inventoryRepository, ImageService $imageService)
+    public function __construct(
+        BulkUploadRepositoryInterface $bulkUploadRepository,
+        InventoryRepositoryInterface $inventoryRepository,
+        ImageService $imageService,
+        InventoryServiceInterface $inventoryService
+    )
     {
         $this->bulkUploadRepository = $bulkUploadRepository;
         $this->inventoryRepository = $inventoryRepository;
         $this->imageService = $imageService;
+        $this->inventoryService = $inventoryService;
 
         $this->convertHelper = new ConvertHelper();
     }
@@ -468,6 +481,8 @@ class CsvImportService implements CsvImportServiceInterface
 
         try {
             $this->inventory['dealer_id'] = $this->bulkUpload->dealer_id;
+
+            $this->inventory['description_html'] = $this->inventoryService->convertMarkdown($this->inventory['description']);
 
             if ($this->inventoryUpdate) {
                 $inventory = $this->inventoryRepository->update($this->inventory, ['updateAttributes' => true]);
