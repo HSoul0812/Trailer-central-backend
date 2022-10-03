@@ -46,6 +46,11 @@ class BulkPdfJobService implements BulkPdfJobServiceInterface, HasExporterInterf
      */
     public function export(BulkDownload $job): void
     {
+        // given it should create an HTML file to be printed and some dealers has many inventory
+        // so we need to increase the memory limit to avoid the worker dying
+        // this has been tested for ~12k inventory units
+        ini_set('memory_limit', '980MB');
+
         try {
             // @todo: the progress calculation should be accurate using a better way
             $this->logger->info(sprintf("[%s:] starting to export the pdf file for the monitored job '%s'", __CLASS__, $job->token));
