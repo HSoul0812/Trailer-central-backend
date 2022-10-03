@@ -668,7 +668,7 @@ class CsvImportService implements CsvImportServiceInterface
             },
             self::HEADER_SHOW_ON_WEBSITE => function (array &$part, ?string $value, int $line) {
                 $this->storeErrorIfValueIsEmpty(self::HEADER_SHOW_ON_WEBSITE, $line, $value);
-                $part['show_on_website'] = $this->sanitizeValueToNumber($value, 0);
+                $part['show_on_website'] = $this->sanitizeValueToBoolean($value, false);
             },
             self::HEADER_IMAGE => function (array &$part, ?string $value, int $line) {
                 $this->storeErrorIfValueIsEmpty(self::HEADER_IMAGE, $line, $value);
@@ -929,5 +929,27 @@ class CsvImportService implements CsvImportServiceInterface
                 ];
             })
             ->toArray();
+    }
+
+    /**
+     * Sanitize the given value to boolean
+     *
+     * @param string|null $value
+     * @param bool $default
+     * @return bool
+     */
+    private function sanitizeValueToBoolean(?string $value, bool $default = false): bool
+    {
+        if (empty($value)) {
+            return $default;
+        }
+
+        $filteredValue = filter_var($value, FILTER_VALIDATE_BOOLEAN);
+
+        if ($filteredValue === false) {
+            return $default;
+        }
+
+        return $filteredValue;
     }
 }
