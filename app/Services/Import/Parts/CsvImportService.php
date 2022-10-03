@@ -3,7 +3,6 @@
 namespace App\Services\Import\Parts;
 
 use App\Events\Parts\PartQtyUpdated;
-use App\Exceptions\ImageNotDownloadedException;
 use App\Exceptions\Services\Import\Parts\EmptySKUException;
 use App\Models\Bulk\Parts\BulkUpload;
 use App\Models\Parts\Bin;
