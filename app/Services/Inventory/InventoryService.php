@@ -886,28 +886,28 @@ class InventoryService implements InventoryServiceInterface
      */
     private function fixNonAsciiChars(string $description)
     {
-        $description = preg_replace('/<(?!br\s*\/?)[^<>]+>/', '', $description);
-
 
         $description = preg_replace('/(\\?\*){2,}/', '**', $description);
         $description = preg_replace('/(\\?_)+/', '_', $description);
         $description = preg_replace('/\\+/', '', $description);
 
         // Fix 0xa0 or nbsp
-        $description = preg_replace('/\0xa0/', ' ', $description);
-        $description = preg_replace('/\0xBE/', '3/4', $description);
-        $description = preg_replace('/\0xBC/', '1/4', $description);
-        $description = preg_replace('/\0xBD/', '1/2', $description);
+        $description = preg_replace('/\xA0/', ' ', $description);
+        $description = preg_replace('/\xBE/', '3/4', $description);
+        $description = preg_replace('/\xBC/', '1/4', $description);
+        $description = preg_replace('/\xBD/', '1/2', $description);
 
-        $description = preg_replace('/\0x91/', "'", $description);
-        $description = preg_replace('/\0x92/', "'", $description);
-        $description = preg_replace('/\0xB4/', "'", $description);
-        $description = preg_replace('/\0x27/', "'", $description);
+        $description = preg_replace('/\x91/', "'", $description);
+        $description = preg_replace('/\x92/', "'", $description);
+        $description = preg_replace('/\xB4/', "'", $description);
+        $description = preg_replace('/\x27/', "'", $description);
 
-        $description = preg_replace('/\0x93/', '"', $description);
-        $description = preg_replace('/\0x94/', '"', $description);
+        $description = preg_replace('/\x93/', '"', $description);
+        $description = preg_replace('/\x94/', '"', $description);
         $description = preg_replace('/”/', '"', $description);
         $description = preg_replace('/’/', "'", $description);
+
+        $description = preg_replace('/[[:^print:]]/', ' ', $description);
 
         return $description;
     }
