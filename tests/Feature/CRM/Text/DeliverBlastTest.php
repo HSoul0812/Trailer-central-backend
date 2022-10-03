@@ -2,19 +2,9 @@
 
 namespace Tests\Feature\CRM\Text;
 
-use App\Exceptions\CRM\Text\NoLeadsDeliverBlastException;
 use App\Models\CRM\Text\BlastSent;
 use App\Services\CRM\Text\TwilioServiceInterface;
 use App\Models\CRM\Leads\Lead;
-use App\Models\CRM\Leads\LeadStatus;
-use App\Models\Inventory\Inventory;
-use App\Models\Inventory\Category;
-use App\Models\Inventory\Manufacturers\Manufacturers;
-use App\Models\CRM\Text\Blast;
-use App\Models\CRM\Text\BlastBrand;
-use App\Models\CRM\Text\BlastCategory;
-use App\Models\CRM\Text\Template;
-use App\Models\User\NewDealerUser;
 use Faker\Factory as Faker;
 use Mockery;
 use Mockery\LegacyMockInterface;
