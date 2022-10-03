@@ -197,25 +197,15 @@ class HotPotatoService extends AutoAssignService implements HotPotatoServiceInte
         }
 
         // Initialize Next Contact Date
-        $nextContactTime = mktime($curHr + $nextHr, 0, 0, $this->datetime->format("n"), $salesDay);
-        $nextContactDate = new \DateTime(date("Y:m:d H:i:s", $nextContactTime), new \DateTimeZone($this->timezone));
+        $nextContact = Carbon::create($curHr + $nextHr, 0, 0, $this->datetime->format("n"), $salesDay, 0, $lead->crmUser->dealer_timezone);
 
         // On Weekend?
-        $mon = 0;
-        if(!empty($settings->get('round-robin/hot-potato/skip-weekends'))) {
-            if($nextContactDate->format("N") > 5) {
-                $mon = 8 - $nextContactDate->format("N");
-                $salesDay += $mon;
-                $nextContactTime = mktime($curHr + $nextHr, $this->datetime->format("i"), 0, $this->datetime->format("n"), $salesDay);
-                $nextContactDate = new \DateTime(date("Y:m:d H:i:s", $nextContactTime), new \DateTimeZone($this->timezone));
-            }
+        if($settings->get('round-robin/hot-potato/skip-weekends') && $nextContact->format("N") > 5) {
+            $salesDay += 8 - $nextContact->format("N");
+            $nextContact = Carbon::create($curHr + $nextHr, $this->datetime->format("i"), 0, $this->datetime->format("n"), $salesDay, 0, $lead->crmUser->dealer_timezone);
         }
 
-        // Set Next Contact Date
-        $nextContactGmt = gmdate("Y-m-d H:i:s", $nextContactTime);
-        $nextContact = $nextContactDate->format("Y-m-d H:i:s");
-
         // Return Lead Status
-        return $this->leadStatusRepository->update(['lead_id' => $lead->identifier, 'next_contact_date' => $nextContact]);
+        return $this->leadStatusRepository->update(['lead_id' => $lead->identifier, 'next_contact_date' => $nextContact->toDateTimeString()]);
     }
 }
