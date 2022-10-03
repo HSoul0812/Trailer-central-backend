@@ -97,6 +97,7 @@ class Marketplace extends Model
         'fb_password',
         'tfa_username',
         'tfa_password',
+        'tfa_code',
         'tfa_type',
         'imported_at'
     ];
