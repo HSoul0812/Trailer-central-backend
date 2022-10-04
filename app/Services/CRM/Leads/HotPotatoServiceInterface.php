@@ -20,8 +20,9 @@ interface HotPotatoServiceInterface extends AutoAssignServiceInterface {
      * Handle Hot Potato for Lead
      * 
      * @param Lead $lead
+     * @param Collection<array{key: value}> $settings
      * @return null|LeadAssign
      */
-    public function hotPotato(Lead $lead): ?LeadAssign;
+    public function hotPotato(Lead $lead, Collection $settings): ?LeadAssign;
     
 }

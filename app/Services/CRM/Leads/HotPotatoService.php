@@ -14,10 +14,11 @@ use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Traits\MailHelper;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
 
 class HotPotatoService extends AutoAssignService implements HotPotatoServiceInterface {
     
