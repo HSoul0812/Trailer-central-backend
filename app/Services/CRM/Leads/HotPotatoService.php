@@ -14,6 +14,7 @@ use App\Services\CRM\Leads\HotPotatoServiceInterface;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
+use App\Repositories\CRM\User\SettingsRepositoryInterface;
 use App\Traits\MailHelper;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
