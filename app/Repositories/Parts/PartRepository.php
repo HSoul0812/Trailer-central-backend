@@ -29,7 +29,7 @@ class PartRepository implements PartRepositoryInterface {
 
     const PARTS_IN_STOCK = 1;
     const PARTS_AVAILABLE = 2;
-    
+
     protected $model;
 
     private $sortOrders = [
@@ -108,7 +108,7 @@ class PartRepository implements PartRepositoryInterface {
         'sku' => 'sku.keyword',
         'price' => 'price.keyword',
     ];
-    
+
     public function __construct(Part $model) {
         $this->model = $model;
     }
@@ -473,20 +473,20 @@ class PartRepository implements PartRepositoryInterface {
                     }
                 } else {
                     $part->images()->delete();
-                } 
+                }
 
                 if (isset($params['bins'])) {
                     $part->bins()->delete();
-                    $part->load('bins');
 
                     foreach ($params['bins'] as $bin) {
-                        $binQty = $this->createBinQuantity([
+                        $this->createBinQuantity([
                             'part_id' => $part->id,
                             'bin_id' => $bin['bin_id'],
                             'qty' => $bin['quantity']
                         ]);
-                        $part->bins->add($binQty);
                     }
+
+                    $part->load('bins');
                 }
             }
         });

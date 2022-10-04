@@ -6,6 +6,7 @@ namespace Tests\database\seeds\Part;
 
 use App\Models\CRM\Dms\PurchaseOrder\PurchaseOrder;
 use App\Models\CRM\Dms\PurchaseOrder\PurchaseOrderPart;
+use App\Models\Parts\BinQuantity;
 use App\Models\Parts\Part;
 use App\Models\Parts\CacheStoreTime;
 use App\Models\Parts\Vendor;
@@ -51,7 +52,7 @@ class PartSeeder extends Seeder
 
         $parts = factory(
             Part::class,
-            $this->configs['count'] === 0 ? random_int(10, 20) : $this->configs['count']
+            ($this->configs['count'] ?? 0) === 0 ? random_int(10, 20) : $this->configs['count']
         )->create([
             'dealer_id' => $dealerId,
             'dealer_cost' => $faker->randomFloat(2, 0, 50),
@@ -62,19 +63,33 @@ class PartSeeder extends Seeder
             Model::unguard();
             $parts->each(function (Part $part) use ($faker) {
                 foreach ($this->configs['with'] as $with) {
-                    if ($with === 'purchaseOrders') {
-                        $purchaseOrder = PurchaseOrder::create([
-                            'dealer_id' => $part->dealer_id,
-                            'vendor_id' => $part->vendor_id,
-                            'status' => 'ordered',
-                            'user_defined_id' => Str::random(5)
-                        ]);
-                        $part->purchaseOrders()->save(new PurchaseOrderPart([
-                            'purchase_order_id' => $purchaseOrder->id,
-                            'part_id' => $part->id,
-                            'act_cost' => $faker->randomFloat(2, 0, 100),
-                            'qty' => random_int(2, 6),
-                        ]));
+                    switch($with) {
+                        case 'purchaseOrders': {
+                            $purchaseOrder = PurchaseOrder::create([
+                                'dealer_id' => $part->dealer_id,
+                                'vendor_id' => $part->vendor_id,
+                                'status' => 'ordered',
+                                'user_defined_id' => Str::random(5)
+                            ]);
+                            $part->purchaseOrders()->save(new PurchaseOrderPart([
+                                'purchase_order_id' => $purchaseOrder->id,
+                                'part_id' => $part->id,
+                                'act_cost' => $faker->randomFloat(2, 0, 100),
+                                'qty' => random_int(2, 6),
+                            ]));
+
+                            return;
+                        }
+                        case 'bins': {
+                            $part->bins()->save(new BinQuantity([
+                                'part_id' => $part->id,
+                                'qty' => random_int(2, 5),
+                            ]));
+                            $part->bins()->save(new BinQuantity([
+                                'part_id' => $part->id,
+                                'qty' => random_int(2, 5),
+                            ]));
+                        }
                     }
                 }
             });
