@@ -2,6 +2,7 @@
 
 namespace App\Repositories\CRM\User;
 
+use App\Models\CRM\User\Settings;
 use App\Repositories\Repository;
 use Illuminate\Support\Collection;
 

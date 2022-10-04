@@ -3,7 +3,7 @@
 namespace App\Repositories\CRM\User;
 
 use App\Exceptions\NotImplementedException;
-use App\Models\User\Settings;
+use App\Models\CRM\User\Settings;
 use Illuminate\Support\Collection;
 
 /**
