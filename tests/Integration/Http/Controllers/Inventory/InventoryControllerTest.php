@@ -125,7 +125,7 @@ class InventoryControllerTest extends TestCase
 
         $inventory = Inventory::find($responseJson['response']['data']['id']);
 
-        $this->assertSame($inventoryParams['description_html'], $inventory['description_html']);
+        $this->assertSame(strip_tags($inventoryParams['description_html']), strip_tags($inventory['description_html']));
 
         $seeder->cleanUp();
     }
