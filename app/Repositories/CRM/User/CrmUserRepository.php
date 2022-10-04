@@ -4,6 +4,7 @@ namespace App\Repositories\CRM\User;
 
 use App\Exceptions\NotImplementedException;
 use App\Models\User\CrmUser;
+use App\Models\User\NewDealerUser;
 
 /**
  * Class CrmUserRepository
