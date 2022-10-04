@@ -60,6 +60,8 @@ use App\Repositories\CRM\Leads\Export\LeadEmailRepositoryInterface;
 use App\Repositories\CRM\Leads\Export\LeadEmailRepository;
 use App\Repositories\CRM\Customer\CustomerRepositoryInterface;
 use App\Repositories\CRM\Customer\CustomerRepository;
+use App\Repositories\CRM\User\CrmUserRepository;
+use App\Repositories\CRM\User\CrmUserRepositoryInterface;
 use App\Repositories\CRM\User\SettingsRepository;
 use App\Repositories\CRM\User\SettingsRepositoryInterface;
 use App\Repositories\Dms\Customer\InventoryRepositoryInterface as CustomerInventoryRepositoryInterface;
@@ -100,6 +102,7 @@ class CrmServiceProvider extends ServiceProvider
         $this->app->bind(BigTexLeadRepositoryInterface::class, BigTexLeadRepository::class);
         $this->app->bind(LeadEmailRepositoryInterface::class, LeadEmailRepository::class);
         $this->app->bind(CustomerRepositoryInterface::class, CustomerRepository::class);
+        $this->app->bind(CrmUserRepositoryInterface::class, CrmUserRepository::class);
         $this->app->bind(SettingsRepositoryInterface::class, SettingsRepository::class);
         $this->app->bind(CustomerInventoryRepositoryInterface::class, CustomerInventoryRepository::class);
         $this->app->bind(DealerDocumentsRepositoryInterface::class, DealerDocumentsRepository::class);
