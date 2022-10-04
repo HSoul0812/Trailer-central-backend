@@ -118,7 +118,7 @@ class HotPotato extends Command
             // Get Dealers With Valid Salespeople
             foreach($dealers as $dealer) {
                 // Handle All Leads For Dealer
-                $leads = $this->hotPotatoService->hotpotato($dealer->newDealerUser);
+                $leads = $this->hotPotatoService->dealer($dealer->newDealerUser);
                 $this->logOutput("{$command} found " . $leads->count() . " leads to process for dealer " . $dealer->id);
             }
         } catch(\Exception $e) {

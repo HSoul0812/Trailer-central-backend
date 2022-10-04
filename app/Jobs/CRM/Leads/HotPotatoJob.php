@@ -7,6 +7,7 @@ use App\Models\CRM\Leads\Lead;
 use App\Services\CRM\Leads\AutoAssignServiceInterface;
 use App\Exceptions\CRM\Leads\AutoAssignJobMissingLeadException;
 use App\Exceptions\CRM\Leads\AutoAssignJobSalesPersonExistsException;
+use League\Fractal\Resource\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Foundation\Bus\Dispatchable;
 
@@ -22,15 +23,22 @@ class HotPotatoJob extends Job
      * @var Lead
      */
     private $lead;
+
+    /**
+     * @var Collection<array{key: value}>
+     */
+    private $settings;
     
     /**
      * HotPotatoJob constructor.
      * 
      * @param Lead $lead
+     * @param Collection<array{key: value}> $settings
      */
-    public function __construct(Lead $lead)
+    public function __construct(Lead $lead, Collection $settings)
     {
         $this->lead = $lead;
+        $this->settings = $settings;
     }
 
     /**
@@ -44,11 +52,11 @@ class HotPotatoJob extends Job
     public function handle(AutoAssignServiceInterface $service)
     {
         // Initialize Log
-        $log = Log::channel('autoassign');
+        $log = Log::channel('hotpotato');
 
         // Process Hot Potato
         $log->info('Handling Hot Potato Manually on Lead #' . $this->lead->identifier);
-        $service->hotPotato($this->lead);
+        $service->hotPotato($this->lead, $this->settings);
         return true;
     }
 }
