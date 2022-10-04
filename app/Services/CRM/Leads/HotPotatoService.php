@@ -8,6 +8,7 @@ use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadAssign;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\User\NewUser;
+use App\Models\User\NewDealerUser;
 use App\Services\CRM\Leads\AutoAssignService;
 use App\Services\CRM\Leads\HotPotatoServiceInterface;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
