@@ -4,6 +4,7 @@ namespace App\Repositories\CRM\User;
 
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\User\Settings;
+use App\Models\User\NewDealerUser;
 use Illuminate\Support\Collection;
 
 /**
