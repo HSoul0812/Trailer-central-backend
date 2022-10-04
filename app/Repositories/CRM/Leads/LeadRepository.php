@@ -332,7 +332,7 @@ class LeadRepository implements LeadRepositoryInterface {
                  ->whereNull(SalesPerson::getTableName() . '.deleted_at');
         })->leftJoin(Interaction::getTableName(), function ($join) {
             $join->on(Lead::getTableName() . '.identifier', '=', Interaction::getTableName() . '.tc_lead_id')
-                 ->on(Interaction::getTableName() . '.interaction_time', '>', SalesPerson::getTableName() . '.next_contact_date')
+                 ->on(Interaction::getTableName() . '.interaction_time', '>', LeadStatus::getTableName() . '.next_contact_date')
                  ->where(Interaction::getTableName() . '.interaction_type', 'EMAIL');
         })->whereNotNull(SalesPerson::getTableName() . '.email')
           ->where(Lead::getTableName() . '.is_archived', 0)
@@ -345,26 +345,26 @@ class LeadRepository implements LeadRepositoryInterface {
 
         // Created At?
         if(!isset($params['first_created']) && !isset($params['last_created'])) {
-            $query = $query->whereNotNull(SalesPerson::getTableName() . '.next_contact_date')
-                           ->where(SalesPerson::getTableName() . '.next_contact_date', '<>', '0000-00-00 00:00:00');
+            $query = $query->whereNotNull(LeadStatus::getTableName() . '.next_contact_date')
+                           ->where(LeadStatus::getTableName() . '.next_contact_date', '<>', '0000-00-00 00:00:00');
 
             // Set First / Last Contact Date
             if(isset($params['first_contact'])) {
-                $query = $query->where(SalesPerson::getTableName() . '.next_contact_date', '>=', $params['first_contact']);
+                $query = $query->where(LeadStatus::getTableName() . '.next_contact_date', '>=', $params['first_contact']);
             }
             if(isset($params['last_contact'])) {
-                $query = $query->where(SalesPerson::getTableName() . '.next_contact_date', '<=', $params['last_contact']);
+                $query = $query->where(LeadStatus::getTableName() . '.next_contact_date', '<=', $params['last_contact']);
             }
         } elseif(isset($params['first_contact']) || isset($params['last_contact'])) {
             $query = $query->where(function($query) use($params) {
-                return $query->whereNull(SalesPerson::getTableName() . '.next_contact_date')
+                return $query->whereNull(LeadStatus::getTableName() . '.next_contact_date')
                              ->orWhere(function($query) use($params) {
                     // Set First / Last Contact Date
                     if(isset($params['first_contact'])) {
-                        $query = $query->where(SalesPerson::getTableName() . '.next_contact_date', '>=', $params['first_contact']);
+                        $query = $query->where(LeadStatus::getTableName() . '.next_contact_date', '>=', $params['first_contact']);
                     }
                     if(isset($params['last_contact'])) {
-                        $query = $query->where(SalesPerson::getTableName() . '.next_contact_date', '<=', $params['last_contact']);
+                        $query = $query->where(LeadStatus::getTableName() . '.next_contact_date', '<=', $params['last_contact']);
                     }
                 });
             });
