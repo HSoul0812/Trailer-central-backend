@@ -51,7 +51,7 @@ class HotPotatoJob extends Job
         $log = Log::channel('hotpotato');
 
         // Process Hot Potato
-        $log->info('Handling Hot Potato Manually on Lead #' . $this->lead->identifier);
+        $log->info('Handling Hot Potato on Lead #' . $this->lead->identifier);
         $service->hotPotato($this->lead, $this->settings);
         return true;
     }
