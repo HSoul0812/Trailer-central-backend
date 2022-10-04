@@ -23,16 +23,16 @@
                                     <!-- begin content -->
 
                                     Your salesperson {{ $salesperson_name }} failed to follow-up with the lead
-                                    {{ $lead_name }}{{ $next_contact_date }} as scheduled.<br /><br />
+                                    {{ $lead_name }}{{ $old_contact_date }} as scheduled.<br /><br />
 
-                                    @if (!empty($new_sales_email))
+                                    @if (!empty($new_salesperson_name))
                                         As per your request, we re-assigned the lead to the next available
-                                        salesperson, {{ $new_sales_email }} and have scheduled the next
-                                        contact time to {{ $new_contact_date }}.<br /><br />
+                                        salesperson, {{ $new_salesperson_name }} and have scheduled the next
+                                        contact time to {{ $next_contact_date }}.<br /><br />
                                     @else
                                         As per your request, we we attempted to re-assign the lead to the
                                         next available salesperson, but no suitable salesperson was found.<br /><br />
-                                        We automatically rescheduled the next contact time to {{ $new_contact_date }}.<br /><br />
+                                        We automatically rescheduled the next contact time to {{ $next_contact_date }}.<br /><br />
                                     @endif
 
                                     @if ($weekend > 0)

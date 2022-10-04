@@ -110,6 +110,7 @@ class HotPotatoService extends AutoAssignService implements HotPotatoServiceInte
         $dealerLocationId = $this->getLeadDealerLocation($lead);
 
         // Get Newest Sales Person
+        $oldContactDate = $lead->leadStatus->next_contact_date;
         $currentSalesPerson = $lead->leadStatus->salesPerson;
         $currentSalesPersonId = $currentSalesPerson->id ?? 0;
         $this->setRoundRobinSalesPerson($dealer->id, $dealerLocationId, $lead, $currentSalesPersonId);
@@ -125,8 +126,8 @@ class HotPotatoService extends AutoAssignService implements HotPotatoServiceInte
         // Finish Assigning Lead and Return Result
         $this->setRoundRobinSalesPerson($dealer->id, $dealerLocationId, $lead, $salesPerson->id);
         $status = $this->handleAssignLead($lead, $salesPerson);
-        $this->pushNextContactDate($lead, $settings);
-        $this->sendHotPotatoEmail($lead, $salesPerson);
+        $nextContactDate = $this->pushNextContactDate($lead, $settings);
+        $this->sendHotPotatoEmail($lead, $currentSalesPerson, $salesPerson, $oldContactDate, $nextContactDate['weekday']);
         return $this->markAssignLead($lead, $dealerLocationId, $currentSalesPerson, $salesPerson, $status);
     }
 
@@ -174,58 +175,14 @@ class HotPotatoService extends AutoAssignService implements HotPotatoServiceInte
 
 
     /**
-     * Prepare Hot Potato Email
-     * 
-     * @param Lead $lead
-     * @param SalesPerson $salesPerson
-     * @return string status of assign
-     */
-    protected function sendHotPotatoEmail(Lead $lead, SalesPerson $salesPerson): string {
-        // Initialize Next Contact Date
-        $date = Carbon::parse($lead->leadStatus->next_contact_date)->timezone($lead->crmUser->dealer_timezone);
-        $credential = NewUser::getDealerCredential($lead->newDealerUser->user_id, $salesPerson->id);
-        $nextContactText  = ' on ' . $date->format("l, F jS, Y") . ' at ' . $date->format("g:i A T");
-
-
-        // Try Processing Admin Email
-        $this->addLeadExplanationNotes($lead->identifier, 'Found Next Matching Sales Person: ' . $salesPerson->id . ' for Lead: ' . $lead->id_name);
-        try {
-            // Send Admin Email
-            Mail::to($lead->dealer_emails)->send(
-                new HotPotatoEmail([
-                    'date' => Carbon::now()->toDateTimeString(),
-                    'new_contact_name' => $salesPerson->getFullNameAttribute(),
-                    'launch_url' => Lead::getLeadCrmUrl($lead->identifier, $credential),
-                    'lead_name' => $lead->id_name,
-                    'lead_email' => $lead->email_address,
-                    'lead_phone' => $lead->phone_number,
-                    'lead_address' => $lead->full_address,
-                    'lead_status' => !empty($lead->leadStatus->status) ? $lead->leadStatus->status : LeadStatus::STATUS_UNCONTACTED,
-                    'lead_comments' => $lead->comments,
-                    'next_contact_date' => $nextContactText
-                ])
-            );
-        } catch(\Exception $e) {
-            // Add Error
-            if(empty($status)) {
-                $status = 'error';
-            }
-            $this->addLeadExplanationNotes($lead->identifier, 'Exception Returned! ' . $e->getMessage() . ': ' . $e->getTraceAsString());
-            $this->log->error("AutoAssignService exception returned on update or email {$e->getMessage()}: {$e->getTraceAsString()}");
-        }
-
-        // Mark Lead as Assign
-        return $status;
-    }
-
-    /**
      * Push Next Contact Date Back Based on Settings
      * 
      * @param Lead $lead
      * @param Collection<{key: value}> $settings
-     * @return LeadStatus
+     * @return array{next_contact_date: string,
+     *               weekday: null|int}
      */
-    private function pushNextContactDate(Lead $lead, Collection $settings): LeadStatus {
+    private function pushNextContactDate(Lead $lead, Collection $settings): array {
         // Set Specific Distance From Now
         $nextHr = $settings->get('round-robin/hot-potato/delay');
         $curHr  = $this->datetime->format("j");
@@ -248,12 +205,66 @@ class HotPotatoService extends AutoAssignService implements HotPotatoServiceInte
         $nextContact = Carbon::create($curHr + $nextHr, 0, 0, $this->datetime->format("n"), $salesDay, 0, $lead->crmUser->dealer_timezone);
 
         // On Weekend?
+        $weekday = 0;
         if($settings->get('round-robin/hot-potato/skip-weekends') && $nextContact->format("N") > 5) {
-            $salesDay += 8 - $nextContact->format("N");
+            $weekday = $nextContact->format("N");
+            $salesDay += (8 - $weekday);
             $nextContact = Carbon::create($curHr + $nextHr, $this->datetime->format("i"), 0, $this->datetime->format("n"), $salesDay, 0, $lead->crmUser->dealer_timezone);
         }
 
+        // Set Next Contact Date
+        $this->leadStatusRepository->update(['lead_id' => $lead->identifier, 'next_contact_date' => $nextContact->toDateTimeString()]);
+
         // Return Lead Status
-        return $this->leadStatusRepository->update(['lead_id' => $lead->identifier, 'next_contact_date' => $nextContact->toDateTimeString()]);
+        return ['next_contact_date' => $nextContact->toDateTimeString(), 'weekday' => $weekday];
+    }
+
+    /**
+     * Prepare Hot Potato Email
+     * 
+     * @param Lead $lead
+     * @param SalesPerson $currentSalesPerson
+     * @param SalesPerson $salesPerson
+     * @param string $oldContactDate
+     * @param null|int $weekday
+     * @return string status of assign
+     */
+    protected function sendHotPotatoEmail(
+        Lead $lead,
+        SalesPerson $currentSalesPerson,
+        SalesPerson $salesPerson,
+        string $oldContactDate,
+        ?int $weekday = 0
+    ): void {
+        // Configure Old Contact Date
+        $oldDate = Carbon::parse($oldContactDate)->timezone($lead->crmUser->dealer_timezone);
+        $oldContactText  = ' on ' . $oldDate->format("l, F jS, Y") . ' at ' . $oldDate->format("g:i A T");
+
+        // Initialize Next Contact Date
+        $date = Carbon::parse($lead->leadStatus->next_contact_date)->timezone($lead->crmUser->dealer_timezone);
+        $credential = NewUser::getDealerCredential($lead->newDealerUser->user_id, $salesPerson->id);
+        $nextContactText  = $date->format("l, F jS, Y") . ' at ' . $date->format("g:i A T");
+
+        // Try Processing Admin Email
+        $this->addLeadExplanationNotes($lead->identifier, 'Sending Admin Email to: ' . print_r($lead->dealer_emails, true));
+        try {
+            // Send Admin Email
+            Mail::to($lead->dealer_emails)->send(
+                new HotPotatoEmail([
+                    'date' => Carbon::now()->toDateTimeString(),
+                    'salesperson_name' => $currentSalesPerson->getFullNameAttribute(),
+                    'new_salesperson_name' => $salesPerson->getFullNameAttribute(),
+                    'launch_url' => Lead::getLeadCrmUrl($lead->identifier, $credential),
+                    'lead_name' => $lead->id_name,
+                    'old_contact_date' => $oldContactText,
+                    'next_contact_date' => $nextContactText,
+                    'weekday' => $weekday
+                ])
+            );
+        } catch(\Exception $e) {
+            // Add Error
+            $this->addLeadExplanationNotes($lead->identifier, 'Exception Returned! ' . $e->getMessage() . ': ' . $e->getTraceAsString());
+            $this->log->error("HotPotatoService exception returned on admin email {$e->getMessage()}: {$e->getTraceAsString()}");
+        }
     }
 }
