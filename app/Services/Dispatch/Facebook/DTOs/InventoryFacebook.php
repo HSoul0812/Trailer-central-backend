@@ -412,13 +412,14 @@ class InventoryFacebook
     public static function getFromInventory(Inventory $inventory,
             Marketplace $integration): InventoryFacebook
     {
+        $calculatedPrice = (!is_null($inventory->sales_price) && $inventory->sales_price > 0) ? $inventory->sales_price : ($inventory->use_website_price && $inventory->website_price > 0 ? $inventory->website_price : $inventory->price);
         // Create Inventory Mapping
         return new self([
             'inventory_id' => $inventory->inventory_id,
             'page_url' => $integration->page_url,
             'entity_type_id' => $inventory->entity_type_id,
             'category' => $inventory->category,
-            'price' => $inventory->price,
+            'price' => $calculatedPrice,
             'year' => $inventory->year,
             'manufacturer' => $inventory->manufacturer,
             'model' => $inventory->model,

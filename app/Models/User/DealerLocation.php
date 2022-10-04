@@ -133,10 +133,12 @@ class DealerLocation extends Model
         "pac_amount",
         "pac_type",
         'sales_tax_item_column_titles',
-        'location_id'
+        'location_id',
+        'google_business_store_code'
     ];
 
     protected $casts = [
+        'is_default' => 'boolean',
         'sales_tax_item_column_titles' => 'array'
     ];
 

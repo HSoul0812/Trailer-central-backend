@@ -12,6 +12,7 @@ use App\Models\Parts\PartImage;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Parts\VehicleSpecific;
 use Illuminate\Support\Facades\DB;
@@ -165,7 +166,9 @@ class PartRepository implements PartRepositoryInterface {
        return $part;
     }
 
-    public function createOrUpdate($params) {
+    public function createOrUpdate($params)
+    {
+        $part = null;
 
         if (isset($params['id'])) {
             $part = $this->model->where('id', $params['id'])->where('dealer_id', $params['dealer_id'])->first();
@@ -462,18 +465,24 @@ class PartRepository implements PartRepositoryInterface {
             }
 
             if ($part->save()) {
+                $deleteImagesIfNoIndex = data_get($params, 'delete_images_if_no_index', true);
+
                 if (isset($params['images'])) {
                     $part->images()->delete();
                     foreach($params['images'] as $image) {
                         try {
                             $this->storeImage($part->id, $image);
-                        } catch (\ImageNotDownloadedException $ex) {
+                        } catch (ImageNotDownloadedException $ex) {
 
                         }
                     }
                 } else {
-                    $part->images()->delete();
-                } 
+                    // Only delete the existing image if the index
+                    // name delete_images_if_no_index is set to true
+                    if ($deleteImagesIfNoIndex) {
+                        $part->images()->delete();
+                    }
+                }
 
                 if (isset($params['bins'])) {
                     $part->bins()->delete();
@@ -528,9 +537,10 @@ class PartRepository implements PartRepositoryInterface {
 
     public function createPart($params)
     {
-        if (empty($params['latest_cost'])) {
+        if (Arr::has($params, 'dealer_cost') && empty($params['latest_cost'])) {
             $params['latest_cost'] = $params['dealer_cost'];
         }
+
         return $this->model->create($params);
     }
 
