@@ -82,19 +82,24 @@ class TcApiResponseInventory
      $obj->manufacturer = $data['manufacturer'];
      $obj->dealer = $data['dealer'];
      $obj->listing_date = $data['created_at'];
-     $obj->price = $data['price'];
-     $obj->basic_price = $data['price'];
-     $obj->sales_price = $data['sales_price'];
-     $obj->website_price = isset($data['use_website_price']) && $data['use_website_price']
-         ? $data['website_price']
-         : $data['price'];
+
+     $obj->availability = self::statusToAvailabilityMap[$data['status_id']] ?? '';
+     $obj->availability_label = $data['status'] ?? '';
+     if($obj->availability !== 'sold') {
+         $obj->price = $data['price'];
+         $obj->sales_price = $data['sales_price'];
+         $obj->website_price = isset($data['use_website_price']) && $data['use_website_price']
+             ? $data['website_price']
+             : $data['price'];
+
+         $obj->basic_price = $data['price'];
+     }
+
      $obj->inventory_title = $data['title'];
      $obj->photos = $data['images'];
      $obj->dealer_location = $data['dealer_location'];
      $obj->primary_image = $data['primary_image'];
      $obj->category = $data['category'];
-     $obj->availability = self::statusToAvailabilityMap[$data['status_id']] ?? '';
-     $obj->availability_label = $data['status'] ?? '';
      $obj->is_archived = $data['is_archived'];
      $obj->show_on_website = $data['show_on_website'];
      $obj->times_viewed = $data['times_viewed'];
