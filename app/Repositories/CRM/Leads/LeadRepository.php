@@ -367,15 +367,15 @@ class LeadRepository implements LeadRepositoryInterface {
                         $query = $query->where(LeadStatus::getTableName() . '.next_contact_date', '<=', $params['last_contact']);
                     }
                 });
+            })->orWhere(function($query) use($params) {
+                // Set First / Last Created Date
+                if(isset($params['first_created'])) {
+                    $query = $query->where(Lead::getTableName() . '.date_submitted', '>=', $params['first_created']);
+                }
+                if(isset($params['last_created'])) {
+                    $query = $query->where(Lead::getTableName() . '.date_submitted', '<=', $params['last_created']);
+                }
             });
-        }
-
-        // Set First / Last Created Date
-        if(isset($params['first_created'])) {
-            $query = $query->where(Lead::getTableName() . '.date_submitted', '>=', $params['first_created']);
-        }
-        if(isset($params['last_created'])) {
-            $query = $query->where(Lead::getTableName() . '.date_submitted', '<=', $params['last_created']);
         }
 
         // Set Sort Query
