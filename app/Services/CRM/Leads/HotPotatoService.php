@@ -58,7 +58,7 @@ class HotPotatoService extends AutoAssignService implements HotPotatoServiceInte
         $settings  = $this->settings->getByDealer($dealer->id);
         $duration  = $settings->get('round-robin/hot-potato/duration');
         $lastDate  = $this->datetime->subMinutes($duration)->toDateTimeString();
-        $firstDate = Carbon::parseFromTimestamp($lastDate)->subDay()->toDateTimeString();
+        $firstDate = Carbon::parse($lastDate)->subDay()->toDateTimeString();
 
         // Use Date Submitted?
         $params = [
@@ -68,7 +68,7 @@ class HotPotatoService extends AutoAssignService implements HotPotatoServiceInte
         ];
         if($settings->get('round-robin/hot-potato/use-submission-date')) {
             $lastCreated  = $this->datetime->subMinutes($duration)->toDateTimeString();
-            $firstCreated = Carbon::parseFromTimestamp($lastCreated)->subDay()->toDateTimeString();
+            $firstCreated = Carbon::parse($lastCreated)->subDay()->toDateTimeString();
             $params['last_created']  = $lastCreated;
             $params['first_created'] = $firstCreated;
         }
