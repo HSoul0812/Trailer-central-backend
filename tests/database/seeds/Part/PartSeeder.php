@@ -81,14 +81,7 @@ class PartSeeder extends Seeder
                             return;
                         }
                         case 'bins': {
-                            $part->bins()->save(new BinQuantity([
-                                'part_id' => $part->id,
-                                'qty' => random_int(2, 5),
-                            ]));
-                            $part->bins()->save(new BinQuantity([
-                                'part_id' => $part->id,
-                                'qty' => random_int(2, 5),
-                            ]));
+                            $part->bins()->saveMany(factory(BinQuantity::class, 2)->make());
                         }
                     }
                 }
