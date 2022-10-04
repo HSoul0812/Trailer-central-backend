@@ -34,31 +34,23 @@ class LatLongDealerPrecisionUpdaterCommand extends Command
     {
         $this->line('This command is going to run over all the records in the dealer locations table and update the precision of each record that has two decimal points.');
 
-        // Prompt user to confirm if we should begin the execution of the command
         if(!$this->confirm('This will take a while. Press [ENTER] to begin')) {
             return 0;
         }
 
-        // Base select for all malformed dataa
         $baseQuery = DealerLocation::whereRaw('(round(latitude,0) - round(latitude,2) <> 0)')
                         ->orWhereRaw('(round(latitude,0) - round(latitude,2) <> 0)')
                         ->orWhereNull('latitude')
                         ->orWhereNull('longitude');
 
-        // Print number of records to be processed
         $this->info("Processing {$baseQuery->count()} records...");
 
-        // The  key to cache the current position were are at with processing the data
         $cacheKey = self::class;
 
-        // Get if we have a process that hung
         $cachedItem = Cache::get($cacheKey);
 
-        // Get boolean representation of whether object is  
         $exists = !!$cachedItem;
 
-        // Start processing the queue
-        // Remembering where we are in the list
         $this->process($exists, $baseQuery,  $cacheKey, $cachedItem);
     }
 
@@ -87,7 +79,6 @@ class LatLongDealerPrecisionUpdaterCommand extends Command
                 if($location->postalcode) {
                     $searchQuery = $location->postalcode;
 
-                    // Get a boolean value telling us whether we have a canadian or a US postcode
                     $isCanadianPostcode = !!preg_match('/^([A-Za-z]\d[A-Za-z][-]?\d[A-Za-z]\d)/i', $searchQuery);
                 } else {
                     $searchQuery = "{$location->address}, {$location->city}, {$location->county}, {$location->region}";
@@ -146,10 +137,8 @@ class LatLongDealerPrecisionUpdaterCommand extends Command
      */
     protected function addError(DealerLocation $location, string $query)
     {
-        // Log out the error
         Log::error("[geolocation:dealers] Failed to get the lat/long value for {$location->dealer_location_id} q. {$query}");
 
-        // Print an error to the console
         $this->error("Failed to get the lat/long value for {$location->dealer_location_id} q. {$query}");
     }
 
@@ -186,7 +175,6 @@ class LatLongDealerPrecisionUpdaterCommand extends Command
 
         $url = config('google.maps.url') . "?{$query}";
 
-        // Make HTTP request to the GMaps API
         $result_string = file_get_contents($url);
 
         $result = json_decode($result_string, true);

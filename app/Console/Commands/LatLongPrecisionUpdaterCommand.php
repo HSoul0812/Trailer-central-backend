@@ -34,23 +34,17 @@ class LatLongPrecisionUpdaterCommand extends Command
     {
         $this->line('This command is going to run over all the records in the geolocation table and update the precision of each record that has two decimal points.');
 
-        // Prompt user to confirm if we should begin the execution of the command
         if(!$this->confirm('This will take a while. Press [ENTER] to begin')) {
             return 0;
         }
 
-        // Base select for all malformed dataa
         $baseQuery = Geolocation::whereRaw('(round(latitude,0) - round(latitude,2) <> 0)')->orWhereRaw('(round(latitude,0) - round(latitude,2) <> 0)');
 
-        // Print number of records to be processed
         $this->info("Processing {$baseQuery->count()} records...");
 
-        // The  key to cache the current position were are at with processing the data
         $cacheKey = self::class;
 
-        // Get if we have a process that hung
         $exists = Cache::get(self::class);
-
 
         $this->process(!!$exists, $baseQuery,  $cacheKey, $exists);
     }
@@ -76,14 +70,12 @@ class LatLongPrecisionUpdaterCommand extends Command
                     return $this->addError($item);
                 }
 
-                // Update the record in the DB
                 $item->update([
                     'latitude' => $latLong->latitude,
                     'longitude' => $latLong->longitude
                 ]);
             });
 
-            // Remember current chunk number
             Cache::set($cacheKey, $chunkNumber);
         });
     }
@@ -95,10 +87,8 @@ class LatLongPrecisionUpdaterCommand extends Command
      */
     protected function addError(Geolocation $item)
     {
-        // Log out the error
         Log::error("[geolocation:precision] Failed to get the lat/long value for {$item->id}");
 
-        // Print an error to the console
         $this->error("Failed to get the lat/long value for {$item->id}");
     }
 
