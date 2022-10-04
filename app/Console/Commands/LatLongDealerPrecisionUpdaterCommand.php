@@ -2,10 +2,10 @@
 
 namespace App\Console\Commands;
 
-use Log;
-use Cache;
 use Illuminate\Console\Command;
 use App\Models\User\DealerLocation;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use App\Models\User\Location\Geolocation;
 use Illuminate\Database\Eloquent\Builder;
 
