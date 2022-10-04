@@ -4,9 +4,7 @@ namespace App\Jobs\CRM\Leads;
 
 use App\Jobs\Job;
 use App\Models\CRM\Leads\Lead;
-use App\Services\CRM\Leads\AutoAssignServiceInterface;
-use App\Exceptions\CRM\Leads\AutoAssignJobMissingLeadException;
-use App\Exceptions\CRM\Leads\AutoAssignJobSalesPersonExistsException;
+use App\Services\CRM\Leads\HotPotatoServiceInterface;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -42,14 +40,12 @@ class HotPotatoJob extends Job
     }
 
     /**
-     * Handle Auto Assign Job
+     * Handle Hot Potato Job
      * 
-     * @param AutoAssignServiceInterface $service
-     * @throws AutoAssignJobMissingLeadException
-     * @throws AutoAssignJobSalesPersonExistsException
+     * @param HotPotatoServiceInterface $service
      * @return boolean
      */
-    public function handle(AutoAssignServiceInterface $service)
+    public function handle(HotPotatoServiceInterface $service)
     {
         // Initialize Log
         $log = Log::channel('hotpotato');
