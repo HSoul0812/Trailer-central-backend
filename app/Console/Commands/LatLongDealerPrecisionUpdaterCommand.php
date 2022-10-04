@@ -11,8 +11,6 @@ use Illuminate\Database\Eloquent\Builder;
 
 class LatLongDealerPrecisionUpdaterCommand extends Command
 {
-    const GOOGLE_MAPS_ENDPOINT = "https://maps.googleapis.com/maps/api/geocode/json";
-
     /**
      * The name and signature of the console command.
      *
@@ -54,9 +52,14 @@ class LatLongDealerPrecisionUpdaterCommand extends Command
         $cacheKey = self::class;
 
         // Get if we have a process that hung
-        $exists = Cache::get($cacheKey);
+        $cachedItem = Cache::get($cacheKey);
 
-        $this->process(!!$exists, $baseQuery,  $cacheKey, $exists);
+        // Get boolean representation of whether object is  
+        $exists = !!$cachedItem;
+
+        // Start processing the queue
+        // Remembering where we are in the list
+        $this->process($exists, $baseQuery,  $cacheKey, $cachedItem);
     }
 
     /**
