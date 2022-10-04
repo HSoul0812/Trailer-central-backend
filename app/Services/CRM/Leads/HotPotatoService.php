@@ -18,7 +18,8 @@ use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\CRM\User\SettingsRepositoryInterface;
 use App\Traits\MailHelper;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection as DBCollection;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
@@ -52,9 +53,9 @@ class HotPotatoService extends AutoAssignService implements HotPotatoServiceInte
      * Handle Hot Potato for Dealer
      * 
      * @param NewDealerUser $dealer
-     * @return Collection<Lead>
+     * @return DBCollection<Lead>
      */
-    public function dealer(NewDealerUser $dealer): Collection {
+    public function dealer(NewDealerUser $dealer): DBCollection {
         // Get Mapped Settings Collection
         $settings  = $this->settings->getByDealer($dealer->id);
         $duration  = $settings->get('round-robin/hot-potato/duration');

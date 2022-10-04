@@ -5,16 +5,17 @@ namespace App\Services\CRM\Leads;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadAssign;
 use App\Models\User\NewDealerUser;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection as DBCollection;
 
 interface HotPotatoServiceInterface extends AutoAssignServiceInterface {
     /**
      * Handle Hot Potato for Dealer
      * 
      * @param User $dealer
-     * @return Collection<LeadAssign>
+     * @return DBCollection<LeadAssign>
      */
-    public function dealer(NewDealerUser $dealer): Collection;
+    public function dealer(NewDealerUser $dealer): DBCollection;
     
     /**
      * Handle Hot Potato for Lead
