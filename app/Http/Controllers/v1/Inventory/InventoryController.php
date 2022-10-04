@@ -492,7 +492,8 @@ class InventoryController extends RestfulControllerV2
 
             return $this->response
                 ->collection($result->hints, new InventoryElasticSearchOutputTransformer())
-                ->addMeta('aggregations',$result->aggregations);
+                ->addMeta('aggregations',$result->aggregations)
+                ->addMeta('total',$result->total);
         }
 
         $this->response->errorBadRequest();

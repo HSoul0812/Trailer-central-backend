@@ -10,6 +10,7 @@ use App\Models\Inventory\Geolocation\Point;
 class SearchInventoryRequest extends Request
 {
     private const DELIMITER = ';';
+    private const SORT_DELIMITER = ':';
 
     protected $rules = [
         'per_page' => 'integer|min:1|max:100',
@@ -30,7 +31,10 @@ class SearchInventoryRequest extends Request
 
     public function sort(): array
     {
-        return ['sort' => $this->sort];
+        return collect(explode(self::DELIMITER, $this->sort))->mapWithKeys(function ($sort) {
+            [$sortTerm, $order] = explode(self::SORT_DELIMITER, $sort);
+            return [$sortTerm => $order];
+        })->toArray();
     }
 
     public function pagination(): array
@@ -50,10 +54,13 @@ class SearchInventoryRequest extends Request
 
     public function offSet(): int
     {
-        return (int)($this->offset ?? 0);
+        if (!$this->offset) {
+            return ($this->page() - 1) * $this->perPage();
+        }
+        return (int)$this->offset;
     }
 
-    public function location(): \App\Models\Inventory\Geolocation\Point
+    public function location(): Point
     {
         return new Point((float)$this->lat, (float)$this->lon);
     }

@@ -541,7 +541,8 @@ class QueryBuilder implements InventoryQueryBuilderInterface
         'stored_fields' => [
             '_source'
         ],
-        'script_fields' => []
+        'script_fields' => [],
+        'sort' => []
     ];
 
     public function addDealers(array $dealerIds): QueryBuilderInterface
@@ -600,11 +601,31 @@ class QueryBuilder implements InventoryQueryBuilderInterface
 
     public function addSort(array $sort): QueryBuilderInterface
     {
+        if (isset($sort['status_script'])) {
+            $this->addStatusSortScript($sort['status_script']);
+            unset($sort['status_script']);
+        }
+
+        if (isset($sort['location_script'])) {
+            $this->addLocationSortScript($sort['location_script']);
+            unset($sort['location_script']);
+        }
+
+        foreach ($sort as $sortKey => $order) {
+            $this->query['sort'][] = [
+                $sortKey => [
+                    'order' => $order
+                ]
+            ];
+        }
+
         return $this;
     }
 
     public function addPagination(array $pagination): QueryBuilderInterface
     {
+        $this->query['from'] = $pagination['offset'];
+        $this->query['size'] = $pagination['per_page'];
         return $this;
     }
 
@@ -618,5 +639,39 @@ class QueryBuilder implements InventoryQueryBuilderInterface
         return function (string $term, string $data) use ($query) {
             return array_merge_recursive($query, $this->mapper->getBuilder($term, $data)->query());
         };
+    }
+
+    private function addStatusSortScript(string $status)
+    {
+        array_push($this->query['sort'], ... array_map(function ($value) {
+            return [
+                '_script' => [
+                    'type' => 'string',
+                    'script' => [
+                        'inline' => "doc['status'].value == params.status",
+                        'params' => [
+                            'status' => (int)$value
+                        ]
+                    ],
+                    'order' => 'desc'
+                ]
+            ];
+        }, explode(',', $status)));
+    }
+
+    private function addLocationSortScript(string $locations)
+    {
+        $this->query['sort'][] = [
+            '_script' => [
+                'type' => 'number',
+                'script' => [
+                    'inline' => "if(doc['dealerLocationId'].value != null) { for(int i=0; i < params['locations'].length; i++) {if(params['locations'][i] == doc['dealerLocationId'].value) return -1;} return 0;} else { return 1; }",
+                    'params' => [
+                        'locations' => array_map('intval', explode(',', $locations))
+                    ]
+                ],
+                'order' => 'asc'
+            ]
+        ];
     }
 }

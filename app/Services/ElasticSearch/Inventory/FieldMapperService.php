@@ -60,10 +60,23 @@ class FieldMapperService implements InventoryFieldMapperServiceInterface
      */
     private function resolveName(string $fieldName): string
     {
-        //existingPrice -- price
         $edgeCases = [
             'existingPrice' => 'price',
-            'numSleep' => 'sleeping_capacity'
+            'numSleep' => 'sleeping_capacity',
+            'basicPrice' => 'price',
+            'numAxles' => 'axles',
+            'frameMaterial' => 'construction',
+            'hasRamps' => 'ramps',
+            'numStalls' => 'stalls',
+            'loadType' => 'configuration',
+            'hasMidtack' => 'midtack',
+            'updatedAtUser' => 'updated_at',
+            'numAc' => 'air_conditioners',
+            'hasLq' => 'livingquarters',
+            'numSlideouts' => 'slideouts',
+            'numPassengers' => 'passengers',
+            'featureList.floorPlan' => 'floor_plans',
+            'numBatteries' => 'number_batteries',
         ];
 
         if (array_key_exists($fieldName, $edgeCases)) {
