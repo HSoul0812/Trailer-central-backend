@@ -37,6 +37,7 @@ class BulkUpload extends Model {
 
     /**
      * @return mixed|null
+     * @throws \JsonException
      */
     public function getValidationErrors()
     {
@@ -44,6 +45,6 @@ class BulkUpload extends Model {
             return null;
         }
 
-        return json_decode($this->validation_errors);
+        return json_decode($this->validation_errors, false, 512, JSON_THROW_ON_ERROR);
     }
 }
