@@ -83,9 +83,7 @@ class ProfileRepository implements ProfileRepositoryInterface
         /** @var  Builder $query */
         $query = Profile::select(Profile::getTableName().'.id', 'profile', 'username', 'postCategory as category');
 
-        $query = $query->where('username', '<>', '')
-            ->where('username', '<>', '0')
-            ->where('deleted', 0);
+        $query = $query->where('deleted', 0);
 
         if (isset($params['type'])) {
             $type = $params['type'];
