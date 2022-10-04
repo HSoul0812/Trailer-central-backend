@@ -20,5 +20,5 @@ interface MarketplaceServiceInterface {
      * 
      * @return MarketplaceStatus
      */
-    public function status(): MarketplaceStatus;
+    public function status(array $params): MarketplaceStatus;
 }
