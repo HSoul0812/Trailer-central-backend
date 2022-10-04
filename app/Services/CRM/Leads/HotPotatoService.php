@@ -81,7 +81,7 @@ class HotPotatoService extends AutoAssignService implements HotPotatoServiceInte
         // No Leads? Skip Dealer
         if($leads->count() < 1) {
             $this->log->info("HotPotatoService skipping dealer {$dealer->id} because there are no pending leads");
-            return new Collection();
+            return new DBCollection();
         }
 
         // Loop Leads to Hot Potato
