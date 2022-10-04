@@ -2,6 +2,7 @@
 
 namespace App\Services\CRM\Leads;
 
+use App\Jobs\CRM\Leads\HotPotatoJob;
 use App\Mail\AutoAssignEmail;
 use App\Mail\HotPotatoEmail;
 use App\Models\CRM\Leads\Lead;
