@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands\CRM\Leads;
 
+use App\Repositories\CRM\User\CrmUserRepositoryInterface;
 use App\Services\CRM\Leads\HotPotatoServiceInterface;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
