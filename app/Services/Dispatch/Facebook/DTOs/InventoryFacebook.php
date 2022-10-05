@@ -419,7 +419,7 @@ class InventoryFacebook
             'page_url' => $integration->page_url,
             'entity_type_id' => $inventory->entity_type_id,
             'category' => $inventory->category,
-            'price' => $calculatedPrice,
+            'price' => intval($calculatedPrice),
             'year' => $inventory->year,
             'manufacturer' => $inventory->manufacturer,
             'model' => $inventory->model,
