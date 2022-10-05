@@ -31,10 +31,10 @@ class SearchInventoryRequest extends Request
 
     public function sort(): array
     {
-        return collect(explode(self::DELIMITER, $this->sort))->mapWithKeys(function ($sort) {
+        return $this->sort ? collect(explode(self::DELIMITER, $this->sort))->mapWithKeys(function ($sort) {
             [$sortTerm, $order] = explode(self::SORT_DELIMITER, $sort);
             return [$sortTerm => $order];
-        })->toArray();
+        })->toArray() : [];
     }
 
     public function pagination(): array
