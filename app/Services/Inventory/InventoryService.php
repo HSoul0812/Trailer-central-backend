@@ -907,6 +907,9 @@ class InventoryService implements InventoryServiceInterface
         $description = preg_replace('/”/', '"', $description);
         $description = preg_replace('/’/', "'", $description);
 
+        $description = preg_replace('/©/', "Copyright", $description);
+        $description = preg_replace('/®/', "Registered", $description);
+
         $description = preg_replace('/[[:^print:]]/', ' ', $description);
 
         return $description;
