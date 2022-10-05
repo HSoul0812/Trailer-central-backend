@@ -6,10 +6,10 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\AutoAssignEmail;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
-use Tests\database\seeds\CRM\Leads\AutoAssignSeeder;
+use Tests\database\seeds\CRM\Leads\HotPotatoSeeder;
 use Tests\TestCase;
 
-class AutoAssignTest extends TestCase
+class HotPotatoTest extends TestCase
 {
     /**
      * @var LeadSeeder
@@ -18,7 +18,7 @@ class AutoAssignTest extends TestCase
 
 
     /**
-     * Test round robin only by location
+     * Test hot potato only by location
      * 
      * @group CRM
      * @specs array dealer_location_id = exists
@@ -26,7 +26,7 @@ class AutoAssignTest extends TestCase
      * @specs bool enable_assign_notification = 1
      * @return void
      */
-    public function testRoundRobin()
+    public function testHotPotato()
     {
         // Seed Database With Auto Assign Leads
         $this->seeder->seed();
@@ -54,7 +54,7 @@ class AutoAssignTest extends TestCase
         sleep(10);
 
         // Call Leads Assign Command
-        $this->artisan('leads:assign:auto ' . $dealerId)->assertExitCode(0);
+        $this->artisan('leads:assign:hot-potato ' . $dealerId)->assertExitCode(0);
 
 
         // Loop Leads
@@ -84,7 +84,7 @@ class AutoAssignTest extends TestCase
     }
 
     /**
-     * Test round robin with some no matches
+     * Test hot potato with some no matches
      * 
      * @group CRM
      * @specs array dealer_location_id = exists
@@ -120,7 +120,7 @@ class AutoAssignTest extends TestCase
         sleep(10);
 
         // Call Leads Assign Command
-        $this->artisan('leads:assign:auto ' . $dealerId)->assertExitCode(0);
+        $this->artisan('leads:assign:hot-potato ' . $dealerId)->assertExitCode(0);
 
 
         // Loop Leads
@@ -161,7 +161,7 @@ class AutoAssignTest extends TestCase
     }
 
     /**
-     * Test round robin without sending email
+     * Test hot potato without sending assign email
      * 
      * @group CRM
      * @specs array dealer_location_id = exists
@@ -169,11 +169,11 @@ class AutoAssignTest extends TestCase
      * @specs bool enable_assign_notification = 0
      * @return void
      */
-    public function testNoEmail()
+    public function testNoAssignEmail()
     {
         // Seed Database With Auto Assign Leads
         $this->seeder->seed();
-        $this->seeder->enableEmail(0);
+        $this->seeder->enableAssignEmail(0);
 
         // Given I have a collection of leads
         $leads = $this->seeder->leads;
@@ -198,7 +198,7 @@ class AutoAssignTest extends TestCase
         sleep(10);
 
         // Call Leads Assign Command
-        $this->artisan('leads:assign:auto ' . $dealerId)->assertExitCode(0);
+        $this->artisan('leads:assign:hot-potato ' . $dealerId)->assertExitCode(0);
 
 
         // Loop Leads
@@ -238,8 +238,8 @@ class AutoAssignTest extends TestCase
     {
         parent::setUp();
 
-        // Make AutoAssign Seeder
-        $this->seeder = new AutoAssignSeeder();
+        // Make HotPotato Seeder
+        $this->seeder = new HotPotatoSeeder();
     }
 
     /**
