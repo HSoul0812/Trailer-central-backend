@@ -2,10 +2,11 @@
 
 namespace App\Repositories\Bulk\Inventory;
 
-use App\Repositories\Bulk\Inventory\BulkUploadRepositoryInterface;
 use App\Exceptions\NotImplementedException;
 use App\Models\Bulk\Inventory\BulkUpload;
 use App\Jobs\Bulk\Inventory\ProcessBulkUpload;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Storage;
 
 
@@ -42,7 +43,7 @@ class BulkUploadRepository implements BulkUploadRepositoryInterface {
 
     /**
      * @param $params
-     * @return \App\Models\Bulk\Parts\BulkUpload|\Illuminate\Database\Query\Builder|null
+     * @return \App\Models\Bulk\Parts\BulkUpload|Builder|null
      */
     public function get($params): BulkUpload {
         return BulkUpload::where(array_key_first($params), current($params))->first();
@@ -50,11 +51,10 @@ class BulkUploadRepository implements BulkUploadRepositoryInterface {
 
     /**
      * @param $params
-     * @return \App\Models\Bulk\Parts\BulkUpload[]|\Illuminate\Database\Query\Builder|null
+     * @return LengthAwarePaginator|Builder|null
      */
-    public function getAll($params): BulkUpload
+    public function getAll($params): LengthAwarePaginator
     {
-
         if (!isset($params['per_page'])) {
             $params['per_page'] = 100;
         }
