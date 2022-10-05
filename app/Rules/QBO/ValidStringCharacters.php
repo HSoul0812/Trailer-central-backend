@@ -14,7 +14,7 @@ class ValidStringCharacters implements Rule
     const CUSTOMERS_SECTION = 'customers';
     const CUSTOMERS_REGEX = "/^[-@.,!'~*_;?#&+\w\s]*$/";
     const CUSTOMERS_POSTAL_CODE_SECTION = 'customer_postal_code';
-    const CUSTOMERS_POSTAL_CODE_REGEX = "/^[\d-]+$/";
+    const CUSTOMERS_POSTAL_CODE_REGEX = "/^[\d\w-]+$/";
     const CUSTOMERS_REGION_SECTION = 'customer_region';
     const CUSTOMERS_REGION_REGEX = "/^[A-Za-z ]+$/";
     const CUSTOMERS_PHONE_SECTION = 'customer_phone';
