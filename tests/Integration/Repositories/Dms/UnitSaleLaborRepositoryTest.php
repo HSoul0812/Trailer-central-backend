@@ -46,7 +46,6 @@ class UnitSaleLaborRepositoryTest extends TestCase
         Payment::where('dealer_id', $this->dealerId)->delete();
         $this->dealerId = null;
         parent::tearDown();
-
     }
 
     /**
@@ -57,6 +56,10 @@ class UnitSaleLaborRepositoryTest extends TestCase
      */
     public function testGetTechnicians()
     {
+        $params = [
+            'dealer_id' => $this->getTestDealerId()
+        ];
+
         $technician1 = 'unit_test_get_technician_technician_1';
         $technician2 = 'unit_test_get_technician_technician_2';
         $technician3 = 'unit_test_get_technician_technician_3';
@@ -64,17 +67,18 @@ class UnitSaleLaborRepositoryTest extends TestCase
         for ($i = 0; $i < 3; $i++) {
             factory(UnitSaleLabor::class)->create([
                 'technician' => $technician1,
+                'unit_sale_id' => factory(UnitSale::class)->create($params)->getKey()
             ]);
         }
 
         factory(UnitSaleLabor::class)->create([
             'technician' => $technician2,
+            'unit_sale_id' => factory(UnitSale::class)->create($params)->getKey()
         ]);
 
         /** @var UnitSaleLaborRepository $repository */
         $repository = app()->make(UnitSaleLaborRepository::class);
-
-        $result = $repository->getTechnicians(['dealer_id' => $this->getTestDealerId()]);
+        $result = $repository->getTechnicians($params);
 
         $this->assertIsArray($result);
 
