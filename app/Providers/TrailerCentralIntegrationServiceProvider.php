@@ -14,6 +14,8 @@ use App\Repositories\Integrations\TrailerCentral\LeadRepository;
 use App\Repositories\Integrations\TrailerCentral\LeadRepositoryInterface;
 use App\Repositories\Inventory\InventoryLogRepository;
 use App\Repositories\Inventory\InventoryLogRepositoryInterface;
+use App\Repositories\Page\PageRepository;
+use App\Repositories\Page\PageRepositoryInterface;
 use App\Repositories\Parts\ListingCategoryMappingsRepository;
 use App\Repositories\Parts\ListingCategoryMappingsRepositoryInterface;
 use App\Repositories\Parts\TypeRepository;
@@ -64,6 +66,8 @@ class TrailerCentralIntegrationServiceProvider extends ServiceProvider
         $this->app->bind(InventoryLogServiceInterface::class, InventoryLogService::class);
         $this->app->bind(LeadServiceInterface::class, LeadService::class);
         $this->app->bind(SubscribeEmailSearchServiceInterface::class, SubscribeEmailSearchService::class);
+
+        $this->app->bind(PageRepositoryInterface::class, PageRepository::class);
 
         $this->app->bind(TypeRepositoryInterface::class, TypeRepository::class);
         $this->app->bind(ListingCategoryMappingsRepositoryInterface::class, ListingCategoryMappingsRepository::class);
