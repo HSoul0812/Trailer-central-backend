@@ -53,7 +53,7 @@ class CustomerControllerTest extends TestCase
         $response = $controller->destroy($customerId, $request);
 
         // Then I should see the customer not exist on database
-        $this->assertDeleted('dms_customer', ['id' => $customerId, 'dealer_id' => $dealerId]);
+        $this->assertSoftDeleted('dms_customer', ['id' => $customerId, 'dealer_id' => $dealerId]);
 
         // And I should see that response status is 202
         self::assertEquals(JsonResponse::HTTP_NO_CONTENT, $response->status());

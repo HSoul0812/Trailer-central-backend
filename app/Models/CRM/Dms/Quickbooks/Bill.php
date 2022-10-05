@@ -6,6 +6,7 @@ use App\Models\Inventory\Inventory;
 use App\Models\Parts\Vendor;
 use App\Models\User\DealerLocation;
 use App\Models\Traits\TableAware;
+use App\Models\User\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -40,14 +41,16 @@ class Bill extends Model
 
     protected $fillable = [
         'dealer_id',
-        'total',
+        'dealer_location_id',
         'vendor_id',
-        'status',
         'doc_num',
+        'total',
         'received_date',
         'due_date',
         'memo',
-        'dealer_location_id'
+        'packing_list_no',
+        'status',
+        'qb_id',
     ];
 
     protected $dates = [
@@ -90,5 +93,10 @@ class Bill extends Model
     public function dealerLocation(): BelongsTo
     {
         return $this->belongsTo(DealerLocation::class, 'dealer_location_id', 'dealer_location_id');
+    }
+
+    public function dealer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
     }
 }
