@@ -851,6 +851,9 @@ class InventoryService implements InventoryServiceInterface
         $input = str_replace('****', '', $input);
         $input = str_replace('__', '', $input);
 
+
+        $input = preg_replace('/<(?!br\s*\/?)[^<>]+>/', '', $input);
+
         // Try/Catch Errors
         $converted = '';
         $exception = '';
