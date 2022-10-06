@@ -96,7 +96,7 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
             ->orderBy($model->getKeyName());
 
         $this->chunkQueryImport($query);
-        echo 'swap index';
+
         $this->swapIndexNames($model);
 
         $query = $model->newQuery()->where('updated_at_auto', '>=' , $now->format(\App\Constants\Date::FORMAT_Y_M_D_T))
