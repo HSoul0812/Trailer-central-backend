@@ -93,6 +93,11 @@ class TcApiResponseInventory
              : $data['price'];
 
          $obj->basic_price = $data['price'];
+     } else {
+         $obj->price = NULL;
+         $obj->sales_price = NULL;
+         $obj->website_price = NULL;
+         $obj->basic_price = NULL;
      }
 
      $obj->inventory_title = $data['title'];
