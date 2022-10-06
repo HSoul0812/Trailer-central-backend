@@ -18,6 +18,7 @@ use App\Transformers\Inventory\InventoryListResponseTransformer;
 use App\Transformers\Inventory\TcApiResponseInventoryTransformer;
 use App\Transformers\Inventory\TcApiResponseInventoryCreateTransformer;
 use App\Transformers\Inventory\TcApiResponseInventoryDeleteTransformer;
+use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
 
 class InventoryController extends AbstractRestfulController
@@ -106,6 +107,21 @@ class InventoryController extends AbstractRestfulController
         }
 
         return $this->response->errorBadRequest();
+    }
+
+    public function saveProgress(Request $request) {
+        $user = auth('api')->user();
+        $progress = $request->all();
+        \Cache::forever($user->getAuthIdentifier() . '/trailer-progress', json_encode($progress));
+        return $this->response->noContent();
+    }
+
+    public function getProgress(Request $request): Response
+    {
+        $user = auth('api')->user();
+        return $this->response->array(
+            json_decode(\Cache::get($user->getAuthIdentifier() . '/trailer-progress', '{}'), true)
+        );
     }
 
     protected function constructRequestBindings(): void
