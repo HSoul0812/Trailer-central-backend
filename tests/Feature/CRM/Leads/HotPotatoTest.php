@@ -4,6 +4,7 @@ namespace Tests\Feature\CRM\Leads;
 
 use Illuminate\Support\Facades\Mail;
 use App\Mail\HotPotatoEmail;
+use App\Mail\AutoAssignEmail;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use Tests\database\seeds\CRM\Leads\HotPotatoSeeder;
