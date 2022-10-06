@@ -91,7 +91,17 @@ class HotPotatoSeeder extends Seeder
         $this->website = factory(Website::class)->create(['dealer_id' => $this->dealer->dealer_id]);
         $this->user = factory(NewUser::class)->create(['user_id' => $this->dealer->dealer_id]);
         $this->newDealer = factory(NewDealerUser::class)->create(['id' => $this->dealer->dealer_id, 'user_id' => $this->dealer->dealer_id]);
-        $this->crmUser = factory(CrmUser::class)->create(['user_id' => $this->dealer->dealer_id, 'enable_assign_notification' => 1]);
+        $this->crmUser = factory(CrmUser::class)->create(['user_id' => $this->dealer->dealer_id, 'enable_hot_potato' => 1]);
+
+
+        // Create Sales People for Hot Potato
+        $salesSeeds = [
+            ['dealer_location_id' => 0, 'is_inventory' => 0],
+            ['is_inventory' => 0],
+            ['is_trade' => 0],
+            ['dealer_location_id' => 0, 'is_trade' => 0]
+        ];
+        $this->sales($salesSeeds);
     }
 
     public function enableAssignEmail($enabled = 1): void {
@@ -114,17 +124,6 @@ class HotPotatoSeeder extends Seeder
         ];
 
         $this->leads($seeds);
-
-
-        // Seed Sales People for Hot Potato
-        $salesSeeds = [
-            ['dealer_location_id' => 0, 'is_inventory' => 0],
-            ['is_inventory' => 0],
-            ['is_trade' => 0],
-            ['dealer_location_id' => 0, 'is_trade' => 0]
-        ];
-
-        $this->sales($salesSeeds);
     }
 
     public function seedNoMatches(): void
@@ -143,17 +142,6 @@ class HotPotatoSeeder extends Seeder
         ];
 
         $this->leads($seeds);
-
-
-        // Seed Sales People for Hot Potato
-        $salesSeeds = [
-            ['dealer_location_id' => 0, 'is_inventory' => 0, 'is_financing' => 0],
-            ['is_inventory' => 0, 'is_financing' => 0],
-            ['is_trade' => 0, 'is_financing' => 0],
-            ['dealer_location_id' => 0, 'is_trade' => 0, 'is_financing' => 0]
-        ];
-
-        $this->sales($salesSeeds);
     }
 
     private function leads($seeds): void {
@@ -175,21 +163,18 @@ class HotPotatoSeeder extends Seeder
             }
 
             // Create Lead
-            $params['date_submitted'] = date('Y-m-d H:i:s');
+            $params['date_submitted'] = Carbon::now()->subDays(7)->toDateTimeString();
             $lead = factory(Lead::class)->create($params);
             $leadId = $lead->getKey();
             $this->leads[] = $lead;
 
-            // Include Status
-            if(isset($seed['source'])) {
-                // Make Status
-                $status = factory(LeadStatus::class)->create([
-                    'tc_lead_identifier' => $leadId,
-                    'source' => $seed['source']
-                ]);
 
-                $this->statuses[$leadId] = $status;
-            }
+            // Make Status
+            $this->statuses[$leadId] = factory(LeadStatus::class)->create([
+                'tc_lead_identifier' => $leadId,
+                'source' => $seed['source'] ?? '',
+                'next_contact_date' => Carbon::now()->subMinutes(45)->toDateTimeString()
+            ]);
         });
     }
 
@@ -200,7 +185,8 @@ class HotPotatoSeeder extends Seeder
             'dealer_location_id' => $this->location->getKey(),
             'is_default' => 1,
             'is_inventory' => 1,
-            'is_trade' => 1
+            'is_trade' => 1,
+            'is_financing' => 0
         ];
 
         // Loop Seeds for Sales People
