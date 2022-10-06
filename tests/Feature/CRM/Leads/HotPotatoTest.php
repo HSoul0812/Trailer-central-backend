@@ -206,7 +206,7 @@ class HotPotatoTest extends TestCase
 
             // Assert a message was sent to the given leads...
             if(!empty($salesPerson)) {
-                Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($salesPerson) {
+                Mail::assertSent(AutoAssignEmail::class, function ($mail) use ($salesPerson) {
                     if(empty($salesPerson->email)) {
                         return false;
                     }                
