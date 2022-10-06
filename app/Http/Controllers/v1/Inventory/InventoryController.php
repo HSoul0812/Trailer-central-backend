@@ -18,6 +18,7 @@ use App\Transformers\Inventory\InventoryListResponseTransformer;
 use App\Transformers\Inventory\TcApiResponseInventoryTransformer;
 use App\Transformers\Inventory\TcApiResponseInventoryCreateTransformer;
 use App\Transformers\Inventory\TcApiResponseInventoryDeleteTransformer;
+use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
 
 class InventoryController extends AbstractRestfulController
@@ -38,11 +39,15 @@ class InventoryController extends AbstractRestfulController
      */
     public function create(CreateRequestInterface $request)
     {
-      if ($request->validate()) {
-          return $this->response->item($this->inventoryService->create($request->all()), new TcApiResponseInventoryCreateTransformer());
-      }
+        $user = auth('api')->user();
+        if ($request->validate()) {
+            return $this->response->item(
+                $this->inventoryService->create($user->tc_user_id, $request->all()),
+                new TcApiResponseInventoryCreateTransformer()
+            );
+        }
 
-      return $this->response->errorBadRequest();
+        return $this->response->errorBadRequest();
     }
 
     /**
@@ -50,10 +55,14 @@ class InventoryController extends AbstractRestfulController
      */
     public function destroy(int $id)
     {
-      $inventoryRequest = new DeleteInventoryRequest(['inventory_id' => $id]);
+        $inventoryRequest = new DeleteInventoryRequest(['inventory_id' => $id]);
+        $user = auth('api')->user();
 
-      if ($inventoryRequest->validate()) {
-            return $this->response->item($this->inventoryService->delete($id), new TcApiResponseInventoryDeleteTransformer());
+        if ($inventoryRequest->validate()) {
+            return $this->response->item(
+                $this->inventoryService->delete($user->tc_user_id, $id),
+                new TcApiResponseInventoryDeleteTransformer()
+            );
         }
 
         return $this->response->errorBadRequest();
@@ -87,13 +96,32 @@ class InventoryController extends AbstractRestfulController
      */
     public function update(int $id, UpdateRequestInterface $request)
     {
-      $inventoryRequest = new UpdateInventoryRequest(array_merge($request->all(), ['inventory_id' => $id]));
+        $inventoryRequest = new UpdateInventoryRequest(array_merge($request->all(), ['inventory_id' => $id]));
+        $user = auth('api')->user();
 
-      if ($inventoryRequest->validate()) {
-          return $this->response->item($this->inventoryService->update($inventoryRequest->all()), new TcApiResponseInventoryCreateTransformer());
-      }
+        if ($inventoryRequest->validate()) {
+            return $this->response->item(
+                $this->inventoryService->update($user->tc_user_id, $inventoryRequest->all()),
+                new TcApiResponseInventoryCreateTransformer()
+            );
+        }
 
-      return $this->response->errorBadRequest();
+        return $this->response->errorBadRequest();
+    }
+
+    public function saveProgress(Request $request) {
+        $user = auth('api')->user();
+        $progress = $request->all();
+        \Cache::forever($user->getAuthIdentifier() . '/trailer-progress', json_encode($progress));
+        return $this->response->noContent();
+    }
+
+    public function getProgress(Request $request): Response
+    {
+        $user = auth('api')->user();
+        return $this->response->array(
+            json_decode(\Cache::get($user->getAuthIdentifier() . '/trailer-progress', '{}'), true)
+        );
     }
 
     protected function constructRequestBindings(): void

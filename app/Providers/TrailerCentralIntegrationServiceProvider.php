@@ -6,12 +6,18 @@ namespace App\Providers;
 
 use App\Repositories\Geolocation\GeolocationRepository;
 use App\Repositories\Geolocation\GeolocationRepositoryInterface;
+use App\Repositories\Integrations\TrailerCentral\AuthTokenRepository;
+use App\Repositories\Integrations\TrailerCentral\AuthTokenRepositoryInterface;
 use App\Repositories\Integrations\TrailerCentral\InventoryRepository;
 use App\Repositories\Integrations\TrailerCentral\InventoryRepositoryInterface;
 use App\Repositories\Integrations\TrailerCentral\LeadRepository;
 use App\Repositories\Integrations\TrailerCentral\LeadRepositoryInterface;
 use App\Repositories\Inventory\InventoryLogRepository;
 use App\Repositories\Inventory\InventoryLogRepositoryInterface;
+use App\Repositories\Page\PageRepository;
+use App\Repositories\Page\PageRepositoryInterface;
+use App\Repositories\Parts\ListingCategoryMappingsRepository;
+use App\Repositories\Parts\ListingCategoryMappingsRepositoryInterface;
 use App\Repositories\Parts\TypeRepository;
 use App\Repositories\Parts\TypeRepositoryInterface;
 use App\Repositories\Glossary\GlossaryRepository;
@@ -22,6 +28,10 @@ use App\Repositories\SyncProcessRepository;
 use App\Repositories\SyncProcessRepositoryInterface;
 use App\Repositories\SysConfig\SysConfigRepository;
 use App\Repositories\SysConfig\SysConfigRepositoryInterface;
+use App\Services\Integrations\TrailerCentral\Api\Image\ImageService;
+use App\Services\Integrations\TrailerCentral\Api\Image\ImageServiceInterface;
+use App\Services\Integrations\TrailerCentral\Api\Users\UsersService;
+use App\Services\Integrations\TrailerCentral\Api\Users\UsersServiceInterface;
 use App\Services\Integrations\TrailerCentral\Console\Inventory\LogService as InventoryLogService;
 use App\Services\Integrations\TrailerCentral\Console\Inventory\LogServiceInterface as InventoryLogServiceInterface;
 use App\Services\Integrations\TrailerCentral\Console\Inventory\SyncService as InventorySyncService;
@@ -39,7 +49,6 @@ use App\Services\Leads\LeadServiceInterface;
 use App\Services\SubscribeEmailSearch\SubscribeEmailSearchService;
 use App\Services\SubscribeEmailSearch\SubscribeEmailSearchServiceInterface;
 use App\Services\MapSearch\GoogleMapSearchService;
-use App\Services\MapSearch\TomTomMapSearchService;
 use App\Services\SysConfig\SysConfigService;
 use App\Services\SysConfig\SysConfigServiceInterface;
 use Illuminate\Support\ServiceProvider;
@@ -55,17 +64,21 @@ class TrailerCentralIntegrationServiceProvider extends ServiceProvider
         $this->app->bind(InventorySyncServiceInterface::class, InventorySyncService::class);
         $this->app->bind(InventoryLogRepositoryInterface::class, InventoryLogRepository::class);
         $this->app->bind(InventoryLogServiceInterface::class, InventoryLogService::class);
-        $this->app->bind(InventoryServiceInterface::class, InventoryService::class);
         $this->app->bind(LeadServiceInterface::class, LeadService::class);
         $this->app->bind(SubscribeEmailSearchServiceInterface::class, SubscribeEmailSearchService::class);
 
+        $this->app->bind(PageRepositoryInterface::class, PageRepository::class);
+
         $this->app->bind(TypeRepositoryInterface::class, TypeRepository::class);
+        $this->app->bind(ListingCategoryMappingsRepositoryInterface::class, ListingCategoryMappingsRepository::class);
         $this->app->bind(GlossaryRepositoryInterface::class, GlossaryRepository::class);
         $this->app->bind(SubscribeEmailSearchRepositoryInterface::class, SubscribeEmailSearchRepository::class);
 
         $this->app->bind(LeadRepositoryInterface::class, LeadRepository::class);
         $this->app->bind(LeadSyncServiceInterface::class, LeadSyncService::class);
         $this->app->bind(LeadLogServiceInterface::class, LeadLogService::class);
+
+        $this->app->bind(AuthTokenRepositoryInterface::class, AuthTokenRepository::class);
 
         $this->app->bind(InventoryServiceInterface::class, InventoryService::class);
         $this->app->bind(SysConfigServiceInterface::class, SysConfigService::class);
@@ -75,6 +88,10 @@ class TrailerCentralIntegrationServiceProvider extends ServiceProvider
         $this->app->bind(SysConfigRepositoryInterface::class, SysConfigRepository::class);
 
         $this->app->bind(IpInfoServiceInterface::class, IpInfoService::class);
+
+        $this->app->bind(UsersServiceInterface::class, UsersService::class);
+
+        $this->app->bind(ImageServiceInterface::class, ImageService::class);
 
         GoogleMapSearchService::register();
     }

@@ -41,6 +41,10 @@ return [
             'driver'   => 'session',
             'provider' => 'users',
         ],
+        'api' => [
+            'driver'   => 'jwt',
+            'provider' => 'website_users'
+        ]
     ],
 
     /*
@@ -65,7 +69,10 @@ return [
             'driver' => 'eloquent',
             'model'  => App\Models\User::class,
         ],
-
+        'website_users' => [
+            'driver' => 'eloquent',
+            'model'  => App\Models\WebsiteUser\WebsiteUser::class
+        ]
         // 'users' => [
         //     'driver' => 'database',
         //     'table' => 'users',
@@ -94,6 +101,11 @@ return [
             'expire'   => 60,
             'throttle' => 60,
         ],
+        'website_users' => [
+            'table'     => 'website_password_resets',
+            'expire'    => 60,
+            'throttle'  => 60,
+        ]
     ],
 
     /*
@@ -106,6 +118,9 @@ return [
     | confirmation screen. By default, the timeout lasts for three hours.
     |
     */
-
+    'site_url' => env('SITE_URL'),
+    'reset_password_url' => env('SITE_URL') . env('RESET_PASSWORD_ROUTE'),
+    'login_url' => env('SITE_URL') . env('LOGIN_ROUTE'),
+    'verify_url' => env('SITE_URL') . env('VERIFY_ROUTE'),
     'password_timeout' => 10800,
 ];

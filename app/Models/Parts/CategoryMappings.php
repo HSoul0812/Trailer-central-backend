@@ -19,7 +19,6 @@ class CategoryMappings extends Model
      */
     protected $fillable = [
         'category_id',
-        'name',
         'map_from',
         'map_to',
         'type'
