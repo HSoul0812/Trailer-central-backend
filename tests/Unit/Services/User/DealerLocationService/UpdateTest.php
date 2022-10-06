@@ -316,7 +316,7 @@ class UpdateTest extends TestCase
         $result = $service->update($location->dealer_location_id, $dealerId, $params);
 
         // Then I expect that "DealerLocationService::update" returns true
-        self::assertTrue($result);
+        $this->assertTrue($result);
     }
 
     /**
