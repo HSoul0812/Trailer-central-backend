@@ -46,7 +46,7 @@ class Marketplace extends Model
      * @const array Active Two-Factor Auth Types
      */
     const TFA_TYPES_ACTIVE = [
-        'sms'
+        'sms', 'code'
     ];
 
     /**
@@ -97,6 +97,7 @@ class Marketplace extends Model
         'fb_password',
         'tfa_username',
         'tfa_password',
+        'tfa_code',
         'tfa_type',
         'imported_at'
     ];
