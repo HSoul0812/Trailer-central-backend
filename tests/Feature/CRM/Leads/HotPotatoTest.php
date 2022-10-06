@@ -3,7 +3,7 @@
 namespace Tests\Feature\CRM\Leads;
 
 use Illuminate\Support\Facades\Mail;
-use App\Mail\AutoAssignEmail;
+use App\Mail\HotPotatoEmail;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use Tests\database\seeds\CRM\Leads\HotPotatoSeeder;
@@ -60,11 +60,9 @@ class HotPotatoTest extends TestCase
         // Loop Leads
         foreach($leadSalesPeople as $leadId => $salesPerson) {
             // Assert a message was sent to the given leads...
-            Mail::assertSent(AutoAssignEmail::class, function ($mail) use ($salesPerson) {
-                if(empty($salesPerson->email)) {
-                    return false;
-                }                
-                return $mail->hasTo($salesPerson->email);
+            Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($leads, $leadId) {
+                $lead = $leads[$leadId];
+                return $mail->hasTo($lead->dealerLocation->email);
             });
 
             // Assert a lead status entry was saved...
@@ -126,14 +124,10 @@ class HotPotatoTest extends TestCase
         // Loop Leads
         foreach($leadSalesPeople as $leadId => $salesPerson) {
             // Assert a message was sent to the given leads...
-            if(!empty($salesPerson)) {
-                Mail::assertSent(AutoAssignEmail::class, function ($mail) use ($salesPerson) {
-                    if(empty($salesPerson->email)) {
-                        return false;
-                    }                
-                    return $mail->hasTo($salesPerson->email);
-                });
-            }
+            Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($leads, $leadId) {
+                $lead = $leads[$leadId];
+                return $mail->hasTo($lead->dealerLocation->email);
+            });
 
             // Assert a lead status entry was saved...
             $this->assertDatabaseHas('crm_tc_lead_status', [
@@ -169,7 +163,7 @@ class HotPotatoTest extends TestCase
      * @specs bool enable_assign_notification = 0
      * @return void
      */
-    public function testNoAssignEmail()
+    public function testAssignEmail()
     {
         // Seed Database With Auto Assign Leads
         $this->seeder->seed();
@@ -204,12 +198,20 @@ class HotPotatoTest extends TestCase
         // Loop Leads
         foreach($leadSalesPeople as $leadId => $salesPerson) {
             // Assert a message was sent to the given leads...
-            Mail::assertNotSent(AutoAssignEmail::class, function ($mail) use ($salesPerson) {
-                if(empty($salesPerson->email)) {
-                    return false;
-                }                
-                return $mail->hasTo($salesPerson->email);
+            Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($leads, $leadId) {
+                $lead = $leads[$leadId];
+                return $mail->hasTo($lead->dealerLocation->email);
             });
+
+            // Assert a message was sent to the given leads...
+            if(!empty($salesPerson)) {
+                Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($salesPerson) {
+                    if(empty($salesPerson->email)) {
+                        return false;
+                    }                
+                    return $mail->hasTo($salesPerson->email);
+                });
+            }
 
             // Assert a lead status entry was saved...
             $this->assertDatabaseHas('crm_tc_lead_status', [
