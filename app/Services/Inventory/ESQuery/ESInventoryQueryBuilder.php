@@ -28,6 +28,7 @@ class ESInventoryQueryBuilder
 
     private ?string $orderField = null;
     private ?string $orderDir = null;
+    private bool $orderRandom = false;
 
     public function getWillPaginate(): bool
     {
@@ -165,6 +166,10 @@ class ESInventoryQueryBuilder
         $this->pageSize = $pageSize;
     }
 
+    public function orderRandom(bool $isRandom) {
+        $this->orderRandom = $isRandom;
+    }
+
     public function orderBy(string $field, string $direction) {
         $this->orderField = $field;
         $this->orderDir = $direction;
@@ -212,26 +217,25 @@ class ESInventoryQueryBuilder
             if(!empty($filters)) {
                 $query['bool']['filter'] = $filters;
             }
-            $result['query'] = $query;
-            /*
-             $result['query'] = [
-                 'function_score' => [
-                     'query' => $query,
-                     'script_score' => [
-                         'script' => [
-                             'source' => "double d; if(doc['location.geo'].value != null) { d = doc['location.geo'].planeDistance(params.lat, params.lon) * 0.000621371; } else { return 0.1; } if(d >= (params.grouping*params.fromScore)) { return 0.2; } else { return params.fromScore - Math.floor(d/params.grouping);} ",
-                             'params' => [
-                                 "lat" => $this->location['lat'],
-                                 "lon" => $this->location['lon'],
-                                 "fromScore" => 100,
-                                 "grouping" => 60
-                             ]
-                         ]
-                     ]
-                 ]
-             ];
-             */
+
+            if($this->orderRandom) {
+                $result['query'] = [
+                    'function_score' => [
+                        'query' => $query,
+                        "functions" => [
+                            [
+                                "random_score" => new \stdClass(),
+                            ]
+                        ],
+                        "score_mode" => "sum",
+                        "boost_mode" => "replace",
+                    ]
+                ];
+            } else {
+                $result['query'] = $query;
+            }
         }
+
 
         if ($this->orderField === 'distance') {
             $result['sort'] = [[
@@ -251,10 +255,10 @@ class ESInventoryQueryBuilder
                     'script' => [
                         'lang' => 'painless',
                         'source' => 'double price;
-                        if(doc[\'websitePrice\'] != null){ price = doc[\'websitePrice\'].value; }
-                        if(0 < doc[\'salesPrice\'].value && doc[\'salesPrice\'].value < price) { price = doc[\'salesPrice\'].value; }
-                        return price;
-                        '
+                    if(doc[\'websitePrice\'] != null){ price = doc[\'websitePrice\'].value; }
+                    if(0 < doc[\'salesPrice\'].value && doc[\'salesPrice\'].value < price) { price = doc[\'salesPrice\'].value; }
+                    return price;
+                    '
                     ],
                     'order' => $this->orderDir
                 ]
@@ -266,12 +270,12 @@ class ESInventoryQueryBuilder
                     'script' => [
                         'lang' => 'painless',
                         'source' => 'int numFeature = 0;
-                        if(doc[\'featureList.floorPlan\'] != null){ numFeature += doc[\'featureList.floorPlan\'].size(); }
-                        if(doc[\'featureList.stallTack\'] != null){ numFeature += doc[\'featureList.stallTack\'].size(); }
-                        if(doc[\'featureList.lq\'] != null){ numFeature += doc[\'featureList.lq\'].size(); }
-                        if(doc[\'featureList.doorsWindowsRamps\'] != null){ numFeature += doc[\'featureList.doorsWindowsRamps\'].size(); }
-                        return numFeature;
-                        '
+                    if(doc[\'featureList.floorPlan\'] != null){ numFeature += doc[\'featureList.floorPlan\'].size(); }
+                    if(doc[\'featureList.stallTack\'] != null){ numFeature += doc[\'featureList.stallTack\'].size(); }
+                    if(doc[\'featureList.lq\'] != null){ numFeature += doc[\'featureList.lq\'].size(); }
+                    if(doc[\'featureList.doorsWindowsRamps\'] != null){ numFeature += doc[\'featureList.doorsWindowsRamps\'].size(); }
+                    return numFeature;
+                    '
                     ],
                     'order' => $this->orderDir
                 ]

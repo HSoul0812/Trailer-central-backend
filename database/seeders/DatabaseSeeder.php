@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use Database\Seeders\Page\PageSeeder;
 use Database\Seeders\SysConfig\BannerSeeder;
 use Database\Seeders\SysConfig\FilterSeeder;
 use Illuminate\Database\Seeder;
@@ -19,6 +20,7 @@ class DatabaseSeeder extends Seeder
             BannerSeeder::class,
             FilterSeeder::class,
             TestUserSeeder::class,
+            PageSeeder::class
         ]);
     }
 }

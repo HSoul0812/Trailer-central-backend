@@ -39,6 +39,7 @@ class InventoryService implements InventoryServiceInterface
     const DEFAULT_COUNTRY = 'USA';
     const PAGE_SIZE = 10;
     const TERM_SEARCH_KEY_MAP = [
+        'dealer_id' => 'dealerId',
         'stalls' => 'numStalls',
         'pull_type' => 'pullType',
         'manufacturer' => 'manufacturer',
@@ -304,16 +305,22 @@ class InventoryService implements InventoryServiceInterface
         $this->addPaginateQuery($queryBuilder, $params);
         $this->addScriptFilter($queryBuilder, $params);
         $this->addGeoFiltering($queryBuilder, $params);
-        if(isset($params['sort'])) {
-            $sort = $params['sort'];
-        } else if($this->getGeolocation($params)) {
-            $sort = self::DEFAULT_SORT;
+
+        if(isset($params['is_random']) && $params['is_random']) {
+            $queryBuilder->orderRandom(true);
         } else {
-            $sort = self::DEFAULT_NO_LOCATION_SORT;
+            if (isset($params['sort'])) {
+                $sort = $params['sort'];
+            } else if ($this->getGeolocation($params)) {
+                $sort = self::DEFAULT_SORT;
+            } else {
+                $sort = self::DEFAULT_NO_LOCATION_SORT;
+            }
+
+            $sortObj = new SortOrder($sort);
+            $queryBuilder->orderBy($sortObj->field, $sortObj->direction);
         }
 
-        $sortObj = new SortOrder($sort);
-        $queryBuilder->orderBy($sortObj->field, $sortObj->direction);
         return $queryBuilder;
     }
 
