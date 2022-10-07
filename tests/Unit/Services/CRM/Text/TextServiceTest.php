@@ -7,6 +7,7 @@ use App\Exceptions\CRM\Text\NoLeadSmsNumberAvailableException;
 use App\Exceptions\CRM\Text\ReplyInvalidArgumentException;
 use App\Models\CRM\Interactions\TextLog;
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Text\Number;
 use App\Models\User\CrmUser;
 use App\Models\User\NewDealerUser;
