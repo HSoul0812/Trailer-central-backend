@@ -183,8 +183,7 @@ class TextServiceTest extends TestCase
             ->shouldReceive('createOrUpdate')
             ->once()
             ->with(Mockery::on(function($params) {
-                return isset($params['lead_id']) && $params['lead_id'] === self::TEST_LEAD_IDENTIFIER
-                    && isset($params['status']) && $params['status'] === Lead::STATUS_MEDIUM
+                return isset($params['lead_id']) && $params['lead_id'] === self::TEST_LEAD_IDENTIFIER && isset($params['status'])
                     && isset($params['next_contact_date']) && strtotime($params['next_contact_date']);
             }));
 
@@ -295,8 +294,7 @@ class TextServiceTest extends TestCase
             ->once()
             ->with(Mockery::on(function($params) {
                 return isset($params['lead_id']) && $params['lead_id'] === self::TEST_LEAD_IDENTIFIER
-                    && isset($params['status']) && $params['status'] === Lead::STATUS_MEDIUM
-                    && isset($params['next_contact_date']) && strtotime($params['next_contact_date']);
+                    && isset($params['status']) && isset($params['next_contact_date']) && strtotime($params['next_contact_date']);
             }));
 
         $this->textRepositoryMock
@@ -412,8 +410,7 @@ class TextServiceTest extends TestCase
             ->once()
             ->with(Mockery::on(function($params) {
                 return isset($params['lead_id']) && $params['lead_id'] === self::TEST_LEAD_IDENTIFIER
-                    && isset($params['status']) && $params['status'] === Lead::STATUS_MEDIUM
-                    && isset($params['next_contact_date']) && strtotime($params['next_contact_date']);
+                    && isset($params['status']) && isset($params['next_contact_date']) && strtotime($params['next_contact_date']);
             }));
 
         $this->textRepositoryMock
@@ -538,8 +535,7 @@ class TextServiceTest extends TestCase
             ->once()
             ->with(Mockery::on(function($params) {
                 return isset($params['lead_id']) && $params['lead_id'] === self::TEST_LEAD_IDENTIFIER
-                    && isset($params['status']) && $params['status'] === Lead::STATUS_MEDIUM
-                    && isset($params['next_contact_date']) && strtotime($params['next_contact_date']);
+                    && isset($params['status']) && isset($params['next_contact_date']) && strtotime($params['next_contact_date']);
             }));
 
         $this->textRepositoryMock
