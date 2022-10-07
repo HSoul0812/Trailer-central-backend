@@ -1601,7 +1601,7 @@ class TextServiceTest extends TestCase
     {
         /** @var LeadStatus|Mockery\MockInterface|Mockery\LegacyMockInterface $leadStatus */
         $leadStatus = $this->getEloquentMock(LeadStatus::class);
-        $lead->status = LeadStatus::STATUS_HOT;
+        $leadStatus->status = LeadStatus::STATUS_HOT;
 
         /** @var Lead|Mockery\MockInterface|Mockery\LegacyMockInterface $lead */
         $lead = $this->getEloquentMock(Lead::class);
