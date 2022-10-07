@@ -11,13 +11,14 @@ use App\Models\User\User;
 use App\Models\User\DealerLocation;
 use App\Models\System\Email;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
+use App\Services\Integration\Common\DTOs\ValidateToken;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
-use Tests\TestCase;
-use Mockery;
-use Tests\database\seeds\CRM\Leads\ADFSeeder;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Artisan;
-use App\Services\Integration\Common\DTOs\ValidateToken;
+use Mockery;
+use Tests\TestCase;
+use Tests\database\seeds\CRM\Leads\ADFSeeder;
 
 class ADFTest extends TestCase
 {
