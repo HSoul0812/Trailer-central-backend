@@ -921,6 +921,7 @@ class InventoryService implements InventoryServiceInterface
             $description = str_replace($match[0], $new_ul, $description);
         }
 
+        // Only accepts necessary tags
         preg_match('/<ol>(.*?)<\/ol>/s', $description, $match);
         if (!empty($match)) {
             $new_ol = strip_tags($match[0], ['ol', 'li', 'a', 'b', 'strong']);
