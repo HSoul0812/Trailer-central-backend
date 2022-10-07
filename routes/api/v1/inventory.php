@@ -19,6 +19,7 @@ $api->version('v1', function ($api) {
         $api->delete('/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@destroy')
             ->where('id', '[0-9]+')
             ->middleware('auth:api');
+        $api->get('/pay/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@pay');
         $api->get('/progress', 'App\Http\Controllers\v1\Inventory\InventoryController@getProgress')
             ->middleware('auth:api');
         $api->post('/progress', 'App\Http\Controllers\v1\Inventory\InventoryController@saveProgress')
