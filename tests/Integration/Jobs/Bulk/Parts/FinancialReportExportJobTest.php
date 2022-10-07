@@ -69,8 +69,10 @@ class FinancialReportExportJobTest extends AbstractMonitoredJobsTest
      *
      * @throws Throwable
      */
-    public function testWriteTheFileInDisk(): void
+    public function testWriteTheFileOnS3(): void
     {
+        Storage::fake('s3');
+
         // Given I dont have any monitored job
         $this->seeder->seed();
 
@@ -96,12 +98,8 @@ class FinancialReportExportJobTest extends AbstractMonitoredJobsTest
         // When I call handle method
         $queueableJob->handle(app(BulkReportRepositoryInterface::class), app(BulkReportJobServiceInterface::class));
 
-        /** @var FilesystemAdapter $storage */
-        $storage = Storage::disk('s3');
-
-        $hasFile = $storage->has(FilesystemPdfExporter::PDF_EXPORT_S3_PREFIX . $monitoredJob->payload->filename);
-
-        $this->assertTrue($hasFile);
+        // /** @var FilesystemAdapter $storage */
+        Storage::disk('s3')->assertExists(FilesystemPdfExporter::PDF_EXPORT_S3_PREFIX . $monitoredJob->payload->filename);
     }
 
     /**
