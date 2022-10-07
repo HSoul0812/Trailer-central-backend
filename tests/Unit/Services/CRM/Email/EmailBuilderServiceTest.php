@@ -607,7 +607,7 @@ class EmailBuilderServiceTest extends TestCase
         $this->assertSame($result['data']['template'], $this->getTemplate());
         $this->assertSame($result['data']['template_id'], $campaign->template->template_id);
         $this->assertSame($result['data']['user_id'], $campaign->user_id);
-        $this->assertSame($result['data']['sales_person_id'], 0);
+        $this->assertSame($result['data']['sales_person_id'], null);
         $this->assertSame($result['data']['from_email'], $defaultFromEmail);
 
         $this->assertIsArray($result['leads']);
@@ -911,7 +911,7 @@ class EmailBuilderServiceTest extends TestCase
         $this->assertSame($result['data']['subject'], self::SEND_TEMPLATE_SUBJECT);
         $this->assertSame($result['data']['template_id'], $template->template_id);
         $this->assertSame($result['data']['user_id'], $template->user_id);
-        $this->assertSame($result['data']['sales_person_id'], 0);
+        $this->assertSame($result['data']['sales_person_id'], null);
         $this->assertSame($result['data']['from_email'], self::DEFAULT_FROM_EMAIL);
 
         $this->assertIsArray($result['leads']);
