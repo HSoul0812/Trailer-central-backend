@@ -71,7 +71,7 @@ class DealerIntegration extends Model
      */
     public function decodeSettings(): \Illuminate\Support\Collection
     {
-        return collect($this->settings ? unserialize($this->settings, ['allowed_classes' => false]) : []);
+        return collect(!empty($this->settings) ? (@unserialize($this->settings) ? unserialize($this->settings, ['allowed_classes' => false]) : []) : []);
     }
 
     /**
@@ -84,7 +84,7 @@ class DealerIntegration extends Model
         $settingValues = $this->decodeSettings();
 
         $settingValueMapper = static function (array $setting) use ($settingValues): array {
-            return $setting + ['value' => $settingValues->get($setting['name'])];
+            return $setting + ['value' => isset($setting['name']) ? $settingValues->get($setting['name']) : ''];
         };
 
         return $this->integration->decodeSettings()->keyBy('name')->map($settingValueMapper);

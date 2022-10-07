@@ -65,7 +65,6 @@ class DescriptionChecker extends Command
                 }
 
                 if (!empty($inventory->description)) {
-                    $inventory->description = strip_tags($inventory->description);
                     $inventory->description_html = $this->inventoryService->convertMarkdown($inventory->description);
                 }
 
