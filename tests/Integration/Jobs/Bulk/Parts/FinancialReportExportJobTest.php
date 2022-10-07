@@ -98,7 +98,6 @@ class FinancialReportExportJobTest extends AbstractMonitoredJobsTest
         // When I call handle method
         $queueableJob->handle(app(BulkReportRepositoryInterface::class), app(BulkReportJobServiceInterface::class));
 
-        // /** @var FilesystemAdapter $storage */
         Storage::disk('s3')->assertExists(FilesystemPdfExporter::PDF_EXPORT_S3_PREFIX . $monitoredJob->payload->filename);
     }
 
