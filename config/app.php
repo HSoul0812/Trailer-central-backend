@@ -178,6 +178,7 @@ return [
         App\Providers\NovaServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         App\Providers\CaptchaServiceProvider::class,
+        App\Providers\PaymentServiceProvider::class,
         App\Providers\TrailerCentralIntegrationServiceProvider::class,
     ],
 
