@@ -204,6 +204,10 @@ class TextServiceTest extends TestCase
             ->once()
             ->withNoArgs();
 
+        $this->textRepositoryMock
+            ->shouldReceive('rollbackTransaction')
+            ->never();
+
         /** @var TextServiceInterface $service */
         $service = $this->app->make(TextServiceInterface::class);
         $this->prepareFileService($service);
@@ -313,6 +317,10 @@ class TextServiceTest extends TestCase
             ->shouldReceive('commitTransaction')
             ->once()
             ->withNoArgs();
+
+        $this->textRepositoryMock
+            ->shouldReceive('rollbackTransaction')
+            ->never();
 
         /** @var TextServiceInterface $service */
         $service = $this->app->make(TextServiceInterface::class);
@@ -429,6 +437,10 @@ class TextServiceTest extends TestCase
             ->shouldReceive('commitTransaction')
             ->once()
             ->withNoArgs();
+
+        $this->textRepositoryMock
+            ->shouldReceive('rollbackTransaction')
+            ->never();
 
         /** @var TextServiceInterface $service */
         $service = $this->app->make(TextServiceInterface::class);
@@ -563,6 +575,10 @@ class TextServiceTest extends TestCase
             ->shouldReceive('commitTransaction')
             ->once()
             ->withNoArgs();
+
+        $this->textRepositoryMock
+            ->shouldReceive('rollbackTransaction')
+            ->never();
 
         /** @var TextServiceInterface $service */
         $service = $this->app->make(TextServiceInterface::class);
