@@ -12,7 +12,6 @@ use Illuminate\Database\Eloquent\Factory;
 use Faker\Generator as Faker;
 
 $factory->define(NewUser::class, static function (Faker $faker, array $attributes): array {
-
     $data = [
         'email' => $faker->email(),
         'password' => $faker->password()
