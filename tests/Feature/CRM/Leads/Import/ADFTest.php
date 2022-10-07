@@ -15,6 +15,7 @@ use App\Services\Integration\Google\GoogleServiceInterface;
 use App\Services\Integration\Google\GmailServiceInterface;
 use Tests\TestCase;
 use Mockery;
+use Tests\database\seeds\CRM\Leads\ADFSeeder;
 
 class ADFTest extends TestCase
 {
@@ -50,12 +51,14 @@ class ADFTest extends TestCase
      */
     public function testADFImport(): void
     {
+        $seeder = new ADFSeeder;
+        $seeder->seed();
         // Get Dealer
-        $dealer = User::findOrFail(self::getTestDealerId());
-        $websiteId = $dealer->website->id;
+        $dealer = $seeder->dealer;
+        $websiteId = $seeder->website->getKey();
 
         // Create Dealer Location
-        $location = DealerLocation::findOrFail(self::getTestDealerLocationId());
+        $location = $seeder->location;
 
         // Get System Email
         $systemEmail = $this->getSystemEmail();
@@ -292,6 +295,8 @@ class ADFTest extends TestCase
                 'phone_number' => $lead->phone_number
             ]);
         }
+
+        $seeder->cleanUp();
     }
 
     /**
