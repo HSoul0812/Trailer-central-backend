@@ -916,12 +916,16 @@ class InventoryService implements InventoryServiceInterface
         $description = preg_replace('/[[:^print:]]/', ' ', $description);
 
         preg_match('/<ul>(.*?)<\/ul>/s', $description, $match);
-        $new_ul = strip_tags($match[0], ['ul', 'li', 'a', 'b', 'strong']);
-        $description = str_replace($match[0], $new_ul, $description);
+        if (!empty($match)) {
+            $new_ul = strip_tags($match[0], ['ul', 'li', 'a', 'b', 'strong']);
+            $description = str_replace($match[0], $new_ul, $description);
+        }
 
-        preg_match('/<ol>(.*?)<\/ol>/s', $description, $match);
-        $new_ol = strip_tags($match[0], ['ol', 'li', 'a', 'b', 'strong']);
-        $description = str_replace($match[0], $new_ol, $description);
+        if (!empty($match)) {
+            preg_match('/<ol>(.*?)<\/ol>/s', $description, $match);
+            $new_ol = strip_tags($match[0], ['ol', 'li', 'a', 'b', 'strong']);
+            $description = str_replace($match[0], $new_ol, $description);
+        }
 
         return $description;
     }
