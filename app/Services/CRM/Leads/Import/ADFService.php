@@ -133,7 +133,7 @@ class ADFService implements ImportTypeInterface
         $adfLead->setWebsiteId($dealer->website->id ?? 0);
 
         // Get Vendor Location
-        $this->getAdfVendorLocation($adfLead, $adf->filter('vendor'));
+        $this->setAdfVendorLocation($adfLead, $adf->filter('vendor'));
 
         // Set Contact Details
         $this->getAdfContact($adfLead, $adf->filter('customer'));
@@ -245,13 +245,13 @@ class ADFService implements ImportTypeInterface
      * @param Crawler $vendor
      * @return ADFLead
      */
-    private function getAdfVendorLocation(ADFLead $adfLead, Crawler $vendor): ADFLead {
+    private function setAdfVendorLocation(ADFLead $adfLead, Crawler $vendor): ADFLead {
         // Set Vendor Address Details
-        $adfLead->setVendorAddrStreet($vendor->filterXPath('//address/street')->text(''));
-        $adfLead->setVendorAddrCity($vendor->filterXPath('//address/city')->text(''));
-        $adfLead->setVendorAddrState($vendor->filterXPath('//address/regioncode')->text(''));
-        $adfLead->setVendorAddrZip($vendor->filterXPath('//address/postalcode')->text(''));
-        $adfLead->setVendorAddrCountry($vendor->filterXPath('//address/country')->text(''));
+        $adfLead->setVendorAddrStreet($vendor->filterXPath('//contact/address/street')->text(''));
+        $adfLead->setVendorAddrCity($vendor->filterXPath('//contact/address/city')->text(''));
+        $adfLead->setVendorAddrState($vendor->filterXPath('//contact/address/regioncode')->text(''));
+        $adfLead->setVendorAddrZip($vendor->filterXPath('//contact/address/postalcode')->text(''));
+        $adfLead->setVendorAddrCountry($vendor->filterXPath('//contact/address/country')->text(''));
 
         // Get Vendor Location
         $filters = $adfLead->getVendorAddrFilters();
