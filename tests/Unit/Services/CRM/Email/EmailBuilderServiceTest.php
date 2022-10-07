@@ -855,7 +855,7 @@ class EmailBuilderServiceTest extends TestCase
                     && $builder->subject === self::SEND_TEMPLATE_SUBJECT
                     && $builder->dealerId === $template->newDealerUser->id
                     && $builder->userId === $template->user_id
-                    && $builder->salesPersonId === 0
+                    && $builder->salesPersonId === null
                     && $builder->fromEmail === self::DEFAULT_FROM_EMAIL
                     && $builder->toEmail === self::SEND_TEMPLATE_TO_EMAIL
                     && $builder->templateId === self::TEMPLATE_ID;
@@ -877,7 +877,7 @@ class EmailBuilderServiceTest extends TestCase
                     && $builder->subject === self::SEND_TEMPLATE_SUBJECT
                     && $builder->dealerId === $template->newDealerUser->id
                     && $builder->userId === $template->user_id
-                    && $builder->salesPersonId === 0
+                    && $builder->salesPersonId === null
                     && $builder->fromEmail === self::DEFAULT_FROM_EMAIL
                     && $builder->toEmail === self::SEND_TEMPLATE_TO_EMAIL
                     && $builder->templateId === self::TEMPLATE_ID;
@@ -1091,7 +1091,7 @@ class EmailBuilderServiceTest extends TestCase
                     && $builder->subject === self::SEND_TEMPLATE_SUBJECT
                     && $builder->dealerId === self::DEALER_ID
                     && $builder->userId === self::NEW_DEALER_USER_ID
-                    && $builder->salesPersonId === 0
+                    && $builder->salesPersonId === null
                     && $builder->fromEmail === self::DEFAULT_FROM_EMAIL
                     && $builder->toEmail === self::SEND_TEMPLATE_TO_EMAIL
                     && $builder->templateId === 1;
@@ -1114,7 +1114,7 @@ class EmailBuilderServiceTest extends TestCase
                     && $builder->subject === self::SEND_TEMPLATE_SUBJECT
                     && $builder->dealerId === self::DEALER_ID
                     && $builder->userId === self::NEW_DEALER_USER_ID
-                    && $builder->salesPersonId === 0
+                    && $builder->salesPersonId === null
                     && $builder->fromEmail === self::DEFAULT_FROM_EMAIL
                     && $builder->toEmail === self::SEND_TEMPLATE_TO_EMAIL
                     && $builder->templateId === 1;
@@ -1188,7 +1188,7 @@ class EmailBuilderServiceTest extends TestCase
                     && $builder->subject === self::SEND_TEMPLATE_SUBJECT
                     && $builder->dealerId === self::DEALER_ID
                     && $builder->userId === self::NEW_DEALER_USER_ID
-                    && $builder->salesPersonId === 0
+                    && $builder->salesPersonId === null
                     && $builder->fromEmail === self::DEFAULT_FROM_EMAIL
                     && $builder->toEmail === self::SEND_TEMPLATE_TO_EMAIL
                     && $builder->templateId === 1;
