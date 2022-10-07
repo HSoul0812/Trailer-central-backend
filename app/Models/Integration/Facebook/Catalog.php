@@ -41,6 +41,11 @@ class Catalog extends Model
     const HOME_TYPE = 'home_listings';
 
     /**
+     * @const array Product Type
+     */
+    const PRODUCT_TYPE = 'products';
+
+    /**
      * @const string Default Catalog Type
      */
     const DEFAULT_TYPE = 'vehicles';

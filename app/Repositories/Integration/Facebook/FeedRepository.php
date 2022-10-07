@@ -162,7 +162,7 @@ class FeedRepository implements FeedRepositoryInterface {
     public function getFeedUrl($businessId, $catalogId, $remote = true)
     {
         // Set URL
-        $url = $remote ? $_ENV['AWS_URL'] : '';
+        $url = $remote ? config('filesystems.disks.s3.url') : '';
 
         // Return URL
         return $url . '/' . Feed::CATALOG_URL_PREFIX . '/' . $businessId . '/' . $catalogId . '.csv';

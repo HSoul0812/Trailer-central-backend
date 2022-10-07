@@ -54,6 +54,7 @@ class InquiryEmailServiceTest extends TestCase
      */
     const TEST_INQUIRY_EMAIL = 'admin@operatebeyond.com';
     const TEST_INQUIRY_NAME = 'Operate Beyond';
+    const TEST_INQUIRY_OVERRIDE = 'operatebeyond@gmail.com';
 
     /**
      * @const string
@@ -75,9 +76,39 @@ class InquiryEmailServiceTest extends TestCase
 
 
     /**
+     * @var LegacyMockInterface|InventoryRepositoryInterface
+     */
+    private $inventoryRepositoryMock;
+
+    /**
+     * @var LegacyMockInterface|PartRepositoryInterface
+     */
+    private $partRepositoryMock;
+
+    /**
+     * @var LegacyMockInterface|ShowroomRepositoryInterface
+     */
+    private $showroomRepositoryMock;
+
+    /**
+     * @var LegacyMockInterface|WebsiteRepositoryInterface
+     */
+    private $websiteRepositoryMock;
+
+    /**
      * @var LegacyMockInterface|WebsiteConfigRepositoryInterface
      */
     private $websiteConfigRepositoryMock;
+
+    /**
+     * @var LegacyMockInterface|UserRepositoryInterface
+     */
+    private $userRepositoryMock;
+
+    /**
+     * @var LegacyMockInterface|DealerLocationRepositoryInterface
+     */
+    private $dealerLocationRepositoryMock;
 
     public function setUp(): void
     {
@@ -390,6 +421,20 @@ class InquiryEmailServiceTest extends TestCase
             ->with($inquiry->websiteId, 'general/item_email_from')
             ->andReturn(self::TEST_WEBSITE_CONFIG);
 
+        // Mock getValueOfConfig on Website Config Repository
+        $this->websiteConfigRepositoryMock
+            ->shouldReceive('getValueOfConfig')
+            ->once()
+            ->with($inquiry->websiteId, 'contact/email/' . $fillInquiry['lead_types'][0])
+            ->andReturn(null);
+
+        // Mock getValueOfConfig on Website Config Repository
+        $this->websiteConfigRepositoryMock
+            ->shouldReceive('getValueOfConfig')
+            ->once()
+            ->with($inquiry->websiteId, 'contact/email')
+            ->andReturn(null);
+
         // Mock User Repository
         $this->userRepositoryMock
             ->shouldReceive('get')
@@ -432,6 +477,7 @@ class InquiryEmailServiceTest extends TestCase
         $location->dealer_location_id = 1;
         $location->dealer_id = 1;
         $location->name = 'Indianopolis';
+        $location->email = self::TEST_INQUIRY_OVERRIDE;
 
         // Send Request Params
         $fillInquiry = [
@@ -470,6 +516,20 @@ class InquiryEmailServiceTest extends TestCase
             ->once()
             ->with($inquiry->websiteId, 'general/item_email_from')
             ->andReturn(self::TEST_WEBSITE_CONFIG);
+
+        // Mock getValueOfConfig on Website Config Repository
+        $this->websiteConfigRepositoryMock
+            ->shouldReceive('getValueOfConfig')
+            ->once()
+            ->with($inquiry->websiteId, 'contact/email/' . $fillInquiry['lead_types'][0])
+            ->andReturn(null);
+
+        // Mock getValueOfConfig on Website Config Repository
+        $this->websiteConfigRepositoryMock
+            ->shouldReceive('getValueOfConfig')
+            ->once()
+            ->with($inquiry->websiteId, 'contact/email')
+            ->andReturn(null);
 
         // Mock Dealer Location Repository
         $this->dealerLocationRepositoryMock
@@ -513,6 +573,7 @@ class InquiryEmailServiceTest extends TestCase
         $location->dealer_location_id = 1;
         $location->dealer_id = 1;
         $location->name = 'Indianopolis';
+        $location->email = self::TEST_INQUIRY_OVERRIDE;
 
         // Get Inventory
         $inventory = $this->getEloquentMock(Inventory::class);
@@ -562,6 +623,20 @@ class InquiryEmailServiceTest extends TestCase
             ->once()
             ->with($inquiry->websiteId, 'general/item_email_from')
             ->andReturn(self::TEST_WEBSITE_CONFIG);
+
+        // Mock getValueOfConfig on Website Config Repository
+        $this->websiteConfigRepositoryMock
+            ->shouldReceive('getValueOfConfig')
+            ->once()
+            ->with($inquiry->websiteId, 'contact/email/' . $fillInquiry['lead_types'][0])
+            ->andReturn(null);
+
+        // Mock getValueOfConfig on Website Config Repository
+        $this->websiteConfigRepositoryMock
+            ->shouldReceive('getValueOfConfig')
+            ->once()
+            ->with($inquiry->websiteId, 'contact/email')
+            ->andReturn(null);
 
         // Mock Inventory Repository
         $this->inventoryRepositoryMock
@@ -645,6 +720,20 @@ class InquiryEmailServiceTest extends TestCase
             ->once()
             ->with($inquiry->websiteId, 'general/item_email_from')
             ->andReturn(self::TEST_WEBSITE_CONFIG);
+
+        // Mock getValueOfConfig on Website Config Repository
+        $this->websiteConfigRepositoryMock
+            ->shouldReceive('getValueOfConfig')
+            ->once()
+            ->with($inquiry->websiteId, 'contact/email/' . $fillInquiry['lead_types'][0])
+            ->andReturn(null);
+
+        // Mock getValueOfConfig on Website Config Repository
+        $this->websiteConfigRepositoryMock
+            ->shouldReceive('getValueOfConfig')
+            ->once()
+            ->with($inquiry->websiteId, 'contact/email')
+            ->andReturn(null);
 
         // Mock Part Repository
         $this->partRepositoryMock
@@ -735,6 +824,20 @@ class InquiryEmailServiceTest extends TestCase
             ->once()
             ->with($inquiry->websiteId, 'general/item_email_from')
             ->andReturn(self::TEST_WEBSITE_CONFIG);
+
+        // Mock getValueOfConfig on Website Config Repository
+        $this->websiteConfigRepositoryMock
+            ->shouldReceive('getValueOfConfig')
+            ->once()
+            ->with($inquiry->websiteId, 'contact/email/' . $fillInquiry['lead_types'][0])
+            ->andReturn(null);
+
+        // Mock getValueOfConfig on Website Config Repository
+        $this->websiteConfigRepositoryMock
+            ->shouldReceive('getValueOfConfig')
+            ->once()
+            ->with($inquiry->websiteId, 'contact/email')
+            ->andReturn(null);
 
         // Mock Showroom Repository
         $this->showroomRepositoryMock
