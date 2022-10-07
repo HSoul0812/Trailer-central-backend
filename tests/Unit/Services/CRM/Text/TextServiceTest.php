@@ -37,13 +37,13 @@ class TextServiceTest extends TestCase
 {
     private const TEST_FULL_NAME = 'test_full_name';
     private const TEST_TO_NUMBER = '123456';
-    private const TEST_FROM_NUMBER = '654321';
-    private const TEST_FROM_NUMBER_2 = '159753';
-    private const TEST_DEALER_ID = PHP_INT_MAX;
-    private const TEST_PREFERRED_LOCATION = PHP_INT_MAX - 1;
-    private const TEST_LEAD_IDENTIFIER = PHP_INT_MAX - 2;
+    private const TEST_FROM_NUMBER = '6543210986';
+    private const TEST_FROM_NUMBER_2 = '1597537493';
+    private const TEST_DEALER_ID = 1;
+    private const TEST_PREFERRED_LOCATION = 2;
+    private const TEST_LEAD_IDENTIFIER = 3;
     private const TEST_MESSAGE = 'some_message';
-    private const TEST_TEXT_LOG_ID = PHP_INT_MAX - 3;
+    private const TEST_TEXT_LOG_ID = 4;
 
     /**
      * @var TwilioServiceInterface|Mockery\LegacyMockInterface|Mockery\MockInterface
@@ -1600,6 +1600,7 @@ class TextServiceTest extends TestCase
     {
         /** @var LeadStatus|Mockery\MockInterface|Mockery\LegacyMockInterface $leadStatus */
         $leadStatus = $this->getEloquentMock(LeadStatus::class);
+        $lead->status = LeadStatus::STATUS_HOT;
 
         /** @var Lead|Mockery\MockInterface|Mockery\LegacyMockInterface $lead */
         $lead = $this->getEloquentMock(Lead::class);
