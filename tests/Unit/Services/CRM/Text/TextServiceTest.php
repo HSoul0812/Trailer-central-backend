@@ -1598,11 +1598,15 @@ class TextServiceTest extends TestCase
      */
     public function sendParamsProvider(): array
     {
+        /** @var LeadStatus|Mockery\MockInterface|Mockery\LegacyMockInterface $leadStatus */
+        $leadStatus = $this->getEloquentMock(LeadStatus::class);
+
         /** @var Lead|Mockery\MockInterface|Mockery\LegacyMockInterface $lead */
         $lead = $this->getEloquentMock(Lead::class);
 
         $lead->dealer_id = self::TEST_DEALER_ID;
         $lead->identifier = self::TEST_LEAD_IDENTIFIER;
+        $lead->leadStatus = $leadStatus;
 
         /** @var NewDealerUser|Mockery\MockInterface|Mockery\LegacyMockInterface $newDealerUser */
         $newDealerUser = $this->getEloquentMock(NewDealerUser::class);
