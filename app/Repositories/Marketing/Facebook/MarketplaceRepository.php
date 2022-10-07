@@ -141,7 +141,7 @@ class MarketplaceRepository implements MarketplaceRepositoryInterface {
                             );
 
         if (!isset($params['per_page'])) {
-            $params['per_page'] = 100;
+            $params['per_page'] = 1000;
         }
 
         if (isset($params['dealer_id'])) {

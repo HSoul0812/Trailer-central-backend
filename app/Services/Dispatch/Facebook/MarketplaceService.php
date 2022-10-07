@@ -121,9 +121,9 @@ class MarketplaceService implements MarketplaceServiceInterface
      * 
      * @return MarketplaceStatus
      */
-    public function status(): MarketplaceStatus {
+    public function status(array $params): MarketplaceStatus {
         // Get All Marketplace Integration Dealers
-        $dealers = $this->getIntegrations();
+        $dealers = $this->getIntegrations($params);
 
         // Get Available Tunnels
         $tunnels = $this->tunnels->getAll();
@@ -291,14 +291,15 @@ class MarketplaceService implements MarketplaceServiceInterface
      * 
      * @return Collection<DealerFacebook>
      */
-    private function getIntegrations(): Collection {
+    private function getIntegrations(array $params): Collection {
         
         $runningIntegrationIds = $this->postingSession->getIntegrationIds();
 
         $integrations = $this->marketplace->getAll(['sort' => '-last_attempt_ts',
             'import_range' => config('marketing.fb.settings.limit.hours', 0),
             'exclude' => $runningIntegrationIds,
-            'skip_errors' => config('marketing.fb.settings.limit.errors', 1)
+            'skip_errors' => config('marketing.fb.settings.limit.errors', 1),
+            'per_page' => $params['per_page'] ?? null
         ]);
 
         // Loop Facebook Integrations
