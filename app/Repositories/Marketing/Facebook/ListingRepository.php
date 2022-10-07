@@ -196,6 +196,7 @@ class ListingRepository implements ListingRepositoryInterface {
             });
         }
 
+        $query = $query->with(['attributeValues', 'orderedImages', 'dealerLocation']);
         // Set Sort By
         $query = $query->orderBy("{$inventoryTableName}.created_at", "asc");
         $query = $query->limit($params['per_page'] ?? config('marketing.fb.settings.limit.listings'));
@@ -233,8 +234,7 @@ class ListingRepository implements ListingRepositoryInterface {
         }
 
         // Require Inventory
-        $query = $query->with('marketplace')->with('inventory')->with('inventory.attributeValues')
-                        ->with('inventory.orderedImages')->with('inventory.dealerLocation');
+        $query = $query->with(['marketplace', 'inventory', 'inventory.attributeValues', 'inventory.orderedImages', 'inventory.dealerLocation']);
 
         // Return Paginated Inventory
         return $query->paginate($params['per_page'])->appends($params);
