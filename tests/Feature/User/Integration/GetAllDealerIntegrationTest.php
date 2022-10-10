@@ -48,12 +48,14 @@ class GetAllDealerIntegrationTest extends DealerIntegrationTest
 
     public function testShouldAccessWithAuthentication(): void
     {
-        ['token' => $token] = $this->generateDealer();
+        ['dealer' => $dealer, 'token' => $token] = $this->generateDealer();
 
         $this->withHeaders(['access-token' => $token->access_token])->json(
             static::VERB,
             str_replace('{id}', $this->faker->numberBetween(3, 3000), static::ENDPOINT)
         )->assertStatus(200);
+
+        $this->tearDownSeed($dealer->dealer_id);
     }
 
     /**
@@ -63,9 +65,11 @@ class GetAllDealerIntegrationTest extends DealerIntegrationTest
      */
     public function testIndexStructure(): void
     {
-        ['token' => $token] = $this->generateDealer();
+        ['dealer' => $dealer, 'token' => $token] = $this->generateDealer();
 
         $response = $this->withHeaders(['access-token' => $token->access_token])->get(self::ENDPOINT);
         $response->assertJsonStructure(self::DATA_STRUCTURE);
+
+        $this->tearDownSeed($dealer->dealer_id);
     }
 }
