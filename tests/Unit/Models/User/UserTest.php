@@ -49,10 +49,8 @@ class UserTest extends TestCase
     public function testHasPermission()
     {
         /** @var LegacyMockInterface|User $user */
-        $user = $this->getEloquentMock(User::class);
+        $user = $this->getEloquentMock(User::class)->makePartial();
 
-        $user->shouldReceive('getPermissions')->passthru();
-        $user->shouldReceive('hasPermission')->passthru();
         $user->shouldReceive('hasCrmPermission')->passthru();
         $user->shouldReceive('getDealerId')->andReturn($this->getTestDealerId());
 
@@ -76,10 +74,8 @@ class UserTest extends TestCase
     public function testHasPermissionInactiveCrmUser()
     {
         /** @var LegacyMockInterface|User $user */
-        $user = $this->getEloquentMock(User::class);
+        $user = $this->getEloquentMock(User::class)->makePartial();
 
-        $user->shouldReceive('getPermissions')->passthru();
-        $user->shouldReceive('hasPermission')->passthru();
         $user->shouldReceive('hasCrmPermission')->andReturn(false);
         $user->shouldReceive('getDealerId')->andReturn($this->getTestDealerId());
 
