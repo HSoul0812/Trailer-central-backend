@@ -21,7 +21,7 @@ class SearchInventoryRequest extends Request
 
     public function terms(): array
     {
-        return collect($this->all())->except(['sort', 'page', 'per_page', 'offset', 'dealerId', 'lat', 'lon'])->toArray();
+        return collect($this->all())->except(['sort', 'page', 'per_page', 'offset', 'dealerId', 'lat', 'lon', 'x_qa_req'])->toArray();
     }
 
     public function dealerIds(): array
@@ -63,5 +63,10 @@ class SearchInventoryRequest extends Request
     public function location(): Point
     {
         return new Point((float)$this->lat, (float)$this->lon);
+    }
+
+    public function getESQuery(): bool
+    {
+        return $this->x_qa_req == 1;
     }
 }

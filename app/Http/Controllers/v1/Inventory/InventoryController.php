@@ -490,10 +490,14 @@ class InventoryController extends RestfulControllerV2
                 $searchRequest->pagination()
             );
 
-            return $this->response
+            $response = $this->response
                 ->collection($result->hints, new InventoryElasticSearchOutputTransformer())
-                ->addMeta('aggregations',$result->aggregations)
-                ->addMeta('total',$result->total);
+                ->addMeta('aggregations', $result->aggregations)
+                ->addMeta('total', $result->total);
+            if ($searchRequest->getESQuery()) {
+                $response->addMeta('x_qa_req', $result->getEncodedESQuery());
+            }
+            return $response;
         }
 
         $this->response->errorBadRequest();
