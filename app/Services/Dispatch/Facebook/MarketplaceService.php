@@ -344,6 +344,9 @@ class MarketplaceService implements MarketplaceServiceInterface
         // Get Method
         $method = MarketplaceStatus::INVENTORY_METHODS[$type];
 
+        $nowTime = microtime(true);
+        $this->log->info('Debug time BEFORE ' . $method . ': ' . ($nowTime - $startTime));
+
         if ($type === MarketplaceStatus::METHOD_MISSING) {
             $params['per_page'] = config('marketing.fb.settings.limit.listings') - $this->listings->countFacebookPostings($integration);
         }
@@ -369,8 +372,7 @@ class MarketplaceService implements MarketplaceServiceInterface
         // Append Paginator
         $response = new MarketplaceInventory([
             'type' => $type,
-            'inventory' => $listings,
-            'paginator' => new IlluminatePaginatorAdapter($inventory)
+            'inventory' => $listings
         ]);
         return $response;
     }
