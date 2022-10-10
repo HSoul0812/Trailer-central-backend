@@ -745,7 +745,7 @@ class Inventory extends Model
      *
      * @return GeolocationPoint
      */
-    public function geolocation(): GeolocationPoint
+    public function geolocationPoint(): GeolocationPoint
     {
         if ($this->latitude && $this->longitude) {
             return new GeolocationPoint((float)$this->latitude, (float)$this->longitude);
