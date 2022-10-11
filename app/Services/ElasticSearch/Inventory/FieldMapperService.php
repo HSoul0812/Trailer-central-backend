@@ -19,7 +19,9 @@ class FieldMapperService implements InventoryFieldMapperServiceInterface
     /** @var string[] */
     private const EDGE_CASES_TO_GENERATE_QUERIES_FOR = [
         'show_images', //based on the show images config
-        'clearance_special' //based on all-inventory/all-clearance-specials for `pandpsales` & `pandprvs`
+        'clearance_special', //based on all-inventory/all-clearance-specials for `pandpsales` & `pandprvs`,
+        'location_region', //based on addRegionToElastic on DW
+        'location_city' ////based on addRegionToElastic on DW
     ];
 
     public function __construct(InventoryFilterRepositoryInterface $repository, Cache $cache)

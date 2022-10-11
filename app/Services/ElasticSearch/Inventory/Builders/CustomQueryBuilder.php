@@ -38,6 +38,9 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
                 return $this->buildImagesQuery();
             case 'clearance_special':
                 return $this->buildClearanceSpecialQuery();
+            case 'location_region':
+            case 'location_city':
+                return $this->buildLocationQuery();
             default:
                 return [];
         }
@@ -111,5 +114,29 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
         }
 
         return [];
+    }
+
+    private function buildLocationQuery(): array
+    {
+        $field = str_replace('_', '.', $this->field);
+        $query = [
+            'bool' => [
+                'must' => [
+                    [
+                        'term' => [
+                            $field => $this->data
+                        ]
+                    ]
+                ]
+            ]
+        ];
+        return [
+            'post_filter' => $query,
+            'aggregations' => [
+                'filter_aggregations' => [
+                    'filter' => $query
+                ]
+            ]
+        ];
     }
 }
