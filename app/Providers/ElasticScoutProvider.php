@@ -11,6 +11,8 @@ use ElasticScoutDriver\Factories\SearchRequestFactory;
 use ElasticScoutDriver\Factories\SearchRequestFactoryInterface;
 use Illuminate\Support\ServiceProvider as AbstractServiceProvider;
 use Laravel\Scout\EngineManager;
+use ElasticScoutDriverPlus\Decorators\EngineDecorator;
+use ElasticAdapter\Documents\DocumentManager;
 
 class ElasticScoutProvider extends AbstractServiceProvider
 {
@@ -58,7 +60,7 @@ class ElasticScoutProvider extends AbstractServiceProvider
         ]);
 
         resolve(EngineManager::class)->extend('elastic', static function () {
-            return resolve(ElasticSearchEngine::class);
+            return new EngineDecorator(app(ElasticSearchEngine::class), app(DocumentManager::class));
         });
     }
 }

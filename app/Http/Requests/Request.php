@@ -38,6 +38,7 @@ class Request extends BaseRequest {
         $this->prepareForValidation();
 
         $validator = Validator::make($this->all(), $this->getRules(), $this->messages());
+        $validator->setAttributeNames($this->getAttributeNames());
 
         if ($validator->fails()) {
             throw new ResourceException("Validation Failed", $validator->errors());
@@ -100,6 +101,14 @@ class Request extends BaseRequest {
     }
 
     protected function messages(): array
+    {
+        return [];
+    }
+
+    /**
+     * @return array
+     */
+    protected function getAttributeNames(): array
     {
         return [];
     }

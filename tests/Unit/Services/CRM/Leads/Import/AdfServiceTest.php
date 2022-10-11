@@ -16,6 +16,7 @@ use App\Services\Integration\Common\DTOs\ParsedEmail;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
 use Mockery\LegacyMockInterface;
+use Psr\Log\LoggerInterface;
 use Tests\TestCase;
 
 /**
@@ -124,6 +125,11 @@ class AdfServiceTest extends TestCase
      */
     protected $sanitizeHelper;
 
+    /**
+     * @var LoggerInterface|LegacyMockInterface
+     */
+    protected $logMock;
+
     public function setUp(): void
     {
         parent::setUp();
@@ -131,6 +137,7 @@ class AdfServiceTest extends TestCase
         $this->instanceMock('locationRepository', DealerLocationRepositoryInterface::class);
         $this->instanceMock('inventoryRepository', InventoryRepositoryInterface::class);
         $this->instanceMock('sanitizeHelper', SanitizeHelper::class);
+        $this->instanceMock('logMock', LoggerInterface::class);
     }
 
     /**
@@ -191,7 +198,13 @@ class AdfServiceTest extends TestCase
             ->once()
             ->andReturn($inventory);
 
-        Log::shouldReceive('info');
+        Log::shouldReceive('channel')
+            ->once()
+            ->andReturn($this->logMock);
+
+        $this->logMock
+            ->shouldReceive('info')
+            ->once();
 
         /** @var ADFService $service */
         $service = $this->app->make(ADFService::class);
@@ -241,7 +254,13 @@ class AdfServiceTest extends TestCase
             ->once()
             ->andReturn($inventory);
 
-        Log::shouldReceive('info');
+        Log::shouldReceive('channel')
+            ->once()
+            ->andReturn($this->logMock);
+
+        $this->logMock
+            ->shouldReceive('info')
+            ->once();
 
         /** @var ADFService $service */
         $service = $this->app->make(ADFService::class);
@@ -278,7 +297,13 @@ class AdfServiceTest extends TestCase
      */
     public function testGetLeadWithNotValidAdf($dealer, $email)
     {
-        Log::shouldReceive('error');
+        Log::shouldReceive('channel')
+            ->once()
+            ->andReturn($this->logMock);
+
+        $this->logMock
+            ->shouldReceive('error')
+            ->once();
 
         $this->expectException(InvalidImportFormatException::class);
 

@@ -82,6 +82,10 @@ $api->version('v1', function ($route) {
                 'bulk/payments',
                 'App\Http\Controllers\v1\Inventory\Floorplan\Bulk\PaymentController@create'
             );
+            $route->get(
+                'payments/check-number-exists',
+                'App\Http\Controllers\v1\Inventory\Floorplan\PaymentController@checkNumberExists'
+            );
 
             $route->group([
                 'prefix' => 'vendors',
@@ -119,7 +123,8 @@ $api->version('v1', function ($route) {
     $route->get('parts/brands/{id}', 'App\Http\Controllers\v1\Parts\BrandController@show')->where('id', '[0-9]+');
     $route->post('parts/brands/{id}', 'App\Http\Controllers\v1\Parts\BrandController@update')->where('id', '[0-9]+');
     $route->delete('parts/brands/{id}', 'App\Http\Controllers\v1\Parts\BrandController@destroy')->where('id', '[0-9]+');
-    $route->post('reports/financials-stock-export', 'App\Http\Controllers\v1\Bulk\Parts\BulkReportsController@financialsExport');
+    $route->post('reports/financials-stock-export/pdf', 'App\Http\Controllers\v1\Bulk\Parts\BulkReportsController@financialsExportPdf');
+    $route->post('reports/financials-stock-export/csv', 'App\Http\Controllers\v1\Bulk\Parts\BulkReportsController@financialsExportCsv');
     $route->post('reports/financials-stock', 'App\Http\Controllers\v1\Bulk\Parts\BulkReportsController@financials');
     $route->get('reports/read', 'App\Http\Controllers\v1\Bulk\Parts\BulkReportsController@read');
 
@@ -234,6 +239,15 @@ $api->version('v1', function ($route) {
     $route->get('inventory/bulk/{id}', 'App\Http\Controllers\v1\Bulk\Inventory\BulkUploadController@show');
     $route->put('inventory/bulk/{id}', 'App\Http\Controllers\v1\Bulk\Inventory\BulkUploadController@update');
     $route->delete('inventory/bulk/{id}', 'App\Http\Controllers\v1\Bulk\Inventory\BulkUploadController@destroy');
+
+    /**
+     * Inventory Bulk download
+     */
+    $route->post('inventory/bulk/create', 'App\Http\Controllers\v1\Bulk\Inventory\BulkDownloadController@create');
+    $route->get('inventory/bulk/output/{token}', 'App\Http\Controllers\v1\Bulk\Inventory\BulkDownloadController@readByToken');
+    $route->get('inventory/bulk/output', 'App\Http\Controllers\v1\Bulk\Inventory\BulkDownloadController@read');
+    $route->get('inventory/bulks', 'App\Http\Controllers\v1\Bulk\Inventory\BulkDownloadController@index');
+    $route->get('inventory/bulk/status/{token}', 'App\Http\Controllers\v1\Bulk\Inventory\BulkDownloadController@statusByToken');
 
     /**
      * Inventory Overlay
@@ -1014,10 +1028,10 @@ $api->version('v1', function ($route) {
                     'middleware' => 'emailbuilder.blast.validate'
                 ], function ($route) {
                     $route->get('/', 'App\Http\Controllers\v1\CRM\Email\BlastController@index');
-                    /*$route->put('/', 'App\Http\Controllers\v1\CRM\Email\BlastController@create');
+                    $route->put('/', 'App\Http\Controllers\v1\CRM\Email\BlastController@create');
                     $route->get('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@show')->where('id', '[0-9]+');
                     $route->post('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@update')->where('id', '[0-9]+');
-                    $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@destroy')->where('id', '[0-9]+');*/
+                    $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Email\BlastController@destroy')->where('id', '[0-9]+');
                 });
             });
 

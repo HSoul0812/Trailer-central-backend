@@ -22,7 +22,7 @@ class InventoryElasticSearchInputTransformer implements Transformer
         $primaryImages = $model->orderedPrimaryImages();
         $secondaryImages = $model->orderedSecondaryImages();
         $defaultImage = $primaryImages->first();
-        $geolocation = $model->geolocation();
+        $geolocation = $model->geolocationPoint();
 
         return [
             'id'                   => TypesHelper::ensureNumeric($model->inventory_id),

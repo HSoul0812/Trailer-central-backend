@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Transformers\Inventory;
 
-class InventoryElasticSearchOutputTransformer
+use League\Fractal\TransformerAbstract;
+use stdClass;
+
+class InventoryElasticSearchOutputTransformer extends TransformerAbstract
 {
-    public function transform(array $hint): array
+    public function transform(stdClass $hit): array
     {
-        return $hint;
+        return (array)$hit->_source;
     }
 }
