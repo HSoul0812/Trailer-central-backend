@@ -218,7 +218,7 @@ class HotPotatoService extends AutoAssignService implements HotPotatoServiceInte
         }
 
         // Set Next Contact Date
-        $this->leadStatusRepository->update(['lead_id' => $lead->identifier, 'next_contact_date' => $nextContact->toDateTimeString()]);
+        $this->leadStatus->update(['lead_id' => $lead->identifier, 'next_contact_date' => $nextContact->toDateTimeString()]);
 
         // Return Lead Status
         return ['next_contact_date' => $nextContact->toDateTimeString(), 'weekday' => $weekday];
