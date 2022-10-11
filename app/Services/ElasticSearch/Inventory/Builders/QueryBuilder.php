@@ -19,11 +19,6 @@ class QueryBuilder implements InventoryQueryBuilderInterface
 
     private const AGGREGATION_SIZE = 200;
 
-    public function __construct(FieldMapperService $mapper)
-    {
-        $this->mapper = $mapper;
-    }
-
     private $aggregations = [
         'sleeping_capacity' => [
             'terms' => [
@@ -220,6 +215,11 @@ class QueryBuilder implements InventoryQueryBuilderInterface
         'sort' => []
     ];
 
+    public function __construct(FieldMapperService $mapper)
+    {
+        $this->mapper = $mapper;
+    }
+
     public function addDealers(array $dealerIds): QueryBuilderInterface
     {
 
@@ -239,7 +239,7 @@ class QueryBuilder implements InventoryQueryBuilderInterface
     public function addGeolocation(GeolocationInterface $geolocation): QueryBuilderInterface
     {
         if ($geolocation instanceof ScatteredGeolocation) {
-            $this->addScatteredQueryFunction();
+            $this->addScatteredQueryFunction($geolocation);
         } elseif ($geolocation instanceof GeolocationRange) {
             $this->addGeoDistanceQuery($geolocation);
         }
@@ -366,38 +366,46 @@ class QueryBuilder implements InventoryQueryBuilderInterface
 
     private function addScatteredQueryFunction(ScatteredGeolocation $geolocation)
     {
-        [
-            "function_score" => [
-                "query" => [
-                    "match_all" => [
-                    ]
-                ],
-                "functions" => [
-                    [
-                        "random_score" => [
-                            "seed" => 10,
-                            "field" => "_seq_no"
-                        ],
-                        "weight" => 1
-                    ],
-                    [
-                        "script_score" => [
-                            "script" => [
-                                "source" => "double d; if(doc['location.geo'].value != null) { d = doc['location.geo'].planeDistance(params.lat, params.lng) * 0.000621371; } else { return 0.1; } if(d >= (params.grouping*params.fromScore)) { return 0.2; } else { return params.fromScore - Math.floor(d/params.grouping); }",
-                                "params" => [
-                                    "lat" => 42.96,
-                                    "lng" => -85.65,
-                                    "fromScore" => 100,
-                                    "grouping" => 60
-                                ]
+        $this->query = array_merge_recursive([
+            'query' => [
+                'bool' => [
+                    'must' => [
+                        [
+                            'function_score' => [
+                                'query' => [
+                                    'match_all' => [
+                                    ]
+                                ],
+                                'functions' => [
+                                    [
+                                        'random_score' => [
+                                            'seed' => 10,
+                                            'field' => '_seq_no'
+                                        ],
+                                        'weight' => 1
+                                    ],
+                                    [
+                                        'script_score' => [
+                                            'script' => [
+                                                'source' => "double d; if(doc['location.geo'].value != null) { d = doc['location.geo'].planeDistance(params.lat, params.lng) * 0.000621371; } else { return 0.1; } if(d >= (params.grouping*params.fromScore)) { return 0.2; } else { return params.fromScore - Math.floor(d/params.grouping); }",
+                                                'params' => [
+                                                    'lat' => $geolocation->lat(),
+                                                    'lng' => $geolocation->lon(),
+                                                    'fromScore' => 100,
+                                                    'grouping' => $geolocation->grouping()
+                                                ]
+                                            ]
+                                        ]
+                                    ]
+                                ],
+                                'boost_mode' => 'replace',
+                                'score_mode' => 'sum'
                             ]
                         ]
                     ]
-                ],
-                "boost_mode" => "replace",
-                "score_mode" => "sum"
+                ]
             ]
-        ];
+        ], $this->query);
     }
 
     private function addAggregations(bool $hasTerms): void
