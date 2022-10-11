@@ -426,9 +426,10 @@ class QueryBuilder implements InventoryQueryBuilderInterface
         }
     }
 
-    private function addGeoDistanceQuery(GeolocationRange $geolocation)
+    private function addGeoDistanceQuery(GeolocationRange $geolocation): void
     {
         $lonLat = sprintf('%d, %d', $geolocation->lon(), $geolocation->lat());
+
         $filter = [
             'must' => [
                 [
@@ -439,12 +440,14 @@ class QueryBuilder implements InventoryQueryBuilderInterface
                 ]
             ]
         ];
+
         if (isset($this->query['post_filter']['bool'])) {
             $filter['must'][] = [
                 'bool' => $this->query['post_filter']['bool']
             ];
             unset($this->query['post_filter']['bool']);
         }
+
         $this->query = array_merge_recursive([
             'post_filter' => [
                 'bool' => $filter
