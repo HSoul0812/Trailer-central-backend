@@ -75,16 +75,16 @@ class CrmUserRepository implements CrmUserRepositoryInterface
 
         // Find By Dealer ID?
         if (isset($params['dealer_id'])) {
-            $query = $query->where('id', $params['dealer_id']);
+            $query = $query->where(NewDealerUser::getTableName() . '.id', $params['dealer_id']);
         } else {
             // Find By Min Dealer ID?
             if(!empty($params['min_dealer_id'])) {
-                $query = $query->where('id', '>=', $params['min_dealer_id']);
+                $query = $query->where(NewDealerUser::getTableName() . '.id', '>=', $params['min_dealer_id']);
             }
 
             // Find Max Dealer ID
             if(!empty($params['max_dealer_id'])) {
-                $query = $query->where('id', '<=', $params['max_dealer_id']);
+                $query = $query->where(NewDealerUser::getTableName() . '.id', '<=', $params['max_dealer_id']);
             }
         }
 
