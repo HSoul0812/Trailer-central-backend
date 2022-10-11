@@ -4,6 +4,7 @@ namespace App\Indexers\Inventory;
 
 use App\Indexers\IndexConfigurator;
 use App\Transformers\Inventory\InventoryElasticSearchInputTransformer;
+use App\Models\Inventory\Inventory;
 
 /**
  * @method InventoryElasticSearchInputTransformer transformer()
@@ -228,7 +229,7 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
 
     public function name(): string
     {
-        return config('elastic.scout_driver.indices.inventory');
+        return Inventory::ALIAS_ES_NAME;
     }
 
     public function __construct()

@@ -70,10 +70,14 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
             ($configurator = $first->indexConfigurator()) &&
             !$this->indexManager->exists($first->searchableAs())
         ) {
+            $indexName = $configurator->name() . '_' . date('YmdHi');
+
             $this->createIndex(
-                $first->searchableAs(),
+                $indexName,
                 ['mapping' => $configurator->mapping(), 'settings' => $configurator->settings()]
             );
+
+            $this->indexManager->putAlias($indexName, new \ElasticAdapter\Indices\Alias($configurator->name()));
         }
     }
 

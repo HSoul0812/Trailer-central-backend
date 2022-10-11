@@ -40,7 +40,7 @@ class RecreateInventoryIndex extends Command
      */
     public function handle()
     {
-        $inventory_name = 'inventory_' . Date::now()->format("YmdHm");
+        $inventory_name = Inventory::ALIAS_ES_NAME . '_' . Date::now()->format("YmdHi");
         $engine = app(EngineManager::class);
 
         $engine->safeSyncImporter(new Inventory, $inventory_name);
