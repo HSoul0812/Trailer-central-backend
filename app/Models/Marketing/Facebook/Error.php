@@ -24,27 +24,39 @@ class Error extends Model
      */
     const ERROR_TYPES = [
         'unknown' => 'Unknown Error',
-        'missing-tunnel' => 'Missing Tunnel on Dealer',
-        'offline-tunnel' => 'Tunnel Temporarily Offline on Dealer',
-        'missing-inventory' => 'Missing Inventory on Integration',
-        'login-failed' => 'Failed to Login for Unknown Reason',
-        'login-invalid' => 'Invalid Credentials',
-        'login-approval' => 'Login requires manual aproval',
+
+        // Authentication
+        'account-disabled' => 'Account Disabled',
+        'account-locked' => 'Account Locked',
+        'auth-fail' => 'Authentication Failed',
         'email-verification' => 'Email Verification',
         'login-approval' => 'Approval Request Submitted',
+        'login-failed' => 'Failed to Login for Unknown Reason',
+        'login-invalid' => 'Invalid Credentials',
         'two-factor-auth' => 'Invalid Two-Factor Credentials',
         'two-factor-failed' => 'Two-Factor Failed',
-        'account-locked' => 'Account Locked',
-        'account-disabled' => 'Account Disabled',
-        'temp-blocked' => 'Temporary Blocked',
+
+        // Connectivity
+        'missing-tunnel' => 'Missing Tunnel on Dealer',
+        'offline-tunnel' => 'Tunnel Temporarily Offline on Dealer',
         'page-unavailable' => 'This Page Isn\'t Available',
-        'marketplace-inaccessible' => 'Marketplace Inaccessible',
-        'marketplace-blocked' => 'Marketplace Blocked',
+        'slow-tunnel' => 'Slow Connection',
+        'timed-out' => 'Timeout encountered',
+
+        // Inventory
+        'missing-inventory' => 'Missing Inventory on Integration',
+
+        // Marketplace
         'final-account-review' => 'Marketplace Permanently Blocked',
-        'limit-reached' => 'Limit Reached on New Account',
+        'marketplace-blocked' => 'Marketplace Blocked',
+        'marketplace-inaccessible' => 'Marketplace Inaccessible',
+        'temp-blocked' => 'Temporary Blocked',
+
+        // Posting
         'failed-post' => 'Inventory Failed to Post',
         'flagged-post' => 'Inventory Post Was Flagged',
-        'timed-out' => 'Timeout encountered'
+        'limit-reached' => 'Limit Reached on New Account',
+        'location-invalid' => 'Invalid Location',
     ];
 
     /**
