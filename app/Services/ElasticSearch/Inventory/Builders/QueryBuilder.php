@@ -366,44 +366,51 @@ class QueryBuilder implements InventoryQueryBuilderInterface
 
     private function addScatteredQueryFunction(ScatteredGeolocation $geolocation)
     {
-        $this->query = array_merge_recursive([
-            'query' => [
-                'bool' => [
-                    'must' => [
+        $filter = [
+            'must' => [
+                [
+                    'query' => [
+                        'match_all' => [
+                        ]
+                    ],
+                    'functions' => [
                         [
-                            'function_score' => [
-                                'query' => [
-                                    'match_all' => [
+                            'random_score' => [
+                                'seed' => 10,
+                                'field' => '_seq_no'
+                            ],
+                            'weight' => 1
+                        ],
+                        [
+                            'script_score' => [
+                                'script' => [
+                                    'source' => "double d; if(doc['location.geo'].value != null) { d = doc['location.geo'].planeDistance(params.lat, params.lng) * 0.000621371; } else { return 0.1; } if(d >= (params.grouping*params.fromScore)) { return 0.2; } else { return params.fromScore - Math.floor(d/params.grouping); }",
+                                    'params' => [
+                                        'lat' => $geolocation->lat(),
+                                        'lng' => $geolocation->lon(),
+                                        'fromScore' => 100,
+                                        'grouping' => $geolocation->grouping()
                                     ]
-                                ],
-                                'functions' => [
-                                    [
-                                        'random_score' => [
-                                            'seed' => 10,
-                                            'field' => '_seq_no'
-                                        ],
-                                        'weight' => 1
-                                    ],
-                                    [
-                                        'script_score' => [
-                                            'script' => [
-                                                'source' => "double d; if(doc['location.geo'].value != null) { d = doc['location.geo'].planeDistance(params.lat, params.lng) * 0.000621371; } else { return 0.1; } if(d >= (params.grouping*params.fromScore)) { return 0.2; } else { return params.fromScore - Math.floor(d/params.grouping); }",
-                                                'params' => [
-                                                    'lat' => $geolocation->lat(),
-                                                    'lng' => $geolocation->lon(),
-                                                    'fromScore' => 100,
-                                                    'grouping' => $geolocation->grouping()
-                                                ]
-                                            ]
-                                        ]
-                                    ]
-                                ],
-                                'boost_mode' => 'replace',
-                                'score_mode' => 'sum'
+                                ]
                             ]
                         ]
-                    ]
+                    ],
+                    'boost_mode' => 'replace',
+                    'score_mode' => 'sum'
                 ]
+            ]
+        ];
+
+        if (isset($this->query['query']['bool'])) {
+            $filter['must'][] = [
+                'bool' => $this->query['query']['bool']
+            ];
+            unset($this->query['query']['bool']);
+        }
+
+        $this->query = array_merge_recursive([
+            'query' => [
+                'bool' => $filter
             ]
         ], $this->query);
     }
