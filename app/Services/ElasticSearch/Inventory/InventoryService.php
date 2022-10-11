@@ -35,7 +35,6 @@ class InventoryService implements InventoryServiceInterface
             ->addGeolocation($geolocation)
             ->addSort($sort)
             ->addPagination($pagination);
-         // dd(json_encode($query->toArray));
 
         return $this->client->search((string)config('elastic.scout_driver.indices.inventory'), $query);
     }

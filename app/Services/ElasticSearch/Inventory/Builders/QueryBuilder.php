@@ -240,8 +240,8 @@ class QueryBuilder implements InventoryQueryBuilderInterface
     {
         if ($geolocation instanceof ScatteredGeolocation) {
             $this->addScatteredQueryFunction();
-        } elseif ($geolocation instanceof GeolocationRange) {
-
+        } elseif ($geolocation instanceof GeolocationRange && $geolocation->range()) {
+            $this->addGeoDistanceQuery($geolocation);
         }
 
         return $this->addDistanceScript($geolocation->toPoint());
@@ -364,7 +364,8 @@ class QueryBuilder implements InventoryQueryBuilderInterface
         return $this;
     }
 
-    private function addScatteredQueryFunction(ScatteredGeolocation $geolocation){
+    private function addScatteredQueryFunction(ScatteredGeolocation $geolocation)
+    {
         [
             "function_score" => [
                 "query" => [
@@ -408,5 +409,41 @@ class QueryBuilder implements InventoryQueryBuilderInterface
             $this->query['aggregations']['location_aggregations'] = $this->aggregations;
             $this->query['aggregations']['selected_location_aggregations'] = $this->aggregations;
         }
+    }
+
+    private function addGeoDistanceQuery(GeolocationRange $geolocation)
+    {
+        $lonLat = sprintf('%d, %d', $geolocation->lon(), $geolocation->lat());
+        $filter = [
+            'must' => [
+                [
+                    'geo_distance' => [
+                        'distance' => sprintf('%d%s', $geolocation->range(), $geolocation->units()),
+                        'location.geo' => $lonLat
+                    ]
+                ]
+            ]
+        ];
+        if (isset($this->query['post_filter']['bool'])) {
+            $filter['must'][] = [
+                'bool' => $this->query['post_filter']['bool']
+            ];
+            unset($this->query['post_filter']['bool']);
+        }
+        $this->query = array_merge_recursive([
+            'post_filter' => [
+                'bool' => $filter
+            ],
+            'sort' => [
+                [
+                    '_geo_distance' => [
+                        'location.geo' => $lonLat,
+                        'order' => $geolocation->sort(),
+                        'unit' => $geolocation->units(),
+                        'distance_type' => 'arc'
+                    ]
+                ]
+            ]
+        ], $this->query);
     }
 }

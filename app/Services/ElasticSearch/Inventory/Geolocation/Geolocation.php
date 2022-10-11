@@ -9,6 +9,7 @@ class Geolocation implements GeolocationInterface
 {
     private const DELIMITER_OPTION = ';';
     private const DELIMITER_VALUE = ':';
+    private const DELIMITER_KEY_VALUE = '=';
 
     /**
      * These constant determines in which filter is appended the filters for Geolocation
@@ -58,7 +59,7 @@ class Geolocation implements GeolocationInterface
 
         try {
             $parts = $parts->forget(0)->map(static function (string $part): array {
-                [$option, $value] = explode(self::DELIMITER_VALUE, $part);
+                [$option, $value] = explode(self::DELIMITER_KEY_VALUE, $part);
 
                 return ['option' => $option, 'value' => $value];
             })->pluck('value', 'option');
@@ -67,11 +68,12 @@ class Geolocation implements GeolocationInterface
             $range = $parts->get('range');
             $units = $parts->get('units');
             $scattered = $parts->get('scattered');
+            $sorting = $parts->get('sorting');
 
             if ($scattered) {
                 return new ScatteredGeolocation($lat, $lon, $scattered, $filterOver);
             } elseif ($range) {
-                return new GeolocationRange($lat, $lon, $range, $units ?? GeolocationRange::UNITS_MILES, $filterOver);
+                return new GeolocationRange($lat, $lon, $range, $units ?? GeolocationRange::UNITS_MILES, $sorting, $filterOver);
             }
 
             return new Geolocation($lat, $lon, $filterOver);
