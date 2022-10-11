@@ -48,14 +48,13 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
      */
     private function buildImagesQuery(): array
     {
-        $images = explode(self::IMAGES_DELIMETER, $this->data);
         return [
             'query' => [
                 'bool' => [
                     'must' => [
                         [
                             'dis_max' => [
-                                'queries' => array_map(function ($image) {
+                                'queries' => array_map(static function ($image) {
                                     return [
                                         'wildcard' => [
                                             'image' => [
@@ -63,7 +62,7 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
                                             ]
                                         ]
                                     ];
-                                }, $images)
+                                }, explode(self::IMAGES_DELIMETER, $this->data))
                             ]
                         ]
                     ]
@@ -110,6 +109,7 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
                 ]
             ];
         }
+
         return [];
     }
 }

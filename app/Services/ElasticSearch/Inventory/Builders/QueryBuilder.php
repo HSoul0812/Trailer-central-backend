@@ -4,7 +4,11 @@ namespace App\Services\ElasticSearch\Inventory\Builders;
 
 use App\Exceptions\ElasticSearch\FilterNotFoundException;
 use App\Models\Inventory\Geolocation\Point;
+use App\Models\Inventory\Inventory;
 use App\Services\ElasticSearch\Inventory\FieldMapperService;
+use App\Services\ElasticSearch\Inventory\Geolocation\GeolocationInterface;
+use App\Services\ElasticSearch\Inventory\Geolocation\GeolocationRange;
+use App\Services\ElasticSearch\Inventory\Geolocation\ScatteredGeolocation;
 use App\Services\ElasticSearch\Inventory\InventoryQueryBuilderInterface;
 use App\Services\ElasticSearch\QueryBuilderInterface;
 
@@ -203,7 +207,7 @@ class QueryBuilder implements InventoryQueryBuilderInterface
                 'must_not' => [
                     [
                         'term' => [
-                            'status' => 6
+                            'status' => Inventory::STATUS_QUOTE
                         ]
                     ]
                 ]
@@ -232,23 +236,15 @@ class QueryBuilder implements InventoryQueryBuilderInterface
         return $this;
     }
 
-    public function addDistance(Point $location): QueryBuilderInterface
+    public function addGeolocation(GeolocationInterface $geolocation): QueryBuilderInterface
     {
-        $this->query['script_fields']['distance'] = [
-            'script' => [
-                'source' => "if(doc['location.geo'].value != null) {
-                                return doc['location.geo'].planeDistance(params.lat, params.lng) * 0.000621371;
-                             } else {
-                                return 0;
-                             }",
-                'params' => [
-                    'lat' => $location->latitude,
-                    'lng' => $location->longitude
-                ]
-            ]
-        ];
+        if ($geolocation instanceof ScatteredGeolocation) {
+            $this->addScatteredQueryFunction();
+        } elseif ($geolocation instanceof GeolocationRange) {
 
-        return $this;
+        }
+
+        return $this->addDistanceScript($geolocation->toPoint());
     }
 
     /**
@@ -299,6 +295,7 @@ class QueryBuilder implements InventoryQueryBuilderInterface
     {
         $this->query['from'] = $pagination['offset'];
         $this->query['size'] = $pagination['per_page'];
+
         return $this;
     }
 
@@ -314,9 +311,9 @@ class QueryBuilder implements InventoryQueryBuilderInterface
         };
     }
 
-    private function addStatusSortScript(string $status)
+    private function addStatusSortScript(string $status): void
     {
-        array_push($this->query['sort'], ... array_map(function ($value) {
+        array_push($this->query['sort'], ... array_map(static function ($value) {
             return [
                 '_script' => [
                     'type' => 'string',
@@ -332,7 +329,7 @@ class QueryBuilder implements InventoryQueryBuilderInterface
         }, explode(',', $status)));
     }
 
-    private function addLocationSortScript(string $locations)
+    private function addLocationSortScript(string $locations): void
     {
         $this->query['sort'][] = [
             '_script' => [
@@ -348,13 +345,68 @@ class QueryBuilder implements InventoryQueryBuilderInterface
         ];
     }
 
-    private function addAggregations(bool $hasTerms)
+    private function addDistanceScript(Point $location): QueryBuilderInterface
+    {
+        $this->query['script_fields']['distance'] = [
+            'script' => [
+                'source' => "if(doc['location.geo'].value != null) {
+                                return doc['location.geo'].planeDistance(params.lat, params.lng) * 0.000621371;
+                             } else {
+                                return 0;
+                             }",
+                'params' => [
+                    'lat' => $location->latitude,
+                    'lng' => $location->longitude
+                ]
+            ]
+        ];
+
+        return $this;
+    }
+
+    private function addScatteredQueryFunction(ScatteredGeolocation $geolocation){
+        [
+            "function_score" => [
+                "query" => [
+                    "match_all" => [
+                    ]
+                ],
+                "functions" => [
+                    [
+                        "random_score" => [
+                            "seed" => 10,
+                            "field" => "_seq_no"
+                        ],
+                        "weight" => 1
+                    ],
+                    [
+                        "script_score" => [
+                            "script" => [
+                                "source" => "double d; if(doc['location.geo'].value != null) { d = doc['location.geo'].planeDistance(params.lat, params.lng) * 0.000621371; } else { return 0.1; } if(d >= (params.grouping*params.fromScore)) { return 0.2; } else { return params.fromScore - Math.floor(d/params.grouping); }",
+                                "params" => [
+                                    "lat" => 42.96,
+                                    "lng" => -85.65,
+                                    "fromScore" => 100,
+                                    "grouping" => 60
+                                ]
+                            ]
+                        ]
+                    ]
+                ],
+                "boost_mode" => "replace",
+                "score_mode" => "sum"
+            ]
+        ];
+    }
+
+    private function addAggregations(bool $hasTerms): void
     {
         $this->query['aggregations'] = $this->aggregations;
 
         if ($hasTerms) {
             $this->query['aggregations']['filter_aggregations'] = $this->aggregations;
             $this->query['aggregations']['location_aggregations'] = $this->aggregations;
+            $this->query['aggregations']['selected_location_aggregations'] = $this->aggregations;
         }
     }
 }

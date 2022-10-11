@@ -2,11 +2,11 @@
 
 namespace App\Services\ElasticSearch;
 
-use App\Models\Inventory\Geolocation\Point;
+use App\Services\ElasticSearch\Inventory\Geolocation\GeolocationInterface;
 
 interface QueryBuilderInterface
 {
-    public function addDistance(Point $location): self;
+    public function addGeolocation(GeolocationInterface $geolocation): self;
 
     public function addDealers(array $dealerIds): self;
 
