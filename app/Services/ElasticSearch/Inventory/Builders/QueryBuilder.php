@@ -364,16 +364,12 @@ class QueryBuilder implements InventoryQueryBuilderInterface
         return $this;
     }
 
-    private function addScatteredQueryFunction(ScatteredGeolocation $geolocation)
+    private function addScatteredQueryFunction(ScatteredGeolocation $geolocation): void
     {
         $filter = [
             'must' => [
                 [
                     'function_score' => [
-                        'query' => [
-                            'match_all' => [
-                            ]
-                        ],
                         'functions' => [
                             [
                                 'random_score' => [
