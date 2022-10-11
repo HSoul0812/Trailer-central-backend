@@ -62,6 +62,11 @@ class HotPotatoSeeder extends Seeder
     private $website;
 
     /**
+     * @var SalesPerson
+     */
+    private $salesPerson;
+
+    /**
      * @var SalesPerson[]
      */
     private $sales = [];
@@ -94,6 +99,15 @@ class HotPotatoSeeder extends Seeder
         $this->newDealer = factory(NewDealerUser::class)->create(['id' => $this->dealer->dealer_id, 'user_id' => $this->dealer->dealer_id]);
         $this->crmUser = factory(CrmUser::class)->create(['user_id' => $this->dealer->dealer_id, 'enable_hot_potato' => 1]);
 
+        // Create Default Sales Person
+        $this->salesPerson = factory(SalesPerson::class)->create([
+            'user_id' => $this->dealer->getKey(),
+            'dealer_location_id' => $this->location->getKey(),
+            'is_default' => 1,
+            'is_inventory' => 1,
+            'is_trade' => 1,
+            'is_financing' => 0
+        ]);
 
         // Create Sales People for Hot Potato
         $salesSeeds = [
@@ -174,7 +188,8 @@ class HotPotatoSeeder extends Seeder
             $this->statuses[$leadId] = factory(LeadStatus::class)->create([
                 'tc_lead_identifier' => $leadId,
                 'source' => $seed['source'] ?? '',
-                'next_contact_date' => Carbon::now()->subMinutes(45)->toDateTimeString()
+                'next_contact_date' => Carbon::now()->subMinutes(45)->toDateTimeString(),
+                'sales_person_id' => $this->salesPerson->getKey()
             ]);
         });
     }
