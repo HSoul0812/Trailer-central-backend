@@ -369,34 +369,36 @@ class QueryBuilder implements InventoryQueryBuilderInterface
         $filter = [
             'must' => [
                 [
-                    'query' => [
-                        'match_all' => [
-                        ]
-                    ],
-                    'functions' => [
-                        [
-                            'random_score' => [
-                                'seed' => 10,
-                                'field' => '_seq_no'
-                            ],
-                            'weight' => 1
+                    'function_score' => [
+                        'query' => [
+                            'match_all' => [
+                            ]
                         ],
-                        [
-                            'script_score' => [
-                                'script' => [
-                                    'source' => "double d; if(doc['location.geo'].value != null) { d = doc['location.geo'].planeDistance(params.lat, params.lng) * 0.000621371; } else { return 0.1; } if(d >= (params.grouping*params.fromScore)) { return 0.2; } else { return params.fromScore - Math.floor(d/params.grouping); }",
-                                    'params' => [
-                                        'lat' => $geolocation->lat(),
-                                        'lng' => $geolocation->lon(),
-                                        'fromScore' => 100,
-                                        'grouping' => $geolocation->grouping()
+                        'functions' => [
+                            [
+                                'random_score' => [
+                                    'seed' => 10,
+                                    'field' => '_seq_no'
+                                ],
+                                'weight' => 1
+                            ],
+                            [
+                                'script_score' => [
+                                    'script' => [
+                                        'source' => "double d; if(doc['location.geo'].value != null) { d = doc['location.geo'].planeDistance(params.lat, params.lng) * 0.000621371; } else { return 0.1; } if(d >= (params.grouping*params.fromScore)) { return 0.2; } else { return params.fromScore - Math.floor(d/params.grouping); }",
+                                        'params' => [
+                                            'lat' => $geolocation->lat(),
+                                            'lng' => $geolocation->lon(),
+                                            'fromScore' => 100,
+                                            'grouping' => $geolocation->grouping()
+                                        ]
                                     ]
                                 ]
                             ]
-                        ]
-                    ],
-                    'boost_mode' => 'replace',
-                    'score_mode' => 'sum'
+                        ],
+                        'boost_mode' => 'replace',
+                        'score_mode' => 'sum'
+                    ]
                 ]
             ]
         ];
