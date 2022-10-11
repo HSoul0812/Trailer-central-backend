@@ -111,7 +111,6 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
 
         $this->chunkQueryImport($query);
 
-        $model::makeAllSearchable();
     }
 
     /**
@@ -135,14 +134,14 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
 
         $aliases = $esClient->indices()->getAliases();
 
-        EsIndex::putAlias($model::$searchableAs, $model::ALIAS_ES_NAME);
+        $this->indexManager->putAlias($model::$searchableAs, new \ElasticAdapter\Indices\Alias($model::ALIAS_ES_NAME));
 
         foreach ($aliases as $index => $aliasMapping) {
             if (array_key_exists($model::ALIAS_ES_NAME, $aliasMapping['aliases'])) {
                 if ($index == $model::$searchableAs ) {
                     continue;
                 } else {
-                    EsIndex::drop($index);
+                    $this->indexManager->drop($index);
                 }
 
             }
