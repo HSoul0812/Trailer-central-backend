@@ -240,7 +240,7 @@ class QueryBuilder implements InventoryQueryBuilderInterface
     {
         if ($geolocation instanceof ScatteredGeolocation) {
             $this->addScatteredQueryFunction();
-        } elseif ($geolocation instanceof GeolocationRange && $geolocation->range()) {
+        } elseif ($geolocation instanceof GeolocationRange) {
             $this->addGeoDistanceQuery($geolocation);
         }
 
