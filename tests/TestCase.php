@@ -10,6 +10,7 @@ use App\Exceptions\Tests\MissingTestDealerIdException;
 use App\Exceptions\Tests\MissingTestDealerLocationIdException;
 use App\Exceptions\Tests\MissingTestWebsiteIdException;
 use Mockery;
+use Mockery\LegacyMockInterface;
 use ReflectionException;
 use ReflectionProperty;
 
@@ -130,7 +131,7 @@ abstract class TestCase extends BaseTestCase
     }
 
     /**
-     * @param Model $model
+     * @param Model|LegacyMockInterface $model
      * @param string $methodName
      * @param Model|null $relation
      * @return void
@@ -146,7 +147,7 @@ abstract class TestCase extends BaseTestCase
     }
 
     /**
-     * @param Model $model
+     * @param Model|LegacyMockInterface $model
      * @param string $methodName
      * @param Model|null $relation
      * @return void

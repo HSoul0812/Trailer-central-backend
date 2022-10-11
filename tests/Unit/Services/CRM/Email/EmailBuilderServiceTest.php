@@ -417,7 +417,7 @@ class EmailBuilderServiceTest extends TestCase
         $this->assertSame($result['data']['template'], $this->getTemplate());
         $this->assertSame($result['data']['template_id'], $blast->template->template_id);
         $this->assertSame($result['data']['user_id'], $blast->user_id);
-        $this->assertSame($result['data']['sales_person_id'], 0);
+        $this->assertSame($result['data']['sales_person_id'], null);
         $this->assertSame($result['data']['from_email'], self::DEFAULT_FROM_EMAIL);
 
         $this->assertIsArray($result['leads']);
@@ -607,7 +607,7 @@ class EmailBuilderServiceTest extends TestCase
         $this->assertSame($result['data']['template'], $this->getTemplate());
         $this->assertSame($result['data']['template_id'], $campaign->template->template_id);
         $this->assertSame($result['data']['user_id'], $campaign->user_id);
-        $this->assertSame($result['data']['sales_person_id'], 0);
+        $this->assertSame($result['data']['sales_person_id'], null);
         $this->assertSame($result['data']['from_email'], $defaultFromEmail);
 
         $this->assertIsArray($result['leads']);
@@ -855,7 +855,7 @@ class EmailBuilderServiceTest extends TestCase
                     && $builder->subject === self::SEND_TEMPLATE_SUBJECT
                     && $builder->dealerId === $template->newDealerUser->id
                     && $builder->userId === $template->user_id
-                    && $builder->salesPersonId === 0
+                    && $builder->salesPersonId === null
                     && $builder->fromEmail === self::DEFAULT_FROM_EMAIL
                     && $builder->toEmail === self::SEND_TEMPLATE_TO_EMAIL
                     && $builder->templateId === self::TEMPLATE_ID;
@@ -877,7 +877,7 @@ class EmailBuilderServiceTest extends TestCase
                     && $builder->subject === self::SEND_TEMPLATE_SUBJECT
                     && $builder->dealerId === $template->newDealerUser->id
                     && $builder->userId === $template->user_id
-                    && $builder->salesPersonId === 0
+                    && $builder->salesPersonId === null
                     && $builder->fromEmail === self::DEFAULT_FROM_EMAIL
                     && $builder->toEmail === self::SEND_TEMPLATE_TO_EMAIL
                     && $builder->templateId === self::TEMPLATE_ID;
@@ -911,7 +911,7 @@ class EmailBuilderServiceTest extends TestCase
         $this->assertSame($result['data']['subject'], self::SEND_TEMPLATE_SUBJECT);
         $this->assertSame($result['data']['template_id'], $template->template_id);
         $this->assertSame($result['data']['user_id'], $template->user_id);
-        $this->assertSame($result['data']['sales_person_id'], 0);
+        $this->assertSame($result['data']['sales_person_id'], null);
         $this->assertSame($result['data']['from_email'], self::DEFAULT_FROM_EMAIL);
 
         $this->assertIsArray($result['leads']);
@@ -1091,7 +1091,7 @@ class EmailBuilderServiceTest extends TestCase
                     && $builder->subject === self::SEND_TEMPLATE_SUBJECT
                     && $builder->dealerId === self::DEALER_ID
                     && $builder->userId === self::NEW_DEALER_USER_ID
-                    && $builder->salesPersonId === 0
+                    && $builder->salesPersonId === null
                     && $builder->fromEmail === self::DEFAULT_FROM_EMAIL
                     && $builder->toEmail === self::SEND_TEMPLATE_TO_EMAIL
                     && $builder->templateId === 1;
@@ -1114,7 +1114,7 @@ class EmailBuilderServiceTest extends TestCase
                     && $builder->subject === self::SEND_TEMPLATE_SUBJECT
                     && $builder->dealerId === self::DEALER_ID
                     && $builder->userId === self::NEW_DEALER_USER_ID
-                    && $builder->salesPersonId === 0
+                    && $builder->salesPersonId === null
                     && $builder->fromEmail === self::DEFAULT_FROM_EMAIL
                     && $builder->toEmail === self::SEND_TEMPLATE_TO_EMAIL
                     && $builder->templateId === 1;
@@ -1150,7 +1150,7 @@ class EmailBuilderServiceTest extends TestCase
         $this->assertSame($result['data']['subject'], self::SEND_TEMPLATE_SUBJECT);
         $this->assertSame($result['data']['template_id'], 1);
         $this->assertSame($result['data']['user_id'], self::NEW_DEALER_USER_ID);
-        $this->assertSame($result['data']['sales_person_id'], 0);
+        $this->assertSame($result['data']['sales_person_id'], null);
         $this->assertSame($result['data']['from_email'], self::DEFAULT_FROM_EMAIL);
 
         $this->assertIsArray($result['leads']);
@@ -1188,7 +1188,7 @@ class EmailBuilderServiceTest extends TestCase
                     && $builder->subject === self::SEND_TEMPLATE_SUBJECT
                     && $builder->dealerId === self::DEALER_ID
                     && $builder->userId === self::NEW_DEALER_USER_ID
-                    && $builder->salesPersonId === 0
+                    && $builder->salesPersonId === null
                     && $builder->fromEmail === self::DEFAULT_FROM_EMAIL
                     && $builder->toEmail === self::SEND_TEMPLATE_TO_EMAIL
                     && $builder->templateId === 1;

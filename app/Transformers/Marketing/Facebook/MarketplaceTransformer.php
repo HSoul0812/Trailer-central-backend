@@ -50,6 +50,7 @@ class MarketplaceTransformer extends TransformerAbstract
             'fb_password' => $marketplace->fb_password,
             'tfa_username' => $marketplace->tfa_username,
             'tfa_password' => $marketplace->tfa_password,
+            'tfa_code' => $marketplace->tfa_code,
             'tfa_type' => $marketplace->tfa_type,
             'filter_map' => $marketplace->filter_map,
             'is_up_to_date' => $marketplace->is_up_to_date,
