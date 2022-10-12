@@ -11,6 +11,6 @@ class InventoryElasticSearchOutputTransformer extends TransformerAbstract
 {
     public function transform(stdClass $hit): array
     {
-        return (array)$hit->_source;
+        return array_merge((array)$hit->_source, ['fields' => (array)$hit->fields]);
     }
 }
