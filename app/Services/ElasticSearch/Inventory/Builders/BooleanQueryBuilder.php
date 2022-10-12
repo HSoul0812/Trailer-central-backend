@@ -13,7 +13,7 @@ class BooleanQueryBuilder implements FieldQueryBuilderInterface
     public function __construct(string $field, string $data)
     {
         $this->field = $field;
-        $this->value = boolval($data);
+        $this->value = (bool)$data;
     }
 
 
@@ -30,6 +30,7 @@ class BooleanQueryBuilder implements FieldQueryBuilderInterface
                 ]
             ]
         ];
+
         switch ($this->field) {
             // if we would need to handle edges cases, then we need to handle here
             default:
@@ -37,7 +38,8 @@ class BooleanQueryBuilder implements FieldQueryBuilderInterface
                     'post_filter' => $boolQuery,
                     'aggregations' => [
                         'filter_aggregations' => ['filter' => $boolQuery],
-                        'location_aggregations' => ['filter' => $boolQuery]
+                        'location_aggregations' => ['filter' => $boolQuery],
+                        'selected_location_aggregations' => ['filter' => $boolQuery]
                     ]
                 ];
         }

@@ -19,7 +19,7 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
     private $data;
 
     /** @var string */
-    private const IMAGES_DELIMETER = ';';
+    private const IMAGES_DELIMITER = ';';
 
     /**
      * @param string $field
@@ -65,7 +65,7 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
                                             ]
                                         ]
                                     ];
-                                }, explode(self::IMAGES_DELIMETER, $this->data))
+                                }, explode(self::IMAGES_DELIMITER, $this->data))
                             ]
                         ]
                     ]
@@ -119,6 +119,7 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
     private function buildLocationQuery(): array
     {
         $field = str_replace('_', '.', $this->field);
+
         $query = [
             'bool' => [
                 'must' => [
@@ -130,6 +131,7 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
                 ]
             ]
         ];
+
         return [
             'post_filter' => $query,
             'aggregations' => [

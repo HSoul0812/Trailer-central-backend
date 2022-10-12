@@ -22,7 +22,6 @@ class SelectQueryBuilder implements FieldQueryBuilderInterface
         $this->options = explode(self::DELIMITER, $data);
     }
 
-
     public function query(): array
     {
         $optionsQuery = [
@@ -36,6 +35,7 @@ class SelectQueryBuilder implements FieldQueryBuilderInterface
                 ]
             ]
         ];
+
         switch ($this->field) {
             // if we would need to handle edges cases, then we need to handle here
             default:
@@ -43,7 +43,8 @@ class SelectQueryBuilder implements FieldQueryBuilderInterface
                     'post_filter' => $optionsQuery,
                     'aggregations' => [
                         'filter_aggregations' => ['filter' => $optionsQuery],
-                        'location_aggregations' => ['filter' => $optionsQuery]
+                        'location_aggregations' => ['filter' => $optionsQuery],
+                        'selected_location_aggregations' => ['filter' => $optionsQuery]
                     ]
                 ];
         }
