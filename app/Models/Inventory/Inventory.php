@@ -187,6 +187,8 @@ class Inventory extends Model
     /** @var InventoryElasticSearchConfigurator */
     private $indexConfigurator;
 
+    public static $searchableAs;
+
     const TABLE_NAME = 'inventory';
 
     const STATUS_QUOTE = 6;
@@ -247,6 +249,7 @@ class Inventory extends Model
 
     public const MIN_DESCRIPTION_LENGTH_FOR_FACEBOOK = 50;
     public const MIN_PRICE_FOR_FACEBOOK = 0;
+    public const ALIAS_ES_NAME = 'inventory';
 
     /**
      * The table associated with the model.
@@ -809,7 +812,7 @@ class Inventory extends Model
 
     public function searchableAs(): string
     {
-        return $this->indexConfigurator()->name();
+        return self::$searchableAs ?? self::ALIAS_ES_NAME;
     }
 
     public function toSearchableArray(): array

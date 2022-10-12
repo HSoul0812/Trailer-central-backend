@@ -2,12 +2,14 @@
 
 namespace App\Indexers;
 
-use App\Models\Inventory\Inventory;
 use ElasticAdapter\Exceptions\BulkRequestException;
 use ElasticAdapter\Indices\Index;
+use ElasticMigrations\Facades\Index as EsIndex;
 use ElasticAdapter\Indices\Mapping;
 use ElasticAdapter\Indices\Settings;
+use Elasticsearch\Client;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Date;
 use InvalidArgumentException;
 
 class ElasticSearchEngine extends \ElasticScoutDriver\Engine
@@ -66,12 +68,83 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
         if ($first &&
             method_exists($first, 'indexConfigurator') &&
             ($configurator = $first->indexConfigurator()) &&
-            !$this->indexManager->exists($configurator->name())
+            !$this->indexManager->exists($first->searchableAs())
         ) {
+            $indexName = $configurator->name() . '_' . date('YmdHi');
+
             $this->createIndex(
-                $configurator->name(),
+                $indexName,
                 ['mapping' => $configurator->mapping(), 'settings' => $configurator->settings()]
             );
+
+            $this->indexManager->putAlias($indexName, new \ElasticAdapter\Indices\Alias($configurator->name()));
+        }
+    }
+
+    public function safeSyncImporter(Model $model, string $indexName): void
+    {
+        if (!method_exists($model, 'usesSoftDelete')) {
+            throw new \InvalidArgumentException('The model must be searchable type');
+        }
+
+        $model::$searchableAs = $indexName;
+
+        $softDelete = $model::usesSoftDelete() && config('scout.soft_delete', false);
+
+        $now = Date::now(); // bear in mind the timezome
+
+        $query = $model->newQuery()
+            ->when($softDelete, function ($query) {
+                $query->withTrashed();
+            })
+            ->orderBy($model->getKeyName());
+
+        $this->chunkQueryImport($query);
+
+        $this->swapIndexNames($model);
+
+        $query = $model->newQuery()->where('updated_at_auto', '>=' , $now->format(\App\Constants\Date::FORMAT_Y_M_D_T))
+            ->when($softDelete, function ($query) {
+                $query->withTrashed();
+            })
+            ->orderBy($model->getKeyName());
+
+        $this->chunkQueryImport($query);
+
+    }
+
+    /**
+     * @param $query
+     * @return void
+     */
+    protected function chunkQueryImport($query): void
+    {
+        $query->chunk(100, function ($models) use ($query) {
+            try {
+                $query->first()->searchableUsing()->update($models);
+            } catch (BulkRequestException $e) {
+
+            }
+        });
+    }
+
+    public function swapIndexNames(Model $model): void
+    {
+        $esClient = app(Client::class);
+
+        $aliases = $esClient->indices()->getAliases();
+
+        $this->indexManager->putAlias($model::$searchableAs, new \ElasticAdapter\Indices\Alias($model::ALIAS_ES_NAME));
+
+        foreach ($aliases as $index => $aliasMapping) {
+            if (array_key_exists($model::ALIAS_ES_NAME, $aliasMapping['aliases'])) {
+                if ($index == $model::$searchableAs ) {
+                    continue;
+                } else {
+                    $this->indexManager->drop($index);
+                }
+
+            }
         }
     }
 }
