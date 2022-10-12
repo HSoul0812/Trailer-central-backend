@@ -47,7 +47,6 @@ use Illuminate\Support\LazyCollection;
         white-space: nowrap;
     }
 </style>
-
 <div class="row">
     <table id="bulkInventoryPrint">
         <tr>
@@ -56,11 +55,8 @@ use Illuminate\Support\LazyCollection;
             <th>Category</th>
             <th>Manufacturer</th>
             <th>Notes</th>
-            <th>Model</th>
             <th>Status</th>
-            <th>Sales price</th>
-            <th>True cost</th>
-            <th>Created at</th>
+            <th>Price</th>
         </tr>
         @foreach($data as $inventory)
             <tr>
@@ -80,19 +76,10 @@ use Illuminate\Support\LazyCollection;
                    <span class="small">{{ $inventory->notes }}</span>
                 </td>
                 <td>
-                    {{ $inventory->model }}
-                </td>
-                <td>
                     {{ $inventory->status_label }}
                 </td>
                 <td class="text-right">
                     ${{ number_format($inventory->sales_price ?: 0, 2) }}
-                </td>
-                <td class="text-right">
-                    ${{ number_format($inventory->true_cost ?: 0, 2) }}
-                </td>
-                <td>
-                    <span class="small nb">{{ $inventory->created_at }}</span>
                 </td>
             </tr>
         @endforeach
