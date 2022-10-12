@@ -99,7 +99,6 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
             'post_filter' => $searchQuery,
             'aggregations' => [
                 'filter_aggregations' => ['filter' => $searchQuery],
-                'location_aggregations' => ['filter' => $searchQuery],
                 'selected_location_aggregations' => ['filter' => $searchQuery]
             ]
         ];

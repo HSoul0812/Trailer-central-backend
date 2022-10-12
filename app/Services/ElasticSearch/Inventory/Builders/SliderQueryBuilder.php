@@ -53,7 +53,6 @@ class SliderQueryBuilder implements FieldQueryBuilderInterface
                     'post_filter' => $boolQuery,
                     'aggregations' => [
                         'filter_aggregations' => ['filter' => $boolQuery],
-                        'location_aggregations' => ['filter' => $boolQuery],
                         'selected_location_aggregations' => ['filter' => $boolQuery]
                     ]
                 ];

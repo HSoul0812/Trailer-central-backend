@@ -139,9 +139,7 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
         return [
             'post_filter' => $query,
             'aggregations' => [
-                'filter_aggregations' => [
-                    'filter' => $query
-                ]
+                'filter_aggregations' => ['filter' => $query]
             ]
         ];
     }

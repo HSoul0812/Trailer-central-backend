@@ -247,13 +247,13 @@ class QueryBuilder implements InventoryQueryBuilderInterface
     {
         $query = [];
 
-        $this->addAggregations(count($terms) > 0);
-
         foreach ($terms as $term => $data) {
             $query = $this->appendQueryTo($query)($term, $data);
         }
 
         $this->query = array_merge_recursive($query, $this->query);
+
+        $this->addAggregations(isset($this->query['post_filter']));
 
         return $this;
     }
@@ -405,12 +405,11 @@ class QueryBuilder implements InventoryQueryBuilderInterface
 
     private function addAggregations(bool $hasTerms): void
     {
-        $this->query['aggregations'] = $this->aggregations;
+        $this->query['aggregations'] = array_merge_recursive($this->query['aggregations'], $this->aggregations);
 
         if ($hasTerms) {
-            $this->query['aggregations']['filter_aggregations'] = $this->aggregations;
-            $this->query['aggregations']['location_aggregations'] = $this->aggregations;
-            $this->query['aggregations']['selected_location_aggregations'] = $this->aggregations;
+            $this->query['aggregations']['filter_aggregations']['aggregations'] = $this->aggregations;
+            $this->query['aggregations']['selected_location_aggregations']['aggregations'] = $this->aggregations;
         }
     }
 
