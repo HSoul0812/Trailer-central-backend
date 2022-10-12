@@ -405,7 +405,7 @@ class QueryBuilder implements InventoryQueryBuilderInterface
 
     private function addAggregations(bool $hasTerms): void
     {
-        $this->query['aggregations'] = array_merge_recursive($this->query['aggregations'], $this->aggregations);
+        $this->query['aggregations'] = array_merge_recursive($this->query['aggregations'] ?? [], $this->aggregations);
 
         if ($hasTerms) {
             $this->query['aggregations']['filter_aggregations']['aggregations'] = $this->aggregations;
