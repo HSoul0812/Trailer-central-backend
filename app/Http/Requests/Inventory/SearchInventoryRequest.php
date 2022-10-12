@@ -15,6 +15,7 @@ use App\Services\ElasticSearch\Inventory\Parameters\Geolocation\GeolocationInter
  * @property int $offset
  * @property int $x_qa_req
  * @property string $geolocation
+ * @property boolean $classifieds_site
  */
 class SearchInventoryRequest extends Request
 {
@@ -24,6 +25,7 @@ class SearchInventoryRequest extends Request
     protected $rules = [
         'per_page' => 'integer|min:1|max:100',
         'page' => ['integer', 'min:0'],
+        'classifieds_site' => 'boolean',
         'geolocation' => ['required', 'string'], // @todo we should add a regex validation here
     ];
 
@@ -85,5 +87,17 @@ class SearchInventoryRequest extends Request
     public function getESQuery(): bool
     {
         return (int)$this->x_qa_req === 1;
+    }
+
+    public function all($keys = null): array
+    {
+        $all = parent::all($keys);
+
+        // default values got through `all` method
+        if ($keys === null || in_array('classifieds_site', $keys)) {
+            $all['classifieds_site'] = $this->input('classifieds_site', false);
+        }
+
+        return $all;
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Services\ElasticSearch\Inventory\Builders;
 
+use App\Models\Inventory\Inventory;
+
 /**
  * Builds a proper ES query for a custom fields & edge cases
  *   - show_images=jpg;png: which is *.jpg & *.png
@@ -41,6 +43,8 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
             case 'location_region':
             case 'location_city':
                 return $this->buildLocationQuery();
+            case 'classifieds_site':
+                return $this->buildClassifiedsSiteQuery();
             default:
                 return [];
         }
@@ -137,6 +141,36 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
             'aggregations' => [
                 'filter_aggregations' => [
                     'filter' => $query
+                ]
+            ]
+        ];
+    }
+
+    private function buildClassifiedsSiteQuery(): array
+    {
+        // when it is not a classifieds site then it should filter by `isArchived` & `isArchived` & `status`
+        return $this->data ? [] : [
+            'query' => [
+                'bool' => [
+                    'must' => [
+                        [
+                            'term' => [
+                                'isArchived' => false
+                            ]
+                        ],
+                        [
+                            'term' => [
+                                'showOnWebsite' => true
+                            ]
+                        ]
+                    ],
+                    'must_not' => [
+                        [
+                            'term' => [
+                                'status' => Inventory::STATUS_QUOTE
+                            ]
+                        ]
+                    ]
                 ]
             ]
         ];

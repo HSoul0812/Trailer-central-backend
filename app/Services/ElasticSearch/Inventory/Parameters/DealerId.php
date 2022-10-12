@@ -30,9 +30,11 @@ class DealerId
     public static function fromString(string $dealerIds): self
     {
         $parts = explode(self::TYPE_DELIMITER, $dealerIds);
-        if (count($parts) == 2) {
+
+        if (count($parts) === 2) {
             $included = array_filter(explode(self::DELIMITER, $parts[0]));
             $excluded = array_filter(explode(self::DELIMITER, $parts[1]));
+
             return new DealerId($included, $excluded);
         }
 

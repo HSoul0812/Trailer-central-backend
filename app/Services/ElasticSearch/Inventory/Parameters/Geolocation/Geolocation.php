@@ -77,6 +77,7 @@ class Geolocation implements GeolocationInterface
 
             return new Geolocation($lat, $lon, $filterOver);
         } catch (\Exception $exception) {
+            dd($exception->getMessage());
             throw new InvalidRequestException("'geolocation' parameter is wrong.");
         }
     }

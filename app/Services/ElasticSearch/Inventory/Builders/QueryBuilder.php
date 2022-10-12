@@ -4,7 +4,6 @@ namespace App\Services\ElasticSearch\Inventory\Builders;
 
 use App\Exceptions\ElasticSearch\FilterNotFoundException;
 use App\Models\Inventory\Geolocation\Point;
-use App\Models\Inventory\Inventory;
 use App\Services\ElasticSearch\Inventory\FieldMapperService;
 use App\Services\ElasticSearch\Inventory\InventoryQueryBuilderInterface;
 use App\Services\ElasticSearch\Inventory\Parameters\DealerId;
@@ -189,23 +188,8 @@ class QueryBuilder implements InventoryQueryBuilderInterface
         'query' => [
             'bool' => [
                 'must' => [
-                    [
-                        'term' => [
-                            'isArchived' => false
-                        ]
-                    ],
-                    [
-                        'term' => [
-                            'showOnWebsite' => true
-                        ]
-                    ]
                 ],
                 'must_not' => [
-                    [
-                        'term' => [
-                            'status' => Inventory::STATUS_QUOTE
-                        ]
-                    ]
                 ]
             ]
         ],
@@ -223,7 +207,6 @@ class QueryBuilder implements InventoryQueryBuilderInterface
 
     public function addDealers(DealerId $dealerIds): QueryBuilderInterface
     {
-
         if (!empty($dealerIds->includeIds())) {
             $this->query['query']['bool']['must'][] = [
                 'terms' => [
