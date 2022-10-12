@@ -47,7 +47,6 @@ use Illuminate\Support\LazyCollection;
         white-space: nowrap;
     }
 </style>
-<h1></h1>
 <div class="row">
     <table id="bulkInventoryPrint">
         <tr>
