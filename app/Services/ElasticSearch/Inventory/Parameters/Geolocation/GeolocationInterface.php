@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\ElasticSearch\Inventory\Geolocation;
+namespace App\Services\ElasticSearch\Inventory\Parameters\Geolocation;
 
 interface GeolocationInterface
 {

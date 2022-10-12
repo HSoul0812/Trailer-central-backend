@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Requests\Inventory;
 
 use App\Http\Requests\Request;
-use App\Services\ElasticSearch\Inventory\Geolocation\Geolocation;
-use App\Services\ElasticSearch\Inventory\Geolocation\GeolocationInterface;
+use App\Services\ElasticSearch\Inventory\Parameters\DealerId;
+use App\Services\ElasticSearch\Inventory\Parameters\Geolocation\Geolocation;
+use App\Services\ElasticSearch\Inventory\Parameters\Geolocation\GeolocationInterface;
 
 /**
  * @property int $page
@@ -39,9 +40,9 @@ class SearchInventoryRequest extends Request
         ])->toArray();
     }
 
-    public function dealerIds(): array
+    public function dealerIds(): DealerId
     {
-        return array_filter(explode(self::DELIMITER, $this->dealerId ?? ''));
+        return DealerId::fromString($this->dealerId ?? '');
     }
 
     public function sort(): array

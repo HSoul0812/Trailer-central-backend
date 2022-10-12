@@ -4,7 +4,8 @@ namespace App\Services\ElasticSearch\Inventory;
 
 use App\Http\Clients\ElasticSearch\ElasticSearchClient;
 use App\Http\Clients\ElasticSearch\ElasticSearchQueryResult;
-use App\Services\ElasticSearch\Inventory\Geolocation\GeolocationInterface;
+use App\Services\ElasticSearch\Inventory\Parameters\DealerId;
+use App\Services\ElasticSearch\Inventory\Parameters\Geolocation\GeolocationInterface;
 
 class InventoryService implements InventoryServiceInterface
 {
@@ -24,7 +25,7 @@ class InventoryService implements InventoryServiceInterface
         $this->queryBuilder = $queryBuilder;
     }
 
-    public function search(array $dealerIds,
+    public function search(DealerId $dealerIds,
                            array $terms,
                            GeolocationInterface $geolocation,
                            array $sort = [],
