@@ -266,6 +266,10 @@ class InventoryService implements InventoryServiceInterface
                 $params['description_html'] = $this->convertMarkdown($params['description']);
             }
 
+            if (!empty($params['is_archived']) && $params['is_archived'] === true) {
+                $params['archived_at'] = Carbon::now()->format('Y-m-d H:i:s');
+            }
+
             $inventory = $this->inventoryRepository->update($params, $options);
 
             if (!$inventory instanceof Inventory) {
