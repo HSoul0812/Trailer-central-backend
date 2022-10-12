@@ -225,21 +225,17 @@ class QueryBuilder implements InventoryQueryBuilderInterface
     {
 
         if (!empty($dealerIds->includeIds())) {
-            $this->query['query']['bool']['must'] = [
-                [
-                    'terms' => [
-                        'dealerId' => $dealerIds->includeIds()
-                    ]
+            $this->query['query']['bool']['must'][] = [
+                'terms' => [
+                    'dealerId' => $dealerIds->includeIds()
                 ]
             ];
         }
 
         if (!empty($dealerIds->excludeIds())) {
-            $this->query['query']['bool']['must_not'] = [
-                [
-                    'terms' => [
-                        'dealerId' => $dealerIds->excludeIds()
-                    ]
+            $this->query['query']['bool']['must_not'][] = [
+                'terms' => [
+                    'dealerId' => $dealerIds->excludeIds()
                 ]
             ];
         }
