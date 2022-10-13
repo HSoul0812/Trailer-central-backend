@@ -207,18 +207,12 @@ class QueryBuilder implements InventoryQueryBuilderInterface
 
     public function addDealers(DealerId $dealerIds): QueryBuilderInterface
     {
-        if (!empty($dealerIds->includeIds())) {
-            $this->query['query']['bool']['must'][] = [
-                'terms' => [
-                    'dealerId' => $dealerIds->includeIds()
-                ]
-            ];
-        }
+        $type = $dealerIds->type() === DealerId::INCLUSION ? 'must' : 'must_not';
 
-        if (!empty($dealerIds->excludeIds())) {
-            $this->query['query']['bool']['must_not'][] = [
+        if (count($dealerIds->list()) > 0) {
+            $this->query['query']['bool'][$type][] = [
                 'terms' => [
-                    'dealerId' => $dealerIds->excludeIds()
+                    'dealerId' => $dealerIds->list()
                 ]
             ];
         }

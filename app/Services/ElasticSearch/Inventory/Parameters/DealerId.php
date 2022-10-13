@@ -4,23 +4,22 @@ namespace App\Services\ElasticSearch\Inventory\Parameters;
 
 class DealerId
 {
-    private const TYPE_DELIMITER = '|';
+    private const EXCLUSION_DELIMITER = '~';
     private const DELIMITER = ';';
 
-    /** @var array */
-    private $included;
+    public const INCLUSION = 'inclusion';
+    public const EXCLUSION = 'exclusion';
 
     /** @var array */
-    private $excluded;
+    private $list;
 
-    /**
-     * @param array $included
-     * @param array $excluded
-     */
-    public function __construct(array $included = [], array $excluded = [])
+    /** @var string */
+    private $type;
+
+    public function __construct(array $list = [], string $type = self::INCLUSION)
     {
-        $this->included = $included;
-        $this->excluded = $excluded;
+        $this->list = $list;
+        $this->type = $type;
     }
 
     /**
@@ -29,31 +28,22 @@ class DealerId
      */
     public static function fromString(string $dealerIds): self
     {
-        $parts = explode(self::TYPE_DELIMITER, $dealerIds);
+        $parts = explode(self::EXCLUSION_DELIMITER, $dealerIds);
 
         if (count($parts) === 2) {
-            $included = array_filter(explode(self::DELIMITER, $parts[0]));
-            $excluded = array_filter(explode(self::DELIMITER, $parts[1]));
-
-            return new DealerId($included, $excluded);
+            return new DealerId(array_filter(explode(self::DELIMITER, $parts[1])), self::EXCLUSION);
         }
 
         return new DealerId(array_filter(explode(self::DELIMITER, $parts[0])));
     }
 
-    /**
-     * @return array
-     */
-    public function includeIds(): array
+    public function list(): array
     {
-        return $this->included;
+        return $this->list;
     }
 
-    /**
-     * @return array
-     */
-    public function excludeIds(): array
+    public function type(): string
     {
-        return $this->excluded;
+        return $this->type;
     }
 }
