@@ -24,7 +24,7 @@ class HotPotatoTest extends TestCase
      * @group CRM
      * @specs array dealer_location_id = exists
      * @specs string lead_type = inventory/trade
-     * @specs bool enable_assign_notification = 1
+     * @specs bool enable_assign_notification = 0
      * @return void
      */
     public function testHotPotato()
@@ -39,14 +39,14 @@ class HotPotatoTest extends TestCase
 
 
         // Based on the seeder results, we should know what sales person is assigned to who:
-        $leadSalesPeople[$leads[0]->identifier] = $sales[1];
+        $leadSalesPeople[$leads[0]->identifier] = $sales[3];
         $leadSalesPeople[$leads[1]->identifier] = $sales[1];
-        $leadSalesPeople[$leads[2]->identifier] = $sales[3];
-        $leadSalesPeople[$leads[3]->identifier] = $sales[2];
+        $leadSalesPeople[$leads[2]->identifier] = $sales[2];
+        $leadSalesPeople[$leads[3]->identifier] = $sales[1];
         $leadSalesPeople[$leads[4]->identifier] = $sales[2];
         $leadSalesPeople[$leads[5]->identifier] = $sales[0];
-        $leadSalesPeople[$leads[6]->identifier] = $sales[1];
-        $leadSalesPeople[$leads[7]->identifier] = $sales[1];
+        $leadSalesPeople[$leads[6]->identifier] = $sales[2];
+        $leadSalesPeople[$leads[7]->identifier] = $sales[2];
 
 
         // Fake Mail
@@ -88,7 +88,7 @@ class HotPotatoTest extends TestCase
      * @group CRM
      * @specs array dealer_location_id = exists
      * @specs string lead_type = inventory/trade
-     * @specs bool enable_assign_notification = 1
+     * @specs bool enable_assign_notification = 0
      * @return void
      */
     public function testNoMatches()
@@ -103,14 +103,14 @@ class HotPotatoTest extends TestCase
 
 
         // Based on the seeder results, we should know what sales person is assigned to who:
-        $leadSalesPeople[$leads[0]->identifier] = $sales[1];
+        $leadSalesPeople[$leads[0]->identifier] = $sales[3];
         $leadSalesPeople[$leads[1]->identifier] = $sales[1];
         $leadSalesPeople[$leads[2]->identifier] = $sales[2];
-        $leadSalesPeople[$leads[3]->identifier] = null;
-        $leadSalesPeople[$leads[4]->identifier] = $sales[1];
+        $leadSalesPeople[$leads[3]->identifier] = $this->seeder->salesPerson->getKey();
+        $leadSalesPeople[$leads[4]->identifier] = $sales[2];
         $leadSalesPeople[$leads[5]->identifier] = $sales[0];
-        $leadSalesPeople[$leads[6]->identifier] = null;
-        $leadSalesPeople[$leads[7]->identifier] = $sales[1];
+        $leadSalesPeople[$leads[6]->identifier] = $this->seeder->salesPerson->getKey();
+        $leadSalesPeople[$leads[7]->identifier] = $sales[2];
 
 
         // Fake Mail
@@ -161,7 +161,7 @@ class HotPotatoTest extends TestCase
      * @group CRM
      * @specs array dealer_location_id = exists
      * @specs string lead_type = general
-     * @specs bool enable_assign_notification = 0
+     * @specs bool enable_assign_notification = 1
      * @return void
      */
     public function testAssignEmail()
@@ -177,9 +177,9 @@ class HotPotatoTest extends TestCase
 
 
         // Based on the seeder results, we should know what sales person is assigned to who:
-        $leadSalesPeople[$leads[0]->identifier] = $sales[2];
+        $leadSalesPeople[$leads[0]->identifier] = $sales[3];
         $leadSalesPeople[$leads[1]->identifier] = $sales[1];
-        $leadSalesPeople[$leads[2]->identifier] = $sales[3];
+        $leadSalesPeople[$leads[2]->identifier] = $sales[2];
         $leadSalesPeople[$leads[3]->identifier] = $sales[1];
         $leadSalesPeople[$leads[4]->identifier] = $sales[2];
         $leadSalesPeople[$leads[5]->identifier] = $sales[0];

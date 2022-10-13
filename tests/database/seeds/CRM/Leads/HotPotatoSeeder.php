@@ -106,7 +106,7 @@ class HotPotatoSeeder extends Seeder
             'is_default' => 1,
             'is_inventory' => 1,
             'is_trade' => 1,
-            'is_financing' => 0
+            'is_financing' => 1
         ]);
 
         // Create Sales People for Hot Potato
