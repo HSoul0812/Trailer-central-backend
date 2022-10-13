@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Services\Stripe;
+use App\Repositories\Payment\PaymentLogRepositoryInterface;
+use App\Services\Inventory\InventoryServiceInterface;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
@@ -14,7 +16,10 @@ use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 class StripePaymentService implements StripePaymentServiceInterface
 {
 
-    public function __construct() {
+    public function __construct(
+        private PaymentLogRepositoryInterface $paymentLogRepository,
+        private InventoryServiceInterface $inventoryService
+    ) {
         Stripe::setApiKey(config('services.stripe.secret_key'));
     }
 
@@ -55,7 +60,20 @@ class StripePaymentService implements StripePaymentServiceInterface
     }
 
     private function fulfillOrder(Session $session) {
+        $inventoryId = $session->metadata->inventory_id;
+        $userId = $session->metadata->user_id;
+
+        $this->paymentLogRepository->create([
+            'payment_id' => $session->id,
+            'client_reference_id' => $session->client_reference_id,
+            'full_response' => json_encode($session->values())
+        ]);
+
+        $this->inventoryService->update($userId, [
+            'inventory_id' => $inventoryId
+        ]);
+
         \Log::info('session', $session->values());
-        \Log::info($session->metadata->inventory_id);
+        \Log::info('inventory_id: ' . $inventoryId);
     }
 }

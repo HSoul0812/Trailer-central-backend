@@ -132,8 +132,10 @@ class InventoryController extends AbstractRestfulController
 
     public function pay(Request $request, $inventoryId, $planId): Redirector|Application|RedirectResponse
     {
+        $user = auth('api')->user();
         return $this->paymentService->createCheckoutSession($planId, [
-            'inventory_id' => $inventoryId
+            'inventory_id' => $inventoryId,
+            'user_id' => $user->getAuthIdentifier()
         ]);
     }
 
