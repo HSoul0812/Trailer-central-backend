@@ -77,7 +77,7 @@ return [
         'hotpotato' => [
             'driver' => 'daily',
             'path' => storage_path('logs/commands/hot-potato.log'),
-            'level' => 'error',
+            'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
         ],
