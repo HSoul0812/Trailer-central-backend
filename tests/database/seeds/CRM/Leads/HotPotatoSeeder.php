@@ -128,13 +128,13 @@ class HotPotatoSeeder extends Seeder
         // Seed Leads for Hot Potato
         $locationId = $this->location->getKey();
         $seeds = [
-            ['type' => 'inventory', 'dealer_location_id' => $locationId],
+            ['source' => 'TruckPaper', 'type' => 'inventory', 'dealer_location_id' => $locationId],
             ['source' => 'Facebook - Podium', 'type' => 'trade', 'dealer_location_id' => $locationId],
-            ['source' => '', 'type' => 'inventory', 'dealer_location_id' => 0],
+            ['source' => 'Google', 'type' => 'inventory', 'dealer_location_id' => 0],
             ['source' => 'RVTrader.com', 'type' => 'trade', 'dealer_location_id' => $locationId],
             ['source' => 'TrailerCentral', 'type' => 'inventory', 'dealer_location_id' => 0],
             ['type' => 'trade', 'dealer_location_id' => 0],
-            ['source' => '', 'type' => 'inventory', 'dealer_location_id' => $locationId],
+            ['source' => 'Facebook - Marketplace', 'type' => 'inventory', 'dealer_location_id' => $locationId],
             ['source' => 'HorseTrailerWorld', 'type' => 'inventory', 'dealer_location_id' => $locationId]
         ];
 
@@ -146,13 +146,13 @@ class HotPotatoSeeder extends Seeder
         // Seed Leads for Hot Potato
         $locationId = $this->location->getKey();
         $seeds = [
-            ['type' => 'inventory', 'dealer_location_id' => $locationId],
+            ['source' => 'TruckPaper', 'type' => 'inventory', 'dealer_location_id' => $locationId],
             ['source' => 'Facebook - Podium', 'type' => 'trade', 'dealer_location_id' => $locationId],
-            ['source' => '', 'type' => 'inventory', 'dealer_location_id' => 0],
+            ['source' => 'Google', 'type' => 'inventory', 'dealer_location_id' => 0],
             ['source' => 'RVTrader.com', 'type' => 'financing', 'dealer_location_id' => $locationId],
             ['source' => 'TrailerCentral', 'type' => 'inventory', 'dealer_location_id' => 0],
             ['type' => 'trade', 'dealer_location_id' => 0],
-            ['source' => '', 'type' => 'financing', 'dealer_location_id' => $locationId],
+            ['source' => 'Facebook - Marketplace', 'type' => 'financing', 'dealer_location_id' => $locationId],
             ['source' => 'HorseTrailerWorld', 'type' => 'inventory', 'dealer_location_id' => $locationId]
         ];
 
