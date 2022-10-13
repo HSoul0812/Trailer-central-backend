@@ -8,7 +8,5 @@ interface GeolocationInterface
 
     public function lon(): float;
 
-    public function filterOver(): ?string;
-
     public function toPoint();
 }
