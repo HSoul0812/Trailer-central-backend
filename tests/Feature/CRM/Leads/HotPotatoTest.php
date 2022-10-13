@@ -100,17 +100,16 @@ class HotPotatoTest extends TestCase
         $leads = $this->seeder->leads;
         $sales = $this->seeder->sales;
         $dealerId = $this->seeder->dealer->getKey();
-        $salesPersonId = $this->seeder->salesPerson->getKey();
 
 
         // Based on the seeder results, we should know what sales person is assigned to who:
         $leadSalesPeople[$leads[0]->identifier] = $sales[2];
         $leadSalesPeople[$leads[1]->identifier] = $sales[1];
         $leadSalesPeople[$leads[2]->identifier] = $sales[2];
-        $leadSalesPeople[$leads[3]->identifier] = $salesPersonId;
+        $leadSalesPeople[$leads[3]->identifier] = $this->seeder->salesPerson;
         $leadSalesPeople[$leads[4]->identifier] = $sales[2];
         $leadSalesPeople[$leads[5]->identifier] = $sales[0];
-        $leadSalesPeople[$leads[6]->identifier] = $salesPersonId;
+        $leadSalesPeople[$leads[6]->identifier] = $this->seeder->salesPerson;
         $leadSalesPeople[$leads[7]->identifier] = $sales[2];
 
 
