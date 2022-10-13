@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\v1\User;
 
 use App\Http\Controllers\RestfulControllerV2;
+use App\Http\Requests\User\Integration\GetAllDealerIntegrationRequest;
 use App\Http\Requests\User\Integration\GetSingleDealerIntegrationRequest;
 use App\Repositories\User\Integration\DealerIntegrationRepositoryInterface;
 use App\Transformers\User\Integration\DealerIntegrationTransformer;
@@ -18,10 +19,39 @@ class DealerIntegrationController extends RestfulControllerV2
      */
     protected $repository;
 
-    public function __construct(DealerIntegrationRepositoryInterface $repository)
+    private $transformer;
+
+    public function __construct(
+        DealerIntegrationRepositoryInterface $repository,
+        DealerIntegrationTransformer $transformer
+    )
     {
-        $this->middleware('setDealerIdOnRequest')->only(['show']);
+        $this->middleware('setDealerIdOnRequest')->only(['index','show']);
         $this->repository = $repository;
+        $this->transformer = $transformer;
+    }
+
+    /**
+     * @param Request $request
+     * @return Response
+     *
+     * @throws \App\Exceptions\Requests\Validation\NoObjectIdValueSetException
+     * @throws \App\Exceptions\Requests\Validation\NoObjectTypeSetException
+     */
+    public function index(Request $request): Response
+    {
+        $integrationRequest = new GetAllDealerIntegrationRequest($request->all());
+
+        if ($integrationRequest->validate()) {
+            return $this->response->collection(
+                $this->repository->getAll([
+                    'dealer_id' => $integrationRequest->dealer_id
+                ]),
+                $this->transformer
+            );
+        }
+
+        $this->response->errorBadRequest();
     }
 
     /**
@@ -42,7 +72,7 @@ class DealerIntegrationController extends RestfulControllerV2
                     'integration_id' => $integrationRequest->integration_id,
                     'dealer_id' => $integrationRequest->dealer_id
                 ]),
-                app()->make(DealerIntegrationTransformer::class)
+                $this->transformer
             );
         }
 
