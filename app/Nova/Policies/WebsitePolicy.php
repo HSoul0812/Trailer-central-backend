@@ -34,7 +34,7 @@ class WebsitePolicy
      */
     public function viewAny(NovaUser $user): bool
     {
-        return $user->hasAnyRole('Admin', 'Support');
+        return $user->hasAnyRole('Admin', 'Support', 'Sales');
     }
 
     /**
@@ -46,7 +46,7 @@ class WebsitePolicy
      */
     public function view(?NovaUser $user, Website $website): bool
     {
-        return $user->hasAnyRole('Admin', 'Support');
+        return $user->hasAnyRole('Admin', 'Support', 'Sales');
     }
 
     /**
@@ -57,7 +57,7 @@ class WebsitePolicy
      */
     public function create(NovaUser $user): bool
     {
-        return $user->hasAnyRole('Admin', 'Support');
+        return $user->hasAnyRole('Admin', 'Support', 'Sales');
     }
 
     /**
@@ -69,7 +69,7 @@ class WebsitePolicy
      */
     public function update(NovaUser $user, Website $website): bool
     {
-        return $user->hasAnyRole('Admin', 'Support');
+        return $user->hasAnyRole('Admin', 'Support', 'Sales');
     }
 
     /**
@@ -81,7 +81,7 @@ class WebsitePolicy
      */
     public function delete(NovaUser $user, Website $website): bool
     {
-        return $user->hasAnyRole('Admin', 'Support');
+        return $user->hasAnyRole('Admin', 'Support', 'Sales');
     }
 
     /**
