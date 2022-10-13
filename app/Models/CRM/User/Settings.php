@@ -61,7 +61,7 @@ class Settings extends Model
     /**
      * CRM User
      * 
-     * @return \App\Models\CRM\User\BelongsTo
+     * @return BelongsTo
      */
     public function crmUser(): BelongsTo
     {
@@ -71,7 +71,7 @@ class Settings extends Model
     /**
      * New Dealer User
      * 
-     * @return \App\Models\CRM\User\BelongsTo
+     * @return BelongsTo
      */
     public function newDealerUser(): BelongsTo
     {
@@ -81,7 +81,7 @@ class Settings extends Model
     /**
      * Dealer
      * 
-     * @return \App\Models\CRM\User\BelongsTo
+     * @return BelongsTo
      */
     public function dealer(): BelongsTo
     {

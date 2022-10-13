@@ -12,7 +12,7 @@ interface HotPotatoServiceInterface extends AutoAssignServiceInterface {
     /**
      * Handle Hot Potato for Dealer
      * 
-     * @param User $dealer
+     * @param NewDealerUser $dealer
      * @return DBCollection<LeadAssign>
      */
     public function dealer(NewDealerUser $dealer): DBCollection;
