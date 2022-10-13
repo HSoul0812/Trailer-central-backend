@@ -177,7 +177,7 @@ class HotPotatoTest extends TestCase
 
 
         // Based on the seeder results, we should know what sales person is assigned to who:
-        $leadSalesPeople[$leads[0]->identifier] = $sales[3];
+        $leadSalesPeople[$leads[0]->identifier] = $sales[2];
         $leadSalesPeople[$leads[1]->identifier] = $sales[1];
         $leadSalesPeople[$leads[2]->identifier] = $sales[2];
         $leadSalesPeople[$leads[3]->identifier] = $sales[1];
