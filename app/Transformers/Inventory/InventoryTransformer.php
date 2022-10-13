@@ -6,6 +6,7 @@ use App\Helpers\ConvertHelper;
 use App\Models\Inventory\File;
 use App\Models\Inventory\InventoryImage;
 use App\Transformers\Dms\ServiceOrderTransformer;
+use App\Transformers\Marketing\Facebook\ListingTransformer;
 use Illuminate\Database\Eloquent\Collection;
 use League\Fractal\Resource\Item;
 use Carbon\Carbon;
@@ -26,6 +27,7 @@ class InventoryTransformer extends TransformerAbstract
         'attributes',
         'features',
         'clapps',
+        'activeListings'
     ];
 
     /**
@@ -237,6 +239,19 @@ class InventoryTransformer extends TransformerAbstract
     public function includeWebsite(Inventory $inventory): Item
     {
         return $this->item($inventory->user->website, new WebsiteTransformer);
+    }
+
+    /**
+     * @param Inventory $inventory
+     * @return array|FractalCollection
+     */
+    public function includeActiveListings(Inventory $inventory)
+    {
+        if (empty($inventory->activeListings)) {
+            return [];
+        }
+
+        return $this->collection($inventory->activeListings, new ListingTransformer);
     }
 
     /**
