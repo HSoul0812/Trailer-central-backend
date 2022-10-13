@@ -217,7 +217,7 @@ class MarketplaceService implements MarketplaceServiceInterface
 
             $nrOfListingsToday = $this->listings->countFacebookPostings(Marketplace::find($params['marketplace_id']));
             $inventoryRemaining = $this->getInventory(Marketplace::find($params['marketplace_id']), MarketplaceStatus::METHOD_MISSING, []);
-            $nrInventoryItemsRemaining = count(Arr::get($inventoryRemaining, 'inventory', []));
+            $nrInventoryItemsRemaining = count($inventoryRemaining->inventory);
 
             if ($nrOfListingsToday === config('marketing.fb.settings.limit.listings', 3) || $nrInventoryItemsRemaining === 0) {
                 // Update Imported At
