@@ -29,10 +29,18 @@ class HotPotatoService extends AutoAssignService implements HotPotatoServiceInte
     use MailHelper, DispatchesJobs;
     
     /**
-     * @var App\Repositories\CRM\User\SettingsRepositoryInterface
+     * @var SettingsRepositoryInterface
      */
     protected $salesPersonRepository;
-    
+
+    /**
+     * HotPotatoService Constructor
+     * 
+     * @param LeadRepositoryInterface $leads
+     * @param StatusRepositoryInterface $leadStatus
+     * @param SalesPersonRepositoryInterface $salesPersonRepo
+     * @param SettingsRepositoryInterface $settings
+     */
     public function __construct(
         LeadRepositoryInterface $leads,
         StatusRepositoryInterface $leadStatus,
@@ -158,7 +166,7 @@ class HotPotatoService extends AutoAssignService implements HotPotatoServiceInte
                             ' at ' . $date->tz($lead->crmUser->dealer_timezone)->format("g:i A T");
 
         // Send Email to Sales Person
-        Mail::to($salesEmail ?? "" )->send(
+        Mail::to($salesEmail)->send(
             new AutoAssignEmail([
                 'date' => Carbon::now()->toDateTimeString(),
                 'salesperson_name' => $salesPerson->getFullNameAttribute(),

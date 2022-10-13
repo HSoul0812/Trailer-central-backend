@@ -2,7 +2,6 @@
 
 namespace App\Models\User;
 
-use App\Models\User\NewDealerUser;
 use Illuminate\Database\Eloquent\Model;
 
 class CrmUser extends Model

@@ -28,12 +28,12 @@ class HotPotato extends Command
     protected $description = 'Reassign leads to SalesPeople using Hot Potato method.';
 
     /**     
-     * @var App\Repositories\CRM\User\CrmUserRepositoryInterface
+     * @var CrmUserRepositoryInterface
      */
     protected $crmUserRepository;
     
     /**     
-     * @var App\Services\CRM\Leads\HotPotatoServiceInterface
+     * @var HotPotatoServiceInterface
      */
     protected $hotPotatoService;
     
@@ -82,18 +82,18 @@ class HotPotato extends Command
     /**
      * Execute the console command.
      *
-     * @return mixed
+     * @return void
      */
-    public function handle()
+    public function handle(): void
     {
         // Get Dealer ID
-        $this->dealerId = $dealerId = $this->argument('dealer');
+        $this->dealerId = $this->argument('dealer');
         
         $this->boundLower = $this->argument('boundLower');
         $this->boundUpper = $this->argument('boundUpper');        
         
         $now = $this->datetime->format("l, F jS, Y");
-        $command = str_replace('{dealer?}', $dealerId, $this->signature);
+        $command = str_replace('{dealer?}', $this->dealerId, $this->signature);
 
         // Get Params for Dealer ID / Boundaries
         $params = [];
@@ -137,9 +137,9 @@ class HotPotato extends Command
      * 
      * @param string $msg
      * @param string $type
-     * @return string
+     * @return void
      */
-    private function logOutput(string $msg, string $type = 'info') {
+    private function logOutput(string $msg, string $type = 'info'): void {
         // Initialize Logger for Hot Potato
         $log = Log::channel('hotpotato');
 
