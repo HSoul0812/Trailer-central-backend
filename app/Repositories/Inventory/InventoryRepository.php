@@ -411,6 +411,10 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query = $query->with('inventoryFeatures.featureList');
         }
 
+        if (in_array('activeListings', $include)) {
+            $query = $query->with('activeListings');
+        }
+
         return $query->firstOrFail();
     }
 
