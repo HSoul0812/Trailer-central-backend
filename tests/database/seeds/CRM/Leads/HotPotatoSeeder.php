@@ -21,9 +21,15 @@ use Carbon\Carbon;
 
 /**
  * @property-read User $dealer
- * @property-read Website $website
- * @property-read SalesPerson $sales
+ * @property-read DealerLocation $location
+ * @property-read NewDealerUser $newDealer
+ * @property-read CrmUser $crmUser
  * @property-read AuthToken $authToken
+ * @property-read Website $website
+ * @property-read SalesPerson $salesPerson
+ * @property-read SalesPerson[] $sales
+ * @property-read Lead[] $leads
+ * @property-read LeadStatus[] $statuses
  * @property-read array<Lead> $leads
  * @property-read array<LeadStatus> $statuses
  */
