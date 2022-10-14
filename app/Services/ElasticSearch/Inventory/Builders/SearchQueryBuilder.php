@@ -14,9 +14,6 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
     private const DELIMITER = '|';
 
     /** @var string */
-    private const INCLUDE_DESCRIPTION_ON_SEARCH_CONFIG_KEY = 'inventory/include_description_on_search';
-
-    /** @var string */
     private $field;
 
     /** @var string */
@@ -52,7 +49,9 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
     public function __construct(string $field, string $data)
     {
         $this->field = $field;
+
         $keywordParts = explode(self::DELIMITER, $data);
+
         $this->value = array_pop($keywordParts);
         $this->ignore = $keywordParts;
     }
@@ -66,13 +65,14 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
                 $shouldQuery[] = $this->wildcardQuery();
                 break;
             default:
-                $columnsToSearch = $this->getSearchFields();
-                foreach ($columnsToSearch as $key => $column) {
+                foreach ($this->getSearchFields() as $key => $column) {
                     $boost = 1;
                     $columnValues = explode('^', $column);
+
                     if (isset($columnValues[$boostKey = 1])) {
-                        $boost = (float)$columnValues[$boostKey];
+                        $boost = (float) $columnValues[$boostKey];
                     }
+
                     $shouldQuery[] = $this->matchQuery($columnValues[0], $boost);
                     $shouldQuery[] = $this->matchQuery($column, $boost);
 
