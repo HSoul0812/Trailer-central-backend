@@ -5,6 +5,7 @@ namespace App\Console\Commands\CRM\Leads;
 use Illuminate\Console\Command;
 use App\Models\User\NewDealerUser;
 use App\Services\CRM\Leads\AutoAssignServiceInterface;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Collection;
 
 class AutoAssign extends Command
@@ -67,11 +68,11 @@ class AutoAssign extends Command
         parent::__construct();
 
         $this->autoAssignService = $autoAssignService;
-        
-        date_default_timezone_set(env('DB_TIMEZONE'));
-        
+
+        date_default_timezone_set(config('app.db_timezone'));
+
         $this->datetime = new \DateTime();
-        $this->datetime->setTimezone(new \DateTimeZone(env('DB_TIMEZONE')));
+        $this->datetime->setTimezone(new \DateTimeZone(config('app.db_timezone')));
     }
 
     /**
@@ -105,11 +106,12 @@ class AutoAssign extends Command
             }
         } catch(\Exception $e) {
             $this->error("{$command} exception returned {$e->getMessage()}: {$e->getTraceAsString()}");
+            Log::channel('autoassign')->error('Exception returned processing auto assign command: ' . $e->getMessage() . ': ' . $e->getTraceAsString());
         }
 
         // Log End
         $datetime = new \DateTime();
-        $datetime->setTimezone(new \DateTimeZone(env('DB_TIMEZONE')));
+        $datetime->setTimezone(new \DateTimeZone(config('app.db_timezone')));
         $this->info("{$command} finished on " . $datetime->format("l, F jS, Y"));
     }
 

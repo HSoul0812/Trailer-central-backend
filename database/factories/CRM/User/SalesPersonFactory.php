@@ -9,7 +9,6 @@ use Faker\Generator as Faker;
 use App\Models\User\NewUser;
 
 $factory->define(SalesPerson::class, function (Faker $faker, array $attributes): array {
-
     // Initialize Email
     $email = $faker->unique()->safeEmail;
     $password = $faker->password;
@@ -20,7 +19,7 @@ $factory->define(SalesPerson::class, function (Faker $faker, array $attributes):
     // Return Overrides
     return [
         'user_id' => $user_id,
-        'dealer_location_id' => $attributes['dealer_location_id'] ?? TestCase::getTestDealerLocationRandom(),
+        'dealer_location_id' => $attributes['dealer_location_id'] ?? 0,
         'perms' => 'user',
         'first_name' => $faker->firstName,
         'last_name' => $faker->lastName,

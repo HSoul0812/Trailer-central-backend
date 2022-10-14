@@ -25,7 +25,7 @@ class PostingHistoryCsvExporter extends GenericFilesystemCsvExporter
             'Facebook User' => $object->fb_username,
             'Facebook ID' => $object->facebook_id,
             'Inventory ID' => $object->inventory_id,
-            'SKU' => $object->SKU,
+            'Stock' => $object->SKU,
             'Created At' => $object->created_at
         ];
     }
@@ -44,7 +44,7 @@ class PostingHistoryCsvExporter extends GenericFilesystemCsvExporter
             'Facebook User',
             'Facebook ID',
             'Inventory ID',
-            'SKU',
+            'Stock',
             'Created At'
         ];
     }

@@ -97,7 +97,7 @@ class BulkReportControllerTest extends AbstractMonitoredJobsTest
         Bus::fake();
 
         // When I call the create action using the well formed request
-        $response = $controller->financialsExport($request);
+        $response = $controller->financialsExportPdf($request);
 
         // Then I should see that job wit a specific name was enqueued
         Bus::assertDispatched(FinancialReportExportJob::class);

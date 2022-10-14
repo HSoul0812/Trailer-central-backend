@@ -14,6 +14,11 @@ class DealerClapp extends Model
     protected $table = "dealer_clapp";
 
     /**
+     * @var int
+     */
+    protected $primaryKey = 'dealer_id';
+
+    /**
      * @var bool
      */
     public $timestamps = false;

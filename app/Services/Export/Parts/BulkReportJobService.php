@@ -163,6 +163,6 @@ class BulkReportJobService extends AbstractMonitoredJobService implements BulkRe
             throw new InvalidArgumentException('This job has a payload without a filename');
         }
 
-        return new FilesystemPdfExporter(Storage::disk('tmp'), $job->payload->filename);
+        return new FilesystemPdfExporter(Storage::disk('s3'), $job->payload->filename);
     }
 }
