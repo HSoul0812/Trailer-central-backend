@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Jobs\Bulk\Parts\FinancialReportCsvExportJob;
 use App\Jobs\Bulk\Parts\FinancialReportExportJob;
 use App\Jobs\Dms\ServiceOrder\ServiceTechnicianExportJob;
 use App\Repositories\Bulk\Parts\BulkReportRepositoryInterface;
+use App\Services\Export\Parts\BulkReportCsvJobServiceInterface;
 use App\Services\Export\Parts\BulkReportJobServiceInterface;
 use App\Services\Dms\ServiceOrder\BulkCsvTechnicianReportServiceInterface;
 use Illuminate\Support\ServiceProvider;
@@ -32,6 +34,13 @@ class JobServiceProvider extends ServiceProvider
             $job->handle(
                 $this->app->make(BulkReportRepositoryInterface::class),
                 $this->app->make(BulkCsvTechnicianReportServiceInterface::class)
+            );
+        });
+
+        $this->app->bindMethod(FinancialReportCsvExportJob::class . '@handle', function (FinancialReportCsvExportJob $job): void {
+            $job->handle(
+                $this->app->make(BulkReportRepositoryInterface::class),
+                $this->app->make(BulkReportCsvJobServiceInterface::class)
             );
         });
     }

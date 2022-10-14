@@ -147,6 +147,7 @@ use Laravel\Scout\Searchable;
  * @property \DateTimeInterface|Carbon $updated_at
  * @property \DateTimeInterface|Carbon $updated_at_auto
  * @property bool $show_on_auction123
+ * @property bool $show_on_rvt
  *
  * @property string $category_label
  * @property string $status_label
@@ -185,6 +186,8 @@ class Inventory extends Model
 
     /** @var InventoryElasticSearchConfigurator */
     private $indexConfigurator;
+
+    public static $searchableAs;
 
     const TABLE_NAME = 'inventory';
 
@@ -246,6 +249,7 @@ class Inventory extends Model
 
     public const MIN_DESCRIPTION_LENGTH_FOR_FACEBOOK = 50;
     public const MIN_PRICE_FOR_FACEBOOK = 0;
+    public const ALIAS_ES_NAME = 'inventory';
 
     /**
      * The table associated with the model.
@@ -360,6 +364,7 @@ class Inventory extends Model
         'times_viewed',
         'trailerworld_store_id',
         'show_on_auction123',
+        'show_on_rvt'
     ];
 
     protected $casts = [
@@ -743,7 +748,7 @@ class Inventory extends Model
      *
      * @return GeolocationPoint
      */
-    public function geolocation(): GeolocationPoint
+    public function geolocationPoint(): GeolocationPoint
     {
         if ($this->latitude && $this->longitude) {
             return new GeolocationPoint((float)$this->latitude, (float)$this->longitude);
@@ -807,7 +812,7 @@ class Inventory extends Model
 
     public function searchableAs(): string
     {
-        return $this->indexConfigurator()->name();
+        return self::$searchableAs ?? self::ALIAS_ES_NAME;
     }
 
     public function toSearchableArray(): array
@@ -863,4 +868,5 @@ class Inventory extends Model
 
         return $this->indexConfigurator;
     }
+
 }

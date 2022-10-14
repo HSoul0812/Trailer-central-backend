@@ -2,8 +2,12 @@
 
 namespace App\Domains\ElasticSearch\Actions;
 
-use ElasticScoutDriverPlus\Builders\SearchRequestBuilder;
+use DB;
 use Elasticsearch\Client;
+use Exception;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Database\Query\Builder;
 
 class RemoveDeletedModelFromESIndexAction
 {
@@ -19,26 +23,34 @@ class RemoveDeletedModelFromESIndexAction
      *
      * @var int
      */
-    private $perPage = 1000;
+    private $size = 1000;
 
     /**
-     * The model that we want to remove the deleted data from ES index
-     * @var
+     * The Model that we want to remove the data
+     *
+     * @var Model
      */
     private $model;
 
     /**
-     * The must raw criteria array
-     * @var array
+     * The index that we derived from the model
+     *
+     * @var
      */
-    private $mustRaw = [];
+    private $index;
 
     /**
-     * The ES index
-     *
-     * @var string
+     * The Dealer ID
+     * @var
      */
-    private $index = '';
+    private $dealerId;
+
+    /**
+     * The search_after property that will send to ES
+     *
+     * @var array
+     */
+    private $searchAfter = [];
 
     /**
      * The callback for when the document id is deleted
@@ -55,28 +67,41 @@ class RemoveDeletedModelFromESIndexAction
     }
 
     /**
-     * Set the model to process
+     * Set the ES index you want to delete the data from
      *
-     * @param string $model
-     * @return $this
+     * @param Model|string $model
+     * @return RemoveDeletedModelFromESIndexAction
+     * @throws Exception
      */
-    public function withModel(string $model): RemoveDeletedModelFromESIndexAction
+    public function forModel($model): RemoveDeletedModelFromESIndexAction
     {
-        $this->model = $model;
-        $this->index = (new $model)->searchableAs();
+        // We accept both string and Model class for the $model
+        // If they send in the model, we'll transform that to the
+        // concrete class
+        if (is_string($model)) {
+            $this->model = new $model();
+        } else {
+            $this->model = $model;
+        }
+
+        if (!method_exists($this->model, 'searchableAs')) {
+            throw new Exception("The method searchableAs doesn't exist in the model $this->model.");
+        }
+
+        $this->index = $this->model->searchableAs();
 
         return $this;
     }
 
     /**
-     * Set the Must Raw criteria
+     * Set the dealer id that we want to delete this data from
      *
-     * @param array $mustRaw
+     * @param int $dealerId
      * @return $this
      */
-    public function withMustRaw(array $mustRaw): RemoveDeletedModelFromESIndexAction
+    public function fromDealerId(int $dealerId): RemoveDeletedModelFromESIndexAction
     {
-        $this->mustRaw = $mustRaw;
+        $this->dealerId = $dealerId;
 
         return $this;
     }
@@ -97,12 +122,12 @@ class RemoveDeletedModelFromESIndexAction
     /**
      * Set the amount of record per page that we want to fetch
      *
-     * @param int $perPage
+     * @param int $size
      * @return $this
      */
-    public function perPage(int $perPage): RemoveDeletedModelFromESIndexAction
+    public function withSize(int $size): RemoveDeletedModelFromESIndexAction
     {
-        $this->perPage = $perPage;
+        $this->size = $size;
 
         return $this;
     }
@@ -114,39 +139,57 @@ class RemoveDeletedModelFromESIndexAction
      */
     public function execute(): array
     {
-        // Initialize some variables
-        $page = 1;
         $totalDelete = 0;
-        $search = $this->getSearchBuilder();
 
-        // We will start looping from the first page to the page
-        // that doesn't have data anymore
         do {
-            $search->from(($page - 1) * $this->perPage);
-            $search->size($this->perPage);
+            $searchParams = $this->getSearchParams();
 
-            $searchResult = $search->execute()->toArray();
+            $response = $this->esClient->search($searchParams);
 
-            // Break from the loop if there is no more data
-            if (empty($searchResult)) {
+            // We only break this while loop when we search and no longer get
+            // the result back from ES
+            if (empty($response['hits']['hits'])) {
                 break;
             }
 
-            // Loop through each result and store the one that no longer has
-            // a model on the database to an array
-            $toRemoveDocumentIds = $this->getToRemoveDocumentIds($searchResult);
+            $modelIds = [];
 
-            // If on this page we don't have deleted model, we'll move
-            // to the next page
-            if (empty($toRemoveDocumentIds)) {
-                $page++;
+            // Loop through each hit and if it doesn't exist in the database
+            // add it in the id to remove
+            foreach ($response['hits']['hits'] as $hit) {
+                $modelIds[] = (int) $hit['_id'];
+
+                // At the same time, keep storing the last sort in the hits array
+                // as the next search_after value
+                $this->searchAfter = $hit['sort'];
+            }
+
+            $table = $this->model->getTable();
+            $modelUsesSoftDelete = $this->model::hasGlobalScope(SoftDeletingScope::class);
+
+            // For performance’s sake, we'll fetch all the model ids at once
+            $query = DB::table($table)
+                ->whereIn('id', $modelIds)
+                ->when($modelUsesSoftDelete, function(Builder $query) {
+                    $query->whereNull('deleted_at');
+                });
+
+            $modelIdsInDB = $query->pluck('id')->toArray();
+
+            // Then, compare it with the full list of model ids, the missing ones
+            // are the one that we need to delete
+            $documentIdsToRemove = array_values(array_diff($modelIds, $modelIdsInDB));
+
+            // No need to do anything in this loop if all the model are still exist
+            // in the database
+            if (empty($documentIdsToRemove)) {
                 continue;
             }
 
-            // Then, build each document id as a bulk delete operation array
-            $body = $this->getESBulkDeleteBody($toRemoveDocumentIds);
+            // Prepare the bulk delete request body
+            $body = $this->getESBulkDeleteBody($documentIdsToRemove);
 
-            // Send an actual bulk delete command to WS
+            // Send the bulk delete message to ES
             $bulkResult = $this->sendBulkDeleteRequestToES($body);
 
             // Summarize the deletion
@@ -154,8 +197,6 @@ class RemoveDeletedModelFromESIndexAction
                 $totalDelete++;
                 call_user_func($this->onDeletedDocumentIdCallback, $result['delete']['_id']);
             }
-
-            $page++;
         } while (true);
 
         // We return as an array for flexibility
@@ -164,47 +205,6 @@ class RemoveDeletedModelFromESIndexAction
         return [
             'total_delete' => $totalDelete,
         ];
-    }
-
-    /**
-     * Get the ES search builder
-     * @return SearchRequestBuilder
-     */
-    private function getSearchBuilder(): SearchRequestBuilder
-    {
-        $search = $this->model::boolSearch();
-
-        if (!empty($this->mustRaw)) {
-            $search->mustRaw($this->mustRaw);
-        }
-
-        return $search;
-    }
-
-    /**
-     * Get the document ids to remove
-     *
-     * @param array $searchResult The ES search result
-     * @return string[]
-     */
-    private function getToRemoveDocumentIds(array $searchResult): array
-    {
-        $toRemoveDocumentIds = [];
-
-        foreach ($searchResult as $result) {
-            // We want to keep only the result that has model record
-            // AND that model record need to have deleted_at = null
-            // we'll use data_get here so if the model doesn't have soft-delete
-            // then it'd still work, basically no need to check for array
-            // key existence
-            if ($result['model'] !== null && data_get($result, 'model.deleted_at') === null) {
-                continue;
-            }
-
-            $toRemoveDocumentIds[] = $result['document']['id'];
-        }
-
-        return $toRemoveDocumentIds;
     }
 
     /**
@@ -236,5 +236,37 @@ class RemoveDeletedModelFromESIndexAction
             'index' => $this->index,
             'body' => $body,
         ]);
+    }
+
+    /**
+     * Get the search param that we'll send to ES
+     *
+     * @return array
+     */
+    private function getSearchParams(): array
+    {
+        $searchParams = [
+            'index' => $this->index,
+            'body' => [
+                'size' => $this->size,
+                'query' => [
+                    'match' => [
+                        'dealer_id' => $this->dealerId,
+                    ],
+                ],
+                'sort' => [[
+                    'id' => 'asc',
+                ]],
+            ],
+        ];
+
+        // We'll use the Search After API to continue searching the data
+        // in the next pages
+        // Ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/paginate-search-results.html
+        if (!empty($this->searchAfter)) {
+            $searchParams['body']['search_after'] = $this->searchAfter;
+        }
+
+        return $searchParams;
     }
 }

@@ -3,6 +3,7 @@
 namespace Tests;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use App\Exceptions\Tests\MissingTestDealerIdException;
@@ -131,10 +132,10 @@ abstract class TestCase extends BaseTestCase
     /**
      * @param Model $model
      * @param string $methodName
-     * @param Model $relation
+     * @param Model|null $relation
      * @return void
      */
-    protected function initHasOneRelation(Model $model, string $methodName, Model $relation)
+    protected function initHasOneRelation(Model $model, string $methodName, ?Model $relation)
     {
         $hasOne = Mockery::mock(HasOne::class);
 
@@ -142,6 +143,22 @@ abstract class TestCase extends BaseTestCase
         $model->shouldReceive($methodName)->andReturn($hasOne);
 
         $hasOne->shouldReceive('getResults')->andReturn($relation);
+    }
+
+    /**
+     * @param Model $model
+     * @param string $methodName
+     * @param Model|null $relation
+     * @return void
+     */
+    protected function initBelongsToRelation(Model $model, string $methodName, ?Model $relation)
+    {
+        $belongsTo = Mockery::mock(BelongsTo::class);
+
+        $model->shouldReceive('setRelation')->passthru();
+        $model->shouldReceive($methodName)->andReturn($belongsTo);
+
+        $belongsTo->shouldReceive('getResults')->andReturn($relation);
     }
 
     /**

@@ -14,6 +14,7 @@ use App\Traits\Repository\Transaction;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class ListingRepository implements ListingRepositoryInterface {
     use SortTrait, Transaction;
@@ -150,7 +151,7 @@ class ListingRepository implements ListingRepositoryInterface {
                           ->where('dealer_id', '=', $integration->dealer_id)
                           ->where('show_on_website', 1)
             ->where(Inventory::getTableName() . '.entity_type_id', '<>', EntityType::ENTITY_TYPE_BUILDING)
-            ->whereRaw('LENGTH(' . Inventory::getTableName() . '.description) >= '. INVENTORY::MIN_DESCRIPTION_LENGTH_FOR_FACEBOOK)
+            ->whereRaw('LENGTH(' . Inventory::getTableName() . '.description) >= ' . INVENTORY::MIN_DESCRIPTION_LENGTH_FOR_FACEBOOK)
             ->where(Inventory::getTableName() . '.price', '>', INVENTORY::MIN_PRICE_FOR_FACEBOOK)
                           ->has('orderedImages')
                           ->where(function(Builder $query) {
@@ -250,5 +251,16 @@ class ListingRepository implements ListingRepositoryInterface {
 
         // Return Paginated Inventory
         return $query->paginate($params['per_page'])->appends($params);
+    }
+
+    /**
+     * Count Inventory posted today on Facebook
+     * 
+     * @param Marketplace $integration
+     * @return int
+     */
+    public function countFacebookPostings(Marketplace $integration): int
+    {
+        return Listings::where('marketplace_id', '=', $integration->id)->whereDate('created_at', Carbon::today())->count();
     }
 }

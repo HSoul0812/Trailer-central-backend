@@ -12,10 +12,12 @@ use App\Models\CRM\Email\BlastCategory;
 use App\Models\CRM\Email\BlastSent;
 use App\Models\CRM\Email\Bounce;
 use App\Models\Inventory\Inventory;
+use App\Models\CRM\Leads\InventoryLead;
 use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Class Email Blast
@@ -84,6 +86,7 @@ class Blast extends Model
         'include_archived',
         'delivered',
         'cancelled',
+        'send_date',
     ];
 
     /**
@@ -104,7 +107,7 @@ class Blast extends Model
 
     /**
      * Get Template
-     * 
+     *
      * @return BelongsTo
      */
     public function template(): BelongsTo
@@ -113,17 +116,17 @@ class Blast extends Model
     }
 
     /**
-     * @return type
+     * @return HasMany
      */
-    public function brands()
+    public function brands(): HasMany
     {
         return $this->hasMany(BlastBrand::class, 'email_blast_id');
     }
 
     /**
-     * @return type
+     * @return HasMany
      */
-    public function categories()
+    public function categories(): HasMany
     {
         return $this->hasMany(BlastCategory::class, 'email_blast_id');
     }
@@ -147,7 +150,7 @@ class Blast extends Model
 
     /**
      * Get Lead ID's for Text Blast
-     * 
+     *
      * @return array<int>
      */
     public function getLeadIdsAttribute()
@@ -172,7 +175,10 @@ class Blast extends Model
 
             // Add IN
             if(count($categories) > 0) {
-                $query = $query->whereIn(Inventory::getTableName() . '.category', $categories);
+                $query->where(function (Builder $query) use ($categories) {
+                    $query->whereIn(Inventory::getTableName() . '.category', $categories)
+                          ->orWhereIn('unit.category', $categories);
+                });
             }
         }
 
@@ -185,10 +191,13 @@ class Blast extends Model
 
             // Add IN
             if(count($brands) > 0) {
-                $query = $query->whereIn(Inventory::getTableName() . '.manufacturer', $brands);
+                $query->where(function (Builder $query) use ($brands) {
+                    $query->whereIn(Inventory::getTableName() . '.manufacturer', $brands)
+                          ->orWhereIn('unit.manufacturer', $brands);
+                });
             }
         }
-        
+
         // Valid Status?
         switch($blast->action) {
             case self::ACTION_INQUIRED:
@@ -242,7 +251,7 @@ class Blast extends Model
 
     /**
      * Get Builder Object for Blast Leads
-     * 
+     *
      * @return Builder
      */
     private function leadsBase(): Builder {
@@ -253,6 +262,10 @@ class Blast extends Model
         return Lead::select(Lead::getTableName() . '.*')
                    ->leftJoin(Inventory::getTableName(), Lead::getTableName() . '.inventory_id',
                                 '=', Inventory::getTableName() . '.inventory_id')
+                   ->leftJoin(InventoryLead::getTableName(), Lead::getTableName() . '.identifier',
+                                '=', InventoryLead::getTableName() . '.website_lead_id')
+                   ->leftJoin(Inventory::getTableName() . ' as unit', 'unit.inventory_id',
+                                '=', InventoryLead::getTableName() . '.inventory_id')
                    ->leftJoin(BlastSent::getTableName(), function($join) use($blast) {
                         return $join->on(BlastSent::getTableName() . '.lead_id',
                                             '=', Lead::getTableName() . '.identifier')

@@ -40,6 +40,10 @@ class EntityType extends Model {
 
     public const ENTITY_TYPE_BUILDING = 10;
 
+    public const ENTITY_TYPE_RV = 3;
+
+    public const ENTITY_TYPE_WATERCRAFT = 5;
+
     /**
      * The table associated with the model.
      *

@@ -3,6 +3,7 @@
 namespace App\Services\Integration\Microsoft;
 
 use App\Exceptions\Common\MissingFolderException;
+use App\Exceptions\Common\InvalidEmailCredentialsException;
 use App\Exceptions\Integration\Microsoft\CannotReceiveOffice365MessagesException;
 use App\Exceptions\Integration\Microsoft\MissingAzureIdTokenException;
 use App\Models\Integration\Auth\AccessToken;

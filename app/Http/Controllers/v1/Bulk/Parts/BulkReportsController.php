@@ -7,9 +7,12 @@ namespace App\Http\Controllers\v1\Bulk\Parts;
 use App\Http\Controllers\v1\Jobs\MonitoredJobsController;
 use App\Http\Requests\Bulk\Parts\CreateBulkReportRequest;
 use App\Http\Requests\Dms\ServiceOrder\GetServiceReportRequest;
+use App\Jobs\Bulk\Parts\FinancialReportCsvExportJob;
 use App\Repositories\Dms\StockRepositoryInterface;
+use App\Services\Export\FilesystemPdfExporter;
 use App\Transformers\Bulk\Stock\StockReportTransformer;
 use Dingo\Api\Http\Response;
+use Illuminate\Support\Facades\Storage;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Manager;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -22,8 +25,6 @@ use App\Models\Bulk\Parts\BulkReportPayload;
 use App\Repositories\Bulk\Parts\BulkReportRepositoryInterface;
 use App\Services\Export\Parts\BulkReportJobServiceInterface;
 use App\Services\Dms\ServiceOrder\BulkCsvTechnicianReportServiceInterface;
-use App\Services\Export\FilesystemPdfExporter;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\JsonResponse;
 use Dingo\Api\Http\Request;
 use Exception;
@@ -64,7 +65,12 @@ class BulkReportsController extends MonitoredJobsController
     {
         parent::__construct($jobsRepository);
 
-        $this->middleware('setDealerIdOnRequest')->only(['financials', 'financialsExport', 'serviceReportExport']);
+        $this->middleware('setDealerIdOnRequest')->only([
+            'financials',
+            'financialsExportPdf',
+            'serviceReportExport',
+            'financialsExportCsv',
+        ]);
 
         $this->repository = $repository;
         $this->stockRepository = $stockRepository;
@@ -152,7 +158,7 @@ class BulkReportsController extends MonitoredJobsController
      * @throws Exception
      *
      * @OA\Post(
-     *     path="/api/reports/financials-stock-export",
+     *     path="/api/reports/financials-stock-export/pdf",
      *     description="Create a bulk pdf file download request",
      *     tags={"BulkReportParts"},
      *     @OA\Parameter(
@@ -204,7 +210,7 @@ class BulkReportsController extends MonitoredJobsController
      *     )
      * )
      */
-    public function financialsExport(Request $request): JsonResponse
+    public function financialsExportPdf(Request $request): JsonResponse
     {
         $request = new CreateBulkReportRequest($request->all());
 
@@ -228,6 +234,89 @@ class BulkReportsController extends MonitoredJobsController
         }
 
         $this->response->errorBadRequest();
+    }
+
+    /**
+     * Create a bulk CSV file download request
+     *
+     * @param Request $request
+     * @return JsonResponse|void when there is a bad request it will throw an HttpException and request life cycle ends
+     * @throws Exception
+     *
+     * @OA\Post(
+     *     path="/api/reports/financials-stock-export/csv",
+     *     description="Create a bulk CSV file download request",
+     *     tags={"BulkReportParts"},
+     *     @OA\Parameter(
+     *         name="dealer_id",
+     *         in="path",
+     *         description="The dealer ID.",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="token",
+     *         in="path",
+     *         description="The token for the job.",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="search_term",
+     *         in="path",
+     *         description="Search by sku/stock, title and bin_name",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="type_of_stock",
+     *         in="path",
+     *         description="Type of data, ot could be inventories, parts and mixed",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="from_date",
+     *         in="path",
+     *         description="Initial date using format YYYY-MM-DD",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *      @OA\Parameter(
+     *         name="to_date",
+     *         in="path",
+     *         description="Final date using format YYYY-MM-DD",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="",
+     *         @OA\JsonContent()
+     *     )
+     * )
+     */
+    public function financialsExportCsv(Request $request): JsonResponse
+    {
+        $request = new CreateBulkReportRequest($request->all());
+
+        $request->validate();
+
+        $payload = BulkReportPayload::from([
+            'filename' => str_replace('.', '-', uniqid('financials-parts-' . date('Ymd'), true)) . '.csv',
+            'type' => BulkReport::TYPE_FINANCIALS,
+            'filters' => $request->all()
+        ]);
+
+        $model = $this->service
+            ->setup($request->get('dealer_id'), $payload, $request->get('token'))
+            ->withQueueableJob(static function (BulkReport $job): FinancialReportCsvExportJob {
+                return new FinancialReportCsvExportJob($job->token);
+            });
+
+        $this->service->dispatch($model);
+
+        return response()->json(['token' => $model->token], 202);
     }
 
     /**
@@ -325,7 +414,8 @@ class BulkReportsController extends MonitoredJobsController
         $payload = BulkReportPayload::from($job->payload);
 
         return response()->streamDownload(static function () use ($payload) {
-            fpassthru(Storage::disk('s3')->readStream(FilesystemPdfExporter::PDF_EXPORT_S3_PREFIX . $payload->filename));
+            //@todo this should be move to the responsible service
+            fpassthru(Storage::disk('s3')->readStream(FilesystemPdfExporter::RUNTIME_PREFIX . $payload->filename));
         }, $payload->filename);
     }
 }

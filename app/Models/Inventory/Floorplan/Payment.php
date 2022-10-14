@@ -9,6 +9,7 @@ use App\Models\Inventory\Inventory;
 
 class Payment extends Model
 {
+    const PAYMENT_TYPES_CHECK = 'check';
 
     const PAYMENT_CATEGORIES = [
         'Balance' => 'balance',
@@ -17,7 +18,7 @@ class Payment extends Model
 
     const PAYMENT_TYPES = [
         'Cash' => 'cash',
-        'Check' => 'check',
+        'Check' => self::PAYMENT_TYPES_CHECK,
         'Ach' => 'ach'
     ];
 
@@ -36,5 +37,4 @@ class Payment extends Model
     {
         return $this->belongsTo(Inventory::class, 'inventory_id', 'inventory_id');
     }
-
 }
