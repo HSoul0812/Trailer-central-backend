@@ -485,7 +485,7 @@ class InventoryController extends RestfulControllerV2
             $result = $this->inventoryElasticSearchService->search(
                 $searchRequest->dealerIds(),
                 $searchRequest->terms(),
-                $searchRequest->location(),
+                $searchRequest->geolocation(),
                 $searchRequest->sort(),
                 $searchRequest->pagination()
             );
