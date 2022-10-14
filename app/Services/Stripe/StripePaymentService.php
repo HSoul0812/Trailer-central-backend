@@ -6,6 +6,7 @@ use App\Services\Inventory\InventoryServiceInterface;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
+use Illuminate\Support\Carbon;
 use Stripe\Exception\SignatureVerificationException;
 use Stripe\Exception\UnexpectedValueException;
 use Stripe\Stripe;
@@ -69,8 +70,13 @@ class StripePaymentService implements StripePaymentServiceInterface
             'full_response' => json_encode($session->values())
         ]);
 
+        // TODO: expiry date varies based product id.
+        $ttPaymentExpirationDate = Carbon::now()->addMonth();
+
         $this->inventoryService->update($userId, [
-            'inventory_id' => $inventoryId
+            'inventory_id' => $inventoryId,
+            'show_on_website' => 1,
+            'tt_payment_expiration_date' => $ttPaymentExpirationDate
         ]);
 
         \Log::info('session', $session->values());
