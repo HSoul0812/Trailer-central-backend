@@ -3,8 +3,6 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
 use App\Models\User\Location\Geolocation;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\Inventory\Geolocation\Point;
@@ -42,24 +40,12 @@ class LatLongPrecisionUpdaterCommand extends Command
 
         $this->info("Processing {$baseQuery->count()} records...");
 
-        $cacheKey = self::class;
-
-        $exists = Cache::get(self::class);
-
-        $this->process(!!$exists, $baseQuery,  $cacheKey, $exists);
+        $this->process($baseQuery);
     }
 
-    private function process(bool $continue, Builder $query, string $cacheKey, $position = null)
+    private function process(Builder $query)
     {
-        $startPos = 0;
-
-        if ($continue) {
-            $startPos = intval($position) ?? 0;
-        }
-
-        // TODO: Pass the start position to the chunk method so inturrupted processes continue from where they were inturupted
-
-        $query->chunk(500, function($data, $chunkNumber) use ($cacheKey) {
+        $query->chunk(500, function($data, $chunkNumber) {
             $this->alert("Processing chunk number '{$chunkNumber}'");
 
             $data->each(function(Geolocation $item) {
@@ -75,8 +61,6 @@ class LatLongPrecisionUpdaterCommand extends Command
                     'longitude' => $latLong->longitude
                 ]);
             });
-
-            Cache::set($cacheKey, $chunkNumber);
         });
     }
 
@@ -87,8 +71,6 @@ class LatLongPrecisionUpdaterCommand extends Command
      */
     protected function addError(Geolocation $item)
     {
-        Log::error("[geolocation:precision] Failed to get the lat/long value for {$item->id}");
-
         $this->error("Failed to get the lat/long value for {$item->id}");
     }
 

@@ -4,8 +4,6 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\User\DealerLocation;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
 use App\Models\User\Location\Geolocation;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -45,13 +43,7 @@ class LatLongDealerPrecisionUpdaterCommand extends Command
 
         $this->info("Processing {$baseQuery->count()} records...");
 
-        $cacheKey = self::class;
-
-        $cachedItem = Cache::get($cacheKey);
-
-        $exists = !!$cachedItem;
-
-        $this->process($exists, $baseQuery,  $cacheKey, $cachedItem);
+        $this->process($baseQuery);
     }
 
     /**
@@ -59,17 +51,9 @@ class LatLongDealerPrecisionUpdaterCommand extends Command
      * 
      * @return void
      */
-    private function process(bool $continue, Builder $query, string $cacheKey, $position = null)
+    private function process(Builder $query)
     {
-        $startPos = 0;
-
-        if ($continue) {
-            $startPos = intval($position) ?? 0;
-        }
-
-        // TODO: Pass the start position to the chunk method so inturrupted processes continue from where they were inturupted
-
-        $query->chunk(500, function($data, $chunkNumber) use ($cacheKey) {
+        $query->chunk(500, function($data, $chunkNumber) {
             $this->alert("Processing chunk number '{$chunkNumber}'");
 
             $data->each(function(DealerLocation $location) {
@@ -137,8 +121,6 @@ class LatLongDealerPrecisionUpdaterCommand extends Command
      */
     protected function addError(DealerLocation $location, string $query)
     {
-        Log::error("[geolocation:dealers] Failed to get the lat/long value for {$location->dealer_location_id} q. {$query}");
-
         $this->error("Failed to get the lat/long value for {$location->dealer_location_id} q. {$query}");
     }
 
