@@ -83,9 +83,6 @@ class LatLongDealerPrecisionUpdaterCommand extends Command
 
                 $this->findCreateOrUpdateGeolocationRecord($location, $latLong);
             });
-
-            // Remember current chunk number
-            Cache::set($cacheKey, $chunkNumber);
         });
     }
 
