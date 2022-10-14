@@ -32,7 +32,7 @@ class SetupTest extends TestCase
      *
      * @throws Exception
      */
-    public function testWillThrowAnException(): void
+    public function deprecatedTestWillThrowAnException(): void
     {
         // Given I have the three dependencies for "BulkCsvDownloadJobService" creation
         $dependencies = new BulkCsvDownloadJobServiceDependencies();
