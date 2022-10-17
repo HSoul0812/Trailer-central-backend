@@ -2,10 +2,14 @@
 
 namespace App\Providers;
 
-use App\Http\Clients\ElasticSearch\ElasticSearchClient;
-use App\Http\Clients\ElasticSearch\ElasticSearchClientInterface;
 use App\Repositories\Bulk\Inventory\BulkDownloadRepository;
 use App\Repositories\Bulk\Inventory\BulkDownloadRepositoryInterface;
+use App\Services\Export\Inventory\Bulk\BulkDownloadJobService;
+use App\Services\Export\Inventory\Bulk\BulkDownloadJobServiceInterface;
+use App\Services\Export\Inventory\Bulk\BulkPdfJobService;
+use App\Services\Export\Inventory\Bulk\BulkPdfJobServiceInterface;
+use App\Http\Clients\ElasticSearch\ElasticSearchClient;
+use App\Http\Clients\ElasticSearch\ElasticSearchClientInterface;
 use App\Repositories\Bulk\Inventory\BulkUploadRepository;
 use App\Repositories\Bulk\Inventory\BulkUploadRepositoryInterface;
 use App\Repositories\Inventory\AttributeRepository;
@@ -55,10 +59,6 @@ use App\Services\ElasticSearch\Inventory\Builders\QueryBuilder;
 use App\Services\ElasticSearch\Inventory\FieldMapperService;
 use App\Services\ElasticSearch\Inventory\InventoryFieldMapperServiceInterface;
 use App\Services\ElasticSearch\Inventory\InventoryQueryBuilderInterface;
-use App\Services\Export\Inventory\Bulk\BulkDownloadJobService;
-use App\Services\Export\Inventory\Bulk\BulkDownloadJobServiceInterface;
-use App\Services\Export\Inventory\Bulk\BulkPdfJobService;
-use App\Services\Export\Inventory\Bulk\BulkPdfJobServiceInterface;
 use App\Services\Import\Inventory\CsvImportService;
 use App\Services\Import\Inventory\CsvImportServiceInterface;
 use App\Services\Inventory\CustomOverlay\CustomOverlayService;
@@ -73,7 +73,6 @@ use App\Services\Inventory\Packages\PackageService;
 use App\Services\Inventory\Packages\PackageServiceInterface;
 use Illuminate\Support\ServiceProvider;
 use Validator;
-
 /**
  * Class InventoryServiceProvider
  * @package App\Providers

@@ -266,6 +266,10 @@ class InventoryService implements InventoryServiceInterface
                 $params['description_html'] = $this->convertMarkdown($params['description']);
             }
 
+            if (!empty($params['is_archived']) && $params['is_archived'] == 1) {
+                $params['archived_at'] = Carbon::now()->format('Y-m-d H:i:s');
+            }
+
             $inventory = $this->inventoryRepository->update($params, $options);
 
             if (!$inventory instanceof Inventory) {
@@ -851,6 +855,9 @@ class InventoryService implements InventoryServiceInterface
         $input = str_replace('****', '', $input);
         $input = str_replace('__', '', $input);
 
+
+        $input = preg_replace('/<(?!br\s*\/?)[^<>]+>/', '', $input);
+
         // Try/Catch Errors
         $converted = '';
         $exception = '';
@@ -865,6 +872,8 @@ class InventoryService implements InventoryServiceInterface
         // Convert Markdown to HTML
         $description = preg_replace('/\\\\/', '<br>', $converted);
 
+        // to fix CDW-824 problems
+        $description = nl2br($description);
 
         // taken from previous CDW-824 solution
         $description = str_replace('<code>', '', $description);
@@ -884,28 +893,44 @@ class InventoryService implements InventoryServiceInterface
      */
     private function fixNonAsciiChars(string $description)
     {
-        $description = preg_replace('/<(?!br\s*\/?)[^<>]+>/', '<br />', $description);
-
 
         $description = preg_replace('/(\\?\*){2,}/', '**', $description);
         $description = preg_replace('/(\\?_)+/', '_', $description);
         $description = preg_replace('/\\+/', '', $description);
 
         // Fix 0xa0 or nbsp
-        $description = preg_replace('/\0xa0/', ' ', $description);
-        $description = preg_replace('/\0xBE/', '3/4', $description);
-        $description = preg_replace('/\0xBC/', '1/4', $description);
-        $description = preg_replace('/\0xBD/', '1/2', $description);
+        $description = preg_replace('/\xA0/', ' ', $description);
+        $description = preg_replace('/\xBE/', '3/4', $description);
+        $description = preg_replace('/\xBC/', '1/4', $description);
+        $description = preg_replace('/\xBD/', '1/2', $description);
 
-        $description = preg_replace('/\0x91/', "'", $description);
-        $description = preg_replace('/\0x92/', "'", $description);
-        $description = preg_replace('/\0xB4/', "'", $description);
-        $description = preg_replace('/\0x27/', "'", $description);
+        $description = preg_replace('/\x91/', "'", $description);
+        $description = preg_replace('/\x92/', "'", $description);
+        $description = preg_replace('/\xB4/', "'", $description);
+        $description = preg_replace('/\x27/', "'", $description);
 
-        $description = preg_replace('/\0x93/', '"', $description);
-        $description = preg_replace('/\0x94/', '"', $description);
+        $description = preg_replace('/\x93/', '"', $description);
+        $description = preg_replace('/\x94/', '"', $description);
         $description = preg_replace('/”/', '"', $description);
         $description = preg_replace('/’/', "'", $description);
+
+        $description = preg_replace('/©/', "Copyright", $description);
+        $description = preg_replace('/®/', "Registered", $description);
+
+        $description = preg_replace('/[[:^print:]]/', ' ', $description);
+
+        preg_match('/<ul>(.*?)<\/ul>/s', $description, $match);
+        if (!empty($match)) {
+            $new_ul = strip_tags($match[0], '<ul><li><a><b><strong>');
+            $description = str_replace($match[0], $new_ul, $description);
+        }
+
+        // Only accepts necessary tags
+        preg_match('/<ol>(.*?)<\/ol>/s', $description, $match);
+        if (!empty($match)) {
+            $new_ol = strip_tags($match[0], '<ul><li><a><b><strong>');
+            $description = str_replace($match[0], $new_ol, $description);
+        }
 
         return $description;
     }

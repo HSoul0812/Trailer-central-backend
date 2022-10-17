@@ -743,6 +743,7 @@ $api->version('v1', function ($route) {
         |
         |
         */
+        $route->get('user/integrations', 'App\Http\Controllers\v1\User\DealerIntegrationController@index');
         $route->get('user/integrations/{id}', 'App\Http\Controllers\v1\User\DealerIntegrationController@show');
 
         /*

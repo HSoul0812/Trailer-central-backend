@@ -69,7 +69,9 @@ class ADFJob extends Job
      */
     public function handle()
     {
-        Log::info('Mailing ADF Lead', ['lead' => $this->adf->leadId]);
+        // Initialize Log
+        $log = Log::channel('leads-export');
+        $log->info('Mailing ADF Lead', ['lead' => $this->adf->leadId]);
 
         try {
             Mail::to($this->toEmails) 
@@ -84,11 +86,13 @@ class ADFJob extends Job
                 $this->lead->adf_email_sent = Carbon::now()->setTimezone('UTC')->toDateTimeString();
                 $this->lead->save();
             }
-            
-            Log::info('ADF Lead Mailed Successfully', ['lead' => $this->adf->leadId]);
+
+            // ADF Lead Sent
+            $log->info('ADF Lead Mailed Successfully', ['lead' => $this->adf->leadId]);
             return true;
         } catch (\Exception $e) {
-            Log::error('ADFLead Mail error', $e->getTrace());
+            // ADF Lead Mail Error
+            $log->error('ADFLead Mail error', $e->getTrace());
             throw $e;
         }
     }

@@ -44,7 +44,7 @@ return [
         'single' => [
             'driver' => 'single',
             'path' => storage_path('logs/laravel.log'),
-            'level' => 'debug',
+            'level' => env('LOG_LEVEL', 'error'),
             'permission' => 0664,
             'tap' => [\App\Logging\DailyLogWithUsername::class],
         ],
@@ -52,7 +52,7 @@ return [
         'daily' => [
             'driver' => 'daily',
             'path' => storage_path('logs/laravel.log'),
-            'level' => 'debug',
+            'level' => env('LOG_LEVEL', 'error'),
             'days' => 7,
             'permission' => 0664,
             'tap' => [\App\Logging\DailyLogWithUsername::class],
@@ -61,7 +61,7 @@ return [
         'inquiry' => [
             'driver' => 'daily',
             'path' => storage_path('logs/services/inquiry.log'),
-            'level' => 'debug',
+            'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
         ],
@@ -69,7 +69,7 @@ return [
         'autoassign' => [
             'driver' => 'daily',
             'path' => storage_path('logs/commands/auto-assign.log'),
-            'level' => 'debug',
+            'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
         ],
@@ -77,7 +77,7 @@ return [
         'scraperepliesjob' => [
             'driver' => 'daily',
             'path' => storage_path('logs/commands/scrape-replies-job.log'),
-            'level' => 'debug',
+            'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
         ],
@@ -85,7 +85,7 @@ return [
         'scrapereplies' => [
             'driver' => 'daily',
             'path' => storage_path('logs/commands/scrape-replies.log'),
-            'level' => 'debug',
+            'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
         ],
@@ -93,7 +93,7 @@ return [
         'textcampaign' => [
             'driver' => 'daily',
             'path' => storage_path('logs/commands/text-campaigns.log'),
-            'level' => 'debug',
+            'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
         ],
@@ -101,7 +101,15 @@ return [
         'import' => [
             'driver' => 'daily',
             'path' => storage_path('logs/commands/import.log'),
-            'level' => 'debug',
+            'level' => env('LOG_LEVEL', 'error'),
+            'days' => 3,
+            'permission' => 0664,
+        ],
+
+        'leads-export' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/jobs/leads-export.log'),
+            'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
         ],
@@ -109,7 +117,7 @@ return [
         'auth' => [
             'driver' => 'daily',
             'path' => storage_path('logs/services/auth.log'),
-            'level' => 'debug',
+            'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
         ],
@@ -117,7 +125,7 @@ return [
         'imap' => [
             'driver' => 'daily',
             'path' => storage_path('logs/services/imap.log'),
-            'level' => 'debug',
+            'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
         ],
@@ -125,7 +133,7 @@ return [
         'google' => [
             'driver' => 'daily',
             'path' => storage_path('logs/services/google.log'),
-            'level' => 'debug',
+            'level' => env('LOG_LEVEL', 'error'),
             'days' => 7,
             'permission' => 0664,
         ],
@@ -133,7 +141,7 @@ return [
         'facebook' => [
             'driver' => 'daily',
             'path' => storage_path('logs/services/facebook.log'),
-            'level' => 'debug',
+            'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
         ],
@@ -141,7 +149,7 @@ return [
         'fb-catalog' => [
             'driver' => 'daily',
             'path' => storage_path('logs/services/fb-catalog.log'),
-            'level' => 'debug',
+            'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
         ],
@@ -149,7 +157,7 @@ return [
         'leads' => [
             'driver' => 'daily',
             'path' => storage_path('logs/services/leads.log'),
-            'level' => 'debug',
+            'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
         ],
@@ -157,7 +165,7 @@ return [
         'emailbuilder' => [
             'driver' => 'daily',
             'path' => storage_path('logs/services/emailbuilder.log'),
-            'level' => 'debug',
+            'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
         ],
@@ -165,7 +173,7 @@ return [
         'texts' => [
             'driver' => 'daily',
             'path' => storage_path('logs/services/texts.log'),
-            'level' => 'debug',
+            'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
         ],
@@ -173,7 +181,7 @@ return [
         'marketplace' => [
             'driver' => 'daily',
             'path' => storage_path('logs/services/marketplace.log'),
-            'level' => 'debug',
+            'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
         ],
@@ -181,7 +189,7 @@ return [
         'dispatch-fb' => [
             'driver' => 'daily',
             'path' => storage_path('logs/dispatch/facebook.log'),
-            'level' => 'debug',
+            'level' => env('LOG_LEVEL', 'error'),
             'days' => 7,
             'permission' => 0664,
         ],
@@ -189,7 +197,7 @@ return [
         'azure' => [
             'driver' => 'daily',
             'path' => storage_path('logs/services/azure.log'),
-            'level' => 'debug',
+            'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
         ],
@@ -197,7 +205,7 @@ return [
         'tunnels' => [
             'driver' => 'daily',
             'path' => storage_path('logs/repositories/tunnels.log'),
-            'level' => 'debug',
+            'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
         ],
@@ -212,7 +220,7 @@ return [
 
         'papertrail' => [
             'driver' => 'monolog',
-            'level' => 'debug',
+            'level' => env('LOG_LEVEL', 'error'),
             'handler' => SyslogUdpHandler::class,
             'handler_with' => [
                 'host' => env('PAPERTRAIL_URL'),
@@ -239,12 +247,12 @@ return [
 
         'syslog' => [
             'driver' => 'syslog',
-            'level' => 'debug',
+            'level' => env('LOG_LEVEL', 'error'),
         ],
 
         'errorlog' => [
             'driver' => 'errorlog',
-            'level' => 'debug',
+            'level' => env('LOG_LEVEL', 'error'),
         ],
 
         'null' => [
@@ -269,7 +277,7 @@ return [
         'blog' => [
             'driver' => 'daily',
             'path' => storage_path('logs/services/blog.log'),
-            'level' => 'debug',
+            'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
         ],

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "55b45f918b07d9b808b1b97a5fad2cd5",
+    "content-hash": "9450dedfaab24c83b2146a312e23b6e5",
     "packages": [
         {
             "name": "algolia/algoliasearch-client-php",
@@ -192,16 +192,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.235.12",
+            "version": "3.235.15",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "e0ebecfb0284dc44dc99a172cd9c68c40739904c"
+                "reference": "635914c29fc875c58a85fdf981c27f1f561eaf50"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/e0ebecfb0284dc44dc99a172cd9c68c40739904c",
-                "reference": "e0ebecfb0284dc44dc99a172cd9c68c40739904c",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/635914c29fc875c58a85fdf981c27f1f561eaf50",
+                "reference": "635914c29fc875c58a85fdf981c27f1f561eaf50",
                 "shasum": ""
             },
             "require": {
@@ -280,9 +280,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.235.12"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.235.15"
             },
-            "time": "2022-09-20T18:18:07+00:00"
+            "time": "2022-09-23T18:16:52+00:00"
         },
         {
             "name": "babenkoivan/elastic-adapter",
@@ -2384,11 +2384,11 @@
         },
         {
             "name": "feed/edit-mapping",
-            "version": "dev-feature/CRM-547-fix-imap-causing-memory-overload",
+            "version": "dev-forked/feature/DMSS-811",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/EditMapping",
-                "reference": "8fd7d56324ac0c7c64f8886e4ff46e0991f75b69"
+                "reference": "b43729ad6fdf37df73dbc44aa30beefbf5e3c2a4"
             },
             "require": {
                 "php": ">=7.1.0"
@@ -2636,16 +2636,16 @@
         },
         {
             "name": "giggsey/libphonenumber-for-php",
-            "version": "8.12.55",
+            "version": "8.12.56",
             "source": {
                 "type": "git",
                 "url": "https://github.com/giggsey/libphonenumber-for-php.git",
-                "reference": "a4f21baace2038d4d47206aec15209365b629e86"
+                "reference": "0f6481df7bee33fe0ed87d2af06770527a2e1c86"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/giggsey/libphonenumber-for-php/zipball/a4f21baace2038d4d47206aec15209365b629e86",
-                "reference": "a4f21baace2038d4d47206aec15209365b629e86",
+                "url": "https://api.github.com/repos/giggsey/libphonenumber-for-php/zipball/0f6481df7bee33fe0ed87d2af06770527a2e1c86",
+                "reference": "0f6481df7bee33fe0ed87d2af06770527a2e1c86",
                 "shasum": ""
             },
             "require": {
@@ -2705,7 +2705,7 @@
                 "issues": "https://github.com/giggsey/libphonenumber-for-php/issues",
                 "source": "https://github.com/giggsey/libphonenumber-for-php"
             },
-            "time": "2022-09-09T12:56:05+00:00"
+            "time": "2022-09-23T15:16:03+00:00"
         },
         {
             "name": "giggsey/locale",
@@ -2833,16 +2833,16 @@
         },
         {
             "name": "google/apiclient-services",
-            "version": "v0.267.0",
+            "version": "v0.268.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/google-api-php-client-services.git",
-                "reference": "fd342b0abaedda02b76acf8df9e0cb798377c562"
+                "reference": "af3e1549ae62ed93ba94a57c5c3d65750b0b0ccf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/google-api-php-client-services/zipball/fd342b0abaedda02b76acf8df9e0cb798377c562",
-                "reference": "fd342b0abaedda02b76acf8df9e0cb798377c562",
+                "url": "https://api.github.com/repos/googleapis/google-api-php-client-services/zipball/af3e1549ae62ed93ba94a57c5c3d65750b0b0ccf",
+                "reference": "af3e1549ae62ed93ba94a57c5c3d65750b0b0ccf",
                 "shasum": ""
             },
             "require": {
@@ -2871,9 +2871,9 @@
             ],
             "support": {
                 "issues": "https://github.com/googleapis/google-api-php-client-services/issues",
-                "source": "https://github.com/googleapis/google-api-php-client-services/tree/v0.267.0"
+                "source": "https://github.com/googleapis/google-api-php-client-services/tree/v0.268.0"
             },
-            "time": "2022-09-18T01:06:12+00:00"
+            "time": "2022-09-24T01:34:14+00:00"
         },
         {
             "name": "google/auth",
@@ -7507,6 +7507,63 @@
             "time": "2022-07-28T14:25:11+00:00"
         },
         {
+            "name": "quickbooks/v3-php-sdk",
+            "version": "6.0.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/intuit/QuickBooks-V3-PHP-SDK.git",
+                "reference": "a2cc23508c8b1c1d8c595d249e5c114917a2f65d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/intuit/QuickBooks-V3-PHP-SDK/zipball/a2cc23508c8b1c1d8c595d249e5c114917a2f65d",
+                "reference": "a2cc23508c8b1c1d8c595d249e5c114917a2f65d",
+                "shasum": ""
+            },
+            "require": {
+                "ext-dom": "*",
+                "ext-mbstring": "*",
+                "php": ">=5.6.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^5.0 || ^6.0 || ^7.0"
+            },
+            "suggest": {
+                "ext-curl": "Uses Curl to make HTTP Requests",
+                "guzzlehttp/guzzle": "Uses Guzzle to make HTTP Requests"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "QuickBooksOnline\\API\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "abisalehalliprasan",
+                    "email": "anil_kumar3@intuit.com"
+                }
+            ],
+            "description": "The Official PHP SDK for QuickBooks Online Accounting API",
+            "homepage": "http://developer.intuit.com",
+            "keywords": [
+                "api",
+                "http",
+                "quickbooks",
+                "rest",
+                "smallbusiness"
+            ],
+            "support": {
+                "issues": "https://github.com/intuit/QuickBooks-V3-PHP-SDK/issues",
+                "source": "https://github.com/intuit/QuickBooks-V3-PHP-SDK/tree/6.0.5"
+            },
+            "time": "2022-05-19T22:36:55+00:00"
+        },
+        {
             "name": "ralouphie/getallheaders",
             "version": "3.0.3",
             "source": {
@@ -8038,11 +8095,11 @@
         },
         {
             "name": "showroom/bulkconfiguration",
-            "version": "dev-feature/CRM-547-fix-imap-causing-memory-overload",
+            "version": "dev-forked/feature/DMSS-811",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/BulkConfiguration",
-                "reference": "301e74370ef2fc821398541508586d9da25cd1c6"
+                "reference": "944cbcf3c2a02da0b424cb4db08de04352e51838"
             },
             "require": {
                 "php": ">=7.1.0"
@@ -11523,6 +11580,57 @@
             "time": "2022-01-26T16:05:39+00:00"
         },
         {
+            "name": "tcentral/qbo-sdk",
+            "version": "1.1.0",
+            "source": {
+                "type": "git",
+                "url": "git@bitbucket.org:tcentral/qbo-sdk.git",
+                "reference": "db45980e447da0381d7adab170844d7c11afb623"
+            },
+            "require": {
+                "php": ">=7.1",
+                "quickbooks/v3-php-sdk": "^6.0"
+            },
+            "require-dev": {
+                "codeception/codeception": "^4.1",
+                "codeception/module-asserts": "^1.0.0",
+                "codeception/module-phpbrowser": "^1.0.0",
+                "fakerphp/faker": "^1.19",
+                "mockery/mockery": "^1.3"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "TCentral\\QboSdk\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Tests\\": "tests/"
+                }
+            },
+            "scripts": {
+                "test": [
+                    "codecept run Unit"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Pond",
+                    "email": "pond@trailercentral.com"
+                },
+                {
+                    "name": "Vishnu",
+                    "email": "vishnu@trailercentral.com"
+                }
+            ],
+            "description": "QBO SDK library used internally by TrailerCentral",
+            "time": "2022-09-19T06:39:01+00:00"
+        },
+        {
             "name": "tightenco/collect",
             "version": "v7.26.1",
             "source": {
@@ -11631,11 +11739,11 @@
         },
         {
             "name": "trailercentral/passwordless-login-url",
-            "version": "dev-feature/CRM-547-fix-imap-causing-memory-overload",
+            "version": "dev-forked/feature/DMSS-811",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/PasswordlessLoginUrl",
-                "reference": "4fbc27f12cba8ed9058fbd0936433becb2a505eb"
+                "reference": "df06c93f1194ca42e1524d7406959adcbda814b4"
             },
             "require": {
                 "php": ">=7.1.0"
@@ -13421,16 +13529,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "9.5.24",
+            "version": "9.5.25",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "d0aa6097bef9fd42458a9b3c49da32c6ce6129c5"
+                "reference": "3e6f90ca7e3d02025b1d147bd8d4a89fd4ca8a1d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/d0aa6097bef9fd42458a9b3c49da32c6ce6129c5",
-                "reference": "d0aa6097bef9fd42458a9b3c49da32c6ce6129c5",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/3e6f90ca7e3d02025b1d147bd8d4a89fd4ca8a1d",
+                "reference": "3e6f90ca7e3d02025b1d147bd8d4a89fd4ca8a1d",
                 "shasum": ""
             },
             "require": {
@@ -13452,14 +13560,14 @@
                 "phpunit/php-timer": "^5.0.2",
                 "sebastian/cli-parser": "^1.0.1",
                 "sebastian/code-unit": "^1.0.6",
-                "sebastian/comparator": "^4.0.5",
+                "sebastian/comparator": "^4.0.8",
                 "sebastian/diff": "^4.0.3",
                 "sebastian/environment": "^5.1.3",
-                "sebastian/exporter": "^4.0.3",
+                "sebastian/exporter": "^4.0.5",
                 "sebastian/global-state": "^5.0.1",
                 "sebastian/object-enumerator": "^4.0.3",
                 "sebastian/resource-operations": "^3.0.3",
-                "sebastian/type": "^3.1",
+                "sebastian/type": "^3.2",
                 "sebastian/version": "^3.0.2"
             },
             "suggest": {
@@ -13503,7 +13611,7 @@
             ],
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/9.5.24"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/9.5.25"
             },
             "funding": [
                 {
@@ -13513,9 +13621,13 @@
                 {
                     "url": "https://github.com/sebastianbergmann",
                     "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/phpunit/phpunit",
+                    "type": "tidelift"
                 }
             ],
-            "time": "2022-08-30T07:42:16+00:00"
+            "time": "2022-09-25T03:44:45+00:00"
         },
         {
             "name": "scrivo/highlight.php",
@@ -14624,5 +14736,5 @@
         "ext-pcntl": "7.1",
         "ext-posix": "7.1"
     },
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.2.0"
 }

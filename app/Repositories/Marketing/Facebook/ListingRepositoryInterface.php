@@ -4,7 +4,7 @@ namespace App\Repositories\Marketing\Facebook;
 
 use App\Models\Marketing\Facebook\Marketplace;
 use App\Repositories\Repository;
-use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 interface ListingRepositoryInterface extends Repository {
     /**
@@ -12,7 +12,7 @@ interface ListingRepositoryInterface extends Repository {
      * 
      * @param Marketplace $integration
      * @param array $params
-     * @return LengthAwarePaginator<Listings>
+     * @return Collection<Listings>
      */
-    public function getAllMissing(Marketplace $integration, array $params): LengthAwarePaginator;
+    public function getAllMissing(Marketplace $integration, array $params): Collection;
 }
