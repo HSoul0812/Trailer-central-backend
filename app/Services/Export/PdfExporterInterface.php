@@ -6,5 +6,10 @@ namespace App\Services\Export;
 
 interface PdfExporterInterface extends ExporterInterface
 {
-
+    /**
+     * @return resource|null
+     *
+     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
+     */
+    public function readStream();
 }
