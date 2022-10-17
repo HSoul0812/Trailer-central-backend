@@ -159,7 +159,7 @@ return [
                     'scrapereplies',
                     'inquiry',
                     'fb-catalog',
-                    'fb-messenger',
+                    //'fb-messenger',
                     'ecommerce',
                     'crm-users',
                     'manufacturers'
@@ -187,7 +187,7 @@ return [
                     'scrapereplies',
                     'inquiry',
                     'fb-catalog',
-                    'fb-messenger',
+                    //'fb-messenger',
                     'ecommerce',
                     'crm-users',
                     'manufacturers'
@@ -205,7 +205,7 @@ return [
                 'queue' => [
                     'inventory',
                     'factory-feeds',
-                    'fb-messenger',
+                    //'fb-messenger',
                     'inquiry',
                     'blog-posts',
                     'ecommerce',

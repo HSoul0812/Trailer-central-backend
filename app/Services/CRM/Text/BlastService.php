@@ -238,10 +238,16 @@ class BlastService implements BlastServiceInterface
      * @return LeadStatus
      */
     private function updateLead(Lead $lead): LeadStatus {
-        // Save Lead Status
+        // If there was no status, or it was uncontacted, set to medium, otherwise, don't change.
+        if (empty($lead->leadStatus) || $lead->leadStatus->status === Lead::STATUS_UNCONTACTED) {
+            $status = Lead::STATUS_MEDIUM;
+        } else {
+            $status = $lead->leadStatus->status;
+        }
+
         return $this->leadStatus->createOrUpdate([
             'lead_id' => $lead->identifier,
-            'status' => Lead::STATUS_MEDIUM,
+            'status' => $status,
             'next_contact_date' => Carbon::now()->addDay()->toDateTimeString()
         ]);
     }

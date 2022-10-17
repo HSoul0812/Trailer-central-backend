@@ -2,23 +2,17 @@
 
 namespace App\Services\Export\Parts;
 
-use App\Contracts\LoggerServiceInterface;
-use App\Exceptions\Common\BusyJobException;
 use App\Models\Bulk\Parts\BulkDownload;
 use App\Models\Bulk\Parts\BulkDownloadPayload;
-use App\Models\Parts\Part;
 use App\Repositories\Bulk\Parts\BulkDownloadRepositoryInterface;
 use App\Repositories\Common\MonitoredJobRepositoryInterface;
 use App\Repositories\Dms\StockRepositoryInterface;
-use App\Repositories\Parts\PartRepositoryInterface;
 use App\Services\Common\AbstractMonitoredJobService;
 use App\Services\Export\FilesystemPdfExporter;
 use App\Services\Export\HasExporterInterface;
 use App\Services\Export\ManualFilesystemCsvExporter;
-use App\Transformers\Bulk\Stock\StockReportTransformer;
 use Exception;
 use Illuminate\Support\Facades\Storage;
-use League\Fractal\Resource\Collection;
 
 class BulkReportCsvJobService extends AbstractMonitoredJobService implements BulkReportCsvJobServiceInterface, HasExporterInterface
 {
@@ -64,10 +58,6 @@ class BulkReportCsvJobService extends AbstractMonitoredJobService implements Bul
      */
     public function setup(int $dealerId, $payload, ?string $token = null): BulkDownload
     {
-        if ($this->bulkRepository->isBusyByDealer($dealerId)) {
-//            throw new BusyJobException("This job can't be set up due there is currently other job working");
-        }
-
         return $this->bulkRepository->create([
             'dealer_id' => $dealerId,
             'token' => $token,
@@ -175,7 +165,7 @@ class BulkReportCsvJobService extends AbstractMonitoredJobService implements Bul
      */
     private function filePath(object $job): string
     {
-        return FilesystemPdfExporter::PDF_EXPORT_S3_PREFIX . $job->payload->filename;
+        return FilesystemPdfExporter::RUNTIME_PREFIX . $job->payload->filename;
     }
 
     /**
