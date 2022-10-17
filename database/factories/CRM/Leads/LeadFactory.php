@@ -12,8 +12,6 @@ use App\Models\Website\Website;
 use Faker\Generator as Faker;
 
 $factory->define(Lead::class, function (Faker $faker, array $attributes) {
-
-
     // Get Dealer ID
     $dealer_id = $attributes['dealer_id'] ?? factory(User::class)->create()->getKey();
 

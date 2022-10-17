@@ -59,6 +59,7 @@
         "psr/container": "1.1.1",
         "psr/log": "^1.0",
         "sentry/sentry-laravel": "^2.11",
+        "showroom/bulkconfiguration": "*",
         "spatie/browsershot": "~3.40.0",
         "spatie/image": "^1.10",
         "spatie/laravel-permission": "^3.0",
@@ -68,12 +69,12 @@
         "swiftmailer/swiftmailer": "^6.0",
         "symfony/css-selector": "^5.1",
         "symfony/dom-crawler": "^5.1",
+        "tcentral/qbo-sdk": "^1.0",
         "tijsverkoyen/css-to-inline-styles": "^2.2.1",
+        "trailercentral/passwordless-login-url": "*",
         "twilio/sdk": "^5.31",
         "vyuldashev/nova-permission": "^2.11",
-        "webklex/laravel-imap": "^3.0",
-        "showroom/bulkconfiguration": "*",
-        "trailercentral/passwordless-login-url": "*"
+        "webklex/laravel-imap": "^3.0"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.4",
@@ -141,6 +142,10 @@
         {
             "type": "path",
             "url": "./nova-components/PasswordlessLoginUrl"
+        },
+        {
+            "type": "vcs",
+            "url": "git@bitbucket.org:tcentral/qbo-sdk.git"
         }
     ],
     "minimum-stability": "dev",
