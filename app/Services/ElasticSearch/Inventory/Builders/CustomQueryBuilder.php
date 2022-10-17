@@ -2,6 +2,8 @@
 
 namespace App\Services\ElasticSearch\Inventory\Builders;
 
+use App\Models\Inventory\Inventory;
+
 /**
  * Builds a proper ES query for a custom fields & edge cases
  *   - show_images=jpg;png: which is *.jpg & *.png
@@ -19,7 +21,7 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
     private $data;
 
     /** @var string */
-    private const IMAGES_DELIMETER = ';';
+    private const IMAGES_DELIMITER = ';';
 
     /**
      * @param string $field
@@ -38,6 +40,11 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
                 return $this->buildImagesQuery();
             case 'clearance_special':
                 return $this->buildClearanceSpecialQuery();
+            case 'location_region':
+            case 'location_city':
+                return $this->buildLocationQuery();
+            case 'classifieds_site':
+                return $this->buildClassifiedsSiteQuery();
             default:
                 return [];
         }
@@ -48,14 +55,13 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
      */
     private function buildImagesQuery(): array
     {
-        $images = explode(self::IMAGES_DELIMETER, $this->data);
         return [
             'query' => [
                 'bool' => [
                     'must' => [
                         [
                             'dis_max' => [
-                                'queries' => array_map(function ($image) {
+                                'queries' => array_map(static function ($image) {
                                     return [
                                         'wildcard' => [
                                             'image' => [
@@ -63,7 +69,7 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
                                             ]
                                         ]
                                     ];
-                                }, $images)
+                                }, explode(self::IMAGES_DELIMITER, $this->data))
                             ]
                         ]
                     ]
@@ -110,6 +116,61 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
                 ]
             ];
         }
+
         return [];
+    }
+
+    private function buildLocationQuery(): array
+    {
+        $field = str_replace('_', '.', $this->field);
+
+        $query = [
+            'bool' => [
+                'must' => [
+                    [
+                        'term' => [
+                            $field => $this->data
+                        ]
+                    ]
+                ]
+            ]
+        ];
+
+        return [
+            'post_filter' => $query,
+            'aggregations' => [
+                'filter_aggregations' => ['filter' => $query]
+            ]
+        ];
+    }
+
+    private function buildClassifiedsSiteQuery(): array
+    {
+        // when it is not a classifieds site then it should filter by `isArchived` & `isArchived` & `status`
+        return $this->data ? [] : [
+            'query' => [
+                'bool' => [
+                    'must' => [
+                        [
+                            'term' => [
+                                'isArchived' => false
+                            ]
+                        ],
+                        [
+                            'term' => [
+                                'showOnWebsite' => true
+                            ]
+                        ]
+                    ],
+                    'must_not' => [
+                        [
+                            'term' => [
+                                'status' => Inventory::STATUS_QUOTE
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ];
     }
 }

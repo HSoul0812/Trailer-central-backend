@@ -19,7 +19,10 @@ class FieldMapperService implements InventoryFieldMapperServiceInterface
     /** @var string[] */
     private const EDGE_CASES_TO_GENERATE_QUERIES_FOR = [
         'show_images', //based on the show images config
-        'clearance_special' //based on all-inventory/all-clearance-specials for `pandpsales` & `pandprvs`
+        'clearance_special', // based on all-inventory/all-clearance-specials for `pandpsales` & `pandprvs`,
+        'location_region', //based on addRegionToElastic on DW
+        'location_city', // based on addRegionToElastic on DW
+        'classifieds_site' // based on InventoryCommon class on DW
     ];
 
     public function __construct(InventoryFilterRepositoryInterface $repository, Cache $cache)
@@ -45,8 +48,11 @@ class FieldMapperService implements InventoryFieldMapperServiceInterface
 
         if ($filter) {
             $className = __NAMESPACE__ . '\\Builders\\' . ucfirst($filter->type) . 'QueryBuilder';
+            
             return new $className($field, $data);
-        } else if (in_array($field, self::EDGE_CASES_TO_GENERATE_QUERIES_FOR)) {
+        }
+
+        if (in_array($field, self::EDGE_CASES_TO_GENERATE_QUERIES_FOR)) {
             return new CustomQueryBuilder($field, $data);
         }
 

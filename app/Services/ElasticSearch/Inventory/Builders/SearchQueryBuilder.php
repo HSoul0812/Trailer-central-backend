@@ -11,7 +11,7 @@ namespace App\Services\ElasticSearch\Inventory\Builders;
 class SearchQueryBuilder implements FieldQueryBuilderInterface
 {
     /** @var string */
-    private const DELIMETER = '|';
+    private const DELIMITER = '|';
 
     /** @var string */
     private $field;
@@ -46,13 +46,12 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
         'featureList.floorPlan' => 'featureList.floorPlan.txt^0.5',
     ];
 
-    /** @var string */
-    private const INCLUDE_DESCRIPTION_ON_SEARCH_CONFIG_KEY = 'inventory/include_description_on_search';
-
     public function __construct(string $field, string $data)
     {
         $this->field = $field;
-        $keywordParts = explode(self::DELIMETER, $data);
+
+        $keywordParts = explode(self::DELIMITER, $data);
+
         $this->value = array_pop($keywordParts);
         $this->ignore = $keywordParts;
     }
@@ -66,13 +65,14 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
                 $shouldQuery[] = $this->wildcardQuery();
                 break;
             default:
-                $columnsToSearch = $this->getSearchFields();
-                foreach ($columnsToSearch as $key => $column) {
+                foreach ($this->getSearchFields() as $key => $column) {
                     $boost = 1;
                     $columnValues = explode('^', $column);
+
                     if (isset($columnValues[$boostKey = 1])) {
-                        $boost = floatval($columnValues[$boostKey]);
+                        $boost = (float) $columnValues[$boostKey];
                     }
+
                     $shouldQuery[] = $this->matchQuery($columnValues[0], $boost);
                     $shouldQuery[] = $this->matchQuery($column, $boost);
 
@@ -99,7 +99,7 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
             'post_filter' => $searchQuery,
             'aggregations' => [
                 'filter_aggregations' => ['filter' => $searchQuery],
-                'location_aggregations' => ['filter' => $searchQuery]
+                'selected_location_aggregations' => ['filter' => $searchQuery]
             ]
         ];
     }
@@ -130,11 +130,11 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
     private function matchQuery(string $field, float $boost): array
     {
         return [
-            "match" => [
+            'match' => [
                 $field => [
-                    "query" => $this->value,
-                    "operator" => "and",
-                    "boost" => $boost
+                    'query' => $this->value,
+                    'operator' => 'and',
+                    'boost' => $boost
                 ]
             ]
         ];
@@ -142,15 +142,20 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
 
     private function getSearchFields(): array
     {
-        if ($this->field == 'description') {
+        if ($this->field === 'description') {
             $descriptionSearchFields = self::DESCRIPTION_SEARCH_FIELDS;
+
             foreach ($this->ignore as $ignore) {
                 unset($descriptionSearchFields[$ignore]);
             }
+
             return $descriptionSearchFields;
-        } else if (isset(self::SEARCH_FIELDS[$this->field])) {
+        }
+
+        if (isset(self::SEARCH_FIELDS[$this->field])) {
             return [self::SEARCH_FIELDS[$this->field]];
         }
+
         return self::SEARCH_FIELDS;
     }
 }

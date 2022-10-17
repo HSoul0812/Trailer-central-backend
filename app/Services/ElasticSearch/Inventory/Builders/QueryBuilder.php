@@ -6,6 +6,10 @@ use App\Exceptions\ElasticSearch\FilterNotFoundException;
 use App\Models\Inventory\Geolocation\Point;
 use App\Services\ElasticSearch\Inventory\FieldMapperService;
 use App\Services\ElasticSearch\Inventory\InventoryQueryBuilderInterface;
+use App\Services\ElasticSearch\Inventory\Parameters\DealerId;
+use App\Services\ElasticSearch\Inventory\Parameters\Geolocation\GeolocationInterface;
+use App\Services\ElasticSearch\Inventory\Parameters\Geolocation\GeolocationRange;
+use App\Services\ElasticSearch\Inventory\Parameters\Geolocation\ScatteredGeolocation;
 use App\Services\ElasticSearch\QueryBuilderInterface;
 
 class QueryBuilder implements InventoryQueryBuilderInterface
@@ -14,11 +18,6 @@ class QueryBuilder implements InventoryQueryBuilderInterface
     private $mapper;
 
     private const AGGREGATION_SIZE = 200;
-
-    public function __construct(FieldMapperService $mapper)
-    {
-        $this->mapper = $mapper;
-    }
 
     private $aggregations = [
         'sleeping_capacity' => [
@@ -189,23 +188,8 @@ class QueryBuilder implements InventoryQueryBuilderInterface
         'query' => [
             'bool' => [
                 'must' => [
-                    [
-                        'term' => [
-                            'isArchived' => false
-                        ]
-                    ],
-                    [
-                        'term' => [
-                            'showOnWebsite' => true
-                        ]
-                    ]
                 ],
                 'must_not' => [
-                    [
-                        'term' => [
-                            'status' => 6
-                        ]
-                    ]
                 ]
             ]
         ],
@@ -216,15 +200,19 @@ class QueryBuilder implements InventoryQueryBuilderInterface
         'sort' => []
     ];
 
-    public function addDealers(array $dealerIds): QueryBuilderInterface
+    public function __construct(FieldMapperService $mapper)
     {
+        $this->mapper = $mapper;
+    }
 
-        if (!empty($dealerIds)) {
-            $this->query['query']['bool']['must'] = [
-                [
-                    'terms' => [
-                        'dealerId' => $dealerIds
-                    ]
+    public function addDealers(DealerId $dealerIds): QueryBuilderInterface
+    {
+        $type = $dealerIds->type() === DealerId::INCLUSION ? 'must' : 'must_not';
+
+        if (count($dealerIds->list()) > 0) {
+            $this->query['query']['bool'][$type][] = [
+                'terms' => [
+                    'dealerId' => $dealerIds->list()
                 ]
             ];
         }
@@ -232,23 +220,15 @@ class QueryBuilder implements InventoryQueryBuilderInterface
         return $this;
     }
 
-    public function addDistance(Point $location): QueryBuilderInterface
+    public function addGeolocation(GeolocationInterface $geolocation): QueryBuilderInterface
     {
-        $this->query['script_fields']['distance'] = [
-            'script' => [
-                'source' => "if(doc['location.geo'].value != null) {
-                                return doc['location.geo'].planeDistance(params.lat, params.lng) * 0.000621371;
-                             } else {
-                                return 0;
-                             }",
-                'params' => [
-                    'lat' => $location->latitude,
-                    'lng' => $location->longitude
-                ]
-            ]
-        ];
+        if ($geolocation instanceof ScatteredGeolocation) {
+            $this->addScatteredQueryFunction($geolocation);
+        } elseif ($geolocation instanceof GeolocationRange) {
+            $this->addGeoDistanceQuery($geolocation);
+        }
 
-        return $this;
+        return $this->addDistanceScript($geolocation->toPoint());
     }
 
     /**
@@ -261,13 +241,13 @@ class QueryBuilder implements InventoryQueryBuilderInterface
     {
         $query = [];
 
-        $this->addAggregations(count($terms) > 0);
-
         foreach ($terms as $term => $data) {
             $query = $this->appendQueryTo($query)($term, $data);
         }
 
         $this->query = array_merge_recursive($query, $this->query);
+
+        $this->addAggregations(isset($this->query['post_filter']));
 
         return $this;
     }
@@ -299,6 +279,7 @@ class QueryBuilder implements InventoryQueryBuilderInterface
     {
         $this->query['from'] = $pagination['offset'];
         $this->query['size'] = $pagination['per_page'];
+
         return $this;
     }
 
@@ -314,14 +295,14 @@ class QueryBuilder implements InventoryQueryBuilderInterface
         };
     }
 
-    private function addStatusSortScript(string $status)
+    private function addStatusSortScript(string $status): void
     {
-        array_push($this->query['sort'], ... array_map(function ($value) {
+        array_push($this->query['sort'], ... array_map(static function ($value) {
             return [
                 '_script' => [
                     'type' => 'string',
                     'script' => [
-                        'inline' => "doc['status'].value == params.status",
+                        'inline' => "doc['status'].value == params.status ? '1': '0'", // to avoid casting issues
                         'params' => [
                             'status' => (int)$value
                         ]
@@ -332,7 +313,7 @@ class QueryBuilder implements InventoryQueryBuilderInterface
         }, explode(',', $status)));
     }
 
-    private function addLocationSortScript(string $locations)
+    private function addLocationSortScript(string $locations): void
     {
         $this->query['sort'][] = [
             '_script' => [
@@ -348,13 +329,120 @@ class QueryBuilder implements InventoryQueryBuilderInterface
         ];
     }
 
-    private function addAggregations(bool $hasTerms)
+    private function addDistanceScript(Point $location): QueryBuilderInterface
     {
-        $this->query['aggregations'] = $this->aggregations;
+        $this->query['script_fields']['distance'] = [
+            'script' => [
+                'source' => "if(doc['location.geo'].value != null) {
+                                return doc['location.geo'].planeDistance(params.lat, params.lng) * 0.000621371;
+                             } else {
+                                return 0;
+                             }",
+                'params' => [
+                    'lat' => $location->latitude,
+                    'lng' => $location->longitude
+                ]
+            ]
+        ];
+
+        return $this;
+    }
+
+    private function addScatteredQueryFunction(ScatteredGeolocation $geolocation): void
+    {
+        $filter = [
+            'must' => [
+                [
+                    'function_score' => [
+                        'functions' => [
+                            [
+                                'random_score' => [
+                                    'seed' => 10,
+                                    'field' => '_seq_no'
+                                ],
+                                'weight' => 1
+                            ],
+                            [
+                                'script_score' => [
+                                    'script' => [
+                                        'source' => "double d; if(doc['location.geo'].value != null) { d = doc['location.geo'].planeDistance(params.lat, params.lng) * 0.000621371; } else { return 0.1; } if(d >= (params.grouping*params.fromScore)) { return 0.2; } else { return params.fromScore - Math.floor(d/params.grouping); }",
+                                        'params' => [
+                                            'lat' => $geolocation->lat(),
+                                            'lng' => $geolocation->lon(),
+                                            'fromScore' => 100,
+                                            'grouping' => $geolocation->grouping()
+                                        ]
+                                    ]
+                                ]
+                            ]
+                        ],
+                        'boost_mode' => 'replace',
+                        'score_mode' => 'sum'
+                    ]
+                ]
+            ]
+        ];
+
+        if (isset($this->query['query']['bool'])) {
+            $filter['must'][] = [
+                'bool' => $this->query['query']['bool']
+            ];
+            unset($this->query['query']['bool']);
+        }
+
+        $this->query = array_merge_recursive([
+            'query' => [
+                'bool' => $filter
+            ]
+        ], $this->query);
+    }
+
+    private function addAggregations(bool $hasTerms): void
+    {
+        $this->query['aggregations'] = array_merge_recursive($this->query['aggregations'] ?? [], $this->aggregations);
 
         if ($hasTerms) {
-            $this->query['aggregations']['filter_aggregations'] = $this->aggregations;
-            $this->query['aggregations']['location_aggregations'] = $this->aggregations;
+            $this->query['aggregations']['filter_aggregations']['aggregations'] = $this->aggregations;
+            $this->query['aggregations']['selected_location_aggregations']['aggregations'] = $this->aggregations;
         }
+    }
+
+    private function addGeoDistanceQuery(GeolocationRange $geolocation): void
+    {
+        $lonLat = sprintf('%d, %d', $geolocation->lon(), $geolocation->lat());
+
+        $filter = [
+            'must' => [
+                [
+                    'geo_distance' => [
+                        'distance' => sprintf('%d%s', $geolocation->range(), $geolocation->units()),
+                        'location.geo' => $lonLat
+                    ]
+                ]
+            ]
+        ];
+
+        if (isset($this->query['post_filter']['bool'])) {
+            $filter['must'][] = [
+                'bool' => $this->query['post_filter']['bool']
+            ];
+            unset($this->query['post_filter']['bool']);
+        }
+
+        $this->query = array_merge_recursive([
+            'post_filter' => [
+                'bool' => $filter
+            ],
+            'sort' => [
+                [
+                    '_geo_distance' => [
+                        'location.geo' => $lonLat,
+                        'order' => 'asc',
+                        'unit' => $geolocation->units(),
+                        'distance_type' => 'arc'
+                    ]
+                ]
+            ]
+        ], $this->query);
     }
 }
