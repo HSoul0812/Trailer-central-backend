@@ -145,9 +145,9 @@ class Kernel extends ConsoleKernel
         /**
          * Scrape Facebook Messages
          */
-        $schedule->command('facebook:scrape-messages')
+        /*$schedule->command('facebook:scrape-messages')
                 ->everyFiveMinutes()
-                ->runInBackground();
+                ->runInBackground();*/
 
         // $schedule->command('inspire')
         //          ->hourly();
