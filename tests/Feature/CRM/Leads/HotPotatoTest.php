@@ -285,7 +285,7 @@ class HotPotatoTest extends TestCase
         $leadSalesPeople[] = $sales[2];
         $leadSalesPeople[] = $sales[0];
         $leadSalesPeople[] = $sales[2];
-        $leadSalesPeople[] = $sales[3];
+        $leadSalesPeople[] = $sales[1];
         $leadSalesPeople[] = $sales[1];
         $leadSalesPeople[] = $sales[0];
         $leadSalesPeople[] = $sales[3];
