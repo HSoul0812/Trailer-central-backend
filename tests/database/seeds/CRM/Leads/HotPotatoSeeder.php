@@ -214,7 +214,7 @@ class HotPotatoSeeder extends Seeder
 
         // Create Sales People for Hot Potato
         $salesSeeds = [
-            ['dealer_location_id' => $this->location2->getKey()],
+            ['dealer_location_id' => $this->location2->getKey(), 'is_trade' => 0],
             ['dealer_location_id' => 0, 'is_inventory' => 0],
             ['is_inventory' => 0],
             ['is_trade' => 0],
