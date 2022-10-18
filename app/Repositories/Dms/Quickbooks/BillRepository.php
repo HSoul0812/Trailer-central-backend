@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Dms\Quickbooks;
 
+use App\Domains\QuickBooks\Actions\DeleteBillInQuickBooksAction;
 use App\Exceptions\NotImplementedException;
 use App\Models\CRM\Dms\Quickbooks\Bill;
 use App\Models\CRM\Dms\Quickbooks\BillCategory;
@@ -250,6 +251,10 @@ class BillRepository implements BillRepositoryInterface
                 'payments'
             ],
         ]);
+
+        // First of all, delete the bill on QBO
+        resolve(DeleteBillInQuickBooksAction::class)
+            ->execute($bill);
 
         // Note: The logic below is taken from https://operatebeyond.atlassian.net/browse/DMSS-645?focusedCommentId=30120
         // First, we want to make sure to remove bill related data on the

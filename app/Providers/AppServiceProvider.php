@@ -8,7 +8,9 @@ use App\Helpers\SanitizeHelper;
 use App\Http\Controllers\v1\File\FileController;
 use App\Http\Controllers\v1\File\ImageController;
 use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping;
+use App\Models\Integration\Integration;
 use App\Nova\Observer\DealerIncomingMappingObserver;
+use App\Nova\Observer\IntegrationObserver;
 use App\Repositories\Bulk\Parts\BulkUploadRepository;
 use App\Repositories\Bulk\Parts\BulkUploadRepositoryInterface;
 use App\Repositories\Common\MonitoredJobRepository;
@@ -239,6 +241,7 @@ class AppServiceProvider extends ServiceProvider
 
         Nova::serving(function () {
             DealerIncomingMapping::observe(DealerIncomingMappingObserver::class);
+            Integration::observe(IntegrationObserver::class);
         });
 
         // Increase default database character set length (Specified key was too long)

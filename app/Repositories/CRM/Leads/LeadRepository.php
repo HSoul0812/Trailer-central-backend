@@ -443,8 +443,8 @@ class LeadRepository implements LeadRepositoryInterface {
         // Find Name
         return $lead->where(function(Builder $query) use($params) {
             return $query->where(function(Builder $query) use($params) {
-                return $query->whereRaw('LOWER(first_name) = ?', [$params['first_name']])
-                             ->whereRaw('LOWER(last_name) = ?', [$params['last_name']]);
+                return $query->where('first_name', $params['first_name'])
+                             ->where('last_name', $params['last_name']);
             })->orWhere(function(Builder $query) use($params) {
                 return $query->whereRaw('REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(`phone_number`, \'+\', \'\'), \'-\', \'\'), \'(\', \'\'), \')\', \'\'), \' \', \'\'), \'x\', \'\') = ?', $params['phone1'])
                              ->where('phone_number', '<>', '');

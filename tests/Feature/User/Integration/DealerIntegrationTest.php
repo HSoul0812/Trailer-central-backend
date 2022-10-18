@@ -30,6 +30,21 @@ abstract class DealerIntegrationTest extends TestCase
         User::query()->where('dealer_id', $dealerId)->delete();
     }
 
+    protected function generateDealer(): array
+    {
+        $dealer = factory(User::class)->create();
+
+        $token = factory(AuthToken::class)->create([
+            'user_id' => $dealer->dealer_id,
+            'user_type' => 'dealer',
+        ]);
+
+        return [
+            'dealer' => $dealer,
+            'token' => $token
+        ];
+    }
+
     /**
      * @param string $integrationCode
      * @param array $attributes
@@ -40,12 +55,7 @@ abstract class DealerIntegrationTest extends TestCase
         /** @var Integration $integration */
         $integration = Integration::query()->where('code', $integrationCode)->firstOrFail();
 
-        $dealer = factory(User::class)->create();
-
-        $token = factory(AuthToken::class)->create([
-            'user_id' => $dealer->dealer_id,
-            'user_type' => 'dealer',
-        ]);
+        ['token' => $token, 'dealer' => $dealer] = $this->generateDealer();
 
         $dealerIntegration = factory(DealerIntegration::class)->create(
             array_merge(
