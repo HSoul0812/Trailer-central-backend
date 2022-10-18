@@ -34,16 +34,17 @@ class IntegrationRepository implements IntegrationRepositoryInterface
 
         if ($params['integrated']) {
             $query = $this->model::query()
-                ->select('integration.*')
+                ->select('integration.*','integration_dealer.last_run_at as last_updated_at')
                 ->join('integration_dealer', 'integration.integration_id', '=', 'integration_dealer.integration_id')
                 ->where('dealer_id', $params['dealer_id']);
+            $query->orderBy('last_updated_at', 'DESC');
         } else {
             $query = Integration::whereDoesntHave('dealers', function($q) use ($params) {
                 return $q->where('dealer.dealer_id', $params['dealer_id']);
             });
         }
 
-        return $query->orderBy('last_run_at', 'DESC')->orderBy('name', 'ASC')->get();
+        return $query->orderBy('name', 'ASC')->get();
     }
 
     /**

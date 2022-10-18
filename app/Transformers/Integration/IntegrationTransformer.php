@@ -26,7 +26,7 @@ class IntegrationTransformer extends TransformerAbstract
             'active' => (bool)$integration->active,
             'filters' => $integration->decodeFilters(),
             'frequency' => $integration->frequency,
-            'last_run_at' => $integration->last_run_at,
+            'last_run_at' => $integration->last_updated_at,
             'settings' => $integration->decodeSettings(),
             'include_sold' => $integration->include_sold,
             'send_email' => $integration->send_email,
