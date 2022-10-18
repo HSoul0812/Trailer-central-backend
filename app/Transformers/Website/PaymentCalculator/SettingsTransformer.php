@@ -18,7 +18,10 @@ class SettingsTransformer extends TransformerAbstract
             'entity_type_id' => $settings->entity_type_id,
             'operator' => $settings->operator,
             'inventory_price' => $settings->inventory_price,
+            // to avoid breaking changes at legacy dashboard we should continue using `condition` instead `inventory_condition`
+            // @todo remove condition property when legacy dashboard has been dropped
             'condition' => $settings->inventory_condition,
+            'inventory_condition' => $settings->inventory_condition,
             'financing' => $settings->financing,
             'entity' => Arr::only($settings->entityType->toArray(), ['name', 'title'])
         ];
