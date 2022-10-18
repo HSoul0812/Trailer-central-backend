@@ -133,15 +133,6 @@ class HotPotatoSeeder extends Seeder
             'is_trade' => 1,
             'is_financing' => 1
         ]);
-
-        // Create Sales People for Hot Potato
-        $salesSeeds = [
-            ['dealer_location_id' => 0, 'is_inventory' => 0],
-            ['is_inventory' => 0],
-            ['is_trade' => 0],
-            ['dealer_location_id' => 0, 'is_trade' => 0]
-        ];
-        $this->sales($salesSeeds);
     }
 
     public function enableAssignEmail($enabled = 1): void
@@ -165,6 +156,15 @@ class HotPotatoSeeder extends Seeder
         ];
 
         $this->leads($seeds);
+
+        // Create Sales People for Hot Potato
+        $salesSeeds = [
+            ['dealer_location_id' => 0, 'is_inventory' => 0],
+            ['is_inventory' => 0],
+            ['is_trade' => 0],
+            ['dealer_location_id' => 0, 'is_trade' => 0]
+        ];
+        $this->sales($salesSeeds);
     }
 
     public function seedNoMatches(): void
@@ -183,6 +183,15 @@ class HotPotatoSeeder extends Seeder
         ];
 
         $this->leads($seeds);
+
+        // Create Sales People for Hot Potato
+        $salesSeeds = [
+            ['dealer_location_id' => 0, 'is_inventory' => 0],
+            ['is_inventory' => 0],
+            ['is_trade' => 0],
+            ['dealer_location_id' => 0, 'is_trade' => 0]
+        ];
+        $this->sales($salesSeeds);
     }
 
     public function seedWithUnits(): void
@@ -203,7 +212,15 @@ class HotPotatoSeeder extends Seeder
 
         $this->leads($seeds);
 
-        $this->sales([['dealer_location_id' => $this->location2->getKey()]]);
+        // Create Sales People for Hot Potato
+        $salesSeeds = [
+            ['dealer_location_id' => $this->location2->getKey()],
+            ['dealer_location_id' => 0, 'is_inventory' => 0],
+            ['is_inventory' => 0],
+            ['is_trade' => 0],
+            ['dealer_location_id' => 0, 'is_trade' => 0]
+        ];
+        $this->sales($salesSeeds);
     }
 
     private function leads($seeds): void
