@@ -159,10 +159,11 @@ return [
                     'scrapereplies',
                     'inquiry',
                     'fb-catalog',
-                    'fb-messenger',
+                    //'fb-messenger',
                     'ecommerce',
                     'crm-users',
-                    'manufacturers'
+                    'manufacturers',
+                    'hot-potato'
                 ],
                 'balance' => 'simple',
                 'processes' => 3,
@@ -187,10 +188,11 @@ return [
                     'scrapereplies',
                     'inquiry',
                     'fb-catalog',
-                    'fb-messenger',
+                    //'fb-messenger',
                     'ecommerce',
                     'crm-users',
-                    'manufacturers'
+                    'manufacturers',
+                    'hot-potato'
                 ],
                 'balance' => 'simple',
                 'processes' => 10,
@@ -205,12 +207,13 @@ return [
                 'queue' => [
                     'inventory',
                     'factory-feeds',
-                    'fb-messenger',
+                    //'fb-messenger',
                     'inquiry',
                     'blog-posts',
                     'ecommerce',
                     'crm-users',
-                    'manufacturers'
+                    'manufacturers',
+                    'hot-potato'
                 ],
                 'balance' => 'auto',
                 'minProcesses' => 1,
@@ -282,7 +285,8 @@ return [
                     'blog-posts',
                     'ecommerce',
                     'crm-users',
-                    'manufacturers'
+                    'manufacturers',
+                    'hot-potato'
                 ],
                 'balance' => 'auto',
                 'minProcesses' => 1,

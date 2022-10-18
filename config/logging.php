@@ -74,6 +74,14 @@ return [
             'permission' => 0664,
         ],
 
+        'hotpotato' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/commands/hot-potato.log'),
+            'level' => env('LOG_LEVEL', 'error'),
+            'days' => 3,
+            'permission' => 0664,
+        ],
+
         'scraperepliesjob' => [
             'driver' => 'daily',
             'path' => storage_path('logs/commands/scrape-replies-job.log'),
@@ -101,6 +109,14 @@ return [
         'import' => [
             'driver' => 'daily',
             'path' => storage_path('logs/commands/import.log'),
+            'level' => env('LOG_LEVEL', 'error'),
+            'days' => 3,
+            'permission' => 0664,
+        ],
+
+        'leads-export' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/jobs/leads-export.log'),
             'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
