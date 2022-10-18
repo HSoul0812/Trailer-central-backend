@@ -39,14 +39,14 @@ class HotPotatoTest extends TestCase
 
 
         // Based on the seeder results, we should know what sales person is assigned to who:
-        $leadSalesPeople[$leads[0]->identifier] = $sales[2];
-        $leadSalesPeople[$leads[1]->identifier] = $sales[1];
-        $leadSalesPeople[$leads[2]->identifier] = $sales[2];
-        $leadSalesPeople[$leads[3]->identifier] = $sales[1];
-        $leadSalesPeople[$leads[4]->identifier] = $sales[2];
-        $leadSalesPeople[$leads[5]->identifier] = $sales[0];
-        $leadSalesPeople[$leads[6]->identifier] = $sales[2];
-        $leadSalesPeople[$leads[7]->identifier] = $sales[2];
+        $leadSalesPeople[] = $sales[2];
+        $leadSalesPeople[] = $sales[1];
+        $leadSalesPeople[] = $sales[2];
+        $leadSalesPeople[] = $sales[1];
+        $leadSalesPeople[] = $sales[2];
+        $leadSalesPeople[] = $sales[0];
+        $leadSalesPeople[] = $sales[2];
+        $leadSalesPeople[] = $sales[2];
 
 
         // Fake Mail
@@ -64,12 +64,13 @@ class HotPotatoTest extends TestCase
 
 
         // Loop Leads
-        foreach($leadSalesPeople as $leadId => $salesPerson) {
+        foreach($leadSalesPeople as $i => $salesPerson) {
+            // Initialize Lead
+            $lead = $leads[$i];
+            $leadId = $lead->identifier;
+
             // Assert a message was sent to the given leads...
-            var_dump($leads[$leadId]);
-            Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($leads, $leadId, $dealer, $location) {
-                $lead = $leads[$leadId];
-                print_r($mail);
+            Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($lead, $dealer, $location) {
                 if(!empty($lead->dealer_location_id)) {
                     return $mail->hasTo($location->email);
                 } else {
@@ -113,14 +114,14 @@ class HotPotatoTest extends TestCase
 
 
         // Based on the seeder results, we should know what sales person is assigned to who:
-        $leadSalesPeople[$leads[0]->identifier] = $sales[2];
-        $leadSalesPeople[$leads[1]->identifier] = $sales[1];
-        $leadSalesPeople[$leads[2]->identifier] = $sales[2];
-        $leadSalesPeople[$leads[3]->identifier] = $this->seeder->salesPerson;
-        $leadSalesPeople[$leads[4]->identifier] = $sales[2];
-        $leadSalesPeople[$leads[5]->identifier] = $sales[0];
-        $leadSalesPeople[$leads[6]->identifier] = $this->seeder->salesPerson;
-        $leadSalesPeople[$leads[7]->identifier] = $sales[2];
+        $leadSalesPeople[] = $sales[2];
+        $leadSalesPeople[] = $sales[1];
+        $leadSalesPeople[] = $sales[2];
+        $leadSalesPeople[] = $this->seeder->salesPerson;
+        $leadSalesPeople[] = $sales[2];
+        $leadSalesPeople[] = $sales[0];
+        $leadSalesPeople[] = $this->seeder->salesPerson;
+        $leadSalesPeople[] = $sales[2];
 
 
         // Fake Mail
@@ -138,12 +139,13 @@ class HotPotatoTest extends TestCase
 
 
         // Loop Leads
-        foreach($leadSalesPeople as $leadId => $salesPerson) {
+        foreach($leadSalesPeople as $i => $salesPerson) {
+            // Initialize Lead
+            $lead = $leads[$i];
+            $leadId = $lead->identifier;
+
             // Assert a message was sent to the given leads...
-            var_dump($leads[$leadId]);
-            Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($leads, $leadId, $dealer, $location) {
-                $lead = $leads[$leadId];
-                print_r($mail);
+            Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($lead, $dealer, $location) {
                 if(!empty($lead->dealer_location_id)) {
                     return $mail->hasTo($location->email);
                 } else {
@@ -197,14 +199,14 @@ class HotPotatoTest extends TestCase
 
 
         // Based on the seeder results, we should know what sales person is assigned to who:
-        $leadSalesPeople[$leads[0]->identifier] = $sales[2];
-        $leadSalesPeople[$leads[1]->identifier] = $sales[1];
-        $leadSalesPeople[$leads[2]->identifier] = $sales[2];
-        $leadSalesPeople[$leads[3]->identifier] = $sales[1];
-        $leadSalesPeople[$leads[4]->identifier] = $sales[2];
-        $leadSalesPeople[$leads[5]->identifier] = $sales[0];
-        $leadSalesPeople[$leads[6]->identifier] = $sales[2];
-        $leadSalesPeople[$leads[7]->identifier] = $sales[2];
+        $leadSalesPeople[] = $sales[2];
+        $leadSalesPeople[] = $sales[1];
+        $leadSalesPeople[] = $sales[2];
+        $leadSalesPeople[] = $sales[1];
+        $leadSalesPeople[] = $sales[2];
+        $leadSalesPeople[] = $sales[0];
+        $leadSalesPeople[] = $sales[2];
+        $leadSalesPeople[] = $sales[2];
 
 
         // Fake Mail
@@ -222,12 +224,13 @@ class HotPotatoTest extends TestCase
 
 
         // Loop Leads
-        foreach($leadSalesPeople as $leadId => $salesPerson) {
+        foreach($leadSalesPeople as $i => $salesPerson) {
+            // Initialize Lead
+            $lead = $leads[$i];
+            $leadId = $lead->identifier;
+
             // Assert a message was sent to the given leads...
-            var_dump($leads[$leadId]);
-            Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($leads, $leadId, $dealer, $location) {
-                $lead = $leads[$leadId];
-                print_r($mail);
+            Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($lead, $dealer, $location) {
                 if(!empty($lead->dealer_location_id)) {
                     return $mail->hasTo($location->email);
                 } else {
@@ -279,14 +282,14 @@ class HotPotatoTest extends TestCase
 
 
         // Based on the seeder results, we should know what sales person is assigned to who:
-        $leadSalesPeople[$leads[0]->identifier] = $sales[2];
-        $leadSalesPeople[$leads[1]->identifier] = $sales[1];
-        $leadSalesPeople[$leads[2]->identifier] = $sales[4];
-        $leadSalesPeople[$leads[3]->identifier] = $sales[1];
-        $leadSalesPeople[$leads[4]->identifier] = $sales[2];
-        $leadSalesPeople[$leads[5]->identifier] = $sales[0];
-        $leadSalesPeople[$leads[6]->identifier] = $sales[4];
-        $leadSalesPeople[$leads[7]->identifier] = $sales[2];
+        $leadSalesPeople[] = $sales[2];
+        $leadSalesPeople[] = $sales[1];
+        $leadSalesPeople[] = $sales[4];
+        $leadSalesPeople[] = $sales[1];
+        $leadSalesPeople[] = $sales[2];
+        $leadSalesPeople[] = $sales[0];
+        $leadSalesPeople[] = $sales[4];
+        $leadSalesPeople[] = $sales[2];
 
 
         // Fake Mail
@@ -305,11 +308,13 @@ class HotPotatoTest extends TestCase
 
 
         // Loop Leads
-        foreach($leadSalesPeople as $leadId => $salesPerson) {
+        foreach($leadSalesPeople as $i => $salesPerson) {
+            // Initialize Lead
+            $lead = $leads[$i];
+            $leadId = $lead->identifier;
+
             // Assert a message was sent to the given leads...
-            Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($leads, $leadId, $dealer, $location, $location2) {
-                $lead = $leads[$leadId];
-                print_r($mail);
+            Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($lead, $dealer, $location, $location2) {
                 if(!empty($lead->dealer_location_id)) {
                     return $mail->hasTo($location->email);
                 } elseif(!empty($lead->inventory_id)) {
