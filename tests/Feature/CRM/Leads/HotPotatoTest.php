@@ -9,6 +9,7 @@ use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use Tests\database\seeds\CRM\Leads\HotPotatoSeeder;
 use Tests\TestCase;
+use Illuminate\Support\Facades\Log;
 
 class HotPotatoTest extends TestCase
 {
@@ -67,7 +68,7 @@ class HotPotatoTest extends TestCase
             // Assert a message was sent to the given leads...
             Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($leads, $leadId, $dealer, $location) {
                 $lead = $leads[$leadId];
-                print_r($mail);
+                Log::channel('hotpotato')->error('DEBUG: ' . print_r($mail, true));
                 if(!empty($lead->dealer_location_id)) {
                     return $mail->hasTo($location->email);
                 } else {
