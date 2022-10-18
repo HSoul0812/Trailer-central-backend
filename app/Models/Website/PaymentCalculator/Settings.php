@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $operator
  * @property float $inventory_price
  * @property string $financing
+ * @property \DateTimeInterface $updated_at,
  *
  * @property EntityType $entityType
  */
@@ -31,9 +32,9 @@ class Settings extends Model {
     const OPERATOR_LESS_THAN = 'less_than';
     const OPERATOR_OVER = 'over';
 
-    protected $table = 'website_payment_calculator_settings';
+    const CREATED_AT = null;
 
-    public $timestamps = false;
+    protected $table = 'website_payment_calculator_settings';
 
     /**
      * The attributes that are mass assignable.
