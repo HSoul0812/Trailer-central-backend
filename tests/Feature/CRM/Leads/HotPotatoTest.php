@@ -68,17 +68,13 @@ class HotPotatoTest extends TestCase
             // Initialize Lead
             $lead = $leads[$i];
             $leadId = $lead->identifier;
-            var_dump($lead->dealer_emails);
-            var_dump($lead->dealer_location_id);
-            var_dump($location->email);
-            var_dump($dealer->email);
 
             // Assert a message was sent to the given leads...
             Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($lead, $dealer, $location) {
                 if(!empty($lead->dealer_location_id)) {
-                    return $mail->hasTo($location->email);
+                    return $mail->hasTo([$location->email]);
                 } else {
-                    return $mail->hasTo($dealer->email);
+                    return $mail->hasTo([$dealer->email]);
                 }
             });
 
@@ -151,9 +147,9 @@ class HotPotatoTest extends TestCase
             // Assert a message was sent to the given leads...
             Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($lead, $dealer, $location) {
                 if(!empty($lead->dealer_location_id)) {
-                    return $mail->hasTo($location->email);
+                    return $mail->hasTo([$location->email]);
                 } else {
-                    return $mail->hasTo($dealer->email);
+                    return $mail->hasTo([$dealer->email]);
                 }
             });
 
@@ -236,9 +232,9 @@ class HotPotatoTest extends TestCase
             // Assert a message was sent to the given leads...
             Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($lead, $dealer, $location) {
                 if(!empty($lead->dealer_location_id)) {
-                    return $mail->hasTo($location->email);
+                    return $mail->hasTo([$location->email]);
                 } else {
-                    return $mail->hasTo($dealer->email);
+                    return $mail->hasTo([$dealer->email]);
                 }
             });
 
@@ -320,11 +316,11 @@ class HotPotatoTest extends TestCase
             // Assert a message was sent to the given leads...
             Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($lead, $dealer, $location, $location2) {
                 if(!empty($lead->dealer_location_id)) {
-                    return $mail->hasTo($location->email);
+                    return $mail->hasTo([$location->email]);
                 } elseif(!empty($lead->inventory_id)) {
-                    return $mail->hasTo($location2->email);
+                    return $mail->hasTo([$location2->email]);
                 } else {
-                    return $mail->hasTo($dealer->email);
+                    return $mail->hasTo([$dealer->email]);
                 }
             });
 
