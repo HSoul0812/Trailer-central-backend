@@ -70,12 +70,8 @@ class HotPotatoTest extends TestCase
             $leadId = $lead->identifier;
 
             // Assert a message was sent to the given leads...
-            Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($lead, $dealer, $location) {
-                if(!empty($lead->dealer_location_id)) {
-                    return $mail->hasTo([$location->email]);
-                } else {
-                    return $mail->hasTo([$dealer->email]);
-                }
+            Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($lead) {
+                return $mail->hasTo($lead->dealer_emails);
             });
 
             // Assert a lead status entry was saved...
@@ -145,12 +141,8 @@ class HotPotatoTest extends TestCase
             $leadId = $lead->identifier;
 
             // Assert a message was sent to the given leads...
-            Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($lead, $dealer, $location) {
-                if(!empty($lead->dealer_location_id)) {
-                    return $mail->hasTo([$location->email]);
-                } else {
-                    return $mail->hasTo([$dealer->email]);
-                }
+            Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($lead) {
+                return $mail->hasTo($lead->dealer_emails);
             });
 
             // Assert a lead status entry was saved...
@@ -230,12 +222,8 @@ class HotPotatoTest extends TestCase
             $leadId = $lead->identifier;
 
             // Assert a message was sent to the given leads...
-            Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($lead, $dealer, $location) {
-                if(!empty($lead->dealer_location_id)) {
-                    return $mail->hasTo([$location->email]);
-                } else {
-                    return $mail->hasTo([$dealer->email]);
-                }
+            Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($lead) {
+                return $mail->hasTo($lead->dealer_emails);
             });
 
             // Assert a message was sent to the given leads...
@@ -314,14 +302,8 @@ class HotPotatoTest extends TestCase
             $leadId = $lead->identifier;
 
             // Assert a message was sent to the given leads...
-            Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($lead, $dealer, $location, $location2) {
-                if(!empty($lead->dealer_location_id)) {
-                    return $mail->hasTo([$location->email]);
-                } elseif(!empty($lead->inventory_id)) {
-                    return $mail->hasTo([$location2->email]);
-                } else {
-                    return $mail->hasTo([$dealer->email]);
-                }
+            Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($lead) {
+                return $mail->hasTo($lead->dealer_emails);
             });
 
             // Assert a lead status entry was saved...
