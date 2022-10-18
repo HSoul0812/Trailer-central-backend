@@ -8,6 +8,7 @@ use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadAssign;
 use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\User\SalesPerson;
+use App\Models\Inventory\Inventory;
 use App\Models\User\AuthToken;
 use App\Models\User\User;
 use App\Models\User\CrmUser;
