@@ -230,7 +230,7 @@ class HotPotatoSeeder extends Seeder
             $params['date_submitted'] = Carbon::now()->subDays(7)->toDateTimeString();
             $lead = factory(Lead::class)->create($params);
             $leadId = $lead->getKey();
-            $this->leads[] = $lead;
+            $this->leads[$leadId] = $lead;
 
 
             // Make Status
