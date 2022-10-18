@@ -557,7 +557,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         return $query->get();
     }
 
-    private function getFloorplannedQuery(array $params): Builder
+    private function getFloorplannedQuery(array $params): GrimzyBuilder
     {
         $query = Inventory::select('*');
 
