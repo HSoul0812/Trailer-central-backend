@@ -68,7 +68,7 @@ class HotPotatoTest extends TestCase
             // Assert a message was sent to the given leads...
             Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($leads, $leadId, $dealer, $location) {
                 $lead = $leads[$leadId];
-                Log::channel('hotpotato')->error('DEBUG: ' . print_r($mail, true));
+                Log::channel('hotpotato')->info('DEBUG: ' . print_r($mail, true));
                 if(!empty($lead->dealer_location_id)) {
                     return $mail->hasTo($location->email);
                 } else {
@@ -141,6 +141,7 @@ class HotPotatoTest extends TestCase
             // Assert a message was sent to the given leads...
             Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($leads, $leadId, $dealer, $location) {
                 $lead = $leads[$leadId];
+                Log::channel('hotpotato')->info('DEBUG: ' . print_r($mail, true));
                 if(!empty($lead->dealer_location_id)) {
                     return $mail->hasTo($location->email);
                 } else {
@@ -223,6 +224,7 @@ class HotPotatoTest extends TestCase
             // Assert a message was sent to the given leads...
             Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($leads, $leadId, $dealer, $location) {
                 $lead = $leads[$leadId];
+                Log::channel('hotpotato')->info('DEBUG: ' . print_r($mail, true));
                 if(!empty($lead->dealer_location_id)) {
                     return $mail->hasTo($location->email);
                 } else {
@@ -304,6 +306,7 @@ class HotPotatoTest extends TestCase
             // Assert a message was sent to the given leads...
             Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($leads, $leadId, $dealer, $location, $location2) {
                 $lead = $leads[$leadId];
+                Log::channel('hotpotato')->info('DEBUG: ' . print_r($mail, true));
                 if(!empty($lead->dealer_location_id)) {
                     return $mail->hasTo($location->email);
                 } elseif(!empty($lead->inventory_id)) {
