@@ -22,6 +22,7 @@ use Carbon\Carbon;
 /**
  * @property-read User $dealer
  * @property-read DealerLocation $location
+ * @property-read DealerLocation $location2
  * @property-read NewDealerUser $newDealer
  * @property-read CrmUser $crmUser
  * @property-read AuthToken $authToken
@@ -46,6 +47,16 @@ class HotPotatoSeeder extends Seeder
      * @var DealerLocation
      */
     private $location;
+
+    /**
+     * @var DealerLocation
+     */
+    private $location2;
+
+    /**
+     * @var Inventory
+     */
+    private $inventory;
 
     /**
      * @var NewDealerUser
@@ -96,6 +107,13 @@ class HotPotatoSeeder extends Seeder
         $this->location = factory(DealerLocation::class)->create([
             'dealer_id' => $this->dealer->dealer_id
         ]);
+        $this->location2 = factory(DealerLocation::class)->create([
+            'dealer_id' => $this->dealer->dealer_id
+        ]);
+        $this->inventory = factory(Inventory::class)->create([
+            'dealer_id' => $this->dealer->dealer_id,
+            'dealer_location_id' => $this->location2
+        ]);
         $this->authToken = factory(AuthToken::class)->create([
             'user_id' => $this->dealer->dealer_id,
             'user_type' => AuthToken::USER_TYPE_DEALER,
@@ -125,7 +143,8 @@ class HotPotatoSeeder extends Seeder
         $this->sales($salesSeeds);
     }
 
-    public function enableAssignEmail($enabled = 1): void {
+    public function enableAssignEmail($enabled = 1): void
+    {
         $this->crmUser->fill(['enable_assign_notification' => $enabled])->save();
     }
 
@@ -165,14 +184,37 @@ class HotPotatoSeeder extends Seeder
         $this->leads($seeds);
     }
 
-    private function leads($seeds): void {
+    public function seedWithUnits(): void
+    {
+        // Seed Leads for Hot Potato
+        $locationId = $this->location->getKey();
+        $inventoryId = $this->inventory->getKey();
+        $seeds = [
+            ['source' => 'TruckPaper', 'type' => 'inventory', 'dealer_location_id' => $locationId],
+            ['source' => 'Facebook - Podium', 'type' => 'trade', 'dealer_location_id' => $locationId],
+            ['source' => 'Google', 'type' => 'inventory', 'dealer_location_id' => 0, 'inventory_id' => $inventoryId],
+            ['source' => 'RVTrader.com', 'type' => 'trade', 'dealer_location_id' => $locationId],
+            ['source' => 'TrailerCentral', 'type' => 'inventory', 'dealer_location_id' => 0],
+            ['type' => 'trade', 'dealer_location_id' => 0],
+            ['source' => 'Facebook - Marketplace', 'type' => 'inventory', 'dealer_location_id' => 0, 'inventoryId' => $inventoryId],
+            ['source' => 'HorseTrailerWorld', 'type' => 'inventory', 'dealer_location_id' => $locationId]
+        ];
+
+        $this->leads($seeds);
+
+        $this->sales(['dealer_location_id' => $this->location2->getKey()]);
+    }
+
+    private function leads($seeds): void
+    {
         // Set Default Lead Params
         $params = [
             'dealer_id' => $this->dealer->getKey(),
             'website_id' => $this->website->getKey()
         ];
 
-        collect($seeds)->each(function (array $seed) use($params): void {
+        collect($seeds)->each(function (array $seed) use($params): void
+        {
             // Set Lead Type
             if(isset($seed['type'])) {
                 $params['lead_type'] = $seed['type'];
@@ -200,7 +242,8 @@ class HotPotatoSeeder extends Seeder
         });
     }
 
-    private function sales($seeds): void {
+    private function sales($seeds): void
+    {
         // Initialize Sales People Seeds
         $params = [
             'user_id' => $this->dealer->getKey(),

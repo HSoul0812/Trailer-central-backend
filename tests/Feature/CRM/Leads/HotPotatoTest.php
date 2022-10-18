@@ -32,10 +32,9 @@ class HotPotatoTest extends TestCase
         // Seed Database With Auto Assign Leads
         $this->seeder->seed();
 
-        // Given I have a collection of leads
+        // Given I have a collection of leads and sales people
         $leads = $this->seeder->leads;
         $sales = $this->seeder->sales;
-        $dealerId = $this->seeder->dealer->getKey();
 
 
         // Based on the seeder results, we should know what sales person is assigned to who:
@@ -51,8 +50,13 @@ class HotPotatoTest extends TestCase
 
         // Fake Mail
         Mail::fake();
-        
+
         sleep(10);
+
+        // Get dealer and location
+        $dealer = $this->seeder->dealer;
+        $location = $this->seeder->location;
+        $dealerId = $this->seeder->dealer->getKey();
 
         // Call Leads Assign Command
         $this->artisan('leads:assign:hot-potato ' . $dealerId)->assertExitCode(0);
@@ -61,10 +65,14 @@ class HotPotatoTest extends TestCase
         // Loop Leads
         foreach($leadSalesPeople as $leadId => $salesPerson) {
             // Assert a message was sent to the given leads...
-            /*Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($leads, $leadId) {
+            Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($leads, $leadId, $dealer, $location) {
                 $lead = $leads[$leadId];
-                return $mail->hasTo($lead->dealerLocation->email);
-            });*/
+                if(!empty($lead->dealer_location_id)) {
+                    return $mail->hasTo($location->email);
+                } else {
+                    return $mail->hasTo($dealer->email);
+                }
+            });
 
             // Assert a lead status entry was saved...
             $this->assertDatabaseHas('crm_tc_lead_status', [
@@ -99,7 +107,6 @@ class HotPotatoTest extends TestCase
         // Given I have a collection of leads
         $leads = $this->seeder->leads;
         $sales = $this->seeder->sales;
-        $dealerId = $this->seeder->dealer->getKey();
 
 
         // Based on the seeder results, we should know what sales person is assigned to who:
@@ -118,6 +125,11 @@ class HotPotatoTest extends TestCase
         
         sleep(10);
 
+        // Get dealer and location
+        $dealer = $this->seeder->dealer;
+        $location = $this->seeder->location;
+        $dealerId = $this->seeder->dealer->getKey();
+
         // Call Leads Assign Command
         $this->artisan('leads:assign:hot-potato ' . $dealerId)->assertExitCode(0);
 
@@ -125,10 +137,14 @@ class HotPotatoTest extends TestCase
         // Loop Leads
         foreach($leadSalesPeople as $leadId => $salesPerson) {
             // Assert a message was sent to the given leads...
-            /*Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($leads, $leadId) {
+            Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($leads, $leadId, $dealer, $location) {
                 $lead = $leads[$leadId];
-                return $mail->hasTo($lead->dealerLocation->email);
-            });*/
+                if(!empty($lead->dealer_location_id)) {
+                    return $mail->hasTo($location->email);
+                } else {
+                    return $mail->hasTo($dealer->email);
+                }
+            });
 
             // Assert a lead status entry was saved...
             $this->assertDatabaseHas('crm_tc_lead_status', [
@@ -173,7 +189,6 @@ class HotPotatoTest extends TestCase
         // Given I have a collection of leads
         $leads = $this->seeder->leads;
         $sales = $this->seeder->sales;
-        $dealerId = $this->seeder->dealer->getKey();
 
 
         // Based on the seeder results, we should know what sales person is assigned to who:
@@ -192,6 +207,11 @@ class HotPotatoTest extends TestCase
         
         sleep(10);
 
+        // Get dealer and location
+        $dealer = $this->seeder->dealer;
+        $location = $this->seeder->location;
+        $dealerId = $this->seeder->dealer->getKey();
+
         // Call Leads Assign Command
         $this->artisan('leads:assign:hot-potato ' . $dealerId)->assertExitCode(0);
 
@@ -199,10 +219,14 @@ class HotPotatoTest extends TestCase
         // Loop Leads
         foreach($leadSalesPeople as $leadId => $salesPerson) {
             // Assert a message was sent to the given leads...
-            /*Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($leads, $leadId) {
+            Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($leads, $leadId, $dealer, $location) {
                 $lead = $leads[$leadId];
-                return $mail->hasTo($lead->dealerLocation->email);
-            });*/
+                if(!empty($lead->dealer_location_id)) {
+                    return $mail->hasTo($location->email);
+                } else {
+                    return $mail->hasTo($dealer->email);
+                }
+            });
 
             // Assert a message was sent to the given leads...
             if(!empty($salesPerson)) {
@@ -213,6 +237,79 @@ class HotPotatoTest extends TestCase
                     return $mail->hasTo($salesPerson->email);
                 });
             }
+
+            // Assert a lead status entry was saved...
+            $this->assertDatabaseHas('crm_tc_lead_status', [
+                'tc_lead_identifier' => $leadId,
+                'sales_person_id' => $salesPerson->getKey()
+            ]);
+
+            // Assert a lead assign entry was saved...
+            $this->assertDatabaseHas('crm_lead_assign', [
+                'dealer_id' => $dealerId,
+                'lead_id' => $leadId,
+                'chosen_salesperson_id' => $salesPerson->getKey(),
+                'status' => 'mailed'
+            ]);
+        }
+    }
+
+    /**
+     * Test hot potato with fallback to units of interest
+     * 
+     * @group CRM
+     * @specs array dealer_location_id = exists
+     * @return void
+     */
+    public function testWithInventory()
+    {
+        // Seed Database With Auto Assign Leads
+        $this->seeder->seedWithInventory();
+
+        // Given I have a collection of leads
+        $leads = $this->seeder->leads;
+        $sales = $this->seeder->sales;
+
+
+        // Based on the seeder results, we should know what sales person is assigned to who:
+        $leadSalesPeople[$leads[0]->identifier] = $sales[2];
+        $leadSalesPeople[$leads[1]->identifier] = $sales[1];
+        $leadSalesPeople[$leads[2]->identifier] = $sales[2];
+        $leadSalesPeople[$leads[3]->identifier] = $sales[1];
+        $leadSalesPeople[$leads[4]->identifier] = $sales[2];
+        $leadSalesPeople[$leads[5]->identifier] = $sales[0];
+        $leadSalesPeople[$leads[6]->identifier] = $sales[2];
+        $leadSalesPeople[$leads[7]->identifier] = $sales[2];
+
+
+        // Fake Mail
+        Mail::fake();
+        
+        sleep(10);
+
+        // Get dealer and location
+        $dealer = $this->seeder->dealer;
+        $location = $this->seeder->location;
+        $location2 = $this->seeder->location2;
+        $dealerId = $this->seeder->dealer->getKey();
+
+        // Call Leads Assign Command
+        $this->artisan('leads:assign:hot-potato ' . $dealerId)->assertExitCode(0);
+
+
+        // Loop Leads
+        foreach($leadSalesPeople as $leadId => $salesPerson) {
+            // Assert a message was sent to the given leads...
+            Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($leads, $leadId, $dealer, $location, $location2) {
+                $lead = $leads[$leadId];
+                if(!empty($lead->dealer_location_id)) {
+                    return $mail->hasTo($location->email);
+                } elseif(!empty($lead->inventory_id)) {
+                    return $mail->hasTo($location2->email);
+                } else {
+                    return $mail->hasTo($dealer->email);
+                }
+            });
 
             // Assert a lead status entry was saved...
             $this->assertDatabaseHas('crm_tc_lead_status', [
