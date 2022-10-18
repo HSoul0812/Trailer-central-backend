@@ -66,6 +66,7 @@ class HotPotatoTest extends TestCase
         // Loop Leads
         foreach($leadSalesPeople as $leadId => $salesPerson) {
             // Assert a message was sent to the given leads...
+            var_dump($leads[$leadId]);
             Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($leads, $leadId, $dealer, $location) {
                 $lead = $leads[$leadId];
                 print_r($mail);
@@ -139,6 +140,7 @@ class HotPotatoTest extends TestCase
         // Loop Leads
         foreach($leadSalesPeople as $leadId => $salesPerson) {
             // Assert a message was sent to the given leads...
+            var_dump($leads[$leadId]);
             Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($leads, $leadId, $dealer, $location) {
                 $lead = $leads[$leadId];
                 print_r($mail);
@@ -222,6 +224,7 @@ class HotPotatoTest extends TestCase
         // Loop Leads
         foreach($leadSalesPeople as $leadId => $salesPerson) {
             // Assert a message was sent to the given leads...
+            var_dump($leads[$leadId]);
             Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($leads, $leadId, $dealer, $location) {
                 $lead = $leads[$leadId];
                 print_r($mail);
@@ -265,7 +268,7 @@ class HotPotatoTest extends TestCase
      * @specs array dealer_location_id = exists
      * @return void
      */
-    public function testWithInventory()
+    public function testWithUnits()
     {
         // Seed Database With Auto Assign Leads
         $this->seeder->seedWithUnits();
@@ -278,11 +281,11 @@ class HotPotatoTest extends TestCase
         // Based on the seeder results, we should know what sales person is assigned to who:
         $leadSalesPeople[$leads[0]->identifier] = $sales[2];
         $leadSalesPeople[$leads[1]->identifier] = $sales[1];
-        $leadSalesPeople[$leads[2]->identifier] = $sales[2];
+        $leadSalesPeople[$leads[2]->identifier] = $sales[4];
         $leadSalesPeople[$leads[3]->identifier] = $sales[1];
         $leadSalesPeople[$leads[4]->identifier] = $sales[2];
         $leadSalesPeople[$leads[5]->identifier] = $sales[0];
-        $leadSalesPeople[$leads[6]->identifier] = $sales[2];
+        $leadSalesPeople[$leads[6]->identifier] = $sales[4];
         $leadSalesPeople[$leads[7]->identifier] = $sales[2];
 
 

@@ -203,7 +203,7 @@ class HotPotatoSeeder extends Seeder
 
         $this->leads($seeds);
 
-        $this->sales(['dealer_location_id' => $this->location2->getKey()]);
+        $this->sales([['dealer_location_id' => $this->location2->getKey()]]);
     }
 
     private function leads($seeds): void
