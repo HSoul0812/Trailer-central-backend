@@ -5,13 +5,8 @@ declare(strict_types=1);
 namespace App\Services\Dms\ServiceOrder;
 
 use App\Contracts\LoggerServiceInterface;
-use App\Exceptions\Common\BusyJobException;
-use App\Models\Bulk\Parts\BulkDownload;
 use App\Models\Bulk\Parts\BulkReport;
 use App\Models\Common\MonitoredJob;
-use App\Models\Bulk\Parts\BulkDownloadPayload;
-use App\Models\Parts\Part;
-use App\Repositories\Bulk\Parts\BulkDownloadRepositoryInterface;
 use App\Repositories\Common\MonitoredJobRepositoryInterface;
 use App\Repositories\Dms\ServiceOrder\ServiceItemTechnicianRepositoryInterface;
 use App\Services\Export\FilesystemPdfExporter;
@@ -95,7 +90,7 @@ class BulkCsvTechnicianReportService extends AbstractMonitoredJobService impleme
             $progress += $step;
             foreach($row as $value) {
                 $this->repository->updateProgress($job->token, $progress);
-                
+
                 $current_cost = (float)$value['part_cost_amount'] + (float)$value['labor_cost_amount'];
                 $current_sale = (float)$value['part_sale_amount'] + (float)$value['labor_sale_amount'];
                 $profit = $current_sale - $current_cost;
@@ -106,7 +101,7 @@ class BulkCsvTechnicianReportService extends AbstractMonitoredJobService impleme
         }
         $this->repository->updateProgress($job->token, 95);
 
-        Storage::disk('s3')->put(FilesystemPdfExporter::PDF_EXPORT_S3_PREFIX . $job->payload->filename, $csv_data);
+        Storage::disk('s3')->put(FilesystemPdfExporter::RUNTIME_PREFIX . $job->payload->filename, $csv_data);
 
         $this->repository->setCompleted($job->token);
     }

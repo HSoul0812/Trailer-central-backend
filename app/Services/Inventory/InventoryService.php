@@ -266,6 +266,10 @@ class InventoryService implements InventoryServiceInterface
                 $params['description_html'] = $this->convertMarkdown($params['description']);
             }
 
+            if (!empty($params['is_archived']) && $params['is_archived'] == 1) {
+                $params['archived_at'] = Carbon::now()->format('Y-m-d H:i:s');
+            }
+
             $inventory = $this->inventoryRepository->update($params, $options);
 
             if (!$inventory instanceof Inventory) {
@@ -914,7 +918,6 @@ class InventoryService implements InventoryServiceInterface
         $description = preg_replace('/®/', "Registered", $description);
 
         $description = preg_replace('/[[:^print:]]/', ' ', $description);
-
 
         preg_match('/<ul>(.*?)<\/ul>/s', $description, $match);
         if (!empty($match)) {

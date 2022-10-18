@@ -18,6 +18,8 @@ use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Textarea;
 
+use Laravel\Nova\Fields\Code;
+
 class Integration extends Resource
 {
     public static $group = 'Integration';
@@ -71,8 +73,8 @@ class Integration extends Resource
 
             Boolean::make('Active'),
 
-            Textarea::make('Filters')->hideFromIndex(),
-            Textarea::make('Settings')->hideFromIndex(),
+            Code::make('Filters', 'unserializeFilters')->language('javascript')->json(),
+            Code::make('Settings', 'unserializeSettings')->language('javascript')->json(),
 
             Boolean::make('Include Sold')->hideFromIndex(),
 

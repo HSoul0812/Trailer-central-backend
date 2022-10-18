@@ -23,31 +23,42 @@ return [
         'start-posting',
         'skip-posting',
         'get-listing-id',
-        'close-and-clear-cookies'
+        'close-and-clear-cookies',
+        'timed-out'
     ])),
 
 
     // Complete List of Available Errors
     'errors' => env('FB_MARKETING_ERRORS', implode(",", [
-        'missing-tunnel',
-        'offline-tunnel',
-        'missing-inventory',
-        'login-failed',
-        'login-invalid',
+        'unknown',
+        // Authentication
+        'account-disabled',
+        'account-locked',
+        'auth-fail',
         'email-verification',
         'login-approval',
+        'login-failed',
+        'login-invalid',
         'two-factor-auth',
         'two-factor-failed',
-        'account-locked',
-        'account-disabled',
-        'temp-blocked',
+        // Connectivity
+        'missing-tunnel',
+        'offline-tunnel',
         'page-unavailable',
-        'marketplace-inaccessible',
-        'marketplace-blocked',
+        'slow-tunnel',
+        'timed-out',
+        // Inventory
+        'missing-inventory',
+        // Marketplace
         'final-account-review',
-        'limit-reached',
+        'marketplace-blocked',
+        'marketplace-inaccessible',
+        'temp-blocked',
+        // Posting
         'failed-post',
-        'flagged-post'
+        'flagged-post',
+        'limit-reached',
+        'location-invalid',
     ])),
 
 

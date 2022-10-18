@@ -9,8 +9,10 @@ use App\Http\Requests\Bulk\Parts\CreateBulkReportRequest;
 use App\Http\Requests\Dms\ServiceOrder\GetServiceReportRequest;
 use App\Jobs\Bulk\Parts\FinancialReportCsvExportJob;
 use App\Repositories\Dms\StockRepositoryInterface;
+use App\Services\Export\FilesystemPdfExporter;
 use App\Transformers\Bulk\Stock\StockReportTransformer;
 use Dingo\Api\Http\Response;
+use Illuminate\Support\Facades\Storage;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Manager;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -23,8 +25,6 @@ use App\Models\Bulk\Parts\BulkReportPayload;
 use App\Repositories\Bulk\Parts\BulkReportRepositoryInterface;
 use App\Services\Export\Parts\BulkReportJobServiceInterface;
 use App\Services\Dms\ServiceOrder\BulkCsvTechnicianReportServiceInterface;
-use App\Services\Export\FilesystemPdfExporter;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\JsonResponse;
 use Dingo\Api\Http\Request;
 use Exception;
@@ -414,7 +414,8 @@ class BulkReportsController extends MonitoredJobsController
         $payload = BulkReportPayload::from($job->payload);
 
         return response()->streamDownload(static function () use ($payload) {
-            fpassthru(Storage::disk('s3')->readStream(FilesystemPdfExporter::PDF_EXPORT_S3_PREFIX . $payload->filename));
+            //@todo this should be move to the responsible service
+            fpassthru(Storage::disk('s3')->readStream(FilesystemPdfExporter::RUNTIME_PREFIX . $payload->filename));
         }, $payload->filename);
     }
 }
