@@ -68,6 +68,7 @@ class HotPotatoTest extends TestCase
             // Initialize Lead
             $lead = $leads[$i];
             $leadId = $lead->identifier;
+            var_dump($lead);
 
             // Assert a message was sent to the given leads...
             Mail::assertSent(HotPotatoEmail::class, function ($mail) use ($lead, $dealer, $location) {
