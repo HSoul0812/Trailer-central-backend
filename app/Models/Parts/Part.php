@@ -126,8 +126,6 @@ class Part extends Model
     protected $casts = [
         'dealer_cost' => 'float',
         'latest_cost' => 'float',
-        'is_active' => 'boolean',
-        'is_taxable' => 'boolean',
     ];
 
     public static function boot()

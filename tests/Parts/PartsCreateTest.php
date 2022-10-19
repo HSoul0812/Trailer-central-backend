@@ -13,6 +13,7 @@ use App\Models\Parts\Vendor;
 use App\Models\User\AuthToken;
 use App\Models\Parts\BinQuantity;
 use App\Models\Parts\Part;
+use Illuminate\Support\Arr;
 use Tests\TestCase;
 use Illuminate\Support\Str;
 
@@ -186,5 +187,29 @@ class PartsCreateTest extends TestCase
                 ],
             ]
         ];
+    }
+
+    /**
+     * @group DMS
+     * @group DMS_PARTS
+     *
+     * @return void
+     */
+    public function testIsActiveAndIsTaxableHasDefault()
+    {
+        $this->initializeTestData();
+        $data = $this->createPartTestData();
+
+        $data = Arr::except($data, ['bins', 'images']);
+
+        $partsRepository = new PartRepository(new Part());
+        $part = $partsRepository->create($data);
+
+        $this->assertDatabaseHas(Part::getTableName(), [
+            'id' => $part->getKey(),
+            'dealer_id' => $part->dealer_id,
+            'is_active' => 0,
+            'is_taxable' => 1,
+        ]);
     }
 }
