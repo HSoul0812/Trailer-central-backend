@@ -4,7 +4,7 @@ namespace App\Services\CRM\Leads;
 
 use App\Jobs\CRM\Leads\HotPotatoJob;
 use App\Mail\AutoAssignEmail;
-use App\Mail\HotPotatoEmail;
+use App\Mail\CRM\Leads\HotPotatoEmail;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadAssign;
 use App\Models\CRM\User\SalesPerson;
