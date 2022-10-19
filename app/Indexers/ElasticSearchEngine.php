@@ -8,6 +8,7 @@ use ElasticMigrations\Facades\Index as EsIndex;
 use ElasticAdapter\Indices\Mapping;
 use ElasticAdapter\Indices\Settings;
 use Elasticsearch\Client;
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Date;
 use InvalidArgumentException;
@@ -20,6 +21,7 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
      * @param \Illuminate\Database\Eloquent\Collection $models
      * @return void
      * @throws BulkRequestException when some item was not able to be sent/updated
+     * @throws Exception when some item was not able to be sent/updated
      */
     public function update($models): void
     {
@@ -28,8 +30,15 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
         try {
             parent::update($models);
         } catch (BulkRequestException $exception) {
-            // we will need to handle in a better way for each item which was not able to be sent
-            throw $exception;
+            $failedModels = collect($exception->getResponse()['items'])->filter(function ($item) {
+                return isset($item['index']['error']);
+            })->map(function ($error) {
+                return [
+                    'id' => $error['index']['_id'],
+                    'reason' => $error['index']['error']['reason']
+                ];
+            })->toJson();
+            throw new Exception($failedModels);
         }
     }
 
@@ -103,7 +112,7 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
 
         $this->swapIndexNames($model);
 
-        $query = $model->newQuery()->where('updated_at_auto', '>=' , $now->format(\App\Constants\Date::FORMAT_Y_M_D_T))
+        $query = $model->newQuery()->where('updated_at_auto', '>=', $now->format(\App\Constants\Date::FORMAT_Y_M_D_T))
             ->when($softDelete, function ($query) {
                 $query->withTrashed();
             })
@@ -138,7 +147,7 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
 
         foreach ($aliases as $index => $aliasMapping) {
             if (array_key_exists($model::ALIAS_ES_NAME, $aliasMapping['aliases'])) {
-                if ($index == $model::$searchableAs ) {
+                if ($index == $model::$searchableAs) {
                     continue;
                 } else {
                     $this->indexManager->drop($index);
