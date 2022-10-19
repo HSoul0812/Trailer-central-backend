@@ -12,6 +12,13 @@ class PostingHistory extends Model
     use TableAware;
 
     /**
+     * The primary key associated with the table.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'record_id';
+
+    /**
      * Table name
      *
      * @var string
