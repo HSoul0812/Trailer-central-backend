@@ -2,7 +2,7 @@
 
 namespace App\Nova\Policies;
 
-use App\Models\Parts\Textrail\Category;
+use App\Models\Parts\Category;
 use App\Models\User\NovaUser;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
