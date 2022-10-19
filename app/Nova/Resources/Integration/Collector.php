@@ -317,10 +317,10 @@ class Collector extends Resource
                 Boolean::make('Zero Out MSRP On Used Units', 'zero_msrp')->hideFromIndex(),
                 Boolean::make('Show On RV Trader', 'show_on_rvtrader')->hideFromIndex(),
                 Boolean::make('Import With Showroom Category', 'import_with_showroom_category')->hideFromIndex(),
-                /*Text::make('Overridable Fields', 'overridableFieldsList')->onlyOnDetail(),
+                Text::make('Overridable Fields', 'overridableFieldsList')->onlyOnDetail(),
                 BooleanGroup::make('Overridable Fields', 'overridable_fields')->options(
                     CollectorFields::select(['label', 'field'])->orderBy('label')->get()->pluck('label', 'field')
-                )->onlyOnForms(),*/
+                )->onlyOnForms(),
                 Text::make('Skip Units By Category', 'skip_categories')->hideFromIndex()->help(
                     'Enter the categories (as they show in the source file) you would like to skip separated by commas. Example: trailer, vehicle, car'
                 ),
