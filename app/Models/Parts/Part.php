@@ -126,6 +126,8 @@ class Part extends Model
     protected $casts = [
         'dealer_cost' => 'float',
         'latest_cost' => 'float',
+        'is_active' => 'boolean',
+        'is_taxable' => 'boolean',
     ];
 
     public static function boot()
@@ -166,6 +168,8 @@ class Part extends Model
         $array['vehicle_specific'] = $this->vehicleSpecifc;
 
         $array['price'] = (string)$this->modified_cost;
+        $array['is_active'] = (int)$this->is_active;
+        $array['is_taxable'] = (int)$this->is_taxable;
 
         // bin qty
         $array['bins'] = $this->bins;

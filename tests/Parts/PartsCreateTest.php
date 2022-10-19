@@ -194,6 +194,7 @@ class PartsCreateTest extends TestCase
      * @group DMS_PARTS
      *
      * @return void
+     * @throws \Exception
      */
     public function testIsActiveAndIsTaxableHasDefault()
     {
