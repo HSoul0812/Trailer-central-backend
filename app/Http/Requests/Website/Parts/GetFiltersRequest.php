@@ -15,6 +15,7 @@ class GetFiltersRequest extends Request {
         'dealer_id' => 'required|array',
         'dealer_id.*' => 'integer',
         'type_id' => 'array',
+        'type_id.*' => 'exists:part_types,name',
         'manufacturer_id' => 'array',
         'brand_id' => 'array',
         'category_id' => 'array',
