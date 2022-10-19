@@ -16,11 +16,6 @@ class AutoAssignTest extends TestCase
      */
     private $seeder;
 
-    /**
-     * @var array $roundRobin
-     */
-    protected $roundRobin = [];
-
 
     /**
      * Test round robin only by location
