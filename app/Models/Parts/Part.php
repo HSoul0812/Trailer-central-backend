@@ -30,15 +30,13 @@ class Part extends Model
 {
     use Searchable, CustomSearch, TableAware;
 
-    public const TABLE_NAME = 'parts_v1';
-
     protected const STATUS_ACTIVE = 'Active';
     protected const STATUS_CATALOG = 'Catalog';
 
     protected const TAXABLE = 'Taxable';
     protected const NOT_TAXABLE = 'Not Taxable';
 
-    protected $table = self::TABLE_NAME;
+    protected $table = 'parts_v1';
 
     /**
      * The attributes that are mass assignable.
@@ -169,7 +167,6 @@ class Part extends Model
 
         $array['vehicle_specific'] = $this->vehicleSpecifc;
 
-        //
         $array['price'] = (string)$this->modified_cost;
 
         // bin qty

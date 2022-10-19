@@ -3,16 +3,10 @@
 use App\Models\Parts\Part;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 
 class AddIsActiveIsTaxableColumnPartsTable extends Migration
 {
-    private $indexCols = [
-        'is_active',
-        'is_taxable',
-    ];
-
     /**
      * Run the migrations.
      *
@@ -20,31 +14,35 @@ class AddIsActiveIsTaxableColumnPartsTable extends Migration
      */
     public function up(): void
     {
-        Schema::table(Part::TABLE_NAME, function (Blueprint $table) {
-            $table->boolean('is_active')->nullable()->default(false);
-            $table->boolean('is_taxable')->nullable()->default(true);
-            $table->index($this->indexCols);
-        });
+        $tableName = Part::getTableName();
 
-        $query = Part::query()->with(['bins']);
-
-        $query->chunk(1000, function ($parts) {
-            foreach ($parts as $part) {
-                try {
-                    $binsQuantity = $part->bins->pluck('qty');
-                    $binsQuantity->each(function ($item, $key) use ($part) {
-                        if ($item !== 0) {
-                            $part->is_active = true;
-                            $part->save();
-
-                            return false;
-                        }
-                    });
-                } catch (Exception $exception) {
-                    $this->info($exception->getMessage());
+        try {
+            Schema::table($tableName, function (Blueprint $table) use ($tableName) {
+                if (!Schema::hasColumn($tableName, 'is_active')) {
+                    $table->boolean('is_active')->nullable()->default(false);
+                    $table->index(['dealer_id', 'is_active']);
                 }
+
+                if (!Schema::hasColumn($tableName, 'is_taxable')) {
+                    $table->boolean('is_taxable')->nullable()->default(true);
+                }
+            });
+
+            if (Schema::hasColumn($tableName, 'is_active')) {
+                DB::query()->from($tableName)->whereExists(function ($query) use ($tableName) {
+                    $query->select(['part_bin_qty.part_id', 'part_bin_qty.qty'])
+                        ->from('part_bin_qty')
+                        ->whereColumn('part_bin_qty.part_id', $tableName . '.id')
+                        ->where([
+                            ['part_bin_qty.qty', '!=', 0],
+                        ]);
+                })->update([
+                    'is_active' => true,
+                ]);
             }
-        });
+        } catch (Exception $exception) {
+            $this->info($exception->getMessage());
+        }
     }
 
     /**
@@ -54,10 +52,13 @@ class AddIsActiveIsTaxableColumnPartsTable extends Migration
      */
     public function down(): void
     {
-        Schema::table(Part::TABLE_NAME, function (Blueprint $table) {
-            $table->dropIndex($this->indexCols);
+        Schema::table(Part::getTableName(), function (Blueprint $table) {
+            $table->dropIndex(['dealer_id', 'is_active']);
 
-            $table->dropColumns($this->indexCols);
+            $table->dropColumn([
+                'is_active',
+                'is_taxable',
+            ]);
         });
     }
 }
