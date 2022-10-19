@@ -48,7 +48,7 @@ class FieldMapperService implements InventoryFieldMapperServiceInterface
 
         if ($filter) {
             $className = __NAMESPACE__ . '\\Builders\\' . ucfirst($filter->type) . 'QueryBuilder';
-            
+
             return new $className($field, $data);
         }
 
@@ -68,6 +68,7 @@ class FieldMapperService implements InventoryFieldMapperServiceInterface
     {
         $edgeCases = [
             'existingPrice' => 'price',
+            'numSleeps' => 'sleeping_capacity',
             'numSleep' => 'sleeping_capacity',
             'basicPrice' => 'price',
             'numAxles' => 'axles',
