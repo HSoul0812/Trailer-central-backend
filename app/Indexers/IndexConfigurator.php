@@ -40,8 +40,6 @@ abstract class IndexConfigurator
             $this->mapping = new Mapping();
 
             foreach (static::PROPERTIES as $field => $settings) {
-                // We need to find a way to set the `case_normal` normalizer, or use another ES7 feature which works in a similar way
-                unset($settings['normalizer']);
                 $this->mapping->{$settings['type']}($field, $settings);
             }
 
