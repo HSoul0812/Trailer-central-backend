@@ -89,8 +89,10 @@ class TypesHelper
      */
     public static function ensureDateString($date): ?string
     {
-        if ($date instanceof Carbon && $date->timestamp > 0) {
-            return $date->toDateTimeString();
+        if ($date instanceof Carbon) {
+            return $date->timestamp > 0 ?
+                $date->toDateTimeString() :
+                now()->toDateTimeString(); // this happens when the date is 0000-00-00 00:00:00
         }
 
         if ($date instanceof DateTimeInterface) {
