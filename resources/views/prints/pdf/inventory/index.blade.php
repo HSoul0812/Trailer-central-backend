@@ -29,8 +29,8 @@
     }
 
     .print-inventory>div>div>img {
-        max-width: 30%;
-        max-height: 250px;
+        max-width: 300px;
+        max-height: 300px;
         margin: 10px;
     }
 
@@ -127,15 +127,15 @@ $columns[] = ['label' => 'Year', 'data' => $inventory['year']];
 $columns[] = ['label' => 'Manufacturer', 'data' => $inventory['manufacturer']];
 
 if ($inventory['width_inches']) {
-    $width = $inventory['width_inches'] . ' or ' . ($inventory['width_second'] ?? ' ') . ($inventory['width_inches_second'] ?? '');
+    $width = $inventory['width_inches'] . '" or ' . ($inventory['width_second']."'" ?? '') . ($inventory['width_inches_second'].'"' ?? '');
     $columns[] = ['label' => 'Width', 'data' => $width];
 }
 if ($inventory['length_inches']) {
-    $length = $inventory['length_inches'] . ' or ' . ($inventory['length_second'] ?? ' ') . ($inventory['length_inches_second'] ?? '');
+    $length = $inventory['length_inches'] . '" or ' . ($inventory['length_second']."'" ?? '') . ($inventory['length_inches_second'].'"' ?? '');
     $columns[] = ['label' => 'Length', 'data' => $length];
 }
 if ($inventory['height_inches']) {
-    $height = $inventory['height_inches'] . ' or ' . ($inventory['height_second'] ?? ' ') . ($inventory['height_inches_second'] ?? '');
+    $height = $inventory['height_inches'] . '" or ' . ($inventory['height_second']."'" ?? '') . ($inventory['height_inches_second'].'"' ?? '');
     $columns[] = ['label' => 'Height', 'data' => $height];
 }
 if ($inventory['weight']) {
