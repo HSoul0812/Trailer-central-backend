@@ -38,7 +38,7 @@ class CategoryRepositoryTest extends TestCase
      *
      * @note IntegrationTestCase
      */
-    public function testGetAllIsNotPaginatingAndItIsFilteringAsExpected(): void
+    public function testGetAllFilterWithoutPaging(): void
     {
         $fakeCategory = factory(Category::class)->create([
             'entity_type_id' => 2,
@@ -62,7 +62,7 @@ class CategoryRepositoryTest extends TestCase
      *
      * @note IntegrationTestCase
      */
-    public function testGetAllIsPaginatingFilteringAndSortingAsExpected(): void
+    public function testGetAllFilterWithPaging(): void
     {
         $categoryRepository = $this->getConcreteRepository();
         $this->assertInstanceOf(CategoryRepository::class, $categoryRepository);
