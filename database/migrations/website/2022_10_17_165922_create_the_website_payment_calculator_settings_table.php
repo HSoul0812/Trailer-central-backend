@@ -48,6 +48,6 @@ class CreateTheWebsitePaymentCalculatorSettingsTable extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists($this->tableName);
+        // To be safe for production database, we won't add the drop table statement here
     }
 }
