@@ -46,9 +46,31 @@ class SelectQueryBuilder implements FieldQueryBuilderInterface
                 ];
 
                 return [
-                    'post_filter' => $optionsQuery,
+                    'post_filter' => $this->options->isFilterable() ? $optionsQuery : [],
+                    'sort' => [
+                        [
+                            '_script' => [
+                                'type' => 'number',
+                                'script' => [
+                                    'inline' => "
+                                    if(doc['dealerLocationId'].value != null) {
+                                        for(int i=0; i < params['locations'].length; i++) {
+                                            if(params['locations'][i] == doc['dealerLocationId'].value) return -1;
+                                        }
+                                        return 0;
+                                    } else { return 1; }",
+                                    'params' => [
+                                        'locations' => array_map(static function ($location) {
+                                            return (int)$location;
+                                        }, $this->options->locationsForSubAggregatorsFiltering())
+                                    ]
+                                ],
+                                'order' => 'asc'
+                            ]
+                        ]
+                    ],
                     'aggregations' => [
-                        'filter_aggregations' => ['filter' => $optionsQuery],
+                        'filter_aggregations' => $this->options->isFilterable() ? ['filter' => $optionsQuery] : [],
                         'selected_location_aggregations' => ['filter' => [
                             'bool' => [
                                 'filter' => [
