@@ -76,8 +76,6 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
                 $indexName,
                 ['mapping' => $configurator->mapping(), 'settings' => $configurator->settings()]
             );
-
-            $this->indexManager->putAlias($indexName, new \ElasticAdapter\Indices\Alias($configurator->name()));
         }
     }
 
@@ -89,9 +87,16 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
 
         $model::$searchableAs = $indexName;
 
+        $this->ensureIndexDoesNotExists($model::ALIAS_ES_NAME);
+
         $softDelete = $model::usesSoftDelete() && config('scout.soft_delete', false);
 
         $now = Date::now(); // bear in mind the timezome
+
+        $this->createIndex(
+            $indexName,
+            ['mapping' => $model->indexConfigurator()->mapping(), 'settings' => $model->indexConfigurator()->settings()]
+        );
 
         $query = $model->newQuery()
             ->when($softDelete, function ($query) {
@@ -145,6 +150,22 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
                 }
 
             }
+        }
+    }
+
+    public function ensureIndexDoesNotExists(string $indexAliasName): void
+    {
+        if ($this->indexManager->exists($indexAliasName)){
+            $esClient = app(Client::class);
+            $tempIndex = $indexAliasName . '_temp_' . Date::now()->format('YmdHi');
+
+            $esClient->indices()->freeze(['index' => $indexAliasName]);
+            $esClient->indices()->clone(['index' => $indexAliasName, 'target' => $tempIndex]);
+            $esClient->indices()->delete(['index' =>$indexAliasName]);
+
+            $this->indexManager->putAlias($tempIndex, new \ElasticAdapter\Indices\Alias($indexAliasName));
+
+            $esClient->indices()->unfreeze(['index' => $tempIndex]);
         }
     }
 }
