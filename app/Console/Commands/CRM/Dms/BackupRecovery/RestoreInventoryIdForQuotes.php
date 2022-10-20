@@ -62,7 +62,7 @@ class RestoreInventoryIdForQuotes extends Command
     {
         $this->info("Start restoring inventory_id for quotes for Dealer ID $dealerId!");
 
-        $totalUpdated = 0;
+        $totalRestored = 0;
 
         // Loop through the backup DB, get the vin of inventory and use that data
         // to read the new inventory_id from the current database
@@ -71,7 +71,7 @@ class RestoreInventoryIdForQuotes extends Command
             ->select(['us.id', 'us.dealer_id', 'us.inventory_id', 'i.vin'])
             ->where('us.dealer_id', $dealerId)
             ->join(Inventory::getTableName() . ' as i', 'us.inventory_id', '=', 'i.inventory_id')
-            ->chunkById(self::CHUNK_SIZE, function (Collection $unitSalesFromBackupDb) use (&$totalUpdated) {
+            ->chunkById(self::CHUNK_SIZE, function (Collection $unitSalesFromBackupDb) use (&$totalRestored) {
                 $unitSalesFromBackupDb = $unitSalesFromBackupDb->keyBy('vin');
 
                 $inventoriesFromCurrentDb = DB::table(Inventory::getTableName())
@@ -118,12 +118,12 @@ class RestoreInventoryIdForQuotes extends Command
 
                     $this->line($message);
 
-                    $totalUpdated++;
+                    $totalRestored++;
                 }
 
                 DB::commit();
             });
 
-        $this->info("The command has successfully restored the inventory_id for $totalUpdated records!");
+        $this->info("The command has successfully restored the inventory_id for $totalRestored records!");
     }
 }
