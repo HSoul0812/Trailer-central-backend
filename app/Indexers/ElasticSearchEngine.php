@@ -155,8 +155,10 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
 
     public function ensureIndexDoesNotExists(string $indexAliasName): void
     {
-        if ($this->indexManager->exists($indexAliasName)){
-            $esClient = app(Client::class);
+        $esClient = app(Client::class);
+
+        if ($this->indexManager->exists($indexAliasName) && !$esClient->indices()->existsalias(['name' => $indexAliasName])) {
+
             $tempIndex = $indexAliasName . '_temp_' . Date::now()->format('YmdHi');
 
             $esClient->indices()->freeze(['index' => $indexAliasName]);
