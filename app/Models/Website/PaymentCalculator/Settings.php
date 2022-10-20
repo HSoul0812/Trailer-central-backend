@@ -3,6 +3,7 @@
 namespace App\Models\Website\PaymentCalculator;
 
 use App\Models\Inventory\EntityType;
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -21,10 +22,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * @property EntityType $entityType
  */
-class Settings extends Model {
+class Settings extends Model
+{
+    use TableAware;
 
-    const CONDITION_USED = 0;
-    const CONDITION_NEW = 1;
+    const CONDITION_USED = 'used';
+    const CONDITION_NEW = 'new';
 
     const FINANCING = 'financing';
     const NO_FINANCING = 'no_financing';
