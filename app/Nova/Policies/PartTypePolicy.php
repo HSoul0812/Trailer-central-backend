@@ -3,7 +3,7 @@
 namespace App\Nova\Policies;
 
 use App\Models\User\NovaUser;
-use App\Nova\Resources\Parts\PartType;
+use App\Models\Parts\Type as PartType;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 /**
