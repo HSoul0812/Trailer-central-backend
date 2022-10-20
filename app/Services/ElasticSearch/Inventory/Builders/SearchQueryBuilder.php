@@ -14,6 +14,12 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
     private const DELIMITER = '|';
 
     /** @var string */
+    private const DEFAULT_BOOST = 1;
+
+    /** @var string */
+    private const MINIMUM_BOOST = 0.001;
+
+    /** @var string */
     private $field;
 
     /** @var string */
@@ -66,11 +72,11 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
                 break;
             default:
                 foreach ($this->getSearchFields() as $key => $column) {
-                    $boost = 1;
+                    $boost = self::DEFAULT_BOOST;
                     $columnValues = explode('^', $column);
 
                     if (isset($columnValues[$boostKey = 1])) {
-                        $boost = (float) $columnValues[$boostKey];
+                        $boost = max(self::MINIMUM_BOOST, (float) $columnValues[$boostKey]);
                     }
 
                     $shouldQuery[] = $this->matchQuery($columnValues[0], $boost);
@@ -121,7 +127,7 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
             'wildcard' => [
                 $column => [
                     'value' => sprintf('*%s*', str_replace(' ', '*', $this->value)),
-                    'boost' => max(0, $boost - 0.95)
+                    'boost' => max(self::MINIMUM_BOOST, $boost - 0.95)
                 ]
             ]
         ];

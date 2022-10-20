@@ -5,6 +5,7 @@ namespace App\Indexers\Inventory;
 use App\Indexers\IndexConfigurator;
 use App\Transformers\Inventory\InventoryElasticSearchInputTransformer;
 use App\Models\Inventory\Inventory;
+use ElasticAdapter\Indices\Settings;
 
 /**
  * @method InventoryElasticSearchInputTransformer transformer()
@@ -235,5 +236,17 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
     public function __construct()
     {
         $this->transformer = new InventoryElasticSearchInputTransformer();
+    }
+
+    public function settings(): ?Settings
+    {
+        return (new Settings())->analysis([
+            'normalizer' => [
+                'case_normal' => [
+                    'type' => 'custom',
+                    'filter' => ['lowercase', 'asciifolding']
+                ]
+            ]
+        ]);
     }
 }
