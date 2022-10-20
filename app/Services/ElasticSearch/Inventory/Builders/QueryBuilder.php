@@ -259,11 +259,6 @@ class QueryBuilder implements InventoryQueryBuilderInterface
             unset($sort['status_script']);
         }
 
-        if (isset($sort['location_script'])) {
-            $this->addLocationSortScript($sort['location_script']);
-            unset($sort['location_script']);
-        }
-
         foreach ($sort as $sortKey => $order) {
             $this->query['sort'][] = [
                 $sortKey => [
@@ -311,22 +306,6 @@ class QueryBuilder implements InventoryQueryBuilderInterface
                 ]
             ];
         }, explode(',', $status)));
-    }
-
-    private function addLocationSortScript(string $locations): void
-    {
-        $this->query['sort'][] = [
-            '_script' => [
-                'type' => 'number',
-                'script' => [
-                    'inline' => "if(doc['dealerLocationId'].value != null) { for(int i=0; i < params['locations'].length; i++) {if(params['locations'][i] == doc['dealerLocationId'].value) return -1;} return 0;} else { return 1; }",
-                    'params' => [
-                        'locations' => array_map('intval', explode(',', $locations))
-                    ]
-                ],
-                'order' => 'asc'
-            ]
-        ];
     }
 
     private function addDistanceScript(Point $location): QueryBuilderInterface
