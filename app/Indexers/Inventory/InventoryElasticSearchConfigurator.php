@@ -12,20 +12,22 @@ use ElasticAdapter\Indices\Settings;
  */
 class InventoryElasticSearchConfigurator extends IndexConfigurator
 {
+    public const TEXT_TYPE_MAX_SIZE = 32766;
+
     public const PROPERTIES = [
-        'id'                   => ['type' => 'long'],
-        'dealerId'             => ['type' => 'integer'],
-        'dealerLocationId'     => ['type' => 'integer'],
-        'createdAt'            => ['type' => 'date', 'format' => 'yyyy-MM-dd HH:mm:ss'],
-        'updatedAt'            => ['type' => 'date', 'format' => 'yyyy-MM-dd HH:mm:ss'],
-        'isActive'             => ['type' => 'boolean'],
-        'isSpecial'            => ['type' => 'boolean'],
-        'isFeatured'           => ['type' => 'boolean'],
-        'isArchived'           => ['type' => 'boolean'],
-        'archivedAt'           => ['type' => 'date', 'format' => 'yyyy-MM-dd HH:mm:ss'],
-        'updatedAtUser'        => ['type' => 'date', 'format' => 'yyyy-MM-dd HH:mm:ss'],
-        'stock'                => [
-            'type'       => 'keyword',
+        'id' => ['type' => 'long'],
+        'dealerId' => ['type' => 'integer'],
+        'dealerLocationId' => ['type' => 'integer'],
+        'createdAt' => ['type' => 'date', 'format' => 'yyyy-MM-dd HH:mm:ss'],
+        'updatedAt' => ['type' => 'date', 'format' => 'yyyy-MM-dd HH:mm:ss'],
+        'isActive' => ['type' => 'boolean'],
+        'isSpecial' => ['type' => 'boolean'],
+        'isFeatured' => ['type' => 'boolean'],
+        'isArchived' => ['type' => 'boolean'],
+        'archivedAt' => ['type' => 'date', 'format' => 'yyyy-MM-dd HH:mm:ss'],
+        'updatedAtUser' => ['type' => 'date', 'format' => 'yyyy-MM-dd HH:mm:ss'],
+        'stock' => [
+            'type' => 'keyword',
             'normalizer' => 'case_normal',
             'fields' => [
                 'normal' => [
@@ -58,8 +60,9 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
             ]
         ],
         'description'          => [
-            'type'       => 'keyword',
+            'type' => 'keyword',
             'normalizer' => 'case_normal',
+            'ignore_above' => self::TEXT_TYPE_MAX_SIZE,
             'fields' => [
                 'txt' => ['type' => 'text', 'analyzer' => 'english']
             ]
