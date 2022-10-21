@@ -22,6 +22,16 @@ class RestoreInventoryIdForQuotes extends Command
 
     protected $description = 'Restore the inventory id for quotes from the backup database';
 
+    /** @var callable */
+    private static $beforeFetchInventoryFromCurrentDbCallback;
+
+    public function __construct()
+    {
+        parent::__construct();
+
+        self::$beforeFetchInventoryFromCurrentDbCallback = function (array $vins) {};
+    }
+
     public function handle(): int
     {
         $dealerId = (int) $this->argument('dealer_id');
@@ -73,10 +83,16 @@ class RestoreInventoryIdForQuotes extends Command
             ->join(Inventory::getTableName() . ' as i', 'us.inventory_id', '=', 'i.inventory_id')
             ->chunkById(self::CHUNK_SIZE, function (Collection $unitSalesFromBackupDb) use (&$totalRestored) {
                 $unitSalesFromBackupDb = $unitSalesFromBackupDb->keyBy('vin');
+                $vins = $unitSalesFromBackupDb->keys()->toArray();
+
+                dd($unitSalesFromBackupDb);
+
+                // Give a chance for the unit test to hook into anything here
+                call_user_func(self::$beforeFetchInventoryFromCurrentDbCallback, $vins);
 
                 $inventoriesFromCurrentDb = DB::table(Inventory::getTableName())
                     ->select(['inventory_id', 'vin'])
-                    ->whereIn('vin', $unitSalesFromBackupDb->keys()->toArray())
+                    ->whereIn('vin', $vins)
                     ->get()
                     ->keyBy('vin');
 
@@ -125,5 +141,13 @@ class RestoreInventoryIdForQuotes extends Command
             });
 
         $this->info("The command has successfully restored the inventory_id for $totalRestored records!");
+    }
+
+    /**
+     * @param callable $beforeFetchInventoryFromCurrentDbCallback
+     */
+    public static function withBeforeFetchInventoryFromCurrentDbCallback(callable $beforeFetchInventoryFromCurrentDbCallback)
+    {
+        self::$beforeFetchInventoryFromCurrentDbCallback = $beforeFetchInventoryFromCurrentDbCallback;
     }
 }
