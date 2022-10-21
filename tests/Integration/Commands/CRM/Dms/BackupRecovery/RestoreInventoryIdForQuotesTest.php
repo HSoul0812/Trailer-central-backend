@@ -123,6 +123,18 @@ class RestoreInventoryIdForQuotesTest extends TestCase
         $unitSale->delete();
     }
 
+    /**
+     * In this test, we simulate the situation where the current DB
+     * no longer has the inventory in the database. In this case,
+     * the code should just ignore that unit_sale and continue to the next
+     * one, leaving that unit_sale to still have the old inventory_id.
+     *
+     * @group DMS
+     * @group DMS_QUOTE
+     *
+     * @return void
+     * @throws MissingTestDealerIdException
+     */
     public function testItSkipsLoopIfNoVinFoundInCurrentDb()
     {
         $vin = Str::random();
