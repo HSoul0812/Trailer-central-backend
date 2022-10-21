@@ -55,10 +55,20 @@ class RestoreInventoryIdForQuotesTest extends TestCase
             $inventory->delete();
         });
 
-        $this->artisan(RestoreInventoryIdForQuotes::class, [
-            'dealer_id' => $dealerId,
-            'backup_db' => config('database.connections.mysql.host'),
-        ])->assertExitCode(0);
+        $expectedOutput = sprintf(
+            "Unit Sale ID %s has updated inventory_id from %d to %d.",
+            $unitSale->id,
+            $unitSale->inventory_id,
+            $inventory->getKey() + 1
+        );
+
+        $this
+            ->artisan(RestoreInventoryIdForQuotes::class, [
+                'dealer_id' => $dealerId,
+                'backup_db' => config('database.connections.mysql.host'),
+            ])
+            ->expectsOutput($expectedOutput)
+            ->assertExitCode(0);
 
         $unitSale = $unitSale->refresh();
 
@@ -95,16 +105,63 @@ class RestoreInventoryIdForQuotesTest extends TestCase
             'inventory_id' => $inventory->getKey(),
         ]);
 
-        $this->artisan(RestoreInventoryIdForQuotes::class, [
-            'dealer_id' => $dealerId,
-            'backup_db' => config('database.connections.mysql.host'),
-        ])->assertExitCode(0);
+        $expectedOutput = "Unit Sale ID $unitSale->id already has the correct inventory_id as $inventory->inventory_id, skipping this one.";
+
+        $this
+            ->artisan(RestoreInventoryIdForQuotes::class, [
+                'dealer_id' => $dealerId,
+                'backup_db' => config('database.connections.mysql.host'),
+            ])
+            ->expectsOutput($expectedOutput)
+            ->assertExitCode(0);
 
         $unitSale = $unitSale->refresh();
 
         $this->assertEquals($inventory->getKey(), $unitSale->inventory_id);
 
         $inventory->delete();
+        $unitSale->delete();
+    }
+
+    public function testItSkipsLoopIfNoVinFoundInCurrentDb()
+    {
+        $vin = Str::random();
+        $dealerId = $this->getTestDealerId();
+
+        $inventory = factory(Inventory::class)->create([
+            'vin' => $vin,
+        ]);
+        $unitSale = factory(UnitSale::class)->create([
+            'dealer_id' => $dealerId,
+            'inventory_id' => $inventory->getKey(),
+        ]);
+
+        // Backup the inventory_id to use later
+        $inventoryId = $inventory->getKey();
+
+        RestoreInventoryIdForQuotes::withBeforeFetchInventoryFromCurrentDbCallback(function (array $vins) use ($inventory, &$inventory2) {
+            // If the inventory vin is not in the vins array, do nothing
+            if (!in_array($inventory->vin, $vins)) {
+                return;
+            }
+
+            $inventory->delete();
+        });
+
+        $expectedOutput = "Cannot find VIN $vin from the current DB, skipping the Unit Sale ID $unitSale->id.";
+
+        $this
+            ->artisan(RestoreInventoryIdForQuotes::class, [
+                'dealer_id' => $dealerId,
+                'backup_db' => config('database.connections.mysql.host'),
+            ])
+            ->expectsOutput($expectedOutput)
+            ->assertExitCode(0);
+
+        $unitSale = $unitSale->refresh();
+
+        $this->assertEquals($inventoryId, $unitSale->inventory_id);
+
         $unitSale->delete();
     }
 }
