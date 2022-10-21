@@ -25,13 +25,6 @@ class RestoreInventoryIdForQuotes extends Command
     /** @var callable */
     private static $beforeFetchInventoryFromCurrentDbCallback;
 
-    public function __construct()
-    {
-        parent::__construct();
-
-        self::$beforeFetchInventoryFromCurrentDbCallback = function (array $vins) {};
-    }
-
     public function handle(): int
     {
         $dealerId = (int) $this->argument('dealer_id');
@@ -85,10 +78,10 @@ class RestoreInventoryIdForQuotes extends Command
                 $unitSalesFromBackupDb = $unitSalesFromBackupDb->keyBy('vin');
                 $vins = $unitSalesFromBackupDb->keys()->toArray();
 
-                dd($unitSalesFromBackupDb);
-
                 // Give a chance for the unit test to hook into anything here
-                call_user_func(self::$beforeFetchInventoryFromCurrentDbCallback, $vins);
+                if(is_callable(self::$beforeFetchInventoryFromCurrentDbCallback)) {
+                    call_user_func(self::$beforeFetchInventoryFromCurrentDbCallback, $vins);
+                }
 
                 $inventoriesFromCurrentDb = DB::table(Inventory::getTableName())
                     ->select(['inventory_id', 'vin'])
