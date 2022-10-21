@@ -79,7 +79,7 @@ class RestoreInventoryIdForQuotes extends Command
                 $vins = $unitSalesFromBackupDb->keys()->toArray();
 
                 // Give a chance for the unit test to hook into anything here
-                if(is_callable(self::$beforeFetchInventoryFromCurrentDbCallback)) {
+                if (is_callable(self::$beforeFetchInventoryFromCurrentDbCallback)) {
                     call_user_func(self::$beforeFetchInventoryFromCurrentDbCallback, $vins);
                 }
 
