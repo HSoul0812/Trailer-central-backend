@@ -27,6 +27,11 @@ class Kernel extends ConsoleKernel
             ->withoutOverlapping()
             ->runInBackground();
 
+        $schedule->command('inventory:check-subs')
+            ->daily()
+            ->withoutOverlapping()
+            ->runInBackground();
+
         $schedule->command('sync:leads')
             ->daily()
             ->withoutOverlapping()

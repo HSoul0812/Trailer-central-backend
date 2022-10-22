@@ -25,6 +25,13 @@ class InventoryRepository implements InventoryRepositoryInterface
         return $query->orderBy('i.updated_at_auto');
     }
 
+    public function expireItems($from, $to) {
+        DB::connection('mysql')
+            ->table('inventory')
+            ->whereBetween('tt_payment_expiration_date', [$from, $to])
+            ->update(['show_on_website' => 0]);
+    }
+
     public function getSerializableColumnsNames(): array
     {
         return collect(Schema::connection('mysql')

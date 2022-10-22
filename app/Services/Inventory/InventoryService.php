@@ -7,11 +7,13 @@ use App\DTOs\Inventory\TcApiResponseInventory;
 use App\DTOs\Inventory\TcApiResponseInventoryCreate;
 use App\DTOs\Inventory\TcApiResponseInventoryDelete;
 use App\Repositories\Integrations\TrailerCentral\AuthTokenRepositoryInterface;
+use App\Repositories\Integrations\TrailerCentral\InventoryRepositoryInterface;
 use App\Repositories\Parts\ListingCategoryMappingsRepositoryInterface;
 use App\Repositories\SysConfig\SysConfigRepositoryInterface;
 use App\Services\Inventory\ESQuery\ESBoolQueryBuilder;
 use App\Services\Inventory\ESQuery\ESInventoryQueryBuilder;
 use App\Services\Inventory\ESQuery\SortOrder;
+use Carbon\Carbon;
 use Dingo\Api\Routing\Helpers;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Collection;
@@ -75,7 +77,8 @@ class InventoryService implements InventoryServiceInterface
         private GuzzleHttpClient $httpClient,
         private SysConfigRepositoryInterface $sysConfigRepository,
         private ListingCategoryMappingsRepositoryInterface $listingCategoryMappingsRepository,
-        private AuthTokenRepositoryInterface $authTokenRepository
+        private AuthTokenRepositoryInterface $authTokenRepository,
+        private InventoryRepositoryInterface $inventoryRepository
     )
     {}
 
@@ -538,6 +541,13 @@ class InventoryService implements InventoryServiceInterface
         $respObj->type_id = $newCategory['type_id'];
         $respObj->type_label = $newCategory['type_label'];
         return $respObj;
+    }
+
+    public function checkSubscriptions()
+    {
+        $from = Carbon::today()->startOfDay();
+        $to = Carbon::today()->startOfDay()->addDay();
+        $this->inventoryRepository->expireItems($from, $to);
     }
 
     public function attributes(array $params): Collection

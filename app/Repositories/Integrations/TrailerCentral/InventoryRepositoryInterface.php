@@ -9,4 +9,5 @@ namespace App\Repositories\Integrations\TrailerCentral;
  */
 interface InventoryRepositoryInterface extends SourceRepositoryInterface
 {
+    public function expireItems($from, $to);
 }
