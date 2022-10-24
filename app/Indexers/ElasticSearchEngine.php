@@ -4,7 +4,6 @@ namespace App\Indexers;
 
 use ElasticAdapter\Exceptions\BulkRequestException;
 use ElasticAdapter\Indices\Index;
-use ElasticMigrations\Facades\Index as EsIndex;
 use ElasticAdapter\Indices\Mapping;
 use ElasticAdapter\Indices\Settings;
 use Elasticsearch\Client;
@@ -38,7 +37,8 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
                     'reason' => $error['index']['error']['reason']
                 ];
             })->toJson();
-            throw new Exception($failedModels);
+
+            \Log::critical($failedModels);
         }
     }
 
@@ -90,6 +90,8 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
 
     public function safeSyncImporter(Model $model, string $indexName): void
     {
+        ini_set('memory_limit', '256MB');
+
         if (!method_exists($model, 'usesSoftDelete')) {
             throw new \InvalidArgumentException('The model must be searchable type');
         }
@@ -100,7 +102,7 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
 
         $softDelete = $model::usesSoftDelete() && config('scout.soft_delete', false);
 
-        $now = Date::now(); // bear in mind the timezome
+        $now = Date::now(); // bear in mind the timezone
 
         $this->createIndex(
             $indexName,
@@ -110,8 +112,7 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
         $query = $model->newQuery()
             ->when($softDelete, function ($query) {
                 $query->withTrashed();
-            })
-            ->orderBy($model->getKeyName());
+            });
 
         $this->chunkQueryImport($query);
 
@@ -120,11 +121,9 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
         $query = $model->newQuery()->where('updated_at_auto', '>=', $now->format(\App\Constants\Date::FORMAT_Y_M_D_T))
             ->when($softDelete, function ($query) {
                 $query->withTrashed();
-            })
-            ->orderBy($model->getKeyName());
+            });
 
         $this->chunkQueryImport($query);
-
     }
 
     /**
@@ -133,7 +132,7 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
      */
     protected function chunkQueryImport($query): void
     {
-        $query->chunk(100, function ($models) use ($query) {
+        $query->chunk(1000, function ($models) use ($query) {
             try {
                 $query->first()->searchableUsing()->update($models);
             } catch (BulkRequestException $e) {
@@ -154,10 +153,9 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
             if (array_key_exists($model::ALIAS_ES_NAME, $aliasMapping['aliases'])) {
                 if ($index == $model::$searchableAs) {
                     continue;
-                } else {
-                    $this->indexManager->drop($index);
                 }
 
+                $this->indexManager->drop($index);
             }
         }
     }
