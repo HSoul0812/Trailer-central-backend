@@ -183,7 +183,7 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
                 ]);
 
                 // Port Exists?
-                if ($dealerTunnel===false || in_array($dealerTunnel->port, $tunnels)) {
+                if (empty($dealerTunnel) || in_array($dealerTunnel->port, $tunnels)) {
                     continue;
                 }
 
@@ -224,7 +224,7 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
             ]);
 
             // Port Exists?
-            if (in_array($dealerTunnel->port, $tunnels)) {
+            if (empty($dealerTunnel) && in_array($dealerTunnel->port, $tunnels)) {
                 continue;
             }
 
