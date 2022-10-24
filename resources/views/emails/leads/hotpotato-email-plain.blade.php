@@ -12,9 +12,9 @@ Your salesperson {{ $salesperson_name }} failed to follow-up with the lead
     We automatically rescheduled the next contact time to {{ $new_contact_date }}.
 @endif
 
-@if ($weekend > 0)
+@if ($weekday > 0)
     As it is now the weekend, we set the Next Contact Date to Monday instead
-    of {{ $weekend > 1 ? 'Sunday' : 'Saturday' }}. If you wish to instead schedule
+    of {{ $weekday > 1 ? 'Sunday' : 'Saturday' }}. If you wish to instead schedule
     this for the weekend, feel free to do so manually in the Trailer Central CRM.
 @endif
 
