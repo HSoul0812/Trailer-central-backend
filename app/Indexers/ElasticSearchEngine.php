@@ -3,24 +3,28 @@
 namespace App\Indexers;
 
 use ElasticAdapter\Exceptions\BulkRequestException;
+use ElasticAdapter\Indices\Alias;
 use ElasticAdapter\Indices\Index;
 use ElasticAdapter\Indices\Mapping;
 use ElasticAdapter\Indices\Settings;
 use Elasticsearch\Client;
-use Exception;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Date;
 use InvalidArgumentException;
+use Laravel\Scout\Searchable;
+use Exception;
+use Log;
 
 class ElasticSearchEngine extends \ElasticScoutDriver\Engine
 {
+    /** @var array<string, bool> */
+    private static $indexStatus = [];
+
     /**
      * Update the given model in the index.
      *
      * @param \Illuminate\Database\Eloquent\Collection $models
      * @return void
-     * @throws BulkRequestException when some item was not able to be sent/updated
-     * @throws Exception when some item was not able to be sent/updated
+     * @throws Exception when some unknown error has been thrown
      */
     public function update($models): void
     {
@@ -29,7 +33,7 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
         try {
             parent::update($models);
         } catch (BulkRequestException $exception) {
-            $failedModels = collect($exception->getResponse()['items'])->filter(function ($item) {
+            $failedModels = collect($exception->getResponse()['items'])->filter(function (array $item) {
                 return isset($item['index']['error']);
             })->map(function ($error) {
                 return [
@@ -38,7 +42,7 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
                 ];
             })->toJson();
 
-            \Log::critical($failedModels);
+            Log::critical($failedModels);
         }
     }
 
@@ -70,111 +74,77 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
         }
 
         /** @var IndexConfigurator $configurator */
-        /** @var Model|WithIndexConfigurator $first */
+        /** @var Model|WithIndexConfigurator|Searchable $first */
 
         $first = $models->first();
 
         if ($first &&
             method_exists($first, 'indexConfigurator') &&
             ($configurator = $first->indexConfigurator()) &&
-            !$this->indexManager->exists($first->searchableAs())
+            ($searchableAs = $configurator->aliasName()) &&
+            !$this->isIndexAlreadyCreated($searchableAs)
         ) {
-            $indexName = $configurator->name() . '_' . date('YmdHi');
+            $indexName = $configurator->name();
 
             $this->createIndex(
                 $indexName,
                 ['mapping' => $configurator->mapping(), 'settings' => $configurator->settings()]
             );
+
+            self::$indexStatus[$searchableAs] = true;
+
+            if ($configurator->shouldMakeAlias()) {
+                $this->indexManager->putAlias($indexName, new Alias($searchableAs));
+            }
         }
-    }
-
-    public function safeSyncImporter(Model $model, string $indexName): void
-    {
-        ini_set('memory_limit', '256MB');
-
-        if (!method_exists($model, 'usesSoftDelete')) {
-            throw new \InvalidArgumentException('The model must be searchable type');
-        }
-
-        $model::$searchableAs = $indexName;
-
-        $this->ensureIndexDoesNotExists($model::ALIAS_ES_NAME);
-
-        $softDelete = $model::usesSoftDelete() && config('scout.soft_delete', false);
-
-        $now = Date::now(); // bear in mind the timezone
-
-        $this->createIndex(
-            $indexName,
-            ['mapping' => $model->indexConfigurator()->mapping(), 'settings' => $model->indexConfigurator()->settings()]
-        );
-
-        $query = $model->newQuery()
-            ->when($softDelete, function ($query) {
-                $query->withTrashed();
-            });
-
-        $this->chunkQueryImport($query);
-
-        $this->swapIndexNames($model);
-
-        $query = $model->newQuery()->where('updated_at_auto', '>=', $now->format(\App\Constants\Date::FORMAT_Y_M_D_T))
-            ->when($softDelete, function ($query) {
-                $query->withTrashed();
-            });
-
-        $this->chunkQueryImport($query);
     }
 
     /**
-     * @param $query
-     * @return void
+     * Checks if a index is already created (or its alias)
+     *
+     * @param string $indexName
+     * @return bool
      */
-    protected function chunkQueryImport($query): void
+    public function isIndexAlreadyCreated(string $indexName): bool
     {
-        $query->chunk(1000, function ($models) use ($query) {
-            try {
-                $query->first()->searchableUsing()->update($models);
-            } catch (BulkRequestException $e) {
+        if (!isset(self::$indexStatus[$indexName])) {
+            self::$indexStatus[$indexName] = $this->indexManager->exists($indexName);
+        }
 
-            }
-        });
+        return self::$indexStatus[$indexName];
     }
 
-    public function swapIndexNames(Model $model): void
+    public function swapIndexNames(string $indexName, string $aliasName): void
     {
-        $esClient = app(Client::class);
+        $this->indexManager->putAlias($indexName, new Alias($aliasName));
+    }
 
-        $aliases = $esClient->indices()->getAliases();
-
-        $this->indexManager->putAlias($model::$searchableAs, new \ElasticAdapter\Indices\Alias($model::ALIAS_ES_NAME));
-
-        foreach ($aliases as $index => $aliasMapping) {
-            if (array_key_exists($model::ALIAS_ES_NAME, $aliasMapping['aliases'])) {
-                if ($index == $model::$searchableAs) {
-                    continue;
-                }
-
-                $this->indexManager->drop($index);
-            }
+    public function purgeIndexList(array $list): void
+    {
+        foreach ($list as $index => $aliasMapping) {
+            $this->indexManager->drop($index);
         }
     }
 
     public function ensureIndexDoesNotExists(string $indexAliasName): void
     {
-        $esClient = app(Client::class);
+        $esClient = $this->getElasticClient();
 
         if ($this->indexManager->exists($indexAliasName) && !$esClient->indices()->existsalias(['name' => $indexAliasName])) {
-
-            $tempIndex = $indexAliasName . '_temp_' . Date::now()->format('YmdHi');
+            $tempIndex = $indexAliasName . '_temp_' . now()->format('YmdHi');
 
             $esClient->indices()->freeze(['index' => $indexAliasName]);
             $esClient->indices()->clone(['index' => $indexAliasName, 'target' => $tempIndex]);
-            $esClient->indices()->delete(['index' =>$indexAliasName]);
+            $esClient->indices()->delete(['index' => $indexAliasName]);
 
-            $this->indexManager->putAlias($tempIndex, new \ElasticAdapter\Indices\Alias($indexAliasName));
+            $this->indexManager->putAlias($tempIndex, new Alias($indexAliasName));
 
             $esClient->indices()->unfreeze(['index' => $tempIndex]);
         }
+    }
+
+    protected function getElasticClient(): Client
+    {
+        return app(Client::class);
     }
 }

@@ -2,10 +2,8 @@
 
 namespace App\Console\Commands\Inventory;
 
-use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Date;
 use App\Models\Inventory\Inventory;
-use Laravel\Scout\EngineManager;
+use Illuminate\Console\Command;
 
 class RecreateInventoryIndex extends Command
 {
@@ -36,13 +34,10 @@ class RecreateInventoryIndex extends Command
     /**
      * Execute the console command.
      *
-     * @return mixed
+     * @throws \Exception when some unknown error has been thrown
      */
-    public function handle()
+    public function handle(): void
     {
-        $inventory_name = Inventory::ALIAS_ES_NAME . '_' . Date::now()->format("YmdHi");
-        $engine = app(EngineManager::class);
-
-        $engine->safeSyncImporter(new Inventory, $inventory_name);
+        Inventory::makeAllSearchableUsingAliasStrategy();
     }
 }
