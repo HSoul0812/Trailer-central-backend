@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Class TunnelRedisRepository
- * 
+ *
  * @package App\Repositories\Marketing
  */
 class TunnelRedisRepository implements TunnelRepositoryInterface
@@ -20,7 +20,7 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
     /**
      * @const Default Sort Order
      */
-    const DEFAULT_SORT = '-port';
+    public const DEFAULT_SORT = '-port';
 
 
     /**
@@ -80,7 +80,7 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
      */
     public function create($params)
     {
-        throw new NotImplementedException;
+        throw new NotImplementedException();
     }
 
     /**
@@ -89,12 +89,12 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
      */
     public function update($params)
     {
-        throw new NotImplementedException;
+        throw new NotImplementedException();
     }
 
     /**
      * Get Single Tunnel
-     * 
+     *
      * @param type $params
      * @throws DealerIdRequiredForGetTunnelException
      * @return DealerTunnel
@@ -106,16 +106,19 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
 
         // Get Dealer ID
         $dealerId = $params['dealer_id'];
-        if(empty($dealerId)) {
-            $this->log->error('Param dealer_id is missing');
-            throw new DealerIdRequiredForGetTunnelException;
+        if (empty($dealerId)) {
+            $this->log->error('Param dealer_id is missing. Params provided: '.print_r($params, true));
+            //throw new DealerIdRequiredForGetTunnelException;
+            return false;
         }
 
         // Get Tunnel ID
         $tunnelId = $params['id'];
-        if(empty($tunnelId)) {
-            $this->log->error('Param id is missing');
-            throw new IdRequiredForGetTunnelException;
+        if (empty($tunnelId)) {
+            $this->log->error('Param id is missing. Params provided: '.print_r($params, true));
+            //throw new IdRequiredForGetTunnelException();
+
+            return false;
         }
 
         // Get Tunnels Server
@@ -125,7 +128,7 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
         $key = 'tunnels:info:' . $server . ':' . $dealerId . ':' . $tunnelId;
         $this->log->info('Passing HGETALL ' . $key . ' to Redis');
         $tunnelData = $this->redis->hgetall($key);
-        $this->log->info('Retrieved tunnel details for tunnel ID #' . $tunnelId . 
+        $this->log->info('Retrieved tunnel details for tunnel ID #' . $tunnelId .
                             'on Dealer ID #' . $dealerId. ': ', $tunnelData);
 
         // Add Port to Tunnels Array
@@ -139,12 +142,12 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
 
     public function delete($params)
     {
-        throw new NotImplementedException;
+        throw new NotImplementedException();
     }
 
     /**
      * Get All Tunnels For Dealer
-     * 
+     *
      * @param array $params
      * @return Collection<DealerTunnel>
      */
@@ -155,7 +158,7 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
         $this->log->info('Getting All Tunnels for Server ' . $server . ' with Params', $params);
 
         // Get By Dealer ID?
-        if(isset($params['dealer_id'])) {
+        if (isset($params['dealer_id'])) {
             $dealerTunnels = $this->getByDealer($params['dealer_id'], $server);
         } else {
             // Get Tunnels By Dealer
@@ -168,7 +171,7 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
             // Loop Tunnel ID's
             $tunnels = [];
             $dealerTunnels = new Collection();
-            foreach($tunnelIds as $pair) {
+            foreach ($tunnelIds as $pair) {
                 // Get Dealer/Tunnel
                 list($dealerId, $tunnelId) = explode(':', $pair);
 
@@ -180,7 +183,7 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
                 ]);
 
                 // Port Exists?
-                if(in_array($dealerTunnel->port, $tunnels)) {
+                if (empty($dealerTunnel) || in_array($dealerTunnel->port, $tunnels)) {
                     continue;
                 }
 
@@ -196,7 +199,7 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
 
     /**
      * Get All Tunnels For Dealer
-     * 
+     *
      * @param array $params
      * @return Collection<DealerTunnel>
      */
@@ -212,7 +215,7 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
         // Loop Tunnel ID's
         $tunnels = [];
         $dealerTunnels = new Collection();
-        foreach($tunnelIds as $tunnelId) {
+        foreach ($tunnelIds as $tunnelId) {
             // Get Dealer Tunnel
             $dealerTunnel = $this->get([
                 'tunnel_server' => $server,
@@ -221,7 +224,7 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
             ]);
 
             // Port Exists?
-            if(in_array($dealerTunnel->port, $tunnels)) {
+            if (empty($dealerTunnel) || in_array($dealerTunnel->port, $tunnels)) {
                 continue;
             }
 
@@ -236,35 +239,36 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
 
     /**
      * Sort Tunnels By Field
-     * 
+     *
      * @param Collection<DealerTunnel> $tunnels
      * @param null|string $sort
      * @return Collection<DealerTunnel>
      */
-    private function sort(Collection $tunnels, ?string $sort = null): Collection {
+    private function sort(Collection $tunnels, ?string $sort = null): Collection
+    {
         // Get Order
         $order = $this->sortOrders[$sort];
 
         // Set Default Sort?
-        if($sort === null || empty($order)) {
+        if ($sort === null || empty($order)) {
             $sort = self::DEFAULT_SORT;
             $order = $this->sortOrders[$sort];
         }
         $this->log->info('Sorting ' . $tunnels->count() . ' Tunnels by Field ' . $order['field']);
 
         // Loop Tunnels
-        $tunnels->sort(function($a, $b) use($order) {
+        $tunnels->sort(function ($a, $b) use ($order) {
             // Get Column
             $aVal = (int) $a->{$order['field']};
             $bVal = (int) $b->{$order['field']};
 
             // Equal Values on Both Sides?
-            if($aVal === $bVal) {
+            if ($aVal === $bVal) {
                 return 0;
             }
 
             // Return Result
-            if($order['direction'] === 'ASC') {
+            if ($order['direction'] === 'ASC') {
                 return ($aVal < $bVal) ? -1 : 1;
             }
             return ($aVal > $bVal) ? -1 : 1;
