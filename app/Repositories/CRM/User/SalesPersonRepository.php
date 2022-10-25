@@ -331,8 +331,73 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
 
                        (i.total - payments.paid_amount)                                      AS remaining,
 
-                       IF(iv.pac_amount = 0, (iv.cost_of_unit), (iv.cost_of_unit * (iv.pac_amount / 100)) + iv.cost_of_unit) AS cost_overhead,
-                       iv.true_cost                                                   AS true_total_cost,
+                       (
+                        SELECT cost_overhead
+                        FROM (
+                            SELECT
+                                cost_overhead_inventory.inventory_id,
+                                @total_of_cost := (
+                                    coalesce(nullif(trim(cost_overhead_inventory.cost_of_shipping), ''), 0) +
+                                    coalesce(nullif(trim(cost_overhead_inventory.cost_of_prep), ''), 0) +
+                                    coalesce(nullif(trim(cost_overhead_inventory.cost_of_unit), ''), 0) +
+                                    coalesce((
+                                      SELECT
+                                        sum(dms_repair_order.total_price) AS total_price
+                                      FROM
+                                        dms_repair_order
+                                      WHERE
+                                        dms_repair_order.inventory_id = cost_overhead_inventory.inventory_id
+                                        AND dms_repair_order.type = 'internal'
+                                        AND dms_repair_order.dealer_id = $dealerId
+                                      GROUP BY
+                                        dms_repair_order.inventory_id
+                                    ), 0)
+                                ) AS total_of_cost,
+                                @pac_total_amount := coalesce(
+                                  if(strcmp(cost_overhead_inventory.pac_type, 'percent') = 0, (@total_of_cost * cost_overhead_inventory.pac_amount) / 100, cost_overhead_inventory.pac_amount),
+                                  0
+                                ) AS pac_total_amount,
+                                (@total_of_cost + @pac_total_amount) AS cost_overhead
+                            FROM
+                                inventory AS cost_overhead_inventory
+                            WHERE
+                                cost_overhead_inventory.dealer_id = $dealerId
+                        ) as cost_overhead_result
+                        where cost_overhead_result.inventory_id = iv.inventory_id
+                      ) AS cost_overhead,
+                    
+                      (
+                       SELECT 
+                        (
+                          coalesce(
+                            true_total_cost_inventory.true_cost,
+                            0
+                          ) + coalesce(
+                            true_total_cost_inventory.cost_of_shipping,
+                            0
+                          ) + coalesce(
+                            true_total_cost_inventory.cost_of_prep,
+                            0
+                          ) + coalesce(
+                            (
+                              SELECT 
+                                sum(dms_repair_order.total_price) AS total_price 
+                              FROM 
+                                dms_repair_order 
+                              WHERE 
+                                dms_repair_order.inventory_id = true_total_cost_inventory.inventory_id 
+                                AND dms_repair_order.type = 'internal' 
+                              GROUP BY 
+                                dms_repair_order.inventory_id
+                            ),
+                            0
+                          )
+                        ) AS true_total_cost 
+                       FROM 
+                        inventory AS true_total_cost_inventory 
+                       WHERE 
+                        true_total_cost_inventory.inventory_id = iv.inventory_id
+                       ) AS true_total_cost,
 
                        ii.unit_price                                                         AS unit_sale_amount,
                        COALESCE(qi.cost, 0)                                                  AS unit_cost_amount,
