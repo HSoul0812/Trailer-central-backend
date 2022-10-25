@@ -20,8 +20,16 @@ abstract class IndexConfigurator
 
     abstract public function name(): string;
 
-    public function transformer(): Transformer{
-        if($this->transformer){
+    abstract public function aliasName(): string;
+
+    public function shouldMakeAlias(): bool
+    {
+        return $this->name() !== $this->aliasName();
+    }
+
+    public function transformer(): Transformer
+    {
+        if ($this->transformer) {
             return $this->transformer;
         }
 

@@ -4,12 +4,8 @@ namespace App\Indexers\Inventory;
 
 use App\Indexers\IndexConfigurator;
 use App\Transformers\Inventory\InventoryElasticSearchInputTransformer;
-use App\Models\Inventory\Inventory;
 use ElasticAdapter\Indices\Settings;
 
-/**
- * @method InventoryElasticSearchInputTransformer transformer()
- */
 class InventoryElasticSearchConfigurator extends IndexConfigurator
 {
     public const TEXT_TYPE_MAX_SIZE = 32766;
@@ -68,7 +64,8 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
             ]
         ],
         'description_html'     => [
-            'type'       => 'keyword',
+            'type' => 'keyword',
+            'ignore_above' => self::TEXT_TYPE_MAX_SIZE,
             'normalizer' => 'case_normal'
         ],
         'status'               => ['type' => 'integer'],
@@ -233,12 +230,12 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
 
     public function name(): string
     {
-        return Inventory::ALIAS_ES_NAME;
+        return $this->aliasName() . '_' . now()->format('Y_m_d_h_i_s');
     }
 
-    public function __construct()
+    public function aliasName(): string
     {
-        $this->transformer = new InventoryElasticSearchInputTransformer();
+        return 'inventory';
     }
 
     public function settings(): ?Settings
@@ -251,5 +248,10 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
                 ]
             ]
         ]);
+    }
+
+    public function __construct()
+    {
+        $this->transformer = new InventoryElasticSearchInputTransformer();
     }
 }
