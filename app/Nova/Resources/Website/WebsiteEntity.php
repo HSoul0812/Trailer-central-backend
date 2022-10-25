@@ -2,16 +2,14 @@
 
 namespace App\Nova\Resources\Website;
 
+use App\Nova\Filters\WebsiteEntity\WebsiteId;
+use App\Nova\Resource;
 use Illuminate\Http\Request;
-use Laravel\Nova\Fields\Text;
-use Laravel\Nova\Fields\Textarea;
+use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\HasMany;
-use Laravel\Nova\Fields\BelongsTo;
-
-use App\Nova\Filters\WebsiteId;
-
-use App\Nova\Resource;
+use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Fields\Textarea;
 
 class WebsiteEntity extends Resource
 {

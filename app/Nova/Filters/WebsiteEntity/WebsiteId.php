@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Nova\Filters;
+namespace App\Nova\Filters\WebsiteEntity;
 
 use Illuminate\Http\Request;
-use Laravel\Nova\Filters\Filter;
 use Illuminate\Support\Facades\DB;
+use Laravel\Nova\Filters\Filter;
 
 class WebsiteId extends Filter
 {
@@ -39,10 +39,10 @@ class WebsiteId extends Filter
     public function options(Request $request)
     {
         $websitesList = [];
-        $websites = DB::table('website_entity')->select('website_id')->get();
+        $websites = DB::table('website')->select('id')->groupBy('id')->get();
 
         foreach($websites as $website) {
-            $websitesList[$website->website_id] = $website->website_id;
+            $websitesList[$website->id] = $website->id;
         }
 
 
