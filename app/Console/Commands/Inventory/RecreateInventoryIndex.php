@@ -12,14 +12,14 @@ class RecreateInventoryIndex extends Command
      *
      * @var string
      */
-    protected $signature = 'inventory:recreate-inventory-index';
+    protected $signature = 'inventory:recreate-index';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Will recreate the inventory ES index using an aliasing strategy';
 
     /**
      * Create a new command instance.
