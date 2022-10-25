@@ -235,7 +235,7 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
 
     public function aliasName(): string
     {
-        return 'inventory';
+        return config('elastic.scout_driver.indices.inventory');
     }
 
     public function settings(): ?Settings
