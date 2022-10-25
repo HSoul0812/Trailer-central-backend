@@ -91,7 +91,7 @@ class SafeIndexer
             $itIsAlreadySwapped = true;
         }
 
-        if (config('elastic.scout_driver.ingestion.inventory') === self::INGEST_BY_DEALER) {
+        if (config('elastic.scout_driver.ingestion.inventory', self::INGEST_BY_DEALER) === self::INGEST_BY_DEALER) {
             /** @var User[] $dealerList */
             $dealerList = $this->dealerRepository->getAll([]);
 
