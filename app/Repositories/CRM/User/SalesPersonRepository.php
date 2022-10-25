@@ -331,8 +331,8 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
 
                        (i.total - payments.paid_amount)                                      AS remaining,
 
-                       iii.cost_overhead                                                     AS cost_overhead,
-                       iii.true_total_cost                                                   AS true_total_cost,
+                       IF(iv.pac_amount = 0, (iv.cost_of_unit), (iv.cost_of_unit * (iv.pac_amount / 100)) + iv.cost_of_unit) AS cost_overhead,
+                       iv.true_cost                                                   AS true_total_cost,
 
                        ii.unit_price                                                         AS unit_sale_amount,
                        COALESCE(qi.cost, 0)                                                  AS unit_cost_amount,
