@@ -5,6 +5,7 @@ namespace App\Models\Inventory;
 use App\Helpers\SanitizeHelper;
 use App\Helpers\TypesHelper;
 use App\Indexers\Inventory\InventoryElasticSearchConfigurator;
+use App\Indexers\Inventory\SafeIndexer;
 use App\Indexers\WithIndexConfigurator;
 use App\Models\CRM\Dms\Customer\CustomerInventory;
 use App\Models\CRM\Dms\Quickbooks\Bill;
@@ -185,9 +186,10 @@ class Inventory extends Model
     use TableAware, SpatialTrait, GeospatialHelper, Searchable, WithIndexConfigurator, CustomSearch;
 
     /** @var InventoryElasticSearchConfigurator */
-    private $indexConfigurator;
+    private static $indexConfigurator;
 
-    public static $searchableAs;
+    /** @var null|string */
+    public static $searchableAs = null;
 
     const TABLE_NAME = 'inventory';
 
@@ -249,7 +251,6 @@ class Inventory extends Model
 
     public const MIN_DESCRIPTION_LENGTH_FOR_FACEBOOK = 50;
     public const MIN_PRICE_FOR_FACEBOOK = 0;
-    public const ALIAS_ES_NAME = 'inventory';
 
     /**
      * The table associated with the model.
@@ -812,7 +813,7 @@ class Inventory extends Model
 
     public function searchableAs(): string
     {
-        return self::$searchableAs ?? self::ALIAS_ES_NAME;
+        return self::$searchableAs ?? $this->indexConfigurator()->aliasName();
     }
 
     public function toSearchableArray(): array
@@ -860,13 +861,21 @@ class Inventory extends Model
 
     public function indexConfigurator(): InventoryElasticSearchConfigurator
     {
-        if ($this->indexConfigurator) {
-            return $this->indexConfigurator;
+        if (self::$indexConfigurator) {
+            return self::$indexConfigurator;
         }
 
-        $this->indexConfigurator = new InventoryElasticSearchConfigurator();
+        self::$indexConfigurator = new InventoryElasticSearchConfigurator();
 
-        return $this->indexConfigurator;
+        return self::$indexConfigurator;
     }
 
+    /**
+     * @throws \Exception when some unknown error has been thrown
+     */
+    public static function makeAllSearchableUsingAliasStrategy(): void
+    {
+        $indexer = app(SafeIndexer::class);
+        $indexer->ingest();
+    }
 }
