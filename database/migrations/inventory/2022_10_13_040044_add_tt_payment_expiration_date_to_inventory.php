@@ -15,6 +15,7 @@ class AddTTPaymentExpirationDateToInventory extends Migration
     {
         Schema::table('inventory', function (Blueprint $table) {
             $table->dateTime('tt_payment_expiration_date')->after('show_on_website');
+            $table->index("tt_payment_expiration_date", "index_tt_payment_expiration_date");
         });
     }
 
@@ -26,6 +27,7 @@ class AddTTPaymentExpirationDateToInventory extends Migration
     public function down()
     {
         Schema::table('inventory', function (Blueprint $table) {
+            $table->dropIndex("index_tt_payment_expiration_date");
             $table->dropColumn('tt_payment_expiration_date');
         });
     }
