@@ -156,6 +156,7 @@ use App\Services\Website\Log\LogServiceInterface;
 use App\Services\Website\Log\LogService;
 use App\Services\Website\WebsiteConfigService;
 use App\Services\Website\WebsiteConfigServiceInterface;
+use Exception;
 use GuzzleHttp\Client;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -245,7 +246,11 @@ class AppServiceProvider extends ServiceProvider
         });
 
         // Increase default database character set length (Specified key was too long)
-        Schema::defaultStringLength(191);
+        try {
+            Schema::defaultStringLength(191);
+        } catch (Exception $exception) {
+            // Do nothing in case we don't have valid DB connection
+        }
 
         // Add Migration Directories Recursively
         $mainPath = database_path('migrations');
