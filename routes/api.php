@@ -654,6 +654,19 @@ $api->version('v1', function ($route) {
     $route->get('users', 'App\Http\Controllers\v1\User\UserController@index');
     $route->post('users', 'App\Http\Controllers\v1\User\UserController@create');
 
+    /*
+    |--------------------------------------------------------------------------
+    | Integrations
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+
+    $route->get('integrations', 'App\Http\Controllers\v1\Integration\IntegrationController@index');
+    $route->get('integrations/{id}', 'App\Http\Controllers\v1\Integration\IntegrationController@show');
+
+
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
         /*
         |--------------------------------------------------------------------------
