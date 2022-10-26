@@ -11,11 +11,10 @@ class EntityType extends Model {
 
     public const TABLE_NAME = 'eav_entity_type';
 
-    public const ENTITY_TYPE_BUILDING = 10;
-
     public const ENTITY_TYPE_RV = 3;
-
+    public const ENTITY_TYPE_VEHICLE = 4;
     public const ENTITY_TYPE_WATERCRAFT = 5;
+    public const ENTITY_TYPE_BUILDING = 10;
 
     /**
      * The table associated with the model.
