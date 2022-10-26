@@ -33,6 +33,7 @@ class LeadService implements LeadServiceInterface
             ]);
         }
 
+        $params['lead_source'] = 'TrailerTrader';
         $params['website_id'] = config('services.trailercentral.tt_website_id');
         $params['is_from_classifieds'] = 1;
         $access_token = $this->getAccessToken($params['inventory']['inventory_id']);
