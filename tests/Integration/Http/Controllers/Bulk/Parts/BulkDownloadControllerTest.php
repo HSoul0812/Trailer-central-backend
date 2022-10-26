@@ -235,8 +235,6 @@ class BulkDownloadControllerTest extends AbstractMonitoredJobsTest
         return [                                            // array $parameters, string $expectedException, string $expectedExceptionMessage, string $firstExpectedErrorMessage
             'No dealer'                                     => [[], ResourceException::class, 'Validation Failed', 'The dealer id field is required.'],
             'Bad token'                                     => [['dealer_id' => 666999, 'token' => 'this-is-a-token'], ResourceException::class, 'Validation Failed', 'The token must be a valid UUID.'],
-            'There is another job working'                  => [['dealer_id' => $this->getSeededData(0,'id')], BusyJobException::class, "This job can't be set up due there is currently other job working", null],
-            'There is another job working (token provided)' => [['dealer_id' => $this->getSeededData(0,'id'),'token' => Uuid::uuid4()->toString()], BusyJobException::class, "This job can't be set up due there is currently other job working", null]
         ];
     }
 
