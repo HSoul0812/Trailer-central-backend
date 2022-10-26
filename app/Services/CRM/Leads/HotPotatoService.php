@@ -65,10 +65,11 @@ class HotPotatoService extends AutoAssignService implements HotPotatoServiceInte
      */
     public function dealer(NewDealerUser $dealer): DBCollection {
         // Get Mapped Settings Collection
-        $settings  = $this->settings->getByDealer($dealer->id);
-        $duration  = $settings->get('round-robin/hot-potato/duration');
-        $lastDate  = $this->datetime->subMinutes($duration)->toDateTimeString();
-        $firstDate = Carbon::parse($lastDate)->subDay()->toDateTimeString();
+        $settings   = $this->settings->getByDealer($dealer->id);
+        $duration   = $settings->get('round-robin/hot-potato/duration');
+        $lastDate   = $this->datetime->subMinutes($duration)->toDateTimeString();
+        $parsedDate = new Carbon($lastDate, config('app.db_timezone'));
+        $firstDate  = $parsedDate->subDay()->toDateTimeString();
 
         // Use Date Submitted?
         $params = [
@@ -77,8 +78,9 @@ class HotPotatoService extends AutoAssignService implements HotPotatoServiceInte
             'last_contact'  => $lastDate
         ];
         if($settings->get('round-robin/hot-potato/use-submission-date')) {
-            $lastCreated  = $this->datetime->subMinutes($duration)->toDateTimeString();
-            $firstCreated = Carbon::parse($lastCreated)->subDay()->toDateTimeString();
+            $lastCreated   = $this->datetime->subMinutes($duration)->toDateTimeString();
+            $parsedCreated = new Carbon($lastCreated, config('app.db_timezone'));
+            $firstCreated  = $parsedCreated->subDay()->toDateTimeString();
             $params['last_created']  = $lastCreated;
             $params['first_created'] = $firstCreated;
         }
@@ -168,7 +170,7 @@ class HotPotatoService extends AutoAssignService implements HotPotatoServiceInte
         // Send Email to Sales Person
         Mail::to($salesEmail)->send(
             new AutoAssignEmail([
-                'date' => Carbon::now()->toDateTimeString(),
+                'date' => Carbon::now()->tz($lead->crmUser->dealer_timezone)->toDateTimeString(),
                 'salesperson_name' => $salesPerson->getFullNameAttribute(),
                 'launch_url' => Lead::getLeadCrmUrl($lead->identifier, $credential),
                 'lead_name' => $lead->id_name,
