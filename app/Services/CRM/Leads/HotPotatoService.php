@@ -55,7 +55,7 @@ class HotPotatoService extends AutoAssignService implements HotPotatoServiceInte
 
         // Set Default Date/Time With Timezone
         date_default_timezone_set(config('app.db_timezone'));
-        $this->datetime = Carbon::now(config('app.db_timezone'));
+        $this->datetime = Carbon::now()->timezone(config('app.db_timezone'));
 
         // Initialize Logger
         $this->log = Log::channel('hotpotato');
@@ -84,14 +84,12 @@ class HotPotatoService extends AutoAssignService implements HotPotatoServiceInte
             'last_contact'  => $lastDate
         ];
         if($settings->get('round-robin/hot-potato/use-submission-date')) {
-            $lastCreated   = $this->datetime->subMinutes($duration)->toDateTimeString();
-            $parsedCreated = new Carbon($lastCreated, config('app.db_timezone'));
-            $firstCreated  = $parsedCreated->subDay()->toDateTimeString();
-            $params['last_created']  = $lastCreated;
-            $params['first_created'] = $firstCreated;
+            $params['last_created']  = $lastDate;
+            $params['first_created'] = $firstDate;
         }
 
         // Get Unprocessed Leads
+        $this->log->info("HotPotatoService finding leads between {$firstDate} and {$lastDate}");
         $leads = $this->leads->getAllUnprocessed($params);
 
         // No Leads? Skip Dealer

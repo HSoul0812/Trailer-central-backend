@@ -69,7 +69,7 @@ class AutoAssignService implements AutoAssignServiceInterface {
 
         // Set Default Date/Time With Timezone
         date_default_timezone_set(config('app.db_timezone'));
-        $this->datetime = Carbon::now(config('app.db_timezone'));
+        $this->datetime = Carbon::now()->timezone(config('app.db_timezone'));
 
         // Initialize Logger
         $this->log = Log::channel('autoassign');
