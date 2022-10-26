@@ -47,13 +47,19 @@ class HotPotatoService extends AutoAssignService implements HotPotatoServiceInte
         SalesPersonRepositoryInterface $salesPersonRepo,
         SettingsRepositoryInterface $settings
     ) {
-        parent::__construct($leads, $leadStatus, $salesPersonRepo);
-
-        // Initialize Settings Repository Interface
+        // Initialize Repositories Needed for Hot Potato
+        $this->leads = $leads;
+        $this->leadStatus = $leadStatus;
+        $this->salesPersonRepository = $salesPersonRepo;
         $this->settings = $settings;
+
+        // Set Default Date/Time With Timezone
+        date_default_timezone_set(config('app.db_timezone'));
+        $this->datetime = Carbon::now(config('app.db_timezone'));
 
         // Initialize Logger
         $this->log = Log::channel('hotpotato');
+        $this->log->info('Started HotPotatoService at ' . $this->datetime->toDateTimeString() . ' using timezone ' . config('app.db_timezone'));
     }
 
 

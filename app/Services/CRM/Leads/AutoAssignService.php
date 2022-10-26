@@ -57,17 +57,23 @@ class AutoAssignService implements AutoAssignServiceInterface {
      */
     protected $datetime;
     
-    public function __construct(LeadRepositoryInterface $leads, StatusRepositoryInterface $leadStatus, SalesPersonRepositoryInterface $salesPersonRepo) {
+    public function __construct(
+        LeadRepositoryInterface $leads,
+        StatusRepositoryInterface $leadStatus,
+        SalesPersonRepositoryInterface $salesPersonRepo
+    ) {
+        // Initialize Repositories Needed for Hot Potato
         $this->leads = $leads;
         $this->leadStatus = $leadStatus;
         $this->salesPersonRepository = $salesPersonRepo;
 
+        // Set Default Date/Time With Timezone
         date_default_timezone_set(config('app.db_timezone'));
-
         $this->datetime = Carbon::now(config('app.db_timezone'));
 
         // Initialize Logger
         $this->log = Log::channel('autoassign');
+        $this->log->info('Started AutoAssignService at ' . $this->datetime->toDateTimeString() . ' using timezone ' . config('app.db_timezone'));
     }
 
 
