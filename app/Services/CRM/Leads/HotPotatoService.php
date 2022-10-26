@@ -18,6 +18,7 @@ use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\CRM\User\SettingsRepositoryInterface;
 use App\Traits\MailHelper;
 use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Collection as DBCollection;
 use Illuminate\Foundation\Bus\DispatchesJobs;
@@ -55,7 +56,7 @@ class HotPotatoService extends AutoAssignService implements HotPotatoServiceInte
 
         // Set Default Date/Time With Timezone
         date_default_timezone_set(config('app.db_timezone'));
-        $this->datetime = Carbon::now()->timezone(config('app.db_timezone'));
+        $this->datetime = CarbonImmutable::now()->timezone(config('app.db_timezone'));
 
         // Initialize Logger
         $this->log = Log::channel('hotpotato');

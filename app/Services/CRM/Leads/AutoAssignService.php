@@ -13,10 +13,11 @@ use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Traits\MailHelper;
+use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Collection;
-use Carbon\Carbon;
 
 class AutoAssignService implements AutoAssignServiceInterface {
     
@@ -69,7 +70,7 @@ class AutoAssignService implements AutoAssignServiceInterface {
 
         // Set Default Date/Time With Timezone
         date_default_timezone_set(config('app.db_timezone'));
-        $this->datetime = Carbon::now()->timezone(config('app.db_timezone'));
+        $this->datetime = CarbonImmutable::now()->timezone(config('app.db_timezone'));
 
         // Initialize Logger
         $this->log = Log::channel('autoassign');
