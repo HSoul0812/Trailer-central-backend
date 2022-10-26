@@ -7,9 +7,7 @@ use App\Models\Inventory\Category;
 use App\Models\Inventory\EntityType;
 use App\Models\Inventory\Inventory;
 use App\Models\Inventory\Status;
-use App\Models\User\DealerLocation;
 use App\Nova\Filters\Integration\IncomingMappingsTypeFilter;
-use App\Nova\Resources\Dealer\Dealer;
 use Epartment\NovaDependencyContainer\HasDependencies;
 use Epartment\NovaDependencyContainer\NovaDependencyContainer;
 use Illuminate\Http\Request;
@@ -21,6 +19,8 @@ use App\Nova\Resource;
 use App\Nova\Filters\DealerIDMapping;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Http\Requests\ResourceIndexRequest;
+
+use App\Nova\Actions\Exports\DealerIncomingMappingExport;
 
 class DealerIncomingMapping extends Resource
 {
@@ -221,7 +221,9 @@ class DealerIncomingMapping extends Resource
      */
     public function actions(Request $request)
     {
-        return [];
+        return [
+            (new DealerIncomingMappingExport)->withHeadings()->askForFilename(),
+        ];
     }
 
     /**
