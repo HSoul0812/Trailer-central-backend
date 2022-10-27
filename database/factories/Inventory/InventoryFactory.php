@@ -31,7 +31,8 @@ $factory->define(Inventory::class, static function (Faker $faker, array $attribu
 
     // Get Showroom Model
     $mfg = $attributes['manufacturer'] ?? Manufacturers::inRandomOrder()->first();
-    $brand = $attributes['brand'] ?? Brand::where('manufacturer_id', $mfg->id)->inRandomOrder()->first();
+    $mfg_id = $mfg->id ?? Manufacturers::where('name', $attributes['manufacturer'])->first()->id;
+    $brand = $attributes['brand'] ?? Brand::where('manufacturer_id', $mfg_id)->inRandomOrder()->first();
     $brandName = is_string($brand) ? $brand : $brand->name ?? '';
     $showroom = Showroom::where('manufacturer', is_string($mfg) ? $mfg : $mfg->name)->inRandomOrder()->first();
 

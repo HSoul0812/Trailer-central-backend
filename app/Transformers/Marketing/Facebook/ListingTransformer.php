@@ -29,14 +29,11 @@ class ListingTransformer extends TransformerAbstract
      */
     protected $imageTransformer;
 
-    public function __construct(
-        MarketplaceTransformer $marketplaceTransformer,
-        InventoryTransformer $inventoryTransformer,
-        ImageTransformer $imageTransformer
-    ) {
-        $this->marketplaceTransformer = $marketplaceTransformer;
-        $this->inventoryTransformer = $inventoryTransformer;
-        $this->imageTransformer = $imageTransformer;
+    public function __construct()
+    {
+        $this->marketplaceTransformer = new MarketplaceTransformer;
+        $this->inventoryTransformer = new InventoryTransformer;
+        $this->imageTransformer = new ImageTransformer;
     }
 
     public function transform(Listings $listing)

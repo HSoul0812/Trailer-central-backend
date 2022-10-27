@@ -29,14 +29,11 @@ class MarketplaceTransformer extends TransformerAbstract
      */
     protected $dealerLocationTransformer;
 
-    public function __construct(
-        FilterTransformer $filterTransformer,
-        UserTransformer $userTransformer,
-        DealerLocationTransformer $dealerLocationTransformer
-    ) {
-        $this->filterTransformer = $filterTransformer;
-        $this->userTransformer = $userTransformer;
-        $this->dealerLocationTransformer = $dealerLocationTransformer;
+    public function __construct()
+    {
+        $this->filterTransformer = new FilterTransformer;
+        $this->userTransformer = new UserTransformer;
+        $this->dealerLocationTransformer = new DealerLocationTransformer;
     }
 
     public function transform(Marketplace $marketplace)
