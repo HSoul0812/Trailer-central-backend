@@ -222,18 +222,16 @@ class HotPotatoService extends AutoAssignService implements HotPotatoServiceInte
         }
 
         // Initialize Next Contact Date
-        $nextContact = Carbon::create($curHr + $nextHr, $this->datetime->format("i"), 0,
-                                       $this->datetime->format("n"), $salesDay,
-                                       $this->datetime->format("Y"), $lead->crmUser->dealer_timezone);
+        $nextContact = Carbon::create($this->datetime->format("Y"), $this->datetime->format("n"), $salesDay,
+                                      $curHr + $nextHr, $this->datetime->format("i"), 0, $lead->crmUser->dealer_timezone);
 
         // On Weekend?
         $weekday = 0;
         if($settings->get('round-robin/hot-potato/skip-weekends') && $nextContact->format("N") > 5) {
             $weekday = $nextContact->format("N");
             $salesDay += (8 - $weekday);
-            $nextContact = Carbon::create($curHr + $nextHr, $this->datetime->format("i"), 0,
-                                          $this->datetime->format("n"), $salesDay,
-                                          $this->datetime->format("Y"), $lead->crmUser->dealer_timezone);
+            $nextContact = Carbon::create($this->datetime->format("Y"), $this->datetime->format("n"), $salesDay,
+                                          $curHr + $nextHr, $this->datetime->format("i"), 0, $lead->crmUser->dealer_timezone);
         }
 
         // Set Next Contact Date
