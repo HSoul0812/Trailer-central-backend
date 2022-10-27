@@ -148,7 +148,9 @@ class AutoAssignService implements AutoAssignServiceInterface {
 
         // Finish Assigning Lead and Return Result
         $this->setRoundRobinSalesPerson($dealer->id, $dealerLocationId, $lead, $salesPerson->id);
-        $status = $this->handleAssignLead($lead, $salesPerson);
+        $date = Carbon::now()->timezone($lead->crmUser->dealer_timezone)
+                      ->addDay()->hour(9)->minute(0)->second(0);
+        $status = $this->handleAssignLead($lead, $salesPerson, $date);
         return $this->markAssignLead($lead, $dealerLocationId, $newestSalesPerson, $salesPerson, $status);
     }
 
@@ -261,13 +263,10 @@ class AutoAssignService implements AutoAssignServiceInterface {
      * 
      * @param Lead $lead
      * @param SalesPerson $salesPerson
+     * @param Carbon $date
      * @return string status of assign
      */
-    protected function handleAssignLead(Lead $lead, SalesPerson $salesPerson): string {
-        // Initialize Next Contact Date
-        $date = Carbon::now()->timezone($lead->crmUser->dealer_timezone)
-                      ->addDay()->hour(9)->minute(0)->second(0);
-
+    protected function handleAssignLead(Lead $lead, SalesPerson $salesPerson, Carbon $date): string {
         // Try Processing Assign Lead
         $this->addLeadExplanationNotes($lead->identifier, 'Found Next Matching Sales Person: ' . $salesPerson->id . ' for Lead: ' . $lead->id_name);
         try {

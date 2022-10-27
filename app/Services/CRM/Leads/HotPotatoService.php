@@ -145,51 +145,12 @@ class HotPotatoService extends AutoAssignService implements HotPotatoServiceInte
 
         // Finish Assigning Lead and Return Result
         $this->setRoundRobinSalesPerson($dealer->id, $dealerLocationId, $lead, $salesPerson->id);
-        $status = $this->handleAssignLead($lead, $salesPerson, $settings);
-        $this->sendHotPotatoEmail($lead, $currentSalesPerson, $salesPerson, $oldContactDate, $status['weekday']);
-        return $this->markAssignLead($lead, $dealerLocationId, $currentSalesPerson, $salesPerson, $status['status']);
-    }
-
-
-    /**
-     * Prepare Assigning Lead
-     * 
-     * @param Lead $lead
-     * @param SalesPerson $salesPerson
-     * @param Collection<{key: value}> $settings
-     * @return array{next_contact_date: string,
-     *               weekday: null|int,
-     *               status: string}
-     */
-    protected function handleAssignLead(Lead $lead, SalesPerson $salesPerson, Collection $settings): array {
-        // Initialize Next Contact Date
         $next = $this->calcNextContactDate($lead, $settings);
-        $date = $next['next_contact_date'];
-
-        // Try Processing Assign Lead
-        $this->addLeadExplanationNotes($lead->identifier, 'Found Next Matching Sales Person: ' . $salesPerson->id . ' for Lead: ' . $lead->id_name);
-        try {
-            // Prepare to Assign
-            $status = LeadAssign::STATUS_ASSIGNING;
-            $status = $this->finishAssignLead($lead, $salesPerson, $date);
-
-            // Send Sales Email
-            if(!empty($lead->crmUser->enable_assign_notification)) {
-                $status = LeadAssign::STATUS_MAILING;
-                $status = $this->sendAssignLeadEmail($lead, $salesPerson, $date);
-            }
-        } catch(\Exception $e) {
-            // Add Error
-            if(empty($status)) {
-                $status = LeadAssign::STATUS_ERROR;
-            }
-            $this->addLeadExplanationNotes($lead->identifier, 'Exception Returned! ' . $e->getMessage() . ': ' . $e->getTraceAsString());
-            $this->log->error("AutoAssignService exception returned on update or email {$e->getMessage()}: {$e->getTraceAsString()}");
-        }
-
-        // Mark Lead as Assign
-        return ['next_contact_date' => $date->toDateTimeString(), 'weekday' => $next['weekday'], 'status' => $status];
+        $status = $this->handleAssignLead($lead, $salesPerson, $next['next_contact_date']);
+        $this->sendHotPotatoEmail($lead, $currentSalesPerson, $salesPerson, $oldContactDate, $next['weekday']);
+        return $this->markAssignLead($lead, $dealerLocationId, $currentSalesPerson, $salesPerson, $status);
     }
+
 
     /**
      * Send Assign Lead Email

@@ -25,16 +25,5 @@ interface HotPotatoServiceInterface extends AutoAssignServiceInterface {
      * @return null|LeadAssign
      */
     public function hotPotato(Lead $lead, Collection $settings): ?LeadAssign;
-
-    /**
-     * Prepare Assigning Lead
-     * 
-     * @param Lead $lead
-     * @param SalesPerson $salesPerson
-     * @param Collection<{key: value}> $settings
-     * @return array{next_contact_date: string,
-     *               weekday: null|int,
-     *               status: string}
-     */
-    protected function handleAssignLead(Lead $lead, SalesPerson $salesPerson, Collection $settings): array;
+    
 }
