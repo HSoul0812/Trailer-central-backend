@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Repositories\Bulk\Inventory\BulkDownloadRepository;
 use App\Repositories\Bulk\Inventory\BulkDownloadRepositoryInterface;
+use App\Repositories\Bulk\Inventory\BulkUploadRepository;
+use App\Repositories\Bulk\Inventory\BulkUploadRepositoryInterface;
 use App\Services\Export\Inventory\Bulk\BulkDownloadJobService;
 use App\Services\Export\Inventory\Bulk\BulkDownloadJobServiceInterface;
 use App\Services\Export\Inventory\Bulk\BulkPdfJobService;
@@ -36,5 +38,6 @@ class InventoryServiceProvider extends ServiceProvider
         $this->app->bind(BulkDownloadRepositoryInterface::class, BulkDownloadRepository::class);
         $this->app->bind(BulkDownloadJobServiceInterface::class, BulkDownloadJobService::class);
         $this->app->bind(BulkPdfJobServiceInterface::class, BulkPdfJobService::class);
+        $this->app->bind(BulkUploadRepositoryInterface::class, BulkUploadRepository::class);
     }
 }
