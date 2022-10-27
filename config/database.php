@@ -82,7 +82,7 @@ return [
                 'host' => [
                     // if no separate read write hosts are configured, then
                     // the same host will be used for both connectsion
-                    env('DB_READ_HOST', env('DB_HOST', '127.0.0.1')),
+                    env('DB_HOST', '127.0.0.1'),
                 ],
             ],
             'write' => [
