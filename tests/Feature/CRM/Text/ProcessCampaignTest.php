@@ -945,7 +945,6 @@ class ProcessCampaignTest extends TestCase
         $campaign = Campaign::find($campaignId);
 
         // Get Website ID
-        // $dealer = NewDealerUser::findOrFail(self::getTestDealerId());
         $dealer = NewDealerUser::findOrFail($this->dealer->getKey());
         $websiteId = $dealer->website->id;
 
@@ -969,7 +968,6 @@ class ProcessCampaignTest extends TestCase
             if(isset($filters['brands']) || isset($filters['categories'])) {
                 // Initialize Lead Params
                 $leadParams = ['dealer_id' => $dealer->getKey()];
-                // $leadParams = [];
 
                 // Insert With Manufacturer
                 if(isset($filters['brands'])) {
@@ -1034,7 +1032,6 @@ class ProcessCampaignTest extends TestCase
             if(isset($filters['unused_brands']) || isset($filters['unused_categories'])) {
                 // Initialize Lead Params
                 $leadParams = ['dealer_id' => $dealer->getKey()];
-                // $leadParams = [];
 
                 // Insert With Manufacturer
                 if(isset($filters['unused_brands'])) {
@@ -1097,7 +1094,6 @@ class ProcessCampaignTest extends TestCase
             if(isset($filters['unused_brands']) || isset($filters['unused_categories'])) {
                 // Initialize Lead Params
                 $leadParams = ['dealer_id' => $dealer->getKey()];
-                // $leadParams = [];
 
                 // Insert With Manufacturer
                 if(isset($filters['unused_brands'])) {
