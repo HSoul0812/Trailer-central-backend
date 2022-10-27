@@ -44,16 +44,11 @@ class DealerPartRepositoryTest extends TestCase
   {
     $this->seeder->seed();
 
-    $dealerPart = $this->seeder->dealerPart;
-
     $dealerPartParams = [
-      'dealer_id' => $dealerPart->dealer_id,
+      'dealer_id' => $this->seeder->dealer->getKey(),
       'since' => now()->addDay()->toDateString(),
     ];
 
-    // When I call find
-    // Then I got a single tracking data
-    /** @var DealerPart $dealerPart */
     $repository = $this->getConcreteRepository();
 
     $repository->update($dealerPartParams);
