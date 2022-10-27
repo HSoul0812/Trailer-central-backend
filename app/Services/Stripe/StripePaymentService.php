@@ -16,6 +16,8 @@ use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 
 class StripePaymentService implements StripePaymentServiceInterface
 {
+    const STRIPE_SUCCESS_URL = '/success';
+    const STRIPE_FAILURE_URL = '/cancel';
 
     public function __construct(
         private PaymentLogRepositoryInterface $paymentLogRepository,
@@ -35,8 +37,8 @@ class StripePaymentService implements StripePaymentServiceInterface
             'client_reference_id' => 'tt' . uuid_create(),
             'metadata' => $metadata,
             'mode' => 'payment',
-            'success_url' => $siteUrl . '/success',
-            'cancel_url' => $siteUrl . '/cancel',
+            'success_url' => $siteUrl . self::STRIPE_SUCCESS_URL,
+            'cancel_url' => $siteUrl . self::STRIPE_FAILURE_URL,
         ]);
         return redirect($checkout_session->url);
     }
