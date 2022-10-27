@@ -14,6 +14,8 @@ use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping;
 
+use App\Nova\Actions\Exports\FieldMappingExport;
+
 class FieldsMapping extends Resource
 {
     public static $group = 'Integration';
@@ -136,6 +138,8 @@ class FieldsMapping extends Resource
      */
     public function actions(Request $request)
     {
-        return [];
+        return [
+            (new FieldMappingExport)->withHeadings()->askForFilename(),
+        ];
     }
 }
