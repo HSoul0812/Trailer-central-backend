@@ -162,7 +162,8 @@ return [
                     //'fb-messenger',
                     'ecommerce',
                     'crm-users',
-                    'manufacturers'
+                    'manufacturers',
+                    'hot-potato'
                 ],
                 'balance' => 'simple',
                 'processes' => 3,
@@ -190,7 +191,8 @@ return [
                     //'fb-messenger',
                     'ecommerce',
                     'crm-users',
-                    'manufacturers'
+                    'manufacturers',
+                    'hot-potato'
                 ],
                 'balance' => 'simple',
                 'processes' => 10,
@@ -210,7 +212,8 @@ return [
                     'blog-posts',
                     'ecommerce',
                     'crm-users',
-                    'manufacturers'
+                    'manufacturers',
+                    'hot-potato'
                 ],
                 'balance' => 'auto',
                 'minProcesses' => 1,
@@ -282,7 +285,8 @@ return [
                     'blog-posts',
                     'ecommerce',
                     'crm-users',
-                    'manufacturers'
+                    'manufacturers',
+                    'hot-potato'
                 ],
                 'balance' => 'auto',
                 'minProcesses' => 1,
