@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers\v1\Bulk\Inventory;
 
+use App\Exceptions\Requests\Validation\NoObjectIdValueSetException;
+use App\Exceptions\Requests\Validation\NoObjectTypeSetException;
+use App\Repositories\Bulk\Inventory\BulkUploadRepositoryInterface;
 use Dingo\Api\Http\Request;
 use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\Bulk\Inventory\CreateBulkUploadRequest;
-use App\Repositories\Bulk\Inventory\BulkUploadRepository;
-
 use App\Http\Requests\Bulk\Inventory\GetBulkUploadRequest;
 use App\Transformers\Bulk\Inventory\BulkUploadTransformer;
+use Dingo\Api\Http\Response;
 
 /**
  * Class BulkUploadController
@@ -16,7 +18,9 @@ use App\Transformers\Bulk\Inventory\BulkUploadTransformer;
  */
 class BulkUploadController extends RestfulControllerV2
 {
-
+    /**
+     * @var BulkUploadRepositoryInterface
+     */
     protected $bulkUploads;
 
     /**
@@ -24,15 +28,17 @@ class BulkUploadController extends RestfulControllerV2
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(BulkUploadRepositoryInterface $bulkUploadRepository)
     {
         $this->middleware('setDealerIdOnRequest')->only(['index', 'create']);
-        $this->bulkUploads = \app('App\Repositories\Bulk\Inventory\BulkUploadRepository');
+        $this->bulkUploads = $bulkUploadRepository;
     }
 
     /**
      * @param Request $request
-     * @return Response
+     * @return Response|null
+     * @throws NoObjectIdValueSetException
+     * @throws NoObjectTypeSetException
      */
     public function index(Request $request)
     {
@@ -49,6 +55,8 @@ class BulkUploadController extends RestfulControllerV2
     /**
      * @param Request $request
      * @return Response
+     * @throws NoObjectIdValueSetException
+     * @throws NoObjectTypeSetException
      */
     public function create(Request $request)
     {
@@ -60,5 +68,4 @@ class BulkUploadController extends RestfulControllerV2
 
         return $this->response->errorBadRequest();
     }
-
 }
