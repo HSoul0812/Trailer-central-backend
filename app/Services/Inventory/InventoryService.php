@@ -198,8 +198,9 @@ class InventoryService implements InventoryServiceInterface
         $inventory = $this->handleHttpRequest(
             'POST',
             $url,
-            ['query' => $params, 'headers' => ['access-token' => $authToken->access_token]]
+            ['json' => $params, 'headers' => ['access-token' => $authToken->access_token]]
         );
+        \Log::info('inventory update', $params);
         $respObj = TcApiResponseInventoryCreate::fromData($inventory['response']['data']);
 
         return $respObj;

@@ -32,6 +32,7 @@ class StripePaymentService implements StripePaymentServiceInterface
                 'price' => "$priceItem",
                 'quantity' => 1
             ]],
+            'client_reference_id' => 'tt' . uuid_create(),
             'metadata' => $metadata,
             'mode' => 'payment',
             'success_url' => $siteUrl . '/success',
@@ -70,7 +71,6 @@ class StripePaymentService implements StripePaymentServiceInterface
             'full_response' => json_encode($session->values())
         ]);
 
-        // TODO: expiry date varies based product id.
         $ttPaymentExpirationDate = Carbon::now()->addMonth();
 
         $this->inventoryService->update($userId, [

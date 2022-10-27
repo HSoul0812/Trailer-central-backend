@@ -24,6 +24,8 @@ use Dingo\Api\Http\Response;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
+use Illuminate\Support\Carbon;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class InventoryController extends AbstractRestfulController
 {
@@ -132,11 +134,18 @@ class InventoryController extends AbstractRestfulController
 
     public function pay(Request $request, $inventoryId, $planId): Redirector|Application|RedirectResponse
     {
+        $inventory = $this->inventoryService->show((int)$inventoryId);
+        $expiry = Carbon::parse($inventory->tt_payment_expiration_date);
+        $now = Carbon::today();
         $user = auth('api')->user();
-        return $this->paymentService->createCheckoutSession($planId, [
-            'inventory_id' => $inventoryId,
-            'user_id' => $user->getAuthIdentifier()
-        ]);
+        if($expiry && $now->isBefore($expiry->startOfDay())) {
+            throw new HttpException(422, "Inventory expiry is still valid");
+        } else {
+            return $this->paymentService->createCheckoutSession($planId, [
+                'inventory_id' => $inventoryId,
+                'user_id' => $user->tc_user_id
+            ]);
+        }
     }
 
     protected function constructRequestBindings(): void
