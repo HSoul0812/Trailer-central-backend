@@ -7,6 +7,7 @@ use App\Models\Inventory\Image;
 use App\Models\Inventory\Inventory;
 use App\Models\Inventory\InventoryImage;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Collection;
 use Tests\TestCase;
 use App\Models\User\User;
 use App\Models\User\AuthToken;
@@ -54,7 +55,7 @@ class EndpointInventoryImageTest extends TestCase
     }
 
     /**
-     * @return array{dealer: User, images: array<Image>, token: AuthToken, inventory: Inventory}
+     * @return array{dealer: User, images: Collection<Image>, token: AuthToken, inventory: Inventory}
      */
     protected function createDealerAndInventoryWithImages(): array
     {

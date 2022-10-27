@@ -164,7 +164,7 @@ class QuickbookApprovalDeletedRepository extends RepositoryAbstract implements Q
 
     private function addSortQuery($query, $sort) {
         if (!isset($this->sortOrders[$sort])) {
-            return;
+            return $query;
         }
         return $query->orderBy($this->sortOrders[$sort]['field'], $this->sortOrders[$sort]['direction']);
     }

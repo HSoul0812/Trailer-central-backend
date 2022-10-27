@@ -403,13 +403,10 @@ $api->version('v1', function ($route) {
     /**
      * Website Payment Calculator Settings
      */
-    $route->group(['middleware' => 'website.validate'], function ($route) {
-        $route->get('website/{websiteId}/payment-calculator/settings', 'App\Http\Controllers\v1\Website\PaymentCalculator\SettingsController@index')->where('websiteId', '[0-9]+');
-        $route->put('website/{websiteId}/payment-calculator/settings', 'App\Http\Controllers\v1\Website\PaymentCalculator\SettingsController@create')->where('websiteId', '[0-9]+');
-        $route->get('website/{websiteId}/payment-calculator/settings/{id}', 'App\Http\Controllers\v1\Website\PaymentCalculator\SettingsController@show')->where('websiteId', '[0-9]+')->where('id', '[0-9]+');
-        $route->post('website/{websiteId}/payment-calculator/settings/{id}', 'App\Http\Controllers\v1\Website\PaymentCalculator\SettingsController@update')->where('websiteId', '[0-9]+')->where('id', '[0-9]+');
-        $route->delete('website/{websiteId}/payment-calculator/settings/{id}', 'App\Http\Controllers\v1\Website\PaymentCalculator\SettingsController@destroy')->where('websiteId', '[0-9]+')->where('id', '[0-9]+');
-    });
+     $route->get('website/{websiteId}/payment-calculator/settings', 'App\Http\Controllers\v1\Website\PaymentCalculator\SettingsController@index')->where('websiteId', '[0-9]+');
+     $route->put('website/{websiteId}/payment-calculator/settings', 'App\Http\Controllers\v1\Website\PaymentCalculator\SettingsController@create')->where('websiteId', '[0-9]+');
+     $route->post('website/{websiteId}/payment-calculator/settings/{id}', 'App\Http\Controllers\v1\Website\PaymentCalculator\SettingsController@update')->where('websiteId', '[0-9]+')->where('id', '[0-9]+');
+     $route->delete('website/{websiteId}/payment-calculator/settings/{id}', 'App\Http\Controllers\v1\Website\PaymentCalculator\SettingsController@destroy')->where('websiteId', '[0-9]+')->where('id', '[0-9]+');
 
     /**
      * Website Towing Capacity
@@ -656,6 +653,19 @@ $api->version('v1', function ($route) {
     */
     $route->get('users', 'App\Http\Controllers\v1\User\UserController@index');
     $route->post('users', 'App\Http\Controllers\v1\User\UserController@create');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Integrations
+    |--------------------------------------------------------------------------
+    |
+    |
+    |
+    */
+
+    $route->get('integrations', 'App\Http\Controllers\v1\Integration\IntegrationController@index');
+    $route->get('integrations/{id}', 'App\Http\Controllers\v1\Integration\IntegrationController@show');
+
 
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
         /*
