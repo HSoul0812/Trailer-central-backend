@@ -576,7 +576,11 @@ class InquiryLead
      */
     public function getMetadata(): array {
         // Get JSON
-        $json = json_decode($this->metadata, true);
+        if(is_string($this->metadata)) {
+            $json = json_decode($this->metadata, true);
+        } else {
+            $json = $this->metadata;
+        }
 
         // Return Result
         if(!empty($json)) {
