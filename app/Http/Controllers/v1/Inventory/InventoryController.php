@@ -135,11 +135,9 @@ class InventoryController extends AbstractRestfulController
     public function pay(Request $request, $inventoryId, $planId): Redirector|Application|RedirectResponse
     {
         $inventory = $this->inventoryService->show((int)$inventoryId);
-        $expiry = Carbon::parse($inventory->tt_payment_expiration_date);
-        $now = Carbon::today();
         $user = auth('api')->user();
-        if($expiry && $now->isBefore($expiry->startOfDay())) {
-            throw new HttpException(422, "Inventory expiry is still valid");
+        if($inventory->dealer->id != $user->tc_user_id) {
+            throw new HttpException(422, "User should be owner of inventory");
         } else {
             return $this->paymentService->createCheckoutSession($planId, [
                 'inventory_id' => $inventoryId,

@@ -71,12 +71,21 @@ class StripePaymentService implements StripePaymentServiceInterface
             'full_response' => json_encode($session->values())
         ]);
 
-        $ttPaymentExpirationDate = Carbon::now()->addMonth();
+        $inventory = $this->inventoryService->show((int)$inventoryId);
+        $inventoryExpiry =
+            $inventory->tt_payment_expiration_date
+                ? Carbon::parse($inventory->tt_payment_expiration_date)
+                : Carbon::now()->startOfDay();
 
+        if($inventoryExpiry->startOfDay()->isBefore(Carbon::now())) {
+            $inventoryExpiry = Carbon::now()->startOfDay();
+        }
+        // TODO: Extend expiry based on plan
+        $inventoryExpiry = $inventoryExpiry->addMonth();
         $this->inventoryService->update($userId, [
             'inventory_id' => $inventoryId,
             'show_on_website' => 1,
-            'tt_payment_expiration_date' => $ttPaymentExpirationDate
+            'tt_payment_expiration_date' => $inventoryExpiry
         ]);
 
         \Log::info('session', $session->values());
