@@ -145,12 +145,51 @@ class HotPotatoService extends AutoAssignService implements HotPotatoServiceInte
 
         // Finish Assigning Lead and Return Result
         $this->setRoundRobinSalesPerson($dealer->id, $dealerLocationId, $lead, $salesPerson->id);
-        $status = $this->handleAssignLead($lead, $salesPerson);
-        $nextContactDate = $this->pushNextContactDate($lead, $settings);
-        $this->sendHotPotatoEmail($lead, $currentSalesPerson, $salesPerson, $oldContactDate, $nextContactDate['weekday']);
-        return $this->markAssignLead($lead, $dealerLocationId, $currentSalesPerson, $salesPerson, $status);
+        $status = $this->handleAssignLead($lead, $salesPerson, $settings);
+        $this->sendHotPotatoEmail($lead, $currentSalesPerson, $salesPerson, $oldContactDate, $status['weekday']);
+        return $this->markAssignLead($lead, $dealerLocationId, $currentSalesPerson, $salesPerson, $status['status']);
     }
 
+
+    /**
+     * Prepare Assigning Lead
+     * 
+     * @param Lead $lead
+     * @param SalesPerson $salesPerson
+     * @param Collection<{key: value}> $settings
+     * @return array{next_contact_date: string,
+     *               weekday: null|int,
+     *               status: string}
+     */
+    protected function handleAssignLead(Lead $lead, SalesPerson $salesPerson, Collection $settings): array {
+        // Initialize Next Contact Date
+        $next = $this->calcNextContactDate($lead, $settings);
+        $date = $next['next_contact_date'];
+
+        // Try Processing Assign Lead
+        $this->addLeadExplanationNotes($lead->identifier, 'Found Next Matching Sales Person: ' . $salesPerson->id . ' for Lead: ' . $lead->id_name);
+        try {
+            // Prepare to Assign
+            $status = LeadAssign::STATUS_ASSIGNING;
+            $status = $this->finishAssignLead($lead, $salesPerson, $date);
+
+            // Send Sales Email
+            if(!empty($lead->crmUser->enable_assign_notification)) {
+                $status = LeadAssign::STATUS_MAILING;
+                $status = $this->sendAssignLeadEmail($lead, $salesPerson, $date);
+            }
+        } catch(\Exception $e) {
+            // Add Error
+            if(empty($status)) {
+                $status = LeadAssign::STATUS_ERROR;
+            }
+            $this->addLeadExplanationNotes($lead->identifier, 'Exception Returned! ' . $e->getMessage() . ': ' . $e->getTraceAsString());
+            $this->log->error("AutoAssignService exception returned on update or email {$e->getMessage()}: {$e->getTraceAsString()}");
+        }
+
+        // Mark Lead as Assign
+        return ['next_contact_date' => $date->toDateTimeString(), 'weekday' => $next['weekday'], 'status' => $status];
+    }
 
     /**
      * Send Assign Lead Email
@@ -195,14 +234,14 @@ class HotPotatoService extends AutoAssignService implements HotPotatoServiceInte
 
 
     /**
-     * Push Next Contact Date Back Based on Settings
+     * Calculate Next Contact Date Back Based on Settings
      * 
      * @param Lead $lead
      * @param Collection<{key: value}> $settings
      * @return array{next_contact_date: string,
      *               weekday: null|int}
      */
-    private function pushNextContactDate(Lead $lead, Collection $settings): array {
+    private function calcNextContactDate(Lead $lead, Collection $settings): array {
         // Set Specific Distance From Now
         $nextHr = $settings->get('round-robin/hot-potato/delay');
         $curHr  = $this->datetime->format("j");
@@ -238,10 +277,7 @@ class HotPotatoService extends AutoAssignService implements HotPotatoServiceInte
 
         // Set Next Contact Date
         $this->log->info("HotPotatoService setting lead #{$lead->identifier} next contact date to " . $nextContact->toDateTimeString());
-        $this->leadStatus->update(['lead_id' => $lead->identifier, 'next_contact_date' => $nextContact->toDateTimeString()]);
-
-        // Return Lead Status
-        return ['next_contact_date' => $nextContact->toDateTimeString(), 'weekday' => $weekday];
+        return ['next_contact_date' => $nextContact, 'weekday' => $weekday];
     }
 
     /**
