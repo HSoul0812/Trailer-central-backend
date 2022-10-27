@@ -42,6 +42,7 @@ class UpdateNotesAndLabelsWebsiteConfigDefault extends Migration
         'website/show_save_search' => ['label' => 'Save Search Function', 'note' => 'When enabled, users can save set of applied filters to view later.  Requires Show Your Search to be enabled and user account functionality to be enabled.  Users must first create an account to save a search'],
         'general/head_script' => ['note' => "Head scripts to be added to between the head tags. Dealers can't see and have no control over this"],
         'call-to-action/recaptcha' => ['note' => null],
+        'website/use_proximity_distance_selector' => ['note' => 'Only available for select dealers'],
     ];
 
     /**
