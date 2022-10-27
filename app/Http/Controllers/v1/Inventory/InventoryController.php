@@ -136,7 +136,7 @@ class InventoryController extends AbstractRestfulController
     {
         $inventory = $this->inventoryService->show((int)$inventoryId);
         $user = auth('api')->user();
-        if($inventory->dealer->id != $user->tc_user_id) {
+        if($inventory->dealer['id'] != $user->tc_user_id) {
             throw new HttpException(422, "User should be owner of inventory");
         } else {
             return $this->paymentService->createCheckoutSession($planId, [
