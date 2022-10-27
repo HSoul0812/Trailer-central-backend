@@ -81,6 +81,8 @@ use App\Repositories\User\DealerLocationSalesTaxRepository;
 use App\Repositories\User\DealerLocationSalesTaxRepositoryInterface;
 use App\Repositories\User\Integration\DealerIntegrationRepository;
 use App\Repositories\User\Integration\DealerIntegrationRepositoryInterface;
+use App\Repositories\Integration\IntegrationRepository;
+use App\Repositories\Integration\IntegrationRepositoryInterface;
 use App\Repositories\Website\DealerProxyRedisRepository;
 use App\Repositories\Website\DealerProxyRepositoryInterface;
 use App\Repositories\Website\TowingCapacity\MakesRepository;
@@ -339,6 +341,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(StockRepositoryInterface::class, StockRepository::class);
 
         $this->app->bind(ApiEntityReferenceRepositoryInterface::class, ApiEntityReferenceRepository::class);
+
+        $this->app->bind(IntegrationRepositoryInterface::class, IntegrationRepository::class);
 
         $this->app->bind(DealerIntegrationServiceInterface::class, DealerIntegrationService::class);
         $this->app->bind(DealerIntegrationRepositoryInterface::class, DealerIntegrationRepository::class);

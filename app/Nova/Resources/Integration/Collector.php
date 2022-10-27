@@ -22,12 +22,17 @@ use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\BooleanGroup;
 use App\Models\Integration\Collector\Collector as CollectorModel;
 
+use Epartment\NovaDependencyContainer\HasDependencies;
+use Epartment\NovaDependencyContainer\NovaDependencyContainer;
+
 /**
  * Class Collector
  * @package App\Nova\Resources\Integration
  */
 class Collector extends Resource
 {
+    use HasDependencies;
+
     public static $group = 'Integration';
 
     /**
@@ -72,53 +77,143 @@ class Collector extends Resource
             ]),
 
             new Panel('Source', [
-                Boolean::make('Use Latest FTP File Only', 'use_latest_ftp_file_only')->hideFromIndex()->help(
-                    'Activate if you want the Collector to ignore any FTP file names specified and use the latest file that was dropped'
-                ),
-                Text::make('Host', 'ftp_host')->rules('required', 'max:128')->hideFromIndex(),
-                Text::make('Path To File', 'ftp_path')->rules('required', 'max:128')->hideFromIndex(),
-                Text::make('Login', 'ftp_login')->rules('required', 'max:128')->hideFromIndex(),
-                Text::make('Password', 'ftp_password')
-                    ->rules('required', 'max:128', 'alpha_num')
-                    ->hideFromIndex()
-                    ->help("Password only include A to Z (in any Case) and 0-9 and Recommended of 16 characters"),
-                Text::make('CDK Username', 'cdk_username')->rules('max:128')->hideFromIndex()->help(
-                    "Only needed if file format is CDK"
-                ),
-                Text::make('CDK Password', 'cdk_password')->rules('max:128')->hideFromIndex()->help(
-                    "Only needed if file format is CDK"
-                ),
-                Text::make('IDS Token', 'ids_token')->rules('max:256')->hideFromIndex()->help(
-                    "Only needed if file format is IDS"
-                ),
-                Text::make('IDS Default Location', 'ids_default_location')->rules('max:256')->hideFromIndex()->help(
-                    "Only needed if file format is IDS"
-                ),
-                Text::make('XML URL', 'xml_url')->rules('required_if:file_format,xml_url')->hideFromIndex()->help(
-                    "Only needed if file format is <strong>xml_url</strong>"
-                ),
-                Text::make('CSV URL', 'csv_url')->rules('required_if:file_format,csv_url')->hideFromIndex()->help(
-                    "Only needed if file format is <strong>csv_url</strong>"
-                ),
-                Text::make('Motility Account Number', 'motility_account_no')->hideFromIndex()->help(
-                    "Only needed if file format is motility"
-                ),
-                Text::make('Motility Username', 'motility_username')->hideFromIndex()->help(
-                    "Only needed if file format is motility"
-                ),
-                Text::make('Motility Password', 'motility_password')->hideFromIndex()->help(
-                    "Only needed if file format is motility"
-                ),
-                Text::make('Motility IntegrationID', 'motility_integration_id')->hideFromIndex()->help(
-                    "Only needed if file format is motility"
-                ),
                 Select::make('File Format', 'file_format')
                     ->options(array_combine(CollectorModel::FILE_FORMATS, CollectorModel::FILE_FORMATS))
                     ->displayUsingLabels()
                     ->rules('required'),
-                Text::make('Path To Data', 'path_to_data')->hideFromIndex()->help(
-                    'The path to list of items is in the file. For instance, "Units" or "Units/Items" (relevant for xml files)'
-                ),
+
+                // FTP
+                NovaDependencyContainer::make([
+                    Boolean::make('Use Latest FTP File Only', 'use_latest_ftp_file_only')->hideFromIndex()->help(
+                        'Activate if you want the Collector to ignore any FTP file names specified and use the latest file that was dropped'
+                    ),
+
+                    Text::make('Host', 'ftp_host')->rules('required', 'max:128')->hideFromIndex(),
+                    Text::make('Path To File', 'ftp_path')->rules('required', 'max:128')->hideFromIndex(),
+                    Text::make('Login', 'ftp_login')->rules('required', 'max:128')->hideFromIndex(),
+                    Text::make('Password', 'ftp_password')
+                        ->rules('required', 'max:128', 'alpha_num')
+                        ->hideFromIndex()
+                        ->help("Password only include A to Z (in any Case) and 0-9 and Recommended of 16 characters"),
+                ])->dependsOn('file_format', 'xml')
+                    ->dependsOn('file_format', 'csv')
+                    ->dependsOn('file_format', 'pipe_delimited')
+                    ->dependsOn('file_format', 'csvs'),
+
+                // CDK
+                NovaDependencyContainer::make([
+                    Text::make('CDK Username', 'cdk_username')->rules('max:128')->hideFromIndex()->help(
+                        "Only needed if file format is CDK"
+                    ),
+                    Text::make('CDK Password', 'cdk_password')->rules('max:128')->hideFromIndex()->help(
+                        "Only needed if file format is CDK"
+                    ),
+                ])->dependsOn('file_format', 'cdk'),
+
+                // CDK MULTIPLE
+                NovaDependencyContainer::make([
+                    Text::make('CDK Username', 'cdk_username')->rules('max:128')->hideFromIndex()->help(
+                        "Only needed if file format is CDK"
+                    ),
+                    Text::make('CDK Password', 'cdk_password')->rules('max:128')->hideFromIndex()->help(
+                        "Only needed if file format is CDK"
+                    ),
+                    Text::make('CDK DealerCmfs', 'cdk_dealer_cmfs')->rules('required_if:file_format,cdk_multiple')->hideFromIndex()->help(
+                        "Only needed if file format is <strong>cdk_multiple</strong>, sparated by comma"
+                    ),
+                ])->dependsOn('file_format', 'cdk_multiple'),
+
+                // IDS
+                NovaDependencyContainer::make([
+                    Text::make('IDS Token', 'ids_token')->rules('max:256')->hideFromIndex()->help(
+                        "Only needed if file format is IDS"
+                    ),
+                    Text::make('IDS Default Location', 'ids_default_location')->rules('max:256')->hideFromIndex()->help(
+                        "Only needed if file format is IDS"
+                    ),
+                ])->dependsOn('file_format', 'ids'),
+
+                // XML
+                NovaDependencyContainer::make([
+                    Text::make('Path To Data', 'path_to_data')->hideFromIndex()->help(
+                        'The path to list of items is in the file. For instance, "Units" or "Units/Items" (relevant for xml files)'
+                    ),
+                ])->dependsOn('file_format', 'xml'),
+
+                // XML URL
+                NovaDependencyContainer::make([
+                    Text::make('XML URL', 'xml_url')->rules('required_if:file_format,xml_url')->hideFromIndex()->help(
+                        "Only needed if file format is <strong>xml_url</strong>"
+                    ),
+
+                    Text::make('Path To Data', 'path_to_data')->hideFromIndex()->help(
+                        'The path to list of items is in the file. For instance, "Units" or "Units/Items" (relevant for xml files)'
+                    ),
+                ])->dependsOn('file_format', 'xml_url'),
+
+                // CSV URL
+                NovaDependencyContainer::make([
+                    Text::make('CSV URL', 'csv_url')->rules('required_if:file_format,csv_url')->hideFromIndex()->help(
+                        "Only needed if file format is <strong>csv_url</strong>"
+                    ),
+                ])->dependsOn('file_format', 'csv_url'),
+
+                // MOTILITY
+                NovaDependencyContainer::make([
+                    Text::make('Motility Account Number', 'motility_account_no')->hideFromIndex()->help(
+                        "Only needed if file format is motility"
+                    ),
+                    Text::make('Motility Username', 'motility_username')->hideFromIndex()->help(
+                        "Only needed if file format is motility"
+                    ),
+                    Text::make('Motility Password', 'motility_password')->hideFromIndex()->help(
+                        "Only needed if file format is motility"
+                    ),
+                    Text::make('Motility IntegrationID', 'motility_integration_id')->hideFromIndex()->help(
+                        "Only needed if file format is motility"
+                    ),
+                ])->dependsOn('file_format', 'motility'),
+
+                // BISH
+                NovaDependencyContainer::make([
+                    Text::make('API URL', 'api_url')->hideFromIndex()->help(
+                        'Complete endpoint url with http/s to get units. Please if the api url has / include it as well'
+                    ),
+                    Text::make('Key Name', 'api_key_name')->hideFromIndex()->help(
+                        'The name of the key used for authentication to the API to be queried on <strong>header</strong>'
+                    )->withMeta(['extraAttributes' => [
+                        'placeholder' => 'api-key']
+                    ]),
+                    Text::make('Key Value', 'api_key_value')->hideFromIndex()->help(
+                        'The encrypted/encoded value that authenticates requests to the API. ' .
+                        'This value is mandatory if the previous field is filled in. This setting goes on <strong>header</strong>'
+                    )->rules('required_if:api_key_name,true'),
+                    Code::make('API Params', 'api_params')->hideFromIndex()->help(
+                        'It is a key=value params that are used to filter results. ' .
+                        'like <strong><code>status=active</code></strong>, please paste it using next format <strong><code>foo=1&bar=2</code></strong> '.
+                        'the <strong>&</strong> is needed to separate different parameters'
+                    )->withMeta(['extraAttributes' => [
+                        'placeholder' => 'status=active']
+                    ]),
+
+                    NovaDependencyContainer::make([
+                        Number::make('Max Records', 'api_max_records')->hideFromIndex()->help(
+                            'Number of Total Records that we can query. ' .
+                            'This field has been created for the Bish integration, '.
+                            'and a pagination of 3000 records is used in each query. '
+                        )->withMeta(['extraAttributes' => [
+                            'placeholder' => '8500']
+                        ]),
+                        Number::make('Pagination', 'api_pagination')->hideFromIndex()->help(
+                            'The number of records to be filtered for pagination to be effective. ' .
+                            'This field has been created for the Bish integration. ' .
+                            'and is required if the previous field is filled.'
+                        )->rules('required_if:api_max_records,true')->withMeta(['extraAttributes' => [
+                            'placeholder' => '3000']
+                        ]),
+                    ])->dependsOn('file_format', 'bish'),
+                ])->dependsOn('file_format', 'json')
+                    ->dependsOn('file_format', 'bish'),
             ]),
 
             new Panel('BDV', [
@@ -137,44 +232,6 @@ class Collector extends Resource
                 Text::make('Spincar Filename', 'spincar_filenames')->hideFromIndex()->help(
                     'The Spincar filename being dropped in our FTP'
                 ),
-            ]),
-
-            new Panel('Generic Api/Json Format', [
-                Text::make('API URL', 'api_url')->hideFromIndex()->help(
-                    'Complete endpoint url with http/s to get units. Please if the api url has / include it as well'
-                ),
-                Text::make('Key Name', 'api_key_name')->hideFromIndex()->help(
-                    'The name of the key used for authentication to the API to be queried on <strong>header</strong>'
-                )->withMeta(['extraAttributes' => [
-                    'placeholder' => 'api-key']
-                ]),
-                Text::make('Key Value', 'api_key_value')->hideFromIndex()->help(
-                    'The encrypted/encoded value that authenticates requests to the API. ' .
-                    'This value is mandatory if the previous field is filled in. This setting goes on <strong>header</strong>'
-                )->rules('required_if:api_key_name,true'),
-                Code::make('API Params', 'api_params')->hideFromIndex()->help(
-                    'It is a key=value params that are used to filter results. ' .
-                    'like <strong><code>status=active</code></strong>, please paste it using next format <strong><code>foo=1&bar=2</code></strong> '.
-                    'the <strong>&</strong> is needed to separate different parameters'
-                )->withMeta(['extraAttributes' => [
-                    'placeholder' => 'status=active']
-                ]),
-                Heading::make('This are Specific Bish settings for API integration'),
-                Number::make('Max Records', 'api_max_records')->hideFromIndex()->help(
-                    'Number of Total Records that we can query. ' .
-                    'This field has been created for the Bish integration, '.
-                    'and a pagination of 3000 records is used in each query. '
-                )->withMeta(['extraAttributes' => [
-                    'placeholder' => '8500']
-                ]),
-                Number::make('Pagination', 'api_pagination')->hideFromIndex()->help(
-                    'The number of records to be filtered for pagination to be effective. ' .
-                    'This field has been created for the Bish integration. ' .
-                    'and is required if the previous field is filled.'
-                )->rules('required_if:api_max_records,true')->withMeta(['extraAttributes' => [
-                    'placeholder' => '3000']
-                ]),
-
             ]),
 
             new Panel('Factory Settings', [

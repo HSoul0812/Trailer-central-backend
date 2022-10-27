@@ -134,7 +134,7 @@ class ConvertHelper
      */
     public function feetToFeetInches(float $feet): array
     {
-        return [floor($feet), floor(($feet - floor($feet)) * 12)];
+        return [floor($feet / 12), $feet % 12];
     }
 
     /**
