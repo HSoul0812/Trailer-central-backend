@@ -11,7 +11,9 @@ class BulkUploadTransformer extends TransformerAbstract
     {
         return [
             'id' => $bulkUpload->id,
+            'identifier' => $bulkUpload->identifier,
             'status' => $bulkUpload->status,
+            'title' =>  $bulkUpload->title,
             'import_source' => $bulkUpload->import_source,
             'validation_errors' => $bulkUpload->validation_errors
         ];
