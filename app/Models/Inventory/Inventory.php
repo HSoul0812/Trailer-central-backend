@@ -322,6 +322,7 @@ class Inventory extends Model
         'show_on_ksl',
         'show_on_racingjunk',
         'show_on_website',
+        'tt_payment_expiration_date',
         'overlay_enabled',
         'is_special',
         'is_featured',
