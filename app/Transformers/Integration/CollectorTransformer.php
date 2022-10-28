@@ -54,6 +54,7 @@ class CollectorTransformer extends TransformerAbstract
             'active' => $collector->active,
             'cdk_password' => $collector->cdk_password,
             'cdk_username' => $collector->cdk_username,
+            'cdk_dealer_cmfs' => $collector->cdk_dealer_cmfs,
             'ids_token' => $collector->ids_token,
             'ids_default_location' => $collector->ids_default_location,
             'use_factory_mapping' => $collector->use_factory_mapping,

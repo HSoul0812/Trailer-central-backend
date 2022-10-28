@@ -25,13 +25,16 @@ $factory->define(Inventory::class, static function (Faker $faker, array $attribu
 
     // Get Entity/Category
     $entityType = EntityType::where('entity_type_id', '<>', 2)->inRandomOrder()->first();
-    $category = $attributes['category'] ??
-        Category::where('entity_type_id', $entityType->entity_type_id)->inRandomOrder()->first()->legacy_category;
+    $inventoryCategory = Category::where('entity_type_id', $entityType->entity_type_id)->inRandomOrder()->first();
+
+    $category = $attributes['category'] ?? optional($inventoryCategory)->legacy_category ?? '';
 
     // Get Showroom Model
     $mfg = $attributes['manufacturer'] ?? Manufacturers::inRandomOrder()->first();
-    $brand = $attributes['brand'] ?? Brand::where('manufacturer_id', $mfg->id)->inRandomOrder()->first();
-    $showroom = Showroom::where('manufacturer', $mfg->name)->inRandomOrder()->first();
+    $mfg_id = $mfg->id ?? Manufacturers::where('name', $attributes['manufacturer'])->first()->id;
+    $brand = $attributes['brand'] ?? Brand::where('manufacturer_id', $mfg_id)->inRandomOrder()->first();
+    $brandName = is_string($brand) ? $brand : $brand->name ?? '';
+    $showroom = Showroom::where('manufacturer', is_string($mfg) ? $mfg : $mfg->name)->inRandomOrder()->first();
 
     // Get Prices
     $msrp = $faker->randomFloat(2, 2000, 9999);
@@ -53,8 +56,8 @@ $factory->define(Inventory::class, static function (Faker $faker, array $attribu
         'active' => 1,
         'title' => !empty($showroom->title) ? $showroom->title : $faker->sentence,
         'stock' => Str::random(10),
-        'manufacturer' => $mfg->name,
-        'brand' => $showroom->brand ??  $brand->name ?? '',
+        'manufacturer' => is_string($mfg) ? $mfg : $mfg->name,
+        'brand' => $showroom->brand ??  $brandName ?? '',
         'model' => $showroom->model ?? $faker->words(2, true),
         //'description' => !empty($showroom->description) ? $showroom->description : $faker->realText,
         'description' => $faker->realText(),

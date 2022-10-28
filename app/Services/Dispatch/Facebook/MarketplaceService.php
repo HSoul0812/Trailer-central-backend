@@ -121,9 +121,9 @@ class MarketplaceService implements MarketplaceServiceInterface
      * 
      * @return MarketplaceStatus
      */
-    public function status(): MarketplaceStatus {
+    public function status(array $params): MarketplaceStatus {
         // Get All Marketplace Integration Dealers
-        $dealers = $this->getIntegrations();
+        $dealers = $this->getIntegrations($params);
 
         // Get Available Tunnels
         $tunnels = $this->tunnels->getAll();
@@ -217,7 +217,7 @@ class MarketplaceService implements MarketplaceServiceInterface
 
             $nrOfListingsToday = $this->listings->countFacebookPostings(Marketplace::find($params['marketplace_id']));
             $inventoryRemaining = $this->getInventory(Marketplace::find($params['marketplace_id']), MarketplaceStatus::METHOD_MISSING, []);
-            $nrInventoryItemsRemaining = count(Arr::get($inventoryRemaining, 'inventory', []));
+            $nrInventoryItemsRemaining = count($inventoryRemaining->inventory);
 
             if ($nrOfListingsToday === config('marketing.fb.settings.limit.listings', 3) || $nrInventoryItemsRemaining === 0) {
                 // Update Imported At
@@ -291,14 +291,15 @@ class MarketplaceService implements MarketplaceServiceInterface
      * 
      * @return Collection<DealerFacebook>
      */
-    private function getIntegrations(): Collection {
+    private function getIntegrations(array $params): Collection {
         
         $runningIntegrationIds = $this->postingSession->getIntegrationIds();
 
         $integrations = $this->marketplace->getAll(['sort' => '-last_attempt_ts',
             'import_range' => config('marketing.fb.settings.limit.hours', 0),
             'exclude' => $runningIntegrationIds,
-            'skip_errors' => config('marketing.fb.settings.limit.errors', 1)
+            'skip_errors' => config('marketing.fb.settings.limit.errors', 1),
+            'per_page' => $params['per_page'] ?? null
         ]);
 
         // Loop Facebook Integrations
@@ -343,6 +344,9 @@ class MarketplaceService implements MarketplaceServiceInterface
         // Get Method
         $method = MarketplaceStatus::INVENTORY_METHODS[$type];
 
+        $nowTime = microtime(true);
+        $this->log->info('Debug time BEFORE ' . $method . ': ' . ($nowTime - $startTime));
+
         if ($type === MarketplaceStatus::METHOD_MISSING) {
             $params['per_page'] = config('marketing.fb.settings.limit.listings') - $this->listings->countFacebookPostings($integration);
         }
@@ -368,8 +372,7 @@ class MarketplaceService implements MarketplaceServiceInterface
         // Append Paginator
         $response = new MarketplaceInventory([
             'type' => $type,
-            'inventory' => $listings,
-            'paginator' => new IlluminatePaginatorAdapter($inventory)
+            'inventory' => $listings
         ]);
         return $response;
     }

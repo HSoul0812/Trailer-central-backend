@@ -27,9 +27,6 @@ class BulkUploadControllerTest extends AbstractMonitoredJobsTest
     /**
      * @covers ::index
      *
-     * @group DMS
-     * @group DMS_BULK
-     * @group DMS_BULK_UPLOAD
      */
     public function testIndexListJobsWithBadParameters(): void
     {
@@ -58,10 +55,6 @@ class BulkUploadControllerTest extends AbstractMonitoredJobsTest
      * @dataProvider invalidParametersForCreationProvider
      *
      * @covers ::create
-     *
-     * @group DMS
-     * @group DMS_BULK
-     * @group DMS_BULK_UPLOAD
      *
      * @param array $params
      * @param string $expectedException
@@ -104,10 +97,6 @@ class BulkUploadControllerTest extends AbstractMonitoredJobsTest
      * @dataProvider validParametersForCreationProvider
      *
      * @covers ::create
-     *
-     * @group DMS
-     * @group DMS_BULK
-     * @group DMS_BULK_UPLOAD
      *
      * @param array $params
      *

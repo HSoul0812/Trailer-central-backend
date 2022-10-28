@@ -44,20 +44,16 @@ class DealerPartRepositoryTest extends TestCase
   {
     $this->seeder->seed();
 
-    $dealerPart = $this->seeder->dealerPart[0];
-    
     $dealerPartParams = [
-      'dealer_id' => $dealerPart->dealer_id
+      'dealer_id' => $this->seeder->dealer->getKey(),
+      'since' => now()->addDay()->toDateString(),
     ];
-  
-    // When I call find
-    // Then I got a single tracking data
-    /** @var DealerPart $dealerPart */
+
     $repository = $this->getConcreteRepository();
-    
-    $updatedDealerPart = $repository->update($dealerPartParams);
-    
-    self::assertSame($updatedDealerPart->dealer_id, $dealerPartParams['dealer_id']);
+
+    $repository->update($dealerPartParams);
+
+    $this->assertDatabaseHas(DealerPart::getTableName(), $dealerPartParams);
   }
 
     /**
@@ -74,16 +70,18 @@ class DealerPartRepositoryTest extends TestCase
     $dealerPartParams = [
       'dealer_id' => $this->seeder->dealer->dealer_id,
     ];
-  
+
     // When I call find
     // Then I got a single tracking data
     /** @var DealerPart $dealerPart */
     $repository = $this->getConcreteRepository();
-    
-    $updatedDealerPart = $repository->create($dealerPartParams);
-    
-    self::assertSame($updatedDealerPart->dealer_id, $dealerPartParams['dealer_id']);
-      
+
+    $repository->create($dealerPartParams);
+
+    $this->assertDatabaseHas(DealerPart::getTableName(), [
+        'dealer_id' => $dealerPartParams['dealer_id']
+    ]);
+
   }
 
   public function setUp(): void
@@ -104,6 +102,6 @@ class DealerPartRepositoryTest extends TestCase
   {
       return $this->app->make(DealerPartRepositoryInterface::class);
   }
-  
+
 
 }

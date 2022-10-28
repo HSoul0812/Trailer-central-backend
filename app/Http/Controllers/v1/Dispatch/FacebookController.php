@@ -100,7 +100,7 @@ class FacebookController extends RestfulControllerV2 {
         $request = new GetMarketplaceRequest($request->all());
         if ($request->validate()) {
             // Get Marketplaces
-            return $this->response->item($this->service->status(), $this->statusTransformer);
+            return $this->response->item($this->service->status($request->all()), $this->statusTransformer);
         }
 
         return $this->response->errorBadRequest();

@@ -8,7 +8,9 @@ use App\Helpers\SanitizeHelper;
 use App\Http\Controllers\v1\File\FileController;
 use App\Http\Controllers\v1\File\ImageController;
 use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping;
+use App\Models\Integration\Integration;
 use App\Nova\Observer\DealerIncomingMappingObserver;
+use App\Nova\Observer\IntegrationObserver;
 use App\Repositories\Bulk\Parts\BulkUploadRepository;
 use App\Repositories\Bulk\Parts\BulkUploadRepositoryInterface;
 use App\Repositories\Common\MonitoredJobRepository;
@@ -79,6 +81,8 @@ use App\Repositories\User\DealerLocationSalesTaxRepository;
 use App\Repositories\User\DealerLocationSalesTaxRepositoryInterface;
 use App\Repositories\User\Integration\DealerIntegrationRepository;
 use App\Repositories\User\Integration\DealerIntegrationRepositoryInterface;
+use App\Repositories\Integration\IntegrationRepository;
+use App\Repositories\Integration\IntegrationRepositoryInterface;
 use App\Repositories\Website\DealerProxyRedisRepository;
 use App\Repositories\Website\DealerProxyRepositoryInterface;
 use App\Repositories\Website\TowingCapacity\MakesRepository;
@@ -154,6 +158,7 @@ use App\Services\Website\Log\LogServiceInterface;
 use App\Services\Website\Log\LogService;
 use App\Services\Website\WebsiteConfigService;
 use App\Services\Website\WebsiteConfigServiceInterface;
+use Exception;
 use GuzzleHttp\Client;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -239,10 +244,15 @@ class AppServiceProvider extends ServiceProvider
 
         Nova::serving(function () {
             DealerIncomingMapping::observe(DealerIncomingMappingObserver::class);
+            Integration::observe(IntegrationObserver::class);
         });
 
         // Increase default database character set length (Specified key was too long)
-        Schema::defaultStringLength(191);
+        try {
+            Schema::defaultStringLength(191);
+        } catch (Exception $exception) {
+            // Do nothing in case we don't have valid DB connection
+        }
 
         // Add Migration Directories Recursively
         $mainPath = database_path('migrations');
@@ -331,6 +341,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(StockRepositoryInterface::class, StockRepository::class);
 
         $this->app->bind(ApiEntityReferenceRepositoryInterface::class, ApiEntityReferenceRepository::class);
+
+        $this->app->bind(IntegrationRepositoryInterface::class, IntegrationRepository::class);
 
         $this->app->bind(DealerIntegrationServiceInterface::class, DealerIntegrationService::class);
         $this->app->bind(DealerIntegrationRepositoryInterface::class, DealerIntegrationRepository::class);

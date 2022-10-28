@@ -91,7 +91,9 @@ class Kernel extends ConsoleKernel
                 ->daily()
                 ->runInBackground();
 
-        //$schedule->command('leads:assign:hotpotato')->withoutOverlapping();
+        $schedule->command('leads:assign:hot-potato')
+                ->everyFiveMinutes()
+                ->runInBackground();
 
         $schedule->command('leads:import')
                 ->everyFiveMinutes()
@@ -145,9 +147,9 @@ class Kernel extends ConsoleKernel
         /**
          * Scrape Facebook Messages
          */
-        $schedule->command('facebook:scrape-messages')
+        /*$schedule->command('facebook:scrape-messages')
                 ->everyFiveMinutes()
-                ->runInBackground();
+                ->runInBackground();*/
 
         // $schedule->command('inspire')
         //          ->hourly();

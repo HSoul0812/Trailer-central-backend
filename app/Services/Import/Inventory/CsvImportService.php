@@ -106,6 +106,7 @@ class CsvImportService implements CsvImportServiceInterface
         "location_phone" => true,
         "location_zip" => true,
         "description" => true,
+        "description_html" => true,
         "vin" => true,
         "category" => true,
         "price" => true,
@@ -154,6 +155,7 @@ class CsvImportService implements CsvImportServiceInterface
         "location_phone" => array("location", "location_phone", "location phone"),
         "location_zip" => array("location zip"),
         "description" => array("description", "desc", "info"),
+        "description_html" => array("description_html", "desc_html", "info_html"),
         "vin" => array("vin", "vin#"),
         "category" => "category",
         "price" => array("price", "sellingprice"),
@@ -198,6 +200,7 @@ class CsvImportService implements CsvImportServiceInterface
         "manufacturer" => array("type" => "string"),
         "model" => array("type" => "string", "length" => 255, "regex" => "[\w\s\d\.'\"\\/\*\+\?]*"),
         "description" => array("type" => "string"),
+        "description_html" => array("type" => "string"),
         "location" => array("type" => "string"),
         "category" => array(
             "type" => "enum",

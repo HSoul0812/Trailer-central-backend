@@ -15,9 +15,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property int $integration_id
  * @property string $name
  * @property string $description
+ * @property string $module_name
+ * @property string $module_status
+ * @property string $active
+ * @property string $frequency
+ * @property string $last_run_at
  * @property string $domain
  * @property string $code
  * @property string $create_account_url
+ * @property string $include_sold
+ * @property string $send_email
+ * @property string $uses_staging
+ * @property string $show_for_integrated
  * @property string $settings originally encoded as PHP serialized string
  * @property string $filters originally encoded as PHP serialized string
  */
@@ -74,7 +83,17 @@ class Integration extends Model
      */
     public function decodeSettings(): \Illuminate\Support\Collection
     {
-        return collect($this->settings ? unserialize($this->settings, ['allowed_classes' => false]) : []);
+        return collect(!empty($this->settings) ? (@unserialize($this->settings) ? unserialize($this->settings, ['allowed_classes' => false]) : []) : []);
+    }
+
+    /**
+     * To avoid mutations and break something
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function decodeFilters(): \Illuminate\Support\Collection
+    {
+        return collect(!empty($this->filters) ? (@unserialize($this->filters) ? unserialize($this->filters) : []) : []);
     }
 
     /**
@@ -91,6 +110,16 @@ class Integration extends Model
         } else {
             return false;
         }
+    }
+
+    public function getUnserializeFiltersAttribute()
+    {
+        return !empty($this->filters) ? (@unserialize($this->filters) ? json_encode(unserialize($this->filters)) : []) : [];
+    }
+
+    public function getUnserializeSettingsAttribute()
+    {
+        return !empty($this->settings) ? (@unserialize($this->settings) ? json_encode(unserialize($this->settings)) : []) : [];
     }
 
     /**

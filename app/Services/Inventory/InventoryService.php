@@ -266,6 +266,10 @@ class InventoryService implements InventoryServiceInterface
                 $params['description_html'] = $this->convertMarkdown($params['description']);
             }
 
+            if (!empty($params['is_archived']) && $params['is_archived'] == 1) {
+                $params['archived_at'] = Carbon::now()->format('Y-m-d H:i:s');
+            }
+
             $inventory = $this->inventoryRepository->update($params, $options);
 
             if (!$inventory instanceof Inventory) {
@@ -851,6 +855,9 @@ class InventoryService implements InventoryServiceInterface
         $input = str_replace('****', '', $input);
         $input = str_replace('__', '', $input);
 
+
+        $input = preg_replace('/<(?!br\s*\/?)[^<>]+>/', '', $input);
+
         // Try/Catch Errors
         $converted = '';
         $exception = '';
@@ -907,7 +914,23 @@ class InventoryService implements InventoryServiceInterface
         $description = preg_replace('/”/', '"', $description);
         $description = preg_replace('/’/', "'", $description);
 
+        $description = preg_replace('/©/', "Copyright", $description);
+        $description = preg_replace('/®/', "Registered", $description);
+
         $description = preg_replace('/[[:^print:]]/', ' ', $description);
+
+        preg_match('/<ul>(.*?)<\/ul>/s', $description, $match);
+        if (!empty($match)) {
+            $new_ul = strip_tags($match[0], '<ul><li><a><b><strong>');
+            $description = str_replace($match[0], $new_ul, $description);
+        }
+
+        // Only accepts necessary tags
+        preg_match('/<ol>(.*?)<\/ol>/s', $description, $match);
+        if (!empty($match)) {
+            $new_ol = strip_tags($match[0], '<ul><li><a><b><strong>');
+            $description = str_replace($match[0], $new_ol, $description);
+        }
 
         return $description;
     }

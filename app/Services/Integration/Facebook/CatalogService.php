@@ -227,7 +227,7 @@ class CatalogService implements CatalogServiceInterface
      */
     public function delete($id) {
         // Get Catalog
-        $catalog = $this->catalogs->get(['id' => $id]);
+        $this->catalogs->get(['id' => $id]);
 
         // Delete Access Token
         $this->tokens->delete([

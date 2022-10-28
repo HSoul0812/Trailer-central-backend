@@ -14,6 +14,7 @@ use App\Traits\Repository\Transaction;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Collection;
 use Carbon\Carbon;
 
 class ListingRepository implements ListingRepositoryInterface {
@@ -143,48 +144,43 @@ class ListingRepository implements ListingRepositoryInterface {
      * 
      * @param Marketplace $integration
      * @param array $params
-     * @return LengthAwarePaginator<Inventory>
+     * @return Collection<Inventory>
      */
-    public function getAllMissing(Marketplace $integration, array $params): LengthAwarePaginator {
+    public function getAllMissing(Marketplace $integration, array $params): Collection
+    {
+        $inventoryTableName = Inventory::getTableName();
+        $listingsTableName = Listings::getTableName();
+ 
         // Initialize Inventory Query
         $query = Inventory::select(Inventory::getTableName().'.*')
-                          ->where('dealer_id', '=', $integration->dealer_id)
-                          ->where('show_on_website', 1)
-            ->where(Inventory::getTableName() . '.entity_type_id', '<>', EntityType::ENTITY_TYPE_BUILDING)
-            ->whereRaw('LENGTH(' . Inventory::getTableName() . '.description) >= ' . INVENTORY::MIN_DESCRIPTION_LENGTH_FOR_FACEBOOK)
-            ->where(Inventory::getTableName() . '.price', '>', INVENTORY::MIN_PRICE_FOR_FACEBOOK)
-                          ->has('orderedImages')
-                          ->where(function(Builder $query) {
-                              $query->where('is_archived', 0)
-                                    ->orWhereNull('is_archived');
-                          })
-                          ->where(function(Builder $query) {
-                              $query->where(function(Builder $query) {
-                                  $query->where(Inventory::getTableName().'.status', '<>', 2)
-                                        ->where(Inventory::getTableName().'.status', '<>', 6);
-                              })->orWhereNull(Inventory::getTableName().'.status');
-                          });
+            ->where('dealer_id', '=', $integration->dealer_id)
+            ->where('show_on_website', 1)
+            ->where("{$inventoryTableName}.price", '>', INVENTORY::MIN_PRICE_FOR_FACEBOOK)
+            ->where("{$inventoryTableName}.entity_type_id", '<>', EntityType::ENTITY_TYPE_BUILDING)
+            ->where("{$inventoryTableName}.entity_type_id", '<>', EntityType::ENTITY_TYPE_VEHICLE)
+            ->whereRaw("IFNULL(is_archived, 0) = 0")
+            ->whereRaw("IFNULL({$inventoryTableName}.status, -1) NOT IN (2,6)")
+            ->whereRaw("LENGTH({$inventoryTableName}.description) >= " . INVENTORY::MIN_DESCRIPTION_LENGTH_FOR_FACEBOOK)
+            ->has('orderedImages');
 
         // Append Join
-        $query = $query->leftJoin(Listings::getTableName(), function($join) use($integration) {
-            $join->on(Listings::getTableName() . '.inventory_id', '=',
-                        Inventory::getTableName() . '.inventory_id')
-                 ->where(Listings::getTableName().'.username', '=', $integration->fb_username)
-                 ->where(Listings::getTableName().'.page_id', '=', $integration->page_id ?? '0');
-        })->where(function(Builder $query) {
-            $query = $query->whereNull(Listings::getTableName() . '.facebook_id')
-                           ->orWhere(Listings::getTableName() . '.status', Listings::STATUS_DELETED)
-                           ->orWhere(Listings::getTableName() . '.status', Listings::STATUS_EXPIRED);
+        $query = $query->leftJoin(Listings::getTableName(), function ($join) use ($integration) {
+            $join->on(Listings::getTableName() . '.inventory_id', '=', Inventory::getTableName() . '.inventory_id')
+                ->where(Listings::getTableName() . '.username', '=', $integration->fb_username)
+                ->where(Listings::getTableName() . '.page_id', '=', $integration->page_id ?? '0');
+        });
+        $query = $query->where(function (Builder $query) use ($listingsTableName) {
+            $query = $query->whereNull("{$listingsTableName}.facebook_id")
+            ->orWhereIn("{$listingsTableName}.status", [Listings::STATUS_DELETED, Listings::STATUS_EXPIRED]);
         });
 
         // Skip Integrations With Non-Expired Errors
-        $query = $query->leftJoin(Error::getTableName(), function($join) {
-            $join->on(Error::getTableName() . '.marketplace_id', '=',
-                                    Inventory::getTableName() . '.inventory_id')
-                 ->where(Error::getTableName().'.dismissed', 0);
-        })->where(function(Builder $query) {
-            return $query->whereNull(Error::getTableName().'.id')
-                         ->orWhere(Error::getTableName().'.expires_at', '<', DB::raw('NOW()'));
+        $query = $query->leftJoin(Error::getTableName(), function ($join) {
+            $join->on(Error::getTableName() . '.marketplace_id', '=', Inventory::getTableName() . '.inventory_id')
+                ->where(Error::getTableName() . '.dismissed', 0);
+        })->where(function (Builder $query) {
+            return $query->whereNull(Error::getTableName() . '.id')
+                ->orWhere(Error::getTableName() . '.expires_at', '<', DB::raw('NOW()'));
         });
 
         // Append Location
@@ -201,20 +197,13 @@ class ListingRepository implements ListingRepositoryInterface {
             });
         }
 
+        $query = $query->with(['attributeValues', 'orderedImages', 'dealerLocation']);
         // Set Sort By
-        $query = $this->addSortQuery($query, '-created_at');
-
-        // Update Page Limit From Settings
-        $forced = config('marketing.fb.settings.limit.force', 0);
-        if (!isset($params['per_page']) || !empty($forced)) {
-            $params['per_page'] = (int) config('marketing.fb.settings.limit.listings', 20);
-        }
-
-        // Require Inventory Images
-        $query = $query->with('attributeValues')->with('orderedImages')->with('dealerLocation');
+        $query = $query->orderBy("{$inventoryTableName}.created_at", "asc");
+        $query = $query->limit($params['per_page'] ?? config('marketing.fb.settings.limit.listings'));
 
         // Return Paginated Inventory
-        return $query->paginate($params['per_page'])->appends($params);;
+        return $query->get();
     }
 
     /**
@@ -246,8 +235,7 @@ class ListingRepository implements ListingRepositoryInterface {
         }
 
         // Require Inventory
-        $query = $query->with('marketplace')->with('inventory')->with('inventory.attributeValues')
-                        ->with('inventory.orderedImages')->with('inventory.dealerLocation');
+        $query = $query->with(['marketplace', 'inventory', 'inventory.attributeValues', 'inventory.orderedImages', 'inventory.dealerLocation']);
 
         // Return Paginated Inventory
         return $query->paginate($params['per_page'])->appends($params);

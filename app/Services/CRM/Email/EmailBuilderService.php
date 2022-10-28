@@ -14,6 +14,7 @@ use App\Mail\CRM\Interactions\InvalidTemplateEmail;
 use App\Models\CRM\Email\Blast;
 use App\Models\CRM\Interactions\EmailHistory;
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Leads\LeadStatus;
 use App\Models\Integration\Auth\AccessToken;
 use App\Models\User\NewUser;
 use App\Repositories\CRM\Email\BlastRepositoryInterface;
@@ -23,6 +24,7 @@ use App\Repositories\CRM\Email\TemplateRepositoryInterface;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
+use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Repositories\User\UserRepositoryInterface;
@@ -61,6 +63,11 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      * @var App\Repositories\CRM\Email\BlastRepositoryInterface
      */
     protected $blasts;
+
+    /**
+     * @var App\Repositories\CRM\Leads\StatusRepository
+     */
+    protected $leadStatus;
 
     /**
      * @var App\Repositories\CRM\Email\CampaignRepositoryInterface
@@ -153,6 +160,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
      */
     public function __construct(
         BlastRepositoryInterface $blasts,
+        StatusRepositoryInterface $leadStatus,
         CampaignRepositoryInterface $campaigns,
         TemplateRepositoryInterface $templates,
         BounceRepositoryInterface $bounces,
@@ -170,6 +178,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         Manager $fractal
     ) {
         $this->blasts = $blasts;
+        $this->leadStatus = $leadStatus;
         $this->campaigns = $campaigns;
         $this->templates = $templates;
         $this->bounces = $bounces;
@@ -439,11 +448,36 @@ class EmailBuilderService implements EmailBuilderServiceInterface
 
             // Send Lead Email
             $status = $this->sendLeadEmail($builder, $leadId);
+            if ($status === BuilderStats::STATUS_SUCCESS) {
+                $this->updateLead($lead);
+            }
             $stats->updateStats($status);
         }
 
         // Return Sent Emails Collection
         return $stats;
+    }
+
+    /**
+     * Update Lead Status
+     *
+     * @param Lead $lead
+     * @return LeadStatus
+     */
+    private function updateLead(Lead $lead): LeadStatus
+    {
+        // If there was no status, or it was uncontacted, set to medium, otherwise, don't change.
+        if (empty($lead->leadStatus) || $lead->leadStatus->status === Lead::STATUS_UNCONTACTED) {
+            $status = Lead::STATUS_MEDIUM;
+        } else {
+            $status = $lead->leadStatus->status;
+        }
+
+        return $this->leadStatus->createOrUpdate([
+            'lead_id' => $lead->identifier,
+            'status' => $status,
+            'next_contact_date' => Carbon::now()->addDay()->toDateTimeString()
+        ]);
     }
 
     /**
@@ -755,7 +789,7 @@ class EmailBuilderService implements EmailBuilderServiceInterface
             // Return Response Array
             return $this->response($builder, new Collection([$toEmail]));
         } catch(\Exception $ex) {
-            $this->log->error($ex->getMessage(), $ex->getTrace());
+            $this->log->error($ex->getMessage());
             throw new SendBuilderEmailsFailedException;
         }
     }

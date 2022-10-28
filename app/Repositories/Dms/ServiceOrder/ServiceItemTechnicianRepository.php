@@ -67,20 +67,12 @@ class ServiceItemTechnicianRepository extends RepositoryAbstract implements Serv
         $where = 'WHERE technician.dealer_id = :dealerId ';
         
         $closedAtField = 's_technician.completed_date';
-        
-        if (!empty($params['completed_on_type']) && !empty($params['completed_on_type'])) {
-            switch($params['completed_on_type']) {
-                case self::COMPLETED_ON_TYPE_RO:                    
-                    $closedAtField = 'r_order.closed_at';
-                    break;
-                case self::COMPLETED_ON_TYPE_TECH:
-                    $closedAtField = 's_technician.completed_date';
-                    break;
-                default:
-                    $closedAtField = 's_technician.completed_date';
-                    break;
+
+        if (!empty($params['completed_on_type'])) {
+            if ($params['completed_on_type'] === self::COMPLETED_ON_TYPE_RO) {
+                $closedAtField = 'r_order.closed_at';
             }
-        } 
+        }
 
         if (!empty($params['from_date']) && !empty($params['to_date'])) {
             $where .= " AND DATE($closedAtField) BETWEEN :fromDate AND :toDate ";

@@ -74,7 +74,7 @@ class CreateInventoryPermissionMiddlewareTest extends TestCase
 
         $dealerUser
             ->shouldReceive('hasPermission')
-            ->twice()
+            ->times(3)
             ->with(Permissions::INVENTORY, Permissions::SUPER_ADMIN_PERMISSION)
             ->andReturn(true);
 
@@ -127,13 +127,13 @@ class CreateInventoryPermissionMiddlewareTest extends TestCase
 
         $dealerUser
             ->shouldReceive('hasPermission')
-            ->once()
+            ->twice()
             ->with(Permissions::INVENTORY, Permissions::SUPER_ADMIN_PERMISSION)
             ->andReturn(false);
 
         $dealerUser
             ->shouldReceive('hasPermission')
-            ->once()
+            ->twice()
             ->with(Permissions::INVENTORY, Permissions::CAN_SEE_AND_CHANGE_PERMISSION)
             ->andReturn(true);
 
@@ -191,6 +191,18 @@ class CreateInventoryPermissionMiddlewareTest extends TestCase
             ->shouldReceive('hasPermission')
             ->once()
             ->with(Permissions::INVENTORY, Permissions::CAN_SEE_AND_CHANGE_PERMISSION)
+            ->andReturn(false);
+
+        $dealerUser
+            ->shouldReceive('hasPermission')
+            ->once()
+            ->with(Permissions::INVENTORY, Permissions::CAN_SEE_AND_CHANGE_IMAGES_PERMISSION)
+            ->andReturn(false);
+
+        $dealerUser
+            ->shouldReceive('hasPermission')
+            ->once()
+            ->with(Permissions::INVENTORY, Permissions::CAN_SEE_PERMISSION)
             ->andReturn(false);
 
         $middleware = new CreateInventoryPermissionMiddleware();

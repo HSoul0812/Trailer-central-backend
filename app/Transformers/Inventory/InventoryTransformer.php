@@ -6,6 +6,7 @@ use App\Helpers\ConvertHelper;
 use App\Models\Inventory\File;
 use App\Models\Inventory\InventoryImage;
 use App\Transformers\Dms\ServiceOrderTransformer;
+use App\Transformers\Marketing\Facebook\ListingTransformer;
 use Illuminate\Database\Eloquent\Collection;
 use League\Fractal\Resource\Item;
 use Carbon\Carbon;
@@ -26,6 +27,7 @@ class InventoryTransformer extends TransformerAbstract
         'attributes',
         'features',
         'clapps',
+        'activeListings'
     ];
 
     /**
@@ -87,16 +89,22 @@ class InventoryTransformer extends TransformerAbstract
      */
     public function transform(Inventory $inventory): array
     {
-        if ($inventory->length > 0) {
-            list($lengthSecond, $lengthInchesSecond) = $this->convertHelper->feetToFeetInches($inventory->length);
+        $lengthDimension = $inventory->length_inches ?: $inventory->length;
+
+        if ($lengthDimension > 0) {
+            list($lengthSecond, $lengthInchesSecond) = $this->convertHelper->feetToFeetInches($lengthDimension);
         }
 
-        if ($inventory->width > 0) {
-            list($widthSecond, $widthInchesSecond) = $this->convertHelper->feetToFeetInches($inventory->width);
+        $widthDimension = $inventory->width_inches ?: $inventory->width;
+
+        if ($widthDimension > 0) {
+            list($widthSecond, $widthInchesSecond) = $this->convertHelper->feetToFeetInches($widthDimension);
         }
 
-        if ($inventory->height > 0) {
-            list($heightSecond, $heightInchesSecond) = $this->convertHelper->feetToFeetInches($inventory->height);
+        $heightDimension = $inventory->height_inches ?: $inventory->height;
+
+        if ($heightDimension > 0) {
+            list($heightSecond, $heightInchesSecond) = $this->convertHelper->feetToFeetInches($heightDimension);
         }
 
         $age = now()->diffInDays(Carbon::parse($inventory->created_at));
@@ -237,6 +245,19 @@ class InventoryTransformer extends TransformerAbstract
     public function includeWebsite(Inventory $inventory): Item
     {
         return $this->item($inventory->user->website, new WebsiteTransformer);
+    }
+
+    /**
+     * @param Inventory $inventory
+     * @return array|FractalCollection
+     */
+    public function includeActiveListings(Inventory $inventory)
+    {
+        if (empty($inventory->activeListings)) {
+            return [];
+        }
+
+        return $this->collection($inventory->activeListings, new ListingTransformer);
     }
 
     /**
