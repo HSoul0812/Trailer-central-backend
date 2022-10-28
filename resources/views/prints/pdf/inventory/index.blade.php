@@ -7,6 +7,7 @@
         font-size: 14px;
         font: inherit;
         vertical-align: baseline;
+        font-family: Arial, Helvetica, sans-serif;
     }
 
     .printTable {
@@ -59,7 +60,7 @@
 
     .print-inventory .inventory-info .label,
     .print-inventory .inventory-info .data {
-        word-wrap: break-word;
+        font-size: 14px;
     }
 
     .inventory-title {
@@ -83,7 +84,6 @@
     }
 
     .inventory-info .label {
-        font-weight: bold;
         display: inline-block;
     }
 
