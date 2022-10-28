@@ -7,6 +7,7 @@ use App\Models\CRM\Dms\Quickbooks\Bill;
 use App\Models\CRM\Dms\ServiceOrder;
 use App\Models\Integration\LotVantage\DealerInventory;
 use App\Models\Inventory\Floorplan\Payment;
+use App\Models\Marketing\Facebook\Listings;
 use App\Models\User\DealerLocation;
 use App\Models\CRM\Leads\InventoryLead;
 use App\Models\CRM\Leads\Lead;
@@ -677,5 +678,15 @@ class Inventory extends Model
     {
         $array = $this->toArray();
         return $array;
+    }
+
+    public function listings(): HasMany
+    {
+        return $this->hasMany(Listings::class, 'inventory_id', 'inventory_id');
+    }
+
+    public function activeListings()
+    {
+        return $this->listings()->whereNotIn('status', ['expired', 'deleted']);
     }
 }
