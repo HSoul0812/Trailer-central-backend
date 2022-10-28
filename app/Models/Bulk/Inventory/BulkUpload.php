@@ -2,6 +2,7 @@
 
 namespace App\Models\Bulk\Inventory;
 
+use App\Traits\CompactHelper;
 use Illuminate\Database\Eloquent\Model;
 
 class BulkUpload extends Model {
@@ -46,5 +47,10 @@ class BulkUpload extends Model {
         }
 
         return json_decode($this->validation_errors, false, 512, JSON_THROW_ON_ERROR);
+    }
+
+    public function getIdentifierAttribute()
+    {
+        return CompactHelper::shorten($this->id);
     }
 }
