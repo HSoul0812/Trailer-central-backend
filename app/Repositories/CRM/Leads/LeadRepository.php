@@ -16,13 +16,14 @@ use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\LeadType;
 use App\Models\Inventory\Inventory;
 use App\Repositories\Traits\SortTrait;
+use App\Utilities\TimeUtil;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
-use App\Utilities\TimeUtil;
 use League\Csv\Writer;
+use Carbon\Carbon;
 
 class LeadRepository implements LeadRepositoryInterface {
 
@@ -39,6 +40,8 @@ class LeadRepository implements LeadRepositoryInterface {
         'inventory',
         'fbUsers',
     ];
+
+    private const DEFAULT_HOT_POTATO_DURATION = 30;
 
     private $sortOrdersCrm = [
         'no_due_past_due_future_due',
@@ -310,6 +313,80 @@ class LeadRepository implements LeadRepositoryInterface {
 
         // Paginate!
         return $query->paginate($params['per_page'])->appends($params);
+    }
+
+    /**
+     * Get All Unprocessed Leads
+     *
+     * @param int $params
+     * @return Collection<Lead>
+     */
+    public function getAllUnprocessed(array $params): Collection {
+        $query = Lead::select(Lead::getTableName() . '.*')->with('inventory')
+                     ->where('lead_type', '<>', LeadType::TYPE_NONLEAD)
+                     ->leftJoin(NewDealerUser::getTableName(), Lead::getTableName() . '.dealer_id', '=', NewDealerUser::getTableName() . '.id')
+                     ->leftJoin(LeadStatus::getTableName(), Lead::getTableName() . '.identifier', '=', LeadStatus::getTableName() . '.tc_lead_identifier')
+                     ->leftJoin(SalesPerson::getTableName(), function ($join) {
+            $join->on(LeadStatus::getTableName() . '.sales_person_id', '=', SalesPerson::getTableName() . '.id')
+                 ->on(SalesPerson::getTableName() . '.user_id', '=', NewDealerUser::getTableName() . '.user_id')
+                 ->whereNull(SalesPerson::getTableName() . '.deleted_at');
+        })->leftJoin(Interaction::getTableName(), function ($join) {
+            $join->on(Lead::getTableName() . '.identifier', '=', Interaction::getTableName() . '.tc_lead_id')
+                 ->on(Interaction::getTableName() . '.interaction_time', '>', LeadStatus::getTableName() . '.next_contact_date')
+                 ->where(Interaction::getTableName() . '.interaction_type', 'EMAIL');
+        })->whereNotNull(SalesPerson::getTableName() . '.email')
+          ->where(Lead::getTableName() . '.is_archived', 0)
+          ->where(Lead::getTableName() . '.is_spam', 0)
+          ->whereNull(Interaction::getTableName() . '.interaction_time');
+
+        if (isset($params['dealer_id'])) {
+            $query = $query->where(Lead::getTableName() . '.dealer_id', $params['dealer_id']);
+        }
+
+        // Created At?
+        if(!isset($params['first_created']) && !isset($params['last_created'])) {
+            $query = $query->whereNotNull(LeadStatus::getTableName() . '.next_contact_date')
+                           ->where(LeadStatus::getTableName() . '.next_contact_date', '<>', '0000-00-00 00:00:00');
+
+            // Set First / Last Contact Date
+            if(isset($params['first_contact'])) {
+                $query = $query->where(LeadStatus::getTableName() . '.next_contact_date', '>=', $params['first_contact']);
+            }
+            if(isset($params['last_contact'])) {
+                $query = $query->where(LeadStatus::getTableName() . '.next_contact_date', '<=', $params['last_contact']);
+            }
+        } elseif(isset($params['first_contact']) || isset($params['last_contact'])) {
+            $query = $query->where(function($query) use($params) {
+                return $query->whereNull(LeadStatus::getTableName() . '.next_contact_date')
+                             ->orWhere(function($query) use($params) {
+                    // Set First / Last Contact Date
+                    if(isset($params['first_contact'])) {
+                        $query = $query->where(LeadStatus::getTableName() . '.next_contact_date', '>=', $params['first_contact']);
+                    }
+                    if(isset($params['last_contact'])) {
+                        $query = $query->where(LeadStatus::getTableName() . '.next_contact_date', '<=', $params['last_contact']);
+                    }
+                });
+            })->orWhere(function($query) use($params) {
+                // Set First / Last Created Date
+                if(isset($params['first_created'])) {
+                    $query = $query->where(Lead::getTableName() . '.date_submitted', '>=', $params['first_created']);
+                }
+                if(isset($params['last_created'])) {
+                    $query = $query->where(Lead::getTableName() . '.date_submitted', '<=', $params['last_created']);
+                }
+            });
+        }
+
+        // Set Sort Query
+        if (isset($params['sort'])) {
+            $query = $this->addSortQuery($query, $params['sort']);
+        }
+
+        // Return Results
+        return $query->groupBy(Lead::getTableName() . '.identifier')
+                     ->orderBy(Lead::getTableName() . '.date_submitted', 'ASC')
+                     ->orderBy(Lead::getTableName() . '.identifier', 'ASC')->get();
     }
 
     /**
