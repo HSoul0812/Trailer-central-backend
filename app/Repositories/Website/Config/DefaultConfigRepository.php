@@ -11,6 +11,7 @@ class DefaultConfigRepository implements DefaultConfigRepositoryInterface
 {
     /** @var string[] CDW-900 requires these variable to be hidden, then in a upcoming clean up we should remove them */
     private const VARIABLES_TO_BE_TEMPORARILY_HIDDEN = [
+        '',
         'call-to-action/snippet/title',
         'call-to-action/snippet/size',
         'call-to-action/snippet/snippet-text',
