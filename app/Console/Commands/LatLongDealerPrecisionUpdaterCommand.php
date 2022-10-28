@@ -37,7 +37,7 @@ class LatLongDealerPrecisionUpdaterCommand extends Command
         }
 
         $baseQuery = DealerLocation::whereRaw('(round(latitude,0) - round(latitude,2) <> 0)')
-                        ->orWhereRaw('(round(latitude,0) - round(latitude,2) <> 0)')
+                        ->orWhereRaw('(round(longitude,0) - round(longitude,2) <> 0)')
                         ->orWhereNull('latitude')
                         ->orWhereNull('longitude');
 
@@ -48,7 +48,7 @@ class LatLongDealerPrecisionUpdaterCommand extends Command
 
     /**
      * Process the records
-     * 
+     *
      * @return void
      */
     private function process(Builder $query)
@@ -67,7 +67,7 @@ class LatLongDealerPrecisionUpdaterCommand extends Command
                 } else {
                     $searchQuery = "{$location->address}, {$location->city}, {$location->county}, {$location->region}";
                 }
-                
+
                 $latLong = $this->getLongitudeAndLatitude($searchQuery, $isCanadianPostcode);
 
                 // If the method returns null, there was an issue with getting info for that zip. Log it and move on
@@ -136,9 +136,9 @@ class LatLongDealerPrecisionUpdaterCommand extends Command
             'sensor' => 'false',
             'address' => $address,
             'components' => implode(',', [
-                'locality', 
-                'administrative_area_level_1', 
-                'postal_code', 
+                'locality',
+                'administrative_area_level_1',
+                'postal_code',
                 "country{$country}"
             ])
         ];
@@ -178,7 +178,7 @@ class LatLongDealerPrecisionUpdaterCommand extends Command
 
     /**
      * Get the short name (formatted to conform to our DB) for a country
-     * 
+     *
      * @return string
      */
     protected function mapCountryIsoShortToLongCode($shortCode): string

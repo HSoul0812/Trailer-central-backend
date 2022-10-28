@@ -37,7 +37,7 @@ class LatLongPrecisionUpdaterCommand extends Command
         }
 
         $baseQuery = Geolocation::whereRaw('(round(latitude,0) - round(latitude,2) <> 0)')
-            ->orWhereRaw('(round(latitude,0) - round(latitude,2) <> 0)');
+            ->orWhereRaw('(round(longitude,0) - round(longitude,2) <> 0)');
 
         $this->info("Processing {$baseQuery->count()} records...");
 
