@@ -150,8 +150,6 @@ class InventoryControllerTest extends TestCase
             }
         }
 
-        $this->assertSame(strip_tags($inventoryParams['description_html']), strip_tags($inventory['description_html']));
-
         $seeder->cleanUp();
     }
 
