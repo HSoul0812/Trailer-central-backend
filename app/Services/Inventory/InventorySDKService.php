@@ -12,6 +12,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use TrailerCentral\Sdk\Handlers\Search\Collection;
 use TrailerCentral\Sdk\Handlers\Search\Geolocation;
 use TrailerCentral\Sdk\Handlers\Search\GeolocationInterface;
+use TrailerCentral\Sdk\Handlers\Search\GeolocationRange;
 use TrailerCentral\Sdk\Handlers\Search\Pagination;
 use TrailerCentral\Sdk\Handlers\Search\Range;
 use TrailerCentral\Sdk\Handlers\Search\Request;
@@ -28,8 +29,9 @@ class InventorySDKService implements InventorySDKServiceInterface
     private Search $search;
 
     const PAGE_SIZE = 10;
-    const INVENTORY_SOLD = 'sold';
-    const INVENTORY_IMAGES = 'jpg;png;jpeg';
+    const IMAGES_ATTRIBUTE = 'empty_images';
+    const SALE_SCRIPT_ATTRIBUTE = 'sale_script';
+    const PRICE_SCRIPT_ATTRIBUTE = 'price_script';
     const TILT_TRAILER_INVENTORY = 'Tilt Trailers';
     const TERM_SEARCH_KEY_MAP = [
         'dealer_id' => 'dealerId',
@@ -70,17 +72,14 @@ class InventorySDKService implements InventorySDKServiceInterface
      */
     public function list(array $params): TcEsResponseInventoryList
     {
-        $this->addCommonFilters();
-        $this->addImages($params);
+        $this->addCommonFilters($params);
         $this->addCategories($params);
         $this->addSearchTerms($params);
         $this->addRangeQueries($params);
         $this->addPagination($params);
+        $this->addGeolocation($params);
 
-        $this->request->withGeolocation($this->getGeolocationInfo($params));
-        $response = $this->search->execute($this->request);
-
-        return $this->responseFromSDKResponse($response);
+        return $this->responseFromSDKResponse($this->search->execute($this->request));
     }
 
     /**
@@ -107,24 +106,44 @@ class InventorySDKService implements InventorySDKServiceInterface
     }
 
     /**
-     * @return void
-     */
-    protected function addCommonFilters()
-    {
-//        $this->request->add('isRental', true);
-        //TODO: handle availability
-//        $this->request->add('availability', new Collection([self::INVENTORY_SOLD], Collection::EXCLUSION));
-    }
-
-    /**
      * @param array $params
      * @return void
      */
-    protected function addImages(array $params)
+    protected function addGeolocation(array $params)
     {
-        if (isset($params['has_image']) && $params['has_image']) {
-            $this->request->add('show_images', self::INVENTORY_IMAGES);
+        $location = $this->getGeolocationInfo($params);
+
+        if (isset($params['country'])) {
+            $this->request->add('location_country', strtoupper($params['country']));
+        } else {
+            $distance = $params['distance'] ? (float)$params['distance'] : 300;
+            $location = new GeolocationRange($location->lat(), $location->lon(), $distance);
         }
+
+        $this->request->withGeolocation($location);
+    }
+
+    /**
+     * @return void
+     */
+    protected function addCommonFilters(array $params)
+    {
+        $attributes = [];
+        if (!empty($params['sale'])) {
+            $attributes[] = self::SALE_SCRIPT_ATTRIBUTE;
+        }
+
+        if (isset($params['has_image']) && $params['has_image']) {
+            $attributes[] = self::IMAGES_ATTRIBUTE;
+        }
+
+        if (!empty($params['price_min']) && $params['price_min'] > 0 && !empty($params['price_max'])) {
+            $attributes[] = sprintf('%s:%d:%d',
+                self::PRICE_SCRIPT_ATTRIBUTE, $params['price_min'], $params['price_max']
+            );
+        }
+
+        $this->request->add('is_trailer_trader', new Collection($attributes));
     }
 
     /**
