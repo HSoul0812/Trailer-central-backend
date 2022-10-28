@@ -117,9 +117,9 @@
 </style>
 
 @php
-$columns = [['label' => 'Stock #', 'data' => $inventory['stock']]];
+$columns = [['label' => 'Stock#', 'data' => $inventory['stock']]];
 if ($inventory['vin']) {
-    $columns[] = ['label' => 'VIN #', 'data' => $inventory['vin']];
+    $columns[] = ['label' => 'VIN#', 'data' => $inventory['vin']];
 }
 $columns[] = ['label' => 'Year', 'data' => $inventory['year']];
 $columns[] = ['label' => 'Manufacturer', 'data' => $inventory['manufacturer']];
@@ -149,7 +149,7 @@ if ($color = optional($inventory['attributes']->where('attribute.code', 'color')
     $columns[] = ['label' => 'Color', 'data' => strtoupper($color)];
 }
 if ($axles = optional($inventory['attributes']->where('attribute.code', 'axles')->first())->value) {
-    $columns[] = ['label' => '# Axles', 'data' => $axles];
+    $columns[] = ['label' => '#Axles', 'data' => $axles];
 }
 if ($inventory['axle_capacity']) {
     $columns[] = ['label' => 'Axle Capacity', 'data' => $inventory['axle_capacity']];
