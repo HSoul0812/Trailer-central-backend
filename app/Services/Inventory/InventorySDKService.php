@@ -36,7 +36,6 @@ class InventorySDKService implements InventorySDKServiceInterface
     private int $currentPage = 1;
     private int $perPage = self::PAGE_SIZE;
 
-    const IMAGES_ATTRIBUTE = 'empty_images';
     const SALE_SCRIPT_ATTRIBUTE = 'sale_script';
     const PRICE_SCRIPT_ATTRIBUTE = 'price_script';
     const TILT_TRAILER_INVENTORY = 'Tilt Trailers';
@@ -70,6 +69,8 @@ class InventorySDKService implements InventorySDKServiceInterface
     const DEFAULT_LAT_ON_DW = 39.8090;
     const DEFAULT_LON_ON_DW = -98.5550;
 
+    const INVENTORY_SOLD = 'sold';
+
     public function __construct()
     {
         $this->request = new Request();
@@ -88,6 +89,7 @@ class InventorySDKService implements InventorySDKServiceInterface
     {
         $this->addCommonFilters($params);
         $this->addCategories($params);
+        $this->addImages($params);
         $this->addSearchTerms($params);
         $this->addRangeQueries($params);
         $this->addPagination($params);
@@ -176,18 +178,16 @@ class InventorySDKService implements InventorySDKServiceInterface
             $attributes[] = self::SALE_SCRIPT_ATTRIBUTE;
         }
 
-        if (isset($params['has_image']) && $params['has_image']) {
-            $attributes[] = self::IMAGES_ATTRIBUTE;
-        }
-
         if (!empty($params['price_min']) && $params['price_min'] > 0 && !empty($params['price_max'])) {
             $attributes[] = sprintf('%s:%d:%d',
                 self::PRICE_SCRIPT_ATTRIBUTE, $params['price_min'], $params['price_max']
             );
         }
 
-        $this->request->add('is_trailer_trader', new Collection($attributes));
+        $this->request->add('sale_price_script', new Collection($attributes));
         $this->request->add('classifieds_site', true);
+        $this->request->add('availability', new Collection([self::INVENTORY_SOLD], Collection::EXCLUSION));
+        $this->request->add('rental_bool', false);
     }
 
     /**
@@ -254,6 +254,13 @@ class InventorySDKService implements InventorySDKServiceInterface
             );
             $this->request->add('tilt', 1);
             $this->request->add('category', new Collection($categories));
+        }
+    }
+
+    protected function addImages(array $params)
+    {
+        if (isset($params['has_image']) && $params['has_image']) {
+            $this->request->add('empty_images', false);
         }
     }
 
