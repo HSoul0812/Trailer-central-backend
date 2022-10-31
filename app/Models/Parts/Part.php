@@ -2,12 +2,12 @@
 
 namespace App\Models\Parts;
 
+use App\Domains\Scout\Traits\ExceptionableSearchable;
 use App\Models\Traits\TableAware;
 use ElasticScoutDriverPlus\CustomSearch;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Laravel\Scout\Searchable;
 use App\Repositories\Parts\CostModifierRepositoryInterface;
 use Carbon\Carbon;
 use App\Models\CRM\Dms\PurchaseOrder\PurchaseOrderPart;
@@ -28,7 +28,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Part extends Model
 {
-    use Searchable, CustomSearch, TableAware;
+    use ExceptionableSearchable, CustomSearch, TableAware;
 
     protected const STATUS_ACTIVE = 'Active';
     protected const STATUS_CATALOG = 'Catalog';
