@@ -21,6 +21,7 @@ class BulkUpload extends Model {
      * @var array
      */
     protected $fillable = [
+        'title',
         'dealer_id',
         'status',
         'import_source',

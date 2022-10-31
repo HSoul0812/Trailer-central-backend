@@ -4,9 +4,9 @@ namespace App\Http\Requests\Bulk\Inventory;
 
 use App\Http\Requests\Request;
 
-class GetBulkUploadRequest extends Request
+class GetBulkUploadsRequest extends Request
 {
     protected $rules = [
-        'id' => 'required|integer'
+        'dealer_id' => 'required|integer'
     ];
 }

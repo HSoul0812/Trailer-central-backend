@@ -14,7 +14,7 @@ use App\Exceptions\Common\BusyJobException;
 use Tests\Integration\AbstractMonitoredJobsTest;
 
 use App\Jobs\Bulk\Inventory\ProcessBulkUpload;
-use App\Http\Requests\Bulk\Inventory\GetBulkUploadRequest;
+use App\Http\Requests\Bulk\Inventory\GetBulkUploadsRequest;
 use App\Http\Requests\Bulk\Inventory\CreateBulkUploadRequest;
 use App\Http\Controllers\v1\Bulk\Inventory\BulkUploadController;
 
@@ -35,8 +35,8 @@ class BulkUploadControllerTest extends AbstractMonitoredJobsTest
     {
         // Given I'm using the controller "BulkUploadController"
         $controller = app(BulkUploadController::class);
-        // And I have a bad formed "GetBulkUploadRequest"
-        $request = new GetBulkUploadRequest([]);
+        // And I have a bad formed "GetBulkUploadsRequest"
+        $request = new GetBulkUploadsRequest([]);
 
         // Then I expect to see an specific exception to be thrown
         $this->expectException(ResourceException::class);
