@@ -4,9 +4,10 @@
         margin: 0;
         padding: 0;
         border: 0;
-        font-size: 100%;
+        font-size: 14px;
         font: inherit;
         vertical-align: baseline;
+        font-family: Arial, Helvetica, sans-serif;
     }
 
     .printTable {
@@ -16,7 +17,6 @@
 
     .print-inventory {
         padding: 10px;
-        font-size: 20px;
     }
 
     .print-inventory-image-container {
@@ -60,8 +60,7 @@
 
     .print-inventory .inventory-info .label,
     .print-inventory .inventory-info .data {
-        word-wrap: break-word;
-        font-size: 20px;
+        font-size: 14px;
     }
 
     .inventory-title {
@@ -72,8 +71,8 @@
     }
 
     h2 {
-        font-size: 21px;
-        font-weight: 700;
+        font-size: 1.5em;
+        font-weight: bold;
     }
 
     table.inventory-info {
@@ -85,7 +84,6 @@
     }
 
     .inventory-info .label {
-        font-weight: bold;
         display: inline-block;
     }
 
@@ -119,9 +117,9 @@
 </style>
 
 @php
-$columns = [['label' => 'Stock #', 'data' => $inventory['stock']]];
+$columns = [['label' => 'Stock#', 'data' => $inventory['stock']]];
 if ($inventory['vin']) {
-    $columns[] = ['label' => 'VIN #', 'data' => $inventory['vin']];
+    $columns[] = ['label' => 'VIN#', 'data' => $inventory['vin']];
 }
 $columns[] = ['label' => 'Year', 'data' => $inventory['year']];
 $columns[] = ['label' => 'Manufacturer', 'data' => $inventory['manufacturer']];
@@ -151,7 +149,7 @@ if ($color = optional($inventory['attributes']->where('attribute.code', 'color')
     $columns[] = ['label' => 'Color', 'data' => strtoupper($color)];
 }
 if ($axles = optional($inventory['attributes']->where('attribute.code', 'axles')->first())->value) {
-    $columns[] = ['label' => '# Axles', 'data' => $axles];
+    $columns[] = ['label' => '#Axles', 'data' => $axles];
 }
 if ($inventory['axle_capacity']) {
     $columns[] = ['label' => 'Axle Capacity', 'data' => $inventory['axle_capacity']];
@@ -252,7 +250,7 @@ if ($mileage = optional($inventory['attributes']->where('attribute.code', 'milea
             Features
         </h3>
     @endif
-    <table class="inventory-info" style="width: 100%; font-size: 80%">
+    <table class="inventory-info" style="width: 100%;">
         @for ($i = 0; $i < ceil(count($inventory['features']) / 3); $i++)
             <tr>
                 @isset($inventory['features'][($i - 1) * 3])
