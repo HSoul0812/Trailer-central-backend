@@ -62,7 +62,7 @@ class InventorySDKService implements InventorySDKServiceInterface
         'gvwr',
         'payload_capacity'
     ];
-
+    const DEFAULT_DISTANCE = 300;
     const DEFAULT_SORT = '+distance';
     const DEFAULT_NO_LOCATION_SORT = '-createdAt';
 
@@ -132,7 +132,7 @@ class InventorySDKService implements InventorySDKServiceInterface
         if (isset($params['country'])) {
             $this->request->add('location_country', strtoupper($params['country']));
         } elseif ($location->lat() !== self::DEFAULT_LAT_ON_DW && $location->lon() !== self::DEFAULT_LON_ON_DW) {
-            $distance = $params['distance'] ? (float)$params['distance'] : 300;
+            $distance = $params['distance'] ? (float)$params['distance'] : self::DEFAULT_DISTANCE;
             $location = new GeolocationRange($location->lat(), $location->lon(), $distance);
         }
 
