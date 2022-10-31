@@ -6,6 +6,7 @@ use App\DTOs\Inventory\TcEsInventory;
 use App\DTOs\Inventory\TcEsResponseInventoryList;
 use App\Models\Parts\CategoryMappings;
 use App\Models\Parts\Type;
+use App\Services\Inventory\ESQuery\SortOrder;
 use Dingo\Api\Routing\Helpers;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -17,6 +18,8 @@ use TrailerCentral\Sdk\Handlers\Search\Pagination;
 use TrailerCentral\Sdk\Handlers\Search\Range;
 use TrailerCentral\Sdk\Handlers\Search\Request;
 use TrailerCentral\Sdk\Handlers\Search\Response;
+use TrailerCentral\Sdk\Handlers\Search\Sorting;
+use TrailerCentral\Sdk\Handlers\Search\SortingField;
 use TrailerCentral\Sdk\Resources\Search;
 use TrailerCentral\Sdk\Sdk;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
@@ -29,6 +32,10 @@ class InventorySDKService implements InventorySDKServiceInterface
     private Search $search;
 
     const PAGE_SIZE = 10;
+
+    private int $currentPage = 1;
+    private int $perPage = self::PAGE_SIZE;
+
     const IMAGES_ATTRIBUTE = 'empty_images';
     const SALE_SCRIPT_ATTRIBUTE = 'sale_script';
     const PRICE_SCRIPT_ATTRIBUTE = 'price_script';
@@ -56,6 +63,13 @@ class InventorySDKService implements InventorySDKServiceInterface
         'payload_capacity'
     ];
 
+    const DEFAULT_SORT = '+distance';
+    const DEFAULT_NO_LOCATION_SORT = '-createdAt';
+
+    // location set by DW as default lat/lon
+    const DEFAULT_LAT_ON_DW = 39.8090;
+    const DEFAULT_LON_ON_DW = -98.5550;
+
     public function __construct()
     {
         $this->request = new Request();
@@ -77,7 +91,9 @@ class InventorySDKService implements InventorySDKServiceInterface
         $this->addSearchTerms($params);
         $this->addRangeQueries($params);
         $this->addPagination($params);
-        $this->addGeolocation($params);
+
+        $location = $this->addGeolocation($params);
+        $this->addSorting($params, $location);
 
         return $this->responseFromSDKResponse($this->search->execute($this->request));
     }
@@ -99,28 +115,55 @@ class InventorySDKService implements InventorySDKServiceInterface
         $response->inventories = new LengthAwarePaginator(
             $result,
             $sdkResponse->total(),
-            10,
-            1
+            $this->perPage,
+            $this->currentPage
         );
         return $response;
     }
 
     /**
      * @param array $params
-     * @return void
+     * @return GeolocationInterface
      */
-    protected function addGeolocation(array $params)
+    protected function addGeolocation(array $params): GeolocationInterface
     {
         $location = $this->getGeolocationInfo($params);
 
         if (isset($params['country'])) {
             $this->request->add('location_country', strtoupper($params['country']));
-        } else {
+        } elseif ($location->lat() !== self::DEFAULT_LAT_ON_DW && $location->lon() !== self::DEFAULT_LON_ON_DW) {
             $distance = $params['distance'] ? (float)$params['distance'] : 300;
             $location = new GeolocationRange($location->lat(), $location->lon(), $distance);
         }
 
         $this->request->withGeolocation($location);
+
+        return $location;
+    }
+
+    /**
+     * @param array $params
+     * @param GeolocationInterface $location
+     * @return void
+     */
+    protected function addSorting(array $params, GeolocationInterface $location)
+    {
+        if (isset($params['is_random']) && $params['is_random']) {
+            $this->request->add('in_random_order', 1);
+        } else {
+            if (isset($params['sort'])) {
+                $sort = $params['sort'];
+            } else if ($location->lat() !== self::DEFAULT_LAT_ON_DW && $location->lon() !== self::DEFAULT_LON_ON_DW) {
+                $sort = self::DEFAULT_SORT;
+            } else {
+                $sort = self::DEFAULT_NO_LOCATION_SORT;
+            }
+
+            $order = new SortOrder($sort);
+            $this->request->withSorting(new Sorting([
+                new SortingField($order->field, $order->direction)
+            ]));
+        }
     }
 
     /**
@@ -144,6 +187,7 @@ class InventorySDKService implements InventorySDKServiceInterface
         }
 
         $this->request->add('is_trailer_trader', new Collection($attributes));
+        $this->request->add('classifieds_site', true);
     }
 
     /**
@@ -180,8 +224,10 @@ class InventorySDKService implements InventorySDKServiceInterface
      */
     protected function addPagination(array $params)
     {
-        $currentPage = LengthAwarePaginator::resolveCurrentPage();
-        $this->request->withPagination(new Pagination($currentPage, $params['per_page'] ?? self::PAGE_SIZE));
+        $this->currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $this->perPage = $params['per_page'] ?? self::PAGE_SIZE;
+
+        $this->request->withPagination(new Pagination($this->perPage, $this->currentPage));
     }
 
     /**
@@ -258,7 +304,7 @@ class InventorySDKService implements InventorySDKServiceInterface
             return $geolocation;
         }
         //use coordinates provided by DW as the center of the US
-        return new Geolocation(39.8090, -98.5550);
+        return new Geolocation(self::DEFAULT_LAT_ON_DW, self::DEFAULT_LON_ON_DW);
     }
 
     /**
