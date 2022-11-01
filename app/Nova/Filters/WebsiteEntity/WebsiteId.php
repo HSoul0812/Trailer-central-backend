@@ -39,7 +39,7 @@ class WebsiteId extends Filter
     public function options(Request $request)
     {
         $websitesList = [];
-        $websites = DB::table('website')->select('id')->groupBy('id')->get();
+        $websites = DB::table('website')->select('id')->get();
 
         foreach($websites as $website) {
             $websitesList[$website->id] = $website->id;
