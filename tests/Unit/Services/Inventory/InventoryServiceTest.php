@@ -32,6 +32,9 @@ use Mockery;
 use Mockery\LegacyMockInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use Tests\TestCase;
+use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
+use App\Repositories\User\GeoLocationRepositoryInterface;
+use App\Contracts\LoggerServiceInterface;
 
 /**
  * Test for App\Services\Inventory\InventoryService
@@ -100,6 +103,24 @@ class InventoryServiceTest extends TestCase
      */
     private $categoryRepositoryMock;
 
+    /**
+     * @var LegacyMockInterface|WebsiteConfigRepositoryInterface
+     */
+    private $websiteConfigRepositoryMock;
+
+    /**
+     * @var LegacyMockInterface|GeoLocationRepositoryInterface
+     */
+    private $geolocationRepositoryMock;
+
+    /**
+     * @var LegacyMockInterface|LoggerServiceInterface
+     */
+    private $logServiceMock;
+
+    /** @var \LegacyMockInterface|Parsedown */
+    private $markdownHelper;
+
     public function setUp(): void
     {
         parent::setUp();
@@ -133,6 +154,18 @@ class InventoryServiceTest extends TestCase
 
         $this->categoryRepositoryMock = Mockery::mock(CategoryRepositoryInterface::class);
         $this->app->instance(CategoryRepositoryInterface::class, $this->categoryRepositoryMock);
+
+        $this->websiteConfigRepositoryMock = Mockery::mock(WebsiteConfigRepositoryInterface::class);
+        $this->app->instance(WebsiteConfigRepositoryInterface::class, $this->websiteConfigRepositoryMock);
+
+        $this->geolocationRepositoryMock = Mockery::mock(GeoLocationRepositoryInterface::class);
+        $this->app->instance(GeoLocationRepositoryInterface::class, $this->geolocationRepositoryMock);
+
+        $this->logServiceMock = Mockery::mock(LoggerServiceInterface::class);
+        $this->app->instance(LoggerServiceInterface::class, $this->logServiceMock);
+
+        $this->markdownHelper = Mockery::mock(\Parsedown::class);
+        $this->app->instance(\Parsedown::class, $this->markdownHelper);
     }
 
     /**
@@ -1038,11 +1071,15 @@ class InventoryServiceTest extends TestCase
                 $this->fileRepositoryMock,
                 $this->billRepositoryMock,
                 $this->quickbookApprovalRepositoryMock,
+                $this->websiteConfigRepositoryMock,
                 $this->imageServiceMock,
                 $this->fileServiceMock,
                 $this->dealerLocationRepositoryMock,
                 $this->dealerLocationMileageFeeRepositoryMock,
-                $this->categoryRepositoryMock
+                $this->categoryRepositoryMock,
+                $this->geolocationRepositoryMock,
+                $this->markdownHelper,
+                $this->logServiceMock ?? app()->make(LoggerServiceInterface::class)
             ])
             ->onlyMethods(['delete'])
             ->getMock();
@@ -1111,8 +1148,15 @@ class InventoryServiceTest extends TestCase
             $this->fileRepositoryMock,
             $this->billRepositoryMock,
             $this->quickbookApprovalRepositoryMock,
+            $this->websiteConfigRepositoryMock,
             $this->imageServiceMock,
-            $this->fileServiceMock
+            $this->fileServiceMock,
+            $this->dealerLocationRepositoryMock,
+            $this->dealerLocationMileageFeeRepositoryMock,
+            $this->categoryRepositoryMock,
+            $this->geolocationRepositoryMock,
+            $this->markdownHelper,
+            $this->logServiceMock ?? app()->make(LoggerServiceInterface::class)
         ]);
 
         $inventoryServiceMock->shouldReceive('deleteDuplicates')->passthru();
