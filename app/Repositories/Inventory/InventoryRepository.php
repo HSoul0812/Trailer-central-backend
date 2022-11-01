@@ -662,11 +662,22 @@ class InventoryRepository implements InventoryRepositoryInterface
     ) : GrimzyBuilder {
         /** @var Builder $query */
         $query = Inventory::query()
-            ->select($select)
-            ->where('inventory.inventory_id', '>', 0);
+            ->select($select);
+
+        if (isset($params['dealer_id'])) {
+            // having this applied filter here will make faster the query
+            $query = $query->where('inventory.dealer_id', $params['dealer_id']);
+        }
+
+        $query = $query->where('inventory.inventory_id', '>', 0);
 
         if (isset($params['include']) && is_string($params['include'])) {
             $query = $query->with(explode(',', $params['include']));
+        }
+
+        if (isset($params['is_archived'])) {
+            $withDefault = false;
+            $query = $query->where('inventory.is_archived', $params['is_archived']);
         }
 
         $attributesEmpty = true;
@@ -712,10 +723,6 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query = $query->where('condition', $params['condition']);
         }
 
-        if (isset($params['dealer_id'])) {
-            $query = $query->where('inventory.dealer_id', $params['dealer_id']);
-        }
-
         if (isset($params['dealer_location_id'])) {
             $query = $query->where('inventory.dealer_location_id', $params['dealer_location_id']);
         }
@@ -730,11 +737,6 @@ class InventoryRepository implements InventoryRepositoryInterface
             } else if ($params['units_with_true_cost'] == self::DO_NOT_SHOW_UNITS_WITH_TRUE_COST) {
                 $query = $query->where('true_cost', 0);
             }
-        }
-
-        if (isset($params['is_archived'])) {
-            $withDefault = false;
-            $query = $query->where('inventory.is_archived', $params['is_archived']);
         }
 
         if ($withDefault) {
