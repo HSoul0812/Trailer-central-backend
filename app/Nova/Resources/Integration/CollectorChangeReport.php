@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Nova;
+namespace App\Nova\Resources\Integration;
 
-use App\Nova\Resources\Integration\Collector;
+use App\Nova\Resource;
+use App\Nova\User;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Http\Requests\NovaRequest;
