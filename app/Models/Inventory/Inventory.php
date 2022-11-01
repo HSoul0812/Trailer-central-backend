@@ -222,13 +222,15 @@ class Inventory extends Model
     const IS_ARCHIVED = 1;
     const IS_NOT_ARCHIVED = 0;
 
+    const SHOW_IN_WEBSITE = 1;
+
     const STATUS_MAPPING = [
-        self::STATUS_QUOTE          => self::STATUS_QUOTE_LABEL,
-        self::STATUS_AVAILABLE      => self::STATUS_AVAILABLE_LABEL,
-        self::STATUS_SOLD           => self::STATUS_SOLD_LABEL,
-        self::STATUS_ON_ORDER       => self::STATUS_ON_ORDER_LABEL,
-        self::STATUS_PENDING_SALE   => self::STATUS_PENDING_SALE_LABEL,
-        self::STATUS_SPECIAL_ORDER  => self::STATUS_SPECIAL_ORDER_LABEL
+        self::STATUS_QUOTE => self::STATUS_QUOTE_LABEL,
+        self::STATUS_AVAILABLE => self::STATUS_AVAILABLE_LABEL,
+        self::STATUS_SOLD => self::STATUS_SOLD_LABEL,
+        self::STATUS_ON_ORDER => self::STATUS_ON_ORDER_LABEL,
+        self::STATUS_PENDING_SALE => self::STATUS_PENDING_SALE_LABEL,
+        self::STATUS_SPECIAL_ORDER => self::STATUS_SPECIAL_ORDER_LABEL
     ];
 
     const CONDITION_NEW = 'new';
