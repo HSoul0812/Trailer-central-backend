@@ -24,6 +24,7 @@ class BulkUpload extends Model {
         'dealer_id',
         'status',
         'import_source',
+        'title',
         'validation_errors',
     ];
 
