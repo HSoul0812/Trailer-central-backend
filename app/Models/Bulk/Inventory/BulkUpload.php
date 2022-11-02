@@ -28,6 +28,10 @@ class BulkUpload extends Model {
         'validation_errors',
     ];
 
+    protected $casts = [
+        'updated_at' => 'date_format:Y-m-d H:i:s'
+    ];
+
     /**
      * The attributes excluded from the model's JSON form.
      *
