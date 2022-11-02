@@ -60,6 +60,37 @@ class InventoryControllerTest extends TestCase
     }
 
     /**
+     * Test that the findByStock method returns 200 if we send the stock
+     * that exists
+     *
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
+     * @return void
+     * @throws MissingTestDealerIdException
+     */
+    public function testFindByStockReturnInventoryWhenStockHasSpaces()
+    {
+        $stock = Str::random() . ' ' . Str::random();
+
+        $inventory = factory(Inventory::class)->create([
+            'dealer_id' => $this->getTestDealerId(),
+            'stock' => $stock,
+        ]);
+
+        $encodedStock = str_replace(' ', '%20', $stock);
+
+        $response = $this->makeApiRequest($encodedStock);
+
+        $response->assertOk();
+
+        $inventoryResponse = $response->json('data');
+
+        $this->assertEquals($inventoryResponse['id'], $inventory->getKey());
+        $this->assertEquals($stock, $inventory->stock);
+    }
+
+    /**
      * Make the API request
      *
      * @param string $stock
