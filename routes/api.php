@@ -314,6 +314,7 @@ $api->version('v1', function ($route) {
     $route->get('inventory/get_all_titles', 'App\Http\Controllers\v1\Inventory\InventoryController@getAllTitles');
     $route->put('inventory', 'App\Http\Controllers\v1\Inventory\InventoryController@create');
     $route->get('inventory/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@show')->where('id', '[0-9]+');
+    $route->get('inventory/stocks/{stock}', 'App\Http\Controllers\v1\Inventory\InventoryController@findByStock');
     $route->post('inventory/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@update')->where('id', '[0-9]+');
     $route->delete('inventory/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@destroy')->where('id', '[0-9]+');
     $route->get('inventory/exists', 'App\Http\Controllers\v1\Inventory\InventoryController@exists');

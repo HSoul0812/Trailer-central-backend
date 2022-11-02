@@ -9,6 +9,7 @@ use App\Http\Requests\Inventory\CreateInventoryRequest;
 use App\Http\Requests\Inventory\DeleteInventoryRequest;
 use App\Http\Requests\Inventory\ExistsInventoryRequest;
 use App\Http\Requests\Inventory\ExportInventoryRequest;
+use App\Http\Requests\Inventory\FindByStockRequest;
 use App\Http\Requests\Inventory\GetAllInventoryTitlesRequest;
 use App\Http\Requests\Inventory\GetInventoryHistoryRequest;
 use App\Http\Requests\Inventory\GetInventoryItemRequest;
@@ -62,7 +63,7 @@ class InventoryController extends RestfulControllerV2
     )
     {
         $this->middleware('setDealerIdOnRequest')
-            ->only(['index', 'create', 'update', 'destroy', 'exists', 'getAllTitles']);
+            ->only(['index', 'create', 'update', 'destroy', 'exists', 'getAllTitles', 'findByStock']);
         $this->middleware('inventory.create.permission')->only(['create', 'update']);
 
         $this->inventoryService = $inventoryService;
@@ -456,5 +457,23 @@ class InventoryController extends RestfulControllerV2
                 'url' => $this->inventoryService->export($inventoryExportRequest->get('inventory_id'), $inventoryExportRequest->get('format'))
             ]
         ]);
+    }
+
+    /**
+     * @throws NoObjectTypeSetException
+     * @throws NoObjectIdValueSetException
+     */
+    public function findByStock(string $stock, Request $request)
+    {
+        $findByStockRequest = new FindByStockRequest($request->all() + ['stock' => $stock]);
+
+        $findByStockRequest->validate();
+
+        $data = $this->inventoryRepository->findByStock(
+            $findByStockRequest->input('dealer_id'),
+            $stock
+        );
+
+        return $this->itemResponse($data, new InventoryTransformer());
     }
 }
