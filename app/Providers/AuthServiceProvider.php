@@ -13,6 +13,7 @@ use App\Models\Feed\Mapping\Incoming\ApiEntityReference;
 use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping;
 use App\Models\Feed\Mapping\Incoming\DealerIncomingPendingMapping;
 use App\Models\Integration\Collector\Collector;
+use App\Models\Integration\Collector\CollectorChangeReport;
 use App\Models\Inventory\Category;
 use App\Models\Inventory\EntityType;
 use App\Models\Inventory\Inventory;
@@ -29,6 +30,7 @@ use App\Models\Website\Forms\FieldMap;
 use App\Models\Website\Website;
 use App\Nova\Policies\ApiEntityReferencePolicy;
 use App\Nova\Policies\BalancePolicy;
+use App\Nova\Policies\CollectorChangeReportPolicy;
 use App\Nova\Policies\CollectorPolicy;
 use App\Nova\Policies\DealerPolicy;
 use App\Nova\Policies\FeedPolicy;
@@ -101,7 +103,8 @@ class AuthServiceProvider extends ServiceProvider
         ShowroomGenericMap::class => ShowroomGenericMapPolicy::class,
         Website::class => WebsitePolicy::class,
         Role::class => RolePolicy::class,
-        Permission::class => PermissionPolicy::class
+        Permission::class => PermissionPolicy::class,
+        CollectorChangeReport::class => CollectorChangeReportPolicy::class
     ];
 
     /**
