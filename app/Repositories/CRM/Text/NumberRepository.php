@@ -124,6 +124,7 @@ class NumberRepository implements NumberRepositoryInterface {
         // Return Number
         return Number::where('dealer_number', $dealerNo)
                      ->where('customer_number', $customerNo)
+                     ->orderBy('id', 'desc')
                      ->first();
     }
 
@@ -138,6 +139,7 @@ class NumberRepository implements NumberRepositoryInterface {
         // Return Numbers
         return Number::where('dealer_number', $dealerNo)
                      ->orWhere('customer_number', $customerNo)
+                     ->orderBy('id', 'desc')
                      ->all();
     }
 
@@ -153,10 +155,11 @@ class NumberRepository implements NumberRepositoryInterface {
         $query = Number::query();
 
         $query->where('twilio_number', $twilioNumber)
-            ->where(function(Builder $query) use($maskedNumber) {
+            ->where(function (Builder $query) use ($maskedNumber) {
                 $query->where('customer_number', $maskedNumber)
                     ->orWhere('dealer_number', $maskedNumber);
-            });
+            })
+            ->orderBy('id', 'desc');
 
         return $query->first();
     }
@@ -170,6 +173,7 @@ class NumberRepository implements NumberRepositoryInterface {
     {
         return Number::query()->where('customer_number', $customerNumber)
             ->where('dealer_id', $dealerId)
+            ->orderBy('id', 'desc')
             ->first();
     }
 
@@ -228,10 +232,12 @@ class NumberRepository implements NumberRepositoryInterface {
     {
         $query = Number::query();
 
-        $query = $query->where([
-            'dealer_number' => $dealerNumber,
-            'twilio_number' => $twilioNumber,
-        ]);
+        $query = $query
+            ->where([
+                'dealer_number' => $dealerNumber,
+                'twilio_number' => $twilioNumber,
+            ])
+            ->orderBy('id', 'desc');
 
         /** @var Number $number */
         $number = $query->first();
