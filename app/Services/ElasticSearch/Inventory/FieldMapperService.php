@@ -22,7 +22,12 @@ class FieldMapperService implements InventoryFieldMapperServiceInterface
         'clearance_special', // based on all-inventory/all-clearance-specials for `pandpsales` & `pandprvs`,
         'location_region', //based on addRegionToElastic on DW
         'location_city', // based on addRegionToElastic on DW
-        'classifieds_site' // based on InventoryCommon class on DW
+        'classifieds_site', // based on InventoryCommon class on DW
+        'sale_price_script', //handle sale&price filtering
+        'location_country', //filter by location.country for TT
+        'empty_images', //handle exclusion of empty images
+        'availability', //handle availability
+        'rental_bool', //handle edge-case to fix isRental being a select in db
     ];
 
     public function __construct(InventoryFilterRepositoryInterface $repository, Cache $cache)

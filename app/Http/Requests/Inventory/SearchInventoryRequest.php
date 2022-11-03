@@ -14,6 +14,7 @@ use App\Services\ElasticSearch\Inventory\Parameters\Geolocation\GeolocationInter
  * @property int $per_page
  * @property int $offset
  * @property int $x_qa_req
+ * @property int $in_random_order
  * @property string $geolocation
  * @property boolean $classifieds_site
  */
@@ -38,7 +39,8 @@ class SearchInventoryRequest extends Request
             'offset',
             'dealerId',
             'geolocation',
-            'x_qa_req'
+            'x_qa_req',
+            'in_random_order'
         ])->toArray();
     }
 
@@ -87,6 +89,11 @@ class SearchInventoryRequest extends Request
     public function getESQuery(): bool
     {
         return (int)$this->x_qa_req === 1;
+    }
+
+    public function inRandomOrder(): bool
+    {
+        return (int)$this->in_random_order === 1;
     }
 
     public function all($keys = null): array

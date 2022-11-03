@@ -60,15 +60,15 @@ class InventoryController extends RestfulControllerV2
     /**
      * Create a new controller instance.
      *
-     * @param  InventoryServiceInterface  $inventoryService
-     * @param  InventoryRepositoryInterface  $inventoryRepository
-     * @param  InventoryHistoryRepositoryInterface  $inventoryHistoryRepository
-     * @param  InventoryElasticSearchServiceInterface $inventoryElasticSearchService
+     * @param InventoryServiceInterface $inventoryService
+     * @param InventoryRepositoryInterface $inventoryRepository
+     * @param InventoryHistoryRepositoryInterface $inventoryHistoryRepository
+     * @param InventoryElasticSearchServiceInterface $inventoryElasticSearchService
      */
     public function __construct(
-        InventoryServiceInterface $inventoryService,
-        InventoryRepositoryInterface $inventoryRepository,
-        InventoryHistoryRepositoryInterface $inventoryHistoryRepository,
+        InventoryServiceInterface              $inventoryService,
+        InventoryRepositoryInterface           $inventoryRepository,
+        InventoryHistoryRepositoryInterface    $inventoryHistoryRepository,
         InventoryElasticSearchServiceInterface $inventoryElasticSearchService
     )
     {
@@ -86,7 +86,6 @@ class InventoryController extends RestfulControllerV2
      * @OA\Get(
      *     path="/api/inventory",
      *     description="Retrieve a list of inventory",
-
      *     tags={"Inventory"},
      *     @OA\Parameter(
      *         name="per_page",
@@ -357,7 +356,7 @@ class InventoryController extends RestfulControllerV2
      *     ),
      * )
      *
-     * @param  int $inventoryId
+     * @param int $inventoryId
      * @param Request $request
      * @return Response
      *
@@ -387,7 +386,7 @@ class InventoryController extends RestfulControllerV2
      * @param Request $request
      * @return Response
      */
-    public function deliveryPrice(int $inventoryId, Request $request):Response
+    public function deliveryPrice(int $inventoryId, Request $request): Response
     {
         $toZipcode = $request->input('tozip');
         return $this->response->array([
@@ -402,7 +401,6 @@ class InventoryController extends RestfulControllerV2
      * @OA\Get(
      *     path="/api/inventory/get_all_titles",
      *     description="Retrieve a list of inventory without defaults",
-
      *     @OA\Response(
      *         response="200",
      *         description="Returns a list of inventory titles",
@@ -483,6 +481,7 @@ class InventoryController extends RestfulControllerV2
         if ($searchRequest->validate()) {
 
             $result = $this->inventoryElasticSearchService->search(
+                $searchRequest->inRandomOrder(),
                 $searchRequest->dealerIds(),
                 $searchRequest->terms(),
                 $searchRequest->geolocation(),

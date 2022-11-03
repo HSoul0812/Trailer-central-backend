@@ -200,6 +200,8 @@ class QueryBuilder implements InventoryQueryBuilderInterface
         'sort' => []
     ];
 
+    private $geolocation;
+
     public function __construct(FieldMapperService $mapper)
     {
         $this->mapper = $mapper;
@@ -227,6 +229,7 @@ class QueryBuilder implements InventoryQueryBuilderInterface
         } elseif ($geolocation instanceof GeolocationRange) {
             $this->addGeoDistanceQuery($geolocation);
         }
+        $this->geolocation = $geolocation;
 
         return $this->addDistanceScript($geolocation->toPoint());
     }
@@ -254,10 +257,7 @@ class QueryBuilder implements InventoryQueryBuilderInterface
 
     public function addSort(array $sort): QueryBuilderInterface
     {
-        if (isset($sort['status_script'])) {
-            $this->addStatusSortScript($sort['status_script']);
-            unset($sort['status_script']);
-        }
+        $sort = $this->addSortScripts($sort);
 
         foreach ($sort as $sortKey => $order) {
             $this->query['sort'][] = [
@@ -268,6 +268,35 @@ class QueryBuilder implements InventoryQueryBuilderInterface
         }
 
         return $this;
+    }
+
+    /**
+     * @param array $sort
+     * @return array
+     */
+    private function addSortScripts(array $sort): array
+    {
+        if (isset($sort['status_script'])) {
+            $this->addStatusSortScript($sort['status_script']);
+            unset($sort['status_script']);
+        }
+
+        if (isset($sort['distance'])) {
+            $this->addGeoDistanceSortScript($sort['distance']);
+            unset($sort['distance']);
+        }
+
+        if (isset($sort['price'])) {
+            $this->addPriceSortScript($sort['price']);
+            unset($sort['price']);
+        }
+
+        if (isset($sort['numFeatures'])) {
+            $this->addNumFeaturesSortScript($sort['numFeatures']);
+            unset($sort['numFeatures']);
+        }
+
+        return $sort;
     }
 
     public function addPagination(array $pagination): QueryBuilderInterface
@@ -306,6 +335,59 @@ class QueryBuilder implements InventoryQueryBuilderInterface
                 ]
             ];
         }, explode(',', $status)));
+    }
+
+    private function addGeoDistanceSortScript(string $order): void
+    {
+        if ($this->geolocation) {
+            $this->query['sort'][] = [
+                '_geo_distance' => [
+                    'location.geo' => [
+                        'lat' => $this->geolocation->lat(),
+                        'lon' => $this->geolocation->lng()
+                    ],
+                    'order' => $order
+                ]
+            ];
+        }
+    }
+
+    private function addPriceSortScript(string $order): void
+    {
+        $this->query['sort'][] = [
+            '_script' => [
+                'type' => 'number',
+                'script' => [
+                    'lang' => 'painless',
+                    'source' => 'double price;
+                    if(doc[\'websitePrice\'] != null){ price = doc[\'websitePrice\'].value; }
+                    if(0 < doc[\'salesPrice\'].value && doc[\'salesPrice\'].value < price) { price = doc[\'salesPrice\'].value; }
+                    return price;
+                    '
+                ],
+                'order' => $order
+            ]
+        ];
+    }
+
+    private function addNumFeaturesSortScript(string $order): void
+    {
+        $this->query['sort'][] = [
+            '_script' => [
+                'type' => 'number',
+                'script' => [
+                    'lang' => 'painless',
+                    'source' => 'int numFeature = 0;
+                    if(doc[\'featureList.floorPlan\'] != null){ numFeature += doc[\'featureList.floorPlan\'].size(); }
+                    if(doc[\'featureList.stallTack\'] != null){ numFeature += doc[\'featureList.stallTack\'].size(); }
+                    if(doc[\'featureList.lq\'] != null){ numFeature += doc[\'featureList.lq\'].size(); }
+                    if(doc[\'featureList.doorsWindowsRamps\'] != null){ numFeature += doc[\'featureList.doorsWindowsRamps\'].size(); }
+                    return numFeature;
+                    '
+                ],
+                'order' => $order
+            ]
+        ];
     }
 
     private function addDistanceScript(Point $location): QueryBuilderInterface
@@ -423,5 +505,29 @@ class QueryBuilder implements InventoryQueryBuilderInterface
                 ]
             ]
         ], $this->query);
+    }
+
+    /**
+     * @param bool $random
+     * @return QueryBuilderInterface
+     */
+    public function inRandomOrder(bool $random): QueryBuilderInterface
+    {
+        if ($random) {
+            $this->query['query'] = [
+                'function_score' => [
+                    'query' => $this->query['query'],
+                    "functions" => [
+                        [
+                            "random_score" => new \stdClass(),
+                        ]
+                    ],
+                    "score_mode" => "sum",
+                    "boost_mode" => "replace",
+                ]
+            ];
+        }
+
+        return $this;
     }
 }

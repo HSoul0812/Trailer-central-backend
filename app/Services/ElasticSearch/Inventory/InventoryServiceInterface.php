@@ -8,9 +8,10 @@ use App\Services\ElasticSearch\Inventory\Parameters\Geolocation\GeolocationInter
 
 interface InventoryServiceInterface
 {
-    public function search(DealerId $dealerIds,
-                           array $terms,
+    public function search(bool                 $inRandomOrder,
+                           DealerId             $dealerIds,
+                           array                $terms,
                            GeolocationInterface $geolocation,
-                           array $sort = [],
-                           array $pagination = []): ElasticSearchQueryResult;
+                           array                $sort = [],
+                           array                $pagination = []): ElasticSearchQueryResult;
 }

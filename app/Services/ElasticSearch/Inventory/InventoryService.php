@@ -25,17 +25,19 @@ class InventoryService implements InventoryServiceInterface
         $this->queryBuilder = $queryBuilder;
     }
 
-    public function search(DealerId $dealerIds,
-                           array $terms,
+    public function search(bool                 $inRandomOrder,
+                           DealerId             $dealerIds,
+                           array                $terms,
                            GeolocationInterface $geolocation,
-                           array $sort = [],
-                           array $pagination = []): ElasticSearchQueryResult
+                           array                $sort = [],
+                           array                $pagination = []): ElasticSearchQueryResult
     {
         $query = $this->queryBuilder->addDealers($dealerIds)
             ->addTerms($terms)
             ->addGeolocation($geolocation)
             ->addSort($sort)
-            ->addPagination($pagination);
+            ->addPagination($pagination)
+            ->inRandomOrder($inRandomOrder);
 
         return $this->client->search((string)config('elastic.scout_driver.indices.inventory'), $query);
     }
