@@ -75,7 +75,7 @@ class InventorySDKService implements InventorySDKServiceInterface
     {
         $this->request = new Request();
 
-        $sdk = new Sdk(env('INVENTORY_SDK_API_URL'));
+        $sdk = new Sdk(config('inventory-sdk.url'));
         $this->search = new Search($sdk);
     }
 
