@@ -70,8 +70,7 @@ class PosterRedisRepository implements PosterRepositoryInterface
     {
         $this->log = Log::channel('tunnels');
         $this->redis = Redis::connection('persist');
-        $this->log->info('Initialized Redis on for Tunnels Using ' . $this->redis->getName());
-        $this->log->info('Found Keys: ', $this->redis->keys('tunnels:*'));
+        $this->log->info('Initialized Redis for CL Poster Using ' . $this->redis->getName());
     }
 
     /**

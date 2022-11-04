@@ -26,6 +26,8 @@ use App\Repositories\Marketing\Craigslist\SchedulerRepository;
 use App\Repositories\Marketing\Craigslist\SchedulerRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\ProfileRepository;
 use App\Repositories\Marketing\Craigslist\ProfileRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\PosterRedisRepository;
+use App\Repositories\Marketing\Craigslist\PosterRepositoryInterface;
 use App\Services\Dispatch\Facebook\PostingHistoryService;
 use App\Services\Dispatch\Facebook\PostingHistoryServiceInterface;
 use App\Services\Marketing\Facebook\MarketplaceService;
@@ -63,6 +65,7 @@ class MarketingServiceProvider extends ServiceProvider
         $this->app->bind(VerifyRepositoryInterface::class, VerifyRepository::class);
 
         // Dispatch (Redis) Repositories
+        $this->app->bind(PosterRepositoryInterface::class, PosterRedisRepository::class);
         $this->app->bind(TunnelRepositoryInterface::class, TunnelRedisRepository::class);
         $this->app->bind(PostingRepositoryInterface::class, PostingRedisRepository::class);
 
