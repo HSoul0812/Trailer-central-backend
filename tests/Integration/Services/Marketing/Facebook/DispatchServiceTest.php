@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Integration\Services\Marketing;
+namespace Tests\Integration\Services\Marketing\Facebook;
 
 use App\Models\Marketing\Facebook\Error;
 use App\Models\Marketing\Facebook\Listings;
@@ -12,11 +12,11 @@ use Tests\Integration\IntegrationTestCase;
 
 /**
  * Class MarketingService
- * @package Tests\Integration\Services\Marketing
+ * @package Tests\Integration\Services\Marketing\Facebook
  *
  * @coversDefaultClass \App\Services\Dispatch\Facebook\MarketplaceService
  */
-class MarketplaceServiceTest extends IntegrationTestCase
+class DispatchServiceTest extends IntegrationTestCase
 {
     use DatabaseTransactions;
 
