@@ -64,7 +64,11 @@ class TransactionExecuteQueue extends Resource
             Text::make('Api')->sortable(),
 
             Text::make('VIN', 'data')->displayUsing(function($value) {
-                return $value['vin'] ?? '';
+                return $value['vin'] ?? null;
+            })->onlyOnIndex(),
+
+            Text::make('Stock', 'data')->displayUsing(function($value) {
+                return $value['stock_id'] ?? null;
             })->onlyOnIndex(),
 
             KeyValue::make('Data')->hideFromIndex(),
