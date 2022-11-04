@@ -3,7 +3,7 @@
 namespace Tests\Feature\Marketing;
 
 use Tests\TestCase;
-use Tests\database\seeds\Marketing\Craigslist\MarketplaceSeeder;
+use Tests\database\seeds\Marketing\Facebook\MarketplaceSeeder;
 
 
 class DispatchStepTest extends TestCase

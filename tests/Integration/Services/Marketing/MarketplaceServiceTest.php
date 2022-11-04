@@ -7,7 +7,7 @@ use App\Models\Marketing\Facebook\Listings;
 use App\Models\Marketing\Facebook\Marketplace;
 use App\Models\User\NewDealerUser;
 use Laravel\Lumen\Testing\DatabaseTransactions;
-use Tests\database\seeds\Marketing\Craigslist\MarketplaceSeeder;
+use Tests\database\seeds\Marketing\Facebook\MarketplaceSeeder;
 use Tests\Integration\IntegrationTestCase;
 
 /**
