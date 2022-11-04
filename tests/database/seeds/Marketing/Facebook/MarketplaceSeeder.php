@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\database\seeds\Marketing;
+namespace Tests\database\seeds\Marketing\Facebook;
 
 use App\Models\Inventory\Image;
 use App\Models\Inventory\Inventory;
@@ -17,7 +17,6 @@ use App\Models\User\User;
 
 class MarketplaceSeeder extends Seeder
 {
-
     /**
      * @var \App\Models\Marketing\Facebook\Marketplace[]
      */
