@@ -7,7 +7,7 @@ use App\Models\Marketing\Facebook\Listings;
 use App\Models\Marketing\Facebook\Marketplace;
 use App\Models\User\NewDealerUser;
 use Laravel\Lumen\Testing\DatabaseTransactions;
-use Tests\database\seeds\Marketing\MarketplaceSeeder;
+use Tests\database\seeds\Marketing\Craigslist\MarketplaceSeeder;
 use Tests\Integration\IntegrationTestCase;
 
 /**
@@ -54,7 +54,7 @@ class MarketplaceServiceTest extends IntegrationTestCase
     }
 
     /**
-     * @group FME
+     * @group Marketing
      * @covers ::login
      */
     public function login(): string
@@ -74,7 +74,7 @@ class MarketplaceServiceTest extends IntegrationTestCase
     }
 
     /**
-     * @group FME
+     * @group Marketing
      * @covers ::dealer
      */
     public function testDealer()
@@ -121,7 +121,7 @@ class MarketplaceServiceTest extends IntegrationTestCase
     /**
      * Test a listing is created correctly.
      *
-     * @group FME
+     * @group Marketing
      * @covers ::create
      */
     public function testCreate()
@@ -217,7 +217,7 @@ class MarketplaceServiceTest extends IntegrationTestCase
     }
 
     /**
-     * @group FME
+     * @group Marketing
      * @covers ::step
      */
     public function testStep()
@@ -287,7 +287,7 @@ class MarketplaceServiceTest extends IntegrationTestCase
     /**
      * Test errors are being reported correctly
      *
-     * @group FME
+     * @group Marketing
      * @covers ::step
      * @dataProvider stepErrorsDataProvider
      *
