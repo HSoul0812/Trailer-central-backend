@@ -7,6 +7,7 @@ use App\Models\User\AuthToken;
 use App\Models\User\DealerLocation;
 use App\Models\User\DealerClapp;
 use App\Models\User\User;
+use App\Traits\WithGetter;
 use Tests\database\seeds\Seeder;
 
 /**
@@ -18,30 +19,32 @@ use Tests\database\seeds\Seeder;
  */
 class ProfileSeeder extends Seeder
 {
+    use WithGetter;
+
     /**
      * @var User
      */
-    protected $dealer;
+    private $dealer;
 
     /**
      * @var DealerClapp
      */
-    protected $clapp;
+    private $clapp;
 
     /**
      * @var DealerLocation
      */
-    protected $dealerLocation;
+    private $dealerLocation;
 
     /**
      * @var AuthToken
      */
-    protected $authToken;
+    private $authToken;
 
     /**
      * @var Profile[]
      */
-    protected $profiles = [];
+    private $profiles = [];
 
 
     /**
