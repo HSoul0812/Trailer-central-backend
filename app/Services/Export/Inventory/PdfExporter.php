@@ -52,42 +52,7 @@ class PdfExporter implements ExporterInterface
         $data['website'] = $transformer->includeWebsite($inventory)->getData();
         $data['dealer_logo'] = $this->getDealerLogo($data['website']);
         $data['attributes'] = $inventory->attributeValues;
-        $data['width_inches'] = $data['width_inches'] ? $this->dimensionToFeetAndInches($data['width_inches'], 'inches') : null;
-        $data['width_second'] = $data['width_second'] ? $this->dimensionToFeetAndInches($data['width_second'], 'feet', 'inches') : null;
-        $data['width_inches_second'] = $data['width_inches_second'] ? $this->dimensionToFeetAndInches($data['width_inches_second'], 'inches') : null;
-        $data['length_inches'] = $data['length_inches'] ? $this->dimensionToFeetAndInches($data['length_inches'], 'inches') : null;
-        $data['length_second'] = $data['length_second'] ? $this->dimensionToFeetAndInches($data['length_second'], 'feet', 'inches') : null;
-        $data['length_inches_second'] = $data['length_inches_second'] ? $this->dimensionToFeetAndInches($data['length_inches_second'], 'inches') : null;
-        $data['height_inches'] = $data['height_inches'] ? $this->dimensionToFeetAndInches($data['height_inches'], 'inches') : null;
-        $data['height_second'] = $data['height_second'] ? $this->dimensionToFeetAndInches($data['height_second'], 'feet', 'inches') : null;
-        $data['height_inches_second'] = $data['height_inches_second'] ? $this->dimensionToFeetAndInches($data['height_inches_second'], 'inches') : null;
         return $data;
-    }
-
-    private function dimensionToFeetAndInches($dimension, $display = 'feet', $from = 'default')
-    {
-        if ($from === 'default') {
-            $from = $display;
-        }
-        if ($from === 'inches') {
-            $inFull = floatval($dimension);
-            $feet = floor($inFull / 12);
-            $inches = $inFull % 12;
-        } else {
-            $feet = intval($dimension);
-            $ftFull = floatval($dimension);
-            $inches = $ftFull - $feet;
-            $inFull = ($ftFull * 12);
-        }
-        if ($display === 'inches') {
-            return "$inFull\"";
-        } else {
-            if ($inches > 0) {
-                return "$feet' $inches\"";
-            } else {
-                return "$feet'";
-            }
-        }
     }
 
     /**
