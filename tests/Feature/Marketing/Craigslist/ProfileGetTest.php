@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Marketing;
+namespace Tests\Feature\Marketing\Craigslist;
 
 use Tests\TestCase;
 use Tests\database\seeds\Marketing\Craigslist\ProfileSeeder;
