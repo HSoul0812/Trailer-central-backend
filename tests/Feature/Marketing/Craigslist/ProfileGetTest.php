@@ -21,7 +21,7 @@ class ProfileGetTest extends TestCase
      * @return void
      */
     public function testGettingProfiles()
-    {                    
+    {
         $this->withHeaders(['access-token' => $this->seeder->authToken->access_token])
             ->json('GET', '/api/marketing/clapp/profile') 
             ->assertStatus(200)
