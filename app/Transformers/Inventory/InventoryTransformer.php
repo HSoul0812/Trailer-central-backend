@@ -87,16 +87,22 @@ class InventoryTransformer extends TransformerAbstract
      */
     public function transform(Inventory $inventory): array
     {
-        if ($inventory->length > 0) {
-            list($lengthSecond, $lengthInchesSecond) = $this->convertHelper->feetToFeetInches($inventory->length);
+        $lengthDimension = $inventory->length_inches ?: $inventory->length;
+
+        if ($lengthDimension > 0) {
+            list($lengthSecond, $lengthInchesSecond) = $this->convertHelper->feetToFeetInches($lengthDimension);
         }
 
-        if ($inventory->width > 0) {
-            list($widthSecond, $widthInchesSecond) = $this->convertHelper->feetToFeetInches($inventory->width);
+        $widthDimension = $inventory->width_inches ?: $inventory->width;
+
+        if ($widthDimension > 0) {
+            list($widthSecond, $widthInchesSecond) = $this->convertHelper->feetToFeetInches($widthDimension);
         }
 
-        if ($inventory->height > 0) {
-            list($heightSecond, $heightInchesSecond) = $this->convertHelper->feetToFeetInches($inventory->height);
+        $heightDimension = $inventory->height_inches ?: $inventory->height;
+
+        if ($heightDimension > 0) {
+            list($heightSecond, $heightInchesSecond) = $this->convertHelper->feetToFeetInches($heightDimension);
         }
 
         $age = now()->diffInDays(Carbon::parse($inventory->created_at));
