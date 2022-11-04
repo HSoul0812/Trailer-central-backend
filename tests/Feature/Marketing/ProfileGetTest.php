@@ -27,11 +27,15 @@ class ProfileGetTest extends TestCase
             ->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
-                    '*' => [
-                        'id',
-                        'profile',
-                        'username',
-                        'category'
+                    'profiles' => [
+                        'data' => [
+                            '*' => [
+                                'id',
+                                'profile',
+                                'username',
+                                'category'
+                            ]
+                        ]
                     ]
                 ]
             ]);
