@@ -47,6 +47,8 @@ class ServiceOrderRepositoryTest extends TestCase
      */
     public function testIoCForServiceOrderRepositoryIsWorking(): void
     {
+        $this->seeder->seed();
+
         $concreteRepository = $this->getConcreteRepository();
 
         self::assertInstanceOf(ServiceOrderRepository::class, $concreteRepository);

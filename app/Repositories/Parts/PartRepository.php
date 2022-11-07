@@ -486,7 +486,6 @@ class PartRepository implements PartRepositoryInterface {
 
                 if (isset($params['bins'])) {
                     $part->bins()->delete();
-                    $part->load('bins');
 
                     foreach ($params['bins'] as $bin) {
                         $binQty = $this->createBinQuantity([
@@ -494,8 +493,9 @@ class PartRepository implements PartRepositoryInterface {
                             'bin_id' => $bin['bin_id'],
                             'qty' => $bin['quantity']
                         ]);
-                        $part->bins->add($binQty);
                     }
+
+                    $part->load('bins');
                 }
             }
         });

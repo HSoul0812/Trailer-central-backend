@@ -47,6 +47,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property bool $unarchive_sold_items
  * @property string $cdk_password
  * @property string $cdk_username
+ * @property string $cdk_dealer_cmfs
  * @property bool $use_factory_mapping
  * @property bool is_mfg_brand_mapping_enabled
  * @property string $skip_categories
@@ -93,6 +94,7 @@ class Collector extends Model implements Filterable
         self::FILE_FORMAT_XML,
         self::FILE_FORMAT_CSV,
         self::FILE_FORMAT_CDK,
+        self::FILE_FORMAT_CDK_MULTIPLE,
         self::FILE_FORMAT_IDS,
         self::FILE_FORMAT_XML_URL,
         self::FILE_FORMAT_PIPE_DELIMITED,
@@ -104,6 +106,7 @@ class Collector extends Model implements Filterable
     ];
 
     public const FILE_FORMAT_CDK = 'cdk';
+    public const FILE_FORMAT_CDK_MULTIPLE = 'cdk_multiple';
     public const FILE_FORMAT_XML = 'xml';
     public const FILE_FORMAT_CSV = 'csv';
     public const FILE_FORMAT_IDS = 'ids';
@@ -171,6 +174,7 @@ class Collector extends Model implements Filterable
         'unarchive_sold_items',
         'cdk_password',
         'cdk_username',
+        'cdk_dealer_cmfs',
         'motility_username',
         'motility_password',
         'motility_account_no',

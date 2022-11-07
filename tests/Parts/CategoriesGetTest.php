@@ -2,18 +2,10 @@
 
 namespace Tests\Parts;
 
-use Laravel\Lumen\Testing\DatabaseMigrations;
-use Laravel\Lumen\Testing\DatabaseTransactions;
 use Tests\TestCase;
-
 
 class CategoriesGetTest extends TestCase
 {
-    
-    public function __construct() {
-        parent::__construct();   
-    }
-    
     /**
      * Test getting brands
      *
@@ -23,14 +15,7 @@ class CategoriesGetTest extends TestCase
      * @return void
      */
     public function testGettingCategoriesNoFilters()
-    {                    
-        $this->json('GET', '/api/parts/categories') 
-            ->seeStatusCode(200);             
+    {
+        $this->getJson('/api/parts/categories')->assertSuccessful();
     }
-    
-//    public function testBrandSearch()
-//    {            
-//                   
-//    }
-    
 }

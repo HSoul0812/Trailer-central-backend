@@ -100,18 +100,7 @@ class DeliverBlastTest extends TestCase
 
         foreach ($otherLeads as $lead) {
             $this->assertDatabaseHas('crm_tc_lead_status', [
-                'tc_lead_identifier' => $lead->identifier,
-                'status' => Lead::STATUS_MEDIUM,
-            ]);
-
-            $this->assertDatabaseMissing('crm_tc_lead_status', [
-                'tc_lead_identifier' => $lead->identifier,
-                'status' => Lead::STATUS_HOT,
-            ]);
-
-            $this->assertDatabaseMissing('crm_tc_lead_status', [
-                'tc_lead_identifier' => $lead->identifier,
-                'status' => Lead::STATUS_COLD,
+                'tc_lead_identifier' => $lead->identifier
             ]);
 
             foreach ($inquiredBlasts as $blast) {
@@ -202,18 +191,7 @@ class DeliverBlastTest extends TestCase
 
         foreach ($wonLeads as $lead) {
             $this->assertDatabaseHas('crm_tc_lead_status', [
-                'tc_lead_identifier' => $lead->identifier,
-                'status' => Lead::STATUS_MEDIUM,
-            ]);
-
-            $this->assertDatabaseMissing('crm_tc_lead_status', [
-                'tc_lead_identifier' => $lead->identifier,
-                'status' => Lead::STATUS_WON,
-            ]);
-
-            $this->assertDatabaseMissing('crm_tc_lead_status', [
-                'tc_lead_identifier' => $lead->identifier,
-                'status' => Lead::STATUS_WON_CLOSED,
+                'tc_lead_identifier' => $lead->identifier
             ]);
 
             foreach ($purchasedBlast as $blast) {
@@ -308,18 +286,7 @@ class DeliverBlastTest extends TestCase
         foreach ($otherLeads as $lead) {
             if ($lead->is_archived) {
                 $this->assertDatabaseHas('crm_tc_lead_status', [
-                    'tc_lead_identifier' => $lead->identifier,
-                    'status' => Lead::STATUS_MEDIUM,
-                ]);
-
-                $this->assertDatabaseMissing('crm_tc_lead_status', [
-                    'tc_lead_identifier' => $lead->identifier,
-                    'status' => Lead::STATUS_HOT,
-                ]);
-
-                $this->assertDatabaseMissing('crm_tc_lead_status', [
-                    'tc_lead_identifier' => $lead->identifier,
-                    'status' => Lead::STATUS_COLD,
+                    'tc_lead_identifier' => $lead->identifier
                 ]);
             }
 
@@ -423,18 +390,7 @@ class DeliverBlastTest extends TestCase
         foreach ($otherLeads as $lead) {
             if ($lead->inventory && in_array($lead->inventory->brand, $blastsBrands)) {
                 $this->assertDatabaseHas('crm_tc_lead_status', [
-                    'tc_lead_identifier' => $lead->identifier,
-                    'status' => Lead::STATUS_MEDIUM,
-                ]);
-
-                $this->assertDatabaseMissing('crm_tc_lead_status', [
-                    'tc_lead_identifier' => $lead->identifier,
-                    'status' => Lead::STATUS_HOT,
-                ]);
-
-                $this->assertDatabaseMissing('crm_tc_lead_status', [
-                    'tc_lead_identifier' => $lead->identifier,
-                    'status' => Lead::STATUS_COLD,
+                    'tc_lead_identifier' => $lead->identifier
                 ]);
 
                 foreach ($inquiredBlasts as $blast) {
@@ -538,18 +494,7 @@ class DeliverBlastTest extends TestCase
         foreach ($otherLeads as $lead) {
             if ($lead->inventory && in_array($lead->inventory->category, $blastsCategories)) {
                 $this->assertDatabaseHas('crm_tc_lead_status', [
-                    'tc_lead_identifier' => $lead->identifier,
-                    'status' => Lead::STATUS_MEDIUM,
-                ]);
-
-                $this->assertDatabaseMissing('crm_tc_lead_status', [
-                    'tc_lead_identifier' => $lead->identifier,
-                    'status' => Lead::STATUS_HOT,
-                ]);
-
-                $this->assertDatabaseMissing('crm_tc_lead_status', [
-                    'tc_lead_identifier' => $lead->identifier,
-                    'status' => Lead::STATUS_COLD,
+                    'tc_lead_identifier' => $lead->identifier
                 ]);
 
                 foreach ($inquiredBlasts as $blast) {
