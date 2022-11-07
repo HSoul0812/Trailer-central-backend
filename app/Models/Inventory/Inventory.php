@@ -891,4 +891,14 @@ class Inventory extends Model
     {
         return $this->listings()->whereNotIn('status', ['expired', 'deleted']);
     }
+
+    public static function makeAllSearchableByDealers(array $dealers = []): void
+    {
+        $self = new static;
+
+        $self->newQuery()
+            ->whereIn('dealer_id', $dealers)
+            ->orderBy($self->getKeyName())
+            ->searchable();
+    }
 }
