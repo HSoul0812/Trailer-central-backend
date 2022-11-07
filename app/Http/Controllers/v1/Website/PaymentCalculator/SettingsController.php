@@ -4,6 +4,7 @@ namespace App\Http\Controllers\v1\Website\PaymentCalculator;
 
 use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\Website\PaymentCalculator\DeleteSettingsRequest;
+use App\Models\Website\PaymentCalculator\Settings;
 use Dingo\Api\Http\Request;
 use App\Repositories\Website\PaymentCalculator\SettingsRepositoryInterface;
 use App\Http\Requests\Website\PaymentCalculator\GetSettingsRequest;
@@ -12,10 +13,14 @@ use App\Http\Requests\Website\PaymentCalculator\CreateSettingsRequest;
 use App\Http\Requests\Website\PaymentCalculator\UpdateSettingsRequest;
 use Dingo\Api\Http\Response;
 
-class SettingsController extends RestfulControllerV2 {
+class SettingsController extends RestfulControllerV2
+{
 
-    /** @var SettingsRepositoryInterface  */
+    /** @var SettingsRepositoryInterface */
     protected $settings;
+
+    /** @var SettingsTransformer */
+    private $transformer;
 
     /**
      * Create a new controller instance.
@@ -26,70 +31,57 @@ class SettingsController extends RestfulControllerV2 {
     {
         $this->settings = $settings;
 
-        $this->middleware('setDealerIdOnRequest')->only(['destroy']);
+        $this->middleware('setDealerIdOnRequest')->only(['destroy', 'index', 'create', 'update']);
+
+        $this->transformer = new SettingsTransformer();
     }
 
-
-    /**
-     * @OA\Get(
-     *     path="/api/website/{websiteId}/payment-calculator/settings",
-     *     description="Retrieve a list of filters",
-     *     tags={"Website Part Filters"},
-     *     @OA\Response(
-     *         response="200",
-     *         description="Returns a list of parts",
-     *         @OA\JsonContent()
-     *     ),
-     *     @OA\Response(
-     *         response="422",
-     *         description="Error: Bad request.",
-     *     ),
-     * )
-     */
-    public function index(Request $request)
+    public function index(int $websiteId, Request $request): Response
     {
-        $request = new GetSettingsRequest($request->all());
+        $request = new GetSettingsRequest($request->all() + ['website_id' => $websiteId]);
 
-        if ($request->validate()) {
-            return $this->response->collection($this->settings->getAll($request->all()), new SettingsTransformer);
+        if (!$request->validate()) {
+            $this->response->errorBadRequest();
         }
 
-        return $this->response->errorBadRequest();
-    }
-
-    public function create(Request $request) {
-        $request = new CreateSettingsRequest($request->all());
-
-        if ( $request->validate() ) {
-            return $this->response->item($this->settings->create($request->all()), new SettingsTransformer());
+        if ($request->grouped) {
+            return $this->response->array(['data' => $this->settings
+                ->getAll($request->all())
+                ->map(function (Settings $defaultConfig): array {
+                    return $this->transformer->transform($defaultConfig);
+                })
+                ->groupBy('entity.name')
+                ->toArray()]);
         }
 
-        return $this->response->errorBadRequest();
+        return $this->response->collection($this->settings->getAll($request->all()), $this->transformer);
     }
 
-    public function update(int $id, Request $request) {
-        $requestData = $request->all();
-        unset($requestData['dealer_id']);
-
-        $request = new UpdateSettingsRequest($requestData);
-
-        if ( $request->validate() ) {
-            return $this->response->item($this->settings->update($request->all()), new SettingsTransformer());
-        }
-
-        return $this->response->errorBadRequest();
-    }
-
-    /**
-     * @param Request $request
-     * @return Response
-     *
-     * @throws \App\Exceptions\Requests\Validation\NoObjectIdValueSetException
-     * @throws \App\Exceptions\Requests\Validation\NoObjectTypeSetException
-     */
-    public function destroy(Request $request): Response
+    public function create(int $websiteId, Request $request): Response
     {
-        $request = new DeleteSettingsRequest($request->all());
+        $request = new CreateSettingsRequest($request->all() + ['website_id' => $websiteId]);
+
+        if (!$request->validate()) {
+            $this->response->errorBadRequest();
+        }
+
+        return $this->response->item($this->settings->create($request->all()), new SettingsTransformer());
+    }
+
+    public function update(int $websiteId, int $id, Request $request): Response
+    {
+        $request = new UpdateSettingsRequest($request->all() + ['website_id' => $websiteId, 'id' => $id]);
+
+        if (!$request->validate()) {
+            $this->response->errorBadRequest();
+        }
+
+        return $this->response->item($this->settings->update($request->all()), $this->transformer);
+    }
+
+    public function destroy(int $websiteId, int $id, Request $request): Response
+    {
+        $request = new DeleteSettingsRequest($request->all() + ['website_id' => $websiteId, 'id' => $id]);
 
         if (!$request->validate()) {
             $this->response->errorBadRequest();

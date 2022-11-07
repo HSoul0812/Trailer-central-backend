@@ -4,6 +4,7 @@ namespace App\Nova\Resources\Integration;
 
 use Illuminate\Database\Eloquent\Model;
 
+use App\Models\Integration\Integration as IntegrationModel;
 use App\Nova\Actions\Integration\HideIntegration;
 use App\Nova\Actions\Integration\UnhideIntegration;
 
@@ -58,17 +59,22 @@ class Integration extends Resource
     public function fields(Request $request)
     {
         return [
-            ID::make('Id', 'integration_id')->sortable(),
+            Text::make('Id', 'integration_id', function() {
+                return IntegrationModel::latest('integration_id')->first()->integration_id + 1;
+            })->showOnCreating()->hideFromDetail()->hideWhenUpdating()->hideFromIndex()->sortable(),
+
+            Text::make('Id', 'integration_id')->hideWhenCreating()->sortable(),
 
             Text::make('Code'),
 
             Text::make('Module Name')->hideFromIndex(),
-            Text::make('Module Status')->hideFromIndex(),
+            Text::make('Module Status')->default('idle')->hideFromIndex(),
 
             Text::make('Name'),
             Text::make('Description'),
-            Text::make('Domain'),
-
+            Text::make('Domain')->help(
+                "Please, only include the domain here, e.g: trailercentral.com"
+            ),
             Text::make('Create Account Url')->hideFromIndex(),
 
             Boolean::make('Active'),
@@ -80,7 +86,7 @@ class Integration extends Resource
 
             Textarea::make('Send Email'),
 
-            Boolean::make('Uses Staging'),
+            Boolean::make('Uses Staging')->default(true),
             Boolean::make('Show for Integrated'),
 
             Boolean::make('Is Hidden')->hideWhenUpdating()->hideWhenCreating()

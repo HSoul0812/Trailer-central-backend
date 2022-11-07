@@ -9,6 +9,7 @@ Homestead.yaml
 .vagrant/
 /nova
 auth.json
+/public/storage
 /storage
 node_modules
 .vscode/
