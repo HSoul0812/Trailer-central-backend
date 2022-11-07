@@ -12,8 +12,6 @@ use App\Services\Export\Inventory\Bulk\BulkPdfJobService;
 use App\Services\Export\Inventory\Bulk\BulkPdfJobServiceInterface;
 use App\Http\Clients\ElasticSearch\ElasticSearchClient;
 use App\Http\Clients\ElasticSearch\ElasticSearchClientInterface;
-use App\Repositories\Bulk\Inventory\BulkUploadRepository;
-use App\Repositories\Bulk\Inventory\BulkUploadRepositoryInterface;
 use App\Repositories\Inventory\AttributeRepository;
 use App\Repositories\Inventory\AttributeRepositoryInterface;
 use App\Repositories\Inventory\AttributeValueRepository;
