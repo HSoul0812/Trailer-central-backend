@@ -14,13 +14,10 @@ use App\Models\CRM\Leads\InventoryLead;
 use App\Models\CRM\Leads\Lead;
 use App\Models\Integration\LotVantage\DealerInventory;
 use App\Models\Inventory\Floorplan\Payment;
-<<<<<<< HEAD
 use App\Models\Marketing\Facebook\Listings;
-=======
 use App\Models\Inventory\Geolocation\Point as GeolocationPoint;
 use App\Models\Parts\Vendor;
 use App\Models\Traits\TableAware;
->>>>>>> 362bfe79b9dd5e360d1bc0e3f7daa698ce3508df
 use App\Models\User\DealerLocation;
 use App\Models\User\User;
 use App\Traits\CompactHelper;

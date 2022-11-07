@@ -18,8 +18,6 @@ class EntityType extends Model {
 
     public const TABLE_NAME = 'eav_entity_type';
 
-<<<<<<< HEAD
-=======
     const TYPE_TRAILER = 1;
     const TYPE_HOSE_TRAILER = 2;
     const TYPE_RV = 3;
@@ -42,11 +40,9 @@ class EntityType extends Model {
 
     public const ENTITY_TYPE_BUILDING = 10;
 
->>>>>>> 362bfe79b9dd5e360d1bc0e3f7daa698ce3508df
     public const ENTITY_TYPE_RV = 3;
     public const ENTITY_TYPE_VEHICLE = 4;
     public const ENTITY_TYPE_WATERCRAFT = 5;
-    public const ENTITY_TYPE_BUILDING = 10;
 
     /**
      * The table associated with the model.

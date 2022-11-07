@@ -163,11 +163,8 @@ return [
                     'ecommerce',
                     'crm-users',
                     'manufacturers',
-<<<<<<< HEAD
-                    'hot-potato'
-=======
+                    'hot-potato',
                     'scout'
->>>>>>> 362bfe79b9dd5e360d1bc0e3f7daa698ce3508df
                 ],
                 'balance' => 'simple',
                 'processes' => 3,
@@ -197,11 +194,8 @@ return [
                     'ecommerce',
                     'crm-users',
                     'manufacturers',
-<<<<<<< HEAD
-                    'hot-potato'
-=======
+                    'hot-potato',
                     'scout'
->>>>>>> 362bfe79b9dd5e360d1bc0e3f7daa698ce3508df
                 ],
                 'balance' => 'simple',
                 'processes' => 10,
@@ -223,11 +217,8 @@ return [
                     'ecommerce',
                     'crm-users',
                     'manufacturers',
-<<<<<<< HEAD
-                    'hot-potato'
-=======
+                    'hot-potato',
                     'scout'
->>>>>>> 362bfe79b9dd5e360d1bc0e3f7daa698ce3508df
                 ],
                 'balance' => 'auto',
                 'minProcesses' => 1,
@@ -301,11 +292,8 @@ return [
                     'ecommerce',
                     'crm-users',
                     'manufacturers',
-<<<<<<< HEAD
-                    'hot-potato'
-=======
+                    'hot-potato',
                     'scout'
->>>>>>> 362bfe79b9dd5e360d1bc0e3f7daa698ce3508df
                 ],
                 'balance' => 'auto',
                 'minProcesses' => 1,
