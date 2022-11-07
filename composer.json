@@ -23,7 +23,7 @@
         "darkaonline/swagger-lume": "6.*",
         "dingo/api": "^2.4",
         "doctrine/dbal": "^2.9",
-        "epartment/nova-dependency-container": "^1.2",
+        "epartment/nova-dependency-container": "^1.2 <=1.3.2",
         "erusev/parsedown": "^1.7",
         "facebook/php-business-sdk": "5.0.5",
         "feed/edit-mapping": "*",

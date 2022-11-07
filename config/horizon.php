@@ -163,11 +163,12 @@ return [
                     'ecommerce',
                     'crm-users',
                     'manufacturers',
-                    'hot-potato'
+                    //'hot-potato'
                 ],
                 'balance' => 'simple',
                 'processes' => 3,
                 'tries' => 3,
+                'delay' => 3,
                 'timeout' => 3600,
             ],
         ],
@@ -192,11 +193,12 @@ return [
                     'ecommerce',
                     'crm-users',
                     'manufacturers',
-                    'hot-potato'
+                    //'hot-potato'
                 ],
                 'balance' => 'simple',
                 'processes' => 10,
                 'tries' => 3,
+                'delay' => 3,
                 'timeout' => 3600,
             ],
         ],
@@ -213,7 +215,7 @@ return [
                     'ecommerce',
                     'crm-users',
                     'manufacturers',
-                    'hot-potato'
+                    //'hot-potato'
                 ],
                 'balance' => 'auto',
                 'minProcesses' => 1,
@@ -227,6 +229,7 @@ return [
                 'balance' => false,
                 'processes' => 1,
                 'tries' => 3,
+                'delay' => 3,
                 'timeout' => 300,
             ],
             'supervisor-3' => [
@@ -286,7 +289,7 @@ return [
                     'ecommerce',
                     'crm-users',
                     'manufacturers',
-                    'hot-potato'
+                    //'hot-potato'
                 ],
                 'balance' => 'auto',
                 'minProcesses' => 1,
@@ -301,6 +304,7 @@ return [
                 'minProcesses' => 15,
                 'maxProcesses' => 55,
                 'tries' => 3,
+                'delay' => 3,
                 'timeout' => 300,
             ],
             'supervisor-3' => [

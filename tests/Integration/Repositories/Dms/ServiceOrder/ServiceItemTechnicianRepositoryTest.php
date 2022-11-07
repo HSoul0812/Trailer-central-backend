@@ -438,18 +438,18 @@ class ServiceItemTechnicianRepositoryTest extends TestCase
 
         $result = $repository->serviceReport([
             'dealer_id' => $this->getTestDealerId(),
-            'from_date' => (new \DateTime)->modify('-2 weeks'),
-            'to_date' => (new \DateTime)->modify('-1 week')->modify('+1 day')
+            'from_date' => now()->subWeeks(2)->startOfDay(),
+            'to_date' => now()->endOfDay(),
         ]);
 
         $this->assertArrayHasKey($technicianId1, $result);
-        $this->assertArrayNotHasKey($technicianId2, $result);
+        $this->assertArrayHasKey($technicianId2, $result);
 
-        $unitSale11Key = array_search($unitSaleId11, array_column($result[$technicianId1], 'sale_id'));
-        $unitSale12Key = array_search($unitSaleId12, array_column($result[$technicianId1], 'sale_id'));
+        $unitSale11Key = (bool) array_search($unitSaleId11, array_column($result[$technicianId1], 'sale_id'));
+        $unitSale12Key = (bool) array_search($unitSaleId12, array_column($result[$technicianId1], 'sale_id'));
 
         $this->assertFalse($unitSale11Key);
-        $this->assertNotFalse($unitSale12Key);
+        $this->assertTrue($unitSale12Key);
     }
 
     /**
@@ -627,6 +627,7 @@ class ServiceItemTechnicianRepositoryTest extends TestCase
             'act_hrs' => $serviceTechnician['act_hrs'],
             'billed_hrs' => $serviceTechnician['billed_hrs'],
             'paid_hrs' => $serviceTechnician['paid_hrs'],
+            'completed_date' => now(),
         ]);
     }
 }

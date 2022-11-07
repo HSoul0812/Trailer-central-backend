@@ -157,6 +157,7 @@ class ListingRepository implements ListingRepositoryInterface {
             ->where('show_on_website', 1)
             ->where("{$inventoryTableName}.price", '>', INVENTORY::MIN_PRICE_FOR_FACEBOOK)
             ->where("{$inventoryTableName}.entity_type_id", '<>', EntityType::ENTITY_TYPE_BUILDING)
+            ->where("{$inventoryTableName}.entity_type_id", '<>', EntityType::ENTITY_TYPE_VEHICLE)
             ->whereRaw("IFNULL(is_archived, 0) = 0")
             ->whereRaw("IFNULL({$inventoryTableName}.status, -1) NOT IN (2,6)")
             ->whereRaw("LENGTH({$inventoryTableName}.description) >= " . INVENTORY::MIN_DESCRIPTION_LENGTH_FOR_FACEBOOK)

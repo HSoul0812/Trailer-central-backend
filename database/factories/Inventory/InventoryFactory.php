@@ -25,8 +25,9 @@ $factory->define(Inventory::class, static function (Faker $faker, array $attribu
 
     // Get Entity/Category
     $entityType = EntityType::where('entity_type_id', '<>', 2)->inRandomOrder()->first();
-    $category = $attributes['category'] ??
-        Category::where('entity_type_id', $entityType->entity_type_id)->inRandomOrder()->first()->legacy_category;
+    $inventoryCategory = Category::where('entity_type_id', $entityType->entity_type_id)->inRandomOrder()->first();
+
+    $category = $attributes['category'] ?? optional($inventoryCategory)->legacy_category ?? '';
 
     // Get Showroom Model
     $mfg = $attributes['manufacturer'] ?? Manufacturers::inRandomOrder()->first();

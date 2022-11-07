@@ -39,26 +39,15 @@ class DeliverBlast extends Command
     protected $datetime = null;
 
     /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct(EmailBuilderServiceInterface $service,
-                                BlastRepositoryInterface $blastRepo)
-    {
-        parent::__construct();
-
-        $this->service = $service;
-        $this->blasts = $blastRepo;
-    }
-
-    /**
      * Execute the console command.
      *
      * @return mixed
      */
     public function handle()
     {
+        $this->service = resolve(EmailBuilderServiceInterface::class);
+        $this->blasts = resolve(BlastRepositoryInterface::class);
+
         // Get Dealer ID
         $dealerId = $this->argument('dealer');
 

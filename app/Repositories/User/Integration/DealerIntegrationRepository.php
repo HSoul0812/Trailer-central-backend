@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Repositories\User\Integration;
 
-use App\Models\Integration\Integration;
 use App\Models\User\Integration\DealerIntegration;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use InvalidArgumentException;
-
+use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 
 class DealerIntegrationRepository implements DealerIntegrationRepositoryInterface
@@ -60,17 +59,26 @@ class DealerIntegrationRepository implements DealerIntegrationRepositoryInterfac
 
         if (empty($params['integration_dealer_id'])) {
             if (empty($params['integration_id'])) {
-                throw new InvalidArgumentException(sprintf("[%s] 'dealer_id' argument is required", __CLASS__));
+                throw new InvalidArgumentException(sprintf("[%s] 'integration_id' argument is required", __CLASS__));
             }
 
             if (empty($params['dealer_id'])) {
                 throw new InvalidArgumentException(sprintf("[%s] 'dealer_id' argument is required", __CLASS__));
             }
 
-            return $query
-                ->where('dealer_id', $params['dealer_id'])
-                ->where('integration_dealer.integration_id', $params['integration_id'])
-                ->firstOrFail();
+            $query = $query->where('dealer_id', $params['dealer_id'])
+                  ->where('integration_dealer.integration_id', $params['integration_id'])
+                  ->first();
+
+            if(!$query) {
+                return $this->model->newInstance([
+                    'dealer_id' => $params['dealer_id'],
+                    'integration_id' => $params['integration_id'],
+                    'settings' => current(\DB::select(\DB::raw("SELECT settings FROM integration WHERE integration_id = {$params['integration_id']}")))->settings
+                ]);
+            } else {
+                return $query;
+            }
         }
 
         return $query->where('integration_dealer_id', $params['integration_dealer_id'])->firstOrFail();
