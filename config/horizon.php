@@ -163,7 +163,7 @@ return [
                     'ecommerce',
                     'crm-users',
                     'manufacturers',
-                    'hot-potato'
+                    //'hot-potato'
                 ],
                 'balance' => 'simple',
                 'processes' => 3,
@@ -193,7 +193,7 @@ return [
                     'ecommerce',
                     'crm-users',
                     'manufacturers',
-                    'hot-potato'
+                    //'hot-potato'
                 ],
                 'balance' => 'simple',
                 'processes' => 10,
@@ -215,7 +215,7 @@ return [
                     'ecommerce',
                     'crm-users',
                     'manufacturers',
-                    'hot-potato'
+                    //'hot-potato'
                 ],
                 'balance' => 'auto',
                 'minProcesses' => 1,
@@ -289,7 +289,7 @@ return [
                     'ecommerce',
                     'crm-users',
                     'manufacturers',
-                    'hot-potato'
+                    //'hot-potato'
                 ],
                 'balance' => 'auto',
                 'minProcesses' => 1,
