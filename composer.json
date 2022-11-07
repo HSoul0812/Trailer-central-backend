@@ -24,6 +24,7 @@
         "nesbot/carbon": "^2.53",
         "psr/log": "^1.0",
         "sentry/sentry-laravel": "^2.11",
+        "tcentral/inventory-sdk": "^1.0",
         "trailer-trader/insights": "*",
         "tymon/jwt-auth": "1.0.*"
     },
@@ -47,6 +48,10 @@
         {
             "type": "path",
             "url": "./nova-components/Insights"
+        },
+        {
+            "type": "vcs",
+            "url": "git@bitbucket.org:tcentral/inventory-sdk.git"
         }
     ],
     "autoload": {
