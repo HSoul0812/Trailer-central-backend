@@ -34,7 +34,9 @@ return [
     | all automatic data syncing will get queued for better performance.
     |
     */
-    'queue' => env('SCOUT_QUEUE', false),
+    'queue' => [
+        'queue' => env('SCOUT_QUEUE_NAME', 'scout'),
+    ],
 
     /*
     |--------------------------------------------------------------------------

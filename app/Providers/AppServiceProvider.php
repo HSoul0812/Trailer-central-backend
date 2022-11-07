@@ -29,22 +29,6 @@ use App\Repositories\Dms\StockRepository;
 use App\Repositories\Dms\StockRepositoryInterface;
 use App\Repositories\Feed\Mapping\Incoming\ApiEntityReferenceRepository;
 use App\Repositories\Feed\Mapping\Incoming\ApiEntityReferenceRepositoryInterface;
-use App\Repositories\Inventory\CategoryRepository;
-use App\Repositories\Inventory\CategoryRepositoryInterface;
-use App\Repositories\Inventory\AttributeRepository;
-use App\Repositories\Inventory\AttributeRepositoryInterface;
-use App\Repositories\Inventory\CustomOverlay\CustomOverlayRepository;
-use App\Repositories\Inventory\CustomOverlay\CustomOverlayRepositoryInterface;
-use App\Repositories\Inventory\FileRepository;
-use App\Repositories\Inventory\FileRepositoryInterface;
-use App\Repositories\Inventory\ImageRepository;
-use App\Repositories\Inventory\ImageRepositoryInterface;
-use App\Repositories\Inventory\InventoryHistoryRepository;
-use App\Repositories\Inventory\InventoryHistoryRepositoryInterface;
-use App\Repositories\Inventory\Packages\PackageRepository;
-use App\Repositories\Inventory\Packages\PackageRepositoryInterface;
-use App\Repositories\Inventory\StatusRepository;
-use App\Repositories\Inventory\StatusRepositoryInterface;
 use App\Repositories\Dms\PurchaseOrder\PurchaseOrderReceiptRepository;
 use App\Repositories\Dms\PurchaseOrder\PurchaseOrderReceiptRepositoryInterface;
 use App\Repositories\Dms\ServiceOrderRepository;
@@ -59,10 +43,6 @@ use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepository;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
 use App\Repositories\Pos\SaleRepository;
 use App\Repositories\Pos\SaleRepositoryInterface;
-use App\Repositories\Inventory\InventoryRepository;
-use App\Repositories\Inventory\InventoryRepositoryInterface;
-use App\Repositories\Inventory\ManufacturerRepository;
-use App\Repositories\Inventory\ManufacturerRepositoryInterface;
 use App\Repositories\Showroom\ShowroomBulkUpdateRepository;
 use App\Repositories\Showroom\ShowroomBulkUpdateRepositoryInterface;
 use App\Repositories\Showroom\ShowroomFieldsMappingRepository;
@@ -105,8 +85,6 @@ use App\Repositories\CRM\Invoice\InvoiceRepository;
 use App\Repositories\CRM\Invoice\InvoiceRepositoryInterface;
 use App\Repositories\CRM\Payment\PaymentRepository;
 use App\Repositories\CRM\Payment\PaymentRepositoryInterface;
-use App\Repositories\Inventory\AttributeValueRepository;
-use App\Repositories\Inventory\AttributeValueRepositoryInterface;
 use App\Repositories\Parts\CostModifierRepository;
 use App\Repositories\Parts\CostModifierRepositoryInterface;
 use App\Repositories\User\DealerPasswordResetRepositoryInterface;
@@ -121,20 +99,14 @@ use App\Services\Dms\Pos\RegisterServiceInterface;
 use App\Services\File\FileService;
 use App\Services\File\FileServiceInterface;
 use App\Services\File\ImageService;
-use App\Services\Inventory\CustomOverlay\CustomOverlayService;
-use App\Services\Inventory\CustomOverlay\CustomOverlayServiceInterface;
 use App\Services\Subscription\StripeService;
 use App\Services\Subscription\StripeServiceInterface;
 use App\Services\User\DealerIntegrationService;
 use App\Services\User\DealerIntegrationServiceInterface;
-use App\Services\Inventory\Packages\PackageService;
-use App\Services\Inventory\Packages\PackageServiceInterface;
 use App\Services\User\DealerLocationService;
 use App\Services\User\DealerLocationServiceInterface;
 use App\Services\User\PasswordResetServiceInterface;
 use App\Services\User\PasswordResetService;
-use App\Repositories\Inventory\Floorplan\VendorRepository as FloorplanVendorRepository;
-use App\Repositories\Inventory\Floorplan\VendorRepositoryInterface as FloorplanVendorRepositoryInterface;
 use App\Repositories\System\EmailRepository;
 use App\Repositories\System\EmailRepositoryInterface;
 use App\Services\Common\EncrypterServiceInterface;
@@ -142,16 +114,8 @@ use App\Services\Common\LoggerService;
 use App\Services\Common\MonitoredGenericJobServiceInterface;
 use App\Services\Common\MonitoredJobService;
 use App\Services\Common\SPLEncrypterService;
-use App\Services\Inventory\Floorplan\PaymentServiceInterface;
-use App\Services\Inventory\Floorplan\PaymentService;
-use App\Services\Inventory\InventoryService;
-use App\Services\Inventory\InventoryServiceInterface;
-use App\Repositories\Inventory\Manufacturers\BrandRepositoryInterface;
-use App\Repositories\Inventory\Manufacturers\BrandRepository;
 use App\Repositories\Marketing\Facebook\ErrorRepository;
 use App\Repositories\Marketing\Facebook\ErrorRepositoryInterface;
-use App\Services\Inventory\InventoryAttributeService;
-use App\Services\Inventory\InventoryAttributeServiceInterface;
 use App\Services\Pos\CustomSalesReportExporterService;
 use App\Services\Pos\CustomSalesReportExporterServiceInterface;
 use App\Services\Website\Log\LogServiceInterface;
@@ -188,17 +152,6 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('tax_calculator_valid', 'App\Rules\User\ValidTaxCalculator@passes');
         \Validator::extend('website_valid', 'App\Rules\Website\ValidWebsite@passes');
         \Validator::extend('website_exists', 'App\Rules\Website\WebsiteExists@passes');
-        \Validator::extend('inventory_valid', 'App\Rules\Inventory\ValidInventory@passes');
-        \Validator::extend('inventory_mfg_exists', 'App\Rules\Inventory\ManufacturerExists@passes');
-        \Validator::extend('inventory_mfg_valid', 'App\Rules\Inventory\ManufacturerValid@passes');
-        \Validator::extend('inventory_mfg_id_valid', 'App\Rules\Inventory\MfgIdExists@passes');
-        \Validator::extend('inventory_mfg_name_valid', 'App\Rules\Inventory\MfgNameValid@passes');
-        \Validator::extend('inventory_cat_exists', 'App\Rules\Inventory\CategoryExists@passes');
-        \Validator::extend('inventory_cat_valid', 'App\Rules\Inventory\CategoryValid@passes');
-        \Validator::extend('inventory_brand_exists', 'App\Rules\Inventory\BrandExists@passes');
-        \Validator::extend('inventory_brand_valid', 'App\Rules\Inventory\BrandValid@passes');
-        \Validator::extend('inventory_unique_stock', 'App\Rules\Inventory\UniqueStock@passes');
-        \Validator::extend('inventory_quotes_not_exist', 'App\Rules\Inventory\QuotesNotExist@passes');
         \Validator::extend('lead_exists', 'App\Rules\CRM\Leads\LeadExists@passes');
         \Validator::extend('lead_type_valid', 'App\Rules\CRM\Leads\ValidLeadType@passes');
         \Validator::extend('lead_status_valid', 'App\Rules\CRM\Leads\ValidLeadStatus@passes');
@@ -215,7 +168,6 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('text_template_exists', 'App\Rules\CRM\Text\TemplateExists@passes');
         \Validator::extend('email_template_exists', 'App\Rules\CRM\Email\TemplateExists@passes');
         \Validator::extend('parts_sku_unique', 'App\Rules\Parts\SkuUnique@validate');
-        \Validator::extend('vendor_exists', 'App\Rules\Inventory\VendorExists@passes');
         \Validator::extend('valid_form_map_type', 'App\Rules\Website\Forms\ValidMapType@passes');
         \Validator::extend('valid_form_map_field', 'App\Rules\Website\Forms\ValidMapField@passes');
         \Validator::extend('valid_form_map_table', 'App\Rules\Website\Forms\ValidMapTable@passes');
@@ -224,7 +176,6 @@ class AppServiceProvider extends ServiceProvider
         \Validator::extend('valid_part_order_status', 'App\Rules\Parts\ValidOrderStatus@passes');
         \Validator::extend('valid_part_fulfillment', 'App\Rules\Parts\ValidFulfillment@passes');
         \Validator::extend('customer_name_unique', 'App\Rules\Dms\Quickbooks\CustomerNameUnique@validate');
-        \Validator::extend('payment_uuid_valid', 'App\Rules\Inventory\Floorplan\PaymentUUIDValid@validate');
         \Validator::extend('stock_type_valid', 'App\Rules\Bulks\Parts\StockTypeValid@passes');
         \Validator::extend('unit_sale_exists', 'App\Rules\Dms\UnitSaleExists@passes');
         \Validator::extend('valid_clapp_profile', 'App\Rules\Marketing\Craigslist\ValidProfile@passes');
@@ -281,25 +232,17 @@ class AppServiceProvider extends ServiceProvider
     public function register()
     {
         //
-        $this->app->bind('App\Repositories\Bulk\Inventory\BulkUploadRepositoryInterface', 'App\Repositories\Bulk\Inventory\BulkUploadRepository');
         $this->app->bind('App\Repositories\Website\Parts\FilterRepositoryInterface', 'App\Repositories\Website\Parts\FilterRepository');
         $this->app->bind('App\Repositories\Website\Blog\PostRepositoryInterface', 'App\Repositories\Website\Blog\PostRepository');
         $this->app->bind('App\Repositories\Subscription\SubscriptionRepositoryInterface', 'App\Repositories\Subscription\SubscriptionRepository');
         $this->app->bind(BulkUploadRepositoryInterface::class, BulkUploadRepository::class);
-        $this->app->bind('App\Repositories\Inventory\Floorplan\PaymentRepositoryInterface', 'App\Repositories\Inventory\Floorplan\PaymentRepository');
+
         $this->app->bind(ShowroomRepositoryInterface::class, ShowroomRepository::class);
         $this->app->bind(ShowroomFieldsMappingRepositoryInterface::class, ShowroomFieldsMappingRepository::class);
         $this->app->bind(SettingsRepositoryInterface::class, SettingsRepository::class);
         $this->app->bind(RedirectRepositoryInterface::class, RedirectRepository::class);
         $this->app->bind(WebsiteRepositoryInterface::class, WebsiteRepository::class);
-        $this->app->bind(InventoryRepositoryInterface::class, InventoryRepository::class);
-        $this->app->bind(InventoryServiceInterface::class, InventoryService::class);
-        $this->app->bind(InventoryHistoryRepositoryInterface::class, InventoryHistoryRepository::class);
-        $this->app->bind(FileRepositoryInterface::class, FileRepository::class);
-        $this->app->bind(ImageRepositoryInterface::class, ImageRepository::class);
-        $this->app->bind(StatusRepositoryInterface::class, StatusRepository::class);
-        $this->app->bind(CategoryRepositoryInterface::class, CategoryRepository::class);
-        $this->app->bind(AttributeRepositoryInterface::class, AttributeRepository::class);
+
         $this->app->bind(EntityRepositoryInterface::class, EntityRepository::class);
         $this->app->bind(FieldMapRepositoryInterface::class, FieldMapRepository::class);
         $this->app->bind(CrmUserRepositoryInterface::class, CrmUserRepository::class);
@@ -315,8 +258,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ExpenseRepositoryInterface::class, ExpenseRepository::class);
         $this->app->bind(ItemNewRepositoryInterface::class, ItemNewRepository::class);
         $this->app->bind(QuickbookApprovalRepositoryInterface::class, QuickbookApprovalRepository::class);
-        $this->app->bind(ManufacturerRepositoryInterface::class, ManufacturerRepository::class);
-        $this->app->bind(FloorplanVendorRepositoryInterface::class, FloorplanVendorRepository::class);
         $this->app->bind(BillServiceInterface::class, BillService::class);
 
         $this->app->bind(CostModifierRepositoryInterface::class, CostModifierRepository::class);
@@ -326,10 +267,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(EncrypterServiceInterface::class, SPLEncrypterService::class);
 
         $this->app->bind(DealerProxyRepositoryInterface::class, DealerProxyRedisRepository::class);
-
         $this->app->bind(EmailRepositoryInterface::class, EmailRepository::class);
-        $this->app->bind(PaymentServiceInterface::class, PaymentService::class);
-
         $this->app->bind(DealerPasswordResetRepositoryInterface::class, DealerPasswordResetRepository::class);
         $this->app->bind(PasswordResetServiceInterface::class, PasswordResetService::class);
 
@@ -352,8 +290,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(DealerLocationQuoteFeeRepositoryInterface::class, DealerLocationQuoteFeeRepository::class);
         $this->app->bind(DealerLocationMileageFeeRepositoryInterface::class, DealerLocationMileageFeeRepository::class);
 
-        $this->app->bind(PackageRepositoryInterface::class, PackageRepository::class);
-        $this->app->bind(PackageServiceInterface::class, PackageService::class);
         $this->app->bind(RegisterRepositoryInterface::class, RegisterRepository::class);
         $this->app->bind(RegisterServiceInterface::class, RegisterService::class);
 
@@ -379,12 +315,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(EmployeeRepositoryInterface::class, EmployeeRepository::class);
         $this->app->bind(TimeClockServiceInterface::class, TimeClockService::class);
         $this->app->bind(WebsiteConfigServiceInterface::class, WebsiteConfigService::class);
-        $this->app->bind(BrandRepositoryInterface::class, BrandRepository::class);
-
-        $this->app->bind(AttributeValueRepositoryInterface::class, AttributeValueRepository::class);
-        $this->app->bind(InventoryAttributeServiceInterface::class, InventoryAttributeService::class);
-        $this->app->bind(CustomOverlayServiceInterface::class, CustomOverlayService::class);
-        $this->app->bind(CustomOverlayRepositoryInterface::class, CustomOverlayRepository::class);
 
         $this->app->bind(ShowroomBulkUpdateRepositoryInterface::class, ShowroomBulkUpdateRepository::class);
 

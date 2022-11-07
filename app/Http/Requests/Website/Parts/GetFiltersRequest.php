@@ -9,8 +9,11 @@ use App\Http\Requests\Request;
  *
  * @author Eczek
  */
-class GetFiltersRequest extends Request {
-
+class GetFiltersRequest extends Request 
+{
+    /**
+     * Get validation rules for a request
+     */
     protected $rules = [
         'dealer_id' => 'required|array',
         'dealer_id.*' => 'integer',
@@ -21,5 +24,4 @@ class GetFiltersRequest extends Request {
         'category_id' => 'array',
         'subcategory' => 'array',
     ];
-
 }

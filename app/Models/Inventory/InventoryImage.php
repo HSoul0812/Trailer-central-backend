@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $image_id,
  * @property int $inventory_id,
  * @property bool $is_default,
- * @property bool $is_secondary,
+ * @property int $is_secondary,
  * @property int $position,
  * @property string $showroom_image,
  * @property bool $was_manually_added,
@@ -22,7 +22,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property Image $image
  */
 class InventoryImage extends Model {
+
     use TableAware;
+
+    const IS_PRIMARY_IMAGE = 0;
 
     /**
      * The table associated with the model.
@@ -50,5 +53,10 @@ class InventoryImage extends Model {
     public function image(): BelongsTo
     {
         return $this->belongsTo(Image::class, 'image_id', 'image_id');
+    }
+
+    public function isPrimaryImage(): bool
+    {
+        return $this->is_secondary === self::IS_PRIMARY_IMAGE;
     }
 }
