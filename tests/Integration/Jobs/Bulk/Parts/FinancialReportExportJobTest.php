@@ -14,6 +14,7 @@ use App\Services\Export\Parts\BulkReportJobService;
 use App\Services\Export\Parts\BulkReportJobServiceInterface;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
 use Ramsey\Uuid\Uuid;
@@ -68,8 +69,10 @@ class FinancialReportExportJobTest extends AbstractMonitoredJobsTest
      *
      * @throws Throwable
      */
-    public function testWriteTheFileInDisk(): void
+    public function testWriteTheFileOnS3(): void
     {
+        Storage::fake('s3');
+
         // Given I dont have any monitored job
         $this->seeder->seed();
 
@@ -95,7 +98,6 @@ class FinancialReportExportJobTest extends AbstractMonitoredJobsTest
         // When I call handle method
         $queueableJob->handle(app(BulkReportRepositoryInterface::class), app(BulkReportJobServiceInterface::class));
 
-        // Then I expect to see an file with certain name to be stored in the disk
         Storage::disk('s3')->assertExists(FilesystemPdfExporter::RUNTIME_PREFIX . $monitoredJob->payload->filename);
     }
 

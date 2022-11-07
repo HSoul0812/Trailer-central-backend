@@ -8,6 +8,9 @@ use App\Models\Website\Entity;
 
 class EntityRepository implements EntityRepositoryInterface {
 
+    const FILTERS_CONFIG_KEY = 'filters';
+    const MANUFACTURER_CONFIG_KEY = 'manufacturer';
+
     public function create($params) {
         throw new NotImplementedException;
     }
@@ -49,4 +52,24 @@ class EntityRepository implements EntityRepositoryInterface {
 
     }
 
+    public function updateConfig($websiteId, array $params) {
+        if(isset($params['manufacturers'])) {
+            $manufacturers = $params['manufacturers'];
+            $query = sprintf('%%"%s"%%', self::MANUFACTURER_CONFIG_KEY);
+
+            $entities = Entity::where('website_id', $websiteId)->where('entity_config', 'like', $query)->get();
+            $entities->each(function(Entity $entity) use ($manufacturers) {
+                $config = unserialize($entity->entity_config);
+                $manufacturersValue = data_get($config, sprintf('%s.%s.*.*', self::FILTERS_CONFIG_KEY, self::MANUFACTURER_CONFIG_KEY));
+                $matches = array_intersect($manufacturers, $manufacturersValue);
+
+                if(count($matches) !== count($manufacturersValue)) {
+                    unset($config[self::FILTERS_CONFIG_KEY][self::MANUFACTURER_CONFIG_KEY]);
+                    $entity->update([
+                        'entity_config' => serialize($config)
+                    ]);
+                }
+            });
+        }
+    }
 }

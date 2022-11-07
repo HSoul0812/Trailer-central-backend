@@ -59,29 +59,19 @@ class AutoAssign extends Command
     protected $boundUpper;
 
     /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct(AutoAssignServiceInterface $autoAssignService)
-    {
-        parent::__construct();
-
-        $this->autoAssignService = $autoAssignService;
-
-        date_default_timezone_set(config('app.db_timezone'));
-
-        $this->datetime = new \DateTime();
-        $this->datetime->setTimezone(new \DateTimeZone(config('app.db_timezone')));
-    }
-
-    /**
      * Execute the console command.
      *
      * @return mixed
      */
     public function handle()
     {
+        $this->autoAssignService = resolve(AutoAssignServiceInterface::class);
+
+        date_default_timezone_set(config('app.db_timezone'));
+
+        $this->datetime = new \DateTime();
+        $this->datetime->setTimezone(new \DateTimeZone(config('app.db_timezone')));
+
         // Get Dealer ID
         $this->dealerId = $dealerId = $this->argument('dealer');
         

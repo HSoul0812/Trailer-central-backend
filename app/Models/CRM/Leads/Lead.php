@@ -378,6 +378,26 @@ class Lead extends Model
 
 
     /**
+     * Get Dealer Emails
+     *
+     * @return array<string>
+     */
+    public function getDealerEmailsAttribute(): array {
+        // Get Email From Preferred Location
+        if(!empty($this->dealerLocation->email)) {
+            return explode(";", $this->dealerLocation->email);
+        }
+
+        // Get Email From Unit of Interest Location
+        if(!empty($this->inventory->dealerLocation->email)) {
+            return explode(";", $this->inventory->dealerLocation->email);
+        }
+
+        // Get Email From Dealer
+        return explode(";", $this->user->email);
+    }
+
+    /**
      * Get Inventory ID's
      *
      * @return array

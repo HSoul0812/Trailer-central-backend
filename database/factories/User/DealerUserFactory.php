@@ -3,6 +3,7 @@
 use App\Models\User\User;
 use Illuminate\Database\Eloquent\Factory;
 use Faker\Generator as Faker;
+use Illuminate\Support\Str;
 
 /** @var Factory $factory */
 
@@ -13,5 +14,8 @@ $factory->define(\App\Models\User\DealerUser::class, static function (Faker $fak
     return [
         'dealer_id' => $userId,
         'name' => $faker->name,
+        'email' => $faker->safeEmail(),
+        'salt' => uniqid(),
+        'password' => Str::random(),
     ];
 });

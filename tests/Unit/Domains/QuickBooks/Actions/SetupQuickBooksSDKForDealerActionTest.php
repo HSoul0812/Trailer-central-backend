@@ -26,6 +26,11 @@ class SetupQuickBooksSDKForDealerActionTest extends TestCase
     public function testItCanSetupQuickBooksSDKForDealer()
     {
         $quickBooksSessionToken = 'token';
+        config([
+            'quickbooks.client_id' => 'test_client',
+            'quickbooks.client_secret' => 'test_secret',
+            'quickbooks.base_url' => 'http://test.com',
+        ]);
 
         $dealer = factory(User::class)->create([
             'quickbooks_session_token' => $quickBooksSessionToken,

@@ -999,7 +999,7 @@ class ADFLead
         // Return VIN Filters
         if(!empty($this->getVendorAddrCity()) && !empty($this->getVendorAddrState())) {
             $filters['city'] = $this->getVendorAddrCity();
-            $filters['state'] = $this->getVendorAddrState();
+            $filters['region'] = $this->getVendorAddrState();
         }
 
         // Return VIN Filters

@@ -153,7 +153,7 @@ class CreateTest extends TestCase
         $location = $service->create($dealerId, $params);
 
         // Then I expect that "DealerLocationService::create" returns a known location instance
-        self::assertSame($expectedLocation, $location);
+        $this->assertSame($expectedLocation, $location);
     }
 
     /**
@@ -210,19 +210,17 @@ class CreateTest extends TestCase
             ->with($params + ['dealer_location_id' => $expectedLocation->dealer_location_id])
             ->once();
 
-        // And I expect that "DealerLocationSalesTaxItemRepositoryInterface::create" method is called three times, with known parameters
         // And I expect that "DealerLocationSalesTaxItemRepositoryInterface::createV1" method is called three times, with known parameters
         foreach ($params['sales_tax_items'] as $item) {
             $dependencies->salesTaxItemRepo
                 ->shouldReceive('create')
                 ->with($item + ['dealer_location_id' => $expectedLocation->dealer_location_id])
                 ->once();
-
-            $dependencies->salesTaxItemRepo
-                ->shouldReceive('createV1')
-                ->with($item + ['dealer_location_id' => $expectedLocation->dealer_location_id])
-                ->once();
         }
+
+        $dependencies->salesTaxItemRepo
+            ->shouldReceive('createV1')
+            ->never();
 
         // And I expect that "DealerLocationRepositoryInterface::commitTransaction" method is called once
         $dependencies->locationRepo->shouldReceive('commitTransaction')->once();
@@ -231,7 +229,7 @@ class CreateTest extends TestCase
         $location = $service->create($dealerId, $params);
 
         // Then I expect that "DealerLocationService::create" returns a known location instance
-        self::assertSame($expectedLocation, $location);
+        $this->assertSame($expectedLocation, $location);
     }
 
     /**
@@ -305,7 +303,7 @@ class CreateTest extends TestCase
         $location = $service->create($dealerId, $params);
 
         // Then I expect that "DealerLocationService::create" returns a known location instance
-        self::assertSame($expectedLocation, $location);
+        $this->assertSame($expectedLocation, $location);
     }
 
     /**
