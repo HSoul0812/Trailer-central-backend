@@ -78,4 +78,13 @@ interface SalesPersonRepositoryInterface extends Repository, RequestQueryable {
      */
     public function findSalesType(string $leadType): string;
 
+    /**
+     * Find Sales Person by Email
+     *
+     * @param int $userId
+     * @param string $email
+     * @return ?SalesPerson
+     */
+    public function getByEmail(int $userId, string $email): ?SalesPerson;
+
 }
