@@ -76,10 +76,16 @@ class InquirySeeder extends Seeder {
             'user_type' => AuthToken::USER_TYPE_DEALER,
         ]);
         $this->website = factory(Website::class)->create(['dealer_id' => $this->dealer->dealer_id]);
+
+        $location = factory(DealerLocation::class)->create([
+            'dealer_id' => $this->dealer->getKey(),
+        ]);
+
         $this->lead = factory(Lead::class)->create([
             'dealer_id' => $this->dealer->getKey(),
             'website_id' => $this->website->getKey(),
-            'lead_type' => LeadType::TYPE_GENERAL
+            'lead_type' => LeadType::TYPE_GENERAL,
+            'dealer_location_id' => $location->getKey()
         ]);
 
         $this->anotherInventory = factory(Inventory::class)->create([
