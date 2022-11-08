@@ -9,6 +9,7 @@ use App\Models\Website\Entity;
 class EntityRepository implements EntityRepositoryInterface {
 
     const FILTERS_CONFIG_KEY = 'filters';
+    const FILTER_GROUP_CONFIG_KEY = 'filterGroup';
     const MANUFACTURER_CONFIG_KEY = 'manufacturer';
 
     public function create($params) {
@@ -58,18 +59,41 @@ class EntityRepository implements EntityRepositoryInterface {
             $query = sprintf('%%"%s"%%', self::MANUFACTURER_CONFIG_KEY);
 
             $entities = Entity::where('website_id', $websiteId)->where('entity_config', 'like', $query)->get();
-            $entities->each(function(Entity $entity) use ($manufacturers) {
+            $entities->each(function (Entity $entity) use ($manufacturers) {
                 $config = unserialize($entity->entity_config);
-                $manufacturersValue = data_get($config, sprintf('%s.%s.*.*', self::FILTERS_CONFIG_KEY, self::MANUFACTURER_CONFIG_KEY));
-                $matches = array_intersect($manufacturers, $manufacturersValue);
-
-                if(count($matches) !== count($manufacturersValue)) {
-                    unset($config[self::FILTERS_CONFIG_KEY][self::MANUFACTURER_CONFIG_KEY]);
-                    $entity->update([
-                        'entity_config' => serialize($config)
-                    ]);
+                foreach ($config as $configKey => $item) {
+                    $config[$configKey] = $this->updateEntityConfigManufacturers($item, $manufacturers);
                 }
+                $entity->update([
+                    'entity_config' => serialize($config)
+                ]);
             });
         }
+    }
+
+    private function updateEntityConfigManufacturers(array $item, array $manufacturers): array
+    {
+        foreach ($item as $key => $value) {
+            if ($key == self::FILTER_GROUP_CONFIG_KEY) {
+                foreach ($value as $groupKey => $groupValue) {
+                    $item[$key][$groupKey][self::FILTERS_CONFIG_KEY] = $this->updateEntityConfigManufacturers($groupValue[self::FILTERS_CONFIG_KEY], $manufacturers);
+                    if (empty($item[$key][$groupKey][self::FILTERS_CONFIG_KEY])) {
+                        unset($item[$key][$groupKey]);
+                    }
+                }
+            }
+            if ($key == self::MANUFACTURER_CONFIG_KEY) {
+                foreach ($value as $condition => $rules) {
+                    $item[$key][$condition] = array_values(array_intersect($rules, $manufacturers));
+                    if (empty($item[$key][$condition])) {
+                        unset($item[$key][$condition]);
+                    }
+                }
+            }
+            if (empty($item[$key])) {
+                unset($item[$key]);
+            }
+        }
+        return $item;
     }
 }
