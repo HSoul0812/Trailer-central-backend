@@ -706,17 +706,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         if ($withDefault) {
-            $query = $query->where(function ($q) {
-                $q->where('status', '<>', Inventory::STATUS_NULL);
-            });
-
             $query = $query->where(self::DEFAULT_GET_PARAMS[self::CONDITION_AND_WHERE]);
-
-            $query = $query->where(function ($q) {
-                foreach (self::DEFAULT_GET_PARAMS[self::CONDITION_OR_WHERE] as $condition) {
-                    $q->orWhere($condition[0], $condition[1], $condition[2]);
-                }
-            });
         }
 
         if (isset($params['status'])) {
