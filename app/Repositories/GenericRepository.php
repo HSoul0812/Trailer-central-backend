@@ -17,6 +17,7 @@ interface GenericRepository
     public const CONDITION_AND_WHERE_RAW = 'andWhereRaw';
     public const CONDITION_AND_WHERE_IN = 'andWhereIn';
     public const CONDITION_AND_WHERE_NOT_IN = 'andWhereNotIn';
+    public const CONDITION_OR_WHERE = 'orWhere';
 
     public const RELATION_WITH_COUNT = 'withCount';
 

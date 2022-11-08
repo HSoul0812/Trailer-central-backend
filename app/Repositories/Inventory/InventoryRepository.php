@@ -709,6 +709,14 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query = $query->where(function ($q) {
                 $q->where('status', '<>', Inventory::STATUS_NULL);
             });
+
+            $query = $query->where(self::DEFAULT_GET_PARAMS[self::CONDITION_AND_WHERE]);
+
+            $query = $query->where(function ($q) {
+                foreach (self::DEFAULT_GET_PARAMS[self::CONDITION_OR_WHERE] as $condition) {
+                    $q->orWhere($condition[0], $condition[1], $condition[2]);
+                }
+            });
         }
 
         if (isset($params['status'])) {
@@ -737,10 +745,6 @@ class InventoryRepository implements InventoryRepositoryInterface
             } else if ($params['units_with_true_cost'] == self::DO_NOT_SHOW_UNITS_WITH_TRUE_COST) {
                 $query = $query->where('true_cost', 0);
             }
-        }
-
-        if ($withDefault) {
-            $query = $query->where(self::DEFAULT_GET_PARAMS[self::CONDITION_AND_WHERE]);
         }
 
         if (isset($params['sold_at_lt'])) {
