@@ -12,11 +12,8 @@ interface InventoryRepositoryInterface extends Repository, TransactionalReposito
     const DEFAULT_GET_PARAMS = [
         self::CONDITION_AND_WHERE => [
             ['active', '=', 1],
-        ],
-        self::CONDITION_OR_WHERE => [
             ['is_archived', '<>', 1],
-            ['is_archived', '=', NULL],
-        ]
+        ],
     ];
 
     public function getAll($params, bool $withDefault = true, bool $paginated = false, $select = []);
