@@ -8,15 +8,17 @@ use App\Models\Marketing\Facebook\Error;
 use App\Models\Marketing\Facebook\Listings;
 use App\Models\Marketing\Facebook\Marketplace;
 use App\Models\User\DealerLocation;
+use App\Models\User\NewDealerUser;
 use App\Models\User\NewUser;
+use App\Models\User\User;
 use Faker\Generator;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Illuminate\Support\Facades\DB;
 use Tests\database\seeds\Seeder;
-use App\Models\User\User;
 
 class MarketplaceSeeder extends Seeder
 {
+
     /**
      * @var \App\Models\Marketing\Facebook\Marketplace[]
      */
@@ -60,7 +62,8 @@ class MarketplaceSeeder extends Seeder
     {
         $this->faker = app(Generator::class);
         $this->dealer = factory(User::class)->create();
-        $this->user = factory(NewUser::class)->create(['user_id' => $this->dealer->dealer_id]);
+        $this->user = factory(NewUser::class)->create();
+        $this->newDealerUser = factory(NewDealerUser::class)->create(['id' => $this->dealer->getKey(), 'user_id' => $this->user->getKey()]);
         $this->dealerLocation = factory(DealerLocation::class)->create([
             'latitude' => 11,
             'longitude' => 11,
