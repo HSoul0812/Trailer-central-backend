@@ -16,6 +16,7 @@ use App\Models\Inventory\InventoryImage;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
 use App\Traits\Repository\Transaction;
 use App\Repositories\Traits\SortTrait;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
@@ -706,8 +707,10 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         if ($withDefault) {
-            $query = $query->where(function ($q) {
-                $q->where('status', '<>', Inventory::STATUS_NULL);
+            $query->where(function (EloquentBuilder $query) {
+                $query
+                    ->where('status', '!=', Inventory::STATUS_QUOTE)
+                    ->orWhereNull('status');
             });
         }
 
@@ -716,7 +719,11 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         if (!empty($params['exclude_status_ids'])) {
-            $query = $query->whereNotIn('status', Arr::wrap($params['exclude_status_ids']));
+            $query->where(function (EloquentBuilder $query) use ($params) {
+                $query
+                    ->whereNotIn('status', Arr::wrap($params['exclude_status_ids']))
+                    ->orWhereNull('status');
+            });
         }
 
         if (isset($params['condition'])) {
