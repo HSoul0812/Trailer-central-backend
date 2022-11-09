@@ -91,9 +91,9 @@ class Kernel extends ConsoleKernel
                 ->daily()
                 ->runInBackground();
 
-/*        $schedule->command('leads:assign:hot-potato')
+        $schedule->command('leads:assign:hot-potato')
                 ->everyFiveMinutes()
-                ->runInBackground();*/
+                ->runInBackground();
 
         $schedule->command('leads:import')
                 ->everyFiveMinutes()
