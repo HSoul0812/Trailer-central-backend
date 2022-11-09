@@ -175,14 +175,14 @@ class BlastSeeder extends Seeder
                 'name' => 'Test Blast 1',
                 'action' => $this->blastAction,
                 'is_delivered' => false,
-                'brand' => $this->testInventoryBrand01,
+                'brand' => $manufacturers[0],
                 'category' => self::TEST_INVENTORY_CATEGORY_1
             ],
             [
                 'name' => 'Test Blast 3',
                 'action' => $this->blastAction,
                 'is_delivered' => true,
-                'brand' => $this->testInventoryBrand03,
+                'brand' => $manufacturers[2],
                 'category' => self::TEST_INVENTORY_CATEGORY_3,
             ],
         ];
