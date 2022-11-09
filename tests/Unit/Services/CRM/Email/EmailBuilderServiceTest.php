@@ -24,6 +24,7 @@ use App\Repositories\CRM\Email\BounceRepositoryInterface;
 use App\Repositories\CRM\Email\CampaignRepositoryInterface;
 use App\Repositories\CRM\Email\TemplateRepositoryInterface;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
+use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
@@ -211,6 +212,9 @@ class EmailBuilderServiceTest extends TestCase
         $this->campaignRepositoryMock = Mockery::mock(CampaignRepositoryInterface::class);
         $this->app->instance(CampaignRepositoryInterface::class, $this->campaignRepositoryMock);
 
+        $this->statusRepositoryMock = Mockery::mock(StatusRepositoryInterface::class);
+        $this->app->instance(StatusRepositoryInterface::class, $this->statusRepositoryMock);
+
         $this->templateRepositoryMock = Mockery::mock(TemplateRepositoryInterface::class);
         $this->app->instance(TemplateRepositoryInterface::class, $this->templateRepositoryMock);
 
@@ -252,6 +256,7 @@ class EmailBuilderServiceTest extends TestCase
 
         $this->emailBuilderServiceMock = Mockery::mock(EmailBuilderService::class, [
             $this->blastRepositoryMock,
+            $this->statusRepositoryMock,
             $this->campaignRepositoryMock,
             $this->templateRepositoryMock,
             $this->bounceRepositoryMock,
