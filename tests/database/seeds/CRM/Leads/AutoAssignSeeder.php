@@ -96,7 +96,7 @@ class AutoAssignSeeder extends Seeder
         ]);
         $this->website = factory(Website::class)->create(['dealer_id' => $this->dealer->dealer_id]);
         $this->user = factory(NewUser::class)->create();
-        $this->crmUser = factory(CrmUser::class)->create(['user_id' => $this->user->dealer_id, 'enable_assign_notification' => 1]);
+        $this->crmUser = factory(CrmUser::class)->create(['user_id' => $this->user->getKey(), 'enable_assign_notification' => 1]);
         $newDealerUserRepo = app(NewDealerUserRepositoryInterface::class);
         $this->newDealer = $newDealerUserRepo->create([
             'user_id' => $this->user->user_id,
