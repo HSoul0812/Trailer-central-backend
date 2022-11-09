@@ -133,6 +133,11 @@ class EmailBuilderServiceTest extends TestCase
     private $campaignRepositoryMock;
 
     /**
+     * @var LegacyMockInterface|StatusRepositoryInterface
+     */
+    private $statusRepositoryMock;
+
+    /**
      * @var LegacyMockInterface|TemplateRepositoryInterface
      */
     private $templateRepositoryMock;
@@ -1396,6 +1401,17 @@ class EmailBuilderServiceTest extends TestCase
             ->shouldReceive('markEmailSent')
             ->with($parsedEmail)
             ->once();
+
+        $this->statusRepositoryMock
+            ->shouldReceive('createOrUpdate')
+            ->withAnyArgs();
+
+        $firstLead->shouldReceive('leadStatus')->passthru();
+        $firstLead->shouldReceive('hasOne')->passthru();
+        $firstLead->shouldReceive('setRelation')->passthru();
+        $secondLead->shouldReceive('leadStatus')->passthru();
+        $secondLead->shouldReceive('hasOne')->passthru();
+        $secondLead->shouldReceive('setRelation')->passthru();
 
         $result = $this->emailBuilderServiceMock->sendEmails($builderEmail, $leadIds);
 
