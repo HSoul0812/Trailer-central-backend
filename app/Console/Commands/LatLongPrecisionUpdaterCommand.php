@@ -36,7 +36,8 @@ class LatLongPrecisionUpdaterCommand extends Command
             return 0;
         }
 
-        $baseQuery = Geolocation::whereRaw('(round(latitude,0) - round(latitude,2) <> 0)')->orWhereRaw('(round(latitude,0) - round(latitude,2) <> 0)');
+        $baseQuery = Geolocation::whereRaw('(round(latitude,0) - round(latitude,2) <> 0)')
+            ->orWhereRaw('(round(longitude,0) - round(longitude,2) <> 0)');
 
         $this->info("Processing {$baseQuery->count()} records...");
 
@@ -102,10 +103,45 @@ class LatLongPrecisionUpdaterCommand extends Command
            return null;
         }
 
-        return new Point(
-            floatval($result['results'][0]['geometry']['location']['lat']),
-            floatval($result['results'][0]['geometry']['location']['lng'])
-        );
+        $latitude = floatval($result['results'][0]['geometry']['location']['lat']);
+        $longitude = floatval($result['results'][0]['geometry']['location']['lng']);
+
+        if($this->getDecimalPlacesCount($latitude) <= 4 || $this->getDecimalPlacesCount($latitude) <= 4) {
+            $point = $this->getLongitudeAndLatitudeFromBoundsBox($result['results'][0]['bounds']);
+
+            $latitude = $point->latitude;
+            $longitude = $point->longitude;
+        }
+
+        return new Point($latitude, $longitude);
+    }
+
+    /**
+     * Get the central point of a bounds box
+     *
+     * @param array $bounds
+     * @return Point
+     */
+    private function getLongitudeAndLatitudeFromBoundsBox(array $bounds) : Point
+    {
+        $latitude = (floatval($bounds['northeast']['lat']) + floatval($bounds['southwest']['lat'])) / 2;
+        $longitude = (floatval($bounds['northeast']['lng']) + floatval($bounds['southwest']['lng'])) / 2;
+
+        return new Point($latitude, $longitude);
+    }
+
+    /**
+     * Hacky, dirty way to get the places after the decimal point
+     *
+     * @param float $number The number to check decimal places for
+     *
+     * @return int
+     */
+    private function getDecimalPlacesCount(float $number) : int
+    {
+        $parts = explode('.', $number);
+
+        return count(str_split($parts[1]));
     }
 
 }
