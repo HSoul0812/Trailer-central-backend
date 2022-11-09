@@ -2,8 +2,13 @@
 
 use App\Models\Inventory\Inventory;
 use Illuminate\Support\LazyCollection;
+use App\Services\Export\FilesystemPdfExporter;
 
-/** @var $data Inventory[]|LazyCollection */
+/** @var $data array{data:Inventory[]|LazyCollection,orientation: string}  * */
+
+$dateFormat = isset($data['orientation']) && $data['orientation'] === FilesystemPdfExporter::ORIENTATION_LANDSCAPE ?
+    'm/d/Y H:i' :
+    'm/d/Y';
 ?>
 <style>
     table {
@@ -14,6 +19,15 @@ use Illuminate\Support\LazyCollection;
 
     th {
         background-color: #eeeeee;
+        padding: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    td {
+        overflow-wrap: break-word;
+        word-break: break-all;
     }
 
     td, th {
@@ -30,21 +44,25 @@ use Illuminate\Support\LazyCollection;
         font-weight: bold;
     }
 
-    .font-weight-bold{
+    .font-weight-bold {
         font-weight: bold;
     }
 
-    .text-right{
+    .text-right {
         text-align: right;
     }
 
-    .small{
-        font-size: 8px;
+    .small {
+        font-size: 10px;
     }
 
-    .nb{
+    .nb {
         word-break: initial;
         white-space: nowrap;
+    }
+
+    table {
+        table-layout: fixed;
     }
 </style>
 <div class="row">
@@ -54,11 +72,15 @@ use Illuminate\Support\LazyCollection;
             <th>Title</th>
             <th>Category</th>
             <th>Manufacturer</th>
-            <th>Notes</th>
+            <th style="width: 140px">Notes</th>
+            <th>Model</th>
             <th>Status</th>
-            <th>Price</th>
+            <th>Sales Price</th>
+            <th>Created At</th>
+            <th>Updated At</th>
+            <th>VIN</th>
         </tr>
-        @foreach($data as $inventory)
+        @foreach($data['data'] as $inventory)
             <tr>
                 <td>
                     {{ $inventory->stock }}
@@ -69,17 +91,31 @@ use Illuminate\Support\LazyCollection;
                 <td>
                     {{ $inventory->category_label }}
                 </td>
-                <td>
+                <td style="width: 90px">
                     {{ $inventory->manufacturer }}
                 </td>
+                <td style="width: 140px">
+                    <span class="small">{{ $inventory->notes }}</span>
+                </td>
                 <td>
-                   <span class="small">{{ $inventory->notes }}</span>
+                    {{ $inventory->model }}
                 </td>
                 <td>
                     {{ $inventory->status_label }}
                 </td>
                 <td class="text-right">
                     ${{ number_format($inventory->sales_price ?: 0, 2) }}
+                </td>
+                <td>
+                    <span
+                        class="small">{{ $inventory->created_at->format($dateFormat) }}</span>
+                </td>
+                <td>
+                    <span
+                        class="small">{{ $inventory->updated_at->format($dateFormat) }}</span>
+                </td>
+                <td>
+                    {{ $inventory->vin }}
                 </td>
             </tr>
         @endforeach
