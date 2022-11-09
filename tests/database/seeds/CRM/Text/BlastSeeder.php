@@ -42,9 +42,9 @@ class BlastSeeder extends Seeder
 
     private const SEND_AFTER_DAYS = 45;
 
-    private $testInventoryBrand01;
-    private $testInventoryBrand02;
-    private $testInventoryBrand03;
+    private const TEST_INVENTORY_BRAND_1 = 'test_inventory_brand_1';
+    private const TEST_INVENTORY_BRAND_2 = 'test_inventory_brand_2';
+    private const TEST_INVENTORY_BRAND_3 = 'test_inventory_brand_3';
 
     private const TEST_INVENTORY_CATEGORY_1 = 'test_inventory_category_1';
     private const TEST_INVENTORY_CATEGORY_2 = 'test_inventory_category_2';
@@ -137,10 +137,6 @@ class BlastSeeder extends Seeder
 
     public function __construct(string $blastAction = 'inquired', int $blastArchived = 0, $withCategories = false, $withBrands = false)
     {
-        $this->testInventoryBrand01 = env('TEST_INVENTORY_BRAND_1');
-        $this->testInventoryBrand02 = env('TEST_INVENTORY_BRAND_2');
-        $this->testInventoryBrand03 = env('TEST_INVENTORY_BRAND_3');
-
         $this->blastAction = $blastAction;
         $this->blasArchived = $blastArchived;
         $this->withCategories = $withCategories;
@@ -148,7 +144,7 @@ class BlastSeeder extends Seeder
 
         $this->dealer = factory(User::class)->create();
         $this->website = factory(Website::class)->create(['dealer_id' => $this->dealer->dealer_id]);
-        $this->user = factory(NewUser::class)->create(['user_id' => $this->dealer->dealer_id]);
+        $this->user = factory(NewUser::class)->create();
         $this->newDealerUser = factory(NewDealerUser::class)->create(['id' => $this->dealer->getKey(), 'user_id' => $this->user->getKey()]);
         $this->location = factory(DealerLocation::class)->create(['dealer_id' => $this->dealer->getKey()]);
         $this->template = factory(Template::class)->create(['user_id' => $this->user->getKey()]);
@@ -159,9 +155,9 @@ class BlastSeeder extends Seeder
     public function seed(): void
     {
         $inventorySeeds = [
-            ['category' => self::TEST_INVENTORY_CATEGORY_1, 'manufacturer' => $this->testInventoryBrand01],
-            ['category' => self::TEST_INVENTORY_CATEGORY_2, 'manufacturer' => $this->testInventoryBrand02],
-            ['category' => self::TEST_INVENTORY_CATEGORY_3, 'manufacturer' => $this->testInventoryBrand03],
+            ['category' => self::TEST_INVENTORY_CATEGORY_1, 'manufacturer' => self::TEST_INVENTORY_BRAND_1],
+            ['category' => self::TEST_INVENTORY_CATEGORY_2, 'manufacturer' => self::TEST_INVENTORY_BRAND_2],
+            ['category' => self::TEST_INVENTORY_CATEGORY_3, 'manufacturer' => self::TEST_INVENTORY_BRAND_3],
         ];
 
         foreach ($inventorySeeds as $inventorySeed) {

@@ -95,8 +95,8 @@ class AutoAssignSeeder extends Seeder
             'user_type' => AuthToken::USER_TYPE_DEALER,
         ]);
         $this->website = factory(Website::class)->create(['dealer_id' => $this->dealer->dealer_id]);
-        $this->user = factory(NewUser::class)->create(['user_id' => $this->dealer->dealer_id]);
-        $this->crmUser = factory(CrmUser::class)->create(['user_id' => $this->dealer->dealer_id, 'enable_assign_notification' => 1]);
+        $this->user = factory(NewUser::class)->create();
+        $this->crmUser = factory(CrmUser::class)->create(['user_id' => $this->user->dealer_id, 'enable_assign_notification' => 1]);
         $newDealerUserRepo = app(NewDealerUserRepositoryInterface::class);
         $this->newDealer = $newDealerUserRepo->create([
             'user_id' => $this->user->user_id,
@@ -210,7 +210,7 @@ class AutoAssignSeeder extends Seeder
     private function sales($seeds): void {
         // Initialize Sales People Seeds
         $params = [
-            'user_id' => $this->dealer->getKey(),
+            'user_id' => $this->user->getKey(),
             'dealer_location_id' => $this->location->getKey(),
             'is_default' => 1,
             'is_inventory' => 1,
@@ -226,6 +226,7 @@ class AutoAssignSeeder extends Seeder
     public function cleanUp(): void
     {
         $dealerId = $this->dealer->getKey();
+        $userId = $this->user->getKey();
 
         // Database clean up
         if(!empty($this->leads) && count($this->leads)) {
@@ -237,10 +238,12 @@ class AutoAssignSeeder extends Seeder
         }
         LeadAssign::where(['dealer_id' => $dealerId])->delete();
 
+        // Clear Out CRM User
+        SalesPerson::where(['user_id' => $userId])->delete();
+        NewUser::where(['user_id' => $userId])->delete();
+        CrmUser::destroy($userId);
+
         // Clear Out User Data
-        SalesPerson::where(['user_id' => $dealerId])->delete();
-        CrmUser::destroy($dealerId);
-        NewUser::destroy($dealerId);
         DealerLocation::where('dealer_id', $dealerId)->delete();
         Website::where('dealer_id', $dealerId)->delete();
         AuthToken::where(['user_id' => $this->authToken->user_id, 'user_type' => AuthToken::USER_TYPE_DEALER])->delete();
