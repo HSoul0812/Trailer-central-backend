@@ -706,14 +706,6 @@ class InventoryRepository implements InventoryRepositoryInterface
             });
         }
 
-        if ($withDefault) {
-            $query->where(function (EloquentBuilder $query) {
-                $query
-                    ->where('status', '!=', Inventory::STATUS_QUOTE)
-                    ->orWhereNull('status');
-            });
-        }
-
         if (isset($params['status'])) {
             $query = $query->where('status', $params['status']);
         }
@@ -722,6 +714,14 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query->where(function (EloquentBuilder $query) use ($params) {
                 $query
                     ->whereNotIn('status', Arr::wrap($params['exclude_status_ids']))
+                    ->orWhereNull('status');
+            });
+        } else {
+            // By default, we don't want to fetch the quote inventory
+            // however, we'll keep fetching the inventory with status = null
+            $query->where(function (EloquentBuilder $query) {
+                $query
+                    ->where('status', '!=', Inventory::STATUS_QUOTE)
                     ->orWhereNull('status');
             });
         }
