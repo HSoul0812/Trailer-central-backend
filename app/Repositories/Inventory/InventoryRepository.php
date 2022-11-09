@@ -16,6 +16,7 @@ use App\Models\Inventory\InventoryImage;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
 use App\Traits\Repository\Transaction;
 use App\Repositories\Traits\SortTrait;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
@@ -412,6 +413,10 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query = $query->with('inventoryFeatures.featureList');
         }
 
+        if (in_array('activeListings', $include)) {
+            $query = $query->with('activeListings');
+        }
+
         return $query->firstOrFail();
     }
 
@@ -658,11 +663,22 @@ class InventoryRepository implements InventoryRepositoryInterface
     ) : GrimzyBuilder {
         /** @var Builder $query */
         $query = Inventory::query()
-            ->select($select)
-            ->where('inventory.inventory_id', '>', 0);
+            ->select($select);
+
+        if (isset($params['dealer_id'])) {
+            // having this applied filter here will make faster the query
+            $query = $query->where('inventory.dealer_id', $params['dealer_id']);
+        }
+
+        $query = $query->where('inventory.inventory_id', '>', 0);
 
         if (isset($params['include']) && is_string($params['include'])) {
             $query = $query->with(explode(',', $params['include']));
+        }
+
+        if (isset($params['is_archived'])) {
+            $withDefault = false;
+            $query = $query->where('inventory.is_archived', $params['is_archived']);
         }
 
         $attributesEmpty = true;
@@ -690,26 +706,28 @@ class InventoryRepository implements InventoryRepositoryInterface
             });
         }
 
-        if ($withDefault) {
-            $query = $query->where(function ($q) {
-                $q->where('status', '<>', Inventory::STATUS_NULL);
-            });
-        }
-
         if (isset($params['status'])) {
             $query = $query->where('status', $params['status']);
         }
 
         if (!empty($params['exclude_status_ids'])) {
-            $query = $query->whereNotIn('status', Arr::wrap($params['exclude_status_ids']));
+            $query->where(function (EloquentBuilder $query) use ($params) {
+                $query
+                    ->whereNotIn('status', Arr::wrap($params['exclude_status_ids']))
+                    ->orWhereNull('status');
+            });
+        } else {
+            // By default, we don't want to fetch the quote inventory
+            // however, we'll keep fetching the inventory with status = null
+            $query->where(function (EloquentBuilder $query) {
+                $query
+                    ->where('status', '!=', Inventory::STATUS_QUOTE)
+                    ->orWhereNull('status');
+            });
         }
 
         if (isset($params['condition'])) {
             $query = $query->where('condition', $params['condition']);
-        }
-
-        if (isset($params['dealer_id'])) {
-            $query = $query->where('inventory.dealer_id', $params['dealer_id']);
         }
 
         if (isset($params['dealer_location_id'])) {
@@ -726,11 +744,6 @@ class InventoryRepository implements InventoryRepositoryInterface
             } else if ($params['units_with_true_cost'] == self::DO_NOT_SHOW_UNITS_WITH_TRUE_COST) {
                 $query = $query->where('true_cost', 0);
             }
-        }
-
-        if (isset($params['is_archived'])) {
-            $withDefault = false;
-            $query = $query->where('inventory.is_archived', $params['is_archived']);
         }
 
         if ($withDefault) {
@@ -1072,5 +1085,17 @@ class InventoryRepository implements InventoryRepositoryInterface
      */
     public function archiveInventory(int $dealerId, array $inventoryParams): int {
         return Inventory::where('dealer_id', $dealerId)->update($inventoryParams);
+    }
+
+    /**
+     * Find the inventory by stock
+     *
+     * @param int $dealerId
+     * @param string $stock
+     * @return Inventory|null
+     */
+    public function findByStock(int $dealerId, string $stock): ?Inventory
+    {
+        return Inventory::where('dealer_id', $dealerId)->where('stock', $stock)->first();
     }
 }

@@ -250,4 +250,8 @@ class Collector extends Model implements Filterable
     {
         return ['*'];
     }
+
+    public function collectorChangeReports() {
+        return $this->hasMany(CollectorChangeReport::class);
+    }
 }

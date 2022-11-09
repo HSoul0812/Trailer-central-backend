@@ -162,11 +162,13 @@ return [
                     //'fb-messenger',
                     'ecommerce',
                     'crm-users',
-                    'manufacturers'
+                    'manufacturers',
+                    //'hot-potato'
                 ],
                 'balance' => 'simple',
                 'processes' => 3,
                 'tries' => 3,
+                'delay' => 3,
                 'timeout' => 3600,
             ],
         ],
@@ -190,11 +192,13 @@ return [
                     //'fb-messenger',
                     'ecommerce',
                     'crm-users',
-                    'manufacturers'
+                    'manufacturers',
+                    //'hot-potato'
                 ],
                 'balance' => 'simple',
                 'processes' => 10,
                 'tries' => 3,
+                'delay' => 3,
                 'timeout' => 3600,
             ],
         ],
@@ -210,7 +214,8 @@ return [
                     'blog-posts',
                     'ecommerce',
                     'crm-users',
-                    'manufacturers'
+                    'manufacturers',
+                    //'hot-potato'
                 ],
                 'balance' => 'auto',
                 'minProcesses' => 1,
@@ -224,6 +229,7 @@ return [
                 'balance' => false,
                 'processes' => 1,
                 'tries' => 3,
+                'delay' => 3,
                 'timeout' => 300,
             ],
             'supervisor-3' => [
@@ -282,7 +288,8 @@ return [
                     'blog-posts',
                     'ecommerce',
                     'crm-users',
-                    'manufacturers'
+                    'manufacturers',
+                    //'hot-potato'
                 ],
                 'balance' => 'auto',
                 'minProcesses' => 1,
@@ -297,6 +304,7 @@ return [
                 'minProcesses' => 15,
                 'maxProcesses' => 55,
                 'tries' => 3,
+                'delay' => 3,
                 'timeout' => 300,
             ],
             'supervisor-3' => [

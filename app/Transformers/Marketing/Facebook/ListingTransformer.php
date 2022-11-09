@@ -29,22 +29,19 @@ class ListingTransformer extends TransformerAbstract
      */
     protected $imageTransformer;
 
-    public function __construct(
-        MarketplaceTransformer $marketplaceTransformer,
-        InventoryTransformer $inventoryTransformer,
-        ImageTransformer $imageTransformer
-    ) {
-        $this->marketplaceTransformer = $marketplaceTransformer;
-        $this->inventoryTransformer = $inventoryTransformer;
-        $this->imageTransformer = $imageTransformer;
+    public function __construct()
+    {
+        $this->marketplaceTransformer = new MarketplaceTransformer;
+        $this->inventoryTransformer = new InventoryTransformer;
+        $this->imageTransformer = new ImageTransformer;
     }
 
     public function transform(Listings $listing)
     {
         return [
             'id' => $listing->id,
-            'marketplace' => $this->marketplaceTransformer->transform($listing->marketplace),
-            'inventory' => $this->inventoryTransformer->transform($listing->inventory),
+            'marketplace' => $listing->marketplace ? $this->marketplaceTransformer->transform($listing->marketplace) : null,
+            'inventory' => $listing->inventory ? $this->inventoryTransformer->transform($listing->inventory) : null,
             'facebook_id' => $listing->facebook_id,
             'account_type' => $listing->account_type,
             'page_id' => $listing->page_id,
