@@ -42,10 +42,6 @@ class BlastSeeder extends Seeder
 
     private const SEND_AFTER_DAYS = 45;
 
-    private const TEST_INVENTORY_BRAND_1 = 'test_inventory_brand_1';
-    private const TEST_INVENTORY_BRAND_2 = 'test_inventory_brand_2';
-    private const TEST_INVENTORY_BRAND_3 = 'test_inventory_brand_3';
-
     private const TEST_INVENTORY_CATEGORY_1 = 'test_inventory_category_1';
     private const TEST_INVENTORY_CATEGORY_2 = 'test_inventory_category_2';
     private const TEST_INVENTORY_CATEGORY_3 = 'test_inventory_category_3';
@@ -154,10 +150,13 @@ class BlastSeeder extends Seeder
 
     public function seed(): void
     {
+        // Get 3 Manufacturers
+        $manufacturers = Manufacturers::inRandomOrder()->take(3)->pluck('name')->toArray();
+
         $inventorySeeds = [
-            ['category' => self::TEST_INVENTORY_CATEGORY_1, 'manufacturer' => self::TEST_INVENTORY_BRAND_1],
-            ['category' => self::TEST_INVENTORY_CATEGORY_2, 'manufacturer' => self::TEST_INVENTORY_BRAND_2],
-            ['category' => self::TEST_INVENTORY_CATEGORY_3, 'manufacturer' => self::TEST_INVENTORY_BRAND_3],
+            ['category' => self::TEST_INVENTORY_CATEGORY_1, 'manufacturer' => $manufacturers[0]],
+            ['category' => self::TEST_INVENTORY_CATEGORY_2, 'manufacturer' => $manufacturers[1]],
+            ['category' => self::TEST_INVENTORY_CATEGORY_3, 'manufacturer' => $manufacturers[2]],
         ];
 
         foreach ($inventorySeeds as $inventorySeed) {
