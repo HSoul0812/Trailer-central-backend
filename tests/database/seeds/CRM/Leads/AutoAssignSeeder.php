@@ -15,6 +15,7 @@ use App\Models\User\NewUser;
 use App\Models\User\NewDealerUser;
 use App\Models\User\DealerLocation;
 use App\Models\Website\Website;
+use App\Repositories\User\NewDealerUserRepositoryInterface;
 use App\Traits\WithGetter;
 use Tests\database\seeds\Seeder;
 
@@ -34,6 +35,11 @@ class AutoAssignSeeder extends Seeder
      * @var User
      */
     private $dealer;
+
+    /**
+     * @var NewUser
+     */
+    private $user;
 
     /**
      * @var DealerLocation
@@ -90,8 +96,16 @@ class AutoAssignSeeder extends Seeder
         ]);
         $this->website = factory(Website::class)->create(['dealer_id' => $this->dealer->dealer_id]);
         $this->user = factory(NewUser::class)->create(['user_id' => $this->dealer->dealer_id]);
-        $this->newDealer = factory(NewDealerUser::class)->create(['id' => $this->dealer->dealer_id, 'user_id' => $this->dealer->dealer_id]);
         $this->crmUser = factory(CrmUser::class)->create(['user_id' => $this->dealer->dealer_id, 'enable_assign_notification' => 1]);
+        $newDealerUserRepo = app(NewDealerUserRepositoryInterface::class);
+        $this->newDealer = $newDealerUserRepo->create([
+            'user_id' => $this->user->user_id,
+            'salt' => md5((string)$this->user->user_id),
+            'auto_import_hide' => 0,
+            'auto_msrp' => 0
+
+        ]);
+        $this->dealer->newDealerUser()->save($this->newDealer);
     }
 
     public function enableEmail($enabled = 1): void {
