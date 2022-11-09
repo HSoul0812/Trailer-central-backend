@@ -11,6 +11,7 @@ use App\Models\CRM\Text\BlastCategory;
 use App\Models\CRM\Text\BlastSent;
 use App\Models\CRM\Text\Template;
 use App\Models\Inventory\Inventory;
+use App\Models\Inventory\Manufacturers\Manufacturers;
 use App\Models\User\DealerLocation;
 use App\Models\User\NewDealerUser;
 use App\Models\User\NewUser;
