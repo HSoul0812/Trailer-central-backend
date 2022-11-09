@@ -57,7 +57,7 @@ class CreateBulkDownloadRequest extends GetInventoryRequest
     public function filters(): array
     {
         return collect($this->all())
-            ->except(['token', 'wait', 'output'])
+            ->except(['token', 'wait', 'output', 'orientation'])
             ->toArray();
     }
 }
