@@ -226,6 +226,12 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
         'lengthDisplayMode'    => ['type' => 'keyword'],
         'tilt'                 => ['type' => 'integer'],
         'entity_type_id'       => ['type' => 'integer'],
+        'paymentCalculator.apr'              => ['type' => 'float'],
+        'paymentCalculator.down'             => ['type' => 'float'],
+        'paymentCalculator.years'            => ['type' => 'float'],
+        'paymentCalculator.month'            => ['type' => 'float'],
+        'paymentCalculator.monthly_payment'  => ['type' => 'float'],
+        'paymentCalculator.down_percentage'  => ['type' => 'float'],
     ];
 
     public function name(): string

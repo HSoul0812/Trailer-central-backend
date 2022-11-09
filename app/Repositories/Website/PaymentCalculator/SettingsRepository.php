@@ -95,4 +95,54 @@ class SettingsRepository implements SettingsRepositoryInterface {
 
         return $settings;
     }
+
+    public function getCalculatedSettings($params): array
+    {
+        $calculatorSettings = $params;
+        $inventoryPrice = $calculatorSettings['inventory_price'];
+
+        if ($calculatorSettings['inventory_price'] > 0 ) {
+
+            $settingFinancing = $this->getAll(array_merge($calculatorSettings + ['financing']));
+            $settingNoFinancing = $this->getAll(array_merge($calculatorSettings + ['no_financing']));
+
+            if ( ($settingFinancing->operator == 'less_than' && $settingNoFinancing->operator == 'less_than') ) {
+                if ($inventoryPrice < $settingFinancing->inventory_price) {
+                    $setting = $settingNoFinancing;
+                } else {
+                    $setting = $settingFinancing;
+                }
+            } else if ( ($settingFinancing->operator == 'over' && $settingNoFinancing->operator == 'over') ) {
+                if ($inventoryPrice > $settingFinancing->inventory_price) {
+                    $setting = $settingNoFinancing;
+                } else {
+                    $setting = $settingFinancing;
+                }
+            } else {
+                $setting = $settingFinancing;
+            }
+
+            if ($setting->financing == 'no_financing' || $setting === false) {
+                return false;
+            }
+
+            $priceDown = (double)($setting->down / 100) * $inventoryPrice;
+            $principal = $inventoryPrice - $priceDown;
+            $interest = (double)$setting->apr / 100 / 12;
+            $payments = $setting->months;
+            $compInterest = pow(1 + $interest, $payments);
+            $monthlyPayment = number_format((float)($principal * $compInterest * $interest) / ($compInterest - 1), 2, '.', '');
+
+            return [
+                'apr' => $setting->apr,
+                'down' => $priceDown,
+                'years' => $setting->months / 12,
+                'months' => $setting->months,
+                'monthly_payment' => abs($monthlyPayment),
+                'down_percentage' => $setting->down
+            ];
+        }
+
+        return [];
+    }
 }

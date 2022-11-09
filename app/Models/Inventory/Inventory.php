@@ -901,4 +901,55 @@ class Inventory extends Model
             ->orderBy($self->getKeyName())
             ->searchable();
     }
+
+    /**
+     * @return array
+     */
+    public function getCalculatorSettings(): array
+    {
+        $website_id = $this->user()->website()->id;
+
+        $current_price = (!empty($this->sales_price) && $this->sales_price > 0) ? $this->sales_price : $this->price;
+
+        $inventoryPrice = $current_price;
+        $prices = [];
+
+        if ($current_price> 0) {
+            $prices[] = $current_price;
+        }
+
+        if ($this->price > 0) {
+            $prices[] = $this->price;
+        }
+
+        if ($this->sales_price > 0) {
+            $prices[] = $this->sales_price;
+        }
+
+        if ($this->msrp > 0) {
+            $prices[] = $this->msrp;
+        }
+
+        if (empty($inventoryPrice)) {
+            $inventoryPrice = $this->price;
+            if (!empty($this->sales_price)) {
+                $inventoryPrice = $this->sales_price;
+            }
+
+            if (empty($inventoryPrice)) {
+                $inventoryPrice = $this->msrp;
+            }
+        }
+
+        $inventoryPrice = min($prices);
+        $condition = $this->condition;
+        $entity_type_id = $this->entity_type_id;
+
+        return [
+            'website_id' => $website_id,
+            'inventory_price' => $inventoryPrice,
+            'entity_type_id' => $entity_type_id,
+            'inventory_condition' => $condition,
+        ];
+    }
 }
