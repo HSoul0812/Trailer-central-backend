@@ -40,8 +40,8 @@ class ListingTransformer extends TransformerAbstract
     {
         return [
             'id' => $listing->id,
-            'marketplace' => $this->marketplaceTransformer->transform($listing->marketplace),
-            'inventory' => $this->inventoryTransformer->transform($listing->inventory),
+            'marketplace' => $listing->marketplace ? $this->marketplaceTransformer->transform($listing->marketplace) : null,
+            'inventory' => $listing->inventory ? $this->inventoryTransformer->transform($listing->inventory) : null,
             'facebook_id' => $listing->facebook_id,
             'account_type' => $listing->account_type,
             'page_id' => $listing->page_id,
