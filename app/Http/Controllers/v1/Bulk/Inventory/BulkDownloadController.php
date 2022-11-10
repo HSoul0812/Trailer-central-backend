@@ -52,6 +52,7 @@ class BulkDownloadController extends MonitoredJobsController
         $payload = BulkDownloadPayload::from([
                 'filename' => str_replace('.', '-', uniqid('inventory-' . date('Ymd'), true)) . '.' . $output,
                 'output' => $output,
+                'orientation' => $request->orientation(),
                 'filters' => $request->filters()
             ]
         );
