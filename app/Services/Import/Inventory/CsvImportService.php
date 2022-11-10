@@ -846,18 +846,23 @@ class CsvImportService implements CsvImportServiceInterface
 
                 if (count($images) > 0) {
                     foreach ($images as $image) {
-                        $fileDto = $this->imageService->upload($image, $this->inventory['stock'], null, null, ['skipNotExisting' => true]);
+                        $fileDto = $this->imageService->upload($image, $this->inventory['stock'], null, null, ['visibility' => 'public']);
 
-                        if ($this->imageMode == self::IM_APPEND) {
-                            $this->inventory['new_images'][] = array(
-                                'filename' => $fileDto->getPath(),
-                                'hash' => $fileDto->getHash()
-                            );
-                        } elseif ($this->imageMode == self::IM_REPLACE) {
-                            $this->inventory['existing_images'][] = array(
-                                'filename' => $fileDto->getPath(),
-                                'hash' => $fileDto->getHash()
-                            );
+                        if ($fileDto) {
+                            if ($this->imageMode == self::IM_APPEND) {
+                                $this->inventory['new_images'][] = array(
+                                    'filename' => $fileDto->getPath(),
+                                    'hash' => $fileDto->getHash()
+                                );
+                            } elseif ($this->imageMode == self::IM_REPLACE) {
+                                $this->inventory['existing_images'][] = array(
+                                    'filename' => $fileDto->getPath(),
+                                    'hash' => $fileDto->getHash()
+                                );
+                            }
+
+                        } else {
+                            return "Image '{$value}' not found in import.";
                         }
                     }
                 }

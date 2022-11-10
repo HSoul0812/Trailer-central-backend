@@ -78,7 +78,7 @@ class ImageService extends AbstractFileService
             $this->imageHelper->addOverlay($localFilename, $overlayText);
         }
 
-        $s3Path = $this->uploadToS3($localFilename, $s3Filename, $dealerId, $identifier);
+        $s3Path = $this->uploadToS3($localFilename, $s3Filename, $dealerId, $identifier, $params);
 
         $hash = sha1_file($localFilename);
         unlink($localFilename);
