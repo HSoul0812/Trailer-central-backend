@@ -11,6 +11,7 @@ use App\Models\Showroom\Showroom;
 use App\Models\User\DealerLocation;
 use App\Models\User\User;
 use Faker\Generator as Faker;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Factory;
 
@@ -64,7 +65,7 @@ $factory->define(Inventory::class, static function (Faker $faker, array $attribu
         'status' => 1,
         'category' => !empty($showroom->type) ? $showroom->type : $category,
         'vin' => $attributes['vin'] ?? Str::random(17),
-        'geolocation' => null,
+        'geolocation' => DB::raw('POINT(' . $faker->longitude() . ' ' . $faker->latitude() . ')'),
         'msrp' => $msrp,
         'price' => $price,
         'cost_of_unit' => $price / 2,
