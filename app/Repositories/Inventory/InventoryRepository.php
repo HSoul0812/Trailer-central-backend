@@ -16,6 +16,7 @@ use App\Models\Inventory\InventoryImage;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
 use App\Traits\Repository\Transaction;
 use App\Repositories\Traits\SortTrait;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
@@ -705,16 +706,24 @@ class InventoryRepository implements InventoryRepositoryInterface
             });
         }
 
-        if ($withDefault) {
-            $query = $query->where(self::DEFAULT_GET_PARAMS[self::CONDITION_AND_WHERE]);
-        }
-
         if (isset($params['status'])) {
             $query = $query->where('status', $params['status']);
         }
 
         if (!empty($params['exclude_status_ids'])) {
-            $query = $query->whereNotIn('status', Arr::wrap($params['exclude_status_ids']));
+            $query->where(function (EloquentBuilder $query) use ($params) {
+                $query
+                    ->whereNotIn('status', Arr::wrap($params['exclude_status_ids']))
+                    ->orWhereNull('status');
+            });
+        } else {
+            // By default, we don't want to fetch the quote inventory
+            // however, we'll keep fetching the inventory with status = null
+            $query->where(function (EloquentBuilder $query) {
+                $query
+                    ->where('status', '!=', Inventory::STATUS_QUOTE)
+                    ->orWhereNull('status');
+            });
         }
 
         if (isset($params['condition'])) {
@@ -735,6 +744,10 @@ class InventoryRepository implements InventoryRepositoryInterface
             } else if ($params['units_with_true_cost'] == self::DO_NOT_SHOW_UNITS_WITH_TRUE_COST) {
                 $query = $query->where('true_cost', 0);
             }
+        }
+
+        if ($withDefault) {
+            $query = $query->where(self::DEFAULT_GET_PARAMS[self::CONDITION_AND_WHERE]);
         }
 
         if (isset($params['sold_at_lt'])) {
