@@ -65,7 +65,7 @@ $factory->define(Inventory::class, static function (Faker $faker, array $attribu
         'status' => 1,
         'category' => !empty($showroom->type) ? $showroom->type : $category,
         'vin' => $attributes['vin'] ?? Str::random(17),
-        'geolocation' => DB::raw('pointfromtext(\'POINT(' . $faker->longitude() . ' ' . $faker->latitude() . ')\')'),
+        'geolocation' => DB::raw('POINT(' . $faker->longitude() . ', ' . $faker->latitude() . ')'),
         'msrp' => $msrp,
         'price' => $price,
         'cost_of_unit' => $price / 2,
