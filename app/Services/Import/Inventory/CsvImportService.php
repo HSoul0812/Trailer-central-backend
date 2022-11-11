@@ -838,7 +838,7 @@ class CsvImportService implements CsvImportServiceInterface
                             $this->inventory['stock'],
                             null,
                             null,
-                            ['visibility' => config('filesystems.disks.s3.bucket.visibility')]
+                            ['visibility' => config('filesystems.disks.s3.visibility')]
                         );
 
                         if ($fileDto) {

@@ -92,7 +92,7 @@ class BulkUploadRepository implements BulkUploadRepositoryInterface
     {
         return Storage::disk('s3')->putFile(
             uniqid() . '/' . $file->getClientOriginalName(),
-            $file, config('filesystems.disks.s3.bucket.visibility')
+            $file, config('filesystems.disks.s3.visibility')
         );
     }
 }
