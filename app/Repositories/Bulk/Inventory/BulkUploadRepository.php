@@ -17,7 +17,7 @@ class BulkUploadRepository implements BulkUploadRepositoryInterface
 {
     /** @var BulkUpload */
     private $model;
-    
+
     public function __construct(BulkUpload $bulkUpload)
     {
         $this->model = $bulkUpload;
@@ -90,7 +90,9 @@ class BulkUploadRepository implements BulkUploadRepositoryInterface
      */
     private function storeCsv($file): string
     {
-        $fileKey = Storage::disk('s3')->putFile(uniqid().'/'.$file->getClientOriginalName(), $file, 'public');
-        return $fileKey;
+        return Storage::disk('s3')->putFile(
+            uniqid() . '/' . $file->getClientOriginalName(),
+            $file, config('filesystems.disks.s3.visibility')
+        );
     }
 }
