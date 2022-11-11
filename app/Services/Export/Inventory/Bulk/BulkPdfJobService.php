@@ -64,7 +64,10 @@ class BulkPdfJobService implements BulkPdfJobServiceInterface, HasExporterInterf
             // do the export
             $this->getExporter($job)
                 ->withView($this->resolveView())
-                ->withData($data)
+                ->withData([
+                    'data' => $data,
+                    'orientation' => $job->payload->orientation ?? FilesystemPdfExporter::ORIENTATION_PORTRAIT
+                ])
                 ->afterRender(function () use ($job) {
                     $this->bulkRepository->updateProgress($job->token, 15);
                 })
@@ -125,6 +128,15 @@ class BulkPdfJobService implements BulkPdfJobServiceInterface, HasExporterInterf
             throw new InvalidArgumentException('This job has a payload without a filename');
         }
 
-        return new FilesystemPdfExporter(Storage::disk('s3'), $job->payload->filename);
+        $exporter = new FilesystemPdfExporter(Storage::disk('s3'), $job->payload->filename);
+
+        $exporter->engine()
+            ->setOption('header-font-size', '6')
+            ->setOption('header-left', now()->format('m/d/Y g:i A'))
+            ->setOption('footer-right', 'Page [page] of [toPage]')
+            ->setOption('footer-font-size', '6')
+            ->setOption('orientation', $job->payload->orientation ?? FilesystemPdfExporter::ORIENTATION_PORTRAIT);
+
+        return $exporter;
     }
 }
