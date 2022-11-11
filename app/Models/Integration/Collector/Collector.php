@@ -127,6 +127,10 @@ class Collector extends Model implements Filterable
     public const MSRP_ZEROED_OUT_ON_USED = 1;
     public const MSRP_NOT_ZEROED_OUT_ON_USED = 0;
 
+    public const OVERRIDE_NOT_SET = 0;
+    public const OVERRIDE_UNLOCKED = 1;
+    public const OVERRIDE_LOCKED = 2;
+
     public const MEASURE_FORMATS = [
         'Feet' => 'feet',
         'Inches' => 'inches',

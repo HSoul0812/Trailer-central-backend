@@ -20,7 +20,7 @@ class ValidCollector implements Rule
      * @param  mixed  $value
      * @return bool
      */
-    public function passes($attribute, $value)
+    public function passes($attribute, $value): bool
     {
         $user = Auth::user();
         $collector = Collector::find($value);
@@ -37,7 +37,7 @@ class ValidCollector implements Rule
      *
      * @return string
      */
-    public function message()
+    public function message(): string
     {
         return 'Collector must exist';
     }
