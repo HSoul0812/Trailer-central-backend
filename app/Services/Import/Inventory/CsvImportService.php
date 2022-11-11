@@ -8,10 +8,7 @@ use App\Models\Inventory\Attribute;
 use App\Models\Inventory\Category;
 use App\Models\Inventory\Inventory;
 use App\Models\User\DealerLocation;
-use App\Repositories\Inventory\ImageRepositoryInterface;
-use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Services\File\ImageService;
-use App\Services\Inventory\InventoryService;
 use App\Services\Inventory\InventoryServiceInterface;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
@@ -32,11 +29,6 @@ class CsvImportService implements CsvImportServiceInterface
      * @var BulkUploadRepositoryInterface
      */
     protected $bulkUploadRepository;
-
-    /**
-     * @var InventoryRepositoryInterface
-     */
-    protected $inventoryRepository;
 
     /**
      * @var ImageService
@@ -399,18 +391,15 @@ class CsvImportService implements CsvImportServiceInterface
 
     /**
      * @param BulkUploadRepositoryInterface $bulkUploadRepository
-     * @param InventoryRepositoryInterface $inventoryRepository
      * @param ImageService $imageService
      */
     public function __construct(
         BulkUploadRepositoryInterface $bulkUploadRepository,
-        InventoryRepositoryInterface $inventoryRepository,
         ImageService $imageService,
         InventoryServiceInterface $inventoryService
     )
     {
         $this->bulkUploadRepository = $bulkUploadRepository;
-        $this->inventoryRepository = $inventoryRepository;
         $this->imageService = $imageService;
         $this->inventoryService = $inventoryService;
 
@@ -485,12 +474,10 @@ class CsvImportService implements CsvImportServiceInterface
         try {
             $this->inventory['dealer_id'] = $this->bulkUpload->dealer_id;
 
-            $this->inventory['description_html'] = $this->inventoryService->convertMarkdown($this->inventory['description']);
-
             if ($this->inventoryUpdate) {
-                $inventory = $this->inventoryRepository->update($this->inventory, ['updateAttributes' => true]);
+                $inventory = $this->inventoryService->update(array_merge($this->inventory, ['updateAttributes' => true]));
             } else {
-                $inventory = $this->inventoryRepository->create($this->inventory);
+                $inventory = $this->inventoryService->create($this->inventory);
             }
 
             if (!$inventory) {
@@ -846,18 +833,23 @@ class CsvImportService implements CsvImportServiceInterface
 
                 if (count($images) > 0) {
                     foreach ($images as $image) {
-                        $fileDto = $this->imageService->upload($image, $this->inventory['stock'], null, null, ['skipNotExisting' => true]);
+                        $fileDto = $this->imageService->upload($image, $this->inventory['stock'], null, null, ['visibility' => 'public']);
 
-                        if ($this->imageMode == self::IM_APPEND) {
-                            $this->inventory['new_images'][] = array(
-                                'filename' => $fileDto->getPath(),
-                                'hash' => $fileDto->getHash()
-                            );
-                        } elseif ($this->imageMode == self::IM_REPLACE) {
-                            $this->inventory['existing_images'][] = array(
-                                'filename' => $fileDto->getPath(),
-                                'hash' => $fileDto->getHash()
-                            );
+                        if ($fileDto) {
+                            if ($this->imageMode == self::IM_APPEND) {
+                                $this->inventory['new_images'][] = array(
+                                    'filename' => $fileDto->getPath(),
+                                    'hash' => $fileDto->getHash()
+                                );
+                            } elseif ($this->imageMode == self::IM_REPLACE) {
+                                $this->inventory['existing_images'][] = array(
+                                    'filename' => $fileDto->getPath(),
+                                    'hash' => $fileDto->getHash()
+                                );
+                            }
+
+                        } else {
+                            return "Image '{$value}' not found in import.";
                         }
                     }
                 }
