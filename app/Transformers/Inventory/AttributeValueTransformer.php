@@ -32,10 +32,11 @@ class AttributeValueTransformer extends TransformerAbstract
      *
      * Normalize: ensure the value is in lowercase
      *
-     * edge case: we have an attribute `conversion` which was setup with values like
+     * Edge case: we have an attribute `conversion` which was setup with values like
      *            `Bunkhouse of Alabama`, `Compass Conversions`, so we need to avoid breaking changes for it.
      *
-     *
+     * Justification: All attributes values are lower case by nature, excepts `conversion`, so every single inventory
+     *                attribute value should be lowercase, but strangely some values are uppercase (probably an integration issue)
      *
      * @param AttributeValue $value
      * @return string|null
