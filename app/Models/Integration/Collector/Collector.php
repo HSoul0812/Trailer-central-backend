@@ -86,6 +86,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $motility_integration_id
  * @property string|null $local_image_directory_address
  * @property string|null $video_source_fields
+ * @property int $override_images
+ * @property int $override_all
+ * @property int $override_video
+ * @property int $override_prices
+ * @property int $override_attributes
+ * @property int $override_descriptions
  *
  */
 class Collector extends Model implements Filterable
@@ -120,6 +126,10 @@ class Collector extends Model implements Filterable
 
     public const MSRP_ZEROED_OUT_ON_USED = 1;
     public const MSRP_NOT_ZEROED_OUT_ON_USED = 0;
+
+    public const OVERRIDE_NOT_SET = 0;
+    public const OVERRIDE_UNLOCKED = 1;
+    public const OVERRIDE_LOCKED = 2;
 
     public const MEASURE_FORMATS = [
         'Feet' => 'feet',
@@ -202,6 +212,12 @@ class Collector extends Model implements Filterable
         'run_errors',
         'show_on_auction123',
         'video_source_fields',
+        'override_images',
+        'override_all',
+        'override_video',
+        'override_prices',
+        'override_attributes',
+        'override_descriptions'
     ];
 
     protected $casts = [
