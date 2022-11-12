@@ -3,10 +3,11 @@
 namespace App\Traits\Models;
 
 use App\Models\User\CrmUser;
-use App\Models\User\NewDealerUser;
-use Illuminate\Support\Collection;
+use App\Models\User\DealerClapp;
 use App\Models\User\DealerUserPermission;
+use App\Models\User\NewDealerUser;
 use App\Models\User\Interfaces\PermissionsInterface;
+use Illuminate\Support\Collection;
 
 /**
  * Class HasPermissionsEmpty
@@ -54,6 +55,11 @@ trait HasPermissionsStub
         return $query->exists();
     }
 
+    public function hasMarketingPermission(): bool
+    {
+        return DealerClapp::where('dealer_id', $this->getDealerId())->exists();
+    }
+
     /**
      * @param string $feature
      * @param string $permissionLevel
@@ -64,6 +70,8 @@ trait HasPermissionsStub
         switch ($feature) {
             case 'crm':
                 return $this->hasCrmPermission();
+            case 'marketing':
+                return $this->hasMarketingPermission();
             // more permissions handlers
             default:
                 return true;
