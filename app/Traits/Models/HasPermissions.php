@@ -36,7 +36,7 @@ trait HasPermissions
     public function getPermissions(): Collection
     {
         if ($this->userPermissions === null) {
-            $this->userPermissions = [];
+            $perms = [];
             $permissions = $this->perms()->get();
 
             // Override Perms?
@@ -45,10 +45,12 @@ trait HasPermissions
                     $perm->permission_level = PermissionsInterface::CANNOT_SEE_PERMISSION;
                 }
 
-                $this->userPermissions[] = $perm;
+                $perms[] = $perm;
             }
         }
 
+        // Return Use Permissions Collection
+        $this->userPermissions = collect($perms);
         return $this->userPermissions;
     }
 
