@@ -64,6 +64,7 @@ trait HasPermissions
 
             $perms[] = $perm;
         }
+        var_dump($perms);
 
         return collect($perms);
     }
@@ -87,6 +88,7 @@ trait HasPermissions
      */
     public function hasMarketingPermission(): bool
     {
+        var_dump($this->getDealerId());
         return DealerClapp::where('dealer_id', $this->getDealerId())->exists();
     }
 
