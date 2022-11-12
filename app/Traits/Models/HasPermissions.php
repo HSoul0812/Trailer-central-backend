@@ -36,7 +36,17 @@ trait HasPermissions
     public function getPermissions(): Collection
     {
         if ($this->userPermissions === null) {
-            $this->userPermissions = $this->perms()->get();
+            $this->userPermissions = [];
+            $permissions = $this->perms()->get();
+
+            // Override Perms?
+            foreach ($permissions as $perm) {
+                if ($this->hasNoPermission($perm->feature, $perm->permission_level)) {
+                    $perm->permission_level = PermissionsInterface::CANNOT_SEE_PERMISSION;
+                }
+
+                $this->userPermissions[] = $perm;
+            }
         }
 
         return $this->userPermissions;
@@ -64,7 +74,6 @@ trait HasPermissions
 
             $perms[] = $perm;
         }
-        var_dump($perms);
 
         return collect($perms);
     }
@@ -88,7 +97,6 @@ trait HasPermissions
      */
     public function hasMarketingPermission(): bool
     {
-        var_dump($this->getDealerId());
         return DealerClapp::where('dealer_id', $this->getDealerId())->exists();
     }
 
