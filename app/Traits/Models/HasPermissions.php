@@ -131,4 +131,6 @@ trait HasPermissions
      * @return Relation|Builder
      */
     abstract public function perms();
+
+    abstract public function getDealerId(): int;
 }
