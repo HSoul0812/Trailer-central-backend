@@ -38,14 +38,19 @@ trait HasPermissionsStub
         foreach ($permissions as $perm) {
             if ($this->hasPermission($perm->feature, $perm->permission_level)) {
                 $perm->permission_level = PermissionsInterface::SUPER_ADMIN_PERMISSION;
-
-                $perms[] = $perm;
+            } else {
+                $perm->permission_level = PermissionsInterface::CANNOT_SEE_PERMISSION;
             }
+
+            $perms[] = $perm;
         }
 
         return collect($perms);
     }
 
+    /**
+     * @return bool
+     */
     public function hasCrmPermission(): bool
     {
         $listOfUsers = NewDealerUser::select('user_id')->where('id', $this->getDealerId());
@@ -55,6 +60,9 @@ trait HasPermissionsStub
         return $query->exists();
     }
 
+    /**
+     * @return bool
+     */
     public function hasMarketingPermission(): bool
     {
         return DealerClapp::where('dealer_id', $this->getDealerId())->exists();
