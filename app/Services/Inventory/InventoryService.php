@@ -477,7 +477,7 @@ class InventoryService implements InventoryServiceInterface
             throw new BadRequestException('No category was selected');
         }
 
-        if(isset($params['category']) && $params['category'] === 'Tilt') {
+        if(isset($params['category']) && $params['category'] === 'Tilt Trailers') {
             $mappedTypeCategories = $this->getMappedCategories(
                 $params['type_id'] ?? null,
                 null

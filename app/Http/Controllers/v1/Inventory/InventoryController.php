@@ -13,6 +13,7 @@ use App\Http\Requests\Inventory\UpdateInventoryRequest;
 use App\Http\Requests\Inventory\DeleteInventoryRequest;
 use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\UpdateRequestInterface;
+use App\Services\Inventory\InventorySDKServiceInterface;
 use App\Services\Inventory\InventoryServiceInterface;
 use App\Services\Stripe\StripePaymentServiceInterface;
 use App\Transformers\Inventory\InventoryListResponseTransformer;
@@ -34,7 +35,8 @@ class InventoryController extends AbstractRestfulController
      *
      */
     public function __construct(
-        private InventoryServiceInterface $inventoryService,
+        private InventoryServiceInterface         $inventoryService,
+        private InventorySDKServiceInterface      $inventorySDKService,
         private TcApiResponseInventoryTransformer $transformer,
         private StripePaymentServiceInterface $paymentService
     )
@@ -81,7 +83,7 @@ class InventoryController extends AbstractRestfulController
      */
     public function index(IndexRequestInterface $request): Response
     {
-        if($request->validate()) {
+        if ($request->validate()) {
             $result = $this->inventoryService->list($request->all());
             return $this->response->item($result, new InventoryListResponseTransformer());
         }
@@ -117,7 +119,8 @@ class InventoryController extends AbstractRestfulController
         return $this->response->errorBadRequest();
     }
 
-    public function saveProgress(Request $request) {
+    public function saveProgress(Request $request)
+    {
         $user = auth('api')->user();
         $progress = $request->all();
         \Cache::forever($user->getAuthIdentifier() . '/trailer-progress', json_encode($progress));
