@@ -495,8 +495,6 @@ class NumberRepositoryTest extends TestCase
         // Given that I have a twilio number
         $twilioNumber = $this->getFirstTwilioNumber();
 
-        var_dump($twilioNumber->toArray());
-
         // And I call delete on the repository
         $response = $this->getConcreteRepository()
             ->deleteTwilioNumber($twilioNumber->phone_number);
