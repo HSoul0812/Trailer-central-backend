@@ -13,6 +13,7 @@ use Stripe\Exception\UnexpectedValueException;
 use Stripe\Stripe;
 use Stripe\Webhook;
 use Stripe\Checkout\Session;
+use Illuminate\Support\Facades\DB;
 
 class StripePaymentService implements StripePaymentServiceInterface
 {
@@ -69,6 +70,8 @@ class StripePaymentService implements StripePaymentServiceInterface
     private function completeOrder(Session $session): int
     {
         try {
+            DB::beginTransaction();
+
             $inventoryId = $session->metadata->inventory_id;
             $userId = $session->metadata->user_id;
 
@@ -95,11 +98,15 @@ class StripePaymentService implements StripePaymentServiceInterface
                 'tt_payment_expiration_date' => $inventoryExpiry
             ]);
 
+            DB::commit();
+
             \Log::info('session', $session->values());
             \Log::info('inventory_id: ' . $inventoryId);
 
             return 200;
         } catch (\Exception $e) {
+            DB::rollBack();
+            
             \Log::critical('Failed fulfilling order: ' . $e->getMessage());
             return 500;
         }
