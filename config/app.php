@@ -57,6 +57,7 @@ return [
 
     'asset_url' => env('ASSET_URL', null),
 
+    'site_url' => env('SITE_URL'),
     /*
     |--------------------------------------------------------------------------
     | Application Timezone
@@ -177,6 +178,7 @@ return [
         App\Providers\NovaServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         App\Providers\CaptchaServiceProvider::class,
+        App\Providers\PaymentServiceProvider::class,
         App\Providers\TrailerCentralIntegrationServiceProvider::class,
     ],
 

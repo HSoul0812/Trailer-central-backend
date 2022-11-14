@@ -7,11 +7,13 @@ use App\DTOs\Inventory\TcApiResponseInventory;
 use App\DTOs\Inventory\TcApiResponseInventoryCreate;
 use App\DTOs\Inventory\TcApiResponseInventoryDelete;
 use App\Repositories\Integrations\TrailerCentral\AuthTokenRepositoryInterface;
+use App\Repositories\Integrations\TrailerCentral\InventoryRepositoryInterface;
 use App\Repositories\Parts\ListingCategoryMappingsRepositoryInterface;
 use App\Repositories\SysConfig\SysConfigRepositoryInterface;
 use App\Services\Inventory\ESQuery\ESBoolQueryBuilder;
 use App\Services\Inventory\ESQuery\ESInventoryQueryBuilder;
 use App\Services\Inventory\ESQuery\SortOrder;
+use Carbon\Carbon;
 use Dingo\Api\Routing\Helpers;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Collection;
@@ -63,8 +65,8 @@ class InventoryService implements InventoryServiceInterface
     ];
 
     const DEFAULT_CATEGORY = [
-        'name'      => 'Other',
-        'type_id'   => 1,
+        'name' => 'Other',
+        'type_id' => 1,
         'type_label' => 'General Trailers'
     ];
 
@@ -72,12 +74,14 @@ class InventoryService implements InventoryServiceInterface
     const INVENTORY_AVAILABLE = 'available';
 
     public function __construct(
-        private GuzzleHttpClient $httpClient,
-        private SysConfigRepositoryInterface $sysConfigRepository,
+        private GuzzleHttpClient                           $httpClient,
+        private SysConfigRepositoryInterface               $sysConfigRepository,
         private ListingCategoryMappingsRepositoryInterface $listingCategoryMappingsRepository,
-        private AuthTokenRepositoryInterface $authTokenRepository
+        private AuthTokenRepositoryInterface               $authTokenRepository,
+        private InventoryRepositoryInterface               $inventoryRepository
     )
-    {}
+    {
+    }
 
     /**
      * @throws \GuzzleHttp\Exception\GuzzleException
@@ -92,10 +96,10 @@ class InventoryService implements InventoryServiceInterface
             'json' => $queryBuilder->build()
         ]);
 
-        if($res->getStatusCode() == self::HTTP_SUCCESS) {
+        if ($res->getStatusCode() == self::HTTP_SUCCESS) {
             $result = [];
             $resJson = json_decode($res->getBody()->getContents(), true);
-            foreach($resJson['hits']['hits'] as $hit) {
+            foreach ($resJson['hits']['hits'] as $hit) {
                 $result[] = TcEsInventory::fromData($hit['_source']);
             }
 
@@ -117,7 +121,9 @@ class InventoryService implements InventoryServiceInterface
             throw new \Exception('Elastic search API responded with http code: ' . $res->getStatusCode());
         }
     }
-    private function esSearchUrl(): string {
+
+    private function esSearchUrl(): string
+    {
         $esIndex = self::ES_INDEX;
         return config('trailercentral.elasticsearch.url') . "/$esIndex/_search";
     }
@@ -137,7 +143,7 @@ class InventoryService implements InventoryServiceInterface
             'type_id' => $params['type_id'],
             'map_from' => $params['category']
         ]);
-        if($categoryMapping === null) {
+        if ($categoryMapping === null) {
             throw new BadRequestException('Corresponding category mapping was not found');
         }
         $params['category'] = $categoryMapping->map_to;
@@ -180,7 +186,7 @@ class InventoryService implements InventoryServiceInterface
         $authToken = $this->authTokenRepository->get(['user_id' => $userId]);
         $url = config('services.trailercentral.api') . 'inventory/' . $params['inventory_id'];
 
-        if(isset($params['type_id'])) {
+        if (isset($params['type_id'])) {
             $categoryMapping = $this->listingCategoryMappingsRepository->get([
                 'type_id' => $params['type_id'],
                 'map_from' => $params['category']
@@ -195,8 +201,9 @@ class InventoryService implements InventoryServiceInterface
         $inventory = $this->handleHttpRequest(
             'POST',
             $url,
-            ['query' => $params, 'headers' => ['access-token' => $authToken->access_token]]
+            ['json' => $params, 'headers' => ['access-token' => $authToken->access_token]]
         );
+        \Log::info('inventory update', $params);
         $respObj = TcApiResponseInventoryCreate::fromData($inventory['response']['data']);
 
         return $respObj;
@@ -205,7 +212,7 @@ class InventoryService implements InventoryServiceInterface
     #[ArrayShape(["key" => "string", "type_id" => "int"])]
     private function mapOldCategoryToNew($oldCategory): array
     {
-        return \Cache::remember('category/' . $oldCategory, self::ES_CACHE_EXPIRY, function() use ($oldCategory) {
+        return \Cache::remember('category/' . $oldCategory, self::ES_CACHE_EXPIRY, function () use ($oldCategory) {
             $value = [];
             $mappedCategories = CategoryMappings::where('map_to', 'like', '%' . $oldCategory . '%')->get();
             $mappedCategory = null;
@@ -232,7 +239,8 @@ class InventoryService implements InventoryServiceInterface
         });
     }
 
-    private function mapCategoryBuckets(array $buckets): array {
+    private function mapCategoryBuckets(array $buckets): array
+    {
         foreach ($buckets as $key => &$value) {
             $oldCategory = $value['key'];
             if ($oldCategory) {
@@ -244,7 +252,7 @@ class InventoryService implements InventoryServiceInterface
 
         $newArr = [];
         $finalArr = [];
-        foreach($buckets as $arr) {
+        foreach ($buckets as $arr) {
             if (isset($newArr[$arr['key']])) {
                 $newArr[$arr['key']] += $arr['doc_count'];
             } else {
@@ -252,7 +260,7 @@ class InventoryService implements InventoryServiceInterface
             }
         }
 
-        foreach($buckets as $arr) {
+        foreach ($buckets as $arr) {
             if (isset($newArr[$arr['key']])) {
                 $finalArr[] = ['key' => $arr['key'], 'doc_count' => $newArr[$arr['key']], 'type_id' => $arr['type_id']];
             }
@@ -261,13 +269,14 @@ class InventoryService implements InventoryServiceInterface
         return array_values(array_unique($finalArr, SORT_REGULAR));
     }
 
-    private function getTypedAggregations($params) {
+    private function getTypedAggregations($params)
+    {
         $esSearchUrl = $this->esSearchUrl();
         $queryBuilder = new ESInventoryQueryBuilder();
         $this->addTypeAggregationQuery($queryBuilder, $params);
         $query = $queryBuilder->build();
 
-        return \Cache::remember(json_encode($query), self::ES_CACHE_EXPIRY, function () use($esSearchUrl, $query){
+        return \Cache::remember(json_encode($query), self::ES_CACHE_EXPIRY, function () use ($esSearchUrl, $query) {
             $res = $this->httpClient->post($esSearchUrl, [
                 'json' => $query
             ]);
@@ -279,13 +288,14 @@ class InventoryService implements InventoryServiceInterface
         });
     }
 
-    private function getCategorizedAggregations($params) {
+    private function getCategorizedAggregations($params)
+    {
         $esSearchUrl = $this->esSearchUrl();
         $queryBuilder = new ESInventoryQueryBuilder();
         $this->addCategoryAggregationQuery($queryBuilder, $params);
         $query = $queryBuilder->build();
 
-        return \Cache::remember(json_encode($query), self::ES_CACHE_EXPIRY, function () use($esSearchUrl, $query){
+        return \Cache::remember(json_encode($query), self::ES_CACHE_EXPIRY, function () use ($esSearchUrl, $query) {
             $res = $this->httpClient->post($esSearchUrl, [
                 'json' => $query
             ]);
@@ -295,7 +305,8 @@ class InventoryService implements InventoryServiceInterface
     }
 
     #[ArrayShape(['from' => "int", 'size' => "int", 'query' => "array[]", 'aggregations' => "array"])]
-    private function buildSearchQuery(array $params): ESInventoryQueryBuilder {
+    private function buildSearchQuery(array $params): ESInventoryQueryBuilder
+    {
         $queryBuilder = new ESInventoryQueryBuilder();
         $this->addCommonFilter($queryBuilder);
         $this->addConditionalFilter($queryBuilder, $params);
@@ -306,7 +317,7 @@ class InventoryService implements InventoryServiceInterface
         $this->addScriptFilter($queryBuilder, $params);
         $this->addGeoFiltering($queryBuilder, $params);
 
-        if(isset($params['is_random']) && $params['is_random']) {
+        if (isset($params['is_random']) && $params['is_random']) {
             $queryBuilder->orderRandom(true);
         } else {
             if (isset($params['sort'])) {
@@ -324,18 +335,19 @@ class InventoryService implements InventoryServiceInterface
         return $queryBuilder;
     }
 
-    private function addScriptFilter(ESInventoryQueryBuilder $queryBuilder, array $params) {
+    private function addScriptFilter(ESInventoryQueryBuilder $queryBuilder, array $params)
+    {
         $priceDef = "double price;
                         if(doc['websitePrice'] != null){ price = doc['websitePrice'].value; }
                         if(0 < doc['salesPrice'].value && doc['salesPrice'].value < price) { price = doc['salesPrice'].value; }";
 
         $filter = "doc['status'].value != 2 && doc['dealer.name'].value != 'Operate Beyond'";
 
-        if(!empty($params['sale'])) {
+        if (!empty($params['sale'])) {
             $filter .= " && doc['salesPrice'].value > 0.0 && doc['salesPrice'].value < doc['websitePrice'].value";
         }
 
-        if(!empty($params['price_min']) && $params['price_min'] > 0 && !empty($params['price_max'])) {
+        if (!empty($params['price_min']) && $params['price_min'] > 0 && !empty($params['price_max'])) {
             $filter = $priceDef . $filter;
 
             $filter .= " && price  > " . $params['price_min'] . "&& price < " . $params['price_max'];
@@ -349,23 +361,25 @@ class InventoryService implements InventoryServiceInterface
 
     private function addGeoFiltering(
         ESInventoryQueryBuilder $queryBuilder,
-        array $params,
-    ) {
+        array                   $params,
+    )
+    {
         $distance = null;
-        if(isset($params['country'])) {
+        if (isset($params['country'])) {
             $queryBuilder->addTermQuery('location.country', strtoupper($params['country']));
         } else {
             $distance = $params['distance'] ?? '300mi';
         }
 
         $location = $this->getGeolocation($params);
-        if($location !== null) {
+        if ($location !== null) {
             $queryBuilder->setGeoDistance(['lat' => $location->latitude, 'lon' => $location->longitude], $distance);
         }
 
     }
 
-    private function addCategoryAggregationQuery(ESInventoryQueryBuilder $queryBuilder, array $params) {
+    private function addCategoryAggregationQuery(ESInventoryQueryBuilder $queryBuilder, array $params)
+    {
         $this->addCategoryQuery($queryBuilder, $params);
         $this->addCommonFilter($queryBuilder);
         $this->addScriptFilter($queryBuilder, []);
@@ -374,7 +388,8 @@ class InventoryService implements InventoryServiceInterface
         ]);
     }
 
-    private function addTypeAggregationQuery(ESInventoryQueryBuilder $queryBuilder, array $params) {
+    private function addTypeAggregationQuery(ESInventoryQueryBuilder $queryBuilder, array $params)
+    {
         $mappedCategories = $this->getMappedCategories(
             $params['type_id'] ?? null,
             null
@@ -408,7 +423,7 @@ class InventoryService implements InventoryServiceInterface
 
     private function getMappedCategories(?int $type_id, ?string $categories_string): string
     {
-        if(isset($type_id)) {
+        if (isset($type_id)) {
             $type = Type::find($type_id);
             $mapped_categories = "";
             if ($categories_string) {
@@ -426,7 +441,7 @@ class InventoryService implements InventoryServiceInterface
             }
         } else {
             $mapped_categories = "";
-            foreach(CategoryMappings::all() as $mapping) {
+            foreach (CategoryMappings::all() as $mapping) {
                 $mapped_categories = $mapped_categories . $mapping->map_to . ';';
             }
         }
@@ -434,18 +449,21 @@ class InventoryService implements InventoryServiceInterface
         return rtrim($mapped_categories, ";");
     }
 
-    private function addPaginateQuery(ESInventoryQueryBuilder $queryBuilder, array $params) {
+    private function addPaginateQuery(ESInventoryQueryBuilder $queryBuilder, array $params)
+    {
         $currentPage = LengthAwarePaginator::resolveCurrentPage();
         $queryBuilder->paginate($currentPage, $params['per_page'] ?? self::PAGE_SIZE);
     }
 
-    private function addTermSearchQueries(ESInventoryQueryBuilder $queryBuilder, array $params) {
-        foreach(self::TERM_SEARCH_KEY_MAP as $field => $searchField) {
+    private function addTermSearchQueries(ESInventoryQueryBuilder $queryBuilder, array $params)
+    {
+        foreach (self::TERM_SEARCH_KEY_MAP as $field => $searchField) {
             $queryBuilder->addTermInValuesQuery($searchField, $params[$field] ?? null);
         }
     }
 
-    private function addCommonFilter(ESInventoryQueryBuilder $queryBuilder) {
+    private function addCommonFilter(ESInventoryQueryBuilder $queryBuilder)
+    {
         $queryBuilder->addTermQuery('isRental', false);
         $queryBuilder->addTermQuery(
             'availability',
@@ -454,8 +472,9 @@ class InventoryService implements InventoryServiceInterface
         );
     }
 
-    private function addConditionalFilter(ESInventoryQueryBuilder $queryBuilder, array $params) {
-        if(isset($params['has_image']) && $params['has_image']) {
+    private function addConditionalFilter(ESInventoryQueryBuilder $queryBuilder, array $params)
+    {
+        if (isset($params['has_image']) && $params['has_image']) {
             $queryBuilder->addTermQuery('image', '', ESInventoryQueryBuilder::OCCUR_MUST_NOT);
             $queryBuilder->addExistsQuery('image');
         }
@@ -469,11 +488,11 @@ class InventoryService implements InventoryServiceInterface
         );
 
         $categoryQueries = $queryBuilder->buildTermInValuesQuery('category', $mappedCategories);
-        if($categoryQueries === NULL) {
+        if ($categoryQueries === NULL) {
             throw new BadRequestException('No category was selected');
         }
 
-        if(isset($params['category']) && $params['category'] === 'Tilt Trailers') {
+        if (isset($params['category']) && $params['category'] === 'Tilt Trailers') {
             $mappedTypeCategories = $this->getMappedCategories(
                 $params['type_id'] ?? null,
                 null
@@ -502,18 +521,19 @@ class InventoryService implements InventoryServiceInterface
         }
     }
 
-    private function getGeolocation(array $params): ?Geolocation {
-        if(isset($params['lat']) && isset($params['lon'])) {
+    private function getGeolocation(array $params): ?Geolocation
+    {
+        if (isset($params['lat']) && isset($params['lon'])) {
             return new Geolocation([
                 'latitude' => (float)$params['lat'],
                 'longitude' => (float)$params['lon']
             ]);
-        } else if(isset($params['location'])) {
+        } else if (isset($params['location'])) {
             $response = json_decode(
                 $this->api->get('map_search/geocode', ['q' => $params['location']]),
                 true
             );
-            if(count($response['data']) > 0) {
+            if (count($response['data']) > 0) {
                 $position = $response['data'][0]['position'];
                 return new Geolocation([
                     'latitude' => (float)$position['lat'],
@@ -540,6 +560,13 @@ class InventoryService implements InventoryServiceInterface
         return $respObj;
     }
 
+    public function checkSubscriptions()
+    {
+        $from = Carbon::today()->startOfDay();
+        $to = Carbon::today()->startOfDay()->addDay();
+        $this->inventoryRepository->expireItems($from, $to);
+    }
+
     public function attributes(array $params): Collection
     {
         $mapping = $this->listingCategoryMappingsRepository->get([
@@ -550,7 +577,7 @@ class InventoryService implements InventoryServiceInterface
         $results = new Collection();
         $url = config('services.trailercentral.api') . 'inventory/attributes' . "?entity_type_id=$mapping->entity_type_id";
         $attributes = $this->handleHttpRequest('GET', $url);
-        foreach($attributes['data'] as $attribute) {
+        foreach ($attributes['data'] as $attribute) {
             $attributeObj = TcApiResponseAttribute::fromData($attribute);
             $results->add($attributeObj);
         }
@@ -565,64 +592,64 @@ class InventoryService implements InventoryServiceInterface
      */
     #[ArrayShape([
         'data' => [[
-            'title'   => 'string',
-            'id'               => 'int',
+            'title' => 'string',
+            'id' => 'int',
             'payload_capacity' => 'float',
-            'url'              => 'string',
-            'description'      => 'string',
-            'weight'           => 'float',
-            'width'            => 'float',
-            'height'           => 'float',
-            'length'           => 'float',
-            'manufacturer'     => 'string',
-            'created_at'       => 'string',
-            'price'            => 'float',
-            'sales_price'      => 'float',
-            'website_price'    => 'float',
+            'url' => 'string',
+            'description' => 'string',
+            'weight' => 'float',
+            'width' => 'float',
+            'height' => 'float',
+            'length' => 'float',
+            'manufacturer' => 'string',
+            'created_at' => 'string',
+            'price' => 'float',
+            'sales_price' => 'float',
+            'website_price' => 'float',
             'images' => [
-                'image_id'     => 'int',
-                'is_default'   => 'int',
+                'image_id' => 'int',
+                'is_default' => 'int',
                 'is_secondary' => 'int',
-                'position'     => 'int',
-                'url'          => 'string',
+                'position' => 'int',
+                'url' => 'string',
             ],
             'dealer' => [
-                'id'            => 'int',
-                'identifier'    => 'string',
-                'created_at'    => 'string',
-                'name'          => 'string',
-                'email'         => 'string',
+                'id' => 'int',
+                'identifier' => 'string',
+                'created_at' => 'string',
+                'name' => 'string',
+                'email' => 'string',
                 'profile_image' => 'string',
             ],
             'features' => [
                 'feature_list_id' => 'int',
-                'value'           => 'string',
-                'feature_name'    => 'string',
+                'value' => 'string',
+                'feature_name' => 'string',
             ],
             'dealer_location' => [
-                'id'         => 'int',
+                'id' => 'int',
                 'identifier' => 'string',
-                'contact'    => 'string',
-                'name'       => 'string',
-                'website'    => 'string',
-                'phone'      => 'string',
-                'fax'        => 'string',
-                'address'    => 'string',
-                'city'       => 'string',
-                'county'     => 'string',
-                'region'     => 'string',
-                'postal'     => 'string',
+                'contact' => 'string',
+                'name' => 'string',
+                'website' => 'string',
+                'phone' => 'string',
+                'fax' => 'string',
+                'address' => 'string',
+                'city' => 'string',
+                'county' => 'string',
+                'region' => 'string',
+                'postal' => 'string',
                 'postalcode' => 'string',
-                'country'    => 'string',
+                'country' => 'string',
                 'federal_id' => 'string',
-                'sales_tax'  => 'array',
+                'sales_tax' => 'array',
             ],
             'primary_image' => [
-                'image_id'     => 'int',
-                'is_default'   => 'int',
+                'image_id' => 'int',
+                'is_default' => 'int',
                 'is_secondary' => 'int',
-                'position'     => 'int',
-                'url'          => 'string',
+                'position' => 'int',
+                'url' => 'string',
             ],
         ]],
     ])]
