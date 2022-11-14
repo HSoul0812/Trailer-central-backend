@@ -833,7 +833,13 @@ class CsvImportService implements CsvImportServiceInterface
 
                 if (count($images) > 0) {
                     foreach ($images as $image) {
-                        $fileDto = $this->imageService->upload($image, $this->inventory['stock'], null, null, ['visibility' => 'public']);
+                        $fileDto = $this->imageService->upload(
+                            $image,
+                            $this->inventory['stock'],
+                            null,
+                            null,
+                            ['visibility' => config('filesystems.disks.s3.visibility')]
+                        );
 
                         if ($fileDto) {
                             if ($this->imageMode == self::IM_APPEND) {
