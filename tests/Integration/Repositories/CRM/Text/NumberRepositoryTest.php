@@ -588,37 +588,4 @@ class NumberRepositoryTest extends TestCase
     {
         return $this->app->make(NumberRepositoryInterface::class);
     }
-
-    /**
-     * Examples of invalid properties for a Number
-     *
-     * @return array
-     */
-    public function invalidPropertiesProvider():array
-    {
-        $dealerIdLambda = static function (NumberSeeder $seeder) {
-            return $seeder->dealer->dealer_id;
-        };
-
-        return [
-          [
-              // Wrong numbers
-              [
-                  'dealer_number' => '17863391202',
-                  'customer_number' => '18604402725',
-                  'twilio_number' => '19854018753',
-                  'expiration_time' => time(),
-                  'dealer_id' => $dealerIdLambda
-              ],
-              // Wrong expiration time
-              [
-                  'dealer_number' => '+17863391202',
-                  'customer_number' => '+18604402725',
-                  'twilio_number' => '+19854018753',
-                  'expiration_time' => now(),
-                  'dealer_id' => $dealerIdLambda
-              ],
-          ]
-        ];
-    }
 }
