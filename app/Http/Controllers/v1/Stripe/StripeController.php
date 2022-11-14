@@ -7,9 +7,12 @@ use App\Services\Stripe\StripePaymentServiceInterface;
 
 class StripeController extends Controller
 {
-    public function __construct(private StripePaymentServiceInterface $service) {}
+    public function __construct(private StripePaymentServiceInterface $service)
+    {
+    }
 
-    public function webhook() {
+    public function webhook()
+    {
         return response()->noContent($this->service->handleEvent());
     }
 }

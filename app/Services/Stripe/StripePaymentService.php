@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Services\Stripe;
+
 use App\Repositories\Payment\PaymentLogRepositoryInterface;
 use App\Services\Inventory\InventoryServiceInterface;
 use Illuminate\Contracts\Foundation\Application;
@@ -12,21 +13,22 @@ use Stripe\Exception\UnexpectedValueException;
 use Stripe\Stripe;
 use Stripe\Webhook;
 use Stripe\Checkout\Session;
-use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 
 class StripePaymentService implements StripePaymentServiceInterface
 {
     const STRIPE_SUCCESS_URL = '/success';
     const STRIPE_FAILURE_URL = '/cancel';
+    const CHECKOUT_SESSION_COMPLETED_EVENT = 'checkout.session.completed';
 
     public function __construct(
         private PaymentLogRepositoryInterface $paymentLogRepository,
-        private InventoryServiceInterface $inventoryService
-    ) {
+        private InventoryServiceInterface     $inventoryService
+    )
+    {
         Stripe::setApiKey(config('services.stripe.secret_key'));
     }
 
-    public function createCheckoutSession(string $priceItem, array $metadata=[]): Redirector|Application|RedirectResponse
+    public function createCheckoutSession(string $priceItem, array $metadata = []): Redirector|Application|RedirectResponse
     {
         $siteUrl = config('app.site_url');
         $checkout_session = Session::create([
@@ -52,45 +54,54 @@ class StripePaymentService implements StripePaymentServiceInterface
             $event = Webhook::constructEvent(
                 $payload, $sigHeader, $endpointSecret
             );
-        } catch(UnexpectedValueException|SignatureVerificationException $e) {
+        } catch (UnexpectedValueException|SignatureVerificationException $e) {
+            \Log::critical('Failed creating webhook: ' . $e->getMessage());
             return 400;
         }
         \Log::info('Event type: ' . $event->type);
-        if($event->type == 'checkout.session.completed') {
+        if ($event->type == self::CHECKOUT_SESSION_COMPLETED_EVENT) {
             $session = $event->data->object;
-            $this->fulfillOrder($session);
+            return $this->completeOrder($session);
         }
         return 200;
     }
 
-    private function fulfillOrder(Session $session) {
-        $inventoryId = $session->metadata->inventory_id;
-        $userId = $session->metadata->user_id;
+    private function completeOrder(Session $session): int
+    {
+        try {
+            $inventoryId = $session->metadata->inventory_id;
+            $userId = $session->metadata->user_id;
 
-        $this->paymentLogRepository->create([
-            'payment_id' => $session->id,
-            'client_reference_id' => $session->client_reference_id,
-            'full_response' => json_encode($session->values())
-        ]);
+            $this->paymentLogRepository->create([
+                'payment_id' => $session->id,
+                'client_reference_id' => $session->client_reference_id,
+                'full_response' => json_encode($session->values())
+            ]);
 
-        $inventory = $this->inventoryService->show((int)$inventoryId);
-        $inventoryExpiry =
-            $inventory->tt_payment_expiration_date
-                ? Carbon::parse($inventory->tt_payment_expiration_date)
-                : Carbon::now()->startOfDay();
+            $inventory = $this->inventoryService->show((int)$inventoryId);
+            $inventoryExpiry =
+                $inventory->tt_payment_expiration_date
+                    ? Carbon::parse($inventory->tt_payment_expiration_date)
+                    : Carbon::now()->startOfDay();
 
-        if($inventoryExpiry->startOfDay()->isBefore(Carbon::now())) {
-            $inventoryExpiry = Carbon::now()->startOfDay();
+            if ($inventoryExpiry->startOfDay()->isBefore(Carbon::now())) {
+                $inventoryExpiry = Carbon::now()->startOfDay();
+            }
+            // TODO: Extend expiry based on plan
+            $inventoryExpiry = $inventoryExpiry->addMonth();
+            $this->inventoryService->update($userId, [
+                'inventory_id' => $inventoryId,
+                'show_on_website' => 1,
+                'tt_payment_expiration_date' => $inventoryExpiry
+            ]);
+
+            \Log::info('session', $session->values());
+            \Log::info('inventory_id: ' . $inventoryId);
+
+            return 200;
+        } catch (\Exception $e) {
+            \Log::critical('Failed fulfilling order: ' . $e->getMessage());
+            return 500;
         }
-        // TODO: Extend expiry based on plan
-        $inventoryExpiry = $inventoryExpiry->addMonth();
-        $this->inventoryService->update($userId, [
-            'inventory_id' => $inventoryId,
-            'show_on_website' => 1,
-            'tt_payment_expiration_date' => $inventoryExpiry
-        ]);
-
-        \Log::info('session', $session->values());
-        \Log::info('inventory_id: ' . $inventoryId);
     }
 }

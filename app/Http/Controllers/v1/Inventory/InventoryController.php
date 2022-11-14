@@ -38,7 +38,7 @@ class InventoryController extends AbstractRestfulController
         private InventoryServiceInterface         $inventoryService,
         private InventorySDKServiceInterface      $inventorySDKService,
         private TcApiResponseInventoryTransformer $transformer,
-        private StripePaymentServiceInterface $paymentService
+        private StripePaymentServiceInterface     $paymentService
     )
     {
         parent::__construct();
@@ -139,14 +139,13 @@ class InventoryController extends AbstractRestfulController
     {
         $inventory = $this->inventoryService->show((int)$inventoryId);
         $user = auth('api')->user();
-        if($inventory->dealer['id'] != $user->tc_user_id) {
+        if ($inventory->dealer['id'] != $user->tc_user_id) {
             throw new HttpException(422, "User should be owner of inventory");
-        } else {
-            return $this->paymentService->createCheckoutSession($planId, [
-                'inventory_id' => $inventoryId,
-                'user_id' => $user->tc_user_id
-            ]);
         }
+        return $this->paymentService->createCheckoutSession($planId, [
+            'inventory_id' => $inventoryId,
+            'user_id' => $user->tc_user_id
+        ]);
     }
 
     protected function constructRequestBindings(): void
