@@ -62,7 +62,7 @@ class NumberSeeder extends Seeder
     public function __construct()
     {
         $this->dealer = factory(User::class)->create();
-        $this->user = factory(NewUser::class)->create(['user_id' =>  $this->dealer->getKey()]);
+        $this->user = factory(NewUser::class)->create();
         $this->dealerLocation = factory(DealerLocation::class)->create([
             'dealer_id' => $this->dealer->getKey(),
             'sms_phone' => $this->dealerNumber
