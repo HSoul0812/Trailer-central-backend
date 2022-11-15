@@ -115,8 +115,6 @@ class BlastControllerTest extends IntegrationTestCase
 
     public function tearDown(): void
     {
-        NewDealerUser::destroy($this->seeder->dealer->dealer_id);
-
         $this->seeder->cleanUp();
 
         parent::tearDown();
@@ -180,13 +178,13 @@ class BlastControllerTest extends IntegrationTestCase
      */
     public function testCreate()
     {
-        $dealerId = $this->seeder->dealer->getKey();
+        $userId = $this->seeder->user->getKey();
         // Grab a template from the seeder
         $template = $this->seeder->template;
 
         // Initialize the required data for the blast
         $rawBlast = [
-            'user_id' => $dealerId,
+            'user_id' => $userId,
             'email_template_id' => $template->id,
             'campaign_name' => 'Test Campaign',
             'campaign_subject' => 'Test Campaign',
@@ -209,7 +207,7 @@ class BlastControllerTest extends IntegrationTestCase
 
         // Check that the data was assigned correctly
         $this->assertSame(
-            $this->seeder->dealer->newDealerUser->user_id,
+            $this->seeder->dealer->user->user_id,
             $response['data']['user_id'],
             "The user doesn't match"
         );
@@ -265,7 +263,7 @@ class BlastControllerTest extends IntegrationTestCase
 
         // Initialize some data for the updated blast
         $updatedInfo = [
-            'user_id' => $this->seeder->dealer->getKey(),
+            'user_id' => $this->seeder->user->getKey(),
             'email_template_id' => $this->seeder->template->id,
             'campaign_name' => $this->faker->unique()->word,
             'send_date' => now()->addDays($randomDigit)->format('Y-m-d H:i:s'),
