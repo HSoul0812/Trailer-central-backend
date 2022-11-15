@@ -110,7 +110,7 @@ class CampaignSeeder extends Seeder
             if(isset($seed['action']) && $seed['action'] === 'create') {
                 // Create Campaign
                 $campaign = factory(Campaign::class)->create([
-                    'user_id' => $this->dealer->getKey(),
+                    'user_id' => $this->user->getKey(),
                     'campaign_name' => $seed['name'],
                     'campaign_subject' => $seed['subject'] ?? $seed['name'],
                     'email_template_id' => $this->template->getKey()
@@ -122,7 +122,7 @@ class CampaignSeeder extends Seeder
 
             // Make Campaign
             $campaign = factory(Campaign::class)->make([
-                'user_id' => $this->dealer->getKey(),
+                'user_id' => $this->user->getKey(),
                 'campaign_name' => $seed['name'],
                 'campaign_subject' => $seed['subject'] ?? $seed['name'],
                 'email_template_id' => $this->template->getKey()
