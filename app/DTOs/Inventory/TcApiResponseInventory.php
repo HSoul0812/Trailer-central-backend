@@ -108,7 +108,7 @@ class TcApiResponseInventory
         $obj->category = $data['category'];
         $obj->is_archived = $data['is_archived'];
         $obj->show_on_website = $data['show_on_website'];
-        $obj->tt_payment_expiration_date = $data['tt_payment_expiration_date'];
+        $obj->tt_payment_expiration_date = $data['tt_payment_expiration_date'] ?? null;
         $obj->times_viewed = $data['times_viewed'];
         $obj->sold_at = $data['sold_at'];
         $obj->is_featured = $data['is_featured'];
