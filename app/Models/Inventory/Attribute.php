@@ -25,6 +25,8 @@ class Attribute extends Model
 {
     use TableAware;
 
+    private const TYPE_SELECT = 'select';
+
     /**
      * The table associated with the model.
      *
@@ -81,5 +83,10 @@ class Attribute extends Model
         }
 
         return $array;
+    }
+
+    public function isSelect(): bool
+    {
+        return $this->type === self::TYPE_SELECT;
     }
 }
