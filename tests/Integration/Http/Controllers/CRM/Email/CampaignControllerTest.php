@@ -200,12 +200,12 @@ class CampaignControllerTest extends IntegrationTestCase
      */
     public function testCreate()
     {
-        $dealerId = $this->seeder->dealer->getKey();
+        $userId = $this->seeder->user->getKey();
 
-        $this->assertDatabaseMissing('crm_drip_campaigns', ['user_id' => $dealerId]);
+        $this->assertDatabaseMissing('crm_drip_campaigns', ['user_id' => $userId]);
 
         $params = [
-            'user_id' => $dealerId,
+            'user_id' => $userId,
             'email_template_id' => $this->seeder->template->getKey(),
             'campaign_name' => $this->faker->unique()->word,
             'send_after_days' => $this->faker->unique()->randomDigit,
