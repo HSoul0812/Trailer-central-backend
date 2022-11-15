@@ -207,7 +207,7 @@ class BlastControllerTest extends IntegrationTestCase
 
         // Check that the data was assigned correctly
         $this->assertSame(
-            $this->seeder->dealer->user->user_id,
+            $this->seeder->user->user_id,
             $response['data']['user_id'],
             "The user doesn't match"
         );
