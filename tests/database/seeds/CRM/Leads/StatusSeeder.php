@@ -75,7 +75,7 @@ class StatusSeeder extends Seeder
         ]);
         $this->website = factory(Website::class)->create(['dealer_id' => $this->dealer->dealer_id]);
         $this->user = factory(NewUser::class)->create();
-        $this->sales = factory(SalesPerson::class)->create(['user_id' => $this->user->dealer_id]);
+        $this->sales = factory(SalesPerson::class)->create(['user_id' => $this->user->user_id]);
     }
 
     public function seed(): void
@@ -129,7 +129,6 @@ class StatusSeeder extends Seeder
     {
         $dealerId = $this->dealer->getKey();
         $userId = $this->user->getKey();
-        $salesId = $this->sales->getKey();
 
         // Database clean up
         if(!empty($this->leads) && count($this->leads)) {
