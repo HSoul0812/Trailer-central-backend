@@ -99,6 +99,11 @@ class InquirySeeder extends Seeder {
     public function cleanUp(): void
     {
         $dealerId = $this->dealer->getKey();
+        $userId = $this->dealer->newDealerUser->user_id;
+
+        CrmUser::where('user_id', $userId)->delete();
+        NewUser::destroy($userId);
+        NewDealerUser::destroy($dealerId);
 
         Interaction::where('tc_lead_id', $this->lead->getKey())->delete();
         InventoryLead::where('website_lead_id', $this->lead->getKey())->delete();
@@ -107,10 +112,6 @@ class InquirySeeder extends Seeder {
         WebsiteConfig::where('website_id', $this->website->getKey())->delete();
         Website::where('dealer_id', $dealerId)->delete();
         AuthToken::where(['user_id' => $this->authToken->user_id, 'user_type' => AuthToken::USER_TYPE_DEALER])->delete();
-        User::destroy($dealerId);
-        NewUser::destroy($dealerId);
-        NewDealerUser::destroy($dealerId);
-        CrmUser::destroy($dealerId);
         User::destroy($dealerId);
     }
 }

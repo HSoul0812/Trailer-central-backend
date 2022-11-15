@@ -74,8 +74,8 @@ class StatusSeeder extends Seeder
             'user_type' => AuthToken::USER_TYPE_DEALER,
         ]);
         $this->website = factory(Website::class)->create(['dealer_id' => $this->dealer->dealer_id]);
-        $this->user = factory(NewUser::class)->create(['user_id' => $this->dealer->dealer_id]);
-        $this->sales = factory(SalesPerson::class)->create(['user_id' => $this->dealer->dealer_id]);
+        $this->user = factory(NewUser::class)->create();
+        $this->sales = factory(SalesPerson::class)->create(['user_id' => $this->user->dealer_id]);
     }
 
     public function seed(): void
@@ -128,6 +128,7 @@ class StatusSeeder extends Seeder
     public function cleanUp(): void
     {
         $dealerId = $this->dealer->getKey();
+        $userId = $this->user->getKey();
         $salesId = $this->sales->getKey();
 
         // Database clean up
@@ -138,8 +139,12 @@ class StatusSeeder extends Seeder
                 Lead::destroy($leadId);
             }
         }
-        SalesPerson::destroy($salesId);
-        NewUser::destroy($dealerId);
+
+        // Delete CRM User Related Models
+        SalesPerson::where('user_id', $userId)->delete();
+        NewUser::destroy($userId);
+
+        // Delete Dealer Related Models
         DealerLocation::where('dealer_id', $dealerId)->delete();
         Website::where('dealer_id', $dealerId)->delete();
         AuthToken::where(['user_id' => $this->authToken->user_id, 'user_type' => AuthToken::USER_TYPE_DEALER])->delete();
