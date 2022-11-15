@@ -655,6 +655,10 @@ $api->version('v1', function ($route) {
     $route->get('users', 'App\Http\Controllers\v1\User\UserController@index');
     $route->post('users', 'App\Http\Controllers\v1\User\UserController@create');
 
+    $route->get('user/classified', 'App\Http\Controllers\v1\User\UserController@getClassified');
+    $route->post('user/activate-classifieds', 'App\Http\Controllers\v1\User\UserController@activateDealerClassifieds');
+    $route->post('user/deactivate-classifieds', 'App\Http\Controllers\v1\User\UserController@deactivateDealerClassifieds');
+
     /*
     |--------------------------------------------------------------------------
     | Integrations
