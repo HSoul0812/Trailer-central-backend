@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Tests\Integration\Services\Dms\Customer;
+namespace Tests\Unit\Services\Dms\Customer;
 
 use App\Models\CRM\Dms\Customer\CustomerInventory;
 use App\Models\CRM\User\Customer;
