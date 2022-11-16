@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Repositories\Dms;
+namespace Tests\Integration\Repositories\Dms;
 
 use App\Models\Inventory\Category;
 use App\Repositories\Dms\ServiceOrderRepositoryInterface;
@@ -47,6 +47,8 @@ class ServiceOrderRepositoryTest extends TestCase
      */
     public function testIoCForServiceOrderRepositoryIsWorking(): void
     {
+        $this->seeder->seed();
+
         $concreteRepository = $this->getConcreteRepository();
 
         self::assertInstanceOf(ServiceOrderRepository::class, $concreteRepository);

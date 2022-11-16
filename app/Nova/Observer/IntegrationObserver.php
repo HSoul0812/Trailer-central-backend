@@ -14,7 +14,7 @@ class IntegrationObserver
      * @param Integration $integration
      * @throws \Exception
      */
-    public function updating(Integration $integration): void
+    public function saving(Integration $integration): void
     {
         $castedIntegration = $integration->toArray();
 

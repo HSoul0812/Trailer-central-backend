@@ -11,6 +11,7 @@ use App\Models\Showroom\Showroom;
 use App\Models\User\DealerLocation;
 use App\Models\User\User;
 use Faker\Generator as Faker;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Factory;
 
@@ -25,8 +26,9 @@ $factory->define(Inventory::class, static function (Faker $faker, array $attribu
 
     // Get Entity/Category
     $entityType = EntityType::where('entity_type_id', '<>', 2)->inRandomOrder()->first();
-    $category = $attributes['category'] ??
-        Category::where('entity_type_id', $entityType->entity_type_id)->inRandomOrder()->first()->legacy_category;
+    $inventoryCategory = Category::where('entity_type_id', $entityType->entity_type_id)->inRandomOrder()->first();
+
+    $category = $attributes['category'] ?? optional($inventoryCategory)->legacy_category ?? '';
 
     // Get Showroom Model
     $mfg = $attributes['manufacturer'] ?? Manufacturers::inRandomOrder()->first();
@@ -63,6 +65,7 @@ $factory->define(Inventory::class, static function (Faker $faker, array $attribu
         'status' => 1,
         'category' => !empty($showroom->type) ? $showroom->type : $category,
         'vin' => $attributes['vin'] ?? Str::random(17),
+        'geolocation' => DB::raw('POINT(' . $faker->longitude() . ', ' . $faker->latitude() . ')'),
         'msrp' => $msrp,
         'price' => $price,
         'cost_of_unit' => $price / 2,

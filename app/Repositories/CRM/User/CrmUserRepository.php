@@ -68,6 +68,15 @@ class CrmUserRepository implements CrmUserRepositoryInterface
                                    '=', CrmUser::getTableName() . '.user_id')
                         ->where(CrmUser::getTableName() . '.user_id', '>', 0);
 
+        // Check Active By Default
+        if (!isset($params['is_active'])) {
+            $query = $query->where('active', 1);
+        }
+        // If Is Active Provided, Use Value
+        elseif(isset($params['is_active'])) {
+            $query = $query->where('active', $params['is_active']);
+        }
+
         // Find By User ID?
         if (isset($params['user_id'])) {
             $query = $query->where(CrmUser::getTableName() . '.user_id', $params['user_id']);

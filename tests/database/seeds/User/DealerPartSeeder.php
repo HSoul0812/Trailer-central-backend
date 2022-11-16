@@ -33,9 +33,9 @@ class DealerPartSeeder extends Seeder
 
 
         $dealerId = $this->dealer->getKey();
-  
 
-        $this->dealerPart = factory(DealerPart::class, 1)->create(['dealer_id' => $dealerId]); // 1 new dealaerPart
+
+        $this->dealerPart = factory(DealerPart::class)->create(['dealer_id' => $dealerId]); // 1 new dealaerPart
     }
 
     public function seedDealer(): void

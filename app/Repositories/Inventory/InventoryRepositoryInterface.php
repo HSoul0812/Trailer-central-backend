@@ -66,4 +66,13 @@ interface InventoryRepositoryInterface extends Repository, TransactionalReposito
      * @return mixed
      */
     public function archiveInventory(int $dealerId, array $inventoryParams);
+
+    /**
+     * Find the inventory by stock
+     *
+     * @param int $dealerId
+     * @param string $stock
+     * @return Inventory|null
+     */
+    public function findByStock(int $dealerId, string $stock): ?Inventory;
 }
