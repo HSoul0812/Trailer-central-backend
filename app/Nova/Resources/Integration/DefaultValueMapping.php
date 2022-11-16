@@ -8,13 +8,14 @@ use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping;
 use App\Models\Integration\Collector\CollectorFields;
 use App\Nova\Filters\DealerIDMapping;
 use App\Nova\Resource;
-use App\Nova\Resources\Dealer\Dealer;
 use App\Nova\Resources\Dealer\LightDealer;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
+
+use App\Nova\Actions\Exports\DefaultValueMappingExport;
 
 class DefaultValueMapping extends Resource
 {
@@ -133,6 +134,8 @@ class DefaultValueMapping extends Resource
      */
     public function actions(Request $request)
     {
-        return [];
+        return [
+            (new DefaultValueMappingExport)->withHeadings()->askForFilename(),
+        ];
     }
 }

@@ -2,19 +2,22 @@
 
 namespace App\Nova\Resources\Integration;
 
-use Illuminate\Http\Request;
-use Laravel\Nova\Fields\Select;
-use Laravel\Nova\Fields\Text;
-use App\Models\Feed\Mapping\Incoming\DealerIncomingPendingMapping as FeedDealerIncomingPendingMapping;
-use App\Nova\Actions\Mapping\MapData;
 use App\Nova\Resource;
-use App\Nova\Filters\DealerIDPendingMapping;
 
-use App\Nova\Actions\Exports\DealerIncomingPendingMappingExport;
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Builder;
 
-class DealerIncomingPendingMapping extends Resource
+use Laravel\Nova\Fields\ID;
+use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Fields\DateTime;
+use Laravel\Nova\Fields\KeyValue;
+
+use App\Models\Feed\TransactionExecuteQueue as TEQ;
+
+class TransactionExecuteQueue extends Resource
 {
-
     public static $group = 'Integration';
 
     /**
@@ -22,7 +25,7 @@ class DealerIncomingPendingMapping extends Resource
      *
      * @var string
      */
-    public static $model = 'App\Models\Feed\Mapping\Incoming\DealerIncomingPendingMapping';
+    public static $model = TEQ::class;
 
     /**
      * The single value that should be used to represent the resource when being displayed.
@@ -44,7 +47,7 @@ class DealerIncomingPendingMapping extends Resource
      * @var array
      */
     public static $search = [
-        'dealer_id',
+        'api',
         'data'
     ];
 
@@ -54,17 +57,28 @@ class DealerIncomingPendingMapping extends Resource
      * @param \Illuminate\Http\Request $request
      * @return array
      */
-    public function fields(Request $request)
-    {
+    public function fields(Request $request): array {
         return [
-            Text::make('Dealer ID', 'dealer_id')->sortable(),
+            ID::make(),
 
-            Select::make('Type', 'type')
-                ->options(FeedDealerIncomingPendingMapping::$types)
-                ->displayUsingLabels(),
+            Text::make('Api')->sortable(),
 
-            Text::make('Data', 'data'),
+            Text::make('VIN', 'data')->displayUsing(function($value) {
+                return $value['vin'] ?? null;
+            })->onlyOnIndex(),
 
+            Text::make('Stock', 'data')->displayUsing(function($value) {
+                return $value['stock_id'] ?? null;
+            })->onlyOnIndex(),
+
+            KeyValue::make('Data')->hideFromIndex(),
+
+            Text::make('Response')->sortable(),
+
+            Text::make('Operation Type')->sortable(),
+
+            DateTime::make('Queued At')->sortable(),
+            DateTime::make('Executed At')->sortable(),
         ];
     }
 
@@ -74,8 +88,7 @@ class DealerIncomingPendingMapping extends Resource
      * @param \Illuminate\Http\Request $request
      * @return array
      */
-    public function cards(Request $request)
-    {
+    public function cards(Request $request): array {
         return [];
     }
 
@@ -85,11 +98,8 @@ class DealerIncomingPendingMapping extends Resource
      * @param \Illuminate\Http\Request $request
      * @return array
      */
-    public function filters(Request $request)
-    {
-        return [
-            new DealerIDPendingMapping
-        ];
+    public function filters(Request $request): array {
+        return [];
     }
 
     /**
@@ -98,8 +108,7 @@ class DealerIncomingPendingMapping extends Resource
      * @param \Illuminate\Http\Request $request
      * @return array
      */
-    public function lenses(Request $request)
-    {
+    public function lenses(Request $request): array {
         return [];
     }
 
@@ -109,16 +118,7 @@ class DealerIncomingPendingMapping extends Resource
      * @param \Illuminate\Http\Request $request
      * @return array
      */
-    public function actions(Request $request)
-    {
-        return [
-            new MapData,
-            (new DealerIncomingPendingMappingExport)->withHeadings()->askForFilename(),
-        ];
-    }
-
-    public function update()
-    {
-        return false;
+    public function actions(Request $request): array {
+        return [];
     }
 }
