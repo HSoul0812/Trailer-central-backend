@@ -1,19 +1,16 @@
 <?php
 
-namespace App\Console\Commands\Marketing\Facebook;
+namespace App\Console\Commands\Marketing\Craigslist;
 
-use App\Repositories\Marketing\Facebook\MarketplaceRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\PosterRepositoryInterface;
 use Illuminate\Console\Command;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Collection;
 
 /**
- * Class ImportMarketplaceListingsForDealer
+ * Class ValidateExtensionRunning
  * 
- * @package App\Console\Commands\Marketing\Facebook
+ * @package App\Console\Commands\Marketing\Craigslist
  */
-class ImportMarketplaceListingsForDealer extends Command
+class ValidateExtensionRunning extends Command
 {
     /**
      * The name and signature of the console command.
@@ -35,7 +32,7 @@ class ImportMarketplaceListingsForDealer extends Command
      * @param MarketplaceRepositoryInterface $repo
      * @return void
      */
-    public function __construct(MarketplaceRepositoryInterface $repo)
+    public function __construct(PosterRepositoryInterface $repo)
     {
         parent::__construct();
 
@@ -54,41 +51,5 @@ class ImportMarketplaceListingsForDealer extends Command
 
         // Get Marketplace Accounts
         $integrations = $this->repo->getAll(['dealer_id' => $dealerId]);
-
-        // Get Inventory Chunked
-        DB::table('inventory')
-            ->select('inventory.inventory_id')
-            ->where('dealer_id', '=', $dealerId)
-            ->where('is_archived', '=', 0)
-            ->where('status', '<>', 2)
-            ->where('status', '<>', 6)
-            ->where('show_on_website', '=', 1)
-            ->orderBy('created_at', 'ASC')
-            ->chunk(500, function (Collection $inventory) use($integrations) {
-                $inventoryListing = [];
-                $countOfInventory = 0;
-
-                foreach ($inventory as $inventory) {
-                    foreach ($integrations as $integration) {
-                        $inventoryListing[] = [
-                            'marketplace_id' => $integration->id,
-                            'inventory_id' => $inventory->inventory_id,
-                            'facebook_id' => 0,
-                            'account_type' => 'user',
-                            'page_id' => 0,
-                            'username' => $integration->fb_username,
-                            'status' => 'active',
-                            'created_at' => Carbon::now()->toDateTimeString(),
-                            'updated_at' => Carbon::now()->toDateTimeString()
-                        ];
-
-                        $countOfInventory++;
-                    }
-                }
-
-                DB::table('fbapp_listings')->insert($inventoryListing);
-
-                $this->info("{$countOfInventory} marketplace listings have been inserted");
-            });
     }
 }
