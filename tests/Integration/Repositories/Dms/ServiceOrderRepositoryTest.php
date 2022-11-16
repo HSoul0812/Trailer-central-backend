@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Repositories\Dms;
+namespace Tests\Integration\Repositories\Dms;
 
 use App\Models\Inventory\Category;
 use App\Repositories\Dms\ServiceOrderRepositoryInterface;

@@ -656,13 +656,10 @@ class GoogleServiceTest extends TestCase
             ->with($accessToken->scope)
             ->once();
 
-        $this->googleService->log
-            ->shouldReceive('info');
-
         $googleClient
             ->shouldReceive('verifyIdToken')
             ->with($accessToken->id_token)
-            ->twice()
+            ->once()
             ->andReturn(self::GOOGLE_SERVICE_PAYLOAD);
 
         $googleClient
@@ -670,6 +667,11 @@ class GoogleServiceTest extends TestCase
             ->withNoArgs()
             ->once()
             ->andReturn(true);
+
+        $this->googleService->log
+            ->shouldReceive('info')
+            ->once()
+            ->withAnyArgs();
 
         $googleClient
             ->shouldReceive('getRefreshToken')
@@ -682,6 +684,10 @@ class GoogleServiceTest extends TestCase
             ->with(self::GOOGLE_REFRESH_TOKEN)
             ->once()
             ->andReturn($newToken);
+
+        $this->googleService->log
+            ->shouldReceive('error')
+            ->withAnyArgs();
 
         $this->googleService
             ->shouldReceive('validate')
@@ -740,10 +746,12 @@ class GoogleServiceTest extends TestCase
             ->once();
 
         $this->googleService->log
-            ->shouldReceive('info');
+            ->shouldReceive('info')
+            ->withAnyArgs();
 
         $this->googleService->log
-            ->shouldReceive('error');
+            ->shouldReceive('error')
+            ->withAnyArgs();
 
         $googleClient
             ->shouldReceive('verifyIdToken')
@@ -817,6 +825,10 @@ class GoogleServiceTest extends TestCase
             ->once()
             ->andReturn(false);
 
+        $this->googleService->log
+            ->shouldReceive('info')
+            ->withAnyArgs();
+
         $this->googleService
             ->shouldReceive('validateCustom')
             ->passthru();
@@ -877,6 +889,11 @@ class GoogleServiceTest extends TestCase
             ->once()
             ->andReturn(false);
 
+        $this->googleService->log
+            ->shouldReceive('info')
+            ->twice()
+            ->withAnyArgs();
+
         $googleClient
             ->shouldReceive('getRefreshToken')
             ->withNoArgs()
@@ -900,7 +917,6 @@ class GoogleServiceTest extends TestCase
         $this->assertFalse($result->isValid);
         $this->assertTrue($result->isExpired);
         $this->assertEquals(self::FAILED_GOOGLE_VALIDATION_MESSAGE, $result->message);
-
         $this->assertInstanceOf(EmailToken::class, $result->newToken);
 
         $this->assertSame($newToken['access_token'], $result->newToken->accessToken);
@@ -956,6 +972,11 @@ class GoogleServiceTest extends TestCase
             ->withNoArgs()
             ->once()
             ->andReturn(true);
+
+        $this->googleService->log
+            ->shouldReceive('info')
+            ->twice()
+            ->withAnyArgs();
 
         $googleClient
             ->shouldReceive('getRefreshToken')
@@ -1033,7 +1054,7 @@ class GoogleServiceTest extends TestCase
         $googleClient
             ->shouldReceive('verifyIdToken')
             ->with($commonToken->idToken)
-            ->twice()
+            ->once()
             ->andReturn(self::GOOGLE_SERVICE_PAYLOAD);
 
         $googleClient
@@ -1041,6 +1062,11 @@ class GoogleServiceTest extends TestCase
             ->withNoArgs()
             ->once()
             ->andReturn(true);
+
+        $this->googleService->log
+            ->shouldReceive('info')
+            ->once()
+            ->withAnyArgs();
 
         $googleClient
             ->shouldReceive('getRefreshToken')
@@ -1057,6 +1083,10 @@ class GoogleServiceTest extends TestCase
         $this->googleService
             ->shouldReceive('validateCustom')
             ->passthru();
+
+        $this->googleService->log
+            ->shouldReceive('error')
+            ->withAnyArgs();
 
         $result = $this->googleService->validateCustom($commonToken);
 
@@ -1111,7 +1141,8 @@ class GoogleServiceTest extends TestCase
             ->once();
 
         $this->googleService->log
-            ->shouldReceive('error');
+            ->shouldReceive('error')
+            ->withAnyArgs();
 
         $googleClient
             ->shouldReceive('verifyIdToken')

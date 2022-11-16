@@ -50,8 +50,6 @@ class TemplateControllerTest extends IntegrationTestCase {
 
     public function tearDown(): void
     {
-        NewDealerUser::destroy($this->seeder->dealer->dealer_id);
-
         $this->seeder->cleanUp();
 
         parent::tearDown();

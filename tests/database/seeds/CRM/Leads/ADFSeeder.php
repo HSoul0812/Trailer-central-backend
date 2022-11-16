@@ -72,15 +72,17 @@ class ADFSeeder extends Seeder {
 
     public function cleanUp(): void
     {
-        Lead::where(['dealer_id' => $this->dealer->getKey()])->delete();
+        // Delete CRM User Related Data
+        NewDealerUser::where(['user_id' => $this->user->getKey()])->delete();
+        CrmUser::where(['user_id' => $this->user->getKey()])->delete();
+        NewUser::destroy($this->user->getKey());
+
+        // Delete Dealer Related Data
         Website::destroy($this->website->getKey());
+        Lead::where(['dealer_id' => $this->dealer->getKey()])->delete();
         Inventory::where(['dealer_id' => $this->dealer->getKey()])->delete();
         DealerLocation::where(['dealer_id' => $this->dealer->getKey()])->delete();
-
         AuthToken::where(['user_id' => $this->dealer->getKey(), 'user_type' => AuthToken::USER_TYPE_DEALER])->delete();
-        NewUser::destroy($this->dealer->getKey());
-        NewDealerUser::destroy($this->dealer->getKey());
-        CrmUser::destroy($this->dealer->getKey());
         User::destroy($this->dealer->getKey());
     }
 }

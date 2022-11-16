@@ -1013,6 +1013,9 @@ class GmailServiceTest extends TestCase
         $this->gmailService->log
             ->shouldReceive('info');
 
+        $this->gmailService->log
+            ->shouldReceive('error');
+
         $this->expectException(MissingGmailLabelsException::class);
 
         $this->gmailService

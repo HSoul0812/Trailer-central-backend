@@ -10,6 +10,9 @@ use App\Services\CRM\Leads\DTOs\InquiryLead;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Interactions\Interaction;
 use App\Models\CRM\Leads\InventoryLead;
+use App\Repositories\CRM\Leads\StatusRepositoryInterface;
+use App\Repositories\CRM\Leads\LeadRepositoryInterface;
+use App\Models\CRM\Leads\LeadStatus;
 
 class InquiryControllerTest extends IntegrationTestCase
 {
@@ -73,6 +76,7 @@ class InquiryControllerTest extends IntegrationTestCase
 
         $seeder->seed();
 
+        // send a new inquiry
         $params = [
             'website_id' => $seeder->website->getKey(),
             'inquiry_type' => InquiryLead::INQUIRY_TYPE_DEFAULT,
@@ -92,8 +96,10 @@ class InquiryControllerTest extends IntegrationTestCase
 
         $response->assertStatus(200);
 
+        // confirm that no new lead is created
         $this->assertEquals(1, Lead::where('dealer_id', $seeder->dealer->getKey())->count());
 
+        // confirm that new inquiry interaction is created
         $this->assertEquals(1, $seeder->lead->interactions()
             ->where('interaction_type', 'INQUIRY')
             ->where('interaction_notes', 'like', 'Original Inquiry: '. strtoupper($seeder->lead->first_name) .' '. strtoupper($seeder->lead->last_name) .'%')->count());
@@ -118,6 +124,85 @@ class InquiryControllerTest extends IntegrationTestCase
         $this->assertDatabaseHas('crm_inventory_lead', [
             'website_lead_id' => $seeder->lead->getKey(),
             'inventory_id' => $seeder->anotherInventory->inventory_id
+        ]);
+
+        $seeder->cleanUp();
+    }
+
+    public function testAutoMergeArchivedLead()
+    {
+        $seeder = new InquirySeeder;
+
+        $seeder->seed();
+
+        // close Lead
+        $statusRepo = app(StatusRepositoryInterface::class);
+        $statusRepo->createOrUpdate(['lead_id' => $seeder->lead->getKey(), 'lead_status' => LeadStatus::STATUS_LOST]);
+
+        // archive Lead
+        $leadRepo = app(LeadRepositoryInterface::class);
+        $leadRepo->update(['id' => $seeder->lead->getKey(), 'is_archived' => Lead::LEAD_ARCHIVED]);
+
+        // send a new inquiry
+        $params = [
+            'website_id' => $seeder->website->getKey(),
+            'inquiry_type' => InquiryLead::INQUIRY_TYPE_DEFAULT,
+            'lead_types' => [LeadType::TYPE_MANUAL],
+            'first_name' => $seeder->lead->first_name,
+            'last_name' => $seeder->lead->last_name,
+            'email_address' => $seeder->lead->email_address,
+            'inventory' => [$seeder->anotherInventory->getKey()]
+        ];
+
+        $response = $this->json(
+            'PUT',
+            '/api/inquiry/create',
+            $params,
+            ['access-token' => $seeder->authToken->access_token]
+        );
+
+        $response->assertStatus(200);
+
+        // confirm that no new lead is created
+        $this->assertEquals(1, Lead::where('dealer_id', $seeder->dealer->getKey())->count());
+
+        // confirm that a new inquiry interaction is created
+        $this->assertEquals(1, $seeder->lead->interactions()
+            ->where('interaction_type', 'INQUIRY')
+            ->where('interaction_notes', 'like', 'Original Inquiry: '. $seeder->lead->first_name .' '. $seeder->lead->last_name .'%')->count());
+
+        // confirm lead types
+        $this->assertDatabaseHas(LeadType::getTableName(), [
+            'lead_id' => $seeder->lead->getKey(),
+            'lead_type' => LeadType::TYPE_MANUAL
+        ]);
+
+        $this->assertDatabaseHas(LeadType::getTableName(), [
+            'lead_id' => $seeder->lead->getKey(),
+            'lead_type' => LeadType::TYPE_GENERAL
+        ]);
+
+        // confirm units of interest
+        $this->assertDatabaseHas('crm_inventory_lead', [
+            'website_lead_id' => $seeder->lead->getKey(),
+            'inventory_id' => $seeder->lead->inventory_id
+        ]);
+
+        $this->assertDatabaseHas('crm_inventory_lead', [
+            'website_lead_id' => $seeder->lead->getKey(),
+            'inventory_id' => $seeder->anotherInventory->inventory_id
+        ]);
+
+        // confirm Lead status is changed to New Inquiry
+        $this->assertDatabaseHas(LeadStatus::getTableName(), [
+            'tc_lead_identifier' => $seeder->lead->getKey(),
+            'status' => LeadStatus::STATUS_NEW_INQUIRY
+        ]);
+
+        // confirm Lead is unarchived
+        $this->assertDatabaseHas(Lead::getTableName(), [
+            'identifier' => $seeder->lead->getKey(),
+            'is_archived' => Lead::NOT_ARCHIVED
         ]);
 
         $seeder->cleanUp();
