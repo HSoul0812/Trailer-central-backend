@@ -4,11 +4,11 @@ namespace App\Http\Controllers\v1\User;
 
 use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\User\CreateUserRequest;
+use App\Http\Requests\User\DealerClassifiedsRequest;
 use App\Http\Requests\User\GetDealerRequest;
 use App\Http\Requests\User\GetUserRequest;
-use App\Models\User\User;
 use App\Repositories\User\UserRepositoryInterface;
-use App\Transformers\User\DealerClassifiedTransformer;
+use App\Services\User\DealerOptionsService;
 use App\Transformers\User\UserTransformer;
 use Dingo\Api\Http\Response;
 use Illuminate\Http\Request;
@@ -23,13 +23,21 @@ class UserController extends RestfulControllerV2
     private $userRepository;
 
     /**
+     * @var DealerOptionsService
+     */
+    private $dealerOptionsService;
+
+    /**
      * @param UserRepositoryInterface $userRepository
+     * @param DealerOptionsService $dealerOptionsService
      */
     public function __construct(
-        UserRepositoryInterface $userRepository
+        UserRepositoryInterface $userRepository,
+        DealerOptionsService $dealerOptionsService
     ) {
         $this->middleware('setDealerIdOnRequest');
         $this->userRepository = $userRepository;
+        $this->dealerOptionsService = $dealerOptionsService;
     }
 
     /**
@@ -71,52 +79,47 @@ class UserController extends RestfulControllerV2
     }
 
     /**
+     * Retrieve dealer user
+     * @param Request $request
+     * @return Response
+     * @throws \App\Exceptions\Requests\Validation\NoObjectIdValueSetException
+     * @throws \App\Exceptions\Requests\Validation\NoObjectTypeSetException
+     */
+    public function show(Request $request): Response {
+        $getRequest = new GetDealerRequest($request->all());
+
+        if($getRequest->validate()) {
+            return $this->response->item(
+                $this->userRepository->get($request->all()),
+                new UserTransformer()
+            );
+        }
+
+        return $this->response->errorBadRequest();
+    }
+
+    /**
      * Activate Dealer Classifieds
      * @param Request $request
+     * @param bool $activate
      * @return Response
      * @throws \App\Exceptions\Requests\Validation\NoObjectIdValueSetException
      * @throws \App\Exceptions\Requests\Validation\NoObjectTypeSetException
      */
-    public function activateDealerClassifieds(Request $request): Response {
-        $getRequest = new GetDealerRequest($request->all());
+    public function updateDealerClassifieds(Request $request): Response {
+        $getRequest = new DealerClassifiedsRequest($request->all());
         if($getRequest->validate()) {
-            return $this->response->item(
-                $this->userRepository->activateDealerClassifieds($request->dealer_id),
-                new UserTransformer()
-            );
+            if ($getRequest->active) {
+                if ($this->dealerOptionsService->activateDealerClassifieds($request->dealer_id)) {
+                    return $this->successResponse();
+                }
+            } else {
+                if ($this->dealerOptionsService->deactivateDealerClassifieds($request->dealer_id)) {
+                    return $this->successResponse();
+                }
+            }
         }
 
         return $this->response->errorBadRequest();
-    }
-
-    /**
-     * Deactivate Dealer Classifieds
-     * @param Request $request
-     * @return Response
-     * @throws \App\Exceptions\Requests\Validation\NoObjectIdValueSetException
-     * @throws \App\Exceptions\Requests\Validation\NoObjectTypeSetException
-     */
-    public function deactivateDealerClassifieds(Request $request): Response {
-        $getRequest = new GetDealerRequest($request->all());
-        if($getRequest->validate()) {
-            return $this->response->item(
-                $this->userRepository->deactivateDealerClassifieds($request->dealer_id),
-                new UserTransformer()
-            );
-        }
-
-        return $this->response->errorBadRequest();
-    }
-
-    /**
-     * Deactivate Dealer Classifieds
-     * @param Request $request
-     * @return Response
-     */
-    public function getClassified(Request $request): Response {
-        return $this->response->item(
-            User::findOrFail($request->dealer_id),
-            new DealerClassifiedTransformer()
-        );
     }
 }
