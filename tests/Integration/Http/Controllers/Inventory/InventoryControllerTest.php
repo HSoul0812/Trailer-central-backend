@@ -17,6 +17,7 @@ use Dingo\Api\Exception\ResourceException;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 use Tests\database\seeds\Inventory\InventoryHistorySeeder;
 use Tests\database\seeds\Inventory\InventorySeeder;
@@ -42,6 +43,7 @@ class InventoryControllerTest extends TestCase
      * Tests that SUT is throwing the correct exception when some query parameter is invalid
      *
      * @typeOfTest IntegrationTestCase
+     *
      * @dataProvider invalidQueryParametersProvider
      *
      * @param array $params
@@ -57,12 +59,11 @@ class InventoryControllerTest extends TestCase
      * @group DMS_INVENTORY
      */
     public function testHistoryInvalidParameters(
-        array   $params,
-        string  $expectedException,
-        string  $expectedExceptionMessage,
+        array $params,
+        string $expectedException,
+        string $expectedExceptionMessage,
         ?string $firstExpectedErrorMessage
-    ): void
-    {
+    ): void {
         $inventoryHistorySeeder = new InventoryHistorySeeder();
 
         // Given I have a collection of inventory transactions
@@ -125,7 +126,29 @@ class InventoryControllerTest extends TestCase
 
         $inventory = Inventory::find($responseJson['response']['data']['id']);
 
-        $this->assertSame($inventoryParams['description_html'], $inventory['description_html']);
+        $doc = new \DOMDocument();
+        $doc->loadHTML($inventory['description_html']);
+
+        foreach ($inventoryParams['description_html_assertion'] ?? [] as $item) {
+            $tagName = $item['tagName'];
+            $domElements = $doc->getElementsByTagName($tagName);
+
+            $this->assertSame($item['count'], count($domElements));
+
+            switch ($item['type']) {
+                case 'same':
+                    $this->assertSame($domElements->item($item['index'])->textContent, $item['search']);
+
+                    break;
+                case 'contains':
+                    $this->assertStringContainsStringIgnoringCase(
+                        $item['search'],
+                        $domElements->item($item['index'])->textContent
+                    );
+
+                    break;
+            }
+        }
 
         $seeder->cleanUp();
     }
@@ -142,6 +165,8 @@ class InventoryControllerTest extends TestCase
      */
     public function testDealerUserCreate(array $inventoryParams)
     {
+        $inventoryParams = $this->getInventoryDataWithoutExtraInfo($inventoryParams);
+
         $seederParams = [
             'userType' => AuthToken::USER_TYPE_DEALER_USER,
             'permissions' => [[
@@ -254,7 +279,7 @@ class InventoryControllerTest extends TestCase
         $inventoryParams['brand'] = $seeder->brand->name;
         $inventoryParams['category'] = $seeder->category->legacy_category;
 
-        $expectedInventoryParams = $inventoryParams;
+        $expectedInventoryParams = $this->getInventoryDataWithoutExtraInfo($inventoryParams);
 
         foreach (CreateInventoryPermissionMiddleware::SUPER_ADMIN_FIELDS as $field) {
             unset($expectedInventoryParams[$field]);
@@ -293,6 +318,7 @@ class InventoryControllerTest extends TestCase
 
     /**
      * @covers ::create
+     *
      * @group DMS
      * @group DMS_INVENTORY
      */
@@ -395,6 +421,8 @@ class InventoryControllerTest extends TestCase
         $inventoryParams['brand'] = $seeder->brand;
         $inventoryParams['category'] = $seeder->category;
 
+        $inventoryParams = $this->getInventoryDataWithoutExtraInfo($inventoryParams);
+
         // Insert Into DB
         $inventory = factory(Inventory::class)->create($inventoryParams);
         $this->assertDatabaseHas('inventory', ['inventory_id' => $inventory->inventory_id]);
@@ -441,6 +469,8 @@ class InventoryControllerTest extends TestCase
     {
         $seeder = new InventorySeeder(['withInventory' => true]);
         $seeder->seed();
+
+        $inventoryParams = $this->getInventoryDataWithoutExtraInfo($inventoryParams);
 
         // Insert Into DB
         $inventory = factory(Inventory::class)->create($inventoryParams);
@@ -635,6 +665,36 @@ HTML,
                 'hidden_price' => 9911.22,
                 'has_stock_images' => true,
                 'show_on_auction123' => false,
+                'description_html_assertion' => [
+                    [
+                        'index' => 0,
+                        'tagName' => 'h4',
+                        'search' => 'OVERVIEW',
+                        'count' => 1,
+                        'type' => 'same',
+                    ],
+                    [
+                        'index' => 0,
+                        'tagName' => 'p',
+                        'search' => '2019 Forest River Grey Wolf 29BH ',
+                        'count' => 4,
+                        'type' => 'same',
+                    ],
+                    [
+                        'index' => 2,
+                        'tagName' => 'p',
+                        'search' => '2019 Grey Wolf 29BH',
+                        'count' => 4,
+                        'type' => 'contains',
+                    ],
+                    [
+                        'index' => 3,
+                        'tagName' => 'p',
+                        'search' => '717-667-1400',
+                        'count' => 4,
+                        'type' => 'contains',
+                    ],
+                ],
             ]],
             'inventory_cdw_824_1' => [[
                 'entity_type_id' => 1, // CDW-824 Sample
@@ -773,6 +833,36 @@ HTML,
                 'hidden_price' => 9911.22,
                 'has_stock_images' => true,
                 'show_on_auction123' => false,
+                'description_html_assertion' => [
+                    [
+                        'index' => 0,
+                        'tagName' => 'p',
+                        'search' => 'Stock Number: AL1879',
+                        'count' => 6,
+                        'type' => 'contains',
+                    ],
+                    [
+                        'index' => 2,
+                        'tagName' => 'p',
+                        'search' => 'Axle',
+                        'count' => 6,
+                        'type' => 'contains',
+                    ],
+                    [
+                        'index' => 3,
+                        'tagName' => 'p',
+                        'search' => '5 Year Limited Warranty',
+                        'count' => 6,
+                        'type' => 'contains',
+                    ],
+                    [
+                        'index' => 5,
+                        'tagName' => 'p',
+                        'search' => 'WASATCH TRAILER SALES',
+                        'count' => 6,
+                        'type' => 'contains',
+                    ],
+                ],
             ]],
             'inventory_cdw_824_2' => [[
                 'entity_type_id' => 1, // CDW-824 Sample
@@ -909,6 +999,36 @@ HTML,
                 'hidden_price' => 9911.22,
                 'has_stock_images' => true,
                 'show_on_auction123' => false,
+                'description_html_assertion' => [
+                    [
+                        'index' => 0,
+                        'tagName' => 'p',
+                        'search' => 'Stock Number: AL1879',
+                        'count' => 5,
+                        'type' => 'contains',
+                    ],
+                    [
+                        'index' => 1,
+                        'tagName' => 'p',
+                        'search' => 'Axle',
+                        'count' => 5,
+                        'type' => 'contains',
+                    ],
+                    [
+                        'index' => 3,
+                        'tagName' => 'p',
+                        'search' => 'Aluminum Fenders',
+                        'count' => 5,
+                        'type' => 'contains',
+                    ],
+                    [
+                        'index' => 4,
+                        'tagName' => 'p',
+                        'search' => 'Springville',
+                        'count' => 5,
+                        'type' => 'contains',
+                    ],
+                ],
             ]],
         ];
     }
@@ -1008,8 +1128,8 @@ HTML,
                     'show_on_auction123' => false,
                 ],
                 'Validation Failed',
-                ['brand' => ['validation.inventory_brand_valid']]
-            ]
+                ['brand' => ['validation.inventory_brand_valid']],
+            ],
         ];
     }
 
@@ -1128,12 +1248,22 @@ HTML,
         $seeder->seed();
         $inventoryId = $seeder->inventory->getKey();
         $response = $this->json('POST', "/api/inventory/$inventoryId/export", [
-            'format' => 'pdf'
+            'format' => 'pdf',
         ], $this->getSeederAccessToken($seeder));
         $response->assertJsonPath('response.status', 'success');
 
         Storage::disk('s3')->exists("inventory-exports/$inventoryId");
 
         $seeder->cleanUp();
+    }
+
+    /**
+     * @param array $inventoryParams
+     *
+     * @return array
+     */
+    private function getInventoryDataWithoutExtraInfo(array $inventoryParams): array
+    {
+        return Arr::except($inventoryParams, ['description_html_assertion', 'description_html']);
     }
 }
