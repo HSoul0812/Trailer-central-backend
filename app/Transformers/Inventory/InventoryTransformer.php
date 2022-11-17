@@ -336,7 +336,7 @@ class InventoryTransformer extends TransformerAbstract
     private function imageSorter(): callable
     {
         return static function (InventoryImage $image): int {
-            $position = $image->position ?: 100; // when the position is null, it will sorted a last position
+            $position = $image->position ?: InventoryImage::LAST_IMAGE_POSITION; // when the position is null, it will sorted a last position
 
             return $image->isDefault() ? -1 : $position;
         };
