@@ -106,6 +106,9 @@ class InventoryService implements InventoryServiceInterface
      */
     private $logService;
 
+    /** @var \Parsedown */
+    private $markdownHelper;
+
     /**
      * InventoryService constructor.
      * @param InventoryRepositoryInterface $inventoryRepository
@@ -119,6 +122,7 @@ class InventoryService implements InventoryServiceInterface
      * @param DealerLocationRepositoryInterface $dealerLocationRepository
      * @param DealerLocationMileageFeeRepositoryInterface $dealerLocationMileageFeeRepository
      * @param CategoryRepositoryInterface $categoryRepository
+     * @param \Parsedown $parsedown
      * @param GeoLocationRepositoryInterface $geolocationRepository
      */
     public function __construct(
@@ -134,6 +138,7 @@ class InventoryService implements InventoryServiceInterface
         DealerLocationMileageFeeRepositoryInterface $dealerLocationMileageFeeRepository,
         CategoryRepositoryInterface $categoryRepository,
         GeoLocationRepositoryInterface $geolocationRepository,
+        \Parsedown $parsedown,
         ?LoggerServiceInterface $logService = null
     ) {
         $this->inventoryRepository = $inventoryRepository;
@@ -149,6 +154,7 @@ class InventoryService implements InventoryServiceInterface
         $this->categoryRepository = $categoryRepository;
         $this->geolocationRepository = $geolocationRepository;
         $this->logService = $logService ?? app()->make(LoggerServiceInterface::class);
+        $this->markdownHelper = $parsedown;
     }
 
     /**
@@ -185,6 +191,10 @@ class InventoryService implements InventoryServiceInterface
                 $params['clapps']['default-image'] = $clappImage['path'];
             }
 
+            if (!empty($params['description'])) {
+                $params['description_html'] = $this->convertMarkdown($params['description']);
+            }
+
             $inventory = $this->inventoryRepository->create($params);
 
             if (!$inventory instanceof Inventory) {
@@ -205,7 +215,7 @@ class InventoryService implements InventoryServiceInterface
             Log::error('Item create error. Message - ' . $e->getMessage(), $e->getTrace());
             $this->inventoryRepository->rollbackTransaction();
 
-            throw new InventoryException('Inventory item create error');
+            throw new InventoryException('Item create error. Message - ' . $e->getMessage());
         }
 
         return $inventory;
@@ -250,6 +260,14 @@ class InventoryService implements InventoryServiceInterface
             if (!empty($clappsDefaultImage)) {
                 $clappImage = $this->imageService->upload($clappsDefaultImage, $params['title'], $params['dealer_id']);
                 $params['clapps']['default-image'] = $clappImage['path'];
+            }
+
+            if (!empty($params['description'])) {
+                $params['description_html'] = $this->convertMarkdown($params['description']);
+            }
+
+            if (!empty($params['is_archived']) && $params['is_archived'] == 1) {
+                $params['archived_at'] = Carbon::now()->format('Y-m-d H:i:s');
             }
 
             $inventory = $this->inventoryRepository->update($params, $options);
@@ -824,5 +842,101 @@ class InventoryService implements InventoryServiceInterface
             self::PDF_EXPORT => PdfExporter::class
         ][$format];
         return (new $instance)->export($this->inventoryRepository->get(['id' => $inventoryId]));
+    }
+
+    public function convertMarkdown($input): string
+    {
+        $input = str_replace('\n', PHP_EOL, $input);
+        $input = str_replace('\\' . PHP_EOL, PHP_EOL . PHP_EOL, $input); // to fix CDW-824 problems
+        $input = str_replace('\\' . PHP_EOL . 'n', PHP_EOL . PHP_EOL . PHP_EOL, $input);
+
+        $input = str_replace('\\\\', '', $input);
+        $input = str_replace('\\,', ',', $input);
+        $input = str_replace('****', '', $input);
+        $input = str_replace('__', '', $input);
+
+        $input = str_replace('<BR>', '<br>', $input);
+        $input = str_replace('<BR/>', '<br>', $input);
+        $input = str_replace('<Br/>', '<br>', $input);
+        $input = str_replace('<br/>', '<br>', $input);
+        $input = str_replace('<bR/>', '<br>', $input);
+        $input = str_replace('<bR>', '<br>', $input);
+        $input = preg_replace('/<(?!br\s*\/?)[^<>]+>/', '', $input);
+
+        // Try/Catch Errors
+        $converted = '';
+        $exception = '';
+        try {
+            // Initialize Markdown Converter
+            $converter = new \Parsedown(); // This parser is 10x faster than the CommonMarkConverter
+            $converted = $converter->text($input);
+        } catch(\Exception $e) {
+            $exception = $e->getMessage();
+        }
+
+        // Convert Markdown to HTML
+        $description = preg_replace('/\\\\/', '<br>', $converted);
+
+        // to fix CDW-824 problems
+        $description = nl2br($description);
+
+        // taken from previous CDW-824 solution
+        $description = str_replace('<code>', '', $description);
+        $description = str_replace('</code>', '', $description);
+        $description = str_replace('<pre>', '', $description);
+        $description = str_replace('</pre>', '', $description);
+
+        $description = $this->fixNonAsciiChars($description);
+
+        // Return
+        return $description.PHP_EOL;
+    }
+
+    /**
+     * @param string $description
+     * @return array|string|string[]|null
+     */
+    private function fixNonAsciiChars(string $description)
+    {
+
+        $description = preg_replace('/(\\?\*){2,}/', '**', $description);
+        $description = preg_replace('/(\\?_)+/', '_', $description);
+        $description = preg_replace('/\\+/', '', $description);
+
+        // Fix 0xa0 or nbsp
+        $description = preg_replace('/\xA0/', ' ', $description);
+        $description = preg_replace('/\xBE/', '3/4', $description);
+        $description = preg_replace('/\xBC/', '1/4', $description);
+        $description = preg_replace('/\xBD/', '1/2', $description);
+
+        $description = preg_replace('/\x91/', "'", $description);
+        $description = preg_replace('/\x92/', "'", $description);
+        $description = preg_replace('/\xB4/', "'", $description);
+        $description = preg_replace('/\x27/', "'", $description);
+
+        $description = preg_replace('/\x93/', '"', $description);
+        $description = preg_replace('/\x94/', '"', $description);
+        $description = preg_replace('/”/', '"', $description);
+        $description = preg_replace('/’/', "'", $description);
+
+        $description = preg_replace('/©/', "Copyright", $description);
+        $description = preg_replace('/®/', "Registered", $description);
+
+        $description = preg_replace('/[[:^print:]]/', ' ', $description);
+
+        preg_match('/<ul>(.*?)<\/ul>/s', $description, $match);
+        if (!empty($match)) {
+            $new_ul = strip_tags($match[0], '<ul><li><a><b><strong>');
+            $description = str_replace($match[0], $new_ul, $description);
+        }
+
+        // Only accepts necessary tags
+        preg_match('/<ol>(.*?)<\/ol>/s', $description, $match);
+        if (!empty($match)) {
+            $new_ol = strip_tags($match[0], '<ul><li><a><b><strong>');
+            $description = str_replace($match[0], $new_ol, $description);
+        }
+
+        return $description;
     }
 }

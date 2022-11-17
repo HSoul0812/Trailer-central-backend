@@ -48,7 +48,8 @@ class DealerTransformer extends TransformerAbstract
                 'type' => $dealer->authType,
                 'username' => $dealer->authUsername,
                 'password' => $dealer->authPassword
-            ]
+            ],
+            'last_attempt_ts' => $dealer->last_attempt_ts
         ];
     }
 

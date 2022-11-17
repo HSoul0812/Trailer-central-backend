@@ -63,4 +63,10 @@ interface InventoryServiceInterface
      * @return string
      */
     public function export(int $inventoryId, string $format): string;
+
+    /**
+     * @param string $markDown
+     * @return string
+     */
+    public function convertMarkdown(string $markDown): string;
 }

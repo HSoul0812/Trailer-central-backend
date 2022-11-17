@@ -24,6 +24,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use League\Fractal\Pagination\IlluminatePaginatorAdapter;
 use League\Fractal\Resource\Collection as Pagination;
+use Illuminate\Support\Arr;
 
 /**
  * Class MarketplaceService
@@ -58,9 +59,9 @@ class MarketplaceService implements MarketplaceServiceInterface
      * 
      * @param MarketplaceRepositoryInterface $marketplace
      * @param TunnelRepositoryInterface $tunnels
-     * @param ListingRepositoryInterfaces $listings
-     * @param ImageRepositoryInterfaces $images
-     * @param ErrorRepositoryInterfaces $errors
+     * @param ListingRepositoryInterface $listings
+     * @param ImageRepositoryInterface $images
+     * @param ErrorRepositoryInterface $errors
      * @param PostingRepositoryInterface $postingSession
      * @param InventoryTransformer $inventoryTransformer
      */
@@ -120,9 +121,9 @@ class MarketplaceService implements MarketplaceServiceInterface
      * 
      * @return MarketplaceStatus
      */
-    public function status(): MarketplaceStatus {
+    public function status(array $params): MarketplaceStatus {
         // Get All Marketplace Integration Dealers
-        $dealers = $this->getIntegrations();
+        $dealers = $this->getIntegrations($params);
 
         // Get Available Tunnels
         $tunnels = $this->tunnels->getAll();
@@ -214,11 +215,17 @@ class MarketplaceService implements MarketplaceServiceInterface
                                     'Listing #' . $params['id']);
             }
 
-            // Update Imported At
-            $marketplace = $this->marketplace->update([
-                'id' => $params['marketplace_id'],
-                'imported_at' => Carbon::now()->setTimezone('UTC')->toDateTimeString()
-            ]);
+            $nrOfListingsToday = $this->listings->countFacebookPostings(Marketplace::find($params['marketplace_id']));
+            $inventoryRemaining = $this->getInventory(Marketplace::find($params['marketplace_id']), MarketplaceStatus::METHOD_MISSING, []);
+            $nrInventoryItemsRemaining = count($inventoryRemaining->inventory);
+
+            if ($nrOfListingsToday === config('marketing.fb.settings.limit.listings', 3) || $nrInventoryItemsRemaining === 0) {
+                // Update Imported At
+                $marketplace = $this->marketplace->update([
+                    'id' => $params['marketplace_id'],
+                    'imported_at' => Carbon::now()->setTimezone('UTC')->toDateTimeString()
+                ]);
+            }
 
             $this->listings->commitTransaction();
 
@@ -284,15 +291,15 @@ class MarketplaceService implements MarketplaceServiceInterface
      * 
      * @return Collection<DealerFacebook>
      */
-    private function getIntegrations(): Collection {
+    private function getIntegrations(array $params): Collection {
         
         $runningIntegrationIds = $this->postingSession->getIntegrationIds();
 
-        $integrations = $this->marketplace->getAll([
-            'sort' => '-imported',
+        $integrations = $this->marketplace->getAll(['sort' => '-last_attempt_ts',
             'import_range' => config('marketing.fb.settings.limit.hours', 0),
             'exclude' => $runningIntegrationIds,
-            'skip_errors' => config('marketing.fb.settings.limit.errors', 1)
+            'skip_errors' => config('marketing.fb.settings.limit.errors', 1),
+            'per_page' => $params['per_page'] ?? null
         ]);
 
         // Loop Facebook Integrations
@@ -308,7 +315,8 @@ class MarketplaceService implements MarketplaceServiceInterface
                 'auth_username' => $integration->tfa_username,
                 'auth_password' => $integration->tfa_password,
                 'auth_type' => $integration->tfa_type,
-                'tunnels' => $this->tunnels->getAll(['dealer_id' => $integration->dealer_id])
+                'tunnels' => $this->tunnels->getAll(['dealer_id' => $integration->dealer_id]),
+                'last_attempt_ts' => $integration->last_attempt_ts
             ]));
         }
 
@@ -336,6 +344,13 @@ class MarketplaceService implements MarketplaceServiceInterface
         // Get Method
         $method = MarketplaceStatus::INVENTORY_METHODS[$type];
 
+        $nowTime = microtime(true);
+        $this->log->info('Debug time BEFORE ' . $method . ': ' . ($nowTime - $startTime));
+
+        if ($type === MarketplaceStatus::METHOD_MISSING) {
+            $params['per_page'] = config('marketing.fb.settings.limit.listings') - $this->listings->countFacebookPostings($integration);
+        }
+
         // Get Inventory
         $inventory = $this->listings->{$method}($integration, $params);
         $nowTime = microtime(true);
@@ -357,8 +372,7 @@ class MarketplaceService implements MarketplaceServiceInterface
         // Append Paginator
         $response = new MarketplaceInventory([
             'type' => $type,
-            'inventory' => $listings,
-            'paginator' => new IlluminatePaginatorAdapter($inventory)
+            'inventory' => $listings
         ]);
         return $response;
     }

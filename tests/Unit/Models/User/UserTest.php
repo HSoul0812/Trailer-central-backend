@@ -12,6 +12,7 @@ use Tests\TestCase;
  * Test for App\Models\User\User
  *
  * Class UserTest
+ *
  * @package Tests\Unit\Models\User
  *
  * @coversDefaultClass \App\Models\User\User
@@ -20,6 +21,9 @@ class UserTest extends TestCase
 {
     /**
      * @covers ::getPermissions
+     *
+     * @group DMS
+     * @group DMS_USER
      */
     public function testGetPermissions()
     {
@@ -28,7 +32,7 @@ class UserTest extends TestCase
 
         $user
             ->shouldReceive('getPermissions')
-            ->passthru();;
+            ->passthru();
 
         $result = $user->getPermissions();
 
@@ -38,24 +42,51 @@ class UserTest extends TestCase
 
     /**
      * @covers ::hasPermission
+     *
+     * @group DMS
+     * @group DMS_USER
      */
     public function testHasPermission()
     {
         /** @var LegacyMockInterface|User $user */
-        $user = $this->getEloquentMock(User::class);
+        $user = $this->getEloquentMock(User::class)->makePartial();
 
-        $user
-            ->shouldReceive('getPermissions')
-            ->passthru();
+        $user->shouldReceive('hasCrmPermission')->passthru();
+        $user->shouldReceive('getDealerId')->andReturn($this->getTestDealerId());
 
-        $user
-            ->shouldReceive('hasPermission')
-            ->passthru();;
+        // Check permission for CRM feature
+        $this->assertTrue(
+            $user->hasPermission(PermissionsInterface::CRM, PermissionsInterface::SUPER_ADMIN_PERMISSION)
+        );
 
-        foreach (PermissionsInterface::FEATURES as $feature) {
-            foreach (PermissionsInterface::PERMISSION_LEVELS as $permissionLevel) {
-                $this->assertFalse($user->hasPermission($feature, $permissionLevel));
-            }
-        }
+        // Check permission for Accounts feature
+        $this->assertTrue(
+            $user->hasPermission(PermissionsInterface::ACCOUNTS, PermissionsInterface::CAN_SEE_AND_CHANGE_PERMISSION)
+        );
+    }
+
+    /**
+     * @covers ::hasPermission
+     *
+     * @group DMS
+     * @group DMS_USER
+     */
+    public function testHasPermissionInactiveCrmUser()
+    {
+        /** @var LegacyMockInterface|User $user */
+        $user = $this->getEloquentMock(User::class)->makePartial();
+
+        $user->shouldReceive('hasCrmPermission')->andReturn(false);
+        $user->shouldReceive('getDealerId')->andReturn($this->getTestDealerId());
+
+        // Check permission for CRM feature
+        $this->assertFalse(
+            $user->hasPermission(PermissionsInterface::CRM, PermissionsInterface::SUPER_ADMIN_PERMISSION)
+        );
+
+        // Check permission for POS feature
+        $this->assertTrue(
+            $user->hasPermission(PermissionsInterface::POS, PermissionsInterface::CANNOT_SEE_PERMISSION)
+        );
     }
 }

@@ -47,7 +47,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property bool $unarchive_sold_items
  * @property string $cdk_password
  * @property string $cdk_username
+ * @property string $cdk_dealer_cmfs
  * @property bool $use_factory_mapping
+ * @property bool is_mfg_brand_mapping_enabled
  * @property string $skip_categories
  * @property string $skip_locations
  * @property string|null $ids_token
@@ -84,6 +86,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $motility_integration_id
  * @property string|null $local_image_directory_address
  * @property string|null $video_source_fields
+ *
  */
 class Collector extends Model implements Filterable
 {
@@ -91,6 +94,7 @@ class Collector extends Model implements Filterable
         self::FILE_FORMAT_XML,
         self::FILE_FORMAT_CSV,
         self::FILE_FORMAT_CDK,
+        self::FILE_FORMAT_CDK_MULTIPLE,
         self::FILE_FORMAT_IDS,
         self::FILE_FORMAT_XML_URL,
         self::FILE_FORMAT_PIPE_DELIMITED,
@@ -102,6 +106,7 @@ class Collector extends Model implements Filterable
     ];
 
     public const FILE_FORMAT_CDK = 'cdk';
+    public const FILE_FORMAT_CDK_MULTIPLE = 'cdk_multiple';
     public const FILE_FORMAT_XML = 'xml';
     public const FILE_FORMAT_CSV = 'csv';
     public const FILE_FORMAT_IDS = 'ids';
@@ -169,11 +174,13 @@ class Collector extends Model implements Filterable
         'unarchive_sold_items',
         'cdk_password',
         'cdk_username',
+        'cdk_dealer_cmfs',
         'motility_username',
         'motility_password',
         'motility_account_no',
         'motility_integration_id',
         'use_factory_mapping',
+        'is_mfg_brand_mapping_enabled',
         'skip_categories',
         'skip_locations',
         'zero_msrp',
@@ -200,7 +207,17 @@ class Collector extends Model implements Filterable
     protected $casts = [
         'last_run' => 'datetime',
         'scheduled_for' => 'datetime',
+        'overridable_fields' => 'array'
     ];
+
+    public function getOverridableFieldsListAttribute(): string
+    {
+        $overridable_fields = array_keys(array_filter($this->overridable_fields, function($v){
+            return $v;
+        }));
+
+        return implode(",", $overridable_fields);
+    }
 
     public function dealers(): BelongsTo
     {

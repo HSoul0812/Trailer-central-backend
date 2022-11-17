@@ -38,16 +38,41 @@ class Marketplace extends Model
      */
     const TFA_TYPES = [
         'authy' => 'Authy',
-        'sms' => 'SMS'
+        'sms' => 'SMS',
+        'code' => 'Facebook 2FA Code',
     ];
 
     /**
      * @const array Active Two-Factor Auth Types
      */
     const TFA_TYPES_ACTIVE = [
-        'sms'
+        'sms', 'code'
     ];
 
+    /**
+     * @const string
+     */
+    const STATUS_ACTIVE = 'active';
+
+    /**
+     * @const string
+     */
+    const STATUS_INVALID = 'invalid';
+
+    /**
+     * @const string
+     */
+    const STATUS_FAILED = 'failed';
+
+    /**
+     * @const string
+     */
+    const STATUS_DELETED = 'deleted';
+
+    /**
+     * @const string
+     */
+    const STATUS_EXPIRED = 'expired';
 
     /**
      * @var string
@@ -72,6 +97,7 @@ class Marketplace extends Model
         'fb_password',
         'tfa_username',
         'tfa_password',
+        'tfa_code',
         'tfa_type',
         'imported_at'
     ];
@@ -104,6 +130,16 @@ class Marketplace extends Model
     public function listings(): HasMany
     {
         return $this->hasMany(Listings::class, 'marketplace_id', 'id');
+    }
+
+    /**
+     * Get Errors
+     *
+     * @return HasMany
+     */
+    public function errors(): HasMany
+    {
+        return $this->hasMany(Error::class, 'marketplace_id', 'id');
     }
 
     /**

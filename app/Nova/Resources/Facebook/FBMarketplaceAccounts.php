@@ -3,6 +3,13 @@
 namespace App\Nova\Resources\Facebook;
 
 use App\Nova\Actions\Dealer\ClearFBMEErrors;
+use App\Nova\Actions\FME\DownloadIntegrationRunHistory;
+use App\Nova\Actions\FME\DownloadRunHistory;
+use App\Nova\Metrics\Marketing\FmeDealersAttempted;
+use App\Nova\Metrics\Marketing\FmeErrors;
+use App\Nova\Metrics\Marketing\FmeIntegrations;
+use App\Nova\Metrics\Marketing\FmeListings;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Text;
@@ -13,6 +20,7 @@ use Laravel\Nova\Panel;
 class FBMarketplaceAccounts extends Resource
 {
     public static $group = 'Facebook';
+    public static $orderBy = ['last_attempt_ts' => 'asc'];
 
     /**
      * The model the resource corresponds to.
@@ -37,7 +45,7 @@ class FBMarketplaceAccounts extends Resource
         'dealer_id', 'dealer_name', 'fb_username', 'units_posted_today'
     ];
 
-    public static function label()
+    public static function label(): string
     {
         return 'FB Marketplace Accounts';
     }
@@ -45,7 +53,7 @@ class FBMarketplaceAccounts extends Resource
     /**
      * Get the fields displayed by the resource.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param Request $request
      * @return array
      */
     public function fields(Request $request): array
@@ -53,7 +61,9 @@ class FBMarketplaceAccounts extends Resource
         return [
             new Panel('FB Integration Details', $this->panelIntegration()),
 
-            new Panel("FBME Run Status", $this->panelStatus()),
+            new Panel("FBME Status", $this->panelStatus()),
+
+            new Panel("Today's status", $this->panelTodaysResults()),
 
             new Panel("Results " . date("m-d-Y", strtotime("-1 day")), $this->panelResults(1)),
             new Panel("Results " . date("m-d-Y", strtotime("-2 day")), $this->panelResults(2)),
@@ -64,11 +74,11 @@ class FBMarketplaceAccounts extends Resource
         ];
     }
 
-    protected function panelIntegration()
+    protected function panelIntegration(): array
     {
         return [
             Text::make('Integration ID', 'id')->onlyOnDetail(),
-            
+
             Text::make('Dealer ID', 'dealer_id')->sortable(),
 
             Text::make('Dealer Name', 'dealer_name')
@@ -79,27 +89,37 @@ class FBMarketplaceAccounts extends Resource
 
             Text::make('Location')
                 ->sortable(),
-
-
         ];
     }
 
-    protected function panelStatus()
+    protected function panelStatus(): array
     {
         return [
-            DateTime::make('Last Run', 'last_run_ts')
+            DateTime::make('Last Run Attempt', 'last_attempt_ts')
+            ->sortable(),
+            
+            Boolean::make('Last Run Status', 'last_run_status')
                 ->sortable(),
 
-            Boolean::make('Status', 'last_run_status')
-                ->sortable(),
+            Text::make('Last Known Error', 'last_known_error'),
 
-            Text::make('Units Posted Today', 'units_posted_today'),
+            DateTime::make('Last Successful Run', 'last_success_ts')
+            ->sortable(),
 
-            Text::make('Error Today', 'error_today'),
+            Text::make('Last Units Posted', 'last_units_posted'),
+
         ];
     }
 
-    protected function panelResults(int $nrDaysAgo)
+    protected function panelTodaysResults(): array
+    {
+        return [
+            Text::make('Units Posted', "units_posted_today")->onlyOnDetail(),
+            Text::make('Last Error', "error_today")->onlyOnDetail(),
+        ];
+    }
+
+    protected function panelResults(int $nrDaysAgo): array
     {
         return [
             Text::make('Units Posted', "units_posted_{$nrDaysAgo}dayago")->onlyOnDetail(),
@@ -110,18 +130,23 @@ class FBMarketplaceAccounts extends Resource
     /**
      * Get the cards available for the request.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param Request $request
      * @return array
      */
     public function cards(Request $request): array
     {
-        return [];
+        return [
+            new FmeErrors,
+            new FmeListings,
+            new FmeDealersAttempted,
+            new FmeIntegrations,
+        ];
     }
 
     /**
      * Get the filters available for the resource.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param Request $request
      * @return array
      */
     public function filters(Request $request): array
@@ -132,7 +157,7 @@ class FBMarketplaceAccounts extends Resource
     /**
      * Get the lenses available for the resource.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param Request $request
      * @return array
      */
     public function lenses(Request $request): array
@@ -145,29 +170,64 @@ class FBMarketplaceAccounts extends Resource
      *
      * @param Request $request
      * @return array
+     * @throws BindingResolutionException
      */
-    public function actions(Request $request)
+    public function actions(Request $request): array
     {
         return [
-            (app()->make(ClearFBMEErrors::class))->canSee(function ($request) {
-                return true;
-            })->canRun(function ($request) {
-                return true;
-            })->onlyOnTableRow(),
+            $this->clearErrorsAction(),
+            $this->downloadIntegrationRunHistoryAction(),
+            $this->downloadRunHistoryAction(),
         ];
     }
 
-    public static function authorizedToCreate(Request $request)
+    /**
+     * @throws BindingResolutionException
+     */
+    private function clearErrorsAction(): ClearFBMEErrors
+    {
+        return (app()->make(ClearFBMEErrors::class))->canSee(function () {
+            return true;
+        })->canRun(function () {
+            return true;
+        })->onlyOnTableRow();
+    }
+
+    /**
+     * @throws BindingResolutionException
+     */
+    private function downloadIntegrationRunHistoryAction(): DownloadIntegrationRunHistory
+    {
+        return (app()->make(DownloadIntegrationRunHistory::class))->canSee(function () {
+            return true;
+        })->canRun(function () {
+            return true;
+        })->onlyOnTableRow();
+    }
+
+    /**
+     * @throws BindingResolutionException
+     */
+    private function downloadRunHistoryAction(): DownloadRunHistory
+    {
+        return (app()->make(DownloadRunHistory::class))->canSee(function () {
+            return true;
+        })->canRun(function () {
+            return true;
+        })->onlyOnIndex();
+    }
+
+    public static function authorizedToCreate(Request $request): bool
     {
         return false;
     }
 
-    public function authorizedToDelete(Request $request)
+    public function authorizedToDelete(Request $request): bool
     {
         return false;
     }
 
-    public function authorizedToUpdate(Request $request)
+    public function authorizedToUpdate(Request $request): bool
     {
         return false;
     }

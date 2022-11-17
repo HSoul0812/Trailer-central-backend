@@ -12,69 +12,94 @@ use App\Models\Parts\Type;
 use App\Models\Parts\Vendor;
 use App\Models\User\AuthToken;
 use App\Models\Parts\BinQuantity;
+use App\Models\Parts\Part;
+use Illuminate\Support\Arr;
 use Tests\TestCase;
+use Illuminate\Support\Str;
 
 class PartsCreateTest extends TestCase
 {
-    
+
     private $vendor;
     private $manufacturer;
     private $category;
     private $type;
     private $brand;
-    
-    public function __construct() {
-        parent::__construct();   
-    }
-    
     /**
      * Test creating a part with all fields populated
+     *
+     * @group DMS
+     * @group DMS_PARTS
      *
      * @return void
      */
     public function testCreatePartAllFields()
-    {            
+    {
         $this->initializeTestData();
         $data = $this->createPartTestData();
         $authToken = AuthToken::where('user_id', 1001)->first();
-        
-        $this->json('PUT', '/api/parts', $data, ['access-token' => $authToken->access_token]) 
-            ->seeJson([
-                'dealer_id' => 1001,
-                'vendor' => $this->vendor->toArray(),
-                'brand' => $this->brand->toArray(),
-                'type' => $this->type->toArray(),
-                'category' => $this->category->toArray(),
-                'subcategory' => "Test",
-                'sku' => "12345",
-                'price' => 13,
-                'dealer_cost' => 16,
-                'msrp' => 25,
-                'weight' => 24,
-                'weight_rating' => "55 lb",
-                'description' => 'asdasdasd',
+
+        $this->putJson('/api/parts', $data, ['access-token' => $authToken->access_token])
+            ->assertJsonFragment([
+                'dealer_id' => $data['dealer_id'],
+                'subcategory' => 'Test',
                 'qty' => 3,
-                'show_on_website' => true, // transformed value
-                'is_vehicle_specific' => false, // transformed value
-                'title' => 'ddddd',
-                'alternative_part_number' => null
-            ]);             
+            ])
+            ->assertJsonStructure([
+                'data' => [
+                    'bins' => [
+                        '*' => [
+                            'id',
+                            'bin_id',
+                            'part_id',
+                            'qty',
+                        ],
+                    ],
+                    'category' => [
+                        'id',
+                        'name',
+                    ],
+                    'type' => [
+                        'id',
+                        'name'
+                    ],
+                    'brand' => [
+                        'id',
+                        'name'
+                    ],
+                    'vendor' => [
+                        'id',
+                        'dealer_id',
+                        'name',
+                        'show_on_part',
+                        'show_on_inventory',
+                        'show_on_floorplan',
+                    ],
+                ],
+            ]);
     }
-    
+
+    /**
+     * @group DMS
+     * @group DMS_PARTS
+     *
+     * @return void
+     */
      public function testCreatePartMissingRequiredFields()
-    {            
+    {
         $this->initializeTestData();
         $data = $this->createPartTestData();
         $authToken = AuthToken::where('user_id', 1001)->first();
-        
+
         unset($data['brand_id']);
         unset($data['type_id']);
         unset($data['category_id']);
         unset($data['sku']);
         unset($data['subcategory']);
-        
-        $this->json('PUT', '/api/parts', $data, ['access-token' => $authToken->access_token]) 
-            ->seeJson([
+
+        $this->putJson('/api/parts', $data, ['access-token' => $authToken->access_token])
+            ->assertStatus(422)
+            ->assertJsonPath('errors', [
                 'brand_id' => [
                     'The brand id field is required.'
                 ],
@@ -86,24 +111,28 @@ class PartsCreateTest extends TestCase
                 ],
                 'sku' => [
                     'The sku field is required.'
-                ],
-                'subcategory' => [
-                    'The subcategory field is required.'
                 ]
-            ]);             
+            ]);
     }
-    
+
+    /**
+     * @group DMS
+     * @group DMS_PARTS
+     *
+     * @return void
+     * @throws \Exception
+     */
     public function testCreatePartImageUpload()
     {
         $this->initializeTestData();
         $data = $this->createPartTestData();
-        $partsRepository = new PartRepository();
+        $partsRepository = new PartRepository(new Part());
         $part = $partsRepository->create($data);
         $imageCount = count($data['images']);
-        
+
         $this->assertEquals($part->images->count(), $imageCount);
     }
-    
+
     private function initializeTestData() {
         $this->vendor = Vendor::first();
         $this->manufacturer = Manufacturer::first();
@@ -111,8 +140,8 @@ class PartsCreateTest extends TestCase
         $this->type = Type::first();
         $this->brand = Brand::first();
     }
-    
-    private function createPartTestData() {        
+
+    private function createPartTestData() {
         return [
             "dealer_id" => 1001,
             "vendor_id" => $this->vendor->id,
@@ -120,7 +149,7 @@ class PartsCreateTest extends TestCase
             "type_id" => $this->type->id,
             "category_id" => $this->category->id,
             "subcategory" => "Test",
-            "sku" => "12345",
+            "sku" => Str::random(),
             "price" => 13,
             "dealer_cost" => 16,
             "msrp" => 25,
@@ -157,6 +186,31 @@ class PartsCreateTest extends TestCase
                     'quantity' => 4
                 ],
             ]
-        ];        
+        ];
+    }
+
+    /**
+     * @group DMS
+     * @group DMS_PARTS
+     *
+     * @return void
+     * @throws \Exception
+     */
+    public function testIsActiveAndIsTaxableHasDefault()
+    {
+        $this->initializeTestData();
+        $data = $this->createPartTestData();
+
+        $data = Arr::except($data, ['bins', 'images']);
+
+        $partsRepository = new PartRepository(new Part());
+        $part = $partsRepository->create($data);
+
+        $this->assertDatabaseHas(Part::getTableName(), [
+            'id' => $part->getKey(),
+            'dealer_id' => $part->dealer_id,
+            'is_active' => 0,
+            'is_taxable' => 1,
+        ]);
     }
 }

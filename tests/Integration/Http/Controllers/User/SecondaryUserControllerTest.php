@@ -8,8 +8,11 @@ use App\Models\User\AuthToken;
 use App\Models\User\User;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\User\DealerLocation;
+use App\Models\User\DealerUser;
+use App\Models\User\DealerUserPermission;
 use App\Models\User\NewUser;
 use App\Models\User\Interfaces\PermissionsInterface;
+use App\Nova\Permission;
 
 /**
   * Class SecondaryUserControllerTest
@@ -99,7 +102,7 @@ class SecondaryUserControllerTest extends TestCase {
             ];
             $formData[] = $userData;
         }
-        
+
         return ['users' => $formData];
     }
 
@@ -141,7 +144,7 @@ class SecondaryUserControllerTest extends TestCase {
 
     public function failedAddSecondaryUserProvider()
     {
-        $otherFeatures = array_diff(PermissionsInterface::FEATURES, 
+        $otherFeatures = array_diff(PermissionsInterface::FEATURES,
             [PermissionsInterface::CRM, PermissionsInterface::LOCATIONS]);
 
         return [
@@ -174,6 +177,10 @@ class SecondaryUserControllerTest extends TestCase {
 
     /**
      * @dataProvider failedAddSecondaryUserProvider
+     *
+     * @group DMS
+     * @group DMS_SECONDARY_USER
+     *
      * @return void
      */
     public function testFailedAddSecondaryUser($feature, $permissionLevel)
@@ -188,16 +195,15 @@ class SecondaryUserControllerTest extends TestCase {
         ];
 
         $this->withHeaders(['access-token' => $this->getAccessToken()])
-            ->json('POST', self::apiEndpoint, $userData) 
+            ->json('POST', self::apiEndpoint, $userData)
             ->assertStatus(422)
             ->assertJsonValidationErrors(['user_permissions.0.permission_level']);
     }
 
     public function addSecondayUserProvider()
     {
-        $otherFeatures = array_diff(PermissionsInterface::FEATURES, 
+        $otherFeatures = array_diff(PermissionsInterface::FEATURES,
             [PermissionsInterface::CRM, PermissionsInterface::LOCATIONS, PermissionsInterface::INVENTORY]);
-
         return [
             [
                 'email' => $this->faker->email(),
@@ -225,16 +231,18 @@ class SecondaryUserControllerTest extends TestCase {
     }
 
     /**
+     * @group DMS
+     * @group DMS_SECONDARY_USER
+     *
      * @return int of userId
      */
-    public function testAddSecondayUser()
+    public function testAddSecondaryUser()
     {
         list($userData) = $this->addSecondayUserProvider();
 
         $response = $this->withHeaders(['access-token' => $this->getAccessToken()])
-            ->json('POST', self::apiEndpoint, $userData) 
-            ->assertStatus(200)
-            ->assertJsonMissingValidationErrors()
+            ->postJson(self::apiEndpoint, $userData)
+            ->assertSuccessful()
             ->assertJsonStructure([
                 'data' => [
                     'id',
@@ -264,22 +272,30 @@ class SecondaryUserControllerTest extends TestCase {
                 'feature' => $userPermission['feature'],
                 'permission_level' => $userPermission['permission_level']
             ]);
-
-        return $newSecondaryUserId;
     }
 
     /**
-     * @depends testAddSecondayUser
      * @param int of new userId from previous test
+     *
+     * @group DMS
+     * @group DMS_SECONDARY_USER
+     *
      * @return array of the same userId & formData of the API response
      */
-    public function testGetSecondayUser($newSecondaryUserId)
+    public function testGetSecondaryUser()
     {
-        $this->assertNotNull($newSecondaryUserId);
-
+        $dealerUser = factory(DealerUser::class)->create([
+            'dealer_id' => $this->getDealerId(),
+        ]);
+        factory(DealerUserPermission::class)->create([
+            'dealer_user_id' => $dealerUser->dealer_user_id,
+            'feature' => PermissionsInterface::LOCATIONS,
+            'permission_level' => PermissionsInterface::CAN_SEE_PERMISSION,
+        ]);
         $response = $this->withHeaders(['access-token' => $this->getAccessToken()])
-            ->json('GET', self::apiEndpoint) 
-            ->assertStatus(200)
+            ->getJson(self::apiEndpoint)
+            ->assertSuccessful()
+            ->assertJsonCount(1, 'data')
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
@@ -297,35 +313,45 @@ class SecondaryUserControllerTest extends TestCase {
                     ]
                 ]
             ]);
-
-        return [
-            'userId' => $newSecondaryUserId,
-            'userIndex' => array_search($newSecondaryUserId, array_column($response->decodeResponseJson()['data'], 'id')),
-            'formData' => $this->getSecondaryUsersFormData($response->decodeResponseJson())
-        ];
     }
 
     /**
-     * @depends testGetSecondayUser
      * @param array of data from previous test
+     *
+     * @group DMS
+     * @group DMS_SECONDARY_USER
+     *
      * @return void
      */
-    public function testUpdateSecondaryUser($dependedData)
+    public function testUpdateSecondaryUser()
     {
-        // update permissions
-        $expectedPermissionLevel = $this->faker->randomElement(PermissionsInterface::PERMISSION_LEVELS);
-        $updatedFormData = $this->updateSecondaryUserFormData($dependedData['formData'], $dependedData['userId'], [
-            'permissions' => [
-                PermissionsInterface::CRM => $expectedPermissionLevel,
-                PermissionsInterface::LOCATIONS => $expectedPermissionLevel,
-                PermissionsInterface::INVENTORY => $expectedPermissionLevel,
-            ]
+        $dealerUser = factory(DealerUser::class)->create([
+            'dealer_id' => $this->getDealerId(),
         ]);
+        factory(DealerUserPermission::class)->create([
+            'dealer_user_id' => $dealerUser->dealer_user_id,
+            'feature' => PermissionsInterface::LOCATIONS,
+            'permission_level' => PermissionsInterface::CAN_SEE_PERMISSION,
+        ]);
+        $updatedFormData = [
+            'users' => [
+                [
+                    'dealer_user_id' => $dealerUser->dealer_user_id,
+                    'email' => 'test@secondary.user',
+                    'password' => 'Test123!',
+                    'user_permissions' => [
+                        [
+                            'permission_level' => PermissionsInterface::CANNOT_SEE_PERMISSION,
+                            'feature' => PermissionsInterface::LOCATIONS,
+                        ]
+                    ]
+                ]
+            ]
+        ];
 
-        $response = $this->withHeaders(['access-token' => $this->getAccessToken()])
-            ->json('PUT', self::apiEndpoint, $updatedFormData) 
-            ->assertStatus(200)
-            ->assertJsonMissingValidationErrors()
+        $this->withHeaders(['access-token' => $this->getAccessToken()])
+            ->putJson(self::apiEndpoint, $updatedFormData)
+            ->assertSuccessful()
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
@@ -342,21 +368,9 @@ class SecondaryUserControllerTest extends TestCase {
                         ]
                     ]
                 ]
+        ])->assertJsonFragment([
+            'permission_level' => PermissionsInterface::CANNOT_SEE_PERMISSION
         ]);
-
-        $jsonResponse = $response->decodeResponseJson();
-
-        $actualPermissions = $jsonResponse['data'][$dependedData['userIndex']]['permissions']['data'];
-        foreach ($actualPermissions as $actualPermission) {
-             
-            $feature = $actualPermission['feature'];
-            $actualPermissionLevel = $actualPermission['permission_level'];
-
-            if (in_array($feature, [PermissionsInterface::CRM, PermissionsInterface::LOCATIONS, PermissionsInterface::INVENTORY])) {
-                $this->assertTrue($expectedPermissionLevel === $actualPermissionLevel);
-                $this->assertDatabaseHas('dealer_user_permissions', ['dealer_user_id' => $dependedData['userId'], 'feature' => $feature, 'permission_level' => $expectedPermissionLevel]);
-            }
-        }
     }
 
     public function failedUpdateSecondaryUserProvider()
@@ -391,131 +405,88 @@ class SecondaryUserControllerTest extends TestCase {
 
     /**
      * @dataProvider failedUpdateSecondaryUserProvider
-     * @depends testGetSecondayUser
+     * @depends testGetSecondaryUser
+     *
+     * @group DMS
+     * @group DMS_SECONDARY_USER
+     *
      * @return void
      */
-    public function testFailedUpdateSecondaryUser($feature, $permissionLevel, $data)
+    public function testFailedUpdateSecondaryUser($feature, $permissionLevel)
     {
-        $testingFeatures = [PermissionsInterface::CRM, PermissionsInterface::LOCATIONS, PermissionsInterface::INVENTORY];
-        $permissionLevelIndex = array_search($feature, $testingFeatures);
-
-        // update permissions
-        $updatedFormData = $this->updateSecondaryUserFormData($data['formData'], $data['userId'], [
-            'permissions' => [
-                $feature => $permissionLevel,
-            ]
+        $dealerUser = factory(DealerUser::class)->create([
+            'dealer_id' => $this->getDealerId(),
         ]);
-
+        factory(DealerUserPermission::class)->create([
+            'dealer_user_id' => $dealerUser->dealer_user_id,
+            'feature' => PermissionsInterface::LOCATIONS,
+            'permission_level' => PermissionsInterface::CAN_SEE_PERMISSION,
+        ]);
+        $updatedFormData = [
+            'users' => [
+                [
+                    'dealer_user_id' => $dealerUser->dealer_user_id,
+                    'email' => 'test@secondary.user',
+                    'password' => 'Test123!',
+                    'user_permissions' => [
+                        [
+                            'permission_level' => $permissionLevel,
+                            'feature' => $feature,
+                        ]
+                    ]
+                ]
+            ]
+        ];
         $this->withHeaders(['access-token' => $this->getAccessToken()])
-            ->json('PUT', self::apiEndpoint, $updatedFormData) 
+            ->putJson(self::apiEndpoint, $updatedFormData)
             ->assertStatus(422)
             ->assertJsonValidationErrors([
-                'users.'. $data['userIndex'] .'.user_permissions.'. $permissionLevelIndex .'.permission_level'
+                'users.0.user_permissions.0.permission_level',
             ]);
     }
 
     /**
-     * @depends testGetSecondayUser
      * @param array of data from previous test
+     *
+     * @group DMS
+     * @group DMS_SECONDARY_USER
+     *
      * @return void
      */
-    public function testUpdateCrmPermissionWithId($data)
+    public function testUpdateCrmPermissionWithId()
     {
-        // update permissions
-        $updatedFormData = $this->updateSecondaryUserFormData($data['formData'], $data['userId'], [
-            'permissions' => [
-                PermissionsInterface::CRM => $this->getSalesPersonId(),
-            ]
+        $dealerUser = factory(DealerUser::class)->create([
+            'dealer_id' => $this->getDealerId(),
         ]);
-
-        $this->withHeaders(['access-token' => $this->getAccessToken()])
-            ->json('PUT', self::apiEndpoint, $updatedFormData) 
-            ->assertStatus(200)
-            ->assertJsonMissingValidationErrors()
-            ->assertJsonStructure([
-                'data' => [
-                    '*' => [
-                        'id',
-                        'name',
-                        'created_at',
-                        'permissions' => [
-                            'data' => [
-                                '*' => [
-                                    'feature',
-                                    'permission_level'
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-        ]);
-
-        $this->assertDatabaseHas('dealer_user_permissions', [
-            'dealer_user_id' => $data['userId'],
-            'feature' => PermissionsInterface::CRM,
-            'permission_level' => $this->getSalesPersonId()
-        ]);
-    }
-
-    /**
-     * @depends testGetSecondayUser
-     * @param array of data from previous test
-     * @return void
-     */
-    public function testUpdateLocationPermissionWithId($data)
-    {
-        // update permissions
-        $updatedFormData = $this->updateSecondaryUserFormData($data['formData'], $data['userId'], [
-            'permissions' => [
-                PermissionsInterface::LOCATIONS => $this->getDealerLocationId(),
-            ]
-        ]);
-
-        $this->withHeaders(['access-token' => $this->getAccessToken()])
-            ->json('PUT', self::apiEndpoint, $updatedFormData) 
-            ->assertStatus(200)
-            ->assertJsonMissingValidationErrors()
-            ->assertJsonStructure([
-                'data' => [
-                    '*' => [
-                        'id',
-                        'name',
-                        'created_at',
-                        'permissions' => [
-                            'data' => [
-                                '*' => [
-                                    'feature',
-                                    'permission_level'
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-        ]);
-
-        $this->assertDatabaseHas('dealer_user_permissions', [
-            'dealer_user_id' => $data['userId'],
+        factory(DealerUserPermission::class)->create([
+            'dealer_user_id' => $dealerUser->dealer_user_id,
             'feature' => PermissionsInterface::LOCATIONS,
-            'permission_level' => $this->getDealerLocationId()
+            'permission_level' => PermissionsInterface::CAN_SEE_PERMISSION,
         ]);
-    }
-
-    /**
-     * @depends testGetSecondayUser
-     * @param array of data from previous test
-     * @return void
-     */
-    public function testDeleteSecondaryUser($data)
-    {
-        // empty out email of the newly created user from the first test
-        $updatedFormData = $this->updateSecondaryUserFormData($data['formData'], $data['userId'], ['email' => '']);
-        // checking if data exists before deleting
-        $this->assertDatabaseHas('dealer_users', ['dealer_user_id' => $data['userId']]);
-        $this->assertDatabaseHas('dealer_user_permissions', ['dealer_user_id' => $data['userId']]);
+        $updatedFormData = [
+            'users' => [
+                [
+                    'dealer_user_id' => $dealerUser->dealer_user_id,
+                    'email' => 'test@secondary.user',
+                    'password' => 'Test123!',
+                    'user_permissions' => [
+                        [
+                            'permission_level' => PermissionsInterface::CANNOT_SEE_PERMISSION,
+                            'feature' => PermissionsInterface::LOCATIONS,
+                        ],
+                        [
+                            'permission_level' => PermissionsInterface::CAN_SEE_AND_CHANGE_PERMISSION,
+                            'feature' => PermissionsInterface::CRM,
+                        ]
+                    ]
+                ]
+            ]
+        ];
 
         $this->withHeaders(['access-token' => $this->getAccessToken()])
-            ->json('PUT', self::apiEndpoint, $updatedFormData) 
-            ->assertStatus(200)
+            ->putJson(self::apiEndpoint, $updatedFormData)
+            ->assertSuccessful()
+            ->assertJsonCount(1, 'data')
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
@@ -532,11 +503,82 @@ class SecondaryUserControllerTest extends TestCase {
                         ]
                     ]
                 ]
-            ])
-            ->assertJsonMissingExact(['data.*.id', $data['userId']]);
+        ]);
+    }
 
-        $this->assertDatabaseMissing('dealer_users', ['dealer_user_id' => $data['userId']]);
-        $this->assertDatabaseMissing('dealer_user_permissions', ['dealer_user_id' => $data['userId']]);
+    /**
+     * @param array of data from previous test
+     *
+     * @group DMS
+     * @group DMS_SECONDARY_USER
+     *
+     * @return void
+     */
+    public function testUpdateLocationPermissionWithId()
+    {
+        $dealerUser = factory(DealerUser::class)->create([
+            'dealer_id' => $this->getDealerId(),
+        ]);
+        factory(DealerUserPermission::class)->create([
+            'dealer_user_id' => $dealerUser->dealer_user_id,
+            'feature' => PermissionsInterface::LOCATIONS,
+            'permission_level' => PermissionsInterface::CAN_SEE_PERMISSION,
+        ]);
+        $updatedFormData = [
+            'users' => [
+                [
+                    'dealer_user_id' => $dealerUser->dealer_user_id,
+                    'email' => 'test@secondary.user',
+                    'password' => 'Test123!',
+                    'user_permissions' => [
+                        [
+                            'permission_level' => PermissionsInterface::CANNOT_SEE_PERMISSION,
+                            'feature' => PermissionsInterface::LOCATIONS,
+                        ]
+                    ]
+                ]
+            ]
+        ];
+
+        $this->withHeaders(['access-token' => $this->getAccessToken()])
+            ->putJson(self::apiEndpoint, $updatedFormData)
+            ->assertSuccessful(200)
+            ->assertJsonMissingValidationErrors()
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'id',
+                        'name',
+                        'created_at',
+                        'permissions' => [
+                            'data' => [
+                                '*' => [
+                                    'feature',
+                                    'permission_level'
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+        ]);
+    }
+
+    /**
+     * @group DMS
+     * @group DMS_SECONDARY_USER
+     *
+     * @return void
+     */
+    public function testDeleteSecondaryUser()
+    {
+        $updatedFormData = [
+            'users' => []
+        ];
+
+        $this->withHeaders(['access-token' => $this->getAccessToken()])
+            ->putJson(self::apiEndpoint, $updatedFormData)
+            ->assertSuccessful()
+            ->assertJsonCount(0, 'data');
     }
 
     public function tearDown(): void

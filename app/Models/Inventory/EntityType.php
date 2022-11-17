@@ -5,12 +5,22 @@ namespace App\Models\Inventory;
 use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $entity_type_id
+ * @property string $name
+ * @property string $title
+ * @property string $title_lowercase
+ * @property string $sort_order
+ */
 class EntityType extends Model {
 
     use TableAware;
 
     public const TABLE_NAME = 'eav_entity_type';
 
+    public const ENTITY_TYPE_RV = 3;
+    public const ENTITY_TYPE_VEHICLE = 4;
+    public const ENTITY_TYPE_WATERCRAFT = 5;
     public const ENTITY_TYPE_BUILDING = 10;
 
     /**

@@ -22,6 +22,9 @@ class IndexTest extends AbstractDealerLocationController
     /**
      * @dataProvider invalidParametersProvider
      *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION
+     *
      * @param array $params
      * @param string $expectedException
      * @param string $expectedExceptionMessage
@@ -62,6 +65,9 @@ class IndexTest extends AbstractDealerLocationController
     /**
      * @dataProvider validParametersProvider
      *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION
+     *
      * @param callable|string $expectedName
      *
      * @throws Exception when an unexpected exception has not been handled
@@ -86,25 +92,22 @@ class IndexTest extends AbstractDealerLocationController
         // When I call the "index" action using the valid request
         $response = $controller->index($request);
         $paginator = $response->original;
-        $firstLocation = $paginator->items()[0];
+        $firstLocation = $paginator->first();
 
         // Then I should see that response status is 200
-        self::assertSame(JsonResponse::HTTP_OK, $response->status());
+        $this->assertSame(JsonResponse::HTTP_OK, $response->status());
 
         // And I should see that $paginator is an expected instance type
-        self::assertInstanceOf(LengthAwarePaginator::class, $paginator);
+        $this->assertInstanceOf(LengthAwarePaginator::class, $paginator);
 
         // And I should see that expected total of dealer locations is the same as dealer locations retrieved
-        self::assertSame($expectedTotal, $paginator->total());
-
-        // And I should see that expected total of dealer locations is the same as dealer locations retrieved
-        self::assertSame($expectedTotal, $paginator->total());
+        $this->assertSame($expectedTotal, $paginator->total());
 
         // And I should see that expected last page number is same as retrieved
-        self::assertSame($expectedLastPage, $paginator->lastPage());
+        $this->assertSame($expectedLastPage, $paginator->lastPage());
 
         // And I should see that expected name of first dealer location is the same as the first of dealer locations retrieved
-        self::assertSame(is_string($expectedName) ? $expectedName : $expectedName($this->seeder)->name, $firstLocation->name);
+        $this->assertSame(is_string($expectedName) ? $expectedName : $expectedName($this->seeder)->name, $firstLocation->name);
     }
 
     /**
@@ -131,7 +134,7 @@ class IndexTest extends AbstractDealerLocationController
             'By dummy dealer paginated by 3'                           => [['dealer_id' => $this->getSeededData(0,'dealerId'), 'per_page' => 3], 9, 3, $this->getSeededData(0,'firstLocation')],
             'By dummy dealer with search term'                         => [['dealer_id' => $this->getSeededData(0,'dealerId'), 'search_term' => 'Springfield XXX'], 1, 1, 'Springfield XXX'],
             'By dummy dealer with custom condition'                    => [['dealer_id' => $this->getSeededData(1,'dealerId'), DealerLocationRepositoryInterface::CONDITION_AND_WHERE => [['city', '=', 'Shelbyville XXX']]], 1, 1, 'Shelbyville YYY'],
-            'By dummy dealer with custom condition and paginated by 2' => [['dealer_id' => $this->getSeededData(2,'dealerId'), 'per_page' => 2, 'search_term' => 'muntz'], 6, 3, $this->getSeededData(2,'firstLocation')]
+            'By dummy dealer with custom condition and paginated by 2' => [['dealer_id' => $this->getSeededData(2,'dealerId'), 'per_page' => 2], 6, 3, $this->getSeededData(2,'firstLocation')]
         ];
     }
 }

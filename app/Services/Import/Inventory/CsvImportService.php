@@ -11,6 +11,8 @@ use App\Models\User\DealerLocation;
 use App\Repositories\Inventory\ImageRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Services\File\ImageService;
+use App\Services\Inventory\InventoryService;
+use App\Services\Inventory\InventoryServiceInterface;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
@@ -104,6 +106,7 @@ class CsvImportService implements CsvImportServiceInterface
         "location_phone" => true,
         "location_zip" => true,
         "description" => true,
+        "description_html" => true,
         "vin" => true,
         "category" => true,
         "price" => true,
@@ -130,6 +133,7 @@ class CsvImportService implements CsvImportServiceInterface
         "is_special" => true,
         "is_featured" => true,
         "is_archived" => true,
+        "show_on_website" => true,
         "append_images" => true,
         "replace_images" => true,
         "video_embed_code" => true
@@ -151,6 +155,7 @@ class CsvImportService implements CsvImportServiceInterface
         "location_phone" => array("location", "location_phone", "location phone"),
         "location_zip" => array("location zip"),
         "description" => array("description", "desc", "info"),
+        "description_html" => array("description_html", "desc_html", "info_html"),
         "vin" => array("vin", "vin#"),
         "category" => "category",
         "price" => array("price", "sellingprice"),
@@ -178,6 +183,7 @@ class CsvImportService implements CsvImportServiceInterface
         "is_special" => array("is_special", "is special", "is on special", "special", "website special"),
         "is_featured" => array("is_featured", "is featured", "featured", "website featured"),
         "is_archived" => array("archived", "is archived"),
+        "show_on_website" => array("show on website" , "hidden", "is hidden"),
         "append_images" => array("append images on import", "append image", "append images", "use images", "use image"),
         "replace_images" => array("replace images", "replace_images"),
         "image_mode" => array("image mode", "images mode", "img mode"),
@@ -194,6 +200,7 @@ class CsvImportService implements CsvImportServiceInterface
         "manufacturer" => array("type" => "string"),
         "model" => array("type" => "string", "length" => 255, "regex" => "[\w\s\d\.'\"\\/\*\+\?]*"),
         "description" => array("type" => "string"),
+        "description_html" => array("type" => "string"),
         "location" => array("type" => "string"),
         "category" => array(
             "type" => "enum",
@@ -316,6 +323,13 @@ class CsvImportService implements CsvImportServiceInterface
                 "no" => "0",
             )
         ),
+        "show_on_website" => array(
+            "type" => "enum",
+            "list" => array(
+                "yes" => "1",
+                "no" => "0"
+            )
+        ),
         "cost_of_unit" => array("type" => "decimal"),
         "cost_of_shipping" => array("type" => "decimal"),
         "cost_of_prep" => array("type" => "decimal"),
@@ -379,15 +393,26 @@ class CsvImportService implements CsvImportServiceInterface
     private $indexToheaderMapping = [];
 
     /**
+     * @var InventoryServiceInterface $inventoryService
+     */
+    private $inventoryService;
+
+    /**
      * @param BulkUploadRepositoryInterface $bulkUploadRepository
      * @param InventoryRepositoryInterface $inventoryRepository
      * @param ImageService $imageService
      */
-    public function __construct(BulkUploadRepositoryInterface $bulkUploadRepository, InventoryRepositoryInterface $inventoryRepository, ImageService $imageService)
+    public function __construct(
+        BulkUploadRepositoryInterface $bulkUploadRepository,
+        InventoryRepositoryInterface $inventoryRepository,
+        ImageService $imageService,
+        InventoryServiceInterface $inventoryService
+    )
     {
         $this->bulkUploadRepository = $bulkUploadRepository;
         $this->inventoryRepository = $inventoryRepository;
         $this->imageService = $imageService;
+        $this->inventoryService = $inventoryService;
 
         $this->convertHelper = new ConvertHelper();
     }
@@ -459,6 +484,8 @@ class CsvImportService implements CsvImportServiceInterface
 
         try {
             $this->inventory['dealer_id'] = $this->bulkUpload->dealer_id;
+
+            $this->inventory['description_html'] = $this->inventoryService->convertMarkdown($this->inventory['description']);
 
             if ($this->inventoryUpdate) {
                 $inventory = $this->inventoryRepository->update($this->inventory, ['updateAttributes' => true]);
@@ -763,6 +790,7 @@ class CsvImportService implements CsvImportServiceInterface
             case 'status':
             case 'is_special':
             case 'is_featured':
+            case 'show_on_website':
                 if (isset(self::$_columnValidation[$type]['list'][strtolower($value)])) {
                     $this->inventory[$type] = self::$_columnValidation[$type]['list'][strtolower($value)];
                 }

@@ -6,6 +6,7 @@ use App\Helpers\ConvertHelper;
 use App\Models\Inventory\File;
 use App\Models\Inventory\InventoryImage;
 use App\Transformers\Dms\ServiceOrderTransformer;
+use App\Transformers\Marketing\Facebook\ListingTransformer;
 use Illuminate\Database\Eloquent\Collection;
 use League\Fractal\Resource\Item;
 use Carbon\Carbon;
@@ -26,6 +27,7 @@ class InventoryTransformer extends TransformerAbstract
         'attributes',
         'features',
         'clapps',
+        'activeListings'
     ];
 
     /**
@@ -87,16 +89,22 @@ class InventoryTransformer extends TransformerAbstract
      */
     public function transform(Inventory $inventory): array
     {
-        if ($inventory->length > 0) {
-            list($lengthSecond, $lengthInchesSecond) = $this->convertHelper->feetToFeetInches($inventory->length);
+        $lengthDimension = $inventory->length_inches ?: $inventory->length;
+
+        if ($lengthDimension > 0) {
+            list($lengthSecond, $lengthInchesSecond) = $this->convertHelper->feetToFeetInches($lengthDimension);
         }
 
-        if ($inventory->width > 0) {
-            list($widthSecond, $widthInchesSecond) = $this->convertHelper->feetToFeetInches($inventory->width);
+        $widthDimension = $inventory->width_inches ?: $inventory->width;
+
+        if ($widthDimension > 0) {
+            list($widthSecond, $widthInchesSecond) = $this->convertHelper->feetToFeetInches($widthDimension);
         }
 
-        if ($inventory->height > 0) {
-            list($heightSecond, $heightInchesSecond) = $this->convertHelper->feetToFeetInches($inventory->height);
+        $heightDimension = $inventory->height_inches ?: $inventory->height;
+
+        if ($heightDimension > 0) {
+            list($heightSecond, $heightInchesSecond) = $this->convertHelper->feetToFeetInches($heightDimension);
         }
 
         $age = now()->diffInDays(Carbon::parse($inventory->created_at));
@@ -121,10 +129,12 @@ class InventoryTransformer extends TransformerAbstract
              'dealer_location_id' => $inventory->dealer_location_id,
              'dealer_location' => $inventory->dealerLocation ? $this->dealerLocationTransformer->transform($inventory->dealerLocation) : null,
              'description' => $this->fixWrongChars($inventory->description),
+             'description_html' => $inventory->description_html,
              'entity_type_id' => $inventory->entity_type_id,
              'fp_balance' => $inventory->fp_balance,
              'fp_interest_paid' => $inventory->interest_paid,
              'fp_committed' => $inventory->fp_committed,
+             'fp_paid' => $inventory->fp_paid,
              'gvwr' => $inventory->gvwr,
              'axle_capacity' => $inventory->axle_capacity,
              'height' => $inventory->height,
@@ -197,6 +207,7 @@ class InventoryTransformer extends TransformerAbstract
              'show_on_rvtrader' => $inventory->show_on_rvtrader,
              'changed_fields_in_dashboard' => $inventory->changed_fields_in_dashboard,
              'show_on_auction123' => $inventory->show_on_auction123,
+             'show_on_rvt' => $inventory->show_on_rvt,
         ];
     }
 
@@ -234,6 +245,19 @@ class InventoryTransformer extends TransformerAbstract
     public function includeWebsite(Inventory $inventory): Item
     {
         return $this->item($inventory->user->website, new WebsiteTransformer);
+    }
+
+    /**
+     * @param Inventory $inventory
+     * @return array|FractalCollection
+     */
+    public function includeActiveListings(Inventory $inventory)
+    {
+        if (empty($inventory->activeListings)) {
+            return [];
+        }
+
+        return $this->collection($inventory->activeListings, new ListingTransformer);
     }
 
     /**
@@ -289,6 +313,14 @@ class InventoryTransformer extends TransformerAbstract
      */
     private function fixWrongChars(?string $rawInput): string
     {
-        return str_replace(['\\' . PHP_EOL . 'n', '\n', '\\' . PHP_EOL], PHP_EOL, $rawInput);
+        return str_replace([
+            '\n',
+            '\\' . PHP_EOL,
+            '\\' . PHP_EOL . 'n'
+        ], [
+            PHP_EOL,
+            PHP_EOL . PHP_EOL,
+            PHP_EOL . PHP_EOL . PHP_EOL
+        ], $rawInput);
     }
 }

@@ -41,6 +41,9 @@ class InventoryRepositoryTest extends TestCase
 
     /**
      * @covers ::getAll
+     *
+     * @group DMS
+     * @group DMS_INVENTORY
      */
     public function testGetAllDefault(): void
     {

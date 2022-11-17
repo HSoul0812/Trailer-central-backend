@@ -26,6 +26,7 @@ class BulkUploadControllerTest extends AbstractMonitoredJobsTest
 {
     /**
      * @covers ::index
+     *
      */
     public function testIndexListJobsWithBadParameters(): void
     {

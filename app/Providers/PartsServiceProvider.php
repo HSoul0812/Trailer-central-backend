@@ -23,6 +23,8 @@ use App\Repositories\Parts\AuditLogRepository;
 use App\Repositories\Parts\AuditLogRepositoryInterface;
 use App\Services\Export\Parts\BulkCsvDownloadJobService;
 use App\Services\Export\Parts\BulkDownloadMonitoredJobServiceInterface;
+use App\Services\Export\Parts\BulkReportCsvJobService;
+use App\Services\Export\Parts\BulkReportCsvJobServiceInterface;
 use App\Services\Export\Parts\BulkReportJobService;
 use App\Services\Export\Parts\BulkReportJobServiceInterface;
 use App\Services\Parts\PartService;
@@ -95,6 +97,7 @@ class PartsServiceProvider extends ServiceProvider
         $this->app->bind(BulkUploadRepositoryInterface::class, BulkUploadRepository::class);
         $this->app->bind(BulkDownloadMonitoredJobServiceInterface::class, BulkCsvDownloadJobService::class);
         $this->app->bind(BulkCsvTechnicianReportServiceInterface::class, BulkCsvTechnicianReportService::class);
+        $this->app->bind(BulkReportCsvJobServiceInterface::class, BulkReportCsvJobService::class);
 
         // PDF exporter bindings
         $this->app->bind(BulkReportRepositoryInterface::class, BulkReportRepository::class);

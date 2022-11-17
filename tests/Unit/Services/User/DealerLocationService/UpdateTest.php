@@ -28,6 +28,9 @@ class UpdateTest extends TestCase
      *
      * @dataProvider wrongParamsProvider
      *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION
+     *
      * @throws Exception when an unexpected exception has been thrown instead of the desired exception
      */
     public function testWillThrowAnExceptionBecauseSomeWrongParameter(array $params, string $expectedExceptionMessage): void
@@ -87,6 +90,9 @@ class UpdateTest extends TestCase
     /**
      * Test that SUT will create a new dealer location setting it up as default location and turning off others
      * locations belonging to that dealer
+     *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION
      *
      * @throws Exception when an unexpected exception has not been handled
      */
@@ -151,6 +157,9 @@ class UpdateTest extends TestCase
 
     /**
      * Test that SUT will update certainly number of tax items
+     *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION
      *
      * @throws Exception when an unexpected exception has not been handled
      */
@@ -219,11 +228,6 @@ class UpdateTest extends TestCase
                 ->shouldReceive('create')
                 ->with($item + ['dealer_location_id' => $location->dealer_location_id])
                 ->once();
-
-            $dependencies->salesTaxItemRepo
-                ->shouldReceive('createV1')
-                ->with($item + ['dealer_location_id' => $location->dealer_location_id])
-                ->once();
         }
 
         // And I expect that "DealerLocationRepositoryInterface::commitTransaction" method is called once
@@ -238,6 +242,9 @@ class UpdateTest extends TestCase
 
     /**
      * Test that SUT will update certainly number of quote fees
+     *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION
      *
      * @throws Exception when an unexpected exception has not been handled
      */
@@ -309,7 +316,7 @@ class UpdateTest extends TestCase
         $result = $service->update($location->dealer_location_id, $dealerId, $params);
 
         // Then I expect that "DealerLocationService::update" returns true
-        self::assertTrue($result);
+        $this->assertTrue($result);
     }
 
     /**

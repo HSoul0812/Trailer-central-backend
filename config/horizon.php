@@ -97,7 +97,7 @@ return [
         'recent' => 60,
         'completed' => 1,
         'recent_failed' => 10080,
-        'failed' => 10080,
+        'failed' => 1440,
         'monitored' => 10080,
     ],
 
@@ -146,10 +146,29 @@ return [
         'local' => [
             'supervisor-1' => [
                 'connection' => 'redis',
-                'queue' => ['inventory', 'parts', 'parts-export-new', 'factory-feeds', 'cvr-send-file', 'default', 'reports', 'emailbuilder', 'blog-posts', 'scrapereplies', 'inquiry', 'fb-catalog', 'fb-messenger', 'ecommerce', 'crm-users'],
+                'queue' => [
+                    'inventory',
+                    'parts',
+                    'parts-export-new',
+                    'factory-feeds',
+                    'cvr-send-file',
+                    'default',
+                    'reports',
+                    'emailbuilder',
+                    'blog-posts',
+                    'scrapereplies',
+                    'inquiry',
+                    'fb-catalog',
+                    //'fb-messenger',
+                    'ecommerce',
+                    'crm-users',
+                    'manufacturers',
+                    //'hot-potato'
+                ],
                 'balance' => 'simple',
                 'processes' => 3,
                 'tries' => 3,
+                'delay' => 3,
                 'timeout' => 3600,
             ],
         ],
@@ -157,10 +176,29 @@ return [
         'dev' => [
             'supervisor-1' => [
                 'connection' => 'redis',
-                'queue' => ['inventory', 'parts', 'parts-export-new', 'factory-feeds', 'cvr-send-file', 'default', 'reports', 'emailbuilder', 'blog-posts', 'scrapereplies', 'inquiry', 'fb-catalog', 'fb-messenger', 'ecommerce', 'crm-users'],
+                'queue' => [
+                    'inventory',
+                    'parts',
+                    'parts-export-new',
+                    'factory-feeds',
+                    'cvr-send-file',
+                    'default',
+                    'reports',
+                    'emailbuilder',
+                    'blog-posts',
+                    'scrapereplies',
+                    'inquiry',
+                    'fb-catalog',
+                    //'fb-messenger',
+                    'ecommerce',
+                    'crm-users',
+                    'manufacturers',
+                    //'hot-potato'
+                ],
                 'balance' => 'simple',
                 'processes' => 10,
                 'tries' => 3,
+                'delay' => 3,
                 'timeout' => 3600,
             ],
         ],
@@ -168,7 +206,17 @@ return [
         'staging' => [
             'supervisor-1' => [
                 'connection' => 'redis',
-                'queue' => ['factory-feeds', 'fb-messenger', 'inquiry', 'blog-posts', 'ecommerce', 'crm-users'],
+                'queue' => [
+                    'inventory',
+                    'factory-feeds',
+                    //'fb-messenger',
+                    'inquiry',
+                    'blog-posts',
+                    'ecommerce',
+                    'crm-users',
+                    'manufacturers',
+                    //'hot-potato'
+                ],
                 'balance' => 'auto',
                 'minProcesses' => 1,
                 'maxProcesses' => 5,
@@ -181,6 +229,7 @@ return [
                 'balance' => false,
                 'processes' => 1,
                 'tries' => 3,
+                'delay' => 3,
                 'timeout' => 300,
             ],
             'supervisor-3' => [
@@ -201,7 +250,7 @@ return [
             ],
             'supervisor-5' => [
                 'connection' => 'redis',
-                'queue' => ['reports', 'emailbuilder', 'scrapereplies'],
+                'queue' => ['reports', 'emailbuilder'],
                 'balance' => 'auto',
                 'minProcesses' => 1,
                 'maxProcesses' => 3,
@@ -217,12 +266,31 @@ return [
                 'tries' => 3,
                 'timeout' => 7200,
             ],
+            'supervisor-7' => [
+                'connection' => 'redis',
+                'queue' => ['scrapereplies'],
+                'balance' => 'auto',
+                'minProcesses' => 1,
+                'maxProcesses' => 5,
+                'tries' => 1,
+                'timeout' => 600,
+            ],
         ],
 
         'production' => [
             'supervisor-1' => [
                 'connection' => 'redis',
-                'queue' => ['factory-feeds', 'fb-messenger', 'inquiry', 'blog-posts', 'ecommerce', 'crm-users'],
+                'queue' => [
+                    'inventory',
+                    'factory-feeds',
+                    'fb-messenger',
+                    'inquiry',
+                    'blog-posts',
+                    'ecommerce',
+                    'crm-users',
+                    'manufacturers',
+                    //'hot-potato'
+                ],
                 'balance' => 'auto',
                 'minProcesses' => 1,
                 'maxProcesses' => 8,
@@ -236,6 +304,7 @@ return [
                 'minProcesses' => 15,
                 'maxProcesses' => 55,
                 'tries' => 3,
+                'delay' => 3,
                 'timeout' => 300,
             ],
             'supervisor-3' => [
@@ -278,8 +347,8 @@ return [
                 'balance' => 'auto',
                 'minProcesses' => 5,
                 'maxProcesses' => 100,
-                'tries' => 3,
-                'timeout' => 7200,
+                'tries' => 1,
+                'timeout' => 600,
             ],
         ],
     ],

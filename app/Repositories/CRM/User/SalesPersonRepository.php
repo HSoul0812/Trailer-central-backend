@@ -202,32 +202,50 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
      */
     public function salesReport($params): array
     {
+        $dealerId = $params['dealer_id'];
+
         $dbParams = [
-            'dealerId1' => $params['dealer_id'],
-            'dealerId2' => $params['dealer_id']
+            'posSalesDealerId' => $params['dealer_id'],
+            'otherSalesDealerId' => $params['dealer_id'],
+            'refundSalesDealerId' => $params['dealer_id'],
+            'specialRefundSalesDealerId' => $params['dealer_id'],
         ];
 
-        $dateClause1 = ''; // no date filters
-        $dateClause2 = ''; // no date filters
+        $posSalesDateClause = ''; // no date filters
+        $otherSalesDateClause = ''; // no date filters
+        $refundSalesDateClause = ''; // no date filters
+        $specialRefundSalesDateClause = ''; // no date filters
 
-        $salesPersonClause1 = ''; // no date filters
-        $salesPersonClause2 = ''; // no date filters
+        $posSalesSalesPersonClause = ''; // no date filters
+        $otherSalesSalesPersonClause = ''; // no date filters
+        $refundSalesSalesPersonClause = ''; // no date filters
+        $specialRefundSalesSalesPersonClause = ''; // no date filters
 
         if (!empty($params['salesperson'])) {
-            $salesPersonClause1 = 'AND ps.sales_person_id = :salesPerson1';
-            $salesPersonClause2 = 'AND IF(i.unit_sale_id IS NOT NULL, us.sales_person_id, i.sales_person_id) = :salesPerson2';
+            $posSalesSalesPersonClause = 'AND ps.sales_person_id = :posSalesSalesPerson';
+            $otherSalesSalesPersonClause = 'AND IF(i.unit_sale_id IS NOT NULL, us.sales_person_id, i.sales_person_id) = :otherSalesSalesPerson';
+            $refundSalesSalesPersonClause = 'AND dms_unit_sale.sales_person_id = :refundSalesSalesPerson';
+            $specialRefundSalesSalesPersonClause = 'AND crm_sales_person.id = :specialRefundSalesSalesPerson';
 
-            $dbParams['salesPerson1'] = $params['salesperson'];
-            $dbParams['salesPerson2'] = $params['salesperson'];
+            $dbParams['posSalesSalesPerson'] = $params['salesperson'];
+            $dbParams['otherSalesSalesPerson'] = $params['salesperson'];
+            $dbParams['refundSalesSalesPerson'] = $params['salesperson'];
+            $dbParams['specialRefundSalesSalesPerson'] = $params['salesperson'];
         }
         if (!empty($params['from_date']) && !empty($params['to_date'])) {
-            $dateClause1 = 'AND DATE(ps.created_at) BETWEEN :fromDate1 AND :toDate1';
-            $dateClause2 = 'AND DATE(i.invoice_date) BETWEEN :fromDate2 AND :toDate2';
+            $posSalesDateClause = 'AND DATE(ps.created_at) BETWEEN :posSalesFrom AND :posSalesTo';
+            $otherSalesDateClause = 'AND DATE(i.invoice_date) BETWEEN :otherSalesFrom AND :otherSalesTo';
+            $refundSalesDateClause = 'AND DATE(dealer_refunds.created_at) BETWEEN :refundSalesFrom AND :refundSalesTo';
+            $specialRefundSalesDateClause = 'AND DATE(dealer_refunds.created_at) BETWEEN :specialRefundSalesFrom AND :specialRefundSalesTo';
 
-            $dbParams['fromDate1'] = $params['from_date'];
-            $dbParams['fromDate2'] = $params['from_date'];
-            $dbParams['toDate1'] =  $params['to_date'];
-            $dbParams['toDate2'] = $params['to_date'];
+            $dbParams['posSalesFrom'] = $params['from_date'];
+            $dbParams['otherSalesFrom'] = $params['from_date'];
+            $dbParams['refundSalesFrom'] = $params['from_date'];
+            $dbParams['specialRefundSalesFrom'] = $params['from_date'];
+            $dbParams['posSalesTo'] =  $params['to_date'];
+            $dbParams['otherSalesTo'] = $params['to_date'];
+            $dbParams['refundSalesTo'] = $params['to_date'];
+            $dbParams['specialRefundSalesTo'] = $params['to_date'];
         }
 
         $sql = <<<SQL
@@ -290,10 +308,10 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                     GROUP BY psp.sale_id
                 ) sales_labor ON ps.id = sales_labor.sale_id
 
-                WHERE po.dealer_id = :dealerId1
-                  $salesPersonClause1
+                WHERE po.dealer_id = :posSalesDealerId
+                  $posSalesSalesPersonClause
                   AND (ps.total - ps.amount_received) <= 0
-                  $dateClause1
+                  $posSalesDateClause
                 GROUP BY ps.id
 
                 UNION
@@ -313,11 +331,76 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
 
                        (i.total - payments.paid_amount)                                      AS remaining,
 
-                       iii.cost_overhead                                                     AS cost_overhead,
-                       iii.true_total_cost                                                   AS true_total_cost,
+                       (
+                        SELECT cost_overhead
+                        FROM (
+                            SELECT
+                                cost_overhead_inventory.inventory_id,
+                                @total_of_cost := (
+                                    coalesce(nullif(trim(cost_overhead_inventory.cost_of_shipping), ''), 0) +
+                                    coalesce(nullif(trim(cost_overhead_inventory.cost_of_prep), ''), 0) +
+                                    coalesce(nullif(trim(cost_overhead_inventory.cost_of_unit), ''), 0) +
+                                    coalesce((
+                                      SELECT
+                                        sum(dms_repair_order.total_price) AS total_price
+                                      FROM
+                                        dms_repair_order
+                                      WHERE
+                                        dms_repair_order.inventory_id = cost_overhead_inventory.inventory_id
+                                        AND dms_repair_order.type = 'internal'
+                                        AND dms_repair_order.dealer_id = $dealerId
+                                      GROUP BY
+                                        dms_repair_order.inventory_id
+                                    ), 0)
+                                ) AS total_of_cost,
+                                @pac_total_amount := coalesce(
+                                  if(strcmp(cost_overhead_inventory.pac_type, 'percent') = 0, (@total_of_cost * cost_overhead_inventory.pac_amount) / 100, cost_overhead_inventory.pac_amount),
+                                  0
+                                ) AS pac_total_amount,
+                                (@total_of_cost + @pac_total_amount) AS cost_overhead
+                            FROM
+                                inventory AS cost_overhead_inventory
+                            WHERE
+                                cost_overhead_inventory.dealer_id = $dealerId
+                        ) as cost_overhead_result
+                        where cost_overhead_result.inventory_id = iv.inventory_id
+                      ) AS cost_overhead,
+                    
+                      (
+                       SELECT 
+                        (
+                          coalesce(
+                            true_total_cost_inventory.true_cost,
+                            0
+                          ) + coalesce(
+                            true_total_cost_inventory.cost_of_shipping,
+                            0
+                          ) + coalesce(
+                            true_total_cost_inventory.cost_of_prep,
+                            0
+                          ) + coalesce(
+                            (
+                              SELECT 
+                                sum(dms_repair_order.total_price) AS total_price 
+                              FROM 
+                                dms_repair_order 
+                              WHERE 
+                                dms_repair_order.inventory_id = true_total_cost_inventory.inventory_id 
+                                AND dms_repair_order.type = 'internal' 
+                              GROUP BY 
+                                dms_repair_order.inventory_id
+                            ),
+                            0
+                          )
+                        ) AS true_total_cost 
+                       FROM 
+                        inventory AS true_total_cost_inventory 
+                       WHERE 
+                        true_total_cost_inventory.inventory_id = iv.inventory_id
+                       ) AS true_total_cost,
 
-                       ii.unit_price                                                         AS sale_amount,
-                       COALESCE(qi.cost, 0)                                                  AS cost_amount,
+                       ii.unit_price                                                         AS unit_sale_amount,
+                       COALESCE(qi.cost, 0)                                                  AS unit_cost_amount,
 
                        ii.unit_price                                                         AS retail_price,
                        (
@@ -347,14 +430,192 @@ class SalesPersonRepository extends RepositoryAbstract implements SalesPersonRep
                         ) payments ON i.id = payments.invoice_id
                          LEFT JOIN dms_unit_sale us ON us.id = i.unit_sale_id
                          LEFT JOIN dms_repair_order ro ON ro.id = i.repair_order_id
-                WHERE i.dealer_id = :dealerId2
+                WHERE i.dealer_id = :otherSalesDealerId
                   AND qi.description != 'Trade In Inventory item' /* exclude trade-ins */
                   AND ii.unit_price >= 0 /* exclude trade-ins */
-                  $salesPersonClause2
-                  $dateClause2
+                  $otherSalesSalesPersonClause
+                  $otherSalesDateClause
+                
+                UNION
+                
+                /* Normal Refund */
+                SELECT 
+                    dealer_refunds.id AS sale_id,
+                    qb_payment.invoice_id,
+                    qb_invoices.doc_num,
+                    qb_invoices.total,
+                    'refund' AS sale_type,
+                    qb_invoices.invoice_date AS sale_date,
+                    dms_unit_sale.sales_person_id,
+                    dms_customer.display_name AS customer_name,
+                    (
+                      qb_invoices.total - payments.paid_amount
+                    ) AS remaining,
+                    qb_invoice_item_inventories.cost_overhead * -1 as cost_overhead,
+                    qb_invoice_item_inventories.true_total_cost,
+                    qb_invoice_items.unit_price AS unit_sale_amount,
+                    COALESCE(qb_items.cost,0) AS unit_cost_amount,
+                    qb_invoice_items.unit_price * -1 AS retail_price,
+                    (
+                      SELECT 
+                        refund_qb_invoice_items.unit_price * -1 
+                      FROM 
+                        qb_invoice_items refund_qb_invoice_items 
+                        JOIN qb_items refund_qb_items ON refund_qb_items.id = refund_qb_invoice_items.item_id 
+                      WHERE 
+                        refund_qb_invoice_items.referenced_item_id = qb_invoice_items.id 
+                        AND refund_qb_items.type = 'discount' 
+                        AND refund_qb_items.name = 'Inventory Discount'
+                    ) AS retail_discount,
+                    inventory.stock AS inventory_stock,
+                    inventory.manufacturer AS inventory_make,
+                    inventory.notes AS inventory_notes,
+                    qb_invoices.unit_sale_id 
+                FROM 
+                    dealer_refunds 
+                    JOIN qb_payment ON qb_payment.id = dealer_refunds.tb_primary_id 
+                    JOIN qb_invoices ON qb_payment.invoice_id = qb_invoices.id 
+                    JOIN dms_unit_sale ON dms_unit_sale.id = qb_invoices.unit_sale_id 
+                    JOIN inventory ON inventory.inventory_id = dms_unit_sale.inventory_id 
+                    JOIN crm_sales_person ON crm_sales_person.id = dms_unit_sale.sales_person_id 
+                    JOIN dms_customer ON dms_customer.id = qb_invoices.customer_id 
+                    JOIN qb_invoice_items ON qb_invoice_items.invoice_id = qb_invoices.id 
+                    JOIN qb_invoice_item_inventories ON qb_invoice_item_inventories.invoice_item_id = qb_invoice_items.id 
+                    JOIN qb_items ON qb_items.id = qb_invoice_items.item_id 
+                    JOIN (
+                      SELECT 
+                        qb_payment.invoice_id,
+                        COALESCE(
+                          SUM(qb_payment.amount),
+                          0
+                        ) paid_amount 
+                      FROM 
+                        qb_payment 
+                      GROUP BY 
+                        qb_payment.invoice_id
+                    ) payments ON qb_invoices.id = payments.invoice_id
+                WHERE
+                    dealer_refunds.dealer_id = :refundSalesDealerId
+                    AND dealer_refunds.tb_name = 'qb_payment' 
+                    AND qb_invoices.unit_sale_id IS NOT null
+                    $refundSalesSalesPersonClause
+                    $refundSalesDateClause
+                
+                UNION
+                
+                /* Special refund (where trade-in value is higher than unit value) */
+                SELECT
+                    dealer_refunds.id AS sale_id,
+                    '' AS invoice_id,
+                    '' AS doc_num,
+                    dealer_refunds.amount AS total,
+                    'refund' AS sale_type,
+                    dealer_refunds.created_at AS sale_date,
+                    crm_sales_person.id AS sales_person_id,
+                    dms_customer.display_name AS customer_name,
+                    0 AS remaining,
+                    (
+                        SELECT cost_overhead
+                        FROM (
+                            SELECT
+                                cost_overhead_inventory.inventory_id,
+                                @total_of_cost := (
+                                    coalesce(nullif(trim(cost_overhead_inventory.cost_of_shipping), ''), 0) +
+                                    coalesce(nullif(trim(cost_overhead_inventory.cost_of_prep), ''), 0) +
+                                    coalesce(nullif(trim(cost_overhead_inventory.cost_of_unit), ''), 0) +
+                                    coalesce((
+                                      SELECT
+                                        sum(dms_repair_order.total_price) AS total_price
+                                      FROM
+                                        dms_repair_order
+                                      WHERE
+                                        dms_repair_order.inventory_id = cost_overhead_inventory.inventory_id
+                                        AND dms_repair_order.type = 'internal'
+                                        AND dms_repair_order.dealer_id = $dealerId
+                                      GROUP BY
+                                        dms_repair_order.inventory_id
+                                    ), 0)
+                                ) AS total_of_cost,
+                                @pac_total_amount := coalesce(
+                                  if(strcmp(cost_overhead_inventory.pac_type, 'percent') = 0, (@total_of_cost * cost_overhead_inventory.pac_amount) / 100, cost_overhead_inventory.pac_amount),
+                                  0
+                                ) AS pac_total_amount,
+                                (@total_of_cost + @pac_total_amount) AS cost_overhead
+                            FROM
+                                inventory AS cost_overhead_inventory
+                            WHERE
+                                cost_overhead_inventory.dealer_id = $dealerId
+                        ) as cost_overhead_result
+                        where cost_overhead_result.inventory_id = inventory.inventory_id
+                    ) AS cost_overhead,
+                    (
+                      SELECT 
+                        (
+                          coalesce(
+                            true_total_cost_inventory.true_cost,
+                            0
+                          ) + coalesce(
+                            true_total_cost_inventory.cost_of_shipping,
+                            0
+                          ) + coalesce(
+                            true_total_cost_inventory.cost_of_prep,
+                            0
+                          ) + coalesce(
+                            (
+                              SELECT 
+                                sum(dms_repair_order.total_price) AS total_price 
+                              FROM 
+                                dms_repair_order 
+                              WHERE 
+                                dms_repair_order.inventory_id = true_total_cost_inventory.inventory_id 
+                                AND dms_repair_order.type = 'internal' 
+                              GROUP BY 
+                                dms_repair_order.inventory_id
+                            ),
+                            0
+                          )
+                        ) AS true_total_cost 
+                      FROM 
+                        inventory AS true_total_cost_inventory 
+                      WHERE 
+                        true_total_cost_inventory.inventory_id = inventory.inventory_id
+                    ) AS true_total_cost,
+                    qb_items.unit_price AS unit_sale_amount,
+                    qb_items.cost AS unit_cost_amount,
+                    qb_items.unit_price AS retail_price,
+                    (
+                      SELECT 
+                        sales_refund_qb_items.unit_price * -1 
+                      FROM 
+                        dealer_refunds_items sales_refund_refunds_items
+                        JOIN qb_items sales_refund_qb_items ON sales_refund_qb_items.id = sales_refund_refunds_items.item_id 
+                      WHERE
+                        sales_refund_refunds_items.dealer_refunds_id = dealer_refunds.id 
+                        AND sales_refund_qb_items.type = 'discount' 
+                        AND sales_refund_qb_items.name = 'Inventory Discount'
+                    ) AS retail_discount,
+                    inventory.stock AS inventory_stock,
+                    inventory.manufacturer AS inventory_make,
+                    inventory.notes AS inventory_notes,
+                    dms_unit_sale.id AS unit_sale_id
+                FROM
+                    dealer_refunds 
+                    JOIN dms_unit_sale ON dms_unit_sale.id = dealer_refunds.tb_primary_id 
+                    JOIN crm_sales_person ON crm_sales_person.id = dms_unit_sale.sales_person_id 
+                    JOIN dms_customer ON dms_customer.id = dms_unit_sale.buyer_id 
+                    JOIN inventory ON inventory.inventory_id = dms_unit_sale.inventory_id
+                    JOIN dealer_refunds_items ON dealer_refunds_items.dealer_refunds_id = dealer_refunds.id
+                    JOIN qb_items ON qb_items.id = dealer_refunds_items.item_id and qb_items.type = 'trailer'
+                WHERE   
+                    dealer_refunds.dealer_id = :specialRefundSalesDealerId 
+                    AND dealer_refunds.tb_name = 'dms_unit_sale' 
+                    $specialRefundSalesDateClause
+                    $specialRefundSalesSalesPersonClause
+
             ) sales ON sales.sales_person_id = sp.id
             LEFT JOIN new_dealer_user ndu ON ndu.user_id = sp.user_id
             WHERE sp.deleted_at IS NULL
+            ORDER BY sales.sale_date DESC
 SQL;
 
         $result = DB::select($sql, $dbParams);

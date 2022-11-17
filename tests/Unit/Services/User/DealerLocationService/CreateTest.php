@@ -28,6 +28,9 @@ class CreateTest extends TestCase
      *
      * @dataProvider wrongParamsProvider
      *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION
+     *
      * @throws Exception when an unexpected exception has been thrown instead of the desired exception
      */
     public function testWillThrowAnExceptionBecauseSomeWrongParameter(array $params, string $expectedExceptionMessage): void
@@ -88,6 +91,9 @@ class CreateTest extends TestCase
     /**
      * Test that SUT will try updating to zero the "is_default" and "is_default_for_invoice" column of any dealer location
      *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION
+     *
      * @throws Exception when an unexpected exception has not been handled
      */
     public function testWillTryTurningOffAnyDefaultLocation(): void
@@ -147,11 +153,14 @@ class CreateTest extends TestCase
         $location = $service->create($dealerId, $params);
 
         // Then I expect that "DealerLocationService::create" returns a known location instance
-        self::assertSame($expectedLocation, $location);
+        $this->assertSame($expectedLocation, $location);
     }
 
     /**
      * Test that SUT will create certainly number of tax items
+     *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION
      *
      * @throws Exception when an unexpected exception has not been handled
      */
@@ -201,19 +210,17 @@ class CreateTest extends TestCase
             ->with($params + ['dealer_location_id' => $expectedLocation->dealer_location_id])
             ->once();
 
-        // And I expect that "DealerLocationSalesTaxItemRepositoryInterface::create" method is called three times, with known parameters
         // And I expect that "DealerLocationSalesTaxItemRepositoryInterface::createV1" method is called three times, with known parameters
         foreach ($params['sales_tax_items'] as $item) {
             $dependencies->salesTaxItemRepo
                 ->shouldReceive('create')
                 ->with($item + ['dealer_location_id' => $expectedLocation->dealer_location_id])
                 ->once();
-
-            $dependencies->salesTaxItemRepo
-                ->shouldReceive('createV1')
-                ->with($item + ['dealer_location_id' => $expectedLocation->dealer_location_id])
-                ->once();
         }
+
+        $dependencies->salesTaxItemRepo
+            ->shouldReceive('createV1')
+            ->never();
 
         // And I expect that "DealerLocationRepositoryInterface::commitTransaction" method is called once
         $dependencies->locationRepo->shouldReceive('commitTransaction')->once();
@@ -222,11 +229,14 @@ class CreateTest extends TestCase
         $location = $service->create($dealerId, $params);
 
         // Then I expect that "DealerLocationService::create" returns a known location instance
-        self::assertSame($expectedLocation, $location);
+        $this->assertSame($expectedLocation, $location);
     }
 
     /**
      * Test that SUT will create certainly number of quote fees
+     *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION
      *
      * @throws Exception when an unexpected exception has not been handled
      */
@@ -293,7 +303,7 @@ class CreateTest extends TestCase
         $location = $service->create($dealerId, $params);
 
         // Then I expect that "DealerLocationService::create" returns a known location instance
-        self::assertSame($expectedLocation, $location);
+        $this->assertSame($expectedLocation, $location);
     }
 
     /**

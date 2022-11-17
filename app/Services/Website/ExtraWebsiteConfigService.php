@@ -9,6 +9,7 @@ use App\Models\User\User;
 use App\Models\Website\Website;
 use App\Repositories\Showroom\ShowroomRepositoryInterface;
 use App\Repositories\User\UserRepositoryInterface;
+use App\Repositories\Website\EntityRepositoryInterface;
 use App\Repositories\Website\WebsiteRepositoryInterface;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Collection;
@@ -36,6 +37,9 @@ class ExtraWebsiteConfigService implements ExtraWebsiteConfigServiceInterface
     /** @var ShowroomRepositoryInterface */
     private $showroomRepository;
 
+    /** @var EntityRepositoryInterface */
+    private $entityRepository;
+
     /** @var Connection */
     private $connection;
 
@@ -45,11 +49,13 @@ class ExtraWebsiteConfigService implements ExtraWebsiteConfigServiceInterface
     public function __construct(WebsiteRepositoryInterface  $websiteRepository,
                                 UserRepositoryInterface     $dealerRepository,
                                 ShowroomRepositoryInterface $showroomRepository,
+                                EntityRepositoryInterface   $entityRepository,
                                 Connection                  $connection,
                                 LoggerServiceInterface      $logger)
     {
         $this->websiteRepository = $websiteRepository;
         $this->showroomRepository = $showroomRepository;
+        $this->entityRepository = $entityRepository;
         $this->dealerRepository = $dealerRepository;
         $this->connection = $connection;
         $this->logger = $logger;
@@ -99,6 +105,7 @@ class ExtraWebsiteConfigService implements ExtraWebsiteConfigServiceInterface
 
             if (isset($params['showroom_dealers'])) {
                 $dealer->showroom_dealers = serialize($params['showroom_dealers']);
+                $this->entityRepository->updateConfig($websiteId, ['manufacturers' => $params['showroom_dealers']]);
             }
 
             $dealer->save();

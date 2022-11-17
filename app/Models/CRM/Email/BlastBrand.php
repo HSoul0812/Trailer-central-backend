@@ -9,6 +9,10 @@ use Illuminate\Database\Eloquent\Model;
  * Class Email Blast Brand
  *
  * @package App\Models\CRM\Email
+ *
+ * @property int $id
+ * @property string $brand
+ * @property int $email_blast_id
  */
 class BlastBrand extends Model
 {
@@ -27,13 +31,4 @@ class BlastBrand extends Model
         'email_blast_id',
         'brand'
     ];
-
-    /**
-     * @param int $blastId
-     * @return array
-     */
-    public static function deleteByBlast(int $blastId)
-    {
-        return self::whereEmailBlastId($blastId)->delete();
-    }
 }

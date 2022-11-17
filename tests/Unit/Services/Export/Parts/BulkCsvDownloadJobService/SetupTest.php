@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Services\Export\Parts\BulkCsvDownloadJobService;
 
-use App\Exceptions\Common\BusyJobException;
 use App\Models\Bulk\Parts\BulkDownload;
 use App\Models\Bulk\Parts\BulkDownloadPayload;
 use App\Services\Export\Parts\BulkCsvDownloadJobService;
@@ -25,46 +24,9 @@ class SetupTest extends TestCase
     use WithFaker;
 
     /**
-     * Test that when there is another monitored job working (same dealer), it will throw a `BusyJobException`
+     * @group DMS
+     * @group DMS_BULK_DOWNLOAD
      *
-     * @throws Exception
-     */
-    public function testWillThrowAnException(): void
-    {
-        // Given I have the three dependencies for "BulkCsvDownloadJobService" creation
-        $dependencies = new BulkCsvDownloadJobServiceDependencies();
-        // And I'm a dealer with a specific id
-        $dealerId = $this->faker->unique()->numberBetween(100, 50000);
-        // And I have a specific token from a monitored job
-        $token = Uuid::uuid4()->toString();
-        // And I have a specific payload
-        $payload = BulkDownloadPayload::from(['export_file' => 'parts-' . date('Ymd') . '-' . $token . '.csv']);
-
-        // Then I expect that repository isBusyByDealer method is called with certain arguments and it will return true
-        $dependencies->bulkDownloadRepository
-            ->shouldReceive('isBusyByDealer')
-            ->once()
-            ->with($dealerId)
-            ->andReturn(true);
-
-        // Also I have a "BulkCsvDownloadJobService" properly created
-        $service = new BulkCsvDownloadJobService(
-            $dependencies->bulkDownloadRepository,
-            $dependencies->partsRepository,
-            $dependencies->loggerService,
-            $dependencies->jobsRepository
-        );
-
-        // Then I expect to see an specific exception to be thrown
-        $this->expectException(BusyJobException::class);
-        // And I also expect to see an specific exception message
-        $this->expectExceptionMessage("This job can't be set up due there is currently other job working");
-
-        // When I call the run method
-        $service->setup($dealerId, $payload, $token);
-    }
-
-    /**
      * @throws Exception
      */
     public function testWillCreateMonitoredJob(): void

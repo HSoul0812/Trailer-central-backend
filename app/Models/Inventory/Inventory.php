@@ -3,9 +3,11 @@ namespace App\Models\Inventory;
 
 use App\Helpers\SanitizeHelper;
 use App\Models\CRM\Dms\Customer\CustomerInventory;
+use App\Models\CRM\Dms\Quickbooks\Bill;
 use App\Models\CRM\Dms\ServiceOrder;
 use App\Models\Integration\LotVantage\DealerInventory;
 use App\Models\Inventory\Floorplan\Payment;
+use App\Models\Marketing\Facebook\Listings;
 use App\Models\User\DealerLocation;
 use App\Models\CRM\Leads\InventoryLead;
 use App\Models\CRM\Leads\Lead;
@@ -132,6 +134,7 @@ use Laravel\Scout\Searchable;
  * @property \DateTimeInterface $created_at
  * @property \DateTimeInterface $updated_at
  * @property bool $show_on_auction123
+ * @property bool $show_on_rvt
  *
  * @property string $category_label
  * @property string $status_label
@@ -342,6 +345,7 @@ class Inventory extends Model
         'times_viewed',
         'trailerworld_store_id',
         'show_on_auction123',
+        'show_on_rvt'
     ];
 
     protected $casts = [
@@ -358,6 +362,9 @@ class Inventory extends Model
         'msrp' => 'float',
         'gvwr' => 'float',
         'fp_balance' => 'float',
+        'qb_sync_processed' => 'boolean',
+        'is_floorplan_bill' => 'boolean',
+        'sold_at' => 'datetime',
         'changed_fields_in_dashboard' => 'array'
     ];
 
@@ -484,6 +491,11 @@ class Inventory extends Model
     public function entityType(): BelongsTo
     {
         return $this->belongsTo(EntityType::class,'entity_type_id');
+    }
+
+    public function bill(): HasOne
+    {
+        return $this->hasOne(Bill::class, 'id', 'bill_id');
     }
 
     /**
@@ -666,5 +678,15 @@ class Inventory extends Model
     {
         $array = $this->toArray();
         return $array;
+    }
+
+    public function listings(): HasMany
+    {
+        return $this->hasMany(Listings::class, 'inventory_id', 'inventory_id');
+    }
+
+    public function activeListings()
+    {
+        return $this->listings()->whereNotIn('status', ['expired', 'deleted']);
     }
 }

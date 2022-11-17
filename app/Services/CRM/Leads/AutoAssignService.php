@@ -13,34 +13,35 @@ use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Traits\MailHelper;
+use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Collection;
-use Carbon\Carbon;
 
 class AutoAssignService implements AutoAssignServiceInterface {
     
     use MailHelper;
     
-    /**     
+    /**
      * @var App\Repositories\CRM\Leads\LeadRepositoryInterface
      */
     protected $leads;
     
-    /**     
+    /**
      * @var App\Repositories\CRM\Leads\StatusRepositoryInterface
      */
     protected $leadStatus;
     
-    /**     
+    /**
      * @var App\Repositories\CRM\User\SalesPersonRepositoryInterface
      */
-    protected $salesPersonRepository;    
+    protected $salesPersonRepository;
        
-    /**     
+    /**
      * @var array
      */
-    private $leadExplanationNotes = [];
+    protected $leadExplanationNotes = [];
     
     /**
      * @var Array
@@ -51,21 +52,29 @@ class AutoAssignService implements AutoAssignServiceInterface {
      * @var Illuminate\Support\Facades\Log
      */
     protected $log;
+
+    /**
+     * @var \DateTime
+     */
+    protected $datetime;
     
-    private $datetime;
-    
-    public function __construct(LeadRepositoryInterface $leads, StatusRepositoryInterface $leadStatus, SalesPersonRepositoryInterface $salesPersonRepo) {
+    public function __construct(
+        LeadRepositoryInterface $leads,
+        StatusRepositoryInterface $leadStatus,
+        SalesPersonRepositoryInterface $salesPersonRepo
+    ) {
+        // Initialize Repositories Needed for Hot Potato
         $this->leads = $leads;
         $this->leadStatus = $leadStatus;
         $this->salesPersonRepository = $salesPersonRepo;
-        
-        date_default_timezone_set(env('DB_TIMEZONE'));
-        
-        $this->datetime = new \DateTime();
-        $this->datetime->setTimezone(new \DateTimeZone(env('DB_TIMEZONE')));
+
+        // Set Default Date/Time With Timezone
+        date_default_timezone_set(config('app.db_timezone'));
+        $this->datetime = CarbonImmutable::now()->timezone(config('app.db_timezone'));
 
         // Initialize Logger
         $this->log = Log::channel('autoassign');
+        $this->log->info('Started AutoAssignService at ' . $this->datetime->toDateTimeString() . ' using timezone ' . config('app.db_timezone'));
     }
 
 
@@ -139,7 +148,9 @@ class AutoAssignService implements AutoAssignServiceInterface {
 
         // Finish Assigning Lead and Return Result
         $this->setRoundRobinSalesPerson($dealer->id, $dealerLocationId, $lead, $salesPerson->id);
-        $status = $this->handleAssignLead($lead, $salesPerson);
+        $date = Carbon::now()->timezone($lead->crmUser->dealer_timezone)
+                      ->addDay()->hour(9)->minute(0)->second(0);
+        $status = $this->handleAssignLead($lead, $salesPerson, $date);
         return $this->markAssignLead($lead, $dealerLocationId, $newestSalesPerson, $salesPerson, $status);
     }
 
@@ -150,7 +161,7 @@ class AutoAssignService implements AutoAssignServiceInterface {
      * @param Lead $lead
      * @return int
      */
-    private function getLeadDealerLocation(Lead $lead): int {
+    protected function getLeadDealerLocation(Lead $lead): int {
         // Initialize Getting Lead's Dealer Location
         $dealerLocationId = $lead->dealer_location_id;
         $salesType = $this->salesPersonRepository->findSalesType($lead->lead_type);
@@ -186,7 +197,7 @@ class AutoAssignService implements AutoAssignServiceInterface {
      * @param int $dealerLocationId
      * @return null|SalesPerson
      */
-    private function getNewestSalesPerson(Lead $lead, int $dealerLocationId): ?SalesPerson {
+    protected function getNewestSalesPerson(Lead $lead, int $dealerLocationId): ?SalesPerson {
         // Initialize
         $newestSalesPerson = null;
         $dealerId = $lead->newDealerUser->id;
@@ -219,7 +230,7 @@ class AutoAssignService implements AutoAssignServiceInterface {
      * @param int $salesPersonId
      * @return int last sales person ID
      */
-    private function setRoundRobinSalesPerson(int $dealerId, int $dealerLocationId, Lead $lead, int $salesPersonId): int {
+    protected function setRoundRobinSalesPerson(int $dealerId, int $dealerLocationId, Lead $lead, int $salesPersonId): int {
         // Initialize
         $salesType = $this->salesPersonRepository->findSalesType($lead->lead_type);
 
@@ -252,13 +263,10 @@ class AutoAssignService implements AutoAssignServiceInterface {
      * 
      * @param Lead $lead
      * @param SalesPerson $salesPerson
+     * @param Carbon $date
      * @return string status of assign
      */
-    private function handleAssignLead(Lead $lead, SalesPerson $salesPerson): string {
-        // Initialize Next Contact Date
-        $date = Carbon::now()->timezone($lead->crmUser->dealer_timezone)
-                      ->addDay()->hour(9)->minute(0)->second(0);
-
+    protected function handleAssignLead(Lead $lead, SalesPerson $salesPerson, Carbon $date): string {
         // Try Processing Assign Lead
         $this->addLeadExplanationNotes($lead->identifier, 'Found Next Matching Sales Person: ' . $salesPerson->id . ' for Lead: ' . $lead->id_name);
         try {
@@ -292,7 +300,7 @@ class AutoAssignService implements AutoAssignServiceInterface {
      * @param Carbon $date
      * @return string
      */
-    private function finishAssignLead(
+    protected function finishAssignLead(
         Lead $lead,
         SalesPerson $salesPerson,
         Carbon $date
@@ -306,7 +314,7 @@ class AutoAssignService implements AutoAssignServiceInterface {
         $this->leadStatus->createOrUpdate([
             'lead_id' => $lead->identifier,
             'sales_person_id' => $salesPerson->id,
-            'next_contact_date' => $date->utc()->format("Y-m-d H:i:s")
+            'next_contact_date' => $date->setTimezone($lead->crmUser->dealer_timezone)->toDateTimeString()
         ]);
 
         // Finish Assigning
@@ -322,14 +330,14 @@ class AutoAssignService implements AutoAssignServiceInterface {
      * @param Carbon Date
      * @return string
      */
-    private function sendAssignLeadEmail(
+    protected function sendAssignLeadEmail(
         Lead $lead,
         SalesPerson $salesPerson,
         Carbon $date
     ): string {
         // Get Sales Person Email
         $salesEmail = $salesPerson->email;
-        $this->addLeadExplanationNotes($lead->identifier, 'Attempting to Send Notification Email to: ' . $salesEmail . ' for Lead: ' . $lead->id_name);
+        $this->addLeadExplanationNotes($lead->identifier, 'Attempting to Send Auto Assign Email to: ' . $salesEmail . ' for Lead: ' . $lead->id_name);
         $credential = NewUser::getDealerCredential($lead->newDealerUser->user_id, $salesPerson->id);
         $nextContactText  = ' on ' . $date->tz($lead->crmUser->dealer_timezone)->format("l, F jS, Y") .
                             ' at ' . $date->tz($lead->crmUser->dealer_timezone)->format("g:i A T");
@@ -363,7 +371,7 @@ class AutoAssignService implements AutoAssignServiceInterface {
      * @param int $newestSalesPersonId
      * @return LeadAssign
      */
-    private function skipAssignLead(
+    protected function skipAssignLead(
         Lead $lead,
         int $dealerLocationId,
         int $newestSalesPersonId
@@ -400,15 +408,15 @@ class AutoAssignService implements AutoAssignServiceInterface {
      * 
      * @param Lead $lead
      * @param int $dealerLocationId
-     * @param SalesPerson $found
+     * @param null|SalesPerson $found
      * @param SalesPerson $chosen
      * @param string $status
      * @return LeadAssign
      */
-    private function markAssignLead(
+    protected function markAssignLead(
         Lead $lead,
         int $dealerLocationId,
-        SalesPerson $found,
+        ?SalesPerson $found,
         SalesPerson $chosen,
         string $status
     ): LeadAssign {
@@ -422,7 +430,7 @@ class AutoAssignService implements AutoAssignServiceInterface {
             'lead_id' => $lead->identifier,
             'dealer_location_id' => $dealerLocationId,
             'salesperson_type' => $salesType,
-            'found_salesperson_id' => $found->id,
+            'found_salesperson_id' => $found->id ?? 0,
             'chosen_salesperson_id' => $chosen->id,
             'assigned_by' => 'autoassign',
             'status' => $status,
@@ -437,7 +445,7 @@ class AutoAssignService implements AutoAssignServiceInterface {
      * @param string $notes
      * @return void
      */
-    private function addLeadExplanationNotes(int $leadId, string $notes, string $log = 'info'): void {
+    protected function addLeadExplanationNotes(int $leadId, string $notes, string $log = 'info'): void {
         if (!isset($this->leadExplanationNotes[$leadId])) {
             $this->leadExplanationNotes[$leadId] = [];
         }
@@ -457,7 +465,7 @@ class AutoAssignService implements AutoAssignServiceInterface {
      * @param int $leadId
      * @return array<string>
      */
-    private function getLeadExplanationNotes($leadId) {
+    protected function getLeadExplanationNotes($leadId) {
         return $this->leadExplanationNotes[$leadId];
     }
 }

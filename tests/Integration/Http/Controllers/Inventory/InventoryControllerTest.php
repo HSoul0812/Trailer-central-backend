@@ -9,13 +9,14 @@ use App\Http\Middleware\Inventory\CreateInventoryPermissionMiddleware;
 use App\Http\Requests\Inventory\GetInventoryHistoryRequest;
 use App\Models\CRM\Dms\Customer\CustomerInventory;
 use App\Models\CRM\User\Customer;
+use App\Models\Inventory\EntityType;
 use App\Models\Inventory\Inventory;
 use App\Models\User\AuthToken;
 use App\Models\User\Interfaces\PermissionsInterface;
-use App\Models\User\User;
 use Dingo\Api\Exception\ResourceException;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Storage;
 use Tests\database\seeds\Inventory\InventoryHistorySeeder;
 use Tests\database\seeds\Inventory\InventorySeeder;
@@ -32,6 +33,8 @@ use TypeError;
  */
 class InventoryControllerTest extends TestCase
 {
+    use WithFaker;
+
     const API_INVENTORY_TITLES = '/api/inventory/get_all_titles';
     const API_INVENTORY_EXISTS = '/api/inventory/exists';
 
@@ -49,6 +52,9 @@ class InventoryControllerTest extends TestCase
      * @throws BindingResolutionException when there is a problem with resolution of concreted class
      *
      * @covers       InventoryController::history
+     *
+     * @group DMS
+     * @group DMS_INVENTORY
      */
     public function testHistoryInvalidParameters(
         array   $params,
@@ -87,11 +93,15 @@ class InventoryControllerTest extends TestCase
 
     /**
      * @covers ::create
+     *
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
      * @dataProvider inventoryDataProvider
      *
      * @param array $inventoryParams
      */
-    public function testCreate(array $inventoryParams)
+    public function testCreateWithDescriptionSuccess(array $inventoryParams)
     {
         $seeder = new InventorySeeder();
         $seeder->seed();
@@ -106,8 +116,6 @@ class InventoryControllerTest extends TestCase
 
         $response = $this->json('PUT', '/api/inventory', $inventoryParams, $this->getSeederAccessToken($seeder));
 
-        $response->assertStatus(200);
-
         $responseJson = json_decode($response->getContent(), true);
         $this->assertArrayHasKey('response', $responseJson);
         $this->assertArrayHasKey('status', $responseJson['response']);
@@ -115,13 +123,19 @@ class InventoryControllerTest extends TestCase
         $this->assertArrayHasKey('id', $responseJson['response']['data']);
         $this->assertSame('success', $responseJson['response']['status']);
 
-        $this->assertDatabaseHas('inventory', $inventoryParams);
+        $inventory = Inventory::find($responseJson['response']['data']['id']);
+
+        $this->assertSame($inventoryParams['description_html'], $inventory['description_html']);
 
         $seeder->cleanUp();
     }
 
     /**
      * @covers ::create
+     *
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
      * @dataProvider inventoryDataProvider
      *
      * @param array $inventoryParams
@@ -150,7 +164,7 @@ class InventoryControllerTest extends TestCase
 
         $response = $this->json('PUT', '/api/inventory', $inventoryParams, $this->getSeederAccessToken($seeder));
 
-        $response->assertStatus(200);
+        $response->assertStatus(201);
 
         $responseJson = json_decode($response->getContent(), true);
         $this->assertArrayHasKey('response', $responseJson);
@@ -166,6 +180,54 @@ class InventoryControllerTest extends TestCase
 
     /**
      * @covers ::create
+     *
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
+     * @dataProvider wrongInventoryDataProvider
+     */
+    public function testWillValidateAsExpected(array $parameters, string $expectedMessage, array $expectedErrorMessages): void
+    {
+        $seederParams = [
+            'userType' => AuthToken::USER_TYPE_DEALER_USER,
+            'permissions' => [[
+                'feature' => PermissionsInterface::INVENTORY,
+                'permission_level' => PermissionsInterface::SUPER_ADMIN_PERMISSION,
+            ]],
+        ];
+
+        $seeder = new InventorySeeder($seederParams);
+
+        $seeder->seed();
+
+        $this->assertDatabaseMissing('inventory', ['dealer_id' => $seeder->dealer->dealer_id]);
+
+        $parameters['dealer_id'] = $seeder->dealer->dealer_id;
+        $parameters['dealer_location_id'] = $seeder->dealerLocation->dealer_location_id;
+        $parameters['manufacturer'] = $seeder->inventoryMfg->name;
+        $parameters['brand'] = is_callable($parameters['brand']) ? $parameters['brand']($seeder) : $parameters['brand'];
+        $parameters['category'] = $seeder->category->legacy_category;
+
+        $response = $this->json('PUT', '/api/inventory', $parameters, $this->getSeederAccessToken($seeder));
+
+        $response->assertStatus(422);
+
+        $responseJson = json_decode($response->getContent(), true);
+
+        self::assertArrayHasKey('message', $responseJson);
+        self::assertArrayHasKey('errors', $responseJson);
+        self::assertSame($expectedMessage, $responseJson['message']);
+        self::assertSame($expectedErrorMessages, $responseJson['errors']);
+
+        $seeder->cleanUp();
+    }
+
+    /**
+     * @covers ::create
+     *
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
      * @dataProvider inventoryDataProvider
      *
      * @param array $inventoryParams
@@ -200,7 +262,7 @@ class InventoryControllerTest extends TestCase
 
         $response = $this->json('PUT', '/api/inventory', $inventoryParams, $this->getSeederAccessToken($seeder));
 
-        $response->assertStatus(200);
+        $response->assertStatus(201);
 
         $responseJson = json_decode($response->getContent(), true);
         $this->assertArrayHasKey('response', $responseJson);
@@ -216,10 +278,13 @@ class InventoryControllerTest extends TestCase
 
     /**
      * @covers ::create
+     *
+     * @group DMS
+     * @group DMS_INVENTORY
      */
     public function testCreateWithWrongAccessToken()
     {
-        $response = $this->json('PUT', '/api/inventory/create', [], ['access-token' => 'wrong_access_token']);
+        $response = $this->json('PUT', '/api/inventory', [], ['access-token' => 'wrong_access_token']);
 
         $response
             ->assertStatus(403)
@@ -228,10 +293,12 @@ class InventoryControllerTest extends TestCase
 
     /**
      * @covers ::create
+     * @group DMS
+     * @group DMS_INVENTORY
      */
     public function testCreateWithoutAccessToken()
     {
-        $response = $this->json('PUT', '/api/inventory/create', []);
+        $response = $this->json('PUT', '/api/inventory', []);
 
         $response
             ->assertStatus(403)
@@ -240,6 +307,9 @@ class InventoryControllerTest extends TestCase
 
     /**
      * @covers ::exists
+     *
+     * @group DMS
+     * @group DMS_INVENTORY
      */
     public function testExists()
     {
@@ -271,6 +341,9 @@ class InventoryControllerTest extends TestCase
 
     /**
      * @covers ::exists
+     *
+     * @group DMS
+     * @group DMS_INVENTORY
      */
     public function testExistsFalse()
     {
@@ -303,6 +376,10 @@ class InventoryControllerTest extends TestCase
 
     /**
      * @covers ::exists
+     *
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
      * @dataProvider inventoryDataProvider
      *
      * @param array $inventoryParams
@@ -352,6 +429,10 @@ class InventoryControllerTest extends TestCase
 
     /**
      * @covers ::exists
+     *
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
      * @dataProvider inventoryDataProvider
      *
      * @param array $inventoryParams
@@ -388,6 +469,12 @@ class InventoryControllerTest extends TestCase
         $seeder->cleanUp();
     }
 
+    /**
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
+     * @return void
+     */
     public function testDeliveryPrice()
     {
         $seeder = new InventorySeeder(['withInventory' => true]);
@@ -403,6 +490,12 @@ class InventoryControllerTest extends TestCase
         $seeder->cleanUp();
     }
 
+    /**
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
+     * @return void
+     */
     public function testDeliveryPriceToZip()
     {
         $seeder = new InventorySeeder(['withInventory' => true]);
@@ -444,20 +537,29 @@ class InventoryControllerTest extends TestCase
     }
 
     /**
-     * @return int[]
+     * @return array
      */
     public function inventoryDataProvider(): array
     {
-        return [[
-            [
-                'entity_type_id' => 1,
+        return [
+            'inventory_cdw_669' => [[
+                'entity_type_id' => 1, // CDW-669 Sample
                 'active' => true,
                 'title' => 'test_title',
                 'stock' => 'test_stock',
                 'model' => 'test_model',
                 'qb_item_category_id' => 111,
-                'description' => 'test_description',
-                'description_html' => 'test_description_html',
+                'description' => <<< SQL
+#### OVERVIEW\\\\n\\\\n\\\\n2019 Forest River Grey Wolf 29BH \\\\nTravel Trailer RV / Sleeps 10 / Dry: 6336 lbs / Bunk Model \\\\n\\\\n\\\\nForest River has been a trusted name that provides reliable and affordable RVs! This pre-owned 2019 Forest River Grey Wolf 29BH appeals to a broad breadth of RV lifestyles ranging from weekend use all the way to extended use and just about every use in between. Designed to fit your family''s budget this exciting Grey Wolf provides an abundance of value. It''s time to make camping great again. So let''s schedule an appointment today to see this exciting 2019 Grey Wolf 29BH. Are you ready to go camping? So it''s time to get hitched up and on the road to your next camping adventure today. \\\\n\\\\nThis 2019 Forest River Grey Wolf 29BH is priced to sell today. Yes you get great instant savings. As well as a full 90 Day Certified Pre-Owned RV Warranty for added peace of mind. So drive a little save a lot at Central PA''s largest towable RV dealership. We are waiting to hear from you call 800-722-1236 today. Or text us at 717-667-1400\\. So fill out the contact form for more information on this exciting RV. Therefore if you have a current trailer that you enjoy camping in fill out our RV trade-in form and we will provide you with honest trade-in values. So click or call today. Financing may be available for qualified buyers. Please contact our Business Department for all financing information. Also additional extended service contracts are available for sale. RV buying made easy at Lerch RV.
+SQL,
+                'description_html' => <<< HTML
+<h4>OVERVIEW</h4><br />
+<p>2019 Forest River Grey Wolf 29BH </p><br />
+<p>Travel Trailer RV / Sleeps 10 / Dry: 6336 lbs / Bunk Model </p><br />
+<p>Forest River has been a trusted name that provides reliable and affordable RVs! This pre-owned 2019 Forest River Grey Wolf 29BH appeals to a broad breadth of RV lifestyles ranging from weekend use all the way to extended use and just about every use in between. Designed to fit your family''s budget this exciting Grey Wolf provides an abundance of value. It''s time to make camping great again. So let''s schedule an appointment today to see this exciting 2019 Grey Wolf 29BH. Are you ready to go camping? So it''s time to get hitched up and on the road to your next camping adventure today. </p><br />
+<p>This 2019 Forest River Grey Wolf 29BH is priced to sell today. Yes you get great instant savings. As well as a full 90 Day Certified Pre-Owned RV Warranty for added peace of mind. So drive a little save a lot at Central PA''s largest towable RV dealership. We are waiting to hear from you call 800-722-1236 today. Or text us at 717-667-1400. So fill out the contact form for more information on this exciting RV. Therefore if you have a current trailer that you enjoy camping in fill out our RV trade-in form and we will provide you with honest trade-in values. So click or call today. Financing may be available for qualified buyers. Please contact our Business Department for all financing information. Also additional extended service contracts are available for sale. RV buying made easy at Lerch RV.</p>
+
+HTML,
                 'status' => 1,
                 'availability' => 'available',
                 'is_consignment' => true,
@@ -533,10 +635,390 @@ class InventoryControllerTest extends TestCase
                 'hidden_price' => 9911.22,
                 'has_stock_images' => true,
                 'show_on_auction123' => false,
-            ],
-        ]];
+            ]],
+            'inventory_cdw_824_1' => [[
+                'entity_type_id' => 1, // CDW-824 Sample
+                'active' => true,
+                'title' => 'test_title',
+                'stock' => 'test_stock',
+                'model' => 'test_model',
+                'qb_item_category_id' => 111,
+                'description' => <<< STRING
+Stock Number: AL1879 \\\\
+
+Trailer Specs:
+Overall: Length: 14'7" Width: 7'8"
+Interior/Bed: Length: 10' Width: 68"
+Weight: 675 lbs\\. \\| GVWR: 3\\,500 lbs\\. \\| Payload: 2\\,825 lbs\\. \\\\
+
+Axle(s): 3,500 lb. Dexter Torsion Idler Axle w/ EZ Lube Hubs
+Tire/Wheel: ST205/75R14 Aluminum Wheel \\| Load Range C
+Coupler: Type: Bumper Pull \\| Size 2" \\| 4\\-Way 12V Connector \\\\
+
+5 Year Limited Warranty \\\\
+
+Standard Features:
+Aluminum Fenders
+Extruded Aluminum Decking
+7" Heavy Duty Frame Rail
+6" Extruded Front Retaining Bumper
+(4) Stake Pockets
+(4) Tie Down Loops
+Swivel Tongue Jack 1,200# Capacity
+LED Lighting Package
+Safety Chains \\\\
+
+WASATCH TRAILER SALES - LARGEST TRAILER SELECTION IN UTAH
+Springville: \\(801\\) 528\\-1581 \\| 1180 S 2000 W\\, Springville UT\\, 84663
+View More Inventory: [www.wasatchtrailer.com](http://www.wasatchtrailer.com/)
+
+STRING,
+                'description_html' => <<< HTML
+<p>Stock Number: AL1879 <br></p><br />
+<p>Trailer Specs:<br />
+Overall: Length: 14'7&quot; Width: 7'8&quot;<br />
+Interior/Bed: Length: 10' Width: 68&quot;<br />
+Weight: 675 lbs. | GVWR: 3,500 lbs. | Payload: 2,825 lbs. <br></p><br />
+<p>Axle(s): 3,500 lb. Dexter Torsion Idler Axle w/ EZ Lube Hubs<br />
+Tire/Wheel: ST205/75R14 Aluminum Wheel | Load Range C<br />
+Coupler: Type: Bumper Pull | Size 2&quot; | 4-Way 12V Connector <br></p><br />
+<p>5 Year Limited Warranty <br></p><br />
+<p>Standard Features:<br />
+Aluminum Fenders<br />
+Extruded Aluminum Decking<br />
+7&quot; Heavy Duty Frame Rail<br />
+6&quot; Extruded Front Retaining Bumper<br />
+(4) Stake Pockets<br />
+(4) Tie Down Loops<br />
+Swivel Tongue Jack 1,200# Capacity<br />
+LED Lighting Package<br />
+Safety Chains <br></p><br />
+<p>WASATCH TRAILER SALES - LARGEST TRAILER SELECTION IN UTAH<br />
+Springville: (801) 528-1581 | 1180 S 2000 W, Springville UT, 84663<br />
+View More Inventory: <a href="http://www.wasatchtrailer.com/">www.wasatchtrailer.com</a></p>
+
+HTML,
+                'status' => 1,
+                'availability' => 'available',
+                'is_consignment' => true,
+                'video_embed_code' => 'some_code',
+                'vin' => 'test_vin',
+                'msrp_min' => 22,
+                'msrp' => 33,
+                'price' => 44,
+                'sales_price' => 66,
+                'use_website_price' => true,
+                'website_price' => 77,
+                'dealer_price' => 88,
+                'monthly_payment' => 99,
+                'year' => 2020,
+                'condition' => 'new',
+                'length' => 111,
+                'width' => 222,
+                'height' => 333,
+                'weight' => 444,
+                'gvwr' => 555,
+                'axle_capacity' => 1,
+                'cost_of_unit' => 100,
+                'true_cost' => 777,
+                'cost_of_shipping' => 'test_cost_of_shipping',
+                'cost_of_prep' => 'test_cost_of_prep',
+                'total_of_cost' => 'test_total_of_cost',
+                'pac_amount' => 5555,
+                'pac_type' => 'percent',
+                'minimum_selling_price' => 'test_minimum_selling_price',
+                'notes' => 'some_notes',
+                'show_on_ksl' => true,
+                'show_on_racingjunk' => true,
+                'show_on_website' => true,
+                'overlay_enabled' => true,
+                'is_special' => true,
+                'is_featured' => true,
+                'is_archived' => false,
+                'archived_at' => null,
+                'broken_video_embed_code' => true,
+                'showroom_id' => 454,
+                'coordinates_updated' => 55,
+                'payload_capacity' => 789,
+                'height_display_mode' => 'inches',
+                'width_display_mode' => 'inches',
+                'length_display_mode' => 'inches',
+                'width_inches' => 987,
+                'height_inches' => 654,
+                'length_inches' => 321,
+                'show_on_rvtrader' => true,
+                'chosen_overlay' => 'test_chosen_overlay',
+                'fp_vendor' => 999,
+                'fp_balance' => 22.33,
+                'fp_paid' => true,
+                'fp_interest_paid' => 983.22,
+                'l_holder' => 'test_l_holder',
+                'l_attn' => 'test_l_attn',
+                'l_name_on_account' => 'test_l_name_on_account',
+                'l_address' => 'test_l_address',
+                'l_account' => 'test_l_account',
+                'l_city' => 'test_l_city',
+                'l_state' => 'test_l_state',
+                'l_zip_code' => 'test_l_zip_code',
+                'l_payoff' => 99.66,
+                'l_phone' => 'test_l_phone',
+                'l_paid' => true,
+                'l_fax' => 'test_l_fax',
+                'bill_id' => 357,
+                'send_to_quickbooks' => true,
+                'is_floorplan_bill' => true,
+                'integration_item_hash' => 'test_integration_item_hash',
+                'integration_images_hash' => 'test_integration_images_hash',
+                'non_serialized' => true,
+                'hidden_price' => 9911.22,
+                'has_stock_images' => true,
+                'show_on_auction123' => false,
+            ]],
+            'inventory_cdw_824_2' => [[
+                'entity_type_id' => 1, // CDW-824 Sample
+                'active' => true,
+                'title' => 'test_title',
+                'stock' => 'test_stock',
+                'model' => 'test_model',
+                'qb_item_category_id' => 111,
+                'description' => <<< STRING
+Stock Number: AL1879
+
+Trailer Specs:
+Overall: Length: 14'7" Width: 7'8"
+Interior/Bed: Length: 10' Width: 68"
+Weight: 675 lbs\\. \\| GVWR: 3\\,500 lbs\\. \\| Payload: 2\\,825 lbs\\.
+Axle(s): 3,500 lb. Dexter Torsion Idler Axle w/ EZ Lube Hubs
+Tire/Wheel: ST205/75R14 Aluminum Wheel \\| Load Range C
+Coupler: Type: Bumper Pull \\| Size 2" \\| 4\\-Way 12V Connector
+
+5 Year Limited Warranty
+
+Standard Features:
+Aluminum Fenders
+Extruded Aluminum Decking
+7" Heavy Duty Frame Rail
+6" Extruded Front Retaining Bumper
+(4) Stake Pockets
+(4) Tie Down Loops
+Swivel Tongue Jack 1,200# Capacity
+LED Lighting Package
+
+Safety Chains
+WASATCH TRAILER SALES - LARGEST TRAILER SELECTION IN UTAH
+Springville: \\(801\\) 528\\-1581 \\| 1180 S 2000 W\\, Springville UT\\, 84663
+View More Inventory: [https://www.wasatchtrailer.com](https://www.wasatchtrailer.com)
+STRING,
+                'description_html' => <<< HTML
+<p>Stock Number: AL1879</p><br />
+<p>Trailer Specs:<br />
+Overall: Length: 14'7&quot; Width: 7'8&quot;<br />
+Interior/Bed: Length: 10' Width: 68&quot;<br />
+Weight: 675 lbs. | GVWR: 3,500 lbs. | Payload: 2,825 lbs.<br />
+Axle(s): 3,500 lb. Dexter Torsion Idler Axle w/ EZ Lube Hubs<br />
+Tire/Wheel: ST205/75R14 Aluminum Wheel | Load Range C<br />
+Coupler: Type: Bumper Pull | Size 2&quot; | 4-Way 12V Connector</p><br />
+<p>5 Year Limited Warranty</p><br />
+<p>Standard Features:<br />
+Aluminum Fenders<br />
+Extruded Aluminum Decking<br />
+7&quot; Heavy Duty Frame Rail<br />
+6&quot; Extruded Front Retaining Bumper<br />
+(4) Stake Pockets<br />
+(4) Tie Down Loops<br />
+Swivel Tongue Jack 1,200# Capacity<br />
+LED Lighting Package</p><br />
+<p>Safety Chains<br />
+WASATCH TRAILER SALES - LARGEST TRAILER SELECTION IN UTAH<br />
+Springville: (801) 528-1581 | 1180 S 2000 W, Springville UT, 84663<br />
+View More Inventory: <a href="https://www.wasatchtrailer.com">https://www.wasatchtrailer.com</a></p>
+
+HTML,
+                'status' => 1,
+                'availability' => 'available',
+                'is_consignment' => true,
+                'video_embed_code' => 'some_code',
+                'vin' => 'test_vin',
+                'msrp_min' => 22,
+                'msrp' => 33,
+                'price' => 44,
+                'sales_price' => 66,
+                'use_website_price' => true,
+                'website_price' => 77,
+                'dealer_price' => 88,
+                'monthly_payment' => 99,
+                'year' => 2020,
+                'condition' => 'new',
+                'length' => 111,
+                'width' => 222,
+                'height' => 333,
+                'weight' => 444,
+                'gvwr' => 555,
+                'axle_capacity' => 1,
+                'cost_of_unit' => 100,
+                'true_cost' => 777,
+                'cost_of_shipping' => 'test_cost_of_shipping',
+                'cost_of_prep' => 'test_cost_of_prep',
+                'total_of_cost' => 'test_total_of_cost',
+                'pac_amount' => 5555,
+                'pac_type' => 'percent',
+                'minimum_selling_price' => 'test_minimum_selling_price',
+                'notes' => 'some_notes',
+                'show_on_ksl' => true,
+                'show_on_racingjunk' => true,
+                'show_on_website' => true,
+                'overlay_enabled' => true,
+                'is_special' => true,
+                'is_featured' => true,
+                'is_archived' => false,
+                'archived_at' => null,
+                'broken_video_embed_code' => true,
+                'showroom_id' => 454,
+                'coordinates_updated' => 55,
+                'payload_capacity' => 789,
+                'height_display_mode' => 'inches',
+                'width_display_mode' => 'inches',
+                'length_display_mode' => 'inches',
+                'width_inches' => 987,
+                'height_inches' => 654,
+                'length_inches' => 321,
+                'show_on_rvtrader' => true,
+                'chosen_overlay' => 'test_chosen_overlay',
+                'fp_vendor' => 999,
+                'fp_balance' => 22.33,
+                'fp_paid' => true,
+                'fp_interest_paid' => 983.22,
+                'l_holder' => 'test_l_holder',
+                'l_attn' => 'test_l_attn',
+                'l_name_on_account' => 'test_l_name_on_account',
+                'l_address' => 'test_l_address',
+                'l_account' => 'test_l_account',
+                'l_city' => 'test_l_city',
+                'l_state' => 'test_l_state',
+                'l_zip_code' => 'test_l_zip_code',
+                'l_payoff' => 99.66,
+                'l_phone' => 'test_l_phone',
+                'l_paid' => true,
+                'l_fax' => 'test_l_fax',
+                'bill_id' => 357,
+                'send_to_quickbooks' => true,
+                'is_floorplan_bill' => true,
+                'integration_item_hash' => 'test_integration_item_hash',
+                'integration_images_hash' => 'test_integration_images_hash',
+                'non_serialized' => true,
+                'hidden_price' => 9911.22,
+                'has_stock_images' => true,
+                'show_on_auction123' => false,
+            ]],
+        ];
     }
 
+    /**
+     * @return array
+     */
+    public function wrongInventoryDataProvider(): array
+    {
+        $this->refreshApplication();
+        $this->setUpTraits();
+
+        return [
+            'wrong brand when brand is watercraft or RVs' => [
+                [
+                    'entity_type_id' => $this->faker->randomElement([EntityType::ENTITY_TYPE_WATERCRAFT, EntityType::ENTITY_TYPE_RV]),
+                    'active' => true,
+                    'title' => 'test_title',
+                    'stock' => 'test_stock',
+                    'model' => 'test_model',
+                    'brand' => 123, // a wrong brand
+                    'qb_item_category_id' => 111,
+                    'status' => 1,
+                    'availability' => 'available',
+                    'is_consignment' => true,
+                    'video_embed_code' => 'some_code',
+                    'vin' => 'test_vin',
+                    'msrp_min' => 22,
+                    'msrp' => 33,
+                    'price' => 44,
+                    'sales_price' => 66,
+                    'use_website_price' => true,
+                    'website_price' => 77,
+                    'dealer_price' => 88,
+                    'monthly_payment' => 99,
+                    'year' => 2020,
+                    'condition' => 'new',
+                    'length' => 111,
+                    'width' => 222,
+                    'height' => 333,
+                    'weight' => 444,
+                    'gvwr' => 555,
+                    'axle_capacity' => 1,
+                    'cost_of_unit' => 100,
+                    'true_cost' => 777,
+                    'cost_of_shipping' => 'test_cost_of_shipping',
+                    'cost_of_prep' => 'test_cost_of_prep',
+                    'total_of_cost' => 'test_total_of_cost',
+                    'pac_amount' => 5555,
+                    'pac_type' => 'percent',
+                    'minimum_selling_price' => 'test_minimum_selling_price',
+                    'notes' => 'some_notes',
+                    'show_on_ksl' => true,
+                    'show_on_racingjunk' => true,
+                    'show_on_website' => true,
+                    'overlay_enabled' => true,
+                    'is_special' => true,
+                    'is_featured' => true,
+                    'is_archived' => false,
+                    'archived_at' => null,
+                    'broken_video_embed_code' => true,
+                    'showroom_id' => 454,
+                    'coordinates_updated' => 55,
+                    'payload_capacity' => 789,
+                    'height_display_mode' => 'inches',
+                    'width_display_mode' => 'inches',
+                    'length_display_mode' => 'inches',
+                    'width_inches' => 987,
+                    'height_inches' => 654,
+                    'length_inches' => 321,
+                    'show_on_rvtrader' => true,
+                    'chosen_overlay' => 'test_chosen_overlay',
+                    'fp_vendor' => 999,
+                    'fp_balance' => 22.33,
+                    'fp_paid' => true,
+                    'fp_interest_paid' => 983.22,
+                    'l_holder' => 'test_l_holder',
+                    'l_attn' => 'test_l_attn',
+                    'l_name_on_account' => 'test_l_name_on_account',
+                    'l_address' => 'test_l_address',
+                    'l_account' => 'test_l_account',
+                    'l_city' => 'test_l_city',
+                    'l_state' => 'test_l_state',
+                    'l_zip_code' => 'test_l_zip_code',
+                    'l_payoff' => 99.66,
+                    'l_phone' => 'test_l_phone',
+                    'l_paid' => true,
+                    'l_fax' => 'test_l_fax',
+                    'bill_id' => 357,
+                    'send_to_quickbooks' => true,
+                    'is_floorplan_bill' => true,
+                    'integration_item_hash' => 'test_integration_item_hash',
+                    'integration_images_hash' => 'test_integration_images_hash',
+                    'non_serialized' => true,
+                    'hidden_price' => 9911.22,
+                    'has_stock_images' => true,
+                    'show_on_auction123' => false,
+                ],
+                'Validation Failed',
+                ['brand' => ['validation.inventory_brand_valid']]
+            ]
+        ];
+    }
+
+    /**
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
+     * @return void
+     */
     public function testGetAllInventoryTitlesWithoutCustomerId()
     {
         $seeder = $this->seedInventory();
@@ -559,6 +1041,12 @@ class InventoryControllerTest extends TestCase
         $this->cleanUpSeeder($seeder);
     }
 
+    /**
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
+     * @return void
+     */
     public function testGetAllInventoryTitlesWithCustomerId()
     {
         $seeder = $this->seedInventory();
@@ -626,6 +1114,12 @@ class InventoryControllerTest extends TestCase
         ];
     }
 
+    /**
+     * @group DMS
+     * @group DMS_INVENTORY
+     *
+     * @return void
+     */
     public function testExport()
     {
         Storage::fake('s3');
@@ -639,7 +1133,7 @@ class InventoryControllerTest extends TestCase
         $response->assertJsonPath('response.status', 'success');
 
         Storage::disk('s3')->exists("inventory-exports/$inventoryId");
-        
+
         $seeder->cleanUp();
     }
 }

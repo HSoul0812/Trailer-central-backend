@@ -2,6 +2,7 @@
 
 namespace Tests\Integration\Repositories\Dms\ServiceOrder;
 
+use App\Exceptions\Tests\MissingTestDealerIdException;
 use App\Models\CRM\Account\Invoice;
 use App\Models\CRM\Account\InvoiceItem;
 use App\Models\CRM\Dms\Quickbooks\Item;
@@ -13,6 +14,7 @@ use App\Models\CRM\Dms\UnitSale;
 use App\Models\CRM\User\Customer;
 use App\Models\Inventory\Inventory;
 use App\Repositories\Dms\ServiceOrder\ServiceItemTechnicianRepository;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
@@ -30,9 +32,14 @@ class ServiceItemTechnicianRepositoryTest extends TestCase
      * @covers ::serviceReport
      * @dataProvider serviceReportProvider
      *
+     * @group DMS
+     * @group DMS_SERVICE_ORDER
+     *
      * @param array $serviceTechnician11
      * @param array $serviceTechnician12
      * @param array $serviceTechnician21
+     * @throws MissingTestDealerIdException
+     * @throws BindingResolutionException
      */
     public function testServiceReport(array $serviceTechnician11, array $serviceTechnician12, array $serviceTechnician21)
     {
@@ -357,11 +364,16 @@ class ServiceItemTechnicianRepositoryTest extends TestCase
     /**
      * @covers ::serviceReport
      *
+     * @group DMS
+     * @group DMS_SERVICE_ORDER
+     *
      * @dataProvider serviceReportProvider
      *
      * @param array $serviceTechnician11
      * @param array $serviceTechnician12
      * @param array $serviceTechnician21
+     * @throws BindingResolutionException
+     * @throws MissingTestDealerIdException
      */
     public function testServiceReportWithTechnician(array $serviceTechnician11, array $serviceTechnician12, array $serviceTechnician21)
     {
@@ -394,11 +406,16 @@ class ServiceItemTechnicianRepositoryTest extends TestCase
     /**
      * @covers ::serviceReport
      *
+     * @group DMS
+     * @group DMS_SERVICE_ORDER
+     *
      * @dataProvider serviceReportProvider
      *
      * @param array $serviceTechnician11
      * @param array $serviceTechnician12
      * @param array $serviceTechnician21
+     * @throws BindingResolutionException
+     * @throws MissingTestDealerIdException
      */
     public function testServiceReportWithDates(array $serviceTechnician11, array $serviceTechnician12, array $serviceTechnician21)
     {
@@ -421,28 +438,33 @@ class ServiceItemTechnicianRepositoryTest extends TestCase
 
         $result = $repository->serviceReport([
             'dealer_id' => $this->getTestDealerId(),
-            'from_date' => (new \DateTime)->modify('-2 weeks'),
-            'to_date' => (new \DateTime)->modify('-1 week')->modify('+1 day')
+            'from_date' => now()->subWeeks(2)->startOfDay(),
+            'to_date' => now()->endOfDay(),
         ]);
 
         $this->assertArrayHasKey($technicianId1, $result);
-        $this->assertArrayNotHasKey($technicianId2, $result);
+        $this->assertArrayHasKey($technicianId2, $result);
 
-        $unitSale11Key = array_search($unitSaleId11, array_column($result[$technicianId1], 'sale_id'));
-        $unitSale12Key = array_search($unitSaleId12, array_column($result[$technicianId1], 'sale_id'));
+        $unitSale11Key = (bool) array_search($unitSaleId11, array_column($result[$technicianId1], 'sale_id'));
+        $unitSale12Key = (bool) array_search($unitSaleId12, array_column($result[$technicianId1], 'sale_id'));
 
         $this->assertFalse($unitSale11Key);
-        $this->assertNotFalse($unitSale12Key);
+        $this->assertTrue($unitSale12Key);
     }
 
     /**
      * @covers ::serviceReport
+     *
+     * @group DMS
+     * @group DMS_SERVICE_ORDER
      *
      * @dataProvider serviceReportProvider
      *
      * @param array $serviceTechnician11
      * @param array $serviceTechnician12
      * @param array $serviceTechnician21
+     * @throws BindingResolutionException
+     * @throws MissingTestDealerIdException
      */
     public function testServiceReportWithTypes(array $serviceTechnician11, array $serviceTechnician12, array $serviceTechnician21)
     {
@@ -605,6 +627,7 @@ class ServiceItemTechnicianRepositoryTest extends TestCase
             'act_hrs' => $serviceTechnician['act_hrs'],
             'billed_hrs' => $serviceTechnician['billed_hrs'],
             'paid_hrs' => $serviceTechnician['paid_hrs'],
+            'completed_date' => now(),
         ]);
     }
 }

@@ -59,7 +59,8 @@ class DealerLocationTransformer extends TransformerAbstract
             'meta' => [
                 'number_of_inventories' => $dealerLocation->inventoryCount(),
                 'number_of_references' => $dealerLocation->referenceCount()
-            ]
+            ],
+            'google_business_store_code' => $dealerLocation->google_business_store_code
         ];
     }
 

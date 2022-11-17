@@ -7,19 +7,19 @@ use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\LeadSource;
 use App\Models\CRM\Leads\LeadType;
 use App\Models\CRM\Leads\InventoryLead;
-use App\Models\CRM\User\SalesPerson;
 use App\Models\Inventory\Inventory;
 use App\Models\User\User;
 use Faker\Generator as Faker;
 
 $factory->define(LeadStatus::class, function (Faker $faker, array $attributes) {
     $lead_id = $attributes['tc_lead_identifier'] ?? factory(Lead::class)->create()->getKey();
-    $sales_person_id = $attributes['sales_person_id'] ?? factory(SalesPerson::class)->create()->getKey();
+    $sales_person_id = $attributes['sales_person_id'] ?? 0;
+    $status = $attributes['status'] ?? $faker->randomElement(LeadStatus::STATUS_ARRAY);
 
     // Return Overrides
     return [
         'tc_lead_identifier' => $lead_id,
-        'status' => $faker->randomElement(LeadStatus::STATUS_ARRAY),
+        'status' => $status,
         'source' => $faker->company,
         'next_contact_date' => $faker->dateTimeBetween('now', '+1 month')->format('Y-m-d H:i:s'),
         'sales_person_id' => $sales_person_id,

@@ -22,6 +22,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Grimzy\LaravelMysqlSpatial\Eloquent\Builder as GrimzyBuilder;
+use Illuminate\Support\Arr;
+use Illuminate\Support\LazyCollection;
 
 /**
  * Class InventoryRepository
@@ -410,6 +412,10 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query = $query->with('inventoryFeatures.featureList');
         }
 
+        if (in_array('activeListings', $include)) {
+            $query = $query->with('activeListings');
+        }
+
         return $query->firstOrFail();
     }
 
@@ -474,15 +480,26 @@ class InventoryRepository implements InventoryRepositoryInterface
      * @param bool $paginated
      * @return Collection|LengthAwarePaginator
      */
-    public function getAll($params, bool $withDefault = true, bool $paginated = false)
+    public function getAll($params, bool $withDefault = true, bool $paginated = false, $select = ['inventory.*'])
     {
         if ($paginated) {
             return $this->getPaginatedResults($params, $withDefault);
         }
 
-        $query = $this->buildInventoryQuery($params, $withDefault);
+        $query = $this->buildInventoryQuery($params, $withDefault, $select);
 
         return $query->get();
+    }
+
+    /**
+     * Gets the query cursor to avoid memory leaks
+     *
+     * @param array $params
+     * @return LazyCollection
+     */
+    public function getAllAsCursor(array $params): LazyCollection
+    {
+        return $this->buildInventoryQuery($params)->cursor();
     }
 
     /**
@@ -513,10 +530,38 @@ class InventoryRepository implements InventoryRepositoryInterface
     }
 
     /**
+     * Gets the query cursor to avoid memory leaks
+     *
+     * @param array $params
+     * @return LazyCollection
+     */
+    public function getFloorplannedInventoryAsCursor(array $params): LazyCollection
+    {
+        return $this->getFloorplannedQuery($params)->cursor();
+    }
+
+    /**
      * @param $params
-     * @return Collection
+     * @return Collection|\Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
     public function getFloorplannedInventory($params, $paginate = true)
+    {
+        if ($paginate && !isset($params['per_page'])) {
+            $params['per_page'] = 15;
+        } else if (!$paginate && isset($params['per_page'])) {
+            unset($params['per_page']);
+        }
+
+        $query = $this->getFloorplannedQuery($params);
+
+        if ($paginate) {
+            return $query->paginate($params['per_page'])->appends($params);
+        }
+
+        return $query->get();
+    }
+
+    private function getFloorplannedQuery(array $params): GrimzyBuilder
     {
         $query = Inventory::select('*');
 
@@ -532,12 +577,6 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query = $query->where('inventory.dealer_id', $params['dealer_id']);
         }
 
-        if ($paginate && !isset($params['per_page'])) {
-            $params['per_page'] = 15;
-        } else if (!$paginate && isset($params['per_page'])) {
-            unset($params['per_page']);
-        }
-
         if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
             $query = $query->where($params[self::CONDITION_AND_WHERE]);
         }
@@ -547,8 +586,8 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         if (isset($params['search_term'])) {
-            if(preg_match(self::DIMENSION_SEARCH_TERM_PATTERN, $params['search_term'])){
-                $params['search_term'] = floatval(trim($params['search_term'],' \'"'));
+            if (preg_match(self::DIMENSION_SEARCH_TERM_PATTERN, $params['search_term'])) {
+                $params['search_term'] = floatval(trim($params['search_term'], ' \'"'));
                 $query = $query->where(function ($q) use ($params) {
                     $q->where('length', $params['search_term'])
                         ->orWhere('width', $params['search_term'])
@@ -557,7 +596,7 @@ class InventoryRepository implements InventoryRepositoryInterface
                         ->orWhere('width_inches', $params['search_term'])
                         ->orWhere('height_inches', $params['search_term']);
                 });
-            }else {
+            } else {
                 /**
                  * This converts strings like 4 Star Trailers to 4%Star%Trailers
                  * so it matches inventories with all words included in the search query
@@ -588,11 +627,7 @@ class InventoryRepository implements InventoryRepositoryInterface
             }
         }
 
-        if ($paginate) {
-            return $query->paginate($params['per_page'])->appends($params);
-        }
-
-        return $query->get();
+        return $query;
     }
 
     /**
@@ -627,11 +662,22 @@ class InventoryRepository implements InventoryRepositoryInterface
     ) : GrimzyBuilder {
         /** @var Builder $query */
         $query = Inventory::query()
-            ->select($select)
-            ->where('inventory.inventory_id', '>', 0);
+            ->select($select);
+
+        if (isset($params['dealer_id'])) {
+            // having this applied filter here will make faster the query
+            $query = $query->where('inventory.dealer_id', $params['dealer_id']);
+        }
+
+        $query = $query->where('inventory.inventory_id', '>', 0);
 
         if (isset($params['include']) && is_string($params['include'])) {
             $query = $query->with(explode(',', $params['include']));
+        }
+
+        if (isset($params['is_archived'])) {
+            $withDefault = false;
+            $query = $query->where('inventory.is_archived', $params['is_archived']);
         }
 
         $attributesEmpty = true;
@@ -669,12 +715,12 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query = $query->where('status', $params['status']);
         }
 
-        if (isset($params['condition'])) {
-            $query = $query->where('condition', $params['condition']);
+        if (!empty($params['exclude_status_ids'])) {
+            $query = $query->whereNotIn('status', Arr::wrap($params['exclude_status_ids']));
         }
 
-        if (isset($params['dealer_id'])) {
-            $query = $query->where('inventory.dealer_id', $params['dealer_id']);
+        if (isset($params['condition'])) {
+            $query = $query->where('condition', $params['condition']);
         }
 
         if (isset($params['dealer_location_id'])) {
@@ -691,11 +737,6 @@ class InventoryRepository implements InventoryRepositoryInterface
             } else if ($params['units_with_true_cost'] == self::DO_NOT_SHOW_UNITS_WITH_TRUE_COST) {
                 $query = $query->where('true_cost', 0);
             }
-        }
-
-        if (isset($params['is_archived'])) {
-            $withDefault = false;
-            $query = $query->where('inventory.is_archived', $params['is_archived']);
         }
 
         if ($withDefault) {
@@ -764,7 +805,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         } elseif (isset($params['images_less_than'])) {
             $query->havingRaw('image_count <= '. $params['images_less_than']);
         } else {
-            $query->select(['inventory.*']);
+            $query->select($select);
         }
 
         if (isset($params['sort'])) {
@@ -1037,5 +1078,17 @@ class InventoryRepository implements InventoryRepositoryInterface
      */
     public function archiveInventory(int $dealerId, array $inventoryParams): int {
         return Inventory::where('dealer_id', $dealerId)->update($inventoryParams);
+    }
+
+    /**
+     * Find the inventory by stock
+     *
+     * @param int $dealerId
+     * @param string $stock
+     * @return Inventory|null
+     */
+    public function findByStock(int $dealerId, string $stock): ?Inventory
+    {
+        return Inventory::where('dealer_id', $dealerId)->where('stock', $stock)->first();
     }
 }

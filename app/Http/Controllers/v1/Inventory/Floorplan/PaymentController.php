@@ -6,6 +6,7 @@ use Dingo\Api\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\RestfulController;
+use App\Http\Requests\Inventory\Floorplan\CheckNumberPaymentRequest;
 use App\Transformers\Quickbooks\ExpenseTransformer;
 use App\Http\Requests\Inventory\GetInventoryRequest;
 use App\Transformers\Inventory\InventoryTransformer;
@@ -18,7 +19,6 @@ use App\Repositories\Inventory\Floorplan\PaymentRepositoryInterface;
 
 class PaymentController extends RestfulController
 {
-    
     protected $payment;
 
     /**
@@ -30,14 +30,14 @@ class PaymentController extends RestfulController
      * @var InventoryRepositoryInterface
      */
     protected $inventoryRepository;
-    
+
     /**
      * Create a new controller instance.
      *
      * @return void
      */
     public function __construct(
-        PaymentRepositoryInterface $payment, 
+        PaymentRepositoryInterface $payment,
         PaymentServiceInterface $paymentService,
         InventoryRepositoryInterface $inventoryRepository
     )
@@ -46,9 +46,9 @@ class PaymentController extends RestfulController
         $this->paymentService = $paymentService;
         $this->inventoryRepository = $inventoryRepository;
 
-        $this->middleware('setDealerIdOnRequest')->only(['create', 'downloadCsv']);
+        $this->middleware('setDealerIdOnRequest')->only(['create', 'downloadCsv', 'checkNumberExists']);
     }
-   
+
 
     /**
      * @OA\Get(
@@ -97,17 +97,17 @@ class PaymentController extends RestfulController
      */
     public function index(Request $request) {
         $request = new GetPaymentRequest($request->all());
-        
+
         if ( $request->validate() ) {
             if ($request->inventory_id) {
                 $payments = $this->payment->getByInventory($request->all());
             } else {
                 $payments = $this->payment->getAll($request->all());
             }
-            
+
             return $this->response->paginator($payments, new PaymentTransformer());
         }
-        
+
         return $this->response->errorBadRequest();
     }
 
@@ -171,13 +171,13 @@ class PaymentController extends RestfulController
      */
     public function create(Request $request) {
         $request = new CreatePaymentRequest($request->all());
-        
+
         if ( $request->validate() ) {
             $expense = $this->paymentService->create($request->all());
 
             return $this->response->item($expense, new ExpenseTransformer());
-        }  
-        
+        }
+
         return $this->response->errorBadRequest();
     }
 
@@ -232,4 +232,46 @@ class PaymentController extends RestfulController
         return $this->response->errorBadRequest();
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/inventory/floorplan/payments/check-number-exists",
+     *     description="Checks whether an check number payment exists",
+     *     tags={"Inventory"},
+     *     @OA\Parameter(
+     *         name="check_number",
+     *         in="query",
+     *         description="Check Number",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns a result",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
+     *     ),
+     * )
+     *
+     * @param CheckNumberPaymentRequest $request
+     * @return Response
+     * @throws NoObjectIdValueSetException|NoObjectTypeSetException
+     */
+    public function checkNumberExists(Request $request): Response
+    {
+        $checkNumberPaymentRequest = new CheckNumberPaymentRequest($request->all());
+
+        if (!$checkNumberPaymentRequest->validate()) {
+            return $this->response->errorBadRequest();
+        }
+
+        $isExists = $this->paymentService->checkNumberExists(
+            $request->input('dealer_id'),
+            $request->input('checkNumber')
+        );
+
+        return $this->existsResponse($isExists);
+    }
 }

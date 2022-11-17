@@ -5,6 +5,7 @@
 namespace Tests\Feature\Inventory\Image;
 
 use App\Jobs\Files\DeleteS3FilesJob;
+use App\Models\Inventory\Inventory;
 use Illuminate\Support\Facades\Bus;
 
 class BulkDestroyInventoryImageTest extends EndpointInventoryImageTest
@@ -12,6 +13,12 @@ class BulkDestroyInventoryImageTest extends EndpointInventoryImageTest
     protected const VERB = 'DELETE';
     protected const ENDPOINT = '/api/inventory/:id/images';
 
+    /**
+     * @group DMS
+     * @group DMS_INVENTORY_IMAGE
+     *
+     * @return void
+     */
     public function testItShouldPreventAccessingWithoutAuthentication(): void
     {
         $this->itShouldPreventAccessingWithoutAuthentication();
@@ -19,6 +26,9 @@ class BulkDestroyInventoryImageTest extends EndpointInventoryImageTest
 
     /**
      * @dataProvider badArgumentsProvider
+     *
+     * @group DMS
+     * @group DMS_INVENTORY_IMAGE
      *
      * @param array $arguments
      * @param string $expectedFieldNameWithError
@@ -72,7 +82,12 @@ class BulkDestroyInventoryImageTest extends EndpointInventoryImageTest
         $this->tearDownSeed($otherSeed['dealer']->dealer_id);
     }
 
-
+    /**
+     * @group DMS
+     * @group DMS_INVENTORY_IMAGE
+     *
+     * @return void
+     */
     public function testItShouldUpdateWhenTheArgumentsAreFine(): void
     {
         Bus::fake();
@@ -94,13 +109,23 @@ class BulkDestroyInventoryImageTest extends EndpointInventoryImageTest
 
         self::assertEmpty($json);
 
-        Bus::assertDispatched(DeleteS3FilesJob::class);
+        // Back in 2022-05-04: We commented out the DeleteS3FileJob
+        // so for now we'll test that it's not dispatched
+        Bus::assertNotDispatched(DeleteS3FilesJob::class);
     }
 
     public function badArgumentsProvider(): array
     {
         $this->refreshApplication();
         $this->setUpFaker();
+
+        $getNotExistInventory = function(): int {
+            $notExistsInventoryId = data_get(Inventory::latest('inventory_id')->first(['inventory_id']), 'inventory_id', 0);
+
+            // Make sure to send the inventory that doesn't exist in the DB
+            // to the test case
+            return $notExistsInventoryId + 1000;
+        };
 
         $getInventory = static function (array $seed): int {
             return $seed['inventory']->inventory_id;
@@ -111,7 +136,7 @@ class BulkDestroyInventoryImageTest extends EndpointInventoryImageTest
         };
 
         return [
-            'non exists inventory' => [['inventory' => $this->faker->numberBetween(1, 5)], 'inventory_id', 'The selected inventory id is invalid.', 422, 'Validation Failed'],
+            'non exists inventory' => [['inventory' => $getNotExistInventory], 'inventory_id', 'The selected inventory id is invalid.', 422, 'Validation Failed'],
             'no images' => [['image_ids' => []], 'image_ids', 'The image ids field is required.', 422, 'Validation Failed'],
             'foreign inventory' => [['foreign_inventory' => $getInventory, 'inventory' => $getInventory, 'image_ids' => $getImages], '', '', 403, 'You are not allowed to delete images from this inventory'],
             'foreign image ids' => [['inventory' => $getInventory, 'foreign_image_ids' => $getImages], '', '', 403, 'You are not allowed to delete those images'],

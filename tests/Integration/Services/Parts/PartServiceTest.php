@@ -16,7 +16,7 @@ class PartServiceTest extends TestCase
     {
         parent::setUp();
 
-        $this->seeder = new PartSeeder();
+        $this->seeder = new PartSeeder(['with' => ['bins']]);
         $this->seeder->seed();
     }
 
@@ -28,13 +28,16 @@ class PartServiceTest extends TestCase
     }
 
     /**
+     * @group DMS
+     * @group DMS_PARTS
+     *
      * @covers ::moveStatus
      * @group quickbook
      */
     public function testUpdateAddNewCostHistory()
     {
         $dealerId = $this->seeder->getDealerId();
-        $part = Part::where(['dealer_id' => $dealerId])->firstOrFail();
+        $part = Part::where(['dealer_id' => $dealerId])->whereHas('bins')->firstOrFail();
         $oldCost = $part->dealer_cost;
         $partData = ['id' => $part->id, 'dealer_cost' => $oldCost + 1];
 

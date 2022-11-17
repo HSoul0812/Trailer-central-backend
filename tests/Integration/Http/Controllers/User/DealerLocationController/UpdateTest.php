@@ -25,6 +25,9 @@ class UpdateTest extends AbstractDealerLocationController
     /**
      * @dataProvider invalidParametersProvider
      *
+     * @group DMS
+     * @group DMS_DEALER_LOCATION
+     *
      * @param array $params
      * @param string $expectedException
      * @param string $expectedExceptionMessage
@@ -80,6 +83,9 @@ class UpdateTest extends AbstractDealerLocationController
     }
 
     /**
+     * @group DMS
+     * @group DMS_DEALER_LOCATION
+     *
      * @throws Exception when an unexpected exception has not been handled
      */
     public function testWithValidParameter(): void
@@ -133,23 +139,23 @@ class UpdateTest extends AbstractDealerLocationController
         $data = $response->original;
 
         // Then I should see that response status is 200
-        self::assertSame(JsonResponse::HTTP_OK, $response->status());
+        $this->assertSame(JsonResponse::HTTP_OK, $response->status());
 
         // And I should see that response has a key-value "data"
-        self::assertArrayHasKey('data', $data);
+        $this->assertArrayHasKey('data', $data);
 
         // And I should see the data retrieved has a key-value "id" which is the identifier of the recently updated dealer location
         $locationId = $data['data']['id'];
 
         // And I should see that I have only one dealer location as default location and that location is the expected location
-        $defaultLocations = DealerLocation::where(['dealer_id' => $dealerId, 'is_default' => 1])->get();
-        self::assertCount(1, $defaultLocations);
-        self::assertSame($locationId, $defaultLocations->first()->dealer_location_id);
+        $defaultLocations = DealerLocation::where(['dealer_id' => $dealerId, 'is_default' => 1]);
+        $this->assertSame(1, $defaultLocations->count());
+        $this->assertSame($locationId, $defaultLocations->first()->dealer_location_id);
 
         // And I should see that I have only one dealer location as default location for invoicing and that location is the expected location
-        $defaultLocationsForInvoicing = DealerLocation::where(['dealer_id' => $dealerId, 'is_default_for_invoice' => 1])->get();
-        self::assertCount(1, $defaultLocationsForInvoicing);
-        self::assertSame($locationId, $defaultLocationsForInvoicing->first()->dealer_location_id);
+        $defaultLocationsForInvoicing = DealerLocation::where(['dealer_id' => $dealerId, 'is_default_for_invoice' => 1]);
+        $this->assertSame(1, $defaultLocationsForInvoicing->count());
+        $this->assertSame($locationId, $defaultLocationsForInvoicing->first()->dealer_location_id);
 
         // And I should see that a record has been persisted with certain values
         $this->assertDatabaseHas(DealerLocation::getTableName(), [
@@ -165,10 +171,8 @@ class UpdateTest extends AbstractDealerLocationController
         ]);
 
         // And I should see the persisted record has other related records
-        self::assertCount(1, DealerLocationSalesTax::where(['dealer_location_id' => $locationId])->get());
-        self::assertCount(2, DealerLocationSalesTaxItem::where(['dealer_location_id' => $locationId])->get());
-        self::assertCount(2, DealerLocationSalesTaxItemV1::where(['dealer_location_id' => $locationId])->get());
-        self::assertCount(3, DealerLocationQuoteFee::where(['dealer_location_id' => $locationId])->get());
+        $this->assertSame(1, DealerLocationSalesTax::where(['dealer_location_id' => $locationId])->count());
+        $this->assertSame(2, DealerLocationSalesTaxItem::where(['dealer_location_id' => $locationId])->count());
     }
 
     /**
