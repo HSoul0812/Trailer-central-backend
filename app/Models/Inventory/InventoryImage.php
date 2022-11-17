@@ -21,8 +21,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * @property Image $image
  */
-class InventoryImage extends Model {
+class InventoryImage extends Model
+{
     use TableAware;
+
+    /** @var int to make the sorting consistent across ES worker, Legacy API and New API */
+    public const LAST_IMAGE_POSITION = 100;
 
     /**
      * The table associated with the model.
