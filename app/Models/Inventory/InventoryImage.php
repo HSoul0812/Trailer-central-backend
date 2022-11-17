@@ -51,4 +51,9 @@ class InventoryImage extends Model {
     {
         return $this->belongsTo(Image::class, 'image_id', 'image_id');
     }
+
+    public function isDefault(): bool
+    {
+        return (bool)$this->is_default;
+    }
 }
