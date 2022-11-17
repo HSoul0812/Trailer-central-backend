@@ -28,6 +28,9 @@ class InventoryImage extends Model
     /** @var int to make the sorting consistent across ES worker, Legacy API and New API */
     public const LAST_IMAGE_POSITION = 100;
 
+    /** @var int to make the sorting consistent across ES worker, Legacy API and New API */
+    public const FIRST_IMAGE_POSITION = -1;
+
     /**
      * The table associated with the model.
      *
