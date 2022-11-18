@@ -3,6 +3,7 @@
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadSource;
 use App\Models\CRM\Leads\LeadStatus;
+use App\Models\User\NewDealerUser;
 use Illuminate\Database\Migrations\Migration;
 
 class ConvertDealersLeadSources extends Migration
@@ -48,12 +49,18 @@ class ConvertDealersLeadSources extends Migration
         $query->select([
             LeadStatus::TABLE_NAME . '.tc_lead_identifier',
             LeadStatus::TABLE_NAME . '.source',
-            Lead::TABLE_NAME . '.dealer_id'
+            Lead::TABLE_NAME . '.dealer_id',
+            NewDealerUser::TABLE_NAME . '.user_id'
         ])->leftJoin(
             Lead::TABLE_NAME,
             LeadStatus::TABLE_NAME . '.tc_lead_identifier',
             '=',
             Lead::TABLE_NAME . '.identifier'
+        )->leftJoin(
+            NewDealerUser::TABLE_NAME,
+            Lead::TABLE_NAME . '.dealer_id',
+            '=',
+            NewDealerUser::TABLE_NAME . '.id'
         )->where(
             LeadStatus::TABLE_NAME . '.source',
             $source
@@ -65,7 +72,7 @@ class ConvertDealersLeadSources extends Migration
 
         foreach ($results as $result) {
             LeadSource::create([
-                'user_id' => $result->dealer_id,
+                'user_id' => $result->user_id,
                 'source_name' => $source
             ]);
         }
