@@ -96,11 +96,19 @@ class SafeIndexer
             $dealerList = $this->dealerRepository->getAll([]);
 
             foreach ($dealerList as $dealer) {
-                $this->chunkHandler($this->getSearchableQuery($model->newQuery()->where('dealer_id', $dealer->dealer_id)));
+                $this->chunkHandler($this->getSearchableQuery(
+                    $model->newQuery()
+                        ->with(['user', 'user.website'])
+                        ->where('dealer_id', $dealer->dealer_id)
+                )
+                );
             }
         } else {
             // this way is faster than `by dealer` ingestion, but it will need a better MySQL instance like production
-            $this->chunkHandler($this->getSearchableQuery($model->newQuery()));
+            $this->chunkHandler($this->getSearchableQuery(
+                $model->newQuery()->with(['user', 'user.website'])
+            )
+            );
         }
 
         if (!$itIsAlreadySwapped) {
@@ -111,7 +119,11 @@ class SafeIndexer
 
         // given it could be some record which was changed/added between main ingesting process and the index swapping process
         // so, we need to cover them by pulling them once again and ingest them
-        $query = $this->getSearchableQuery($model->newQuery()->where('updated_at_auto', '>=', $now->format(Date::FORMAT_Y_M_D_T)));
+        $query = $this->getSearchableQuery(
+            $model->newQuery()
+                ->with(['user', 'user.website'])
+                ->where('updated_at_auto', '>=', $now->format(Date::FORMAT_Y_M_D_T))
+        );
         $this->numberUnitsToBeProcessed = $query->count('inventory_id');
         $this->numberOfUnitsProcessed = 0;
 

@@ -10,6 +10,7 @@ use App\Models\Inventory\Attribute;
 use App\Models\Inventory\Inventory;
 use App\Models\Inventory\InventoryFeature;
 use App\Models\Inventory\InventoryImage;
+use App\Repositories\Website\PaymentCalculator\SettingsRepositoryInterface;
 
 class InventoryElasticSearchInputTransformer implements Transformer
 {
@@ -23,6 +24,7 @@ class InventoryElasticSearchInputTransformer implements Transformer
         $secondaryImages = $model->orderedSecondaryImages();
         $defaultImage = $primaryImages->first();
         $geolocation = $model->geolocationPoint();
+        $paymentCalculatorSettings = $this->settingsRepository()->getCalculatedSettingsByInventory($model);
 
         return [
             'id'                   => TypesHelper::ensureNumeric($model->inventory_id),
@@ -188,7 +190,8 @@ class InventoryElasticSearchInputTransformer implements Transformer
             'heightDisplayMode'    => $model->height_display_mode,
             'lengthDisplayMode'    => $model->length_display_mode,
             'tilt'                 => $model->getAttributeById(Attribute::TILT),
-            'entity_type_id'       => $model->entity_type_id
+            'entity_type_id'       => $model->entity_type_id,
+            'paymentCalculator' => $paymentCalculatorSettings
         ];
     }
 
@@ -197,5 +200,10 @@ class InventoryElasticSearchInputTransformer implements Transformer
         return static function (InventoryImage $image) {
             return $image->image->filename;
         };
+    }
+
+    protected function settingsRepository(): SettingsRepositoryInterface
+    {
+        return app(SettingsRepositoryInterface::class);
     }
 }

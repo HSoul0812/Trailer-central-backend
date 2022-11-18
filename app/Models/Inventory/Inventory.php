@@ -891,4 +891,46 @@ class Inventory extends Model
     {
         return $this->listings()->whereNotIn('status', ['expired', 'deleted']);
     }
+
+    public static function makeAllSearchableByDealers(array $dealers = []): void
+    {
+        self::query()->with(['user', 'user.website'])
+            ->whereIn('dealer_id', $dealers)
+            ->searchable();
+    }
+
+    /**
+     * Resolves the well defined calculator setting to be able calculate the right calculator configuration
+     *
+     * @return array{website_id: int, inventory_price: float, entity_type_id: int, inventory_condition: string}
+     */
+    public function resolveCalculatorSettings(): array
+    {
+        $currentPrice = (!empty($this->sales_price) && $this->sales_price > 0) ? $this->sales_price : $this->price;
+        $potentialsPrices = [];
+
+        if ($currentPrice > 0) {
+            $potentialsPrices[] = $currentPrice;
+        }
+
+        if ($this->price > 0) {
+            $potentialsPrices[] = $this->price;
+        }
+
+        if ($this->sales_price > 0) {
+            $potentialsPrices[] = $this->sales_price;
+        }
+
+        if ($this->msrp > 0) {
+            $potentialsPrices[] = $this->msrp;
+        }
+
+        return [
+            'website_id' => $this->user->website->id,
+            // not sure why the minimum price should be the choice
+            'inventory_price' => count($potentialsPrices) ? min($potentialsPrices) : 0,
+            'entity_type_id' => $this->entity_type_id,
+            'inventory_condition' => $this->condition,
+        ];
+    }
 }
