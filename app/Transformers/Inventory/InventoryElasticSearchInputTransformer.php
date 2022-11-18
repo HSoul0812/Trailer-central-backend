@@ -14,17 +14,6 @@ use App\Repositories\Website\PaymentCalculator\SettingsRepositoryInterface;
 
 class InventoryElasticSearchInputTransformer implements Transformer
 {
-    /** @var SettingsRepositoryInterface */
-    private $settingsRepo;
-
-    /**
-     * @param SettingsRepositoryInterface $settingsRepo
-     */
-    public function __construct(SettingsRepositoryInterface $settingsRepo)
-    {
-        $this->settingsRepo = $settingsRepo;
-    }
-
     /**
      * @param Inventory $model
      * @return array
@@ -35,8 +24,7 @@ class InventoryElasticSearchInputTransformer implements Transformer
         $secondaryImages = $model->orderedSecondaryImages();
         $defaultImage = $primaryImages->first();
         $geolocation = $model->geolocationPoint();
-        $calculatorSettings = $model->getCalculatorSettings();
-        $calculator = $this->settingsRepo->getCalculatedSettings($calculatorSettings);
+        $paymentCalculatorSettings = $this->settingsRepository()->getCalculatedSettingsByInventory($model);
 
         return [
             'id'                   => TypesHelper::ensureNumeric($model->inventory_id),
@@ -203,12 +191,7 @@ class InventoryElasticSearchInputTransformer implements Transformer
             'lengthDisplayMode'    => $model->length_display_mode,
             'tilt'                 => $model->getAttributeById(Attribute::TILT),
             'entity_type_id'       => $model->entity_type_id,
-            'paymentCalculator.apr'                =>  $calculator['apr'],
-            'paymentCalculator.down'               =>  $calculator['down'],
-            'paymentCalculator.years'              =>  $calculator['years'],
-            'paymentCalculator.months'             =>  $calculator['months'],
-            'paymentCalculator.monthly_payment'    =>  $calculator['monthly_payment'],
-            'paymentCalculator.down_percentage'    =>  $calculator['down_percentage'],
+            'paymentCalculator' => $paymentCalculatorSettings
         ];
     }
 
@@ -217,5 +200,10 @@ class InventoryElasticSearchInputTransformer implements Transformer
         return static function (InventoryImage $image) {
             return $image->image->filename;
         };
+    }
+
+    protected function settingsRepository(): SettingsRepositoryInterface
+    {
+        return app(SettingsRepositoryInterface::class);
     }
 }
