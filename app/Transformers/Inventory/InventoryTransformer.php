@@ -327,7 +327,7 @@ class InventoryTransformer extends TransformerAbstract
     }
 
     /**
-     * Sorts the images, always that image which is `is_default=1`  should be the first image,
+     * Sorts the images, always that image which is `is_default=1` should be the first image,
      * also, if the image has NULL as position, then, that image will be sorted at last position.
      * That sorting way was extracted from the ES worker.
      *
