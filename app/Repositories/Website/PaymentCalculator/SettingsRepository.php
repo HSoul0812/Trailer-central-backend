@@ -3,6 +3,7 @@
 namespace App\Repositories\Website\PaymentCalculator;
 
 use App\Jobs\Website\PaymentCalculatorReIndexJob;
+use App\Models\Inventory\Inventory;
 use App\Models\Website\PaymentCalculator\Settings;
 use App\Models\Website\Website;
 use Illuminate\Database\Query\Builder;
@@ -96,64 +97,81 @@ class SettingsRepository implements SettingsRepositoryInterface {
         return $query->get();
     }
 
-    public function update($params) {
+    public function update($params)
+    {
+        /** @var Settings $settings */
         $settings = Settings::findOrFail($params['id']);
         $settings->fill($params);
         $settings->save();
 
-        $dealer = Website::find($settings->website_id)->dealer_id;
-        dispatch(new PaymentCalculatorReIndexJob([$dealer]));
+        if ($settings->website->dealer_id) {
+            dispatch(new PaymentCalculatorReIndexJob([$settings->website->dealer_id]));
+        }
 
         return $settings;
     }
 
-    public function getCalculatedSettings($params): array
+    /**
+     * @param Inventory $inventory
+     * @return array{apr: float, down: float, years: int, months: int, monthly_payment: float, down_percentage:float}
+     */
+    public function getCalculatedSettingsByInventory(Inventory $inventory): array
     {
-        $calculatorSettings = $params;
-        $inventoryPrice = $calculatorSettings['inventory_price'];
+        $inventorySettings = $inventory->resolveCalculatorSettings();
+        $inventoryPrice = $inventorySettings['inventory_price'];
 
-        if ($calculatorSettings['inventory_price'] > 0 ) {
-
-            $settingFinancing = $this->getAll(array_merge($calculatorSettings + ['financing']));
-            $settingNoFinancing = $this->getAll(array_merge($calculatorSettings + ['no_financing']));
-
-            if ( ($settingFinancing->operator == 'less_than' && $settingNoFinancing->operator == 'less_than') ) {
-                if ($inventoryPrice < $settingFinancing->inventory_price) {
-                    $setting = $settingNoFinancing;
-                } else {
-                    $setting = $settingFinancing;
-                }
-            } else if ( ($settingFinancing->operator == 'over' && $settingNoFinancing->operator == 'over') ) {
-                if ($inventoryPrice > $settingFinancing->inventory_price) {
-                    $setting = $settingNoFinancing;
-                } else {
-                    $setting = $settingFinancing;
-                }
-            } else {
-                $setting = $settingFinancing;
-            }
-
-            if ($setting->financing == 'no_financing' || $setting === false) {
-                return false;
-            }
-
-            $priceDown = (double)($setting->down / 100) * $inventoryPrice;
-            $principal = $inventoryPrice - $priceDown;
-            $interest = (double)$setting->apr / 100 / 12;
-            $payments = $setting->months;
-            $compInterest = pow(1 + $interest, $payments);
-            $monthlyPayment = number_format((float)($principal * $compInterest * $interest) / ($compInterest - 1), 2, '.', '');
-
-            return [
-                'apr' => $setting->apr,
-                'down' => $priceDown,
-                'years' => $setting->months / 12,
-                'months' => $setting->months,
-                'monthly_payment' => abs($monthlyPayment),
-                'down_percentage' => $setting->down
-            ];
+        if (!$inventorySettings['inventory_price']) {
+            return Settings::NO_SETTINGS_AVAILABLE;
         }
 
-        return [];
+        /** @var Settings|null $financingSettings */
+        /** @var Settings|null $noFinancingSettings */
+
+        $financingSettings = $this->getAll(array_merge($inventorySettings + ['financing' => 'financing']))->first();
+        $noFinancingSettings = $this->getAll(array_merge($inventorySettings + ['financing' => 'no_financing']))->first();
+
+        if (!$financingSettings && !$noFinancingSettings) {
+            return Settings::NO_SETTINGS_AVAILABLE;
+        }
+
+        $calculatorSettings = null;
+
+        if ($financingSettings && !$noFinancingSettings) {
+            $calculatorSettings = $financingSettings;
+        } elseif (!$financingSettings && $noFinancingSettings) {
+            $calculatorSettings = $noFinancingSettings;
+        } else if (($financingSettings->isLessThan() && $noFinancingSettings->isLessThan())) {
+            $calculatorSettings = $financingSettings;
+
+            if ($inventoryPrice < $financingSettings->inventory_price) {
+                $calculatorSettings = $noFinancingSettings;
+            }
+        } else if (($financingSettings->isOver() && $noFinancingSettings->isOver())) {
+            $calculatorSettings = $financingSettings;
+
+            if ($inventoryPrice > $financingSettings->inventory_price) {
+                $calculatorSettings = $noFinancingSettings;
+            }
+        }
+
+        if (!$calculatorSettings || $calculatorSettings->isNoFinancing()) {
+            return Settings::NO_SETTINGS_AVAILABLE;
+        }
+
+        $priceDown = (double)($calculatorSettings->down / 100) * $inventoryPrice;
+        $principal = $inventoryPrice - $priceDown;
+        $interest = (double)$calculatorSettings->apr / 100 / 12;
+        $payments = $calculatorSettings->months;
+        $compInterest = (1 + $interest) ** $payments;
+        $monthlyPayment = number_format((float)($principal * $compInterest * $interest) / ($compInterest - 1), 2, '.', '');
+
+        return [
+            'apr' => $calculatorSettings->apr,
+            'down' => $priceDown,
+            'years' => $calculatorSettings->months / 12,
+            'months' => $calculatorSettings->months,
+            'monthly_payment' => abs($monthlyPayment),
+            'down_percentage' => $calculatorSettings->down
+        ];
     }
 }
