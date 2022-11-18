@@ -894,62 +894,43 @@ class Inventory extends Model
 
     public static function makeAllSearchableByDealers(array $dealers = []): void
     {
-        $self = new static;
-
-        $self->newQuery()
+        self::query()->with(['user', 'user.website'])
             ->whereIn('dealer_id', $dealers)
-            ->orderBy($self->getKeyName())
             ->searchable();
     }
 
     /**
-     * @return array
+     * Resolves the well defined calculator setting to be able calculate the right calculator configuration
+     *
+     * @return array{website_id: int, inventory_price: float, entity_type_id: int, inventory_condition: string}
      */
-    public function getCalculatorSettings(): array
+    public function resolveCalculatorSettings(): array
     {
-        $website_id = $this->user()->website()->id;
+        $currentPrice = (!empty($this->sales_price) && $this->sales_price > 0) ? $this->sales_price : $this->price;
+        $potentialsPrices = [];
 
-        $current_price = (!empty($this->sales_price) && $this->sales_price > 0) ? $this->sales_price : $this->price;
-
-        $inventoryPrice = $current_price;
-        $prices = [];
-
-        if ($current_price> 0) {
-            $prices[] = $current_price;
+        if ($currentPrice > 0) {
+            $potentialsPrices[] = $currentPrice;
         }
 
         if ($this->price > 0) {
-            $prices[] = $this->price;
+            $potentialsPrices[] = $this->price;
         }
 
         if ($this->sales_price > 0) {
-            $prices[] = $this->sales_price;
+            $potentialsPrices[] = $this->sales_price;
         }
 
         if ($this->msrp > 0) {
-            $prices[] = $this->msrp;
+            $potentialsPrices[] = $this->msrp;
         }
-
-        if (empty($inventoryPrice)) {
-            $inventoryPrice = $this->price;
-            if (!empty($this->sales_price)) {
-                $inventoryPrice = $this->sales_price;
-            }
-
-            if (empty($inventoryPrice)) {
-                $inventoryPrice = $this->msrp;
-            }
-        }
-
-        $inventoryPrice = min($prices);
-        $condition = $this->condition;
-        $entity_type_id = $this->entity_type_id;
 
         return [
-            'website_id' => $website_id,
-            'inventory_price' => $inventoryPrice,
-            'entity_type_id' => $entity_type_id,
-            'inventory_condition' => $condition,
+            'website_id' => $this->user->website->id,
+            // not sure why the minimum price should be the choice
+            'inventory_price' => count($potentialsPrices) ? min($potentialsPrices) : 0,
+            'entity_type_id' => $this->entity_type_id,
+            'inventory_condition' => $this->condition,
         ];
     }
 }
