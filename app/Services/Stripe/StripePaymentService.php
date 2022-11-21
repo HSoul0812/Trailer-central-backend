@@ -14,6 +14,7 @@ use Stripe\Stripe;
 use Stripe\Webhook;
 use Stripe\Checkout\Session;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class StripePaymentService implements StripePaymentServiceInterface
 {
@@ -37,7 +38,7 @@ class StripePaymentService implements StripePaymentServiceInterface
                 'price' => "$priceItem",
                 'quantity' => 1
             ]],
-            'client_reference_id' => 'tt' . uuid_create(),
+            'client_reference_id' => 'tt' . Str::uuid(),
             'metadata' => $metadata,
             'mode' => 'payment',
             'success_url' => $siteUrl . self::STRIPE_SUCCESS_URL,
@@ -106,7 +107,7 @@ class StripePaymentService implements StripePaymentServiceInterface
             return 200;
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             \Log::critical('Failed fulfilling order: ' . $e->getMessage());
             return 500;
         }
