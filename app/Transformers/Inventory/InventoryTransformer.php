@@ -143,7 +143,9 @@ class InventoryTransformer extends TransformerAbstract
              'height_inches_second' => $heightInchesSecond ?? 0,
              'images' => $this->transformImages($inventory->inventoryImages),
              'files' => $this->transformFiles($inventory->files),
-             'primary_image' => $inventory->images->count() > 0 ? $this->inventoryImageTransformer->transform($inventory->inventoryImages->sortBy('position')->first()) : null,
+             'primary_image' => $inventory->images->count() > 0 ?
+                    $this->inventoryImageTransformer->transform($inventory->inventoryImages->sortBy($this->imageSorter())->first()) :
+                    null,
              'is_archived' => $inventory->is_archived,
              'is_floorplan_bill' => $inventory->is_floorplan_bill,
              'length' => $inventory->length,
@@ -279,7 +281,7 @@ class InventoryTransformer extends TransformerAbstract
      */
     private function transformImages(Collection $images): array
     {
-        return $images->sortBy('position')->values()->map(function (InventoryImage $image) {
+        return $images->sortBy($this->imageSorter())->values()->map(function (InventoryImage $image) {
             return $this->inventoryImageTransformer->transform($image);
         })->toArray();
     }
@@ -322,5 +324,22 @@ class InventoryTransformer extends TransformerAbstract
             PHP_EOL . PHP_EOL,
             PHP_EOL . PHP_EOL . PHP_EOL
         ], $rawInput);
+    }
+
+    /**
+     * Sorts the images, always that image which is `is_default=1` should be the first image,
+     * also, if the image has NULL as position, then, that image will be sorted at last position.
+     * That sorting way was extracted from the ES worker.
+     *
+     * @return callable
+     */
+    private function imageSorter(): callable
+    {
+        return static function (InventoryImage $image): int {
+            // when the position is null, it will sorted a last position
+            $position = $image->position ?: InventoryImage::LAST_IMAGE_POSITION;
+
+            return $image->isDefault() ? InventoryImage::FIRST_IMAGE_POSITION : $position;
+        };
     }
 }
