@@ -188,6 +188,10 @@ class CustomSalesReportExporterService implements CustomSalesReportExporterServi
             return $item;
         });
 
+        $salesData = $salesData->filter(function ($item) {
+            return $item->price > 0;
+        });
+
         return new Collection(
             $salesData->toArray(),
             new CustomSalesReportTransformer(),
