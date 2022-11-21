@@ -655,6 +655,9 @@ $api->version('v1', function ($route) {
     $route->get('users', 'App\Http\Controllers\v1\User\UserController@index');
     $route->post('users', 'App\Http\Controllers\v1\User\UserController@create');
 
+    $route->get('user', 'App\Http\Controllers\v1\User\UserController@show');
+    $route->post('user/classified', 'App\Http\Controllers\v1\User\UserController@updateDealerClassifieds');
+
     /*
     |--------------------------------------------------------------------------
     | Integrations
