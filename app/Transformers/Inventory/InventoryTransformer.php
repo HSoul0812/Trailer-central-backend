@@ -144,7 +144,7 @@ class InventoryTransformer extends TransformerAbstract
              'images' => $this->transformImages($inventory->inventoryImages),
              'files' => $this->transformFiles($inventory->files),
              'primary_image' => $inventory->images->count() > 0 ?
-                    $this->inventoryImageTransformer->transform($inventory->inventoryImages->sortBy($this->imageSorter())->first()) : 
+                    $this->inventoryImageTransformer->transform($inventory->inventoryImages->sortBy($this->imageSorter())->first()) :
                     null,
              'is_archived' => $inventory->is_archived,
              'is_floorplan_bill' => $inventory->is_floorplan_bill,
@@ -327,8 +327,8 @@ class InventoryTransformer extends TransformerAbstract
     }
 
     /**
-     * Sorts the images, which always the `is_default=1`will be always the first image,
-     * also, if the image has NULL as position, then that image will be sorted at last position.
+     * Sorts the images, always that image which is `is_default=1` should be the first image,
+     * also, if the image has NULL as position, then, that image will be sorted at last position.
      * That sorting way was extracted from the ES worker.
      *
      * @return callable
@@ -337,7 +337,7 @@ class InventoryTransformer extends TransformerAbstract
     {
         return static function (InventoryImage $image): int {
             // when the position is null, it will sorted a last position
-            $position = $image->position ?: InventoryImage::LAST_IMAGE_POSITION; 
+            $position = $image->position ?: InventoryImage::LAST_IMAGE_POSITION;
 
             return $image->isDefault() ? InventoryImage::FIRST_IMAGE_POSITION : $position;
         };
