@@ -1,0 +1,414 @@
+<?php
+
+namespace App\Repositories\Marketing\Craigslist;
+
+use App\DTO\Marketing\Craigslist\Client;
+use App\Exceptions\NotImplementedException;
+use App\Repositories\Marketing\Craigslist\ClientRepositoryInterface;
+use Illuminate\Redis\Connections\Connection;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Facades\Log;
+
+/**
+ * Class ClientRedisRepository
+ * 
+ * @package App\Repositories\Marketing\Craigslist
+ */
+class ClientRedisRepository implements ClientRepositoryInterface
+{
+    /**
+     * @const Default Sort Order
+     */
+    const DEFAULT_SORT = '-checkin';
+
+    /**
+     * @const Config Paths
+     */
+    const CONFIG_PATHS = [
+        'enabled',
+        'ignore',
+        'elapse.warning',
+        'elapse.error',
+        'elapse.critical',
+        'clients.low',
+        'clients.edit'
+    ];
+
+
+    /**
+     * Define Sort Orders
+     *
+     * @var array
+     */
+    private $sortOrders = [
+        'dealer' => [
+            'field' => 'dealerId',
+            'direction' => 'DESC'
+        ],
+        '-dealer' => [
+            'field' => 'dealerId',
+            'direction' => 'ASC'
+        ],
+        'slot' => [
+            'field' => 'slotId',
+            'direction' => 'DESC'
+        ],
+        '-slot' => [
+            'field' => 'slotId',
+            'direction' => 'ASC'
+        ],
+        'checkin' => [
+            'field' => 'lastCheckin',
+            'direction' => 'DESC'
+        ],
+        '-checkin' => [
+            'field' => 'lastCheckin',
+            'direction' => 'ASC'
+        ]
+    ];
+
+    /**
+     * @var Connection
+     */
+    private $redis;
+
+    /**
+     * @var Log
+     */
+    private $log;
+
+    public function __construct()
+    {
+        $this->log = Log::channel('cl-client');
+        $this->redis = Redis::connection('persist');
+        $this->log->info('Initialized Redis for CL Client Using ' . $this->redis->getName());
+    }
+
+    /**
+     * @param array $params
+     * @return bool
+     */
+    public function create($params)
+    {
+        throw new NotImplementedException;
+    }
+
+    /**
+     * @param array $params
+     * @return bool
+     */
+    public function update($params)
+    {
+        throw new NotImplementedException;
+    }
+
+    /**
+     * Get Single Client
+     * 
+     * @param type $params
+     * @throws UuidRequiredForGetClientException
+     * @return Client
+     */
+    public function get($params)
+    {
+        // Log Get
+        $this->log->info('Getting client with params ', $params);
+
+        // Get UUID
+        $uuid = $params['uuid'];
+        if(empty($uuid)) {
+            $this->log->error('Param uuid is missing');
+            throw new UuidRequiredForGetClientException;
+        }
+
+        // Get Data
+        $key = 'client:' . $uuid;
+        $this->log->info('Passing HGETALL ' . $key . ' to Redis');
+        $clientData = $this->redis->hgetall($key);
+        $this->log->info('Retrieved client details for client ID #' . $uuid . ': ', $clientData);
+
+        // Add Port to Clients Array
+        return new Client([
+            'dealer_id'    => $clientData['dealerId'],
+            'slot_id'      => $clientData['slotId'],
+            'uuid'         => $uuid,
+            'count'        => $clientData['count'],
+            'version'      => $clientData['version'],
+            'last_ip'      => $clientData['last-ip'],
+            'last_checkin' => $clientData['last-checkin'],
+            'label'        => $clientData['label']
+        ]);
+    }
+
+    public function delete($params)
+    {
+        throw new NotImplementedException;
+    }
+
+    /**
+     * Get All Clients
+     * 
+     * @param array $params
+     * @return Collection<Client>
+     */
+    public function getAll($params = [])
+    {
+        // Get Clients Server
+        $this->log->info('Getting All Clients for Params', $params);
+
+        // Check Dealer ID
+        $dealerId = '*';
+        if(!empty($params['dealer_id'])) {
+            $dealerId = $params['dealer_id'];
+        }
+
+        // Check Slot ID
+        $slotId = '';
+        if(!empty($params['slot_id'])) {
+            $slotId = '.' . $params['slot_id'];
+        }
+
+        // Scan for Clients
+        $key = 'client-list-all:' . $dealerId . $slotId;
+        $this->log->info('Passing SCAN ' . $key . ' to Redis');
+        $clientKeys = $this->redis->scan($key);
+        $this->log->info('Returned ' . count($clientKeys) . ' clients in total');
+
+        // Loop Connections
+        $clients = new Collection();
+        foreach($clientKeys as $key) {
+            // Parse Dealer and Slot ID
+            $parsed = str_replace('client-list-all:', '', $key);
+
+            // Split Dealer ID / Slot ID
+            list($dealerId, $slotId) = explode('.', $parsed);
+
+            // Combine Dealer Clients
+            $clients->merge($this->getAllUuids($dealerId, $slotId));
+        }
+
+        // Append Sort
+        return $this->sort($clients, '-checkin');
+    }
+
+    /**
+     * Get All Clients
+     * 
+     * @param array $params
+     * @return Collection<Client>
+     */
+    public function getAllInternal()
+    {
+        // Get Clients Server
+        $this->log->info('Getting All Internal Clients for Params');
+
+        // Scan for Clients
+        $this->log->info('Retrieving All Internal Behaviours');
+        $behaviours = Behaviour::getAllInternal();
+
+        // Loop Behaviours
+        $clients = new Collection();
+        foreach($behaviours as $behaviour) {
+            // Combine Dealer Clients
+            $clients->merge($this->getAllUuids($behaviour->dealerId, $behaviour->slotId));
+        }
+
+        // Append Sort
+        return $this->sort($clients, '-ping');
+    }
+
+    /**
+     * Validate Provided Client
+     * 
+     * @param Client $client
+     * @return ClientValidate
+     */
+    public function validate(Client $client): ClientValidate {
+        // Get Config
+        $config = $this->getConfig($client->dealerId);
+
+        // Is a Warning?
+        $level = 'info';
+        if($client->elapsed() > (int) $config['elapse.warning']) {
+            $level = 'warning';
+        }
+
+        // Is an Error?
+        if($client->elapsed() > (int) $config['elapse.error']) {
+            $level = 'error';
+        }
+
+        // Is Critical?
+        if($client->elapsed() > (int) $config['elapse.critical']) {
+            $level = 'critical';
+        }
+
+        // Return ClientValidate
+        return new ClientValidate([
+            'dealer_id' => $client->dealerId,
+            'slot_id' => $client->slotId,
+            'uuid' => $client->uuid,
+            'email' => $client->email,
+            'label' => $client->label,
+            'level' => $level,
+            'elapsed' => $client->elapsed()
+        ]);
+    }
+
+    /**
+     * Return Status of All Active Clients
+     * 
+     * @param Collection<ClientValidate> $validation
+     * @return ClientStatus
+     */
+    public function status(Collection $validation): ClientStatus {
+        // Get Config
+        $config = $this->getConfig($client->dealerId);
+
+        // Is a Warning?
+        $level = 'info';
+        if($client->elapsed() > (int) $config['elapse.warning']) {
+            $level = 'warning';
+        }
+
+        // Is an Error?
+        if($client->elapsed() > (int) $config['elapse.error']) {
+            $level = 'error';
+        }
+
+        // Is Critical?
+        if($client->elapsed() > (int) $config['elapse.critical']) {
+            $level = 'critical';
+        }
+
+        // Return ClientValidate
+        return new ClientValidate([
+            'dealer_id' => $client->dealerId,
+            'slot_id' => $client->slotId,
+            'uuid' => $client->uuid,
+            'level' => $level,
+            'elapsed' => $client->elapsed()
+        ]);
+    }
+
+
+    /**
+     * Get All UUID's
+     * 
+     * @param int $dealerId
+     * @param int $slotId
+     * @return Collection<string>
+     */
+    private function getAllUuids(int $dealerId, int $slotId): Collection {
+        // Get All UUID's for Dealer ID and Slot ID
+        $key = 'client-list-all:' . $dealerId . '.' . $slotId;
+        $this->log->info('Passing ZRANGE ' . $key . ' 0 -1 to Redis');
+        $clientUuids = $this->redis->zrange($key, 0, -1);
+
+        // Loop Client ID's
+        $clients = new Collection();
+        foreach($clientUuids as $uuid) {
+            // Get Dealer Client
+            $client = $this->get([
+                'uuid' => $uuid
+            ]);
+
+            // Get Dealer Client
+            $clients->push($client);
+        }
+
+        // Return Clients
+        return $clients;
+    }
+
+
+    /**
+     * Sort Clients By Field
+     * 
+     * @param Collection<Client> $clients
+     * @param null|string $sort
+     * @return Collection<Client>
+     */
+    private function sort(Collection $clients, ?string $sort = null): Collection {
+        // Get Order
+        $order = $this->sortOrders[$sort];
+
+        // Set Default Sort?
+        if($sort === null || empty($order)) {
+            $sort = self::DEFAULT_SORT;
+            $order = $this->sortOrders[$sort];
+        }
+        $this->log->info('Sorting ' . $clients->count() . ' Clients by Field ' . $order['field']);
+
+        // Loop Clients
+        $clients->sort(function($a, $b) use($order) {
+            // Get Column
+            $aVal = (int) $a->{$order['field']};
+            $bVal = (int) $b->{$order['field']};
+
+            // Equal Values on Both Sides?
+            if($aVal === $bVal) {
+                return 0;
+            }
+
+            // Return Result
+            if($order['direction'] === 'ASC') {
+                return ($aVal < $bVal) ? -1 : 1;
+            }
+            return ($aVal > $bVal) ? -1 : 1;
+        });
+
+        // Return Result After Sort
+        return $clients;
+    }
+
+    /**
+     * Get Config From Environment Variables
+     * 
+     * @param int
+     * @return array{string: string}
+     */
+    private function getConfig(int $dealerId): array {
+        // Loop Config Paths
+        $config = [];
+        foreach(self::CONFIG_PATHS as $path) {
+            $value = config('marketing.cl.warning.' . $path);
+
+            // Check Override Instead
+            $override = $this->getOverride($path, $dealerId);
+            if(!empty($override)) {
+                $value = $override;
+            }
+
+            // Add Config
+            $config[$path] = $value;
+        }
+
+        // Return Config Array
+        return $config;
+    }
+
+    /**
+     * Get Override Config From Environment Variables
+     * 
+     * @param string
+     * @param int
+     * @return string
+     */
+    private function getOverride(string $path, int $dealerId): string {
+        // Loop Config Paths
+        $config = config('marketing.cl.warning.override.' . $path);
+
+        // Parse Overrides
+        $overrides = explode(';', $config);
+        $clean = [];
+        foreach($overrides as $override) {
+            list($dealerId, $value) = explode(':', $override);
+            $clean[$dealerId] = $value;
+        }
+
+        // Return Clean Override Array
+        return $clean;
+    }
+}

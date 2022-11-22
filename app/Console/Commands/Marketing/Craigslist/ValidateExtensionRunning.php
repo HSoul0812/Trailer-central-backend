@@ -4,6 +4,7 @@ namespace App\Console\Commands\Marketing\Craigslist;
 
 use App\Repositories\Marketing\Craigslist\PosterRepositoryInterface;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class ValidateExtensionRunning
@@ -12,6 +13,12 @@ use Illuminate\Console\Command;
  */
 class ValidateExtensionRunning extends Command
 {
+    /**
+     * @var Log
+     */
+    private $slack;
+
+
     /**
      * The name and signature of the console command.
      *
@@ -37,6 +44,7 @@ class ValidateExtensionRunning extends Command
         parent::__construct();
 
         $this->repo = $repo;
+        $this->slack = Log::channel('slack-cl');
     }
 
     /**
@@ -46,10 +54,22 @@ class ValidateExtensionRunning extends Command
      */
     public function handle()
     {
-        // Get Dealer ID
-        $dealerId = $this->argument('dealer');
+        // Get Craigslist Poster Instances
+        $clients = $this->repo->getAllInternal();
 
-        // Get Marketplace Accounts
-        $integrations = $this->repo->getAll(['dealer_id' => $dealerId]);
+        // Loop Posters
+        $validation = [];
+        foreach($clients as $client) {
+            // Handle Validation
+            $validation[] = $this->repo->validate($client);
+        }
+
+        // Check Client Status
+        $status = $this->repo->status($validation);
+
+        // Send Slack Message?
+        if($status->isWarning()) {
+            $this->slack->{$status->level}($status->message);
+        }
     }
 }

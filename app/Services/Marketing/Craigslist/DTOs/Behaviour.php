@@ -276,6 +276,24 @@ class Behaviour
         return new self($behaviour);
     }
 
+    /**
+     * Get Internal Behaviours
+     * 
+     * @return Collection<Behaviour>
+     */
+    static public function getAllInternal(): Collection {
+        // Find Dealer Config Override Based on ID Provided
+        $collection = new Collection();
+        foreach(self::DEALER_ID_BEHAVIOURS as $dealerId => $config) {
+            if(self::isInternalSlot($config['slotId'])) {
+                $collection->push(self::byDealerId($dealerId));
+            }
+        }
+
+        // Return All Internal Behaviours
+        return $collection;
+    }
+
 
     /**
      * Is Internal Client?
@@ -287,7 +305,7 @@ class Behaviour
         // Find Dealer Config Override Based on Email Provided
         foreach(self::DEALER_ID_BEHAVIOURS as $behaviour) {
             if((int) $slotId === $behaviour['slotId']) {
-                return true;
+                return !empty($behaviour['internal']);
             }
         }
 
