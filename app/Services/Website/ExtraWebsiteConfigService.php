@@ -69,7 +69,9 @@ class ExtraWebsiteConfigService implements ExtraWebsiteConfigServiceInterface
         $showroomDealers = [];
 
         try {
-            $showroomDealers = array_filter(unserialize($dealer->showroom_dealers));
+            if ($dealer->showroom_dealers) {
+                $showroomDealers = array_values(array_filter(unserialize($dealer->showroom_dealers)));
+            }
         } catch (\Exception $exception) {
             $this->logger->error('`ExtraWebsiteConfigService::getAll` has failed to unserialize `showroom_dealers`');
         }
