@@ -3,6 +3,7 @@
 namespace App\Services\CRM\Interactions;
 
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Dms\UnitSale;
 use App\Models\CRM\Interactions\Interaction;
 use App\Models\CRM\User\SalesPerson;
 use App\Models\Integration\Auth\AccessToken;
@@ -212,20 +213,18 @@ class InteractionService implements InteractionServiceInterface
     /**
      * Send Email to Lead
      *
-     * @param int $leadId
      * @param array $params
      * @param array $attachments
      * @return Interaction
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
-    public function email(int $leadId, array $params, array $attachments = []): Interaction {
+    public function email(array $params, array $attachments = []): Interaction {
         // Get User
         $user = $this->users->get(['dealer_id' => $params['dealer_id']]);
-        $lead = Lead::findOrFail($leadId);
         $smtpConfig = null;
         $salesPerson = null;
         $interactionEmail = null;
-        if(isset($params['sales_person_id'])) {
+        if(!empty($params['sales_person_id'])) {
             $salesPerson = $this->salespeople->get(['sales_person_id' => $params['sales_person_id']]);
 
             // Get SMTP Config
@@ -259,44 +258,51 @@ class InteractionService implements InteractionServiceInterface
         }
 
         // Create Parsed Email
-        $parsedEmail = $this->getParsedEmail($smtpConfig, $leadId, $params);
+        $parsedEmail = $this->getParsedEmail($smtpConfig, $params);
 
         // Get Draft if Exists
-        $emailHistory = $this->emailHistory->findEmailDraft($fromEmail, $leadId);
+        $emailHistory = $this->emailHistory->findEmailDraft($fromEmail, $params['lead_id'], $params['quote_id']);
         if(!empty($emailHistory->email_id)) {
             $parsedEmail->setEmailHistoryId($emailHistory->email_id);
             $parsedEmail->setMessageId($emailHistory->message_id);
         }
 
-        // Send Email
-        if($smtpConfig !== null && $smtpConfig->isAuthTypeGmail()) {
-            $finalEmail = $this->gmail->send($smtpConfig, $parsedEmail);
-        } elseif($smtpConfig !== null && $smtpConfig->isAuthTypeOffice()) {
-            // Send Office Email
-            $finalEmail = $this->office->send($smtpConfig, $parsedEmail);
-        } elseif($smtpConfig !== null && $smtpConfig->isAuthTypeNtlm()) {
-            $finalEmail = $this->ntlm->send($user->dealer_id, $smtpConfig, $parsedEmail);
-        } else {
-            $emailConfig = $this->config($user->dealer_id, !empty($salesPerson) ? $salesPerson->id : null);
-            $finalEmail = $this->interactionEmail->send($emailConfig, $smtpConfig, $parsedEmail);
-            $interactionEmail = true;
+        try {
+            // Send Email
+            if($smtpConfig !== null && $smtpConfig->isAuthTypeGmail()) {
+                $finalEmail = $this->gmail->send($smtpConfig, $parsedEmail);
+            } elseif($smtpConfig !== null && $smtpConfig->isAuthTypeOffice()) {
+                // Send Office Email
+                $finalEmail = $this->office->send($smtpConfig, $parsedEmail);
+            } elseif($smtpConfig !== null && $smtpConfig->isAuthTypeNtlm()) {
+                $finalEmail = $this->ntlm->send($user->dealer_id, $smtpConfig, $parsedEmail);
+            } else {
+                $emailConfig = $this->config($user->dealer_id, !empty($salesPerson) ? $salesPerson->id : null);
+                $finalEmail = $this->interactionEmail->send($emailConfig, $smtpConfig, $parsedEmail);
+                $interactionEmail = true;
+            }
+        } catch (\Exception $e) {
+            var_dump(111, $e->getMessage()); exit;
         }
 
-        // If there was no status, or it was uncontacted, set to medium, otherwise, don't change.
-        if (empty($lead->leadStatus) || $lead->leadStatus->status === Lead::STATUS_UNCONTACTED) {
-            $status = Lead::STATUS_MEDIUM;
-        } else {
-            $status = $lead->leadStatus->status;
-        }
+        if (!empty($params['lead_id'])) {
+            $lead = Lead::findOrFail($params['lead_id']);
+            // If there was no status, or it was uncontacted, set to medium, otherwise, don't change.
+            if (empty($lead->leadStatus) || $lead->leadStatus->status === Lead::STATUS_UNCONTACTED) {
+                $status = Lead::STATUS_MEDIUM;
+            } else {
+                $status = $lead->leadStatus->status;
+            }
 
-        $this->leadStatus->createOrUpdate([
-            'lead_id' => $lead->identifier,
-            'status' => $status,
-            'next_contact_date' => Carbon::now()->addDay()->toDateTimeString()
-        ]);
+            $this->leadStatus->createOrUpdate([
+                'lead_id' => $lead->identifier,
+                'status' => $status,
+                'next_contact_date' => Carbon::now()->addDay()->toDateTimeString()
+            ]);
+        }
 
         // Save Email
-        return $this->saveEmail($leadId, $user->newDealerUser->user_id, $finalEmail, $salesPerson, $interactionEmail);
+        return $this->saveEmail($params, $user->newDealerUser->user_id, $finalEmail, $salesPerson, $interactionEmail);
     }
 
 
@@ -304,11 +310,10 @@ class InteractionService implements InteractionServiceInterface
      * Get Parsed Email From Params
      *
      * @param null|SmtpConfig $smtpConfig
-     * @param int $leadId
      * @param array $params
      * @return ParsedEmail
      */
-    private function getParsedEmail(?SmtpConfig $smtpConfig, int $leadId, array $params): ParsedEmail {
+    private function getParsedEmail(?SmtpConfig $smtpConfig, array $params): ParsedEmail {
         // Initialize Parsed Email
         $parsedEmail = new ParsedEmail();
 
@@ -321,12 +326,19 @@ class InteractionService implements InteractionServiceInterface
             $parsedEmail->setFromName($params['from_name']);
         }
 
-        // Set Lead Details
-        $lead = Lead::findOrFail($leadId);
-        $parsedEmail->setLeadId($lead->identifier);
-        $parsedEmail->setToEmail(trim($lead->email_address));
-        $parsedEmail->setToName($lead->full_name);
-
+        if (!empty($params['lead_id'])) {
+            // Set Lead Details
+            $lead = Lead::findOrFail($params['lead_id']);
+            $parsedEmail->setLeadId($lead->identifier);
+            $parsedEmail->setToEmail(trim($lead->email_address));
+            $parsedEmail->setToName($lead->full_name);
+        }
+        
+        if (!empty($params['quote_id'])) {
+            $parsedEmail->setQuoteId($params['quote_id']);
+            $parsedEmail->setToEmail(trim($params['to']));
+        }
+        
         // Set Email Details
         $parsedEmail->setSubject($params['subject']);
         $parsedEmail->setBody($params['body']);
@@ -350,20 +362,21 @@ class InteractionService implements InteractionServiceInterface
     /**
      * Save Email From Send Email
      *
-     * @param int $leadId
+     * @param array $params
      * @param int $userId
      * @param ParsedEmail $parsedEmail
      * @param null|SalesPerson $salesPerson
      * @param null|bool $interactionEmail
      * @return Interaction
      */
-    private function saveEmail(int $leadId, int $userId, ParsedEmail $parsedEmail, ?SalesPerson $salesPerson = null, ?bool $interactionEmail = null): Interaction {
+    private function saveEmail(array $params, int $userId, ParsedEmail $parsedEmail, ?SalesPerson $salesPerson = null, ?bool $interactionEmail = null): Interaction {
         // Initialize Transaction
-        DB::transaction(function() use (&$parsedEmail, $leadId, $userId, $salesPerson, $interactionEmail) {
+        DB::transaction(function() use (&$parsedEmail, $params, $userId, $salesPerson, $interactionEmail) {
             // Create or Update
             $interaction = $this->interactions->createOrUpdate([
                 'id'                => $parsedEmail->getInteractionId(),
-                'lead_id'           => $leadId,
+                'lead_id'           => (!empty($params['lead_id'])) ? trim($params['lead_id']) : '',
+                'quote_id'          => (int) $params['quote_id'] ?? '',
                 'user_id'           => $userId,
                 'sales_person_id'   => !empty($salesPerson) ? $salesPerson->id : NULL,
                 'interaction_type'  => 'EMAIL',
@@ -372,7 +385,6 @@ class InteractionService implements InteractionServiceInterface
                 'from_email'        => $parsedEmail->getFromEmail(),
                 'sent_by'           => !empty($salesPerson) ? $salesPerson->email : NULL
             ]);
-
             // Set Interaction ID/Date
             $parsedEmail->setInteractionId($interaction->interaction_id);
             $parsedEmail->setDateNow();
@@ -387,7 +399,6 @@ class InteractionService implements InteractionServiceInterface
                     'message_id'     => $emailHistory->message_id
                 ]);
             }
-
         });
 
         // Return Interaction
