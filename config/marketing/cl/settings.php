@@ -40,7 +40,8 @@ return [
     'slack' => [
         'webhook' => env('CLAPP_SLACK_WEBHOOK_URL'),
         'level' => env('CLAPP_SLACK_LEVEL', 'info'),
-        'critical' => env('CLAPP_SLACK_CRITICAL_NOTIFY')
+        'critical' => env('CLAPP_SLACK_CRITICAL_NOTIFY_USER'),
+        'interval' => env('CLAPP_SLACK_MESSAGE_INTERVAL', '60')
     ],
 
     // Image Domain

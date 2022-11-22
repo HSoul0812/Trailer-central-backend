@@ -19,4 +19,21 @@ interface ClientRepositoryInterface extends Repository {
      * @return Collection<Client>
      */
     public function getAllInternal(): Collection;
+
+    /**
+     * Email Last Sent in Last Interval
+     * 
+     * @param string $email
+     * @param int $interval
+     * @return int
+     */
+    public function sentIn(string $email, int $interval): int;
+
+    /**
+     * Email Last Sent in Last Interval
+     * 
+     * @param string $email
+     * @return void
+     */
+    public function markSent(string $email): void;
 }

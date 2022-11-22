@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands\Marketing\Craigslist;
 
-use App\Repositories\Marketing\Craigslist\PosterRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\ClientRepositoryInterface;
+use App\Services\Marketing\Craigslist\ValidateServiceInterface;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Class ValidateExtensionRunning
@@ -14,9 +14,14 @@ use Illuminate\Support\Facades\Log;
 class ValidateExtensionRunning extends Command
 {
     /**
-     * @var Log
+     * @var ClientRepositoryInterface
      */
-    private $slack;
+    private $repo;
+
+    /**
+     * @var ValidateServiceInterface
+     */
+    private $service;
 
 
     /**
@@ -36,15 +41,16 @@ class ValidateExtensionRunning extends Command
     /**
      * Create a new command instance.
      *
-     * @param MarketplaceRepositoryInterface $repo
+     * @param ClientRepositoryInterface $repo
+     * @param ValidateServiceInterface $service
      * @return void
      */
-    public function __construct(PosterRepositoryInterface $repo)
+    public function __construct(ClientRepositoryInterface $repo, ValidateServiceInterface $service)
     {
         parent::__construct();
 
         $this->repo = $repo;
-        $this->slack = Log::channel('slack-cl');
+        $this->service = $service;
     }
 
     /**
@@ -61,15 +67,17 @@ class ValidateExtensionRunning extends Command
         $validation = [];
         foreach($clients as $client) {
             // Handle Validation
-            $validation[] = $this->repo->validate($client);
+            $validation[] = $this->service->validate($client);
         }
 
         // Check Client Status
-        $status = $this->repo->status($validation);
+        $messages = $this->service->messages($validation);
 
-        // Send Slack Message?
-        if($status->isWarning()) {
-            $this->slack->{$status->level}($status->message);
+        // Send Slack Messages?
+        if($messages->count() > 0) {
+            foreach($messages as $message) {
+                $this->service->send($message);
+            }
         }
     }
 }

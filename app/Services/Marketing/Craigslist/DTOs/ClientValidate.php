@@ -16,6 +16,16 @@ class ClientValidate
 
 
     /**
+     * @const array<string>
+     */
+    const WARNING_LEVELS = [
+        'warning',
+        'error',
+        'critical'
+    ];
+
+
+    /**
      * @var int
      */
     private $dealerId;
@@ -31,12 +41,38 @@ class ClientValidate
     private $uuid;
 
     /**
-     * @var int
+     * @var string
      */
-    private $elapsed;
+    private $email;
+
+    /**
+     * @var string
+     */
+    private $label;
+
+    /**
+     * @var bool
+     */
+    private $isEdit;
 
     /**
      * @var string
      */
     private $level;
+
+    /**
+     * @var int
+     */
+    private $elapsed;
+
+
+    /**
+     * Check if Warning Exists
+     * 
+     * @return bool
+     */
+    public function isWarning(): bool {
+        // Check if Level Exists
+        return in_array($this->level, self::WARNING_LEVELS);
+    }
 }

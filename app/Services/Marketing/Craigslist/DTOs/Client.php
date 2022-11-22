@@ -71,7 +71,36 @@ class Client
     /**
      * Get Behaviour Email If Exists
      * 
-     * @return array
+     * @return null|string
      */
-    
+    public function email(): ?string {
+        // Find Behaviour for Dealer ID
+        $behaviour = Behaviour::byDealerId($this->dealerId);
+
+        // Behaviour Exists?
+        if(!empty($behaviour) && $behaviour->email) {
+            return $behaviour->email;
+        }
+
+        // Return Null
+        return null;
+    }
+
+    /**
+     * Get Behaviour Is Edit If Exists
+     * 
+     * @return bool
+     */
+    public function isEdit(): bool {
+        // Find Behaviour for Dealer ID
+        $behaviour = Behaviour::byDealerId($this->dealerId);
+
+        // Behaviour Exists?
+        if(!empty($behaviour)) {
+            return $behaviour->edit;
+        }
+
+        // Return Null
+        return false;
+    }
 }

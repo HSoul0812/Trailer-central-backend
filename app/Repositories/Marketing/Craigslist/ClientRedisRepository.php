@@ -5,6 +5,7 @@ namespace App\Repositories\Marketing\Craigslist;
 use App\DTO\Marketing\Craigslist\Client;
 use App\Exceptions\NotImplementedException;
 use App\Repositories\Marketing\Craigslist\ClientRepositoryInterface;
+use App\Service\Marketing\Craigslist\DTOs\ClientMessage;
 use Illuminate\Redis\Connections\Connection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Redis;
@@ -218,78 +219,33 @@ class ClientRedisRepository implements ClientRepositoryInterface
         return $this->sort($clients, '-ping');
     }
 
+
     /**
-     * Validate Provided Client
+     * Email Last Sent in Last Interval
      * 
-     * @param Client $client
-     * @return ClientValidate
+     * @param string $email
+     * @param int $interval
+     * @return int
      */
-    public function validate(Client $client): ClientValidate {
-        // Get Config
-        $config = $this->getConfig($client->dealerId);
+    public function sentIn(string $email, int $interval): int
+    {
+        // Redis Key Exists for Slack?
+        $lastRun = $this->redis->hmget(ClientMessage::LAST_SENT_KEY, $email);
 
-        // Is a Warning?
-        $level = 'info';
-        if($client->elapsed() > (int) $config['elapse.warning']) {
-            $level = 'warning';
-        }
-
-        // Is an Error?
-        if($client->elapsed() > (int) $config['elapse.error']) {
-            $level = 'error';
-        }
-
-        // Is Critical?
-        if($client->elapsed() > (int) $config['elapse.critical']) {
-            $level = 'critical';
-        }
-
-        // Return ClientValidate
-        return new ClientValidate([
-            'dealer_id' => $client->dealerId,
-            'slot_id' => $client->slotId,
-            'uuid' => $client->uuid,
-            'email' => $client->email,
-            'label' => $client->label,
-            'level' => $level,
-            'elapsed' => $client->elapsed()
-        ]);
+        // Check Interval
+        return (time() - (int) $lastRun) > $interval;
     }
 
     /**
-     * Return Status of All Active Clients
+     * Email Last Sent in Last Interval
      * 
-     * @param Collection<ClientValidate> $validation
-     * @return ClientStatus
+     * @param string $email
+     * @return void
      */
-    public function status(Collection $validation): ClientStatus {
-        // Get Config
-        $config = $this->getConfig($client->dealerId);
-
-        // Is a Warning?
-        $level = 'info';
-        if($client->elapsed() > (int) $config['elapse.warning']) {
-            $level = 'warning';
-        }
-
-        // Is an Error?
-        if($client->elapsed() > (int) $config['elapse.error']) {
-            $level = 'error';
-        }
-
-        // Is Critical?
-        if($client->elapsed() > (int) $config['elapse.critical']) {
-            $level = 'critical';
-        }
-
-        // Return ClientValidate
-        return new ClientValidate([
-            'dealer_id' => $client->dealerId,
-            'slot_id' => $client->slotId,
-            'uuid' => $client->uuid,
-            'level' => $level,
-            'elapsed' => $client->elapsed()
-        ]);
+    public function markSent(string $email): void
+    {
+        // Set Current Time on Last Sent Key
+        $this->redis->hmset(ClientMessage::LAST_SENT_KEY, $email, time());
     }
 
 
@@ -361,54 +317,5 @@ class ClientRedisRepository implements ClientRepositoryInterface
 
         // Return Result After Sort
         return $clients;
-    }
-
-    /**
-     * Get Config From Environment Variables
-     * 
-     * @param int
-     * @return array{string: string}
-     */
-    private function getConfig(int $dealerId): array {
-        // Loop Config Paths
-        $config = [];
-        foreach(self::CONFIG_PATHS as $path) {
-            $value = config('marketing.cl.warning.' . $path);
-
-            // Check Override Instead
-            $override = $this->getOverride($path, $dealerId);
-            if(!empty($override)) {
-                $value = $override;
-            }
-
-            // Add Config
-            $config[$path] = $value;
-        }
-
-        // Return Config Array
-        return $config;
-    }
-
-    /**
-     * Get Override Config From Environment Variables
-     * 
-     * @param string
-     * @param int
-     * @return string
-     */
-    private function getOverride(string $path, int $dealerId): string {
-        // Loop Config Paths
-        $config = config('marketing.cl.warning.override.' . $path);
-
-        // Parse Overrides
-        $overrides = explode(';', $config);
-        $clean = [];
-        foreach($overrides as $override) {
-            list($dealerId, $value) = explode(':', $override);
-            $clean[$dealerId] = $value;
-        }
-
-        // Return Clean Override Array
-        return $clean;
     }
 }

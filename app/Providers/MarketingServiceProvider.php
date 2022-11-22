@@ -34,6 +34,8 @@ use App\Services\Marketing\Facebook\MarketplaceService;
 use App\Services\Marketing\Facebook\MarketplaceServiceInterface;
 use App\Services\Marketing\Craigslist\ProfileService;
 use App\Services\Marketing\Craigslist\ProfileServiceInterface;
+use App\Services\Marketing\Craigslist\ValidateService;
+use App\Services\Marketing\Craigslist\ValidateServiceInterface;
 use App\Services\Dispatch\Facebook\MarketplaceService as MarketplaceDispatchService;
 use App\Services\Dispatch\Facebook\MarketplaceServiceInterface as MarketplaceDispatchServiceInterface;
 use Illuminate\Support\ServiceProvider;
@@ -51,6 +53,7 @@ class MarketingServiceProvider extends ServiceProvider
         $this->app->bind(MarketplaceServiceInterface::class, MarketplaceService::class);
         $this->app->bind(ProfileServiceInterface::class, ProfileService::class);
         $this->app->bind(PostingHistoryServiceInterface::class, PostingHistoryService::class);
+        $this->app->bind(ValidateServiceInterface::class, ValidateService::class);
 
         // Marketing Repositories
         $this->app->bind(ActivePostRepositoryInterface::class, ActivePostRepository::class);
