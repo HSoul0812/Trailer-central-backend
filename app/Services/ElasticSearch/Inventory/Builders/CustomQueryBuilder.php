@@ -51,6 +51,7 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
             case 'clearance_special':
                 return $this->buildClearanceSpecialQuery();
             case 'location_region':
+                return $this->buildLocationQuery();
             case 'location_city':
             case 'location_country':
                 return $this->buildLocationQuery();
@@ -158,7 +159,8 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
         return [
             'post_filter' => $query,
             'aggregations' => [
-                'filter_aggregations' => ['filter' => $query]
+                'filter_aggregations' => ['filter' => $query],
+                'selected_location_aggregations' => ['filter' => $query]
             ]
         ];
     }
