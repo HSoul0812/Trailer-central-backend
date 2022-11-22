@@ -18,7 +18,8 @@ use Tests\TestCase;
 
 class NumberRepositoryTest extends TestCase
 {
-    use WithMySqlConstraintViolationsParser, WithFaker;
+    use WithMySqlConstraintViolationsParser;
+    use WithFaker;
 
     /**
      * @var NumberSeeder

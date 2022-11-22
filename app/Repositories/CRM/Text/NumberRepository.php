@@ -144,9 +144,9 @@ class NumberRepository implements NumberRepositoryInterface
      *
      * @param string $dealerNo
      * @param string $customerNo
-     * @return Number
+     * @return Number|null
      */
-    public function findActiveTwilioNumber(string $dealerNo, string $customerNo): Number
+    public function findActiveTwilioNumber(string $dealerNo, string $customerNo): ?Number
     {
         // Return Number
         return Number::where('dealer_number', $dealerNo)
@@ -195,9 +195,9 @@ class NumberRepository implements NumberRepositoryInterface
     /**
      * @param string $customerNumber
      * @param int $dealerId
-     * @return Number
+     * @return Number|null
      */
-    public function activeTwilioNumberByCustomerNumber(string $customerNumber, int $dealerId): Number
+    public function activeTwilioNumberByCustomerNumber(string $customerNumber, int $dealerId): ?Number
     {
         return Number::where('customer_number', $customerNumber)
             ->where('dealer_id', $dealerId)
