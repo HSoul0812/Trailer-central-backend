@@ -199,7 +199,7 @@ class ClientRedisRepository implements ClientRepositoryInterface
      * @param array $params
      * @return Collection<Client>
      */
-    public function getAllInternal()
+    public function getAllInternal(): Collection
     {
         // Get Clients Server
         $this->log->info('Getting All Internal Clients for Params');
