@@ -71,7 +71,7 @@ class ConvertDealersLeadSources extends Migration
         $results = $query->get();
 
         foreach ($results as $result) {
-            LeadSource::create([
+            LeadSource::updateOrCreate([
                 'user_id' => $result->user_id,
                 'source_name' => $source
             ]);
