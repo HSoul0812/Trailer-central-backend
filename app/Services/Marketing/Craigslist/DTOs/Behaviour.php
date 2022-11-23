@@ -2,6 +2,7 @@
 
 namespace App\Services\Marketing\Craigslist\DTOs;
 
+use Illuminate\Support\Collection;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
 
