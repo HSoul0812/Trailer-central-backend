@@ -5,6 +5,7 @@ namespace App\Console\Commands\Marketing\Craigslist;
 use App\Repositories\Marketing\Craigslist\ClientRepositoryInterface;
 use App\Services\Marketing\Craigslist\ValidateServiceInterface;
 use Illuminate\Console\Command;
+use Illuminate\Support\Collection;
 
 /**
  * Class ValidateExtensionRunning
@@ -64,10 +65,10 @@ class ValidateExtensionRunning extends Command
         $clients = $this->repo->getAllInternal();
 
         // Loop Posters
-        $validation = [];
+        $validation = new Collection();
         foreach($clients as $client) {
             // Handle Validation
-            $validation[] = $this->service->validate($client);
+            $validation->push($this->service->validate($client));
         }
 
         // Check Client Status
