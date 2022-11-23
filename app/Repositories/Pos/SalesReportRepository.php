@@ -244,7 +244,7 @@ SQL;
                 WHERE
                       sh.dealer_location_id IN (SELECT l.dealer_location_id FROM dealer_location l WHERE l.dealer_id = :dealer_id_inventory_qb)
                       AND qi.invoice_date >= :from_date_inventory_qb AND qi.invoice_date <= :to_date_inventory_qb
-                      AND SIGN(@actual_price:=IFNULL(ii.unit_price,0) * ii.qty) = 1
+                      AND ii.unit_price >= 0
                       {$this->customReportHelpers['inventoryWhere']['inventory_qb']}
                 UNION
                 SELECT
@@ -281,7 +281,6 @@ SQL;
                     JOIN inventory i on iitem.item_primary_id = i.inventory_id
                     WHERE sh.dealer_location_id IN (SELECT l.dealer_location_id FROM dealer_location l WHERE l.dealer_id = :dealer_id_inventory_pos)
                           AND ps.created_at >= :from_date_inventory_pos AND ps.created_at <= :to_date_inventory_pos
-                          AND SIGN(@actual_price:=IFNULL(psp.price,0) * psp.qty) = 1
                           {$this->customReportHelpers['inventoryWhere']['inventory_pos']}
 SQL;
 
