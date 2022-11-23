@@ -30,14 +30,14 @@ class Client
     private $uuid;
 
     /**
-     * @var int
+     * @var string
      */
-    private $count;
+    private $version;
 
     /**
      * @var string
      */
-    private $version;
+    private $label;
 
     /**
      * @var string
@@ -47,12 +47,12 @@ class Client
     /**
      * @var int
      */
-    private $lastCheckin;
+    private $count;
 
     /**
-     * @var string
+     * @var int
      */
-    private $label;
+    private $lastCheckin;
 
 
     /**

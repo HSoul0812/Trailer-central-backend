@@ -24,6 +24,11 @@ class ClientValidate
         'critical'
     ];
 
+    /**
+     * @const string
+     */
+    const CLIENTS_LEVEL = 'clients';
+
 
     /**
      * @var int
@@ -74,5 +79,35 @@ class ClientValidate
     public function isWarning(): bool {
         // Check if Level Exists
         return in_array($this->level, self::WARNING_LEVELS);
+    }
+
+    /**
+     * Get Parsed Elapsed Time
+     * 
+     * @return string
+     */
+    public function elapsed(): string {
+        // Elapsed > 60?
+        if($this->elapsed > 60) {
+            return floor($this->elapsed / 60);
+        }
+
+        // Get Minutes
+        return $this->elapsed;
+    }
+
+    /**
+     * Get Scale of Elapsed Time
+     * 
+     * @return string
+     */
+    public function scale(): string {
+        // Elapsed > 60?
+        if($this->elapsed > 60) {
+            return self::SCALE_HOURS;
+        }
+
+        // Get Minutes
+        return self::SCALE_MINUTES;
     }
 }
