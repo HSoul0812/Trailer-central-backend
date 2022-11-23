@@ -357,7 +357,7 @@ class User extends Model implements Authenticatable, PermissionsInterface
 
     public function getIsFmeActiveAttribute(): bool
     {
-        return boolval(count($this->marketplaceIntegrations));
+        return $this->is_marketing_active && boolval(count($this->marketplaceIntegrations));
     }
 
     public function getIsMobileActiveAttribute(): bool
