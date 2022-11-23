@@ -7,6 +7,7 @@ use App\Models\Integration\Integration;
 use App\Models\Integration\IntegrationDealer;
 use App\Models\Inventory\Inventory;
 use App\Models\CRM\Dms\Quote\QuoteSetting;
+use App\Models\Marketing\Facebook\Marketplace;
 use App\Models\Parts\Bin;
 use App\Models\User\Interfaces\PermissionsInterface;
 use App\Traits\Models\HasPermissionsStub;
@@ -303,6 +304,11 @@ class User extends Model implements Authenticatable, PermissionsInterface
         return $this->hasOne(DealerClapp::class, 'dealer_id', 'dealer_id');
     }
 
+    public function marketplaceIntegration(): HasOne
+    {
+        return $this->hasOne(Marketplace::class, 'dealer_id', 'dealer_id');
+    }
+
     public function authToken(): HasOne
     {
         return $this
@@ -347,6 +353,11 @@ class User extends Model implements Authenticatable, PermissionsInterface
     public function getIsMarketingActiveAttribute(): bool
     {
         return !empty($this->dealerClapp);
+    }
+
+    public function getIsFmeActiveAttribute(): bool
+    {
+        return !empty($this->marketplaceIntegration);
     }
 
     public function getIsMobileActiveAttribute(): bool
