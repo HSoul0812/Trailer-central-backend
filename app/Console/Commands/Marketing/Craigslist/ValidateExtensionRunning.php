@@ -71,7 +71,7 @@ class ValidateExtensionRunning extends Command
         }
 
         // Check Client Status
-        $messages = $this->service->messages($validation);
+        $messages = $this->service->status($validation);
 
         // Send Slack Messages?
         if($messages->count() > 0) {
