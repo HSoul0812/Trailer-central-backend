@@ -217,7 +217,7 @@ class ClientRedisRepository implements ClientRepositoryInterface
         }
 
         // Append Sort
-        return $this->sort($clients, '-ping');
+        return $this->sort($clients, '-checkin');
     }
 
 
