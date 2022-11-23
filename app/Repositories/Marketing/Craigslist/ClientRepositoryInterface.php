@@ -3,7 +3,7 @@
 namespace App\Repositories\Marketing\Craigslist;
 
 use App\Repositories\Repository;
-use App\Service\Marketing\Craigslist\DTOs\Client;
+use App\Services\Marketing\Craigslist\DTOs\Client;
 use Illuminate\Support\Collection;
 
 /**
