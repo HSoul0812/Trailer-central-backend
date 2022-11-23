@@ -43,9 +43,9 @@ interface NumberRepositoryInterface extends Repository
      *
      * @param string $dealerNo
      * @param string $customerNo
-     * @return Number
+     * @return Number|null
      */
-    public function findActiveTwilioNumber(string $dealerNo, string $customerNo): Number;
+    public function findActiveTwilioNumber(string $dealerNo, string $customerNo): ?Number;
 
     /**
      * Find All Twilio Numbers
