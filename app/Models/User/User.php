@@ -304,9 +304,9 @@ class User extends Model implements Authenticatable, PermissionsInterface
         return $this->hasOne(DealerClapp::class, 'dealer_id', 'dealer_id');
     }
 
-    public function marketplaceIntegration(): HasOne
+    public function marketplaceIntegrations(): HasMany
     {
-        return $this->hasOne(Marketplace::class, 'dealer_id', 'dealer_id');
+        return $this->hasMany(Marketplace::class, 'dealer_id', 'dealer_id');
     }
 
     public function authToken(): HasOne
@@ -357,7 +357,7 @@ class User extends Model implements Authenticatable, PermissionsInterface
 
     public function getIsFmeActiveAttribute(): bool
     {
-        return !empty($this->marketplaceIntegration);
+        return boolval(count($this->marketplaceIntegrations));
     }
 
     public function getIsMobileActiveAttribute(): bool
