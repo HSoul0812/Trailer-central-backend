@@ -146,7 +146,7 @@ class ValidateService implements ValidateServiceInterface
      * @param array<ClientValidate> $warnings
      * @return Collection<ClientMessage>
      */
-    private function messages(array $active, array $warnings): ClientMessage {
+    private function messages(array $active, array $warnings): Collection {
         // Check All Warning Clients
         $messages = new Collection();
         foreach($warnings as $email => $warnings) {
