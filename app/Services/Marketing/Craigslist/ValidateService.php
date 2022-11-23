@@ -4,6 +4,7 @@ namespace App\Services\Marketing\Craigslist;
 
 use App\Repositories\Marketing\Craigslist\ClientRepositoryInterface;
 use App\Service\Marketing\Craigslist\DTOs\ClientMessage;
+use App\Service\Marketing\Craigslist\DTOs\ClientValidate;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
