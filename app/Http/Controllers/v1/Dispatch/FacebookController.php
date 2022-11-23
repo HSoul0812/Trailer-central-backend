@@ -210,4 +210,24 @@ class FacebookController extends RestfulControllerV2 {
 
         return $this->response->errorBadRequest();
     }
+
+    public function metrics(int $id, Request $request)
+    {
+        $metricRequest = new UpdateMarketplaceMetricsRequest($request->all());
+        if ($metricRequest->validate()) {
+            MarketplaceMetric::updateOrCreate(
+                [
+                    'fbapp_marketplace_id' => $id,
+                    'category' => $request->category ?? '',
+                    'name' => $request->name
+                ],
+                [
+                    'value' => $request->value
+                ]
+            );
+            return $this->successResponse();
+        }
+
+        return $this->response->errorBadRequest();
+    }
 }
