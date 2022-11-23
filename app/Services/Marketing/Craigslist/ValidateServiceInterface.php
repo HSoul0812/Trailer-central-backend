@@ -2,8 +2,8 @@
 
 namespace App\Services\Marketing\Craigslist;
 
-use App\Service\Marketing\Craigslist\DTOs\ClientMessage;
-use App\Service\Marketing\Craigslist\DTOs\ClientValidate;
+use App\Services\Marketing\Craigslist\DTOs\ClientMessage;
+use App\Services\Marketing\Craigslist\DTOs\ClientValidate;
 use Illuminate\Support\Collection;
 
 interface ValidateServiceInterface {

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service\Marketing\Craigslist\DTOs;
+namespace App\Services\Marketing\Craigslist\DTOs;
 
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
@@ -8,7 +8,7 @@ use App\Traits\WithGetter;
 /**
  * Class ClientValidate
  * 
- * @package App\Service\Marketing\Craigslist\DTOs
+ * @package App\Services\Marketing\Craigslist\DTOs
  */
 class ClientValidate
 {

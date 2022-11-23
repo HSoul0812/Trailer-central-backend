@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Service\Marketing\Craigslist\DTOs;
+namespace App\Services\Marketing\Craigslist\DTOs;
 
-use App\Service\Marketing\Craigslist\DTOs\ClientValidate;
+use App\Services\Marketing\Craigslist\DTOs\ClientValidate;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
 use Illuminate\Support\Collection;
@@ -10,7 +10,7 @@ use Illuminate\Support\Collection;
 /**
  * Class ClientMessage
  * 
- * @package App\Service\Marketing\Craigslist\DTOs
+ * @package App\Services\Marketing\Craigslist\DTOs
  */
 class ClientMessage
 {
