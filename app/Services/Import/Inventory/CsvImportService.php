@@ -997,7 +997,7 @@ class CsvImportService implements CsvImportServiceInterface
         if (strlen($jsonEncodedValidationErrors) > self::MAX_VALIDATION_ERROR_CHAR_COUNT) {
             $filePath = sprintf(self::S3_VALIDATION_ERRORS_PATH, uniqid() . '.txt');
             Storage::disk('s3')->put($filePath, implode(PHP_EOL, $this->validationErrors));
-            return json_encode(Storage::disk('s3')->url($filePath));
+            return "Log too big, please follow this link to see what failed: " . Storage::disk('s3')->url($filePath);
         }
         return $jsonEncodedValidationErrors;
     }
