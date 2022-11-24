@@ -20,6 +20,12 @@ class QueryBuilder implements InventoryQueryBuilderInterface
     private const AGGREGATION_SIZE = 200;
 
     private $aggregations = [
+        'dry_weight' => [
+            'terms' => [
+                'field' => 'dryWeight',
+                'size' => self::AGGREGATION_SIZE
+            ]
+        ],
         'is_featured' => [
             'terms' => [
                 'field' => 'isFeatured',
