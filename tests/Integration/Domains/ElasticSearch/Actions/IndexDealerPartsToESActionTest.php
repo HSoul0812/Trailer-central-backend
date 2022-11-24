@@ -47,9 +47,9 @@ class IndexDealerPartsToESActionTest extends TestCase
         // Give it two seconds for the data to be indexed to ES
         sleep(2);
 
-        $esPart = $this->searchForPartInES($dealer->dealer_id);
+        $esParts = $this->searchForPartInES($dealer->dealer_id);
 
-        $this->assertEquals($numberOfPartToCreate, data_get($esPart, 'hits.total.value'));
+        $this->assertEquals($numberOfPartToCreate, data_get($esParts, 'hits.total.value'));
     }
 
     /**
