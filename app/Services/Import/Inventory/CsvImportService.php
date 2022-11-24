@@ -90,6 +90,7 @@ class CsvImportService implements CsvImportServiceInterface
      */
     protected $allowedHeaderValues = [
         "inventory_id" => false,
+        "on website & classifieds" => true,
         "stock" => true,
         "title" => true,
         "model" => true,
@@ -102,6 +103,7 @@ class CsvImportService implements CsvImportServiceInterface
         "vin" => true,
         "category" => true,
         "price" => true,
+        "hidden_price" => true,
         "sales_price" => true,
         "website_price" => true,
         "msrp" => true,
@@ -139,6 +141,7 @@ class CsvImportService implements CsvImportServiceInterface
      */
     static private $_columnMap = array(
         "inventory_id" => "identifier",
+        "on website & classifieds" => array("on website & classifieds", "on website and classifieds", "show on website"),
         "stock" => array("stock", "stock #", "stock#", "stock nr", "stock number"),
         "title" => "title",
         "model" => array("model", "model#", "model no", "model no."),
@@ -151,6 +154,7 @@ class CsvImportService implements CsvImportServiceInterface
         "vin" => array("vin", "vin#"),
         "category" => "category",
         "price" => array("price", "sellingprice"),
+        "hidden_price" => array("hidden price"),
         "sales_price" => array("sales price", "sale price", "sales only price", "sale only price"),
         "website_price" => array("website price", "website only price"),
         "msrp" => array("msrp", "mfg price"),
@@ -187,10 +191,18 @@ class CsvImportService implements CsvImportServiceInterface
      */
     static private $_columnValidation = array(
         "inventory_id" => array("type" => "string", "regex" => "([a-zA-Z0-9]+)"),
+        "on website & classifieds" => array(
+            "type" => "enum",
+            "list" => array(
+                "yes" => "1",
+                "no" => "0"
+            )
+        ),
         "stock" => array("type" => "string", "unique" => true),
         "title" => array("type" => "string", "length" => 255, "regex" => "[\w\s\d\.'\"\\/\*\+\?]*"),
         "manufacturer" => array("type" => "string"),
         "model" => array("type" => "string", "length" => 255, "regex" => "[\w\s\d\.'\"\\/\*\+\?]*"),
+        "brand" => array("type" => "string"),
         "description" => array("type" => "string"),
         "description_html" => array("type" => "string"),
         "location" => array("type" => "string"),
@@ -260,6 +272,7 @@ class CsvImportService implements CsvImportServiceInterface
             "type" => "string"
         ),
         "price" => array("type" => "decimal"),
+        "hidden_price" => array("type" => "decimal"),
         "year" => array("type" => "date", "format" => "Y"),
         "condition" => array(
             "type" => "enum",
@@ -365,6 +378,7 @@ class CsvImportService implements CsvImportServiceInterface
      * @var string[]
      */
     static $ignorableColumns = array(
+        "number of images",
         "admin-notes",
         "created at date"
     );
