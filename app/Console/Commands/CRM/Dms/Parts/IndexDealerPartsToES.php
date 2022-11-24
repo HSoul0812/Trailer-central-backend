@@ -60,7 +60,7 @@ class IndexDealerPartsToES extends Command
             ->withChunkSize($this->option('chunkSize'))
             ->withDelayChunkThreshold($delayChunkThreshold)
             ->withDelay($delay)
-            ->withOnDealerHasNoParts(function() {
+            ->withOnDealerHasNoParts(function () {
                 $this->line("Dealer has no parts in the database, skipping this one...");
             })
             ->withOnStartProcessingRound(function (int $round) {

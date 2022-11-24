@@ -25,6 +25,9 @@ class IndexDealerPartsToESActionTest extends TestCase
      * the action must be able to index that part into ES and if it is
      * we'll consider it a success
      *
+     * @group DMS
+     * @group DMS_PARTS
+     *
      * @return void
      */
     public function testItCanIndexAllDealerPartsToES()
@@ -45,7 +48,7 @@ class IndexDealerPartsToESActionTest extends TestCase
         resolve(IndexDealerPartsToESAction::class)->execute($dealer);
 
         // Give it two seconds for the data to be indexed to ES
-        sleep(2);
+        sleep(3);
 
         $esParts = $this->searchForPartInES($dealer->dealer_id);
 
