@@ -835,7 +835,7 @@ class Inventory extends Model
     {
         $value = $this->getAttributesIndexedByIdAttribute()->get($id);
 
-        if (is_null($value)) {
+        if (is_null($value) || empty($value)) {
             return $default;
         }
 
