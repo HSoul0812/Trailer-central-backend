@@ -20,6 +20,12 @@ class QueryBuilder implements InventoryQueryBuilderInterface
     private const AGGREGATION_SIZE = 200;
 
     private $aggregations = [
+        'fuel_type' => [
+            'terms' => [
+                'field' => 'fuelType',
+                'size' => self::AGGREGATION_SIZE
+            ]
+        ],
         'sleeping_capacity' => [
             'terms' => [
                 'field' => 'numSleeps',
