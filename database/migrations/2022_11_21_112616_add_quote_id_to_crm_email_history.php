@@ -14,13 +14,13 @@ class AddQuoteIdToCrmEmailHistory extends Migration
     public function up()
     {
         Schema::table('crm_email_history', function (Blueprint $table) {
-            $table->integer('quote_id')->default(0)->after('lead_id');
+            $table->integer('quote_id')->nullable()->after('lead_id');
 
             $table->index(['quote_id']);
         });
 
         Schema::table('crm_interaction', function (Blueprint $table) {
-            $table->integer('quote_id')->default(0)->after('tc_lead_id');
+            $table->integer('quote_id')->nullable()->after('tc_lead_id');
 
             $table->index(['quote_id']);
         });
