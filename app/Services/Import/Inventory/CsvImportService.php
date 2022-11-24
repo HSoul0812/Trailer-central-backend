@@ -425,10 +425,11 @@ class CsvImportService implements CsvImportServiceInterface
         // Set categories
         $this->setCategories();
 
+        /* For testing purposes only
         Log::debug("Attributes: " . json_encode(self::$_attributes));
         Log::debug("Allowed: " . json_encode($this->allowedHeaderValues));
         Log::debug("Validation: " . json_encode(self::$_columnValidation));
-        Log::debug("Mapping: " . json_encode(self::$_columnMap));
+        Log::debug("Mapping: " . json_encode(self::$_columnMap));*/
 
         try {
             if (!$this->validate()) {
