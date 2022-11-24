@@ -8,7 +8,6 @@ use App\Models\Inventory\Attribute;
 use App\Models\Inventory\Category;
 use App\Models\Inventory\Inventory;
 use App\Models\User\DealerLocation;
-use App\Services\File\ImageService;
 use App\Services\Inventory\InventoryServiceInterface;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
@@ -29,11 +28,6 @@ class CsvImportService implements CsvImportServiceInterface
      * @var BulkUploadRepositoryInterface
      */
     protected $bulkUploadRepository;
-
-    /**
-     * @var ImageService
-     */
-    private $imageService;
 
     /**
      * @var
@@ -405,16 +399,14 @@ class CsvImportService implements CsvImportServiceInterface
 
     /**
      * @param BulkUploadRepositoryInterface $bulkUploadRepository
-     * @param ImageService $imageService
+     * @param InventoryServiceInterface $inventoryService
      */
     public function __construct(
         BulkUploadRepositoryInterface $bulkUploadRepository,
-        ImageService $imageService,
         InventoryServiceInterface $inventoryService
     )
     {
         $this->bulkUploadRepository = $bulkUploadRepository;
-        $this->imageService = $imageService;
         $this->inventoryService = $inventoryService;
 
         $this->convertHelper = new ConvertHelper();
@@ -842,34 +834,24 @@ class CsvImportService implements CsvImportServiceInterface
                 break;
 
             case 'images':
-                $images = explode(',', $value);
-                $images = array_map('trim', $images);
+                // Stop sending images here, InventoryService will handle...
+                if (!empty($value)) {
+                    $images = explode(',', $value);
+                    $images = array_map('trim', $images);
 
-                if (count($images) > 0) {
-                    foreach ($images as $image) {
-                        $fileDto = $this->imageService->upload(
-                            $image,
-                            $this->inventory['stock'],
-                            null,
-                            null,
-                            ['visibility' => config('filesystems.disks.s3.visibility')]
-                        );
-
-                        if ($fileDto) {
-                            if ($this->imageMode == self::IM_APPEND) {
-                                $this->inventory['new_images'][] = array(
-                                    'filename' => $fileDto->getPath(),
-                                    'hash' => $fileDto->getHash()
-                                );
-                            } elseif ($this->imageMode == self::IM_REPLACE) {
-                                $this->inventory['existing_images'][] = array(
-                                    'filename' => $fileDto->getPath(),
-                                    'hash' => $fileDto->getHash()
-                                );
+                    if (count($images) > 0) {
+                        if ($this->imageMode == self::IM_APPEND) {
+                            foreach ($images as $image) {
+                                $this->inventory['new_images'][] = [
+                                    'url' => $image
+                                ];
                             }
-
-                        } else {
-                            return "Image '{$value}' not found in import.";
+                        } elseif ($this->imageMode == self::IM_REPLACE) {
+                            foreach ($images as $image) {
+                                $this->inventory['existing_images'][] = [
+                                    'url' => $image
+                                ];
+                            }
                         }
                     }
                 }
