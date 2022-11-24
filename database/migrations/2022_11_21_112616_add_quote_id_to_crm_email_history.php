@@ -40,7 +40,7 @@ class AddQuoteIdToCrmEmailHistory extends Migration
         });
 
         Schema::table('crm_interaction', function (Blueprint $table) {
-            $table->dropColumn(['quote_id']);
+            $table->dropIndex(['quote_id']);
         });
     }
 }
