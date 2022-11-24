@@ -267,22 +267,18 @@ class InteractionService implements InteractionServiceInterface
             $parsedEmail->setMessageId($emailHistory->message_id);
         }
 
-        try {
-            // Send Email
-            if($smtpConfig !== null && $smtpConfig->isAuthTypeGmail()) {
-                $finalEmail = $this->gmail->send($smtpConfig, $parsedEmail);
-            } elseif($smtpConfig !== null && $smtpConfig->isAuthTypeOffice()) {
-                // Send Office Email
-                $finalEmail = $this->office->send($smtpConfig, $parsedEmail);
-            } elseif($smtpConfig !== null && $smtpConfig->isAuthTypeNtlm()) {
-                $finalEmail = $this->ntlm->send($user->dealer_id, $smtpConfig, $parsedEmail);
-            } else {
-                $emailConfig = $this->config($user->dealer_id, !empty($salesPerson) ? $salesPerson->id : null);
-                $finalEmail = $this->interactionEmail->send($emailConfig, $smtpConfig, $parsedEmail);
-                $interactionEmail = true;
-            }
-        } catch (\Exception $e) {
-            var_dump(111, $e->getMessage()); exit;
+        // Send Email
+        if($smtpConfig !== null && $smtpConfig->isAuthTypeGmail()) {
+            $finalEmail = $this->gmail->send($smtpConfig, $parsedEmail);
+        } elseif($smtpConfig !== null && $smtpConfig->isAuthTypeOffice()) {
+            // Send Office Email
+            $finalEmail = $this->office->send($smtpConfig, $parsedEmail);
+        } elseif($smtpConfig !== null && $smtpConfig->isAuthTypeNtlm()) {
+            $finalEmail = $this->ntlm->send($user->dealer_id, $smtpConfig, $parsedEmail);
+        } else {
+            $emailConfig = $this->config($user->dealer_id, !empty($salesPerson) ? $salesPerson->id : null);
+            $finalEmail = $this->interactionEmail->send($emailConfig, $smtpConfig, $parsedEmail);
+            $interactionEmail = true;
         }
 
         if (!empty($params['lead_id'])) {
