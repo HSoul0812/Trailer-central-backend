@@ -2,12 +2,16 @@
 
 namespace App\Console\Commands\CRM\Dms\Parts;
 
+use App\Console\Traits\PrependsOutput;
+use App\Console\Traits\PrependsTimestamp;
 use App\Domains\Parts\Actions\IndexDealerPartsToESAction;
 use App\Models\User\User;
 use Illuminate\Console\Command;
 
 class IndexDealerPartsToES extends Command
 {
+    use PrependsOutput, PrependsTimestamp;
+
     protected $signature = '
         crm:dms:parts:index-to-es
         {dealerIds : Dealer IDs seperated by commas.}
@@ -29,16 +33,12 @@ class IndexDealerPartsToES extends Command
             return 1;
         }
 
-        $this->line('');
-
         foreach ($dealers as $dealer) {
             $this->info("Start indexing parts for dealer ID $dealer->dealer_id!");
 
             $indexPartsAction->execute($dealer);
 
-            $this->info("Finished indexing parts for dealer ID $dealer->dealer_id!");
-
-            $this->line('');
+            $this->info("Finished indexing parts for dealer ID $dealer->dealer_id!" . PHP_EOL);
         }
 
         $this->info('The command has finished!');
@@ -118,7 +118,7 @@ class IndexDealerPartsToES extends Command
 
         $dealerIds = implode(', ', array_keys($dealers));
 
-        $this->info("Finished gathering dealers! The command will index parts for dealers in this order: $dealerIds.");
+        $this->info("Finished gathering dealers! The command will index parts for dealers in this order: $dealerIds." . PHP_EOL);
 
         return $dealers;
     }
