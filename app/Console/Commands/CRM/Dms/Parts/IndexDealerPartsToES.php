@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands\CRM\Dms\Parts;
 
+use App\Domains\Parts\Actions\IndexDealerPartsToESAction;
 use App\Models\User\User;
 use Illuminate\Console\Command;
-use Illuminate\Support\Collection;
 
 class IndexDealerPartsToES extends Command
 {
@@ -12,93 +12,114 @@ class IndexDealerPartsToES extends Command
         crm:dms:parts:index-to-es
         {dealerIds : Dealer IDs seperated by commas.}
         {--chunkSize=500 : The size for each chunk.}
-        {--delayChunkCount=10000 : The size of the chunk before we apply the wait time (delays).}
+        {--delayChunkThreshold=10000 : The size of the chunk before we apply the wait time (delays).}
         {--delay=120 : Delay time in seconds after each delayChunkCount parts is being dispatched.}
     ';
 
     protected $description = 'Index all the parts under the dealer ids.';
 
-    /** @var array<int, int> */
-    private $dealerIds;
-
-    private $chunkSize;
-
-    private $delayChunkCount;
-
-    private $delay;
-
     public function handle(): int
     {
-        $this->prepareInputs();
+        $indexPartsAction = $this->getIndexPartsAction();
 
-        foreach ($this->dealerIds as $dealerId) {
-            $dealer = User::find($dealerId);
+        $dealers = $this->getDealers();
 
-            if ($dealer === null) {
-                $this->error("Dealer ID $dealerId doesn't exist, skipping...");
-                continue;
-            }
-
-            $this->indexParts($dealer);
+        if (empty($dealers)) {
+            $this->error("No valid dealers to process! terminating the script now, have a good day!");
+            return 1;
         }
 
         $this->line('');
+
+        foreach ($dealers as $dealer) {
+            $this->info("Start indexing parts for dealer ID $dealer->dealer_id!");
+
+            $indexPartsAction->execute($dealer);
+
+            $this->info("Finished indexing parts for dealer ID $dealer->dealer_id!");
+
+            $this->line('');
+        }
+
         $this->info('The command has finished!');
 
         return 0;
     }
 
-    private function prepareInputs(): void
+    /**
+     * Get the Index Parts action to use in this command
+     *
+     * @return IndexDealerPartsToESAction
+     */
+    private function getIndexPartsAction(): IndexDealerPartsToESAction
     {
-        $this->dealerIds = collect(explode(',', $this->argument('dealerIds')))
-            ->filter(function (string $dealerId) {
-                return !empty($dealerId);
-            })
-            ->map(function (string $dealerId) {
-                return (int) trim($dealerId);
-            })
-            ->unique()
-            ->values();
+        $delayChunkThreshold = $this->option('delayChunkThreshold');
+        $delay = $this->option('delay');
 
-        $this->chunkSize = $this->option('chunkSize');
-        $this->delayChunkCount = $this->option('delayChunkCount');
-        $this->delay = $this->option('delay');
+        return resolve(IndexDealerPartsToESAction::class)
+            ->withChunkSize($this->option('chunkSize'))
+            ->withDelayChunkThreshold($delayChunkThreshold)
+            ->withDelay($delay)
+            ->withOnDealerHasNoParts(function() {
+                $this->line("Dealer has no parts in the database, skipping this one...");
+            })
+            ->withOnStartProcessingRound(function (int $round) {
+                $this->line("Chunk round: $round, start processing...");
+            })
+            ->withOnDispatchedJobs(function (int $dispatchedTotal, int $totalParts) {
+                $this->line("Dispatched MakeSearchable jobs for $dispatchedTotal from $totalParts parts.");
+            })
+            ->withOnDispatchedExceedingThreshold(function (int $dispatchedThisRound, int $round) use ($delayChunkThreshold, $delay) {
+                $this->line("We've reached $dispatchedThisRound parts in this round! (delayChunkCount = $delayChunkThreshold), chunk round $round ends here.");
+                $this->line("Pause for $delay seconds before processing the next chunk round...");
+            });
     }
 
-    private function indexParts(User $dealer): void
+    /**
+     * Get the dealers collection from the input
+     *
+     * @return array<int, User>
+     */
+    private function getDealers(): array
     {
-        $this->alert("Start indexing parts for dealer ID $dealer->dealer_id!");
+        $this->info("Gathering dealers from the database...");
 
-        $chunkRound = 0;
-        $dispatchedCountTotal = 0;
-        $dispatchedCountThisRound = 0;
+        $dealerIds = explode(',', $this->argument('dealerIds'));
 
-        $partCount = $dealer->parts()->count();
+        $dealers = [];
 
-        $dealer->parts()->chunkById($this->chunkSize, function (Collection $parts) use (&$chunkRound, &$dispatchedCountTotal, &$dispatchedCountThisRound, $partCount) {
-            $chunkRound++;
+        foreach ($dealerIds as $dealerId) {
+            $dealerId = trim($dealerId);
+            $tempDealerId = $dealerId;
 
-            $this->info("Chunk round: $chunkRound, start processing...");
+            $dealerId = filter_var($dealerId, FILTER_VALIDATE_INT);
 
-            $parts->searchable();
-            $currentRoundPartsCount = $parts->count();
-
-            $dispatchedCountTotal += $currentRoundPartsCount;
-            $dispatchedCountThisRound += $currentRoundPartsCount;
-
-            $this->info("Dispatched MakeSearchable jobs for $dispatchedCountThisRound from $partCount parts.");
-
-            // Once we've dispatched the parts >= the chunk count
-            // we will sleep for a certain seconds to allow Redis
-            // to process all of the dispatched jobs before we dispatch
-            // the new round of jobs (just so we don't flush Redis)
-            if ($dispatchedCountThisRound >= $this->delayChunkCount) {
-                $dispatchedCountThisRound = 0;
-
-                $this->info("We've reached $dispatchedCountThisRound parts in this round! (delayChunkCount = $this->delayChunkCount), chunk round $chunkRound ends here.");
-                $this->info("Sleep for $this->delay seconds before starting next chunk round...");
-                sleep($this->delay);
+            // Ignore the non integer dealer id
+            if ($dealerId === false) {
+                $this->error("Invalid dealer ID format: $tempDealerId, dealer ID must be an integer.");
+                continue;
             }
-        });
+
+            // No need to process the same dealer id again
+            if (array_key_exists($dealerId, $dealers)) {
+                $this->error("Duplicate dealer ID: $dealerId, will process only once.");
+                continue;
+            }
+
+            $dealer = User::find($dealerId);
+
+            if ($dealer === null) {
+                $this->error("Dealer ID $dealerId doesn't exist in the database!");
+                continue;
+            }
+
+            $dealers[$dealerId] = $dealer;
+        }
+
+        $dealerIds = implode(', ', array_keys($dealers));
+
+        $this->info("Finished gathering dealers! The command will index parts for dealers in this order: $dealerIds.");
+
+        return $dealers;
     }
 }
