@@ -5,6 +5,7 @@ namespace App\Http\Controllers\v1\Inventory;
 use App\Exceptions\Requests\Validation\NoObjectIdValueSetException;
 use App\Exceptions\Requests\Validation\NoObjectTypeSetException;
 use App\Http\Controllers\RestfulControllerV2;
+use App\Http\Requests\Inventory\BulkUpdateInventoryRequest;
 use App\Http\Requests\Inventory\CreateInventoryRequest;
 use App\Http\Requests\Inventory\DeleteInventoryRequest;
 use App\Http\Requests\Inventory\ExistsInventoryRequest;
@@ -63,7 +64,7 @@ class InventoryController extends RestfulControllerV2
     )
     {
         $this->middleware('setDealerIdOnRequest')
-            ->only(['index', 'create', 'update', 'destroy', 'exists', 'getAllTitles', 'findByStock']);
+            ->only(['index', 'create', 'update', 'destroy', 'exists', 'getAllTitles', 'findByStock', 'bulkUpdate']);
         $this->middleware('inventory.create.permission')->only(['create', 'update']);
 
         $this->inventoryService = $inventoryService;
@@ -253,6 +254,23 @@ class InventoryController extends RestfulControllerV2
         }
 
         return $this->updatedResponse($inventory->inventory_id);
+    }
+
+    /**
+     * @param Request $request
+     * @return Response
+     * @throws NoObjectIdValueSetException
+     * @throws NoObjectTypeSetException
+     */
+    public function bulkUpdate(Request $request): Response
+    {
+        $bulkRequest = new BulkUpdateInventoryRequest($request->all());
+
+        if (!$bulkRequest->validate() || !$this->inventoryService->bulkUpdate($bulkRequest->all())) {
+            return $this->response->errorBadRequest();
+        }
+
+        return $this->updatedResponse();
     }
 
     /**
