@@ -64,11 +64,11 @@ class StripePaymentService implements StripePaymentServiceInterface
         $siteUrl = config('app.site_url');
 
         /** @var TcApiResponseInventory $inventory */
-        $inventory = $metadata['inventory'];
+        $inventoryTitle = $metadata['inventory_title'];
 
         $planPrice = self::PRICES[$priceItem]['price'];
         $planName = self::PRICES[$priceItem]['name'];
-        $planName = str_replace('{title}', $inventory->inventory_title, $planName);
+        $planName = str_replace('{title}', $inventoryTitle, $planName);
 
         $product = \Stripe\Product::create([
             'name' => $planName
