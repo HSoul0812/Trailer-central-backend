@@ -161,11 +161,9 @@ class ExportUnitSalesSummaryCsvAction
         // Start by inserting the headers row
         $writer->insertOne(array_values($this->headers));
 
-        // TODO: Query the data from the database and then start
-        //  looping through each data and use ->insertOne to add
-        //  them into the CSV file
-        //  IMPORTANT: Prepend the path with unit-sales-summary/
-        //  before inserting the file into S3.
+        // Call another function to fetch and write all the unit sales
+        // data to the CSV file just so we keep this method clear
+        $this->fetchAndWriteReportDataToCsv($writer);
 
         // Output the content from the buffer to the actual CSV file
         $tmpStorage->put($this->filename, $writer->toString());
@@ -200,9 +198,23 @@ class ExportUnitSalesSummaryCsvAction
      */
     public function mergeHeaders(array $headers): ExportUnitSalesSummaryCsvAction
     {
+        // Remove any headers that we don't have in the $headers array
+        // so, we don't accidentally add it to the CSV file
+        $headers = array_filter($headers, function(string $headerKey) {
+            return array_key_exists($headerKey, $this->headers);
+        }, ARRAY_FILTER_USE_KEY);
+
         $this->headers = array_merge($this->headers, $headers);
 
         return $this;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getHeaders(): array
+    {
+        return $this->headers;
     }
 
     /**
@@ -286,5 +298,20 @@ class ExportUnitSalesSummaryCsvAction
         }
 
         $this->filename = $this->filename ?? $this->getDefaultFileName();
+    }
+
+    /**
+     * Main method to read if you want to understand the main logic of this action
+     *
+     * @param Writer $writer
+     * @return void
+     */
+    private function fetchAndWriteReportDataToCsv(Writer $writer)
+    {
+        // TODO: Query the data from the database and then start
+        //  looping through each data and use ->insertOne to add
+        //  them into the CSV file
+        //  IMPORTANT: Prepend the path with unit-sales-summary/
+        //  before inserting the file into S3.
     }
 }
