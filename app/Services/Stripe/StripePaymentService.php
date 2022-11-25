@@ -2,6 +2,7 @@
 
 namespace App\Services\Stripe;
 
+use App\DTOs\Inventory\TcApiResponseInventory;
 use App\Repositories\Payment\PaymentLogRepositoryInterface;
 use App\Services\Inventory\InventoryServiceInterface;
 use Illuminate\Contracts\Foundation\Application;
@@ -23,8 +24,14 @@ class StripePaymentService implements StripePaymentServiceInterface
     const CHECKOUT_SESSION_COMPLETED_EVENT = 'checkout.session.completed';
 
     const PRICES = [
-        'tt30' => 75.00,
-        'tt60' => 100.00,
+        'tt30' => [
+            'price' => 75.00,
+            'name' => '30 day plan for publishing your listing titled {title} on TrailerTrader.com'
+        ],
+        'tt60' => [
+            'price' => 100.00,
+            'name' => '600 day plan for publishing your listing titled {title} on TrailerTrader.com'
+        ],
     ];
 
     public function __construct(
@@ -52,14 +59,19 @@ class StripePaymentService implements StripePaymentServiceInterface
         return (int)str_replace('.', '', $numberWithTwoDecimals);
     }
 
-    public function createCheckoutSession(string $priceItem, array $metadata = []): Redirector|Application|RedirectResponse
+    public function createCheckoutSession(string $priceItem, array $metadata = []): string
     {
         $siteUrl = config('app.site_url');
 
-        $planPrice = self::PRICES[$priceItem];
+        /** @var TcApiResponseInventory $inventory */
+        $inventory = $metadata['inventory'];
+
+        $planPrice = self::PRICES[$priceItem]['price'];
+        $planName = self::PRICES[$priceItem]['name'];
+        $planName = str_replace('{title}', $inventory->inventory_title, $planName);
 
         $product = \Stripe\Product::create([
-            'name' => $priceItem
+            'name' => $planName
         ]);
 
         $priceObj = \Stripe\Price::create([
@@ -82,7 +94,8 @@ class StripePaymentService implements StripePaymentServiceInterface
             'success_url' => $siteUrl . self::STRIPE_SUCCESS_URL,
             'cancel_url' => $siteUrl . self::STRIPE_FAILURE_URL,
         ]);
-        return redirect($checkout_session->url);
+
+        return $checkout_session->url;
     }
 
     public function handleEvent(): int
