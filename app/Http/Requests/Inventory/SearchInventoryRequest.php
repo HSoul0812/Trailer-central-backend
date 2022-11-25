@@ -20,9 +20,6 @@ use App\Services\ElasticSearch\Inventory\Parameters\Geolocation\GeolocationInter
  */
 class SearchInventoryRequest extends Request
 {
-    private const DELIMITER = ';';
-    private const SORT_DELIMITER = ':';
-
     protected $rules = [
         'per_page' => 'integer|min:1|max:100',
         'page' => ['integer', 'min:0'],
@@ -51,9 +48,8 @@ class SearchInventoryRequest extends Request
 
     public function sort(): array
     {
-        return $this->sort ? collect(explode(self::DELIMITER, $this->sort))->mapWithKeys(function ($sort) {
-            [$sortTerm, $order] = explode(self::SORT_DELIMITER, $sort);
-            return [$sortTerm => $order];
+        return $this->sort ? collect($this->sort)->mapWithKeys(function ($term) {
+            return [$term['field'] => $term['order']];
         })->toArray() : [];
     }
 
@@ -88,7 +84,7 @@ class SearchInventoryRequest extends Request
 
     public function getESQuery(): bool
     {
-        return (int)$this->x_qa_req === 1;
+        return $this->json('debug.x_qa_req');
     }
 
     public function inRandomOrder(): bool
