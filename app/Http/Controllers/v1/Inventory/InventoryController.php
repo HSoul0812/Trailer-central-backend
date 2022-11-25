@@ -23,6 +23,7 @@ use App\Transformers\Inventory\TcApiResponseInventoryDeleteTransformer;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Carbon;
@@ -135,17 +136,20 @@ class InventoryController extends AbstractRestfulController
         );
     }
 
-    public function pay(Request $request, $inventoryId, $planId): Redirector|Application|RedirectResponse
+    public function pay(Request $request, $inventoryId, $planId): Response
     {
         $inventory = $this->inventoryService->show((int)$inventoryId);
         $user = auth('api')->user();
         if ($inventory->dealer['id'] != $user->tc_user_id) {
             throw new HttpException(422, "User should be owner of inventory");
         }
-        return $this->paymentService->createCheckoutSession($planId, [
-            'inventory_id' => $inventoryId,
+
+        $url = $this->paymentService->createCheckoutSession($planId, [
+            'inventory' => $inventory,
             'user_id' => $user->tc_user_id
         ]);
+
+        return new Response(['url' => $url]);
     }
 
     protected function constructRequestBindings(): void
