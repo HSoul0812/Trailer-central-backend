@@ -60,21 +60,21 @@ class SearchInventoryRequest extends Request
 
     public function page(): int
     {
-        return (int)($this->page ?? 1);
+        return (int)($this->json('pagination.page') ?? 1);
     }
 
     public function perPage(): int
     {
-        return (int)($this->per_page ?? 15);
+        return (int)($this->json('pagination.per_page') ?? 15);
     }
 
     public function offSet(): int
     {
-        if (!$this->offset) {
+        if (!$this->json('pagination.offset')) {
             return ($this->page() - 1) * $this->perPage();
         }
 
-        return (int)$this->offset;
+        return (int)$this->json('pagination.offset');
     }
 
     public function geolocation(): GeolocationInterface
