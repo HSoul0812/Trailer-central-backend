@@ -24,8 +24,14 @@ class StripePaymentService implements StripePaymentServiceInterface
     const CHECKOUT_SESSION_COMPLETED_EVENT = 'checkout.session.completed';
 
     const PRICES = [
-        'tt30' => 75.00,
-        'tt60' => 100.00,
+        'tt30' => [
+            'price' => 75.00,
+            'name' => '30 day plan for publishing your listing titled {title} on TrailerTrader.com'
+        ],
+        'tt60' => [
+            'price' => 100.00,
+            'name' => '600 day plan for publishing your listing titled {title} on TrailerTrader.com'
+        ],
     ];
 
     public function __construct(
@@ -60,10 +66,12 @@ class StripePaymentService implements StripePaymentServiceInterface
         /** @var TcApiResponseInventory $inventory */
         $inventory = $metadata['inventory'];
 
-        $planPrice = self::PRICES[$priceItem];
+        $planPrice = self::PRICES[$priceItem]['price'];
+        $planName = self::PRICES[$priceItem]['name'];
+        $planName = str_replace('{title}', $inventory->inventory_title, $planName);
 
         $product = \Stripe\Product::create([
-            'name' => $inventory->inventory_title
+            'name' => $planName
         ]);
 
         $priceObj = \Stripe\Price::create([
