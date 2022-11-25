@@ -26,11 +26,10 @@ class IndexDealerPartsToESTest extends TestCase
         $dealers = factory(User::class, 2)->create();
 
         $dealerIds = $dealers->pluck('dealer_id')->implode(',');
-        $noPartsCount = 0;
 
         $this->instance(
             IndexDealerPartsToESAction::class,
-            Mockery::mock(IndexDealerPartsToESAction::class, function (MockInterface $mock) use ($dealers, &$noPartsCount) {
+            Mockery::mock(IndexDealerPartsToESAction::class, function (MockInterface $mock) use ($dealers) {
                 $mock->shouldReceive('withChunkSize')->with(80)->once()->andReturn($mock);
                 $mock->shouldReceive('withDelayChunkThreshold')->with(100)->once()->andReturn($mock);
                 $mock->shouldReceive('withDelay')->with(15)->once()->andReturn($mock);
@@ -39,6 +38,7 @@ class IndexDealerPartsToESTest extends TestCase
                 $mock->shouldReceive('withOnDispatchedJobs')->once()->andReturn($mock);
                 $mock->shouldReceive('withOnDispatchedExceedingThreshold')->once()->andReturn($mock);
 
+                // We make sure that the execute method got called once for each dealer id
                 foreach (range(0, count($dealers) - 1) as $index) {
                     $mock->shouldReceive('execute')->with(Mockery::on(function (User $dealer) use ($dealers, $index) {
                         return $dealer->dealer_id === $dealers->get($index)->dealer_id;
