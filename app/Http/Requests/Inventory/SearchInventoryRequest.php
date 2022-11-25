@@ -20,25 +20,16 @@ use App\Services\ElasticSearch\Inventory\Parameters\Geolocation\GeolocationInter
  */
 class SearchInventoryRequest extends Request
 {
-    protected $rules = [
-        'per_page' => 'integer|min:1|max:100',
-        'page' => ['integer', 'min:0'],
-        'classifieds_site' => 'boolean',
-        'geolocation' => ['required', 'string'], // @todo we should add a regex validation here
-    ];
+//    protected $rules = [
+//        'pagination.per_page' => 'integer|min:1|max:100',
+//        'pagination.page' => ['integer', 'min:0'],
+//        'classifieds_site' => 'boolean',
+//        'geolocation' => ['required', 'string'], // @todo we should add a regex validation here
+//    ];
 
     public function terms(): array
     {
-        return collect($this->all())->except([
-            'sort',
-            'page',
-            'per_page',
-            'offset',
-            'dealerId',
-            'geolocation',
-            'x_qa_req',
-            'in_random_order'
-        ])->toArray();
+        return $this->filters;
     }
 
     public function dealerIds(): DealerId

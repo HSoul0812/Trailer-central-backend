@@ -2,12 +2,8 @@
 
 namespace App\Services\ElasticSearch\Inventory\Builders;
 
-/**
- * Builds a proper ES query for a search by keyword, they should be provided as follows:
- *   - keyword=some text to search
- *   - keyword=description|some text to search: where `description` is ignored from the search list
- *   - keyword=description|model|some text to search: ignore description & model
- */
+use App\Services\ElasticSearch\Inventory\Parameters\Filters\Field;
+
 class SearchQueryBuilder implements FieldQueryBuilderInterface
 {
     /** @var string */
@@ -52,7 +48,7 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
         'featureList.floorPlan' => 'featureList.floorPlan.txt^0.5',
     ];
 
-    public function __construct(string $field, string $data)
+    public function __construct(Field $field)
     {
         $this->field = $field;
 
@@ -76,7 +72,7 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
                     $columnValues = explode('^', $column);
 
                     if (isset($columnValues[$boostKey = 1])) {
-                        $boost = max(self::MINIMUM_BOOST, (float) $columnValues[$boostKey]);
+                        $boost = max(self::MINIMUM_BOOST, (float)$columnValues[$boostKey]);
                     }
 
                     $shouldQuery[] = $this->matchQuery($columnValues[0], $boost);

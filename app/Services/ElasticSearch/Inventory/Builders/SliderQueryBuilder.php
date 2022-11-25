@@ -2,75 +2,85 @@
 
 namespace App\Services\ElasticSearch\Inventory\Builders;
 
-/**
- * Builds a proper ES query for a range, they should be provided as follows:
- *   - existingPrice=7000: which is a range between 7000 and infinite
- *   - existingPrice=:9000 which is a range between 0 and 900
- *   - existingPrice=7000:9000 which is a range between 7000 and 9000
- */
+use App\Services\ElasticSearch\Inventory\Parameters\Filters\Field;
+use App\Services\ElasticSearch\Inventory\Parameters\Filters\Term;
+
 class SliderQueryBuilder implements FieldQueryBuilderInterface
 {
-    private const DELIMITER = ':';
-
-    /** @var float */
-    private $min;
-
-    /** @var float */
-    private $max;
-
-    /** @var string */
+    /** @var Field */
     private $field;
 
-    public function __construct(string $field, string $data)
+    /** @var array */
+    private $query = [];
+
+    public function __construct(Field $field)
     {
         $this->field = $field;
-        $parts = explode(self::DELIMITER, $data);
-
-        $this->min = $parts[0] ?? 0;
-        $this->max = $parts[1] ?? 0;
     }
 
-    public function query(): array
+    /**
+     * @return array
+     */
+    public function globalQuery(): array
     {
-        $range = $this->getRangeTerm();
-
-        switch ($this->field) {
-            // if we would need to handle edges cases, then we need to handle here
-            default:
-                $boolQuery = [
+        $this->field->getTerms()->each(function (Term $term) {
+            $this->appendToQuery([
+                'query' => [
                     'bool' => [
-                        'filter' => [
+                        'must' => [
                             [
-                                'range' => [
-                                    $this->field => $range
+                                'bool' => [
+                                    $term->getESOperatorKeyword() => [
+                                        [
+                                            'range' => [
+                                                $this->field->getName() => $term->getValues()[0]
+                                            ]
+                                        ]
+                                    ]
                                 ]
                             ]
                         ]
                     ]
-                ];
-
-                return [
-                    'post_filter' => $boolQuery,
-                    'aggregations' => [
-                        'filter_aggregations' => ['filter' => $boolQuery],
-                        'selected_location_aggregations' => ['filter' => $boolQuery]
-                    ]
-                ];
-        }
+                ]
+            ]);
+        });
+        return $this->query;
     }
 
-    public function getRangeTerm(): array
+    /**
+     * @return array
+     */
+    public function generalQuery(): array
     {
-        $range = [];
+        $this->field->getTerms()->each(function (Term $term) {
+            $boolQuery = [
+                'bool' => [
+                    'filter' => [
+                        [
+                            'range' => [
+                                $this->field->getName() => $term->getValues()[0]
+                            ]
+                        ]
+                    ]
+                ]
+            ];
+            $this->appendToQuery([
+                'post_filter' => $boolQuery,
+                'aggregations' => [
+                    'filter_aggregations' => ['filter' => $boolQuery],
+                    'selected_location_aggregations' => ['filter' => $boolQuery]
+                ]
+            ]);
+        });
+        return $this->query;
+    }
 
-        if ($this->min) {
-            $range['gte'] = $this->min;
-        }
-
-        if ($this->max) {
-            $range['lte'] = $this->max;
-        }
-
-        return $range;
+    /**
+     * @param array $query
+     * @return void
+     */
+    private function appendToQuery(array $query)
+    {
+        $this->query = array_merge_recursive($this->query, $query);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Services\ElasticSearch\Inventory\Builders;
 
 use App\Models\Inventory\Inventory;
+use App\Services\ElasticSearch\Inventory\Parameters\Filters\Field;
 use Illuminate\Support\Str;
 
 /**
@@ -37,7 +38,7 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
      * @param string $field
      * @param string $data
      */
-    public function __construct(string $field, string $data)
+    public function __construct(Field $field)
     {
         $this->field = $field;
         $this->data = $data;
@@ -325,5 +326,15 @@ doc['status'].value != 2 && doc['dealer.name'].value != 'Operate Beyond'";
             }
         }
         return [];
+    }
+
+    public function globalQuery(): array
+    {
+        // TODO: Implement globalQuery() method.
+    }
+
+    public function generalQuery(): array
+    {
+        // TODO: Implement generalQuery() method.
     }
 }
