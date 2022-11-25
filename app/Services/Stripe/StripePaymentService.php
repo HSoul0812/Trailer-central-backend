@@ -22,6 +22,11 @@ class StripePaymentService implements StripePaymentServiceInterface
     const STRIPE_FAILURE_URL = '/cancel';
     const CHECKOUT_SESSION_COMPLETED_EVENT = 'checkout.session.completed';
 
+    const PRICES = [
+        'tt30' => 75.00,
+        'tt60' => 100.00,
+    ];
+
     public function __construct(
         private PaymentLogRepositoryInterface $paymentLogRepository,
         private InventoryServiceInterface     $inventoryService
@@ -30,14 +35,47 @@ class StripePaymentService implements StripePaymentServiceInterface
         Stripe::setApiKey(config('services.stripe.secret_key'));
     }
 
+    /**
+     * Parses a number, then returns the same number but without decimals separator, just like Stripe requires it
+     * e.g. 123.44 -> 12344
+     *      120 -> 12000
+     *      120.0 -> 12000
+     *      5.0 -> 500
+     *
+     * @param numeric $number
+     * @return int
+     */
+    private function numberToStripeFormat($number): int
+    {
+        $numberWithTwoDecimals = number_format((float)$number, 2, '.', '');
+
+        return (int)str_replace('.', '', $numberWithTwoDecimals);
+    }
+
     public function createCheckoutSession(string $priceItem, array $metadata = []): Redirector|Application|RedirectResponse
     {
         $siteUrl = config('app.site_url');
+
+        $planPrice = self::PRICES[$priceItem];
+
+        $product = \Stripe\Product::create([
+            'name' => $priceItem
+        ]);
+
+        $priceObj = \Stripe\Price::create([
+            "billing_scheme" => "per_unit",
+            "currency" => "usd",
+            "product" => $product->id,
+            "unit_amount" => $this->numberToStripeFormat($planPrice),
+        ]);
+
+        $priceObjects[] = [
+            'price' => $priceObj->id,
+            'quantity' => 1,
+        ];
+
         $checkout_session = Session::create([
-            'line_items' => [[
-                'price' => "$priceItem",
-                'quantity' => 1
-            ]],
+            'line_items' => $priceObjects,
             'client_reference_id' => 'tt' . Str::uuid(),
             'metadata' => $metadata,
             'mode' => 'payment',
