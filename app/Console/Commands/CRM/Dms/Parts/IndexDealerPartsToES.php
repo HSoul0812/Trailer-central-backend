@@ -29,7 +29,7 @@ class IndexDealerPartsToES extends Command
         $dealers = $this->getDealers();
 
         if (empty($dealers)) {
-            $this->error("No valid dealers to process! terminating the script now, have a good day!");
+            $this->info("No valid dealers to process! terminating the script now, have a good day! 😃");
             return 1;
         }
 
