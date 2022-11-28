@@ -135,18 +135,21 @@ class InventoryController extends AbstractRestfulController
         );
     }
 
-    public function pay(Request $request, $inventoryId, $planId): Redirector|Application|RedirectResponse
+    public function pay(Request $request, $inventoryId, $planId): Response
     {
         $inventory = $this->inventoryService->show((int)$inventoryId);
         $user = auth('api')->user();
-        if($inventory->dealer['id'] != $user->tc_user_id) {
+        if ($inventory->dealer['id'] != $user->tc_user_id) {
             throw new HttpException(422, "User should be owner of inventory");
-        } else {
-            return $this->paymentService->createCheckoutSession($planId, [
-                'inventory_id' => $inventoryId,
-                'user_id' => $user->tc_user_id
-            ]);
         }
+
+        $url = $this->paymentService->createCheckoutSession($planId, [
+            'inventory_title' => $inventory->inventory_title,
+            'inventory_id' => $inventory->id,
+            'user_id' => $user->tc_user_id
+        ]);
+
+        return new Response(['url' => $url]);
     }
 
     protected function constructRequestBindings(): void

@@ -16,8 +16,20 @@ use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 
 class StripePaymentService implements StripePaymentServiceInterface
 {
-    const STRIPE_SUCCESS_URL = '/success';
-    const STRIPE_FAILURE_URL = '/cancel';
+    const STRIPE_SUCCESS_URL = '/{id}/?payment_status=success';
+    const STRIPE_FAILURE_URL = '/{id}/?payment_status=failed';
+    const CHECKOUT_SESSION_COMPLETED_EVENT = 'checkout.session.completed';
+
+    const PRICES = [
+        'tt30' => [
+            'price' => 75.00,
+            'name' => '30 day plan for publishing your listing titled {title} on TrailerTrader.com'
+        ],
+        'tt60' => [
+            'price' => 100.00,
+            'name' => '600 day plan for publishing your listing titled {title} on TrailerTrader.com'
+        ],
+    ];
 
     public function __construct(
         private PaymentLogRepositoryInterface $paymentLogRepository,
@@ -29,6 +41,33 @@ class StripePaymentService implements StripePaymentServiceInterface
     public function createCheckoutSession(string $priceItem, array $metadata=[]): Redirector|Application|RedirectResponse
     {
         $siteUrl = config('app.site_url');
+
+        $inventoryTitle = $metadata['inventory_title'];
+        $inventoryId = $metadata['inventory_id'];
+
+        $planPrice = self::PRICES[$priceItem]['price'];
+        $planName = self::PRICES[$priceItem]['name'];
+        $planName = str_replace('{title}', $inventoryTitle, $planName);
+
+        $product = \Stripe\Product::create([
+            'name' => $planName
+        ]);
+
+        $priceObj = \Stripe\Price::create([
+            "billing_scheme" => "per_unit",
+            "currency" => "usd",
+            "product" => $product->id,
+            "unit_amount" => $this->numberToStripeFormat($planPrice),
+        ]);
+
+        $priceObjects[] = [
+            'price' => $priceObj->id,
+            'quantity' => 1,
+        ];
+
+        $successUrl = str_replace('{id}', $inventoryId, self::STRIPE_SUCCESS_URL);
+        $failUrl = str_replace('{id}', $inventoryId, self::STRIPE_FAILURE_URL);
+
         $checkout_session = Session::create([
             'line_items' => [[
                 'price' => "$priceItem",
@@ -37,8 +76,8 @@ class StripePaymentService implements StripePaymentServiceInterface
             'client_reference_id' => 'tt' . uuid_create(),
             'metadata' => $metadata,
             'mode' => 'payment',
-            'success_url' => $siteUrl . self::STRIPE_SUCCESS_URL,
-            'cancel_url' => $siteUrl . self::STRIPE_FAILURE_URL,
+            'success_url' => $siteUrl .$successUrl,
+            'cancel_url' => $siteUrl . $failUrl,
         ]);
         return redirect($checkout_session->url);
     }
