@@ -22,6 +22,12 @@ class QueryBuilder implements InventoryQueryBuilderInterface
     private const AGGREGATION_SIZE = 200;
 
     private $aggregations = [
+        'status' => [
+            'terms' => [
+                'field' => 'status',
+                'size' => self::AGGREGATION_SIZE
+            ]
+        ],
         'dry_weight' => [
             'terms' => [
                 'field' => 'dryWeight',
@@ -37,12 +43,6 @@ class QueryBuilder implements InventoryQueryBuilderInterface
         'gvwr' => [
             'terms' => [
                 'field' => 'gvwr',
-                'size' => self::AGGREGATION_SIZE
-            ]
-        ],
-        'fuel_capacity' => [
-            'terms' => [
-                'field' => 'fuelCapacity',
                 'size' => self::AGGREGATION_SIZE
             ]
         ],
