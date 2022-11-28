@@ -24,6 +24,7 @@ use App\Repositories\CRM\Email\BounceRepositoryInterface;
 use App\Repositories\CRM\Email\CampaignRepositoryInterface;
 use App\Repositories\CRM\Email\TemplateRepositoryInterface;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
+use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\User\SalesPersonRepositoryInterface;
 use App\Repositories\CRM\Interactions\InteractionsRepositoryInterface;
 use App\Repositories\CRM\Interactions\EmailHistoryRepositoryInterface;
@@ -132,6 +133,11 @@ class EmailBuilderServiceTest extends TestCase
     private $campaignRepositoryMock;
 
     /**
+     * @var LegacyMockInterface|StatusRepositoryInterface
+     */
+    private $statusRepositoryMock;
+
+    /**
      * @var LegacyMockInterface|TemplateRepositoryInterface
      */
     private $templateRepositoryMock;
@@ -211,6 +217,9 @@ class EmailBuilderServiceTest extends TestCase
         $this->campaignRepositoryMock = Mockery::mock(CampaignRepositoryInterface::class);
         $this->app->instance(CampaignRepositoryInterface::class, $this->campaignRepositoryMock);
 
+        $this->statusRepositoryMock = Mockery::mock(StatusRepositoryInterface::class);
+        $this->app->instance(StatusRepositoryInterface::class, $this->statusRepositoryMock);
+
         $this->templateRepositoryMock = Mockery::mock(TemplateRepositoryInterface::class);
         $this->app->instance(TemplateRepositoryInterface::class, $this->templateRepositoryMock);
 
@@ -252,6 +261,7 @@ class EmailBuilderServiceTest extends TestCase
 
         $this->emailBuilderServiceMock = Mockery::mock(EmailBuilderService::class, [
             $this->blastRepositoryMock,
+            $this->statusRepositoryMock,
             $this->campaignRepositoryMock,
             $this->templateRepositoryMock,
             $this->bounceRepositoryMock,
@@ -1391,6 +1401,17 @@ class EmailBuilderServiceTest extends TestCase
             ->shouldReceive('markEmailSent')
             ->with($parsedEmail)
             ->once();
+
+        $this->statusRepositoryMock
+            ->shouldReceive('createOrUpdate')
+            ->withAnyArgs();
+
+        $firstLead->shouldReceive('leadStatus')->passthru();
+        $firstLead->shouldReceive('hasOne')->passthru();
+        $firstLead->shouldReceive('setRelation')->passthru();
+        $secondLead->shouldReceive('leadStatus')->passthru();
+        $secondLead->shouldReceive('hasOne')->passthru();
+        $secondLead->shouldReceive('setRelation')->passthru();
 
         $result = $this->emailBuilderServiceMock->sendEmails($builderEmail, $leadIds);
 

@@ -9,12 +9,19 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Storage;
 
-
 /**
  * Class BulkUploadRepository
  * @params App\Repositories\Bulk\Inventory
  */
-class BulkUploadRepository implements BulkUploadRepositoryInterface {
+class BulkUploadRepository implements BulkUploadRepositoryInterface
+{
+    /** @var BulkUpload */
+    private $model;
+
+    public function __construct(BulkUpload $bulkUpload)
+    {
+        $this->model = $bulkUpload;
+    }
 
     /**
      * @param $params
@@ -24,10 +31,10 @@ class BulkUploadRepository implements BulkUploadRepositoryInterface {
     {
         $csvKey = $this->storeCsv($params['csv_file']);
 
-        $params['status'] = BulkUpload::PROCESSING;
+        $params['status'] = $this->model::PROCESSING;
         $params['import_source'] = $csvKey;
 
-        $bulkUpload = BulkUpload::create($params);
+        $bulkUpload = $this->model::create($params);
         dispatch((new ProcessBulkUpload($bulkUpload->id))->onQueue('inventory'));
 
         return $bulkUpload;
@@ -37,7 +44,8 @@ class BulkUploadRepository implements BulkUploadRepositoryInterface {
      * @param $params
      * @return mixed
      */
-    public function delete($params) {
+    public function delete($params)
+    {
         throw new NotImplementedException;
     }
 
@@ -45,8 +53,9 @@ class BulkUploadRepository implements BulkUploadRepositoryInterface {
      * @param $params
      * @return \App\Models\Bulk\Parts\BulkUpload|Builder|null
      */
-    public function get($params): BulkUpload {
-        return BulkUpload::where(array_key_first($params), current($params))->first();
+    public function get($params): BulkUpload
+    {
+        return $this->model::where(array_key_first($params), current($params))->first();
     }
 
     /**
@@ -59,15 +68,16 @@ class BulkUploadRepository implements BulkUploadRepositoryInterface {
             $params['per_page'] = 100;
         }
 
-        return BulkUpload::where('dealer_id', $params['dealer_id'])->paginate($params['per_page'])->appends($params);
+        return $this->model::where('dealer_id', $params['dealer_id'])->paginate($params['per_page'])->appends($params);
     }
 
     /**
      * @param $params
      * @return mixed
      */
-    public function update($params) {
-        $bulkUpload = BulkUpload::findOrFail($params['id']);
+    public function update($params)
+    {
+        $bulkUpload = $this->model::findOrFail($params['id']);
         $bulkUpload->fill($params);
         return $bulkUpload->save();
     }
@@ -78,8 +88,11 @@ class BulkUploadRepository implements BulkUploadRepositoryInterface {
      * @param $file
      * @return string
      */
-    private function storeCsv($file): string {
-        $fileKey = Storage::disk('s3')->putFile(uniqid().'/'.$file->getClientOriginalName(), $file, 'public');
-        return $fileKey;
+    private function storeCsv($file): string
+    {
+        return Storage::disk('s3')->putFile(
+            uniqid() . '/' . $file->getClientOriginalName(),
+            $file, config('filesystems.disks.s3.visibility')
+        );
     }
 }

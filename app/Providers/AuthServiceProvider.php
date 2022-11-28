@@ -12,7 +12,9 @@ use App\Models\Feed\Feed;
 use App\Models\Feed\Mapping\Incoming\ApiEntityReference;
 use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping;
 use App\Models\Feed\Mapping\Incoming\DealerIncomingPendingMapping;
+use App\Models\Feed\TransactionExecuteQueue;
 use App\Models\Integration\Collector\Collector;
+use App\Models\Integration\Collector\CollectorChangeReport;
 use App\Models\Inventory\Category;
 use App\Models\Inventory\EntityType;
 use App\Models\Inventory\Inventory;
@@ -29,6 +31,7 @@ use App\Models\Website\Forms\FieldMap;
 use App\Models\Website\Website;
 use App\Nova\Policies\ApiEntityReferencePolicy;
 use App\Nova\Policies\BalancePolicy;
+use App\Nova\Policies\CollectorChangeReportPolicy;
 use App\Nova\Policies\CollectorPolicy;
 use App\Nova\Policies\DealerPolicy;
 use App\Nova\Policies\FeedPolicy;
@@ -55,6 +58,7 @@ use App\Nova\Policies\PermissionPolicy;
 use App\Nova\Policies\QuickbookApprovalPolicy;
 use App\Nova\Policies\RolePolicy;
 use App\Nova\Policies\ShowroomGenericMapPolicy;
+use App\Nova\Policies\TransactionExecuteQueuePolicy;
 use App\Nova\Policies\UserPolicy;
 use App\Nova\Policies\WebsiteFormsPolicy;
 use App\Nova\Policies\WebsitePolicy;
@@ -101,7 +105,9 @@ class AuthServiceProvider extends ServiceProvider
         ShowroomGenericMap::class => ShowroomGenericMapPolicy::class,
         Website::class => WebsitePolicy::class,
         Role::class => RolePolicy::class,
-        Permission::class => PermissionPolicy::class
+        Permission::class => PermissionPolicy::class,
+        CollectorChangeReport::class => CollectorChangeReportPolicy::class,
+        TransactionExecuteQueue::class => TransactionExecuteQueuePolicy::class
     ];
 
     /**

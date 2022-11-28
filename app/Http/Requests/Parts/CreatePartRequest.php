@@ -52,7 +52,8 @@ class CreatePartRequest extends Request {
             'bins.*.bin_id' => 'required|integer',
             'bins.*.quantity' => 'required|numeric',
             'bins.*.old_quantity' => 'numeric',
-            'is_sublet_specific' => 'integer'
+            'is_sublet_specific' => 'integer',
+            'is_active' => 'boolean',
         ];
     }
 

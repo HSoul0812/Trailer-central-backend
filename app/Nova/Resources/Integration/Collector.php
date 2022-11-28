@@ -274,7 +274,7 @@ class Collector extends Resource
                 Boolean::make('Use Secondary Image', 'use_secondary_image')->hideFromIndex()->help(
                     'Images in the file are marked as secondary'
                 ),
-                Boolean::make('Append Floorplan Image', 'append_floorplan_image')->withMeta(['value' => $this->active ?? true])->hideFromIndex(),
+                Boolean::make('Append Floorplan Image', 'append_floorplan_image')->hideFromIndex(),
                 Heading::make('<p class="text-primary"">Video Section</p>')->asHtml(),
                 Text::make('Video Source Fields', 'video_source_fields')->hideFromIndex()->help(
                     'Please Add with <strong>, separated values without spaces!</strong> all the source file fields that are related to <code>video_embed_code</code><br />
@@ -336,7 +336,9 @@ class Collector extends Resource
                 Boolean::make('Show On Auction 123', 'show_on_auction123')->hideFromIndex(),
             ]),
 
-            HasMany::make('Specifications', 'specifications', CollectorSpecification::class)
+            HasMany::make('Specifications', 'specifications', CollectorSpecification::class),
+
+            HasMany::make('Change Reports', 'collectorChangeReports', CollectorChangeReport::class)
         ];
     }
 
