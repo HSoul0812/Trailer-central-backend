@@ -277,7 +277,8 @@ class QueryBuilder implements InventoryQueryBuilderInterface
         $query = [];
 
         foreach ($terms as $term) {
-            $query = $this->appendQueryTo($query)($term);
+            $filter = Filter::fromArray($term);
+            $query = $this->appendQueryTo($query)($filter);
         }
 
         $this->query = array_merge_recursive($query, $this->query);
@@ -326,6 +327,11 @@ class QueryBuilder implements InventoryQueryBuilderInterface
         if (isset($sort['numFeatures'])) {
             $this->addNumFeaturesSortScript($sort['numFeatures']);
             unset($sort['numFeatures']);
+        }
+
+        if (isset($sort['tt_sort'])) {
+            $this->inRandomOrder();
+            unset($sort['tt_sort']);
         }
 
         return $sort;
@@ -546,27 +552,19 @@ class QueryBuilder implements InventoryQueryBuilderInterface
         ], $this->query);
     }
 
-    /**
-     * @param bool $random
-     * @return QueryBuilderInterface
-     */
-    public function inRandomOrder(bool $random): QueryBuilderInterface
+    public function inRandomOrder(): void
     {
-        if ($random) {
-            $this->query['query'] = [
-                'function_score' => [
-                    'query' => $this->query['query'],
-                    "functions" => [
-                        [
-                            "random_score" => new \stdClass(),
-                        ]
-                    ],
-                    "score_mode" => "sum",
-                    "boost_mode" => "replace",
-                ]
-            ];
-        }
-
-        return $this;
+        $this->query['query'] = [
+            'function_score' => [
+                'query' => $this->query['query'],
+                "functions" => [
+                    [
+                        "random_score" => new \stdClass(),
+                    ]
+                ],
+                "score_mode" => "sum",
+                "boost_mode" => "replace",
+            ]
+        ];
     }
 }

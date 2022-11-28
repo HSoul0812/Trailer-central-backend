@@ -17,7 +17,5 @@ interface QueryBuilderInterface
 
     public function addPagination(array $pagination): self;
 
-    public function inRandomOrder(bool $random): self;
-
     public function toArray(): array;
 }

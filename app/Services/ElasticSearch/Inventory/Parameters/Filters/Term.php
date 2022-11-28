@@ -20,7 +20,7 @@ class Term
     private const OPERATOR_EQ = 'eq';
 
     /** @var string */
-    private const OPERATOR_NEQ = 'eq';
+    private const OPERATOR_NEQ = 'neq';
 
     /**
      * @param string $operator

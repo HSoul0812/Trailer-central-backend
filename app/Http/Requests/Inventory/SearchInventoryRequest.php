@@ -14,8 +14,6 @@ use App\Services\ElasticSearch\Inventory\Parameters\Geolocation\GeolocationInter
  * @property int $per_page
  * @property int $offset
  * @property int $x_qa_req
- * @property int $in_random_order
- * @property string $geolocation
  * @property boolean $classifieds_site
  */
 class SearchInventoryRequest extends Request
@@ -29,7 +27,7 @@ class SearchInventoryRequest extends Request
 
     public function terms(): array
     {
-        return $this->filters;
+        return $this->json('filter_groups');
     }
 
     public function dealerIds(): DealerId
@@ -39,7 +37,8 @@ class SearchInventoryRequest extends Request
 
     public function sort(): array
     {
-        return $this->sort ? collect($this->sort)->mapWithKeys(function ($term) {
+        $sort = $this->json('sort');
+        return $sort ? collect($sort)->mapWithKeys(function ($term) {
             return [$term['field'] => $term['order']];
         })->toArray() : [];
     }
@@ -70,28 +69,11 @@ class SearchInventoryRequest extends Request
 
     public function geolocation(): GeolocationInterface
     {
-        return Geolocation::fromString($this->geolocation ?? '');
+        return Geolocation::fromArray($this->json('geolocation'));
     }
 
     public function getESQuery(): bool
     {
         return $this->json('debug.x_qa_req');
-    }
-
-    public function inRandomOrder(): bool
-    {
-        return (int)$this->in_random_order === 1;
-    }
-
-    public function all($keys = null): array
-    {
-        $all = parent::all($keys);
-
-        // default values got through `all` method
-        if ($keys === null || in_array('classifieds_site', $keys)) {
-            $all['classifieds_site'] = $this->input('classifieds_site', false);
-        }
-
-        return $all;
     }
 }

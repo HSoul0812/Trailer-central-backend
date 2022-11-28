@@ -482,7 +482,6 @@ class InventoryController extends RestfulControllerV2
         if ($searchRequest->validate()) {
 
             $result = $this->inventoryElasticSearchService->search(
-                $searchRequest->inRandomOrder(),
                 $searchRequest->dealerIds(),
                 $searchRequest->terms(),
                 $searchRequest->geolocation(),

@@ -33,7 +33,7 @@ class SliderQueryBuilder implements FieldQueryBuilderInterface
                                     $term->getESOperatorKeyword() => [
                                         [
                                             'range' => [
-                                                $this->field->getName() => $term->getValues()[0]
+                                                $this->field->getName() => $term->getValues()
                                             ]
                                         ]
                                     ]
@@ -58,7 +58,7 @@ class SliderQueryBuilder implements FieldQueryBuilderInterface
                     'filter' => [
                         [
                             'range' => [
-                                $this->field->getName() => $term->getValues()[0]
+                                $this->field->getName() => $term->getValues()
                             ]
                         ]
                     ]

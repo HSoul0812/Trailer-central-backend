@@ -2,14 +2,10 @@
 
 namespace App\Services\ElasticSearch\Inventory\Parameters\Geolocation;
 
-use App\Exceptions\ElasticSearch\InvalidRequestException;
 use App\Models\Inventory\Geolocation\Point;
 
 class Geolocation implements GeolocationInterface
 {
-    private const DELIMITER_OPTION = ';';
-    private const DELIMITER_VALUE = ':';
-
     /** @var float */
     private $lat;
 
@@ -23,44 +19,23 @@ class Geolocation implements GeolocationInterface
     }
 
     /**
-     * @param  string  $string  a string like `lat:lon`
+     * @param array $data
      * @return static
      */
-    public static function fromString(string $string): self
+    public static function fromArray(array $data): self
     {
-        $parts = collect(array_filter(explode(self::DELIMITER_OPTION, $string)));
-
-        $partsNumber = $parts->count();
-
-        if ($partsNumber === 0) {
-            throw new InvalidRequestException("'geolocation' parameter is wrong.");
+        $lat = $data['lat'];
+        $lon = $data['lon'];
+        
+        if ($grouping = $data['grouping']) {
+            return new ScatteredGeolocation($lat, $lon, $grouping);
         }
 
-        [$lat, $lon] = explode(self::DELIMITER_VALUE, $parts->first());
-
-        try {
-            $parts = $parts->forget(0)->map(static function (string $part): array {
-                [$option, $value] = explode(self::DELIMITER_VALUE, $part);
-
-                return ['option' => $option, 'value' => $value];
-            })->pluck('value', 'option');
-
-            $range = $parts->get('range');
-            $units = $parts->get('units');
-            $scattered = $parts->get('scattered');
-
-            if ($scattered) {
-                return new ScatteredGeolocation($lat, $lon, $scattered);
-            }
-
-            if ($range) {
-                return new GeolocationRange($lat, $lon, $range, $units ?? GeolocationRange::UNITS_MILES);
-            }
-
-            return new Geolocation($lat, $lon);
-        } catch (\Exception $exception) {
-            throw new InvalidRequestException("'geolocation' parameter is wrong.");
+        if ($range = $data['range']) {
+            return new GeolocationRange($lat, $lon, $range, $data['units'] ?? GeolocationRange::UNITS_MILES);
         }
+
+        return new Geolocation($lat, $lon);
     }
 
     public function lat(): float
