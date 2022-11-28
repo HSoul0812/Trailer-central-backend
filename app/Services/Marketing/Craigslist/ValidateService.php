@@ -156,8 +156,8 @@ class ValidateService implements ValidateServiceInterface
     /**
      * Recover Messages From Accounts Active and w/Warnings
      * 
-     * @param array<ClientValidate> $active
-     * @param array<ClientValidate> $warnings
+     * @param array<string: array<ClientValidate>> $active
+     * @param array<string: array<ClientValidate>> $warnings
      * @return Collection<ClientMessage>
      */
     private function messages(array $active, array $warnings): Collection {
