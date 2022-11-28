@@ -6,10 +6,10 @@ use App\Models\Inventory\Attribute;
 use App\Models\Inventory\Category;
 use App\Models\Inventory\EntityType;
 use App\Models\Inventory\Inventory;
+use App\Models\Inventory\InventoryMfg;
+use App\Models\Inventory\Manufacturers\Brand;
 use App\Models\Inventory\Status;
-use App\Models\User\DealerLocation;
 use App\Nova\Filters\Integration\IncomingMappingsTypeFilter;
-use App\Nova\Resources\Dealer\Dealer;
 use Epartment\NovaDependencyContainer\HasDependencies;
 use Epartment\NovaDependencyContainer\NovaDependencyContainer;
 use Illuminate\Http\Request;
@@ -21,6 +21,8 @@ use App\Nova\Resource;
 use App\Nova\Filters\DealerIDMapping;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Http\Requests\ResourceIndexRequest;
+
+use App\Nova\Actions\Exports\DealerIncomingMappingExport;
 
 class DealerIncomingMapping extends Resource
 {
@@ -103,8 +105,11 @@ class DealerIncomingMapping extends Resource
                 Text::make('Map To', 'map_to')
             ])->dependsOn('type', FeedDealerIncomingMapping::LOCATION)->onlyOnForms(),
 
-            NovaDependencyContainer::make([Text::make('Map To', 'map_to')->sortable()->rules('required')])
-                ->dependsOn('type', FeedDealerIncomingMapping::BRAND)->onlyOnForms(),
+            NovaDependencyContainer::make([
+                Select::make('Map To', 'map_to')
+                    ->options(Brand::select('name')->orderBy('name')->get()->pluck('name'))
+                    ->rules('required')
+            ])->dependsOn('type', FeedDealerIncomingMapping::BRAND)->onlyOnForms(),
 
             NovaDependencyContainer::make([
                 Select::make('Map To', 'map_to')
@@ -124,16 +129,20 @@ class DealerIncomingMapping extends Resource
                     ->rules('required')
             ])->dependsOn('type', FeedDealerIncomingMapping::CATEGORY)->onlyOnForms(),
 
-            NovaDependencyContainer::make([Text::make('Map To', 'map_to')->sortable()->rules('required')])
-                ->dependsOn('type', FeedDealerIncomingMapping::MAKE)->onlyOnForms(),
+            NovaDependencyContainer::make([
+                Select::make('Map To', 'map_to')
+                    ->options(InventoryMfg::select('label')->orderBy('label')->get()->pluck('label'))
+                    ->rules('required')
+            ])->dependsOn('type', FeedDealerIncomingMapping::MAKE)->onlyOnForms(),
 
             NovaDependencyContainer::make([
-                Text::make('Map To Manufacturer', self::MAP_TO_MANUFACTURER)->sortable()->rules('required')
-            ])->dependsOn('type', FeedDealerIncomingMapping::MANUFACTURER_BRAND)->onlyOnForms(),
-
-            NovaDependencyContainer::make([
-                Text::make('Map To Brand', self::MAP_TO_BRAND)->sortable()->rules('required')
-            ])->dependsOn('type', FeedDealerIncomingMapping::MANUFACTURER_BRAND)->onlyOnForms(),
+                Select::make('Map To', 'map_to')
+                    ->options(InventoryMfg::select('label')->orderBy('label')->get()->pluck('label'))
+                    ->rules('required'),
+                Select::make('Map To', 'map_to')
+                    ->options(Brand::select('name')->orderBy('name')->get()->pluck('name'))
+                    ->rules('required')
+            ])->dependsOn('type', FeedDealerIncomingMapping::MANUFACTURER_BRAND)->onlyOnForms()
         ];
 
         foreach ($attributes as $attribute) {
@@ -221,7 +230,9 @@ class DealerIncomingMapping extends Resource
      */
     public function actions(Request $request)
     {
-        return [];
+        return [
+            (new DealerIncomingMappingExport)->withHeadings()->askForFilename(),
+        ];
     }
 
     /**

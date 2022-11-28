@@ -194,7 +194,7 @@ if ($mileage = optional($inventory['attributes']->where('attribute.code', 'milea
             @endif
         </div>
         <h2 style="border: none" class="inventory-title">
-            {{ $inventory['title'] }}
+            {!! $inventory['title'] !!}
         </h2>
     </div>
     <div class="clear"></div>

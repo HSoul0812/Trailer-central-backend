@@ -22,15 +22,26 @@ class TransactionExecuteQueue extends Model
     protected $primaryKey = 'id';
 
     public $timestamps = false;
-    
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'data' => 'array',
+        'queued_at' => 'datetime',
+        'executed_at' => 'datetime',
+    ];
+
     public const OPERATION_TYPES = [
         self::INSERT_OPERATION_TYPE,
         self::UPDATE_OPERATION_TYPE
     ];
-            
+
     public const INSERT_OPERATION_TYPE = 'insert';
     public const UPDATE_OPERATION_TYPE = 'update';
-    
+
     public const SOURCE_MAPPINGS = [
        'pj' => false,
        'btt' => 'bigtex',

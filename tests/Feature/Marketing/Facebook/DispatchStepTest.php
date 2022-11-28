@@ -3,15 +3,12 @@
 namespace Tests\Feature\Marketing;
 
 use Tests\TestCase;
+use Tests\database\seeds\Marketing\Facebook\MarketplaceSeeder;
 
 
-class FacebookDispatchStepTest extends TestCase
+class DispatchStepTest extends TestCase
 {
     const API_ENDPOINT = '/api/dispatch/facebook/';
-    
-    public function __construct() {
-        parent::__construct();   
-    }
 
     /**
      * @group Marketing
@@ -33,7 +30,10 @@ class FacebookDispatchStepTest extends TestCase
      * @depends testGetToken
      */
     public function testGettingData($fbAccessToken)
-    {                    
+    {
+        // Seed Marketplace Data
+        $this->seeder->seed();
+
         // get initial integration data
         $initialData = $this->withHeaders(['access-token' => $fbAccessToken])
             ->json('GET', self::API_ENDPOINT) 
@@ -112,5 +112,31 @@ class FacebookDispatchStepTest extends TestCase
             ])
             ->assertJsonPath('data.dealers.data.*.integration', $integrationIds)
             ->assertJsonCount(count($integrations), 'data.dealers.data.*');
+    }
+
+
+    /**
+     * Set Up Seeder
+     * 
+     * @return void
+     */
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        // Make Profile Seeder
+        $this->seeder = new MarketplaceSeeder();
+    }
+
+    /**
+     * Tear Down Seeder
+     * 
+     * @return void
+     */
+    public function tearDown(): void
+    {
+        $this->seeder->cleanUp();
+
+        parent::tearDown();
     }
 }

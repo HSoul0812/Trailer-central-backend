@@ -15,6 +15,7 @@ use App\Models\User\NewUser;
 use App\Models\User\NewDealerUser;
 use App\Models\User\DealerLocation;
 use App\Models\Website\Website;
+use App\Repositories\User\NewDealerUserRepositoryInterface;
 use App\Traits\WithGetter;
 use Tests\database\seeds\Seeder;
 
@@ -34,6 +35,11 @@ class AutoAssignSeeder extends Seeder
      * @var User
      */
     private $dealer;
+
+    /**
+     * @var NewUser
+     */
+    private $user;
 
     /**
      * @var DealerLocation
@@ -89,9 +95,17 @@ class AutoAssignSeeder extends Seeder
             'user_type' => AuthToken::USER_TYPE_DEALER,
         ]);
         $this->website = factory(Website::class)->create(['dealer_id' => $this->dealer->dealer_id]);
-        $this->user = factory(NewUser::class)->create(['user_id' => $this->dealer->dealer_id]);
-        $this->newDealer = factory(NewDealerUser::class)->create(['id' => $this->dealer->dealer_id, 'user_id' => $this->dealer->dealer_id]);
-        $this->crmUser = factory(CrmUser::class)->create(['user_id' => $this->dealer->dealer_id, 'enable_assign_notification' => 1]);
+        $this->user = factory(NewUser::class)->create();
+        $this->crmUser = factory(CrmUser::class)->create(['user_id' => $this->user->getKey(), 'enable_assign_notification' => 1]);
+        $newDealerUserRepo = app(NewDealerUserRepositoryInterface::class);
+        $this->newDealer = $newDealerUserRepo->create([
+            'user_id' => $this->user->user_id,
+            'salt' => md5((string)$this->user->user_id),
+            'auto_import_hide' => 0,
+            'auto_msrp' => 0
+
+        ]);
+        $this->dealer->newDealerUser()->save($this->newDealer);
     }
 
     public function enableEmail($enabled = 1): void {
@@ -196,7 +210,7 @@ class AutoAssignSeeder extends Seeder
     private function sales($seeds): void {
         // Initialize Sales People Seeds
         $params = [
-            'user_id' => $this->dealer->getKey(),
+            'user_id' => $this->user->getKey(),
             'dealer_location_id' => $this->location->getKey(),
             'is_default' => 1,
             'is_inventory' => 1,
@@ -212,6 +226,7 @@ class AutoAssignSeeder extends Seeder
     public function cleanUp(): void
     {
         $dealerId = $this->dealer->getKey();
+        $userId = $this->user->getKey();
 
         // Database clean up
         if(!empty($this->leads) && count($this->leads)) {
@@ -223,10 +238,12 @@ class AutoAssignSeeder extends Seeder
         }
         LeadAssign::where(['dealer_id' => $dealerId])->delete();
 
+        // Clear Out CRM User
+        SalesPerson::where(['user_id' => $userId])->delete();
+        NewUser::where(['user_id' => $userId])->delete();
+        CrmUser::destroy($userId);
+
         // Clear Out User Data
-        SalesPerson::where(['user_id' => $dealerId])->delete();
-        CrmUser::destroy($dealerId);
-        NewUser::destroy($dealerId);
         DealerLocation::where('dealer_id', $dealerId)->delete();
         Website::where('dealer_id', $dealerId)->delete();
         AuthToken::where(['user_id' => $this->authToken->user_id, 'user_type' => AuthToken::USER_TYPE_DEALER])->delete();
