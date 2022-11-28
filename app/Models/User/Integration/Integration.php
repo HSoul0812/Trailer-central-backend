@@ -64,6 +64,13 @@ class Integration extends Model implements Authenticatable, PermissionsInterface
     public function getRememberTokenName() {}
 
     /**
+     * {@inheritDoc}
+     * This method and table not have Dealer Id we decide return null
+     * to avoid any broken message
+     */
+    public function getDealerId(): ?int { return null; }
+
+    /**
      * @return HasMany
      */
     public function perms(): HasMany
