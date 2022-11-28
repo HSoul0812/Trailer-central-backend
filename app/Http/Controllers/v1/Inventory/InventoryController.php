@@ -23,6 +23,7 @@ use App\Transformers\Inventory\TcApiResponseInventoryDeleteTransformer;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Carbon;
@@ -38,7 +39,7 @@ class InventoryController extends AbstractRestfulController
         private InventoryServiceInterface         $inventoryService,
         private InventorySDKServiceInterface      $inventorySDKService,
         private TcApiResponseInventoryTransformer $transformer,
-        private StripePaymentServiceInterface $paymentService
+        private StripePaymentServiceInterface     $paymentService
     )
     {
         parent::__construct();

@@ -23,11 +23,11 @@ class CheckInventorySubscriptionsCommand extends Command
         parent::__construct();
     }
 
-    public function handle() {
+    public function handle()
+    {
         $this->logger->info("[CheckInventorySubscriptionsCommand] starting $this->signature ...");
         $this->info('Checking inventory subscriptions');
         $this->inventoryService->checkSubscriptions();
         $this->info('Finished checking inventory subscriptions');
-
     }
 }

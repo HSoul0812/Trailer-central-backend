@@ -8,6 +8,7 @@ use Illuminate\Routing\Redirector;
 
 interface StripePaymentServiceInterface
 {
-    public function createCheckoutSession(string $priceItem, array $metadata=[]):Redirector|Application|RedirectResponse;
+    public function createCheckoutSession(string $priceItem, array $metadata = []): string;
+
     public function handleEvent(): int;
 }
