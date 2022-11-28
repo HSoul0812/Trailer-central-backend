@@ -38,12 +38,6 @@ class QueryBuilder implements InventoryQueryBuilderInterface
                 'size' => self::AGGREGATION_SIZE
             ]
         ],
-        'fuel_capacity' => [
-            'terms' => [
-                'field' => 'fuelCapacity',
-                'size' => self::AGGREGATION_SIZE
-            ]
-        ],
         'fuel_type' => [
             'terms' => [
                 'field' => 'fuelType',
