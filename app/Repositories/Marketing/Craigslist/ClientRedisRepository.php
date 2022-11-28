@@ -2,9 +2,10 @@
 
 namespace App\Repositories\Marketing\Craigslist;
 
-use App\DTO\Marketing\Craigslist\Client;
 use App\Exceptions\NotImplementedException;
+use App\Exceptions\Marketing\Craigslist\UuidRequiredForGetClientException;
 use App\Repositories\Marketing\Craigslist\ClientRepositoryInterface;
+use App\Services\Marketing\Craigslist\DTOs\Client;
 use App\Services\Marketing\Craigslist\DTOs\ClientMessage;
 use App\Services\Marketing\Craigslist\DTOs\Behaviour;
 use Illuminate\Redis\Connections\Connection;
@@ -23,19 +24,6 @@ class ClientRedisRepository implements ClientRepositoryInterface
      * @const Default Sort Order
      */
     const DEFAULT_SORT = '-checkin';
-
-    /**
-     * @const Config Paths
-     */
-    const CONFIG_PATHS = [
-        'enabled',
-        'ignore',
-        'elapse.warning',
-        'elapse.error',
-        'elapse.critical',
-        'clients.low',
-        'clients.edit'
-    ];
 
 
     /**
@@ -108,7 +96,7 @@ class ClientRedisRepository implements ClientRepositoryInterface
     /**
      * Get Single Client
      * 
-     * @param type $params
+     * @param array $params
      * @throws UuidRequiredForGetClientException
      * @return Client
      */

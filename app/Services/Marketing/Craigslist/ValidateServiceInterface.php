@@ -2,6 +2,7 @@
 
 namespace App\Services\Marketing\Craigslist;
 
+use App\Services\Marketing\Craigslist\DTOs\Client;
 use App\Services\Marketing\Craigslist\DTOs\ClientMessage;
 use App\Services\Marketing\Craigslist\DTOs\ClientValidate;
 use Illuminate\Support\Collection;

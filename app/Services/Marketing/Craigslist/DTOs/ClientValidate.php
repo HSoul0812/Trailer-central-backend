@@ -27,6 +27,16 @@ class ClientValidate
     /**
      * @const string
      */
+    const SCALE_HOURS = 'hours';
+
+    /**
+     * @const string
+     */
+    const SCALE_MINUTES = 'minutes';
+
+    /**
+     * @const string
+     */
     const CLIENTS_LEVEL = 'clients';
 
 

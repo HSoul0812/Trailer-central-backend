@@ -323,7 +323,7 @@ class Behaviour
      */
     static public function getInternalLogin(string $uuid): array {
         // Find Dealer Config Override Based on ID Provided
-        $behaviour = self::getDealerUuidBehaviour($uuid);
+        $behaviour = self::byUuid($uuid);
 
         // Return Empty Array
         return [

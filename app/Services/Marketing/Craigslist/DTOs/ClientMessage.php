@@ -103,7 +103,7 @@ class ClientMessage
         $client = $validation->first();
 
         // Discover Client Level
-        $message = $this->message($client->level, [
+        $message = self::message($client->level, [
             'email'   => $client->email,
             'elapsed' => $client->elapsed(),
             'scale'   => $client->scale()
@@ -130,7 +130,7 @@ class ClientMessage
         $level = ClientValidate::CLIENTS_LEVEL;
 
         // Discover Client Level
-        $message = $this->message($level, [
+        $message = self::message($level, [
             'active' => $active->count(),
             'email'  => $client->email
         ]);
@@ -155,7 +155,7 @@ class ClientMessage
         $client = $active->first();
 
         // Discover Client Level
-        $message = $this->message($client->level, [
+        $message = self::message($client->level, [
             'active' => $active->count(),
             'email'  => $client->email
         ]);
@@ -169,7 +169,6 @@ class ClientMessage
         ]);
     }
 
-
     /**
      * Get Message
      * 
@@ -177,17 +176,18 @@ class ClientMessage
      * @param array{string: string} $params
      * @return string
      */
-    private function message(string $level, array $params): string {
+    static public function message(string $level, array $params): string {
         // Get Messages By Warning Level
         $message = self::WARNING_LEVELS[$level];
         if(empty($message)) {
-            $level = reset(ClientValidate::WARNING_LEVELS);
+            $levels = array_keys(ClientValidate::WARNING_LEVELS);
+            $level = $levels[0];
             $message = self::WARNING_LEVELS[$level];
         }
 
         // Replace Params
         foreach($params as $key => $value) {
-            if(in_array(self::MESSAGE_VARS)) {
+            if(in_array($key, self::MESSAGE_VARS)) {
                 $message = str_replace(':' . $key, $value, $message);
             }
         }

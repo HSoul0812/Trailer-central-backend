@@ -3,6 +3,7 @@
 namespace App\Services\Marketing\Craigslist;
 
 use App\Repositories\Marketing\Craigslist\ClientRepositoryInterface;
+use App\Services\Marketing\Craigslist\DTOs\Client;
 use App\Services\Marketing\Craigslist\DTOs\ClientMessage;
 use App\Services\Marketing\Craigslist\DTOs\ClientValidate;
 use Illuminate\Support\Collection;
@@ -15,6 +16,19 @@ use Illuminate\Support\Facades\Log;
  */
 class ValidateService implements ValidateServiceInterface
 {
+    /**
+     * @const Config Paths
+     */
+    const CONFIG_PATHS = [
+        'enabled',
+        'ignore',
+        'elapse.warning',
+        'elapse.error',
+        'elapse.critical',
+        'clients.low',
+        'clients.edit'
+    ];
+
     /**
      * @var ProfileRepositoryInterface
      */
@@ -71,7 +85,7 @@ class ValidateService implements ValidateServiceInterface
             'uuid'      => $client->uuid,
             'email'     => $client->email(),
             'label'     => $client->label,
-            'isEdit'    => $client->edit(),
+            'isEdit'    => $client->isEdit(),
             'level'     => $level,
             'elapsed'   => $client->elapsed()
         ]);
@@ -149,18 +163,19 @@ class ValidateService implements ValidateServiceInterface
     private function messages(array $active, array $warnings): Collection {
         // Check All Warning Clients
         $messages = new Collection();
-        foreach($warnings as $email => $warnings) {
+        foreach($warnings as $email => $warning) {
             // Get Config
-            $active = $active[$email];
-            $config = $this->getConfig($warnings[0]->dealerId);
+            $valid = $active[$email];
+            $client = $warning[0];
+            $config = $this->getConfig($client->dealerId);
 
             // Check Number of Clients
             if(count($active) < 1) {
-                $message = ClientMessage::varied($warnings);
-            } elseif($client->isEdit && count($active) <= (int) $config['clients.edit']) {
-                $message = ClientMessage::warning($active);
-            } elseif(count($active) <= (int) $config['clients.low']) {
-                $message = ClientMessage::warning($active);
+                $message = ClientMessage::varied($warning);
+            } elseif($client->isEdit && count($valid) <= (int) $config['clients.edit']) {
+                $message = ClientMessage::warning($valid);
+            } elseif(count($valid) <= (int) $config['clients.low']) {
+                $message = ClientMessage::warning($valid);
             }
 
             // Message Exists?
@@ -171,8 +186,8 @@ class ValidateService implements ValidateServiceInterface
         }
 
         // Find Remaining Active Accounts
-        foreach($active as $email => $active) {
-            $messages->push(ClientMessage::active($active));
+        foreach($active as $email => $single) {
+            $messages->push(ClientMessage::active($single));
         }
 
         // Return Messages
@@ -221,11 +236,11 @@ class ValidateService implements ValidateServiceInterface
         $overrides = explode(';', $config);
         $clean = [];
         foreach($overrides as $override) {
-            list($dealerId, $value) = explode(':', $override);
-            $clean[$dealerId] = $value;
+            list($dealer, $value) = explode(':', $override);
+            $clean[$dealer] = $value;
         }
 
         // Return Clean Override Array
-        return $clean;
+        return $clean[$dealerId];
     }
 }
