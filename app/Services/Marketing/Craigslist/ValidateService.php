@@ -3,7 +3,6 @@
 namespace App\Services\Marketing\Craigslist;
 
 use App\Repositories\Marketing\Craigslist\ClientRepositoryInterface;
-use App\Repositories\Marketing\Craigslist\ProfileRepositoryInterface;
 use App\Services\Marketing\Craigslist\DTOs\Client;
 use App\Services\Marketing\Craigslist\DTOs\ClientMessage;
 use App\Services\Marketing\Craigslist\DTOs\ClientValidate;
@@ -31,9 +30,9 @@ class ValidateService implements ValidateServiceInterface
     ];
 
     /**
-     * @var ProfileRepositoryInterface
+     * @var ClientRepositoryInterface
      */
-    protected $profiles;
+    protected $repo;
 
     /**
      * Construct Facebook Marketplace Service
