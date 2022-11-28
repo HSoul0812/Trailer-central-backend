@@ -6,9 +6,9 @@ use App\Exceptions\ElasticSearch\FilterNotFoundException;
 use App\Models\Inventory\Geolocation\Point;
 use App\Services\ElasticSearch\Inventory\FieldMapperService;
 use App\Services\ElasticSearch\Inventory\InventoryQueryBuilderInterface;
-use App\Services\ElasticSearch\Inventory\Parameters\DealerId;
 use App\Services\ElasticSearch\Inventory\Parameters\FilterGroup;
 use App\Services\ElasticSearch\Inventory\Parameters\Filters\Field;
+use App\Services\ElasticSearch\Inventory\Parameters\Filters\Term;
 use App\Services\ElasticSearch\Inventory\Parameters\Geolocation\GeolocationInterface;
 use App\Services\ElasticSearch\Inventory\Parameters\Geolocation\GeolocationRange;
 use App\Services\ElasticSearch\Inventory\Parameters\Geolocation\ScatteredGeolocation;
@@ -239,17 +239,17 @@ class QueryBuilder implements InventoryQueryBuilderInterface
         $this->mapper = $mapper;
     }
 
-    public function addDealers(DealerId $dealerIds): QueryBuilderInterface
+    public function addDealers(array $dealerIds): QueryBuilderInterface
     {
-        $type = $dealerIds->type() === DealerId::INCLUSION ? 'must' : 'must_not';
-
-        if (count($dealerIds->list()) > 0) {
+        collect($dealerIds)->each(function ($term) {
+            $term = Term::fromArray($term);
+            $type = $term->getOperator() === Term::OPERATOR_EQ ? 'must' : 'must_not';
             $this->query['query']['bool'][$type][] = [
                 'terms' => [
-                    'dealerId' => $dealerIds->list()
+                    'dealerId' => $term->getValues()
                 ]
             ];
-        }
+        });
 
         return $this;
     }

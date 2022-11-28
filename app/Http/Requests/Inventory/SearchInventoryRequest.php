@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Requests\Inventory;
 
 use App\Http\Requests\Request;
-use App\Services\ElasticSearch\Inventory\Parameters\DealerId;
 use App\Services\ElasticSearch\Inventory\Parameters\Geolocation\Geolocation;
 use App\Services\ElasticSearch\Inventory\Parameters\Geolocation\GeolocationInterface;
 
@@ -30,9 +29,9 @@ class SearchInventoryRequest extends Request
         return $this->json('filter_groups');
     }
 
-    public function dealerIds(): DealerId
+    public function dealerIds(): array
     {
-        return DealerId::fromString($this->dealerId ?? '');
+        return $this->json('dealers');
     }
 
     public function sort(): array
@@ -74,6 +73,6 @@ class SearchInventoryRequest extends Request
 
     public function getESQuery(): bool
     {
-        return $this->json('debug.x_qa_req');
+        return $this->json('debug');
     }
 }

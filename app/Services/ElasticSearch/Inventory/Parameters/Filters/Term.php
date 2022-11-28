@@ -17,10 +17,10 @@ class Term
     private const ES_MUST_NOT = 'must_not';
 
     /** @var string */
-    private const OPERATOR_EQ = 'eq';
+    public const OPERATOR_EQ = 'eq';
 
     /** @var string */
-    private const OPERATOR_NEQ = 'neq';
+    public const OPERATOR_NEQ = 'neq';
 
     /**
      * @param string $operator
@@ -55,5 +55,13 @@ class Term
     public function getESOperatorKeyword(): string
     {
         return [self::OPERATOR_EQ => self::ES_SHOULD, self::OPERATOR_NEQ => self::ES_MUST_NOT][$this->operator];
+    }
+
+    /**
+     * @return string
+     */
+    public function getOperator(): string
+    {
+        return $this->operator;
     }
 }

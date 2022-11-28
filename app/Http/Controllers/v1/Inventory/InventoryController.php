@@ -17,7 +17,6 @@ use App\Http\Requests\Inventory\SearchInventoryRequest;
 use App\Http\Requests\Inventory\UpdateInventoryRequest;
 use App\Repositories\Inventory\InventoryHistoryRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
-use App\Services\ElasticSearch\ElasticSearchPaginator;
 use App\Services\Inventory\InventoryServiceInterface;
 use App\Transformers\Inventory\InventoryElasticSearchOutputTransformer;
 use App\Transformers\Inventory\SaveInventoryTransformer;
