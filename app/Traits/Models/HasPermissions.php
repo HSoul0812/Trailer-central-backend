@@ -35,8 +35,9 @@ trait HasPermissions
      */
     public function getPermissions(): Collection
     {
+        $perms = [];
+
         if ($this->userPermissions === null) {
-            $perms = [];
             $permissions = $this->perms()->get();
 
             // Override Perms?
@@ -51,6 +52,7 @@ trait HasPermissions
 
         // Return Use Permissions Collection
         $this->userPermissions = collect($perms);
+
         return $this->userPermissions;
     }
 

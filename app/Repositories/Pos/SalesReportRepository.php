@@ -253,6 +253,7 @@ SQL;
                 WHERE
                       sh.dealer_location_id IN (SELECT l.dealer_location_id FROM dealer_location l WHERE l.dealer_id = :dealer_id_inventory_qb)
                       AND qi.invoice_date >= :from_date_inventory_qb AND qi.invoice_date <= :to_date_inventory_qb
+                      AND ii.description != 'Trade In Inventory item'
                       {$this->customReportHelpers['inventoryWhere']['inventory_qb']}
                 UNION
                 SELECT
