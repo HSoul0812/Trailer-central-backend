@@ -7,7 +7,7 @@ use App\Models\Inventory\Geolocation\Point;
 use App\Services\ElasticSearch\Inventory\FieldMapperService;
 use App\Services\ElasticSearch\Inventory\InventoryQueryBuilderInterface;
 use App\Services\ElasticSearch\Inventory\Parameters\DealerId;
-use App\Services\ElasticSearch\Inventory\Parameters\Filter;
+use App\Services\ElasticSearch\Inventory\Parameters\FilterGroup;
 use App\Services\ElasticSearch\Inventory\Parameters\Filters\Field;
 use App\Services\ElasticSearch\Inventory\Parameters\Geolocation\GeolocationInterface;
 use App\Services\ElasticSearch\Inventory\Parameters\Geolocation\GeolocationRange;
@@ -277,8 +277,8 @@ class QueryBuilder implements InventoryQueryBuilderInterface
         $query = [];
 
         foreach ($terms as $term) {
-            $filter = Filter::fromArray($term);
-            $query = $this->appendQueryTo($query)($filter);
+            $filters = FilterGroup::fromArray($term);
+            $query = $this->appendQueryTo($query)($filters);
         }
 
         $this->query = array_merge_recursive($query, $this->query);
@@ -352,9 +352,9 @@ class QueryBuilder implements InventoryQueryBuilderInterface
 
     private function appendQueryTo(array $query): callable
     {
-        return function (Filter $filter) use ($query) {
-            $filter->getFields()->each(function (Field $field) use (&$query, $filter) {
-                if ($filter->appendsToQuery()) {
+        return function (FilterGroup $filters) use ($query) {
+            $filters->getFields()->each(function (Field $field) use (&$query, $filters) {
+                if ($filters->appendsToQuery()) {
                     $query = array_merge_recursive($query, $this->mapper->getBuilder($field)->globalQuery());
                     return;
                 }
