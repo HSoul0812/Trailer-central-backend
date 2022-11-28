@@ -210,7 +210,7 @@ class ClientRedisRepository implements ClientRepositoryInterface
 
 
     /**
-     * Email Last Sent in Last Interval
+     * Was the Email Last Sent Within the Interval?
      * 
      * @param string $email
      * @param int $interval
@@ -226,7 +226,7 @@ class ClientRedisRepository implements ClientRepositoryInterface
     }
 
     /**
-     * Email Last Sent in Last Interval
+     * Mark Email's Last Sent Time to Now
      * 
      * @param string $email
      * @return void

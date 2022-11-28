@@ -21,7 +21,7 @@ interface ClientRepositoryInterface extends Repository {
     public function getAllInternal(): Collection;
 
     /**
-     * Email Last Sent in Last Interval
+     * Was the Email Last Sent Within the Interval?
      * 
      * @param string $email
      * @param int $interval
@@ -30,7 +30,7 @@ interface ClientRepositoryInterface extends Repository {
     public function sentIn(string $email, int $interval): int;
 
     /**
-     * Email Last Sent in Last Interval
+     * Mark Email's Last Sent Time to Now
      * 
      * @param string $email
      * @return void

@@ -138,7 +138,7 @@ class ValidateService implements ValidateServiceInterface
         $interval = (int) config('marketing.cl.settings.slack.interval');
 
         // Check if Message Sent Recently
-        if(!$this->repo->sentIn($interval, $message->email)) {
+        if(!$this->repo->sentIn($message->email, $interval)) {
             $this->slack->{$message->level}($message->message);
             $this->repo->markSent($message->email);
             $this->log->info('Successfully Sent ' . $message->level . ' Slack Message for ' . $message->email);
