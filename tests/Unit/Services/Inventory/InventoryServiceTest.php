@@ -32,6 +32,9 @@ use Mockery;
 use Mockery\LegacyMockInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use Tests\TestCase;
+use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
+use App\Repositories\User\GeoLocationRepositoryInterface;
+use App\Contracts\LoggerServiceInterface;
 
 /**
  * Test for App\Services\Inventory\InventoryService
@@ -100,6 +103,24 @@ class InventoryServiceTest extends TestCase
      */
     private $categoryRepositoryMock;
 
+    /**
+     * @var LegacyMockInterface|WebsiteConfigRepositoryInterface
+     */
+    private $websiteConfigRepositoryMock;
+
+    /**
+     * @var LegacyMockInterface|GeoLocationRepositoryInterface
+     */
+    private $geolocationRepositoryMock;
+
+    /**
+     * @var LegacyMockInterface|LoggerServiceInterface
+     */
+    private $logServiceMock;
+
+    /** @var \LegacyMockInterface|Parsedown */
+    private $markdownHelper;
+
     public function setUp(): void
     {
         parent::setUp();
@@ -133,6 +154,18 @@ class InventoryServiceTest extends TestCase
 
         $this->categoryRepositoryMock = Mockery::mock(CategoryRepositoryInterface::class);
         $this->app->instance(CategoryRepositoryInterface::class, $this->categoryRepositoryMock);
+
+        $this->websiteConfigRepositoryMock = Mockery::mock(WebsiteConfigRepositoryInterface::class);
+        $this->app->instance(WebsiteConfigRepositoryInterface::class, $this->websiteConfigRepositoryMock);
+
+        $this->geolocationRepositoryMock = Mockery::mock(GeoLocationRepositoryInterface::class);
+        $this->app->instance(GeoLocationRepositoryInterface::class, $this->geolocationRepositoryMock);
+
+        $this->logServiceMock = Mockery::mock(LoggerServiceInterface::class);
+        $this->app->instance(LoggerServiceInterface::class, $this->logServiceMock);
+
+        $this->markdownHelper = Mockery::mock(\Parsedown::class);
+        $this->app->instance(\Parsedown::class, $this->markdownHelper);
     }
 
     /**
@@ -236,48 +269,38 @@ class InventoryServiceTest extends TestCase
         $params['overlay_enabled'] = Inventory::OVERLAY_ENABLED_PRIMARY;
         $params['new_files'] = [];
 
-        $overlayEnabledParams = ['overlayText' => $params['stock']];
+        $overlayEnabledParams = ['skipNotExisting' => true];
 
         $this->inventoryRepositoryMock
             ->shouldReceive('beginTransaction')
             ->once()
             ->with();
 
-        $expectedParams = $params;
+        $newImage = new FileDto('path', 'hash');
+        $newImageWithOverlay = new FileDto('path_with_overlay', 'hash_with_overlay');
 
-        foreach ($params['new_images'] as $key => $image) {
-            $newImage = new FileDto('path' . $key, 'hash' . $key);
-            $newImageWithOverlay = new FileDto('path_with_overlay' . $key, 'hash_with_overlay' . $key);
+        $this->imageServiceMock
+            ->shouldReceive('upload')
+            ->once()
+            ->with($params['new_images'][1]['url'], $params['title'], self::TEST_DEALER_ID, null, $overlayEnabledParams)
+            ->andReturn($newImage);
 
-            $this->imageServiceMock
-                ->shouldReceive('upload')
-                ->once()
-                ->with($image['url'], $params['title'], self::TEST_DEALER_ID)
-                ->andReturn($newImage);
+        $this->imageServiceMock
+            ->shouldReceive('upload')
+            ->once()
+            ->with($params['new_images'][0]['url'], $params['title'], self::TEST_DEALER_ID, null, $overlayEnabledParams)
+            ->andReturn($newImage);
 
-            if ($image['position'] == 0) {
-                $this->imageServiceMock
-                    ->shouldReceive('upload')
-                    ->once()
-                    ->with($image['url'], $params['title'], self::TEST_DEALER_ID, null, $overlayEnabledParams)
-                    ->andReturn($newImageWithOverlay);
-            }
-
-            if ($image['position'] == 0) {
-                $expectedParams['new_images'][$key]['filename'] = $newImageWithOverlay->getPath();
-                $expectedParams['new_images'][$key]['filename_noverlay'] = $newImage->getPath();
-                $expectedParams['new_images'][$key]['hash'] = $newImageWithOverlay->getHash();
-            } else {
-                $expectedParams['new_images'][$key]['filename'] = $newImage->getPath();
-                $expectedParams['new_images'][$key]['filename_noverlay'] = '';
-                $expectedParams['new_images'][$key]['hash'] = $newImage->getHash();
-            }
-        }
+        $this->imageServiceMock
+            ->shouldReceive('upload')
+            ->once()
+            ->with($params['new_images'][0]['url'], $params['title'], self::TEST_DEALER_ID, null, $overlayEnabledParams)
+            ->andReturn($newImageWithOverlay);
 
         $this->inventoryRepositoryMock
             ->shouldReceive('create')
             ->once()
-            ->with($expectedParams)
+            ->withAnyArgs()
             ->andReturn($inventory);
 
         $this->inventoryRepositoryMock
@@ -470,7 +493,7 @@ class InventoryServiceTest extends TestCase
         $this->quickbookApprovalRepositoryMock
             ->shouldReceive('deleteByTbPrimaryId')
             ->once()
-            ->with($bill->id);
+            ->with($bill->id, 'qb_bills', self::TEST_DEALER_ID);
 
         $this->billRepositoryMock
             ->shouldReceive('update')
@@ -713,11 +736,12 @@ class InventoryServiceTest extends TestCase
 
         $this->inventoryRepositoryMock
             ->shouldReceive('rollbackTransaction')
-            ->once()
+            ->twice()
             ->with();
 
-        Log::shouldReceive('error')
-            ->with('Item hasn\'t been created.', ['params' => $params]);
+        Log::shouldReceive('error');
+
+        $this->expectException(InventoryException::class);
 
         /** @var InventoryService $service */
         $service = $this->app->make(InventoryService::class);
@@ -759,8 +783,9 @@ class InventoryServiceTest extends TestCase
             ->once()
             ->with();
 
-        Log::shouldReceive('error')
-            ->with('Item create error. Params - ' . json_encode($params), $exception->getTrace());
+        Log::shouldReceive('error');
+
+        $this->expectException(InventoryException::class);
 
         /** @var InventoryService $service */
         $service = $this->app->make(InventoryService::class);
@@ -823,7 +848,7 @@ class InventoryServiceTest extends TestCase
             'fileIds' => [$fileModel1->id],
         ];
 
-        $this->expectsJobs(DeleteS3FilesJob::class);
+        $this->doesntExpectJobs(DeleteS3FilesJob::class);
 
         $this->fileRepositoryMock
             ->shouldReceive('getAllByInventoryId')
@@ -837,7 +862,7 @@ class InventoryServiceTest extends TestCase
             ->with($inventoryDeleteParams)
             ->andReturn(true);
 
-        $this->expectsJobs(DeleteS3FilesJob::class);
+        $this->doesntExpectJobs(DeleteS3FilesJob::class);
 
         Log::shouldReceive('info')
             ->with('Item has been successfully deleted', ['inventoryId' => $inventoryId]);
@@ -1038,11 +1063,15 @@ class InventoryServiceTest extends TestCase
                 $this->fileRepositoryMock,
                 $this->billRepositoryMock,
                 $this->quickbookApprovalRepositoryMock,
+                $this->websiteConfigRepositoryMock,
                 $this->imageServiceMock,
                 $this->fileServiceMock,
                 $this->dealerLocationRepositoryMock,
                 $this->dealerLocationMileageFeeRepositoryMock,
-                $this->categoryRepositoryMock
+                $this->categoryRepositoryMock,
+                $this->geolocationRepositoryMock,
+                $this->markdownHelper,
+                $this->logServiceMock ?? app()->make(LoggerServiceInterface::class)
             ])
             ->onlyMethods(['delete'])
             ->getMock();
@@ -1060,28 +1089,9 @@ class InventoryServiceTest extends TestCase
             ->andReturn($inventoryCollection);
 
         $inventoryServiceMock
-            ->expects($this->at(0))
+            ->expects($this->exactly(4))
             ->method('delete')
-            ->with($this->equalTo(1))
-            ->willReturn(true);
-
-        $inventoryServiceMock
-            ->expects($this->at(1))
-            ->method('delete')
-            ->with($this->equalTo(4))
-            ->willReturn(true);
-
-        $inventoryServiceMock
-            ->expects($this->at(2))
-            ->method('delete')
-            ->with($this->equalTo(5))
-            ->willReturn(true);
-
-        $inventoryServiceMock
-            ->expects($this->at(3))
-            ->method('delete')
-            ->with($this->equalTo(6))
-            ->willReturn(false);
+            ->willReturnOnConsecutiveCalls(true, true, true, false);
 
         $result = $inventoryServiceMock->deleteDuplicates($dealerId);
         $assertedResult = ['deletedDuplicates' => 3, 'couldNotDeleteDuplicates' => [6]];
@@ -1111,8 +1121,15 @@ class InventoryServiceTest extends TestCase
             $this->fileRepositoryMock,
             $this->billRepositoryMock,
             $this->quickbookApprovalRepositoryMock,
+            $this->websiteConfigRepositoryMock,
             $this->imageServiceMock,
-            $this->fileServiceMock
+            $this->fileServiceMock,
+            $this->dealerLocationRepositoryMock,
+            $this->dealerLocationMileageFeeRepositoryMock,
+            $this->categoryRepositoryMock,
+            $this->geolocationRepositoryMock,
+            $this->markdownHelper,
+            $this->logServiceMock ?? app()->make(LoggerServiceInterface::class)
         ]);
 
         $inventoryServiceMock->shouldReceive('deleteDuplicates')->passthru();

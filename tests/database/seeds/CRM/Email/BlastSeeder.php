@@ -82,7 +82,7 @@ class BlastSeeder extends Seeder
     public function __construct()
     {
         $this->dealer = factory(User::class)->create();
-        $this->user = factory(NewUser::class)->create(['user_id' => $this->dealer->dealer_id]);
+        $this->user = factory(NewUser::class)->create();
         $this->template = factory(Template::class)->create(['user_id' => $this->user->getKey()]);
 
         $newDealerUserRepo = app(NewDealerUserRepositoryInterface::class);

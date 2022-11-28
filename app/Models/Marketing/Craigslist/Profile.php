@@ -86,7 +86,7 @@ class Profile extends Model
         'embed_bg_lower',
         'embed_text_lower',
         'keywords',
-        'scrample',
+        'scramble',
         'blurb',
         'proxy_type',
         'proxy_host',

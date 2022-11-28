@@ -27,6 +27,7 @@ class NumberTwilio extends Model
      * @var string
      */
     protected $primaryKey = 'phone_number';
+    public $incrementing = false;
 
     /**
      * The attributes that are mass assignable.

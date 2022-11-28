@@ -11,6 +11,7 @@ use App\Models\CRM\Text\BlastCategory;
 use App\Models\CRM\Text\BlastSent;
 use App\Models\CRM\Text\Template;
 use App\Models\Inventory\Inventory;
+use App\Models\Inventory\Manufacturers\Manufacturers;
 use App\Models\User\DealerLocation;
 use App\Models\User\NewDealerUser;
 use App\Models\User\NewUser;
@@ -41,10 +42,6 @@ class BlastSeeder extends Seeder
     use WithGetter;
 
     private const SEND_AFTER_DAYS = 45;
-
-    private const TEST_INVENTORY_BRAND_1 = 'test_inventory_brand_1';
-    private const TEST_INVENTORY_BRAND_2 = 'test_inventory_brand_2';
-    private const TEST_INVENTORY_BRAND_3 = 'test_inventory_brand_3';
 
     private const TEST_INVENTORY_CATEGORY_1 = 'test_inventory_category_1';
     private const TEST_INVENTORY_CATEGORY_2 = 'test_inventory_category_2';
@@ -144,7 +141,7 @@ class BlastSeeder extends Seeder
 
         $this->dealer = factory(User::class)->create();
         $this->website = factory(Website::class)->create(['dealer_id' => $this->dealer->dealer_id]);
-        $this->user = factory(NewUser::class)->create(['user_id' => $this->dealer->dealer_id]);
+        $this->user = factory(NewUser::class)->create();
         $this->newDealerUser = factory(NewDealerUser::class)->create(['id' => $this->dealer->getKey(), 'user_id' => $this->user->getKey()]);
         $this->location = factory(DealerLocation::class)->create(['dealer_id' => $this->dealer->getKey()]);
         $this->template = factory(Template::class)->create(['user_id' => $this->user->getKey()]);
@@ -154,10 +151,13 @@ class BlastSeeder extends Seeder
 
     public function seed(): void
     {
+        // Get 3 Manufacturers
+        $manufacturers = Manufacturers::inRandomOrder()->take(3)->pluck('name')->toArray();
+
         $inventorySeeds = [
-            ['category' => self::TEST_INVENTORY_CATEGORY_1, 'manufacturer' => self::TEST_INVENTORY_BRAND_1],
-            ['category' => self::TEST_INVENTORY_CATEGORY_2, 'manufacturer' => self::TEST_INVENTORY_BRAND_2],
-            ['category' => self::TEST_INVENTORY_CATEGORY_3, 'manufacturer' => self::TEST_INVENTORY_BRAND_3],
+            ['category' => self::TEST_INVENTORY_CATEGORY_1, 'manufacturer' => $manufacturers[0]],
+            ['category' => self::TEST_INVENTORY_CATEGORY_2, 'manufacturer' => $manufacturers[1]],
+            ['category' => self::TEST_INVENTORY_CATEGORY_3, 'manufacturer' => $manufacturers[2]],
         ];
 
         foreach ($inventorySeeds as $inventorySeed) {
@@ -175,14 +175,14 @@ class BlastSeeder extends Seeder
                 'name' => 'Test Blast 1',
                 'action' => $this->blastAction,
                 'is_delivered' => false,
-                'brand' => self::TEST_INVENTORY_BRAND_1,
+                'brand' => $manufacturers[0],
                 'category' => self::TEST_INVENTORY_CATEGORY_1
             ],
             [
                 'name' => 'Test Blast 3',
                 'action' => $this->blastAction,
                 'is_delivered' => true,
-                'brand' => self::TEST_INVENTORY_BRAND_3,
+                'brand' => $manufacturers[2],
                 'category' => self::TEST_INVENTORY_CATEGORY_3,
             ],
         ];

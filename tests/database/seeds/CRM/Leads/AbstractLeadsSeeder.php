@@ -59,7 +59,7 @@ abstract class AbstractLeadsSeeder extends Seeder
             'user_type' => AuthToken::USER_TYPE_DEALER,
         ]);
         $this->website = factory(Website::class)->create(['dealer_id' => $this->dealer->dealer_id]);
-        $this->user = factory(NewUser::class)->create(['user_id' => $this->dealer->dealer_id]);
+        $this->user = factory(NewUser::class)->create();
         $this->lead = factory(Lead::class)->create([
             'dealer_id' => $this->dealer->getKey(),
             'website_id' => $this->website->getKey()
@@ -69,9 +69,11 @@ abstract class AbstractLeadsSeeder extends Seeder
     public function cleanUp(): void
     {
         $dealerId = $this->dealer->getKey();
+        $userId = $this->user->getKey();
+
+        NewUser::where('user_id', $userId)->delete();
 
         Lead::destroy($this->lead->identifier);
-        NewUser::destroy($dealerId);
         DealerLocation::where('dealer_id', $dealerId)->delete();
         Website::where('dealer_id', $dealerId)->delete();
         AuthToken::where(['user_id' => $this->authToken->user_id, 'user_type' => AuthToken::USER_TYPE_DEALER])->delete();

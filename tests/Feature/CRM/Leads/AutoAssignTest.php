@@ -12,7 +12,7 @@ use Tests\TestCase;
 class AutoAssignTest extends TestCase
 {
     /**
-     * @var LeadSeeder
+     * @var AutoAssignSeeder
      */
     private $seeder;
 
