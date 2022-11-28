@@ -24,9 +24,9 @@ interface InventoryServiceInterface
 
     /**
      * @param array $params
-     * @return Inventory
+     * @return bool
      */
-    public function bulkUpdate(array $params): bool;
+    public function massUpdate(array $params): bool;
 
     /**
      * @param int $inventoryId

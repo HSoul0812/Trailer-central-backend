@@ -342,19 +342,19 @@ class InventoryService implements InventoryServiceInterface
      * @return bool
      * @throws InventoryException
      */
-    public function bulkUpdate(array $params): bool
+    public function massUpdate(array $params): bool
     {
         try {
             $this->inventoryRepository->beginTransaction();
 
-            $this->inventoryRepository->bulkUpdate($params);
+            $this->inventoryRepository->massUpdate($params);
 
             $this->inventoryRepository->commitTransaction();
         } catch (\Exception $e) {
-            Log::error('Inventory bulk update error. Message - ' . $e->getMessage(), $e->getTrace());
+            Log::error('Inventory mass update error. Message - ' . $e->getMessage(), $e->getTrace());
             $this->inventoryRepository->rollbackTransaction();
 
-            throw new InventoryException('Inventory bulk update error');
+            throw new InventoryException('Inventory mass update error');
         }
 
         return true;

@@ -353,7 +353,7 @@ class InventoryRepository implements InventoryRepositoryInterface
      * @param array $params
      * @return bool
      */
-    public function bulkUpdate(array $params): bool
+    public function massUpdate(array $params): bool
     {
         if (!isset($params['dealer_id'])) {
             throw new RepositoryInvalidArgumentException('dealer_id has been missed. Params - ' . json_encode($params));
