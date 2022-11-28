@@ -186,8 +186,8 @@ class ValidateService implements ValidateServiceInterface
         }
 
         // Find Remaining Active Accounts
-        foreach($active as $email => $single) {
-            $messages->push(ClientMessage::active($single));
+        foreach($active as $email => $validation) {
+            $messages->push(ClientMessage::active($validation));
         }
 
         // Return Messages
