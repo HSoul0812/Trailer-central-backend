@@ -146,6 +146,7 @@ class InventoryController extends AbstractRestfulController
 
         $url = $this->paymentService->createCheckoutSession($planId, [
             'inventory_title' => $inventory->inventory_title,
+            'inventory_id' => $inventory->id,
             'user_id' => $user->tc_user_id
         ]);
 

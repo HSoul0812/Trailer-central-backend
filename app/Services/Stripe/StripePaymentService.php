@@ -19,8 +19,8 @@ use Illuminate\Support\Str;
 
 class StripePaymentService implements StripePaymentServiceInterface
 {
-    const STRIPE_SUCCESS_URL = '/success';
-    const STRIPE_FAILURE_URL = '/cancel';
+    const STRIPE_SUCCESS_URL = '/{id}/?payment_status=success';
+    const STRIPE_FAILURE_URL = '/{id}/?payment_status=failed';
     const CHECKOUT_SESSION_COMPLETED_EVENT = 'checkout.session.completed';
 
     const PRICES = [
@@ -63,8 +63,8 @@ class StripePaymentService implements StripePaymentServiceInterface
     {
         $siteUrl = config('app.site_url');
 
-        /** @var TcApiResponseInventory $inventory */
         $inventoryTitle = $metadata['inventory_title'];
+        $inventoryId = $metadata['inventory_id'];
 
         $planPrice = self::PRICES[$priceItem]['price'];
         $planName = self::PRICES[$priceItem]['name'];
@@ -86,13 +86,16 @@ class StripePaymentService implements StripePaymentServiceInterface
             'quantity' => 1,
         ];
 
+        $successUrl = str_replace('{id}', $inventoryId, self::STRIPE_SUCCESS_URL);
+        $failUrl = str_replace('{id}', $inventoryId, self::STRIPE_FAILURE_URL);
+
         $checkout_session = Session::create([
             'line_items' => $priceObjects,
             'client_reference_id' => 'tt' . Str::uuid(),
             'metadata' => $metadata,
             'mode' => 'payment',
-            'success_url' => $siteUrl . self::STRIPE_SUCCESS_URL,
-            'cancel_url' => $siteUrl . self::STRIPE_FAILURE_URL,
+            'success_url' => $siteUrl .$successUrl,
+            'cancel_url' => $siteUrl . $failUrl,
         ]);
 
         return $checkout_session->url;
