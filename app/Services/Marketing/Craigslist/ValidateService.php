@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Class ValidateService
  * 
- * @package App\Services\Marketing\Facebook
+ * @package App\Services\Marketing\Craigslist
  */
 class ValidateService implements ValidateServiceInterface
 {
