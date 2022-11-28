@@ -461,7 +461,7 @@ class InventoryService implements InventoryServiceInterface
         }
 
         if (isset($params['dealer_location_id']) && $params['dealer_location_id']) {
-            $queryBuilder->addTermQuery('dealerLocationId', $params['dealer_location_id'], ESInventoryQueryBuilder::OCCUR_SHOULD);
+            $queryBuilder->addTermQuery('dealerLocationId', $params['dealer_location_id'], ESInventoryQueryBuilder::OCCUR_MUST);
         }
     }
 
