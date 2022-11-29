@@ -29,7 +29,6 @@ class TransactionExecuteQueue extends Model
      * @var array
      */
     protected $casts = [
-        'data' => 'array',
         'queued_at' => 'datetime',
         'executed_at' => 'datetime',
     ];
@@ -62,5 +61,9 @@ class TransactionExecuteQueue extends Model
         'api',
         'operation_type'
     ];
+
+    public function getDataAttribute() {
+        return json_decode($this->data, true);
+    }
 
 }
