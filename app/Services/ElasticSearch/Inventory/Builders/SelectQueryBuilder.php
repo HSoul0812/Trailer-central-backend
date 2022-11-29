@@ -44,15 +44,9 @@ class SelectQueryBuilder implements FieldQueryBuilderInterface
                 ];
             }
             $this->appendToQuery([
-                'query' => [
+                [
                     'bool' => [
-                        'must' => [
-                            [
-                                'bool' => [
-                                    $term->getESOperatorKeyword() => $queries
-                                ]
-                            ]
-                        ]
+                        $term->getESOperatorKeyword() => $queries
                     ]
                 ]
             ]);

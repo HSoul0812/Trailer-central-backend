@@ -355,7 +355,13 @@ class QueryBuilder implements InventoryQueryBuilderInterface
         return function (FilterGroup $filters) use ($query) {
             $filters->getFields()->each(function (Field $field) use (&$query, $filters) {
                 if ($filters->appendsToQuery()) {
-                    $query = array_merge_recursive($query, $this->mapper->getBuilder($field)->globalQuery());
+                    $query = array_merge_recursive($query, [
+                        'query' => [
+                            'bool' => [
+                                $filters->getESOperatorKeyword() => $this->mapper->getBuilder($field)->globalQuery()
+                            ]
+                        ]
+                    ]);
                     return;
                 }
                 $query = array_merge_recursive($query, $this->mapper->getBuilder($field)->generalQuery());
