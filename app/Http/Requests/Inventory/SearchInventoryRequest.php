@@ -5,8 +5,12 @@ declare(strict_types=1);
 namespace App\Http\Requests\Inventory;
 
 use App\Http\Requests\Request;
+use App\Services\ElasticSearch\Inventory\Parameters\FilterGroup;
+use App\Services\ElasticSearch\Inventory\Parameters\Filters\Term;
 use App\Services\ElasticSearch\Inventory\Parameters\Geolocation\Geolocation;
 use App\Services\ElasticSearch\Inventory\Parameters\Geolocation\GeolocationInterface;
+use App\Services\ElasticSearch\Inventory\Parameters\Geolocation\GeolocationRange;
+use Illuminate\Validation\Rule;
 
 /**
  * @property int $page
@@ -17,13 +21,6 @@ use App\Services\ElasticSearch\Inventory\Parameters\Geolocation\GeolocationInter
  */
 class SearchInventoryRequest extends Request
 {
-//    protected $rules = [
-//        'pagination.per_page' => 'integer|min:1|max:100',
-//        'pagination.page' => ['integer', 'min:0'],
-//        'classifieds_site' => 'boolean',
-//        'geolocation' => ['required', 'string'], // @todo we should add a regex validation here
-//    ];
-
     public function terms(): array
     {
         return $this->json('filter_groups');
@@ -74,5 +71,41 @@ class SearchInventoryRequest extends Request
     public function getESQuery(): bool
     {
         return $this->json('debug');
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function getRules(): array
+    {
+        return [
+            'sort' => ['present', 'array'],
+            'sort.*.field' => ['required'],
+            'sort.*.order' => ['required'],
+            'pagination' => ['required'],
+            'pagination.page' => ['integer', 'min:0'],
+            'pagination.per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'pagination.offset' => ['present'],
+            'filter_groups' => ['required', 'array'],
+            'filter_groups.*.fields' => ['required', 'array'],
+            'filter_groups.*.fields.*.name' => ['required'],
+            'filter_groups.*.fields.*.terms' => ['present', 'array'],
+            'filter_groups.*.fields.*.terms.*.operator' => ['required', Rule::in([Term::OPERATOR_EQ, Term::OPERATOR_NEQ])],
+            'filter_groups.*.fields.*.terms.*.values' => ['present'],
+            'filter_groups.*.append_to' => ['required', Rule::in([FilterGroup::APPEND_TO_POST_FILTERS, FilterGroup::APPEND_TO_QUERY])],
+            'filter_groups.*.operator' => ['required', Rule::in([FilterGroup::OPERATOR_AND, FilterGroup::OPERATOR_OR])],
+            'geolocation' => ['required'],
+            'geolocation.lat' => ['required', 'numeric'],
+            'geolocation.lon' => ['required', 'numeric'],
+            'geolocation.range' => ['nullable', 'numeric'],
+            'geolocation.units' => ['nullable', Rule::in([GeolocationRange::UNITS_MILES, GeolocationRange::UNITS_KILOMETERS])],
+            'geolocation.grouping' => ['nullable', Rule::in([GeolocationRange::GROUPING_RANGE, GeolocationRange::GROUPING_UNITS])],
+            'dealers' => ['present', 'array'],
+            'dealers.*.operator' => ['required', Rule::in([Term::OPERATOR_EQ, Term::OPERATOR_NEQ])],
+            'dealers.*.values' => ['required', 'array'],
+            'debug' => ['required', 'boolean']
+        ];
     }
 }

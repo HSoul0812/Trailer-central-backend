@@ -26,7 +26,7 @@ class Geolocation implements GeolocationInterface
     {
         $lat = $data['lat'];
         $lon = $data['lon'];
-        
+
         if ($grouping = $data['grouping']) {
             return new ScatteredGeolocation($lat, $lon, $grouping);
         }

@@ -17,10 +17,10 @@ class FilterGroup
     protected $fields;
 
     /** @var string */
-    protected const APPEND_TO_QUERY = 'query';
+    public const APPEND_TO_QUERY = 'query';
 
     /** @var string */
-    protected const APPEND_TO_POST_FILTERS = 'post_filter';
+    public const APPEND_TO_POST_FILTERS = 'post_filter';
 
     /** @var string */
     private const ES_SHOULD = 'should';
@@ -29,10 +29,10 @@ class FilterGroup
     private const ES_MUST = 'must';
 
     /** @var string */
-    private const OPERATOR_AND = 'and';
+    public const OPERATOR_AND = 'and';
 
     /** @var string */
-    private const OPERATOR_OR = 'or';
+    public const OPERATOR_OR = 'or';
 
     /**
      * @param array $fields
