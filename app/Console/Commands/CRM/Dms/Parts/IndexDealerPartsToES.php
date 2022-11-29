@@ -17,7 +17,7 @@ class IndexDealerPartsToES extends Command
         {dealerIds : Dealer IDs seperated by commas.}
         {--chunkSize=500 : The size for each chunk.}
         {--delayChunkThreshold=10000 : The size of the chunk before we apply the wait time (delays).}
-        {--delay=120 : Delay time in seconds after each delayChunkCount parts is being dispatched.}
+        {--delay=10 : Delay time in seconds after each delayChunkCount parts is being dispatched.}
     ';
 
     protected $description = 'Index all the parts under the dealer ids.';
