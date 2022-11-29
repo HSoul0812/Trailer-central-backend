@@ -10,7 +10,7 @@ use App\Services\ElasticSearch\Inventory\Builders\CustomQueryBuilder;
 use App\Services\ElasticSearch\Inventory\Builders\SelectQueryBuilder;
 use App\Services\ElasticSearch\Inventory\Builders\SliderQueryBuilder;
 use App\Services\ElasticSearch\Inventory\FieldMapperService;
-use App\Services\ElasticSearch\Inventory\Parameters\Filters\Field;
+use App\Services\ElasticSearch\Inventory\Parameters\Filters\Filter;
 use App\Services\ElasticSearch\Inventory\Parameters\Filters\Term;
 use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
@@ -61,7 +61,7 @@ class FieldMapperServiceTest extends TestCase
     public function test_it_throws_an_exception_if_the_field_is_unknown()
     {
         $this->expectException(FilterNotFoundException::class);
-        $field = Field::fromArray(['name' => 'some_unknown_field', 'terms' => [
+        $field = Filter::fromArray(['name' => 'some_unknown_field', 'terms' => [
             [
                 'operator' => Term::OPERATOR_EQ,
                 'values' => []
@@ -72,7 +72,7 @@ class FieldMapperServiceTest extends TestCase
 
     public function test_it_create_the_right_builder_instance_based_on_the_field_type()
     {
-        $field = Field::fromArray(['name' => 'price', 'terms' => [
+        $field = Filter::fromArray(['name' => 'price', 'terms' => [
             [
                 'operator' => Term::OPERATOR_EQ,
                 'values' => [
@@ -84,7 +84,7 @@ class FieldMapperServiceTest extends TestCase
         $builder = $this->service->getBuilder($field);
         $this->assertInstanceOf(SliderQueryBuilder::class, $builder);
 
-        $field = Field::fromArray(['name' => 'year', 'terms' => [
+        $field = Filter::fromArray(['name' => 'year', 'terms' => [
             [
                 'operator' => Term::OPERATOR_EQ,
                 'values' => [2020]
@@ -93,7 +93,7 @@ class FieldMapperServiceTest extends TestCase
         $builder = $this->service->getBuilder($field);
         $this->assertInstanceOf(SelectQueryBuilder::class, $builder);
 
-        $field = Field::fromArray(['name' => 'is_special', 'terms' => [
+        $field = Filter::fromArray(['name' => 'is_special', 'terms' => [
             [
                 'operator' => Term::OPERATOR_EQ,
                 'values' => [true]
@@ -105,7 +105,7 @@ class FieldMapperServiceTest extends TestCase
 
     public function test_it_resolves_the_right_builder_instance_for_known_fields_with_different_names()
     {
-        $field = Field::fromArray(['name' => 'existingPrice', 'terms' => [
+        $field = Filter::fromArray(['name' => 'existingPrice', 'terms' => [
             [
                 'operator' => Term::OPERATOR_EQ,
                 'values' => [
@@ -117,7 +117,7 @@ class FieldMapperServiceTest extends TestCase
         $builder = $this->service->getBuilder($field);
         $this->assertInstanceOf(SliderQueryBuilder::class, $builder);
 
-        $field = Field::fromArray(['name' => 'numSleep', 'terms' => [
+        $field = Filter::fromArray(['name' => 'numSleep', 'terms' => [
             [
                 'operator' => Term::OPERATOR_EQ,
                 'values' => [
@@ -131,7 +131,7 @@ class FieldMapperServiceTest extends TestCase
 
     public function test_it_builds_queries_for_edge_cases_with_a_custom_query_builder_instance()
     {
-        $field = Field::fromArray(['name' => 'show_images', 'terms' => [
+        $field = Filter::fromArray(['name' => 'show_images', 'terms' => [
             [
                 'operator' => Term::OPERATOR_EQ,
                 'values' => [
@@ -143,7 +143,7 @@ class FieldMapperServiceTest extends TestCase
         $builder = $this->service->getBuilder($field);
         $this->assertInstanceOf(CustomQueryBuilder::class, $builder);
 
-        $field = Field::fromArray(['name' => 'clearance_special', 'terms' => [
+        $field = Filter::fromArray(['name' => 'clearance_special', 'terms' => [
             [
                 'operator' => Term::OPERATOR_EQ,
                 'values' => []

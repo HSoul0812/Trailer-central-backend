@@ -3,13 +3,13 @@
 namespace App\Services\ElasticSearch;
 
 use App\Services\ElasticSearch\Inventory\Builders\FieldQueryBuilderInterface;
-use App\Services\ElasticSearch\Inventory\Parameters\Filters\Field;
+use App\Services\ElasticSearch\Inventory\Parameters\Filters\Filter;
 
 interface FieldMapperServiceInterface
 {
     /**
-     * @param Field $field
+     * @param Filter $field
      * @return FieldQueryBuilderInterface
      */
-    public function getBuilder(Field $field): FieldQueryBuilderInterface;
+    public function getBuilder(Filter $field): FieldQueryBuilderInterface;
 }

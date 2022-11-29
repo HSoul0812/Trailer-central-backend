@@ -27,12 +27,12 @@ class Geolocation implements GeolocationInterface
         $lat = $data['lat'];
         $lon = $data['lon'];
 
-        if ($grouping = $data['grouping']) {
-            return new ScatteredGeolocation($lat, $lon, $grouping);
+        if (isset($data['grouping'])) {
+            return new ScatteredGeolocation($lat, $lon, $data['grouping']);
         }
 
-        if ($range = $data['range']) {
-            return new GeolocationRange($lat, $lon, $range, $data['units'] ?? GeolocationRange::UNITS_MILES);
+        if (isset($data['range'])) {
+            return new GeolocationRange($lat, $lon, $data['range'], $data['units'] ?? GeolocationRange::UNITS_MILES);
         }
 
         return new Geolocation($lat, $lon);

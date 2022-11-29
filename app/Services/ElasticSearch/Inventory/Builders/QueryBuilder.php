@@ -7,7 +7,7 @@ use App\Models\Inventory\Geolocation\Point;
 use App\Services\ElasticSearch\Inventory\FieldMapperService;
 use App\Services\ElasticSearch\Inventory\InventoryQueryBuilderInterface;
 use App\Services\ElasticSearch\Inventory\Parameters\FilterGroup;
-use App\Services\ElasticSearch\Inventory\Parameters\Filters\Field;
+use App\Services\ElasticSearch\Inventory\Parameters\Filters\Filter;
 use App\Services\ElasticSearch\Inventory\Parameters\Filters\Term;
 use App\Services\ElasticSearch\Inventory\Parameters\Geolocation\GeolocationInterface;
 use App\Services\ElasticSearch\Inventory\Parameters\Geolocation\GeolocationRange;
@@ -353,7 +353,7 @@ class QueryBuilder implements InventoryQueryBuilderInterface
     private function appendQueryTo(array $query): callable
     {
         return function (FilterGroup $filters) use ($query) {
-            $filters->getFields()->each(function (Field $field) use (&$query, $filters) {
+            $filters->getFields()->each(function (Filter $field) use (&$query, $filters) {
                 if ($filters->appendsToQuery()) {
                     $query = array_merge_recursive($query, [
                         'query' => [

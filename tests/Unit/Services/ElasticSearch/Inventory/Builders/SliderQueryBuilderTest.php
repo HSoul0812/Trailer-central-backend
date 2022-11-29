@@ -3,7 +3,7 @@
 namespace Tests\Unit\Services\ElasticSearch\Inventory\Builders;
 
 use App\Services\ElasticSearch\Inventory\Builders\SliderQueryBuilder;
-use App\Services\ElasticSearch\Inventory\Parameters\Filters\Field;
+use App\Services\ElasticSearch\Inventory\Parameters\Filters\Filter;
 use App\Services\ElasticSearch\Inventory\Parameters\Filters\Term;
 use Tests\TestCase;
 
@@ -33,7 +33,7 @@ class SliderQueryBuilderTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-        $field = Field::fromArray(['name' => 'existingPrice', 'terms' => [
+        $field = Filter::fromArray(['name' => 'existingPrice', 'terms' => [
             [
                 'operator' => Term::OPERATOR_EQ,
                 'values' => [
@@ -80,7 +80,7 @@ class SliderQueryBuilderTest extends TestCase
 
     public function test_it_generates_the_correct_range_if_only_one_value_is_passed()
     {
-        $field = Field::fromArray(['name' => 'existingPrice', 'terms' => [
+        $field = Filter::fromArray(['name' => 'existingPrice', 'terms' => [
             [
                 'operator' => Term::OPERATOR_EQ,
                 'values' => [
