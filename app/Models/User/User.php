@@ -8,6 +8,7 @@ use App\Models\Integration\IntegrationDealer;
 use App\Models\Inventory\Inventory;
 use App\Models\CRM\Dms\Quote\QuoteSetting;
 use App\Models\Parts\Bin;
+use App\Models\Parts\Part;
 use App\Models\User\Interfaces\PermissionsInterface;
 use App\Traits\Models\HasPermissionsStub;
 use Illuminate\Contracts\Auth\Authenticatable;
@@ -297,6 +298,11 @@ class User extends Model implements Authenticatable, PermissionsInterface
     public function dealerParts(): HasOne
     {
         return $this->hasOne(DealerPart::class, 'dealer_id', 'dealer_id');
+    }
+
+    public function parts(): HasMany
+    {
+        return $this->hasMany(Part::class, 'dealer_id', 'dealer_id');
     }
 
     public function dealerClapp(): HasOne
