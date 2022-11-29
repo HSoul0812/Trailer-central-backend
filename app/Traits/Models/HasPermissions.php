@@ -33,8 +33,7 @@ trait HasPermissions
     /**
      * @return Collection
      */
-    public function getPermissions(): Collection
-    {
+    public function getPermissions(): Collection {
         $perms = [];
 
         if ($this->userPermissions === null) {
@@ -48,10 +47,10 @@ trait HasPermissions
 
                 $perms[] = $perm;
             }
-        }
 
-        // Return Use Permissions Collection
-        $this->userPermissions = collect($perms);
+            // Return Use Permissions Collection
+            $this->userPermissions = collect($perms);
+        }
 
         return $this->userPermissions;
     }

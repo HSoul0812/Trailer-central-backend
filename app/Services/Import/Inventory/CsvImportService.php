@@ -8,7 +8,6 @@ use App\Models\Inventory\Attribute;
 use App\Models\Inventory\Category;
 use App\Models\Inventory\Inventory;
 use App\Models\User\DealerLocation;
-use App\Services\File\ImageService;
 use App\Services\Inventory\InventoryServiceInterface;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
@@ -29,11 +28,6 @@ class CsvImportService implements CsvImportServiceInterface
      * @var BulkUploadRepositoryInterface
      */
     protected $bulkUploadRepository;
-
-    /**
-     * @var ImageService
-     */
-    private $imageService;
 
     /**
      * @var
@@ -90,6 +84,7 @@ class CsvImportService implements CsvImportServiceInterface
      */
     protected $allowedHeaderValues = [
         "inventory_id" => false,
+        "on website & classifieds" => true,
         "stock" => true,
         "title" => true,
         "model" => true,
@@ -102,6 +97,7 @@ class CsvImportService implements CsvImportServiceInterface
         "vin" => true,
         "category" => true,
         "price" => true,
+        "hidden_price" => true,
         "sales_price" => true,
         "website_price" => true,
         "msrp" => true,
@@ -139,6 +135,7 @@ class CsvImportService implements CsvImportServiceInterface
      */
     static private $_columnMap = array(
         "inventory_id" => "identifier",
+        "on website & classifieds" => array("on website & classifieds", "on website and classifieds", "show on website"),
         "stock" => array("stock", "stock #", "stock#", "stock nr", "stock number"),
         "title" => "title",
         "model" => array("model", "model#", "model no", "model no."),
@@ -151,6 +148,7 @@ class CsvImportService implements CsvImportServiceInterface
         "vin" => array("vin", "vin#"),
         "category" => "category",
         "price" => array("price", "sellingprice"),
+        "hidden_price" => array("hidden price"),
         "sales_price" => array("sales price", "sale price", "sales only price", "sale only price"),
         "website_price" => array("website price", "website only price"),
         "msrp" => array("msrp", "mfg price"),
@@ -187,10 +185,18 @@ class CsvImportService implements CsvImportServiceInterface
      */
     static private $_columnValidation = array(
         "inventory_id" => array("type" => "string", "regex" => "([a-zA-Z0-9]+)"),
+        "on website & classifieds" => array(
+            "type" => "enum",
+            "list" => array(
+                "yes" => "1",
+                "no" => "0"
+            )
+        ),
         "stock" => array("type" => "string", "unique" => true),
         "title" => array("type" => "string", "length" => 255, "regex" => "[\w\s\d\.'\"\\/\*\+\?]*"),
         "manufacturer" => array("type" => "string"),
         "model" => array("type" => "string", "length" => 255, "regex" => "[\w\s\d\.'\"\\/\*\+\?]*"),
+        "brand" => array("type" => "string"),
         "description" => array("type" => "string"),
         "description_html" => array("type" => "string"),
         "location" => array("type" => "string"),
@@ -260,6 +266,7 @@ class CsvImportService implements CsvImportServiceInterface
             "type" => "string"
         ),
         "price" => array("type" => "decimal"),
+        "hidden_price" => array("type" => "decimal"),
         "year" => array("type" => "date", "format" => "Y"),
         "condition" => array(
             "type" => "enum",
@@ -365,6 +372,7 @@ class CsvImportService implements CsvImportServiceInterface
      * @var string[]
      */
     static $ignorableColumns = array(
+        "number of images",
         "admin-notes",
         "created at date"
     );
@@ -391,16 +399,14 @@ class CsvImportService implements CsvImportServiceInterface
 
     /**
      * @param BulkUploadRepositoryInterface $bulkUploadRepository
-     * @param ImageService $imageService
+     * @param InventoryServiceInterface $inventoryService
      */
     public function __construct(
         BulkUploadRepositoryInterface $bulkUploadRepository,
-        ImageService $imageService,
         InventoryServiceInterface $inventoryService
     )
     {
         $this->bulkUploadRepository = $bulkUploadRepository;
-        $this->imageService = $imageService;
         $this->inventoryService = $inventoryService;
 
         $this->convertHelper = new ConvertHelper();
@@ -419,10 +425,11 @@ class CsvImportService implements CsvImportServiceInterface
         // Set categories
         $this->setCategories();
 
+        /* For testing purposes only
         Log::debug("Attributes: " . json_encode(self::$_attributes));
         Log::debug("Allowed: " . json_encode($this->allowedHeaderValues));
         Log::debug("Validation: " . json_encode(self::$_columnValidation));
-        Log::debug("Mapping: " . json_encode(self::$_columnMap));
+        Log::debug("Mapping: " . json_encode(self::$_columnMap));*/
 
         try {
             if (!$this->validate()) {
@@ -828,34 +835,24 @@ class CsvImportService implements CsvImportServiceInterface
                 break;
 
             case 'images':
-                $images = explode(',', $value);
-                $images = array_map('trim', $images);
+                // Stop sending images here, InventoryService will handle...
+                if (!empty($value)) {
+                    $images = explode(',', $value);
+                    $images = array_map('trim', $images);
 
-                if (count($images) > 0) {
-                    foreach ($images as $image) {
-                        $fileDto = $this->imageService->upload(
-                            $image,
-                            $this->inventory['stock'],
-                            null,
-                            null,
-                            ['visibility' => config('filesystems.disks.s3.visibility')]
-                        );
-
-                        if ($fileDto) {
-                            if ($this->imageMode == self::IM_APPEND) {
-                                $this->inventory['new_images'][] = array(
-                                    'filename' => $fileDto->getPath(),
-                                    'hash' => $fileDto->getHash()
-                                );
-                            } elseif ($this->imageMode == self::IM_REPLACE) {
-                                $this->inventory['existing_images'][] = array(
-                                    'filename' => $fileDto->getPath(),
-                                    'hash' => $fileDto->getHash()
-                                );
+                    if (count($images) > 0) {
+                        if ($this->imageMode == self::IM_APPEND) {
+                            foreach ($images as $image) {
+                                $this->inventory['new_images'][] = [
+                                    'url' => $image
+                                ];
                             }
-
-                        } else {
-                            return "Image '{$value}' not found in import.";
+                        } elseif ($this->imageMode == self::IM_REPLACE) {
+                            foreach ($images as $image) {
+                                $this->inventory['existing_images'][] = [
+                                    'url' => $image
+                                ];
+                            }
                         }
                     }
                 }
@@ -1000,7 +997,7 @@ class CsvImportService implements CsvImportServiceInterface
         if (strlen($jsonEncodedValidationErrors) > self::MAX_VALIDATION_ERROR_CHAR_COUNT) {
             $filePath = sprintf(self::S3_VALIDATION_ERRORS_PATH, uniqid() . '.txt');
             Storage::disk('s3')->put($filePath, implode(PHP_EOL, $this->validationErrors));
-            return json_encode(Storage::disk('s3')->url($filePath));
+            return "Log too big, please follow this link to see what failed: " . Storage::disk('s3')->url($filePath);
         }
         return $jsonEncodedValidationErrors;
     }
