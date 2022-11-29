@@ -36,6 +36,11 @@ class SelectQueryBuilder implements FieldQueryBuilderInterface
             if ($name == 'dealerLocationId' && $options->isFilterable()) {
                 $options = $options->locations();
             }
+
+            if ($name == 'isRental') {
+                $options = array_map('boolval', $options);
+            }
+
             foreach ($options as $value) {
                 $queries[] = [
                     'term' => [
@@ -118,6 +123,8 @@ class SelectQueryBuilder implements FieldQueryBuilderInterface
                         ]
                     ]);
                     break;
+                case 'isRental':
+                    $options = array_map('boolval', $options);
                 default:
                     $optionsQuery = [
                         'bool' => [

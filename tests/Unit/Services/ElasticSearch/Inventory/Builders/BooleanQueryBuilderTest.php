@@ -3,6 +3,8 @@
 namespace Tests\Unit\Services\ElasticSearch\Inventory\Builders;
 
 use App\Services\ElasticSearch\Inventory\Builders\BooleanQueryBuilder;
+use App\Services\ElasticSearch\Inventory\Parameters\Filters\Field;
+use App\Services\ElasticSearch\Inventory\Parameters\Filters\Term;
 use Tests\TestCase;
 
 class BooleanQueryBuilderTest extends TestCase
@@ -30,8 +32,14 @@ class BooleanQueryBuilderTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-        $boolQuery = new BooleanQueryBuilder('is_special', '1');
-        $this->query = $boolQuery->query();
+        $field = Field::fromArray(['name' => 'is_special', 'terms' => [
+            [
+                'operator' => Term::OPERATOR_EQ,
+                'values' => [true]
+            ]
+        ]]);
+        $boolQuery = new BooleanQueryBuilder($field);
+        $this->query = $boolQuery->generalQuery();
     }
 
     public function test_it_appends_the_query_to_the_post_filters()

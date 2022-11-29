@@ -188,26 +188,6 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
     }
 
     /**
-     * @return \array[][][][][]
-     */
-    private function buildRentalBoolQuery(array $rental): array
-    {
-        return [
-            'query' => [
-                'bool' => [
-                    'must' => [
-                        [
-                            'term' => [
-                                'isRental' => $rental[0]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
-        ];
-    }
-
-    /**
      * @return \array[][]
      */
     private function buildSalePriceFilterScriptQuery(array $data): array
@@ -285,9 +265,6 @@ doc['status'].value != 2 && doc['dealer.name'].value != 'Operate Beyond'";
                     break;
                 case 'availability':
                     $this->appendToQuery($this->buildAvailabilityQuery($term->getOperator(), $values));
-                    break;
-                case 'rental_bool':
-                    $this->appendToQuery($this->buildRentalBoolQuery($values));
                     break;
             }
         });

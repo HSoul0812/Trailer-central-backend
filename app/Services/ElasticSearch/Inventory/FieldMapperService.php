@@ -28,7 +28,6 @@ class FieldMapperService implements InventoryFieldMapperServiceInterface
         'location_country', //filter by location.country for TT
         'empty_images', //handle exclusion of empty images
         'availability', //handle availability
-        'rental_bool', //handle edge-case to fix isRental being a select in db
     ];
 
     public function __construct(InventoryFilterRepositoryInterface $repository, Cache $cache)

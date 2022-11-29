@@ -10,6 +10,8 @@ use App\Services\ElasticSearch\Inventory\Builders\CustomQueryBuilder;
 use App\Services\ElasticSearch\Inventory\Builders\SelectQueryBuilder;
 use App\Services\ElasticSearch\Inventory\Builders\SliderQueryBuilder;
 use App\Services\ElasticSearch\Inventory\FieldMapperService;
+use App\Services\ElasticSearch\Inventory\Parameters\Filters\Field;
+use App\Services\ElasticSearch\Inventory\Parameters\Filters\Term;
 use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
@@ -59,36 +61,93 @@ class FieldMapperServiceTest extends TestCase
     public function test_it_throws_an_exception_if_the_field_is_unknown()
     {
         $this->expectException(FilterNotFoundException::class);
-        $this->service->getBuilder('some_unknown_field', 'somedata');
+        $field = Field::fromArray(['name' => 'some_unknown_field', 'terms' => [
+            [
+                'operator' => Term::OPERATOR_EQ,
+                'values' => []
+            ]
+        ]]);
+        $this->service->getBuilder($field);
     }
 
     public function test_it_create_the_right_builder_instance_based_on_the_field_type()
     {
-        $builder = $this->service->getBuilder('price', '10000:20000');
+        $field = Field::fromArray(['name' => 'price', 'terms' => [
+            [
+                'operator' => Term::OPERATOR_EQ,
+                'values' => [
+                    'gte' => 10000,
+                    'lte' => 20000
+                ]
+            ]
+        ]]);
+        $builder = $this->service->getBuilder($field);
         $this->assertInstanceOf(SliderQueryBuilder::class, $builder);
 
-        $builder = $this->service->getBuilder('year', '2020');
+        $field = Field::fromArray(['name' => 'year', 'terms' => [
+            [
+                'operator' => Term::OPERATOR_EQ,
+                'values' => [2020]
+            ]
+        ]]);
+        $builder = $this->service->getBuilder($field);
         $this->assertInstanceOf(SelectQueryBuilder::class, $builder);
 
-        $builder = $this->service->getBuilder('is_special', '1');
+        $field = Field::fromArray(['name' => 'is_special', 'terms' => [
+            [
+                'operator' => Term::OPERATOR_EQ,
+                'values' => [true]
+            ]
+        ]]);
+        $builder = $this->service->getBuilder($field);
         $this->assertInstanceOf(BooleanQueryBuilder::class, $builder);
     }
 
     public function test_it_resolves_the_right_builder_instance_for_known_fields_with_different_names()
     {
-        $builder = $this->service->getBuilder('existingPrice', '10000:20000');
+        $field = Field::fromArray(['name' => 'existingPrice', 'terms' => [
+            [
+                'operator' => Term::OPERATOR_EQ,
+                'values' => [
+                    'gte' => 10000,
+                    'lte' => 20000
+                ]
+            ]
+        ]]);
+        $builder = $this->service->getBuilder($field);
         $this->assertInstanceOf(SliderQueryBuilder::class, $builder);
 
-        $builder = $this->service->getBuilder('numSleep', '10');
+        $field = Field::fromArray(['name' => 'numSleep', 'terms' => [
+            [
+                'operator' => Term::OPERATOR_EQ,
+                'values' => [
+                    10
+                ]
+            ]
+        ]]);
+        $builder = $this->service->getBuilder($field);
         $this->assertInstanceOf(SelectQueryBuilder::class, $builder);
     }
 
     public function test_it_builds_queries_for_edge_cases_with_a_custom_query_builder_instance()
     {
-        $builder = $this->service->getBuilder('show_images', 'jpg;png');
+        $field = Field::fromArray(['name' => 'show_images', 'terms' => [
+            [
+                'operator' => Term::OPERATOR_EQ,
+                'values' => [
+                    'jpg',
+                    'png'
+                ]
+            ]
+        ]]);
+        $builder = $this->service->getBuilder($field);
         $this->assertInstanceOf(CustomQueryBuilder::class, $builder);
 
-        $builder = $this->service->getBuilder('clearance_special', '1');
+        $field = Field::fromArray(['name' => 'clearance_special', 'terms' => [
+            'operator' => Term::OPERATOR_EQ,
+            'values' => []
+        ]]);
+        $builder = $this->service->getBuilder($field);
         $this->assertInstanceOf(CustomQueryBuilder::class, $builder);
     }
 }
