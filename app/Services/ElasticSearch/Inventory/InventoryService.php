@@ -4,7 +4,6 @@ namespace App\Services\ElasticSearch\Inventory;
 
 use App\Http\Clients\ElasticSearch\ElasticSearchClient;
 use App\Http\Clients\ElasticSearch\ElasticSearchQueryResult;
-use App\Services\ElasticSearch\Inventory\Parameters\DealerId;
 use App\Services\ElasticSearch\Inventory\Parameters\Geolocation\GeolocationInterface;
 
 class InventoryService implements InventoryServiceInterface
@@ -25,19 +24,18 @@ class InventoryService implements InventoryServiceInterface
         $this->queryBuilder = $queryBuilder;
     }
 
-    public function search(bool                 $inRandomOrder,
-                           DealerId             $dealerIds,
-                           array                $terms,
-                           GeolocationInterface $geolocation,
-                           array                $sort = [],
-                           array                $pagination = []): ElasticSearchQueryResult
+    public function search(
+        array                $dealerIds,
+        array                $terms,
+        GeolocationInterface $geolocation,
+        array                $sort = [],
+        array                $pagination = []): ElasticSearchQueryResult
     {
         $query = $this->queryBuilder->addDealers($dealerIds)
             ->addTerms($terms)
             ->addGeolocation($geolocation)
             ->addSort($sort)
-            ->addPagination($pagination)
-            ->inRandomOrder($inRandomOrder);
+            ->addPagination($pagination);
 
         return $this->client->search((string)config('elastic.scout_driver.indices.inventory'), $query);
     }

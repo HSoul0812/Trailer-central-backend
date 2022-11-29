@@ -3,6 +3,8 @@
 namespace Tests\Unit\Services\ElasticSearch\Inventory\Builders;
 
 use App\Services\ElasticSearch\Inventory\Builders\BooleanQueryBuilder;
+use App\Services\ElasticSearch\Inventory\Parameters\Filters\Field;
+use App\Services\ElasticSearch\Inventory\Parameters\Filters\Term;
 use Tests\TestCase;
 
 class BooleanQueryBuilderTest extends TestCase
@@ -30,8 +32,14 @@ class BooleanQueryBuilderTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-        $boolQuery = new BooleanQueryBuilder('is_special', '1');
-        $this->query = $boolQuery->query();
+        $field = Field::fromArray(['name' => 'is_special', 'terms' => [
+            [
+                'operator' => Term::OPERATOR_EQ,
+                'values' => [true]
+            ]
+        ]]);
+        $boolQuery = new BooleanQueryBuilder($field);
+        $this->query = $boolQuery->generalQuery();
     }
 
     public function test_it_appends_the_query_to_the_post_filters()
@@ -45,7 +53,7 @@ class BooleanQueryBuilderTest extends TestCase
     {
         $this->assertArrayHasKey('aggregations', $this->query);
         $this->assertArrayHasKey('filter_aggregations', $this->query['aggregations']);
-        $this->assertArrayHasKey('location_aggregations', $this->query['aggregations']);
+        $this->assertArrayHasKey('selected_location_aggregations', $this->query['aggregations']);
     }
 
     public function test_it_appends_the_query_to_the_filter_aggregations_filter()
@@ -57,12 +65,12 @@ class BooleanQueryBuilderTest extends TestCase
         $this->assertSame($this->expectedQuery, $this->query['aggregations']['filter_aggregations']['filter']);
     }
 
-    public function test_it_appends_the_query_to_the_location_aggregations_filter()
+    public function test_it_appends_the_query_to_the_selected_location_aggregations_filter()
     {
-        $this->assertArrayHasKey('location_aggregations', $this->query['aggregations']);
-        $this->assertIsArray($this->query['aggregations']['location_aggregations']);
-        $this->assertArrayHasKey('filter', $this->query['aggregations']['location_aggregations']);
-        $this->assertIsArray($this->query['aggregations']['location_aggregations']['filter']);
-        $this->assertSame($this->expectedQuery, $this->query['aggregations']['location_aggregations']['filter']);
+        $this->assertArrayHasKey('selected_location_aggregations', $this->query['aggregations']);
+        $this->assertIsArray($this->query['aggregations']['selected_location_aggregations']);
+        $this->assertArrayHasKey('filter', $this->query['aggregations']['selected_location_aggregations']);
+        $this->assertIsArray($this->query['aggregations']['selected_location_aggregations']['filter']);
+        $this->assertSame($this->expectedQuery, $this->query['aggregations']['selected_location_aggregations']['filter']);
     }
 }

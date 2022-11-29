@@ -4,5 +4,13 @@ namespace App\Services\ElasticSearch\Inventory\Builders;
 
 interface FieldQueryBuilderInterface
 {
-    public function query(): array;
+    /**
+     * @return array
+     */
+    public function globalQuery(): array;
+
+    /**
+     * @return array
+     */
+    public function generalQuery(): array;
 }

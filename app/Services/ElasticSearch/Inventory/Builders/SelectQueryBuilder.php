@@ -2,108 +2,159 @@
 
 namespace App\Services\ElasticSearch\Inventory\Builders;
 
+use App\Services\ElasticSearch\Inventory\Parameters\Filters\Term;
+use App\Services\ElasticSearch\Inventory\Parameters\Filters\Field;
 use App\Services\ElasticSearch\Inventory\Parameters\DealerLocationIds;
 
-/**
- * Builds a proper ES query for a select, they should be provided as follows:
- *   - category=camping_rv;fifth_wheel_campers: which is a category with options camping_rv & fifth_wheel_campers
- */
 class SelectQueryBuilder implements FieldQueryBuilderInterface
 {
-    public const DELIMITER = ';';
-
-    /** @var string */
+    /** @var Field */
     private $field;
 
-    /** @var array|DealerLocationIds */
-    private $options;
+    /** @var array */
+    private $query = [];
 
-    public function __construct(string $field, string $data)
+    public function __construct(Field $field)
     {
         $this->field = $field;
-
-        $this->options = explode(self::DELIMITER, $data);
-
-        if ($this->field === 'dealerLocationId') {
-            $this->options = DealerLocationIds::fromString($data);
-        }
     }
 
-    public function query(): array
+    /**
+     * @return array
+     */
+    public function globalQuery(): array
     {
-        switch ($this->field) {
-            case 'dealerLocationId':
-                $optionsQuery = [
+        $this->field->getTerms()->each(function (Term $term) {
+            $name = $this->field->getName();
+            $options = $term->getValues();
+            $queries = [];
+
+            if ($name === 'dealerLocationId') {
+                $options = DealerLocationIds::fromArray($options);
+            }
+
+            if ($name == 'dealerLocationId' && $options->isFilterable()) {
+                $options = $options->locations();
+            }
+
+            if ($name == 'isRental') {
+                $options = array_map('boolval', $options);
+            }
+
+            foreach ($options as $value) {
+                $queries[] = [
+                    'term' => [
+                        $name => $value
+                    ]
+                ];
+            }
+            $this->appendToQuery([
+                [
                     'bool' => [
-                        'filter' => [
-                            [
-                                'terms' => [
-                                    $this->field => $this->options->locations()
+                        $term->getESOperatorKeyword() => $queries
+                    ]
+                ]
+            ]);
+        });
+
+        return $this->query;
+    }
+
+    /**
+     * @return array
+     */
+    public function generalQuery(): array
+    {
+        $this->field->getTerms()->each(function (Term $term) {
+            $name = $this->field->getName();
+            $options = $term->getValues();
+
+            switch ($name) {
+                case 'dealerLocationId':
+                    $options = DealerLocationIds::fromArray($options);
+                    $optionsQuery = [
+                        'bool' => [
+                            'filter' => [
+                                [
+                                    'terms' => [
+                                        $name => $options->locations()
+                                    ]
                                 ]
                             ]
                         ]
-                    ]
-                ];
-
-                return [
-                    'post_filter' => $this->options->isFilterable() ? $optionsQuery : [],
-                    'sort' => [
-                        [
-                            '_script' => [
-                                'type' => 'number',
-                                'script' => [
-                                    'inline' => "
+                    ];
+                    $this->appendToQuery([
+                        'post_filter' => $options->isFilterable() ? $optionsQuery : [],
+                        'sort' => [
+                            [
+                                '_script' => [
+                                    'type' => 'number',
+                                    'script' => [
+                                        'inline' => "
                                     if(doc['dealerLocationId'].value != null) {
                                         for(int i=0; i < params['locations'].length; i++) {
                                             if(params['locations'][i] == doc['dealerLocationId'].value) return -1;
                                         }
                                         return 0;
                                     } else { return 1; }",
-                                    'params' => [
-                                        'locations' => array_map(static function ($location) {
-                                            return (int)$location;
-                                        }, $this->options->locationsForSubAggregatorsFiltering())
-                                    ]
-                                ],
-                                'order' => 'asc'
+                                        'params' => [
+                                            'locations' => array_map(static function ($location) {
+                                                return (int)$location;
+                                            }, $options->locationsForSubAggregatorsFiltering())
+                                        ]
+                                    ],
+                                    'order' => 'asc'
+                                ]
                             ]
-                        ]
-                    ],
-                    'aggregations' => [
-                        'filter_aggregations' => $this->options->isFilterable() ? ['filter' => $optionsQuery] : [],
-                        'selected_location_aggregations' => ['filter' => [
-                            'bool' => [
-                                'filter' => [
-                                    [
-                                        'terms' => [
-                                            $this->field => $this->options->locationsForSubAggregatorsFiltering()
+                        ],
+                        'aggregations' => [
+                            'filter_aggregations' => $options->isFilterable() ? ['filter' => $optionsQuery] : [],
+                            'selected_location_aggregations' => ['filter' => [
+                                'bool' => [
+                                    'filter' => [
+                                        [
+                                            'terms' => [
+                                                $name => $options->locationsForSubAggregatorsFiltering()
+                                            ]
                                         ]
                                     ]
                                 ]
-                            ]
-                        ]]
-                    ]
-                ];
-            default:
-                $optionsQuery = [
-                    'bool' => [
-                        'filter' => [
-                            [
-                                'terms' => [
-                                    $this->field => $this->options
+                            ]]
+                        ]
+                    ]);
+                    break;
+                case 'isRental':
+                    $options = array_map('boolval', $options);
+                default:
+                    $optionsQuery = [
+                        'bool' => [
+                            'filter' => [
+                                [
+                                    'terms' => [
+                                        $name => $options
+                                    ]
                                 ]
                             ]
                         ]
-                    ]
-                ];
+                    ];
+                    $this->appendToQuery([
+                        'post_filter' => $optionsQuery,
+                        'aggregations' => [
+                            'filter_aggregations' => ['filter' => $optionsQuery],
+                            'selected_location_aggregations' => ['filter' => $optionsQuery]
+                        ]
+                    ]);
+            }
+        });
+        return $this->query;
+    }
 
-                return [
-                    'post_filter' => $optionsQuery,
-                    'aggregations' => [
-                        'filter_aggregations' => ['filter' => $optionsQuery],
-                        'selected_location_aggregations' => ['filter' => $optionsQuery]
-                    ]
-                ];
-        }
+    /**
+     * @param array $query
+     * @return void
+     */
+    private function appendToQuery(array $query)
+    {
+        $this->query = array_merge_recursive($this->query, $query);
     }
 }
