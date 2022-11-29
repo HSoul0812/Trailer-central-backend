@@ -72,7 +72,6 @@ class ClientRedisRepository implements ClientRepositoryInterface
     {
         $this->log = Log::channel('cl-client');
         $this->redis = Redis::connection('persist');
-        $this->log->info('Initialized Redis for CL Client Using ' . $this->redis->getName());
     }
 
     /**
@@ -194,17 +193,22 @@ class ClientRedisRepository implements ClientRepositoryInterface
         $this->log->info('Getting All Internal Clients for Params');
 
         // Scan for Clients
-        $this->log->info('Retrieving All Internal Behaviours');
         $behaviours = Behaviour::getAllInternal();
+        $this->log->info('Retrieved All ' . count($behaviours) . ' Internal Behaviours');
 
         // Loop Behaviours
         $clients = new Collection();
         foreach($behaviours as $behaviour) {
             // Combine Dealer Clients
-            $clients->merge($this->getAllUuids($behaviour->dealerId, $behaviour->slotId));
+            $uuids = $this->getAllUuids($behaviour->dealerId, $behaviour->slotId);
+            foreach($uuids as $uuid) {
+                $clients->push($uuid);
+            }
+            $this->log->info('Merged ' . $uuids->count() . ' Clients For Total ' . $clients->count());
         }
 
         // Append Sort
+        $this->log->info('Merged All ' . $clients->count() . ' Clients Into Single Collection');
         return $this->sort($clients, '-checkin');
     }
 
@@ -219,10 +223,10 @@ class ClientRedisRepository implements ClientRepositoryInterface
     public function sentIn(string $email, int $interval): int
     {
         // Redis Key Exists for Slack?
-        $lastRun = $this->redis->hmget(ClientMessage::LAST_SENT_KEY, $email);
+        $lastRun = $this->redis->hmget(ClientMessage::LAST_SENT_KEY, [$email]);
 
         // Check Interval
-        return (time() - (int) $lastRun) > $interval;
+        return (floor((time() - (int) $lastRun[0]) / 60) < $interval);
     }
 
     /**
@@ -243,7 +247,7 @@ class ClientRedisRepository implements ClientRepositoryInterface
      * 
      * @param int $dealerId
      * @param int $slotId
-     * @return Collection<string>
+     * @return Collection<Client>
      */
     private function getAllUuids(int $dealerId, int $slotId): Collection {
         // Get All UUID's for Dealer ID and Slot ID
@@ -264,6 +268,7 @@ class ClientRedisRepository implements ClientRepositoryInterface
         }
 
         // Return Clients
+        $this->log->info('Retrieved ' . $clients->count() . ' Clients For Dealer #' . $dealerId . ' and Slot #' . $slotId);
         return $clients;
     }
 

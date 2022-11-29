@@ -43,19 +43,19 @@ class ClientMessage
     /**
      * @const string
      */
-    const WARNING_ELAPSED = 'WARNING: No :email Craigslist clients have checked in for over :elapsed' .
+    const WARNING_ELAPSED = 'WARNING: No :email Craigslist clients have checked in for over :elapsed ' .
             ':scale, please check to ensure Craigslist posts do not fall too far behind.';
 
     /**
      * @const string
      */
-    const WARNING_ALERT = 'ALERT: Its has been over :elapsed :scale since any :email Craigslist' .
+    const WARNING_ALERT = 'ALERT: Its has been over :elapsed :scale since any :email Craigslist ' .
             'clients have checked in! This must be reviewed as soon as possible!';
 
     /**
      * @const string
      */
-    const WARNING_CRITICAL = 'CRITICAL!: Its has been over :elapsed :scale since any :email Craigslist' .
+    const WARNING_CRITICAL = 'CRITICAL!: Its has been over :elapsed :scale since any :email Craigslist ' .
             'clients have checked in! This must be fixed IMMEDIATELY!';
 
     
@@ -139,7 +139,7 @@ class ClientMessage
         return new self([
             'dealer_id' => $client->dealerId,
             'email'     => $client->email,
-            'level'     => $level,
+            'level'     => ClientValidate::WARNING_LEVELS[0],
             'message'   => $message
         ]);
     }
@@ -190,6 +190,12 @@ class ClientMessage
             if(in_array($key, self::MESSAGE_VARS)) {
                 $message = str_replace(':' . $key, $value, $message);
             }
+        }
+
+        // If Critical, Prepend Username
+        $critical = config('marketing.cl.settings.slack.critical');
+        if(!empty($critical) && $level === ClientValidate::CRITICAL_LEVEL) {
+            $message = '<' . $critical . '> ' . $message;
         }
 
         // Returned Filled Message

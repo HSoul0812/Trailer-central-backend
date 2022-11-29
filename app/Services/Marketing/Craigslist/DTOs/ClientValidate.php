@@ -39,6 +39,11 @@ class ClientValidate
      */
     const CLIENTS_LEVEL = 'clients';
 
+    /**
+     * @const string
+     */
+    const CRITICAL_LEVEL = 'critical';
+
 
     /**
      * @var int

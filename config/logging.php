@@ -239,7 +239,7 @@ return [
             'url' => env('CLAPP_SLACK_WEBHOOK_URL'),
             'username' => 'Laravel Log',
             'emoji' => ':boom:',
-            'level' => env('CLAPP_SLACK_LEVEL', 'warning'),
+            'level' => env('CLAPP_SLACK_LEVEL', 'info'),
         ],
 
         'papertrail' => [
