@@ -173,8 +173,10 @@ class ValidateService implements ValidateServiceInterface
             // Check Number of Clients
             if(count($valid) < 1) {
                 $message = ClientMessage::varied(collect($warning));
-            } elseif($client->isEdit && count($valid) <= (int) $config['clients.edit']) {
-                $message = ClientMessage::warning(collect($valid));
+            } elseif($client->isEdit) {
+                if(count($valid) <= (int) $config['clients.edit']) {
+                    $message = ClientMessage::warning(collect($valid));
+                }
             } elseif(count($valid) <= (int) $config['clients.low']) {
                 $message = ClientMessage::warning(collect($valid));
             }
