@@ -19,8 +19,8 @@ use Illuminate\Support\Str;
 
 class StripePaymentService implements StripePaymentServiceInterface
 {
-    const STRIPE_SUCCESS_URL = '/{id}/?payment_status=success';
-    const STRIPE_FAILURE_URL = '/{id}/?payment_status=failed';
+    const STRIPE_SUCCESS_URL = '/trailers/{id}/?payment_status=success';
+    const STRIPE_FAILURE_URL = '/trailers/{id}/?payment_status=failed';
     const CHECKOUT_SESSION_COMPLETED_EVENT = 'checkout.session.completed';
 
     const PRICES = [
