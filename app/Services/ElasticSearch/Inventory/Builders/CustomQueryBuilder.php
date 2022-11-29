@@ -264,28 +264,43 @@ doc['status'].value != 2 && doc['dealer.name'].value != 'Operate Beyond'";
             $values = $term->getValues();
             switch ($name) {
                 case 'show_images':
-                    return $this->buildImagesQuery($values);
+                    $this->appendToQuery($this->buildImagesQuery($values));
+                    break;
                 case 'clearance_special':
-                    return $this->buildClearanceSpecialQuery();
+                    $this->appendToQuery($this->buildClearanceSpecialQuery());
+                    break;
                 case 'location_region':
                 case 'location_city':
                 case 'location_country':
-                    return $this->buildLocationQuery($name, $values);
+                    $this->appendToQuery($this->buildLocationQuery($name, $values));
+                    break;
                 case 'classifieds_site':
-                    return $this->buildClassifiedsSiteQuery();
+                    $this->appendToQuery($this->buildClassifiedsSiteQuery());
+                    break;
                 case 'sale_price_script':
-                    return $this->buildSalePriceFilterScriptQuery($values);
+                    $this->appendToQuery($this->buildSalePriceFilterScriptQuery($values));
+                    break;
                 case 'empty_images':
-                    return $this->buildEmptyImagesQuery();
+                    $this->appendToQuery($this->buildEmptyImagesQuery());
+                    break;
                 case 'availability':
-                    return $this->buildAvailabilityQuery($term->getOperator(), $values);
+                    $this->appendToQuery($this->buildAvailabilityQuery($term->getOperator(), $values));
+                    break;
                 case 'rental_bool':
-                    return $this->buildRentalBoolQuery($values);
-                default:
-                    return [];
+                    $this->appendToQuery($this->buildRentalBoolQuery($values));
+                    break;
             }
         });
 
         return $this->query;
+    }
+
+    /**
+     * @param array $query
+     * @return void
+     */
+    private function appendToQuery(array $query)
+    {
+        $this->query = array_merge_recursive($this->query, $query);
     }
 }
