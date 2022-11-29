@@ -56,7 +56,7 @@ class FieldMapperService implements InventoryFieldMapperServiceInterface
             return new $className($field);
         }
 
-        if (in_array($field, self::EDGE_CASES_TO_GENERATE_QUERIES_FOR)) {
+        if (in_array($field->getName(), self::EDGE_CASES_TO_GENERATE_QUERIES_FOR)) {
             return new CustomQueryBuilder($field);
         }
 
