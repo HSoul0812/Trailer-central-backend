@@ -117,10 +117,10 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
         ];
     }
 
-    private function buildClassifiedsSiteQuery(): array
+    private function buildClassifiedsSiteQuery($isClassifieds): array
     {
         // when it is not a classifieds site then it should filter by `isArchived` & `isArchived` & `status`
-        return [
+        return $isClassifieds ? [] : [
             'query' => [
                 'bool' => [
                     'must' => [
@@ -255,7 +255,7 @@ doc['status'].value != 2 && doc['dealer.name'].value != 'Operate Beyond'";
                     $this->appendToQuery($this->buildLocationQuery($name, $values));
                     break;
                 case 'classifieds_site':
-                    $this->appendToQuery($this->buildClassifiedsSiteQuery());
+                    $this->appendToQuery($this->buildClassifiedsSiteQuery($values[0]));
                     break;
                 case 'sale_price_script':
                     $this->appendToQuery($this->buildSalePriceFilterScriptQuery($values));
