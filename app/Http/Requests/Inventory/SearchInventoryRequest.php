@@ -87,7 +87,7 @@ class SearchInventoryRequest extends Request
             'pagination' => ['required'],
             'pagination.page' => ['nullable', 'integer', 'min:1'],
             'pagination.per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
-            'filter_groups' => ['required', 'array'],
+            'filter_groups' => ['present', 'array'],
             'filter_groups.*.filters' => ['required', 'array'],
             'filter_groups.*.filters.*.name' => ['required'],
             'filter_groups.*.filters.*.terms' => ['present', 'array'],
