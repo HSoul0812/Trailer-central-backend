@@ -106,7 +106,7 @@ class TransactionExecuteQueueRepository implements TransactionExecuteQueueReposi
         $dataToInsert = [
             'queued_at' => Carbon::now()->toDateTimeString(),
             'api' => $data['source'],
-            'data' => json_encode($data, JSON_UNESCAPED_SLASHES),
+            'data' => $data,
             'operation_type' => $isUpdate ? TransactionExecuteQueue::UPDATE_OPERATION_TYPE : TransactionExecuteQueue::INSERT_OPERATION_TYPE
         ];
 
