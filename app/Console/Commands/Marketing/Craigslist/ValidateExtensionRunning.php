@@ -61,12 +61,23 @@ class ValidateExtensionRunning extends Command
      */
     public function handle()
     {
+        // CL Warning Enabled
+        $isEnabled = config('marketing.cl.settings.warning.enabled', '0');
+        if(!(int) $isEnabled) {
+            return false;
+        }
+
         // Get Craigslist Poster Instances
         $clients = $this->repo->getAllInternal();
 
         // Loop Posters
         $validation = new Collection();
         foreach($clients as $client) {
+            $ignore = explode(",", config('marketing.cl.settings.warning.ignore'));
+            if(in_array($client->dealerId, $ignore)) {
+                continue;
+            }
+
             // Handle Validation
             $validation->push($this->service->validate($client));
         }

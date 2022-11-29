@@ -4,6 +4,7 @@ namespace App\Services\Marketing\Craigslist\DTOs;
 
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
+use Carbon\Carbon;
 
 /**
  * Class Client
@@ -62,7 +63,7 @@ class Client
      */
     public function elapsed(): int {
         // Return Elapsed Seconds
-        $elapsed = time() - $this->lastCheckin;
+        $elapsed = time() - Carbon::parse($this->lastCheckin)->timestamp;
 
         // Convert to Minutes
         return floor($elapsed / 60);
@@ -97,7 +98,7 @@ class Client
 
         // Behaviour Exists?
         if(!empty($behaviour)) {
-            return $behaviour->edit;
+            return $behaviour->edit ?? false;
         }
 
         // Return Null
