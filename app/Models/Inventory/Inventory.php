@@ -225,6 +225,8 @@ class Inventory extends Model
 
     const SHOW_IN_WEBSITE = 1;
 
+    const ATTRIBUTE_ZERO_VALUE = 0;
+
     const STATUS_MAPPING = [
         self::STATUS_QUOTE => self::STATUS_QUOTE_LABEL,
         self::STATUS_AVAILABLE => self::STATUS_AVAILABLE_LABEL,
@@ -835,7 +837,7 @@ class Inventory extends Model
     {
         $value = $this->getAttributesIndexedByIdAttribute()->get($id);
 
-        if (is_null($value) || empty($value)) {
+        if ($value !== self::ATTRIBUTE_ZERO_VALUE && (is_null($value) || empty($value))) { // we need the attributes with value 0 to be displayed
             return $default;
         }
 
