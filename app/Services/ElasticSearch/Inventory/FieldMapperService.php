@@ -7,6 +7,7 @@ use App\Models\Inventory\InventoryFilter;
 use App\Repositories\Inventory\InventoryFilterRepositoryInterface;
 use App\Services\ElasticSearch\Inventory\Builders\CustomQueryBuilder;
 use App\Services\ElasticSearch\Inventory\Builders\FieldQueryBuilderInterface;
+use App\Services\ElasticSearch\Inventory\Parameters\Filters\Field;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
@@ -40,28 +41,26 @@ class FieldMapperService implements InventoryFieldMapperServiceInterface
     }
 
     /**
-     * @param string $field
-     * @param string $data
-     *
+     * @param Field $field
      * @return FieldQueryBuilderInterface when the filter was not able to be handled
      */
-    public function getBuilder(string $field, string $data): FieldQueryBuilderInterface
+    public function getBuilder(Field $field): FieldQueryBuilderInterface
     {
         /** @var ?InventoryFilter $filter */
 
-        $filter = $this->filters->get($this->resolveName($field));
+        $filter = $this->filters->get($this->resolveName($field->getName()));
 
         if ($filter) {
             $className = __NAMESPACE__ . '\\Builders\\' . ucfirst($filter->type) . 'QueryBuilder';
 
-            return new $className($field, $data);
+            return new $className($field);
         }
 
-        if (in_array($field, self::EDGE_CASES_TO_GENERATE_QUERIES_FOR)) {
-            return new CustomQueryBuilder($field, $data);
+        if (in_array($field->getName(), self::EDGE_CASES_TO_GENERATE_QUERIES_FOR)) {
+            return new CustomQueryBuilder($field);
         }
 
-        throw new FilterNotFoundException("`$field` was not able to be build");
+        throw new FilterNotFoundException("`{$field->getName()}` was not able to be build");
     }
 
     /**

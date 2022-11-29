@@ -5,55 +5,37 @@ declare(strict_types=1);
 namespace App\Http\Requests\Inventory;
 
 use App\Http\Requests\Request;
-use App\Services\ElasticSearch\Inventory\Parameters\DealerId;
+use App\Services\ElasticSearch\Inventory\Parameters\FilterGroup;
+use App\Services\ElasticSearch\Inventory\Parameters\Filters\Term;
 use App\Services\ElasticSearch\Inventory\Parameters\Geolocation\Geolocation;
 use App\Services\ElasticSearch\Inventory\Parameters\Geolocation\GeolocationInterface;
+use App\Services\ElasticSearch\Inventory\Parameters\Geolocation\GeolocationRange;
+use Illuminate\Validation\Rule;
 
 /**
  * @property int $page
  * @property int $per_page
  * @property int $offset
  * @property int $x_qa_req
- * @property int $in_random_order
- * @property string $geolocation
  * @property boolean $classifieds_site
  */
 class SearchInventoryRequest extends Request
 {
-    private const DELIMITER = ';';
-    private const SORT_DELIMITER = ':';
-
-    protected $rules = [
-        'per_page' => 'integer|min:1|max:100',
-        'page' => ['integer', 'min:0'],
-        'classifieds_site' => 'boolean',
-        'geolocation' => ['required', 'string'], // @todo we should add a regex validation here
-    ];
-
     public function terms(): array
     {
-        return collect($this->all())->except([
-            'sort',
-            'page',
-            'per_page',
-            'offset',
-            'dealerId',
-            'geolocation',
-            'x_qa_req',
-            'in_random_order'
-        ])->toArray();
+        return $this->json('filter_groups');
     }
 
-    public function dealerIds(): DealerId
+    public function dealerIds(): array
     {
-        return DealerId::fromString($this->dealerId ?? '');
+        return $this->json('dealers');
     }
 
     public function sort(): array
     {
-        return $this->sort ? collect(explode(self::DELIMITER, $this->sort))->mapWithKeys(function ($sort) {
-            [$sortTerm, $order] = explode(self::SORT_DELIMITER, $sort);
-            return [$sortTerm => $order];
+        $sort = $this->json('sort');
+        return $sort ? collect($sort)->mapWithKeys(function ($term) {
+            return [$term['field'] => $term['order']];
         })->toArray() : [];
     }
 
@@ -64,47 +46,66 @@ class SearchInventoryRequest extends Request
 
     public function page(): int
     {
-        return (int)($this->page ?? 1);
+        return (int)($this->json('pagination.page') ?? 1);
     }
 
     public function perPage(): int
     {
-        return (int)($this->per_page ?? 15);
+        return (int)($this->json('pagination.per_page') ?? 15);
     }
 
     public function offSet(): int
     {
-        if (!$this->offset) {
+        if (!$this->json('pagination.offset')) {
             return ($this->page() - 1) * $this->perPage();
         }
 
-        return (int)$this->offset;
+        return (int)$this->json('pagination.offset');
     }
 
     public function geolocation(): GeolocationInterface
     {
-        return Geolocation::fromString($this->geolocation ?? '');
+        return Geolocation::fromArray($this->json('geolocation'));
     }
 
     public function getESQuery(): bool
     {
-        return (int)$this->x_qa_req === 1;
+        return $this->json('debug');
     }
 
-    public function inRandomOrder(): bool
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function getRules(): array
     {
-        return (int)$this->in_random_order === 1;
-    }
-
-    public function all($keys = null): array
-    {
-        $all = parent::all($keys);
-
-        // default values got through `all` method
-        if ($keys === null || in_array('classifieds_site', $keys)) {
-            $all['classifieds_site'] = $this->input('classifieds_site', false);
-        }
-
-        return $all;
+        return [
+            'sort' => ['present', 'array'],
+            'sort.*.field' => ['required'],
+            'sort.*.order' => ['required'],
+            'pagination' => ['required'],
+            'pagination.page' => ['integer', 'min:0'],
+            'pagination.per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'pagination.offset' => ['present'],
+            'filter_groups' => ['required', 'array'],
+            'filter_groups.*.fields' => ['required', 'array'],
+            'filter_groups.*.fields.*.name' => ['required'],
+            'filter_groups.*.fields.*.terms' => ['present', 'array'],
+            'filter_groups.*.fields.*.terms.*.operator' => ['required', Rule::in([Term::OPERATOR_EQ, Term::OPERATOR_NEQ])],
+            'filter_groups.*.fields.*.terms.*.values' => ['present'],
+            'filter_groups.*.append_to' => ['required', Rule::in([FilterGroup::APPEND_TO_POST_FILTERS, FilterGroup::APPEND_TO_QUERY])],
+            'filter_groups.*.operator' => ['required', Rule::in([FilterGroup::OPERATOR_AND, FilterGroup::OPERATOR_OR])],
+            'geolocation' => ['required'],
+            'geolocation.lat' => ['required', 'numeric'],
+            'geolocation.lon' => ['required', 'numeric'],
+            'geolocation.range' => ['nullable', 'numeric'],
+            'geolocation.units' => ['nullable', Rule::in([GeolocationRange::UNITS_MILES, GeolocationRange::UNITS_KILOMETERS])],
+            'geolocation.grouping' => ['nullable', Rule::in([GeolocationRange::GROUPING_RANGE, GeolocationRange::GROUPING_UNITS])],
+            'dealers' => ['present', 'array'],
+            'dealers.*.operator' => ['required', Rule::in([Term::OPERATOR_EQ, Term::OPERATOR_NEQ])],
+            'dealers.*.values' => ['required', 'array'],
+            'debug' => ['required', 'boolean']
+        ];
     }
 }

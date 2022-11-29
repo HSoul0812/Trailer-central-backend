@@ -4,9 +4,6 @@ namespace App\Services\ElasticSearch\Inventory\Parameters;
 
 class DealerLocationIds
 {
-    public const DELIMITER = ';';
-    public const DELIMITER_OPTION = '|';
-
     /** @var array */
     private $locations;
 
@@ -39,25 +36,11 @@ class DealerLocationIds
     }
 
     /**
-     * @param string $locationExpression a value like 1|123;234 or 0|123;234|234;567 when the locations for the sub aggregator were provided
+     * @param array $data
      * @return static
      */
-    public static function fromString(string $locationExpression): self
+    public static function fromArray(array $data): self
     {
-        $parts = explode(self::DELIMITER_OPTION, $locationExpression);
-
-        if (count($parts) === 3) {
-            $locationsForSubAggregatorsFiltering = !empty($parts[2]) ?
-                array_filter(explode(self::DELIMITER, $parts[2])) :
-                null;
-
-            return new self(
-                (bool)$parts[0],
-                array_filter(explode(self::DELIMITER, $parts[1])),
-                $locationsForSubAggregatorsFiltering
-            );
-        }
-
-        return new self((bool)$parts[0], array_filter(explode(self::DELIMITER, $parts[1])));
+        return new self($data['is_filterable'], $data['locations'], $data['locations_aggregators']);
     }
 }

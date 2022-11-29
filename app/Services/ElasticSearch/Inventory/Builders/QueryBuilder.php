@@ -6,7 +6,9 @@ use App\Exceptions\ElasticSearch\FilterNotFoundException;
 use App\Models\Inventory\Geolocation\Point;
 use App\Services\ElasticSearch\Inventory\FieldMapperService;
 use App\Services\ElasticSearch\Inventory\InventoryQueryBuilderInterface;
-use App\Services\ElasticSearch\Inventory\Parameters\DealerId;
+use App\Services\ElasticSearch\Inventory\Parameters\FilterGroup;
+use App\Services\ElasticSearch\Inventory\Parameters\Filters\Field;
+use App\Services\ElasticSearch\Inventory\Parameters\Filters\Term;
 use App\Services\ElasticSearch\Inventory\Parameters\Geolocation\GeolocationInterface;
 use App\Services\ElasticSearch\Inventory\Parameters\Geolocation\GeolocationRange;
 use App\Services\ElasticSearch\Inventory\Parameters\Geolocation\ScatteredGeolocation;
@@ -237,17 +239,17 @@ class QueryBuilder implements InventoryQueryBuilderInterface
         $this->mapper = $mapper;
     }
 
-    public function addDealers(DealerId $dealerIds): QueryBuilderInterface
+    public function addDealers(array $dealerIds): QueryBuilderInterface
     {
-        $type = $dealerIds->type() === DealerId::INCLUSION ? 'must' : 'must_not';
-
-        if (count($dealerIds->list()) > 0) {
+        collect($dealerIds)->each(function ($term) {
+            $term = Term::fromArray($term);
+            $type = $term->getOperator() === Term::OPERATOR_EQ ? 'must' : 'must_not';
             $this->query['query']['bool'][$type][] = [
                 'terms' => [
-                    'dealerId' => $dealerIds->list()
+                    'dealerId' => $term->getValues()
                 ]
             ];
-        }
+        });
 
         return $this;
     }
@@ -274,8 +276,9 @@ class QueryBuilder implements InventoryQueryBuilderInterface
     {
         $query = [];
 
-        foreach ($terms as $term => $data) {
-            $query = $this->appendQueryTo($query)($term, $data);
+        foreach ($terms as $term) {
+            $filters = FilterGroup::fromArray($term);
+            $query = $this->appendQueryTo($query)($filters);
         }
 
         $this->query = array_merge_recursive($query, $this->query);
@@ -326,6 +329,11 @@ class QueryBuilder implements InventoryQueryBuilderInterface
             unset($sort['numFeatures']);
         }
 
+        if (isset($sort['tt_sort'])) {
+            $this->inRandomOrder();
+            unset($sort['tt_sort']);
+        }
+
         return $sort;
     }
 
@@ -344,8 +352,21 @@ class QueryBuilder implements InventoryQueryBuilderInterface
 
     private function appendQueryTo(array $query): callable
     {
-        return function (string $term, string $data) use ($query) {
-            return array_merge_recursive($query, $this->mapper->getBuilder($term, $data)->query());
+        return function (FilterGroup $filters) use ($query) {
+            $filters->getFields()->each(function (Field $field) use (&$query, $filters) {
+                if ($filters->appendsToQuery()) {
+                    $query = array_merge_recursive($query, [
+                        'query' => [
+                            'bool' => [
+                                $filters->getESOperatorKeyword() => $this->mapper->getBuilder($field)->globalQuery()
+                            ]
+                        ]
+                    ]);
+                    return;
+                }
+                $query = array_merge_recursive($query, $this->mapper->getBuilder($field)->generalQuery());
+            });
+            return $query;
         };
     }
 
@@ -537,27 +558,19 @@ class QueryBuilder implements InventoryQueryBuilderInterface
         ], $this->query);
     }
 
-    /**
-     * @param bool $random
-     * @return QueryBuilderInterface
-     */
-    public function inRandomOrder(bool $random): QueryBuilderInterface
+    public function inRandomOrder(): void
     {
-        if ($random) {
-            $this->query['query'] = [
-                'function_score' => [
-                    'query' => $this->query['query'],
-                    "functions" => [
-                        [
-                            "random_score" => new \stdClass(),
-                        ]
-                    ],
-                    "score_mode" => "sum",
-                    "boost_mode" => "replace",
-                ]
-            ];
-        }
-
-        return $this;
+        $this->query['query'] = [
+            'function_score' => [
+                'query' => $this->query['query'],
+                "functions" => [
+                    [
+                        "random_score" => new \stdClass(),
+                    ]
+                ],
+                "score_mode" => "sum",
+                "boost_mode" => "replace",
+            ]
+        ];
     }
 }

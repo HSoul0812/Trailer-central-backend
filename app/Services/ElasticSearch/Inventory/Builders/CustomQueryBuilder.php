@@ -3,76 +3,31 @@
 namespace App\Services\ElasticSearch\Inventory\Builders;
 
 use App\Models\Inventory\Inventory;
-use Illuminate\Support\Str;
+use App\Services\ElasticSearch\Inventory\Parameters\Filters\Field;
+use App\Services\ElasticSearch\Inventory\Parameters\Filters\Term;
 
-/**
- * Builds a proper ES query for a custom fields & edge cases
- *   - show_images=jpg;png: which is *.jpg & *.png
- *   - clearance_special=1
- */
 class CustomQueryBuilder implements FieldQueryBuilderInterface
 {
     /**
      * @var string
      */
     private $field;
-    /**
-     * @var string
-     */
-    private $data;
 
-    /** @var string */
-    private const DELIMITER = ';';
-
-    /** @var string */
-    private const DELIMITER_EXCLUSION = '~';
-
-    /** @var string */
-    private const SALE_SCRIPT_ATTRIBUTE = 'sale_script';
-
-    /** @var string */
-    private const PRICE_SCRIPT_ATTRIBUTE = 'price_script';
+    /** @var array */
+    private $query = [];
 
     /**
-     * @param string $field
-     * @param string $data
+     * @param Field $field
      */
-    public function __construct(string $field, string $data)
+    public function __construct(Field $field)
     {
         $this->field = $field;
-        $this->data = $data;
-    }
-
-    public function query(): array
-    {
-        switch ($this->field) {
-            case 'show_images':
-                return $this->buildImagesQuery();
-            case 'clearance_special':
-                return $this->buildClearanceSpecialQuery();
-            case 'location_region':
-            case 'location_city':
-            case 'location_country':
-                return $this->buildLocationQuery();
-            case 'classifieds_site':
-                return $this->buildClassifiedsSiteQuery();
-            case 'sale_price_script':
-                return $this->buildSalePriceFilterScriptQuery();
-            case 'empty_images':
-                return $this->buildEmptyImagesQuery();
-            case 'availability':
-                return $this->buildAvailabilityQuery();
-            case 'rental_bool':
-                return $this->buildRentalBoolQuery();
-            default:
-                return [];
-        }
     }
 
     /**
      * @return \array[][][][][]
      */
-    private function buildImagesQuery(): array
+    private function buildImagesQuery(array $extensions): array
     {
         return [
             'query' => [
@@ -88,7 +43,7 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
                                             ]
                                         ]
                                     ];
-                                }, explode(self::DELIMITER, $this->data))
+                                }, $extensions)
                             ]
                         ]
                     ]
@@ -102,29 +57,27 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
      */
     private function buildClearanceSpecialQuery(): array
     {
-        if ($this->data) {
-            return [
-                'query' => [
-                    'bool' => [
-                        'must' => [
-                            [
-                                'bool' => [
-                                    'should' => [
-                                        [
-                                            'term' => [
-                                                'isFeatured' => true
-                                            ]
-                                        ],
-                                        [
-                                            'term' => [
-                                                'isSpecial' => true
-                                            ]
-                                        ],
-                                        [
-                                            'wildcard' => [
-                                                'title' => [
-                                                    'value' => '*as is*'
-                                                ]
+        return [
+            'query' => [
+                'bool' => [
+                    'must' => [
+                        [
+                            'bool' => [
+                                'should' => [
+                                    [
+                                        'term' => [
+                                            'isFeatured' => true
+                                        ]
+                                    ],
+                                    [
+                                        'term' => [
+                                            'isSpecial' => true
+                                        ]
+                                    ],
+                                    [
+                                        'wildcard' => [
+                                            'title' => [
+                                                'value' => '*as is*'
                                             ]
                                         ]
                                     ]
@@ -133,27 +86,27 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
                         ]
                     ]
                 ]
-            ];
-        }
-
-        return [];
+            ]
+        ];
     }
 
-    private function buildLocationQuery(): array
+    private function buildLocationQuery(string $name, array $values): array
     {
-        $field = str_replace('_', '.', $this->field);
+        $field = str_replace('_', '.', $name);
 
         $query = [
             'bool' => [
-                'must' => [
-                    [
-                        'term' => [
-                            $field => $this->data
-                        ]
-                    ]
-                ]
+                'must' => []
             ]
         ];
+
+        foreach ($values as $value) {
+            $query['bool']['must'][] = [
+                'term' => [
+                    $field => $value
+                ]
+            ];
+        }
 
         return [
             'post_filter' => $query,
@@ -167,7 +120,7 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
     private function buildClassifiedsSiteQuery(): array
     {
         // when it is not a classifieds site then it should filter by `isArchived` & `isArchived` & `status`
-        return $this->data ? [] : [
+        return [
             'query' => [
                 'bool' => [
                     'must' => [
@@ -195,11 +148,11 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
     }
 
     /**
-     * @return array|\string[][][][][][]
+     * @return array|string[][][][][][]
      */
     private function buildEmptyImagesQuery(): array
     {
-        return !boolval($this->data) ? [
+        return [
             'query' => [
                 'bool' => [
                     'must_not' => [
@@ -211,29 +164,21 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
                     ]
                 ]
             ]
-        ] : [];
+        ];
     }
 
     /**
-     * @return \string[][][][][][]
+     * @return string[][][][][][]
      */
-    private function buildAvailabilityQuery(): array
+    private function buildAvailabilityQuery(string $operator, array $values): array
     {
-        $value = $this->data;
-        $query = 'must';
-
-        if (Str::startsWith($value, self::DELIMITER_EXCLUSION)) {
-            $query = 'must_not';
-            $value = substr($value, 1);
-        }
-
         return [
             'query' => [
                 'bool' => [
-                    $query => [
+                    $operator == Term::OPERATOR_EQ ? 'must' : 'must_not' => [
                         [
                             'term' => [
-                                'availability' => $value
+                                'availability' => $values[0]
                             ]
                         ]
                     ]
@@ -245,7 +190,7 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
     /**
      * @return \array[][][][][]
      */
-    private function buildRentalBoolQuery(): array
+    private function buildRentalBoolQuery(array $rental): array
     {
         return [
             'query' => [
@@ -253,7 +198,7 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
                     'must' => [
                         [
                             'term' => [
-                                'isRental' => boolval($this->data)
+                                'isRental' => $rental[0]
                             ]
                         ]
                     ]
@@ -265,18 +210,13 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
     /**
      * @return \array[][]
      */
-    private function buildSalePriceFilterScriptQuery(): array
+    private function buildSalePriceFilterScriptQuery(array $data): array
     {
-        $values = explode(self::DELIMITER, $this->data);
-
-        $sale = in_array(self::SALE_SCRIPT_ATTRIBUTE, $values);
-        $price = $this->getPriceForFilterScript($values);
-
         return [
             'query' => [
                 'bool' => [
                     'filter' => [
-                        'script' => $this->generateSalePriceFilterScript($sale, $price)
+                        'script' => $this->generateSalePriceFilterScript($data['sale'], $data['price'])
                     ]
                 ]
             ]
@@ -312,18 +252,55 @@ doc['status'].value != 2 && doc['dealer.name'].value != 'Operate Beyond'";
         ];
     }
 
-    /**
-     * @param array $values
-     * @return array
-     */
-    private function getPriceForFilterScript(array $values): array
+    public function globalQuery(): array
     {
-        foreach ($values as $value) {
-            if (Str::startsWith($value, self::PRICE_SCRIPT_ATTRIBUTE)) {
-                $priceParts = explode(':', $value);
-                return [$priceParts[1], $priceParts[2]];
+        return $this->query;
+    }
+
+    public function generalQuery(): array
+    {
+        $this->field->getTerms()->each(function (Term $term) {
+            $name = $this->field->getName();
+            $values = $term->getValues();
+            switch ($name) {
+                case 'show_images':
+                    $this->appendToQuery($this->buildImagesQuery($values));
+                    break;
+                case 'clearance_special':
+                    $this->appendToQuery($this->buildClearanceSpecialQuery());
+                    break;
+                case 'location_region':
+                case 'location_city':
+                case 'location_country':
+                    $this->appendToQuery($this->buildLocationQuery($name, $values));
+                    break;
+                case 'classifieds_site':
+                    $this->appendToQuery($this->buildClassifiedsSiteQuery());
+                    break;
+                case 'sale_price_script':
+                    $this->appendToQuery($this->buildSalePriceFilterScriptQuery($values));
+                    break;
+                case 'empty_images':
+                    $this->appendToQuery($this->buildEmptyImagesQuery());
+                    break;
+                case 'availability':
+                    $this->appendToQuery($this->buildAvailabilityQuery($term->getOperator(), $values));
+                    break;
+                case 'rental_bool':
+                    $this->appendToQuery($this->buildRentalBoolQuery($values));
+                    break;
             }
-        }
-        return [];
+        });
+
+        return $this->query;
+    }
+
+    /**
+     * @param array $query
+     * @return void
+     */
+    private function appendToQuery(array $query)
+    {
+        $this->query = array_merge_recursive($this->query, $query);
     }
 }
