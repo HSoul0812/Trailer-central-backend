@@ -3,7 +3,7 @@
 namespace Tests\Unit\Services\ElasticSearch\Inventory\Builders;
 
 use App\Services\ElasticSearch\Inventory\Builders\BooleanQueryBuilder;
-use App\Services\ElasticSearch\Inventory\Parameters\Filters\Field;
+use App\Services\ElasticSearch\Inventory\Parameters\Filters\Filter;
 use App\Services\ElasticSearch\Inventory\Parameters\Filters\Term;
 use Tests\TestCase;
 
@@ -32,7 +32,7 @@ class BooleanQueryBuilderTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-        $field = Field::fromArray(['name' => 'is_special', 'terms' => [
+        $field = Filter::fromArray(['name' => 'is_special', 'terms' => [
             [
                 'operator' => Term::OPERATOR_EQ,
                 'values' => [true]

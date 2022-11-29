@@ -4,7 +4,7 @@ namespace App\Services\ElasticSearch\Inventory\Parameters\Filters;
 
 use Illuminate\Support\Collection;
 
-class Field
+class Filter
 {
     /** @var string */
     protected $name;
@@ -26,9 +26,9 @@ class Field
 
     /**
      * @param array $data
-     * @return Field
+     * @return Filter
      */
-    public static function fromArray(array $data): Field
+    public static function fromArray(array $data): Filter
     {
         return new static($data['name'], $data['terms']);
     }

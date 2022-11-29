@@ -7,7 +7,7 @@ use App\Models\Inventory\InventoryFilter;
 use App\Repositories\Inventory\InventoryFilterRepositoryInterface;
 use App\Services\ElasticSearch\Inventory\Builders\CustomQueryBuilder;
 use App\Services\ElasticSearch\Inventory\Builders\FieldQueryBuilderInterface;
-use App\Services\ElasticSearch\Inventory\Parameters\Filters\Field;
+use App\Services\ElasticSearch\Inventory\Parameters\Filters\Filter;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
@@ -40,10 +40,10 @@ class FieldMapperService implements InventoryFieldMapperServiceInterface
     }
 
     /**
-     * @param Field $field
+     * @param Filter $field
      * @return FieldQueryBuilderInterface when the filter was not able to be handled
      */
-    public function getBuilder(Field $field): FieldQueryBuilderInterface
+    public function getBuilder(Filter $field): FieldQueryBuilderInterface
     {
         /** @var ?InventoryFilter $filter */
 

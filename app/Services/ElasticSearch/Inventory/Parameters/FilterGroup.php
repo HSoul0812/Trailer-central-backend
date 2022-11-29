@@ -2,7 +2,7 @@
 
 namespace App\Services\ElasticSearch\Inventory\Parameters;
 
-use App\Services\ElasticSearch\Inventory\Parameters\Filters\Field;
+use App\Services\ElasticSearch\Inventory\Parameters\Filters\Filter;
 use Illuminate\Support\Collection;
 
 class FilterGroup
@@ -13,7 +13,7 @@ class FilterGroup
     /** @var string */
     protected $operator;
 
-    /** @var Collection<Field> */
+    /** @var Collection<Filter> */
     protected $fields;
 
     /** @var string */
@@ -42,7 +42,7 @@ class FilterGroup
     {
         $this->appendTo = $appendTo;
         $this->fields = collect($fields)->map(function ($field) {
-            return Field::fromArray($field);
+            return Filter::fromArray($field);
         });
         $this->operator = $operator;
     }
@@ -53,7 +53,7 @@ class FilterGroup
      */
     public static function fromArray(array $data): FilterGroup
     {
-        return new static($data['fields'], $data['append_to'], $data['operator']);
+        return new static($data['filters'], $data['append_to'], $data['operator']);
     }
 
     /**
@@ -73,7 +73,7 @@ class FilterGroup
     }
 
     /**
-     * @return Collection<Field>
+     * @return Collection<Filter>
      */
     public function getFields(): Collection
     {

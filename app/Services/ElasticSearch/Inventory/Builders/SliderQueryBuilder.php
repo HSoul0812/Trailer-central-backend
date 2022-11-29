@@ -2,18 +2,18 @@
 
 namespace App\Services\ElasticSearch\Inventory\Builders;
 
-use App\Services\ElasticSearch\Inventory\Parameters\Filters\Field;
+use App\Services\ElasticSearch\Inventory\Parameters\Filters\Filter;
 use App\Services\ElasticSearch\Inventory\Parameters\Filters\Term;
 
 class SliderQueryBuilder implements FieldQueryBuilderInterface
 {
-    /** @var Field */
+    /** @var Filter */
     private $field;
 
     /** @var array */
     private $query = [];
 
-    public function __construct(Field $field)
+    public function __construct(Filter $field)
     {
         $this->field = $field;
     }

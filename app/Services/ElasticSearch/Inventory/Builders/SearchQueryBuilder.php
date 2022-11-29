@@ -2,7 +2,7 @@
 
 namespace App\Services\ElasticSearch\Inventory\Builders;
 
-use App\Services\ElasticSearch\Inventory\Parameters\Filters\Field;
+use App\Services\ElasticSearch\Inventory\Parameters\Filters\Filter;
 use App\Services\ElasticSearch\Inventory\Parameters\Filters\Term;
 
 class SearchQueryBuilder implements FieldQueryBuilderInterface
@@ -13,7 +13,7 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
     /** @var string */
     private const MINIMUM_BOOST = 0.001;
 
-    /** @var Field */
+    /** @var Filter */
     private $field;
 
     /** @var string[] */
@@ -43,7 +43,7 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
     /** @var array */
     private $query = [];
 
-    public function __construct(Field $field)
+    public function __construct(Filter $field)
     {
         $this->field = $field;
     }

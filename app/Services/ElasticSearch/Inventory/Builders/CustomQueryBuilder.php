@@ -3,7 +3,7 @@
 namespace App\Services\ElasticSearch\Inventory\Builders;
 
 use App\Models\Inventory\Inventory;
-use App\Services\ElasticSearch\Inventory\Parameters\Filters\Field;
+use App\Services\ElasticSearch\Inventory\Parameters\Filters\Filter;
 use App\Services\ElasticSearch\Inventory\Parameters\Filters\Term;
 
 class CustomQueryBuilder implements FieldQueryBuilderInterface
@@ -17,9 +17,9 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
     private $query = [];
 
     /**
-     * @param Field $field
+     * @param Filter $field
      */
-    public function __construct(Field $field)
+    public function __construct(Filter $field)
     {
         $this->field = $field;
     }
