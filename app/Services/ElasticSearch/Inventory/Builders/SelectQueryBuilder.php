@@ -30,7 +30,7 @@ class SelectQueryBuilder implements FieldQueryBuilderInterface
             $queries = [];
 
             if ($name === 'dealerLocationId') {
-                $options = DealerLocationIds::fromString($options[0]);
+                $options = DealerLocationIds::fromArray($options);
             }
 
             if ($name == 'dealerLocationId' && $options->isFilterable()) {
@@ -72,8 +72,7 @@ class SelectQueryBuilder implements FieldQueryBuilderInterface
 
             switch ($name) {
                 case 'dealerLocationId':
-                    //@FIXME: handle dealer locations properly
-                    $options = DealerLocationIds::fromString($options[0]);
+                    $options = DealerLocationIds::fromArray($options);
                     $optionsQuery = [
                         'bool' => [
                             'filter' => [
