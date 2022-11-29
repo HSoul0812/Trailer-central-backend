@@ -144,8 +144,10 @@ class FieldMapperServiceTest extends TestCase
         $this->assertInstanceOf(CustomQueryBuilder::class, $builder);
 
         $field = Field::fromArray(['name' => 'clearance_special', 'terms' => [
-            'operator' => Term::OPERATOR_EQ,
-            'values' => []
+            [
+                'operator' => Term::OPERATOR_EQ,
+                'values' => []
+            ]
         ]]);
         $builder = $this->service->getBuilder($field);
         $this->assertInstanceOf(CustomQueryBuilder::class, $builder);
