@@ -52,17 +52,11 @@ class UpdateTfaCodeOnFbappMarketplace extends Migration
             $table->string('tfa_code')->after('tfa_password');
         });
 
-        // Move the codes only on manually updated accounts
+        // Move the codes only on manually updated accounts and clear the field
         DB::table(Marketplace::TABLE_NAME)
             ->whereIn('id', self::MANUALLY_ADDED_ACCOUNTS_IDS)
             ->update([
-                'tfa_code' => DB::raw('tfa_password')
-            ]);
-
-        // Clear the codes only on manually updated accounts
-        DB::table(Marketplace::TABLE_NAME)
-            ->whereIn('id', self::MANUALLY_ADDED_ACCOUNTS_IDS)
-            ->update([
+                'tfa_code' => DB::raw('tfa_password'),
                 'tfa_password' => null
             ]);
     }
