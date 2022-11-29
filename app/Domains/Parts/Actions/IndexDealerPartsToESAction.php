@@ -23,10 +23,12 @@ class IndexDealerPartsToESAction
 
     /**
      * How long we want to wait before processing the new round
+     * by default it's 10 seconds because that's how long it takes
+     * for production to process one chunk (500 parts)
      *
      * @var int
      */
-    private $delay = 120;
+    private $delay = 10;
 
     /**
      * A callable that will be called if the dealer has no parts
