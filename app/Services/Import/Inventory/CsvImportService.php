@@ -7,6 +7,7 @@ use App\Helpers\ConvertHelper;
 use App\Models\Inventory\Attribute;
 use App\Models\Inventory\Category;
 use App\Models\Inventory\Inventory;
+use App\Models\Inventory\Manufacturers\Brand;
 use App\Models\User\DealerLocation;
 use App\Services\Inventory\InventoryServiceInterface;
 use Illuminate\Support\Facades\Storage;
@@ -196,7 +197,10 @@ class CsvImportService implements CsvImportServiceInterface
         "title" => array("type" => "string", "length" => 255, "regex" => "[\w\s\d\.'\"\\/\*\+\?]*"),
         "manufacturer" => array("type" => "string"),
         "model" => array("type" => "string", "length" => 255, "regex" => "[\w\s\d\.'\"\\/\*\+\?]*"),
-        "brand" => array("type" => "string"),
+        "brand" => array(
+            "type" => "enum",
+            "list" => array()
+        ),
         "description" => array("type" => "string"),
         "description_html" => array("type" => "string"),
         "location" => array("type" => "string"),
@@ -358,6 +362,14 @@ class CsvImportService implements CsvImportServiceInterface
     );
 
     /**
+     * @var array
+     */
+    private $requiredBrandCategories = [
+        3, // RV
+        5  // Watercraft
+    ];
+
+    /**
      * @var string[]
      */
     static $locationColumns = array(
@@ -424,6 +436,9 @@ class CsvImportService implements CsvImportServiceInterface
 
         // Set categories
         $this->setCategories();
+
+        // Set categories
+        $this->setBrands();
 
         /* For testing purposes only
         Log::debug("Attributes: " . json_encode(self::$_attributes));
@@ -662,6 +677,18 @@ class CsvImportService implements CsvImportServiceInterface
     }
 
     /**
+     * @return void
+     */
+    private function setBrands()
+    {
+        $brands = Brand::all();
+
+        foreach ($brands as $brand) {
+            self::$_columnValidation['brand']['list'][strtolower($brand->name)] = $brand->name;
+        }
+    }
+
+    /**
      * @param $val
      * @return bool
      */
@@ -779,6 +806,17 @@ class CsvImportService implements CsvImportServiceInterface
                     // this should really fail further up the line
                     $this->inventory["entity_type_id"] = 1;
                 }
+                break;
+
+            case 'brand':
+                if (isset(self::$_columnValidation[$type]['list'][strtolower($value)])) {
+                    $this->inventory[$type] = self::$_columnValidation[$type]['list'][strtolower($value)];
+                } else {
+                    if (in_array($this->inventory["entity_type_id"], $this->requiredBrandCategories)) {
+                        return "A valid brand name is required for Recreational Vehicles and Watercraft";
+                    }
+                }
+
                 break;
 
             case 'status':
