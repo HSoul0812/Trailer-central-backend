@@ -99,6 +99,13 @@ class Kernel extends ConsoleKernel
                 ->everyFiveMinutes()
                 ->runInBackground();
 
+        /**
+         * Marketing
+         */
+        $schedule->command('marketing:craigslist:validate')
+                ->hourly()
+                ->runInBackground();
+
 
         /**
          * Campaigns/Blasts
@@ -138,7 +145,7 @@ class Kernel extends ConsoleKernel
 
 
         /**
-         * Scrape Facebook Messages
+         * Scrape Email Replies
          */
         $schedule->command('email:scrape-replies')
                 ->everyFiveMinutes()
