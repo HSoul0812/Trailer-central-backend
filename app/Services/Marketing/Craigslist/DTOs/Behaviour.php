@@ -141,6 +141,11 @@ class Behaviour
     /**
      * @var int
      */
+    private $dealerId;
+
+    /**
+     * @var int
+     */
     private $slotId;
 
     /**
@@ -285,7 +290,7 @@ class Behaviour
     static public function getAllInternal(): Collection {
         // Find Dealer Config Override Based on ID Provided
         $collection = new Collection();
-        foreach(self::DEALER_ID_BEHAVIOURS as $dealerId => $config) {
+        foreach(self::DEALER_ID_BEHAVIOURS as $dealerId => $behaviour) {
             if(!empty($behaviour['internal'])) {
                 $collection->push(self::byDealerId($dealerId));
             }

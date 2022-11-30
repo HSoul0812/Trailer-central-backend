@@ -58,6 +58,7 @@ class ValidateService implements ValidateServiceInterface
     public function validate(Client $client): ClientValidate {
         // Get Config
         $config = $this->getConfig($client->dealerId);
+        $this->log->info('Cl Client Elapsed ' . $client->elapsed() . ' Minutes, Last Checked In on ' . $client->lastCheckin);
 
         // Is a Warning?
         $level = 'info';
@@ -165,29 +166,33 @@ class ValidateService implements ValidateServiceInterface
         $messages = new Collection();
         foreach($warnings as $email => $warning) {
             // Get Config
-            $valid = $active[$email];
+            $valid = $active[$email] ?? [];
             $client = $warning[0];
             $config = $this->getConfig($client->dealerId);
 
             // Check Number of Clients
-            if(count($active) < 1) {
-                $message = ClientMessage::varied($warning);
-            } elseif($client->isEdit && count($valid) <= (int) $config['clients.edit']) {
-                $message = ClientMessage::warning($valid);
+            if(count($valid) < 1) {
+                $message = ClientMessage::varied(collect($warning));
+            } elseif($client->isEdit) {
+                if(count($valid) <= (int) $config['clients.edit']) {
+                    $message = ClientMessage::warning(collect($valid));
+                }
             } elseif(count($valid) <= (int) $config['clients.low']) {
-                $message = ClientMessage::warning($valid);
+                $message = ClientMessage::warning(collect($valid));
             }
 
             // Message Exists?
             if(!empty($message)) {
                 $messages->push($message);
-                unset($active[$email]);
+                if(isset($active[$email])) {
+                    unset($active[$email]);
+                }
             }
         }
 
         // Find Remaining Active Accounts
         foreach($active as $email => $validation) {
-            $messages->push(ClientMessage::active($validation));
+            $messages->push(ClientMessage::active(collect($validation)));
         }
 
         // Return Messages
@@ -205,7 +210,7 @@ class ValidateService implements ValidateServiceInterface
         // Loop Config Paths
         $config = [];
         foreach(self::CONFIG_PATHS as $path) {
-            $value = config('marketing.cl.warning.' . $path);
+            $value = config('marketing.cl.settings.warning.' . $path);
 
             // Check Override Instead
             $override = $this->getOverride($path, $dealerId);
@@ -230,17 +235,23 @@ class ValidateService implements ValidateServiceInterface
      */
     private function getOverride(string $path, int $dealerId): string {
         // Loop Config Paths
-        $config = config('marketing.cl.warning.override.' . $path);
+        $config = config('marketing.cl.settings.warning.override.' . $path);
+        if(empty($config)) {
+            return '';
+        }
 
         // Parse Overrides
         $overrides = explode(';', $config);
         $clean = [];
         foreach($overrides as $override) {
+            if(strpos($override, ':') === FALSE) {
+                continue;
+            }
             list($dealer, $value) = explode(':', $override);
             $clean[$dealer] = $value;
         }
 
         // Return Clean Override Array
-        return $clean[$dealerId];
+        return $clean[$dealerId] ?? '';
     }
 }
