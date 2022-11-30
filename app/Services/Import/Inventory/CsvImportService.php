@@ -535,7 +535,7 @@ class CsvImportService implements CsvImportServiceInterface
                 if ($lineNumber === 1) {
                     // if column header is not allowed
                     if (!$this->isAllowedHeader($value)) {
-                        $this->validationErrors[] = $this->printError($lineNumber, $index + 1, "Invalid Header: " . $value);
+                        $this->validationErrors[$lineNumber][] = $this->printError($lineNumber, $index + 1, "Invalid Header: " . $value);
                         Log::info("Invalid Header: " . $value);
                         // else, the column header is allowed
                     } else {
@@ -548,7 +548,7 @@ class CsvImportService implements CsvImportServiceInterface
 
                     if ($header) {
                         if ($errorMessage = $this->isDataInvalid($header, $value)) {
-                            $this->validationErrors[] = $this->printError($lineNumber, $index + 1, $errorMessage);
+                            $this->validationErrors[$lineNumber][] = $this->printError($lineNumber, $index + 1, $errorMessage);
                             Log::info("Error: " . $errorMessage);
                         }
                     }
@@ -558,17 +558,19 @@ class CsvImportService implements CsvImportServiceInterface
             // Log::debug(self::$_labels);
 
             // if there's an error return false, if not, import part
-            if (count($this->validationErrors) > 0) {
-                Log::info("Errors: " . json_encode($this->validationErrors));
+            if ($lineNumber != 1) {
+                if (isset($this->validationErrors[$lineNumber]) && count($this->validationErrors[$lineNumber]) > 0) {
+                    Log::info("Errors: " . json_encode($this->validationErrors));
+                    $this->inventory = [];
 
-                return false;
-            } else {
-                Log::info("Importing...");
+                    return false;
+                } else {
+                    Log::info("Importing...");
+                    $this->import($csvData, $lineNumber);
 
-                $this->import($csvData, $lineNumber);
+                    $this->inventory = [];
+                }
             }
-
-            $this->inventory = [];
 
             return true;
         });
