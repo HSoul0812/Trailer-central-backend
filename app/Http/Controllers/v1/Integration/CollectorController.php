@@ -80,8 +80,8 @@ class CollectorController extends RestfulController
         $request = new UpdateCollectorRequest(array_merge($request->all(), ['id' => $id]));
 
         if ($request->validate()) {
-            $this->collectorRepository->update($request->all());
-            return $this->updatedResponse($id);
+            $item = $this->collectorRepository->update($request->all());
+            return $this->response->item($item, new CollectorTransformer());
         }
 
         return $this->response->errorBadRequest();
