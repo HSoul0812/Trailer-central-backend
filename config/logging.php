@@ -202,6 +202,14 @@ return [
             'permission' => 0664,
         ],
 
+        'cl-client' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/repositories/cl-client.log'),
+            'level' => env('LOG_LEVEL', 'error'),
+            'days' => 3,
+            'permission' => 0664,
+        ],
+
         'azure' => [
             'driver' => 'daily',
             'path' => storage_path('logs/services/azure.log'),
@@ -224,6 +232,14 @@ return [
             'username' => 'Laravel Log',
             'emoji' => ':boom:',
             'level' => 'critical',
+        ],
+
+        'slack-cl' => [
+            'driver' => 'slack',
+            'url' => env('CLAPP_SLACK_WEBHOOK_URL'),
+            'username' => 'Laravel Log',
+            'emoji' => ':boom:',
+            'level' => env('CLAPP_SLACK_LEVEL', 'info'),
         ],
 
         'papertrail' => [
