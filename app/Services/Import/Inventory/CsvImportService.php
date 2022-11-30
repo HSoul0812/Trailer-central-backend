@@ -437,7 +437,7 @@ class CsvImportService implements CsvImportServiceInterface
         // Set categories
         $this->setCategories();
 
-        // Set categories
+        // Set brands
         $this->setBrands();
 
         /* For testing purposes only
