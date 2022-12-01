@@ -531,7 +531,10 @@ class InventoryService implements InventoryServiceInterface
         $images = $params[$imagesKey];
 
         $isOverlayEnabled = isset($params['overlay_enabled']) && in_array($params['overlay_enabled'], Inventory::OVERLAY_CODES);
-        $overlayEnabledParams = ['skipNotExisting' => true];
+        $overlayEnabledParams = [
+            'skipNotExisting' => true,
+            'visibility' => config('filesystems.disks.s3.visibility')
+        ];
 
         $withOverlay = [];
         $withoutOverlay = [];
