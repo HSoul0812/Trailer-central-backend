@@ -589,6 +589,11 @@ class PartRepository implements PartRepositoryInterface {
             }
         }
 
+        // if part is active
+        if ($query['is_active'] ?? false) {
+            $search->filter('term', ['is_active' => $query['is_active']]);
+        }
+
         // filter by dealer
         $search->filter('term', ['dealer_id' => $dealerId]);
 

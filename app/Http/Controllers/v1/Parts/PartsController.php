@@ -753,7 +753,7 @@ class PartsController extends RestfulController
             $escapedQuery = resolve(EscapeElasticSearchReservedCharactersAction::class)->execute($request->get('query', '') ?? '');
             $request->merge(['query' => $escapedQuery]);
 
-            $query = $request->only('query', 'vendor_id', 'with_cost', 'in_stock', 'sort');
+            $query = $request->only('query', 'vendor_id', 'with_cost', 'in_stock', 'sort', 'is_active');
 
             $paginator = new \stdClass(); // this will hold the paginator produced by search
             $dealerId = $this->getRequestDealerId($request, Auth::user());
