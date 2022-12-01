@@ -459,6 +459,10 @@ class InventoryService implements InventoryServiceInterface
             $queryBuilder->addTermQuery('image', '', ESInventoryQueryBuilder::OCCUR_MUST_NOT);
             $queryBuilder->addExistsQuery('image');
         }
+
+        if (isset($params['dealer_location_id']) && $params['dealer_location_id']) {
+            $queryBuilder->addTermQuery('dealerLocationId', $params['dealer_location_id'], ESInventoryQueryBuilder::OCCUR_MUST);
+        }
     }
 
     private function addCategoryQuery(ESInventoryQueryBuilder $queryBuilder, array $params)
