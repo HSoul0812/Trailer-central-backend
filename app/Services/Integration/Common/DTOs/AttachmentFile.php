@@ -127,7 +127,7 @@ class AttachmentFile
      */
     public static function getByImapAttachment(Attachment $attachment): AttachmentFile {
         // Save Attachment to Directory
-        $attachment->save(self::getAttachmentDir());
+        $attachment->save(self::getAttachmentDir(), urlencode($attachment->getName()));
 
         // Return Attachment File
         return new self([
