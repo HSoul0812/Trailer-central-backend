@@ -6,6 +6,7 @@ use App\Events\Inventory\InventoryUpdated;
 use App\Helpers\ConvertHelper;
 use App\Models\Inventory\Attribute;
 use App\Models\Inventory\Category;
+use App\Models\Inventory\EntityType;
 use App\Models\Inventory\Inventory;
 use App\Models\Inventory\Manufacturers\Brand;
 use App\Models\User\DealerLocation;
@@ -365,8 +366,8 @@ class CsvImportService implements CsvImportServiceInterface
      * @var array
      */
     private $requiredBrandCategories = [
-        3, // RV
-        5  // Watercraft
+        EntityType::ENTITY_TYPE_RV,
+        EntityType::ENTITY_TYPE_WATERCRAFT
     ];
 
     /**
