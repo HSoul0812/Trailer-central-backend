@@ -62,6 +62,7 @@ use Stripe\StripeClient;
 use Stripe\StripeClientInterface;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Config;
 
 class EcommerceProvider extends ServiceProvider
 {
@@ -121,7 +122,7 @@ class EcommerceProvider extends ServiceProvider
             });
         $this->app->bind(RefundRepositoryInterface::class, RefundRepository::class);
         $this->app->bind(StripeClientInterface::class, static function (): StripeClient {
-            $stripe_secret = DB::table('stripe_checkout_credentials')->first()->secret;
+            $stripe_secret = Config::get('stripe_checkout.secret');
             return new StripeClient($stripe_secret);
         });
         $this->app->bind(PaymentGatewayServiceInterface::class, StripeService::class);
