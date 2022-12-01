@@ -205,6 +205,11 @@ class InventoryTransformer extends TransformerAbstract
                  $this->getNewQuoteRoute($inventory->identifier),
                  true
              ),
+             'fuel_type' => $inventory->getAttributeById(Attribute::FUEL_TYPE),
+             'mileage' => $inventory->getAttributeById(Attribute::MILEAGE),
+             'mileage_miles' => $inventory->mileage_miles,
+             'mileage_kilometres' => $inventory->mileage_kilometers,
+             'sleeping_capacity' => $inventory->getAttributeById(Attribute::SLEEPING_CAPACITY),
              'age' => $age,
              'use_website_price' => $inventory->use_website_price,
              'minimum_selling_price' => $inventory->minimum_selling_price,
