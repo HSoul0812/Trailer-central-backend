@@ -58,6 +58,14 @@ class Term
     }
 
     /**
+     * @return bool
+     */
+    public function operatorIsNotEquals(): bool
+    {
+        return $this->operator == self::OPERATOR_NEQ;
+    }
+
+    /**
      * @return string
      */
     public function getOperator(): string
