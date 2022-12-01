@@ -119,7 +119,7 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
         }
 
         if (isset(self::SEARCH_FIELDS[$name])) {
-            return [self::SEARCH_FIELDS[$name]];
+            return [$name => self::SEARCH_FIELDS[$name]];
         }
 
         return self::SEARCH_FIELDS;
@@ -148,6 +148,7 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
                     break;
                 default:
                     $searchFields = $this->getSearchFields($data['ignore_fields'] ?? []);
+
                     foreach ($searchFields as $key => $column) {
                         $boost = self::DEFAULT_BOOST;
                         $columnValues = explode('^', $column);
