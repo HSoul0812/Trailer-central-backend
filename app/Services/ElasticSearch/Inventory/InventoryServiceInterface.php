@@ -11,5 +11,6 @@ interface InventoryServiceInterface
                            array                $terms,
                            GeolocationInterface $geolocation,
                            array                $sort = [],
-                           array                $pagination = []): ElasticSearchQueryResult;
+                           array                $pagination = [],
+                           bool                 $debug = false): ElasticSearchQueryResult;
 }

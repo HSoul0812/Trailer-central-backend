@@ -9,7 +9,7 @@ use App\Services\ElasticSearch\Inventory\Parameters\Filters\Term;
 class CustomQueryBuilder implements FieldQueryBuilderInterface
 {
     /**
-     * @var string
+     * @var Filter
      */
     private $field;
 

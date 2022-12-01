@@ -112,7 +112,7 @@ class InventoryElasticSearchInputTransformer implements Transformer
             // probably when that Eloquent accessor is fixed, then we could use it
             'mileage'              => TypesHelper::ensureNumeric($model->getAttributeById(Attribute::MILEAGE)),
             'mileageMiles'         => TypesHelper::ensureNumeric($model->mileage_miles),
-            'mileageKilometres'    => TypesHelper::ensureNumeric($model->mileage_kilometres),
+            'mileageKilometres' => TypesHelper::ensureNumeric($model->mileage_kilometers),
             'isRental'             => TypesHelper::ensureBoolean($model->getAttributeById(Attribute::IS_RENTAL)),
             'weeklyPrice'          => TypesHelper::ensureNumeric($model->getAttributeById(Attribute::WEEKLY_PRICE)),
             'dailyPrice'           => TypesHelper::ensureNumeric($model->getAttributeById(Attribute::DAILY_PRICE)),

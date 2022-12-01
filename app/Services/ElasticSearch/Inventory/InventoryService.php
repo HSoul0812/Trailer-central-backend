@@ -29,7 +29,8 @@ class InventoryService implements InventoryServiceInterface
         array                $terms,
         GeolocationInterface $geolocation,
         array                $sort = [],
-        array                $pagination = []): ElasticSearchQueryResult
+        array                $pagination = [],
+        bool                 $debug = false): ElasticSearchQueryResult
     {
         $query = $this->queryBuilder->addDealers($dealerIds)
             ->addTerms($terms)
@@ -37,6 +38,6 @@ class InventoryService implements InventoryServiceInterface
             ->addSort($sort)
             ->addPagination($pagination);
 
-        return $this->client->search((string)config('elastic.scout_driver.indices.inventory'), $query);
+        return $this->client->search((string)config('elastic.scout_driver.indices.inventory'), $query, $debug);
     }
 }

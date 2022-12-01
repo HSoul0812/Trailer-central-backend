@@ -10,8 +10,12 @@ class ElasticSearchClient extends Client implements ElasticSearchClientInterface
 {
     private const HTTP_SUCCESS = 200;
 
-    public function search(string $indexName, QueryBuilderInterface $query): ElasticSearchQueryResult
+    public function search(string $indexName, QueryBuilderInterface $query, bool $debug): ElasticSearchQueryResult
     {
+        if ($debug) {
+            return new ElasticSearchQueryResult($query->toArray(), [], 0, []);
+        }
+
         $response = $this->post(config('elastic.client.hosts')[0] . "/$indexName/_search", ['json' => $query->toArray()]);
 
         if ($response->getStatusCode() === self::HTTP_SUCCESS) {

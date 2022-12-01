@@ -113,7 +113,7 @@ use Laravel\Scout\Searchable;
  * @property string $chosen_overlay
  * @property double $mileage
  * @property double $mileage_miles
- * @property double $mileage_kilometres
+ * @property double $mileage_kilometers
  * @property \DateTimeInterface $fp_committed
  * @property int $fp_vendor
  * @property double $fp_balance

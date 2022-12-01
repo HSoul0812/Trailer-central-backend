@@ -485,7 +485,8 @@ class InventoryController extends RestfulControllerV2
                 $searchRequest->terms(),
                 $searchRequest->geolocation(),
                 $searchRequest->sort(),
-                $searchRequest->pagination()
+                $searchRequest->pagination(),
+                $searchRequest->getESQuery()
             );
 
             $response = $this->response
