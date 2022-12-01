@@ -48,9 +48,8 @@ trait HasPermissions
                 $perms[] = $perm;
             }
 
-            // Return User Permissions Collection
+            // Return Use Permissions Collection
             $this->userPermissions = collect($perms);
-
         }
 
         return $this->userPermissions;
