@@ -48,6 +48,15 @@ class SelectQueryBuilder implements FieldQueryBuilderInterface
                     ]
                 ];
             }
+
+            if ($term->operatorIsNotEquals()) {
+                $queries = [
+                    'bool' => [
+                        $term->getESOperatorKeyword() => $queries
+                    ]
+                ];
+            }
+
             $this->appendToQuery($queries);
         });
 

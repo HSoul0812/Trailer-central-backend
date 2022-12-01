@@ -234,7 +234,7 @@ doc['status'].value != 2 && doc['dealer.name'].value != 'Operate Beyond'";
 
     public function globalQuery(): array
     {
-        return $this->query;
+        return $this->generalQuery();
     }
 
     public function generalQuery(): array
