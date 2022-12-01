@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\DB;
 
 class AddDealervisionAlternateToIntegrationTable extends Migration
 {
-    private const INTEGRATION_IDS = [97, 98, 99, 100, 101];
+    private const INTEGRATION_IDS = [98, 99, 100, 101, 102];
 
     private const TABLE_NAME = 'integration';
 
