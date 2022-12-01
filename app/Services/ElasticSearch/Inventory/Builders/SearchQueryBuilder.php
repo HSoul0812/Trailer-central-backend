@@ -18,14 +18,14 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
 
     /** @var string[] */
     private const SEARCH_FIELDS = [
-        'title' => 'title.txt',
-        'description' => 'description.txt',
-        'stock' => 'stock.normal',
-        'vin' => 'vin',
-        'manufacturer' => 'manufacturer',
-        'brand' => 'brand',
-        'model' => 'model.txt',
-        'featureList.floorPlan' => 'featureList.floorPlan.txt',
+        'title' => 'title.txt^4',
+        'description' => 'description.txt^1',
+        'stock' => 'stock.normal^1',
+        'vin' => 'vin^1',
+        'manufacturer' => 'manufacturer^1',
+        'brand' => 'brand^1',
+        'model' => 'model^1',
+        'featureList.floorPlan' => 'featureList.floorPlan.txt^0.5',
     ];
 
     /** @var string[] */
