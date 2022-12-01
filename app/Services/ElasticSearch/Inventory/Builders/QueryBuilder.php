@@ -29,9 +29,8 @@ class QueryBuilder implements InventoryQueryBuilderInterface
             ]
         ],
         'dry_weight' => [
-            'terms' => [
-                'field' => 'dryWeight',
-                'size' => self::AGGREGATION_SIZE
+            'stats' => [
+                'field' => 'dryWeight'
             ]
         ],
         'is_featured' => [
@@ -41,9 +40,8 @@ class QueryBuilder implements InventoryQueryBuilderInterface
             ]
         ],
         'gvwr' => [
-            'terms' => [
-                'field' => 'gvwr',
-                'size' => self::AGGREGATION_SIZE
+            'stats' => [
+                'field' => 'gvwr'
             ]
         ],
         'fuel_type' => [
@@ -151,6 +149,16 @@ class QueryBuilder implements InventoryQueryBuilderInterface
         'payload_capacity' => [
             'stats' => [
                 'field' => 'payloadCapacity'
+            ]
+        ],
+        'mileage_miles' => [
+            'stats' => [
+                'field' => 'mileageMiles'
+            ]
+        ],
+        'mileage_kilometres' => [
+            'stats' => [
+                'field' => 'mileageKilometres'
             ]
         ],
         'manufacturer' => [
