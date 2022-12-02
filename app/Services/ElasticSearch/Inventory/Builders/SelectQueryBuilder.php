@@ -36,7 +36,7 @@ class SelectQueryBuilder implements FieldQueryBuilderInterface
                 $options = $options->locations();
             }
 
-            if ($name === 'isRental') {
+            if (in_array($name, ['isRental', 'hasRamps'])) {
                 $options = array_map('boolval', $options);
             }
 
@@ -124,6 +124,7 @@ class SelectQueryBuilder implements FieldQueryBuilderInterface
                     ]);
                     break;
                 case 'isRental':
+                case 'hasRamps':
                     $options = array_map('boolval', $options);
                 default:
                     $optionsQuery = [
