@@ -6,7 +6,9 @@ use App\Events\Inventory\InventoryUpdated;
 use App\Helpers\ConvertHelper;
 use App\Models\Inventory\Attribute;
 use App\Models\Inventory\Category;
+use App\Models\Inventory\EntityType;
 use App\Models\Inventory\Inventory;
+use App\Models\Inventory\Manufacturers\Brand;
 use App\Models\User\DealerLocation;
 use App\Services\Inventory\InventoryServiceInterface;
 use Illuminate\Support\Facades\Storage;
@@ -196,7 +198,10 @@ class CsvImportService implements CsvImportServiceInterface
         "title" => array("type" => "string", "length" => 255, "regex" => "[\w\s\d\.'\"\\/\*\+\?]*"),
         "manufacturer" => array("type" => "string"),
         "model" => array("type" => "string", "length" => 255, "regex" => "[\w\s\d\.'\"\\/\*\+\?]*"),
-        "brand" => array("type" => "string"),
+        "brand" => array(
+            "type" => "enum",
+            "list" => array()
+        ),
         "description" => array("type" => "string"),
         "description_html" => array("type" => "string"),
         "location" => array("type" => "string"),
@@ -358,6 +363,14 @@ class CsvImportService implements CsvImportServiceInterface
     );
 
     /**
+     * @var array
+     */
+    private $requiredBrandCategories = [
+        EntityType::ENTITY_TYPE_RV,
+        EntityType::ENTITY_TYPE_WATERCRAFT
+    ];
+
+    /**
      * @var string[]
      */
     static $locationColumns = array(
@@ -424,6 +437,9 @@ class CsvImportService implements CsvImportServiceInterface
 
         // Set categories
         $this->setCategories();
+
+        // Set brands
+        $this->setBrands();
 
         /* For testing purposes only
         Log::debug("Attributes: " . json_encode(self::$_attributes));
@@ -520,7 +536,7 @@ class CsvImportService implements CsvImportServiceInterface
                 if ($lineNumber === 1) {
                     // if column header is not allowed
                     if (!$this->isAllowedHeader($value)) {
-                        $this->validationErrors[] = $this->printError($lineNumber, $index + 1, "Invalid Header: " . $value);
+                        $this->validationErrors[$lineNumber][] = $this->printError($lineNumber, $index + 1, "Invalid Header: " . $value);
                         Log::info("Invalid Header: " . $value);
                         // else, the column header is allowed
                     } else {
@@ -533,7 +549,7 @@ class CsvImportService implements CsvImportServiceInterface
 
                     if ($header) {
                         if ($errorMessage = $this->isDataInvalid($header, $value)) {
-                            $this->validationErrors[] = $this->printError($lineNumber, $index + 1, $errorMessage);
+                            $this->validationErrors[$lineNumber][] = $this->printError($lineNumber, $index + 1, $errorMessage);
                             Log::info("Error: " . $errorMessage);
                         }
                     }
@@ -543,17 +559,19 @@ class CsvImportService implements CsvImportServiceInterface
             // Log::debug(self::$_labels);
 
             // if there's an error return false, if not, import part
-            if (count($this->validationErrors) > 0) {
-                Log::info("Errors: " . json_encode($this->validationErrors));
+            if ($lineNumber != 1) {
+                if (isset($this->validationErrors[$lineNumber]) && count($this->validationErrors[$lineNumber]) > 0) {
+                    Log::info("Errors: " . json_encode($this->validationErrors));
+                    $this->inventory = [];
 
-                return false;
-            } else {
-                Log::info("Importing...");
+                    return false;
+                } else {
+                    Log::info("Importing...");
+                    $this->import($csvData, $lineNumber);
 
-                $this->import($csvData, $lineNumber);
+                    $this->inventory = [];
+                }
             }
-
-            $this->inventory = [];
 
             return true;
         });
@@ -658,6 +676,18 @@ class CsvImportService implements CsvImportServiceInterface
             }
 
             self::$_categoryToEntityTypeId[$category->legacy_category] = $category->entity_type_id;
+        }
+    }
+
+    /**
+     * @return void
+     */
+    private function setBrands()
+    {
+        $brands = Brand::all();
+
+        foreach ($brands as $brand) {
+            self::$_columnValidation['brand']['list'][strtolower($brand->name)] = $brand->name;
         }
     }
 
@@ -779,6 +809,17 @@ class CsvImportService implements CsvImportServiceInterface
                     // this should really fail further up the line
                     $this->inventory["entity_type_id"] = 1;
                 }
+                break;
+
+            case 'brand':
+                if (isset(self::$_columnValidation[$type]['list'][strtolower($value)])) {
+                    $this->inventory[$type] = self::$_columnValidation[$type]['list'][strtolower($value)];
+                } else {
+                    if (in_array($this->inventory["entity_type_id"], $this->requiredBrandCategories)) {
+                        return "A valid brand name is required for Recreational Vehicles and Watercraft";
+                    }
+                }
+
                 break;
 
             case 'status':
