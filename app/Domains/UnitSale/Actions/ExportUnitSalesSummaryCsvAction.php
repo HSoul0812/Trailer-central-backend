@@ -29,6 +29,12 @@ class ExportUnitSalesSummaryCsvAction
     /** @var FilesystemAdapter */
     private $storage;
 
+    /**
+     * The mapping between DB columns -> CSV columns
+     * IMPORTANT: Do not change DB columns unless you also change the column aliases in the query
+     *
+     * @var string[]
+     */
     private $headers = [
         'invoice_no' => 'Invoice No.',
         'invoice_date' => 'Invoice Date',
@@ -546,14 +552,23 @@ class ExportUnitSalesSummaryCsvAction
     private function transformDBRowToResultRow(object $row, array $headers): array
     {
         // TODO: Calculate columns that require PHP to process
+        $this->calculateManuallyRequiredData($row);
 
-        $csvRow = [];
+        return array_map(function(string $header) use ($row) {
+            return object_get($row, $header);
+        }, $headers);
+    }
 
-        foreach ($headers as $header) {
-            $csvRow[] = object_get($row, $header);
-        }
-
-        return $csvRow;
+    /**
+     * @param object $row
+     * @return void
+     */
+    protected function calculateManuallyRequiredData(object $row): void
+    {
+        // In here we can change props in $row directly since it's send by reference
+        // For example:
+        // $row->invoice_date = 'ABC';
+        // $row->payment_type = 'Eiya';
     }
 
     /**
