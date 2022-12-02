@@ -56,7 +56,7 @@ class InventoryImage extends Model
      */
     public function image(): BelongsTo
     {
-        return $this->belongsTo(Image::class, 'image_id', 'image_id');
+        return $this->belongsTo(Image::class, 'image_id', 'image_id')->where('filename', '<>', '');
     }
 
     public function isDefault(): bool
