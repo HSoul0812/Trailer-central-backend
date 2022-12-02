@@ -17,6 +17,9 @@ use Throwable;
 class ExportUnitSalesSummaryCsvActionTest extends TestCase
 {
     /**
+     * @group DMS
+     * @group DMS_REPORTS
+     *
      * @throws CannotInsertRecord
      * @throws EmptyPropValueException
      * @throws Exception
@@ -45,8 +48,15 @@ class ExportUnitSalesSummaryCsvActionTest extends TestCase
     }
 
     /**
+     * @group DMS
+     * @group DMS_REPORTS
+     *
      * @throws CannotInsertRecord
+     * @throws EmptyPropValueException
      * @throws Exception
+     * @throws FileNotFoundException
+     * @throws FileUploadException
+     * @throws Throwable
      */
     public function testItThrowsExceptionIfPropsAreInvalid()
     {
@@ -58,6 +68,12 @@ class ExportUnitSalesSummaryCsvActionTest extends TestCase
         $action->execute();
     }
 
+    /**
+     * @group DMS
+     * @group DMS_REPORTS
+     *
+     * @return void
+     */
     public function testTheMergeHeadersMethodWorksProperly()
     {
         $invoiceNo = Str::random(8);

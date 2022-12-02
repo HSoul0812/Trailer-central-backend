@@ -569,6 +569,47 @@ class ExportUnitSalesSummaryCsvAction
         // For example:
         // $row->invoice_date = 'ABC';
         // $row->payment_type = 'Eiya';
+
+        // Columns that need attention:
+        // - unit_total_tax_rate
+        // - unit_total_sales_tax_amount
+        // - unit_state_tax_rate
+        // - unit_state_tax_amount
+        // - unit_county_tax_rate
+        // - unit_county_tax_amount
+        // - unit_local_tax_rate
+        // - unit_local_tax_amount
+        // - unit_other_tax_rate
+        // - unit_other_tax_amount
+        // - unit_total_cost
+        // - unit_total_true_cost
+        // - unit_pac_adj
+        // - unit_cost_overhead_percent
+        // - additional_pricing_state_tax
+        // - additional_pricing_county_tax
+        // - additional_pricing_local_tax
+        // - part_tax_rate_applied
+        // - part_state_tax_amount
+        // - part_county_tax_amount
+        // - part_local_tax_amount
+        // - total_parts_tax_amount
+        // - labor_subtotal
+        // - labor_discount
+        // - labor_tax_rate_applied
+        // - labor_state_tax_amount
+        // - labor_county_tax_amount
+        // - labor_local_tax_amount
+        // - labor_total_tax_amount
+        // - invoice_nontaxable_total
+        // - invoice_taxable_total
+        // - state_tax_total
+        // - county_tax_total
+        // - city_tax_total
+        // - warranty_tax_total
+        // - other_taxes_total
+        // - total_invoice_tax
+        // - total_amount_due
+        // - remaining_balance
     }
 
     /**
