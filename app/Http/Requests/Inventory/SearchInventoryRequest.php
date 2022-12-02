@@ -100,7 +100,7 @@ class SearchInventoryRequest extends Request
             'geolocation.lon' => ['required', 'numeric'],
             'geolocation.range' => ['nullable', 'numeric'],
             'geolocation.units' => ['nullable', Rule::in([GeolocationRange::UNITS_MILES, GeolocationRange::UNITS_KILOMETERS])],
-            'geolocation.grouping' => ['nullable', Rule::in([GeolocationRange::GROUPING_RANGE, GeolocationRange::GROUPING_UNITS])],
+            'geolocation.grouping' => ['nullable', 'numeric'],
             'dealers' => ['present', 'array'],
             'dealers.*.operator' => ['required', Rule::in([Term::OPERATOR_EQ, Term::OPERATOR_NEQ])],
             'dealers.*.values' => ['required', 'array'],

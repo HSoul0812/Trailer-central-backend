@@ -18,14 +18,14 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
 
     /** @var string[] */
     private const SEARCH_FIELDS = [
-        'title' => 'title.txt',
-        'description' => 'description.txt',
-        'stock' => 'stock.normal',
-        'vin' => 'vin',
-        'manufacturer' => 'manufacturer',
-        'brand' => 'brand',
-        'model' => 'model.txt',
-        'featureList.floorPlan' => 'featureList.floorPlan.txt',
+        'title' => 'title.txt^4',
+        'description' => 'description.txt^1',
+        'stock' => 'stock.normal^1',
+        'vin' => 'vin^1',
+        'manufacturer' => 'manufacturer^1',
+        'brand' => 'brand^1',
+        'model' => 'model^1',
+        'featureList.floorPlan' => 'featureList.floorPlan.txt^0.5',
     ];
 
     /** @var string[] */
@@ -119,7 +119,7 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
         }
 
         if (isset(self::SEARCH_FIELDS[$name])) {
-            return [self::SEARCH_FIELDS[$name]];
+            return [$name => self::SEARCH_FIELDS[$name]];
         }
 
         return self::SEARCH_FIELDS;
@@ -142,12 +142,14 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
             $shouldQuery = [];
             $name = $this->field->getName();
             $data = $term->getValues();
+
             switch ($name) {
                 case 'stock':
                     $shouldQuery[] = $this->wildcardQuery($data['match']);
                     break;
                 default:
                     $searchFields = $this->getSearchFields($data['ignore_fields'] ?? []);
+
                     foreach ($searchFields as $key => $column) {
                         $boost = self::DEFAULT_BOOST;
                         $columnValues = explode('^', $column);
@@ -186,6 +188,7 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
                 ]
             ]);
         });
+
         return $this->query;
     }
 
