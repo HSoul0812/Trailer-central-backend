@@ -4,29 +4,44 @@ namespace Tests\Unit\Domains\UnitSale\Actions;
 
 use App\Domains\UnitSale\Actions\ExportUnitSalesSummaryCsvAction;
 use App\Exceptions\EmptyPropValueException;
+use App\Exceptions\File\FileUploadException;
 use App\Models\User\User;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Str;
 use League\Csv\CannotInsertRecord;
 use League\Csv\Exception;
 use Storage;
 use Tests\TestCase;
+use Throwable;
 
 class ExportUnitSalesSummaryCsvActionTest extends TestCase
 {
     /**
+     * @throws CannotInsertRecord
+     * @throws EmptyPropValueException
+     * @throws Exception
+     * @throws FileNotFoundException
+     * @throws FileUploadException
+     * @throws Throwable
      */
     public function testItCanExportDataToS3()
     {
         $dealer = factory(User::class)->create();
+        $fileName = Str::random() . '.csv';
 
         /** @var ExportUnitSalesSummaryCsvAction $action */
         $action = resolve(ExportUnitSalesSummaryCsvAction::class)
             ->fromDealer($dealer)
             ->from(now()->subMonth()->startOfDay())
-            ->to(now()->endOfDay());
+            ->to(now()->endOfDay())
+            ->withFilename($fileName);
 
         Storage::fake('s3');
         Storage::fake('tmp');
+
+        $action->execute();
+
+        Storage::disk('tmp')->assertExists($fileName);
     }
 
     /**

@@ -3,14 +3,20 @@
 namespace App\Domains\UnitSale\Actions;
 
 use App\Exceptions\EmptyPropValueException;
+use App\Exceptions\File\FileUploadException;
+use App\Models\CRM\Dms\ServiceOrder;
 use App\Models\User\User;
 use Carbon\Carbon;
+use DB;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Str;
 use League\Csv\CannotInsertRecord;
 use League\Csv\Exception;
 use League\Csv\Writer;
 use Storage;
+use Throwable;
 
 /**
  * This action will export the Unit Sales Summary report as a CSV file
@@ -18,6 +24,8 @@ use Storage;
  */
 class ExportUnitSalesSummaryCsvAction
 {
+    const REPORT_PATH_S3 = 'reports/unit-sales-summary';
+
     /** @var FilesystemAdapter */
     private $storage;
 
@@ -48,7 +56,7 @@ class ExportUnitSalesSummaryCsvAction
         'unit_mfg' => 'Unit Mfg',
         'unit_model' => 'Unit Model',
         'unit_location' => 'Unit Location',
-        'unit_nud' => 'Unit N/U/D',
+        'unit_condition' => 'Unit N/U/D',
         'unit_retail_price' => 'Unit Retail Price',
         'unit_discount' => 'Unit Discount',
         'unit_total_after_discount' => 'Unit Total after Discount (Sale Price)',
@@ -62,35 +70,35 @@ class ExportUnitSalesSummaryCsvAction
         'unit_local_tax_amount' => 'Unit Local Tax Amount',
         'unit_other_tax_rate' => 'Unit Other Tax Rate',
         'unit_other_tax_amount' => 'Unit Other Tax Amount',
-        'cost_of_unit' => 'Cost of Unit',
-        'cost_of_shipping' => 'Cost of Shipping',
-        'cost_of_ros' => 'Cost of Ros',
-        'cost_of_prep' => 'Cost of Prep',
-        'total_cost' => 'Total Cost',
-        'true_cost' => 'True Cost',
-        'associated_bill_no' => 'Associated Bill No.',
-        'total_true_cost' => 'Total True Cost',
-        'pac_adj' => 'Pac Adj',
-        'overhead_percentage' => 'Overhead %',
-        'cost_plus_overhead' => 'Cost + Overhead',
-        'min_selling_price' => 'Min. Selling Price',
-        'floorplan_vendor' => 'Floorplan Vendor',
-        'floorplan_committed_date' => 'Floorplan Committed Date',
-        'floorplan_balance' => 'Floorplan Balance',
-        'trade_stock' => 'Trade in Stock',
-        'trade_vin' => 'Trade in VIN',
-        'trade_type' => 'Trade in Type',
-        'trade_category' => 'Trade in Category',
+        'unit_cost' => 'Cost of Unit',
+        'unit_cost_of_shipping' => 'Cost of Shipping',
+        'unit_cost_of_ros' => 'Cost of Ros',
+        'unit_cost_of_prep' => 'Cost of Prep',
+        'unit_total_cost' => 'Total Cost',
+        'unit_true_cost' => 'True Cost',
+        'unit_associated_bill_no' => 'Associated Bill No.',
+        'unit_total_true_cost' => 'Total True Cost',
+        'unit_pac_adj' => 'Pac Adj',
+        'unit_cost_overhead_percent' => 'Overhead %',
+        'unit_cost_plus_overhead' => 'Cost + Overhead',
+        'unit_min_selling_price' => 'Min. Selling Price',
+        'unit_floorplan_vendor' => 'Floorplan Vendor',
+        'unit_floorplan_committed_date' => 'Floorplan Committed Date',
+        'unit_floorplan_balance' => 'Floorplan Balance',
+        'trade_in_stock' => 'Trade in Stock',
+        'trade_in_vin' => 'Trade in VIN',
+        'trade_in_type' => 'Trade in Type',
+        'trade_in_category' => 'Trade in Category',
         'trade_in_year' => 'Trade in Year',
-        'trade_mfg' => 'Trade in Mfg',
+        'trade_in_mfg' => 'Trade in Mfg',
         'trade_in_brand' => 'Trade in Brand',
         'trade_in_model' => 'Trade in Model',
-        'trade_sell_price' => 'Trade in Sell Price',
-        'trade_value_allowance' => 'Trade in Value/Allowance',
-        'trade_book_value' => 'Trade in Book Value',
-        'trade_lien' => 'Trade in Lien: Yes/No',
-        'trade_lien_payoff_amount' => 'Trade in Lien Payoff Amount',
-        'trade_net_trade' => 'Trade in Net Trade',
+        'trade_in_sell_price' => 'Trade in Sell Price',
+        'trade_in_trade_value' => 'Trade in Value/Allowance',
+        'trade_in_book_value' => 'Trade in Book Value',
+        'trade_in_has_lien' => 'Trade in Lien: Yes/No',
+        'trade_in_lien_payoff_amount' => 'Trade in Lien Payoff Amount',
+        'trade_in_net_trade' => 'Trade in Net Trade',
         'additional_pricing_price' => 'Additional Pricing Price',
         'additional_pricing_cost' => 'Additional Pricing Cost',
         'additional_pricing_state_tax' => 'Additional Pricing State Tax',
@@ -100,13 +108,17 @@ class ExportUnitSalesSummaryCsvAction
         'part_total_price' => 'Part Total Price',
         'part_discount' => 'Part Discount',
         'part_tax_rate_applied' => 'Part Tax Rate Applied',
-        'part_state_tax' => 'Part State Tax Amount',
+        'part_state_tax_amount' => 'Part State Tax Amount',
         'part_county_tax_amount' => 'Part County Tax Amount',
         'part_local_tax_amount' => 'Part Local Tax Amount',
         'total_parts_tax_amount' => 'Total Parts Tax Amount',
         'labor_subtotal' => 'Labor Subtotal',
         'labor_discount' => 'Labor Discount',
-        'labor_total_tax' => 'Labor Total Tax',
+        'labor_tax_rate_applied' => 'Labor Tax Rate Applied',
+        'labor_state_tax_amount' => 'Labor State Tax Amount',
+        'labor_county_tax_amount' => 'Labor County Tax Amount',
+        'labor_local_tax_amount' => 'Labor Local Tax Amount',
+        'labor_total_tax_amount' => 'Labor Total Tax Amount',
         'invoice_nontaxable_total' => 'Invoice Nontaxable Total',
         'invoice_taxable_total' => 'Invoice Taxable Total',
         'state_tax_total' => 'State Tax Total',
@@ -149,6 +161,9 @@ class ExportUnitSalesSummaryCsvAction
      * @throws CannotInsertRecord
      * @throws EmptyPropValueException
      * @throws Exception
+     * @throws FileNotFoundException
+     * @throws FileUploadException
+     * @throws Throwable
      */
     public function execute(): string
     {
@@ -160,15 +175,19 @@ class ExportUnitSalesSummaryCsvAction
         // Start by inserting the headers row
         $writer->insertOne(array_values($this->headers));
 
-        // Call another function to fetch and write all the unit sales
-        // data to the CSV file just so we keep this method clear
+        // Fetch data from DB and write to the writer
         $this->fetchAndWriteReportDataToCsv($writer);
 
         // Output the content from the buffer to the actual CSV file
         $tmpStorage->put($this->filename, $writer->toString());
 
-        // TODO: Change so it return path on S3
-        return $tmpStorage->path($this->filename);
+        // Upload CSV File to S3
+        $s3FilePath = $this->getS3FilePath();
+        $result = $this->storage->putStream($s3FilePath, $tmpStorage->readStream($this->filename));
+
+        throw_if(!$result, new FileUploadException("Can't upload CSV file to S3, please check configuration variables."));
+
+        return $this->storage->url($s3FilePath);
     }
 
     /**
@@ -199,7 +218,7 @@ class ExportUnitSalesSummaryCsvAction
     {
         // Remove any headers that we don't have in the $headers array
         // so, we don't accidentally add it to the CSV file
-        $headers = array_filter($headers, function(string $headerKey) {
+        $headers = array_filter($headers, function (string $headerKey) {
             return array_key_exists($headerKey, $this->headers);
         }, ARRAY_FILTER_USE_KEY);
 
@@ -258,7 +277,7 @@ class ExportUnitSalesSummaryCsvAction
     public function withFilename(string $filename): ExportUnitSalesSummaryCsvAction
     {
         // Add the .csv extension if the class user doesn't provide it with the file name
-        if (Str::contains($filename, '.csv')) {
+        if (!Str::contains($filename, '.csv')) {
             $filename .= '.csv';
         }
 
@@ -304,13 +323,244 @@ class ExportUnitSalesSummaryCsvAction
      *
      * @param Writer $writer
      * @return void
+     * @throws CannotInsertRecord
      */
     private function fetchAndWriteReportDataToCsv(Writer $writer)
     {
-        // TODO: Query the data from the database and then start
-        //  looping through each data and use ->insertOne to add
-        //  them into the CSV file
-        //  IMPORTANT: Prepend the path with unit-sales-summary/
-        //  before inserting the file into S3.
+        // TODO: Remove from the actual code
+        $this->dealer->dealer_id = 11708;
+
+        $headersOrder = array_keys($this->headers);
+
+        /** @var object $row */
+        foreach ($this->getQueryBuilder()->get() as $row) {
+            $csvRow = $this->transformDBRowToResultRow($row, $headersOrder);
+
+            $writer->insertOne($csvRow);
+        }
+    }
+
+    private function getQueryBuilder(): Builder
+    {
+        return DB::query()
+            ->select([
+                'qb_invoices.unit_sale_id as unit_sale_id',
+                'qb_invoices.id as invoice_no',
+                'qb_invoices.invoice_date as invoice_date',
+                DB::raw("'Unit Sale' as invoice_type"),
+                'dealer_location.name as invoice_sales_location',
+                'dms_customer.display_name as buyer_display_name',
+                DB::raw("if(dms_customer.tax_exempt = 1, 'TRUE', 'FALSE') as tax_exempt"),
+                'dms_customer.tax_id_number as tax_id_number',
+                DB::raw("if(dms_customer.is_wholesale = 1, 'TRUE', 'FALSE') as wholesale_customer"),
+                'dms_customer.default_discount_percent as default_discount',
+                'dms_customer.address as billing_address',
+                'dms_customer.city as billing_city',
+                'dms_customer.county as billing_county',
+                'dms_customer.region as billing_state',
+                'dms_customer.postal_code as billing_postal_code',
+                'dms_customer.country as billing_country',
+                'dms_unit_sale.sales_person_id',
+                DB::raw("CONCAT(sales_person_1.first_name, ' ', sales_person_1.last_name) as sales_person_1"),
+                DB::raw("CONCAT(sales_person_2.first_name, ' ', sales_person_2.last_name) as sales_person_2"),
+                'dms_unit_sale.tax_profile as tax_profile',
+                'inventory.stock as unit_stock',
+                'inventory.vin as unit_vin',
+                'eav_entity_type.title as unit_type',
+                DB::raw("coalesce(if(inventory_category.inventory_category_id is not null, inventory_category.label, inventory_category_legacy.label), '') as unit_category"),
+                'inventory.year as unit_year',
+                'inventory.manufacturer as unit_mfg',
+                'inventory.model as unit_model',
+                'unit_location.name as unit_location',
+                DB::raw("if(inventory.condition = 'new', 'New', if(inventory.condition = 'used', 'Used', 'Dealer')) as unit_condition"),
+                'dms_unit_sale.inventory_price as unit_retail_price',
+                'dms_unit_sale.inventory_discount as unit_discount',
+                DB::raw('dms_unit_sale.inventory_price - dms_unit_sale.inventory_discount as unit_total_after_discount'),
+                'dms_unit_sale.meta as unit_metadata',
+                DB::raw("'' as unit_total_tax_rate"),
+                DB::raw("'' as unit_total_sales_tax_amount"),
+                DB::raw("'' as unit_state_tax_rate"),
+                DB::raw("'' as unit_state_tax_amount"),
+                DB::raw("'' as unit_county_tax_rate"),
+                DB::raw("'' as unit_county_tax_amount"),
+                DB::raw("'' as unit_local_tax_rate"),
+                DB::raw("'' as unit_local_tax_amount"),
+                DB::raw("'' as unit_other_tax_rate"),
+                DB::raw("'' as unit_other_tax_amount"),
+                DB::raw('coalesce(inventory.cost_of_unit, 0) as unit_cost'),
+                DB::raw('coalesce(inventory.cost_of_shipping, 0) as unit_cost_of_shipping'),
+                DB::raw(sprintf("
+                    coalesce((
+                        select sum(dms_repair_order.total_price)
+                        from dms_repair_order
+                        where dms_repair_order.inventory_id = inventory.inventory_id AND dms_repair_order.type = '%s'
+                        group by dms_repair_order.inventory_id
+                    ), 0) as unit_cost_of_ros
+                ", ServiceOrder::TYPE_INTERNAL)),
+                DB::raw('coalesce(inventory.cost_of_prep, 0) as unit_cost_of_prep'),
+                DB::raw('0 as unit_total_cost'),
+                'inventory.true_cost as unit_true_cost',
+                'qb_bills.doc_num as unit_associated_bill_no',
+                DB::raw('0 as unit_total_true_cost'),
+                'inventory.pac_amount as unit_pac_amount',
+                'inventory.pac_type as unit_pac_type',
+                DB::raw('0 as unit_pac_adj'),
+                DB::raw('0 as unit_cost_overhead_percent'),
+                'qb_invoice_item_inventories.cost_overhead as unit_cost_plus_overhead',
+                'inventory.minimum_selling_price as unit_min_selling_price',
+                'qb_vendors.name as unit_floorplan_vendor',
+                DB::raw("nullif(inventory.fp_committed, '0000-00-00') as unit_floorplan_committed_date"),
+                'inventory.fp_balance as unit_floorplan_balance',
+                'dms_unit_sale_trade_in_v1.temp_inv_stock as trade_in_stock',
+                'dms_unit_sale_trade_in_v1.temp_inv_vin as trade_in_vin',
+                'trade_in_eav_entity_types.title as trade_in_type',
+                'trade_in_inventory_category.label as trade_in_category',
+                'dms_unit_sale_trade_in_v1.temp_inv_year as trade_in_year',
+                'trade_in_manufacturers.name as trade_in_mfg',
+                'dms_unit_sale_trade_in_v1.temp_inv_brand as trade_in_brand',
+                'dms_unit_sale_trade_in_v1.temp_inv_model as trade_in_model',
+                'dms_unit_sale_trade_in_v1.temp_inv_price as trade_in_sell_price',
+                DB::raw('dms_unit_sale_trade_in_v1.trade_value - dms_unit_sale_trade_in_v1.lien_payoff_amount as trade_in_trade_value'),
+                'dms_unit_sale_trade_in_v1.temp_inv_cost_of_unit as trade_in_book_value',
+                DB::raw("if(dms_unit_sale_trade_in_v1.lien_payoff_amount is not null, 'Yes', 'No') as trade_in_has_lien"),
+                'dms_unit_sale_trade_in_v1.lien_payoff_amount as trade_in_lien_payoff_amount',
+                DB::raw('dms_unit_sale_trade_in_v1.trade_value - dms_unit_sale_trade_in_v1.lien_payoff_amount as trade_in_net_trade'),
+                DB::raw(sprintf("
+                    coalesce((
+                        select sum(qb_items.unit_price)
+                        from qb_items
+                        left join qb_invoice_items as add_on_qb_invoice_items on add_on_qb_invoice_items.item_id = qb_items.id
+                        left join qb_invoices as add_on_qb_invoices on add_on_qb_invoices.id = add_on_qb_invoice_items.invoice_id
+                        where add_on_qb_invoices.unit_sale_id = dms_unit_sale.id
+                        and qb_items.type = '%s'
+                    ), 0) as additional_pricing_price
+                ", 'add_on')),
+                DB::raw(sprintf("
+                    coalesce((
+                        select sum(qb_items.cost)
+                        from qb_items
+                        left join qb_invoice_items as add_on_qb_invoice_items on add_on_qb_invoice_items.item_id = qb_items.id
+                        left join qb_invoices as add_on_qb_invoices on add_on_qb_invoices.id = add_on_qb_invoice_items.invoice_id
+                        where add_on_qb_invoices.unit_sale_id = dms_unit_sale.id
+                        and qb_items.type = '%s'
+                    ), 0) as additional_pricing_cost
+                ", 'add_on')),
+                DB::raw('0 as additional_pricing_state_tax'),
+                DB::raw('0 as additional_pricing_county_tax'),
+                DB::raw('0 as additional_pricing_local_tax'),
+                DB::raw(sprintf("
+                    coalesce((
+                        select sum(part_qb_invoice_items.qty * qb_items.cost)
+                        from qb_items
+                        left join qb_invoice_items as part_qb_invoice_items on part_qb_invoice_items.item_id = qb_items.id
+                        left join qb_invoices as part_qb_invoices on part_qb_invoices.id = part_qb_invoice_items.invoice_id
+                        where part_qb_invoices.unit_sale_id = dms_unit_sale.id
+                        and qb_items.type = '%s'
+                    ), 0) as part_cost
+                ", 'part')),
+                DB::raw(sprintf("
+                    coalesce((
+                        select sum(part_qb_invoice_items.qty * part_qb_invoice_items.unit_price)
+                        from qb_items
+                        left join qb_invoice_items as part_qb_invoice_items on part_qb_invoice_items.item_id = qb_items.id
+                        left join qb_invoices as part_qb_invoices on part_qb_invoices.id = part_qb_invoice_items.invoice_id
+                        where part_qb_invoices.unit_sale_id = dms_unit_sale.id
+                        and qb_items.type = '%s'
+                    ), 0) as part_total_price
+                ", 'part')),
+                DB::raw(sprintf("
+                    coalesce((
+                        select abs(qb_invoice_items.unit_price)
+                        from qb_invoice_items
+                        left join qb_invoices as add_on_qb_invoices on add_on_qb_invoices.id = qb_invoice_items.invoice_id
+                        where add_on_qb_invoices.unit_sale_id = dms_unit_sale.id
+                        and qb_invoice_items.description = '%s'
+                    ), 0) as part_discount
+                ", 'Part Discount')),
+                DB::raw('0 as part_tax_rate_applied'),
+                DB::raw('0 as part_state_tax_amount'),
+                DB::raw('0 as part_county_tax_amount'),
+                DB::raw('0 as part_local_tax_amount'),
+                DB::raw('0 as total_parts_tax_amount'),
+                DB::raw('0 as labor_subtotal'),
+                DB::raw('0 as labor_discount'),
+                DB::raw('0 as labor_tax_rate_applied'),
+                DB::raw('0 as labor_state_tax_amount'),
+                DB::raw('0 as labor_county_tax_amount'),
+                DB::raw('0 as labor_local_tax_amount'),
+                DB::raw('0 as labor_total_tax_amount'),
+                DB::raw('0 as invoice_nontaxable_total'),
+                DB::raw('0 as invoice_taxable_total'),
+                DB::raw('0 as state_tax_total'),
+                DB::raw('0 as county_tax_total'),
+                DB::raw('0 as city_tax_total'),
+                DB::raw('0 as warranty_tax_total'),
+                DB::raw('0 as other_taxes_total'),
+                DB::raw('0 as total_invoice_tax'),
+                DB::raw('0 as total_amount_due'),
+                'qb_payment_methods.name as payment_type',
+                'qb_payment.date as payment_date',
+                DB::raw(sprintf("
+                    (
+                        select coalesce(sum(qb_payment.amount), 0) - coalesce(sum(payment_dealer_refunds.amount), 0)
+                        from qb_payment
+                        left join qb_invoices as payment_qb_invoices on payment_qb_invoices.id = qb_payment.invoice_id
+                        left join dealer_refunds as payment_dealer_refunds on payment_dealer_refunds.tb_primary_id = qb_payment.id and payment_dealer_refunds.tb_name = '%s'
+                        where payment_qb_invoices.unit_sale_id = qb_invoices.unit_sale_id
+                    ) as payment_received_total_amount
+                ", 'qb_payment')),
+                'dms_unit_sale.total_price as unit_sale_total_price',
+                DB::raw('0 as remaining_balance'),
+            ])
+            ->from('qb_invoice_item_inventories')
+            ->leftJoin('qb_invoice_items', 'qb_invoice_items.id', '=', 'qb_invoice_item_inventories.invoice_item_id')
+            ->leftJoin('qb_invoices', 'qb_invoice_items.invoice_id', '=', 'qb_invoices.id')
+            ->leftJoin('dms_unit_sale', 'qb_invoices.unit_sale_id', '=', 'dms_unit_sale.id')
+            ->leftJoin('dealer_location', 'dealer_location.dealer_location_id', '=', 'qb_invoices.dealer_location_id')
+            ->leftJoin('dms_customer', 'dms_customer.id', '=', 'qb_invoices.customer_id')
+            ->leftJoin('crm_sales_person as sales_person_1', 'sales_person_1.id', '=', 'dms_unit_sale.sales_person_id')
+            ->leftJoin('crm_sales_person as sales_person_2', 'sales_person_2.id', '=', 'dms_unit_sale.sales_person1_id')
+            ->leftJoin('inventory', 'inventory.inventory_id', '=', 'qb_invoice_item_inventories.inventory_id')
+            ->leftJoin('eav_entity_type', 'eav_entity_type.entity_type_id', '=', 'inventory.entity_type_id')
+            ->leftJoin('inventory_category', 'inventory_category.category', '=', 'inventory.category')
+            ->leftJoin('inventory_category as inventory_category_legacy', 'inventory_category_legacy.legacy_category', '=', 'inventory.category')
+            ->leftJoin('dealer_location as unit_location', 'unit_location.dealer_location_id', '=', 'inventory.dealer_location_id')
+            ->leftJoin('qb_bills', 'qb_bills.id', '=', 'inventory.bill_id')
+            ->leftJoin('inventory_floor_plan_payment', 'inventory_floor_plan_payment.inventory_id', '=', 'inventory.inventory_id')
+            ->leftJoin('qb_vendors', 'qb_vendors.id', '=', 'inventory.fp_vendor')
+            ->leftJoin('dms_unit_sale_trade_in_v1', 'dms_unit_sale_trade_in_v1.unit_sale_id', '=', 'dms_unit_sale.id')
+            ->leftJoin('inventory_category as trade_in_inventory_category', 'trade_in_inventory_category.inventory_category_id', '=', 'dms_unit_sale_trade_in_v1.temp_inv_category')
+            ->leftJoin('eav_entity_type as trade_in_eav_entity_types', 'trade_in_eav_entity_types.entity_type_id', '=', 'trade_in_inventory_category.entity_type_id')
+            ->leftJoin('manufacturers as trade_in_manufacturers', 'trade_in_manufacturers.id', '=', 'dms_unit_sale_trade_in_v1.temp_inv_mfg')
+            ->leftJoin('qb_payment', 'qb_payment.invoice_id', '=', 'qb_invoices.id')
+            ->leftJoin('qb_payment_methods', 'qb_payment_methods.id', '=', 'qb_payment.payment_method_id')
+            ->where('qb_invoices.dealer_id', $this->dealer->dealer_id)
+            ->whereBetween('qb_invoices.invoice_date', [$this->from, $this->to]);
+    }
+
+    /**
+     * @param object $row
+     * @param array $headers
+     * @return void
+     */
+    private function transformDBRowToResultRow(object $row, array $headers): array
+    {
+        // TODO: Calculate columns that require PHP to process
+
+        $csvRow = [];
+
+        foreach ($headers as $header) {
+            $csvRow[] = object_get($row, $header);
+        }
+
+        return $csvRow;
+    }
+
+    /**
+     * @return string
+     */
+    public function getS3FilePath(): string
+    {
+        return sprintf("/%s/%s", self::REPORT_PATH_S3, $this->filename);
     }
 }
