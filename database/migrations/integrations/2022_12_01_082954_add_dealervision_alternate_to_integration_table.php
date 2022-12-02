@@ -7,6 +7,8 @@ class AddDealervisionAlternateToIntegrationTable extends Migration
 {
     private const INTEGRATION_IDS = [98, 99, 100, 101, 102];
 
+    private const DELAERVISION_INTEGRATION_ID = 89;
+
     private const TABLE_NAME = 'integration';
 
     private const INTEGRATION_DATA = [
@@ -20,7 +22,6 @@ class AddDealervisionAlternateToIntegrationTable extends Migration
         'active' => 1,
         'filters' => 'a:0:{}',
         'frequency' => 21600,
-        'settings' => 'a:4:{i:0;a:5:{s:4:"name";s:9:"dealer_id";s:5:"label";s:9:"Dealer ID";s:11:"description";s:34:"Your DealerVision match dealer ID.";s:4:"type";s:4:"text";s:8:"required";b:1;}i:1;a:5:{s:4:"name";s:4:"host";s:5:"label";s:4:"Host";s:11:"description";s:20:"Ip or domain for ftp";s:4:"type";s:4:"text";s:8:"required";b:0;}i:2;a:5:{s:4:"name";s:8:"username";s:5:"label";s:8:"Username";s:11:"description";s:31:"Username for the ftp connection";s:4:"type";s:4:"text";s:8:"required";b:0;}i:3;a:5:{s:4:"name";s:8:"password";s:5:"label";s:8:"Password";s:11:"description";s:31:"Password for the ftp connection";s:4:"type";s:4:"text";s:8:"required";b:0;}}',
         'include_sold' => 0,
         'uses_staging' => 1,
         'show_for_integrated' => 0
@@ -33,6 +34,10 @@ class AddDealervisionAlternateToIntegrationTable extends Migration
      */
     public function up()
     {
+        $dealervisionIntegration = DB::table(self::TABLE_NAME)
+            ->where('integration_id', '=', self::DELAERVISION_INTEGRATION_ID)
+            ->first();
+
         for ($i = 0; $i < count(self::INTEGRATION_IDS); $i++) {
             $integrationData = self::INTEGRATION_DATA;
             $number = $i + 1;
@@ -41,6 +46,7 @@ class AddDealervisionAlternateToIntegrationTable extends Migration
             $integrationData['code'] = $integrationData['code'] . $number;
             $integrationData['module_name'] = $integrationData['module_name'] . $number;
             $integrationData['name'] = $integrationData['name'] . " $number";
+            $integrationData['settings'] = $dealervisionIntegration->settings;
 
             DB::table(self::TABLE_NAME)->insert($integrationData);
         }
