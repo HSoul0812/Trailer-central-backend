@@ -6,6 +6,7 @@ use App\Jobs\Job;
 use App\Mail\CRM\Leads\Export\ADFEmail;
 use App\Models\CRM\Leads\Lead;
 use App\Services\CRM\Leads\DTOs\ADFLead;
+use App\Traits\ParsesEmails;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Bus\Queueable;
@@ -20,7 +21,7 @@ use Carbon\Carbon;
  */
 class ADFJob extends Job
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, ParsesEmails;
 
     /**
      * @var ADFLead
@@ -56,9 +57,9 @@ class ADFJob extends Job
     {
         $this->adf = $adf;
         $this->lead = $lead;
-        $this->toEmails = $toEmails;
-        $this->copiedEmails = $copiedEmails;
-        $this->hiddenCopiedEmails = $hiddenCopiedEmails;
+        $this->toEmails = $this->parseEmails($toEmails);
+        $this->copiedEmails = $this->parseEmails($copiedEmails);
+        $this->hiddenCopiedEmails = $this->parseEmails($hiddenCopiedEmails);
     }
 
     /**
