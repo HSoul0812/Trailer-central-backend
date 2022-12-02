@@ -376,7 +376,7 @@ class QueryBuilder implements InventoryQueryBuilderInterface
                                     'bool' => [
                                         $filters->getESOperatorKeyword() => $filters->getFields()->map(function (Filter $field) {
                                             return $this->mapper->getBuilder($field)->globalQuery();
-                                        })->flatten(1)
+                                        })
                                     ]
                                 ]
                             ]

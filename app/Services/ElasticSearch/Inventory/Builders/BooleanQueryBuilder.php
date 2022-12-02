@@ -34,11 +34,21 @@ class BooleanQueryBuilder implements FieldQueryBuilderInterface
     {
         $this->field->getTerms()->each(function (Term $term) {
             $name = $this->field->getName();
-            $this->appendToQuery([
+            $termQuery = [
                 'term' => [
                     $name => $term->getValues()[0]
                 ]
-            ]);
+            ];
+
+            if ($term->operatorIsNotEquals()) {
+                $termQuery = [
+                    'bool' => [
+                        $term->getESOperatorKeyword() => [$termQuery]
+                    ]
+                ];
+            }
+
+            $this->appendToQuery($termQuery);
         });
         return $this->query;
     }

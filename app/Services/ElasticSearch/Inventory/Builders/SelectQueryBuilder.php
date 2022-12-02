@@ -27,7 +27,6 @@ class SelectQueryBuilder implements FieldQueryBuilderInterface
         $this->field->getTerms()->each(function (Term $term) {
             $name = $this->field->getName();
             $options = $term->getValues();
-            $queries = [];
 
             if ($name === 'dealerLocationId') {
                 $options = DealerLocationIds::fromArray($options);
@@ -41,13 +40,20 @@ class SelectQueryBuilder implements FieldQueryBuilderInterface
                 $options = array_map('boolval', $options);
             }
 
-            foreach ($options as $value) {
-                $queries[] = [
-                    'term' => [
-                        $name => $value
+            $queries = [
+                'terms' => [
+                    $name => $options
+                ]
+            ];
+
+            if ($term->operatorIsNotEquals()) {
+                $queries = [
+                    'bool' => [
+                        $term->getESOperatorKeyword() => $queries
                     ]
                 ];
             }
+
             $this->appendToQuery($queries);
         });
 
