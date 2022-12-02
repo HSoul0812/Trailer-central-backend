@@ -113,7 +113,9 @@ class InventoryElasticSearchInputTransformer implements Transformer
             'mileage'              => TypesHelper::ensureNumeric($model->getAttributeById(Attribute::MILEAGE)),
             'mileageMiles'         => TypesHelper::ensureNumeric($model->mileage_miles),
             'mileageKilometres'    => TypesHelper::ensureNumeric($model->mileage_kilometres),
-            'isRental'             => TypesHelper::ensureBoolean($model->getAttributeById(Attribute::IS_RENTAL)),
+            // Handle isRental somewhat specially.
+            // If it isn't explicity set to yes, then explicitly set it to no.
+            'isRental'             => (bool)TypesHelper::ensureBoolean($model->getAttributeById(Attribute::IS_RENTAL)),
             'weeklyPrice'          => TypesHelper::ensureNumeric($model->getAttributeById(Attribute::WEEKLY_PRICE)),
             'dailyPrice'           => TypesHelper::ensureNumeric($model->getAttributeById(Attribute::DAILY_PRICE)),
             'floorplan'            => $model->getAttributeById(Attribute::FLOORPLAN), // maybe this field is deprecated
