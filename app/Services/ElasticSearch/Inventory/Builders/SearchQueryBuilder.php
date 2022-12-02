@@ -142,6 +142,7 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
             $shouldQuery = [];
             $name = $this->field->getName();
             $data = $term->getValues();
+
             switch ($name) {
                 case 'stock':
                     $shouldQuery[] = $this->wildcardQuery($data['match']);
@@ -187,6 +188,7 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
                 ]
             ]);
         });
+
         return $this->query;
     }
 

@@ -33,11 +33,11 @@ class SelectQueryBuilder implements FieldQueryBuilderInterface
                 $options = DealerLocationIds::fromArray($options);
             }
 
-            if ($name == 'dealerLocationId' && $options->isFilterable()) {
+            if ($name === 'dealerLocationId' && $options->isFilterable()) {
                 $options = $options->locations();
             }
 
-            if ($name == 'isRental') {
+            if ($name === 'isRental') {
                 $options = array_map('boolval', $options);
             }
 
@@ -140,6 +140,7 @@ class SelectQueryBuilder implements FieldQueryBuilderInterface
                     ]);
             }
         });
+
         return $this->query;
     }
 

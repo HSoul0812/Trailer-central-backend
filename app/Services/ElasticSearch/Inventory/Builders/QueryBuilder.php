@@ -161,6 +161,12 @@ class QueryBuilder implements InventoryQueryBuilderInterface
                 'field' => 'mileageKilometres'
             ]
         ],
+        'is_rental' => [
+            'terms' => [
+                'field' => 'isRental',
+                'size' => self::AGGREGATION_SIZE
+            ]
+        ],
         'manufacturer' => [
             'terms' => [
                 'field' => 'manufacturer',
