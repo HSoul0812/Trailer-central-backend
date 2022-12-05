@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class FbappMarketplaceMetrics extends Migration
+class CreateFbappMarketplaceMetrics extends Migration
 {
     /**
      * Run the migrations.
@@ -34,6 +34,6 @@ class FbappMarketplaceMetrics extends Migration
      */
     public function down()
     {
-        Schema::drop('fbapp_marketplace_metrics');
+        Schema::dropIfExists('fbapp_marketplace_metrics');
     }
 }

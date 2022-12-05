@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Class Marketplace
- * 
+ *
  * @package App\Models\Marketing\Facebook\Marketplace
  */
 class Marketplace extends Model
@@ -104,7 +104,7 @@ class Marketplace extends Model
 
     /**
      * Get User
-     * 
+     *
      * @return BelongsTo
      */
     public function user(): BelongsTo
@@ -114,7 +114,7 @@ class Marketplace extends Model
 
     /**
      * Get Dealer Location
-     * 
+     *
      * @return BelongsTo
      */
     public function dealerLocation(): BelongsTo
@@ -124,7 +124,7 @@ class Marketplace extends Model
 
     /**
      * Get Listings
-     * 
+     *
      * @return HasMany
      */
     public function listings(): HasMany
@@ -143,8 +143,18 @@ class Marketplace extends Model
     }
 
     /**
+     * Get Metrics
+     *
+     * @return HasMany
+     */
+    public function metrics(): HasMany
+    {
+        return $this->hasMany(MarketplaceMetric::class, 'fbapp_marketplace_id', 'id');
+    }
+
+    /**
      * Get Filters
-     * 
+     *
      * @return HasMany
      */
     public function filters(): HasMany
@@ -155,7 +165,7 @@ class Marketplace extends Model
 
     /**
      * Get Filters Map
-     * 
+     *
      * @return array{entity: array<string>,
      *               category: array<string>}
      */
@@ -180,7 +190,7 @@ class Marketplace extends Model
 
     /**
      * Is Up To Date?
-     * 
+     *
      * @return bool
      */
     public function getIsUpToDateAttribute(): bool

@@ -22,6 +22,8 @@ use App\Utilities\Fractal\NoDataArraySerializer;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
 use Illuminate\Support\Facades\Log;
+use App\Http\Requests\Dispatch\Facebook\UpdateMarketplaceMetricsRequest;
+use App\Models\Marketing\Facebook\MarketplaceMetric;
 
 class FacebookController extends RestfulControllerV2 {
     /**
