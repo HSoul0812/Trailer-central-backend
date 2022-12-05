@@ -837,7 +837,7 @@ class Inventory extends Model
     {
         $value = $this->getAttributesIndexedByIdAttribute()->get($id);
 
-        if ($value !== self::ATTRIBUTE_ZERO_VALUE && (is_null($value) || empty($value))) { // we need the attributes with value 0 to be displayed
+        if (is_null($value) || (is_string($value) && $value !== '0' && empty($value))) { // we need the attributes with value 0 to be displayed
             return $default;
         }
 
