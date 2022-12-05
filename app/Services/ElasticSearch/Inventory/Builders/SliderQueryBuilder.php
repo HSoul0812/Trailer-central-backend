@@ -25,10 +25,8 @@ class SliderQueryBuilder implements FieldQueryBuilderInterface
     {
         $this->field->getTerms()->each(function (Term $term) {
             $this->appendToQuery([
-                [
-                    'range' => [
-                        $this->field->getName() => $term->getValues()
-                    ]
+                'range' => [
+                    $this->field->getName() => $term->getValues()
                 ]
             ]);
         });
