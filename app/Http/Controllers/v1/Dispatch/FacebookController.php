@@ -219,7 +219,7 @@ class FacebookController extends RestfulControllerV2 {
         if ($metricRequest->validate()) {
             MarketplaceMetric::updateOrCreate(
                 [
-                    'fbapp_marketplace_id' => $id,
+                    'marketplace_id' => $id,
                     'category' => $request->category ?? '',
                     'name' => $request->name
                 ],

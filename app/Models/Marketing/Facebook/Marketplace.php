@@ -149,7 +149,7 @@ class Marketplace extends Model
      */
     public function metrics(): HasMany
     {
-        return $this->hasMany(MarketplaceMetric::class, 'fbapp_marketplace_id', 'id');
+        return $this->hasMany(MarketplaceMetric::class, 'marketplace_id', 'id');
     }
 
     /**

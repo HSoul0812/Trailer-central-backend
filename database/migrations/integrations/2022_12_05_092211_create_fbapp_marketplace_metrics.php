@@ -15,13 +15,13 @@ class CreateFbappMarketplaceMetrics extends Migration
     {
         Schema::create('fbapp_marketplace_metrics', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedInteger('fbapp_marketplace_id');
+            $table->unsignedInteger('marketplace_id');
             $table->string('category', 64)->default('');
             $table->string('name', 64);
-            $table->string('value', 512)->nullable();
+            $table->string('value', 64)->nullable();
             $table->timestamps();
 
-            $table->foreign('fbapp_marketplace_id')
+            $table->foreign('marketplace_id')
                 ->references('id')
                 ->on('fbapp_marketplace');
         });

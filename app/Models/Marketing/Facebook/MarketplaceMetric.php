@@ -13,7 +13,7 @@ class MarketplaceMetric extends Model
     protected $table = self::TABLE_NAME;
     protected $primaryKey = 'id';
     protected $fillable = [
-        'fbapp_marketplace_id',
+        'marketplace_id',
         'category',
         'name',
         'value'
