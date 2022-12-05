@@ -91,12 +91,19 @@ class Kernel extends ConsoleKernel
                 ->daily()
                 ->runInBackground();
 
-/*        $schedule->command('leads:assign:hot-potato')
+        /*$schedule->command('leads:assign:hot-potato')
                 ->everyFiveMinutes()
                 ->runInBackground();*/
 
         $schedule->command('leads:import')
                 ->everyFiveMinutes()
+                ->runInBackground();
+
+        /**
+         * Marketing
+         */
+        $schedule->command('marketing:craigslist:validate')
+                ->hourly()
                 ->runInBackground();
 
 
@@ -138,7 +145,7 @@ class Kernel extends ConsoleKernel
 
 
         /**
-         * Scrape Facebook Messages
+         * Scrape Email Replies
          */
         $schedule->command('email:scrape-replies')
                 ->everyFiveMinutes()

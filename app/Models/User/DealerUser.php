@@ -182,6 +182,11 @@ class DealerUser extends Model implements Authenticatable, PermissionsInterface
         return self::TABLE_NAME;
     }
 
+    public function getDealerId(): int
+    {
+        return $this->dealer_id;
+    }
+
     /**
      * Get By Sales Person
      *

@@ -1,22 +1,22 @@
 <?php
 
-namespace Tests\Integration\Services\Marketing;
+namespace Tests\Integration\Services\Marketing\Facebook;
 
 use App\Models\Marketing\Facebook\Error;
 use App\Models\Marketing\Facebook\Listings;
 use App\Models\Marketing\Facebook\Marketplace;
 use App\Models\User\NewDealerUser;
 use Laravel\Lumen\Testing\DatabaseTransactions;
-use Tests\database\seeds\Marketing\MarketplaceSeeder;
+use Tests\database\seeds\Marketing\Facebook\MarketplaceSeeder;
 use Tests\Integration\IntegrationTestCase;
 
 /**
  * Class MarketingService
- * @package Tests\Integration\Services\Marketing
+ * @package Tests\Integration\Services\Marketing\Facebook
  *
  * @coversDefaultClass \App\Services\Dispatch\Facebook\MarketplaceService
  */
-class MarketplaceServiceTest extends IntegrationTestCase
+class DispatchServiceTest extends IntegrationTestCase
 {
     use DatabaseTransactions;
 
@@ -54,7 +54,7 @@ class MarketplaceServiceTest extends IntegrationTestCase
     }
 
     /**
-     * @group FME
+     * @group Marketing
      * @covers ::login
      */
     public function login(): string
@@ -74,7 +74,7 @@ class MarketplaceServiceTest extends IntegrationTestCase
     }
 
     /**
-     * @group FME
+     * @group Marketing
      * @covers ::dealer
      */
     public function testDealer()
@@ -121,7 +121,7 @@ class MarketplaceServiceTest extends IntegrationTestCase
     /**
      * Test a listing is created correctly.
      *
-     * @group FME
+     * @group Marketing
      * @covers ::create
      */
     public function testCreate()
@@ -217,7 +217,7 @@ class MarketplaceServiceTest extends IntegrationTestCase
     }
 
     /**
-     * @group FME
+     * @group Marketing
      * @covers ::step
      */
     public function testStep()
@@ -287,7 +287,7 @@ class MarketplaceServiceTest extends IntegrationTestCase
     /**
      * Test errors are being reported correctly
      *
-     * @group FME
+     * @group Marketing
      * @covers ::step
      * @dataProvider stepErrorsDataProvider
      *

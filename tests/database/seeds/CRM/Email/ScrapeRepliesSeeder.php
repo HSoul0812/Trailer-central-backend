@@ -61,10 +61,9 @@ class ScrapeRepliesSeeder extends Seeder
     public function __construct($tokenType = 'google')
     {
         $this->dealer = factory(User::class)->create();
-        NewUser::destroy(['user_id' => $this->dealer->dealer_id]);
-        $this->user = factory(NewUser::class)->create(['user_id' => $this->dealer->dealer_id]);
+        $this->user = factory(NewUser::class)->create();
         $this->newDealerUser = factory(NewDealerUser::class)->create(['id' => $this->dealer->getKey(), 'user_id' => $this->user->getKey()]);
-        $this->crmUser = factory(CrmUser::class)->create(['user_id' => $this->newDealerUser->user_id, 'active' => 1]);
+        $this->crmUser = factory(CrmUser::class)->create(['user_id' => $this->user->user_id, 'active' => 1]);
 
         $this->tokenType = $tokenType;
     }

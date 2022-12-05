@@ -58,6 +58,11 @@ class DealerFacebook
     /**
      * @var string
      */
+    private $authCode;
+
+    /**
+     * @var string
+     */
     private $authType;
 
     /**

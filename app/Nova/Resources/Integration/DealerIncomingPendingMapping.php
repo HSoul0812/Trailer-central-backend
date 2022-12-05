@@ -10,6 +10,8 @@ use App\Nova\Actions\Mapping\MapData;
 use App\Nova\Resource;
 use App\Nova\Filters\DealerIDPendingMapping;
 
+use App\Nova\Actions\Exports\DealerIncomingPendingMappingExport;
+
 class DealerIncomingPendingMapping extends Resource
 {
 
@@ -110,7 +112,8 @@ class DealerIncomingPendingMapping extends Resource
     public function actions(Request $request)
     {
         return [
-            new MapData
+            new MapData,
+            (new DealerIncomingPendingMappingExport)->withHeadings()->askForFilename(),
         ];
     }
 
