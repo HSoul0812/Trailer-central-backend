@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $image_id,
  * @property int $inventory_id,
  * @property bool $is_default,
- * @property bool $is_secondary,
+ * @property int $is_secondary,
  * @property int $position,
  * @property string $showroom_image,
  * @property bool $was_manually_added,
