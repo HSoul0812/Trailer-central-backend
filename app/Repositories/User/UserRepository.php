@@ -477,4 +477,18 @@ class UserRepository implements UserRepositoryInterface {
 
         return $dealer;
     }
+
+    /**
+     * @param int $dealerId
+     * @param string $status
+     * @return User
+     */
+    public function changeStatus(int $dealerId, string $status): User
+    {
+        $dealer = User::findOrFail($dealerId);
+        $dealer->state = $status;
+        $dealer->save();
+
+        return $dealer;
+    }
 }
