@@ -12,6 +12,8 @@ use League\Fractal\Resource\Item;
 use Carbon\Carbon;
 use League\Fractal\TransformerAbstract;
 use App\Models\Inventory\Inventory;
+use App\Models\Inventory\InventoryFeature;
+use App\Models\Inventory\Attribute;
 use App\Transformers\User\UserTransformer;
 use App\Transformers\User\DealerLocationTransformer;
 use App\Transformers\Website\WebsiteTransformer;
@@ -137,6 +139,7 @@ class InventoryTransformer extends TransformerAbstract
              'fp_paid' => $inventory->fp_paid,
              'gvwr' => $inventory->gvwr,
              'axle_capacity' => $inventory->axle_capacity,
+             'height_display_mode' => $inventory->height_display_mode,
              'height' => $inventory->height,
              'height_inches' => $inventory->height_inches,
              'height_second' => $heightSecond ?? 0,
@@ -148,10 +151,12 @@ class InventoryTransformer extends TransformerAbstract
                     null,
              'is_archived' => $inventory->is_archived,
              'is_floorplan_bill' => $inventory->is_floorplan_bill,
+             'floor_plans' => $inventory->getFeatureById(InventoryFeature::FLOORPLAN)->values()->toArray(),
              'length' => $inventory->length,
              'length_inches' => $inventory->length_inches,
              'length_second' => $lengthSecond ?? null,
              'length_inches_second' => $lengthInchesSecond ?? null,
+             'length_display_mode' => $inventory->length_display_mode,
              'manufacturer' => $inventory->manufacturer,
              'model' => $inventory->model,
              'msrp' => $inventory->msrp,
@@ -177,6 +182,7 @@ class InventoryTransformer extends TransformerAbstract
              'width_inches' => $inventory->width_inches,
              'width_second' => $widthSecond ?? null,
              'width_inches_second' => $widthInchesSecond ?? null,
+             'width_display_mode' => $inventory->width_display_mode,
              'year' => $inventory->year,
              'chassis_year' => $inventory->chassis_year,
              'color' => $inventory->color,
@@ -185,10 +191,12 @@ class InventoryTransformer extends TransformerAbstract
              'floorplan_vendor' => $inventory->floorplanVendor,
              'created_at' => $inventory->created_at,
              'updated_at' => $inventory->updated_at,
+             'updated_at_auto' => $inventory->updated_at_auto,
              'times_viewed' => $inventory->times_viewed,
              'sold_at' => $inventory->sold_at,
              'is_featured' => $inventory->is_featured,
              'is_special' => $inventory->is_special,
+             'is_rental' => (bool)$inventory->getAttributeById(Attribute::IS_RENTAL),
              'chosen_overlay' => $inventory->chosen_overlay,
              'hidden_price' => $inventory->hidden_price,
              'monthly_payment' => $inventory->monthly_payment,
@@ -199,6 +207,11 @@ class InventoryTransformer extends TransformerAbstract
                  $this->getNewQuoteRoute($inventory->identifier),
                  true
              ),
+             'fuel_type' => $inventory->getAttributeById(Attribute::FUEL_TYPE),
+             'mileage' => $inventory->getAttributeById(Attribute::MILEAGE),
+             'mileage_miles' => $inventory->mileage_miles,
+             'mileage_kilometres' => $inventory->mileage_kilometers,
+             'sleeping_capacity' => $inventory->getAttributeById(Attribute::SLEEPING_CAPACITY),
              'age' => $age,
              'use_website_price' => $inventory->use_website_price,
              'minimum_selling_price' => $inventory->minimum_selling_price,
@@ -209,7 +222,7 @@ class InventoryTransformer extends TransformerAbstract
              'show_on_rvtrader' => $inventory->show_on_rvtrader,
              'changed_fields_in_dashboard' => $inventory->changed_fields_in_dashboard,
              'show_on_auction123' => $inventory->show_on_auction123,
-             'show_on_rvt' => $inventory->show_on_rvt,
+             'show_on_rvt' => $inventory->show_on_rvt
         ];
     }
 

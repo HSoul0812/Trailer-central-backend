@@ -57,6 +57,11 @@ class TextrailPartService implements TextrailPartServiceInterface
         return $this->provider->getTextrailDumpStock();
     }
 
+    public function getAllCategories(): array
+    {
+        return $this->provider->getTextrailCategories();
+    }
+
     public function getParentAndCategory(int $category_id): array
     {
         return $this->provider->getTextrailParentCategory($category_id);
