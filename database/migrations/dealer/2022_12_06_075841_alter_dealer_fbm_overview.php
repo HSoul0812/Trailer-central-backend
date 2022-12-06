@@ -17,6 +17,8 @@ class AlterDealerFbmOverview extends Migration
         $conn = DB::connection()->getDoctrineConnection();
         $conn->executeStatement($this->dropView1());
         $conn->executeStatement($this->dropView2());
+        $conn->executeStatement($this->dropUCFunctions());
+        $this->createFunctions();
         $conn->executeStatement($this->createView1());
         $conn->executeStatement($this->createView2());
         $conn->close();
@@ -32,6 +34,7 @@ class AlterDealerFbmOverview extends Migration
         $conn = DB::connection()->getDoctrineConnection();
         $conn->executeStatement($this->dropView1());
         $conn->executeStatement($this->dropView2());
+        $conn->executeStatement($this->dropUCFunctions());
         $conn->close();
     }
 
@@ -43,6 +46,48 @@ class AlterDealerFbmOverview extends Migration
     private function dropView2(): string
     {
         return "DROP VIEW IF EXISTS fbme_listings;";
+    }
+
+    private function dropUCFunctions(): string
+    {
+        return "DROP FUNCTION IF EXISTS UC_First;
+                DROP FUNCTION IF EXISTS UC_Delimiter;";
+    }
+
+    private function createFunctions(): void
+    {
+        $functionUCFirst = <<<SQL
+CREATE FUNCTION UC_First(oldWord VARCHAR(255)) RETURNS VARCHAR(255)
+  RETURN CONCAT(UCASE(SUBSTRING(oldWord, 1, 1)),SUBSTRING(oldWord, 2));
+SQL;
+
+        DB::unprepared($functionUCFirst);
+        $functionUCDelimiter = <<<SQL
+
+CREATE FUNCTION UC_Delimiter(oldName VARCHAR(255), delim VARCHAR(1), trimSpaces BOOL) RETURNS VARCHAR(255)
+BEGIN
+  SET @oldString := oldName;
+  SET @newString := "";
+
+  tokenLoop: LOOP
+    IF trimSpaces THEN SET @oldString := TRIM(BOTH " " FROM @oldString); END IF;
+
+    SET @splitPoint := LOCATE(delim, @oldString);
+
+    IF @splitPoint = 0 THEN
+      SET @newString := CONCAT(@newString, UC_FIRST(@oldString));
+      LEAVE tokenLoop;
+    END IF;
+
+    SET @newString := CONCAT(@newString, UC_FIRST(SUBSTRING(@oldString, 1, @splitPoint)));
+    SET @oldString := SUBSTRING(@oldString, @splitPoint+1);
+  END LOOP tokenLoop;
+
+  RETURN @newString;
+END
+SQL;
+
+        DB::unprepared($functionUCDelimiter);
     }
 
     private function createView1(): string
@@ -62,6 +107,8 @@ class AlterDealerFbmOverview extends Migration
     private function createView2(): string
     {
         return "
+        CREATE VIEW dealer_fbm_overview AS
+
         SELECT
             fbm.id AS id,
             d.dealer_id AS dealer_id,
@@ -79,7 +126,7 @@ class AlterDealerFbmOverview extends Migration
 				)
             ) AS last_run_status,
             IFNULL((SELECT created_at FROM fbapp_errors WHERE marketplace_id=fbm.id ORDER BY id DESC LIMIT 1), '1000-01-01 00:00:00') AS last_known_error_ts,
-            IFNULL((SELECT REPLACE(error_type, '-', ' ') FROM fbapp_errors WHERE marketplace_id=fbm.id ORDER BY id DESC LIMIT 1), 'no error') AS last_known_error_code,
+            IFNULL((SELECT UC_Delimiter(REPLACE(error_type, '-', ' '), ' ', TRUE) FROM fbapp_errors WHERE marketplace_id=fbm.id ORDER BY id DESC LIMIT 1), 'no error') AS last_known_error_code,
             IFNULL((SELECT error_message FROM fbapp_errors WHERE marketplace_id=fbm.id ORDER BY id DESC LIMIT 1), 'no error') AS last_known_error_message,
             (IFNULL((SELECT fbme_listings.listed_at FROM fbme_listings WHERE integration_id = fbm.id ORDER BY fbme_listings.listed_at DESC LIMIT 1),'1000-01-01 00:00:00')) AS last_success_ts,
 
