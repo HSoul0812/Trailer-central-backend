@@ -2,58 +2,79 @@
 
 namespace App\Repositories\CRM\Text;
 
-use App\Exceptions\NotImplementedException;
-use App\Repositories\CRM\Text\NumberRepositoryInterface;
-use App\Repositories\CRM\Text\DealerLocationRepositoryInterface;
+use Closure;
 use App\Models\CRM\Text\Number;
 use App\Models\CRM\Text\NumberTwilio;
-use App\Services\CRM\Text\TwilioServiceInterface;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
-use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Propaganistas\LaravelPhone\PhoneNumber;
 use App\Models\User\DealerLocation;
 
-class NumberRepository implements NumberRepositoryInterface {
-
+class NumberRepository implements NumberRepositoryInterface
+{
     /**
-     * @var TwilioServiceInterface
+     * Create a new Number
+     *
+     * @param $params
+     * @return Number
      */
-    private $service;
-
-    /**
-     * @var DealerLocationRepositoryInterface
-     */
-    private $dealerLocation;
-
-    private $sortOrders = [
-        'date_sent' => [
-            'field' => 'date_sent',
-            'direction' => 'DESC'
-        ],
-        '-date_sent' => [
-            'field' => 'date_sent',
-            'direction' => 'ASC'
-        ]
-    ];
-
-    public function create($params) {
+    public function create($params): Number
+    {
         return Number::create($params);
     }
 
+    /**
+     * Delete a given number by id
+     *
+     * @param $params
+     * @return bool
+     */
     public function delete($params): bool
     {
         return Number::query()->where('id', $params['id'])->delete();
     }
 
-    public function get($params) {
-        throw new NotImplementedException();
+    /**
+     * Retrieve a Number by id
+     *
+     * @param $params
+     * @return Number
+     */
+    public function get($params): Number
+    {
+        return Number::findOrFail($params['id']);
     }
 
-    public function getAll($params) {
-        throw new NotImplementedException();
+    /**
+     * Get all Numbers by parameters paginated
+     *
+     * @param $params
+     * @return LengthAwarePaginator
+     */
+    public function getAll($params): LengthAwarePaginator
+    {
+        $query = Number::query();
+
+        if (isset($params['dealer_id'])) {
+            $query = $query->where(Number::getTableName().'.dealer_id', $params['dealer_id']);
+        }
+
+        if (!isset($params['per_page'])) {
+            $params['per_page'] = 15;
+        }
+
+        return $query->paginate($params['per_page'])->appends($params);
     }
 
-    public function update($params) {
+    /**
+     * Update a given Number by id
+     *
+     * @param $params
+     * @return bool
+     */
+    public function update($params): bool
+    {
         // Save Text Number
         return Number::findOrFail($params['id'])->fill($params)->save();
     }
@@ -65,15 +86,18 @@ class NumberRepository implements NumberRepositoryInterface {
      * @param string $twilioNumber
      * @param string $toNumber
      * @param string $customerName
+     * @param int|null $dealerId
      * @return Number
      */
-    public function setPhoneAsUsed($fromNumber, $twilioNumber, $toNumber, $customerName, ?int $dealerId = null) {
+    public function setPhoneAsUsed(string $fromNumber, string $twilioNumber, string $toNumber, string $customerName, ?int $dealerId = null): Number
+    {
         // Calculate Expiration
         $expirationTime = time() + (Number::EXPIRATION_TIME * 60 * 60);
 
         $dealerNumber = $fromNumber;
         $customerNumber = $toNumber;
-        // if customer sent text inquiry, fromNumber & toNumber were switched
+
+        // If customer sent text inquiry, fromNumber & toNumber were switched
         if ($this->isDealerNumber($toNumber)) {
             $dealerNumber = $toNumber;
             $customerNumber = $fromNumber;
@@ -96,7 +120,8 @@ class NumberRepository implements NumberRepositoryInterface {
      * @param string $phoneNumber
      * @return bool
      */
-    public function existsTwilioNumber(string $phoneNumber): bool {
+    public function existsTwilioNumber(string $phoneNumber): bool
+    {
         $number = NumberTwilio::where('phone_number', $phoneNumber)->first();
 
         // Successful?
@@ -109,7 +134,8 @@ class NumberRepository implements NumberRepositoryInterface {
      * @param string $phoneNumber
      * @return NumberTwilio
      */
-    public function createTwilioNumber($phoneNumber) {
+    public function createTwilioNumber(string $phoneNumber): NumberTwilio
+    {
         return NumberTwilio::create(['phone_number' => $phoneNumber]);
     }
 
@@ -118,12 +144,14 @@ class NumberRepository implements NumberRepositoryInterface {
      *
      * @param string $dealerNo
      * @param string $customerNo
-     * @return Number
+     * @return Number|null
      */
-    public function findActiveTwilioNumber($dealerNo, $customerNo) {
+    public function findActiveTwilioNumber(string $dealerNo, string $customerNo): ?Number
+    {
         // Return Number
         return Number::where('dealer_number', $dealerNo)
                      ->where('customer_number', $customerNo)
+                     ->orderBy('id', 'desc')
                      ->first();
     }
 
@@ -132,13 +160,15 @@ class NumberRepository implements NumberRepositoryInterface {
      *
      * @param string $dealerNo
      * @param string $customerNo
-     * @return array Number
+     * @return Collection Number
      */
-    public function findAllTwilioNumbers($dealerNo, $customerNo) {
+    public function findAllTwilioNumbers(string $dealerNo, string $customerNo): Collection
+    {
         // Return Numbers
         return Number::where('dealer_number', $dealerNo)
                      ->orWhere('customer_number', $customerNo)
-                     ->all();
+                     ->orderBy('id', 'desc')
+                     ->get();
     }
 
     /**
@@ -153,12 +183,13 @@ class NumberRepository implements NumberRepositoryInterface {
         $query = Number::query();
 
         $query->where('twilio_number', $twilioNumber)
-            ->where(function(Builder $query) use($maskedNumber) {
+            ->where(function (Builder $query) use ($maskedNumber) {
                 $query->where('customer_number', $maskedNumber)
                     ->orWhere('dealer_number', $maskedNumber);
-            });
+            })
+            ->orderBy('id', 'desc');
 
-        return $query->first();
+        return $query->get()->first();
     }
 
     /**
@@ -168,8 +199,9 @@ class NumberRepository implements NumberRepositoryInterface {
      */
     public function activeTwilioNumberByCustomerNumber(string $customerNumber, int $dealerId): ?Number
     {
-        return Number::query()->where('customer_number', $customerNumber)
+        return Number::where('customer_number', $customerNumber)
             ->where('dealer_id', $dealerId)
+            ->orderBy('id', 'desc')
             ->first();
     }
 
@@ -180,7 +212,8 @@ class NumberRepository implements NumberRepositoryInterface {
      * @param string $phone
      * @return bool
      */
-    public function deleteTwilioNumber(string $phone): bool {
+    public function deleteTwilioNumber(string $phone): bool
+    {
         // Return Numbers
         $deleted = NumberTwilio::where('phone_number', $phone)->delete();
 
@@ -196,7 +229,8 @@ class NumberRepository implements NumberRepositoryInterface {
      * @param int $chunkSize
      * @return void
      */
-    public function getAllExpiredChunked(\Closure $callable, int $toDate, int $chunkSize = 500): void {
+    public function getAllExpiredChunked(Closure $callable, int $toDate, int $chunkSize = 500): void
+    {
         NumberTwilio::select(NumberTwilio::getTableName() . '.phone_number')
                 ->leftJoin(Number::getTableName(), NumberTwilio::getTableName() . '.phone_number', '=', Number::getTableName() . '.twilio_number')
                 ->whereNull(Number::getTableName() . '.expiration_time')
@@ -209,9 +243,10 @@ class NumberRepository implements NumberRepositoryInterface {
      * Is Phone Number is a Dealer Number?
      *
      * @param string $phoneNumber
+     * @param string $countryCode
      * @return bool
      */
-    public function isDealerNumber($phoneNumber, $countryCode = 'US')
+    public function isDealerNumber(string $phoneNumber, string $countryCode = 'US'): bool
     {
         $phoneNumber = (string) PhoneNumber::make($phoneNumber, $countryCode);
 
@@ -228,10 +263,12 @@ class NumberRepository implements NumberRepositoryInterface {
     {
         $query = Number::query();
 
-        $query = $query->where([
-            'dealer_number' => $dealerNumber,
-            'twilio_number' => $twilioNumber,
-        ]);
+        $query = $query
+            ->where([
+                'dealer_number' => $dealerNumber,
+                'twilio_number' => $twilioNumber,
+            ])
+            ->orderBy('id', 'desc');
 
         /** @var Number $number */
         $number = $query->first();

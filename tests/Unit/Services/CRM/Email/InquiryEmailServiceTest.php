@@ -316,54 +316,6 @@ class InquiryEmailServiceTest extends TestCase
         $this->assertTrue($result);
     }
 
-    /**
-     * @group CRM
-     * @covers ::send
-     * @group Inquiry
-     *
-     * @throws BindingResolutionException
-     */
-    public function testSendWithException()
-    {
-        // Send Request Params
-        $sendRequestParams = [
-            'inquiry_type' => InquiryLead::INQUIRY_TYPES[0],
-            'lead_types' => [LeadType::TYPE_GENERAL],
-            'website_domain' => self::TEST_DOMAIN,
-            'logo' => self::TEST_WEBSITE_CONFIG['logo'],
-            'logo_url' => self::TEST_WEBSITE_CONFIG['logoUrl'],
-            'from_name' => self::TEST_WEBSITE_CONFIG['fromName'],
-            'inquiry_name' => self::TEST_INQUIRY_NAME,
-            'inquiry_email' => self::TEST_INQUIRY_EMAIL,
-            'device' => self::TEST_DEVICE,
-            'metadata' => [],
-            'is_spam' => 1
-        ];
-
-        // Get Inquiry Lead
-        $inquiry = new InquiryLead($sendRequestParams);
-
-
-        // @var InquiryEmailServiceInterface $service
-        $service = $this->app->make(InquiryEmailServiceInterface::class);
-
-        // Fake Mail
-        Mail::fake();
-
-        // Expect Exception
-        $this->expectException(SendInquiryFailedException::class);
-
-
-        // Validate Send Inquiry Result
-        $result = $service->send($inquiry);
-
-        // Assert a message was sent to the dealer...
-        Mail::assertNotSent(InquiryEmail::class);
-
-        // Assert True
-        $this->assertFalse($result);
-    }
-
 
     /**
      * @group CRM

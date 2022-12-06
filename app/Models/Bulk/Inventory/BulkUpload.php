@@ -21,10 +21,16 @@ class BulkUpload extends Model {
      * @var array
      */
     protected $fillable = [
+        'title',
         'dealer_id',
         'status',
         'import_source',
+        'title',
         'validation_errors',
+    ];
+
+    protected $casts = [
+        'updated_at' => 'date_format:Y-m-d H:i:s'
     ];
 
     /**

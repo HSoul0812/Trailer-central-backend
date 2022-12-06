@@ -1420,6 +1420,7 @@ $api->version('v1', function ($route) {
     |
     */
     $route->get('integration/collectors', 'App\Http\Controllers\v1\Integration\CollectorController@index');
+    $route->post('integration/collectors/{id}', 'App\Http\Controllers\v1\Integration\CollectorController@update');
     $route->get('integration/collector/fields', 'App\Http\Controllers\v1\Integration\CollectorFieldsController@index');
 
     /*

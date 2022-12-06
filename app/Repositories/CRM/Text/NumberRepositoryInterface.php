@@ -2,11 +2,14 @@
 
 namespace App\Repositories\CRM\Text;
 
+use App\Models\CRM\Text\NumberTwilio;
 use App\Repositories\Repository;
 use App\Models\CRM\Text\Number;
-use App\Models\CRM\Text\NumberVerify;
+use Closure;
+use Illuminate\Support\Collection;
 
-interface NumberRepositoryInterface extends Repository {
+interface NumberRepositoryInterface extends Repository
+{
     /**
      * Set Phone as Used
      *
@@ -14,9 +17,18 @@ interface NumberRepositoryInterface extends Repository {
      * @param string $usedNo
      * @param string $customerNo
      * @param string $customerName
+     * @param int|null $dealerId
      * @return Number
      */
-    public function setPhoneAsUsed($dealerNo, $usedNo, $customerNo, $customerName, ?int $dealerId = null);
+    public function setPhoneAsUsed(string $dealerNo, string $usedNo, string $customerNo, string $customerName, ?int $dealerId = null): Number;
+
+    /**
+     * Check if a given twilio number exists
+     *
+     * @param string $phoneNumber
+     * @return bool
+     */
+    public function existsTwilioNumber(string $phoneNumber): bool;
 
     /**
      * Create Twilio Number
@@ -24,25 +36,25 @@ interface NumberRepositoryInterface extends Repository {
      * @param string $phoneNumber
      * @return NumberTwilio
      */
-    public function createTwilioNumber($phoneNumber);
+    public function createTwilioNumber(string $phoneNumber): NumberTwilio;
 
     /**
      * Find Active Twilio Number
      *
-     * @param type $dealerNo
-     * @param type $customerNo
-     * @return Number
+     * @param string $dealerNo
+     * @param string $customerNo
+     * @return Number|null
      */
-    public function findActiveTwilioNumber($dealerNo, $customerNo);
+    public function findActiveTwilioNumber(string $dealerNo, string $customerNo): ?Number;
 
     /**
      * Find All Twilio Numbers
      *
-     * @param type $dealerNo
-     * @param type $customerNo
-     * @return array Number
+     * @param string $dealerNo
+     * @param string $customerNo
+     * @return Collection<Number>
      */
-    public function findAllTwilioNumbers($dealerNo, $customerNo);
+    public function findAllTwilioNumbers(string $dealerNo, string $customerNo): Collection;
 
     /**
      * Is Active Twilio Number?
@@ -76,7 +88,15 @@ interface NumberRepositoryInterface extends Repository {
      * @param int $chunkSize
      * @return void
      */
-    public function getAllExpiredChunked(\Closure $callable, int $toDate, int $chunkSize = 500): void;
+    public function getAllExpiredChunked(Closure $callable, int $toDate, int $chunkSize = 500): void;
+
+    /**
+     * Check if a given number is from a dealer
+     * @param string $phoneNumber
+     * @param string $countryCode
+     * @return bool
+     */
+    public function isDealerNumber(string $phoneNumber, string $countryCode): bool;
 
     /**
      * @param int $expirationTime

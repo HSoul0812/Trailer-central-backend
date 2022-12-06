@@ -272,7 +272,9 @@ class InquiryService implements InquiryServiceInterface
                     $lead = $this->leads->update([
                         'id' => $lead->identifier,
                         'inventory' => array_merge($lead->inventory_ids, $params['inventory']),
-                        'lead_types' => array_merge($lead->lead_types, $params['lead_types'])
+                        'lead_types' => array_merge($lead->lead_types, $params['lead_types']),
+                        'is_archived' => Lead::NOT_ARCHIVED,
+                        'status' => Lead::STATUS_NEW_INQUIRY,
                     ]);
                 }
             }

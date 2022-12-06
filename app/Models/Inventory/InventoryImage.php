@@ -21,11 +21,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * @property Image $image
  */
-class InventoryImage extends Model {
-
+class InventoryImage extends Model
+{
     use TableAware;
 
-    const IS_PRIMARY_IMAGE = 0;
+    /** @var int to make the sorting consistent across ES worker, Legacy API and New API */
+    public const LAST_IMAGE_POSITION = 100;
+
+    /** @var int to make the sorting consistent across ES worker, Legacy API and New API */
+    public const FIRST_IMAGE_POSITION = -1;
 
     /**
      * The table associated with the model.
@@ -55,8 +59,8 @@ class InventoryImage extends Model {
         return $this->belongsTo(Image::class, 'image_id', 'image_id');
     }
 
-    public function isPrimaryImage(): bool
+    public function isDefault(): bool
     {
-        return $this->is_secondary === self::IS_PRIMARY_IMAGE;
+        return (bool)$this->is_default;
     }
 }
