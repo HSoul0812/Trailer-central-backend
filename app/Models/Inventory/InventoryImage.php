@@ -63,4 +63,9 @@ class InventoryImage extends Model
     {
         return (bool)$this->is_default;
     }
+
+    public function isSecondary(): bool
+    {
+        return (bool)$this->is_secondary;
+    }
 }
