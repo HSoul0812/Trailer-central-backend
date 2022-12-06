@@ -79,7 +79,7 @@ class AlterDealerFbmOverview extends Migration
 				)
             ) AS last_run_status,
             IFNULL((SELECT created_at FROM fbapp_errors WHERE marketplace_id=fbm.id ORDER BY id DESC LIMIT 1), '1000-01-01 00:00:00') AS last_known_error_ts,
-            IFNULL((SELECT UC_DELIMETER(REPLACE(error_type, '-', ' '), ' ', TRUE) FROM fbapp_errors WHERE marketplace_id=fbm.id ORDER BY id DESC LIMIT 1), 'no error') AS last_known_error_code,
+            IFNULL((SELECT REPLACE(error_type, '-', ' ') FROM fbapp_errors WHERE marketplace_id=fbm.id ORDER BY id DESC LIMIT 1), 'no error') AS last_known_error_code,
             IFNULL((SELECT error_message FROM fbapp_errors WHERE marketplace_id=fbm.id ORDER BY id DESC LIMIT 1), 'no error') AS last_known_error_message,
             (IFNULL((SELECT fbme_listings.listed_at FROM fbme_listings WHERE integration_id = fbm.id ORDER BY fbme_listings.listed_at DESC LIMIT 1),'1000-01-01 00:00:00')) AS last_success_ts,
 
