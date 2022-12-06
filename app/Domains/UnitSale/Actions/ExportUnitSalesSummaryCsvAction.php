@@ -570,7 +570,7 @@ class ExportUnitSalesSummaryCsvAction
         // $row->invoice_date = 'ABC';
         // $row->payment_type = 'Eiya';
 
-        // Columns that need attention:
+        // Columns that need manual calculation:
         // - unit_total_tax_rate
         // - unit_total_sales_tax_amount
         // - unit_state_tax_rate
