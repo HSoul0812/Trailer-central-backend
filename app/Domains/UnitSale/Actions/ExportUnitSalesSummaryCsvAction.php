@@ -4,7 +4,10 @@ namespace App\Domains\UnitSale\Actions;
 
 use App\Exceptions\EmptyPropValueException;
 use App\Exceptions\File\FileUploadException;
+use App\Models\CRM\Account\InvoiceItem;
+use App\Models\CRM\Dms\Quickbooks\Item;
 use App\Models\CRM\Dms\ServiceOrder;
+use App\Models\Inventory\Inventory;
 use App\Models\User\User;
 use Carbon\Carbon;
 use DB;
@@ -384,13 +387,42 @@ class ExportUnitSalesSummaryCsvAction
                 DB::raw('dms_unit_sale.inventory_price - dms_unit_sale.inventory_discount as unit_total_after_discount'),
                 'dms_unit_sale.meta as unit_metadata',
                 DB::raw("'' as unit_total_tax_rate"),
-                DB::raw("'' as unit_total_sales_tax_amount"),
+                DB::raw(sprintf("
+                    coalesce((
+                        select sum(abs(qb_invoice_items.qty * qb_invoice_items.unit_price))
+                        from qb_invoice_items
+                        left join qb_items as unit_total_sales_tax_amount_qb_items on unit_total_sales_tax_amount_qb_items.id = qb_invoice_items.item_id
+                        where qb_invoice_items.invoice_id = qb_invoices.id
+                        and unit_total_sales_tax_amount_qb_items.type = '%s'
+                    ), 0) as unit_total_sales_tax_amount
+                ", Item::ITEM_TYPES['TAX'])),
                 DB::raw("'' as unit_state_tax_rate"),
-                DB::raw("'' as unit_state_tax_amount"),
+                DB::raw(sprintf("
+                    coalesce((
+                        select abs(qb_invoice_items.qty * qb_invoice_items.unit_price)
+                        from qb_invoice_items
+                        where qb_invoice_items.invoice_id = qb_invoices.id
+                        and qb_invoice_items.description = '%s'
+                    ), 0) as unit_state_tax_amount
+                ", InvoiceItem::DESCRIPTION_DEAL_STATE_TAX)),
                 DB::raw("'' as unit_county_tax_rate"),
-                DB::raw("'' as unit_county_tax_amount"),
+                DB::raw(sprintf("
+                    coalesce((
+                        select abs(qb_invoice_items.qty * qb_invoice_items.unit_price)
+                        from qb_invoice_items
+                        where qb_invoice_items.invoice_id = qb_invoices.id
+                        and qb_invoice_items.description = '%s'
+                    ), 0) as unit_county_tax_amount
+                ", InvoiceItem::DESCRIPTION_DEAL_COUNTY_TAX)),
                 DB::raw("'' as unit_local_tax_rate"),
-                DB::raw("'' as unit_local_tax_amount"),
+                DB::raw(sprintf("
+                    coalesce((
+                        select abs(qb_invoice_items.qty * qb_invoice_items.unit_price)
+                        from qb_invoice_items
+                        where qb_invoice_items.invoice_id = qb_invoices.id
+                        and qb_invoice_items.description = '%s'
+                    ), 0) as unit_local_tax_amount
+                ", InvoiceItem::DESCRIPTION_DEAL_LOCAL_TAX)),
                 DB::raw("'' as unit_other_tax_rate"),
                 DB::raw("'' as unit_other_tax_amount"),
                 DB::raw('coalesce(inventory.cost_of_unit, 0) as unit_cost'),
@@ -412,7 +444,7 @@ class ExportUnitSalesSummaryCsvAction
                 'inventory.pac_type as unit_pac_type',
                 DB::raw('0 as unit_pac_adj'),
                 DB::raw('0 as unit_cost_overhead_percent'),
-                'qb_invoice_item_inventories.cost_overhead as unit_cost_plus_overhead',
+                DB::raw('0 as unit_cost_plus_overhead'),
                 'inventory.minimum_selling_price as unit_min_selling_price',
                 'qb_vendors.name as unit_floorplan_vendor',
                 DB::raw("nullif(inventory.fp_committed, '0000-00-00') as unit_floorplan_committed_date"),
@@ -552,9 +584,9 @@ class ExportUnitSalesSummaryCsvAction
     private function transformDBRowToResultRow(object $row, array $headers): array
     {
         // TODO: Calculate columns that require PHP to process
-        $this->calculateManuallyRequiredData($row);
+        $this->populateManualData($row);
 
-        return array_map(function(string $header) use ($row) {
+        return array_map(function (string $header) use ($row) {
             return object_get($row, $header);
         }, $headers);
     }
@@ -563,36 +595,71 @@ class ExportUnitSalesSummaryCsvAction
      * @param object $row
      * @return void
      */
-    protected function calculateManuallyRequiredData(object $row): void
+    protected function populateManualData(object $row): void
     {
-        // In here we can change props in $row directly since it's send by reference
-        // For example:
-        // $row->invoice_date = 'ABC';
-        // $row->payment_type = 'Eiya';
+        $this->populateUnitTotalData($row);
+        $this->populateAdditionalPricingData($row);
+        $this->populatePartData($row);
+        $this->populateLaborData($row);
+        $this->populateInvoiceTotalData($row);
+    }
 
-        // Columns that need manual calculation:
+    /**
+     * @return string
+     */
+    public function getS3FilePath(): string
+    {
+        return sprintf("/%s/%s", self::REPORT_PATH_S3, $this->filename);
+    }
+
+    private function populateUnitTotalData(object $row)
+    {
         // - unit_total_tax_rate
-        // - unit_total_sales_tax_amount
         // - unit_state_tax_rate
-        // - unit_state_tax_amount
         // - unit_county_tax_rate
-        // - unit_county_tax_amount
         // - unit_local_tax_rate
-        // - unit_local_tax_amount
         // - unit_other_tax_rate
         // - unit_other_tax_amount
-        // - unit_total_cost
-        // - unit_total_true_cost
-        // - unit_pac_adj
-        // - unit_cost_overhead_percent
+
+        $row->unit_total_cost = $row->unit_cost + $row->unit_cost_of_shipping + $row->unit_cost_of_ros + $row->unit_cost_of_prep;
+
+        $row->unit_total_true_cost = $row->unit_true_cost + $row->unit_cost_of_shipping + $row->unit_cost_of_ros + $row->unit_cost_of_prep;
+
+        // The unit_pac_adj is the full amount when the type is 'amount'
+        // in the case of type is 'percent', we need to calculate the amount
+        // by seeing the unit_pac_amount as the percentage of the unit_total_cost
+        $row->unit_pac_adj = $row->unit_pac_type === Inventory::PAC_TYPE_AMOUNT
+            ? $row->unit_pac_amount
+            : round(($row->unit_pac_amount / 100) * $row->unit_total_cost, 2);
+
+        // The unit_cost_overhead_percent is the full amount when the type is 'percent'
+        // in the case of type is 'amount', we'll need to calculate the percent using
+        // the unit_total_cost
+        $row->unit_cost_overhead_percent = $row->unit_pac_type === Inventory::PAC_TYPE_PERCENT
+            ? $row->unit_pac_amount
+            : round(($row->unit_pac_amount / $row->unit_total_cost) * 100, 2);
+
+        $row->unit_cost_plus_overhead = $row->unit_total_cost + $row->unit_pac_adj;
+    }
+
+    private function populateAdditionalPricingData(object $row)
+    {
         // - additional_pricing_state_tax
         // - additional_pricing_county_tax
         // - additional_pricing_local_tax
+    }
+
+    private function populatePartData(object $row)
+    {
         // - part_tax_rate_applied
         // - part_state_tax_amount
         // - part_county_tax_amount
         // - part_local_tax_amount
         // - total_parts_tax_amount
+    }
+
+    private function populateLaborData(object $row)
+    {
         // - labor_subtotal
         // - labor_discount
         // - labor_tax_rate_applied
@@ -600,6 +667,10 @@ class ExportUnitSalesSummaryCsvAction
         // - labor_county_tax_amount
         // - labor_local_tax_amount
         // - labor_total_tax_amount
+    }
+
+    private function populateInvoiceTotalData(object $row)
+    {
         // - invoice_nontaxable_total
         // - invoice_taxable_total
         // - state_tax_total
@@ -609,14 +680,8 @@ class ExportUnitSalesSummaryCsvAction
         // - other_taxes_total
         // - total_invoice_tax
         // - total_amount_due
-        // - remaining_balance
-    }
 
-    /**
-     * @return string
-     */
-    public function getS3FilePath(): string
-    {
-        return sprintf("/%s/%s", self::REPORT_PATH_S3, $this->filename);
+        // - remaining_balance
+        $row->remaining_balance = $row->unit_sale_total_price - $row->payment_received_total_amount;
     }
 }
