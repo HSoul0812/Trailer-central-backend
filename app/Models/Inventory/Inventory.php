@@ -454,14 +454,14 @@ class Inventory extends Model
     public function orderedPrimaryImages(): Collection
     {
         return $this->orderedImages->filter(function (InventoryImage $image) {
-            return $image->isPrimaryImage();
+            return $image->isDefault();
         });
     }
 
     public function orderedSecondaryImages(): Collection
     {
         return $this->orderedImages->filter(function (InventoryImage $image) {
-            return !$image->isPrimaryImage();
+            return $image->isSecondary();
         });
     }
 
@@ -928,7 +928,7 @@ class Inventory extends Model
         }
 
         return [
-            'website_id' => $this->user->website->id,
+            'website_id' => $this->user && $this->user->website ? $this->user->website->id : 0,
             // not sure why the minimum price should be the choice
             'inventory_price' => count($potentialsPrices) ? min($potentialsPrices) : 0,
             'entity_type_id' => $this->entity_type_id,
