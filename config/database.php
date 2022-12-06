@@ -205,7 +205,7 @@ return [
 
         'persist' => [
             'url' => env('REDIS_PERSIST_URL'),
-            'host' => env('REDIS_PERSIST_HOST', '127.0.0.1'),
+            'host' => env('REDIS_PERSIST_HOST', env('REDIS_HOST', '127.0.0.1')),
             'password' => env('REDIS_PERSIST_PASSWORD', null),
             'port' => env('REDIS_PERSIST_PORT', '6379'),
             'database' => env('REDIS_PERSIST_CACHE_DB', '0'),
