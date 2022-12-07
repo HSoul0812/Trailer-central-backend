@@ -167,11 +167,20 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
      *
      * @param string $fromEmail
      * @param string $leadId
+     * @param int $quoteId
      * @return EmailHistory
      */
-    public function findEmailDraft($fromEmail, $leadId) {
+    public function findEmailDraft($fromEmail, $leadId, $quoteId) {
+        if (!empty($leadId)) {
+            $emailHistory = EmailHistory::whereLeadId($leadId);
+        }
+
+        if (!empty($quoteId)) {
+            $emailHistory = EmailHistory::whereQuoteId($quoteId);
+        }
+
         // Return Email Draft
-        return EmailHistory::whereLeadId($leadId)
+        return $emailHistory
             ->whereFromEmail($fromEmail)
             ->whereNotNull('draft_saved')
             ->whereNull('date_sent')

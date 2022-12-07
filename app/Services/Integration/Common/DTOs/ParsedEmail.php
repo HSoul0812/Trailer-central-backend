@@ -121,6 +121,11 @@ class ParsedEmail
     private $leadId = 0;
 
     /**
+     * @var int Quote ID Associated With Email
+     */
+    private $quoteId = 0;
+
+    /**
      * @var int Interaction ID Associated With Email
      */
     private $interactionId = 0;
@@ -741,6 +746,26 @@ class ParsedEmail
         $this->leadId = $leadId;
     }
 
+    /**
+     * Return Quote ID
+     * 
+     * @return int $this->quoteId
+     */
+    public function getQuoteId(): int
+    {
+        return $this->quoteId;
+    }
+
+    /**
+     * Set Quote ID
+     * 
+     * @param int $quoteId Quote ID Associated With Email
+     * @return void
+     */
+    public function setQuoteId(int $quoteId): void
+    {
+        $this->quoteId = $quoteId;
+    }
 
     /**
      * Return Interaction ID
