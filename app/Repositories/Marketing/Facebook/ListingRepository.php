@@ -152,9 +152,10 @@ class ListingRepository implements ListingRepositoryInterface {
         $listingsTableName = Listings::getTableName();
  
         // Initialize Inventory Query
-        $query = Inventory::select(Inventory::getTableName().'.*')
+        $query = Inventory::select(Inventory::getTableName() . '.*')
             ->where('dealer_id', '=', $integration->dealer_id)
             ->where('show_on_website', 1)
+            ->where("{$inventoryTableName}.year", '<', '2024') //TODO: remove when Facebook allows this
             ->where("{$inventoryTableName}.price", '>', INVENTORY::MIN_PRICE_FOR_FACEBOOK)
             ->where("{$inventoryTableName}.entity_type_id", '<>', EntityType::ENTITY_TYPE_BUILDING)
             ->where("{$inventoryTableName}.entity_type_id", '<>', EntityType::ENTITY_TYPE_VEHICLE)

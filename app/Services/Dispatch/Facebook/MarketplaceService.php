@@ -168,6 +168,7 @@ class MarketplaceService implements MarketplaceServiceInterface
             'fb_password' => $integration->fb_password,
             'auth_username' => $integration->tfa_username,
             'auth_password' => $integration->tfa_password,
+            'auth_code' => $integration->tfa_code,
             'auth_type' => $integration->tfa_type,
             'tunnels' => $this->tunnels->getAll(['dealer_id' => $integration->dealer_id]),
             'inventory' => !$integration->is_up_to_date ? $this->getInventory($integration, $type, $params) : null
@@ -314,6 +315,7 @@ class MarketplaceService implements MarketplaceServiceInterface
                 'fb_password' => $integration->fb_password,
                 'auth_username' => $integration->tfa_username,
                 'auth_password' => $integration->tfa_password,
+                'auth_code' => $integration->tfa_code,
                 'auth_type' => $integration->tfa_type,
                 'tunnels' => $this->tunnels->getAll(['dealer_id' => $integration->dealer_id]),
                 'last_attempt_ts' => $integration->last_attempt_ts
