@@ -22,6 +22,8 @@ use App\Utilities\Fractal\NoDataArraySerializer;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
 use Illuminate\Support\Facades\Log;
+use App\Http\Requests\Dispatch\Facebook\UpdateMarketplaceMetricsRequest;
+use App\Models\Marketing\Facebook\MarketplaceMetric;
 
 class FacebookController extends RestfulControllerV2 {
     /**
@@ -206,6 +208,26 @@ class FacebookController extends RestfulControllerV2 {
                                                 $request->ip_address,
                                                 $request->version)
             ]);
+        }
+
+        return $this->response->errorBadRequest();
+    }
+
+    public function metrics(int $id, Request $request)
+    {
+        $metricRequest = new UpdateMarketplaceMetricsRequest($request->all());
+        if ($metricRequest->validate()) {
+            MarketplaceMetric::updateOrCreate(
+                [
+                    'marketplace_id' => $id,
+                    'category' => $request->category ?? '',
+                    'name' => $request->name
+                ],
+                [
+                    'value' => $request->value
+                ]
+            );
+            return $this->successResponse();
         }
 
         return $this->response->errorBadRequest();

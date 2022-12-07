@@ -1477,6 +1477,7 @@ $api->version('v1', function ($route) {
                 $route->get('{id}', 'App\Http\Controllers\v1\Dispatch\FacebookController@show')->where('id', '[0-9]+');
                 $route->post('{id}', 'App\Http\Controllers\v1\Dispatch\FacebookController@create')->where('id', '[0-9]+');
                 $route->put('{id}', 'App\Http\Controllers\v1\Dispatch\FacebookController@update')->where('id', '[0-9]+');
+                $route->post('{id}/metrics', 'App\Http\Controllers\v1\Dispatch\FacebookController@metrics')->where('id', '[0-9]+');
             });
         });
     });
