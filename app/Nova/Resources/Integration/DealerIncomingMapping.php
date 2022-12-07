@@ -107,7 +107,7 @@ class DealerIncomingMapping extends Resource
 
             NovaDependencyContainer::make([
                 Select::make('Map To', 'map_to')
-                    ->options(Brand::select('name')->orderBy('name')->get()->pluck('name'))
+                    ->options(Brand::select('name')->orderBy('name')->get()->pluck('name', 'name'))
                     ->rules('required')
             ])->dependsOn('type', FeedDealerIncomingMapping::BRAND)->onlyOnForms(),
 
@@ -131,16 +131,16 @@ class DealerIncomingMapping extends Resource
 
             NovaDependencyContainer::make([
                 Select::make('Map To', 'map_to')
-                    ->options(InventoryMfg::select('label')->orderBy('label')->get()->pluck('label'))
+                    ->options(InventoryMfg::select('label')->orderBy('label')->get()->pluck('label', 'label'))
                     ->rules('required')
             ])->dependsOn('type', FeedDealerIncomingMapping::MAKE)->onlyOnForms(),
 
             NovaDependencyContainer::make([
                 Select::make('Map To', 'map_to')
-                    ->options(InventoryMfg::select('label')->orderBy('label')->get()->pluck('label'))
+                    ->options(InventoryMfg::select('label')->orderBy('label')->get()->pluck('label', 'label'))
                     ->rules('required'),
                 Select::make('Map To', 'map_to')
-                    ->options(Brand::select('name')->orderBy('name')->get()->pluck('name'))
+                    ->options(Brand::select('name')->orderBy('name')->get()->pluck('name', 'name'))
                     ->rules('required')
             ])->dependsOn('type', FeedDealerIncomingMapping::MANUFACTURER_BRAND)->onlyOnForms()
         ];
