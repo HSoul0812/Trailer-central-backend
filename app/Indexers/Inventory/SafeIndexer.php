@@ -96,11 +96,12 @@ class SafeIndexer
             $dealerList = $this->dealerRepository->getAll([]);
 
             foreach ($dealerList as $dealer) {
-                $this->chunkHandler($this->getSearchableQuery(
-                    $model->newQuery()
-                        ->with(['user', 'user.website'])
-                        ->where('dealer_id', $dealer->dealer_id)
-                )
+                $this->chunkHandler(
+                    $this->getSearchableQuery(
+                        $model->newQuery()
+                            ->with('user', 'user.website', 'orderedImages')
+                            ->where('dealer_id', $dealer->dealer_id)
+                    )
                 );
             }
         } else {
@@ -121,7 +122,7 @@ class SafeIndexer
         // so, we need to cover them by pulling them once again and ingest them
         $query = $this->getSearchableQuery(
             $model->newQuery()
-                ->with(['user', 'user.website'])
+                ->with('user', 'user.website', 'orderedImages')
                 ->where('updated_at_auto', '>=', $now->format(Date::FORMAT_Y_M_D_T))
         );
         $this->numberUnitsToBeProcessed = $query->count('inventory_id');
@@ -158,6 +159,7 @@ class SafeIndexer
                         $this->numberUnitsToBeProcessed)
                 );
             } catch (Exception $e) {
+                $this->output->writeln(sprintf('[%s] at %s of %d', $e->getMessage(), $e->getFile(), $e->getLine()));
                 // to avoid any interruption
             }
         });
@@ -166,8 +168,8 @@ class SafeIndexer
     protected function getSearchableQuery(Builder $builder): Builder
     {
         return $builder
-            ->where('status', '<>', Inventory::STATUS_QUOTE)
+            ->where('show_on_website', Inventory::SHOW_IN_WEBSITE)
             ->where('is_archived', Inventory::IS_NOT_ARCHIVED)
-            ->where('show_on_website', Inventory::SHOW_IN_WEBSITE);
+            ->where('status', '<>', Inventory::STATUS_QUOTE);
     }
 }
