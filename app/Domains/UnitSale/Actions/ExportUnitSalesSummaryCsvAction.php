@@ -385,46 +385,17 @@ class ExportUnitSalesSummaryCsvAction
                 'dms_unit_sale.inventory_price as unit_retail_price',
                 'dms_unit_sale.inventory_discount as unit_discount',
                 DB::raw('dms_unit_sale.inventory_price - dms_unit_sale.inventory_discount as unit_total_after_discount'),
-                'dms_unit_sale.meta as unit_metadata',
-                DB::raw("'' as unit_total_tax_rate"),
-                DB::raw(sprintf("
-                    coalesce((
-                        select sum(abs(qb_invoice_items.qty * qb_invoice_items.unit_price))
-                        from qb_invoice_items
-                        left join qb_items as unit_total_sales_tax_amount_qb_items on unit_total_sales_tax_amount_qb_items.id = qb_invoice_items.item_id
-                        where qb_invoice_items.invoice_id = qb_invoices.id
-                        and unit_total_sales_tax_amount_qb_items.type = '%s'
-                    ), 0) as unit_total_sales_tax_amount
-                ", Item::ITEM_TYPES['TAX'])),
-                DB::raw("'' as unit_state_tax_rate"),
-                DB::raw(sprintf("
-                    coalesce((
-                        select abs(qb_invoice_items.qty * qb_invoice_items.unit_price)
-                        from qb_invoice_items
-                        where qb_invoice_items.invoice_id = qb_invoices.id
-                        and qb_invoice_items.description = '%s'
-                    ), 0) as unit_state_tax_amount
-                ", InvoiceItem::DESCRIPTION_DEAL_STATE_TAX)),
-                DB::raw("'' as unit_county_tax_rate"),
-                DB::raw(sprintf("
-                    coalesce((
-                        select abs(qb_invoice_items.qty * qb_invoice_items.unit_price)
-                        from qb_invoice_items
-                        where qb_invoice_items.invoice_id = qb_invoices.id
-                        and qb_invoice_items.description = '%s'
-                    ), 0) as unit_county_tax_amount
-                ", InvoiceItem::DESCRIPTION_DEAL_COUNTY_TAX)),
-                DB::raw("'' as unit_local_tax_rate"),
-                DB::raw(sprintf("
-                    coalesce((
-                        select abs(qb_invoice_items.qty * qb_invoice_items.unit_price)
-                        from qb_invoice_items
-                        where qb_invoice_items.invoice_id = qb_invoices.id
-                        and qb_invoice_items.description = '%s'
-                    ), 0) as unit_local_tax_amount
-                ", InvoiceItem::DESCRIPTION_DEAL_LOCAL_TAX)),
-                DB::raw("'' as unit_other_tax_rate"),
-                DB::raw("'' as unit_other_tax_amount"),
+                'dms_unit_sale.meta as unit_sale_metadata',
+                DB::raw("0 as unit_total_tax_rate"),
+                DB::raw("0 as unit_total_sales_tax_amount"),
+                DB::raw("0 as unit_state_tax_rate"),
+                DB::raw("0 as unit_state_tax_amount"),
+                DB::raw("0 as unit_county_tax_rate"),
+                DB::raw("0 as unit_county_tax_amount"),
+                DB::raw("0 as unit_local_tax_rate"),
+                DB::raw("0 as unit_local_tax_amount"),
+                DB::raw("0 as unit_other_tax_rate"),
+                DB::raw("0 as unit_other_tax_amount"),
                 DB::raw('coalesce(inventory.cost_of_unit, 0) as unit_cost'),
                 DB::raw('coalesce(inventory.cost_of_shipping, 0) as unit_cost_of_shipping'),
                 DB::raw(sprintf("
@@ -472,7 +443,7 @@ class ExportUnitSalesSummaryCsvAction
                         where add_on_qb_invoices.unit_sale_id = dms_unit_sale.id
                         and qb_items.type = '%s'
                     ), 0) as additional_pricing_price
-                ", 'add_on')),
+                ", Item::ITEM_TYPES['ADD_ON'])),
                 DB::raw(sprintf("
                     coalesce((
                         select sum(qb_items.cost)
@@ -482,7 +453,40 @@ class ExportUnitSalesSummaryCsvAction
                         where add_on_qb_invoices.unit_sale_id = dms_unit_sale.id
                         and qb_items.type = '%s'
                     ), 0) as additional_pricing_cost
-                ", 'add_on')),
+                ", Item::ITEM_TYPES['ADD_ON'])),
+                DB::raw(sprintf("
+                    coalesce((
+                        select sum(qb_invoice_items.unit_price)
+                        from qb_invoice_items
+                        left join qb_items as additional_pricing_taxable_amount_qb_items on additional_pricing_taxable_amount_qb_items.id = qb_invoice_items.item_id
+                        left join dealer_location_quote_fee as additional_pricing_taxable_amount_quote_fee on additional_pricing_taxable_amount_quote_fee.id = additional_pricing_taxable_amount_qb_items.item_primary_id
+                        where qb_invoice_items.invoice_id = qb_invoices.id
+                        and additional_pricing_taxable_amount_qb_items.type = '%s'
+                        and additional_pricing_taxable_amount_quote_fee.is_state_taxed = 1
+                    ), 0) as additional_pricing_state_taxable_amount
+                ", Item::ITEM_TYPES['ADD_ON'])),
+                DB::raw(sprintf("
+                    coalesce((
+                        select sum(qb_invoice_items.unit_price)
+                        from qb_invoice_items
+                        left join qb_items as additional_pricing_taxable_amount_qb_items on additional_pricing_taxable_amount_qb_items.id = qb_invoice_items.item_id
+                        left join dealer_location_quote_fee as additional_pricing_taxable_amount_quote_fee on additional_pricing_taxable_amount_quote_fee.id = additional_pricing_taxable_amount_qb_items.item_primary_id
+                        where qb_invoice_items.invoice_id = qb_invoices.id
+                        and additional_pricing_taxable_amount_qb_items.type = '%s'
+                        and additional_pricing_taxable_amount_quote_fee.is_county_taxed = 1
+                    ), 0) as additional_pricing_county_taxable_amount
+                ", Item::ITEM_TYPES['ADD_ON'])),
+                DB::raw(sprintf("
+                    coalesce((
+                        select sum(qb_invoice_items.unit_price)
+                        from qb_invoice_items
+                        left join qb_items as additional_pricing_taxable_amount_qb_items on additional_pricing_taxable_amount_qb_items.id = qb_invoice_items.item_id
+                        left join dealer_location_quote_fee as additional_pricing_taxable_amount_quote_fee on additional_pricing_taxable_amount_quote_fee.id = additional_pricing_taxable_amount_qb_items.item_primary_id
+                        where qb_invoice_items.invoice_id = qb_invoices.id
+                        and additional_pricing_taxable_amount_qb_items.type = '%s'
+                        and additional_pricing_taxable_amount_quote_fee.is_local_taxed = 1
+                    ), 0) as additional_pricing_local_taxable_amount
+                ", Item::ITEM_TYPES['ADD_ON'])),
                 DB::raw('0 as additional_pricing_state_tax'),
                 DB::raw('0 as additional_pricing_county_tax'),
                 DB::raw('0 as additional_pricing_local_tax'),
@@ -516,6 +520,15 @@ class ExportUnitSalesSummaryCsvAction
                     ), 0) as part_discount
                 ", 'Part Discount')),
                 DB::raw('0 as part_tax_rate_applied'),
+                DB::raw("
+                    (
+                        select sum(part_total_taxable_amount_accessory.qty * part_total_taxable_amount_accessory.price)
+                        from dms_unit_sale_accessory as part_total_taxable_amount_accessory
+                        where qb_invoices.unit_sale_id = part_total_taxable_amount_accessory.unit_sale_id
+                        and part_total_taxable_amount_accessory.taxable = 1
+                    ) as part_total_taxable_amount
+                "),
+                DB::raw('0 as part_total_taxable_amount_after_discount'),
                 DB::raw('0 as part_state_tax_amount'),
                 DB::raw('0 as part_county_tax_amount'),
                 DB::raw('0 as part_local_tax_amount'),
@@ -529,9 +542,30 @@ class ExportUnitSalesSummaryCsvAction
                 DB::raw('0 as labor_total_tax_amount'),
                 DB::raw('0 as invoice_nontaxable_total'),
                 DB::raw('0 as invoice_taxable_total'),
-                DB::raw('0 as state_tax_total'),
-                DB::raw('0 as county_tax_total'),
-                DB::raw('0 as city_tax_total'),
+                DB::raw(sprintf("
+                    coalesce((
+                        select abs(qb_invoice_items.qty * qb_invoice_items.unit_price)
+                        from qb_invoice_items
+                        where qb_invoice_items.invoice_id = qb_invoices.id
+                        and qb_invoice_items.description = '%s'
+                    ), 0) as state_tax_total
+                ", InvoiceItem::DESCRIPTION_DEAL_STATE_TAX)),
+                DB::raw(sprintf("
+                    coalesce((
+                        select abs(qb_invoice_items.qty * qb_invoice_items.unit_price)
+                        from qb_invoice_items
+                        where qb_invoice_items.invoice_id = qb_invoices.id
+                        and qb_invoice_items.description = '%s'
+                    ), 0) as county_tax_total
+                ", InvoiceItem::DESCRIPTION_DEAL_COUNTY_TAX)),
+                DB::raw(sprintf("
+                    coalesce((
+                        select abs(qb_invoice_items.qty * qb_invoice_items.unit_price)
+                        from qb_invoice_items
+                        where qb_invoice_items.invoice_id = qb_invoices.id
+                        and qb_invoice_items.description = '%s'
+                    ), 0) as city_tax_total
+                ", InvoiceItem::DESCRIPTION_DEAL_LOCAL_TAX)),
                 DB::raw('0 as warranty_tax_total'),
                 DB::raw('0 as other_taxes_total'),
                 DB::raw('0 as total_invoice_tax'),
@@ -583,7 +617,6 @@ class ExportUnitSalesSummaryCsvAction
      */
     private function transformDBRowToResultRow(object $row, array $headers): array
     {
-        // TODO: Calculate columns that require PHP to process
         $this->populateManualData($row);
 
         return array_map(function (string $header) use ($row) {
@@ -614,16 +647,73 @@ class ExportUnitSalesSummaryCsvAction
 
     private function populateUnitTotalData(object $row)
     {
-        // - unit_total_tax_rate
-        // - unit_state_tax_rate
-        // - unit_county_tax_rate
-        // - unit_local_tax_rate
-        // - unit_other_tax_rate
-        // - unit_other_tax_amount
+        $row->unit_sale_metadata = json_decode($row->unit_sale_metadata, true);
 
-        $row->unit_total_cost = $row->unit_cost + $row->unit_cost_of_shipping + $row->unit_cost_of_ros + $row->unit_cost_of_prep;
+        $row->unit_state_tax_rate = $this->convertTaxRateToPercentage(
+            data_get($row->unit_sale_metadata, 'taxRates.inventory.stateTaxRate', 0)
+        );
 
-        $row->unit_total_true_cost = $row->unit_true_cost + $row->unit_cost_of_shipping + $row->unit_cost_of_ros + $row->unit_cost_of_prep;
+        $row->unit_state_tax_amount = round(($row->unit_state_tax_rate / 100) * $row->unit_total_after_discount, 2);
+
+        $row->unit_county_tax_rate = $this->convertTaxRateToPercentage(
+            data_get($row->unit_sale_metadata, 'taxRates.inventory.countyTaxRate', 0)
+        );
+
+        $row->unit_county_tax_amount = round(($row->unit_county_tax_rate / 100) * $row->unit_total_after_discount, 2);
+
+        $row->unit_local_tax_rate = array_sum([
+            $this->convertTaxRateToPercentage(
+                data_get($row->unit_sale_metadata, 'taxRates.inventory.cityTaxRate', 0)
+            ),
+            $this->convertTaxRateToPercentage(
+                data_get($row->unit_sale_metadata, 'taxRates.inventory.district1TaxRate', 0)
+            ),
+            $this->convertTaxRateToPercentage(
+                data_get($row->unit_sale_metadata, 'taxRates.inventory.district2TaxRate', 0)
+            ),
+            $this->convertTaxRateToPercentage(
+                data_get($row->unit_sale_metadata, 'taxRates.inventory.district3TaxRate', 0)
+            ),
+            $this->convertTaxRateToPercentage(
+                data_get($row->unit_sale_metadata, 'taxRates.inventory.district4TaxRate', 0)
+            ),
+        ]);
+
+        $row->unit_local_tax_amount = round(($row->unit_local_tax_rate / 100) * $row->unit_total_after_discount, 2);
+
+        $row->unit_other_tax_rate = array_sum([
+            $this->convertTaxRateToPercentage(
+                data_get($row->unit_sale_metadata, 'taxRates.inventory.dmvTaxRate', 0)
+            ),
+            $this->convertTaxRateToPercentage(
+                data_get($row->unit_sale_metadata, 'taxRates.inventory.registrationTaxRate', 0)
+            ),
+        ]);
+
+        $row->unit_other_tax_amount = round(($row->unit_other_tax_rate / 100) * $row->unit_total_after_discount, 2);
+
+        $row->unit_total_tax_rate = array_sum([
+            $row->unit_state_tax_rate,
+            $row->unit_county_tax_rate,
+            $row->unit_local_tax_rate,
+            $row->unit_other_tax_rate,
+        ]);
+
+        $row->unit_total_sales_tax_amount = round(($row->unit_total_tax_rate / 100) * $row->unit_total_after_discount, 2);
+
+        $row->unit_total_cost = array_sum([
+            $row->unit_cost,
+            $row->unit_cost_of_shipping,
+            $row->unit_cost_of_ros,
+            $row->unit_cost_of_prep,
+        ]);
+
+        $row->unit_total_true_cost = array_sum([
+            $row->unit_true_cost,
+            $row->unit_cost_of_shipping,
+            $row->unit_cost_of_ros,
+            $row->unit_cost_of_prep,
+        ]);
 
         // The unit_pac_adj is the full amount when the type is 'amount'
         // in the case of type is 'percent', we need to calculate the amount
@@ -632,30 +722,101 @@ class ExportUnitSalesSummaryCsvAction
             ? $row->unit_pac_amount
             : round(($row->unit_pac_amount / 100) * $row->unit_total_cost, 2);
 
+        // Prevent Divide By Zero error
+        $safeUnitTotalCost = empty($row->unit_total_cost) ? 1 : $row->unit_total_cost;
+
         // The unit_cost_overhead_percent is the full amount when the type is 'percent'
         // in the case of type is 'amount', we'll need to calculate the percent using
         // the unit_total_cost
         $row->unit_cost_overhead_percent = $row->unit_pac_type === Inventory::PAC_TYPE_PERCENT
             ? $row->unit_pac_amount
-            : round(($row->unit_pac_amount / $row->unit_total_cost) * 100, 2);
+            : round(($row->unit_pac_amount / $safeUnitTotalCost) * 100, 2);
 
         $row->unit_cost_plus_overhead = $row->unit_total_cost + $row->unit_pac_adj;
     }
 
     private function populateAdditionalPricingData(object $row)
     {
-        // - additional_pricing_state_tax
-        // - additional_pricing_county_tax
-        // - additional_pricing_local_tax
+        $stateTaxRate = $this->convertTaxRateToPercentage(
+            data_get($row->unit_sale_metadata, 'taxRates.pricing.stateTaxRate', 0)
+        );
+
+        $row->additional_pricing_state_tax = round(($stateTaxRate / 100) * $row->additional_pricing_state_taxable_amount, 2);
+
+        $countyTaxRate = $this->convertTaxRateToPercentage(
+            data_get($row->unit_sale_metadata, 'taxRates.pricing.countyTaxRate', 0)
+        );
+
+        $row->additional_pricing_county_tax = round(($countyTaxRate / 100) * $row->additional_pricing_county_taxable_amount, 2);
+
+        $localTaxRate = array_sum([
+            $this->convertTaxRateToPercentage(
+                data_get($row->unit_sale_metadata, 'taxRates.pricing.cityTaxRate', 0)
+            ),
+            $this->convertTaxRateToPercentage(
+                data_get($row->unit_sale_metadata, 'taxRates.pricing.district1TaxRate', 0)
+            ),
+            $this->convertTaxRateToPercentage(
+                data_get($row->unit_sale_metadata, 'taxRates.pricing.district2TaxRate', 0)
+            ),
+            $this->convertTaxRateToPercentage(
+                data_get($row->unit_sale_metadata, 'taxRates.pricing.district3TaxRate', 0)
+            ),
+            $this->convertTaxRateToPercentage(
+                data_get($row->unit_sale_metadata, 'taxRates.pricing.district4TaxRate', 0)
+            ),
+        ]);
+
+        $row->additional_pricing_local_tax = round(($localTaxRate / 100) * $row->additional_pricing_local_taxable_amount, 2);
     }
 
     private function populatePartData(object $row)
     {
-        // - part_tax_rate_applied
-        // - part_state_tax_amount
-        // - part_county_tax_amount
-        // - part_local_tax_amount
-        // - total_parts_tax_amount
+        $stateTaxRate = $this->convertTaxRateToPercentage(
+            data_get($row->unit_sale_metadata, 'taxRates.pricing.stateTaxRate', 0)
+        );
+
+        $countyTaxRate = $this->convertTaxRateToPercentage(
+            data_get($row->unit_sale_metadata, 'taxRates.pricing.countyTaxRate', 0)
+        );
+
+        $localTaxRate = array_sum([
+            $this->convertTaxRateToPercentage(
+                data_get($row->unit_sale_metadata, 'taxRates.pricing.cityTaxRate', 0)
+            ),
+            $this->convertTaxRateToPercentage(
+                data_get($row->unit_sale_metadata, 'taxRates.pricing.district1TaxRate', 0)
+            ),
+            $this->convertTaxRateToPercentage(
+                data_get($row->unit_sale_metadata, 'taxRates.pricing.district2TaxRate', 0)
+            ),
+            $this->convertTaxRateToPercentage(
+                data_get($row->unit_sale_metadata, 'taxRates.pricing.district3TaxRate', 0)
+            ),
+            $this->convertTaxRateToPercentage(
+                data_get($row->unit_sale_metadata, 'taxRates.pricing.district4TaxRate', 0)
+            )
+        ]);
+
+        $row->part_tax_rate_applied = array_sum([
+            $stateTaxRate,
+            $countyTaxRate,
+            $localTaxRate,
+        ]);
+
+        $row->part_total_taxable_amount_after_discount = $row->part_total_taxable_amount - $row->part_discount;
+
+        $row->part_state_tax_amount = round(($stateTaxRate / 100) * $row->part_total_taxable_amount_after_discount);
+
+        $row->part_county_tax_amount = round(($countyTaxRate / 100) * $row->part_total_taxable_amount_after_discount);
+
+        $row->part_local_tax_amount = round(($localTaxRate / 100) * $row->part_total_taxable_amount_after_discount);
+
+        $row->total_parts_tax_amount = array_sum([
+            $row->part_state_tax_amount,
+            $row->part_county_tax_amount,
+            $row->part_local_tax_amount,
+        ]);
     }
 
     private function populateLaborData(object $row)
@@ -673,15 +834,22 @@ class ExportUnitSalesSummaryCsvAction
     {
         // - invoice_nontaxable_total
         // - invoice_taxable_total
-        // - state_tax_total
-        // - county_tax_total
-        // - city_tax_total
         // - warranty_tax_total
         // - other_taxes_total
         // - total_invoice_tax
         // - total_amount_due
 
-        // - remaining_balance
         $row->remaining_balance = $row->unit_sale_total_price - $row->payment_received_total_amount;
+    }
+
+    /**
+     * Convert the tax rate like 0.06 to the percentage like 6
+     *
+     * @param float $taxRate
+     * @return float
+     */
+    private function convertTaxRateToPercentage(float $taxRate): float
+    {
+        return round($taxRate * 100, 2);
     }
 }
