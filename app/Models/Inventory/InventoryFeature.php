@@ -24,6 +24,11 @@ class InventoryFeature extends Model
      */
     protected $table = 'inventory_feature';
 
+    const FLOORPLAN = 10;
+    const STALL_TACK = 9;
+    const LQ = 8;
+    const DOORS_WINDOWS_RAMPS = 7;
+
     /**
      * @var string
      */
