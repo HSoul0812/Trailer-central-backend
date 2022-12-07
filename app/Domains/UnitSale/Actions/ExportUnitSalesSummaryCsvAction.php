@@ -429,29 +429,27 @@ class ExportUnitSalesSummaryCsvAction
                 'dms_unit_sale_trade_in_v1.temp_inv_brand as trade_in_brand',
                 'dms_unit_sale_trade_in_v1.temp_inv_model as trade_in_model',
                 'dms_unit_sale_trade_in_v1.temp_inv_price as trade_in_sell_price',
-                DB::raw('dms_unit_sale_trade_in_v1.trade_value - dms_unit_sale_trade_in_v1.lien_payoff_amount as trade_in_trade_value'),
+                'dms_unit_sale_trade_in_v1.trade_value as trade_in_trade_value',
                 'dms_unit_sale_trade_in_v1.temp_inv_cost_of_unit as trade_in_book_value',
                 DB::raw("if(dms_unit_sale_trade_in_v1.lien_payoff_amount is not null, 'Yes', 'No') as trade_in_has_lien"),
                 'dms_unit_sale_trade_in_v1.lien_payoff_amount as trade_in_lien_payoff_amount',
                 DB::raw('dms_unit_sale_trade_in_v1.trade_value - dms_unit_sale_trade_in_v1.lien_payoff_amount as trade_in_net_trade'),
                 DB::raw(sprintf("
                     coalesce((
-                        select sum(qb_items.unit_price)
-                        from qb_items
-                        left join qb_invoice_items as add_on_qb_invoice_items on add_on_qb_invoice_items.item_id = qb_items.id
-                        left join qb_invoices as add_on_qb_invoices on add_on_qb_invoices.id = add_on_qb_invoice_items.invoice_id
-                        where add_on_qb_invoices.unit_sale_id = dms_unit_sale.id
-                        and qb_items.type = '%s'
+                        select sum(qb_invoice_items.unit_price)
+                        from qb_invoice_items
+                        left join qb_items as additional_pricing_price_qb_items on additional_pricing_price_qb_items.id = qb_invoice_items.item_id
+                        where qb_invoice_items.invoice_id = qb_invoices.id
+                        and additional_pricing_price_qb_items.type = '%s'
                     ), 0) as additional_pricing_price
                 ", Item::ITEM_TYPES['ADD_ON'])),
                 DB::raw(sprintf("
                     coalesce((
-                        select sum(qb_items.cost)
-                        from qb_items
-                        left join qb_invoice_items as add_on_qb_invoice_items on add_on_qb_invoice_items.item_id = qb_items.id
-                        left join qb_invoices as add_on_qb_invoices on add_on_qb_invoices.id = add_on_qb_invoice_items.invoice_id
-                        where add_on_qb_invoices.unit_sale_id = dms_unit_sale.id
-                        and qb_items.type = '%s'
+                        select sum(additional_pricing_cost_qb_items.cost)
+                        from qb_invoice_items
+                        left join qb_items as additional_pricing_cost_qb_items on additional_pricing_cost_qb_items.id = qb_invoice_items.item_id
+                        where qb_invoice_items.invoice_id = qb_invoices.id
+                        and additional_pricing_cost_qb_items.type = '%s'
                     ), 0) as additional_pricing_cost
                 ", Item::ITEM_TYPES['ADD_ON'])),
                 DB::raw(sprintf("
@@ -533,8 +531,25 @@ class ExportUnitSalesSummaryCsvAction
                 DB::raw('0 as part_county_tax_amount'),
                 DB::raw('0 as part_local_tax_amount'),
                 DB::raw('0 as total_parts_tax_amount'),
-                DB::raw('0 as labor_subtotal'),
-                DB::raw('0 as labor_discount'),
+                DB::raw(sprintf("
+                    coalesce((
+                        select sum(qb_invoice_items.qty * qb_invoice_items.unit_price)
+                        from qb_invoice_items
+                        left join qb_items as labor_subtotal_qb_items on labor_subtotal_qb_items.id = qb_invoice_items.item_id
+                        where qb_invoice_items.invoice_id = qb_invoices.id
+                        and labor_subtotal_qb_items.type = '%s'
+                    ), 0) as labor_subtotal
+                ", Item::ITEM_TYPES['LABOR'])),
+                DB::raw(sprintf("
+                    coalesce((
+                        select abs(qb_invoice_items.unit_price)
+                        from qb_invoice_items
+                        left join qb_items as labor_discount_qb_items on labor_discount_qb_items.id = qb_invoice_items.item_id
+                        where qb_invoice_items.invoice_id = qb_invoices.id
+                        and labor_discount_qb_items.name = '%s'
+                    ), 0) as labor_discount
+                ", Item::NAMES['LABOR_DISCOUNT'])),
+                DB::raw('0 as labor_total_after_discount'),
                 DB::raw('0 as labor_tax_rate_applied'),
                 DB::raw('0 as labor_state_tax_amount'),
                 DB::raw('0 as labor_county_tax_amount'),
@@ -804,6 +819,8 @@ class ExportUnitSalesSummaryCsvAction
             $localTaxRate,
         ]);
 
+        // TODO: Revisit how to calculate the part when we have both taxable and non taxable path
+
         $row->part_total_taxable_amount_after_discount = $row->part_total_taxable_amount - $row->part_discount;
 
         $row->part_state_tax_amount = round(($stateTaxRate / 100) * $row->part_total_taxable_amount_after_discount);
@@ -821,13 +838,51 @@ class ExportUnitSalesSummaryCsvAction
 
     private function populateLaborData(object $row)
     {
-        // - labor_subtotal
-        // - labor_discount
-        // - labor_tax_rate_applied
-        // - labor_state_tax_amount
-        // - labor_county_tax_amount
-        // - labor_local_tax_amount
-        // - labor_total_tax_amount
+        $row->labor_total_after_discount = $row->labor_subtotal - $row->labor_discount;
+
+        $stateTaxRate = $this->convertTaxRateToPercentage(
+            data_get($row->unit_sale_metadata, 'taxRates.labor.stateTaxRate', 0)
+        );
+
+        $countyTaxRate = $this->convertTaxRateToPercentage(
+            data_get($row->unit_sale_metadata, 'taxRates.labor.countyTaxRate', 0)
+        );
+
+        $localTaxRate = array_sum([
+            $this->convertTaxRateToPercentage(
+                data_get($row->unit_sale_metadata, 'taxRates.labor.cityTaxRate', 0)
+            ),
+            $this->convertTaxRateToPercentage(
+                data_get($row->unit_sale_metadata, 'taxRates.labor.district1TaxRate', 0)
+            ),
+            $this->convertTaxRateToPercentage(
+                data_get($row->unit_sale_metadata, 'taxRates.labor.district2TaxRate', 0)
+            ),
+            $this->convertTaxRateToPercentage(
+                data_get($row->unit_sale_metadata, 'taxRates.labor.district3TaxRate', 0)
+            ),
+            $this->convertTaxRateToPercentage(
+                data_get($row->unit_sale_metadata, 'taxRates.labor.district4TaxRate', 0)
+            ),
+        ]);
+
+        $row->labor_tax_rate_applied = array_sum([
+            $stateTaxRate,
+            $countyTaxRate,
+            $localTaxRate,
+        ]);
+
+        $row->labor_state_tax_amount = round(($stateTaxRate / 100) * $row->labor_total_after_discount, 2);
+
+        $row->labor_county_tax_amount = round(($countyTaxRate / 100) * $row->labor_total_after_discount, 2);
+
+        $row->labor_local_tax_amount = round(($localTaxRate / 100) * $row->labor_total_after_discount, 2);
+
+        $row->labor_total_tax_amount = array_sum([
+            $row->labor_state_tax_amount,
+            $row->labor_county_tax_amount,
+            $row->labor_local_tax_amount,
+        ]);
     }
 
     private function populateInvoiceTotalData(object $row)
