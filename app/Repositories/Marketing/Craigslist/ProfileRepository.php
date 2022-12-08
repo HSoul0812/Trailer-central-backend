@@ -78,15 +78,16 @@ class ProfileRepository implements ProfileRepositoryInterface
      * @param $params
      * @return Collection
      */
-    public function getAll($params, string $type = 'inventory')
+    public function getAll($params)
     {
         /** @var  Builder $query */
         $query = Profile::select(Profile::getTableName().'.id', 'profile', 'username', 'postCategory as category')
                         ->where('deleted', 0);
 
-        if (isset($params['type'])) {
-            $query = $query->where('profile_type', $type);
+        if (!isset($params['type'])) {
+            $params['type'] = 'inventory';
         }
+        $query = $query->where('profile_type', $params['type']);
 
         if (!isset($params['sort'])) {
             $params['sort'] = '-profile';
