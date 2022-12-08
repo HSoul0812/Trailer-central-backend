@@ -120,7 +120,13 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
         'customConversion'     => ['type' => 'keyword'],
         'shortwallFt'          => ['type' => 'float'],
         'color'                => ['type' => 'keyword'],
-        'pullType'             => ['type' => 'keyword'],
+        'pullType'             => [
+            'type'       => 'keyword',
+            'normalizer' => 'case_normal',
+            'fields' => [
+                'txt' => ['type' => 'text', 'analyzer' => 'english']
+            ]
+        ],
         'noseType'             => ['type' => 'keyword'],
         'roofType'             => ['type' => 'keyword'],
         'loadType'             => ['type' => 'keyword'],
