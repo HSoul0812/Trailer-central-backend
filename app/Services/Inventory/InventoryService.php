@@ -31,6 +31,8 @@ use League\Fractal\Resource\Collection as FractalResourceCollection;
 use League\Fractal\Manager as FractalManager;
 use App\Repositories\Dms\Customer\InventoryRepository as DmsCustomerInventoryRepository;
 use App\Services\Export\Inventory\PdfExporter;
+use App\Traits\S3\S3Helper;
+use App\Jobs\Inventory\GenerateOverlayImageJob;
 
 /**
  * Class InventoryService
@@ -38,7 +40,7 @@ use App\Services\Export\Inventory\PdfExporter;
  */
 class InventoryService implements InventoryServiceInterface
 {
-    use DispatchesJobs;
+    use DispatchesJobs, S3Helper;
 
     const SOURCE_DASHBOARD = 'dashboard';
 
@@ -244,6 +246,9 @@ class InventoryService implements InventoryServiceInterface
 
             $this->inventoryRepository->commitTransaction();
 
+            // Generate Overlay Inventory Images if necessary
+            $this->dispatch((new GenerateOverlayImageJob($inventory))->onQueue('overlay-images'));
+
             Log::info('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
         } catch (\Exception $e) {
             Log::error('Item create error. Message - ' . $e->getMessage(), $e->getTrace());
@@ -325,6 +330,9 @@ class InventoryService implements InventoryServiceInterface
             }
 
             $this->inventoryRepository->commitTransaction();
+
+            // Generate Overlay Inventory Images if necessary
+            $this->dispatch((new GenerateOverlayImageJob($inventory))->onQueue('overlay-images'));
 
             Log::info('Item has been successfully updated', ['inventoryId' => $inventory->inventory_id]);
         } catch (\Exception $e) {
@@ -577,6 +585,68 @@ class InventoryService implements InventoryServiceInterface
         }
 
         return array_merge($withOverlay, $withoutOverlay);
+    }
+
+    /**
+     * Apply Overlays to Inventory Images
+     * 
+     * @param int $inventoryId
+     * @return void
+     */
+    public function generateOverlays(int $inventoryId)
+    {
+        $overlayParams = $this->inventoryRepository->getOverlayParams($inventoryId);
+
+        Log::info('Adding Overlays on Inventory Images', array_merge(['inventory_id' => $inventoryId], $overlayParams));
+
+        $inventory = $this->inventoryRepository->get(['id' => $inventoryId]);
+
+        $overlayEnabled = $overlayParams['dealer_overlay_enabled'] ?? $overlayParams['overlay_enabled'];
+
+        $inventoryImages = $inventory->inventoryImages()->get();
+        if (empty($inventoryImages)) return;
+
+        foreach ($inventoryImages as $inventoryImage) {
+
+            $imageObj = $inventoryImage->image;
+
+            $originalFilename = !empty($imageObj->filename_noverlay) ? $imageObj->filename_noverlay : $imageObj->filename;
+
+            // Add Overlays if enabled
+            if ($overlayEnabled == Inventory::OVERLAY_ENABLED_ALL 
+                || (
+                    $overlayEnabled == Inventory::OVERLAY_ENABLED_PRIMARY
+                    && ($inventoryImage->position == 1 || $inventoryImage->is_default == 1)
+                    )
+                ) { 
+
+                $localNewImagePath = $this->imageService->addOverlays($this->getS3BaseUrl() . $originalFilename, $overlayParams);
+
+                $imageExtension = pathinfo($originalFilename, PATHINFO_EXTENSION);
+                $randomFilename = md5($localNewImagePath) . '.'. $imageExtension;
+                $newFilename = $this->imageService->uploadToS3($localNewImagePath, $randomFilename, $inventory->dealer_id);
+                
+                $newHash = sha1_file($localNewImagePath);
+                $filenameWithoutOverlay = $originalFilename;
+                
+                unlink($localNewImagePath);
+
+            // otherwise Reset Overlay
+            } else {
+
+                $newFilename = $originalFilename;
+                $newHash = sha1_file($this->getS3BaseUrl() . $originalFilename);
+                $filenameWithoutOverlay = '';
+            }
+
+            // Update Image to database
+            $imageObj->fill([
+                'filename' => $newFilename,
+                'hash' => $newHash,
+                'filename_noverlay' => $filenameWithoutOverlay,
+            ]);
+            $imageObj->save();
+        }
     }
 
     /**

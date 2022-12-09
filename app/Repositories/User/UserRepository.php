@@ -14,9 +14,11 @@ use App\Traits\Repository\Transaction;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Models\User\DealerUser;
+use Illuminate\Foundation\Bus\DispatchesJobs;
+use App\Jobs\Inventory\GenerateOverlayImageJob;
 
 class UserRepository implements UserRepositoryInterface {
-    use Transaction;
+    use Transaction, DispatchesJobs;
 
     /**
      * @var EncrypterServiceInterface
@@ -199,6 +201,14 @@ class UserRepository implements UserRepositoryInterface {
             $dealer->overlay_logo = $overlay_logo_src;
         }
         $dealer->save();
+
+        // Generate Overlay Inventory Images if necessary
+        if ($dealer->inventories()->count() > 0) {
+            foreach ($dealer->inventories as $inventory) {
+                $this->dispatch((new GenerateOverlayImageJob($inventory))->onQueue('overlay-images'));
+            }
+        }
+
         return $dealer;
     }
 
