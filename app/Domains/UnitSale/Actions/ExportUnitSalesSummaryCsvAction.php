@@ -360,21 +360,21 @@ class ExportUnitSalesSummaryCsvAction
                 'dealer_location.name as invoice_sales_location',
                 'dms_customer.display_name as buyer_display_name',
                 DB::raw("if(dms_customer.tax_exempt = 1, 'TRUE', 'FALSE') as tax_exempt"),
-                'dms_customer.tax_id_number as tax_id_number',
+                DB::raw("coalesce(dms_customer.tax_id_number, '') as tax_id_number"),
                 DB::raw("if(dms_customer.is_wholesale = 1, 'TRUE', 'FALSE') as wholesale_customer"),
                 'dms_customer.default_discount_percent as default_discount',
-                'dms_customer.address as billing_address',
-                'dms_customer.city as billing_city',
-                'dms_customer.county as billing_county',
-                'dms_customer.region as billing_state',
-                'dms_customer.postal_code as billing_postal_code',
-                'dms_customer.country as billing_country',
+                DB::raw("coalesce(dms_customer.address, '') as billing_address"),
+                DB::raw("coalesce(dms_customer.city, '') as billing_city"),
+                DB::raw("coalesce(dms_customer.county, '') as billing_county"),
+                DB::raw("coalesce(dms_customer.region, '') as billing_state"),
+                DB::raw("coalesce(dms_customer.postal_code, '') as billing_postal_code"),
+                DB::raw("coalesce(dms_customer.country, '') as billing_country"),
                 'dms_unit_sale.sales_person_id',
                 DB::raw("CONCAT(sales_person_1.first_name, ' ', sales_person_1.last_name) as sales_person_1"),
-                DB::raw("CONCAT(sales_person_2.first_name, ' ', sales_person_2.last_name) as sales_person_2"),
+                DB::raw("coalesce(concat(sales_person_2.first_name, ' ', sales_person_2.last_name), '') as sales_person_2"),
                 'dms_unit_sale.tax_profile as tax_profile',
                 'inventory.stock as unit_stock',
-                'inventory.vin as unit_vin',
+                DB::raw("coalesce(inventory.vin, '') as unit_vin"),
                 'eav_entity_type.title as unit_type',
                 DB::raw("coalesce(if(inventory_category.inventory_category_id is not null, inventory_category.label, inventory_category_legacy.label), '') as unit_category"),
                 'inventory.year as unit_year',
@@ -387,6 +387,7 @@ class ExportUnitSalesSummaryCsvAction
                 DB::raw('dms_unit_sale.inventory_price - dms_unit_sale.inventory_discount as unit_total_after_discount'),
                 DB::raw('dms_unit_sale.inventory_price - dms_unit_sale.inventory_discount - dms_unit_sale_trade_in_v1.trade_value as unit_total_after_discount_less_trade_in'),
                 'dms_unit_sale.meta as unit_sale_metadata',
+                'dealer_location_sales_tax.tax_before_trade as unit_tax_before_trade',
                 DB::raw('0 as unit_total_tax_rate'),
                 DB::raw('0 as unit_total_sales_tax_amount'),
                 DB::raw('0 as unit_state_tax_rate'),
@@ -412,31 +413,31 @@ class ExportUnitSalesSummaryCsvAction
                 DB::raw('coalesce(inventory.cost_of_prep, 0) as unit_cost_of_prep'),
                 DB::raw('0 as unit_total_cost'),
                 'inventory.true_cost as unit_true_cost',
-                'qb_bills.doc_num as unit_associated_bill_no',
+                DB::raw("coalesce(qb_bills.doc_num, '') as unit_associated_bill_no"),
                 DB::raw('0 as unit_total_true_cost'),
-                'inventory.pac_amount as unit_pac_amount',
+                DB::raw('coalesce(inventory.pac_amount, 0) as unit_pac_amount'),
                 'inventory.pac_type as unit_pac_type',
                 DB::raw('0 as unit_pac_adj'),
                 DB::raw('0 as unit_cost_overhead_percent'),
                 DB::raw('0 as unit_cost_plus_overhead'),
-                'inventory.minimum_selling_price as unit_min_selling_price',
-                'qb_vendors.name as unit_floorplan_vendor',
-                DB::raw("nullif(inventory.fp_committed, '0000-00-00') as unit_floorplan_committed_date"),
-                'inventory.fp_balance as unit_floorplan_balance',
+                DB::raw('coalesce(inventory.minimum_selling_price, 0) as unit_min_selling_price'),
+                DB::raw("coalesce(qb_vendors.name, '') as unit_floorplan_vendor"),
+                DB::raw("coalesce(if(inventory.fp_committed = '0000-00-00', '', inventory.fp_committed), '') as unit_floorplan_committed_date"),
+                DB::raw('coalesce(inventory.fp_balance, 0) as unit_floorplan_balance'),
                 'dms_unit_sale_trade_in_v1.temp_inv_stock as trade_in_stock',
                 'dms_unit_sale_trade_in_v1.temp_inv_vin as trade_in_vin',
-                'trade_in_eav_entity_types.title as trade_in_type',
-                'trade_in_inventory_category.label as trade_in_category',
-                'dms_unit_sale_trade_in_v1.temp_inv_year as trade_in_year',
-                'trade_in_manufacturers.name as trade_in_mfg',
+                DB::raw("coalesce(trade_in_eav_entity_types.title, '') as trade_in_type"),
+                DB::raw("coalesce(trade_in_inventory_category.label, '') as trade_in_category"),
+                DB::raw("coalesce(dms_unit_sale_trade_in_v1.temp_inv_year, '') as trade_in_year"),
+                DB::raw("coalesce(trade_in_manufacturers.name, '') as trade_in_mfg"),
                 'dms_unit_sale_trade_in_v1.temp_inv_brand as trade_in_brand',
                 'dms_unit_sale_trade_in_v1.temp_inv_model as trade_in_model',
                 'dms_unit_sale_trade_in_v1.temp_inv_price as trade_in_sell_price',
                 'dms_unit_sale_trade_in_v1.trade_value as trade_in_trade_value',
                 'dms_unit_sale_trade_in_v1.temp_inv_cost_of_unit as trade_in_book_value',
                 DB::raw("if(dms_unit_sale_trade_in_v1.lien_payoff_amount is not null, 'Yes', 'No') as trade_in_has_lien"),
-                'dms_unit_sale_trade_in_v1.lien_payoff_amount as trade_in_lien_payoff_amount',
-                DB::raw('dms_unit_sale_trade_in_v1.trade_value - dms_unit_sale_trade_in_v1.lien_payoff_amount as trade_in_net_trade'),
+                DB::raw('coalesce(dms_unit_sale_trade_in_v1.lien_payoff_amount, 0) as trade_in_lien_payoff_amount'),
+                DB::raw('coalesce(dms_unit_sale_trade_in_v1.trade_value - dms_unit_sale_trade_in_v1.lien_payoff_amount, 0) as trade_in_net_trade'),
                 DB::raw(sprintf("
                     coalesce((
                         select sum(qb_invoice_items.unit_price)
@@ -591,6 +592,7 @@ class ExportUnitSalesSummaryCsvAction
                         and labor_discount_qb_items.name = '%s'
                     ), 0) as labor_discount
                 ", Item::NAMES['LABOR_DISCOUNT'])),
+                'dealer_location_sales_tax.labor_tax_type as labor_tax_type_from_location',
                 DB::raw('0 as labor_total_after_discount'),
                 DB::raw('0 as labor_taxable_amount'),
                 DB::raw('0 as labor_nontaxable_amount'),
@@ -648,6 +650,7 @@ class ExportUnitSalesSummaryCsvAction
             ->leftJoin('qb_invoices', 'qb_invoice_items.invoice_id', '=', 'qb_invoices.id')
             ->leftJoin('dms_unit_sale', 'qb_invoices.unit_sale_id', '=', 'dms_unit_sale.id')
             ->leftJoin('dealer_location', 'dealer_location.dealer_location_id', '=', 'qb_invoices.dealer_location_id')
+            ->leftJoin('dealer_location_sales_tax', 'dealer_location_sales_tax.dealer_location_id', '=', 'qb_invoices.dealer_location_id')
             ->leftJoin('dms_customer', 'dms_customer.id', '=', 'qb_invoices.customer_id')
             ->leftJoin('crm_sales_person as sales_person_1', 'sales_person_1.id', '=', 'dms_unit_sale.sales_person_id')
             ->leftJoin('crm_sales_person as sales_person_2', 'sales_person_2.id', '=', 'dms_unit_sale.sales_person1_id')
@@ -706,6 +709,8 @@ class ExportUnitSalesSummaryCsvAction
 
     private function populateUnitTotalData(object $row)
     {
+        // TODO: if unit_tax_before_trade is 1 then the tax amount doesn't count the trade in amount
+
         $row->unit_sale_metadata = json_decode($row->unit_sale_metadata, true);
 
         $row->unit_state_tax_rate = $this->convertTaxRateToPercentage(
@@ -888,6 +893,10 @@ class ExportUnitSalesSummaryCsvAction
 
     private function populateLaborData(object $row)
     {
+        // IF labor_tax_type_from_location is not_tax OR total tax rate is 0, then there is no tax
+
+
+
         $row->labor_total_after_discount = $row->labor_subtotal - $row->labor_discount;
 
         // TODO: Fix this, the first step is to check if the location has Not Tax Labor enabled
