@@ -232,6 +232,9 @@ class Inventory extends Model
     public const MIN_DESCRIPTION_LENGTH_FOR_FACEBOOK = 50;
     public const MIN_PRICE_FOR_FACEBOOK = 0;
 
+    const PAC_TYPE_PERCENT = 'percent';
+    const PAC_TYPE_AMOUNT = 'amount';
+
     /**
      * The table associated with the model.
      *
