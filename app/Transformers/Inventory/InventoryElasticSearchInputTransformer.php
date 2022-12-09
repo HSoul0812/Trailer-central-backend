@@ -26,11 +26,6 @@ class InventoryElasticSearchInputTransformer implements Transformer
         $geolocation = $model->geolocationPoint();
         $paymentCalculatorSettings = $this->settingsRepository()->getCalculatedSettingsByInventory($model);
 
-        $floorPlan = $model->getAttributeById(Attribute::FLOORPLAN);
-        if($floorPlan){
-            $floorPlan = trim($floorPlan);
-        }
-
         return [
             'id'                   => TypesHelper::ensureNumeric($model->inventory_id),
             'dealerId'             => $model->dealer_id,
@@ -123,7 +118,7 @@ class InventoryElasticSearchInputTransformer implements Transformer
             'isRental'             => (bool)TypesHelper::ensureBoolean($model->getAttributeById(Attribute::IS_RENTAL)),
             'weeklyPrice'          => TypesHelper::ensureNumeric($model->getAttributeById(Attribute::WEEKLY_PRICE)),
             'dailyPrice'           => TypesHelper::ensureNumeric($model->getAttributeById(Attribute::DAILY_PRICE)),
-            'floorplan'            => $floorPlan, // maybe this field is deprecated
+            'floorplan'            => $model->getAttributeById(Attribute::FLOORPLAN), // maybe this field is deprecated
 
             // the following fields are not being considered by the ES worker to be pulled,
             // however they are defined in the index map, so we will index them again
@@ -181,7 +176,9 @@ class InventoryElasticSearchInputTransformer implements Transformer
             ],
             'keywords'              => [],// currently this is sending nothing
 
-            'featureList.floorPlan' => $model->getFeatureById(InventoryFeature::FLOORPLAN)->values()->toArray(),
+            'featureList.floorPlan' => $model->getFeatureById(InventoryFeature::FLOORPLAN)->values()->map(function($value) {
+                return trim($value);
+            })->toArray(),
             'featureList.stallTack' => $model->getFeatureById(InventoryFeature::STALL_TACK)->values()->toArray(),
             'featureList.lq'        => $model->getFeatureById(InventoryFeature::LQ)->values()->toArray(),
             'featureList.doorsWindowsRamps'=> $model->getFeatureById(InventoryFeature::DOORS_WINDOWS_RAMPS)->values()->toArray(),
