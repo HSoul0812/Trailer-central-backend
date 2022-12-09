@@ -7,6 +7,7 @@ use App\Http\Middleware\Ecommerce\StripeWebhookValidate;
 use App\Http\Middleware\Ecommerce\TexTrailWebhookValidate;
 use App\Http\Middleware\Ecommerce\ValidHookIpMiddleware;
 use App\Http\Middleware\Inventory\CreateInventoryPermissionMiddleware;
+use App\Http\Middleware\User\ManageAccountPermissionMiddleware;
 use App\Http\Middleware\SetDealerIdFilterOnRequest;
 use App\Http\Middleware\SetDealerIdWhenAuthenticatedOnRequest;
 use App\Http\Middleware\ValidateDealerIdOnRequest;
@@ -124,6 +125,7 @@ class Kernel extends HttpKernel
         'printer.form.validate' => PrinterFormValidate::class,
         'printer.instruction.validate' => PrinterInstructionValidate::class,
         'inventory.create.permission' => CreateInventoryPermissionMiddleware::class,
+        'accounts.manage.permission' => ManageAccountPermissionMiddleware::class,
         'stripe.webhook.validate' => StripeWebhookValidate::class,
         'textrail.webhook.validate' => TexTrailWebhookValidate::class,
         'marketing.facebook.marketplace' => MarketplaceValidate::class,
