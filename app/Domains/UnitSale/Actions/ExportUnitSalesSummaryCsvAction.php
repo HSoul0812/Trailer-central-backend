@@ -139,7 +139,7 @@ class ExportUnitSalesSummaryCsvAction
         'total_amount_due' => 'Total Amount Due',
         'payment_type' => 'Payment Type',
         'payment_date' => 'Payment Date',
-        'payments_received_total_amount' => 'Payments Received Total Amount',
+        'payment_received_total_amount' => 'Payments Received Total Amount',
         'remaining_balance' => 'Remaining Balance',
     ];
 
@@ -387,16 +387,18 @@ class ExportUnitSalesSummaryCsvAction
                 DB::raw('dms_unit_sale.inventory_price - dms_unit_sale.inventory_discount as unit_total_after_discount'),
                 DB::raw('dms_unit_sale.inventory_price - dms_unit_sale.inventory_discount - dms_unit_sale_trade_in_v1.trade_value as unit_total_after_discount_less_trade_in'),
                 'dms_unit_sale.meta as unit_sale_metadata',
-                DB::raw("0 as unit_total_tax_rate"),
-                DB::raw("0 as unit_total_sales_tax_amount"),
-                DB::raw("0 as unit_state_tax_rate"),
-                DB::raw("0 as unit_state_tax_amount"),
-                DB::raw("0 as unit_county_tax_rate"),
-                DB::raw("0 as unit_county_tax_amount"),
-                DB::raw("0 as unit_local_tax_rate"),
-                DB::raw("0 as unit_local_tax_amount"),
-                DB::raw("0 as unit_other_tax_rate"),
-                DB::raw("0 as unit_other_tax_amount"),
+                DB::raw('0 as unit_total_tax_rate'),
+                DB::raw('0 as unit_total_sales_tax_amount'),
+                DB::raw('0 as unit_state_tax_rate'),
+                DB::raw('0 as unit_state_tax_amount'),
+                DB::raw('0 as unit_county_tax_rate'),
+                DB::raw('0 as unit_county_tax_amount'),
+                DB::raw('0 as unit_local_tax_rate'),
+                DB::raw('0 as unit_local_tax_amount'),
+                DB::raw('0 as unit_other_tax_rate'),
+                DB::raw('0 as unit_other_tax_amount'),
+                DB::raw('0 as unit_taxable_amount'),
+                DB::raw('0 as unit_nontaxable_amount'),
                 DB::raw('coalesce(inventory.cost_of_unit, 0) as unit_cost'),
                 DB::raw('coalesce(inventory.cost_of_shipping, 0) as unit_cost_of_shipping'),
                 DB::raw(sprintf("
@@ -519,6 +521,7 @@ class ExportUnitSalesSummaryCsvAction
                 DB::raw('0 as additional_pricing_state_tax'),
                 DB::raw('0 as additional_pricing_county_tax'),
                 DB::raw('0 as additional_pricing_local_tax'),
+                DB::raw('0 as additional_pricing_total_tax_rate'),
                 DB::raw(sprintf("
                     coalesce((
                         select sum(part_qb_invoice_items.qty * qb_items.cost)
@@ -589,6 +592,8 @@ class ExportUnitSalesSummaryCsvAction
                     ), 0) as labor_discount
                 ", Item::NAMES['LABOR_DISCOUNT'])),
                 DB::raw('0 as labor_total_after_discount'),
+                DB::raw('0 as labor_taxable_amount'),
+                DB::raw('0 as labor_nontaxable_amount'),
                 DB::raw('0 as labor_tax_rate_applied'),
                 DB::raw('0 as labor_state_tax_amount'),
                 DB::raw('0 as labor_county_tax_amount'),
@@ -624,7 +629,7 @@ class ExportUnitSalesSummaryCsvAction
                 DB::raw('0 as warranty_tax_total'),
                 DB::raw('0 as other_taxes_total'),
                 DB::raw('0 as total_invoice_tax'),
-                DB::raw('0 as total_amount_due'),
+                DB::raw('dms_unit_sale.total_price as total_amount_due'),
                 'qb_payment_methods.name as payment_type',
                 'qb_payment.date as payment_date',
                 DB::raw(sprintf("
@@ -636,7 +641,6 @@ class ExportUnitSalesSummaryCsvAction
                         where payment_qb_invoices.unit_sale_id = qb_invoices.unit_sale_id
                     ) as payment_received_total_amount
                 ", 'qb_payment')),
-                'dms_unit_sale.total_price as unit_sale_total_price',
                 DB::raw('0 as remaining_balance'),
             ])
             ->from('qb_invoice_item_inventories')
@@ -823,6 +827,12 @@ class ExportUnitSalesSummaryCsvAction
         ]);
 
         $row->additional_pricing_local_tax = round(($localTaxRate / 100) * $row->additional_pricing_local_taxable_amount, 2);
+
+        $row->additional_pricing_total_tax_rate = array_sum([
+            $stateTaxRate,
+            $countyTaxRate,
+            $localTaxRate,
+        ]);
     }
 
     private function populatePartData(object $row)
@@ -880,6 +890,13 @@ class ExportUnitSalesSummaryCsvAction
     {
         $row->labor_total_after_discount = $row->labor_subtotal - $row->labor_discount;
 
+        // TODO: Fix this, the first step is to check if the location has Not Tax Labor enabled
+        //  if so, then all the labor will be nontaxable
+        $row->labor_taxable_amount = $row->labor_total_after_discount;
+
+        // TODO: The second step is with the RO, in the RO only some labors are taxable, we need
+        //  to check that accordingly as well
+
         $stateTaxRate = $this->convertTaxRateToPercentage(
             data_get($row->unit_sale_metadata, 'taxRates.labor.stateTaxRate', 0)
         );
@@ -927,16 +944,40 @@ class ExportUnitSalesSummaryCsvAction
 
     private function populateInvoiceTotalData(object $row)
     {
+        $row->unit_taxable_amount = $row->unit_total_after_discount_less_trade_in;
+
+        if (empty($row->unit_total_tax_rate)) {
+            $row->unit_nontaxable_amount = $row->unit_taxable_amount;
+            $row->unit_taxable_amount = 0;
+        }
+
+        if (empty($row->additional_pricing_total_tax_rate)) {
+            $row->additional_pricing_nontaxable_amount += $row->additional_pricing_taxable_amount;
+            $row->additional_pricing_taxable_amount = 0;
+        }
+
+        if (empty($row->part_tax_rate_applied)) {
+            $row->part_total_nontaxable_amount += $row->part_total_taxable_amount_after_discount;
+            $row->part_total_taxable_amount_after_discount = 0;
+        }
+
+        if (empty($row->labor_tax_rate_applied)) {
+            $row->labor_nontaxable_amount += $row->labor_taxable_amount;
+            $row->labor_taxable_amount = 0;
+        }
+
         $row->invoice_taxable_total = array_sum([
-            $row->unit_total_after_discount_less_trade_in,
+            $row->unit_taxable_amount,
             $row->additional_pricing_taxable_amount,
             $row->part_total_taxable_amount_after_discount,
-            $row->labor_total_after_discount,
+            $row->labor_taxable_amount,
         ]);
 
         $row->invoice_nontaxable_total = array_sum([
+            $row->unit_nontaxable_amount,
             $row->additional_pricing_nontaxable_amount,
             $row->part_total_nontaxable_amount,
+            $row->labor_nontaxable_amount,
         ]);
 
         // - warranty_tax_total
@@ -944,14 +985,11 @@ class ExportUnitSalesSummaryCsvAction
 
         // - other_taxes_total
         // Other Taxes Total - total $ Amount of non State, County or Local(?) Taxes. Will double check if Local is separate or included in Other
+        // probably shop supply taxes
 
-        // - total_invoice_tax
-        // Total Invoice Tax = Sum of all $ amount Taxes, the total sales tax on the invoice
+        $row->total_invoice_tax = $row->total_amount_due - ($row->invoice_taxable_total + $row->invoice_nontaxable_total);
 
-        // - total_amount_due
-        // Total Amount Due - This is the Sum of all totals minus the sum of payments received
-
-        $row->remaining_balance = $row->unit_sale_total_price - $row->payment_received_total_amount;
+        $row->remaining_balance = $row->total_amount_due - $row->payment_received_total_amount;
     }
 
     /**
