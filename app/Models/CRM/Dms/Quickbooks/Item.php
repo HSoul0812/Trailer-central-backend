@@ -37,6 +37,11 @@ class Item extends Model
         'TRADE_IN_PAYOFF' => 'trade_in_payoff'
     ];
 
+    const NAMES = [
+        'INVENTORY_DISCOUNT' => 'Inventory Discount',
+        'LABOR_DISCOUNT' => 'Labor Discount',
+    ];
+
     public function category()
     {
         return $this->belongsTo(ItemCategory::class, 'item_category_id', 'id');
