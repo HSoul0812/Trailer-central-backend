@@ -38,6 +38,7 @@ class Item extends Model
     ];
 
     const NAMES = [
+        'INVENTORY_DISCOUNT' => 'Inventory Discount',
         'LABOR_DISCOUNT' => 'Labor Discount',
     ];
 

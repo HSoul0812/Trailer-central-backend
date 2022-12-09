@@ -94,18 +94,7 @@ class ExportUnitSalesSummaryCsvAction
         'unit_floorplan_vendor' => 'Floorplan Vendor',
         'unit_floorplan_committed_date' => 'Floorplan Committed Date',
         'unit_floorplan_balance' => 'Floorplan Balance',
-        'trade_in_stock' => 'Trade in Stock',
-        'trade_in_vin' => 'Trade in VIN',
-        'trade_in_type' => 'Trade in Type',
-        'trade_in_category' => 'Trade in Category',
-        'trade_in_year' => 'Trade in Year',
-        'trade_in_mfg' => 'Trade in Mfg',
-        'trade_in_brand' => 'Trade in Brand',
-        'trade_in_model' => 'Trade in Model',
-        'trade_in_sell_price' => 'Trade in Sell Price',
         'trade_in_trade_value' => 'Trade in Value/Allowance',
-        'trade_in_book_value' => 'Trade in Book Value',
-        'trade_in_has_lien' => 'Trade in Lien: Yes/No',
         'trade_in_lien_payoff_amount' => 'Trade in Lien Payoff Amount',
         'trade_in_net_trade' => 'Trade in Net Trade',
         'additional_pricing_price' => 'Additional Pricing Price',
@@ -382,12 +371,21 @@ class ExportUnitSalesSummaryCsvAction
                 'inventory.model as unit_model',
                 'unit_location.name as unit_location',
                 DB::raw("if(inventory.condition = 'new', 'New', if(inventory.condition = 'used', 'Used', 'Dealer')) as unit_condition"),
-                'dms_unit_sale.inventory_price as unit_retail_price',
-                'dms_unit_sale.inventory_discount as unit_discount',
-                DB::raw('dms_unit_sale.inventory_price - dms_unit_sale.inventory_discount as unit_total_after_discount'),
-                DB::raw('dms_unit_sale.inventory_price - dms_unit_sale.inventory_discount - dms_unit_sale_trade_in_v1.trade_value as unit_total_after_discount_less_trade_in'),
+                'qb_invoice_items.unit_price as unit_retail_price',
+                DB::raw(sprintf("
+                    (
+                        select abs(unit_discount_qb_invoice_items.unit_price)
+                        from qb_invoice_items as unit_discount_qb_invoice_items
+                        left join qb_items as unit_discount_qb_items on unit_discount_qb_items.id = unit_discount_qb_invoice_items.item_id
+                        where unit_discount_qb_invoice_items.referenced_item_id = qb_invoice_item_inventories.invoice_item_id
+                        and (unit_discount_qb_items.type = '%s' and unit_discount_qb_items.name = '%s')
+                    ) as unit_discount
+                ", Item::ITEM_TYPES['DISCOUNT'], Item::NAMES['INVENTORY_DISCOUNT'])),
+                DB::raw('0 as unit_total_after_discount'),
+                DB::raw('if(qb_invoice_item_inventories.inventory_id = dms_unit_sale.inventory_id, 1, 0) as unit_is_main'),
+                DB::raw('0 as unit_total_after_discount_less_trade_in'),
                 'dms_unit_sale.meta as unit_sale_metadata',
-                'dealer_location_sales_tax.tax_before_trade as unit_tax_before_trade',
+                DB::raw('if(qb_invoices.tax_before_trade is null, 0, qb_invoices.tax_before_trade) as unit_tax_before_trade'),
                 DB::raw('0 as unit_total_tax_rate'),
                 DB::raw('0 as unit_total_sales_tax_amount'),
                 DB::raw('0 as unit_state_tax_rate'),
@@ -424,20 +422,21 @@ class ExportUnitSalesSummaryCsvAction
                 DB::raw("coalesce(qb_vendors.name, '') as unit_floorplan_vendor"),
                 DB::raw("coalesce(if(inventory.fp_committed = '0000-00-00', '', inventory.fp_committed), '') as unit_floorplan_committed_date"),
                 DB::raw('coalesce(inventory.fp_balance, 0) as unit_floorplan_balance'),
-                'dms_unit_sale_trade_in_v1.temp_inv_stock as trade_in_stock',
-                'dms_unit_sale_trade_in_v1.temp_inv_vin as trade_in_vin',
-                DB::raw("coalesce(trade_in_eav_entity_types.title, '') as trade_in_type"),
-                DB::raw("coalesce(trade_in_inventory_category.label, '') as trade_in_category"),
-                DB::raw("coalesce(dms_unit_sale_trade_in_v1.temp_inv_year, '') as trade_in_year"),
-                DB::raw("coalesce(trade_in_manufacturers.name, '') as trade_in_mfg"),
-                'dms_unit_sale_trade_in_v1.temp_inv_brand as trade_in_brand',
-                'dms_unit_sale_trade_in_v1.temp_inv_model as trade_in_model',
-                'dms_unit_sale_trade_in_v1.temp_inv_price as trade_in_sell_price',
-                'dms_unit_sale_trade_in_v1.trade_value as trade_in_trade_value',
-                'dms_unit_sale_trade_in_v1.temp_inv_cost_of_unit as trade_in_book_value',
-                DB::raw("if(dms_unit_sale_trade_in_v1.lien_payoff_amount is not null, 'Yes', 'No') as trade_in_has_lien"),
-                DB::raw('coalesce(dms_unit_sale_trade_in_v1.lien_payoff_amount, 0) as trade_in_lien_payoff_amount'),
-                DB::raw('coalesce(dms_unit_sale_trade_in_v1.trade_value - dms_unit_sale_trade_in_v1.lien_payoff_amount, 0) as trade_in_net_trade'),
+                DB::raw("
+                    coalesce((
+                        select sum(trade_in_trade_value_trade_in.trade_value)
+                        from dms_unit_sale_trade_in_v1 as trade_in_trade_value_trade_in
+                        where trade_in_trade_value_trade_in.unit_sale_id = dms_unit_sale.id
+                    ), 0) as trade_in_trade_value
+                "),
+                DB::raw("
+                    coalesce((
+                        select sum(coalesce(trade_in_trade_value_trade_in.lien_payoff_amount, 0))
+                        from dms_unit_sale_trade_in_v1 as trade_in_trade_value_trade_in
+                        where trade_in_trade_value_trade_in.unit_sale_id = dms_unit_sale.id
+                    ), 0) as trade_in_lien_payoff_amount
+                "),
+                DB::raw('0 as trade_in_net_trade'),
                 DB::raw(sprintf("
                     coalesce((
                         select sum(qb_invoice_items.unit_price)
@@ -711,19 +710,36 @@ class ExportUnitSalesSummaryCsvAction
     {
         // TODO: if unit_tax_before_trade is 1 then the tax amount doesn't count the trade in amount
 
+        $row->unit_total_after_discount = $row->unit_retail_price - $row->unit_discount;
+
+        $row->unit_total_after_discount_less_trade_in = $row->unit_total_after_discount;
+
+        // For the main inventory, the value after trade in needs to be calculated by
+        // deducting the amount of trade in value
+        if ($row->unit_is_main) {
+            $row->unit_total_after_discount_less_trade_in -= $row->trade_in_trade_value;
+        }
+
+        // The amount to calculate tax depends on either the unit has tax_before_trade as on or off
+        // on means we apply the taxes directly to the unit amount without deducting the trade in amount
+        // off means we will apply the taxes after the trade in amount is deducted from the unit amount
+        $amountToCalculateTax = $row->unit_tax_before_trade
+            ? $row->unit_total_after_discount
+            : $row->unit_total_after_discount_less_trade_in;
+
         $row->unit_sale_metadata = json_decode($row->unit_sale_metadata, true);
 
         $row->unit_state_tax_rate = $this->convertTaxRateToPercentage(
             data_get($row->unit_sale_metadata, 'taxRates.inventory.stateTaxRate', 0)
         );
 
-        $row->unit_state_tax_amount = round(($row->unit_state_tax_rate / 100) * $row->unit_total_after_discount_less_trade_in, 2);
+        $row->unit_state_tax_amount = round(($row->unit_state_tax_rate / 100) * $amountToCalculateTax, 2);
 
         $row->unit_county_tax_rate = $this->convertTaxRateToPercentage(
             data_get($row->unit_sale_metadata, 'taxRates.inventory.countyTaxRate', 0)
         );
 
-        $row->unit_county_tax_amount = round(($row->unit_county_tax_rate / 100) * $row->unit_total_after_discount_less_trade_in, 2);
+        $row->unit_county_tax_amount = round(($row->unit_county_tax_rate / 100) * $amountToCalculateTax, 2);
 
         $row->unit_local_tax_rate = array_sum([
             $this->convertTaxRateToPercentage(
@@ -743,7 +759,7 @@ class ExportUnitSalesSummaryCsvAction
             ),
         ]);
 
-        $row->unit_local_tax_amount = round(($row->unit_local_tax_rate / 100) * $row->unit_total_after_discount_less_trade_in, 2);
+        $row->unit_local_tax_amount = round(($row->unit_local_tax_rate / 100) * $amountToCalculateTax, 2);
 
         $row->unit_other_tax_rate = array_sum([
             $this->convertTaxRateToPercentage(
@@ -754,7 +770,7 @@ class ExportUnitSalesSummaryCsvAction
             ),
         ]);
 
-        $row->unit_other_tax_amount = round(($row->unit_other_tax_rate / 100) * $row->unit_total_after_discount_less_trade_in, 2);
+        $row->unit_other_tax_amount = round(($row->unit_other_tax_rate / 100) * $amountToCalculateTax, 2);
 
         $row->unit_total_tax_rate = array_sum([
             $row->unit_state_tax_rate,
@@ -763,7 +779,7 @@ class ExportUnitSalesSummaryCsvAction
             $row->unit_other_tax_rate,
         ]);
 
-        $row->unit_total_sales_tax_amount = round(($row->unit_total_tax_rate / 100) * $row->unit_total_after_discount_less_trade_in, 2);
+        $row->unit_total_sales_tax_amount = round(($row->unit_total_tax_rate / 100) * $amountToCalculateTax, 2);
 
         $row->unit_total_cost = array_sum([
             $row->unit_cost,
@@ -797,6 +813,8 @@ class ExportUnitSalesSummaryCsvAction
             : round(($row->unit_pac_amount / $safeUnitTotalCost) * 100, 2);
 
         $row->unit_cost_plus_overhead = $row->unit_total_cost + $row->unit_pac_adj;
+
+        $row->trade_in_net_trade = $row->trade_in_trade_value - $row->trade_in_lien_payoff_amount;
     }
 
     private function populateAdditionalPricingData(object $row)
