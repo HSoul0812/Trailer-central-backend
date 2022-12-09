@@ -38,7 +38,8 @@ class ManageAccountPermissionMiddleware
          * Validate Secondary User Has Permission to Change Account Settings
          */
         if (
-            !$user->hasPermission(Permissions::ACCOUNTS, Permissions::SUPER_ADMIN_PERMISSION)
+            !$user->hasPermission(Permissions::ACCOUNTS, Permissions::SUPER_ADMIN_PERMISSION) ||
+            !$user->hasPermission(Permissions::ACCOUNTS, Permissions::CAN_SEE_AND_CHANGE_PERMISSION)
         ) {
             return response('Invalid access token.', 403);
         }
