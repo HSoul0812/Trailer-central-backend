@@ -176,9 +176,7 @@ class InventoryElasticSearchInputTransformer implements Transformer
             ],
             'keywords'              => [],// currently this is sending nothing
 
-            'featureList.floorPlan' => $model->getFeatureById(InventoryFeature::FLOORPLAN)->values()->map(function($value) {
-                return trim($value);
-            })->toArray(),
+            'featureList.floorPlan' => $model->getFeatureById(InventoryFeature::FLOORPLAN)->values()->toArray(),
             'featureList.stallTack' => $model->getFeatureById(InventoryFeature::STALL_TACK)->values()->toArray(),
             'featureList.lq'        => $model->getFeatureById(InventoryFeature::LQ)->values()->toArray(),
             'featureList.doorsWindowsRamps'=> $model->getFeatureById(InventoryFeature::DOORS_WINDOWS_RAMPS)->values()->toArray(),
