@@ -31,7 +31,7 @@ class ManageAccountPermissionMiddleware
          * Must be a Secondary User to Get Access
          */
         if (!$user instanceof DealerUser) {
-            return response('Invalid access token (not valid type).', 403);
+            return response('Invalid access token.', 403);
         }
 
         /**
@@ -41,7 +41,7 @@ class ManageAccountPermissionMiddleware
             !$user->hasPermission(Permissions::ACCOUNTS, Permissions::SUPER_ADMIN_PERMISSION) &&
             !$user->hasPermission(Permissions::ACCOUNTS, Permissions::CAN_SEE_AND_CHANGE_PERMISSION)
         ) {
-            return response('Invalid access token (permission).', 403);
+            return response('Invalid access token.', 403);
         }
 
         return $next($request);
