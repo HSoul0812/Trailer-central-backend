@@ -19,6 +19,10 @@ class InvoiceItem extends Model
 {
     use TableAware;
 
+    const DESCRIPTION_DEAL_STATE_TAX = 'Deal State Tax';
+    const DESCRIPTION_DEAL_COUNTY_TAX = 'Deal County Tax';
+    const DESCRIPTION_DEAL_LOCAL_TAX = 'Deal Local Tax';
+
     protected $table = "qb_invoice_items";
 
     public $timestamps = false;
