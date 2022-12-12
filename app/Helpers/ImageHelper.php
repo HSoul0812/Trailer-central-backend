@@ -478,10 +478,16 @@ class ImageHelper
             $logoHeight = -1;
         }
 
-        // Scale Logo
-        $scaledLogo = imagescale($logoResource, $logoWidth, $logoHeight);
-        $logoNewWidth = imagesx($scaledLogo);
-        $logoNewHeight = imagesy($scaledLogo);
+        // Create Local Logo Path
+        $localLogoPath = tempnam(Storage::disk('tmp')->path('/'), 'img-local-logo-');
+        file_put_contents($localLogoPath, $this->getContentFromResource($logoResource, $logoType));
+
+        // Create Resized Logo while keeping ratio
+        $resizedLogo = tempnam(Storage::disk('tmp')->path('/'), 'img-resized-logo-');
+        shell_exec('convert ' . $localLogoPath . ' -resize ' . $logoWidth . 'x' . $logoHeight . ' ' . $resizedLogo);
+        $resizedLogoResource = $this->getImageResource($resizedLogo);
+        $logoNewWidth = imagesx($resizedLogoResource);
+        $logoNewHeight = imagesy($resizedLogoResource);
 
         // Get X/Y Position
         $x = 5; $y = 5;
@@ -501,14 +507,6 @@ class ImageHelper
         // Create Local Image Path
         $localImagePath = tempnam(Storage::disk('tmp')->path('/'), 'img-local-image-');
         file_put_contents($localImagePath, $this->getContentFromResource($imageResource, $imageType));
-
-        // Create Local Logo Path
-        $localLogoPath = tempnam(Storage::disk('tmp')->path('/'), 'img-local-logo-');
-        file_put_contents($localLogoPath, $this->getContentFromResource($logoResource, $logoType));
-
-        // Create Resized Logo
-        $resizedLogo = tempnam(Storage::disk('tmp')->path('/'), 'img-resized-logo-');
-        shell_exec('convert ' . $localLogoPath . ' -resize ' . $logoNewWidth . 'x' . $logoNewHeight . ' ' . $resizedLogo);
 
         // Add Logo to Image
         $newImagePath = tempnam(Storage::disk('tmp')->path('/'), 'img-merged-logo-');
