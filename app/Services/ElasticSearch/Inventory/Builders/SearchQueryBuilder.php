@@ -141,6 +141,35 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
      */
     public function globalQuery(): array
     {
+        $this->field->getTerms()->each(function (Term $term) {
+            $name = $this->field->getName();
+            $value = $term->getValues()[0];
+
+            $query = [
+                'bool' => [
+                    $term->getESOperatorKeyword() => [
+                        [
+                            'match' => [
+                                sprintf('%s.txt', $name) => [
+                                    'query' => $value,
+                                    'operator' => 'and'
+                                ]
+                            ]
+                        ],
+                        [
+                            'wildcard' => [
+                                $name => [
+                                    'value' => sprintf('*%s*', $value)
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ];
+
+            $this->appendToQuery($query);
+        });
+
         return $this->query;
     }
 
