@@ -107,7 +107,8 @@ class DealerIncomingMapping extends Resource
 
             NovaDependencyContainer::make([
                 Select::make('Map To', 'map_to')
-                    ->options(Brand::select('name')->orderBy('name')->get()->pluck('name'))
+                    ->options(Brand::select('name')->orderBy('name')->get()->pluck('name', 'name'))
+                    ->displayUsingLabels()
                     ->rules('required')
             ])->dependsOn('type', FeedDealerIncomingMapping::BRAND)->onlyOnForms(),
 
@@ -131,18 +132,21 @@ class DealerIncomingMapping extends Resource
 
             NovaDependencyContainer::make([
                 Select::make('Map To', 'map_to')
-                    ->options(InventoryMfg::select('label')->orderBy('label')->get()->pluck('label'))
+                    ->options(InventoryMfg::select('label')->orderBy('label')->get()->pluck('label', 'label'))
+                    ->displayUsingLabels()
                     ->rules('required')
             ])->dependsOn('type', FeedDealerIncomingMapping::MAKE)->onlyOnForms(),
 
             NovaDependencyContainer::make([
-                Select::make('Map To', 'map_to')
-                    ->options(InventoryMfg::select('label')->orderBy('label')->get()->pluck('label'))
+                Select::make('Map To Manufacturer', self::MAP_TO_MANUFACTURER)
+                    ->options(InventoryMfg::select('label')->orderBy('label')->get()->pluck('label', 'label'))
+                    ->displayUsingLabels()
                     ->rules('required'),
-                Select::make('Map To', 'map_to')
-                    ->options(Brand::select('name')->orderBy('name')->get()->pluck('name'))
+                Select::make('Map To Brand', self::MAP_TO_BRAND)
+                    ->options(Brand::select('name')->orderBy('name')->get()->pluck('name', 'name'))
+                    ->displayUsingLabels()
                     ->rules('required')
-            ])->dependsOn('type', FeedDealerIncomingMapping::MANUFACTURER_BRAND)->onlyOnForms()
+            ])->dependsOn('type', FeedDealerIncomingMapping::MANUFACTURER_BRAND)->onlyOnForms(),
         ];
 
         foreach ($attributes as $attribute) {
