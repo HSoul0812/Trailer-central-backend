@@ -58,7 +58,8 @@ class PartsTransformer extends TransformerAbstract implements PartsTransformerIn
              'new_po_url' => optional($part->user)->getCrmLoginUrl(
                 $this->getNewPORoute($part->id),
                 true
-            )
+             ),
+             'is_active' => (bool) $part->is_active
          ];
     }
 

@@ -21,6 +21,7 @@ use League\Fractal\Manager;
 use League\Fractal\Pagination\IlluminatePaginatorAdapter;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Item;
+use App\Http\Requests\CRM\User\DeleteSalesPersonRequest;
 
 class SalesPersonController extends RestfulController {
 
@@ -151,5 +152,28 @@ class SalesPersonController extends RestfulController {
         }
 
         return $this->response->errorBadRequest();
+    }
+
+    /**
+     * Delete Sales Person
+     * 
+     * @param int $id
+     * @return type
+     */
+    public function destroy(int $id)
+    {
+        $requestData = ['id' => $id];
+        $request = new DeleteSalesPersonRequest($requestData);
+
+        if ($request->validate()) {
+           
+            $deleted = $this->salesPerson->delete($request->all());
+
+            return $this->response->array([
+                'deleted' => $deleted
+            ]);
+        }
+
+        $this->response->errorBadRequest();
     }
 }

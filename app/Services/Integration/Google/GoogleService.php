@@ -163,7 +163,6 @@ class GoogleService implements GoogleServiceInterface
                 'created' => strtotime($accessToken->issued_at)
             ]);
             $client->setScopes($accessToken->scope);
-            $this->log->info("Validating access token for {$accessToken->relation_type} #{$accessToken->relation_id}");
 
             // Valid/Expired
             $isValid = $this->validateIdToken($accessToken->id_token);
@@ -178,8 +177,8 @@ class GoogleService implements GoogleServiceInterface
                     $isExpired = false;
                     $this->log->info("Successfully refreshed access token for {$accessToken->relation_type} #{$accessToken->relation_id}");
                 } else {
-	            $this->log->error("Failed to refresh access token for {$accessToken->relation_type} #{$accessToken->relation_id}");
-		}
+                    $this->log->error("Failed to refresh access token for {$accessToken->relation_type} #{$accessToken->relation_id}");
+                }
             }
 
             // Not Valid? Mark Expired
@@ -187,7 +186,7 @@ class GoogleService implements GoogleServiceInterface
                 $isExpired = true;
             }
         } catch (\Exception $e) {
-            $this->log->error('Exception returned validating google oauth: ' . $e->getMessage());
+            $this->log->error('Exception returned validating custom google oauth: ' . $e->getMessage());
             $isValid = false;
             $isExpired = true;
         }
@@ -220,6 +219,7 @@ class GoogleService implements GoogleServiceInterface
                 'created' => $accessToken->getIssuedUnix()
             ]);
             $client->setScopes($accessToken->getScope());
+            $accessTokenString = json_encode($accessToken);
 
             // Valid/Expired
             $isValid = $this->validateIdToken($accessToken->getIdToken());
@@ -232,10 +232,10 @@ class GoogleService implements GoogleServiceInterface
                 if($refresh->exists()) {
                     $isValid = $this->validateIdToken($refresh->idToken);
                     $isExpired = false;
-                    $this->log->info("Successfully refreshed access token for {$accessToken->relation_type} #{$accessToken->relation_id}");
+                    $this->log->info("Successfully refreshed access token for $accessTokenString");
                 } else {
-	            $this->log->error("Failed to refresh access token for {$accessToken->relation_type} #{$accessToken->relation_id}");
-		}
+                    $this->log->error("Failed to refresh access token for $accessTokenString");
+                }
             }
             if(!$isValid) {
                 $isExpired = true;
@@ -245,7 +245,6 @@ class GoogleService implements GoogleServiceInterface
             $isValid = false;
             $isExpired = true;
         }
-
         // Return Payload Results
         return new ValidateToken([
             'new_token' => $refresh ?? null,

@@ -43,8 +43,16 @@ class InventoryTransformer extends TransformerAbstract
 
     public function includeImages(InventoryFacebook $inventory)
     {
-        if($inventory->images) {
-            return $this->collection($inventory->images, $this->imageTransformer);
+        // Let's make sure all images have filenames.
+        $imagesWithFileName = $inventory->images->filter(function ($inventoryImage) {
+            return isset($inventoryImage->image) && $inventoryImage->image->filename;
+        });
+
+        if($imagesWithFileName) {
+            return $this->collection(
+                $imagesWithFileName,
+                $this->imageTransformer
+            );
         }
         return $this->null();
     }

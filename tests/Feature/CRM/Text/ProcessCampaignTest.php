@@ -921,7 +921,6 @@ class ProcessCampaignTest extends TestCase
     /**
      * Refresh Campaigns in DB
      *
-     * @group CRM
      * @param int $userId
      * @return void
      */
@@ -935,7 +934,6 @@ class ProcessCampaignTest extends TestCase
     /**
      * Refresh Campaign Leads in DB
      *
-     * @group CRM
      * @param int $campaignId
      * @param array $filters
      * @return array of leads outside of range

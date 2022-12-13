@@ -151,8 +151,11 @@ class SalesReportRepository implements SalesReportRepositoryInterface
                                WHEN qi.sales_person_id IS NOT NULL THEN 'POS'
                                ELSE 'Service'
                            END AS type,
-                           '' AS model
+                           '' AS model,
+                           sh.dealer_location_id AS location_id,
+                           loc.name AS location_name
                     FROM dealer_sales_history sh
+                    LEFT JOIN dealer_location loc on sh.dealer_location_id = loc.dealer_location_id
                     JOIN qb_invoices qi on sh.tb_primary_id = qi.id AND sh.tb_name = 'qb_invoices'
                     LEFT JOIN dms_repair_order ro on qi.repair_order_id = ro.id
                     LEFT JOIN qb_invoice_items ii on qi.id = ii.invoice_id
@@ -188,8 +191,11 @@ class SalesReportRepository implements SalesReportRepositoryInterface
                         ps.id AS doc_id,
                         CONCAT('POS Sales # ',  ps.id) AS doc_num,
                         'POS' AS type,
-                        '' AS model
+                        '' AS model,
+                        sh.dealer_location_id AS location_id,
+                        loc.name AS location_name
                     FROM dealer_sales_history sh
+                    LEFT JOIN dealer_location loc on sh.dealer_location_id = loc.dealer_location_id
                     JOIN crm_pos_sales ps on sh.tb_primary_id = ps.id AND sh.tb_name = 'crm_pos_sales'
                     JOIN crm_pos_sale_products psp on ps.id = psp.sale_id
                     JOIN qb_items iitem on psp.item_id = iitem.id AND iitem.type = 'part'
@@ -234,8 +240,11 @@ SQL;
                                WHEN qi.sales_person_id IS NOT NULL THEN 'POS'
                                ELSE 'Service'
                     END AS type,
-                    i.model
+                    i.model,
+                    sh.dealer_location_id AS location_id,
+                    loc.name AS location_name
                 FROM dealer_sales_history sh
+                LEFT JOIN dealer_location loc on sh.dealer_location_id = loc.dealer_location_id
                 JOIN qb_invoices qi on sh.tb_primary_id = qi.id AND sh.tb_name = 'qb_invoices'
                 LEFT JOIN dms_repair_order ro on qi.repair_order_id = ro.id
                 JOIN qb_invoice_items ii on qi.id = ii.invoice_id
@@ -244,6 +253,7 @@ SQL;
                 WHERE
                       sh.dealer_location_id IN (SELECT l.dealer_location_id FROM dealer_location l WHERE l.dealer_id = :dealer_id_inventory_qb)
                       AND qi.invoice_date >= :from_date_inventory_qb AND qi.invoice_date <= :to_date_inventory_qb
+                      AND ii.description != 'Trade In Inventory item'
                       {$this->customReportHelpers['inventoryWhere']['inventory_qb']}
                 UNION
                 SELECT
@@ -272,8 +282,11 @@ SQL;
                         ps.id AS doc_id,
                         CONCAT('POS Sales # ',  ps.id) AS doc_num,
                         'POS' AS type,
-                        i.model
+                        i.model,
+                        sh.dealer_location_id AS location_id,
+                        loc.name AS location_name
                     FROM dealer_sales_history sh
+                    LEFT JOIN dealer_location loc on sh.dealer_location_id = loc.dealer_location_id
                     JOIN crm_pos_sales ps on sh.tb_primary_id = ps.id AND sh.tb_name = 'crm_pos_sales'
                     JOIN crm_pos_sale_products psp on ps.id = psp.sale_id
                     JOIN qb_items iitem on psp.item_id = iitem.id AND iitem.type = 'trailer'

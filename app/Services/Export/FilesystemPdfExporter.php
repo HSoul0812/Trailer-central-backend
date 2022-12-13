@@ -17,6 +17,9 @@ class FilesystemPdfExporter extends PdfExporter implements PdfExporterInterface
     /** @var string a temp folder */
     public const RUNTIME_PREFIX = 'runtime/';
 
+    public const ORIENTATION_PORTRAIT = 'portrait';
+    public const ORIENTATION_LANDSCAPE = 'landscape';
+
     /**
      * @var Filesystem
      */
@@ -70,5 +73,10 @@ class FilesystemPdfExporter extends PdfExporter implements PdfExporterInterface
     public function readStream()
     {
         return $this->filesystem->readStream(self::RUNTIME_PREFIX . $this->filename);
+    }
+
+    public function engine(): \Barryvdh\Snappy\PdfWrapper
+    {
+        return $this->engine;
     }
 }

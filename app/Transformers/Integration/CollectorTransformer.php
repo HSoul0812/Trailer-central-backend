@@ -83,6 +83,14 @@ class CollectorTransformer extends TransformerAbstract
             'is_bdv_enabled' => $collector->is_bdv_enabled,
             'show_on_auction123' => $collector->show_on_auction123,
             'video_source_fields' => $collector->video_source_fields,
+            'override_all' => $collector->override_all,
+            'override_images' => $collector->override_images,
+            'override_video' => $collector->override_video,
+            'override_prices' => $collector->override_prices,
+            'override_attributes' => $collector->override_attributes,
+            'override_descriptions' => $collector->override_descriptions,
+            'last_run' => $collector->last_run,
+            'scheduled_for' => $collector->scheduled_for,
         ];
     }
 }

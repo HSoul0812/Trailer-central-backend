@@ -51,7 +51,8 @@ class UpdatePartRequest extends Request {
             'images.*.position' => 'integer',
             'bins' => 'array',
             'bins.*.bin_id' => 'required|integer',
-            'bins.*.quantity' => 'required|numeric'
+            'bins.*.quantity' => 'required|numeric',
+            'is_active' => 'boolean'
         ];
     }
 }

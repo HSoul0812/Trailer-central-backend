@@ -48,6 +48,40 @@ class InventoryService implements InventoryServiceInterface
     private const OPTION_GROUP_TEXT_CUSTOMER_OWNED = 'Customer Owned Inventories';
     private const OPTION_GROUP_TEXT_DEALER_OWNED = 'All Inventories';
 
+    private const CHANGED_FIELDS_IN_DASHBOARD_UNLOCK_MAPPING = [
+        'unlock_type_code' => [
+            'category',
+            'category_label',
+        ],
+        'unlock_designation' => [
+            'condition'
+        ],
+        'dealer_location' => [
+            'dealer_location_id'
+        ],
+        'unlock_images' => [
+            'existing_images'
+        ],
+        'unlock_files' => [
+            'existing_files'
+        ],
+        'unlock_video' => [
+            'video_embed_code'
+        ],
+        'unlock_length' => [
+            'length_second',
+            'length_inches_second',
+        ],
+        'unlock_width' => [
+            'width_second',
+            'width_inches_second',
+        ],
+        'unlock_height' => [
+            'height_second',
+            'height_inches_second',
+        ],
+    ];
+
     /**
      * @var InventoryRepositoryInterface
      */
@@ -304,6 +338,29 @@ class InventoryService implements InventoryServiceInterface
     }
 
     /**
+     * @param array $params
+     * @return bool
+     * @throws InventoryException
+     */
+    public function massUpdate(array $params): bool
+    {
+        try {
+            $this->inventoryRepository->beginTransaction();
+
+            $this->inventoryRepository->massUpdate($params);
+
+            $this->inventoryRepository->commitTransaction();
+        } catch (\Exception $e) {
+            Log::error('Inventory mass update error. Message - ' . $e->getMessage(), $e->getTrace());
+            $this->inventoryRepository->rollbackTransaction();
+
+            throw new InventoryException('Inventory mass update error');
+        }
+
+        return true;
+    }
+
+    /**
      * @param int $inventoryId
      * @return bool
      */
@@ -497,7 +554,10 @@ class InventoryService implements InventoryServiceInterface
         $images = $params[$imagesKey];
 
         $isOverlayEnabled = isset($params['overlay_enabled']) && in_array($params['overlay_enabled'], Inventory::OVERLAY_CODES);
-        $overlayEnabledParams = ['skipNotExisting' => true];
+        $overlayEnabledParams = [
+            'skipNotExisting' => true,
+            'visibility' => config('filesystems.disks.s3.visibility')
+        ];
 
         $withOverlay = [];
         $withoutOverlay = [];
@@ -653,18 +713,26 @@ class InventoryService implements InventoryServiceInterface
     private function getChangedFields(Inventory $inventory, array $params): array
     {
         $changedFields = array_values(array_unique(array_merge(
-            $inventory->changed_fields_in_dashboard ?? [], $params['changed_fields_in_dashboard']
+            $inventory->changed_fields_in_dashboard ?? [], $params['changed_fields_in_dashboard'] ?? []
         )));
 
-        if ($params['unlock_images'] ?? false) {
-            $changedFields = array_diff($changedFields, ['existing_images', 'images']);
+        foreach ($params as $field => $param) {
+            if (strpos($field, 'unlock_') === 0) {
+                $changedFields = array_diff($changedFields, [str_replace('unlock_', '', $field)]);
+            }
         }
 
-        if ($params['unlock_video'] ?? false) {
-            $changedFields = array_diff($changedFields, ['video_embed_code']);
+        foreach (self::CHANGED_FIELDS_IN_DASHBOARD_UNLOCK_MAPPING as $unlockKey => $fields) {
+            if (!isset($params[$unlockKey])) {
+                continue;
+            }
+
+            foreach ($fields as $field) {
+                $changedFields = array_diff($changedFields, [$field]);
+            }
         }
 
-        return $changedFields;
+        return array_values($changedFields);
     }
 
     public function deliveryPrice(int $inventoryId, string $toZip=null): float

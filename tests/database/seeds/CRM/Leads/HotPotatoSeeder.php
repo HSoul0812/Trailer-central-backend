@@ -120,13 +120,13 @@ class HotPotatoSeeder extends Seeder
             'user_type' => AuthToken::USER_TYPE_DEALER,
         ]);
         $this->website = factory(Website::class)->create(['dealer_id' => $this->dealer->dealer_id]);
-        $this->user = factory(NewUser::class)->create(['user_id' => $this->dealer->dealer_id]);
-        $this->newDealer = factory(NewDealerUser::class)->create(['id' => $this->dealer->dealer_id, 'user_id' => $this->dealer->dealer_id]);
-        $this->crmUser = factory(CrmUser::class)->create(['user_id' => $this->dealer->dealer_id, 'enable_hot_potato' => 1]);
+        $this->user = factory(NewUser::class)->create();
+        $this->newDealer = factory(NewDealerUser::class)->create(['id' => $this->dealer->dealer_id, 'user_id' => $this->user->getKey()]);
+        $this->crmUser = factory(CrmUser::class)->create(['user_id' => $this->user->getKey(), 'enable_hot_potato' => 1]);
 
         // Create Default Sales Person
         $this->salesPerson = factory(SalesPerson::class)->create([
-            'user_id' => $this->dealer->getKey(),
+            'user_id' => $this->user->getKey(),
             'dealer_location_id' => $this->location->getKey(),
             'is_default' => 1,
             'is_inventory' => 1,
@@ -264,7 +264,7 @@ class HotPotatoSeeder extends Seeder
     {
         // Initialize Sales People Seeds
         $params = [
-            'user_id' => $this->dealer->getKey(),
+            'user_id' => $this->user->getKey(),
             'dealer_location_id' => $this->location->getKey(),
             'is_default' => 1,
             'is_inventory' => 1,
@@ -281,6 +281,7 @@ class HotPotatoSeeder extends Seeder
     public function cleanUp(): void
     {
         $dealerId = $this->dealer->getKey();
+        $userId = $this->user->getKey();
 
         // Database clean up
         if(!empty($this->leads) && count($this->leads)) {
@@ -292,10 +293,12 @@ class HotPotatoSeeder extends Seeder
         }
         LeadAssign::where(['dealer_id' => $dealerId])->delete();
 
+        // Clear Out CRM User Data
+        NewUser::destroy($userId);
+        SalesPerson::where(['user_id' => $userId])->delete();
+        CrmUser::where('user_id', $userId)->delete();
+
         // Clear Out User Data
-        SalesPerson::where(['user_id' => $dealerId])->delete();
-        CrmUser::destroy($dealerId);
-        NewUser::destroy($dealerId);
         DealerLocation::where('dealer_id', $dealerId)->delete();
         Website::where('dealer_id', $dealerId)->delete();
         AuthToken::where(['user_id' => $this->authToken->user_id, 'user_type' => AuthToken::USER_TYPE_DEALER])->delete();

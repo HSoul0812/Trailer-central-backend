@@ -16,6 +16,7 @@ use App\Models\Inventory\InventoryImage;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
 use App\Traits\Repository\Transaction;
 use App\Repositories\Traits\SortTrait;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
@@ -346,6 +347,24 @@ class InventoryRepository implements InventoryRepositoryInterface
         $this->updateQbInvoiceItems($item);
 
         return $item;
+    }
+
+    /**
+     * @param array $params
+     * @return bool
+     */
+    public function massUpdate(array $params): bool
+    {
+        if (!isset($params['dealer_id'])) {
+            throw new RepositoryInvalidArgumentException('dealer_id has been missed. Params - ' . json_encode($params));
+        }
+
+        $dealerId = $params['dealer_id'];
+        unset($params['dealer_id']);
+
+        Inventory::query()->where('dealer_id', $dealerId)->update($params);
+
+        return true;
     }
 
     /**
@@ -705,18 +724,24 @@ class InventoryRepository implements InventoryRepositoryInterface
             });
         }
 
-        if ($withDefault) {
-            $query = $query->where(function ($q) {
-                $q->where('status', '<>', Inventory::STATUS_NULL);
-            });
-        }
-
         if (isset($params['status'])) {
             $query = $query->where('status', $params['status']);
         }
 
         if (!empty($params['exclude_status_ids'])) {
-            $query = $query->whereNotIn('status', Arr::wrap($params['exclude_status_ids']));
+            $query->where(function (EloquentBuilder $query) use ($params) {
+                $query
+                    ->whereNotIn('status', Arr::wrap($params['exclude_status_ids']))
+                    ->orWhereNull('status');
+            });
+        } else {
+            // By default, we don't want to fetch the quote inventory
+            // however, we'll keep fetching the inventory with status = null
+            $query->where(function (EloquentBuilder $query) {
+                $query
+                    ->where('status', '!=', Inventory::STATUS_QUOTE)
+                    ->orWhereNull('status');
+            });
         }
 
         if (isset($params['condition'])) {
