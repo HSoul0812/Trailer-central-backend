@@ -38,6 +38,7 @@ class UserTransformer extends TransformerAbstract
              'is_crm_active' => $user->is_crm_active,
              'is_parts_active' => $user->is_parts_active,
              'is_marketing_active' => $user->is_marketing_active,
+             'is_fme_active' => $user->is_fme_active,
              'profile_image' => config('user.profile.image'),
              'website' => $user->website,
         ];
