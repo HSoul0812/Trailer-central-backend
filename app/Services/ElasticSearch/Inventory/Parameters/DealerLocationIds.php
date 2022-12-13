@@ -41,6 +41,9 @@ class DealerLocationIds
      */
     public static function fromArray(array $data): self
     {
+        if (!isset($data['is_filterable']) && !isset($data['locations_aggregators'])) {
+            return new self(false, $data, []);
+        }
         return new self($data['is_filterable'], $data['locations'], $data['locations_aggregators']);
     }
 }

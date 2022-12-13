@@ -29,11 +29,7 @@ class SelectQueryBuilder implements FieldQueryBuilderInterface
             $options = $term->getValues();
 
             if ($name === 'dealerLocationId') {
-                $options = DealerLocationIds::fromArray($options);
-            }
-
-            if ($name === 'dealerLocationId' && $options->isFilterable()) {
-                $options = $options->locations();
+                $options = DealerLocationIds::fromArray($options)->locations();
             }
 
             if (in_array($name, ['isRental', 'hasRamps'])) {

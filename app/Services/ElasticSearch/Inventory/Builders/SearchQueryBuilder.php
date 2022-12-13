@@ -40,6 +40,17 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
         'featureList.floorPlan' => 'featureList.floorPlan.txt^0.5',
     ];
 
+    /** @var string[] */
+    private const REPLACE_SPACE_WITH_ASTERISK = [
+        'manufacturer',
+        'brand',
+        'description.txt',
+        'stock.normal',
+        'model',
+        'vin',
+        'featureList.floorPlan.txt'
+    ];
+
     /** @var array */
     private $query = [];
 
@@ -130,6 +141,35 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
      */
     public function globalQuery(): array
     {
+        $this->field->getTerms()->each(function (Term $term) {
+            $name = $this->field->getName();
+            $value = $term->getValues()[0];
+
+            $query = [
+                'bool' => [
+                    $term->getESOperatorKeyword() => [
+                        [
+                            'match' => [
+                                sprintf('%s.txt', $name) => [
+                                    'query' => $value,
+                                    'operator' => 'and'
+                                ]
+                            ]
+                        ],
+                        [
+                            'wildcard' => [
+                                $name => [
+                                    'value' => sprintf('*%s*', $value)
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ];
+
+            $this->appendToQuery($query);
+        });
+
         return $this->query;
     }
 
@@ -158,8 +198,13 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
                             $boost = max(self::MINIMUM_BOOST, (float)$columnValues[$boostKey]);
                         }
 
-                        $shouldQuery[] = $this->matchQuery($columnValues[0], $boost, $data['match']);
-                        $shouldQuery[] = $this->matchQuery($column, $boost, $data['match']);
+                        $match = $data['match'];
+                        if (in_array($columnValues[0], self::REPLACE_SPACE_WITH_ASTERISK)) {
+                            $match = str_replace(' ', '*', $match);
+                        }
+
+                        $shouldQuery[] = $this->matchQuery($columnValues[0], $boost, $match);
+                        $shouldQuery[] = $this->matchQuery($column, $boost, $match);
 
                         if (!is_numeric($key) && strpos($column, '.') !== false) {
                             $shouldQuery[] = $this->wildcardQueryWithBoost($key, $boost, $data['match']);

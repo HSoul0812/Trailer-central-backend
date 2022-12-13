@@ -590,9 +590,9 @@ class Inventory extends Model
             foreach ($this->inventoryFeatures as $feature) {
                 $value = is_numeric($feature->value) ? TypesHelper::ensureNumeric($feature->value) : trim($feature->value);
 
-                if ($this->featuresIndexedById->has($feature->inventory_feature_id)) {
+                if ($this->featuresIndexedById->has($feature->feature_list_id)) {
                     $this->featuresIndexedById
-                        ->get($feature->inventory_feature_id)
+                        ->get($feature->feature_list_id)
                         ->push($value);
                 } else {
                     $this->featuresIndexedById->put($feature->feature_list_id, new Collection($value));

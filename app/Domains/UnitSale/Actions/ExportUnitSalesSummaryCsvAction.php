@@ -326,7 +326,7 @@ class ExportUnitSalesSummaryCsvAction
     private function fetchAndWriteReportDataToCsv(Writer $writer)
     {
         // TODO: Remove from the actual code
-        $this->dealer->dealer_id = 11708;
+        // $this->dealer->dealer_id = 11708;
 
         $headersOrder = array_keys($this->headers);
 
