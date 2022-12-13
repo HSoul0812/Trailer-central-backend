@@ -66,6 +66,14 @@ return [
             'permission' => 0664,
         ],
 
+        'interaction' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/services/interaction.log'),
+            'level' => env('LOG_LEVEL', 'error'),
+            'days' => 3,
+            'permission' => 0664,
+        ],
+
         'autoassign' => [
             'driver' => 'daily',
             'path' => storage_path('logs/commands/auto-assign.log'),

@@ -2,6 +2,7 @@
 
 namespace App\Services\CRM\Interactions;
 
+use App\Exceptions\CRM\Interactions\SaveEmailInteractionUnknownException;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Dms\UnitSale;
 use App\Models\CRM\Interactions\Interaction;
@@ -29,6 +30,7 @@ use App\Traits\MailHelper;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 /**
@@ -101,6 +103,11 @@ class InteractionService implements InteractionServiceInterface
      */
     protected $salespeople;
 
+    /**
+     * @var Log
+     */
+    protected $log;
+
 
     /**
      * InteractionsRepository constructor.
@@ -147,6 +154,9 @@ class InteractionService implements InteractionServiceInterface
         $this->leadStatus = $leadStatus;
         $this->users = $users;
         $this->salespeople = $salespeople;
+
+        // Initialize Log File for Interactions
+        $this->log = Log::channel('interaction');
     }
 
 
@@ -363,6 +373,7 @@ class InteractionService implements InteractionServiceInterface
      * @param ParsedEmail $parsedEmail
      * @param null|SalesPerson $salesPerson
      * @param null|bool $interactionEmail
+     * @throws SaveEmailInteractionUnknownException
      * @return Interaction
      */
     private function saveEmail(array $params, int $userId, ParsedEmail $parsedEmail, ?SalesPerson $salesPerson = null, ?bool $interactionEmail = null): Interaction {
@@ -381,9 +392,6 @@ class InteractionService implements InteractionServiceInterface
                 'from_email'        => $parsedEmail->getFromEmail(),
                 'sent_by'           => !empty($salesPerson) ? $salesPerson->email : NULL
             ]);
-            // Set Interaction ID/Date
-            $parsedEmail->setInteractionId($interaction->interaction_id);
-            $parsedEmail->setDateNow();
 
             // Create or Update Email
             $emailHistory = $this->emailHistory->createOrUpdate($parsedEmail->getParams());
@@ -395,12 +403,21 @@ class InteractionService implements InteractionServiceInterface
                     'message_id'     => $emailHistory->message_id
                 ]);
             }
+
+            // Set Interaction ID/Date
+            $parsedEmail->setInteractionId($interaction->interaction_id);
+            $parsedEmail->setDateNow();
         });
 
         // Return Interaction
-        return $this->interactions->get([
-            'id' => $parsedEmail->getInteractionId()
-        ]);
+        if($parsedEmail->getInteractionId()) {
+            return $this->interactions->get([
+                'id' => $parsedEmail->getInteractionId()
+            ]);
+        }
+
+        // Throw Exception
+        throw new SaveEmailInteractionUnknownException;
     }
 
     /**
