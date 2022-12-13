@@ -14,7 +14,7 @@ use Illuminate\Validation\Rule;
 
 /**
  * @property int $page
- * @property int $per_page
+ * @property int $limit
  * @property int $offset
  * @property int $x_qa_req
  * @property boolean $classifieds_site
@@ -51,7 +51,7 @@ class SearchInventoryRequest extends Request
 
     public function perPage(): int
     {
-        return (int)($this->json('pagination.per_page') ?? 15);
+        return (int)($this->json('pagination.limit') ?? 15);
     }
 
     public function offSet(): int
@@ -86,7 +86,7 @@ class SearchInventoryRequest extends Request
             'sort.*.order' => ['required'],
             'pagination' => ['required'],
             'pagination.page' => ['nullable', 'integer', 'min:1'],
-            'pagination.per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'pagination.limit' => ['nullable', 'integer', 'min:1', 'max:100'],
             'filter_groups' => ['present', 'array'],
             'filter_groups.*.filters' => ['required', 'array'],
             'filter_groups.*.filters.*.name' => ['required'],

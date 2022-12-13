@@ -790,6 +790,24 @@ class DealerOptionsService implements DealerOptionsServiceInterface
     }
 
     /**
+     * @param int $dealerId
+     * @param string $status
+     * @return bool
+     */
+    public function changeStatus(int $dealerId, string $status): bool
+    {
+        try {
+            $this->userRepository->changeStatus($dealerId, $status);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("Change dealer status error. dealer_id - {$dealerId}", $e->getTrace());
+
+            return false;
+        }
+    }
+
+    /**
      * @param User $user
      * @return NewDealerUser
      * @throws \Exception

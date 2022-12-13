@@ -38,7 +38,8 @@ class StripeService implements StripeServiceInterface
         $customer = $user->createOrGetStripeCustomer();
 
         if ($user->defaultPaymentMethod()) {
-            $customer["card"] = $user->defaultPaymentMethod()->card;
+            // Sometimes the card comes nested and sometimes it doesn't
+            $customer["card"] = $user->defaultPaymentMethod()->card ?? $user->defaultPaymentMethod();
         }
 
         $per_page = $request->transactions_limit ?? 0;

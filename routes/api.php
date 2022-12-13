@@ -316,6 +316,7 @@ $api->version('v1', function ($route) {
     $route->get('inventory/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@show')->where('id', '[0-9]+');
     $route->get('inventory/stocks/{stock}', 'App\Http\Controllers\v1\Inventory\InventoryController@findByStock');
     $route->post('inventory/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@update')->where('id', '[0-9]+');
+    $route->post('inventory/mass', 'App\Http\Controllers\v1\Inventory\InventoryController@massUpdate');
     $route->delete('inventory/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@destroy')->where('id', '[0-9]+');
     $route->get('inventory/exists', 'App\Http\Controllers\v1\Inventory\InventoryController@exists');
     $route->post('inventory/{id}/export', 'App\Http\Controllers\v1\Inventory\InventoryController@export')->where('id', '[0-9]+');
@@ -480,13 +481,11 @@ $api->version('v1', function ($route) {
      * Interactions
      */
     $route->group(['middleware' => 'interaction.validate'], function ($route) {
-        // TO DO: Need a Send Email endpoint that doesn't Require Lead ID By Default
-        //$route->post('leads/interactions/send-email', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@sendEmail');
         $route->get('leads/{leadId}/interactions', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@index')->where('leadId', '[0-9]+');
         $route->put('leads/{leadId}/interactions', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@create')->where('leadId', '[0-9]+');
-        $route->post('leads/{leadId}/interactions/send-email', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@sendEmail')->where('leadId', '[0-9]+');
         $route->get('leads/{leadId}/interactions/{id}', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@show')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
         $route->post('leads/{leadId}/interactions/{id}', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@update')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
+        $route->post('interactions/send-email', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@sendEmail');
     });
 
     /**
@@ -655,6 +654,8 @@ $api->version('v1', function ($route) {
     */
     $route->get('users', 'App\Http\Controllers\v1\User\UserController@index');
     $route->post('users', 'App\Http\Controllers\v1\User\UserController@create');
+
+    $route->post('user/classified', 'App\Http\Controllers\v1\User\UserController@updateDealerClassifieds');
 
     /*
     |--------------------------------------------------------------------------

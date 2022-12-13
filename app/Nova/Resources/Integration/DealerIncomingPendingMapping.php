@@ -112,7 +112,7 @@ class DealerIncomingPendingMapping extends Resource
     public function actions(Request $request)
     {
         return [
-            new MapData,
+            (new MapData($this->model()))->exceptOnIndex(),
             (new DealerIncomingPendingMappingExport)->withHeadings()->askForFilename(),
         ];
     }

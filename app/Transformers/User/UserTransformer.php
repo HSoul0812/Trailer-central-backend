@@ -34,6 +34,7 @@ class UserTransformer extends TransformerAbstract
              'name' => $user->name,
              'email' => $email,
              'primary_email' => $user->email,
+             'clsf_active' => $user->clsf_active,
              'is_dms_active' => $user->is_dms_active,
              'is_crm_active' => $user->is_crm_active,
              'is_parts_active' => $user->is_parts_active,

@@ -4,6 +4,7 @@ namespace App\Models\CRM\Interactions;
 
 use App\Models\CRM\Email\Attachment;
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Dms\UnitSale;
 use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -76,6 +77,7 @@ class EmailHistory extends Model
      */
     protected $fillable = [
         "lead_id",
+        "quote_id",
         "interaction_id",
         "message_id",
         "ses_message_id",
@@ -127,6 +129,14 @@ class EmailHistory extends Model
     public function lead(): BelongsTo
     {
         return $this->belongsTo(Lead::class, "lead_id", "identifier");
+    }
+
+    /**
+     * Get the lead that owns the email history.
+     */
+    public function quote(): BelongsTo
+    {
+        return $this->belongsTo(UnitSale::class, "quote_id", "id");
     }
 
     /**
