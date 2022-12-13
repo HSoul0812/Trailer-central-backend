@@ -645,63 +645,46 @@ class PartRepository implements PartRepositoryInterface {
     public function searchByQuery($query, $dealerId, $options = [])
     {
         $params = array_merge($query, $options);
-        $result = $this->model->where('id', '>', 0);
-
-        // filter by dealer
-        $result = $result->where('dealer_id', '=', $dealerId);
-
-        // vendor id
-        if ($params['vendor_id'] ?? null) {
-            $result = $result->whereHas('vendor', function($r) use($params) {
-                $r->where('id', '=', $params['vendor_id']);
-            });
-        }
-
-        // if part has dealer cost
-        if ($params['with_cost'] ?? false) {
-            if ($params['with_cost'] == 1) {
-                $result = $result->where('dealer_cost', '>', 0);
-            } else if ($params['with_cost'] == 2) {
-                $result = $result->where('dealer_cost', '=', 0);
-            }
-        }
-
-        // if part is in stock
-        if (isset($params['in_stock'])) {
-            if ($params['in_stock'] == self::PARTS_IN_STOCK) {
-                $result = $result->whereHas('bins', function($r) {
-                    $r->select(DB::raw('sum(qty) as total_qty'))
-                        ->groupBy('part_id')
-                        ->havingRaw('total_qty > 0');
+        $result = $this->model->where('id', '>', 0)
+            ->where('dealer_id', '=', $dealerId)
+            ->when(isset($params['vendor_id']), function($q) use($params) {
+                $q->whereHas('vendor', function($qq) use($params) {
+                    $qq->where('id', '=', $params['vendor_id']);
                 });
-            } else if ($params['in_stock'] == self::PARTS_AVAILABLE) {
-                $result = $result->where(function($result) {
-                    $result->whereHas('bins', function($result) {
-                        $result->select(DB::raw('sum(qty) as total_qty'))
+            })->when(isset($params['with_cost']), function($q) use($params) {
+                $q->when($params['with_cost'] == 1, function($qq) use($params) {
+                    $qq->where('dealer_cost', '>', 0);
+                }, function($qq) use($params) {
+                    $qq->where('dealer_cost', '=', 0);
+                });
+            })->when(isset($params['in_stock']), function($q) use($params) {
+                $q->when($params['in_stock'] == self::PARTS_IN_STOCK, function($qq) use($params) {
+                    $qq->whereHas('bins', function($qqq) {
+                        $qqq->select(DB::raw('sum(qty) as total_qty'))
                             ->groupBy('part_id')
-                            ->havingRaw('total_qty <= 0');
-                    })
-                    ->orDoesntHave('bins');
+                            ->havingRaw('total_qty > 0');
+                    });
+                }, function($qq) use($params) {
+                    $qq->where(function($qqq) {
+                        $qqq->whereHas('bins', function($qqqq) {
+                            $qqqq->select(DB::raw('sum(qty) as total_qty'))
+                                ->groupBy('part_id')
+                                ->havingRaw('total_qty <= 0');
+                        })->orDoesntHave('bins');
+                    });
                 });
-            }
-        }
-
-        // if part is active
-        if (isset($params['is_active'])) {
-            $result = $result->where('is_active', '=', $params['is_active']);
-        }
-
-        if ($params['query'] ?? null) { // if a query is specified
-            $result = $result->where('sku', 'LIKE', '%' . $params['query'] . '%')
-                ->orWhere('title', 'LIKE', '%' . $params['query'] . '%')
-                ->orWhere('description', 'LIKE', '%' . $params['query'] . '%')
-                ->orWhere('alternative_part_number', 'LIKE', '%' . $params['query'] . '%');
-        }
-        
-        // sort order
-        if ($params['sort'] ?? null) {
-            $result = $this->addSortQuery($result, $params['sort']);
-        }
+            })->when(isset($params['is_active']), function($q) use($params) {
+                $q->where('is_active', '=', $params['is_active']);
+            })->when($params['query'], function($q) use($params) {
+                $q->where(function($qq) use($params) {
+                    $qq->where('sku', 'LIKE', '%' . $params['query'] . '%')
+                    ->orWhere('title', 'LIKE', '%' . $params['query'] . '%')
+                    ->orWhere('description', 'LIKE', '%' . $params['query'] . '%')
+                    ->orWhere('alternative_part_number', 'LIKE', '%' . $params['query'] . '%');
+                });
+            })->when(isset($params['sort']), function($q) use($params) {
+                $this->addSortQuery($q, $params['sort']);
+            });
 
         // if a paginator is requested
         if (!isset($params['per_page'])) {
