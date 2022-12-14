@@ -404,9 +404,11 @@ class InteractionService implements InteractionServiceInterface
                 'from_email'        => $parsedEmail->getFromEmail(),
                 'sent_by'           => !empty($salesPerson) ? $salesPerson->email : NULL
             ]);
+            $this->log->info('Created Interaction #' . $interaction->interaction_id . ' for Sent Email');
 
             // Create or Update Email
             $emailHistory = $this->emailHistory->createOrUpdate($parsedEmail->getParams());
+            $this->log->info('Created Email #' . $emailHistory->email_id . ' for Sent Email');
 
             // Create Interaction Email
             if ($interactionEmail) {
@@ -414,6 +416,8 @@ class InteractionService implements InteractionServiceInterface
                     'interaction_id' => $interaction->interaction_id,
                     'message_id'     => $emailHistory->message_id
                 ]);
+                $this->log->info('Connected Interaction #' . $interaction->interaction_id .
+                                    ' to Email #' . $emailHistory->email_id . ' for Sent Email');
             }
 
             // Set Interaction ID/Date
@@ -423,12 +427,15 @@ class InteractionService implements InteractionServiceInterface
 
         // Return Interaction
         if($parsedEmail->getInteractionId()) {
+            $this->log->info('Returned Interaction #' . $parsedEmail->getInteractionId() . ' for Sent Email');
             return $this->interactions->get([
                 'id' => $parsedEmail->getInteractionId()
             ]);
         }
 
         // Throw Exception
+        $this->log->error('An Unknown Exception Returned Trying to Save Email ' .
+                            'for Interaction #' . $parsedEmail->getInteractionId());
         throw new SaveEmailInteractionUnknownException;
     }
 
