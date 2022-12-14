@@ -755,6 +755,7 @@ class PartsController extends RestfulController
 
             $query = $request->only('query', 'vendor_id', 'with_cost', 'in_stock', 'sort', 'is_active');
 
+            $paginator = new \stdClass(); // this will hold the paginator produced by search
             $dealerId = $this->getRequestDealerId($request, Auth::user());
 
             // do the search
@@ -763,7 +764,7 @@ class PartsController extends RestfulController
                     'allowAll' => true,
                     'page' => $request->get('page'),
                     'per_page' => $request->get('per_page', 10),
-                ]
+                ], $paginator
             );
 
             $data = new Collection($result, $this->partsTransformer, 'data');
