@@ -390,7 +390,8 @@ class InteractionService implements InteractionServiceInterface
      */
     private function saveEmail(array $params, int $userId, ParsedEmail $parsedEmail, ?SalesPerson $salesPerson = null, ?bool $interactionEmail = null): Interaction {
         // Initialize Transaction
-        DB::transaction(function() use (&$parsedEmail, $params, $userId, $salesPerson, $interactionEmail) {
+        $interaction = null;
+        DB::transaction(function() use (&$interaction, $parsedEmail, $params, $userId, $salesPerson, $interactionEmail) {
             // Create or Update
             $interaction = $this->interactions->createOrUpdate([
                 'id'                => $parsedEmail->getInteractionId(),
@@ -419,21 +420,18 @@ class InteractionService implements InteractionServiceInterface
                 $this->log->info('Connected Interaction #' . $interaction->interaction_id .
                                     ' to Email #' . $emailHistory->email_id . ' for Sent Email');
             }
-
-            // Set Interaction ID/Date
-            $parsedEmail->setInteractionId($interaction->interaction_id);
-            $parsedEmail->setDateNow();
         });
 
         // Return Interaction
-        try {
-            $this->log->info('Returning Interaction #' . $parsedEmail->getInteractionId() . ' for Sent Email');
-            return $this->interactions->get(['id' => $parsedEmail->getInteractionId()]);
-        } catch(\Exception $e) {
-            // Throw Exception
-            $this->log->error('Exception Returned Trying to Save Email: ' . $e->getMessage());
-            throw new SaveEmailInteractionUnknownException;
+        if(!empty($interaction)) {
+            $this->log->info('Returning Interaction #' . $interaction->interaction_id . ' for Sent Email');
+            return $interaction;
         }
+
+        // Throw Exception
+        $this->log->error('Unknown error occurred trying to save email ' .
+                            'From ' . $parsedEmail->from . ' To ' . $parsedEmail->to);
+        throw new SaveEmailInteractionUnknownException;
     }
 
     /**
