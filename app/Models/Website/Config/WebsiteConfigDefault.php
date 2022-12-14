@@ -35,6 +35,10 @@ class WebsiteConfigDefault extends Model
 
     public $primaryKey = 'key';
 
+    protected $keyType = 'string';
+
+    public $incrementing = false;
+
     protected $fillable = [
       'private', 'type', 'label', 'note', 'grouping', 'values', 'values_mapping',
         'default_label', 'default_value', 'sort_order'
