@@ -33,6 +33,8 @@ class WebsiteConfigDefault extends Model
 
     public $timestamps = false;
 
+    public $primaryKey = 'key';
+
     protected $fillable = [
       'private', 'type', 'label', 'note', 'grouping', 'values', 'values_mapping',
         'default_label', 'default_value', 'sort_order'
