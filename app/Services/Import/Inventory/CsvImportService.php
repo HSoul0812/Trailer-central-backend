@@ -562,7 +562,7 @@ class CsvImportService implements CsvImportServiceInterface
                     }
                     // for lines > 1
                 } else {
-                    $header = array_search($this->indexToheaderMapping[$index], self::$_labels);
+                    $header = array_search(strtolower($this->indexToheaderMapping[$index]), array_map('strtolower', self::$_labels));
                     Log::debug(array("header" => $header, 'headerMapping' => $this->indexToheaderMapping[$index]));
 
                     if ($header) {
