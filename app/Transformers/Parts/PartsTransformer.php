@@ -59,8 +59,7 @@ class PartsTransformer extends TransformerAbstract implements PartsTransformerIn
                 $this->getNewPORoute($part->id),
                 true
              ),
-             'is_active' => (bool) $part->is_active,
-             'total_qty' => $part->getTotalQtyAttribute()
+             'is_active' => (bool) $part->is_active
          ];
     }
 
