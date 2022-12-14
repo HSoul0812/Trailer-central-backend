@@ -2,6 +2,7 @@
 
 namespace App\Services\CRM\Interactions;
 
+use App\Exceptions\CRM\Interactions\SaveEmailInteractionUnknownException;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Dms\UnitSale;
 use App\Models\CRM\Interactions\Interaction;
@@ -29,6 +30,8 @@ use App\Traits\MailHelper;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Database\Eloquent\Collection;
 use Carbon\Carbon;
 
 /**
@@ -101,6 +104,11 @@ class InteractionService implements InteractionServiceInterface
      */
     protected $salespeople;
 
+    /**
+     * @var Log
+     */
+    protected $log;
+
 
     /**
      * InteractionsRepository constructor.
@@ -147,6 +155,9 @@ class InteractionService implements InteractionServiceInterface
         $this->leadStatus = $leadStatus;
         $this->users = $users;
         $this->salespeople = $salespeople;
+
+        // Initialize Log File for Interactions
+        $this->log = Log::channel('interaction');
     }
 
 
@@ -221,11 +232,15 @@ class InteractionService implements InteractionServiceInterface
     public function email(array $params, array $attachments = []): Interaction {
         // Get User
         $user = $this->users->get(['dealer_id' => $params['dealer_id']]);
+        $this->log->info('Found Dealer ID #' . $user->dealer_id . ' to Send Email From');
+
+        // Initialize SMTP Config
         $smtpConfig = null;
         $salesPerson = null;
         $interactionEmail = null;
         if(!empty($params['sales_person_id'])) {
             $salesPerson = $this->salespeople->get(['sales_person_id' => $params['sales_person_id']]);
+            $this->log->info('Found Sales Person #' . $salesPerson->id . ' To Send Email From');
 
             // Get SMTP Config
             $smtpConfig = SmtpConfig::fillFromSalesPerson($salesPerson);
@@ -243,6 +258,7 @@ class InteractionService implements InteractionServiceInterface
             $params['attachments'] = array_fill(0, 1, $params['attachments']);
         }
 
+        $this->log->info('Found ' . count($params['attachments']) . ' Attachments To Send Via Email');
         foreach($params['attachments'] as $key => $attachment) {
             if (!is_a($attachment, UploadedFile::class)) {
                 unset($params['attachments'][$key]);
@@ -256,18 +272,22 @@ class InteractionService implements InteractionServiceInterface
             $fromEmail = $params['from_email'] = config('mail.from.address');
             $params['from_name'] = $user->name;
         }
+        $this->log->info('Got Email ' . $fromEmail . ' To Send From');
 
         // Create Parsed Email
         $parsedEmail = $this->getParsedEmail($smtpConfig, $params);
+        $this->log->info('Configured Email With Subject ' . $parsedEmail->subject . ' To Send to Lead');
 
         // Get Draft if Exists
         $emailHistory = $this->emailHistory->findEmailDraft($fromEmail, $params['lead_id'], $params['quote_id']);
         if(!empty($emailHistory->email_id)) {
+            $this->log->info('Found Draft #' . $emailHistory->email_id . ' of Email We Are Currently Sending');
             $parsedEmail->setEmailHistoryId($emailHistory->email_id);
             $parsedEmail->setMessageId($emailHistory->message_id);
         }
 
         // Send Email
+        $this->log->info('Sending Email From ' . $parsedEmail->from . ' To ' . $parsedEmail->to);
         if($smtpConfig !== null && $smtpConfig->isAuthTypeGmail()) {
             $finalEmail = $this->gmail->send($smtpConfig, $parsedEmail);
         } elseif($smtpConfig !== null && $smtpConfig->isAuthTypeOffice()) {
@@ -283,6 +303,8 @@ class InteractionService implements InteractionServiceInterface
 
         if (!empty($params['lead_id'])) {
             $lead = Lead::findOrFail($params['lead_id']);
+            $this->log->info('Found Lead ID #' . $lead->identifier . ' to Send Email To');
+
             // If there was no status, or it was uncontacted, set to medium, otherwise, don't change.
             if (empty($lead->leadStatus) || $lead->leadStatus->status === Lead::STATUS_UNCONTACTED) {
                 $status = Lead::STATUS_MEDIUM;
@@ -298,6 +320,7 @@ class InteractionService implements InteractionServiceInterface
         }
 
         // Save Email
+        $this->log->info('Saving Email From ' . $parsedEmail->from . ' To ' . $parsedEmail->to . ' into DB');
         return $this->saveEmail($params, $user->newDealerUser->user_id, $finalEmail, $salesPerson, $interactionEmail);
     }
 
@@ -363,11 +386,13 @@ class InteractionService implements InteractionServiceInterface
      * @param ParsedEmail $parsedEmail
      * @param null|SalesPerson $salesPerson
      * @param null|bool $interactionEmail
+     * @throws SaveEmailInteractionUnknownException
      * @return Interaction
      */
     private function saveEmail(array $params, int $userId, ParsedEmail $parsedEmail, ?SalesPerson $salesPerson = null, ?bool $interactionEmail = null): Interaction {
         // Initialize Transaction
-        DB::transaction(function() use (&$parsedEmail, $params, $userId, $salesPerson, $interactionEmail) {
+        $interaction = null;
+        DB::transaction(function() use (&$interaction, $parsedEmail, $params, $userId, $salesPerson, $interactionEmail) {
             // Create or Update
             $interaction = $this->interactions->createOrUpdate([
                 'id'                => $parsedEmail->getInteractionId(),
@@ -381,12 +406,12 @@ class InteractionService implements InteractionServiceInterface
                 'from_email'        => $parsedEmail->getFromEmail(),
                 'sent_by'           => !empty($salesPerson) ? $salesPerson->email : NULL
             ]);
-            // Set Interaction ID/Date
-            $parsedEmail->setInteractionId($interaction->interaction_id);
-            $parsedEmail->setDateNow();
+            $this->log->info('Created Interaction #' . $interaction->interaction_id . ' for Sent Email');
 
             // Create or Update Email
             $emailHistory = $this->emailHistory->createOrUpdate($parsedEmail->getParams());
+            $interaction->setRelation('emailHistory', new Collection([$emailHistory]));
+            $this->log->info('Created Email #' . $emailHistory->email_id . ' for Sent Email');
 
             // Create Interaction Email
             if ($interactionEmail) {
@@ -394,13 +419,21 @@ class InteractionService implements InteractionServiceInterface
                     'interaction_id' => $interaction->interaction_id,
                     'message_id'     => $emailHistory->message_id
                 ]);
+                $this->log->info('Connected Interaction #' . $interaction->interaction_id .
+                                    ' to Email #' . $emailHistory->email_id . ' for Sent Email');
             }
         });
 
         // Return Interaction
-        return $this->interactions->get([
-            'id' => $parsedEmail->getInteractionId()
-        ]);
+        if(!empty($interaction)) {
+            $this->log->info('Returning Interaction #' . $interaction->interaction_id . ' for Sent Email');
+            return $interaction;
+        }
+
+        // Throw Exception
+        $this->log->error('Unknown error occurred trying to save email ' .
+                            'From ' . $parsedEmail->from . ' To ' . $parsedEmail->to);
+        throw new SaveEmailInteractionUnknownException;
     }
 
     /**

@@ -66,6 +66,14 @@ return [
             'permission' => 0664,
         ],
 
+        'interaction' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/services/interaction.log'),
+            'level' => env('LOG_LEVEL', 'error'),
+            'days' => 3,
+            'permission' => 0664,
+        ],
+
         'autoassign' => [
             'driver' => 'daily',
             'path' => storage_path('logs/commands/auto-assign.log'),
@@ -236,7 +244,7 @@ return [
 
         'slack-cl' => [
             'driver' => 'slack',
-            'url' => env('CLAPP_SLACK_WEBHOOK_URL'),
+            'url' => env('CLAPP_SLACK_WEBHOOK_URL', ''),
             'username' => 'Laravel Log',
             'emoji' => ':boom:',
             'level' => env('CLAPP_SLACK_LEVEL', 'info'),
