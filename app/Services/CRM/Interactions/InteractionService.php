@@ -31,6 +31,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Database\Eloquent\Collection;
 use Carbon\Carbon;
 
 /**
@@ -409,6 +410,7 @@ class InteractionService implements InteractionServiceInterface
 
             // Create or Update Email
             $emailHistory = $this->emailHistory->createOrUpdate($parsedEmail->getParams());
+            $interaction->setRelation('emailHistory', new Collection([$emailHistory]));
             $this->log->info('Created Email #' . $emailHistory->email_id . ' for Sent Email');
 
             // Create Interaction Email
