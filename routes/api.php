@@ -587,9 +587,11 @@ $api->version('v1', function ($route) {
         $route->get('user', 'App\Http\Controllers\v1\User\SignInController@details');
         $route->post('user/check-admin-password', 'App\Http\Controllers\v1\User\SignInController@checkAdminPassword');
 
-        $route->get('user/secondary-users', 'App\Http\Controllers\v1\User\SecondaryUsersController@index');
-        $route->post('user/secondary-users', 'App\Http\Controllers\v1\User\SecondaryUsersController@create');
-        $route->put('user/secondary-users', 'App\Http\Controllers\v1\User\SecondaryUsersController@updateBulk');
+        $route->group(['middleware' => 'accounts.manage.permission'], function ($route) {
+            $route->get('user/secondary-users', 'App\Http\Controllers\v1\User\SecondaryUsersController@index');
+            $route->post('user/secondary-users', 'App\Http\Controllers\v1\User\SecondaryUsersController@create');
+            $route->put('user/secondary-users', 'App\Http\Controllers\v1\User\SecondaryUsersController@updateBulk');
+        });
 
         $route->put('user/password/update', 'App\Http\Controllers\v1\User\SignInController@updatePassword');
 
