@@ -426,17 +426,14 @@ class InteractionService implements InteractionServiceInterface
         });
 
         // Return Interaction
-        if($parsedEmail->getInteractionId()) {
-            $this->log->info('Returned Interaction #' . $parsedEmail->getInteractionId() . ' for Sent Email');
-            return $this->interactions->get([
-                'id' => $parsedEmail->getInteractionId()
-            ]);
+        try {
+            $this->log->info('Returning Interaction #' . $parsedEmail->getInteractionId() . ' for Sent Email');
+            return $this->interactions->get(['id' => $parsedEmail->getInteractionId()]);
+        } catch(\Exception $e) {
+            // Throw Exception
+            $this->log->error('Exception Returned Trying to Save Email: ' . $e->getMessage());
+            throw new SaveEmailInteractionUnknownException;
         }
-
-        // Throw Exception
-        $this->log->error('An Unknown Exception Returned Trying to Save Email ' .
-                            'for Interaction #' . $parsedEmail->getInteractionId());
-        throw new SaveEmailInteractionUnknownException;
     }
 
     /**
