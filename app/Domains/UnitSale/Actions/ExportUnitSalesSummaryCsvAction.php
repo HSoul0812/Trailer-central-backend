@@ -14,6 +14,7 @@ use DB;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Filesystem\FilesystemAdapter;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use League\Csv\CannotInsertRecord;
 use League\Csv\Exception;
@@ -144,10 +145,107 @@ class ExportUnitSalesSummaryCsvAction
     /** @var string */
     private $filename;
 
+    /** @var Collection<int, object> */
+    private $rows;
+
+    /**
+     * This is the headers that we want to use for the extra unit in the same invoice
+     *
+     * @var array<string, bool>
+     */
+    private $headersForExtraUnitRows = [
+        'invoice_no' => true,
+        'invoice_date' => true,
+        'invoice_type' => true,
+        'invoice_sales_location' => true,
+        'buyer_display_name' => true,
+        'tax_exempt' => true,
+        'tax_id_number' => true,
+        'wholesale_customer' => true,
+        'default_discount' => true,
+        'billing_address' => true,
+        'billing_city' => true,
+        'billing_county' => true,
+        'billing_state' => true,
+        'billing_postal_code' => true,
+        'billing_country' => true,
+        'sales_person_1' => true,
+        'sales_person_2' => true,
+        'tax_profile' => true,
+        'unit_stock' => true,
+        'unit_vin' => true,
+        'unit_type' => true,
+        'unit_category' => true,
+        'unit_year' => true,
+        'unit_mfg' => true,
+        'unit_model' => true,
+        'unit_location' => true,
+        'unit_condition' => true,
+        'unit_retail_price' => true,
+        'unit_discount' => true,
+        'unit_total_after_discount' => true,
+        'unit_total_tax_rate' => true,
+        'unit_total_sales_tax_amount' => true,
+        'unit_state_tax_rate' => true,
+        'unit_state_tax_amount' => true,
+        'unit_county_tax_rate' => true,
+        'unit_county_tax_amount' => true,
+        'unit_local_tax_rate' => true,
+        'unit_local_tax_amount' => true,
+        'unit_other_tax_rate' => true,
+        'unit_other_tax_amount' => true,
+        'unit_cost' => true,
+        'unit_cost_of_shipping' => true,
+        'unit_cost_of_ros' => true,
+        'unit_cost_of_prep' => true,
+        'unit_total_cost' => true,
+        'unit_true_cost' => true,
+        'unit_associated_bill_no' => true,
+        'unit_total_true_cost' => true,
+        'unit_pac_adj' => true,
+        'unit_cost_overhead_percent' => true,
+        'unit_cost_plus_overhead' => true,
+        'unit_min_selling_price' => true,
+        'unit_floorplan_vendor' => true,
+        'unit_floorplan_committed_date' => true,
+        'unit_floorplan_balance' => true,
+    ];
+
+    /**
+     * The list of headers that we want to print to the file for the duplicate unit row
+     * (the extra row that already has the same unit stock printed previously).
+     *
+     * @var array<string, bool>
+     */
+    private $headersForDuplicateUnitRows = [
+        'invoice_no' => true,
+        'invoice_date' => true,
+        'invoice_type' => true,
+        'invoice_sales_location' => true,
+        'buyer_display_name' => true,
+        'tax_exempt' => true,
+        'tax_id_number' => true,
+        'wholesale_customer' => true,
+        'default_discount' => true,
+        'billing_address' => true,
+        'billing_city' => true,
+        'billing_county' => true,
+        'billing_state' => true,
+        'billing_postal_code' => true,
+        'billing_country' => true,
+        'sales_person_1' => true,
+        'sales_person_2' => true,
+        'tax_profile' => true,
+        'payment_type' => true,
+        'payment_date' => true,
+    ];
+
     public function __construct()
     {
         // By default, we'll use S3 storage because it's the best option for production ENV
         $this->storage = Storage::disk('s3');
+
+        $this->rows = collect([]);
     }
 
     /**
@@ -325,14 +423,13 @@ class ExportUnitSalesSummaryCsvAction
      */
     private function fetchAndWriteReportDataToCsv(Writer $writer)
     {
-        // TODO: Remove from the actual code
-        // $this->dealer->dealer_id = 11708;
-
         $headersOrder = array_keys($this->headers);
 
+        $this->rows = $this->getQueryBuilder()->get();
+
         /** @var object $row */
-        foreach ($this->getQueryBuilder()->get() as $row) {
-            $csvRow = $this->transformDBRowToResultRow($row, $headersOrder);
+        foreach ($this->rows as $rowIndex => $ignored) {
+            $csvRow = $this->transformDBRowToResultRow($rowIndex, $headersOrder);
 
             $writer->insertOne($csvRow);
         }
@@ -659,7 +756,6 @@ class ExportUnitSalesSummaryCsvAction
             ->leftJoin('inventory_category as inventory_category_legacy', 'inventory_category_legacy.legacy_category', '=', 'inventory.category')
             ->leftJoin('dealer_location as unit_location', 'unit_location.dealer_location_id', '=', 'inventory.dealer_location_id')
             ->leftJoin('qb_bills', 'qb_bills.id', '=', 'inventory.bill_id')
-            ->leftJoin('inventory_floor_plan_payment', 'inventory_floor_plan_payment.inventory_id', '=', 'inventory.inventory_id')
             ->leftJoin('qb_vendors', 'qb_vendors.id', '=', 'inventory.fp_vendor')
             ->leftJoin('dms_unit_sale_trade_in_v1', 'dms_unit_sale_trade_in_v1.unit_sale_id', '=', 'dms_unit_sale.id')
             ->leftJoin('inventory_category as trade_in_inventory_category', 'trade_in_inventory_category.inventory_category_id', '=', 'dms_unit_sale_trade_in_v1.temp_inv_category')
@@ -668,19 +764,44 @@ class ExportUnitSalesSummaryCsvAction
             ->leftJoin('qb_payment', 'qb_payment.invoice_id', '=', 'qb_invoices.id')
             ->leftJoin('qb_payment_methods', 'qb_payment_methods.id', '=', 'qb_payment.payment_method_id')
             ->where('qb_invoices.dealer_id', $this->dealer->dealer_id)
-            ->whereBetween('qb_invoices.invoice_date', [$this->from, $this->to]);
+            ->whereBetween('qb_invoices.invoice_date', [$this->from, $this->to])
+            ->orderBy('qb_invoices.invoice_date');
     }
 
     /**
-     * @param object $row
+     * @param int $rowIndex
      * @param array $headers
      * @return void
      */
-    private function transformDBRowToResultRow(object $row, array $headers): array
+    private function transformDBRowToResultRow(int $rowIndex, array $headers): array
     {
+        $row = $this->rows[$rowIndex];
+
         $this->populateManualData($row);
 
-        return array_map(function (string $header) use ($row) {
+        $hasTheSameUnitPrintedOnThePreviousRows = $this->hasTheSameUnitPrintedOnThePreviousRows($rowIndex);
+
+        return array_map(function (string $header) use ($row, $hasTheSameUnitPrintedOnThePreviousRows) {
+            // If the same invoice has more than one unit of the same stock #, we will print
+            // only the necessary columns from the 2nd row onward
+            if ($hasTheSameUnitPrintedOnThePreviousRows) {
+                if (array_key_exists($header, $this->headersForDuplicateUnitRows)) {
+                    return object_get($row, $header);
+                } else {
+                    return '';
+                }
+            }
+
+            // For the non-main unit, we print only some important columns
+            if (!$row->unit_is_main) {
+                if (array_key_exists($header, $this->headersForExtraUnitRows)) {
+                    return object_get($row, $header);
+                } else {
+                    return '';
+                }
+            }
+
+            // For the first unit, generate everything as usual
             return object_get($row, $header);
         }, $headers);
     }
@@ -914,7 +1035,6 @@ class ExportUnitSalesSummaryCsvAction
         // IF labor_tax_type_from_location is not_tax OR total tax rate is 0, then there is no tax
 
 
-
         $row->labor_total_after_discount = $row->labor_subtotal - $row->labor_discount;
 
         // TODO: Fix this, the first step is to check if the location has Not Tax Labor enabled
@@ -1028,5 +1148,26 @@ class ExportUnitSalesSummaryCsvAction
     private function convertTaxRateToPercentage(float $taxRate): float
     {
         return round($taxRate * 100, 2);
+    }
+
+    /**
+     * Check if we ever have the same unit with the given rowIndex printed in the file
+     *
+     * @param int $rowIndex
+     * @return bool
+     */
+    private function hasTheSameUnitPrintedOnThePreviousRows(int $rowIndex): bool
+    {
+        $row = $this->rows[$rowIndex];
+
+        for ($i = 0; $i < $rowIndex; $i++) {
+            $currentRow = $this->rows[$i];
+
+            if ($row->unit_stock === $currentRow->unit_stock) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
