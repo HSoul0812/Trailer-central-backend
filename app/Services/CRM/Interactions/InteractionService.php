@@ -231,11 +231,15 @@ class InteractionService implements InteractionServiceInterface
     public function email(array $params, array $attachments = []): Interaction {
         // Get User
         $user = $this->users->get(['dealer_id' => $params['dealer_id']]);
+        $this->log->info('Found Dealer ID #' . $user->dealer_id . ' to Send Email From');
+
+        // Initialize SMTP Config
         $smtpConfig = null;
         $salesPerson = null;
         $interactionEmail = null;
         if(!empty($params['sales_person_id'])) {
             $salesPerson = $this->salespeople->get(['sales_person_id' => $params['sales_person_id']]);
+            $this->log->info('Found Sales Person #' . $salesPerson->id . ' To Send Email From');
 
             // Get SMTP Config
             $smtpConfig = SmtpConfig::fillFromSalesPerson($salesPerson);
@@ -253,6 +257,7 @@ class InteractionService implements InteractionServiceInterface
             $params['attachments'] = array_fill(0, 1, $params['attachments']);
         }
 
+        $this->log->info('Found ' . count($params['attachments']) . ' Attachments To Send Via Email');
         foreach($params['attachments'] as $key => $attachment) {
             if (!is_a($attachment, UploadedFile::class)) {
                 unset($params['attachments'][$key]);
@@ -266,18 +271,22 @@ class InteractionService implements InteractionServiceInterface
             $fromEmail = $params['from_email'] = config('mail.from.address');
             $params['from_name'] = $user->name;
         }
+        $this->log->info('Got Email ' . $fromEmail . ' To Send From');
 
         // Create Parsed Email
         $parsedEmail = $this->getParsedEmail($smtpConfig, $params);
+        $this->log->info('Configured Email With Subject ' . $parsedEmail->subject . ' To Send to Lead');
 
         // Get Draft if Exists
         $emailHistory = $this->emailHistory->findEmailDraft($fromEmail, $params['lead_id'], $params['quote_id']);
         if(!empty($emailHistory->email_id)) {
+            $this->log->info('Found Draft #' . $emailHistory->email_id . ' of Email We Are Currently Sending');
             $parsedEmail->setEmailHistoryId($emailHistory->email_id);
             $parsedEmail->setMessageId($emailHistory->message_id);
         }
 
         // Send Email
+        $this->log->info('Sending Email From ' . $parsedEmail->from . ' To ' . $parsedEmail->to);
         if($smtpConfig !== null && $smtpConfig->isAuthTypeGmail()) {
             $finalEmail = $this->gmail->send($smtpConfig, $parsedEmail);
         } elseif($smtpConfig !== null && $smtpConfig->isAuthTypeOffice()) {
@@ -293,6 +302,8 @@ class InteractionService implements InteractionServiceInterface
 
         if (!empty($params['lead_id'])) {
             $lead = Lead::findOrFail($params['lead_id']);
+            $this->log->info('Found Lead ID #' . $lead->identifier . ' to Send Email To');
+
             // If there was no status, or it was uncontacted, set to medium, otherwise, don't change.
             if (empty($lead->leadStatus) || $lead->leadStatus->status === Lead::STATUS_UNCONTACTED) {
                 $status = Lead::STATUS_MEDIUM;
@@ -308,6 +319,7 @@ class InteractionService implements InteractionServiceInterface
         }
 
         // Save Email
+        $this->log->info('Saving Email From ' . $parsedEmail->from . ' To ' . $parsedEmail->to . ' into DB');
         return $this->saveEmail($params, $user->newDealerUser->user_id, $finalEmail, $salesPerson, $interactionEmail);
     }
 
