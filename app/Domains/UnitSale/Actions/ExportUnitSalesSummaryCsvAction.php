@@ -756,7 +756,6 @@ class ExportUnitSalesSummaryCsvAction
             ->leftJoin('inventory_category as inventory_category_legacy', 'inventory_category_legacy.legacy_category', '=', 'inventory.category')
             ->leftJoin('dealer_location as unit_location', 'unit_location.dealer_location_id', '=', 'inventory.dealer_location_id')
             ->leftJoin('qb_bills', 'qb_bills.id', '=', 'inventory.bill_id')
-            ->leftJoin('inventory_floor_plan_payment', 'inventory_floor_plan_payment.inventory_id', '=', 'inventory.inventory_id')
             ->leftJoin('qb_vendors', 'qb_vendors.id', '=', 'inventory.fp_vendor')
             ->leftJoin('dms_unit_sale_trade_in_v1', 'dms_unit_sale_trade_in_v1.unit_sale_id', '=', 'dms_unit_sale.id')
             ->leftJoin('inventory_category as trade_in_inventory_category', 'trade_in_inventory_category.inventory_category_id', '=', 'dms_unit_sale_trade_in_v1.temp_inv_category')
