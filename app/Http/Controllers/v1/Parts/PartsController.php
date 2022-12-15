@@ -766,17 +766,20 @@ class PartsController extends RestfulController
                     'per_page' => $request->get('per_page', 10),
                 ], $paginator
             );
-
             $data = new Collection($result, $this->partsTransformer, 'data');
+
             // if a paginator is requested
             if ($request->get('page')) {
                 $data->setPaginator(new IlluminatePaginatorAdapter($paginator));
             }
+
             // parses the include params
             $this->fractal->parseIncludes($request->get('include', []));
+
             // build the api response
             $result = (array) $this->fractal->createData($data)->toArray();
             return $this->response->array($result);
+
         } catch (\Exception $e) {
             Log::error($e->getMessage());
             Log::error($e->getTraceAsString());
