@@ -28,7 +28,7 @@ class SearchInventoryRequest extends Request
 
     public function dealerIds(): array
     {
-        return $this->json('dealers');
+        return $this->json('dealers', []);
     }
 
     public function sort(): array
@@ -101,7 +101,7 @@ class SearchInventoryRequest extends Request
             'geolocation.range' => ['nullable', 'numeric'],
             'geolocation.units' => ['nullable', Rule::in([GeolocationRange::UNITS_MILES, GeolocationRange::UNITS_KILOMETERS])],
             'geolocation.grouping' => ['nullable', 'numeric'],
-            'dealers' => ['present', 'array'],
+            'dealers' => ['nullable', 'array'],
             'dealers.*.operator' => ['required', Rule::in([Term::OPERATOR_EQ, Term::OPERATOR_NEQ])],
             'dealers.*.values' => ['required', 'array'],
             'debug' => ['required', 'boolean']
