@@ -5,6 +5,9 @@ namespace App\Console\Commands\Inventory;
 use App\Models\Inventory\Inventory;
 use Illuminate\Console\Command;
 
+/**
+ * Once the integration team has moved everything (inventory related) to the API side, then this command should be removed
+ */
 class ReindexInventoryIndex extends Command
 {
     /**
