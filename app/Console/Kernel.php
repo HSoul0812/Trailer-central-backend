@@ -169,6 +169,10 @@ class Kernel extends ConsoleKernel
            ->dailyAt('1:00')
            ->runInBackground();
 
+        $schedule->command('command:inventory:reindex')
+            ->dailyAt('1:00')
+            ->runInBackground();
+
         $schedule->command('horizon:snapshot')
             ->everyFiveMinutes()
             ->runInBackground();
