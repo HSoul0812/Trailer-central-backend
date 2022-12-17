@@ -181,6 +181,7 @@ use Laravel\Scout\Searchable;
  *
  * @method static Builder select($columns = ['*'])
  * @method static Builder where($column, $operator = null, $value = null, $boolean = 'and')
+ * @method \Illuminate\Database\Eloquent\Builder publishable()
  */
 class Inventory extends Model
 {
@@ -937,5 +938,17 @@ class Inventory extends Model
             'entity_type_id' => $this->entity_type_id,
             'inventory_condition' => $this->condition,
         ];
+    }
+
+    /**
+     * Pulls only those inventories which can be published on dealer website
+     *
+     * @param \Illuminate\Database\Query\Builder|\Grimzy\LaravelMysqlSpatial\Eloquent\Builder $query the query to append
+     */
+    public function scopePublishable($query): void
+    {
+        $query->where('show_on_website', self::SHOW_IN_WEBSITE)
+            ->where('is_archived', self::IS_NOT_ARCHIVED)
+            ->where('status', '<>', self::STATUS_QUOTE);
     }
 }
