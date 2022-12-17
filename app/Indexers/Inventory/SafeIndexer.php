@@ -59,6 +59,7 @@ class SafeIndexer
         ini_set('memory_limit', '256MB');
 
         $model = new Inventory();
+
         $this->indexAlias = $model->indexConfigurator()->aliasName();
         $this->indexName = $model::$searchableAs = $model->indexConfigurator()->name();
 
