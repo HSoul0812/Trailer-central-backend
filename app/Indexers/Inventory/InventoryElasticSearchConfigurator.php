@@ -20,6 +20,7 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
         'isSpecial' => ['type' => 'boolean'],
         'isFeatured' => ['type' => 'boolean'],
         'isArchived' => ['type' => 'boolean'],
+        'isClassified' => ['type' => 'boolean'],
         'archivedAt' => ['type' => 'date', 'format' => 'yyyy-MM-dd HH:mm:ss'],
         'updatedAtUser' => ['type' => 'date', 'format' => 'yyyy-MM-dd HH:mm:ss'],
         'stock' => [

@@ -38,6 +38,7 @@ class InventoryElasticSearchInputTransformer implements Transformer
             'isArchived'           => TypesHelper::ensureBoolean($model->is_archived),
             'archivedAt'           => TypesHelper::ensureDateString($model->archived_at),
             'updatedAtUser'        => TypesHelper::ensureDateString($model->updated_at),
+            'isClassified'        => (bool)$model->user->clsf_active,
             'stock'                => $model->stock,
             'title'                => $model->title,
             'year'                 => TypesHelper::ensureInt($model->year),
