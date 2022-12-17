@@ -67,7 +67,7 @@ class SafeIndexer
 
         $this->indexManager = $model->searchableUsing();
 
-        $this->numberUnitsToBeProcessed = $this->getSearchableQuery($model->newQuery())->count('inventory_id');
+        $this->numberUnitsToBeProcessed = $model->newQuery()->count('inventory_id');
 
         $this->numberOfUnitsProcessed = 0;
 
@@ -97,19 +97,14 @@ class SafeIndexer
 
             foreach ($dealerList as $dealer) {
                 $this->chunkHandler(
-                    $this->getSearchableQuery(
-                        $model->newQuery()
+                      $model->newQuery()
                             ->with('user', 'user.website', 'orderedImages')
                             ->where('dealer_id', $dealer->dealer_id)
-                    )
                 );
             }
         } else {
             // this way is faster than `by dealer` ingestion, but it will need a better MySQL instance like production
-            $this->chunkHandler($this->getSearchableQuery(
-                $model->newQuery()->with(['user', 'user.website'])
-            )
-            );
+            $this->chunkHandler($model->newQuery()->with(['user', 'user.website']));
         }
 
         if (!$itIsAlreadySwapped) {
@@ -120,11 +115,10 @@ class SafeIndexer
 
         // given it could be some record which was changed/added between main ingesting process and the index swapping process
         // so, we need to cover them by pulling them once again and ingest them
-        $query = $this->getSearchableQuery(
-            $model->newQuery()
+        $query = $model->newQuery()
                 ->with('user', 'user.website', 'orderedImages')
-                ->where('updated_at_auto', '>=', $now->format(Date::FORMAT_Y_M_D_T))
-        );
+                ->where('updated_at_auto', '>=', $now->format(Date::FORMAT_Y_M_D_T));
+
         $this->numberUnitsToBeProcessed = $query->count('inventory_id');
         $this->numberOfUnitsProcessed = 0;
 
@@ -163,13 +157,5 @@ class SafeIndexer
                 // to avoid any interruption
             }
         });
-    }
-
-    protected function getSearchableQuery(Builder $builder): Builder
-    {
-        return $builder
-            ->where('show_on_website', Inventory::SHOW_IN_WEBSITE)
-            ->where('is_archived', Inventory::IS_NOT_ARCHIVED)
-            ->where('status', '<>', Inventory::STATUS_QUOTE);
     }
 }
