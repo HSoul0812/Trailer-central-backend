@@ -59,7 +59,6 @@ class SafeIndexer
         ini_set('memory_limit', '256MB');
 
         $model = new Inventory();
-
         $this->indexAlias = $model->indexConfigurator()->aliasName();
         $this->indexName = $model::$searchableAs = $model->indexConfigurator()->name();
 
@@ -67,7 +66,7 @@ class SafeIndexer
 
         $this->indexManager = $model->searchableUsing();
 
-        $this->numberUnitsToBeProcessed = $model->newQuery()->count('inventory_id');
+        $this->numberUnitsToBeProcessed = $model->newQuery()->publishable()->count('inventory_id');
 
         $this->numberOfUnitsProcessed = 0;
 
@@ -98,13 +97,14 @@ class SafeIndexer
             foreach ($dealerList as $dealer) {
                 $this->chunkHandler(
                       $model->newQuery()
+                            ->publishable()
                             ->with('user', 'user.website', 'orderedImages')
                             ->where('dealer_id', $dealer->dealer_id)
                 );
             }
         } else {
             // this way is faster than `by dealer` ingestion, but it will need a better MySQL instance like production
-            $this->chunkHandler($model->newQuery()->with(['user', 'user.website']));
+            $this->chunkHandler($model->newQuery()->publishable()->with(['user', 'user.website']));
         }
 
         if (!$itIsAlreadySwapped) {
