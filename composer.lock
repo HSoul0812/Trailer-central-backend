@@ -2442,7 +2442,7 @@
         },
         {
             "name": "feed/edit-mapping",
-            "version": "dev-install_redis_mock",
+            "version": "dev-develop",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/EditMapping",
@@ -8808,7 +8808,7 @@
         },
         {
             "name": "showroom/bulkconfiguration",
-            "version": "dev-install_redis_mock",
+            "version": "dev-develop",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/BulkConfiguration",
