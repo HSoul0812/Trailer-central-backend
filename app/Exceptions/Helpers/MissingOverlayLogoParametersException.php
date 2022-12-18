@@ -2,7 +2,4 @@
 
 namespace App\Exceptions\Helpers;
 
-class MissingOverlayLogoParametersException extends \Exception  
-{
-    
-}
+class MissingOverlayLogoParametersException extends \Exception {}

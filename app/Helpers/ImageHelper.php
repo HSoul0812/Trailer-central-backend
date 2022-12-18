@@ -302,8 +302,7 @@ class ImageHelper
         $font = resource_path('fonts/IMPACT.TTF');
         $imageResource = $this->getImageResource($imagePath);
         $basicColors = $this->getBasicColors($imageResource);
-        list($imageWidth, $imageHeight, $imageType, $attr) = getimagesize($imagePath);
-        $imageExtension = image_type_to_extension($imageType);
+        list($imageWidth, $imageHeight, $imageType) = getimagesize($imagePath);
 
         // Get BG & Border Color
         $bgColor = $borderColor = $basicColors['black'];
@@ -355,8 +354,7 @@ class ImageHelper
 
         // Paste back $imageResource;
         $imageContent = $this->getContentFromResource($imageResource, $imageType);
-        $newImagePath = tempnam(Storage::disk('tmp')->path('/'), 'img-upper-text-');
-        file_put_contents($newImagePath, $imageContent);
+        $newImagePath = $this->createTempFile($imageContent);
 
         return $newImagePath;
     }
@@ -372,8 +370,7 @@ class ImageHelper
         $font = resource_path('fonts/IMPACT.TTF');
         $imageResource = $this->getImageResource($imagePath);
         $basicColors = $this->getBasicColors($imageResource);
-        list($imageWidth, $imageHeight, $imageType, $attr) = getimagesize($imagePath);
-        $imageExtension = image_type_to_extension($imageType);
+        list($imageWidth, $imageHeight, $imageType) = getimagesize($imagePath);
 
         // Get Background & Border Color
         $bgColor = $borderColor = $basicColors['black'];
@@ -425,8 +422,7 @@ class ImageHelper
     
         // Paste back $imageResource;
         $imageContent = $this->getContentFromResource($imageResource, $imageType);
-        $newImagePath = tempnam(Storage::disk('tmp')->path('/'), 'img-lower-text-');
-        file_put_contents($newImagePath, $imageContent);
+        $newImagePath = $this->createTempFile($imageContent);
 
         return $newImagePath;
     }
@@ -445,10 +441,8 @@ class ImageHelper
             throw new MissingOverlayLogoParametersException;
         }
 
-        list($imageWidth, $imageHeight, $imageType, $attr) = getimagesize($imagePath);
-        list($originalLogoWidth, $originalLogoHeight, $logoType, $logoAttr) = getimagesize($logoPath);
-        $imageExtension = image_type_to_extension($imageType);
-        $logoExtension = image_type_to_extension($logoType);
+        list($imageWidth, $imageHeight, $imageType) = getimagesize($imagePath);
+        list($originalLogoWidth, $originalLogoHeight, $logoType) = getimagesize($logoPath);
         $logoResource = $this->getImageResource($logoPath);
         $imageResource = $this->getImageResource($imagePath);
 
@@ -479,12 +473,13 @@ class ImageHelper
         }
 
         // Create Local Logo Path
-        $localLogoPath = tempnam(Storage::disk('tmp')->path('/'), 'img-local-logo-');
-        file_put_contents($localLogoPath, $this->getContentFromResource($logoResource, $logoType));
+        $localLogoPath = $this->createTempFile($this->getContentFromResource($logoResource, $logoType));
 
         // Create Resized Logo while keeping ratio
-        $resizedLogo = tempnam(Storage::disk('tmp')->path('/'), 'img-resized-logo-');
+        $resizedLogo = $this->createTempFile();
         shell_exec('convert ' . $localLogoPath . ' -resize ' . $logoWidth . 'x' . $logoHeight . ' ' . $resizedLogo);
+
+        // Get New Logo Dimensions
         $resizedLogoResource = $this->getImageResource($resizedLogo);
         $logoNewWidth = imagesx($resizedLogoResource);
         $logoNewHeight = imagesy($resizedLogoResource);
@@ -505,11 +500,10 @@ class ImageHelper
         }
 
         // Create Local Image Path
-        $localImagePath = tempnam(Storage::disk('tmp')->path('/'), 'img-local-image-');
-        file_put_contents($localImagePath, $this->getContentFromResource($imageResource, $imageType));
+        $localImagePath = $this->createTempFile($this->getContentFromResource($imageResource, $imageType));
 
         // Add Logo to Image
-        $newImagePath = tempnam(Storage::disk('tmp')->path('/'), 'img-merged-logo-');
+        $newImagePath = $this->createTempFile();
         shell_exec('convert ' . $localImagePath . ' ' . $resizedLogo . ' -alpha on -compose src-over -geometry +' . $x . '+' . $y . ' -composite ' . $newImagePath);
 
         // Delete Tmp Files
@@ -518,6 +512,29 @@ class ImageHelper
         unlink($localImagePath);
 
         return $newImagePath;
+    }
+
+    /**
+     * Create temp files
+     * 
+     * @param string|null $fileContent
+     * @return string new file path
+     */
+    protected function createTempFile(string $fileContent = '')
+    {
+        $randomFilename = $this->getRandomString();
+        Storage::disk('tmp')->put($randomFilename, $fileContent);
+        return Storage::disk('tmp')->path($randomFilename);
+    }
+
+    /**
+     * Create random string
+     * 
+     * @return string
+     */
+    protected function getRandomString()
+    {
+        return bin2hex(random_bytes(18));
     }
 
     /**

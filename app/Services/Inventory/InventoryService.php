@@ -33,6 +33,8 @@ use App\Repositories\Dms\Customer\InventoryRepository as DmsCustomerInventoryRep
 use App\Services\Export\Inventory\PdfExporter;
 use App\Traits\S3\S3Helper;
 use App\Jobs\Inventory\GenerateOverlayImageJob;
+use App\Services\Inventory\ImageServiceInterface;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Class InventoryService
@@ -146,6 +148,11 @@ class InventoryService implements InventoryServiceInterface
     private $markdownHelper;
 
     /**
+     * @var ImageServiceInterface
+     */
+    private $imageTableService;
+
+    /**
      * InventoryService constructor.
      * @param InventoryRepositoryInterface $inventoryRepository
      * @param ImageRepositoryInterface $imageRepository
@@ -160,6 +167,7 @@ class InventoryService implements InventoryServiceInterface
      * @param CategoryRepositoryInterface $categoryRepository
      * @param \Parsedown $parsedown
      * @param GeoLocationRepositoryInterface $geolocationRepository
+     * @param ImageServiceInterface $imageTableService
      */
     public function __construct(
         InventoryRepositoryInterface $inventoryRepository,
@@ -175,7 +183,8 @@ class InventoryService implements InventoryServiceInterface
         CategoryRepositoryInterface $categoryRepository,
         GeoLocationRepositoryInterface $geolocationRepository,
         \Parsedown $parsedown,
-        ?LoggerServiceInterface $logService = null
+        ?LoggerServiceInterface $logService = null,
+        ImageServiceInterface $imageTableService
     ) {
         $this->inventoryRepository = $inventoryRepository;
         $this->imageRepository = $imageRepository;
@@ -191,6 +200,7 @@ class InventoryService implements InventoryServiceInterface
         $this->geolocationRepository = $geolocationRepository;
         $this->logService = $logService ?? app()->make(LoggerServiceInterface::class);
         $this->markdownHelper = $parsedown;
+        $this->imageTableService = $imageTableService;
     }
 
     /**
@@ -595,22 +605,19 @@ class InventoryService implements InventoryServiceInterface
      */
     public function generateOverlays(int $inventoryId)
     {
+        $inventoryImages = $this->inventoryRepository->getInventoryImages($inventoryId);
+
+        if ($inventoryImages->count() === 0) return;
+        
         $overlayParams = $this->inventoryRepository->getOverlayParams($inventoryId);
 
-        Log::info('Adding Overlays on Inventory Images', array_merge(['inventory_id' => $inventoryId], $overlayParams));
-
-        $inventory = $this->inventoryRepository->get(['id' => $inventoryId]);
+        Log::info('Adding Overlays on Inventory Images', $overlayParams);
 
         $overlayEnabled = $overlayParams['dealer_overlay_enabled'] ?? $overlayParams['overlay_enabled'];
-
-        $inventoryImages = $inventory->inventoryImages()->get();
-        if (empty($inventoryImages)) return;
 
         foreach ($inventoryImages as $inventoryImage) {
 
             $imageObj = $inventoryImage->image;
-
-            $originalFilename = !empty($imageObj->filename_noverlay) ? $imageObj->filename_noverlay : $imageObj->filename;
 
             // Add Overlays if enabled
             if ($overlayEnabled == Inventory::OVERLAY_ENABLED_ALL 
@@ -620,32 +627,23 @@ class InventoryService implements InventoryServiceInterface
                     )
                 ) { 
 
+                // apply overlays
+                $originalFilename = !empty($imageObj->filename_noverlay) ? $imageObj->filename_noverlay : $imageObj->filename;
                 $localNewImagePath = $this->imageService->addOverlays($this->getS3BaseUrl() . $originalFilename, $overlayParams);
 
-                $imageExtension = pathinfo($originalFilename, PATHINFO_EXTENSION);
-                $randomFilename = md5($localNewImagePath) . '.'. $imageExtension;
-                $newFilename = $this->imageService->uploadToS3($localNewImagePath, $randomFilename, $inventory->dealer_id);
-                
-                $newHash = sha1_file($localNewImagePath);
-                $filenameWithoutOverlay = $originalFilename;
-                
+                // upload overlay image
+                $randomFilename = md5($localNewImagePath);
+                $newFilename = $this->imageService->uploadToS3($localNewImagePath, $randomFilename, $overlayParams['dealer_id']);
                 unlink($localNewImagePath);
+                
+                // update image to database
+                $this->imageTableService->saveOverlay($imageObj, $newFilename);
 
             // otherwise Reset Overlay
             } else {
 
-                $newFilename = $originalFilename;
-                $newHash = sha1_file($this->getS3BaseUrl() . $originalFilename);
-                $filenameWithoutOverlay = '';
+                $this->imageTableService->resetOverlay($imageObj);
             }
-
-            // Update Image to database
-            $imageObj->fill([
-                'filename' => $newFilename,
-                'hash' => $newHash,
-                'filename_noverlay' => $filenameWithoutOverlay,
-            ]);
-            $imageObj->save();
         }
     }
 

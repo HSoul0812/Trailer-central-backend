@@ -1109,7 +1109,7 @@ class InventoryRepository implements InventoryRepositoryInterface
      */
     public function getOverlayParams(int $inventoryId)
     {
-        $query = Inventory::select('overlay_logo', 'overlay_logo_position', 'overlay_logo_width', 'overlay_logo_height', 
+        $query = Inventory::select(User::getTableName() .'.dealer_id', 'inventory_id', 'overlay_logo', 'overlay_logo_position', 'overlay_logo_width', 'overlay_logo_height', 
             'overlay_upper', 'overlay_upper_bg', 'overlay_upper_alpha', 'overlay_upper_text', 'overlay_upper_size', 'overlay_upper_margin',
             'overlay_lower', 'overlay_lower_bg', 'overlay_lower_alpha', 'overlay_lower_text', 'overlay_lower_size', 'overlay_lower_margin',
             'overlay_default', Inventory::getTableName() .'.overlay_enabled', User::getTableName() .'.overlay_enabled AS dealer_overlay_enabled',
@@ -1120,5 +1120,16 @@ class InventoryRepository implements InventoryRepositoryInterface
         ->where(Inventory::getTableName() .'.inventory_id', $inventoryId);
 
         return $query->first()->toArray();
+    }
+
+    /**
+     * @param int $inventoryId
+     * @return Collection
+     */
+    public function getInventoryImages(int $inventoryId)
+    {
+        $inventory = $this->get(['id' => $inventoryId]);
+
+        return $inventory->inventoryImages()->get();
     }
 }
