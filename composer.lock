@@ -12453,7 +12453,7 @@
         },
         {
             "name": "trailercentral/passwordless-login-url",
-            "version": "dev-install_redis_mock",
+            "version": "dev-develop",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/PasswordlessLoginUrl",
