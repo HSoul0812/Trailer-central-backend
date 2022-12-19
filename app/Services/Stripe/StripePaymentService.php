@@ -26,11 +26,13 @@ class StripePaymentService implements StripePaymentServiceInterface
     const PRICES = [
         'tt30' => [
             'price' => 75.00,
-            'name' => '30 day plan for publishing your listing titled {title} on TrailerTrader.com'
+            'name' => '30 day plan for publishing your listing titled {title} on TrailerTrader.com',
+            'duration' => 30,
         ],
         'tt60' => [
             'price' => 100.00,
-            'name' => '600 day plan for publishing your listing titled {title} on TrailerTrader.com'
+            'name' => '600 days plan for publishing your listing titled {title} on TrailerTrader.com',
+            'duration' => 600,
         ],
     ];
 
@@ -68,7 +70,12 @@ class StripePaymentService implements StripePaymentServiceInterface
 
         $planPrice = self::PRICES[$priceItem]['price'];
         $planName = self::PRICES[$priceItem]['name'];
+        $planDuration = self::PRICES[$priceItem]['duration'];
         $planName = str_replace('{title}', $inventoryTitle, $planName);
+
+        $metadata['planKey'] = $priceItem;
+        $metadata['planName'] = $planName;
+        $metadata['planDuration'] = $planDuration;
 
         $product = \Stripe\Product::create([
             'name' => $planName
@@ -129,11 +136,17 @@ class StripePaymentService implements StripePaymentServiceInterface
 
             $inventoryId = $session->metadata->inventory_id;
             $userId = $session->metadata->user_id;
+            $planKey = $session->metadata->planKey;
+            $planName = $session->metadata->planName;
+            $planDuration = $session->metadata->planDuration;
 
             $this->paymentLogRepository->create([
                 'payment_id' => $session->id,
                 'client_reference_id' => $session->client_reference_id,
-                'full_response' => json_encode($session->values())
+                'full_response' => json_encode($session->values()),
+                'plan_key' => $planKey,
+                'plan_name' => $planName,
+                'plan_duration' => $planDuration
             ]);
 
             $inventory = $this->inventoryService->show((int)$inventoryId);
