@@ -30,6 +30,7 @@ return [
 
     // Complete List of Available Errors
     'errors' => env('FB_MARKETING_ERRORS', implode(",", [
+        'no-error',
         'unknown',
         // Authentication
         'account-disabled',
@@ -60,6 +61,30 @@ return [
         'limit-reached',
         'location-invalid',
     ])),
+
+    'errors_title' => [
+        'no-error' => "No Error",
+        'missing-tunnel' => "Tunnel Client App Not Installed",
+        'offline-tunnel' => "Tunnel Client App Offline",
+        'slow-tunnel' => "Tunnel Client App Slow Internet Connection",
+        'missing-inventory' => "Inventory Missing",
+        'login-failed' => "Login Failed",
+        'login-invalid' => "Login Invalid",
+        'email-verification' => "Email Verification",
+        'login-approval' => "Login Approval",
+        'two-factor-auth' => "Two Factor Authentication Required",
+        'two-factor-failed' => "Two Factor Authentication Failed",
+        'account-locked' => "Facebook Account locked",
+        'account-disabled' => "Facebook Account disabled",
+        'temp-blocked' => "Facebook Account temporary blocked",
+        'page-unavailable' => "Facebook Page Unavailable",
+        'marketplace-inaccessible' => "Marketplace Not Available",
+        'marketplace-blocked' => "Market Place blocked",
+        'final-account-review' => "Final Account Review",
+        'limit-reached' => "Posting Limit Reached Temporary",
+        'failed-post' => "Failed Post",
+        'flagged-post' => "Flagged Post"
+    ],
 
 
     // Define Selectors By Step

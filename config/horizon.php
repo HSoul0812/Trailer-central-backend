@@ -152,7 +152,7 @@ return [
                     'parts-export-new',
                     'factory-feeds',
                     'cvr-send-file',
-                    'default',
+                    'scout',
                     'reports',
                     'emailbuilder',
                     'blog-posts',
@@ -163,7 +163,7 @@ return [
                     'ecommerce',
                     'crm-users',
                     'manufacturers',
-                    //'hot-potato'
+                    //'hot-potato',
                 ],
                 'balance' => 'simple',
                 'processes' => 3,
@@ -182,7 +182,7 @@ return [
                     'parts-export-new',
                     'factory-feeds',
                     'cvr-send-file',
-                    'default',
+                    'scout',
                     'reports',
                     'emailbuilder',
                     'blog-posts',
@@ -193,7 +193,7 @@ return [
                     'ecommerce',
                     'crm-users',
                     'manufacturers',
-                    //'hot-potato'
+                    //'hot-potato',
                 ],
                 'balance' => 'simple',
                 'processes' => 10,
@@ -215,7 +215,7 @@ return [
                     'ecommerce',
                     'crm-users',
                     'manufacturers',
-                    //'hot-potato'
+                    //'hot-potato',
                 ],
                 'balance' => 'auto',
                 'minProcesses' => 1,
@@ -225,7 +225,7 @@ return [
             ],
             'supervisor-2' => [
                 'connection' => 'redis',
-                'queue' => ['default'],
+                'queue' => ['scout'],
                 'balance' => false,
                 'processes' => 1,
                 'tries' => 3,
@@ -289,7 +289,7 @@ return [
                     'ecommerce',
                     'crm-users',
                     'manufacturers',
-                    //'hot-potato'
+                    //'hot-potato',
                 ],
                 'balance' => 'auto',
                 'minProcesses' => 1,
@@ -299,7 +299,7 @@ return [
             ],
             'supervisor-2' => [
                 'connection' => 'redis',
-                'queue' => ['default'],
+                'queue' => ['scout'],
                 'balance' => 'auto',
                 'minProcesses' => 15,
                 'maxProcesses' => 55,
