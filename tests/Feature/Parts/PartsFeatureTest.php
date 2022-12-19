@@ -148,4 +148,33 @@ class PartsFeatureTest extends TestCase
             ->assertSuccessful()
             ->assertJsonPath('data.0.purchaseOrders.meta.has_not_completed', true);
     }
+
+    /**
+     * @group DMS
+     * @group DMS_PARTS
+     *
+     * @return void
+     */
+    public function testPartSearchWithDifferentDealerId(): void
+    {
+        $dealerId = $this->getTestDealerId();
+
+        $params = [
+            'dealer_id' => 5001,    // Passing different DealerId than Authenticated
+            'per_page' => 10,
+            'page' => 1,
+        ];
+
+        // When I search using the stock number
+        $response = $this
+            // ->withHeaders(['access-token' => $seeder->dealer->authToken->access_token])
+            ->withHeaders(['access-token' => $this->accessToken()])
+            ->get('/api/parts/search?' . http_build_query($params));
+
+        // $response->dump();
+        $response
+            ->assertSuccessful()
+            ->assertJsonPath('data.0.dealer_id', $dealerId)
+            ->assertJsonPath('meta.pagination.per_page', 10);
+    }
 }
