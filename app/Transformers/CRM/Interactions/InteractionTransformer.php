@@ -82,7 +82,7 @@ class InteractionTransformer extends TransformerAbstract
             'type' => $interaction->interaction_type,
             'time' => Carbon::parse($interaction->interaction_time)->format('F d, Y g:i A'),
             'notes' => $interaction->interaction_notes,
-            'contact_name' => $interaction->lead->full_name,
+            'contact_name' => ($interaction->lead) ? $interaction->lead->full_name : '',
             'username' => $interaction->real_username,
             'to_no' => $interaction->to_no,
             'interaction_time' => $interaction->interaction_time,

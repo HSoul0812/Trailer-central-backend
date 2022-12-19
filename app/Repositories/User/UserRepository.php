@@ -12,6 +12,7 @@ use App\Models\Website\Config\WebsiteConfig;
 use App\Services\Common\EncrypterServiceInterface;
 use App\Traits\Repository\Transaction;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Models\User\DealerUser;
 
@@ -60,18 +61,20 @@ class UserRepository implements UserRepositoryInterface {
         return User::findOrFail($params['dealer_id']);
     }
 
-    public function getAll($params) {
-        throw new NotImplementedException;
+    public function getAll($params): Collection
+    {
+        return User::query()->get();
     }
 
-    public function update($params) {
+    public function update($params)
+    {
         throw new NotImplementedException;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getByEmail(string $email) : User
+    public function getByEmail(string $email): User
     {
         return User::where('email', $email)->firstOrFail();
     }
@@ -473,6 +476,20 @@ class UserRepository implements UserRepositoryInterface {
     public function deactivateQuoteManager(int $dealerId) : User {
         $dealer = User::findOrFail($dealerId);
         $dealer->is_quote_manager_active = 0;
+        $dealer->save();
+
+        return $dealer;
+    }
+
+    /**
+     * @param int $dealerId
+     * @param string $status
+     * @return User
+     */
+    public function changeStatus(int $dealerId, string $status): User
+    {
+        $dealer = User::findOrFail($dealerId);
+        $dealer->state = $status;
         $dealer->save();
 
         return $dealer;

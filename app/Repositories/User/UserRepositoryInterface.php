@@ -193,4 +193,11 @@ interface UserRepositoryInterface extends Repository, TransactionalRepository {
      * @return User
      */
     public function deactivateQuoteManager(int $dealerId): User;
+
+    /**
+     * @param int $dealerId
+     * @param string $status
+     * @return User
+     */
+    public function changeStatus(int $dealerId, string $status): User;
 }

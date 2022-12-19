@@ -13,8 +13,9 @@ class SendEmailRequest extends Request {
 
     protected $rules = [
         'dealer_id' => 'required|integer',
-        'sales_person_id' => 'nullable|integer',
-        'lead_id' => 'required|integer',
+        'sales_person_id' => 'integer',
+        'lead_id' => 'nullable|integer',
+        'quote_id' => 'nullable|integer',
         'subject' => 'required|string',
         'body' => 'required|string',
         'files' => 'array',

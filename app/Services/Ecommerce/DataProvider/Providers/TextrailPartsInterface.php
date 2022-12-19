@@ -30,4 +30,8 @@ interface TextrailPartsInterface
     public function getAttributes(): array;
 
     public function getAttribute(string $code): array;
+
+    public function getTextrailCategories(): array;
+
+    public function getTextrailParentCategory(int $category_id): array;
 }

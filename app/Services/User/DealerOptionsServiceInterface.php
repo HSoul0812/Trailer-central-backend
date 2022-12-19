@@ -167,4 +167,11 @@ interface DealerOptionsServiceInterface
      * @return bool
      */
     public function isAllowedParts(int $dealerId): bool;
+
+    /**
+     * @param int $dealerId
+     * @param string $status
+     * @return bool
+     */
+    public function changeStatus(int $dealerId, string $status): bool;
 }
