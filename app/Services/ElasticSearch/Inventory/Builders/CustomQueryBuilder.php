@@ -120,7 +120,7 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
     private function buildClassifiedsSiteQuery($isClassifieds): array
     {
         // when it is not a classifieds site then it should filter by `isArchived` & `isArchived` & `status`
-        return $isClassifieds ? [] : [
+        $query = [
             'query' => [
                 'bool' => [
                     'must' => [
@@ -145,6 +145,16 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
                 ]
             ]
         ];
+
+        if ($isClassifieds) {
+            $query['query']['bool']['must'][] = [
+                'term' => [
+                    'isClassified' => true
+                ]
+            ];
+        }
+
+        return $query;
     }
 
     /**

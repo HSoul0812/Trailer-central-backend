@@ -169,6 +169,14 @@ class Kernel extends ConsoleKernel
            ->dailyAt('1:00')
            ->runInBackground();
 
+        /**
+         * Temporary scheduled command to mitigate the integration issue,
+         * we need to make time so they will be able to move everything inventory related to the API side
+         */
+        $schedule->command('command:inventory:reindex')
+            ->dailyAt('1:00')
+            ->runInBackground();
+
         $schedule->command('horizon:snapshot')
             ->everyFiveMinutes()
             ->runInBackground();
