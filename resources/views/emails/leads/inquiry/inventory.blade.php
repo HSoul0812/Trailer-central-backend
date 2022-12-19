@@ -39,8 +39,11 @@
 
                         <p style="font-size:12px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">Inventory Stock: <strong>{{ $stock }}</strong></p>
 
+                        @if ($website == $simpleDomain)
+                        <p style="font-size:12px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">Inventory Item: <a href="https://{{ $simpleDomain . $url }}"><strong>{{ $title }}</strong></a></p>
+                        @else
                         <p style="font-size:12px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">Inventory Item: <a href="{{ $url }}"><strong>{{ $title }}</strong></a></p>
-  
+                        @endif
                         <p style="font-size:12px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">Full Name: <strong>{{ $fullName }}</strong></p>
 
                         <p style="font-size:12px; line-height:16px; font-family:Verdana, Arial, Helvetica, sans-serif;">Preferred Contact: <strong>{{ $preferred }}</strong></p>

@@ -4,6 +4,7 @@ namespace App\Models\Website\PaymentCalculator;
 
 use App\Models\Inventory\EntityType;
 use App\Models\Traits\TableAware;
+use App\Models\Website\Website;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -21,10 +22,20 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property \DateTimeInterface $updated_at,
  *
  * @property EntityType $entityType
+ * @property Website $website
  */
 class Settings extends Model
 {
     use TableAware;
+
+    const NO_SETTINGS_AVAILABLE = [
+        'apr' => null,
+        'down' => null,
+        'years' => null,
+        'months' => null,
+        'monthly_payment' => null,
+        'down_percentage' => null
+    ];
 
     const CONDITION_USED = 'used';
     const CONDITION_NEW = 'new';
@@ -58,6 +69,26 @@ class Settings extends Model
 
     public function entityType(): BelongsTo
     {
-        return $this->belongsTo(EntityType::class,'entity_type_id');
+        return $this->belongsTo(EntityType::class, 'entity_type_id');
+    }
+
+    public function website(): BelongsTo
+    {
+        return $this->belongsTo(Website::class, 'website_id');
+    }
+
+    public function isLessThan(): bool
+    {
+        return $this->operator === self::OPERATOR_LESS_THAN;
+    }
+
+    public function isOver(): bool
+    {
+        return $this->operator === self::OPERATOR_OVER;
+    }
+
+    public function isNoFinancing(): bool
+    {
+        return $this->financing === self::NO_FINANCING;
     }
 }

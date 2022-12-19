@@ -12,8 +12,8 @@ interface InventoryRepositoryInterface extends Repository, TransactionalReposito
     const DEFAULT_GET_PARAMS = [
         self::CONDITION_AND_WHERE => [
             ['active', '=', 1],
-            ['is_archived', '<>', 1]
-        ]
+            ['is_archived', '<>', 1],
+        ],
     ];
 
     public function getAll($params, bool $withDefault = true, bool $paginated = false, $select = []);
@@ -43,6 +43,8 @@ interface InventoryRepositoryInterface extends Repository, TransactionalReposito
     public function getPopularInventory(int $dealer_id);
 
     public function update($params, array $options = []): Inventory;
+
+    public function massUpdate(array $params): bool;
 
     /**
      * @return int number of touched records

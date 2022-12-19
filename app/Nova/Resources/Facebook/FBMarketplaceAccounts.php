@@ -22,6 +22,8 @@ class FBMarketplaceAccounts extends Resource
     public static $group = 'Facebook';
     public static $orderBy = ['last_attempt_ts' => 'asc'];
 
+    public static $tableStyle = 'tight';
+
     /**
      * The model the resource corresponds to.
      *
@@ -77,7 +79,7 @@ class FBMarketplaceAccounts extends Resource
     protected function panelIntegration(): array
     {
         return [
-            Text::make('Integration ID', 'id')->onlyOnDetail(),
+            Text::make('ID', 'id'),
 
             Text::make('Dealer ID', 'dealer_id')->sortable(),
 
@@ -95,18 +97,25 @@ class FBMarketplaceAccounts extends Resource
     protected function panelStatus(): array
     {
         return [
-            DateTime::make('Last Run Attempt', 'last_attempt_ts')
+            DateTime::make('Last Attempt', 'last_attempt_ts')
             ->sortable(),
-            
-            Boolean::make('Last Run Status', 'last_run_status')
+
+            Boolean::make('Last Status', 'last_run_status')
                 ->sortable(),
 
-            Text::make('Last Known Error', 'last_known_error'),
+            DateTime::make('Last Error', 'last_known_error_ts')
+                ->sortable(),
 
-            DateTime::make('Last Successful Run', 'last_success_ts')
-            ->sortable(),
+            Text::make('Last Error Code', 'last_known_error_code')
+                ->sortable(),
 
-            Text::make('Last Units Posted', 'last_units_posted'),
+            Text::make('Last Error Message', 'last_known_error_message')
+                ->onlyOnDetail(),
+
+            DateTime::make('Last Success', 'last_success_ts')
+                ->sortable(),
+
+            Text::make('Lastest Posts', 'last_units_posted'),
 
         ];
     }

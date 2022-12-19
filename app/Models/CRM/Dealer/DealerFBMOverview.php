@@ -22,5 +22,6 @@ class DealerFBMOverview extends Model
     protected $dates = [
         'last_attempt_ts',
         'last_success_ts',
+        'last_known_error_ts',
     ];
 }

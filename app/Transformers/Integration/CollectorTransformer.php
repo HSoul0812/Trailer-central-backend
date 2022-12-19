@@ -89,6 +89,8 @@ class CollectorTransformer extends TransformerAbstract
             'override_prices' => $collector->override_prices,
             'override_attributes' => $collector->override_attributes,
             'override_descriptions' => $collector->override_descriptions,
+            'last_run' => $collector->last_run,
+            'scheduled_for' => $collector->scheduled_for,
         ];
     }
 }
