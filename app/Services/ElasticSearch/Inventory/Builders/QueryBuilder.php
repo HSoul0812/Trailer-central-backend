@@ -399,7 +399,7 @@ class QueryBuilder implements InventoryQueryBuilderInterface
                 '_script' => [
                     'type' => 'string',
                     'script' => [
-                        'inline' => "doc['status'].value == params.status ? '1': '0'", // to avoid casting issues
+                        'inline' => "doc['status'].size() != 0 && doc['status'].value == params.status ? '1': '0'", // to avoid casting issues
                         'params' => [
                             'status' => (int)$value
                         ]

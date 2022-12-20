@@ -30,21 +30,20 @@ class FieldMapperService implements InventoryFieldMapperServiceInterface
         'availability', //handle availability
     ];
 
-    public function __construct(InventoryFilterRepositoryInterface $repository, Cache $cache)
-    {
-        $this->filters = $cache::remember('inventory.filters',
-            60 * 60 * 24,
-            static function () use ($repository): Collection {
-                return $repository->getAll()->keyBy('attribute');
-            });
-    }
-
     /**
      * @param Filter $field
      * @return FieldQueryBuilderInterface when the filter was not able to be handled
      */
     public function getBuilder(Filter $field): FieldQueryBuilderInterface
     {
+        $repository = resolve(InventoryFilterRepositoryInterface::class);
+
+        $this->filters = Cache::remember('inventory.filters',
+            60 * 60 * 24,
+            static function () use ($repository): Collection {
+                return $repository->getAll()->keyBy('attribute');
+            });
+
         /** @var ?InventoryFilter $filter */
 
         $filter = $this->filters->get($this->resolveName($field->getName()));
