@@ -165,7 +165,7 @@ class PartsFeatureTest extends TestCase
             'page' => 1,
         ];
 
-        // When I search using the stock number
+        // When I search using the different dealer id
         $response = $this
             ->withHeaders(['access-token' => $this->accessToken()])
             ->get('/api/parts/search?' . http_build_query($params));
