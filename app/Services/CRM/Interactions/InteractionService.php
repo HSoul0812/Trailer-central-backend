@@ -352,12 +352,12 @@ class InteractionService implements InteractionServiceInterface
             $parsedEmail->setToEmail(trim($lead->email_address));
             $parsedEmail->setToName($lead->full_name);
         }
-
+        
         if (!empty($params['quote_id'])) {
             $parsedEmail->setQuoteId($params['quote_id']);
             $parsedEmail->setToEmail(trim($params['to']));
         }
-
+        
         // Set Email Details
         $parsedEmail->setSubject($params['subject']);
         $parsedEmail->setBody($params['body']);
@@ -397,7 +397,7 @@ class InteractionService implements InteractionServiceInterface
             $interaction = $this->interactions->createOrUpdate([
                 'id'                => $parsedEmail->getInteractionId(),
                 'lead_id'           => (!empty($params['lead_id'])) ? trim($params['lead_id']) : '',
-                // 'quote_id'          => (int) $params['quote_id'] ?? '', // Commenting this due to migration issue as P1 - CRM-711
+                'quote_id'          => (int) $params['quote_id'] ?? '',
                 'user_id'           => $userId,
                 'sales_person_id'   => !empty($salesPerson) ? $salesPerson->id : NULL,
                 'interaction_type'  => 'EMAIL',
