@@ -175,10 +175,9 @@ class EmailHistoryRepository implements EmailHistoryRepositoryInterface {
             $emailHistory = EmailHistory::whereLeadId($leadId);
         }
 
-        // Commenting this due to migration issue as P1 - CRM-711
-        /*if (!empty($quoteId)) {
+        if (!empty($quoteId)) {
             $emailHistory = EmailHistory::whereQuoteId($quoteId);
-        }*/
+        }
 
         // Return Email Draft
         return $emailHistory
