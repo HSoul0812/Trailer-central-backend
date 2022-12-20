@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Class PostingRedisRepository
- * 
+ *
  * @package App\Repositories\Marketing\Facebook
  */
 class PostingRedisRepository implements PostingRepositoryInterface
@@ -66,9 +66,9 @@ class PostingRedisRepository implements PostingRepositoryInterface
 
 
     /**
-     * @var Connection
+     * @var Connection|null
      */
-    private $redis;
+    private $redis = null;
 
     /**
      * @var Log
@@ -78,9 +78,6 @@ class PostingRedisRepository implements PostingRepositoryInterface
     public function __construct()
     {
         $this->log = Log::channel('dispatch-fb');
-        $this->redis = Redis::connection('persist');
-        $this->log->info('Initialized Redis FB Posting Using ' . $this->redis->getName());
-        $this->log->info('Found Keys: ', $this->redis->keys(self::REDIS_NAMESPACE .'*'));
     }
 
     /**
@@ -92,6 +89,8 @@ class PostingRedisRepository implements PostingRepositoryInterface
         if (!isset($params['id'])) {
             throw new RepositoryInvalidArgumentException;
         }
+
+        $this->connectToRedis();
 
         $this->log->info('Creating ' . self::REDIS_NAMESPACE . $params['id'] . ' expiring in ' . self::getTtl() . ' seconds');
 
@@ -108,6 +107,8 @@ class PostingRedisRepository implements PostingRepositoryInterface
             throw new RepositoryInvalidArgumentException;
         }
 
+        $this->connectToRedis();
+
         $this->log->info('Check if ' . self::REDIS_NAMESPACE . $params['id'] . ' has not yet expired');
 
         // Check if Not Yet Expired
@@ -119,13 +120,15 @@ class PostingRedisRepository implements PostingRepositoryInterface
 
     /**
      * Get Single Running Session
-     * 
+     *
      * @param type $params
      * @throws RepositoryInvalidArgumentException
      * @return DealerPosting
      */
     public function get($params)
     {
+        $this->connectToRedis();
+
         // Log Get
         $this->log->info('Getting running session with params ', $params);
 
@@ -155,12 +158,14 @@ class PostingRedisRepository implements PostingRepositoryInterface
             throw new RepositoryInvalidArgumentException;
         }
 
+        $this->connectToRedis();
+
         $this->redis->del(self::REDIS_NAMESPACE . $params['id']);
     }
 
     /**
      * Get All Current Running Session
-     * 
+     *
      * @param array $params
      * @return Collection<DealerPosting>
      */
@@ -184,11 +189,13 @@ class PostingRedisRepository implements PostingRepositoryInterface
 
     /**
      * Get All Current Running Integration Ids
-     * 
+     *
      * @return Array<Integer>
      */
     public function getIntegrationIds()
     {
+        $this->connectToRedis();
+
         $allKeys = $this->redis->keys(self::REDIS_NAMESPACE . '*');
         $integrationIds = [];
 
@@ -205,7 +212,7 @@ class PostingRedisRepository implements PostingRepositoryInterface
 
     /**
      * Sort Collection By Field
-     * 
+     *
      * @param Collection<DealerPosting> $collections
      * @param null|string $sort
      * @return Collection<DealerPosting>
@@ -247,7 +254,7 @@ class PostingRedisRepository implements PostingRepositoryInterface
 
     /**
      * Get TTL From Constant or Config Vars
-     * 
+     *
      * @return int
      */
     public static function getTtl(): int {
@@ -259,5 +266,17 @@ class PostingRedisRepository implements PostingRepositoryInterface
 
         // Return Constant
         return self::TTL;
+    }
+
+    private function connectToRedis(): void
+    {
+        if ($this->redis instanceof Connection) {
+            return;
+        }
+
+        $this->redis = Redis::connection('persist');
+
+        $this->log->info('Initialized Redis FB Posting Using ' . $this->redis->getName());
+        $this->log->info('Found Keys: ', $this->redis->keys(self::REDIS_NAMESPACE . '*'));
     }
 }

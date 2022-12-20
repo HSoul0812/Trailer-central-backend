@@ -41,6 +41,7 @@ use Laravel\Cashier\Billable;
  * @property string $name
  * @property string $email
  *
+ * @property bool $clsf_active;
  * @property bool $isCrmActive
  * @property bool $is_dms_active
  * @property bool $is_scheduler_active
