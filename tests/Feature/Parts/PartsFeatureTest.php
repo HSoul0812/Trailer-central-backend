@@ -167,11 +167,9 @@ class PartsFeatureTest extends TestCase
 
         // When I search using the stock number
         $response = $this
-            // ->withHeaders(['access-token' => $seeder->dealer->authToken->access_token])
             ->withHeaders(['access-token' => $this->accessToken()])
             ->get('/api/parts/search?' . http_build_query($params));
 
-        // $response->dump();
         $response
             ->assertSuccessful()
             ->assertJsonPath('data.0.dealer_id', $dealerId)
