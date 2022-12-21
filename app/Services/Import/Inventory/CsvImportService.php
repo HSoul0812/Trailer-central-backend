@@ -3,6 +3,7 @@
 namespace App\Services\Import\Inventory;
 
 use App\Events\Inventory\InventoryUpdated;
+use App\Exceptions\Inventory\InventoryException;
 use App\Helpers\ConvertHelper;
 use App\Models\Inventory\Attribute;
 use App\Models\Inventory\Category;
@@ -454,7 +455,7 @@ class CsvImportService implements CsvImportServiceInterface
                 return false;
             }
         } catch (\Exception $ex) {
-            $this->validationErrors[] = $ex->getMessage();
+            $this->validationErrors[] = 'An error occurred validating the structure or data of this file.';
 
             Log::info('Invalid bulk upload ID: ' . $this->bulkUpload->id . ' setting validation_errors...');
             $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => $this->outputValidationErrors()]);
@@ -503,17 +504,11 @@ class CsvImportService implements CsvImportServiceInterface
                 $inventory = $this->inventoryService->create($this->inventory);
             }
 
-            if (!$inventory) {
-                $this->validationErrors[] = "Error creating/updating Inventory";
-                $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
-                //throw new \Exception("Error creating/updating Inventory");
-            }
-
             event(new InventoryUpdated($inventory, [
                 'description' => 'Created/updated using inventory bulk uploader'
             ]));
-        } catch (\Exception $ex) {
-            $this->validationErrors[] = $ex->getTraceAsString();
+        } catch (\Exception | InventoryException $ex) {
+            $this->validationErrors[] = 'An error occurred validating the inventory' . $this->inventory['stock'] ? ' with stock: ' . $this->inventory['stock'] . '.' : ' on row: ' . $lineNumber;
             $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
             Log::info('Error found on inventory for inventory bulk upload : ' . $this->bulkUpload->id . ' : ' . $ex->getTraceAsString() . json_encode($this->validationErrors));
             Log::info("Index to header mapping: {$this->indexToheaderMapping}");
