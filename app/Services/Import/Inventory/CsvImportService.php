@@ -973,26 +973,26 @@ class CsvImportService implements CsvImportServiceInterface
 
             case 'location_phone':
                 // lookup location by phone number
+                $phone = str_replace(array('(', ')', ' ', '-'), '', $value);
                 $dealerLocation = DealerLocation::where([
-                    'phone' => $value,
+                    'phone' => $phone,
                     'dealer_id' => $this->bulkUpload->dealer_id
                 ])->first();
 
-                if ($dealerLocation) {
-                    $this->inventory['dealer_location_id'] = $dealerLocation->dealer_location_id;
-                } else {
-                    $phone = str_replace(array('(', ')', ' ', '-'), '', $value);
+                // If no dealerLocation is found by phone, use default dealer location
+                if (!$dealerLocation) {
                     $dealerLocation = DealerLocation::where([
-                        'phone' => $phone,
-                        'dealer_id' => $this->bulkUpload->dealer_id
+                        'dealer_id' => $this->bulkUpload->dealer_id,
+                        'is_default' => 1
                     ])->first();
 
-                    if ($dealerLocation) {
-                        $this->inventory['dealer_location_id'] = $dealerLocation->dealer_location_id;
-                    } else {
-                        return "Location based on phone number '{$value}' not found.";
+                    // If no default location found return default error
+                    if (!$dealerLocation) {
+                        return "Location based on phone number '{$value}' not found and no default location has been found for this dealer.";
                     }
                 }
+
+                $this->inventory['dealer_location_id'] = $dealerLocation->dealer_location_id;
                 break;
 
             case 'axles':
