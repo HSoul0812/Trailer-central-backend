@@ -271,6 +271,8 @@ class InventoryServiceTest extends TestCase
      *
      * @group DMS
      * @group DMS_INVENTORY
+     * @group Marketing
+     * @group Marketing_Overlays
      *
      * @param array $params
      * @throws BindingResolutionException
@@ -1014,6 +1016,8 @@ class InventoryServiceTest extends TestCase
      *
      * @group DMS
      * @group DMS_INVENTORY
+     * @group Marketing
+     * @group Marketing_Overlays
      *
      * @param array $getAllWithHavingCountParams
      * @param array $getAllParams
@@ -1133,6 +1137,8 @@ class InventoryServiceTest extends TestCase
      *
      * @group DMS
      * @group DMS_INVENTORY
+     * @group Marketing
+     * @group Marketing_Overlays
      *
      * @param array $getAllWithHavingCountParams
      * @param array $getAllParams
@@ -1363,7 +1369,8 @@ class InventoryServiceTest extends TestCase
      * Test if overlay_enabled = Inventory::OVERLAY_ENABLED_ALL
      * 
      * @dataProvider overlayParamDataProvider
-     * @group overlay_images
+     * @group Marketing
+     * @group Marketing_Overlays
      */
     public function testGenerateOverlaysAll($overlayParams)
     {
@@ -1498,7 +1505,8 @@ class InventoryServiceTest extends TestCase
      * Test if overlay_enabled = Inventory::OVERLAY_ENABLED_PRIMARY
      * 
      * @dataProvider overlayParamDataProvider
-     * @group overlay_images
+     * @group Marketing
+     * @group Marketing_Overlays
      */
     public function testGenerateOverlaysPrimary($overlayParams)
     {
@@ -1646,7 +1654,8 @@ class InventoryServiceTest extends TestCase
      * Test if missing inventoryImages
      * 
      * @dataProvider overlayParamDataProvider
-     * @group overlay_images
+     * @group Marketing
+     * @group Marketing_Overlays
      */
     public function testGenerateOverlaysNone($overlayParams)
     {
@@ -1699,7 +1708,8 @@ class InventoryServiceTest extends TestCase
      * Test if overlay_enabled = 0
      * 
      * @dataProvider overlayParamDataProvider
-     * @group overlay_images
+     * @group Marketing
+     * @group Marketing_Overlays
      */
     public function testResetOverlays($overlayParams)
     {
@@ -1838,7 +1848,8 @@ class InventoryServiceTest extends TestCase
 
     /**
      * @dataProvider createParamsProvider
-     * @group overlay_images
+     * @group Marketing
+     * @group Marketing_Overlays
      */
     public function testOverlayJobOnCreate($params)
     {
@@ -1883,7 +1894,8 @@ class InventoryServiceTest extends TestCase
 
     /**
      * @dataProvider createParamsProvider
-     * @group overlay_images
+     * @group Marketing
+     * @group Marketing_Overlays
      */
     public function testOverlayJobOnUpdate($params)
     {

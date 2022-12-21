@@ -34,7 +34,8 @@ class UserRepositoryTest extends TestCase {
     }
 
     /**
-     * @group overlay_images
+     * @group Marketing
+     * @group Marketing_Overlays
      */
     public function testUpdateOverlaySettings()
     {

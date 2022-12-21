@@ -457,7 +457,8 @@ class ImageServiceTest extends TestCase
 
     /**
      * @dataProvider overlayParamDataProvider
-     * @group overlay_images
+     * @group Marketing
+     * @group Marketing_Overlays
      */
     public function testAddUpperTextLowerLogoOverlays($overlayParams)
     {
@@ -518,7 +519,8 @@ class ImageServiceTest extends TestCase
 
     /**
      * @dataProvider overlayParamDataProvider
-     * @group overlay_images
+     * @group Marketing
+     * @group Marketing_Overlays
      */
     public function testAddLowerTextUpperLogoOverlays($overlayParams)
     {
@@ -580,7 +582,8 @@ class ImageServiceTest extends TestCase
 
     /**
      * @dataProvider overlayParamDataProvider
-     * @group overlay_images
+     * @group Marketing
+     * @group Marketing_Overlays
      */
     public function testAddLowerTextUpperTextOverlays($overlayParams)
     {
@@ -632,7 +635,8 @@ class ImageServiceTest extends TestCase
 
     /**
      * @dataProvider overlayParamDataProvider
-     * @group overlay_images
+     * @group Marketing
+     * @group Marketing_Overlays
      */
     public function testAddLogoOnlyOverlay($overlayParams)
     {
