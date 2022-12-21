@@ -59,9 +59,9 @@ class ClientRedisRepository implements ClientRepositoryInterface
     ];
 
     /**
-     * @var Connection
+     * @var Connection|null
      */
-    private $redis;
+    private $redis = null;
 
     /**
      * @var Log
@@ -71,7 +71,6 @@ class ClientRedisRepository implements ClientRepositoryInterface
     public function __construct()
     {
         $this->log = Log::channel('cl-client');
-        $this->redis = Redis::connection('persist');
     }
 
     /**
@@ -101,6 +100,8 @@ class ClientRedisRepository implements ClientRepositoryInterface
      */
     public function get($params)
     {
+        $this->connectToRedis();
+
         // Log Get
         $this->log->info('Getting client with params ', $params);
 
@@ -143,6 +144,8 @@ class ClientRedisRepository implements ClientRepositoryInterface
      */
     public function getAll($params = [])
     {
+        $this->connectToRedis();
+
         // Get Clients Server
         $this->log->info('Getting All Clients for Params', $params);
 
@@ -222,6 +225,8 @@ class ClientRedisRepository implements ClientRepositoryInterface
      */
     public function sentIn(string $email, int $interval): int
     {
+        $this->connectToRedis();
+
         // Redis Key Exists for Slack?
         $lastRun = $this->redis->hmget(ClientMessage::LAST_SENT_KEY, [$email]);
 
@@ -237,6 +242,8 @@ class ClientRedisRepository implements ClientRepositoryInterface
      */
     public function markSent(string $email): void
     {
+        $this->connectToRedis();
+
         // Set Current Time on Last Sent Key
         $this->redis->hmset(ClientMessage::LAST_SENT_KEY, $email, time());
     }
@@ -249,7 +256,10 @@ class ClientRedisRepository implements ClientRepositoryInterface
      * @param int $slotId
      * @return Collection<Client>
      */
-    private function getAllUuids(int $dealerId, int $slotId): Collection {
+    private function getAllUuids(int $dealerId, int $slotId): Collection
+    {
+        $this->connectToRedis();
+
         // Get All UUID's for Dealer ID and Slot ID
         $key = 'client-list-all:' . $dealerId . '.' . $slotId;
         $this->log->info('Passing ZRANGE ' . $key . ' 0 -1 to Redis');
@@ -311,5 +321,14 @@ class ClientRedisRepository implements ClientRepositoryInterface
 
         // Return Result After Sort
         return $clients;
+    }
+
+    private function connectToRedis(): void
+    {
+        if ($this->redis instanceof Connection) {
+            return;
+        }
+
+        $this->redis = Redis::connection('persist');
     }
 }

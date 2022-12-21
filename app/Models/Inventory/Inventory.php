@@ -949,6 +949,9 @@ class Inventory extends Model
     {
         $query->where('show_on_website', self::SHOW_IN_WEBSITE)
             ->where('is_archived', self::IS_NOT_ARCHIVED)
-            ->where('status', '<>', self::STATUS_QUOTE);
+            ->where(function ($query){
+                $query->whereNull('status')
+                    ->orWhere('status', '<>', self::STATUS_QUOTE);
+            });
     }
 }
