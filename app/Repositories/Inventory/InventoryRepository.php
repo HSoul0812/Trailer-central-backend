@@ -352,6 +352,24 @@ class InventoryRepository implements InventoryRepositoryInterface
     }
 
     /**
+     * @param array $params
+     * @return bool
+     */
+    public function massUpdate(array $params): bool
+    {
+        if (!isset($params['dealer_id'])) {
+            throw new RepositoryInvalidArgumentException('dealer_id has been missed. Params - ' . json_encode($params));
+        }
+
+        $dealerId = $params['dealer_id'];
+        unset($params['dealer_id']);
+
+        Inventory::query()->where('dealer_id', $dealerId)->update($params);
+
+        return true;
+    }
+
+    /**
      * Update the qb_invoice_item_inventories table for sales person report updation.
      *
      * @param Inventory $item

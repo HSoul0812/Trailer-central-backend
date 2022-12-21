@@ -57,9 +57,9 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
 
 
     /**
-     * @var Connection
+     * @var Connection|null
      */
-    private $redis;
+    private $redis = null;
 
     /**
      * @var Log
@@ -69,9 +69,6 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
     public function __construct()
     {
         $this->log = Log::channel('tunnels');
-        $this->redis = Redis::connection('persist');
-        $this->log->info('Initialized Redis on for Tunnels Using ' . $this->redis->getName());
-        $this->log->info('Found Keys: ', $this->redis->keys('tunnels:*'));
     }
 
     /**
@@ -121,6 +118,8 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
             return false;
         }
 
+        $this->connectToRedis();
+
         // Get Tunnels Server
         $server = $params['tunnel_server'] ?? self::SERVER_DEFAULT;
 
@@ -153,6 +152,8 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
      */
     public function getAll($params = [])
     {
+        $this->connectToRedis();
+
         // Get Tunnels Server
         $server = $params['tunnel_server'] ?? self::SERVER_DEFAULT;
         $this->log->info('Getting All Tunnels for Server ' . $server . ' with Params', $params);
@@ -205,6 +206,8 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
      */
     public function getByDealer(int $dealerId, string $server = self::SERVER_DEFAULT): Collection
     {
+        $this->connectToRedis();
+
         // Get Tunnels By Dealer
         $key = 'tunnels:byDealerId:' . $server . ':' . $dealerId;
         $this->log->info('Passing SMEMBERS ' . $key . ' to Redis');
@@ -276,5 +279,17 @@ class TunnelRedisRepository implements TunnelRepositoryInterface
 
         // Return Result After Sort
         return $tunnels;
+    }
+
+    private function connectToRedis(): void
+    {
+        if ($this->redis instanceof Connection) {
+            return;
+        }
+
+        $this->redis = Redis::connection('persist');
+
+        $this->log->info('Initialized Redis on for Tunnels Using ' . $this->redis->getName());
+        $this->log->info('Found Keys: ', $this->redis->keys('tunnels:*'));
     }
 }

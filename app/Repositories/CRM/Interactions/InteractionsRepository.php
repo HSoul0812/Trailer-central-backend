@@ -54,10 +54,12 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
     }
     
     public function create($params) {
-        // Get User ID
-        $lead = Lead::findOrFail($params['lead_id']);
-        $params['tc_lead_id'] = $lead->identifier;
-        $params['user_id'] = $lead->newDealerUser->user_id;
+        if (!empty($params['lead_id'])) {
+            // Get User ID
+            $lead = Lead::findOrFail($params['lead_id']);
+            $params['tc_lead_id'] = $lead->identifier;
+            $params['user_id'] = $lead->newDealerUser->user_id;
+        }
 
         // Create Interaction
         return Interaction::create($params);

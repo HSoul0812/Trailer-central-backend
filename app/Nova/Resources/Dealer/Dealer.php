@@ -4,6 +4,7 @@ namespace App\Nova\Resources\Dealer;
 
 use App\Nova\Actions\ActivateUserAccounts;
 use App\Nova\Actions\DeactivateUserAccounts;
+use App\Nova\Actions\Dealer\ChangeStatus;
 use App\Nova\Actions\Dealer\DeactivateDealer;
 use App\Nova\Actions\Dealer\DeactivateECommerce;
 use App\Nova\Actions\Dealer\HiddenIntegrations\ActivateELeads;
@@ -413,6 +414,7 @@ class Dealer extends Resource
 
                 return $this->resource instanceof Model && $this->resource->isUserAccountsActive;
             }),
+            app()->make(ChangeStatus::class),
             app()->make(DeactivateDealer::class)->canSee(function ($request) {
                 if ($request instanceof ActionRequest) {
                     return true;

@@ -23,7 +23,7 @@ class GetInventoryRequest extends Request
             'floorplan_vendor' => 'vendor_exists',
             'images_greater_than' => 'integer',
             'images_less_than' => 'integer',
-            'units_with_true_Cost' => 'boolean',
+            'units_with_true_cost' => 'boolean',
             'dealer_location_id' => 'dealer_location_valid',
             'status' => 'integer',
             'inventory_ids' => 'array',

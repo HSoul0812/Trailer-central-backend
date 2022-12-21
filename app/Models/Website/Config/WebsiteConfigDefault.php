@@ -31,6 +31,19 @@ class WebsiteConfigDefault extends Model
 
     protected $table = 'website_config_default';
 
+    public $timestamps = false;
+
+    public $primaryKey = 'key';
+
+    protected $keyType = 'string';
+
+    public $incrementing = false;
+
+    protected $fillable = [
+      'private', 'type', 'label', 'note', 'grouping', 'values', 'values_mapping',
+        'default_label', 'default_value', 'sort_order'
+    ];
+
     /** @var WebsiteConfigRepositoryInterface */
     private $currentValueRepository;
 

@@ -70,6 +70,7 @@ class Interaction extends Model
     protected $fillable = [
         "lead_product_id",
         "tc_lead_id",
+        "quote_id",
         "user_id",
         "sales_person_id",
         "interaction_type",

@@ -219,4 +219,5 @@ return [
     'unique_email_blast_name' => 'You already have a blast with this name',
     'active_interaction' => 'The number is not active',
     'valid_password' => 'Password should be at least 1 Capital letter, 1 Number and min 8 chars.',
+    'allowed_attributes' => 'The :attribute is not allowed',
 ];
