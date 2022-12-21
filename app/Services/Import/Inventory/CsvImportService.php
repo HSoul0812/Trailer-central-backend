@@ -540,7 +540,7 @@ class CsvImportService implements CsvImportServiceInterface
                         Log::info("Invalid Header: " . $value);
                         // else, the column header is allowed
                     } else {
-                        $this->indexToheaderMapping[$index] = $value;
+                        $this->indexToheaderMapping[$index] = strtolower($value);
                     }
                     // for lines > 1
                 } else {
