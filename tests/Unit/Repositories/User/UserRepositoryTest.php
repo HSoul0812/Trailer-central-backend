@@ -25,8 +25,6 @@ class UserRepositoryTest extends TestCase {
         $this->app->instance(User::class, $this->userMock);
         $this->userMock->dealer_id = 1;
 
-        $this->userRepository = $this->app->make(UserRepositoryInterface::class);
-
         Queue::fake();
     }
 
@@ -58,8 +56,10 @@ class UserRepositoryTest extends TestCase {
             ->with($this->userMock->dealer_id)
             ->andReturn($this->userMock);
 
-        $this->userRepository->updateOverlaySettings($this->userMock->dealer_id);
+        $userRepo = $this->app->make(UserRepositoryInterface::class);
+        $result = $userRepo->updateOverlaySettings($this->userMock->dealer_id);
 
         Queue::assertPushed(GenerateOverlayImageJob::class, $inventories->count());
+        $this->assertEquals($result->dealer_id, $this->userMock->dealer_id);
     }
 }
