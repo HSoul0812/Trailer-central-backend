@@ -880,6 +880,7 @@ class CsvImportService implements CsvImportServiceInterface
                 if (!empty($value)) {
                     $images = explode(',', $value);
                     $images = array_map('trim', $images);
+                    $images = array_filter($images);
 
                     if (count($images) > 0) {
                         if ($this->imageMode == self::IM_APPEND) {
