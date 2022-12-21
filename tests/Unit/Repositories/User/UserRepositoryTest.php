@@ -12,7 +12,6 @@ use Illuminate\Support\Collection;
 
 class UserRepositoryTest extends TestCase {
 
-    const TEST_DEALER_ID = PHP_INT_MAX;
      /**
      * @var array|\Mockery\LegacyMockInterface|\Mockery\MockInterface
      */
@@ -21,8 +20,10 @@ class UserRepositoryTest extends TestCase {
     public function setUp(): void
     {
         parent::setUp();
+
         $this->userMock = $this->getEloquentMock(User::class);
         $this->app->instance(User::class, $this->userMock);
+        $this->userMock->dealer_id = 1;
 
         $this->userRepository = $this->app->make(UserRepositoryInterface::class);
 
@@ -54,10 +55,10 @@ class UserRepositoryTest extends TestCase {
 
         $this->userMock->shouldReceive('findOrFail')
             ->once()
-            ->with(self::TEST_DEALER_ID)
+            ->with($this->userMock->dealer_id)
             ->andReturn($this->userMock);
 
-        $this->userRepository->updateOverlaySettings(self::TEST_DEALER_ID);
+        $this->userRepository->updateOverlaySettings($this->userMock->dealer_id);
 
         Queue::assertPushed(GenerateOverlayImageJob::class, $inventories->count());
     }
