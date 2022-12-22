@@ -184,6 +184,7 @@ return [
          * Package Service Providers...
          */
         Laravel\Cashier\CashierServiceProvider::class,
+        Lunaweb\RedisMock\Providers\RedisMockServiceProvider::class,
 
         /*
          * Application Service Providers...
