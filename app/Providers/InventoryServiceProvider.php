@@ -6,6 +6,10 @@ use App\Repositories\Bulk\Inventory\BulkDownloadRepository;
 use App\Repositories\Bulk\Inventory\BulkDownloadRepositoryInterface;
 use App\Repositories\Bulk\Inventory\BulkUploadRepository;
 use App\Repositories\Bulk\Inventory\BulkUploadRepositoryInterface;
+use App\Services\ElasticSearch\Cache\RedisResponseCache;
+use App\Services\ElasticSearch\Cache\RedisResponseCacheKey;
+use App\Services\ElasticSearch\Cache\ResponseCacheInterface;
+use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
 use App\Services\Export\Inventory\Bulk\BulkDownloadJobService;
 use App\Services\Export\Inventory\Bulk\BulkDownloadJobServiceInterface;
 use App\Services\Export\Inventory\Bulk\BulkPdfJobService;
@@ -135,5 +139,7 @@ class InventoryServiceProvider extends ServiceProvider
         $this->app->bind(BulkDownloadJobServiceInterface::class, BulkDownloadJobService::class);
         $this->app->bind(BulkPdfJobServiceInterface::class, BulkPdfJobService::class);
         $this->app->bind(BulkUploadRepositoryInterface::class, BulkUploadRepository::class);
+        $this->app->bind(ResponseCacheInterface ::class, RedisResponseCache::class);
+        $this->app->bind(ResponseCacheKeyInterface::class, RedisResponseCacheKey::class);
     }
 }
