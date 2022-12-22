@@ -157,8 +157,6 @@ class ListingRepository implements ListingRepositoryInterface {
             ->where('dealer_id', '=', $integration->dealer_id)
             ->where('show_on_website', 1)
             ->where("{$inventoryTableName}.year", '<', '2024') //TODO: remove when Facebook allows this
-            // (!is_null($inventory->sales_price) && $inventory->sales_price > 0) ? $inventory->sales_price :
-            // ($inventory->use_website_price && $inventory->website_price > 0 ? $inventory->website_price : $inventory->price);
             ->whereRaw("(IFNULL($inventoryTableName.sales_price, 0) > $fbMinPrice
                             OR ($inventoryTableName.use_website_price AND IFNULL($inventoryTableName.website_price, 0) > $fbMinPrice)
                             OR IFNULL($inventoryTableName.price, 0) > $fbMinPrice)")
@@ -166,7 +164,7 @@ class ListingRepository implements ListingRepositoryInterface {
             ->where("{$inventoryTableName}.entity_type_id", '<>', EntityType::ENTITY_TYPE_VEHICLE)
             ->whereRaw("IFNULL(is_archived, 0) = 0")
             ->whereRaw("IFNULL({$inventoryTableName}.status, -1) NOT IN (2,6)")
-            ->whereRaw("LENGTH({$inventoryTableName}.description) >= " . INVENTORY::MIN_DESCRIPTION_LENGTH_FOR_FACEBOOK ." OR LENGTH({$inventoryTableName}.description_html) >= " . 2 * INVENTORY::MIN_DESCRIPTION_LENGTH_FOR_FACEBOOK)
+            ->whereRaw("LENGTH({$inventoryTableName}.description) >= " . INVENTORY::MIN_DESCRIPTION_LENGTH_FOR_FACEBOOK ." OR LENGTH({$inventoryTableName}.description_html) >= " . (2 * INVENTORY::MIN_DESCRIPTION_LENGTH_FOR_FACEBOOK))
             ->has('orderedImages');
 
         // Append Join

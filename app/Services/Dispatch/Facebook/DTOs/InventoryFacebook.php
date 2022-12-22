@@ -423,7 +423,7 @@ class InventoryFacebook
             'year' => $inventory->year,
             'manufacturer' => $inventory->manufacturer,
             'model' => $inventory->model,
-            'description' => (strlen($inventory->description) < INVENTORY::MIN_DESCRIPTION_LENGTH_FOR_FACEBOOK) ? strip_tags($inventory->html_description) : $inventory->description,
+            'description' => (strlen($inventory->description) < INVENTORY::MIN_DESCRIPTION_LENGTH_FOR_FACEBOOK) ? strip_tags($inventory->description_html) : $inventory->description,
             'dealer_location_id' => $inventory->dealer_location_id,
             'location' => $inventory->dealerLocation->city_state,
             'color' => $inventory->attributes->get('color'),
