@@ -26,7 +26,7 @@ class RedisResponseCache implements ResponseCacheInterface
     {
         Redis::pipeline(function ($pipe) use ($keys) {
             foreach ($keys as $key) {
-                $pipe->eval("return redis.call('del', unpack(redis.call('keys','$key')))", []);
+                $pipe->eval("return redis.call('unlink', unpack(redis.call('keys','$key')))", []);
             }
         });
     }
