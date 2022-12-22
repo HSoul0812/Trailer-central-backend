@@ -236,11 +236,12 @@ class InventoryController extends RestfulControllerV2
         $data = $this->inventoryRepository->getAndIncrementTimesViewed($request->all());
 
         $response = $this->itemResponse($data, new InventoryTransformer());
-        
+
         $this->responseCache->set(
             $this->responseCacheKey->single($data->inventory_id),
             $response->morph('json')->getContent()
         );
+
         return $response;
     }
 
