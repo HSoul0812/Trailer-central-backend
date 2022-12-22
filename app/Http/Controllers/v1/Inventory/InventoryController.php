@@ -18,6 +18,8 @@ use App\Http\Requests\Inventory\SearchInventoryRequest;
 use App\Http\Requests\Inventory\UpdateInventoryRequest;
 use App\Repositories\Inventory\InventoryHistoryRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
+use App\Services\ElasticSearch\Cache\ResponseCacheInterface;
+use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
 use App\Services\Inventory\InventoryServiceInterface;
 use App\Transformers\Inventory\InventoryElasticSearchOutputTransformer;
 use App\Transformers\Inventory\SaveInventoryTransformer;
@@ -59,18 +61,31 @@ class InventoryController extends RestfulControllerV2
     protected $inventoryElasticSearchService;
 
     /**
+     * @var ResponseCacheInterface
+     */
+    protected $responseCache;
+
+    /**
+     * @var ResponseCacheKeyInterface
+     */
+    protected $responseCacheKey;
+
+    /**
      * Create a new controller instance.
      *
      * @param InventoryServiceInterface $inventoryService
      * @param InventoryRepositoryInterface $inventoryRepository
      * @param InventoryHistoryRepositoryInterface $inventoryHistoryRepository
      * @param InventoryElasticSearchServiceInterface $inventoryElasticSearchService
+     * @param ResponseCacheInterface $responseCache
      */
     public function __construct(
         InventoryServiceInterface              $inventoryService,
         InventoryRepositoryInterface           $inventoryRepository,
         InventoryHistoryRepositoryInterface    $inventoryHistoryRepository,
-        InventoryElasticSearchServiceInterface $inventoryElasticSearchService
+        InventoryElasticSearchServiceInterface $inventoryElasticSearchService,
+        ResponseCacheInterface                 $responseCache,
+        ResponseCacheKeyInterface              $responseCacheKey
     )
     {
         $this->middleware('setDealerIdOnRequest')
@@ -81,6 +96,8 @@ class InventoryController extends RestfulControllerV2
         $this->inventoryRepository = $inventoryRepository;
         $this->inventoryHistoryRepository = $inventoryHistoryRepository;
         $this->inventoryElasticSearchService = $inventoryElasticSearchService;
+        $this->responseCache = $responseCache;
+        $this->responseCacheKey = $responseCacheKey;
     }
 
     /**
@@ -218,7 +235,13 @@ class InventoryController extends RestfulControllerV2
 
         $data = $this->inventoryRepository->getAndIncrementTimesViewed($request->all());
 
-        return $this->itemResponse($data, new InventoryTransformer());
+        $response = $this->itemResponse($data, new InventoryTransformer());
+        
+        $this->responseCache->set(
+            $this->responseCacheKey->single($data->inventory_id),
+            $response->morph('json')->getContent()
+        );
+        return $response;
     }
 
     /**
@@ -513,6 +536,14 @@ class InventoryController extends RestfulControllerV2
                 ->addMeta('total', $result->total);
             if ($searchRequest->getESQuery()) {
                 $response->addMeta('x_qa_req', $result->getEncodedESQuery());
+            }
+
+            //Cache only if there are results
+            if ($result->hints->count()) {
+                $this->responseCache->set(
+                    $this->responseCacheKey->collection($searchRequest->requestId(), $result),
+                    $response->morph('json')->getContent()
+                );
             }
             return $response;
         }
