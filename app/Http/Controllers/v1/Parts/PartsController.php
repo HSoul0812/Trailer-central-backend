@@ -756,7 +756,7 @@ class PartsController extends RestfulController
             $query = $request->only('query', 'vendor_id', 'with_cost', 'in_stock', 'sort', 'is_active');
 
             $paginator = new \stdClass(); // this will hold the paginator produced by search
-            $dealerId = $this->getRequestDealerId($request, Auth::user());
+            $dealerId = $this->getRequestDealerId(Auth::user());
 
             // do the search
             $result = $this->parts->search(
@@ -788,12 +788,8 @@ class PartsController extends RestfulController
         }
     }
 
-    private function getRequestDealerId(Request $request, $user, $required = true)
+    private function getRequestDealerId($user, $required = true)
     {
-        if ($dealerId = $request->get('dealer_id', null)) {
-            return $dealerId;
-        }
-
         if (!empty($user) && !empty($user->dealer_id)) {
             return $user->dealer_id;
         }
