@@ -42,6 +42,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\User\User;
 use App\Services\Inventory\ImageServiceInterface;
 use App\Services\Inventory\ImageService as ImageTableService;
+use App\Repositories\User\UserRepositoryInterface;
 
 /**
  * Test for App\Services\Inventory\InventoryService
@@ -133,6 +134,11 @@ class InventoryServiceTest extends TestCase
      */
     private $imageTableServiceMock;
 
+    /**
+     * @var LegacyMockInterface|UserRepositoryInterface
+     */
+    private $userRepositoryMock;
+
     public function setUp(): void
     {
         parent::setUp();
@@ -179,18 +185,23 @@ class InventoryServiceTest extends TestCase
         $this->markdownHelper = Mockery::mock(\Parsedown::class);
         $this->app->instance(\Parsedown::class, $this->markdownHelper);
 
-        $this->imageTableServiceMock = Mockery::mock(ImageTableService::class);
+        $this->userRepositoryMock = Mockery::mock(UserRepositoryInterface::class);
+        $this->app->instance(UserRepositoryInterface::class, $this->userRepositoryMock);
+
+        $this->imageTableServiceMock = Mockery::mock(ImageTableService::class, [
+            $this->imageRepositoryMock,
+            $this->userRepositoryMock,
+            $this->inventoryRepositoryMock
+        ]);
         $this->app->instance(ImageTableService::class, $this->imageTableServiceMock);
 
         Queue::fake();
         Storage::fake('tmp');
-        Storage::fake('s3');
     }
 
     public function tearDown(): void
     {
         Storage::fake('tmp');
-        Storage::fake('s3');
 
         parent::tearDown();
     }
@@ -1376,7 +1387,6 @@ class InventoryServiceTest extends TestCase
     {
         $inventoryImages = new Collection();
 
-        Storage::disk('s3')->put('filename_1', '');
         $image1 = $this->getEloquentMock(Image::class);
         $image1->image_id = 1;
         $image1->filename = 'filename_1';
@@ -1389,8 +1399,6 @@ class InventoryServiceTest extends TestCase
         $inventoryImages->push($inventoryImage1);
 
         // Mock Image with existing overlay
-        Storage::disk('s3')->put('filename_2', '');
-        Storage::disk('s3')->put('filename_with_overlay_2', '');
         $image2 = $this->getEloquentMock(Image::class);
         $image2->image_id = 2;
         $image2->filename = 'filename_with_overlay_2';
@@ -1414,10 +1422,6 @@ class InventoryServiceTest extends TestCase
             ->once()
             ->andReturn($inventoryImages);
 
-        $imageTableServiceMock = Mockery::mock(ImageTableService::class, [
-            $this->imageRepositoryMock
-        ]);
-
         foreach ($inventoryImages as $inventoryImage) {
 
             $image = $inventoryImage->image;
@@ -1426,7 +1430,6 @@ class InventoryServiceTest extends TestCase
             $tmpFilename = 'tmp_image_with_overlay_'. $imageId;
 
             // Mock uploadToS3
-            Storage::disk('s3')->put($s3Filename, '');
             $this->imageServiceMock
                 ->shouldReceive('uploadToS3')
                 ->once()->andReturn($s3Filename);
@@ -1440,29 +1443,12 @@ class InventoryServiceTest extends TestCase
                 );
 
             // Mock saveOverlay
-            $imageTableServiceMock
+            $this->imageTableServiceMock
                 ->shouldReceive('saveOverlay')
-                ->once()->with($image, $s3Filename)
-                ->passthru();
-
-            // Mock getFileHash
-            $imageTableServiceMock
-                ->shouldAllowMockingProtectedMethods()
-                ->shouldReceive('getFileHash')
-                ->once()->with($s3Filename)
-                ->andReturn(md5($s3Filename));
-
-            // Mock update
-            $this->imageRepositoryMock->shouldReceive('update')
-                ->once()->with([
-                    'filename' => $s3Filename,
-                    'filename_noverlay' => 'filename_'.$imageId,
-                    'hash' => md5($s3Filename),
-                    'id' => $imageId
-                ]);
+                ->once()->with($image, $s3Filename);
         }
 
-        $imageTableServiceMock->shouldNotReceive('resetOverlay');
+        $this->imageTableServiceMock->shouldNotReceive('resetOverlay');
 
         $inventoryServiceMock = Mockery::mock(InventoryService::class, [
             $this->inventoryRepositoryMock,
@@ -1479,7 +1465,7 @@ class InventoryServiceTest extends TestCase
             $this->geolocationRepositoryMock,
             $this->markdownHelper,
             $this->logServiceMock ?? app()->make(LoggerServiceInterface::class),
-            $imageTableServiceMock,
+            $this->imageTableServiceMock,
         ])->makePartial();
 
         $inventoryServiceMock->generateOverlays(self::TEST_INVENTORY_ID);
@@ -1487,17 +1473,6 @@ class InventoryServiceTest extends TestCase
         Storage::disk('tmp')->assertMissing([
             'tmp_image_with_overlay_1',
             'tmp_image_with_overlay_2'
-        ]);
-        
-        Storage::disk('s3')->assertExists([
-            'filename_1',
-            'filename_2',
-            's3_image_with_overlay_1',
-            's3_image_with_overlay_2',
-        ]);
-
-        Storage::disk('s3')->assertMissing([
-            'filename_with_overlay_2'
         ]);
     }
 
@@ -1514,11 +1489,9 @@ class InventoryServiceTest extends TestCase
 
         $inventoryImages = new Collection();
 
-        Storage::disk('s3')->put('filename_1', '');
         $image1 = $this->getEloquentMock(Image::class);
         $image1->image_id = 1;
         $image1->filename = 'filename_1';
-        $image1->filename_noverlay = '';
 
         $inventoryImage1 = $this->getEloquentMock(InventoryImage::class);
         $inventoryImage1->image = $image1;
@@ -1526,11 +1499,9 @@ class InventoryServiceTest extends TestCase
         $inventoryImage1->position = 1;
         $inventoryImages->push($inventoryImage1);
 
-        Storage::disk('s3')->put('filename_2', '');
         $image2 = $this->getEloquentMock(Image::class);
         $image2->image_id = 2;
         $image2->filename = 'filename_2';
-        $image2->filename_noverlay = '';
 
         $inventoryImage2 = $this->getEloquentMock(InventoryImage::class);
         $inventoryImage2->image = $image2;
@@ -1550,10 +1521,6 @@ class InventoryServiceTest extends TestCase
             ->once()
             ->andReturn($inventoryImages);
 
-        $imageTableServiceMock = Mockery::mock(ImageTableService::class, [
-            $this->imageRepositoryMock
-        ]);
-
         foreach ($inventoryImages as $inventoryImage) {
 
             $image = $inventoryImage->image;
@@ -1564,7 +1531,6 @@ class InventoryServiceTest extends TestCase
             if ($imageId == 1) {
 
                 // Mock uploadToS3
-                Storage::disk('s3')->put($s3Filename, '');
                 $this->imageServiceMock
                     ->shouldReceive('uploadToS3')
                     ->once()->andReturn($s3Filename);
@@ -1573,45 +1539,22 @@ class InventoryServiceTest extends TestCase
                 Storage::disk('tmp')->put($tmpFilename, '');
                 $this->imageServiceMock
                     ->shouldReceive('addOverlays')
-                    ->once()->andReturn(
-                        Storage::disk('tmp')->path($tmpFilename)
-                    );
+                    ->once()->andReturn(Storage::disk('tmp')->path($tmpFilename));
 
                 // Mock saveOverlay
-                $imageTableServiceMock
+                $this->imageTableServiceMock
                     ->shouldReceive('saveOverlay')
-                    ->once()->with($image, $s3Filename)
-                    ->passthru();
-
-                // Mock getFileHash
-                $imageTableServiceMock
-                    ->shouldAllowMockingProtectedMethods()
-                    ->shouldReceive('getFileHash')
-                    ->once()->with($s3Filename)
-                    ->andReturn(md5($s3Filename));
-
-                // Mock update
-                $this->imageRepositoryMock->shouldReceive('update')
-                    ->once()->with([
-                        'filename' => $s3Filename,
-                        'filename_noverlay' => 'filename_'.$imageId,
-                        'hash' => md5($s3Filename),
-                        'id' => $imageId
-                    ]);
+                    ->once()->with($image, $s3Filename);
                 
             } else {
 
                 // Mock resetOverlay
-                $imageTableServiceMock
+                $this->imageTableServiceMock
                     ->shouldReceive('resetOverlay')
-                    ->once()->withArgs([$image])
-                    ->passthru();
+                    ->once()->withArgs([$image]);
 
-                $imageTableServiceMock
-                    ->shouldNotReceive('saveOverlay');
-
-                // Check no update
-                $this->imageRepositoryMock->shouldNotReceive('update');
+                $this->imageTableServiceMock
+                    ->shouldNotReceive('saveOverlay')->with($image);
             }
         }
 
@@ -1630,23 +1573,13 @@ class InventoryServiceTest extends TestCase
             $this->geolocationRepositoryMock,
             $this->markdownHelper,
             $this->logServiceMock ?? app()->make(LoggerServiceInterface::class),
-            $imageTableServiceMock,
+            $this->imageTableServiceMock,
         ])->makePartial();
 
         $inventoryServiceMock->generateOverlays(self::TEST_INVENTORY_ID);
 
         Storage::disk('tmp')->assertMissing([
             'tmp_image_with_overlay_1'
-        ]);
-        
-        Storage::disk('s3')->assertExists([
-            'filename_1',
-            'filename_2',
-            's3_image_with_overlay_1'
-        ]);
-        
-        Storage::disk('s3')->assertMissing([
-            's3_image_with_overlay_2'
         ]);
     }
 
@@ -1672,16 +1605,10 @@ class InventoryServiceTest extends TestCase
         $this->inventoryRepositoryMock
             ->shouldNotReceive('getOverlayParams');
 
-        $imageTableServiceMock = Mockery::mock(ImageTableService::class, [
-            $this->imageRepositoryMock
-        ]);
-
         $this->imageServiceMock->shouldNotReceive('uploadToS3');
         $this->imageServiceMock->shouldNotReceive('addOverlays');
-        $imageTableServiceMock->shouldNotReceive('saveOverlay');
-        $imageTableServiceMock->shouldAllowMockingProtectedMethods()->shouldNotReceive('getFileHash');
-        $imageTableServiceMock->shouldNotReceive('resetOverlay');
-        $this->imageRepositoryMock->shouldNotReceive('update');
+        $this->imageTableServiceMock->shouldNotReceive('saveOverlay');
+        $this->imageTableServiceMock->shouldNotReceive('resetOverlay');
 
         $inventoryServiceMock = Mockery::mock(InventoryService::class, [
             $this->inventoryRepositoryMock,
@@ -1698,7 +1625,7 @@ class InventoryServiceTest extends TestCase
             $this->geolocationRepositoryMock,
             $this->markdownHelper,
             $this->logServiceMock ?? app()->make(LoggerServiceInterface::class),
-            $imageTableServiceMock,
+            $this->imageTableServiceMock,
         ])->makePartial();
 
         $inventoryServiceMock->generateOverlays(self::TEST_INVENTORY_ID);
@@ -1717,11 +1644,8 @@ class InventoryServiceTest extends TestCase
 
         $inventoryImages = new Collection();
 
-        Storage::disk('s3')->put('filename_1', '');
         $image1 = $this->getEloquentMock(Image::class);
-        $image1->image_id = 1;
         $image1->filename = 'filename_1';
-        $image1->filename_noverlay = '';
 
         $inventoryImage1 = $this->getEloquentMock(InventoryImage::class);
         $inventoryImage1->image = $image1;
@@ -1730,10 +1654,7 @@ class InventoryServiceTest extends TestCase
         $inventoryImages->push($inventoryImage1);
 
         // Mock Image with existing overlay
-        Storage::disk('s3')->put('filename_2', '');
-        Storage::disk('s3')->put('filename_with_overlay_2', '');
         $image2 = $this->getEloquentMock(Image::class);
-        $image2->image_id = 2;
         $image2->filename = 'filename_with_overlay_2';
         $image2->filename_noverlay = 'filename_2';
 
@@ -1755,58 +1676,15 @@ class InventoryServiceTest extends TestCase
             ->once()
             ->andReturn($inventoryImages);
 
-        $imageTableServiceMock = Mockery::mock(ImageTableService::class, [
-            $this->imageRepositoryMock
-        ]);
-
-        $imageTableServiceMock->shouldNotReceive('saveOverlay');
+        $this->imageTableServiceMock->shouldNotReceive('saveOverlay');
         $this->imageServiceMock->shouldNotReceive('uploadToS3');
         $this->imageServiceMock->shouldNotReceive('addOverlays');
-        $imageTableServiceMock->shouldNotReceive('saveOverlay');
 
         foreach ($inventoryImages as $inventoryImage) {
-
             $image = $inventoryImage->image;
-            $imageId = $image->image_id;
-            $s3Filename = 's3_image_with_overlay_'. $imageId;
-            $tmpFilename = 'tmp_image_with_overlay_'. $imageId;
 
-            // Mock resetOverlay
-            $that = $this;
-            $imageTableServiceMock
-                ->shouldReceive('resetOverlay')->once()
-                ->withArgs(function($image) use ($imageId, $that, $imageTableServiceMock) {
-
-                    // Image with existing overlay
-                    if ($image->image_id == 2) {
-
-                        // Mock getFileHash
-                        $imageTableServiceMock
-                            ->shouldAllowMockingProtectedMethods()
-                            ->shouldReceive('getFileHash')
-                            ->with('filename_'.$imageId)->once()
-                            ->andReturn(md5($imageId));
-
-                        // Mock update
-                        $that->imageRepositoryMock->shouldReceive('update')
-                            ->once()
-                            ->with([
-                                'filename' => 'filename_'.$imageId,
-                                'filename_noverlay' => '',
-                                'hash' => md5($imageId),
-                                'id' => $imageId
-                            ]);
-                    } else {
-
-                        $imageTableServiceMock
-                            ->shouldAllowMockingProtectedMethods()
-                            ->shouldNotReceive('getFileHash');
-                        $that->imageRepositoryMock->shouldNotReceive('update');
-                    }
-
-                    return true;
-                })
-                ->passthru();
+            $this->imageTableServiceMock->shouldReceive('resetOverlay')
+                ->once()->with($image);
         }
 
         $inventoryServiceMock = Mockery::mock(InventoryService::class, [
@@ -1824,26 +1702,10 @@ class InventoryServiceTest extends TestCase
             $this->geolocationRepositoryMock,
             $this->markdownHelper,
             $this->logServiceMock ?? app()->make(LoggerServiceInterface::class),
-            $imageTableServiceMock,
+            $this->imageTableServiceMock,
         ])->makePartial();
 
         $inventoryServiceMock->generateOverlays(self::TEST_INVENTORY_ID);
-
-        Storage::disk('tmp')->assertMissing([
-            'tmp_image_with_overlay_1',
-            'tmp_image_with_overlay_2'
-        ]);
-        
-        Storage::disk('s3')->assertExists([
-            'filename_1',
-            'filename_2',
-        ]);
-
-        Storage::disk('s3')->assertMissing([
-            'filename_with_overlay_2',
-            's3_image_with_overlay_1',
-            's3_image_with_overlay_2',
-        ]);
     }
 
     /**

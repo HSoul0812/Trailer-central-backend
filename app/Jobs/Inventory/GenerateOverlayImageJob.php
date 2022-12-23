@@ -8,7 +8,6 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use App\Models\Inventory\Inventory;
 use App\Services\Inventory\InventoryService;
 
 class GenerateOverlayImageJob extends Job {
@@ -16,17 +15,17 @@ class GenerateOverlayImageJob extends Job {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
-     * @var Inventory
+     * @var int
      */
-    private $inventory;
+    private $inventoryId;
 
     /**
      * GenerateOverlayImageJob constructor.
-     * @param Inventory $inventory
+     * @param int $inventoryId
      */
-    public function __construct(Inventory $inventory)
+    public function __construct(int $inventoryId)
     {
-        $this->inventory = $inventory;
+        $this->inventoryId = $inventoryId;
     }
 
     /**
@@ -36,9 +35,9 @@ class GenerateOverlayImageJob extends Job {
     public function handle(InventoryService $service)
     {
         try {
-            $service->generateOverlays($this->inventory->inventory_id);
+            $service->generateOverlays($this->inventoryId);
 
-            Log::info('Inventory Images with Overlay has been successfully generated', ['inventory_id' => $this->inventory->inventory_id]);
+            Log::info('Inventory Images with Overlay has been successfully generated', ['inventory_id' => $this->inventoryId]);
         } catch (\Exception $e) {
 
             Log::error($e->getMessage());

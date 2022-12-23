@@ -8,22 +8,44 @@ use Illuminate\Support\Facades\Storage;
 use App\Helpers\ImageHelper;
 use App\Traits\S3\S3Helper;
 use App\Models\Inventory\Image;
+use Illuminate\Foundation\Bus\DispatchesJobs;
+use App\Jobs\Inventory\GenerateOverlayImageJob;
+use App\Repositories\User\UserRepositoryInterface;
+use App\Models\User\User;
+use App\Repositories\Inventory\InventoryRepository;
+use App\Repositories\Inventory\InventoryRepositoryInterface;
 
 class ImageService implements ImageServiceInterface 
 {
-    use S3Helper;
+    use S3Helper, DispatchesJobs;
     /**
      * @var ImageRepositoryInterface
      */
     private $imageRepository;
 
     /**
+     * @var UserRepositoryInterface
+     */
+    private $userRepository;
+
+    /**
+     * @var InventoryRepositoryInterface
+     */
+    private $inventoryRepository;
+
+    /**
      * @param ImageRepositoryInterface $imageRepository
      */
     public function __construct(
-        ImageRepositoryInterface $imageRepository
+        ImageRepositoryInterface $imageRepository, 
+        UserRepositoryInterface $userRepository,
+        InventoryRepositoryInterface $inventoryRepository
     ) {
         $this->imageRepository = $imageRepository;
+
+        $this->userRepository = $userRepository;
+
+        $this->inventoryRepository = $inventoryRepository;
     }
 
     /**
@@ -82,11 +104,30 @@ class ImageService implements ImageServiceInterface
      * @param string $filename
      * @return string
      */
-    protected function getFileHash(string $filename)
+    public function getFileHash(string $filename): string
     {
         if (Storage::disk('s3')->missing($filename))
             throw new MissingS3FileException;
 
         return sha1_file($this->getS3BaseUrl() . $filename);
+    }
+
+    /**
+     * Update Overlay Settings
+     */
+    public function updateOverlaySettings(array $params): User
+    {
+        $dealer = $this->userRepository->updateOverlaySettings($params['dealer_id'], $params);
+
+        $inventories = $this->inventoryRepository->getAll(['dealer_id' => $params['dealer_id']], false, false, ['inventory_id']);
+
+        // Generate Overlay Inventory Images if necessary
+        if ($inventories->count() > 0) {
+            foreach ($inventories as $inventory) {
+                $this->dispatch((new GenerateOverlayImageJob($inventory->inventory_id))->onQueue('overlay-images'));
+            }
+        }
+
+        return $dealer;
     }
 }

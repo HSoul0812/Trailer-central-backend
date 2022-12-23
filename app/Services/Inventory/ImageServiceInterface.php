@@ -3,6 +3,7 @@
 namespace App\Services\Inventory;
 
 use App\Models\Inventory\Image;
+use App\Models\User\User;
 
 /**
  * Interface ImageServiceInterface
@@ -23,4 +24,16 @@ interface ImageServiceInterface
      * @return void
      */
     public function resetOverlay(Image $image): void;
+
+    /**
+     * @param string $filename
+     * @return string
+     */
+    public function getFileHash(string $filename): string;
+
+    /**
+     * @param array $params
+     * @return User
+     */
+    public function updateOverlaySettings(array $params): User; 
 }

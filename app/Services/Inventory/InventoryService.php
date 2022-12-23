@@ -257,7 +257,7 @@ class InventoryService implements InventoryServiceInterface
             $this->inventoryRepository->commitTransaction();
 
             // Generate Overlay Inventory Images if necessary
-            $this->dispatch((new GenerateOverlayImageJob($inventory))->onQueue('overlay-images'));
+            $this->dispatch((new GenerateOverlayImageJob($inventory->inventory_id))->onQueue('overlay-images'));
 
             Log::info('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
         } catch (\Exception $e) {
@@ -342,7 +342,7 @@ class InventoryService implements InventoryServiceInterface
             $this->inventoryRepository->commitTransaction();
 
             // Generate Overlay Inventory Images if necessary
-            $this->dispatch((new GenerateOverlayImageJob($inventory))->onQueue('overlay-images'));
+            $this->dispatch((new GenerateOverlayImageJob($inventory->inventory_id))->onQueue('overlay-images'));
 
             Log::info('Item has been successfully updated', ['inventoryId' => $inventory->inventory_id]);
         } catch (\Exception $e) {
