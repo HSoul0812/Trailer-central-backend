@@ -982,9 +982,13 @@ class CsvImportService implements CsvImportServiceInterface
                         'is_default' => 1
                     ])->first();
 
-                    // If no default location found return default error
+                    // If no default location found use first location found for dealer
                     if (!$dealerLocation) {
-                        return "Location based on phone number '{$value}' not found and no default location has been found for this dealer.";
+                        $dealerLocation = DealerLocation::where([
+                            'dealer_id' => $this->bulkUpload->dealer_id,
+                        ])->first();
+                    } else { // If no location found return default error
+                        return "Location based on phone number '{$value}' not found and no location has been found for this dealer.";
                     }
                 }
 
