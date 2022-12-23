@@ -300,9 +300,9 @@ class ImageHelper
     public function addUpperTextOverlay(string $imagePath, string $text, array $params)
     {
         $font = resource_path('fonts/IMPACT.TTF');
-        $imageResource = $this->getImageResource($imagePath);
-        $basicColors = $this->getBasicColors($imageResource);
         list($imageWidth, $imageHeight, $imageType) = getimagesize($imagePath);
+        $imageResource = $this->getImageResource($imagePath, $imageType);
+        $basicColors = $this->getBasicColors($imageResource);
 
         // Get BG & Border Color
         $bgColor = $borderColor = $basicColors['black'];
@@ -368,9 +368,9 @@ class ImageHelper
     public function addLowerTextOverlay(string $imagePath, string $text, array $params)
     {
         $font = resource_path('fonts/IMPACT.TTF');
-        $imageResource = $this->getImageResource($imagePath);
-        $basicColors = $this->getBasicColors($imageResource);
         list($imageWidth, $imageHeight, $imageType) = getimagesize($imagePath);
+        $imageResource = $this->getImageResource($imagePath, $imageType);
+        $basicColors = $this->getBasicColors($imageResource);
 
         // Get Background & Border Color
         $bgColor = $borderColor = $basicColors['black'];
@@ -443,8 +443,8 @@ class ImageHelper
 
         list($imageWidth, $imageHeight, $imageType) = getimagesize($imagePath);
         list($originalLogoWidth, $originalLogoHeight, $logoType) = getimagesize($logoPath);
-        $logoResource = $this->getImageResource($logoPath);
-        $imageResource = $this->getImageResource($imagePath);
+        $logoResource = $this->getImageResource($logoPath, $logoType);
+        $imageResource = $this->getImageResource($imagePath, $imageType);
 
         // Check Dimensions
         $logoWidth = preg_replace("/[^0-9.]/", "", $config['overlay_logo_width']);
@@ -480,7 +480,7 @@ class ImageHelper
         shell_exec('convert ' . $localLogoPath . ' -resize ' . $logoWidth . 'x' . $logoHeight . ' ' . $resizedLogo);
 
         // Get New Logo Dimensions
-        $resizedLogoResource = $this->getImageResource($resizedLogo);
+        $resizedLogoResource = $this->getImageResource($resizedLogo, $logoType);
         $logoNewWidth = imagesx($resizedLogoResource);
         $logoNewHeight = imagesy($resizedLogoResource);
 
@@ -539,11 +539,12 @@ class ImageHelper
 
     /**
      * @param string $imagePath
+     * @param int $imageType
      * @return \GdImage
      */
-    protected function getImageResource(string $imagePath)
+    protected function getImageResource(string $imagePath, int $imageType)
     {
-        switch(exif_imagetype($imagePath)) {
+        switch($imageType) {
             case IMAGETYPE_GIF:
                 return imagecreatefromgif($imagePath);
             case IMAGETYPE_JPEG:
