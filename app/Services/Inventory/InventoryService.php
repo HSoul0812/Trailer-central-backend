@@ -34,7 +34,6 @@ use App\Services\Export\Inventory\PdfExporter;
 use App\Traits\S3\S3Helper;
 use App\Jobs\Inventory\GenerateOverlayImageJob;
 use App\Services\Inventory\ImageServiceInterface;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * Class InventoryService
