@@ -954,4 +954,16 @@ class Inventory extends Model
                     ->orWhere('status', '<>', self::STATUS_QUOTE);
             });
     }
+
+    /**
+     * Save without triggering the model events
+     * @param array $options
+     * @return mixed
+     */
+    public function saveQuietly(array $options = [])
+    {
+        return static::withoutEvents(function () use ($options) {
+            return $this->save($options);
+        });
+    }
 }
