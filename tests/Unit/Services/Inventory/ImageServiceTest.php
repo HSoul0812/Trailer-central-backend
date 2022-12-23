@@ -245,9 +245,9 @@ class ImageServiceTest extends TestCase
         $inventories = new Collection([]);
         for ($i = 0; $i < 5; $i++)
         {
-            $i++;
+            $inventoryId = $i + 1;
             $inventory = $this->getEloquentMock(Inventory::class);
-            $inventory->inventory_id = $i;
+            $inventory->inventory_id = $inventoryId;
             $inventories->push($inventory);
         }
 
