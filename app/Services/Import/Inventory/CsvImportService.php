@@ -77,6 +77,11 @@ class CsvImportService implements CsvImportServiceInterface
     protected $imageMode = 0;
 
     /**
+     * @var int
+     */
+    protected $appendIndex = null;
+
+    /**
      * @var bool
      */
     protected $inventoryUpdate = false;
@@ -540,10 +545,28 @@ class CsvImportService implements CsvImportServiceInterface
                         Log::info("Invalid Header: " . $value);
                         // else, the column header is allowed
                     } else {
-                        $this->indexToheaderMapping[$index] = $value;
+                        $this->indexToheaderMapping[$index] = strtolower($value);
+                        $appendImages = array_search(strtolower($value), self::$_labels);
+
+                        if ($appendImages == 'append_images') {
+                            $this->appendIndex = $index;
+                        }
                     }
                     // for lines > 1
                 } else {
+                    if ($this->appendIndex) {
+                        $isAppend = $csvData[$this->appendIndex];
+                        $isAppend = self::handleBoolean($isAppend);
+
+                        if ($isAppend === true) {
+                            $this->imageMode = self::IM_APPEND;
+                        } elseif ($isAppend === false) {
+                            $this->imageMode = 0;
+                        } else {
+                            return "Value for append images column must be a valid boolean-type (yes, y, no, n, or 0/1)";
+                        }
+                    }
+
                     $header = array_search($this->indexToheaderMapping[$index], self::$_labels);
                     Log::debug(array("header" => $header, 'headerMapping' => $this->indexToheaderMapping[$index]));
 
@@ -880,6 +903,7 @@ class CsvImportService implements CsvImportServiceInterface
                 if (!empty($value)) {
                     $images = explode(',', $value);
                     $images = array_map('trim', $images);
+                    $images = array_filter($images);
 
                     if (count($images) > 0) {
                         if ($this->imageMode == self::IM_APPEND) {
