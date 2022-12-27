@@ -45,7 +45,7 @@ class RedisResponseCache implements ResponseCacheInterface
             );
         };
 
-        echo sprintf('STARTED: %s', $start->format('%H:%I:%S')).PHP_EOL;
+        echo sprintf('STARTED: %s', $start->format('H:i:s')).PHP_EOL;
 
         foreach ($keyPatterns as $pattern) {
             /** @var null|int $cursor */
@@ -63,7 +63,7 @@ class RedisResponseCache implements ResponseCacheInterface
                 $keysInvalidated += count($keys);
                 $client->unlink($removeKeyPrefix($keys));
             } else {
-                while (false !== ($keys = $client->scan($cursor, $pattern, self::CURSOR_LIMIT))) {
+                while (false !== ($keys = $client->scan($cursor, $pattern, 1000))) {
                     $keysInvalidated += count($keys);
                     $client->unlink($removeKeyPrefix($keys));
                 }
