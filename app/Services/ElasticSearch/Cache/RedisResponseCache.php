@@ -8,7 +8,7 @@ use \Redis as PhpRedis;
 class RedisResponseCache implements ResponseCacheInterface
 {
     public const TTL = 172800; //2 days
-    public const CURSOR_LIMIT = 5000;
+    public const CURSOR_LIMIT = 1000;
 
     /**
      * @param  string  $key
@@ -61,7 +61,7 @@ class RedisResponseCache implements ResponseCacheInterface
                 $keysInvalidated += count($keys);
                 $client->unlink($removeKeyPrefix($keys));
             } else {
-                while (false !== ($keys = $client->scan($cursor, $pattern, 5000))) {
+                while (false !== ($keys = $client->scan($cursor, $pattern, self::CURSOR_LIMIT))) {
                     $keysInvalidated += count($keys);
                     $client->unlink($removeKeyPrefix($keys));
                 }
