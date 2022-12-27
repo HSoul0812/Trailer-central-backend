@@ -45,6 +45,8 @@ class RedisResponseCache implements ResponseCacheInterface
             );
         };
 
+        echo sprintf('STARTED: %s', $start->format('%H:%I:%S')).PHP_EOL;
+
         foreach ($keyPatterns as $pattern) {
             /** @var null|int $cursor */
             $cursor = null;
@@ -71,6 +73,6 @@ class RedisResponseCache implements ResponseCacheInterface
         $end = new \DateTime();
 
         echo sprintf('KEYS INVALIDATED: %d', $keysInvalidated).PHP_EOL;
-        echo $start->diff($end)->format('%H:%I:%S').PHP_EOL;
+        echo sprintf('TIME ELAPSED: %s', $start->diff($end)->format('%H:%I:%S')).PHP_EOL;
     }
 }
