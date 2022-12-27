@@ -179,29 +179,41 @@ class UserRepository implements UserRepositoryInterface {
         return $dealer;
     }
 
-    public function updateOverlaySettings(int $dealerId, int $overlayEnabled = null, bool $overlay_default = null, string $overlay_logo_position = null, string $overlay_logo_width = null, string $overlay_logo_height = null, string $overlay_upper = null, string $overlay_upper_bg = null, int $overlay_upper_alpha = null, string $overlay_upper_text = null, int $overlay_upper_size = null, int $overlay_upper_margin = null, string $overlay_lower = null, string $overlay_lower_bg = null, int $overlay_lower_alpha = null, string $overlay_lower_text = null, int $overlay_lower_size = null, int $overlay_lower_margin = null, string $overlay_logo_src = null): User {
+    public function updateOverlaySettings($dealerId, $params): User 
+    {
         $dealer = User::findOrFail($dealerId);
-        $dealer->overlay_enabled = $overlayEnabled;
-        $dealer->overlay_default = $overlay_default;
-        $dealer->overlay_logo_position  = $overlay_logo_position;
-        $dealer->overlay_logo_width  = $overlay_logo_width;
-        $dealer->overlay_logo_height  = $overlay_logo_height;
-        $dealer->overlay_upper = $overlay_upper;
-        $dealer->overlay_upper_bg = $overlay_upper_bg;
-        $dealer->overlay_upper_alpha = $overlay_upper_alpha;
-        $dealer->overlay_upper_text = $overlay_upper_text;
-        $dealer->overlay_upper_size = $overlay_upper_size;
-        $dealer->overlay_upper_margin = $overlay_upper_margin;
-        $dealer->overlay_lower = $overlay_lower;
-        $dealer->overlay_lower_bg = $overlay_lower_bg;
-        $dealer->overlay_lower_alpha = $overlay_lower_alpha;
-        $dealer->overlay_lower_text = $overlay_lower_text;
-        $dealer->overlay_lower_size = $overlay_lower_size;
-        $dealer->overlay_lower_margin = $overlay_lower_margin;
-        if($overlay_logo_src !== null) {
-            $dealer->overlay_logo = $overlay_logo_src;
+
+        $overlaySettingFields = [
+            'overlay_logo',
+            'overlay_enabled',
+            'overlay_default',
+            'overlay_logo_position',
+            'overlay_logo_width',
+            'overlay_logo_height',
+            'overlay_upper',
+            'overlay_upper_bg',
+            'overlay_upper_alpha',
+            'overlay_upper_text',
+            'overlay_upper_size',
+            'overlay_upper_margin',
+            'overlay_lower',
+            'overlay_lower_bg',
+            'overlay_lower_alpha',
+            'overlay_lower_text',
+            'overlay_lower_size',
+            'overlay_lower_margin',
+        ];
+
+        // only keep overlay settings fields
+        $params = array_intersect_key($params, array_flip($overlaySettingFields));
+        
+        foreach ($params as $field => $value)
+        {
+            $dealer->$field = $value;
         }
+
         $dealer->save();
+
         return $dealer;
     }
 
