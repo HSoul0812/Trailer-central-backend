@@ -70,7 +70,7 @@ class RedisResponseCache implements ResponseCacheInterface
 
         $end = new \DateTime();
 
-        // echo sprintf('KEYS INVALIDATED: %d', $keysInvalidated).PHP_EOL;
-        // echo $start->diff($end)->format('%H:%I:%S').PHP_EOL;
+        echo sprintf('KEYS INVALIDATED: %d', $keysInvalidated).PHP_EOL;
+        echo $start->diff($end)->format('%H:%I:%S').PHP_EOL;
     }
 }
