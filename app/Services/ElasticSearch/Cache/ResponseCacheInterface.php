@@ -12,7 +12,7 @@ interface ResponseCacheInterface
     public function set(string $key, string $value);
 
     /**
-     * @param string ...$keys
+     * @param string ...$keyPatterns
      */
-    public function forget(string ...$keys);
+    public function forget(string ...$keyPatterns);
 }
