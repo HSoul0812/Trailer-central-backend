@@ -94,14 +94,15 @@ class RedisResponseCache implements ResponseCacheInterface
      */
     private function unlink(int &$cursor, string $pattern): int
     {
-        $keysInvalidated = 0;
+        $numberOfKeysInvalidated = 0;
 
         while (false !== ($keys = $this->client->scan($cursor, $pattern, self::CURSOR_LIMIT))) {
-            $keysInvalidated += count($keys);
+            $numberOfKeysInvalidated += count($keys);
+
             $this->client->unlink($this->removeKeyPrefix($keys));
         }
 
-        return $keysInvalidated;
+        return $numberOfKeysInvalidated;
     }
 
     /**
