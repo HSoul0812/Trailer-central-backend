@@ -39,10 +39,6 @@ class SettingsObserver
     {
         $settings->load('website');
 
-        if ($dealerId = $settings->website->dealer_id) {
-            dispatch(new PaymentCalculatorReIndexJob([$dealerId]));
-        }
-
         $this->deleted($settings);
     }
 
@@ -55,10 +51,6 @@ class SettingsObserver
     public function updated(Settings $settings)
     {
         $settings->load('website');
-
-        if ($dealerId = $settings->website->dealer_id) {
-            dispatch(new PaymentCalculatorReIndexJob([$dealerId]));
-        }
 
         $this->deleted($settings);
     }
@@ -77,6 +69,10 @@ class SettingsObserver
             $this->cacheKey->deleteByDealer($website->dealer_id),
             $this->cacheKey->deleteSingleByDealer($website->dealer_id)
         );
+
+        if ($dealerId = $settings->website->dealer_id) {
+            dispatch(new PaymentCalculatorReIndexJob([$dealerId]));
+        }
     }
 
     /**

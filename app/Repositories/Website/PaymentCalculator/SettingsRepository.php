@@ -8,11 +8,9 @@ use Illuminate\Database\Query\Builder;
 
 class SettingsRepository implements SettingsRepositoryInterface {
 
-    public function create($params) {
-
-        $settings = Settings::create($params);
-
-        return $settings;
+    public function create($params)
+    {
+        return Settings::create($params);
     }
 
     /**
