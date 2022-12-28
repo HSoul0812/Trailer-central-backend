@@ -195,6 +195,12 @@ class InventoryRepository implements InventoryRepositoryInterface
         $inventoryImageObjs = $this->createImages($params['new_images'] ?? []);
         $inventoryFilesObjs = $this->createFiles($params['new_files'] ?? []);
 
+        // Set Geolocation if Not Exists
+        if(empty($params['geolocation'])) {
+            $params['geolocation'] = DB::raw('POINT(0, 0)');
+        }
+
+        // Unset Unneeded Params
         unset($params['attributes']);
         unset($params['features']);
         unset($params['new_images']);
