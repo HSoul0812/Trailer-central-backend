@@ -56,17 +56,8 @@ class RedisResponseCache implements ResponseCacheInterface
      */
     public function invalidate(string ...$keyPatterns): void
     {
-        $prefix = $this->client->getOption(PhpRedis::OPT_PREFIX);
         $start = new DateTime();
         $keysInvalidated = 0;
-
-        $removeKeyPrefix = static function (array $keys) use ($prefix): array {
-            return array_map(
-                static function (string $key) use ($prefix): string {
-                    return str_replace($prefix, '', $key);
-                }, $keys
-            );
-        };
 
         echo sprintf('STARTED: %s', $start->format('H:i:s')).PHP_EOL;
 
@@ -84,18 +75,47 @@ class RedisResponseCache implements ResponseCacheInterface
              */
             if (!empty($keys)) {
                 $keysInvalidated += count($keys);
-                $this->client->unlink($removeKeyPrefix($keys));
-            } else {
-                while (false !== ($keys = $this->client->scan($cursor, $pattern, 1000))) {
-                    $keysInvalidated += count($keys);
-                    $this->client->unlink($removeKeyPrefix($keys));
-                }
+                $this->client->unlink($this->removeKeyPrefix($keys));
             }
+
+            $keysInvalidated += $this->unlink($cursor, $pattern);
         }
 
         $end = new DateTime();
 
         echo sprintf('KEYS INVALIDATED: %d', $keysInvalidated).PHP_EOL;
         echo sprintf('TIME ELAPSED: %s', $start->diff($end)->format('%H:%I:%S')).PHP_EOL;
+    }
+
+    /**
+     * @param  int  &$cursor
+     * @param  string  $pattern
+     * @return int number of deleted keys
+     */
+    private function unlink(int &$cursor, string $pattern): int
+    {
+        $keysInvalidated = 0;
+
+        while (false !== ($keys = $this->client->scan($cursor, $pattern, self::CURSOR_LIMIT))) {
+            $keysInvalidated += count($keys);
+            $this->client->unlink($this->removeKeyPrefix($keys));
+        }
+
+        return $keysInvalidated;
+    }
+
+    /**
+     * @param  array  $keys  list of keys with prefix
+     * @return string[] list of keys without prefix
+     */
+    private function removeKeyPrefix(array $keys): array
+    {
+        $prefix = $this->client->getOption(PhpRedis::OPT_PREFIX);
+
+        return array_map(
+            static function (string $key) use ($prefix): string {
+                return str_replace($prefix, '', $key);
+            }, $keys
+        );
     }
 }
