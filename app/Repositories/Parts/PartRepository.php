@@ -430,7 +430,7 @@ class PartRepository implements PartRepositoryInterface {
                 'v.name AS vendor_name',
                 'b.name AS brand_name',
                 't.name AS type_name',
-                'b.name AS category_name',
+                'c.name AS category_name',
             ])
             ->selectRaw(DB::raw('COALESCE((SELECT SUM(bc.qty) FROM part_bin_qty bc WHERE bc.part_id = p.id), 0) total_qty'))
             ->selectRaw(DB::raw("(SELECT group_concat(i.image_url , '\\n') FROM part_images i WHERE i.part_id = p.id) images"))
@@ -587,6 +587,11 @@ class PartRepository implements PartRepositoryInterface {
             } else if ($query['in_stock'] == self::PARTS_AVAILABLE) {
                 $search->filter('range', ['bins_total_qty' => ['lte' => 0]]);
             }
+        }
+
+        // if part is active
+        if (isset($query['is_active'])) {
+            $search->filter('term', ['is_active' => $query['is_active']]);
         }
 
         // filter by dealer

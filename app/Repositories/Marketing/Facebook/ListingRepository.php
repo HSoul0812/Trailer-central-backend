@@ -46,7 +46,7 @@ class ListingRepository implements ListingRepositoryInterface {
 
     /**
      * Create Facebook Listing
-     * 
+     *
      * @param array $params
      * @return Listing
      */
@@ -69,7 +69,7 @@ class ListingRepository implements ListingRepositoryInterface {
 
     /**
      * Delete Listing
-     * 
+     *
      * @param int $id
      * @throws NotImplementedException
      */
@@ -80,7 +80,7 @@ class ListingRepository implements ListingRepositoryInterface {
 
     /**
      * Get Listing
-     * 
+     *
      * @param array $params
      * @return Listing
      */
@@ -91,7 +91,7 @@ class ListingRepository implements ListingRepositoryInterface {
 
     /**
      * Get All Listings That Match Params
-     * 
+     *
      * @param array $params
      * @return Collection<Listings>
      */
@@ -115,7 +115,7 @@ class ListingRepository implements ListingRepositoryInterface {
 
     /**
      * Update Listing
-     * 
+     *
      * @param array $params
      * @return Listings
      */
@@ -141,7 +141,7 @@ class ListingRepository implements ListingRepositoryInterface {
 
     /**
      * Get All Inventory Missing on Facebook
-     * 
+     *
      * @param Marketplace $integration
      * @param array $params
      * @return Collection<Inventory>
@@ -150,18 +150,21 @@ class ListingRepository implements ListingRepositoryInterface {
     {
         $inventoryTableName = Inventory::getTableName();
         $listingsTableName = Listings::getTableName();
- 
+        $fbMinPrice = INVENTORY::MIN_PRICE_FOR_FACEBOOK;
+
         // Initialize Inventory Query
         $query = Inventory::select(Inventory::getTableName() . '.*')
             ->where('dealer_id', '=', $integration->dealer_id)
             ->where('show_on_website', 1)
             ->where("{$inventoryTableName}.year", '<', '2024') //TODO: remove when Facebook allows this
-            ->where("{$inventoryTableName}.price", '>', INVENTORY::MIN_PRICE_FOR_FACEBOOK)
+            ->whereRaw("(IFNULL($inventoryTableName.sales_price, 0) > $fbMinPrice
+                            OR ($inventoryTableName.use_website_price AND IFNULL($inventoryTableName.website_price, 0) > $fbMinPrice)
+                            OR IFNULL($inventoryTableName.price, 0) > $fbMinPrice)")
             ->where("{$inventoryTableName}.entity_type_id", '<>', EntityType::ENTITY_TYPE_BUILDING)
             ->where("{$inventoryTableName}.entity_type_id", '<>', EntityType::ENTITY_TYPE_VEHICLE)
             ->whereRaw("IFNULL(is_archived, 0) = 0")
             ->whereRaw("IFNULL({$inventoryTableName}.status, -1) NOT IN (2,6)")
-            ->whereRaw("LENGTH({$inventoryTableName}.description) >= " . INVENTORY::MIN_DESCRIPTION_LENGTH_FOR_FACEBOOK)
+            ->whereRaw("LENGTH({$inventoryTableName}.description) >= " . INVENTORY::MIN_DESCRIPTION_LENGTH_FOR_FACEBOOK ." OR LENGTH({$inventoryTableName}.description_html) >= " . (2 * INVENTORY::MIN_DESCRIPTION_LENGTH_FOR_FACEBOOK))
             ->has('orderedImages');
 
         // Append Join
@@ -209,7 +212,7 @@ class ListingRepository implements ListingRepositoryInterface {
 
     /**
      * Get All Inventory To Delete on Facebook
-     * 
+     *
      * @param Marketplace $integration
      * @param array $params
      * @return LengthAwarePaginator<Listings>
@@ -244,7 +247,7 @@ class ListingRepository implements ListingRepositoryInterface {
 
     /**
      * Count Inventory posted today on Facebook
-     * 
+     *
      * @param Marketplace $integration
      * @return int
      */
