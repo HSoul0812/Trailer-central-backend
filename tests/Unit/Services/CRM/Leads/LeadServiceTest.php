@@ -254,6 +254,12 @@ class LeadServiceTest extends TestCase
             ->with($createSourceParams)
             ->andReturn($source);
 
+        // Mock Customer Repository
+        $this->customerRepositoryMock
+            ->shouldReceive('createFromLead')
+            ->once()
+            ->with($lead);
+
         // Get Lead Types
         $lead->shouldReceive('getLeadTypesAttribute')
              ->twice()
@@ -391,6 +397,12 @@ class LeadServiceTest extends TestCase
             ->once()
             ->with($createSourceParams)
             ->andReturn($source);
+
+        // Mock Customer Repository
+        $this->customerRepositoryMock
+            ->shouldReceive('createFromLead')
+            ->once()
+            ->with($lead);
 
         // Get Lead Types
         $lead->shouldReceive('getLeadTypesAttribute')
