@@ -77,9 +77,9 @@ use App\Services\Inventory\InventoryServiceInterface;
 use App\Services\Inventory\Packages\PackageService;
 use App\Services\Inventory\Packages\PackageServiceInterface;
 use Illuminate\Support\Facades\Redis;
-use \Redis as PhpRedis;
 use Illuminate\Support\ServiceProvider;
 use Validator;
+
 /**
  * Class InventoryServiceProvider
  * @package App\Providers
