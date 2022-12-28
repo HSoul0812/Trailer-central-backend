@@ -23,11 +23,17 @@ class ImageRepository implements ImageRepositoryInterface
 
     /**
      * @param $params
-     * @throws NotImplementedException
+     * @return bool
      */
     public function update($params)
     {
-        throw new NotImplementedException;
+        $imageId = $params['id'];
+
+        $image = Image::findOrFail($imageId);
+
+        unset($params['id']);
+
+        return $image->update($params);
     }
 
     /**

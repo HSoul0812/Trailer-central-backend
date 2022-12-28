@@ -170,6 +170,9 @@ class LeadService implements LeadServiceInterface
             $this->updateUnitsOfInterest($lead, $params['inventory']);
         }
 
+        // Create Customer if Not Exist
+        $this->customerRepository->createFromLead($lead);
+
         // Return Full Lead Details
         return $lead;
     }
