@@ -35,7 +35,8 @@ $factory->define(Inventory::class, static function (Faker $faker, array $attribu
     if(!empty($attributes['manufacturer']) || !empty($mfg->id)) {
         $mfg_id = $mfg->id ?? Manufacturers::where('name', $attributes['manufacturer'])->first()->id;
     } else {
-        $mfg_id = factory(Manufacturers::class)->create()->getKey();
+        $mfg = factory(Manufacturers::class)->create();
+        $mfg_id = $mfg->getKey();
     }
 
     // Get Showroom Model
