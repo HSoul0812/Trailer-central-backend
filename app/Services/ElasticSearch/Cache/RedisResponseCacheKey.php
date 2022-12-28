@@ -17,13 +17,16 @@ class RedisResponseCacheKey implements ResponseCacheKeyInterface
     {
         $inventories = collect([]);
         $dealers = collect([]);
+
         foreach ($result->hints as $hint) {
             $inventories->push($hint->_source->id);
             $dealers->push($hint->_source->dealerId);
         }
+
         $dealers = $dealers->unique()->map(function ($dealer) {
             return 'dealer:' . $dealer;
         })->join(self::SEPARATOR);
+
         $inventories = $inventories->join(self::SEPARATOR);
 
         return sprintf('inventories.%s_%s_%s_', $requestId, $dealers, $inventories);
