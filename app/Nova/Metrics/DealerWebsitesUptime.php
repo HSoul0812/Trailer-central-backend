@@ -9,7 +9,7 @@ use Laravel\Nova\Metrics\Value;
 
 class DealerWebsitesUptime extends Value
 {
-    public const DEALER_WEBSITES_UPTIME_KEY = 'database:dealer_websites_uptime';
+    public const DEALER_WEBSITES_UPTIME_KEY = 'dealer_websites_uptime';
 
     /**
      * Get the displayable name of the metric
