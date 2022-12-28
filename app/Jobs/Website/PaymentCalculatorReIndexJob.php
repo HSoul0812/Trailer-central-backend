@@ -4,7 +4,6 @@ namespace App\Jobs\Website;
 
 use App\Jobs\Job;
 use App\Models\Inventory\Inventory;
-use App\Models\User\User;
 
 class PaymentCalculatorReIndexJob extends Job
 {
