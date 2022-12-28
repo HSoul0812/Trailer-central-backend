@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Jobs\Website\PaymentCalculatorReIndexJob;
 use App\Models\Website\PaymentCalculator\Settings;
 use App\Services\ElasticSearch\Cache\ResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
@@ -36,6 +37,12 @@ class SettingsObserver
      */
     public function created(Settings $settings)
     {
+        $settings->load('website');
+
+        if ($dealerId = $settings->website->dealer_id) {
+            dispatch(new PaymentCalculatorReIndexJob([$dealerId]));
+        }
+
         $this->deleted($settings);
     }
 
@@ -47,6 +54,12 @@ class SettingsObserver
      */
     public function updated(Settings $settings)
     {
+        $settings->load('website');
+
+        if ($dealerId = $settings->website->dealer_id) {
+            dispatch(new PaymentCalculatorReIndexJob([$dealerId]));
+        }
+
         $this->deleted($settings);
     }
 
