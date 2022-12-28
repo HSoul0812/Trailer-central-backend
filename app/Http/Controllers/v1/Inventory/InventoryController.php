@@ -238,7 +238,7 @@ class InventoryController extends RestfulControllerV2
         $response = $this->itemResponse($data, new InventoryTransformer());
 
         $this->responseCache->set(
-            $this->responseCacheKey->single($data->inventory_id),
+            $this->responseCacheKey->single($data->inventory_id, $data->dealer_id),
             $response->morph('json')->getContent()
         );
 
