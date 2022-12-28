@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
 use App\Repositories\Bulk\Inventory\BulkDownloadRepository;
 use App\Repositories\Bulk\Inventory\BulkDownloadRepositoryInterface;
 use App\Repositories\Bulk\Inventory\BulkUploadRepository;
@@ -77,6 +78,7 @@ use App\Services\Inventory\InventoryService;
 use App\Services\Inventory\InventoryServiceInterface;
 use App\Services\Inventory\Packages\PackageService;
 use App\Services\Inventory\Packages\PackageServiceInterface;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\ServiceProvider;
 use Validator;
 
@@ -142,8 +144,16 @@ class InventoryServiceProvider extends ServiceProvider
         $this->app->bind(BulkDownloadJobServiceInterface::class, BulkDownloadJobService::class);
         $this->app->bind(BulkPdfJobServiceInterface::class, BulkPdfJobService::class);
         $this->app->bind(BulkUploadRepositoryInterface::class, BulkUploadRepository::class);
-        $this->app->bind(ResponseCacheInterface ::class, RedisResponseCache::class);
+
         $this->app->bind(ResponseCacheKeyInterface::class, RedisResponseCacheKey::class);
         $this->app->bind(ImageServiceInterface::class, ImageService::class);
+
+        $this->app->bindMethod(InvalidateCacheJob::class.'@handle', function (InvalidateCacheJob $job): void {
+            $job->handle($this->app->make(ResponseCacheInterface::class));
+        });
+
+        $this->app->bind(ResponseCacheInterface::class, function (): RedisResponseCache {
+            return new RedisResponseCache(Redis::client());
+        });
     }
 }
