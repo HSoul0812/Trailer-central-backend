@@ -154,7 +154,7 @@ class InventoryServiceProvider extends ServiceProvider
         });
 
         $this->app->bind(ResponseCacheInterface::class, function (): RedisResponseCache {
-            return new RedisResponseCache(Redis::client('sdk-cache'));
+            return new RedisResponseCache(Redis::connection('sdk-cache')->client());
         });
     }
 }

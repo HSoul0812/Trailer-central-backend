@@ -190,7 +190,7 @@ return [
             'host' => env('REDIS_HOST', '127.0.0.1'),
             'password' => env('REDIS_PASSWORD', null),
             'port' => env('REDIS_PORT', '6379'),
-            'dbNum' => env('REDIS_SDK_CACHE_DB', '4'),
+            'database' => env('REDIS_SDK_CACHE_DB', '4'),
         ],
 
         'dealer-proxy' => [
