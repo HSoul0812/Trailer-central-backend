@@ -174,4 +174,16 @@ interface DealerOptionsServiceInterface
      * @return bool
      */
     public function changeStatus(int $dealerId, string $status): bool;
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function activateGoogleFeed(int $dealerId): bool;
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateGoogleFeed(int $dealerId): bool;
 }
