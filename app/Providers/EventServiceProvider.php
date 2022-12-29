@@ -4,7 +4,11 @@ namespace App\Providers;
 
 use App\Listeners\CRM\Email\SesMessageSentNotification;
 use App\Models\Inventory\Inventory;
+use App\Models\Inventory\InventoryImage;
+use App\Models\Website\PaymentCalculator\Settings;
+use App\Observers\InventoryImageObserver;
 use App\Observers\InventoryObserver;
+use App\Observers\SettingsObserver;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -36,5 +40,7 @@ class EventServiceProvider extends ServiceProvider
         parent::boot();
 
         Inventory::observe(InventoryObserver::class);
+        Settings::observe(SettingsObserver::class);
+        InventoryImage::observe(InventoryImageObserver::class);
     }
 }
