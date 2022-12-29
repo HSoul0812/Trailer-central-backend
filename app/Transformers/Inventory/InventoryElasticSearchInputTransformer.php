@@ -191,7 +191,7 @@ class InventoryElasticSearchInputTransformer implements Transformer
             'featureList.lq'        => $model->getFeatureById(InventoryFeature::LQ)->values()->toArray(),
             'featureList.doorsWindowsRamps'=> $model->getFeatureById(InventoryFeature::DOORS_WINDOWS_RAMPS)->values()->toArray(),
 
-            'image'                => $defaultImage ? $defaultImage->image->filename : null,
+            'image'                => $defaultImage,
             'images'               => $primaryImages,
             'imagesSecondary'      => $secondaryImages,
             'numberOfImages'       => count($primaryImages) + count($secondaryImages),
