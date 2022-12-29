@@ -36,7 +36,9 @@ class InventoryObserver
      */
     public function created(Inventory $inventory)
     {
-        $this->responseCache->forget($this->cacheKey->deleteByDealer($inventory->dealer_id));
+        if (config('cache.inventory')) {
+            $this->responseCache->forget($this->cacheKey->deleteByDealer($inventory->dealer_id));
+        }
     }
 
     /**
@@ -47,10 +49,12 @@ class InventoryObserver
      */
     public function updated(Inventory $inventory)
     {
-        $this->responseCache->forget(
-            $this->cacheKey->deleteByDealer($inventory->dealer_id),
-            $this->cacheKey->deleteSingle($inventory->inventory_id)
-        );
+        if (config('cache.inventory')) {
+            $this->responseCache->forget(
+                $this->cacheKey->deleteByDealer($inventory->dealer_id),
+                $this->cacheKey->deleteSingle($inventory->inventory_id)
+            );
+        }
     }
 
     /**
@@ -61,10 +65,12 @@ class InventoryObserver
      */
     public function deleted(Inventory $inventory)
     {
-        $this->responseCache->forget(
-            $this->cacheKey->deleteSingleFromCollection($inventory->inventory_id),
-            $this->cacheKey->deleteSingle($inventory->inventory_id)
-        );
+        if (config('cache.inventory')) {
+            $this->responseCache->forget(
+                $this->cacheKey->deleteSingleFromCollection($inventory->inventory_id),
+                $this->cacheKey->deleteSingle($inventory->inventory_id)
+            );
+        }
     }
 
     /**
@@ -75,7 +81,9 @@ class InventoryObserver
      */
     public function restored(Inventory $inventory)
     {
-        $this->responseCache->forget($this->cacheKey->deleteByDealer($inventory->dealer_id));
+        if (config('cache.inventory')) {
+            $this->responseCache->forget($this->cacheKey->deleteByDealer($inventory->dealer_id));
+        }
     }
 
     /**
