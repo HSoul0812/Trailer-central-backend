@@ -856,6 +856,16 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query->groupBy('inventory.inventory_id');
         }
 
+        if (isset($params['visible'])) {
+            $query = $query->join('dealer', 'dealer.dealer_id', '=', 'inventory.dealer_id');
+            if ($params['visible']) {
+                $query = $query->where('clsf_active', $params['visible'])->where('show_on_website', $params['visible']);
+            } else {
+                $query = $query->where('clsf_active', $params['visible'])->orWhere('show_on_website', $params['visible']);
+            }
+
+        }
+
         return $query;
     }
 
@@ -1128,17 +1138,17 @@ class InventoryRepository implements InventoryRepositoryInterface
 
     /**
      * Get necessary parameters to generate overlays
-     * 
+     *
      * @param int $inventoryId
      * @return array
      */
     public function getOverlayParams(int $inventoryId)
     {
-        $query = Inventory::select(User::getTableName() .'.dealer_id', 'inventory_id', 'overlay_logo', 'overlay_logo_position', 'overlay_logo_width', 'overlay_logo_height', 
+        $query = Inventory::select(User::getTableName() .'.dealer_id', 'inventory_id', 'overlay_logo', 'overlay_logo_position', 'overlay_logo_width', 'overlay_logo_height',
             'overlay_upper', 'overlay_upper_bg', 'overlay_upper_alpha', 'overlay_upper_text', 'overlay_upper_size', 'overlay_upper_margin',
             'overlay_lower', 'overlay_lower_bg', 'overlay_lower_alpha', 'overlay_lower_text', 'overlay_lower_size', 'overlay_lower_margin',
             'overlay_default', Inventory::getTableName() .'.overlay_enabled', User::getTableName() .'.overlay_enabled AS dealer_overlay_enabled',
-            User::getTableName() .'.name AS overlay_text_dealer', DealerLocation::getTableName() .'.phone AS overlay_text_phone', 
+            User::getTableName() .'.name AS overlay_text_dealer', DealerLocation::getTableName() .'.phone AS overlay_text_phone',
             \DB::raw("CONCAT(".DealerLocation::getTableName() .".city, ', ',".DealerLocation::getTableName() .".region) AS overlay_text_location"))
         ->leftJoin(User::getTableName(), Inventory::getTableName() .'.dealer_id', '=', User::getTableName() .'.dealer_id')
         ->leftJoin(DealerLocation::getTableName(), Inventory::getTableName() .'.dealer_location_id', '=', DealerLocation::getTableName() .'.dealer_location_id')
