@@ -107,4 +107,9 @@ class SearchInventoryRequest extends Request
             'debug' => ['required', 'boolean']
         ];
     }
+
+    public function requestId()
+    {
+        return $this->json('request_id');
+    }
 }

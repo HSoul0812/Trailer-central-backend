@@ -11,18 +11,27 @@ use App\Models\Inventory\Inventory;
 use App\Models\Inventory\InventoryFeature;
 use App\Models\Inventory\InventoryImage;
 use App\Repositories\Website\PaymentCalculator\SettingsRepositoryInterface;
+use Illuminate\Database\Eloquent\Collection;
 
 class InventoryElasticSearchInputTransformer implements Transformer
 {
+    /** @var InventoryImageTransformer  */
+    private $inventoryImageTransformer;
+
+    public function __construct()
+    {
+        $this->inventoryImageTransformer = new InventoryImageTransformer;
+    }
+
     /**
      * @param Inventory $model
      * @return array
      */
     public function transform($model): array
     {
-        $primaryImages = $model->orderedPrimaryImages();
-        $secondaryImages = $model->orderedSecondaryImages();
-        $defaultImage = $primaryImages->first();
+        $primaryImages = $this->transformPrimaryImages($model->inventoryImages);
+        $secondaryImages = $this->transformSecondaryImages($model->inventoryImages);
+        $defaultImage = $primaryImages[0] ?? null;
         $geolocation = $model->geolocationPoint();
         $paymentCalculatorSettings = $this->settingsRepository()->getCalculatedSettingsByInventory($model);
 
@@ -47,9 +56,9 @@ class InventoryElasticSearchInputTransformer implements Transformer
             'model'                => $model->model,
             'description'          => $model->description,
             'description_html'     => $model->description_html,
-            'status'               => $model->status,
-            'availability'         => $model->availability,
-            'availabilityLabel'    => $model->status_label,
+            'status'               => $model->status ?? Inventory::STATUS_AVAILABLE,
+            'availability'         => $model->availability ?? strtolower(Inventory::STATUS_AVAILABLE_LABEL),
+            'availabilityLabel'    => $model->status_label ?? Inventory::STATUS_AVAILABLE_LABEL,
             'typeLabel'            => $model->type_label,
             'category'             => $model->category,
             'categoryLabel'        => $model->category_label,
@@ -182,10 +191,10 @@ class InventoryElasticSearchInputTransformer implements Transformer
             'featureList.lq'        => $model->getFeatureById(InventoryFeature::LQ)->values()->toArray(),
             'featureList.doorsWindowsRamps'=> $model->getFeatureById(InventoryFeature::DOORS_WINDOWS_RAMPS)->values()->toArray(),
 
-            'image'                => $defaultImage ? $defaultImage->image->filename : null,
-            'images'               => $primaryImages->map($this->imagesMapper())->values()->toArray(),
-            'imagesSecondary'      => $secondaryImages->map($this->imagesMapper())->values()->toArray(),
-            'numberOfImages'       => $primaryImages->count() + $secondaryImages->count(),
+            'image'                => $defaultImage,
+            'images'               => $primaryImages,
+            'imagesSecondary'      => $secondaryImages,
+            'numberOfImages'       => count($primaryImages) + count($secondaryImages),
             'widthInches'          => TypesHelper::ensureNumeric($model->width_inches),
             'heightInches'         => TypesHelper::ensureNumeric($model->height_inches),
             'lengthInches'         => TypesHelper::ensureNumeric($model->length_inches),
@@ -208,5 +217,37 @@ class InventoryElasticSearchInputTransformer implements Transformer
     protected function settingsRepository(): SettingsRepositoryInterface
     {
         return app(SettingsRepositoryInterface::class);
+    }
+
+    private function imageSorter(): callable
+    {
+        return static function (InventoryImage $image): int {
+            // when the position is null, it will sorted a last position
+            $position = $image->position ?: InventoryImage::LAST_IMAGE_POSITION;
+
+            return $image->isDefault() ? InventoryImage::FIRST_IMAGE_POSITION : $position;
+        };
+    }
+
+    /**
+     * @param Collection $images
+     * @return array
+     */
+    private function transformPrimaryImages(Collection $images): array
+    {
+        return $images->sortBy($this->imageSorter())->values()->filter(function (InventoryImage $image) {
+            return !$image->isSecondary();
+        })->map(function (InventoryImage $image) { return $image->image->filename; })->values()->toArray();
+    }
+
+    /**
+     * @param Collection $images
+     * @return array
+     */
+    private function transformSecondaryImages(Collection $images): array
+    {
+        return $images->sortBy($this->imageSorter())->values()->filter(function (InventoryImage $image) {
+            return $image->isSecondary();
+        })->map(function (InventoryImage $image) { return $image->image->filename; })->values()->toArray();
     }
 }
