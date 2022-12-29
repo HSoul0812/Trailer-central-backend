@@ -171,7 +171,8 @@ class MarketplaceService implements MarketplaceServiceInterface
             'auth_code' => $integration->tfa_code,
             'auth_type' => $integration->tfa_type,
             'tunnels' => $this->tunnels->getAll(['dealer_id' => $integration->dealer_id]),
-            'inventory' => !$integration->is_up_to_date ? $this->getInventory($integration, $type, $params) : null
+            'missing' => !$integration->is_up_to_date ? $this->getInventory($integration, 'missing', $params) : null,
+            'sold' => !$integration->is_up_to_date ? $this->getInventory($integration, 'sold', $params) : null
         ]);
         $nowTime = microtime(true);
         $this->log->info('Debug time after creating DealerFacebook: ' . ($nowTime - $startTime));
@@ -361,6 +362,7 @@ class MarketplaceService implements MarketplaceServiceInterface
         // Loop Through Inventory Items
         $listings = new Collection();
         foreach($inventory as $listing) {
+
             if($type === MarketplaceStatus::METHOD_MISSING) {
                 $item = InventoryFacebook::getFromInventory($listing, $integration);
             } else {

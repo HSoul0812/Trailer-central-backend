@@ -73,7 +73,12 @@ class DealerFacebook
     /**
      * @var Collection<InventoryFacebook>
      */
-    private $inventory;
+    private $missing;
+
+    /**
+     * @var Collection<InventoryFacebook>
+     */
+    private $sold;
 
     /**
      * @var $string
