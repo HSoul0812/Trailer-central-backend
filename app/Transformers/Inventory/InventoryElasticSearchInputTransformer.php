@@ -207,13 +207,6 @@ class InventoryElasticSearchInputTransformer implements Transformer
         ];
     }
 
-    private function imagesMapper(): callable
-    {
-        return static function (InventoryImage $image) {
-            return $image->image->filename;
-        };
-    }
-
     protected function settingsRepository(): SettingsRepositoryInterface
     {
         return app(SettingsRepositoryInterface::class);
