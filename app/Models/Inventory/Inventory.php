@@ -469,28 +469,6 @@ class Inventory extends Model
         });
     }
 
-//    public function orderedPrimaryImages(): Collection
-//    {
-//        return $this->orderedImages->sort(function (InventoryImage $a, InventoryImage $b) {
-//            if($a->isDefault()) {
-//                return 0;
-//            }
-//
-//            return $a->position - $b->position;
-//        });
-//    }
-//
-//    public function orderedSecondaryImages(): Collection
-//    {
-//        return $this->orderedImages->sort(function (InventoryImage $a, InventoryImage $b) {
-//            if($a->isSecondary()) {
-//                return 0;
-//            }
-//
-//            return $a->position - $b->position;
-//        });
-//    }
-
     public function images(): HasManyThrough
     {
         return $this->hasManyThrough(Image::class, InventoryImage::class, 'inventory_id', 'image_id', 'inventory_id', 'image_id');

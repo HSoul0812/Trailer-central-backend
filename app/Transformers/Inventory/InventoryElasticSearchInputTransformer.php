@@ -193,8 +193,8 @@ class InventoryElasticSearchInputTransformer implements Transformer
 
             'image'                => $defaultImage ? $defaultImage->image->filename : null,
             'images'               => $primaryImages,
-            'imagesSecondary'      => $secondaryImages->map($this->imagesMapper())->values()->toArray(),
-            'numberOfImages'       => $primaryImages->count() + $secondaryImages->count(),
+            'imagesSecondary'      => $secondaryImages,
+            'numberOfImages'       => count($primaryImages) + count($secondaryImages),
             'widthInches'          => TypesHelper::ensureNumeric($model->width_inches),
             'heightInches'         => TypesHelper::ensureNumeric($model->height_inches),
             'lengthInches'         => TypesHelper::ensureNumeric($model->length_inches),
@@ -237,7 +237,7 @@ class InventoryElasticSearchInputTransformer implements Transformer
     {
         return $images->sortBy($this->imageSorter())->values()->filter(function (InventoryImage $image) {
             return !$image->isSecondary();
-        })->map(function (InventoryImage $image) { return $image->image->filename; })->toArray();
+        })->map(function (InventoryImage $image) { return $image->image->filename; })->values()->toArray();
     }
 
     /**
@@ -248,6 +248,6 @@ class InventoryElasticSearchInputTransformer implements Transformer
     {
         return $images->sortBy($this->imageSorter())->values()->filter(function (InventoryImage $image) {
             return $image->isSecondary();
-        })->map(function (InventoryImage $image) { return $image->image->filename; })->toArray();
+        })->map(function (InventoryImage $image) { return $image->image->filename; })->values()->toArray();
     }
 }
