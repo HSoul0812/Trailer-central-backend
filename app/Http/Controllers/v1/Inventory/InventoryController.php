@@ -237,10 +237,12 @@ class InventoryController extends RestfulControllerV2
 
         $response = $this->itemResponse($data, new InventoryTransformer());
 
-        $this->responseCache->set(
-            $this->responseCacheKey->single($data->inventory_id, $data->dealer_id),
-            $response->morph('json')->getContent()
-        );
+        if (config('cache.inventory')) {
+            $this->responseCache->set(
+                $this->responseCacheKey->single($data->inventory_id, $data->dealer_id),
+                $response->morph('json')->getContent()
+            );
+        }
 
         return $response;
     }
@@ -540,7 +542,7 @@ class InventoryController extends RestfulControllerV2
             }
 
             //Cache only if there are results
-            if ($result->hints->count()) {
+            if ($result->hints->count() && config('cache.inventory')) {
                 $this->responseCache->set(
                     $this->responseCacheKey->collection($searchRequest->requestId(), $result),
                     $response->morph('json')->getContent()

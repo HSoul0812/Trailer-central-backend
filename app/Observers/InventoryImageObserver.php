@@ -58,10 +58,12 @@ class InventoryImageObserver
      */
     public function deleted(InventoryImage $image)
     {
-        $this->responseCache->forget(
-            $this->cacheKey->deleteSingleFromCollection($image->inventory_id),
-            $this->cacheKey->deleteSingle($image->inventory_id)
-        );
+        if (config('cache.inventory')) {
+            $this->responseCache->forget(
+                $this->cacheKey->deleteSingleFromCollection($image->inventory_id),
+                $this->cacheKey->deleteSingle($image->inventory_id)
+            );
+        }
     }
 
     /**
