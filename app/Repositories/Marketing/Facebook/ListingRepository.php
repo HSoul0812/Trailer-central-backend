@@ -216,20 +216,18 @@ class ListingRepository implements ListingRepositoryInterface {
      */
     public function getAllSold(Marketplace $integration, array $params): LengthAwarePaginator {
         // Initialize Inventory Query
-        $query = Listings::select(Listings::getTableName().'.*')
-                          ->where(Listings::getTableName().'.username', '=', $integration->fb_username)
-                          ->where(Listings::getTableName().'.page_id', '=', $integration->page_id ?? '0')
-                          ->whereNotNull(Listings::getTableName() . '.facebook_id')
-                          ->where(Listings::getTableName() . '.status', Listings::STATUS_ACTIVE)
-                          ->leftJoin(Inventory::getTableName(), Listings::getTableName() . '.inventory_id',
-                                        '=', Inventory::getTableName() . '.inventory_id')
-                          ->where(function(Builder $query) {
-                                $query = $query->where(Inventory::getTableName() . '.status', 2)
-                                               ->orWhere(Inventory::getTableName() . '.status', 6)
-                                               ->orWhere(Inventory::getTableName() . '.is_archived', 1)
-                                               ->orWhere(Inventory::getTableName() . '.show_on_website', 0)
-                                               ->orWhereNull(Inventory::getTableName() . '.inventory_id');
-                          });
+        $query = Listings::select(Listings::getTableName() . '.*')
+            ->join(Inventory::getTableName(), Listings::getTableName() . '.inventory_id', '=', Inventory::getTableName() . '.inventory_id')
+            ->where(Listings::getTableName() . '.username', '=', $integration->fb_username)
+            ->where(Listings::getTableName() . '.page_id', '=', $integration->page_id ?? '0')
+            ->where(Listings::getTableName() . '.status', Listings::STATUS_ACTIVE)
+            ->where(function (Builder $query) {
+                $query = $query->where(Inventory::getTableName() . '.status', 2)
+                    ->orWhere(Inventory::getTableName() . '.status', 6)
+                    ->orWhere(Inventory::getTableName() . '.is_archived', 1)
+                    ->orWhere(Inventory::getTableName() . '.show_on_website', 0)
+                    ->orWhereNull(Inventory::getTableName() . '.inventory_id');
+            });
 
         if (!isset($params['per_page'])) {
             $params['per_page'] = 20;
