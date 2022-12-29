@@ -15,14 +15,6 @@ use Illuminate\Database\Eloquent\Collection;
 
 class InventoryElasticSearchInputTransformer implements Transformer
 {
-    /** @var InventoryImageTransformer  */
-    private $inventoryImageTransformer;
-
-    public function __construct()
-    {
-        $this->inventoryImageTransformer = new InventoryImageTransformer;
-    }
-
     /**
      * @param Inventory $model
      * @return array
