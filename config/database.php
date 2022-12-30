@@ -225,5 +225,13 @@ return [
                 'prefix' => env('REDIS_PERSIST_PREFIX', '')
             ]
         ],
+
+        'inventory-job-cache' => [
+            'url' => env('REDIS_URL'),
+            'host' => env('REDIS_HOST', '127.0.0.1'),
+            'password' => env('REDIS_PASSWORD', null),
+            'port' => env('REDIS_PORT', '6379'),
+            'database' => env('REDIS_INVENTORY_JOB_CACHE_DB', '5'),
+        ],
     ],
 ];
