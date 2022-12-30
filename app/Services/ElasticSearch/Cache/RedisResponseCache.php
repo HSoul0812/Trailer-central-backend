@@ -52,9 +52,9 @@ class RedisResponseCache implements ResponseCacheInterface
         $keyPatterns = $this->uniqueCacheInvalidation->keysWithNoJobs($keyPatterns);
 
         if (count($keyPatterns)) {
-            $job = new InvalidateCacheJob($keyPatterns);
 
-            $this->dispatch($job->onQueue('inventory'));
+            $this->uniqueCacheInvalidation->createJobsForKeys($keyPatterns);
+            $this->dispatch(new InvalidateCacheJob($keyPatterns));
         }
     }
 

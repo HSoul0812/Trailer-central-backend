@@ -67,6 +67,8 @@ use App\Services\ElasticSearch\Inventory\FieldMapperService;
 use App\Services\ElasticSearch\Inventory\InventoryFieldMapperServiceInterface;
 use App\Services\ElasticSearch\Inventory\InventoryQueryBuilderInterface;
 use App\Services\Import\Inventory\CsvImportService;
+use App\Services\Inventory\ImageService;
+use App\Services\Inventory\ImageServiceInterface;
 use App\Services\Import\Inventory\CsvImportServiceInterface;
 use App\Services\Inventory\CustomOverlay\CustomOverlayService;
 use App\Services\Inventory\CustomOverlay\CustomOverlayServiceInterface;
@@ -144,6 +146,8 @@ class InventoryServiceProvider extends ServiceProvider
         $this->app->bind(BulkDownloadJobServiceInterface::class, BulkDownloadJobService::class);
         $this->app->bind(BulkPdfJobServiceInterface::class, BulkPdfJobService::class);
         $this->app->bind(BulkUploadRepositoryInterface::class, BulkUploadRepository::class);
+
+        $this->app->bind(ImageServiceInterface::class, ImageService::class);
 
         $this->app->bind(ResponseCacheKeyInterface::class, RedisResponseCacheKey::class);
         $this->app->bind(UniqueCacheInvalidationInterface::class, function (): UniqueCacheInvalidation {

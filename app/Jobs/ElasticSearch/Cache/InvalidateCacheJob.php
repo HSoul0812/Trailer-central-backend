@@ -11,6 +11,15 @@ class InvalidateCacheJob extends Job
     /** @var string[] */
     private $keyPatterns;
 
+    public $tries = 1;
+
+    public $queue = 'inventory';
+
+    public function tags(): array
+    {
+        return ['cache-invalidation'];
+    }
+
     /**
      * @param array $keyPatterns
      */
@@ -21,15 +30,11 @@ class InvalidateCacheJob extends Job
 
     public function handle(ResponseCacheInterface $service, UniqueCacheInvalidationInterface $uniqueCacheInvalidation): void
     {
-        $uniqueCacheInvalidation->createJobsForKeys($this->keyPatterns);
         $service->invalidate(...$this->keyPatterns);
         $uniqueCacheInvalidation->removeJobsForKeys($this->keyPatterns);
     }
-    
-    /**
-     * @return void
-     */
-    public function failed()
+
+    public function failed(): void
     {
         app(UniqueCacheInvalidationInterface::class)->removeJobsForKeys($this->keyPatterns);
     }
