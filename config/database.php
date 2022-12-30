@@ -185,6 +185,10 @@ return [
             'database' => env('REDIS_CACHE_DB', '1'),
         ],
 
+        /**
+         * This new connection is aimed to help us to flush only this db, so we will avoid mistake,
+         * also this is faster and safe
+         */
         'sdk-cache' => [
             'url' => env('REDIS_URL'),
             'host' => env('REDIS_HOST', '127.0.0.1'),
