@@ -8,8 +8,6 @@ use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\Export\LeadEmail;
 use App\Models\Inventory\Inventory;
 use App\Repositories\CRM\Leads\Export\LeadEmailRepositoryInterface;
-use App\Repositories\Inventory\InventoryRepositoryInterface;
-use App\Repositories\User\UserRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Services\CRM\Leads\DTOs\ADFLead;
@@ -25,16 +23,6 @@ class ADFService implements ADFServiceInterface
     protected $leadEmailRepository;
 
     /**
-     * @var App\Repositories\CRM\Inventory\InventoryRepositoryInterface
-     */
-    protected $inventoryRepository;
-
-    /**
-     * @var App\Repositories\User\UserRepositoryInterface
-     */
-    protected $userRepository;
-
-    /**
      * @var App\Repositories\User\DealerLocationRepositoryInterface
      */
     protected $dealerLocationRepository;
@@ -48,14 +36,10 @@ class ADFService implements ADFServiceInterface
 
     public function __construct(
         LeadEmailRepositoryInterface $leadEmailRepository,
-        InventoryRepositoryInterface $inventoryRepository,
-        UserRepositoryInterface $userRepository,
         WebsiteConfigRepositoryInterface $websiteConfig,
         DealerLocationRepositoryInterface $dealerLocationRepository
     ) {
         $this->leadEmailRepository = $leadEmailRepository;
-        $this->inventoryRepository = $inventoryRepository;
-        $this->userRepository = $userRepository;
         $this->websiteConfig = $websiteConfig;
         $this->dealerLocationRepository = $dealerLocationRepository;
     }
