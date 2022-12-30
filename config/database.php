@@ -226,6 +226,10 @@ return [
             ]
         ],
 
+        /**
+         * This new connection is aimed to have isolated the invalidation jobs, so we will ensure we will have only
+         * one job per invalidation key pattern, avoiding to have many jobs using resources.
+         */
         'inventory-job-cache' => [
             'url' => env('REDIS_URL'),
             'host' => env('REDIS_HOST', '127.0.0.1'),
