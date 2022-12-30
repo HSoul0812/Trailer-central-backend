@@ -59,7 +59,9 @@ class CollectorSpecificationRule extends Resource
                 ->sortable()
                 ->rules('required')
                 ->help(
-                    'For example, "Category". If it\'s needed, the path can be specified (for instance, Details/Category)'
+                    'For example, "Category". If it\'s needed, the path can be specified (for instance, Details/Category)<br>
+                    Service fields:<br>
+                    ###service_data_url### - relevant when several files from different sources are specified for one collector'
                 ),
 
             Text::make('Incoming Value', 'value')
