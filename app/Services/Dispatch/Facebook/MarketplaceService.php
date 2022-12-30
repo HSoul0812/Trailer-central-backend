@@ -154,7 +154,7 @@ class MarketplaceService implements MarketplaceServiceInterface
 
         // Get Types
         $type = !empty($params['type']) ? $params['type'] : MarketplaceInventory::METHOD_DEFAULT;
-        if(empty(MarketplaceStatus::INVENTORY_METHODS[$type])) {
+        if (empty(MarketplaceStatus::INVENTORY_METHODS[$type])) {
             $type = MarketplaceInventory::METHOD_DEFAULT;
         }
 
@@ -356,18 +356,19 @@ class MarketplaceService implements MarketplaceServiceInterface
 
         // Get Inventory
         $inventory = $this->listings->{$method}($integration, $params);
+
         $nowTime = microtime(true);
         $this->log->info('Debug time after ' . $method . ': ' . ($nowTime - $startTime));
 
         // Loop Through Inventory Items
         $listings = new Collection();
-        foreach($inventory as $listing) {
-
-            if($type === MarketplaceStatus::METHOD_MISSING) {
+        foreach ($inventory as $listing) {
+            if ($type === MarketplaceStatus::METHOD_MISSING) {
                 $item = InventoryFacebook::getFromInventory($listing, $integration);
             } else {
                 $item = InventoryFacebook::getFromListings($listing);
             }
+
             $listings->push($item);
             $nowTime = microtime(true);
             $this->log->info('Debug time InventoryFacebook #' . $listing->inventory_id . ': ' . ($nowTime - $startTime));
