@@ -2,22 +2,15 @@
 
 namespace App\Repositories\Website\PaymentCalculator;
 
-use App\Jobs\Website\PaymentCalculatorReIndexJob;
 use App\Models\Inventory\Inventory;
 use App\Models\Website\PaymentCalculator\Settings;
-use App\Models\Website\Website;
 use Illuminate\Database\Query\Builder;
 
 class SettingsRepository implements SettingsRepositoryInterface {
 
-    public function create($params) {
-
-        $settings = Settings::create($params);
-
-        $dealer = Website::find($settings->website_id)->dealer_id;
-        dispatch(new PaymentCalculatorReIndexJob([$dealer]));
-
-        return $settings;
+    public function create($params)
+    {
+        return Settings::create($params);
     }
 
     /**
@@ -103,10 +96,6 @@ class SettingsRepository implements SettingsRepositoryInterface {
         $settings = Settings::findOrFail($params['id']);
         $settings->fill($params);
         $settings->save();
-
-        if ($settings->website->dealer_id) {
-            dispatch(new PaymentCalculatorReIndexJob([$settings->website->dealer_id]));
-        }
 
         return $settings;
     }
