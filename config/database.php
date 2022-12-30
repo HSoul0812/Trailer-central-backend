@@ -185,6 +185,18 @@ return [
             'database' => env('REDIS_CACHE_DB', '1'),
         ],
 
+        /**
+         * This new connection is aimed to help us to flush only this db, so we will avoid mistake,
+         * also this is faster and safe
+         */
+        'sdk-cache' => [
+            'url' => env('REDIS_URL'),
+            'host' => env('REDIS_HOST', '127.0.0.1'),
+            'password' => env('REDIS_PASSWORD', null),
+            'port' => env('REDIS_PORT', '6379'),
+            'database' => env('REDIS_SDK_CACHE_DB', '4'),
+        ],
+
         'dealer-proxy' => [
             'host' => env('REDIS_HOST_PROXY', '127.0.0.1'),
             'password' => env('REDIS_PASSWORD_PROXY', null),
