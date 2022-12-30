@@ -395,18 +395,24 @@ class QueryBuilder implements InventoryQueryBuilderInterface
     private function addStatusSortScript(string $status): void
     {
         array_push($this->query['sort'], ... array_map(static function ($value) {
-            return [
-                '_script' => [
-                    'type' => 'string',
-                    'script' => [
-                        'inline' => "doc['status'].size() != 0 && doc['status'].value == params.status ? '1': '0'", // to avoid casting issues
-                        'params' => [
-                            'status' => (int)$value
-                        ]
-                    ],
-                    'order' => 'desc'
-                ]
-            ];
+            if(is_numeric($value)){
+                return [
+                    '_script' => [
+                        'type' => 'string',
+                        'script' => [
+                            'inline' => "doc['status'].size() != 0 && doc['status'].value == params.status ? '1': '0'", // to avoid casting issues
+                            'params' => [
+                                'status' => (int)$value
+                            ]
+                        ],
+                        'order' => 'desc'
+                    ]
+                ];
+            }
+
+            $parts = explode(':', $value);
+
+            return [\Str::camel($parts[0]) => ['order' => $parts[1]]];
         }, explode(',', $status)));
     }
 
