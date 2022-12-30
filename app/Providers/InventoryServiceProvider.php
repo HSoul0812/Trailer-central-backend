@@ -147,8 +147,6 @@ class InventoryServiceProvider extends ServiceProvider
         $this->app->bind(BulkPdfJobServiceInterface::class, BulkPdfJobService::class);
         $this->app->bind(BulkUploadRepositoryInterface::class, BulkUploadRepository::class);
 
-        $this->app->bind(ImageServiceInterface::class, ImageService::class);
-
         $this->app->bind(ResponseCacheKeyInterface::class, RedisResponseCacheKey::class);
         $this->app->bind(UniqueCacheInvalidationInterface::class, function (): UniqueCacheInvalidation {
             return new UniqueCacheInvalidation(Redis::connection('inventory-job-cache')->client());
