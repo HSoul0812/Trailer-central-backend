@@ -235,7 +235,7 @@ class ListingRepository implements ListingRepositoryInterface {
         // Require Inventory
         $query = $query->with(['marketplace', 'inventory', 'inventory.attributeValues', 'inventory.dealerLocation']);
         $query = $query->orderBy(Listings::getTableName() . ".created_at", "asc");
-        $query = $query->limit($params['per_page'] ?? config('marketing.fb.settings.limit.updates'));
+        $query = $query->limit($params['per_page'] ?? config('marketing.fb.settings.limit.sold_updates'));
 
         return $query->get();
     }
