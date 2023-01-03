@@ -551,28 +551,7 @@ class QueryBuilder implements InventoryQueryBuilderInterface
     {
         $geo = sprintf('%d, %d', $geolocation->lat(), $geolocation->lon());
 
-        $filter = [
-            'must' => [
-                [
-                    'geo_distance' => [
-                        'distance' => sprintf('%d%s', $geolocation->range(), $geolocation->units()),
-                        'location.geo' => $geo
-                    ]
-                ]
-            ]
-        ];
-
-        if (isset($this->query['post_filter']['bool'])) {
-            $filter['must'][] = [
-                'bool' => $this->query['post_filter']['bool']
-            ];
-            unset($this->query['post_filter']['bool']);
-        }
-
-        $this->query = array_merge_recursive([
-            'post_filter' => [
-                'bool' => $filter
-            ],
+        $query = [
             'sort' => [
                 [
                     '_geo_distance' => [
@@ -583,7 +562,34 @@ class QueryBuilder implements InventoryQueryBuilderInterface
                     ]
                 ]
             ]
-        ], $this->query);
+        ];
+
+        if ($geolocation->appendToPostQuery()) {
+            $filter = [
+                'must' => [
+                    [
+                        'geo_distance' => [
+                            'distance' => sprintf('%f%s', abs($geolocation->range()), $geolocation->units()),
+                            'location.geo' => $geo
+                        ]
+                    ]
+                ]
+            ];
+
+            if (isset($this->query['post_filter']['bool'])) {
+                $filter['must'][] = [
+                    'bool' => $this->query['post_filter']['bool']
+                ];
+                unset($this->query['post_filter']['bool']);
+            }
+
+            $query['post_filter'] = [
+                'bool' => $filter
+            ];
+        }
+
+
+        $this->query = array_merge_recursive($query, $this->query);
     }
 
     public function inRandomOrder(): void
