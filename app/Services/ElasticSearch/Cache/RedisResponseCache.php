@@ -4,7 +4,6 @@ namespace App\Services\ElasticSearch\Cache;
 
 use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
 use Illuminate\Foundation\Bus\DispatchesJobs;
-use DateTime;
 use \Redis as PhpRedis;
 
 class RedisResponseCache implements ResponseCacheInterface
@@ -17,13 +16,23 @@ class RedisResponseCache implements ResponseCacheInterface
     /** @var PhpRedis */
     private $client;
 
-    public function __construct(PhpRedis $client)
+    /**
+     * @var UniqueCacheInvalidationInterface
+     */
+    private $uniqueCacheInvalidation;
+
+    /**
+     * @param PhpRedis $client
+     * @param UniqueCacheInvalidationInterface $uniqueCacheInvalidation
+     */
+    public function __construct(PhpRedis $client, UniqueCacheInvalidationInterface $uniqueCacheInvalidation)
     {
         $this->client = $client;
+        $this->uniqueCacheInvalidation = $uniqueCacheInvalidation;
     }
 
     /**
-     * @param  string  $key
+     * @param string $key
      * @param $value
      * @return void
      */
@@ -35,14 +44,18 @@ class RedisResponseCache implements ResponseCacheInterface
     /**
      * Invalidates all keys which match with key pattern list in asynchronous way.
      *
-     * @param  string  ...$keyPatterns  a list of key patterns
+     * @param string ...$keyPatterns a list of key patterns
      * @return void
      */
     public function forget(string ...$keyPatterns): void
     {
-        $job = new InvalidateCacheJob($keyPatterns);
+        $keyPatterns = $this->uniqueCacheInvalidation->keysWithNoJobs($keyPatterns);
 
-        $this->dispatch($job->onQueue('inventory'));
+        if (count($keyPatterns)) {
+
+            $this->uniqueCacheInvalidation->createJobsForKeys($keyPatterns);
+            $this->dispatch(new InvalidateCacheJob($keyPatterns));
+        }
     }
 
     /**
@@ -51,16 +64,11 @@ class RedisResponseCache implements ResponseCacheInterface
      * This method perform the key list iteration in Laravel side because it will not block the Redis server,
      * we could have done this at Lua side, but sadly it blocks server making it unresponsive
      *
-     * @param  string  ...$keyPatterns  a list of key patterns
+     * @param string ...$keyPatterns a list of key patterns
      * @return void
      */
     public function invalidate(string ...$keyPatterns): void
     {
-        $start = new DateTime();
-        $keysInvalidated = 0;
-
-        echo sprintf('STARTED: %s', $start->format('H:i:s')).PHP_EOL;
-
         foreach ($keyPatterns as $pattern) {
             /** @var null|int $cursor */
             $cursor = null;
@@ -74,39 +82,27 @@ class RedisResponseCache implements ResponseCacheInterface
              * otherwise we have more than 10 keys, so we could iterate using a greater cursor counter
              */
             if (!empty($keys)) {
-                $keysInvalidated += count($keys);
                 $this->client->unlink($this->removeKeyPrefix($keys));
             }
 
-            $keysInvalidated += $this->unlink($cursor, $pattern);
+            $this->unlink($cursor, $pattern);
         }
-
-        $end = new DateTime();
-
-        echo sprintf('KEYS INVALIDATED: %d', $keysInvalidated).PHP_EOL;
-        echo sprintf('TIME ELAPSED: %s', $start->diff($end)->format('%H:%I:%S')).PHP_EOL;
     }
 
     /**
-     * @param  int  &$cursor
-     * @param  string  $pattern
-     * @return int number of deleted keys
+     * @param int  &$cursor
+     * @param string $pattern
+     * @return void number of deleted keys
      */
-    private function unlink(int &$cursor, string $pattern): int
+    private function unlink(int &$cursor, string $pattern)
     {
-        $numberOfKeysInvalidated = 0;
-
         while (false !== ($keys = $this->client->scan($cursor, $pattern, self::CURSOR_LIMIT))) {
-            $numberOfKeysInvalidated += count($keys);
-
             $this->client->unlink($this->removeKeyPrefix($keys));
         }
-
-        return $numberOfKeysInvalidated;
     }
 
     /**
-     * @param  array  $keys  list of keys with prefix
+     * @param array $keys list of keys with prefix
      * @return string[] list of keys without prefix
      */
     private function removeKeyPrefix(array $keys): array

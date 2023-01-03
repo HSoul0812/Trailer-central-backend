@@ -11,6 +11,8 @@ use App\Services\ElasticSearch\Cache\RedisResponseCache;
 use App\Services\ElasticSearch\Cache\RedisResponseCacheKey;
 use App\Services\ElasticSearch\Cache\ResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
+use App\Services\ElasticSearch\Cache\UniqueCacheInvalidation;
+use App\Services\ElasticSearch\Cache\UniqueCacheInvalidationInterface;
 use App\Services\Export\Inventory\Bulk\BulkDownloadJobService;
 use App\Services\Export\Inventory\Bulk\BulkDownloadJobServiceInterface;
 use App\Services\Export\Inventory\Bulk\BulkPdfJobService;
@@ -148,13 +150,19 @@ class InventoryServiceProvider extends ServiceProvider
         $this->app->bind(ImageServiceInterface::class, ImageService::class);
 
         $this->app->bind(ResponseCacheKeyInterface::class, RedisResponseCacheKey::class);
+        $this->app->bind(UniqueCacheInvalidationInterface::class, function (): UniqueCacheInvalidation {
+            return new UniqueCacheInvalidation(Redis::connection('inventory-job-cache')->client());
+        });
 
-        $this->app->bindMethod(InvalidateCacheJob::class.'@handle', function (InvalidateCacheJob $job): void {
-            $job->handle($this->app->make(ResponseCacheInterface::class));
+        $this->app->bindMethod(InvalidateCacheJob::class . '@handle', function (InvalidateCacheJob $job): void {
+            $job->handle($this->app->make(ResponseCacheInterface::class), $this->app->make(UniqueCacheInvalidationInterface::class));
         });
 
         $this->app->bind(ResponseCacheInterface::class, function (): RedisResponseCache {
-            return new RedisResponseCache(Redis::connection('sdk-cache')->client());
+            return new RedisResponseCache(
+                Redis::connection('sdk-cache')->client(),
+                $this->app->make(UniqueCacheInvalidationInterface::class)
+            );
         });
     }
 }
