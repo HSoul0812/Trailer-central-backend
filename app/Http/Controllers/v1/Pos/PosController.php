@@ -89,7 +89,8 @@ class PosController extends RestfulControllerV2
     }
 
     /**
-     * POS products search - includes parts and non serialized inventory
+     * Creating a POS Quote.
+     * 
      * @param  IlluminateRequest  $request
      * 
      * @return \App\Models\Pos\Quote|void
