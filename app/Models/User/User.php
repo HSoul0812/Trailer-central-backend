@@ -7,6 +7,7 @@ use App\Models\Integration\Integration;
 use App\Models\Integration\IntegrationDealer;
 use App\Models\Inventory\Inventory;
 use App\Models\CRM\Dms\Quote\QuoteSetting;
+use App\Models\Marketing\Facebook\Marketplace;
 use App\Models\Parts\Bin;
 use App\Models\Parts\Part;
 use App\Models\User\Interfaces\PermissionsInterface;
@@ -40,6 +41,7 @@ use Laravel\Cashier\Billable;
  * @property string $name
  * @property string $email
  *
+ * @property bool $clsf_active;
  * @property bool $isCrmActive
  * @property bool $is_dms_active
  * @property bool $is_scheduler_active
@@ -309,6 +311,11 @@ class User extends Model implements Authenticatable, PermissionsInterface
         return $this->hasOne(DealerClapp::class, 'dealer_id', 'dealer_id');
     }
 
+    public function marketplaceIntegrations(): HasMany
+    {
+        return $this->hasMany(Marketplace::class, 'dealer_id', 'dealer_id');
+    }
+
     public function authToken(): HasOne
     {
         return $this
@@ -353,6 +360,11 @@ class User extends Model implements Authenticatable, PermissionsInterface
     public function getIsMarketingActiveAttribute(): bool
     {
         return !empty($this->dealerClapp);
+    }
+
+    public function getIsFmeActiveAttribute(): bool
+    {
+        return $this->is_marketing_active && boolval(count($this->marketplaceIntegrations));
     }
 
     public function getIsMobileActiveAttribute(): bool

@@ -92,6 +92,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $override_prices
  * @property int $override_attributes
  * @property int $override_descriptions
+ * @property \DateTime|null $last_run
+ * @property \DateTime|null $scheduled_for
  *
  */
 class Collector extends Model implements Filterable

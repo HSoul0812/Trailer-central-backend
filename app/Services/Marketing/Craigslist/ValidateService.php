@@ -169,6 +169,7 @@ class ValidateService implements ValidateServiceInterface
             $valid = $active[$email] ?? [];
             $client = $warning[0];
             $config = $this->getConfig($client->dealerId);
+            $message = '';
 
             // Check Number of Clients
             if(count($valid) < 1) {
