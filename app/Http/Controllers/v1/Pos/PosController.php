@@ -88,7 +88,14 @@ class PosController extends RestfulControllerV2
 
     }
 
-    public function createPosQuote(IlluminateRequest $request) {
+    /**
+     * POS products search - includes parts and non serialized inventory
+     * @param  IlluminateRequest  $request
+     * 
+     * @return \App\Models\Pos\Quote|void
+     */
+    public function createPosQuote(IlluminateRequest $request) 
+    {
         $requestData = $request->all();
         $request = new CreatePosQuoteRequest($requestData);
         if ( $request->validate() ) {
