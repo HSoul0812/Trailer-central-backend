@@ -16,6 +16,8 @@ use App\Nova\Actions\Dealer\Subscriptions\DealerClassifieds\ActivateDealerClassi
 use App\Nova\Actions\Dealer\Subscriptions\DealerClassifieds\DeactivateDealerClassifieds;
 use App\Nova\Actions\Dealer\Subscriptions\DMS\DeactivateDms;
 use App\Nova\Actions\Dealer\Subscriptions\ECommerce\ActivateECommerce;
+use App\Nova\Actions\Dealer\Subscriptions\Google\ActivateGoogleFeed;
+use App\Nova\Actions\Dealer\Subscriptions\Google\DeactivateGoogleFeed;
 use App\Nova\Actions\Dealer\Subscriptions\Marketing\ActivateMarketing;
 use App\Nova\Actions\Dealer\Subscriptions\Marketing\DeactivateMarketing;
 use App\Nova\Actions\Dealer\Subscriptions\Parts\ActivateParts;
@@ -156,6 +158,7 @@ class Dealer extends Resource
                 'isDmsActive' => 'DMS',
                 'isDealersClassifiedsActive' => 'DealerClassifieds',
                 'IsEcommerceActive' => 'E-Commerce',
+                'IsGoogleFeedActive' => 'GoogleFeed',
                 'isMarketingActive' => 'Marketing',
                 'isMobileActive' => 'MobileSite',
                 'isPartsActive' => 'Parts',
@@ -169,6 +172,7 @@ class Dealer extends Resource
                     'isDmsActive' => $this->is_dms_active,
                     'isDealersClassifiedsActive' => $this->clsf_active,
                     'IsEcommerceActive' => $this->IsEcommerceActive,
+                    'IsGoogleFeedActive' => $this->google_feed_active,
                     'isMarketingActive' => $this->is_marketing_active,
                     'isMobileActive' => $this->isMobileActive,
                     'isPartsActive' => $this->isPartsActive,
@@ -324,6 +328,20 @@ class Dealer extends Resource
                 return $this->resource instanceof Model && !$this->resource->isELeadsActive;
             }),
             app()->make(DeactivateELeads::class)->canSee(function ($request) {
+                if ($request instanceof ActionRequest) {
+                    return true;
+                }
+
+                return $this->resource instanceof Model && $this->resource->isELeadsActive;
+            }),
+            app()->make(ActivateGoogleFeed::class)->canSee(function ($request) {
+                if ($request instanceof ActionRequest) {
+                    return true;
+                }
+
+                return $this->resource instanceof Model && !$this->resource->isELeadsActive;
+            }),
+            app()->make(DeactivateGoogleFeed::class)->canSee(function ($request) {
                 if ($request instanceof ActionRequest) {
                     return true;
                 }

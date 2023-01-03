@@ -162,6 +162,8 @@ class ListingRepository implements ListingRepositoryInterface {
                             OR IFNULL($inventoryTableName.price, 0) > $fbMinPrice)")
             ->where("{$inventoryTableName}.entity_type_id", '<>', EntityType::ENTITY_TYPE_BUILDING)
             ->where("{$inventoryTableName}.entity_type_id", '<>', EntityType::ENTITY_TYPE_VEHICLE)
+            ->whereRaw("IFNULL({$inventoryTableName}.manufacturer, '') = ''")
+            ->whereRaw("IFNULL({$inventoryTableName}.model, '') = ''")
             ->whereRaw("IFNULL(is_archived, 0) = 0")
             ->whereRaw("IFNULL({$inventoryTableName}.status, -1) NOT IN (2,6)")
             ->whereRaw("LENGTH({$inventoryTableName}.description) >= " . INVENTORY::MIN_DESCRIPTION_LENGTH_FOR_FACEBOOK ." OR LENGTH({$inventoryTableName}.description_html) >= " . (2 * INVENTORY::MIN_DESCRIPTION_LENGTH_FOR_FACEBOOK))

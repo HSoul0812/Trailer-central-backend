@@ -17,25 +17,29 @@ class RedisResponseCacheKey implements ResponseCacheKeyInterface
     {
         $inventories = collect([]);
         $dealers = collect([]);
+
         foreach ($result->hints as $hint) {
             $inventories->push($hint->_source->id);
             $dealers->push($hint->_source->dealerId);
         }
+
         $dealers = $dealers->unique()->map(function ($dealer) {
             return 'dealer:' . $dealer;
         })->join(self::SEPARATOR);
+
         $inventories = $inventories->join(self::SEPARATOR);
 
         return sprintf('inventories.%s_%s_%s_', $requestId, $dealers, $inventories);
     }
 
     /**
-     * @param $id
+     * @param $inventoryId
+     * @param $dealerId
      * @return string
      */
-    public function single($id): string
+    public function single($inventoryId, $dealerId): string
     {
-        return sprintf('inventories.single:%d', $id);
+        return sprintf('inventories.single:%d:-dealer:%d', $inventoryId, $dealerId);
     }
 
     /**
@@ -44,7 +48,7 @@ class RedisResponseCacheKey implements ResponseCacheKeyInterface
      */
     public function deleteSingle(int $id): string
     {
-        return sprintf('*inventories.single:%d', $id);
+        return sprintf('*inventories.single:%d*', $id);
     }
 
     /**
@@ -63,5 +67,14 @@ class RedisResponseCacheKey implements ResponseCacheKeyInterface
     public function deleteByDealer(int $id): string
     {
         return sprintf('*inventories.*_dealer:%d_*', $id);
+    }
+
+    /**
+     * @param int $id
+     * @return string
+     */
+    public function deleteSingleByDealer(int $id): string
+    {
+        return sprintf('*inventories.single:*:-dealer:%d', $id);
     }
 }

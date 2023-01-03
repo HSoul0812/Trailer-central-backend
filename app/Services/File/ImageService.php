@@ -12,6 +12,7 @@ use GuzzleHttp\Client;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use App\Models\User\User;
 
 /**
  * Class ImageService
@@ -120,5 +121,47 @@ class ImageService extends AbstractFileService
         $url = $localDisk->url(str_replace($localDisk->path(''),'', $localFilename));
 
         return new FileDto($localFilename, $hash, null, $url);
+    }
+
+    /**
+     * Add Text and Logo Overlays to image
+     * 
+     * @param string $imagePath
+     * @param array $params Overlay configs
+     * @return string local path of new image
+     */
+    public function addOverlays(string $imagePath, array $params)
+    {
+        $tempFiles = [];
+        // Add Upper Text Overlay if applicable
+        if ($params['overlay_upper'] !== User::OVERLAY_UPPER_NONE
+            && !in_array($params['overlay_logo_position'], [User::OVERLAY_LOGO_POSITION_UPPER_LEFT, User::OVERLAY_LOGO_POSITION_UPPER_RIGHT])) {
+
+            $upperText = $params['overlay_text_'. $params['overlay_upper']];
+            $imagePath = $this->imageHelper->addUpperTextOverlay($imagePath, $upperText, $params);
+            $tempFiles[] = $imagePath;
+        }
+
+        // Add Lower Text Overlay if applicable
+        if ($params['overlay_lower'] !== User::OVERLAY_UPPER_NONE
+            && !in_array($params['overlay_logo_position'], [User::OVERLAY_LOGO_POSITION_LOWER_LEFT, User::OVERLAY_LOGO_POSITION_LOWER_RIGHT])) {
+
+            $lowerText = $params['overlay_text_'. $params['overlay_lower']];
+            $imagePath = $this->imageHelper->addLowerTextOverlay($imagePath, $lowerText, $params);
+            $tempFiles[] = $imagePath;
+        }
+
+        // Add Logo Overlay if applicable
+        if ($params['overlay_logo_position'] !== User::OVERLAY_LOGO_POSITION_NONE) {
+
+            $logoPath = $params['overlay_logo'];
+            $imagePath = $this->imageHelper->addLogoOverlay($imagePath, $logoPath, $params);
+        }
+
+        // Delete Unused Temp Files
+        $tempFiles = array_diff($tempFiles, [$imagePath]);
+        foreach ($tempFiles as $file) unlink($file); 
+
+        return $imagePath;
     }
 }

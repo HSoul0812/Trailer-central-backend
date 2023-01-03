@@ -190,7 +190,8 @@ class User extends Model implements Authenticatable, PermissionsInterface
         'is_dms_active' => 'boolean',
         'is_scheduler_active' => 'boolean',
         'clsf_active' => 'boolean',
-        'is_quote_manager_active' => 'boolean'
+        'is_quote_manager_active' => 'boolean',
+        'google_feed_active' => 'boolean'
     ];
 
     /**
