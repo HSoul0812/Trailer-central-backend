@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreatePrintQuotesTable extends Migration
+class CreatePosQuotesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,13 @@ class CreatePrintQuotesTable extends Migration
      */
     public function up()
     {
-        Schema::create('print_quotes', function (Blueprint $table) {
+        Schema::create('pos_quotes', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('quote_id')->unique();
+            $table->integer('dealer_id');
             $table->text('quote_details');
             $table->timestamps();
+
+            $table->index(['dealer_id']);
         });
     }
 
@@ -28,6 +30,6 @@ class CreatePrintQuotesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('print_quotes');
+        Schema::dropIfExists('pos_quotes');
     }
 }
