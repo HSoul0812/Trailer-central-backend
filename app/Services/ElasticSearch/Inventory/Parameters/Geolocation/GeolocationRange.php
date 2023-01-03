@@ -28,20 +28,25 @@ class GeolocationRange extends Geolocation
     /** @var string */
     private $sorting;
 
+    /** @var bool */
+    private $appendToPostQuery;
+
     public function __construct(
         float  $lat,
         float  $lon,
-        int    $range,
-        string $units = self::UNITS_MILES
+        float  $range,
+        string $units = self::UNITS_MILES,
+        bool   $appendToPostQuery = false
     )
     {
         $this->range = $range;
         $this->units = $units;
+        $this->appendToPostQuery = $appendToPostQuery;
 
         parent::__construct($lat, $lon);
     }
 
-    public function range(): ?int
+    public function range(): ?float
     {
         return $this->range;
     }
@@ -49,5 +54,10 @@ class GeolocationRange extends Geolocation
     public function units(): string
     {
         return $this->units;
+    }
+
+    public function appendToPostQuery(): bool
+    {
+        return $this->appendToPostQuery;
     }
 }

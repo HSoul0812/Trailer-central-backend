@@ -32,7 +32,12 @@ class Geolocation implements GeolocationInterface
         }
 
         if (isset($data['range'])) {
-            return new GeolocationRange($lat, $lon, $data['range'], $data['units'] ?? GeolocationRange::UNITS_MILES);
+            return new GeolocationRange($lat,
+                $lon,
+                $data['range'],
+                $data['units'] ?? GeolocationRange::UNITS_MILES,
+                $data['append_to_post_query']
+            );
         }
 
         return new Geolocation($lat, $lon);
