@@ -2,7 +2,7 @@
 
 namespace App\Observers;
 
-use App\Jobs\Website\PaymentCalculatorReIndexJob;
+use App\Jobs\Website\ReIndexInventoriesByDealersJob;
 use App\Models\Website\PaymentCalculator\Settings;
 use App\Services\ElasticSearch\Cache\ResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
@@ -71,7 +71,7 @@ class SettingsObserver
         }
 
         if ($dealerId = $settings->website->dealer_id) {
-            dispatch(new PaymentCalculatorReIndexJob([$dealerId]));
+            dispatch(new ReIndexInventoriesByDealersJob([$dealerId]));
         }
     }
 
