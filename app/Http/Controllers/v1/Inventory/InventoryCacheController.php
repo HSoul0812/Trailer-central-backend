@@ -32,9 +32,9 @@ class InventoryCacheController extends RestfulControllerV2
         $request = new InvalidateByDealerRequest($request->all());
 
         if ($request->validate()) {
-            $this->inventoryService->invalidateCacheAndReindexByDealerIds($request->all());
+            $this->inventoryService->invalidateCacheAndReindexByDealerIds($request->input('dealer_id'));
 
-            return $this->successResponse();
+            return $this->acceptedResponse();
         }
 
         return $this->response->errorBadRequest();
