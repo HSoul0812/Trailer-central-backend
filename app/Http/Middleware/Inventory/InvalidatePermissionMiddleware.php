@@ -18,9 +18,8 @@ class InvalidatePermissionMiddleware
         if ( $request->header('access-token') === config('integrations.inventory_cache_auth.credentials.access_token') )
         {
             return $next($request);
-        } else
-        {
-            return response('Invalid access token.', 403);
         }
+
+        return response('Invalid access token.', 403);
     }
 }
