@@ -341,6 +341,18 @@ class InventoryService implements InventoryServiceInterface
             $filter .= " && price  > " . $params['price_min'] . "&& price < " . $params['price_max'];
         }
 
+        if (!empty($params['price_min']) && $params['price_min'] > 0 && empty($params['price_max'])) {
+            $filter = $priceDef . $filter;
+
+            $filter .= " && price  > " . $params['price_min'];
+        }
+
+        if (!empty($params['price_max']) && $params['price_max'] > 0 && empty($params['price_min'])) {
+            $filter = $priceDef . $filter;
+
+            $filter .= " && price  < " . $params['price_min'];
+        }
+
         $queryBuilder->setFilterScript([
             'source' => $filter,
             'lang' => 'painless'
