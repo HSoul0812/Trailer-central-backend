@@ -9,7 +9,8 @@ class InvalidateByDealerRequest extends Request
     protected function getRules(): array
     {
         return [
-            'dealer_id' => 'required|integer|exists:App\Models\User\User,dealer_id',
+            'dealer_id' => 'array',
+            'dealer_id.*' => 'required|integer|exists:App\Models\User\User,dealer_id',
         ];
     }
 }
