@@ -52,7 +52,7 @@ class WebsiteConfigController extends RestfulControllerV2
                 ->map(function (WebsiteConfigDefault $defaultConfig) use ($transformer) {
                     return $transformer->transform($defaultConfig);
                 })
-                ->groupBy('`grouping`')
+                ->groupBy('grouping')
                 ->toArray();
 
             return $this->response->array(['data' => $list]);

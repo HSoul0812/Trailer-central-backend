@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
 use App\Repositories\Bulk\Inventory\BulkDownloadRepository;
 use App\Repositories\Bulk\Inventory\BulkDownloadRepositoryInterface;
 use App\Repositories\Bulk\Inventory\BulkUploadRepository;
@@ -10,6 +11,8 @@ use App\Services\ElasticSearch\Cache\RedisResponseCache;
 use App\Services\ElasticSearch\Cache\RedisResponseCacheKey;
 use App\Services\ElasticSearch\Cache\ResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
+use App\Services\ElasticSearch\Cache\UniqueCacheInvalidation;
+use App\Services\ElasticSearch\Cache\UniqueCacheInvalidationInterface;
 use App\Services\Export\Inventory\Bulk\BulkDownloadJobService;
 use App\Services\Export\Inventory\Bulk\BulkDownloadJobServiceInterface;
 use App\Services\Export\Inventory\Bulk\BulkPdfJobService;
@@ -64,6 +67,8 @@ use App\Services\ElasticSearch\Inventory\FieldMapperService;
 use App\Services\ElasticSearch\Inventory\InventoryFieldMapperServiceInterface;
 use App\Services\ElasticSearch\Inventory\InventoryQueryBuilderInterface;
 use App\Services\Import\Inventory\CsvImportService;
+use App\Services\Inventory\ImageService;
+use App\Services\Inventory\ImageServiceInterface;
 use App\Services\Import\Inventory\CsvImportServiceInterface;
 use App\Services\Inventory\CustomOverlay\CustomOverlayService;
 use App\Services\Inventory\CustomOverlay\CustomOverlayServiceInterface;
@@ -75,8 +80,10 @@ use App\Services\Inventory\InventoryService;
 use App\Services\Inventory\InventoryServiceInterface;
 use App\Services\Inventory\Packages\PackageService;
 use App\Services\Inventory\Packages\PackageServiceInterface;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\ServiceProvider;
 use Validator;
+
 /**
  * Class InventoryServiceProvider
  * @package App\Providers
@@ -139,7 +146,23 @@ class InventoryServiceProvider extends ServiceProvider
         $this->app->bind(BulkDownloadJobServiceInterface::class, BulkDownloadJobService::class);
         $this->app->bind(BulkPdfJobServiceInterface::class, BulkPdfJobService::class);
         $this->app->bind(BulkUploadRepositoryInterface::class, BulkUploadRepository::class);
-        $this->app->bind(ResponseCacheInterface ::class, RedisResponseCache::class);
+
+        $this->app->bind(ImageServiceInterface::class, ImageService::class);
+
         $this->app->bind(ResponseCacheKeyInterface::class, RedisResponseCacheKey::class);
+        $this->app->bind(UniqueCacheInvalidationInterface::class, function (): UniqueCacheInvalidation {
+            return new UniqueCacheInvalidation(Redis::connection('inventory-job-cache')->client());
+        });
+
+        $this->app->bindMethod(InvalidateCacheJob::class . '@handle', function (InvalidateCacheJob $job): void {
+            $job->handle($this->app->make(ResponseCacheInterface::class), $this->app->make(UniqueCacheInvalidationInterface::class));
+        });
+
+        $this->app->bind(ResponseCacheInterface::class, function (): RedisResponseCache {
+            return new RedisResponseCache(
+                Redis::connection('sdk-cache')->client(),
+                $this->app->make(UniqueCacheInvalidationInterface::class)
+            );
+        });
     }
 }
