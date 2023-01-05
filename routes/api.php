@@ -343,7 +343,7 @@ $api->version('v1', function ($route) {
     /*
      * Cache
      */
-    $route->post('inventory/cache/invalidate/dealer/{id}', 'App\Http\Controllers\v1\Inventory\InventoryCacheController@invalidateByDealer');
+    $route->post('inventory/cache/invalidate/dealer', 'App\Http\Controllers\v1\Inventory\InventoryCacheController@invalidateByDealer');
 
     /*
     |--------------------------------------------------------------------------
