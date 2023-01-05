@@ -23,6 +23,7 @@ use App\Models\User\User;
 use App\Traits\CompactHelper;
 use App\Traits\GeospatialHelper;
 use ElasticScoutDriverPlus\CustomSearch;
+use Exception;
 use Grimzy\LaravelMysqlSpatial\Eloquent\SpatialTrait;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Illuminate\Database\Eloquent\Collection;
@@ -880,7 +881,7 @@ class Inventory extends Model
     }
 
     /**
-     * @throws \Exception when some unknown error has been thrown
+     * @throws Exception when some unknown error has been thrown
      */
     public static function makeAllSearchableUsingAliasStrategy(): void
     {
@@ -964,6 +965,18 @@ class Inventory extends Model
     {
         return static::withoutEvents(function () use ($options) {
             return $this->save($options);
+        });
+    }
+
+    /**
+     * Delete without triggering the model events
+     * @return mixed
+     * @throws Exception
+     */
+    public function deleteQuietly()
+    {
+        return static::withoutEvents(function () {
+            return $this->delete();
         });
     }
 }
