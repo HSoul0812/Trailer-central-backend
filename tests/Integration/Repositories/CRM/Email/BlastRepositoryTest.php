@@ -195,7 +195,7 @@ class BlastRepositoryTest extends TestCase
 
         // When I call wasSent with valid parameters
         /** @var bool $wasSent */
-        $wasSent = $this->getConcreteRepository()->wasSent($sent->email_blasts_id, $sent->lead_id);
+        $wasSent = $this->getConcreteRepository()->wasSent($sent->email_blasts_id, $sent->lead->email_address);
 
         // Then I should return true
         self::assertTrue($wasSent);
@@ -222,7 +222,7 @@ class BlastRepositoryTest extends TestCase
 
         // When I call wasSent with valid parameters
         /** @var bool $wasSent */
-        $wasSent = $this->getConcreteRepository()->wasSent($sent->email_blasts_id, $sent->lead_id);
+        $wasSent = $this->getConcreteRepository()->wasSent($sent->email_blasts_id, $sent->lead->email_address);
 
         // Then I should return true
         self::assertFalse($wasSent);
