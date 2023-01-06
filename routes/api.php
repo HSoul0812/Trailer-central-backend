@@ -670,9 +670,6 @@ $api->version('v1', function ($route) {
 
     $route->get('integrations', 'App\Http\Controllers\v1\Integration\IntegrationController@index');
     $route->get('integrations/{id}', 'App\Http\Controllers\v1\Integration\IntegrationController@show');
-    $route->post('integrations/{id}', 'App\Http\Controllers\v1\Integration\IntegrationController@update');
-    $route->delete('integrations/{id}', 'App\Http\Controllers\v1\Integration\IntegrationController@delete');
-
 
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
         /*
