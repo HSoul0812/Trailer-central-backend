@@ -2,7 +2,6 @@
 
 namespace App\Services\ElasticSearch\Inventory\Builders;
 
-use App\Services\ElasticSearch\Inventory\Parameters\DealerLocationIds;
 use App\Services\ElasticSearch\Inventory\Parameters\Filters\Filter;
 use App\Services\ElasticSearch\Inventory\Parameters\Filters\Term;
 
