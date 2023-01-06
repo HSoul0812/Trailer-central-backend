@@ -206,7 +206,16 @@ class ListingRepository implements ListingRepositoryInterface {
         $query = $query->with(['attributeValues', 'orderedImages', 'dealerLocation']);
         // Set Sort By
         $query = $query->orderBy("{$inventoryTableName}.created_at", "asc");
-        $query = $query->limit($params['per_page'] ?? config('marketing.fb.settings.limit.listings'));
+
+        // Per dealer request, and after advising that this might be risky,
+        // the dealer insisted that they want their inventory up ASAP.
+        // We are adding this manually for one specific dealer for now, but might
+        // be added as a feature in the future.
+        if ($integration->dealer_id == 12611) {
+            $query = $query->limit(10);
+        } else {
+            $query = $query->limit($params['per_page'] ?? config('marketing.fb.settings.limit.listings'));
+        }
 
         // Return Paginated Inventory
         return $query->get();
