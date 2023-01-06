@@ -109,6 +109,61 @@ class CustomerControllerTest extends TestCase
         }
     }
 
+    public function validCustomernameProvider()
+    {
+        return [
+            [
+                'first_name' => 'Juan Carlos',
+                'middle_name' => 'Diego-Sanchez',
+                'last_name' => 'Rodriguez Jr.'
+            ],
+            [
+                'first_name' => 'Sara',
+                'middle_name' => 'Mary Anne',
+                'last_name' => 'Petersen-Nelson'
+            ],
+            [
+                'first_name' => 'Dr. Blake',
+                'middle_name' => 'Hunter',
+                'last_name' => 'Nelson Sr.'
+            ],
+            [
+                'first_name' => 'Anna-Molly',
+                'middle_name' => 'LeAnne',
+                'last_name' => 'Ray II'
+            ]
+        ];
+    }
+
+    /**
+     * @dataProvider validCustomernameProvider
+     * 
+     * @group DMS
+     * @group DMS_CUSTOMER
+     */
+    public function testCreateCustomerWithValidCustomerName($first_name, $middle_name, $last_name)
+    {
+        $params = [
+            'fist_name' => $first_name,
+            'middle_name' => $middle_name,
+            'last_name' => $last_name,
+            'display_name' => $first_name .' '. $middle_name .' '. $last_name,
+            'default_discount_percent' => 0
+        ];
+
+        $token = $this->seeder->dealers[0]->authToken->access_token;
+
+        $response = $this->json(
+            'PUT',
+            '/api/user/customers',
+            $params,
+            ['access-token' => $token]
+        );
+
+        $response->assertSuccessful()
+            ->assertJsonMissingValidationErrors();
+    }
+
     /**
      * Examples of invalid querystring params with their respective exceptions and messages
      *
