@@ -165,7 +165,7 @@ class BlastRepositoryTest extends TestCase
 
         // Blast sent did exist before and still only one exists now
         self::assertSame(1, BlastSent::where([
-            'drip_campaigns_id' => $blastSent->drip_campaigns_id,
+            'email_blasts_id' => $blastSent->email_blasts_id,
             'lead_id' => $blastSent->lead_id
         ])->count());
     }
