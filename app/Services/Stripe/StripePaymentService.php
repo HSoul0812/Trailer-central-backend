@@ -31,8 +31,8 @@ class StripePaymentService implements StripePaymentServiceInterface
         ],
         'tt60' => [
             'price' => 100.00,
-            'name' => '600 days plan for publishing your listing titled {title} on TrailerTrader.com',
-            'duration' => 600,
+            'name' => '60 days plan for publishing your listing titled {title} on TrailerTrader.com',
+            'duration' => 60,
         ],
     ];
 
@@ -158,8 +158,10 @@ class StripePaymentService implements StripePaymentServiceInterface
             if ($inventoryExpiry->startOfDay()->isBefore(Carbon::now())) {
                 $inventoryExpiry = Carbon::now()->startOfDay();
             }
-            // TODO: Extend expiry based on plan
-            $inventoryExpiry = $inventoryExpiry->addMonth();
+
+            $planDuration = intval($planDuration) ?: 30;
+
+            $inventoryExpiry = $inventoryExpiry->addDays($planDuration);
             $this->inventoryService->update($userId, [
                 'inventory_id' => $inventoryId,
                 'show_on_website' => 1,
