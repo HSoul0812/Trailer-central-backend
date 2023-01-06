@@ -20,6 +20,8 @@ use App\Models\Parts\Vendor;
 use App\Models\Traits\TableAware;
 use App\Models\User\DealerLocation;
 use App\Models\User\User;
+use App\Services\Inventory\InventoryUpdateSource;
+use App\Services\Inventory\InventoryUpdateSourceInterface;
 use App\Traits\CompactHelper;
 use App\Traits\GeospatialHelper;
 use ElasticScoutDriverPlus\CustomSearch;
@@ -978,5 +980,21 @@ class Inventory extends Model
         return static::withoutEvents(function () {
             return $this->delete();
         });
+    }
+
+    /**
+     * This need to be override to be able avoid dispatching jobs when integrations is requesting
+     * @return void
+     */
+    function searchable()
+    {
+        if (!$this->getInventoryUpdateSource()->integrations()) {
+            $this->newCollection([$this])->searchable();
+        }
+    }
+
+    protected function getInventoryUpdateSource(): InventoryUpdateSource
+    {
+        return app(InventoryUpdateSourceInterface::class);
     }
 }
