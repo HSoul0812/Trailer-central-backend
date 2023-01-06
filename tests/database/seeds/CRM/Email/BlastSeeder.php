@@ -156,6 +156,7 @@ class BlastSeeder extends Seeder
                     'email_blasts_id' => $this->createdBlasts[0]->getKey(),
                     'lead_id' => $lead->getKey()
                 ]);
+                $sent->setRelation('lead', $lead);
 
                 $this->blastsSent[] = $sent;
                 return;
@@ -166,6 +167,7 @@ class BlastSeeder extends Seeder
                 'email_blasts_id' => $this->createdBlasts[0]->getKey(),
                 'lead_id' => $lead->getKey()
             ]);
+            $sent->setRelation('lead', $lead);
 
             $this->blastsUnsent[] = $sent;
         });
