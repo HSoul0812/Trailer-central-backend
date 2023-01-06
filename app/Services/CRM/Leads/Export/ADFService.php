@@ -12,6 +12,7 @@ use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Services\CRM\Leads\DTOs\ADFLead;
 use Illuminate\Foundation\Bus\DispatchesJobs;
+use Illuminate\Support\Facades\Log;
 
 class ADFService implements ADFServiceInterface
 {
@@ -56,9 +57,11 @@ class ADFService implements ADFServiceInterface
     {
         $leadEmail = $this->leadEmailRepository->find($lead->dealer_id, $lead->dealer_location_id);
         if (!$leadEmail) {
-            throw new \Exception("Lead {$lead->identifier} couldn't find a LeadEmail associated.");
+            Log::info("Lead {$lead->identifier} couldn't find a LeadEmail associated.");
+            return false;
         } elseif ($leadEmail->export_format !== LeadEmail::EXPORT_FORMAT_ADF) {
-            throw new \Exception("Lead {$lead->identifier} export format is not ADF.");
+            Log::info("Lead {$lead->identifier} export format is not ADF.");
+            return false;
         }
 
         $hiddenCopiedEmails = explode(',', config('adf.exports.copied_emails'));
