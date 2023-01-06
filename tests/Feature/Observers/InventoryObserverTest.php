@@ -2,13 +2,15 @@
 
 namespace Tests\Feature\Observers;
 
+use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
 use App\Models\User\AuthToken;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
+use Laravel\Scout\Jobs\MakeSearchable;
 use Tests\TestCase;
 use App\Models\User\User;
 use App\Models\Inventory\Inventory;
-use Illuminate\Support\Facades\Queue;
 use App\Services\ElasticSearch\Cache\ResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
 
@@ -25,7 +27,8 @@ class InventoryObserverTest extends TestCase
     {
         parent::setUp();
 
-        Queue::fake();
+        Bus::fake();
+
         $this->dealer = factory(User::class)->create();
         $this->cacheKeyService = app(ResponseCacheKeyInterface::class);
     }
@@ -98,35 +101,37 @@ class InventoryObserverTest extends TestCase
     public function test_it_does_not_trigger_invalidations_for_requests_from_integrations()
     {
         Config::set('integrations.inventory_cache_auth.credentials.access_token', self::INTEGRATIONS_ACCESS_TOKEN);
+        Config::set('cache.inventory', true); // to ensure the cache is enable for this particular test case
 
-        Inventory::withoutSyncingToSearch(function () {
-            $this->mock(ResponseCacheInterface::class, function ($mock) {
-                $mock->shouldNotReceive('forget');
-            });
-
-            $inventory = Inventory::withoutEvents(function () {
-                return Inventory::create(factory(Inventory::class)->make(['dealer_id' => $this->dealer->dealer_id])->toArray());
-            });
-
-            $authToken = factory(AuthToken::class)->create(['user_id' => $this->dealer->dealer_id]);
-
-            $newTitle = Str::random(20);
-            $response = $this->withHeaders([
-                'access-token' => $authToken->access_token,
-                'x-client-id' => self::INTEGRATIONS_ACCESS_TOKEN
-            ])
-                ->post('/api/inventory/' . $inventory->inventory_id, ['title' => $newTitle]);
-
-            $response->assertStatus(200);
-
-            $this->assertDatabaseHas(Inventory::getTableName(), [
-                'inventory_id' => $inventory->inventory_id,
-                'title' => $newTitle
-            ]);
-
-            $inventory->deleteQuietly();
-            $authToken->delete();
+        $this->mock(ResponseCacheInterface::class, function ($mock) {
+            $mock->shouldNotReceive('forget');
         });
+
+        $inventory = Inventory::withoutEvents(function () {
+            return Inventory::create(factory(Inventory::class)->make(['dealer_id' => $this->dealer->dealer_id])->toArray());
+        });
+
+        $authToken = factory(AuthToken::class)->create(['user_id' => $this->dealer->dealer_id]);
+
+        $newTitle = Str::random(20);
+        $response = $this->withHeaders([
+            'access-token' => $authToken->access_token,
+            'x-client-id' => self::INTEGRATIONS_ACCESS_TOKEN
+        ])
+            ->post('/api/inventory/'.$inventory->inventory_id, ['title' => $newTitle]);
+
+        $response->assertStatus(200);
+
+        $this->assertDatabaseHas(Inventory::getTableName(), [
+            'inventory_id' => $inventory->inventory_id,
+            'title' => $newTitle
+        ]);
+
+        $inventory->deleteQuietly();
+        $authToken->delete();
+
+        Bus::assertNotDispatched(InvalidateCacheJob::class);
+        Bus::assertNotDispatched(MakeSearchable::class);
     }
 
     public function test_it_triggers_invalidations_for_requests_not_from_integrations()
