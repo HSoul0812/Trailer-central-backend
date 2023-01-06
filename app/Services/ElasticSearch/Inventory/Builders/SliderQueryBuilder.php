@@ -2,6 +2,7 @@
 
 namespace App\Services\ElasticSearch\Inventory\Builders;
 
+use App\Services\ElasticSearch\Inventory\Parameters\DealerLocationIds;
 use App\Services\ElasticSearch\Inventory\Parameters\Filters\Filter;
 use App\Services\ElasticSearch\Inventory\Parameters\Filters\Term;
 
@@ -23,13 +24,53 @@ class SliderQueryBuilder implements FieldQueryBuilderInterface
      */
     public function globalQuery(): array
     {
-        $this->field->getTerms()->each(function (Term $term) {
-            $this->appendToQuery([
-                'range' => [
-                    $this->field->getName() => $term->getValues()
+        $this->field->getTerms()->filter(function (Term $term): bool {
+            return array_key_exists('lte', $term->getValues()) || array_key_exists('gte', $term->getValues());
+        })->each(function (Term $term) {
+            $queries = [
+                'bool' => [
+                    'must' => [
+                        [
+                            'range' => [
+                                $this->field->getName() => $term->getValues()
+                            ]
+                        ]
+                    ]
                 ]
-            ]);
+            ];
+
+            $this->appendToQuery($queries);
         });
+
+        $this->field->getTerms()->filter(function (Term $term): bool {
+            return !(array_key_exists('lte', $term->getValues()) || array_key_exists('gte', $term->getValues()));
+        })->each(function (Term $term) {
+            $name = $this->field->getName();
+            $options = $term->getValues();
+
+            $queries = [
+                'bool' => [
+                    'must' => [
+                        [
+                            'terms' => [
+                                $name => $options
+                            ]
+                        ]
+                    ]
+                ]
+            ];
+
+            if ($term->operatorIsNotEquals()) {
+                $queries = [
+                    'bool' => [
+                        $term->getESOperatorKeyword() => $queries
+                    ]
+                ];
+            }
+
+            $this->appendToQuery($queries);
+        });
+
         return $this->query;
     }
 
