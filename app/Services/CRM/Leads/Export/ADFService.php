@@ -50,12 +50,15 @@ class ADFService implements ADFServiceInterface
      * @param Lead $lead lead to export to ADF
      * @return bool
      * @throws PropertyDoesNotExists
+     * @throws \Exception
      */
     public function export(Lead $lead): bool
     {
         $leadEmail = $this->leadEmailRepository->find($lead->dealer_id, $lead->dealer_location_id);
-        if (!$leadEmail || $leadEmail->export_format !== LeadEmail::EXPORT_FORMAT_ADF) {
-            return false;
+        if (!$leadEmail) {
+            throw new \Exception("Lead {$lead->identifier} couldn't find a LeadEmail associated.");
+        } elseif ($leadEmail->export_format !== LeadEmail::EXPORT_FORMAT_ADF) {
+            throw new \Exception("Lead {$lead->identifier} export format is not ADF.");
         }
 
         $hiddenCopiedEmails = explode(',', config('adf.exports.copied_emails'));
@@ -98,7 +101,9 @@ class ADFService implements ADFServiceInterface
         ];
 
         // Get Vehicle/Vendor Params
-        $this->adfParams = array_merge($this->adfParams, $this->getAdfVehicle($lead->inventory));
+        $inventory = $lead->inventory ?? new Inventory();
+
+        $this->adfParams = array_merge($this->adfParams, $this->getAdfVehicle($inventory));
         $this->adfParams = array_merge($this->adfParams, $this->getAdfVendor($lead));
 
         // Return ADF Lead

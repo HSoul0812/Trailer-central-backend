@@ -373,10 +373,10 @@ class Lead extends Model
     /**
      * Find Lead Contact Details
      *
-     * @param type $id
+     * @param int $id
      * @return array
      */
-    public static function findLeadContact(type $id): array
+    public static function findLeadContact(int $id): array
     {
         $result = Lead::findOrFail($id)->pluck('first_name', 'last_name', 'email_address')->toArray();
         return array('name' => $result['first_name'] .' '. $result['last_name'], 'email' => $result['email_address']);

@@ -65,10 +65,13 @@ class ADF extends Command
                 $this->info("Processing lead {$lead->identifier}");
 
                 try {
-                    $this->adfService->export($lead);
+                    if (!$this->adfService->export($lead)) {
+                        continue;
+                    };
                     $this->info("Lead {$lead->identifier} added to queue");
                 } catch (\Exception $e) {
-                    $this->info("Error processing lead {$lead->identifier}: " . $e->getMessage());
+                    $this->error("Error processing lead {$lead->identifier}: " . $e->getMessage());
+                    continue;
                 }
                 $this->info("====================");
             }
