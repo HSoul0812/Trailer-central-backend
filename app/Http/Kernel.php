@@ -7,6 +7,7 @@ use App\Http\Middleware\Ecommerce\StripeWebhookValidate;
 use App\Http\Middleware\Ecommerce\TexTrailWebhookValidate;
 use App\Http\Middleware\Ecommerce\ValidHookIpMiddleware;
 use App\Http\Middleware\Inventory\CreateInventoryPermissionMiddleware;
+use App\Http\Middleware\Inventory\InvalidatePermissionMiddleware;
 use App\Http\Middleware\User\ManageAccountPermissionMiddleware;
 use App\Http\Middleware\SetDealerIdFilterOnRequest;
 use App\Http\Middleware\SetDealerIdWhenAuthenticatedOnRequest;
@@ -133,6 +134,7 @@ class Kernel extends HttpKernel
         'dispatch.facebook' => FacebookValidate::class,
         'replytext.validate' => ReplyTextValidate::class,
         'validateDealerIdOnRequest' => ValidateDealerIdOnRequest::class,
+        'inventory.cache.permission' => InvalidatePermissionMiddleware::class,
     ];
 
     /**
