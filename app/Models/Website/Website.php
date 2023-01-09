@@ -38,6 +38,9 @@ class Website extends Model
     use TableAware;
 
     const TRAILERTRADER_ID = 284;
+
+    const WEBSITE_TYPE_CUSTOM = 'custom';
+    const WEBSITE_TYPE_WEBSITE = 'website';
     const WEBSITE_TYPE_CLASSIFIED = 'classified';
 
     protected $table = 'website';

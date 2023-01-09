@@ -37,6 +37,35 @@ class WebsiteService
      * @param int $websiteId
      * @return bool
      */
+    public function certificateDomainSsl(int $websiteId): bool
+    {
+        $www = 'www.';
+        $website = $this->websiteRepository->get(['id' => $websiteId]);
+        $domain = strpos($website, $www) !== 0 ? $www . $website->domain : $website->domain;
+
+        $data = [
+            "CertificateName" => $website->template,
+            "DomainName" => $domain
+        ];
+
+        $ch = curl_init("https://i2o2ut7e95.execute-api.us-east-1.amazonaws.com/dev/cloudfront-setup/start");
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        $result = curl_exec($ch);
+        curl_close($ch);
+
+        if (!$result) {
+            Log::error('An error occurred issuing certificate for Website ID - ' . $websiteId . "\n Error: " . $result);
+        }
+
+        Log::info('Certificate issued successfully for Website ID - ' . $websiteId);
+        return $result;
+    }
+
+    /**
+     * @param int $websiteId
+     * @return bool
+     */
     public function enableProxiedDomainSsl(int $websiteId): bool
     {
         try {

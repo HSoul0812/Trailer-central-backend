@@ -2,6 +2,8 @@
 
 namespace App\Nova\Resources\Website;
 
+use App\Nova\Actions\Dealer\Subscriptions\Google\EnableProxiedDomainsSsl;
+use App\Nova\Actions\Dealer\Subscriptions\Google\IssueCertificateSSL;
 use App\Nova\Metrics\DealerWebsitesUptime;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Text;
@@ -9,6 +11,8 @@ use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\HasMany;
 use App\Models\Website\Config\WebsiteConfig;
+use App\Models\Website\Website as DealerWebsite;
+use Laravel\Nova\Fields\Select;
 
 use App\Nova\Resource;
 
@@ -59,13 +63,16 @@ class Website extends Resource
             Text::make('Domain')
                 ->sortable(),
 
-            Text::make('Type')
-                ->sortable(),
+            Select::make('Type', 'type')
+                ->options($this->websiteTypes())
+                ->displayUsingLabels(),
+
+            Text::make('Template')->help("This will apply as the CertificateName on SSL certificates")->hideFromIndex(),
 
             Boolean::make('Active', 'is_active')->sortable(),
 
             Textarea::make('Global Filter', 'type_config')->sortable()->help(
-              "Usage:<br>
+                "Usage:<br>
               {field}|{operator}|{value} - Each in a new line<br>
 
               Example Usage:<br>
@@ -127,6 +134,15 @@ class Website extends Resource
         ];
     }
 
+    public function websiteTypes(): array
+    {
+        return [
+            DealerWebsite::WEBSITE_TYPE_CUSTOM => 'Custom',
+            DealerWebsite::WEBSITE_TYPE_WEBSITE => 'Website',
+            DealerWebsite::WEBSITE_TYPE_CLASSIFIED => 'Classified'
+        ];
+    }
+
     /**
      * Get the cards available for the request.
      *
@@ -173,7 +189,8 @@ class Website extends Resource
     public function actions(Request $request)
     {
         return [
-
+            app()->make(IssueCertificateSsl::class),
+            app()->make(EnableProxiedDomainsSsl::class)
         ];
     }
 }
