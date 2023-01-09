@@ -78,6 +78,8 @@ use App\Services\Inventory\InventoryAttributeService;
 use App\Services\Inventory\InventoryAttributeServiceInterface;
 use App\Services\Inventory\InventoryService;
 use App\Services\Inventory\InventoryServiceInterface;
+use App\Services\Inventory\InventoryUpdateSource;
+use App\Services\Inventory\InventoryUpdateSourceInterface;
 use App\Services\Inventory\Packages\PackageService;
 use App\Services\Inventory\Packages\PackageServiceInterface;
 use Illuminate\Support\Facades\Redis;
@@ -164,5 +166,7 @@ class InventoryServiceProvider extends ServiceProvider
                 $this->app->make(UniqueCacheInvalidationInterface::class)
             );
         });
+
+		$this->app->bind(InventoryUpdateSourceInterface::class, InventoryUpdateSource::class);
     }
 }
