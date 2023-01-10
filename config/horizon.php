@@ -148,6 +148,7 @@ return [
                 'connection' => 'redis',
                 'queue' => [
                     'inventory',
+                    'inventory-cache',
                     'parts',
                     'parts-export-new',
                     'factory-feeds',
@@ -178,6 +179,7 @@ return [
                 'connection' => 'redis',
                 'queue' => [
                     'inventory',
+                    'inventory-cache',
                     'parts',
                     'parts-export-new',
                     'factory-feeds',
@@ -225,7 +227,9 @@ return [
             ],
             'supervisor-2' => [
                 'connection' => 'redis',
-                'queue' => ['scout'],
+                'queue' => ['scout', 'inventory-cache'],
+                'minProcesses' => 3,
+                'maxProcesses' => 6,
                 'balance' => false,
                 'processes' => 1,
                 'tries' => 3,
@@ -299,10 +303,10 @@ return [
             ],
             'supervisor-2' => [
                 'connection' => 'redis',
-                'queue' => ['scout'],
+                'queue' => ['scout', 'inventory-cache'],
                 'balance' => 'auto',
-                'minProcesses' => 15,
-                'maxProcesses' => 55,
+                'minProcesses' => 25,
+                'maxProcesses' => 60,
                 'tries' => 3,
                 'delay' => 3,
                 'timeout' => 300,
