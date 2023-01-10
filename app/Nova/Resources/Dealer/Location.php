@@ -5,7 +5,6 @@ namespace App\Nova\Resources\Dealer;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Text;
 use App\Nova\Resource;
-use Laravel\Nova\Panel;
 
 class Location extends Resource
 {
@@ -61,9 +60,6 @@ class Location extends Resource
 
             Text::make('Region'),
 
-            new Panel('Google', [
-                Text::make('Google Store Code', 'google_business_store_code')
-            ])
         ];
     }
 
