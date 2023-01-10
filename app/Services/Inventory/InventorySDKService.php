@@ -10,16 +10,18 @@ use App\Services\Inventory\ESQuery\SortOrder;
 use Dingo\Api\Routing\Helpers;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Pagination\LengthAwarePaginator;
-use TrailerCentral\Sdk\Handlers\Search\Collection;
-use TrailerCentral\Sdk\Handlers\Search\Geolocation;
-use TrailerCentral\Sdk\Handlers\Search\GeolocationInterface;
-use TrailerCentral\Sdk\Handlers\Search\GeolocationRange;
+use TrailerCentral\Sdk\Handlers\Search\Filters\Operator;
+use TrailerCentral\Sdk\Handlers\Search\Geolocation\GeoCoordinates;
+use TrailerCentral\Sdk\Handlers\Search\Geolocation\Geolocation;
+use TrailerCentral\Sdk\Handlers\Search\Geolocation\GeolocationRange;
 use TrailerCentral\Sdk\Handlers\Search\Pagination;
-use TrailerCentral\Sdk\Handlers\Search\Range;
 use TrailerCentral\Sdk\Handlers\Search\Request;
 use TrailerCentral\Sdk\Handlers\Search\Response;
-use TrailerCentral\Sdk\Handlers\Search\Sorting;
-use TrailerCentral\Sdk\Handlers\Search\SortingField;
+
+use TrailerCentral\Sdk\Handlers\Search\Sorting\Sorting;
+use TrailerCentral\Sdk\Handlers\Search\Sorting\SortingField;
+use TrailerCentral\Sdk\Handlers\Search\Terms\Collection;
+use TrailerCentral\Sdk\Handlers\Search\Terms\Range;
 use TrailerCentral\Sdk\Resources\Search;
 use TrailerCentral\Sdk\Sdk;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
@@ -41,26 +43,37 @@ class InventorySDKService implements InventorySDKServiceInterface
     const TILT_TRAILER_INVENTORY = 'Tilt Trailers';
     const TERM_SEARCH_KEY_MAP = [
         'dealer_id' => 'dealerId',
+        'dealer_location_id' => 'dealerLocationId',
         'stalls' => 'stalls',
         'pull_type' => 'pullType',
         'manufacturer' => 'manufacturer',
         'condition' => 'condition',
-        'construction' => 'construction',
+        'construction' => 'frameMaterial',
         'year' => 'year',
-        'slideouts' => 'slideouts',
-        'configuration' => 'configuration',
-        'axles' => 'axles',
+        'slideouts' => 'numSlideouts',
+        'configuration' => 'loadType',
+        'axles' => 'numAxles',
         'color' => 'color',
         'availability' => 'availability'
     ];
     const RANGE_SEARCH_KEY_MAP = [
-        'price',
-        'length',
-        'width',
-        'height',
-        'gvwr',
-        'payload_capacity'
+        'price' => 'existingPrice',
+        'length' => 'length',
+        'width' => 'width',
+        'height' => 'height',
+        'gvwr' => 'gvwr',
+        'payload_capacity' => 'payloadCapacity',
     ];
+
+    const DEFAULT_CATEGORY = [
+        'name' => 'Other',
+        'type_id' => 1,
+        'type_label' => 'General Trailers'
+    ];
+
+    const INVENTORY_SOLD = 'sold';
+    const INVENTORY_AVAILABLE = 'available';
+
     const DEFAULT_DISTANCE = 300;
     const DEFAULT_SORT = '+distance';
     const DEFAULT_NO_LOCATION_SORT = '-createdAt';
@@ -69,13 +82,18 @@ class InventorySDKService implements InventorySDKServiceInterface
     const DEFAULT_LAT_ON_DW = 39.8090;
     const DEFAULT_LON_ON_DW = -98.5550;
 
-    const INVENTORY_SOLD = 'sold';
-
     public function __construct()
     {
         $this->request = new Request();
 
-        $sdk = new Sdk(config('inventory-sdk.url'));
+        $sdk = new Sdk(config('inventory-sdk.url'), [
+            'headers' => [
+                'access-token' => '',
+                'sample_key' => ''
+            ],
+            'verify' => false
+        ]);
+
         $this->search = new Search($sdk);
     }
 
@@ -113,7 +131,9 @@ class InventorySDKService implements InventorySDKServiceInterface
         }
 
         $response = new TcEsResponseInventoryList();
+        // TODO: check if aggregations is correct.
         $response->aggregations = $sdkResponse->aggregations();
+
         $response->inventories = new LengthAwarePaginator(
             $result,
             $sdkResponse->total(),
@@ -125,9 +145,9 @@ class InventorySDKService implements InventorySDKServiceInterface
 
     /**
      * @param array $params
-     * @return GeolocationInterface
+     * @return GeoCoordinates
      */
-    protected function addGeolocation(array $params): GeolocationInterface
+    protected function addGeolocation(array $params): GeoCoordinates
     {
         $location = $this->getGeolocationInfo($params);
 
@@ -145,10 +165,10 @@ class InventorySDKService implements InventorySDKServiceInterface
 
     /**
      * @param array $params
-     * @param GeolocationInterface $location
+     * @param GeoCoordinates $location
      * @return void
      */
-    protected function addSorting(array $params, GeolocationInterface $location)
+    protected function addSorting(array $params, GeoCoordinates $location)
     {
         if (isset($params['is_random']) && $params['is_random']) {
             $this->request->add('in_random_order', 1);
@@ -185,8 +205,8 @@ class InventorySDKService implements InventorySDKServiceInterface
         }
 
         $this->request->add('sale_price_script', new Collection($attributes));
-        $this->request->add('classifieds_site', true);
-        $this->request->add('availability', new Collection([self::INVENTORY_SOLD], Collection::EXCLUSION));
+        $this->request->add('classified_site', true);
+        $this->request->add('availability', new Collection([self::INVENTORY_SOLD], Operator::NOT_EQUAL));
         $this->request->add('rental_bool', false);
     }
 
@@ -298,9 +318,9 @@ class InventorySDKService implements InventorySDKServiceInterface
 
     /**
      * @param array $params
-     * @return GeolocationInterface
+     * @return GeoCoordinates
      */
-    protected function getGeolocationInfo(array $params): GeolocationInterface
+    protected function getGeolocationInfo(array $params): GeoCoordinates
     {
         if (isset($params['lat']) && isset($params['lon'])) {
             return new Geolocation((float)$params['lat'], (float)$params['lon']);
@@ -316,9 +336,9 @@ class InventorySDKService implements InventorySDKServiceInterface
 
     /**
      * @param string $location
-     * @return GeolocationInterface|null
+     * @return GeoCoordinates|null
      */
-    protected function getGeolocationInfoFromLocation(string $location): ?GeolocationInterface
+    protected function getGeolocationInfoFromLocation(string $location): ?GeoCoordinates
     {
         $response = json_decode(
             $this->api->get('map_search/geocode', ['q' => $location]),
