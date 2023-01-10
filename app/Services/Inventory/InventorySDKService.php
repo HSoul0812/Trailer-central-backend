@@ -205,7 +205,7 @@ class InventorySDKService implements InventorySDKServiceInterface
         }
 
         $this->request->add('sale_price_script', new Collection($attributes));
-        $this->request->add('classified_site', true);
+        $this->request->add('classifieds_site', true);
         $this->request->add('availability', new Collection([self::INVENTORY_SOLD], Operator::NOT_EQUAL));
         $this->request->add('rental_bool', false);
     }
