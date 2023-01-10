@@ -21,7 +21,6 @@ class PageSeeder extends Seeder
         ['name' => 'Affiliates',      'url' => '/affiliates'    ],
         ['name' => 'Privacy Policy',  'url' => '/privacypolicy' ],
         ['name' => 'Terms of Use',    'url' => '/termsofuse'    ],
-        ['name' => 'Affiliates',      'url' => '/affiliates'    ],
     ];
 
     /**
