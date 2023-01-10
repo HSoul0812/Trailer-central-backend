@@ -90,12 +90,19 @@ class BulkCsvDownloadJobService extends AbstractMonitoredJobService implements B
         // get stream of parts rows from db
         $partsQuery = $this->partRepository->queryAllByDealerId($job->dealer_id);
 
+        // get bin names
+        $bins = $this->partRepository->getBins($job->dealer_id);
+        $addedHeaders = [];
+        foreach($bins as $bin) {
+            $addedHeaders[] = $bin['bin_name'];
+        }
+
         $exporter = $this->getExporter($job);
 
         // prep the exporter
         $exporter->createFile()
             // set the csv headers
-            ->setHeaders($exporter->getHeaders())
+            ->setHeaders(array_merge($exporter->getHeaders(), $addedHeaders, ['Part ID']))
 
             // a line mapper maps the db columns by name to csv column by position
             ->setLineMapper(static function (\stdClass $part) use ($exporter): array {
