@@ -43,6 +43,13 @@ class StatusRepository implements StatusRepositoryInterface {
             $params['contact_type'] = LeadStatus::TYPE_CONTACT;
         }
 
+        // Add Closed_at time when lead is closed
+        $closedStatuses = [LeadStatus::STATUS_WON, LeadStatus::STATUS_WON_CLOSED, LeadStatus::STATUS_LOST];
+
+        if (in_array($params['status'], $closedStatuses)) {
+            $params['closed_at'] = date('Y-m-d H:i:s');
+        }
+
         // Create Lead Status
         return LeadStatus::create($params);
     }
@@ -113,6 +120,13 @@ class StatusRepository implements StatusRepositoryInterface {
             // Contact Type Not Set?
             if(!isset($params['contact_type'])) {
                 $params['contact_type'] = LeadStatus::TYPE_CONTACT;
+            }
+
+            // Add Closed_at time when lead is closed
+            $closedStatuses = [LeadStatus::STATUS_WON, LeadStatus::STATUS_WON_CLOSED, LeadStatus::STATUS_LOST];
+
+            if (empty($status->closed_at) && in_array($params['status'], $closedStatuses)) {
+                $params['closed_at'] = date('Y-m-d H:i:s');
             }
 
             // Update Lead Status
