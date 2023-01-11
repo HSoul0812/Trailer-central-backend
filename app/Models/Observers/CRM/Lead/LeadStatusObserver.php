@@ -63,7 +63,7 @@ class LeadStatusObserver
      */
     public function updating(LeadStatus $leadStatus)
     {
-        if ($leadStatus->isDirty('status')) {
+        if ($leadStatus->closed_at === null) {
 
             if (in_array($leadStatus->status, [LeadStatus::STATUS_WON, LeadStatus::STATUS_WON_CLOSED, LeadStatus::STATUS_LOST])) {
         
