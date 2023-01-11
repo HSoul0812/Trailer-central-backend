@@ -5,6 +5,7 @@ namespace App\Repositories\Bulk\Inventory;
 use App\Exceptions\NotImplementedException;
 use App\Models\Bulk\Inventory\BulkUpload;
 use App\Jobs\Bulk\Inventory\ProcessBulkUpload;
+use App\Services\Import\Inventory\CsvImportServiceInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Storage;
@@ -35,7 +36,9 @@ class BulkUploadRepository implements BulkUploadRepositoryInterface
         $params['import_source'] = $csvKey;
 
         $bulkUpload = $this->model::create($params);
-        dispatch((new ProcessBulkUpload($bulkUpload->id))->onQueue('inventory'));
+        $process = new ProcessBulkUpload($bulkUpload->id);
+        $service = app()->make(CsvImportServiceInterface::class);
+        $process->handle($service);
 
         return $bulkUpload;
     }
