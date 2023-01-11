@@ -44,7 +44,7 @@ class MarketplaceService implements MarketplaceServiceInterface
      * We are adding this manually for one specific dealer for now, but might
      * be added as a feature in the future.
      */
-    const OVERRIDE_DEALER_ID = 8410;
+    const OVERRIDE_DEALER_ID = 12611;
     const OVERRIDE_DEALER_POSTS = 10;
 
 
