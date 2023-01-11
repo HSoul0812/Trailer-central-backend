@@ -44,9 +44,7 @@ class StatusRepository implements StatusRepositoryInterface {
         }
 
         // Add Closed_at time when lead is closed
-        $closedStatuses = [LeadStatus::STATUS_WON, LeadStatus::STATUS_WON_CLOSED, LeadStatus::STATUS_LOST];
-
-        if (in_array($params['status'], $closedStatuses)) {
+        if (in_array($params['status'], LeadStatus::CLOSED_STATUSES)) {
             $params['closed_at'] = date('Y-m-d H:i:s');
         }
 
@@ -123,9 +121,8 @@ class StatusRepository implements StatusRepositoryInterface {
             }
 
             // Add Closed_at time when lead is closed
-            $closedStatuses = [LeadStatus::STATUS_WON, LeadStatus::STATUS_WON_CLOSED, LeadStatus::STATUS_LOST];
-
-            if (empty($status->closed_at) && in_array($params['status'], $closedStatuses)) {
+            if(empty($status->closed_at) && isset($params['status']) &&
+               in_array($params['status'], LeadStatus::CLOSED_STATUSES)) {
                 $params['closed_at'] = date('Y-m-d H:i:s');
             }
 
