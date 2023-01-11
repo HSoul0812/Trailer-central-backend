@@ -2,6 +2,7 @@
 
 namespace App\Http\Clients\ElasticSearch;
 
+use App\Exceptions\ElasticSearch\BadRequestException;
 use App\Exceptions\ElasticSearch\ResponseException;
 use App\Services\ElasticSearch\QueryBuilderInterface;
 use GuzzleHttp\Client;
@@ -9,6 +10,8 @@ use GuzzleHttp\Client;
 class ElasticSearchClient extends Client implements ElasticSearchClientInterface
 {
     private const HTTP_SUCCESS = 200;
+
+    private const HTTP_BAD_REQUEST = 400;
 
     public function search(string $indexName, QueryBuilderInterface $query, bool $debug): ElasticSearchQueryResult
     {
@@ -22,6 +25,13 @@ class ElasticSearchClient extends Client implements ElasticSearchClientInterface
             $json = json_decode($response->getBody()->getContents(), false);
 
             return new ElasticSearchQueryResult($query->toArray(), (array)$json->aggregations, $json->hits->total->value, $json->hits->hits);
+        }
+
+        if ($response->getStatusCode() === self::HTTP_BAD_REQUEST) {
+            $exception = new BadRequestException($response);
+            if ($exception->isParseException()) {
+                $exception->throwAsServerError();
+            }
         }
 
         throw new ResponseException($response);
