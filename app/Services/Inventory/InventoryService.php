@@ -1022,7 +1022,10 @@ class InventoryService implements InventoryServiceInterface
             $patterns[] = $cacheKey->deleteByDealer($dealer_id);
         }
 
-        $this->dispatch(new InvalidateCacheJob($patterns));
+        if (config('cache.inventory')) {
+            $this->dispatch(new InvalidateCacheJob($patterns));
+        }
+
         $this->dispatch(new ReIndexInventoriesByDealersJob($dealer_ids));
     }
 }
