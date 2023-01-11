@@ -96,7 +96,8 @@ class LeadStatus extends Model
         'source',
         'next_contact_date',
         'sales_person_id',
-        'contact_type'
+        'contact_type',
+        'closed_at'
     ];
 
     /**
