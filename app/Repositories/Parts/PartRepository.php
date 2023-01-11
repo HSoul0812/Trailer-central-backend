@@ -451,9 +451,7 @@ class PartRepository implements PartRepositoryInterface {
      * @return Collection
      */
     public function getBins($dealerId) {
-        return DB::table(Bin::getTableName())
-            ->where('dealer_id', $dealerId)
-            ->get();
+        return Bin::where('dealer_id', $dealerId)->get();
     }
 
     public function update($params) {

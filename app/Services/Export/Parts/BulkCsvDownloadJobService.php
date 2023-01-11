@@ -9,6 +9,7 @@ use App\Exceptions\Common\BusyJobException;
 use App\Models\Bulk\Parts\BulkDownload;
 use App\Models\Bulk\Parts\BulkDownloadPayload;
 use App\Models\Parts\Part;
+use App\Models\Parts\Bin;
 use App\Repositories\Bulk\Parts\BulkDownloadRepositoryInterface;
 use App\Repositories\Common\MonitoredJobRepositoryInterface;
 use App\Repositories\Parts\PartRepositoryInterface;
@@ -91,11 +92,9 @@ class BulkCsvDownloadJobService extends AbstractMonitoredJobService implements B
         $partsQuery = $this->partRepository->queryAllByDealerId($job->dealer_id);
 
         // get bin names
-        $bins = $this->partRepository->getBins($job->dealer_id);
-        $addedHeaders = [];
-        foreach($bins as $bin) {
-            $addedHeaders[] = $bin['bin_name'];
-        }
+        $addedHeaders = $this->partRepository->getBins($job->dealer_id)->map(function(Bin $bin) {
+            return $bin->bin_name;
+        })->toArray();
 
         $exporter = $this->getExporter($job);
 
