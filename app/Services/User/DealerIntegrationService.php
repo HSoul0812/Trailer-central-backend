@@ -4,17 +4,71 @@ declare(strict_types=1);
 
 namespace App\Services\User;
 
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Database\Eloquent\Collection;
+
+use App\Mail\Integration\DealerIntegrationEmail;
+use App\Models\User\Integration\DealerIntegration;
 use App\Repositories\User\Integration\DealerIntegrationRepositoryInterface;
 use App\Repositories\User\Integration\Specific\SpecificIntegrationRepositoryInterface;
 
+/**
+ * Class DealerIntegrationService
+ * @package App\Services\User
+ */
 class DealerIntegrationService implements DealerIntegrationServiceInterface
 {
     /** @var DealerIntegrationRepositoryInterface */
     private $dealerIntegrationRepo;
 
+    /**
+     * @param DealerIntegrationRepositoryInterface $dealerIntegrationRepo
+     */
     public function __construct(DealerIntegrationRepositoryInterface $dealerIntegrationRepo)
     {
         $this->dealerIntegrationRepo = $dealerIntegrationRepo;
+    }
+
+    /**
+     * @param array $params
+     * @return DealerIntegration
+     */
+    public function get(array $params): DealerIntegration
+    {
+        return $this->dealerIntegrationRepo->get($params);
+    }
+
+    /**
+     * @param array $params
+     * @return Collection
+     */
+    public function getAll(array $params): Collection
+    {
+        return $this->dealerIntegrationRepo->getAll($params);
+    }
+
+    /**
+     * @param array $params
+     * @return DealerIntegration
+     */
+    public function update(array $params): DealerIntegration
+    {
+        $dealerIntegration = $this->dealerIntegrationRepo->update($params);
+        Mail::send(new DealerIntegrationEmail($dealerIntegration));
+
+        return $dealerIntegration;
+    }
+
+    /**
+     * @param array $params
+     * @return DealerIntegration
+     */
+    public function delete(array $params): DealerIntegration
+    {
+        $dealerIntegration = $this->dealerIntegrationRepo->delete($params);
+        Mail::send(new DealerIntegrationEmail($dealerIntegration));
+
+        return $dealerIntegration;
     }
 
     /**
@@ -52,7 +106,7 @@ class DealerIntegrationService implements DealerIntegrationServiceInterface
             return app()->make($className);
         }
 
-        return new class implements SpecificIntegrationRepositoryInterface {
+        return new class () implements SpecificIntegrationRepositoryInterface {
             public function get(array $params): array
             {
                 return [];

@@ -10,8 +10,8 @@ use App\Http\Requests\Integration\UpdateDealerIntegrationRequest;
 use App\Http\Requests\Integration\UpdateIntegrationRequest;
 use App\Http\Requests\User\Integration\GetAllDealerIntegrationRequest;
 use App\Http\Requests\User\Integration\GetSingleDealerIntegrationRequest;
-use App\Repositories\User\Integration\DealerIntegrationRepositoryInterface;
 use App\Transformers\User\Integration\DealerIntegrationTransformer;
+use App\Services\User\DealerIntegrationServiceInterface;
 use Illuminate\Http\Request;
 use Dingo\Api\Http\Response;
 
@@ -22,9 +22,9 @@ use Dingo\Api\Http\Response;
 class DealerIntegrationController extends RestfulControllerV2
 {
     /**
-     * @var DealerIntegrationRepositoryInterface
+     * @var DealerIntegrationServiceInterface
      */
-    protected $repository;
+    protected $service;
 
     /**
      * @var DealerIntegrationTransformer
@@ -32,15 +32,15 @@ class DealerIntegrationController extends RestfulControllerV2
     private $transformer;
 
     /**
-     * @param DealerIntegrationRepositoryInterface $repository
+     * @param DealerIntegrationServiceInterface $service
      * @param DealerIntegrationTransformer $transformer
      */
     public function __construct(
-        DealerIntegrationRepositoryInterface $repository,
+        DealerIntegrationServiceInterface $service,
         DealerIntegrationTransformer $transformer
     ) {
         $this->middleware('setDealerIdOnRequest')->only(['index','show','update','delete']);
-        $this->repository = $repository;
+        $this->service = $service;
         $this->transformer = $transformer;
     }
 
@@ -57,7 +57,7 @@ class DealerIntegrationController extends RestfulControllerV2
 
         if ($integrationRequest->validate()) {
             return $this->response->collection(
-                $this->repository->getAll([
+                $this->service->getAll([
                     'dealer_id' => $integrationRequest->dealer_id
                 ]),
                 $this->transformer
@@ -81,7 +81,7 @@ class DealerIntegrationController extends RestfulControllerV2
 
         if ($integrationRequest->validate()) {
             return $this->response->item(
-                $this->repository->get([
+                $this->service->get([
                     'integration_id' => $integrationRequest->integration_id,
                     'dealer_id' => $integrationRequest->dealer_id
                 ]),
@@ -104,7 +104,7 @@ class DealerIntegrationController extends RestfulControllerV2
         $integrationRequest = new UpdateDealerIntegrationRequest($request->all() + ['integration_id' => $id]);
 
         if ($integrationRequest->validate()) {
-            $this->repository->update([
+            $this->service->update([
                 'integration_id' => $integrationRequest->integration_id,
                 'dealer_id' => $integrationRequest->dealer_id,
                 'settings' => $integrationRequest->settings,
@@ -130,7 +130,7 @@ class DealerIntegrationController extends RestfulControllerV2
         $integrationRequest = new DeleteDealerIntegrationRequest($request->all() + ['integration_id' => $id]);
 
         if ($integrationRequest->validate()) {
-            $this->repository->delete([
+            $this->service->delete([
                 'integration_id' => $integrationRequest->integration_id,
                 'dealer_id' => $integrationRequest->dealer_id,
                 'active' => 0

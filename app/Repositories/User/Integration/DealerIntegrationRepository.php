@@ -88,9 +88,9 @@ class DealerIntegrationRepository implements DealerIntegrationRepositoryInterfac
 
     /**
      * @param array $params
-     * @return bool
+     * @return DealerIntegration
      */
-    public function update(array $params): bool
+    public function update(array $params): DealerIntegration
     {
         $dealerIntegration = $this->get($params);
         $dealerIntegration->active = $params['active'];
@@ -112,23 +112,24 @@ class DealerIntegrationRepository implements DealerIntegrationRepositoryInterfac
             $dealerIntegration->location_ids = '';
         }
 
-        Mail::send(new DealerIntegrationEmail($dealerIntegration));
+        $dealerIntegration->save();
 
-        return $dealerIntegration->save();
+        return $dealerIntegration;
     }
 
     /**
      * @param array $params
-     * @return bool
+     * @return DealerIntegration
      */
-    public function delete(array $params): bool
+    public function delete(array $params): DealerIntegration
     {
         $dealerIntegration = $this->retrieveDealerIntegration($params['integration_id'], $params['dealer_id']);
-        $dealerIntegration->active = $params['active'];
+        $deletedDealerIntegration = $dealerIntegration->replicate();
 
-        Mail::send(new DealerIntegrationEmail($dealerIntegration));
+        $deletedDealerIntegration->active = $params['active'];
+        $dealerIntegration->delete();
 
-        return $dealerIntegration->delete();
+        return $deletedDealerIntegration;
     }
 
     /**

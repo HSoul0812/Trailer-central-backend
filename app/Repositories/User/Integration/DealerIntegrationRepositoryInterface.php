@@ -15,7 +15,7 @@ interface DealerIntegrationRepositoryInterface extends GenericRepository
 
     public function get(array $params): DealerIntegration;
 
-    public function update(array $params): bool;
+    public function update(array $params): DealerIntegration;
 
-    public function delete(array $params): bool;
+    public function delete(array $params): DealerIntegration;
 }
