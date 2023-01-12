@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands\Inventory;
 
+use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
 use App\Models\Inventory\Inventory;
 use Illuminate\Console\Command;
 
@@ -22,16 +23,6 @@ class RecreateInventoryIndex extends Command
     protected $description = 'Will recreate the inventory ES index using an aliasing strategy';
 
     /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
      * Execute the console command.
      *
      * @throws \Exception when some unknown error has been thrown
@@ -39,5 +30,8 @@ class RecreateInventoryIndex extends Command
     public function handle(): void
     {
         Inventory::makeAllSearchableUsingAliasStrategy();
+
+        // no matter if cache is disabled, invalidating the entire cache should be done
+        dispatch(new InvalidateCacheJob(['*inventories.*']));
     }
 }
