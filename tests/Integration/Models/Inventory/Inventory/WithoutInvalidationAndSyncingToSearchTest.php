@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Integration\Models\Inventory;
+namespace Tests\Integration\Models\Inventory\Inventory;
 
 use App\Domains\Scout\Jobs\ExceptionableMakeSearchable;
 use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
@@ -9,16 +9,17 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Config;
 use Tests\TestCase;
+use RuntimeException;
 
 /**
- * @coversDefaultClass \App\Models\Inventory\Inventory
+ * @covers \App\Models\Inventory\Inventory::withoutInvalidationAndSyncingToSearch
  *
  * @group DW
  * @group DW_BULK
  * @group DW_BULK_INVENTORY
  * @group DW_BULK_UPLOAD_INVENTORY
  */
-class InventoryTest extends TestCase
+class WithoutInvalidationAndSyncingToSearchTest extends TestCase
 {
     use WithFaker;
 
@@ -27,9 +28,8 @@ class InventoryTest extends TestCase
      * also, it will ensure that after `withoutInvalidationAndSyncingToSearch` was used, the jobs will be dispatched
      * once again (we supposed always cache is enabled)
      *
-     * @covers ::withoutInvalidationAndSyncingToSearch
-     * @covers ::update
-     * @covers ::delete
+     * @covers \App\Models\Inventory\Inventory::update
+     * @covers \App\Models\Inventory\Inventory::delete
      *
      * @return void
      * @throws \Exception when deletion fails
@@ -55,6 +55,31 @@ class InventoryTest extends TestCase
         Bus::assertDispatchedTimes(ExceptionableMakeSearchable::class, 2);
 
         Bus::assertDispatchedTimes(InvalidateCacheJob::class, 3);
+    }
+
+    /**
+     * Test that SUT will not hide any exception occurred within it
+     *
+     * @return void
+     */
+    public function testItWillThrowExceptionAsExpected(): void
+    {
+        $expectedExceptionMessage = 'Some exception message';
+        $expectedException = new RuntimeException($expectedExceptionMessage);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage($expectedExceptionMessage);
+
+        $spy = Config::spy();
+
+        $isCacheEnabled = config('cache.inventory');
+
+        $spy->allows('set')->once()->with('cache.inventory', false);
+        $spy->allows('set')->once()->with('cache.inventory', $isCacheEnabled);
+
+        Inventory::withoutInvalidationAndSyncingToSearch(static function () use ($expectedException) {
+            throw $expectedException;
+        });
     }
 
     protected function setUp(): void

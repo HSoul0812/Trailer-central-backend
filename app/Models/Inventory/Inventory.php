@@ -1012,6 +1012,7 @@ class Inventory extends Model
             return $callback();
         } finally {
             Config::set('cache.inventory', $isCacheEnabled);
+
             self::enableSearchSyncing();
         }
     }
