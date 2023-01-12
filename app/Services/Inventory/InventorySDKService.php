@@ -22,6 +22,10 @@ use TrailerCentral\Sdk\Handlers\Search\Sorting\Sorting;
 use TrailerCentral\Sdk\Handlers\Search\Sorting\SortingField;
 use TrailerCentral\Sdk\Handlers\Search\Terms\Collection;
 use TrailerCentral\Sdk\Handlers\Search\Terms\Range;
+use TrailerCentral\Sdk\Handlers\Search\Terms\Searchable;
+use TrailerCentral\Sdk\Handlers\Search\Terms\Term;
+use TrailerCentral\Sdk\Handlers\Search\Filters\FilterGroup;
+use TrailerCentral\Sdk\Handlers\Search\Filters\Filter;
 use TrailerCentral\Sdk\Resources\Search;
 use TrailerCentral\Sdk\Sdk;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
@@ -32,6 +36,7 @@ class InventorySDKService implements InventorySDKServiceInterface
 
     private Request $request;
     private Search $search;
+    private FilterGroup $mainFilterGroup;
 
     const PAGE_SIZE = 10;
 
@@ -42,9 +47,8 @@ class InventorySDKService implements InventorySDKServiceInterface
     const PRICE_SCRIPT_ATTRIBUTE = 'price_script';
     const TILT_TRAILER_INVENTORY = 'Tilt Trailers';
     const TERM_SEARCH_KEY_MAP = [
-        'dealer_id' => 'dealerId',
         'dealer_location_id' => 'dealerLocationId',
-        'stalls' => 'stalls',
+        'stalls' => 'numStalls',
         'pull_type' => 'pullType',
         'manufacturer' => 'manufacturer',
         'condition' => 'condition',
@@ -85,6 +89,9 @@ class InventorySDKService implements InventorySDKServiceInterface
     public function __construct()
     {
         $this->request = new Request();
+        $this->mainFilterGroup = new FilterGroup();
+
+        $this->request->addFilterGroup($this->mainFilterGroup);
 
         $sdk = new Sdk(config('inventory-sdk.url'), [
             'headers' => [
@@ -111,10 +118,12 @@ class InventorySDKService implements InventorySDKServiceInterface
         $this->addSearchTerms($params);
         $this->addRangeQueries($params);
         $this->addPagination($params);
+        $this->addDealerFilter($params);
 
         $location = $this->addGeolocation($params);
         $this->addSorting($params, $location);
-
+        echo(json_encode($this->request->serialize()));
+        die(1);
         return $this->responseFromSDKResponse($this->search->execute($this->request));
     }
 
@@ -204,10 +213,20 @@ class InventorySDKService implements InventorySDKServiceInterface
             );
         }
 
-        $this->request->add('sale_price_script', new Collection($attributes));
-        $this->request->add('classifieds_site', true);
-        $this->request->add('availability', new Collection([self::INVENTORY_SOLD], Operator::NOT_EQUAL));
-        $this->request->add('rental_bool', false);
+        $this->mainFilterGroup->add(new Filter('sale_price_script', new Collection($attributes)));
+        $this->mainFilterGroup->add(new Filter('classifieds_site', new Collection([true])));
+        $this->mainFilterGroup->add(new Filter(
+            'availability', new Collection([self::INVENTORY_SOLD], Operator::NOT_EQUAL
+        )));
+        $this->mainFilterGroup->add(new Filter('isRental', new Collection([false])));
+    }
+
+    protected function addDealerFilter(array $params) {
+        if(!empty($params['dealer_id'])) {
+            $this->request->withDealerIds(new Filter(
+                'dealer_id', new Collection([$params['dealer_id']])
+            ));
+        }
     }
 
     /**
@@ -218,7 +237,9 @@ class InventorySDKService implements InventorySDKServiceInterface
     {
         foreach (self::TERM_SEARCH_KEY_MAP as $field => $searchField) {
             if ($value = $params[$field] ?? null) {
-                $this->request->add($searchField, $value);
+                $this->mainFilterGroup->add(new Filter(
+                    $searchField, new Collection([$value])
+                ));
             }
         }
     }
@@ -233,7 +254,9 @@ class InventorySDKService implements InventorySDKServiceInterface
             $minFieldKey = "{$field}_min";
             $maxFieldKey = "{$field}_max";
             if (isset($params[$minFieldKey]) || isset($params[$maxFieldKey])) {
-                $this->request->add($field, new Range($params[$minFieldKey] ?? null, $params[$maxFieldKey] ?? null));
+                $this->mainFilterGroup->add(new Filter(
+                    $field, new Range($params[$minFieldKey] ?? null, $params[$maxFieldKey] ?? null)
+                ));
             }
         }
     }
@@ -265,22 +288,28 @@ class InventorySDKService implements InventorySDKServiceInterface
             throw new BadRequestException('No category was selected');
         }
 
-        $this->request->add('category', new Collection($categories));
+        $this->mainFilterGroup->add(new Filter(
+            'category', new Collection($categories)
+        ));
 
         if (isset($params['category']) && $params['category'] === self::TILT_TRAILER_INVENTORY) {
             $categories = $this->getMappedCategories(
                 $params['type_id'] ?? null,
                 null
             );
-            $this->request->add('tilt', 1);
-            $this->request->add('category', new Collection($categories));
+            $this->mainFilterGroup->add(new Filter(
+                'tilt', new Collection([1])
+            ));
+            $this->mainFilterGroup->add(new Filter(
+                'category', new Collection($categories)
+            ));
         }
     }
 
     protected function addImages(array $params)
     {
         if (isset($params['has_image']) && $params['has_image']) {
-            $this->request->add('empty_images', false);
+            $this->mainFilterGroup->add(new Filter('empty_images', new Collection([false])));
         }
     }
 
@@ -304,16 +333,16 @@ class InventorySDKService implements InventorySDKServiceInterface
 
             foreach ($categories as $category) {
                 if ($category->category_mappings) {
-                    $mapped_categories[] = $category->category_mappings->map_to;
+                    $mapped_categories = array_merge($mapped_categories, explode(';', $category->category_mappings->map_to));
                 }
             }
         } else {
             foreach (CategoryMappings::all() as $mapping) {
-                $mapped_categories[] = $mapping->map_to;
+                $mapped_categories = array_merge($mapped_categories, explode(';', $mapping->map_to));
             }
         }
 
-        return $mapped_categories;
+        return array_unique($mapped_categories);
     }
 
     /**
