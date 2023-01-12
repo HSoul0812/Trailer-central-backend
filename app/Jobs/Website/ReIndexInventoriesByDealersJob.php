@@ -12,6 +12,8 @@ class ReIndexInventoriesByDealersJob extends Job
      */
     private $dealers;
 
+    public $queue = 'scout';
+
     public function __construct(array $dealers)
     {
         $this->dealers = $dealers;
