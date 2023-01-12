@@ -232,7 +232,7 @@ class UserRepository implements UserRepositoryInterface {
         $cdk = $dealer->adminSettings()->where([
             'setting' => 'website_leads_cdk_source_id'
         ])->firstOr( function() use ($dealerId, $sourceId) {
-            DealerAdminSetting::create([
+            return DealerAdminSetting::create([
                'dealer_id' => $dealerId,
                'setting' => 'website_leads_cdk_source_id',
                'setting_value' => $sourceId
@@ -369,6 +369,30 @@ class UserRepository implements UserRepositoryInterface {
         });
 
         return $integrationDealer->update(['active' => 0]);
+    }
+
+    /**
+     * @param int $dealerId
+     * @return User
+     */
+    public function activateGoogleFeed(int $dealerId) : User {
+        $dealer = User::findOrFail($dealerId);
+        $dealer->google_feed_active = 1;
+        $dealer->save();
+
+        return $dealer;
+    }
+
+    /**
+     * @param int $dealerId
+     * @return User
+     */
+    public function deactivateGoogleFeed(int $dealerId) : User {
+        $dealer = User::findOrFail($dealerId);
+        $dealer->google_feed_active = 0;
+        $dealer->save();
+
+        return $dealer;
     }
 
     /**

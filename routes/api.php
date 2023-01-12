@@ -341,6 +341,11 @@ $api->version('v1', function ($route) {
     $route->delete('inventory/packages/{id}', 'App\Http\Controllers\v1\Inventory\PackageController@destroy');
 
     /*
+     * Cache
+     */
+    $route->post('inventory/cache/invalidate/dealer', 'App\Http\Controllers\v1\Inventory\InventoryCacheController@invalidateByDealer');
+
+    /*
     |--------------------------------------------------------------------------
     | Website
     |--------------------------------------------------------------------------

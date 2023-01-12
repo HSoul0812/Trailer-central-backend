@@ -13,7 +13,7 @@ class InvalidateCacheJob extends Job
 
     public $tries = 1;
 
-    public $queue = 'inventory';
+    public $queue = 'inventory-cache';
 
     public function tags(): array
     {

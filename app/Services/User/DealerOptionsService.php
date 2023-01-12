@@ -598,6 +598,40 @@ class DealerOptionsService implements DealerOptionsServiceInterface
      * @param int $dealerId
      * @return bool
      */
+    public function activateGoogleFeed(int $dealerId): bool
+    {
+        try {
+            $this->userRepository->activateGoogleFeed($dealerId);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("Google Feed activation error. dealer_id - {$dealerId}", $e->getTrace());
+
+            return false;
+        }
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateGoogleFeed(int $dealerId): bool
+    {
+        try {
+            $this->userRepository->deactivateGoogleFeed($dealerId);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("Google Feed deactivation error. dealer_id - {$dealerId}", $e->getTrace());
+
+            return false;
+        }
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
     public function activateParts(int $dealerId): bool
     {
         try {

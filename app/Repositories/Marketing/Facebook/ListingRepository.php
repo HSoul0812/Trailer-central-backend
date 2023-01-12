@@ -46,7 +46,7 @@ class ListingRepository implements ListingRepositoryInterface {
 
     /**
      * Create Facebook Listing
-     * 
+     *
      * @param array $params
      * @return Listing
      */
@@ -69,7 +69,7 @@ class ListingRepository implements ListingRepositoryInterface {
 
     /**
      * Delete Listing
-     * 
+     *
      * @param int $id
      * @throws NotImplementedException
      */
@@ -80,7 +80,7 @@ class ListingRepository implements ListingRepositoryInterface {
 
     /**
      * Get Listing
-     * 
+     *
      * @param array $params
      * @return Listing
      */
@@ -91,7 +91,7 @@ class ListingRepository implements ListingRepositoryInterface {
 
     /**
      * Get All Listings That Match Params
-     * 
+     *
      * @param array $params
      * @return Collection<Listings>
      */
@@ -115,7 +115,7 @@ class ListingRepository implements ListingRepositoryInterface {
 
     /**
      * Update Listing
-     * 
+     *
      * @param array $params
      * @return Listings
      */
@@ -141,7 +141,7 @@ class ListingRepository implements ListingRepositoryInterface {
 
     /**
      * Get All Inventory Missing on Facebook
-     * 
+     *
      * @param Marketplace $integration
      * @param array $params
      * @return Collection<Inventory>
@@ -150,7 +150,7 @@ class ListingRepository implements ListingRepositoryInterface {
     {
         $inventoryTableName = Inventory::getTableName();
         $listingsTableName = Listings::getTableName();
- 
+
         // Initialize Inventory Query
         $query = Inventory::select(Inventory::getTableName() . '.*')
             ->where('dealer_id', '=', $integration->dealer_id)
@@ -211,7 +211,7 @@ class ListingRepository implements ListingRepositoryInterface {
 
     /**
      * Get All Inventory To Delete on Facebook
-     * 
+     *
      * @param Marketplace $integration
      * @param array $params
      * @return LengthAwarePaginator<Listings>
@@ -246,7 +246,7 @@ class ListingRepository implements ListingRepositoryInterface {
 
     /**
      * Count Inventory posted today on Facebook
-     * 
+     *
      * @param Marketplace $integration
      * @return int
      */

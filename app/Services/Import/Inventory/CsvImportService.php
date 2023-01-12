@@ -131,7 +131,9 @@ class CsvImportService implements CsvImportServiceInterface
         "show_on_website" => true,
         "append_images" => true,
         "replace_images" => true,
-        "video_embed_code" => true
+        "video_embed_code" => true,
+        "show_on_auction123" => true,
+        "show_on_rvt" => true
     ];
 
     // mapping between import column names and field names in database:
@@ -184,7 +186,9 @@ class CsvImportService implements CsvImportServiceInterface
         "append_images" => array("append images on import", "append image", "append images", "use images", "use image"),
         "replace_images" => array("replace images", "replace_images"),
         "image_mode" => array("image mode", "images mode", "img mode"),
-        "video_embed_code" => array("video_embed_code", "video embed code")
+        "video_embed_code" => array("video_embed_code", "video embed code"),
+        "show_on_auction123" => array("show_on_auction123", "show on auction123", "Show on Auction123", "Auction123"),
+        "show_on_rvt" => array("show_on_rvt", "show on rvt", "Show on Rvt", "Show on RVT", "RVT"),
     );
 
     /**
@@ -349,7 +353,21 @@ class CsvImportService implements CsvImportServiceInterface
         "gvwr" => array("type" => "string"),
         "axle_capacity" => array("type" => "string"),
         "msrp" => array("type" => "msrp"),
-        "location_phone" => array("type" => "location_phone")
+        "location_phone" => array("type" => "location_phone"),
+        "show_on_auction123" => array(
+            "type" => "enum",
+            "list" => array(
+                "yes" => "1",
+                "no" => "0"
+            )
+        ),
+        "show_on_rvt" => array(
+            "type" => "enum",
+            "list" => array(
+                "yes" => "1",
+                "no" => "0"
+            )
+        ),
     );
 
     /**
@@ -567,7 +585,7 @@ class CsvImportService implements CsvImportServiceInterface
                         }
                     }
 
-                    $header = array_search($this->indexToheaderMapping[$index], self::$_labels);
+                    $header = array_search(strtolower($this->indexToheaderMapping[$index]), array_map('strtolower', self::$_labels));
                     Log::debug(array("header" => $header, 'headerMapping' => $this->indexToheaderMapping[$index]));
 
                     if ($header) {
@@ -849,6 +867,8 @@ class CsvImportService implements CsvImportServiceInterface
             case 'is_special':
             case 'is_featured':
             case 'show_on_website':
+            case 'show_on_auction123':
+            case 'show_on_rvt':
                 if (isset(self::$_columnValidation[$type]['list'][strtolower($value)])) {
                     $this->inventory[$type] = self::$_columnValidation[$type]['list'][strtolower($value)];
                 }
