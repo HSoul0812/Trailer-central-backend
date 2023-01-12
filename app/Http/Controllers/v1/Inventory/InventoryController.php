@@ -86,7 +86,6 @@ class InventoryController extends AbstractRestfulController
     {
         if ($request->validate()) {
             $result = $this->inventorySDKService->list($request->all());
-//            $result = $this->inventoryService->list($request->all());
             return $this->response->item($result, new InventoryListResponseTransformer());
         }
 
