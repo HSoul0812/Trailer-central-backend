@@ -45,7 +45,7 @@ class ProcessBulkUpload extends Job {
                 $importerService->run();
             });
 
-            $inventoryService->invalidateCacheAndReindexByDealerIds([$bulk->dealer_id]);\
+            $inventoryService->invalidateCacheAndReindexByDealerIds([$bulk->dealer_id]);
 
             Log::info(sprintf('Inventory bulk upload %d was processed', $bulk->id));
         } catch (\Exception $ex) {
