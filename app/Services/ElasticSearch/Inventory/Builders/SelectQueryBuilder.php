@@ -37,8 +37,14 @@ class SelectQueryBuilder implements FieldQueryBuilderInterface
             }
 
             $queries = [
-                'terms' => [
-                    $name => $options
+                'bool' => [
+                    'must' => [
+                        [
+                            'terms' => [
+                                $name => $options
+                            ]
+                        ]
+                    ]
                 ]
             ];
 
