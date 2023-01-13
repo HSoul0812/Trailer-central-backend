@@ -41,7 +41,7 @@ class ConvertEstTimezones extends Command
         Log::info('Converting EST Timezones to UTC, Starting From ' . $startTime);
 
         // Handle Updating Leads Chunked
-        /*DB::table('website_lead')
+        DB::table('website_lead')
             ->select('identifier', 'date_submitted')
             ->where('date_submitted', '>', $startTime)
             ->chunk(500, function ($leads) {
@@ -53,6 +53,6 @@ class ConvertEstTimezones extends Command
                             ->where(['id' => $lead->identifier])
                             ->update(['date_submitted' => $utcDate]);
                 }
-            });*/
+            });
     }
 }
