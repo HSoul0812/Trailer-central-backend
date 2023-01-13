@@ -5,7 +5,7 @@ namespace App\Console\Commands\CRM\Leads;
 use Illuminate\Console\Command;
 
 /**
- * Class ConvertESTtoUTCOnRecentLeads
+ * Class ConvertEstTimezones
  * @package App\Console\Commands\CRM\Leads
  */
 class ConvertEstTimezones extends Command
