@@ -16,7 +16,7 @@ class ConvertEstTimezones extends Command
     /**
      * @const string
      */
-    const ORIGIN_TIMEZONE = 'America/Indiana/Indianopolis';
+    const ORIGIN_TIMEZONE = 'America/Indianopolis';
 
     /**
      * @const string
