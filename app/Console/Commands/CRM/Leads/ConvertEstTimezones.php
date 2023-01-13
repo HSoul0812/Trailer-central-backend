@@ -45,6 +45,7 @@ class ConvertEstTimezones extends Command
         DB::table('website_lead')
             ->select('identifier', 'date_submitted')
             ->where('date_submitted', '>', $startTime)
+            ->orderBy('date_submitted', 'DESC')
             ->chunk(500, function ($leads) {
                 foreach ($leads as $lead) {
                     $origDate = new Carbon($lead->date_submitted, self::ORIGIN_TIMEZONE);
