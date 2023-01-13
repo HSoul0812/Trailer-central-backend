@@ -30,6 +30,11 @@ class ConvertEstTimezones extends Command
     protected $signature = "leads:convert-est-timezones {start?}";
 
     /**
+     * @var int
+     */
+    private $updated = 0;
+
+    /**
      * Execute the console command.
      *
      * @return mixed
@@ -51,10 +56,16 @@ class ConvertEstTimezones extends Command
                     $origDate = new Carbon($lead->date_submitted, self::ORIGIN_TIMEZONE);
                     $utcDate = $origDate->utc()->toDateTimeString();
 
-                    DB::table('website_lead')
-                            ->where(['id' => $lead->identifier])
-                            ->update(['date_submitted' => $utcDate]);
+                    $result = DB::table('website_lead')
+                                ->where(['identifier' => $lead->identifier])
+                                ->update(['date_submitted' => $utcDate]);
+
+                    if(!empty($result)) {
+                        $this->updated++;
+                    }
                 }
             });
+
+        Log::info('Converted ' . $this->updated . ' EST Timezones to UTC Submitted After ' . $startTime);
     }
 }
