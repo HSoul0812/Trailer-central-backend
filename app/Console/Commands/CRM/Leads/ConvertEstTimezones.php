@@ -4,6 +4,7 @@ namespace App\Console\Commands\CRM\Leads;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 /**
  * Class ConvertEstTimezones
