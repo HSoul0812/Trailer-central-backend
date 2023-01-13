@@ -20,7 +20,7 @@ class ConvertEstTimezones extends Command
     /**
      * @const string
      */
-    const OLDEST_DATE_SUBMITTED = 'first day of three months ago';
+    const OLDEST_DATE_SUBMITTED = 'first day of 3 months ago';
 
 
     /**
