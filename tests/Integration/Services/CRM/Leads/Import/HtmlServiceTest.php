@@ -311,10 +311,12 @@ class HtmlServiceTest extends TestCase
     {
         return [
             'Boats.com, given source' => [
-                $this->getInvalidHtmlFromBoatsCom()
+                $this->getInvalidHtmlFromBoatsCom(),
+                self::EMAIL_WITH_AUTHOR
             ],
             'BoatTrader Portal, given source' => [
-                $this->getInvalidHtmlFromBoatTraderPortal()
+                $this->getInvalidHtmlFromBoatTraderPortal(),
+                self::EMAIL_WITH_AUTHOR
             ],
             'Boats.com, email with author' => [
                 $this->getInvalidHtmlFromBoatsCom(),
