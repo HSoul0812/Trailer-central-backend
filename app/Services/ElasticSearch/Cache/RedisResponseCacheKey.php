@@ -77,4 +77,29 @@ class RedisResponseCacheKey implements ResponseCacheKeyInterface
     {
         return sprintf('*inventories.single:*:-dealer:%d', $id);
     }
+
+    public static function humanReadable(string $pattern): string
+    {
+        if ($pattern === '*inventories.*') {
+            return 'delete-everything';
+        }
+
+        if (preg_match('/\*inventories\.single:\d+.*$/s', $pattern)) {
+            return 'delete-single';
+        }
+
+        if (preg_match('/\*inventories\..*_\d*_.*$/s', $pattern)) {
+            return 'delete-single-from-collection';
+        }
+
+        if (preg_match('/\*inventories\..*_dealer:\d*_.*$/s', $pattern)) {
+            return 'delete-by-dealer';
+        }
+
+        if (preg_match('/\*inventories\.single:\*:-dealer:\d.*$/s', $pattern)) {
+            return 'delete-single-by-dealer';
+        }
+
+        return 'unknown-pattern';
+    }
 }
