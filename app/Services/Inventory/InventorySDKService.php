@@ -374,7 +374,7 @@ class InventorySDKService implements InventorySDKServiceInterface
         );
         if (count($response['data']) > 0) {
             $position = $response['data'][0]['position'];
-            return new Geolocation((float)$position['lat'], (float)$position['lon']);
+            return new Geolocation((float)$position['lat'], (float)$position['lng']);
         }
         return null;
     }
