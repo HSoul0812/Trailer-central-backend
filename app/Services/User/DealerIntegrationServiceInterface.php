@@ -27,18 +27,6 @@ interface DealerIntegrationServiceInterface
      * @param array $params
      * @return DealerIntegration
      */
-    public function get(array $params): DealerIntegration;
-
-    /**
-     * @param array $params
-     * @return Collection
-     */
-    public function getAll(array $params): Collection;
-
-    /**
-     * @param array $params
-     * @return DealerIntegration
-     */
     public function update(array $params): DealerIntegration;
 
     /**

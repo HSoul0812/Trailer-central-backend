@@ -10,6 +10,8 @@ use App\Http\Requests\Integration\UpdateDealerIntegrationRequest;
 use App\Http\Requests\Integration\UpdateIntegrationRequest;
 use App\Http\Requests\User\Integration\GetAllDealerIntegrationRequest;
 use App\Http\Requests\User\Integration\GetSingleDealerIntegrationRequest;
+use App\Repositories\User\Integration\DealerIntegrationRepository;
+use App\Repositories\User\Integration\DealerIntegrationRepositoryInterface;
 use App\Transformers\User\Integration\DealerIntegrationTransformer;
 use App\Services\User\DealerIntegrationServiceInterface;
 use Illuminate\Http\Request;
@@ -32,14 +34,22 @@ class DealerIntegrationController extends RestfulControllerV2
     private $transformer;
 
     /**
+     * @var DealerIntegrationRepositoryInterface
+     */
+    private $repository;
+
+    /**
+     * @param DealerIntegrationRepository $repository
      * @param DealerIntegrationServiceInterface $service
      * @param DealerIntegrationTransformer $transformer
      */
     public function __construct(
+        DealerIntegrationRepositoryInterface $repository,
         DealerIntegrationServiceInterface $service,
         DealerIntegrationTransformer $transformer
     ) {
         $this->middleware('setDealerIdOnRequest')->only(['index','show','update','delete']);
+        $this->repository = $repository;
         $this->service = $service;
         $this->transformer = $transformer;
     }
@@ -57,7 +67,7 @@ class DealerIntegrationController extends RestfulControllerV2
 
         if ($integrationRequest->validate()) {
             return $this->response->collection(
-                $this->service->getAll([
+                $this->repository->getAll([
                     'dealer_id' => $integrationRequest->dealer_id
                 ]),
                 $this->transformer
@@ -81,7 +91,7 @@ class DealerIntegrationController extends RestfulControllerV2
 
         if ($integrationRequest->validate()) {
             return $this->response->item(
-                $this->service->get([
+                $this->repository->get([
                     'integration_id' => $integrationRequest->integration_id,
                     'dealer_id' => $integrationRequest->dealer_id
                 ]),

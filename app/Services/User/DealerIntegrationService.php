@@ -33,24 +33,6 @@ class DealerIntegrationService implements DealerIntegrationServiceInterface
      * @param array $params
      * @return DealerIntegration
      */
-    public function get(array $params): DealerIntegration
-    {
-        return $this->dealerIntegrationRepo->get($params);
-    }
-
-    /**
-     * @param array $params
-     * @return Collection
-     */
-    public function getAll(array $params): Collection
-    {
-        return $this->dealerIntegrationRepo->getAll($params);
-    }
-
-    /**
-     * @param array $params
-     * @return DealerIntegration
-     */
     public function update(array $params): DealerIntegration
     {
         $dealerIntegration = $this->dealerIntegrationRepo->update($params);
