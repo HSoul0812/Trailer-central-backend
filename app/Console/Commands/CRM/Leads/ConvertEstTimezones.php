@@ -3,6 +3,7 @@
 namespace App\Console\Commands\CRM\Leads;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class ConvertEstTimezones
@@ -24,7 +25,7 @@ class ConvertEstTimezones extends Command
     /**
      * @var string
      */
-    protected $signature = "leads:convert-est-timezones (start?)";
+    protected $signature = "leads:convert-est-timezones {start?}";
 
     /**
      * Execute the console command.
@@ -36,9 +37,10 @@ class ConvertEstTimezones extends Command
         // Get Oldest Date
         $time = $this->argument('start') ?? self::OLDEST_DATE_SUBMITTED;
         $startTime = Carbon::parse($time)->toDateTimeString();
+        Log::info('Converting EST Timezones to UTC, Starting From ' . $startTime);
 
         // Handle Updating Leads Chunked
-        DB::table('website_lead')
+        /*DB::table('website_lead')
             ->select('identifier', 'date_submitted')
             ->where('date_submitted', '>', $startTime)
             ->chunk(500, function ($leads) {
@@ -50,6 +52,6 @@ class ConvertEstTimezones extends Command
                             ->where(['id' => $lead->identifier])
                             ->update(['date_submitted' => $utcDate]);
                 }
-            });
+            });*/
     }
 }
