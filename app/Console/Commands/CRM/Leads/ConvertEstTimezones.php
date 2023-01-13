@@ -48,7 +48,7 @@ class ConvertEstTimezones extends Command
             ->orderBy('date_submitted', 'DESC')
             ->chunk(500, function ($leads) {
                 foreach ($leads as $lead) {
-                    $origDate = new Carbon($lead->date_submitted, self::ORIGIN_TIMEZONE);
+                    $origDate = new Carbon($lead->date_submitted, new DateTimeZone(self::ORIGIN_TIMEZONE));
                     $utcDate = $origDate->utc()->toDateTimeString();
 
                     DB::table('website_lead')
