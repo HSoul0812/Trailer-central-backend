@@ -1,28 +1,27 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\Sync;
 
-use App\Console\Commands\Inventory\ReindexInventoryIndex;
 use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
 use App\Jobs\Website\ReIndexInventoriesByDealersJob;
-use App\Models\Website\PaymentCalculator\Settings as PaymentCalculatorSettings;
-use App\Models\Inventory\AttributeValue as InventoryAttributeValue;
+use App\Models\Image;
 use App\Models\Inventory\Attribute as InventoryAttribute;
-use App\Models\Website\Entity as WebsiteEntity;
-use App\Models\Website\Config\WebsiteConfig;
-use App\Services\ElasticSearch\Cache\RedisResponseCacheKey;
-use Illuminate\Database\Eloquent\Collection;
+use App\Models\Inventory\AttributeValue as InventoryAttributeValue;
+use App\Models\Inventory\Inventory;
 use App\Models\Inventory\InventoryFeature;
 use App\Models\Inventory\InventoryImage;
-use Illuminate\Support\Facades\Config;
-use App\Models\Inventory\Inventory;
 use App\Models\User\DealerLocation;
 use App\Models\User\User as Dealer;
-use Illuminate\Support\Facades\DB;
+use App\Models\Website\Config\WebsiteConfig;
+use App\Models\Website\Entity as WebsiteEntity;
+use App\Models\Website\PaymentCalculator\Settings as PaymentCalculatorSettings;
 use App\Models\Website\Website;
-use App\Models\Image;
+use App\Services\ElasticSearch\Cache\RedisResponseCacheKey;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 
-class SyncWebsiteFromRemote extends AbstractFromRemoteSourceCommand
+class SyncWebsiteFromRemoteCommand extends AbstractSyncFromRemoteCommand
 {
     /**
      * The console command name.

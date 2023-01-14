@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\Sync;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Config;
 use PDO;
 
-abstract class AbstractFromRemoteSourceCommand extends Command
+abstract class AbstractSyncFromRemoteCommand extends Command
 {
     final public function handle(): void
     {
