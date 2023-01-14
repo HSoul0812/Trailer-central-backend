@@ -23,7 +23,7 @@ abstract class AbstractFromRemoteSourceCommand extends Command
                 'host' => [$host]
             ],
             'write' => [
-                'host' => [$host]
+                'host' => [env('DB_HOST', '127.0.0.1')] // to avoid any mismatch at coding time
             ],
             'sticky' => false,
             'port' => $port,
