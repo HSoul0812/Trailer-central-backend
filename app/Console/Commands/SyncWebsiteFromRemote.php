@@ -14,6 +14,7 @@ use App\Services\ElasticSearch\Cache\RedisResponseCacheKey;
 use Illuminate\Database\Eloquent\Collection;
 use App\Models\Inventory\InventoryFeature;
 use App\Models\Inventory\InventoryImage;
+use Illuminate\Support\Facades\Config;
 use App\Models\Inventory\Inventory;
 use App\Models\User\DealerLocation;
 use App\Models\User\User as Dealer;
@@ -65,6 +66,10 @@ class SyncWebsiteFromRemote extends AbstractFromRemoteSourceCommand
 
         if ($dealer && $website) {
             DB::transaction(function () use ($dealer, $website) {
+                // to dispatch fewer jobs
+                Inventory::disableSearchSyncing();
+                Config::set('cache.inventory', false);
+
                 $this->unguard();
 
                 Dealer::query()->updateOrCreate(['dealer_id' => $dealer->dealer_id], $dealer->toArray());
