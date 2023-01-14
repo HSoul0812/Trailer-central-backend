@@ -2,11 +2,15 @@
 
 namespace App\Console\Commands;
 
+use App\Console\Commands\Inventory\ReindexInventoryIndex;
+use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
+use App\Jobs\Website\ReIndexInventoriesByDealersJob;
 use App\Models\Website\PaymentCalculator\Settings as PaymentCalculatorSettings;
 use App\Models\Inventory\AttributeValue as InventoryAttributeValue;
 use App\Models\Inventory\Attribute as InventoryAttribute;
 use App\Models\Website\Entity as WebsiteEntity;
 use App\Models\Website\Config\WebsiteConfig;
+use App\Services\ElasticSearch\Cache\RedisResponseCacheKey;
 use Illuminate\Database\Eloquent\Collection;
 use App\Models\Inventory\InventoryFeature;
 use App\Models\Inventory\InventoryImage;
@@ -242,6 +246,15 @@ class SyncWebsiteFromRemote extends AbstractFromRemoteSourceCommand
                 $this->reguard();
             });
         }
+
+        /** @var RedisResponseCacheKey $cacheService */
+        $cacheService = app(RedisResponseCacheKey::class);
+
+        $this->output->writeln('Dispatching Cache invalidation jobs...');
+        dispatch(new InvalidateCacheJob([$cacheService->deleteByDealer($dealer->dealer_id)])); // not matter if cache is disabled
+
+        $this->output->writeln('Dispatching ES indexation jobs...');
+        dispatch(new ReIndexInventoriesByDealersJob([$dealer->dealer_id]));
 
         $this->output->writeln(sprintf('%s was successfully synced.', $dealer->name));
     }
