@@ -105,6 +105,7 @@ class SyncWebsiteFromRemoteCommand extends AbstractSyncFromRemoteCommand
             $websiteConfigs = WebsiteConfig::on('remote')
                 ->where('website_id', $website->id)
                 ->get()
+                ->makeHidden(['id'])
                 ->toArray();
 
             WebsiteConfig::query()->insert($websiteConfigs);
