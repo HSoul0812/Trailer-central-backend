@@ -7,12 +7,15 @@ use App\Models\Inventory\AttributeValue as InventoryAttributeValue;
 use App\Models\Inventory\Attribute as InventoryAttribute;
 use App\Models\Website\Entity as WebsiteEntity;
 use App\Models\Website\Config\WebsiteConfig;
+use Illuminate\Database\Eloquent\Collection;
+use App\Models\Inventory\InventoryFeature;
+use App\Models\Inventory\InventoryImage;
 use App\Models\Inventory\Inventory;
 use App\Models\User\DealerLocation;
 use App\Models\User\User as Dealer;
-use App\Models\Website\Website;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use App\Models\Website\Website;
+use App\Models\Image;
 
 class SyncWebsiteFromRemote extends AbstractFromRemoteSourceCommand
 {
@@ -30,6 +33,22 @@ class SyncWebsiteFromRemote extends AbstractFromRemoteSourceCommand
      */
     protected $description = 'Sync a remote DB (partially) within current DB';
 
+    /**
+     * Will sync following tables:
+     * - dealer
+     * - dealer_location
+     * - website
+     * - website_config
+     * - website_entity
+     * - inventory
+     * - eav_attribute
+     * - eav_attribute_value
+     * - inventory_feature
+     * - inventory_image
+     * - image (related with inventory)
+     *
+     * @return void
+     */
     public function sync(): void
     {
         /** @var Website $website */
@@ -99,6 +118,10 @@ class SyncWebsiteFromRemote extends AbstractFromRemoteSourceCommand
                 Inventory::on('remote')
                     ->where('dealer_id', $dealer->dealer_id)
                     ->chunk(100, function (Collection $inventories) use (&$units, $dealerLocationsId): void {
+                        Inventory::query()->whereIn(
+                            'inventory_id',
+                            $inventories->pluck('inventory_id')->toArray()
+                        )->delete(); // to avoid inventory id collisions
 
                         $inventories->each(function (Inventory $inventory) use ($dealerLocationsId): void {
                             if (!isset($dealerLocationsId[$inventory->dealer_location_id])) {
@@ -118,7 +141,14 @@ class SyncWebsiteFromRemote extends AbstractFromRemoteSourceCommand
                                 $inventory->getOriginal()
                             );
 
-                            InventoryAttributeValue::query()->where('inventory_id', $inventory->inventory_id)->delete();
+                            InventoryAttributeValue::query()->where('inventory_id', $inventory->inventory_id)
+                                ->delete();
+                            InventoryFeature::query()->where('inventory_id', $inventory->inventory_id)->delete();
+                            Image::query()
+                                ->join('inventory_image', 'inventory_image.image_id', '=', 'image.image_id')
+                                ->join('inventory', 'inventory.inventory_id', '=', 'inventory_image.inventory_id')
+                                ->where('inventory.inventory_id', $inventory->inventory_id)
+                                ->delete();
                         });
 
                         $units += count($inventories);
@@ -149,9 +179,49 @@ class SyncWebsiteFromRemote extends AbstractFromRemoteSourceCommand
                         $inventoryAttributesCounter++;
                     });
 
-                $this->output->writeln(sprintf('%d inventories attributes were synced.', $inventoryAttributesCounter));
+                $this->output->writeln(sprintf('%d inventory attributes were synced.', $inventoryAttributesCounter));
 
-                // @todo import inventory images, inventory features and whatever the Frontend team needs
+                $inventoryFeaturesCounter = 0;
+
+                InventoryFeature::on('remote')
+                    ->join('inventory', 'inventory.inventory_id', '=', 'inventory_feature.inventory_id')
+                    ->where('inventory.dealer_id', $dealer->dealer_id)
+                    ->whereIn('inventory.dealer_location_id', $dealerLocationsId)
+                    ->select('inventory_feature.*')
+                    ->chunk(700, function (Collection $features) use (&$inventoryFeaturesCounter): void {
+                        InventoryFeature::query()->insert($features->toArray());
+
+                        $inventoryFeaturesCounter += count($features);
+                    });
+
+                $this->output->writeln(sprintf('%d inventory features were synced.', $inventoryFeaturesCounter));
+
+                $inventoryImagesCounter = 0;
+
+                Image::on('remote')
+                    ->join('inventory_image', 'inventory_image.image_id', '=', 'image.image_id')
+                    ->join('inventory', 'inventory.inventory_id', '=', 'inventory_image.inventory_id')
+                    ->where('inventory.dealer_id', $dealer->dealer_id)
+                    ->whereIn('inventory.dealer_location_id', $dealerLocationsId)
+                    ->select('image.*')
+                    ->chunk(700, function (Collection $images) use (&$inventoryImagesCounter): void {
+                        $images->each(function (Image $image): void {
+                            $localImage = Image::query()->create($image->makeHidden(['image_id'])->toArray());
+
+                            $images = InventoryImage::on('remote')
+                                ->where('image_id', $image->image_id)
+                                ->get()
+                                ->map(function (InventoryImage $image) use ($localImage): array {
+                                    return $image->makeHidden(['image_id'])->toArray() + ['image_id' => $localImage->image_id];
+                                })->toArray();
+
+                            InventoryImage::query()->insert($images);
+                        });
+
+                        $inventoryImagesCounter += count($images);
+                    });
+
+                $this->output->writeln(sprintf('%d inventory images were synced.', $inventoryImagesCounter));
 
                 PaymentCalculatorSettings::query()->where('website_id', $website->id)->delete();
 
@@ -187,6 +257,9 @@ class SyncWebsiteFromRemote extends AbstractFromRemoteSourceCommand
         PaymentCalculatorSettings::unguard();
         InventoryAttribute::unguard();
         InventoryAttributeValue::unguard();
+        InventoryFeature::unguard();
+        Image::unguard();
+        InventoryImage::unguard();
     }
 
     private function reguard(): void
@@ -200,5 +273,8 @@ class SyncWebsiteFromRemote extends AbstractFromRemoteSourceCommand
         PaymentCalculatorSettings::reguard();
         InventoryAttribute::reguard();
         InventoryAttributeValue::reguard();
+        InventoryFeature::reguard();
+        Image::reguard();
+        InventoryImage::reguard();
     }
 }
