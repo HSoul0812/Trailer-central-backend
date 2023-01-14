@@ -107,7 +107,7 @@ class SyncWebsiteFromRemoteCommand extends AbstractSyncFromRemoteCommand
                 ->get()
                 ->makeHidden(['id'])
                 ->toArray();
-
+            dd($websiteConfigs);
             WebsiteConfig::query()->insert($websiteConfigs);
 
             $this->output->writeln(sprintf('%d website configs were synced.', count($websiteConfigs)));
@@ -198,8 +198,13 @@ class SyncWebsiteFromRemoteCommand extends AbstractSyncFromRemoteCommand
                 ->where('inventory.dealer_id', $dealer->dealer_id)
                 ->whereIn('inventory.dealer_location_id', $dealerLocationsId)
                 ->select('inventory_feature.*')
-                ->chunk(700, function (Collection $features) use (&$inventoryFeaturesCounter): void {
-                    InventoryFeature::query()->insert($features->toArray());
+                ->chunk(1000, function (Collection $features) use (&$inventoryFeaturesCounter): void {
+                    InventoryFeature::query()
+                        ->insert(
+                            $features->map(function (InventoryFeature $feature): array {
+                                return $feature->makeHidden(['inventory_feature_id'])->toArray();
+                            })->toArray()
+                        );
 
                     $inventoryFeaturesCounter += count($features);
                 });
