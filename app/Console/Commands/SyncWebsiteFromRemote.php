@@ -36,21 +36,21 @@ class SyncWebsiteFromRemote extends AbstractFromRemoteSourceCommand
      *
      * @var string
      */
-    protected $description = 'Sync a remote DB (partially) within current DB';
+    protected $description = 'Sync a dealer website from remote DB.';
 
     /**
      * Will sync following tables:
-     * - dealer
-     * - dealer_location
-     * - website
-     * - website_config
-     * - website_entity
-     * - inventory
-     * - eav_attribute
-     * - eav_attribute_value
-     * - inventory_feature
-     * - inventory_image
-     * - image (related with inventory)
+     * - `dealer`
+     * - `dealer_location`
+     * - `website`
+     * - `website_config`
+     * - `website_entity`
+     * - `inventory`
+     * - `eav_attribute`
+     * - `eav_attribute_value`
+     * - `inventory_feature`
+     * - `inventory_image`
+     * - `image` (related with inventory)
      *
      * @return void
      */
