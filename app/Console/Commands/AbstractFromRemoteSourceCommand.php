@@ -14,8 +14,8 @@ abstract class AbstractFromRemoteSourceCommand extends Command
         $dbName = $this->argument('db');
         $user = $this->argument('user');
         $port = $this->argument('port');
-        $password = $this->getOutput()->askHidden('password');
-        //$password = $this->argument('password');
+        $password = $this->getOutput()->askHidden('password'); // comment me when coding
+        //$password = 'hardcode password tp boost coding phase';
 
         Config::set('database.connections.remote', [
             'driver' => 'mysql',
