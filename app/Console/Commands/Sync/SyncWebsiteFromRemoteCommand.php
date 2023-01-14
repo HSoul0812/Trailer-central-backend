@@ -77,25 +77,21 @@ class SyncWebsiteFromRemoteCommand extends AbstractSyncFromRemoteCommand
                 $this->output->writeln('website and dealer tables were synced.');
 
                 $locations = 0;
+                $dealerLocationsId= [];
 
                 DealerLocation::on('remote')
                     ->where('dealer_id', $dealer->dealer_id)
                     ->get()
-                    ->each(function (DealerLocation $location) use (&$locations) {
+                    ->each(function (DealerLocation $location) use (&$locations, &$dealerLocationsId) {
                         DealerLocation::query()->updateOrCreate(
                             ['dealer_location_id' => $location->dealer_location_id],
                             $location->getOriginal()
                         );
 
                         $locations++;
-                    });
 
-                $dealerLocationsId = DealerLocation::query()
-                    ->where('dealer_id', $dealer->dealer_id)
-                    ->get(['dealer_location_id'])
-                    ->keyBy('dealer_location_id')
-                    ->pluck('dealer_location_id', 'dealer_location_id')
-                    ->toArray();
+                        $dealerLocationsId[$location->dealer_location_id] = $location->dealer_location_id;
+                    });
 
                 $this->output->writeln(sprintf('%d dealer locations were synced.', $locations));
 
