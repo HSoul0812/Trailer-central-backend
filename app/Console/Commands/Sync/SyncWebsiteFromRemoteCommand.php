@@ -242,6 +242,7 @@ class SyncWebsiteFromRemoteCommand extends AbstractSyncFromRemoteCommand
             $paymentCalculatorSettings = PaymentCalculatorSettings::on('remote')
                 ->where('website_id', $website->id)
                 ->get()
+                ->makeHidden(['id'])
                 ->toArray();
 
             PaymentCalculatorSettings::query()->insert($paymentCalculatorSettings);
