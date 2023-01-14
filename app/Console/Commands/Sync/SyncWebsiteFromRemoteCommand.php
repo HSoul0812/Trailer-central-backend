@@ -63,189 +63,193 @@ class SyncWebsiteFromRemoteCommand extends AbstractSyncFromRemoteCommand
         $dealer = Dealer::on('remote')->where('dealer_id', $dealerId)->first();
         $website = Website::on('remote')->where('dealer_id', $dealerId)->first();
 
-        if ($dealer && $website) {
-            DB::transaction(function () use ($dealer, $website) {
-                // to dispatch fewer jobs
-                Inventory::disableSearchSyncing();
-                Config::set('cache.inventory', false);
+        if (is_null($dealer) || is_null($website)) {
+            $this->output->error('Dealer or Website does not even exists.');
 
-                $this->unguard();
+            return;
+        }
 
-                Dealer::query()->updateOrCreate(['dealer_id' => $dealer->dealer_id], $dealer->toArray());
-                Website::query()->updateOrCreate(['id' => $website->id], $website->toArray());
+        DB::transaction(function () use ($dealer, $website) {
+            // to dispatch fewer jobs
+            Inventory::disableSearchSyncing();
+            Config::set('cache.inventory', false);
 
-                $this->output->writeln('website and dealer tables were synced.');
+            $this->unguard();
 
-                $locations = 0;
-                $dealerLocationsId= [];
+            Dealer::query()->updateOrCreate(['dealer_id' => $dealer->dealer_id], $dealer->toArray());
+            Website::query()->updateOrCreate(['id' => $website->id], $website->toArray());
 
-                DealerLocation::on('remote')
-                    ->where('dealer_id', $dealer->dealer_id)
-                    ->get()
-                    ->each(function (DealerLocation $location) use (&$locations, &$dealerLocationsId) {
-                        DealerLocation::query()->updateOrCreate(
-                            ['dealer_location_id' => $location->dealer_location_id],
-                            $location->getOriginal()
-                        );
+            $this->output->writeln('website and dealer tables were synced.');
 
-                        $locations++;
+            $locations = 0;
+            $dealerLocationsId = [];
 
-                        $dealerLocationsId[$location->dealer_location_id] = $location->dealer_location_id;
-                    });
+            DealerLocation::on('remote')
+                ->where('dealer_id', $dealer->dealer_id)
+                ->get()
+                ->each(function (DealerLocation $location) use (&$locations, &$dealerLocationsId) {
+                    DealerLocation::query()->updateOrCreate(
+                        ['dealer_location_id' => $location->dealer_location_id],
+                        $location->getOriginal()
+                    );
 
-                $this->output->writeln(sprintf('%d dealer locations were synced.', $locations));
+                    $locations++;
 
-                WebsiteConfig::query()->where('website_id', $website->id)->delete();
+                    $dealerLocationsId[$location->dealer_location_id] = $location->dealer_location_id;
+                });
 
-                $websiteConfigs = WebsiteConfig::on('remote')
-                    ->where('website_id', $website->id)
-                    ->get()
-                    ->toArray();
+            $this->output->writeln(sprintf('%d dealer locations were synced.', $locations));
 
-                WebsiteConfig::query()->insert($websiteConfigs);
+            WebsiteConfig::query()->where('website_id', $website->id)->delete();
 
-                $this->output->writeln(sprintf('%d website configs were synced.', count($websiteConfigs)));
+            $websiteConfigs = WebsiteConfig::on('remote')
+                ->where('website_id', $website->id)
+                ->get()
+                ->toArray();
 
-                WebsiteEntity::query()->where('website_id', $website->id)->delete();
+            WebsiteConfig::query()->insert($websiteConfigs);
 
-                $entities = WebsiteEntity::on('remote')
-                    ->where('website_id', $website->id)
-                    ->get()
-                    ->toArray();
+            $this->output->writeln(sprintf('%d website configs were synced.', count($websiteConfigs)));
 
-                WebsiteEntity::query()->insert($entities);
+            WebsiteEntity::query()->where('website_id', $website->id)->delete();
 
-                $this->output->writeln(sprintf('%d website entities were synced.', count($entities)));
+            $entities = WebsiteEntity::on('remote')
+                ->where('website_id', $website->id)
+                ->get()
+                ->toArray();
 
-                $units = 0;
+            WebsiteEntity::query()->insert($entities);
 
-                Inventory::on('remote')
-                    ->where('dealer_id', $dealer->dealer_id)
-                    ->chunk(100, function (Collection $inventories) use (&$units, $dealerLocationsId): void {
-                        Inventory::query()->whereIn(
-                            'inventory_id',
-                            $inventories->pluck('inventory_id')->toArray()
-                        )->delete(); // to avoid inventory id collisions
+            $this->output->writeln(sprintf('%d website entities were synced.', count($entities)));
 
-                        $inventories->each(function (Inventory $inventory) use ($dealerLocationsId): void {
-                            if (!isset($dealerLocationsId[$inventory->dealer_location_id])) {
-                                $this->output->writeln(
-                                    sprintf(
-                                        '[error] inventory %d has %d as location, that location does not belong to this dealer.',
-                                        $inventory->inventory_id,
-                                        $inventory->dealer_location_id
-                                    )
-                                );
+            $units = 0;
 
-                                return;
-                            }
+            Inventory::on('remote')
+                ->where('dealer_id', $dealer->dealer_id)
+                ->chunk(100, function (Collection $inventories) use (&$units, $dealerLocationsId): void {
+                    Inventory::query()->whereIn(
+                        'inventory_id',
+                        $inventories->pluck('inventory_id')->toArray()
+                    )->delete(); // to avoid inventory id collisions
 
-                            Inventory::query()->updateOrCreate(
-                                ['inventory_id' => $inventory->inventory_id],
-                                $inventory->getOriginal()
+                    $inventories->each(function (Inventory $inventory) use ($dealerLocationsId): void {
+                        if (!isset($dealerLocationsId[$inventory->dealer_location_id])) {
+                            $this->output->writeln(
+                                sprintf(
+                                    '[error] inventory %d has %d as location, that location does not belong to this dealer.',
+                                    $inventory->inventory_id,
+                                    $inventory->dealer_location_id
+                                )
                             );
 
-                            InventoryAttributeValue::query()->where('inventory_id', $inventory->inventory_id)
-                                ->delete();
-                            InventoryFeature::query()->where('inventory_id', $inventory->inventory_id)->delete();
-                            Image::query()
-                                ->join('inventory_image', 'inventory_image.image_id', '=', 'image.image_id')
-                                ->join('inventory', 'inventory.inventory_id', '=', 'inventory_image.inventory_id')
-                                ->where('inventory.inventory_id', $inventory->inventory_id)
-                                ->delete();
-                        });
+                            return;
+                        }
 
-                        $units += count($inventories);
-                    });
-
-                $this->output->writeln(sprintf('%d dealer inventory were synced.', $units));
-
-                InventoryAttribute::on('remote')
-                    ->get()
-                    ->each(function (InventoryAttribute $attribute): void {
-                        InventoryAttribute::query()->updateOrCreate(
-                            ['attribute_id' => $attribute->attribute_id],
-                            $attribute->toArray()
+                        Inventory::query()->updateOrCreate(
+                            ['inventory_id' => $inventory->inventory_id],
+                            $inventory->getOriginal()
                         );
+
+                        InventoryAttributeValue::query()->where('inventory_id', $inventory->inventory_id)
+                            ->delete();
+                        InventoryFeature::query()->where('inventory_id', $inventory->inventory_id)->delete();
+                        Image::query()
+                            ->join('inventory_image', 'inventory_image.image_id', '=', 'image.image_id')
+                            ->join('inventory', 'inventory.inventory_id', '=', 'inventory_image.inventory_id')
+                            ->where('inventory.inventory_id', $inventory->inventory_id)
+                            ->delete();
                     });
 
-                $inventoryAttributesCounter = 0;
+                    $units += count($inventories);
+                });
 
-                InventoryAttributeValue::on('remote')
-                    ->join('inventory', 'inventory.inventory_id', '=', 'eav_attribute_value.inventory_id')
-                    ->where('inventory.dealer_id', $dealer->dealer_id)
-                    ->whereIn('inventory.dealer_location_id', $dealerLocationsId)
-                    ->select('eav_attribute_value.*')
-                    ->cursor() // we were forced to use a cursor here, somehow chunk fails
-                    ->each(function (InventoryAttributeValue $attributeValue) use (&$inventoryAttributesCounter): void {
-                        InventoryAttributeValue::query()->insert($attributeValue->toArray());
+            $this->output->writeln(sprintf('%d dealer inventory were synced.', $units));
 
-                        $inventoryAttributesCounter++;
+            InventoryAttribute::on('remote')
+                ->get()
+                ->each(function (InventoryAttribute $attribute): void {
+                    InventoryAttribute::query()->updateOrCreate(
+                        ['attribute_id' => $attribute->attribute_id],
+                        $attribute->toArray()
+                    );
+                });
+
+            $inventoryAttributesCounter = 0;
+
+            InventoryAttributeValue::on('remote')
+                ->join('inventory', 'inventory.inventory_id', '=', 'eav_attribute_value.inventory_id')
+                ->where('inventory.dealer_id', $dealer->dealer_id)
+                ->whereIn('inventory.dealer_location_id', $dealerLocationsId)
+                ->select('eav_attribute_value.*')
+                ->cursor() // we were forced to use a cursor here, somehow chunk fails
+                ->each(function (InventoryAttributeValue $attributeValue) use (&$inventoryAttributesCounter): void {
+                    InventoryAttributeValue::query()->insert($attributeValue->toArray());
+
+                    $inventoryAttributesCounter++;
+                });
+
+            $this->output->writeln(sprintf('%d inventory attributes were synced.', $inventoryAttributesCounter));
+
+            $inventoryFeaturesCounter = 0;
+
+            InventoryFeature::on('remote')
+                ->join('inventory', 'inventory.inventory_id', '=', 'inventory_feature.inventory_id')
+                ->where('inventory.dealer_id', $dealer->dealer_id)
+                ->whereIn('inventory.dealer_location_id', $dealerLocationsId)
+                ->select('inventory_feature.*')
+                ->chunk(700, function (Collection $features) use (&$inventoryFeaturesCounter): void {
+                    InventoryFeature::query()->insert($features->toArray());
+
+                    $inventoryFeaturesCounter += count($features);
+                });
+
+            $this->output->writeln(sprintf('%d inventory features were synced.', $inventoryFeaturesCounter));
+
+            $inventoryImagesCounter = 0;
+
+            Image::on('remote')
+                ->join('inventory_image', 'inventory_image.image_id', '=', 'image.image_id')
+                ->join('inventory', 'inventory.inventory_id', '=', 'inventory_image.inventory_id')
+                ->where('inventory.dealer_id', $dealer->dealer_id)
+                ->whereIn('inventory.dealer_location_id', $dealerLocationsId)
+                ->select('image.*')
+                ->chunk(700, function (Collection $images) use (&$inventoryImagesCounter): void {
+                    $images->each(function (Image $image): void {
+                        $localImage = Image::query()->create($image->makeHidden(['image_id'])->toArray());
+
+                        $images = InventoryImage::on('remote')
+                            ->where('image_id', $image->image_id)
+                            ->get()
+                            ->map(function (InventoryImage $image) use ($localImage): array {
+                                return $image->makeHidden(['image_id'])->toArray() + ['image_id' => $localImage->image_id];
+                            })->toArray();
+
+                        InventoryImage::query()->insert($images);
                     });
 
-                $this->output->writeln(sprintf('%d inventory attributes were synced.', $inventoryAttributesCounter));
+                    $inventoryImagesCounter += count($images);
+                });
 
-                $inventoryFeaturesCounter = 0;
+            $this->output->writeln(sprintf('%d inventory images were synced.', $inventoryImagesCounter));
 
-                InventoryFeature::on('remote')
-                    ->join('inventory', 'inventory.inventory_id', '=', 'inventory_feature.inventory_id')
-                    ->where('inventory.dealer_id', $dealer->dealer_id)
-                    ->whereIn('inventory.dealer_location_id', $dealerLocationsId)
-                    ->select('inventory_feature.*')
-                    ->chunk(700, function (Collection $features) use (&$inventoryFeaturesCounter): void {
-                        InventoryFeature::query()->insert($features->toArray());
+            PaymentCalculatorSettings::query()->where('website_id', $website->id)->delete();
 
-                        $inventoryFeaturesCounter += count($features);
-                    });
+            $paymentCalculatorSettings = PaymentCalculatorSettings::on('remote')
+                ->where('website_id', $website->id)
+                ->get()
+                ->toArray();
 
-                $this->output->writeln(sprintf('%d inventory features were synced.', $inventoryFeaturesCounter));
+            PaymentCalculatorSettings::query()->insert($paymentCalculatorSettings);
 
-                $inventoryImagesCounter = 0;
+            $this->output->writeln(
+                sprintf(
+                    '%d payment calculator settings were synced.',
+                    count($paymentCalculatorSettings)
+                )
+            );
 
-                Image::on('remote')
-                    ->join('inventory_image', 'inventory_image.image_id', '=', 'image.image_id')
-                    ->join('inventory', 'inventory.inventory_id', '=', 'inventory_image.inventory_id')
-                    ->where('inventory.dealer_id', $dealer->dealer_id)
-                    ->whereIn('inventory.dealer_location_id', $dealerLocationsId)
-                    ->select('image.*')
-                    ->chunk(700, function (Collection $images) use (&$inventoryImagesCounter): void {
-                        $images->each(function (Image $image): void {
-                            $localImage = Image::query()->create($image->makeHidden(['image_id'])->toArray());
-
-                            $images = InventoryImage::on('remote')
-                                ->where('image_id', $image->image_id)
-                                ->get()
-                                ->map(function (InventoryImage $image) use ($localImage): array {
-                                    return $image->makeHidden(['image_id'])->toArray() + ['image_id' => $localImage->image_id];
-                                })->toArray();
-
-                            InventoryImage::query()->insert($images);
-                        });
-
-                        $inventoryImagesCounter += count($images);
-                    });
-
-                $this->output->writeln(sprintf('%d inventory images were synced.', $inventoryImagesCounter));
-
-                PaymentCalculatorSettings::query()->where('website_id', $website->id)->delete();
-
-                $paymentCalculatorSettings = PaymentCalculatorSettings::on('remote')
-                    ->where('website_id', $website->id)
-                    ->get()
-                    ->toArray();
-
-                PaymentCalculatorSettings::query()->insert($paymentCalculatorSettings);
-
-                $this->output->writeln(
-                    sprintf(
-                        '%d payment calculator settings were synced.',
-                        count($paymentCalculatorSettings)
-                    )
-                );
-
-                $this->reguard();
-            });
-        }
+            $this->reguard();
+        });
 
         /** @var RedisResponseCacheKey $cacheService */
         $cacheService = app(RedisResponseCacheKey::class);
