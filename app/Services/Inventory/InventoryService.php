@@ -2,11 +2,14 @@
 
 namespace App\Services\Inventory;
 
+use App\Console\Commands\Inventory\ReindexInventoryIndex;
 use App\Contracts\LoggerServiceInterface;
 use App\Exceptions\File\FileUploadException;
 use App\Exceptions\File\ImageUploadException;
 use App\Exceptions\Inventory\InventoryException;
+use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
 use App\Jobs\Files\DeleteS3FilesJob;
+use App\Jobs\Website\ReIndexInventoriesByDealersJob;
 use App\Models\CRM\Dms\Quickbooks\Bill;
 use App\Models\Inventory\File;
 use App\Models\Inventory\Inventory;
@@ -23,6 +26,7 @@ use App\Repositories\User\DealerLocationMileageFeeRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Repositories\User\GeoLocationRepositoryInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
+use App\Services\ElasticSearch\Cache\RedisResponseCacheKey;
 use App\Services\File\FileService;
 use App\Services\File\ImageService;
 use App\Transformers\Inventory\InventoryTitleAndVinTransformer;
@@ -1090,5 +1094,22 @@ class InventoryService implements InventoryServiceInterface
         }
 
         return $description;
+    }
+
+    public function invalidateCacheAndReindexByDealerIds(array $dealer_ids): void
+    {
+        $cacheKey = new RedisResponseCacheKey();
+        $patterns = [];
+
+        foreach ($dealer_ids as $dealer_id)
+        {
+            $patterns[] = $cacheKey->deleteByDealer($dealer_id);
+        }
+
+        if (config('cache.inventory')) {
+            $this->dispatch(new InvalidateCacheJob($patterns));
+        }
+
+        $this->dispatch(new ReIndexInventoriesByDealersJob($dealer_ids));
     }
 }

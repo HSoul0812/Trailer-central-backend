@@ -13,6 +13,7 @@ use App\Models\CRM\Leads\InventoryLead;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Models\CRM\Leads\LeadStatus;
+use Illuminate\Support\Facades\Log;
 
 class InquiryControllerTest extends IntegrationTestCase
 {

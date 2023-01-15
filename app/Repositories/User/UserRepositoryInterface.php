@@ -200,4 +200,16 @@ interface UserRepositoryInterface extends Repository, TransactionalRepository {
      * @return User
      */
     public function changeStatus(int $dealerId, string $status): User;
+
+    /**
+     * @param int $dealerId
+     * @return User
+     */
+    public function activateGoogleFeed(int $dealerId): User;
+
+    /**
+     * @param int $dealerId
+     * @return User
+     */
+    public function deactivateGoogleFeed(int $dealerId): User;
 }

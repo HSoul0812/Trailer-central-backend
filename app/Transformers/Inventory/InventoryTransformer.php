@@ -5,11 +5,13 @@ namespace App\Transformers\Inventory;
 use App\Helpers\ConvertHelper;
 use App\Models\Inventory\File;
 use App\Models\Inventory\InventoryImage;
+use App\Repositories\Website\PaymentCalculator\SettingsRepositoryInterface;
 use App\Transformers\Dms\ServiceOrderTransformer;
 use App\Transformers\Marketing\Facebook\ListingTransformer;
 use Illuminate\Database\Eloquent\Collection;
 use League\Fractal\Resource\Item;
 use Carbon\Carbon;
+use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
 use App\Models\Inventory\Inventory;
 use App\Models\Inventory\InventoryFeature;
@@ -29,7 +31,8 @@ class InventoryTransformer extends TransformerAbstract
         'attributes',
         'features',
         'clapps',
-        'activeListings'
+        'activeListings',
+        'paymentCalculator'
     ];
 
     /**
@@ -288,6 +291,11 @@ class InventoryTransformer extends TransformerAbstract
         return $this->collection($inventory->repairOrders, new ServiceOrderTransformer());
     }
 
+    public function includePaymentCalculator(Inventory $inventory): Primitive
+    {
+        return $this->primitive($this->settingsRepository()->getCalculatedSettingsByInventory($inventory));
+    }
+
     /**
      * @param Collection $images
      * @return array
@@ -355,5 +363,10 @@ class InventoryTransformer extends TransformerAbstract
 
             return $image->isDefault() ? InventoryImage::FIRST_IMAGE_POSITION : $position;
         };
+    }
+
+    protected function settingsRepository(): SettingsRepositoryInterface
+    {
+        return app(SettingsRepositoryInterface::class);
     }
 }

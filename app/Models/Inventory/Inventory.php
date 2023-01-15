@@ -20,9 +20,12 @@ use App\Models\Parts\Vendor;
 use App\Models\Traits\TableAware;
 use App\Models\User\DealerLocation;
 use App\Models\User\User;
+use App\Services\Inventory\InventoryUpdateSource;
+use App\Services\Inventory\InventoryUpdateSourceInterface;
 use App\Traits\CompactHelper;
 use App\Traits\GeospatialHelper;
 use ElasticScoutDriverPlus\CustomSearch;
+use Exception;
 use Grimzy\LaravelMysqlSpatial\Eloquent\SpatialTrait;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Illuminate\Database\Eloquent\Collection;
@@ -880,7 +883,7 @@ class Inventory extends Model
     }
 
     /**
-     * @throws \Exception when some unknown error has been thrown
+     * @throws Exception when some unknown error has been thrown
      */
     public static function makeAllSearchableUsingAliasStrategy(): void
     {
@@ -953,5 +956,45 @@ class Inventory extends Model
                 $query->whereNull('status')
                     ->orWhere('status', '<>', self::STATUS_QUOTE);
             });
+    }
+
+    /**
+     * Save without triggering the model events
+     * @param array $options
+     * @return mixed
+     */
+    public function saveQuietly(array $options = [])
+    {
+        return static::withoutEvents(function () use ($options) {
+            return $this->save($options);
+        });
+    }
+
+    /**
+     * Delete without triggering the model events
+     * @return mixed
+     * @throws Exception
+     */
+    public function deleteQuietly()
+    {
+        return static::withoutEvents(function () {
+            return $this->delete();
+        });
+    }
+
+    /**
+     * This need to be override to be able avoid dispatching jobs when integrations is requesting
+     * @return void
+     */
+    function searchable()
+    {
+        if (!$this->getInventoryUpdateSource()->integrations()) {
+            $this->newCollection([$this])->searchable();
+        }
+    }
+
+    protected function getInventoryUpdateSource(): InventoryUpdateSource
+    {
+        return app(InventoryUpdateSourceInterface::class);
     }
 }

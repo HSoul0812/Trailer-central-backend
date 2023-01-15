@@ -1044,7 +1044,8 @@ class InventoryRepository implements InventoryRepositoryInterface
         $inventory = $this->get($params);
         $inventory->times_viewed += 1;
         $inventory->timestamps = false;
-        $inventory->save();
+        //we need to disable the events so the observer method doesn't trigger
+        $inventory->saveQuietly();
         return $inventory;
     }
 

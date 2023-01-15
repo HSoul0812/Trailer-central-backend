@@ -80,7 +80,12 @@ class Integration extends Resource
             Boolean::make('Active'),
 
             Code::make('Filters', 'unserializeFilters')->language('javascript')->json(),
-            Code::make('Settings', 'unserializeSettings')->language('javascript')->json(),
+            Code::make('Settings', 'unserializeSettings')->language('javascript')->json()->help(
+                "Please, when using package options, to set unlimited/all units set key as '0', e.g:
+                'options': {
+                    '0': 'Unlimited'
+                }"
+            ),
 
             Boolean::make('Include Sold')->hideFromIndex(),
 

@@ -44,7 +44,7 @@ class ShowroomBulkUpdateYearService implements ShowroomBulkUpdateYearServiceInte
 
             foreach ($manufacturers as $key => $manufacturer) {
                 $this->manufacturerRepository->bulkUpdate(
-                    $this->params['manufacturer'],
+                    $manufacturer,
                     [
                         'year' => $this->params['to']
                     ]

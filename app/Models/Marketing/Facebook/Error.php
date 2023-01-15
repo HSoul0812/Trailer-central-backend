@@ -72,6 +72,7 @@ class Error extends Model
         'missing-inventory' => 1,
         'email-verification' => 2,
         'missing-tunnel' => 1,
+        'offline-tunnel' => 1,
         'two-factor-auth' => 24,
         'two-factor-failed' => 1,
         'marketplace-inaccessible' => 24,
