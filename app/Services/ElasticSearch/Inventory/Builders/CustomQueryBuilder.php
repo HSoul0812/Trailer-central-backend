@@ -90,6 +90,27 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
         ];
     }
 
+    private function buildLocationQueryForGlobalFilter(string $name, array $values): array
+    {
+        $field = str_replace('_', '.', $name);
+
+        $query = [
+            'bool' => [
+                'must' => []
+            ]
+        ];
+
+        foreach ($values as $value) {
+            $query['bool']['must'][] = [
+                'term' => [
+                    $field => $value
+                ]
+            ];
+        }
+
+        return $query;
+    }
+
     private function buildLocationQuery(string $name, array $values): array
     {
         $field = str_replace('_', '.', $name);
@@ -244,7 +265,21 @@ doc['status'].value != 2 && doc['dealer.name'].value != 'Operate Beyond'";
 
     public function globalQuery(): array
     {
-        return $this->generalQuery();
+        $this->field->getTerms()->each(function (Term $term) {
+            $name = $this->field->getName();
+            $values = $term->getValues();
+
+            switch ($name) {
+                case 'location_region':
+                case 'location_city':
+                case 'location_country':
+                    $this->appendToQuery($this->buildLocationQueryForGlobalFilter($name, $values));
+                    break;
+            }
+
+        });
+
+        return $this->query;
     }
 
     public function generalQuery(): array

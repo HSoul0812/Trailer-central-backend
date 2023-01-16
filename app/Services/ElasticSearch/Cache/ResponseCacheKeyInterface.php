@@ -14,10 +14,11 @@ interface ResponseCacheKeyInterface
     public function collection(string $requestId, ElasticSearchQueryResult $result): string;
 
     /**
-     * @param $id
+     * @param $inventoryId
+     * @param $dealerId
      * @return string
      */
-    public function single($id): string;
+    public function single($inventoryId, $dealerId): string;
 
     /**
      * @param int $id
@@ -36,4 +37,10 @@ interface ResponseCacheKeyInterface
      * @return string
      */
     public function deleteByDealer(int $id): string;
+
+    /**
+     * @param int $id
+     * @return string
+     */
+    public function deleteSingleByDealer(int $id): string;
 }

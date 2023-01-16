@@ -20,9 +20,12 @@ use App\Models\Parts\Vendor;
 use App\Models\Traits\TableAware;
 use App\Models\User\DealerLocation;
 use App\Models\User\User;
+use App\Services\Inventory\InventoryUpdateSource;
+use App\Services\Inventory\InventoryUpdateSourceInterface;
 use App\Traits\CompactHelper;
 use App\Traits\GeospatialHelper;
 use ElasticScoutDriverPlus\CustomSearch;
+use Exception;
 use Grimzy\LaravelMysqlSpatial\Eloquent\SpatialTrait;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Illuminate\Database\Eloquent\Collection;
@@ -33,6 +36,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
 use Laravel\Scout\Searchable;
 
@@ -880,7 +884,7 @@ class Inventory extends Model
     }
 
     /**
-     * @throws \Exception when some unknown error has been thrown
+     * @throws Exception when some unknown error has been thrown
      */
     public static function makeAllSearchableUsingAliasStrategy(): void
     {
@@ -965,5 +969,56 @@ class Inventory extends Model
         return static::withoutEvents(function () use ($options) {
             return $this->save($options);
         });
+    }
+
+    /**
+     * Delete without triggering the model events
+     * @return mixed
+     * @throws Exception
+     */
+    public function deleteQuietly()
+    {
+        return static::withoutEvents(function () {
+            return $this->delete();
+        });
+    }
+
+    /**
+     * This need to be override to be able avoid dispatching jobs when integrations is requesting
+     * @return void
+     */
+    function searchable()
+    {
+        if (!$this->getInventoryUpdateSource()->integrations()) {
+            $this->newCollection([$this])->searchable();
+        }
+    }
+
+    /**
+     * To avoid to dispatch jobs for invalidation cache and ElasticSearch indexation
+     *
+     * @param  callable  $callback
+     * @return mixed
+     */
+    public static function withoutInvalidationAndSyncingToSearch(callable $callback)
+    {
+        $isCacheEnabled = config('cache.inventory');
+
+        Config::set('cache.inventory', false);
+
+        self::disableSearchSyncing();
+
+        try {
+            return $callback();
+        } finally {
+            Config::set('cache.inventory', $isCacheEnabled);
+
+            self::enableSearchSyncing();
+        }
+    }
+
+    protected function getInventoryUpdateSource(): InventoryUpdateSource
+    {
+        return app(InventoryUpdateSourceInterface::class);
     }
 }
