@@ -35,6 +35,9 @@ use League\Fractal\Resource\Collection as FractalResourceCollection;
 use League\Fractal\Manager as FractalManager;
 use App\Repositories\Dms\Customer\InventoryRepository as DmsCustomerInventoryRepository;
 use App\Services\Export\Inventory\PdfExporter;
+use App\Traits\S3\S3Helper;
+use App\Jobs\Inventory\GenerateOverlayImageJob;
+use App\Services\Inventory\ImageServiceInterface;
 
 /**
  * Class InventoryService
@@ -42,7 +45,7 @@ use App\Services\Export\Inventory\PdfExporter;
  */
 class InventoryService implements InventoryServiceInterface
 {
-    use DispatchesJobs;
+    use DispatchesJobs, S3Helper;
 
     const SOURCE_DASHBOARD = 'dashboard';
 
@@ -148,6 +151,11 @@ class InventoryService implements InventoryServiceInterface
     private $markdownHelper;
 
     /**
+     * @var ImageServiceInterface
+     */
+    private $imageTableService;
+
+    /**
      * InventoryService constructor.
      * @param InventoryRepositoryInterface $inventoryRepository
      * @param ImageRepositoryInterface $imageRepository
@@ -162,6 +170,7 @@ class InventoryService implements InventoryServiceInterface
      * @param CategoryRepositoryInterface $categoryRepository
      * @param \Parsedown $parsedown
      * @param GeoLocationRepositoryInterface $geolocationRepository
+     * @param ImageServiceInterface $imageTableService
      */
     public function __construct(
         InventoryRepositoryInterface $inventoryRepository,
@@ -177,7 +186,8 @@ class InventoryService implements InventoryServiceInterface
         CategoryRepositoryInterface $categoryRepository,
         GeoLocationRepositoryInterface $geolocationRepository,
         \Parsedown $parsedown,
-        ?LoggerServiceInterface $logService = null
+        ?LoggerServiceInterface $logService = null,
+        ImageServiceInterface $imageTableService
     ) {
         $this->inventoryRepository = $inventoryRepository;
         $this->imageRepository = $imageRepository;
@@ -193,6 +203,7 @@ class InventoryService implements InventoryServiceInterface
         $this->geolocationRepository = $geolocationRepository;
         $this->logService = $logService ?? app()->make(LoggerServiceInterface::class);
         $this->markdownHelper = $parsedown;
+        $this->imageTableService = $imageTableService;
     }
 
     /**
@@ -247,6 +258,9 @@ class InventoryService implements InventoryServiceInterface
             }
 
             $this->inventoryRepository->commitTransaction();
+
+            // Generate Overlay Inventory Images if necessary
+            $this->dispatch((new GenerateOverlayImageJob($inventory->inventory_id))->onQueue('overlay-images'));
 
             Log::info('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
         } catch (\Exception $e) {
@@ -329,6 +343,9 @@ class InventoryService implements InventoryServiceInterface
             }
 
             $this->inventoryRepository->commitTransaction();
+
+            // Generate Overlay Inventory Images if necessary
+            $this->dispatch((new GenerateOverlayImageJob($inventory->inventory_id))->onQueue('overlay-images'));
 
             Log::info('Item has been successfully updated', ['inventoryId' => $inventory->inventory_id]);
         } catch (\Exception $e) {
@@ -604,6 +621,56 @@ class InventoryService implements InventoryServiceInterface
         }
 
         return array_merge($withOverlay, $withoutOverlay);
+    }
+
+    /**
+     * Apply Overlays to Inventory Images
+     *
+     * @param int $inventoryId
+     * @return void
+     */
+    public function generateOverlays(int $inventoryId)
+    {
+        $inventoryImages = $this->inventoryRepository->getInventoryImages($inventoryId);
+
+        if ($inventoryImages->count() === 0) return;
+
+        $overlayParams = $this->inventoryRepository->getOverlayParams($inventoryId);
+
+        Log::info('Adding Overlays on Inventory Images', $overlayParams);
+
+        $overlayEnabled = $overlayParams['dealer_overlay_enabled'] ?? $overlayParams['overlay_enabled'];
+
+        foreach ($inventoryImages as $inventoryImage) {
+
+            $imageObj = $inventoryImage->image;
+
+            // Add Overlays if enabled
+            if ($overlayEnabled == Inventory::OVERLAY_ENABLED_ALL
+                || (
+                    $overlayEnabled == Inventory::OVERLAY_ENABLED_PRIMARY
+                    && ($inventoryImage->position == 1 || $inventoryImage->is_default == 1)
+                    )
+                ) {
+
+                // apply overlays
+                $originalFilename = !empty($imageObj->filename_noverlay) ? $imageObj->filename_noverlay : $imageObj->filename;
+                $localNewImagePath = $this->imageService->addOverlays($this->getS3BaseUrl() . $originalFilename, $overlayParams);
+
+                // upload overlay image
+                $randomFilename = md5($localNewImagePath);
+                $newFilename = $this->imageService->uploadToS3($localNewImagePath, $randomFilename, $overlayParams['dealer_id']);
+                unlink($localNewImagePath);
+
+                // update image to database
+                $this->imageTableService->saveOverlay($imageObj, $newFilename);
+
+            // otherwise Reset Overlay
+            } else {
+
+                $this->imageTableService->resetOverlay($imageObj);
+            }
+        }
     }
 
     /**
