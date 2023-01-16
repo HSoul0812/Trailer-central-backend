@@ -856,12 +856,12 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query->groupBy('inventory.inventory_id');
         }
 
-        if (isset($params['visible'])) {
+        if (isset($params['is_publishable_classified'])) {
             $query = $query->join('dealer', 'dealer.dealer_id', '=', 'inventory.dealer_id');
-            if ($params['visible']) {
-                $query = $query->where('clsf_active', $params['visible'])->where('show_on_website', $params['visible']);
+            if ($params['is_publishable_classified']) {
+                $query = $query->where('clsf_active', (int)$params['is_publishable_classified'])->where('show_on_website', (int)$params['is_publishable_classified']);
             } else {
-                $query = $query->where('clsf_active', $params['visible'])->orWhere('show_on_website', $params['visible']);
+                $query = $query->where('clsf_active', (int)$params['is_publishable_classified'])->orWhere('show_on_website', (int)$params['is_publishable_classified']);
             }
 
         }

@@ -31,7 +31,7 @@ class GetInventoryRequest extends Request
             'attribute_names' => 'array',
             'model' => 'string',
             'exclude_status_ids' => 'array',
-            'visible' => 'boolean',
+            'is_publishable_classified' => 'boolean',
             'exclude_status_ids.*' => [
                 'int',
                 Rule::in([
