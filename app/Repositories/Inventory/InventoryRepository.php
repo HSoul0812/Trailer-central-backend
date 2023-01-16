@@ -861,7 +861,7 @@ class InventoryRepository implements InventoryRepositoryInterface
             if ($params['is_publishable_classified']) {
                 $query = $query->where('clsf_active', User::CLASSIFIED_ACTIVE)->where('show_on_website', Inventory::SHOW_IN_WEBSITE);
             } else {
-                $query = $query->where('clsf_active', (int)$params['is_publishable_classified'])->orWhere('show_on_website', (int)$params['is_publishable_classified']);
+                $query = $query->where('clsf_active', !User::CLASSIFIED_ACTIVE)->orWhere('show_on_website', !Inventory::SHOW_IN_WEBSITE);
             }
 
         }
