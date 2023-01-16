@@ -25,17 +25,17 @@ class FilesystemCsvExporter extends GenericFilesystemCsvExporter
         $bin_ids = [];
         foreach(explode(',', $part->qty_values) as $qty) {
             $id_qty = explode(';', $qty);
-            $qty_values[$id_qty[0]] = $id_qty[1];
+            $qty_values[(string)$id_qty[0]] = $id_qty[1];
         }
         foreach(explode(',', $part->bins) as $bin) {
             $id_bin = explode(';', $bin);
-            $bins[$id_bin[0]] = $id_bin[1];
-            $bin_ids[] = $id_bin[0];
+            $bins[(string)$id_bin[0]] = $id_bin[1];
+            $bin_ids[] = (string)$id_bin[0];
         }
 
         $addedLines = [];
         foreach($bin_ids as $bin_id) {
-            $addedLines[$bins[$bin_id]] = $qty_values[$bin_id];
+            $addedLines[$bins[(string)$bin_id]] = $qty_values[(string)$bin_id];
         }
         $addedLines['Part ID'] = $part->id;
         return array_merge([
@@ -59,9 +59,9 @@ class FilesystemCsvExporter extends GenericFilesystemCsvExporter
             'Video Embed Code' => $part->video_embed_code,
             'Alternative Part Number' => $part->alternative_part_number,
             'Shipping Fee' => $part->shipping_fee,
-            'Qty' => $part->total_qty,
             'Is Active' => $part->is_active,
             'Is Taxable' => $part->is_taxable,
+            'Qty' => $part->total_qty,
         ], $addedLines);
     }
 
