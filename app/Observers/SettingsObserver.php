@@ -2,7 +2,7 @@
 
 namespace App\Observers;
 
-use App\Jobs\Website\PaymentCalculatorReIndexJob;
+use App\Jobs\Website\ReIndexInventoriesByDealersJob;
 use App\Models\Website\PaymentCalculator\Settings;
 use App\Services\ElasticSearch\Cache\ResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
@@ -37,8 +37,6 @@ class SettingsObserver
      */
     public function created(Settings $settings)
     {
-        $settings->load('website');
-
         $this->deleted($settings);
     }
 
@@ -50,8 +48,6 @@ class SettingsObserver
      */
     public function updated(Settings $settings)
     {
-        $settings->load('website');
-
         $this->deleted($settings);
     }
 
@@ -63,15 +59,19 @@ class SettingsObserver
      */
     public function deleted(Settings $settings)
     {
-        $website = $settings->website;
+        $settings->load('website');
 
-        $this->responseCache->forget(
-            $this->cacheKey->deleteByDealer($website->dealer_id),
-            $this->cacheKey->deleteSingleByDealer($website->dealer_id)
-        );
+        if (config('cache.inventory')) {
+            $website = $settings->website;
+
+            $this->responseCache->forget(
+                $this->cacheKey->deleteByDealer($website->dealer_id),
+                $this->cacheKey->deleteSingleByDealer($website->dealer_id)
+            );
+        }
 
         if ($dealerId = $settings->website->dealer_id) {
-            dispatch(new PaymentCalculatorReIndexJob([$dealerId]));
+            dispatch(new ReIndexInventoriesByDealersJob([$dealerId]));
         }
     }
 
