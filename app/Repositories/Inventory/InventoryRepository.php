@@ -16,6 +16,7 @@ use App\Models\Inventory\InventoryImage;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
 use App\Traits\Repository\Transaction;
 use App\Repositories\Traits\SortTrait;
+use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\Builder;
@@ -215,6 +216,11 @@ class InventoryRepository implements InventoryRepositoryInterface
         // so the cronjob can create the add bill approval record and also the
         // bill category record, allowing the dealer to update the bill later on
         $item->send_to_quickbooks = !empty($item->bill_id);
+
+        // Try to get the geolocation point class from the existing method and use it here
+        $geolocation = $item->geolocationPoint();
+
+        $item->geolocation = new Point($geolocation->latitude, $geolocation->longitude);
 
         $item->save();
 
