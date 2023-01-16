@@ -131,13 +131,12 @@ class UnitRepositoryTest extends TestCase
         self::assertSame(count($units), InventoryLead::where(['website_lead_id' => $leadId])->count());
 
         // When I call create with valid parameters
-        /** @var int $deleted */
         $deleted = $this->getConcreteRepository()->delete([
             'website_lead_id' => $leadId
         ]);
 
         // Then I should get true
-        self::assertSame(count($units), $deleted);
+        self::assertTrue($deleted);
 
         // Inventory lead had entries before and are now all gone
         self::assertSame(0, InventoryLead::where(['website_lead_id' => $leadId])->count());
