@@ -148,6 +148,7 @@ class InventoryServiceProvider extends ServiceProvider
         $this->app->bind(BulkDownloadJobServiceInterface::class, BulkDownloadJobService::class);
         $this->app->bind(BulkPdfJobServiceInterface::class, BulkPdfJobService::class);
         $this->app->bind(BulkUploadRepositoryInterface::class, BulkUploadRepository::class);
+
         $this->app->bind(ImageServiceInterface::class, ImageService::class);
 
         $this->app->bind(ResponseCacheKeyInterface::class, RedisResponseCacheKey::class);
@@ -160,9 +161,12 @@ class InventoryServiceProvider extends ServiceProvider
         });
 
         $this->app->bind(ResponseCacheInterface::class, function (): RedisResponseCache {
-            return new RedisResponseCache(Redis::connection('sdk-cache')->client(), $this->app->make(UniqueCacheInvalidationInterface::class));
+            return new RedisResponseCache(
+                Redis::connection('sdk-cache')->client(),
+                $this->app->make(UniqueCacheInvalidationInterface::class)
+            );
         });
-        
+
         $this->app->bind(InventoryUpdateSourceInterface::class, InventoryUpdateSource::class);
     }
 }

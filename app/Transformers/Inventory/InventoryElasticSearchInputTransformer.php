@@ -15,14 +15,6 @@ use Illuminate\Database\Eloquent\Collection;
 
 class InventoryElasticSearchInputTransformer implements Transformer
 {
-    /** @var InventoryImageTransformer  */
-    private $inventoryImageTransformer;
-
-    public function __construct()
-    {
-        $this->inventoryImageTransformer = new InventoryImageTransformer;
-    }
-
     /**
      * @param Inventory $model
      * @return array
@@ -205,13 +197,6 @@ class InventoryElasticSearchInputTransformer implements Transformer
             'entity_type_id'       => $model->entity_type_id,
             'paymentCalculator' => $paymentCalculatorSettings
         ];
-    }
-
-    private function imagesMapper(): callable
-    {
-        return static function (InventoryImage $image) {
-            return $image->image->filename;
-        };
     }
 
     protected function settingsRepository(): SettingsRepositoryInterface

@@ -625,7 +625,7 @@ class InventoryService implements InventoryServiceInterface
 
     /**
      * Apply Overlays to Inventory Images
-     * 
+     *
      * @param int $inventoryId
      * @return void
      */
@@ -634,7 +634,7 @@ class InventoryService implements InventoryServiceInterface
         $inventoryImages = $this->inventoryRepository->getInventoryImages($inventoryId);
 
         if ($inventoryImages->count() === 0) return;
-        
+
         $overlayParams = $this->inventoryRepository->getOverlayParams($inventoryId);
 
         Log::info('Adding Overlays on Inventory Images', $overlayParams);
@@ -646,12 +646,12 @@ class InventoryService implements InventoryServiceInterface
             $imageObj = $inventoryImage->image;
 
             // Add Overlays if enabled
-            if ($overlayEnabled == Inventory::OVERLAY_ENABLED_ALL 
+            if ($overlayEnabled == Inventory::OVERLAY_ENABLED_ALL
                 || (
                     $overlayEnabled == Inventory::OVERLAY_ENABLED_PRIMARY
                     && ($inventoryImage->position == 1 || $inventoryImage->is_default == 1)
                     )
-                ) { 
+                ) {
 
                 // apply overlays
                 $originalFilename = !empty($imageObj->filename_noverlay) ? $imageObj->filename_noverlay : $imageObj->filename;
@@ -661,7 +661,7 @@ class InventoryService implements InventoryServiceInterface
                 $randomFilename = md5($localNewImagePath);
                 $newFilename = $this->imageService->uploadToS3($localNewImagePath, $randomFilename, $overlayParams['dealer_id']);
                 unlink($localNewImagePath);
-                
+
                 // update image to database
                 $this->imageTableService->saveOverlay($imageObj, $newFilename);
 
