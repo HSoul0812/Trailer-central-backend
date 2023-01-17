@@ -14,7 +14,6 @@ use App\Models\User\User;
 use App\Models\User\Integration\Integration;
 use App\Models\User\Integration\DealerIntegration;
 
-use App\Services\User\DealerIntegrationServiceInterface;
 use App\Repositories\User\Integration\DealerIntegrationRepositoryInterface;
 
 /**
@@ -33,11 +32,6 @@ class DealerIntegrationServiceTest extends TestCase
     private $repository;
 
     /**
-     * @var DealerIntegrationServiceInterface
-     */
-    private $service;
-
-    /**
      * @return void
      */
     public function setUp(): void
@@ -46,13 +40,12 @@ class DealerIntegrationServiceTest extends TestCase
 
         $this->repository = Mockery::mock(DealerIntegrationRepositoryInterface::class);
         $this->app->instance(DealerIntegrationRepositoryInterface::class, $this->repository);
-
-        $this->service = Mockery::mock(DealerIntegrationServiceInterface::class);
-        $this->app->instance(DealerIntegrationServiceInterface::class, $this->service);
     }
 
     public function testUpdateDealerIntegration()
     {
+        Mail::fake();
+
         $dealer = $this->getEloquentMock(User::class);
         $integration = $this->getEloquentMock(Integration::class);
         $dealerIntegration = $this->getEloquentMock(DealerIntegration::class);
@@ -63,18 +56,8 @@ class DealerIntegrationServiceTest extends TestCase
         $dealerIntegration->dealer_id = 1;
         $dealerIntegration->integration_id = 1;
 
-        $dealerIntegration->shouldReceive('setRelation')->passthru();
-        $dealerIntegration->shouldReceive('belongsTo')->passthru();
-        $dealerIntegration->shouldReceive('dealer')->passthru();
-        $dealerIntegration->shouldReceive('integration')->passthru();
-
-        $this->service
-            ->shouldReceive('update')
-            ->with([
-                'dealer_id' => $dealerIntegration->dealer_id,
-                'integration_id' => $dealerIntegration->integration_id
-            ])
-            ->andReturn($dealerIntegration);
+        $this->initBelongsToRelation($dealerIntegration, 'dealer', $dealer);
+        $this->initBelongsToRelation($dealerIntegration, 'integration', $integration);
 
         $this->repository
             ->shouldReceive('update')
@@ -84,13 +67,6 @@ class DealerIntegrationServiceTest extends TestCase
                 'integration_id' => $dealerIntegration->integration_id
             ])
             ->andReturn($dealerIntegration);
-
-        Mail::shouldReceive('send')->once()->andReturnUsing(function ($message) {
-            $message->build();
-            $this->assertTrue($message->hasFrom(config('mail.from.address')));
-            $this->assertTrue($message->hasTo(config('support.to.address')));
-            $this->assertInstanceOf(DealerIntegrationEmail::class, $message);
-        });
 
         $service = $this->app->make(DealerIntegrationService::class);
 
@@ -99,11 +75,20 @@ class DealerIntegrationServiceTest extends TestCase
             'integration_id' => $dealerIntegration->integration_id
         ]);
 
+        Mail::assertSent(DealerIntegrationEmail::class, function ($mail) {
+            $mail->build();
+
+            return $mail->hasTo(config('support.to.address')) &&
+                   $mail->hasFrom(config('mail.from.address'));
+        });
+
         $this->assertInstanceOf(DealerIntegration::class, $result);
     }
 
     public function testDeleteDealerIntegration()
     {
+        Mail::fake();
+
         $dealer = $this->getEloquentMock(User::class);
         $integration = $this->getEloquentMock(Integration::class);
         $dealerIntegration = $this->getEloquentMock(DealerIntegration::class);
@@ -114,18 +99,8 @@ class DealerIntegrationServiceTest extends TestCase
         $dealerIntegration->dealer_id = 1;
         $dealerIntegration->integration_id = 1;
 
-        $dealerIntegration->shouldReceive('setRelation')->passthru();
-        $dealerIntegration->shouldReceive('belongsTo')->passthru();
-        $dealerIntegration->shouldReceive('dealer')->passthru();
-        $dealerIntegration->shouldReceive('integration')->passthru();
-
-        $this->service
-            ->shouldReceive('delete')
-            ->with([
-                'dealer_id' => $dealerIntegration->dealer_id,
-                'integration_id' => $dealerIntegration->integration_id
-            ])
-            ->andReturn($dealerIntegration);
+        $this->initBelongsToRelation($dealerIntegration, 'dealer', $dealer);
+        $this->initBelongsToRelation($dealerIntegration, 'integration', $integration);
 
         $this->repository
             ->shouldReceive('delete')
@@ -136,19 +111,19 @@ class DealerIntegrationServiceTest extends TestCase
             ])
             ->andReturn($dealerIntegration);
 
-        Mail::shouldReceive('send')->once()->andReturnUsing(function ($message) {
-            $message->build();
-            $this->assertTrue($message->hasFrom(config('mail.from.address')));
-            $this->assertTrue($message->hasTo(config('support.to.address')));
-            $this->assertInstanceOf(DealerIntegrationEmail::class, $message);
-        });
-
         $service = $this->app->make(DealerIntegrationService::class);
 
         $result = $service->delete([
             'dealer_id' => $dealerIntegration->dealer_id,
             'integration_id' => $dealerIntegration->integration_id
         ]);
+
+        Mail::assertSent(DealerIntegrationEmail::class, function ($mail) {
+            $mail->build();
+
+            return $mail->hasTo(config('support.to.address')) &&
+                   $mail->hasFrom(config('mail.from.address'));
+        });
 
         $this->assertInstanceOf(DealerIntegration::class, $result);
     }
