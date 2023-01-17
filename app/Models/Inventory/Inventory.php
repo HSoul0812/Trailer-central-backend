@@ -36,6 +36,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
 use Laravel\Scout\Searchable;
 
@@ -990,6 +991,29 @@ class Inventory extends Model
     {
         if (!$this->getInventoryUpdateSource()->integrations()) {
             $this->newCollection([$this])->searchable();
+        }
+    }
+
+    /**
+     * To avoid to dispatch jobs for invalidation cache and ElasticSearch indexation
+     *
+     * @param  callable  $callback
+     * @return mixed
+     */
+    public static function withoutInvalidationAndSyncingToSearch(callable $callback)
+    {
+        $isCacheEnabled = config('cache.inventory');
+
+        Config::set('cache.inventory', false);
+
+        self::disableSearchSyncing();
+
+        try {
+            return $callback();
+        } finally {
+            Config::set('cache.inventory', $isCacheEnabled);
+
+            self::enableSearchSyncing();
         }
     }
 
