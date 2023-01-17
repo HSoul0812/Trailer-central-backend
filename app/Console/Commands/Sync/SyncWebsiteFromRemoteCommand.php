@@ -14,6 +14,7 @@ use App\Models\User\DealerLocation;
 use App\Models\User\User as Dealer;
 use App\Models\Website\Config\WebsiteConfig;
 use App\Models\Website\Entity as WebsiteEntity;
+use App\Models\Website\Image\WebsiteImage;
 use App\Models\Website\PaymentCalculator\Settings as PaymentCalculatorSettings;
 use App\Models\Website\Website;
 use App\Services\ElasticSearch\Cache\RedisResponseCacheKey;
@@ -198,14 +199,14 @@ class SyncWebsiteFromRemoteCommand extends AbstractSyncFromRemoteCommand
                 ->where('inventory.dealer_id', $dealer->dealer_id)
                 ->whereIn('inventory.dealer_location_id', $dealerLocationsId)
                 ->select('inventory_feature.*')
-                ->chunk(1000, function (Collection $features) use (&$inventoryFeaturesCounter): void {
-                    InventoryFeature::query()->insert(
-                        $features->map(function (InventoryFeature $feature): array {
-                            return $feature->makeHidden(['inventory_feature_id'])->toArray();
-                        })->toArray()
-                    );
+                ->chunk(1000, function (Collection $inventoryFeatures) use (&$inventoryFeaturesCounter): void {
+                    $features  = $inventoryFeatures->map(function (InventoryFeature $feature): array {
+                        return $feature->makeHidden(['inventory_feature_id'])->toArray();
+                    })->toArray();
 
-                    $inventoryFeaturesCounter += count($features);
+                    InventoryFeature::query()->insert($features);
+
+                    $inventoryFeaturesCounter += count($inventoryFeatures);
                 });
 
             $this->output->writeln(sprintf('%d inventory features were synced.', $inventoryFeaturesCounter));
@@ -254,6 +255,22 @@ class SyncWebsiteFromRemoteCommand extends AbstractSyncFromRemoteCommand
                 )
             );
 
+            // for website images we dont need to import dealer promos because that table is actually empty
+            $websiteImages = WebsiteImage::on('remote')
+                ->where('website_id', $website->id)
+                ->get()
+                ->makeHidden(['identifier'])
+                ->toArray();
+
+            WebsiteImage::query()->insert($websiteImages);
+
+            $this->output->writeln(
+                sprintf(
+                    '%d website images were synced.',
+                    count($websiteImages)
+                )
+            );
+
             $this->reguard();
         });
 
@@ -283,6 +300,7 @@ class SyncWebsiteFromRemoteCommand extends AbstractSyncFromRemoteCommand
         InventoryFeature::unguard();
         Image::unguard();
         InventoryImage::unguard();
+        WebsiteImage::unguard();
     }
 
     private function reguard(): void
@@ -299,5 +317,6 @@ class SyncWebsiteFromRemoteCommand extends AbstractSyncFromRemoteCommand
         InventoryFeature::reguard();
         Image::reguard();
         InventoryImage::reguard();
+        WebsiteImage::reguard();
     }
 }
