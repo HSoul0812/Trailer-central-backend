@@ -125,6 +125,10 @@ class DealerLocationService implements DealerLocationServiceInterface
 
             $salesTaxItemColumnTitles = $this->encodeTaxColumnTitles($params['sales_tax_item_column_titles'] ?? []);
 
+            if (empty($params['location_id'])) {
+                $params['location_id'] = '';
+            }
+
             $location = $this->locationRepo->create(
                 $params + ['sales_tax_item_column_titles' => $salesTaxItemColumnTitles, 'dealer_id' => $dealerId]
             );
