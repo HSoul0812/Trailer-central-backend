@@ -4,22 +4,36 @@ namespace Tests\Feature\Observers;
 
 use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
 use App\Models\User\AuthToken;
+use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
+use App\Services\ElasticSearch\Cache\InventoryResponseRedisCache;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
 use Laravel\Scout\Jobs\MakeSearchable;
+use Mockery;
+use PHPUnit\Framework\MockObject\MockObject;
 use Tests\TestCase;
 use App\Models\User\User;
 use App\Models\Inventory\Inventory;
 use App\Services\ElasticSearch\Cache\ResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
 
+/**
+ * @group ElasticSearch
+ * @group Inventory
+ */
 class InventoryObserverTest extends TestCase
 {
     private $dealer;
 
     /** @var ResponseCacheKeyInterface */
     private $cacheKeyService;
+
+    /** @var MockObject */
+    private $searchResponseCache;
+
+    /** @var MockObject */
+    private $singleResponseCache;
 
     const INTEGRATIONS_ACCESS_TOKEN = '123';
 
@@ -31,15 +45,24 @@ class InventoryObserverTest extends TestCase
 
         $this->dealer = factory(User::class)->create();
         $this->cacheKeyService = app(ResponseCacheKeyInterface::class);
+
+        $this->singleResponseCache = Mockery::mock(ResponseCacheInterface::class);
+        $this->searchResponseCache = Mockery::mock(ResponseCacheInterface::class);
+
+        $inventoryCache = $this->createStub(InventoryResponseRedisCache::class);
+        $inventoryCache->method('search')
+            ->willReturn($this->searchResponseCache);
+        $inventoryCache->method('single')
+            ->willReturn($this->singleResponseCache);
+
+        $this->instance(InventoryResponseCacheInterface::class, $inventoryCache);
     }
 
     public function test_it_invalidates_by_dealer_when_an_inventory_is_created()
     {
         Inventory::withoutSyncingToSearch(function () {
-            $this->mock(ResponseCacheInterface::class, function ($mock) {
-                $key = $this->cacheKeyService->deleteByDealer($this->dealer->dealer_id);
-                $mock->shouldReceive('forget')->once()->with($key);
-            });
+            $key = $this->cacheKeyService->deleteByDealer($this->dealer->dealer_id);
+            $this->searchResponseCache->shouldReceive('forget')->once()->with($key);
 
             $inventory = factory(Inventory::class)->create(['dealer_id' => $this->dealer->dealer_id]);
             $inventory->deleteQuietly();
@@ -53,12 +76,11 @@ class InventoryObserverTest extends TestCase
                 return Inventory::create(factory(Inventory::class)->make(['dealer_id' => $this->dealer->dealer_id])->toArray());
             });
 
-            $this->mock(ResponseCacheInterface::class, function ($mock) use ($inventory) {
-                $dealerKey = $this->cacheKeyService->deleteByDealer($this->dealer->dealer_id);
-                $singleKey = $this->cacheKeyService->deleteSingle($inventory->inventory_id);
+            $dealerKey = $this->cacheKeyService->deleteByDealer($this->dealer->dealer_id);
+            $singleKey = $this->cacheKeyService->deleteSingle($inventory->inventory_id);
 
-                $mock->shouldReceive('forget')->once()->with($dealerKey, $singleKey);
-            });
+            $this->searchResponseCache->shouldReceive('forget')->once()->with($dealerKey);
+            $this->singleResponseCache->shouldReceive('forget')->once()->with($singleKey);
 
             $inventory->update(['title' => Str::random(10)]);
 
@@ -73,11 +95,11 @@ class InventoryObserverTest extends TestCase
                 return Inventory::create(factory(Inventory::class)->make(['dealer_id' => $this->dealer->dealer_id])->toArray());
             });
 
-            $this->mock(ResponseCacheInterface::class, function ($mock) use ($inventory) {
-                $singleInCollectionKey = $this->cacheKeyService->deleteSingleFromCollection($inventory->inventory_id);
-                $singleKey = $this->cacheKeyService->deleteSingle($inventory->inventory_id);
-                $mock->shouldReceive('forget')->once()->with($singleInCollectionKey, $singleKey);
-            });
+            $singleInCollectionKey = $this->cacheKeyService->deleteSingleFromCollection($inventory->inventory_id);
+            $singleKey = $this->cacheKeyService->deleteSingle($inventory->inventory_id);
+
+            $this->searchResponseCache->shouldReceive('forget')->once()->with($singleInCollectionKey);
+            $this->singleResponseCache->shouldReceive('forget')->once()->with($singleKey);
 
             $inventory->delete();
         });
@@ -88,9 +110,8 @@ class InventoryObserverTest extends TestCase
         Config::set('cache.inventory', 0);
 
         Inventory::withoutSyncingToSearch(function () {
-            $this->mock(ResponseCacheInterface::class, function ($mock) {
-                $mock->shouldNotReceive('forget');
-            });
+            $this->searchResponseCache->shouldNotReceive('forget');
+            $this->singleResponseCache->shouldNotReceive('forget');
 
             $inventory = factory(Inventory::class)->create(['dealer_id' => $this->dealer->dealer_id]);
             $inventory->update(['title' => Str::random(10)]);
@@ -103,9 +124,8 @@ class InventoryObserverTest extends TestCase
         Config::set('integrations.inventory_cache_auth.credentials.access_token', self::INTEGRATIONS_ACCESS_TOKEN);
         Config::set('cache.inventory', true); // to ensure the cache is enable for this particular test case
 
-        $this->mock(ResponseCacheInterface::class, function ($mock) {
-            $mock->shouldNotReceive('forget');
-        });
+        $this->searchResponseCache->shouldNotReceive('forget');
+        $this->singleResponseCache->shouldNotReceive('forget');
 
         $inventory = Inventory::withoutEvents(function () {
             return Inventory::create(factory(Inventory::class)->make(['dealer_id' => $this->dealer->dealer_id])->toArray());
@@ -118,7 +138,7 @@ class InventoryObserverTest extends TestCase
             'access-token' => $authToken->access_token,
             'x-client-id' => self::INTEGRATIONS_ACCESS_TOKEN
         ])
-            ->post('/api/inventory/'.$inventory->inventory_id, ['title' => $newTitle]);
+            ->post('/api/inventory/' . $inventory->inventory_id, ['title' => $newTitle]);
 
         $response->assertStatus(200);
 
@@ -143,12 +163,11 @@ class InventoryObserverTest extends TestCase
                 return Inventory::create(factory(Inventory::class)->make(['dealer_id' => $this->dealer->dealer_id])->toArray());
             });
 
-            $this->mock(ResponseCacheInterface::class, function ($mock) use ($inventory) {
-                $dealerKey = $this->cacheKeyService->deleteByDealer($this->dealer->dealer_id);
-                $singleKey = $this->cacheKeyService->deleteSingle($inventory->inventory_id);
+            $dealerKey = $this->cacheKeyService->deleteByDealer($this->dealer->dealer_id);
+            $singleKey = $this->cacheKeyService->deleteSingle($inventory->inventory_id);
 
-                $mock->shouldReceive('forget')->once()->with($dealerKey, $singleKey);
-            });
+            $this->searchResponseCache->shouldReceive('forget')->once()->with($dealerKey);
+            $this->singleResponseCache->shouldReceive('forget')->once()->with($singleKey);
 
             $authToken = factory(AuthToken::class)->create(['user_id' => $this->dealer->dealer_id]);
 

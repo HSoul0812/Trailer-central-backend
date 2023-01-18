@@ -7,9 +7,9 @@ use App\Repositories\Bulk\Inventory\BulkDownloadRepository;
 use App\Repositories\Bulk\Inventory\BulkDownloadRepositoryInterface;
 use App\Repositories\Bulk\Inventory\BulkUploadRepository;
 use App\Repositories\Bulk\Inventory\BulkUploadRepositoryInterface;
-use App\Services\ElasticSearch\Cache\RedisResponseCache;
+use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
+use App\Services\ElasticSearch\Cache\InventoryResponseRedisCache;
 use App\Services\ElasticSearch\Cache\RedisResponseCacheKey;
-use App\Services\ElasticSearch\Cache\ResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
 use App\Services\ElasticSearch\Cache\UniqueCacheInvalidation;
 use App\Services\ElasticSearch\Cache\UniqueCacheInvalidationInterface;
@@ -156,17 +156,16 @@ class InventoryServiceProvider extends ServiceProvider
             return new UniqueCacheInvalidation(Redis::connection('inventory-job-cache')->client());
         });
 
-        $this->app->bindMethod(InvalidateCacheJob::class . '@handle', function (InvalidateCacheJob $job): void {
-            $job->handle($this->app->make(ResponseCacheInterface::class), $this->app->make(UniqueCacheInvalidationInterface::class));
-        });
+        $this->app->bind(InventoryResponseCacheInterface::class, InventoryResponseRedisCache::class);
 
-        $this->app->bind(ResponseCacheInterface::class, function (): RedisResponseCache {
-            return new RedisResponseCache(
-                Redis::connection('sdk-cache')->client(),
-                $this->app->make(UniqueCacheInvalidationInterface::class)
+        $this->app->bindMethod(InvalidateCacheJob::class . '@handle', function (InvalidateCacheJob $job): void {
+            $job->handle(
+                $this->app->make(InventoryResponseCacheInterface::class),
+                $this->app->make(UniqueCacheInvalidationInterface::class),
+                $this->app->make(ResponseCacheKeyInterface::class)
             );
         });
 
-		$this->app->bind(InventoryUpdateSourceInterface::class, InventoryUpdateSource::class);
+        $this->app->bind(InventoryUpdateSourceInterface::class, InventoryUpdateSource::class);
     }
 }

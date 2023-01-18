@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Jobs\Website\ReIndexInventoriesByDealersJob;
 use App\Models\Website\PaymentCalculator\Settings;
+use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
 
@@ -17,16 +18,22 @@ class SettingsObserver
     /**
      * @var ResponseCacheInterface
      */
-    private $responseCache;
+    private $singleResponseCache;
+
+    /**
+     * @var ResponseCacheInterface
+     */
+    private $searchResponseCache;
 
     /**
      * @param ResponseCacheKeyInterface $cacheKey
-     * @param ResponseCacheInterface $responseCache
+     * @param InventoryResponseCacheInterface $responseCache
      */
-    public function __construct(ResponseCacheKeyInterface $cacheKey, ResponseCacheInterface $responseCache)
+    public function __construct(ResponseCacheKeyInterface $cacheKey, InventoryResponseCacheInterface $responseCache)
     {
         $this->cacheKey = $cacheKey;
-        $this->responseCache = $responseCache;
+        $this->singleResponseCache = $responseCache->single();
+        $this->searchResponseCache = $responseCache->search();
     }
 
     /**
@@ -63,11 +70,8 @@ class SettingsObserver
 
         if (config('cache.inventory')) {
             $website = $settings->website;
-
-            $this->responseCache->forget(
-                $this->cacheKey->deleteByDealer($website->dealer_id),
-                $this->cacheKey->deleteSingleByDealer($website->dealer_id)
-            );
+            $this->searchResponseCache->forget($this->cacheKey->deleteByDealer($website->dealer_id));
+            $this->singleResponseCache->forget($this->cacheKey->deleteSingleByDealer($website->dealer_id));
         }
 
         if ($dealerId = $settings->website->dealer_id) {

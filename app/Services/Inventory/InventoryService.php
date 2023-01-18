@@ -23,6 +23,8 @@ use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Repositories\User\GeoLocationRepositoryInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Services\ElasticSearch\Cache\RedisResponseCacheKey;
+use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
+use App\Services\ElasticSearch\Cache\UniqueCacheInvalidationInterface;
 use App\Services\File\FileService;
 use App\Services\File\ImageService;
 use App\Transformers\Inventory\InventoryTitleAndVinTransformer;
@@ -156,6 +158,16 @@ class InventoryService implements InventoryServiceInterface
     private $imageTableService;
 
     /**
+     * @var UniqueCacheInvalidationInterface
+     */
+    private $uniqueCacheInvalidation;
+
+    /**
+     * @var ResponseCacheKeyInterface
+     */
+    private $responseCacheKey;
+
+    /**
      * InventoryService constructor.
      * @param InventoryRepositoryInterface $inventoryRepository
      * @param ImageRepositoryInterface $imageRepository
@@ -168,9 +180,13 @@ class InventoryService implements InventoryServiceInterface
      * @param DealerLocationRepositoryInterface $dealerLocationRepository
      * @param DealerLocationMileageFeeRepositoryInterface $dealerLocationMileageFeeRepository
      * @param CategoryRepositoryInterface $categoryRepository
-     * @param \Parsedown $parsedown
      * @param GeoLocationRepositoryInterface $geolocationRepository
+     * @param \Parsedown $parsedown
+     * @param LoggerServiceInterface|null $logService
      * @param ImageServiceInterface $imageTableService
+     * @param UniqueCacheInvalidationInterface $uniqueCacheInvalidation
+     * @param ResponseCacheKeyInterface $responseCacheKey
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
     public function __construct(
         InventoryRepositoryInterface $inventoryRepository,
@@ -187,7 +203,9 @@ class InventoryService implements InventoryServiceInterface
         GeoLocationRepositoryInterface $geolocationRepository,
         \Parsedown $parsedown,
         ?LoggerServiceInterface $logService = null,
-        ImageServiceInterface $imageTableService
+        ImageServiceInterface $imageTableService,
+        UniqueCacheInvalidationInterface $uniqueCacheInvalidation,
+        ResponseCacheKeyInterface $responseCacheKey
     ) {
         $this->inventoryRepository = $inventoryRepository;
         $this->imageRepository = $imageRepository;
@@ -204,6 +222,8 @@ class InventoryService implements InventoryServiceInterface
         $this->logService = $logService ?? app()->make(LoggerServiceInterface::class);
         $this->markdownHelper = $parsedown;
         $this->imageTableService = $imageTableService;
+        $this->uniqueCacheInvalidation = $uniqueCacheInvalidation;
+        $this->responseCacheKey = $responseCacheKey;
     }
 
     /**
@@ -1081,16 +1101,19 @@ class InventoryService implements InventoryServiceInterface
 
     public function invalidateCacheAndReindexByDealerIds(array $dealer_ids): void
     {
-        $cacheKey = new RedisResponseCacheKey();
         $patterns = [];
-
         foreach ($dealer_ids as $dealer_id)
         {
-            $patterns[] = $cacheKey->deleteByDealer($dealer_id);
+            $patterns[] = $this->responseCacheKey->deleteByDealer($dealer_id);
         }
 
         if (config('cache.inventory')) {
-            $this->dispatch(new InvalidateCacheJob($patterns));
+            $patterns = $this->uniqueCacheInvalidation->keysWithNoJobs($patterns);
+
+            if (count($patterns)) {
+                $this->uniqueCacheInvalidation->createJobsForKeys($patterns);
+                $this->dispatch(new InvalidateCacheJob($patterns));
+            }
         }
 
         $this->dispatch(new ReIndexInventoriesByDealersJob($dealer_ids));

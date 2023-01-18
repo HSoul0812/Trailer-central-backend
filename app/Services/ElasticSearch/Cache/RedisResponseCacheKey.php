@@ -3,6 +3,7 @@
 namespace App\Services\ElasticSearch\Cache;
 
 use App\Http\Clients\ElasticSearch\ElasticSearchQueryResult;
+use Illuminate\Support\Str;
 
 class RedisResponseCacheKey implements ResponseCacheKeyInterface
 {
@@ -101,5 +102,23 @@ class RedisResponseCacheKey implements ResponseCacheKeyInterface
         }
 
         return 'unknown-pattern';
+    }
+
+    /**
+     * @param string $key
+     * @return bool
+     */
+    public function isSingleKey(string $key): bool
+    {
+        return Str::contains($key, 'inventories.single');
+    }
+
+    /**
+     * @param string $key
+     * @return bool
+     */
+    public function isSearchKey(string $key): bool
+    {
+        return !$this->isSingleKey($key);
     }
 }

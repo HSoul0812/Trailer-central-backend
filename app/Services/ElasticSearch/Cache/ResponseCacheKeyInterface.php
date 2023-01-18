@@ -43,4 +43,16 @@ interface ResponseCacheKeyInterface
      * @return string
      */
     public function deleteSingleByDealer(int $id): string;
+
+    /**
+     * @param string $key
+     * @return bool
+     */
+    public function isSingleKey(string $key): bool;
+
+    /**
+     * @param string $key
+     * @return bool
+     */
+    public function isSearchKey(string $key): bool;
 }

@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Inventory\Inventory;
+use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
 use App\Services\Inventory\InventoryUpdateSourceInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
@@ -17,7 +18,13 @@ class InventoryObserver
     /**
      * @var ResponseCacheInterface
      */
-    private $responseCache;
+    private $singleResponseCache;
+
+    /**
+     * @var ResponseCacheInterface
+     */
+    private $searchResponseCache;
+
     /**
      * @var InventoryUpdateSourceInterface
      */
@@ -28,14 +35,15 @@ class InventoryObserver
 
     /**
      * @param ResponseCacheKeyInterface $cacheKey
-     * @param ResponseCacheInterface $responseCache
+     * @param InventoryResponseCacheInterface $responseCache
      * @param InventoryUpdateSourceInterface $updateSource
      */
-    public function __construct(ResponseCacheKeyInterface $cacheKey, ResponseCacheInterface $responseCache, InventoryUpdateSourceInterface $updateSource)
+    public function __construct(ResponseCacheKeyInterface $cacheKey, InventoryResponseCacheInterface $responseCache, InventoryUpdateSourceInterface $updateSource)
     {
         $this->cacheKey = $cacheKey;
-        $this->responseCache = $responseCache;
         $this->updateSource = $updateSource;
+        $this->singleResponseCache = $responseCache->single();
+        $this->searchResponseCache = $responseCache->search();
     }
 
     /**
@@ -47,7 +55,7 @@ class InventoryObserver
     public function created(Inventory $inventory)
     {
         if (config('cache.inventory') && !$this->updateSource->integrations()) {
-            $this->responseCache->forget($this->cacheKey->deleteByDealer($inventory->dealer_id));
+            $this->searchResponseCache->forget($this->cacheKey->deleteByDealer($inventory->dealer_id));
         }
     }
 
@@ -60,10 +68,8 @@ class InventoryObserver
     public function updated(Inventory $inventory)
     {
         if (config('cache.inventory') && !$this->updateSource->integrations()) {
-            $this->responseCache->forget(
-                $this->cacheKey->deleteByDealer($inventory->dealer_id),
-                $this->cacheKey->deleteSingle($inventory->inventory_id)
-            );
+            $this->searchResponseCache->forget($this->cacheKey->deleteByDealer($inventory->dealer_id));
+            $this->singleResponseCache->forget($this->cacheKey->deleteSingle($inventory->inventory_id));
         }
     }
 
@@ -76,10 +82,8 @@ class InventoryObserver
     public function deleted(Inventory $inventory)
     {
         if (config('cache.inventory') && !$this->updateSource->integrations()) {
-            $this->responseCache->forget(
-                $this->cacheKey->deleteSingleFromCollection($inventory->inventory_id),
-                $this->cacheKey->deleteSingle($inventory->inventory_id)
-            );
+            $this->searchResponseCache->forget($this->cacheKey->deleteSingleFromCollection($inventory->inventory_id));
+            $this->singleResponseCache->forget($this->cacheKey->deleteSingle($inventory->inventory_id));
         }
     }
 
@@ -92,7 +96,7 @@ class InventoryObserver
     public function restored(Inventory $inventory)
     {
         if (config('cache.inventory') && !$this->updateSource->integrations()) {
-            $this->responseCache->forget($this->cacheKey->deleteByDealer($inventory->dealer_id));
+            $this->searchResponseCache->forget($this->cacheKey->deleteByDealer($inventory->dealer_id));
         }
     }
 
