@@ -51,6 +51,7 @@ class SyncWebsiteFromRemoteCommand extends AbstractSyncFromRemoteCommand
      * - `inventory_feature`
      * - `inventory_image`
      * - `image` (related with inventory)
+     * - `website_image`
      *
      * @return void
      */
