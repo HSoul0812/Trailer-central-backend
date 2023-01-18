@@ -13,8 +13,12 @@ use PHPUnit\Framework\MockObject\MockObject;
 use Tests\TestCase;
 
 /**
- * @group ElasticSearch
- * @group Inventory
+ * @group DW
+ * @group DW_ELASTICSSEARCH
+ * @group DW_INVENTORY
+ * @group DW_JOBS
+ *
+ * @covers \App\Jobs\ElasticSearch\Cache\InvalidateCacheJob::handle
  */
 class InvalidateCacheJobTest extends TestCase
 {

@@ -19,8 +19,9 @@ use App\Services\ElasticSearch\Cache\ResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
 
 /**
- * @group ElasticSearch
- * @group Inventory
+ * @group DW
+ * @group DW_ELASTICSSEARCH
+ * @group DW_INVENTORY
  */
 class InventoryObserverTest extends TestCase
 {
