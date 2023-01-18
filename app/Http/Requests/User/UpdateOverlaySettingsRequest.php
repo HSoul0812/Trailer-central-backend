@@ -3,6 +3,7 @@
 namespace App\Http\Requests\User;
 
 use App\Http\Requests\Request;
+use Illuminate\Support\Facades\Storage;
 
 class UpdateOverlaySettingsRequest extends Request 
 {
@@ -27,5 +28,26 @@ class UpdateOverlaySettingsRequest extends Request
         'overlay_lower_size' => 'integer',
         'overlay_lower_margin' => 'integer'
     ];
+
+    /**
+     * Handle a passed validation attempt.
+     *
+     * @return void
+     */
+    protected function passedValidation()
+    {
+        if ($this->filled('overlay_logo')) {
+
+            // upload logo
+            $overlayLogo = $this->overlay_logo;
+            $randomFilename = 'logo-' . sha1_file($overlayLogo);
+            $filePath = 'media/'. $this->dealer_id . '/' .$randomFilename;
+            Storage::disk('s3')->put($filePath, file_get_contents($overlayLogo));
+
+            $this->merge([
+                'overlay_logo' => Storage::disk('s3')->url($filePath)
+            ]);
+        }
+    }
     
 }

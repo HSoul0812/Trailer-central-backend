@@ -102,6 +102,19 @@ class TaskControllerTest extends IntegrationTestCase {
             $interactionIdsWithoutSalesperson[] = $interaction->interaction_id;
         }
 
+        // Ordering MUST be done after generating the expected data
+        // it also MUST be converted to avoid AM/PM issues
+        usort($dealerExpectedData, function ($a, $b) {
+            $first = strtotime("{$a['task_date']} {$a['task_time']}");
+            $second = strtotime("{$b['task_date']} {$b['task_time']}");
+            return $first <=> $second;
+        });
+        usort($salesPersonExpectedData, function ($a, $b) {
+            $first = strtotime("{$a['task_date']} {$a['task_time']}");
+            $second = strtotime("{$b['task_date']} {$b['task_time']}");
+            return $first <=> $second;
+        });
+
         $this->assertResponseDataEquals($response, $dealerExpectedData, false);
 
         $salespersonResponse = $this->json(

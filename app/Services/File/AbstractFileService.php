@@ -226,7 +226,7 @@ abstract class AbstractFileService implements FileServiceInterface
      *
      * @throws FileUploadException
      */
-    protected function uploadToS3(string $localFilename, string $newFilename, ?int $dealerId = null, ?int $identifier = null, array $uploadParams = []): string
+    public function uploadToS3(string $localFilename, string $newFilename, ?int $dealerId = null, ?int $identifier = null, array $uploadParams = []): string
     {
         $dealerId = $dealerId ?? mt_rand(self::RAND_MIN, self::RAND_MAX);
         $identifier = $identifier ?? mt_rand(self::RAND_MIN, self::RAND_MAX);
