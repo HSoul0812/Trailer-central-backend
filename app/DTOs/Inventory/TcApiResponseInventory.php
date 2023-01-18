@@ -82,6 +82,11 @@ class TcApiResponseInventory
         $obj->pull_type = '';
         $obj->manufacturer = $data['manufacturer'];
         $obj->dealer = $data['dealer'];
+
+        if(!empty($obj->dealer)) {
+            $obj->dealer['is_private'] = isset($data['from']) && $data['from'] === InventoryFrom::FROM_TT;
+        }
+
         $obj->listing_date = $data['created_at'];
 
         $obj->availability = self::statusToAvailabilityMap[$data['status_id']] ?? '';
