@@ -25,6 +25,12 @@ class StripePaymentService implements StripePaymentServiceInterface
     const CHECKOUT_SESSION_COMPLETED_EVENT = 'checkout.session.completed';
 
     const PLANS = [
+        'tt1' => [
+            'name' => 'TrailerTrader-1days',
+            'price' => 75.00,
+            'description' => '1 day plan for publishing your listing with id {id} on TrailerTrader.com by user {user_id}',
+            'duration' => 1,
+        ],
         'tt30' => [
             'name' => 'TrailerTrader-30days',
             'price' => 75.00,
