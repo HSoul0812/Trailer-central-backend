@@ -15,7 +15,7 @@ class TcEsInventoryDealer implements Arrayable {
         $obj = new self();
         $obj->name = $data['name'] ?? null;
         $obj->email = $data['email'] ?? null;
-        $obj->is_private = isset($data['from']) && $data['from'] === InventoryFrom::FROM_TT;
+        $obj->is_private = (new PrivateDealerCheck)->checkArray($data);
         return $obj;
     }
 }
