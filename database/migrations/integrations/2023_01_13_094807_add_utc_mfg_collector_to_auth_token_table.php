@@ -7,7 +7,7 @@ class AddUtcMfgCollectorToAuthTokenTable extends Migration
 {
     private const INTERACTION_INTEGRATION_TABLE = 'interaction_integration';
     private const AUTH_TOKEN_TABLE = 'auth_token';
-    private const INTEGRATION_NAME = 'utc_mfg';
+    private const INTEGRATION_NAME = 'utc';
     private const USER_TYPE = 'integration';
 
     /**
