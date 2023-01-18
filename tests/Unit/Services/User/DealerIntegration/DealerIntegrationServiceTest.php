@@ -42,7 +42,12 @@ class DealerIntegrationServiceTest extends TestCase
         $this->app->instance(DealerIntegrationRepositoryInterface::class, $this->repository);
     }
 
-    public function testUpdateDealerIntegration()
+    /**
+     * @covers ::update
+     * @group Integrations
+     * @dataProvider dealerIntegrationDataProvider
+     */
+    public function testUpdateDealerIntegration($dealerId, $integrationId)
     {
         Mail::fake();
 
@@ -50,11 +55,11 @@ class DealerIntegrationServiceTest extends TestCase
         $integration = $this->getEloquentMock(Integration::class);
         $dealerIntegration = $this->getEloquentMock(DealerIntegration::class);
 
-        $dealer->dealer_id = 1;
-        $integration->integration_id = 1;
+        $dealer->dealer_id = $dealerId;
+        $integration->integration_id = $integrationId;
 
-        $dealerIntegration->dealer_id = 1;
-        $dealerIntegration->integration_id = 1;
+        $dealerIntegration->dealer_id = $dealerId;
+        $dealerIntegration->integration_id = $integrationId;
 
         $this->initBelongsToRelation($dealerIntegration, 'dealer', $dealer);
         $this->initBelongsToRelation($dealerIntegration, 'integration', $integration);
@@ -85,7 +90,12 @@ class DealerIntegrationServiceTest extends TestCase
         $this->assertInstanceOf(DealerIntegration::class, $result);
     }
 
-    public function testDeleteDealerIntegration()
+    /**
+     * @covers ::delete
+     * @group Integrations
+     * @dataProvider dealerIntegrationDataProvider
+     */
+    public function testDeleteDealerIntegration($dealerId, $integrationId)
     {
         Mail::fake();
 
@@ -93,11 +103,11 @@ class DealerIntegrationServiceTest extends TestCase
         $integration = $this->getEloquentMock(Integration::class);
         $dealerIntegration = $this->getEloquentMock(DealerIntegration::class);
 
-        $dealer->dealer_id = 1;
-        $integration->integration_id = 1;
+        $dealer->dealer_id = $dealerId;
+        $integration->integration_id = $integrationId;
 
-        $dealerIntegration->dealer_id = 1;
-        $dealerIntegration->integration_id = 1;
+        $dealerIntegration->dealer_id = $dealerId;
+        $dealerIntegration->integration_id = $integrationId;
 
         $this->initBelongsToRelation($dealerIntegration, 'dealer', $dealer);
         $this->initBelongsToRelation($dealerIntegration, 'integration', $integration);
@@ -126,5 +136,15 @@ class DealerIntegrationServiceTest extends TestCase
         });
 
         $this->assertInstanceOf(DealerIntegration::class, $result);
+    }
+
+    public function dealerIntegrationDataProvider(): array
+    {
+        return [
+            [
+                'dealer_id' => 1,
+                'integration_id' => 1,
+            ]
+        ];
     }
 }
