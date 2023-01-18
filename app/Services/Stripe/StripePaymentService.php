@@ -12,6 +12,7 @@ use Illuminate\Support\Carbon;
 use Stripe\Exception\SignatureVerificationException;
 use Stripe\Exception\UnexpectedValueException;
 use Stripe\Stripe;
+use Stripe\StripeObject;
 use Stripe\Webhook;
 use Stripe\Checkout\Session;
 use Illuminate\Support\Facades\DB;
@@ -23,16 +24,24 @@ class StripePaymentService implements StripePaymentServiceInterface
     const STRIPE_FAILURE_URL = '/trailers/{id}/?payment_status=failed';
     const CHECKOUT_SESSION_COMPLETED_EVENT = 'checkout.session.completed';
 
-    const PRICES = [
-        'tt30' => [
+    const PLANS = [
+        'tt1' => [
+            'name' => 'TrailerTrader-1days',
             'price' => 75.00,
-            'name' => '30 day plan for publishing your listing titled {title} on TrailerTrader.com',
+            'description' => '1 day plan for publishing your listing with id {id} on TrailerTrader.com by user {user_id}',
+            'duration' => 1,
+        ],
+        'tt30' => [
+            'name' => 'TrailerTrader-30days',
+            'price' => 75.00,
+            'description' => '30 day plan for publishing your listing with id {id} on TrailerTrader.com by user {user_id}',
             'duration' => 30,
         ],
         'tt60' => [
+            'name' => 'TrailerTrader-60days',
             'price' => 100.00,
-            'name' => '600 days plan for publishing your listing titled {title} on TrailerTrader.com',
-            'duration' => 600,
+            'description' => '60 days plan for publishing your listing with id {id} on TrailerTrader.com by user {user_id}',
+            'duration' => 60,
         ],
     ];
 
@@ -61,35 +70,29 @@ class StripePaymentService implements StripePaymentServiceInterface
         return (int)str_replace('.', '', $numberWithTwoDecimals);
     }
 
-    public function createCheckoutSession(string $priceItem, array $metadata = []): string
+    public function createCheckoutSession(string $planId, array $metadata = []): string
     {
         $siteUrl = config('app.site_url');
 
-        $inventoryTitle = $metadata['inventory_title'];
         $inventoryId = $metadata['inventory_id'];
+        $userId = $metadata['user_id'];
 
-        $planPrice = self::PRICES[$priceItem]['price'];
-        $planName = self::PRICES[$priceItem]['name'];
-        $planDuration = self::PRICES[$priceItem]['duration'];
-        $planName = str_replace('{title}', $inventoryTitle, $planName);
+        $plan = self::PLANS[$planId];
+        $planName = $plan['name'];
+        $planDuration = $plan['duration'];
+        $planDescription = $plan['description'];
+        $planDescription = str_replace('{id}', $inventoryId, $planDescription);
+        $planDescription = str_replace('{user_id}', $userId, $planDescription);
 
-        $metadata['planKey'] = $priceItem;
+        $metadata['planKey'] = $planId;
         $metadata['planName'] = $planName;
+        $metadata['planDescription'] = $planDescription;
         $metadata['planDuration'] = $planDuration;
 
-        $product = \Stripe\Product::create([
-            'name' => $planName
-        ]);
-
-        $priceObj = \Stripe\Price::create([
-            "billing_scheme" => "per_unit",
-            "currency" => "usd",
-            "product" => $product->id,
-            "unit_amount" => $this->numberToStripeFormat($planPrice),
-        ]);
+        $product = $this->findOrCreatePlan($planId);
 
         $priceObjects[] = [
-            'price' => $priceObj->id,
+            'price' => $product->default_price,
             'quantity' => 1,
         ];
 
@@ -129,6 +132,28 @@ class StripePaymentService implements StripePaymentServiceInterface
         return 200;
     }
 
+    private function findOrCreatePlan(string $planId): StripeObject {
+        $plan = self::PLANS[$planId];
+        $response = \Stripe\Product::search([
+            'query' => "name:'{$plan['name']}' and active:'true'"
+        ]);
+
+        if(count($response->data) > 0) {
+            return $response->data[0];
+        }
+
+        $product = \Stripe\Product::create([
+            'name' => $planId,
+            'description' => $plan['description'],
+            'default_price_data' => [
+                "currency" => "usd",
+                "unit_amount" => $this->numberToStripeFormat($plan['price']),
+            ]
+        ]);
+
+        return $product;
+    }
+
     private function completeOrder(Session $session): int
     {
         try {
@@ -138,6 +163,7 @@ class StripePaymentService implements StripePaymentServiceInterface
             $userId = $session->metadata->user_id;
             $planKey = $session->metadata->planKey;
             $planName = $session->metadata->planName;
+            $planDescription = $session->metadata->planDescription;
             $planDuration = $session->metadata->planDuration;
 
             $this->paymentLogRepository->create([
@@ -145,7 +171,7 @@ class StripePaymentService implements StripePaymentServiceInterface
                 'client_reference_id' => $session->client_reference_id,
                 'full_response' => json_encode($session->values()),
                 'plan_key' => $planKey,
-                'plan_name' => $planName,
+                'plan_name' => $planDescription,
                 'plan_duration' => $planDuration
             ]);
 
@@ -158,8 +184,10 @@ class StripePaymentService implements StripePaymentServiceInterface
             if ($inventoryExpiry->startOfDay()->isBefore(Carbon::now())) {
                 $inventoryExpiry = Carbon::now()->startOfDay();
             }
-            // TODO: Extend expiry based on plan
-            $inventoryExpiry = $inventoryExpiry->addMonth();
+
+            $planDuration = intval($planDuration) ?: 30;
+
+            $inventoryExpiry = $inventoryExpiry->addDays($planDuration);
             $this->inventoryService->update($userId, [
                 'inventory_id' => $inventoryId,
                 'show_on_website' => 1,
@@ -168,7 +196,7 @@ class StripePaymentService implements StripePaymentServiceInterface
 
             DB::commit();
 
-            \Log::info('session', $session->values());
+            \Log::info('session', $session->toArray());
             \Log::info('inventory_id: ' . $inventoryId);
 
             return 200;
