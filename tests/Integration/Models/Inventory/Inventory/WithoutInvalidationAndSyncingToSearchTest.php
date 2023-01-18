@@ -41,7 +41,7 @@ class WithoutInvalidationAndSyncingToSearchTest extends TestCase
         Inventory::withoutInvalidationAndSyncingToSearch(function () {
             $inventory = factory(Inventory::class)->create();
             $inventory->update(['description' => $this->faker->sentence(4)]);
-            $inventory->delete(); // delete doesn't trigger jobs
+            $inventory->delete(); // delete doesn't trigger jobs for scout
         });
 
         Bus::assertNotDispatched(InvalidateCacheJob::class);
@@ -49,7 +49,7 @@ class WithoutInvalidationAndSyncingToSearchTest extends TestCase
 
         $inventory = factory(Inventory::class)->create();
         $inventory->update(['description' => $this->faker->sentence(4)]);
-        $inventory->delete(); // delete doesn't trigger jobs
+        $inventory->delete(); // delete doesn't trigger jobs for scout
 
         Bus::assertDispatchedTimes(MakeSearchable::class, 2);
         Bus::assertDispatchedTimes(InvalidateCacheJob::class, 3);
