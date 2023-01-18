@@ -12,7 +12,8 @@ trait Searchable
     /**
      * Register the searchable macros.
      *
-     * This method is a hotfix to avoid to use last model which register the searchable macro
+     * This method is a hotfix to avoid to use last model which is registered by the searchable macro,
+     * it was a source of bugs
      *
      * @return void
      */
