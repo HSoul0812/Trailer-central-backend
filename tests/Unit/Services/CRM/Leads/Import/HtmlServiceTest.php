@@ -12,6 +12,7 @@ use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Services\CRM\Leads\DTOs\ADFLead;
 use App\Services\CRM\Leads\Import\HtmlService;
+use App\Services\CRM\Leads\Import\ImportSourceInterface;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
@@ -51,15 +52,36 @@ class HtmlServiceTest extends TestCase
     private const OFFICE_INFO_CITY = 'office_info_city';
     private const OFFICE_INFO_STATE = 'office_info_state';
     private const OFFICE_INFO_ZIP = 'office_info_zip';
-    private const CUSTOMER_COMMENTS = 'customer_comments';
 
-    private const VALID_HTML = "<p>LEAD DESTINATION:</p><p>Address:%LEAD_ADDRESS%</p><br/><p>INDIVIDUAL PROSPECT:</p>
-    <p>Name:                   %LEAD_FIRST_NAME% %LEAD_LAST_NAME%</p><p>Telephone:%LEAD_TELEPHONE%</p><p>Email:%LEAD_EMAIL%</p><br/>
-    <p> LEAD INFORMATION: </p><p>Lead date:%LEAD_DATE%</p><p>Lead source:%LEAD_SOURCE%</p><p>Lead request type:      %LEAD_REQUEST_TYPE%</p><br/>
-    <p>SALES BOAT:</p><p>Sale class:%LEAD_ITEM_SALES_CLASS%</p><p>Make:%LEAD_ITEM_MAKE%</p><p>Model description:%LEAD_ITEM_MODEL_DESCRIPTION%</p>
-    <p>Year:%LEAD_ITEM_YEAR%</p><p>IMT ID:%LEAD_ITEM_IMT_ID%</p><p>URI:%LEAD_ITEM_URI%</p><br/><p>OFFICEINFO:</p><p>Name:%OFFICE_INFO_NAME%</p>
-    <p>Address:%OFFICE_INFO_STREET%</p><p>City:%OFFICE_INFO_CITY%</p><p>State/Province:%OFFICE_INFO_STATE%</p>
-    <p>Zip/Postal code:%OFFICE_INFO_ZIP%</p><p>CUSTOMER COMMENTS:%CUSTOMER_COMMENTS%</p>";
+    private const VALID_HTML = "INDIVIDUAL PROSPECT:
+                Name:                   %LEAD_FIRST_NAME% %LEAD_LAST_NAME%
+                Telephone:              %LEAD_TELEPHONE%
+                Email:                  %LEAD_EMAIL%
+
+                LEAD INFORMATION:
+                Lead date:              October 10, 2022 3:58 PM PDT
+                Lead source:            Boats.com
+                Lead status:            Lead
+                Lead request type:      MORE-INFO-REQUEST
+
+                SALES BOAT:
+                Sale class:             New
+                Make:                   %LEAD_ITEM_MAKE%
+                Model description:      %LEAD_ITEM_MODEL_DESCRIPTION%
+                Year:                   %LEAD_ITEM_YEAR%
+                HIN:                    %LEAD_ITEM_IMT_ID%
+                Stock Number:           %INVENTORY_STOCK%
+                URI:                    %LEAD_ITEM_URI%
+
+                OFFICEINFO:
+                Sales Contact:          Kellie rhoderiver
+                Name:                   %OFFICE_INFO_NAME%
+                Address:                %OFFICE_INFO_STREET%
+                Address 2:
+                City:                   %OFFICE_INFO_CITY%
+                State/Province:         %OFFICE_INFO_STATE%
+                Zip/Postal code:        %OFFICE_INFO_ZIP%
+                Country:                US";
 
     private const NOT_VALID_HTML = "<p>LEAD DESTINATION:</p><p>Address:%LEAD_ADDRESS%</p><br/><p>INDIVIDUAL PROSPECT:</p>
     <p>Name:                   %LEAD_FIRST_NAME% %LEAD_LAST_NAME%</p><p>Telephone:%LEAD_TELEPHONE%</p><p>Email:%LEAD_EMAIL%</p><br/>
@@ -105,9 +127,9 @@ class HtmlServiceTest extends TestCase
     {
         /** @var HtmlService $service */
         $service = $this->app->make(HtmlService::class);
-        $result = $service->isSatisfiedBy($email);
+        $source = $service->findSource($email);
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(ImportSourceInterface::class, $source);
     }
 
     /**
@@ -120,9 +142,9 @@ class HtmlServiceTest extends TestCase
     {
         /** @var HtmlService $service */
         $service = $this->app->make(HtmlService::class);
-        $result = $service->isSatisfiedBy($email);
+        $result = $service->findSource($email);
 
-        $this->assertFalse($result);
+        $this->assertNull($result);
     }
 
     /**
@@ -143,12 +165,6 @@ class HtmlServiceTest extends TestCase
         $inventoryItem->inventory_id = PHP_INT_MAX - 654321;
         $inventory = new Collection([$inventoryItem]);
 
-        $this->sanitizeHelper
-            ->shouldReceive('removeBrokenCharacters')
-            ->with(self::CUSTOMER_COMMENTS)
-            ->once()
-            ->andReturn(self::CUSTOMER_COMMENTS);
-
         $this->locationRepository
             ->shouldReceive('find')
             ->once()
@@ -160,12 +176,12 @@ class HtmlServiceTest extends TestCase
             ->andReturn($inventory);
 
         Log::shouldReceive('channel')
-            ->once()
+            ->zeroOrMoreTimes()
             ->andReturn($this->logMock);
 
         $this->logMock
             ->shouldReceive('info')
-            ->once();
+            ->twice();
 
         /** @var HtmlService $service */
         $service = $this->app->make(HtmlService::class);
@@ -186,7 +202,6 @@ class HtmlServiceTest extends TestCase
         $this->assertEquals(self::OFFICE_INFO_CITY, $result->getAddrCity());
         $this->assertEquals(self::OFFICE_INFO_STATE, $result->getAddrState());
         $this->assertEquals(self::OFFICE_INFO_ZIP, $result->getAddrZip());
-        $this->assertEquals(self::CUSTOMER_COMMENTS, $result->getComments());
     }
 
     /**
@@ -200,12 +215,6 @@ class HtmlServiceTest extends TestCase
         $locations = new Collection([]);
         $inventory = new Collection([]);
 
-        $this->sanitizeHelper
-            ->shouldReceive('removeBrokenCharacters')
-            ->with(self::CUSTOMER_COMMENTS)
-            ->once()
-            ->andReturn(self::CUSTOMER_COMMENTS);
-
         $this->locationRepository
             ->shouldReceive('find')
             ->once()
@@ -217,12 +226,12 @@ class HtmlServiceTest extends TestCase
             ->andReturn($inventory);
 
         Log::shouldReceive('channel')
-            ->once()
+            ->times(3)
             ->andReturn($this->logMock);
 
         $this->logMock
             ->shouldReceive('info')
-            ->once();
+            ->twice();
 
         /** @var HtmlService $service */
         $service = $this->app->make(HtmlService::class);
@@ -243,7 +252,6 @@ class HtmlServiceTest extends TestCase
         $this->assertEquals(self::OFFICE_INFO_CITY, $result->getAddrCity());
         $this->assertEquals(self::OFFICE_INFO_STATE, $result->getAddrState());
         $this->assertEquals(self::OFFICE_INFO_ZIP, $result->getAddrZip());
-        $this->assertEquals(self::CUSTOMER_COMMENTS, $result->getComments());
     }
 
     /**
@@ -255,7 +263,7 @@ class HtmlServiceTest extends TestCase
     public function testGetLeadWithNotValidHtml($dealer, $email)
     {
         Log::shouldReceive('channel')
-            ->once()
+            ->times(3)
             ->andReturn($this->logMock);
 
         $this->logMock

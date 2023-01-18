@@ -23,7 +23,7 @@ use App\Models\Inventory\Inventory;
  * @property-read Website $website
  * @property-read Inventory $inventory
  */
-class ADFSeeder extends Seeder
+class HtmlSeeder extends Seeder
 {
     use WithGetter;
 
@@ -31,6 +31,11 @@ class ADFSeeder extends Seeder
      * @var User
      */
     protected $dealer;
+
+    /**
+     * @var NewUser
+     */
+    protected $user;
 
     /**
      * @var DealerLocation
@@ -59,7 +64,8 @@ class ADFSeeder extends Seeder
         /**
          * necessary data for dealer
          */
-        $user = factory(NewUser::class)->create();
+        $this->user = factory(NewUser::class)->create();
+        $user = $this->user;
         $newDealerUserRepo = app(NewDealerUserRepositoryInterface::class);
         $newDealerUser = $newDealerUserRepo->create([
             'user_id' => $user->user_id,
@@ -102,10 +108,9 @@ class ADFSeeder extends Seeder
     public function cleanUp(): void
     {
         // Delete CRM User Related Data
-        $userId = $this->dealer->newDealerUser->user_id;
-        NewDealerUser::where(['user_id' => $userId])->delete();
-        CrmUser::where(['user_id' => $userId])->delete();
-        NewUser::destroy($userId);
+        NewDealerUser::where(['user_id' => $this->user->getKey()])->delete();
+        CrmUser::where(['user_id' => $this->user->getKey()])->delete();
+        NewUser::destroy($this->user->getKey());
 
         // Delete Dealer Related Data
         Website::destroy($this->website->getKey());
