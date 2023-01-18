@@ -696,6 +696,7 @@ $api->version('v1', function ($route) {
         $route->post('leads/find-matches', 'App\Http\Controllers\v1\CRM\Leads\LeadController@getMatches');
         $route->post('leads/{id}/merge', 'App\Http\Controllers\v1\CRM\Leads\LeadController@mergeLeads');
         $route->get('leads/output', 'App\Http\Controllers\v1\CRM\Leads\LeadController@output');
+        $route->delete('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@destroy');
 
         /*
         |--------------------------------------------------------------------------
