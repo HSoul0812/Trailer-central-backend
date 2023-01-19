@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\DTOs\Inventory;
 
 use App\Traits\TypedPropertyTrait;
+use App\DTOs\Dealer\PrivateDealerCheck;
 use Illuminate\Contracts\Support\Arrayable;
 use JetBrains\PhpStorm\Pure;
 
