@@ -213,8 +213,7 @@ class ListingRepository implements ListingRepositoryInterface {
         // Set Sort By
         $query = $query->orderBy("{$inventoryTableName}.created_at", "asc");
         $query = $query->limit($params['per_page'] ?? config('marketing.fb.settings.limit.listings'));
-
-        die($query->toSql());
+        
         // Return Paginated Inventory
         return $query->get();
     }
