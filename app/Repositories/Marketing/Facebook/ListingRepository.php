@@ -160,7 +160,7 @@ class ListingRepository implements ListingRepositoryInterface {
             ->where("{$inventoryTableName}.year", '<', '2024') //TODO: remove when Facebook allows this
             ->where(function ($query) use ($inventoryTableName, $fbMinPrice) {
                 $query->whereRaw("IFNULL($inventoryTableName.sales_price, 0) > $fbMinPrice")
-                    ->orWhereRaw("($inventoryTableName.use_website_price AND IFNULL($inventoryTableName.website_price, 0) > $fbMinPrice")
+                    ->orWhereRaw("($inventoryTableName.use_website_price AND IFNULL($inventoryTableName.website_price, 0) > $fbMinPrice)")
                     ->orWhereRaw("IFNULL($inventoryTableName.price, 0) > $fbMinPrice");
             })
             ->where("{$inventoryTableName}.entity_type_id", '<>', EntityType::ENTITY_TYPE_BUILDING)
@@ -214,6 +214,7 @@ class ListingRepository implements ListingRepositoryInterface {
         $query = $query->orderBy("{$inventoryTableName}.created_at", "asc");
         $query = $query->limit($params['per_page'] ?? config('marketing.fb.settings.limit.listings'));
 
+        die($query->toSql());
         // Return Paginated Inventory
         return $query->get();
     }
