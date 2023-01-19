@@ -167,6 +167,6 @@ class InventoryServiceProvider extends ServiceProvider
             );
         });
 
-		$this->app->bind(InventoryUpdateSourceInterface::class, InventoryUpdateSource::class);
+        $this->app->bind(InventoryUpdateSourceInterface::class, InventoryUpdateSource::class);
     }
 }

@@ -29,7 +29,8 @@ class CreateBillRequest extends Request
             'nullable',
             'string',
             'max:' . DocNumConstraint::MAX_LENGTH,
-            Rule::unique('qb_bills', 'doc_num'),
+            Rule::unique('qb_bills', 'doc_num')
+                ->where('vendor_id', $this->input('vendor_id')),
         ];
         
         return parent::getRules();

@@ -695,6 +695,7 @@ $api->version('v1', function ($route) {
         $route->post('leads/find-matches', 'App\Http\Controllers\v1\CRM\Leads\LeadController@getMatches');
         $route->post('leads/{id}/merge', 'App\Http\Controllers\v1\CRM\Leads\LeadController@mergeLeads');
         $route->get('leads/output', 'App\Http\Controllers\v1\CRM\Leads\LeadController@output');
+        $route->delete('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@destroy');
 
         /*
         |--------------------------------------------------------------------------
@@ -707,6 +708,16 @@ $api->version('v1', function ($route) {
         $route->get('user/quotes', 'App\Http\Controllers\v1\Dms\UnitSaleController@index');
         $route->put('user/quotes/bulk-archive', 'App\Http\Controllers\v1\Dms\UnitSaleController@bulkArchive');
         $route->put('user/quotes/setting', 'App\Http\Controllers\v1\Dms\Quote\QuoteSettingController@updateDealerSetting');
+
+        /*
+        |--------------------------------------------------------------------------
+        | POS Quotes
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->post('pos-quotes', 'App\Http\Controllers\v1\Pos\PosController@createPosQuote');
 
         /*
         |--------------------------------------------------------------------------
