@@ -90,6 +90,16 @@ class Part extends BasePart
         return env('INDEX_PARTS_TEXTRAIL', 'parts_textrail');
     }
 
+    public function searchable()
+    {
+        // does nothing
+    }
+
+    public function unsearchable()
+    {
+        // does nothing
+    }
+
     public static function boot(): void
     {
         parent::boot();
