@@ -1,6 +1,7 @@
 <?php
 namespace App\DTOs\Inventory;
 
+use App\DTOs\Dealer\PrivateDealerCheck;
 use Illuminate\Contracts\Support\Arrayable;
 use JetBrains\PhpStorm\Pure;
 

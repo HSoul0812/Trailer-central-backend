@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DTOs\Inventory;
+namespace App\DTOs\Dealer;
 
 class PrivateDealerCheck
 {
