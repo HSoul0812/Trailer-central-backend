@@ -53,6 +53,13 @@ trait InventorySearchable
             ->searchable();
     }
 
+    public static function makeAllSearchableByDealerLocations(array $locations = []): void
+    {
+        self::query()->whereIn('dealer_location_id', $locations)
+            ->orderBy('updated_at_auto', 'DESC')
+            ->searchable();
+    }
+
     public static function makeAllSearchable(): void
     {
         self::query()->orderBy('updated_at_auto', 'DESC')->searchable();
