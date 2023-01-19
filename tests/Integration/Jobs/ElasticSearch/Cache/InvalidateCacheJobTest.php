@@ -14,7 +14,7 @@ use Tests\TestCase;
 
 /**
  * @group DW
- * @group DW_ELASTICSSEARCH
+ * @group DW_ELASTICSEARCH
  * @group DW_INVENTORY
  * @group DW_JOBS
  *
@@ -56,7 +56,7 @@ class InvalidateCacheJobTest extends TestCase
     public function test_it_uses_the_correct_cache_connection_when_invalidating_single_keys()
     {
         $patterns = [
-            $this->cacheKey->deleteSingle(1234),
+            $this->cacheKey->deleteSingle(1234, 345),
             $this->cacheKey->deleteSingleByDealer(5678)
         ];
 
@@ -93,7 +93,7 @@ class InvalidateCacheJobTest extends TestCase
         ];
 
         $singleKeys = [
-            $this->cacheKey->deleteSingle(9999),
+            $this->cacheKey->deleteSingle(9999, 444),
             $this->cacheKey->deleteSingleByDealer(8982)
         ];
 
@@ -113,7 +113,7 @@ class InvalidateCacheJobTest extends TestCase
     public function test_it_removes_lock_for_keys_after_invalidation()
     {
         $patterns = [
-            $this->cacheKey->deleteSingle(1234),
+            $this->cacheKey->deleteSingle(1234, 456),
             $this->cacheKey->deleteSingleByDealer(5678)
         ];
 

@@ -69,7 +69,7 @@ class InventoryObserver
     {
         if (config('cache.inventory') && !$this->updateSource->integrations()) {
             $this->searchResponseCache->forget($this->cacheKey->deleteByDealer($inventory->dealer_id));
-            $this->singleResponseCache->forget($this->cacheKey->deleteSingle($inventory->inventory_id));
+            $this->singleResponseCache->forget($this->cacheKey->deleteSingle($inventory->inventory_id, $inventory->dealer_id));
         }
     }
 
@@ -83,7 +83,7 @@ class InventoryObserver
     {
         if (config('cache.inventory') && !$this->updateSource->integrations()) {
             $this->searchResponseCache->forget($this->cacheKey->deleteSingleFromCollection($inventory->inventory_id));
-            $this->singleResponseCache->forget($this->cacheKey->deleteSingle($inventory->inventory_id));
+            $this->singleResponseCache->forget($this->cacheKey->deleteSingle($inventory->inventory_id, $inventory->dealer_id));
         }
     }
 

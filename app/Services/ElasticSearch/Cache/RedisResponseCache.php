@@ -72,6 +72,7 @@ class RedisResponseCache implements ResponseCacheInterface
             /** @var null|int $cursor */
             $cursor = null;
 
+            // @todo we need remove by key when we dont have `*` wildcard
             $keys = $this->client->scan($cursor, $pattern);
 
             /**

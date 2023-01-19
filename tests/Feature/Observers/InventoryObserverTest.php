@@ -20,7 +20,7 @@ use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
 
 /**
  * @group DW
- * @group DW_ELASTICSSEARCH
+ * @group DW_ELASTICSEARCH
  * @group DW_INVENTORY
  */
 class InventoryObserverTest extends TestCase
@@ -78,7 +78,7 @@ class InventoryObserverTest extends TestCase
             });
 
             $dealerKey = $this->cacheKeyService->deleteByDealer($this->dealer->dealer_id);
-            $singleKey = $this->cacheKeyService->deleteSingle($inventory->inventory_id);
+            $singleKey = $this->cacheKeyService->deleteSingle($inventory->inventory_id, $inventory->dealer_id);
 
             $this->searchResponseCache->shouldReceive('forget')->once()->with($dealerKey);
             $this->singleResponseCache->shouldReceive('forget')->once()->with($singleKey);
@@ -97,7 +97,7 @@ class InventoryObserverTest extends TestCase
             });
 
             $singleInCollectionKey = $this->cacheKeyService->deleteSingleFromCollection($inventory->inventory_id);
-            $singleKey = $this->cacheKeyService->deleteSingle($inventory->inventory_id);
+            $singleKey = $this->cacheKeyService->deleteSingle($inventory->inventory_id, $inventory->dealer_id);
 
             $this->searchResponseCache->shouldReceive('forget')->once()->with($singleInCollectionKey);
             $this->singleResponseCache->shouldReceive('forget')->once()->with($singleKey);
@@ -165,7 +165,7 @@ class InventoryObserverTest extends TestCase
             });
 
             $dealerKey = $this->cacheKeyService->deleteByDealer($this->dealer->dealer_id);
-            $singleKey = $this->cacheKeyService->deleteSingle($inventory->inventory_id);
+            $singleKey = $this->cacheKeyService->deleteSingle($inventory->inventory_id, $inventory->dealer_id);
 
             $this->searchResponseCache->shouldReceive('forget')->once()->with($dealerKey);
             $this->singleResponseCache->shouldReceive('forget')->once()->with($singleKey);

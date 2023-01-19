@@ -67,7 +67,7 @@ class InventoryImageObserver
     {
         if (config('cache.inventory')) {
             $this->searchResponseCache->forget($this->cacheKey->deleteSingleFromCollection($image->inventory_id));
-            $this->singleResponseCache->forget($this->cacheKey->deleteSingle($image->inventory_id));
+            $this->singleResponseCache->forget($this->cacheKey->deleteSingle($image->inventory_id, $image->inventory->dealer_id));
         }
     }
 

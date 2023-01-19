@@ -44,12 +44,13 @@ class RedisResponseCacheKey implements ResponseCacheKeyInterface
     }
 
     /**
-     * @param int $id
+     * @param  int  $id
+     * @param  int  $dealerId
      * @return string
      */
-    public function deleteSingle(int $id): string
+    public function deleteSingle(int $id, int $dealerId): string
     {
-        return sprintf('*inventories.single:%d*', $id);
+        return sprintf('*inventories.single:%d:-dealer:%d', $id, $dealerId);
     }
 
     /**
