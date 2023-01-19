@@ -299,7 +299,8 @@ class LeadController extends RestfulControllerV2
     {
         $request = new DeleteLeadRequest(array_merge($request->all(), ['id' => $id]));
         
-        if ($request->validate() && $this->leads->delete($request->all()) > 0) {
+        if ($request->validate() 
+            && $this->leads->delete(['id' => $id, 'dealer_id' => $request->get('dealer_id')]) > 0) {
 
             return $this->updatedResponse();
         }
