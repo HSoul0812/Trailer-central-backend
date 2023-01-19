@@ -80,6 +80,13 @@ class DealerLocationService implements DealerLocationServiceInterface
         return null;
     }
 
+    /**
+     * Reindex the inventory by dealer location, if the cache for inventory is enabled,
+     * then it will invalidate cache by dealer id
+     *
+     * @param  int  $dealerLocationId
+     * @return void
+     */
     public function invalidateCacheAndReindex(int $dealerLocationId): void
     {
         $location = $this->locationsRepo->get(['dealer_location_id' => $dealerLocationId]);
