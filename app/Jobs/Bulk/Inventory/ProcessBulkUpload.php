@@ -41,7 +41,7 @@ class ProcessBulkUpload extends Job {
 
             $importerService->setBulkUpload($bulk);
 
-            Inventory::withoutInvalidationAndSyncingToSearch(static function () use ($importerService): void {
+            Inventory::withoutCacheInvalidationAndSearchSyncing(static function () use ($importerService): void {
                 $importerService->run();
             });
 

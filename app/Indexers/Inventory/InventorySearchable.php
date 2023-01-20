@@ -4,10 +4,8 @@ namespace App\Indexers\Inventory;
 
 use App\Indexers\Searchable;
 use App\Indexers\WithIndexConfigurator;
-use App\Services\Inventory\InventoryUpdateSource;
-use App\Services\Inventory\InventoryUpdateSourceInterface;
+use App\Observers\Inventory\InventoryObserver;
 use Exception;
-use Illuminate\Support\Facades\Config;
 
 /**
  * @method \Illuminate\Database\Eloquent\Builder query
@@ -92,41 +90,31 @@ trait InventorySearchable
     }
 
     /**
-     * This need to be override to be able avoid dispatching jobs when integrations is requesting
-     * @return void
-     */
-    public function searchable(): void
-    {
-        if (!$this->getInventoryUpdateSource()->integrations()) {
-            $this->newCollection([$this])->searchable();
-        }
-    }
-
-    /**
      * To avoid to dispatch jobs for invalidation cache and ElasticSearch indexation
      *
      * @param  callable  $callback
      * @return mixed
      */
-    public static function withoutInvalidationAndSyncingToSearch(callable $callback)
+    public static function withoutCacheInvalidationAndSearchSyncing(callable $callback)
     {
-        $isCacheEnabled = config('cache.inventory');
-
-        Config::set('cache.inventory', false);
-
-        self::disableSearchSyncing();
+        self::disableCacheInvalidationAndSearchSyncing();
 
         try {
             return $callback();
         } finally {
-            Config::set('cache.inventory', $isCacheEnabled);
-
-            self::enableSearchSyncing();
+            self::enableCacheInvalidationAndSearchSyncing();
         }
     }
 
-    protected function getInventoryUpdateSource(): InventoryUpdateSource
+    public static function disableCacheInvalidationAndSearchSyncing(): void
     {
-        return app(InventoryUpdateSourceInterface::class);
+        self::disableSearchSyncing();
+        InventoryObserver::disableCacheInvalidation();
+    }
+
+    public static function enableCacheInvalidationAndSearchSyncing(): void
+    {
+        self::enableSearchSyncing();
+        InventoryObserver::enableCacheInvalidation();
     }
 }
