@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Observers;
+namespace App\Observers\Inventory;
 
 use App\Models\Inventory\InventoryImage;
 use App\Services\ElasticSearch\Cache\ResponseCacheInterface;
