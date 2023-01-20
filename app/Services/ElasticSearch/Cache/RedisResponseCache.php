@@ -4,6 +4,7 @@ namespace App\Services\ElasticSearch\Cache;
 
 use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
 use Illuminate\Foundation\Bus\DispatchesJobs;
+use Illuminate\Support\Str;
 use \Redis as PhpRedis;
 
 class RedisResponseCache implements ResponseCacheInterface
@@ -69,10 +70,14 @@ class RedisResponseCache implements ResponseCacheInterface
     public function invalidate(string ...$keyPatterns): void
     {
         foreach ($keyPatterns as $pattern) {
+            if (Str::startsWith($pattern, '*') && (substr_count($pattern, '*') == 1)) {
+                $this->client->unlink(Str::replaceFirst('*', '', $pattern));
+                continue;
+            }
+
             /** @var null|int $cursor */
             $cursor = null;
 
-            // @todo we need remove by key when we dont have `*` wildcard
             $keys = $this->client->scan($cursor, $pattern);
 
             /**
@@ -85,7 +90,9 @@ class RedisResponseCache implements ResponseCacheInterface
                 $this->client->unlink($this->removeKeyPrefix($keys));
             }
 
-            $this->unlink($cursor, $pattern);
+            if (!is_null($cursor)) {
+                $this->unlink($cursor, $pattern);
+            }
         }
     }
 
