@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Observers;
+namespace App\Observers\Website\PaymentCalculator;
 
 use App\Jobs\Website\ReIndexInventoriesByDealersJob;
 use App\Models\Website\PaymentCalculator\Settings;

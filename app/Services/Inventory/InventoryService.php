@@ -2,11 +2,9 @@
 
 namespace App\Services\Inventory;
 
-use App\Console\Commands\Inventory\ReindexInventoryIndex;
 use App\Contracts\LoggerServiceInterface;
 use App\Exceptions\Inventory\InventoryException;
 use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
-use App\Jobs\Files\DeleteS3FilesJob;
 use App\Jobs\Website\ReIndexInventoriesByDealersJob;
 use App\Models\CRM\Dms\Quickbooks\Bill;
 use App\Models\Inventory\Inventory;
@@ -39,7 +37,6 @@ use App\Repositories\Dms\Customer\InventoryRepository as DmsCustomerInventoryRep
 use App\Services\Export\Inventory\PdfExporter;
 use App\Traits\S3\S3Helper;
 use App\Jobs\Inventory\GenerateOverlayImageJob;
-use App\Services\Inventory\ImageServiceInterface;
 
 /**
  * Class InventoryService

@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
+use App\Models\Inventory\Inventory;
 use App\Repositories\Bulk\Inventory\BulkDownloadRepository;
 use App\Repositories\Bulk\Inventory\BulkDownloadRepositoryInterface;
 use App\Repositories\Bulk\Inventory\BulkUploadRepository;
@@ -78,8 +79,6 @@ use App\Services\Inventory\InventoryAttributeService;
 use App\Services\Inventory\InventoryAttributeServiceInterface;
 use App\Services\Inventory\InventoryService;
 use App\Services\Inventory\InventoryServiceInterface;
-use App\Services\Inventory\InventoryUpdateSource;
-use App\Services\Inventory\InventoryUpdateSourceInterface;
 use App\Services\Inventory\Packages\PackageService;
 use App\Services\Inventory\Packages\PackageServiceInterface;
 use Illuminate\Support\Facades\Redis;
@@ -92,7 +91,6 @@ use Validator;
  */
 class InventoryServiceProvider extends ServiceProvider
 {
-
     public function boot(): void
     {
         Validator::extend('inventory_valid', ValidInventory::class . '@passes');
@@ -108,6 +106,8 @@ class InventoryServiceProvider extends ServiceProvider
         Validator::extend('inventory_quotes_not_exist', QuotesNotExist::class . '@passes');
         Validator::extend('vendor_exists', VendorExists::class . '@passes');
         Validator::extend('payment_uuid_valid', PaymentUUIDValid::class . '@validate');
+
+        $this->bootCacheInvalidationAndSearchSyncing();
     }
 
     public function register(): void
@@ -165,7 +165,23 @@ class InventoryServiceProvider extends ServiceProvider
                 $this->app->make(ResponseCacheKeyInterface::class)
             );
         });
+    }
 
-        $this->app->bind(InventoryUpdateSourceInterface::class, InventoryUpdateSource::class);
+    /**
+     * It will disable cache invalidation and search syncing when `cache.inventory` is false or when the `x-client-id`
+     * request header belongs to an integration process
+     *
+     * @return void
+     */
+    private function bootCacheInvalidationAndSearchSyncing(): void
+    {
+        $clientId = request()->header('x-client-id');
+
+        if (
+            !config('cache.inventory') ||
+            $clientId === config('integrations.inventory_cache_auth.credentials.access_token')
+        ) {
+            Inventory::disableCacheInvalidationAndSearchSyncing();
+        }
     }
 }
