@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Part extends BasePart
 {
     use SoftDeletes;
+
     protected $table = 'textrail_parts';
 
     /**
@@ -89,9 +90,11 @@ class Part extends BasePart
         return env('INDEX_PARTS_TEXTRAIL', 'parts_textrail');
     }
 
-    public function searchable()
+    public static function boot(): void
     {
-       return;
+        parent::boot();
+
+        self::disableSearchSyncing();
     }
 
     public function toSearchableArray(): array
