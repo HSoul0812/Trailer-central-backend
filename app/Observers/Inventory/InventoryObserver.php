@@ -1,41 +1,44 @@
 <?php
 
-namespace App\Observers;
+namespace App\Observers\Inventory;
 
 use App\Models\Inventory\Inventory;
-use App\Services\Inventory\InventoryUpdateSourceInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
 
 class InventoryObserver
 {
-    /**
-     * @var ResponseCacheKeyInterface
-     */
+    /** @var bool will help to determines when cache is enable thus jobs will be dispatched */
+    private static $isCacheInvalidationEnabled = true;
+
+    /** @var ResponseCacheKeyInterface */
     private $cacheKey;
 
-    /**
-     * @var ResponseCacheInterface
-     */
+    /** @var ResponseCacheInterface */
     private $responseCache;
-    /**
-     * @var InventoryUpdateSourceInterface
-     */
-    /**
-     * @var InventoryUpdateSourceInterface
-     */
-    private $updateSource;
 
-    /**
-     * @param ResponseCacheKeyInterface $cacheKey
-     * @param ResponseCacheInterface $responseCache
-     * @param InventoryUpdateSourceInterface $updateSource
-     */
-    public function __construct(ResponseCacheKeyInterface $cacheKey, ResponseCacheInterface $responseCache, InventoryUpdateSourceInterface $updateSource)
+    public function __construct(ResponseCacheKeyInterface $cacheKey, ResponseCacheInterface $responseCache)
     {
         $this->cacheKey = $cacheKey;
         $this->responseCache = $responseCache;
-        $this->updateSource = $updateSource;
+    }
+
+    public static function enableCacheInvalidation(): void
+    {
+        self::$isCacheInvalidationEnabled = true;
+    }
+
+    public static function disableCacheInvalidation():void
+    {
+        self::$isCacheInvalidationEnabled = false;
+    }
+
+    /**
+     * Determine if cache invalidation is enabled
+     */
+    public static function isCacheInvalidationEnabled():bool
+    {
+        return self::$isCacheInvalidationEnabled;
     }
 
     /**
@@ -46,7 +49,7 @@ class InventoryObserver
      */
     public function created(Inventory $inventory)
     {
-        if (config('cache.inventory') && !$this->updateSource->integrations()) {
+        if (self::$isCacheInvalidationEnabled) {
             $this->responseCache->forget($this->cacheKey->deleteByDealer($inventory->dealer_id));
         }
     }
@@ -59,7 +62,7 @@ class InventoryObserver
      */
     public function updated(Inventory $inventory)
     {
-        if (config('cache.inventory') && !$this->updateSource->integrations()) {
+        if (self::$isCacheInvalidationEnabled) {
             $this->responseCache->forget(
                 $this->cacheKey->deleteByDealer($inventory->dealer_id),
                 $this->cacheKey->deleteSingle($inventory->inventory_id)
@@ -75,7 +78,7 @@ class InventoryObserver
      */
     public function deleted(Inventory $inventory)
     {
-        if (config('cache.inventory') && !$this->updateSource->integrations()) {
+        if (self::$isCacheInvalidationEnabled) {
             $this->responseCache->forget(
                 $this->cacheKey->deleteSingleFromCollection($inventory->inventory_id),
                 $this->cacheKey->deleteSingle($inventory->inventory_id)
@@ -91,7 +94,7 @@ class InventoryObserver
      */
     public function restored(Inventory $inventory)
     {
-        if (config('cache.inventory') && !$this->updateSource->integrations()) {
+        if (self::$isCacheInvalidationEnabled) {
             $this->responseCache->forget($this->cacheKey->deleteByDealer($inventory->dealer_id));
         }
     }

@@ -2,22 +2,23 @@
 
 namespace Tests\Integration\Models\Inventory\Inventory;
 
-use App\Domains\Scout\Jobs\ExceptionableMakeSearchable;
 use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
 use App\Models\Inventory\Inventory;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Facades\Config;
+use Laravel\Scout\Jobs\MakeSearchable;
 use Tests\TestCase;
 use RuntimeException;
 
 /**
- * @covers \App\Models\Inventory\Inventory::withoutInvalidationAndSyncingToSearch
+ * @covers \App\Models\Inventory\Inventory::withoutCacheInvalidationAndSearchSyncing
  *
  * @group DW
+ * @group DW_INVENTORY
  * @group DW_BULK
  * @group DW_BULK_INVENTORY
  * @group DW_BULK_UPLOAD_INVENTORY
+ * @group DW_ELASTICSEARCH
  */
 class WithoutInvalidationAndSyncingToSearchTest extends TestCase
 {
@@ -36,24 +37,20 @@ class WithoutInvalidationAndSyncingToSearchTest extends TestCase
      */
     public function testItWillNotDispatchAnyJobAsExpected(): void
     {
-        Inventory::withoutInvalidationAndSyncingToSearch(function () {
+        Inventory::withoutCacheInvalidationAndSearchSyncing(function () {
             $inventory = factory(Inventory::class)->create();
             $inventory->update(['description' => $this->faker->sentence(4)]);
-            $inventory->delete();
+            $inventory->delete(); // delete doesn't trigger jobs for scout
         });
 
         Bus::assertNotDispatched(InvalidateCacheJob::class);
-
-        // we need to fix this, the right class should be `MakeSearchable`
-        Bus::assertNotDispatched(ExceptionableMakeSearchable::class);
+        Bus::assertNotDispatched(MakeSearchable::class);
 
         $inventory = factory(Inventory::class)->create();
         $inventory->update(['description' => $this->faker->sentence(4)]);
-        $inventory->delete();
+        $inventory->delete(); // delete doesn't trigger jobs for scout
 
-        // we need to fix this, the right class should be `MakeSearchable`
-        Bus::assertDispatchedTimes(ExceptionableMakeSearchable::class, 2);
-
+        Bus::assertDispatchedTimes(MakeSearchable::class, 2);
         Bus::assertDispatchedTimes(InvalidateCacheJob::class, 3);
     }
 
@@ -70,14 +67,7 @@ class WithoutInvalidationAndSyncingToSearchTest extends TestCase
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage($expectedExceptionMessage);
 
-        $spy = Config::spy();
-
-        $isCacheEnabled = config('cache.inventory');
-
-        $spy->allows('set')->once()->with('cache.inventory', false);
-        $spy->allows('set')->once()->with('cache.inventory', $isCacheEnabled);
-
-        Inventory::withoutInvalidationAndSyncingToSearch(static function () use ($expectedException) {
+        Inventory::withoutCacheInvalidationAndSearchSyncing(static function () use ($expectedException) {
             throw $expectedException;
         });
     }
@@ -85,8 +75,6 @@ class WithoutInvalidationAndSyncingToSearchTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
-        Config::set('cache.inventory', true);
 
         Bus::fake();
     }

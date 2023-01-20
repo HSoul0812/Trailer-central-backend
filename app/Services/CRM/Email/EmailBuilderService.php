@@ -502,7 +502,9 @@ class EmailBuilderService implements EmailBuilderServiceInterface
         }
 
         // Create Email History Entry
-        return $this->emailhistory->create($builder->getEmailHistoryParams($interaction->interaction_id ?? 0));
+        $email = $this->emailhistory->create($builder->getEmailHistoryParams($interaction->interaction_id ?? 0));
+        sleep(1);
+        return $email;
     }
 
     /**
