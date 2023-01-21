@@ -20,7 +20,6 @@ use App\Repositories\User\DealerLocationMileageFeeRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Repositories\User\GeoLocationRepositoryInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
-use App\Services\ElasticSearch\Cache\RedisResponseCacheKey;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
 use App\Services\ElasticSearch\Cache\UniqueCacheInvalidationInterface;
 use App\Services\File\FileService;
@@ -1099,18 +1098,17 @@ class InventoryService implements InventoryServiceInterface
     public function invalidateCacheAndReindexByDealerIds(array $dealer_ids): void
     {
         $patterns = [];
+
         foreach ($dealer_ids as $dealer_id)
         {
             $patterns[] = $this->responseCacheKey->deleteByDealer($dealer_id);
         }
 
-        if (config('cache.inventory')) {
-            $patterns = $this->uniqueCacheInvalidation->keysWithNoJobs($patterns);
+        $patterns = $this->uniqueCacheInvalidation->keysWithNoJobs($patterns);
 
-            if (count($patterns)) {
-                $this->uniqueCacheInvalidation->createJobsForKeys($patterns);
-                $this->dispatch(new InvalidateCacheJob($patterns));
-            }
+        if (count($patterns)) {
+            $this->uniqueCacheInvalidation->createJobsForKeys($patterns);
+            $this->dispatch(new InvalidateCacheJob($patterns));
         }
 
         $this->dispatch(new ReIndexInventoriesByDealersJob($dealer_ids));
