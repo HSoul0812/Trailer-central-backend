@@ -7,7 +7,6 @@ use App\Jobs\Website\ReIndexInventoriesByDealersJob;
 use App\Models\Inventory\Inventory;
 use App\Models\User\AuthToken;
 use App\Models\User\User;
-use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
@@ -26,22 +25,27 @@ class CacheInvalidationSearchSyncingTest extends TestCase
     /** @var User */
     private $dealer;
 
-    /** @var ResponseCacheKeyInterface */
-    private $cacheKeyService;
+    /** @var AuthToken[] */
+    private $tokens = [];
+
+    /** @var Inventory[] */
+    private $inventories = [];
 
     public function test_it_does_not_dispatch_jobs_when_requests_from_integrations(): void
     {
-        Inventory::disableCacheInvalidationAndSearchSyncing();
+        Config::set('cache.inventory', true); // this should not be consider due the request comes from integration process
 
-        $inventory = Inventory::create(factory(Inventory::class)->make(['dealer_id' => $this->dealer->dealer_id])->toArray());
-        $authToken = factory(AuthToken::class)->create(['user_id' => $this->dealer->dealer_id]);
+        $inventory = $this->getInventoryWithoutTriggerEvents();
+        $authToken = $this->getAuthToken();
+
+        Config::set('integrations.inventory_cache_auth.credentials.access_token', $authToken->access_token);
 
         $newTitle = Str::random(20);
-        $response = $this->withHeaders([
-            'access-token' => $authToken->access_token,
-            'x-client-id' => self::INTEGRATIONS_ACCESS_TOKEN
-        ])
-            ->post('/api/inventory/' . $inventory->inventory_id, ['title' => $newTitle]);
+        $response = $this
+            ->withHeaders([
+                'access-token' => $authToken->access_token
+            ])
+            ->post('/api/inventory/'.$inventory->inventory_id, ['title' => $newTitle]);
 
         $response->assertStatus(200);
 
@@ -49,25 +53,23 @@ class CacheInvalidationSearchSyncingTest extends TestCase
             'inventory_id' => $inventory->inventory_id,
             'title' => $newTitle
         ]);
-
-        $inventory->deleteQuietly();
-        $authToken->delete();
 
         Bus::assertNotDispatched(InvalidateCacheJob::class);
         Bus::assertNotDispatched(MakeSearchable::class);
     }
 
-    public function test_it_dispatch_jobs_when_requests_not_from_integrations(): void
+    public function test_it_doesnt_invalidate_cache_when_cache_is_disabled(): void
     {
-        $authToken = factory(AuthToken::class)->create(['user_id' => $this->dealer->dealer_id]);
+        Config::set('cache.inventory', false);
+
         $inventory = $this->getInventoryWithoutTriggerEvents();
+        $authToken = $this->getAuthToken();
 
         $newTitle = Str::random(20);
 
-        $response = $this->withHeaders([
-            'access-token' => $authToken->access_token
-        ])
-            ->post('/api/inventory/' . $inventory->inventory_id, ['title' => $newTitle]);
+        $response = $this
+            ->withHeaders(['access-token' => $authToken->access_token])
+            ->post('/api/inventory/'.$inventory->inventory_id, ['title' => $newTitle]);
 
         $response->assertStatus(200);
 
@@ -76,28 +78,53 @@ class CacheInvalidationSearchSyncingTest extends TestCase
             'title' => $newTitle
         ]);
 
-        $inventory->deleteQuietly();
-        $authToken->delete();
+        Bus::assertNotDispatched(InvalidateCacheJob::class);
+        Bus::assertDispatchedTimes(MakeSearchable::class, 1); // it should still being indexing
+    }
 
-        Bus::assertDispatched(InvalidateCacheJob::class);
-        Bus::assertDispatched(MakeSearchable::class);
+    public function test_it_dispatch_jobs_when_requests_not_from_integrations(): void
+    {
+        Config::set('cache.inventory', true);
+
+        $inventory = $this->getInventoryWithoutTriggerEvents();
+        $authToken = $this->getAuthToken();
+
+        $newTitle = Str::random(20);
+
+        $response = $this
+            ->withHeaders(['access-token' => $authToken->access_token])
+            ->post('/api/inventory/'.$inventory->inventory_id, ['title' => $newTitle]);
+
+        $response->assertStatus(200);
+
+        $this->assertDatabaseHas(Inventory::getTableName(), [
+            'inventory_id' => $inventory->inventory_id,
+            'title' => $newTitle
+        ]);
+
+        Bus::assertDispatchedTimes(InvalidateCacheJob::class, 2); // this should be fixed to only dispatch it once
+        Bus::assertDispatchedTimes(MakeSearchable::class, 1);
     }
 
     public function test_it_dispatch_jobs_by_dealer_when_direct_endpoint_is_use(): void
     {
+        Config::set('cache.inventory', false); // no matter if cache is disabled, it should invalidate
+
         Config::set('integrations.inventory_cache_auth.credentials.access_token', self::INTEGRATIONS_ACCESS_TOKEN);
 
         Inventory::disableCacheInvalidationAndSearchSyncing();
 
-        $response = $this->withHeaders([
-            'access-token' => self::INTEGRATIONS_ACCESS_TOKEN
-        ])
-            ->post('api/inventory/cache/invalidate/dealer', ['dealer_id' => [$this->dealer->dealer_id]]);
+        $response = $this
+            ->withHeaders(['access-token' => self::INTEGRATIONS_ACCESS_TOKEN])
+            ->post('api/inventory/cache/invalidate/dealer', ['dealer_id' => [
+                $this->dealer->dealer_id,
+                $this->dealer->dealer_id // twice to ensure it still enqueueing only once
+            ]]);
 
         $response->assertStatus(202);
 
-        Bus::assertDispatched(InvalidateCacheJob::class);
-        Bus::assertDispatched(ReIndexInventoriesByDealersJob::class);
+        Bus::assertDispatchedTimes(InvalidateCacheJob::class, 1);
+        Bus::assertDispatchedTimes(ReIndexInventoriesByDealersJob::class, 1);
     }
 
     public function setUp(): void
@@ -106,24 +133,42 @@ class CacheInvalidationSearchSyncingTest extends TestCase
 
         Bus::fake();
 
-        $this->dealer = factory(User::class)->create();
-
-        $this->cacheKeyService = app(ResponseCacheKeyInterface::class);
-
-        Inventory::enableCacheInvalidationAndSearchSyncing();
+        Inventory::withoutCacheInvalidationAndSearchSyncing(function () {
+            $this->dealer = factory(User::class)->create();
+        });
     }
 
     public function tearDown(): void
     {
+        foreach ($this->tokens as $token) {
+            $token->delete();
+        }
+
+        foreach ($this->inventories as $inventory) {
+            $inventory->delete();
+        }
+
         $this->dealer->delete();
 
         parent::tearDown();
     }
 
-    public function getInventoryWithoutTriggerEvents(): Inventory
+    private function getInventoryWithoutTriggerEvents(): Inventory
     {
-        return Inventory::withoutCacheInvalidationAndSearchSyncing(function (): Inventory {
+        $inventory = Inventory::withoutCacheInvalidationAndSearchSyncing(function (): Inventory {
             return Inventory::create(factory(Inventory::class)->make(['dealer_id' => $this->dealer->dealer_id])->toArray());
         });
+
+        $this->inventories[] = $inventory;
+
+        return $inventory;
+    }
+
+    private function getAuthToken(): AuthToken
+    {
+        $token = factory(AuthToken::class)->create(['user_id' => $this->dealer->dealer_id]);
+        $this->tokens[] = $token;
+
+        return $token;
     }
 }

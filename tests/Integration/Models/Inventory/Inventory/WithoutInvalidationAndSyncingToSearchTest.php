@@ -6,6 +6,7 @@ use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
 use App\Models\Inventory\Inventory;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Config;
 use Laravel\Scout\Jobs\MakeSearchable;
 use Tests\TestCase;
 use RuntimeException;
@@ -37,6 +38,8 @@ class WithoutInvalidationAndSyncingToSearchTest extends TestCase
      */
     public function testItWillNotDispatchAnyJobAsExpected(): void
     {
+        Config::set('cache.inventory', true);
+
         Inventory::withoutCacheInvalidationAndSearchSyncing(function () {
             $inventory = factory(Inventory::class)->create();
             $inventory->update(['description' => $this->faker->sentence(4)]);

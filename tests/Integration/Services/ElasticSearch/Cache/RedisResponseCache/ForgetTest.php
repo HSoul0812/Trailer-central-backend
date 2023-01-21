@@ -9,6 +9,7 @@ use App\Services\ElasticSearch\Cache\InventoryResponseRedisCache;
 use App\Services\ElasticSearch\Cache\ResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
 use Mockery;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -37,6 +38,8 @@ class ForgetTest extends TestCase
 
     public function test_it_forgets_by_dealer_when_an_inventory_is_created(): void
     {
+        Inventory::enableCacheInvalidation();
+
         $key = $this->cacheKeyService->deleteByDealer($this->dealer->dealer_id);
         $this->searchResponseCache->expects('forget')->with($key);
 
@@ -74,7 +77,7 @@ class ForgetTest extends TestCase
 
     public function test_it_does_not_forget_if_cache_is_disabled(): void
     {
-        Inventory::disableCacheInvalidationAndSearchSyncing();
+        Inventory::disableCacheInvalidation();
 
         $this->mock(ResponseCacheInterface::class, function ($mock) {
             $mock->shouldNotReceive('forget');
@@ -107,7 +110,7 @@ class ForgetTest extends TestCase
 
         $this->instance(InventoryResponseCacheInterface::class, $inventoryCache);
 
-        Inventory::enableCacheInvalidationAndSearchSyncing();
+        Config::set('cache.inventory', true);
     }
 
     public function tearDown(): void
