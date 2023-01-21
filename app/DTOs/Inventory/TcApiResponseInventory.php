@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\DTOs\Inventory;
 
 use App\Traits\TypedPropertyTrait;
+use App\DTOs\Dealer\PrivateDealerCheck;
 use Illuminate\Contracts\Support\Arrayable;
 use JetBrains\PhpStorm\Pure;
 
@@ -82,6 +83,11 @@ class TcApiResponseInventory
         $obj->pull_type = '';
         $obj->manufacturer = $data['manufacturer'];
         $obj->dealer = $data['dealer'];
+
+        if(!empty($obj->dealer)) {
+            $obj->dealer['is_private'] = (new PrivateDealerCheck())->checkArray($obj->dealer);
+        }
+
         $obj->listing_date = $data['created_at'];
 
         $obj->availability = self::statusToAvailabilityMap[$data['status_id']] ?? '';
