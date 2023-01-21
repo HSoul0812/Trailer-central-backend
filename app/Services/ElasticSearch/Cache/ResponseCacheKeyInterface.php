@@ -21,10 +21,11 @@ interface ResponseCacheKeyInterface
     public function single($inventoryId, $dealerId): string;
 
     /**
-     * @param int $id
+     * @param  int  $id
+     * @param  int  $dealerId
      * @return string
      */
-    public function deleteSingle(int $id): string;
+    public function deleteSingle(int $id, int $dealerId): string;
 
     /**
      * @param int $id
@@ -43,4 +44,16 @@ interface ResponseCacheKeyInterface
      * @return string
      */
     public function deleteSingleByDealer(int $id): string;
+
+    /**
+     * @param string $key
+     * @return bool
+     */
+    public function isSingleKey(string $key): bool;
+
+    /**
+     * @param string $key
+     * @return bool
+     */
+    public function isSearchKey(string $key): bool;
 }
