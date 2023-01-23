@@ -7,7 +7,7 @@ class AddSimpleFeatureFlagTable extends Migration
 {
     public function up(): void
     {
-        // @todo in near feature we could relate the dealers which the feature is enabled
+        // @todo in near future we could relate the dealers with the enabled features
         Schema::create('simple_feature_flag', static function (Blueprint $table) {
             $table->char('code', 32)->primary();
             $table->boolean('is_enabled')->default(false)->index('feature_flag_index_is_enabled');
