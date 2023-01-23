@@ -97,12 +97,18 @@ trait InventorySearchable
      */
     public static function withoutCacheInvalidationAndSearchSyncing(callable $callback)
     {
+        $config = config('cache.inventory');
+
         self::disableCacheInvalidationAndSearchSyncing();
 
         try {
             return $callback();
         } finally {
-            self::enableCacheInvalidationAndSearchSyncing();
+            if ($config) {
+                self::enableCacheInvalidation();
+            }
+
+            self::enableSearchSyncing();
         }
     }
 
@@ -116,5 +122,41 @@ trait InventorySearchable
     {
         self::enableSearchSyncing();
         InventoryObserver::enableCacheInvalidation();
+    }
+
+    /**
+     * To avoid to dispatch jobs for invalidation cache
+     *
+     * @param  callable  $callback
+     * @return mixed
+     */
+    public static function withoutCacheInvalidation(callable $callback)
+    {
+        $config = config('cache.inventory');
+
+        self::disableCacheInvalidation();
+
+        try {
+            return $callback();
+        } finally {
+            if ($config) {
+                self::enableCacheInvalidation();
+            }
+        }
+    }
+
+    public static function disableCacheInvalidation(): void
+    {
+        InventoryObserver::disableCacheInvalidation();
+    }
+
+    public static function enableCacheInvalidation(): void
+    {
+        InventoryObserver::enableCacheInvalidation();
+    }
+
+    public static function isCacheInvalidationEnabled(): bool
+    {
+        return InventoryObserver::isCacheInvalidationEnabled();
     }
 }

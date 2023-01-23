@@ -20,9 +20,6 @@ class InventoryCacheController extends RestfulControllerV2
         $this->middleware('inventory.cache.permission');
 
         $this->inventoryService = $inventoryService;
-
-        // to ensure it will always enabled for this particular controller
-        Inventory::enableCacheInvalidationAndSearchSyncing();
     }
 
     /**
@@ -33,6 +30,9 @@ class InventoryCacheController extends RestfulControllerV2
      */
     public function invalidateByDealer(Request $request)
     {
+        // to ensure it will always enabled for this particular controller
+        Inventory::enableCacheInvalidationAndSearchSyncing();
+
         $request = new InvalidateByDealerRequest($request->all());
 
         if ($request->validate()) {
