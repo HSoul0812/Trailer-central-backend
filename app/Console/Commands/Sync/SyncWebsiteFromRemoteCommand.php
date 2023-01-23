@@ -19,7 +19,6 @@ use App\Models\Website\PaymentCalculator\Settings as PaymentCalculatorSettings;
 use App\Models\Website\Website;
 use App\Services\ElasticSearch\Cache\RedisResponseCacheKey;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 
 class SyncWebsiteFromRemoteCommand extends AbstractSyncFromRemoteCommand
@@ -73,8 +72,7 @@ class SyncWebsiteFromRemoteCommand extends AbstractSyncFromRemoteCommand
 
         DB::transaction(function () use ($dealer, $website) {
             // to dispatch fewer jobs
-            Inventory::disableSearchSyncing();
-            Config::set('cache.inventory', false);
+            Inventory::disableCacheInvalidationAndSearchSyncing();
 
             $this->unguard();
 

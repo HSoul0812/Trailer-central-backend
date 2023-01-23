@@ -3,10 +3,11 @@
 namespace Tests\Integration\Models\Inventory\Inventory;
 
 use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
+use App\Models\FeatureFlag;
 use App\Models\Inventory\Inventory;
+use App\Repositories\FeatureFlagRepositoryInterface;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Facades\Config;
 use Laravel\Scout\Jobs\MakeSearchable;
 use Tests\TestCase;
 use RuntimeException;
@@ -38,7 +39,9 @@ class WithoutInvalidationAndSyncingToSearchTest extends TestCase
      */
     public function testItWillNotDispatchAnyJobAsExpected(): void
     {
-        Config::set('cache.inventory', true);
+        app(FeatureFlagRepositoryInterface::class)->set(
+            new FeatureFlag(['code' => 'inventory-sdk-cache', 'is_enabled' => true])
+        );
 
         Inventory::withoutCacheInvalidationAndSearchSyncing(function () {
             $inventory = factory(Inventory::class)->create();

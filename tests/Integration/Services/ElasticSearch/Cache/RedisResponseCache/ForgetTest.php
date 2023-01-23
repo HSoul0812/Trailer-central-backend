@@ -2,14 +2,17 @@
 
 namespace Tests\Integration\Services\ElasticSearch\Cache\RedisResponseCache;
 
+use App\Models\FeatureFlag;
 use App\Models\Inventory\Inventory;
 use App\Models\User\User;
+//use App\Repositories\FeatureFlagRepository;
+use App\Repositories\FeatureFlagRepositoryInterface;
 use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\InventoryResponseRedisCache;
 use App\Services\ElasticSearch\Cache\ResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
 use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Facades\Config;
+//use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
 use Mockery;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -110,7 +113,9 @@ class ForgetTest extends TestCase
 
         $this->instance(InventoryResponseCacheInterface::class, $inventoryCache);
 
-        Config::set('cache.inventory', true);
+        app(FeatureFlagRepositoryInterface::class)->set(
+            new FeatureFlag(['code' => 'inventory-sdk-cache', 'is_enabled' => true])
+        );
     }
 
     public function tearDown(): void
