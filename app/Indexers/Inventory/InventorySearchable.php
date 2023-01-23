@@ -5,6 +5,7 @@ namespace App\Indexers\Inventory;
 use App\Indexers\Searchable;
 use App\Indexers\WithIndexConfigurator;
 use App\Observers\Inventory\InventoryObserver;
+use App\Repositories\FeatureFlagRepositoryInterface;
 use Exception;
 
 /**
@@ -97,14 +98,14 @@ trait InventorySearchable
      */
     public static function withoutCacheInvalidationAndSearchSyncing(callable $callback)
     {
-        $config = config('cache.inventory');
+        $isCacheInvalidationEnabled = app(FeatureFlagRepositoryInterface::class)->isEnabled('inventory-sdk-cache');
 
         self::disableCacheInvalidationAndSearchSyncing();
 
         try {
             return $callback();
         } finally {
-            if ($config) {
+            if ($isCacheInvalidationEnabled) {
                 self::enableCacheInvalidation();
             }
 
@@ -132,14 +133,14 @@ trait InventorySearchable
      */
     public static function withoutCacheInvalidation(callable $callback)
     {
-        $config = config('cache.inventory');
+        $isCacheInvalidationEnabled = app(FeatureFlagRepositoryInterface::class)->isEnabled('inventory-sdk-cache');
 
         self::disableCacheInvalidation();
 
         try {
             return $callback();
         } finally {
-            if ($config) {
+            if ($isCacheInvalidationEnabled) {
                 self::enableCacheInvalidation();
             }
         }
