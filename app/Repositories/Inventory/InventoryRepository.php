@@ -525,6 +525,32 @@ class InventoryRepository implements InventoryRepositoryInterface
     }
 
     /**
+     * @param Inventory $inventory
+     * @param array $newImages
+     * @return array
+     */
+    public function createInventoryImages(Inventory $inventory, array $newImages): array
+    {
+        $inventoryImageObjs = $this->createImages($newImages);
+        $inventory->inventoryImages()->saveMany($inventoryImageObjs);
+
+        return $inventoryImageObjs;
+    }
+
+    /**
+     * @param Inventory $inventory
+     * @param array $newFiles
+     * @return array
+     */
+    public function createInventoryFiles(Inventory $inventory, array $newFiles): array
+    {
+        $inventoryFileObjs = $this->createFiles($newFiles);
+        $inventory->inventoryFiles()->saveMany($inventoryFileObjs);
+
+        return $inventoryFileObjs;
+    }
+
+    /**
      * Gets the query cursor to avoid memory leaks
      *
      * @param array $params
