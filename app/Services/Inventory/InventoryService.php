@@ -1038,7 +1038,7 @@ class InventoryService implements InventoryServiceInterface
     private function fixNonAsciiChars(string $description)
     {
 
-        $description = preg_replace('/(\\?\*){2,}/', '**', $description);
+        //$description = preg_replace('/(\\?\*){2,}/', '**', $description);
         $description = preg_replace('/(\\?_)+/', '_', $description);
 
         // Fix 0xa0 or nbsp
@@ -1052,15 +1052,16 @@ class InventoryService implements InventoryServiceInterface
         $description = preg_replace('/\xB4/', "'", $description);
         $description = preg_replace('/\x27/', "'", $description);
 
-        $description = preg_replace('/\x93/', '"', $description);
-        $description = preg_replace('/\x94/', '"', $description);
+        //$description = preg_replace('/\x93/', '"', $description);
+        //$description = preg_replace('/\x94/', '"', $description);
+
         $description = preg_replace('/”/', '"', $description);
         $description = preg_replace('/’/', "'", $description);
 
         $description = preg_replace('/©/', "Copyright", $description);
         $description = preg_replace('/®/', "Registered", $description);
 
-        $description = preg_replace('/[[:^print:]]/', ' ', $description);
+        //$description = preg_replace('/[[:^print:]]/', ' ', $description);
 
         preg_match('/<ul>(.*?)<\/ul>/s', $description, $match);
         if (!empty($match)) {
