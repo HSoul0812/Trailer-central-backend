@@ -8,6 +8,7 @@ use App\Repositories\Bulk\Inventory\BulkDownloadRepository;
 use App\Repositories\Bulk\Inventory\BulkDownloadRepositoryInterface;
 use App\Repositories\Bulk\Inventory\BulkUploadRepository;
 use App\Repositories\Bulk\Inventory\BulkUploadRepositoryInterface;
+use App\Repositories\FeatureFlagRepositoryInterface;
 use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\InventoryResponseRedisCache;
 use App\Services\ElasticSearch\Cache\RedisResponseCacheKey;
@@ -172,7 +173,9 @@ class InventoryServiceProvider extends ServiceProvider
      */
     private function bootCacheInvalidation(): void
     {
-        if (config('cache.inventory')) {
+        $repo = app(FeatureFlagRepositoryInterface::class);
+
+        if ($repo->isEnabled('inventory-sdk-cache')) {
             Inventory::enableCacheInvalidation();
         }
     }
