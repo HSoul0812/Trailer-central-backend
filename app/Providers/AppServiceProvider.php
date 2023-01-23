@@ -29,6 +29,8 @@ use App\Repositories\Dms\Pos\RegisterRepository;
 use App\Repositories\Dms\Pos\RegisterRepositoryInterface;
 use App\Repositories\Dms\StockRepository;
 use App\Repositories\Dms\StockRepositoryInterface;
+use App\Repositories\FeatureFlagRepository;
+use App\Repositories\FeatureFlagRepositoryInterface;
 use App\Repositories\Feed\Mapping\Incoming\ApiEntityReferenceRepository;
 use App\Repositories\Feed\Mapping\Incoming\ApiEntityReferenceRepositoryInterface;
 use App\Repositories\Dms\PurchaseOrder\PurchaseOrderReceiptRepository;
@@ -326,6 +328,8 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(SubscriptionRepositoryInterface::class, SubscriptionRepository::class);
         $this->app->bind(StripeServiceInterface::class, StripeService::class);
+
+        $this->app->bind(FeatureFlagRepositoryInterface::class, FeatureFlagRepository::class);
 
         $this->app->register(PhoneServiceProvider::class);
     }
