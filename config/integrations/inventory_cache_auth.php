@@ -6,7 +6,7 @@
   |---------------------------------------------------------------------------------------------------------------------
   |
   | `integration_client_id` is used to identified every single request coming from integration processes, so the backend
-  | is able to avoid perform certain process like dispatching many jobs
+  | is able to avoid performing certain process like dispatching many Scout-ES/Cache-invalidation jobs
   |
   */
 return [
