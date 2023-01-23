@@ -3,6 +3,7 @@
 namespace App\Services\ElasticSearch\Cache;
 
 use App\Http\Clients\ElasticSearch\ElasticSearchQueryResult;
+use Illuminate\Support\Str;
 
 class RedisResponseCacheKey implements ResponseCacheKeyInterface
 {
@@ -43,12 +44,13 @@ class RedisResponseCacheKey implements ResponseCacheKeyInterface
     }
 
     /**
-     * @param int $id
+     * @param  int  $id
+     * @param  int  $dealerId
      * @return string
      */
-    public function deleteSingle(int $id): string
+    public function deleteSingle(int $id, int $dealerId): string
     {
-        return sprintf('*inventories.single:%d*', $id);
+        return sprintf('*inventories.single:%d:-dealer:%d', $id, $dealerId);
     }
 
     /**
@@ -78,28 +80,21 @@ class RedisResponseCacheKey implements ResponseCacheKeyInterface
         return sprintf('*inventories.single:*:-dealer:%d', $id);
     }
 
-    public static function humanReadable(string $pattern): string
+    /**
+     * @param string $key
+     * @return bool
+     */
+    public function isSingleKey(string $key): bool
     {
-        if ($pattern === '*inventories.*') {
-            return 'delete-everything';
-        }
+        return Str::contains($key, 'inventories.single');
+    }
 
-        if (preg_match('/\*inventories\.single:\d+.*$/s', $pattern)) {
-            return 'delete-single';
-        }
-
-        if (preg_match('/\*inventories\..*_\d*_.*$/s', $pattern)) {
-            return 'delete-single-from-collection';
-        }
-
-        if (preg_match('/\*inventories\..*_dealer:\d*_.*$/s', $pattern)) {
-            return 'delete-by-dealer';
-        }
-
-        if (preg_match('/\*inventories\.single:\*:-dealer:\d.*$/s', $pattern)) {
-            return 'delete-single-by-dealer';
-        }
-
-        return 'unknown-pattern';
+    /**
+     * @param string $key
+     * @return bool
+     */
+    public function isSearchKey(string $key): bool
+    {
+        return !$this->isSingleKey($key);
     }
 }

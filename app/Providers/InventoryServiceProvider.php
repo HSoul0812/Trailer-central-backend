@@ -8,9 +8,9 @@ use App\Repositories\Bulk\Inventory\BulkDownloadRepository;
 use App\Repositories\Bulk\Inventory\BulkDownloadRepositoryInterface;
 use App\Repositories\Bulk\Inventory\BulkUploadRepository;
 use App\Repositories\Bulk\Inventory\BulkUploadRepositoryInterface;
-use App\Services\ElasticSearch\Cache\RedisResponseCache;
+use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
+use App\Services\ElasticSearch\Cache\InventoryResponseRedisCache;
 use App\Services\ElasticSearch\Cache\RedisResponseCacheKey;
-use App\Services\ElasticSearch\Cache\ResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
 use App\Services\ElasticSearch\Cache\UniqueCacheInvalidation;
 use App\Services\ElasticSearch\Cache\UniqueCacheInvalidationInterface;
@@ -107,7 +107,7 @@ class InventoryServiceProvider extends ServiceProvider
         Validator::extend('vendor_exists', VendorExists::class . '@passes');
         Validator::extend('payment_uuid_valid', PaymentUUIDValid::class . '@validate');
 
-        $this->bootCacheInvalidationAndSearchSyncing();
+        $this->bootCacheInvalidation();
     }
 
     public function register(): void
@@ -156,32 +156,24 @@ class InventoryServiceProvider extends ServiceProvider
             return new UniqueCacheInvalidation(Redis::connection('inventory-job-cache')->client());
         });
 
-        $this->app->bindMethod(InvalidateCacheJob::class . '@handle', function (InvalidateCacheJob $job): void {
-            $job->handle($this->app->make(ResponseCacheInterface::class), $this->app->make(UniqueCacheInvalidationInterface::class));
-        });
+        $this->app->bind(InventoryResponseCacheInterface::class, InventoryResponseRedisCache::class);
 
-        $this->app->bind(ResponseCacheInterface::class, function (): RedisResponseCache {
-            return new RedisResponseCache(
-                Redis::connection('sdk-cache')->client(),
-                $this->app->make(UniqueCacheInvalidationInterface::class)
+        $this->app->bindMethod(InvalidateCacheJob::class . '@handle', function (InvalidateCacheJob $job): void {
+            $job->handle(
+                $this->app->make(InventoryResponseCacheInterface::class),
+                $this->app->make(UniqueCacheInvalidationInterface::class),
+                $this->app->make(ResponseCacheKeyInterface::class)
             );
         });
     }
 
     /**
-     * It will disable cache invalidation and search syncing when `cache.inventory` is false or when the `x-client-id`
-     * request header belongs to an integration process
-     *
      * @return void
      */
-    private function bootCacheInvalidationAndSearchSyncing(): void
+    private function bootCacheInvalidation(): void
     {
-        $clientId = request()->header('x-client-id');
-
-        if (!config('cache.inventory') ||
-            $clientId === config('integrations.inventory_cache_auth.credentials.access_token')
-        ) {
-            Inventory::disableCacheInvalidationAndSearchSyncing();
+        if (config('cache.inventory')) {
+            Inventory::enableCacheInvalidation();
         }
     }
 }

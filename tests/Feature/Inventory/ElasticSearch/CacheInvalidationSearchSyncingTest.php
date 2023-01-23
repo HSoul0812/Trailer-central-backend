@@ -7,8 +7,6 @@ use App\Jobs\Website\ReIndexInventoriesByDealersJob;
 use App\Models\Inventory\Inventory;
 use App\Models\User\AuthToken;
 use App\Models\User\User;
-use App\Services\ElasticSearch\Cache\ResponseCacheInterface;
-use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
@@ -16,9 +14,6 @@ use Laravel\Scout\Jobs\MakeSearchable;
 use Tests\TestCase;
 
 /**
- * This is a real mix of tests cases, it has feature cases, integration cases, and why not, it has unit cases.
- * All in a single one, Talk to Mr. Oduro to understand why.
- *
  * @group DW
  * @group DW_INVENTORY
  * @group DW_ELASTICSEARCH
@@ -30,78 +25,26 @@ class CacheInvalidationSearchSyncingTest extends TestCase
     /** @var User */
     private $dealer;
 
-    /** @var ResponseCacheKeyInterface */
-    private $cacheKeyService;
+    /** @var AuthToken[] */
+    private $tokens = [];
 
-    public function test_it_forgets_by_dealer_when_an_inventory_is_created(): void
-    {
-        $this->mock(ResponseCacheInterface::class, function ($mock) {
-            $key = $this->cacheKeyService->deleteByDealer($this->dealer->dealer_id);
-            $mock->shouldReceive('forget')->once()->with($key);
-        });
-
-        $inventory = factory(Inventory::class)->create(['dealer_id' => $this->dealer->dealer_id]);
-        $inventory->deleteQuietly();
-    }
-
-    public function test_it_forgets_by_dealer_and_by_single_when_an_inventory_is_updated(): void
-    {
-        $inventory = Inventory::create(factory(Inventory::class)->make(['dealer_id' => $this->dealer->dealer_id])->toArray());
-
-        $this->mock(ResponseCacheInterface::class, function ($mock) use ($inventory) {
-            $dealerKey = $this->cacheKeyService->deleteByDealer($this->dealer->dealer_id);
-            $singleKey = $this->cacheKeyService->deleteSingle($inventory->inventory_id);
-
-            $mock->shouldReceive('forget')->once()->with($dealerKey, $singleKey);
-        });
-
-        $inventory->update(['title' => Str::random(10)]);
-
-        $inventory->deleteQuietly();
-    }
-
-    public function test_it_forgets_by_single_in_collection_and_by_single_when_an_inventory_is_deleted(): void
-    {
-        $inventory = Inventory::create(factory(Inventory::class)->make(['dealer_id' => $this->dealer->dealer_id])->toArray());
-
-        $this->mock(ResponseCacheInterface::class, function ($mock) use ($inventory) {
-            $singleInCollectionKey = $this->cacheKeyService->deleteSingleFromCollection($inventory->inventory_id);
-            $singleKey = $this->cacheKeyService->deleteSingle($inventory->inventory_id);
-            $mock->shouldReceive('forget')->once()->with($singleInCollectionKey, $singleKey);
-        });
-
-        $inventory->delete();
-    }
-
-    public function test_it_does_not_forget_if_cache_is_disabled(): void
-    {
-        Inventory::disableCacheInvalidationAndSearchSyncing();
-
-        $this->mock(ResponseCacheInterface::class, function ($mock) {
-            $mock->shouldNotReceive('forget');
-        });
-
-        $inventory = factory(Inventory::class)->create(['dealer_id' => $this->dealer->dealer_id]);
-        $inventory->update(['title' => Str::random(10)]);
-        $inventory->delete();
-    }
+    /** @var Inventory[] */
+    private $inventories = [];
 
     public function test_it_does_not_dispatch_jobs_when_requests_from_integrations(): void
     {
-        Inventory::disableCacheInvalidationAndSearchSyncing();
+        Config::set('cache.inventory', true); // this should not be consider due the request comes from integration process
 
-        $this->mock(ResponseCacheInterface::class, function ($mock) {
-            $mock->shouldNotReceive('forget');
-        });
+        $inventory = $this->getInventoryWithoutTriggerEvents();
+        $authToken = $this->getAuthToken();
 
-        $inventory = Inventory::create(factory(Inventory::class)->make(['dealer_id' => $this->dealer->dealer_id])->toArray());
-        $authToken = factory(AuthToken::class)->create(['user_id' => $this->dealer->dealer_id]);
+        Config::set('integrations.inventory_cache_auth.credentials.access_token', $authToken->access_token);
 
         $newTitle = Str::random(20);
-        $response = $this->withHeaders([
-            'access-token' => $authToken->access_token,
-            'x-client-id' => self::INTEGRATIONS_ACCESS_TOKEN
-        ])
+        $response = $this
+            ->withHeaders([
+                'access-token' => $authToken->access_token
+            ])
             ->post('/api/inventory/'.$inventory->inventory_id, ['title' => $newTitle]);
 
         $response->assertStatus(200);
@@ -110,31 +53,22 @@ class CacheInvalidationSearchSyncingTest extends TestCase
             'inventory_id' => $inventory->inventory_id,
             'title' => $newTitle
         ]);
-
-        $inventory->deleteQuietly();
-        $authToken->delete();
 
         Bus::assertNotDispatched(InvalidateCacheJob::class);
         Bus::assertNotDispatched(MakeSearchable::class);
     }
 
-    public function test_it_dispatch_jobs_when_requests_not_from_integrations(): void
+    public function test_it_doesnt_invalidate_cache_when_cache_is_disabled(): void
     {
-        $inventory = Inventory::create(factory(Inventory::class)->make(['dealer_id' => $this->dealer->dealer_id])->toArray());
+        Config::set('cache.inventory', false);
 
-        $this->mock(ResponseCacheInterface::class, function ($mock) use ($inventory) {
-            $dealerKey = $this->cacheKeyService->deleteByDealer($this->dealer->dealer_id);
-            $singleKey = $this->cacheKeyService->deleteSingle($inventory->inventory_id);
-
-            $mock->shouldReceive('forget')->once()->with($dealerKey, $singleKey);
-        });
-
-        $authToken = factory(AuthToken::class)->create(['user_id' => $this->dealer->dealer_id]);
+        $inventory = $this->getInventoryWithoutTriggerEvents();
+        $authToken = $this->getAuthToken();
 
         $newTitle = Str::random(20);
-        $response = $this->withHeaders([
-            'access-token' => $authToken->access_token
-        ])
+
+        $response = $this
+            ->withHeaders(['access-token' => $authToken->access_token])
             ->post('/api/inventory/'.$inventory->inventory_id, ['title' => $newTitle]);
 
         $response->assertStatus(200);
@@ -144,28 +78,53 @@ class CacheInvalidationSearchSyncingTest extends TestCase
             'title' => $newTitle
         ]);
 
-        $inventory->deleteQuietly();
-        $authToken->delete();
+        Bus::assertNotDispatched(InvalidateCacheJob::class);
+        Bus::assertDispatchedTimes(MakeSearchable::class, 1); // it should still being indexing
+    }
 
-        Bus::assertDispatched(InvalidateCacheJob::class);
-        Bus::assertDispatched(MakeSearchable::class);
+    public function test_it_dispatch_jobs_when_requests_not_from_integrations(): void
+    {
+        Config::set('cache.inventory', true);
+
+        $inventory = $this->getInventoryWithoutTriggerEvents();
+        $authToken = $this->getAuthToken();
+
+        $newTitle = Str::random(20);
+
+        $response = $this
+            ->withHeaders(['access-token' => $authToken->access_token])
+            ->post('/api/inventory/'.$inventory->inventory_id, ['title' => $newTitle]);
+
+        $response->assertStatus(200);
+
+        $this->assertDatabaseHas(Inventory::getTableName(), [
+            'inventory_id' => $inventory->inventory_id,
+            'title' => $newTitle
+        ]);
+
+        Bus::assertDispatchedTimes(InvalidateCacheJob::class, 2); // this should be fixed to only dispatch it once
+        Bus::assertDispatchedTimes(MakeSearchable::class, 1);
     }
 
     public function test_it_dispatch_jobs_by_dealer_when_direct_endpoint_is_use(): void
     {
+        Config::set('cache.inventory', false); // no matter if cache is disabled, it should invalidate
+
         Config::set('integrations.inventory_cache_auth.credentials.access_token', self::INTEGRATIONS_ACCESS_TOKEN);
 
         Inventory::disableCacheInvalidationAndSearchSyncing();
 
-        $response = $this->withHeaders([
-            'access-token' => self::INTEGRATIONS_ACCESS_TOKEN
-        ])
-            ->post('api/inventory/cache/invalidate/dealer', ['dealer_id' => [$this->dealer->dealer_id]]);
+        $response = $this
+            ->withHeaders(['access-token' => self::INTEGRATIONS_ACCESS_TOKEN])
+            ->post('api/inventory/cache/invalidate/dealer', ['dealer_id' => [
+                $this->dealer->dealer_id,
+                $this->dealer->dealer_id // twice to ensure it still enqueueing only once
+            ]]);
 
         $response->assertStatus(202);
 
-        Bus::assertDispatched(InvalidateCacheJob::class);
-        Bus::assertDispatched(ReIndexInventoriesByDealersJob::class);
+        Bus::assertDispatchedTimes(InvalidateCacheJob::class, 1);
+        Bus::assertDispatchedTimes(ReIndexInventoriesByDealersJob::class, 1);
     }
 
     public function setUp(): void
@@ -174,16 +133,42 @@ class CacheInvalidationSearchSyncingTest extends TestCase
 
         Bus::fake();
 
-        $this->dealer = factory(User::class)->create();
-        $this->cacheKeyService = app(ResponseCacheKeyInterface::class);
-
-        Inventory::enableCacheInvalidationAndSearchSyncing();
+        Inventory::withoutCacheInvalidationAndSearchSyncing(function () {
+            $this->dealer = factory(User::class)->create();
+        });
     }
 
     public function tearDown(): void
     {
+        foreach ($this->tokens as $token) {
+            $token->delete();
+        }
+
+        foreach ($this->inventories as $inventory) {
+            $inventory->delete();
+        }
+
         $this->dealer->delete();
 
         parent::tearDown();
+    }
+
+    private function getInventoryWithoutTriggerEvents(): Inventory
+    {
+        $inventory = Inventory::withoutCacheInvalidationAndSearchSyncing(function (): Inventory {
+            return Inventory::create(factory(Inventory::class)->make(['dealer_id' => $this->dealer->dealer_id])->toArray());
+        });
+
+        $this->inventories[] = $inventory;
+
+        return $inventory;
+    }
+
+    private function getAuthToken(): AuthToken
+    {
+        $token = factory(AuthToken::class)->create(['user_id' => $this->dealer->dealer_id]);
+        $this->tokens[] = $token;
+
+        return $token;
     }
 }

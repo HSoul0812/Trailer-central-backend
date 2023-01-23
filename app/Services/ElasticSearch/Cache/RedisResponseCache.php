@@ -4,6 +4,7 @@ namespace App\Services\ElasticSearch\Cache;
 
 use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
 use Illuminate\Foundation\Bus\DispatchesJobs;
+use Illuminate\Support\Str;
 use \Redis as PhpRedis;
 
 class RedisResponseCache implements ResponseCacheInterface
@@ -52,7 +53,6 @@ class RedisResponseCache implements ResponseCacheInterface
         $keyPatterns = $this->uniqueCacheInvalidation->keysWithNoJobs($keyPatterns);
 
         if (count($keyPatterns)) {
-
             $this->uniqueCacheInvalidation->createJobsForKeys($keyPatterns);
             $this->dispatch(new InvalidateCacheJob($keyPatterns));
         }
@@ -70,6 +70,11 @@ class RedisResponseCache implements ResponseCacheInterface
     public function invalidate(string ...$keyPatterns): void
     {
         foreach ($keyPatterns as $pattern) {
+            if (Str::startsWith($pattern, '*') && (substr_count($pattern, '*') == 1)) {
+                $this->client->unlink(Str::replaceFirst('*', '', $pattern));
+                continue;
+            }
+
             /** @var null|int $cursor */
             $cursor = null;
 
@@ -85,7 +90,9 @@ class RedisResponseCache implements ResponseCacheInterface
                 $this->client->unlink($this->removeKeyPrefix($keys));
             }
 
-            $this->unlink($cursor, $pattern);
+            if (!is_null($cursor)) {
+                $this->unlink($cursor, $pattern);
+            }
         }
     }
 

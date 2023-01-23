@@ -3,6 +3,7 @@
 namespace App\Observers\Inventory;
 
 use App\Models\Inventory\InventoryImage;
+use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
 
@@ -16,16 +17,22 @@ class InventoryImageObserver
     /**
      * @var ResponseCacheInterface
      */
-    private $responseCache;
+    private $singleResponseCache;
+
+    /**
+     * @var ResponseCacheInterface
+     */
+    private $searchResponseCache;
 
     /**
      * @param ResponseCacheKeyInterface $cacheKey
-     * @param ResponseCacheInterface $responseCache
+     * @param InventoryResponseCacheInterface $responseCache
      */
-    public function __construct(ResponseCacheKeyInterface $cacheKey, ResponseCacheInterface $responseCache)
+    public function __construct(ResponseCacheKeyInterface $cacheKey, InventoryResponseCacheInterface $responseCache)
     {
         $this->cacheKey = $cacheKey;
-        $this->responseCache = $responseCache;
+        $this->singleResponseCache = $responseCache->single();
+        $this->searchResponseCache = $responseCache->search();
     }
 
     /**
@@ -59,10 +66,8 @@ class InventoryImageObserver
     public function deleted(InventoryImage $image)
     {
         if (config('cache.inventory')) {
-            $this->responseCache->forget(
-                $this->cacheKey->deleteSingleFromCollection($image->inventory_id),
-                $this->cacheKey->deleteSingle($image->inventory_id)
-            );
+            $this->searchResponseCache->forget($this->cacheKey->deleteSingleFromCollection($image->inventory_id));
+            $this->singleResponseCache->forget($this->cacheKey->deleteSingle($image->inventory_id, $image->inventory->dealer_id));
         }
     }
 
