@@ -38,21 +38,26 @@ class CacheInvalidationSearchSyncingTest extends TestCase
         $inventory = $this->getInventoryWithoutTriggerEvents();
         $authToken = $this->getAuthToken();
 
-        Config::set('integrations.inventory_cache_auth.credentials.access_token', $authToken->access_token);
+        $integrationClientId =  md5(Str::random(20));
 
-        $newTitle = Str::random(20);
-        $response = $this
-            ->withHeaders([
-                'access-token' => $authToken->access_token
-            ])
-            ->post('/api/inventory/'.$inventory->inventory_id, ['title' => $newTitle]);
+        Config::set('integrations.inventory_cache_auth.credentials.integration_client_id', $integrationClientId);
 
-        $response->assertStatus(200);
+        for ($x = 0; $x < 10; $x++) {
+            $newTitle = Str::random(20);
+            $response = $this
+                ->withHeaders([
+                    'access-token' => $authToken->access_token,
+                    'x-client-id' => $integrationClientId
+                ])
+                ->post('/api/inventory/'.$inventory->inventory_id, ['title' => $newTitle]);
 
-        $this->assertDatabaseHas(Inventory::getTableName(), [
-            'inventory_id' => $inventory->inventory_id,
-            'title' => $newTitle
-        ]);
+            $response->assertStatus(200);
+
+            $this->assertDatabaseHas(Inventory::getTableName(), [
+                'inventory_id' => $inventory->inventory_id,
+                'title' => $newTitle
+            ]);
+        }
 
         Bus::assertNotDispatched(InvalidateCacheJob::class);
         Bus::assertNotDispatched(MakeSearchable::class);
