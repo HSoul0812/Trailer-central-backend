@@ -2,6 +2,7 @@
 
 namespace App\Observers\Inventory;
 
+use App\Models\Inventory\Inventory;
 use App\Models\Inventory\InventoryImage;
 use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheInterface;
@@ -65,7 +66,7 @@ class InventoryImageObserver
      */
     public function deleted(InventoryImage $image)
     {
-        if (config('cache.inventory')) {
+        if (Inventory::isCacheInvalidationEnabled()) {
             $this->searchResponseCache->forget($this->cacheKey->deleteSingleFromCollection($image->inventory_id));
             $this->singleResponseCache->forget($this->cacheKey->deleteSingle($image->inventory_id, $image->inventory->dealer_id));
         }

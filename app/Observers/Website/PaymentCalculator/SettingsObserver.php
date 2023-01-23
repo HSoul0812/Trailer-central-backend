@@ -3,6 +3,7 @@
 namespace App\Observers\Website\PaymentCalculator;
 
 use App\Jobs\Website\ReIndexInventoriesByDealersJob;
+use App\Models\Inventory\Inventory;
 use App\Models\Website\PaymentCalculator\Settings;
 use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheInterface;
@@ -68,13 +69,13 @@ class SettingsObserver
     {
         $settings->load('website');
 
-        if (config('cache.inventory')) {
+        if (Inventory::isCacheInvalidationEnabled()) {
             $website = $settings->website;
             $this->searchResponseCache->forget($this->cacheKey->deleteByDealer($website->dealer_id));
             $this->singleResponseCache->forget($this->cacheKey->deleteSingleByDealer($website->dealer_id));
         }
 
-        if ($dealerId = $settings->website->dealer_id) {
+        if (($dealerId = $settings->website->dealer_id)) {
             dispatch(new ReIndexInventoriesByDealersJob([$dealerId]));
         }
     }
