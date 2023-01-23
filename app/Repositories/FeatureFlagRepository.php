@@ -35,6 +35,16 @@ class FeatureFlagRepository implements FeatureFlagRepositoryInterface
         return $this->getAll()->get($code);
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function set(FeatureFlag $feature): void
+    {
+        $this->getAll(); // to ensure there is a collection
+
+        self::$list->offsetSet($feature->code, $feature);
+    }
+
     public function isEnabled(string $code): bool
     {
         /** @var FeatureFlag|null $feature */

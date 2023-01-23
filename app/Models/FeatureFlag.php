@@ -57,7 +57,7 @@ class FeatureFlag extends Model
     protected $keyType = 'string';
 
     /** @var array<string> */
-    protected $fillable = ['code'];
+    protected $fillable = ['code', 'is_enabled'];
 
     /** @var array<string,string> */
     protected $casts = ['is_enabled' => 'boolean'];

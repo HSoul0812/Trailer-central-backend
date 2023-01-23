@@ -329,7 +329,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(SubscriptionRepositoryInterface::class, SubscriptionRepository::class);
         $this->app->bind(StripeServiceInterface::class, StripeService::class);
 
-        $this->app->bind(FeatureFlagRepositoryInterface::class, FeatureFlagRepository::class);
+        $this->app->singleton(FeatureFlagRepositoryInterface::class, FeatureFlagRepository::class);
 
         $this->app->register(PhoneServiceProvider::class);
     }

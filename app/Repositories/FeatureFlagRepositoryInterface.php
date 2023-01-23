@@ -14,5 +14,13 @@ interface FeatureFlagRepositoryInterface
 
     public function get(string $code): ?FeatureFlag;
 
+    /**
+     * Basically a handy method to test
+     *
+     * @param  FeatureFlag  $feature
+     * @return void
+     */
+    public function set(FeatureFlag $feature): void;
+
     public function isEnabled(string $code): bool;
 }
