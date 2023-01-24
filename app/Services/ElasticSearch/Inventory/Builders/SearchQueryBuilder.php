@@ -206,7 +206,9 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
                         $shouldQuery[] = $this->matchQuery($columnValues[0], $boost, $match);
                         $shouldQuery[] = $this->matchQuery($column, $boost, $match);
 
-                        if (!is_numeric($key) && strpos($column, '.') !== false) {
+                        // leading description wildcard add a tremendous penalty to the query, so is avoided
+                        // it only will use leading wildcards for those fields different from `description`
+                        if (!is_numeric($key) && $key !== 'description' && strpos($column, '.') !== false) {
                             $shouldQuery[] = $this->wildcardQueryWithBoost($key, $boost, $data['match']);
                         }
                     }
