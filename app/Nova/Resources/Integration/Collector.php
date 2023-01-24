@@ -4,7 +4,6 @@ namespace App\Nova\Resources\Integration;
 
 use App\Models\Integration\Collector\CollectorFields;
 use App\Nova\Resource;
-use App\Nova\Resources\Dealer\Dealer;
 use App\Nova\Resources\Dealer\Location;
 use App\Nova\Resources\Dealer\LightDealer;
 use Illuminate\Http\Request;
@@ -20,6 +19,7 @@ use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Panel;
 use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\BooleanGroup;
+use App\Nova\Resources\Integration\CollectorAdminNote as AdminNote;
 use App\Models\Integration\Collector\Collector as CollectorModel;
 
 use Epartment\NovaDependencyContainer\HasDependencies;
@@ -337,6 +337,8 @@ class Collector extends Resource
             ]),
 
             HasMany::make('Specifications', 'specifications', CollectorSpecification::class),
+
+            HasMany::make('Admin Notes', 'collectorAdminNotes', AdminNote::class),
 
             HasMany::make('Change Reports', 'collectorChangeReports', CollectorChangeReport::class)
         ];

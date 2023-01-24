@@ -676,7 +676,6 @@ $api->version('v1', function ($route) {
     $route->get('integrations', 'App\Http\Controllers\v1\Integration\IntegrationController@index');
     $route->get('integrations/{id}', 'App\Http\Controllers\v1\Integration\IntegrationController@show');
 
-
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
         /*
         |--------------------------------------------------------------------------
@@ -778,6 +777,8 @@ $api->version('v1', function ($route) {
         */
         $route->get('user/integrations', 'App\Http\Controllers\v1\User\DealerIntegrationController@index');
         $route->get('user/integrations/{id}', 'App\Http\Controllers\v1\User\DealerIntegrationController@show');
+        $route->post('user/integrations/{id}', 'App\Http\Controllers\v1\User\DealerIntegrationController@update');
+        $route->delete('user/integrations/{id}', 'App\Http\Controllers\v1\User\DealerIntegrationController@delete');
 
         /*
         |--------------------------------------------------------------------------
