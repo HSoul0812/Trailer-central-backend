@@ -12,15 +12,15 @@ use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\LaravelNovaExcel\Actions\DownloadExcel;
 
 /**
- * Class FieldMappingExport
+ * Class CollectorSpecificationActionExport
  * @package App\Nova\Actions\Exports
  */
-class FieldMappingExport extends DownloadExcel implements WithHeadings, WithMapping, WithStyles, WithEvents
+class CollectorSpecificationActionExport extends DownloadExcel implements WithHeadings, WithMapping, WithStyles, WithEvents
 {
     /**
      * @var string
      */
-    public $name = "Export Field Mapping Export";
+    public $name = "Export Collector Specification Actions";
 
     /**
      * @return array
@@ -28,10 +28,13 @@ class FieldMappingExport extends DownloadExcel implements WithHeadings, WithMapp
     public function headings(): array
     {
         return [
-            'Dealer ID',
-            'Their Field',
-            'Our Field',
-            'Type'
+            'ID',
+            'Collector Specification ID',
+            'Action',
+            'Field',
+            'Value',
+            'Created At',
+            'Updated At'
         ];
     }
 
@@ -43,10 +46,13 @@ class FieldMappingExport extends DownloadExcel implements WithHeadings, WithMapp
     public function map($mapping): array
     {
         return [
-            $mapping->dealer_id,
-            $mapping->map_from,
-            $mapping->map_to,
-            $mapping->type
+            $mapping->id,
+            $mapping->collector_specification_id,
+            $mapping->action,
+            $mapping->field,
+            $mapping->value,
+            $mapping->created_at,
+            $mapping->updated_at
         ];
     }
 
