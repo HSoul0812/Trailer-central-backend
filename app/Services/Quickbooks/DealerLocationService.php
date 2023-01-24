@@ -8,6 +8,7 @@ use App\Contracts\LoggerServiceInterface;
 use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
 use App\Jobs\Inventory\ReIndexInventoriesByDealerLocationJob;
 use App\Models\CRM\Dms\Quickbooks\QuickbookApproval;
+use App\Models\Inventory\Inventory;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
@@ -97,7 +98,7 @@ class DealerLocationService implements DealerLocationServiceInterface
             'dealer_location_id' => $location->dealer_location_id
         ];
 
-        if (config('cache.inventory')) {
+        if (Inventory::isCacheInvalidationEnabled()) {
             $this->logger->info(
                 'Enqueueing the job to invalidate cache by dealer location',
                 $logContext

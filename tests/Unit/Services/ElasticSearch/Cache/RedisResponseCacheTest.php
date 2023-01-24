@@ -2,12 +2,9 @@
 
 namespace Tests\Unit\Services\ElasticSearch\Cache;
 
-use App\Services\ElasticSearch\Cache\InventoryResponseRedisCache;
 use App\Services\ElasticSearch\Cache\RedisResponseCache;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
 use App\Services\ElasticSearch\Cache\UniqueCacheInvalidationInterface;
-use Illuminate\Support\Facades\Redis;
-use Mockery;
 use PHPUnit\Framework\MockObject\MockObject;
 use Tests\TestCase;
 use \Redis as PhpRedis;

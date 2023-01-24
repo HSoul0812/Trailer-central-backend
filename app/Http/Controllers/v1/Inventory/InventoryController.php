@@ -16,6 +16,7 @@ use App\Http\Requests\Inventory\GetInventoryHistoryRequest;
 use App\Http\Requests\Inventory\GetInventoryItemRequest;
 use App\Http\Requests\Inventory\SearchInventoryRequest;
 use App\Http\Requests\Inventory\UpdateInventoryRequest;
+use App\Models\Inventory\Inventory;
 use App\Repositories\Inventory\InventoryHistoryRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
@@ -238,7 +239,7 @@ class InventoryController extends RestfulControllerV2
 
         $response = $this->itemResponse($data, new InventoryTransformer());
 
-        if (config('cache.inventory')) {
+        if (Inventory::isCacheInvalidationEnabled()) {
             $this->inventoryResponseCache->single()->set(
                 $this->responseCacheKey->single($data->inventory_id, $data->dealer_id),
                 $response->morph('json')->getContent()
@@ -543,7 +544,7 @@ class InventoryController extends RestfulControllerV2
             }
 
             //Cache only if there are results
-            if ($result->hints->count() && config('cache.inventory')) {
+            if (Inventory::isCacheInvalidationEnabled() && $result->hints->count()) {
                 $this->inventoryResponseCache->search()->set(
                     $this->responseCacheKey->collection($searchRequest->requestId(), $result),
                     $response->morph('json')->getContent()

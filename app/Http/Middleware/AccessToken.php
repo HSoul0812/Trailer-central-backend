@@ -20,9 +20,10 @@ class AccessToken
     public function handle($request, Closure $next)
     {
         $accessTokenHeader = $request->header('access-token');
+        $clientId = $request->header('x-client-id');
 
         // if the request is coming from integration processes, then it will avoid to dispatch many inventory-related jobs
-        if ($accessTokenHeader && $accessTokenHeader === config('integrations.inventory_cache_auth.credentials.access_token')) {
+        if ($clientId && $clientId === config('integrations.inventory_cache_auth.credentials.integration_client_id')) {
             Inventory::disableCacheInvalidationAndSearchSyncing();
         }
 
