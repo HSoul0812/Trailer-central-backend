@@ -208,7 +208,7 @@ class InventoryElasticSearchInputTransformer implements Transformer
     {
         return static function (InventoryImage $image): int {
             // when the position is null, it will sorted a last position
-            $position = $image->position ?: InventoryImage::LAST_IMAGE_POSITION;
+            $position = $image->position ?? InventoryImage::LAST_IMAGE_POSITION;
 
             return $image->isDefault() ? InventoryImage::FIRST_IMAGE_POSITION : $position;
         };
