@@ -4,18 +4,21 @@ namespace App\Repositories;
 
 use App\Models\FeatureFlag;
 use Illuminate\Database\Eloquent\Collection;
+use Schema;
 
 class FeatureFlagRepository implements FeatureFlagRepositoryInterface
 {
-    /** @var FeatureFlag */
+    /** @var ?FeatureFlag */
     private $model;
 
     /** @var Collection<FeatureFlag>|Collection[] list of feature flags indexed by code */
     private static $list;
 
-    public function __construct(FeatureFlag $model)
+    public function __construct()
     {
-        $this->model = $model;
+        if (Schema::hasTable(FeatureFlag::getTableName())) {
+            $this->model = new FeatureFlag();
+        }
     }
 
     /**
@@ -23,6 +26,11 @@ class FeatureFlagRepository implements FeatureFlagRepositoryInterface
      */
     public function getAll(): Collection
     {
+        // Return an empty collection if the table isn't being created yet
+        if ($this->model === null) {
+            return new Collection();
+        }
+
         if ($this->isEmpty()) {
             self::$list = $this->model->newQuery()->get()->keyBy('code');
         }
