@@ -3,16 +3,17 @@
 namespace Tests\Integration\Models\Inventory\Inventory;
 
 use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
+use App\Models\FeatureFlag;
 use App\Models\Inventory\Inventory;
+use App\Repositories\FeatureFlagRepositoryInterface;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Facades\Config;
 use Laravel\Scout\Jobs\MakeSearchable;
 use Tests\TestCase;
 use RuntimeException;
 
 /**
- * @covers \App\Models\Inventory\Inventory::withoutInvalidationAndSyncingToSearch
+ * @covers \App\Models\Inventory\Inventory::withoutCacheInvalidationAndSearchSyncing
  *
  * @group DW
  * @group DW_INVENTORY
@@ -38,7 +39,11 @@ class WithoutInvalidationAndSyncingToSearchTest extends TestCase
      */
     public function testItWillNotDispatchAnyJobAsExpected(): void
     {
-        Inventory::withoutInvalidationAndSyncingToSearch(function () {
+        app(FeatureFlagRepositoryInterface::class)->set(
+            new FeatureFlag(['code' => 'inventory-sdk-cache', 'is_enabled' => true])
+        );
+
+        Inventory::withoutCacheInvalidationAndSearchSyncing(function () {
             $inventory = factory(Inventory::class)->create();
             $inventory->update(['description' => $this->faker->sentence(4)]);
             $inventory->delete(); // delete doesn't trigger jobs for scout
@@ -68,14 +73,7 @@ class WithoutInvalidationAndSyncingToSearchTest extends TestCase
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage($expectedExceptionMessage);
 
-        $spy = Config::spy();
-
-        $isCacheEnabled = config('cache.inventory');
-
-        $spy->allows('set')->once()->with('cache.inventory', false);
-        $spy->allows('set')->once()->with('cache.inventory', $isCacheEnabled);
-
-        Inventory::withoutInvalidationAndSyncingToSearch(static function () use ($expectedException) {
+        Inventory::withoutCacheInvalidationAndSearchSyncing(static function () use ($expectedException) {
             throw $expectedException;
         });
     }
@@ -83,8 +81,6 @@ class WithoutInvalidationAndSyncingToSearchTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
-        Config::set('cache.inventory', true);
 
         Bus::fake();
     }

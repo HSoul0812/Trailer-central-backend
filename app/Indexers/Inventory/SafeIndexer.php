@@ -122,7 +122,7 @@ class SafeIndexer
         $this->numberOfUnitsProcessed = 0;
 
         if ($this->numberUnitsToBeProcessed > 0) {
-            $this->output->writeln('Checking some records affected while the main ingest was working...');
+            $this->output->writeln('<comment>Checking some records affected while the main ingest was working...</comment>');
         }
 
         $this->chunkHandler($query);
@@ -146,13 +146,13 @@ class SafeIndexer
                 $this->numberOfUnitsProcessed += $models->count();
 
                 $this->output->writeln(
-                    sprintf('[%s] processing %d of %d',
+                    sprintf('<comment>[%s]</comment> processing %d of %d',
                         $this->indexName,
                         $this->numberOfUnitsProcessed,
                         $this->numberUnitsToBeProcessed)
                 );
             } catch (Exception $e) {
-                $this->output->writeln(sprintf('[%s] at %s of %d', $e->getMessage(), $e->getFile(), $e->getLine()));
+                $this->output->writeln(sprintf('<error>[%s] at %s of %d</error>', $e->getMessage(), $e->getFile(), $e->getLine()));
                 // to avoid any interruption
             }
         });

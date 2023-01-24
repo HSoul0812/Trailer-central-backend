@@ -478,7 +478,7 @@ class CsvImportService implements CsvImportServiceInterface
                 return false;
             }
         } catch (\Exception $ex) {
-            $this->validationErrors[] = 'An error occurred validating the structure or data of this file.';
+            $this->validationErrors[] = $ex->getMessage();
 
             Log::info('Invalid bulk upload ID: ' . $this->bulkUpload->id . ' setting validation_errors...');
             $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => $this->outputValidationErrors()]);
