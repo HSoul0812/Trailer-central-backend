@@ -57,11 +57,11 @@ class ApiEntityReference extends Resource
      */
     public function fields(Request $request): array {
         return [
+            Text::make('Entity Type')->sortable(),
+
             Text::make('Entity ID')->sortable(),
 
             Text::make('Reference ID')->sortable(),
-
-            Text::make('Entity Type')->sortable(),
 
             Text::make('API Key')->sortable(),
         ];
