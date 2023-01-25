@@ -1,29 +1,38 @@
 <?php
 
-namespace App\Nova\Resources\Dealer;
+namespace App\Nova\Resources\Integration;
 
-use Illuminate\Http\Request;
-use Laravel\Nova\Fields\Text;
 use App\Nova\Resource;
-use Laravel\Nova\Panel;
+use App\Nova\User;
+use Illuminate\Http\Request;
+use Laravel\Nova\Fields\ID;
+use Laravel\Nova\Http\Requests\NovaRequest;
 
-class Location extends Resource
+use Laravel\Nova\Fields\BelongsTo;
+use Laravel\Nova\Fields\DateTime;
+use Laravel\Nova\Fields\HasMany;
+use Laravel\Nova\Fields\Text;
+
+class CollectorAdminNote extends Resource
 {
-    public static $group = 'Dealer';
+    public static $perPageViaRelationship = 10;
+    public static $displayInNavigation = false;
+
+    public static $group = 'Integration';
 
     /**
      * The model the resource corresponds to.
      *
      * @var string
      */
-    public static $model = 'App\Models\User\DealerLocation';
+    public static $model = 'App\Models\Integration\Collector\CollectorAdminNote';
 
     /**
      * The single value that should be used to represent the resource when being displayed.
      *
      * @var string
      */
-    public static $title = 'name';
+    public static $title = 'note';
 
     /**
      * The columns that should be searched.
@@ -31,7 +40,7 @@ class Location extends Resource
      * @var array
      */
     public static $search = [
-        'dealer_id', 'name', 'email'
+        'note'
     ];
 
     /**
@@ -43,27 +52,21 @@ class Location extends Resource
     public function fields(Request $request)
     {
         return [
-            Text::make('Dealer Location ID')->sortable(),
-
-            Text::make('Dealer ID')->sortable(),
-
-            Text::make('Name')
+            BelongsTo::make('Collector', 'collector', Collector::class)
                 ->sortable()
-                ->rules('required', 'max:255'),
+                ->rules('required')
+                ->readonly(),
 
-            Text::make('App ID', 'identifier')->exceptOnForms(),
+            BelongsTo::make('User', 'user', User::class)
+                ->sortable()
+                ->rules('required')
+                ->exceptOnForms(),
 
-            Text::make('Phone'),
+            Text::make('Note', 'note')
+                ->rules('required'),
 
-            Text::make('Address'),
-
-            Text::make('City'),
-
-            Text::make('Region'),
-
-            new Panel('Google', [
-                Text::make('Google Store Code', 'google_business_store_code')
-            ])
+            DateTime::make('Created At', 'created_at')
+                ->exceptOnForms(),
         ];
     }
 

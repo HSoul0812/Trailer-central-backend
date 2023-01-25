@@ -16,6 +16,7 @@ use App\Models\Inventory\InventoryImage;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
 use App\Traits\Repository\Transaction;
 use App\Repositories\Traits\SortTrait;
+use Dingo\Api\Exception\ResourceException;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -911,6 +912,9 @@ class InventoryRepository implements InventoryRepositoryInterface
         $inventoryImageObjs = [];
 
         foreach ($newImages as $newImage) {
+            if(empty($newImage['filename'])) {
+                throw new ResourceException("Validation Failed", 'Filename cant be blank');
+            }
             $imageObj = new Image($newImage);
             $imageObj->save();
 
