@@ -1,12 +1,9 @@
 <?php
 
-
 namespace App\Nova\Resources\Integration;
 
-
-use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping;
 use App\Models\Integration\Collector\CollectorFields;
-use App\Nova\Actions\Importer\DefaultValueMappingImporter;
+use App\Nova\Actions\Importer\FieldMappingImporter;
 use App\Nova\Filters\DealerIDMapping;
 use App\Nova\Resource;
 use App\Nova\Resources\Dealer\LightDealer;
@@ -15,10 +12,11 @@ use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping;
 
-use App\Nova\Actions\Exports\DefaultValueMappingExport;
+use App\Nova\Actions\Exports\FieldMappingExport;
 
-class DefaultValueMapping extends Resource
+class FieldMapping extends Resource
 {
     public static $group = 'Collector';
 
@@ -63,19 +61,24 @@ class DefaultValueMapping extends Resource
     public function fields(Request $request)
     {
         return [
-            BelongsTo::make('Dealer', 'dealers', LightDealer::class)->searchable()->sortable()->rules('required'),
+            Text::make('Incoming Field', 'map_from')->rules('required')->sortable()->help(
+                'For example, "Category". If it\'s needed, the path can be specified (for instance, Details/Category)'
+            ),
 
-            Select::make('Field', 'map_from')
+            Select::make('Our Field', 'map_to')
                 ->options(CollectorFields::select(['label', 'field'])->orderBy('label')->get()->pluck('label', 'field'))
                 ->rules('required')
                 ->sortable()
-                ->displayUsingLabels(),
+                ->displayUsingLabels()
+                ->help(
+                    '<span style="color: red">Important! The following fields must be specified: manufacturer, category, status. If some of the fields is absent in the file, the default value should be specified. (Default Value Mappings)</span>'
+                ),
 
-            Text::make('Default Value', 'map_to')->rules('required')->sortable(),
+            BelongsTo::make('Dealer', 'dealers', LightDealer::class)->searchable()->sortable()->rules('required'),
 
             Text::make('', 'type')->withMeta([
                 'type' => 'hidden',
-                'value'=> $this->type ?? DealerIncomingMapping::DEFAULT_VALUES
+                'value'=> $this->type ?? 'fields'
             ])->onlyOnForms()
         ];
     }
@@ -89,7 +92,7 @@ class DefaultValueMapping extends Resource
      */
     public static function indexQuery(NovaRequest $request, $query)
     {
-        return $query->where('type', DealerIncomingMapping::DEFAULT_VALUES);
+        return $query->where('type', DealerIncomingMapping::FIELDS);
     }
 
     /**
@@ -136,8 +139,8 @@ class DefaultValueMapping extends Resource
     public function actions(Request $request)
     {
         return [
-            (new DefaultValueMappingExport())->withHeadings()->askForFilename(),
-            new DefaultValueMappingImporter()
+            (new FieldMappingExport())->withHeadings()->askForFilename(),
+            new FieldMappingImporter()
         ];
     }
 }
