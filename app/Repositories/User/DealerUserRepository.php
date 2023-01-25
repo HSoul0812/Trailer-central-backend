@@ -29,7 +29,7 @@ class DealerUserRepository extends RepositoryAbstract implements DealerUserRepos
         return $dealer->dealerUsers;
     }
 
-    public function getByDealerEmail(string $dealerEmail): User
+    public function getByDealerEmail(string $dealerEmail): ?User
     {
         return User::where('email', '=', $dealerEmail)->first();
     }

@@ -15,7 +15,7 @@ interface DealerUserRepositoryInterface extends Repository
 {
     public function getByDealer(int $dealerId): Collection;
 
-    public function getByDealerEmail(string $dealerEmail): User;
+    public function getByDealerEmail(string $dealerEmail): ?User;
 
     public function updateBulk(array $params): Collection;
 
