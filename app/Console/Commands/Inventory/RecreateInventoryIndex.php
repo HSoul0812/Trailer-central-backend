@@ -4,6 +4,7 @@ namespace App\Console\Commands\Inventory;
 
 use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
 use App\Models\Inventory\Inventory;
+use App\Services\ElasticSearch\Cache\RedisResponseCacheKey;
 use Illuminate\Console\Command;
 
 class RecreateInventoryIndex extends Command
@@ -31,11 +32,9 @@ class RecreateInventoryIndex extends Command
     {
         Inventory::makeAllSearchableUsingAliasStrategy();
 
-        $patternToCleanAll = '*inventories.*';
-
         // no matter if cache is disabled, invalidating the entire cache should be done
-        dispatch(new InvalidateCacheJob([$patternToCleanAll]));
+        dispatch(new InvalidateCacheJob([RedisResponseCacheKey::CLEAR_ALL_PATTERN]));
 
-        $this->output->writeln(sprintf('InvalidateCacheJob was dispatched using the pattern: %s', $patternToCleanAll));
+        $this->output->writeln(sprintf('InvalidateCacheJob was dispatched using the pattern: %s', RedisResponseCacheKey::CLEAR_ALL_PATTERN));
     }
 }
