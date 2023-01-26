@@ -317,10 +317,6 @@ return [
             'driver' => 'sentry',
             'level' => env('SENTRY_LOG_LEVEL', 'error')
         ],
-        'sentry' => [
-            'driver' => 'sentry',
-            'level' => env('SENTRY_LOG_LEVEL', 'error')
-        ],
     ],
 
 ];

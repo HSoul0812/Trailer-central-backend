@@ -20,11 +20,11 @@ interface UniqueCacheInvalidationInterface
      * @param array $keyPatterns
      * @return void
      */
-    public function createJobsForKeys(array $keyPatterns);
+    public function createJobsForKeys(array $keyPatterns): void;
 
     /**
      * @param array $keyPatterns
      * @return void
      */
-    public function removeJobsForKeys(array $keyPatterns);
+    public function removeJobsForKeys(array $keyPatterns): void;
 }
