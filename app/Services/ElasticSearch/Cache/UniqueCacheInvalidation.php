@@ -49,7 +49,7 @@ class UniqueCacheInvalidation implements UniqueCacheInvalidationInterface
      * @param array $keyPatterns
      * @return void
      */
-    public function createJobsForKeys(array $keyPatterns)
+    public function createJobsForKeys(array $keyPatterns): void
     {
         foreach ($keyPatterns as $keyPattern) {
             $key = sprintf('%s%s', self::PREFIX, $this->sanitizePattern($keyPattern));
@@ -61,7 +61,7 @@ class UniqueCacheInvalidation implements UniqueCacheInvalidationInterface
      * @param array $keyPatterns
      * @return void
      */
-    public function removeJobsForKeys(array $keyPatterns)
+    public function removeJobsForKeys(array $keyPatterns): void
     {
         foreach ($keyPatterns as $keyPattern) {
             $key = sprintf('%s%s', self::PREFIX, $this->sanitizePattern($keyPattern));
