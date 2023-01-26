@@ -186,6 +186,14 @@ return [
             'permission' => 0664,
         ],
 
+        'inventory' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/inventory.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 3,
+            'permission' => 0664,
+        ],
+
         'texts' => [
             'driver' => 'daily',
             'path' => storage_path('logs/services/texts.log'),
