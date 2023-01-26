@@ -132,7 +132,13 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
         'roofType'             => ['type' => 'keyword'],
         'loadType'             => ['type' => 'keyword'],
         'fuelType'             => ['type' => 'keyword'],
-        'frameMaterial'        => ['type' => 'keyword'],
+        'frameMaterial'        => [
+            'type'       => 'keyword',
+            'normalizer' => 'case_normal',
+            'fields' => [
+                'txt' => ['type' => 'text', 'analyzer' => 'english']
+            ]
+        ],
         'horsepower'           => ['type' => 'keyword'],
         'hasLq'                => ['type' => 'boolean'],
         'hasManger'            => ['type' => 'boolean'],
