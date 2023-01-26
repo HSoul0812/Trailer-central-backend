@@ -79,17 +79,9 @@ class RedisResponseCache implements ResponseCacheInterface
     public function invalidate(string ...$keyPatterns): void
     {
         foreach ($keyPatterns as $pattern) {
-            if ($pattern === RedisResponseCacheKey::CLEAR_ALL_PATTERN &&
-                in_array((int)$this->client->getDbNum(), [
-                    (int)config('database.sdk-search-cache.database'),
-                    (int)config('database.sdk-single-cache.database'),
-                ], true)
-            ) {
+            if ($pattern === RedisResponseCacheKey::CLEAR_ALL_PATTERN) {
                 $this->client->flushDB();
-
-                //remove job locks for all patterns since we are flushing the db
-                $this->uniqueCacheInvalidation->removeJobsForKeys($keyPatterns);
-
+                
                 return; // since it will flush the DB, we dont need to continue
             }
 
