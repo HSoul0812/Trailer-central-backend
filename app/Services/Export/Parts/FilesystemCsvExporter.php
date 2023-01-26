@@ -30,10 +30,6 @@ class FilesystemCsvExporter extends GenericFilesystemCsvExporter
                 }
             }
         }
-        // foreach(explode(',', $part->bins) as $bin) {
-        //     $id_bin = explode(';', $bin);
-        //     $addedLines[(string)$id_bin[1]] = $qty_values[(string)$id_bin[0]];
-        // }
         $addedLines['Part ID'] = $part->id;
 
         return array_merge([
