@@ -64,7 +64,9 @@ class UniqueCacheInvalidation implements UniqueCacheInvalidationInterface
     public function removeJobsForKeys(array $keyPatterns): void
     {
         foreach ($keyPatterns as $keyPattern) {
-            if ($keyPattern === RedisResponseCacheKey::CLEAR_ALL_PATTERN) {
+            if ($keyPattern === RedisResponseCacheKey::CLEAR_ALL_PATTERN &&
+                !in_array((int)$this->client->getDbNum(), [0, 1, 2, 3], true)
+            ) {
                 $this->client->flushDB();
 
                 return;

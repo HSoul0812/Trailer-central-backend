@@ -79,9 +79,11 @@ class RedisResponseCache implements ResponseCacheInterface
     public function invalidate(string ...$keyPatterns): void
     {
         foreach ($keyPatterns as $pattern) {
-            if ($pattern === RedisResponseCacheKey::CLEAR_ALL_PATTERN) {
+            if ($pattern === RedisResponseCacheKey::CLEAR_ALL_PATTERN &&
+                !in_array((int)$this->client->getDbNum(), [0, 1, 2, 3], true)
+            ) {
                 $this->client->flushDB();
-                
+
                 return; // since it will flush the DB, we dont need to continue
             }
 
