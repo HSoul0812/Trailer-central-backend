@@ -1,7 +1,15 @@
 <?php
 
-namespace App\Helpers\Integration\Transaction;
+namespace App\Services\Integration\Transaction;
 
+use App\Models\Feed\Mapping\Incoming\ApiEntityReference;
+use App\Repositories\Feed\Mapping\Incoming\ApiEntityReferenceRepositoryInterface;
+use Illuminate\Contracts\Container\BindingResolutionException;
+
+/**
+ * Class Reference
+ * @package App\Services\Integration\Transaction
+ */
 class Reference
 {
     static private $_methodTranslation = array(
@@ -73,7 +81,12 @@ class Reference
         )
     );
 
-    static function isValidAction($action, $apiKey)
+    /**
+     * @param $action
+     * @param $apiKey
+     * @return bool
+     */
+    static function isValidAction($action, $apiKey): bool
     {
         if(isset(self::$_methodTranslation[$apiKey])) {
             if(isset(self::$_methodTranslation[$apiKey][$action])) {
@@ -83,6 +96,11 @@ class Reference
         return false;
     }
 
+    /**
+     * @param $action
+     * @param $apiKey
+     * @return false|string[]
+     */
     static function decodeAction($action, $apiKey)
     {
         if(isset(self::$_methodTranslation[$apiKey])) {
@@ -103,46 +121,27 @@ class Reference
         }
     }
 
+    /**
+     * @param $value
+     * @param $entityType
+     * @param $apiKey
+     * @return false|int
+     * @throws BindingResolutionException
+     */
     static function getEntityFromReference($value, $entityType, $apiKey)
     {
-        $db = TC_Db::getInstance();
+        /** @var ApiEntityReferenceRepositoryInterface $apiEntityReferenceRepository */
+        $apiEntityReferenceRepository = app()->make(ApiEntityReferenceRepositoryInterface::class);
+
         $entityType = self::translateEntityType($entityType, $apiKey);
 
-        $select = $db->select()->from('api_entity_reference', 'entity_id');
+        /** @var ApiEntityReference $apiEntityReference */
+        $apiEntityReference = $apiEntityReferenceRepository->get([
+            'reference_id' => $value,
+            'entity_type' => $entityType,
+            'api_key' => $apiKey,
+        ]);
 
-        $value = $db->quote($value);
-        $entityType = $db->quote($entityType);
-        $apiKey = $db->quote($apiKey);
-
-        $select->where("`reference_id` = $value");
-        $select->where("`entity_type` = $entityType");
-        $select->where("`api_key` = $apiKey");
-
-        $result = $select->query()->fetchAll();
-        if(count($result)) {
-            return $result[0]['entity_id'];
-        }
-        return false;
-    }
-
-    static function getReferenceFromEntity($value, $entityType, $apiKey)
-    {
-        $db = TC_Db::getInstance();
-
-        $select = $db->select()->from('api_entity_reference', 'reference_id');
-
-        $value = $db->quote($value);
-        $entityType = $db->quote($entityType);
-        $apiKey = $db->quote($apiKey);
-
-        $select->where("`entity_id` = $value");
-        $select->where("`entity_type` = $entityType");
-        $select->where("`api_key` = $apiKey");
-
-        $result = $select->query()->fetchAll();
-        if(count($result)) {
-            return $result[0]['reference_id'];
-        }
-        return false;
+        return $apiEntityReference ? $apiEntityReference->entity_id : false;
     }
 }

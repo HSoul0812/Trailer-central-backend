@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Helpers\Integration\Transaction;
+namespace App\Services\Integration\Transaction;
 
 use App\Models\Inventory\Inventory;
 use App\Repositories\Feed\Mapping\Incoming\ApiEntityReferenceRepositoryInterface;
@@ -9,6 +9,10 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Class Validation
+ * @package App\Services\Integration\Transaction
+ */
 class Validation
 {
     static private $_apiKey = '';
@@ -49,6 +53,10 @@ class Validation
     static function isValidAction($action = null): bool
     {
         $validation = self::getValidation();
+
+        print_r($action);
+        print_r($validation);exit();
+
         if(isset($validation[$action])) {
             if(Reference::isValidAction($action, self::getApiKey())) {
                 return true;
@@ -268,6 +276,7 @@ class Validation
      * @param $action
      * @param $useReference
      * @return bool
+     * @throws BindingResolutionException
      */
     static private function checkUnique($key, $value, $table, $action, $useReference): bool
     {

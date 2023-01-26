@@ -2,8 +2,9 @@
 
 namespace App\Services\Integration\Transaction;
 
-use App\Helpers\Integration\Transaction\Validation;
+use App\Services\Integration\Transaction\Validation;
 use App\Repositories\Feed\TransactionExecuteQueueRepositoryInterface;
+use Illuminate\Contracts\Container\BindingResolutionException;
 
 /**
  * Class TransactionService
@@ -16,11 +17,21 @@ class TransactionService implements TransactionServiceInterface
      */
     private $transactionExecuteQueueRepository;
 
+    /**
+     * @var array
+     */
+    private $transactionErrors = [];
+
     public function __construct(TransactionExecuteQueueRepositoryInterface $transactionExecuteQueueRepository)
     {
         $this->transactionExecuteQueueRepository = $transactionExecuteQueueRepository;
     }
 
+    /**
+     * @param array $params
+     * @return array
+     * @throws BindingResolutionException
+     */
     public function post(array $params): array
     {
         $transactionData = [
@@ -53,7 +64,6 @@ class TransactionService implements TransactionServiceInterface
 
         $i = 0;
 
-
         foreach ($parsed as $transaction) {
             if(empty($transaction['action'])) {
                 $this->addTransactionError($i, 'No action supplied for this transaction.');
@@ -75,18 +85,33 @@ class TransactionService implements TransactionServiceInterface
             $i++;
         }
 
+        $errors = $this->getTransactionErrors();
+
+        print_r($errors);exit();
+
         exit();
         return [];
     }
 
-    public function addTransactionError($i = null, $error = null)
+    /**
+     * @param int $i
+     * @param string|null $error
+     * @return void
+     */
+    public function addTransactionError(int $i, string $error = null)
     {
         if(empty($i) && $i != '0') {
             return;
         }
 
-        if(!isset($this->_transactionErrors[$i])) {}
-            $this->_transactionErrors[$i] = array();
-        $this->_transactionErrors[$i][] = $error;
+        $this->transactionErrors[$i][] = $error;
+    }
+
+    /**
+     * @return array
+     */
+    public function getTransactionErrors(): array
+    {
+        return $this->transactionErrors;
     }
 }
