@@ -73,11 +73,11 @@ class RedisResponseCacheKey implements ResponseCacheKeyInterface
 
     public function isSingleKey(string $key): bool
     {
-        return Str::contains($key, 'inventories.single');
+        return Str::contains($key, 'inventories.single') || $key === 'inventories.*';
     }
 
     public function isSearchKey(string $key): bool
     {
-        return !$this->isSingleKey($key);
+        return !$this->isSingleKey($key) || $key === 'inventories.*';
     }
 }

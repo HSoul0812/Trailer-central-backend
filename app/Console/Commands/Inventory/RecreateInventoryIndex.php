@@ -31,7 +31,7 @@ class RecreateInventoryIndex extends Command
     {
         Inventory::makeAllSearchableUsingAliasStrategy();
 
-        $patternToCleanAll = '*inventories.*';
+        $patternToCleanAll = 'inventories.*';
 
         // no matter if cache is disabled, invalidating the entire cache should be done
         dispatch(new InvalidateCacheJob([$patternToCleanAll]));
