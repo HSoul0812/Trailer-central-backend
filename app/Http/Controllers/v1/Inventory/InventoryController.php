@@ -259,6 +259,8 @@ class InventoryController extends RestfulControllerV2
      */
     public function create(Request $request): Response
     {
+        $this->debugRequest('create');
+
         $inventoryRequest = new CreateInventoryRequest($request->all());
 
         $transformer = app()->make(SaveInventoryTransformer::class);
@@ -282,6 +284,8 @@ class InventoryController extends RestfulControllerV2
      */
     public function update(int $id, Request $request): Response
     {
+        $this->debugRequest('update');
+
         $inventoryRequest = new UpdateInventoryRequest(array_merge($request->all(), ['inventory_id' => $id]));
 
         $transformer = app()->make(SaveInventoryTransformer::class);
@@ -572,5 +576,29 @@ class InventoryController extends RestfulControllerV2
         );
 
         return $this->itemResponse($data, new InventoryTransformer());
+    }
+
+    /**
+     * @todo removed this method and usages when it helps to discover the where is the issue
+     *
+     * It will debug those incoming request without `x-client-id` header, which is the mechanism to determine where come
+     * from the request and when to disable massive enqueuing jobs.
+     *
+     * @param  string  $method
+     * @return void
+     */
+    private function debugRequest(string $method): void
+    {
+        $logContext = collect(request()->headers->all())
+            ->map(function (array $contents) {
+                return implode('', $contents);
+            })->except('content-type')->toArray();
+
+        if (!isset($logContext['referer'], $logContext['x-client-id'])) {
+            \Illuminate\Support\Facades\Log::stack(['inventory'])->debug(
+                sprintf('[%s] incoming request without `x-client-id`', $method),
+                $logContext
+            );
+        }
     }
 }
