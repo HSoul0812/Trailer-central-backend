@@ -20,16 +20,20 @@ class FilesystemCsvExporter extends GenericFilesystemCsvExporter
      */
     public function getLineMapper($part): array
     {
-        $qty_values = [];
         $addedLines = [];
         foreach(explode(',', $part->qty_values) as $qty) {
             $id_qty = explode(';', $qty);
-            $qty_values[(string)$id_qty[0]] = $id_qty[1];
+            foreach(explode(',', $part->bins) as $bin) {
+                $id_bin = explode(';', $bin);
+                if($id_qty[0] === $id_bin[0]) {
+                    $addedLines[(string)$id_bin[1]] = $id_qty[1];
+                }
+            }
         }
-        foreach(explode(',', $part->bins) as $bin) {
-            $id_bin = explode(';', $bin);
-            $addedLines[(string)$id_bin[1]] = $qty_values[(string)$id_bin[0]];
-        }
+        // foreach(explode(',', $part->bins) as $bin) {
+        //     $id_bin = explode(';', $bin);
+        //     $addedLines[(string)$id_bin[1]] = $qty_values[(string)$id_bin[0]];
+        // }
         $addedLines['Part ID'] = $part->id;
 
         return array_merge([
