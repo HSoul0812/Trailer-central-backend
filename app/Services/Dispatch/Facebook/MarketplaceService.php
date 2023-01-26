@@ -38,15 +38,6 @@ class MarketplaceService implements MarketplaceServiceInterface
      */
     const INTEGRATION_NAME = 'dispatch_facebook';
 
-    /*
-     * Per dealer request, and after advising that this might be risky,
-     * the dealer insisted that they want their inventory up ASAP.
-     * We are adding this manually for one specific dealer for now, but might
-     * be added as a feature in the future.
-     */
-    const OVERRIDE_DEALER_ID = 12611;
-    const OVERRIDE_DEALER_POSTS = 10;
-
 
     /**
      * @var MarketplaceRepositoryInterface
@@ -180,7 +171,8 @@ class MarketplaceService implements MarketplaceServiceInterface
             'auth_code' => $integration->tfa_code,
             'auth_type' => $integration->tfa_type,
             'tunnels' => $this->tunnels->getAll(['dealer_id' => $integration->dealer_id]),
-            'inventory' => !$integration->is_up_to_date ? $this->getInventory($integration, $type, $params) : null
+            'inventory' => !$integration->is_up_to_date ? $this->getInventory($integration, $type, $params) : null,
+            'posts_per_day' => $integration->posts_per_day ?? intval(config('marketing.fb.settings.limit.listings', 3))
         ]);
         $nowTime = microtime(true);
         $this->log->info('Debug time after creating DealerFacebook: ' . ($nowTime - $startTime));
@@ -230,7 +222,7 @@ class MarketplaceService implements MarketplaceServiceInterface
             $inventoryRemaining = $this->getInventory($integration, MarketplaceStatus::METHOD_MISSING, []);
             $nrInventoryItemsRemaining = count($inventoryRemaining->inventory);
 
-            $maxListings = $integration->dealer_id == self::OVERRIDE_DEALER_ID ? self::OVERRIDE_DEALER_POSTS : config('marketing.fb.settings.limit.listings', 3);
+            $maxListings = $integration->posts_per_day ?? config('marketing.fb.settings.limit.listings', 3);
 
             if ($nrOfListingsToday === $maxListings || $nrInventoryItemsRemaining === 0) {
                 // Update Imported At
@@ -362,7 +354,7 @@ class MarketplaceService implements MarketplaceServiceInterface
         $this->log->info('Debug time BEFORE ' . $method . ': ' . ($nowTime - $startTime));
 
         if ($type === MarketplaceStatus::METHOD_MISSING) {
-            $maxListings = $integration->dealer_id == self::OVERRIDE_DEALER_ID ? self::OVERRIDE_DEALER_POSTS : config('marketing.fb.settings.limit.listings', 3);
+            $maxListings = $integration->posts_per_day ?? config('marketing.fb.settings.limit.listings', 3);
             $params['per_page'] = $maxListings - $this->listings->countFacebookPostings($integration);
         }
 

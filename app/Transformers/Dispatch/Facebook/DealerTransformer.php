@@ -40,6 +40,7 @@ class DealerTransformer extends TransformerAbstract
             'locationId' => $dealer->dealerLocationId,
             'name' => $dealer->dealerName,
             'integration' => $dealer->integrationId,
+            'posts_per_day' => $dealer->posts_per_day,
             'fb' => [
                 'username' => $dealer->fbUsername,
                 'password' => $dealer->fbPassword
