@@ -9,6 +9,8 @@ class RedisResponseCacheKey implements ResponseCacheKeyInterface
 {
     private const SEPARATOR = '_';
 
+    public const CLEAR_ALL_PATTERN = 'inventories.*';
+
     /**
      * It returns a string like `inventories.search.0698854bbb02f1f9dcd91350272e6e4f42150150.dealers:_4203_.inventories:_3207402_3207708_3207709_3207815_3207283_`
      */
