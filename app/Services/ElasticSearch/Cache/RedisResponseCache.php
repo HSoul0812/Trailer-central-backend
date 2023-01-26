@@ -38,7 +38,7 @@ class RedisResponseCache implements ResponseCacheInterface
     }
 
     /**
-     * @param string  $key
+     * @param string $key
      * @param mixed $value
      * @return void
      */
@@ -80,11 +80,15 @@ class RedisResponseCache implements ResponseCacheInterface
     {
         foreach ($keyPatterns as $pattern) {
             if ($pattern === RedisResponseCacheKey::CLEAR_ALL_PATTERN &&
-                !in_array((int) $this->client->getDbNum(), [0, 1, 2, 3], true)
+                in_array((int)$this->client->getDbNum(), [
+                    (int)config('database.sdk-search-cache.database'),
+                    (int)config('database.sdk-single-cache.database'),
+                ], true)
             ) {
                 $this->client->flushDB();
 
-                // @todo we need to flush the DB which is used to avoid job overlapping
+                //remove job locks for all patterns since we are flushing the db
+                $this->uniqueCacheInvalidation->removeJobsForKeys($keyPatterns);
 
                 return; // since it will flush the DB, we dont need to continue
             }
@@ -104,6 +108,13 @@ class RedisResponseCache implements ResponseCacheInterface
 
     public function hScanAndUnlink(string $hashKey, string $pattern): void
     {
+        if (Str::contains($pattern, RedisResponseCacheKey::SINGLE_PATTERN)) {
+            $this->client->unlink($this->extractExactKey($pattern));
+            $this->client->hDel($hashKey, $pattern);
+
+            return;
+        }
+
         /** @var null|int $cursor */
         $cursor = null;
 
@@ -116,7 +127,7 @@ class RedisResponseCache implements ResponseCacheInterface
     }
 
     /**
-     * @param  string  $key
+     * @param string $key
      * @return string an exact key like `inventories.search.bbb02f1f9dcd91350272e6e4f42150150` or `inventories.single.3207402`
      */
     private function extractExactKey(string $key): string
@@ -127,7 +138,7 @@ class RedisResponseCache implements ResponseCacheInterface
     }
 
     /**
-     * @param  string  $key
+     * @param string $key
      * @return string a hash key, `inventory_search_list` or `inventory_single_list`
      */
     private function extractHashKey(string $key): string

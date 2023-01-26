@@ -11,6 +11,8 @@ class RedisResponseCacheKey implements ResponseCacheKeyInterface
 
     public const CLEAR_ALL_PATTERN = 'inventories.*';
 
+    public const SINGLE_PATTERN = 'inventories.single';
+
     /**
      * It returns a string like `inventories.search.0698854bbb02f1f9dcd91350272e6e4f42150150.dealers:_4203_.inventories:_3207402_3207708_3207709_3207815_3207283_`
      */
@@ -49,7 +51,7 @@ class RedisResponseCacheKey implements ResponseCacheKeyInterface
     /**
      * It returns a string like `inventories.search.*.dealers:*.inventories:*_323332_*`
      *
-     * @param  int  $inventoryId
+     * @param int $inventoryId
      * @return string
      */
     public function deleteSingleFromCollection(int $inventoryId): string
@@ -75,11 +77,11 @@ class RedisResponseCacheKey implements ResponseCacheKeyInterface
 
     public function isSingleKey(string $key): bool
     {
-        return Str::contains($key, 'inventories.single') || $key === 'inventories.*';
+        return Str::contains($key, self::SINGLE_PATTERN) || $key === self::CLEAR_ALL_PATTERN;
     }
 
     public function isSearchKey(string $key): bool
     {
-        return !$this->isSingleKey($key) || $key === 'inventories.*';
+        return !$this->isSingleKey($key) || $key === self::CLEAR_ALL_PATTERN;
     }
 }
