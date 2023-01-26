@@ -189,7 +189,7 @@ return [
         'inventory' => [
             'driver' => 'daily',
             'path' => storage_path('logs/inventory.log'),
-            'level' => env('LOG_LEVEL', 'debug'),
+            'level' => env('INVENTORY_LOG_LEVEL', 'debug'),
             'days' => 3,
             'permission' => 0664,
         ],
