@@ -2,6 +2,7 @@
 
 namespace App\Services\Integration\Transaction;
 
+use App\Helpers\Integration\Transaction\Validation;
 use App\Repositories\Feed\TransactionExecuteQueueRepositoryInterface;
 
 /**
@@ -50,9 +51,42 @@ class TransactionService implements TransactionServiceInterface
             $parsed = $transactions['transaction'];
         }
 
+        $i = 0;
 
+
+        foreach ($parsed as $transaction) {
+            if(empty($transaction['action'])) {
+                $this->addTransactionError($i, 'No action supplied for this transaction.');
+                continue;
+            }
+
+            if(empty($transaction['data'])) {
+                $this->addTransactionError($i, 'No data supplied for this transaction.');
+                continue;
+            }
+
+            if(!Validation::isValidAction($transaction['action'])) {
+                $message = 'Invalid action "' . $transaction['action'] . '" supplied for this transaction.';
+                $this->addTransactionError($i, $message);
+                continue;
+            }
+
+            Validation::validateTransaction($transaction['action'], $transaction['data'], (string) $i, $this);
+            $i++;
+        }
 
         exit();
         return [];
+    }
+
+    public function addTransactionError($i = null, $error = null)
+    {
+        if(empty($i) && $i != '0') {
+            return;
+        }
+
+        if(!isset($this->_transactionErrors[$i])) {}
+            $this->_transactionErrors[$i] = array();
+        $this->_transactionErrors[$i][] = $error;
     }
 }
