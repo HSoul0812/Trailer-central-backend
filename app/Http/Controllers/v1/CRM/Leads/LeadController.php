@@ -281,7 +281,7 @@ class LeadController extends RestfulControllerV2
             return $this->response->errorBadRequest();
         }
 
-        $this->service->mergeLeads($id, $request->get('merges_lead_id'));
+        $this->service->mergeLeads($id, $request->get('merge_lead_ids'));
 
         return $this->updatedResponse();
     }

@@ -49,6 +49,11 @@ class Interaction extends Model
     const TYPE_TEXT = 'TEXT';
 
     /**
+     * @const string
+     */
+    const TYPE_INQUIRY = 'INQUIRY';
+
+    /**
      * The table associated with the model.
      *
      * @var string
