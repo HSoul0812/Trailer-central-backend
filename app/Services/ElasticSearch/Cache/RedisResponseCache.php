@@ -10,7 +10,11 @@ class RedisResponseCache implements ResponseCacheInterface
 {
     use DispatchesJobs;
 
-    public const TTL = 10800; // 3 hours
+    /**
+     * @var int 3 hours, to avoid to reach out max memory, however we need to use a better policy
+     * Maybe we need to use a TTL according the dealer traffic, or some similar policy
+     */
+    public const TTL = 10800;
 
     public const HASH_SCAN_COUNTER = 10000;
 
