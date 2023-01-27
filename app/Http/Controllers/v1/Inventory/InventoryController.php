@@ -601,7 +601,7 @@ class InventoryController extends RestfulControllerV2
             )
         ) {
             \Illuminate\Support\Facades\Log::stack(['inventory'])->debug(
-                sprintf('[%s] incoming request without/wrong `x-client-id`', $method),
+                sprintf('[%s] incoming request without or wrong `x-client-id`', $method),
                 $logContext
             );
         }
