@@ -13,7 +13,8 @@ class RedisResponseCache implements ResponseCacheInterface
 
     public const TTL = 172800; //2 days
 
-    public const CURSOR_LIMIT = 1000;
+    /** @var int we need to use a big number to ensure it will pull everything which match with pattern */
+    public const HASH_COUNTER = 100000000;
 
     public const SEARCH_HASHMAP_KEY = 'inventory_search_hashmap';
 
@@ -112,8 +113,8 @@ class RedisResponseCache implements ResponseCacheInterface
         /** @var null|int $cursor */
         $cursor = null;
 
-        while ($keys = $this->client->hScan($hashKey, $cursor, $pattern, self::CURSOR_LIMIT)) {
-            $keys = array_keys($keys); // it only needs the key
+        while ($elements = $this->client->hScan($hashKey, $cursor, $pattern, self::HASH_COUNTER)) {
+            $keys = array_keys($elements); // it only needs the key
 
             $this->client->unlink($this->getExactKeysFromLongKeyNames($keys)); // delete by exact key names
             $this->client->hDel($hashKey, ...$keys); // delete keys from hashmap
