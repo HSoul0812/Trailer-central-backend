@@ -1104,12 +1104,12 @@ class InventoryService implements InventoryServiceInterface
             $patterns[] = $this->responseCacheKey->deleteByDealer($dealer_id);
         }
 
-        $patterns = $this->uniqueCacheInvalidation->keysWithNoJobs($patterns);
+        //$patterns = $this->uniqueCacheInvalidation->keysWithNoJobs($patterns);
 
-        if (count($patterns)) {
-            $this->uniqueCacheInvalidation->createJobsForKeys($patterns);
+        //if (count($patterns)) {
+            //$this->uniqueCacheInvalidation->createJobsForKeys($patterns);
             $this->dispatch(new InvalidateCacheJob($patterns));
-        }
+        //}
 
         $this->dispatch(new ReIndexInventoriesByDealersJob($dealer_ids));
     }
