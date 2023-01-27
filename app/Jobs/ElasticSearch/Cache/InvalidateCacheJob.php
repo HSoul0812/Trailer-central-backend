@@ -37,9 +37,11 @@ class InvalidateCacheJob extends Job
     public function handle(InventoryResponseCacheInterface $service, UniqueCacheInvalidationInterface $uniqueCacheInvalidation, ResponseCacheKeyInterface $responseCacheKey): void
     {
         $patternCollection = collect($this->keyPatterns);
+
         $searchKeys = $patternCollection->filter(function ($key) use ($responseCacheKey) {
             return $responseCacheKey->isSearchKey($key);
         })->values();
+
         $singleKeys = $patternCollection->filter(function ($key) use ($responseCacheKey) {
             return $responseCacheKey->isSingleKey($key);
         })->values();
@@ -47,9 +49,11 @@ class InvalidateCacheJob extends Job
         if ($searchKeys->count()) {
             $service->search()->invalidate(...$searchKeys->toArray());
         }
+
         if ($singleKeys->count()) {
             $service->single()->invalidate(...$singleKeys->toArray());
         }
+
         $uniqueCacheInvalidation->removeJobsForKeys($this->keyPatterns);
     }
 
