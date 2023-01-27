@@ -12,7 +12,12 @@ class RedisResponseCache implements ResponseCacheInterface
     use DispatchesJobs;
 
     public const TTL = 172800; //2 days
+
     public const CURSOR_LIMIT = 1000;
+
+    public const SEARCH_HASHMAP_KEY = 'inventory_search_hashmap';
+
+    public const SINGLE_HASHMAP_KEY = 'inventory_single_hashmap';
 
     /** @var PhpRedis */
     private $client;
@@ -34,12 +39,16 @@ class RedisResponseCache implements ResponseCacheInterface
 
     /**
      * @param string $key
-     * @param $value
+     * @param mixed $value
      * @return void
      */
     public function set(string $key, $value): void
     {
-        $this->client->set($key, $value, self::TTL);
+        // it stores a new empty field within a hashmap using long key name
+        $this->client->hSet($this->extractHashKey($key), $key, '');
+
+        // it stores a new key-value using an exact key name which is known by the cache client (DW)
+        $this->client->set($this->extractExactKey($key), $value, self::TTL);
     }
 
     /**
@@ -70,56 +79,66 @@ class RedisResponseCache implements ResponseCacheInterface
     public function invalidate(string ...$keyPatterns): void
     {
         foreach ($keyPatterns as $pattern) {
-            if (Str::startsWith($pattern, '*') && (substr_count($pattern, '*') == 1)) {
-                $this->client->unlink(Str::replaceFirst('*', '', $pattern));
-                continue;
+            if ($pattern === RedisResponseCacheKey::CLEAR_ALL_PATTERN &&
+                !in_array((int)$this->client->getDbNum(), [0, 1, 2, 3], true)
+            ) {
+                $this->client->flushDB();
+
+                return; // since it will flush the DB, we dont need to continue
             }
 
-            /** @var null|int $cursor */
-            $cursor = null;
-
-            $keys = $this->client->scan($cursor, $pattern);
-
-            /**
-             * @see https://stackoverflow.com/a/36920063/6082936
-             *
-             * We need to start by looking up using cursor zero, that means we have less than 10 keys,
-             * otherwise we have more than 10 keys, so we could iterate using a greater cursor counter
-             */
-            if (!empty($keys)) {
-                $this->client->unlink($this->removeKeyPrefix($keys));
-            }
-
-            if (!is_null($cursor)) {
-                $this->unlink($cursor, $pattern);
-            }
+            $this->hScanAndUnlink($this->extractHashKey($pattern), $pattern);
         }
     }
 
-    /**
-     * @param int  &$cursor
-     * @param string $pattern
-     * @return void number of deleted keys
-     */
-    private function unlink(int &$cursor, string $pattern)
+    private function getExactKeysFromLongKeyNames(array $patterns): array
     {
-        while (false !== ($keys = $this->client->scan($cursor, $pattern, self::CURSOR_LIMIT))) {
-            $this->client->unlink($this->removeKeyPrefix($keys));
-        }
-    }
-
-    /**
-     * @param array $keys list of keys with prefix
-     * @return string[] list of keys without prefix
-     */
-    private function removeKeyPrefix(array $keys): array
-    {
-        $prefix = $this->client->getOption(PhpRedis::OPT_PREFIX);
-
         return array_map(
-            static function (string $key) use ($prefix): string {
-                return str_replace($prefix, '', $key);
-            }, $keys
+            function (string $pattern): string {
+                return $this->extractExactKey($pattern);
+            }, $patterns
         );
+    }
+
+    public function hScanAndUnlink(string $hashKey, string $pattern): void
+    {
+        if (Str::contains($pattern, RedisResponseCacheKey::SINGLE_PATTERN)) {
+            $this->client->unlink($this->extractExactKey($pattern));
+            $this->client->hDel($hashKey, $pattern);
+
+            return;
+        }
+
+        /** @var null|int $cursor */
+        $cursor = null;
+
+        while ($keys = $this->client->hScan($hashKey, $cursor, $pattern, self::CURSOR_LIMIT)) {
+            $keys = array_keys($keys); // it only needs the key
+
+            $this->client->unlink($this->getExactKeysFromLongKeyNames($keys)); // delete by exact key names
+            $this->client->hDel($hashKey, ...$keys); // delete keys from hashmap
+        }
+    }
+
+    /**
+     * @param string $key
+     * @return string an exact key like `inventories.search.bbb02f1f9dcd91350272e6e4f42150150` or `inventories.single.3207402`
+     */
+    private function extractExactKey(string $key): string
+    {
+        $parts = explode('.', $key);
+
+        return sprintf('inventories.%s.%s', $parts[1], $parts[2]);
+    }
+
+    /**
+     * @param string $key
+     * @return string a hash key, `inventory_search_list` or `inventory_single_list`
+     */
+    private function extractHashKey(string $key): string
+    {
+        $parts = explode('.', $key);
+
+        return $parts[1] === 'search' ? self::SEARCH_HASHMAP_KEY : self::SINGLE_HASHMAP_KEY;
     }
 }
