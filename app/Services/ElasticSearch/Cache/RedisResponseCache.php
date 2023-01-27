@@ -4,7 +4,6 @@ namespace App\Services\ElasticSearch\Cache;
 
 use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
 use Illuminate\Foundation\Bus\DispatchesJobs;
-use Illuminate\Support\Str;
 use \Redis as PhpRedis;
 
 class RedisResponseCache implements ResponseCacheInterface
@@ -14,7 +13,7 @@ class RedisResponseCache implements ResponseCacheInterface
     public const TTL = 172800; //2 days
 
     /** @var int we need to use a big number to ensure it will pull everything which match with pattern */
-    public const HASH_SCAN_COUNTER = 100000000;
+    public const HASH_SCAN_COUNTER = 10000;
 
     public const SEARCH_HASHMAP_KEY = 'inventory_search_hashmap';
 
@@ -60,12 +59,12 @@ class RedisResponseCache implements ResponseCacheInterface
      */
     public function forget(string ...$keyPatterns): void
     {
-        $keyPatterns = $this->uniqueCacheInvalidation->keysWithNoJobs($keyPatterns);
+        //$keyPatterns = $this->uniqueCacheInvalidation->keysWithNoJobs($keyPatterns);
 
-        if (count($keyPatterns)) {
-            $this->uniqueCacheInvalidation->createJobsForKeys($keyPatterns);
+        //if (count($keyPatterns)) {
+            //$this->uniqueCacheInvalidation->createJobsForKeys($keyPatterns);
             $this->dispatch(new InvalidateCacheJob($keyPatterns));
-        }
+        ///}
     }
 
     /**
@@ -103,13 +102,6 @@ class RedisResponseCache implements ResponseCacheInterface
 
     public function hScanAndUnlink(string $hashKey, string $pattern): void
     {
-        if (Str::contains($pattern, RedisResponseCacheKey::SINGLE_PATTERN)) {
-            $this->client->unlink($this->extractExactKey($pattern));
-            $this->client->hDel($hashKey, $pattern);
-
-            return;
-        }
-
         /** @var null|int $cursor */
         $cursor = null;
 
