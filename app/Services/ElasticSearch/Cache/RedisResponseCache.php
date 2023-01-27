@@ -10,7 +10,7 @@ class RedisResponseCache implements ResponseCacheInterface
 {
     use DispatchesJobs;
 
-    public const TTL = 172800; //2 days
+    public const TTL = 10800; // 3 hours
 
     public const HASH_SCAN_COUNTER = 10000;
 
