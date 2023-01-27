@@ -88,18 +88,18 @@ class LeadControllerTest extends IntegrationTestCase
         
         // create an interaction for each lead
 
-        $dealerId = $this->dealer->getKey();
-        $this->leads->each(function($lead) use ($dealerId) {
+        $userId = $this->dealer->newDealerUser->user_id;
+        $this->leads->each(function($lead) use ($userId) {
             factory(Interaction::class)->create([
                 'tc_lead_id' => $lead->getKey(),
-                'user_id' => $dealerId,
+                'user_id' => $userId,
                 'interaction_type' => Interaction::TYPE_TASK
             ]);
         });
 
         factory(Interaction::class)->create([
             'tc_lead_id' => $this->lead->getKey(),
-            'user_id' => $dealerId,
+            'user_id' => $userId,
             'interaction_type' => Interaction::TYPE_TASK
         ]);
     }
@@ -189,7 +189,9 @@ class LeadControllerTest extends IntegrationTestCase
 
     public function tearDown(): void
     {
-        Interaction::where('tc_lead_id', $this->lead->getKey())->delete();
+        $userId = $this->dealer->newDealerUser->user_id;
+        
+        Interaction::where('user_id', $userId)->delete();
         Lead::where('dealer_id', $this->dealer->getKey())->delete();
 
         $this->website->delete();
@@ -197,7 +199,6 @@ class LeadControllerTest extends IntegrationTestCase
         $this->token->delete();
 
         // Delete CRM User Related Data
-        $userId = $this->dealer->newDealerUser->user_id;
         NewDealerUser::where(['user_id' => $userId])->delete();
         CrmUser::where(['user_id' => $userId])->delete();
         NewUser::destroy($userId);
