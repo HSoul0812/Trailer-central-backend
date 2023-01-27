@@ -12,7 +12,6 @@ class RedisResponseCache implements ResponseCacheInterface
 
     public const TTL = 172800; //2 days
 
-    /** @var int we need to use a big number to ensure it will pull everything which match with pattern */
     public const HASH_SCAN_COUNTER = 10000;
 
     public const SEARCH_HASHMAP_KEY = 'inventory_search_hashmap';
