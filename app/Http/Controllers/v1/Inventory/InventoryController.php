@@ -581,7 +581,7 @@ class InventoryController extends RestfulControllerV2
     /**
      * @todo removed this method and usages when it helps to discover the where is the issue
      *
-     * It will debug those incoming request without `x-client-id` header, which is the mechanism to determine where come
+     * It will debug those incoming request without or wrong `x-client-id` header, which is the key to determine where come
      * from the request and when to disable massive enqueuing jobs.
      *
      * @param  string  $method
@@ -594,9 +594,14 @@ class InventoryController extends RestfulControllerV2
                 return implode('', $contents);
             })->except('content-type')->toArray();
 
-        if (!isset($logContext['referer'], $logContext['x-client-id'])) {
+        if (empty($logContext['referer']) &&
+            (
+                empty($logContext['x-client-id']) ||
+                $logContext['x-client-id'] !== config('integrations.inventory_cache_auth.credentials.integration_client_id')
+            )
+        ) {
             \Illuminate\Support\Facades\Log::stack(['inventory'])->debug(
-                sprintf('[%s] incoming request without `x-client-id`', $method),
+                sprintf('[%s] incoming request without/wrong `x-client-id`', $method),
                 $logContext
             );
         }
