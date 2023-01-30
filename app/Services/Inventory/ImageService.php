@@ -14,6 +14,7 @@ use App\Repositories\User\UserRepositoryInterface;
 use App\Models\User\User;
 use App\Repositories\Inventory\InventoryRepository;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
+use App\Models\Inventory\Inventory;
 
 class ImageService implements ImageServiceInterface 
 {
@@ -117,16 +118,26 @@ class ImageService implements ImageServiceInterface
      */
     public function updateOverlaySettings(array $params): User
     {
-        $dealer = $this->userRepository->updateOverlaySettings($params['dealer_id'], $params);
-
-        $inventories = $this->inventoryRepository->getAll(['dealer_id' => $params['dealer_id']], false, false, ['inventory_id']);
+        $wasChanged = $this->userRepository->updateOverlaySettings($params['dealer_id'], $params);
 
         // Generate Overlay Inventory Images if necessary
-        if ($inventories->count() > 0) {
-            foreach ($inventories as $inventory) {
-                $this->dispatch((new GenerateOverlayImageJob($inventory->inventory_id))->onQueue('overlay-images'));
+        if ($wasChanged) {
+
+            $inventories = $this->inventoryRepository->getAll(
+                [
+                    'dealer_id' => $params['dealer_id'],
+                    'images_greater_than' => 1
+                ], false, false, [Inventory::getTableName(). '.inventory_id']
+            );
+
+            if ($inventories->count() > 0) {
+                foreach ($inventories as $inventory) {
+                    $this->dispatch((new GenerateOverlayImageJob($inventory->inventory_id))->onQueue('overlay-images'));
+                }
             }
         }
+
+        $dealer = $this->userRepository->get(['dealer_id' => $params['dealer_id']]);
 
         return $dealer;
     }
