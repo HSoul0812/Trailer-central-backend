@@ -1138,9 +1138,8 @@ class InventoryService implements InventoryServiceInterface
     private function fixNonAsciiChars(string $description)
     {
 
-        $description = preg_replace('/(\\?\*){2,}/', '**', $description);
+        //$description = preg_replace('/(\\?\*){2,}/', '**', $description);
         $description = preg_replace('/(\\?_)+/', '_', $description);
-        $description = preg_replace('/\\+/', '', $description);
 
         // Fix 0xa0 or nbsp
         $description = preg_replace('/\xA0/', ' ', $description);
@@ -1153,15 +1152,16 @@ class InventoryService implements InventoryServiceInterface
         $description = preg_replace('/\xB4/', "'", $description);
         $description = preg_replace('/\x27/', "'", $description);
 
-        $description = preg_replace('/\x93/', '"', $description);
-        $description = preg_replace('/\x94/', '"', $description);
+        //$description = preg_replace('/\x93/', '"', $description);
+        //$description = preg_replace('/\x94/', '"', $description);
+
         $description = preg_replace('/”/', '"', $description);
         $description = preg_replace('/’/', "'", $description);
 
         $description = preg_replace('/©/', "Copyright", $description);
         $description = preg_replace('/®/', "Registered", $description);
 
-        $description = preg_replace('/[[:^print:]]/', ' ', $description);
+        //$description = preg_replace('/[[:^print:]]/', ' ', $description);
 
         preg_match('/<ul>(.*?)<\/ul>/s', $description, $match);
         if (!empty($match)) {
@@ -1188,12 +1188,12 @@ class InventoryService implements InventoryServiceInterface
             $patterns[] = $this->responseCacheKey->deleteByDealer($dealer_id);
         }
 
-        $patterns = $this->uniqueCacheInvalidation->keysWithNoJobs($patterns);
+        //$patterns = $this->uniqueCacheInvalidation->keysWithNoJobs($patterns);
 
-        if (count($patterns)) {
-            $this->uniqueCacheInvalidation->createJobsForKeys($patterns);
+        //if (count($patterns)) {
+            //$this->uniqueCacheInvalidation->createJobsForKeys($patterns);
             $this->dispatch(new InvalidateCacheJob($patterns));
-        }
+        //}
 
         $this->dispatch(new ReIndexInventoriesByDealersJob($dealer_ids));
     }

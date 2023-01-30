@@ -14,9 +14,9 @@ interface ImportTypeInterface
 {
     /**
      * @param ParsedEmail $parsedEmail
-     * @return bool
+     * @return ImportSourceInterface|null
      */
-    public function isSatisfiedBy(ParsedEmail $parsedEmail): bool;
+    public function findSource(ParsedEmail $parsedEmail): ?ImportSourceInterface;
 
     /**
      * @param User $dealer
