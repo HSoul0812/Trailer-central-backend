@@ -140,38 +140,34 @@ class BlastRepositoryTest extends TestCase
      *
      * @group CRM
      * @typeOfTest IntegrationTestCase
-     * @dataProvider invalidPropertiesProvider
+     * @dataProvider duplicatePropertiesProvider
      *
      * @param  array  $properties
-     * @param  string|callable  $expectedPDOExceptionMessage
-     *
-     * @throws BindingResolutionException when there is a problem with resolution of concreted class
      *
      * @covers BlastRepository::sent
      */
     public function testSentWithException(
-        array $properties,
-        $expectedPDOExceptionMessage
+        array $properties
     ): void {
         $this->seeder->seed();
 
         $properties = $this->seeder->extractValues($properties);
-        $expectedPDOExceptionMessage = is_callable($expectedPDOExceptionMessage) ?
-            $expectedPDOExceptionMessage($properties['email_blasts_id'], $properties['lead_id']) :
-            $expectedPDOExceptionMessage;
 
-        // When I call create with invalid parameters
-        // Then I expect see that one exception have been thrown with a specific message
-        //$this->expectException(PDOException::class);
-        $this->expectExceptionMessage($expectedPDOExceptionMessage);
-
+        // Campaign sent did not exist before but does now after sent
+        self::assertSame(1, BlastSent::where([
+            'email_blasts_id' => $properties['email_blasts_id'],
+            'lead_id' => $properties['lead_id']
+        ])->count());
 
         // When I call create with valid parameters
-        /** @var BlastSent $leadBlastToCustomer */
+        /** @var BlastSent $leadCampaignToCustomer */
         $blastSent = $this->getConcreteRepository()->sent($properties['email_blasts_id'], $properties['lead_id']);
 
-        // And I should get a null value
-        self::assertNull($blastSent);
+        // Blast sent did exist before and still only one exists now
+        self::assertSame(1, BlastSent::where([
+            'email_blasts_id' => $blastSent->email_blasts_id,
+            'lead_id' => $blastSent->lead_id
+        ])->count());
     }
 
     /**
@@ -195,7 +191,7 @@ class BlastRepositoryTest extends TestCase
 
         // When I call wasSent with valid parameters
         /** @var bool $wasSent */
-        $wasSent = $this->getConcreteRepository()->wasSent($sent->email_blasts_id, $sent->lead_id);
+        $wasSent = $this->getConcreteRepository()->wasSent($sent->email_blasts_id, $sent->lead->email_address);
 
         // Then I should return true
         self::assertTrue($wasSent);
@@ -222,7 +218,7 @@ class BlastRepositoryTest extends TestCase
 
         // When I call wasSent with valid parameters
         /** @var bool $wasSent */
-        $wasSent = $this->getConcreteRepository()->wasSent($sent->email_blasts_id, $sent->lead_id);
+        $wasSent = $this->getConcreteRepository()->wasSent($sent->email_blasts_id, $sent->lead->email_address);
 
         // Then I should return true
         self::assertFalse($wasSent);
@@ -246,11 +242,11 @@ class BlastRepositoryTest extends TestCase
     }
 
     /**
-     * Examples of invalid customer-inventory id properties with theirs expected exception messages.
+     * Examples of duplicate customer-inventory id properties.
      *
      * @return array[]
      */
-    public function invalidPropertiesProvider(): array
+    public function duplicatePropertiesProvider(): array
     {
         $blastIdLambda = static function (BlastSeeder $seeder) {
             return $seeder->blastsSent[0]->email_blasts_id;
@@ -260,15 +256,8 @@ class BlastRepositoryTest extends TestCase
             return $seeder->blastsSent[0]->lead_id;
         };
 
-        $duplicateEntryLambda = function (int $blastId, int $leadId) {
-            return $this->getDuplicateEntryMessage(
-                "$blastId-$leadId",
-                'PRIMARY'
-            );
-        };
-
-        return [                      // array $properties, string $expectedPDOExceptionMessage
-            'With duplicate entry' => [['email_blasts_id' => $blastIdLambda, 'lead_id' => $leadIdLambda], $duplicateEntryLambda],
+        return [                      // array $properties
+            'With duplicate entry' => [['email_blasts_id' => $blastIdLambda, 'lead_id' => $leadIdLambda]],
         ];
     }
 
