@@ -309,11 +309,15 @@ class LeadRepository implements LeadRepositoryInterface {
      */
     public function getNotesBetweenLeads(array $leadIds)
     {
-        return Lead::selectRaw("GROUP_CONCAT(note separator '\n\n') as notes")
+        // Get Notes for Various Leads
+        $lead = Lead::selectRaw("GROUP_CONCAT(note separator '\n\n') as notes")
             ->whereIn('identifier', $leadIds)
             ->whereRaw('note is not null')
             ->whereRaw("trim(note) <> ''")
-            ->first()->notes;
+            ->first();
+
+        // Get Notes
+        return $lead->notes ?? '';
     }
 
     /**
