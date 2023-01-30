@@ -310,14 +310,23 @@ class LeadRepository implements LeadRepositoryInterface {
     public function getNotesBetweenLeads(array $leadIds)
     {
         // Get Notes for Various Leads
-        $lead = Lead::selectRaw("GROUP_CONCAT(note separator '\n\n') as notes")
+        $leads = Lead::select('note')
             ->whereIn('identifier', $leadIds)
             ->whereRaw('note is not null')
             ->whereRaw("trim(note) <> ''")
-            ->first();
+            ->get();
 
         // Get Notes
-        return $lead->notes ?? '';
+        $notes = '';
+        foreach($leads as $lead) {
+            if(!empty($notes)) {
+                $notes .= PHP_EOL . PHP_EOL;
+            }
+            $notes .= $lead->note;
+        }
+
+        // Return Combined Notes
+        return $notes;
     }
 
     /**
