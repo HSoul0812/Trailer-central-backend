@@ -276,7 +276,8 @@ class InventoryService implements InventoryServiceInterface
             $this->inventoryRepository->commitTransaction();
 
             // Generate Overlay Inventory Images if necessary
-            $this->dispatch((new GenerateOverlayImageJob($inventory->inventory_id))->onQueue('overlay-images'));
+            if (!empty($newImages))
+                $this->dispatch((new GenerateOverlayImageJob($inventory->inventory_id))->onQueue('overlay-images'));
 
             Log::info('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
         } catch (\Exception $e) {
@@ -301,6 +302,7 @@ class InventoryService implements InventoryServiceInterface
             $this->inventoryRepository->beginTransaction();
 
             $newImages = $params['new_images'] ?? [];
+            $existingImages = $params['existing_images'] ?? [];
             $newFiles = $params['new_files'] ?? [];
             $hiddenFiles = $params['hidden_files'] ?? [];
             $clappsDefaultImage = $params['clapps']['default-image']['url'] ?? '';
@@ -361,7 +363,8 @@ class InventoryService implements InventoryServiceInterface
             $this->inventoryRepository->commitTransaction();
 
             // Generate Overlay Inventory Images if necessary
-            $this->dispatch((new GenerateOverlayImageJob($inventory->inventory_id))->onQueue('overlay-images'));
+            if (!empty($newImages) || !empty($existingImages))
+                $this->dispatch((new GenerateOverlayImageJob($inventory->inventory_id))->onQueue('overlay-images'));
 
             Log::info('Item has been successfully updated', ['inventoryId' => $inventory->inventory_id]);
         } catch (\Exception $e) {
@@ -586,7 +589,7 @@ class InventoryService implements InventoryServiceInterface
      * @throws \App\Exceptions\File\FileUploadException
      * @throws \App\Exceptions\File\ImageUploadException
      */
-    private function uploadImages(array $params, string $imagesKey): array
+    protected function uploadImages(array $params, string $imagesKey): array
     {
         $images = $params[$imagesKey];
 
