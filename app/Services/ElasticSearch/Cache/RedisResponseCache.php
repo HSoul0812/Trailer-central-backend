@@ -4,16 +4,19 @@ namespace App\Services\ElasticSearch\Cache;
 
 use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
 use Illuminate\Foundation\Bus\DispatchesJobs;
-use Illuminate\Support\Str;
 use \Redis as PhpRedis;
 
 class RedisResponseCache implements ResponseCacheInterface
 {
     use DispatchesJobs;
 
-    public const TTL = 172800; //2 days
+    /**
+     * @var int 3 hours, to avoid to reach out max memory, however we need to use a better policy
+     * Maybe we need to use a TTL according the dealer traffic, or some similar policy
+     */
+    public const TTL = 10800;
 
-    public const CURSOR_LIMIT = 1000;
+    public const HASH_SCAN_COUNTER = 10000;
 
     public const SEARCH_HASHMAP_KEY = 'inventory_search_hashmap';
 
@@ -59,12 +62,12 @@ class RedisResponseCache implements ResponseCacheInterface
      */
     public function forget(string ...$keyPatterns): void
     {
-        $keyPatterns = $this->uniqueCacheInvalidation->keysWithNoJobs($keyPatterns);
+        //$keyPatterns = $this->uniqueCacheInvalidation->keysWithNoJobs($keyPatterns);
 
-        if (count($keyPatterns)) {
-            $this->uniqueCacheInvalidation->createJobsForKeys($keyPatterns);
+        //if (count($keyPatterns)) {
+            //$this->uniqueCacheInvalidation->createJobsForKeys($keyPatterns);
             $this->dispatch(new InvalidateCacheJob($keyPatterns));
-        }
+        ///}
     }
 
     /**
@@ -102,18 +105,11 @@ class RedisResponseCache implements ResponseCacheInterface
 
     public function hScanAndUnlink(string $hashKey, string $pattern): void
     {
-        if (Str::contains($pattern, RedisResponseCacheKey::SINGLE_PATTERN)) {
-            $this->client->unlink($this->extractExactKey($pattern));
-            $this->client->hDel($hashKey, $pattern);
-
-            return;
-        }
-
         /** @var null|int $cursor */
         $cursor = null;
 
-        while ($keys = $this->client->hScan($hashKey, $cursor, $pattern, self::CURSOR_LIMIT)) {
-            $keys = array_keys($keys); // it only needs the key
+        while ($elements = $this->client->hScan($hashKey, $cursor, $pattern, self::HASH_SCAN_COUNTER)) {
+            $keys = array_keys($elements); // it only needs the key
 
             $this->client->unlink($this->getExactKeysFromLongKeyNames($keys)); // delete by exact key names
             $this->client->hDel($hashKey, ...$keys); // delete keys from hashmap
