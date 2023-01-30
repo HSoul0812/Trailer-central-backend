@@ -82,6 +82,7 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
             method_exists($first, 'indexConfigurator') &&
             ($configurator = $first->indexConfigurator()) &&
             ($searchableAs = $configurator->aliasName()) &&
+            config('elastic.scout_driver.check_index.inventory', true) && // to save a RPC in ES server
             !$this->isIndexAlreadyCreated($searchableAs)
         ) {
             $indexName = $configurator->name();
