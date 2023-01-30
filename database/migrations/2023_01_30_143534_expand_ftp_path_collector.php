@@ -19,6 +19,8 @@ class ExpandFtpPathCollector extends Migration
         Schema::table(self::TARGET_TABLE, function (Blueprint $table) {
             if ($this->checkColumn()) {
                 $table->string(self::TARGET_FIELD, 254)->change();
+            } else {
+                $table->string(self::TARGET_FIELD, 254);
             }
         });
     }
@@ -30,9 +32,7 @@ class ExpandFtpPathCollector extends Migration
      */
     public function down(): void {
         Schema::table(self::TARGET_TABLE, function (Blueprint $table) {
-            if ($this->checkColumn()) {
                 $table->string(self::TARGET_FIELD, 128)->change();
-            }
         });
     }
 
