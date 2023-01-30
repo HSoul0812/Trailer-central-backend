@@ -91,6 +91,7 @@ use App\Indexers\Inventory\InventorySearchable as Searchable;
  * @property bool $show_on_ksl
  * @property bool $show_on_racingjunk
  * @property bool $show_on_website
+ * @property \DateTimeInterface|Carbon $tt_payment_expiration_date
  * @property bool $overlay_enabled
  * @property bool $is_special
  * @property bool $is_featured
@@ -322,6 +323,7 @@ class Inventory extends Model
         'show_on_ksl',
         'show_on_racingjunk',
         'show_on_website',
+        'tt_payment_expiration_date',
         'overlay_enabled',
         'is_special',
         'is_featured',
@@ -392,7 +394,8 @@ class Inventory extends Model
         'qb_sync_processed' => 'boolean',
         'is_floorplan_bill' => 'boolean',
         'sold_at' => 'datetime',
-        'changed_fields_in_dashboard' => 'array'
+        'changed_fields_in_dashboard' => 'array',
+        'tt_payment_expiration_date' => 'date'
     ];
 
     protected $hidden = [
