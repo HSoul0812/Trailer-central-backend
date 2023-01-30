@@ -72,6 +72,7 @@ class PruneSSNCommand extends Command
             ->select('id', 'answers')
             ->where([
                 ['created_at', '<', $selectedDate],
+                ['is_ssn_removed', '=', false],
             ])
             ->whereNotNull('answers')
             ->whereRaw("answers LIKE '%ssn%'")
