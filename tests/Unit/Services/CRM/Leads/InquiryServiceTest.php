@@ -1295,7 +1295,7 @@ class InquiryServiceTest extends TestCase
 
         // Mock Merge Lead
         $this->leadServiceMock
-            ->shouldReceive('merge')
+            ->shouldReceive('mergeInquiry')
             ->once()
             ->andReturn($interaction);
 
@@ -1499,7 +1499,7 @@ class InquiryServiceTest extends TestCase
 
         // Mock Merge Lead
         $this->leadServiceMock
-            ->shouldReceive('merge')
+            ->shouldReceive('mergeInquiry')
             ->once()
             ->andReturn($interaction);
 
