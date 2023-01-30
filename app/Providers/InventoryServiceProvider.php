@@ -166,6 +166,8 @@ class InventoryServiceProvider extends ServiceProvider
                 $this->app->make(ResponseCacheKeyInterface::class)
             );
         });
+
+		$this->app->bind(InventoryUpdateSourceInterface::class, InventoryUpdateSource::class);
     }
 
     /**

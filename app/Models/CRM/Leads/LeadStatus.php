@@ -66,6 +66,12 @@ class LeadStatus extends Model
         self::STATUS_ID_CLOSED => self::STATUS_WON_CLOSED,
         self::STATUS_ID_LOST => self::STATUS_LOST,
     ];
+    
+    const CLOSED_STATUSES = [
+        self::STATUS_WON,
+        self::STATUS_WON_CLOSED,
+        self::STATUS_LOST
+    ];
 
     const TABLE_NAME = 'crm_tc_lead_status';
 
@@ -96,7 +102,8 @@ class LeadStatus extends Model
         'source',
         'next_contact_date',
         'sales_person_id',
-        'contact_type'
+        'contact_type',
+        'closed_at'
     ];
 
     /**
