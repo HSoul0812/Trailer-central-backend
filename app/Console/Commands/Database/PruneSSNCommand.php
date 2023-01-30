@@ -2,11 +2,11 @@
 
 namespace App\Console\Commands\Database;
 
-use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Collection;
 use App\Console\Traits\PrependsOutput;
 use App\Console\Traits\PrependsTimestamp;
+use Illuminate\Console\Command;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class PruneSSNCommand
@@ -17,6 +17,8 @@ class PruneSSNCommand extends Command
 {
     use PrependsOutput, PrependsTimestamp;
 
+    const WEBSITE_FORM_SUBMISSIONS_TABLE_SSN_KEY = 'ssn';
+
     /**
      * @var string
      */
@@ -26,8 +28,6 @@ class PruneSSNCommand extends Command
         {--chunkSize=1000 : The size for each chunk.}
         {--delay=5 : Delay time in seconds after each delayChunkCount parts is being dispatched.}
     ';
-
-    const WEBSITE_FORM_SUBMISSIONS_TABLE_SSN_KEY = 'ssn';
 
     /**
      * @var string
@@ -52,51 +52,59 @@ class PruneSSNCommand extends Command
         $tableData = $this->getTableFields($selectedDate);
 
         foreach ($tableData as $key => $value) {
-            $infoMsg = 'SSN data created before "' . $selectedDate . '" in "' . $value['tableName'] . '" table.';
+            $infoMsg = 'SSN data, created before "' . $selectedDate . '" in "' . $value['tableName'] . '" table.';
             $this->line('Removing ' . $infoMsg);
 
             DB::table($value['tableName'])
                 ->where($value['whereCondition'])
                 ->update($value['updateData']);
 
-            $this->line('Removed ' . $infoMsg);
+            $this->info('Removed 🗑️ ' . $infoMsg);
         }
 
         $chunkSize = $this->option('chunkSize');
         $delay = $this->option('delay');
 
-        $infoMsg = 'SSN data created before "' . $selectedDate . '" in "website_form_submissions" table.';
+        $infoMsg = 'SSN data, created before "' . $selectedDate . '" in "website_form_submissions" table.';
         $this->line('Removing ' . $infoMsg);
 
         DB::table('website_form_submissions')
-            ->select('id', 'answers')
+            ->select(['id', 'answers', 'is_ssn_removed',])
             ->where([
                 ['created_at', '<', $selectedDate],
                 ['is_ssn_removed', '=', false],
             ])
             ->whereNotNull('answers')
-            ->whereRaw("answers LIKE '%ssn%'")
+            ->whereRaw("answers LIKE '%" . self::WEBSITE_FORM_SUBMISSIONS_TABLE_SSN_KEY . "%'")
             ->orderBy('id')
             ->chunkById($chunkSize, function (Collection $submissions) use ($delay) {
+                $this->line('Processing for: ' . $submissions->pluck('id')->implode(', '));
                 foreach ($submissions as $submission) {
                     try {
                         if (self::isValidJson($submission->answers)) {
-                            $alteredAnswer = null;
                             $answersCollection = collect(json_decode($submission->answers, true));
-                            if($answersCollection->isNotEmpty() & $answersCollection->contains('name', 'ssn')) {
-                                $alteredAnswer = $answersCollection->reject(function ($value, $key) {
-                                    return $value['name'] === 'ssn';
-                                });
+                            if ($answersCollection->isNotEmpty() &&
+                                $answersCollection->contains('name', self::WEBSITE_FORM_SUBMISSIONS_TABLE_SSN_KEY)
+                            ) {
+                                $ssnAnswers = $answersCollection->all();
+                                $answersCollection->where('name', self::WEBSITE_FORM_SUBMISSIONS_TABLE_SSN_KEY)
+                                    ->each(function ($item, $key) use (&$ssnAnswers, $submission) {
+
+                                        $ssnAnswers = data_set($ssnAnswers, $key . '.answer', '');
+                                    });
 
                                 DB::table('website_form_submissions')
                                     ->where('id', '=', $submission->id)
-                                    ->update(['answers' => $alteredAnswer->toJson()]);
+                                    ->update([
+                                        'answers' => json_encode($ssnAnswers),
+                                        'is_ssn_removed' => true,
+                                    ]);
                             }
                         } else {
-                            $this->line('Invalid JSON for id: ' . $submission->id);
+                            $this->warn('Invalid JSON for id: ' . $submission->id);
                         }
                     } catch (\Throwable $th) {
-                        $this->line($th->getMessage());
+                        $this->error($th->getMessage());
                     }
                 }
 
@@ -104,23 +112,29 @@ class PruneSSNCommand extends Command
                 sleep($delay);
             });
 
-        $this->line('Removed ' . $infoMsg);
+        $this->info('Removed 🗑️ ' . $infoMsg);
 
-        $this->line('The command has finished!');
+        $this->info('The command has finished!');
 
         return 0;
     }
 
+    /**
+     * @param string $string
+     *
+     * @return bool
+     */
     private static function isValidJson(string $string): bool
     {
         json_decode($string);
+
         return json_last_error() === JSON_ERROR_NONE;
     }
 
     /**
-     * @return array
-     *
      * @param mixed $selectedDate
+     *
+     * @return array
      */
     private function getTableFields($selectedDate): array
     {
