@@ -69,7 +69,7 @@ class ShowroomBulkUpdateRepository implements ShowroomBulkUpdateRepositoryInterf
      */
     public function bulkUpdate($manufacturer, $params): bool
     {
-        return Showroom::where('manufacturer', $manufacturer)->update($params);
+        return $manufacturer->update($params);
     }
 
     /**

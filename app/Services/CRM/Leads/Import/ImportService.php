@@ -17,6 +17,7 @@ use App\Services\Integration\Google\GoogleService;
 use App\Services\Integration\Google\GmailServiceInterface;
 use App\Services\Integration\Google\GoogleServiceInterface;
 use Carbon\CarbonImmutable;
+use Exception;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -86,25 +87,23 @@ class ImportService implements ImportServiceInterface
     /**
      * Takes a lead and import it to the system in various formats
      *
-     * @param User $dealer
-     * @param ParsedEmail $parsedEmail
-     * @return ADFLead
-     * @throws InvalidImportFormatException
+     * @return int
+     * @throws MissingEmailAccessTokenException
      */
     public function import(): int
     {
         // Get Emails From Service
         $accessToken = $this->getAccessToken();
         $address = config('adf.imports.gmail.email');
-	    $this->log->info('Getting Messages With Access Token ' . print_r($accessToken, true));
+        $this->log->info('Getting Messages With Access Token ' . print_r($accessToken, true));
 
-	    // Get Messages for Access Token
+        // Get Messages for Access Token
         $messages = $this->gmail->messages($accessToken, config('adf.imports.gmail.inbox'));
         $this->log->info('Parsing ' . count($messages) . ' Email Messages From Email Address ' . $address);
 
         // Checking Each Message
         $total = 0;
-        foreach($messages as $mailId) {
+        foreach ($messages as $mailId) {
             /** @var ParsedEmail $email */
             $email = $this->gmail->message($mailId);
             $this->log->info('Parsing Email Message #' . $mailId . ' From Email Address ' . $address);
@@ -112,16 +111,16 @@ class ImportService implements ImportServiceInterface
             // Find Exceptions
             try {
                 // Confirm Needed Service
-                $neededService = null;
+                $importSource = null;
                 foreach ($this->services as $service) {
-                    if ($service->isSatisfiedBy($email)) {
-                        $neededService = $service;
+                    if ($matchedSource = $service->findSource($email)) {
+                        $importSource = $matchedSource;
                         break;
                     }
                 }
 
                 // No Service Found, Throw Exception
-                if (!$neededService instanceof ImportTypeInterface) {
+                if (!$importSource instanceof ImportSourceInterface) {
                     throw new InvalidImportFormatException();
                 }
 
@@ -130,13 +129,13 @@ class ImportService implements ImportServiceInterface
                 try {
                     $dealer = $this->dealers->get(['dealer_id' => $dealerId]);
                     $this->log->info('Parsing Email #' . $mailId . ' Import for Dealer #' . $dealerId);
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $this->log->error("Exception occurred Parsing Email #{$mailId} for Dealer #{$dealerId}: {$e->getMessage()}");
                     throw new InvalidDealerIdException;
                 }
 
                 // Import Lead
-                $adfLead = $neededService->getLead($dealer, $email);
+                $adfLead = $importSource->getLead($dealer, $email);
 
                 // Process Further
                 $result = $this->importLead($adfLead);
@@ -145,18 +144,17 @@ class ImportService implements ImportServiceInterface
                     $this->tryMove($accessToken, $mailId, 'processed');
                     $total++;
                 }
-
-            } catch(InvalidDealerIdException $e) {
-                if(!empty($dealerId) && is_numeric($dealerId)) {
+            } catch (InvalidDealerIdException $e) {
+                if (!empty($dealerId) && is_numeric($dealerId)) {
                     $this->tryMove($accessToken, $mailId, 'unmapped');
                 } else {
                     $this->tryMove($accessToken, $mailId, 'invalid');
                 }
                 $this->log->error("Invalid Dealer Exception on Import Message #{$mailId}: {$e->getMessage()}");
-            } catch(InvalidImportFormatException $e) {
+            } catch (InvalidImportFormatException $e) {
                 $this->tryMove($accessToken, $mailId, 'invalid');
                 $this->log->error("Invalid Import Exception on Message #{$mailId}: {$e->getMessage()}");
-            } catch(\Exception $e) {
+            } catch (Exception $e) {
                 $this->log->error("Exception returned on ADF Import Message #{$mailId}: " .
                                     "{$e->getMessage()}: {$e->getTraceAsString()}");
             }
@@ -180,7 +178,7 @@ class ImportService implements ImportServiceInterface
         $systemEmail = $this->emails->find(['email' => $email]);
 
         // No Access Token?
-        if(empty($systemEmail->googleToken)) {
+        if (empty($systemEmail->googleToken)) {
             throw new MissingEmailAccessTokenException;
         }
 
@@ -188,7 +186,7 @@ class ImportService implements ImportServiceInterface
         $accessToken = $systemEmail->googleToken;
         $this->google->setKey(GoogleService::AUTH_TYPE_SYSTEM);
         $validate = $this->google->validate($accessToken);
-        if($validate->newToken && $validate->newToken->exists()) {
+        if ($validate->newToken && $validate->newToken->exists()) {
             // Refresh Access Token
             $time = CarbonImmutable::now();
             $accessToken = $this->tokens->refresh($accessToken->id, $validate->newToken);
@@ -204,7 +202,8 @@ class ImportService implements ImportServiceInterface
      * @param ADFLead $adfLead
      * @return Lead
      */
-    private function importLead(ADFLead $adfLead): Lead {
+    private function importLead(ADFLead $adfLead): Lead
+    {
         // Save Lead From ADF Data
         return $this->leadService->create([
             'website_id' => $adfLead->getWebsiteId(),
@@ -239,8 +238,10 @@ class ImportService implements ImportServiceInterface
      * @param AccessToken $accessToken
      * @param string $mailId
      * @param string $add ; label to add from config
+     * @return void
      */
-    private function tryMove(AccessToken $accessToken, string $mailId, string $add) {
+    private function tryMove(AccessToken $accessToken, string $mailId, string $add): void
+    {
         // Are We Moving Labels Right Now?!
         $move = config('adf.imports.gmail.move', true);
 
@@ -248,13 +249,9 @@ class ImportService implements ImportServiceInterface
         $inbox = config('adf.imports.gmail.inbox');
 
         // Yes?
-        if($move) {
+        if ($move) {
             $this->gmail->move($accessToken, $mailId, [config('adf.imports.gmail.' . $add)], [$inbox]);
             $this->log->info('Moved ADF Email #' . $mailId . ' to ' . ucfirst($add));
-            return true;
         }
-
-        // Just Skip for Now
-        return false;
     }
 }

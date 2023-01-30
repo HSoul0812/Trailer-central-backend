@@ -13,6 +13,7 @@ use App\Repositories\User\UserRepositoryInterface;
 use App\Services\CRM\Leads\DTOs\ADFLead;
 use App\Services\CRM\Leads\Import\ADFService;
 use App\Services\CRM\Leads\Import\HtmlService;
+use App\Services\CRM\Leads\Import\HtmlServices\BoatsCom;
 use App\Services\CRM\Leads\Import\ImportService;
 use App\Services\CRM\Leads\LeadServiceInterface;
 use App\Services\Integration\Common\DTOs\ParsedEmail;
@@ -84,6 +85,11 @@ class ImportServiceTest extends TestCase
     protected $htmlService;
 
     /**
+     * @var BoatsCom|LegacyMockInterface
+     */
+    protected $boatsCom;
+
+    /**
      * @var LoggerInterface|LegacyMockInterface
      */
     protected $logMock;
@@ -101,6 +107,7 @@ class ImportServiceTest extends TestCase
         $this->instanceMock('adfService', ADFService::class);
         $this->instanceMock('htmlService', HtmlService::class);
         $this->instanceMock('logMock', LoggerInterface::class);
+        $this->instanceMock('boatsCom', BoatsCom::class);
 
         Config::set('adf.imports.gmail.move', true);
     }
@@ -171,16 +178,16 @@ class ImportServiceTest extends TestCase
             ->andReturn($email);
 
         $this->htmlService
-            ->shouldReceive('isSatisfiedBy')
+            ->shouldReceive('findSource')
             ->with($email)
             ->once()
-            ->andReturn(true);
+            ->andReturn($this->boatsCom);
 
         $this->adfService
-            ->shouldReceive('isSatisfiedBy')
+            ->shouldReceive('findSource')
             ->with($email)
             ->once()
-            ->andReturn(false);
+            ->andReturn(null);
 
         $this->userRepository
             ->shouldReceive('get')
@@ -188,7 +195,7 @@ class ImportServiceTest extends TestCase
             ->once()
             ->andReturn($dealer);
 
-        $this->htmlService
+        $this->boatsCom
             ->shouldReceive('getLead')
             ->with($dealer, $email)
             ->once()
@@ -284,7 +291,7 @@ class ImportServiceTest extends TestCase
             ->andReturn($email);
 
         $this->adfService
-            ->shouldReceive('isSatisfiedBy')
+            ->shouldReceive('findSource')
             ->with($email)
             ->once()
             ->andThrow(new \Exception());
@@ -353,16 +360,16 @@ class ImportServiceTest extends TestCase
             ->andReturn($email);
 
         $this->htmlService
-            ->shouldReceive('isSatisfiedBy')
+            ->shouldReceive('findSource')
             ->with($email)
             ->once()
-            ->andReturn(true);
+            ->andReturn($this->boatsCom);
 
         $this->adfService
-            ->shouldReceive('isSatisfiedBy')
+            ->shouldReceive('findSource')
             ->with($email)
             ->once()
-            ->andReturn(false);
+            ->andReturn(null);
 
         $this->userRepository
             ->shouldReceive('get')
@@ -435,16 +442,16 @@ class ImportServiceTest extends TestCase
             ->andReturn($email);
 
         $this->htmlService
-            ->shouldReceive('isSatisfiedBy')
+            ->shouldReceive('findSource')
             ->with($email)
             ->once()
-            ->andReturn(false);
+            ->andReturn($this->boatsCom);
 
         $this->adfService
-            ->shouldReceive('isSatisfiedBy')
+            ->shouldReceive('findSource')
             ->with($email)
             ->once()
-            ->andReturn(false);
+            ->andReturn(null);
 
         $this->gmailService
             ->shouldReceive('move')

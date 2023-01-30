@@ -579,7 +579,7 @@ class InventoryController extends RestfulControllerV2
     }
 
     /**
-     * @todo removed this method and usages when it helps to discover the where is the issue
+     * @todo remove this method and usages when it has helped us to discover where is the issue
      *
      * It will debug those incoming request without or wrong `x-client-id` header, which is the key to determine where come
      * from the request and when to disable massive enqueuing jobs.
