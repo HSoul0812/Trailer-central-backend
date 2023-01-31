@@ -1350,7 +1350,7 @@ class InquiryServiceTest extends TestCase
 
         // Get Pretty Phone
         $this->mergeLead->shouldReceive('getPreferredDealerLocationAttribute')
-             ->andReturn([]);
+             ->andReturn(null);
 
         // Get Real Username Attribute
         $interaction->shouldReceive('getRealUsernameAttribute')
@@ -1554,7 +1554,7 @@ class InquiryServiceTest extends TestCase
 
         // Get Pretty Phone
         $this->mergeLead->shouldReceive('getPreferredDealerLocationAttribute')
-             ->andReturn([]);
+             ->andReturn(null);
 
         // Get Real Username Attribute
         $interaction->shouldReceive('getRealUsernameAttribute')
