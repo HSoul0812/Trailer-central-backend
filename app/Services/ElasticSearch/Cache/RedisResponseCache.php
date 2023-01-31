@@ -34,7 +34,7 @@ class RedisResponseCache implements ResponseCacheInterface
      * @param PhpRedis $client
      * @param UniqueCacheInvalidationInterface $uniqueCacheInvalidation
      */
-    public function __construct(PhpRedis $client, UniqueCacheInvalidationInterface $uniqueCacheInvalidation)
+    public function __construct($client, UniqueCacheInvalidationInterface $uniqueCacheInvalidation)
     {
         $this->client = $client;
         $this->uniqueCacheInvalidation = $uniqueCacheInvalidation;
