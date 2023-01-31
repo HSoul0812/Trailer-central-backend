@@ -74,13 +74,15 @@ class PruneSSNCommand extends Command
                 ['created_at', '<', $selectedDate],
                 ['is_ssn_removed', '=', false],
             ])
-            ->whereNotNull('answers')
-            ->whereRaw("answers LIKE '%" . self::WEBSITE_FORM_SUBMISSIONS_TABLE_SSN_KEY . "%'")
             ->orderBy('id')
             ->chunkById($chunkSize, function (Collection $submissions) use ($delay) {
                 $this->line('Processing for: ' . $submissions->pluck('id')->implode(', '));
                 foreach ($submissions as $submission) {
                     try {
+                        $updateData = [
+                            'is_ssn_removed' => true,
+                        ];
+
                         if (self::isValidJson($submission->answers)) {
                             $answersCollection = collect(json_decode($submission->answers, true));
                             if ($answersCollection->isNotEmpty() &&
@@ -93,16 +95,15 @@ class PruneSSNCommand extends Command
                                         $ssnAnswers = data_set($ssnAnswers, $key . '.answer', '');
                                     });
 
-                                DB::table('website_form_submissions')
-                                    ->where('id', '=', $submission->id)
-                                    ->update([
-                                        'answers' => json_encode($ssnAnswers),
-                                        'is_ssn_removed' => true,
-                                    ]);
+                                $updateData['answers'] = json_encode($ssnAnswers);
                             }
                         } else {
                             $this->warn('Invalid JSON for id: ' . $submission->id);
                         }
+
+                        DB::table('website_form_submissions')
+                            ->where('id', '=', $submission->id)
+                            ->update($updateData);
                     } catch (\Throwable $th) {
                         $this->error($th->getMessage());
                     }

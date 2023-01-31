@@ -17,6 +17,7 @@ class AddSsnRemovedColumnToWebsiteFormSubmissionsTable extends Migration
     {
         Schema::table($this->tableName, function (Blueprint $table) {
             $table->boolean('is_ssn_removed')->default(false);
+            $table->index(['created_at', 'is_ssn_removed']);
         });
     }
 
@@ -29,6 +30,7 @@ class AddSsnRemovedColumnToWebsiteFormSubmissionsTable extends Migration
     {
         Schema::table($this->tableName, function (Blueprint $table) {
             $table->dropColumn('is_ssn_removed');
+            $table->dropIndex(['created_at', 'is_ssn_removed']);
         });
     }
 }
