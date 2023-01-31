@@ -109,6 +109,7 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
         'showOnKsl'            => ['type' => 'boolean'],
         'showOnRacingjunk'     => ['type' => 'boolean'],
         'showOnWebsite'        => ['type' => 'boolean'],
+        'ttPaymentExpirationDate' => ['type' => 'date', 'format' => 'yyyy-MM-dd'],
         'videoEmbedCode'       => ['type' => 'keyword'],
         'numAc'                => ['type' => 'integer'],
         'numAxles'             => ['type' => 'integer'],
