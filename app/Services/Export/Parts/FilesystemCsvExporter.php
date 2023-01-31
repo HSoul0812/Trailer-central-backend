@@ -21,13 +21,17 @@ class FilesystemCsvExporter extends GenericFilesystemCsvExporter
     public function getLineMapper($part): array
     {
         $addedLines = [];
-        foreach(explode(',', $part->qty_values) as $qty) {
-            $id_qty = explode(';', $qty);
-            foreach(explode(',', $part->bins) as $bin) {
-                $id_bin = explode(';', $bin);
-                if($id_qty[0] === $id_bin[0]) {
-                    $addedLines[(string)$id_bin[1]] = $id_qty[1];
+        foreach(explode(',', $part->bins) as $bin) {
+            $id_bin = explode(';', $bin);
+            if($part->qty_values !== null) {
+                foreach(explode(',', $part->qty_values) as $qty) {
+                    $id_qty = explode(';', $qty);
+                    if($id_qty[0] === $id_bin[0]) {
+                        $addedLines[$id_bin[1]] = $id_qty[1];
+                    }
                 }
+            } else {
+                $addedLines[$id_bin[1]] = 0;
             }
         }
         $addedLines['Part ID'] = $part->id;
