@@ -3,7 +3,7 @@
 namespace App\Services\ElasticSearch\Cache;
 
 use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
-use App\Repositories\FeatureFlagRepository;
+use App\Repositories\FeatureFlagRepositoryInterface;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use \Redis as PhpRedis;
 
@@ -32,12 +32,12 @@ class RedisResponseCache implements ResponseCacheInterface
     /** @var UniqueCacheInvalidationInterface */
     private $uniqueCacheInvalidation;
 
-    /** @var FeatureFlagRepository */
+    /** @var FeatureFlagRepositoryInterface */
     private $featureFlagRepository;
 
     public function __construct(PhpRedis $client,
                                 UniqueCacheInvalidationInterface $uniqueCacheInvalidation,
-                                FeatureFlagRepository $featureFlagRepository)
+                                FeatureFlagRepositoryInterface $featureFlagRepository)
     {
         $this->client = $client;
         $this->uniqueCacheInvalidation = $uniqueCacheInvalidation;
@@ -98,7 +98,16 @@ class RedisResponseCache implements ResponseCacheInterface
                 return; // since it will flush the DB, we dont need to continue
             }
 
-            $this->hScanAndUnlink($this->extractHashKey($pattern), $pattern);
+            $hashKey = $this->extractHashKey($pattern);
+
+            if (preg_match('/inventories\.single\.\d+\.dealer:\d+$/', $pattern)) {
+                $this->client->unlink($this->extractExactKey($pattern));
+                $this->client->hDel($hashKey, $pattern);
+
+                continue;
+            }
+
+            $this->hScanAndUnlink($hashKey, $pattern);
         }
     }
 
