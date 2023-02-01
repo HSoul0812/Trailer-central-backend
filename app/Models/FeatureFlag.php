@@ -14,7 +14,9 @@ use Illuminate\Support\Carbon;
  *
  * @method static Builder where($column, $operator = null, $value = null, $boolean = 'and')
  * @method static FeatureFlag    find($id, array $columns = ['*'])
+ * @method static FeatureFlag    findOrFail($id, array $columns = ['*'])
  * @method static FeatureFlag    first()
+ * @method static FeatureFlag    create(array $attributes = [])
  */
 class FeatureFlag extends Model
 {
