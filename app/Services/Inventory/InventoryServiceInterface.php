@@ -77,4 +77,6 @@ interface InventoryServiceInterface
     public function convertMarkdown(string $markDown): string;
 
 	public function invalidateCacheAndReindexByDealerIds(array $dealer_ids): void;
+
+    public function invalidateCacheAndReindexByInventoryIds(array $inventoryIds): void;
 }

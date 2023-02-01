@@ -1113,4 +1113,20 @@ class InventoryService implements InventoryServiceInterface
 
         $this->dispatch(new ReIndexInventoriesByDealersJob($dealer_ids));
     }
+
+    public function invalidateCacheAndReindexByInventoryIds(array $inventoryIds): void
+    {
+        /** @var Inventory[] $inventories */
+        $inventories = $this->inventoryRepository->getAll(['inventory_ids' => $inventoryIds]);
+
+        foreach ($inventories as $inventory)
+        {
+            $inventory->searchable();
+
+            $this->dispatch(new InvalidateCacheJob([
+                $this->responseCacheKey->deleteByDealer($inventory->dealer_id),
+                $this->responseCacheKey->deleteSingle($inventory->inventory_id, $inventory->dealer_id)
+            ]));
+        }
+    }
 }
