@@ -44,6 +44,6 @@ class CreateCollectorLogTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('collector_log');
+        Schema::dropIfExists(self::TABLE);
     }
 }
