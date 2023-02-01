@@ -147,13 +147,12 @@ return [
             'supervisor-1' => [
                 'connection' => 'redis',
                 'queue' => [
+                    'overlay-images', // high priority
                     'inventory',
-                    'inventory-cache',
                     'parts',
                     'parts-export-new',
                     'factory-feeds',
                     'cvr-send-file',
-                    'scout',
                     'reports',
                     'emailbuilder',
                     'blog-posts',
@@ -165,7 +164,8 @@ return [
                     'crm-users',
                     'manufacturers',
                     //'hot-potato',
-                    'overlay-images',
+                    'scout', // low priority
+                    'inventory-cache' // low priority
                 ],
                 'balance' => 'simple',
                 'processes' => 16,
@@ -179,13 +179,12 @@ return [
             'supervisor-1' => [
                 'connection' => 'redis',
                 'queue' => [
+                    'overlay-images', // high priority
                     'inventory',
-                    'inventory-cache',
                     'parts',
                     'parts-export-new',
                     'factory-feeds',
                     'cvr-send-file',
-                    'scout',
                     'reports',
                     'emailbuilder',
                     'blog-posts',
@@ -197,7 +196,8 @@ return [
                     'crm-users',
                     'manufacturers',
                     //'hot-potato',
-                    'overlay-images',
+                    'scout', // low priority
+                    'inventory-cache' // low priority
                 ],
                 'balance' => 'simple',
                 'processes' => 16,
@@ -229,7 +229,7 @@ return [
             ],
             'supervisor-2' => [
                 'connection' => 'redis',
-                'queue' => ['scout', 'inventory-cache', 'overlay-images'],
+                'queue' => ['overlay-images', 'scout', 'inventory-cache'], // high to low priority
                 'minProcesses' => 3,
                 'maxProcesses' => 6,
                 'balance' => false,
@@ -305,7 +305,7 @@ return [
             ],
             'supervisor-2' => [
                 'connection' => 'redis',
-                'queue' => ['scout', 'inventory-cache', 'overlay-images'],
+                'queue' => ['overlay-images', 'scout', 'inventory-cache'], // high to low priority
                 'balance' => 'auto',
                 'minProcesses' => 25,
                 'maxProcesses' => 60,
