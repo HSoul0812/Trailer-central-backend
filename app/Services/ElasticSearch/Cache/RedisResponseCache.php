@@ -3,6 +3,7 @@
 namespace App\Services\ElasticSearch\Cache;
 
 use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
+use App\Repositories\FeatureFlagRepositoryInterface;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use \Redis as PhpRedis;
 
@@ -11,10 +12,13 @@ class RedisResponseCache implements ResponseCacheInterface
     use DispatchesJobs;
 
     /**
-     * @var int 3 hours, to avoid to reach out max memory, however we need to use a better policy
+     * @var int 8 hours, to avoid to reach out max memory, however we need to use a better policy
      * Maybe we need to use a TTL according the dealer traffic, or some similar policy
      */
-    public const TTL = 10800;
+    public const TTL = 28800;
+
+    /** @var int @see https://www.php.net/manual/en/function.gzencode.php */
+    public const COMPRESSION_LEVEL = 9;
 
     public const HASH_SCAN_COUNTER = 10000;
 
@@ -25,19 +29,19 @@ class RedisResponseCache implements ResponseCacheInterface
     /** @var PhpRedis */
     private $client;
 
-    /**
-     * @var UniqueCacheInvalidationInterface
-     */
+    /** @var UniqueCacheInvalidationInterface */
     private $uniqueCacheInvalidation;
 
-    /**
-     * @param PhpRedis $client
-     * @param UniqueCacheInvalidationInterface $uniqueCacheInvalidation
-     */
-    public function __construct(PhpRedis $client, UniqueCacheInvalidationInterface $uniqueCacheInvalidation)
+    /** @var FeatureFlagRepositoryInterface */
+    private $featureFlagRepository;
+
+    public function __construct($client,
+                                UniqueCacheInvalidationInterface $uniqueCacheInvalidation,
+                                FeatureFlagRepositoryInterface $featureFlagRepository)
     {
         $this->client = $client;
         $this->uniqueCacheInvalidation = $uniqueCacheInvalidation;
+        $this->featureFlagRepository = $featureFlagRepository;
     }
 
     /**
@@ -51,7 +55,11 @@ class RedisResponseCache implements ResponseCacheInterface
         $this->client->hSet($this->extractHashKey($key), $key, '');
 
         // it stores a new key-value using an exact key name which is known by the cache client (DW)
-        $this->client->set($this->extractExactKey($key), $value, self::TTL);
+        $this->client->set(
+            $this->extractExactKey($key),
+            $this->featureFlagRepository->get('inventory-sdk-cache-compression') ? gzencode($value, self::COMPRESSION_LEVEL): $value,
+            self::TTL
+        );
     }
 
     /**
@@ -90,7 +98,16 @@ class RedisResponseCache implements ResponseCacheInterface
                 return; // since it will flush the DB, we dont need to continue
             }
 
-            $this->hScanAndUnlink($this->extractHashKey($pattern), $pattern);
+            $hashKey = $this->extractHashKey($pattern);
+
+            if (preg_match('/inventories\.single\.\d+\.dealer:\d+$/', $pattern)) {
+                $this->client->unlink($this->extractExactKey($pattern));
+                $this->client->hDel($hashKey, $pattern);
+
+                continue;
+            }
+
+            $this->hScanAndUnlink($hashKey, $pattern);
         }
     }
 

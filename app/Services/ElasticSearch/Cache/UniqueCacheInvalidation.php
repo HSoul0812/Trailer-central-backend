@@ -19,7 +19,7 @@ class UniqueCacheInvalidation implements UniqueCacheInvalidationInterface
     /**
      * @param PhpRedis $client
      */
-    public function __construct(PhpRedis $client)
+    public function __construct($client)
     {
         $this->client = $client;
     }
