@@ -691,6 +691,29 @@ class ImageServiceTest extends TestCase
             Storage::disk('test_resources')->path('testAddLogoOnlyOverlay.png'));
     }
 
+
+
+    /**
+     * @dataProvider overlayParamDataProvider
+     * @group Marketing
+     * @group Marketing_Overlays
+     */
+    public function testAddLogoOverlayWithEmptyLogoPath($overlayParams)
+    {
+        $overlayParams['overlay_upper'] = User::OVERLAY_UPPER_NONE;
+
+        $imagePath = Storage::disk('test_resources')->path('inventory_image.png');
+
+        $this->imageHelper->shouldNotReceive('addLogoOverlay');
+
+        $this->imageHelper->shouldNotReceive('addUpperTextOverlay');
+        $this->imageHelper->shouldNotReceive('addLowerTextOverlay');
+
+        $imageService = app()->make(ImageService::class);
+
+        $newImage = $imageService->addOverlays($imagePath, $overlayParams);
+    }
+
     private function assertImages($expectedPath, $outputPath)
     {
         $expectedImage = new Imagick($expectedPath);

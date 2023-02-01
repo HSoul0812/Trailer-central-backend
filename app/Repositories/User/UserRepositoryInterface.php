@@ -56,9 +56,9 @@ interface UserRepositoryInterface extends Repository, TransactionalRepository {
      *
      * @param int $dealerId
      * @param array $params
-     * @return User
+     * @return bool was there any changes?
      */
-    public function updateOverlaySettings(int $dealerId, array $params) : User;
+    public function updateOverlaySettings(int $dealerId, array $params) : bool;
 
     /**
      * Check admin password

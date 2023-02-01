@@ -24,6 +24,10 @@ use Tests\database\seeds\Inventory\InventorySeeder;
 use Tests\database\seeds\User\GeolocationSeeder;
 use Tests\TestCase;
 use TypeError;
+use Illuminate\Support\Facades\Queue;
+use App\Jobs\Inventory\GenerateOverlayImageJob;
+use App\Models\Inventory\InventoryImage;
+use App\Models\Inventory\Image;
 
 /**
  * Class InventoryControllerTest
@@ -38,6 +42,13 @@ class InventoryControllerTest extends TestCase
 
     const API_INVENTORY_TITLES = '/api/inventory/get_all_titles';
     const API_INVENTORY_EXISTS = '/api/inventory/exists';
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        Queue::fake();
+    }
 
     /**
      * Tests that SUT is throwing the correct exception when some query parameter is invalid
@@ -1266,4 +1277,247 @@ HTML,
     {
         return Arr::except($inventoryParams, ['description_html_assertion', 'description_html']);
     }
+
+    /**
+     * @covers ::create
+     * 
+     * @group Marketing
+     * @group Marketing_Overlays
+     */
+    public function testCreateWithImages()
+    {
+        $seeder = new InventorySeeder;
+        $seeder->seed();
+
+        $inventoryParams['dealer_id'] = $seeder->dealer->dealer_id;
+        $inventoryParams['dealer_location_id'] = $seeder->dealerLocation->dealer_location_id;
+        $inventoryParams['entity_type_id'] = 1;
+        $inventoryParams['title'] = 'test_title';
+
+        $inventoryParams['new_images'] = [];
+        $inventoryParams['new_images'][] = [
+            'is_default' => 1,
+            'is_secondary' => 0,
+            'position' => 1,
+            'url' => 'https://placehold.co/400',
+            'was_manually_added' => 1
+        ];
+        $inventoryParams['new_images'][] = [
+            'is_default' => 0,
+            'is_secondary' => 1,
+            'position' => 2,
+            'url' => 'https://placehold.co/400',
+            'was_manually_added' => 1
+        ];
+
+        $response = $this->json('PUT', '/api/inventory', $inventoryParams, $this->getSeederAccessToken($seeder));
+
+        $response->assertSuccessful();
+
+        $responseJson = json_decode($response->getContent(), true)['response']['data'];
+        $inventoryId = $responseJson['id'];
+
+        $this->assertDatabaseHas(InventoryImage::getTableName(), [
+            'inventory_id' => $inventoryId
+        ]);
+
+        Queue::assertPushed(GenerateOverlayImageJob::class);
+
+        $seeder->cleanUp();
+    }
+
+    /**
+     * @covers ::create
+     * @group Marketing
+     * @group Marketing_Overlays
+     */
+    public function testCreateWithNoImage()
+    {
+        $seeder = new InventorySeeder;
+        $seeder->seed();
+
+        $inventoryParams['dealer_id'] = $seeder->dealer->dealer_id;
+        $inventoryParams['dealer_location_id'] = $seeder->dealerLocation->dealer_location_id;
+        $inventoryParams['entity_type_id'] = 1;
+        $inventoryParams['title'] = 'test_title';
+
+        $response = $this->json('PUT', '/api/inventory', $inventoryParams, $this->getSeederAccessToken($seeder));
+
+        $response->assertSuccessful();
+
+        $responseJson = json_decode($response->getContent(), true)['response']['data'];
+        $inventoryId = $responseJson['id'];
+
+        $this->assertDatabaseMissing(InventoryImage::getTableName(), [
+            'inventory_id' => $inventoryId
+        ]);
+
+        Queue::assertNotPushed(GenerateOverlayImageJob::class);
+
+        $seeder->cleanUp();
+
+    }
+
+    /**
+     * @covers ::update
+     * @group Marketing
+     * @group Marketing_Overlays
+     */
+    public function testUpdateWithNewImages()
+    {
+        $seeder = new InventorySeeder(['withInventory' => true]);
+        $seeder->seed();
+
+        $inventoryParams['title'] = 'test_title';
+        $inventoryParams['new_images'] = [];
+        $inventoryParams['new_images'][] = [
+            'is_default' => 1,
+            'is_secondary' => 0,
+            'position' => 1,
+            'url' => 'https://placehold.co/400',
+            'was_manually_added' => 1
+        ];
+        $inventoryParams['new_images'][] = [
+            'is_default' => 0,
+            'is_secondary' => 1,
+            'position' => 2,
+            'url' => 'https://placehold.co/400',
+            'was_manually_added' => 1
+        ];
+
+        $response = $this->json('POST', '/api/inventory/'. $seeder->inventory->getKey(), 
+            $inventoryParams, $this->getSeederAccessToken($seeder));
+
+        $response->assertSuccessful();
+
+        $this->assertDatabaseHas(InventoryImage::getTableName(), [
+            'inventory_id' => $seeder->inventory->getKey()
+        ]);
+        
+        Queue::assertPushed(GenerateOverlayImageJob::class, 1);
+
+        $seeder->cleanUp();
+
+    }
+
+    /**
+     * @covers ::update
+     * @group Marketing
+     * @group Marketing_Overlays
+     */
+    public function testUpdateWithExistingImages()
+    {
+        $seeder = new InventorySeeder(['withInventory' => true]);
+        $seeder->seed();
+
+        $inventoryParams['title'] = 'test_title';
+
+        $images = factory(Image::class, 2)->create(); $index = 0;
+        $images->each(function (Image $image) use ($seeder, &$index, &$inventoryParams): void {
+            factory(InventoryImage::class)->create([
+                'inventory_id' => $seeder->inventory->inventory_id,
+                'image_id' => $image->image_id
+            ]);
+
+            $inventoryParams['existing_images'][] = [
+                'image_id' => $image->getKey(),
+                'is_default' => $index == 0 ? 1 : 0,
+                'is_secondary' => $index == 1 ? 1 : 0,
+                'position' => $index + 1
+            ];
+
+            $index++;
+        });
+
+        $response = $this->json('POST', '/api/inventory/'. $seeder->inventory->getKey(), 
+            $inventoryParams, $this->getSeederAccessToken($seeder));
+
+        $response->assertSuccessful();
+
+        $this->assertDatabaseHas(InventoryImage::getTableName(), [
+            'inventory_id' => $seeder->inventory->getKey()
+        ]);
+        
+        Queue::assertPushed(GenerateOverlayImageJob::class, 1);
+
+        $seeder->cleanUp();
+
+    }
+
+    /**
+     * @covers ::update
+     * @group Marketing
+     * @group Marketing_Overlays
+     */
+    public function testUpdateWithNoImage()
+    {
+        $seeder = new InventorySeeder(['withInventory' => true]);
+        $seeder->seed();
+
+        $inventoryParams['title'] = 'test_title';
+
+        $response = $this->json('POST', '/api/inventory/'. $seeder->inventory->getKey(), 
+            $inventoryParams, $this->getSeederAccessToken($seeder));
+
+        $response->assertSuccessful();
+
+        $this->assertDatabaseMissing(InventoryImage::getTableName(), [
+            'inventory_id' => $seeder->inventory->getKey()
+        ]);
+        
+        Queue::assertNotPushed(GenerateOverlayImageJob::class, 1);
+
+        $seeder->cleanUp();
+    }
+
+    /**
+     * @covers ::update
+     * @group Marketing
+     * @group Marketing_Overlays
+     */
+    public function testUpdateWithBothImages()
+    {
+        $seeder = new InventorySeeder(['withInventory' => true]);
+        $seeder->seed();
+
+        $inventoryParams['title'] = 'test_title';
+
+        $images = factory(Image::class, 2)->create(); $index = 0;
+        $images->each(function (Image $image) use ($seeder, &$index, &$inventoryParams): void {
+            factory(InventoryImage::class)->create([
+                'inventory_id' => $seeder->inventory->inventory_id,
+                'image_id' => $image->image_id
+            ]);
+
+            $inventoryParams['existing_images'][] = [
+                'image_id' => $image->getKey(),
+                'is_default' => $index == 0 ? 1 : 0,
+                'is_secondary' => $index == 1 ? 1 : 0,
+                'position' => $index + 1
+            ];
+
+            $index++;
+        });
+
+        $inventoryParams['new_images'][] = [
+            'is_default' => 0,
+            'is_secondary' => 0,
+            'position' => 3,
+            'url' => 'https://placehold.co/400',
+            'was_manually_added' => 1
+        ];
+
+        $response = $this->json('POST', '/api/inventory/'. $seeder->inventory->getKey(), 
+            $inventoryParams, $this->getSeederAccessToken($seeder));
+
+        $response->assertSuccessful();
+
+        $this->assertEquals(3, InventoryImage::where('inventory_id', $seeder->inventory->getKey())->count());
+        
+        Queue::assertPushed(GenerateOverlayImageJob::class, 1);
+
+        $seeder->cleanUp();
+    }
+
+
 }
