@@ -5,17 +5,15 @@ namespace App\Services\Inventory;
 use App\Repositories\Inventory\ImageRepositoryInterface;
 use App\Exceptions\File\MissingS3FileException;
 use Illuminate\Support\Facades\Storage;
-use App\Helpers\ImageHelper;
 use App\Traits\S3\S3Helper;
 use App\Models\Inventory\Image;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use App\Jobs\Inventory\GenerateOverlayImageJob;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Models\User\User;
-use App\Repositories\Inventory\InventoryRepository;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 
-class ImageService implements ImageServiceInterface 
+class ImageService implements ImageServiceInterface
 {
     use S3Helper, DispatchesJobs;
     /**
@@ -34,18 +32,26 @@ class ImageService implements ImageServiceInterface
     private $inventoryRepository;
 
     /**
+     * @var InventoryServiceInterface
+     */
+    private $inventoryService;
+
+    /**
      * @param ImageRepositoryInterface $imageRepository
      */
     public function __construct(
-        ImageRepositoryInterface $imageRepository, 
+        ImageRepositoryInterface $imageRepository,
         UserRepositoryInterface $userRepository,
-        InventoryRepositoryInterface $inventoryRepository
+        InventoryRepositoryInterface $inventoryRepository,
+        InventoryServiceInterface $inventoryService
     ) {
         $this->imageRepository = $imageRepository;
 
         $this->userRepository = $userRepository;
 
         $this->inventoryRepository = $inventoryRepository;
+
+        $this->inventoryService = $inventoryService;
     }
 
     /**
@@ -100,7 +106,7 @@ class ImageService implements ImageServiceInterface
 
     /**
      * Get Hash
-     * 
+     *
      * @param string $filename
      * @return string
      */
@@ -127,6 +133,8 @@ class ImageService implements ImageServiceInterface
                 $this->dispatch((new GenerateOverlayImageJob($inventory->inventory_id))->onQueue('overlay-images'));
             }
         }
+
+        $this->inventoryService->invalidateCacheAndReindexByDealerIds([$dealer->dealer_id]);
 
         return $dealer;
     }
