@@ -147,7 +147,6 @@ return [
             'supervisor-1' => [
                 'connection' => 'redis',
                 'queue' => [
-                    'overlay-images', // high priority
                     'inventory',
                     'parts',
                     'parts-export-new',
@@ -163,23 +162,31 @@ return [
                     'ecommerce',
                     'crm-users',
                     'manufacturers',
-                    //'hot-potato',
-                    'scout', // low priority
-                    'inventory-cache' // low priority
+                    //'hot-potato'
                 ],
                 'balance' => 'simple',
-                'processes' => 16,
+                'minProcesses' => 1,
+                'maxProcesses' => 8,
                 'tries' => 3,
                 'delay' => 3,
                 'timeout' => 3600,
             ],
+            'supervisor-2' => [
+                'connection' => 'redis',
+                'queue' => ['overlay-images', 'scout', 'inventory-cache'],
+                'balance' => false,
+                'minProcesses' => 3,
+                'maxProcesses' => 10,
+                'tries' => 3,
+                'delay' => 3,
+                'timeout' => 3600,
+            ]
         ],
 
         'dev' => [
             'supervisor-1' => [
                 'connection' => 'redis',
                 'queue' => [
-                    'overlay-images', // high priority
                     'inventory',
                     'parts',
                     'parts-export-new',
@@ -195,16 +202,25 @@ return [
                     'ecommerce',
                     'crm-users',
                     'manufacturers',
-                    //'hot-potato',
-                    'scout', // low priority
-                    'inventory-cache' // low priority
+                    //'hot-potato'
                 ],
                 'balance' => 'simple',
-                'processes' => 16,
+                'minProcesses' => 1,
+                'maxProcesses' => 8,
                 'tries' => 3,
                 'delay' => 3,
                 'timeout' => 3600,
             ],
+            'supervisor-2' => [
+                'connection' => 'redis',
+                'queue' => ['overlay-images', 'scout',  'inventory-cache'],
+                'balance' => false,
+                'minProcesses' => 3,
+                'maxProcesses' => 12,
+                'tries' => 3,
+                'delay' => 3,
+                'timeout' => 3600,
+            ]
         ],
 
         'staging' => [
@@ -223,17 +239,16 @@ return [
                 ],
                 'balance' => 'auto',
                 'minProcesses' => 1,
-                'maxProcesses' => 5,
+                'maxProcesses' => 8,
                 'tries' => 3,
                 'timeout' => 60,
             ],
             'supervisor-2' => [
                 'connection' => 'redis',
-                'queue' => ['overlay-images', 'scout', 'inventory-cache'], // high to low priority
+                'queue' => ['overlay-images', 'scout', 'inventory-cache'],
                 'minProcesses' => 3,
-                'maxProcesses' => 6,
+                'maxProcesses' => 14,
                 'balance' => false,
-                'processes' => 1,
                 'tries' => 3,
                 'delay' => 3,
                 'timeout' => 300,
@@ -306,8 +321,8 @@ return [
             'supervisor-2' => [
                 'connection' => 'redis',
                 'queue' => ['overlay-images', 'scout', 'inventory-cache'], // high to low priority
-                'balance' => 'auto',
-                'minProcesses' => 25,
+                'balance' => false,
+                'minProcesses' => 45,
                 'maxProcesses' => 60,
                 'tries' => 3,
                 'delay' => 3,
