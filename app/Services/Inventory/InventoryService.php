@@ -4,10 +4,11 @@ namespace App\Services\Inventory;
 
 use App\Contracts\LoggerServiceInterface;
 use App\Exceptions\Inventory\InventoryException;
-use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
+use App\Jobs\Inventory\ReIndexInventoriesByDealerLocationJob;
 use App\Jobs\Website\ReIndexInventoriesByDealersJob;
 use App\Models\CRM\Dms\Quickbooks\Bill;
 use App\Models\Inventory\Inventory;
+use App\Models\User\DealerLocation;
 use App\Models\Website\Config\WebsiteConfig;
 use App\Repositories\Dms\Quickbooks\BillRepositoryInterface;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
@@ -19,6 +20,7 @@ use App\Repositories\Repository;
 use App\Repositories\User\DealerLocationMileageFeeRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
+use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
 use App\Services\File\FileService;
 use App\Services\File\ImageService;
@@ -155,6 +157,11 @@ class InventoryService implements InventoryServiceInterface
     private $geoLocationService;
 
     /**
+     * @var InventoryResponseCacheInterface
+     */
+    private $responseCache;
+
+    /**
      * InventoryService constructor.
      * @param InventoryRepositoryInterface $inventoryRepository
      * @param ImageRepositoryInterface $imageRepository
@@ -167,10 +174,11 @@ class InventoryService implements InventoryServiceInterface
      * @param DealerLocationRepositoryInterface $dealerLocationRepository
      * @param DealerLocationMileageFeeRepositoryInterface $dealerLocationMileageFeeRepository
      * @param CategoryRepositoryInterface $categoryRepository
-     * @param LoggerServiceInterface|null $logService
      * @param ImageServiceInterface $imageTableService
      * @param ResponseCacheKeyInterface $responseCacheKey
      * @param GeoLocationServiceInterface $geoLocationService
+     * @param InventoryResponseCacheInterface $responseCache
+     * @param LoggerServiceInterface|null $logService
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
     public function __construct(
@@ -188,6 +196,7 @@ class InventoryService implements InventoryServiceInterface
         ImageServiceInterface $imageTableService,
         ResponseCacheKeyInterface $responseCacheKey,
         GeoLocationServiceInterface $geoLocationService,
+        InventoryResponseCacheInterface $responseCache,
         ?LoggerServiceInterface $logService = null
     ) {
         $this->inventoryRepository = $inventoryRepository;
@@ -204,6 +213,7 @@ class InventoryService implements InventoryServiceInterface
         $this->imageTableService = $imageTableService;
         $this->responseCacheKey = $responseCacheKey;
         $this->geoLocationService = $geoLocationService;
+        $this->responseCache = $responseCache;
 
         $this->logService = $logService ?? app()->make(LoggerServiceInterface::class);
     }
@@ -389,9 +399,14 @@ class InventoryService implements InventoryServiceInterface
         try {
             $this->inventoryRepository->beginTransaction();
 
-            $this->inventoryRepository->massUpdate($params);
+            // if $params['dealer_id'] is not present it will throw an exception
+            Inventory::withoutCacheInvalidationAndSearchSyncing(function () use ($params){
+                $this->inventoryRepository->massUpdate($params);
+            });
 
             $this->inventoryRepository->commitTransaction();
+
+            $this->invalidateCacheAndReindexByDealerIds([$params['dealer_id']]);
         } catch (\Exception $e) {
             Log::error('Inventory mass update error. Message - ' . $e->getMessage(), $e->getTrace());
             $this->inventoryRepository->rollbackTransaction();
@@ -1103,38 +1118,65 @@ class InventoryService implements InventoryServiceInterface
         return $description;
     }
 
-    public function invalidateCacheAndReindexByDealerIds(array $dealer_ids): void
+    /**
+     * Reindex the inventory by dealer ids, then it will invalidate cache by dealer ids
+     *
+     * @param  int[]  $dealerIds
+     * @return void
+     */
+    public function invalidateCacheAndReindexByDealerIds(array $dealerIds): void
     {
-        $patterns = [];
+        $this->logService->info(
+            'Enqueueing the job to reindex inventory by dealer ids',
+            ['dealer_ids' => $dealerIds]
+        );
 
-        foreach ($dealer_ids as $dealer_id)
-        {
-            $patterns[] = $this->responseCacheKey->deleteByDealer($dealer_id);
+        // indexation should always being dispatched at first
+        $this->dispatch(new ReIndexInventoriesByDealersJob($dealerIds));
+
+        $this->logService->info(
+            'Enqueueing the job to invalidate cache by dealer ids',
+            ['dealer_ids' => $dealerIds]
+        );
+
+        foreach ($dealerIds as $dealerId) {
+            $this->responseCache->forget([
+                $this->responseCacheKey->deleteByDealer($dealerId),
+                $this->responseCacheKey->deleteSingleByDealer($dealerId)
+            ]);
         }
-
-        //$patterns = $this->uniqueCacheInvalidation->keysWithNoJobs($patterns);
-
-        //if (count($patterns)) {
-            //$this->uniqueCacheInvalidation->createJobsForKeys($patterns);
-            $this->dispatch(new InvalidateCacheJob($patterns));
-        //}
-
-        $this->dispatch(new ReIndexInventoriesByDealersJob($dealer_ids));
     }
 
-    public function invalidateCacheAndReindexByInventoryIds(array $inventoryIds): void
+    /**
+     * Reindex the inventory by dealer location id, then it will invalidate cache by dealer id
+     *
+     * @param  DealerLocation  $dealerLocation
+     * @return void
+     */
+    public function invalidateCacheAndReindexByDealerLocation(DealerLocation $dealerLocation): void
     {
-        /** @var Inventory[] $inventories */
-        $inventories = $this->inventoryRepository->getAll(['inventory_ids' => $inventoryIds]);
+        $logContext = [
+            'name' => $dealerLocation->name,
+            'dealer_id' => $dealerLocation->dealer_id,
+            'dealer_location_id' => $dealerLocation->dealer_location_id
+        ];
 
-        foreach ($inventories as $inventory)
-        {
-            $inventory->searchable();
+        $this->logService->info(
+            'Enqueueing the job to reindex inventory by dealer location',
+            $logContext
+        );
 
-            $this->dispatch(new InvalidateCacheJob([
-                $this->responseCacheKey->deleteByDealer($inventory->dealer_id),
-                $this->responseCacheKey->deleteSingle($inventory->inventory_id, $inventory->dealer_id)
-            ]));
-        }
+        // indexation should always being dispatched at first
+        $this->dispatch(new ReIndexInventoriesByDealerLocationJob([$dealerLocation->dealer_location_id]));
+
+        $this->logService->info(
+            'Enqueueing the job to invalidate cache by dealer location',
+            $logContext
+        );
+
+        $this->responseCache->forget([
+            $this->responseCacheKey->deleteByDealer($dealerLocation->dealer_id),
+            $this->responseCacheKey->deleteSingleByDealer($dealerLocation->dealer_id)
+        ]);
     }
 }
