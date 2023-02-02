@@ -55,6 +55,15 @@ class ADFService implements ADFServiceInterface
      */
     public function export(Lead $lead): bool
     {
+        /*
+         * If the lead comes with dealer location 0 or null
+         * And we have an inventory assigned to the lead
+         * Use the inventory dealer location instead
+         */
+        if (empty($lead->dealer_location_id) && !empty($lead->inventory)) {
+            $lead->dealer_location_id = $lead->inventory->dealer_location_id;
+        }
+
         $leadEmail = $this->leadEmailRepository->find($lead->dealer_id, $lead->dealer_location_id);
         if (!$leadEmail) {
             Log::info("Lead {$lead->identifier} couldn't find a LeadEmail associated.");

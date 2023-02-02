@@ -43,6 +43,8 @@ use App\Models\User\User;
 use App\Services\Inventory\ImageServiceInterface;
 use App\Services\Inventory\ImageService as ImageTableService;
 use App\Repositories\User\UserRepositoryInterface;
+use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
+use App\Services\ElasticSearch\Cache\UniqueCacheInvalidationInterface;
 
 /**
  * Test for App\Services\Inventory\InventoryService
@@ -135,6 +137,16 @@ class InventoryServiceTest extends TestCase
     private $imageTableServiceMock;
 
     /**
+     * @var LegacyMockInterface|ResponseCacheKeyInterface
+     */
+    private $responseCacheKeyMock;
+
+    /**
+     * @var LegacyMockInterface|UniqueCacheInvalidationInterface
+     */
+    private $uniqueCacheInvalidationMock;
+
+    /**
      * @var LegacyMockInterface|UserRepositoryInterface
      */
     private $userRepositoryMock;
@@ -194,6 +206,12 @@ class InventoryServiceTest extends TestCase
             $this->inventoryRepositoryMock
         ]);
         $this->app->instance(ImageTableService::class, $this->imageTableServiceMock);
+
+        $this->responseCacheKeyMock = Mockery::mock(ResponseCacheKeyInterface::class);
+        $this->app->instance(ResponseCacheKeyInterface::class, $this->responseCacheKeyMock);
+
+        $this->uniqueCacheInvalidationMock = Mockery::mock(UniqueCacheInvalidationInterface::class);
+        $this->app->instance(UniqueCacheInvalidationInterface::class, $this->uniqueCacheInvalidationMock);
 
         Queue::fake();
         Storage::fake('tmp');
@@ -1115,6 +1133,8 @@ class InventoryServiceTest extends TestCase
                 $this->markdownHelper,
                 $this->logServiceMock ?? app()->make(LoggerServiceInterface::class),
                 $this->imageTableServiceMock,
+                $this->uniqueCacheInvalidationMock,
+                $this->responseCacheKeyMock
             ])
             ->onlyMethods(['delete'])
             ->getMock();
@@ -1176,6 +1196,8 @@ class InventoryServiceTest extends TestCase
             $this->markdownHelper,
             $this->logServiceMock ?? app()->make(LoggerServiceInterface::class),
             $this->imageTableServiceMock,
+            $this->uniqueCacheInvalidationMock,
+            $this->responseCacheKeyMock
         ]);
 
         $inventoryServiceMock->shouldReceive('deleteDuplicates')->passthru();
@@ -1466,6 +1488,8 @@ class InventoryServiceTest extends TestCase
             $this->markdownHelper,
             $this->logServiceMock ?? app()->make(LoggerServiceInterface::class),
             $this->imageTableServiceMock,
+            $this->uniqueCacheInvalidationMock,
+            $this->responseCacheKeyMock
         ])->makePartial();
 
         $inventoryServiceMock->generateOverlays(self::TEST_INVENTORY_ID);
@@ -1574,6 +1598,8 @@ class InventoryServiceTest extends TestCase
             $this->markdownHelper,
             $this->logServiceMock ?? app()->make(LoggerServiceInterface::class),
             $this->imageTableServiceMock,
+            $this->uniqueCacheInvalidationMock,
+            $this->responseCacheKeyMock
         ])->makePartial();
 
         $inventoryServiceMock->generateOverlays(self::TEST_INVENTORY_ID);
@@ -1626,6 +1652,8 @@ class InventoryServiceTest extends TestCase
             $this->markdownHelper,
             $this->logServiceMock ?? app()->make(LoggerServiceInterface::class),
             $this->imageTableServiceMock,
+            $this->uniqueCacheInvalidationMock,
+            $this->responseCacheKeyMock
         ])->makePartial();
 
         $inventoryServiceMock->generateOverlays(self::TEST_INVENTORY_ID);
@@ -1703,6 +1731,8 @@ class InventoryServiceTest extends TestCase
             $this->markdownHelper,
             $this->logServiceMock ?? app()->make(LoggerServiceInterface::class),
             $this->imageTableServiceMock,
+            $this->uniqueCacheInvalidationMock,
+            $this->responseCacheKeyMock
         ])->makePartial();
 
         $inventoryServiceMock->generateOverlays(self::TEST_INVENTORY_ID);
@@ -1713,7 +1743,7 @@ class InventoryServiceTest extends TestCase
      * @group Marketing
      * @group Marketing_Overlays
      */
-    public function testOverlayJobOnCreate($params)
+    public function testOverlayJobOnCreateWithoutImages($params)
     {
         /** @var Inventory|LegacyMockInterface $inventory */
         $inventory = $this->getEloquentMock(Inventory::class);
@@ -1751,6 +1781,76 @@ class InventoryServiceTest extends TestCase
 
         $this->assertEquals($inventory, $result);
 
+        Queue::assertNotPushed(GenerateOverlayImageJob::class);
+    }
+
+    /**
+     * @dataProvider createParamsProvider
+     * @group Marketing
+     * @group Marketing_Overlays
+     */
+    public function testOverlayJobOnCreateWithImages($params)
+    {
+        $params['new_images'] = ['tmp_image_path'];
+        /** @var Inventory|LegacyMockInterface $inventory */
+        $inventory = $this->getEloquentMock(Inventory::class);
+        $inventory->inventory_id = self::TEST_INVENTORY_ID;
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('beginTransaction')
+            ->once()
+            ->with();
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('create')
+            ->once()
+            ->withAnyArgs()
+            ->andReturn($inventory);
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('commitTransaction')
+            ->once()
+            ->with();
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('rollbackTransaction')
+            ->never();
+
+        Log::shouldReceive('info')
+            ->with('Item has been successfully created', ['inventoryId' => self::TEST_INVENTORY_ID]);
+
+        Log::shouldReceive('error')->never();
+
+        /** @var InventoryService $service */
+        $inventoryServiceMock = Mockery::mock(InventoryService::class, [
+            $this->inventoryRepositoryMock,
+            $this->imageRepositoryMock,
+            $this->fileRepositoryMock,
+            $this->billRepositoryMock,
+            $this->quickbookApprovalRepositoryMock,
+            $this->websiteConfigRepositoryMock,
+            $this->imageServiceMock,
+            $this->fileServiceMock,
+            $this->dealerLocationRepositoryMock,
+            $this->dealerLocationMileageFeeRepositoryMock,
+            $this->categoryRepositoryMock,
+            $this->geolocationRepositoryMock,
+            $this->markdownHelper,
+            $this->logServiceMock ?? app()->make(LoggerServiceInterface::class),
+            $this->imageTableServiceMock,
+            $this->uniqueCacheInvalidationMock,
+            $this->responseCacheKeyMock
+        ])->makePartial();
+
+        $inventoryServiceMock
+            ->shouldAllowMockingProtectedMethods()
+            ->shouldReceive('uploadImages')
+            ->once();
+
+        $result = $inventoryServiceMock->create($params);
+
+        $this->assertEquals($inventory, $result);
+
         Queue::assertPushed(GenerateOverlayImageJob::class, 1);
     }
 
@@ -1759,7 +1859,7 @@ class InventoryServiceTest extends TestCase
      * @group Marketing
      * @group Marketing_Overlays
      */
-    public function testOverlayJobOnUpdate($params)
+    public function testOverlayJobOnUpdateWithoutImages($params)
     {
         $params['inventory_id'] = self::TEST_INVENTORY_ID;
         /** @var Inventory|LegacyMockInterface $inventory */
@@ -1790,6 +1890,182 @@ class InventoryServiceTest extends TestCase
         $service = $this->app->make(InventoryService::class);
 
         $result = $service->update($params);
+
+        $this->assertEquals($inventory, $result);
+
+        Queue::assertNotPushed(GenerateOverlayImageJob::class);
+    }
+
+    /**
+     * @dataProvider createParamsProvider
+     * @group Marketing
+     * @group Marketing_Overlays
+     */
+    public function testOverlayJobOnUpdateWithNewImages($params)
+    {
+        $params['new_images'] = ['uploaded_img_path'];
+        $params['inventory_id'] = self::TEST_INVENTORY_ID;
+        /** @var Inventory|LegacyMockInterface $inventory */
+        $inventory = $this->getEloquentMock(Inventory::class);
+        $inventory->inventory_id = self::TEST_INVENTORY_ID;
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('beginTransaction')
+            ->once()
+            ->with();
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('update')
+            ->once()
+            ->withAnyArgs()
+            ->andReturn($inventory);
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('commitTransaction')
+            ->once()
+            ->with();
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('rollbackTransaction')
+            ->never();
+
+        /** @var InventoryService $service */
+        $inventoryServiceMock = Mockery::mock(InventoryService::class, [
+            $this->inventoryRepositoryMock,
+            $this->imageRepositoryMock,
+            $this->fileRepositoryMock,
+            $this->billRepositoryMock,
+            $this->quickbookApprovalRepositoryMock,
+            $this->websiteConfigRepositoryMock,
+            $this->imageServiceMock,
+            $this->fileServiceMock,
+            $this->dealerLocationRepositoryMock,
+            $this->dealerLocationMileageFeeRepositoryMock,
+            $this->categoryRepositoryMock,
+            $this->geolocationRepositoryMock,
+            $this->markdownHelper,
+            $this->logServiceMock ?? app()->make(LoggerServiceInterface::class),
+            $this->imageTableServiceMock,
+            $this->uniqueCacheInvalidationMock,
+            $this->responseCacheKeyMock
+        ])->makePartial();
+
+        $inventoryServiceMock
+            ->shouldAllowMockingProtectedMethods()
+            ->shouldReceive('uploadImages')
+            ->once();
+
+        $result = $inventoryServiceMock->update($params);
+
+        $this->assertEquals($inventory, $result);
+
+        Queue::assertPushed(GenerateOverlayImageJob::class, 1);
+    }
+
+    /**
+     * @dataProvider createParamsProvider
+     * @group Marketing
+     * @group Marketing_Overlays
+     */
+    public function testOverlayJobOnUpdateWithExistingImages($params)
+    {
+        $params['existing_images'] = ['uploaded_img_path'];
+        $params['inventory_id'] = self::TEST_INVENTORY_ID;
+        /** @var Inventory|LegacyMockInterface $inventory */
+        $inventory = $this->getEloquentMock(Inventory::class);
+        $inventory->inventory_id = self::TEST_INVENTORY_ID;
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('beginTransaction')
+            ->once()
+            ->with();
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('update')
+            ->once()
+            ->withAnyArgs()
+            ->andReturn($inventory);
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('commitTransaction')
+            ->once()
+            ->with();
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('rollbackTransaction')
+            ->never();
+
+        /** @var InventoryService $service */
+        $service = $this->app->make(InventoryService::class);
+
+        $result = $service->update($params);
+
+        $this->assertEquals($inventory, $result);
+
+        Queue::assertPushed(GenerateOverlayImageJob::class, 1);
+    }
+
+    /**
+     * @dataProvider createParamsProvider
+     * @group Marketing
+     * @group Marketing_Overlays
+     */
+    public function testOverlayJobOnUpdateWithAnyImages($params)
+    {
+        $params['existing_images'] = ['uploaded_img_path'];
+        $params['new_images'] = ['uploaded_img_path'];
+        $params['inventory_id'] = self::TEST_INVENTORY_ID;
+        /** @var Inventory|LegacyMockInterface $inventory */
+        $inventory = $this->getEloquentMock(Inventory::class);
+        $inventory->inventory_id = self::TEST_INVENTORY_ID;
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('beginTransaction')
+            ->once()
+            ->with();
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('update')
+            ->once()
+            ->withAnyArgs()
+            ->andReturn($inventory);
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('commitTransaction')
+            ->once()
+            ->with();
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('rollbackTransaction')
+            ->never();
+
+        /** @var InventoryService $service */
+        $inventoryServiceMock = Mockery::mock(InventoryService::class, [
+            $this->inventoryRepositoryMock,
+            $this->imageRepositoryMock,
+            $this->fileRepositoryMock,
+            $this->billRepositoryMock,
+            $this->quickbookApprovalRepositoryMock,
+            $this->websiteConfigRepositoryMock,
+            $this->imageServiceMock,
+            $this->fileServiceMock,
+            $this->dealerLocationRepositoryMock,
+            $this->dealerLocationMileageFeeRepositoryMock,
+            $this->categoryRepositoryMock,
+            $this->geolocationRepositoryMock,
+            $this->markdownHelper,
+            $this->logServiceMock ?? app()->make(LoggerServiceInterface::class),
+            $this->imageTableServiceMock,
+            $this->uniqueCacheInvalidationMock,
+            $this->responseCacheKeyMock
+        ])->makePartial();
+
+        $inventoryServiceMock
+            ->shouldAllowMockingProtectedMethods()
+            ->shouldReceive('uploadImages')
+            ->once();
+
+        $result = $inventoryServiceMock->update($params);
 
         $this->assertEquals($inventory, $result);
 
