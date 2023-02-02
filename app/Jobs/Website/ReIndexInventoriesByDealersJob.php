@@ -10,17 +10,17 @@ class ReIndexInventoriesByDealersJob extends Job
     /**
      * @var array<integer>
      */
-    private $dealers;
+    private $dealerIds;
 
     public $queue = 'scout';
 
-    public function __construct(array $dealers)
+    public function __construct(array $dealerIds)
     {
-        $this->dealers = $dealers;
+        $this->dealerIds = $dealerIds;
     }
 
     public function handle(): void
     {
-        Inventory::makeAllSearchableByDealers($this->dealers);
+        Inventory::makeAllSearchableByDealers($this->dealerIds);
     }
 }
