@@ -153,6 +153,16 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
     }
 
     /**
+     * @param array $data Data to replace
+     * @param array $where Condition
+     * @return int Total data affected
+     */
+    public function batchUpdate(array $data, array $where) {
+        
+        return Interaction::where($where)->update($data);
+    }
+
+    /**
      * Create or Update Interaction
      * 
      * @param array $params

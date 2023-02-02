@@ -15,6 +15,12 @@
         <testsuite name="Integration">
             <directory suffix="Test.php">./tests/Integration</directory>
         </testsuite>
+
+        <testsuite name="Lead">
+            <file>./tests/Integration/Http/Controllers/CRM/Leads/LeadControllerTest.php</file>
+            <file>./tests/Unit/Services/CRM/Leads/LeadServiceTest.php</file>
+            <file>./tests/Unit/Services/CRM/Leads/InquiryServiceTest.php</file>
+        </testsuite>
     </testsuites>
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
