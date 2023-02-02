@@ -4,8 +4,8 @@ namespace App\DTOs\Dealer;
 
 class PrivateDealerCheck
 {
-    const FROM_TT = 'trailertrader';
-    const FROM_TC = 'trailercentral';
+    public const FROM_TT = 'trailertrader';
+    public const FROM_TC = 'trailercentral';
     const PRIVATE_DEALER_IDS = [
         8410,
         1004,
