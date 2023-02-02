@@ -219,8 +219,7 @@ return [
                     'ecommerce',
                     'crm-users',
                     'manufacturers',
-                    //'hot-potato',
-                    'overlay-images',
+                    //'hot-potato'
                 ],
                 'balance' => 'auto',
                 'minProcesses' => 1,
@@ -230,7 +229,7 @@ return [
             ],
             'supervisor-2' => [
                 'connection' => 'redis',
-                'queue' => ['scout', 'inventory-cache'],
+                'queue' => ['scout', 'inventory-cache', 'overlay-images'],
                 'minProcesses' => 3,
                 'maxProcesses' => 6,
                 'balance' => false,
@@ -296,8 +295,7 @@ return [
                     'ecommerce',
                     'crm-users',
                     'manufacturers',
-                    //'hot-potato',
-                    'overlay-images',
+                    //'hot-potato'
                 ],
                 'balance' => 'auto',
                 'minProcesses' => 1,
@@ -307,7 +305,7 @@ return [
             ],
             'supervisor-2' => [
                 'connection' => 'redis',
-                'queue' => ['scout', 'inventory-cache'],
+                'queue' => ['scout', 'inventory-cache', 'overlay-images'],
                 'balance' => 'auto',
                 'minProcesses' => 25,
                 'maxProcesses' => 60,
