@@ -4,6 +4,7 @@ namespace App\Indexers\Inventory;
 
 use App\Indexers\Searchable;
 use App\Indexers\WithIndexConfigurator;
+use App\Models\Inventory\Inventory;
 use App\Observers\Inventory\InventoryObserver;
 use App\Repositories\FeatureFlagRepositoryInterface;
 use Exception;
@@ -14,6 +15,15 @@ use Exception;
 trait InventorySearchable
 {
     use Searchable, WithIndexConfigurator;
+
+    public static function bootInventorySearchable(): void
+    {
+        $repo = app(FeatureFlagRepositoryInterface::class);
+
+        if ($repo->isEnabled('inventory-sdk-cache')) {
+            Inventory::enableCacheInvalidation();
+        }
+    }
 
     public function searchableAs(): string
     {
