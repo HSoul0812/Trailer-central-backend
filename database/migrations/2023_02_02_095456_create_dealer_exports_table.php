@@ -15,7 +15,8 @@ class CreateDealerExportsTable extends Migration
     {
         Schema::create('dealer_exports', function (Blueprint $table) {
             $table->increments('id');
-            $table->foreignId('dealer_id')->references('dealer_id')->on('user');
+            $table->unsignedInteger('dealer_id');
+            $table->foreign('dealer_id')->references('dealer_id')->on('dealer');
             $table->string('entity_type');
             $table->string('file_path')->nullable();
             $table->unsignedTinyInteger('status')->default(0)->comment('0 => queued, 1 => processing, 2 => processed');

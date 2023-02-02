@@ -6,7 +6,7 @@ use App\Domains\DealerExports\BaseExportAction;
 use App\Contracts\DealerExports\EntityActionExportable;
 use App\Models\Parts\Brand;
 
-class BrandsExporterAction extends BaseExportAction implements EntityActionExportable
+class BrandsExportAction extends BaseExportAction implements EntityActionExportable
 {
     const ENTITY_TYPE = 'brands';
 

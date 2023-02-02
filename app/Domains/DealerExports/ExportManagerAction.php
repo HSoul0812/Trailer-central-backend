@@ -11,8 +11,8 @@ class ExportManagerAction
     protected $dealer;
 
     protected $exportActions = [
-        VendorsExporterAction::class,
-        BrandsExporterAction::class,
+        VendorsExportAction::class,
+        // BrandsExportAction::class,
     ];
 
     public function __construct(User $dealer)

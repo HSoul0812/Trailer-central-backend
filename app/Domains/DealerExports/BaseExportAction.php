@@ -5,10 +5,12 @@ namespace App\Domains\DealerExports;
 use Illuminate\Filesystem\FilesystemAdapter;
 use League\Csv\Writer;
 use App\Models\User\User;
+use Storage;
 
 abstract class BaseExportAction
 {
     const S3_EXPORT_PATH = 'exports/{dealer}/{entity}.csv';
+    const EXPORT_FILE_DIRECTORY = 'exports/{dealer}';
 
     /** @var FilesystemAdapter */
     protected $storage;
@@ -26,6 +28,9 @@ abstract class BaseExportAction
 
     /** @var string */
     protected $filename;
+
+    /** @var string */
+    protected $directory;
 
     /** @var Collection<int, object> */
     protected $rows;
@@ -51,7 +56,9 @@ abstract class BaseExportAction
 
     protected function setFilename($entity)
     {
-        $this->filename = str_replace([], [$this->dealer->dealer_id, $entity], self::S3_EXPORT_PATH);
+        $this->filename = str_replace(['{dealer}', '{entity}'], [$this->dealer->dealer_id, $entity], self::S3_EXPORT_PATH);
+
+        $this->direcotry = str_replace(['{dealer}'], [$this->dealer->dealer_id], self::EXPORT_FILE_DIRECTORY);
 
         return $this;
     }
@@ -59,6 +66,8 @@ abstract class BaseExportAction
     protected function InitiateWriter()
     {
         $this->tmpStorage = Storage::disk('tmp');
+
+        $this->tmpStorage->makeDirectory($this->direcotry);
 
         $this->writer = Writer::createFromPath($this->tmpStorage->path($this->filename), 'w+');
 

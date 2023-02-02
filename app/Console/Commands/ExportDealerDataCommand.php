@@ -43,7 +43,7 @@ class ExportDealerDataCommand extends Command
     public function handle()
     {
         $dealerId = $this->argument('dealerId');
-        $zipPassword = $this->arguement('zipPassword');
+        $zipPassword = $this->argument('zipPassword');
         try {
             $dealer = User::query()->where('dealer_id', $dealerId)->firstOrFail();
         } catch (ModelNotFoundException $e) {

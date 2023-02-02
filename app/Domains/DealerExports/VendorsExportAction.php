@@ -5,10 +5,12 @@ namespace App\Domains\DealerExports;
 use App\Domains\DealerExports\BaseExportAction;
 use App\Contracts\DealerExports\EntityActionExportable;
 use App\Models\Parts\Vendor;
+use App\Events\DealerExports\EntityDataExportInitiated;
+use App\Events\DealerExports\EntityDataExported;
 
-class VendorsExporterAction extends BaseExportAction implements EntityActionExportable
+class VendorsExportAction extends BaseExportAction implements EntityActionExportable
 {
-    const ENTITY_TYPE = 'vendors';
+    public const ENTITY_TYPE = 'vendors';
 
     public function getQuery()
     {
@@ -38,8 +40,10 @@ class VendorsExporterAction extends BaseExportAction implements EntityActionExpo
         return $this;
     }
 
-    public function execute(): string
+    public function execute(): void
     {
+        (new ExportStartAction($this->dealer, self::ENTITY_TYPE))->execute();
+
         $this->setFilename('vendors')
             ->setHeaders([
                 'name' => 'Name',
@@ -61,6 +65,10 @@ class VendorsExporterAction extends BaseExportAction implements EntityActionExpo
             ->generateFile()
             ->uploadFile();
 
-        return $this->storage->url($this->filename);
+        (new ExportFinishedAction(
+            $this->dealer,
+            self::ENTITY_TYPE,
+            $this->storage->url($this->filename)
+        ))->execute();
     }
 }

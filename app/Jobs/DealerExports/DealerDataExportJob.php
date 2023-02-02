@@ -5,6 +5,7 @@ namespace App\Jobs\DealerExports;
 use App\Jobs\Job;
 use Exception;
 use App\Models\User\User;
+use Illuminate\Foundation\Bus\Dispatchable;
 
 /**
  * Class CsvExportJob
@@ -15,6 +16,7 @@ use App\Models\User\User;
  */
 class DealerDataExportJob extends Job
 {
+    use Dispatchable;
     /**
      * @var User
      */
