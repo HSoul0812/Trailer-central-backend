@@ -8,31 +8,29 @@ use App\Jobs\DealerExports\DealerDataExportJob;
 
 class ExportManagerAction
 {
-    protected $dealerId;
+    protected $dealer;
 
     protected $exportActions = [
         VendorsExporterAction::class,
         BrandsExporterAction::class,
     ];
 
-    public function __construct(int $dealerId)
+    public function __construct(User $dealer)
     {
-        $this->dealerId = $dealerId;
+        $this->dealer = $dealer;
     }
 
     public function execute()
     {
-        $dealer = User::query()->where('dealer_id', $this->dealerId)->where('type', User::TYPE_DEALER)->firstOrFail();
-
         foreach($this->exportActions as $exportAction) {
             // The export job can run multiple times, so its possible that we have the data in the table.
             // We will update the entry if it already exists, else will create a new one.
             DealerExport::updateOrCreate(
-                ['dealer_id' => $dealer->dealer_id, 'entity_type' => constant($exportAction . '::ENTITY_TYPE')],
+                ['dealer_id' => $this->dealer->dealer_id, 'entity_type' => constant($exportAction . '::ENTITY_TYPE')],
                 ['status' => DealerExport::STATUS_QUEUED]
             );
 
-            DealerDataExportJob::dispatch($dealer, $exportAction);
+            DealerDataExportJob::dispatch($this->dealer, $exportAction);
         }
     }
 }
