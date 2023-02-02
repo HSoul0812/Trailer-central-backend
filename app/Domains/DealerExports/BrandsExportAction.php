@@ -4,13 +4,13 @@ namespace App\Domains\DealerExports;
 
 use App\Domains\DealerExports\BaseExportAction;
 use App\Contracts\DealerExports\EntityActionExportable;
-use App\Models\Parts\Vendor;
+use App\Models\Parts\Brand;
 
-class VendorsExporterAction extends BaseExportAction implements EntityActionExportable
+class BrandsExporterAction extends BaseExportAction implements EntityActionExportable
 {
     public function getQuery()
     {
-        return Vendor::query()->where('dealer_id', $this->dealer->dealer_id);
+        return Brand::query()->where('dealer_id', $this->dealer->dealer_id)->get();
     }
 
     protected function fetchResults()
@@ -38,19 +38,17 @@ class VendorsExporterAction extends BaseExportAction implements EntityActionExpo
 
     public function execute(): string
     {
-        $this->setFilename('vendors')
+        $this->setFilename('brands')
             ->setHeaders([
-                'name' => 'Name',
-                'business_email' => 'Business Email',
-                'business_phone' => 'Business Phone',
-                'contact_name' => 'Contact Name',
-                'contact_email' => 'Contact Email',
-                'contact_phone' => 'Contact Phone',
-                'street' => 'Street',
-                'city' => 'City',
-                'state' => 'State',
-                'zip_code' => 'Zip Code',
-                'country' => 'Country',
+                'brand' => 'Brand',
+                'label' => 'Label',
+                'website' => 'Website',
+                'address' => 'Address',
+                'phone' => 'Phone',
+                'customer_id' => 'Customer Identifier',
+                'customer_name' => 'Customer Name',
+                'vendor_id' => 'Vendor Identifier',
+                'vendor_name' => 'Vendor Name',
             ])
             ->initiateWriter()
             ->writeHeader()

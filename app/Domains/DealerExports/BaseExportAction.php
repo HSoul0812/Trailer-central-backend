@@ -4,7 +4,7 @@ namespace App\Domains\DealerExports;
 
 use Illuminate\Filesystem\FilesystemAdapter;
 use League\Csv\Writer;
-use Illuminate\Database\Query\Builder;
+use App\Models\User\User;
 
 class BaseExportAction
 {
@@ -12,6 +12,9 @@ class BaseExportAction
 
     /** @var FilesystemAdapter */
     protected $storage;
+
+    /** @var User */
+    protected $dealer;
 
     /** @var FilesystemAdapter */
     protected $tmpStorage;
@@ -30,11 +33,13 @@ class BaseExportAction
     /** @var Writer */
     protected $writer;
 
-    public function __construct()
+    public function __construct(User $dealer)
     {
         $this->storage = Storage::disk('s3');
 
         $this->rows = collect([]);
+
+        $this->dealer = $dealer;
     }
 
     protected function setHeaders($headers)
