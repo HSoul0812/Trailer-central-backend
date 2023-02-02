@@ -17,6 +17,7 @@ use App\Models\Inventory\Inventory;
 class ImageService implements ImageServiceInterface
 {
     use S3Helper, DispatchesJobs;
+
     /**
      * @var ImageRepositoryInterface
      */
@@ -32,19 +33,10 @@ class ImageService implements ImageServiceInterface
      */
     private $inventoryRepository;
 
-    /**
-     * @var InventoryServiceInterface
-     */
-    private $inventoryService;
-
-    /**
-     * @param ImageRepositoryInterface $imageRepository
-     */
     public function __construct(
         ImageRepositoryInterface $imageRepository,
         UserRepositoryInterface $userRepository,
-        InventoryRepositoryInterface $inventoryRepository,
-        InventoryServiceInterface $inventoryService
+        InventoryRepositoryInterface $inventoryRepository
     ) {
         $this->imageRepository = $imageRepository;
 
@@ -141,9 +133,11 @@ class ImageService implements ImageServiceInterface
             }
         }
 
+        $inventoryService = app(InventoryServiceInterface::class); // to avoid cyclic dependency
+
         $dealer = $this->userRepository->get(['dealer_id' => $params['dealer_id']]);
 
-        $this->inventoryService->invalidateCacheAndReindexByDealerIds([$dealer->dealer_id]);
+        $inventoryService->invalidateCacheAndReindexByDealerIds([$dealer->dealer_id]);
 
         return $dealer;
     }
