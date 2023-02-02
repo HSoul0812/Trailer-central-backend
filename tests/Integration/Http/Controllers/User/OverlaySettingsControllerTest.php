@@ -9,6 +9,11 @@ use App\Models\User\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Inventory\Inventory;
+use Illuminate\Support\Facades\Queue;
+use App\Jobs\Inventory\GenerateOverlayImageJob;
+use App\Models\Inventory\InventoryImage;
+use App\Models\Inventory\Image;
+use App\Models\User\DealerLocation;
 
 class OverlaySettingsControllerTest extends TestCase {
 
@@ -32,10 +37,20 @@ class OverlaySettingsControllerTest extends TestCase {
         ]);
 
         $this->token = $this->dealer->authToken->access_token;
+
+        $this->location = factory(DealerLocation::class)->create([
+            'dealer_id' => $this->dealer->getKey(),
+        ]);
+
+        Queue::fake();
     }
 
     public function tearDown(): void
     {
+        Inventory::where('dealer_id', $this->dealer->getKey())->delete();
+
+        $this->location->delete();
+
         $this->dealer->authToken->delete();
 
         $this->dealer->delete();
@@ -73,7 +88,7 @@ class OverlaySettingsControllerTest extends TestCase {
      * @group Marketing
      * @group Marketing_Overlays
      */
-    public function testUpdateOverlaySettings($overlaySettings)
+    public function testUpdateOverlaySettingsWithNoInventories($overlaySettings)
     {
         $overlaySettings['dealer_id'] = $this->dealer->dealer_id;
 
@@ -104,6 +119,8 @@ class OverlaySettingsControllerTest extends TestCase {
             ]);
 
         $this->assertDatabaseHas(User::getTableName(), $overlaySettings);
+
+        Queue::assertNotPushed(GenerateOverlayImageJob::class);
     }
 
     /**
@@ -158,5 +175,172 @@ class OverlaySettingsControllerTest extends TestCase {
         Storage::disk('s3')->delete($logoPath);
 
         $this->assertDatabaseHas(User::getTableName(), $overlaySettings);
+
+        Queue::assertNotPushed(GenerateOverlayImageJob::class);
+    }
+
+    /**
+     * @dataProvider overlayParamDataProvider
+     * @group Marketing
+     * @group Marketing_Overlays
+     */
+    public function testUpdateOverlaySettingsWithInventories($overlaySettings)
+    {
+        $overlaySettings['dealer_id'] = $this->dealer->dealer_id;
+
+        $inventory = factory(Inventory::class)->create([
+            'dealer_id' => $this->dealer->getKey(),
+            'dealer_location_id' => $this->location->dealer_location_id
+        ]);
+
+        $images = factory(Image::class, 2)->create();
+
+        $images->each(function (Image $image) use ($inventory): void {
+            factory(InventoryImage::class)->create([
+                'inventory_id' => $inventory->inventory_id,
+                'image_id' => $image->image_id
+            ]);
+        });
+
+        $this->withHeaders(['access-token' => $this->token])
+            ->postJson(self::apiEndpoint, $overlaySettings)
+            ->assertSuccessful()
+            ->assertJsonStructure([
+                'data' => [
+                    'overlay_default',
+                    'overlay_enabled',
+                    'overlay_logo',
+                    'overlay_logo_height',
+                    'overlay_logo_position',
+                    'overlay_logo_width',
+                    'overlay_lower',
+                    'overlay_lower_alpha',
+                    'overlay_lower_bg',
+                    'overlay_lower_margin',
+                    'overlay_lower_size',
+                    'overlay_lower_text',
+                    'overlay_upper',
+                    'overlay_upper_alpha',
+                    'overlay_upper_bg',
+                    'overlay_upper_margin',
+                    'overlay_upper_size',
+                    'overlay_upper_text'
+                ]
+            ]);
+
+        $this->assertDatabaseHas(User::getTableName(), $overlaySettings);
+
+        Queue::assertPushed(GenerateOverlayImageJob::class);
+    }
+
+    /**
+     * @dataProvider overlayParamDataProvider
+     * @group Marketing
+     * @group Marketing_Overlays
+     */
+    public function testUpdateOverlaySettingsWithNoChanges($overlaySettings)
+    {
+        $overlaySettings['dealer_id'] = $this->dealer->dealer_id;
+
+        $inventory = factory(Inventory::class)->create([
+            'dealer_id' => $this->dealer->getKey(),
+            'dealer_location_id' => $this->location->dealer_location_id
+        ]);
+
+        $images = factory(Image::class, 2)->create();
+
+        $images->each(function (Image $image) use ($inventory): void {
+            factory(InventoryImage::class)->create([
+                'inventory_id' => $inventory->inventory_id,
+                'image_id' => $image->image_id
+            ]);
+        });
+
+        // update overlay settings before sending update request API
+        foreach ($overlaySettings as $field => $value)
+        {
+            $this->dealer->$field = $value;
+        }
+        $this->dealer->save();
+
+        $this->withHeaders(['access-token' => $this->token])
+            ->postJson(self::apiEndpoint, $overlaySettings)
+            ->assertSuccessful()
+            ->assertJsonStructure([
+                'data' => [
+                    'overlay_default',
+                    'overlay_enabled',
+                    'overlay_logo',
+                    'overlay_logo_height',
+                    'overlay_logo_position',
+                    'overlay_logo_width',
+                    'overlay_lower',
+                    'overlay_lower_alpha',
+                    'overlay_lower_bg',
+                    'overlay_lower_margin',
+                    'overlay_lower_size',
+                    'overlay_lower_text',
+                    'overlay_upper',
+                    'overlay_upper_alpha',
+                    'overlay_upper_bg',
+                    'overlay_upper_margin',
+                    'overlay_upper_size',
+                    'overlay_upper_text'
+                ]
+            ]);
+
+        $this->assertDatabaseHas(User::getTableName(), $overlaySettings);
+
+        Queue::assertNotPushed(GenerateOverlayImageJob::class);
+    }
+
+    /**
+     * @dataProvider overlayParamDataProvider
+     * @group Marketing
+     * @group Marketing_Overlays
+     */
+    public function testUpdateOverlaySettingsWithNoInventoryImages($overlaySettings)
+    {
+
+        $overlaySettings['dealer_id'] = $this->dealer->dealer_id;
+
+        $inventory = factory(Inventory::class)->create([
+            'dealer_id' => $this->dealer->getKey(),
+            'dealer_location_id' => $this->location->dealer_location_id
+        ]);
+
+        $this->assertDatabaseMissing(InventoryImage::getTableName(), [
+            'inventory_id' => $inventory->getKey()
+        ]);
+
+        $this->withHeaders(['access-token' => $this->token])
+            ->postJson(self::apiEndpoint, $overlaySettings)
+            ->assertSuccessful()
+            ->assertJsonStructure([
+                'data' => [
+                    'overlay_default',
+                    'overlay_enabled',
+                    'overlay_logo',
+                    'overlay_logo_height',
+                    'overlay_logo_position',
+                    'overlay_logo_width',
+                    'overlay_lower',
+                    'overlay_lower_alpha',
+                    'overlay_lower_bg',
+                    'overlay_lower_margin',
+                    'overlay_lower_size',
+                    'overlay_lower_text',
+                    'overlay_upper',
+                    'overlay_upper_alpha',
+                    'overlay_upper_bg',
+                    'overlay_upper_margin',
+                    'overlay_upper_size',
+                    'overlay_upper_text'
+                ]
+            ]);
+
+        $this->assertDatabaseHas(User::getTableName(), $overlaySettings);
+
+        Queue::assertNotPushed(GenerateOverlayImageJob::class);
     }
 }

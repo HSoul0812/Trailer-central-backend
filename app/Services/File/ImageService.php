@@ -152,7 +152,8 @@ class ImageService extends AbstractFileService
         }
 
         // Add Logo Overlay if applicable
-        if ($params['overlay_logo_position'] !== User::OVERLAY_LOGO_POSITION_NONE) {
+        if ($params['overlay_logo_position'] !== User::OVERLAY_LOGO_POSITION_NONE
+            && !empty($params['overlay_logo'])) {
 
             $logoPath = $params['overlay_logo'];
             $imagePath = $this->imageHelper->addLogoOverlay($imagePath, $logoPath, $params);
