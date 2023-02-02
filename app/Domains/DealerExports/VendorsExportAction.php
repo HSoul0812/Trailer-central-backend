@@ -8,6 +8,8 @@ use App\Models\Parts\Vendor;
 
 class VendorsExporterAction extends BaseExportAction implements EntityActionExportable
 {
+    const ENTITY_TYPE = 'vendors';
+
     public function getQuery()
     {
         return Vendor::query()->where('dealer_id', $this->dealer->dealer_id);

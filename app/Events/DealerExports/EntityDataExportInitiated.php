@@ -8,7 +8,7 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use App\Models\User\User;
 
-class EntityDataExported
+class EntityDataExportInitiated
 {
     use Dispatchable, InteractsWithSockets, SerializesModels, WithGetter;
 
@@ -18,13 +18,9 @@ class EntityDataExported
     /** @var string */
     public $entityType;
 
-    /** @var string */
-    public $filePath;
-
-    public function __construct(User $dealer, string $entityType, string $filePath)
+    public function __construct(User $dealer, string $entityType)
     {
         $this->dealer = $dealer;
         $this->entityType = $entityType;
-        $this->filePath = $filePath;
     }
 }

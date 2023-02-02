@@ -8,6 +8,8 @@ use App\Models\Parts\Brand;
 
 class BrandsExporterAction extends BaseExportAction implements EntityActionExportable
 {
+    const ENTITY_TYPE = 'brands';
+
     public function getQuery()
     {
         return Brand::query()->where('dealer_id', $this->dealer->dealer_id)->get();
