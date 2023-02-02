@@ -42,6 +42,7 @@ class InventoryControllerTest extends TestCase
 
     const API_INVENTORY_TITLES = '/api/inventory/get_all_titles';
     const API_INVENTORY_EXISTS = '/api/inventory/exists';
+    const TEST_UPLOADED_IMAGE_URL = 'https://placehold.co/700.png';
 
     public function setUp(): void
     {
@@ -1299,14 +1300,14 @@ HTML,
             'is_default' => 1,
             'is_secondary' => 0,
             'position' => 1,
-            'url' => 'https://placehold.co/400',
+            'url' => self::TEST_UPLOADED_IMAGE_URL,
             'was_manually_added' => 1
         ];
         $inventoryParams['new_images'][] = [
             'is_default' => 0,
             'is_secondary' => 1,
             'position' => 2,
-            'url' => 'https://placehold.co/400',
+            'url' => self::TEST_UPLOADED_IMAGE_URL,
             'was_manually_added' => 1
         ];
 
@@ -1374,14 +1375,14 @@ HTML,
             'is_default' => 1,
             'is_secondary' => 0,
             'position' => 1,
-            'url' => 'https://placehold.co/400',
+            'url' => self::TEST_UPLOADED_IMAGE_URL,
             'was_manually_added' => 1
         ];
         $inventoryParams['new_images'][] = [
             'is_default' => 0,
             'is_secondary' => 1,
             'position' => 2,
-            'url' => 'https://placehold.co/400',
+            'url' => self::TEST_UPLOADED_IMAGE_URL,
             'was_manually_added' => 1
         ];
 
@@ -1503,7 +1504,7 @@ HTML,
             'is_default' => 0,
             'is_secondary' => 0,
             'position' => 3,
-            'url' => 'https://placehold.co/400',
+            'url' => self::TEST_UPLOADED_IMAGE_URL,
             'was_manually_added' => 1
         ];
 
