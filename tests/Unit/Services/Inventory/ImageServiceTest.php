@@ -242,7 +242,7 @@ class ImageServiceTest extends TestCase
             'overlay_logo' => 'logo.png'
         ];
 
-        $inventories = new Collection([]);
+        $inventories = new Collection();
         for ($i = 0; $i < 5; $i++)
         {
             $inventoryId = $i + 1;
@@ -252,14 +252,47 @@ class ImageServiceTest extends TestCase
         }
 
         $this->inventoryRepositoryMock->shouldReceive('getAll')
-            ->with(['dealer_id' => self::DEALER_ID], false, false, ['inventory_id'])
+            ->with([
+                'dealer_id' => self::DEALER_ID, 'images_greater_than' => 1], 
+                false, false, [Inventory::getTableName(). '.inventory_id'])
             ->once()->andReturn($inventories);
 
         $this->userRepositoryMock->shouldReceive('updateOverlaySettings')
-            ->once()->with(self::DEALER_ID, $overlayParams);
+            ->once()->with(self::DEALER_ID, $overlayParams)
+            ->andReturn(true);
+
+        $this->userRepositoryMock->shouldReceive('get')
+            ->once()->with(['dealer_id' => self::DEALER_ID])
+            ->andReturn($this->getEloquentMock(User::class));
 
         $this->imageService->updateOverlaySettings($overlayParams);
 
         Queue::assertPushed(GenerateOverlayImageJob::class, $inventories->count());
+    }
+
+    /**
+     * @group Marketing
+     * @group Marketing_Overlays
+     */
+    public function testUpdateOverlaySettingsWithoutChanges()
+    {
+        $overlayParams = [
+            'dealer_id' => self::DEALER_ID,
+            'overlay_logo' => 'logo.png'
+        ];
+
+        $this->inventoryRepositoryMock->shouldNotReceive('getAll');
+
+        $this->userRepositoryMock->shouldReceive('updateOverlaySettings')
+            ->once()->with(self::DEALER_ID, $overlayParams)
+            ->andReturn(false);
+
+        $this->userRepositoryMock->shouldReceive('get')
+            ->once()->with(['dealer_id' => self::DEALER_ID])
+            ->andReturn($this->getEloquentMock(User::class));
+
+        $this->imageService->updateOverlaySettings($overlayParams);
+
+        Queue::assertNotPushed(GenerateOverlayImageJob::class);
     }
 }
