@@ -52,7 +52,7 @@ class ExportDealerDataCommand extends Command
 
         DealerExport::updateOrCreate(
             ['dealer_id' => $dealer->dealer_id, 'entity_type' => 'zip'],
-            ['status' => DealerExport::STATUS_IN_PROGRESS, 'password' => Crypt::encryptString($zipPassword)],
+            ['status' => DealerExport::STATUS_IN_PROGRESS, 'zip_password' => Crypt::encryptString($zipPassword)],
         );
 
         $action = new ExportManagerAction($dealer);

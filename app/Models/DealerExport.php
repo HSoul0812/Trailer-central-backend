@@ -14,5 +14,6 @@ class DealerExport extends Model
         'file_path',
         'entity_type',
         'status',
+        'zip_password'
     ];
 }

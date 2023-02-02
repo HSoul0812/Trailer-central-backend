@@ -14,11 +14,12 @@ class CreateDealerExportsTable extends Migration
     public function up()
     {
         Schema::create('dealer_exports', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->foreignId('dealer_id')->references('id')->on('user');
+            $table->increments('id');
+            $table->foreignId('dealer_id')->references('dealer_id')->on('user');
             $table->string('entity_type');
             $table->string('file_path')->nullable();
             $table->unsignedTinyInteger('status')->default(0)->comment('0 => queued, 1 => processing, 2 => processed');
+            $table->string('zip_password')->nullable();
             $table->timestamps();
         });
     }
