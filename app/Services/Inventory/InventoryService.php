@@ -340,6 +340,10 @@ class InventoryService implements InventoryServiceInterface
                 $params['archived_at'] = Carbon::now()->format('Y-m-d H:i:s');
             }
 
+            if (!empty($params['status']) && $params['status'] == Inventory::STATUS_SOLD) {
+                $params['sold_at'] = Carbon::now()->format('Y-m-d H:i:s');
+            }
+
             $inventory = $this->inventoryRepository->update($params, $options);
 
             if (!$inventory instanceof Inventory) {

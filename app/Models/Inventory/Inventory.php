@@ -374,7 +374,8 @@ class Inventory extends Model
         'times_viewed',
         'trailerworld_store_id',
         'show_on_auction123',
-        'show_on_rvt'
+        'show_on_rvt',
+        'sold_at',
     ];
 
     protected $casts = [
