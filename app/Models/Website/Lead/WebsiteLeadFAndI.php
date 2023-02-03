@@ -4,6 +4,7 @@ namespace App\Models\Website\Lead;
 
 use App\Models\Traits\TableAware;
 use App\Models\Website\Website;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -45,7 +46,7 @@ use Illuminate\Database\Eloquent\Model;
 
  * @property Lead $lead
  */
-class Lead extends Model
+class WebsiteLeadFAndI extends Model
 {
     use TableAware;
 
@@ -81,21 +82,21 @@ class Lead extends Model
      *
      * @var string
      */
-    protected $primaryKey = 'identifier';
+    protected $primaryKey = 'fandi_id';
 
     /**
      * The name of the "created at" column.
      *
      * @var string
      */
-    const CREATED_AT = 'date_submitted';
+    const CREATED_AT = 'date_imported';
 
     /**
      * The name of the "updated at" column.
      *
      * @var string
      */
-    const UPDATED_AT = NULL;
+    const UPDATED_AT = null;
 
     /**
      * The attributes that are mass assignable.
@@ -103,7 +104,6 @@ class Lead extends Model
      * @var array
      */
     protected $fillable = [
-        'fandi_id',
         'lead_id',
         'drivers_first_name',
         'drivers_mid_name',
@@ -138,19 +138,35 @@ class Lead extends Model
     ];
 
     protected $casts = [
+        'monthly_rent' => 'int',
+        'down_payment' => 'int',
+        'trade_value' => 'int',
+        'trade_payoff' => 'int',
+        'other_income' => 'int',
+
     ];
+
+    protected $dates = [
+        'date_imported',
+        'drivers_dob',
+    ];
+
 
     /**
      * Get Website.
      *
      * @return BelongsTo
      */
-    public function website(): BelongsTo
+    public function lead(): BelongsTo
     {
         return $this->belongsTo(Website::class, 'website_id', 'id');
     }
 
-    public static function getTableName() {
+    /**
+     * @return string
+     */
+    public static function getTableName(): string
+    {
         return self::TABLE_NAME;
     }
 }
