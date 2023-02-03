@@ -7,6 +7,10 @@ use App\Models\Inventory\InventoryImage;
 use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
 
+/**
+ * @deprecated
+ * @todo this must be analyzed given that inventory service/inventory model is already dispatching jobs becoming this redundant
+ */
 class InventoryImageObserver
 {
     /**
@@ -37,7 +41,7 @@ class InventoryImageObserver
      */
     public function created(InventoryImage $image)
     {
-        $this->deleted($image);
+        // $this->deleted($image);
     }
 
     /**
@@ -48,7 +52,7 @@ class InventoryImageObserver
      */
     public function updated(InventoryImage $image)
     {
-        $this->deleted($image);
+        // $this->deleted($image);
     }
 
     /**
@@ -60,10 +64,10 @@ class InventoryImageObserver
     public function deleted(InventoryImage $image)
     {
         if (Inventory::isCacheInvalidationEnabled()) {
-            $this->responseCache->forget([
-                $this->cacheKey->deleteSingleFromCollection($image->inventory_id),
-                $this->cacheKey->deleteSingle($image->inventory_id, $image->inventory->dealer_id)
-            ]);
+            //  $this->responseCache->forget([
+            //      $this->cacheKey->deleteSingleFromCollection($image->inventory_id),
+            //      $this->cacheKey->deleteSingle($image->inventory_id, $image->inventory->dealer_id)
+            //  ]);
         }
     }
 

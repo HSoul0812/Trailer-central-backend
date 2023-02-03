@@ -8,6 +8,7 @@ use App\Models\Inventory\Inventory;
 use App\Observers\Inventory\InventoryObserver;
 use App\Repositories\FeatureFlagRepositoryInterface;
 use Exception;
+use Laravel\Scout\ModelObserver;
 
 /**
  * @method \Illuminate\Database\Eloquent\Builder query
@@ -169,5 +170,10 @@ trait InventorySearchable
     public static function isCacheInvalidationEnabled(): bool
     {
         return InventoryObserver::isCacheInvalidationEnabled();
+    }
+
+    public static function isSearchSyncingEnabled(): bool
+    {
+        return !ModelObserver::syncingDisabledFor(__CLASS__);
     }
 }

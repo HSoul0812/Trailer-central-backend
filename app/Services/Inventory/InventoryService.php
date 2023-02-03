@@ -4,6 +4,7 @@ namespace App\Services\Inventory;
 
 use App\Contracts\LoggerServiceInterface;
 use App\Exceptions\Inventory\InventoryException;
+use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
 use App\Jobs\Inventory\ReIndexInventoriesByDealerLocationJob;
 use App\Jobs\Website\ReIndexInventoriesByDealersJob;
 use App\Models\CRM\Dms\Quickbooks\Bill;
@@ -859,8 +860,8 @@ class InventoryService implements InventoryServiceInterface
         if($toZip !== null) {
             $geolocation = $this->geoLocationService->geoPointFromZipCode($toZip);
             if($geolocation){
-                $fromLat = $geolocation->latitude;
-                $fromLng = $geolocation->longitude;
+                $fromLat = $geolocation->getLat();
+                $fromLng = $geolocation->getLng();
             }
         }
 

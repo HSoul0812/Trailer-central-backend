@@ -32,7 +32,6 @@ use App\Services\User\GeoLocationServiceInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use Laravel\Scout\Jobs\MakeSearchable;
 use Mockery;
 use Mockery\LegacyMockInterface;
 use PHPUnit\Framework\MockObject\MockObject;

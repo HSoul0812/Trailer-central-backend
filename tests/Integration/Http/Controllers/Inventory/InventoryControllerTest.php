@@ -7,6 +7,7 @@ namespace Tests\Integration\Http\Controllers\Inventory;
 use App\Http\Controllers\v1\Inventory\InventoryController;
 use App\Http\Middleware\Inventory\CreateInventoryPermissionMiddleware;
 use App\Http\Requests\Inventory\GetInventoryHistoryRequest;
+use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
 use App\Models\CRM\Dms\Customer\CustomerInventory;
 use App\Models\CRM\User\Customer;
 use App\Models\Inventory\EntityType;
@@ -19,6 +20,7 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
+use Laravel\Scout\Jobs\MakeSearchable;
 use Tests\database\seeds\Inventory\InventoryHistorySeeder;
 use Tests\database\seeds\Inventory\InventorySeeder;
 use Tests\database\seeds\User\GeolocationSeeder;
@@ -109,6 +111,9 @@ class InventoryControllerTest extends TestCase
      *
      * @group DMS
      * @group DMS_INVENTORY
+     * @group DW
+     * @group DW_INVENTORY
+     * @group DW_ELASTICSEARCH
      *
      * @dataProvider inventoryDataProvider
      *
@@ -135,6 +140,9 @@ class InventoryControllerTest extends TestCase
         $this->assertArrayHasKey('data', $responseJson['response']);
         $this->assertArrayHasKey('id', $responseJson['response']['data']);
         $this->assertSame('success', $responseJson['response']['status']);
+
+        Queue::assertPushed(MakeSearchable::class, 1);
+        Queue::assertPushed(InvalidateCacheJob::class, 1);
 
         $inventory = Inventory::find($responseJson['response']['data']['id']);
 
@@ -170,6 +178,9 @@ class InventoryControllerTest extends TestCase
      *
      * @group DMS
      * @group DMS_INVENTORY
+     * @group DW
+     * @group DW_INVENTORY
+     * @group DW_ELASTICSEARCH
      *
      * @dataProvider inventoryDataProvider
      *
@@ -203,6 +214,9 @@ class InventoryControllerTest extends TestCase
 
         $response->assertStatus(201);
 
+        Queue::assertPushed(MakeSearchable::class, 1);
+        Queue::assertPushed(InvalidateCacheJob::class, 1);
+
         $responseJson = json_decode($response->getContent(), true);
         $this->assertArrayHasKey('response', $responseJson);
         $this->assertArrayHasKey('status', $responseJson['response']);
@@ -220,6 +234,8 @@ class InventoryControllerTest extends TestCase
      *
      * @group DMS
      * @group DMS_INVENTORY
+     * @group DW
+     * @group DW_INVENTORY
      *
      * @dataProvider wrongInventoryDataProvider
      */
@@ -264,6 +280,9 @@ class InventoryControllerTest extends TestCase
      *
      * @group DMS
      * @group DMS_INVENTORY
+     * @group DW
+     * @group DW_INVENTORY
+     * @group DW_ELASTICSEARCH
      *
      * @dataProvider inventoryDataProvider
      *
@@ -301,6 +320,9 @@ class InventoryControllerTest extends TestCase
 
         $response->assertStatus(201);
 
+        Queue::assertPushed(MakeSearchable::class, 1);
+        Queue::assertPushed(InvalidateCacheJob::class, 1);
+
         $responseJson = json_decode($response->getContent(), true);
         $this->assertArrayHasKey('response', $responseJson);
         $this->assertArrayHasKey('status', $responseJson['response']);
@@ -318,6 +340,8 @@ class InventoryControllerTest extends TestCase
      *
      * @group DMS
      * @group DMS_INVENTORY
+     * @group DW
+     * @group DW_INVENTORY
      */
     public function testCreateWithWrongAccessToken()
     {
@@ -333,6 +357,8 @@ class InventoryControllerTest extends TestCase
      *
      * @group DMS
      * @group DMS_INVENTORY
+     * @group DW
+     * @group DW_INVENTORY
      */
     public function testCreateWithoutAccessToken()
     {
@@ -348,6 +374,8 @@ class InventoryControllerTest extends TestCase
      *
      * @group DMS
      * @group DMS_INVENTORY
+     * @group DW
+     * @group DW_INVENTORY
      */
     public function testExists()
     {
@@ -382,6 +410,8 @@ class InventoryControllerTest extends TestCase
      *
      * @group DMS
      * @group DMS_INVENTORY
+     * @group DW
+     * @group DW_INVENTORY
      */
     public function testExistsFalse()
     {
@@ -417,6 +447,8 @@ class InventoryControllerTest extends TestCase
      *
      * @group DMS
      * @group DMS_INVENTORY
+     * @group DW
+     * @group DW_INVENTORY
      *
      * @dataProvider inventoryDataProvider
      *
@@ -472,6 +504,8 @@ class InventoryControllerTest extends TestCase
      *
      * @group DMS
      * @group DMS_INVENTORY
+     * @group DW
+     * @group DW_INVENTORY
      *
      * @dataProvider inventoryDataProvider
      *
@@ -514,6 +548,8 @@ class InventoryControllerTest extends TestCase
     /**
      * @group DMS
      * @group DMS_INVENTORY
+     * @group DW
+     * @group DW_INVENTORY
      *
      * @return void
      */
@@ -535,6 +571,8 @@ class InventoryControllerTest extends TestCase
     /**
      * @group DMS
      * @group DMS_INVENTORY
+     * @group DW
+     * @group DW_INVENTORY
      *
      * @return void
      */
@@ -1148,6 +1186,8 @@ HTML,
     /**
      * @group DMS
      * @group DMS_INVENTORY
+     * @group DW
+     * @group DW_INVENTORY
      *
      * @return void
      */
@@ -1176,6 +1216,8 @@ HTML,
     /**
      * @group DMS
      * @group DMS_INVENTORY
+     * @group DW
+     * @group DW_INVENTORY
      *
      * @return void
      */
@@ -1249,6 +1291,8 @@ HTML,
     /**
      * @group DMS
      * @group DMS_INVENTORY
+     * @group DW
+     * @group DW_INVENTORY
      *
      * @return void
      */
@@ -1281,9 +1325,12 @@ HTML,
 
     /**
      * @covers ::create
-     * 
+     *
      * @group Marketing
      * @group Marketing_Overlays
+     * @group DW
+     * @group DW_INVENTORY
+     * @group DW_ELASTICSEARCH
      */
     public function testCreateWithImages()
     {
@@ -1323,14 +1370,20 @@ HTML,
         ]);
 
         Queue::assertPushed(GenerateOverlayImageJob::class);
+        Queue::assertPushed(InvalidateCacheJob::class, 1);
+        Queue::assertPushed(MakeSearchable::class, 1);
 
         $seeder->cleanUp();
     }
 
     /**
      * @covers ::create
+     *
      * @group Marketing
      * @group Marketing_Overlays
+     * @group DW
+     * @group DW_INVENTORY
+     * @group DW_ELASTICSEARCH
      */
     public function testCreateWithNoImage()
     {
@@ -1354,6 +1407,8 @@ HTML,
         ]);
 
         Queue::assertNotPushed(GenerateOverlayImageJob::class);
+        Queue::assertPushed(InvalidateCacheJob::class, 1);
+        Queue::assertPushed(MakeSearchable::class, 1);
 
         $seeder->cleanUp();
 
@@ -1386,7 +1441,7 @@ HTML,
             'was_manually_added' => 1
         ];
 
-        $response = $this->json('POST', '/api/inventory/'. $seeder->inventory->getKey(), 
+        $response = $this->json('POST', '/api/inventory/'. $seeder->inventory->getKey(),
             $inventoryParams, $this->getSeederAccessToken($seeder));
 
         $response->assertSuccessful();
@@ -1394,8 +1449,10 @@ HTML,
         $this->assertDatabaseHas(InventoryImage::getTableName(), [
             'inventory_id' => $seeder->inventory->getKey()
         ]);
-        
+
         Queue::assertPushed(GenerateOverlayImageJob::class, 1);
+        Queue::assertPushed(InvalidateCacheJob::class, 2);
+        Queue::assertPushed(MakeSearchable::class, 1);
 
         $seeder->cleanUp();
 
@@ -1430,16 +1487,17 @@ HTML,
             $index++;
         });
 
-        $response = $this->json('POST', '/api/inventory/'. $seeder->inventory->getKey(), 
-            $inventoryParams, $this->getSeederAccessToken($seeder));
+        $response = $this->json('POST', '/api/inventory/'. $seeder->inventory->getKey(), $inventoryParams, $this->getSeederAccessToken($seeder));
 
         $response->assertSuccessful();
 
         $this->assertDatabaseHas(InventoryImage::getTableName(), [
             'inventory_id' => $seeder->inventory->getKey()
         ]);
-        
+
         Queue::assertPushed(GenerateOverlayImageJob::class, 1);
+        Queue::assertPushed(InvalidateCacheJob::class, 2);
+        Queue::assertPushed(MakeSearchable::class, 1);
 
         $seeder->cleanUp();
 
@@ -1457,7 +1515,7 @@ HTML,
 
         $inventoryParams['title'] = 'test_title';
 
-        $response = $this->json('POST', '/api/inventory/'. $seeder->inventory->getKey(), 
+        $response = $this->json('POST', '/api/inventory/'. $seeder->inventory->getKey(),
             $inventoryParams, $this->getSeederAccessToken($seeder));
 
         $response->assertSuccessful();
@@ -1465,8 +1523,10 @@ HTML,
         $this->assertDatabaseMissing(InventoryImage::getTableName(), [
             'inventory_id' => $seeder->inventory->getKey()
         ]);
-        
+
         Queue::assertNotPushed(GenerateOverlayImageJob::class, 1);
+        Queue::assertPushed(InvalidateCacheJob::class, 2);
+        Queue::assertPushed(MakeSearchable::class, 1);
 
         $seeder->cleanUp();
     }
@@ -1508,17 +1568,17 @@ HTML,
             'was_manually_added' => 1
         ];
 
-        $response = $this->json('POST', '/api/inventory/'. $seeder->inventory->getKey(), 
+        $response = $this->json('POST', '/api/inventory/'. $seeder->inventory->getKey(),
             $inventoryParams, $this->getSeederAccessToken($seeder));
 
         $response->assertSuccessful();
 
         $this->assertEquals(3, InventoryImage::where('inventory_id', $seeder->inventory->getKey())->count());
-        
+
         Queue::assertPushed(GenerateOverlayImageJob::class, 1);
+        Queue::assertPushed(InvalidateCacheJob::class, 2);
+        Queue::assertPushed(MakeSearchable::class, 1);
 
         $seeder->cleanUp();
     }
-
-
 }
