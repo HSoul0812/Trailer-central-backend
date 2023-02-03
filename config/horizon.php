@@ -173,7 +173,7 @@ return [
             ],
             'supervisor-2' => [
                 'connection' => 'redis',
-                'queue' => ['overlay-images', 'scout', 'inventory-cache'],
+                'queue' => ['overlay-images', 'scout', 'inventory-cache'], // high to low "priority"
                 'balance' => false,
                 'minProcesses' => 3,
                 'maxProcesses' => 10,
@@ -213,7 +213,7 @@ return [
             ],
             'supervisor-2' => [
                 'connection' => 'redis',
-                'queue' => ['overlay-images', 'scout',  'inventory-cache'],
+                'queue' => ['overlay-images', 'scout',  'inventory-cache'], // high to low "priority"
                 'balance' => false,
                 'minProcesses' => 3,
                 'maxProcesses' => 12,
@@ -245,7 +245,7 @@ return [
             ],
             'supervisor-2' => [
                 'connection' => 'redis',
-                'queue' => ['overlay-images', 'scout', 'inventory-cache'],
+                'queue' => ['overlay-images', 'scout', 'inventory-cache'], // high to low "priority"
                 'minProcesses' => 3,
                 'maxProcesses' => 14,
                 'balance' => false,
@@ -320,7 +320,7 @@ return [
             ],
             'supervisor-2' => [
                 'connection' => 'redis',
-                'queue' => ['overlay-images', 'scout', 'inventory-cache'], // high to low priority
+                'queue' => ['overlay-images', 'scout', 'inventory-cache'], // high to low "priority"
                 'balance' => false,
                 'minProcesses' => 45,
                 'maxProcesses' => 60,
