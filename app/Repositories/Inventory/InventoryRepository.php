@@ -218,10 +218,13 @@ class InventoryRepository implements InventoryRepositoryInterface
         // bill category record, allowing the dealer to update the bill later on
         $item->send_to_quickbooks = !empty($item->bill_id);
 
-        // Try to get the geolocation point class from the existing method and use it here
-        $geolocation = $item->geolocationPoint();
+        // when the geolocation is not setup as Point, it will use a default Point
+        if (empty($params['geolocation']) || !($params['geolocation'] instanceof Point)) {
+            // Try to get the geolocation point class from the existing method and use it here
+            $geolocation = $item->geolocationPoint();
 
-        $item->geolocation = new Point($geolocation->latitude, $geolocation->longitude);
+            $item->geolocation = new Point($geolocation->latitude, $geolocation->longitude);
+        }
 
         $item->save();
 
@@ -352,6 +355,15 @@ class InventoryRepository implements InventoryRepositoryInterface
         // so the cronjob can create the add bill approval record and also the
         // bill category record, allowing the dealer to update the bill later on
         $item->send_to_quickbooks = !empty($item->bill_id);
+
+        // when the geolocation is not setup as Point, it will use a Point which is build
+        // either from inventory coordinates or dealer location coordinates as fallback
+        if (empty($params['geolocation']) || !($params['geolocation'] instanceof Point)) {
+            // Try to get the geolocation point class from the existing method and use it here
+            $geolocation = $item->geolocationPoint();
+
+            $item->geolocation = new Point($geolocation->latitude, $geolocation->longitude);
+        }
 
         $item->save();
 
