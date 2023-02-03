@@ -154,6 +154,12 @@ class User extends Model implements Authenticatable, PermissionsInterface
         self::OVERLAY_UPPER_DEALER_LOCATION_NAME
     ];
 
+    public const OVERLAY_TEXT_SETTINGS = [
+        self::OVERLAY_UPPER_DEALER_NAME,
+        self::OVERLAY_UPPER_DEALER_PHONE,
+        self::OVERLAY_UPPER_DEALER_LOCATION_NAME
+    ];
+
     /**
      * The table associated with the model.
      *
