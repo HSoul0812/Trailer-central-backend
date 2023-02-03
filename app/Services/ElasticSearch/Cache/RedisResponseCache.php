@@ -127,6 +127,6 @@ class RedisResponseCache implements ResponseCacheInterface
     {
         $parts = explode('.', $key);
 
-        return $parts[1] === 'search' ? self::SEARCH_HASHMAP_KEY : self::SINGLE_HASHMAP_KEY;
+        return count($parts) > 1 && $parts[1] === 'search' ? self::SEARCH_HASHMAP_KEY : self::SINGLE_HASHMAP_KEY;
     }
 }
