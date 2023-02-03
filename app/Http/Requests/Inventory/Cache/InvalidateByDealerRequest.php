@@ -16,6 +16,6 @@ class InvalidateByDealerRequest extends Request
 
     public function dealerIds(): array
     {
-        return $this->input('dealer_id', []);
+        return array_unique($this->input('dealer_id', []));
     }
 }

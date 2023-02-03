@@ -28,9 +28,7 @@ class SetTest extends AbstractInventoryResponseRedisCacheTest
         /** @var Mockery\MockInterface|Mockery\Mock|InventoryResponseCacheInterface $inventoryCache */
         $inventoryCache = app(InventoryResponseCacheInterface::class);
 
-        $this->singleResponseCache->allows('set')->withArgs([$key, $value]);
-
-        $this->expectNotToPerformAssertions();
+        $this->singleResponseCache->expects($this->once())->method('set')->with($key, $value);
 
         $inventoryCache->set($key, $value);
     }
@@ -57,9 +55,7 @@ class SetTest extends AbstractInventoryResponseRedisCacheTest
         /** @var Mockery\MockInterface|Mockery\Mock|InventoryResponseCacheInterface $inventoryCache */
         $inventoryCache = app(InventoryResponseCacheInterface::class);
 
-        $this->searchResponseCache->allows('set')->withArgs([$key, $value]);
-
-        $this->expectNotToPerformAssertions();
+        $this->searchResponseCache->expects($this->once())->method('set')->with($key, $value);
 
         $inventoryCache->set($key, $value);
     }

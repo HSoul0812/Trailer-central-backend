@@ -26,6 +26,10 @@ class ForgetAndInvalidateTest extends AbstractInventoryResponseRedisCacheTest
      */
     public function test_it_uses_the_correct_cache_connection_when_invalidating_both_kind_of_keys(string $method): void
     {
+        $commonPatterns = [
+            RedisResponseCacheKey::CLEAR_ALL_PATTERN
+        ];
+
         $singlePatterns = [
             $this->cacheKey->deleteSingle(1234, 345),
             $this->cacheKey->deleteSingleByDealer(5678)
@@ -36,37 +40,13 @@ class ForgetAndInvalidateTest extends AbstractInventoryResponseRedisCacheTest
             $this->cacheKey->deleteSingleFromCollection(1234)
         ];
 
-        $patterns = array_merge($singlePatterns, $searchPatterns);
+        $patterns = array_merge($commonPatterns, $singlePatterns, $searchPatterns);
 
         /** @var Mockery\MockInterface|Mockery\Mock|InventoryResponseCacheInterface $inventoryCache */
         $inventoryCache = app(InventoryResponseCacheInterface::class);
 
-        $this->singleResponseCache->allows($method)->withArgs($singlePatterns);
-        $this->searchResponseCache->allows($method)->withArgs($searchPatterns);
-
-        $this->expectNotToPerformAssertions();
-
-        $inventoryCache->{$method}($patterns);
-    }
-
-    /**
-     * @param  string  $method
-     * @return void
-     * @dataProvider methodsDataProvider
-     */
-   public function test_it_uses_the_correct_cache_connection_when_invalidating_both_kind_of_keys_at_same_time(string $method): void
-    {
-        $patterns = [
-            RedisResponseCacheKey::CLEAR_ALL_PATTERN
-        ];
-
-        /** @var Mockery\MockInterface|Mockery\Mock|InventoryResponseCacheInterface $inventoryCache */
-        $inventoryCache = app(InventoryResponseCacheInterface::class);
-
-        $this->singleResponseCache->allows($method)->withArgs($patterns);
-        $this->searchResponseCache->allows($method)->withArgs($patterns);
-
-        $this->expectNotToPerformAssertions();
+        $this->singleResponseCache->expects($this->once())->method($method)->with(...array_merge($commonPatterns, $singlePatterns));
+        $this->searchResponseCache->expects($this->once())->method($method)->with(...array_merge($commonPatterns, $searchPatterns));
 
         $inventoryCache->{$method}($patterns);
     }

@@ -6,6 +6,7 @@ use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\InventoryResponseRedisCache;
 use App\Services\ElasticSearch\Cache\ResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use Tests\TestCase;
 use Mockery;
 
@@ -14,10 +15,10 @@ abstract class AbstractInventoryResponseRedisCacheTest extends TestCase
     /** @var ResponseCacheKeyInterface */
     protected $cacheKey;
 
-    /** @var Mockery\LegacyMockInterface|Mockery\MockInterface|ResponseCacheInterface */
+    /** @var MockObject|Mockery\LegacyMockInterface|Mockery\MockInterface|ResponseCacheInterface */
     protected $searchResponseCache;
 
-    /** @var Mockery\LegacyMockInterface|Mockery\MockInterface|ResponseCacheInterface */
+    /** @var MockObject|Mockery\LegacyMockInterface|Mockery\MockInterface|ResponseCacheInterface */
     protected $singleResponseCache;
 
     public function setUp(): void
@@ -26,8 +27,8 @@ abstract class AbstractInventoryResponseRedisCacheTest extends TestCase
 
         $this->cacheKey = app(ResponseCacheKeyInterface::class);
 
-        $this->singleResponseCache = Mockery::mock(ResponseCacheInterface::class);
-        $this->searchResponseCache = Mockery::mock(ResponseCacheInterface::class);
+        $this->singleResponseCache = $this->createStub(ResponseCacheInterface::class);
+        $this->searchResponseCache = $this->createStub(ResponseCacheInterface::class);
 
         $this->inventoryCache = Mockery::mock(
             InventoryResponseRedisCache::class,
