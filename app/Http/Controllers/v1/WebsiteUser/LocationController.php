@@ -20,6 +20,7 @@ class LocationController extends AbstractRestfulController
         private TcApiResponseUserLocationTransformer $transformer
     )
     {
+        parent::__construct();
     }
 
     public function index(IndexRequestInterface $request)
