@@ -111,6 +111,8 @@ class User extends Model implements Authenticatable, PermissionsInterface
 
     public const OVERLAY_UPPER_DEALER_LOCATION_NAME = 'location';
 
+    public const CLASSIFIED_ACTIVE = 1;
+
     public const TYPES = [
         self::TYPE_DEALER,
         self::TYPE_MANUFACTURER,
@@ -190,7 +192,8 @@ class User extends Model implements Authenticatable, PermissionsInterface
         'is_dms_active' => 'boolean',
         'is_scheduler_active' => 'boolean',
         'clsf_active' => 'boolean',
-        'is_quote_manager_active' => 'boolean'
+        'is_quote_manager_active' => 'boolean',
+        'google_feed_active' => 'boolean'
     ];
 
     /**

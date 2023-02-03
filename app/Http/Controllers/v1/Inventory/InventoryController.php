@@ -16,9 +16,10 @@ use App\Http\Requests\Inventory\GetInventoryHistoryRequest;
 use App\Http\Requests\Inventory\GetInventoryItemRequest;
 use App\Http\Requests\Inventory\SearchInventoryRequest;
 use App\Http\Requests\Inventory\UpdateInventoryRequest;
+use App\Models\Inventory\Inventory;
 use App\Repositories\Inventory\InventoryHistoryRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
-use App\Services\ElasticSearch\Cache\ResponseCacheInterface;
+use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
 use App\Services\Inventory\InventoryServiceInterface;
 use App\Transformers\Inventory\InventoryElasticSearchOutputTransformer;
@@ -61,14 +62,14 @@ class InventoryController extends RestfulControllerV2
     protected $inventoryElasticSearchService;
 
     /**
-     * @var ResponseCacheInterface
-     */
-    protected $responseCache;
-
-    /**
      * @var ResponseCacheKeyInterface
      */
     protected $responseCacheKey;
+
+    /**
+     * @var InventoryResponseCacheInterface
+     */
+    public $inventoryResponseCache;
 
     /**
      * Create a new controller instance.
@@ -77,14 +78,15 @@ class InventoryController extends RestfulControllerV2
      * @param InventoryRepositoryInterface $inventoryRepository
      * @param InventoryHistoryRepositoryInterface $inventoryHistoryRepository
      * @param InventoryElasticSearchServiceInterface $inventoryElasticSearchService
-     * @param ResponseCacheInterface $responseCache
+     * @param InventoryResponseCacheInterface $inventoryResponseCache
+     * @param ResponseCacheKeyInterface $responseCacheKey
      */
     public function __construct(
         InventoryServiceInterface              $inventoryService,
         InventoryRepositoryInterface           $inventoryRepository,
         InventoryHistoryRepositoryInterface    $inventoryHistoryRepository,
         InventoryElasticSearchServiceInterface $inventoryElasticSearchService,
-        ResponseCacheInterface                 $responseCache,
+        InventoryResponseCacheInterface        $inventoryResponseCache,
         ResponseCacheKeyInterface              $responseCacheKey
     )
     {
@@ -96,8 +98,8 @@ class InventoryController extends RestfulControllerV2
         $this->inventoryRepository = $inventoryRepository;
         $this->inventoryHistoryRepository = $inventoryHistoryRepository;
         $this->inventoryElasticSearchService = $inventoryElasticSearchService;
-        $this->responseCache = $responseCache;
         $this->responseCacheKey = $responseCacheKey;
+        $this->inventoryResponseCache = $inventoryResponseCache;
     }
 
     /**
@@ -237,10 +239,12 @@ class InventoryController extends RestfulControllerV2
 
         $response = $this->itemResponse($data, new InventoryTransformer());
 
-        $this->responseCache->set(
-            $this->responseCacheKey->single($data->inventory_id, $data->dealer_id),
-            $response->morph('json')->getContent()
-        );
+        if (Inventory::isCacheInvalidationEnabled()) {
+            $this->inventoryResponseCache->single()->set(
+                $this->responseCacheKey->single($data->inventory_id, $data->dealer_id),
+                $response->morph('json')->getContent()
+            );
+        }
 
         return $response;
     }
@@ -255,6 +259,8 @@ class InventoryController extends RestfulControllerV2
      */
     public function create(Request $request): Response
     {
+        $this->debugRequest('create');
+
         $inventoryRequest = new CreateInventoryRequest($request->all());
 
         $transformer = app()->make(SaveInventoryTransformer::class);
@@ -278,6 +284,8 @@ class InventoryController extends RestfulControllerV2
      */
     public function update(int $id, Request $request): Response
     {
+        $this->debugRequest('update');
+
         $inventoryRequest = new UpdateInventoryRequest(array_merge($request->all(), ['inventory_id' => $id]));
 
         $transformer = app()->make(SaveInventoryTransformer::class);
@@ -540,8 +548,8 @@ class InventoryController extends RestfulControllerV2
             }
 
             //Cache only if there are results
-            if ($result->hints->count()) {
-                $this->responseCache->set(
+            if (Inventory::isCacheInvalidationEnabled() && $result->hints->count()) {
+                $this->inventoryResponseCache->search()->set(
                     $this->responseCacheKey->collection($searchRequest->requestId(), $result),
                     $response->morph('json')->getContent()
                 );
@@ -568,5 +576,34 @@ class InventoryController extends RestfulControllerV2
         );
 
         return $this->itemResponse($data, new InventoryTransformer());
+    }
+
+    /**
+     * @todo remove this method and usages when it has helped us to discover where is the issue
+     *
+     * It will debug those incoming request without or wrong `x-client-id` header, which is the key to determine where come
+     * from the request and when to disable massive enqueuing jobs.
+     *
+     * @param  string  $method
+     * @return void
+     */
+    private function debugRequest(string $method): void
+    {
+        $logContext = collect(request()->headers->all())
+            ->map(function (array $contents) {
+                return implode('', $contents);
+            })->except('content-type')->toArray();
+
+        if (empty($logContext['referer']) &&
+            (
+                empty($logContext['x-client-id']) ||
+                $logContext['x-client-id'] !== config('integrations.inventory_cache_auth.credentials.integration_client_id')
+            )
+        ) {
+            \Illuminate\Support\Facades\Log::stack(['inventory'])->debug(
+                sprintf('[%s] incoming request without or wrong `x-client-id`', $method),
+                $logContext
+            );
+        }
     }
 }

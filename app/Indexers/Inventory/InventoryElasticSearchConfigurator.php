@@ -109,6 +109,7 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
         'showOnKsl'            => ['type' => 'boolean'],
         'showOnRacingjunk'     => ['type' => 'boolean'],
         'showOnWebsite'        => ['type' => 'boolean'],
+        'ttPaymentExpirationDate' => ['type' => 'date', 'format' => 'yyyy-MM-dd'],
         'videoEmbedCode'       => ['type' => 'keyword'],
         'numAc'                => ['type' => 'integer'],
         'numAxles'             => ['type' => 'integer'],
@@ -132,7 +133,13 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
         'roofType'             => ['type' => 'keyword'],
         'loadType'             => ['type' => 'keyword'],
         'fuelType'             => ['type' => 'keyword'],
-        'frameMaterial'        => ['type' => 'keyword'],
+        'frameMaterial'        => [
+            'type'       => 'keyword',
+            'normalizer' => 'case_normal',
+            'fields' => [
+                'txt' => ['type' => 'text', 'analyzer' => 'english']
+            ]
+        ],
         'horsepower'           => ['type' => 'keyword'],
         'hasLq'                => ['type' => 'boolean'],
         'hasManger'            => ['type' => 'boolean'],

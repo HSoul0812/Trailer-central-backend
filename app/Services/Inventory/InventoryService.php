@@ -4,7 +4,8 @@ namespace App\Services\Inventory;
 
 use App\Contracts\LoggerServiceInterface;
 use App\Exceptions\Inventory\InventoryException;
-use App\Jobs\Files\DeleteS3FilesJob;
+use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
+use App\Jobs\Website\ReIndexInventoriesByDealersJob;
 use App\Models\CRM\Dms\Quickbooks\Bill;
 use App\Models\Inventory\Inventory;
 use App\Models\Website\Config\WebsiteConfig;
@@ -17,10 +18,11 @@ use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\Repository;
 use App\Repositories\User\DealerLocationMileageFeeRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
-use App\Repositories\User\GeoLocationRepositoryInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
+use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
 use App\Services\File\FileService;
 use App\Services\File\ImageService;
+use App\Services\User\GeoLocationServiceInterface;
 use App\Transformers\Inventory\InventoryTitleAndVinTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use Illuminate\Foundation\Bus\DispatchesJobs;
@@ -31,6 +33,8 @@ use League\Fractal\Resource\Collection as FractalResourceCollection;
 use League\Fractal\Manager as FractalManager;
 use App\Repositories\Dms\Customer\InventoryRepository as DmsCustomerInventoryRepository;
 use App\Services\Export\Inventory\PdfExporter;
+use App\Traits\S3\S3Helper;
+use App\Jobs\Inventory\GenerateOverlayImageJob;
 
 /**
  * Class InventoryService
@@ -38,7 +42,7 @@ use App\Services\Export\Inventory\PdfExporter;
  */
 class InventoryService implements InventoryServiceInterface
 {
-    use DispatchesJobs;
+    use DispatchesJobs, S3Helper;
 
     const SOURCE_DASHBOARD = 'dashboard';
 
@@ -131,17 +135,24 @@ class InventoryService implements InventoryServiceInterface
     private $categoryRepository;
 
     /**
-     * @var GeoLocationRepositoryInterface
-     */
-    private $geolocationRepository;
-
-    /**
      * @var LoggerServiceInterface
      */
     private $logService;
 
-    /** @var \Parsedown */
-    private $markdownHelper;
+    /**
+     * @var ImageServiceInterface
+     */
+    private $imageTableService;
+
+    /**
+     * @var ResponseCacheKeyInterface
+     */
+    private $responseCacheKey;
+
+    /**
+     * @var GeoLocationServiceInterface
+     */
+    private $geoLocationService;
 
     /**
      * InventoryService constructor.
@@ -156,8 +167,11 @@ class InventoryService implements InventoryServiceInterface
      * @param DealerLocationRepositoryInterface $dealerLocationRepository
      * @param DealerLocationMileageFeeRepositoryInterface $dealerLocationMileageFeeRepository
      * @param CategoryRepositoryInterface $categoryRepository
-     * @param \Parsedown $parsedown
-     * @param GeoLocationRepositoryInterface $geolocationRepository
+     * @param LoggerServiceInterface|null $logService
+     * @param ImageServiceInterface $imageTableService
+     * @param ResponseCacheKeyInterface $responseCacheKey
+     * @param GeoLocationServiceInterface $geoLocationService
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
     public function __construct(
         InventoryRepositoryInterface $inventoryRepository,
@@ -171,8 +185,9 @@ class InventoryService implements InventoryServiceInterface
         DealerLocationRepositoryInterface $dealerLocationRepository,
         DealerLocationMileageFeeRepositoryInterface $dealerLocationMileageFeeRepository,
         CategoryRepositoryInterface $categoryRepository,
-        GeoLocationRepositoryInterface $geolocationRepository,
-        \Parsedown $parsedown,
+        ImageServiceInterface $imageTableService,
+        ResponseCacheKeyInterface $responseCacheKey,
+        GeoLocationServiceInterface $geoLocationService,
         ?LoggerServiceInterface $logService = null
     ) {
         $this->inventoryRepository = $inventoryRepository;
@@ -186,9 +201,11 @@ class InventoryService implements InventoryServiceInterface
         $this->imageService = $imageService;
         $this->fileService = $fileService;
         $this->categoryRepository = $categoryRepository;
-        $this->geolocationRepository = $geolocationRepository;
+        $this->imageTableService = $imageTableService;
+        $this->responseCacheKey = $responseCacheKey;
+        $this->geoLocationService = $geoLocationService;
+
         $this->logService = $logService ?? app()->make(LoggerServiceInterface::class);
-        $this->markdownHelper = $parsedown;
     }
 
     /**
@@ -208,6 +225,14 @@ class InventoryService implements InventoryServiceInterface
             $clappsDefaultImage = $params['clapps']['default-image']['url'] ?? '';
 
             $addBill = $params['add_bill'] ?? false;
+
+            if (!empty($params['dealer_location_id'])) {
+                $location = $this->dealerLocationRepository->get(['dealer_location_id' => $params['dealer_location_id']]);
+
+                if ($location->postalcode) {
+                    $params['geolocation'] = $this->geoLocationService->geoPointFromZipCode($location->postalcode);
+                }
+            }
 
             if (!empty($newImages)) {
                 $params['new_images'] = $this->uploadImages($params, 'new_images');
@@ -244,6 +269,10 @@ class InventoryService implements InventoryServiceInterface
 
             $this->inventoryRepository->commitTransaction();
 
+            // Generate Overlay Inventory Images if necessary
+            if (!empty($newImages))
+                $this->dispatch((new GenerateOverlayImageJob($inventory->inventory_id))->onQueue('overlay-images'));
+
             Log::info('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
         } catch (\Exception $e) {
             Log::error('Item create error. Message - ' . $e->getMessage(), $e->getTrace());
@@ -267,6 +296,7 @@ class InventoryService implements InventoryServiceInterface
             $this->inventoryRepository->beginTransaction();
 
             $newImages = $params['new_images'] ?? [];
+            $existingImages = $params['existing_images'] ?? [];
             $newFiles = $params['new_files'] ?? [];
             $hiddenFiles = $params['hidden_files'] ?? [];
             $clappsDefaultImage = $params['clapps']['default-image']['url'] ?? '';
@@ -304,6 +334,14 @@ class InventoryService implements InventoryServiceInterface
                 $params['archived_at'] = Carbon::now()->format('Y-m-d H:i:s');
             }
 
+            if (!empty($params['dealer_location_id'])) {
+                $location = $this->dealerLocationRepository->get(['dealer_location_id' => $params['dealer_location_id']]);
+
+                if ($location->postalcode) {
+                    $params['geolocation'] = $this->geoLocationService->geoPointFromZipCode($location->postalcode);
+                }
+            }
+
             $inventory = $this->inventoryRepository->update($params, $options);
 
             if (!$inventory instanceof Inventory) {
@@ -325,6 +363,10 @@ class InventoryService implements InventoryServiceInterface
             }
 
             $this->inventoryRepository->commitTransaction();
+
+            // Generate Overlay Inventory Images if necessary
+            if (!empty($newImages) || !empty($existingImages))
+                $this->dispatch((new GenerateOverlayImageJob($inventory->inventory_id))->onQueue('overlay-images'));
 
             Log::info('Item has been successfully updated', ['inventoryId' => $inventory->inventory_id]);
         } catch (\Exception $e) {
@@ -549,7 +591,7 @@ class InventoryService implements InventoryServiceInterface
      * @throws \App\Exceptions\File\FileUploadException
      * @throws \App\Exceptions\File\ImageUploadException
      */
-    private function uploadImages(array $params, string $imagesKey): array
+    protected function uploadImages(array $params, string $imagesKey): array
     {
         $images = $params[$imagesKey];
 
@@ -600,6 +642,56 @@ class InventoryService implements InventoryServiceInterface
         }
 
         return array_merge($withOverlay, $withoutOverlay);
+    }
+
+    /**
+     * Apply Overlays to Inventory Images
+     *
+     * @param int $inventoryId
+     * @return void
+     */
+    public function generateOverlays(int $inventoryId)
+    {
+        $inventoryImages = $this->inventoryRepository->getInventoryImages($inventoryId);
+
+        if ($inventoryImages->count() === 0) return;
+
+        $overlayParams = $this->inventoryRepository->getOverlayParams($inventoryId);
+
+        Log::channel('inventory-overlays')->info('Adding Overlays on Inventory Images', $overlayParams);
+
+        $overlayEnabled = $overlayParams['dealer_overlay_enabled'] ?? $overlayParams['overlay_enabled'];
+
+        foreach ($inventoryImages as $inventoryImage) {
+
+            $imageObj = $inventoryImage->image;
+
+            // Add Overlays if enabled
+            if ($overlayEnabled == Inventory::OVERLAY_ENABLED_ALL
+                || (
+                    $overlayEnabled == Inventory::OVERLAY_ENABLED_PRIMARY
+                    && ($inventoryImage->position == 1 || $inventoryImage->is_default == 1)
+                    )
+                ) {
+
+                // apply overlays
+                $originalFilename = !empty($imageObj->filename_noverlay) ? $imageObj->filename_noverlay : $imageObj->filename;
+                $localNewImagePath = $this->imageService->addOverlays($this->getS3BaseUrl() . $originalFilename, $overlayParams);
+
+                // upload overlay image
+                $randomFilename = md5($localNewImagePath);
+                $newFilename = $this->imageService->uploadToS3($localNewImagePath, $randomFilename, $overlayParams['dealer_id']);
+                unlink($localNewImagePath);
+
+                // update image to database
+                $this->imageTableService->saveOverlay($imageObj, $newFilename);
+
+            // otherwise Reset Overlay
+            } else {
+
+                $this->imageTableService->resetOverlay($imageObj);
+            }
+        }
     }
 
     /**
@@ -749,10 +841,12 @@ class InventoryService implements InventoryServiceInterface
         $fromLat = $dealerLocation->latitude;
         $fromLng = $dealerLocation->longitude;
 
-        if($toZip != null) {
-            $geolocation = $this->geolocationRepository->get(['zip' => $toZip]);
-            $fromLat = $geolocation->latitude;
-            $fromLng = $geolocation->longitude;
+        if($toZip !== null) {
+            $geolocation = $this->geoLocationService->geoPointFromZipCode($toZip);
+            if($geolocation){
+                $fromLat = $geolocation->latitude;
+                $fromLng = $geolocation->longitude;
+            }
         }
 
         $toLat  = $inventory->latitude;
@@ -764,6 +858,7 @@ class InventoryService implements InventoryServiceInterface
         }
 
         $distance = $this->calculateDistanceBetweenTwoPoints($fromLat, $fromLng, $toLat, $toLong, 'ML');
+
         return $feePerMile * $distance;
     }
 
@@ -967,9 +1062,8 @@ class InventoryService implements InventoryServiceInterface
     private function fixNonAsciiChars(string $description)
     {
 
-        $description = preg_replace('/(\\?\*){2,}/', '**', $description);
+        //$description = preg_replace('/(\\?\*){2,}/', '**', $description);
         $description = preg_replace('/(\\?_)+/', '_', $description);
-        $description = preg_replace('/\\+/', '', $description);
 
         // Fix 0xa0 or nbsp
         $description = preg_replace('/\xA0/', ' ', $description);
@@ -982,15 +1076,16 @@ class InventoryService implements InventoryServiceInterface
         $description = preg_replace('/\xB4/', "'", $description);
         $description = preg_replace('/\x27/', "'", $description);
 
-        $description = preg_replace('/\x93/', '"', $description);
-        $description = preg_replace('/\x94/', '"', $description);
+        //$description = preg_replace('/\x93/', '"', $description);
+        //$description = preg_replace('/\x94/', '"', $description);
+
         $description = preg_replace('/”/', '"', $description);
         $description = preg_replace('/’/', "'", $description);
 
         $description = preg_replace('/©/', "Copyright", $description);
         $description = preg_replace('/®/', "Registered", $description);
 
-        $description = preg_replace('/[[:^print:]]/', ' ', $description);
+        //$description = preg_replace('/[[:^print:]]/', ' ', $description);
 
         preg_match('/<ul>(.*?)<\/ul>/s', $description, $match);
         if (!empty($match)) {
@@ -1006,5 +1101,24 @@ class InventoryService implements InventoryServiceInterface
         }
 
         return $description;
+    }
+
+    public function invalidateCacheAndReindexByDealerIds(array $dealer_ids): void
+    {
+        $patterns = [];
+
+        foreach ($dealer_ids as $dealer_id)
+        {
+            $patterns[] = $this->responseCacheKey->deleteByDealer($dealer_id);
+        }
+
+        //$patterns = $this->uniqueCacheInvalidation->keysWithNoJobs($patterns);
+
+        //if (count($patterns)) {
+            //$this->uniqueCacheInvalidation->createJobsForKeys($patterns);
+            $this->dispatch(new InvalidateCacheJob($patterns));
+        //}
+
+        $this->dispatch(new ReIndexInventoriesByDealersJob($dealer_ids));
     }
 }

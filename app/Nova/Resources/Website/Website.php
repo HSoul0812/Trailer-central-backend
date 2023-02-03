@@ -122,7 +122,7 @@ class Website extends Resource
               lte (is less than or equal)<br>"
             ),
 
-            Text::make('Head Scripts', 'HeadScripts')->hideFromIndex(),
+            Textarea::make('Head Scripts', 'HeadScripts')->hideFromIndex(),
 
         ];
     }

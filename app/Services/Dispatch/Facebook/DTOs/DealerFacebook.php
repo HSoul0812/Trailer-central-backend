@@ -8,7 +8,7 @@ use App\Traits\WithGetter;
 
 /**
  * Class DealerFacebook
- * 
+ *
  * @package App\Services\Dispatch\Facebook\DTOs
  */
 class DealerFacebook
@@ -84,4 +84,9 @@ class DealerFacebook
      * @var $string
      */
     private $last_attempt_ts;
+
+    /**
+     * @var int
+     */
+    private $posts_per_day;
 }

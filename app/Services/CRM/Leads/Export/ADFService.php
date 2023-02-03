@@ -2,17 +2,17 @@
 
 namespace App\Services\CRM\Leads\Export;
 
+use App\Exceptions\PropertyDoesNotExists;
 use App\Jobs\CRM\Leads\Export\ADFJob;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\Export\LeadEmail;
+use App\Models\Inventory\Inventory;
 use App\Repositories\CRM\Leads\Export\LeadEmailRepositoryInterface;
-use App\Repositories\Inventory\InventoryRepositoryInterface;
-use App\Repositories\User\UserRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
-use App\Services\CRM\Leads\Export\ADFServiceInterface;
+use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Services\CRM\Leads\DTOs\ADFLead;
-use App\Services\CRM\Leads\DTOs\InquiryLead;
 use Illuminate\Foundation\Bus\DispatchesJobs;
+use Illuminate\Support\Facades\Log;
 
 class ADFService implements ADFServiceInterface
 {
@@ -24,49 +24,58 @@ class ADFService implements ADFServiceInterface
     protected $leadEmailRepository;
 
     /**
-     * @var App\Repositories\CRM\Inventory\InventoryRepositoryInterface
-     */
-    protected $inventoryRepository;
-
-    /**
-     * @var App\Repositories\User\UserRepositoryInterface
-     */
-    protected $userRepository;
-
-    /**
      * @var App\Repositories\User\DealerLocationRepositoryInterface
      */
     protected $dealerLocationRepository;
 
+    /**
+     * @var App\Repositories\Website\Config\WebsiteConfigRepositoryInterface
+     */
+    protected $websiteConfig;
+
+    protected $adfParams;
+
     public function __construct(
         LeadEmailRepositoryInterface $leadEmailRepository,
-        InventoryRepositoryInterface $inventoryRepository,
-        UserRepositoryInterface $userRepository,
+        WebsiteConfigRepositoryInterface $websiteConfig,
         DealerLocationRepositoryInterface $dealerLocationRepository
     ) {
         $this->leadEmailRepository = $leadEmailRepository;
-        $this->inventoryRepository = $inventoryRepository;
-        $this->userRepository = $userRepository;
+        $this->websiteConfig = $websiteConfig;
         $this->dealerLocationRepository = $dealerLocationRepository;
     }
 
     /**
      * Takes a lead and export it to ADF in XML format
      *
-     * @param InquiryLead $inquiry lead to export to IDS
-     * @param Lead $lead lead to export to IDS
+     * @param Lead $lead lead to export to ADF
      * @return bool
+     * @throws PropertyDoesNotExists
+     * @throws \Exception
      */
-    public function export(InquiryLead $inquiry, Lead $lead): bool
+    public function export(Lead $lead): bool
     {
-        $leadEmail = $this->leadEmailRepository->find($inquiry->dealerId, $inquiry->dealerLocationId);
-        if (!$leadEmail || $leadEmail->export_format !== LeadEmail::EXPORT_FORMAT_ADF) {
+        /*
+         * If the lead comes with dealer location 0 or null
+         * And we have an inventory assigned to the lead
+         * Use the inventory dealer location instead
+         */
+        if (empty($lead->dealer_location_id) && !empty($lead->inventory)) {
+            $lead->dealer_location_id = $lead->inventory->dealer_location_id;
+        }
+
+        $leadEmail = $this->leadEmailRepository->find($lead->dealer_id, $lead->dealer_location_id);
+        if (!$leadEmail) {
+            Log::info("Lead {$lead->identifier} couldn't find a LeadEmail associated.");
+            return false;
+        } elseif ($leadEmail->export_format !== LeadEmail::EXPORT_FORMAT_ADF) {
+            Log::info("Lead {$lead->identifier} export format is not ADF.");
             return false;
         }
 
         $hiddenCopiedEmails = explode(',', config('adf.exports.copied_emails'));
 
-        $adf = $this->getAdfLead($inquiry, $lead->identifier);
+        $adf = $this->getAdfLead($lead);
 
         // Dispatch ADF Export Job
         $job = new ADFJob($adf, $lead, $leadEmail->to_emails, $leadEmail->copied_emails, $hiddenCopiedEmails);
@@ -78,69 +87,67 @@ class ADFService implements ADFServiceInterface
     /**
      * Create ADF Lead From InquiryLead
      *
-     * @param InquiryLead $inquiry
-     * @param int $leadId
+     * @param Lead $lead
      * @return ADFLead
+     * @throws PropertyDoesNotExists
      */
-    private function getAdfLead(InquiryLead $inquiry, int $leadId): ADFLead
+    private function getAdfLead(Lead $lead): ADFLead
     {
+        $config = $this->websiteConfig->getValueOrDefault($lead->website_id, 'general/item_email_from');
+
         // Initialize ADF Lead Params
-        $params = [
-            'leadId' => $leadId,
-            'subject' => $inquiry->getSubject(),
-            'requestDate' => $inquiry->dateSubmitted,
-            'firstName' => $inquiry->firstName,
-            'lastName' => $inquiry->lastName,
-            'email' => $inquiry->emailAddress,
-            'phone' => $inquiry->phoneNumber,
-            'comments' => $inquiry->comments,
-            'addrStreet' => $inquiry->address,
-            'addrCity' => $inquiry->city,
-            'addrState' => $inquiry->state,
-            'addrZip' => $inquiry->zip,
-            'vendorProvider' => $inquiry->fromName
+        $this->adfParams = [
+            'leadId' => $lead->identifier,
+            'subject' => $lead->lead_type,
+            'requestDate' => $lead->date_submitted,
+            'firstName' => $lead->first_name,
+            'lastName' => $lead->last_name,
+            'email' => $lead->email_address,
+            'phone' => $lead->phone_number,
+            'comments' => $lead->comments,
+            'addrStreet' => $lead->address,
+            'addrCity' => $lead->city,
+            'addrState' => $lead->state,
+            'addrZip' => $lead->zip,
+            'vendorProvider' => $config['fromName']
         ];
 
         // Get Vehicle/Vendor Params
-        $params2 = array_merge($params, $this->getAdfVehicle($inquiry->inventory));
-        $params3 = array_merge($params2, $this->getAdfVendor($inquiry));
+        $inventory = $lead->inventory ?? new Inventory();
+
+        $this->adfParams = array_merge($this->adfParams, $this->getAdfVehicle($inventory));
+        $this->adfParams = array_merge($this->adfParams, $this->getAdfVendor($lead));
 
         // Return ADF Lead
-        return new ADFLead($params3);
+        return new ADFLead($this->adfParams);
     }
 
     /**
      * Get ADF Vehicle Params From Inventory
      *
-     * @param array<int> $inventory
+     * @param Inventory $inventory
      * @return array{vehicleYear: int,
      *               vehicleMake: string,
      *               vehicleModel: string,
      *               vehicleStock: string,
      *               vehicleVin: string}
      */
-    private function getAdfVehicle(array $inventory): array
+    private function getAdfVehicle(Inventory $inventory): array
     {
-        // Get Inventory
-        $itemId = reset($inventory);
-        if(!empty($itemId)) {
-            $item = $this->inventoryRepository->get(['id' => $itemId]);
-        }
-
         // Initialize ADF Lead Params
         return [
-            'vehicleYear' => !empty($item->year) ? $item->year : 0,
-            'vehicleMake' => !empty($item->manufacturer) ? $item->manufacturer : '',
-            'vehicleModel' => !empty($item->model) ? $item->model : '',
-            'vehicleStock' => !empty($item->stock) ? $item->stock : '',
-            'vehicleVin' => !empty($item->vin) ? $item->vin : ''
+            'vehicleYear' => !empty($inventory->year) ? $inventory->year : 0,
+            'vehicleMake' => !empty($inventory->manufacturer) ? $inventory->manufacturer : '',
+            'vehicleModel' => !empty($inventory->model) ? $inventory->model : '',
+            'vehicleStock' => !empty($inventory->stock) ? $inventory->stock : '',
+            'vehicleVin' => !empty($inventory->vin) ? $inventory->vin : ''
         ];
     }
 
     /**
      * Get ADF Vendor Params From Dealer/DealerLocation
      *
-     * @param InquiryLead $inquiry
+     * @param Lead $lead
      * @return array{dealerId: int,
      *               locationId: int,
      *               vendorName: string,
@@ -154,21 +161,20 @@ class ADFService implements ADFServiceInterface
      *               vendorAddrZip: string,
      *               vendorAddrCountry: string}
      */
-    private function getAdfVendor(InquiryLead $inquiry): array
+    private function getAdfVendor(Lead $lead): array
     {
-        // Get Dealer & Location
-        $dealer = $this->userRepository->get(['dealer_id' => $inquiry->dealerId]);
-        if($inquiry->dealerLocationId) {
-            $location = $this->dealerLocationRepository->get(['id' => $inquiry->dealerLocationId]);
+        // Get Location
+        if ($lead->dealer_location_id) {
+            $location = $this->dealerLocationRepository->get(['id' => $lead->dealer_location_id]);
         } else {
-            $location = $this->dealerLocationRepository->get(['dealer_id' => $inquiry->dealerId]);
+            $location = $this->dealerLocationRepository->get(['dealer_id' => $lead->dealer_id]);
         }
 
         // Initialize ADF Lead Params
         return [
-            'dealerId' => $inquiry->dealerId,
-            'locationId' => $inquiry->dealerLocationId,
-            'vendorName' => $dealer->name,
+            'dealerId' => $lead->dealer_id,
+            'locationId' => $lead->dealer_location_id,
+            'vendorName' => $lead->user->name,
             'vendorContact' => $location->contact,
             'vendorUrl' => $location->website,
             'vendorEmail' => $location->email,

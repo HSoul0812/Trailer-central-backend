@@ -1,9 +1,9 @@
-<?php /** @noinspection ALL */
+<?php
 
 namespace App\Domains\Scout\Traits;
 
 use App\Domains\Scout\Jobs\ExceptionableMakeSearchable;
-use Laravel\Scout\Searchable;
+use App\Indexers\Searchable;
 
 trait ExceptionableSearchable
 {
@@ -12,8 +12,8 @@ trait ExceptionableSearchable
     /**
      * Dispatch the job to make the given models searchable.
      *
-     * @param \Illuminate\Database\Eloquent\Collection $models
-     * @return void
+     * @param  \Illuminate\Database\Eloquent\Collection  $models
+     * @return mixed
      */
     public function queueMakeSearchable($models)
     {

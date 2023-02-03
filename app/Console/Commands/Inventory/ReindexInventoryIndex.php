@@ -26,6 +26,6 @@ class ReindexInventoryIndex extends Command
 
     public function handle(): void
     {
-        Inventory::makeAllSearchable();
+        $this->call('scout:import', ['model' => Inventory::class]);
     }
 }

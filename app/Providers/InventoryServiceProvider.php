@@ -3,14 +3,18 @@
 namespace App\Providers;
 
 use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
+use App\Models\Inventory\Inventory;
 use App\Repositories\Bulk\Inventory\BulkDownloadRepository;
 use App\Repositories\Bulk\Inventory\BulkDownloadRepositoryInterface;
 use App\Repositories\Bulk\Inventory\BulkUploadRepository;
 use App\Repositories\Bulk\Inventory\BulkUploadRepositoryInterface;
-use App\Services\ElasticSearch\Cache\RedisResponseCache;
+use App\Repositories\FeatureFlagRepositoryInterface;
+use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
+use App\Services\ElasticSearch\Cache\InventoryResponseRedisCache;
 use App\Services\ElasticSearch\Cache\RedisResponseCacheKey;
-use App\Services\ElasticSearch\Cache\ResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
+use App\Services\ElasticSearch\Cache\UniqueCacheInvalidation;
+use App\Services\ElasticSearch\Cache\UniqueCacheInvalidationInterface;
 use App\Services\Export\Inventory\Bulk\BulkDownloadJobService;
 use App\Services\Export\Inventory\Bulk\BulkDownloadJobServiceInterface;
 use App\Services\Export\Inventory\Bulk\BulkPdfJobService;
@@ -65,6 +69,8 @@ use App\Services\ElasticSearch\Inventory\FieldMapperService;
 use App\Services\ElasticSearch\Inventory\InventoryFieldMapperServiceInterface;
 use App\Services\ElasticSearch\Inventory\InventoryQueryBuilderInterface;
 use App\Services\Import\Inventory\CsvImportService;
+use App\Services\Inventory\ImageService;
+use App\Services\Inventory\ImageServiceInterface;
 use App\Services\Import\Inventory\CsvImportServiceInterface;
 use App\Services\Inventory\CustomOverlay\CustomOverlayService;
 use App\Services\Inventory\CustomOverlay\CustomOverlayServiceInterface;
@@ -86,7 +92,6 @@ use Validator;
  */
 class InventoryServiceProvider extends ServiceProvider
 {
-
     public function boot(): void
     {
         Validator::extend('inventory_valid', ValidInventory::class . '@passes');
@@ -102,6 +107,8 @@ class InventoryServiceProvider extends ServiceProvider
         Validator::extend('inventory_quotes_not_exist', QuotesNotExist::class . '@passes');
         Validator::extend('vendor_exists', VendorExists::class . '@passes');
         Validator::extend('payment_uuid_valid', PaymentUUIDValid::class . '@validate');
+
+        $this->bootCacheInvalidation();
     }
 
     public function register(): void
@@ -143,14 +150,35 @@ class InventoryServiceProvider extends ServiceProvider
         $this->app->bind(BulkPdfJobServiceInterface::class, BulkPdfJobService::class);
         $this->app->bind(BulkUploadRepositoryInterface::class, BulkUploadRepository::class);
 
+        $this->app->bind(ImageServiceInterface::class, ImageService::class);
+
         $this->app->bind(ResponseCacheKeyInterface::class, RedisResponseCacheKey::class);
-
-        $this->app->bindMethod(InvalidateCacheJob::class.'@handle', function (InvalidateCacheJob $job): void {
-            $job->handle($this->app->make(ResponseCacheInterface::class));
+        $this->app->bind(UniqueCacheInvalidationInterface::class, function (): UniqueCacheInvalidation {
+            return new UniqueCacheInvalidation(Redis::connection('inventory-job-cache')->client());
         });
 
-        $this->app->bind(ResponseCacheInterface::class, function (): RedisResponseCache {
-            return new RedisResponseCache(Redis::client());
+        $this->app->bind(InventoryResponseCacheInterface::class, InventoryResponseRedisCache::class);
+
+        $this->app->bindMethod(InvalidateCacheJob::class . '@handle', function (InvalidateCacheJob $job): void {
+            $job->handle(
+                $this->app->make(InventoryResponseCacheInterface::class),
+                $this->app->make(UniqueCacheInvalidationInterface::class),
+                $this->app->make(ResponseCacheKeyInterface::class)
+            );
         });
+
+		$this->app->bind(InventoryUpdateSourceInterface::class, InventoryUpdateSource::class);
+    }
+
+    /**
+     * @return void
+     */
+    private function bootCacheInvalidation(): void
+    {
+        $repo = app(FeatureFlagRepositoryInterface::class);
+
+        if ($repo->isEnabled('inventory-sdk-cache')) {
+            Inventory::enableCacheInvalidation();
+        }
     }
 }

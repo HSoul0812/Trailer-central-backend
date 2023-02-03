@@ -2,6 +2,7 @@
 
 namespace App\Services\ElasticSearch\Inventory\Builders;
 
+use App\Repositories\FeatureFlagRepositoryInterface;
 use App\Services\ElasticSearch\Inventory\Parameters\Filters\Filter;
 use App\Services\ElasticSearch\Inventory\Parameters\Filters\Term;
 
@@ -178,7 +179,10 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
      */
     public function generalQuery(): array
     {
-        $this->field->getTerms()->each(function (Term $term) {
+        // @todo: remove keyword-wildcard feature when safe
+        $keywordWildcard = app(FeatureFlagRepositoryInterface::class)->isEnabled('inventory-sdk-keyword-wildcard');
+
+        $this->field->getTerms()->each(function (Term $term) use($keywordWildcard) {
             $shouldQuery = [];
             $name = $this->field->getName();
             $data = $term->getValues();
@@ -206,8 +210,10 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
                         $shouldQuery[] = $this->matchQuery($columnValues[0], $boost, $match);
                         $shouldQuery[] = $this->matchQuery($column, $boost, $match);
 
-                        if (!is_numeric($key) && strpos($column, '.') !== false) {
-                            $shouldQuery[] = $this->wildcardQueryWithBoost($key, $boost, $data['match']);
+                        // leading description wildcard add a tremendous penalty to the query, so is avoided
+                        // it only will use leading wildcards for those fields different from `description`
+                        if ($keywordWildcard && !is_numeric($key) && $key !== 'description' && strpos($column, '.') !== false) {
+                             $shouldQuery[] = $this->wildcardQueryWithBoost($key, $boost, $data['match']);
                         }
                     }
                     break;

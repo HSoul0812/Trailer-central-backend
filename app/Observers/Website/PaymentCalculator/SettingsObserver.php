@@ -1,9 +1,11 @@
 <?php
 
-namespace App\Observers;
+namespace App\Observers\Website\PaymentCalculator;
 
-use App\Jobs\Website\PaymentCalculatorReIndexJob;
+use App\Jobs\Website\ReIndexInventoriesByDealersJob;
+use App\Models\Inventory\Inventory;
 use App\Models\Website\PaymentCalculator\Settings;
+use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
 
@@ -17,16 +19,22 @@ class SettingsObserver
     /**
      * @var ResponseCacheInterface
      */
-    private $responseCache;
+    private $singleResponseCache;
+
+    /**
+     * @var ResponseCacheInterface
+     */
+    private $searchResponseCache;
 
     /**
      * @param ResponseCacheKeyInterface $cacheKey
-     * @param ResponseCacheInterface $responseCache
+     * @param InventoryResponseCacheInterface $responseCache
      */
-    public function __construct(ResponseCacheKeyInterface $cacheKey, ResponseCacheInterface $responseCache)
+    public function __construct(ResponseCacheKeyInterface $cacheKey, InventoryResponseCacheInterface $responseCache)
     {
         $this->cacheKey = $cacheKey;
-        $this->responseCache = $responseCache;
+        $this->singleResponseCache = $responseCache->single();
+        $this->searchResponseCache = $responseCache->search();
     }
 
     /**
@@ -37,8 +45,6 @@ class SettingsObserver
      */
     public function created(Settings $settings)
     {
-        $settings->load('website');
-
         $this->deleted($settings);
     }
 
@@ -50,8 +56,6 @@ class SettingsObserver
      */
     public function updated(Settings $settings)
     {
-        $settings->load('website');
-
         $this->deleted($settings);
     }
 
@@ -63,15 +67,16 @@ class SettingsObserver
      */
     public function deleted(Settings $settings)
     {
-        $website = $settings->website;
+        $settings->load('website');
 
-        $this->responseCache->forget(
-            $this->cacheKey->deleteByDealer($website->dealer_id),
-            $this->cacheKey->deleteSingleByDealer($website->dealer_id)
-        );
+        if (Inventory::isCacheInvalidationEnabled()) {
+            $website = $settings->website;
+            $this->searchResponseCache->forget($this->cacheKey->deleteByDealer($website->dealer_id));
+            $this->singleResponseCache->forget($this->cacheKey->deleteSingleByDealer($website->dealer_id));
+        }
 
-        if ($dealerId = $settings->website->dealer_id) {
-            dispatch(new PaymentCalculatorReIndexJob([$dealerId]));
+        if (($dealerId = $settings->website->dealer_id)) {
+            dispatch(new ReIndexInventoriesByDealersJob([$dealerId]));
         }
     }
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Models\Observers\User;
+namespace App\Observers\User;
 
 use App\Models\User\DealerLocation;
 use App\Services\Quickbooks\DealerLocationServiceInterface;
@@ -30,6 +30,8 @@ class DealerLocationObserver
 
             $this->service->update($model->dealer_location_id);
         }
+
+        $this->service->invalidateCacheAndReindex($model->dealer_location_id);
     }
 
     private function hasChangedName(DealerLocation $model): bool

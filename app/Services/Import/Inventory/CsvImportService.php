@@ -3,6 +3,7 @@
 namespace App\Services\Import\Inventory;
 
 use App\Events\Inventory\InventoryUpdated;
+use App\Exceptions\Inventory\InventoryException;
 use App\Helpers\ConvertHelper;
 use App\Models\Inventory\Attribute;
 use App\Models\Inventory\Category;
@@ -131,7 +132,9 @@ class CsvImportService implements CsvImportServiceInterface
         "show_on_website" => true,
         "append_images" => true,
         "replace_images" => true,
-        "video_embed_code" => true
+        "video_embed_code" => true,
+        "show_on_auction123" => true,
+        "show_on_rvt" => true
     ];
 
     // mapping between import column names and field names in database:
@@ -184,7 +187,9 @@ class CsvImportService implements CsvImportServiceInterface
         "append_images" => array("append images on import", "append image", "append images", "use images", "use image"),
         "replace_images" => array("replace images", "replace_images"),
         "image_mode" => array("image mode", "images mode", "img mode"),
-        "video_embed_code" => array("video_embed_code", "video embed code")
+        "video_embed_code" => array("video_embed_code", "video embed code"),
+        "show_on_auction123" => array("show_on_auction123", "show on auction123", "Show on Auction123", "Auction123"),
+        "show_on_rvt" => array("show_on_rvt", "show on rvt", "Show on Rvt", "Show on RVT", "RVT"),
     );
 
     /**
@@ -349,7 +354,21 @@ class CsvImportService implements CsvImportServiceInterface
         "gvwr" => array("type" => "string"),
         "axle_capacity" => array("type" => "string"),
         "msrp" => array("type" => "msrp"),
-        "location_phone" => array("type" => "location_phone")
+        "location_phone" => array("type" => "location_phone"),
+        "show_on_auction123" => array(
+            "type" => "enum",
+            "list" => array(
+                "yes" => "1",
+                "no" => "0"
+            )
+        ),
+        "show_on_rvt" => array(
+            "type" => "enum",
+            "list" => array(
+                "yes" => "1",
+                "no" => "0"
+            )
+        ),
     );
 
     /**
@@ -508,17 +527,11 @@ class CsvImportService implements CsvImportServiceInterface
                 $inventory = $this->inventoryService->create($this->inventory);
             }
 
-            if (!$inventory) {
-                $this->validationErrors[] = "Error creating/updating Inventory";
-                $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
-                //throw new \Exception("Error creating/updating Inventory");
-            }
-
             event(new InventoryUpdated($inventory, [
                 'description' => 'Created/updated using inventory bulk uploader'
             ]));
-        } catch (\Exception $ex) {
-            $this->validationErrors[] = $ex->getTraceAsString();
+        } catch (\Exception | InventoryException $ex) {
+            $this->validationErrors[] = 'An error occurred validating the inventory' . $this->inventory['stock'] ? ' with stock: ' . $this->inventory['stock'] . '.' : ' on row: ' . $lineNumber;
             $this->bulkUploadRepository->update(['id' => $this->bulkUpload->id, 'status' => BulkUpload::VALIDATION_ERROR, 'validation_errors' => json_encode($this->validationErrors)]);
             Log::info('Error found on inventory for inventory bulk upload : ' . $this->bulkUpload->id . ' : ' . $ex->getTraceAsString() . json_encode($this->validationErrors));
             Log::info("Index to header mapping: {$this->indexToheaderMapping}");
@@ -567,7 +580,7 @@ class CsvImportService implements CsvImportServiceInterface
                         }
                     }
 
-                    $header = array_search($this->indexToheaderMapping[$index], self::$_labels);
+                    $header = array_search(strtolower($this->indexToheaderMapping[$index]), array_map('strtolower', self::$_labels));
                     Log::debug(array("header" => $header, 'headerMapping' => $this->indexToheaderMapping[$index]));
 
                     if ($header) {
@@ -849,6 +862,8 @@ class CsvImportService implements CsvImportServiceInterface
             case 'is_special':
             case 'is_featured':
             case 'show_on_website':
+            case 'show_on_auction123':
+            case 'show_on_rvt':
                 if (isset(self::$_columnValidation[$type]['list'][strtolower($value)])) {
                     $this->inventory[$type] = self::$_columnValidation[$type]['list'][strtolower($value)];
                 }
@@ -997,26 +1012,30 @@ class CsvImportService implements CsvImportServiceInterface
 
             case 'location_phone':
                 // lookup location by phone number
+                $phone = str_replace(array('(', ')', ' ', '-'), '', $value);
                 $dealerLocation = DealerLocation::where([
-                    'phone' => $value,
+                    'phone' => $phone,
                     'dealer_id' => $this->bulkUpload->dealer_id
                 ])->first();
 
-                if ($dealerLocation) {
-                    $this->inventory['dealer_location_id'] = $dealerLocation->dealer_location_id;
-                } else {
-                    $phone = str_replace(array('(', ')', ' ', '-'), '', $value);
+                // If no dealerLocation is found by phone, use default dealer location
+                if (!$dealerLocation) {
                     $dealerLocation = DealerLocation::where([
-                        'phone' => $phone,
-                        'dealer_id' => $this->bulkUpload->dealer_id
+                        'dealer_id' => $this->bulkUpload->dealer_id,
+                        'is_default' => 1
                     ])->first();
 
-                    if ($dealerLocation) {
-                        $this->inventory['dealer_location_id'] = $dealerLocation->dealer_location_id;
-                    } else {
-                        return "Location based on phone number '{$value}' not found.";
+                    // If no default location found use first location found for dealer
+                    if (!$dealerLocation) {
+                        $dealerLocation = DealerLocation::where([
+                            'dealer_id' => $this->bulkUpload->dealer_id,
+                        ])->first();
+                    } else { // If no location found return default error
+                        return "Location based on phone number '{$value}' not found and no location has been found for this dealer.";
                     }
                 }
+
+                $this->inventory['dealer_location_id'] = $dealerLocation->dealer_location_id;
                 break;
 
             case 'axles':
