@@ -4,10 +4,10 @@ namespace App\Services\ElasticSearch\Cache;
 
 class InventoryResponseRedisCache implements InventoryResponseCacheInterface
 {
-    /** @var RedisResponseCache */
+    /** @var ResponseCacheInterface */
     private $searchCache;
 
-    /** @var RedisResponseCache */
+    /** @var ResponseCacheInterface */
     private $singleCache;
 
     /** @var ResponseCacheKeyInterface */
@@ -15,8 +15,8 @@ class InventoryResponseRedisCache implements InventoryResponseCacheInterface
 
     public function __construct(
         ResponseCacheKeyInterface $responseCacheKey,
-        RedisResponseCache $searchCache,
-        RedisResponseCache $singleCache
+        ResponseCacheInterface $searchCache,
+        ResponseCacheInterface $singleCache
     ) {
         $this->responseCacheKey = $responseCacheKey;
         $this->searchCache = $searchCache;
@@ -45,16 +45,26 @@ class InventoryResponseRedisCache implements InventoryResponseCacheInterface
     {
         ['search' => $searchKeyPatterns, 'single' => $singleKeyPatterns] = $this->sliceKeyPatterns($keyPatterns);
 
-        $this->searchCache->forget(...$searchKeyPatterns);
-        $this->singleCache->forget(...$singleKeyPatterns);
+        if (count($searchKeyPatterns)) {
+            $this->searchCache->forget(...$searchKeyPatterns);
+        }
+
+        if (count($singleKeyPatterns)) {
+            $this->singleCache->forget(...$singleKeyPatterns);
+        }
     }
 
     public function invalidate(array $keyPatterns): void
     {
         ['search' => $searchKeyPatterns, 'single' => $singleKeyPatterns] = $this->sliceKeyPatterns($keyPatterns);
 
-        $this->searchCache->invalidate(...$searchKeyPatterns);
-        $this->singleCache->invalidate(...$singleKeyPatterns);
+        if (count($searchKeyPatterns)) {
+            $this->searchCache->invalidate(...$searchKeyPatterns);
+        }
+
+        if (count($singleKeyPatterns)) {
+            $this->singleCache->invalidate(...$singleKeyPatterns);
+        }
     }
 
     /**
