@@ -151,9 +151,7 @@ class InventoryServiceTest extends TestCase
     {
         parent::setUp();
 
-       // $this->inventoryRepositoryMock = Mockery::mock(InventoryRepositoryInterface::class);
-        $this->inventoryRepositoryMock = $this->createStub(InventoryRepositoryInterface::class);
-        //$this->singleResponseCache = ;
+        $this->inventoryRepositoryMock = Mockery::mock(InventoryRepositoryInterface::class);
         $this->app->instance(InventoryRepositoryInterface::class, $this->inventoryRepositoryMock);
 
         $this->imageRepositoryMock = Mockery::mock(ImageRepositoryInterface::class);
