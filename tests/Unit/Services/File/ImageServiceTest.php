@@ -765,6 +765,37 @@ class ImageServiceTest extends TestCase
         $this->assertEquals(mime_content_type($newImage), 'image/png');
     }
 
+    /**
+     * @dataProvider overlayParamDataProvider
+     * @group Marketing
+     * @group Marketing_Overlays
+     */
+    public function testAddOverlayWithNonvalidTextSettings($overlayParams)
+    {
+        $overlayParams['overlay_upper'] = 'foo';
+        $overlayParams['overlay_lower'] = '';
+
+        $overlayParams['overlay_logo'] = Storage::disk('test_resources')->path('logo_image.png');
+        $overlayParams['overlay_logo_position'] = User::OVERLAY_LOGO_POSITION_NONE;
+
+        $imagePath = Storage::disk('test_resources')->path('inventory_image.png');
+
+        $this->imageHelper->shouldNotReceive('addUpperTextOverlay');
+        $this->imageHelper->shouldNotReceive('addLowerTextOverlay');
+        $this->imageHelper->shouldNotReceive('addLogoOverlay');
+
+        $imageService = app()->make(ImageService::class);
+
+        $newImage = $imageService->addOverlays($imagePath, $overlayParams);
+
+        Storage::disk('tmp')->assertMissing([
+            'tmp_addUpperTextOverlay',
+            'tmp_addLowerTextOverlay'
+        ]);
+
+        $this->assertEquals(null, $newImage);
+    }
+
     private function assertImages($expectedPath, $outputPath)
     {
         $expectedImage = new Imagick($expectedPath);
