@@ -686,7 +686,7 @@ class InventoryService implements InventoryServiceInterface
                 } else {
 
                     Log::channel('inventory-overlays')
-                        ->info('Failed Adding Overlays, Invalid OverlayParams', 
+                        ->error('Failed Adding Overlays, Invalid OverlayParams', 
                             array_merge($overlayParams, ['image_id' => $imageObj->image_id]));
                 }
 
