@@ -11,15 +11,6 @@ class RedisResponseCache implements ResponseCacheInterface
 {
     use DispatchesJobs;
 
-    /**
-     * @var int 8 hours, to avoid to reach out max memory, however we need to use a better policy
-     * Maybe we need to use a TTL according the dealer traffic, or some similar policy
-     */
-    public const TTL = 28800;
-
-    /** @var int @see https://www.php.net/manual/en/function.gzencode.php */
-    public const COMPRESSION_LEVEL = 9;
-
     public const HASH_SCAN_COUNTER = 10000;
 
     public const SEARCH_HASHMAP_KEY = 'inventory_search_hashmap';
@@ -29,18 +20,12 @@ class RedisResponseCache implements ResponseCacheInterface
     /** @var PhpRedis */
     private $client;
 
-    /** @var UniqueCacheInvalidationInterface */
-    private $uniqueCacheInvalidation;
-
     /** @var FeatureFlagRepositoryInterface */
     private $featureFlagRepository;
 
-    public function __construct(PhpRedis $client,
-                                UniqueCacheInvalidationInterface $uniqueCacheInvalidation,
-                                FeatureFlagRepositoryInterface $featureFlagRepository)
+    public function __construct(PhpRedis $client, FeatureFlagRepositoryInterface $featureFlagRepository)
     {
         $this->client = $client;
-        $this->uniqueCacheInvalidation = $uniqueCacheInvalidation;
         $this->featureFlagRepository = $featureFlagRepository;
     }
 
@@ -57,8 +42,8 @@ class RedisResponseCache implements ResponseCacheInterface
         // it stores a new key-value using an exact key name which is known by the cache client (DW)
         $this->client->set(
             $this->extractExactKey($key),
-            $this->featureFlagRepository->get('inventory-sdk-cache-compression') ? gzencode($value, self::COMPRESSION_LEVEL): $value,
-            self::TTL
+            $this->featureFlagRepository->get('inventory-sdk-cache-compression') ? gzencode($value, config('elastic.scout_driver.cache.compression_level', 9)) : $value,
+            config('elastic.scout_driver.cache.ttl', 86400)
         );
     }
 
@@ -70,12 +55,7 @@ class RedisResponseCache implements ResponseCacheInterface
      */
     public function forget(string ...$keyPatterns): void
     {
-        //$keyPatterns = $this->uniqueCacheInvalidation->keysWithNoJobs($keyPatterns);
-
-        //if (count($keyPatterns)) {
-            //$this->uniqueCacheInvalidation->createJobsForKeys($keyPatterns);
-            $this->dispatch(new InvalidateCacheJob($keyPatterns));
-        ///}
+        $this->dispatch(new InvalidateCacheJob($keyPatterns));
     }
 
     /**

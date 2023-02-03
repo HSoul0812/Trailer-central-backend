@@ -14,7 +14,6 @@ class InventoryResponseRedisCache implements InventoryResponseCacheInterface
     {
         return new RedisResponseCache(
             Redis::connection('sdk-search-cache')->client(),
-            app(UniqueCacheInvalidationInterface::class),
             app(FeatureFlagRepositoryInterface::class)
         );
     }
@@ -26,7 +25,6 @@ class InventoryResponseRedisCache implements InventoryResponseCacheInterface
     {
         return new RedisResponseCache(
             Redis::connection('sdk-single-cache')->client(),
-            app(UniqueCacheInvalidationInterface::class),
             app(FeatureFlagRepositoryInterface::class)
         );
     }

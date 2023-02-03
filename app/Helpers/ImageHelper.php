@@ -516,6 +516,20 @@ class ImageHelper
     }
 
     /**
+     * Encode URL if filename has whitespace
+     *
+     * @param string $url
+     * @return string new url with encoded filename
+     */
+    public function encodeUrl(string $url) 
+    {
+        $pos = strrpos($url, '/') + 1; // last occurance slash
+        $result = substr($url, 0, $pos) . rawurlencode(substr($url, $pos));
+
+        return $result;
+    }
+
+    /**
      * Create temp files
      *
      * @param string|null $fileContent

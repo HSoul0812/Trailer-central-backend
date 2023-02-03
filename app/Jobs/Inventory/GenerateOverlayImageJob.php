@@ -34,14 +34,17 @@ class GenerateOverlayImageJob extends Job {
      */
     public function handle(InventoryService $service)
     {
+        // Initialize Log File
+        $log = Log::channel('inventory-overlays');
+
+        // Try Generating Overlays
         try {
             $service->generateOverlays($this->inventoryId);
 
-            Log::info('Inventory Images with Overlay has been successfully generated', ['inventory_id' => $this->inventoryId]);
+            $log->info('Inventory Images with Overlay has been successfully generated', ['inventory_id' => $this->inventoryId]);
         } catch (\Exception $e) {
-
-            Log::error($e->getMessage());
-            Log::error($e->getTraceAsString());
+            $log->error($e->getMessage());
+            $log->error($e->getTraceAsString());
         }
     }
 }
