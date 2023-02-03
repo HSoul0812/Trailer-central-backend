@@ -132,8 +132,8 @@ class ImageService implements ImageServiceInterface
                     $this->dispatch((new GenerateOverlayImageJob($inventory->inventory_id))->onQueue('overlay-images'));
                 }
 
-                $inventoryService = app(InventoryServiceInterface::class); // to avoid cyclic dependency
-                $inventoryService->invalidateCacheAndReindexByDealerIds([$dealer->dealer_id]);
+                // we can not inject `InventoryServiceInterface` into constructor to avoid cyclic dependency
+                app(InventoryServiceInterface::class)->invalidateCacheAndReindexByDealerIds([$dealer->dealer_id]);
             }
         }
 
