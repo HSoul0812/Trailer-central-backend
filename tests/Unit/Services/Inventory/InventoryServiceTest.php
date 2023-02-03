@@ -3,7 +3,6 @@
 namespace Tests\Unit\Services\Inventory;
 
 use App\Exceptions\Inventory\InventoryException;
-use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
 use App\Jobs\Files\DeleteS3FilesJob;
 use App\Models\CRM\Dms\Quickbooks\Bill;
 use App\Models\Inventory\File;
