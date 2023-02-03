@@ -43,6 +43,8 @@ use App\Models\User\User;
 use App\Services\Inventory\ImageServiceInterface;
 use App\Services\Inventory\ImageService as ImageTableService;
 use App\Repositories\User\UserRepositoryInterface;
+use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
+use App\Services\ElasticSearch\Cache\UniqueCacheInvalidationInterface;
 
 /**
  * Test for App\Services\Inventory\InventoryService
@@ -135,6 +137,16 @@ class InventoryServiceTest extends TestCase
     private $imageTableServiceMock;
 
     /**
+     * @var LegacyMockInterface|ResponseCacheKeyInterface
+     */
+    private $responseCacheKeyMock;
+
+    /**
+     * @var LegacyMockInterface|UniqueCacheInvalidationInterface
+     */
+    private $uniqueCacheInvalidationMock;
+
+    /**
      * @var LegacyMockInterface|UserRepositoryInterface
      */
     private $userRepositoryMock;
@@ -194,6 +206,12 @@ class InventoryServiceTest extends TestCase
             $this->inventoryRepositoryMock
         ]);
         $this->app->instance(ImageTableService::class, $this->imageTableServiceMock);
+
+        $this->responseCacheKeyMock = Mockery::mock(ResponseCacheKeyInterface::class);
+        $this->app->instance(ResponseCacheKeyInterface::class, $this->responseCacheKeyMock);
+
+        $this->uniqueCacheInvalidationMock = Mockery::mock(UniqueCacheInvalidationInterface::class);
+        $this->app->instance(UniqueCacheInvalidationInterface::class, $this->uniqueCacheInvalidationMock);
 
         Queue::fake();
         Storage::fake('tmp');
@@ -1115,6 +1133,8 @@ class InventoryServiceTest extends TestCase
                 $this->markdownHelper,
                 $this->logServiceMock ?? app()->make(LoggerServiceInterface::class),
                 $this->imageTableServiceMock,
+                $this->uniqueCacheInvalidationMock,
+                $this->responseCacheKeyMock
             ])
             ->onlyMethods(['delete'])
             ->getMock();
@@ -1176,6 +1196,8 @@ class InventoryServiceTest extends TestCase
             $this->markdownHelper,
             $this->logServiceMock ?? app()->make(LoggerServiceInterface::class),
             $this->imageTableServiceMock,
+            $this->uniqueCacheInvalidationMock,
+            $this->responseCacheKeyMock
         ]);
 
         $inventoryServiceMock->shouldReceive('deleteDuplicates')->passthru();
@@ -1466,6 +1488,8 @@ class InventoryServiceTest extends TestCase
             $this->markdownHelper,
             $this->logServiceMock ?? app()->make(LoggerServiceInterface::class),
             $this->imageTableServiceMock,
+            $this->uniqueCacheInvalidationMock,
+            $this->responseCacheKeyMock
         ])->makePartial();
 
         $inventoryServiceMock->generateOverlays(self::TEST_INVENTORY_ID);
@@ -1574,6 +1598,8 @@ class InventoryServiceTest extends TestCase
             $this->markdownHelper,
             $this->logServiceMock ?? app()->make(LoggerServiceInterface::class),
             $this->imageTableServiceMock,
+            $this->uniqueCacheInvalidationMock,
+            $this->responseCacheKeyMock
         ])->makePartial();
 
         $inventoryServiceMock->generateOverlays(self::TEST_INVENTORY_ID);
@@ -1626,6 +1652,8 @@ class InventoryServiceTest extends TestCase
             $this->markdownHelper,
             $this->logServiceMock ?? app()->make(LoggerServiceInterface::class),
             $this->imageTableServiceMock,
+            $this->uniqueCacheInvalidationMock,
+            $this->responseCacheKeyMock
         ])->makePartial();
 
         $inventoryServiceMock->generateOverlays(self::TEST_INVENTORY_ID);
@@ -1703,6 +1731,8 @@ class InventoryServiceTest extends TestCase
             $this->markdownHelper,
             $this->logServiceMock ?? app()->make(LoggerServiceInterface::class),
             $this->imageTableServiceMock,
+            $this->uniqueCacheInvalidationMock,
+            $this->responseCacheKeyMock
         ])->makePartial();
 
         $inventoryServiceMock->generateOverlays(self::TEST_INVENTORY_ID);
@@ -1808,6 +1838,8 @@ class InventoryServiceTest extends TestCase
             $this->markdownHelper,
             $this->logServiceMock ?? app()->make(LoggerServiceInterface::class),
             $this->imageTableServiceMock,
+            $this->uniqueCacheInvalidationMock,
+            $this->responseCacheKeyMock
         ])->makePartial();
 
         $inventoryServiceMock
@@ -1914,6 +1946,8 @@ class InventoryServiceTest extends TestCase
             $this->markdownHelper,
             $this->logServiceMock ?? app()->make(LoggerServiceInterface::class),
             $this->imageTableServiceMock,
+            $this->uniqueCacheInvalidationMock,
+            $this->responseCacheKeyMock
         ])->makePartial();
 
         $inventoryServiceMock
@@ -2022,6 +2056,8 @@ class InventoryServiceTest extends TestCase
             $this->markdownHelper,
             $this->logServiceMock ?? app()->make(LoggerServiceInterface::class),
             $this->imageTableServiceMock,
+            $this->uniqueCacheInvalidationMock,
+            $this->responseCacheKeyMock
         ])->makePartial();
 
         $inventoryServiceMock

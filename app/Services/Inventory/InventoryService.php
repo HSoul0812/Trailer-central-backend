@@ -18,12 +18,11 @@ use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\Repository;
 use App\Repositories\User\DealerLocationMileageFeeRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
-use App\Repositories\User\GeoLocationRepositoryInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
-use App\Services\ElasticSearch\Cache\UniqueCacheInvalidationInterface;
 use App\Services\File\FileService;
 use App\Services\File\ImageService;
+use App\Services\User\GeoLocationServiceInterface;
 use App\Transformers\Inventory\InventoryTitleAndVinTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use Illuminate\Foundation\Bus\DispatchesJobs;
@@ -136,17 +135,9 @@ class InventoryService implements InventoryServiceInterface
     private $categoryRepository;
 
     /**
-     * @var GeoLocationRepositoryInterface
-     */
-    private $geolocationRepository;
-
-    /**
      * @var LoggerServiceInterface
      */
     private $logService;
-
-    /** @var \Parsedown */
-    private $markdownHelper;
 
     /**
      * @var ImageServiceInterface
@@ -154,14 +145,14 @@ class InventoryService implements InventoryServiceInterface
     private $imageTableService;
 
     /**
-     * @var UniqueCacheInvalidationInterface
-     */
-    private $uniqueCacheInvalidation;
-
-    /**
      * @var ResponseCacheKeyInterface
      */
     private $responseCacheKey;
+
+    /**
+     * @var GeoLocationServiceInterface
+     */
+    private $geoLocationService;
 
     /**
      * InventoryService constructor.
@@ -176,12 +167,10 @@ class InventoryService implements InventoryServiceInterface
      * @param DealerLocationRepositoryInterface $dealerLocationRepository
      * @param DealerLocationMileageFeeRepositoryInterface $dealerLocationMileageFeeRepository
      * @param CategoryRepositoryInterface $categoryRepository
-     * @param GeoLocationRepositoryInterface $geolocationRepository
-     * @param \Parsedown $parsedown
      * @param LoggerServiceInterface|null $logService
      * @param ImageServiceInterface $imageTableService
-     * @param UniqueCacheInvalidationInterface $uniqueCacheInvalidation
      * @param ResponseCacheKeyInterface $responseCacheKey
+     * @param GeoLocationServiceInterface $geoLocationService
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
     public function __construct(
@@ -196,12 +185,10 @@ class InventoryService implements InventoryServiceInterface
         DealerLocationRepositoryInterface $dealerLocationRepository,
         DealerLocationMileageFeeRepositoryInterface $dealerLocationMileageFeeRepository,
         CategoryRepositoryInterface $categoryRepository,
-        GeoLocationRepositoryInterface $geolocationRepository,
-        \Parsedown $parsedown,
-        ?LoggerServiceInterface $logService = null,
         ImageServiceInterface $imageTableService,
-        UniqueCacheInvalidationInterface $uniqueCacheInvalidation,
-        ResponseCacheKeyInterface $responseCacheKey
+        ResponseCacheKeyInterface $responseCacheKey,
+        GeoLocationServiceInterface $geoLocationService,
+        ?LoggerServiceInterface $logService = null
     ) {
         $this->inventoryRepository = $inventoryRepository;
         $this->imageRepository = $imageRepository;
@@ -214,12 +201,11 @@ class InventoryService implements InventoryServiceInterface
         $this->imageService = $imageService;
         $this->fileService = $fileService;
         $this->categoryRepository = $categoryRepository;
-        $this->geolocationRepository = $geolocationRepository;
-        $this->logService = $logService ?? app()->make(LoggerServiceInterface::class);
-        $this->markdownHelper = $parsedown;
         $this->imageTableService = $imageTableService;
-        $this->uniqueCacheInvalidation = $uniqueCacheInvalidation;
         $this->responseCacheKey = $responseCacheKey;
+        $this->geoLocationService = $geoLocationService;
+
+        $this->logService = $logService ?? app()->make(LoggerServiceInterface::class);
     }
 
     /**
@@ -239,6 +225,14 @@ class InventoryService implements InventoryServiceInterface
             $clappsDefaultImage = $params['clapps']['default-image']['url'] ?? '';
 
             $addBill = $params['add_bill'] ?? false;
+
+            if (!empty($params['dealer_location_id'])) {
+                $location = $this->dealerLocationRepository->get(['dealer_location_id' => $params['dealer_location_id']]);
+
+                if ($location->postalcode) {
+                    $params['geolocation'] = $this->geoLocationService->geoPointFromZipCode($location->postalcode);
+                }
+            }
 
             if (!empty($newImages)) {
                 $params['new_images'] = $this->uploadImages($params, 'new_images');
@@ -338,6 +332,18 @@ class InventoryService implements InventoryServiceInterface
 
             if (!empty($params['is_archived']) && $params['is_archived'] == 1) {
                 $params['archived_at'] = Carbon::now()->format('Y-m-d H:i:s');
+            }
+
+            if (!empty($params['dealer_location_id'])) {
+                $location = $this->dealerLocationRepository->get(['dealer_location_id' => $params['dealer_location_id']]);
+
+                if ($location->postalcode) {
+                    $params['geolocation'] = $this->geoLocationService->geoPointFromZipCode($location->postalcode);
+                }
+			}
+
+            if (!empty($params['status']) && $params['status'] == Inventory::STATUS_SOLD) {
+                $params['sold_at'] = Carbon::now()->format('Y-m-d H:i:s');
             }
 
             $inventory = $this->inventoryRepository->update($params, $options);
@@ -839,10 +845,12 @@ class InventoryService implements InventoryServiceInterface
         $fromLat = $dealerLocation->latitude;
         $fromLng = $dealerLocation->longitude;
 
-        if($toZip != null) {
-            $geolocation = $this->geolocationRepository->get(['zip' => $toZip]);
-            $fromLat = $geolocation->latitude;
-            $fromLng = $geolocation->longitude;
+        if($toZip !== null) {
+            $geolocation = $this->geoLocationService->geoPointFromZipCode($toZip);
+            if($geolocation){
+                $fromLat = $geolocation->latitude;
+                $fromLng = $geolocation->longitude;
+            }
         }
 
         $toLat  = $inventory->latitude;
@@ -854,6 +862,7 @@ class InventoryService implements InventoryServiceInterface
         }
 
         $distance = $this->calculateDistanceBetweenTwoPoints($fromLat, $fromLng, $toLat, $toLong, 'ML');
+
         return $feePerMile * $distance;
     }
 
