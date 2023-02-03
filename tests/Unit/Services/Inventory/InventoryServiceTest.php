@@ -3,6 +3,7 @@
 namespace Tests\Unit\Services\Inventory;
 
 use App\Exceptions\Inventory\InventoryException;
+use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
 use App\Jobs\Files\DeleteS3FilesJob;
 use App\Models\CRM\Dms\Quickbooks\Bill;
 use App\Models\Inventory\File;
@@ -32,6 +33,7 @@ use App\Services\User\GeoLocationServiceInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Laravel\Scout\Jobs\MakeSearchable;
 use Mockery;
 use Mockery\LegacyMockInterface;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -150,7 +152,9 @@ class InventoryServiceTest extends TestCase
     {
         parent::setUp();
 
-        $this->inventoryRepositoryMock = Mockery::mock(InventoryRepositoryInterface::class);
+       // $this->inventoryRepositoryMock = Mockery::mock(InventoryRepositoryInterface::class);
+        $this->inventoryRepositoryMock = $this->createStub(InventoryRepositoryInterface::class);
+        //$this->singleResponseCache = ;
         $this->app->instance(InventoryRepositoryInterface::class, $this->inventoryRepositoryMock);
 
         $this->imageRepositoryMock = Mockery::mock(ImageRepositoryInterface::class);
@@ -1754,6 +1758,8 @@ class InventoryServiceTest extends TestCase
         $this->assertEquals($inventory, $result);
 
         Queue::assertPushed(GenerateOverlayImageJob::class, 1);
+        // sadly with this kinda mocking we can not test redispatched jobs via observers,
+        // so we can not test indexation and invalidation dispatching jobs
     }
 
     /**
@@ -1844,6 +1850,8 @@ class InventoryServiceTest extends TestCase
         $this->assertEquals($inventory, $result);
 
         Queue::assertPushed(GenerateOverlayImageJob::class, 1);
+        // sadly with this kinda mocking we can not test redispatched jobs via observers,
+        // so we can not test indexation and invalidation dispatching jobs
     }
 
     /**
@@ -1853,8 +1861,11 @@ class InventoryServiceTest extends TestCase
      */
     public function testOverlayJobOnUpdateWithExistingImages($params)
     {
+        Inventory::enableCacheInvalidation();
+
         $params['existing_images'] = ['uploaded_img_path'];
         $params['inventory_id'] = self::TEST_INVENTORY_ID;
+        $params['title'] = 'some title';
         /** @var Inventory|LegacyMockInterface $inventory */
         $inventory = $this->getEloquentMock(Inventory::class);
         $inventory->inventory_id = self::TEST_INVENTORY_ID;
@@ -1887,6 +1898,8 @@ class InventoryServiceTest extends TestCase
         $this->assertEquals($inventory, $result);
 
         Queue::assertPushed(GenerateOverlayImageJob::class, 1);
+        // sadly with this kinda mocking we can not test redispatched jobs via observers,
+        // so we can not test indexation and invalidation dispatching jobs
     }
 
     /**
@@ -1936,6 +1949,8 @@ class InventoryServiceTest extends TestCase
         $this->assertEquals($inventory, $result);
 
         Queue::assertPushed(GenerateOverlayImageJob::class, 1);
+        // sadly with this kinda mocking we can not test redispatched jobs via observers,
+        // so we can not test indexation and invalidation dispatching jobs
     }
 
     protected function getInventoryServiceDependencies(): array
