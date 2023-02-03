@@ -1610,6 +1610,93 @@ class InventoryServiceTest extends TestCase
     }
 
     /**
+     * Test if addOverlays() is null
+     * 
+     * @dataProvider overlayParamDataProvider
+     * @group Marketing
+     * @group Marketing_Overlays
+     */
+    public function testGenerateOverlaysWithNoOverlay($overlayParams)
+    {
+        $inventoryImages = new Collection();
+
+        $image1 = $this->getEloquentMock(Image::class);
+        $image1->image_id = 1;
+        $image1->filename = 'filename_1';
+        $image1->filename_noverlay = '';
+
+        $inventoryImage1 = $this->getEloquentMock(InventoryImage::class);
+        $inventoryImage1->image = $image1;
+        $inventoryImage1->is_default = 0;
+        $inventoryImage1->position = 1;
+        $inventoryImages->push($inventoryImage1);
+
+        // Mock Image with existing overlay
+        $image2 = $this->getEloquentMock(Image::class);
+        $image2->image_id = 2;
+        $image2->filename = 'filename_with_overlay_2';
+        $image2->filename_noverlay = 'filename_2';
+
+        $inventoryImage2 = $this->getEloquentMock(InventoryImage::class);
+        $inventoryImage2->image = $image2;
+        $inventoryImage2->is_default = 0;
+        $inventoryImage2->position = 2;
+        $inventoryImages->push($inventoryImage2);
+
+        $this->inventoryRepositoryMock
+            ->shouldReceive('getOverlayParams')
+            ->with(self::TEST_INVENTORY_ID)
+            ->once()
+            ->andReturn($overlayParams);
+        
+        $this->inventoryRepositoryMock
+            ->shouldReceive('getInventoryImages')
+            ->with(self::TEST_INVENTORY_ID)
+            ->once()
+            ->andReturn($inventoryImages);
+
+        foreach ($inventoryImages as $inventoryImage) {
+
+            // Mock addOverlays
+            $this->imageServiceMock
+                ->shouldReceive('addOverlays')
+                ->once()
+                ->andReturn(null);
+        }
+
+        $this->imageTableServiceMock->shouldNotReceive('saveOverlay');
+        $this->imageServiceMock->shouldNotReceive('uploadToS3');
+        $this->imageTableServiceMock->shouldNotReceive('resetOverlay');
+
+        $inventoryServiceMock = Mockery::mock(InventoryService::class, [
+            $this->inventoryRepositoryMock,
+            $this->imageRepositoryMock,
+            $this->fileRepositoryMock,
+            $this->billRepositoryMock,
+            $this->quickbookApprovalRepositoryMock,
+            $this->websiteConfigRepositoryMock,
+            $this->imageServiceMock,
+            $this->fileServiceMock,
+            $this->dealerLocationRepositoryMock,
+            $this->dealerLocationMileageFeeRepositoryMock,
+            $this->categoryRepositoryMock,
+            $this->geolocationRepositoryMock,
+            $this->markdownHelper,
+            $this->logServiceMock ?? app()->make(LoggerServiceInterface::class),
+            $this->imageTableServiceMock,
+            $this->uniqueCacheInvalidationMock,
+            $this->responseCacheKeyMock
+        ])->makePartial();
+
+        $inventoryServiceMock->generateOverlays(self::TEST_INVENTORY_ID);
+
+        Storage::disk('tmp')->assertMissing([
+            'tmp_image_with_overlay_1',
+            'tmp_image_with_overlay_2'
+        ]);
+    }
+
+    /**
      * Test if missing inventoryImages
      * 
      * @dataProvider overlayParamDataProvider
