@@ -20,11 +20,15 @@ use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\Repository;
 use App\Repositories\User\DealerLocationMileageFeeRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
+use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
+use App\Services\ElasticSearch\Cache\InventoryResponseRedisCache;
 use App\Services\File\DTOs\FileDto;
 use App\Services\File\FileService;
 use App\Services\File\ImageService;
 use App\Services\Inventory\InventoryService;
 use App\Services\Inventory\InventoryServiceInterface;
+use App\Services\User\GeolocationService;
+use App\Services\User\GeoLocationServiceInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -44,7 +48,6 @@ use App\Services\Inventory\ImageServiceInterface;
 use App\Services\Inventory\ImageService as ImageTableService;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
-use App\Services\ElasticSearch\Cache\UniqueCacheInvalidationInterface;
 
 /**
  * Test for App\Services\Inventory\InventoryService
@@ -119,17 +122,9 @@ class InventoryServiceTest extends TestCase
     private $websiteConfigRepositoryMock;
 
     /**
-     * @var LegacyMockInterface|GeoLocationRepositoryInterface
-     */
-    private $geolocationRepositoryMock;
-
-    /**
      * @var LegacyMockInterface|LoggerServiceInterface
      */
     private $logServiceMock;
-
-    /** @var \LegacyMockInterface|Parsedown */
-    private $markdownHelper;
 
     /**
      * @var LegacyMockInterface|ImageServiceInterface
@@ -142,9 +137,9 @@ class InventoryServiceTest extends TestCase
     private $responseCacheKeyMock;
 
     /**
-     * @var LegacyMockInterface|UniqueCacheInvalidationInterface
+     * @var LegacyMockInterface|InventoryResponseCacheInterface
      */
-    private $uniqueCacheInvalidationMock;
+    private $inventoryResponseCacheMock;
 
     /**
      * @var LegacyMockInterface|UserRepositoryInterface
@@ -210,8 +205,11 @@ class InventoryServiceTest extends TestCase
         $this->responseCacheKeyMock = Mockery::mock(ResponseCacheKeyInterface::class);
         $this->app->instance(ResponseCacheKeyInterface::class, $this->responseCacheKeyMock);
 
-        $this->uniqueCacheInvalidationMock = Mockery::mock(UniqueCacheInvalidationInterface::class);
-        $this->app->instance(UniqueCacheInvalidationInterface::class, $this->uniqueCacheInvalidationMock);
+        $this->inventoryResponseCacheMock = Mockery::mock(InventoryResponseRedisCache::class);
+        $this->app->instance(InventoryResponseCacheInterface::class, $this->inventoryResponseCacheMock);
+
+        $this->geolocationServiceMock = Mockery::mock(GeolocationService::class);
+        $this->app->instance(GeoLocationServiceInterface::class, $this->geolocationServiceMock);
 
         Queue::fake();
         Storage::fake('tmp');
@@ -302,6 +300,9 @@ class InventoryServiceTest extends TestCase
      * @group DMS_INVENTORY
      * @group Marketing
      * @group Marketing_Overlays
+     * @group DW
+     * @group DW_INVENTORY
+     * @group DW_ELASTICSEARCH
      *
      * @param array $params
      * @throws BindingResolutionException
@@ -399,6 +400,9 @@ class InventoryServiceTest extends TestCase
      *
      * @group DMS
      * @group DMS_INVENTORY
+     * @group DW
+     * @group DW_INVENTORY
+     * @group DW_ELASTICSEARCH
      *
      * @param array $params
      * @throws BindingResolutionException
@@ -772,6 +776,9 @@ class InventoryServiceTest extends TestCase
      *
      * @group DMS
      * @group DMS_INVENTORY
+     * @group DW
+     * @group DW_INVENTORY
+     * @group DW_ELASTICSEARCH
      *
      * @param array $params
      * @throws BindingResolutionException
@@ -815,6 +822,9 @@ class InventoryServiceTest extends TestCase
      *
      * @group DMS
      * @group DMS_INVENTORY
+     * @group DW
+     * @group DW_INVENTORY
+     * @group DW_ELASTICSEARCH
      *
      * @param array $params
      * @throws BindingResolutionException
@@ -859,6 +869,9 @@ class InventoryServiceTest extends TestCase
      *
      * @group DMS
      * @group DMS_INVENTORY
+     * @group DW
+     * @group DW_INVENTORY
+     * @group DW_ELASTICSEARCH
      *
      * @param $imageParams
      * @param $fileParams
@@ -939,6 +952,9 @@ class InventoryServiceTest extends TestCase
      *
      * @group DMS
      * @group DMS_INVENTORY
+     * @group DW
+     * @group DW_INVENTORY
+     * @group DW_ELASTICSEARCH
      *
      * @param $imageParams
      * @param $fileParams
@@ -994,6 +1010,9 @@ class InventoryServiceTest extends TestCase
      *
      * @group DMS
      * @group DMS_INVENTORY
+     * @group DW
+     * @group DW_INVENTORY
+     * @group DW_ELASTICSEARCH
      *
      * @param $imageParams
      * @param $fileParams
@@ -1047,6 +1066,9 @@ class InventoryServiceTest extends TestCase
      * @group DMS_INVENTORY
      * @group Marketing
      * @group Marketing_Overlays
+     * @group DW
+     * @group DW_INVENTORY
+     * @group DW_ELASTICSEARCH
      *
      * @param array $getAllWithHavingCountParams
      * @param array $getAllParams
@@ -1117,25 +1139,7 @@ class InventoryServiceTest extends TestCase
 
         /** @var InventoryService|MockObject $inventoryServiceMock */
         $inventoryServiceMock = $this->getMockBuilder(InventoryService::class)
-            ->setConstructorArgs([
-                $this->inventoryRepositoryMock,
-                $this->imageRepositoryMock,
-                $this->fileRepositoryMock,
-                $this->billRepositoryMock,
-                $this->quickbookApprovalRepositoryMock,
-                $this->websiteConfigRepositoryMock,
-                $this->imageServiceMock,
-                $this->fileServiceMock,
-                $this->dealerLocationRepositoryMock,
-                $this->dealerLocationMileageFeeRepositoryMock,
-                $this->categoryRepositoryMock,
-                $this->geolocationRepositoryMock,
-                $this->markdownHelper,
-                $this->logServiceMock ?? app()->make(LoggerServiceInterface::class),
-                $this->imageTableServiceMock,
-                $this->uniqueCacheInvalidationMock,
-                $this->responseCacheKeyMock
-            ])
+            ->setConstructorArgs($this->getInventoryServiceDependencies())
             ->onlyMethods(['delete'])
             ->getMock();
 
@@ -1170,6 +1174,9 @@ class InventoryServiceTest extends TestCase
      * @group DMS_INVENTORY
      * @group Marketing
      * @group Marketing_Overlays
+     * @group DW
+     * @group DW_INVENTORY
+     * @group DW_ELASTICSEARCH
      *
      * @param array $getAllWithHavingCountParams
      * @param array $getAllParams
@@ -1180,25 +1187,7 @@ class InventoryServiceTest extends TestCase
         $emptyCollection = new Collection();
 
         /** @var InventoryService|LegacyMockInterface $inventoryServiceMock */
-        $inventoryServiceMock = Mockery::mock(InventoryService::class, [
-            $this->inventoryRepositoryMock,
-            $this->imageRepositoryMock,
-            $this->fileRepositoryMock,
-            $this->billRepositoryMock,
-            $this->quickbookApprovalRepositoryMock,
-            $this->websiteConfigRepositoryMock,
-            $this->imageServiceMock,
-            $this->fileServiceMock,
-            $this->dealerLocationRepositoryMock,
-            $this->dealerLocationMileageFeeRepositoryMock,
-            $this->categoryRepositoryMock,
-            $this->geolocationRepositoryMock,
-            $this->markdownHelper,
-            $this->logServiceMock ?? app()->make(LoggerServiceInterface::class),
-            $this->imageTableServiceMock,
-            $this->uniqueCacheInvalidationMock,
-            $this->responseCacheKeyMock
-        ]);
+        $inventoryServiceMock = Mockery::mock(InventoryService::class, $this->getInventoryServiceDependencies());
 
         $inventoryServiceMock->shouldReceive('deleteDuplicates')->passthru();
 
@@ -1225,6 +1214,9 @@ class InventoryServiceTest extends TestCase
     /**
      * @group DMS
      * @group DMS_INVENTORY
+     * @group DW
+     * @group DW_INVENTORY
+     * @group DW_ELASTICSEARCH
      *
      * @return void
      * @throws BindingResolutionException
@@ -1375,20 +1367,20 @@ class InventoryServiceTest extends TestCase
             'dealer_id' => self::TEST_DEALER_ID,
             'inventory_id' => self::TEST_INVENTORY_ID,
             'overlay_logo' => 'logo.png',
-            'overlay_logo_position' => User::OVERLAY_LOGO_POSITION_LOWER_RIGHT, 
-            'overlay_logo_width' => '20%', 
-            'overlay_logo_height' => '20%', 
-            'overlay_upper' => User::OVERLAY_UPPER_DEALER_NAME, 
-            'overlay_upper_bg' => '#000000', 
-            'overlay_upper_alpha' => 0, 
-            'overlay_upper_text' => '#ffffff', 
-            'overlay_upper_size' => 40, 
+            'overlay_logo_position' => User::OVERLAY_LOGO_POSITION_LOWER_RIGHT,
+            'overlay_logo_width' => '20%',
+            'overlay_logo_height' => '20%',
+            'overlay_upper' => User::OVERLAY_UPPER_DEALER_NAME,
+            'overlay_upper_bg' => '#000000',
+            'overlay_upper_alpha' => 0,
+            'overlay_upper_text' => '#ffffff',
+            'overlay_upper_size' => 40,
             'overlay_upper_margin' => 40,
-            'overlay_lower' => User::OVERLAY_UPPER_DEALER_PHONE, 
-            'overlay_lower_bg' => '#000000', 
-            'overlay_lower_alpha' => 0, 
-            'overlay_lower_text' => '#ffffff', 
-            'overlay_lower_size' => 40, 
+            'overlay_lower' => User::OVERLAY_UPPER_DEALER_PHONE,
+            'overlay_lower_bg' => '#000000',
+            'overlay_lower_alpha' => 0,
+            'overlay_lower_text' => '#ffffff',
+            'overlay_lower_size' => 40,
             'overlay_lower_margin' => 40,
             'overlay_enabled' => Inventory::OVERLAY_ENABLED_ALL,
             'dealer_overlay_enabled' => Inventory::OVERLAY_ENABLED_ALL,
@@ -1400,7 +1392,7 @@ class InventoryServiceTest extends TestCase
 
     /**
      * Test if overlay_enabled = Inventory::OVERLAY_ENABLED_ALL
-     * 
+     *
      * @dataProvider overlayParamDataProvider
      * @group Marketing
      * @group Marketing_Overlays
@@ -1437,7 +1429,7 @@ class InventoryServiceTest extends TestCase
             ->with(self::TEST_INVENTORY_ID)
             ->once()
             ->andReturn($overlayParams);
-        
+
         $this->inventoryRepositoryMock
             ->shouldReceive('getInventoryImages')
             ->with(self::TEST_INVENTORY_ID)
@@ -1472,25 +1464,7 @@ class InventoryServiceTest extends TestCase
 
         $this->imageTableServiceMock->shouldNotReceive('resetOverlay');
 
-        $inventoryServiceMock = Mockery::mock(InventoryService::class, [
-            $this->inventoryRepositoryMock,
-            $this->imageRepositoryMock,
-            $this->fileRepositoryMock,
-            $this->billRepositoryMock,
-            $this->quickbookApprovalRepositoryMock,
-            $this->websiteConfigRepositoryMock,
-            $this->imageServiceMock,
-            $this->fileServiceMock,
-            $this->dealerLocationRepositoryMock,
-            $this->dealerLocationMileageFeeRepositoryMock,
-            $this->categoryRepositoryMock,
-            $this->geolocationRepositoryMock,
-            $this->markdownHelper,
-            $this->logServiceMock ?? app()->make(LoggerServiceInterface::class),
-            $this->imageTableServiceMock,
-            $this->uniqueCacheInvalidationMock,
-            $this->responseCacheKeyMock
-        ])->makePartial();
+        $inventoryServiceMock = Mockery::mock(InventoryService::class, $this->getInventoryServiceDependencies())->makePartial();
 
         $inventoryServiceMock->generateOverlays(self::TEST_INVENTORY_ID);
 
@@ -1502,7 +1476,7 @@ class InventoryServiceTest extends TestCase
 
     /**
      * Test if overlay_enabled = Inventory::OVERLAY_ENABLED_PRIMARY
-     * 
+     *
      * @dataProvider overlayParamDataProvider
      * @group Marketing
      * @group Marketing_Overlays
@@ -1538,7 +1512,7 @@ class InventoryServiceTest extends TestCase
             ->with(self::TEST_INVENTORY_ID)
             ->once()
             ->andReturn($overlayParams);
-        
+
         $this->inventoryRepositoryMock
             ->shouldReceive('getInventoryImages')
             ->with(self::TEST_INVENTORY_ID)
@@ -1558,7 +1532,7 @@ class InventoryServiceTest extends TestCase
                 $this->imageServiceMock
                     ->shouldReceive('uploadToS3')
                     ->once()->andReturn($s3Filename);
-    
+
                 // Mock addOverlays
                 Storage::disk('tmp')->put($tmpFilename, '');
                 $this->imageServiceMock
@@ -1569,7 +1543,7 @@ class InventoryServiceTest extends TestCase
                 $this->imageTableServiceMock
                     ->shouldReceive('saveOverlay')
                     ->once()->with($image, $s3Filename);
-                
+
             } else {
 
                 // Mock resetOverlay
@@ -1582,25 +1556,7 @@ class InventoryServiceTest extends TestCase
             }
         }
 
-        $inventoryServiceMock = Mockery::mock(InventoryService::class, [
-            $this->inventoryRepositoryMock,
-            $this->imageRepositoryMock,
-            $this->fileRepositoryMock,
-            $this->billRepositoryMock,
-            $this->quickbookApprovalRepositoryMock,
-            $this->websiteConfigRepositoryMock,
-            $this->imageServiceMock,
-            $this->fileServiceMock,
-            $this->dealerLocationRepositoryMock,
-            $this->dealerLocationMileageFeeRepositoryMock,
-            $this->categoryRepositoryMock,
-            $this->geolocationRepositoryMock,
-            $this->markdownHelper,
-            $this->logServiceMock ?? app()->make(LoggerServiceInterface::class),
-            $this->imageTableServiceMock,
-            $this->uniqueCacheInvalidationMock,
-            $this->responseCacheKeyMock
-        ])->makePartial();
+        $inventoryServiceMock = Mockery::mock(InventoryService::class, $this->getInventoryServiceDependencies())->makePartial();
 
         $inventoryServiceMock->generateOverlays(self::TEST_INVENTORY_ID);
 
@@ -1611,7 +1567,7 @@ class InventoryServiceTest extends TestCase
 
     /**
      * Test if missing inventoryImages
-     * 
+     *
      * @dataProvider overlayParamDataProvider
      * @group Marketing
      * @group Marketing_Overlays
@@ -1619,7 +1575,7 @@ class InventoryServiceTest extends TestCase
     public function testGenerateOverlaysNone($overlayParams)
     {
         $inventoryImages = new Collection();
-        
+
         $this->inventoryRepositoryMock
             ->shouldReceive('getInventoryImages')
             ->with(self::TEST_INVENTORY_ID)
@@ -1636,32 +1592,14 @@ class InventoryServiceTest extends TestCase
         $this->imageTableServiceMock->shouldNotReceive('saveOverlay');
         $this->imageTableServiceMock->shouldNotReceive('resetOverlay');
 
-        $inventoryServiceMock = Mockery::mock(InventoryService::class, [
-            $this->inventoryRepositoryMock,
-            $this->imageRepositoryMock,
-            $this->fileRepositoryMock,
-            $this->billRepositoryMock,
-            $this->quickbookApprovalRepositoryMock,
-            $this->websiteConfigRepositoryMock,
-            $this->imageServiceMock,
-            $this->fileServiceMock,
-            $this->dealerLocationRepositoryMock,
-            $this->dealerLocationMileageFeeRepositoryMock,
-            $this->categoryRepositoryMock,
-            $this->geolocationRepositoryMock,
-            $this->markdownHelper,
-            $this->logServiceMock ?? app()->make(LoggerServiceInterface::class),
-            $this->imageTableServiceMock,
-            $this->uniqueCacheInvalidationMock,
-            $this->responseCacheKeyMock
-        ])->makePartial();
+        $inventoryServiceMock = Mockery::mock(InventoryService::class, $this->getInventoryServiceDependencies())->makePartial();
 
         $inventoryServiceMock->generateOverlays(self::TEST_INVENTORY_ID);
     }
 
     /**
      * Test if overlay_enabled = 0
-     * 
+     *
      * @dataProvider overlayParamDataProvider
      * @group Marketing
      * @group Marketing_Overlays
@@ -1697,7 +1635,7 @@ class InventoryServiceTest extends TestCase
             ->with(self::TEST_INVENTORY_ID)
             ->once()
             ->andReturn($overlayParams);
-        
+
         $this->inventoryRepositoryMock
             ->shouldReceive('getInventoryImages')
             ->with(self::TEST_INVENTORY_ID)
@@ -1715,25 +1653,7 @@ class InventoryServiceTest extends TestCase
                 ->once()->with($image);
         }
 
-        $inventoryServiceMock = Mockery::mock(InventoryService::class, [
-            $this->inventoryRepositoryMock,
-            $this->imageRepositoryMock,
-            $this->fileRepositoryMock,
-            $this->billRepositoryMock,
-            $this->quickbookApprovalRepositoryMock,
-            $this->websiteConfigRepositoryMock,
-            $this->imageServiceMock,
-            $this->fileServiceMock,
-            $this->dealerLocationRepositoryMock,
-            $this->dealerLocationMileageFeeRepositoryMock,
-            $this->categoryRepositoryMock,
-            $this->geolocationRepositoryMock,
-            $this->markdownHelper,
-            $this->logServiceMock ?? app()->make(LoggerServiceInterface::class),
-            $this->imageTableServiceMock,
-            $this->uniqueCacheInvalidationMock,
-            $this->responseCacheKeyMock
-        ])->makePartial();
+        $inventoryServiceMock = Mockery::mock(InventoryService::class, $this->getInventoryServiceDependencies())->makePartial();
 
         $inventoryServiceMock->generateOverlays(self::TEST_INVENTORY_ID);
     }
@@ -1822,25 +1742,7 @@ class InventoryServiceTest extends TestCase
         Log::shouldReceive('error')->never();
 
         /** @var InventoryService $service */
-        $inventoryServiceMock = Mockery::mock(InventoryService::class, [
-            $this->inventoryRepositoryMock,
-            $this->imageRepositoryMock,
-            $this->fileRepositoryMock,
-            $this->billRepositoryMock,
-            $this->quickbookApprovalRepositoryMock,
-            $this->websiteConfigRepositoryMock,
-            $this->imageServiceMock,
-            $this->fileServiceMock,
-            $this->dealerLocationRepositoryMock,
-            $this->dealerLocationMileageFeeRepositoryMock,
-            $this->categoryRepositoryMock,
-            $this->geolocationRepositoryMock,
-            $this->markdownHelper,
-            $this->logServiceMock ?? app()->make(LoggerServiceInterface::class),
-            $this->imageTableServiceMock,
-            $this->uniqueCacheInvalidationMock,
-            $this->responseCacheKeyMock
-        ])->makePartial();
+        $inventoryServiceMock = Mockery::mock(InventoryService::class, $this->getInventoryServiceDependencies())->makePartial();
 
         $inventoryServiceMock
             ->shouldAllowMockingProtectedMethods()
@@ -1930,25 +1832,7 @@ class InventoryServiceTest extends TestCase
             ->never();
 
         /** @var InventoryService $service */
-        $inventoryServiceMock = Mockery::mock(InventoryService::class, [
-            $this->inventoryRepositoryMock,
-            $this->imageRepositoryMock,
-            $this->fileRepositoryMock,
-            $this->billRepositoryMock,
-            $this->quickbookApprovalRepositoryMock,
-            $this->websiteConfigRepositoryMock,
-            $this->imageServiceMock,
-            $this->fileServiceMock,
-            $this->dealerLocationRepositoryMock,
-            $this->dealerLocationMileageFeeRepositoryMock,
-            $this->categoryRepositoryMock,
-            $this->geolocationRepositoryMock,
-            $this->markdownHelper,
-            $this->logServiceMock ?? app()->make(LoggerServiceInterface::class),
-            $this->imageTableServiceMock,
-            $this->uniqueCacheInvalidationMock,
-            $this->responseCacheKeyMock
-        ])->makePartial();
+        $inventoryServiceMock = Mockery::mock(InventoryService::class, $this->getInventoryServiceDependencies())->makePartial();
 
         $inventoryServiceMock
             ->shouldAllowMockingProtectedMethods()
@@ -2040,25 +1924,7 @@ class InventoryServiceTest extends TestCase
             ->never();
 
         /** @var InventoryService $service */
-        $inventoryServiceMock = Mockery::mock(InventoryService::class, [
-            $this->inventoryRepositoryMock,
-            $this->imageRepositoryMock,
-            $this->fileRepositoryMock,
-            $this->billRepositoryMock,
-            $this->quickbookApprovalRepositoryMock,
-            $this->websiteConfigRepositoryMock,
-            $this->imageServiceMock,
-            $this->fileServiceMock,
-            $this->dealerLocationRepositoryMock,
-            $this->dealerLocationMileageFeeRepositoryMock,
-            $this->categoryRepositoryMock,
-            $this->geolocationRepositoryMock,
-            $this->markdownHelper,
-            $this->logServiceMock ?? app()->make(LoggerServiceInterface::class),
-            $this->imageTableServiceMock,
-            $this->uniqueCacheInvalidationMock,
-            $this->responseCacheKeyMock
-        ])->makePartial();
+        $inventoryServiceMock = Mockery::mock(InventoryService::class, $this->getInventoryServiceDependencies())->makePartial();
 
         $inventoryServiceMock
             ->shouldAllowMockingProtectedMethods()
@@ -2070,5 +1936,27 @@ class InventoryServiceTest extends TestCase
         $this->assertEquals($inventory, $result);
 
         Queue::assertPushed(GenerateOverlayImageJob::class, 1);
+    }
+
+    protected function getInventoryServiceDependencies(): array
+    {
+        return [
+            $this->inventoryRepositoryMock,
+            $this->imageRepositoryMock,
+            $this->fileRepositoryMock,
+            $this->billRepositoryMock,
+            $this->quickbookApprovalRepositoryMock,
+            $this->websiteConfigRepositoryMock,
+            $this->imageServiceMock,
+            $this->fileServiceMock,
+            $this->dealerLocationRepositoryMock,
+            $this->dealerLocationMileageFeeRepositoryMock,
+            $this->categoryRepositoryMock,
+            $this->imageTableServiceMock,
+            $this->responseCacheKeyMock,
+            $this->geolocationServiceMock,
+            $this->inventoryResponseCacheMock,
+            $this->logServiceMock ?? app()->make(LoggerServiceInterface::class)
+        ];
     }
 }
