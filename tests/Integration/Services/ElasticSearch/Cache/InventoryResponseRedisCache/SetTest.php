@@ -12,7 +12,6 @@ use Mockery;
  * @group DW
  * @group DW_ELASTICSEARCH
  * @group DW_INVENTORY
- * @group DW_JOBS
  *
  * @covers \App\Services\ElasticSearch\Cache\InventoryResponseRedisCache::set
  */

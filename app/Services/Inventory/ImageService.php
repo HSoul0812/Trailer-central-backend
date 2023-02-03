@@ -115,6 +115,7 @@ class ImageService implements ImageServiceInterface
     public function updateOverlaySettings(array $params): User
     {
         $wasChanged = $this->userRepository->updateOverlaySettings($params['dealer_id'], $params);
+        $dealer = $this->userRepository->get(['dealer_id' => $params['dealer_id']]);
 
         // Generate Overlay Inventory Images if necessary
         if ($wasChanged) {
@@ -130,14 +131,11 @@ class ImageService implements ImageServiceInterface
                 foreach ($inventories as $inventory) {
                     $this->dispatch((new GenerateOverlayImageJob($inventory->inventory_id))->onQueue('overlay-images'));
                 }
+
+                $inventoryService = app(InventoryServiceInterface::class); // to avoid cyclic dependency
+                $inventoryService->invalidateCacheAndReindexByDealerIds([$dealer->dealer_id]);
             }
         }
-
-        $inventoryService = app(InventoryServiceInterface::class); // to avoid cyclic dependency
-
-        $dealer = $this->userRepository->get(['dealer_id' => $params['dealer_id']]);
-
-        $inventoryService->invalidateCacheAndReindexByDealerIds([$dealer->dealer_id]);
 
         return $dealer;
     }
