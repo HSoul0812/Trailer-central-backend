@@ -133,6 +133,7 @@ class ImageService extends AbstractFileService
     public function addOverlays(string $imagePath, array $params)
     {
         $imagePath = $this->imageHelper->encodeUrl($imagePath);
+        $originalImagePath = $imagePath;
         $tempFiles = [];
         // Add Upper Text Overlay if applicable
         if (in_array($params['overlay_upper'], User::OVERLAY_TEXT_SETTINGS)
@@ -159,6 +160,10 @@ class ImageService extends AbstractFileService
             $logoPath = $this->imageHelper->encodeUrl($params['overlay_logo']);
             $imagePath = $this->imageHelper->addLogoOverlay($imagePath, $logoPath, $params);
         }
+
+        // If No Overlays are applied
+        if ($imagePath === $originalImagePath)
+            return null;
 
         // Delete Unused Temp Files
         $tempFiles = array_diff($tempFiles, [$imagePath]);
