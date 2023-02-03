@@ -676,13 +676,21 @@ class InventoryService implements InventoryServiceInterface
                 $originalFilename = !empty($imageObj->filename_noverlay) ? $imageObj->filename_noverlay : $imageObj->filename;
                 $localNewImagePath = $this->imageService->addOverlays($this->getS3BaseUrl() . $originalFilename, $overlayParams);
 
-                // upload overlay image
-                $randomFilename = md5($localNewImagePath);
-                $newFilename = $this->imageService->uploadToS3($localNewImagePath, $randomFilename, $overlayParams['dealer_id']);
-                unlink($localNewImagePath);
+                if (!empty($localNewImagePath)) {
 
-                // update image to database
-                $this->imageTableService->saveOverlay($imageObj, $newFilename);
+                    // upload overlay image
+                    $randomFilename = md5($localNewImagePath);
+                    $newFilename = $this->imageService->uploadToS3($localNewImagePath, $randomFilename, $overlayParams['dealer_id']);
+                    unlink($localNewImagePath);
+    
+                    // update image to database
+                    $this->imageTableService->saveOverlay($imageObj, $newFilename);
+                } else {
+
+                    Log::channel('inventory-overlays')
+                        ->error('Failed Adding Overlays, Invalid OverlayParams', 
+                            array_merge($overlayParams, ['image_id' => $imageObj->image_id]));
+                }
 
             // otherwise Reset Overlay
             } else {
