@@ -110,6 +110,7 @@ trait InventorySearchable
     public static function withoutCacheInvalidationAndSearchSyncing(callable $callback)
     {
         $isCacheInvalidationEnabled = self::isCacheInvalidationEnabled();
+        $isSearchSyncingEnabled = self::isSearchSyncingEnabled();
 
         self::disableCacheInvalidationAndSearchSyncing();
 
@@ -120,7 +121,9 @@ trait InventorySearchable
                 self::enableCacheInvalidation();
             }
 
-            self::enableSearchSyncing();
+            if ($isSearchSyncingEnabled) {
+                self::enableSearchSyncing();
+            }
         }
     }
 
