@@ -228,6 +228,30 @@ class InventoryService implements InventoryServiceInterface
     public function create(array $params): Inventory
     {
         try {
+            // next closure is aimed to avoid to dispatch duplicate jobs for elastic indexation and cache invalidation
+            // with minor refactor
+            $isCacheInvalidationEnabled = Inventory::isCacheInvalidationEnabled();
+            $isSearchSyncingEnabled = Inventory::isSearchSyncingEnabled();
+
+            $indexAndInvalidate = function (Inventory $inventory) use (
+                $isCacheInvalidationEnabled,
+                $isSearchSyncingEnabled
+            ):void {
+                if ($isSearchSyncingEnabled) {
+                    $inventory->searchable();
+
+                    Inventory::enableSearchSyncing();
+                }
+
+                if ($isCacheInvalidationEnabled) {
+                    $this->responseCache->forget([$this->responseCacheKey->deleteByDealer($inventory->dealer_id)]);
+
+                    Inventory::enableCacheInvalidation();
+                }
+            };
+
+            Inventory::disableCacheInvalidationAndSearchSyncing();
+
             $this->inventoryRepository->beginTransaction();
 
             $newImages = $params['new_images'] ?? [];
@@ -285,6 +309,8 @@ class InventoryService implements InventoryServiceInterface
                 $this->dispatch((new GenerateOverlayImageJob($inventory->inventory_id))->onQueue('overlay-images'));
 
             Log::info('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
+
+            $indexAndInvalidate($inventory);
         } catch (\Exception $e) {
             Log::error('Item create error. Message - ' . $e->getMessage(), $e->getTrace());
             $this->inventoryRepository->rollbackTransaction();
@@ -304,6 +330,34 @@ class InventoryService implements InventoryServiceInterface
     public function update(array $params): Inventory
     {
         try {
+            // next closure is aimed to avoid to dispatch duplicate jobs for elastic indexation and cache invalidation
+            // with minor refactor
+            $isCacheInvalidationEnabled = Inventory::isCacheInvalidationEnabled();
+            $isSearchSyncingEnabled = Inventory::isSearchSyncingEnabled();
+
+            $indexAndInvalidate = function (Inventory $inventory) use (
+                $isCacheInvalidationEnabled,
+                $isSearchSyncingEnabled
+            ):void {
+                if ($isSearchSyncingEnabled) {
+                    $inventory->searchable();
+
+                    Inventory::enableSearchSyncing();
+                }
+
+                if ($isCacheInvalidationEnabled) {
+                    $this->responseCache->forget([
+                            $this->responseCacheKey->deleteByDealer($inventory->dealer_id),
+                            $this->responseCacheKey->deleteSingle($inventory->inventory_id, $inventory->dealer_id)
+                        ]
+                    );
+
+                    Inventory::enableCacheInvalidation();
+                }
+            };
+
+            Inventory::disableCacheInvalidationAndSearchSyncing();
+
             $this->inventoryRepository->beginTransaction();
 
             $newImages = $params['new_images'] ?? [];
@@ -380,6 +434,8 @@ class InventoryService implements InventoryServiceInterface
                 $this->dispatch((new GenerateOverlayImageJob($inventory->inventory_id))->onQueue('overlay-images'));
 
             Log::info('Item has been successfully updated', ['inventoryId' => $inventory->inventory_id]);
+
+            $indexAndInvalidate($inventory);
         } catch (\Exception $e) {
             Log::error('Item update error. Message - ' . $e->getMessage(), $e->getTrace());
             $this->inventoryRepository->rollbackTransaction();
