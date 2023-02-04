@@ -313,6 +313,7 @@ class InventoryServiceTest extends TestCase
         /** @var Inventory|LegacyMockInterface $inventory */
         $inventory = $this->getEloquentMock(Inventory::class);
         $inventory->inventory_id = self::TEST_INVENTORY_ID;
+        $inventory->shouldReceive('searchable');
 
         $params['new_images'] = [
             [
@@ -413,6 +414,7 @@ class InventoryServiceTest extends TestCase
         /** @var Inventory|LegacyMockInterface $inventory */
         $inventory = $this->getEloquentMock(Inventory::class);
         $inventory->inventory_id = self::TEST_INVENTORY_ID;
+        $inventory->shouldReceive('searchable');
 
         $params['new_files'] = [
             [
