@@ -1203,7 +1203,7 @@ class InventoryService implements InventoryServiceInterface
     }
 
     /**
-     * - Will try to index for a given inventory only when ES indexation is enabled
+     * - Will try to index a given inventory only when ES indexation is enabled
      * - Will try invalidate inventory cache for a given inventory only when cache invalidation is enabled
      *
      * @param  Inventory  $inventory
