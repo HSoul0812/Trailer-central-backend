@@ -51,6 +51,17 @@ class InventoryControllerTest extends TestCase
         parent::setUp();
 
         Queue::fake();
+
+        $this->setCacheInvalidation(true);
+        Inventory::enableSearchSyncing();
+    }
+
+    protected function tearDown(): void
+    {
+        $this->setCacheInvalidation(true);
+        Inventory::enableSearchSyncing();
+
+        parent::tearDown();
     }
 
     /**
@@ -1418,6 +1429,9 @@ HTML,
      * @covers ::update
      * @group Marketing
      * @group Marketing_Overlays
+     * @group DW
+     * @group DW_INVENTORY
+     * @group DW_ELASTICSEARCH
      */
     public function testUpdateWithNewImages()
     {
@@ -1462,6 +1476,9 @@ HTML,
      * @covers ::update
      * @group Marketing
      * @group Marketing_Overlays
+     * @group DW
+     * @group DW_INVENTORY
+     * @group DW_ELASTICSEARCH
      */
     public function testUpdateWithExistingImages()
     {
@@ -1507,6 +1524,9 @@ HTML,
      * @covers ::update
      * @group Marketing
      * @group Marketing_Overlays
+     * @group DW
+     * @group DW_INVENTORY
+     * @group DW_ELASTICSEARCH
      */
     public function testUpdateWithNoImage()
     {
@@ -1535,6 +1555,9 @@ HTML,
      * @covers ::update
      * @group Marketing
      * @group Marketing_Overlays
+     * @group DW
+     * @group DW_INVENTORY
+     * @group DW_ELASTICSEARCH
      */
     public function testUpdateWithBothImages()
     {
@@ -1568,8 +1591,7 @@ HTML,
             'was_manually_added' => 1
         ];
 
-        $response = $this->json('POST', '/api/inventory/'. $seeder->inventory->getKey(),
-            $inventoryParams, $this->getSeederAccessToken($seeder));
+        $response = $this->json('POST', '/api/inventory/'. $seeder->inventory->getKey(), $inventoryParams, $this->getSeederAccessToken($seeder));
 
         $response->assertSuccessful();
 
