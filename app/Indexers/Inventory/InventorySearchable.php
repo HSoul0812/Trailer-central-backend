@@ -109,7 +109,7 @@ trait InventorySearchable
      */
     public static function withoutCacheInvalidationAndSearchSyncing(callable $callback)
     {
-        $isCacheInvalidationEnabled = app(FeatureFlagRepositoryInterface::class)->isEnabled('inventory-sdk-cache');
+        $isCacheInvalidationEnabled = self::isCacheInvalidationEnabled();
 
         self::disableCacheInvalidationAndSearchSyncing();
 
@@ -144,7 +144,7 @@ trait InventorySearchable
      */
     public static function withoutCacheInvalidation(callable $callback)
     {
-        $isCacheInvalidationEnabled = app(FeatureFlagRepositoryInterface::class)->isEnabled('inventory-sdk-cache');
+        $isCacheInvalidationEnabled = self::isCacheInvalidationEnabled();
 
         self::disableCacheInvalidation();
 
