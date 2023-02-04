@@ -153,14 +153,8 @@ class InventoryServiceProvider extends ServiceProvider
         $this->app->bind(InventoryResponseCacheInterface::class, function (): InventoryResponseRedisCache {
             return new InventoryResponseRedisCache(
                 $this->app->make(ResponseCacheKeyInterface::class),
-                new RedisResponseCache(
-                    Redis::connection('sdk-search-cache')->client(),
-                    $this->app->make(FeatureFlagRepositoryInterface::class)
-                ),
-                new RedisResponseCache(
-                    Redis::connection('sdk-single-cache')->client(),
-                    $this->app->make(FeatureFlagRepositoryInterface::class)
-                )
+                new RedisResponseCache(Redis::connection('sdk-search-cache')->client()),
+                new RedisResponseCache(Redis::connection('sdk-single-cache')->client())
             );
         });
 

@@ -3,7 +3,6 @@
 namespace App\Services\ElasticSearch\Cache;
 
 use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
-use App\Repositories\FeatureFlagRepositoryInterface;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use \Redis as PhpRedis;
 
@@ -20,13 +19,9 @@ class RedisResponseCache implements ResponseCacheInterface
     /** @var PhpRedis */
     private $client;
 
-    /** @var FeatureFlagRepositoryInterface */
-    private $featureFlagRepository;
-
-    public function __construct(PhpRedis $client, FeatureFlagRepositoryInterface $featureFlagRepository)
+    public function __construct(PhpRedis $client)
     {
         $this->client = $client;
-        $this->featureFlagRepository = $featureFlagRepository;
     }
 
     public function set(string $key, $value): void
@@ -37,7 +32,7 @@ class RedisResponseCache implements ResponseCacheInterface
         // it stores a new key-value using an exact key name which is known by the cache client (DW)
         $this->client->set(
             $this->extractExactKey($key),
-            $this->featureFlagRepository->isEnabled('inventory-sdk-cache-compression') ? gzencode($value, config('elastic.scout_driver.cache.compression_level', 9)) : $value,
+            gzencode($value, config('elastic.scout_driver.cache.compression_level', 9)),
             config('elastic.scout_driver.cache.ttl', 86400)
         );
     }
