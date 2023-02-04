@@ -228,7 +228,7 @@ class InventoryService implements InventoryServiceInterface
     public function create(array $params): Inventory
     {
         try {
-            // next closure is aimed to avoid to dispatch duplicate jobs for elastic indexation and cache invalidation
+            // Next closure is aimed to avoid to dispatch duplicate jobs for elastic indexation and cache invalidation
             // with minor refactor
             $isCacheInvalidationEnabled = Inventory::isCacheInvalidationEnabled();
             $isSearchSyncingEnabled = Inventory::isSearchSyncingEnabled();
@@ -756,13 +756,13 @@ class InventoryService implements InventoryServiceInterface
                     $randomFilename = md5($localNewImagePath);
                     $newFilename = $this->imageService->uploadToS3($localNewImagePath, $randomFilename, $overlayParams['dealer_id']);
                     unlink($localNewImagePath);
-    
+
                     // update image to database
                     $this->imageTableService->saveOverlay($imageObj, $newFilename);
                 } else {
 
                     Log::channel('inventory-overlays')
-                        ->error('Failed Adding Overlays, Invalid OverlayParams', 
+                        ->error('Failed Adding Overlays, Invalid OverlayParams',
                             array_merge($overlayParams, ['image_id' => $imageObj->image_id]));
                 }
 
