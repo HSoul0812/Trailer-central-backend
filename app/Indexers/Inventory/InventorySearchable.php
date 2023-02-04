@@ -4,9 +4,11 @@ namespace App\Indexers\Inventory;
 
 use App\Indexers\Searchable;
 use App\Indexers\WithIndexConfigurator;
+use App\Models\Inventory\Inventory;
 use App\Observers\Inventory\InventoryObserver;
 use App\Repositories\FeatureFlagRepositoryInterface;
 use Exception;
+use Laravel\Scout\ModelObserver;
 
 /**
  * @method \Illuminate\Database\Eloquent\Builder query
@@ -14,6 +16,15 @@ use Exception;
 trait InventorySearchable
 {
     use Searchable, WithIndexConfigurator;
+
+    public static function bootInventorySearchable(): void
+    {
+        $repo = app(FeatureFlagRepositoryInterface::class);
+
+        if ($repo->isEnabled('inventory-sdk-cache')) {
+            Inventory::enableCacheInvalidation();
+        }
+    }
 
     public function searchableAs(): string
     {
@@ -98,7 +109,7 @@ trait InventorySearchable
      */
     public static function withoutCacheInvalidationAndSearchSyncing(callable $callback)
     {
-        $isCacheInvalidationEnabled = app(FeatureFlagRepositoryInterface::class)->isEnabled('inventory-sdk-cache');
+        $isCacheInvalidationEnabled = self::isCacheInvalidationEnabled();
 
         self::disableCacheInvalidationAndSearchSyncing();
 
@@ -133,7 +144,7 @@ trait InventorySearchable
      */
     public static function withoutCacheInvalidation(callable $callback)
     {
-        $isCacheInvalidationEnabled = app(FeatureFlagRepositoryInterface::class)->isEnabled('inventory-sdk-cache');
+        $isCacheInvalidationEnabled = self::isCacheInvalidationEnabled();
 
         self::disableCacheInvalidation();
 
@@ -159,5 +170,10 @@ trait InventorySearchable
     public static function isCacheInvalidationEnabled(): bool
     {
         return InventoryObserver::isCacheInvalidationEnabled();
+    }
+
+    public static function isSearchSyncingEnabled(): bool
+    {
+        return !ModelObserver::syncingDisabledFor(__CLASS__);
     }
 }

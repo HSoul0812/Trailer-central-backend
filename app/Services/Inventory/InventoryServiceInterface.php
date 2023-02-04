@@ -3,6 +3,7 @@
 namespace App\Services\Inventory;
 
 use App\Models\Inventory\Inventory;
+use App\Models\User\DealerLocation;
 
 /**
  * Interface InventoryServiceInterface
@@ -76,5 +77,7 @@ interface InventoryServiceInterface
      */
     public function convertMarkdown(string $markDown): string;
 
-	public function invalidateCacheAndReindexByDealerIds(array $dealer_ids): void;
+    public function invalidateCacheAndReindexByDealerIds(array $dealerIds): void;
+
+    public function invalidateCacheAndReindexByDealerLocation(DealerLocation $dealerLocation): void;
 }

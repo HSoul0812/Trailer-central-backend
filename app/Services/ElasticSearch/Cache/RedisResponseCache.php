@@ -29,11 +29,6 @@ class RedisResponseCache implements ResponseCacheInterface
         $this->featureFlagRepository = $featureFlagRepository;
     }
 
-    /**
-     * @param string $key
-     * @param mixed $value
-     * @return void
-     */
     public function set(string $key, $value): void
     {
         // it stores a new empty field within a hashmap using long key name
@@ -42,13 +37,13 @@ class RedisResponseCache implements ResponseCacheInterface
         // it stores a new key-value using an exact key name which is known by the cache client (DW)
         $this->client->set(
             $this->extractExactKey($key),
-            $this->featureFlagRepository->get('inventory-sdk-cache-compression') ? gzencode($value, config('elastic.scout_driver.cache.compression_level', 9)) : $value,
+            $this->featureFlagRepository->isEnabled('inventory-sdk-cache-compression') ? gzencode($value, config('elastic.scout_driver.cache.compression_level', 9)) : $value,
             config('elastic.scout_driver.cache.ttl', 86400)
         );
     }
 
     /**
-     * Invalidates all keys which match with key pattern list in asynchronous way.
+     * Dispatch all jobs given the key patterns.
      *
      * @param string ...$keyPatterns a list of key patterns
      * @return void
@@ -61,8 +56,8 @@ class RedisResponseCache implements ResponseCacheInterface
     /**
      * Invalidates all keys which match with key pattern list in synchronous way.
      *
-     * This method perform the key list iteration in Laravel side because it will not block the Redis server,
-     * we could have done this at Lua side, but sadly it blocks server making it unresponsive
+     * This method perform the key list iteration (hash scan) in Laravel side because it will not block the Redis server,
+     * we could have done this at Lua side, but sadly it blocks server becoming unresponsive
      *
      * @param string ...$keyPatterns a list of key patterns
      * @return void
@@ -100,7 +95,7 @@ class RedisResponseCache implements ResponseCacheInterface
         );
     }
 
-    public function hScanAndUnlink(string $hashKey, string $pattern): void
+    private function hScanAndUnlink(string $hashKey, string $pattern): void
     {
         /** @var null|int $cursor */
         $cursor = null;
@@ -132,6 +127,6 @@ class RedisResponseCache implements ResponseCacheInterface
     {
         $parts = explode('.', $key);
 
-        return $parts[1] === 'search' ? self::SEARCH_HASHMAP_KEY : self::SINGLE_HASHMAP_KEY;
+        return count($parts) > 1 && $parts[1] === 'search' ? self::SEARCH_HASHMAP_KEY : self::SINGLE_HASHMAP_KEY;
     }
 }
