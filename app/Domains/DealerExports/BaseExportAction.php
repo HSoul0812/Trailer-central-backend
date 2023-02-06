@@ -6,6 +6,7 @@ use Illuminate\Filesystem\FilesystemAdapter;
 use League\Csv\Writer;
 use App\Models\User\User;
 use Storage;
+use Exception;
 
 abstract class BaseExportAction
 {
@@ -114,5 +115,28 @@ abstract class BaseExportAction
             ->writeResults()
             ->generateFile()
             ->uploadFile();
+    }
+
+    public function transformRow($row)
+    {
+        $headers = array_keys($this->headers);
+
+        return array_map(function (string $header) use ($row) {
+            return object_get($row, $header);
+        }, $headers);
+    }
+
+    protected function writeResults()
+    {
+        $this->writeData([$this, 'transformRow']);
+
+        return $this;
+    }
+
+    protected function fetchResults()
+    {
+        $this->rows = $this->getQuery()->get();
+
+        return $this;
     }
 }

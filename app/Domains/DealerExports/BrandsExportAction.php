@@ -4,7 +4,6 @@ namespace App\Domains\DealerExports;
 
 use App\Domains\DealerExports\BaseExportAction;
 use App\Contracts\DealerExports\EntityActionExportable;
-use App\Models\Parts\Brand;
 use App\Models\Inventory\Inventory;
 
 class BrandsExportAction extends BaseExportAction implements EntityActionExportable
@@ -14,7 +13,6 @@ class BrandsExportAction extends BaseExportAction implements EntityActionExporta
     public function getQuery()
     {
         return Inventory::query()
-            // ->where('inventory.dealer_id', $this->dealer->dealer_id)
             ->selectRaw('DISTINCT brand.id, brand.name as brand, brand.label as label, brand.website as website, brand.address as address, brand.phone as phone, mfgSetting.vendor_id as vendor_id, vendor.name AS vendor_name, mfgSetting.customer_id as customer_id, customer.display_name AS customer_name')
             ->leftJoin('inventory_mfg as brand', function ($query) {
                 $query->on('inventory.manufacturer', '=', 'brand.name')->where('inventory.dealer_id', $this->dealer->dealer_id);
@@ -30,29 +28,6 @@ class BrandsExportAction extends BaseExportAction implements EntityActionExporta
             })
             ->whereRaw('LENGTH(brand.label) > 0')
             ->orderBy('brand.label', 'ASC');
-    }
-
-    protected function fetchResults()
-    {
-        $this->rows = $this->getQuery()->get();
-
-        return $this;
-    }
-
-    public function transformRow($row)
-    {
-        $headers = array_keys($this->headers);
-
-        return array_map(function (string $header) use ($row) {
-            return object_get($row, $header);
-        }, $headers);
-    }
-
-    protected function writeResults()
-    {
-        $this->writeData([$this, 'transformRow']);
-
-        return $this;
     }
 
     public function execute(): void
