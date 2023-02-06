@@ -2,6 +2,7 @@
 
 namespace App\Nova\Actions\Exports;
 
+use App\Models\Integration\Collector\Collector;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -12,15 +13,15 @@ use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\LaravelNovaExcel\Actions\DownloadExcel;
 
 /**
- * Class FieldMappingExport
+ * Class CollectorSpecificationExport
  * @package App\Nova\Actions\Exports
  */
-class FieldMappingExport extends DownloadExcel implements WithHeadings, WithMapping, WithStyles, WithEvents
+class CollectorSpecificationExport extends DownloadExcel implements WithHeadings, WithMapping, WithStyles, WithEvents
 {
     /**
      * @var string
      */
-    public $name = "Export Field Mapping Export";
+    public $name = "Export Collector Specifications";
 
     /**
      * @return array
@@ -28,10 +29,11 @@ class FieldMappingExport extends DownloadExcel implements WithHeadings, WithMapp
     public function headings(): array
     {
         return [
-            'Dealer ID',
-            'Their Field',
-            'Our Field',
-            'Type'
+            'ID',
+            'Collector ID',
+            'Logical Operator',
+            'Created At',
+            'Updated At'
         ];
     }
 
@@ -43,12 +45,14 @@ class FieldMappingExport extends DownloadExcel implements WithHeadings, WithMapp
     public function map($mapping): array
     {
         return [
-            $mapping->dealer_id,
-            $mapping->map_from,
-            $mapping->map_to,
-            $mapping->type
+            $mapping->id,
+            $mapping->collector_id,
+            $mapping->logical_operator,
+            $mapping->created_at,
+            $mapping->updated_at
         ];
     }
+
 
     /**
      * @param Worksheet $sheet
