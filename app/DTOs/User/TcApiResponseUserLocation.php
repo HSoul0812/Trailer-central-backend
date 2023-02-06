@@ -28,7 +28,7 @@ class TcApiResponseUserLocation
         $obj->county = $data['county'];
         $obj->region = $data['region'];
         $obj->country = $data['country'];
-        $obj->postalCode = $data['postalCode'];
+        $obj->postalCode = $data['postalcode'];
         $obj->phone = $data['phone'];
         $obj->is_default = $data['is_default'];
 

@@ -39,7 +39,8 @@ class UsersService implements UsersServiceInterface
 
     public function createLocation(array $location): TcApiResponseUserLocation {
         if(!$accessToken = request()->header('access-token')) {
-            $accessToken = $this->authTokenRepository->get(['user_id' => $location['dealer_id']]);
+            $authToken = $this->authTokenRepository->get(['user_id' => $location['dealer_id']]);
+            $accessToken = $authToken->access_token;
         }
 
         $responseContent = $this->handleHttpRequest(
@@ -52,12 +53,13 @@ class UsersService implements UsersServiceInterface
                 ]
             ]
         );
-        return TcApiResponseUserLocation::fromData($responseContent);
+        return TcApiResponseUserLocation::fromData($responseContent['data']);
     }
 
     public function updateLocation(int $locationId, array $location): TcApiResponseUserLocation {
         if(!$accessToken = request()->header('access-token')) {
-            $accessToken = $this->authTokenRepository->get(['user_id' => $location['dealer_id']]);
+            $authToken = $this->authTokenRepository->get(['user_id' => $location['dealer_id']]);
+            $accessToken = $authToken->access_token;
         }
 
         $responseContent = $this->handleHttpRequest(
@@ -70,7 +72,7 @@ class UsersService implements UsersServiceInterface
                 ]
             ]
         );
-        return TcApiResponseUserLocation::fromData($responseContent);
+        return TcApiResponseUserLocation::fromData($responseContent['data']);
     }
 
     private function handleHttpRequest(string $method, string $url, array $options): array

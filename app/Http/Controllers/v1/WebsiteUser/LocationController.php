@@ -9,6 +9,7 @@ use App\Http\Requests\CreateRequestInterface;
 use App\Http\Requests\IndexRequestInterface;
 use App\Http\Requests\UpdateRequestInterface;
 use App\Http\Requests\WebsiteUser\CreateLocationRequest;
+use App\Repositories\WebsiteUser\WebsiteUserRepositoryInterface;
 use App\Services\Integrations\TrailerCentral\Api\Users\UsersServiceInterface;
 use App\Transformers\Location\TcApiResponseUserLocationTransformer;
 
@@ -17,7 +18,8 @@ class LocationController extends AbstractRestfulController
 
     public function __construct(
         private UsersServiceInterface $tcUserService,
-        private TcApiResponseUserLocationTransformer $transformer
+        private TcApiResponseUserLocationTransformer $transformer,
+        private WebsiteUserRepositoryInterface $userRepository
     )
     {
         parent::__construct();
@@ -32,11 +34,17 @@ class LocationController extends AbstractRestfulController
     {
         if($request->validate()) {
             $user = auth('api')->user();
+            if($user->tc_user_location_id) {
+                $this->response->error("Location already exist", 400);
+            }
             $attributes = array_merge($request->all(), [
                 'dealer_id' => $user->tc_user_id
             ]);
 
             $tcLocation = $this->tcUserService->createLocation($attributes);
+            $this->userRepository->update($user->id, [
+               'tc_user_location_id'  => $tcLocation->id
+            ]);
             return $this->response->item($tcLocation, $this->transformer);
         }
 
