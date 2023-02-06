@@ -28,7 +28,7 @@ $api->version('v1', function ($api) {
         $api->get('/reset-password', [PasswordResetController::class, 'showReset'])
             ->name('password.reset');
         $api->post('/reset-password', [PasswordResetController::class, 'resetPassword']);
-        $api->put('/location', [LocationController::class, 'create']);
+        $api->post('/location', [LocationController::class, 'create']);
         /*
         |--------------------------------------------------------------------------
         | Email verification
