@@ -9,16 +9,20 @@ use App\Domains\DealerExports\BackOffice\Settings\VendorsExportAction;
 use App\Domains\DealerExports\BackOffice\Settings\BrandsExportAction;
 use App\Domains\DealerExports\BackOffice\Settings\EmployeesExportAction;
 use App\Domains\DealerExports\BackOffice\Settings\ExpensesExportAction;
+use App\Domains\DealerExports\BackOffice\FinancingCompaniesExportAction;
 
 class ExportManagerAction
 {
     protected $dealer;
 
     protected $exportActions = [
+        // BackOffice -> Settings
         VendorsExportAction::class,
         BrandsExportAction::class,
         EmployeesExportAction::class,
         ExpensesExportAction::class,
+        // BackOffice -> Financial Companies
+        FinancingCompaniesExportAction::class,
     ];
 
     public function __construct(User $dealer)
