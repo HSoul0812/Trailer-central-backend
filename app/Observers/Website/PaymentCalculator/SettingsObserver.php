@@ -6,7 +6,6 @@ use App\Jobs\Website\ReIndexInventoriesByDealersJob;
 use App\Models\Inventory\Inventory;
 use App\Models\Website\PaymentCalculator\Settings;
 use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
-use App\Services\ElasticSearch\Cache\ResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
 
 class SettingsObserver
@@ -17,24 +16,14 @@ class SettingsObserver
     private $cacheKey;
 
     /**
-     * @var ResponseCacheInterface
+     * @var InventoryResponseCacheInterface
      */
-    private $singleResponseCache;
+    private $responseCache;
 
-    /**
-     * @var ResponseCacheInterface
-     */
-    private $searchResponseCache;
-
-    /**
-     * @param ResponseCacheKeyInterface $cacheKey
-     * @param InventoryResponseCacheInterface $responseCache
-     */
     public function __construct(ResponseCacheKeyInterface $cacheKey, InventoryResponseCacheInterface $responseCache)
     {
         $this->cacheKey = $cacheKey;
-        $this->singleResponseCache = $responseCache->single();
-        $this->searchResponseCache = $responseCache->search();
+        $this->responseCache = $responseCache;
     }
 
     /**
@@ -69,14 +58,17 @@ class SettingsObserver
     {
         $settings->load('website');
 
-        if (Inventory::isCacheInvalidationEnabled()) {
-            $website = $settings->website;
-            $this->searchResponseCache->forget($this->cacheKey->deleteByDealer($website->dealer_id));
-            $this->singleResponseCache->forget($this->cacheKey->deleteSingleByDealer($website->dealer_id));
-        }
-
         if (($dealerId = $settings->website->dealer_id)) {
             dispatch(new ReIndexInventoriesByDealersJob([$dealerId]));
+        }
+
+        if (Inventory::isCacheInvalidationEnabled()) {
+            $website = $settings->website;
+
+            $this->responseCache->forget([
+                $this->cacheKey->deleteByDealer($website->dealer_id),
+                $this->cacheKey->deleteSingleByDealer($website->dealer_id)
+            ]);
         }
     }
 
