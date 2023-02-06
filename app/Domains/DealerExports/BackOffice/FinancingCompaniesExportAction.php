@@ -4,8 +4,6 @@ namespace App\Domains\DealerExports\BackOffice;
 
 use App\Domains\DealerExports\BaseExportAction;
 use App\Contracts\DealerExports\EntityActionExportable;
-use App\Domains\DealerExports\ExportStartAction;
-use App\Domains\DealerExports\ExportFinishedAction;
 use App\Models\CRM\Dms\FinancingCompany;
 
 class FinancingCompaniesExportAction extends BaseExportAction implements EntityActionExportable
@@ -19,9 +17,7 @@ class FinancingCompaniesExportAction extends BaseExportAction implements EntityA
 
     public function execute(): void
     {
-        (new ExportStartAction($this->dealer, self::ENTITY_TYPE))->execute();
-
-        $this->setFilename('financing_companies')
+        $this->setEntity('financing_companies')
             ->setHeaders([
                 'first_name' => 'First Name',
                 'last_name' => 'Last Name',
@@ -43,11 +39,5 @@ class FinancingCompaniesExportAction extends BaseExportAction implements EntityA
                 'fin' => 'FIN',
             ])
             ->export();
-
-        (new ExportFinishedAction(
-            $this->dealer,
-            self::ENTITY_TYPE,
-            $this->storage->url($this->filename)
-        ))->execute();
     }
 }

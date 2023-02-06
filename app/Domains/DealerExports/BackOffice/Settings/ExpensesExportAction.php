@@ -4,9 +4,6 @@ namespace App\Domains\DealerExports\BackOffice\Settings;
 
 use App\Domains\DealerExports\BaseExportAction;
 use App\Contracts\DealerExports\EntityActionExportable;
-use App\Models\CRM\User\Employee;
-use App\Domains\DealerExports\ExportStartAction;
-use App\Domains\DealerExports\ExportFinishedAction;
 use App\Models\CRM\Dms\Quickbooks\Expense;
 
 class ExpensesExportAction extends BaseExportAction implements EntityActionExportable
@@ -32,9 +29,7 @@ class ExpensesExportAction extends BaseExportAction implements EntityActionExpor
 
     public function execute(): void
     {
-        (new ExportStartAction($this->dealer, self::ENTITY_TYPE))->execute();
-
-        $this->setFilename(self::ENTITY_TYPE)
+        $this->setEntity(self::ENTITY_TYPE)
             ->setHeaders([
                 'account' => 'Account',
                 'doc_num' => 'Doc Num',
@@ -42,11 +37,5 @@ class ExpensesExportAction extends BaseExportAction implements EntityActionExpor
                 'payment_method' => 'Payment Method',
             ])
             ->export();
-
-        (new ExportFinishedAction(
-            $this->dealer,
-            self::ENTITY_TYPE,
-            $this->storage->url($this->filename)
-        ))->execute();
     }
 }

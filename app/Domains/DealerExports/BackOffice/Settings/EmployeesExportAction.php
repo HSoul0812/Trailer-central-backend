@@ -5,8 +5,6 @@ namespace App\Domains\DealerExports\BackOffice\Settings;
 use App\Domains\DealerExports\BaseExportAction;
 use App\Contracts\DealerExports\EntityActionExportable;
 use App\Models\CRM\User\Employee;
-use App\Domains\DealerExports\ExportStartAction;
-use App\Domains\DealerExports\ExportFinishedAction;
 
 class EmployeesExportAction extends BaseExportAction implements EntityActionExportable
 {
@@ -23,9 +21,7 @@ class EmployeesExportAction extends BaseExportAction implements EntityActionExpo
 
     public function execute(): void
     {
-        (new ExportStartAction($this->dealer, self::ENTITY_TYPE))->execute();
-
-        $this->setFilename(self::ENTITY_TYPE)
+        $this->setEntity(self::ENTITY_TYPE)
             ->setHeaders([
                 'first_name' => 'First Name',
                 'last_name' => 'Last Nmae',
@@ -43,11 +39,5 @@ class EmployeesExportAction extends BaseExportAction implements EntityActionExpo
                 'service_user' => 'Service User',
             ])
             ->export();
-
-        (new ExportFinishedAction(
-            $this->dealer,
-            self::ENTITY_TYPE,
-            $this->storage->url($this->filename)
-        ))->execute();
     }
 }

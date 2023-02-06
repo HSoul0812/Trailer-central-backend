@@ -5,8 +5,6 @@ namespace App\Domains\DealerExports\BackOffice\Settings;
 use App\Domains\DealerExports\BaseExportAction;
 use App\Contracts\DealerExports\EntityActionExportable;
 use App\Models\Parts\Vendor;
-use App\Domains\DealerExports\ExportStartAction;
-use App\Domains\DealerExports\ExportFinishedAction;
 
 class VendorsExportAction extends BaseExportAction implements EntityActionExportable
 {
@@ -19,9 +17,7 @@ class VendorsExportAction extends BaseExportAction implements EntityActionExport
 
     public function execute(): void
     {
-        (new ExportStartAction($this->dealer, self::ENTITY_TYPE))->execute();
-
-        $this->setFilename('vendors')
+        $this->setEntity(self::ENTITY_TYPE)
             ->setHeaders([
                 'name' => 'Name',
                 'business_email' => 'Business Email',
@@ -36,11 +32,5 @@ class VendorsExportAction extends BaseExportAction implements EntityActionExport
                 'country' => 'Country',
             ])
             ->export();
-
-        (new ExportFinishedAction(
-            $this->dealer,
-            self::ENTITY_TYPE,
-            $this->storage->url($this->filename)
-        ))->execute();
     }
 }

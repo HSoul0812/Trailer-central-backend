@@ -5,8 +5,6 @@ namespace App\Domains\DealerExports\BackOffice\Settings;
 use App\Domains\DealerExports\BaseExportAction;
 use App\Contracts\DealerExports\EntityActionExportable;
 use App\Models\Inventory\Inventory;
-use App\Domains\DealerExports\ExportStartAction;
-use App\Domains\DealerExports\ExportFinishedAction;
 
 class BrandsExportAction extends BaseExportAction implements EntityActionExportable
 {
@@ -34,9 +32,7 @@ class BrandsExportAction extends BaseExportAction implements EntityActionExporta
 
     public function execute(): void
     {
-        (new ExportStartAction($this->dealer, self::ENTITY_TYPE))->execute();
-
-        $this->setFilename('brands')
+        $this->setEntity(self::ENTITY_TYPE)
             ->setHeaders([
                 'brand' => 'Brand',
                 'label' => 'Label',
@@ -49,11 +45,5 @@ class BrandsExportAction extends BaseExportAction implements EntityActionExporta
                 'vendor_name' => 'Vendor Name',
             ])
             ->export();
-
-        (new ExportFinishedAction(
-            $this->dealer,
-            self::ENTITY_TYPE,
-            $this->storage->url($this->filename)
-        ))->execute();
     }
 }

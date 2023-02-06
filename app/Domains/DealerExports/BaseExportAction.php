@@ -31,6 +31,9 @@ abstract class BaseExportAction
     protected $filename;
 
     /** @var string */
+    protected $entity;
+
+    /** @var string */
     protected $directory;
 
     /** @var Collection<int, object> */
@@ -55,9 +58,16 @@ abstract class BaseExportAction
         return $this;
     }
 
-    protected function setFilename($entity)
+    protected function setEntity(string $entity)
     {
-        $this->filename = str_replace(['{dealer}', '{entity}'], [$this->dealer->dealer_id, $entity], self::S3_EXPORT_PATH);
+        $this->entity = $entity;
+
+        return $this;
+    }
+
+    protected function setFilename()
+    {
+        $this->filename = str_replace(['{dealer}', '{entity}'], [$this->dealer->dealer_id, $this->entity], self::S3_EXPORT_PATH);
 
         $this->direcotry = str_replace(['{dealer}'], [$this->dealer->dealer_id], self::EXPORT_FILE_DIRECTORY);
 
@@ -109,12 +119,17 @@ abstract class BaseExportAction
 
     public function export()
     {
-        $this->initiateWriter()
+        (new ExportStartAction($this->dealer, $this->entity))->execute();
+
+        $this->setFileName()
+            ->initiateWriter()
             ->writeHeader()
             ->fetchResults()
             ->writeResults()
             ->generateFile()
             ->uploadFile();
+
+        (new ExportFinishedAction($this->dealer, $this->entity, $this->storage->url($this->filename)))->execute();
     }
 
     public function transformRow($row)
