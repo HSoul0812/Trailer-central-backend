@@ -5,20 +5,19 @@ namespace App\Services\Inventory;
 use App\Repositories\Inventory\ImageRepositoryInterface;
 use App\Exceptions\File\MissingS3FileException;
 use Illuminate\Support\Facades\Storage;
-use App\Helpers\ImageHelper;
 use App\Traits\S3\S3Helper;
 use App\Models\Inventory\Image;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use App\Jobs\Inventory\GenerateOverlayImageJob;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Models\User\User;
-use App\Repositories\Inventory\InventoryRepository;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Models\Inventory\Inventory;
 
-class ImageService implements ImageServiceInterface 
+class ImageService implements ImageServiceInterface
 {
     use S3Helper, DispatchesJobs;
+
     /**
      * @var ImageRepositoryInterface
      */
@@ -34,11 +33,8 @@ class ImageService implements ImageServiceInterface
      */
     private $inventoryRepository;
 
-    /**
-     * @param ImageRepositoryInterface $imageRepository
-     */
     public function __construct(
-        ImageRepositoryInterface $imageRepository, 
+        ImageRepositoryInterface $imageRepository,
         UserRepositoryInterface $userRepository,
         InventoryRepositoryInterface $inventoryRepository
     ) {
@@ -101,7 +97,7 @@ class ImageService implements ImageServiceInterface
 
     /**
      * Get Hash
-     * 
+     *
      * @param string $filename
      * @return string
      */
@@ -119,6 +115,7 @@ class ImageService implements ImageServiceInterface
     public function updateOverlaySettings(array $params): User
     {
         $wasChanged = $this->userRepository->updateOverlaySettings($params['dealer_id'], $params);
+        $dealer = $this->userRepository->get(['dealer_id' => $params['dealer_id']]);
 
         // Generate Overlay Inventory Images if necessary
         if ($wasChanged) {
@@ -134,10 +131,11 @@ class ImageService implements ImageServiceInterface
                 foreach ($inventories as $inventory) {
                     $this->dispatch((new GenerateOverlayImageJob($inventory->inventory_id))->onQueue('overlay-images'));
                 }
+
+                // we can not inject `InventoryServiceInterface` into constructor to avoid cyclic dependency
+                app(InventoryServiceInterface::class)->invalidateCacheAndReindexByDealerIds([$dealer->dealer_id]);
             }
         }
-
-        $dealer = $this->userRepository->get(['dealer_id' => $params['dealer_id']]);
 
         return $dealer;
     }
