@@ -5,6 +5,7 @@ namespace App\Domains\DealerExports;
 use App\Domains\DealerExports\BaseExportAction;
 use App\Contracts\DealerExports\EntityActionExportable;
 use App\Models\Parts\Brand;
+use App\Models\Inventory\Inventory;
 
 class BrandsExportAction extends BaseExportAction implements EntityActionExportable
 {
@@ -12,7 +13,23 @@ class BrandsExportAction extends BaseExportAction implements EntityActionExporta
 
     public function getQuery()
     {
-        return Brand::query()->where('dealer_id', $this->dealer->dealer_id)->get();
+        return Inventory::query()
+            // ->where('inventory.dealer_id', $this->dealer->dealer_id)
+            ->selectRaw('DISTINCT brand.id, brand.name as brand, brand.label as label, brand.website as website, brand.address as address, brand.phone as phone, mfgSetting.vendor_id as vendor_id, vendor.name AS vendor_name, mfgSetting.customer_id as customer_id, customer.display_name AS customer_name')
+            ->leftJoin('inventory_mfg as brand', function ($query) {
+                $query->on('inventory.manufacturer', '=', 'brand.name')->where('inventory.dealer_id', $this->dealer->dealer_id);
+            })
+            ->leftJoin('dealer_mfg_setting as mfgSetting', function ($query) {
+                $query->on('mfgSetting.dealer_id', '=', 'inventory.dealer_id')->on('mfgSetting.inventory_mfg_id', '=', 'brand.id');
+            })
+            ->leftJoin('qb_vendors as vendor', function ($query) {
+                $query->on('mfgSetting.vendor_id', '=', 'vendor.id');
+            })
+            ->leftJoin('dms_customer as customer', function ($query) {
+                $query->on('mfgSetting.customer_id', '=', 'customer.id');
+            })
+            ->whereRaw('LENGTH(brand.label) > 0')
+            ->orderBy('brand.label', 'ASC');
     }
 
     protected function fetchResults()
@@ -38,8 +55,10 @@ class BrandsExportAction extends BaseExportAction implements EntityActionExporta
         return $this;
     }
 
-    public function execute(): string
+    public function execute(): void
     {
+        (new ExportStartAction($this->dealer, self::ENTITY_TYPE))->execute();
+
         $this->setFilename('brands')
             ->setHeaders([
                 'brand' => 'Brand',
@@ -52,13 +71,12 @@ class BrandsExportAction extends BaseExportAction implements EntityActionExporta
                 'vendor_id' => 'Vendor Identifier',
                 'vendor_name' => 'Vendor Name',
             ])
-            ->initiateWriter()
-            ->writeHeader()
-            ->fetchResults()
-            ->writeResults()
-            ->generateFile()
-            ->uploadFile();
+            ->export();
 
-        return $this->storage->url($this->filename);
+        (new ExportFinishedAction(
+            $this->dealer,
+            self::ENTITY_TYPE,
+            $this->storage->url($this->filename)
+        ))->execute();
     }
 }

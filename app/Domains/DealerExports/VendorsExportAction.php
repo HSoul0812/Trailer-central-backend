@@ -58,12 +58,7 @@ class VendorsExportAction extends BaseExportAction implements EntityActionExport
                 'zip_code' => 'Zip Code',
                 'country' => 'Country',
             ])
-            ->initiateWriter()
-            ->writeHeader()
-            ->fetchResults()
-            ->writeResults()
-            ->generateFile()
-            ->uploadFile();
+            ->export();
 
         (new ExportFinishedAction(
             $this->dealer,

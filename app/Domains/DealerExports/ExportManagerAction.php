@@ -12,7 +12,7 @@ class ExportManagerAction
 
     protected $exportActions = [
         VendorsExportAction::class,
-        // BrandsExportAction::class,
+        BrandsExportAction::class,
     ];
 
     public function __construct(User $dealer)
