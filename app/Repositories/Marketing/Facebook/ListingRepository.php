@@ -150,20 +150,29 @@ class ListingRepository implements ListingRepositoryInterface {
     {
         $inventoryTableName = Inventory::getTableName();
         $listingsTableName = Listings::getTableName();
+        $fbMinPrice = INVENTORY::MIN_PRICE_FOR_FACEBOOK;
+        $minDescriptionLength = INVENTORY::MIN_DESCRIPTION_LENGTH_FOR_FACEBOOK;
 
         // Initialize Inventory Query
         $query = Inventory::select(Inventory::getTableName() . '.*')
             ->where('dealer_id', '=', $integration->dealer_id)
             ->where('show_on_website', 1)
-            ->where("{$inventoryTableName}.year", '<', '2024') //TODO: remove when Facebook allows this
-            ->where("{$inventoryTableName}.price", '>', INVENTORY::MIN_PRICE_FOR_FACEBOOK)
+            ->where("{$inventoryTableName}.year", '<', '2025')
+            ->where(function ($query) use ($inventoryTableName, $fbMinPrice) {
+                $query->whereRaw("IFNULL($inventoryTableName.sales_price, 0) >= $fbMinPrice")
+                    ->orWhereRaw("($inventoryTableName.use_website_price AND IFNULL($inventoryTableName.website_price, 0) >= $fbMinPrice)")
+                    ->orWhereRaw("IFNULL($inventoryTableName.price, 0) >= $fbMinPrice");
+            })
             ->where("{$inventoryTableName}.entity_type_id", '<>', EntityType::ENTITY_TYPE_BUILDING)
             ->where("{$inventoryTableName}.entity_type_id", '<>', EntityType::ENTITY_TYPE_VEHICLE)
             ->whereRaw("IFNULL({$inventoryTableName}.manufacturer, '') <> ''")
             ->whereRaw("IFNULL({$inventoryTableName}.model, '') <> ''")
             ->whereRaw("IFNULL(is_archived, 0) = 0")
             ->whereRaw("IFNULL({$inventoryTableName}.status, -1) NOT IN (2,6)")
-            ->whereRaw("LENGTH({$inventoryTableName}.description) >= " . INVENTORY::MIN_DESCRIPTION_LENGTH_FOR_FACEBOOK)
+            ->where(function ($query) use ($inventoryTableName, $minDescriptionLength) {
+                $query->whereRaw("LENGTH({$inventoryTableName}.description) >= " . $minDescriptionLength)
+                    ->orWhereRaw("LENGTH({$inventoryTableName}.description_html) >= " . (2 * $minDescriptionLength));
+            })
             ->has('orderedImages');
 
         // Append Join
@@ -204,7 +213,7 @@ class ListingRepository implements ListingRepositoryInterface {
         // Set Sort By
         $query = $query->orderBy("{$inventoryTableName}.created_at", "asc");
         $query = $query->limit($params['per_page'] ?? config('marketing.fb.settings.limit.listings'));
-
+        
         // Return Paginated Inventory
         return $query->get();
     }

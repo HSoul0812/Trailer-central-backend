@@ -204,6 +204,7 @@ class InventoryTransformer extends TransformerAbstract
              'hidden_price' => $inventory->hidden_price,
              'monthly_payment' => $inventory->monthly_payment,
              'show_on_website' => $inventory->show_on_website,
+             'tt_payment_expiration_date' => $inventory->tt_payment_expiration_date,
              'overlay_enabled' => $inventory->overlay_enabled,
              'cost_of_ros' => $inventory->cost_of_ros,
              'quote_url' => optional($inventory->user)->getCrmLoginUrl(

@@ -8,9 +8,13 @@ use App\Contracts\LoggerServiceInterface;
 use App\Models\CRM\Dms\Quickbooks\QuickbookApproval;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
+use App\Services\Inventory\InventoryServiceInterface;
+use Illuminate\Foundation\Bus\DispatchesJobs;
 
 class DealerLocationService implements DealerLocationServiceInterface
 {
+    use DispatchesJobs;
+
     /** @var LoggerServiceInterface */
     private $logger;
 
@@ -20,13 +24,18 @@ class DealerLocationService implements DealerLocationServiceInterface
     /** @var QuickbookApprovalRepositoryInterface */
     private $approvalsRepo;
 
+    /** @var InventoryServiceInterface */
+    private $inventoryService;
+
     public function __construct(DealerLocationRepositoryInterface $locationsRepo,
                                 QuickbookApprovalRepositoryInterface $approvalsRepo,
-                                LoggerServiceInterface $logger)
+                                LoggerServiceInterface $logger,
+                                InventoryServiceInterface $inventoryService)
     {
         $this->logger = $logger;
         $this->locationsRepo = $locationsRepo;
         $this->approvalsRepo = $approvalsRepo;
+        $this->inventoryService = $inventoryService;
     }
 
     public function update(int $dealerLocationId): ?QuickbookApproval
@@ -67,5 +76,18 @@ class DealerLocationService implements DealerLocationServiceInterface
         }
 
         return null;
+    }
+
+    /**
+     * Reindex the inventory by dealer location, then it will invalidate cache by dealer id
+     *
+     * @param  int  $dealerLocationId
+     * @return void
+     */
+    public function reindexAndInvalidateCacheInventory(int $dealerLocationId): void
+    {
+        $location = $this->locationsRepo->get(['dealer_location_id' => $dealerLocationId]);
+
+        $this->inventoryService->invalidateCacheAndReindexByDealerLocation($location);
     }
 }

@@ -140,38 +140,34 @@ class CampaignRepositoryTest extends TestCase
      *
      * @group CRM
      * @typeOfTest IntegrationTestCase
-     * @dataProvider invalidPropertiesProvider
+     * @dataProvider duplicatePropertiesProvider
      *
      * @param  array  $properties
-     * @param  string|callable  $expectedPDOExceptionMessage
-     *
-     * @throws BindingResolutionException when there is a problem with resolution of concreted class
      *
      * @covers CampaignRepository::sent
      */
-    public function testSentWithException(
-        array $properties,
-        $expectedPDOExceptionMessage
+    public function testSentDuplicate(
+        array $properties
     ): void {
         $this->seeder->seed();
 
         $properties = $this->seeder->extractValues($properties);
-        $expectedPDOExceptionMessage = is_callable($expectedPDOExceptionMessage) ?
-            $expectedPDOExceptionMessage($properties['drip_campaigns_id'], $properties['lead_id']) :
-            $expectedPDOExceptionMessage;
 
-        // When I call create with invalid parameters
-        // Then I expect see that one exception have been thrown with a specific message
-        //$this->expectException(PDOException::class);
-        $this->expectExceptionMessage($expectedPDOExceptionMessage);
-
+        // Campaign sent did not exist before but does now after sent
+        self::assertSame(1, CampaignSent::where([
+            'drip_campaigns_id' => $properties['drip_campaigns_id'],
+            'lead_id' => $properties['lead_id']
+        ])->count());
 
         // When I call create with valid parameters
         /** @var CampaignSent $leadCampaignToCustomer */
         $campaignSent = $this->getConcreteRepository()->sent($properties['drip_campaigns_id'], $properties['lead_id']);
 
-        // And I should get a null value
-        self::assertNull($campaignSent);
+        // Campaign sent did exist before and still only one exists now
+        self::assertSame(1, CampaignSent::where([
+            'drip_campaigns_id' => $campaignSent->drip_campaigns_id,
+            'lead_id' => $campaignSent->lead_id
+        ])->count());
     }
 
     /**
@@ -195,7 +191,7 @@ class CampaignRepositoryTest extends TestCase
 
         // When I call wasSent with valid parameters
         /** @var bool $wasSent */
-        $wasSent = $this->getConcreteRepository()->wasSent($sent->drip_campaigns_id, $sent->lead_id);
+        $wasSent = $this->getConcreteRepository()->wasSent($sent->drip_campaigns_id, $sent->lead->email_address);
 
         // Then I should return true
         self::assertTrue($wasSent);
@@ -222,7 +218,7 @@ class CampaignRepositoryTest extends TestCase
 
         // When I call wasSent with valid parameters
         /** @var bool $wasSent */
-        $wasSent = $this->getConcreteRepository()->wasSent($sent->drip_campaigns_id, $sent->lead_id);
+        $wasSent = $this->getConcreteRepository()->wasSent($sent->drip_campaigns_id, $sent->lead->email_address);
 
         // Then I should return true
         self::assertFalse($wasSent);
@@ -246,11 +242,11 @@ class CampaignRepositoryTest extends TestCase
     }
 
     /**
-     * Examples of invalid customer-inventory id properties with theirs expected exception messages.
+     * Examples of duplicate customer-inventory id properties.
      *
      * @return array[]
      */
-    public function invalidPropertiesProvider(): array
+    public function duplicatePropertiesProvider(): array
     {
         $campaignIdLambda = static function (CampaignSeeder $seeder) {
             return $seeder->campaignsSent[0]->drip_campaigns_id;
@@ -260,15 +256,8 @@ class CampaignRepositoryTest extends TestCase
             return $seeder->campaignsSent[0]->lead_id;
         };
 
-        $duplicateEntryLambda = function (int $campaignId, int $leadId) {
-            return $this->getDuplicateEntryMessage(
-                "$campaignId-$leadId",
-                'PRIMARY'
-            );
-        };
-
-        return [                      // array $properties, string $expectedPDOExceptionMessage
-            'With duplicate entry' => [['drip_campaigns_id' => $campaignIdLambda, 'lead_id' => $leadIdLambda], $duplicateEntryLambda],
+        return [                      // array $properties
+            'With duplicate entry' => [['drip_campaigns_id' => $campaignIdLambda, 'lead_id' => $leadIdLambda]],
         ];
     }
 

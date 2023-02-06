@@ -1,36 +1,19 @@
-<?php /** @noinspection ALL */
+<?php
 
 namespace App\Domains\Scout\Traits;
 
 use App\Domains\Scout\Jobs\ExceptionableMakeSearchable;
-use Laravel\Scout\ModelObserver;
-use Laravel\Scout\Searchable;
-use Laravel\Scout\SearchableScope;
+use App\Indexers\Searchable;
 
 trait ExceptionableSearchable
 {
     use Searchable;
 
-    public static function bootSearchable()
-    {
-        // to avoid the original trait behavior which is being override by `bootExceptionableSearchable` ensuring the
-        // `registerSearchableMacros` belongs only to those classes which uses this trait
-    }
-
-    public static function bootExceptionableSearchable()
-    {
-        static::addGlobalScope(new SearchableScope);
-
-        static::observe(new ModelObserver);
-
-        (new static)->registerSearchableMacros();
-    }
-
     /**
      * Dispatch the job to make the given models searchable.
      *
      * @param  \Illuminate\Database\Eloquent\Collection  $models
-     * @return void
+     * @return mixed
      */
     public function queueMakeSearchable($models)
     {

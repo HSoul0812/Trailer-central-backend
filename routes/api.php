@@ -49,15 +49,22 @@ $api->version('v1', function ($route) {
     // Utils
     $route->group([
         'prefix' => 'utils',
-    ], function($route) {
+    ], function ($route) {
         $route->get('/ip', 'App\Http\Controllers\v1\Marketing\Utils\NetworkController@getIp');
+    });
+
+    // Tunnel Operations
+    $route->group([
+        'prefix' => 'tunnels',
+    ], function ($route) {
+        $route->post('/check', 'App\Http\Controllers\v1\Marketing\Tunnels\TunnelsController@check');
     });
 
     $route->group(['middleware' => 'textrail.webhook.validate'], function ($route) {
         $route->post('ecommerce/orders/{textrail_order_id}/approve', 'App\Http\Controllers\v1\Ecommerce\CompletedOrderController@markAsApproved')->where('textrail_order_id', '[0-9]+');
-        $route->post('ecommerce/cancellation/{textrail_order_id}','App\Http\Controllers\v1\Ecommerce\RefundController@cancelOrder')->where('textrail_order_id', '[0-9]+');
-        $route->post('ecommerce/returns/{rma}','App\Http\Controllers\v1\Ecommerce\RefundController@updateReturnStatus')->where('rma', '[0-9]+');
-        $route->post('ecommerce/orders/{textrail_order_id}/returns','App\Http\Controllers\v1\Ecommerce\RefundController@create')->where('textrail_order_id', '[0-9]+');
+        $route->post('ecommerce/cancellation/{textrail_order_id}', 'App\Http\Controllers\v1\Ecommerce\RefundController@cancelOrder')->where('textrail_order_id', '[0-9]+');
+        $route->post('ecommerce/returns/{rma}', 'App\Http\Controllers\v1\Ecommerce\RefundController@updateReturnStatus')->where('rma', '[0-9]+');
+        $route->post('ecommerce/orders/{textrail_order_id}/returns', 'App\Http\Controllers\v1\Ecommerce\RefundController@create')->where('textrail_order_id', '[0-9]+');
     });
 
     /**
@@ -682,7 +689,6 @@ $api->version('v1', function ($route) {
     $route->get('integrations', 'App\Http\Controllers\v1\Integration\IntegrationController@index');
     $route->get('integrations/{id}', 'App\Http\Controllers\v1\Integration\IntegrationController@show');
 
-
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
         /*
         |--------------------------------------------------------------------------
@@ -702,6 +708,7 @@ $api->version('v1', function ($route) {
         $route->post('leads/find-matches', 'App\Http\Controllers\v1\CRM\Leads\LeadController@getMatches');
         $route->post('leads/{id}/merge', 'App\Http\Controllers\v1\CRM\Leads\LeadController@mergeLeads');
         $route->get('leads/output', 'App\Http\Controllers\v1\CRM\Leads\LeadController@output');
+        $route->delete('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@destroy');
 
         /*
         |--------------------------------------------------------------------------
@@ -714,6 +721,16 @@ $api->version('v1', function ($route) {
         $route->get('user/quotes', 'App\Http\Controllers\v1\Dms\UnitSaleController@index');
         $route->put('user/quotes/bulk-archive', 'App\Http\Controllers\v1\Dms\UnitSaleController@bulkArchive');
         $route->put('user/quotes/setting', 'App\Http\Controllers\v1\Dms\Quote\QuoteSettingController@updateDealerSetting');
+
+        /*
+        |--------------------------------------------------------------------------
+        | POS Quotes
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->post('pos-quotes', 'App\Http\Controllers\v1\Pos\PosController@createPosQuote');
 
         /*
         |--------------------------------------------------------------------------
@@ -773,6 +790,8 @@ $api->version('v1', function ($route) {
         */
         $route->get('user/integrations', 'App\Http\Controllers\v1\User\DealerIntegrationController@index');
         $route->get('user/integrations/{id}', 'App\Http\Controllers\v1\User\DealerIntegrationController@show');
+        $route->post('user/integrations/{id}', 'App\Http\Controllers\v1\User\DealerIntegrationController@update');
+        $route->delete('user/integrations/{id}', 'App\Http\Controllers\v1\User\DealerIntegrationController@delete');
 
         /*
         |--------------------------------------------------------------------------

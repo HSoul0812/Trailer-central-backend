@@ -14,9 +14,11 @@ use Illuminate\Http\Request;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Http\Requests\ActionRequest;
 
+use Laravel\Nova\Panel;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Boolean;
+use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\Textarea;
 
 use Laravel\Nova\Fields\Code;
@@ -94,7 +96,11 @@ class Integration extends Resource
             Boolean::make('Uses Staging')->default(true),
             Boolean::make('Show for Integrated'),
 
-            Boolean::make('Is Hidden')->hideWhenUpdating()->hideWhenCreating()
+            Boolean::make('Is Hidden')->hideWhenUpdating()->hideWhenCreating(),
+
+            new Panel('Main', [
+                HasMany::make('Dealers', 'dealers')
+            ]),
         ];
     }
 

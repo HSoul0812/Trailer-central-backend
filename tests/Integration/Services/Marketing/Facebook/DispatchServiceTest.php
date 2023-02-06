@@ -279,7 +279,7 @@ class DispatchServiceTest extends IntegrationTestCase
         // Check that the view has the correct info
         $this->assertDatabaseHas('dealer_fbm_overview', [
             'id' => $marketplace->getKey(),
-            [ 'last_known_error', 'LIKE', "%: {$requiredParams['message']}" ],
+            [ 'last_known_error_message', 'LIKE', "{$requiredParams['message']}" ],
             'error_today' => $requiredParams['message'],
         ]);
     }
@@ -354,7 +354,7 @@ class DispatchServiceTest extends IntegrationTestCase
         // Check that the view has the correct info
         $this->assertDatabaseHas('dealer_fbm_overview', [
             'id' => $marketplace->getKey(),
-            [ 'last_known_error', 'LIKE', "%: {$requiredParams['message']}" ],
+            [ 'last_known_error_message', 'LIKE', "{$requiredParams['message']}" ],
             'error_today' => $requiredParams['message'],
         ]);
     }

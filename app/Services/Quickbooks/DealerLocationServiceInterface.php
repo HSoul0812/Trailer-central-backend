@@ -9,4 +9,6 @@ use App\Models\CRM\Dms\Quickbooks\QuickbookApproval;
 interface DealerLocationServiceInterface
 {
     public function update(int $dealerLocationId): ?QuickbookApproval;
+
+    public function reindexAndInvalidateCacheInventory(int $dealerLocationId): void;
 }

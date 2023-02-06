@@ -55,45 +55,10 @@ interface UserRepositoryInterface extends Repository, TransactionalRepository {
     /**
      *
      * @param int $dealerId
-     * @param bool $overlayEnabled
-     * @param bool $overlay_default
-     * @param string $overlay_logo_position
-     * @param int $overlay_logo_width
-     * @param int $overlay_logo_height
-     * @param string $overlay_upper
-     * @param string $overlay_upper_bg
-     * @param int $overlay_upper_alpha
-     * @param string $overlay_upper_text
-     * @param int $overlay_upper_size
-     * @param int $overlay_upper_margin
-     * @param string $overlay_lower
-     * @param string $overlay_lower_bg
-     * @param int $overlay_lower_alpha
-     * @param string $overlay_lower_text
-     * @param int $overlay_lower_size
-     * @param int $overlay_lower_margin
-     * @param string $overlay_logo_src
-     * @return User
+     * @param array $params
+     * @return bool was there any changes?
      */
-    public function updateOverlaySettings(int $dealerId,
-                                          int $overlayEnabled = null,
-                                          bool $overlay_default = null,
-                                          string $overlay_logo_position = null,
-                                          string $overlay_logo_width = null,
-                                          string $overlay_logo_height = null,
-                                          string $overlay_upper = null,
-                                          string $overlay_upper_bg = null,
-                                          int $overlay_upper_alpha = null,
-                                          string $overlay_upper_text = null,
-                                          int $overlay_upper_size = null,
-                                          int $overlay_upper_margin = null,
-                                          string $overlay_lower = null,
-                                          string $overlay_lower_bg = null,
-                                          int $overlay_lower_alpha = null,
-                                          string $overlay_lower_text = null,
-                                          int $overlay_lower_size = null,
-                                          int $overlay_lower_margin = null,
-                                          string $overlay_logo_src = null) : User;
+    public function updateOverlaySettings(int $dealerId, array $params) : bool;
 
     /**
      * Check admin password

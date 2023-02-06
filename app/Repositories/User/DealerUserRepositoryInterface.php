@@ -3,6 +3,7 @@
 namespace App\Repositories\User;
 
 use App\Models\User\DealerUser;
+use App\Models\User\User;
 use App\Repositories\Repository;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -12,9 +13,11 @@ use Illuminate\Database\Eloquent\Collection;
  */
 interface DealerUserRepositoryInterface extends Repository
 {
-    public function getByDealer(int $dealerId) : Collection;
+    public function getByDealer(int $dealerId): Collection;
 
-    public function updateBulk(array $params) : Collection;
+    public function getByDealerEmail(string $dealerEmail): ?User;
+
+    public function updateBulk(array $params): Collection;
 
     /**
      * @param array{dealer_user_id: int} $params

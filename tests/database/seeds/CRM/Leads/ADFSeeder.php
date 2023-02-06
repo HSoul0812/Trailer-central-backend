@@ -16,8 +16,15 @@ use App\Repositories\CRM\User\CrmUserRepositoryInterface;
 use App\Models\CRM\Leads\Lead;
 use App\Models\Inventory\Inventory;
 
-class ADFSeeder extends Seeder {
-
+/**
+ * @property-read User $dealer
+ * @property-read Lead $lead
+ * @property-read DealerLocation $location
+ * @property-read Website $website
+ * @property-read Inventory $inventory
+ */
+class ADFSeeder extends Seeder
+{
     use WithGetter;
 
     /**
@@ -34,6 +41,16 @@ class ADFSeeder extends Seeder {
      * @var Website
      */
     protected $website;
+
+    /**
+     * @var Lead
+     */
+    private $lead;
+
+    /**
+     * @var Inventory
+     */
+    private $inventory;
 
     public function seed(): void
     {
@@ -68,14 +85,27 @@ class ADFSeeder extends Seeder {
         $this->location = factory(DealerLocation::class)->create([
             'dealer_id' => $this->dealer->getKey(),
         ]);
+
+        $this->inventory = factory(Inventory::class, 1)->create([
+            'dealer_id' => $this->dealer->dealer_id,
+            'dealer_location_id' => $this->location->dealer_location_id
+        ])->first();
+
+        $this->lead = factory(Lead::class, 1)->create([
+            'website_id' => $this->website->getKey(),
+            'dealer_id' => $this->dealer->getKey(),
+            'dealer_location_id' => $this->location->getKey(),
+            'inventory_id' => $this->inventory->inventory_id
+        ])->first();
     }
 
     public function cleanUp(): void
     {
         // Delete CRM User Related Data
-        NewDealerUser::where(['user_id' => $this->user->getKey()])->delete();
-        CrmUser::where(['user_id' => $this->user->getKey()])->delete();
-        NewUser::destroy($this->user->getKey());
+        $userId = $this->dealer->newDealerUser->user_id;
+        NewDealerUser::where(['user_id' => $userId])->delete();
+        CrmUser::where(['user_id' => $userId])->delete();
+        NewUser::destroy($userId);
 
         // Delete Dealer Related Data
         Website::destroy($this->website->getKey());

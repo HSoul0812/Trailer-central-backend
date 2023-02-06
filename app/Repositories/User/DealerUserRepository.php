@@ -23,10 +23,15 @@ class DealerUserRepository extends RepositoryAbstract implements DealerUserRepos
         $this->encrypterService = $encrypterService;
     }
 
-    public function getByDealer(int $dealerId) : Collection
+    public function getByDealer(int $dealerId): Collection
     {
         $dealer = User::findOrFail($dealerId);
         return $dealer->dealerUsers;
+    }
+
+    public function getByDealerEmail(string $dealerEmail): ?User
+    {
+        return User::where('email', '=', $dealerEmail)->first();
     }
 
     /**
