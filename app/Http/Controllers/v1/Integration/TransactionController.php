@@ -8,7 +8,8 @@ use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\Integration\PostTransactionRequest;
 use App\Services\Integration\Transaction\TransactionServiceInterface;
 use Dingo\Api\Http\Request;
-use Dingo\Api\Http\Response;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\Routing\ResponseFactory;
 
 /**
  * Class TransactionController
@@ -28,7 +29,7 @@ class TransactionController extends RestfulControllerV2
 
     /**
      * @param Request $request
-     * @return Response|null
+     * @return Application|ResponseFactory|\Illuminate\Http\Response|\Laravel\Lumen\Http\ResponseFactory|null
      * @throws NoObjectIdValueSetException
      * @throws NoObjectTypeSetException
      */
@@ -42,6 +43,6 @@ class TransactionController extends RestfulControllerV2
 
         $result = $this->transactionService->post($request->all());
 
-        return $this->itemResponse($result);
+        return $this->xmlResponse($result);
     }
 }

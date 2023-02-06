@@ -8,5 +8,9 @@ namespace App\Services\Integration\Transaction;
  */
 interface TransactionServiceInterface
 {
-    public function post(array $params): array;
+    /**
+     * @param array $params
+     * @return string
+     */
+    public function post(array $params): string;
 }

@@ -54,9 +54,6 @@ class Validation
     {
         $validation = self::getValidation();
 
-        print_r($action);
-        print_r($validation);exit();
-
         if(isset($validation[$action])) {
             if(Reference::isValidAction($action, self::getApiKey())) {
                 return true;
@@ -288,7 +285,7 @@ class Validation
             }
         }
 
-        return DB::table($table)->where([$key => $value])->count() > 0;
+        return DB::table($table)->where([$key => $value])->count() <= 0;
     }
 
     /**

@@ -22,15 +22,15 @@ class ApiEntityReferenceRepository extends RepositoryAbstract implements ApiEnti
         }
 
         if (isset($params['reference_id'])) {
-            $query->where('entity_id', '=', $params['entity_id']);
+            $query->where('reference_id', '=', $params['reference_id']);
         }
 
         if (isset($params['entity_type'])) {
-            $query->where('entity_id', '=', $params['entity_id']);
+            $query->where('entity_type', '=', $params['entity_type']);
         }
 
         if (isset($params['api_key'])) {
-            $query->where('entity_id', '=', $params['entity_id']);
+            $query->where('api_key', '=', $params['api_key']);
         }
 
         return $query->first();
@@ -51,5 +51,13 @@ class ApiEntityReferenceRepository extends RepositoryAbstract implements ApiEnti
     public function updateMultiples(array $conditions, array $newData): int
     {
         return ApiEntityReference::where($conditions)->update($newData);
+    }
+
+    public function delete($params)
+    {
+        return ApiEntityReference::query()->where([
+            ['entity_id', '=', $params['entity_id']],
+            ['entity_type', '=', $params['entity_type']]
+        ])->delete();
     }
 }

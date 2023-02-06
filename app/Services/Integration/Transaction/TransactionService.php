@@ -2,8 +2,9 @@
 
 namespace App\Services\Integration\Transaction;
 
-use App\Services\Integration\Transaction\Validation;
+use App\Helpers\StringHelper;
 use App\Repositories\Feed\TransactionExecuteQueueRepositoryInterface;
+use App\Services\Integration\Transaction\Adapter\Adapter;
 use Illuminate\Contracts\Container\BindingResolutionException;
 
 /**
@@ -18,25 +19,40 @@ class TransactionService implements TransactionServiceInterface
     private $transactionExecuteQueueRepository;
 
     /**
+     * @var StringHelper
+     */
+    private $stringHelper;
+
+    /**
+     * @var string
+     */
+    private $integrationName;
+
+    /**
      * @var array
      */
     private $transactionErrors = [];
 
-    public function __construct(TransactionExecuteQueueRepositoryInterface $transactionExecuteQueueRepository)
-    {
+    public function __construct(
+        TransactionExecuteQueueRepositoryInterface $transactionExecuteQueueRepository,
+        StringHelper $stringHelper
+    ) {
         $this->transactionExecuteQueueRepository = $transactionExecuteQueueRepository;
+        $this->stringHelper = $stringHelper;
     }
 
     /**
      * @param array $params
-     * @return array
-     * @throws BindingResolutionException
+     * @return string
+     * @throws BindingResolutionException|\DOMException
      */
-    public function post(array $params): array
+    public function post(array $params): string
     {
+        $this->integrationName = $params['integration_name'];
+
         $transactionData = [
             'data' => $params['data'],
-            'api' => $params['integration_name'],
+            'api' => $this->integrationName,
             'without_prepare_data' => true
         ];
 
@@ -45,13 +61,8 @@ class TransactionService implements TransactionServiceInterface
         $config = new \SimpleXMLElement($params['data'], LIBXML_NOCDATA);
 
         if (!$config || !isset($config->transactions) || !isset($config->transactions->transaction)) {
-/*            return $this->_setResponseBody(array(
-                'status'  => 'error',
-                'message' => 'No transactions were found in request body.',
-                'type'    => 'ContentException',
-                'code'    => '201'
-            ));*/
-            print_r(1111111);exit();
+            $this->addTransactionError(0, 'No data supplied for this transaction.');
+            return $this->getXml([]);
         }
 
         $transactions = json_decode(json_encode($config->transactions), true);
@@ -63,6 +74,8 @@ class TransactionService implements TransactionServiceInterface
         }
 
         $i = 0;
+
+        Validation::setApiKey($this->integrationName);
 
         foreach ($parsed as $transaction) {
             if(empty($transaction['action'])) {
@@ -85,12 +98,13 @@ class TransactionService implements TransactionServiceInterface
             $i++;
         }
 
-        $errors = $this->getTransactionErrors();
+        if(!count($this->getTransactionErrors())) {
+            foreach ($parsed as $transaction) {
+                $this->executeTransaction($transaction['action'], $transaction['data']);
+            }
+        }
 
-        print_r($errors);exit();
-
-        exit();
-        return [];
+        return $this->getXml($parsed);
     }
 
     /**
@@ -113,5 +127,142 @@ class TransactionService implements TransactionServiceInterface
     public function getTransactionErrors(): array
     {
         return $this->transactionErrors;
+    }
+
+    /**
+     * @param string|null $method
+     * @param array|null $data
+     * @return void
+     * @throws BindingResolutionException
+     */
+    protected function executeTransaction(?string $method = null, ?array $data = null)
+    {
+        if(empty($method) || empty($data)) {
+            return;
+        }
+
+        $action = Reference::decodeAction($method, $this->integrationName);
+
+        if(!$action) {
+            return;
+        }
+
+        $adapter = $this->createAdapter($action);
+        $method = $action['action'];
+
+        return $adapter->$method($data);
+    }
+
+    /**
+     * @param array $action
+     * @return Adapter
+     * @throws BindingResolutionException
+     */
+    protected function createAdapter(array $action): Adapter
+    {
+        $className = Adapter::ADAPTER_MAPPING['Adapter_' . ucwords($this->integrationName) . '_' . ucwords($action['entity_type'])];
+        return app()->make($className);
+    }
+
+    /**
+     * @return false|string
+     * @throws \DOMException
+     */
+    private function getXml(array $data)
+    {
+        $xml = new \DomDocument('1.0', 'UTF-8');
+        $xml->formatOutput = true;
+
+        $responseElement = $xml->createElement('response');
+        $this->toXml($this->prepareData($data), $responseElement, $xml);
+        $xml->appendChild($responseElement);
+
+        return $xml->saveXML();
+    }
+
+    /**
+     * @param array $transactions
+     * @return array
+     */
+    private function prepareData(array $transactions): array
+    {
+        $errors = $this->getTransactionErrors();
+
+        if (count($errors)) {
+            $status = 'error';
+        } else {
+            $status = 'success';
+        }
+
+        $body = array(
+            'status'       => $status,
+            'transactions' => array()
+        );
+
+        foreach ($transactions as $i => $transaction) {
+            if(isset($errors[$i])) {
+                $array = array(
+                    'status'               => 'invalid',
+                    'errors'               => array(),
+                    'original_transaction' => $transaction
+                );
+
+                foreach ($errors[$i] as $error) {
+                    $array['errors'][] = array('error' => $error);
+                }
+            } else {
+                if(count($errors)) $status = 'valid';
+                else $status = 'executed';
+
+                $array = array(
+                    'status'               => $status,
+                    'original_transaction' => $transaction
+                );
+            }
+
+            $body['transactions'][] = array(
+                'transaction' => $array
+            );
+        }
+
+        return $body;
+    }
+
+    /**
+     * @param array $array
+     * @param \DOMElement $xml
+     * @param \DOMDocument $document
+     * @return void
+     * @throws \DOMException
+     */
+    private function toXml(array $array, \DOMElement $xml, \DOMDocument $document)
+    {
+        foreach ($array as $key => $value) {
+            if(is_array($value)) {
+                if((string) $key == '@attributes') {
+                    foreach ($value as $attributeKey => $attributeValue) {
+                        $attribute = $document->createAttribute($attributeKey);
+
+                        $node = $document->createCDATASection($attributeValue);
+                        $attribute->appendChild($node);
+
+                        $xml->appendChild($attribute);
+                    }
+                } else {
+                    if(!is_numeric($key)) {
+                        $element = $document->createElement($key);
+                        $this->toXml($value, $element, $document);
+                        $xml->appendChild($element);
+                    } else {
+                        $this->toXml($value, $xml, $document);
+                    }
+                }
+
+            } else {
+                $element = $document->createElement($key);
+                $element->appendChild($document->createCDATASection($value));
+                $xml->appendChild($element);
+            }
+        }
     }
 }
