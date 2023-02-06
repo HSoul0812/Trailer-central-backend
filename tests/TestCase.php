@@ -2,6 +2,9 @@
 
 namespace Tests;
 
+use App\Models\FeatureFlag;
+use App\Models\Inventory\Inventory;
+use App\Repositories\FeatureFlagRepositoryInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -22,10 +25,16 @@ abstract class TestCase extends BaseTestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        $this->setCacheInvalidation(false);
+        Inventory::enableSearchSyncing();
     }
 
     protected function tearDown(): void
     {
+        $this->setCacheInvalidation(false);
+        Inventory::enableSearchSyncing();
+
         parent::tearDown();
     }
 
@@ -126,7 +135,8 @@ abstract class TestCase extends BaseTestCase
         $mock->shouldReceive('getRelationValue')->passthru();
         $mock->shouldReceive('relationLoaded')->passthru();
         $mock->shouldReceive('fromFloat')->passthru();
-
+        $mock->wasRecentlyCreated = true;
+        
         return $mock;
     }
 
@@ -256,5 +266,14 @@ abstract class TestCase extends BaseTestCase
         $reflector->setAccessible(true);
 
         return $reflector->getValue($object);
+    }
+
+    protected function setCacheInvalidation(bool $isEnabled): void
+    {
+        app(FeatureFlagRepositoryInterface::class)->set(
+            new FeatureFlag(['code' => 'inventory-sdk-cache', 'is_enabled' => $isEnabled])
+        );
+
+        Inventory::bootInventorySearchable();
     }
 }
