@@ -13,10 +13,15 @@ use Maatwebsite\LaravelNovaExcel\Actions\DownloadExcel;
 
 /**
  * Class DealerIncomingMappingExport
- * @package App\Nova\Actions\Exports\DealerIncomingMappingExport
+ * @package App\Nova\Actions\Exports
  */
 class DealerIncomingMappingExport extends DownloadExcel implements WithHeadings, WithMapping, WithStyles, WithEvents
 {
+    /**
+     * @var string
+     */
+    public $name = "Export Dealer Incoming Mappings";
+
     /**
      * @return array
      */
@@ -25,7 +30,8 @@ class DealerIncomingMappingExport extends DownloadExcel implements WithHeadings,
         return [
             'Dealer ID',
             'Their Field',
-            'Our Field'
+            'Our Field',
+            'Type'
         ];
     }
 
@@ -39,7 +45,8 @@ class DealerIncomingMappingExport extends DownloadExcel implements WithHeadings,
         return [
             $mapping->dealer_id,
             $mapping->map_from,
-            $mapping->map_to
+            $mapping->map_to,
+            $mapping->type
         ];
     }
 
@@ -64,7 +71,7 @@ class DealerIncomingMappingExport extends DownloadExcel implements WithHeadings,
     public function registerEvents(): array
     {
         return [
-            AfterSheet::class => function(AfterSheet $event) {
+            AfterSheet::class => function (AfterSheet $event) {
                 foreach ($event->sheet->getColumnIterator() as $column) {
                     $event->sheet->getColumnDimension($column->getColumnIndex())->setAutoSize(true);
                 }

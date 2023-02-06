@@ -4,6 +4,7 @@ namespace App\Services\Inventory;
 
 use App\Models\Inventory\File;
 use App\Models\Inventory\Inventory;
+use App\Models\User\DealerLocation;
 use App\Models\Inventory\InventoryImage;
 
 /**
@@ -98,5 +99,16 @@ interface InventoryServiceInterface
      */
     public function convertMarkdown(string $markDown): string;
 
-	public function invalidateCacheAndReindexByDealerIds(array $dealer_ids): void;
+    public function invalidateCacheAndReindexByDealerIds(array $dealerIds): void;
+
+    public function invalidateCacheAndReindexByDealerLocation(DealerLocation $dealerLocation): void;
+
+    /**
+     * - Will try to index for a given inventory only when ES indexation is enabled
+     * - Will try invalidate inventory cache for a given inventory only when cache invalidation is enabled
+     *
+     * @param  Inventory  $inventory
+     * @return void
+     */
+    public function tryToIndexAndInvalidateInventory(Inventory $inventory): void;
 }

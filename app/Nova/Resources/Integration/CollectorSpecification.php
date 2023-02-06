@@ -2,6 +2,8 @@
 
 namespace App\Nova\Resources\Integration;
 
+use App\Nova\Actions\Exports\CollectorSpecificationExport;
+use App\Nova\Actions\Importer\CollectorSpecificationImporter;
 use App\Nova\Resource;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
@@ -20,7 +22,7 @@ use Laravel\Nova\Fields\Text;
  */
 class CollectorSpecification extends Resource
 {
-    public static $group = 'Integration';
+    public static $group = 'Collector';
 
     /**
      * The model the resource corresponds to.
@@ -31,11 +33,14 @@ class CollectorSpecification extends Resource
     public static $model = CollectorSpecificationModel::class;
 
     /**
-     * The single value that should be used to represent the resource when being displayed.
+     * Get the value that should be displayed to represent the resource.
      *
-     * @var string
+     * @return string
      */
-    public static $title = 'id';
+    public function title()
+    {
+        return $this->collector->process_name;
+    }
 
     public static $search = [
         'collector'
@@ -142,14 +147,9 @@ class CollectorSpecification extends Resource
      */
     public function actions(Request $request): array
     {
-        return [];
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public static function availableForNavigation(Request $request): bool
-    {
-        return false;
+        return [
+            (new CollectorSpecificationExport())->withHeadings()->askForFilename(),
+            new CollectorSpecificationImporter()
+        ];
     }
 }

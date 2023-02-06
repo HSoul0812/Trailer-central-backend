@@ -2,6 +2,8 @@
 
 namespace App\Nova\Resources\Integration;
 
+use App\Nova\Actions\Importer\CollectorImporter;
+use App\Nova\Actions\Importer\DealerIncomingPendingMappingImporter;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
@@ -14,8 +16,7 @@ use App\Nova\Actions\Exports\DealerIncomingPendingMappingExport;
 
 class DealerIncomingPendingMapping extends Resource
 {
-
-    public static $group = 'Integration';
+    public static $group = 'Collector';
 
     /**
      * The model the resource corresponds to.
@@ -88,7 +89,7 @@ class DealerIncomingPendingMapping extends Resource
     public function filters(Request $request)
     {
         return [
-            new DealerIDPendingMapping
+            new DealerIDPendingMapping()
         ];
     }
 
@@ -113,7 +114,8 @@ class DealerIncomingPendingMapping extends Resource
     {
         return [
             (new MapData($this->model()))->exceptOnIndex(),
-            (new DealerIncomingPendingMappingExport)->withHeadings()->askForFilename(),
+            (new DealerIncomingPendingMappingExport())->withHeadings()->askForFilename(),
+            new DealerIncomingPendingMappingImporter()
         ];
     }
 

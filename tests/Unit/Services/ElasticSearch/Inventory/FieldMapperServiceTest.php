@@ -21,6 +21,12 @@ use Tests\TestCase;
  * Class FieldMapperServiceTest
  * @package Tests\Unit\Services\ElasticSearch\Inventory
  *
+ * @group DW
+ * @group DW_INVENTORY
+ * @group DW_ELASTICSEARCH_WHICH_ARE_FAILING
+ *
+ * @todo This suit should be updated accordingly to past changes
+ *
  * @coversDefaultClass \App\Services\ElasticSearch\Inventory\FieldMapperService
  */
 class FieldMapperServiceTest extends TestCase

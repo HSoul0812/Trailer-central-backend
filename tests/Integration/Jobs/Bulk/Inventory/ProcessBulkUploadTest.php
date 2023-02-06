@@ -21,6 +21,8 @@ use Mockery;
  * @group DW_BULK
  * @group DW_BULK_INVENTORY
  * @group DW_BULK_UPLOAD_INVENTORY
+ * @group DW_ELASTICSEARCH
+ * @group DW_INVENTORY
  * @group INTEGRATION
  * @group INTEGRATION_BULK
  * @group INTEGRATION_BULK_UPLOAD_INVENTORY
@@ -100,7 +102,7 @@ class ProcessBulkUploadTest extends TestCase
 
         $job->handle($this->importerService, $this->inventoryService);
 
-        Bus::assertDispatchedTimes(InvalidateCacheJob::class, 1);
+        Bus::assertDispatchedTimes(InvalidateCacheJob::class, 2);
         Bus::assertDispatchedTimes(ReIndexInventoriesByDealersJob::class, 1);
     }
 
