@@ -1,10 +1,12 @@
 <?php
 
-namespace App\Domains\DealerExports;
+namespace App\Domains\DealerExports\BackOffice\Settings;
 
 use App\Domains\DealerExports\BaseExportAction;
 use App\Contracts\DealerExports\EntityActionExportable;
 use App\Models\Parts\Vendor;
+use App\Domains\DealerExports\ExportStartAction;
+use App\Domains\DealerExports\ExportFinishedAction;
 
 class VendorsExportAction extends BaseExportAction implements EntityActionExportable
 {

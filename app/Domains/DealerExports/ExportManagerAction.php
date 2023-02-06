@@ -5,6 +5,9 @@ namespace App\Domains\DealerExports;
 use App\Models\User\User;
 use App\Models\DealerExport;
 use App\Jobs\DealerExports\DealerDataExportJob;
+use App\Domains\DealerExports\BackOffice\Settings\VendorsExportAction;
+use App\Domains\DealerExports\BackOffice\Settings\BrandsExportAction;
+use App\Domains\DealerExports\BackOffice\Settings\EmployeesExportAction;
 
 class ExportManagerAction
 {
@@ -13,6 +16,7 @@ class ExportManagerAction
     protected $exportActions = [
         VendorsExportAction::class,
         BrandsExportAction::class,
+        EmployeesExportAction::class,
     ];
 
     public function __construct(User $dealer)
