@@ -157,11 +157,11 @@ class ListingRepository implements ListingRepositoryInterface {
         $query = Inventory::select(Inventory::getTableName() . '.*')
             ->where('dealer_id', '=', $integration->dealer_id)
             ->where('show_on_website', 1)
-            ->where("{$inventoryTableName}.year", '<', '2024') //TODO: remove when Facebook allows this
+            ->where("{$inventoryTableName}.year", '<', '2025')
             ->where(function ($query) use ($inventoryTableName, $fbMinPrice) {
-                $query->whereRaw("IFNULL($inventoryTableName.sales_price, 0) > $fbMinPrice")
-                    ->orWhereRaw("($inventoryTableName.use_website_price AND IFNULL($inventoryTableName.website_price, 0) > $fbMinPrice)")
-                    ->orWhereRaw("IFNULL($inventoryTableName.price, 0) > $fbMinPrice");
+                $query->whereRaw("IFNULL($inventoryTableName.sales_price, 0) >= $fbMinPrice")
+                    ->orWhereRaw("($inventoryTableName.use_website_price AND IFNULL($inventoryTableName.website_price, 0) >= $fbMinPrice)")
+                    ->orWhereRaw("IFNULL($inventoryTableName.price, 0) >= $fbMinPrice");
             })
             ->where("{$inventoryTableName}.entity_type_id", '<>', EntityType::ENTITY_TYPE_BUILDING)
             ->where("{$inventoryTableName}.entity_type_id", '<>', EntityType::ENTITY_TYPE_VEHICLE)
