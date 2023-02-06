@@ -175,7 +175,7 @@
                         <select id="manufacturer-inv-change"
                                 name="manufacturer-inv-change"
                                 class="w-full form-control form-input form-input-bordered"
-                                v-model="formBulkVisibility.manufacturer">
+                                v-model="formBulkInvMfg.from_manufacturer">
                             <option v-for="manufacturer in manufacturers">{{ manufacturer.name }}</option>
                         </select>
                         <!---->
@@ -196,7 +196,7 @@
                         <select id="manufacturer-inv-change"
                                 name="manufacturer-inv-change"
                                 class="w-full form-control form-input form-input-bordered"
-                                v-model="formBulkVisibility.manufacturer">
+                                v-model="formBulkInvMfg.to_manufacturer">
                             <option v-for="manufacturer in manufacturers">{{ manufacturer.name }}</option>
                         </select>
                         <!---->
@@ -274,7 +274,7 @@ export default {
 
             formBulkInvMfg: {
                 from_manufacturer: '',
-                to_year: ''
+                to_manufacturer: ''
             },
 
             manufacturers: [],
