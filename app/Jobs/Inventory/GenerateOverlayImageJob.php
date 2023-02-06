@@ -9,15 +9,25 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use App\Services\Inventory\InventoryService;
+use App\Services\Inventory\InventoryServiceInterface;
 
 class GenerateOverlayImageJob extends Job {
 
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
+     * The number of times the job may be attempted.
+     *
+     * @var int
+     */
+    public $tries = 5;
+
+    /**
      * @var int
      */
     private $inventoryId;
+
+    const MISSING_INVENTORY_ERROR_MESSAGE = 'No query results for model [App\Models\Inventory\Inventory].';
 
     /**
      * GenerateOverlayImageJob constructor.
@@ -29,10 +39,10 @@ class GenerateOverlayImageJob extends Job {
     }
 
     /**
-     * @param InventoryService $service
+     * @param InventoryServiceInterface $service
      * @return void
      */
-    public function handle(InventoryService $service)
+    public function handle(InventoryServiceInterface $service)
     {
         // Initialize Log File
         $log = Log::channel('inventory-overlays');
@@ -43,8 +53,18 @@ class GenerateOverlayImageJob extends Job {
 
             $log->info('Inventory Images with Overlay has been successfully generated', ['inventory_id' => $this->inventoryId]);
         } catch (\Exception $e) {
-            $log->error($e->getMessage());
+
+            $errorMessage = $e->getMessage();
+
+            $log->error($errorMessage);
             $log->error($e->getTraceAsString());
+
+            // assuming there's a race condition when transaction commit is taking longer to process when adding new inventory
+            if ($errorMessage === self::MISSING_INVENTORY_ERROR_MESSAGE) {
+
+                // put back to queue after one second
+                $this->release(1);
+            }
         }
     }
 }
