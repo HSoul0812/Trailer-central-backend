@@ -19,14 +19,21 @@ class PruneSSNCommand extends Command
 
     const WEBSITE_FORM_SUBMISSIONS_TABLE_SSN_KEY = 'ssn';
 
+    const DEFAULT_CHUNK_SIZE = 1000;
+    const DEFAULT_DELAY = 5;
+    const DEFAULT_OLDER_THAN_DAYS = 30;
+
     /**
      * @var string
      */
     protected $signature = '
         database:prune-ssn
-        {--olderThanDays=30 : To prune SSN older than specified value, default is 30 days.}
-        {--chunkSize=1000 : The size for each chunk.}
-        {--delay=5 : Delay time in seconds after each delayChunkCount parts is being dispatched.}
+        {--olderThanDays=' . self::DEFAULT_OLDER_THAN_DAYS .
+        ' : To prune SSN older than specified value, default is 30 days.}
+        {--chunkSize=' . self::DEFAULT_CHUNK_SIZE .
+        ' : The size for each chunk.}
+        {--delay=' . self::DEFAULT_DELAY .
+        ' : Delay time in seconds after each delayChunkCount parts is being dispatched.}
     ';
 
     /**
@@ -69,7 +76,7 @@ class PruneSSNCommand extends Command
         $this->line('Removing ' . $infoMsg);
 
         DB::table('website_form_submissions')
-            ->select(['id', 'answers', 'is_ssn_removed',])
+            ->select(['id', 'answers', 'is_ssn_removed', ])
             ->where([
                 ['created_at', '<', $selectedDate],
                 ['is_ssn_removed', '=', false],
@@ -91,7 +98,6 @@ class PruneSSNCommand extends Command
                                 $ssnAnswers = $answersCollection->all();
                                 $answersCollection->where('name', self::WEBSITE_FORM_SUBMISSIONS_TABLE_SSN_KEY)
                                     ->each(function ($item, $key) use (&$ssnAnswers, $submission) {
-
                                         $ssnAnswers = data_set($ssnAnswers, $key . '.answer', '');
                                     });
 

@@ -2,20 +2,18 @@
 
 /** @var \Illuminate\Database\Eloquent\Factory $factory */
 
-use App\Helpers\GeographyHelper;
 use App\Models\CRM\Leads\Lead;
-use App\Models\CRM\Leads\LeadType;
-use Faker\Generator as Faker;
 use App\Models\Website\Lead\WebsiteLeadFAndI;
+use Faker\Generator as Faker;
 
 $factory->define(WebsiteLeadFAndI::class, function (Faker $faker, array $attributes) {
     $data = [
-        'lead' => factory(Lead::class)->create()->getKey(),
+        'lead_id' => factory(Lead::class)->create()->getKey(),
         'drivers_first_name' => $faker->firstName,
         'drivers_mid_name' => $faker->firstName,
         'drivers_last_name' => $faker->lastName,
         'drivers_suffix' => $faker->suffix,
-        'drivers_dob' => $faker->dateTimeBetween('-50 year', '-10 years'),
+        'drivers_dob' => $faker->dateTimeBetween('-50 years', '-10 years'),
         'drivers_no' => $faker->isbn10,
         'drivers_front' => '',
         'drivers_back' => '',
@@ -36,7 +34,7 @@ $factory->define(WebsiteLeadFAndI::class, function (Faker $faker, array $attribu
         'evening_phone' => $faker->phoneNumber,
         'mobile_phone' => $faker->phoneNumber,
         'rent_own' => $faker->randomElement(['rent', 'own']),
-        'monthly_rent' => $faker->randomNumber(),
+        'monthly_rent' => $faker->randomNumber(4),
         'type' => $faker->randomElement([
             WebsiteLeadFAndI::TYPE_SINGLE,
             WebsiteLeadFAndI::TYPE_JOINT,
@@ -44,21 +42,21 @@ $factory->define(WebsiteLeadFAndI::class, function (Faker $faker, array $attribu
         ]),
         'co_first_name' => $faker->firstName,
         'co_last_name' => $faker->lastName,
-        'item_inquiry' => $faker->words(3),
+        'item_inquiry' => $faker->words(3, true),
         'item_price' => $faker->randomNumber(),
-        'down_payment' => $faker->randomNumber(),
-        'trade_value' => $faker->randomNumber(),
-        'trade_payoff' => $faker->randomNumber(),
-        'other_income' => $faker->randomNumber(),
+        'down_payment' => $faker->randomNumber(4),
+        'trade_value' => $faker->randomNumber(4),
+        'trade_payoff' => $faker->randomNumber(4),
+        'other_income' => $faker->randomNumber(4),
         'other_income_source' => $faker->word,
-        'extra' => $faker->words(2),
+        'extra' => $faker->words(2, true),
         'preferred_salesperson' => $faker->firstName,
         'delivery_method' => $faker->randomElement([
             WebsiteLeadFAndI::DELIVERY_METHOD_PICKUP,
             WebsiteLeadFAndI::DELIVERY_METHOD_RESIDENCE,
             WebsiteLeadFAndI::DELIVERY_METHOD_ELSEWHERE,
         ]),
-        'date_imported' => $faker->firstName,
+        'date_imported' => $attributes['date_imported'] ?? $faker->dateTimeBetween('-2 years', '-30 days'),
     ];
 
     // Return Overrides

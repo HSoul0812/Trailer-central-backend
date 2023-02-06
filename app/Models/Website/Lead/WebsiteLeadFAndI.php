@@ -2,13 +2,14 @@
 
 namespace App\Models\Website\Lead;
 
+use App\Models\CRM\Leads\Lead;
 use App\Models\Traits\TableAware;
-use App\Models\Website\Website;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Class WebsiteLeadFAndI
+ *
  * @package App\Models\Website\Lead
  *
  * @property int fandi_id
@@ -43,7 +44,6 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null preferred_salesperson
  * @property string delivery_method
  * @property string date_imported
-
  * @property Lead $lead
  */
 class WebsiteLeadFAndI extends Model
@@ -137,29 +137,33 @@ class WebsiteLeadFAndI extends Model
         'date_imported',
     ];
 
+    /**
+     * @var array
+     */
     protected $casts = [
         'monthly_rent' => 'int',
         'down_payment' => 'int',
         'trade_value' => 'int',
         'trade_payoff' => 'int',
         'other_income' => 'int',
-
     ];
 
+    /**
+     * @var array
+     */
     protected $dates = [
         'date_imported',
         'drivers_dob',
     ];
 
-
     /**
-     * Get Website.
+     * Get Lead.
      *
      * @return BelongsTo
      */
     public function lead(): BelongsTo
     {
-        return $this->belongsTo(Website::class, 'website_id', 'id');
+        return $this->belongsTo(Lead::class, 'lead_id', 'identifier');
     }
 
     /**
