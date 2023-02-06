@@ -14,13 +14,6 @@ class EmployeesExportAction extends BaseExportAction implements EntityActionExpo
 
     public function getQuery()
     {
-        /**
-         * SELECT de.*, CONCAT(dst.first_name, ' ', dst.last_name) as serviceUserName, du.email as crmUserName
-                FROM dealer_employee as de
-                    LEFT JOIN dealer_users as du on de.crm_user_id = du.dealer_user_id
-                    LEFT JOIN dms_settings_technician as dst on de.service_user_id = dst.id
-                WHERE de.dealer_id='{$this->getDealerId()}
-         */
         return Employee::query()
             ->selectRaw('dealer_employee.*, CONCAT(dms_settings_technician.first_name, " ", dms_settings_technician.last_name) as service_user, dealer_users.email as crm_user')
             ->leftJoin('dealer_users', 'dealer_employee.crm_user_id', '=', 'dealer_users.dealer_user_id')

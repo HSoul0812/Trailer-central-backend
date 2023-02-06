@@ -8,6 +8,7 @@ use App\Jobs\DealerExports\DealerDataExportJob;
 use App\Domains\DealerExports\BackOffice\Settings\VendorsExportAction;
 use App\Domains\DealerExports\BackOffice\Settings\BrandsExportAction;
 use App\Domains\DealerExports\BackOffice\Settings\EmployeesExportAction;
+use App\Domains\DealerExports\BackOffice\Settings\ExpensesExportAction;
 
 class ExportManagerAction
 {
@@ -17,6 +18,7 @@ class ExportManagerAction
         VendorsExportAction::class,
         BrandsExportAction::class,
         EmployeesExportAction::class,
+        ExpensesExportAction::class,
     ];
 
     public function __construct(User $dealer)
