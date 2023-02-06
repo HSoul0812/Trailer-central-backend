@@ -243,7 +243,7 @@
 
                 <div class="p-4">
                     <div class="mb-2">
-                        <span>Bulk Invenotory Manufacturer</span>
+                        <span>Bulk Inventory Manufacturer</span>
                     </div>
                     <pre style="background-color: black; color: white;">{{ formBulkInvMfg }}</pre>
                 </div>
