@@ -15,7 +15,6 @@ use App\Transformers\Location\TcApiResponseUserLocationTransformer;
 
 class LocationController extends AbstractRestfulController
 {
-
     public function __construct(
         private UsersServiceInterface $tcUserService,
         private TcApiResponseUserLocationTransformer $transformer,
