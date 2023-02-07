@@ -10,6 +10,7 @@ use App\Services\Inventory\ESQuery\SortOrder;
 use Dingo\Api\Routing\Helpers;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use TrailerCentral\Sdk\Handlers\Search\Filters\Operator;
 use TrailerCentral\Sdk\Handlers\Search\Geolocation\GeoCoordinates;
 use TrailerCentral\Sdk\Handlers\Search\Geolocation\Geolocation;
@@ -28,7 +29,6 @@ use TrailerCentral\Sdk\Handlers\Search\Filters\FilterGroup;
 use TrailerCentral\Sdk\Handlers\Search\Filters\Filter;
 use TrailerCentral\Sdk\Resources\Search;
 use TrailerCentral\Sdk\Sdk;
-use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 
 class InventorySDKService implements InventorySDKServiceInterface
 {
@@ -284,7 +284,7 @@ class InventorySDKService implements InventorySDKServiceInterface
         );
 
         if (empty($categories)) {
-            throw new BadRequestException('No category was selected');
+            throw new HttpException(400, 'No category was selected');
         }
 
         $this->mainFilterGroup->add(new Filter(

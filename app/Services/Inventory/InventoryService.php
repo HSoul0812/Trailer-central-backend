@@ -17,7 +17,6 @@ use Carbon\Carbon;
 use Dingo\Api\Routing\Helpers;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Collection;
-use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use App\DTOs\Inventory\TcEsInventory;
 use App\DTOs\Inventory\TcEsResponseInventoryList;
@@ -144,7 +143,7 @@ class InventoryService implements InventoryServiceInterface
             'map_from' => $params['category']
         ]);
         if ($categoryMapping === null) {
-            throw new BadRequestException('Corresponding category mapping was not found');
+            throw new HttpException(400, 'Corresponding category mapping was not found');
         }
         $params['category'] = $categoryMapping->map_to;
         $params['entity_type_id'] = $categoryMapping->entity_type_id;
@@ -192,7 +191,7 @@ class InventoryService implements InventoryServiceInterface
                 'map_from' => $params['category']
             ]);
             if ($categoryMapping === null) {
-                throw new BadRequestException('Corresponding category mapping was not found');
+                throw new HttpException(400, 'Corresponding category mapping was not found');
             }
             $params['category'] = $categoryMapping->map_to;
             $params['entity_type_id'] = $categoryMapping->entity_type_id;
@@ -505,7 +504,7 @@ class InventoryService implements InventoryServiceInterface
 
         $categoryQueries = $queryBuilder->buildTermInValuesQuery('category', $mappedCategories);
         if ($categoryQueries === NULL) {
-            throw new BadRequestException('No category was selected');
+            throw new HttpException(400, 'No category was selected');
         }
 
         if (isset($params['category']) && $params['category'] === 'Tilt Trailers') {
