@@ -26,7 +26,7 @@ class SyncWebsiteFromRemoteCommand extends AbstractSyncFromRemoteCommand
      *
      * @var string
      */
-    protected $signature = "inventory:sync-dealer-website-from-remote {dealer_id} {host} {user} {db=trailercentral} {port=3306}";
+    protected $signature = 'sync:dealer-website-from-remote {dealer_id} {host} {user} {db=trailercentral} {port=3306}';
 
     /**
      * The console command description.
