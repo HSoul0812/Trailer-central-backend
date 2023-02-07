@@ -878,9 +878,9 @@ class InventoryRepository implements InventoryRepositoryInterface
         if (isset($params['is_publishable_classified'])) {
             $query = $query->join('dealer', 'dealer.dealer_id', '=', 'inventory.dealer_id');
             if ($params['is_publishable_classified']) {
-                $query = $query->where('clsf_active', User::CLASSIFIED_ACTIVE)->where('show_on_website', Inventory::SHOW_IN_WEBSITE);
+                $query = $query->where('clsf_active', User::CLASSIFIED_ACTIVE)->where('show_on_website', Inventory::SHOW_IN_WEBSITE)->where('inventory.dealer_id', $params['dealer_id']);
             } else {
-                $query = $query->where('clsf_active', !User::CLASSIFIED_ACTIVE)->orWhere('show_on_website', !Inventory::SHOW_IN_WEBSITE);
+                $query = $query->where('clsf_active', !User::CLASSIFIED_ACTIVE)->orWhere('show_on_website', !Inventory::SHOW_IN_WEBSITE)->where('inventory.dealer_id', $params['dealer_id']);
             }
 
         }
