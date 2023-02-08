@@ -2,10 +2,9 @@
 
 namespace App\Repositories\Inventory;
 
-use Illuminate\Support\Collection;
 use App\Models\Inventory\Inventory;
+use Illuminate\Support\Collection;
 use App\Exceptions\NotImplementedException;
-use App\Jobs\Inventory\InventoryBulkUpdateManufacturer;
 
 /**
  * Class InventoryBulkUpdateRepository
@@ -14,6 +13,18 @@ use App\Jobs\Inventory\InventoryBulkUpdateManufacturer;
  */
 class InventoryBulkUpdateRepository implements InventoryBulkUpdateRepositoryInterface
 {
+    protected $inventoryRepository;
+
+    /**
+     * Create a new controller instance.
+     *
+     * @param InventoryRepositoryInterface $inventoryRepository
+     */
+    public function __construct(InventoryRepositoryInterface $inventoryRepository)
+    {
+        $this->inventoryRepository = $inventoryRepository;
+    }
+
     /**
      * @param $params
      * @throws NotImplementedException
@@ -64,22 +75,14 @@ class InventoryBulkUpdateRepository implements InventoryBulkUpdateRepositoryInte
      */
     public function getInventoriesFromManufacturer($params): Collection
     {
-        return Inventory::where($params)->get();
+        return $this->inventoryRepository->get($params);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function bulkUpdateInventoryManufacturer($inventory, $params): bool
+    public function bulkUpdateInventoryManufacturer($inventory, $params): Inventory
     {
-        return $inventory->update($params);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function bulkUpdateManufacturer($params)
-    {
-        return dispatch((new InventoryBulkUpdateManufacturer($params))->onQueue('inventory'));
+        return $this->inventoryRepository->update($params);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Services\Inventory;
 
+use App\Jobs\Inventory\InventoryBulkUpdateManufacturer;
 use App\Repositories\Inventory\InventoryBulkUpdateRepository;
 use Exception;
 use Illuminate\Support\Facades\Log;
@@ -36,9 +37,7 @@ class InventoryBulkUpdateManufacturerService implements InventoryBulkUpdateManuf
     }
 
     /**
-     * Updates Showrooms year
-     *
-     * @throws Exception
+     * {@inheritDoc}
      */
     public function update()
     {
@@ -62,5 +61,13 @@ class InventoryBulkUpdateManufacturerService implements InventoryBulkUpdateManuf
 
             throw $e;
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function bulkUpdateManufacturer($params)
+    {
+        return dispatch((new InventoryBulkUpdateManufacturer($params))->onQueue('inventory'));
     }
 }

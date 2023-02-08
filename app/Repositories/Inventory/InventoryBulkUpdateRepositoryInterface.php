@@ -23,14 +23,7 @@ interface InventoryBulkUpdateRepositoryInterface extends Repository
     /**
      * @param Inventory $inventory
      * @param array $params
-     * @return bool
+     * @return Inventory
      */
-    public function bulkUpdateInventoryManufacturer(Inventory $inventory, array $params): bool;
-
-    /**
-     * @param array $params
-     * @return mixed
-     * @throws Exception
-     */
-    public function bulkUpdateManufacturer(array $params);
+    public function bulkUpdateInventoryManufacturer(Inventory $inventory, array $params): Inventory;
 }

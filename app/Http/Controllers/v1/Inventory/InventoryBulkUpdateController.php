@@ -2,17 +2,14 @@
 
 namespace App\Http\Controllers\v1\Inventory;
 
-use App\Repositories\Inventory\InventoryBulkUpdateRepository;
-use Dingo\Api\Http\Response;
 use Exception;
 use Dingo\Api\Http\Request;
+use Dingo\Api\Http\Response;
 
 use App\Http\Controllers\RestfulController;
-use App\Http\Requests\Showroom\ShowroomGetRequest;
-use App\Transformers\Inventory\ManufacturerTransformer;
-use App\Repositories\Showroom\ShowroomBulkUpdateRepository;
-use App\Http\Requests\Showroom\ShowroomBulkUpdateYearRequest;
-use App\Http\Requests\Showroom\ShowroomBulkUpdateVisibilityRequest;
+use App\Repositories\Inventory\InventoryBulkUpdateRepositoryInterface;
+use App\Http\Requests\Inventory\InventoryBulkUpdateManufacturerRequest;
+use App\Services\Inventory\InventoryBulkUpdateManufacturerServiceInterface;
 
 /**
  * Class InventoryBulkUpdateController
@@ -22,20 +19,27 @@ use App\Http\Requests\Showroom\ShowroomBulkUpdateVisibilityRequest;
 class InventoryBulkUpdateController extends RestfulController
 {
     /**
-     * @var InventoryBulkUpdateRepository
+     * @var InventoryBulkUpdateRepositoryInterface
      */
     protected $inventoryBulkUpdateRepository;
 
+    /**
+     * @var InventoryBulkUpdateManufacturerServiceInterface
+     */
+    protected $inventoryBulkUpdateManufacturerService;
 
     /**
      * Create a new controller instance.
      *
-     * @param InventoryBulkUpdateRepository $inventoryBulkUpdateRepository
+     * @param InventoryBulkUpdateRepositoryInterface $inventoryBulkUpdateRepository
+     * @param InventoryBulkUpdateManufacturerServiceInterface $inventoryBulkUpdateManufacturerService
      */
     public function __construct(
-        InventoryBulkUpdateRepository $inventoryBulkUpdateRepository
+        InventoryBulkUpdateRepositoryInterface $inventoryBulkUpdateRepository,
+        InventoryBulkUpdateManufacturerServiceInterface $inventoryBulkUpdateManufacturerService
     ) {
         $this->inventoryBulkUpdateRepository = $inventoryBulkUpdateRepository;
+        $this->inventoryBulkUpdateManufacturerService = $inventoryBulkUpdateManufacturerService;
     }
 
     /**
@@ -43,6 +47,7 @@ class InventoryBulkUpdateController extends RestfulController
      *
      * @param Request $request
      * @return Response
+     * @throws Exception
      */
     public function bulkUpdateManufacturer(Request $request): Response
     {
@@ -52,18 +57,11 @@ class InventoryBulkUpdateController extends RestfulController
             $this->response->errorBadRequest();
         }
 
-        try {
-            $this->inventoryBulkUpdateRepository->bulkUpdateManufacturer($request->all());
+        $this->inventoryBulkUpdateManufacturerService->bulkUpdateManufacturer($request->all());
 
-            return $this->response->array([
-                'status' => 'success',
-                'message' => 'Updating Inventories'
-            ]);
-        } catch (Exception $e) {
-            return $this->response->array([
-                'status' => 'error',
-                'message' => $e->getMessage()
-            ]);
-        }
+        return $this->response->array([
+            'status' => 'success',
+            'message' => 'Updating Inventories'
+        ]);
     }
 }

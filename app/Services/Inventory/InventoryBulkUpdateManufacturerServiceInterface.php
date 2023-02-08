@@ -2,6 +2,8 @@
 
 namespace App\Services\Inventory;
 
+use Exception;
+
 /**
  * interface InventoryBulkUpdateManufacturerServiceInterface
  *
@@ -9,5 +11,18 @@ namespace App\Services\Inventory;
  */
 interface InventoryBulkUpdateManufacturerServiceInterface
 {
-    // Interface methods if needed
+
+    /**
+     * Updates Inventory Manufacturers
+     *
+     * @throws Exception
+     */
+    public function update();
+
+    /**
+     * @param $params
+     * @return mixed
+     * @throws Exception
+     */
+    public function bulkUpdateManufacturer($params);
 }
