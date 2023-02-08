@@ -2,6 +2,7 @@
 
 namespace App\Jobs\CRM\Leads\Export;
 
+use App\Exceptions\CRM\Leads\Export\InvalidToEmailAddressException;
 use App\Jobs\Job;
 use App\Mail\CRM\Leads\Export\ADFEmail;
 use App\Models\CRM\Leads\Lead;
@@ -83,6 +84,10 @@ class ADFJob extends Job
         $log->info('Mailing ADF Lead', ['lead' => $this->adf->leadId]);
 
         try {
+            if(empty($this->toEmails)) {
+                throw new InvalidToEmailAddressException();
+            }
+
             Mail::to($this->toEmails)
                 ->cc($this->copiedEmails)
                 ->bcc($this->hiddenCopiedEmails)
