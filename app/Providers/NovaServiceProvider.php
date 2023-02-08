@@ -10,6 +10,8 @@ use Laravel\Nova\Nova;
 use Laravel\Nova\NovaApplicationServiceProvider;
 use Showroom\BulkConfiguration\BulkConfiguration;
 
+use Anaseqal\NovaImport\NovaImport;
+
 class NovaServiceProvider extends NovaApplicationServiceProvider
 {
     /**
@@ -61,7 +63,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     protected function cards()
     {
         return [
-            new Help,
+            new Help(),
         ];
     }
 
@@ -83,6 +85,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     public function tools()
     {
         return [
+            new NovaImport(),
             (new BulkConfiguration())->canSee(function ($request) {
                 return $request->user()->hasAnyRole('Admin', 'Support');
             }),
@@ -97,7 +100,9 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
      */
     public function register()
     {
-        //
+        Nova::sortResourcesBy(function ($resource) {
+            return $resource::$priority ?? 99999;
+        });
     }
 
     protected function resources()

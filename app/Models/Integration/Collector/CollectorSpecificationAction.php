@@ -43,7 +43,7 @@ class CollectorSpecificationAction extends Model
         'updated_at',
     ];
 
-    public function collector(): BelongsTo
+    public function collectorSpecification(): BelongsTo
     {
         return $this->belongsTo(CollectorSpecification::class);
     }
