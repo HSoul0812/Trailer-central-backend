@@ -4,15 +4,15 @@ namespace App\Domains\DealerExports\BackOffice;
 
 use App\Domains\DealerExports\BaseExportAction;
 use App\Contracts\DealerExports\EntityActionExportable;
-use App\Models\CRM\Dms\FinancingCompany;
+use App\Models\CRM\User\Customer;
 
-class FinancingCompaniesExportAction extends BaseExportAction implements EntityActionExportable
+class CustomersExportAction extends BaseExportAction implements EntityActionExportable
 {
-    public const ENTITY_TYPE = 'financing_companies';
+    public const ENTITY_TYPE = 'customers';
 
     public function getQuery()
     {
-        return FinancingCompany::query()->where('dealer_id', $this->dealer->dealer_id);
+        return Customer::query()->where('dealer_id', $this->dealer->dealer_id);
     }
 
     public function execute(): void
@@ -21,6 +21,7 @@ class FinancingCompaniesExportAction extends BaseExportAction implements EntityA
             ->setHeaders([
                 'first_name' => 'First Name',
                 'last_name' => 'Last Name',
+                'middle_name' => 'Middle Name',
                 'display_name' => 'Display Name',
                 'email' => 'Email',
                 'drivers_license' => 'Drivers License',
@@ -32,11 +33,18 @@ class FinancingCompaniesExportAction extends BaseExportAction implements EntityA
                 'region' => 'Region',
                 'postal_code' => 'Postal Code',
                 'country' => 'Country',
+                'county' => 'County',
                 'tax_exempt' => 'Is Tax Exempted',
                 'account_number' => 'Account Number',
                 'gender' => 'Gender',
                 'dob' => 'Date of Birth',
-                'fin' => 'FIN',
+                'company_name' => 'Company Name',
+                'shipping_address' => 'Shipping Address',
+                'shipping_city' => 'Shipping City',
+                'shipping_region' => 'Shipping Region',
+                'shipping_postal_code' => 'Shipping Postal Code',
+                'shipping_country' => 'Shipping Country',
+                'shipping_county' => 'Shipping County',
             ])
             ->export();
     }
