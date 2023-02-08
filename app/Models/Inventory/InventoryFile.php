@@ -4,6 +4,7 @@
 namespace App\Models\Inventory;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Class InventoryFile
@@ -14,6 +15,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $inventory_id,
  * @property int $position,
  * @property bool $is_manual,
+ *
+ * @property File $file
  */
 class InventoryFile extends Model {
 
@@ -32,4 +35,12 @@ class InventoryFile extends Model {
         'position',
         'is_manual',
     ];
+
+    /**
+     * @return BelongsTo
+     */
+    public function file(): BelongsTo
+    {
+        return $this->belongsTo(File::class,'file_id', 'id');
+    }
 }

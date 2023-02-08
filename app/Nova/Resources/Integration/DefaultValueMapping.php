@@ -6,6 +6,7 @@ namespace App\Nova\Resources\Integration;
 
 use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping;
 use App\Models\Integration\Collector\CollectorFields;
+use App\Nova\Actions\Importer\DefaultValueMappingImporter;
 use App\Nova\Filters\DealerIDMapping;
 use App\Nova\Resource;
 use App\Nova\Resources\Dealer\LightDealer;
@@ -19,7 +20,7 @@ use App\Nova\Actions\Exports\DefaultValueMappingExport;
 
 class DefaultValueMapping extends Resource
 {
-    public static $group = 'Integration';
+    public static $group = 'Collector';
 
     /**
      * The model the resource corresponds to.
@@ -135,7 +136,8 @@ class DefaultValueMapping extends Resource
     public function actions(Request $request)
     {
         return [
-            (new DefaultValueMappingExport)->withHeadings()->askForFilename(),
+            (new DefaultValueMappingExport())->withHeadings()->askForFilename(),
+            new DefaultValueMappingImporter()
         ];
     }
 }
