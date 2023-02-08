@@ -11,6 +11,7 @@ use App\Domains\DealerExports\BackOffice\Settings\EmployeesExportAction;
 use App\Domains\DealerExports\BackOffice\Settings\ExpensesExportAction;
 use App\Domains\DealerExports\BackOffice\FinancingCompaniesExportAction;
 use App\Domains\DealerExports\BackOffice\CustomersExportAction;
+use App\Domains\DealerExports\BackOffice\BillsExportAction;
 
 class ExportManagerAction
 {
@@ -26,6 +27,8 @@ class ExportManagerAction
         FinancingCompaniesExportAction::class,
         // BackOffice -> Customers
         CustomersExportAction::class,
+        // BackOffice -> Bills
+        BillsExportAction::class,
     ];
 
     public function __construct(User $dealer)
