@@ -182,9 +182,9 @@ class UserRepository implements UserRepositoryInterface {
     /**
      * @param int $dealerId
      * @param array $params
-     * @return bool was there any change?
+     * @return array fields and values that were changed
      */
-    public function updateOverlaySettings(int $dealerId, array $params): bool 
+    public function updateOverlaySettings(int $dealerId, array $params): array 
     {
         $dealer = User::findOrFail($dealerId);
 
@@ -219,7 +219,7 @@ class UserRepository implements UserRepositoryInterface {
 
         $dealer->save();
 
-        return $dealer->wasChanged();
+        return $dealer->getChanges();
     }
 
     /**
