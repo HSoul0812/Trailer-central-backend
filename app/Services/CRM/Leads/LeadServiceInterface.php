@@ -23,13 +23,13 @@ interface LeadServiceInterface {
     public function update(array $rawParams): Lead;
 
     /**
-     * Merge Lead
+     * Adding Sent Inquiry into Lead Interaction 
      *
      * @param Lead $lead
      * @param array $params
      * @return Interaction
      */
-    public function merge(Lead $lead, array $params): Interaction;
+    public function mergeInquiry(Lead $lead, array $params): Interaction;
 
     /**
      * @param array $params
@@ -39,8 +39,17 @@ interface LeadServiceInterface {
 
     /**
      * @param int $leadId
-     * @param int $mergesLeadId
+     * @param int $mergeLeadId
      * @return bool
      */
-    public function mergeLeads(int $leadId, int $mergesLeadId): bool;
+    public function mergeLeadData(int $leadId, int $mergeLeadId): bool;
+
+    /**
+     * Merge Leads
+     * 
+     * @param int $LeadId primary lead ID
+     * @param array $mergeLeadIds lead IDs to be merged
+     * @return void
+     */
+    public function mergeLeads(int $leadId, array $mergeLeadIds);
 }

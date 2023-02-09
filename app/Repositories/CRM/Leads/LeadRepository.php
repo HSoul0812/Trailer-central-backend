@@ -278,6 +278,58 @@ class LeadRepository implements LeadRepositoryInterface {
     }
 
     /**
+     * Get the earliest of submitted date between leads
+     * 
+     * @param array $leadIds
+     * @param string 
+     */
+    public function getMinSubmittedDateBetweenLeads(array $leadIds)
+    {
+        return Lead::selectRaw('MIN(date_submitted) AS min_date_submitted')
+            ->whereIn('identifier', $leadIds)->first()->min_date_submitted;
+    }
+
+    /**
+     * Get the latest contact date between leads
+     * 
+     * @param array $leadIds
+     * @return string
+     */
+    public function getMaxContactDateBetweenLeads(array $leadIds)
+    {
+        return LeadStatus::selectRaw('MAX(next_contact_date) AS max_contact_date')
+            ->whereIn('tc_lead_identifier', $leadIds)->first()->max_contact_date;
+    }
+
+    /**
+     * Get combined notes of leads
+     * 
+     * @param array $leadIds
+     * @return string
+     */
+    public function getNotesBetweenLeads(array $leadIds)
+    {
+        // Get Notes for Various Leads
+        $leads = Lead::select('note')
+            ->whereIn('identifier', $leadIds)
+            ->whereRaw('note is not null')
+            ->whereRaw("trim(note) <> ''")
+            ->get();
+
+        // Get Notes
+        $notes = '';
+        foreach($leads as $lead) {
+            if(!empty($notes)) {
+                $notes .= PHP_EOL . PHP_EOL;
+            }
+            $notes .= $lead->note;
+        }
+
+        // Return Combined Notes
+        return $notes;
+    }
+
+    /**
      * Get All Unassigned Leads
      *
      * @param int $params

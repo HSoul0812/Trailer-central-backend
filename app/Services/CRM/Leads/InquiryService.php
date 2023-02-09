@@ -269,7 +269,7 @@ class InquiryService implements InquiryServiceInterface
                 // Merge Lead!
                 if (!empty($lead->identifier)) {
                     $this->log->info('Merged lead inquiry into #' . $lead->identifier);
-                    $interaction = $this->leads->merge($lead, $params);
+                    $interaction = $this->leads->mergeInquiry($lead, $params);
 
                     // Update Existing Lead
                     $lead = $this->leads->update([
