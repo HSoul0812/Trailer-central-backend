@@ -14,6 +14,9 @@ use Illuminate\Console\Command;
  */
 class ReindexInventoryIndex extends Command
 {
+    /** @var int time in seconds */
+    private const WAIT_TIME = 15;
+
     /**
      * The name and signature of the console command.
      *
@@ -36,7 +39,7 @@ class ReindexInventoryIndex extends Command
             $this->call('scout:import', ['model' => Inventory::class]);
 
             $this->line(sprintf('Waiting for batch <comment>%s</comment> ...', $batch->batch_id));
-        }, __CLASS__);
+        }, __CLASS__, self::WAIT_TIME);
 
         // no matter if cache is disabled, invalidating the entire cache should be done
         $responseCache->forget([RedisResponseCacheKey::CLEAR_ALL_PATTERN]);

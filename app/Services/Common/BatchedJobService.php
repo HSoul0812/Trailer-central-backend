@@ -7,15 +7,17 @@ use App\Models\BatchedJob;
 use App\Repositories\Horizon\TagRepositoryInterface;
 use Illuminate\Support\Carbon;
 use Laravel\Horizon\Contracts\JobRepository;
-use Str;
+use Illuminate\Support\Str;
 
 class BatchedJobService implements BatchedJobServiceInterface
 {
     private const COMPLETED = 'completed';
 
-    private const WAIT_TIME = 2;
-
+    /** @var string used when the batch doesn't have a group */
     private const NO_GROUP = 'no-group';
+
+    /** @var int time in seconds */
+    public const WAIT_TIME = 2;
 
     /** @var \App\Repositories\Horizon\TagRepositoryInterface */
     private $tagRepository;
@@ -39,11 +41,12 @@ class BatchedJobService implements BatchedJobServiceInterface
     /**
      * @inheritDoc
      */
-    public function create(?string $group = null): BatchedJob
+    public function create(?string $group = null, ?int $waitTime = null): BatchedJob
     {
         $batch = BatchedJob::create([
             'batch_id' => Str::uuid()->toString(),
-            'group' => $group ?: self::NO_GROUP
+            'group' => $group ?: self::NO_GROUP,
+            'wait_time' => $waitTime ?? self::WAIT_TIME
         ]);
 
         $this->logger->info(sprintf('Batch [%s] was created', $batch->batch_id));
@@ -85,7 +88,7 @@ class BatchedJobService implements BatchedJobServiceInterface
         $this->logger->info(sprintf('Batch [%s] was started to be monitored', $batch->batch_id));
 
         do {
-            $this->wait();
+            $this->waitFor($batch);
         } while ($this->isRunning($batch));
     }
 
@@ -135,8 +138,8 @@ class BatchedJobService implements BatchedJobServiceInterface
         return $job;
     }
 
-    protected function wait(): void
+    protected function waitFor(BatchedJob $batch): void
     {
-        sleep(self::WAIT_TIME);
+        sleep($batch->wait_time);
     }
 }

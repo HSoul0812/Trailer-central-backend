@@ -34,14 +34,15 @@ abstract class Job implements ShouldQueue
      *
      * @param  callable  $callback
      * @param  string|null  $group
+     * @param  int|null  $waitTime in seconds
      * @return BatchedJob
      */
-    public static function batch(callable $callback, ?string $group = null): BatchedJob
+    public static function batch(callable $callback, ?string $group = null, ?int $waitTime = null): BatchedJob
     {
         /** @var BatchedJobServiceInterface $service */
         $service = app(BatchedJobServiceInterface::class);
 
-        $batch = $service->create($group);
+        $batch = $service->create($group, $waitTime);
 
         self::$batchId = $batch->batch_id;
 

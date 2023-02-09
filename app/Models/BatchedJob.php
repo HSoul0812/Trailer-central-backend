@@ -13,6 +13,7 @@ use Illuminate\Support\Carbon;
  * @property integer $total_jobs
  * @property integer $processed_jobs
  * @property integer $failed_jobs
+ * @property integer $wait_time time in seconds
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property Carbon $finished_at
@@ -58,7 +59,7 @@ class BatchedJob extends Model
     protected $keyType = 'string';
 
     /** @var array<string> */
-    protected $fillable = ['batch_id', 'group', 'total_jobs', 'processed_jobs', 'failed_jobs', 'finished_at'];
+    protected $fillable = ['batch_id', 'group', 'total_jobs', 'processed_jobs', 'failed_jobs', 'finished_at', 'wait_time'];
 
     /** @var array<string> */
     protected $dates = ['created_at', 'updated_at', 'finished_at'];
