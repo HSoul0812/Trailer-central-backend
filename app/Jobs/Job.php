@@ -52,7 +52,7 @@ abstract class Job implements ShouldQueue
 
             return $batch;
         } finally {
-            $service->forget($batch);
+            $service->detach($batch);
 
             self::$batchId = null;
         }

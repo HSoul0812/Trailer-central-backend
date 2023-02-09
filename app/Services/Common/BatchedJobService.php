@@ -56,7 +56,7 @@ class BatchedJobService implements BatchedJobServiceInterface
     /**
      * @inheritDoc
      */
-    public function forget(BatchedJob $batch): void
+    public function detach(BatchedJob $batch): void
     {
         $processed_jobs = $batch->total_jobs - $this->count($batch);
 
@@ -67,6 +67,10 @@ class BatchedJobService implements BatchedJobServiceInterface
         ]);
 
         $this->tagRepository->forget($batch->batch_id);
+
+        if ($processed_jobs === $batch->total_jobs) {
+            $this->tagRepository->stopMonitoring($batch->batch_id);
+        }
 
         $this->logger->info(sprintf('Batch [%s] was forgot', $batch->batch_id));
     }
