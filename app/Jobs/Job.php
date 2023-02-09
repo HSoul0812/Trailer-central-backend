@@ -2,6 +2,8 @@
 
 namespace App\Jobs;
 
+use App\Models\BatchedJob;
+use App\Services\Common\BatchedJobServiceInterface;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
@@ -9,6 +11,9 @@ use Illuminate\Queue\SerializesModels;
 
 abstract class Job implements ShouldQueue
 {
+    /** @var string|null */
+    private static $batchId;
+
     /*
     |--------------------------------------------------------------------------
     | Queueable Jobs
@@ -21,4 +26,45 @@ abstract class Job implements ShouldQueue
     */
 
     use InteractsWithQueue, Queueable, SerializesModels;
+
+    /**
+     * Will create the batch, then it will run the anonymous function and monitor the batch, when it is finished,
+     * it will return the batch
+     *
+     * @param  callable  $callback
+     * @param  string|null  $group
+     * @return BatchedJob
+     */
+    public static function batch(callable $callback, ?string $group = null): BatchedJob
+    {
+        /** @var BatchedJobServiceInterface $service */
+        $service = app(BatchedJobServiceInterface::class);
+
+        $batch = $service->create($group);
+
+        self::$batchId = $batch->batch_id;
+
+        try {
+            $callback($batch);
+
+            $service->monitor($batch);
+
+            return $batch;
+        } finally {
+
+            $service->stop($batch); //if for some reason it has not been stopped
+
+            self::$batchId = null;
+        }
+    }
+
+    /**
+     * Gets the current batch id when it exist
+     *
+     * @return string|null
+     */
+    public static function batchId(): ?string
+    {
+        return self::$batchId;
+    }
 }
