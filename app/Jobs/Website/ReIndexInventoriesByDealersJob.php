@@ -2,11 +2,18 @@
 
 namespace App\Jobs\Website;
 
+use App\Contracts\LoggerServiceInterface;
 use App\Jobs\Job;
+use App\Models\BatchedJob;
 use App\Models\Inventory\Inventory;
+use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
+use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
 
 class ReIndexInventoriesByDealersJob extends Job
 {
+    /** @var int time in seconds */
+    private const WAIT_TIME = 15;
+
     /**
      * @var array<integer>
      */
@@ -19,8 +26,30 @@ class ReIndexInventoriesByDealersJob extends Job
         $this->dealerIds = $dealerIds;
     }
 
-    public function handle(): void
-    {
-        Inventory::makeAllSearchableByDealers($this->dealerIds);
+    public function handle(
+        InventoryResponseCacheInterface $responseCache,
+        ResponseCacheKeyInterface $responseCacheKey,
+        LoggerServiceInterface $logger
+    ): void {
+        $logger->info(
+            'Enqueueing the job to reindex inventory by dealer ids',
+            ['dealer_ids' => $this->dealerIds]
+        );
+
+        Job::batch(function (BatchedJob $batch): void {
+            Inventory::makeAllSearchableByDealers($this->dealerIds);
+        }, __CLASS__, self::WAIT_TIME);
+
+        $logger->info(
+            'Enqueueing the job to invalidate cache by dealer ids',
+            ['dealer_ids' => $this->dealerIds]
+        );
+
+        foreach ($this->dealerIds as $dealerId) {
+            $responseCache->forget([
+                $responseCacheKey->deleteByDealer($dealerId),
+                $responseCacheKey->deleteSingleByDealer($dealerId)
+            ]);
+        }
     }
 }
