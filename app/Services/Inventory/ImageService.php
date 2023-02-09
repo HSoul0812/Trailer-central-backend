@@ -115,6 +115,7 @@ class ImageService implements ImageServiceInterface
     public function updateOverlaySettings(array $params): User
     {
         $changes = $this->userRepository->updateOverlaySettings($params['dealer_id'], $params);
+        $dealer = $this->userRepository->get(['dealer_id' => $params['dealer_id']]);
         $wasChanged = !empty($changes);
         $isOverlayenabledChanged = isset($changes['overlay_enabled']);
 
