@@ -2,19 +2,30 @@
 
 namespace App\Domains\DealerExports\BackOffice;
 
-use App\Domains\DealerExports\BaseExportAction;
 use App\Contracts\DealerExports\EntityActionExportable;
+use App\Domains\DealerExports\BaseExportAction;
 use App\Models\CRM\User\Customer;
 
+/**
+ * Class CustomersExportAction
+ *
+ * @package App\Domains\DealerExports\BackOffice
+ */
 class CustomersExportAction extends BaseExportAction implements EntityActionExportable
 {
     public const ENTITY_TYPE = 'customers';
 
+    /**
+     * @return void
+     */
     public function getQuery()
     {
         return Customer::query()->where('dealer_id', $this->dealer->dealer_id);
     }
 
+    /**
+     * @return void
+     */
     public function execute(): void
     {
         $this->setEntity(self::ENTITY_TYPE)

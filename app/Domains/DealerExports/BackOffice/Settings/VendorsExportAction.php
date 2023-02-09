@@ -2,10 +2,15 @@
 
 namespace App\Domains\DealerExports\BackOffice\Settings;
 
-use App\Domains\DealerExports\BaseExportAction;
 use App\Contracts\DealerExports\EntityActionExportable;
+use App\Domains\DealerExports\BaseExportAction;
 use App\Models\Parts\Vendor;
 
+/**
+ * Class VendorsExportAction
+ *
+ * @package App\Domains\DealerExports\BackOffice\Settings
+ */
 class VendorsExportAction extends BaseExportAction implements EntityActionExportable
 {
     public const ENTITY_TYPE = 'vendors';
@@ -15,6 +20,9 @@ class VendorsExportAction extends BaseExportAction implements EntityActionExport
         return Vendor::query()->where('dealer_id', $this->dealer->dealer_id);
     }
 
+    /**
+     * @return void
+     */
     public function execute(): void
     {
         $this->setEntity(self::ENTITY_TYPE)

@@ -2,15 +2,25 @@
 
 namespace App\Domains\DealerExports;
 
-use App\Models\User\User;
 use App\Models\DealerExport;
+use App\Models\User\User;
 
+/**
+ * Class ExportFinishedAction
+ *
+ * @package App\Domains\DealerExports
+ */
 class ExportFinishedAction
 {
     protected $dealer;
     protected $entityType;
     protected $filePath;
 
+    /**
+     * @param User $dealer
+     * @param string $entityType
+     * @param string $filePath
+     */
     public function __construct(User $dealer, string $entityType, string $filePath)
     {
         $this->dealer = $dealer;
@@ -18,6 +28,9 @@ class ExportFinishedAction
         $this->filePath = $filePath;
     }
 
+    /**
+     * @return void
+     */
     public function execute()
     {
         DealerExport::query()

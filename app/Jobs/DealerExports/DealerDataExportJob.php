@@ -3,8 +3,8 @@
 namespace App\Jobs\DealerExports;
 
 use App\Jobs\Job;
-use Exception;
 use App\Models\User\User;
+use Exception;
 use Illuminate\Foundation\Bus\Dispatchable;
 
 /**
@@ -12,7 +12,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
  *
  * Job wrapper for CsvExporterService
  *
- * @package App\Services\Export\Parts
+ * @package App\Jobs\DealerExports
  */
 class DealerDataExportJob extends Job
 {
@@ -24,6 +24,10 @@ class DealerDataExportJob extends Job
 
     private $actionClass;
 
+    /**
+     * @param User $dealer
+     * @param string $actionClass
+     */
     public function __construct(User $dealer, string $actionClass)
     {
         $this->dealer = $dealer;
@@ -32,6 +36,7 @@ class DealerDataExportJob extends Job
 
     /**
      * @return bool
+     *
      * @throws Exception
      */
     public function handle(): bool

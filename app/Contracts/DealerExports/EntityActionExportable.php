@@ -2,6 +2,12 @@
 
 namespace App\Contracts\DealerExports;
 
-interface EntityActionExportable {
+/**
+ * Interface EntityActionExportable
+ *
+ * @package App\Contracts\DealerExports
+ */
+interface EntityActionExportable
+{
     public function getQuery();
 }

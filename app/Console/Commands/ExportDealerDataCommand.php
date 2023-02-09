@@ -2,13 +2,18 @@
 
 namespace App\Console\Commands;
 
+use App\Domains\DealerExports\ExportManagerAction;
+use App\Models\DealerExport;
 use App\Models\User\User;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use App\Models\DealerExport;
 use Illuminate\Support\Facades\Crypt;
-use App\Domains\DealerExports\ExportManagerAction;
 
+/**
+ * Class ExportDealerDataCommand
+ *
+ * @package App\Console\Commands
+ */
 class ExportDealerDataCommand extends Command
 {
     /**
@@ -44,6 +49,7 @@ class ExportDealerDataCommand extends Command
     {
         $dealerId = $this->argument('dealerId');
         $zipPassword = $this->argument('zipPassword');
+
         try {
             $dealer = User::query()->where('dealer_id', $dealerId)->firstOrFail();
         } catch (ModelNotFoundException $e) {

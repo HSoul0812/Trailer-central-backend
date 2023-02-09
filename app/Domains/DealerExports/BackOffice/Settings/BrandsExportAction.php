@@ -2,10 +2,15 @@
 
 namespace App\Domains\DealerExports\BackOffice\Settings;
 
-use App\Domains\DealerExports\BaseExportAction;
 use App\Contracts\DealerExports\EntityActionExportable;
+use App\Domains\DealerExports\BaseExportAction;
 use App\Models\Inventory\Inventory;
 
+/**
+ * Class BrandsExportAction
+ *
+ * @package App\Domains\DealerExports\BackOffice\Settings
+ */
 class BrandsExportAction extends BaseExportAction implements EntityActionExportable
 {
     const ENTITY_TYPE = 'brands';

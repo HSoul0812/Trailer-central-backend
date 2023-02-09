@@ -2,17 +2,22 @@
 
 namespace App\Domains\DealerExports;
 
-use App\Models\User\User;
-use App\Models\DealerExport;
-use App\Jobs\DealerExports\DealerDataExportJob;
-use App\Domains\DealerExports\BackOffice\Settings\VendorsExportAction;
+use App\Domains\DealerExports\BackOffice\BillsExportAction;
+use App\Domains\DealerExports\BackOffice\CustomersExportAction;
+use App\Domains\DealerExports\BackOffice\FinancingCompaniesExportAction;
 use App\Domains\DealerExports\BackOffice\Settings\BrandsExportAction;
 use App\Domains\DealerExports\BackOffice\Settings\EmployeesExportAction;
 use App\Domains\DealerExports\BackOffice\Settings\ExpensesExportAction;
-use App\Domains\DealerExports\BackOffice\FinancingCompaniesExportAction;
-use App\Domains\DealerExports\BackOffice\CustomersExportAction;
-use App\Domains\DealerExports\BackOffice\BillsExportAction;
+use App\Domains\DealerExports\BackOffice\Settings\VendorsExportAction;
+use App\Jobs\DealerExports\DealerDataExportJob;
+use App\Models\DealerExport;
+use App\Models\User\User;
 
+/**
+ * Class ExportManagerAction
+ *
+ * @package App\Domains\DealerExports
+ */
 class ExportManagerAction
 {
     protected $dealer;
@@ -31,14 +36,20 @@ class ExportManagerAction
         BillsExportAction::class,
     ];
 
+    /**
+     * @param User $dealer
+     */
     public function __construct(User $dealer)
     {
         $this->dealer = $dealer;
     }
 
+    /**
+     * @return void
+     */
     public function execute()
     {
-        foreach($this->exportActions as $exportAction) {
+        foreach ($this->exportActions as $exportAction) {
             // The export job can run multiple times, so its possible that we have the data in the table.
             // We will update the entry if it already exists, else will create a new one.
             DealerExport::updateOrCreate(

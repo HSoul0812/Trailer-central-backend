@@ -2,10 +2,15 @@
 
 namespace App\Domains\DealerExports\BackOffice\Settings;
 
-use App\Domains\DealerExports\BaseExportAction;
 use App\Contracts\DealerExports\EntityActionExportable;
+use App\Domains\DealerExports\BaseExportAction;
 use App\Models\CRM\User\Employee;
 
+/**
+ * Class EmployeesExportAction
+ *
+ * @package App\Domains\DealerExports\BackOffice\Settings
+ */
 class EmployeesExportAction extends BaseExportAction implements EntityActionExportable
 {
     public const ENTITY_TYPE = 'employees';
@@ -19,6 +24,9 @@ class EmployeesExportAction extends BaseExportAction implements EntityActionExpo
             ->where('dealer_employee.dealer_id', $this->dealer->dealer_id);
     }
 
+    /**
+     * @return void
+     */
     public function execute(): void
     {
         $this->setEntity(self::ENTITY_TYPE)

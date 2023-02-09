@@ -2,12 +2,17 @@
 
 namespace App\Domains\DealerExports;
 
+use App\Models\User\User;
+use Exception;
 use Illuminate\Filesystem\FilesystemAdapter;
 use League\Csv\Writer;
-use App\Models\User\User;
 use Storage;
-use Exception;
 
+/**
+ * Class BaseExportAction
+ *
+ * @package App\Domains\DealerExports
+ */
 abstract class BaseExportAction
 {
     const S3_EXPORT_PATH = 'exports/{dealer}/{entity}.csv';

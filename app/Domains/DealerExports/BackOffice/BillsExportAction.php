@@ -2,11 +2,16 @@
 
 namespace App\Domains\DealerExports\BackOffice;
 
-use App\Domains\DealerExports\BaseExportAction;
 use App\Contracts\DealerExports\EntityActionExportable;
-use Illuminate\Support\Facades\DB;
+use App\Domains\DealerExports\BaseExportAction;
 use App\Models\CRM\Dms\Quickbooks\Bill;
+use Illuminate\Support\Facades\DB;
 
+/**
+ * Class BillsExportAction
+ *
+ * @package App\Domains\DealerExports\BackOffice
+ */
 class BillsExportAction extends BaseExportAction implements EntityActionExportable
 {
     public const ENTITY_TYPE = 'bills';
