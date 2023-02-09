@@ -331,7 +331,13 @@ $api->version('v1', function ($route) {
     /**
      * Inventory images
      */
+    $route->put('inventory/{id}/images', 'App\Http\Controllers\v1\Inventory\ImageController@create')->where('id', '[0-9]+');
     $route->delete('inventory/{id}/images', 'App\Http\Controllers\v1\Inventory\ImageController@bulkDestroy')->where('id', '[0-9]+');
+    /**
+     * Inventory files
+     */
+    $route->put('inventory/{id}/files', 'App\Http\Controllers\v1\Inventory\FileController@create')->where('id', '[0-9]+');
+    $route->delete('inventory/{id}/files', 'App\Http\Controllers\v1\Inventory\FileController@bulkDestroy')->where('id', '[0-9]+');
 
     /*
     |--------------------------------------------------------------------------

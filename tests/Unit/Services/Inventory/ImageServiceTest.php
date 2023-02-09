@@ -2,11 +2,13 @@
 
 namespace Tests\Unit\Services\Inventory;
 
+use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
+use App\Jobs\Website\ReIndexInventoriesByDealersJob;
+use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use Mockery;
 use App\Jobs\Inventory\GenerateOverlayImageJob;
 use Illuminate\Support\Facades\Queue;
-use App\Models\Inventory\InventoryImage;
 use Illuminate\Support\Facades\Storage;
 use App\Models\User\User;
 use App\Models\Inventory\Inventory;
@@ -14,7 +16,6 @@ use App\Services\Inventory\ImageServiceInterface;
 use App\Services\Inventory\ImageService;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Repositories\Inventory\ImageRepositoryInterface;
-use App\Exceptions\File\MissingS3FileException;
 use App\Models\Inventory\Image;
 use Illuminate\Support\Collection;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
@@ -25,10 +26,16 @@ use App\Repositories\Inventory\InventoryRepositoryInterface;
  * Class ImageServiceTest
  * @package Tests\Unit\Services\Inventory
  *
+ * @group DW
+ * @group DW_ELASTICSEARCH
+ * @group DW_INVENTORY
+ *
  * @coversDefaultClass \App\Services\Inventory\ImageService
  */
-class ImageServiceTest extends TestCase 
+class ImageServiceTest extends TestCase
 {
+    use WithFaker;
+
     const DEALER_ID = 1;
     /**
      * @var LegacyMockInterface|ImageRepositoryInterface
@@ -242,7 +249,10 @@ class ImageServiceTest extends TestCase
             'overlay_logo' => 'logo.png'
         ];
 
-        $inventories = new Collection([]);
+        $userMock = $this->getEloquentMock(User::class);
+        $userMock->dealer_id = $this->faker->numberBetween(2000, 4000);
+
+        $inventories = new Collection();
         for ($i = 0; $i < 5; $i++)
         {
             $inventoryId = $i + 1;
@@ -252,14 +262,51 @@ class ImageServiceTest extends TestCase
         }
 
         $this->inventoryRepositoryMock->shouldReceive('getAll')
-            ->with(['dealer_id' => self::DEALER_ID], false, false, ['inventory_id'])
+            ->with([
+                'dealer_id' => self::DEALER_ID, 'images_greater_than' => 1],
+                false, false, [Inventory::getTableName(). '.inventory_id'])
             ->once()->andReturn($inventories);
 
         $this->userRepositoryMock->shouldReceive('updateOverlaySettings')
-            ->once()->with(self::DEALER_ID, $overlayParams);
+            ->once()->with(self::DEALER_ID, $overlayParams)
+            ->andReturn(true);
+
+        $this->userRepositoryMock->shouldReceive('get')
+            ->once()->with(['dealer_id' => self::DEALER_ID])
+            ->andReturn($userMock);
 
         $this->imageService->updateOverlaySettings($overlayParams);
 
         Queue::assertPushed(GenerateOverlayImageJob::class, $inventories->count());
+        Queue::assertPushed(ReIndexInventoriesByDealersJob::class, 1);
+        Queue::assertPushed(InvalidateCacheJob::class, 2); // once for single cache, once for search cache
+    }
+
+    /**
+     * @group Marketing
+     * @group Marketing_Overlays
+     */
+    public function testUpdateOverlaySettingsWithoutChanges()
+    {
+        $overlayParams = [
+            'dealer_id' => self::DEALER_ID,
+            'overlay_logo' => 'logo.png'
+        ];
+
+        $this->inventoryRepositoryMock->shouldNotReceive('getAll');
+
+        $this->userRepositoryMock->shouldReceive('updateOverlaySettings')
+            ->once()->with(self::DEALER_ID, $overlayParams)
+            ->andReturn(false);
+
+        $this->userRepositoryMock->shouldReceive('get')
+            ->once()->with(['dealer_id' => self::DEALER_ID])
+            ->andReturn($this->getEloquentMock(User::class));
+
+        $this->imageService->updateOverlaySettings($overlayParams);
+
+        Queue::assertNotPushed(GenerateOverlayImageJob::class);
+        Queue::assertNotPushed(ReIndexInventoriesByDealersJob::class);
+        Queue::assertNotPushed(InvalidateCacheJob::class);
     }
 }

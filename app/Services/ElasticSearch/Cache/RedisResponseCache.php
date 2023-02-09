@@ -3,22 +3,12 @@
 namespace App\Services\ElasticSearch\Cache;
 
 use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
-use App\Repositories\FeatureFlagRepositoryInterface;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use \Redis as PhpRedis;
 
 class RedisResponseCache implements ResponseCacheInterface
 {
     use DispatchesJobs;
-
-    /**
-     * @var int 8 hours, to avoid to reach out max memory, however we need to use a better policy
-     * Maybe we need to use a TTL according the dealer traffic, or some similar policy
-     */
-    public const TTL = 28800;
-
-    /** @var int @see https://www.php.net/manual/en/function.gzencode.php */
-    public const COMPRESSION_LEVEL = 9;
 
     public const HASH_SCAN_COUNTER = 10000;
 
@@ -29,26 +19,11 @@ class RedisResponseCache implements ResponseCacheInterface
     /** @var PhpRedis */
     private $client;
 
-    /** @var UniqueCacheInvalidationInterface */
-    private $uniqueCacheInvalidation;
-
-    /** @var FeatureFlagRepositoryInterface */
-    private $featureFlagRepository;
-
-    public function __construct($client,
-                                UniqueCacheInvalidationInterface $uniqueCacheInvalidation,
-                                FeatureFlagRepositoryInterface $featureFlagRepository)
+    public function __construct($client)
     {
         $this->client = $client;
-        $this->uniqueCacheInvalidation = $uniqueCacheInvalidation;
-        $this->featureFlagRepository = $featureFlagRepository;
     }
 
-    /**
-     * @param string $key
-     * @param mixed $value
-     * @return void
-     */
     public function set(string $key, $value): void
     {
         // it stores a new empty field within a hashmap using long key name
@@ -57,32 +32,27 @@ class RedisResponseCache implements ResponseCacheInterface
         // it stores a new key-value using an exact key name which is known by the cache client (DW)
         $this->client->set(
             $this->extractExactKey($key),
-            $this->featureFlagRepository->get('inventory-sdk-cache-compression') ? gzencode($value, self::COMPRESSION_LEVEL): $value,
-            self::TTL
+            gzencode($value, config('elastic.scout_driver.cache.compression_level', 9)),
+            config('elastic.scout_driver.cache.ttl', 86400)
         );
     }
 
     /**
-     * Invalidates all keys which match with key pattern list in asynchronous way.
+     * Dispatch all jobs given the key patterns.
      *
      * @param string ...$keyPatterns a list of key patterns
      * @return void
      */
     public function forget(string ...$keyPatterns): void
     {
-        //$keyPatterns = $this->uniqueCacheInvalidation->keysWithNoJobs($keyPatterns);
-
-        //if (count($keyPatterns)) {
-            //$this->uniqueCacheInvalidation->createJobsForKeys($keyPatterns);
-            $this->dispatch(new InvalidateCacheJob($keyPatterns));
-        ///}
+        $this->dispatch(new InvalidateCacheJob($keyPatterns));
     }
 
     /**
      * Invalidates all keys which match with key pattern list in synchronous way.
      *
-     * This method perform the key list iteration in Laravel side because it will not block the Redis server,
-     * we could have done this at Lua side, but sadly it blocks server making it unresponsive
+     * This method perform the key list iteration (hash scan) in Laravel side because it will not block the Redis server,
+     * we could have done this at Lua side, but sadly it blocks server becoming unresponsive
      *
      * @param string ...$keyPatterns a list of key patterns
      * @return void
@@ -120,7 +90,7 @@ class RedisResponseCache implements ResponseCacheInterface
         );
     }
 
-    public function hScanAndUnlink(string $hashKey, string $pattern): void
+    private function hScanAndUnlink(string $hashKey, string $pattern): void
     {
         /** @var null|int $cursor */
         $cursor = null;
@@ -152,6 +122,6 @@ class RedisResponseCache implements ResponseCacheInterface
     {
         $parts = explode('.', $key);
 
-        return $parts[1] === 'search' ? self::SEARCH_HASHMAP_KEY : self::SINGLE_HASHMAP_KEY;
+        return count($parts) > 1 && $parts[1] === 'search' ? self::SEARCH_HASHMAP_KEY : self::SINGLE_HASHMAP_KEY;
     }
 }

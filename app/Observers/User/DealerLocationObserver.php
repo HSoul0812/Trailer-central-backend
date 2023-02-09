@@ -31,7 +31,7 @@ class DealerLocationObserver
             $this->service->update($model->dealer_location_id);
         }
 
-        $this->service->invalidateCacheAndReindex($model->dealer_location_id);
+        $this->service->reindexAndInvalidateCacheInventory($model->dealer_location_id);
     }
 
     private function hasChangedName(DealerLocation $model): bool

@@ -469,7 +469,7 @@ class ImageServiceTest extends TestCase
         $this->imageHelper->shouldReceive('addLogoOverlay')
             ->withArgs([
                 Storage::disk('tmp')->path('tmp_addUpperTextOverlay'),
-                Storage::disk('test_resources')->path('logo_image.png'),
+                $overlayParams['overlay_logo'],
                 $overlayParams
             ])
             ->passthru();
@@ -532,7 +532,7 @@ class ImageServiceTest extends TestCase
         $this->imageHelper->shouldReceive('addLogoOverlay')
             ->withArgs([
                 Storage::disk('tmp')->path('tmp_addLowerTextOverlay'),
-                Storage::disk('test_resources')->path('logo_image.png'),
+                $overlayParams['overlay_logo'],
                 $overlayParams
             ])
             ->passthru();
@@ -648,7 +648,7 @@ class ImageServiceTest extends TestCase
         $this->imageHelper->shouldReceive('addLogoOverlay')
             ->withArgs([
                 $imagePath,
-                Storage::disk('test_resources')->path('logo_image.png'),
+                $overlayParams['overlay_logo'],
                 $overlayParams
             ])
             ->passthru();
@@ -689,6 +689,134 @@ class ImageServiceTest extends TestCase
 
         $this->assertImages($newImage,
             Storage::disk('test_resources')->path('testAddLogoOnlyOverlay.png'));
+    }
+
+
+
+    /**
+     * @dataProvider overlayParamDataProvider
+     * @group Marketing
+     * @group Marketing_Overlays
+     */
+    public function testAddLogoOverlayWithEmptyLogoPath($overlayParams)
+    {
+        $overlayParams['overlay_upper'] = User::OVERLAY_UPPER_NONE;
+
+        $imagePath = Storage::disk('test_resources')->path('inventory_image.png');
+
+        $this->imageHelper->shouldNotReceive('addLogoOverlay');
+
+        $this->imageHelper->shouldNotReceive('addUpperTextOverlay');
+        $this->imageHelper->shouldNotReceive('addLowerTextOverlay');
+
+        $imageService = app()->make(ImageService::class);
+
+        $newImage = $imageService->addOverlays($imagePath, $overlayParams);
+    }
+
+    /**
+     * @dataProvider overlayParamDataProvider
+     * @group Marketing
+     * @group Marketing_Overlays
+     */
+    public function testAddOverlayWithUrl($overlayParams)
+    {
+        $overlayParams['overlay_logo'] = 'https://s3.amazonaws.com/distillery-trailercentral/media/Indiana Trailer Sales & More - Transparent.png';
+        $overlayParams['overlay_upper'] = User::OVERLAY_UPPER_NONE;
+
+        $imagePath = 'https://s3.amazonaws.com/distillery-trailercentral/media/Indiana Trailer Sales & More - Transparent.png';
+
+        $this->imageHelper->shouldReceive('addLogoOverlay')
+            ->withArgs([
+                $imagePath,
+                $overlayParams['overlay_logo'],
+                $overlayParams
+            ])
+            ->passthru();
+
+        $this->imageHelper->shouldNotReceive('addUpperTextOverlay');
+        $this->imageHelper->shouldNotReceive('addLowerTextOverlay');
+
+        // Mock Temp Filenames
+        $this->imageHelper
+            ->shouldAllowMockingProtectedMethods()
+            ->shouldReceive('getRandomString')
+            ->andReturn(
+                'tmp_localLogoPath',
+                'tmp_resizedLogo',
+                'tmp_localImagePath',
+                'tmp_addLogoOverlay',
+            );
+
+        $imageService = app()->make(ImageService::class);
+
+        $newImage = $imageService->addOverlays($imagePath, $overlayParams);
+
+        Storage::disk('tmp')->assertExists([
+            'tmp_addLogoOverlay'
+        ]);
+
+        Storage::disk('tmp')->assertMissing([
+            'tmp_localLogoPath',
+            'tmp_resizedLogo',
+            'tmp_localImagePath',
+        ]);
+
+        $this->assertEquals(mime_content_type($newImage), 'image/png');
+    }
+
+    /**
+     * @dataProvider overlayParamDataProvider
+     * @group Marketing
+     * @group Marketing_Overlays
+     */
+    public function testAddOverlayWithNonvalidTextSettings($overlayParams)
+    {
+        $overlayParams['overlay_upper'] = 'foo';
+        $overlayParams['overlay_lower'] = '';
+
+        $overlayParams['overlay_logo'] = Storage::disk('test_resources')->path('logo_image.png');
+        $overlayParams['overlay_logo_position'] = User::OVERLAY_LOGO_POSITION_NONE;
+
+        $imagePath = Storage::disk('test_resources')->path('inventory_image.png');
+
+        $this->imageHelper->shouldNotReceive('addUpperTextOverlay');
+        $this->imageHelper->shouldNotReceive('addLowerTextOverlay');
+        $this->imageHelper->shouldNotReceive('addLogoOverlay');
+
+        $imageService = app()->make(ImageService::class);
+
+        $newImage = $imageService->addOverlays($imagePath, $overlayParams);
+
+        Storage::disk('tmp')->assertMissing([
+            'tmp_addUpperTextOverlay',
+            'tmp_addLowerTextOverlay'
+        ]);
+
+        $this->assertEquals(null, $newImage);
+    }
+
+    /**
+     * @dataProvider overlayParamDataProvider
+     * @group Marketing
+     * @group Marketing_Overlays
+     */
+    public function testFailedAddingOverlay($overlayParams)
+    {
+        $overlayParams['overlay_logo'] = '';
+        $overlayParams['overlay_upper'] = 'foo';
+
+        $imagePath = Storage::disk('test_resources')->path('inventory_image.png');
+
+        $this->imageHelper->shouldNotReceive('addLogoOverlay');
+        $this->imageHelper->shouldNotReceive('addUpperTextOverlay');
+        $this->imageHelper->shouldNotReceive('addLowerTextOverlay');
+
+        $imageService = app()->make(ImageService::class);
+
+        $newImage = $imageService->addOverlays($imagePath, $overlayParams);
+
+        $this->assertEquals(null, $newImage);
     }
 
     private function assertImages($expectedPath, $outputPath)

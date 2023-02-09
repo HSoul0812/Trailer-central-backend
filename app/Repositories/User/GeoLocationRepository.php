@@ -19,7 +19,7 @@ class GeoLocationRepository implements GeoLocationRepositoryInterface {
 
     /**
      * @param array $params
-     * @return mixed
+     * @return Geolocation
      * @throws ModelNotFoundException
      */
     public function get($params)
