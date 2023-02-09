@@ -4,6 +4,7 @@ namespace App\Services\Common;
 
 use App\Models\BatchedJob;
 use Illuminate\Contracts\Redis\Factory as RedisFactory;
+use Illuminate\Support\Carbon;
 use Laravel\Horizon\Contracts\JobRepository;
 use Laravel\Horizon\Contracts\TagRepository;
 use Str;
@@ -56,7 +57,8 @@ class BatchedJobService implements BatchedJobServiceInterface
 
         $this->update($batch, [
             'processed_jobs' => $processed_jobs,
-            'failed_jobs' => $batch->total_jobs - $processed_jobs
+            'failed_jobs' => $batch->total_jobs - $processed_jobs,
+            'finished_at' => Carbon::now()->format('Y-m-d H:i:s')
         ]);
 
         $this->tagRepository->stopMonitoring($batch->batch_id);
@@ -67,6 +69,8 @@ class BatchedJobService implements BatchedJobServiceInterface
      */
     public function monitor(BatchedJob $batch): void
     {
+        $this->update($batch, ['total_jobs' => $this->count($batch)]);
+
         do {
             $this->wait();
         } while ($this->isRunning($batch));
@@ -96,6 +100,8 @@ class BatchedJobService implements BatchedJobServiceInterface
             if ($job->status === self::COMPLETED) {
                 $this->connection()->zrem($batch->batch_id, $job->id);
                 unset($jobIds[$job->id]);
+
+                $this->update($batch, ['processed_jobs' => $batch->total_jobs - count($jobIds)]);
             }
         });
 
