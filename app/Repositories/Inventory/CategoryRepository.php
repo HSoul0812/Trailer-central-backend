@@ -123,6 +123,8 @@ class CategoryRepository implements CategoryRepositoryInterface
             '=',
             Category::getTableName() . '.entity_type_id'
         );
+        
+        $query->with(['entityType']);
 
         if ($paginated) {
             return $query->paginate($params['per_page'])->appends($params);
@@ -131,7 +133,8 @@ class CategoryRepository implements CategoryRepositoryInterface
         return $query->get();
     }
 
-    protected function getSortOrders() {
+    protected function getSortOrders()
+    {
         return $this->sortOrders;
     }
 }

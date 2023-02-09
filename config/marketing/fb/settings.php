@@ -39,6 +39,7 @@ return [
     'limit' => [
         'force' => env('FB_MARKETING_SETTING_LIMIT_FORCE', '1'),
         'listings' => env('FB_MARKETING_SETTING_LIMIT_LISTINGS', '3'),
+        'sold_updates' => env('FB_MARKETING_SETTING_LIMIT_SOLD_UPDATES', '5'),
         'hours' => env('FB_MARKETING_SETTING_LIMIT_HOURS', '24'),
         'errors' => env('FB_MARKETING_SETTING_LIMIT_ERRORS', '1'),
         'ttl' => env('FB_MARKETING_SETTING_LIMIT_TTL', ''),

@@ -19,7 +19,7 @@ class RedisResponseCache implements ResponseCacheInterface
     /** @var PhpRedis */
     private $client;
 
-    public function __construct(PhpRedis $client)
+    public function __construct($client)
     {
         $this->client = $client;
     }

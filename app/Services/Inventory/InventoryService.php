@@ -3,11 +3,15 @@
 namespace App\Services\Inventory;
 
 use App\Contracts\LoggerServiceInterface;
+use App\Exceptions\File\FileUploadException;
+use App\Exceptions\File\ImageUploadException;
 use App\Exceptions\Inventory\InventoryException;
 use App\Jobs\Inventory\ReIndexInventoriesByDealerLocationJob;
 use App\Jobs\Website\ReIndexInventoriesByDealersJob;
 use App\Models\CRM\Dms\Quickbooks\Bill;
+use App\Models\Inventory\File;
 use App\Models\Inventory\Inventory;
+use App\Models\Inventory\InventoryImage;
 use App\Models\User\DealerLocation;
 use App\Models\Website\Config\WebsiteConfig;
 use App\Repositories\Dms\Quickbooks\BillRepositoryInterface;
@@ -331,6 +335,12 @@ class InventoryService implements InventoryServiceInterface
 
                 if (!empty($newImages)) {
                     $params['new_images'] = $this->uploadImages($params, 'new_images');
+                }
+
+                if (!empty($params['status']) && $params['status'] == Inventory::STATUS_SOLD) {
+                    $params['sold_at'] = Carbon::now()->format('Y-m-d H:i:s');
+                } else {
+                    $params['sold_at'] = null;
                 }
 
                 $newFiles = $params['new_files'] = array_merge($newFiles, $hiddenFiles);
@@ -742,7 +752,7 @@ class InventoryService implements InventoryServiceInterface
         $files = $params[$filesKey];
 
         foreach ($files as &$file) {
-            $fileDto = $this->fileService->upload($file['url'], $file['title'], $params['dealer_id']);
+            $fileDto = $this->fileService->upload($file['url'], $file['title'], $params['dealer_id'], $params['inventory_id'] ?? null);
 
             $file['path'] = $fileDto->getPath();
             $file['type'] = $fileDto->getMimeType();
@@ -947,6 +957,51 @@ class InventoryService implements InventoryServiceInterface
     }
 
     /**
+     * @param int $inventoryId
+     * @param array $params
+     * @return InventoryImage
+     * @throws FileUploadException
+     * @throws ImageUploadException
+     */
+    public function createImage(int $inventoryId, array $params): InventoryImage
+    {
+        /** @var Inventory $inventory */
+        $inventory = $this->inventoryRepository->get(['id' => $inventoryId]);
+
+        $images = $this->uploadImages([
+            'title' => $inventory->title,
+            'dealer_id' => $inventory->dealer_id,
+            'images' => [$params]
+        ], 'images');
+
+        $inventoryImages = $this->inventoryRepository->createInventoryImages($inventory, $images);
+
+        return array_pop($inventoryImages);
+    }
+
+    /**
+     * @param int $inventoryId
+     * @param array $params
+     * @return File
+     * @throws FileUploadException
+     */
+    public function createFile(int $inventoryId, array $params): File
+    {
+        /** @var Inventory $inventory */
+        $inventory = $this->inventoryRepository->get(['id' => $inventoryId]);
+
+        $files = $this->uploadFiles([
+            'dealer_id' => $inventory->dealer_id,
+            'inventory_id' => $inventory->inventory_id,
+            'files' => [$params]
+        ], 'files');
+
+        $inventoryFiles = $this->inventoryRepository->createInventoryFiles($inventory, $files);
+
+        return $inventoryFiles[0]->file;
+    }
+
+    /**
      * Deletes the inventory images from the DB and the filesystem
      *
      * @param int $inventoryId
@@ -954,10 +1009,17 @@ class InventoryService implements InventoryServiceInterface
      * @return bool
      * @throws \RuntimeException when the images could not be deleted
      */
-    public function imageBulkDelete(int $inventoryId, array $imageIds): bool
+    public function imageBulkDelete(int $inventoryId, array $imageIds = null): bool
     {
         try {
             $this->inventoryRepository->beginTransaction();
+
+            if (empty($imageIds)) {
+                $imageIds = $this->imageRepository
+                    ->getAll(['inventory_id' => $inventoryId,])
+                    ->pluck('image_id')
+                    ->toArray();
+            }
 
             $imagesFilenames = $this->imageRepository
                 ->getAll([
@@ -982,6 +1044,34 @@ class InventoryService implements InventoryServiceInterface
             $message = sprintf('Images deletion have failed: %s', $e->getMessage());
 
             $this->logService->error($message, ['image_ids' => $imageIds]);
+
+            throw new \RuntimeException($message);
+        }
+
+        return true;
+    }
+
+    /**
+     * @param int $inventoryId
+     * @return bool
+     */
+    public function fileBulkDelete(int $inventoryId): bool
+    {
+        try {
+            $fileIds = $this->fileRepository
+                ->getAllByInventoryId($inventoryId)
+                ->pluck('file_id')
+                ->toArray();
+
+            $this->fileRepository->delete([
+                FileRepositoryInterface::CONDITION_AND_WHERE_IN => ['id' => $fileIds]
+            ]);
+
+            $this->logService->info('Files have been successfully deleted', ['file_ids' => $fileIds]);
+        } catch (\Exception $e) {
+            $message = sprintf('Files deletion have failed: %s', $e->getMessage());
+
+            $this->logService->error($message, ['file_ids' => $fileIds ?? []]);
 
             throw new \RuntimeException($message);
         }

@@ -59,6 +59,10 @@ class ImageRepository implements ImageRepositoryInterface
             }
         }
 
+        if (isset($params[self::CONDITION_AND_WHERE]) && is_array($params[self::CONDITION_AND_WHERE])) {
+            $query = $query->where($field, $values);
+        }
+
         return $query->delete();
     }
 

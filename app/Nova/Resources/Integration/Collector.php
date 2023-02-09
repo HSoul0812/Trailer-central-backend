@@ -3,6 +3,8 @@
 namespace App\Nova\Resources\Integration;
 
 use App\Models\Integration\Collector\CollectorFields;
+use App\Nova\Actions\Exports\CollectorExport;
+use App\Nova\Actions\Importer\CollectorImporter;
 use App\Nova\Resource;
 use App\Nova\Resources\Dealer\Location;
 use App\Nova\Resources\Dealer\LightDealer;
@@ -33,7 +35,7 @@ class Collector extends Resource
 {
     use HasDependencies;
 
-    public static $group = 'Integration';
+    public static $group = 'Collector';
 
     /**
      * The model the resource corresponds to.
@@ -383,8 +385,11 @@ class Collector extends Resource
      * @param Request $request
      * @return array
      */
-    public function actions(Request $request)
+    public function actions(Request $request): array
     {
-        return [];
+        return [
+            (new CollectorExport())->withHeadings()->askForFilename(),
+            new CollectorImporter()
+        ];
     }
 }

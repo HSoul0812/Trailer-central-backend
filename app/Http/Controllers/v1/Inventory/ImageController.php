@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\v1\Inventory;
 
+use App\Exceptions\Requests\Validation\NoObjectIdValueSetException;
+use App\Exceptions\Requests\Validation\NoObjectTypeSetException;
 use App\Http\Controllers\RestfulControllerV2;
+use App\Http\Requests\Inventory\Images\CreateImageRequest;
 use App\Http\Requests\Inventory\Images\DeleteImagesRequest;
 use App\Services\Inventory\InventoryServiceInterface;
+use App\Transformers\Inventory\InventoryImageTransformer;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
 
@@ -19,13 +23,31 @@ class ImageController extends RestfulControllerV2
 
     public function __construct(InventoryServiceInterface $inventoryService)
     {
-        $this->middleware('setDealerIdOnRequest')->only(['bulkDestroy']);
+        $this->middleware('setDealerIdOnRequest')->only(['create', 'bulkDestroy']);
 
         // this permission is inherited from the creation permission,
         // if it would be necessary to have a separate permission for this action, then it should be added here
         $this->middleware('inventory.create.permission')->only(['bulkDestroy']);
 
         $this->inventoryService = $inventoryService;
+    }
+
+    /**
+     * @param int $id
+     * @param Request $request
+     * @return Response
+     * @throws NoObjectIdValueSetException
+     * @throws NoObjectTypeSetException
+     */
+    public function create(int $id, Request $request): Response
+    {
+        $createImageRequest = new CreateImageRequest(['inventory_id' => $id] + $request->all());
+
+        if (!$createImageRequest->validate() || !($data = $this->inventoryService->createImage($id, $createImageRequest->all()))) {
+            return $this->response->errorBadRequest();
+        }
+
+        return $this->itemResponse($data, new InventoryImageTransformer());
     }
 
     /**
