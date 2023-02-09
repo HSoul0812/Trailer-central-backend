@@ -118,7 +118,18 @@ class ImageService implements ImageServiceInterface
      */
     public function updateOverlaySettings(array $params): User
     {
-        $wasChanged = $this->userRepository->updateOverlaySettings($params['dealer_id'], $params);
+        $changes = $this->userRepository->updateOverlaySettings($params['dealer_id'], $params);
+        $wasChanged = !empty($changes);
+        $isOverlayenabledChanged = isset($changes['overlay_enabled']);
+
+        // update overlay_enabled on all inventories
+        if ($isOverlayenabledChanged) {
+
+            $this->inventoryRepository->massUpdate([
+                'dealer_id' => $params['dealer_id'],
+                'overlay_enabled' => $changes['overlay_enabled']
+            ]);
+        }
 
         // Generate Overlay Inventory Images if necessary
         if ($wasChanged) {

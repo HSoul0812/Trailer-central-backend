@@ -658,7 +658,7 @@ class InventoryService implements InventoryServiceInterface
 
         Log::channel('inventory-overlays')->info('Adding Overlays on Inventory Images', $overlayParams);
 
-        $overlayEnabled = $overlayParams['dealer_overlay_enabled'] ?? $overlayParams['overlay_enabled'];
+        $overlayEnabled = $overlayParams['overlay_enabled'];
 
         foreach ($inventoryImages as $inventoryImage) {
 

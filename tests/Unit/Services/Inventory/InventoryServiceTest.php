@@ -1407,6 +1407,9 @@ class InventoryServiceTest extends TestCase
      */
     public function testGenerateOverlaysAll($overlayParams)
     {
+        $overlayParams['dealer_overlay_enabled'] = Inventory::OVERLAY_ENABLED_PRIMARY;
+        $overlayParams['overlay_enabled'] = Inventory::OVERLAY_ENABLED_ALL;
+        
         $inventoryImages = new Collection();
 
         $image1 = $this->getEloquentMock(Image::class);
@@ -1509,7 +1512,8 @@ class InventoryServiceTest extends TestCase
      */
     public function testGenerateOverlaysPrimary($overlayParams)
     {
-        $overlayParams['dealer_overlay_enabled'] = Inventory::OVERLAY_ENABLED_PRIMARY;
+        $overlayParams['dealer_overlay_enabled'] = Inventory::OVERLAY_ENABLED_ALL;
+        $overlayParams['overlay_enabled'] = Inventory::OVERLAY_ENABLED_PRIMARY;
 
         $inventoryImages = new Collection();
 
@@ -1755,7 +1759,8 @@ class InventoryServiceTest extends TestCase
      */
     public function testResetOverlays($overlayParams)
     {
-        $overlayParams['dealer_overlay_enabled'] = 0;
+        $overlayParams['dealer_overlay_enabled'] = Inventory::OVERLAY_ENABLED_ALL;
+        $overlayParams['overlay_enabled'] = 0;
 
         $inventoryImages = new Collection();
 
