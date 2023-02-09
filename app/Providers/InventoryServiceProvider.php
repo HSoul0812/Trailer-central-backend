@@ -3,18 +3,15 @@
 namespace App\Providers;
 
 use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
-use App\Models\Inventory\Inventory;
 use App\Repositories\Bulk\Inventory\BulkDownloadRepository;
 use App\Repositories\Bulk\Inventory\BulkDownloadRepositoryInterface;
 use App\Repositories\Bulk\Inventory\BulkUploadRepository;
 use App\Repositories\Bulk\Inventory\BulkUploadRepositoryInterface;
-use App\Repositories\FeatureFlagRepositoryInterface;
 use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\InventoryResponseRedisCache;
+use App\Services\ElasticSearch\Cache\RedisResponseCache;
 use App\Services\ElasticSearch\Cache\RedisResponseCacheKey;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
-use App\Services\ElasticSearch\Cache\UniqueCacheInvalidation;
-use App\Services\ElasticSearch\Cache\UniqueCacheInvalidationInterface;
 use App\Services\Export\Inventory\Bulk\BulkDownloadJobService;
 use App\Services\Export\Inventory\Bulk\BulkDownloadJobServiceInterface;
 use App\Services\Export\Inventory\Bulk\BulkPdfJobService;
@@ -107,8 +104,6 @@ class InventoryServiceProvider extends ServiceProvider
         Validator::extend('inventory_quotes_not_exist', QuotesNotExist::class . '@passes');
         Validator::extend('vendor_exists', VendorExists::class . '@passes');
         Validator::extend('payment_uuid_valid', PaymentUUIDValid::class . '@validate');
-
-        $this->bootCacheInvalidation();
     }
 
     public function register(): void
@@ -153,32 +148,17 @@ class InventoryServiceProvider extends ServiceProvider
         $this->app->bind(ImageServiceInterface::class, ImageService::class);
 
         $this->app->bind(ResponseCacheKeyInterface::class, RedisResponseCacheKey::class);
-        $this->app->bind(UniqueCacheInvalidationInterface::class, function (): UniqueCacheInvalidation {
-            return new UniqueCacheInvalidation(Redis::connection('inventory-job-cache')->client());
-        });
 
-        $this->app->bind(InventoryResponseCacheInterface::class, InventoryResponseRedisCache::class);
-
-        $this->app->bindMethod(InvalidateCacheJob::class . '@handle', function (InvalidateCacheJob $job): void {
-            $job->handle(
-                $this->app->make(InventoryResponseCacheInterface::class),
-                $this->app->make(UniqueCacheInvalidationInterface::class),
-                $this->app->make(ResponseCacheKeyInterface::class)
+        $this->app->bind(InventoryResponseCacheInterface::class, function (): InventoryResponseRedisCache {
+            return new InventoryResponseRedisCache(
+                $this->app->make(ResponseCacheKeyInterface::class),
+                new RedisResponseCache(Redis::connection('sdk-search-cache')->client()),
+                new RedisResponseCache(Redis::connection('sdk-single-cache')->client())
             );
         });
 
-		$this->app->bind(InventoryUpdateSourceInterface::class, InventoryUpdateSource::class);
-    }
-
-    /**
-     * @return void
-     */
-    private function bootCacheInvalidation(): void
-    {
-        $repo = app(FeatureFlagRepositoryInterface::class);
-
-        if ($repo->isEnabled('inventory-sdk-cache')) {
-            Inventory::enableCacheInvalidation();
-        }
+        $this->app->bindMethod(InvalidateCacheJob::class . '@handle', function (InvalidateCacheJob $job): void {
+            $job->handle($this->app->make(InventoryResponseCacheInterface::class));
+        });
     }
 }

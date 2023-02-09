@@ -4,9 +4,12 @@ namespace App\Indexers\Inventory;
 
 use App\Indexers\Searchable;
 use App\Indexers\WithIndexConfigurator;
+use App\Models\Inventory\Inventory;
 use App\Observers\Inventory\InventoryObserver;
 use App\Repositories\FeatureFlagRepositoryInterface;
 use Exception;
+use App\Jobs\Scout\MakeSearchable;
+use Laravel\Scout\ModelObserver;
 
 /**
  * @method \Illuminate\Database\Eloquent\Builder query
@@ -14,6 +17,15 @@ use Exception;
 trait InventorySearchable
 {
     use Searchable, WithIndexConfigurator;
+
+    public static function bootInventorySearchable(): void
+    {
+        $repo = app(FeatureFlagRepositoryInterface::class);
+
+        if ($repo->isEnabled('inventory-sdk-cache')) {
+            Inventory::enableCacheInvalidation();
+        }
+    }
 
     public function searchableAs(): string
     {
@@ -98,7 +110,8 @@ trait InventorySearchable
      */
     public static function withoutCacheInvalidationAndSearchSyncing(callable $callback)
     {
-        $isCacheInvalidationEnabled = app(FeatureFlagRepositoryInterface::class)->isEnabled('inventory-sdk-cache');
+        $isCacheInvalidationEnabled = self::isCacheInvalidationEnabled();
+        $isSearchSyncingEnabled = self::isSearchSyncingEnabled();
 
         self::disableCacheInvalidationAndSearchSyncing();
 
@@ -109,7 +122,9 @@ trait InventorySearchable
                 self::enableCacheInvalidation();
             }
 
-            self::enableSearchSyncing();
+            if ($isSearchSyncingEnabled) {
+                self::enableSearchSyncing();
+            }
         }
     }
 
@@ -133,7 +148,7 @@ trait InventorySearchable
      */
     public static function withoutCacheInvalidation(callable $callback)
     {
-        $isCacheInvalidationEnabled = app(FeatureFlagRepositoryInterface::class)->isEnabled('inventory-sdk-cache');
+        $isCacheInvalidationEnabled = self::isCacheInvalidationEnabled();
 
         self::disableCacheInvalidation();
 
@@ -159,5 +174,31 @@ trait InventorySearchable
     public static function isCacheInvalidationEnabled(): bool
     {
         return InventoryObserver::isCacheInvalidationEnabled();
+    }
+
+    public static function isSearchSyncingEnabled(): bool
+    {
+        return !ModelObserver::syncingDisabledFor(__CLASS__);
+    }
+
+    /**
+     * Dispatch the job to make the given models searchable.
+     *
+     * @param  \Illuminate\Database\Eloquent\Collection  $models
+     * @return void
+     */
+    public function queueMakeSearchable($models)
+    {
+        if ($models->isEmpty()) {
+            return;
+        }
+
+        if (! config('scout.queue')) {
+            return $models->first()->searchableUsing()->update($models);
+        }
+
+        dispatch((new MakeSearchable($models))
+            ->onQueue($models->first()->syncWithSearchUsingQueue())
+            ->onConnection($models->first()->syncWithSearchUsing()));
     }
 }

@@ -4,10 +4,11 @@ namespace App\Services\Inventory;
 
 use App\Contracts\LoggerServiceInterface;
 use App\Exceptions\Inventory\InventoryException;
-use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
+use App\Jobs\Inventory\ReIndexInventoriesByDealerLocationJob;
 use App\Jobs\Website\ReIndexInventoriesByDealersJob;
 use App\Models\CRM\Dms\Quickbooks\Bill;
 use App\Models\Inventory\Inventory;
+use App\Models\User\DealerLocation;
 use App\Models\Website\Config\WebsiteConfig;
 use App\Repositories\Dms\Quickbooks\BillRepositoryInterface;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
@@ -18,12 +19,12 @@ use App\Repositories\Inventory\InventoryRepositoryInterface;
 use App\Repositories\Repository;
 use App\Repositories\User\DealerLocationMileageFeeRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
-use App\Repositories\User\GeoLocationRepositoryInterface;
 use App\Repositories\Website\Config\WebsiteConfigRepositoryInterface;
+use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
-use App\Services\ElasticSearch\Cache\UniqueCacheInvalidationInterface;
 use App\Services\File\FileService;
 use App\Services\File\ImageService;
+use App\Services\User\GeoLocationServiceInterface;
 use App\Transformers\Inventory\InventoryTitleAndVinTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use Illuminate\Foundation\Bus\DispatchesJobs;
@@ -136,17 +137,9 @@ class InventoryService implements InventoryServiceInterface
     private $categoryRepository;
 
     /**
-     * @var GeoLocationRepositoryInterface
-     */
-    private $geolocationRepository;
-
-    /**
      * @var LoggerServiceInterface
      */
     private $logService;
-
-    /** @var \Parsedown */
-    private $markdownHelper;
 
     /**
      * @var ImageServiceInterface
@@ -154,14 +147,19 @@ class InventoryService implements InventoryServiceInterface
     private $imageTableService;
 
     /**
-     * @var UniqueCacheInvalidationInterface
-     */
-    private $uniqueCacheInvalidation;
-
-    /**
      * @var ResponseCacheKeyInterface
      */
     private $responseCacheKey;
+
+    /**
+     * @var GeoLocationServiceInterface
+     */
+    private $geoLocationService;
+
+    /**
+     * @var InventoryResponseCacheInterface
+     */
+    private $responseCache;
 
     /**
      * InventoryService constructor.
@@ -176,12 +174,11 @@ class InventoryService implements InventoryServiceInterface
      * @param DealerLocationRepositoryInterface $dealerLocationRepository
      * @param DealerLocationMileageFeeRepositoryInterface $dealerLocationMileageFeeRepository
      * @param CategoryRepositoryInterface $categoryRepository
-     * @param GeoLocationRepositoryInterface $geolocationRepository
-     * @param \Parsedown $parsedown
-     * @param LoggerServiceInterface|null $logService
      * @param ImageServiceInterface $imageTableService
-     * @param UniqueCacheInvalidationInterface $uniqueCacheInvalidation
      * @param ResponseCacheKeyInterface $responseCacheKey
+     * @param GeoLocationServiceInterface $geoLocationService
+     * @param InventoryResponseCacheInterface $responseCache
+     * @param LoggerServiceInterface|null $logService
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
     public function __construct(
@@ -196,12 +193,11 @@ class InventoryService implements InventoryServiceInterface
         DealerLocationRepositoryInterface $dealerLocationRepository,
         DealerLocationMileageFeeRepositoryInterface $dealerLocationMileageFeeRepository,
         CategoryRepositoryInterface $categoryRepository,
-        GeoLocationRepositoryInterface $geolocationRepository,
-        \Parsedown $parsedown,
-        ?LoggerServiceInterface $logService = null,
         ImageServiceInterface $imageTableService,
-        UniqueCacheInvalidationInterface $uniqueCacheInvalidation,
-        ResponseCacheKeyInterface $responseCacheKey
+        ResponseCacheKeyInterface $responseCacheKey,
+        GeoLocationServiceInterface $geoLocationService,
+        InventoryResponseCacheInterface $responseCache,
+        ?LoggerServiceInterface $logService = null
     ) {
         $this->inventoryRepository = $inventoryRepository;
         $this->imageRepository = $imageRepository;
@@ -214,12 +210,12 @@ class InventoryService implements InventoryServiceInterface
         $this->imageService = $imageService;
         $this->fileService = $fileService;
         $this->categoryRepository = $categoryRepository;
-        $this->geolocationRepository = $geolocationRepository;
-        $this->logService = $logService ?? app()->make(LoggerServiceInterface::class);
-        $this->markdownHelper = $parsedown;
         $this->imageTableService = $imageTableService;
-        $this->uniqueCacheInvalidation = $uniqueCacheInvalidation;
         $this->responseCacheKey = $responseCacheKey;
+        $this->geoLocationService = $geoLocationService;
+        $this->responseCache = $responseCache;
+
+        $this->logService = $logService ?? app()->make(LoggerServiceInterface::class);
     }
 
     /**
@@ -231,55 +227,71 @@ class InventoryService implements InventoryServiceInterface
     public function create(array $params): Inventory
     {
         try {
-            $this->inventoryRepository->beginTransaction();
+            $inventory = Inventory::withoutCacheInvalidationAndSearchSyncing(function () use ($params) {
+                $this->inventoryRepository->beginTransaction();
 
-            $newImages = $params['new_images'] ?? [];
-            $newFiles = $params['new_files'] ?? [];
-            $hiddenFiles = $params['hidden_files'] ?? [];
-            $clappsDefaultImage = $params['clapps']['default-image']['url'] ?? '';
+                $newImages = $params['new_images'] ?? [];
+                $newFiles = $params['new_files'] ?? [];
+                $hiddenFiles = $params['hidden_files'] ?? [];
+                $clappsDefaultImage = $params['clapps']['default-image']['url'] ?? '';
 
-            $addBill = $params['add_bill'] ?? false;
+                $addBill = $params['add_bill'] ?? false;
 
-            if (!empty($newImages)) {
-                $params['new_images'] = $this->uploadImages($params, 'new_images');
-            }
+                if (!empty($params['dealer_location_id'])) {
+                    $location = $this->dealerLocationRepository->get(['dealer_location_id' => $params['dealer_location_id']]);
 
-            $newFiles = $params['new_files'] = array_merge($newFiles, $hiddenFiles);
-            unset($params['hidden_files']);
+                    if ($location->postalcode) {
+                        $params['geolocation'] = $this->geoLocationService->geoPointFromZipCode($location->postalcode);
+                    }
+                }
 
-            if (!empty($newFiles)) {
-                $params['new_files'] = $this->uploadFiles($params, 'new_files');
-            }
+                if (!empty($newImages)) {
+                    $params['new_images'] = $this->uploadImages($params, 'new_images');
+                }
 
-            if (!empty($clappsDefaultImage)) {
-                $clappImage = $this->imageService->upload($clappsDefaultImage, $params['title'], $params['dealer_id']);
-                $params['clapps']['default-image'] = $clappImage['path'];
-            }
+                $newFiles = $params['new_files'] = array_merge($newFiles, $hiddenFiles);
+                unset($params['hidden_files']);
 
-            if (!empty($params['description'])) {
-                $params['description_html'] = $this->convertMarkdown($params['description']);
-            }
+                if (!empty($newFiles)) {
+                    $params['new_files'] = $this->uploadFiles($params, 'new_files');
+                }
 
-            $inventory = $this->inventoryRepository->create($params);
+                if (!empty($clappsDefaultImage)) {
+                    $clappImage = $this->imageService->upload($clappsDefaultImage, $params['title'],
+                        $params['dealer_id']);
+                    $params['clapps']['default-image'] = $clappImage['path'];
+                }
 
-            if (!$inventory instanceof Inventory) {
-                Log::error('Item hasn\'t been created.', ['params' => $params]);
-                $this->inventoryRepository->rollbackTransaction();
+                if (!empty($params['description'])) {
+                    $params['description_html'] = $this->convertMarkdown($params['description']);
+                }
 
-                throw new InventoryException('Inventory item create error');
-            }
+                $inventory = $this->inventoryRepository->create($params);
 
-            if ($addBill) {
-                $this->addBill($params, $inventory);
-            }
+                if (!$inventory instanceof Inventory) {
+                    Log::error('Item hasn\'t been created.', ['params' => $params]);
+                    $this->inventoryRepository->rollbackTransaction();
 
-            $this->inventoryRepository->commitTransaction();
+                    throw new InventoryException('Inventory item create error');
+                }
 
-            // Generate Overlay Inventory Images if necessary
-            if (!empty($newImages))
-                $this->dispatch((new GenerateOverlayImageJob($inventory->inventory_id))->onQueue('overlay-images'));
+                if ($addBill) {
+                    $this->addBill($params, $inventory);
+                }
 
-            Log::info('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
+                $this->inventoryRepository->commitTransaction();
+
+                // Generate Overlay Inventory Images if necessary
+                if (!empty($newImages)) {
+                    $this->dispatch((new GenerateOverlayImageJob($inventory->inventory_id))->onQueue('overlay-images'));
+                }
+
+                Log::info('Item has been successfully created', ['inventoryId' => $inventory->inventory_id]);
+
+                return $inventory;
+            });
+
+            $this->tryToIndexAndInvalidateInventory($inventory);
         } catch (\Exception $e) {
             Log::error('Item create error. Message - ' . $e->getMessage(), $e->getTrace());
             $this->inventoryRepository->rollbackTransaction();
@@ -299,74 +311,88 @@ class InventoryService implements InventoryServiceInterface
     public function update(array $params): Inventory
     {
         try {
-            $this->inventoryRepository->beginTransaction();
+            $inventory = Inventory::withoutCacheInvalidationAndSearchSyncing(function () use ($params) {
+                $this->inventoryRepository->beginTransaction();
 
-            $newImages = $params['new_images'] ?? [];
-            $existingImages = $params['existing_images'] ?? [];
-            $newFiles = $params['new_files'] ?? [];
-            $hiddenFiles = $params['hidden_files'] ?? [];
-            $clappsDefaultImage = $params['clapps']['default-image']['url'] ?? '';
+                $newImages = $params['new_images'] ?? [];
+                $existingImages = $params['existing_images'] ?? [];
+                $newFiles = $params['new_files'] ?? [];
+                $hiddenFiles = $params['hidden_files'] ?? [];
+                $clappsDefaultImage = $params['clapps']['default-image']['url'] ?? '';
 
-            $options = [
-                'updateAttributes' => $params['update_attributes'] ?? false,
-                'updateFeatures' => $params['update_features'] ?? false,
-                'updateClapps' => $params['update_clapps'] ?? false,
-            ];
+                $options = [
+                    'updateAttributes' => $params['update_attributes'] ?? false,
+                    'updateFeatures' => $params['update_features'] ?? false,
+                    'updateClapps' => $params['update_clapps'] ?? false,
+                ];
 
-            $source = $params['source'] ?? '';
-            $addBill = $params['add_bill'] ?? false;
+                $source = $params['source'] ?? '';
+                $addBill = $params['add_bill'] ?? false;
 
-            if (!empty($newImages)) {
-                $params['new_images'] = $this->uploadImages($params, 'new_images');
-            }
+                if (!empty($newImages)) {
+                    $params['new_images'] = $this->uploadImages($params, 'new_images');
+                }
 
-            $newFiles = $params['new_files'] = array_merge($newFiles, $hiddenFiles);
-            unset($params['hidden_files']);
+                $newFiles = $params['new_files'] = array_merge($newFiles, $hiddenFiles);
+                unset($params['hidden_files']);
 
-            if (!empty($newFiles)) {
-                $params['new_files'] = $this->uploadFiles($params, 'new_files');
-            }
+                if (!empty($newFiles)) {
+                    $params['new_files'] = $this->uploadFiles($params, 'new_files');
+                }
 
-            if (!empty($clappsDefaultImage)) {
-                $clappImage = $this->imageService->upload($clappsDefaultImage, $params['title'], $params['dealer_id']);
-                $params['clapps']['default-image'] = $clappImage['path'];
-            }
+                if (!empty($clappsDefaultImage)) {
+                    $clappImage = $this->imageService->upload($clappsDefaultImage, $params['title'], $params['dealer_id']);
+                    $params['clapps']['default-image'] = $clappImage['path'];
+                }
 
-            if (!empty($params['description'])) {
-                $params['description_html'] = $this->convertMarkdown($params['description']);
-            }
+                if (!empty($params['description'])) {
+                    $params['description_html'] = $this->convertMarkdown($params['description']);
+                }
 
-            if (!empty($params['is_archived']) && $params['is_archived'] == 1) {
-                $params['archived_at'] = Carbon::now()->format('Y-m-d H:i:s');
-            }
+                if (!empty($params['is_archived']) && $params['is_archived'] == 1) {
+                    $params['archived_at'] = Carbon::now()->format('Y-m-d H:i:s');
+                }
 
-            $inventory = $this->inventoryRepository->update($params, $options);
+                if (!empty($params['dealer_location_id'])) {
+                    $location = $this->dealerLocationRepository->get(['dealer_location_id' => $params['dealer_location_id']]);
 
-            if (!$inventory instanceof Inventory) {
-                Log::error('Item hasn\'t been updated.', ['params' => $params]);
-                $this->inventoryRepository->rollbackTransaction();
+                    if ($location->postalcode) {
+                        $params['geolocation'] = $this->geoLocationService->geoPointFromZipCode($location->postalcode);
+                    }
+                }
 
-                throw new InventoryException('Inventory item update error');
-            }
+                $inventory = $this->inventoryRepository->update($params, $options);
 
-            if ($addBill) {
-                $this->addBill($params, $inventory);
-            }
+                if (!$inventory instanceof Inventory) {
+                    Log::error('Item hasn\'t been updated.', ['params' => $params]);
+                    $this->inventoryRepository->rollbackTransaction();
 
-            if ($source === self::SOURCE_DASHBOARD) {
-                $this->inventoryRepository->update([
-                    'inventory_id' => $params['inventory_id'],
-                    'changed_fields_in_dashboard' => $this->getChangedFields($inventory, $params)
-                ]);
-            }
+                    throw new InventoryException('Inventory item update error');
+                }
 
-            $this->inventoryRepository->commitTransaction();
+                if ($addBill) {
+                    $this->addBill($params, $inventory);
+                }
 
-            // Generate Overlay Inventory Images if necessary
-            if (!empty($newImages) || !empty($existingImages))
-                $this->dispatch((new GenerateOverlayImageJob($inventory->inventory_id))->onQueue('overlay-images'));
+                if ($source === self::SOURCE_DASHBOARD) {
+                    $this->inventoryRepository->update([
+                        'inventory_id' => $params['inventory_id'],
+                        'changed_fields_in_dashboard' => $this->getChangedFields($inventory, $params)
+                    ]);
+                }
 
-            Log::info('Item has been successfully updated', ['inventoryId' => $inventory->inventory_id]);
+                $this->inventoryRepository->commitTransaction();
+
+                // Generate Overlay Inventory Images if necessary
+                if (!empty($newImages) || !empty($existingImages))
+                    $this->dispatch((new GenerateOverlayImageJob($inventory->inventory_id))->onQueue('overlay-images'));
+
+                Log::info('Item has been successfully updated', ['inventoryId' => $inventory->inventory_id]);
+
+                return $inventory;
+            });
+
+            $this->tryToIndexAndInvalidateInventory($inventory);
         } catch (\Exception $e) {
             Log::error('Item update error. Message - ' . $e->getMessage(), $e->getTrace());
             $this->inventoryRepository->rollbackTransaction();
@@ -387,9 +413,14 @@ class InventoryService implements InventoryServiceInterface
         try {
             $this->inventoryRepository->beginTransaction();
 
-            $this->inventoryRepository->massUpdate($params);
+            // if $params['dealer_id'] is not present it will throw an exception
+            Inventory::withoutCacheInvalidationAndSearchSyncing(function () use ($params){
+                $this->inventoryRepository->massUpdate($params);
+            });
 
             $this->inventoryRepository->commitTransaction();
+
+            $this->invalidateCacheAndReindexByDealerIds([$params['dealer_id']]);
         } catch (\Exception $e) {
             Log::error('Inventory mass update error. Message - ' . $e->getMessage(), $e->getTrace());
             $this->inventoryRepository->rollbackTransaction();
@@ -677,18 +708,17 @@ class InventoryService implements InventoryServiceInterface
                 $localNewImagePath = $this->imageService->addOverlays($this->getS3BaseUrl() . $originalFilename, $overlayParams);
 
                 if (!empty($localNewImagePath)) {
-
                     // upload overlay image
                     $randomFilename = md5($localNewImagePath);
                     $newFilename = $this->imageService->uploadToS3($localNewImagePath, $randomFilename, $overlayParams['dealer_id']);
                     unlink($localNewImagePath);
-    
+
                     // update image to database
                     $this->imageTableService->saveOverlay($imageObj, $newFilename);
                 } else {
 
                     Log::channel('inventory-overlays')
-                        ->error('Failed Adding Overlays, Invalid OverlayParams', 
+                        ->error('Failed Adding Overlays, Invalid OverlayParams',
                             array_merge($overlayParams, ['image_id' => $imageObj->image_id]));
                 }
 
@@ -847,10 +877,12 @@ class InventoryService implements InventoryServiceInterface
         $fromLat = $dealerLocation->latitude;
         $fromLng = $dealerLocation->longitude;
 
-        if($toZip != null) {
-            $geolocation = $this->geolocationRepository->get(['zip' => $toZip]);
-            $fromLat = $geolocation->latitude;
-            $fromLng = $geolocation->longitude;
+        if($toZip !== null) {
+            $geolocation = $this->geoLocationService->geoPointFromZipCode($toZip);
+            if($geolocation){
+                $fromLat = $geolocation->getLat();
+                $fromLng = $geolocation->getLng();
+            }
         }
 
         $toLat  = $inventory->latitude;
@@ -862,6 +894,7 @@ class InventoryService implements InventoryServiceInterface
         }
 
         $distance = $this->calculateDistanceBetweenTwoPoints($fromLat, $fromLng, $toLat, $toLong, 'ML');
+
         return $feePerMile * $distance;
     }
 
@@ -1106,22 +1139,89 @@ class InventoryService implements InventoryServiceInterface
         return $description;
     }
 
-    public function invalidateCacheAndReindexByDealerIds(array $dealer_ids): void
+    /**
+     * Reindex the inventory by dealer ids, then it will invalidate cache by dealer ids
+     *
+     * @param  int[]  $dealerIds
+     * @return void
+     */
+    public function invalidateCacheAndReindexByDealerIds(array $dealerIds): void
     {
-        $patterns = [];
+        $this->logService->info(
+            'Enqueueing the job to reindex inventory by dealer ids',
+            ['dealer_ids' => $dealerIds]
+        );
 
-        foreach ($dealer_ids as $dealer_id)
-        {
-            $patterns[] = $this->responseCacheKey->deleteByDealer($dealer_id);
+        // indexation should always being dispatched at first
+        $this->dispatch(new ReIndexInventoriesByDealersJob($dealerIds));
+
+        $this->logService->info(
+            'Enqueueing the job to invalidate cache by dealer ids',
+            ['dealer_ids' => $dealerIds]
+        );
+
+        foreach ($dealerIds as $dealerId) {
+            $this->responseCache->forget([
+                $this->responseCacheKey->deleteByDealer($dealerId),
+                $this->responseCacheKey->deleteSingleByDealer($dealerId)
+            ]);
+        }
+    }
+
+    /**
+     * Reindex the inventory by dealer location id, then it will invalidate cache by dealer id
+     *
+     * @param  DealerLocation  $dealerLocation
+     * @return void
+     */
+    public function invalidateCacheAndReindexByDealerLocation(DealerLocation $dealerLocation): void
+    {
+        $logContext = [
+            'name' => $dealerLocation->name,
+            'dealer_id' => $dealerLocation->dealer_id,
+            'dealer_location_id' => $dealerLocation->dealer_location_id
+        ];
+
+        $this->logService->info(
+            'Enqueueing the job to reindex inventory by dealer location',
+            $logContext
+        );
+
+        // indexation should always being dispatched at first
+        $this->dispatch(new ReIndexInventoriesByDealerLocationJob([$dealerLocation->dealer_location_id]));
+
+        $this->logService->info(
+            'Enqueueing the job to invalidate cache by dealer location',
+            $logContext
+        );
+
+        $this->responseCache->forget([
+            $this->responseCacheKey->deleteByDealer($dealerLocation->dealer_id),
+            $this->responseCacheKey->deleteSingleByDealer($dealerLocation->dealer_id)
+        ]);
+    }
+
+    /**
+     * - Will try to index a given inventory only when ES indexation is enabled
+     * - Will try invalidate inventory cache for a given inventory only when cache invalidation is enabled
+     *
+     * @param  Inventory  $inventory
+     * @return void
+     */
+    public function tryToIndexAndInvalidateInventory(Inventory $inventory): void
+    {
+        if (Inventory::isSearchSyncingEnabled()) {
+            $inventory->searchable();
         }
 
-        //$patterns = $this->uniqueCacheInvalidation->keysWithNoJobs($patterns);
+        if (Inventory::isCacheInvalidationEnabled()) {
+            $keyPatterns = [$this->responseCacheKey->deleteByDealer($inventory->dealer_id)];
 
-        //if (count($patterns)) {
-            //$this->uniqueCacheInvalidation->createJobsForKeys($patterns);
-            $this->dispatch(new InvalidateCacheJob($patterns));
-        //}
+            if (!$inventory->wasRecentlyCreated) {
+                $keyPatterns[] = $this->responseCacheKey->deleteSingle($inventory->inventory_id, $inventory->dealer_id);
+            }
 
-        $this->dispatch(new ReIndexInventoriesByDealersJob($dealer_ids));
+            $this->responseCache->forget($keyPatterns);
+        }
     }
 }
