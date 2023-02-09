@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Repositories\Horizon\TagRepository;
+use App\Repositories\Horizon\TagRepositoryInterface;
 use App\Services\Common\BatchedJobService;
 use App\Services\Common\BatchedJobServiceInterface;
 use Illuminate\Support\ServiceProvider;
@@ -14,5 +16,6 @@ class BusServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(BatchedJobServiceInterface::class, BatchedJobService::class);
+        $this->app->bind(TagRepositoryInterface::class, TagRepository::class);
     }
 }
