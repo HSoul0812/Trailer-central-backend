@@ -31,11 +31,11 @@ class ReindexInventoryIndex extends Command
     public function handle(InventoryResponseCacheInterface $responseCache): void
     {
         Job::batch(function (BatchedJob $batch): void {
-            $this->line(sprintf('working on batch <comment>%s</comment> ...', $batch->batch_id));
+            $this->line(sprintf('Working on batch <comment>%s</comment> ...', $batch->batch_id));
 
             $this->call('scout:import', ['model' => Inventory::class]);
 
-            $this->line(sprintf('waiting for batch <comment>%s</comment> ...', $batch->batch_id));
+            $this->line(sprintf('Waiting for batch <comment>%s</comment> ...', $batch->batch_id));
         }, __CLASS__);
 
         // no matter if cache is disabled, invalidating the entire cache should be done

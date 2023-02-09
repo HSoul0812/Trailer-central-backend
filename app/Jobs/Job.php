@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\BatchedJob;
 use App\Services\Common\BatchedJobServiceInterface;
+use App\Traits\Horizon\WithTags;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
@@ -25,7 +26,7 @@ abstract class Job implements ShouldQueue
     |
     */
 
-    use InteractsWithQueue, Queueable, SerializesModels;
+    use InteractsWithQueue, Queueable, SerializesModels, WithTags;
 
     /**
      * Will create the batch, then it will run the anonymous function and monitor the batch, when it is finished,
@@ -51,8 +52,7 @@ abstract class Job implements ShouldQueue
 
             return $batch;
         } finally {
-
-            $service->stop($batch); //if for some reason it has not been stopped
+            $service->forget($batch);
 
             self::$batchId = null;
         }

@@ -58,7 +58,7 @@ class BatchedJob extends Model
     protected $keyType = 'string';
 
     /** @var array<string> */
-    protected $fillable = ['batch_id', 'group', 'total_jobs'];
+    protected $fillable = ['batch_id', 'group', 'total_jobs', 'processed_jobs', 'failed_jobs', 'finished_at'];
 
     /** @var array<string> */
     protected $dates = ['created_at', 'updated_at', 'finished_at'];

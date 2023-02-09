@@ -15,12 +15,12 @@ interface BatchedJobServiceInterface
     public function create(?string $group = null): BatchedJob;
 
     /**
-     * Stop monitoring a given batch
+     * Forget monitoring a given batch
      *
      * @param  BatchedJob  $batch
      * @return void
      */
-    public function stop(BatchedJob $batch): void;
+    public function forget(BatchedJob $batch): void;
 
     /**
      * Count number of jobs for a given batch

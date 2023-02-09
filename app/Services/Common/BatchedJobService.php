@@ -2,11 +2,11 @@
 
 namespace App\Services\Common;
 
+use App\Contracts\LoggerServiceInterface;
 use App\Models\BatchedJob;
-use Illuminate\Contracts\Redis\Factory as RedisFactory;
+use App\Repositories\Horizon\TagRepositoryInterface;
 use Illuminate\Support\Carbon;
 use Laravel\Horizon\Contracts\JobRepository;
-use Laravel\Horizon\Contracts\TagRepository;
 use Str;
 
 class BatchedJobService implements BatchedJobServiceInterface
@@ -17,20 +17,23 @@ class BatchedJobService implements BatchedJobServiceInterface
 
     private const NO_GROUP = 'no-group';
 
-    /** @var \Laravel\Horizon\Contracts\TagRepository */
+    /** @var \App\Repositories\Horizon\TagRepositoryInterface */
     private $tagRepository;
 
     /** @var \Laravel\Horizon\Contracts\JobRepository */
     private $jobRepository;
 
-    /** @var \Illuminate\Contracts\Redis\Factory */
-    private $redis;
+    /** @var \App\Contracts\LoggerServiceInterface */
+    private $logger;
 
-    public function __construct(TagRepository $tagRepository, JobRepository $jobRepository, RedisFactory $redis)
-    {
+    public function __construct(
+        TagRepositoryInterface $tagRepository,
+        JobRepository $jobRepository,
+        LoggerServiceInterface $logger
+    ) {
         $this->tagRepository = $tagRepository;
         $this->jobRepository = $jobRepository;
-        $this->redis = $redis;
+        $this->logger = $logger;
     }
 
     /**
@@ -43,6 +46,8 @@ class BatchedJobService implements BatchedJobServiceInterface
             'group' => $group ?: self::NO_GROUP
         ]);
 
+        $this->logger->info(sprintf('Batch [%s] was created', $batch->batch_id));
+
         $this->tagRepository->monitor($batch->batch_id);
 
         return $batch;
@@ -51,7 +56,7 @@ class BatchedJobService implements BatchedJobServiceInterface
     /**
      * @inheritDoc
      */
-    public function stop(BatchedJob $batch): void
+    public function forget(BatchedJob $batch): void
     {
         $processed_jobs = $batch->total_jobs - $this->count($batch);
 
@@ -61,7 +66,9 @@ class BatchedJobService implements BatchedJobServiceInterface
             'finished_at' => Carbon::now()->format('Y-m-d H:i:s')
         ]);
 
-        $this->tagRepository->stopMonitoring($batch->batch_id);
+        $this->tagRepository->forget($batch->batch_id);
+
+        $this->logger->info(sprintf('Batch [%s] was forgot', $batch->batch_id));
     }
 
     /**
@@ -71,11 +78,11 @@ class BatchedJobService implements BatchedJobServiceInterface
     {
         $this->update($batch, ['total_jobs' => $this->count($batch)]);
 
+        $this->logger->info(sprintf('Batch [%s] was started to be monitored', $batch->batch_id));
+
         do {
             $this->wait();
         } while ($this->isRunning($batch));
-
-        $this->forget($batch);
     }
 
     /**
@@ -98,10 +105,12 @@ class BatchedJobService implements BatchedJobServiceInterface
 
         $this->jobRepository->getJobs($jobIds)->each(function (\stdClass $job) use ($batch, &$jobIds) {
             if ($job->status === self::COMPLETED) {
-                $this->connection()->zrem($batch->batch_id, $job->id);
+                $this->tagRepository->detach($batch->batch_id, $job->id);
                 unset($jobIds[$job->id]);
 
                 $this->update($batch, ['processed_jobs' => $batch->total_jobs - count($jobIds)]);
+
+                $this->logger->info(sprintf('[%s] was detached from the batch [%s]', $job->id, $batch->batch_id));
             }
         });
 
@@ -120,27 +129,6 @@ class BatchedJobService implements BatchedJobServiceInterface
         $job->fill($properties)->save();
 
         return $job;
-    }
-
-    /**
-     * Forget a batch given a batch
-     *
-     * @param  BatchedJob  $batch
-     * @return void
-     */
-    protected function forget(BatchedJob $batch): void
-    {
-        $this->tagRepository->forget($batch->batch_id);
-    }
-
-    /**
-     * Get the Redis connection instance.
-     *
-     * @return \Illuminate\Redis\Connections\Connection
-     */
-    protected function connection()
-    {
-        return $this->redis->connection('horizon');
     }
 
     protected function wait(): void
