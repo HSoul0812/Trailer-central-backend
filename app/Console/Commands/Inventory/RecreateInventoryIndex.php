@@ -35,6 +35,10 @@ class RecreateInventoryIndex extends Command
         // no matter if cache is disabled, invalidating the entire cache should be done
         $responseCache->forget([RedisResponseCacheKey::CLEAR_ALL_PATTERN]);
 
-        $this->output->writeln(sprintf('InvalidateCacheJob was dispatched using the pattern: %s', RedisResponseCacheKey::CLEAR_ALL_PATTERN));
+        $this->line(sprintf(
+                'InvalidateCacheJob was dispatched using the pattern: <comment>%s</comment>',
+                RedisResponseCacheKey::CLEAR_ALL_PATTERN
+            )
+        );
     }
 }
