@@ -699,7 +699,7 @@ class InventoryService implements InventoryServiceInterface
 
         Log::channel('inventory-overlays')->info('Adding Overlays on Inventory Images', $overlayParams);
 
-        $overlayEnabled = $overlayParams['dealer_overlay_enabled'] ?? $overlayParams['overlay_enabled'];
+        $overlayEnabled = $overlayParams['overlay_enabled'];
 
         foreach ($inventoryImages as $inventoryImage) {
 
@@ -718,7 +718,6 @@ class InventoryService implements InventoryServiceInterface
                 $localNewImagePath = $this->imageService->addOverlays($this->getS3BaseUrl() . $originalFilename, $overlayParams);
 
                 if (!empty($localNewImagePath)) {
-
                     // upload overlay image
                     $randomFilename = md5($localNewImagePath);
                     $newFilename = $this->imageService->uploadToS3($localNewImagePath, $randomFilename, $overlayParams['dealer_id']);

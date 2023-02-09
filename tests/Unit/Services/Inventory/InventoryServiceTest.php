@@ -49,6 +49,7 @@ use App\Services\Inventory\ImageServiceInterface;
 use App\Services\Inventory\ImageService as ImageTableService;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
+use App\Services\ElasticSearch\Cache\UniqueCacheInvalidationInterface;
 
 /**
  * Test for App\Services\Inventory\InventoryService
@@ -144,6 +145,11 @@ class InventoryServiceTest extends TestCase
     private $responseCacheKeyMock;
 
     /**
+     * @var LegacyMockInterface|UniqueCacheInvalidationInterface
+     */
+    private $uniqueCacheInvalidationMock;
+
+    /**
      * @var LegacyMockInterface|InventoryResponseCacheInterface
      */
     private $inventoryResponseCacheMock;
@@ -211,6 +217,9 @@ class InventoryServiceTest extends TestCase
 
         $this->responseCacheKeyMock = Mockery::mock(ResponseCacheKeyInterface::class);
         $this->app->instance(ResponseCacheKeyInterface::class, $this->responseCacheKeyMock);
+
+        $this->uniqueCacheInvalidationMock = Mockery::mock(UniqueCacheInvalidationInterface::class);
+        $this->app->instance(UniqueCacheInvalidationInterface::class, $this->uniqueCacheInvalidationMock);
 
         $this->inventoryResponseCacheMock = Mockery::mock(InventoryResponseRedisCache::class);
         $this->app->instance(InventoryResponseCacheInterface::class, $this->inventoryResponseCacheMock);
@@ -1445,6 +1454,9 @@ class InventoryServiceTest extends TestCase
      */
     public function testGenerateOverlaysAll($overlayParams)
     {
+        $overlayParams['dealer_overlay_enabled'] = Inventory::OVERLAY_ENABLED_PRIMARY;
+        $overlayParams['overlay_enabled'] = Inventory::OVERLAY_ENABLED_ALL;
+        
         $inventoryImages = new Collection();
 
         $image1 = $this->getEloquentMock(Image::class);
@@ -1529,7 +1541,8 @@ class InventoryServiceTest extends TestCase
      */
     public function testGenerateOverlaysPrimary($overlayParams)
     {
-        $overlayParams['dealer_overlay_enabled'] = Inventory::OVERLAY_ENABLED_PRIMARY;
+        $overlayParams['dealer_overlay_enabled'] = Inventory::OVERLAY_ENABLED_ALL;
+        $overlayParams['overlay_enabled'] = Inventory::OVERLAY_ENABLED_PRIMARY;
 
         $inventoryImages = new Collection();
 
@@ -1721,7 +1734,8 @@ class InventoryServiceTest extends TestCase
      */
     public function testResetOverlays($overlayParams)
     {
-        $overlayParams['dealer_overlay_enabled'] = 0;
+        $overlayParams['dealer_overlay_enabled'] = Inventory::OVERLAY_ENABLED_ALL;
+        $overlayParams['overlay_enabled'] = 0;
 
         $inventoryImages = new Collection();
 
