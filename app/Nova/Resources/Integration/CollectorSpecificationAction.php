@@ -78,7 +78,9 @@ class CollectorSpecificationAction extends Resource
 
             Text::make('Description', function () {
                 $description = "<div style='font-size: medium;'>";
-                $description .= strtoupper(CollectorSpecificationActionModel::ACTION_FORMATS[$this->action]);
+                if ($this->action) {
+                    $description .= strtoupper(CollectorSpecificationActionModel::ACTION_FORMATS[$this->action]);
+                }
 
                 if ($this->action === CollectorSpecificationActionModel::ACTION_MAPPING) {
                     $description .= ": {$this->field} = {$this->value}";
