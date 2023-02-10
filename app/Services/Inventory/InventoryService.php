@@ -363,8 +363,6 @@ class InventoryService implements InventoryServiceInterface
 
                 $inventory = $this->inventoryRepository->update($params, $options);    
                 $changes = $inventory->getChanges();
-                Log::channel('inventory-overlays')
-                   ->info('Got all changes on inventory #' . $inventory->inventory_id . '; ' . print_r($changes, true));
 
                 if (!$inventory instanceof Inventory) {
                     Log::error('Item hasn\'t been updated.', ['params' => $params]);
