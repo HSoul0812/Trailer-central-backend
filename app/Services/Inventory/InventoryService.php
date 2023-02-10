@@ -1232,25 +1232,7 @@ class InventoryService implements InventoryServiceInterface
      */
     public function invalidateCacheAndReindexByDealerIds(array $dealerIds): void
     {
-        $this->logService->info(
-            'Enqueueing the job to reindex inventory by dealer ids',
-            ['dealer_ids' => $dealerIds]
-        );
-
-        // indexation should always being dispatched at first
         $this->dispatch(new ReIndexInventoriesByDealersJob($dealerIds));
-
-        $this->logService->info(
-            'Enqueueing the job to invalidate cache by dealer ids',
-            ['dealer_ids' => $dealerIds]
-        );
-
-        foreach ($dealerIds as $dealerId) {
-            $this->responseCache->forget([
-                $this->responseCacheKey->deleteByDealer($dealerId),
-                $this->responseCacheKey->deleteSingleByDealer($dealerId)
-            ]);
-        }
     }
 
     /**
@@ -1261,29 +1243,7 @@ class InventoryService implements InventoryServiceInterface
      */
     public function invalidateCacheAndReindexByDealerLocation(DealerLocation $dealerLocation): void
     {
-        $logContext = [
-            'name' => $dealerLocation->name,
-            'dealer_id' => $dealerLocation->dealer_id,
-            'dealer_location_id' => $dealerLocation->dealer_location_id
-        ];
-
-        $this->logService->info(
-            'Enqueueing the job to reindex inventory by dealer location',
-            $logContext
-        );
-
-        // indexation should always being dispatched at first
-        $this->dispatch(new ReIndexInventoriesByDealerLocationJob([$dealerLocation->dealer_location_id]));
-
-        $this->logService->info(
-            'Enqueueing the job to invalidate cache by dealer location',
-            $logContext
-        );
-
-        $this->responseCache->forget([
-            $this->responseCacheKey->deleteByDealer($dealerLocation->dealer_id),
-            $this->responseCacheKey->deleteSingleByDealer($dealerLocation->dealer_id)
-        ]);
+        $this->dispatch(new ReIndexInventoriesByDealerLocationJob($dealerLocation->dealer_location_id));
     }
 
     /**

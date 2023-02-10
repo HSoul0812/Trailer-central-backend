@@ -10,7 +10,7 @@ use App\Models\User\User;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
-use Laravel\Scout\Jobs\MakeSearchable;
+use App\Jobs\Scout\MakeSearchable;
 use Tests\TestCase;
 
 /**
@@ -126,7 +126,6 @@ class CacheInvalidationSearchSyncingTest extends TestCase
 
         $response->assertStatus(202);
 
-        Bus::assertDispatchedTimes(InvalidateCacheJob::class, 2); // once for single cache, once for search cache
         Bus::assertDispatchedTimes(ReIndexInventoriesByDealersJob::class, 1);
     }
 
