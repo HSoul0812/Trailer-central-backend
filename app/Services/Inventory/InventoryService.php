@@ -375,17 +375,23 @@ class InventoryService implements InventoryServiceInterface
                 }
 
                 if ($source === self::SOURCE_DASHBOARD) {
-                    $this->inventoryRepository->update([
+                    $item = $this->inventoryRepository->update([
                         'inventory_id' => $params['inventory_id'],
                         'changed_fields_in_dashboard' => $this->getChangedFields($inventory, $params)
                     ]);
+                    
+                    $changes = $item->getChanges();
                 }
 
                 $this->inventoryRepository->commitTransaction();
 
                 // Generate Overlay Inventory Images if necessary
-                if (!empty($newImages) || !empty($existingImages))
+                if (!empty($newImages) || !empty($existingImages) ||
+                    (!empty($changes) && isset($changes['overlay_enabled']))) {
+                    Log::channel('inventory-overlays')
+                       ->info('Queue regenerating overlays just for Inventory ID #' . $inventory->inventory_id);
                     $this->dispatch((new GenerateOverlayImageJob($inventory->inventory_id))->onQueue('overlay-images'));
+                }
 
                 Log::info('Item has been successfully updated', ['inventoryId' => $inventory->inventory_id]);
 
