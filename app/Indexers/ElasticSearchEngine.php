@@ -42,6 +42,7 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
                 ];
             })->toJson();
 
+            // @todo to avoid any potential error we should store the somewhere, maybe MySQL DB
             Log::critical($failedModels);
         }
     }

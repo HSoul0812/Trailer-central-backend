@@ -169,6 +169,8 @@ class Kernel extends ConsoleKernel
             ->runInBackground();
 
         /**
+         * @todo Calo say we could schedule this to be removed in next scheduled release (Feb 20th)
+         *
          * Temporary scheduled command to mitigate the integration issue,
          * we need to make time so they will be able to move everything inventory related to the API side
          */
