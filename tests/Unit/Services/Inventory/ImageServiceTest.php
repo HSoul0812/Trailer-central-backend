@@ -249,7 +249,7 @@ class ImageServiceTest extends TestCase
         ];
 
         $userMock = $this->getEloquentMock(User::class);
-        $userMock->dealer_id = $this->faker->numberBetween(2000, 4000);
+        $userMock->dealer_id = self::DEALER_ID;
 
         $inventories = new Collection();
         for ($i = 0; $i < 5; $i++)
@@ -274,7 +274,7 @@ class ImageServiceTest extends TestCase
 
         $this->userRepositoryMock->shouldReceive('get')
             ->once()->with(['dealer_id' => self::DEALER_ID])
-            ->andReturn($this->getEloquentMock(User::class));
+            ->andReturn($userMock);
 
         $this->imageService->updateOverlaySettings($overlayParams);
 
@@ -292,6 +292,9 @@ class ImageServiceTest extends TestCase
             'overlay_logo' => 'logo.png',
             'overlay_enabled' => 2
         ];
+
+        $userMock = $this->getEloquentMock(User::class);
+        $userMock->dealer_id = self::DEALER_ID;
 
         $inventories = new Collection();
         for ($i = 0; $i < 5; $i++)
