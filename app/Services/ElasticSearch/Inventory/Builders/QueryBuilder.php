@@ -376,9 +376,7 @@ class QueryBuilder implements InventoryQueryBuilderInterface
                                     'bool' => [
                                         $filters->getESOperatorKeyword() => $filters->getFields()->map(function (Filter $field) {
                                             return $this->mapper->getBuilder($field)->globalQuery();
-                                        })->filter(function ($queries) {
-                                            return count($queries);
-                                        })->values()
+                                        })
                                     ]
                                 ]
                             ]
@@ -397,7 +395,7 @@ class QueryBuilder implements InventoryQueryBuilderInterface
     private function addStatusSortScript(string $status): void
     {
         array_push($this->query['sort'], ... array_map(static function ($value) {
-            if (is_numeric($value)) {
+            if(is_numeric($value)){
                 return [
                     '_script' => [
                         'type' => 'string',
