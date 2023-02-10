@@ -580,7 +580,7 @@ class InventoryService implements InventoryServiceInterface
     {
         $from = Carbon::today()->startOfDay();
         $to = Carbon::today()->startOfDay()->addDay();
-        $this->inventoryRepository->expireItems($from, $to);
+        $this->inventoryRepository->hideExpiredItems($from, $to);
     }
 
     public function attributes(array $params): Collection
