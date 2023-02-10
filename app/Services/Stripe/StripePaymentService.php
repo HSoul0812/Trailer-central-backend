@@ -189,8 +189,8 @@ class StripePaymentService implements StripePaymentServiceInterface
 
             $inventoryExpiry = $inventoryExpiry
                 ->addDays($planDuration)
-                ->setTimezone('America/Indiana/Indianapolis')
-                ->format('Y-m-d H:i:s');
+                ->setTimezone(config('trailercentral.api_timezone'))
+                ->format(config('trailercentral.api_datetime_format'));
 
             $this->inventoryService->update($userId, [
                 'inventory_id' => $inventoryId,
