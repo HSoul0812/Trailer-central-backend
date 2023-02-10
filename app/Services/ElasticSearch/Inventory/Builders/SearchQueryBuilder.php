@@ -160,7 +160,7 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
                                 ]
                             ]
                         ];
-                        if ($descriptionWildcard && $name === 'description') {
+                        if ($name !== 'description' || $descriptionWildcard) {
                             $searchQuery[] = [
                                 'wildcard' => [
                                     $name => [
