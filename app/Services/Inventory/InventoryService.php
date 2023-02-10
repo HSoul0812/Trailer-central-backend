@@ -576,7 +576,7 @@ class InventoryService implements InventoryServiceInterface
         return $respObj;
     }
 
-    public function checkSubscriptions()
+    public function hideExpired()
     {
         $from = Carbon::today()->startOfDay();
         $to = Carbon::today()->startOfDay()->addDay();

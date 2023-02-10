@@ -27,7 +27,7 @@ class Kernel extends ConsoleKernel
             ->withoutOverlapping()
             ->runInBackground();
 
-        $schedule->command('inventory:check-subs')
+        $schedule->command('inventory:hide-expired')
             ->daily()
             ->withoutOverlapping()
             ->runInBackground();
