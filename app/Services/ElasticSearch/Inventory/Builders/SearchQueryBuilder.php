@@ -142,38 +142,41 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
      */
     public function globalQuery(): array
     {
-        $this->field->getTerms()->each(function (Term $term) {
-            $name = $this->field->getName();
+        $descriptionWildcard = app(FeatureFlagRepositoryInterface::class)->isEnabled('inventory-sdk-global-description-wildcard');
+        $name = $this->field->getName();
 
-            $query = [
-                'bool' => [
-                    'must' => array_map(static function ($value) use ($term, $name) {
-                        return [
-                            'bool' => [
-                                $term->getESOperatorKeyword() => [
-                                    [
-                                        'match' => [
-                                            sprintf('%s.txt', $name) => [
-                                                'query' => $value,
-                                                'operator' => 'and'
+        if (!$descriptionWildcard || $name != 'description') {
+            $this->field->getTerms()->each(function (Term $term) use ($name) {
+                $query = [
+                    'bool' => [
+                        'must' => array_map(static function ($value) use ($term, $name) {
+                            return [
+                                'bool' => [
+                                    $term->getESOperatorKeyword() => [
+                                        [
+                                            'match' => [
+                                                sprintf('%s.txt', $name) => [
+                                                    'query' => $value,
+                                                    'operator' => 'and'
+                                                ]
                                             ]
-                                        ]
-                                    ],
-                                    [
-                                        'wildcard' => [
-                                            $name => [
-                                                'value' => sprintf('*%s*', $value)
+                                        ],
+                                        [
+                                            'wildcard' => [
+                                                $name => [
+                                                    'value' => sprintf('*%s*', $value)
+                                                ]
                                             ]
                                         ]
                                     ]
                                 ]
-                            ]
-                        ];
-                    }, $term->getValues())
-                ]
-            ];
-            $this->appendToQuery($query);
-        });
+                            ];
+                        }, $term->getValues())
+                    ]
+                ];
+                $this->appendToQuery($query);
+            });
+        }
 
         return $this->query;
     }
