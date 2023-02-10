@@ -43,7 +43,8 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
             })->toJson();
 
             // @todo to avoid any potential missing inventory in the ES index due some error at bulk time,
-            // we should persist the error somewhere, maybe in MySQL DB
+            // we should persist the error somewhere, maybe in MySQL DB, it will be handy to trace any error source
+            // at indexation time
             Log::critical($failedModels);
         }
     }
