@@ -361,7 +361,10 @@ class InventoryService implements InventoryServiceInterface
                     }
                 }
 
-                $inventory = $this->inventoryRepository->update($params, $options);
+                $inventory = $this->inventoryRepository->update($params, $options);    
+                $changes = $inventory->getChanges();
+                Log::channel('inventory-overlays')
+                   ->info('Got all changes on inventory #' . $inventory->inventory_id . '; ' . print_r($changes, true));
 
                 if (!$inventory instanceof Inventory) {
                     Log::error('Item hasn\'t been updated.', ['params' => $params]);
@@ -375,12 +378,10 @@ class InventoryService implements InventoryServiceInterface
                 }
 
                 if ($source === self::SOURCE_DASHBOARD) {
-                    $item = $this->inventoryRepository->update([
+                    $this->inventoryRepository->update([
                         'inventory_id' => $params['inventory_id'],
                         'changed_fields_in_dashboard' => $this->getChangedFields($inventory, $params)
                     ]);
-                    
-                    $changes = $item->getChanges();
                 }
 
                 $this->inventoryRepository->commitTransaction();
