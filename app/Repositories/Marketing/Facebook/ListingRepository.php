@@ -159,9 +159,9 @@ class ListingRepository implements ListingRepositoryInterface {
             ->where('show_on_website', 1)
             ->where("{$inventoryTableName}.year", '<', '2025')
             ->where(function ($query) use ($inventoryTableName, $fbMinPrice) {
-                $query->whereRaw("IFNULL($inventoryTableName.sales_price, 0) >= $fbMinPrice")
-                    ->orWhereRaw("($inventoryTableName.use_website_price AND IFNULL($inventoryTableName.website_price, 0) >= $fbMinPrice)")
-                    ->orWhereRaw("IFNULL($inventoryTableName.price, 0) >= $fbMinPrice");
+                $query->whereRaw("IFNULL($inventoryTableName.sales_price, 0) > $fbMinPrice")
+                    ->orWhereRaw("($inventoryTableName.use_website_price AND IFNULL($inventoryTableName.website_price, 0) > $fbMinPrice)")
+                    ->orWhereRaw("IFNULL($inventoryTableName.price, 0) > $fbMinPrice");
             })
             ->where("{$inventoryTableName}.entity_type_id", '<>', EntityType::ENTITY_TYPE_BUILDING)
             ->where("{$inventoryTableName}.entity_type_id", '<>', EntityType::ENTITY_TYPE_VEHICLE)
