@@ -21,9 +21,13 @@ class ReIndexInventoriesByDealersJob extends Job
 
     public $queue = 'scout';
 
-    public function __construct(array $dealerIds)
+    /**  @var array|null */
+    private $context;
+
+    public function __construct(array $dealerIds, ?array $context = null)
     {
         $this->dealerIds = $dealerIds;
+        $this->context = $context ?? ['dealer_ids' => $dealerIds];
     }
 
     public function handle(
@@ -38,7 +42,7 @@ class ReIndexInventoriesByDealersJob extends Job
 
         Job::batch(function (BatchedJob $batch): void {
             Inventory::makeAllSearchableByDealers($this->dealerIds);
-        }, __CLASS__, self::WAIT_TIME);
+        }, __CLASS__, self::WAIT_TIME, $this->context);
 
         $logger->info(
             'Enqueueing the job to invalidate cache by dealer ids',
