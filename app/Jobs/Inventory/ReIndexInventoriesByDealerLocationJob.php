@@ -18,16 +18,18 @@ class ReIndexInventoriesByDealerLocationJob extends Job
     /** @var int time in seconds */
     private const WAIT_TIME = 15;
 
-    /**
-     * @var array<integer>
-     */
+    /** @var array<integer> */
     private $locationId;
+
+    /**  @var array|null */
+    private $context;
 
     public $queue = 'scout';
 
-    public function __construct(int $locationId)
+    public function __construct(int $locationId, ?array $context = null)
     {
         $this->locationId = $locationId;
+        $this->context = $context ?? ['location_id' => $locationId];
     }
 
     public function handle(
@@ -51,7 +53,11 @@ class ReIndexInventoriesByDealerLocationJob extends Job
 
         Job::batch(function (BatchedJob $batch): void {
             Inventory::makeAllSearchableByDealerLocationId($this->locationId);
-        }, __CLASS__, self::WAIT_TIME);
+        },
+            __CLASS__,
+            self::WAIT_TIME,
+            array_merge($this->context, ['dealer_id' => $dealerLocation->dealer_id,])
+        );
 
         $logger->info(
             'Enqueueing the job to invalidate cache by dealer location',
