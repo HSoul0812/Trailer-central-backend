@@ -10,6 +10,8 @@ use App\Models\Observers\CRM\Lead\LeadObserver;
 use App\Models\Observers\CRM\Lead\LeadStatusObserver;
 use App\Repositories\CRM\Documents\DealerDocumentsRepository;
 use App\Repositories\CRM\Documents\DealerDocumentsRepositoryInterface;
+use App\Repositories\CRM\Leads\Export\ADFLeadRepository;
+use App\Repositories\CRM\Leads\Export\ADFLeadRepositoryInterface;
 use App\Repositories\CRM\Leads\LeadTradeRepository;
 use App\Repositories\CRM\Leads\LeadTradeRepositoryInterface;
 use App\Repositories\CRM\Refund\RefundRepository;
@@ -96,6 +98,7 @@ class CrmServiceProvider extends ServiceProvider
         $this->app->bind(TypeRepositoryInterface::class, TypeRepository::class);
         $this->app->bind(UnitRepositoryInterface::class, UnitRepository::class);
         $this->app->bind(FacebookRepositoryInterface::class, FacebookRepository::class);
+        $this->app->bind(ADFLeadRepositoryInterface::class, ADFLeadRepository::class);
         $this->app->bind(IDSLeadRepositoryInterface::class, IDSLeadRepository::class);
         $this->app->bind(BigTexLeadRepositoryInterface::class, BigTexLeadRepository::class);
         $this->app->bind(LeadEmailRepositoryInterface::class, LeadEmailRepository::class);

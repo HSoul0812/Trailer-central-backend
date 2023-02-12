@@ -2,7 +2,6 @@
 
 namespace Tests\Integration\Jobs\Bulk\Inventory;
 
-use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
 use App\Jobs\Website\ReIndexInventoriesByDealersJob;
 use App\Services\Import\Inventory\CsvImportServiceInterface;
 use App\Services\Inventory\InventoryServiceInterface;
@@ -21,6 +20,8 @@ use Mockery;
  * @group DW_BULK
  * @group DW_BULK_INVENTORY
  * @group DW_BULK_UPLOAD_INVENTORY
+ * @group DW_ELASTICSEARCH
+ * @group DW_INVENTORY
  * @group INTEGRATION
  * @group INTEGRATION_BULK
  * @group INTEGRATION_BULK_UPLOAD_INVENTORY
@@ -100,7 +101,6 @@ class ProcessBulkUploadTest extends TestCase
 
         $job->handle($this->importerService, $this->inventoryService);
 
-        Bus::assertDispatchedTimes(InvalidateCacheJob::class, 1);
         Bus::assertDispatchedTimes(ReIndexInventoriesByDealersJob::class, 1);
     }
 

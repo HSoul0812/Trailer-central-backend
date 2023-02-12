@@ -10,7 +10,7 @@ use App\Services\Integration\Common\DTOs\ParsedEmail;
 interface GmailServiceInterface {
     /**
      * Get Auth URL
-     * 
+     *
      * @param string $redirectUrl url to redirect auth back to again
      * @param string $authCode auth code to get full credentials with
      * @return array created from GoogleTokenTransformer
@@ -40,17 +40,17 @@ interface GmailServiceInterface {
 
     /**
      * Get All Messages With Label
-     * 
+     *
      * @param AccessToken $accessToken
      * @param string $folder folder name to get messages from; defaults to inbox
      * @param array $params
-     * @return whether the email was sent successfully or not
+     * @return array whether the email was sent successfully or not
      */
     public function messages(AccessToken $accessToken, string $folder = 'INBOX', array $params = []);
 
     /**
      * Get and Parse Individual Message
-     * 
+     *
      * @param string $mailId
      * @return parsed message details
      */
@@ -58,7 +58,7 @@ interface GmailServiceInterface {
 
     /**
      * Move Message Labels
-     * 
+     *
      * @param AccessToken $accessToken
      * @param string $mailId mail ID to modify
      * @param array $labels labels to add by name | required
@@ -69,7 +69,7 @@ interface GmailServiceInterface {
 
     /**
      * Get All Labels for User
-     * 
+     *
      * @param AccessToken $accessToken
      * @param array $search
      * @throws App\Exceptions\Integration\Google\MissingGmailLabelsException
@@ -80,7 +80,7 @@ interface GmailServiceInterface {
 
     /**
      * Set Key for Google Service
-     * 
+     *
      * @param string $key
      * @return string
      */

@@ -9,10 +9,12 @@ class RedisResponseCacheKey implements ResponseCacheKeyInterface
 {
     private const SEPARATOR = '_';
 
+    public const CLEAR_ALL_PATTERN = 'inventories.*';
+
+    public const SINGLE_PATTERN = 'inventories.single';
+
     /**
-     * @param string $requestId
-     * @param ElasticSearchQueryResult $result
-     * @return string
+     * It returns a string like `inventories.search.0698854bbb02f1f9dcd91350272e6e4f42150150.dealers:_4203_.inventories:_3207402_3207708_3207709_3207815_3207283_`
      */
     public function collection(string $requestId, ElasticSearchQueryResult $result): string
     {
@@ -24,77 +26,62 @@ class RedisResponseCacheKey implements ResponseCacheKeyInterface
             $dealers->push($hint->_source->dealerId);
         }
 
-        $dealers = $dealers->unique()->map(function ($dealer) {
-            return 'dealer:' . $dealer;
-        })->join(self::SEPARATOR);
-
-        $inventories = $inventories->join(self::SEPARATOR);
-
-        return sprintf('inventories.%s_%s_%s_', $requestId, $dealers, $inventories);
+        return sprintf(
+            'inventories.search.%s.dealers:_%s_.inventories:_%s_',
+            $requestId, $dealers->unique()->join(self::SEPARATOR), $inventories->join(self::SEPARATOR)
+        );
     }
 
     /**
-     * @param $inventoryId
-     * @param $dealerId
-     * @return string
+     * It returns a string like `inventories.single.323332.dealer:4203`
      */
     public function single($inventoryId, $dealerId): string
     {
-        return sprintf('inventories.single:%d:-dealer:%d', $inventoryId, $dealerId);
+        return sprintf('inventories.single.%d.dealer:%d', $inventoryId, $dealerId);
     }
 
     /**
-     * @param  int  $id
-     * @param  int  $dealerId
+     * It returns a string like `inventories.single.323332.dealer:4203`
+     */
+    public function deleteSingle(int $inventoryId, int $dealerId): string
+    {
+        return $this->single($inventoryId, $dealerId);
+    }
+
+    /**
+     * It returns a string like `inventories.search.*.dealers:*.inventories:*_323332_*`
+     *
+     * @param int $inventoryId
      * @return string
      */
-    public function deleteSingle(int $id, int $dealerId): string
+    public function deleteSingleFromCollection(int $inventoryId): string
     {
-        return sprintf('*inventories.single:%d:-dealer:%d', $id, $dealerId);
+        return sprintf('inventories.search.*.dealers:*.inventories:*_%d_*', $inventoryId);
     }
 
     /**
-     * @param int $id
-     * @return string
+     * It returns a string like `inventories.search.*.dealers:*_4203_*.inventories:*`
      */
-    public function deleteSingleFromCollection(int $id): string
+    public function deleteByDealer(int $dealerId): string
     {
-        return sprintf('*inventories.*_%d_*', $id);
+        return sprintf('inventories.search.*.dealers:*_%d_*.inventories:*', $dealerId);
     }
 
     /**
-     * @param int $id
-     * @return string
+     * It returns a string like `inventories.single.*.dealer:4203`
      */
-    public function deleteByDealer(int $id): string
+    public function deleteSingleByDealer(int $dealerId): string
     {
-        return sprintf('*inventories.*_dealer:%d_*', $id);
+        return sprintf('inventories.single.*.dealer:%d', $dealerId);
     }
 
-    /**
-     * @param int $id
-     * @return string
-     */
-    public function deleteSingleByDealer(int $id): string
-    {
-        return sprintf('*inventories.single:*:-dealer:%d', $id);
-    }
-
-    /**
-     * @param string $key
-     * @return bool
-     */
     public function isSingleKey(string $key): bool
     {
-        return Str::contains($key, 'inventories.single');
+        return Str::contains($key, self::SINGLE_PATTERN) || $key === self::CLEAR_ALL_PATTERN;
     }
 
-    /**
-     * @param string $key
-     * @return bool
-     */
     public function isSearchKey(string $key): bool
     {
-        return !$this->isSingleKey($key);
+        return !$this->isSingleKey($key) || $key === self::CLEAR_ALL_PATTERN;
     }
 }

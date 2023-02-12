@@ -2,23 +2,86 @@
 
 namespace App\Services\ElasticSearch\Cache;
 
-use Illuminate\Support\Facades\Redis;
-
 class InventoryResponseRedisCache implements InventoryResponseCacheInterface
 {
-    /**
-     * @return ResponseCacheInterface
-     */
-    public function search(): ResponseCacheInterface
-    {
-        return new RedisResponseCache(Redis::connection('sdk-search-cache')->client(), app(UniqueCacheInvalidationInterface::class));
+    /** @var ResponseCacheInterface */
+    private $searchCache;
+
+    /** @var ResponseCacheInterface */
+    private $singleCache;
+
+    /** @var ResponseCacheKeyInterface */
+    private $responseCacheKey;
+
+    public function __construct(
+        ResponseCacheKeyInterface $responseCacheKey,
+        ResponseCacheInterface $searchCache,
+        ResponseCacheInterface $singleCache
+    ) {
+        $this->responseCacheKey = $responseCacheKey;
+        $this->searchCache = $searchCache;
+        $this->singleCache = $singleCache;
     }
 
     /**
-     * @return ResponseCacheInterface
+     * It should store the cache in the proper database
+     *
+     * @param  string  $key
+     * @param  string  $value
+     * @return void
      */
-    public function single(): ResponseCacheInterface
+    public function set(string $key, string $value): void
     {
-        return new RedisResponseCache(Redis::connection('sdk-single-cache')->client(), app(UniqueCacheInvalidationInterface::class));
+        if ($this->responseCacheKey->isSearchKey($key)) {
+            $this->searchCache->set($key, $value);
+
+            return;
+        }
+
+        $this->singleCache->set($key, $value);
+    }
+
+    public function forget(array $keyPatterns): void
+    {
+        ['search' => $searchKeyPatterns, 'single' => $singleKeyPatterns] = $this->sliceKeyPatterns($keyPatterns);
+
+        if (count($searchKeyPatterns)) {
+            $this->searchCache->forget(...$searchKeyPatterns);
+        }
+
+        if (count($singleKeyPatterns)) {
+            $this->singleCache->forget(...$singleKeyPatterns);
+        }
+    }
+
+    public function invalidate(array $keyPatterns): void
+    {
+        ['search' => $searchKeyPatterns, 'single' => $singleKeyPatterns] = $this->sliceKeyPatterns($keyPatterns);
+
+        if (count($searchKeyPatterns)) {
+            $this->searchCache->invalidate(...$searchKeyPatterns);
+        }
+
+        if (count($singleKeyPatterns)) {
+            $this->singleCache->invalidate(...$singleKeyPatterns);
+        }
+    }
+
+    /**
+     * @param  array  $keyPatterns
+     * @return array{search: array<string>, single: array<string>}
+     */
+    private function sliceKeyPatterns(array $keyPatterns): array
+    {
+        $collection = collect($keyPatterns);
+
+        return [
+            'search' => $collection->filter(function (string $key): bool {
+                return $this->responseCacheKey->isSearchKey($key);
+            })->values(),
+            'single' => $collection->filter(function (string $key): bool {
+                return $this->responseCacheKey->isSingleKey($key);
+            })->values()
+        ];
     }
 }

@@ -683,7 +683,6 @@ $api->version('v1', function ($route) {
     $route->get('integrations', 'App\Http\Controllers\v1\Integration\IntegrationController@index');
     $route->get('integrations/{id}', 'App\Http\Controllers\v1\Integration\IntegrationController@show');
 
-
     $route->group(['middleware' => 'accesstoken.validate'], function ($route) {
         /*
         |--------------------------------------------------------------------------
@@ -703,6 +702,7 @@ $api->version('v1', function ($route) {
         $route->post('leads/find-matches', 'App\Http\Controllers\v1\CRM\Leads\LeadController@getMatches');
         $route->post('leads/{id}/merge', 'App\Http\Controllers\v1\CRM\Leads\LeadController@mergeLeads');
         $route->get('leads/output', 'App\Http\Controllers\v1\CRM\Leads\LeadController@output');
+        $route->delete('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@destroy');
 
         /*
         |--------------------------------------------------------------------------
@@ -715,6 +715,16 @@ $api->version('v1', function ($route) {
         $route->get('user/quotes', 'App\Http\Controllers\v1\Dms\UnitSaleController@index');
         $route->put('user/quotes/bulk-archive', 'App\Http\Controllers\v1\Dms\UnitSaleController@bulkArchive');
         $route->put('user/quotes/setting', 'App\Http\Controllers\v1\Dms\Quote\QuoteSettingController@updateDealerSetting');
+
+        /*
+        |--------------------------------------------------------------------------
+        | POS Quotes
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->post('pos-quotes', 'App\Http\Controllers\v1\Pos\PosController@createPosQuote');
 
         /*
         |--------------------------------------------------------------------------
@@ -774,6 +784,8 @@ $api->version('v1', function ($route) {
         */
         $route->get('user/integrations', 'App\Http\Controllers\v1\User\DealerIntegrationController@index');
         $route->get('user/integrations/{id}', 'App\Http\Controllers\v1\User\DealerIntegrationController@show');
+        $route->post('user/integrations/{id}', 'App\Http\Controllers\v1\User\DealerIntegrationController@update');
+        $route->delete('user/integrations/{id}', 'App\Http\Controllers\v1\User\DealerIntegrationController@delete');
 
         /*
         |--------------------------------------------------------------------------

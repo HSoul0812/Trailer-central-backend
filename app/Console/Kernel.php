@@ -23,6 +23,7 @@ use App\Console\Commands\Parts\FixPartVendor;
 use App\Console\Commands\CRM\Dms\CVR\GenerateCVRDocumentCommand;
 use App\Console\Commands\CRM\Dms\UnitSale\GetCompletedSaleWithNoFullInvoice;
 use App\Console\Commands\CRM\Dms\UnitSale\FixEmptyManufacturerUnitSale;
+use App\Console\Commands\Database\PruneSSNCommand;
 use App\Console\Commands\Inventory\FixFloorplanBillStatus;
 use App\Console\Commands\Parts\Import\GetTextrailParts;
 use App\Console\Commands\Export\ExportFavoritesCommand;
@@ -60,7 +61,8 @@ class Kernel extends ConsoleKernel
         MyScheduleWorkCommand::class,
         ExportFavoritesCommand::class,
         GenerateCrmUsers::class,
-        HideExpiredImages::class
+        HideExpiredImages::class,
+        PruneSSNCommand::class,
     ];
 
     /**
@@ -113,7 +115,6 @@ class Kernel extends ConsoleKernel
                 ->onOneServer()
                 ->runInBackground();
 
-
         /**
          * Campaigns/Blasts
          */
@@ -137,7 +138,6 @@ class Kernel extends ConsoleKernel
                 ->onOneServer()
                 ->runInBackground();
 
-
         $schedule->command('files:clear-local-tmp-folder')
             ->weeklyOn(7, '4:00')
             ->onOneServer()
@@ -157,7 +157,6 @@ class Kernel extends ConsoleKernel
             ->hourly()
             ->onOneServer()
             ->runInBackground();
-
 
         /**
          * Scrape Email Replies
@@ -187,6 +186,8 @@ class Kernel extends ConsoleKernel
            ->runInBackground();
 
         /**
+         * @todo Calo say we could schedule this to be removed in next scheduled release (Feb 20th)
+         *
          * Temporary scheduled command to mitigate the integration issue,
          * we need to make time so they will be able to move everything inventory related to the API side
          */
@@ -209,6 +210,10 @@ class Kernel extends ConsoleKernel
             ->daily()
             ->onOneServer()
             ->runInBackground();
+
+        $schedule->command('database:prune-ssn')
+            ->daily()
+            ->runInBackground();
     }
 
     /**
@@ -218,7 +223,7 @@ class Kernel extends ConsoleKernel
      */
     protected function commands()
     {
-        $this->load(__DIR__.'/Commands');
+        $this->load(__DIR__ . '/Commands');
 
         require base_path('routes/console.php');
     }

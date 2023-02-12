@@ -130,6 +130,14 @@ return [
             'permission' => 0664,
         ],
 
+        'inventory-overlays' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/jobs/inventory-overlays.log'),
+            'level' => env('LOG_LEVEL', 'error'),
+            'days' => 3,
+            'permission' => 0664,
+        ],
+
         'auth' => [
             'driver' => 'daily',
             'path' => storage_path('logs/services/auth.log'),
@@ -182,6 +190,14 @@ return [
             'driver' => 'daily',
             'path' => storage_path('logs/services/emailbuilder.log'),
             'level' => env('LOG_LEVEL', 'error'),
+            'days' => 3,
+            'permission' => 0664,
+        ],
+
+        'inventory' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/inventory.log'),
+            'level' => env('INVENTORY_LOG_LEVEL', 'debug'),
             'days' => 3,
             'permission' => 0664,
         ],
@@ -312,10 +328,6 @@ return [
             'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
-        ],
-        'sentry' => [
-            'driver' => 'sentry',
-            'level' => env('SENTRY_LOG_LEVEL', 'error')
         ],
         'sentry' => [
             'driver' => 'sentry',

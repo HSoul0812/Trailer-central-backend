@@ -23,7 +23,7 @@ abstract class AbstractSyncFromRemoteCommand extends Command
                 'host' => [$host]
             ],
             'write' => [
-                'host' => [env('DB_HOST', '127.0.0.1')] // to avoid any mismatch at coding time
+                'host' => [$host]
             ],
             'sticky' => false,
             'port' => $port,

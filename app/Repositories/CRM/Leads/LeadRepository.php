@@ -181,8 +181,20 @@ class LeadRepository implements LeadRepositoryInterface {
         return Lead::create($params);
     }
 
+    /**
+     * Delete Lead
+     *
+     * @param array $params
+     * @return Lead
+     */
     public function delete($params) {
-        throw new NotImplementedException;
+        
+        if (isset($params['id'])) {
+            $params['identifier'] = $params['id'];
+            unset($params['id']);
+        }
+
+        return Lead::where($params)->delete();
     }
 
     public function get($params) {

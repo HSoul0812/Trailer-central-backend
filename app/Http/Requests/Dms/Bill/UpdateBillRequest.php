@@ -28,7 +28,9 @@ class UpdateBillRequest extends Request
             'nullable',
             'string',
             'max:' . DocNumConstraint::MAX_LENGTH,
-            Rule::unique('qb_bills', 'doc_num')->ignore($this->get('id')),
+            Rule::unique('qb_bills', 'doc_num')
+                ->where('vendor_id', $this->input('vendor_id'))
+                ->ignore($this->get('id')),
         ];
         
         return parent::getRules();

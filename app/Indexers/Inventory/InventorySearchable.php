@@ -4,16 +4,28 @@ namespace App\Indexers\Inventory;
 
 use App\Indexers\Searchable;
 use App\Indexers\WithIndexConfigurator;
+use App\Models\Inventory\Inventory;
 use App\Observers\Inventory\InventoryObserver;
 use App\Repositories\FeatureFlagRepositoryInterface;
 use Exception;
-
+use App\Jobs\Scout\MakeSearchable;
+use Laravel\Scout\ModelObserver;
+use App\Models\User\User as Dealer;
 /**
  * @method \Illuminate\Database\Eloquent\Builder query
  */
 trait InventorySearchable
 {
     use Searchable, WithIndexConfigurator;
+
+    public static function bootInventorySearchable(): void
+    {
+        $repo = app(FeatureFlagRepositoryInterface::class);
+
+        if ($repo->isEnabled('inventory-sdk-cache')) {
+            Inventory::enableCacheInvalidation();
+        }
+    }
 
     public function searchableAs(): string
     {
@@ -37,6 +49,19 @@ trait InventorySearchable
     }
 
     /**
+     * Get a new query to restore one or more models by their queueable IDs.
+     *
+     * @param  array|int  $ids
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function newQueryForRestoration($ids)
+    {
+        return is_array($ids)
+            ? $this->newQueryWithoutScopes()->with('user', 'user.website', 'dealerLocation')->whereIn($this->getQualifiedKeyName(), $ids)
+            : $this->newQueryWithoutScopes()->with('user', 'user.website', 'dealerLocation')->whereKey($ids);
+    }
+
+    /**
      * @throws Exception when some unknown error has been thrown
      */
     public static function makeAllSearchableUsingAliasStrategy(): void
@@ -47,21 +72,32 @@ trait InventorySearchable
 
     public static function makeAllSearchableByDealers(array $dealers = []): void
     {
-        self::query()->whereIn('dealer_id', $dealers)
-            ->orderBy('updated_at_auto', 'DESC')
+        self::query()->select('inventory.inventory_id')
+            ->whereIn('dealer_id', $dealers)
             ->searchable();
     }
 
-    public static function makeAllSearchableByDealerLocations(array $locations = []): void
+    public static function makeAllSearchableByDealerLocationId(int $dealerLocationId): void
     {
-        self::query()->whereIn('dealer_location_id', $locations)
-            ->orderBy('updated_at_auto', 'DESC')
+        self::query()->select('inventory.inventory_id')
+            ->where('dealer_location_id', $dealerLocationId)
             ->searchable();
     }
 
+    /**
+     * It will iterate over all dealers, then over all inventories which belongs to the dealer
+     *
+     * @return void
+     */
     public static function makeAllSearchable(): void
     {
-        self::query()->orderBy('updated_at_auto', 'DESC')->searchable();
+        Dealer::query()->select('dealer.dealer_id')
+            ->get()
+            ->each(function (Dealer $dealer): void {
+                self::query()->select('inventory.inventory_id')
+                    ->where('inventory.dealer_id', $dealer->dealer_id)
+                    ->searchable();
+            });
     }
 
     /**
@@ -98,7 +134,8 @@ trait InventorySearchable
      */
     public static function withoutCacheInvalidationAndSearchSyncing(callable $callback)
     {
-        $isCacheInvalidationEnabled = app(FeatureFlagRepositoryInterface::class)->isEnabled('inventory-sdk-cache');
+        $isCacheInvalidationEnabled = self::isCacheInvalidationEnabled();
+        $isSearchSyncingEnabled = self::isSearchSyncingEnabled();
 
         self::disableCacheInvalidationAndSearchSyncing();
 
@@ -109,7 +146,9 @@ trait InventorySearchable
                 self::enableCacheInvalidation();
             }
 
-            self::enableSearchSyncing();
+            if ($isSearchSyncingEnabled) {
+                self::enableSearchSyncing();
+            }
         }
     }
 
@@ -133,7 +172,7 @@ trait InventorySearchable
      */
     public static function withoutCacheInvalidation(callable $callback)
     {
-        $isCacheInvalidationEnabled = app(FeatureFlagRepositoryInterface::class)->isEnabled('inventory-sdk-cache');
+        $isCacheInvalidationEnabled = self::isCacheInvalidationEnabled();
 
         self::disableCacheInvalidation();
 
@@ -159,5 +198,31 @@ trait InventorySearchable
     public static function isCacheInvalidationEnabled(): bool
     {
         return InventoryObserver::isCacheInvalidationEnabled();
+    }
+
+    public static function isSearchSyncingEnabled(): bool
+    {
+        return !ModelObserver::syncingDisabledFor(__CLASS__);
+    }
+
+    /**
+     * Dispatch the job to make the given models searchable.
+     *
+     * @param  \Illuminate\Database\Eloquent\Collection  $models
+     * @return void
+     */
+    public function queueMakeSearchable($models)
+    {
+        if ($models->isEmpty()) {
+            return;
+        }
+
+        if (! config('scout.queue')) {
+            return $models->first()->searchableUsing()->update($models);
+        }
+
+        dispatch((new MakeSearchable($models))
+            ->onQueue($models->first()->syncWithSearchUsingQueue())
+            ->onConnection($models->first()->syncWithSearchUsing()));
     }
 }

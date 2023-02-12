@@ -175,7 +175,10 @@ class InventorySeeder extends Seeder
                 'longitude' => 10,
                 'geolocation' => new Point(0, 0),
             ];
-            $this->inventory = factory(Inventory::class)->create($inventoryParams);
+
+            $this->inventory = Inventory::withoutCacheInvalidationAndSearchSyncing(function () use ($inventoryParams){
+                return factory(Inventory::class)->create($inventoryParams);
+            });
         }
 
         if($this->withWebsite){

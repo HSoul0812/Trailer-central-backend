@@ -13,6 +13,7 @@ use App\Models\CRM\Leads\InventoryLead;
 use App\Repositories\CRM\Leads\StatusRepositoryInterface;
 use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Models\CRM\Leads\LeadStatus;
+use Illuminate\Support\Facades\Log;
 use Faker\Factory as Faker;
 use App\Models\CRM\User\Customer;
 

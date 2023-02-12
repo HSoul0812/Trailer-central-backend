@@ -2,8 +2,6 @@
 
 namespace App\Console\Commands\Sync;
 
-use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
-use App\Jobs\Website\ReIndexInventoriesByDealersJob;
 use App\Models\Image;
 use App\Models\Inventory\Attribute as InventoryAttribute;
 use App\Models\Inventory\AttributeValue as InventoryAttributeValue;
@@ -17,7 +15,7 @@ use App\Models\Website\Entity as WebsiteEntity;
 use App\Models\Website\Image\WebsiteImage;
 use App\Models\Website\PaymentCalculator\Settings as PaymentCalculatorSettings;
 use App\Models\Website\Website;
-use App\Services\ElasticSearch\Cache\RedisResponseCacheKey;
+use App\Services\Inventory\InventoryServiceInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -28,7 +26,7 @@ class SyncWebsiteFromRemoteCommand extends AbstractSyncFromRemoteCommand
      *
      * @var string
      */
-    protected $signature = "inventory:sync-dealer-website-from-remote {dealer_id} {host} {user} {db=trailercentral} {port=3306}";
+    protected $signature = 'sync:dealer-website-from-remote {dealer_id} {host} {user} {db=trailercentral} {port=3306}';
 
     /**
      * The console command description.
@@ -273,14 +271,10 @@ class SyncWebsiteFromRemoteCommand extends AbstractSyncFromRemoteCommand
             $this->reguard();
         });
 
-        /** @var RedisResponseCacheKey $cacheService */
-        $cacheService = app(RedisResponseCacheKey::class);
-
-        $this->output->writeln('Dispatching Cache invalidation jobs...');
-        dispatch(new InvalidateCacheJob([$cacheService->deleteByDealer($dealer->dealer_id)])); // not matter if cache is disabled
-
         $this->output->writeln('Dispatching ES indexation jobs...');
-        dispatch(new ReIndexInventoriesByDealersJob([$dealer->dealer_id]));
+        $this->output->writeln('Dispatching Cache invalidation jobs...');
+
+        app(InventoryServiceInterface::class)->invalidateCacheAndReindexByDealerIds([$dealer->dealer_id]);
 
         $this->output->writeln(sprintf('%s was successfully synced.', $dealer->name));
     }

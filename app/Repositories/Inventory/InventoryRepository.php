@@ -16,6 +16,7 @@ use App\Models\Inventory\InventoryImage;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
 use App\Traits\Repository\Transaction;
 use App\Repositories\Traits\SortTrait;
+use Dingo\Api\Exception\ResourceException;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -217,10 +218,13 @@ class InventoryRepository implements InventoryRepositoryInterface
         // bill category record, allowing the dealer to update the bill later on
         $item->send_to_quickbooks = !empty($item->bill_id);
 
-        // Try to get the geolocation point class from the existing method and use it here
-        $geolocation = $item->geolocationPoint();
+        // when the geolocation is not setup as Point, it will use a default Point
+        if (empty($params['geolocation']) || !($params['geolocation'] instanceof Point)) {
+            // Try to get the geolocation point class from the existing method and use it here
+            $geolocation = $item->geolocationPoint();
 
-        $item->geolocation = new Point($geolocation->latitude, $geolocation->longitude);
+            $item->geolocation = new Point($geolocation->latitude, $geolocation->longitude);
+        }
 
         $item->save();
 
@@ -351,6 +355,15 @@ class InventoryRepository implements InventoryRepositoryInterface
         // so the cronjob can create the add bill approval record and also the
         // bill category record, allowing the dealer to update the bill later on
         $item->send_to_quickbooks = !empty($item->bill_id);
+
+        // when the geolocation is not setup as Point, it will use a Point which is build
+        // either from inventory coordinates or dealer location coordinates as fallback
+        if (empty($params['geolocation']) || !($params['geolocation'] instanceof Point)) {
+            // Try to get the geolocation point class from the existing method and use it here
+            $geolocation = $item->geolocationPoint();
+
+            $item->geolocation = new Point($geolocation->latitude, $geolocation->longitude);
+        }
 
         $item->save();
 
@@ -862,6 +875,16 @@ class InventoryRepository implements InventoryRepositoryInterface
             $query->groupBy('inventory.inventory_id');
         }
 
+        if (isset($params['is_publishable_classified'])) {
+            $query = $query->join('dealer', 'dealer.dealer_id', '=', 'inventory.dealer_id');
+            if ($params['is_publishable_classified']) {
+                $query = $query->where('clsf_active', User::CLASSIFIED_ACTIVE)->where('show_on_website', Inventory::SHOW_IN_WEBSITE)->where('inventory.dealer_id', $params['dealer_id']);
+            } else {
+                $query = $query->where('clsf_active', !User::CLASSIFIED_ACTIVE)->orWhere('show_on_website', !Inventory::SHOW_IN_WEBSITE)->where('inventory.dealer_id', $params['dealer_id']);
+            }
+
+        }
+
         return $query;
     }
 
@@ -901,6 +924,9 @@ class InventoryRepository implements InventoryRepositoryInterface
         $inventoryImageObjs = [];
 
         foreach ($newImages as $newImage) {
+            if(empty($newImage['filename'])) {
+                throw new ResourceException("Validation Failed", 'Filename cant be blank');
+            }
             $imageObj = new Image($newImage);
             $imageObj->save();
 
@@ -1134,17 +1160,17 @@ class InventoryRepository implements InventoryRepositoryInterface
 
     /**
      * Get necessary parameters to generate overlays
-     * 
+     *
      * @param int $inventoryId
      * @return array
      */
     public function getOverlayParams(int $inventoryId)
     {
-        $query = Inventory::select(User::getTableName() .'.dealer_id', 'inventory_id', 'overlay_logo', 'overlay_logo_position', 'overlay_logo_width', 'overlay_logo_height', 
+        $query = Inventory::select(User::getTableName() .'.dealer_id', 'inventory_id', 'overlay_logo', 'overlay_logo_position', 'overlay_logo_width', 'overlay_logo_height',
             'overlay_upper', 'overlay_upper_bg', 'overlay_upper_alpha', 'overlay_upper_text', 'overlay_upper_size', 'overlay_upper_margin',
             'overlay_lower', 'overlay_lower_bg', 'overlay_lower_alpha', 'overlay_lower_text', 'overlay_lower_size', 'overlay_lower_margin',
             'overlay_default', Inventory::getTableName() .'.overlay_enabled', User::getTableName() .'.overlay_enabled AS dealer_overlay_enabled',
-            User::getTableName() .'.name AS overlay_text_dealer', DealerLocation::getTableName() .'.phone AS overlay_text_phone', 
+            User::getTableName() .'.name AS overlay_text_dealer', DealerLocation::getTableName() .'.phone AS overlay_text_phone',
             \DB::raw("CONCAT(".DealerLocation::getTableName() .".city, ', ',".DealerLocation::getTableName() .".region) AS overlay_text_location"))
         ->leftJoin(User::getTableName(), Inventory::getTableName() .'.dealer_id', '=', User::getTableName() .'.dealer_id')
         ->leftJoin(DealerLocation::getTableName(), Inventory::getTableName() .'.dealer_location_id', '=', DealerLocation::getTableName() .'.dealer_location_id')

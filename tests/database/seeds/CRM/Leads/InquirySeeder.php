@@ -124,5 +124,9 @@ class InquirySeeder extends Seeder {
         NewUser::destroy($userId);
         NewDealerUser::destroy($dealerId);
         User::destroy($dealerId);
+
+        CrmUser::where('user_id', $userId)->delete();
+        NewUser::destroy($userId);
+        NewDealerUser::destroy($dealerId);
     }
 }

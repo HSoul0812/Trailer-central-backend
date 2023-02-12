@@ -63,9 +63,12 @@ class InventoryHistorySeeder extends Seeder
         $this->faker = Faker::create();
 
         $this->dealer = factory(User::class)->create();
-        $this->inventory = factory(Inventory::class)->create([
-            'dealer_id' => $this->dealer->getKey()
-        ]);
+
+        $this->inventory = Inventory::withoutCacheInvalidationAndSearchSyncing(function (){
+            return factory(Inventory::class)->create([
+                'dealer_id' => $this->dealer->getKey()
+            ]);
+        });
     }
 
     public function seed(): void

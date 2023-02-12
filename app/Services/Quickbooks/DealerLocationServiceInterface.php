@@ -10,5 +10,5 @@ interface DealerLocationServiceInterface
 {
     public function update(int $dealerLocationId): ?QuickbookApproval;
 
-    public function invalidateCacheAndReindex(int $dealerLocationId): void;
+    public function reindexAndInvalidateCacheInventory(int $dealerLocationId): void;
 }

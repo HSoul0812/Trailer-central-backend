@@ -240,7 +240,7 @@ class InventoryController extends RestfulControllerV2
         $response = $this->itemResponse($data, new InventoryTransformer());
 
         if (Inventory::isCacheInvalidationEnabled()) {
-            $this->inventoryResponseCache->single()->set(
+            $this->inventoryResponseCache->set(
                 $this->responseCacheKey->single($data->inventory_id, $data->dealer_id),
                 $response->morph('json')->getContent()
             );
@@ -545,7 +545,7 @@ class InventoryController extends RestfulControllerV2
 
             //Cache only if there are results
             if (Inventory::isCacheInvalidationEnabled() && $result->hints->count()) {
-                $this->inventoryResponseCache->search()->set(
+                $this->inventoryResponseCache->set(
                     $this->responseCacheKey->collection($searchRequest->requestId(), $result),
                     $response->morph('json')->getContent()
                 );

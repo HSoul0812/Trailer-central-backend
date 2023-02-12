@@ -14,9 +14,11 @@ use Illuminate\Http\Request;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Http\Requests\ActionRequest;
 
+use Laravel\Nova\Panel;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Boolean;
+use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\Textarea;
 
 use Laravel\Nova\Fields\Code;
@@ -80,7 +82,12 @@ class Integration extends Resource
             Boolean::make('Active'),
 
             Code::make('Filters', 'unserializeFilters')->language('javascript')->json(),
-            Code::make('Settings', 'unserializeSettings')->language('javascript')->json(),
+            Code::make('Settings', 'unserializeSettings')->language('javascript')->json()->help(
+                "Please, when using package options, to set unlimited/all units set key as '0', e.g:
+                'options': {
+                    '0': 'Unlimited'
+                }"
+            ),
 
             Boolean::make('Include Sold')->hideFromIndex(),
 
@@ -89,7 +96,11 @@ class Integration extends Resource
             Boolean::make('Uses Staging')->default(true),
             Boolean::make('Show for Integrated'),
 
-            Boolean::make('Is Hidden')->hideWhenUpdating()->hideWhenCreating()
+            Boolean::make('Is Hidden')->hideWhenUpdating()->hideWhenCreating(),
+
+            new Panel('Main', [
+                HasMany::make('Dealers', 'dealers')
+            ]),
         ];
     }
 

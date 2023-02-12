@@ -4,7 +4,6 @@ namespace Tests\Unit\Services\ElasticSearch\Cache;
 
 use App\Services\ElasticSearch\Cache\RedisResponseCache;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
-use App\Services\ElasticSearch\Cache\UniqueCacheInvalidationInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use Tests\TestCase;
 use \Redis as PhpRedis;
@@ -32,11 +31,11 @@ class RedisResponseCacheTest extends TestCase
         parent::setUp();
 
         $this->phpRedis = $this->createStub(PhpRedis::class);
-        $this->phpRedis->method('scan')
-            ->willReturn(['abcd']);
+        $this->phpRedis->method('hScan')
+            ->willReturn(['some.random.keys.with.dots' => null], null);
         $this->phpRedis->method('unlink')
             ->willReturn(1234);
-        $this->responseCache = new RedisResponseCache($this->phpRedis, $this->createStub(UniqueCacheInvalidationInterface::class));
+        $this->responseCache = new RedisResponseCache($this->phpRedis);
         $this->instance(ResponseCacheInterface::class, $this->responseCache);
 
         $this->cacheKey = app(ResponseCacheKeyInterface::class);
@@ -44,16 +43,18 @@ class RedisResponseCacheTest extends TestCase
 
     public function test_it_invalidates_with_key_if_a_normal_key_is_provided()
     {
-        $this->phpRedis->expects($this->never())->method('scan');
+        $this->phpRedis->expects($this->never())->method('hScan');
         $this->phpRedis->expects($this->once())->method('unlink');
+        $this->phpRedis->expects($this->once())->method('hDel');
 
         $this->responseCache->invalidate($this->cacheKey->deleteSingle(1234, 5678));
     }
 
     public function test_it_invalidates_with_scan_if_a_wildcard_is_provided()
     {
-        $this->phpRedis->expects($this->once())->method('scan');
+        $this->phpRedis->expects($this->exactly(2))->method('hScan');
         $this->phpRedis->expects($this->once())->method('unlink');
+        $this->phpRedis->expects($this->once())->method('hDel');
 
         $this->responseCache->invalidate($this->cacheKey->deleteSingleFromCollection(1234));
     }

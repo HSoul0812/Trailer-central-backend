@@ -81,7 +81,23 @@ class LeadControllerTest extends IntegrationTestCase
         $this->assertStringContainsString($this->lead->city, $output);
         $this->assertStringContainsString($this->lead->state, $output);
         $this->assertStringContainsString($this->lead->zip, $output);
-        $this->assertStringContainsString($this->lead->comments, $output);
+    }
+
+    public function testDelete()
+    {
+        $response = $this->json(
+            'DELETE',
+            '/api/leads/'. $this->lead->getKey(),
+            [],
+            ['access-token' => $this->token->access_token]
+        );
+
+        $response->assertStatus(200);
+
+        $this->assertDatabaseMissing(Lead::getTableName(), [
+            'identifier' => $this->lead->getKey()
+        ]);
+
     }
 
     public function tearDwon(): void

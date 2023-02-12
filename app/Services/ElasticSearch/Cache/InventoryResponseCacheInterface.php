@@ -5,12 +5,27 @@ namespace App\Services\ElasticSearch\Cache;
 interface InventoryResponseCacheInterface
 {
     /**
-     * @return ResponseCacheInterface
+     * It should store the cache in the proper database
+     *
+     * @param  string  $key
+     * @param  string  $value
+     * @return void
      */
-    public function search(): ResponseCacheInterface;
+    public function set(string $key, string $value): void;
 
     /**
-     * @return ResponseCacheInterface
+     * It should queue the jobs to invalidate
+     *
+     * @param  array  $keyPatterns
+     * @return void
      */
-    public function single(): ResponseCacheInterface;
+    public function forget(array $keyPatterns): void;
+
+    /**
+     * It should handle invalidation process
+     *
+     * @param  array  $keyPatterns
+     * @return void
+     */
+    public function invalidate(array $keyPatterns): void;
 }

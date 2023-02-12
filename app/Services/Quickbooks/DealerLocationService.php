@@ -5,13 +5,10 @@ declare(strict_types=1);
 namespace App\Services\Quickbooks;
 
 use App\Contracts\LoggerServiceInterface;
-use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
-use App\Jobs\Inventory\ReIndexInventoriesByDealerLocationJob;
 use App\Models\CRM\Dms\Quickbooks\QuickbookApproval;
-use App\Models\Inventory\Inventory;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
 use App\Repositories\User\DealerLocationRepositoryInterface;
-use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
+use App\Services\Inventory\InventoryServiceInterface;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 
 class DealerLocationService implements DealerLocationServiceInterface
@@ -27,18 +24,18 @@ class DealerLocationService implements DealerLocationServiceInterface
     /** @var QuickbookApprovalRepositoryInterface */
     private $approvalsRepo;
 
-    /** @var ResponseCacheKeyInterface */
-    private $responseCache;
+    /** @var InventoryServiceInterface */
+    private $inventoryService;
 
     public function __construct(DealerLocationRepositoryInterface $locationsRepo,
                                 QuickbookApprovalRepositoryInterface $approvalsRepo,
                                 LoggerServiceInterface $logger,
-                                ResponseCacheKeyInterface $responseCache)
+                                InventoryServiceInterface $inventoryService)
     {
         $this->logger = $logger;
         $this->locationsRepo = $locationsRepo;
         $this->approvalsRepo = $approvalsRepo;
-        $this->responseCache = $responseCache;
+        $this->inventoryService = $inventoryService;
     }
 
     public function update(int $dealerLocationId): ?QuickbookApproval
@@ -82,36 +79,15 @@ class DealerLocationService implements DealerLocationServiceInterface
     }
 
     /**
-     * Reindex the inventory by dealer location, if the cache for inventory is enabled,
-     * then it will invalidate cache by dealer id
+     * Reindex the inventory by dealer location, then it will invalidate cache by dealer id
      *
      * @param  int  $dealerLocationId
      * @return void
      */
-    public function invalidateCacheAndReindex(int $dealerLocationId): void
+    public function reindexAndInvalidateCacheInventory(int $dealerLocationId): void
     {
         $location = $this->locationsRepo->get(['dealer_location_id' => $dealerLocationId]);
 
-        $logContext = [
-            'name' => $location->name,
-            'dealer_id' => $location->dealer_id,
-            'dealer_location_id' => $location->dealer_location_id
-        ];
-
-        if (Inventory::isCacheInvalidationEnabled()) {
-            $this->logger->info(
-                'Enqueueing the job to invalidate cache by dealer location',
-                $logContext
-            );
-
-            $this->dispatch(new InvalidateCacheJob([$this->responseCache->deleteByDealer($location->dealer_id)]));
-        }
-
-        $this->logger->info(
-            'Enqueueing the job to reindex inventory by dealer location',
-            $logContext
-        );
-
-        $this->dispatch(new ReIndexInventoriesByDealerLocationJob([$dealerLocationId]));
+        $this->inventoryService->invalidateCacheAndReindexByDealerLocation($location);
     }
 }

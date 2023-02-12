@@ -88,9 +88,10 @@ class ImageHelper
 
         if(($size[2] == IMAGETYPE_GIF) || ($size[2] == IMAGETYPE_PNG)) {
             $trnprt_indx = imagecolortransparent($image);
+            $palletsize = imagecolorstotal($image);
 
             // If we have a specific transparent color
-            if($trnprt_indx >= 0) {
+            if($trnprt_indx >= 0 && $trnprt_indx < $palletsize) {
 
                 // Get the original image's transparent color's RGB values
                 $trnprt_color = imagecolorsforindex($image, $trnprt_indx);
@@ -323,7 +324,7 @@ class ImageHelper
 
         // Get Text Size
         $textSize = 40;
-        if (isset($params['overlay_upper_size']) && !empty($params['overlay_upper_size']) 
+        if (isset($params['overlay_upper_size']) && !empty($params['overlay_upper_size'])
             && is_numeric($params['overlay_upper_size'])) {
 
             $textSize = $params['overlay_upper_size'];
@@ -331,7 +332,7 @@ class ImageHelper
 
         // Get Text Margin
         $textMargin = 40;
-        if (isset($params['overlay_upper_margin']) && !empty($params['overlay_upper_margin']) 
+        if (isset($params['overlay_upper_margin']) && !empty($params['overlay_upper_margin'])
             && is_numeric($params['overlay_upper_margin'])) {
 
             $textMargin = $params['overlay_upper_margin'];
@@ -391,7 +392,7 @@ class ImageHelper
 
         // Get Text Size
         $textSize = 40;
-        if (isset($params['overlay_lower_size']) && !empty($params['overlay_lower_size']) 
+        if (isset($params['overlay_lower_size']) && !empty($params['overlay_lower_size'])
             && is_numeric($params['overlay_lower_size'])) {
 
             $textSize = $params['overlay_lower_size'];
@@ -399,7 +400,7 @@ class ImageHelper
 
         // Get Text Margin
         $textMargin = 40;
-        if (isset($params['overlay_lower_margin']) && !empty($params['overlay_lower_margin']) 
+        if (isset($params['overlay_lower_margin']) && !empty($params['overlay_lower_margin'])
             && is_numeric($params['overlay_lower_margin'])) {
 
             $textMargin = $params['overlay_lower_margin'];
@@ -419,7 +420,7 @@ class ImageHelper
 
         // Add Lower Text
         imagettftext($imageResource, $textSize, 0, round(($imageWidth - $bottomWidth) / 2), round($imageHeight - ($textMargin / 2)), $textColor, $font, $text);
-    
+
         // Paste back $imageResource;
         $imageContent = $this->getContentFromResource($imageResource, $imageType);
         $newImagePath = $this->createTempFile($imageContent);
@@ -515,8 +516,22 @@ class ImageHelper
     }
 
     /**
+     * Encode URL if filename has whitespace
+     *
+     * @param string $url
+     * @return string new url with encoded filename
+     */
+    public function encodeUrl(string $url) 
+    {
+        $pos = strrpos($url, '/') + 1; // last occurance slash
+        $result = substr($url, 0, $pos) . rawurlencode(substr($url, $pos));
+
+        return $result;
+    }
+
+    /**
      * Create temp files
-     * 
+     *
      * @param string|null $fileContent
      * @return string new file path
      */
@@ -529,7 +544,7 @@ class ImageHelper
 
     /**
      * Create random string
-     * 
+     *
      * @return string
      */
     protected function getRandomString()
@@ -561,7 +576,7 @@ class ImageHelper
 
     /**
      * Handle Basic Colors
-     * 
+     *
      * @param string $image Image resource
      * @return array
      */
@@ -591,7 +606,7 @@ class ImageHelper
             $r = hexdec(substr($hex,0,1) . substr($hex,0,1));
             $g = hexdec(substr($hex,1,1) . substr($hex,1,1));
             $b = hexdec(substr($hex,2,1) . substr($hex,2,1));
-        
+
         } elseif (strlen($hex) == 6) {
 
             // Convert 6-to-RGB
@@ -609,14 +624,14 @@ class ImageHelper
         // Return Hex Array
         return $rgb;
     }
-    
+
     /**
      * Get Alpha From Transparent Percentage
-     * 
+     *
      * @param string|int $alpha Get Alpha Color from Percentage
      * @return string Formatted alpha color to add to the overlay
      */
-    protected function getAlphaFromPercent($alpha) 
+    protected function getAlphaFromPercent($alpha)
     {
         // Clean Percentage
         $per = ($alpha * 0.01);
@@ -630,14 +645,14 @@ class ImageHelper
     }
 
     /**
-     * 
+     *
      * @param string $resource Image resource
      * @param int $imageType
      * @return string
      */
     protected function getContentFromResource($resource, int $imageType)
     {
-        ob_start(); 
+        ob_start();
 
         switch ($imageType) {
             case IMAGETYPE_GIF:
@@ -651,9 +666,9 @@ class ImageHelper
                 break;
         }
 
-        $imageContent = ob_get_contents(); 
+        $imageContent = ob_get_contents();
 
-        ob_end_clean(); 
+        ob_end_clean();
 
         return $imageContent;
     }

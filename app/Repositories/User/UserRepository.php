@@ -179,7 +179,12 @@ class UserRepository implements UserRepositoryInterface {
         return $dealer;
     }
 
-    public function updateOverlaySettings($dealerId, $params): User 
+    /**
+     * @param int $dealerId
+     * @param array $params
+     * @return bool was there any change?
+     */
+    public function updateOverlaySettings(int $dealerId, array $params): bool 
     {
         $dealer = User::findOrFail($dealerId);
 
@@ -214,7 +219,7 @@ class UserRepository implements UserRepositoryInterface {
 
         $dealer->save();
 
-        return $dealer;
+        return $dealer->wasChanged();
     }
 
     /**

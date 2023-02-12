@@ -257,7 +257,13 @@ class Collector extends Model implements Filterable
         return ['*'];
     }
 
-    public function collectorChangeReports() {
+    public function collectorChangeReports()
+    {
         return $this->hasMany(CollectorChangeReport::class);
+    }
+
+    public function collectorAdminNotes()
+    {
+        return $this->hasMany(CollectorAdminNote::class);
     }
 }

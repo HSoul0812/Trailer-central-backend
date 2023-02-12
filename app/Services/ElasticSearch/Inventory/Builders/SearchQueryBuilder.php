@@ -2,6 +2,7 @@
 
 namespace App\Services\ElasticSearch\Inventory\Builders;
 
+use App\Repositories\FeatureFlagRepositoryInterface;
 use App\Services\ElasticSearch\Inventory\Parameters\Filters\Filter;
 use App\Services\ElasticSearch\Inventory\Parameters\Filters\Term;
 
@@ -141,32 +142,41 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
      */
     public function globalQuery(): array
     {
-        $this->field->getTerms()->each(function (Term $term) {
+        $descriptionWildcard = app(FeatureFlagRepositoryInterface::class)->isEnabled('inventory-sdk-global-description-wildcard');
+
+        $this->field->getTerms()->each(function (Term $term) use ($descriptionWildcard) {
             $name = $this->field->getName();
-            $value = $term->getValues()[0];
 
             $query = [
                 'bool' => [
-                    $term->getESOperatorKeyword() => [
-                        [
-                            'match' => [
-                                sprintf('%s.txt', $name) => [
-                                    'query' => $value,
-                                    'operator' => 'and'
+                    'must' => array_map(static function ($value) use ($term, $name, $descriptionWildcard) {
+                        $searchQuery = [
+                            [
+                                'match' => [
+                                    sprintf('%s.txt', $name) => [
+                                        'query' => $value,
+                                        'operator' => 'and'
+                                    ]
                                 ]
                             ]
-                        ],
-                        [
-                            'wildcard' => [
-                                $name => [
-                                    'value' => sprintf('*%s*', $value)
+                        ];
+                        if ($name !== 'description' || $descriptionWildcard) {
+                            $searchQuery[] = [
+                                'wildcard' => [
+                                    $name => [
+                                        'value' => sprintf('*%s*', $value)
+                                    ]
                                 ]
+                            ];
+                        }
+                        return [
+                            'bool' => [
+                                $term->getESOperatorKeyword() => $searchQuery
                             ]
-                        ]
-                    ]
+                        ];
+                    }, $term->getValues())
                 ]
             ];
-
             $this->appendToQuery($query);
         });
 
@@ -178,7 +188,10 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
      */
     public function generalQuery(): array
     {
-        $this->field->getTerms()->each(function (Term $term) {
+        // @todo: remove keyword-wildcard feature when safe
+        $keywordWildcard = app(FeatureFlagRepositoryInterface::class)->isEnabled('inventory-sdk-keyword-wildcard');
+
+        $this->field->getTerms()->each(function (Term $term) use ($keywordWildcard) {
             $shouldQuery = [];
             $name = $this->field->getName();
             $data = $term->getValues();
@@ -208,7 +221,7 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
 
                         // leading description wildcard add a tremendous penalty to the query, so is avoided
                         // it only will use leading wildcards for those fields different from `description`
-                        if (!is_numeric($key) && $key !== 'description' && strpos($column, '.') !== false) {
+                        if ($keywordWildcard && !is_numeric($key) && $key !== 'description' && strpos($column, '.') !== false) {
                             $shouldQuery[] = $this->wildcardQueryWithBoost($key, $boost, $data['match']);
                         }
                     }

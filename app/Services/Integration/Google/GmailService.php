@@ -183,7 +183,7 @@ class GmailService implements GmailServiceInterface
      * @param AccessToken $accessToken
      * @param string $folder folder name to get messages from; defaults to inbox
      * @param array $params
-     * @return whether the email was sent successfully or not
+     * @return array whether the email was sent successfully or not
      */
     public function messages(AccessToken $accessToken, string $folder = 'INBOX', array $params = []) {
         // Get Labels

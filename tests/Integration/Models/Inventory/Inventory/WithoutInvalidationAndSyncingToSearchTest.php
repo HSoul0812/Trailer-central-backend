@@ -8,7 +8,7 @@ use App\Models\Inventory\Inventory;
 use App\Repositories\FeatureFlagRepositoryInterface;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Bus;
-use Laravel\Scout\Jobs\MakeSearchable;
+use App\Jobs\Scout\MakeSearchable;
 use Tests\TestCase;
 use RuntimeException;
 
@@ -53,11 +53,20 @@ class WithoutInvalidationAndSyncingToSearchTest extends TestCase
         Bus::assertNotDispatched(MakeSearchable::class);
 
         $inventory = factory(Inventory::class)->create();
+
+        Bus::assertDispatchedTimes(InvalidateCacheJob::class, 1);
+        Bus::assertDispatchedTimes(MakeSearchable::class, 1);
+
+        Bus::fake();
         $inventory->update(['description' => $this->faker->sentence(4)]);
+
+        Bus::assertDispatchedTimes(InvalidateCacheJob::class, 2);
+        Bus::assertDispatchedTimes(MakeSearchable::class, 1);
+
+        Bus::fake();
         $inventory->delete(); // delete doesn't trigger jobs for scout
 
-        Bus::assertDispatchedTimes(MakeSearchable::class, 2);
-        Bus::assertDispatchedTimes(InvalidateCacheJob::class, 3);
+        Bus::assertDispatchedTimes(InvalidateCacheJob::class, 2);
     }
 
     /**

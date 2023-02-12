@@ -90,20 +90,15 @@ class SafeIndexer
             $itIsAlreadySwapped = true;
         }
 
-        if (config('elastic.scout_driver.ingestion.inventory', self::INGEST_BY_DEALER) === self::INGEST_BY_DEALER) {
-            /** @var User[] $dealerList */
-            $dealerList = $this->dealerRepository->getAll([]);
+        /** @var User[] $dealerList */
+        $dealerList = $this->dealerRepository->getAll([]);
 
-            foreach ($dealerList as $dealer) {
-                $this->chunkHandler(
-                      $model->newQuery()
-                            ->with('user', 'user.website', 'orderedImages')
-                            ->where('dealer_id', $dealer->dealer_id)
-                );
-            }
-        } else {
-            // this way is faster than `by dealer` ingestion, but it will need a better MySQL instance like production
-            $this->chunkHandler($model->newQuery()->with(['user', 'user.website']));
+        foreach ($dealerList as $dealer) {
+            $this->chunkHandler(
+                  $model->newQuery()
+                        ->with('user', 'user.website', 'dealerLocation')
+                        ->where('dealer_id', $dealer->dealer_id)
+            );
         }
 
         if (!$itIsAlreadySwapped) {
@@ -115,14 +110,14 @@ class SafeIndexer
         // given it could be some record which was changed/added between main ingesting process and the index swapping process
         // so, we need to cover them by pulling them once again and ingest them
         $query = $model->newQuery()
-                ->with('user', 'user.website', 'orderedImages')
-                ->where('updated_at_auto', '>=', $now->format(Date::FORMAT_Y_M_D_T));
+                ->with('user', 'user.website', 'dealerLocation')
+                ->where('updated_at', '>=', $now->format(Date::FORMAT_Y_M_D_T));
 
         $this->numberUnitsToBeProcessed = $query->count('inventory_id');
         $this->numberOfUnitsProcessed = 0;
 
         if ($this->numberUnitsToBeProcessed > 0) {
-            $this->output->writeln('<comment>Checking some records affected while the main ingest was working...</comment>');
+            $this->output->writeln('<comment>Checking some records affected while the main ingestion was working...</comment>');
         }
 
         $this->chunkHandler($query);

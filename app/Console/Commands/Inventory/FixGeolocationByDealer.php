@@ -2,11 +2,10 @@
 
 namespace App\Console\Commands\Inventory;
 
+use App\Services\Inventory\InventoryServiceInterface;
+use App\Services\User\GeoLocationServiceInterface;
 use Illuminate\Console\Command;
 use App\Models\Inventory\Inventory;
-use Grimzy\LaravelMysqlSpatial\Eloquent\Builder as GrimzyBuilder;
-use App\Repositories\User\GeoLocationRepositoryInterface;
-use Grimzy\LaravelMysqlSpatial\Types\Point;
 
 /**
  * Class FixGeolocationByDealer
@@ -20,34 +19,36 @@ class FixGeolocationByDealer extends Command
      * @var string
      */
     protected $signature = "inventory:fix-geolocation-by-dealer {dealer_id?}";
-        
+
     /**
      * Execute the console command.
      *
      * @return mixed
      */
-    public function handle()
-    {                      
-        $geoLocationRepo = app(GeoLocationRepositoryInterface::class);
-        $inventories = $this->getInventoryQuery()->get();
-
-        foreach($inventories as $inventory) {
-            $geoLocation = $geoLocationRepo->get(['zip' => $inventory->dealerLocation->postalcode]);
-            $inventory->geolocation = new Point($geoLocation->latitude, $geoLocation->longitude);
-            $inventory->save();
-            $this->info("Saved Inventory: {$inventory->inventory_id}");
-        }
-        
-        return true;
-    }
-    
-    private function getInventoryQuery(): GrimzyBuilder
+    public function handle(GeoLocationServiceInterface $geoService, InventoryServiceInterface $inventoryService)
     {
         $dealerId = $this->argument('dealer_id');
-        
-        $query = Inventory::where('dealer_id', $dealerId);
-        
-        return $query;
-    }
 
+        $inventories = Inventory::where('dealer_id', $dealerId)->get();
+
+        foreach ($inventories as $inventory) {
+
+            $geoLocationPoint = $geoService->geoPointFromZipCode($inventory->dealerLocation->postalcode);
+
+            Inventory::withoutCacheInvalidationAndSearchSyncing(function () use ($geoLocationPoint, $inventory): void {
+                if($geoLocationPoint){
+                    $inventory->geolocation = $geoLocationPoint;
+                    $inventory->save();
+
+                    $this->info("Saved Inventory: {$inventory->inventory_id}");
+                }
+            });
+        }
+
+        if ($dealerId) {
+            $inventoryService->invalidateCacheAndReindexByDealerIds([$dealerId]);
+        }
+
+        return true;
+    }
 }

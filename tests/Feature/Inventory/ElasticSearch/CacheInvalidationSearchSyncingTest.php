@@ -4,15 +4,13 @@ namespace Tests\Feature\Inventory\ElasticSearch;
 
 use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
 use App\Jobs\Website\ReIndexInventoriesByDealersJob;
-use App\Models\FeatureFlag;
 use App\Models\Inventory\Inventory;
 use App\Models\User\AuthToken;
 use App\Models\User\User;
-use App\Repositories\FeatureFlagRepositoryInterface;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
-use Laravel\Scout\Jobs\MakeSearchable;
+use App\Jobs\Scout\MakeSearchable;
 use Tests\TestCase;
 
 /**
@@ -35,8 +33,6 @@ class CacheInvalidationSearchSyncingTest extends TestCase
 
     public function test_it_does_not_dispatch_jobs_when_requests_from_integrations(): void
     {
-        $this->setCacheInvalidation(true); // this should not be consider due the request comes from integration process
-
         $inventory = $this->getInventoryWithoutTriggerEvents();
         $authToken = $this->getAuthToken();
 
@@ -45,6 +41,8 @@ class CacheInvalidationSearchSyncingTest extends TestCase
         Config::set('integrations.inventory_cache_auth.credentials.integration_client_id', $integrationClientId);
 
         for ($x = 0; $x < 10; $x++) {
+            $this->setCacheInvalidation(true); // this should not be consider due the request comes from integration process
+
             $newTitle = Str::random(20);
             $response = $this
                 ->withHeaders([
@@ -67,8 +65,6 @@ class CacheInvalidationSearchSyncingTest extends TestCase
 
     public function test_it_doesnt_invalidate_cache_when_cache_is_disabled(): void
     {
-        $this->setCacheInvalidation(false);
-
         $inventory = $this->getInventoryWithoutTriggerEvents();
         $authToken = $this->getAuthToken();
 
@@ -119,7 +115,7 @@ class CacheInvalidationSearchSyncingTest extends TestCase
 
         Config::set('integrations.inventory_cache_auth.credentials.access_token', self::INTEGRATIONS_ACCESS_TOKEN);
 
-        Inventory::disableCacheInvalidationAndSearchSyncing();
+        Inventory::disableCacheInvalidationAndSearchSyncing(); // no matter if cache is disabled, it should invalidate
 
         $response = $this
             ->withHeaders(['access-token' => self::INTEGRATIONS_ACCESS_TOKEN])
@@ -130,7 +126,6 @@ class CacheInvalidationSearchSyncingTest extends TestCase
 
         $response->assertStatus(202);
 
-        Bus::assertDispatchedTimes(InvalidateCacheJob::class, 1);
         Bus::assertDispatchedTimes(ReIndexInventoriesByDealersJob::class, 1);
     }
 
@@ -177,12 +172,5 @@ class CacheInvalidationSearchSyncingTest extends TestCase
         $this->tokens[] = $token;
 
         return $token;
-    }
-
-    private function setCacheInvalidation(bool $isEnabled): void
-    {
-        app(FeatureFlagRepositoryInterface::class)->set(
-            new FeatureFlag(['code' => 'inventory-sdk-cache', 'is_enabled' => $isEnabled])
-        );
     }
 }
