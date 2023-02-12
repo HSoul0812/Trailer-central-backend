@@ -75,22 +75,27 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('run:bulk')
                 ->withoutOverlapping()
+                ->onOneServer()
                 ->runInBackground();
 
         $schedule->command('add:sitemaps')
                 ->daily()
+                ->onOneServer()
                 ->runInBackground();
 
         $schedule->command('user:create-access-token')
                 ->hourly()
+                ->onOneServer()
                 ->runInBackground();
 
         $schedule->command('user:generate-crm-users')
                 ->hourly()
+                ->onOneServer()
                 ->runInBackground();
 
         $schedule->command('crm:dms:update-po-num-ref')
                 ->daily()
+                ->onOneServer()
                 ->runInBackground();
 
         /*$schedule->command('leads:assign:hot-potato')
@@ -99,6 +104,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('leads:import')
                 ->everyFiveMinutes()
+                ->onOneServer()
                 ->runInBackground();
 
         /**
@@ -106,6 +112,7 @@ class Kernel extends ConsoleKernel
          */
         $schedule->command('marketing:craigslist:validate')
                 ->hourly()
+                ->onOneServer()
                 ->runInBackground();
 
         /**
@@ -113,42 +120,51 @@ class Kernel extends ConsoleKernel
          */
         $schedule->command('text:process-campaign')
                 ->withoutOverlapping()
+                ->onOneServer()
                 ->runInBackground();
 
         $schedule->command('text:deliver-blast')
                 ->withoutOverlapping()
+                ->onOneServer()
                 ->runInBackground();
 
         $schedule->command('text:auto-expire-phones')
                 ->weeklyOn(7, '4:00')
+                ->onOneServer()
                 ->runInBackground();
 
         $schedule->command('email:deliver-blast')
                 ->withoutOverlapping()
+                ->onOneServer()
                 ->runInBackground();
 
         $schedule->command('files:clear-local-tmp-folder')
             ->weeklyOn(7, '4:00')
+            ->onOneServer()
             ->runInBackground();
 
         $schedule->command('website:generate-dealer-specific-site-urls')
             ->daily()
+            ->onOneServer()
             ->runInBackground();
 
         $schedule->command('inventory:auto-archive-sold-items')
             ->daily()
+            ->onOneServer()
             ->runInBackground();
 
         $schedule->command('inventory:fix-floorplan-bill-status')
             ->hourly()
+            ->onOneServer()
             ->runInBackground();
 
         /**
          * Scrape Email Replies
          */
         $schedule->command('email:scrape-replies')
-            ->everyFiveMinutes()
-            ->runInBackground();
+                ->everyFiveMinutes()
+                ->onOneServer()
+                ->runInBackground();
 
         /**
          * Scrape Facebook Messages
@@ -165,8 +181,9 @@ class Kernel extends ConsoleKernel
          */
 
         $schedule->command('command:get-textrail-parts')
-            ->dailyAt('1:00')
-            ->runInBackground();
+           ->dailyAt('1:00')
+           ->onOneServer()
+           ->runInBackground();
 
         /**
          * @todo Calo say we could schedule this to be removed in next scheduled release (Feb 20th)
@@ -176,18 +193,22 @@ class Kernel extends ConsoleKernel
          */
         $schedule->command('command:inventory:reindex')
             ->dailyAt('1:00')
+            ->onOneServer()
             ->runInBackground();
 
         $schedule->command('horizon:snapshot')
             ->everyFiveMinutes()
+            ->onOneServer()
             ->runInBackground();
 
         $schedule->command('export:inventory-favorites')
             ->daily()
+            ->onOneServer()
             ->runInBackground();
 
         $schedule->command('website:hide-expired-images')
             ->daily()
+            ->onOneServer()
             ->runInBackground();
 
         $schedule->command('database:prune-ssn')
