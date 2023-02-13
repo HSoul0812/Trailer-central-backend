@@ -4,6 +4,7 @@ declare(strict_types=1);
 use App\Http\Controllers\v1\WebsiteUser\AuthController;
 use App\Http\Controllers\v1\WebsiteUser\PasswordResetController;
 use App\Http\Controllers\v1\WebsiteUser\VerificationController;
+use App\Http\Controllers\v1\WebsiteUser\LocationController;
 use App\Http\Controllers\v1\Image\ImageController;
 
 $api = app(Dingo\Api\Routing\Router::class);
@@ -27,7 +28,7 @@ $api->version('v1', function ($api) {
         $api->get('/reset-password', [PasswordResetController::class, 'showReset'])
             ->name('password.reset');
         $api->post('/reset-password', [PasswordResetController::class, 'resetPassword']);
-
+        $api->post('/location', [LocationController::class, 'create']);
         /*
         |--------------------------------------------------------------------------
         | Email verification

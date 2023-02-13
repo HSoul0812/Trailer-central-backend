@@ -4,6 +4,7 @@ namespace App\Services\Integrations\TrailerCentral\Api\Users;
 
 use App\DTOs\User\TcApiResponseUser;
 use App\DTOs\User\TcApiResponseUserLocation;
+use App\Repositories\Integrations\TrailerCentral\AuthTokenRepositoryInterface;
 use GuzzleHttp\Client as GuzzleHttpClient;
 use GuzzleHttp\Exception\GuzzleException;
 
@@ -12,7 +13,8 @@ class UsersService implements UsersServiceInterface
     private string $endpointUrl;
 
     public function __construct(
-        private GuzzleHttpClient $httpClient
+        private GuzzleHttpClient $httpClient,
+        private AuthTokenRepositoryInterface $authTokenRepository
     ) {
         $this->endpointUrl = config('services.trailercentral.api') . 'users';
     }
@@ -36,34 +38,45 @@ class UsersService implements UsersServiceInterface
     }
 
     public function createLocation(array $location): TcApiResponseUserLocation {
+        if(!$accessToken = request()->header('access-token')) {
+            $authToken = $this->authTokenRepository->get(['user_id' => $location['dealer_id']]);
+            $accessToken = $authToken->access_token;
+        }
+
         $responseContent = $this->handleHttpRequest(
             'PUT',
             config('services.trailercentral.api') . 'user' . "/dealer-location",
             [
-                'json' => $location
+                'json' => $location,
+                'headers' => [
+                    'access-token' => $accessToken
+                ]
             ]
         );
-        return TcApiResponseUserLocation::fromData($responseContent);
+        return TcApiResponseUserLocation::fromData($responseContent['data']);
     }
 
     public function updateLocation(int $locationId, array $location): TcApiResponseUserLocation {
+        if(!$accessToken = request()->header('access-token')) {
+            $authToken = $this->authTokenRepository->get(['user_id' => $location['dealer_id']]);
+            $accessToken = $authToken->access_token;
+        }
+
         $responseContent = $this->handleHttpRequest(
             'POST',
             config('services.trailercentral.api') . 'user' . "/dealer-location/$locationId",
             [
-                'json' => $location
+                'json' => $location,
+                'headers' => [
+                    'access-token' => $accessToken
+                ]
             ]
         );
-        return TcApiResponseUserLocation::fromData($responseContent);
+        return TcApiResponseUserLocation::fromData($responseContent['data']);
     }
 
     private function handleHttpRequest(string $method, string $url, array $options): array
     {
-        $accessToken = request()->header('access-token');
-        $options['headers'] = [
-            'access-token' => $accessToken
-        ];
-
         try {
             $response = $this->httpClient->request($method, $url, $options);
 
