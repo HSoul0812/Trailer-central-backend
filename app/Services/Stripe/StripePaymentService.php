@@ -187,7 +187,11 @@ class StripePaymentService implements StripePaymentServiceInterface
 
             $planDuration = intval($planDuration) ?: 30;
 
-            $inventoryExpiry = $inventoryExpiry->addDays($planDuration);
+            $inventoryExpiry = $inventoryExpiry
+                ->addDays($planDuration)
+                ->setTimezone(config('trailercentral.api_timezone'))
+                ->format(config('trailercentral.api_datetime_format'));
+
             $this->inventoryService->update($userId, [
                 'inventory_id' => $inventoryId,
                 'show_on_website' => 1,
@@ -195,9 +199,6 @@ class StripePaymentService implements StripePaymentServiceInterface
             ]);
 
             DB::commit();
-
-            \Log::info('session', $session->toArray());
-            \Log::info('inventory_id: ' . $inventoryId);
 
             return 200;
         } catch (\Exception $e) {

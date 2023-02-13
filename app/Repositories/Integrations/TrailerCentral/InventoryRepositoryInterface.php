@@ -11,5 +11,5 @@ use Carbon\Carbon;
  */
 interface InventoryRepositoryInterface extends SourceRepositoryInterface
 {
-    public function expireItems(Carbon $from, Carbon $to);
+    public function hideExpiredItems(Carbon $from, Carbon $to);
 }

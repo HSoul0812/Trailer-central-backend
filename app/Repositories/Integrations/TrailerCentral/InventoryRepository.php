@@ -26,7 +26,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         return $query->orderBy('i.updated_at_auto');
     }
 
-    public function expireItems(Carbon $from, Carbon $to)
+    public function hideExpiredItems(Carbon $from, Carbon $to)
     {
         DB::connection('mysql')
             ->table('inventory')

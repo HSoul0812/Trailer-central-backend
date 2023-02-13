@@ -6,14 +6,14 @@ use App\Services\Inventory\InventoryServiceInterface;
 use App\Services\LoggerServiceInterface;
 use Illuminate\Console\Command;
 
-class CheckInventorySubscriptionsCommand extends Command
+class HideExpiredInventoryCommand extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'inventory:check-subs';
+    protected $signature = 'inventory:hide-expired';
 
     /** @var string The console command description. */
     protected $description = 'Check expiry date of inventory subscriptions';
@@ -25,9 +25,9 @@ class CheckInventorySubscriptionsCommand extends Command
 
     public function handle()
     {
-        $this->logger->info("[CheckInventorySubscriptionsCommand] starting $this->signature ...");
-        $this->info('Checking inventory subscriptions');
-        $this->inventoryService->checkSubscriptions();
-        $this->info('Finished checking inventory subscriptions');
+        $this->logger->info("[HideExpiredInventoryCommand] starting $this->signature ...");
+        $this->info('Checking inventory expiry');
+        $this->inventoryService->hideExpired();
+        $this->info('Finished checking inventory expiry');
     }
 }
