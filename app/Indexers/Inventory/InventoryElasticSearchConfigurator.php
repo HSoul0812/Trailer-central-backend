@@ -267,6 +267,9 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
                     'filter' => ['lowercase', 'asciifolding']
                 ]
             ]
+        ])->index([
+            'number_of_shards' => config('elastic.scout_driver.settings.inventory.number_of_shards'),
+            'number_of_replicas' => config('elastic.scout_driver.settings.inventory.number_of_replicas')
         ]);
     }
 
