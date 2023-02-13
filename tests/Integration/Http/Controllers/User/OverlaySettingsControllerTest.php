@@ -343,4 +343,66 @@ class OverlaySettingsControllerTest extends TestCase {
 
         Queue::assertNotPushed(GenerateOverlayImageJob::class);
     }
+
+    /**
+     * @dataProvider overlayParamDataProvider
+     * @group Marketing
+     * @group Marketing_Overlays
+     */
+    public function testUpdateOverlaySettingsWithOverlayenabled($overlaySettings)
+    {
+        $overlaySettings['dealer_id'] = $this->dealer->dealer_id;
+
+        $inventory = factory(Inventory::class)->create([
+            'dealer_id' => $this->dealer->getKey(),
+            'dealer_location_id' => $this->location->dealer_location_id
+        ]);
+
+        // update overlay_enabled
+        $inventory->update(['overlay_enabled' => 0]);
+
+        // confirm change
+        $this->assertDatabaseHas(Inventory::getTableName(), [
+            'dealer_id' => $overlaySettings['dealer_id'],
+            'overlay_enabled' => 0
+        ]);
+
+        $this->withHeaders(['access-token' => $this->token])
+            ->postJson(self::apiEndpoint, $overlaySettings)
+            ->assertSuccessful()
+            ->assertJsonStructure([
+                'data' => [
+                    'overlay_default',
+                    'overlay_enabled',
+                    'overlay_logo',
+                    'overlay_logo_height',
+                    'overlay_logo_position',
+                    'overlay_logo_width',
+                    'overlay_lower',
+                    'overlay_lower_alpha',
+                    'overlay_lower_bg',
+                    'overlay_lower_margin',
+                    'overlay_lower_size',
+                    'overlay_lower_text',
+                    'overlay_upper',
+                    'overlay_upper_alpha',
+                    'overlay_upper_bg',
+                    'overlay_upper_margin',
+                    'overlay_upper_size',
+                    'overlay_upper_text'
+                ]
+            ]);
+
+        $this->assertDatabaseHas(User::getTableName(), $overlaySettings);
+
+        $this->assertDatabaseHas(Inventory::getTableName(), [
+            'dealer_id' => $overlaySettings['dealer_id'],
+            'overlay_enabled' => Inventory::OVERLAY_ENABLED_ALL
+        ]);
+
+        $this->assertDatabaseMissing(Inventory::getTableName(), [
+            'dealer_id' => $overlaySettings['dealer_id'],
+            'overlay_enabled' => 0
+        ]);
+    }
 }
