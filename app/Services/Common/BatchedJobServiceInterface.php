@@ -10,10 +10,11 @@ interface BatchedJobServiceInterface
      * Creates a batch, then start to monitoring it
      *
      * @param  string|null  $group
-     * @param  int|null  $waitTime time in seconds
+     * @param  int|null  $waitTime  time in seconds
+     * @param  array|null  $context
      * @return BatchedJob
      */
-    public function create(?string $group = null, ?int $waitTime = null): BatchedJob;
+    public function create(?string $group = null, ?int $waitTime = null, ?array $context = null): BatchedJob;
 
     /**
      * Detaches a monitored batch

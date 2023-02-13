@@ -173,8 +173,8 @@ return [
             ],
             'supervisor-2' => [
                 'connection' => 'redis',
-                'queue' => ['overlay-images', 'scout', 'inventory-cache'], // high to low "priority"
-                'balance' => false,
+                'queue' => ['overlay-images', 'scout', 'inventory-cache'],
+                'balance' => 'auto',
                 'minProcesses' => 3,
                 'maxProcesses' => 10,
                 'tries' => 3,
@@ -213,13 +213,13 @@ return [
             ],
             'supervisor-2' => [
                 'connection' => 'redis',
-                'queue' => ['overlay-images', 'scout',  'inventory-cache'], // high to low "priority"
-                'balance' => false,
+                'queue' => ['overlay-images', 'scout',  'inventory-cache'],
+                'balance' => 'auto',
                 'minProcesses' => 3,
                 'maxProcesses' => 12,
                 'tries' => 3,
                 'delay' => 3,
-                'timeout' => 3600,
+                'timeout' => 900,
             ]
         ],
 
@@ -245,13 +245,13 @@ return [
             ],
             'supervisor-2' => [
                 'connection' => 'redis',
-                'queue' => ['overlay-images', 'scout', 'inventory-cache'], // high to low "priority"
+                'queue' => ['overlay-images', 'scout', 'inventory-cache'],
                 'minProcesses' => 3,
                 'maxProcesses' => 14,
-                'balance' => false,
+                'balance' => 'auto',
                 'tries' => 3,
                 'delay' => 3,
-                'timeout' => 300,
+                'timeout' => 900,
             ],
             'supervisor-3' => [
                 'connection' => 'redis',
@@ -320,13 +320,13 @@ return [
             ],
             'supervisor-2' => [
                 'connection' => 'redis',
-                'queue' => ['overlay-images', 'scout', 'inventory-cache'], // high to low "priority"
-                'balance' => false,
+                'queue' => ['overlay-images', 'scout', 'inventory-cache'],
+                'balance' => 'auto',
                 'minProcesses' => 45,
                 'maxProcesses' => 60,
                 'tries' => 3,
                 'delay' => 3,
-                'timeout' => 300,
+                'timeout' => 900,
             ],
             'supervisor-3' => [
                 'connection' => 'redis',

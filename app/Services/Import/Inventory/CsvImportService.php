@@ -323,6 +323,13 @@ class CsvImportService implements CsvImportServiceInterface
                 "special order" => 5
             )
         ),
+        "is_featured" => array(
+            "type" => "enum",
+            "list" => array(
+                "yes" => "1",
+                "no" => "0"
+            )
+        ),
         "is_special" => array(
             "type" => "enum",
             "list" => array(
