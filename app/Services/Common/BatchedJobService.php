@@ -41,12 +41,13 @@ class BatchedJobService implements BatchedJobServiceInterface
     /**
      * @inheritDoc
      */
-    public function create(?string $group = null, ?int $waitTime = null): BatchedJob
+    public function create(?string $group = null, ?int $waitTime = null, ?array $context = null): BatchedJob
     {
         $batch = BatchedJob::create([
             'batch_id' => Str::uuid()->toString(),
             'group' => $group ?: self::NO_GROUP,
-            'wait_time' => $waitTime ?? self::WAIT_TIME
+            'wait_time' => $waitTime ?? self::WAIT_TIME,
+            'context' => $context
         ]);
 
         $this->logger->info(sprintf('Batch [%s] was created', $batch->batch_id));

@@ -602,15 +602,23 @@ class InventoryService implements InventoryServiceInterface
                 'integration_item_hash' => 'not_null',
             ]);
 
-            foreach ($inventories as $inventory) {
-                $this->inventoryRepository->update([
-                    'inventory_id' => $inventory->inventory_id,
-                    'is_archived' => 1,
-                    'archived_at' => Carbon::now()
-                ]);
+            $result = Inventory::withoutCacheInvalidationAndSearchSyncing(function () use ($inventories): array {
+                $result = [];
 
-                $result[] = $inventory->inventory_id;
-            }
+                foreach ($inventories as $inventory) {
+                    $this->inventoryRepository->update([
+                        'inventory_id' => $inventory->inventory_id,
+                        'is_archived' => 1,
+                        'archived_at' => Carbon::now()
+                    ]);
+
+                    $result[] = $inventory->inventory_id;
+                }
+
+                return $result;
+            });
+
+            $this->invalidateCacheAndReindexByDealerIds([$dealerId]);
         }
 
         return $result;
