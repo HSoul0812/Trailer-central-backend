@@ -58,9 +58,7 @@ class SafeIndexer
 
         $indexManager = $model->searchableUsing();
 
-        $this->numberUnitsToBeProcessed = $model->newQuery()
-            ->select('inventory.inventory_id')
-            ->count('inventory_id');
+        $this->numberUnitsToBeProcessed = $model->newQuery()->count('inventory_id');
 
         // we must to avoid index name collisions, so, when we have a physical index using the name as the upcoming index alias
         // then we need to apply a cloning strategy to rename such index
@@ -123,10 +121,8 @@ class SafeIndexer
         );
 
         $this->numberUnitsToBeProcessed = $model->newQuery()
-            ->select('inventory.inventory_id')
-            ->with('user', 'user.website', 'dealerLocation')
             ->where('updated_at_auto', '>=', $now->format(Date::FORMAT_Y_M_D_T))
-            ->count();
+            ->count('inventory.inventory_id');
 
         if ($this->numberUnitsToBeProcessed) {
             Job::batch(function (BatchedJob $batch) use ($model, $now) {
