@@ -371,7 +371,7 @@ class InventoryService implements InventoryServiceInterface
                     }
                 }
 
-                $inventory = $this->inventoryRepository->update($params, $options);    
+                $inventory = $this->inventoryRepository->update($params, $options);
                 $changes = $inventory->getChanges();
 
                 if (!$inventory instanceof Inventory) {
@@ -1190,8 +1190,13 @@ class InventoryService implements InventoryServiceInterface
 
         $description = $this->fixNonAsciiChars($description);
 
+        $description = str_replace("\r\n","",$description);
+        $description = trim(preg_replace('/\s\s+/', ' ', $description));
+
+        $description = str_replace(PHP_EOL, '', $description);
+
         // Return
-        return $description.PHP_EOL;
+        return $description;
     }
 
     /**
@@ -1226,18 +1231,27 @@ class InventoryService implements InventoryServiceInterface
 
         //$description = preg_replace('/[[:^print:]]/', ' ', $description);
 
-        preg_match('/<ul>(.*?)<\/ul>/s', $description, $match);
-        if (!empty($match)) {
+        preg_match('/<blockquote>(.*?)<\/blockquote>/s', $description, $match);
+        if (!empty($match[0])) {
+            $new_ul = strip_tags($match[0], '<blockquote><ul><ol><li><a><b><strong>');
+            $description = str_replace($match[0], $new_ul, $description);
+        }
+
+
+        preg_match('/<ul.*>(.*?)<\/ul>/s', $description, $match);
+        if (!empty($match[0])) {
             $new_ul = strip_tags($match[0], '<ul><li><a><b><strong>');
             $description = str_replace($match[0], $new_ul, $description);
         }
 
         // Only accepts necessary tags
-        preg_match('/<ol>(.*?)<\/ol>/s', $description, $match);
-        if (!empty($match)) {
-            $new_ol = strip_tags($match[0], '<ul><li><a><b><strong>');
+        preg_match('/<ol.*>(.*?)<\/ol>/s', $description, $match);
+        if (!empty($match[0])) {
+            $new_ol = strip_tags($match[0], '<ol><li><a><b><strong>');
             $description = str_replace($match[0], $new_ol, $description);
         }
+
+        $description = str_replace('\n', '', $description);
 
         return $description;
     }
