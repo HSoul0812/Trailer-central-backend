@@ -19,9 +19,9 @@ class TransactionService implements TransactionServiceInterface
     private $transactionExecuteQueueRepository;
 
     /**
-     * @var StringHelper
+     * @var Validation
      */
-    private $stringHelper;
+    private $validation;
 
     /**
      * @var string
@@ -35,10 +35,10 @@ class TransactionService implements TransactionServiceInterface
 
     public function __construct(
         TransactionExecuteQueueRepositoryInterface $transactionExecuteQueueRepository,
-        StringHelper $stringHelper
+        Validation $validation
     ) {
         $this->transactionExecuteQueueRepository = $transactionExecuteQueueRepository;
-        $this->stringHelper = $stringHelper;
+        $this->validation = $validation;
     }
 
     /**
@@ -75,7 +75,7 @@ class TransactionService implements TransactionServiceInterface
 
         $i = 0;
 
-        Validation::setApiKey($this->integrationName);
+        $this->validation->setApiKey($this->integrationName);
 
         foreach ($parsed as $transaction) {
             if(empty($transaction['action'])) {
@@ -88,13 +88,13 @@ class TransactionService implements TransactionServiceInterface
                 continue;
             }
 
-            if(!Validation::isValidAction($transaction['action'])) {
+            if(!$this->validation->isValidAction($transaction['action'])) {
                 $message = 'Invalid action "' . $transaction['action'] . '" supplied for this transaction.';
                 $this->addTransactionError($i, $message);
                 continue;
             }
 
-            Validation::validateTransaction($transaction['action'], $transaction['data'], (string) $i, $this);
+            $this->validation->validateTransaction($transaction['action'], $transaction['data'], (string) $i, $this);
             $i++;
         }
 
