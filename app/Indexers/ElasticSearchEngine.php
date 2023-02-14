@@ -28,7 +28,12 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
      */
     public function update($models): void
     {
-        $this->ensureIndexIsCreated($models);
+        if (in_array(config('app.env'), ['local', 'dev'])) {
+            // in production or staging this is not an issue, but in devs/local environments we need to avoid index auto-creation
+            // because the index mapping most of cases are special
+            // in production we're using `inventory:recreate-index` command to made sure it is being created with proper mapping
+            $this->ensureIndexIsCreated($models);
+        }
 
         try {
             parent::update($models);
