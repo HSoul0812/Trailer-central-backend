@@ -70,4 +70,8 @@ return [
             ],
         ],
     ],
+    'chunk' => [
+        'searchable' => env('SCOUT_CHUNK_SEARCHABLE', 500),
+        'unsearchable' => env('SCOUT_CHUNK_UNSEARCHABLE', 500),
+    ]
 ];
