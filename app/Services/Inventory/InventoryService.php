@@ -361,7 +361,8 @@ class InventoryService implements InventoryServiceInterface
                     }
                 }
 
-                $inventory = $this->inventoryRepository->update($params, $options);
+                $inventory = $this->inventoryRepository->update($params, $options);    
+                $changes = $inventory->getChanges();
 
                 if (!$inventory instanceof Inventory) {
                     Log::error('Item hasn\'t been updated.', ['params' => $params]);
@@ -384,8 +385,12 @@ class InventoryService implements InventoryServiceInterface
                 $this->inventoryRepository->commitTransaction();
 
                 // Generate Overlay Inventory Images if necessary
-                if (!empty($newImages) || !empty($existingImages))
+                if (!empty($newImages) || !empty($existingImages) ||
+                    (!empty($changes) && isset($changes['overlay_enabled']))) {
+                    Log::channel('inventory-overlays')
+                       ->info('Queue regenerating overlays just for Inventory ID #' . $inventory->inventory_id);
                     $this->dispatch((new GenerateOverlayImageJob($inventory->inventory_id))->onQueue('overlay-images'));
+                }
 
                 Log::info('Item has been successfully updated', ['inventoryId' => $inventory->inventory_id]);
 
@@ -697,7 +702,7 @@ class InventoryService implements InventoryServiceInterface
 
         Log::channel('inventory-overlays')->info('Adding Overlays on Inventory Images', $overlayParams);
 
-        $overlayEnabled = $overlayParams['dealer_overlay_enabled'] ?? $overlayParams['overlay_enabled'];
+        $overlayEnabled = $overlayParams['overlay_enabled'];
 
         foreach ($inventoryImages as $inventoryImage) {
 

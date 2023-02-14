@@ -249,7 +249,7 @@ class ImageServiceTest extends TestCase
         ];
 
         $userMock = $this->getEloquentMock(User::class);
-        $userMock->dealer_id = $this->faker->numberBetween(2000, 4000);
+        $userMock->dealer_id = self::DEALER_ID;
 
         $inventories = new Collection();
         for ($i = 0; $i < 5; $i++)
@@ -266,9 +266,61 @@ class ImageServiceTest extends TestCase
                 false, false, [Inventory::getTableName(). '.inventory_id'])
             ->once()->andReturn($inventories);
 
+        $this->inventoryRepositoryMock->shouldNotReceive('massUpdate');
+
         $this->userRepositoryMock->shouldReceive('updateOverlaySettings')
             ->once()->with(self::DEALER_ID, $overlayParams)
-            ->andReturn(true);
+            ->andReturn($overlayParams);
+
+        $this->userRepositoryMock->shouldReceive('get')
+            ->once()->with(['dealer_id' => self::DEALER_ID])
+            ->andReturn($userMock);
+
+        $this->imageService->updateOverlaySettings($overlayParams);
+
+        Queue::assertPushed(GenerateOverlayImageJob::class, $inventories->count());
+    }
+
+    /**
+     * @group Marketing
+     * @group Marketing_Overlays
+     */
+    public function testUpdateOverlaySettingsWithOverlayenabledChanged()
+    {
+        $overlayParams = [
+            'dealer_id' => self::DEALER_ID,
+            'overlay_logo' => 'logo.png',
+            'overlay_enabled' => 2
+        ];
+
+        $userMock = $this->getEloquentMock(User::class);
+        $userMock->dealer_id = self::DEALER_ID;
+
+        $inventories = new Collection();
+        for ($i = 0; $i < 5; $i++)
+        {
+            $inventoryId = $i + 1;
+            $inventory = $this->getEloquentMock(Inventory::class);
+            $inventory->inventory_id = $inventoryId;
+            $inventories->push($inventory);
+        }
+
+        $this->inventoryRepositoryMock->shouldReceive('getAll')
+            ->with([
+                'dealer_id' => self::DEALER_ID, 'images_greater_than' => 1], 
+                false, false, [Inventory::getTableName(). '.inventory_id'])
+            ->once()->andReturn($inventories);
+
+        $this->inventoryRepositoryMock->shouldReceive('massUpdate')
+            ->with([
+                'dealer_id' => $overlayParams['dealer_id'],
+                'overlay_enabled' => $overlayParams['overlay_enabled']
+            ])
+            ->once();
+
+        $this->userRepositoryMock->shouldReceive('updateOverlaySettings')
+            ->once()->with(self::DEALER_ID, $overlayParams)
+            ->andReturn($overlayParams);
 
         $this->userRepositoryMock->shouldReceive('get')
             ->once()->with(['dealer_id' => self::DEALER_ID])
@@ -293,9 +345,11 @@ class ImageServiceTest extends TestCase
 
         $this->inventoryRepositoryMock->shouldNotReceive('getAll');
 
+        $this->inventoryRepositoryMock->shouldNotReceive('massUpdate');
+
         $this->userRepositoryMock->shouldReceive('updateOverlaySettings')
             ->once()->with(self::DEALER_ID, $overlayParams)
-            ->andReturn(false);
+            ->andReturn([]);
 
         $this->userRepositoryMock->shouldReceive('get')
             ->once()->with(['dealer_id' => self::DEALER_ID])
