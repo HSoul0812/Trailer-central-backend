@@ -8,7 +8,7 @@ use App\Models\Inventory\Inventory;
 use App\Repositories\FeatureFlagRepositoryInterface;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Bus;
-use Laravel\Scout\Jobs\MakeSearchable;
+use App\Jobs\Scout\MakeSearchable;
 use Tests\TestCase;
 use RuntimeException;
 
