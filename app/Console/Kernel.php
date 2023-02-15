@@ -118,15 +118,17 @@ class Kernel extends ConsoleKernel
         /**
          * Campaigns/Blasts
          */
-        $schedule->command('text:process-campaign')
-                ->withoutOverlapping()
-                ->onOneServer()
-                ->runInBackground();
+        if (config('app.env') === 'production') {
+            $schedule->command('text:process-campaign')
+                    ->withoutOverlapping()
+                    ->onOneServer()
+                    ->runInBackground();
 
-        $schedule->command('text:deliver-blast')
-                ->withoutOverlapping()
-                ->onOneServer()
-                ->runInBackground();
+            $schedule->command('text:deliver-blast')
+                    ->withoutOverlapping()
+                    ->onOneServer()
+                    ->runInBackground();
+        }
 
         $schedule->command('text:auto-expire-phones')
                 ->weeklyOn(7, '4:00')
