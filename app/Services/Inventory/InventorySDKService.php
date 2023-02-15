@@ -89,6 +89,7 @@ class InventorySDKService implements InventorySDKServiceInterface
     public function __construct()
     {
         $this->request = new Request();
+        $this->request->add('request_id', config('inventory-sdk.request_id'));
         $this->mainFilterGroup = new FilterGroup();
 
         $this->request->addFilterGroup($this->mainFilterGroup);
@@ -122,7 +123,6 @@ class InventorySDKService implements InventorySDKServiceInterface
 
         $location = $this->addGeolocation($params);
         $this->addSorting($params, $location);
-
         return $this->responseFromSDKResponse($this->search->execute($this->request));
     }
 
