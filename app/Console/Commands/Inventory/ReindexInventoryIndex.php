@@ -29,7 +29,7 @@ class ReindexInventoryIndex extends Command
      *
      * @var string
      */
-    protected $description = 'Will reindex the inventory ES index using queue workers';
+    protected $description = 'Will fully reindex the inventory ES index using queue workers';
 
     public function handle(InventoryResponseCacheInterface $responseCache): void
     {

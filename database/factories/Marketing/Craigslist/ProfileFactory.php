@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Marketing\Craigslist\Category;
+use App\Models\Marketing\Craigslist\Market;
 use App\Models\User\User;
 use App\Models\User\DealerLocation;
 use App\Models\Marketing\Craigslist\Profile;
@@ -7,7 +9,6 @@ use Faker\Generator as Faker;
 use Illuminate\Database\Eloquent\Factory;
 
 /** @var Factory $factory */
-
 $factory->define(Profile::class, static function (Faker $faker, array $attributes): array {
     // Get Dealer
     $user = isset($attributes['dealer_id']) ? null : factory(User::class)->create();
@@ -22,9 +23,9 @@ $factory->define(Profile::class, static function (Faker $faker, array $attribute
     $postCategory = $category ? $category->category : $attributes['postCategory'];
 
     // Get Random Market
-    if(isset($attributes['market_city']) && isset($attributes['market_subarea'])) {
+    if (isset($attributes['market_city']) && isset($attributes['market_subarea'])) {
         $market = Market::where('city_code', $attributes['market_city'])->where('subarea_code', $attributes['market_subarea'])->first();
-    } elseif(isset($attributes['market_city'])) {
+    } elseif (isset($attributes['market_city'])) {
         $market = Market::where('city_code', $attributes['market_city'])->first();
     } else {
         $market = Market::inRandomOrder()->first();
@@ -37,7 +38,7 @@ $factory->define(Profile::class, static function (Faker $faker, array $attribute
         'location_filter' => 'All',
         'username' => isset($attributes['username']) ? $attributes['username'] : $faker->username,
         'password' => isset($attributes['password']) ? $attributes['password'] : $faker->password,
-        'profile' => isset($attributes['profile']) ? $attributes['profile'] : $faker->companyName,
+        'profile' => isset($attributes['profile']) ? $attributes['profile'] : $faker->company,
         'phone' => isset($attributes['phone']) ? $attributes['phone'] : $faker->phoneNumber,
         'location' => isset($attributes['location']) ? $attributes['location'] : $faker->city,
         'postal' => isset($attributes['postal']) ? $attributes['postal'] : $faker->postcode,
@@ -58,12 +59,11 @@ $factory->define(Profile::class, static function (Faker $faker, array $attribute
         'format_fbk' => isset($attributes['format_fbk']) ? (int) $attributes['format_fbk'] : 0,
         'show_more_ads' => isset($attributes['show_more_ads']) ? (int) $attributes['show_more_ads'] : 0,
         'autoposting_enable' => isset($attributes['autoposting_enable']) ? (int) $attributes['autoposting_enable'] : 0,
-        'autposting_items' => isset($attributes['autposting_items']) ? (int) $attributes['autposting_items'] : 1,
-        'autposting_hrs' => isset($attributes['autposting_hrs']) ? (int) $attributes['autposting_hrs'] : 8,
-        'autposting_slot_id' => isset($attributes['autposting_slot_id']) ? (int) $attributes['autposting_slot_id'] : 1,
-        'autoposting_start_at' => isset($attributes['autposting_start_at']) ? (int) $attributes['autposting_start_at'] : 0,
+        'autoposting_items' => isset($attributes['autoposting_items']) ? (int) $attributes['autoposting_items'] : 1,
+        'autoposting_hrs' => isset($attributes['autoposting_hrs']) ? (int) $attributes['autoposting_hrs'] : 8,
+        'autoposting_slot_id' => isset($attributes['autoposting_slot_id']) ? (int) $attributes['autoposting_slot_id'] : 1,
+        'autoposting_start_at' => isset($attributes['autoposting_start_at']) ? (int) $attributes['autoposting_start_at'] : 0,
         'embed_phone' => isset($attributes['embed_phone']) ? (int) $attributes['embed_phone'] : 0,
-        'embed_dealer_phone' => isset($attributes['embed_dealer_phone']) ? (int) $attributes['embed_dealer_phone'] : 0,
         'embed_dealer_and_phone' => isset($attributes['embed_dealer_and_phone']) ? (int) $attributes['embed_dealer_and_phone'] : 0,
         'embed_logo' => isset($attributes['embed_logo']) ? (int) $attributes['embed_logo'] : 0,
         'embed_logo_position' => isset($attributes['embed_logo_position']) ? $attributes['embed_logo_position'] : 'none',
@@ -75,7 +75,7 @@ $factory->define(Profile::class, static function (Faker $faker, array $attribute
         'embed_lower' => isset($attributes['embed_lower']) ? $attributes['embed_lower'] : 'phone',
         'embed_bg_lower' => isset($attributes['embed_bg_lower']) ? $attributes['embed_bg_lower'] : '#000000',
         'embed_text_lower' => isset($attributes['embed_text_lower']) ? $attributes['embed_text_lower'] : '#ffffff',
-        'keywords' => isset($attributes['keywords']) ? $attributes['keywords'] : $faker->words(12),
+        'keywords' => isset($attributes['keywords']) ? $attributes['keywords'] : $faker->words(12, true),
         'scramble' => isset($attributes['scramble']) ? (int) $attributes['scramble'] : 0,
         'blurb' => isset($attributes['blurb']) ? $attributes['blurb'] : $faker->paragraph,
         'proxy_type' => 0,
@@ -87,6 +87,6 @@ $factory->define(Profile::class, static function (Faker $faker, array $attribute
         'use_website_price' => isset($attributes['use_website_price']) ? (int) $attributes['use_website_price'] : 0,
         'market_city' => $market->city_code,
         'market_subarea' => $market->subarea_code,
-        'profile_type' => isset($attributes['profile_type']) ? $attributes['profile_type'] : 'inventory',
+        'profile_type' => isset($attributes['profile_type']) ? $attributes['profile_type'] : 'inventory'
     ];
 });

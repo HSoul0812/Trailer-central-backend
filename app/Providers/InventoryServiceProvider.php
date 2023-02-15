@@ -2,11 +2,15 @@
 
 namespace App\Providers;
 
+use App\Contracts\LoggerServiceInterface;
 use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
+use App\Jobs\Inventory\ReIndexInventoriesByDealerLocationJob;
+use App\Jobs\Website\ReIndexInventoriesByDealersJob;
 use App\Repositories\Bulk\Inventory\BulkDownloadRepository;
 use App\Repositories\Bulk\Inventory\BulkDownloadRepositoryInterface;
 use App\Repositories\Bulk\Inventory\BulkUploadRepository;
 use App\Repositories\Bulk\Inventory\BulkUploadRepositoryInterface;
+use App\Repositories\User\DealerLocationRepositoryInterface;
 use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
 use App\Services\ElasticSearch\Cache\InventoryResponseRedisCache;
 use App\Services\ElasticSearch\Cache\RedisResponseCache;
@@ -159,6 +163,23 @@ class InventoryServiceProvider extends ServiceProvider
 
         $this->app->bindMethod(InvalidateCacheJob::class . '@handle', function (InvalidateCacheJob $job): void {
             $job->handle($this->app->make(InventoryResponseCacheInterface::class));
+        });
+
+        $this->app->bindMethod(ReIndexInventoriesByDealersJob::class . '@handle', function (ReIndexInventoriesByDealersJob $job): void {
+            $job->handle(
+                $this->app->make(InventoryResponseCacheInterface::class),
+                $this->app->make(ResponseCacheKeyInterface::class),
+                $this->app->make(LoggerServiceInterface::class)
+            );
+        });
+
+        $this->app->bindMethod(ReIndexInventoriesByDealerLocationJob::class . '@handle', function (ReIndexInventoriesByDealerLocationJob $job): void {
+            $job->handle(
+                $this->app->make(DealerLocationRepositoryInterface::class),
+                $this->app->make(InventoryResponseCacheInterface::class),
+                $this->app->make(ResponseCacheKeyInterface::class),
+                $this->app->make(LoggerServiceInterface::class)
+            );
         });
     }
 }

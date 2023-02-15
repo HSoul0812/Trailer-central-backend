@@ -2,7 +2,6 @@
 
 namespace Tests\Unit\Services\Inventory;
 
-use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
 use App\Jobs\Website\ReIndexInventoriesByDealersJob;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -19,7 +18,7 @@ use App\Repositories\Inventory\ImageRepositoryInterface;
 use App\Models\Inventory\Image;
 use Illuminate\Support\Collection;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
-
+use Mockery\LegacyMockInterface;
 /**
  * Test for App\Services\Inventory\ImageService
  *
@@ -331,7 +330,6 @@ class ImageServiceTest extends TestCase
 
         Queue::assertPushed(GenerateOverlayImageJob::class, $inventories->count());
         Queue::assertPushed(ReIndexInventoriesByDealersJob::class, 1);
-        Queue::assertPushed(InvalidateCacheJob::class, 2); // once for single cache, once for search cache
     }
 
     /**
@@ -361,6 +359,5 @@ class ImageServiceTest extends TestCase
 
         Queue::assertNotPushed(GenerateOverlayImageJob::class);
         Queue::assertNotPushed(ReIndexInventoriesByDealersJob::class);
-        Queue::assertNotPushed(InvalidateCacheJob::class);
     }
 }

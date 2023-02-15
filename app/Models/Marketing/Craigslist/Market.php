@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class Market
- * 
+ *
  * @package App\Models\Marketing\Craigslist
  */
 class Market extends Model
@@ -32,6 +32,11 @@ class Market extends Model
      * @var bool
      */
     public $timestamps = false;
+
+    /**
+     * @var bool
+     */
+    public $incrementing = false;
 
     /**
      * The attributes that are mass assignable.

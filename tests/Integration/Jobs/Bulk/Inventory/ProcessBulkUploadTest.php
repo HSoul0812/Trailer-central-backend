@@ -2,7 +2,6 @@
 
 namespace Tests\Integration\Jobs\Bulk\Inventory;
 
-use App\Jobs\ElasticSearch\Cache\InvalidateCacheJob;
 use App\Jobs\Website\ReIndexInventoriesByDealersJob;
 use App\Services\Import\Inventory\CsvImportServiceInterface;
 use App\Services\Inventory\InventoryServiceInterface;
@@ -102,7 +101,6 @@ class ProcessBulkUploadTest extends TestCase
 
         $job->handle($this->importerService, $this->inventoryService);
 
-        Bus::assertDispatchedTimes(InvalidateCacheJob::class, 2);
         Bus::assertDispatchedTimes(ReIndexInventoriesByDealersJob::class, 1);
     }
 

@@ -10,7 +10,7 @@ use App\Repositories\FeatureFlagRepositoryInterface;
 use Exception;
 use App\Jobs\Scout\MakeSearchable;
 use Laravel\Scout\ModelObserver;
-
+use App\Models\User\User as Dealer;
 /**
  * @method \Illuminate\Database\Eloquent\Builder query
  */
@@ -49,6 +49,19 @@ trait InventorySearchable
     }
 
     /**
+     * Get a new query to restore one or more models by their queueable IDs.
+     *
+     * @param  array|int  $ids
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function newQueryForRestoration($ids)
+    {
+        return is_array($ids)
+            ? $this->newQueryWithoutScopes()->with('user', 'user.website', 'dealerLocation')->whereIn($this->getQualifiedKeyName(), $ids)
+            : $this->newQueryWithoutScopes()->with('user', 'user.website', 'dealerLocation')->whereKey($ids);
+    }
+
+    /**
      * @throws Exception when some unknown error has been thrown
      */
     public static function makeAllSearchableUsingAliasStrategy(): void
@@ -59,21 +72,32 @@ trait InventorySearchable
 
     public static function makeAllSearchableByDealers(array $dealers = []): void
     {
-        self::query()->whereIn('dealer_id', $dealers)
-            ->orderBy('updated_at_auto', 'DESC')
+        self::query()->select('inventory.inventory_id')
+            ->whereIn('dealer_id', $dealers)
             ->searchable();
     }
 
-    public static function makeAllSearchableByDealerLocations(array $locations = []): void
+    public static function makeAllSearchableByDealerLocationId(int $dealerLocationId): void
     {
-        self::query()->whereIn('dealer_location_id', $locations)
-            ->orderBy('updated_at_auto', 'DESC')
+        self::query()->select('inventory.inventory_id')
+            ->where('dealer_location_id', $dealerLocationId)
             ->searchable();
     }
 
+    /**
+     * It will iterate over all dealers, then over all inventories which belongs to the dealer
+     *
+     * @return void
+     */
     public static function makeAllSearchable(): void
     {
-        self::query()->orderBy('updated_at_auto', 'DESC')->searchable();
+        Dealer::query()->select('dealer.dealer_id')
+            ->get()
+            ->each(function (Dealer $dealer): void {
+                self::query()->select('inventory.inventory_id')
+                    ->where('inventory.dealer_id', $dealer->dealer_id)
+                    ->searchable();
+            });
     }
 
     /**
@@ -197,7 +221,7 @@ trait InventorySearchable
             return $models->first()->searchableUsing()->update($models);
         }
 
-        dispatch((new MakeSearchable($models))
+        dispatch((new MakeSearchable($models, $this->searchableAs()))
             ->onQueue($models->first()->syncWithSearchUsingQueue())
             ->onConnection($models->first()->syncWithSearchUsing()));
     }

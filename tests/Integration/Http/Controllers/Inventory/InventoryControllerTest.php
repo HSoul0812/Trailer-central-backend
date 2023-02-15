@@ -20,7 +20,7 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
-use Laravel\Scout\Jobs\MakeSearchable;
+use App\Jobs\Scout\MakeSearchable;
 use Tests\database\seeds\Inventory\InventoryHistorySeeder;
 use Tests\database\seeds\Inventory\InventorySeeder;
 use Tests\database\seeds\User\GeolocationSeeder;

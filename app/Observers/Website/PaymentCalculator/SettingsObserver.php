@@ -2,28 +2,19 @@
 
 namespace App\Observers\Website\PaymentCalculator;
 
-use App\Jobs\Website\ReIndexInventoriesByDealersJob;
-use App\Models\Inventory\Inventory;
 use App\Models\Website\PaymentCalculator\Settings;
-use App\Services\ElasticSearch\Cache\InventoryResponseCacheInterface;
-use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
+use App\Services\Inventory\InventoryServiceInterface;
 
 class SettingsObserver
 {
     /**
-     * @var ResponseCacheKeyInterface
+     * @var InventoryServiceInterface
      */
-    private $cacheKey;
+    private $inventoryService;
 
-    /**
-     * @var InventoryResponseCacheInterface
-     */
-    private $responseCache;
-
-    public function __construct(ResponseCacheKeyInterface $cacheKey, InventoryResponseCacheInterface $responseCache)
+    public function __construct(InventoryServiceInterface $inventoryService)
     {
-        $this->cacheKey = $cacheKey;
-        $this->responseCache = $responseCache;
+        $this->inventoryService = $inventoryService;
     }
 
     /**
@@ -59,16 +50,7 @@ class SettingsObserver
         $settings->load('website');
 
         if (($dealerId = $settings->website->dealer_id)) {
-            dispatch(new ReIndexInventoriesByDealersJob([$dealerId]));
-        }
-
-        if (Inventory::isCacheInvalidationEnabled()) {
-            $website = $settings->website;
-
-            $this->responseCache->forget([
-                $this->cacheKey->deleteByDealer($website->dealer_id),
-                $this->cacheKey->deleteSingleByDealer($website->dealer_id)
-            ]);
+            $this->inventoryService->invalidateCacheAndReindexByDealerIds([$dealerId]);
         }
     }
 
