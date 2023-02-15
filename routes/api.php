@@ -386,13 +386,6 @@ $api->version('v1', function ($route) {
     $route->post('website/{websiteId}/showroom', 'App\Http\Controllers\v1\Website\Config\ShowroomController@create')->where('websiteId', '[0-9]+');
 
     /**
-     * Manufacturers
-     */
-    $route->get('manufacturers', 'App\Http\Controllers\v1\Showroom\ShowroomBulkUpdateController@index');
-    $route->post('manufacturers/bulk_year', 'App\Http\Controllers\v1\Showroom\ShowroomBulkUpdateController@bulkUpdateYear');
-    $route->post('manufacturers/bulk_visibility', 'App\Http\Controllers\v1\Showroom\ShowroomBulkUpdateController@bulkUpdateVisibility');
-
-    /**
      * Log
      */
     $route->put('website/log', 'App\Http\Controllers\v1\Website\Log\LogController@create');

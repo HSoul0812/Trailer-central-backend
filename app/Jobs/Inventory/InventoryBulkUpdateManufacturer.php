@@ -5,7 +5,7 @@ namespace App\Jobs\Inventory;
 use Exception;
 use App\Jobs\Job;
 use Illuminate\Support\Facades\Log;
-use App\Services\Inventory\InventoryBulkUpdateManufacturerService;
+use App\Services\Inventory\InventoryBulkUpdateManufacturerServiceInterface;
 
 class InventoryBulkUpdateManufacturer extends Job
 {
@@ -18,20 +18,15 @@ class InventoryBulkUpdateManufacturer extends Job
     protected $params;
 
     /**
-     * @var InventoryBulkUpdateManufacturerService
-     */
-    protected $inventoryBulkUpdateService;
-
-    /**
      * Create a new job instance.
      *
      * @param array $params
-     * @throws Exception
      */
-    public function __construct(array $params)
+    public function __construct(
+        array $params
+    )
     {
         $this->params = $params;
-        $this->inventoryBulkUpdateService = new InventoryBulkUpdateManufacturerService($params);
     }
 
     /**
@@ -39,11 +34,11 @@ class InventoryBulkUpdateManufacturer extends Job
      *
      * @return void
      */
-    public function handle()
+    public function handle(InventoryBulkUpdateManufacturerServiceInterface $inventoryBulkUpdateService)
     {
         Log::info('Starting Inventory Bulk Manufacturer Update');
         try {
-            $this->inventoryBulkUpdateService->update();
+            $inventoryBulkUpdateService->update($this->params);
         } catch (Exception $ex) {
             Log::info($ex->getMessage());
         }

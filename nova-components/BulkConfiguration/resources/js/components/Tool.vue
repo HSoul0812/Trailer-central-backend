@@ -286,8 +286,8 @@ export default {
     },
 
     methods: {
-        getManufacturers() {
-            axios.get('/api/manufacturers')
+        async getManufacturers() {
+            await Nova.request().get('/api/manufacturers')
                 .then((response) => {
                     this.manufacturers = response.data.data;
                 });

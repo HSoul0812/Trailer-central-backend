@@ -15,14 +15,15 @@ interface InventoryBulkUpdateManufacturerServiceInterface
     /**
      * Updates Inventory Manufacturers
      *
+     * @param array $params
      * @throws Exception
      */
-    public function update();
+    public function update(array $params);
 
     /**
-     * @param $params
+     * @param array $params
      * @return mixed
      * @throws Exception
      */
-    public function bulkUpdateManufacturer($params);
+    public function bulkUpdateManufacturer(array $params);
 }

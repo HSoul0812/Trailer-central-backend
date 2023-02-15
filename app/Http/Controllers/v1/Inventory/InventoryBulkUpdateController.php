@@ -7,7 +7,6 @@ use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
 
 use App\Http\Controllers\RestfulController;
-use App\Repositories\Inventory\InventoryBulkUpdateRepositoryInterface;
 use App\Http\Requests\Inventory\InventoryBulkUpdateManufacturerRequest;
 use App\Services\Inventory\InventoryBulkUpdateManufacturerServiceInterface;
 
@@ -18,10 +17,6 @@ use App\Services\Inventory\InventoryBulkUpdateManufacturerServiceInterface;
  */
 class InventoryBulkUpdateController extends RestfulController
 {
-    /**
-     * @var InventoryBulkUpdateRepositoryInterface
-     */
-    protected $inventoryBulkUpdateRepository;
 
     /**
      * @var InventoryBulkUpdateManufacturerServiceInterface
@@ -31,14 +26,11 @@ class InventoryBulkUpdateController extends RestfulController
     /**
      * Create a new controller instance.
      *
-     * @param InventoryBulkUpdateRepositoryInterface $inventoryBulkUpdateRepository
      * @param InventoryBulkUpdateManufacturerServiceInterface $inventoryBulkUpdateManufacturerService
      */
     public function __construct(
-        InventoryBulkUpdateRepositoryInterface $inventoryBulkUpdateRepository,
         InventoryBulkUpdateManufacturerServiceInterface $inventoryBulkUpdateManufacturerService
     ) {
-        $this->inventoryBulkUpdateRepository = $inventoryBulkUpdateRepository;
         $this->inventoryBulkUpdateManufacturerService = $inventoryBulkUpdateManufacturerService;
     }
 
