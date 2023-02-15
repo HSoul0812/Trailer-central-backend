@@ -12,6 +12,9 @@ class Filter
     /** @var Collection<Term> */
     protected $terms;
 
+    /** @var string */
+    protected $parentESKeyword;
+
     /**
      * @param string $name
      * @param array $terms
@@ -47,5 +50,22 @@ class Filter
     public function getTerms(): Collection
     {
         return $this->terms;
+    }
+
+    /**
+     * @param string $operator
+     * @return void
+     */
+    public function setParentESOperatorKeyword(string $operator)
+    {
+        $this->parentESKeyword = $operator;
+    }
+
+    /**
+     * @return string
+     */
+    public function getParentESOperatorKeyword(): string
+    {
+        return $this->parentESKeyword;
     }
 }

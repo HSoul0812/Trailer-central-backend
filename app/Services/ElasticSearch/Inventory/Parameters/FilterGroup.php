@@ -41,10 +41,13 @@ class FilterGroup
     public function __construct(array $fields, string $appendTo, string $operator)
     {
         $this->appendTo = $appendTo;
-        $this->fields = collect($fields)->map(function ($field) {
-            return Filter::fromArray($field);
-        });
         $this->operator = $operator;
+        
+        $this->fields = collect($fields)->map(function ($field) {
+            $filter = Filter::fromArray($field);
+            $filter->setParentESOperatorKeyword($this->getESOperatorKeyword());
+            return $filter;
+        });
     }
 
     /**
