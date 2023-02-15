@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 
 /**
+ * @property int $api_entity_reference_id
+ * @property int|null $entity_id
+ * @property string|null $reference_id
+ * @property string $entity_type
+ * @property string $api_key
  * @method static Builder where($column, $operator = null, $value = null, $boolean = 'and')
  */
 class ApiEntityReference extends Model {

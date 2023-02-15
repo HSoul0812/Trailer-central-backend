@@ -42,6 +42,8 @@ use App\Repositories\Integration\CVR\CvrFileRepository;
 use App\Repositories\Integration\CVR\CvrFileRepositoryInterface;
 use App\Services\Integration\CVR\CvrFileService;
 use App\Services\Integration\CVR\CvrFileServiceInterface;
+use App\Services\Integration\Transaction\TransactionService;
+use App\Services\Integration\Transaction\TransactionServiceInterface;
 use FacebookAds\Http\Client;
 use FacebookAds\Http\Request;
 use Illuminate\Support\ServiceProvider;
@@ -65,19 +67,20 @@ class IntegrationServiceProvider extends ServiceProvider
         $this->app->bind(CatalogServiceInterface::class, CatalogService::class);
         $this->app->bind(ChatServiceInterface::class, ChatService::class);
         $this->app->bind(BusinessServiceInterface::class, BusinessService::class);
-        
+        $this->app->bind(TransactionServiceInterface::class, TransactionService::class);
+
         // Integration Repositories
         $this->app->bind(TokenRepositoryInterface::class, TokenRepository::class);
         $this->app->bind(CatalogRepositoryInterface::class, CatalogRepository::class);
         $this->app->bind(ChatRepositoryInterface::class, ChatRepository::class);
         $this->app->bind(FeedRepositoryInterface::class, FeedRepository::class);
         $this->app->bind(PageRepositoryInterface::class, PageRepository::class);
-        
+
         $this->app->bind(TransactionExecuteQueueRepositoryInterface::class, TransactionExecuteQueueRepository::class);
-        
+
         $this->app->bind(CvrFileRepositoryInterface::class, CvrFileRepository::class);
         $this->app->bind(CvrFileServiceInterface::class, CvrFileService::class);
-                
+
         // Collector Repositories
         $this->app->bind(CollectorRepositoryInterface::class, function() {
             return new CollectorRepository(Collector::query());
