@@ -179,7 +179,7 @@ class InventorySDKService implements InventorySDKServiceInterface
     protected function addSorting(array $params, GeoCoordinates $location)
     {
         if (isset($params['is_random']) && $params['is_random']) {
-            $this->request->add('in_random_order', 1);
+            $this->request->withSorting(new Sorting([], [], true));
         } else {
             if (isset($params['sort'])) {
                 $sort = $params['sort'];
