@@ -45,6 +45,8 @@ use App\Repositories\Dms\Quickbooks\ItemNewRepository;
 use App\Repositories\Dms\Quickbooks\ItemNewRepositoryInterface;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepository;
 use App\Repositories\Dms\Quickbooks\QuickbookApprovalRepositoryInterface;
+use App\Repositories\Inventory\InventoryBulkUpdateRepository;
+use App\Repositories\Inventory\InventoryBulkUpdateRepositoryInterface;
 use App\Repositories\Pos\SaleRepository;
 use App\Repositories\Pos\SaleRepositoryInterface;
 use App\Repositories\Showroom\ShowroomBulkUpdateRepository;
@@ -323,6 +325,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(WebsiteConfigServiceInterface::class, WebsiteConfigService::class);
 
         $this->app->bind(ShowroomBulkUpdateRepositoryInterface::class, ShowroomBulkUpdateRepository::class);
+        $this->app->bind(InventoryBulkUpdateRepositoryInterface::class, InventoryBulkUpdateRepository::class);
 
         $this->app->bind(ErrorRepositoryInterface::class, ErrorRepository::class);
 
