@@ -69,7 +69,7 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
         return [
             'wildcard' => [
                 $this->field->getName() => [
-                    'value' => sprintf('*%s*', $value)
+                    'value' => $value
                 ]
             ]
         ];
@@ -86,7 +86,7 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
         return [
             'wildcard' => [
                 $column => [
-                    'value' => sprintf('*%s*', str_replace(' ', '*', $value)),
+                    'value' => $value,
                     'boost' => max(self::MINIMUM_BOOST, $boost - 0.95)
                 ]
             ]
@@ -160,15 +160,25 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
                                 ]
                             ]
                         ];
+
                         if ($name !== 'description' || $descriptionWildcard) {
                             $searchQuery[] = [
                                 'wildcard' => [
                                     $name => [
-                                        'value' => sprintf('*%s*', $value)
+                                        'value' => sprintf('*%s', $value)
+                                    ]
+                                ]
+                            ];
+
+                            $searchQuery[] = [
+                                'wildcard' => [
+                                    $name => [
+                                        'value' => sprintf('%s*', $value)
                                     ]
                                 ]
                             ];
                         }
+
                         return [
                             'bool' => [
                                 $term->getESOperatorKeyword() => $searchQuery
@@ -177,6 +187,7 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
                     }, $term->getValues())
                 ]
             ];
+
             $this->appendToQuery($query);
         });
 
@@ -198,7 +209,8 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
 
             switch ($name) {
                 case 'stock':
-                    $shouldQuery[] = $this->wildcardQuery($data['match']);
+                    $shouldQuery[] = $this->wildcardQuery(sprintf('*%s', $data['match']));
+                    $shouldQuery[] = $this->wildcardQuery(sprintf('%s*', $data['match']));
                     break;
                 default:
                     $searchFields = $this->getSearchFields($data['ignore_fields'] ?? []);
@@ -219,10 +231,9 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
                         $shouldQuery[] = $this->matchQuery($columnValues[0], $boost, $match);
                         $shouldQuery[] = $this->matchQuery($column, $boost, $match);
 
-                        // leading description wildcard add a tremendous penalty to the query, so is avoided
-                        // it only will use leading wildcards for those fields different from `description`
-                        if ($keywordWildcard && !is_numeric($key) && $key !== 'description' && strpos($column, '.') !== false) {
-                            $shouldQuery[] = $this->wildcardQueryWithBoost($key, $boost, $data['match']);
+                        if ($keywordWildcard && !is_numeric($key) && strpos($column, '.') !== false) {
+                            $shouldQuery[] = $this->wildcardQueryWithBoost($key, $boost, sprintf('*%s', str_replace(' ', '*', $data['match'])));
+                            $shouldQuery[] = $this->wildcardQueryWithBoost($key, $boost, sprintf('%s*', str_replace(' ', '*', $data['match'])));
                         }
                     }
                     break;
