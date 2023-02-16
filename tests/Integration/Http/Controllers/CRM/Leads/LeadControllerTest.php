@@ -230,6 +230,31 @@ class LeadControllerTest extends IntegrationTestCase
 
     /**
      * @group CRM
+     * @covers ::update
+     */
+    public function testUpdateLeadStatus()
+    {
+        $status = $this->faker->randomElement(LeadStatus::STATUS_ARRAY);
+        $response = $this->json(
+            'POST',
+            '/api/leads/'. $this->lead->getKey(),
+            [
+                'lead_status' => $status
+            ],
+            ['access-token' => $this->token->access_token]
+        );
+
+        $response->assertStatus(200);
+
+        $this->assertDatabaseHas(LeadStatus::getTableName(), [
+            'tc_lead_identifier' => $this->lead->getKey(),
+            'status' => $status,
+            'contact_type' => LeadStatus::TYPE_TASK
+        ]);
+    }
+
+    /**
+     * @group CRM
      * @covers ::mergeLeads
      */
     public function testMerge()
