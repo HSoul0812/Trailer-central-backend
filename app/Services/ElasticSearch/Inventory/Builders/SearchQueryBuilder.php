@@ -149,7 +149,7 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
 
             $query = [
                 'bool' => [
-                    $term->getESOperatorKeyword() => array_map(static function ($value) use ($term, $name, $descriptionWildcard) {
+                    'must' => array_map(static function ($value) use ($term, $name, $descriptionWildcard) {
                         $searchQuery = [
                             [
                                 'match' => [
@@ -181,7 +181,7 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
 
                         return [
                             'bool' => [
-                                'should' => $searchQuery
+                                $term->getESOperatorKeyword() => $searchQuery
                             ]
                         ];
                     }, $term->getValues())
