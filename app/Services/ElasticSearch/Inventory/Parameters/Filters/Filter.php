@@ -56,7 +56,7 @@ class Filter
      * @param string $operator
      * @return void
      */
-    public function setParentESOperatorKeyword(string $operator)
+    public function setParentESOperatorKeyword(string $operator): void
     {
         $this->parentESKeyword = $operator;
     }

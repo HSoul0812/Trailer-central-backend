@@ -42,10 +42,11 @@ class FilterGroup
     {
         $this->appendTo = $appendTo;
         $this->operator = $operator;
-        
+
         $this->fields = collect($fields)->map(function ($field) {
             $filter = Filter::fromArray($field);
             $filter->setParentESOperatorKeyword($this->getESOperatorKeyword());
+
             return $filter;
         });
     }
