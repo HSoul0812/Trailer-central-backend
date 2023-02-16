@@ -11,8 +11,5 @@ $api->version('v1', function ($api) {
         $api->get('/geocode', [MapSearchController::class, 'geocode']);
         $api->get('/autocomplete', [MapSearchController::class, 'autocomplete']);
         $api->get('/reverse', [MapSearchController::class, 'reverse']);
-        $api->get('/test', function() {
-            return [];
-        });
     });
 });
