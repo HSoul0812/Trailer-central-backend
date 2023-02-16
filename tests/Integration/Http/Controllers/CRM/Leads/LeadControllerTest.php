@@ -3,6 +3,7 @@
 namespace Tests\Integration\Http\Controllers\CRM\Leads;
 
 use App\Models\CRM\Leads\Lead;
+use App\Models\CRM\Leads\LeadStatus;
 use App\Models\User\User;
 use App\Models\User\AuthToken;
 use Tests\Integration\IntegrationTestCase;
@@ -13,6 +14,9 @@ use App\Models\User\NewDealerUser;
 use App\Repositories\User\NewDealerUserRepositoryInterface;
 use App\Repositories\CRM\User\CrmUserRepositoryInterface;
 use App\Models\CRM\Interactions\Interaction;
+use Carbon\Carbon;
+use App\Models\CRM\Leads\LeadType;
+use Faker\Factory;
 
 /**
  * Class LeadControllerTest
@@ -37,6 +41,8 @@ class LeadControllerTest extends IntegrationTestCase
     public function setUp(): void
     {
         parent::setUp();
+
+        $this->faker = Factory::create();
 
         $this->dealer = factory(User::class)->create([
             'type' => User::TYPE_DEALER,
@@ -97,10 +103,20 @@ class LeadControllerTest extends IntegrationTestCase
             ]);
         });
 
+        $interactionTime = Carbon::now()->addDays(2)->format('Y-m-d H:i:s');
         factory(Interaction::class)->create([
             'tc_lead_id' => $this->lead->getKey(),
             'user_id' => $userId,
-            'interaction_type' => Interaction::TYPE_TASK
+            'interaction_type' => Interaction::TYPE_TASK,
+            'interaction_time' => $interactionTime,
+            'interaction_notes' => 'INTERACTION_NOTE'
+        ]);
+
+        factory(LeadStatus::class)->create([
+            'tc_lead_identifier' => $this->lead->getKey(),
+            'status' => LeadStatus::STATUS_UNCONTACTED,
+            'contact_type' => LeadStatus::TYPE_TASK,
+            'next_contact_date' => $interactionTime
         ]);
     }
 
@@ -154,6 +170,62 @@ class LeadControllerTest extends IntegrationTestCase
             'identifier' => $this->lead->getKey()
         ]);
 
+    }
+
+    /**
+     * @group CRM
+     * @covers ::update
+     */
+    public function testUpdateLeadSource()
+    {
+        $source = $this->faker->company;
+        $response = $this->json(
+            'POST',
+            '/api/leads/'. $this->lead->getKey(),
+            [
+                'lead_source' => $source
+            ],
+            ['access-token' => $this->token->access_token]
+        );
+
+        $response->assertStatus(200);
+
+        $this->assertDatabaseHas(LeadStatus::getTableName(), [
+            'tc_lead_identifier' => $this->lead->getKey(),
+            'source' => $source,
+            'contact_type' => LeadStatus::TYPE_TASK
+        ]);
+    }
+
+    /**
+     * @group CRM
+     * @covers ::update
+     */
+    public function testUpdateLeadTypes()
+    {
+        $types = $this->faker->randomElements(LeadType::TYPE_ARRAY, 3);
+        $response = $this->json(
+            'POST',
+            '/api/leads/'. $this->lead->getKey(),
+            [
+                'lead_types' => $types
+            ],
+            ['access-token' => $this->token->access_token]
+        );
+
+        $response->assertStatus(200);
+
+        foreach ($types as $type)
+            $this->assertDatabaseHas(LeadType::getTableName(), [
+                'lead_id' => $this->lead->getKey(),
+                'lead_type' => $type,
+            ]);
+
+        // confirm contact_type is not changed
+        $this->assertDatabaseHas(LeadStatus::getTableName(), [
+            'tc_lead_identifier' => $this->lead->getKey(),
+            'contact_type' => LeadStatus::TYPE_TASK
+        ]);
     }
 
     /**
