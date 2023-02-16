@@ -20,7 +20,7 @@ class Request extends BaseRequest implements RequestInterface
      */
     public function validate(): bool
     {
-        $validator = Validator::make($this->all(), $this->getRules());
+        $validator = Validator::make($this->all(), $this->getRules(), $this->messages());
 
         if ($validator->fails()) {
             throw new ResourceException('Validation Failed', $validator->errors());
@@ -32,5 +32,10 @@ class Request extends BaseRequest implements RequestInterface
     protected function getRules(): array
     {
         return $this->rules;
+    }
+
+    public function messages(): array
+    {
+        return [];
     }
 }

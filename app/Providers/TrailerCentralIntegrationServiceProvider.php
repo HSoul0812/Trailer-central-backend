@@ -28,6 +28,8 @@ use App\Repositories\SyncProcessRepository;
 use App\Repositories\SyncProcessRepositoryInterface;
 use App\Repositories\SysConfig\SysConfigRepository;
 use App\Repositories\SysConfig\SysConfigRepositoryInterface;
+use App\Repositories\ViewedDealer\ViewedDealerRepository;
+use App\Repositories\ViewedDealer\ViewedDealerRepositoryInterface;
 use App\Services\Integrations\TrailerCentral\Api\Image\ImageService;
 use App\Services\Integrations\TrailerCentral\Api\Image\ImageServiceInterface;
 use App\Services\Integrations\TrailerCentral\Api\Users\UsersService;
@@ -95,6 +97,8 @@ class TrailerCentralIntegrationServiceProvider extends ServiceProvider
         $this->app->bind(UsersServiceInterface::class, UsersService::class);
 
         $this->app->bind(ImageServiceInterface::class, ImageService::class);
+
+        $this->app->bind(ViewedDealerRepositoryInterface::class, ViewedDealerRepository::class);
 
         GoogleMapSearchService::register();
     }
