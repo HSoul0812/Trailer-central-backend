@@ -14,25 +14,25 @@ class UserPolicy
 {
     use HandlesAuthorization;
 
+    private const VALID_ROLES = ['Admin'];
+
     /**
      * Create a new policy instance.
      *
      * @return void
      */
-    public function __construct()
-    {
+    public function __construct() {
         //
     }
 
     /**
      * Determine whether the user can view any user.
      *
-     * @param  NovaUser  $user
+     * @param NovaUser $user
      * @return bool
      */
-    public function viewAny(NovaUser $user): bool
-    {
-        return $user->hasAnyRole('Admin');
+    public function viewAny(NovaUser $user): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -42,20 +42,18 @@ class UserPolicy
      * @param NovaUser $novaUser
      * @return bool
      */
-    public function view(?NovaUser $user, NovaUser $novaUser): bool
-    {
-        return $user->hasAnyRole('Admin');
+    public function view(?NovaUser $user, NovaUser $novaUser): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
      * Determine whether the user can create users.
      *
-     * @param  NovaUser  $user
+     * @param NovaUser $user
      * @return bool
      */
-    public function create(NovaUser $user): bool
-    {
-        return $user->hasAnyRole('Admin');
+    public function create(NovaUser $user): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -65,9 +63,8 @@ class UserPolicy
      * @param NovaUser $novaUser
      * @return bool
      */
-    public function update(NovaUser $user, NovaUser $novaUser): bool
-    {
-        return $user->hasAnyRole('Admin');
+    public function update(NovaUser $user, NovaUser $novaUser): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -77,9 +74,8 @@ class UserPolicy
      * @param NovaUser $novaUser
      * @return bool
      */
-    public function delete(NovaUser $user, NovaUser $novaUser): bool
-    {
-        return $user->hasAnyRole('Admin');
+    public function delete(NovaUser $user, NovaUser $novaUser): bool {
+        return false;
     }
 
     /**
@@ -89,8 +85,7 @@ class UserPolicy
      * @param NovaUser $novaUser
      * @return void
      */
-    public function restore(NovaUser $user, NovaUser $novaUser)
-    {
+    public function restore(NovaUser $user, NovaUser $novaUser) {
         //
     }
 
@@ -101,8 +96,7 @@ class UserPolicy
      * @param NovaUser $novaUser
      * @return void
      */
-    public function forceDelete(NovaUser $user, NovaUser $novaUser)
-    {
+    public function forceDelete(NovaUser $user, NovaUser $novaUser) {
         //
     }
 }
