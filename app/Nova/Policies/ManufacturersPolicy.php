@@ -2,9 +2,9 @@
 
 namespace App\Nova\Policies;
 
+use App\Models\Inventory\Manufacturers\Manufacturers;
 use App\Models\User\NovaUser;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use App\Models\Inventory\Manufacturers\Manufacturers;
 
 /**
  * Class ManufacturersPolicy
@@ -14,25 +14,25 @@ class ManufacturersPolicy
 {
     use HandlesAuthorization;
 
+    private const VALID_ROLES = ['Admin', 'Support', 'DataSupport'];
+
     /**
      * Create a new policy instance.
      *
      * @return void
      */
-    public function __construct()
-    {
+    public function __construct() {
         //
     }
 
     /**
      * Determine whether the user can view any manufacturer.
      *
-     * @param  NovaUser $user
+     * @param NovaUser $user
      * @return bool
      */
-    public function viewAny(NovaUser $user): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function viewAny(NovaUser $user): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -42,20 +42,18 @@ class ManufacturersPolicy
      * @param Manufacturers $manufacturer
      * @return bool
      */
-    public function view(?NovaUser $user, Manufacturers $manufacturer): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function view(?NovaUser $user, Manufacturers $manufacturer): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
      * Determine whether the user can create manufacturer.
      *
-     * @param  NovaUser  $user
+     * @param NovaUser $user
      * @return bool
      */
-    public function create(NovaUser $user): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function create(NovaUser $user): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -65,9 +63,8 @@ class ManufacturersPolicy
      * @param Manufacturers $manufacturer
      * @return bool
      */
-    public function update(NovaUser $user, Manufacturers $manufacturer): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function update(NovaUser $user, Manufacturers $manufacturer): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -77,9 +74,8 @@ class ManufacturersPolicy
      * @param Manufacturers $manufacturer
      * @return bool
      */
-    public function delete(NovaUser $user, Manufacturers $manufacturer): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function delete(NovaUser $user, Manufacturers $manufacturer): bool {
+        return false;
     }
 
     /**
@@ -89,8 +85,7 @@ class ManufacturersPolicy
      * @param Manufacturers $manufacturer
      * @return void
      */
-    public function restore(NovaUser $user, Manufacturers $manufacturer): void
-    {
+    public function restore(NovaUser $user, Manufacturers $manufacturer): void {
         //
     }
 
@@ -101,8 +96,7 @@ class ManufacturersPolicy
      * @param Manufacturers $manufacturer
      * @return void
      */
-    public function forceDelete(NovaUser $user, Manufacturers $manufacturer): void
-    {
+    public function forceDelete(NovaUser $user, Manufacturers $manufacturer): void {
         //
     }
 }
