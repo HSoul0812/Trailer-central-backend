@@ -1233,7 +1233,7 @@ class InventoryService implements InventoryServiceInterface
 
         preg_match('/<blockquote>(.*?)<\/blockquote>/s', $description, $match);
         if (!empty($match[0])) {
-            $new_ul = strip_tags($match[0], '<blockquote><ul><ol><li><a><b><strong>');
+            $new_ul = strip_tags($match[0], '<blockquote><br><ul><ol><li><a><b><strong>');
             $description = str_replace($match[0], $new_ul, $description);
         }
 
