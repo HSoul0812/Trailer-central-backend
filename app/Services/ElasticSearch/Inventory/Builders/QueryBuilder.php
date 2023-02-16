@@ -246,6 +246,7 @@ class QueryBuilder implements InventoryQueryBuilderInterface
         'sort' => []
     ];
 
+    /** @var GeolocationInterface */
     private $geolocation;
 
     public function __construct(FieldMapperService $mapper)
