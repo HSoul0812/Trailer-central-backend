@@ -2,15 +2,15 @@
 
 namespace App\Nova\Policies;
 
+use App\Models\Integration\Integration;
 use App\Models\User\NovaUser;
-use App\Models\Inventory\EntityType;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 /**
- * Class EntityTypePolicy
+ * Class Integration
  * @package App\Nova\Policies
  */
-class EntityTypePolicy
+class IntegrationPolicy
 {
     use HandlesAuthorization;
 
@@ -25,7 +25,7 @@ class EntityTypePolicy
     }
 
     /**
-     * Determine whether the user can view any entity.
+     * Determine whether the user can view any change integrations.
      *
      * @param  NovaUser $user
      * @return bool
@@ -36,19 +36,19 @@ class EntityTypePolicy
     }
 
     /**
-     * Determine whether the user can view the entity.
+     * Determine whether the user can view the change integration.
      *
      * @param NovaUser|null $user
-     * @param EntityType $type
+     * @param Integration $integration
      * @return bool
      */
-    public function view(?NovaUser $user, EntityType $type): bool
+    public function view(?NovaUser $user, Integration $integration): bool
     {
         return $user->hasAnyRole('Admin', 'Support');
     }
 
     /**
-     * Determine whether the user can create entity.
+     * Determine whether the user can create change integration.
      *
      * @param  NovaUser  $user
      * @return bool
@@ -59,49 +59,49 @@ class EntityTypePolicy
     }
 
     /**
-     * Determine whether the user can update the entity.
+     * Determine whether the user can update the change integration.
      *
      * @param NovaUser $user
-     * @param EntityType $type
+     * @param Integration $integration
      * @return bool
      */
-    public function update(NovaUser $user, EntityType $type): bool
+    public function update(NovaUser $user, Integration $integration): bool
     {
         return $user->hasAnyRole('Admin', 'Support');
     }
 
     /**
-     * Determine whether the user can delete the entity.
+     * Determine whether the user can delete the change integration.
      *
      * @param NovaUser $user
-     * @param EntityType $type
+     * @param Integration $integration
      * @return bool
      */
-    public function delete(NovaUser $user, EntityType $type): bool
+    public function delete(NovaUser $user, Integration $integration): bool
     {
         return false;
     }
 
     /**
-     * Determine whether the user can restore the entity.
+     * Determine whether the user can restore the change integrations.
      *
      * @param NovaUser $user
-     * @param EntityType $type
+     * @param Integration $integration
      * @return void
      */
-    public function restore(NovaUser $user, EntityType $type): void
+    public function restore(NovaUser $user, Integration $integration): void
     {
         //
     }
 
     /**
-     * Determine whether the user can permanently delete the entity.
+     * Determine whether the user can permanently delete the change integrations.
      *
      * @param NovaUser $user
-     * @param EntityType $type
+     * @param Integration $integration
      * @return void
      */
-    public function forceDelete(NovaUser $user, EntityType $type): void
+    public function forceDelete(NovaUser $user, Integration $integration): void
     {
         //
     }

@@ -81,7 +81,7 @@ class DealerPolicy
      */
     public function delete(NovaUser $user, User $dealer): bool
     {
-        return $user->hasAnyRole('Admin', 'Support', 'Sales');
+        return false;
     }
 
     /**

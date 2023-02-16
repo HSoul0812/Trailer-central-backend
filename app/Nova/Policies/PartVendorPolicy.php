@@ -79,7 +79,7 @@ class PartVendorPolicy
      */
     public function delete(NovaUser $user, Vendor $vendor): bool
     {
-        return $user->hasAnyRole('Admin', 'Support');
+        return false;
     }
 
     /**

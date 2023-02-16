@@ -79,7 +79,7 @@ class CollectorPolicy
      */
     public function delete(NovaUser $user, Collector $collector): bool
     {
-        return $user->hasAnyRole('Admin', 'Support');
+        return false;
     }
 
     /**

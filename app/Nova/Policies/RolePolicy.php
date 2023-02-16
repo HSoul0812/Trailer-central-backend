@@ -79,7 +79,7 @@ class RolePolicy
      */
     public function delete(NovaUser $user, Role $role): bool
     {
-        return $user->hasAnyRole('Admin');
+        return false;
     }
 
     /**

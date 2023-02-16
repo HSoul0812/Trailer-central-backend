@@ -79,7 +79,7 @@ class QuickbookApprovalPolicy
      */
     public function delete(NovaUser $user, QuickbookApproval $approval): bool
     {
-        return $user->hasAnyRole('Admin', 'Support');
+        return false;
     }
 
     /**

@@ -79,7 +79,7 @@ class InventoryMfgPolicy
      */
     public function delete(NovaUser $user, InventoryMfg $manufacturer): bool
     {
-        return $user->hasAnyRole('Admin', 'Support');
+        return false;
     }
 
     /**

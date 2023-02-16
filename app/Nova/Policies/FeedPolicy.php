@@ -79,7 +79,7 @@ class FeedPolicy
      */
     public function delete(NovaUser $user, Feed $feed): bool
     {
-        return $user->hasAnyRole('Admin', 'Support');
+        return false;
     }
 
     /**

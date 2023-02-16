@@ -81,7 +81,7 @@ class WebsitePolicy
      */
     public function delete(NovaUser $user, Website $website): bool
     {
-        return $user->hasAnyRole('Admin', 'Support', 'Sales');
+        return false;
     }
 
     /**

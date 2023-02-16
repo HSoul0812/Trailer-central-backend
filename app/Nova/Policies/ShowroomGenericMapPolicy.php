@@ -79,7 +79,7 @@ class ShowroomGenericMapPolicy
      */
     public function delete(NovaUser $user, ShowroomGenericMap $map): bool
     {
-        return $user->hasAnyRole('Admin', 'Support');
+        return false;
     }
 
     /**

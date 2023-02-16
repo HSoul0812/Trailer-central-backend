@@ -79,7 +79,7 @@ class CategoryPolicy
      */
     public function delete(NovaUser $user, Category $category): bool
     {
-        return $user->hasAnyRole('Admin', 'Support');
+        return false;
     }
 
     /**

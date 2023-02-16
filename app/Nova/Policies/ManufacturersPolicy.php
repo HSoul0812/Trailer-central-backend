@@ -79,7 +79,7 @@ class ManufacturersPolicy
      */
     public function delete(NovaUser $user, Manufacturers $manufacturer): bool
     {
-        return $user->hasAnyRole('Admin', 'Support');
+        return false;
     }
 
     /**

@@ -80,7 +80,7 @@ class LocationPolicy
      */
     public function delete(NovaUser $user, DealerLocation $location): bool
     {
-        return $user->hasAnyRole('Admin', 'Support', 'Sales');
+        return false;
     }
 
     /**

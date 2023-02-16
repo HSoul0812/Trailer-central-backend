@@ -79,7 +79,7 @@ class FieldMapPolicy
      */
     public function delete(NovaUser $user, FieldMap $field): bool
     {
-        return $user->hasAnyRole('Admin', 'Support');
+        return false;
     }
 
     /**

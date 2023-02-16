@@ -81,7 +81,7 @@ class JotformPolicy
      */
     public function delete(NovaUser $user, WebsiteForms $form): bool
     {
-        return $user->hasAnyRole('Admin', 'Support');
+        return false;
     }
 
     /**

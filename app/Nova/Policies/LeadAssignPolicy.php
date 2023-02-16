@@ -79,7 +79,7 @@ class LeadAssignPolicy
      */
     public function delete(NovaUser $user, LeadAssign $lead): bool
     {
-        return $user->hasAnyRole('Admin', 'Support');
+        return false;
     }
 
     /**

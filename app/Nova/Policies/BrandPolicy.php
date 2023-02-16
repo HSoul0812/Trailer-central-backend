@@ -80,7 +80,7 @@ class BrandPolicy
      */
     public function delete(NovaUser $user, Brand $brand): bool
     {
-        return $user->hasAnyRole('Admin', 'Support');
+        return false;
     }
 
     /**

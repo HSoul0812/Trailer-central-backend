@@ -79,7 +79,7 @@ class PermissionPolicy
      */
     public function delete(NovaUser $user, Permission $permission): bool
     {
-        return $user->hasAnyRole('Admin');
+        return false;
     }
 
     /**

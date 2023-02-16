@@ -80,7 +80,7 @@ class BalancePolicy
      */
     public function delete(NovaUser $user, Balance $balance): bool
     {
-        return $user->hasAnyRole('Admin', 'Support');
+        return false;
     }
 
     /**

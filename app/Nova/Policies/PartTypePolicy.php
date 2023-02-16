@@ -79,7 +79,7 @@ class PartTypePolicy
      */
     public function delete(NovaUser $user, PartType $type): bool
     {
-        return $user->hasAnyRole('Admin', 'Support');
+        return false;
     }
 
     /**

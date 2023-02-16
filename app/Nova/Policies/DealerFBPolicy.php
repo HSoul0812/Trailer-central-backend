@@ -81,7 +81,7 @@ class DealerFBPolicy
      */
     public function delete(NovaUser $user, DealerFBMOverview $account): bool
     {
-        return $user->hasAnyRole('Admin', 'Support', 'Sales');
+        return false;
     }
 
     /**

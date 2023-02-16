@@ -79,7 +79,7 @@ class PartBrandPolicy
      */
     public function delete(NovaUser $user, PartBrand $brand): bool
     {
-        return $user->hasAnyRole('Admin', 'Support');
+        return false;
     }
 
     /**

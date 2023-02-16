@@ -79,7 +79,7 @@ class DealerIncomingPendingMappingPolicy
      */
     public function delete(NovaUser $user, DealerIncomingPendingMapping $mapping): bool
     {
-        return $user->hasAnyRole('Admin', 'Support');
+        return false;
     }
 
     /**

@@ -3,14 +3,14 @@
 namespace App\Nova\Policies;
 
 use App\Models\User\NovaUser;
-use App\Models\Inventory\EntityType;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use App\Models\Website\Entity as WebsiteEntity;
 
 /**
- * Class EntityTypePolicy
+ * Class WebsiteEntity
  * @package App\Nova\Policies
  */
-class EntityTypePolicy
+class WebsiteEntityPolicy
 {
     use HandlesAuthorization;
 
@@ -25,7 +25,7 @@ class EntityTypePolicy
     }
 
     /**
-     * Determine whether the user can view any entity.
+     * Determine whether the user can view any change website entities.
      *
      * @param  NovaUser $user
      * @return bool
@@ -36,19 +36,19 @@ class EntityTypePolicy
     }
 
     /**
-     * Determine whether the user can view the entity.
+     * Determine whether the user can view the change website entities.
      *
      * @param NovaUser|null $user
-     * @param EntityType $type
+     * @param WebsiteEntity $entity
      * @return bool
      */
-    public function view(?NovaUser $user, EntityType $type): bool
+    public function view(?NovaUser $user, WebsiteEntity $entity): bool
     {
         return $user->hasAnyRole('Admin', 'Support');
     }
 
     /**
-     * Determine whether the user can create entity.
+     * Determine whether the user can create change website entities.
      *
      * @param  NovaUser  $user
      * @return bool
@@ -59,49 +59,49 @@ class EntityTypePolicy
     }
 
     /**
-     * Determine whether the user can update the entity.
+     * Determine whether the user can update the change website entities.
      *
      * @param NovaUser $user
-     * @param EntityType $type
+     * @param WebsiteEntity $entity
      * @return bool
      */
-    public function update(NovaUser $user, EntityType $type): bool
+    public function update(NovaUser $user, WebsiteEntity $entity): bool
     {
         return $user->hasAnyRole('Admin', 'Support');
     }
 
     /**
-     * Determine whether the user can delete the entity.
+     * Determine whether the user can delete the change website entities.
      *
      * @param NovaUser $user
-     * @param EntityType $type
+     * @param WebsiteEntity $entity
      * @return bool
      */
-    public function delete(NovaUser $user, EntityType $type): bool
+    public function delete(NovaUser $user, WebsiteEntity $entity): bool
     {
         return false;
     }
 
     /**
-     * Determine whether the user can restore the entity.
+     * Determine whether the user can restore the change website entities.
      *
      * @param NovaUser $user
-     * @param EntityType $type
+     * @param WebsiteEntity $entity
      * @return void
      */
-    public function restore(NovaUser $user, EntityType $type): void
+    public function restore(NovaUser $user, WebsiteEntity $entity): void
     {
         //
     }
 
     /**
-     * Determine whether the user can permanently delete the entity.
+     * Determine whether the user can permanently delete the change website entities.
      *
      * @param NovaUser $user
-     * @param EntityType $type
+     * @param WebsiteEntity $entity
      * @return void
      */
-    public function forceDelete(NovaUser $user, EntityType $type): void
+    public function forceDelete(NovaUser $user, WebsiteEntity $entity): void
     {
         //
     }

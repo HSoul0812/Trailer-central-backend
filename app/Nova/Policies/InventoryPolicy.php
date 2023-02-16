@@ -79,7 +79,7 @@ class InventoryPolicy
      */
     public function delete(NovaUser $user, Inventory $inventory): bool
     {
-        return $user->hasAnyRole('Admin', 'Support');
+        return false;
     }
 
     /**

@@ -79,7 +79,7 @@ class ApiEntityReferencePolicy
      */
     public function delete(NovaUser $user, ApiEntityReference $reference): bool
     {
-        return $user->hasAnyRole('Admin', 'Support');
+        return false;
     }
 
     /**
