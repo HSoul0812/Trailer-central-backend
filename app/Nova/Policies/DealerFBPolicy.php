@@ -2,11 +2,9 @@
 
 namespace App\Nova\Policies;
 
+use App\Models\CRM\Dealer\DealerFBMOverview;
 use App\Models\User\NovaUser;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use App\Models\CRM\Dealer\DealerFBMOverview;
-
-use Spatie\Permission\Models\Role;
 
 /**
  * Class DealerFBPolicy
@@ -16,25 +14,25 @@ class DealerFBPolicy
 {
     use HandlesAuthorization;
 
+    private const VALID_ROLES = ['Admin', 'Support', 'Sales'];
+
     /**
      * Create a new policy instance.
      *
      * @return void
      */
-    public function __construct()
-    {
+    public function __construct() {
         //
     }
 
     /**
      * Determine whether the user can view any fb account.
      *
-     * @param  NovaUser  $user
+     * @param NovaUser $user
      * @return bool
      */
-    public function viewAny(NovaUser $user): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support', 'Sales');
+    public function viewAny(NovaUser $user): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -44,20 +42,18 @@ class DealerFBPolicy
      * @param DealerFBMOverview $account
      * @return bool
      */
-    public function view(?NovaUser $user, DealerFBMOverview $account): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support', 'Sales');
+    public function view(?NovaUser $user, DealerFBMOverview $account): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
      * Determine whether the user can create fb accounts.
      *
-     * @param  NovaUser  $user
+     * @param NovaUser $user
      * @return bool
      */
-    public function create(NovaUser $user): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support', 'Sales');
+    public function create(NovaUser $user): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -67,9 +63,8 @@ class DealerFBPolicy
      * @param DealerFBMOverview $account
      * @return bool
      */
-    public function update(NovaUser $user, DealerFBMOverview $account): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support', 'Sales');
+    public function update(NovaUser $user, DealerFBMOverview $account): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -79,9 +74,8 @@ class DealerFBPolicy
      * @param DealerFBMOverview $account
      * @return bool
      */
-    public function delete(NovaUser $user, DealerFBMOverview $account): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support', 'Sales');
+    public function delete(NovaUser $user, DealerFBMOverview $account): bool {
+        return false;
     }
 
     /**
@@ -91,8 +85,7 @@ class DealerFBPolicy
      * @param DealerFBMOverview $account
      * @return void
      */
-    public function restore(NovaUser $user, DealerFBMOverview $account): void
-    {
+    public function restore(NovaUser $user, DealerFBMOverview $account): void {
         //
     }
 
@@ -103,8 +96,7 @@ class DealerFBPolicy
      * @param DealerFBMOverview $account
      * @return void
      */
-    public function forceDelete(NovaUser $user, DealerFBMOverview $account): void
-    {
+    public function forceDelete(NovaUser $user, DealerFBMOverview $account): void {
         //
     }
 }
