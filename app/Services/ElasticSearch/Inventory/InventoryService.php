@@ -32,8 +32,8 @@ class InventoryService implements InventoryServiceInterface
         array                $pagination = [],
         bool                 $debug = false): ElasticSearchQueryResult
     {
-        $query = $this->queryBuilder->addDealers($dealerIds)
-            ->addTerms($terms)
+        $query = $this->queryBuilder->addTerms($terms)
+            ->addDealers($dealerIds)
             ->addGeolocation($geolocation)
             ->addSort($sort)
             ->addPagination($pagination);
