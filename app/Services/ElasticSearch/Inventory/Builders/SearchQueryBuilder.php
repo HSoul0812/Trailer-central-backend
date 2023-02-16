@@ -146,49 +146,49 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
 
         $this->field->getTerms()->each(function (Term $term) use ($descriptionWildcard) {
             $name = $this->field->getName();
+            $boolQuery = [];
 
-            $query = [
+            foreach ($term->getValues() as $value) {
+                $query = [
+                    [
+                        'match' => [
+                            sprintf('%s.txt', $name) => [
+                                'query' => $value,
+                                'operator' => 'and'
+                            ]
+                        ]
+                    ]
+                ];
+
+                if ($name !== 'description' || $descriptionWildcard) {
+                    $query[] = [
+                        'wildcard' => [
+                            $name => [
+                                'value' => sprintf('*%s', $value)
+                            ]
+                        ]
+                    ];
+
+                    $query[] = [
+                        'wildcard' => [
+                            $name => [
+                                'value' => sprintf('%s*', $value)
+                            ]
+                        ]
+                    ];
+                    $boolQuery[] = [
+                        'bool' => [
+                            $term->getESOperatorKeyword() => $query
+                        ]
+                    ];
+                }
+            }
+
+            $this->appendToQuery([
                 'bool' => [
-                    'must' => array_map(static function ($value) use ($term, $name, $descriptionWildcard) {
-                        $searchQuery = [
-                            [
-                                'match' => [
-                                    sprintf('%s.txt', $name) => [
-                                        'query' => $value,
-                                        'operator' => 'and'
-                                    ]
-                                ]
-                            ]
-                        ];
-
-                        if ($name !== 'description' || $descriptionWildcard) {
-                            $searchQuery[] = [
-                                'wildcard' => [
-                                    $name => [
-                                        'value' => sprintf('*%s', $value)
-                                    ]
-                                ]
-                            ];
-
-                            $searchQuery[] = [
-                                'wildcard' => [
-                                    $name => [
-                                        'value' => sprintf('%s*', $value)
-                                    ]
-                                ]
-                            ];
-                        }
-
-                        return [
-                            'bool' => [
-                                $term->getESOperatorKeyword() => $searchQuery
-                            ]
-                        ];
-                    }, $term->getValues())
+                    $this->field->getParentESOperatorKeyword() => $boolQuery
                 ]
-            ];
-
-            $this->appendToQuery($query);
+            ]);
         });
 
         return $this->query;
