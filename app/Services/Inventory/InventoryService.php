@@ -1154,16 +1154,17 @@ class InventoryService implements InventoryServiceInterface
 
         $input = str_replace('\\\\', '', $input);
         $input = str_replace('\\,', ',', $input);
-        $input = str_replace('****', '', $input);
-        $input = str_replace('__', '', $input);
+//        $input = str_replace('****', '', $input);
+//        $input = str_replace('__', '', $input);
 
-        $input = str_replace('<BR>', '<br>', $input);
-        $input = str_replace('<BR/>', '<br>', $input);
-        $input = str_replace('<Br/>', '<br>', $input);
-        $input = str_replace('<br/>', '<br>', $input);
-        $input = str_replace('<bR/>', '<br>', $input);
-        $input = str_replace('<bR>', '<br>', $input);
-        $input = preg_replace('/<(?!br\s*\/?)[^<>]+>/', '', $input);
+        $input = str_replace('<BR>', '\n', $input);
+        $input = str_replace('<BR/>', '\n', $input);
+        $input = str_replace('<Br/>', '\n', $input);
+        $input = str_replace('<br/>', '\n', $input);
+        $input = str_replace('<bR/>', '\n', $input);
+        $input = str_replace('<bR>', '\n', $input);
+        //$input = preg_replace('/<(?!br\s*\/?)[^<>]+>/', '\n', $input);
+        $input = nl2br($input, false);
 
         // Try/Catch Errors
         $converted = '';
@@ -1171,19 +1172,21 @@ class InventoryService implements InventoryServiceInterface
         try {
             // Initialize Markdown Converter
             $converter = new \Parsedown(); // This parser is 10x faster than the CommonMarkConverter
+            $converter->setBreaksEnabled(false);
+            $converter->setSafeMode(false);
             $converted = $converter->text($input);
         } catch(\Exception $e) {
             $exception = $e->getMessage();
         }
 
         // Convert Markdown to HTML
-        $description = preg_replace('/\\\\/', '<br>', $converted);
+        //$description = preg_replace('/\\\\/', '<br>', $converted);
 
         // to fix CDW-824 problems
-        $description = nl2br($description);
+        //$description = nl2br($converted);
 
         // taken from previous CDW-824 solution
-        $description = str_replace('<code>', '', $description);
+        $description = str_replace('<code>', '', $converted);
         $description = str_replace('</code>', '', $description);
         $description = str_replace('<pre>', '', $description);
         $description = str_replace('</pre>', '', $description);
