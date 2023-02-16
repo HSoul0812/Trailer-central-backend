@@ -423,7 +423,7 @@ class QueryBuilder implements InventoryQueryBuilderInterface
                 '_geo_distance' => [
                     'location.geo' => [
                         'lat' => $this->geolocation->lat(),
-                        'lon' => $this->geolocation->lng()
+                        'lon' => $this->geolocation->lon()
                     ],
                     'order' => $order
                 ]
