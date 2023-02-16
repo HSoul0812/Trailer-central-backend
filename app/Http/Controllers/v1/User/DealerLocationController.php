@@ -15,6 +15,7 @@ use App\Services\User\DealerLocationServiceInterface;
 use App\Transformers\User\DealerLocationQuoteFeeTransformer;
 use App\Transformers\User\DealerLocationTransformer;
 use App\Http\Requests\User\CommonDealerLocationRequest;
+use App\Models\User\DealerLocation;
 use App\Transformers\User\DealerLocationTitleTransformer;
 use Dingo\Api\Exception\ResourceException;
 use Illuminate\Http\Request;
@@ -24,8 +25,8 @@ use League\Fractal\Manager;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use League\Fractal\Resource\Item;
 
-class DealerLocationController extends RestfulControllerV2 {
-
+class DealerLocationController extends RestfulControllerV2
+{
     /**
      * @var DealerLocationQuoteFeeRepositoryInterface
      */
@@ -48,8 +49,7 @@ class DealerLocationController extends RestfulControllerV2 {
         DealerLocationRepositoryInterface $dealerLocationRepo,
         DealerLocationQuoteFeeRepositoryInterface $dealerLocationRepoFee,
         Manager $fractal
-    )
-    {
+    ) {
         $this->middleware('setDealerIdOnRequest')->only([
             'index', 'quoteFees', 'destroy', 'update', 'show', 'create', 'update', 'check',
             'getDealerLocationTitles'
@@ -71,13 +71,13 @@ class DealerLocationController extends RestfulControllerV2 {
 
         if ($request->validate()) {
             $params = $request->all();
-            
+
             // We should decode the URL, otherwise we're searching for
             // string like "Pond%20Shop" instead of "Pond Shop"
             if (array_key_exists('search_term', $params)) {
                 $params['search_term'] = urldecode($params['search_term']);
             }
-            
+
             return $this->response->paginator($this->service->getAll($params), $this->transformer);
         }
 
@@ -160,7 +160,11 @@ class DealerLocationController extends RestfulControllerV2 {
         if ($request->validate()) {
             $location = $this->service->create($request->getDealerId(), $request->all());
 
-            return $this->sendResponseForSingleLocation($location->dealer_location_id, $request->getInclude());
+            return $this->sendResponseForSingleLocation(
+                $location->dealer_location_id,
+                $request->getInclude(),
+                $location
+            );
         }
 
         $this->response->errorBadRequest();
@@ -215,11 +219,20 @@ class DealerLocationController extends RestfulControllerV2 {
         $this->response->errorBadRequest();
     }
 
-    private function sendResponseForSingleLocation(int $id, string $include): Response
+    /**
+     * @param int $id
+     * @param string $include
+     * @param DealerLocation|null $location
+     * @return Response
+     */
+    private function sendResponseForSingleLocation(int $id, string $include, ?DealerLocation $location = null): Response
     {
         $this->fractal->parseIncludes($include);
 
-        $locationItem = new Item($this->dealerLocation->get(['dealer_location_id' => $id]), $this->transformer);
+        $locationItem = new Item(
+            $location ?? $this->dealerLocation->get(['dealer_location_id' => $id]),
+            $this->transformer
+        );
 
         return $this->response->array($this->fractal->createData($locationItem)->toArray());
     }
