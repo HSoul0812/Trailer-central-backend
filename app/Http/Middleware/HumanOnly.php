@@ -23,7 +23,9 @@ class HumanOnly
     public function handle(Request $request, Closure $next)
     {
         if (!$this->shouldAllowRequestToGoThrough($request)) {
-            abort(Response::HTTP_FORBIDDEN);
+            return response()->json([
+                'data' => [],
+            ]);
         }
 
         return $next($request);
