@@ -498,6 +498,7 @@ $api->version('v1', function ($route) {
         $route->get('leads/{leadId}/interactions/{id}', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@show')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
         $route->post('leads/{leadId}/interactions/{id}', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@update')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
         $route->post('interactions/send-email', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@sendEmail');
+        $route->get('leads/{leadId}/contact-date', 'App\Http\Controllers\v1\CRM\Interactions\TasksController@getContactDate');
     });
 
     /**
