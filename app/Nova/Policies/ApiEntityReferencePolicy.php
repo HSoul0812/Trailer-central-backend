@@ -2,9 +2,9 @@
 
 namespace App\Nova\Policies;
 
-use App\Models\Feed\Mapping\Incoming\ApiEntityReference;
 use App\Models\User\NovaUser;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use App\Models\Feed\Mapping\Incoming\ApiEntityReference;
 
 /**
  * Class ApiEntityReferencePolicy
@@ -74,7 +74,7 @@ class ApiEntityReferencePolicy
      * @param ApiEntityReference $reference
      * @return bool
      */
-    public function delete(NovaUser $user, Balance $balance): bool {
+    public function delete(NovaUser $user, ApiEntityReference $balance): bool {
         return false;
     }
 
