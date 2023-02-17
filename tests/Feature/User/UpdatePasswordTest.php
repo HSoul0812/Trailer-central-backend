@@ -23,6 +23,12 @@ class UpdatePasswordTest extends TestCase
     /** @var AuthToken */
     protected $token;
 
+    /** @var string */
+    protected $password;
+
+    /** @var string */
+    protected $salt;
+
     /**
      * @group DMS
      * @group DMS_USER_PASSWORD
@@ -31,7 +37,7 @@ class UpdatePasswordTest extends TestCase
      */
     public function testUpdatePasswordUsingWrongVerb(): void
     {
-        $response = $this->json('PUT', '/api/user/password/update', ['password' => $this->faker->password(6,8)]);
+        $response = $this->json('PUT', '/api/user/password/update', ['current_password' => $this->password, 'password' => $this->faker->password(6,8)]);
 
         $response->assertStatus(403);
     }
@@ -54,7 +60,10 @@ class UpdatePasswordTest extends TestCase
 
         $response = $this->json(
             'PUT', '/api/user/password/update',
-            ['password' => $this->faker->password(6,8)],
+            [
+                'current_password' => $this->password, 
+                'password' => $this->faker->password(6,8)
+            ],
             ['access-token' => $this->token->access_token]
         );
 
@@ -76,7 +85,10 @@ class UpdatePasswordTest extends TestCase
 
         $response = $this->json(
             'PUT', '/api/user/password/update',
-            ['password' => $this->faker->password(6,8)],
+            [
+                'current_password' => $this->password,
+                'password' => $this->faker->password(6,8)
+            ],
             ['access-token' => $this->token->access_token]
         );
 
@@ -100,7 +112,10 @@ class UpdatePasswordTest extends TestCase
 
         $response = $this->json(
             'PUT', '/api/user/password/update',
-            ['password' => $this->faker->password(9, 10)],
+            [
+                'current_password' => $this->password,
+                'password' => $this->faker->password(9,10)
+            ],
             ['access-token' => $this->token->access_token]
         );
 
@@ -122,10 +137,43 @@ class UpdatePasswordTest extends TestCase
      *
      * @return void
      */
+    public function testUpdatePasswordForUserWithDealerTypeWithWrongCurrentPassword(): void
+    {
+        $this->token = factory(AuthToken::class)->create([
+            'user_id' => $this->dealer->dealer_id,
+            'user_type' => AuthToken::USER_TYPE_DEALER,
+        ]);
+
+        $response = $this->json(
+            'PUT', '/api/user/password/update',
+            [
+                'current_password' => $this->faker->password(5),
+                'password' => $this->faker->password(6,8)
+            ],
+            ['access-token' => $this->token->access_token]
+        );
+
+        $response->assertStatus(500);
+
+        $json = json_decode($response->getContent(), true);
+
+        self::assertArrayHasKey('message', $json);
+
+        $this->assertSame('The current password is wrong!', $json['message']);
+    }
+
+    /**
+     * @group DMS
+     * @group DMS_USER_PASSWORD
+     *
+     * @return void
+     */
     public function testUpdatePasswordForUserWithDealerUserType(): void
     {
         $this->dealerUser = factory(DealerUser::class)->create([
-            'dealer_id' => $this->dealer->dealer_id
+            'dealer_id' => $this->dealer->dealer_id,
+            'password' => $this->dealser->password,
+            'salt' => $this->salt,
         ]);
 
         $this->token = factory(AuthToken::class)->create([
@@ -135,7 +183,10 @@ class UpdatePasswordTest extends TestCase
 
         $response = $this->json(
             'PUT', '/api/user/password/update',
-            ['password' => $this->faker->password(6,8)],
+            [
+                'current_password' => $this->password,
+                'password' => $this->faker->password(6,8)
+            ],
             ['access-token' => $this->token->access_token]
         );
 
@@ -163,7 +214,10 @@ class UpdatePasswordTest extends TestCase
 
         $response = $this->json(
             'PUT', '/api/user/password/update',
-            ['password' => $this->faker->password(9, 10)],
+            [
+                'current_password' => $this->password,
+                'password' => $this->faker->password(9, 10)
+            ],
             ['access-token' => $this->token->access_token]
         );
 
@@ -183,7 +237,13 @@ class UpdatePasswordTest extends TestCase
     {
         parent::setUp();
 
-        $this->dealer = factory(User::class)->create();
+        $this->password = $this->faker->password(6, 8);
+        $this->salt = uniqid();
+
+        $this->dealer = factory(User::class)->create([
+            'password' => $this->password,
+            'salt' => $this->salt
+        ]);
     }
 
     public function tearDown(): void

@@ -118,7 +118,7 @@ class DealerPasswordResetRepository implements DealerPasswordResetRepositoryInte
      */
     public function updateDealerUserPassword(DealerUser $user, string $password, string $current_password) : void
     {
-        $this->passwordMatch($dealer->password, $current_password, $dealer->salt);
+        $this->passwordMatch($user->password, $current_password, $user->salt);
         $this->guardPasswordLength($password);
 
         DB::statement("UPDATE dealer_users SET password = ENCRYPT('{$password}', salt) WHERE dealer_user_id = {$user->dealer_user_id}");
