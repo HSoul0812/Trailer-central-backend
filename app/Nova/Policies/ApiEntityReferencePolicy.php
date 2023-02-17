@@ -74,7 +74,7 @@ class ApiEntityReferencePolicy
      * @param ApiEntityReference $reference
      * @return bool
      */
-    public function delete(NovaUser $user, Balance $balance): bool {
+    public function delete(NovaUser $user, ApiEntityReference $balance): bool {
         return false;
     }
 
