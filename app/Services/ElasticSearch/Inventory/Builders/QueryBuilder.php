@@ -246,6 +246,7 @@ class QueryBuilder implements InventoryQueryBuilderInterface
         'sort' => []
     ];
 
+    /** @var GeolocationInterface */
     private $geolocation;
 
     public function __construct(FieldMapperService $mapper)
@@ -258,11 +259,13 @@ class QueryBuilder implements InventoryQueryBuilderInterface
         collect($dealerIds)->each(function ($term) {
             $term = Term::fromArray($term);
             $type = $term->getOperator() === Term::OPERATOR_EQ ? 'must' : 'must_not';
-            $this->query['query']['bool'][$type][] = [
+
+            // to ensure it is always a top of terms
+            array_unshift($this->query['query']['bool'][$type], [
                 'terms' => [
                     'dealerId' => $term->getValues()
                 ]
-            ];
+            ]);
         });
 
         return $this;
@@ -386,8 +389,44 @@ class QueryBuilder implements InventoryQueryBuilderInterface
             }
 
             $filters->getFields()->each(function (Filter $field) use (&$query) {
+
+                if ($field->getName() === 'classifieds_site') {
+                    $classifiedSitesQuery = $this->mapper->getBuilder($field)->generalQuery();
+
+                    // to ensure it always has proper structure
+                    $query = array_merge_recursive($query, [
+                        'query' => [
+                            'bool' => [
+                                'must' => [
+                                ]
+                            ]
+                        ]
+                    ]);
+
+                    // to ensure it will be prepend
+                    array_unshift($query['query']['bool']['must'], ...$classifiedSitesQuery['query']['bool']['must']);
+
+                    if (isset($classifiedSitesQuery['query']['bool']['must_not'])) {
+                        // to ensure it always has proper structure
+                        $query = array_merge_recursive($query, [
+                            'query' => [
+                                'bool' => [
+                                    'must_not' => [
+                                    ]
+                                ]
+                            ]
+                        ]);
+
+                        // to ensure it will be prepend
+                        array_unshift($query['query']['bool']['must_not'], ...$classifiedSitesQuery['query']['bool']['must_not']);
+                    }
+
+                    return;
+                }
+
                 $query = array_merge_recursive($query, $this->mapper->getBuilder($field)->generalQuery());
             });
+
             return $query;
         };
     }
@@ -423,7 +462,7 @@ class QueryBuilder implements InventoryQueryBuilderInterface
                 '_geo_distance' => [
                     'location.geo' => [
                         'lat' => $this->geolocation->lat(),
-                        'lon' => $this->geolocation->lng()
+                        'lon' => $this->geolocation->lon()
                     ],
                     'order' => $order
                 ]
