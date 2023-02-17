@@ -2,8 +2,8 @@
 
 namespace App\Nova\Policies;
 
-use App\Models\User\NovaUser;
 use App\Models\Feed\Factory\ShowroomGenericMap;
+use App\Models\User\NovaUser;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 /**
@@ -14,25 +14,25 @@ class ShowroomGenericMapPolicy
 {
     use HandlesAuthorization;
 
+    private const VALID_ROLES = ['Admin', 'Support'];
+
     /**
      * Create a new policy instance.
      *
      * @return void
      */
-    public function __construct()
-    {
+    public function __construct() {
         //
     }
 
     /**
      * Determine whether the user can view any map.
      *
-     * @param  NovaUser $user
+     * @param NovaUser $user
      * @return bool
      */
-    public function viewAny(NovaUser $user): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function viewAny(NovaUser $user): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -42,20 +42,18 @@ class ShowroomGenericMapPolicy
      * @param ShowroomGenericMap $map
      * @return bool
      */
-    public function view(?NovaUser $user, ShowroomGenericMap $map): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function view(?NovaUser $user, ShowroomGenericMap $map): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
      * Determine whether the user can create map.
      *
-     * @param  NovaUser  $user
+     * @param NovaUser $user
      * @return bool
      */
-    public function create(NovaUser $user): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function create(NovaUser $user): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -65,9 +63,8 @@ class ShowroomGenericMapPolicy
      * @param ShowroomGenericMap $map
      * @return bool
      */
-    public function update(NovaUser $user, ShowroomGenericMap $map): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function update(NovaUser $user, ShowroomGenericMap $map): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -77,8 +74,7 @@ class ShowroomGenericMapPolicy
      * @param ShowroomGenericMap $map
      * @return bool
      */
-    public function delete(NovaUser $user, ShowroomGenericMap $map): bool
-    {
+    public function delete(NovaUser $user, ShowroomGenericMap $map): bool {
         return false;
     }
 
@@ -89,8 +85,7 @@ class ShowroomGenericMapPolicy
      * @param ShowroomGenericMap $map
      * @return void
      */
-    public function restore(NovaUser $user, ShowroomGenericMap $map): void
-    {
+    public function restore(NovaUser $user, ShowroomGenericMap $map): void {
         //
     }
 
@@ -101,8 +96,7 @@ class ShowroomGenericMapPolicy
      * @param ShowroomGenericMap $map
      * @return void
      */
-    public function forceDelete(NovaUser $user, ShowroomGenericMap $map): void
-    {
+    public function forceDelete(NovaUser $user, ShowroomGenericMap $map): void {
         //
     }
 }

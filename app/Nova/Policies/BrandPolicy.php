@@ -2,9 +2,8 @@
 
 namespace App\Nova\Policies;
 
-use App\Models\User\NovaUser;
-use Spatie\Permission\Models\Permission;
 use App\Models\Inventory\Manufacturers\Brand;
+use App\Models\User\NovaUser;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 /**
@@ -15,25 +14,25 @@ class BrandPolicy
 {
     use HandlesAuthorization;
 
+    private const VALID_ROLES = ['Admin', 'Support', 'DataSupport'];
+
     /**
      * Create a new policy instance.
      *
      * @return void
      */
-    public function __construct()
-    {
+    public function __construct() {
         //
     }
 
     /**
      * Determine whether the user can view any brand.
      *
-     * @param  NovaUser $user
+     * @param NovaUser $user
      * @return bool
      */
-    public function viewAny(NovaUser $user): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function viewAny(NovaUser $user): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -43,20 +42,18 @@ class BrandPolicy
      * @param Brand $brand
      * @return bool
      */
-    public function view(?NovaUser $user, Brand $brand): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function view(?NovaUser $user, Brand $brand): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
      * Determine whether the user can create brands.
      *
-     * @param  NovaUser  $user
+     * @param NovaUser $user
      * @return bool
      */
-    public function create(NovaUser $user): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function create(NovaUser $user): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -66,9 +63,8 @@ class BrandPolicy
      * @param Brand $brand
      * @return bool
      */
-    public function update(NovaUser $user, Brand $brand): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function update(NovaUser $user, Brand $brand): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -78,8 +74,7 @@ class BrandPolicy
      * @param Brand $brand
      * @return bool
      */
-    public function delete(NovaUser $user, Brand $brand): bool
-    {
+    public function delete(NovaUser $user, Brand $brand): bool {
         return false;
     }
 
@@ -90,8 +85,7 @@ class BrandPolicy
      * @param Brand $brand
      * @return void
      */
-    public function restore(NovaUser $user, Brand $brand): void
-    {
+    public function restore(NovaUser $user, Brand $brand): void {
         //
     }
 
@@ -102,8 +96,7 @@ class BrandPolicy
      * @param Brand $brand
      * @return void
      */
-    public function forceDelete(NovaUser $user, Brand $brand): void
-    {
+    public function forceDelete(NovaUser $user, Brand $brand): void {
         //
     }
 }

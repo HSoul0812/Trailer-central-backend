@@ -2,9 +2,8 @@
 
 namespace App\Nova\Policies;
 
-use App\Models\User\NovaUser;
-use Spatie\Permission\Models\Role;
 use App\Models\Marketing\Craigslist\Balance;
+use App\Models\User\NovaUser;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 /**
@@ -15,25 +14,25 @@ class BalancePolicy
 {
     use HandlesAuthorization;
 
+    private const VALID_ROLES = ['Admin', 'Support'];
+
     /**
      * Create a new policy instance.
      *
      * @return void
      */
-    public function __construct()
-    {
+    public function __construct() {
         //
     }
 
     /**
      * Determine whether the user can view any balances.
      *
-     * @param  NovaUser $user
+     * @param NovaUser $user
      * @return bool
      */
-    public function viewAny(NovaUser $user): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function viewAny(NovaUser $user): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -43,20 +42,18 @@ class BalancePolicy
      * @param Balance $balance
      * @return bool
      */
-    public function view(?NovaUser $user, Balance $balance): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function view(?NovaUser $user, Balance $balance): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
      * Determine whether the user can create balances.
      *
-     * @param  NovaUser  $user
+     * @param NovaUser $user
      * @return bool
      */
-    public function create(NovaUser $user): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function create(NovaUser $user): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -66,9 +63,8 @@ class BalancePolicy
      * @param Balance $balance
      * @return bool
      */
-    public function update(NovaUser $user, Balance $balance): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function update(NovaUser $user, Balance $balance): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -78,8 +74,7 @@ class BalancePolicy
      * @param Balance $balance
      * @return bool
      */
-    public function delete(NovaUser $user, Balance $balance): bool
-    {
+    public function delete(NovaUser $user, Balance $balance): bool {
         return false;
     }
 
@@ -90,8 +85,7 @@ class BalancePolicy
      * @param Balance $balance
      * @return void
      */
-    public function restore(NovaUser $user, Balance $balance): void
-    {
+    public function restore(NovaUser $user, Balance $balance): void {
         //
     }
 
@@ -102,8 +96,7 @@ class BalancePolicy
      * @param Balance $balance
      * @return void
      */
-    public function forceDelete(NovaUser $user, Balance $balance): void
-    {
+    public function forceDelete(NovaUser $user, Balance $balance): void {
         //
     }
 }

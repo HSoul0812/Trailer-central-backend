@@ -2,8 +2,8 @@
 
 namespace App\Nova\Policies;
 
-use App\Models\User\NovaUser;
 use App\Models\Inventory\EntityType;
+use App\Models\User\NovaUser;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 /**
@@ -14,25 +14,25 @@ class EntityTypePolicy
 {
     use HandlesAuthorization;
 
+    private const VALID_ROLES = ['Admin', 'Support'];
+
     /**
      * Create a new policy instance.
      *
      * @return void
      */
-    public function __construct()
-    {
+    public function __construct() {
         //
     }
 
     /**
      * Determine whether the user can view any entity.
      *
-     * @param  NovaUser $user
+     * @param NovaUser $user
      * @return bool
      */
-    public function viewAny(NovaUser $user): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function viewAny(NovaUser $user): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -42,20 +42,18 @@ class EntityTypePolicy
      * @param EntityType $type
      * @return bool
      */
-    public function view(?NovaUser $user, EntityType $type): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function view(?NovaUser $user, EntityType $type): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
      * Determine whether the user can create entity.
      *
-     * @param  NovaUser  $user
+     * @param NovaUser $user
      * @return bool
      */
-    public function create(NovaUser $user): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function create(NovaUser $user): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -65,9 +63,8 @@ class EntityTypePolicy
      * @param EntityType $type
      * @return bool
      */
-    public function update(NovaUser $user, EntityType $type): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function update(NovaUser $user, EntityType $type): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -77,8 +74,7 @@ class EntityTypePolicy
      * @param EntityType $type
      * @return bool
      */
-    public function delete(NovaUser $user, EntityType $type): bool
-    {
+    public function delete(NovaUser $user, EntityType $type): bool {
         return false;
     }
 
@@ -89,8 +85,7 @@ class EntityTypePolicy
      * @param EntityType $type
      * @return void
      */
-    public function restore(NovaUser $user, EntityType $type): void
-    {
+    public function restore(NovaUser $user, EntityType $type): void {
         //
     }
 
@@ -101,8 +96,7 @@ class EntityTypePolicy
      * @param EntityType $type
      * @return void
      */
-    public function forceDelete(NovaUser $user, EntityType $type): void
-    {
+    public function forceDelete(NovaUser $user, EntityType $type): void {
         //
     }
 }

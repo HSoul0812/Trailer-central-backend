@@ -2,8 +2,8 @@
 
 namespace App\Nova\Policies;
 
-use App\Models\User\NovaUser;
 use App\Models\Inventory\Inventory;
+use App\Models\User\NovaUser;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 /**
@@ -14,25 +14,25 @@ class InventoryPolicy
 {
     use HandlesAuthorization;
 
+    private const VALID_ROLES = ['Admin', 'Support', 'DataSupport'];
+
     /**
      * Create a new policy instance.
      *
      * @return void
      */
-    public function __construct()
-    {
+    public function __construct() {
         //
     }
 
     /**
      * Determine whether the user can view any inventory.
      *
-     * @param  NovaUser $user
+     * @param NovaUser $user
      * @return bool
      */
-    public function viewAny(NovaUser $user): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function viewAny(NovaUser $user): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -42,20 +42,18 @@ class InventoryPolicy
      * @param Inventory $inventory
      * @return bool
      */
-    public function view(?NovaUser $user, Inventory $inventory): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function view(?NovaUser $user, Inventory $inventory): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
      * Determine whether the user can create inventories.
      *
-     * @param  NovaUser  $user
+     * @param NovaUser $user
      * @return bool
      */
-    public function create(NovaUser $user): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function create(NovaUser $user): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -65,9 +63,8 @@ class InventoryPolicy
      * @param Inventory $inventory
      * @return bool
      */
-    public function update(NovaUser $user, Inventory $inventory): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function update(NovaUser $user, Inventory $inventory): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -77,8 +74,7 @@ class InventoryPolicy
      * @param Inventory $inventory
      * @return bool
      */
-    public function delete(NovaUser $user, Inventory $inventory): bool
-    {
+    public function delete(NovaUser $user, Inventory $inventory): bool {
         return false;
     }
 
@@ -89,8 +85,7 @@ class InventoryPolicy
      * @param Inventory $inventory
      * @return void
      */
-    public function restore(NovaUser $user, Inventory $inventory): void
-    {
+    public function restore(NovaUser $user, Inventory $inventory): void {
         //
     }
 
@@ -101,8 +96,7 @@ class InventoryPolicy
      * @param Inventory $inventory
      * @return void
      */
-    public function forceDelete(NovaUser $user, Inventory $inventory): void
-    {
+    public function forceDelete(NovaUser $user, Inventory $inventory): void {
         //
     }
 }

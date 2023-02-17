@@ -2,9 +2,9 @@
 
 namespace App\Nova\Policies;
 
+use App\Models\Feed\Mapping\Incoming\DealerIncomingPendingMapping;
 use App\Models\User\NovaUser;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use App\Models\Feed\Mapping\Incoming\DealerIncomingPendingMapping;
 
 /**
  * Class DealerIncomingPendingMappingPolicy
@@ -14,25 +14,25 @@ class DealerIncomingPendingMappingPolicy
 {
     use HandlesAuthorization;
 
+    private const VALID_ROLES = ['Admin', 'Support'];
+
     /**
      * Create a new policy instance.
      *
      * @return void
      */
-    public function __construct()
-    {
+    public function __construct() {
         //
     }
 
     /**
      * Determine whether the user can view any mappings.
      *
-     * @param  NovaUser $user
+     * @param NovaUser $user
      * @return bool
      */
-    public function viewAny(NovaUser $user): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function viewAny(NovaUser $user): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -42,20 +42,18 @@ class DealerIncomingPendingMappingPolicy
      * @param DealerIncomingPendingMapping $mapping
      * @return bool
      */
-    public function view(?NovaUser $user, DealerIncomingPendingMapping $mapping): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function view(?NovaUser $user, DealerIncomingPendingMapping $mapping): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
      * Determine whether the user can create mappings.
      *
-     * @param  NovaUser  $user
+     * @param NovaUser $user
      * @return bool
      */
-    public function create(NovaUser $user): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function create(NovaUser $user): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -65,9 +63,8 @@ class DealerIncomingPendingMappingPolicy
      * @param DealerIncomingPendingMapping $mapping
      * @return bool
      */
-    public function update(NovaUser $user, DealerIncomingPendingMapping $mapping): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function update(NovaUser $user, DealerIncomingPendingMapping $mapping): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -77,8 +74,7 @@ class DealerIncomingPendingMappingPolicy
      * @param DealerIncomingPendingMapping $mapping
      * @return bool
      */
-    public function delete(NovaUser $user, DealerIncomingPendingMapping $mapping): bool
-    {
+    public function delete(NovaUser $user, DealerIncomingPendingMapping $mapping): bool {
         return false;
     }
 
@@ -89,8 +85,7 @@ class DealerIncomingPendingMappingPolicy
      * @param DealerIncomingPendingMapping $mapping
      * @return void
      */
-    public function restore(NovaUser $user, DealerIncomingPendingMapping $mapping): void
-    {
+    public function restore(NovaUser $user, DealerIncomingPendingMapping $mapping): void {
         //
     }
 
@@ -101,8 +96,7 @@ class DealerIncomingPendingMappingPolicy
      * @param DealerIncomingPendingMapping $mapping
      * @return void
      */
-    public function forceDelete(NovaUser $user, DealerIncomingPendingMapping $mapping): void
-    {
+    public function forceDelete(NovaUser $user, DealerIncomingPendingMapping $mapping): void {
         //
     }
 }

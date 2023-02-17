@@ -14,25 +14,25 @@ class ApiEntityReferencePolicy
 {
     use HandlesAuthorization;
 
+    private const VALID_ROLES = ['Admin', 'Support'];
+
     /**
      * Create a new policy instance.
      *
      * @return void
      */
-    public function __construct()
-    {
+    public function __construct() {
         //
     }
 
     /**
      * Determine whether the user can view any reference.
      *
-     * @param  NovaUser  $user
+     * @param NovaUser $user
      * @return bool
      */
-    public function viewAny(NovaUser $user): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function viewAny(NovaUser $user): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -42,20 +42,18 @@ class ApiEntityReferencePolicy
      * @param ApiEntityReference $reference
      * @return bool
      */
-    public function view(?NovaUser $user, ApiEntityReference $reference): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function view(?NovaUser $user, ApiEntityReference $reference): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
      * Determine whether the user can create references.
      *
-     * @param  NovaUser  $user
+     * @param NovaUser $user
      * @return bool
      */
-    public function create(NovaUser $user): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function create(NovaUser $user): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -65,9 +63,8 @@ class ApiEntityReferencePolicy
      * @param ApiEntityReference $reference
      * @return bool
      */
-    public function update(NovaUser $user, ApiEntityReference $reference): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function update(NovaUser $user, ApiEntityReference $reference): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -77,8 +74,7 @@ class ApiEntityReferencePolicy
      * @param ApiEntityReference $reference
      * @return bool
      */
-    public function delete(NovaUser $user, ApiEntityReference $reference): bool
-    {
+    public function delete(NovaUser $user, Balance $balance): bool {
         return false;
     }
 
@@ -89,8 +85,7 @@ class ApiEntityReferencePolicy
      * @param ApiEntityReference $reference
      * @return void
      */
-    public function restore(NovaUser $user, ApiEntityReference $reference): void
-    {
+    public function restore(NovaUser $user, ApiEntityReference $reference): void {
         //
     }
 
@@ -101,8 +96,7 @@ class ApiEntityReferencePolicy
      * @param ApiEntityReference $reference
      * @return void
      */
-    public function forceDelete(NovaUser $user, ApiEntityReference $reference): void
-    {
+    public function forceDelete(NovaUser $user, ApiEntityReference $reference): void {
         //
     }
 }

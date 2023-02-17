@@ -2,8 +2,8 @@
 
 namespace App\Nova\Policies;
 
-use App\Models\User\NovaUser;
 use App\Models\CRM\Leads\LeadAssign;
+use App\Models\User\NovaUser;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 /**
@@ -14,25 +14,25 @@ class LeadAssignPolicy
 {
     use HandlesAuthorization;
 
+    private const VALID_ROLES = ['Admin', 'Support'];
+
     /**
      * Create a new policy instance.
      *
      * @return void
      */
-    public function __construct()
-    {
+    public function __construct() {
         //
     }
 
     /**
      * Determine whether the user can view any lead.
      *
-     * @param  NovaUser $user
+     * @param NovaUser $user
      * @return bool
      */
-    public function viewAny(NovaUser $user): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function viewAny(NovaUser $user): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -42,20 +42,18 @@ class LeadAssignPolicy
      * @param LeadAssign $lead
      * @return bool
      */
-    public function view(?NovaUser $user, LeadAssign $lead): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function view(?NovaUser $user, LeadAssign $lead): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
      * Determine whether the user can create leads.
      *
-     * @param  NovaUser  $user
+     * @param NovaUser $user
      * @return bool
      */
-    public function create(NovaUser $user): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function create(NovaUser $user): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -65,9 +63,8 @@ class LeadAssignPolicy
      * @param LeadAssign $lead
      * @return bool
      */
-    public function update(NovaUser $user, LeadAssign $lead): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function update(NovaUser $user, LeadAssign $lead): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -77,8 +74,7 @@ class LeadAssignPolicy
      * @param LeadAssign $lead
      * @return bool
      */
-    public function delete(NovaUser $user, LeadAssign $lead): bool
-    {
+    public function delete(NovaUser $user, LeadAssign $lead): bool {
         return false;
     }
 
@@ -89,8 +85,7 @@ class LeadAssignPolicy
      * @param LeadAssign $lead
      * @return void
      */
-    public function restore(NovaUser $user, LeadAssign $lead): void
-    {
+    public function restore(NovaUser $user, LeadAssign $lead): void {
         //
     }
 
@@ -101,8 +96,7 @@ class LeadAssignPolicy
      * @param LeadAssign $lead
      * @return void
      */
-    public function forceDelete(NovaUser $user, LeadAssign $lead): void
-    {
+    public function forceDelete(NovaUser $user, LeadAssign $lead): void {
         //
     }
 }
