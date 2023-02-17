@@ -14,8 +14,6 @@ class FeatureFlagPolicy
 {
     use HandlesAuthorization;
 
-    private const VALID_ROLES = ['Admin'];
-
     /**
      * Create a new policy instance.
      *
@@ -32,7 +30,7 @@ class FeatureFlagPolicy
      * @return bool
      */
     public function viewAny(NovaUser $user): bool {
-        return $user->hasAnyRole(self::VALID_ROLES);
+        return true;
     }
 
     /**
@@ -43,7 +41,7 @@ class FeatureFlagPolicy
      * @return bool
      */
     public function view(?NovaUser $user, FeatureFlag $flag): bool {
-        return $user->hasAnyRole(self::VALID_ROLES);
+        return true;
     }
 
     /**
