@@ -222,6 +222,9 @@ class LeadService implements LeadServiceInterface
 
             // Update Units of Interest
             $this->updateUnitsOfInterest($lead, $params['inventory']);
+
+            // Update Customer
+            $this->updateCustomer($lead, $params);
         });
 
         // Return Full Lead Details
@@ -352,6 +355,31 @@ class LeadService implements LeadServiceInterface
 
         // Return Array of Inventory Lead
         return $units;
+    }
+
+    /**
+     * Update Customer details when related fields are updated too
+     * 
+     * @param Lead $lead
+     * @param array $params
+     * @return void
+     */
+    public function updateCustomer(Lead $lead, array $params)
+    {
+        $customerLeadParams = array_intersect_key($params, array_flip(array_keys(Lead::CUSTOMER_FIELDS)));
+
+        if (count($customerLeadParams) > 0) {
+
+            $customerTableParams = [];
+            foreach ($customerLeadParams as $leadField => $value) {
+                $customerField = Lead::CUSTOMER_FIELDS[$leadField];
+                $customerTableParams[$customerField] = $value;
+            }
+
+            $customerTableParams['search'] = ['website_lead_id' => $lead->identifier];
+
+            $this->customerRepository->bulkUpdate($customerTableParams);
+        }
     }
 
     /**

@@ -17,6 +17,7 @@ use App\Models\CRM\Interactions\Interaction;
 use Carbon\Carbon;
 use App\Models\CRM\Leads\LeadType;
 use Faker\Factory;
+use App\Models\CRM\User\Customer;
 
 /**
  * Class LeadControllerTest
@@ -117,6 +118,18 @@ class LeadControllerTest extends IntegrationTestCase
             'status' => LeadStatus::STATUS_UNCONTACTED,
             'contact_type' => LeadStatus::TYPE_TASK,
             'next_contact_date' => $interactionTime
+        ]);
+
+        // create Customer
+        factory(Customer::class)->create([
+            'first_name' => $this->lead->first_name,
+            'last_name' => $this->lead->last_name,
+            'email' => $this->lead->email_address,
+            'home_phone' => $this->lead->phone_number,
+            'work_phone' => $this->lead->phone_number,
+            'cell_phone' => $this->lead->phone_number,
+            'dealer_id' => $this->lead->dealer_id,
+            'website_lead_id' => $this->lead->getKey()
         ]);
     }
 
@@ -250,6 +263,88 @@ class LeadControllerTest extends IntegrationTestCase
             'tc_lead_identifier' => $this->lead->getKey(),
             'status' => $status,
             'contact_type' => LeadStatus::TYPE_TASK
+        ]);
+    }
+
+    /**
+     * @group CRM
+     * @covers ::update
+     */
+    public function testUpdateNote()
+    {
+        $note = $this->faker->sentence;
+        $response = $this->json(
+            'POST',
+            '/api/leads/'. $this->lead->getKey(),
+            [
+                'note' => $note
+            ],
+            ['access-token' => $this->token->access_token]
+        );
+
+        $response->assertStatus(200);
+
+        $this->assertDatabaseHas(Lead::getTableName(), [
+            'identifier' => $this->lead->getKey(),
+            'note' => $note
+        ]);
+    }
+
+    /**
+     * @group CRM
+     * @covers ::update
+     */
+    public function testUpdateCustomerDetails()
+    {
+        $this->assertDatabaseHas(Customer::getTableName(), [
+            'website_lead_id' => $this->lead->getKey(),
+            'first_name' => $this->lead->first_name,
+            'last_name' => $this->lead->last_name,
+            'email' => $this->lead->email_address,
+            'work_phone' => $this->lead->phone_number
+        ]);
+
+        $newFirstName = $this->faker->firstName;
+        $newLastName = $this->faker->lastName;
+        $newMiddleName = $this->faker->suffix;
+        $newEmail = $this->faker->email;
+        $newPhone = $this->faker->e164PhoneNumber;
+        $note = $this->faker->sentence;
+        $comment = $this->faker->sentence;
+
+        $response = $this->json(
+            'POST',
+            '/api/leads/'. $this->lead->getKey(),
+            [
+                'first_name' => $newFirstName,
+                'middle_name' => $newMiddleName,
+                'last_name' => $newLastName,
+                'email_address' => $newEmail,
+                'phone_number' => $newPhone,
+                'note' => $note,
+                'comments' => $comment
+            ],
+            ['access-token' => $this->token->access_token]
+        );
+
+        $this->assertDatabaseHas(Customer::getTableName(), [
+            'website_lead_id' => $this->lead->getKey(),
+            'first_name' => $newFirstName,
+            'last_name' => $newLastName,
+            'middle_name' => $newMiddleName,
+            'email' => $newEmail,
+            'work_phone' => $newPhone,
+        ]);
+
+        $this->assertDatabaseHas(Lead::getTableName(), [
+            'identifier' => $this->lead->getKey(),
+            'first_name' => $newFirstName,
+            'last_name' => $newLastName,
+            'middle_name' => $newMiddleName,
+            'email_address' => $newEmail,
+            'phone_number' => $newPhone,
+            'note' => $note,
+            'comments' => $comment
         ]);
     }
 
