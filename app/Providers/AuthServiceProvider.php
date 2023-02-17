@@ -16,6 +16,7 @@ use App\Models\Feed\Mapping\Incoming\DealerIncomingPendingMapping;
 use App\Models\Feed\TransactionExecuteQueue;
 use App\Models\Integration\Collector\Collector;
 use App\Models\Integration\Collector\CollectorChangeReport;
+use App\Models\Integration\Collector\CollectorFields;
 use App\Models\Integration\Collector\CollectorLog;
 use App\Models\Integration\Collector\CollectorSpecification;
 use App\Models\Integration\Collector\CollectorSpecificationAction;
@@ -40,6 +41,7 @@ use App\Models\Website\Website;
 use App\Nova\Policies\ApiEntityReferencePolicy;
 use App\Nova\Policies\BalancePolicy;
 use App\Nova\Policies\CollectorChangeReportPolicy;
+use App\Nova\Policies\CollectorFieldPolicy;
 use App\Nova\Policies\CollectorLogPolicy;
 use App\Nova\Policies\CollectorPolicy;
 use App\Nova\Policies\CollectorSpecificationActionPolicy;
@@ -76,13 +78,12 @@ use App\Nova\Policies\ShowroomGenericMapPolicy;
 use App\Nova\Policies\TransactionExecuteQueuePolicy;
 use App\Nova\Policies\UserPolicy;
 use App\Nova\Policies\WebsiteEntityPolicy;
-use App\Nova\Policies\WebsiteFormsPolicy;
+use App\Nova\Policies\WebsiteEntityPolicy;
 use App\Nova\Policies\WebsitePolicy;
 
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -129,6 +130,7 @@ class AuthServiceProvider extends ServiceProvider
         Marketplace::class => MarketplacePolicy::class,
         Integration::class => IntegrationPolicy::class,
         ExternalDealerMapping::class => ExternalDealerMappingPolicy::class,
+        CollectorFields::class => CollectorFieldPolicy::class
         CollectorSpecification::class => CollectorSpecificationPolicy::class,
         CollectorSpecificationRule::class => CollectorSpecificationRulePolicy::class,
         CollectorSpecificationAction::class => CollectorSpecificationActionPolicy::class

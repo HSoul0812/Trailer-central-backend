@@ -1,9 +1,9 @@
 <?php
-
 namespace App\Nova\Policies;
 
-use App\Models\Integration\Integration;
 use App\Models\User\NovaUser;
+use App\Models\Integration\Integration;
+
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 /**
@@ -13,9 +13,7 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 class IntegrationPolicy
 {
     use HandlesAuthorization;
-
     private const VALID_ROLES = ['Admin', 'Support'];
-
     /**
      * Create a new policy instance.
      *
@@ -25,7 +23,6 @@ class IntegrationPolicy
     {
         //
     }
-
     /**
      * Determine whether the user can view any change integrations.
      *
@@ -36,7 +33,6 @@ class IntegrationPolicy
     {
         return $user->hasAnyRole(self::VALID_ROLES);
     }
-
     /**
      * Determine whether the user can view the change integration.
      *
@@ -48,7 +44,6 @@ class IntegrationPolicy
     {
         return $user->hasAnyRole(self::VALID_ROLES);
     }
-
     /**
      * Determine whether the user can create change integration.
      *
@@ -59,7 +54,6 @@ class IntegrationPolicy
     {
         return $user->hasAnyRole(self::VALID_ROLES);
     }
-
     /**
      * Determine whether the user can update the change integration.
      *
@@ -71,7 +65,6 @@ class IntegrationPolicy
     {
         return $user->hasAnyRole(self::VALID_ROLES);
     }
-
     /**
      * Determine whether the user can delete the change integration.
      *
@@ -83,7 +76,6 @@ class IntegrationPolicy
     {
         return false;
     }
-
     /**
      * Determine whether the user can restore the change integrations.
      *
@@ -95,7 +87,6 @@ class IntegrationPolicy
     {
         //
     }
-
     /**
      * Determine whether the user can permanently delete the change integrations.
      *
@@ -108,4 +99,3 @@ class IntegrationPolicy
         //
     }
 }
-

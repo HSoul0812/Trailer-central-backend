@@ -1,10 +1,10 @@
 <?php
-
 namespace App\Nova\Policies;
 
 use App\Models\User\NovaUser;
-use Illuminate\Auth\Access\HandlesAuthorization;
 use App\Models\Marketing\Facebook\Marketplace;
+
+use Illuminate\Auth\Access\HandlesAuthorization;
 
 /**
  * Class Marketplace
@@ -13,9 +13,7 @@ use App\Models\Marketing\Facebook\Marketplace;
 class MarketplacePolicy
 {
     use HandlesAuthorization;
-
     private const VALID_ROLES = ['Admin', 'Support'];
-
     /**
      * Create a new policy instance.
      *
@@ -25,7 +23,6 @@ class MarketplacePolicy
     {
         //
     }
-
     /**
      * Determine whether the user can view any change integrations.
      *
@@ -36,7 +33,6 @@ class MarketplacePolicy
     {
         return $user->hasAnyRole(self::VALID_ROLES);
     }
-
     /**
      * Determine whether the user can view the change integration.
      *
@@ -48,7 +44,6 @@ class MarketplacePolicy
     {
         return $user->hasAnyRole(self::VALID_ROLES);
     }
-
     /**
      * Determine whether the user can create change integration.
      *
@@ -59,7 +54,6 @@ class MarketplacePolicy
     {
         return $user->hasAnyRole(self::VALID_ROLES);
     }
-
     /**
      * Determine whether the user can update the change integration.
      *
@@ -71,7 +65,6 @@ class MarketplacePolicy
     {
         return $user->hasAnyRole(self::VALID_ROLES);
     }
-
     /**
      * Determine whether the user can delete the change integration.
      *
@@ -83,7 +76,6 @@ class MarketplacePolicy
     {
         return false;
     }
-
     /**
      * Determine whether the user can restore the change integration.
      *
@@ -95,7 +87,6 @@ class MarketplacePolicy
     {
         //
     }
-
     /**
      * Determine whether the user can permanently delete the change integration.
      *
@@ -108,4 +99,3 @@ class MarketplacePolicy
         //
     }
 }
-
