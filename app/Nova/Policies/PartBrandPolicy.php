@@ -2,8 +2,8 @@
 
 namespace App\Nova\Policies;
 
-use App\Models\User\NovaUser;
 use App\Models\Parts\Brand as PartBrand;
+use App\Models\User\NovaUser;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 /**
@@ -14,25 +14,25 @@ class PartBrandPolicy
 {
     use HandlesAuthorization;
 
+    private const VALID_ROLES = ['Admin', 'Support'];
+
     /**
      * Create a new policy instance.
      *
      * @return void
      */
-    public function __construct()
-    {
+    public function __construct() {
         //
     }
 
     /**
      * Determine whether the user can view any brand.
      *
-     * @param  NovaUser $user
+     * @param NovaUser $user
      * @return bool
      */
-    public function viewAny(NovaUser $user): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function viewAny(NovaUser $user): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -42,20 +42,18 @@ class PartBrandPolicy
      * @param PartBrand $brand
      * @return bool
      */
-    public function view(?NovaUser $user, PartBrand $brand): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function view(?NovaUser $user, PartBrand $brand): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
      * Determine whether the user can create brands.
      *
-     * @param  NovaUser  $user
+     * @param NovaUser $user
      * @return bool
      */
-    public function create(NovaUser $user): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function create(NovaUser $user): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -65,9 +63,8 @@ class PartBrandPolicy
      * @param PartBrand $brand
      * @return bool
      */
-    public function update(NovaUser $user, PartBrand $brand): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function update(NovaUser $user, PartBrand $brand): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -77,9 +74,8 @@ class PartBrandPolicy
      * @param PartBrand $brand
      * @return bool
      */
-    public function delete(NovaUser $user, PartBrand $brand): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function delete(NovaUser $user, PartBrand $brand): bool {
+        return false;
     }
 
     /**
@@ -89,8 +85,7 @@ class PartBrandPolicy
      * @param PartBrand $brand
      * @return void
      */
-    public function restore(NovaUser $user, PartBrand $brand): void
-    {
+    public function restore(NovaUser $user, PartBrand $brand): void {
         //
     }
 
@@ -101,8 +96,7 @@ class PartBrandPolicy
      * @param PartBrand $brand
      * @return void
      */
-    public function forceDelete(NovaUser $user, PartBrand $brand): void
-    {
+    public function forceDelete(NovaUser $user, PartBrand $brand): void {
         //
     }
 }
