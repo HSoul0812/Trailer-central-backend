@@ -5,6 +5,7 @@ namespace App\Providers;
 use Dingo\Api\Exception\Handler;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\UnauthorizedException;
 use Symfony\Component\HttpFoundation\Response;
 
 class ApiServiceProvider extends ServiceProvider
@@ -14,7 +15,12 @@ class ApiServiceProvider extends ServiceProvider
 
     }
 
-    public function register()
+    public function register(): void
+    {
+        $this->registerDingoHandler();
+    }
+
+    private function registerDingoHandler(): void
     {
         /*
          * We need to customize the response for the AuthenticationException exception
@@ -27,6 +33,13 @@ class ApiServiceProvider extends ServiceProvider
                 'message' => $exception->getMessage(),
                 'status_code' => Response::HTTP_UNAUTHORIZED,
             ], Response::HTTP_UNAUTHORIZED);
+        });
+
+        app(Handler::class)->register(function (UnauthorizedException $exception) {
+            return response()->json([
+                'message' => $exception->getMessage(),
+                'status_code' => Response::HTTP_BAD_REQUEST,
+            ], Response::HTTP_BAD_REQUEST);
         });
     }
 }
