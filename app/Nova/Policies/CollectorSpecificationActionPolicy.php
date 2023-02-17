@@ -14,6 +14,8 @@ class CollectorSpecificationActionPolicy
 {
     use HandlesAuthorization;
 
+    private const VALID_ROLES = ['Admin', 'Support'];
+
     /**
      * Create a new policy instance.
      *
@@ -32,7 +34,7 @@ class CollectorSpecificationActionPolicy
      */
     public function viewAny(NovaUser $user): bool
     {
-        return $user->hasAnyRole('Admin', 'Support');
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -44,7 +46,7 @@ class CollectorSpecificationActionPolicy
      */
     public function view(?NovaUser $user, CollectorSpecificationAction $CollectorSpecificationAction): bool
     {
-        return $user->hasAnyRole('Admin', 'Support');
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -55,7 +57,7 @@ class CollectorSpecificationActionPolicy
      */
     public function create(NovaUser $user): bool
     {
-        return $user->hasAnyRole('Admin', 'Support');
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -67,7 +69,7 @@ class CollectorSpecificationActionPolicy
      */
     public function update(NovaUser $user, CollectorSpecificationAction $CollectorSpecificationAction): bool
     {
-        return $user->hasAnyRole('Admin', 'Support');
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
