@@ -34,8 +34,7 @@ class FeatureFlag extends Resource
     public static $title = 'code';
 
     public static $search = [
-        'process_name',
-        'dealer_id'
+        'code'
     ];
 
     /**
