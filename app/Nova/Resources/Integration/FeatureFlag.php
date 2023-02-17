@@ -52,6 +52,8 @@ class FeatureFlag extends Resource
             Boolean::make('Is Enabled'),
 
             DateTime::make('Created At')->sortable()->format('DD MMM, YYYY - LT'),
+
+            DateTime::make('Last Updated At')->sortable()->format('DD MMM, YYYY - LT'),
         ];
     }
 
