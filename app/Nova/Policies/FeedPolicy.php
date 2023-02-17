@@ -14,25 +14,25 @@ class FeedPolicy
 {
     use HandlesAuthorization;
 
+    private const VALID_ROLES = ['Admin', 'Support'];
+
     /**
      * Create a new policy instance.
      *
      * @return void
      */
-    public function __construct()
-    {
+    public function __construct() {
         //
     }
 
     /**
      * Determine whether the user can view any feed.
      *
-     * @param  NovaUser $user
+     * @param NovaUser $user
      * @return bool
      */
-    public function viewAny(NovaUser $user): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function viewAny(NovaUser $user): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -42,20 +42,18 @@ class FeedPolicy
      * @param Feed $feed
      * @return bool
      */
-    public function view(?NovaUser $user, Feed $feed): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function view(?NovaUser $user, Feed $feed): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
      * Determine whether the user can create feeds.
      *
-     * @param  NovaUser  $user
+     * @param NovaUser $user
      * @return bool
      */
-    public function create(NovaUser $user): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function create(NovaUser $user): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -65,9 +63,8 @@ class FeedPolicy
      * @param Feed $feed
      * @return bool
      */
-    public function update(NovaUser $user, Feed $feed): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function update(NovaUser $user, Feed $feed): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -77,9 +74,8 @@ class FeedPolicy
      * @param Feed $feed
      * @return bool
      */
-    public function delete(NovaUser $user, Feed $feed): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function delete(NovaUser $user, Feed $feed): bool {
+        return false;
     }
 
     /**
@@ -89,8 +85,7 @@ class FeedPolicy
      * @param Feed $feed
      * @return void
      */
-    public function restore(NovaUser $user, Feed $feed): void
-    {
+    public function restore(NovaUser $user, Feed $feed): void {
         //
     }
 
@@ -101,8 +96,7 @@ class FeedPolicy
      * @param Feed $feed
      * @return void
      */
-    public function forceDelete(NovaUser $user, Feed $feed): void
-    {
+    public function forceDelete(NovaUser $user, Feed $feed): void {
         //
     }
 }

@@ -2,8 +2,8 @@
 
 namespace App\Nova\Policies;
 
-use App\Models\User\NovaUser;
 use App\Models\Inventory\InventoryMfg;
+use App\Models\User\NovaUser;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 /**
@@ -14,25 +14,25 @@ class InventoryMfgPolicy
 {
     use HandlesAuthorization;
 
+    private const VALID_ROLES = ['Admin', 'Support', 'DataSupport'];
+
     /**
      * Create a new policy instance.
      *
      * @return void
      */
-    public function __construct()
-    {
+    public function __construct() {
         //
     }
 
     /**
      * Determine whether the user can view any balances.
      *
-     * @param  NovaUser $user
+     * @param NovaUser $user
      * @return bool
      */
-    public function viewAny(NovaUser $user): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function viewAny(NovaUser $user): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -42,20 +42,18 @@ class InventoryMfgPolicy
      * @param InventoryMfg $manufacturer
      * @return bool
      */
-    public function view(?NovaUser $user, InventoryMfg $manufacturer): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function view(?NovaUser $user, InventoryMfg $manufacturer): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
      * Determine whether the user can create balances.
      *
-     * @param  NovaUser  $user
+     * @param NovaUser $user
      * @return bool
      */
-    public function create(NovaUser $user): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function create(NovaUser $user): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -65,9 +63,8 @@ class InventoryMfgPolicy
      * @param InventoryMfg $manufacturer
      * @return bool
      */
-    public function update(NovaUser $user, InventoryMfg $manufacturer): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function update(NovaUser $user, InventoryMfg $manufacturer): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -77,9 +74,8 @@ class InventoryMfgPolicy
      * @param InventoryMfg $manufacturer
      * @return bool
      */
-    public function delete(NovaUser $user, InventoryMfg $manufacturer): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function delete(NovaUser $user, InventoryMfg $manufacturer): bool {
+        return false;
     }
 
     /**
@@ -89,8 +85,7 @@ class InventoryMfgPolicy
      * @param InventoryMfg $manufacturer
      * @return void
      */
-    public function restore(NovaUser $user, InventoryMfg $manufacturer): void
-    {
+    public function restore(NovaUser $user, InventoryMfg $manufacturer): void {
         //
     }
 
@@ -101,8 +96,7 @@ class InventoryMfgPolicy
      * @param InventoryMfg $manufacturer
      * @return void
      */
-    public function forceDelete(NovaUser $user, InventoryMfg $manufacturer): void
-    {
+    public function forceDelete(NovaUser $user, InventoryMfg $manufacturer): void {
         //
     }
 }
