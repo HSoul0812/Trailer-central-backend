@@ -65,7 +65,7 @@ class FeatureFlag extends Model
     protected $casts = ['is_enabled' => 'boolean'];
 
     /** @var array<string> */
-    protected $dates = ['created_at'];
+    protected $dates = ['created_at', 'last_updated_at'];
 
     /** @var array<string> */
     protected $hidden = ['created_at'];
