@@ -18,7 +18,7 @@ class AddLastUpdatedAtToSimpleFeatureFlagTable extends Migration
     {
         Schema::table(self::TARGET_TABLE, function (Blueprint $table) {
             if (!$this->checkColumn()) {
-                $table->timestamp(self::TARGET_COLUMN)->useCurrent();
+                $table->timestamp(self::TARGET_COLUMN)->useCurrentOnUpdate();
             }
         });
     }
