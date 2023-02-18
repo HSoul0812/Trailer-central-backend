@@ -64,7 +64,6 @@ class SchedulerController extends RestfulControllerV2
 
         if ($request->validate()) {
             return $this->response->collection($this->repository->scheduler($request->all()), $this->scheduleTransformer);
-            // return $this->response->paginator($this->repository->scheduler($request->all()), $this->scheduleTransformer);
         }
 
         return $this->response->errorBadRequest();

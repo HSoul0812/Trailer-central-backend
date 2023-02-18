@@ -1164,6 +1164,7 @@ $api->version('v1', function ($route) {
                 // Scheduler
                 $route->get('scheduler', 'App\Http\Controllers\v1\Marketing\Craigslist\SchedulerController@index');
                 $route->get('upcoming', 'App\Http\Controllers\v1\Marketing\Craigslist\SchedulerController@upcoming');
+                $route->get('billing', 'App\Http\Controllers\v1\Marketing\Craigslist\BillingController@index');
 
                 // Posts
                 $route->group([
