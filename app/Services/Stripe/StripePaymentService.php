@@ -4,6 +4,7 @@ namespace App\Services\Stripe;
 
 use App\Repositories\Payment\PaymentLogRepositoryInterface;
 use App\Services\Inventory\InventoryServiceInterface;
+use \Log as Logger;
 use Illuminate\Support\Carbon;
 use Stripe\Exception\SignatureVerificationException;
 use Stripe\Exception\UnexpectedValueException;
@@ -139,7 +140,7 @@ class StripePaymentService implements StripePaymentServiceInterface
         } catch (\Exception $e) {
             DB::rollBack();
 
-            \Log::critical('Failed fulfilling order: ' . $e->getMessage());
+            Logger::critical('Failed fulfilling order: ' . $e->getMessage());
             return 500;
         }
     }
@@ -173,7 +174,7 @@ class StripePaymentService implements StripePaymentServiceInterface
         $successUrl = str_replace('{id}', $inventoryId, self::STRIPE_SUCCESS_URL);
         $failUrl = str_replace('{id}', $inventoryId, self::STRIPE_FAILURE_URL);
 
-        $checkout_session = Session::create([
+        $checkoutSession = Session::create([
             'line_items' => $priceObjects,
             'client_reference_id' => 'tt' . Str::uuid(),
             'metadata' => $metadata,
@@ -182,7 +183,7 @@ class StripePaymentService implements StripePaymentServiceInterface
             'cancel_url' => $siteUrl . $failUrl,
         ]);
 
-        return $checkout_session->url;
+        return $checkoutSession->url;
     }
 
     public function handleEvent(): int
@@ -195,11 +196,11 @@ class StripePaymentService implements StripePaymentServiceInterface
                 $payload, $sigHeader, $endpointSecret
             );
         } catch (UnexpectedValueException|SignatureVerificationException $e) {
-            \Log::critical('Failed creating webhook: ' . $e->getMessage());
+            Logger::critical('Failed creating webhook: ' . $e->getMessage());
             return 400;
         }
-        \Log::info('Event type: ' . $event->type);
-        if ($event->type == self::CHECKOUT_SESSION_COMPLETED_EVENT) {
+        Logger::info('Event type: ' . $event->type);
+        if ($event->type === self::CHECKOUT_SESSION_COMPLETED_EVENT) {
             $session = $event->data->object;
             return $this->completeOrder($session);
         }
