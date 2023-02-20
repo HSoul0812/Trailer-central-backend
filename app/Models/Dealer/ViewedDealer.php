@@ -10,7 +10,8 @@ class ViewedDealer extends Model
     use HasFactory;
 
     protected $fillable = [
-        'dealer_id',
         'name',
+        'dealer_id',
+        'inventory_id',
     ];
 }

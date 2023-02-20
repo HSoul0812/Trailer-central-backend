@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\v1\ViewedDealer;
 
-use App\Domains\ViewedDealer\Exceptions\DuplicateDealerIdException;
 use App\Exceptions\NotImplementedException;
 use App\Http\Controllers\AbstractRestfulController;
 use App\Http\Requests\CreateRequestInterface;
@@ -11,6 +10,7 @@ use App\Http\Requests\UpdateRequestInterface;
 use App\Http\Requests\ViewedDealer\CreateViewedDealerRequest;
 use App\Http\Requests\ViewedDealer\IndexViewedDealerRequest;
 use App\Repositories\ViewedDealer\ViewedDealerRepositoryInterface;
+use App\Transformers\ViewedDealer\ViewedDealerCreateTransformer;
 use App\Transformers\ViewedDealer\ViewedDealerIndexTransformer;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Throwable;
@@ -33,7 +33,7 @@ class ViewedDealerController extends AbstractRestfulController
         try {
             return $this->response->item(
                 item: $this->repository->findByName($name),
-                transformer: new ViewedDealerIndexTransformer(),
+                transformer: resolve(ViewedDealerIndexTransformer::class),
             );
         } catch (ModelNotFoundException) {
             $this->response->errorNotFound("Not found dealer id from name '$name'.");
@@ -47,7 +47,7 @@ class ViewedDealerController extends AbstractRestfulController
         try {
             return $this->response->collection(
                 collection: $this->repository->create($request->input('viewed_dealers')),
-                transformer: new ViewedDealerIndexTransformer(),
+                transformer: resolve(ViewedDealerCreateTransformer::class),
             );
         } catch (Throwable $e) {
             $this->response->error(

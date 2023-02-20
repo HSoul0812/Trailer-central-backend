@@ -30,7 +30,8 @@ class CreateViewedDealerTest extends IntegrationTestCase
             ])
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertSeeText('The viewed_dealers.0.dealer_id field is required.')
-            ->assertSeeText('The viewed_dealers.0.name field is required.');
+            ->assertSeeText('The viewed_dealers.0.name field is required.')
+            ->assertSeeText('The viewed_dealers.0.inventory_id field is required.');
     }
 
     /**
@@ -49,6 +50,7 @@ class CreateViewedDealerTest extends IntegrationTestCase
                 'viewed_dealers' => [[
                     'dealer_id' => $dealerId,
                     'name' => Str::random(),
+                    'inventory_id' => $viewedDealer->inventory_id,
                 ]],
             ])
             ->assertStatus(Response::HTTP_BAD_REQUEST)
@@ -71,9 +73,11 @@ class CreateViewedDealerTest extends IntegrationTestCase
                 'viewed_dealers' => [[
                     'dealer_id' => 1,
                     'name' => $name1,
+                    'inventory_id' => 1,
                 ], [
                     'dealer_id' => 1,
                     'name' => $name2,
+                    'inventory_id' => 2,
                 ]],
             ])
             ->assertStatus(Response::HTTP_BAD_REQUEST)
@@ -94,14 +98,17 @@ class CreateViewedDealerTest extends IntegrationTestCase
         $viewedDealer1 = [
             'dealer_id' => 1,
             'name' => 'duplicate',
+            'inventory_id' => 1,
         ];
         $viewedDealer2 = [
             'dealer_id' => 2,
             'name' => 'duplicate',
+            'inventory_id' => 2,
         ];
         $viewedDealer3 = [
             'dealer_id' => 3,
             'name' => 'not duplicate',
+            'inventory_id' => 3,
         ];
 
         // The code should remove the 2nd one and only store the first one in the database
@@ -135,14 +142,17 @@ class CreateViewedDealerTest extends IntegrationTestCase
         $viewedDealer1 = [
             'dealer_id' => 1,
             'name' => 'Dealer 1',
+            'inventory_id' => 1,
         ];
         $viewedDealer2 = [
             'dealer_id' => 2,
             'name' => 'Dealer 2',
+            'inventory_id' => 2,
         ];
         $viewedDealer3 = [
             'dealer_id' => 3,
             'name' => 'Dealer 3',
+            'inventory_id' => 3,
         ];
 
         $this

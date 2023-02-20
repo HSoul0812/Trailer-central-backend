@@ -9,8 +9,9 @@ class CreateViewedDealerRequest extends Request implements CreateRequestInterfac
 {
     protected array $rules = [
         'viewed_dealers' => 'required|array',
-        'viewed_dealers.*.dealer_id' => 'required|int',
         'viewed_dealers.*.name' => 'required|string',
+        'viewed_dealers.*.dealer_id' => 'required|int',
+        'viewed_dealers.*.inventory_id' => 'required|integer',
     ];
 
     public function messages(): array

@@ -13,8 +13,9 @@ class ViewedDealerFactory extends Factory
     public function definition(): array
     {
         return [
-            'dealer_id' => $this->fakeUniqueDealerId(),
             'name' => $this->fakeUniqueDealerName(),
+            'dealer_id' => $this->fakeUniqueDealerId(),
+            'inventory_id' => $this->faker->randomNumber(),
         ];
     }
 
