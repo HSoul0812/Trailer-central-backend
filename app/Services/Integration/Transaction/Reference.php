@@ -12,7 +12,7 @@ use Illuminate\Contracts\Container\BindingResolutionException;
  */
 class Reference
 {
-    static private $_methodTranslation = array(
+    private $methodTranslation = array(
         'utc' => array(
             'addInventory' => array(
                 'action' => 'add',
@@ -86,10 +86,10 @@ class Reference
      * @param $apiKey
      * @return bool
      */
-    static function isValidAction($action, $apiKey): bool
+    public function isValidAction($action, $apiKey): bool
     {
-        if(isset(self::$_methodTranslation[$apiKey])) {
-            if(isset(self::$_methodTranslation[$apiKey][$action])) {
+        if(isset($this->methodTranslation[$apiKey])) {
+            if(isset($this->methodTranslation[$apiKey][$action])) {
                 return true;
             }
         }
@@ -101,19 +101,19 @@ class Reference
      * @param $apiKey
      * @return false|string[]
      */
-    static function decodeAction($action, $apiKey)
+    public function decodeAction($action, $apiKey)
     {
-        if(isset(self::$_methodTranslation[$apiKey])) {
-            if(isset(self::$_methodTranslation[$apiKey][$action])) {
-                return self::$_methodTranslation[$apiKey][$action];
+        if(isset($this->methodTranslation[$apiKey])) {
+            if(isset($this->methodTranslation[$apiKey][$action])) {
+                return $this->methodTranslation[$apiKey][$action];
             }
         }
         return false;
     }
 
-    static function translateEntityType($entityType, $apiKey)
+    function translateEntityType($entityType, $apiKey)
     {
-        $action = self::decodeAction($entityType, $apiKey);
+        $action = $this->decodeAction($entityType, $apiKey);
         if(!empty($action)) {
             return $action['entity_type'];
         } else {
@@ -128,7 +128,7 @@ class Reference
      * @return false|int
      * @throws BindingResolutionException
      */
-    static function getEntityFromReference($value, $entityType, $apiKey)
+    public function getEntityFromReference($value, $entityType, $apiKey)
     {
         /** @var ApiEntityReferenceRepositoryInterface $apiEntityReferenceRepository */
         $apiEntityReferenceRepository = app()->make(ApiEntityReferenceRepositoryInterface::class);
@@ -141,6 +141,12 @@ class Reference
             'entity_type' => $entityType,
             'api_key' => $apiKey,
         ]);
+
+        if (!($apiEntityReference ? $apiEntityReference->entity_id : false)) {
+            print_r($apiKey);
+            print_r($value);
+            print_r($entityType);exit();
+        }
 
         return $apiEntityReference ? $apiEntityReference->entity_id : false;
     }

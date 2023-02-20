@@ -15,47 +15,60 @@ use Illuminate\Support\Facades\DB;
  */
 class Validation
 {
-    static private $_apiKey = '';
+    private $apiKey = '';
+
+    /**
+     * @var Reference
+     */
+    private $reference;
+
+    /**
+     * @param Reference $reference
+     */
+    public function __construct(Reference $reference)
+    {
+        $this->reference = $reference;
+    }
 
     /**
      * @param $apiKey
      * @return void
      */
-    static function setApiKey($apiKey)
+    public function setApiKey($apiKey)
     {
-        self::$_apiKey = $apiKey;
+        $this->apiKey = $apiKey;
     }
 
     /**
      * @return string
      */
-    static function getApiKey(): string
+    public function getApiKey(): string
     {
-        return self::$_apiKey;
+        return $this->apiKey;
     }
 
     /**
      * @return false|mixed
      */
-    static function getValidation()
+    public function getValidation()
     {
-        if(!isset(self::$_validation[self::$_apiKey])) {
+        if(!isset($this->validation[$this->apiKey])) {
             return false;
         }
 
-        return self::$_validation[self::$_apiKey];
+        return $this->validation[$this->apiKey];
     }
 
     /**
      * @param $action
      * @return bool
      */
-    static function isValidAction($action = null): bool
+    public function isValidAction($action = null): bool
     {
-        $validation = self::getValidation();
+        $validation = $this->getValidation();
 
         if(isset($validation[$action])) {
-            if(Reference::isValidAction($action, self::getApiKey())) {
+            if($this->reference->isValidAction($action, $this->getApiKey())) {
                 return true;
             }
         }
@@ -69,7 +82,7 @@ class Validation
      * @param $format
      * @return array|mixed|string|string[]
      */
-    static private function getReferenceFormat($value, $data, $format)
+    private function getReferenceFormat($value, $data, $format)
     {
         foreach($data as $key => $value) {
             $format = str_replace('{{' . $key . '}}', $value, $format);
@@ -86,7 +99,7 @@ class Validation
      * @return void
      * @throws BindingResolutionException
      */
-    static function validateTransaction($action = null, $data = null, $i = 1, $context)
+    public function validateTransaction($action = null, $data = null, $i = 1, $context)
     {
         $validation = self::getValidation();
 
@@ -156,7 +169,7 @@ class Validation
                             break;
                         }
 
-                        $result = self::checkValidation($key, $value, $validationSettings);
+                        $result = $this->checkValidation($key, $value, $validationSettings);
 
                         if(!$result) {
                             //if it is an array of values to validate against
@@ -185,8 +198,8 @@ class Validation
                         $checkValue = isset($validation['reference_format']) ? self::getReferenceFormat($value, $data,
                             $validation['reference_format']) : $value;
 
-                        if(!isset($validation['validation']) || self::checkValidation($key, $value, $validation['validation'])) {
-                            $result = self::checkUnique($uniqueKey, $checkValue, $table, $thisAction, $useReference);
+                        if(!isset($validation['validation']) || $this->checkValidation($key, $value, $validation['validation'])) {
+                            $result = $this->checkUnique($uniqueKey, $checkValue, $table, $thisAction, $useReference);
 
                             if(!$result && isset($validation['required']) && $validation['required']) {
                                 $context->addTransactionError($i,
@@ -209,7 +222,7 @@ class Validation
                         $checkValue = isset($validation['reference_format']) ? self::getReferenceFormat($value, $data,
                             $validation['reference_format']) : $value;
 
-                        $result = self::checkExists($existsKey, $checkValue, $table, $thisAction, $useReference);
+                        $result = $this->checkExists($existsKey, $checkValue, $table, $thisAction, $useReference);
 
                         if(!$result && isset($validation['required']) && $validation['required']) {
                             if($key == 'vin') {
@@ -255,7 +268,7 @@ class Validation
      * @param $validationSettings
      * @return bool|int
      */
-    static private function checkValidation($key, $value, $validationSettings)
+    private function checkValidation($key, $value, $validationSettings)
     {
         //if it is an array of values to validate against
         if(is_array($validationSettings)) {
@@ -275,10 +288,10 @@ class Validation
      * @return bool
      * @throws BindingResolutionException
      */
-    static private function checkUnique($key, $value, $table, $action, $useReference): bool
+    private function checkUnique($key, $value, $table, $action, $useReference): bool
     {
         if($useReference) {
-            $value = Reference::getEntityFromReference($value, $action, self::getApiKey());
+            $value = $this->reference->getEntityFromReference($value, $action, $this->getApiKey());
 
             if(empty($value)) {
                 return true;
@@ -297,7 +310,7 @@ class Validation
      * @return bool
      * @throws BindingResolutionException
      */
-    static private function checkExists($key, $value, $table, $action, $useReference): bool
+    private function checkExists($key, $value, $table, $action, $useReference): bool
     {
         /** @var InventoryRepositoryInterface $inventoryRepository */
         $inventoryRepository = app()->make(InventoryRepositoryInterface::class);
@@ -310,7 +323,7 @@ class Validation
                 $inventory = $inventoryRepository->get(['vin' => $value]);
             } catch (ModelNotFoundException $e) {}
 
-            $value = Reference::getEntityFromReference($value, $action, self::getApiKey());
+            $value = $this->reference->getEntityFromReference($value, $action, self::getApiKey());
 
             if(empty($value) && empty($inventory)) {
                 return false;
@@ -361,7 +374,7 @@ class Validation
     // own. we store the reference as {{dealer_id}}_{{location_id}}, which would come
     // out as something like 1234_1.
 
-    static private $_validation = array(
+    private $validation = array(
         'utc' => array(
             'addInventory'         => array(
                 'dealer_identifier'   => array(

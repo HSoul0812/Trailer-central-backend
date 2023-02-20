@@ -3,7 +3,11 @@
 namespace App\Services\Integration\Transaction\Adapter;
 
 use App\Repositories\Feed\Mapping\Incoming\ApiEntityReferenceRepositoryInterface;
+use App\Repositories\Inventory\AttributeRepositoryInterface;
+use App\Repositories\Inventory\InventoryRepositoryInterface;
+use App\Repositories\User\UserRepositoryInterface;
 use App\Services\Integration\Transaction\Reference;
+use App\Services\Inventory\InventoryServiceInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
 
 /**
@@ -12,12 +16,13 @@ use Illuminate\Contracts\Container\BindingResolutionException;
  */
 abstract class Adapter
 {
-    protected $_apiKey = '';
+    protected $apiKey = '';
     protected $_entityType = '';
     protected $_conversions = array();
 
     public const ADAPTER_MAPPING = [
-        'Adapter_Utc_Inventory' => 'App\Services\Integration\Transaction\Adapter\Utc\Inventory'
+        'Adapter_Utc_Inventory' => 'App\Services\Integration\Transaction\Adapter\Utc\Inventory',
+        'Adapter_Pj_Inventory' => 'App\Services\Integration\Transaction\Adapter\Pj\Inventory'
     ];
 
     /**
@@ -25,9 +30,45 @@ abstract class Adapter
      */
     protected $apiEntityReferenceRepository;
 
-    public function __construct(ApiEntityReferenceRepositoryInterface $apiEntityReferenceRepository)
-    {
+    /**
+     * @var AttributeRepositoryInterface
+     */
+    protected $attributeRepository;
+
+    /**
+     * @var UserRepositoryInterface
+     */
+    protected $userRepository;
+
+    /**
+     * @var InventoryServiceInterface
+     */
+    protected $inventoryService;
+
+    /**
+     * @var InventoryRepositoryInterface
+     */
+    protected $inventoryRepository;
+
+    /**
+     * @var Reference
+     */
+    protected $reference;
+
+    public function __construct(
+        ApiEntityReferenceRepositoryInterface $apiEntityReferenceRepository,
+        UserRepositoryInterface $userRepository,
+        AttributeRepositoryInterface $attributeRepository,
+        InventoryServiceInterface $inventoryService,
+        InventoryRepositoryInterface $inventoryRepository,
+        Reference $reference
+    ) {
         $this->apiEntityReferenceRepository = $apiEntityReferenceRepository;
+        $this->attributeRepository = $attributeRepository;
+        $this->userRepository = $userRepository;
+        $this->inventoryService = $inventoryService;
+        $this->inventoryRepository = $inventoryRepository;
+        $this->reference = $reference;
     }
 
     /**
@@ -38,7 +79,7 @@ abstract class Adapter
      */
     public function getEntityFromReference($entityType = null, $referenceId = null)
     {
-        return Reference::getEntityFromReference($referenceId, $entityType, $this->_apiKey);
+        return $this->reference->getEntityFromReference($referenceId, $entityType, $this->apiKey);
     }
 
     /**
@@ -52,7 +93,7 @@ abstract class Adapter
             'entity_id'    => $entityId,
             'reference_id' => $referenceId,
             'entity_type'  => $this->_entityType,
-            'api_key'      => $this->_apiKey
+            'api_key'      => $this->apiKey
         ));
     }
 
@@ -72,5 +113,33 @@ abstract class Adapter
         }
 
         return $value;
+    }
+
+    /**
+     * @param string $entityType
+     * @param array $attributes
+     * @return array
+     */
+    protected function getInventoryAttributes(string $entityType, array $attributes): array
+    {
+        $defaultAttributes = $this->attributeRepository
+            ->getAllByEntityTypeId($entityType)
+            ->pluck('attribute_id', 'code')
+            ->toArray();
+
+        $inventoryAttributes = [];
+
+        foreach ($attributes as $name => $value) {
+            if (!isset($defaultAttributes[$name])) {
+                continue;
+            }
+
+            $inventoryAttributes[] = [
+                'attribute_id' => $defaultAttributes[$name],
+                'value' => $value,
+            ];
+        }
+
+        return $inventoryAttributes;
     }
 }

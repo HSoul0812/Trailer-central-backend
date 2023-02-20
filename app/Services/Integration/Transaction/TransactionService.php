@@ -24,6 +24,11 @@ class TransactionService implements TransactionServiceInterface
     private $validation;
 
     /**
+     * @var Reference
+     */
+    private $reference;
+
+    /**
      * @var string
      */
     private $integrationName;
@@ -35,10 +40,12 @@ class TransactionService implements TransactionServiceInterface
 
     public function __construct(
         TransactionExecuteQueueRepositoryInterface $transactionExecuteQueueRepository,
-        Validation $validation
+        Validation $validation,
+        Reference $reference
     ) {
         $this->transactionExecuteQueueRepository = $transactionExecuteQueueRepository;
         $this->validation = $validation;
+        $this->reference = $reference;
     }
 
     /**
@@ -141,7 +148,7 @@ class TransactionService implements TransactionServiceInterface
             return;
         }
 
-        $action = Reference::decodeAction($method, $this->integrationName);
+        $action = $this->reference->decodeAction($method, $this->integrationName);
 
         if(!$action) {
             return;

@@ -3,12 +3,7 @@
 namespace App\Services\Integration\Transaction\Adapter\Utc;
 
 use App\Models\User\User;
-use App\Repositories\Feed\Mapping\Incoming\ApiEntityReferenceRepositoryInterface;
-use App\Repositories\Inventory\AttributeRepositoryInterface;
-use App\Repositories\Inventory\InventoryRepositoryInterface;
-use App\Repositories\User\UserRepositoryInterface;
 use App\Services\Integration\Transaction\Adapter\UtcAdapter;
-use App\Services\Inventory\InventoryServiceInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
 
 /**
@@ -17,27 +12,8 @@ use Illuminate\Contracts\Container\BindingResolutionException;
  */
 class Inventory extends UtcAdapter
 {
-    /**
-     * @var UserRepositoryInterface
-     */
-    private $userRepository;
-
-    /**
-     * @var AttributeRepositoryInterface
-     */
-    private $attributeRepository;
-
-    /**
-     * @var InventoryServiceInterface
-     */
-    private $inventoryService;
-
-    /**
-     * @var InventoryRepositoryInterface
-     */
-    private $inventoryRepository;
-
     protected $_entityType = 'inventory';
+
     protected $_conversions = array(
         'status' => array(
             'available' => '1', // available
@@ -131,20 +107,6 @@ class Inventory extends UtcAdapter
         )
     );
 
-    public function __construct(
-        ApiEntityReferenceRepositoryInterface $apiEntityReferenceRepository,
-        UserRepositoryInterface $userRepository,
-        AttributeRepositoryInterface $attributeRepository,
-        InventoryServiceInterface $inventoryService,
-        InventoryRepositoryInterface $inventoryRepository
-    ) {
-        $this->userRepository = $userRepository;
-        $this->attributeRepository = $attributeRepository;
-        $this->inventoryService = $inventoryService;
-        $this->inventoryRepository = $inventoryRepository;
-        parent::__construct($apiEntityReferenceRepository);
-    }
-
     /**
      * This is our overriden convert() method that takes case sensitivity out of the equasion
      *
@@ -198,11 +160,6 @@ class Inventory extends UtcAdapter
 
         /** @var User $dealer */
         $dealer = $this->userRepository->get(['dealer_id' => $dealerID]);
-
-        $defaultAttributes = $this->attributeRepository
-            ->getAllByEntityTypeId($entityType)
-            ->pluck('attribute_id', 'code')
-            ->toArray();
 
         $title = $data['year'] . ' ' . $this->convert('brand', $data['brand']) . ' ' . $data['model'] . ' ' .
             $this->convert('category_label', $data['category']);
@@ -275,6 +232,7 @@ class Inventory extends UtcAdapter
         }
 
         $attributes = array();
+
         if(!empty($data['axles'])) {
             $attributes['axles'] = $data['axles'];
         }
@@ -303,20 +261,7 @@ class Inventory extends UtcAdapter
             $attributes['construction'] = $data['construction'];
         }
 
-        $inventoryAttributes = [];
-
-        foreach ($attributes as $name => $value) {
-            if (!isset($defaultAttributes[$name])) {
-                continue;
-            }
-
-            $inventoryAttributes[] = [
-                'attribute_id' => $defaultAttributes[$name],
-                'value' => $value,
-            ];
-        }
-
-        $inventoryParams['attributes'] = $inventoryAttributes;
+        $inventoryParams['attributes'] = $this->getInventoryAttributes($entityType, $attributes);
 
         $inventoryParams['new_images'] = [];
 
