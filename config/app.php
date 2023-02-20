@@ -180,6 +180,11 @@ return [
         App\Providers\CaptchaServiceProvider::class,
         App\Providers\PaymentServiceProvider::class,
         App\Providers\TrailerCentralIntegrationServiceProvider::class,
+
+        /*
+         * TrailerTrader Service Providers
+         */
+        App\Providers\ApiServiceProvider::class,
     ],
 
     /*

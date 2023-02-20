@@ -2,6 +2,7 @@
 
 namespace App\Services\Captcha\Google;
 
+use App;
 use App\Services\Captcha\CaptchaServiceInterface;
 use GuzzleHttp\Client;
 
