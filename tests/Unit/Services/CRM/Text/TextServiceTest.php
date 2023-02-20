@@ -626,7 +626,7 @@ class TextServiceTest extends TestCase
 
         $lead->shouldReceive('getTextPhoneAttribute')
             ->once()
-            ->andReturn(null);
+            ->andReturn('');
 
         $this->fileServiceMock
             ->shouldReceive('bulkUpload')

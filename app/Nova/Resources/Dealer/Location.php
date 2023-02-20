@@ -3,9 +3,12 @@
 namespace App\Nova\Resources\Dealer;
 
 use Illuminate\Http\Request;
-use Laravel\Nova\Fields\Text;
-use App\Nova\Resource;
+
 use Laravel\Nova\Panel;
+use Laravel\Nova\Fields\ID;
+use Laravel\Nova\Fields\Text;
+
+use App\Nova\Resource;
 
 class Location extends Resource
 {
@@ -43,7 +46,7 @@ class Location extends Resource
     public function fields(Request $request)
     {
         return [
-            Text::make('Dealer Location ID')->sortable(),
+            ID::make('Dealer Location ID')->sortable(),
 
             Text::make('Dealer ID')->sortable(),
 

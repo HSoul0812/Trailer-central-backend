@@ -538,6 +538,32 @@ class InventoryRepository implements InventoryRepositoryInterface
     }
 
     /**
+     * @param Inventory $inventory
+     * @param array $newImages
+     * @return array
+     */
+    public function createInventoryImages(Inventory $inventory, array $newImages): array
+    {
+        $inventoryImageObjs = $this->createImages($newImages);
+        $inventory->inventoryImages()->saveMany($inventoryImageObjs);
+
+        return $inventoryImageObjs;
+    }
+
+    /**
+     * @param Inventory $inventory
+     * @param array $newFiles
+     * @return array
+     */
+    public function createInventoryFiles(Inventory $inventory, array $newFiles): array
+    {
+        $inventoryFileObjs = $this->createFiles($newFiles);
+        $inventory->inventoryFiles()->saveMany($inventoryFileObjs);
+
+        return $inventoryFileObjs;
+    }
+
+    /**
      * Gets the query cursor to avoid memory leaks
      *
      * @param array $params
@@ -876,13 +902,7 @@ class InventoryRepository implements InventoryRepositoryInterface
         }
 
         if (isset($params['is_publishable_classified'])) {
-            $query = $query->join('dealer', 'dealer.dealer_id', '=', 'inventory.dealer_id');
-            if ($params['is_publishable_classified']) {
-                $query = $query->where('clsf_active', User::CLASSIFIED_ACTIVE)->where('show_on_website', Inventory::SHOW_IN_WEBSITE)->where('inventory.dealer_id', $params['dealer_id']);
-            } else {
-                $query = $query->where('clsf_active', !User::CLASSIFIED_ACTIVE)->orWhere('show_on_website', !Inventory::SHOW_IN_WEBSITE)->where('inventory.dealer_id', $params['dealer_id']);
-            }
-
+            $query = $query->where('show_on_website', $params['is_publishable_classified']);
         }
 
         return $query;

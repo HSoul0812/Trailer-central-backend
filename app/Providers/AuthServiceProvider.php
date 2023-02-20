@@ -7,6 +7,7 @@ use App\Models\CRM\Dms\Quickbooks\QuickbookApproval;
 use App\Models\CRM\Leads\Jotform\WebsiteForms;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadAssign;
+use App\Models\FeatureFlag;
 use App\Models\Feed\Factory\ShowroomGenericMap;
 use App\Models\Feed\Feed;
 use App\Models\Feed\Mapping\Incoming\ApiEntityReference;
@@ -39,6 +40,7 @@ use App\Nova\Policies\CollectorChangeReportPolicy;
 use App\Nova\Policies\CollectorFieldPolicy;
 use App\Nova\Policies\CollectorPolicy;
 use App\Nova\Policies\DealerPolicy;
+use App\Nova\Policies\FeatureFlagPolicy;
 use App\Nova\Policies\FeedPolicy;
 use App\Nova\Policies\FieldMapPolicy;
 use App\Nova\Policies\IntegrationPolicy;
@@ -117,7 +119,8 @@ class AuthServiceProvider extends ServiceProvider
         Entity::class => WebsiteEntityPolicy::class,
         Marketplace::class => MarketplacePolicy::class,
         Integration::class => IntegrationPolicy::class,
-        CollectorFields::class => CollectorFieldPolicy::class
+        CollectorFields::class => CollectorFieldPolicy::class,
+        FeatureFlag::class => FeatureFlagPolicy::class
     ];
 
     /**

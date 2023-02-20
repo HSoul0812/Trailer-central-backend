@@ -34,7 +34,7 @@ class DeleteImagesRequest extends WithDealerRequest
     {
         return $this->rules + [
                 'inventory_id' => 'integer|min:1|required|exists:inventory,inventory_id',
-                'image_ids' => 'array|required',
+                'image_ids' => 'array|nullable',
                 'image_ids.*' => 'integer|min:1|exists:inventory_image,image_id'
             ];
     }
@@ -62,6 +62,10 @@ class DeleteImagesRequest extends WithDealerRequest
                     throw new AccessDeniedHttpException(
                         'You are not allowed to delete images from this inventory'
                     );
+                }
+
+                if (empty($this->image_ids)) {
+                    return true;
                 }
 
                 $allImagesBelongsToCurrentUser = $this->getImageRepository()->getAll([

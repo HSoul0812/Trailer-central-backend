@@ -49,6 +49,7 @@ use App\Services\Inventory\ImageServiceInterface;
 use App\Services\Inventory\ImageService as ImageTableService;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
+use App\Services\ElasticSearch\Cache\UniqueCacheInvalidationInterface;
 
 /**
  * Test for App\Services\Inventory\InventoryService
@@ -144,6 +145,11 @@ class InventoryServiceTest extends TestCase
     private $responseCacheKeyMock;
 
     /**
+     * @var LegacyMockInterface|UniqueCacheInvalidationInterface
+     */
+    private $uniqueCacheInvalidationMock;
+
+    /**
      * @var LegacyMockInterface|InventoryResponseCacheInterface
      */
     private $inventoryResponseCacheMock;
@@ -211,6 +217,9 @@ class InventoryServiceTest extends TestCase
 
         $this->responseCacheKeyMock = Mockery::mock(ResponseCacheKeyInterface::class);
         $this->app->instance(ResponseCacheKeyInterface::class, $this->responseCacheKeyMock);
+
+        $this->uniqueCacheInvalidationMock = Mockery::mock(UniqueCacheInvalidationInterface::class);
+        $this->app->instance(UniqueCacheInvalidationInterface::class, $this->uniqueCacheInvalidationMock);
 
         $this->inventoryResponseCacheMock = Mockery::mock(InventoryResponseRedisCache::class);
         $this->app->instance(InventoryResponseCacheInterface::class, $this->inventoryResponseCacheMock);

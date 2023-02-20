@@ -22,7 +22,8 @@ class DealerTransformer extends TransformerAbstract
 
     protected $defaultIncludes = [
         'tunnels',
-        'inventory'
+        'missing',
+        'sold'
     ];
 
     public function __construct(
@@ -60,10 +61,18 @@ class DealerTransformer extends TransformerAbstract
         return $this->collection($dealer->tunnels, $this->tunnelTransformer);
     }
 
-    public function includeInventory(DealerFacebook $dealer)
+    public function includeMissing(DealerFacebook $dealer)
     {
-        if($dealer->inventory) {
-            return $this->item($dealer->inventory, $this->paginatorTransformer);
+        if ($dealer->missing) {
+            return $this->item($dealer->missing, $this->paginatorTransformer);
+        }
+        return $this->null();
+    }
+    
+    public function includeSold(DealerFacebook $dealer)
+    {
+        if ($dealer->sold) {
+            return $this->item($dealer->sold, $this->paginatorTransformer);
         }
         return $this->null();
     }

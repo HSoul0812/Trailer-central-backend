@@ -4,9 +4,12 @@ namespace App\Nova\Resources\Integration;
 
 use App\Models\Integration\Collector\CollectorFields;
 use App\Models\Integration\Collector\CollectorSpecificationAction as CollectorSpecificationActionModel;
+use App\Nova\Actions\Exports\CollectorSpecificationActionExport;
+use App\Nova\Actions\Importer\CollectorSpecificationActionImporter;
 use App\Nova\Resource;
 use Epartment\NovaDependencyContainer\NovaDependencyContainer;
 use Illuminate\Http\Request;
+use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 
@@ -16,7 +19,7 @@ use Laravel\Nova\Fields\Text;
  */
 class CollectorSpecificationAction extends Resource
 {
-    public static $group = 'Integration';
+    public static $group = 'Collector';
 
     /**
      * The model the resource corresponds to.
@@ -46,6 +49,12 @@ class CollectorSpecificationAction extends Resource
     public function fields(Request $request): array
     {
         return [
+            BelongsTo::make('Specification For', 'collectorSpecification', CollectorSpecification::class)
+                ->showOnIndex()
+                ->showOnDetail()
+                ->sortable()
+                ->rules('required'),
+
             Select::make('Action', 'action')
                 ->options(CollectorSpecificationActionModel::ACTION_FORMATS)
                 ->displayUsingLabels()
@@ -123,14 +132,9 @@ class CollectorSpecificationAction extends Resource
      */
     public function actions(Request $request): array
     {
-        return [];
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public static function availableForNavigation(Request $request): bool
-    {
-        return false;
+        return [
+            (new CollectorSpecificationActionExport())->withHeadings()->askForFilename(),
+            new CollectorSpecificationActionImporter()
+        ];
     }
 }
