@@ -30,6 +30,7 @@ use Illuminate\Support\Facades\Log;
 use Mockery;
 use Mockery\LegacyMockInterface;
 use Tests\TestCase;
+use App\Repositories\Website\Tracking\TrackingRepositoryInterface;
 
 /**
  * Test for App\Services\CRM\Leads\LeadService
@@ -120,6 +121,11 @@ class LeadServiceTest extends TestCase
      */
     private $customerRepositoryMock;
 
+    /**
+     * @var LegacyMockInterface|TrackingRepositoryInterface
+     */
+    private $trackingRepositoryMock;
+
     public function setUp(): void
     {
         parent::setUp();
@@ -162,6 +168,9 @@ class LeadServiceTest extends TestCase
 
         $this->customerRepositoryMock = Mockery::mock(CustomerRepositoryInterface::class);
         $this->app->instance(CustomerRepositoryInterface::class, $this->customerRepositoryMock);
+
+        $this->trackingRepositoryMock = Mockery::mock(TrackingRepositoryInterface::class);
+        $this->app->instance(TrackingRepositoryInterface::class, $this->trackingRepositoryMock);
     }
 
 
@@ -742,11 +751,11 @@ class LeadServiceTest extends TestCase
 
     /**
      * @group CRM
-     * @covers ::merge
+     * @covers ::mergeInquiry
      *
      * @throws BindingResolutionException
      */
-    public function testMerge()
+    public function testMergeInquiry()
     {
         // Get Model Mocks
         $lead = $this->getEloquentMock(Lead::class);
@@ -805,7 +814,7 @@ class LeadServiceTest extends TestCase
 
 
         // Validate Send Inquiry Result
-        $result = $service->merge($lead, $mergeLeadParams);
+        $result = $service->mergeInquiry($lead, $mergeLeadParams);
 
         // Match Merged Lead Details
         $this->assertSame($result->interaction_id, $interaction->interaction_id);
@@ -813,9 +822,9 @@ class LeadServiceTest extends TestCase
 
     /**
      * @group CRM
-     * @covers ::mergeLeads
+     * @covers ::mergeLeadData
      */
-    public function testMergeLeads()
+    public function testMergeLeadData()
     {
         $leadId = PHP_INT_MAX;
         $mergesLeadId = PHP_INT_MAX - 1;
@@ -861,23 +870,66 @@ class LeadServiceTest extends TestCase
             ->with($customerParams)
             ->once();
 
+        $this->leadRepositoryMock
+            ->shouldReceive('get')
+            ->with(['id' => $leadId])
+            ->once()
+            ->andReturn($this->getEloquentMock(Lead::class));
+
+        $this->leadRepositoryMock
+            ->shouldReceive('get')
+            ->with(['id' => $mergesLeadId])
+            ->once()
+            ->andReturn($this->getEloquentMock(Lead::class));
+
+        $this->interactionRepositoryMock
+            ->shouldReceive('batchUpdate')
+            ->with(['tc_lead_id' => $leadId], ['tc_lead_id' => $mergesLeadId])
+            ->once();
+
+        $this->interactionRepositoryMock
+            ->shouldReceive('create')
+            ->once()
+            ->andReturn($this->getEloquentMock(Interaction::class));
+
+        $this->trackingRepositoryMock
+            ->shouldReceive('batchUpdate')
+            ->with(['lead_id' => $leadId], ['lead_id' => $mergesLeadId])
+            ->once();
+
+        $this->unitRepositoryMock
+            ->shouldReceive('getUnitIds')
+            ->with($leadId)
+            ->once();
+
+        $this->unitRepositoryMock
+            ->shouldReceive('getUnitIds')
+            ->with($mergesLeadId)
+            ->once();
+
         DB::shouldReceive('commit')
             ->once();
 
         Log::shouldReceive('info')
-            ->with('leads has been successfully merged', ['leadId' => $leadId, 'mergesLeadId' => $mergesLeadId])
+            ->with('leads has been successfully merged', ['leadId' => $leadId, 'oldLeadId' => $mergesLeadId])
             ->once();
 
-        $result = $service->mergeLeads($leadId, $mergesLeadId);
+        Log::shouldReceive('error')
+            ->never();
+
+        DB::shouldReceive('rollback')
+            ->never();
+
+        $result = $service->mergeLeadData($leadId, $mergesLeadId);
 
         $this->assertTrue($result);
     }
 
     /**
      * @group CRM
-     * @covers ::mergeLeads
+     * @covers ::mergeLeadData
      */
-    public function testMergeLeadsWithError()
+    public function testMergeLeadDataWithError()
     {
         $leadId = PHP_INT_MAX;
         $mergesLeadId = PHP_INT_MAX - 1;
@@ -920,6 +972,16 @@ class LeadServiceTest extends TestCase
             ->shouldReceive('bulkUpdate')
             ->never();
 
+        $this->leadRepositoryMock
+            ->shouldReceive('get')
+            ->with(['id' => $leadId])
+            ->andReturn($this->getEloquentMock(Lead::class));
+
+        $this->leadRepositoryMock
+            ->shouldReceive('get')
+            ->with(['id' => $mergesLeadId])
+            ->never();
+
         DB::shouldReceive('rollback')
             ->once();
 
@@ -928,7 +990,138 @@ class LeadServiceTest extends TestCase
 
         $this->expectException(MergeLeadsException::class);
 
-        $service->mergeLeads($leadId, $mergesLeadId);
+        $service->mergeLeadData($leadId, $mergesLeadId);
+    }
+
+    /**
+     * @group CRM
+     * @covers ::mergeLeads
+     */
+    public function testMergeLeads()
+    {
+        $leadId = PHP_INT_MAX;
+        $mergeLeadIds = [PHP_INT_MAX - 1, PHP_INT_MAX - 2];
+
+        $this->leadRepositoryMock
+            ->shouldReceive('getNotesBetweenLeads')
+            ->once();
+
+        $this->leadRepositoryMock
+            ->shouldReceive('getMinSubmittedDateBetweenLeads')
+            ->once();
+
+        $this->leadRepositoryMock
+            ->shouldReceive('update')
+            ->once();
+
+        $this->leadRepositoryMock
+            ->shouldReceive('getMaxContactDateBetweenLeads')
+            ->once();
+
+        $this->statusRepositoryMock
+            ->shouldReceive('createOrUpdate')
+            ->once();
+
+        $this->leadRepositoryMock
+            ->shouldReceive('delete')
+            ->times(count($mergeLeadIds));
+
+
+        // Mocking @mergeLeadData
+
+        $this->emailHistoryRepositoryMock
+            ->shouldReceive('bulkUpdate')
+            ->times(count($mergeLeadIds));
+
+        $this->facebookRepositoryMock
+            ->shouldReceive('bulkUpdateFbLead')
+            ->times(count($mergeLeadIds));
+
+        $this->textRepositoryMock
+            ->shouldReceive('bulkUpdate')
+            ->times(count($mergeLeadIds));
+
+        $this->quoteRepositoryMock
+            ->shouldReceive('bulkUpdate')
+            ->times(count($mergeLeadIds));
+
+        $this->customerRepositoryMock
+            ->shouldReceive('bulkUpdate')
+            ->times(count($mergeLeadIds));
+
+        $this->leadRepositoryMock
+            ->shouldReceive('get')
+            ->with(['id' => $leadId])
+            ->times(count($mergeLeadIds))
+            ->andReturn($this->getEloquentMock(Lead::class));
+
+        $this->leadRepositoryMock
+            ->shouldReceive('get')
+            ->times(count($mergeLeadIds))
+            ->andReturn($this->getEloquentMock(Lead::class));
+
+        $this->interactionRepositoryMock
+            ->shouldReceive('batchUpdate')
+            ->times(count($mergeLeadIds));
+
+        $this->interactionRepositoryMock
+            ->shouldReceive('create')
+            ->times(count($mergeLeadIds))
+            ->andReturn($this->getEloquentMock(Interaction::class));
+
+        $this->trackingRepositoryMock
+            ->shouldReceive('batchUpdate')
+            ->times(count($mergeLeadIds));
+
+        $this->unitRepositoryMock
+            ->shouldReceive('getUnitIds')
+            ->with($leadId)
+            ->times(count($mergeLeadIds));
+
+        $this->unitRepositoryMock
+            ->shouldReceive('getUnitIds')
+            ->times(count($mergeLeadIds));
+    
+
+        /** @var LegacyMockInterface|LeadServiceInterface $service */
+        $service = $this->app->make(LeadServiceInterface::class);
+
+        $service->mergeLeads($leadId, $mergeLeadIds);
+    }
+
+    /**
+     * @group CRM
+     * @covers ::mergeUnits
+     */
+    public function testMergeUnits()
+    {
+        $leadId = PHP_INT_MAX;
+        $mergeLeadId = PHP_INT_MAX - 1;
+
+        $this->unitRepositoryMock
+            ->shouldReceive('getUnitIds')
+            ->with($leadId)
+            ->once()
+            ->andReturn([1, 2]);
+
+        $this->unitRepositoryMock
+            ->shouldReceive('getUnitIds')
+            ->with($mergeLeadId)
+            ->once()
+            ->andReturn([2, 3]);
+
+        $this->unitRepositoryMock
+            ->shouldReceive('create')
+            ->with([
+                'inventory_id' => 3,
+                'website_lead_id' => $leadId
+            ])
+            ->once();
+
+        /** @var LegacyMockInterface|LeadServiceInterface $service */
+        $service = $this->app->make(LeadServiceInterface::class);
+
+        $service->mergeUnits($leadId, $mergeLeadId);
     }
 
     /**

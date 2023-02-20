@@ -10,19 +10,24 @@ use App\Nova\Actions\Dealer\DeactivateECommerce;
 use App\Nova\Actions\Dealer\HiddenIntegrations\ActivateELeads;
 use App\Nova\Actions\Dealer\HiddenIntegrations\DeactivateELeads;
 use App\Nova\Actions\Dealer\Subscriptions\CDK\ActivateCdk;
+use App\Nova\Actions\Dealer\Subscriptions\CDK\DeactivateCdk;
 use App\Nova\Actions\Dealer\Subscriptions\CRM\ActivateCrm;
 use App\Nova\Actions\Dealer\Subscriptions\CRM\DeactivateCrm;
 use App\Nova\Actions\Dealer\Subscriptions\DealerClassifieds\ActivateDealerClassifieds;
 use App\Nova\Actions\Dealer\Subscriptions\DealerClassifieds\DeactivateDealerClassifieds;
+use App\Nova\Actions\Dealer\Subscriptions\DMS\ActivateDms;
 use App\Nova\Actions\Dealer\Subscriptions\DMS\DeactivateDms;
 use App\Nova\Actions\Dealer\Subscriptions\ECommerce\ActivateECommerce;
 use App\Nova\Actions\Dealer\Subscriptions\Google\ActivateGoogleFeed;
 use App\Nova\Actions\Dealer\Subscriptions\Google\DeactivateGoogleFeed;
 use App\Nova\Actions\Dealer\Subscriptions\Marketing\ActivateMarketing;
 use App\Nova\Actions\Dealer\Subscriptions\Marketing\DeactivateMarketing;
+use App\Nova\Actions\Dealer\Subscriptions\MobileSite\ActivateMobileSite;
+use App\Nova\Actions\Dealer\Subscriptions\MobileSite\DeactivateMobileSite;
 use App\Nova\Actions\Dealer\Subscriptions\Parts\ActivateParts;
 use App\Nova\Actions\Dealer\Subscriptions\Parts\DeactivateParts;
 use App\Nova\Actions\Dealer\Subscriptions\QuoteManager\ActivateQuoteManager;
+use App\Nova\Actions\Dealer\Subscriptions\QuoteManager\DeactivateQuoteManager;
 use App\Nova\Actions\Dealer\Subscriptions\Scheduler\ActivateScheduler;
 use App\Nova\Actions\Dealer\Subscriptions\Scheduler\DeactivateScheduler;
 use App\Nova\Resource;
@@ -31,9 +36,7 @@ use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\BooleanGroup;
-use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\Password;
-use Laravel\Nova\Fields\PasswordConfirmation;
 use Laravel\Nova\Fields\Stack;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\ActionRequest;
@@ -72,7 +75,7 @@ class Dealer extends Resource
     /**
      * Get the fields displayed by the resource.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param Request $request
      * @return array
      */
     public function fields(Request $request): array
@@ -140,7 +143,7 @@ class Dealer extends Resource
                 ->onlyOnForms()
                 ->creationRules('required', 'string', 'min:12', 'regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[\d\x])(?=.*[!$#%]).*$/')
                 ->updateRules('nullable', 'string', 'min:12', 'regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[\d\x])(?=.*[!$#%]).*$/')
-                ->fillUsing(function($request, $model, $attribute, $requestAttribute) {
+                ->fillUsing(function ($request, $model, $attribute, $requestAttribute) {
                     if (!empty($request[$requestAttribute])) {
                         $model->{$attribute} = $request[$requestAttribute];
                     }
@@ -210,7 +213,7 @@ class Dealer extends Resource
     /**
      * Get the cards available for the request.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param Request $request
      * @return array
      */
     public function cards(Request $request): array
@@ -221,7 +224,7 @@ class Dealer extends Resource
     /**
      * Get the filters available for the resource.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param Request $request
      * @return array
      */
     public function filters(Request $request): array
@@ -232,7 +235,7 @@ class Dealer extends Resource
     /**
      * Get the lenses available for the resource.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param Request $request
      * @return array
      */
     public function lenses(Request $request): array
@@ -243,212 +246,232 @@ class Dealer extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param Request $request
      * @return array
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
     public function actions(Request $request): array
     {
         return [
-            app()->make(ActivateCdk::class)->canSee(function ($request) {
+            app()->make(ActivateCdk::class)->exceptOnTableRow(),
+            app()->make(DeactivateCdk::class)->exceptOnTableRow(),
+            app()->make(ActivateCrm::class)->exceptOnTableRow(),
+            app()->make(DeactivateCrm::class)->exceptOnTableRow(),
+            app()->make(ActivateDealerClassifieds::class)->exceptOnTableRow(),
+            app()->make(DeactivateDealerClassifieds::class)->exceptOnTableRow(),
+            app()->make(ActivateDms::class)->exceptOnTableRow(),
+            app()->make(DeactivateDms::class)->exceptOnTableRow(),
+            app()->make(ActivateECommerce::class)->exceptOnTableRow(),
+            app()->make(DeactivateECommerce::class)->exceptOnTableRow(),
+            app()->make(ActivateELeads::class)->exceptOnTableRow(),
+            app()->make(DeactivateELeads::class)->exceptOnTableRow(),
+            app()->make(ActivateGoogleFeed::class)->exceptOnTableRow(),
+            app()->make(DeactivateGoogleFeed::class)->exceptOnTableRow(),
+            app()->make(ActivateMarketing::class)->exceptOnTableRow(),
+            app()->make(DeactivateMarketing::class)->exceptOnTableRow(),
+            app()->make(ActivateMobileSite::class)->exceptOnTableRow(),
+            app()->make(DeactivateMobileSite::class)->exceptOnTableRow(),
+            app()->make(ActivateParts::class)->exceptOnTableRow(),
+            app()->make(DeactivateParts::class)->exceptOnTableRow(),
+            app()->make(ActivateQuoteManager::class)->exceptOnTableRow(),
+            app()->make(DeactivateQuoteManager::class)->exceptOnTableRow(),
+            app()->make(ActivateScheduler::class)->exceptOnTableRow(),
+            app()->make(DeactivateScheduler::class)->exceptOnTableRow(),
+            app()->make(ActivateUserAccounts::class)->exceptOnTableRow(),
+            app()->make(DeactivateUserAccounts::class)->exceptOnTableRow(),
+            app()->make(DeactivateDealer::class)->exceptOnTableRow(),
+
+            // Table Row can see
+            app()->make(ActivateCdk::class)->onlyOnTableRow()->canSee(function ($request) {
                 if ($request instanceof ActionRequest) {
                     return true;
                 }
 
                 return $this->resource instanceof Model && !$this->resource->isCdkActive;
             }),
-            app()->make(\App\Nova\Actions\Dealer\Subscriptions\CDK\DeactivateCdk::class)->canSee(function ($request) {
+            app()->make(DeactivateCdk::class)->onlyOnTableRow()->canSee(function ($request) {
                 if ($request instanceof ActionRequest) {
                     return true;
                 }
 
                 return $this->resource instanceof Model && $this->resource->isCdkActive;
             }),
-            app()->make(ActivateCrm::class)->canSee(function ($request) {
+            app()->make(ActivateCrm::class)->onlyOnTableRow()->canSee(function ($request) {
                 if ($request instanceof ActionRequest) {
                     return true;
                 }
 
                 return $this->resource instanceof Model && !$this->resource->isCrmActive;
             }),
-            app()->make(DeactivateCrm::class)->canSee(function ($request) {
+            app()->make(DeactivateCrm::class)->onlyOnTableRow()->canSee(function ($request) {
                 if ($request instanceof ActionRequest) {
                     return true;
                 }
 
                 return $this->resource instanceof Model && $this->resource->isCrmActive;
             }),
-            app()->make(ActivateDealerClassifieds::class)->canSee(function ($request) {
+            app()->make(ActivateDealerClassifieds::class)->onlyOnTableRow()->canSee(function ($request) {
                 if ($request instanceof ActionRequest) {
                     return true;
                 }
 
                 return $this->resource instanceof Model && !$this->resource->clsf_active;
             }),
-            app()->make(DeactivateDealerClassifieds::class)->canSee(function ($request) {
+            app()->make(DeactivateDealerClassifieds::class)->onlyOnTableRow()->canSee(function ($request) {
                 if ($request instanceof ActionRequest) {
                     return true;
                 }
 
                 return $this->resource instanceof Model && $this->resource->clsf_active;
             }),
-            app()->make(\App\Nova\Actions\Dealer\Subscriptions\DMS\ActivateDms::class)->canSee(function ($request) {
+            app()->make(ActivateDms::class)->onlyOnTableRow()->canSee(function ($request) {
                 if ($request instanceof ActionRequest) {
                     return true;
                 }
 
                 return $this->resource instanceof Model && !$this->resource->is_dms_active;
             }),
-            app()->make(DeactivateDms::class)->canSee(function ($request) {
+            app()->make(DeactivateDms::class)->onlyOnTableRow()->canSee(function ($request) {
                 if ($request instanceof ActionRequest) {
                     return true;
                 }
 
                 return $this->resource instanceof Model && $this->resource->is_dms_active;
             }),
-            app()->make(ActivateECommerce::class)->canSee(function ($request) {
+            app()->make(ActivateECommerce::class)->onlyOnTableRow()->canSee(function ($request) {
                 if ($request instanceof ActionRequest) {
                     return true;
                 }
 
                 return $this->resource instanceof Model && !$this->resource->isEcommerceActive;
             }),
-            app()->make(DeactivateECommerce::class)->canSee(function ($request) {
+            app()->make(DeactivateECommerce::class)->onlyOnTableRow()->canSee(function ($request) {
                 if ($request instanceof ActionRequest) {
                     return true;
                 }
 
                 return $this->resource instanceof Model && $this->resource->isEcommerceActive;
             }),
-            app()->make(ActivateELeads::class)->canSee(function ($request) {
+            app()->make(ActivateELeads::class)->onlyOnTableRow()->canSee(function ($request) {
                 if ($request instanceof ActionRequest) {
                     return true;
                 }
 
                 return $this->resource instanceof Model && !$this->resource->isELeadsActive;
             }),
-            app()->make(DeactivateELeads::class)->canSee(function ($request) {
+            app()->make(DeactivateELeads::class)->onlyOnTableRow()->canSee(function ($request) {
                 if ($request instanceof ActionRequest) {
                     return true;
                 }
 
                 return $this->resource instanceof Model && $this->resource->isELeadsActive;
             }),
-            app()->make(ActivateGoogleFeed::class)->canSee(function ($request) {
+            app()->make(ActivateGoogleFeed::class)->onlyOnTableRow()->canSee(function ($request) {
                 if ($request instanceof ActionRequest) {
                     return true;
                 }
 
                 return $this->resource instanceof Model && !$this->resource->isELeadsActive;
             }),
-            app()->make(DeactivateGoogleFeed::class)->canSee(function ($request) {
+            app()->make(DeactivateGoogleFeed::class)->onlyOnTableRow()->canSee(function ($request) {
                 if ($request instanceof ActionRequest) {
                     return true;
                 }
 
                 return $this->resource instanceof Model && $this->resource->isELeadsActive;
             }),
-            app()->make(ActivateMarketing::class)->canSee(function ($request) {
+            app()->make(ActivateMarketing::class)->onlyOnTableRow()->canSee(function ($request) {
                 if ($request instanceof ActionRequest) {
                     return true;
                 }
 
                 return $this->resource instanceof Model && !$this->resource->isMarketingActive;
             }),
-            app()->make(DeactivateMarketing::class)->canSee(function ($request) {
+            app()->make(DeactivateMarketing::class)->onlyOnTableRow()->canSee(function ($request) {
                 if ($request instanceof ActionRequest) {
                     return true;
                 }
 
                 return $this->resource instanceof Model && $this->resource->isMarketingActive;
             }),
-            app()->make(\App\Nova\Actions\Dealer\Subscriptions\MobileSite\ActivateMobileSite::class)->canSee(function ($request) {
+            app()->make(ActivateMobileSite::class)->onlyOnTableRow()->canSee(function ($request) {
                 if ($request instanceof ActionRequest) {
                     return true;
                 }
 
                 return $this->resource instanceof Model && !$this->resource->isMobileActive;
             }),
-            app()->make(\App\Nova\Actions\Dealer\Subscriptions\MobileSite\DeactivateMobileSite::class)->canSee(function ($request) {
+            app()->make(DeactivateMobileSite::class)->onlyOnTableRow()->canSee(function ($request) {
                 if ($request instanceof ActionRequest) {
                     return true;
                 }
 
                 return $this->resource instanceof Model && $this->resource->isMobileActive;
             }),
-            app()->make(ActivateParts::class)->canSee(function ($request) {
+            app()->make(ActivateParts::class)->onlyOnTableRow()->canSee(function ($request) {
                 if ($request instanceof ActionRequest) {
                     return true;
                 }
 
                 return $this->resource instanceof Model && !$this->resource->isPartsActive;
             }),
-            app()->make(DeactivateParts::class)->canSee(function ($request) {
+            app()->make(DeactivateParts::class)->onlyOnTableRow()->canSee(function ($request) {
                 if ($request instanceof ActionRequest) {
                     return true;
                 }
 
                 return $this->resource instanceof Model && $this->resource->isPartsActive;
             }),
-            app()->make(ActivateQuoteManager::class)->canSee(function ($request) {
+            app()->make(ActivateQuoteManager::class)->onlyOnTableRow()->canSee(function ($request) {
                 if ($request instanceof ActionRequest) {
                     return true;
                 }
 
                 return $this->resource instanceof Model && !$this->resource->is_quote_manager_active;
             }),
-            app()->make(\App\Nova\Actions\Dealer\Subscriptions\QuoteManager\DeactivateQuoteManager::class)->canSee(function ($request) {
+            app()->make(DeactivateQuoteManager::class)->onlyOnTableRow()->canSee(function ($request) {
                 if ($request instanceof ActionRequest) {
                     return true;
                 }
 
                 return $this->resource instanceof Model && $this->resource->is_quote_manager_active;
             }),
-            app()->make(ActivateScheduler::class)->canSee(function ($request) {
+            app()->make(ActivateScheduler::class)->onlyOnTableRow()->canSee(function ($request) {
                 if ($request instanceof ActionRequest) {
                     return true;
                 }
 
                 return $this->resource instanceof Model && !$this->resource->is_scheduler_active;
             }),
-            app()->make(DeactivateScheduler::class)->canSee(function ($request) {
+            app()->make(DeactivateScheduler::class)->onlyOnTableRow()->canSee(function ($request) {
                 if ($request instanceof ActionRequest) {
                     return true;
                 }
 
                 return $this->resource instanceof Model && $this->resource->is_scheduler_active;
             }),
-            app()->make(ActivateUserAccounts::class)->canSee(function ($request) {
+            app()->make(ActivateUserAccounts::class)->onlyOnTableRow()->canSee(function ($request) {
                 if ($request instanceof ActionRequest) {
                     return true;
                 }
 
                 return $this->resource instanceof Model && !$this->resource->isUserAccountsActive;
             }),
-            app()->make(DeactivateUserAccounts::class)->canSee(function ($request) {
+            app()->make(DeactivateUserAccounts::class)->onlyOnTableRow()->canSee(function ($request) {
                 if ($request instanceof ActionRequest) {
                     return true;
                 }
 
                 return $this->resource instanceof Model && $this->resource->isUserAccountsActive;
             }),
-            app()->make(ChangeStatus::class),
-            app()->make(DeactivateDealer::class)->canSee(function ($request) {
+            app()->make(DeactivateDealer::class)->onlyOnTableRow()->canSee(function ($request) {
                 if ($request instanceof ActionRequest) {
                     return true;
                 }
 
                 return $this->resource instanceof Model && !$this->resource->deleted;
             }),
+
+            app()->make(ChangeStatus::class),
         ];
-    }
-
-    public function validateActionState($request, bool $validation): bool
-    {
-        if ($request instanceof ActionRequest) {
-            return true;
-        }
-
-        return $this->resource instanceof Model && $validation;
     }
 }

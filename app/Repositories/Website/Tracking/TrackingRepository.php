@@ -127,4 +127,14 @@ class TrackingRepository implements TrackingRepositoryInterface
             'date_inquired' => Carbon::now()->setTimezone('UTC')->toDateTimeString()
         ]);
     }
+
+    /**
+     * @param array $data Data to replace
+     * @param array $where Condition
+     * @return int Total data affected
+     */
+    public function batchUpdate(array $data, array $where)
+    {
+        return Tracking::where($where)->update($data);
+    }
 }

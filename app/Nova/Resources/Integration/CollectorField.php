@@ -25,7 +25,7 @@ use App\Models\Integration\Collector\CollectorFields;
  */
 class CollectorField extends Resource
 {
-    public static $group = 'Integration';
+    public static $group = 'Collector';
 
     /**
      * The model the resource corresponds to.
