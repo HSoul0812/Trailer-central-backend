@@ -36,7 +36,7 @@ class CreateViewedDealerAction
             ViewedDealer::query()->upsert(
                 values: $viewedDealers,
                 uniqueBy: ['name'],
-                update: ['dealer_id']
+                update: ['dealer_id', 'inventory_id']
             );
         } catch (QueryException $exception) {
             throw $this->captureQueryException($exception);

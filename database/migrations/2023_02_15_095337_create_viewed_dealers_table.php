@@ -15,8 +15,9 @@ class CreateViewedDealersTable extends Migration
     {
         Schema::create('viewed_dealers', function (Blueprint $table) {
             $table->id();
-            $table->unsignedInteger('dealer_id');
             $table->string('name');
+            $table->unsignedInteger('dealer_id');
+            $table->unsignedBigInteger('inventory_id');
             $table->timestamps();
 
             // We maintain uniqueness in TT even though it's not unique in TC
