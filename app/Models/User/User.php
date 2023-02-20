@@ -534,4 +534,16 @@ class User extends Model implements Authenticatable, PermissionsInterface
         }
         $this->attributes['password'] = $encrypterService->encryptBySalt($value, $salt);
     }
+
+    /**
+     * Unserializes and returns the serialized showroom dealers
+     * @return array|null
+     */
+    public function getShowroomDealers():?array
+    {
+        if ($this->showroom_dealers) {
+            return array_values(array_filter(unserialize($this->showroom_dealers)));
+        }
+        return null;
+    }
 }

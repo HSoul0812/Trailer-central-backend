@@ -7,6 +7,7 @@ use App\Models\CRM\Dms\Quickbooks\QuickbookApproval;
 use App\Models\CRM\Leads\Jotform\WebsiteForms;
 use App\Models\CRM\Leads\Lead;
 use App\Models\CRM\Leads\LeadAssign;
+use App\Models\FeatureFlag;
 use App\Models\Feed\Factory\ShowroomGenericMap;
 use App\Models\Feed\Feed;
 use App\Models\Feed\Mapping\ExternalDealerMapping;
@@ -48,6 +49,7 @@ use App\Nova\Policies\CollectorSpecificationActionPolicy;
 use App\Nova\Policies\CollectorSpecificationPolicy;
 use App\Nova\Policies\CollectorSpecificationRulePolicy;
 use App\Nova\Policies\DealerPolicy;
+use App\Nova\Policies\FeatureFlagPolicy;
 use App\Nova\Policies\ExternalDealerMappingPolicy;
 use App\Nova\Policies\FeedPolicy;
 use App\Nova\Policies\FieldMapPolicy;
@@ -77,7 +79,6 @@ use App\Nova\Policies\RolePolicy;
 use App\Nova\Policies\ShowroomGenericMapPolicy;
 use App\Nova\Policies\TransactionExecuteQueuePolicy;
 use App\Nova\Policies\UserPolicy;
-use App\Nova\Policies\WebsiteEntityPolicy;
 use App\Nova\Policies\WebsiteEntityPolicy;
 use App\Nova\Policies\WebsitePolicy;
 
@@ -130,10 +131,11 @@ class AuthServiceProvider extends ServiceProvider
         Marketplace::class => MarketplacePolicy::class,
         Integration::class => IntegrationPolicy::class,
         ExternalDealerMapping::class => ExternalDealerMappingPolicy::class,
-        CollectorFields::class => CollectorFieldPolicy::class
+        CollectorFields::class => CollectorFieldPolicy::class,
         CollectorSpecification::class => CollectorSpecificationPolicy::class,
         CollectorSpecificationRule::class => CollectorSpecificationRulePolicy::class,
-        CollectorSpecificationAction::class => CollectorSpecificationActionPolicy::class
+        CollectorSpecificationAction::class => CollectorSpecificationActionPolicy::class,
+        FeatureFlag::class => FeatureFlagPolicy::class
     ];
 
     /**

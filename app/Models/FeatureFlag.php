@@ -27,8 +27,8 @@ class FeatureFlag extends Model
     /** @var string */
     public const CREATED_AT = 'created_at';
 
-    /** @var string to avoid touching the model on updates */
-    public const UPDATED_AT = null;
+    /** @var string */
+    public const UPDATED_AT = 'last_updated_at';
 
     /**
      * The table associated with the model.
@@ -65,7 +65,7 @@ class FeatureFlag extends Model
     protected $casts = ['is_enabled' => 'boolean'];
 
     /** @var array<string> */
-    protected $dates = ['created_at'];
+    protected $dates = ['created_at', 'last_updated_at'];
 
     /** @var array<string> */
     protected $hidden = ['created_at'];

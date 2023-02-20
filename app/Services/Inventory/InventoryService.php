@@ -337,6 +337,12 @@ class InventoryService implements InventoryServiceInterface
                     $params['new_images'] = $this->uploadImages($params, 'new_images');
                 }
 
+                if (!empty($params['status']) && $params['status'] == Inventory::STATUS_SOLD) {
+                    $params['sold_at'] = Carbon::now()->format('Y-m-d H:i:s');
+                } else {
+                    $params['sold_at'] = null;
+                }
+
                 $newFiles = $params['new_files'] = array_merge($newFiles, $hiddenFiles);
                 unset($params['hidden_files']);
 
@@ -365,7 +371,7 @@ class InventoryService implements InventoryServiceInterface
                     }
                 }
 
-                $inventory = $this->inventoryRepository->update($params, $options);    
+                $inventory = $this->inventoryRepository->update($params, $options);
                 $changes = $inventory->getChanges();
 
                 if (!$inventory instanceof Inventory) {
@@ -725,7 +731,6 @@ class InventoryService implements InventoryServiceInterface
                 $localNewImagePath = $this->imageService->addOverlays($this->getS3BaseUrl() . $originalFilename, $overlayParams);
 
                 if (!empty($localNewImagePath)) {
-
                     // upload overlay image
                     $randomFilename = md5($localNewImagePath);
                     $newFilename = $this->imageService->uploadToS3($localNewImagePath, $randomFilename, $overlayParams['dealer_id']);
@@ -1144,13 +1149,13 @@ class InventoryService implements InventoryServiceInterface
     public function convertMarkdown($input): string
     {
         $input = str_replace('\n', PHP_EOL, $input);
-        $input = str_replace('\\' . PHP_EOL, PHP_EOL . PHP_EOL, $input); // to fix CDW-824 problems
-        $input = str_replace('\\' . PHP_EOL . 'n', PHP_EOL . PHP_EOL . PHP_EOL, $input);
+        //$input = str_replace('\\' . PHP_EOL, PHP_EOL . PHP_EOL, $input); // to fix CDW-824 problems
+        //$input = str_replace('\\' . PHP_EOL . 'n', PHP_EOL . PHP_EOL . PHP_EOL, $input);
 
         $input = str_replace('\\\\', '', $input);
         $input = str_replace('\\,', ',', $input);
-        $input = str_replace('****', '', $input);
-        $input = str_replace('__', '', $input);
+        //$input = str_replace('****', '', $input);
+        //$input = str_replace('__', '', $input);
 
         $input = str_replace('<BR>', '<br>', $input);
         $input = str_replace('<BR/>', '<br>', $input);
@@ -1166,6 +1171,8 @@ class InventoryService implements InventoryServiceInterface
         try {
             // Initialize Markdown Converter
             $converter = new \Parsedown(); // This parser is 10x faster than the CommonMarkConverter
+            $converter->setBreaksEnabled(true);
+            $converter->setSafeMode(false);
             $converted = $converter->text($input);
         } catch(\Exception $e) {
             $exception = $e->getMessage();
@@ -1185,8 +1192,10 @@ class InventoryService implements InventoryServiceInterface
 
         $description = $this->fixNonAsciiChars($description);
 
+        $description = preg_replace("/\r|\n/", "", $description);
+        $description = str_replace("\n", PHP_EOL, $description);
         // Return
-        return $description.PHP_EOL;
+        return $description;
     }
 
     /**
@@ -1221,18 +1230,27 @@ class InventoryService implements InventoryServiceInterface
 
         //$description = preg_replace('/[[:^print:]]/', ' ', $description);
 
-        preg_match('/<ul>(.*?)<\/ul>/s', $description, $match);
-        if (!empty($match)) {
+//        preg_match('/<blockquote>(.*?)<\/blockquote>/s', $description, $match);
+//        if (!empty($match[0])) {
+//            $new_ul = strip_tags($match[0], '<blockquote><br><ul><ol><li><a><b><strong>');
+//            $description = str_replace($match[0], $new_ul, $description);
+//        }
+
+
+        preg_match('/<ul.*>(.*?)<\/ul>/s', $description, $match);
+        if (!empty($match[0])) {
             $new_ul = strip_tags($match[0], '<ul><li><a><b><strong>');
             $description = str_replace($match[0], $new_ul, $description);
         }
 
         // Only accepts necessary tags
-        preg_match('/<ol>(.*?)<\/ol>/s', $description, $match);
-        if (!empty($match)) {
-            $new_ol = strip_tags($match[0], '<ul><li><a><b><strong>');
+        preg_match('/<ol.*>(.*?)<\/ol>/s', $description, $match);
+        if (!empty($match[0])) {
+            $new_ol = strip_tags($match[0], '<ol><li><a><b><strong>');
             $description = str_replace($match[0], $new_ol, $description);
         }
+
+        $description = str_replace('\n', '', $description);
 
         return $description;
     }

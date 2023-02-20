@@ -64,20 +64,24 @@ class ExtraWebsiteConfigService implements ExtraWebsiteConfigServiceInterface
     public function getAllByWebsiteId(int $websiteId): Collection
     {
         $website = $this->getWebsiteById($websiteId);
-        $dealer = $this->getDealerById($website->dealer_id);
+        $mainDealer = $this->getDealerById($website->dealer_id);
 
-        $showroomDealers = [];
-
+        $showroomDealers = $mainDealer->getShowroomDealers() ?? [];
         try {
-            if ($dealer->showroom_dealers) {
-                $showroomDealers = array_values(array_filter(unserialize($dealer->showroom_dealers)));
+            $dealersIds = $website->getFilterValue('dealer_id') ?? [];
+            foreach ($dealersIds as $dealerId) {
+                $dealer = $this->getDealerById((int)$dealerId);
+                if ($dealers = $dealer->getShowroomDealers()) {
+                    $showroomDealers = array_merge($showroomDealers, $dealers);
+                }
             }
+            $showroomDealers = array_unique($showroomDealers);
         } catch (\Exception $exception) {
             $this->logger->error('`ExtraWebsiteConfigService::getAll` has failed to unserialize `showroom_dealers`');
         }
 
         return collect([
-            'include_showroom' => (bool)$dealer->showroom,
+            'include_showroom' => (bool)$mainDealer->showroom,
             'showroom_dealers' => $showroomDealers,
             'available_showroom_dealers' => $this->showroomRepository->distinctByManufacturers(),
             'global_filter' => $website->type_config
@@ -113,7 +117,7 @@ class ExtraWebsiteConfigService implements ExtraWebsiteConfigServiceInterface
             $dealer->save();
 
             if (array_key_exists('global_filter', $params)) {
-                $website->type_config = (string) $params['global_filter'];
+                $website->type_config = (string)$params['global_filter'];
                 $website->save();
             }
 
