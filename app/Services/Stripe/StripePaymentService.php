@@ -2,15 +2,12 @@
 
 namespace App\Services\Stripe;
 
-use App\DTOs\Inventory\TcApiResponseInventory;
 use App\Repositories\Payment\PaymentLogRepositoryInterface;
 use App\Services\Inventory\InventoryServiceInterface;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Routing\Redirector;
 use Illuminate\Support\Carbon;
 use Stripe\Exception\SignatureVerificationException;
 use Stripe\Exception\UnexpectedValueException;
+use Stripe\Product;
 use Stripe\Stripe;
 use Stripe\StripeObject;
 use Stripe\Webhook;
@@ -70,71 +67,9 @@ class StripePaymentService implements StripePaymentServiceInterface
         return (int)str_replace('.', '', $numberWithTwoDecimals);
     }
 
-    public function createCheckoutSession(string $planId, array $metadata = []): string
-    {
-        $siteUrl = config('app.site_url');
-
-        $inventoryId = $metadata['inventory_id'];
-        $userId = $metadata['user_id'];
-
-        $plan = self::PLANS[$planId];
-        $planName = $plan['name'];
-        $planDuration = $plan['duration'];
-        $planDescription = $plan['description'];
-        $planDescription = str_replace('{id}', $inventoryId, $planDescription);
-        $planDescription = str_replace('{user_id}', $userId, $planDescription);
-
-        $metadata['planKey'] = $planId;
-        $metadata['planName'] = $planName;
-        $metadata['planDescription'] = $planDescription;
-        $metadata['planDuration'] = $planDuration;
-
-        $product = $this->findOrCreatePlan($planId);
-
-        $priceObjects[] = [
-            'price' => $product->default_price,
-            'quantity' => 1,
-        ];
-
-        $successUrl = str_replace('{id}', $inventoryId, self::STRIPE_SUCCESS_URL);
-        $failUrl = str_replace('{id}', $inventoryId, self::STRIPE_FAILURE_URL);
-
-        $checkout_session = Session::create([
-            'line_items' => $priceObjects,
-            'client_reference_id' => 'tt' . Str::uuid(),
-            'metadata' => $metadata,
-            'mode' => 'payment',
-            'success_url' => $siteUrl .$successUrl,
-            'cancel_url' => $siteUrl . $failUrl,
-        ]);
-
-        return $checkout_session->url;
-    }
-
-    public function handleEvent(): int
-    {
-        $endpointSecret = config('services.stripe.webhook_secret_key');
-        $payload = @file_get_contents('php://input');
-        $sigHeader = request()->server('HTTP_STRIPE_SIGNATURE');
-        try {
-            $event = Webhook::constructEvent(
-                $payload, $sigHeader, $endpointSecret
-            );
-        } catch (UnexpectedValueException|SignatureVerificationException $e) {
-            \Log::critical('Failed creating webhook: ' . $e->getMessage());
-            return 400;
-        }
-        \Log::info('Event type: ' . $event->type);
-        if ($event->type == self::CHECKOUT_SESSION_COMPLETED_EVENT) {
-            $session = $event->data->object;
-            return $this->completeOrder($session);
-        }
-        return 200;
-    }
-
     private function findOrCreatePlan(string $planId): StripeObject {
         $plan = self::PLANS[$planId];
-        $response = \Stripe\Product::search([
+        $response = Product::search([
             'query' => "name:'{$plan['name']}' and active:'true'"
         ]);
 
@@ -142,7 +77,7 @@ class StripePaymentService implements StripePaymentServiceInterface
             return $response->data[0];
         }
 
-        $product = \Stripe\Product::create([
+        $product = Product::create([
             'name' => $planId,
             'description' => $plan['description'],
             'default_price_data' => [
@@ -207,5 +142,76 @@ class StripePaymentService implements StripePaymentServiceInterface
             \Log::critical('Failed fulfilling order: ' . $e->getMessage());
             return 500;
         }
+    }
+
+    public function createCheckoutSession(string $planId, array $metadata = []): string
+    {
+        $siteUrl = config('app.site_url');
+
+        $inventoryId = $metadata['inventory_id'];
+        $userId = $metadata['user_id'];
+
+        $plan = self::PLANS[$planId];
+        $planName = $plan['name'];
+        $planDuration = $plan['duration'];
+        $planDescription = $plan['description'];
+        $planDescription = str_replace('{id}', $inventoryId, $planDescription);
+        $planDescription = str_replace('{user_id}', $userId, $planDescription);
+
+        $metadata['planKey'] = $planId;
+        $metadata['planName'] = $planName;
+        $metadata['planDescription'] = $planDescription;
+        $metadata['planDuration'] = $planDuration;
+
+        $product = $this->findOrCreatePlan($planId);
+
+        $priceObjects[] = [
+            'price' => $product->default_price,
+            'quantity' => 1,
+        ];
+
+        $successUrl = str_replace('{id}', $inventoryId, self::STRIPE_SUCCESS_URL);
+        $failUrl = str_replace('{id}', $inventoryId, self::STRIPE_FAILURE_URL);
+
+        $checkout_session = Session::create([
+            'line_items' => $priceObjects,
+            'client_reference_id' => 'tt' . Str::uuid(),
+            'metadata' => $metadata,
+            'mode' => 'payment',
+            'success_url' => $siteUrl .$successUrl,
+            'cancel_url' => $siteUrl . $failUrl,
+        ]);
+
+        return $checkout_session->url;
+    }
+
+    public function handleEvent(): int
+    {
+        $endpointSecret = config('services.stripe.webhook_secret_key');
+        $payload = @file_get_contents('php://input');
+        $sigHeader = request()->server('HTTP_STRIPE_SIGNATURE');
+        try {
+            $event = Webhook::constructEvent(
+                $payload, $sigHeader, $endpointSecret
+            );
+        } catch (UnexpectedValueException|SignatureVerificationException $e) {
+            \Log::critical('Failed creating webhook: ' . $e->getMessage());
+            return 400;
+        }
+        \Log::info('Event type: ' . $event->type);
+        if ($event->type == self::CHECKOUT_SESSION_COMPLETED_EVENT) {
+            $session = $event->data->object;
+            return $this->completeOrder($session);
+        }
+        return 200;
+    }
+
+    public function paymentPlans(): array
+    {
+        $plans = [];
+        foreach(self::PLANS as $planId => $plan) {
+            $plans[] = array_merge(['id' => $planId], $plan);
+        }
+        return $plans;
     }
 }
