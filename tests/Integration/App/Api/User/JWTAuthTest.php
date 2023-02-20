@@ -34,7 +34,7 @@ class JWTAuthTest extends IntegrationTestCase
      */
     public function testItCanGenerateAJwtTokenWhenCredentialsIsCorrect(): void
     {
-        $password = 'password';
+        $password = $this->faker->password();
 
         $websiteUser = WebsiteUser::factory()->create([
             'password' => $password,
@@ -58,7 +58,7 @@ class JWTAuthTest extends IntegrationTestCase
      */
     public function testItCanRefreshJwtToken(): void
     {
-        $password = 'password';
+        $password = $this->faker->password();
 
         $websiteUser = WebsiteUser::factory()->create([
             'password' => $password,
@@ -87,7 +87,7 @@ class JWTAuthTest extends IntegrationTestCase
      */
     public function testItCanLogOutOrInvalidateJwtToken(): void
     {
-        $password = 'password';
+        $password = $this->faker->password();
 
         $websiteUser = WebsiteUser::factory()->create([
             'password' => $password,
