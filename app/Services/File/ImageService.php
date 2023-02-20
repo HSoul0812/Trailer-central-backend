@@ -70,7 +70,7 @@ class ImageService extends AbstractFileService
             $imageInfo = getimagesize($localFilename);
         }
 
-        if (isset($imageInfo) && in_array($imageInfo['mime'], array_keys(self::EXTENSION_MAPPING))) {
+        if (isset($imageInfo['mime']) && in_array($imageInfo['mime'], array_keys(self::EXTENSION_MAPPING))) {
             $extension = self::EXTENSION_MAPPING[$imageInfo['mime']];
         } else {
             $extension = pathinfo($url, PATHINFO_EXTENSION);
