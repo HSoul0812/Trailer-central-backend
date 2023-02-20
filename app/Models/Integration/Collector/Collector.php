@@ -154,6 +154,7 @@ class Collector extends Model implements Filterable
     protected $primaryKey = 'id';
 
     protected $fillable = [
+        'id',
         'dealer_location_id',
         'dealer_id',
         'process_name',

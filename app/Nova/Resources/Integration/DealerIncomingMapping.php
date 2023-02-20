@@ -9,6 +9,7 @@ use App\Models\Inventory\Inventory;
 use App\Models\Inventory\InventoryMfg;
 use App\Models\Inventory\Manufacturers\Brand;
 use App\Models\Inventory\Status;
+use App\Nova\Actions\Importer\DealerIncomingMappingImporter;
 use App\Nova\Filters\Integration\IncomingMappingsTypeFilter;
 use Epartment\NovaDependencyContainer\HasDependencies;
 use Epartment\NovaDependencyContainer\NovaDependencyContainer;
@@ -28,10 +29,10 @@ class DealerIncomingMapping extends Resource
 {
     use HasDependencies;
 
-    const MAP_TO_MANUFACTURER = 'map_to_manufacturer';
-    const MAP_TO_BRAND = 'map_to_brand';
+    public const MAP_TO_MANUFACTURER = 'map_to_manufacturer';
+    public const MAP_TO_BRAND = 'map_to_brand';
 
-    public static $group = 'Integration';
+    public static $group = 'Collector';
 
     /**
      * The model the resource corresponds to.
@@ -210,8 +211,8 @@ class DealerIncomingMapping extends Resource
     public function filters(Request $request)
     {
         return [
-            new DealerIDMapping,
-            new IncomingMappingsTypeFilter
+            new DealerIDMapping(),
+            new IncomingMappingsTypeFilter()
         ];
     }
 
@@ -235,7 +236,8 @@ class DealerIncomingMapping extends Resource
     public function actions(Request $request)
     {
         return [
-            (new DealerIncomingMappingExport)->withHeadings()->askForFilename(),
+            (new DealerIncomingMappingExport())->withHeadings()->askForFilename(),
+            new DealerIncomingMappingImporter()
         ];
     }
 

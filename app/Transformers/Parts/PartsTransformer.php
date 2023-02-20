@@ -59,7 +59,8 @@ class PartsTransformer extends TransformerAbstract implements PartsTransformerIn
                 $this->getNewPORoute($part->id),
                 true
              ),
-             'is_active' => (bool) $part->is_active
+             'is_active' => (bool) $part->is_active,
+             'taxable' => $part->is_taxable,
          ];
     }
 

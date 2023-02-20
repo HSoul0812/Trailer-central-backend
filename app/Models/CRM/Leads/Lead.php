@@ -72,6 +72,9 @@ use App\Models\CRM\Leads\Facebook\User as FbUser;
  * @property FbUser $fbUsers
  * @property FbLead $fbLead
  * @property Inventory $inventory
+ *
+ * @property string $full_name
+ *
  */
 class Lead extends Model
 {

@@ -3,9 +3,9 @@
 namespace App\Nova\Resources\Integration;
 
 use App\Models\Integration\Collector\CollectorFields;
+use App\Nova\Actions\Importer\FieldMappingImporter;
 use App\Nova\Filters\DealerIDMapping;
 use App\Nova\Resource;
-use App\Nova\Resources\Dealer\Dealer;
 use App\Nova\Resources\Dealer\LightDealer;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
@@ -16,9 +16,9 @@ use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping;
 
 use App\Nova\Actions\Exports\FieldMappingExport;
 
-class FieldsMapping extends Resource
+class FieldMapping extends Resource
 {
-    public static $group = 'Integration';
+    public static $group = 'Collector';
 
     /**
      * The model the resource corresponds to.
@@ -139,7 +139,8 @@ class FieldsMapping extends Resource
     public function actions(Request $request)
     {
         return [
-            (new FieldMappingExport)->withHeadings()->askForFilename(),
+            (new FieldMappingExport())->withHeadings()->askForFilename(),
+            new FieldMappingImporter()
         ];
     }
 }

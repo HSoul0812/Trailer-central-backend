@@ -19,7 +19,7 @@ class RedisResponseCache implements ResponseCacheInterface
     /** @var PhpRedis */
     private $client;
 
-    public function __construct(PhpRedis $client)
+    public function __construct($client)
     {
         $this->client = $client;
     }
@@ -32,8 +32,8 @@ class RedisResponseCache implements ResponseCacheInterface
         // it stores a new key-value using an exact key name which is known by the cache client (DW)
         $this->client->set(
             $this->extractExactKey($key),
-            gzencode($value, config('elastic.scout_driver.cache.compression_level', 9)),
-            config('elastic.scout_driver.cache.ttl', 86400)
+            gzencode($value, (int)config('elastic.scout_driver.cache.compression_level', 9)),
+            (int)config('elastic.scout_driver.cache.ttl', 86400)
         );
     }
 

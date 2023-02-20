@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\Parts\VehicleSpecific;
 use Illuminate\Support\Facades\DB;
 use App\Models\Parts\BinQuantity;
+use App\Models\Parts\Bin;
 use App\Exceptions\ImageNotDownloadedException;
 use App\Repositories\Traits\SortTrait;
 
@@ -433,6 +434,8 @@ class PartRepository implements PartRepositoryInterface {
                 'c.name AS category_name',
             ])
             ->selectRaw(DB::raw('COALESCE((SELECT SUM(bc.qty) FROM part_bin_qty bc WHERE bc.part_id = p.id), 0) total_qty'))
+            ->selectRaw(DB::raw('(SELECT GROUP_CONCAT(CONCAT_WS(";", bc.bin_id, bc.qty)) FROM part_bin_qty bc WHERE bc.part_id = p.id) qty_values'))
+            ->selectRaw(DB::raw('(SELECT GROUP_CONCAT(CONCAT_WS(";", bin.id, bin.bin_name)) FROM dms_settings_part_bin bin WHERE bin.dealer_id = '.$dealerId.') bins'))
             ->selectRaw(DB::raw("(SELECT group_concat(i.image_url , '\\n') FROM part_images i WHERE i.part_id = p.id) images"))
             ->leftJoin(Vendor::getTableName().' AS v', 'p.vendor_id','=','v.id')
             ->leftJoin(Brand::getTableName().' AS b', 'p.brand_id','=','b.id')
@@ -440,6 +443,15 @@ class PartRepository implements PartRepositoryInterface {
             ->leftJoin(Category::getTableName().' AS c', 'p.category_id','=','c.id')
             ->orderBy('p.id')
             ->where('p.dealer_id', $dealerId);
+    }
+
+    /**
+     * Get all bins by dealerId.
+     * @param int $dealerId
+     * @return Collection
+     */
+    public function getBins($dealerId) {
+        return Bin::where('dealer_id', $dealerId)->get();
     }
 
     public function update($params) {

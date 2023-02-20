@@ -8,7 +8,7 @@ class InventoryImageTransformer extends MediaFileTransformer
 {
     public function transform(InventoryImage $inventoryImage): array
     {
-        $position = $inventoryImage->position !== null ? $inventoryImage->position : InventoryImage::LAST_IMAGE_POSITION;
+        $position = $inventoryImage->position ?? InventoryImage::LAST_IMAGE_POSITION;
 
         return [
             'image_id' => $inventoryImage->image_id,
