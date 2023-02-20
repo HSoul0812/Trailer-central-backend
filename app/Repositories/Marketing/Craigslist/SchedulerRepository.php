@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Marketing\Craigslist;
 
+use App\Exceptions\Marketing\Craigslist\InvalidDealerIdException;
 use App\Exceptions\NotImplementedException;
 use App\Models\Marketing\Craigslist\ActivePost;
 use App\Models\Marketing\Craigslist\Queue;
@@ -48,11 +49,28 @@ class SchedulerRepository implements SchedulerRepositoryInterface
         ]
     ];
 
+    public const DEFAULT_SLOT = 99;
+
     /**
      * Get the records for the scheduler
+     *
+     * @param $params
+     *
+     * @throws InvalidDealerIdException
+     *
+     * @return Collection
      */
     public function scheduler($params): Collection
     {
+        // Dealer id is always required
+        if (empty($params['dealer_id'])) {
+            throw new InvalidDealerIdException();
+        }
+
+        if (empty($params['slot_id'])) {
+            $params['slot_id'] = self::DEFAULT_SLOT;
+        }
+
         // Start the query
         $query = Queue::query();
 
@@ -106,12 +124,12 @@ class SchedulerRepository implements SchedulerRepositoryInterface
         });
 
         // Last conditions
+        $query->where(Session::getTableName() . '.session_dealer_id', '=', $params['dealer_id']);
+        $query->where(Session::getTableName() . '.session_profile_id', '=', $params['profile_id']);
+        $query->where(Session::getTableName() . '.session_slot_id', '=', $params['slot_id']);
         $query->where(Queue::getTableName() . '.command', '<>', 'directEdit');
         $query->where(Queue::getTableName() . '.command', '<>', 'postEdit');
         $query->whereNotNull(Session::getTableName() . '.session_scheduled');
-
-        // Group by session
-        $query->groupBy(Session::getTableName() . '.session_id');
 
         // Limit within a certain range of dates
         if (isset($params['start'])) {
@@ -125,6 +143,9 @@ class SchedulerRepository implements SchedulerRepositoryInterface
         if (!isset($params['start']) && !isset($params['end'])) {
             $query->whereDate(Session::getTableName() . '.session_scheduled', '>=', 'LAST_DAY(CURRENT_DATE) + INTERVAL 1 DAY - INTERVAL 2 MONTH');
         }
+
+        // Group by session
+        $query->groupBy(Session::getTableName() . '.session_id');
 
         // Make sure it also includes inventories with images
         $query->has('inventory')->with('inventory')->with('inventory.orderedImages');
