@@ -25,9 +25,12 @@ class ImageService extends AbstractFileService
      */
     private $imageHelper;
 
+    private const DEFAULT_EXTENSION = 'jpg';
+
     private const EXTENSION_MAPPING = [
         "image/gif" => "gif",
         "image/jpeg" => "jpg",
+        "image/jpg" => "jpg",
         "image/png" => "png",
         "image/x-png" => "png",
         "image/x-MS-bmp" => "bmp",
@@ -71,6 +74,10 @@ class ImageService extends AbstractFileService
             $extension = self::EXTENSION_MAPPING[$imageInfo['mime']];
         } else {
             $extension = pathinfo($url, PATHINFO_EXTENSION);
+        }
+
+        if (empty($extension)) {
+            $extension = self::DEFAULT_EXTENSION;
         }
 
         $inventoryFilenameTitle = $title . "_" . CompactHelper::getRandomString() . ($overlayText ? ("_overlay_" . time()) : '') . ".{$extension}";
