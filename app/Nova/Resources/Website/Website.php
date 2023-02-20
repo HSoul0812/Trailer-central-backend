@@ -62,7 +62,11 @@ class Website extends Resource
             Text::make('Type')
                 ->sortable(),
 
+            Text::make('Template','template')->sortable(),
+
             Boolean::make('Active', 'is_active')->sortable(),
+
+            Boolean::make('Responsive', 'responsive')->sortable(),
 
             Textarea::make('Global Filter', 'type_config')->sortable()->help(
               "Usage:<br>
