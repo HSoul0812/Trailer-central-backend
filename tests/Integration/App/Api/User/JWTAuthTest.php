@@ -20,7 +20,6 @@ class JWTAuthTest extends IntegrationTestCase
             'email' => $this->faker->safeEmail(),
             'password' => $this->faker->password(),
             'captcha' => Str::random(),
-            'bypass_captcha' => 1,
         ]);
 
         $this->getJson("/api/user/auth?$params")
@@ -45,7 +44,6 @@ class JWTAuthTest extends IntegrationTestCase
             'email' => $websiteUser->email,
             'password' => $password,
             'captcha' => Str::random(),
-            'bypass_captcha' => 1,
         ]);
 
         $this->getJson("/api/user/auth?$params")

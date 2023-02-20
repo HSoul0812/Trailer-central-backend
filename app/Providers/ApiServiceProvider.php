@@ -7,6 +7,9 @@ use Illuminate\Auth\AuthenticationException;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\UnauthorizedException;
 use Symfony\Component\HttpFoundation\Response;
+use Throwable;
+use Tymon\JWTAuth\Exceptions\JWTException;
+use Tymon\JWTAuth\Exceptions\TokenBlacklistedException;
 
 class ApiServiceProvider extends ServiceProvider
 {
@@ -22,24 +25,25 @@ class ApiServiceProvider extends ServiceProvider
 
     private function registerDingoHandler(): void
     {
+        $dingoHandler = app(Handler::class);
+
+        // A simple Transformer method to transform exception and status code to JSON response
+        $jsonResponse = function (Throwable $throwable, int $statusCode) {
+            return response()->json([
+                'message' => $throwable->getMessage(),
+                'status_code' => $statusCode,
+            ], $statusCode);
+        };
+
         /*
          * We need to customize the response for the AuthenticationException exception
          * If we don't do this, Dingo will return it with status code 500, which is incorrect
          *
          * Ref: https://github.com/dingo/api/wiki/Errors-And-Error-Responses#custom-exception-responses
          */
-        app(Handler::class)->register(function (AuthenticationException $exception) {
-            return response()->json([
-                'message' => $exception->getMessage(),
-                'status_code' => Response::HTTP_UNAUTHORIZED,
-            ], Response::HTTP_UNAUTHORIZED);
-        });
-
-        app(Handler::class)->register(function (UnauthorizedException $exception) {
-            return response()->json([
-                'message' => $exception->getMessage(),
-                'status_code' => Response::HTTP_BAD_REQUEST,
-            ], Response::HTTP_BAD_REQUEST);
-        });
+        $dingoHandler->register(fn (AuthenticationException $e) => $jsonResponse($e, Response::HTTP_UNAUTHORIZED));
+        $dingoHandler->register(fn (UnauthorizedException $e) => $jsonResponse($e, Response::HTTP_BAD_REQUEST));
+        $dingoHandler->register(fn (TokenBlacklistedException $e) => $jsonResponse($e, Response::HTTP_FORBIDDEN));
+        $dingoHandler->register(fn (JWTException $e) => $jsonResponse($e, Response::HTTP_BAD_REQUEST));
     }
 }

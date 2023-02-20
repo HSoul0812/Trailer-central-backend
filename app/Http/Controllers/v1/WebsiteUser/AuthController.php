@@ -33,7 +33,9 @@ class AuthController extends AbstractRestfulController
 
         $token = $this->authService->authenticate($request->all());
 
-        return $this->respondWithJwtToken($token);
+        return $this->respondWithJwtToken($token, [
+            'user' => $this->transformer->transform(auth('api')->user()),
+        ]);
     }
 
     public function social(string $social, Request $request) {
@@ -123,7 +125,6 @@ class AuthController extends AbstractRestfulController
             'token' => $token,
                 'token_type' => 'bearer',
                 'expires_in' => auth('api')->factory()->getTTL() * 60,
-                'user' => $this->transformer->transform(auth('api')->user()),
         ], $extras);
 
         return $this->response->array($response);

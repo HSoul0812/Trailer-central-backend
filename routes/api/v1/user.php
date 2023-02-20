@@ -18,6 +18,7 @@ $api->version('v1', function ($api) {
     $api->group(['prefix' => '/user'], function ($api) {
         $api->post('/register', [AuthController::class, 'create']);
         $api->get('/auth', [AuthController::class, 'authenticate']);
+        $api->post('/jwt/refresh', [AuthController::class, 'jwtRefreshToken']);
         $api->get('/auth/{social}', [AuthController::class, 'social'])
             ->name('SocialAuth')
             ->where('social', 'google|facebook');
@@ -47,7 +48,6 @@ $api->version('v1', function ($api) {
 
     $api->group(['prefix' => '/user', 'middleware' => 'auth:api'], function ($api) {
         $api->get('', [AuthController::class, 'getProfile']);
-        $api->post('/jwt/refresh', [AuthController::class, 'jwtRefreshToken']);
         $api->post('/jwt/logout', [AuthController::class, 'jwtLogout']);
         $api->put('', [AuthController::class, 'updateProfile']);
         $api->post('/images', [ImageController::class, 'create']);
