@@ -27,23 +27,25 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
             'type' => 'keyword',
             'normalizer' => 'case_normal',
             'fields' => [
-                'normal' => [
-                    'type' => 'text',
-                    'analyzer' => 'standard',
-                ]
+                'normal' => ['type' => 'text', 'analyzer' => 'standard'],
+                'tokens' => ['type' => 'text', 'analyzer' => 'standard_analyzer', 'index' => true]
             ]
         ],
         'title'                 => [
-            'type'       => 'keyword',
+            'type' => 'keyword',
             'normalizer' => 'case_normal',
             'fields' => [
-                'txt' => ['type' => 'text', 'analyzer' => 'english']
+                'txt' => ['type' => 'text', 'analyzer' => 'english'],
+                'tokens' => ['type' => 'text', 'analyzer' => 'standard_analyzer', 'index' => true]
             ]
         ],
         'year'                  => ['type' => 'integer'],
         'manufacturer'          => [
             'type'       => 'keyword',
-            'normalizer' => 'case_normal'
+            'normalizer' => 'case_normal',
+            'fields' => [
+                'tokens' => ['type' => 'text', 'analyzer' => 'standard_analyzer', 'index' => true]
+            ]
         ],
         'brand'                => [
             'type'       => 'keyword',
@@ -53,7 +55,8 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
             'type'       => 'keyword',
             'normalizer' => 'case_normal',
             'fields' => [
-                'txt' => ['type' => 'text', 'analyzer' => 'english']
+                'txt' => ['type' => 'text', 'analyzer' => 'english'],
+                'tokens' => ['type' => 'text', 'analyzer' => 'standard_analyzer', 'index' => true]
             ]
         ],
         'description'          => [
@@ -61,14 +64,11 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
             'normalizer' => 'case_normal',
             'ignore_above' => self::TEXT_TYPE_MAX_SIZE,
             'fields' => [
-                'txt' => ['type' => 'text', 'analyzer' => 'english']
+                'txt' => ['type' => 'text', 'analyzer' => 'english'],
+                'tokens' => ['type' => 'text', 'analyzer' => 'standard_analyzer', 'index' => true]
             ]
         ],
-        'description_html'     => [
-            'type' => 'keyword',
-            'ignore_above' => self::TEXT_TYPE_MAX_SIZE,
-            'normalizer' => 'case_normal'
-        ],
+        'description_html'     => ['type' => 'text', 'index' => false],
         'status'               => ['type' => 'integer'],
         'availability'         => ['type' => 'keyword'],
         'availabilityLabel'    => ['type' => 'keyword'],
@@ -103,7 +103,8 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
         'notes'                => [
             'type'   => 'keyword',
             'fields' => [
-                'txt' => ['type' => 'text', 'analyzer' => 'english']
+                'txt' => ['type' => 'text', 'analyzer' => 'english'],
+                'tokens' => ['type' => 'text', 'analyzer' => 'standard_analyzer', 'index' => true]
             ]
         ],
         'showOnKsl'            => ['type' => 'boolean'],
@@ -126,7 +127,8 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
             'type'       => 'keyword',
             'normalizer' => 'case_normal',
             'fields' => [
-                'txt' => ['type' => 'text', 'analyzer' => 'english']
+                'txt' => ['type' => 'text', 'analyzer' => 'english'],
+                'tokens' => ['type' => 'text', 'analyzer' => 'standard_analyzer', 'index' => true]
             ]
         ],
         'noseType'             => ['type' => 'keyword'],
@@ -137,7 +139,8 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
             'type'       => 'keyword',
             'normalizer' => 'case_normal',
             'fields' => [
-                'txt' => ['type' => 'text', 'analyzer' => 'english']
+                'txt' => ['type' => 'text', 'analyzer' => 'english'],
+                'tokens' => ['type' => 'text', 'analyzer' => 'standard_analyzer', 'index' => true]
             ]
         ],
         'horsepower'           => ['type' => 'keyword'],
@@ -204,48 +207,52 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
             'type'       => 'keyword',
             'normalizer' => 'case_normal',
             'fields' => [
-                'txt' => ['type' => 'text', 'analyzer' => 'english']
+                'txt' => ['type' => 'text', 'analyzer' => 'english'],
+                'tokens' => ['type' => 'text', 'analyzer' => 'standard_analyzer', 'index' => true]
             ]
         ],
         'featureList.stallTack'=> [
             'type'       => 'keyword',
             'normalizer' => 'case_normal',
             'fields' => [
-                'txt' => ['type' => 'text', 'analyzer' => 'english']
+                'txt' => ['type' => 'text', 'analyzer' => 'english'],
+                'tokens' => ['type' => 'text', 'analyzer' => 'standard_analyzer', 'index' => true]
             ]
         ],
         'featureList.lq'=> [
             'type'       => 'keyword',
             'normalizer' => 'case_normal',
             'fields' => [
-                'txt' => ['type' => 'text', 'analyzer' => 'english']
+                'txt' => ['type' => 'text', 'analyzer' => 'english'],
+                'tokens' => ['type' => 'text', 'analyzer' => 'standard_analyzer', 'index' => true]
             ]
         ],
         'featureList.doorsWindowsRamps'=> [
             'type'       => 'keyword',
             'normalizer' => 'case_normal',
             'fields' => [
-                'txt' => ['type' => 'text', 'analyzer' => 'english']
+                'txt' => ['type' => 'text', 'analyzer' => 'english'],
+                'tokens' => ['type' => 'text', 'analyzer' => 'standard_analyzer', 'index' => true]
             ]
         ],
         'image'                => ['type' => 'keyword'],
         'images'               => ['type' => 'keyword'],
         'imagesSecondary'      => ['type' => 'keyword'],
         'numberOfImages'       => ['type' => 'integer'],
-        'widthInches' => ['type' => 'float'],
-        'heightInches' => ['type' => 'float'],
-        'lengthInches' => ['type' => 'float'],
-        'widthDisplayMode' => ['type' => 'keyword'],
-        'heightDisplayMode' => ['type' => 'keyword'],
-        'lengthDisplayMode' => ['type' => 'keyword'],
-        'tilt' => ['type' => 'integer'],
-        'entity_type_id' => ['type' => 'integer'],
-        'paymentCalculator.apr' => ['type' => 'float'],
-        'paymentCalculator.down' => ['type' => 'float'],
-        'paymentCalculator.years' => ['type' => 'integer'],
-        'paymentCalculator.month' => ['type' => 'integer'],
-        'paymentCalculator.monthly_payment' => ['type' => 'float'],
-        'paymentCalculator.down_percentage' => ['type' => 'float'],
+        'widthInches'          => ['type' => 'float'],
+        'heightInches'         => ['type' => 'float'],
+        'lengthInches'         => ['type' => 'float'],
+        'widthDisplayMode'     => ['type' => 'keyword'],
+        'heightDisplayMode'    => ['type' => 'keyword'],
+        'lengthDisplayMode'    => ['type' => 'keyword'],
+        'tilt'                 => ['type' => 'integer'],
+        'entity_type_id'       => ['type' => 'integer'],
+        'paymentCalculator.apr'     => ['type' => 'float', 'index' => false],
+        'paymentCalculator.down'    => ['type' => 'float', 'index' => false],
+        'paymentCalculator.years'   => ['type' => 'integer', 'index' => false],
+        'paymentCalculator.month'   => ['type' => 'integer', 'index' => false],
+        'paymentCalculator.monthly_payment' => ['type' => 'float', 'index' => false],
+        'paymentCalculator.down_percentage' => ['type' => 'float', 'index' => false],
     ];
 
     public function name(): string
@@ -265,6 +272,17 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
                 'case_normal' => [
                     'type' => 'custom',
                     'filter' => ['lowercase', 'asciifolding']
+                ]
+            ],
+            'analyzer' => [
+                'standard_analyzer'=>[
+                    'tokenizer' => 'standard_tokenizer',
+                    'filter' => ['lowercase', 'asciifolding']
+                ]
+            ],
+            'tokenizer' => [
+                'standard_tokenizer' => [
+                    'type' => 'standard'
                 ]
             ]
         ])->index([
