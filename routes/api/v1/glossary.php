@@ -11,5 +11,5 @@ $api->version('v1', function ($api) {
     |--------------------------------------------------------------------------
     */
 
-    $api->get('glossary', 'App\Http\Controllers\v1\Glossary\GlossaryController@index');
+    $api->get('glossary', 'App\Http\Controllers\v1\Glossary\GlossaryController@index')->middleware(['gzip']);
 });

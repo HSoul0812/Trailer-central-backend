@@ -9,7 +9,7 @@ $api = app(Dingo\Api\Routing\Router::class);
 
 $api->version('v1', function ($api) {
     $api->group(['prefix' => '/inventory'], function ($api) {
-        $api->get('/', [InventoryController::class, 'index'])->middleware(['human-only']);
+        $api->get('/', [InventoryController::class, 'index'])->middleware(['human-only', 'gzip']);
         $api->put('/', 'App\Http\Controllers\v1\Inventory\InventoryController@create')
             ->middleware('auth:api');
         $api->post('/{id}', 'App\Http\Controllers\v1\Inventory\InventoryController@update')
