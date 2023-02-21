@@ -28,7 +28,8 @@
         "stripe/stripe-php": "^9.6",
         "tcentral/inventory-sdk": "^1.2",
         "trailer-trader/insights": "*",
-        "tymon/jwt-auth": "1.0.*"
+        "tymon/jwt-auth": "1.0.*",
+        "ext-zlib": "*"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^2.13",
