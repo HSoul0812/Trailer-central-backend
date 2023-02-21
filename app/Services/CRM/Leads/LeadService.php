@@ -198,7 +198,11 @@ class LeadService implements LeadServiceInterface
 
         // Start Transaction
         $lead = null;
-        DB::transaction(function() use (&$lead, $params) {
+
+        try {
+
+            $this->beginTransaction();
+
             // Update Lead
             $lead = $this->leads->update($params);
             $params = $this->appendRelationParams($lead, $params);
@@ -223,9 +227,20 @@ class LeadService implements LeadServiceInterface
             // Update Units of Interest
             $this->updateUnitsOfInterest($lead, $params['inventory']);
 
+            // Append Units of Interest
+            if (isset($params['append_inventory']))
+                $this->appendUnitsOfInterest($lead, $params['append_inventory']);
+
             // Update Customer
             $this->updateCustomer($lead, $params);
-        });
+
+            $this->commitTransaction();
+
+        } catch (\Exception $e) {
+
+            Log::error('Update leads error. Message - ' . $e->getMessage() , $e->getTrace());
+            $this->rollbackTransaction();
+        }
 
         // Return Full Lead Details
         return $lead;
@@ -343,7 +358,7 @@ class LeadService implements LeadServiceInterface
         }
 
         // Get Inventory
-        $inventory = $this->inventory->getAll([
+        $inventories = $this->inventory->getAll([
             'dealer_id' => $lead->dealer_id,
             InventoryRepositoryInterface::CONDITION_AND_WHERE_IN => [
                 'inventory_id' => $inventoryIds
@@ -351,7 +366,52 @@ class LeadService implements LeadServiceInterface
         ]);
 
         // Set Units of Interest to Lead
-        $lead->setRelation('units', $inventory);
+        $lead->setRelation('units', $inventories);
+
+        // Return Array of Inventory Lead
+        return $units;
+    }
+
+    /**
+     * Add new Units of Interest without deleting existing one
+     *
+     * @param Lead $lead
+     * @param array $inventoryIds
+     * @return Collection<InventoryLead>
+     */
+    protected function appendUnitsOfInterest(Lead $lead, array $inventoryIds) {
+
+        // Nothing to Update
+        if (empty($inventoryIds)) {
+            return collect([]);
+        }
+
+        $existingUnitIds = $this->units->getUnitIds($lead->identifier);
+
+        $missingUnitIds = array_diff($inventoryIds, $existingUnitIds);
+
+        $units = new Collection();
+        foreach ($missingUnitIds as $missingUnitId) {
+
+            $unit = $this->units->create([
+                'inventory_id' => $missingUnitId,
+                'website_lead_id' => $lead->identifier
+            ]);
+            $units->push($unit);
+        }
+
+        $allUnitIds = array_merge($existingUnitIds, $missingUnitIds);
+
+        // Get Inventory
+        $inventories = $this->inventory->getAll([
+            'dealer_id' => $lead->dealer_id,
+            InventoryRepositoryInterface::CONDITION_AND_WHERE_IN => [
+                'inventory_id' => $allUnitIds
+            ]
+        ]);
+
+        // Set Units of Interest to Lead
+        $lead->setRelation('units', $inventories);
 
         // Return Array of Inventory Lead
         return $units;
