@@ -54,7 +54,7 @@ class Import extends Command
             $log->info('Imported ' . $imported . ' leads from import service');
         } catch (\Exception $e) {
             $this->error('Exception thrown parsing import: ' . $e->getMessage());
-            $log->error('Exception thrown parsing import: ' . $e->getMessage() . '; ' . $e->getTraceAsString());
+            $log->error('Exception thrown parsing import: ' . $e->getMessage());
         }
 
         // Sleep for a Second to Prevent Rate Limiting
