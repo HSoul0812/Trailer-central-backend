@@ -46,13 +46,23 @@ return [
             'driver' => 'single',
             'path'   => storage_path('logs/laravel.log'),
             'level'  => env('LOG_LEVEL', 'debug'),
+            'permission' => 0664,
         ],
 
         'daily' => [
             'driver' => 'daily',
             'path'   => storage_path('logs/laravel.log'),
             'level'  => env('LOG_LEVEL', 'debug'),
+            'permission' => 0664,
             'days'   => 14,
+        ],
+
+        'elasticsearch' => [
+            'driver' => 'daily',
+            'path'   => storage_path('logs/elasticsearch.log'),
+            'level'  => env('LOG_LEVEL', 'debug'),
+            'permission' => 0664,
+            'days'   => 3,
         ],
 
         'slack' => [
@@ -100,6 +110,15 @@ return [
 
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
+        ],
+    ],
+
+    /*
+     * This config stores the logging enablers
+     */
+    'enablers' => [
+        'elasticsearch' => [
+            'header' => 'Log-ES-Query',
         ],
     ],
 ];
