@@ -28,7 +28,7 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
             'normalizer' => 'case_normal',
             'fields' => [
                 'normal' => ['type' => 'text', 'analyzer' => 'standard'],
-                'tokens' => ['type' => 'text', 'analyzer' => 'standard_analyzer', 'index' => true]
+                'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer', 'index' => true]
             ]
         ],
         'title'                 => [
@@ -36,7 +36,7 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
             'normalizer' => 'case_normal',
             'fields' => [
                 'txt' => ['type' => 'text', 'analyzer' => 'english'],
-                'tokens' => ['type' => 'text', 'analyzer' => 'standard_analyzer', 'index' => true]
+                'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer', 'index' => true]
             ]
         ],
         'year'                  => ['type' => 'integer'],
@@ -44,7 +44,7 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
             'type'       => 'keyword',
             'normalizer' => 'case_normal',
             'fields' => [
-                'tokens' => ['type' => 'text', 'analyzer' => 'standard_analyzer', 'index' => true]
+                'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer', 'index' => true],
             ]
         ],
         'brand'                => [
@@ -56,7 +56,7 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
             'normalizer' => 'case_normal',
             'fields' => [
                 'txt' => ['type' => 'text', 'analyzer' => 'english'],
-                'tokens' => ['type' => 'text', 'analyzer' => 'standard_analyzer', 'index' => true]
+                'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer', 'index' => true]
             ]
         ],
         'description'          => [
@@ -65,7 +65,7 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
             'ignore_above' => self::TEXT_TYPE_MAX_SIZE,
             'fields' => [
                 'txt' => ['type' => 'text', 'analyzer' => 'english'],
-                'tokens' => ['type' => 'text', 'analyzer' => 'standard_analyzer', 'index' => true]
+                'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer', 'index' => true]
             ]
         ],
         'description_html'     => ['type' => 'text', 'index' => false],
@@ -104,7 +104,7 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
             'type'   => 'keyword',
             'fields' => [
                 'txt' => ['type' => 'text', 'analyzer' => 'english'],
-                'tokens' => ['type' => 'text', 'analyzer' => 'standard_analyzer', 'index' => true]
+                'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer', 'index' => true]
             ]
         ],
         'showOnKsl'            => ['type' => 'boolean'],
@@ -128,7 +128,7 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
             'normalizer' => 'case_normal',
             'fields' => [
                 'txt' => ['type' => 'text', 'analyzer' => 'english'],
-                'tokens' => ['type' => 'text', 'analyzer' => 'standard_analyzer', 'index' => true]
+                'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer', 'index' => true]
             ]
         ],
         'noseType'             => ['type' => 'keyword'],
@@ -140,7 +140,7 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
             'normalizer' => 'case_normal',
             'fields' => [
                 'txt' => ['type' => 'text', 'analyzer' => 'english'],
-                'tokens' => ['type' => 'text', 'analyzer' => 'standard_analyzer', 'index' => true]
+                'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer', 'index' => true]
             ]
         ],
         'horsepower'           => ['type' => 'keyword'],
@@ -208,7 +208,7 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
             'normalizer' => 'case_normal',
             'fields' => [
                 'txt' => ['type' => 'text', 'analyzer' => 'english'],
-                'tokens' => ['type' => 'text', 'analyzer' => 'standard_analyzer', 'index' => true]
+                'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer', 'index' => true]
             ]
         ],
         'featureList.stallTack'=> [
@@ -216,7 +216,7 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
             'normalizer' => 'case_normal',
             'fields' => [
                 'txt' => ['type' => 'text', 'analyzer' => 'english'],
-                'tokens' => ['type' => 'text', 'analyzer' => 'standard_analyzer', 'index' => true]
+                'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer', 'index' => true]
             ]
         ],
         'featureList.lq'=> [
@@ -224,7 +224,7 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
             'normalizer' => 'case_normal',
             'fields' => [
                 'txt' => ['type' => 'text', 'analyzer' => 'english'],
-                'tokens' => ['type' => 'text', 'analyzer' => 'standard_analyzer', 'index' => true]
+                'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer', 'index' => true]
             ]
         ],
         'featureList.doorsWindowsRamps'=> [
@@ -232,7 +232,7 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
             'normalizer' => 'case_normal',
             'fields' => [
                 'txt' => ['type' => 'text', 'analyzer' => 'english'],
-                'tokens' => ['type' => 'text', 'analyzer' => 'standard_analyzer', 'index' => true]
+                'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer', 'index' => true]
             ]
         ],
         'image'                => ['type' => 'keyword'],
@@ -275,13 +275,20 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
                 ]
             ],
             'analyzer' => [
-                'standard_analyzer'=>[
+                'standard_analyzer'=>[ // it will generate standard tokens per word
                     'tokenizer' => 'standard_tokenizer',
                     'filter' => ['lowercase', 'asciifolding']
-                ]
+                ],
+                'shingle_analyzer' => [ // it will generate standard tokens per two word
+                    'tokenizer' => 'shingle_tokenizer',
+                    'filter' => ['lowercase', 'asciifolding', 'shingle']
+                ],
             ],
             'tokenizer' => [
                 'standard_tokenizer' => [
+                    'type' => 'standard'
+                ],
+                'shingle_tokenizer' => [
                     'type' => 'standard'
                 ]
             ]
