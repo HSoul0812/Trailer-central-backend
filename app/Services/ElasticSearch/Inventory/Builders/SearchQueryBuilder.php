@@ -8,10 +8,13 @@ use App\Services\ElasticSearch\Inventory\Parameters\Filters\Term;
 
 class SearchQueryBuilder implements FieldQueryBuilderInterface
 {
-    /** @var string */
+    /** @var int */
     private const DEFAULT_BOOST = 1;
 
-    /** @var string */
+    /** @var int */
+    private const GLOBAL_FILTER_WILDCARD_BOOST = 4;
+
+    /** @var float */
     private const MINIMUM_BOOST = 0.001;
 
     /** @var Filter */
@@ -61,21 +64,6 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
     }
 
     /**
-     * @param string $value
-     * @return \array[][]
-     */
-    private function wildcardQuery(string $value): array
-    {
-        return [
-            'wildcard' => [
-                $this->field->getName() => [
-                    'value' => $value
-                ]
-            ]
-        ];
-    }
-
-    /**
      * @param string $column
      * @param float $boost
      * @param string $value
@@ -83,11 +71,31 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
      */
     private function wildcardQueryWithBoost(string $column, float $boost, string $value): array
     {
+        $terms = explode(' ', $value);
+        $boost = max(self::MINIMUM_BOOST, $boost - 0.95);
+
+        if (count($terms) > 1) {
+            return [
+                'bool' => [
+                    'must' => array_map(static function (string $term) use ($boost, $column): array {
+                        return [
+                            'wildcard' => [
+                                $column => [
+                                    'value' => sprintf('*%s*', $term),
+                                    'boost' => max(self::MINIMUM_BOOST, $boost)
+                                ]
+                            ]
+                        ];
+                    }, $terms)
+                ]
+            ];
+        }
+
         return [
             'wildcard' => [
                 $column => [
-                    'value' => $value,
-                    'boost' => max(self::MINIMUM_BOOST, $boost - 0.95)
+                    'value' => sprintf('*%s*', $terms[0]),
+                    'boost' => max(self::MINIMUM_BOOST, $boost)
                 ]
             ]
         ];
@@ -108,6 +116,24 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
                     'operator' => 'and',
                     'boost' => $boost
                 ]
+            ]
+        ];
+    }
+
+    /**
+     * @param string[] $fields
+     * @param float $boost
+     * @param string $value
+     * @return \array[][]
+     */
+    private function multiMatchQuery(array $fields, float $boost, string $value): array
+    {
+        return [
+            'multi_match' => [
+                'query' => $value,
+                'operator' => 'and',
+                'boost' => $boost,
+                'fields' => $fields
             ]
         ];
     }
@@ -150,32 +176,12 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
 
             foreach ($term->getValues() as $value) {
                 $query = [
-                    [
-                        'match' => [
-                            sprintf('%s.txt', $name) => [
-                                'query' => $value,
-                                'operator' => 'and'
-                            ]
-                        ]
-                    ]
+                    $this->multiMatchQuery([$name, sprintf('%s.txt', $name)], self::DEFAULT_BOOST, $value)
                 ];
 
                 if ($name !== 'description' || $descriptionWildcard) {
-                    $query[] = [
-                        'wildcard' => [
-                            $name => [
-                                'value' => sprintf('*%s', $value)
-                            ]
-                        ]
-                    ];
+                    $query[] = $this->wildcardQueryWithBoost($name.'.tokens', self::GLOBAL_FILTER_WILDCARD_BOOST, $value);
 
-                    $query[] = [
-                        'wildcard' => [
-                            $name => [
-                                'value' => sprintf('%s*', $value)
-                            ]
-                        ]
-                    ];
                     $boolQuery[] = [
                         'bool' => [
                             $term->getESOperatorKeyword() => $query
@@ -199,8 +205,7 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
      */
     public function generalQuery(): array
     {
-        // @todo: remove keyword-wildcard feature when safe
-        $keywordWildcard = app(FeatureFlagRepositoryInterface::class)->isEnabled('inventory-sdk-keyword-wildcard');
+        $keywordWildcard = app(FeatureFlagRepositoryInterface::class)->isEnabled('inventory-sdk-es-keyword-wildcard');
 
         $this->field->getTerms()->each(function (Term $term) use ($keywordWildcard) {
             $shouldQuery = [];
@@ -209,11 +214,15 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
 
             switch ($name) {
                 case 'stock':
-                    $shouldQuery[] = $this->wildcardQuery(sprintf('*%s', $data['match']));
-                    $shouldQuery[] = $this->wildcardQuery(sprintf('%s*', $data['match']));
+                    $shouldQuery[] = $this->wildcardQueryWithBoost(
+                        $this->field->getName().'.tokens' ,
+                        self::DEFAULT_BOOST,
+                        $data['match']
+                    );
                     break;
                 default:
                     $searchFields = $this->getSearchFields($data['ignore_fields'] ?? []);
+                    $match = str_replace(' ', '*', $data['match']);
 
                     foreach ($searchFields as $key => $column) {
                         $boost = self::DEFAULT_BOOST;
@@ -223,19 +232,23 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
                             $boost = max(self::MINIMUM_BOOST, (float)$columnValues[$boostKey]);
                         }
 
-                        $match = $data['match'];
-                        if (in_array($columnValues[0], self::REPLACE_SPACE_WITH_ASTERISK)) {
-                            $match = str_replace(' ', '*', $match);
-                        }
+                        $columnParts = explode('.', $column);
 
-                        $shouldQuery[] = $this->matchQuery($columnValues[0], $boost, $match);
-                        $shouldQuery[] = $this->matchQuery($column, $boost, $match);
+                        if (count($columnParts) > 1) {
+                            $shouldQuery[] = $this->multiMatchQuery(
+                                [$columnParts[0], $columnValues[0]],
+                                $boost,
+                                $match
+                            );
+                        } else {
+                            $shouldQuery[] = $this->matchQuery($columnValues[0], $boost, $match);
+                        }
 
                         if ($keywordWildcard && !is_numeric($key) && strpos($column, '.') !== false) {
-                            $shouldQuery[] = $this->wildcardQueryWithBoost($key, $boost, sprintf('*%s', str_replace(' ', '*', $data['match'])));
-                            $shouldQuery[] = $this->wildcardQueryWithBoost($key, $boost, sprintf('%s*', str_replace(' ', '*', $data['match'])));
+                            $shouldQuery[] = $this->wildcardQueryWithBoost($key.'.tokens', $boost, $data['match']);
                         }
                     }
+
                     break;
             }
 
@@ -267,7 +280,7 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
      * @param array $query
      * @return void
      */
-    private function appendToQuery(array $query)
+    private function appendToQuery(array $query): void
     {
         $this->query = array_merge_recursive($this->query, $query);
     }
