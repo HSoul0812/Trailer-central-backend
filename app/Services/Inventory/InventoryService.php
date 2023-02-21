@@ -87,8 +87,19 @@ class InventoryService implements InventoryServiceInterface
         $esSearchUrl = $this->esSearchUrl();
 
         $queryBuilder = $this->buildSearchQuery($params);
+        $body = $queryBuilder->build();
+
+        $logEnabled = request()->header(config('logging.enablers.elasticsearch.header'));
+
+        if (filter_var($logEnabled, FILTER_VALIDATE_BOOLEAN)) {
+            \Log::channel('elasticsearch')->debug(__METHOD__ . ':' . __LINE__, [
+                'url' => $esSearchUrl,
+                'body' => $body,
+            ]);
+        }
+
         $res = $this->httpClient->post($esSearchUrl, [
-            'json' => $queryBuilder->build()
+            'json' => $body,
         ]);
 
         if($res->getStatusCode() == self::HTTP_SUCCESS) {
