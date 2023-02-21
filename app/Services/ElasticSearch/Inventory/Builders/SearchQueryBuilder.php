@@ -71,30 +71,10 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
      */
     private function wildcardQueryWithBoost(string $column, float $boost, string $value): array
     {
-        $terms = explode(' ', $value);
-        $boost = max(self::MINIMUM_BOOST, $boost - 0.95);
-
-        if (count($terms) > 1) {
-            return [
-                'bool' => [
-                    'must' => array_map(static function (string $term) use ($boost, $column): array {
-                        return [
-                            'wildcard' => [
-                                $column => [
-                                    'value' => sprintf('*%s*', $term),
-                                    'boost' => max(self::MINIMUM_BOOST, $boost)
-                                ]
-                            ]
-                        ];
-                    }, $terms)
-                ]
-            ];
-        }
-
         return [
             'wildcard' => [
                 $column => [
-                    'value' => sprintf('*%s*', $terms[0]),
+                    'value' => sprintf('*%s*', $value),
                     'boost' => max(self::MINIMUM_BOOST, $boost)
                 ]
             ]
@@ -172,29 +152,34 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
 
         $this->field->getTerms()->each(function (Term $term) use ($descriptionWildcard) {
             $name = $this->field->getName();
-            $boolQuery = [];
+
+            $operator = $this->field->getParentESOperatorKeyword() === 'must' && $term->getESOperatorKeyword() === 'should' ?
+                'must': $term->getESOperatorKeyword();
+
+            $boolQuery = [
+                'bool' => [
+                    $operator =>[]
+                ]
+            ];
 
             foreach ($term->getValues() as $value) {
-                $query = [
-                    $this->multiMatchQuery([$name, sprintf('%s.txt', $name)], self::DEFAULT_BOOST, $value)
-                ];
+
+                $boolQuery['bool'][$operator][] =  $this->matchQuery(
+                    sprintf('%s.txt', $name),
+                    self::GLOBAL_FILTER_WILDCARD_BOOST + self::DEFAULT_BOOST,
+                    $value
+                );
 
                 if ($name !== 'description' || $descriptionWildcard) {
-                    $query[] = $this->wildcardQueryWithBoost($name.'.tokens', self::GLOBAL_FILTER_WILDCARD_BOOST, $value);
-
-                    $boolQuery[] = [
-                        'bool' => [
-                            $term->getESOperatorKeyword() => $query
-                        ]
-                    ];
+                    $boolQuery['bool'][$operator][]  = $this->wildcardQueryWithBoost(
+                        $name.'.tokens',
+                        self::GLOBAL_FILTER_WILDCARD_BOOST,
+                        $value
+                    );
                 }
             }
 
-            $this->appendToQuery([
-                'bool' => [
-                    $this->field->getParentESOperatorKeyword() => $boolQuery
-                ]
-            ]);
+             $this->appendToQuery($boolQuery);
         });
 
         return $this->query;
