@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Models\Integration\Collector\Collector;
 use App\Models\Integration\Collector\CollectorFields;
+use App\Repositories\Feed\Mapping\Incoming\DealerIncomingMappingRepository;
+use App\Repositories\Feed\Mapping\Incoming\DealerIncomingMappingRepositoryInterface;
 use App\Repositories\Integration\Auth\TokenRepository;
 use App\Repositories\Integration\Auth\TokenRepositoryInterface;
 use App\Repositories\Integration\CollectorFieldsRepository;
@@ -80,6 +82,8 @@ class IntegrationServiceProvider extends ServiceProvider
 
         $this->app->bind(CvrFileRepositoryInterface::class, CvrFileRepository::class);
         $this->app->bind(CvrFileServiceInterface::class, CvrFileService::class);
+
+        $this->app->bind(DealerIncomingMappingRepositoryInterface::class, DealerIncomingMappingRepository::class);
 
         // Collector Repositories
         $this->app->bind(CollectorRepositoryInterface::class, function() {

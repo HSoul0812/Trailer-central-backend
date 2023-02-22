@@ -3,10 +3,10 @@
 namespace App\Services\Integration\Transaction\Adapter;
 
 /**
- * Class UtcAdapter
+ * Class PjAdapter
  * @package App\Services\Integration\Transaction\Adapter
  */
-abstract class UtcAdapter extends Adapter
+abstract class PjAdapter extends Adapter
 {
-    protected $apiKey = 'utc';
+    protected $apiKey = 'pj';
 }
