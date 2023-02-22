@@ -2,13 +2,18 @@
 
 namespace App\Services\Integration\Transaction\Adapter;
 
+use App\Models\Feed\Mapping\Incoming\DealerIncomingMapping;
+use App\Models\Inventory\Status;
 use App\Repositories\Feed\Mapping\Incoming\ApiEntityReferenceRepositoryInterface;
+use App\Repositories\Feed\Mapping\Incoming\DealerIncomingMappingRepositoryInterface;
 use App\Repositories\Inventory\AttributeRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
+use App\Repositories\Inventory\StatusRepositoryInterface;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Services\Integration\Transaction\Reference;
 use App\Services\Inventory\InventoryServiceInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Class Adapter
@@ -17,8 +22,17 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 abstract class Adapter
 {
     protected $apiKey = '';
-    protected $_entityType = '';
-    protected $_conversions = array();
+    protected $entityType = '';
+
+    /**
+     * @var Collection|null
+     */
+    protected $conversions = null;
+
+    /**
+     * @var Collection|null
+     */
+    protected $inventoryStatuses = null;
 
     public const ADAPTER_MAPPING = [
         'Adapter_Utc_Inventory' => 'App\Services\Integration\Transaction\Adapter\Utc\Inventory',
@@ -51,6 +65,16 @@ abstract class Adapter
     protected $inventoryRepository;
 
     /**
+     * @var DealerIncomingMappingRepositoryInterface
+     */
+    protected $dealerIncomingMappingRepository;
+
+    /**
+     * @var StatusRepositoryInterface
+     */
+    protected $statusRepository;
+
+    /**
      * @var Reference
      */
     protected $reference;
@@ -61,7 +85,9 @@ abstract class Adapter
         AttributeRepositoryInterface $attributeRepository,
         InventoryServiceInterface $inventoryService,
         InventoryRepositoryInterface $inventoryRepository,
-        Reference $reference
+        Reference $reference,
+        DealerIncomingMappingRepositoryInterface $dealerIncomingMappingRepository,
+        StatusRepositoryInterface $statusRepository
     ) {
         $this->apiEntityReferenceRepository = $apiEntityReferenceRepository;
         $this->attributeRepository = $attributeRepository;
@@ -69,6 +95,8 @@ abstract class Adapter
         $this->inventoryService = $inventoryService;
         $this->inventoryRepository = $inventoryRepository;
         $this->reference = $reference;
+        $this->dealerIncomingMappingRepository = $dealerIncomingMappingRepository;
+        $this->statusRepository = $statusRepository;
     }
 
     /**
@@ -92,27 +120,40 @@ abstract class Adapter
         $this->apiEntityReferenceRepository->create(array(
             'entity_id'    => $entityId,
             'reference_id' => $referenceId,
-            'entity_type'  => $this->_entityType,
+            'entity_type'  => $this->entityType,
             'api_key'      => $this->apiKey
         ));
     }
 
     /**
-     * @param $attribute
-     * @param $value
+     * @param $type
+     * @param $mapFrom
      * @return mixed
      */
-    public function convert($attribute, $value)
+    public function convert($type, $mapFrom)
     {
-        if(!isset($this->_conversions[$attribute])) {
-            return $value;
+        if ($this->conversions === null) {
+            $this->conversions = $this->dealerIncomingMappingRepository->getAll(['integration_name' => $this->apiKey]);
         }
 
-        if(isset($this->_conversions[$attribute][$value])) {
-            return $this->_conversions[$attribute][$value];
+        $searchArray = [
+            [$type, $mapFrom],
+            [strtolower($type), $mapFrom],
+            [$type, strtolower($mapFrom)],
+            [strtolower($type), strtolower($mapFrom)],
+        ];
+
+        foreach ($searchArray as $item) {
+            /** @var DealerIncomingMapping $dealerIncomingMapping */
+            $dealerIncomingMapping = $this->conversions->where('type', $item[0])
+                ->firstWhere('map_from', $item[1]);
+
+            if ($dealerIncomingMapping instanceof DealerIncomingMapping) {
+                return $dealerIncomingMapping->map_to;
+            }
         }
 
-        return $value;
+        return $mapFrom;
     }
 
     /**
@@ -141,5 +182,25 @@ abstract class Adapter
         }
 
         return $inventoryAttributes;
+    }
+
+    /**
+     * @param int|null $statusId
+     * @return string
+     */
+    protected function getStatusLabel(?int $statusId): string
+    {
+        if ($this->inventoryStatuses === null) {
+            $this->inventoryStatuses = $this->statusRepository->getAll();
+        }
+
+        /** @var Status $inventoryStatus */
+        $inventoryStatus = $this->inventoryStatuses->where('id', '=', $statusId);
+
+        if (!$inventoryStatus instanceof Status) {
+            return '';
+        }
+
+        return $inventoryStatus->label;
     }
 }

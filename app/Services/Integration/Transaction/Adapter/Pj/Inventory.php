@@ -17,59 +17,7 @@ class Inventory extends PjAdapter
 
     private const ENTITY_TYPE = 1;
 
-    protected $_entityType = 'inventory';
-    protected $_conversions = array(
-        'pull_type' => array(
-            'BP' => 'bumper',
-            'GN' => 'gooseneck',
-            'PT' => 'pintle',
-            'SD' => 'tractor_hookup',
-        ),
-        'roof_type' => array(
-            'Round' => 'round',
-            'Flat'  => 'flat'
-        ),
-        'nose_type' => array(
-            'V Front' => 'v_front',
-            'Flat'    => 'flat'
-        ),
-        'status'    => array(
-            //sold
-            'sold'      => '2',
-            //available
-            'available' => '1',
-            //on order
-            'on_order'  => '3',
-        ),
-        'color'     => array(
-            'Black Powdercoat'            => 'black',
-            'Equipment Yellow Powdercoat' => 'yellow',
-            'Grey Powdercoat'             => 'grey',
-            'Red Powdercoat'              => 'red',
-            'Tractor Green Powdercoat'    => 'green',
-            'Tractor Orange'              => 'orange',
-            'White Powdercoat'            => 'white'
-        ),
-        'category'  => array(
-            'camping_rv'         => 'Camping / RV Trailer',
-            'cargo_enclosed'     => 'Cargo / Enclosed Trailer',
-            'car_racing'         => 'Car / Racing Trailer',
-            'dump'               => 'Dump Trailer',
-            'flatbed'            => 'Flatbed Trailer',
-            'motorcycle'         => 'Motorcycle Trailer',
-            'other'              => 'Trailer',
-            'snowmobile'         => 'Snowmobile Trailer',
-            'stock_stock-combo'  => 'Stock / Stock Combo Trailer',
-            'toy'                => 'Toy Hauler',
-            'utility'            => 'Utility Trailer',
-            'vending_concession' => 'Vending / Concession Trailer',
-            'watercraft'         => 'Watercraft Trailer',
-            'atv'                => 'ATV Trailer',
-            'bed_equipment'      => 'Truck Bed / Equipment',
-            'tow_dolly'          => 'Tow Dolly',
-            'equipment'          => 'Equipment Trailer'
-        )
-    );
+    protected $entityType = 'inventory';
 
     /**
      * @param $data
