@@ -588,7 +588,7 @@ class QueryBuilder implements InventoryQueryBuilderInterface
 
     private function addGeoDistanceQuery(GeolocationRange $geolocation): void
     {
-        $geo = sprintf('%d, %d', $geolocation->lat(), $geolocation->lon());
+        $geo = sprintf('%.2f, %.2f', $geolocation->lat(), $geolocation->lon());
 
         $query = [
             'sort' => [
@@ -608,7 +608,7 @@ class QueryBuilder implements InventoryQueryBuilderInterface
                 'must' => [
                     [
                         'geo_distance' => [
-                            'distance' => sprintf('%f%s', abs($geolocation->range()), $geolocation->units()),
+                            'distance' => sprintf('%g%s', abs($geolocation->range()), $geolocation->units()),
                             'location.geo' => $geo
                         ]
                     ]
