@@ -456,9 +456,9 @@ class ADFLead
     /**
      * Return Street Address
      *
-     * @return string $this->addrStreet
+     * @return null|string $this->addrStreet
      */
-    public function getAddrStreet(): string
+    public function getAddrStreet(): ?string
     {
         return $this->addrStreet;
     }
@@ -478,9 +478,9 @@ class ADFLead
     /**
      * Return City Address
      *
-     * @return string $this->addrCity
+     * @return null|string $this->addrCity
      */
-    public function getAddrCity(): string
+    public function getAddrCity(): ?string
     {
         return $this->addrCity;
     }
@@ -500,9 +500,9 @@ class ADFLead
     /**
      * Return State Address
      *
-     * @return string $this->addrState
+     * @return null|string $this->addrState
      */
-    public function getAddrState(): string
+    public function getAddrState(): ?string
     {
         return $this->addrState;
     }
@@ -522,9 +522,9 @@ class ADFLead
     /**
      * Return Zip Address
      *
-     * @return string $this->addrZip
+     * @return null|string $this->addrZip
      */
-    public function getAddrZip(): string
+    public function getAddrZip(): ?string
     {
         return $this->addrZip;
     }
