@@ -13,6 +13,7 @@ use App\Http\Requests\WebsiteUser\CreateLocationRequest;
 use App\Repositories\WebsiteUser\WebsiteUserRepositoryInterface;
 use App\Services\Integrations\TrailerCentral\Api\Users\UsersServiceInterface;
 use App\Transformers\Location\TcApiResponseUserLocationTransformer;
+use Dingo\Api\Http\Response;
 use Illuminate\Support\Collection;
 
 class LocationController extends AbstractRestfulController
@@ -31,7 +32,8 @@ class LocationController extends AbstractRestfulController
         throw new NotImplementedException();
     }
 
-    public function all() {
+    public function all(): Response
+    {
         $user = auth('api')->user();
         $locations = $this->tcUserService->getLocations($user->tc_user_id);
         return $this->response->collection(collect($locations), $this->transformer);
