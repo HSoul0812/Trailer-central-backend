@@ -142,12 +142,6 @@ class Reference
             'api_key' => $apiKey,
         ]);
 
-        if (!($apiEntityReference ? $apiEntityReference->entity_id : false)) {
-            print_r($apiKey);
-            print_r($value);
-            print_r($entityType);exit();
-        }
-
         return $apiEntityReference ? $apiEntityReference->entity_id : false;
     }
 }
