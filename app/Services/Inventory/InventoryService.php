@@ -741,6 +741,7 @@ class InventoryService implements InventoryServiceInterface
                     // update image to database
                     $this->imageTableService->saveOverlay($imageObj, $newFilename);
 
+                    // @todo implement a mechanism to detect any image processing failure and reset the image to previous state
                     $hasChanges = true;
                 } else {
 
