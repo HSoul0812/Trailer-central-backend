@@ -92,10 +92,15 @@ class InventoryService implements InventoryServiceInterface
         $logEnabled = request()->header(config('logging.enablers.elasticsearch.header'));
 
         if (filter_var($logEnabled, FILTER_VALIDATE_BOOLEAN)) {
-            \Log::channel('elasticsearch')->debug(__METHOD__ . ':' . __LINE__, [
-                'url' => $esSearchUrl,
-                'body' => $body,
-            ]);
+            $logMessage = sprintf(
+                "%s:%d => URL: %s, Body: %s",
+                __METHOD__,
+                __LINE__,
+                $esSearchUrl,
+                json_encode($body),
+            );
+
+            \Log::channel('elasticsearch')->debug($logMessage);
         }
 
         $res = $this->httpClient->post($esSearchUrl, [
