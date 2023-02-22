@@ -530,8 +530,11 @@ class EmulateHighSearchRates extends Command
 
         $uri = sprintf('%s/inventory/_search', config('elastic.client.hosts.0'));
 
-        $this->line(sprintf('It will execute a benchmark by sending <comment>%d</comment> request concurrently',
-            $times));
+        $this->line(sprintf(
+                'It will execute a benchmark by sending <comment>%d</comment> request concurrently',
+                $times
+            )
+        );
 
         $startTime = new DateTime();
 
