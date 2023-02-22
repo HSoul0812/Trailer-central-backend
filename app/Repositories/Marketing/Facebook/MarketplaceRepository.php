@@ -10,6 +10,7 @@ use App\Models\Marketing\Facebook\Marketplace;
 use App\Repositories\Traits\SortTrait;
 use App\Traits\Repository\Transaction;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -188,16 +189,45 @@ class MarketplaceRepository implements MarketplaceRepositoryInterface {
         }
 
         return $query->groupBy(Marketplace::getTableName() . '.id')
-                     ->paginate($params['per_page'])->appends($params);
+            ->paginate($params['per_page'])->appends($params);
+    }
+
+    public function getAllIntegrations($params): Collection
+    {
+        $query = Marketplace::select(Marketplace::getTableName() . '.*', User::getTableName() . '.name AS dealer_name', DealerFBMOverview::getTableName() . '.last_attempt_ts')
+            ->leftJoin(Listings::getTableName(), Listings::getTableName() . '.marketplace_id', '=', Marketplace::getTableName() . '.id')
+            ->leftJoin(User::getTableName(), Marketplace::getTableName() . '.dealer_id', '=', User::getTableName() . '.dealer_id')
+            ->leftJoin(DealerFBMOverview::getTableName(), DealerFBMOverview::getTableName() . '.id', '=', Marketplace::getTableName() . '.id')
+            ->leftJoin(Error::getTableName(), function ($join) {
+                $join->on(Error::getTableName() . '.marketplace_id', '=',
+                    Marketplace::getTableName() . '.id')
+                    ->where(Error::getTableName() . '.dismissed', 0)
+                    ->whereNull(Error::getTableName() . '.inventory_id');
+            })
+            ->where(function (Builder $query) {
+                return $query->whereNull(Error::getTableName() . '.id')
+                    ->orWhere(Error::getTableName() . '.expires_at', '<', DB::raw('NOW()'));
+            });
+
+        if (!isset($params['per_page'])) {
+            $params['per_page'] = 1000;
+        }
+
+        if (isset($params['sort'])) {
+            $query = $this->addSortQuery($query, $params['sort']);
+        }
+
+        return $query->groupBy(Marketplace::getTableName() . '.id')->limit($params['per_page'])->get();
     }
 
     /**
      * Update Marketplace
-     * 
+     *
      * @param array $params
      * @return Marketplace
      */
-    public function update($params) {
+    public function update($params)
+    {
         $marketplace = Marketplace::findOrFail($params['id']);
 
         DB::transaction(function() use (&$marketplace, $params) {
