@@ -205,6 +205,9 @@ class GmailService implements GmailServiceInterface
                 'q' => $q
             ]);
             $messages = $results->getMessages();
+	    if(empty($messages)) {
+		$messages = [];
+	    }
         } catch (\Exception $e) {
             $this->log->error('Exception thrown trying to retrieve gmail messages: ' . $e->getMessage());
             throw new InvalidEmailCredentialsException;
