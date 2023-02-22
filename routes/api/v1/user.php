@@ -28,6 +28,7 @@ $api->version('v1', function ($api) {
         $api->get('/reset-password', [PasswordResetController::class, 'showReset'])
             ->name('password.reset');
         $api->post('/reset-password', [PasswordResetController::class, 'resetPassword']);
+        $api->get('/locations', [LocationController::class, 'all']);
         $api->post('/location', [LocationController::class, 'create']);
         $api->post('/jwt/refresh', [AuthController::class, 'jwtRefreshToken']);
         /*

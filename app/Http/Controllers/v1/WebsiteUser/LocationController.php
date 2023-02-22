@@ -7,11 +7,13 @@ use App\Exceptions\NotImplementedException;
 use App\Http\Controllers\AbstractRestfulController;
 use App\Http\Requests\CreateRequestInterface;
 use App\Http\Requests\IndexRequestInterface;
+use App\Http\Requests\Request;
 use App\Http\Requests\UpdateRequestInterface;
 use App\Http\Requests\WebsiteUser\CreateLocationRequest;
 use App\Repositories\WebsiteUser\WebsiteUserRepositoryInterface;
 use App\Services\Integrations\TrailerCentral\Api\Users\UsersServiceInterface;
 use App\Transformers\Location\TcApiResponseUserLocationTransformer;
+use Illuminate\Support\Collection;
 
 class LocationController extends AbstractRestfulController
 {
@@ -26,9 +28,13 @@ class LocationController extends AbstractRestfulController
 
     public function index(IndexRequestInterface $request)
     {
+        throw new NotImplementedException();
+    }
+
+    public function all() {
         $user = auth('api')->user();
-        $locations = $this->tcUserService->getLocations($user->tc_user_location_id);
-        $this->response->array($locations, $this->transformer);
+        $locations = $this->tcUserService->getLocations($user->tc_user_id);
+        return $this->response->collection(collect($locations), $this->transformer);
     }
 
     public function create(CreateRequestInterface $request)
@@ -40,7 +46,6 @@ class LocationController extends AbstractRestfulController
             ]);
 
             if($user->tc_user_location_id) {
-                $this->response->error("Location already exist", 400);
                 $tcLocation = $this->tcUserService->updateLocation($user->tc_user_location_id, $attributes);
             } else {
                 $tcLocation = $this->tcUserService->createLocation($attributes);
