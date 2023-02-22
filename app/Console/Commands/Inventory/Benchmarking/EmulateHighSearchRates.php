@@ -559,11 +559,14 @@ class EmulateHighSearchRates extends Command
             $response = $data['value'];
             $content = json_decode($response->getBody(), true);
 
-            $stats['took'][] = $content['took'];
-            $stats['avg'] += $content['took'];
+            if (isset($content['took'])){
+                $stats['took'][] = $content['took'];
+                $stats['avg'] += $content['took'];
+            }
         });
 
-        $stats['avg'] = round($stats['avg'] / $times, 2);
+        $stats['request'] = count($stats['took']);
+        $stats['avg'] = round($stats['avg'] / $stats['request'], 2);
         $stats['min'] = min($stats['took']);
         $stats['max'] = max($stats['took']);
 
