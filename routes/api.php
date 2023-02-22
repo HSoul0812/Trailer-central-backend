@@ -652,6 +652,7 @@ $api->version('v1', function ($route) {
     $route->get('leads/sort-fields', 'App\Http\Controllers\v1\CRM\Leads\LeadController@sortFields');
     $route->get('leads/sort-fields/crm', 'App\Http\Controllers\v1\CRM\Leads\LeadController@sortFieldsCrm');
     $route->get('leads/unique-full-names', 'App\Http\Controllers\v1\CRM\Leads\LeadController@uniqueFullNames');
+    $route->get('leads/filters', 'App\Http\Controllers\v1\CRM\Leads\LeadController@filters');
     $route->get('crm/states', 'App\Http\Controllers\v1\CRM\StatesController@index');
 
     /*

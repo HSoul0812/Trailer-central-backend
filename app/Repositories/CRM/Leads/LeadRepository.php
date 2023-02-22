@@ -596,6 +596,25 @@ class LeadRepository implements LeadRepositoryInterface {
         return $this->sortOrdersNames;
     }
 
+    /** 
+     * Get Mapped Array of CRM Sorts > Name
+     * 
+     * @return array
+     */
+    public function getSortOrderNamesCrm(): array
+    {
+        // Initialize Sorts
+        $sorts = [];
+        foreach($this->getLeadsSortFieldsCrm() as $sort) {
+            if(isset($this->sortOrdersNames[$sort])) {
+                $sorts[$sort] = $this->sortOrdersNames[$sort]['name'];
+            }
+        }
+
+        // Return Sorts => Names Mapping
+        return $sorts;
+    }
+
     private function getHotLeadsByDealer($dealerId, $params = []) {
         $user = User::findOrFail($dealerId);
 

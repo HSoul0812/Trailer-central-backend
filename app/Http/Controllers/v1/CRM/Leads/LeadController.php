@@ -286,6 +286,38 @@ class LeadController extends RestfulControllerV2
         return $this->updatedResponse();
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/leads/filters",
+     *     description="Retrieve various filter options for view leads page",
+     *     tags={"Lead"},
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns various filter options",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Error: Bad request.",
+     *     ),
+     * )
+     *
+     * @param Request $request
+     * @return Response
+     * @throws NoObjectIdValueSetException
+     * @throws NoObjectTypeSetException
+     */
+    public function filters(Request $request): Response
+    {
+        $request = new FilterLeadsRequest($request->all());
+
+        if ($request->validate()) {
+            return $this->response->item($this->service->filters($request->all()), new LeadFilterTransformer());
+        }
+
+        return $this->response->errorBadRequest();
+    }
+
     public function output(Request $request)
     {
         $request = new GetLeadsRequest($request->all());

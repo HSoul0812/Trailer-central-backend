@@ -471,6 +471,27 @@ class LeadService implements LeadServiceInterface
     }
 
     /**
+     * Get Filters for Leads
+     *
+     * @param array $params
+     * @return LeadFilter
+     */
+    public function getFilters(array $params): LeadFilters
+    {
+        // Get Core CRM Sort Fields
+        $sorts = $this->leads->getSortOrderNamesCrm();
+
+        // Get Popular Filters
+        
+        // Return LeadFilters
+        return new LeadFilters([
+            'sorts' => $sorts,
+            'archived' => Lead::ARCHIVED_STATUSES,
+            'popular' => $popular
+        ]);
+    }
+
+    /**
      * Merge Lead Data
      * 
      * @param int $leadId primary lead ID
