@@ -37,6 +37,31 @@ class UsersService implements UsersServiceInterface
         return TcApiResponseUser::fromData($responseContent);
     }
 
+    public function getLocations(int $userId): array
+    {
+        if(!$accessToken = request()->header('access-token')) {
+            $authToken = $this->authTokenRepository->get(['user_id' => $userId]);
+            $accessToken = $authToken->access_token;
+        }
+
+        $responseContent = $this->handleHttpRequest(
+            'GET',
+            config('services.trailercentral.api') . 'user' . "/dealer-location",
+            [
+                'json' => [],
+                'headers' => [
+                    'access-token' => $accessToken
+                ]
+            ]
+        );
+
+        $locations = [];
+        foreach($responseContent['data'] as $location) {
+            $locations[] = TcApiResponseUserLocation::fromData($location);
+        }
+        return $locations;
+    }
+
     public function createLocation(array $location): TcApiResponseUserLocation {
         if(!$accessToken = request()->header('access-token')) {
             $authToken = $this->authTokenRepository->get(['user_id' => $location['dealer_id']]);

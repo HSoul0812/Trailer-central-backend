@@ -18,7 +18,6 @@ $api->version('v1', function ($api) {
     $api->group(['prefix' => '/user'], function ($api) {
         $api->post('/register', [AuthController::class, 'create']);
         $api->get('/auth', [AuthController::class, 'authenticate']);
-        $api->post('/jwt/refresh', [AuthController::class, 'jwtRefreshToken']);
         $api->get('/auth/{social}', [AuthController::class, 'social'])
             ->name('SocialAuth')
             ->where('social', 'google|facebook');
@@ -30,6 +29,7 @@ $api->version('v1', function ($api) {
             ->name('password.reset');
         $api->post('/reset-password', [PasswordResetController::class, 'resetPassword']);
         $api->post('/location', [LocationController::class, 'create']);
+        $api->post('/jwt/refresh', [AuthController::class, 'jwtRefreshToken']);
         /*
         |--------------------------------------------------------------------------
         | Email verification
