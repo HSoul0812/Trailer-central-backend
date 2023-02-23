@@ -2,6 +2,8 @@
 
 namespace Tests\Integration\Services\User;
 
+use App\Models\User\DealerLogo;
+use App\Services\User\DealerLogoService;
 use App\Services\User\DealerLogoServiceInterface;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -33,7 +35,7 @@ class DealerLogoServiceTest extends TestCase
 
     public function test_it_can_upload_a_logo()
     {
-        Storage::fake('s3');
+        Storage::fake(DealerLogoService::STORAGE_DISK);
 
         $file = $this->dealerLogoService->upload(
             $this->dealerId,
@@ -41,6 +43,29 @@ class DealerLogoServiceTest extends TestCase
         );
 
         $this->assertSame($this->uploadedFilename, $file);
-        Storage::disk('s3')->assertExists($this->uploadedFilename);
+        Storage::disk(DealerLogoService::STORAGE_DISK)->assertExists($this->uploadedFilename);
+    }
+
+    public function test_it_can_delete_a_logo()
+    {
+        Storage::fake(DealerLogoService::STORAGE_DISK);
+
+        $logo = factory(DealerLogo::class)->create([
+            'dealer_id' => $this->dealerId,
+            'filename' => $this->uploadedFilename
+        ]);
+
+        $this->dealerLogoService->upload(
+            $this->dealerId,
+            UploadedFile::fake()->create('image.png', 1024, 'image/png')
+        );
+
+        Storage::disk(DealerLogoService::STORAGE_DISK)->assertExists($this->uploadedFilename);
+
+        $this->dealerLogoService->delete($this->dealerId);
+
+        Storage::disk(DealerLogoService::STORAGE_DISK)->assertMissing($this->uploadedFilename);
+
+        $logo->delete();
     }
 }

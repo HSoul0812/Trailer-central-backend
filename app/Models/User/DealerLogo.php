@@ -18,6 +18,6 @@ class DealerLogo extends Model
 
     public function dealer(): BelongsTo
     {
-        return $this->BelongsTo(User::class, 'dealer_id', 'user_id');
+        return $this->BelongsTo(User::class, 'dealer_id');
     }
 }
