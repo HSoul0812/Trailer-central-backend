@@ -76,7 +76,7 @@ class CustomQueryBuilder implements FieldQueryBuilderInterface
                                     ],
                                     [
                                         'wildcard' => [
-                                            'title' => [
+                                            'title.tokens' => [
                                                 'value' => '*as is*'
                                             ]
                                         ]
