@@ -20,6 +20,7 @@ use App\Repositories\CRM\Leads\LeadRepositoryInterface;
 use App\Services\CRM\Leads\LeadServiceInterface;
 use App\Transformers\CRM\Leads\GetUniqueFullNamesTransformer;
 use App\Transformers\CRM\Leads\LeadTransformer;
+use App\Transformers\CRM\Leads\LeadFiltersTransformer;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
 use App\Http\Requests\CRM\Leads\DeleteLeadRequest;
@@ -312,7 +313,7 @@ class LeadController extends RestfulControllerV2
         $request = new FilterLeadsRequest($request->all());
 
         if ($request->validate()) {
-            return $this->response->item($this->service->filters($request->all()), new LeadFilterTransformer());
+            return $this->response->item($this->service->getFilters($request->all()), new LeadFiltersTransformer());
         }
 
         return $this->response->errorBadRequest();

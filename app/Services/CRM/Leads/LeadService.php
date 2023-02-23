@@ -20,6 +20,7 @@ use App\Repositories\CRM\Leads\UnitRepositoryInterface;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
 use App\Repositories\Dms\QuoteRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
+use App\Services\CRM\Leads\DTOs\LeadFilters;
 use App\Traits\Repository\Transaction;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -474,7 +475,7 @@ class LeadService implements LeadServiceInterface
      * Get Filters for Leads
      *
      * @param array $params
-     * @return LeadFilter
+     * @return LeadFilters
      */
     public function getFilters(array $params): LeadFilters
     {
@@ -482,7 +483,8 @@ class LeadService implements LeadServiceInterface
         $sorts = $this->leads->getSortOrderNamesCrm();
 
         // Get Popular Filters
-        
+        $popular = $this->leads->getPopularFilters();
+
         // Return LeadFilters
         return new LeadFilters([
             'sorts' => $sorts,

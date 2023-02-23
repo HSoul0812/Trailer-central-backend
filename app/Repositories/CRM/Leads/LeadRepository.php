@@ -16,6 +16,7 @@ use App\Models\CRM\Leads\LeadStatus;
 use App\Models\CRM\Leads\LeadType;
 use App\Models\Inventory\Inventory;
 use App\Repositories\Traits\SortTrait;
+use App\Services\CRM\Leads\DTOs\LeadFiltersPopular;
 use App\Utilities\TimeUtil;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
@@ -42,6 +43,16 @@ class LeadRepository implements LeadRepositoryInterface {
     ];
 
     private const DEFAULT_HOT_POTATO_DURATION = 30;
+
+    private const POPULAR_FILTERS = [
+        'all'              => ['label' => 'All'],
+        'due_today'        => ['label' => 'Due Today', 'type' => 'interaction', 'time' => 'today'],
+        'due_yesterday'    => ['label' => 'Due Yesterday', 'type' => 'interaction', 'time' => 'yesterday'],
+        'due_week'         => ['label' => 'Due This Week', 'type' => 'interaction', 'time' => 'week'],
+        'uncontacted'      => ['label' => 'Uncontacted', 'type' => 'interaction', 'time' => 'no'],
+        'interacted_today' => ['label' => 'Interacted Today', 'type' => 'interacted', 'time' => 'today'],
+        'interacted_week'  => ['label' => 'Interacted This Week', 'type' => 'interacted', 'time' => 'week']
+    ];
 
     private $sortOrdersCrm = [
         'no_due_past_due_future_due',
@@ -613,6 +624,23 @@ class LeadRepository implements LeadRepositoryInterface {
 
         // Return Sorts => Names Mapping
         return $sorts;
+    }
+
+    /** 
+     * Get Popular Filters
+     * 
+     * @return array<LeadFiltersPopular>
+     */
+    public function getPopularFilters(): array
+    {
+        // Return Popular Filters Containing Preset Times
+        $filters = [];
+        foreach(self::POPULAR_FILTERS as $filter) {
+            $filters[] = LeadFiltersPopular::fill($filter);
+        }
+
+        // Return array<LeadFiltersPopular>
+        return $filters;
     }
 
     private function getHotLeadsByDealer($dealerId, $params = []) {
