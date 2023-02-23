@@ -111,9 +111,7 @@ class LeadTradeController extends RestfulControllerV2
     {
         $request = new DeleteLeadTradeRequest(array_merge($request->all(), ['id' => $id]));
         
-        if ($request->validate() 
-            && $this->leads->delete(['id' => $id, 'dealer_id' => $request->get('dealer_id')]) > 0) {
-
+        if ($request->validate() && $this->leadTradeRepository->delete(['id' => $id]) > 0) {
             return $this->updatedResponse();
         }
 

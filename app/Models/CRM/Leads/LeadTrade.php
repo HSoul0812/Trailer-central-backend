@@ -4,6 +4,7 @@ namespace App\Models\CRM\Leads;
 
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
@@ -51,6 +52,14 @@ class LeadTrade extends Model
         'width',
         'notes'
     ];
+
+    /**
+     * @return BelongsTo
+     */
+    public function lead(): BelongsTo
+    {
+        return $this->belongsTo(Lead::class, 'lead_id', 'identifier');
+    }
 
     /**
      * @return HasMany
