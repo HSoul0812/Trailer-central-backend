@@ -37,10 +37,10 @@ class GenerateOverlayImageJob extends Job {
      * GenerateOverlayImageJob constructor.
      * @param int $inventoryId
      */
-    public function __construct(int $inventoryId, bool $reindexAndInvalidateCache = true)
+    public function __construct(int $inventoryId, ?bool $reindexAndInvalidateCache = null)
     {
         $this->inventoryId = $inventoryId;
-        $this->reindexAndInvalidateCache = $reindexAndInvalidateCache;
+        $this->reindexAndInvalidateCache = $reindexAndInvalidateCache ?? true;
     }
 
     /**
