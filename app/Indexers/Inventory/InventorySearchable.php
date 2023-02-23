@@ -92,7 +92,6 @@ trait InventorySearchable
     public static function makeAllSearchable(): void
     {
         Dealer::query()->select('dealer.dealer_id')
-            ->whereIn('dealer_id', [9088])
             ->get()
             ->each(function (Dealer $dealer): void {
                 self::query()->select('inventory.inventory_id')
