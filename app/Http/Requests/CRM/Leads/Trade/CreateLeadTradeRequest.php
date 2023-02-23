@@ -5,10 +5,10 @@ namespace App\Http\Requests\CRM\Leads\Trade;
 use App\Http\Requests\Request;
 
 /**
- * Class CreateLeadTradesRequest
+ * Class CreateLeadTradeRequest
  * @package App\Http\Requests\CRM\Leads\Trade
  */
-class CreateLeadTradesRequest extends Request
+class CreateLeadTradeRequest extends Request
 {
     protected $rules = [
         'lead_id' => 'required|valid_lead',
