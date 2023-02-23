@@ -11,7 +11,7 @@ use App\Http\Requests\Request;
 class UpdateLeadTradeRequest extends Request
 {
     protected $rules = [
-        'id' => 'required|valid_lead_trade',
+        'id' => 'required|lead_trade_valid',
         'type' => 'string',
         'make' => 'string',
         'model' => 'string',

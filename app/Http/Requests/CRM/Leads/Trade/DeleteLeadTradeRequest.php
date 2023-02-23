@@ -11,6 +11,6 @@ use App\Http\Requests\Request;
 class DeleteLeadTradeRequest extends Request
 {
     protected $rules = [
-        'id' => 'required|valid_lead_trade'
+        'id' => 'required|lead_trade_valid'
     ];
 }
