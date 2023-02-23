@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\CRM\Leads;
+namespace App\Http\Requests\CRM\Leads\Trade;
 
 use App\Http\Requests\Request;
 
