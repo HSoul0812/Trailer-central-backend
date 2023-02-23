@@ -48,7 +48,9 @@ class PdfExporter implements ExporterInterface
     {
         $transformer = new InventoryTransformer();
         $data = $transformer->transform($inventory);
-        $data['features'] = $transformer->includeFeatures($inventory)->getData()->toArray();
+        $features = $transformer->includeFeatures($inventory)->getData();
+        $data['features_count'] = $features->count();
+        $data['features'] = $features->chunk(3);
         $data['website'] = $transformer->includeWebsite($inventory)->getData();
         $data['dealer_logo'] = $this->getDealerLogo($data['website']);
         $data['attributes'] = $inventory->attributeValues;

@@ -11,7 +11,8 @@ use League\Fractal\TransformerAbstract;
 class UserTransformer extends TransformerAbstract
 {
     protected $defaultIncludes = [
-        'permissions'
+        'permissions',
+        'logo'
     ];
 
     public function transform($user): array
@@ -28,21 +29,21 @@ class UserTransformer extends TransformerAbstract
         }
 
         return [
-             'id' => $user->dealer_id,
-             'identifier' => $user->identifier,
-             'created_at' => $user->created_at,
-             'name' => $user->name,
-             'email' => $email,
-             'primary_email' => $user->email,
-             'clsf_active' => $user->clsf_active,
-             'is_dms_active' => $user->is_dms_active,
-             'is_crm_active' => $user->is_crm_active,
-             'is_parts_active' => $user->is_parts_active,
-             'is_marketing_active' => $user->is_marketing_active,
-             'is_fme_active' => $user->is_fme_active,
-             'profile_image' => config('user.profile.image'),
-             'website' => $user->website,
-             'from' => $user->from,
+            'id' => $user->dealer_id,
+            'identifier' => $user->identifier,
+            'created_at' => $user->created_at,
+            'name' => $user->name,
+            'email' => $email,
+            'primary_email' => $user->email,
+            'clsf_active' => $user->clsf_active,
+            'is_dms_active' => $user->is_dms_active,
+            'is_crm_active' => $user->is_crm_active,
+            'is_parts_active' => $user->is_parts_active,
+            'is_marketing_active' => $user->is_marketing_active,
+            'is_fme_active' => $user->is_fme_active,
+            'profile_image' => config('user.profile.image'),
+            'website' => $user->website,
+            'from' => $user->from,
         ];
     }
 
@@ -62,5 +63,11 @@ class UserTransformer extends TransformerAbstract
         }
 
         return $user->getPermissionsAllowed();
+    }
+
+    public function includeLogo($user)
+    {
+        $logo = $user->logo;
+        return $logo ? $this->item($logo, new DealerLogoTransformer()) : $this->null();
     }
 }

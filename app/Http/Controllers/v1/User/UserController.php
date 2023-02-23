@@ -35,7 +35,7 @@ class UserController extends RestfulControllerV2
         UserRepositoryInterface $userRepository,
         DealerOptionsService $dealerOptionsService
     ) {
-        $this->middleware('setDealerIdOnRequest');
+        $this->middleware('setDealerIdOnRequest', ['except' => ['create']]);
         $this->userRepository = $userRepository;
         $this->dealerOptionsService = $dealerOptionsService;
     }

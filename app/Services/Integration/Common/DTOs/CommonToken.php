@@ -75,7 +75,7 @@ class CommonToken
         $commonToken = new static([
             'access_token' => $authToken['access_token'],
             'refresh_token' => $authToken['refresh_token'] ?? '',
-            'id_token' => $authToken['id_token'],
+            'id_token' => $authToken['id_token'] ?? null,
             'scopes' => explode(" ", $authToken['scope']),
             'issued_at' => $authToken['issued_at'] ?? CarbonImmutable::now(),
             'expires_in' => $authToken['expires_in'],

@@ -215,11 +215,11 @@ class User extends Model implements Authenticatable, PermissionsInterface
     {
         parent::boot();
 
-        self::created(function($model){
+        self::created(function ($model) {
             AuthToken::create([
                 'user_id' => $model->dealer_id,
                 'user_type' => 'dealer',
-                'access_token' => md5($model->dealer_id.uniqid())
+                'access_token' => md5($model->dealer_id . uniqid())
             ]);
         });
     }
@@ -229,7 +229,8 @@ class User extends Model implements Authenticatable, PermissionsInterface
      *
      * @return string
      */
-    public function getAuthIdentifierName() {
+    public function getAuthIdentifierName()
+    {
         return $this->name;
     }
 
@@ -238,7 +239,8 @@ class User extends Model implements Authenticatable, PermissionsInterface
      *
      * @return mixed
      */
-    public function getAuthIdentifier() {
+    public function getAuthIdentifier()
+    {
         return $this->dealer_id;
     }
 
@@ -247,29 +249,37 @@ class User extends Model implements Authenticatable, PermissionsInterface
      *
      * @return string
      */
-    public function getAuthPassword() {}
+    public function getAuthPassword()
+    {
+    }
 
     /**
      * Get the token value for the "remember me" session.
      *
      * @return string
      */
-    public function getRememberToken() {}
+    public function getRememberToken()
+    {
+    }
 
     /**
      * Set the token value for the "remember me" session.
      *
-     * @param  string  $value
+     * @param string $value
      * @return void
      */
-    public function setRememberToken($value) {}
+    public function setRememberToken($value)
+    {
+    }
 
     /**
      * Get the column name for the "remember me" token.
      *
      * @return string
      */
-    public function getRememberTokenName() {}
+    public function getRememberTokenName()
+    {
+    }
 
     /**
      * Get dealer shorten identifier
@@ -339,7 +349,7 @@ class User extends Model implements Authenticatable, PermissionsInterface
 
     public function getIsCdkActiveAttribute(): bool
     {
-        return (bool) $this->getCdkAttribute();
+        return (bool)$this->getCdkAttribute();
     }
 
     public function getCdkAttribute()
@@ -378,8 +388,8 @@ class User extends Model implements Authenticatable, PermissionsInterface
 
     public function getIsMobileActiveAttribute(): bool
     {
-        if(isset($this->website)) {
-            return (bool) $this->website->websiteConfigByKey(WebsiteConfig::MOBILE_KEY_ENABLED);
+        if (isset($this->website)) {
+            return (bool)$this->website->websiteConfigByKey(WebsiteConfig::MOBILE_KEY_ENABLED);
         } else {
             return false;
         }
@@ -387,8 +397,8 @@ class User extends Model implements Authenticatable, PermissionsInterface
 
     public function getIsEcommerceActiveAttribute(): bool
     {
-        if(isset($this->website)) {
-            return (bool) $this->website->websiteConfigByKey(WebsiteConfig::ECOMMERCE_KEY_ENABLE);
+        if (isset($this->website)) {
+            return (bool)$this->website->websiteConfigByKey(WebsiteConfig::ECOMMERCE_KEY_ENABLE);
         } else {
             return false;
         }
@@ -426,8 +436,8 @@ class User extends Model implements Authenticatable, PermissionsInterface
 
     public function getIsUserAccountsActiveAttribute(): ?bool
     {
-        if(isset($this->website)) {
-            return (bool) $this->website->websiteConfigByKey(WebsiteConfig::USER_ACCOUNTS_KEY);
+        if (isset($this->website)) {
+            return (bool)$this->website->websiteConfigByKey(WebsiteConfig::USER_ACCOUNTS_KEY);
         } else {
             return false;
         }
@@ -441,7 +451,7 @@ class User extends Model implements Authenticatable, PermissionsInterface
         return $this->hasMany(DealerUser::class, 'dealer_id', 'dealer_id');
     }
 
-    public function locations() : HasMany
+    public function locations(): HasMany
     {
         return $this->hasMany(DealerLocation::class, 'dealer_id', 'dealer_id');
     }
@@ -457,7 +467,7 @@ class User extends Model implements Authenticatable, PermissionsInterface
     public function leads()
     {
         return $this->hasMany(Lead::class, 'dealer_id', 'dealer_id')->where('is_spam', 0)
-                    ->where(Lead::getTableName() . '.lead_type', '<>', LeadType::TYPE_NONLEAD);
+            ->where(Lead::getTableName() . '.lead_type', '<>', LeadType::TYPE_NONLEAD);
     }
 
     /**
@@ -484,12 +494,12 @@ class User extends Model implements Authenticatable, PermissionsInterface
         return $this->hasOne(Collector::class, 'dealer_id', 'dealer_id');
     }
 
-    public function printerSettings() : HasOne
+    public function printerSettings(): HasOne
     {
         return $this->hasOne(Settings::class, 'dealer_id', 'dealer_id');
     }
 
-    public function bins() : HasMany
+    public function bins(): HasMany
     {
         return $this->hasMany(Bin::class, 'dealer_id', 'dealer_id');
     }
@@ -499,17 +509,18 @@ class User extends Model implements Authenticatable, PermissionsInterface
         $userService = app(UserService::class);
         $crmLoginString = $userService->getUserCrmLoginUrl($this->getAuthIdentifier());
         if ($route) {
-            $crmLoginString .= '&r='.$route;
+            $crmLoginString .= '&r=' . $route;
         }
         return ($useNewDesign ? config('app.new_design_crm_url') : '') . $crmLoginString;
     }
 
-    public function isSecondaryUser() : bool
+    public function isSecondaryUser(): bool
     {
         return false;
     }
 
-    public static function getTableName() {
+    public static function getTableName()
+    {
         return self::TABLE_NAME;
     }
 
@@ -521,7 +532,7 @@ class User extends Model implements Authenticatable, PermissionsInterface
     /**
      * Set the user's password encryption method
      *
-     * @param  string  $value
+     * @param string $value
      * @return void
      */
     public function setPasswordAttribute(string $value): void
@@ -539,11 +550,16 @@ class User extends Model implements Authenticatable, PermissionsInterface
      * Unserializes and returns the serialized showroom dealers
      * @return array|null
      */
-    public function getShowroomDealers():?array
+    public function getShowroomDealers(): ?array
     {
         if ($this->showroom_dealers) {
             return array_values(array_filter(unserialize($this->showroom_dealers)));
         }
         return null;
+    }
+
+    public function logo(): HasOne
+    {
+        return $this->hasOne(DealerLogo::class, 'dealer_id');
     }
 }

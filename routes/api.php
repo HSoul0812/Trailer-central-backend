@@ -677,6 +677,7 @@ $api->version('v1', function ($route) {
 
     $route->post('user/classified', 'App\Http\Controllers\v1\User\UserController@updateDealerClassifieds');
 
+
     /*
     |--------------------------------------------------------------------------
     | Integrations
@@ -779,6 +780,16 @@ $api->version('v1', function ($route) {
         */
         $route->get('website/{websiteId}/images', 'App\Http\Controllers\v1\Website\Image\WebsiteImagesController@index')->where('websiteId', '[0-9]+');
         $route->post('website/{websiteId}/image/{imageId}', 'App\Http\Controllers\v1\Website\Image\WebsiteImagesController@update')->where(['websiteId' => '[0-9]+', 'imageId' => '[0-9]+']);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Dealer Logos
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->post('user/logo', 'App\Http\Controllers\v1\User\DealerLogoController@store');
 
         /*
         |--------------------------------------------------------------------------
