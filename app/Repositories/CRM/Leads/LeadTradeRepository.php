@@ -6,6 +6,7 @@ use App\Exceptions\CRM\Leads\MissingLeadIdGetAllTradesException;
 use App\Models\CRM\Leads\LeadTrade;
 use App\Repositories\RepositoryAbstract;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class LeadTradeRepository
