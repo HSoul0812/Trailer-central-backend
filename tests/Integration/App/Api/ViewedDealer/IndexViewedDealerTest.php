@@ -6,6 +6,7 @@ use App\DTOs\Inventory\TcApiResponseInventory;
 use App\Models\Dealer\ViewedDealer;
 use App\Services\Inventory\InventoryServiceInterface;
 use App\Transformers\Inventory\TcApiResponseInventoryTransformer;
+use Http;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Mockery;
 use Mockery\MockInterface;
@@ -40,6 +41,10 @@ class IndexViewedDealerTest extends IntegrationTestCase
     public function testItReturnsNotFoundWhenFetchWithNonExistenceName(): void
     {
         $name = Str::random();
+
+        Http::fake([
+            '*' => Http::response([]),
+        ]);
 
         $this
             ->getJson(self::INDEX_VIEWED_DEALER_ENDPOINT . "?name=$name")
