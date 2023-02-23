@@ -5,12 +5,22 @@ namespace App\Repositories\ViewedDealer;
 use App\Domains\ViewedDealer\Actions\CreateViewedDealerAction;
 use App\Domains\ViewedDealer\Exceptions\DealerIdExistsException;
 use App\Domains\ViewedDealer\Exceptions\DuplicateDealerIdException;
+use App\DTOs\Inventory\TcEsInventory;
 use App\Models\Dealer\ViewedDealer;
+use App\Services\Dealers\DealerServiceInterface;
+use App\Services\Inventory\InventoryServiceInterface;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Collection;
 
 class ViewedDealerRepository implements ViewedDealerRepositoryInterface
 {
+    public function __construct(
+        private DealerServiceInterface $dealerService,
+        private InventoryServiceInterface $inventoryService,
+    )
+    {
+    }
+
     /**
      * Get the ViewedDealer model by name, returns null if it doesn't exist
      *
@@ -20,7 +30,13 @@ class ViewedDealerRepository implements ViewedDealerRepositoryInterface
      */
     public function findByName(string $name): ViewedDealer
     {
-        return ViewedDealer::where('name', $name)->firstOrFail();
+        $viewedDealer = ViewedDealer::where('name', $name)->first();
+
+        if ($viewedDealer === null) {
+            return $this->createViewedDealerFromTcApi($name);
+        }
+
+        return $viewedDealer;
     }
 
     /**
@@ -34,5 +50,36 @@ class ViewedDealerRepository implements ViewedDealerRepositoryInterface
     public function create(array $params): Collection
     {
         return resolve(CreateViewedDealerAction::class)->execute($params);
+    }
+
+    /**
+     * @param string $name
+     * @return ViewedDealer
+     * @throws ModelNotFoundException
+     */
+    private function createViewedDealerFromTcApi(string $name): ViewedDealer
+    {
+        // Get dealers from TC API
+        $dealers = $this->dealerService->listByName($name);
+
+        if (empty($dealers)) {
+            throw new ModelNotFoundException("Not found dealer with name $name.");
+        }
+
+        $dealer = $dealers[0];
+
+        // Get the first inventory from ES
+        $inventories = $this->inventoryService->list([
+            'dealerId' => $dealer['id'],
+        ]);
+
+        /** @var TcEsInventory $inventory */
+        $inventory = $inventories->inventories->first();
+
+        return ViewedDealer::create([
+            'name' => $dealer['name'],
+            'dealer_id' => $dealer['id'],
+            'inventory_id' => (int) $inventory->id,
+        ]);
     }
 }
