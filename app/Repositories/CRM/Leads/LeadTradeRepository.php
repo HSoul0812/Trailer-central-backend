@@ -65,7 +65,7 @@ class LeadTradeRepository extends RepositoryAbstract implements LeadTradeReposit
      * @param int $id
      * @return null|LeadTrade
      */
-    public function find(int $id): ?LeadTrade {
+    public function find($id): ?LeadTrade {
         return LeadTrade::find($id);
     }
 
