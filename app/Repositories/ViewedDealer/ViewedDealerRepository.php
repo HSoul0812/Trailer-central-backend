@@ -5,6 +5,7 @@ namespace App\Repositories\ViewedDealer;
 use App\Domains\ViewedDealer\Actions\CreateViewedDealerAction;
 use App\Domains\ViewedDealer\Exceptions\DealerIdExistsException;
 use App\Domains\ViewedDealer\Exceptions\DuplicateDealerIdException;
+use App\DTOs\Dealer\TcApiResponseDealer;
 use App\DTOs\Inventory\TcEsInventory;
 use App\Models\Dealer\ViewedDealer;
 use App\Services\Dealers\DealerServiceInterface;
@@ -66,19 +67,20 @@ class ViewedDealerRepository implements ViewedDealerRepositoryInterface
             throw new ModelNotFoundException("Not found dealer with name $name.");
         }
 
-        $dealer = $dealers[0];
+        /** @var TcApiResponseDealer $dealer */
+        $dealer = $dealers->first();
 
         // Get the first inventory from ES
         $inventories = $this->inventoryService->list([
-            'dealerId' => $dealer['id'],
+            'dealerId' => $dealer->id,
         ]);
 
         /** @var TcEsInventory $inventory */
         $inventory = $inventories->inventories->first();
 
         return ViewedDealer::create([
-            'name' => $dealer['name'],
-            'dealer_id' => $dealer['id'],
+            'name' => $dealer->name,
+            'dealer_id' => $dealer->id,
             'inventory_id' => (int) $inventory->id,
         ]);
     }

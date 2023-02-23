@@ -2,9 +2,11 @@
 
 namespace App\Services\Dealers;
 
+use App\DTOs\Dealer\TcApiResponseDealer;
 use Closure;
 use Http;
 use Illuminate\Http\Client\Response;
+use Illuminate\Support\Collection;
 use Log;
 use Throwable;
 
@@ -12,15 +14,35 @@ class DealerService implements DealerServiceInterface
 {
     const ENDPOINT_USERS_BY_NAME = '/users-by-name';
 
-    public function listByName(string $name): ?array
+    /**
+     * @param string $name
+     * @return Collection<int, TcApiResponseDealer>
+     */
+    public function listByName(string $name): Collection
     {
-        return $this->handleHttpRequest('GET', self::ENDPOINT_USERS_BY_NAME, [
+        $dealers = $this->handleHttpRequest('GET', self::ENDPOINT_USERS_BY_NAME, [
             'query' => [
                 'name' => $name,
             ],
-        ])?->json('data');
+        ])?->collect('data');
+
+        if ($dealers === null) {
+            return collect([]);
+        }
+
+        return $dealers->map(
+            fn(array $dealer) => TcApiResponseDealer::fromData($dealer)
+        );
     }
 
+    /**
+     * Handle the HTTP request, helper method for this class
+     *
+     * @param string $method
+     * @param string $url
+     * @param array $options
+     * @return Response|null
+     */
     private function handleHttpRequest(string $method, string $url, array $options = []): ?Response
     {
         try {
