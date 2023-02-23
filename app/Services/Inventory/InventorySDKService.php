@@ -122,7 +122,7 @@ class InventorySDKService implements InventorySDKServiceInterface
         $this->addDealerFilter($params);
 
         $location = $this->addGeolocation($params);
-        $this->addSorting($params, $location);
+        $this->addSorting($params, $location);;
         return $this->responseFromSDKResponse($this->search->execute($this->request));
     }
 
@@ -237,7 +237,7 @@ class InventorySDKService implements InventorySDKServiceInterface
         foreach (self::TERM_SEARCH_KEY_MAP as $field => $searchField) {
             if ($value = $params[$field] ?? null) {
                 $this->mainFilterGroup->add(new Filter(
-                    $searchField, new Collection([$value])
+                    $searchField, new Collection(explode(';', $value))
                 ));
             }
         }
@@ -249,12 +249,13 @@ class InventorySDKService implements InventorySDKServiceInterface
      */
     protected function addRangeQueries(array $params)
     {
-        foreach (self::RANGE_SEARCH_KEY_MAP as $field) {
+        foreach (self::RANGE_SEARCH_KEY_MAP as $field => $searchField) {
             $minFieldKey = "{$field}_min";
             $maxFieldKey = "{$field}_max";
             if (isset($params[$minFieldKey]) || isset($params[$maxFieldKey])) {
                 $this->mainFilterGroup->add(new Filter(
-                    $field, new Range($params[$minFieldKey] ?? null, $params[$maxFieldKey] ?? null)
+                    $searchField,
+                    new Range($params[$minFieldKey] ?? null, $params[$maxFieldKey] ?? null)
                 ));
             }
         }
