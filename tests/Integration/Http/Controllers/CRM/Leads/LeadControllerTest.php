@@ -18,6 +18,9 @@ use Carbon\Carbon;
 use App\Models\CRM\Leads\LeadType;
 use Faker\Factory;
 use App\Models\CRM\User\Customer;
+use App\Models\User\DealerLocation;
+use App\Models\Inventory\Inventory;
+use App\Models\CRM\Leads\InventoryLead;
 
 /**
  * Class LeadControllerTest
@@ -131,6 +134,18 @@ class LeadControllerTest extends IntegrationTestCase
             'dealer_id' => $this->lead->dealer_id,
             'website_lead_id' => $this->lead->getKey()
         ]);
+
+        $this->location = factory(DealerLocation::class)->create([
+            'dealer_id' => $this->dealer->getKey(),
+        ]);
+
+        $this->inventories = factory(Inventory::class, 6)->create([
+            'dealer_id' => $this->dealer->getKey(),
+            'dealer_location_id' => $this->location->getKey()
+        ]);
+
+        // assign first 4 inventories as units of interest
+        $this->lead->units()->saveMany($this->inventories->slice(0, 4));
     }
 
     /**
@@ -350,6 +365,56 @@ class LeadControllerTest extends IntegrationTestCase
 
     /**
      * @group CRM
+     * @covers ::update
+     */
+    public function testUpdateAppendInventory()
+    {
+        $this->assertEquals(4, InventoryLead::where(['website_lead_id' => $this->lead->getKey()])->count());
+
+        foreach($this->inventories as $index => $inventory) {
+
+            // confirm first 4 of 6 inventories are already assigned as units of interest
+            if ($index < 4) {
+
+                $this->assertDatabaseHas(InventoryLead::getTableName(), [
+                    'website_lead_id' => $this->lead->getKey(),
+                    'inventory_id' => $inventory->getKey()
+                ]);
+
+            } else {
+
+                $this->assertDatabaseMissing(InventoryLead::getTableName(), [
+                    'website_lead_id' => $this->lead->getKey(),
+                    'inventory_id' => $inventory->getKey()
+                ]);
+            }
+        }
+
+        $response = $this->json(
+            'POST',
+            '/api/leads/'. $this->lead->getKey(),
+            [
+                'append_inventory' => $this->inventories->pluck('inventory_id')->toArray()
+            ],
+            ['access-token' => $this->token->access_token]
+        );
+
+        $response->assertStatus(200);
+
+        // confirm all 6 Unit of Interest are saved
+        $this->assertEquals(6, InventoryLead::where(['website_lead_id' => $this->lead->getKey()])->count());
+
+        foreach($this->inventories as $index => $inventory) {
+
+            $this->assertDatabaseHas(InventoryLead::getTableName(), [
+                'website_lead_id' => $this->lead->getKey(),
+                'inventory_id' => $inventory->getKey()
+            ]);
+        }
+    }
+
+    /**
+     * @group CRM
      * @covers ::mergeLeads
      */
     public function testMerge()
@@ -384,9 +449,11 @@ class LeadControllerTest extends IntegrationTestCase
         $userId = $this->dealer->newDealerUser->user_id;
         
         Interaction::where('user_id', $userId)->delete();
+        InventoryLead::where('website_lead_id', $this->lead->getKey())->delete();
         Lead::where('dealer_id', $this->dealer->getKey())->delete();
-
+        Inventory::where('dealer_id', $this->dealer->getKey())->delete();
         $this->website->delete();
+        $this->location->delete();
 
         $this->token->delete();
 
