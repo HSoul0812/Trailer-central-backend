@@ -2,6 +2,7 @@
 
 namespace App\Transformers\CRM\Leads;
 
+use App\Services\CRM\Leads\DTOs\LeadFilters;
 use League\Fractal\TransformerAbstract;
 
 /**
