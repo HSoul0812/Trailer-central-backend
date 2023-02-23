@@ -5,7 +5,6 @@ namespace Tests\Integration\Http\Controllers\User;
 use App\Models\User\AuthToken;
 use App\Models\User\Integration\Integration;
 use App\Models\User\User;
-use App\Nova\Resources\Dealer\Dealer;
 use Illuminate\Foundation\Testing\WithFaker;
 use Str;
 use Tests\TestCase;
@@ -42,10 +41,12 @@ class UserControllerTest extends TestCase
         ]);
 
         $this
-            ->getJson("/api/users-by-name?name=$dealer", [
+            ->getJson("/api/users-by-name?name=$dealer->name", [
                 'access-token' => $token,
             ])
             ->assertOk()
+            ->assertJsonPath('data.0.id', $dealer->dealer_id)
+            ->assertJsonPath('data.0.name', $dealer->name)
             ->assertSeeText($dealer->name);
     }
 }
