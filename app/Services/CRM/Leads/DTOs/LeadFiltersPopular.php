@@ -137,7 +137,7 @@ class LeadFiltersPopular
                 $filters[$this->prefix . '_from'] = Carbon::now()->startOfDay()->toDateTimeString();
                 $filters[$this->prefix . '_to']   = Carbon::now()->endOfDay()->toDateTimeString();
             break;
-            case self::FILTER_TIME_PAST:
+            case self::FILTER_TIME_YESTERDAY:
                 $filters[$this->prefix . '_from'] = Carbon::now()->subDay()->startOfDay()->toDateTimeString();
                 $filters[$this->prefix . '_to']   = Carbon::now()->subDay()->endOfDay()->toDateTimeString();
             break;
