@@ -616,6 +616,7 @@ class LeadRepository implements LeadRepositoryInterface {
     {
         // Initialize Sorts
         $sorts = [];
+        var_dump($this->getLeadsSortFieldsCrm());
         foreach($this->getLeadsSortFieldsCrm() as $sort) {
             if(isset($this->sortOrdersNames[$sort])) {
                 $sorts[$sort] = $this->sortOrdersNames[$sort]['name'];
