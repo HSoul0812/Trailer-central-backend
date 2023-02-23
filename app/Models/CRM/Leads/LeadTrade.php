@@ -26,9 +26,31 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class LeadTrade extends Model
 {
-    const UPDATED_AT = NULL;
-
     protected $table = 'website_lead_trades';
+
+    /**
+     * The name of the "updated at" column.
+     *
+     * @var string
+     */
+    public const UPDATED_AT = null;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'lead_id',
+        'type',
+        'make',
+        'model',
+        'year',
+        'price',
+        'length',
+        'width',
+        'notes'
+    ];
 
     /**
      * @return HasMany
