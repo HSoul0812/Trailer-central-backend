@@ -8,6 +8,7 @@ use App\Domains\DealerExports\BackOffice\FinancingCompaniesExportAction;
 use App\Domains\DealerExports\BackOffice\Settings\BrandsExportAction;
 use App\Domains\DealerExports\BackOffice\Settings\EmployeesExportAction;
 use App\Domains\DealerExports\BackOffice\Settings\ExpensesExportAction;
+use App\Domains\DealerExports\BackOffice\Settings\PaymentMethodsExportAction;
 use App\Domains\DealerExports\BackOffice\Settings\VendorsExportAction;
 use App\Jobs\DealerExports\DealerDataExportJob;
 use App\Models\DealerExport;
@@ -28,6 +29,7 @@ class ExportManagerAction
         BrandsExportAction::class,
         EmployeesExportAction::class,
         ExpensesExportAction::class,
+        PaymentMethodsExportAction::class,
         // BackOffice -> Financial Companies
         FinancingCompaniesExportAction::class,
         // BackOffice -> Customers

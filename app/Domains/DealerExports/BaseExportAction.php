@@ -74,16 +74,16 @@ abstract class BaseExportAction
     {
         $this->filename = str_replace(['{dealer}', '{entity}'], [$this->dealer->dealer_id, $this->entity], self::S3_EXPORT_PATH);
 
-        $this->direcotry = str_replace(['{dealer}'], [$this->dealer->dealer_id], self::EXPORT_FILE_DIRECTORY);
+        $this->directory = str_replace(['{dealer}'], [$this->dealer->dealer_id], self::EXPORT_FILE_DIRECTORY);
 
         return $this;
     }
 
-    protected function InitiateWriter()
+    protected function initiateWriter()
     {
         $this->tmpStorage = Storage::disk('tmp');
 
-        $this->tmpStorage->makeDirectory($this->direcotry);
+        $this->tmpStorage->makeDirectory($this->directory);
 
         $this->writer = Writer::createFromPath($this->tmpStorage->path($this->filename), 'w+');
 
