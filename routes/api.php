@@ -789,10 +789,7 @@ $api->version('v1', function ($route) {
         |
         |
         */
-        $route->get('user/logo', 'App\Http\Controllers\v1\User\DealerLogoController@index');
         $route->post('user/logo', 'App\Http\Controllers\v1\User\DealerLogoController@store');
-        $route->patch('user/logo', 'App\Http\Controllers\v1\User\DealerLogoController@update');
-        $route->delete('user/logo', 'App\Http\Controllers\v1\User\DealerLogoController@destroy');
 
         /*
         |--------------------------------------------------------------------------

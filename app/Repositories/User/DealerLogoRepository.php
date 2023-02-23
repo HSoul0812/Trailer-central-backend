@@ -6,23 +6,13 @@ use App\Models\User\DealerLogo;
 
 class DealerLogoRepository implements DealerLogoRepositoryInterface
 {
-    public function get(int $dealerId): DealerLogo
+    public function get(int $dealerId): ?DealerLogo
     {
-        return DealerLogo::whereDealerId($dealerId)->firstOrFail();
+        return DealerLogo::whereDealerId($dealerId)->first();
     }
 
-    public function delete(int $dealerId): void
+    public function update(int $dealerId, array $params): DealerLogo
     {
-        DealerLogo::whereDealerId($dealerId)->delete();
-    }
-
-    public function create(array $params): DealerLogo
-    {
-        return DealerLogo::create($params);
-    }
-
-    public function update(int $dealerId, array $params): void
-    {
-        DealerLogo::whereDealerId($dealerId)->update($params);
+        return DealerLogo::updateOrCreate(['dealer_id' => $dealerId], $params);
     }
 }
