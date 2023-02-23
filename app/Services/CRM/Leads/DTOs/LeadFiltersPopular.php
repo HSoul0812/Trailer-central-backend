@@ -102,7 +102,17 @@ class LeadFiltersPopular
      */
     public static function fill(array $params): LeadFiltersPopular {
         // Add Prefix
-        $params['prefix'] = self::FILTER_PREFIXES[$params['type']];
+        if(isset($params['type'])) {
+            $params['prefix'] = self::FILTER_PREFIXES[$params['type']];
+        } else {
+            $params['type'] = null;
+            $params['prefix'] = null;
+        }
+
+        // No Time Frame?
+        if(!isset($params['time'])) {
+            $params['time'] = null;
+        }
 
         // Return LeadFiltersPopular
         return new self($params);
