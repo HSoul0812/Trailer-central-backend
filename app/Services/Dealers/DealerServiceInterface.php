@@ -2,7 +2,14 @@
 
 namespace App\Services\Dealers;
 
+use App\DTOs\Dealer\TcApiResponseDealer;
+use Illuminate\Support\Collection;
+
 interface DealerServiceInterface
 {
-    public function listByName(string $name): ?array;
+    /**
+     * @param string $name
+     * @return Collection<int, TcApiResponseDealer>
+     */
+    public function listByName(string $name): Collection;
 }
