@@ -10,18 +10,21 @@ use GuzzleHttp\Exception\GuzzleException;
 
 class UsersService implements UsersServiceInterface
 {
-    private string $endpointUrl;
+    private string $usersUrl;
+    private string $userLocationUrl;
 
     public function __construct(
         private GuzzleHttpClient $httpClient,
         private AuthTokenRepositoryInterface $authTokenRepository
     ) {
-        $this->endpointUrl = config('services.trailercentral.api') . 'users';
+        $tcApiPath = config('services.trailercentral.api');
+        $this->usersUrl = $tcApiPath . 'users';
+        $this->userLocationUrl = $tcApiPath . 'user/dealer-location';
     }
 
     public function create(array $attributes): TcApiResponseUser
     {
-        $responseContent = $this->handleHttpRequest('POST', $this->endpointUrl, [
+        $responseContent = $this->handleHttpRequest('POST', $this->usersUrl, [
             'json' => $attributes
         ]);
         return TcApiResponseUser::fromData($responseContent['data']);
@@ -29,12 +32,37 @@ class UsersService implements UsersServiceInterface
 
     public function get(string $email): TcApiResponseUser
     {
-        $responseContent = $this->handleHttpRequest('GET', $this->endpointUrl, [
+        $responseContent = $this->handleHttpRequest('GET', $this->usersUrl, [
             'query' => [
                 'email' => $email
             ]
         ]);
         return TcApiResponseUser::fromData($responseContent);
+    }
+
+    public function getLocations(int $userId): array
+    {
+        if(!$accessToken = request()->header('access-token')) {
+            $authToken = $this->authTokenRepository->get(['user_id' => $userId]);
+            $accessToken = $authToken->access_token;
+        }
+
+        $responseContent = $this->handleHttpRequest(
+            'GET',
+            $this->userLocationUrl,
+            [
+                'json' => [],
+                'headers' => [
+                    'access-token' => $accessToken
+                ]
+            ]
+        );
+
+        $locations = [];
+        foreach($responseContent['data'] as $location) {
+            $locations[] = TcApiResponseUserLocation::fromData($location);
+        }
+        return $locations;
     }
 
     public function createLocation(array $location): TcApiResponseUserLocation {
@@ -45,7 +73,7 @@ class UsersService implements UsersServiceInterface
 
         $responseContent = $this->handleHttpRequest(
             'PUT',
-            config('services.trailercentral.api') . 'user' . "/dealer-location",
+            $this->userLocationUrl,
             [
                 'json' => $location,
                 'headers' => [
@@ -64,7 +92,7 @@ class UsersService implements UsersServiceInterface
 
         $responseContent = $this->handleHttpRequest(
             'POST',
-            config('services.trailercentral.api') . 'user' . "/dealer-location/$locationId",
+            $this->userLocationUrl . "/$locationId",
             [
                 'json' => $location,
                 'headers' => [
