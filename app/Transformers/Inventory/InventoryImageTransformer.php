@@ -15,7 +15,7 @@ class InventoryImageTransformer extends MediaFileTransformer
             'is_default' => $inventoryImage->is_default,
             'is_secondary' => $inventoryImage->is_secondary,
             'position' => $inventoryImage->isDefault() ? InventoryImage::FIRST_IMAGE_POSITION : $position,
-            'url' => $this->getBaseUrl() . $inventoryImage->image->filename,
+            'url' => $this->getBaseUrl() . $inventoryImage->image ? $inventoryImage->image->filename : '',
         ];
     }
 }
