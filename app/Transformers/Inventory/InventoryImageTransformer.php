@@ -2,6 +2,7 @@
 
 namespace App\Transformers\Inventory;
 
+use App\Models\Image;
 use App\Models\Inventory\InventoryImage;
 
 class InventoryImageTransformer extends MediaFileTransformer
@@ -15,7 +16,7 @@ class InventoryImageTransformer extends MediaFileTransformer
             'is_default' => $inventoryImage->is_default,
             'is_secondary' => $inventoryImage->is_secondary,
             'position' => $inventoryImage->isDefault() ? InventoryImage::FIRST_IMAGE_POSITION : $position,
-            'url' => $this->getBaseUrl() . ($inventoryImage->image ? $inventoryImage->image->filename : ''),
+            'url' => $this->getBaseUrl() . (is_object($inventoryImage->image) ? $inventoryImage->image->filename : '')
         ];
     }
 }
