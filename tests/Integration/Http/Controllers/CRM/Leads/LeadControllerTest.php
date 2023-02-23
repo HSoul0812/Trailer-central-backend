@@ -187,6 +187,41 @@ class LeadControllerTest extends IntegrationTestCase
         $this->assertEquals(0, Interaction::whereIn('tc_lead_id', $leadIds)->count());
     }
 
+    /**
+     * @group CRM
+     * @covers ::filters
+     */
+    public function testFilters()
+    {
+        $response = $this->json(
+            'GET',
+            '/api/leads/filters'
+        );
+
+        $response->assertStatus(200)->assertJsonStructure([
+            'data' => [
+                'sorts' => [
+                    'created_at',
+                    '-created_at',
+                    'no_due_past_due_future_due',
+                    'future_due_past_due_no_due',
+                    '-most_recent',
+                    'most_recent',
+                    'status'
+                ],
+                'archived' => ['0', '-1', '1'],
+                'filters' => [
+                    '*' => [
+                        'label',
+                        'type',
+                        'time',
+                        'filters'
+                    ]
+                ]
+            ]
+        ]);
+    }
+
     public function tearDown(): void
     {
         $userId = $this->dealer->newDealerUser->user_id;
