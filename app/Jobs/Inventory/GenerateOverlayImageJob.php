@@ -67,7 +67,7 @@ class GenerateOverlayImageJob extends Job {
                     'inventory_id' => $inventory->inventory_id, 'dealer_id' => $inventory->dealer_id
                 ]);
 
-                $service->invalidateCacheAndReindexByDealerIds([$inventory->dealer_id]);
+                $service->tryToIndexAndInvalidateInventory($inventory);
             }
 
             $log->info('Inventory Images with Overlay has been successfully generated', ['inventory_id' => $this->inventoryId]);

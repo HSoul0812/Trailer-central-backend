@@ -66,7 +66,9 @@ class ImageService implements ImageServiceInterface
         } else {
 
             // delete old s3 file
-            Storage::disk('s3')->delete($image->filename);
+            // We can not drop the S3 object because maybe there is another indexing job which is using `filename` as it is
+            // Storage::disk('s3')->delete($image->filename);
+            // @todo we need to investigate how to drop images already removed from DB and remove them from S3 buckets
         }
 
         $params['hash'] = $this->getFileHash($params['filename']);
@@ -90,7 +92,9 @@ class ImageService implements ImageServiceInterface
         $params['id'] = $image->image_id;
 
         // delete old s3 file
-        Storage::disk('s3')->delete($image->filename);
+        // We can not drop the S3 object because maybe there is another indexing job which is using `filename` as it is
+        // Storage::disk('s3')->delete($image->filename);
+        // @todo we need to investigate how to drop images already removed from DB and remove them from S3 buckets
 
         $this->imageRepository->update($params);
     }
