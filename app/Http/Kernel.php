@@ -37,6 +37,7 @@ use App\Http\Middleware\Dms\Printer\InstructionValidate as PrinterInstructionVal
 use App\Http\Middleware\Integration\AuthValidate;
 use App\Http\Middleware\Integration\Facebook\CatalogValidate;
 use App\Http\Middleware\Integration\Facebook\ChatValidate;
+use App\Http\Middleware\CRM\Leads\LeadTradeValidate;
 use App\Http\Middleware\Marketing\Facebook\MarketplaceValidate;
 use App\Http\Middleware\Marketing\Facebook\PagetabValidate;
 use App\Http\Middleware\Parts\PartOrderValidate;
@@ -135,6 +136,7 @@ class Kernel extends HttpKernel
         'replytext.validate' => ReplyTextValidate::class,
         'validateDealerIdOnRequest' => ValidateDealerIdOnRequest::class,
         'inventory.cache.permission' => InvalidatePermissionMiddleware::class,
+        'leads.trade.validate' => LeadTradeValidate::class,
     ];
 
     /**

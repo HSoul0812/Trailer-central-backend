@@ -5,7 +5,11 @@ namespace App\Http\Controllers\v1\CRM\Leads;
 use App\Exceptions\Requests\Validation\NoObjectIdValueSetException;
 use App\Exceptions\Requests\Validation\NoObjectTypeSetException;
 use App\Http\Controllers\RestfulControllerV2;
-use App\Http\Requests\CRM\Leads\GetLeadTradesRequest;
+use App\Http\Requests\CRM\Leads\Trade\GetLeadTradesRequest;
+use App\Http\Requests\CRM\Leads\Trade\GetLeadTradeRequest;
+use App\Http\Requests\CRM\Leads\Trade\CreateLeadTradeRequest;
+use App\Http\Requests\CRM\Leads\Trade\UpdateLeadTradeRequest;
+use App\Http\Requests\CRM\Leads\Trade\DeleteLeadTradeRequest;
 use App\Repositories\CRM\Leads\LeadTradeRepositoryInterface;
 use App\Transformers\CRM\Leads\LeadTradeTransformer;
 use Dingo\Api\Http\Request;
@@ -27,8 +31,8 @@ class LeadTradeController extends RestfulControllerV2
      */
     public function __construct(LeadTradeRepositoryInterface $leadTradeRepository)
     {
-        $this->middleware('setDealerIdOnRequest')->only(['index']);
         $this->leadTradeRepository = $leadTradeRepository;
+        $this->transformer = new LeadTradeTransformer();
     }
 
     /**
@@ -42,7 +46,75 @@ class LeadTradeController extends RestfulControllerV2
         $request = new GetLeadTradesRequest($request->all());
 
         if ($request->validate()) {
-            return $this->collectionResponse($this->leadTradeRepository->getAll($request->all()), new LeadTradeTransformer());
+            return $this->collectionResponse($this->leadTradeRepository->getAll($request->all()), $this->transformer);
+        }
+
+        return $this->response->errorBadRequest();
+    }
+
+    /**
+     * Display data about the record in the DB
+     *
+     * @param int $id
+     */
+    public function show(int $id)
+    {
+        $request = new GetLeadTradeRequest(['id' => $id]);
+
+        if ($request->validate()) {
+            return $this->response->item($this->leadTradeRepository->get(['id' => $id]), $this->transformer);
+        }
+
+        return $this->response->errorBadRequest();
+    }
+
+    /**
+     * Insert new data into the DB
+     *
+     * @param Request $request
+     */
+    public function create(Request $request) {
+        $request = new CreateLeadTradeRequest($request->all());
+
+        if ($request->validate()) {
+            return $this->response->item($this->leadTradeRepository->create($request->all()), $this->transformer);
+        }
+
+        return $this->response->errorBadRequest();
+    }
+
+    /**
+     * Update existing data on the record already in the DB
+     *
+     * @param int $id
+     * @param Request $request
+     */
+    public function update(int $id, Request $request) {
+        $requestData = $request->all();
+        $requestData['id'] = $id;
+        $request = new UpdateLeadTradeRequest($requestData);
+
+        if ($request->validate()) {
+            return $this->response->item($this->leadTradeRepository->update($request->all()), $this->transformer);
+        }
+
+        return $this->response->errorBadRequest();
+    }
+
+    /**
+     * Delete existing data on the record already in the DB
+     *
+     * @param int $id
+     * @param Request $request
+     */
+    public function destroy(int $id, Request $request)
+    {
+        $request = new DeleteLeadTradeRequest(array_merge($request->all(), ['id' => $id]));
+        
+        if ($request->validate() 
+            && $this->leads->delete(['id' => $id, 'dealer_id' => $request->get('dealer_id')]) > 0) {
+
+            return $this->updatedResponse();
         }
 
         return $this->response->errorBadRequest();
