@@ -6,9 +6,11 @@ use Http;
 
 class DealerService implements DealerServiceInterface
 {
-    public function listByName(string $name): array
+    const ENDPOINT_USERS_BY_NAME = '/users-by-name';
+    
+    public function listByName(string $name): ?array
     {
-        return Http::tcApi()->get('/users-by-name', [
+        return Http::tcApi()->get(self::ENDPOINT_USERS_BY_NAME, [
             'name' => $name,
         ])->json('data');
     }
