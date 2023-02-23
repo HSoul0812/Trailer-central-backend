@@ -6,6 +6,7 @@ use App\Exceptions\Requests\Validation\NoObjectIdValueSetException;
 use App\Exceptions\Requests\Validation\NoObjectTypeSetException;
 use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\CRM\Leads\AssignLeadRequest;
+use App\Http\Requests\CRM\Leads\FilterLeadsRequest;
 use App\Http\Requests\CRM\Leads\FirstLeadRequest;
 use App\Http\Requests\CRM\Leads\GetLeadsSortFieldsCrmRequest;
 use App\Http\Requests\CRM\Leads\MergeLeadsRequest;
