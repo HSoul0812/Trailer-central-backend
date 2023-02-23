@@ -251,31 +251,21 @@
             @endif
         </table>
         <div class="clear"></div>
-        @if (count($inventory['features']))
+        @if ($inventory['features_count'])
             <h3 class="inventory-title">
                 Features
             </h3>
         @endif
         <table class="inventory-info" style="width: 100%;">
-            @for ($i = 0; $i < ceil(count($inventory['features']) / 3); $i++)
+            @foreach ($inventory['features'] as $features)
                 <tr>
-                    @isset($inventory['features'][($i - 1) * 3])
+                    @foreach($features as $feature)
                         <td>
-                            - <span class="data">{{ $inventory['features'][($i - 1) * 3]['value'] }}</span>
+                            - <span class="data">{{ $feature->value }}</span>
                         </td>
-                    @endisset
-                    @isset($inventory['features'][($i - 1) * 3 + 1])
-                        <td>
-                            - <span class="data">{{ $inventory['features'][($i - 1) * 3 + 1]['value'] }}</span>
-                        </td>
-                    @endisset
-                    @isset($inventory['features'][($i - 1) * 3 + 2])
-                        <td>
-                            - <span class="data">{{ $inventory['features'][($i - 1) * 3 + 2]['value'] }}</span>
-                        </td>
-                    @endisset
+                    @endforeach
                 </tr>
-            @endfor
+            @endforeach
         </table>
         <div class="clear"></div>
         <h2>Description</h2>
