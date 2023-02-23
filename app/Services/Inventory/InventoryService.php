@@ -700,19 +700,21 @@ class InventoryService implements InventoryServiceInterface
      * Apply Overlays to Inventory Images
      *
      * @param int $inventoryId
-     * @return void
+     * @return bool
      */
     public function generateOverlays(int $inventoryId)
     {
         $inventoryImages = $this->inventoryRepository->getInventoryImages($inventoryId);
 
-        if ($inventoryImages->count() === 0) return;
+        if ($inventoryImages->count() === 0) return false;
 
         $overlayParams = $this->inventoryRepository->getOverlayParams($inventoryId);
 
         Log::channel('inventory-overlays')->info('Adding Overlays on Inventory Images', $overlayParams);
 
         $overlayEnabled = $overlayParams['overlay_enabled'];
+
+        $hasChanges = false;
 
         foreach ($inventoryImages as $inventoryImage) {
 
@@ -738,6 +740,9 @@ class InventoryService implements InventoryServiceInterface
 
                     // update image to database
                     $this->imageTableService->saveOverlay($imageObj, $newFilename);
+
+                    // @todo implement a mechanism to detect any image processing failure and reset the image to previous state
+                    $hasChanges = true;
                 } else {
 
                     Log::channel('inventory-overlays')
@@ -749,8 +754,12 @@ class InventoryService implements InventoryServiceInterface
             } else {
 
                 $this->imageTableService->resetOverlay($imageObj);
+
+                $hasChanges = true;
             }
         }
+
+        return $hasChanges;
     }
 
     /**
