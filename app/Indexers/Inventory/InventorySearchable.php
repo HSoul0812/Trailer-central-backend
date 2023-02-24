@@ -191,7 +191,7 @@ trait InventorySearchable
         return InventoryObserver::isCacheInvalidationEnabled();
     }
 
-    public static function isCacheInvalidationEnabledByFeatureFlag(): bool
+    public static function isCacheEnabledByFeatureFlag(): bool
     {
         return app(FeatureFlagRepositoryInterface::class)->isEnabled('inventory-sdk-cache');
     }
