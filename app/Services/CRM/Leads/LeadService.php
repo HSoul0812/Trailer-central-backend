@@ -20,6 +20,7 @@ use App\Repositories\CRM\Leads\UnitRepositoryInterface;
 use App\Repositories\CRM\Text\TextRepositoryInterface;
 use App\Repositories\Dms\QuoteRepositoryInterface;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
+use App\Services\CRM\Leads\DTOs\LeadFilters;
 use App\Traits\Repository\Transaction;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -556,6 +557,28 @@ class LeadService implements LeadServiceInterface
     public function getMatches(array $params)
     {
         return $this->leads->getMatches($params['dealer_id'], $params);
+    }
+
+    /**
+     * Get Filters for Leads
+     *
+     * @param array $params
+     * @return LeadFilters
+     */
+    public function getFilters(array $params): LeadFilters
+    {
+        // Get Core CRM Sort Fields
+        $sorts = $this->leads->getSortOrderNamesCrm();
+
+        // Get Popular Filters
+        $popular = $this->leads->getPopularFilters();
+
+        // Return LeadFilters
+        return new LeadFilters([
+            'sorts' => $sorts,
+            'archived' => Lead::ARCHIVED_STATUSES,
+            'popular' => $popular
+        ]);
     }
 
     /**
