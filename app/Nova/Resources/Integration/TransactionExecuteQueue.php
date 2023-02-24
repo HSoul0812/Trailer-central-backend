@@ -19,7 +19,7 @@ use App\Models\Feed\TransactionExecuteQueue as TEQ;
 
 class TransactionExecuteQueue extends Resource
 {
-    public static $group = 'Integration';
+    public static $group = 'Factory Feeds';
 
     /**
      * The model the resource corresponds to.
