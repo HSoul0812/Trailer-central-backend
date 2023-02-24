@@ -398,6 +398,12 @@ class User extends Model implements Authenticatable, PermissionsInterface
         }
     }
 
+    public function getIsAuction123ActiveAttribute(): bool
+    {
+        $integration = $this->integrations()->where('integration.integration_id', 35)->first();
+        return $integration ? $integration->pivot->active : false;
+    }
+
     public function getIsAutoConxActiveAttribute(): bool
     {
         $integration = $this->integrations()->where('integration.integration_id', 33)->first();

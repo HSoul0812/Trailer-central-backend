@@ -130,6 +130,66 @@ interface DealerOptionsServiceInterface
      * @param int $dealerId
      * @return bool
      */
+    public function activateAuction123(int $dealerId): bool;
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateAuction123(int $dealerId): bool;
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function activateAutoConx(int $dealerId): bool;
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateAutoConx(int $dealerId): bool;
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function activateCarBase(int $dealerId): bool;
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateCarBase(int $dealerId): bool;
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function activateDP360(int $dealerId): bool;
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateDP360(int $dealerId): bool;
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function activateTrailerUSA(int $dealerId): bool;
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateTrailerUSA(int $dealerId): bool;
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
     public function activateParts(int $dealerId): bool;
 
     /**

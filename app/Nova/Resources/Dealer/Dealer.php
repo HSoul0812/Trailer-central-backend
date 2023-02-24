@@ -7,8 +7,18 @@ use App\Nova\Actions\DeactivateUserAccounts;
 use App\Nova\Actions\Dealer\ChangeStatus;
 use App\Nova\Actions\Dealer\DeactivateDealer;
 use App\Nova\Actions\Dealer\DeactivateECommerce;
+use App\Nova\Actions\Dealer\HiddenIntegrations\ActivateAuction123;
+use App\Nova\Actions\Dealer\HiddenIntegrations\ActivateAutoConx;
+use App\Nova\Actions\Dealer\HiddenIntegrations\ActivateCarBase;
+use App\Nova\Actions\Dealer\HiddenIntegrations\ActivateDP360;
 use App\Nova\Actions\Dealer\HiddenIntegrations\ActivateELeads;
+use App\Nova\Actions\Dealer\HiddenIntegrations\ActivateTrailerUSA;
+use App\Nova\Actions\Dealer\HiddenIntegrations\DeactivateAuction123;
+use App\Nova\Actions\Dealer\HiddenIntegrations\DeactivateAutoConx;
+use App\Nova\Actions\Dealer\HiddenIntegrations\DeactivateCarBase;
+use App\Nova\Actions\Dealer\HiddenIntegrations\DeactivateDP360;
 use App\Nova\Actions\Dealer\HiddenIntegrations\DeactivateELeads;
+use App\Nova\Actions\Dealer\HiddenIntegrations\DeactivateTrailerUSA;
 use App\Nova\Actions\Dealer\Subscriptions\CDK\ActivateCdk;
 use App\Nova\Actions\Dealer\Subscriptions\CDK\DeactivateCdk;
 use App\Nova\Actions\Dealer\Subscriptions\CRM\ActivateCrm;
@@ -264,6 +274,16 @@ class Dealer extends Resource
             app()->make(DeactivateECommerce::class)->exceptOnTableRow(),
             app()->make(ActivateELeads::class)->exceptOnTableRow(),
             app()->make(DeactivateELeads::class)->exceptOnTableRow(),
+            app()->make(ActivateAuction123::class)->exceptOnTableRow(),
+            app()->make(DeactivateAuction123::class)->exceptOnTableRow(),
+            app()->make(ActivateAutoConx::class)->exceptOnTableRow(),
+            app()->make(DeactivateAutoConx::class)->exceptOnTableRow(),
+            app()->make(ActivateCarBase::class)->exceptOnTableRow(),
+            app()->make(DeactivateCarBase::class)->exceptOnTableRow(),
+            app()->make(ActivateTrailerUSA::class)->exceptOnTableRow(),
+            app()->make(DeactivateTrailerUSA::class)->exceptOnTableRow(),
+            app()->make(ActivateDP360::class)->exceptOnTableRow(),
+            app()->make(DeactivateDP360::class)->exceptOnTableRow(),
             app()->make(ActivateGoogleFeed::class)->exceptOnTableRow(),
             app()->make(DeactivateGoogleFeed::class)->exceptOnTableRow(),
             app()->make(ActivateMarketing::class)->exceptOnTableRow(),
@@ -365,19 +385,89 @@ class Dealer extends Resource
 
                 return $this->resource instanceof Model && $this->resource->isELeadsActive;
             }),
+            app()->make(ActivateCarBase::class)->onlyOnTableRow()->canSee(function ($request) {
+                if ($request instanceof ActionRequest) {
+                    return true;
+                }
+
+                return $this->resource instanceof Model && !$this->resource->isCarBaseActive;
+            }),
+            app()->make(DeactivateCarBase::class)->onlyOnTableRow()->canSee(function ($request) {
+                if ($request instanceof ActionRequest) {
+                    return true;
+                }
+
+                return $this->resource instanceof Model && $this->resource->isCarBaseActive;
+            }),
+            app()->make(ActivateAuction123::class)->onlyOnTableRow()->canSee(function ($request) {
+                if ($request instanceof ActionRequest) {
+                    return true;
+                }
+
+                return $this->resource instanceof Model && !$this->resource->isAuction123Active;
+            }),
+            app()->make(DeactivateAuction123::class)->onlyOnTableRow()->canSee(function ($request) {
+                if ($request instanceof ActionRequest) {
+                    return true;
+                }
+
+                return $this->resource instanceof Model && $this->resource->isAuction123Active;
+            }),
+            app()->make(ActivateAutoConx::class)->onlyOnTableRow()->canSee(function ($request) {
+                if ($request instanceof ActionRequest) {
+                    return true;
+                }
+
+                return $this->resource instanceof Model && !$this->resource->isAutoConxActive;
+            }),
+            app()->make(DeactivateAutoConx::class)->onlyOnTableRow()->canSee(function ($request) {
+                if ($request instanceof ActionRequest) {
+                    return true;
+                }
+
+                return $this->resource instanceof Model && $this->resource->isAutoConxActive;
+            }),
+            app()->make(ActivateDP360::class)->onlyOnTableRow()->canSee(function ($request) {
+                if ($request instanceof ActionRequest) {
+                    return true;
+                }
+
+                return $this->resource instanceof Model && !$this->resource->isDP360Active;
+            }),
+            app()->make(DeactivateDP360::class)->onlyOnTableRow()->canSee(function ($request) {
+                if ($request instanceof ActionRequest) {
+                    return true;
+                }
+
+                return $this->resource instanceof Model && $this->resource->isDP360Active;
+            }),
+            app()->make(ActivateTrailerUSA::class)->onlyOnTableRow()->canSee(function ($request) {
+                if ($request instanceof ActionRequest) {
+                    return true;
+                }
+
+                return $this->resource instanceof Model && !$this->resource->isTrailerUSAActive;
+            }),
+            app()->make(DeactivateTrailerUSA::class)->onlyOnTableRow()->canSee(function ($request) {
+                if ($request instanceof ActionRequest) {
+                    return true;
+                }
+
+                return $this->resource instanceof Model && $this->resource->isTrailerUSAActive;
+            }),
             app()->make(ActivateGoogleFeed::class)->onlyOnTableRow()->canSee(function ($request) {
                 if ($request instanceof ActionRequest) {
                     return true;
                 }
 
-                return $this->resource instanceof Model && !$this->resource->isELeadsActive;
+                return $this->resource instanceof Model && !$this->resource->google_feed_active;
             }),
             app()->make(DeactivateGoogleFeed::class)->onlyOnTableRow()->canSee(function ($request) {
                 if ($request instanceof ActionRequest) {
                     return true;
                 }
 
-                return $this->resource instanceof Model && $this->resource->isELeadsActive;
+                return $this->resource instanceof Model && $this->resource->google_feed_active;
             }),
             app()->make(ActivateMarketing::class)->onlyOnTableRow()->canSee(function ($request) {
                 if ($request instanceof ActionRequest) {

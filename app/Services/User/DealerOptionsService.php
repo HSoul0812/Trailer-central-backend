@@ -403,6 +403,176 @@ class DealerOptionsService implements DealerOptionsServiceInterface
      * @param int $dealerId
      * @return bool
      */
+    public function activateAuction123(int $dealerId): bool
+    {
+        try {
+            $this->userRepository->activateAuction123($dealerId);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("Auction123 activation error. dealer_id - {$dealerId}", $e->getTrace());
+
+            return false;
+        }
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateAuction123(int $dealerId): bool
+    {
+        try {
+            $this->userRepository->deactivateAuction123($dealerId);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("Auction123 deactivation error. dealer_id - {$dealerId}", $e->getTrace());
+
+            return false;
+        }
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function activateAutoConx(int $dealerId): bool
+    {
+        try {
+            $this->userRepository->activateAutoConx($dealerId);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("AutoConx activation error. dealer_id - {$dealerId}", $e->getTrace());
+
+            return false;
+        }
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateAutoConx(int $dealerId): bool
+    {
+        try {
+            $this->userRepository->deactivateAutoConx($dealerId);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("AutoConx deactivation error. dealer_id - {$dealerId}", $e->getTrace());
+
+            return false;
+        }
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function activateCarBase(int $dealerId): bool
+    {
+        try {
+            $this->userRepository->activateCarBase($dealerId);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("CarBase activation error. dealer_id - {$dealerId}", $e->getTrace());
+
+            return false;
+        }
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateCarBase(int $dealerId): bool
+    {
+        try {
+            $this->userRepository->deactivateCarBase($dealerId);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("CarBase deactivation error. dealer_id - {$dealerId}", $e->getTrace());
+
+            return false;
+        }
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function activateDP360(int $dealerId): bool
+    {
+        try {
+            $this->userRepository->activateDP360($dealerId);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("DP360 activation error. dealer_id - {$dealerId}", $e->getTrace());
+
+            return false;
+        }
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateDP360(int $dealerId): bool
+    {
+        try {
+            $this->userRepository->deactivateDP360($dealerId);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("DP360 deactivation error. dealer_id - {$dealerId}", $e->getTrace());
+
+            return false;
+        }
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function activateTrailerUSA(int $dealerId): bool
+    {
+        try {
+            $this->userRepository->activateTrailerUSA($dealerId);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("TrailerUSA activation error. dealer_id - {$dealerId}", $e->getTrace());
+
+            return false;
+        }
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateTrailerUSA(int $dealerId): bool
+    {
+        try {
+            $this->userRepository->deactivateTrailerUSA($dealerId);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("TrailerUSA deactivation error. dealer_id - {$dealerId}", $e->getTrace());
+
+            return false;
+        }
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
     public function activateCrm(int $dealerId): bool
     {
         try {

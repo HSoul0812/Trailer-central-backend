@@ -184,7 +184,7 @@ class UserRepository implements UserRepositoryInterface {
      * @param array $params
      * @return array fields and values that were changed
      */
-    public function updateOverlaySettings(int $dealerId, array $params): array 
+    public function updateOverlaySettings(int $dealerId, array $params): array
     {
         $dealer = User::findOrFail($dealerId);
 
@@ -211,7 +211,7 @@ class UserRepository implements UserRepositoryInterface {
 
         // only keep overlay settings fields
         $params = array_intersect_key($params, array_flip($overlaySettingFields));
-        
+
         foreach ($params as $field => $value)
         {
             $dealer->$field = $value;
@@ -378,6 +378,226 @@ class UserRepository implements UserRepositoryInterface {
             return IntegrationDealer::create([
                 'dealer_id' => $dealerId,
                 'integration_id' => 54,
+                'active' => 0,
+                'msg_body' => '',
+                'msg_title' => '',
+                'msg_date' => '0000-00-00'
+            ]);
+        });
+
+        return $integrationDealer->update(['active' => 0]);
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function activateAuction123(int $dealerId) : bool {
+        $integrationDealer = IntegrationDealer::where([
+            'dealer_id' => $dealerId,
+            'integration_id' => 35 // Auction123
+        ])->firstOr(function () use ($dealerId) {
+            return IntegrationDealer::create([
+                'dealer_id' => $dealerId,
+                'integration_id' => 35,
+                'active' => 0,
+                'msg_body' => '',
+                'msg_title' => '',
+                'msg_date' => '0000-00-00'
+            ]);
+        });
+
+        return $integrationDealer->update(['active' => 1]);
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateAuction123(int $dealerId) : bool {
+        $integrationDealer = IntegrationDealer::where([
+            'dealer_id' => $dealerId,
+            'integration_id' => 35 // Auction123
+        ])->firstOr(function () use ($dealerId) {
+            return IntegrationDealer::create([
+                'dealer_id' => $dealerId,
+                'integration_id' => 35,
+                'active' => 0,
+                'msg_body' => '',
+                'msg_title' => '',
+                'msg_date' => '0000-00-00'
+            ]);
+        });
+
+        return $integrationDealer->update(['active' => 0]);
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function activateAutoConx(int $dealerId) : bool {
+        $integrationDealer = IntegrationDealer::where([
+            'dealer_id' => $dealerId,
+            'integration_id' => 33 // AutoConx
+        ])->firstOr(function () use ($dealerId) {
+            return IntegrationDealer::create([
+                'dealer_id' => $dealerId,
+                'integration_id' => 33,
+                'active' => 0,
+                'msg_body' => '',
+                'msg_title' => '',
+                'msg_date' => '0000-00-00'
+            ]);
+        });
+
+        return $integrationDealer->update(['active' => 1]);
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateAutoConx(int $dealerId) : bool {
+        $integrationDealer = IntegrationDealer::where([
+            'dealer_id' => $dealerId,
+            'integration_id' => 33 // AutoConx
+        ])->firstOr(function () use ($dealerId) {
+            return IntegrationDealer::create([
+                'dealer_id' => $dealerId,
+                'integration_id' => 33,
+                'active' => 0,
+                'msg_body' => '',
+                'msg_title' => '',
+                'msg_date' => '0000-00-00'
+            ]);
+        });
+
+        return $integrationDealer->update(['active' => 0]);
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function activateCarBase(int $dealerId) : bool {
+        $integrationDealer = IntegrationDealer::where([
+            'dealer_id' => $dealerId,
+            'integration_id' => 50 // CarBase
+        ])->firstOr(function () use ($dealerId) {
+            return IntegrationDealer::create([
+                'dealer_id' => $dealerId,
+                'integration_id' => 50,
+                'active' => 0,
+                'msg_body' => '',
+                'msg_title' => '',
+                'msg_date' => '0000-00-00'
+            ]);
+        });
+
+        return $integrationDealer->update(['active' => 1]);
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateCarBase(int $dealerId) : bool {
+        $integrationDealer = IntegrationDealer::where([
+            'dealer_id' => $dealerId,
+            'integration_id' => 50 // CarBase
+        ])->firstOr(function () use ($dealerId) {
+            return IntegrationDealer::create([
+                'dealer_id' => $dealerId,
+                'integration_id' => 50,
+                'active' => 0,
+                'msg_body' => '',
+                'msg_title' => '',
+                'msg_date' => '0000-00-00'
+            ]);
+        });
+
+        return $integrationDealer->update(['active' => 0]);
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function activateDP360(int $dealerId) : bool {
+        $integrationDealer = IntegrationDealer::where([
+            'dealer_id' => $dealerId,
+            'integration_id' => 62 // DP360
+        ])->firstOr(function () use ($dealerId) {
+            return IntegrationDealer::create([
+                'dealer_id' => $dealerId,
+                'integration_id' => 62,
+                'active' => 0,
+                'msg_body' => '',
+                'msg_title' => '',
+                'msg_date' => '0000-00-00'
+            ]);
+        });
+
+        return $integrationDealer->update(['active' => 1]);
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateDP360(int $dealerId) : bool {
+        $integrationDealer = IntegrationDealer::where([
+            'dealer_id' => $dealerId,
+            'integration_id' => 62 // DP360
+        ])->firstOr(function () use ($dealerId) {
+            return IntegrationDealer::create([
+                'dealer_id' => $dealerId,
+                'integration_id' => 62,
+                'active' => 0,
+                'msg_body' => '',
+                'msg_title' => '',
+                'msg_date' => '0000-00-00'
+            ]);
+        });
+
+        return $integrationDealer->update(['active' => 0]);
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function activateTrailerUSA(int $dealerId) : bool {
+        $integrationDealer = IntegrationDealer::where([
+            'dealer_id' => $dealerId,
+            'integration_id' => 31 // TrailerUSA
+        ])->firstOr(function () use ($dealerId) {
+            return IntegrationDealer::create([
+                'dealer_id' => $dealerId,
+                'integration_id' => 31,
+                'active' => 0,
+                'msg_body' => '',
+                'msg_title' => '',
+                'msg_date' => '0000-00-00'
+            ]);
+        });
+
+        return $integrationDealer->update(['active' => 1]);
+    }
+
+    /**
+     * @param int $dealerId
+     * @return bool
+     */
+    public function deactivateTrailerUSA(int $dealerId) : bool {
+        $integrationDealer = IntegrationDealer::where([
+            'dealer_id' => $dealerId,
+            'integration_id' => 31 // TrailerUSA
+        ])->firstOr(function () use ($dealerId) {
+            return IntegrationDealer::create([
+                'dealer_id' => $dealerId,
+                'integration_id' => 31,
                 'active' => 0,
                 'msg_body' => '',
                 'msg_title' => '',
