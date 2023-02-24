@@ -8,6 +8,10 @@ use Illuminate\Support\Collection;
 use App\Models\Website\Website;
 use Tests\TestCase;
 
+/**
+ * @group DW
+ * @group DW_SLIDESHOW
+ */
 class UpdateWebsiteImagesVisibilityTest extends TestCase
 {
     /**

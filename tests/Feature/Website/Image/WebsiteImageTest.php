@@ -6,6 +6,10 @@ use App\Models\Website\Image\WebsiteImage;
 use Tests\TestCase;
 use App\Models\Website\Website;
 
+/**
+ * @group DW
+ * @group DW_SLIDESHOW
+ */
 class WebsiteImageTest extends TestCase
 {
     protected $website;
