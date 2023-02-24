@@ -1,15 +1,16 @@
 <?php
 
-
 namespace App\Http\Controllers\v1\Feed;
 
+use Dingo\Api\Http\Request;
+use Dingo\Api\Http\Response;
+use Illuminate\Support\Facades\Log;
 
 use App\Http\Controllers\RestfulController;
 use App\Jobs\Import\Feed\DealerFeedImporterJob;
 use App\Services\Import\Feed\DealerFeedUploaderService;
-use Dingo\Api\Http\Request;
-use Dingo\Api\Http\Response;
-use Illuminate\Support\Facades\Log;
+
+use App\Http\Requests\Feed\Factory\UploadFactoryFeedUnitRequest;
 
 /**
  * Class UploadController
@@ -20,6 +21,10 @@ use Illuminate\Support\Facades\Log;
  */
 class UploadController extends RestfulController
 {
+    public function __construct()
+    {
+        $this->middleware('setDealerIdOnRequest')->only(['upload']);
+    }
 
     /**
      * Upload source data
@@ -27,44 +32,20 @@ class UploadController extends RestfulController
      * @param Request $request
      * @param string $code
      * @param DealerFeedUploaderService $feedUploader
-     * @return \Dingo\Api\Http\Response|void
+     * @throws \Exception
+     * @return Response
      *
-     * @QA\Post(
-     *     path="/api/feed/uploader/{code}",
-     *     description="Upload source data",
-     *     @OA\Parameter(
-     *         name="code",
-     *         in="path",
-     *         description="Page Limit",
-     *         required=false
-     *     )
-     * )
      */
-    public function upload(Request $request, string $code, DealerFeedUploaderService $feedUploader)
+    public function upload(Request $request, string $code, DealerFeedUploaderService $feedUploader): Response
     {
-        $json = $request->all();
+        $request = new UploadFactoryFeedUnitRequest(array_merge($request->all(), ['code' => $code]));
 
-        try {
-            // queue the data for processing; processing involves breaking up the data into
-            //   individual transactions (addInventory, addDealer) and one object per row
-            //   then a collector then later processes each row/object for importing
-            $job = new DealerFeedImporterJob($json, $code, $feedUploader);
-
-            Log::info('Dispatching a DealerFeedImporterJob', ['code' => $code]);
-            $this->dispatch($job->onQueue('factory-feeds'));
-
-            return new Response([
-                'message' => 'Data has been received and is queued for processing.',
-                'result' => true,
-            ]);
-
-        } catch (\Exception $e) {
-            // return error
-            Log::error("Exception: {$e->getMessage()}", [
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            $this->response->errorBadRequest($e->getMessage());
+        if (!$request->validate()) {
+            return $this->response->errorBadRequest();
         }
+
+        dispatch((new DealerFeedImporterJob($request->all(), $code, $feedUploader))->onQueue('factory-feeds'));
+
+        return $this->successResponse();
     }
 }

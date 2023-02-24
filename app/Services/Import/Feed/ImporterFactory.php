@@ -3,13 +3,12 @@
 
 namespace App\Services\Import\Feed;
 
-
-use App\Services\Import\Feed\Type\Norstar;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class ImporterFactory
  *
- * Create instances of dealer specific importers
+ * Create instances of factory uploader
  *
  * @package App\Services\Import\Feed
  */
@@ -22,12 +21,7 @@ class ImporterFactory
      */
     public function build($code)
     {
-        switch ($code) {
-            case 'norstar':
-                return app(Norstar::class);
-
-            default:
-                throw new \Exception("Unknown importer type: {$code}");
-        }
+        Log::info('Building for ' . $code);
+        return app(FactoryUpload::class);
     }
 }
