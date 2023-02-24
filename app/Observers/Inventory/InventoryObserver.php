@@ -8,8 +8,8 @@ use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
 
 class InventoryObserver
 {
-    /** @var bool will help to determines when cache is enable thus jobs will be dispatched */
-    private static $isCacheInvalidationEnabled = false;
+    /** @var bool */
+    private static $isCacheInvalidationEnabled = true;
 
     /** @var ResponseCacheKeyInterface */
     private $cacheKey;
