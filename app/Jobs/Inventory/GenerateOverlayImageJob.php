@@ -61,7 +61,7 @@ class GenerateOverlayImageJob extends Job {
 
             if ($this->reindexAndInvalidateCache) {
                 /** @var Inventory $inventory */
-                $inventory = $repo->get(['inventory_id' => $this->inventoryId]);
+                $inventory = $repo->get(['id' => $this->inventoryId]);
 
                 $log->info('it will dispatch jobs for sync to index and invalidate cache', [
                     'inventory_id' => $inventory->inventory_id, 'dealer_id' => $inventory->dealer_id
