@@ -71,6 +71,12 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
      */
     private function wildcardQueryWithBoost(string $column, float $boost, string $value): array
     {
+        $termParts = explode(' ', $value);
+        // Given full search over tokens are faster than over keyword fields, so we need always search using them,
+        // only exception is when the number of term words are greater than 4,
+        // in that particular case we need to use the keyword field itself
+        $column = count($termParts) > 4 ? $column : $column.'.tokens';
+
         return [
             'wildcard' => [
                 $column => [
@@ -172,7 +178,7 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
 
                 if ($name !== 'description' || $descriptionWildcard) {
                     $boolQuery['bool'][$operator][]  = $this->wildcardQueryWithBoost(
-                        $name.'.tokens',
+                        $name,
                         self::GLOBAL_FILTER_WILDCARD_BOOST,
                         $value
                     );
@@ -200,7 +206,7 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
             switch ($name) {
                 case 'stock':
                     $shouldQuery[] = $this->wildcardQueryWithBoost(
-                        $this->field->getName().'.tokens' ,
+                        $this->field->getName(),
                         self::DEFAULT_BOOST,
                         $data['match']
                     );
@@ -230,7 +236,7 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
                         }
 
                         if ($keywordWildcard && !is_numeric($key) && strpos($column, '.') !== false) {
-                            $shouldQuery[] = $this->wildcardQueryWithBoost($key.'.tokens', $boost, $data['match']);
+                            $shouldQuery[] = $this->wildcardQueryWithBoost($key, $boost, $data['match']);
                         }
                     }
 
