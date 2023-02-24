@@ -2,6 +2,14 @@
 
 namespace App\Nova\Resources\Integration;
 
+use App\Nova\Filters\TransactionExecute\TransactionExecuteApiFilter;
+use App\Nova\Filters\TransactionExecute\TransactionExecuteDateFromFilter;
+use App\Nova\Filters\TransactionExecute\TransactionExecuteDateToFilter;
+use App\Nova\Metrics\FactoryFeed\BigTexMetric;
+use App\Nova\Metrics\FactoryFeed\PjMetric;
+use App\Nova\Metrics\FactoryFeed\TrailerWorldMetric;
+use App\Nova\Metrics\TransactionExecuteMetric;
+use App\Nova\Metrics\TransactionExecuteTrendMetric;
 use App\Nova\Resource;
 
 use Illuminate\Support\Str;
@@ -74,7 +82,7 @@ class TransactionExecuteQueue extends Resource
 
             Code::make('Data')->language('javascript')->json()->hideFromIndex(),
 
-            Text::make('Response')->sortable(),
+            Code::make('Response')->language('xml')->hideFromIndex(),
 
             Text::make('Operation Type')->sortable(),
 
@@ -90,7 +98,13 @@ class TransactionExecuteQueue extends Resource
      * @return array
      */
     public function cards(Request $request): array {
-        return [];
+        return [
+            new BigTexMetric(),
+            new PjMetric(),
+            new TrailerWorldMetric(),
+            new TransactionExecuteMetric(),
+            new TransactionExecuteTrendMetric()
+        ];
     }
 
     /**
@@ -100,7 +114,11 @@ class TransactionExecuteQueue extends Resource
      * @return array
      */
     public function filters(Request $request): array {
-        return [];
+        return [
+            new TransactionExecuteApiFilter(),
+            new TransactionExecuteDateFromFilter(),
+            new TransactionExecuteDateToFilter()
+        ];
     }
 
     /**
