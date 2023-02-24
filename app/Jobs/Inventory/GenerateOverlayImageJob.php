@@ -55,11 +55,11 @@ class GenerateOverlayImageJob extends Job {
 
         // Try Generating Overlays
         try {
-            $itHasGeneratedOverlay = Inventory::withoutCacheInvalidationAndSearchSyncing(function () use ($service) {
+            Inventory::withoutCacheInvalidationAndSearchSyncing(function () use ($service) {
                 return $service->generateOverlays($this->inventoryId);
             });
 
-            if ($this->reindexAndInvalidateCache && $itHasGeneratedOverlay) {
+            if ($this->reindexAndInvalidateCache) {
                 /** @var Inventory $inventory */
                 $inventory = $repo->get(['inventory_id' => $this->inventoryId]);
 
