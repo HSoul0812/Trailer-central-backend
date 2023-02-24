@@ -18,15 +18,6 @@ trait InventorySearchable
 {
     use Searchable, WithIndexConfigurator;
 
-    public static function bootInventorySearchable(): void
-    {
-        $repo = app(FeatureFlagRepositoryInterface::class);
-
-        if ($repo->isEnabled('inventory-sdk-cache')) {
-            Inventory::enableCacheInvalidation();
-        }
-    }
-
     public function searchableAs(): string
     {
         return self::$searchableAs ?? $this->indexConfigurator()->aliasName();
@@ -198,6 +189,11 @@ trait InventorySearchable
     public static function isCacheInvalidationEnabled(): bool
     {
         return InventoryObserver::isCacheInvalidationEnabled();
+    }
+
+    public static function isCacheInvalidationEnabledByFeatureFlag(): bool
+    {
+        return app(FeatureFlagRepositoryInterface::class)->isEnabled('inventory-sdk-cache');
     }
 
     public static function isSearchSyncingEnabled(): bool
