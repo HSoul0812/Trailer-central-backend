@@ -5,6 +5,7 @@ namespace App\Jobs\Inventory;
 use App\Jobs\Job;
 use App\Models\Inventory\Inventory;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
+use App\Traits\Horizon\WithTags;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -12,7 +13,7 @@ use App\Services\Inventory\InventoryServiceInterface;
 
 class GenerateOverlayImageJob extends Job {
 
-    use Dispatchable, SerializesModels;
+    use Dispatchable, SerializesModels, WithTags;
 
     /**
      * The number of times the job may be attempted.
@@ -32,6 +33,8 @@ class GenerateOverlayImageJob extends Job {
      * @var bool
      */
     private $reindexAndInvalidateCache;
+
+    public $queue = 'overlay-images';
 
     /**
      * GenerateOverlayImageJob constructor.
