@@ -122,7 +122,7 @@ class InventorySDKService implements InventorySDKServiceInterface
         $this->addDealerFilter($params);
 
         $location = $this->addGeolocation($params);
-        $this->addSorting($params, $location);;
+        $this->addSorting($params, $location);
         return $this->responseFromSDKResponse($this->search->execute($this->request));
     }
 
