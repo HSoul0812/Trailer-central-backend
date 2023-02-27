@@ -38,7 +38,7 @@ return [
     'channels' => [
         'stack' => [
             'driver'            => 'stack',
-            'channels'          => ['single'],
+            'channels'          => ['daily', 'error'],
             'ignore_exceptions' => false,
         ],
 
@@ -56,6 +56,14 @@ return [
             'permission' => 0664,
             'days' => 30,
         ],
+
+        'error' => [
+            'driver' => 'daily',
+            'path'   => storage_path('logs/error.log'),
+            'level'  => 'error',
+            'permission' => 0664,
+            'days' => 30,
+		],
 
         'elasticsearch' => [
             'driver' => 'daily',
