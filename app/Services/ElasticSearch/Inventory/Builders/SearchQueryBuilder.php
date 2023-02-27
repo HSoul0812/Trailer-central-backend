@@ -208,7 +208,7 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
      */
     public function generalQuery(): array
     {
-        $this->field->getTerms()->each(function (Term $term) use ($keywordWildcard) {
+        $this->field->getTerms()->each(function (Term $term) {
             $shouldQuery = [];
             $name = $this->field->getName();
             $data = $term->getValues();
