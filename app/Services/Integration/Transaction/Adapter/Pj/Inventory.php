@@ -152,7 +152,7 @@ class Inventory extends PjAdapter
         if (!empty($data['model'])) {
             $inventoryParams['model'] = $data['model'];
         }
-        if (isset($data['category']) && !empty($data['category'])) {
+        if (!empty($data['category'])) {
             $inventoryParams['category'] = $data['category'];
         } else {
             // Category is a required field. This is just in case.
