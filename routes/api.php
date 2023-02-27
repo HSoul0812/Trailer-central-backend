@@ -675,6 +675,8 @@ $api->version('v1', function ($route) {
     $route->get('users', 'App\Http\Controllers\v1\User\UserController@index');
     $route->post('users', 'App\Http\Controllers\v1\User\UserController@create');
 
+    $route->get('users-by-name', 'App\Http\Controllers\v1\User\UserController@listByName')->middleware('integration-permission:get_dealers_by_name,can_see');
+
     $route->post('user/classified', 'App\Http\Controllers\v1\User\UserController@updateDealerClassifieds');
 
 
