@@ -95,13 +95,13 @@ class Inventory extends PjAdapter
             $inventoryParams['archived_at'] = (new \DateTime())->format('Y-m-d H:i:s');
         }
 
-        if(isset($data['msrp'])) {
+        if (!empty($data['msrp'])) {
             $inventoryParams['msrp'] = $data['msrp'];
         }
-        if(isset($data['width'])) {
+        if (!empty($data['width'])) {
             $inventoryParams['width'] = $data['width'];
         }
-        if(isset($data['height'])) {
+        if (!empty($data['height'])) {
             $inventoryParams['height'] = $data['height'];
         }
 
@@ -111,7 +111,7 @@ class Inventory extends PjAdapter
         $images = is_string($images) ? explode(',', $images) : $images;
 
         foreach($images as $image) {
-            if(strpos($image, 'http://') === false && substr($image, 0, 2) == '//') {
+            if (strpos($image, 'http://') === false && strpos($image, '//') === 0) {
                 $image = 'http:' . $image;
             }
 
@@ -149,37 +149,41 @@ class Inventory extends PjAdapter
 
         $inventoryParams['title'] = $title;
 
-        if(isset($data['model'])) {
+        if (!empty($data['model'])) {
             $inventoryParams['model'] = $data['model'];
         }
-        if(isset($data['category'])) {
+        if (isset($data['category']) && !empty($data['category'])) {
             $inventoryParams['category'] = $data['category'];
+        } else {
+            // Category is a required field. This is just in case.
+            $inventoryParams['category'] = 'other';
         }
-        if(isset($data['msrp'])) {
+
+        if (!empty($data['msrp'])) {
             $inventoryParams['msrp'] = $data['msrp'];
         }
-        if(isset($data['year'])) {
+        if (!empty($data['year'])) {
             $inventoryParams['year'] = $data['year'];
         }
-        if(isset($data['length'])) {
+        if (!empty($data['length'])) {
             $inventoryParams['length'] = $data['length'];
         }
-        if(isset($data['width'])) {
+        if (!empty($data['width'])) {
             $inventoryParams['width'] = $data['width'];
         }
-        if(isset($data['height'])) {
+        if (!empty($data['height'])) {
             $inventoryParams['height'] = $data['height'];
         }
-        if(isset($data['gvwr'])) {
+        if (!empty($data['gvwr'])) {
             $inventoryParams['gvwr'] = $data['gvwr'];
         }
-        if(isset($data['axle_capacity'])) {
+        if (!empty($data['axle_capacity'])) {
             $inventoryParams['axle_capacity'] = $data['axle_capacity'];
         }
-        if(isset($data['status'])) {
+        if (!empty($data['status'])) {
             $inventoryParams['status'] = $this->convert('status', $data['status']);
         }
-        if(isset($data['description'])) {
+        if (!empty($data['description'])) {
             $inventoryParams['description'] = $data['description'];
         }
 
