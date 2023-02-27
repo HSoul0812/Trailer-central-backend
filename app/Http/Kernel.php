@@ -7,6 +7,7 @@ use App\Http\Middleware\Ecommerce\StripeWebhookValidate;
 use App\Http\Middleware\Ecommerce\TexTrailWebhookValidate;
 use App\Http\Middleware\Ecommerce\ValidHookIpMiddleware;
 use App\Http\Middleware\Integration\ValidIntegrationAccessToken;
+use App\Http\Middleware\InteractionIntegration\IntegrationPermission;
 use App\Http\Middleware\Inventory\CreateInventoryPermissionMiddleware;
 use App\Http\Middleware\Inventory\InvalidatePermissionMiddleware;
 use App\Http\Middleware\User\ManageAccountPermissionMiddleware;
@@ -137,6 +138,7 @@ class Kernel extends HttpKernel
         'replytext.validate' => ReplyTextValidate::class,
         'validateDealerIdOnRequest' => ValidateDealerIdOnRequest::class,
         'inventory.cache.permission' => InvalidatePermissionMiddleware::class,
+        'integration-permission' => IntegrationPermission::class,
     ];
 
     /**

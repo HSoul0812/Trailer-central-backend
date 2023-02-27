@@ -755,4 +755,9 @@ class UserRepository implements UserRepositoryInterface {
 
         return $dealer;
     }
+
+    public function getByName(string $name): Collection
+    {
+        return User::where('name', $name)->get();
+    }
 }
