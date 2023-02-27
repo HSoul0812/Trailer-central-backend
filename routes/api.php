@@ -714,6 +714,21 @@ $api->version('v1', function ($route) {
 
         /*
         |--------------------------------------------------------------------------
+        | Dealer Documents
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->group(['prefix' => 'leads/{leadId}/documents'], function ($route) {
+
+            $route->get('/', 'App\Http\Controllers\v1\CRM\Documents\DealerDocumentsController@index');
+            $route->put('/', 'App\Http\Controllers\v1\CRM\Documents\DealerDocumentsController@create');
+            $route->delete('/{documentId}', 'App\Http\Controllers\v1\CRM\Documents\DealerDocumentsController@destroy');
+        });
+
+        /*
+        |--------------------------------------------------------------------------
         | Quotes
         |--------------------------------------------------------------------------
         |
@@ -1134,16 +1149,6 @@ $api->version('v1', function ($route) {
                     $route->post('{id}/sent', 'App\Http\Controllers\v1\CRM\Text\BlastController@sent')->where('id', '[0-9]+');
                 });
             });
-
-            /*
-            |--------------------------------------------------------------------------
-            | Dealer Documents
-            |--------------------------------------------------------------------------
-            |
-            |
-            |
-            */
-            $route->get('documents', 'App\Http\Controllers\v1\CRM\Documents\DealerDocumentsController@index');
         });
 
         /*

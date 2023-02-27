@@ -459,7 +459,7 @@ class InteractionService implements InteractionServiceInterface
     public function getContactDate(int $leadId)
     {
         $leadStatus = $this->leadStatus->get(['lead_id' => $leadId]);
-        $contactDate = $leadStatus->next_contact_date;
+        $contactDate = $leadStatus->next_contact_date ?? null;
         $interactionNote = '';
 
         if ($contactDate === '0000-00-00 00:00:00' || empty($contactDate)) {
