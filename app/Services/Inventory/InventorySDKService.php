@@ -206,10 +206,9 @@ class InventorySDKService implements InventorySDKServiceInterface
         if (!empty($params['sale'])) {
             $attributes[self::SALE_SCRIPT_ATTRIBUTE] = true;
 
+            $attributes[self::PRICE_SCRIPT_ATTRIBUTE] = [];
             if (!empty($params['price_min']) && $params['price_min'] > 0 && !empty($params['price_max'])) {
                 $attributes[self::PRICE_SCRIPT_ATTRIBUTE] = [$params['price_min'], $params['price_max']];
-            } else {
-                $attributes[self::PRICE_SCRIPT_ATTRIBUTE] = [];
             }
 
             $this->mainFilterGroup->add(new Filter('sale_price_script', new Collection($attributes)));
