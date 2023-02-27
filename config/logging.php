@@ -65,6 +65,14 @@ return [
             'days' => 30,
 		],
 
+        'custom' => [
+            'driver' => 'daily',
+            'path'   => storage_path('logs/custom.log'),
+            'level'  => 'debug',
+            'permission' => 0664,
+            'days' => 30,
+		],
+
         'elasticsearch' => [
             'driver' => 'daily',
             'path'   => storage_path('logs/elasticsearch.log'),
