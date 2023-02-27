@@ -16,7 +16,7 @@ class TcApiResponseDealer
     public bool $isMarketingActive;
     public bool $isFmeActive;
     public ?string $profileImage;
-    public ?string $website;
+    public ?array $website;
     public ?string $from;
     public array $permissions;
 
