@@ -43,8 +43,8 @@ class InventorySDKService implements InventorySDKServiceInterface
     private int $currentPage = 1;
     private int $perPage = self::PAGE_SIZE;
 
-    const SALE_SCRIPT_ATTRIBUTE = 'sale_script';
-    const PRICE_SCRIPT_ATTRIBUTE = 'price_script';
+    const SALE_SCRIPT_ATTRIBUTE = 'sale';
+    const PRICE_SCRIPT_ATTRIBUTE = 'price';
     const TILT_TRAILER_INVENTORY = 'Tilt Trailers';
     const TERM_SEARCH_KEY_MAP = [
         'dealer_location_id' => 'dealerLocationId',
@@ -123,6 +123,7 @@ class InventorySDKService implements InventorySDKServiceInterface
 
         $location = $this->addGeolocation($params);
         $this->addSorting($params, $location);
+        \Log::info($this->request->serialize());
         return $this->responseFromSDKResponse($this->search->execute($this->request));
     }
 
@@ -203,16 +204,16 @@ class InventorySDKService implements InventorySDKServiceInterface
     {
         $attributes = [];
         if (!empty($params['sale'])) {
-            $attributes[] = self::SALE_SCRIPT_ATTRIBUTE;
+            $attributes[self::SALE_SCRIPT_ATTRIBUTE] = true;
+
+            $attributes[self::PRICE_SCRIPT_ATTRIBUTE] = [];
+            if (!empty($params['price_min']) && $params['price_min'] > 0 && !empty($params['price_max'])) {
+                $attributes[self::PRICE_SCRIPT_ATTRIBUTE] = [$params['price_min'], $params['price_max']];
+            }
+
+            $this->mainFilterGroup->add(new Filter('sale_price_script', new Collection($attributes)));
         }
 
-        if (!empty($params['price_min']) && $params['price_min'] > 0 && !empty($params['price_max'])) {
-            $attributes[] = sprintf('%s:%d:%d',
-                self::PRICE_SCRIPT_ATTRIBUTE, $params['price_min'], $params['price_max']
-            );
-        }
-
-        $this->mainFilterGroup->add(new Filter('sale_price_script', new Collection($attributes)));
         $this->mainFilterGroup->add(new Filter('classifieds_site', new Collection([true])));
         $this->mainFilterGroup->add(new Filter(
             'availability', new Collection([self::INVENTORY_SOLD], Operator::NOT_EQUAL
@@ -237,7 +238,7 @@ class InventorySDKService implements InventorySDKServiceInterface
         foreach (self::TERM_SEARCH_KEY_MAP as $field => $searchField) {
             if ($value = $params[$field] ?? null) {
                 $this->mainFilterGroup->add(new Filter(
-                    $searchField, new Collection([$value])
+                    $searchField, new Collection(explode(';', $value))
                 ));
             }
         }
@@ -249,12 +250,13 @@ class InventorySDKService implements InventorySDKServiceInterface
      */
     protected function addRangeQueries(array $params)
     {
-        foreach (self::RANGE_SEARCH_KEY_MAP as $field) {
+        foreach (self::RANGE_SEARCH_KEY_MAP as $field => $searchField) {
             $minFieldKey = "{$field}_min";
             $maxFieldKey = "{$field}_max";
             if (isset($params[$minFieldKey]) || isset($params[$maxFieldKey])) {
                 $this->mainFilterGroup->add(new Filter(
-                    $field, new Range($params[$minFieldKey] ?? null, $params[$maxFieldKey] ?? null)
+                    $searchField,
+                    new Range($params[$minFieldKey] ?? null, $params[$maxFieldKey] ?? null)
                 ));
             }
         }
