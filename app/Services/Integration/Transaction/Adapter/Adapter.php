@@ -136,12 +136,14 @@ abstract class Adapter
             $this->conversions = $this->dealerIncomingMappingRepository->getAll(['integration_name' => $this->apiKey]);
         }
 
-        $searchArray = [
+        $searchArrayOrg = [
             [$type, $mapFrom],
             [strtolower($type), $mapFrom],
             [$type, strtolower($mapFrom)],
             [strtolower($type), strtolower($mapFrom)],
         ];
+
+        $searchArray = array_map("unserialize", array_unique(array_map("serialize", $searchArrayOrg)));
 
         foreach ($searchArray as $item) {
             /** @var DealerIncomingMapping $dealerIncomingMapping */
