@@ -2,12 +2,13 @@
 
 namespace App\Services\ElasticSearch\Inventory\Builders;
 
-use App\Repositories\FeatureFlagRepositoryInterface;
 use App\Services\ElasticSearch\Inventory\Parameters\Filters\Filter;
 use App\Services\ElasticSearch\Inventory\Parameters\Filters\Term;
 
 class SearchQueryBuilder implements FieldQueryBuilderInterface
 {
+    private const QUERY_SEARCH_SPECIAL_CHARS = ['and', 'or', '(', ')', '=', '&', '*'];
+
     /** @var int */
     private const DEFAULT_BOOST = 1;
 
@@ -22,37 +23,26 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
 
     /** @var string[] */
     private const SEARCH_FIELDS = [
-        'title' => 'title.txt^4',
-        'description' => 'description.txt^1',
-        'stock' => 'stock.normal^1',
+        'title' => 'title.tokens^4',
+        'description' => 'description.tokens^1',
+        'stock' => 'stock.tokens^1',
         'vin' => 'vin^1',
         'manufacturer' => 'manufacturer^1',
         'brand' => 'brand^1',
         'model' => 'model^1',
-        'featureList.floorPlan' => 'featureList.floorPlan.txt^0.5',
+        'featureList.floorPlan' => 'featureList.floorPlan.tokens^0.5',
     ];
 
     /** @var string[] */
     private const DESCRIPTION_SEARCH_FIELDS = [
-        'title' => 'title.txt^4',
+        'title' => 'title.tokens^4',
         'manufacturer' => 'manufacturer^1',
         'brand' => 'brand^1',
-        'description' => 'description.txt^1',
-        'stock' => 'stock.normal^1',
+        'description' => 'description.tokens^1',
+        'stock' => 'stock.tokens^1',
         'model' => 'model^1',
         'vin' => 'vin^1',
-        'featureList.floorPlan' => 'featureList.floorPlan.txt^0.5',
-    ];
-
-    /** @var string[] */
-    private const REPLACE_SPACE_WITH_ASTERISK = [
-        'manufacturer',
-        'brand',
-        'description.txt',
-        'stock.normal',
-        'model',
-        'vin',
-        'featureList.floorPlan.txt'
+        'featureList.floorPlan' => 'featureList.floorPlan.tokens^0.5',
     ];
 
     /** @var array */
@@ -64,25 +54,57 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
     }
 
     /**
-     * @param string $column
+     * @param string|array $fields
      * @param float $boost
-     * @param string $value
+     * @param string $termAsString
      * @return \array[][]
      */
-    private function wildcardQueryWithBoost(string $column, float $boost, string $value): array
+    private function queryStringWithBoost($fields, float $boost, string $termAsString): array
     {
-        $termParts = explode(' ', $value);
-        // Given full search over tokens are faster than over keyword fields, so we need always search using them,
-        // only exception is when the number of term words are greater than 4,
-        // in that particular case we need to use the keyword field itself
-        $column = count($termParts) > 4 ? $column : $column.'.tokens';
+        if (!is_array($fields)) {
+            $fields = [$fields];
+        }
+
+        // to be able quoting special chars
+        $terms = array_map(static function ($term): string {
+            if (in_array($term, self::QUERY_SEARCH_SPECIAL_CHARS)) {
+                return sprintf('"%s"', $term);
+            }
+
+            return $term;
+        },
+            array_filter(explode(' ', strtolower($termAsString)))
+        );
+
+        $query = sprintf('*%s*', $terms[0]);
+
+        $numberOfTerms = count($terms);
+
+        if ($numberOfTerms > 1) {
+            $queries = [
+                sprintf('*%s', $terms[0])
+            ];
+
+            array_shift($terms);
+
+            $lastQuery = sprintf('%s*', $terms[$numberOfTerms - 2]);
+
+            array_pop($terms);
+
+            foreach ($terms as $term) {
+                $queries[] = $term;
+            }
+
+            $queries[] = $lastQuery;
+
+            $query = implode(' AND ', $queries);
+        }
 
         return [
-            'wildcard' => [
-                $column => [
-                    'value' => sprintf('*%s*', $value),
-                    'boost' => max(self::MINIMUM_BOOST, $boost)
-                ]
+            'query_string' => [
+                'fields' => $fields,
+                'query' => $query,
+                'boost' => max(self::MINIMUM_BOOST, $boost)
             ]
         ];
     }
@@ -154,9 +176,7 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
      */
     public function globalQuery(): array
     {
-        $descriptionWildcard = app(FeatureFlagRepositoryInterface::class)->isEnabled('inventory-sdk-global-description-wildcard');
-
-        $this->field->getTerms()->each(function (Term $term) use ($descriptionWildcard) {
+        $this->field->getTerms()->each(function (Term $term) {
             $name = $this->field->getName();
 
             $operator = $this->field->getParentESOperatorKeyword() === 'must' && $term->getESOperatorKeyword() === 'should' ?
@@ -169,20 +189,12 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
             ];
 
             foreach ($term->getValues() as $value) {
-
-                $boolQuery['bool'][$operator][] =  $this->matchQuery(
-                    sprintf('%s.txt', $name),
-                    self::GLOBAL_FILTER_WILDCARD_BOOST + self::DEFAULT_BOOST,
+                // we're assuming all fields are analyzed with `shingle_analyzer`
+                $boolQuery['bool'][$operator][] = $this->queryStringWithBoost(
+                    sprintf('%s.tokens', $name),
+                    self::GLOBAL_FILTER_WILDCARD_BOOST,
                     $value
                 );
-
-                if ($name !== 'description' || $descriptionWildcard) {
-                    $boolQuery['bool'][$operator][]  = $this->wildcardQueryWithBoost(
-                        $name,
-                        self::GLOBAL_FILTER_WILDCARD_BOOST,
-                        $value
-                    );
-                }
             }
 
              $this->appendToQuery($boolQuery);
@@ -196,8 +208,6 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
      */
     public function generalQuery(): array
     {
-        $keywordWildcard = app(FeatureFlagRepositoryInterface::class)->isEnabled('inventory-sdk-es-keyword-wildcard');
-
         $this->field->getTerms()->each(function (Term $term) use ($keywordWildcard) {
             $shouldQuery = [];
             $name = $this->field->getName();
@@ -205,15 +215,14 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
 
             switch ($name) {
                 case 'stock':
-                    $shouldQuery[] = $this->wildcardQueryWithBoost(
-                        $this->field->getName(),
+                    $shouldQuery[] = $this->queryStringWithBoost(
+                        $this->field->getName().'.tokens',
                         self::DEFAULT_BOOST,
                         $data['match']
                     );
                     break;
                 default:
                     $searchFields = $this->getSearchFields($data['ignore_fields'] ?? []);
-                    $match = str_replace(' ', '*', $data['match']);
 
                     foreach ($searchFields as $key => $column) {
                         $boost = self::DEFAULT_BOOST;
@@ -223,21 +232,7 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
                             $boost = max(self::MINIMUM_BOOST, (float)$columnValues[$boostKey]);
                         }
 
-                        $columnParts = explode('.', $column);
-
-                        if (count($columnParts) > 1) {
-                            $shouldQuery[] = $this->multiMatchQuery(
-                                [$columnParts[0], $columnValues[0]],
-                                $boost,
-                                $match
-                            );
-                        } else {
-                            $shouldQuery[] = $this->matchQuery($columnValues[0], $boost, $match);
-                        }
-
-                        if ($keywordWildcard && !is_numeric($key) && strpos($column, '.') !== false) {
-                            $shouldQuery[] = $this->wildcardQueryWithBoost($key, $boost, $data['match']);
-                        }
+                        $shouldQuery[] = $this->queryStringWithBoost($columnValues[0], $boost, $data['match']);
                     }
 
                     break;
