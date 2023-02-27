@@ -19,11 +19,13 @@ use App\Transformers\Dispatch\Facebook\DealerTransformer;
 use App\Transformers\Dispatch\Facebook\StatusTransformer;
 use App\Transformers\Dispatch\Facebook\StepTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
+use Illuminate\Http\Resources\Json\JsonResource;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
 use Illuminate\Support\Facades\Log;
 use App\Http\Requests\Dispatch\Facebook\UpdateMarketplaceMetricsRequest;
 use App\Models\Marketing\Facebook\MarketplaceMetric;
+use App\Http\Resources\FacebookIntegrationResource;
 
 class FacebookController extends RestfulControllerV2 {
     /**
@@ -94,18 +96,11 @@ class FacebookController extends RestfulControllerV2 {
      * Get Facebook Marketplace Integrations
      *
      * @param Request $request
-     * @return type
+     * @return JsonResource
      */
     public function index(Request $request)
     {
-        // Handle Facebook Marketplace Request
-        $request = new GetMarketplaceRequest($request->all());
-        if ($request->validate()) {
-            // Get Marketplaces
-            return $this->response->item($this->service->status($request->all()), $this->statusTransformer);
-        }
-
-        return $this->response->errorBadRequest();
+        return FacebookIntegrationResource::collection($this->repository->getAllIntegrations($request->all()));
     }
 
     /**

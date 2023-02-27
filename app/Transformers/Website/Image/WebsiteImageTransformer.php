@@ -20,7 +20,8 @@ class WebsiteImageTransformer extends TransformerAbstract
             'date_created' => $image->date_created,
             'is_active' => $image->is_active,
             'promo_id' => $image->promo_id,
-            'expires_at' => $image->expires_at
+            'expires_at' => $image->expires_at,
+            'starts_from' => $image->starts_from
         ];
     }
 }

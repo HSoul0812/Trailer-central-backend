@@ -5,21 +5,21 @@ namespace App\Console\Commands\Website;
 use App\Models\Website\Image\WebsiteImage;
 use Illuminate\Console\Command;
 
-class HideExpiredImages extends Command
+class UpdateWebsiteImagesVisibility extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'website:hide-expired-images';
+    protected $signature = 'website:update-images-visibility';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'This command would hide expired website images';
+    protected $description = 'This command updates the website image is_active based on its start and expiry dates';
 
     /**
      * Execute the console command.
@@ -31,5 +31,9 @@ class HideExpiredImages extends Command
         WebsiteImage::whereDate('expires_at', '<=', now())
             ->where('is_active', true)
             ->update(['is_active' => false]);
+
+        WebsiteImage::whereDate('starts_from', '<=', now())
+            ->where('is_active', false)
+            ->update(['is_active' => true]);
     }
 }
