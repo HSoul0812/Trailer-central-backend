@@ -29,4 +29,31 @@ class DealerDocumentsRepository extends RepositoryAbstract implements DealerDocu
 
         return $query->get();
     }
+
+    /**
+     * @param int $id
+     * @return DealerDocuments
+     */
+    public function find($id): DealerDocuments
+    {
+        return DealerDocuments::find($id);
+    }
+
+    /**
+     * @param array $params
+     * @return DealerDocuments
+     */
+    public function create($params): DealerDocuments
+    {
+        return DealerDocuments::create($params);
+    }
+
+    /**
+     * @param array $params
+     * @return bool
+     */
+    public function delete($params)
+    {
+        return $this->find($params['document_id'])->delete();
+    }
 }
