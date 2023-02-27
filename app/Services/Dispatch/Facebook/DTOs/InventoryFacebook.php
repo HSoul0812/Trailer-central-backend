@@ -483,7 +483,7 @@ class InventoryFacebook
      * @return string
      */
     public function getPlainDescription(): string {
-        return $this->stripMarkdown($this->description);
+        return $this->stripMarkdown($this->description ?? '');
     }
 
     /**
