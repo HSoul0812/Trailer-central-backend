@@ -3,7 +3,9 @@
 namespace Tests\Unit\Transformers\User;
 
 use App\Models\User\DealerLogo;
+use App\Services\User\DealerLogoService;
 use App\Transformers\User\DealerLogoTransformer;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 /**
@@ -40,7 +42,7 @@ class DealerLogoTransformerTest extends TestCase
     {
         $transformedLogo = $this->transformer->transform($this->dealerLogo);
 
-        $url = sprintf('https://%s.s3.amazonaws.com/%s', env('AWS_BUCKET'), $this->dealerLogo->filename);
+        $url = Storage::disk(DealerLogoService::STORAGE_DISK)->url($this->dealerLogo->filename);
         $this->assertSame($url, $transformedLogo['filename']);
     }
 }
