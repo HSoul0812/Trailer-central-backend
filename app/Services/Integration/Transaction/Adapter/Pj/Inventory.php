@@ -220,19 +220,19 @@ class Inventory extends PjAdapter
             $attributes['axles'] = $data['axles'];
         }
 
-        if(isset($data['color'])) {
+        if(!empty($data['color']) && is_string($data['color'])) {
             $attributes['color'] = strtolower($this->convert('color', $data['color']));
         }
 
-        if(isset($data['hitch_type'])) {
+        if(!empty($data['hitch_type']) && is_string($data['hitch_type'])) {
             $attributes['pull_type'] = $this->convert('pull_type', $data['hitch_type']);
         }
 
-        if(isset($data['roof_type'])) {
+        if(!empty($data['roof_type']) && is_string($data['roof_type'])) {
             $attributes['roof_type'] = $this->convert('roof_type', $data['roof_type']);
         }
 
-        if(isset($data['nose_type'])) {
+        if(!empty($data['nose_type']) && is_string($data['nose_type'])) {
             $attributes['nose_type'] = $this->convert('nose_type', $data['nose_type']);
         }
 
