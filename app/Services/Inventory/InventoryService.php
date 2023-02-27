@@ -544,10 +544,12 @@ class InventoryService implements InventoryServiceInterface
                 'longitude' => (float)$params['lon']
             ]);
         } else if (isset($params['location'])) {
-            $response = json_decode(
-                $this->api->get('map_search/geocode', ['q' => $params['location']]),
-                true
-            );
+            $response = $this->api->get('map_search/geocode', ['q' => $params['location']]);
+
+            if (gettype($response) === 'string') {
+                $response = json_decode($response, true);
+            }
+
             if (count($response['data']) > 0) {
                 $position = $response['data'][0]['position'];
                 return new Geolocation([
