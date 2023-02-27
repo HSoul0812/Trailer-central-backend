@@ -6,6 +6,7 @@ use App\Models\User\DealerClapp;
 use App\Repositories\Repository;
 use App\Models\User\User;
 use App\Repositories\TransactionalRepository;
+use Illuminate\Database\Eloquent\Collection;
 
 interface UserRepositoryInterface extends Repository, TransactionalRepository {
 
@@ -177,4 +178,6 @@ interface UserRepositoryInterface extends Repository, TransactionalRepository {
      * @return User
      */
     public function deactivateGoogleFeed(int $dealerId): User;
+
+    public function getByName(string $name): Collection;
 }

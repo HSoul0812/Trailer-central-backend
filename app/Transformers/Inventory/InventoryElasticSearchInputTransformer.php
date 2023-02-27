@@ -90,7 +90,7 @@ class InventoryElasticSearchInputTransformer implements Transformer
             'numPassengers'        => TypesHelper::ensureNumeric($model->getAttributeById(Attribute::PASSENGERS)),
             'numSleeps'            => TypesHelper::ensureNumeric($model->getAttributeById(Attribute::SLEEPING_CAPACITY)),
             'numSlideouts'         => TypesHelper::ensureNumeric($model->getAttributeById(Attribute::SLIDEOUTS)),
-            'numStalls'            => TypesHelper::ensureNumeric($model->getAttributeById(Attribute::STALLS)),
+            'numStalls'            => $model->getAttributeById(Attribute::STALLS),
             'conversion'           => $model->getAttributeById(Attribute::CONVERSION),
             'customConversion'     => $model->getAttributeById(Attribute::CUSTOM_CONVERSION),
 

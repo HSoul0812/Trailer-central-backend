@@ -281,7 +281,11 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
                 ],
                 'shingle_analyzer' => [ // it will generate standard tokens per two word
                     'tokenizer' => 'shingle_tokenizer',
-                    'filter' => ['lowercase', 'asciifolding', 'shingle']
+                    'filter' => [
+                        'lowercase',
+                        'asciifolding',
+                        '2_4_shingle_filter'
+                    ]
                 ],
             ],
             'tokenizer' => [
@@ -290,6 +294,14 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
                 ],
                 'shingle_tokenizer' => [
                     'type' => 'standard'
+                ]
+            ],
+            'filter' => [
+                '2_4_shingle_filter' => [
+                    'type' => 'shingle',
+                    'min_shingle_size' => 2,
+                    'max_shingle_size' => 4,
+                    'output_unigrams' => false
                 ]
             ]
         ])->index([
