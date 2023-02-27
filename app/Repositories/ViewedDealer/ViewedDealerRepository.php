@@ -72,7 +72,7 @@ class ViewedDealerRepository implements ViewedDealerRepositoryInterface
 
         // Get the first inventory from ES
         $inventories = $this->inventoryService->list([
-            'dealerId' => $dealer->id,
+            'dealer_id' => $dealer->id,
         ]);
 
         /** @var TcEsInventory $inventory */
