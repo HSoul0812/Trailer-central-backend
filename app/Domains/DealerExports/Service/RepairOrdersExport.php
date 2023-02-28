@@ -7,9 +7,9 @@ use App\Domains\DealerExports\BaseExportAction;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Class BillsExportAction
+ * Class RepairOrdersExport
  *
- * @package App\Domains\DealerExports\BackOffice
+ * @package App\Domains\DealerExports\Service
  */
 class RepairOrdersExport extends BaseExportAction implements EntityActionExportable
 {

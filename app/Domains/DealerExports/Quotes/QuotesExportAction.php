@@ -10,9 +10,9 @@ use App\Models\CRM\Account\InvoiceItem;
 use App\Models\CRM\Dms\ServiceOrder;
 
 /**
- * Class BillsExportAction
+ * Class QuotesExportAction
  *
- * @package App\Domains\DealerExports\BackOffice
+ * @package App\Domains\DealerExports\Quotes
  */
 class QuotesExportAction extends BaseExportAction implements EntityActionExportable
 {
