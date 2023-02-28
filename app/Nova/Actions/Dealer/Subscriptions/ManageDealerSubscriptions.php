@@ -1,13 +1,12 @@
 <?php
 
-namespace App\Nova\Actions\Dealer\Subscriptions\DealerClassifieds;
+namespace App\Nova\Actions\Dealer\Subscriptions;
 
 use App\Models\User\User;
 use Illuminate\Bus\Queueable;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Actions\Action;
-use Illuminate\Support\Collection;
 use Laravel\Nova\Fields\ActionFields;
 use Illuminate\Queue\InteractsWithQueue;
 use App\Services\User\DealerOptionsServiceInterface;
@@ -17,7 +16,7 @@ use Epartment\NovaDependencyContainer\NovaDependencyContainer;
 /**
  * class ManageDealerSubscriptions
  *
- * @package App\Nova\Actions\Dealer\Subscriptions\DealerClassifieds
+ * @package App\Nova\Actions\Dealer\Subscriptions
  */
 class ManageDealerSubscriptions extends Action
 {

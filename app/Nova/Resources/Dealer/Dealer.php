@@ -17,12 +17,8 @@ use App\Nova\Actions\Dealer\ChangeStatus;
 use App\Nova\Actions\Dealer\DeactivateDealer;
 use Laravel\Nova\Http\Requests\ActionRequest;
 use Trailercentral\PasswordlessLoginUrl\PasswordlessLoginUrl;
+use App\Nova\Actions\Dealer\Subscriptions\ManageDealerSubscriptions;
 use App\Nova\Actions\Dealer\HiddenIntegrations\ManageHiddenIntegrations;
-use App\Nova\Actions\Dealer\Subscriptions\DealerClassifieds\ManageSubscriptions;
-use App\Nova\Actions\Dealer\Subscriptions\DealerClassifieds\ManageDealerClassifieds;
-use App\Nova\Actions\Dealer\Subscriptions\DealerClassifieds\ActivateDealerClassifieds;
-use App\Nova\Actions\Dealer\Subscriptions\DealerClassifieds\ManageDealerSubscriptions;
-
 
 /**
  * class Dealer
