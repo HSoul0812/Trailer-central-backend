@@ -57,13 +57,15 @@ class TransactionService implements TransactionServiceInterface
     {
         $this->integrationName = $params['integration_name'];
 
-        $transactionData = [
-            'data' => $params['data'],
-            'api' => $this->integrationName,
-            'without_prepare_data' => true
-        ];
+        if ($params['create_transaction_queue'] ?? false) {
+            $transactionData = [
+                'data' => $params['data'],
+                'api' => $this->integrationName,
+                'without_prepare_data' => true
+            ];
 
-        $this->transactionExecuteQueueRepository->create($transactionData);
+            $this->transactionExecuteQueueRepository->create($transactionData);
+        }
 
         $config = new \SimpleXMLElement($params['data'], LIBXML_NOCDATA);
 
