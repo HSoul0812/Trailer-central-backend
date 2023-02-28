@@ -194,7 +194,12 @@ class User extends Model implements Authenticatable, PermissionsInterface
         'import_config',
         'auto_msrp',
         'auto_msrp_percent',
-        'from'
+        'from',
+        'clsf_active',
+        'is_dms_active',
+        'is_scheduler_active',
+        'is_quote_manager_active',
+        'google_feed_active'
     ];
 
     protected $casts = [
@@ -398,42 +403,9 @@ class User extends Model implements Authenticatable, PermissionsInterface
         }
     }
 
-    public function getIsAuction123ActiveAttribute(): bool
-    {
-        $integration = $this->integrations()->where('integration.integration_id', 35)->first();
-        return $integration ? $integration->pivot->active : false;
-    }
-
-    public function getIsAutoConxActiveAttribute(): bool
-    {
-        $integration = $this->integrations()->where('integration.integration_id', 33)->first();
-        return $integration ? $integration->pivot->active : false;
-    }
-
-    public function getIsCarbaseActiveAttribute(): bool
-    {
-        $integration = $this->integrations()->where('integration.integration_id', 50)->first();
-        return $integration ? $integration->pivot->active : false;
-    }
-
-    public function getIsDP360ActiveAttribute(): bool
-    {
-        $integration = $this->integrations()->where('integration.integration_id', 62)->first();
-        return $integration ? $integration->pivot->active : false;
-    }
-
-    public function getIsTrailerUsaActiveAttribute(): bool
-    {
-        $integration = $this->integrations()->where('integration.integration_id', 31)->first();
-        return $integration ? $integration->pivot->active : false;
-    }
-
-    public function getIsELeadsActiveAttribute(): bool
-    {
-        $integration = $this->integrations()->where('integration.integration_id', 54)->first();
-        return $integration ? $integration->pivot->active : false;
-    }
-
+    /**
+     * @return bool|null
+     */
     public function getIsUserAccountsActiveAttribute(): ?bool
     {
         if(isset($this->website)) {
@@ -483,7 +455,7 @@ class User extends Model implements Authenticatable, PermissionsInterface
      */
     public function integrations(): BelongsToMany
     {
-        return $this->belongsToMany(Integration::class, 'integration_dealer', 'dealer_id', 'integration_id')->withPivot(['active']);
+        return $this->belongsToMany(Integration::class, 'integration_dealer', 'dealer_id', 'integration_id')->withPivot('active');
     }
 
     /**
