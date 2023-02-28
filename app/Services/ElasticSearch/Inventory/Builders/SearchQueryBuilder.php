@@ -54,18 +54,13 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
             $fields = [$fields];
         }
 
-        $escapeElasticReservedChars = static function(string $string): string
-        {
+        // to be able quoting special chars
+        $terms = array_map(static function ($term): string {
             return preg_replace(
                 "/[\\+\\-\\=\\&\\|\\!\\(\\)\\{\\}\\[\\]\\^\\\"\\~\\*\\<\\>\\?\\:\\\\\\/]/",
                 addslashes('\\$0'),
-                $string
+                $term
             );
-        };
-
-        // to be able quoting special chars
-        $terms = array_map(static function ($term) use ($escapeElasticReservedChars): string {
-            return $escapeElasticReservedChars($term);
         },
             array_filter(explode(' ', strtolower(trim($termAsString))))
         );
