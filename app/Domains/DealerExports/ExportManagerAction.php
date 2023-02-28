@@ -16,6 +16,7 @@ use App\Models\User\User;
 use App\Domains\DealerExports\POS\SalesLedgerExport;
 use App\Domains\DealerExports\POS\RefundsExportAction;
 use App\Domains\DealerExports\Service\RepairOrdersExport;
+use App\Domains\DealerExports\Quotes\QuotesExportAction;
 
 /**
  * Class ExportManagerAction
@@ -45,6 +46,8 @@ class ExportManagerAction
         RefundsExportAction::class,
         // Service
         RepairOrdersExport::class,
+        // Quotes
+        QuotesExportAction::class
     ];
 
     /**
