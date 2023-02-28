@@ -13,6 +13,6 @@ class PostTransactionRequest extends Request
     protected $rules = [
         'integration_name' => 'required|string',
         'data' => 'required|string',
-        'update_transaction_queue' => 'nullable|boolean'
+        'create_transaction_queue' => 'nullable|boolean'
     ];
 }

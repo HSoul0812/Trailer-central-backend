@@ -57,7 +57,7 @@ class TransactionService implements TransactionServiceInterface
     {
         $this->integrationName = $params['integration_name'];
 
-        if ($params['update_transaction_queue'] ?? false) {
+        if ($params['create_transaction_queue'] ?? false) {
             $transactionData = [
                 'data' => $params['data'],
                 'api' => $this->integrationName,
