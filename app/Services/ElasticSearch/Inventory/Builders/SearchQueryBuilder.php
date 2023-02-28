@@ -76,9 +76,13 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
             array_filter(explode(' ', strtolower(trim($termAsString))))
         );
 
-        $query = sprintf('*%s*', $terms[0]);
-
         $numberOfTerms = count($terms);
+
+        if($numberOfTerms === 0) {
+            return [];
+        }
+
+        $query = sprintf('*%s*', $terms[0]);
 
         if ($numberOfTerms > 1) {
             $queries = [
@@ -188,7 +192,7 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
                 ]
             ];
 
-            foreach ($term->getValues() as $value) {
+            foreach (array_filter($term->getValues()) as $value) {
                 // we're assuming all fields are analyzed with `shingle_analyzer`
                 $boolQuery['bool'][$operator][] = $this->queryStringWithBoost(
                     sprintf('%s.tokens', $name),
