@@ -2,33 +2,31 @@
 
 namespace App\Models\User;
 
-use App\Models\Integration\Collector\Collector;
-use App\Models\Integration\Integration;
-use App\Models\Integration\IntegrationDealer;
-use App\Models\Inventory\Inventory;
-use App\Models\CRM\Dms\Quote\QuoteSetting;
-use App\Models\Marketing\Facebook\Marketplace;
 use App\Models\Parts\Bin;
 use App\Models\Parts\Part;
-use App\Models\User\Interfaces\PermissionsInterface;
-use App\Traits\Models\HasPermissionsStub;
-use Illuminate\Contracts\Auth\Authenticatable;
-use Illuminate\Database\Eloquent\Model;
+use Laravel\Cashier\Billable;
+use App\Traits\CompactHelper;
 use App\Models\CRM\Leads\Lead;
-use App\Models\CRM\Leads\LeadType;
 use App\Models\Website\Website;
+use App\Models\CRM\Leads\LeadType;
+use App\Services\User\UserService;
+use App\Models\Inventory\Inventory;
+use Illuminate\Database\Query\Builder;
+use App\Models\Integration\Integration;
+use Illuminate\Database\Eloquent\Model;
+use App\Models\CRM\Dms\Printer\Settings;
+use App\Traits\Models\HasPermissionsStub;
+use App\Models\CRM\Dms\Quote\QuoteSetting;
 use App\Models\Website\Config\WebsiteConfig;
+use App\Models\Marketing\Facebook\Marketplace;
+use Illuminate\Contracts\Auth\Authenticatable;
+use App\Models\Integration\Collector\Collector;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use App\Services\Common\EncrypterServiceInterface;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\User\Interfaces\PermissionsInterface;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use App\Models\CRM\Dms\Printer\Settings;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Query\Builder;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Services\User\UserService;
-use App\Traits\CompactHelper;
-use App\Services\Common\EncrypterServiceInterface;
-use App\Models\User\AuthToken;
-use Laravel\Cashier\Billable;
 
 /**
  * Class User
@@ -59,70 +57,163 @@ class User extends Model implements Authenticatable, PermissionsInterface
 {
     use HasPermissionsStub, Billable;
 
+    /**
+     * @var string
+     */
     const TABLE_NAME = 'dealer';
 
+    /**
+     * @var string
+     */
     public const TYPE_DEALER = 'dealer';
 
+    /**
+     * @var string
+     */
     public const TYPE_MANUFACTURER = 'manufacturer';
 
+    /**
+     * @var string
+     */
     public const TYPE_WEBSITE = 'website';
 
+    /**
+     * @var string
+     */
     public const STATUS_SUSPENDED = 'suspended';
 
+    /**
+     * @var string
+     */
     public const STATUS_ACTIVE = 'active';
 
+    /**
+     * @var string
+     */
     public const STATUS_TRIAL = 'trial';
 
+    /**
+     * @var string
+     */
     public const STATUS_EXTERNAL = 'external';
 
+    /**
+     * @var string
+     */
     public const STATUS_SIGNUP = 'signup';
 
+    /**
+     * @var string
+     */
     public const AUTO_IMPORT_MODEL_LAST_7 = 'model+last 7 of vin (default)';
 
+    /**
+     * @var string
+     */
     public const AUTO_IMPORT_MODEL_VIN = 'model+vin';
 
+    /**
+     * @var string
+     */
     public const AUTO_IMPORT_MODEL_LAST_4 = 'last 4 of vin';
 
+    /**
+     * @var int
+     */
     public const AUTO_IMPORT_HIDE_NOT_HIDDEN = 0;
 
+    /**
+     * @var int
+     */
     public const AUTO_IMPORT_HIDE_HIDDEN = 1;
 
+    /**
+     * @var int
+     */
     public const AUTO_IMPORT_HIDE_ARCHIVED = 2;
 
+    /**
+     * @var int
+     */
     public const USE_DESCRIPTION_IN_FEED = 1;
 
+    /**
+     * @var int
+     */
     public const DONT_USE_DESCRIPTION_IN_FEED = 0;
 
+    /**
+     * @var int
+     */
     public const USE_AUTO_MSRP = 1;
 
+    /**
+     * @var int
+     */
     public const DONT_USE_AUTO_MSRP = 0;
 
+    /**
+     * @var string
+     */
     public const OVERLAY_LOGO_POSITION_NONE = 'none';
 
+    /**
+     * @var string
+     */
     public const OVERLAY_LOGO_POSITION_UPPER_LEFT = 'upper_left';
 
+    /**
+     * @var string
+     */
     public const OVERLAY_LOGO_POSITION_UPPER_RIGHT = 'upper_right';
 
+    /**
+     * @var string
+     */
     public const OVERLAY_LOGO_POSITION_LOWER_LEFT = 'lower_left';
 
+    /**
+     * @var string
+     */
     public const OVERLAY_LOGO_POSITION_LOWER_RIGHT = 'lower_right';
 
+    /**
+     * @var string
+     */
     public const OVERLAY_UPPER_NONE = 'none';
 
+    /**
+     * @var string
+     */
     public const OVERLAY_UPPER_DEALER_NAME = 'dealer';
 
+    /**
+     * @var string
+     */
     public const OVERLAY_UPPER_DEALER_PHONE = 'phone';
 
+    /**
+     * @var string
+     */
     public const OVERLAY_UPPER_DEALER_LOCATION_NAME = 'location';
 
+    /**
+     * @var int
+     */
     public const CLASSIFIED_ACTIVE = 1;
 
+    /**
+     * @var array
+     */
     public const TYPES = [
         self::TYPE_DEALER,
         self::TYPE_MANUFACTURER,
         self::TYPE_WEBSITE
     ];
 
+    /**
+     * @var array
+     */
     public const STATUSES = [
         self::STATUS_SUSPENDED,
         self::STATUS_ACTIVE,
@@ -131,18 +222,27 @@ class User extends Model implements Authenticatable, PermissionsInterface
         self::STATUS_SIGNUP
     ];
 
+    /**
+     * @var array
+     */
     public const AUTO_IMPORT_SETTINGS = [
         self::AUTO_IMPORT_MODEL_LAST_7,
         self::AUTO_IMPORT_MODEL_VIN,
         self::AUTO_IMPORT_MODEL_LAST_4
     ];
 
+    /**
+     * @var array
+     */
     public const AUTO_IMPORT_HIDE_SETTINGS = [
         self::AUTO_IMPORT_HIDE_NOT_HIDDEN => 'Auto-imported inventory is on website, not archived',
         self::AUTO_IMPORT_HIDE_HIDDEN => 'Auto-imported inventory is hidden from website',
         self::AUTO_IMPORT_HIDE_ARCHIVED => 'Auto-imported inventory is archived'
     ];
 
+    /**
+     * @var array
+     */
     public const OVERLAY_LOGO_POSITIONS = [
         self::OVERLAY_LOGO_POSITION_NONE,
         self::OVERLAY_LOGO_POSITION_UPPER_LEFT,
@@ -151,6 +251,9 @@ class User extends Model implements Authenticatable, PermissionsInterface
         self::OVERLAY_LOGO_POSITION_LOWER_RIGHT
     ];
 
+    /**
+     * @var array
+     */
     public const OVERLAY_UPPER_SETTINGS = [
         self::OVERLAY_UPPER_NONE,
         self::OVERLAY_UPPER_DEALER_NAME,
@@ -158,6 +261,9 @@ class User extends Model implements Authenticatable, PermissionsInterface
         self::OVERLAY_UPPER_DEALER_LOCATION_NAME
     ];
 
+    /**
+     * @var array
+     */
     public const OVERLAY_TEXT_SETTINGS = [
         self::OVERLAY_UPPER_DEALER_NAME,
         self::OVERLAY_UPPER_DEALER_PHONE,
@@ -202,6 +308,9 @@ class User extends Model implements Authenticatable, PermissionsInterface
         'google_feed_active'
     ];
 
+    /**
+     * @var string[]
+     */
     protected $casts = [
         'autoresponder_enable' => 'boolean',
         'is_dms_active' => 'boolean',
@@ -220,6 +329,9 @@ class User extends Model implements Authenticatable, PermissionsInterface
 
     ];
 
+    /**
+     * @return void
+     */
     public static function boot()
     {
         parent::boot();
@@ -290,12 +402,18 @@ class User extends Model implements Authenticatable, PermissionsInterface
         return CompactHelper::shorten($this->dealer_id);
     }
 
+    /**
+     * @return mixed
+     */
     public function getAccessTokenAttribute()
     {
         $authToken = AuthToken::where('user_id', $this->dealer_id)->firstOrFail();
         return $authToken->access_token;
     }
 
+    /**
+     * @return mixed
+     */
     public function website()
     {
         return $this->hasOne(Website::class, 'dealer_id', 'dealer_id');
@@ -309,31 +427,49 @@ class User extends Model implements Authenticatable, PermissionsInterface
         return $this->hasOne(NewDealerUser::class, 'id', 'dealer_id');
     }
 
+    /**
+     * @return HasOneThrough
+     */
     public function crmUser(): HasOneThrough
     {
         return $this->hasOneThrough(CrmUser::class, NewDealerUser::class, 'id', 'user_id', 'dealer_id', 'user_id');
     }
 
+    /**
+     * @return HasOne
+     */
     public function dealerParts(): HasOne
     {
         return $this->hasOne(DealerPart::class, 'dealer_id', 'dealer_id');
     }
 
+    /**
+     * @return HasMany
+     */
     public function parts(): HasMany
     {
         return $this->hasMany(Part::class, 'dealer_id', 'dealer_id');
     }
 
+    /**
+     * @return HasOne
+     */
     public function dealerClapp(): HasOne
     {
         return $this->hasOne(DealerClapp::class, 'dealer_id', 'dealer_id');
     }
 
+    /**
+     * @return HasMany
+     */
     public function marketplaceIntegrations(): HasMany
     {
         return $this->hasMany(Marketplace::class, 'dealer_id', 'dealer_id');
     }
 
+    /**
+     * @return HasOne
+     */
     public function authToken(): HasOne
     {
         return $this
@@ -341,16 +477,25 @@ class User extends Model implements Authenticatable, PermissionsInterface
             ->where('user_type', 'dealer');
     }
 
+    /**
+     * @return HasOne
+     */
     public function quoteSetting(): HasOne
     {
         return $this->hasOne(QuoteSetting::class, 'dealer_id', 'dealer_id');
     }
 
+    /**
+     * @return bool
+     */
     public function getIsCdkActiveAttribute(): bool
     {
         return (bool) $this->getCdkAttribute();
     }
 
+    /**
+     * @return mixed
+     */
     public function getCdkAttribute()
     {
         $cdk = $this->adminSettings()->where([
@@ -364,27 +509,42 @@ class User extends Model implements Authenticatable, PermissionsInterface
         }
     }
 
+    /**
+     * @return bool
+     */
     public function getIsCrmActiveAttribute(): bool
     {
         $crmUser = $this->crmUser()->first();
         return $crmUser instanceof CrmUser && $crmUser->active;
     }
 
+    /**
+     * @return bool
+     */
     public function getIsPartsActiveAttribute(): bool
     {
         return !empty($this->dealerParts);
     }
 
+    /**
+     * @return bool
+     */
     public function getIsMarketingActiveAttribute(): bool
     {
         return !empty($this->dealerClapp);
     }
 
+    /**
+     * @return bool
+     */
     public function getIsFmeActiveAttribute(): bool
     {
         return $this->is_marketing_active && boolval(count($this->marketplaceIntegrations));
     }
 
+    /**
+     * @return bool
+     */
     public function getIsMobileActiveAttribute(): bool
     {
         if(isset($this->website)) {
@@ -394,6 +554,9 @@ class User extends Model implements Authenticatable, PermissionsInterface
         }
     }
 
+    /**
+     * @return bool
+     */
     public function getIsEcommerceActiveAttribute(): bool
     {
         if(isset($this->website)) {
@@ -423,11 +586,17 @@ class User extends Model implements Authenticatable, PermissionsInterface
         return $this->hasMany(DealerUser::class, 'dealer_id', 'dealer_id');
     }
 
+    /**
+     * @return HasMany
+     */
     public function locations() : HasMany
     {
         return $this->hasMany(DealerLocation::class, 'dealer_id', 'dealer_id');
     }
 
+    /**
+     * @return HasMany
+     */
     public function adminSettings(): HasMany
     {
         return $this->hasMany(DealerAdminSetting::class, 'dealer_id', 'dealer_id');
@@ -466,16 +635,27 @@ class User extends Model implements Authenticatable, PermissionsInterface
         return $this->hasOne(Collector::class, 'dealer_id', 'dealer_id');
     }
 
+    /**
+     * @return HasOne
+     */
     public function printerSettings() : HasOne
     {
         return $this->hasOne(Settings::class, 'dealer_id', 'dealer_id');
     }
 
+    /**
+     * @return HasMany
+     */
     public function bins() : HasMany
     {
         return $this->hasMany(Bin::class, 'dealer_id', 'dealer_id');
     }
 
+    /**
+     * @param string $route
+     * @param bool $useNewDesign
+     * @return string
+     */
     public function getCrmLoginUrl(string $route = '', bool $useNewDesign = false): string
     {
         $userService = app(UserService::class);
@@ -486,15 +666,25 @@ class User extends Model implements Authenticatable, PermissionsInterface
         return ($useNewDesign ? config('app.new_design_crm_url') : '') . $crmLoginString;
     }
 
+    /**
+     * @return bool
+     */
     public function isSecondaryUser() : bool
     {
         return false;
     }
 
-    public static function getTableName() {
+    /**
+     * @return string
+     */
+    public static function getTableName(): string
+    {
         return self::TABLE_NAME;
     }
 
+    /**
+     * @return int
+     */
     public function getDealerId(): int
     {
         return $this->dealer_id;
