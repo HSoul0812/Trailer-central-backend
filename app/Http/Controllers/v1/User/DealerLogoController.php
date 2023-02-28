@@ -48,12 +48,12 @@ class DealerLogoController extends RestfulControllerV2
     {
         $dealerId = auth()->id();
         $data = [
-            'benefit_statement' => $request->benefit_statement,
-            'filename' => null
+            'benefit_statement' => $request->benefit_statement
         ];
 
         if ($request->exists('logo') && !$request->hasFile('logo')) {
             $this->dealerLogoService->delete($dealerId);
+            $data['filename'] = null;
         } else if ($logo = $request->file('logo')) {
             $data['filename'] = $this->dealerLogoService->upload($dealerId, $logo);
         }
