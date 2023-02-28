@@ -14,6 +14,7 @@ return [
         'inventory' => [
             'number_of_shards' => env('ELASTIC_SCOUT_DRIVER_INDEX_SETTINGS_INVENTORY_SHARDS', 5),
             'number_of_replicas' => env('ELASTIC_SCOUT_DRIVER_INDEX_SETTINGS_INVENTORY_REPLICAS', 1),
+            'refresh_interval' => env('ELASTIC_SCOUT_DRIVER_INDEX_SETTINGS_REFRESH_INTERVAL', '30s')
         ]
     ],
     'cache' => [
