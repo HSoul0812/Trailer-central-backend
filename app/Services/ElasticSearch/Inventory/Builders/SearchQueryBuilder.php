@@ -4,11 +4,10 @@ namespace App\Services\ElasticSearch\Inventory\Builders;
 
 use App\Services\ElasticSearch\Inventory\Parameters\Filters\Filter;
 use App\Services\ElasticSearch\Inventory\Parameters\Filters\Term;
+use Illuminate\Support\Arr;
 
 class SearchQueryBuilder implements FieldQueryBuilderInterface
 {
-    private const QUERY_SEARCH_SPECIAL_CHARS = ['and', 'or', '(', ')', '=', '&', '*'];
-
     /** @var int */
     private const DEFAULT_BOOST = 1;
 
@@ -23,9 +22,9 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
 
     /** @var string[] */
     private const SEARCH_FIELDS = [
-        'title' => 'title.tokens^4',
+        'title' => ['title^4', 'title.tokens^4'],
         'description' => 'description.tokens^1',
-        'stock' => 'stock.tokens^1',
+        'stock' => 'stock^1',
         'vin' => 'vin^1',
         'manufacturer' => 'manufacturer^1',
         'brand' => 'brand^1',
@@ -34,16 +33,7 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
     ];
 
     /** @var string[] */
-    private const DESCRIPTION_SEARCH_FIELDS = [
-        'title' => 'title.tokens^4',
-        'manufacturer' => 'manufacturer^1',
-        'brand' => 'brand^1',
-        'description' => 'description.tokens^1',
-        'stock' => 'stock.tokens^1',
-        'model' => 'model^1',
-        'vin' => 'vin^1',
-        'featureList.floorPlan' => 'featureList.floorPlan.tokens^0.5',
-    ];
+    private const DESCRIPTION_SEARCH_FIELDS = self::SEARCH_FIELDS;
 
     /** @var array */
     private $query = [];
@@ -55,23 +45,27 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
 
     /**
      * @param string|array $fields
-     * @param float $boost
      * @param string $termAsString
      * @return \array[][]
      */
-    private function queryStringWithBoost($fields, float $boost, string $termAsString): array
+    private function queryStringWithBoost($fields, string $termAsString): array
     {
         if (!is_array($fields)) {
             $fields = [$fields];
         }
 
-        // to be able quoting special chars
-        $terms = array_map(static function ($term): string {
-            if (in_array($term, self::QUERY_SEARCH_SPECIAL_CHARS) || \Str::contains($term, ['+', '-'])) {
-                return sprintf('"%s"', $term);
-            }
+        $escapeElasticReservedChars = static function(string $string): string
+        {
+            return preg_replace(
+                "/[\\+\\-\\=\\&\\|\\!\\(\\)\\{\\}\\[\\]\\^\\\"\\~\\*\\<\\>\\?\\:\\\\\\/]/",
+                addslashes('\\$0'),
+                $string
+            );
+        };
 
-            return $term;
+        // to be able quoting special chars
+        $terms = array_map(static function ($term) use ($escapeElasticReservedChars): string {
+            return $escapeElasticReservedChars($term);
         },
             array_filter(explode(' ', strtolower(trim($termAsString))))
         );
@@ -107,8 +101,7 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
         return [
             'query_string' => [
                 'fields' => $fields,
-                'query' => $query,
-                'boost' => max(self::MINIMUM_BOOST, $boost)
+                'query' => $query
             ]
         ];
     }
@@ -195,8 +188,7 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
             foreach (array_filter($term->getValues()) as $value) {
                 // we're assuming all fields are analyzed with `shingle_analyzer`
                 $boolQuery['bool'][$operator][] = $this->queryStringWithBoost(
-                    sprintf('%s.tokens', $name),
-                    self::GLOBAL_FILTER_WILDCARD_BOOST,
+                    self::SEARCH_FIELDS[$name] ?? sprintf('%s.tokens', $name),
                     $value
                 );
             }
@@ -219,26 +211,12 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
 
             switch ($name) {
                 case 'stock':
-                    $shouldQuery[] = $this->queryStringWithBoost(
-                        $this->field->getName().'.tokens',
-                        self::DEFAULT_BOOST,
-                        $data['match']
-                    );
+                    $shouldQuery[] = $this->queryStringWithBoost(self::SEARCH_FIELDS['stock'], $data['match']);
                     break;
                 default:
-                    $searchFields = $this->getSearchFields($data['ignore_fields'] ?? []);
+                    $searchFields = Arr::flatten($this->getSearchFields($data['ignore_fields'] ?? []));
 
-                    foreach ($searchFields as $key => $column) {
-                        $boost = self::DEFAULT_BOOST;
-                        $columnValues = explode('^', $column);
-
-                        if (isset($columnValues[$boostKey = 1])) {
-                            $boost = max(self::MINIMUM_BOOST, (float)$columnValues[$boostKey]);
-                        }
-
-                        $shouldQuery[] = $this->queryStringWithBoost($columnValues[0], $boost, $data['match']);
-                    }
-
+                    $shouldQuery[] = $this->queryStringWithBoost($searchFields, $data['match']);
                     break;
             }
 
