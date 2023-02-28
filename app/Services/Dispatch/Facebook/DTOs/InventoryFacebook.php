@@ -448,7 +448,7 @@ class InventoryFacebook
         return new self([
             'inventory_id' => $inventory ? $inventory->inventory_id : $listing->inventory_id,
             'facebook_id' => $listing->facebook_id,
-            'page_url' => $listing->marketplace->page_url,
+            'page_url' => $listing->marketplace ? $listing->marketplace->page_url : '',
             'entity_type_id' => $inventory ? $inventory->entity_type_id : null,
             'category' => $inventory ? $inventory->category : null,
             'price' => $inventory ? $inventory->price : null,
@@ -483,7 +483,7 @@ class InventoryFacebook
      * @return string
      */
     public function getPlainDescription(): string {
-        return $this->stripMarkdown($this->description);
+        return $this->stripMarkdown($this->description ?? '');
     }
 
     /**
