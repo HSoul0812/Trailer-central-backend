@@ -8,7 +8,6 @@ use App\Models\User\User as Dealer;
 use Elasticsearch\Client;
 use Illuminate\Contracts\Events\Dispatcher;
 use App\Models\Inventory\Inventory;
-use App\Constants\Date;
 use Exception;
 use Laravel\Scout\Events\ModelsImported;
 use Symfony\Component\Console\Output\ConsoleOutput;
@@ -64,7 +63,9 @@ class SafeIndexer
         // then we need to apply a cloning strategy to rename such index
         $indexManager->ensureIndexDoesNotExists($this->indexAlias);
 
-        $now = now(); // bear in mind the timezone
+        // @todo we need to consider another potential source of changes like dealer, payment calculator, dealer location and overlay settings updating
+        // for now, this command should be ran in time frames where those changes wont happen
+        $lastUpdateTime = $model->newQuery()->max('updated_at_auto');
 
         $itIsAlreadySwapped = false;
 
@@ -107,13 +108,6 @@ class SafeIndexer
             $this->output->writeln(sprintf('Waiting for batch <comment>%s</comment> ...', $batch->batch_id));
         }, __CLASS__, self::WAIT_TIME);
 
-
-        if (!$itIsAlreadySwapped) {
-            $indexManager->swapIndexNames(Inventory::$searchableAs, $this->indexAlias);
-        }
-
-        $indexManager->purgeIndexList($indexList->toArray());
-
         // given it could be some record which was changed/added between main ingesting process and the index swapping process
         // so, we need to cover them by pulling them once again and ingest them
         $this->output->writeln(
@@ -121,11 +115,11 @@ class SafeIndexer
         );
 
         $this->numberUnitsToBeProcessed = $model->newQuery()
-            ->where('updated_at_auto', '>=', $now->format(Date::FORMAT_Y_M_D_T))
+            ->where('updated_at_auto', '>', $lastUpdateTime)
             ->count('inventory.inventory_id');
 
         if ($this->numberUnitsToBeProcessed) {
-            Job::batch(function (BatchedJob $batch) use ($model, $now) {
+            Job::batch(function (BatchedJob $batch) use ($model, $lastUpdateTime) {
                 $this->output->writeln(
                     sprintf(
                         'It will ingest <comment>%d</comment> records to the index [%s]...',
@@ -148,12 +142,12 @@ class SafeIndexer
 
                 Dealer::query()->select('dealer.dealer_id')
                     ->get()
-                    ->each(function (Dealer $dealer) use ($model, $now): void {
+                    ->each(function (Dealer $dealer) use ($model, $lastUpdateTime): void {
                         $model->newQuery()
                             ->select('inventory.inventory_id')
                             ->with('user', 'user.website', 'dealerLocation')
                             ->where('inventory.dealer_id', $dealer->dealer_id)
-                            ->where('updated_at_auto', '>=', $now->format(Date::FORMAT_Y_M_D_T))
+                            ->where('updated_at_auto', '>', $lastUpdateTime)
                             ->searchable();
                     });
 
@@ -162,6 +156,12 @@ class SafeIndexer
                 $this->output->writeln(sprintf('Waiting for batch <comment>%s</comment> ...', $batch->batch_id));
             }, __CLASS__, self::WAIT_TIME);
         }
+
+        if (!$itIsAlreadySwapped) {
+            $indexManager->swapIndexNames(Inventory::$searchableAs, $this->indexAlias);
+        }
+
+        $indexManager->purgeIndexList($indexList->toArray());
     }
 
     /**
