@@ -6,6 +6,9 @@ use App\Services\ElasticSearch\Inventory\Parameters\Filters\Filter;
 use App\Services\ElasticSearch\Inventory\Parameters\Filters\Term;
 use Illuminate\Support\Arr;
 
+/**
+ * Please, any change in this handler should be reviewed in a console to check query performance
+ */
 class SearchQueryBuilder implements FieldQueryBuilderInterface
 {
     /** @var int */
