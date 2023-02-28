@@ -13,6 +13,8 @@ use App\Domains\DealerExports\BackOffice\Settings\VendorsExportAction;
 use App\Jobs\DealerExports\DealerDataExportJob;
 use App\Models\DealerExport;
 use App\Models\User\User;
+use App\Domains\DealerExports\POS\SalesLedgerExport;
+use App\Domains\DealerExports\POS\RefundsExportAction;
 
 /**
  * Class ExportManagerAction
@@ -36,6 +38,10 @@ class ExportManagerAction
         CustomersExportAction::class,
         // BackOffice -> Bills
         BillsExportAction::class,
+        // POS -> Sales
+        SalesLedgerExport::class,
+        // POS -> Sales -> Refunds
+        RefundsExportAction::class,
     ];
 
     /**
