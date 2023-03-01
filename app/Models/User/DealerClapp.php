@@ -90,7 +90,7 @@ class DealerClapp extends Model
                         ->where(function (Builder $query) {
                             $query->where('status', '=', 'scheduled')
                                   ->orWhere('status', '=', 'new');
-                        });
+                        })->first();
 
         // Return Session Scheduled
         return $session->session_scheduled;
