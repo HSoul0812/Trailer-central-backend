@@ -8,10 +8,10 @@ use App\Http\Requests\Request;
 class CreateViewedDealerRequest extends Request implements CreateRequestInterface
 {
     protected array $rules = [
-        'viewed_dealers' => 'required|array',
-        'viewed_dealers.*.name' => 'required|string',
-        'viewed_dealers.*.dealer_id' => 'required|int',
-        'viewed_dealers.*.inventory_id' => 'required|integer',
+        'viewed_dealers' => 'array',
+        'viewed_dealers.*.name' => 'string',
+        'viewed_dealers.*.dealer_id' => 'int',
+        'viewed_dealers.*.inventory_id' => 'integer',
     ];
 
     public function messages(): array
