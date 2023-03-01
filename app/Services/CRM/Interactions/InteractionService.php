@@ -452,4 +452,29 @@ class InteractionService implements InteractionServiceInterface
         // Return Access Token
         return $accessToken;
     }
+
+    /**
+     * Get Next Contact Date details
+     */
+    public function getContactDate(int $leadId)
+    {
+        $leadStatus = $this->leadStatus->get(['lead_id' => $leadId]);
+        $contactDate = $leadStatus->next_contact_date ?? null;
+        $interactionNote = '';
+
+        if ($contactDate === '0000-00-00 00:00:00' || empty($contactDate)) {
+            $contactDate = date('Y-m-d H:i:s');
+        }
+
+        $interaction = $this->interactions->getInteractionByTime($leadId, $contactDate);
+
+        if (!empty($interaction)) {
+            $interactionNote = $interaction->interaction_notes;
+        }
+
+        return [
+            'contact_date' => $contactDate,
+            'task_details' => $interactionNote
+        ];
+    }
 }

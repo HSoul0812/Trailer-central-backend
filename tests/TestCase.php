@@ -26,13 +26,15 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
 
-        $this->setCacheInvalidation(false);
+        // we want to assume always inventory cache invalidation feature flag is off
+        $this->setCacheInvalidationFeatureFlag(false);
+        Inventory::enableCacheInvalidation();
         Inventory::enableSearchSyncing();
     }
 
     protected function tearDown(): void
     {
-        $this->setCacheInvalidation(false);
+        Inventory::enableCacheInvalidation();
         Inventory::enableSearchSyncing();
 
         parent::tearDown();
@@ -136,7 +138,7 @@ abstract class TestCase extends BaseTestCase
         $mock->shouldReceive('relationLoaded')->passthru();
         $mock->shouldReceive('fromFloat')->passthru();
         $mock->wasRecentlyCreated = true;
-        
+
         return $mock;
     }
 
@@ -268,12 +270,10 @@ abstract class TestCase extends BaseTestCase
         return $reflector->getValue($object);
     }
 
-    protected function setCacheInvalidation(bool $isEnabled): void
+    protected function setCacheInvalidationFeatureFlag(bool $isEnabled): void
     {
         app(FeatureFlagRepositoryInterface::class)->set(
             new FeatureFlag(['code' => 'inventory-sdk-cache', 'is_enabled' => $isEnabled])
         );
-
-        Inventory::bootInventorySearchable();
     }
 }

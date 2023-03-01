@@ -172,9 +172,9 @@ return [
             ],
             'supervisor-2' => [
                 'connection' => 'redis',
-                'queue' => ['overlay-images', 'scout', 'inventory-cache'],
-                'balance' => 'auto',
-                'processes' => 1,
+                'queue' => ['overlay-images', 'inventory-cache'],
+                'balance' => 'simple',
+                'processes' => 3,
                 'tries' => 3,
                 'delay' => 3,
                 'timeout' => 3600,
@@ -220,8 +220,8 @@ return [
             'supervisor-2' => [
                 'connection' => 'redis',
                 'queue' => ['overlay-images', 'inventory-cache'],
-                'balance' => 'auto',
-                'processes' => 1,
+                'balance' => 'simple',
+                'processes' => 3,
                 'tries' => 3,
                 'delay' => 3,
                 'timeout' => 900,

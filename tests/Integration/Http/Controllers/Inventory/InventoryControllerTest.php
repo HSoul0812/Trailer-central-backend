@@ -52,14 +52,14 @@ class InventoryControllerTest extends TestCase
 
         Queue::fake();
 
-        $this->setCacheInvalidation(true);
-        Inventory::enableSearchSyncing();
+        // we want to assume always inventory cache invalidation feature flag is on
+        $this->setCacheInvalidationFeatureFlag(true);
     }
 
     protected function tearDown(): void
     {
-        $this->setCacheInvalidation(true);
-        Inventory::enableSearchSyncing();
+        // we want to assume always inventory cache invalidation feature flag is on
+        $this->setCacheInvalidationFeatureFlag(true);
 
         parent::tearDown();
     }

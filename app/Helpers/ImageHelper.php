@@ -521,7 +521,7 @@ class ImageHelper
      * @param string $url
      * @return string new url with encoded filename
      */
-    public function encodeUrl(string $url) 
+    public function encodeUrl(string $url)
     {
         $pos = strrpos($url, '/') + 1; // last occurance slash
         $result = substr($url, 0, $pos) . rawurlencode(substr($url, $pos));
@@ -537,8 +537,10 @@ class ImageHelper
      */
     protected function createTempFile(string $fileContent = '')
     {
-        $randomFilename = $this->getRandomString();
+        $randomFilename = $this->getRandomImageNameWithExtension($fileContent);
+
         Storage::disk('tmp')->put($randomFilename, $fileContent);
+
         return Storage::disk('tmp')->path($randomFilename);
     }
 
@@ -550,6 +552,18 @@ class ImageHelper
     protected function getRandomString()
     {
         return bin2hex(random_bytes(18));
+    }
+
+    /**
+     * Creates random image name with a proper extension according to file content
+     */
+    protected function getRandomImageNameWithExtension(string $fileContent): string
+    {
+        $fileInfo = finfo_open();
+        $mimeType = finfo_buffer($fileInfo, $fileContent, FILEINFO_MIME_TYPE);
+        finfo_close($fileInfo);
+
+        return bin2hex(random_bytes(18)).($mimeType ? '.'.str_replace('image/', '', $mimeType) : '');
     }
 
     /**

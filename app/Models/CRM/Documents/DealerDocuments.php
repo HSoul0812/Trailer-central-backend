@@ -36,4 +36,11 @@ class DealerDocuments extends Model
      * @var string
      */
     protected $table = 'dealer_document_upload';
+
+    const TABLE_NAME = 'dealer_document_upload';
+
+    public static function getTableName(): string
+    {
+        return self::TABLE_NAME;
+    }
 }

@@ -504,6 +504,7 @@ $api->version('v1', function ($route) {
         $route->get('leads/{leadId}/interactions/{id}', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@show')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
         $route->post('leads/{leadId}/interactions/{id}', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@update')->where('leadId', '[0-9]+')->where('id', '[0-9]+');
         $route->post('interactions/send-email', 'App\Http\Controllers\v1\CRM\Interactions\InteractionsController@sendEmail');
+        $route->get('leads/{leadId}/contact-date', 'App\Http\Controllers\v1\CRM\Interactions\TasksController@getContactDate');
     });
 
     /**
@@ -652,6 +653,7 @@ $api->version('v1', function ($route) {
     $route->get('leads/sort-fields', 'App\Http\Controllers\v1\CRM\Leads\LeadController@sortFields');
     $route->get('leads/sort-fields/crm', 'App\Http\Controllers\v1\CRM\Leads\LeadController@sortFieldsCrm');
     $route->get('leads/unique-full-names', 'App\Http\Controllers\v1\CRM\Leads\LeadController@uniqueFullNames');
+    $route->get('leads/filters', 'App\Http\Controllers\v1\CRM\Leads\LeadController@filters');
     $route->get('crm/states', 'App\Http\Controllers\v1\CRM\StatesController@index');
 
     /*
@@ -674,6 +676,8 @@ $api->version('v1', function ($route) {
     */
     $route->get('users', 'App\Http\Controllers\v1\User\UserController@index');
     $route->post('users', 'App\Http\Controllers\v1\User\UserController@create');
+
+    $route->get('users-by-name', 'App\Http\Controllers\v1\User\UserController@listByName')->middleware('integration-permission:get_dealers_by_name,can_see');
 
     $route->post('user/classified', 'App\Http\Controllers\v1\User\UserController@updateDealerClassifieds');
 
@@ -710,6 +714,21 @@ $api->version('v1', function ($route) {
         $route->post('leads/{id}/merge', 'App\Http\Controllers\v1\CRM\Leads\LeadController@mergeLeads');
         $route->get('leads/output', 'App\Http\Controllers\v1\CRM\Leads\LeadController@output');
         $route->delete('leads/{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadController@destroy');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Dealer Documents
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->group(['prefix' => 'leads/{leadId}/documents'], function ($route) {
+
+            $route->get('/', 'App\Http\Controllers\v1\CRM\Documents\DealerDocumentsController@index');
+            $route->put('/', 'App\Http\Controllers\v1\CRM\Documents\DealerDocumentsController@create');
+            $route->delete('/{documentId}', 'App\Http\Controllers\v1\CRM\Documents\DealerDocumentsController@destroy');
+        });
 
         /*
         |--------------------------------------------------------------------------
@@ -1143,16 +1162,6 @@ $api->version('v1', function ($route) {
                     $route->post('{id}/sent', 'App\Http\Controllers\v1\CRM\Text\BlastController@sent')->where('id', '[0-9]+');
                 });
             });
-
-            /*
-            |--------------------------------------------------------------------------
-            | Dealer Documents
-            |--------------------------------------------------------------------------
-            |
-            |
-            |
-            */
-            $route->get('documents', 'App\Http\Controllers\v1\CRM\Documents\DealerDocumentsController@index');
         });
 
         /*
@@ -1177,15 +1186,17 @@ $api->version('v1', function ($route) {
                     $route->get('/', 'App\Http\Controllers\v1\Marketing\Craigslist\InventoryController@index');
                 });
 
+                // Scheduler
+                $route->get('scheduler', 'App\Http\Controllers\v1\Marketing\Craigslist\SchedulerController@index');
+                $route->get('upcoming', 'App\Http\Controllers\v1\Marketing\Craigslist\SchedulerController@upcoming');
+                $route->get('billing', 'App\Http\Controllers\v1\Marketing\Craigslist\BillingController@index');
+
                 // Posts
                 $route->group([
                     'prefix' => 'posts'
                 ], function ($route) {
                     $route->get('/', 'App\Http\Controllers\v1\Marketing\Craigslist\ActivePostController@index');
                 });
-
-                // Upcoming Scheduler Posts
-                $route->get('upcoming', 'App\Http\Controllers\v1\Marketing\Craigslist\SchedulerController@upcoming');
 
                 // Profile
                 $route->group([
@@ -1505,6 +1516,35 @@ $api->version('v1', function ($route) {
     $route->group([
         'prefix' => 'dispatch'
     ], function ($route) {
+        // Craigslist Extension
+        $route->group([
+            'prefix' => 'craigslist'
+        ], function ($route) {
+            // Login to Craigslist Dispatch
+            $route->post('/', 'App\Http\Controllers\v1\Dispatch\CraigslistController@login');
+
+            // Craigslist
+            $route->group([
+                'middleware' => 'dispatch.craigslist'
+            ], function ($route) {
+                // Can See is Required
+                $route->group([
+                    'middleware' => 'integration-permission:craigslist_dispatch,can_see'
+                ], function ($route) {
+                    $route->get('/', 'App\Http\Controllers\v1\Dispatch\CraigslistController@index');
+                    //$route->get('{id}', 'App\Http\Controllers\v1\Dispatch\CraigslistController@show')->where('id', '[0-9]+');
+                });
+
+                // Can See and Change is Required
+                /*$route->group([
+                    'middleware' => 'integration-permission:craigslist_dispatch,can_see_and_change'
+                ], function ($route) {
+                    $route->post('{id}', 'App\Http\Controllers\v1\Dispatch\CraigslistController@create')->where('id', '[0-9]+');
+                    $route->put('{id}', 'App\Http\Controllers\v1\Dispatch\CraigslistController@update')->where('id', '[0-9]+');
+                });*/
+            });
+        });
+
         // Facebook Marketplace Extension
         $route->group([
             'prefix' => 'facebook'
