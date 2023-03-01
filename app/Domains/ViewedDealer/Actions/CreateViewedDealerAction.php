@@ -26,7 +26,7 @@ class CreateViewedDealerAction
      *
      * @param array<int, array{dealer_id: int, name: string}> $viewedDealers
      * @return Collection
-     * @throws DuplicateDealerIdException|DealerIdExistsException
+     * @throws DealerIdExistsException
      * @throws Throwable
      */
     public function execute(array $viewedDealers): Collection
@@ -64,15 +64,12 @@ class CreateViewedDealerAction
      *
      * @param array $viewedDealers
      * @return array
-     * @throws DuplicateDealerIdException
      */
     private function transformAndValidate(array $viewedDealers): array
     {
         $viewedDealers = $this->removeDuplicateNames($viewedDealers);
 
-        // $this->validateUniqueDealerIds($viewedDealers);
-
-        return $viewedDealers;
+        return $this->removeDuplicateDealerIds($viewedDealers);
     }
 
     /**
@@ -105,27 +102,21 @@ class CreateViewedDealerAction
      * Make sure that we don't have duplicate dealer id in a different name
      *
      * @param array $viewedDealers
-     * @return void
-     * @throws DuplicateDealerIdException
+     * @return array
      */
-    private function validateUniqueDealerIds(array $viewedDealers): void
+    private function removeDuplicateDealerIds(array $viewedDealers): array
     {
         $dealerIds = [];
 
         foreach ($viewedDealers as $viewedDealer) {
-            // We'll throw an exception if this viewedDealer array has the
-            // dealer_id that we already found in one of the previous
-            // viewedDealer array
             if (array_key_exists($viewedDealer['dealer_id'], $dealerIds)) {
-                throw DuplicateDealerIdException::make(
-                    name1: $dealerIds[$viewedDealer['dealer_id']],
-                    name2: $viewedDealer['name'],
-                    dealerId: $viewedDealer['dealer_id'],
-                );
+                continue;
             }
 
-            $dealerIds[$viewedDealer['dealer_id']] = $viewedDealer['name'];
+            $dealerIds[$viewedDealer['dealer_id']] = $viewedDealer;
         }
+
+        return array_values($dealerIds);
     }
 
     /**
