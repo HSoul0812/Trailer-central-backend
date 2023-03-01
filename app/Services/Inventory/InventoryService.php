@@ -734,7 +734,14 @@ class InventoryService implements InventoryServiceInterface
 
                 if (!empty($localNewImagePath)) {
                     // upload overlay image
+                    $filenameParts = explode('.', $localNewImagePath);
+
                     $randomFilename = md5($localNewImagePath);
+
+                    if (count($filenameParts) > 1) {
+                        $randomFilename .= '.'.$filenameParts[1];
+                    }
+
                     $newFilename = $this->imageService->uploadToS3($localNewImagePath, $randomFilename, $overlayParams['dealer_id']);
                     unlink($localNewImagePath);
 

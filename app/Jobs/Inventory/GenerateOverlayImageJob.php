@@ -5,6 +5,7 @@ namespace App\Jobs\Inventory;
 use App\Jobs\Job;
 use App\Models\Inventory\Inventory;
 use App\Repositories\Inventory\InventoryRepositoryInterface;
+use App\Traits\Horizon\WithTags;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -12,7 +13,7 @@ use App\Services\Inventory\InventoryServiceInterface;
 
 class GenerateOverlayImageJob extends Job {
 
-    use Dispatchable, SerializesModels;
+    use Dispatchable, SerializesModels, WithTags;
 
     /**
      * The number of times the job may be attempted.
@@ -33,14 +34,16 @@ class GenerateOverlayImageJob extends Job {
      */
     private $reindexAndInvalidateCache;
 
+    public $queue = 'overlay-images';
+
     /**
      * GenerateOverlayImageJob constructor.
      * @param int $inventoryId
      */
-    public function __construct(int $inventoryId, bool $reindexAndInvalidateCache = true)
+    public function __construct(int $inventoryId, ?bool $reindexAndInvalidateCache = null)
     {
         $this->inventoryId = $inventoryId;
-        $this->reindexAndInvalidateCache = $reindexAndInvalidateCache;
+        $this->reindexAndInvalidateCache = $reindexAndInvalidateCache ?? true;
     }
 
     /**
@@ -55,13 +58,13 @@ class GenerateOverlayImageJob extends Job {
 
         // Try Generating Overlays
         try {
-            $itHasGeneratedOverlay = Inventory::withoutCacheInvalidationAndSearchSyncing(function () use ($service) {
+            Inventory::withoutCacheInvalidationAndSearchSyncing(function () use ($service) {
                 return $service->generateOverlays($this->inventoryId);
             });
 
-            if ($this->reindexAndInvalidateCache && $itHasGeneratedOverlay) {
+            if ($this->reindexAndInvalidateCache) {
                 /** @var Inventory $inventory */
-                $inventory = $repo->get(['inventory_id' => $this->inventoryId]);
+                $inventory = $repo->get(['id' => $this->inventoryId]);
 
                 $log->info('it will dispatch jobs for sync to index and invalidate cache', [
                     'inventory_id' => $inventory->inventory_id, 'dealer_id' => $inventory->dealer_id

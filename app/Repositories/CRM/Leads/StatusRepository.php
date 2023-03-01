@@ -115,11 +115,6 @@ class StatusRepository implements StatusRepositoryInterface {
                 $params['status'] = $params['lead_status'];
             }
 
-            // Contact Type Not Set?
-            if(!isset($params['contact_type'])) {
-                $params['contact_type'] = LeadStatus::TYPE_CONTACT;
-            }
-
             // Add Closed_at time when lead is closed
             if(empty($status->closed_at) && isset($params['status']) &&
                in_array($params['status'], LeadStatus::CLOSED_STATUSES)) {

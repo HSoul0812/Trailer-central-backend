@@ -133,7 +133,7 @@ return [
         'inventory-overlays' => [
             'driver' => 'daily',
             'path' => storage_path('logs/jobs/inventory-overlays.log'),
-            'level' => 'info',
+            'level' => env('LOG_LEVEL', 'error'),
             'days' => 3,
             'permission' => 0664,
         ],
@@ -221,6 +221,14 @@ return [
         'dispatch-fb' => [
             'driver' => 'daily',
             'path' => storage_path('logs/dispatch/facebook.log'),
+            'level' => env('LOG_LEVEL', 'error'),
+            'days' => 7,
+            'permission' => 0664,
+        ],
+
+        'dispatch-cl' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/dispatch/craigslist.log'),
             'level' => env('LOG_LEVEL', 'error'),
             'days' => 7,
             'permission' => 0664,

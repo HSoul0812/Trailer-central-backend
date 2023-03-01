@@ -280,4 +280,15 @@ class InteractionsRepository implements InteractionsRepositoryInterface {
         // Initialize TextLog Query
         return $query->union($textLog);
     }
+
+    public function getInteractionByTime(int $leadId, string $interactionTime)
+    {
+        $query = Interaction::select('*');
+
+        $query->where('tc_lead_id', $leadId);
+        $query->where('interaction_time', $interactionTime);
+        $query->orderBy('interaction_id', 'DESC');
+
+        return $query->first() ?? [];
+    }
 }

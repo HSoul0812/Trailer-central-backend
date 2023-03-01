@@ -228,6 +228,7 @@ class ListingRepository implements ListingRepositoryInterface {
     {
         // Initialize Inventory Query
         $query = Listings::select(Listings::getTableName() . '.*')
+            ->join(Marketplace::getTableName(), Listings::getTableName() . '.marketplace_id', '=', Marketplace::getTableName() . '.id')
             ->join(Inventory::getTableName(), Listings::getTableName() . '.inventory_id', '=', Inventory::getTableName() . '.inventory_id')
             ->where(Listings::getTableName() . '.username', '=', $integration->fb_username)
             ->where(Listings::getTableName() . '.status', Listings::STATUS_ACTIVE)
