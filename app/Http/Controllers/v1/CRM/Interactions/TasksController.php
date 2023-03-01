@@ -8,9 +8,13 @@ use App\Http\Requests\CRM\Interactions\GetTasksRequest;
 use App\Transformers\CRM\Interactions\TaskTransformer;
 use Dingo\Api\Http\Request;
 use App\Http\Requests\CRM\Interactions\GetTasksSortFieldsRequest;
+use App\Http\Requests\CRM\Interactions\GetContactDateRequest;
+use App\Services\CRM\Interactions\InteractionServiceInterface;
 
 class TasksController extends RestfulController
 {
+    protected $interactionService;
+
     protected $interactions;
     
     protected $transformer;
@@ -20,10 +24,12 @@ class TasksController extends RestfulController
      *
      * @param Repository $interactions
      */
-    public function __construct(InteractionsRepositoryInterface $interactions, TaskTransformer $transformer)
+    public function __construct(interactionServiceInterface $interactionService, 
+        InteractionsRepositoryInterface $interactions, TaskTransformer $transformer)
     {
         $this->middleware('setDealerIdOnRequest')->only(['index']);
         $this->middleware('setSalesPersonIdOnRequest')->only(['index']);
+        $this->interactionService = $interactionService;
         $this->interactions = $interactions;
         $this->transformer = $transformer;
     }
@@ -48,6 +54,17 @@ class TasksController extends RestfulController
 
         if ($request->validate()) {             
             return $this->response->array([ 'data' => $this->interactions->getTasksSortFields() ]);
+        }
+        
+        return $this->response->errorBadRequest();
+    }
+
+    public function getContactDate(int $leadId, Request $request)
+    {
+        $request = new GetContactDateRequest(array_merge(['lead_id' => $leadId], $request->all()));
+
+        if ($request->validate()) {       
+            return $this->response->array(['data' => $this->interactionService->getContactDate($leadId)]);
         }
         
         return $this->response->errorBadRequest();
