@@ -2,7 +2,7 @@
 
 namespace App\Services\Dispatch\Craigslist;
 
-use App\Services\Dispatch\Craigslist\DTOs\CraigslistStatus;
+use Illuminate\Support\Collection;
 
 interface CraigslistServiceInterface {
     /**
@@ -18,7 +18,7 @@ interface CraigslistServiceInterface {
     /**
      * Get Dealer Craigslist Status
      * 
-     * @return CraigslistStatus
+     * @return Collection<DealerCraigslist>
      */
-    public function status(array $params): CraigslistStatus;
+    public function status(array $params): Collection;
 }
