@@ -7,6 +7,9 @@ use ElasticAdapter\Indices\Alias;
 use ElasticAdapter\Indices\Index;
 use ElasticAdapter\Indices\Mapping;
 use ElasticAdapter\Indices\Settings;
+use ElasticScoutDriver\Factories\DocumentFactoryInterface;
+use ElasticScoutDriver\Factories\ModelFactoryInterface;
+use ElasticScoutDriver\Factories\SearchRequestFactoryInterface;
 use Elasticsearch\Client;
 use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
@@ -18,6 +21,22 @@ class ElasticSearchEngine extends \ElasticScoutDriver\Engine
 {
     /** @var array<string, bool> */
     private static $indexStatus = [];
+
+    public function __construct(
+        DocumentManager $documentManager,
+        DocumentFactoryInterface $documentFactory,
+        SearchRequestFactoryInterface $searchRequestFactory,
+        ModelFactoryInterface $modelFactory,
+        IndexManager $indexManager
+    ) {
+        $this->refreshDocuments = config('elastic.scout_driver.refresh_documents');
+
+        $this->documentManager = $documentManager;
+        $this->documentFactory = $documentFactory;
+        $this->searchRequestFactory = $searchRequestFactory;
+        $this->modelFactory = $modelFactory;
+        $this->indexManager = $indexManager;
+    }
 
     /**
      * Update the given model in the index.

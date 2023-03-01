@@ -16,6 +16,9 @@ class InvalidateCacheJob extends Job
 
     public $queue = 'inventory-cache';
 
+    /** @var int given we have an ElasticSearch refresh interval of 60 seconds, we need to made sure this will be precessed after that period  */
+    public $delay = 62;
+
     public function tags(): array
     {
         return array_merge(

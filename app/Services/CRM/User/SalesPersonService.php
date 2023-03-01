@@ -80,7 +80,7 @@ class SalesPersonService implements SalesPersonServiceInterface
         }
 
         // Return Response
-        return $this->salespeople->get(['sales_person_id' => $salesPerson->id]);
+        return $salesPerson;
     }
 
     /**
@@ -121,7 +121,7 @@ class SalesPersonService implements SalesPersonServiceInterface
         }
 
         // Return Sales Person
-        return $this->salespeople->get(['sales_person_id' => $salesPerson->id]);
+        return $salesPerson;
     }
 
     /**
