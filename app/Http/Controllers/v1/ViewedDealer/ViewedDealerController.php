@@ -10,7 +10,6 @@ use App\Http\Requests\UpdateRequestInterface;
 use App\Http\Requests\ViewedDealer\CreateViewedDealerRequest;
 use App\Http\Requests\ViewedDealer\IndexViewedDealerRequest;
 use App\Repositories\ViewedDealer\ViewedDealerRepositoryInterface;
-use App\Transformers\ViewedDealer\ViewedDealerCreateTransformer;
 use App\Transformers\ViewedDealer\ViewedDealerIndexTransformer;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Throwable;
@@ -45,9 +44,8 @@ class ViewedDealerController extends AbstractRestfulController
         $request->validate();
 
         try {
-            return $this->response->collection(
-                collection: $this->repository->create($request->input('viewed_dealers')),
-                transformer: resolve(ViewedDealerCreateTransformer::class),
+            return $this->response->array(
+                $this->repository->create($request->input('viewed_dealers')),
             );
         } catch (Throwable $e) {
             $statusCode = $e->getCode();
