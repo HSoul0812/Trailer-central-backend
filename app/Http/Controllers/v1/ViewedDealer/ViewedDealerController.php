@@ -50,9 +50,15 @@ class ViewedDealerController extends AbstractRestfulController
                 transformer: resolve(ViewedDealerCreateTransformer::class),
             );
         } catch (Throwable $e) {
+            $statusCode = $e->getCode();
+
+            if (gettype($statusCode) === 'string') {
+                $statusCode = 422;
+            }
+
             $this->response->error(
                 message: $e->getMessage(),
-                statusCode: $e->getCode(),
+                statusCode: $statusCode,
             );
         }
     }
