@@ -21,7 +21,7 @@ class CraigslistService implements CraigslistServiceInterface
     /**
      * @const Craigslist Integration Name
      */
-    const INTEGRATION_NAME = 'craigslist_poster';
+    const INTEGRATION_NAME = 'dispatch_craigslist';
 
 
     /**
