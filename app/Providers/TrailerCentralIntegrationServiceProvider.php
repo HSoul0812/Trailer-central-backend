@@ -28,6 +28,10 @@ use App\Repositories\SyncProcessRepository;
 use App\Repositories\SyncProcessRepositoryInterface;
 use App\Repositories\SysConfig\SysConfigRepository;
 use App\Repositories\SysConfig\SysConfigRepositoryInterface;
+use App\Repositories\ViewedDealer\ViewedDealerRepository;
+use App\Repositories\ViewedDealer\ViewedDealerRepositoryInterface;
+use App\Services\Dealers\DealerService;
+use App\Services\Dealers\DealerServiceInterface;
 use App\Services\Integrations\TrailerCentral\Api\Image\ImageService;
 use App\Services\Integrations\TrailerCentral\Api\Image\ImageServiceInterface;
 use App\Services\Integrations\TrailerCentral\Api\Users\UsersService;
@@ -51,6 +55,7 @@ use App\Services\SubscribeEmailSearch\SubscribeEmailSearchServiceInterface;
 use App\Services\MapSearch\GoogleMapSearchService;
 use App\Services\SysConfig\SysConfigService;
 use App\Services\SysConfig\SysConfigServiceInterface;
+use Http;
 use Illuminate\Support\ServiceProvider;
 
 class TrailerCentralIntegrationServiceProvider extends ServiceProvider
@@ -93,6 +98,19 @@ class TrailerCentralIntegrationServiceProvider extends ServiceProvider
 
         $this->app->bind(ImageServiceInterface::class, ImageService::class);
 
+        $this->app->bind(ViewedDealerRepositoryInterface::class, ViewedDealerRepository::class);
+
+        $this->app->bind(DealerServiceInterface::class, DealerService::class);
+
         GoogleMapSearchService::register();
+    }
+
+    public function boot(): void
+    {
+        Http::macro('tcApi', function() {
+            return Http::withHeaders([
+                'access-token' => config('trailercentral.integration.api.access_token'),
+            ])->baseUrl(config('services.trailercentral.api'));
+        });
     }
 }
