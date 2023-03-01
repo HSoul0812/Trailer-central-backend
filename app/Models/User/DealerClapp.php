@@ -2,18 +2,25 @@
 
 namespace App\Models\User;
 
+use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
 
 class DealerClapp extends Model
 {
+    use TableAware;
+
+
+    // Define Table Name Constant
+    const TABLE_NAME = 'dealer_clapp';
+
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = "dealer_clapp";
+    protected $table = self::TABLE_NAME;
 
     /**
      * @var int

@@ -143,6 +143,11 @@ class CraigslistService implements CraigslistServiceInterface
      * @return Collection<DealerCraigslist>
      */
     private function getDealers(array $params): Collection {
+        // Empty Type?
+        if(!isset($params['type'])) {
+            $params['type'] = 'now';
+        }
+
         // Get Craigslist Dealers
         $dealerClapp = $this->dealers->getAll([
             'sort' => '-date_scheduled',
