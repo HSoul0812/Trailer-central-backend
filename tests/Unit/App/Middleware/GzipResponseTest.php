@@ -81,7 +81,7 @@ class GzipResponseTest extends TestCase
         $this->assertStringContainsString('This view is for testing only.', $content);
     }
 
-    private function assertResponseNotEncoded(Request $request)
+    private function assertResponseNotEncoded(Request $request): void
     {
         $middleware = new GzipResponse();
 
