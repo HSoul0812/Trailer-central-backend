@@ -8,7 +8,7 @@ use App\Http\Requests\Dispatch\Craigslist\GetCraigslistRequest;
 use App\Http\Requests\Dispatch\Craigslist\ShowCraigslistRequest;
 use App\Http\Requests\Dispatch\Craigslist\LoginCraigslistRequest;
 use App\Services\Dispatch\Craigslist\CraigslistServiceInterface;
-use App\Transformers\Marketing\Craigslist\DealerTransformer;
+use App\Transformers\Dispatch\Craigslist\DealerTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use League\Fractal\Manager;
 
@@ -46,10 +46,16 @@ class CraigslistController extends RestfulControllerV2 {
     public function index(Request $request)
     {
         // Handle Craigslist Request
+        $startTime = microtime(true);
         $request = new GetCraigslistRequest($request->all());
         if ($request->validate()) {
             // Get Craigslist Dealers
-            return $this->response->collection($this->service->status($request->all()), $this->dealerTransformer);
+            Log::channel('dispatch-cl')->info('Debug time after retrieving dealers list endpoint: ' . (microtime(true) - $startTime));
+            $data = $this->response->collection(
+                $this->service->status($request->all(), $startTime),
+                $this->dealerTransformer);
+            Log::channel('dispatch-cl')->info('Debug time after calling dealers list service: ' . (microtime(true) - $startTime));
+            return $data;
         }
 
         return $this->response->errorBadRequest();
@@ -61,7 +67,7 @@ class CraigslistController extends RestfulControllerV2 {
      * @param Request $request
      * @return type
      */
-    /*public function show(int $id, Request $request)
+    public function show(int $id, Request $request)
     {
         // Handle Craigslist Request
         $startTime = microtime(true);
@@ -71,16 +77,15 @@ class CraigslistController extends RestfulControllerV2 {
         if ($request->validate()) {
             // Return Item Craigslist Dispatch Dealer Transformer
             Log::channel('dispatch-cl')->info('Debug time after validating FB Inventory endpoint: ' . (microtime(true) - $startTime));
-            $data = $this->itemResponse(
+            $data = $this->item(
                 $this->service->dealer($request->id, $request->all(), $startTime),
-                $this->dealerTransformer,
-                'data');
-            Log::channel('dispatch-cl')->info('Debug time after calling service: ' . (microtime(true) - $startTime));
+                $this->dealerTransformer);
+            Log::channel('dispatch-cl')->info('Debug time after calling single craigslist dealer service: ' . (microtime(true) - $startTime));
             return $data;
         }
 
         return $this->response->errorBadRequest();
-    }*/
+    }
 
     /**
      * Create Craigslist Inventory
