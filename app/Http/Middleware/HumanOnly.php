@@ -46,6 +46,9 @@ class HumanOnly
         // Postman use this one, and it's being seen as a bot from the Crawler class,
         // so we need to add it here
         'PostmanRuntime',
+
+        // We use trailertrader-frontend on the server.js file of the frontend side
+        'trailertrader',
     ];
 
     public function handle(Request $request, Closure $next)
