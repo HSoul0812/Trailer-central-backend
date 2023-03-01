@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Services\Inventory;
 
+use App\Jobs\Inventory\GenerateOverlayImageJobByDealer;
 use App\Jobs\Website\ReIndexInventoriesByDealersJob;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -169,9 +170,12 @@ class ImageServiceTest extends TestCase
             'image_1'
         ]);
 
-        Storage::disk('s3')->assertMissing([
+        /*
+         * // due we have avoided to remove from S3 bucket because it is causing ES6 have broken images
+         Storage::disk('s3')->assertMissing([
             'image_with_overlay_1'
         ]);
+        */
     }
 
     /**
@@ -232,9 +236,12 @@ class ImageServiceTest extends TestCase
             'image_1'
         ]);
 
-        Storage::disk('s3')->assertMissing([
+        // due we have avoided to remove from S3 bucket because it is causing ES6 have broken images
+        /*
+         Storage::disk('s3')->assertMissing([
             'image_with_overlay_1'
         ]);
+        */
     }
 
     /**
@@ -260,12 +267,6 @@ class ImageServiceTest extends TestCase
             $inventories->push($inventory);
         }
 
-        $this->inventoryRepositoryMock->shouldReceive('getAll')
-            ->with([
-                'dealer_id' => self::DEALER_ID, 'images_greater_than' => 1],
-                false, false, [Inventory::getTableName(). '.inventory_id'])
-            ->once()->andReturn($inventories);
-
         $this->inventoryRepositoryMock->shouldNotReceive('massUpdate');
 
         $this->userRepositoryMock->shouldReceive('updateOverlaySettings')
@@ -278,7 +279,8 @@ class ImageServiceTest extends TestCase
 
         $this->imageService->updateOverlaySettings($overlayParams);
 
-        Queue::assertPushed(GenerateOverlayImageJob::class, $inventories->count());
+        Queue::assertNotPushed(GenerateOverlayImageJob::class);
+        Queue::assertPushed(GenerateOverlayImageJobByDealer::class, 1);
     }
 
     /**
@@ -305,12 +307,6 @@ class ImageServiceTest extends TestCase
             $inventories->push($inventory);
         }
 
-        $this->inventoryRepositoryMock->shouldReceive('getAll')
-            ->with([
-                'dealer_id' => self::DEALER_ID, 'images_greater_than' => 1], 
-                false, false, [Inventory::getTableName(). '.inventory_id'])
-            ->once()->andReturn($inventories);
-
         $this->inventoryRepositoryMock->shouldReceive('massUpdate')
             ->with([
                 'dealer_id' => $overlayParams['dealer_id'],
@@ -328,8 +324,8 @@ class ImageServiceTest extends TestCase
 
         $this->imageService->updateOverlaySettings($overlayParams);
 
-        Queue::assertPushed(GenerateOverlayImageJob::class, $inventories->count());
-        Queue::assertPushed(ReIndexInventoriesByDealersJob::class, 1);
+        Queue::assertNotPushed(GenerateOverlayImageJob::class);
+        Queue::assertPushed(GenerateOverlayImageJobByDealer::class, 1);
     }
 
     /**

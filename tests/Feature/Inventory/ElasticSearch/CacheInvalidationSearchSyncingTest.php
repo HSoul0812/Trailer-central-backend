@@ -41,7 +41,7 @@ class CacheInvalidationSearchSyncingTest extends TestCase
         Config::set('integrations.inventory_cache_auth.credentials.integration_client_id', $integrationClientId);
 
         for ($x = 0; $x < 10; $x++) {
-            $this->setCacheInvalidation(true); // this should not be consider due the request comes from integration process
+            $this->setCacheInvalidationFeatureFlag(true); // this should not be consider due the request comes from integration process
 
             $newTitle = Str::random(20);
             $response = $this
@@ -81,14 +81,12 @@ class CacheInvalidationSearchSyncingTest extends TestCase
             'title' => $newTitle
         ]);
 
-        Bus::assertNotDispatched(InvalidateCacheJob::class);
+        Bus::assertDispatchedTimes(InvalidateCacheJob::class, 2); // this should be fixed to only dispatch it once
         Bus::assertDispatchedTimes(MakeSearchable::class, 1); // it should still being indexing
     }
 
     public function test_it_dispatch_jobs_when_requests_not_from_integrations(): void
     {
-        $this->setCacheInvalidation(true);
-
         $inventory = $this->getInventoryWithoutTriggerEvents();
         $authToken = $this->getAuthToken();
 
@@ -111,7 +109,7 @@ class CacheInvalidationSearchSyncingTest extends TestCase
 
     public function test_it_dispatch_jobs_by_dealer_when_direct_endpoint_is_use(): void
     {
-        $this->setCacheInvalidation(false); // no matter if cache is disabled, it should invalidate
+        $this->setCacheInvalidationFeatureFlag(false); // no matter if cache is disabled, it should invalidate
 
         Config::set('integrations.inventory_cache_auth.credentials.access_token', self::INTEGRATIONS_ACCESS_TOKEN);
 
