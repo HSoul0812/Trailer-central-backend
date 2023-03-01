@@ -20,6 +20,8 @@ use App\Repositories\Marketing\Facebook\PostingRedisRepository;
 use App\Repositories\Marketing\Facebook\PostingRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\ActivePostRepository;
 use App\Repositories\Marketing\Craigslist\ActivePostRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\DealerRepository;
+use App\Repositories\Marketing\Craigslist\DealerRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\InventoryRepository;
 use App\Repositories\Marketing\Craigslist\InventoryRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\SchedulerRepository;
@@ -32,6 +34,8 @@ use App\Services\Dispatch\Facebook\PostingHistoryService;
 use App\Services\Dispatch\Facebook\PostingHistoryServiceInterface;
 use App\Services\Marketing\Facebook\MarketplaceService;
 use App\Services\Marketing\Facebook\MarketplaceServiceInterface;
+use App\Services\Marketing\Craigslist\CraigslistService;
+use App\Services\Marketing\Craigslist\CraigslistServiceInterface;
 use App\Services\Marketing\Craigslist\ProfileService;
 use App\Services\Marketing\Craigslist\ProfileServiceInterface;
 use App\Services\Marketing\Craigslist\ValidateService;
@@ -57,6 +61,7 @@ class MarketingServiceProvider extends ServiceProvider
 
         // Marketing Repositories
         $this->app->bind(ActivePostRepositoryInterface::class, ActivePostRepository::class);
+        $this->app->bind(DealerRepositoryInterface::class, DealerRepository::class);
         $this->app->bind(InventoryRepositoryInterface::class, InventoryRepository::class);
         $this->app->bind(SchedulerRepositoryInterface::class, SchedulerRepository::class);
         $this->app->bind(MarketplaceRepositoryInterface::class, MarketplaceRepository::class);
@@ -74,6 +79,7 @@ class MarketingServiceProvider extends ServiceProvider
 
         // Dispatch Services
         $this->app->bind(MarketplaceDispatchServiceInterface::class, MarketplaceDispatchService::class);
+        $this->app->bind(CraigslistServiceInterface::class, CraigslistService::class);
     }
 
 }
