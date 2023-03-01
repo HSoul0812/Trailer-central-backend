@@ -52,7 +52,7 @@ return [
             'driver' => 'daily',
             'path'   => storage_path('logs/laravel.log'),
             'level'  => env('LOG_LEVEL', 'debug'),
-            'permission' => 0664,
+            'permission' => 0666,
             'days' => 30,
         ],
 
@@ -60,7 +60,7 @@ return [
             'driver' => 'daily',
             'path'   => storage_path('logs/error.log'),
             'level'  => 'error',
-            'permission' => 0664,
+            'permission' => 0666,
             'days' => 30,
 		],
 
@@ -68,7 +68,7 @@ return [
             'driver' => 'daily',
             'path'   => storage_path('logs/custom.log'),
             'level'  => 'debug',
-            'permission' => 0664,
+            'permission' => 0666,
             'days' => 30,
         ],
 
