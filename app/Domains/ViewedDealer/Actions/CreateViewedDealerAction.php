@@ -6,9 +6,11 @@ use App\Domains\ViewedDealer\Exceptions\DealerIdExistsException;
 use App\Domains\ViewedDealer\Exceptions\DuplicateDealerIdException;
 use App\Models\Dealer\ViewedDealer;
 use Arr;
+use DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Collection;
 use Str;
+use Throwable;
 
 class CreateViewedDealerAction
 {
@@ -25,22 +27,31 @@ class CreateViewedDealerAction
      * @param array<int, array{dealer_id: int, name: string}> $viewedDealers
      * @return Collection
      * @throws DuplicateDealerIdException|DealerIdExistsException
+     * @throws Throwable
      */
     public function execute(array $viewedDealers): Collection
     {
         $viewedDealers = $this->transformAndValidate($viewedDealers);
 
-        try {
-            // Upsert the data, unique by name and update the dealer_id if the record exists
-            // if not, create a new record
-            ViewedDealer::query()->upsert(
-                values: $viewedDealers,
-                uniqueBy: ['name'],
-                update: ['dealer_id', 'inventory_id']
-            );
-        } catch (QueryException $exception) {
-            throw $this->captureQueryException($exception);
-        }
+        DB::transaction(function () use ($viewedDealers) {
+            foreach ($viewedDealers as $viewedDealer) {
+                try {
+                    /** @var ViewedDealer $viewedDealer */
+                    $model = ViewedDealer::firstOrNew([
+                        'name' => $viewedDealer['name'],
+                    ]);
+
+                    $model->fill([
+                        'dealer_id' => $viewedDealer['dealer_id'],
+                        'inventory_id' => $viewedDealer['inventory_id'],
+                    ]);
+
+                    $model->save();
+                } catch (QueryException $exception) {
+                    throw $this->captureQueryException($exception);
+                }
+            }
+        });
 
         return ViewedDealer::query()
             ->whereIn('name', Arr::pluck($viewedDealers, 'name'))
