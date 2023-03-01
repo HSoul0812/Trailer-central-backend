@@ -533,9 +533,10 @@ class ImageHelper
      * Create temp files
      *
      * @param string|null $fileContent
+     * @param  int  $mimeType image type as integer commonly used by `getimagesize`, `exif_read_data`, `exif_thumbnail`, `exif_imagetype`
      * @return string new file path
      */
-    protected function createTempFile(string $fileContent = '', ?string $mimeType = null)
+    protected function createTempFile(string $fileContent = '', $mimeType = null)
     {
         $randomFilename = $this->getRandomImageNameWithExtension($fileContent, $mimeType);
 
@@ -556,11 +557,15 @@ class ImageHelper
 
     /**
      * Creates random image name with a proper extension according to file content
+     * @param  int  $mimeType image type as integer commonly used by `getimagesize`, `exif_read_data`, `exif_thumbnail`, `exif_imagetype`
+     * @throws \Exception when an appropriate source of randomness cannot be found.
      */
-    protected function getRandomImageNameWithExtension(string $fileContent, ?string $mimeType = null): string
+    protected function getRandomImageNameWithExtension(string $fileContent, $mimeType = null): string
     {
+        $mimeType= image_type_to_mime_type(((int)$mimeType) ?: 2); // to ensure it always is an integer and do not break something
+
         // we gonna use `jpeg` extension as fallback, it is not a problem because for S3 object it doesn't matter
-        $extension = !empty($mimeType) ? str_replace('image/', '', $mimeType) : 'jpeg';
+        $extension = str_replace('image/', '', $mimeType);
 
         return sprintf('%s.%s', bin2hex(random_bytes(18)), $extension);
     }
