@@ -32,38 +32,36 @@ class CreateViewedDealerAction
 
         $returnValues = collect([]);
 
-        DB::transaction(function () use ($viewedDealers, $returnValues) {
-            foreach ($viewedDealers as $viewedDealer) {
-                $nameSlug = Str::of($viewedDealer['name'])->slug();
+        foreach ($viewedDealers as $viewedDealer) {
+            $nameSlug = Str::of($viewedDealer['name'])->slug();
 
-                $cachedModel = Cache::remember(
-                    key: "viewed-dealer.$nameSlug",
-                    ttl: self::VIEWED_DEALER_CACHE_SECONDS,
-                    callback: function () use ($viewedDealer) {
-                        /** @var ViewedDealer $viewedDealer */
-                        $model = ViewedDealer::firstOrNew([
-                            'name' => $viewedDealer['name'],
-                        ]);
+            $cachedModel = Cache::remember(
+                key: "viewed-dealer.$nameSlug",
+                ttl: self::VIEWED_DEALER_CACHE_SECONDS,
+                callback: function () use ($viewedDealer) {
+                    /** @var ViewedDealer $viewedDealer */
+                    $model = ViewedDealer::firstOrNew([
+                        'name' => $viewedDealer['name'],
+                    ]);
 
-                        $model->fill([
-                            'dealer_id' => $viewedDealer['dealer_id'],
-                            'inventory_id' => $viewedDealer['inventory_id'],
-                        ]);
+                    $model->fill([
+                        'dealer_id' => $viewedDealer['dealer_id'],
+                        'inventory_id' => $viewedDealer['inventory_id'],
+                    ]);
 
-                        try {
-                            $model->save();
-                        } catch (Throwable) {
-                            return null;
-                        }
+                    try {
+                        $model->save();
+                    } catch (Throwable) {
+                        return null;
+                    }
 
-                        return $model->toArray();
-                    });
+                    return $model->toArray();
+                });
 
-                if ($cachedModel !== null) {
-                    $returnValues->push($cachedModel);
-                }
+            if ($cachedModel !== null) {
+                $returnValues->push($cachedModel);
             }
-        });
+        }
 
         return $returnValues->toArray();
     }
