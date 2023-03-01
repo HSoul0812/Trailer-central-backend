@@ -94,7 +94,7 @@ class ExtraWebsiteConfigService implements ExtraWebsiteConfigServiceInterface
 
         return collect([
             'include_showroom' => (bool)$mainDealer->showroom,
-            'showroom_dealers' => $showroomDealers,
+            'showroom_dealers' => array_values($showroomDealers),
             'available_showroom_dealers' => $this->showroomRepository->distinctByManufacturers(),
             'global_filter' => $website->type_config
         ]);
