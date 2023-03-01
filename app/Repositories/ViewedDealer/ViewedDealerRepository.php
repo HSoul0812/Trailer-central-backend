@@ -12,7 +12,6 @@ use App\Services\Dealers\DealerServiceInterface;
 use App\Services\Inventory\InventoryServiceInterface;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Collection;
-use Throwable;
 
 class ViewedDealerRepository implements ViewedDealerRepositoryInterface
 {
@@ -45,11 +44,11 @@ class ViewedDealerRepository implements ViewedDealerRepositoryInterface
      * Create new viewed_dealer records (accepts multiple pairs)
      *
      * @param array<int, array{dealer_id: int, name: string}> $params
-     * @return array
+     * @return Collection
+     * @throws DuplicateDealerIdException
      * @throws DealerIdExistsException
-     * @throws Throwable
      */
-    public function create(array $params): array
+    public function create(array $params): Collection
     {
         return resolve(CreateViewedDealerAction::class)->execute($params);
     }
