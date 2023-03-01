@@ -169,6 +169,9 @@ class DealerLocationValidationTest extends TestCase {
             ->postJson(self::apiEndpoint .'/'. $this->dealerLocationId, $updatingFormData)
             ->assertSuccessful()
             ->assertJsonFragment([
+                'name' => $formData['name'],
+                'contact' => $formData['contact'],
+                'address' => $formData['address'],
                 'city' => $updatingFormData['city'],
                 'county' => $updatingFormData['county'],
                 'region' => $updatingFormData['region'],
