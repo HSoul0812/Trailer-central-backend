@@ -14,7 +14,7 @@ class DealerLogoTransformer extends TransformerAbstract
         return [
             'id' => $dealerLogo->id,
             'dealer_id' => $dealerLogo->dealer_id,
-            'filename' => $dealerLogo->filename ? Storage::disk(DealerLogoService::STORAGE_DISK)->url($dealerLogo->filename) : null,
+            'url' => $dealerLogo->filename ? Storage::disk(DealerLogoService::STORAGE_DISK)->url($dealerLogo->filename) : null,
             'benefit_statement' => $dealerLogo->benefit_statement
         ];
     }
