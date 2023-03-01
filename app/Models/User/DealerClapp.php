@@ -6,6 +6,7 @@ use App\Models\Traits\TableAware;
 use App\Models\Marketing\Craigslist\Session;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 
 class DealerClapp extends Model
