@@ -5,7 +5,7 @@ namespace App\Services\Dispatch\Craigslist;
 use App\Models\User\AuthToken;
 use App\Models\User\Integration\Integration;
 use App\Repositories\Marketing\TunnelRepositoryInterface;
-use App\Repositories\Marketing\Craigslist\TunnelRepositoryInterface;
+use App\Repositories\Marketing\Craigslist\DealerRepositoryInterface;
 use App\Services\Dispatch\Craigslist\DTOs\DealerCraigslist;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
