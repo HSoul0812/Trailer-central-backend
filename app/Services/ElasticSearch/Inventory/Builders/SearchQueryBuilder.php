@@ -67,7 +67,7 @@ class SearchQueryBuilder implements FieldQueryBuilderInterface
 
         // to be able quoting special chars
         $terms = array_map(static function ($term): string {
-            if (in_array($term, self::QUERY_SEARCH_SPECIAL_CHARS) || \Str::contains($term, ['+', '-'])) {
+            if (in_array($term, self::QUERY_SEARCH_SPECIAL_CHARS) || \Str::contains($term, ['+', '-', '"'])) {
                 return sprintf('"%s"', $term);
             }
 
