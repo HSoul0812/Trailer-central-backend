@@ -26,7 +26,6 @@ class DealerTransformer extends TransformerAbstract
                 'type'  => $clapp->dealerType,
                 'state' => $clapp->dealerState
             ],
-            'type'                 => $clapp->type,
             'slots'                => $clapp->slots,
             'chrome_mode'          => $clapp->chromeMode,
             'marketing_enabled_at' => $clapp->since,
