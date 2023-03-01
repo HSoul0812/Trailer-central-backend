@@ -210,6 +210,17 @@ class SyncWebsiteFromRemoteCommand extends AbstractSyncFromRemoteCommand
 
             $inventoryImagesCounter = 0;
 
+            Image::query()
+                ->join('inventory_image', 'inventory_image.image_id', '=', 'image.image_id')
+                ->join('inventory', 'inventory.inventory_id', '=', 'inventory_image.inventory_id')
+                ->where('inventory.dealer_id', $dealer->dealer_id)
+                ->delete();
+
+            InventoryImage::query()
+                ->join('inventory', 'inventory.inventory_id', '=', 'inventory_image.inventory_id')
+                ->where('inventory.dealer_id', $dealer->dealer_id)
+                ->delete();
+
             Image::on('remote')
                 ->join('inventory_image', 'inventory_image.image_id', '=', 'image.image_id')
                 ->join('inventory', 'inventory.inventory_id', '=', 'inventory_image.inventory_id')
