@@ -89,8 +89,14 @@ class Lead extends Model
     public const STATUS_UNCONTACTED = 'Uncontacted';
     public const STATUS_NEW_INQUIRY = 'New Inquiry';
 
+    public const IGNORE_ARCHIVED = -1;
     public const NOT_ARCHIVED = 0;
     public const LEAD_ARCHIVED = 1;
+    public const ARCHIVED_STATUSES = [
+        self::NOT_ARCHIVED => 'Active Only',
+        self::LEAD_ARCHIVED => 'Archived Only',
+        self::IGNORE_ARCHIVED => 'All Leads'
+    ];
 
     public const IS_NOT_SPAM = 0;
     public const IS_SPAM = 1;
@@ -107,6 +113,18 @@ class Lead extends Model
     public const LEAD_TYPE_CLASSIFIED = 'classified';
 
     public const TABLE_NAME = 'website_lead';
+
+    /**
+     * Lead fields that are related to Customer fields
+     * Lead field => Customer field
+     */
+    public const CUSTOMER_FIELDS = [
+        'email_address' => 'email',
+        'phone_number' => 'work_phone',
+        'first_name' => 'first_name',
+        'last_name' => 'last_name',
+        'middle_name' => 'middle_name'
+    ];
 
     /**
      * The table associated with the model.
@@ -171,6 +189,7 @@ class Lead extends Model
         'is_from_classifieds',
         'bigtex_exported',
         'next_followup',
+        'middle_name',
     ];
 
     protected $casts = [

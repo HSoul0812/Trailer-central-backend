@@ -22,8 +22,10 @@ class ProfileGetTest extends TestCase
      */
     public function testGettingProfiles()
     {
+        $this->seeder->seed();
+
         $this->withHeaders(['access-token' => $this->seeder->authToken->access_token])
-            ->json('GET', '/api/marketing/clapp/profile') 
+            ->json('GET', '/api/marketing/clapp/profile')
             ->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
@@ -44,7 +46,7 @@ class ProfileGetTest extends TestCase
 
     /**
      * Set Up Seeder
-     * 
+     *
      * @return void
      */
     public function setUp(): void
@@ -57,7 +59,7 @@ class ProfileGetTest extends TestCase
 
     /**
      * Tear Down Seeder
-     * 
+     *
      * @return void
      */
     public function tearDown(): void
