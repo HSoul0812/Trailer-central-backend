@@ -35,7 +35,7 @@ class DealerLogoTransformerTest extends TestCase
     public function test_it_can_transform_a_dealer_logo_model()
     {
         $transformedLogo = $this->transformer->transform($this->dealerLogo);
-        $this->assertSame(['id', 'dealer_id', 'filename', 'benefit_statement'], array_keys($transformedLogo));
+        $this->assertSame(['id', 'dealer_id', 'url', 'benefit_statement'], array_keys($transformedLogo));
     }
 
     public function test_it_creates_a_valid_s3_url_for_the_logo()
@@ -43,6 +43,6 @@ class DealerLogoTransformerTest extends TestCase
         $transformedLogo = $this->transformer->transform($this->dealerLogo);
 
         $url = Storage::disk(DealerLogoService::STORAGE_DISK)->url($this->dealerLogo->filename);
-        $this->assertSame($url, $transformedLogo['filename']);
+        $this->assertSame($url, $transformedLogo['url']);
     }
 }
