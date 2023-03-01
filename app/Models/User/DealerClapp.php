@@ -72,7 +72,7 @@ class DealerClapp extends Model
      * @return HasMany
      */
     public function sessions(): HasMany {
-        return $this->hasMany(Session::class, 'dealer_id', 'session_dealer_id');
+        return $this->hasMany(Session::class, 'session_dealer_id', 'dealer_id');
     }
 
     /**
