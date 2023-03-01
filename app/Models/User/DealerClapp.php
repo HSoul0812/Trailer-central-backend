@@ -93,6 +93,6 @@ class DealerClapp extends Model
                         })->first();
 
         // Return Session Scheduled
-        return $session->session_scheduled;
+        return $session->session_scheduled ?? '';
     }
 }
