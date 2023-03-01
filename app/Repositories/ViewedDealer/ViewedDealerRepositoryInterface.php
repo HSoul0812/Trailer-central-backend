@@ -27,5 +27,5 @@ interface ViewedDealerRepositoryInterface
      * @throws DuplicateDealerIdException
      * @throws DealerIdExistsException
      */
-    public function create(array $params): Collection;
+    public function create(array $params): array;
 }
