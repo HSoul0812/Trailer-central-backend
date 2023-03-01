@@ -34,14 +34,14 @@ use App\Services\Dispatch\Facebook\PostingHistoryService;
 use App\Services\Dispatch\Facebook\PostingHistoryServiceInterface;
 use App\Services\Marketing\Facebook\MarketplaceService;
 use App\Services\Marketing\Facebook\MarketplaceServiceInterface;
-use App\Services\Marketing\Craigslist\CraigslistService;
-use App\Services\Marketing\Craigslist\CraigslistServiceInterface;
 use App\Services\Marketing\Craigslist\ProfileService;
 use App\Services\Marketing\Craigslist\ProfileServiceInterface;
 use App\Services\Marketing\Craigslist\ValidateService;
 use App\Services\Marketing\Craigslist\ValidateServiceInterface;
 use App\Services\Dispatch\Facebook\MarketplaceService as MarketplaceDispatchService;
 use App\Services\Dispatch\Facebook\MarketplaceServiceInterface as MarketplaceDispatchServiceInterface;
+use App\Services\Dispatch\Craigslist\CraigslistService as CraigslistDispatchService;
+use App\Services\Dispatch\Craigslist\CraigslistServiceInterface as CraigslistDispatchServiceInterface;
 use Illuminate\Support\ServiceProvider;
 
 class MarketingServiceProvider extends ServiceProvider
@@ -79,7 +79,7 @@ class MarketingServiceProvider extends ServiceProvider
 
         // Dispatch Services
         $this->app->bind(MarketplaceDispatchServiceInterface::class, MarketplaceDispatchService::class);
-        $this->app->bind(CraigslistServiceInterface::class, CraigslistService::class);
+        $this->app->bind(CraigslistDispatchServiceInterface::class, CraigslistDispatchService::class);
     }
 
 }
