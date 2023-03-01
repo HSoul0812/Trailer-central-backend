@@ -14,7 +14,17 @@ class CreateDealerVirtualCardsTable extends Migration
     public function up()
     {
         Schema::create('dealer_virtual_cards', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->increments('id');
+            $table->integer('dealer_id')->index();
+            $table->enum('type', VirtualCard::CARD_SERVICE)->index();
+            $table->integer('card_number', 20);
+            $table->integer('security', 5);
+            $table->string('name_on_card', 100);
+            $table->string('address_street', 100);
+            $table->string('address_city', 50);
+            $table->string('address_state', 5);
+            $table->string('address_zip', 20);
+            $table->date('expires_at')->index();
             $table->timestamps();
         });
     }
