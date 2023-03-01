@@ -22,19 +22,19 @@ class DealerRepository implements DealerRepositoryInterface
 
     private $sortOrders = [
         'date_scheduled' => [
-            'field' => 'clapp_session.date_scheduled',
+            'field' => 'clapp_session.session_scheduled',
             'direction' => 'DESC'
         ],
         '-date_scheduled' => [
-            'field' => 'clapp_session.date_scheduled',
+            'field' => 'clapp_session.session_scheduled',
             'direction' => 'ASC'
         ],
         'date_started' => [
-            'field' => 'clapp_session.date_started',
+            'field' => 'clapp_session.session_started',
             'direction' => 'DESC'
         ],
         '-date_started' => [
-            'field' => 'clapp_session.date_started',
+            'field' => 'clapp_session.session_started',
             'direction' => 'ASC'
         ]
     ];
@@ -93,7 +93,10 @@ class DealerRepository implements DealerRepositoryInterface
         }
 
         if($params['type'] === 'now') {
-            $query->where(Session::getTableName() . '.clapp_session', '<=', DB::raw('NOW()'));
+            $query->where(Session::getTableName() . '.session_scheduled', '<=', DB::raw('NOW()'));
+        } elseif($params['type'] === 'posted') {
+            $query->where(Session::getTableName() . '.status', '=', 'done')
+                  ->where(Session::getTableName() . '.state', '=', 'done');
         }
 
         if (!isset($params['sort'])) {
