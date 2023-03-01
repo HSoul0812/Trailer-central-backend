@@ -26,7 +26,19 @@ class SelectQueryBuilder implements FieldQueryBuilderInterface
     {
         $this->field->getTerms()->each(function (Term $term) {
             $name = $this->field->getName();
-            $options = $term->getValues();
+            $options = array_filter($term->getValues());
+
+
+            if (empty($options)) {
+                $this->appendToQuery([
+                    'bool' => [
+                        'must' => [
+                        ]
+                    ]
+                ]);
+
+                return $this->query;
+            }
 
             if ($name === 'dealerLocationId') {
                 $options = DealerLocationIds::fromArray($options)->locations();
