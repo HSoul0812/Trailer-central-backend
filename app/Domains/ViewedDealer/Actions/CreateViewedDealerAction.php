@@ -59,7 +59,7 @@ class CreateViewedDealerAction
     {
         $viewedDealers = $this->removeDuplicateNames($viewedDealers);
 
-        $this->validateUniqueDealerIds($viewedDealers);
+        // $this->validateUniqueDealerIds($viewedDealers);
 
         return $viewedDealers;
     }
