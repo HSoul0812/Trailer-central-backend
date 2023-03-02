@@ -12,7 +12,7 @@ class UpdateLeadTradeRequest extends Request
 {
     protected $rules = [
         'lead_id' => 'required|valid_lead',
-        'id' => 'required|lead_trade_valid',
+        'id' => 'required|lead_trade_valid:lead_id',
         'type' => 'string',
         'make' => 'string',
         'model' => 'string',

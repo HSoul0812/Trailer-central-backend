@@ -12,6 +12,6 @@ class DeleteLeadTradeRequest extends Request
 {
     protected $rules = [
         'lead_id' => 'required|integer',
-        'id' => 'required|lead_trade_valid'
+        'id' => 'required|lead_trade_valid:lead_id'
     ];
 }

@@ -12,6 +12,6 @@ class GetLeadTradeRequest extends Request
 {
     protected $rules = [
         'lead_id' => 'required|integer|valid_Lead',
-        'id' => 'required|lead_trade_valid'
+        'id' => 'required|lead_trade_valid:lead_id'
     ];
 }
