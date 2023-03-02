@@ -14,7 +14,7 @@ class ShowCraigslistRequest extends Request {
 
     protected $rules = [
         'dealer_id' => 'required|exists:dealer_clapp,dealer_id',
-        'include' => 'string|valid_include:accounts,profiles,cards,tunnels'
+        'include.*' => 'in:accounts,profiles,cards,tunnels'
     ];
 
 }
