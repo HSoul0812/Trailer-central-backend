@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Collection;
  * 
  * @package App\Repositories\Marketing\Craigslist
  */
-class AccountRepository implements VirtualCardRepositoryInterface 
+class AccountRepository implements AccountRepositoryInterface 
 {
     use SortTrait, Pagination;
 
