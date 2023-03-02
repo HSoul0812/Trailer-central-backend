@@ -136,6 +136,23 @@ class DealerDocumentsControllerTest extends IntegrationTestCase
     }
 
     /**
+     * @covers ::create
+     * @group CRM
+     */
+    public function testCreateWithoutFiles()
+    {
+        $response = $this->json(
+            'POST',
+            str_replace('{leadId}', $documentsSeeder->lead->getKey(), self::API_URL),
+            [],
+            ['access-token' => $documentsSeeder->authToken->access_token]
+        );
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['files']);
+    }
+
+    /**
      * @covers ::destroy
      * @group CRM
      */
