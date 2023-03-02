@@ -11,9 +11,9 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
     public const TEXT_TYPE_MAX_SIZE = 32766;
 
     public const PROPERTIES = [
-        'id' => ['type' => 'long'],
-        'dealerId' => ['type' => 'integer'],
-        'dealerLocationId' => ['type' => 'integer'],
+        'id' => ['type' => 'keyword'],
+        'dealerId' => ['type' => 'keyword'],
+        'dealerLocationId' => ['type' => 'keyword'],
         'createdAt' => ['type' => 'date', 'format' => 'yyyy-MM-dd HH:mm:ss'],
         'updatedAt' => ['type' => 'date', 'format' => 'yyyy-MM-dd HH:mm:ss'],
         'isActive' => ['type' => 'boolean'],
@@ -27,49 +27,46 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
             'type' => 'keyword',
             'normalizer' => 'case_normal',
             'fields' => [
-                'normal' => [
-                    'type' => 'text',
-                    'analyzer' => 'standard',
-                ]
+                'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer']
             ]
         ],
         'title'                 => [
-            'type'       => 'keyword',
+            'type' => 'keyword',
             'normalizer' => 'case_normal',
             'fields' => [
-                'txt' => ['type' => 'text', 'analyzer' => 'english']
+                'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer']
             ]
         ],
         'year'                  => ['type' => 'integer'],
         'manufacturer'          => [
             'type'       => 'keyword',
-            'normalizer' => 'case_normal'
+            'normalizer' => 'case_normal',
+            'fields' => [
+                'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer']
+            ]
         ],
         'brand'                => [
             'type'       => 'keyword',
-            'normalizer' => 'case_normal'
+            'normalizer' => 'case_normal',
+            'fields' => [
+                'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer']
+            ]
         ],
         'model'                => [
             'type'       => 'keyword',
             'normalizer' => 'case_normal',
             'fields' => [
-                'txt' => ['type' => 'text', 'analyzer' => 'english']
+                'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer']
             ]
         ],
         'description'          => [
-            'type' => 'keyword',
-            'normalizer' => 'case_normal',
-            'ignore_above' => self::TEXT_TYPE_MAX_SIZE,
+            'type' => 'text',
             'fields' => [
-                'txt' => ['type' => 'text', 'analyzer' => 'english']
+                'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer']
             ]
         ],
-        'description_html'     => [
-            'type' => 'keyword',
-            'ignore_above' => self::TEXT_TYPE_MAX_SIZE,
-            'normalizer' => 'case_normal'
-        ],
-        'status'               => ['type' => 'integer'],
+        'description_html'     => ['type' => 'text', 'index' => false],
+        'status'               => ['type' => 'keyword'],
         'availability'         => ['type' => 'keyword'],
         'availabilityLabel'    => ['type' => 'keyword'],
         'typeLabel'            => ['type' => 'keyword'],
@@ -101,9 +98,9 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
         'totalOfCost'          => ['type' => 'keyword'],
         'minimumSellingPrice'  => ['type' => 'keyword'],
         'notes'                => [
-            'type'   => 'keyword',
+            'type'   => 'text',
             'fields' => [
-                'txt' => ['type' => 'text', 'analyzer' => 'english']
+                'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer']
             ]
         ],
         'showOnKsl'            => ['type' => 'boolean'],
@@ -126,7 +123,7 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
             'type'       => 'keyword',
             'normalizer' => 'case_normal',
             'fields' => [
-                'txt' => ['type' => 'text', 'analyzer' => 'english']
+                'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer']
             ]
         ],
         'noseType'             => ['type' => 'keyword'],
@@ -137,7 +134,7 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
             'type'       => 'keyword',
             'normalizer' => 'case_normal',
             'fields' => [
-                'txt' => ['type' => 'text', 'analyzer' => 'english']
+                'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer']
             ]
         ],
         'horsepower'           => ['type' => 'keyword'],
@@ -204,48 +201,48 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
             'type'       => 'keyword',
             'normalizer' => 'case_normal',
             'fields' => [
-                'txt' => ['type' => 'text', 'analyzer' => 'english']
+                'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer']
             ]
         ],
         'featureList.stallTack'=> [
             'type'       => 'keyword',
             'normalizer' => 'case_normal',
             'fields' => [
-                'txt' => ['type' => 'text', 'analyzer' => 'english']
+                'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer']
             ]
         ],
         'featureList.lq'=> [
             'type'       => 'keyword',
             'normalizer' => 'case_normal',
             'fields' => [
-                'txt' => ['type' => 'text', 'analyzer' => 'english']
+                'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer']
             ]
         ],
         'featureList.doorsWindowsRamps'=> [
             'type'       => 'keyword',
             'normalizer' => 'case_normal',
             'fields' => [
-                'txt' => ['type' => 'text', 'analyzer' => 'english']
+                'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer']
             ]
         ],
         'image'                => ['type' => 'keyword'],
         'images'               => ['type' => 'keyword'],
         'imagesSecondary'      => ['type' => 'keyword'],
         'numberOfImages'       => ['type' => 'integer'],
-        'widthInches' => ['type' => 'float'],
-        'heightInches' => ['type' => 'float'],
-        'lengthInches' => ['type' => 'float'],
-        'widthDisplayMode' => ['type' => 'keyword'],
-        'heightDisplayMode' => ['type' => 'keyword'],
-        'lengthDisplayMode' => ['type' => 'keyword'],
-        'tilt' => ['type' => 'integer'],
-        'entity_type_id' => ['type' => 'integer'],
-        'paymentCalculator.apr' => ['type' => 'float'],
-        'paymentCalculator.down' => ['type' => 'float'],
-        'paymentCalculator.years' => ['type' => 'integer'],
-        'paymentCalculator.month' => ['type' => 'integer'],
-        'paymentCalculator.monthly_payment' => ['type' => 'float'],
-        'paymentCalculator.down_percentage' => ['type' => 'float'],
+        'widthInches'          => ['type' => 'float'],
+        'heightInches'         => ['type' => 'float'],
+        'lengthInches'         => ['type' => 'float'],
+        'widthDisplayMode'     => ['type' => 'keyword'],
+        'heightDisplayMode'    => ['type' => 'keyword'],
+        'lengthDisplayMode'    => ['type' => 'keyword'],
+        'tilt'                 => ['type' => 'integer'],
+        'entity_type_id'       => ['type' => 'keyword'],
+        'paymentCalculator.apr'     => ['type' => 'float', 'index' => false],
+        'paymentCalculator.down'    => ['type' => 'float', 'index' => false],
+        'paymentCalculator.years'   => ['type' => 'integer', 'index' => false],
+        'paymentCalculator.month'   => ['type' => 'integer', 'index' => false],
+        'paymentCalculator.monthly_payment' => ['type' => 'float', 'index' => false],
+        'paymentCalculator.down_percentage' => ['type' => 'float', 'index' => false],
     ];
 
     public function name(): string
@@ -266,11 +263,42 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
                     'type' => 'custom',
                     'filter' => ['lowercase', 'asciifolding']
                 ]
+            ],
+            'analyzer' => [
+                'standard_analyzer'=>[ // it will generate standard tokens per word
+                    'tokenizer' => 'standard_tokenizer',
+                    'filter' => ['lowercase', 'asciifolding']
+                ],
+                'shingle_analyzer' => [ // it will generate standard 2-3 words
+                    'tokenizer' => 'shingle_tokenizer',
+                    'filter' => [
+                        'lowercase',
+                        'asciifolding',
+                        'shingle_filter'
+                    ]
+                ]
+            ],
+            'tokenizer' => [
+                'standard_tokenizer' => [
+                    'type' => 'standard'
+                ],
+                'shingle_tokenizer' => [
+                    'type' => 'standard'
+                ]
+            ],
+            'filter' => [
+                'shingle_filter' => [
+                    'type' => 'shingle',
+                    'min_shingle_size' => 2,
+                    'max_shingle_size' => 3,
+                    'output_unigrams' => true
+                ]
             ]
         ])->index([
             'number_of_shards' => config('elastic.scout_driver.settings.inventory.number_of_shards'),
-            'number_of_replicas' => config('elastic.scout_driver.settings.inventory.number_of_replicas')
-        ]);
+            'number_of_replicas' => config('elastic.scout_driver.settings.inventory.number_of_replicas'),
+            'refresh_interval' => config('elastic.scout_driver.settings.inventory.refresh_interval')
+       ]);
     }
 
     public function __construct()

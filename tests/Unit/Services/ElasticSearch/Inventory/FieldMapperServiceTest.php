@@ -40,27 +40,7 @@ class FieldMapperServiceTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-        Cache::shouldReceive('remember')
-            ->once()
-            ->withAnyArgs()
-            ->andReturn(collect([
-                'price' => factory(InventoryFilter::class)->make([
-                    'attribute' => 'price',
-                    'type' => 'slider'
-                ]),
-                'year' => factory(InventoryFilter::class)->make([
-                    'attribute' => 'year',
-                    'type' => 'select'
-                ]),
-                'sleeping_capacity' => factory(InventoryFilter::class)->make([
-                    'attribute' => 'sleeping_capacity',
-                    'type' => 'select'
-                ]),
-                'is_special' => factory(InventoryFilter::class)->make([
-                    'attribute' => 'is_special',
-                    'type' => 'boolean'
-                ])
-            ]));
+
         $this->service = $this->app->make(FieldMapperService::class);
     }
 
@@ -73,11 +53,16 @@ class FieldMapperServiceTest extends TestCase
                 'values' => []
             ]
         ]]);
+
+        $this->assertCacheRememberWasCalled();
+
         $this->service->getBuilder($field);
     }
 
     public function test_it_create_the_right_builder_instance_based_on_the_field_type()
     {
+        $this->assertCacheRememberWasCalled(3);
+
         $field = Filter::fromArray(['name' => 'price', 'terms' => [
             [
                 'operator' => Term::OPERATOR_EQ,
@@ -111,6 +96,8 @@ class FieldMapperServiceTest extends TestCase
 
     public function test_it_resolves_the_right_builder_instance_for_known_fields_with_different_names()
     {
+        $this->assertCacheRememberWasCalled(2);
+
         $field = Filter::fromArray(['name' => 'existingPrice', 'terms' => [
             [
                 'operator' => Term::OPERATOR_EQ,
@@ -137,6 +124,8 @@ class FieldMapperServiceTest extends TestCase
 
     public function test_it_builds_queries_for_edge_cases_with_a_custom_query_builder_instance()
     {
+        $this->assertCacheRememberWasCalled(2);
+
         $field = Filter::fromArray(['name' => 'show_images', 'terms' => [
             [
                 'operator' => Term::OPERATOR_EQ,
@@ -157,5 +146,30 @@ class FieldMapperServiceTest extends TestCase
         ]]);
         $builder = $this->service->getBuilder($field);
         $this->assertInstanceOf(CustomQueryBuilder::class, $builder);
+    }
+
+    private function assertCacheRememberWasCalled(int $times = 1): void
+    {
+        Cache::shouldReceive('remember')
+            ->times($times)
+            ->withAnyArgs()
+            ->andReturn(collect([
+                'price' => factory(InventoryFilter::class)->make([
+                    'attribute' => 'price',
+                    'type' => 'slider'
+                ]),
+                'year' => factory(InventoryFilter::class)->make([
+                    'attribute' => 'year',
+                    'type' => 'select'
+                ]),
+                'sleeping_capacity' => factory(InventoryFilter::class)->make([
+                    'attribute' => 'sleeping_capacity',
+                    'type' => 'select'
+                ]),
+                'is_special' => factory(InventoryFilter::class)->make([
+                    'attribute' => 'is_special',
+                    'type' => 'boolean'
+                ])
+            ]));
     }
 }

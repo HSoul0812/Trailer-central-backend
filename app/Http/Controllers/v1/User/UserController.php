@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers\v1\User;
 
+use App\Domains\InteractionIntegration\Permissions\InteractionIntegrationFeature;
+use App\Exceptions\Requests\Validation\NoObjectIdValueSetException;
+use App\Exceptions\Requests\Validation\NoObjectTypeSetException;
 use App\Http\Controllers\RestfulControllerV2;
 use App\Http\Requests\User\CreateUserRequest;
 use App\Http\Requests\User\DealerClassifiedsRequest;
 use App\Http\Requests\User\GetDealerRequest;
 use App\Http\Requests\User\GetUserRequest;
+use App\Http\Requests\User\ListUserByNameRequest;
+use App\Models\User\Interfaces\PermissionsInterface;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Services\User\DealerOptionsService;
 use App\Transformers\User\UserTransformer;
@@ -35,7 +40,7 @@ class UserController extends RestfulControllerV2
         UserRepositoryInterface $userRepository,
         DealerOptionsService $dealerOptionsService
     ) {
-        $this->middleware('setDealerIdOnRequest');
+        $this->middleware('setDealerIdOnRequest')->except(['create', 'listByName']);
         $this->userRepository = $userRepository;
         $this->dealerOptionsService = $dealerOptionsService;
     }
@@ -121,5 +126,21 @@ class UserController extends RestfulControllerV2
         }
 
         return $this->response->errorBadRequest();
+    }
+
+    /**
+     * @throws NoObjectTypeSetException
+     * @throws NoObjectIdValueSetException
+     */
+    public function listByName(Request $request): Response
+    {
+        $request = new ListUserByNameRequest($request->all());
+
+        $request->validate();
+
+        return $this->response->collection(
+            $this->userRepository->getByName($request->input('name')),
+            new UserTransformer()
+        );
     }
 }

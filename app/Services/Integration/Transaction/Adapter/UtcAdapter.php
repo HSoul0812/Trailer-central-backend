@@ -8,5 +8,5 @@ namespace App\Services\Integration\Transaction\Adapter;
  */
 abstract class UtcAdapter extends Adapter
 {
-    protected $_apiKey = 'utc';
+    protected $apiKey = 'utc';
 }

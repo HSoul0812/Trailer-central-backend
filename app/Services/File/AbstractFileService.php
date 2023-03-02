@@ -184,7 +184,11 @@ abstract class AbstractFileService implements FileServiceInterface
 
         $filename = $this->getLocalFilename($localDisk, $dealerId, $identifier);
 
-        $fileContents = $this->httpClient->get($url, ['http_errors' => false])->getBody()->getContents();
+        if ($this->checkIfUrlIsFtp($url)) {
+            $fileContents = file_get_contents($url);
+        } else {
+            $fileContents = $this->httpClient->get($url, ['http_errors' => false])->getBody()->getContents();
+        }
 
         if (!$skipNotExisting && !$fileContents) {
             throw new FileUploadException("Can't get file contents. Url - {$url}, dealer_id - {$dealerId}, id - $identifier");
@@ -240,5 +244,14 @@ abstract class AbstractFileService implements FileServiceInterface
         }
 
         return $s3Filename;
+    }
+
+    /**
+     * @param string $url
+     * @return bool
+     */
+    public function checkIfUrlIsFtp(string $url): bool
+    {
+        return preg_match('/^ftp:\/\/[\da-z]+:[^\@]+\@\S+\s*$/', $url);
     }
 }

@@ -45,9 +45,13 @@ use Laravel\Cashier\Billable;
  * @property bool $isCrmActive
  * @property bool $is_dms_active
  * @property bool $is_scheduler_active
+ * @property bool|null $use_description_in_feed
+ * @property string|null $default_description
+ * @property string|null $import_config
  * @property string $identifier
  * @property integer $showroom
  * @property string $showroom_dealers a PHP serialized object
+ * @property int $auto_import_hide
  *
  * @method static Builder whereIn($column, $values, $boolean = 'and', $not = false)
  */
@@ -533,5 +537,17 @@ class User extends Model implements Authenticatable, PermissionsInterface
             $this->attributes['salt'] = $salt;
         }
         $this->attributes['password'] = $encrypterService->encryptBySalt($value, $salt);
+    }
+
+    /**
+     * Unserializes and returns the serialized showroom dealers
+     * @return array|null
+     */
+    public function getShowroomDealers():?array
+    {
+        if ($this->showroom_dealers) {
+            return array_values(array_filter(unserialize($this->showroom_dealers)));
+        }
+        return null;
     }
 }

@@ -34,6 +34,8 @@ class AuthToken extends Model
         self::USER_TYPE_INTEGRATION
     ];
 
+    const INTEGRATION_ACCESS_TOKEN_LENGTH = 32;
+
     /**
      * The attributes that are mass assignable.
      *

@@ -49,6 +49,7 @@ use App\Services\Inventory\ImageServiceInterface;
 use App\Services\Inventory\ImageService as ImageTableService;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Services\ElasticSearch\Cache\ResponseCacheKeyInterface;
+use App\Services\ElasticSearch\Cache\UniqueCacheInvalidationInterface;
 
 /**
  * Test for App\Services\Inventory\InventoryService
@@ -144,6 +145,11 @@ class InventoryServiceTest extends TestCase
     private $responseCacheKeyMock;
 
     /**
+     * @var LegacyMockInterface|UniqueCacheInvalidationInterface
+     */
+    private $uniqueCacheInvalidationMock;
+
+    /**
      * @var LegacyMockInterface|InventoryResponseCacheInterface
      */
     private $inventoryResponseCacheMock;
@@ -211,6 +217,9 @@ class InventoryServiceTest extends TestCase
 
         $this->responseCacheKeyMock = Mockery::mock(ResponseCacheKeyInterface::class);
         $this->app->instance(ResponseCacheKeyInterface::class, $this->responseCacheKeyMock);
+
+        $this->uniqueCacheInvalidationMock = Mockery::mock(UniqueCacheInvalidationInterface::class);
+        $this->app->instance(UniqueCacheInvalidationInterface::class, $this->uniqueCacheInvalidationMock);
 
         $this->inventoryResponseCacheMock = Mockery::mock(InventoryResponseRedisCache::class);
         $this->app->instance(InventoryResponseCacheInterface::class, $this->inventoryResponseCacheMock);
@@ -472,7 +481,7 @@ class InventoryServiceTest extends TestCase
             $this->fileServiceMock
                 ->shouldReceive('upload')
                 ->once()
-                ->with($file['url'], $file['title'], self::TEST_DEALER_ID)
+                ->with($file['url'], $file['title'], self::TEST_DEALER_ID, null)
                 ->andReturn($newFile);
 
             $expectedParams['new_files'][$key] = array_merge($expectedParams['new_files'][$key], [
@@ -1447,7 +1456,7 @@ class InventoryServiceTest extends TestCase
     {
         $overlayParams['dealer_overlay_enabled'] = Inventory::OVERLAY_ENABLED_PRIMARY;
         $overlayParams['overlay_enabled'] = Inventory::OVERLAY_ENABLED_ALL;
-        
+
         $inventoryImages = new Collection();
 
         $image1 = $this->getEloquentMock(Image::class);
@@ -1907,6 +1916,7 @@ class InventoryServiceTest extends TestCase
         $inventory->dealer_id = $this->faker->numberBetween(1222, 3333);
         $inventory->wasRecentlyCreated = false;
         $inventory->shouldReceive('searchable');
+        $inventory->shouldReceive('getChanges');
 
         $expectedSearchCacheKey = sprintf('inventories.search.*.dealers:*_%d_*.inventories:*', $inventory->dealer_id);
         $expectedSingleCacheKey = sprintf('inventories.single.%d.dealer:%d',$inventory->inventory_id, $inventory->dealer_id);
@@ -1961,6 +1971,7 @@ class InventoryServiceTest extends TestCase
         $inventory->wasRecentlyCreated = false;
         $inventory->shouldReceive('searchable');
         $inventory->shouldReceive('jsonSerialize');
+        $inventory->shouldReceive('getChanges');
 
         $expectedSearchCacheKey = sprintf('inventories.search.*.dealers:*_%d_*.inventories:*', $inventory->dealer_id);
         $expectedSingleCacheKey = sprintf('inventories.single.%d.dealer:%d',$inventory->inventory_id, $inventory->dealer_id);
@@ -2025,6 +2036,7 @@ class InventoryServiceTest extends TestCase
         $inventory->wasRecentlyCreated = false;
         $inventory->shouldReceive('searchable');
         $inventory->shouldReceive('jsonSerialize');
+        $inventory->shouldReceive('getChanges');
 
         $expectedSearchCacheKey = sprintf('inventories.search.*.dealers:*_%d_*.inventories:*', $inventory->dealer_id);
         $expectedSingleCacheKey = sprintf('inventories.single.%d.dealer:%d',$inventory->inventory_id, $inventory->dealer_id);
@@ -2081,6 +2093,7 @@ class InventoryServiceTest extends TestCase
         $inventory->dealer_id = $this->faker->numberBetween(1222, 3333);
         $inventory->wasRecentlyCreated = false;
         $inventory->shouldReceive('searchable');
+        $inventory->shouldReceive('getChanges');
 
         $expectedSearchCacheKey = sprintf('inventories.search.*.dealers:*_%d_*.inventories:*', $inventory->dealer_id);
         $expectedSingleCacheKey = sprintf('inventories.single.%d.dealer:%d',$inventory->inventory_id, $inventory->dealer_id);

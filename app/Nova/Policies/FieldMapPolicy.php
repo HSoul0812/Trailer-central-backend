@@ -14,25 +14,25 @@ class FieldMapPolicy
 {
     use HandlesAuthorization;
 
+    private const VALID_ROLES = ['Admin', 'Support'];
+
     /**
      * Create a new policy instance.
      *
      * @return void
      */
-    public function __construct()
-    {
+    public function __construct() {
         //
     }
 
     /**
      * Determine whether the user can view any field map.
      *
-     * @param  NovaUser $user
+     * @param NovaUser $user
      * @return bool
      */
-    public function viewAny(NovaUser $user): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function viewAny(NovaUser $user): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -42,20 +42,18 @@ class FieldMapPolicy
      * @param FieldMap $field
      * @return bool
      */
-    public function view(?NovaUser $user, FieldMap $field): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function view(?NovaUser $user, FieldMap $field): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
      * Determine whether the user can create field maps.
      *
-     * @param  NovaUser  $user
+     * @param NovaUser $user
      * @return bool
      */
-    public function create(NovaUser $user): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function create(NovaUser $user): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -65,9 +63,8 @@ class FieldMapPolicy
      * @param FieldMap $field
      * @return bool
      */
-    public function update(NovaUser $user, FieldMap $field): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function update(NovaUser $user, FieldMap $field): bool {
+        return $user->hasAnyRole(self::VALID_ROLES);
     }
 
     /**
@@ -77,9 +74,8 @@ class FieldMapPolicy
      * @param FieldMap $field
      * @return bool
      */
-    public function delete(NovaUser $user, FieldMap $field): bool
-    {
-        return $user->hasAnyRole('Admin', 'Support');
+    public function delete(NovaUser $user, FieldMap $field): bool {
+        return false;
     }
 
     /**
@@ -89,8 +85,7 @@ class FieldMapPolicy
      * @param FieldMap $field
      * @return void
      */
-    public function restore(NovaUser $user, FieldMap $field): void
-    {
+    public function restore(NovaUser $user, FieldMap $field): void {
         //
     }
 
@@ -101,8 +96,7 @@ class FieldMapPolicy
      * @param FieldMap $field
      * @return void
      */
-    public function forceDelete(NovaUser $user, FieldMap $field): void
-    {
+    public function forceDelete(NovaUser $user, FieldMap $field): void {
         //
     }
 }

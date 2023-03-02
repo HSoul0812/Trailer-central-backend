@@ -24,9 +24,19 @@ class TransactionService implements TransactionServiceInterface
     private $validation;
 
     /**
+     * @var Reference
+     */
+    private $reference;
+
+    /**
      * @var string
      */
     private $integrationName;
+
+    /**
+     * @var string
+     */
+    private $manufacturer;
 
     /**
      * @var array
@@ -35,10 +45,12 @@ class TransactionService implements TransactionServiceInterface
 
     public function __construct(
         TransactionExecuteQueueRepositoryInterface $transactionExecuteQueueRepository,
-        Validation $validation
+        Validation $validation,
+        Reference $reference
     ) {
         $this->transactionExecuteQueueRepository = $transactionExecuteQueueRepository;
         $this->validation = $validation;
+        $this->reference = $reference;
     }
 
     /**
@@ -49,14 +61,17 @@ class TransactionService implements TransactionServiceInterface
     public function post(array $params): string
     {
         $this->integrationName = $params['integration_name'];
+        $this->manufacturer = $params['manufacturer'] ?? $this->integrationName;
 
-        $transactionData = [
-            'data' => $params['data'],
-            'api' => $this->integrationName,
-            'without_prepare_data' => true
-        ];
+        if ($params['create_transaction_queue'] ?? false) {
+            $transactionData = [
+                'data' => $params['data'],
+                'api' => $this->integrationName,
+                'without_prepare_data' => true
+            ];
 
-        $this->transactionExecuteQueueRepository->create($transactionData);
+            $this->transactionExecuteQueueRepository->create($transactionData);
+        }
 
         $config = new \SimpleXMLElement($params['data'], LIBXML_NOCDATA);
 
@@ -141,7 +156,7 @@ class TransactionService implements TransactionServiceInterface
             return;
         }
 
-        $action = Reference::decodeAction($method, $this->integrationName);
+        $action = $this->reference->decodeAction($method, $this->integrationName);
 
         if(!$action) {
             return;
@@ -160,7 +175,7 @@ class TransactionService implements TransactionServiceInterface
      */
     protected function createAdapter(array $action): Adapter
     {
-        $className = Adapter::ADAPTER_MAPPING['Adapter_' . ucwords($this->integrationName) . '_' . ucwords($action['entity_type'])];
+        $className = Adapter::ADAPTER_MAPPING['Adapter_' . ucwords($this->manufacturer) . '_' . ucwords($action['entity_type'])];
         return app()->make($className);
     }
 
