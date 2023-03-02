@@ -16,7 +16,7 @@ class CreateDealerVirtualCardsTable extends Migration
         Schema::create('dealer_virtual_cards', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('dealer_id')->index();
-            $table->enum('type', VirtualCard::CARD_SERVICE)->index();
+            $table->enum('type', VirtualCard::CARD_SERVICES)->index();
             $table->integer('card_number', 20);
             $table->integer('security', 5);
             $table->string('name_on_card', 100);
