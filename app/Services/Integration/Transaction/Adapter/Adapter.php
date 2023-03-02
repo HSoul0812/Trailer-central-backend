@@ -36,7 +36,8 @@ abstract class Adapter
 
     public const ADAPTER_MAPPING = [
         'Adapter_Utc_Inventory' => 'App\Services\Integration\Transaction\Adapter\Utc\Inventory',
-        'Adapter_Pj_Inventory' => 'App\Services\Integration\Transaction\Adapter\Pj\Inventory'
+        'Adapter_Pj_Inventory' => 'App\Services\Integration\Transaction\Adapter\Pj\Inventory',
+        'Adapter_Bigtex_Inventory' => 'App\Services\Integration\Transaction\Adapter\Bigtex\Inventory',
     ];
 
     /**

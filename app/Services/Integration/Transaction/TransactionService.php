@@ -34,6 +34,11 @@ class TransactionService implements TransactionServiceInterface
     private $integrationName;
 
     /**
+     * @var string
+     */
+    private $manufacturer;
+
+    /**
      * @var array
      */
     private $transactionErrors = [];
@@ -56,6 +61,7 @@ class TransactionService implements TransactionServiceInterface
     public function post(array $params): string
     {
         $this->integrationName = $params['integration_name'];
+        $this->manufacturer = $params['manufacturer'] ?? $this->integrationName;
 
         if ($params['create_transaction_queue'] ?? false) {
             $transactionData = [
@@ -169,7 +175,7 @@ class TransactionService implements TransactionServiceInterface
      */
     protected function createAdapter(array $action): Adapter
     {
-        $className = Adapter::ADAPTER_MAPPING['Adapter_' . ucwords($this->integrationName) . '_' . ucwords($action['entity_type'])];
+        $className = Adapter::ADAPTER_MAPPING['Adapter_' . ucwords($this->manufacturer) . '_' . ucwords($action['entity_type'])];
         return app()->make($className);
     }
 
