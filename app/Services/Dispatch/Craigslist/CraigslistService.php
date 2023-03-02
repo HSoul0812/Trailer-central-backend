@@ -26,6 +26,16 @@ class CraigslistService implements CraigslistServiceInterface
      */
     const INTEGRATION_NAME = 'dispatch_craigslist';
 
+    /**
+     * @const array<string> Craigslist Dealer Available Includes
+     */
+    const AVAILABLE_INCLUDES = [
+        'accounts',
+        'profiles',
+        'cards',
+        'tunnels'
+    ];
+
 
     /**
      * @var DealerRepositoryInterface
@@ -167,7 +177,7 @@ class CraigslistService implements CraigslistServiceInterface
         // Include Extra Features
         foreach(self::AVAILABLE_INCLUDES as $include) {
             if(!empty($params['include']) && strpos($include, $params['include']) !== false) {
-                $dealerClapp[$include] = $this->$include->getAll(['dealer_id' => $dealerId]);
+                $dealerClapp[$include] = $clapp->$include->getAll(['dealer_id' => $dealerId]);
             }
         }
         $response = new DealerCraigslist($dealerClapp);
