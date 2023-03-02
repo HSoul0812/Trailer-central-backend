@@ -150,6 +150,172 @@ class LeadControllerTest extends IntegrationTestCase
 
     /**
      * @group CRM
+     * @covers ::index
+     */
+    public function testIndex()
+    {
+        $params = [
+            'dealer_id' => $this->dealer->getKey(),
+            'page' => 0,
+            'per_page' => 10,
+            'sort' => '-most_recent',
+            'include' => 'otherLeadProperties'
+        ];
+
+        $response = $this->json(
+            'GET',
+            '/api/leads',
+            $params,
+            ['access-token' => $this->token->access_token]
+        );
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'id',
+                        'identifier',
+                        'website_id',
+                        'dealer_id',
+                        'name',
+                        'lead_types',
+                        'email',
+                        'phone',
+                        'preferred_contact',
+                        'address',
+                        'full_address',
+                        'comments',
+                        'note',
+                        'referral',
+                        'title',
+                        'status',
+                        'source',
+                        'next_contact_date',
+                        'contact_type',
+                        'created_at',
+                        'zip',
+                        'is_archived',
+                        'inventoryInterestedIn',
+                        'otherLeadProperties'
+                    ]
+                ]
+            ]);
+    }
+
+    /**
+     * @group CRM
+     * @covers ::index
+     */
+    public function testSearch()
+    {
+        $params = [
+            'dealer_id' => $this->dealer->getKey(),
+            'page' => 0,
+            'per_page' => 10,
+            'sort' => '-most_recent',
+            'include' => 'otherLeadProperties',
+            'search_term' => $this->lead->email_address
+        ];
+
+        $response = $this->json(
+            'GET',
+            '/api/leads',
+            $params,
+            ['access-token' => $this->token->access_token]
+        );
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'id',
+                        'identifier',
+                        'website_id',
+                        'dealer_id',
+                        'name',
+                        'lead_types',
+                        'email',
+                        'phone',
+                        'preferred_contact',
+                        'address',
+                        'full_address',
+                        'comments',
+                        'note',
+                        'referral',
+                        'title',
+                        'status',
+                        'source',
+                        'next_contact_date',
+                        'contact_type',
+                        'created_at',
+                        'zip',
+                        'is_archived',
+                        'inventoryInterestedIn',
+                        'otherLeadProperties'
+                    ]
+                ]
+            ])
+            ->assertJsonFragment(['email' => $this->lead->email_address]);
+    }
+
+    /**
+     * @group CRM
+     * @covers ::getMatches
+     */
+    public function testGetMatches()
+    {
+        $params = [
+            'leads' => [
+                [
+                    'type' => 'email',
+                    'identifier' => $this->lead->email_address
+                ]
+            ]
+        ];
+
+        $response = $this->json(
+            'POST',
+            '/api/leads/find-matches?include=otherLeadProperties',
+            $params,
+            ['access-token' => $this->token->access_token]
+        );
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'id',
+                        'identifier',
+                        'website_id',
+                        'dealer_id',
+                        'name',
+                        'lead_types',
+                        'email',
+                        'phone',
+                        'preferred_contact',
+                        'address',
+                        'full_address',
+                        'comments',
+                        'note',
+                        'referral',
+                        'title',
+                        'status',
+                        'source',
+                        'next_contact_date',
+                        'contact_type',
+                        'created_at',
+                        'zip',
+                        'is_archived',
+                        'inventoryInterestedIn',
+                        'otherLeadProperties'
+                    ]
+                ]
+            ])
+            ->assertJsonFragment(['email' => $this->lead->email_address]);
+    }
+
+    /**
+     * @group CRM
      * @covers ::output
      */
     public function testOutput()
