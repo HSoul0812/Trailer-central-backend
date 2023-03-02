@@ -18,8 +18,8 @@ class CreateDealerVirtualCardsTable extends Migration
             $table->increments('id');
             $table->integer('dealer_id')->index();
             $table->enum('type', VirtualCard::CARD_SERVICES)->index();
-            $table->integer('card_number', 20);
-            $table->integer('security', 5);
+            $table->bigInteger('card_number', 20);
+            $table->smallInteger('security');
             $table->string('name_on_card', 100);
             $table->string('address_street', 100);
             $table->string('address_city', 50);

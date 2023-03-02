@@ -23,12 +23,12 @@ class CreateClappAccountsTable extends Migration
             $table->string('password');
             $table->string('smtp_password')->nullable();
             $table->string('smtp_server')->nullable();
-            $table->integer('smtp_port', 10)->nullable();
+            $table->integer('smtp_port')->nullable();
             $table->string('smtp_security', 10)->nullable();
             $table->string('smtp_auth')->nullable();
             $table->string('imap_password')->nullable();
             $table->string('imap_server')->nullable();
-            $table->integer('imap_port', 10)->nullable();
+            $table->integer('imap_port')->nullable();
             $table->string('imap_security', 10)->nullable();
             $table->timestamps();
         });
