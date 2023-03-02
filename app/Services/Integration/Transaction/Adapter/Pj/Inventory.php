@@ -12,7 +12,9 @@ use Illuminate\Contracts\Container\BindingResolutionException;
  */
 class Inventory extends PjAdapter
 {
-    private const TITLE_FORMAT = '%d PJ Trailers %s Trailer';
+    private const MANUFACTURE_NAME = 'PJ Trailers';
+
+    private const TITLE_FORMAT = '%d %s %s Trailer';
     private const NOTES_FORMAT = '-- Auto imported %s --';
 
     private const ENTITY_TYPE = 1;
@@ -49,8 +51,8 @@ class Inventory extends PjAdapter
             'dealer_id' => $dealerID,
             'dealer_location_id' => $locationID,
             'active' => 1,
-            'title' => sprintf(self::TITLE_FORMAT, $data['year'], $data['model']),
-            'manufacturer' => 'PJ Trailers',
+            'title' => sprintf(self::TITLE_FORMAT, $data['year'], $this->getManufactureName(), $data['model']),
+            'manufacturer' => $this->getManufactureName(),
             'price' => 0,
             'model' => $data['model'],
             'notes' => sprintf(self::NOTES_FORMAT, date("F j, Y g:i a")),
@@ -152,6 +154,7 @@ class Inventory extends PjAdapter
         if (!empty($data['model'])) {
             $inventoryParams['model'] = $data['model'];
         }
+
         if (!empty($data['category'])) {
             $inventoryParams['category'] = $data['category'];
         } else {
@@ -241,5 +244,13 @@ class Inventory extends PjAdapter
         }
 
         return $this->getInventoryAttributes(self::ENTITY_TYPE, $attributes);
+    }
+
+    /**
+     * @return string
+     */
+    protected function getManufactureName(): string
+    {
+        return self::MANUFACTURE_NAME;
     }
 }
