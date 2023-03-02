@@ -226,6 +226,14 @@ return [
             'permission' => 0664,
         ],
 
+        'dispatch-cl' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/dispatch/craigslist.log'),
+            'level' => env('LOG_LEVEL', 'error'),
+            'days' => 7,
+            'permission' => 0664,
+        ],
+
         'cl-client' => [
             'driver' => 'daily',
             'path' => storage_path('logs/repositories/cl-client.log'),

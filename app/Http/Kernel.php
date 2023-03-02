@@ -34,6 +34,7 @@ use App\Http\Middleware\CRM\Text\BlastValidate as TextBlastValidate;
 use App\Http\Middleware\CRM\Text\CampaignValidate as TextCampaignValidate;
 use App\Http\Middleware\CRM\User\SalesPersonValidate;
 use App\Http\Middleware\Dispatch\FacebookValidate;
+use App\Http\Middleware\Dispatch\CraigslistValidate;
 use App\Http\Middleware\Dms\Printer\FormValidate as PrinterFormValidate;
 use App\Http\Middleware\Dms\Printer\InstructionValidate as PrinterInstructionValidate;
 use App\Http\Middleware\Integration\AuthValidate;
@@ -135,6 +136,7 @@ class Kernel extends HttpKernel
         'marketing.facebook.marketplace' => MarketplaceValidate::class,
         'marketing.facebook.pagetab' => PagetabValidate::class,
         'dispatch.facebook' => FacebookValidate::class,
+        'dispatch.craigslist' => CraigslistValidate::class,
         'replytext.validate' => ReplyTextValidate::class,
         'validateDealerIdOnRequest' => ValidateDealerIdOnRequest::class,
         'inventory.cache.permission' => InvalidatePermissionMiddleware::class,
