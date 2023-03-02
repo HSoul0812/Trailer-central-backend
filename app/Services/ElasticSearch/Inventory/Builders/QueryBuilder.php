@@ -433,26 +433,44 @@ class QueryBuilder implements InventoryQueryBuilderInterface
 
     private function addStatusSortScript(string $status): void
     {
-        array_push($this->query['sort'], ... array_map(static function ($value) {
-            if(is_numeric($value)){
-                return [
-                    '_script' => [
-                        'type' => 'string',
-                        'script' => [
-                            'inline' => "doc['status'].size() != 0 && doc['status'].value == params.status ? '1': '0'", // to avoid casting issues
-                            'params' => [
-                                'status' => (int)$value
-                            ]
-                        ],
-                        'order' => 'desc'
-                    ]
-                ];
-            }
+        $sortingAsArray = array_filter(explode(',', trim($status)));
 
-            $parts = explode(':', $value);
+        if (count($sortingAsArray) === 0) {
+            return;
+        }
 
-            return [\Str::camel($parts[0]) => ['order' => $parts[1]]];
-        }, explode(',', $status)));
+        if (((int) $sortingAsArray[0]) === 0) {
+            $parts = explode(':', $sortingAsArray[0]);
+
+            $this->query['sort'][] = [\Str::camel($parts[0]) => ['order' => $parts[1]]];
+
+            array_shift($sortingAsArray);
+        }
+
+        $script = "if (doc['status'].size() == 0) {return 0;}";
+        $max = count($sortingAsArray);
+        $ceil = $max;
+
+        foreach ($sortingAsArray as $sorting) {
+            $script .= sprintf(
+                " else if (doc['status'].value == '%s') {  return %d;} ",
+                $sorting,
+                $ceil--
+            );
+        }
+
+        $script .= " else {return 0;}";
+
+        $this->query['sort'][] = [
+            '_script' => [
+                'type' => 'number',
+                'script' => [
+                    'lang' => 'painless',
+                    'source' => $script
+                ],
+                'order' => 'desc'
+            ]
+        ];
     }
 
     private function addGeoDistanceSortScript(string $order): void
