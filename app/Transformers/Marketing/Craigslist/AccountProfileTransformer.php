@@ -3,19 +3,17 @@
 namespace App\Transformers\Marketing\Craigslist;
 
 use App\Services\Marketing\Craigslist\DTOs\Account;
-use App\Transformers\User\UserTransformer;
-use App\Transformers\Marketing\VirtualCardTransformer;
 use App\Transformers\Marketing\Craigslist\ProfileTransformer;
 use League\Fractal\TransformerAbstract;
 
 /**
- * Class AccountTransformer
+ * Class AccountProfileTransformer
  * 
  * @package App\Transformers\Marketing\Craigslist
  */
 class AccountProfileTransformer extends TransformerAbstract
 {
-    protected $availableIncludes = [
+    protected $defaultIncludes = [
         'profile'
     ];
 
