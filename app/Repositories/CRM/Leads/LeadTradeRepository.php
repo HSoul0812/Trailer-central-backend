@@ -4,6 +4,7 @@ namespace App\Repositories\CRM\Leads;
 
 use App\Exceptions\CRM\Leads\MissingLeadIdGetAllTradesException;
 use App\Models\CRM\Leads\LeadTrade;
+use App\Models\CRM\Leads\LeadTradeImage;
 use App\Repositories\RepositoryAbstract;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -104,5 +105,55 @@ class LeadTradeRepository extends RepositoryAbstract implements LeadTradeReposit
         }
 
         return $query->get();
+    }
+
+    /**
+     * Get Lead Trade Image IDs
+     * @param int $imageId
+     * @return array
+     */
+    public function getImageIds(int $tradeId): array
+    {
+        return $this->find($tradeId)->images()->pluck('id')->toArray();
+    }
+
+    /**
+     * Get Lead Trade Image Path
+     * @param int $imageId
+     * @return string
+     */
+    public function getImagePath(int $imageId): string
+    {
+        return LeadTradeImage::find($imageId)->path;
+    }
+
+    /**
+     * Delete Lead Trade Image
+     * @param int $imageId
+     * @return bool
+     */
+    public function deleteImage(int $imageId): bool
+    {
+        return LeadTradeImage::find($imageId)->delete();
+    }
+
+    /**
+     * Create Lead Trade Image
+     * @param array $params
+     * @return LeadTradeImage
+     */
+    public function createImage(array $params): LeadTradeImage
+    {
+        return LeadTradeImage::create($params);
+    }
+
+    /**
+     * Get Lead Trade Images
+     * @param int $tradeId
+     * @return Collection<LeadTradeImage>
+     */
+    public function getImages(int $tradeId): Collection
+    {
+        return $this->find($tradeId)->images;
     }
 }

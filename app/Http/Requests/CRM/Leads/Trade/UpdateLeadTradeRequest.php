@@ -11,6 +11,7 @@ use App\Http\Requests\Request;
 class UpdateLeadTradeRequest extends Request
 {
     protected $rules = [
+        'lead_id' => 'required|valid_lead',
         'id' => 'required|lead_trade_valid',
         'type' => 'string',
         'make' => 'string',
@@ -19,6 +20,10 @@ class UpdateLeadTradeRequest extends Request
         'price' => 'numeric',
         'length' => 'numeric',
         'width' => 'numeric',
-        'notes' => 'string'
+        'notes' => 'string',
+        'new_images' => 'array',
+        'new_images.*' => 'max:10000|mimes:jpg,jpeg,png,bmp',
+        'existing_images' => 'array|nullable',
+        'existing_images.*.id' => 'integer|required'
     ];
 }

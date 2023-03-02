@@ -14,6 +14,7 @@ use App\Repositories\CRM\Leads\LeadTradeRepositoryInterface;
 use App\Transformers\CRM\Leads\LeadTradeTransformer;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Http\Response;
+use App\Services\CRM\Leads\LeadTradeServiceInterface;
 
 /**
  * Class LeadTradeController
@@ -27,23 +28,32 @@ class LeadTradeController extends RestfulControllerV2
     private $leadTradeRepository;
 
     /**
+     * @var LeadTradeServiceInterface
+     */
+    private $leadTradeService;
+
+    /**
      * @param LeadTradeRepositoryInterface $leadTradeRepository
      */
-    public function __construct(LeadTradeRepositoryInterface $leadTradeRepository)
+    public function __construct(LeadTradeRepositoryInterface $leadTradeRepository, LeadTradeServiceInterface $leadTradeService)
     {
         $this->leadTradeRepository = $leadTradeRepository;
+        $this->leadTradeService = $leadTradeService;
         $this->transformer = new LeadTradeTransformer();
     }
 
     /**
+     * @param int $leadId
      * @param Request $request
      * @return Response
      * @throws NoObjectIdValueSetException
      * @throws NoObjectTypeSetException
      */
-    public function index(Request $request): Response
+    public function index(int $leadId, Request $request): Response
     {
-        $request = new GetLeadTradesRequest($request->all());
+        $requestData = $request->all();
+        $requestData['lead_id'] = $leadId;
+        $request = new GetLeadTradesRequest($requestData);
 
         if ($request->validate()) {
             return $this->collectionResponse($this->leadTradeRepository->getAll($request->all()), $this->transformer);
@@ -57,9 +67,12 @@ class LeadTradeController extends RestfulControllerV2
      *
      * @param int $id
      */
-    public function show(int $id)
+    public function show(int $leadId, int $id, Request $request)
     {
-        $request = new GetLeadTradeRequest(['id' => $id]);
+        $requestData = $request->all();
+        $requestData['lead_id'] = $leadId;
+        $requestData['id'] = $id;
+        $request = new GetLeadTradeRequest($requestData);
 
         if ($request->validate()) {
             return $this->response->item($this->leadTradeRepository->get(['id' => $id]), $this->transformer);
@@ -71,13 +84,17 @@ class LeadTradeController extends RestfulControllerV2
     /**
      * Insert new data into the DB
      *
+     * @param int $leadId
      * @param Request $request
      */
-    public function create(Request $request) {
-        $request = new CreateLeadTradeRequest($request->all());
+    public function create(int $leadId, Request $request) 
+    {
+        $requestData = $request->all();
+        $requestData['lead_id'] = $leadId;
+        $request = new CreateLeadTradeRequest($requestData);
 
         if ($request->validate()) {
-            return $this->response->item($this->leadTradeRepository->create($request->all()), $this->transformer);
+            return $this->response->item($this->leadTradeService->create($request->all()), $this->transformer);
         }
 
         return $this->response->errorBadRequest();
@@ -86,16 +103,19 @@ class LeadTradeController extends RestfulControllerV2
     /**
      * Update existing data on the record already in the DB
      *
+     * @param int $leadId
      * @param int $id
      * @param Request $request
      */
-    public function update(int $id, Request $request) {
+    public function update(int $leadId, int $id, Request $request) 
+    {
         $requestData = $request->all();
+        $requestData['lead_id'] = $leadId;
         $requestData['id'] = $id;
         $request = new UpdateLeadTradeRequest($requestData);
 
         if ($request->validate()) {
-            return $this->response->item($this->leadTradeRepository->update($request->all()), $this->transformer);
+            return $this->response->item($this->leadTradeService->update($request->all()), $this->transformer);
         }
 
         return $this->response->errorBadRequest();
@@ -104,14 +124,18 @@ class LeadTradeController extends RestfulControllerV2
     /**
      * Delete existing data on the record already in the DB
      *
+     * @param int $leadId
      * @param int $id
      * @param Request $request
      */
-    public function destroy(int $id, Request $request)
+    public function destroy(int $leadId, int $id, Request $request)
     {
-        $request = new DeleteLeadTradeRequest(array_merge($request->all(), ['id' => $id]));
+        $requestData = $request->all();
+        $requestData['lead_id'] = $leadId;
+        $requestData['id'] = $id;
+        $request = new DeleteLeadTradeRequest($requestData);
         
-        if ($request->validate() && $this->leadTradeRepository->delete(['id' => $id]) > 0) {
+        if ($request->validate() && $this->leadTradeService->delete(['id' => $id])) {
             return $this->updatedResponse();
         }
 

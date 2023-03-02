@@ -19,6 +19,8 @@ class CreateLeadTradeRequest extends Request
         'price' => 'nullable|numeric',
         'length' => 'nullable|numeric',
         'width' => 'nullable|numeric',
-        'notes' => 'required|string'
+        'notes' => 'required|string',
+        'images' => 'array',
+        'images.*' => 'file|max:10000|mimes:jpg,jpeg,png,bmp'
     ];
 }
