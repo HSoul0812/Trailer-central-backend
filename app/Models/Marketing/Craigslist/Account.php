@@ -2,7 +2,6 @@
 
 namespace App\Models\Marketing\Craigslist;
 
-use App\Models\Marketing\VirtualCard;
 use App\Models\Traits\TableAware;
 use App\Models\User\User;
 use App\Models\Marketing\Craigslist\Profile;
