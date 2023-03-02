@@ -21,15 +21,15 @@ class CreateClappAccountsTable extends Migration
             $table->integer('virtual_card_id')->nullable()->index();
             $table->string('username')->index();
             $table->string('password');
-            $table->string('smtp_password');
-            $table->string('smtp_server');
-            $table->integer('smtp_port', 10);
-            $table->string('smtp_security', 10);
-            $table->string('smtp_auth');
-            $table->string('imap_password');
-            $table->string('imap_server');
-            $table->integer('imap_port', 10);
-            $table->string('imap_security', 10);
+            $table->string('smtp_password')->nullable();
+            $table->string('smtp_server')->nullable();
+            $table->integer('smtp_port', 10)->nullable();
+            $table->string('smtp_security', 10)->nullable();
+            $table->string('smtp_auth')->nullable();
+            $table->string('imap_password')->nullable();
+            $table->string('imap_server')->nullable();
+            $table->integer('imap_port', 10)->nullable();
+            $table->string('imap_security', 10)->nullable();
             $table->timestamps();
         });
 
