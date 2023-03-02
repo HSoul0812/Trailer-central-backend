@@ -81,6 +81,7 @@ class CraigslistController extends RestfulControllerV2 {
             $data = $this->item(
                 $this->service->dealer($request->dealer_id, $request->all(), $startTime),
                 $this->dealerTransformer);
+            var_dump($data);
             Log::channel('dispatch-cl')->info('Debug time after calling single craigslist dealer service: ' . (microtime(true) - $startTime));
             return $data;
         }
