@@ -725,7 +725,7 @@ $api->version('v1', function ($route) {
         $route->group(['prefix' => 'leads/{leadId}/documents'], function ($route) {
 
             $route->get('/', 'App\Http\Controllers\v1\CRM\Documents\DealerDocumentsController@index');
-            $route->put('/', 'App\Http\Controllers\v1\CRM\Documents\DealerDocumentsController@create');
+            $route->post('/', 'App\Http\Controllers\v1\CRM\Documents\DealerDocumentsController@create');
             $route->delete('/{documentId}', 'App\Http\Controllers\v1\CRM\Documents\DealerDocumentsController@destroy');
         });
 

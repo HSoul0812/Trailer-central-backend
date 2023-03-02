@@ -99,7 +99,7 @@ class DealerDocumentsControllerTest extends IntegrationTestCase
             ->andReturn($randomString);
 
         $response = $this->json(
-            'PUT',
+            'POST',
             str_replace('{leadId}', $documentsSeeder->lead->getKey(), self::API_URL),
             [
                 'files' => [

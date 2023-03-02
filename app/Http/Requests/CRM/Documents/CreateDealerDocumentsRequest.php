@@ -13,7 +13,7 @@ class CreateDealerDocumentsRequest extends Request {
     protected $rules = [
         'dealer_id' => 'required|integer|exists:dealer,dealer_id',
         'lead_id' => 'required|integer|valid_lead',
-        'files' => 'required|array',
-        'files.*' => 'max:10000|mimes:pdf'
+        'files' => 'array',
+        'files.*' => 'required|file|max:10000|mimes:pdf'
     ];
 }
