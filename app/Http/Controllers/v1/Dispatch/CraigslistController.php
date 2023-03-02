@@ -78,7 +78,7 @@ class CraigslistController extends RestfulControllerV2 {
         if ($request->validate()) {
             // Return Item Craigslist Dispatch Dealer Transformer
             Log::channel('dispatch-cl')->info('Debug time after validating FB Inventory endpoint: ' . (microtime(true) - $startTime));
-            $data = $this->response->item(
+            $data = $this->itemResponse(
                 $this->service->dealer($request->dealer_id, $request->all(), $startTime),
                 $this->dealerTransformer);
             Log::channel('dispatch-cl')->info('Debug time after calling single craigslist dealer service: ' . (microtime(true) - $startTime));
