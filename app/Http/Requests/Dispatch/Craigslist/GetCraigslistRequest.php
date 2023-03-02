@@ -12,6 +12,10 @@ use App\Http\Requests\Request;
  */
 class GetCraigslistRequest extends Request {
 
-    protected $rules = [];
+    protected $rules = [
+        'per_page' => 'integer',
+        'page' => 'integer',
+        'type' => 'string|in:posted,profiles,scheduled,upcoming,now'
+    ];
 
 }
