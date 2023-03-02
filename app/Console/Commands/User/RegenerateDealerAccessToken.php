@@ -2,16 +2,16 @@
 
 namespace App\Console\Commands\User;
 
-use Illuminate\Console\Command;
 use App\Models\User\User;
 use App\Models\User\AuthToken;
+use Illuminate\Console\Command;
 
 /**
- * class RegenerateAccessTokens
+ * class RegenerateDealerAccessToken
  *
  * @package App\Console\Commands\User
  */
-class RegenerateAccessToken extends Command
+class RegenerateDealerAccessToken extends Command
 {
     /**
      * The console command name.
