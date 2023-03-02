@@ -5,12 +5,13 @@ namespace App\Http\Requests\CRM\Leads;
 use App\Http\Requests\Request;
 
 /**
- * Class DeleteLeadTradeRequest
+ * Class DeleteLeadRequest
  * @package App\Http\Requests\CRM\Leads
  */
-class DeleteLeadTradeRequest extends Request
+class DeleteLeadRequest extends Request
 {
     protected $rules = [
-        'id' => 'required|integer|valid_lead_trade'
+        'dealer_id' => 'required|integer',
+        'id' => 'required|integer|valid_lead'
     ];
 }
