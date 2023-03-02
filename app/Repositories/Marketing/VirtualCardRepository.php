@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Collection;
 /**
  * Class VirtualCardRepository
  * 
- * @package App\Repositories\Inventory
+ * @package App\Repositories\Marketing
  */
 class VirtualCardRepository implements VirtualCardRepositoryInterface 
 {

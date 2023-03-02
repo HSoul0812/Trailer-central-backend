@@ -73,16 +73,16 @@ class AccountTransformer extends TransformerAbstract
 
     public function includeDealer(Account $account)
     {
-        return $this->collection($account->dealer, $this->userTransformer);
+        return $this->item($account->dealer, $this->userTransformer);
     }
 
     public function includeVirtualCard(Account $account)
     {
-        return $this->collection($account->card, $this->cardTransformer);
+        return $this->item($account->card, $this->cardTransformer);
     }
 
     public function includeProfile(Account $account)
     {
-        return $this->collection($account->profile, $this->profileTransformer);
+        return $this->item($account->profile, $this->profileTransformer);
     }
 }
