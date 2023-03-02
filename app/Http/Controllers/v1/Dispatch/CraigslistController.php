@@ -11,6 +11,7 @@ use App\Services\Dispatch\Craigslist\CraigslistServiceInterface;
 use App\Transformers\Dispatch\Craigslist\DealerTransformer;
 use App\Utilities\Fractal\NoDataArraySerializer;
 use League\Fractal\Manager;
+use Illuminate\Support\Facades\Log;
 
 class CraigslistController extends RestfulControllerV2 {
     /**
