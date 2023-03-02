@@ -4,6 +4,9 @@ namespace App\Models\Marketing\Craigslist;
 
 use App\Models\User\User;
 use App\Models\User\DealerLocation;
+use App\Models\Marketing\Craigslist\City;
+use App\Models\Marketing\Craigslist\ClCity;
+use App\Models\Marketing\Craigslist\Subarea;
 use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,6 +19,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Profile extends Model
 {
     use TableAware;
+
+
+    /**
+     * @const array{string: string}
+     */
+    const MAP_GROUPING = [
+        'fso' => 'o',
+        'fsd' => 'd',
+        'ho' => 'ho'
+    ];
 
 
     // Define Table Name Constant
@@ -68,12 +81,12 @@ class Profile extends Model
         'format_fbk',
         'show_more_ads',
         'autoposting_enable',
-        'autposting_items',
-        'autposting_hrs',
-        'autposting_slot_id',
+        'autoposting_items',
+        'autoposting_hrs',
+        'autoposting_slot_id',
         'autoposting_start_at',
         'embed_phone',
-        'embed_dealer_phone',
+        'embed_dealer_name',
         'embed_dealer_and_phone',
         'embed_logo',
         'embed_logo_position',
@@ -118,5 +131,64 @@ class Profile extends Model
     public function dealerLocation(): BelongsTo
     {
         return $this->belongsTo(DealerLocation::class, 'dealer_location_id', 'dealer_location_id');
+    }
+
+    /**
+     * Get Category
+     * 
+     * @return BelongsTo
+     */
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class, 'postCategory', 'category');
+    }
+
+    /**
+     * Get City
+     * 
+     * @return BelongsTo
+     */
+    public function cities(): BelongsTo
+    {
+        return $this->belongsTo(City::class, 'city', 'city');
+    }
+
+    /**
+     * Get CL City / Area
+     * 
+     * @return BelongsTo
+     */
+    public function clCity(): BelongsTo
+    {
+        return $this->belongsTo(ClCity::class, 'city', 'name');
+    }
+
+    /**
+     * Get Subarea
+     * 
+     * @return BelongsTo
+     */
+    public function subarea(): BelongsTo
+    {
+        return $this->belongsTo(Subarea::class, 'city_location', 'name');
+    }
+
+    /**
+     * Get Base URL
+     * 
+     * @return string
+     */
+    public function getBaseUrlAttribute(): string {
+        // Get Category
+        $category = $this->category->abbr;
+
+        // Get Subarea
+        $subarea = (!empty($this->subarea->code) ? '/' . $this->subarea->code : '');
+
+        // Get By
+        $by = self::MAP_GROUPING[$this->category->grouping];
+
+        // Return Full URL Path
+        return $this->cities->url . $category . $subarea . '/' . $by . '/';
     }
 }

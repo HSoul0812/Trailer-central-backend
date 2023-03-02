@@ -55,7 +55,9 @@ class Queue extends Model
         'inventory_id',
         'status',
         'state',
-        'img_status'
+        'img_status',
+        'costs',
+        'log'
     ];
 
     /**

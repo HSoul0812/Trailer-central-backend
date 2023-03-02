@@ -2,23 +2,22 @@
 
 namespace App\Models\Marketing\Craigslist;
 
-use App\Models\Traits\Inventory\CompositePrimaryKeys;
 use App\Models\Traits\TableAware;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * Class Market
+ * Class Category
  * 
  * @package App\Models\Marketing\Craigslist
  */
-class Market extends Model
+class Category extends Model
 {
-    use TableAware, CompositePrimaryKeys;
+    use TableAware;
 
 
     // Define Table Name Constant
-    const TABLE_NAME = 'clapp_markets';
+    const TABLE_NAME = 'clapp_category_prices';
 
     /**
      * @var string
@@ -26,9 +25,9 @@ class Market extends Model
     protected $table = self::TABLE_NAME;
 
     /**
-     * @var array<string>
+     * @var string
      */
-    protected $primaryKey = ['city_code', 'subarea_code'];
+    protected $primaryKey = 'category_price_id';
 
     /**
      * @var bool
@@ -41,14 +40,21 @@ class Market extends Model
      * @var array
      */
     protected $fillable = [
+        'category_id',
         'city_code',
-        'city_name',
-        'city_alt_name',
-        'city_domain',
-        'subarea_code',
-        'subarea_name',
-        'subarea_alt_name'
+        'price'
     ];
+
+
+    /**
+     * Get Category
+     * 
+     * @return BelongsTo
+     */
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class, 'category_id', 'id');
+    }
 
     /**
      * Get City
@@ -57,6 +63,6 @@ class Market extends Model
      */
     public function city(): BelongsTo
     {
-        return $this->belongsTo(City::class, 'city_name', 'city');
+        return $this->belongsTo(Category::class, 'city_code', 'code');
     }
 }

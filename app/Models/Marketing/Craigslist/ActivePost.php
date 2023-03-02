@@ -108,6 +108,16 @@ class ActivePost extends Model
     }
 
     /**
+     * Get Parent Queue
+     * 
+     * @return BelongsTo
+     */
+    public function parentQueue(): BelongsTo
+    {
+        return $this->belongsTo(Queue::class, 'queue_id', 'parent_id');
+    }
+
+    /**
      * Get Inventory
      * 
      * @return BelongsTo
@@ -117,6 +127,36 @@ class ActivePost extends Model
         return $this->belongsTo(Inventory::class, 'inventory_id', 'inventory_id');
     }
 
+
+    /**
+     * Get Dealer ID From Related Items
+     * 
+     * @return int
+     */
+    public function getDealerIdAttribute(): int {
+        // Find By Profile ID
+        if($this->profile) {
+            return $this->profile->dealer_id;
+        }
+
+        // Find By Queue ID
+        if($this->queue) {
+            return $this->queue->dealer_id;
+        }
+
+        // Find By Parent Queue ID
+        if($this->parentQueue) {
+            return $this->parentQueue->dealer_id;
+        }
+
+        // Find By Session ID
+        if($this->session) {
+            return $this->session->session_dealer_id;
+        }
+
+        // Can't Find One, Not Synced Correctly?
+        return 0;
+    }
 
     /**
      * Get Current Title
