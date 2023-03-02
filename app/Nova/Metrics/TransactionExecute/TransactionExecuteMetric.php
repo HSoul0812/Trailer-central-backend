@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Nova\Filters\TransactionExecute;
+namespace App\Nova\Metrics\TransactionExecute;
 
 use App\Models\Feed\TransactionExecuteQueue;
 use Laravel\Nova\Http\Requests\NovaRequest;

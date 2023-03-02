@@ -5,11 +5,11 @@ namespace App\Nova\Resources\Integration;
 use App\Nova\Filters\TransactionExecute\TransactionExecuteApiFilter;
 use App\Nova\Filters\TransactionExecute\TransactionExecuteDateFromFilter;
 use App\Nova\Filters\TransactionExecute\TransactionExecuteDateToFilter;
-use App\Nova\Metrics\FactoryFeed\BigTexMetric;
-use App\Nova\Metrics\FactoryFeed\PjMetric;
-use App\Nova\Metrics\FactoryFeed\TrailerWorldMetric;
-use App\Nova\Metrics\TransactionExecuteMetric;
-use App\Nova\Metrics\TransactionExecuteTrendMetric;
+use App\Nova\Metrics\TransactionExecute\BigTexMetric;
+use App\Nova\Metrics\TransactionExecute\PjMetric;
+use App\Nova\Metrics\TransactionExecute\TrailerWorldMetric;
+use App\Nova\Metrics\TransactionExecute\TransactionExecuteMetric;
+use App\Nova\Metrics\TransactionExecute\TransactionExecuteTrendMetric;
 use App\Nova\Resource;
 
 use Illuminate\Support\Str;
