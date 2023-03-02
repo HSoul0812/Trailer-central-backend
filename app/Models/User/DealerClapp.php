@@ -4,6 +4,9 @@ namespace App\Models\User;
 
 use App\Models\Traits\TableAware;
 use App\Models\Marketing\Craigslist\Session;
+use App\Models\Marketing\VirtualCard;
+use App\Models\Marketing\Craigslist\Account;
+use App\Models\Marketing\Craigslist\Profile;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -73,6 +76,33 @@ class DealerClapp extends Model
      */
     public function sessions(): HasMany {
         return $this->hasMany(Session::class, 'session_dealer_id', 'dealer_id');
+    }
+
+    /**
+     * Get Virtual Cards
+     * 
+     * @return HasMany
+     */
+    public function virtualCards(): HasMany {
+        return $this->hasMany(VirtualCard::class, 'dealer_id', 'dealer_id');
+    }
+
+    /**
+     * Get CL Accounts
+     * 
+     * @return HasMany
+     */
+    public function accounts(): HasMany {
+        return $this->hasMany(Account::class, 'dealer_id', 'dealer_id');
+    }
+
+    /**
+     * Get Profiles
+     * 
+     * @return HasMany
+     */
+    public function profiles(): HasMany {
+        return $this->hasMany(Profile::class, 'dealer_id', 'dealer_id');
     }
 
     /**
