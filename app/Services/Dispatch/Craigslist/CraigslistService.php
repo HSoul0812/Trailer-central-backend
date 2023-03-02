@@ -175,7 +175,7 @@ class CraigslistService implements CraigslistServiceInterface
 
         // Include Extra Features
         foreach(self::AVAILABLE_INCLUDES as $include) {
-            if(!empty($params['include']) && strpos($include, $params['include']) !== false) {
+            if(!empty($params['include']) && in_array($include, $params['include'])) {
                 $dealerClapp[$include] = $this->$include->getAll(['dealer_id' => $dealerId]);
             }
             $nowTime = microtime(true);
