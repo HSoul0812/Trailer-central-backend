@@ -176,7 +176,7 @@ class CraigslistService implements CraigslistServiceInterface
         // Include Extra Features
         foreach(self::AVAILABLE_INCLUDES as $include) {
             if(!empty($params['include']) && strpos($include, $params['include']) !== false) {
-                $dealerClapp[$include] = $clapp->$include->getAll(['dealer_id' => $dealerId]);
+                $dealerClapp[$include] = $this->$include->getAll(['dealer_id' => $dealerId]);
             }
         }
         $response = new DealerCraigslist($dealerClapp);
