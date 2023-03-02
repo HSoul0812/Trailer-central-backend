@@ -6,6 +6,7 @@ use App\Http\Middleware\CRM\Text\ReplyTextValidate;
 use App\Http\Middleware\Ecommerce\StripeWebhookValidate;
 use App\Http\Middleware\Ecommerce\TexTrailWebhookValidate;
 use App\Http\Middleware\Ecommerce\ValidHookIpMiddleware;
+use App\Http\Middleware\Integration\ValidIntegrationAccessToken;
 use App\Http\Middleware\InteractionIntegration\IntegrationPermission;
 use App\Http\Middleware\Inventory\CreateInventoryPermissionMiddleware;
 use App\Http\Middleware\Inventory\InvalidatePermissionMiddleware;
@@ -120,6 +121,7 @@ class Kernel extends HttpKernel
         'text.campaign.validate' => TextCampaignValidate::class,
         'text.blast.validate' => TextBlastValidate::class,
         'integration.auth.validate' => AuthValidate::class,
+        'integration.access_token.validate' => ValidIntegrationAccessToken::class,
         'facebook.catalog.validate' => CatalogValidate::class,
         'facebook.chat.validate' => ChatValidate::class,
         'facebook.message.validate' => MessageValidate::class,

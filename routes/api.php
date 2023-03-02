@@ -1003,6 +1003,21 @@ $api->version('v1', function ($route) {
                 $route->post('/', 'App\Http\Controllers\v1\Integration\CvrController@create');
                 $route->get('{token}', 'App\Http\Controllers\v1\Integration\CvrController@statusByToken');
             });
+
+            /*
+            |--------------------------------------------------------------------------
+            | Transaction
+            |--------------------------------------------------------------------------
+            |
+            |
+            |
+            */
+            $route->group([
+                'prefix' => 'transaction',
+                'middleware' => 'integration.access_token.validate'
+            ], function ($route) {
+                $route->post('/', 'App\Http\Controllers\v1\Integration\TransactionController@post');
+            });
         });
 
         /*
