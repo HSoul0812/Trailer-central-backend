@@ -43,14 +43,15 @@ class ProfileAccountTransformer extends TransformerAbstract
         return [];
     }
 
-    public function includeProfiles(ProfileAccounts $account)
+    public function includeProfiles(ProfileAccounts $accounts)
     {
-        return $this->collection($account->profiles, $this->profileTransformer);
+        return $this->collection($accounts->profiles, $this->profileTransformer);
     }
 
-    public function includeAccounts(ProfileAccounts $account)
+    public function includeAccounts(ProfileAccounts $accounts)
     {
-        return $this->collection($account->accounts, function(Account $account) {
+        return $this->collection($accounts->accounts, function(Account $account) {
+            var_dump($account->profiles);
             return [
                 'username' => $account->username,
                 'profiles' => $this->collection($account->profiles, $this->profileTransformer)

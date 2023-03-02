@@ -58,11 +58,11 @@ class Account extends Model
     ];
 
     /**
-     * Get User
+     * Get Dealer
      *
      * @return BelongsTo
      */
-    public function user(): BelongsTo
+    public function dealer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
     }
