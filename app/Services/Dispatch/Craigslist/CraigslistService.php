@@ -156,7 +156,7 @@ class CraigslistService implements CraigslistServiceInterface
         }
 
         // Get Craigslist Dealers
-        $clapp = $this->dealers->getAll([
+        $clapp = $this->dealers->get([
             'dealer_id' => $dealerId
         ]);
 
