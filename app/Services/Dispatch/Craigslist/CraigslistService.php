@@ -178,6 +178,8 @@ class CraigslistService implements CraigslistServiceInterface
             if(!empty($params['include']) && strpos($include, $params['include']) !== false) {
                 $dealerClapp[$include] = $this->$include->getAll(['dealer_id' => $dealerId]);
             }
+            $nowTime = microtime(true);
+            $this->log->info('Debug time after include ' . $include . ': ' . ($nowTime - $startTime));
         }
         $response = new DealerCraigslist($dealerClapp);
 
