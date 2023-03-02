@@ -62,4 +62,24 @@ class DealerTransformer extends TransformerAbstract
             'next_scheduled'       => $clapp->next
         ];
     }
+
+    public function includeAccounts(DealerCraigslist $dealer)
+    {
+        return $this->collection($dealer->accounts, $this->accountTransformer);
+    }
+
+    public function includeProfiles(DealerCraigslist $dealer)
+    {
+        return $this->collection($dealer->profiles, $this->profileTransformer);
+    }
+
+    public function includeTunnels(DealerCraigslist $dealer)
+    {
+        return $this->collection($dealer->tunnels, $this->tunnelTransformer);
+    }
+
+    public function includeCards(DealerCraigslist $dealer)
+    {
+        return $this->collection($dealer->cards, $this->cardTransformer);
+    }
 }
