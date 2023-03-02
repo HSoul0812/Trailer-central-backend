@@ -2,35 +2,102 @@
 
 namespace App\Repositories\CRM\Leads;
 
-use App\Exceptions\RepositoryInvalidArgumentException;
+use App\Exceptions\CRM\Leads\MissingLeadIdGetAllTradesException;
 use App\Models\CRM\Leads\LeadTrade;
+use App\Models\CRM\Leads\LeadTradeImage;
 use App\Repositories\RepositoryAbstract;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class LeadTradeRepository
+ * 
  * @package App\Repositories\CRM\Leads
  */
 class LeadTradeRepository extends RepositoryAbstract implements LeadTradeRepositoryInterface
 {
     private const AVAILABLE_INCLUDE = [
-        'images',
+        'images'
     ];
 
+
     /**
+     * Create One Lead Trade
+     * 
+     * @param array $params
+     * @return LeadTrade
+     */
+    public function create($params): LeadTrade {
+        // Create Lead
+        return LeadTrade::create($params);
+    }
+
+    /**
+     * Update One Lead Trade
+     * 
+     * @param array $params
+     * @return LeadTrade
+     */
+    public function update($params): LeadTrade {
+        // Get Lead Trade
+        $leadTrade = $this->get($params);
+
+        // Update Lead Trade
+        DB::transaction(function() use (&$leadTrade, $params) {
+            $leadTrade->fill($params)->save();
+        });
+
+        // Return Full Lead Trade Details
+        return $leadTrade;
+    }
+
+    /**
+     * Delete One Lead Trade
+     * 
+     * @param array $params
+     * @return bool
+     */
+    public function delete($params): bool {
+        return LeadTrade::findOrFail($params['id'])->delete();
+    }
+
+    /**
+     * Find Lead Trade By ID; don't throw error if missing
+     * 
+     * @param int $id
+     * @return null|LeadTrade
+     */
+    public function find($id): ?LeadTrade {
+        return LeadTrade::find($id);
+    }
+
+    /**
+     * Get One Lead Trade
+     * 
+     * @param array $params
+     * @return LeadTrade
+     */
+    public function get($params): LeadTrade {
+        return LeadTrade::findOrFail($params['id']);
+    }
+
+    /**
+     * Get All Lead Trades
+     * 
      * @param $params
-     * @return Collection
+     * @return Collection<LeadTrade>
      */
     public function getAll($params): Collection
     {
+        // Missing Lead ID While Getting Trades?
         if (empty($params['lead_id'])) {
-            throw new RepositoryInvalidArgumentException('Lead id is required');
+            throw new MissingLeadIdGetAllTradesException;
         }
 
-        $query = LeadTrade::query();
+        // Initialize Lead Trade Query
+        $query = LeadTrade::where('lead_id', '=', $params['lead_id']);
 
-        $query = $query->where('lead_id', '=', $params['lead_id']);
-
+        // Includes?
         if (isset($params['include']) && is_string($params['include'])) {
             foreach (array_intersect(self::AVAILABLE_INCLUDE, explode(',', $params['include'])) as $include) {
                 $query = $query->with($include);
@@ -38,5 +105,45 @@ class LeadTradeRepository extends RepositoryAbstract implements LeadTradeReposit
         }
 
         return $query->get();
+    }
+
+    /**
+     * Get Lead Trade Image IDs
+     * @param int $imageId
+     * @return array
+     */
+    public function getImageIds(int $tradeId): array
+    {
+        return $this->find($tradeId)->images()->pluck('id')->toArray();
+    }
+
+    /**
+     * Get Lead Trade Image Path
+     * @param int $imageId
+     * @return string
+     */
+    public function getImagePath(int $imageId): string
+    {
+        return LeadTradeImage::find($imageId)->path;
+    }
+
+    /**
+     * Delete Lead Trade Image
+     * @param int $imageId
+     * @return bool
+     */
+    public function deleteImage(int $imageId): bool
+    {
+        return LeadTradeImage::find($imageId)->delete();
+    }
+
+    /**
+     * Create Lead Trade Image
+     * @param array $params
+     * @return LeadTradeImage
+     */
+    public function createImage(array $params): LeadTradeImage
+    {
+        return LeadTradeImage::create($params);
     }
 }

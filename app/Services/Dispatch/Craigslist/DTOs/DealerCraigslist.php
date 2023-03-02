@@ -2,6 +2,10 @@
 
 namespace App\Services\Dispatch\Craigslist\DTOs;
 
+use App\Models\Marketing\Craigslist\Account;
+use App\Models\Marketing\Craigslist\Profile;
+use App\Models\Marketing\VirtualCard;
+use App\DTO\Marketing\DealerTunnel;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
 
@@ -76,6 +80,27 @@ class DealerCraigslist
      * @var string
      */
     private $dealerState;
+
+
+    /**
+     * @var Collection<Account>
+     */
+    private $accounts;
+
+    /**
+     * @var Collection<Profile>
+     */
+    private $profiles;
+
+    /**
+     * @var Collection<VirtualCard>
+     */
+    private $cards;
+
+    /**
+     * @var Collection<DealerTunnel>
+     */
+    private $tunnels;
 
 
     /**

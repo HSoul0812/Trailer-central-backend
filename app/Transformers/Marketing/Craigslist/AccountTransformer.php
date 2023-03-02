@@ -2,7 +2,9 @@
 
 namespace App\Transformers\Marketing\Craigslist;
 
-use App\Services\Marketing\Craigslist\DTOs\Account;
+use App\Models\Marketing\Craigslist\Account;
+use App\Transformers\User\UserTransformer;
+use App\Transformers\Marketing\VirtualCardTransformer;
 use App\Transformers\Marketing\Craigslist\ProfileTransformer;
 use League\Fractal\TransformerAbstract;
 
@@ -12,10 +14,22 @@ use League\Fractal\TransformerAbstract;
  * @package App\Transformers\Marketing\Craigslist
  */
 class AccountTransformer extends TransformerAbstract
-{ 
-    protected $defaultIncludes = [
-        'profiles'
+{
+    protected $availableIncludes = [
+        'dealer',
+        'virtualCard',
+        'profile'
     ];
+
+    /**
+     * @var UserTransformer
+     */
+    protected $userTransformer;
+
+    /**
+     * @var VirtualCardTransformer
+     */
+    protected $virtualCardTransformer;
 
     /**
      * @var ProfileTransformer
@@ -23,8 +37,12 @@ class AccountTransformer extends TransformerAbstract
     protected $profileTransformer;
 
     public function __construct(
+        UserTransformer $userTransformer,
+        VirtualCardTransformer $cardTransformer,
         ProfileTransformer $profileTransformer
     ) {
+        $this->userTransformer = $userTransformer;
+        $this->cardTransformer = $cardTransformer;
         $this->profileTransformer = $profileTransformer;
     }
 
@@ -35,12 +53,36 @@ class AccountTransformer extends TransformerAbstract
     public function transform(Account $account): array
     {
         return [
-            'username' => $account->username
+            'id' => $account->id,
+            'dealer_id' => $account->dealer_id,
+            'virtual_card_id' => $account->virtual_card_id,
+            'profile_id' => $account->profile_id,
+            'username' => $account->username,
+            'password' => $account->password,
+            'smtp_password' => $account->smtp_password,
+            'smtp_server' => $account->smtp_server,
+            'smtp_port' => $account->smtp_port,
+            'smtp_security' => $account->smtp_security,
+            'smtp_auth' => $account->smtp_auth,
+            'imap_password' => $account->imap_password,
+            'imap_server' => $account->imap_server,
+            'imap_port' => $account->imap_port,
+            'imap_security' => $account->imap_security
         ];
     }
 
-    public function includeProfiles(Account $account)
+    public function includeDealer(Account $account)
     {
-        return $this->collection($account->profiles, $this->profileTransformer);
+        return $this->item($account->dealer, $this->userTransformer);
+    }
+
+    public function includeVirtualCard(Account $account)
+    {
+        return $this->item($account->card, $this->cardTransformer);
+    }
+
+    public function includeProfile(Account $account)
+    {
+        return $this->item($account->profile, $this->profileTransformer);
     }
 }

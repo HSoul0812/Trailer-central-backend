@@ -10,7 +10,7 @@ use App\Http\Requests\CRM\Documents\CreateDealerDocumentsRequest;
 use App\Http\Requests\CRM\Documents\DeleteDealerDocumentRequest;
 use App\Repositories\CRM\Documents\DealerDocumentsRepositoryInterface;
 use App\Transformers\CRM\Documents\DealerDocumentsTransformer;
-use Dingo\Api\Http\Request;
+use Illuminate\Http\Request;
 use Dingo\Api\Http\Response;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use App\Services\CRM\Documents\DealerDocumentsServiceInterface;
@@ -78,12 +78,13 @@ class DealerDocumentsController extends RestfulControllerV2
      */
     public function create(int $leadId, Request $request): Response
     {
-        $request = new CreateDealerDocumentsRequest(array_merge(['lead_id' => $leadId], $request->all()));
         $requestData = $request->all();
+        $requestData['lead_id'] = $leadId;
+        $request = new CreateDealerDocumentsRequest($requestData);
 
         if ($request->validate()) {
 
-            return $this->collectionResponse($this->dealerDocumentsService->create($requestData), $this->transformer);
+            return $this->collectionResponse($this->dealerDocumentsService->create($request->all()), $this->transformer);
         }
 
         return $this->response->errorBadRequest();

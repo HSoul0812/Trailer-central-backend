@@ -30,7 +30,8 @@ class AccessToken extends Model
         'sales_person' => 'Sales Person',
         'fbapp_page' => 'Facebook Page',
         'fbapp_catalog' => 'Facebook Catalog',
-        'fbapp_chat' => 'Facebook Chat'
+        'fbapp_chat' => 'Facebook Chat',
+        'clapp_accounts' => 'CL Email Account'
     ];
 
     // Define Supported Token Types
@@ -39,7 +40,8 @@ class AccessToken extends Model
         'sales_person' => ['google', 'office365'],
         'fbapp_page' => 'facebook',
         'fbapp_catalog' => 'facebook',
-        'fbapp_chat' => 'facebook'
+        'fbapp_chat' => 'facebook',
+        'clapp_accounts' => ['google', 'office365']
     ];
 
     /**
