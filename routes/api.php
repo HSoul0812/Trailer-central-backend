@@ -726,7 +726,7 @@ $api->version('v1', function ($route) {
         $route->group(['prefix' => 'leads/{leadId}/documents'], function ($route) {
 
             $route->get('/', 'App\Http\Controllers\v1\CRM\Documents\DealerDocumentsController@index');
-            $route->put('/', 'App\Http\Controllers\v1\CRM\Documents\DealerDocumentsController@create');
+            $route->post('/', 'App\Http\Controllers\v1\CRM\Documents\DealerDocumentsController@create');
             $route->delete('/{documentId}', 'App\Http\Controllers\v1\CRM\Documents\DealerDocumentsController@destroy');
         });
 
@@ -913,16 +913,25 @@ $api->version('v1', function ($route) {
             |
             */
             $route->get('products', 'App\Http\Controllers\v1\CRM\Leads\ProductController@index');
+        });
 
-            /*
-            |--------------------------------------------------------------------------
-            | Lead Trades
-            |--------------------------------------------------------------------------
-            |
-            |
-            |
-            */
-            $route->get('trades', 'App\Http\Controllers\v1\CRM\Leads\LeadTradeController@index');
+        /*
+        |--------------------------------------------------------------------------
+        | Lead Trades
+        |--------------------------------------------------------------------------
+        |
+        |
+        |
+        */
+        $route->group([
+            'prefix' => 'leads/{leadId}/trades',
+            'middleware' => 'leads.trade.validate'
+        ], function ($route) {
+            $route->get('/', 'App\Http\Controllers\v1\CRM\Leads\LeadTradeController@index');
+            $route->post('/', 'App\Http\Controllers\v1\CRM\Leads\LeadTradeController@create');
+            $route->post('{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadTradeController@update')->where('id', '[0-9]+');
+            $route->delete('{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadTradeController@destroy')->where('id', '[0-9]+');
+            $route->get('{id}', 'App\Http\Controllers\v1\CRM\Leads\LeadTradeController@show')->where('id', '[0-9]+');
         });
 
         $route->group([
@@ -1547,7 +1556,7 @@ $api->version('v1', function ($route) {
                     'middleware' => 'integration-permission:craigslist_dispatch,can_see'
                 ], function ($route) {
                     $route->get('/', 'App\Http\Controllers\v1\Dispatch\CraigslistController@index');
-                    //$route->get('{id}', 'App\Http\Controllers\v1\Dispatch\CraigslistController@show')->where('id', '[0-9]+');
+                    $route->get('{id}', 'App\Http\Controllers\v1\Dispatch\CraigslistController@show')->where('id', '[0-9]+');
                 });
 
                 // Can See and Change is Required
