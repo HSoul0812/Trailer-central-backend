@@ -13,7 +13,7 @@ use App\Http\Requests\Request;
 class ShowCraigslistRequest extends Request {
 
     protected $rules = [
-        'id' => 'required|valid_clapp_dealer',
+        'dealer_id' => 'required|exists:dealer_clapp,dealer_id',
         'include' => 'string|valid_include:accounts,profiles,cards,tunnels'
     ];
 
