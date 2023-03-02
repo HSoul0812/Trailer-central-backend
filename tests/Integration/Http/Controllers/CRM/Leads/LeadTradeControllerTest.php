@@ -138,12 +138,9 @@ class LeadTradeControllerTest extends IntegrationTestCase
                 $randomStrings[2]
             );
 
-        $trade = $this->getEloquentMock(LeadTrade::class);
-        $trade->shouldReceive('setRelation')->passthru();
-
         $response = $this->json(
             'POST',
-            '/api/leads/'. $leadTradeSeeder->lead->getKey() .'/trades',
+            '/api/leads/'. $leadTradeSeeder->lead->getKey() .'/trades?include=images',
             [
                 'make' => self::TEST_VEHICLE_MAKE,
                 'model' => self::TEST_VEHICLE_MODEL,
@@ -172,12 +169,14 @@ class LeadTradeControllerTest extends IntegrationTestCase
                     'width',
                     'notes',
                     'created_at',
-                    // 'images' => [
-                    //     '*' => [
-                    //         'filename',
-                    //         'path',
-                    //     ]
-                    // ]
+                    'images' => [
+                        'data' => [
+                            '*' => [
+                                'filename',
+                                'path',
+                            ]
+                        ]
+                    ]
                 ]
             ]);
 
@@ -281,12 +280,9 @@ class LeadTradeControllerTest extends IntegrationTestCase
             ->once()
             ->andReturn($randomString3);
 
-        $trade = $this->getEloquentMock(LeadTrade::class);
-        $trade->shouldReceive('setRelation')->passthru();
-
         $response = $this->json(
             'POST',
-            '/api/leads/'. $leadTradeSeeder->lead->getKey() .'/trades/' . $tradeId,
+            '/api/leads/'. $leadTradeSeeder->lead->getKey() .'/trades/' . $tradeId . '?include=images',
             [
                 'make' => self::TEST_VEHICLE_MAKE,
                 'model' => self::TEST_VEHICLE_MODEL,
@@ -318,12 +314,14 @@ class LeadTradeControllerTest extends IntegrationTestCase
                     'width',
                     'notes',
                     'created_at',
-                    // 'images' => [
-                    //     '*' => [
-                    //         'filename',
-                    //         'path',
-                    //     ]
-                    // ]
+                    'images' => [
+                        'data' => [
+                            '*' => [
+                                'filename',
+                                'path',
+                            ]
+                        ]
+                    ]
                 ]
             ]);
         
@@ -430,7 +428,7 @@ class LeadTradeControllerTest extends IntegrationTestCase
 
         $response = $this->json(
             'GET',
-            '/api/leads/'. $leadTradeSeeder->lead->getKey() .'/trades/'. $tradeId .'?with=images',
+            '/api/leads/'. $leadTradeSeeder->lead->getKey() .'/trades/'. $tradeId .'?include=images',
             [],
             ['access-token' => $leadTradeSeeder->authToken->access_token]
         );
@@ -449,16 +447,16 @@ class LeadTradeControllerTest extends IntegrationTestCase
                     'width',
                     'notes',
                     'created_at',
-                    // 'images' => [
-                    //     '*' => [
-                    //         'filename',
-                    //         'path',
-                    //     ]
-                    // ]
+                    'images' => [
+                        'data' => [
+                            '*' => [
+                                'filename',
+                                'path',
+                            ]
+                        ]
+                    ]
                 ]
             ]);
-
-
 
         $leadTradeSeeder->cleanUp();
     }

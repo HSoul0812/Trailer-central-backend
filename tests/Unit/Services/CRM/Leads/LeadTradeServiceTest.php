@@ -72,7 +72,6 @@ class LeadTradeServiceTest extends TestCase
 
         $trade = $this->getEloquentMock(LeadTrade::class);
         $trade->id = self::TEST_TRADE_ID;
-        $trade->shouldReceive('setRelation')->passthru();
 
         // mock getRandomString()
         $randomString = $this->faker->md5();
@@ -131,7 +130,6 @@ class LeadTradeServiceTest extends TestCase
 
         $trade = $this->getEloquentMock(LeadTrade::class);
         $trade->id = self::TEST_TRADE_ID;
-        $trade->shouldReceive('setRelation')->passthru();
 
         $this->leadTradeRepositoryMock->shouldReceive('update')
             ->once()->with($updateParams)->andReturn($trade);
@@ -151,10 +149,6 @@ class LeadTradeServiceTest extends TestCase
 
         $this->leadTradeRepositoryMock->shouldReceive('getImagePath')
             ->once()->with($tradeImageId1);
-
-        $this->leadTradeRepositoryMock->shouldReceive('getImages')
-            ->once()->with(self::TEST_TRADE_ID)
-            ->andReturn(collect([$this->getEloquentMock(LeadTradeImage::class)]));
 
         $service = $this->app->make(LeadTradeService::class);
         $service->update($updateParams);

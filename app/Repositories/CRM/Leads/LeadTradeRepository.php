@@ -146,14 +146,4 @@ class LeadTradeRepository extends RepositoryAbstract implements LeadTradeReposit
     {
         return LeadTradeImage::create($params);
     }
-
-    /**
-     * Get Lead Trade Images
-     * @param int $tradeId
-     * @return Collection<LeadTradeImage>
-     */
-    public function getImages(int $tradeId): Collection
-    {
-        return $this->find($tradeId)->images;
-    }
 }

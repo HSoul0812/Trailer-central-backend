@@ -39,8 +39,6 @@ class LeadTradeService implements LeadTradeServiceInterface {
 
         if (isset($params['images']) && is_array($params['images'])) {
 
-            $images = collect();
-
             foreach ($params['images'] as $file) {
 
                 if (!($file instanceof UploadedFile)) continue;
@@ -51,16 +49,12 @@ class LeadTradeService implements LeadTradeServiceInterface {
                 $randomS3Filename = $this->imageHelper->getRandomString($fileContent);
                 Storage::disk('s3')->put($randomS3Filename, $fileContent);
 
-                $image = $this->leadTradeRepository->createImage([
+                $this->leadTradeRepository->createImage([
                     'trade_id' => $trade->id,
                     'filename' => $fileName,
                     'path' => Storage::disk('s3')->url($randomS3Filename)
                 ]);
-
-                $images->push($image);
             }
-
-            $trade->setRelation('images', $images);
         }
 
         return $trade;
@@ -109,9 +103,6 @@ class LeadTradeService implements LeadTradeServiceInterface {
         foreach ($imageIdsToBeDeleted as $deletingImageId) {
             $this->deleteImage($deletingImageId);
         }
-
-        $images = $this->leadTradeRepository->getImages($params['id']);
-        $trade->setRelation('images', $images);
 
         return $trade;
     }
