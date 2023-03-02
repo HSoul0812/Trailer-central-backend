@@ -27,7 +27,6 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
             'type' => 'keyword',
             'normalizer' => 'case_normal',
             'fields' => [
-                'txt' => ['type' => 'text', 'analyzer' => 'standard'],
                 'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer']
             ]
         ],
@@ -35,7 +34,6 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
             'type' => 'keyword',
             'normalizer' => 'case_normal',
             'fields' => [
-                'txt' => ['type' => 'text', 'analyzer' => 'english'],
                 'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer']
             ]
         ],
@@ -58,14 +56,12 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
             'type'       => 'keyword',
             'normalizer' => 'case_normal',
             'fields' => [
-                'txt' => ['type' => 'text', 'analyzer' => 'english'],
                 'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer']
             ]
         ],
         'description'          => [
             'type' => 'text',
             'fields' => [
-                'txt' => ['type' => 'text', 'analyzer' => 'english'],
                 'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer']
             ]
         ],
@@ -104,7 +100,6 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
         'notes'                => [
             'type'   => 'text',
             'fields' => [
-                'txt' => ['type' => 'text', 'analyzer' => 'english'],
                 'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer']
             ]
         ],
@@ -128,7 +123,6 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
             'type'       => 'keyword',
             'normalizer' => 'case_normal',
             'fields' => [
-                'txt' => ['type' => 'text', 'analyzer' => 'english'],
                 'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer']
             ]
         ],
@@ -140,7 +134,6 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
             'type'       => 'keyword',
             'normalizer' => 'case_normal',
             'fields' => [
-                'txt' => ['type' => 'text', 'analyzer' => 'english'],
                 'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer']
             ]
         ],
@@ -208,7 +201,6 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
             'type'       => 'keyword',
             'normalizer' => 'case_normal',
             'fields' => [
-                'txt' => ['type' => 'text', 'analyzer' => 'english'],
                 'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer']
             ]
         ],
@@ -216,7 +208,6 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
             'type'       => 'keyword',
             'normalizer' => 'case_normal',
             'fields' => [
-                'txt' => ['type' => 'text', 'analyzer' => 'english'],
                 'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer']
             ]
         ],
@@ -224,7 +215,6 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
             'type'       => 'keyword',
             'normalizer' => 'case_normal',
             'fields' => [
-                'txt' => ['type' => 'text', 'analyzer' => 'english'],
                 'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer']
             ]
         ],
@@ -232,7 +222,6 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
             'type'       => 'keyword',
             'normalizer' => 'case_normal',
             'fields' => [
-                'txt' => ['type' => 'text', 'analyzer' => 'english'],
                 'tokens' => ['type' => 'text', 'analyzer' => 'shingle_analyzer']
             ]
         ],
@@ -305,11 +294,11 @@ class InventoryElasticSearchConfigurator extends IndexConfigurator
                     'output_unigrams' => true
                 ]
             ]
-        ])->index(array_merge([
+        ])->index([
             'number_of_shards' => config('elastic.scout_driver.settings.inventory.number_of_shards'),
             'number_of_replicas' => config('elastic.scout_driver.settings.inventory.number_of_replicas'),
             'refresh_interval' => config('elastic.scout_driver.settings.inventory.refresh_interval')
-        ], (app()->environment(['production']) ? ['knn' => true] : [])));
+       ]);
     }
 
     public function __construct()
