@@ -35,14 +35,14 @@ class ClappPost
 
 
     /**
-     * @var ClappQueue
-     */
-    private $queueData;
-
-    /**
      * @var Queue
      */
     private $queue;
+
+    /**
+     * @var ClappQueue
+     */
+    private $queueData;
 
 
     /**
@@ -198,8 +198,8 @@ class ClappPost
 
         // Create ClappPost Results
         return new ClappPost([
+            'queue' => $queue,
             'queue_data' => $qData,
-            'session' => $queue,
             'category' => $queue->inventory->category,
             'category_type' => $queue->profile->category->grouping,
             'subarea' => strtolower($queue->profile->subarea_alt_name),
@@ -234,6 +234,20 @@ class ClappPost
             'overall_length' => $queue->inventory->attributes['overall_length'] ?? 0,
             'propulsion' => $queue->inventory->attributes['propulsion'] ?? ''
         ]);
+    }
+
+
+    /**
+     * Get Params
+     * 
+     * @return array
+     */
+    public function getParams(): array {
+        return [
+            'queue_id' => $this->queue->queue_id,
+            'parameter' => $this->qData->json(),
+            'costs' => $this->qData->costs
+        ];
     }
 
 

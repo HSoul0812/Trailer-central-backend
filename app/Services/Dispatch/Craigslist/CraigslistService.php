@@ -274,7 +274,7 @@ class CraigslistService implements CraigslistServiceInterface
         }
 
         // Get Inventory
-        $sessions = $this->scheduler->getReady($params);
+        $queues = $this->scheduler->getReady($params);
 
         // Log Debug on Getting Inventories or Updates
         $nowTime = microtime(true);
@@ -282,13 +282,14 @@ class CraigslistService implements CraigslistServiceInterface
 
         // Loop Through Inventory Items
         $listings = new Collection();
-        foreach ($sessions as $session) {
+        foreach ($queues as $queue) {
             $nowTime = microtime(true);
-            $clappPost = ClappPost::fill($session);
-            if($this->validatePost($session, $clappPost)) {
+            $clappPost = ClappPost::fill($queue);
+            $this->queues->update($queue->getParams());
+            if($this->validatePost($queue, $clappPost)) {
                 $listings->push($clappPost);
             }
-            $this->log->info('Debug time ClappPost #' . $session->session_id . ': ' . ($nowTime - $startTime));
+            $this->log->info('Debug time ClappPost #' . $queue->session_id . ': ' . ($nowTime - $startTime));
         }
 
         // Return Results After Checking Balance
@@ -312,7 +313,7 @@ class CraigslistService implements CraigslistServiceInterface
         }
 
         // Get Inventory
-        $sessions = $this->scheduler->getUpdates($params);
+        $queues = $this->scheduler->getUpdates($params);
 
         // Log Debug on Getting Inventories or Updates
         $nowTime = microtime(true);
@@ -320,10 +321,10 @@ class CraigslistService implements CraigslistServiceInterface
 
         // Loop Through Inventory Items
         $listings = new Collection();
-        foreach ($sessions as $session) {
+        foreach ($queues as $queue) {
             $nowTime = microtime(true);
-            $listings->push(ClappUpdate::fill($session));
-            $this->log->info('Debug time ClappUpdate #' . $session->session_id . ': ' . ($nowTime - $startTime));
+            $listings->push(ClappUpdate::fill($queue));
+            $this->log->info('Debug time ClappUpdate #' . $queue->session_id . ': ' . ($nowTime - $startTime));
         }
 
         // Return Results
@@ -334,11 +335,11 @@ class CraigslistService implements CraigslistServiceInterface
     /**
      * Check if the Current Post is Valid
      * 
-     * @param Session $session
+     * @param Queue $queue
      * @param ClappPost $clapp
      * @return bool
      */
-    private function validatePost(Session $session, ClappPost $clapp): bool {
+    private function validatePost(Queue $queue, ClappPost $clapp): bool {
         return true;
     }
 
@@ -363,7 +364,7 @@ class CraigslistService implements CraigslistServiceInterface
 
             // Check Balance So Far
             if($balance < $costs || $balance < $minBalance) {
-                $this->markError($post->session, 'pending-billing');
+                $this->markError($post->queue, 'pending-billing');
             } else {
                 $remaining->push($post);
             }
@@ -376,17 +377,17 @@ class CraigslistService implements CraigslistServiceInterface
     /**
      * Mark Error and Return Status Based on Error
      * 
-     * @param Session $session
+     * @param Queue $queue
      * @param string $error
      * @return bool
      */
-    private function markError(Session $session, string $error): bool {
+    private function markError(Queue $queue, string $error): bool {
         // Get Error Status
         $err = ClappError::fill($error);
 
         // Update Session
         $post = $this->sessions->update([
-            'session_id' => $session->session_id,
+            'session_id' => $queue->session_id,
             'status' => $err->status,
             'state' => $err>state,
             'text_status' => $err->textStatus

@@ -113,14 +113,14 @@ class QueueRepository implements QueueRepositoryInterface {
      * @return Queue
      */
     public function update($params) {
-        $session = $this->get($params);
+        $queue = $this->get($params);
 
-        DB::transaction(function() use (&$session, $params) {
+        DB::transaction(function() use (&$queue, $params) {
             // Fill Active Session Details
-            $session->fill($params)->save();
+            $queue->fill($params)->save();
         });
 
-        return $session;
+        return $queue;
     }
 
     protected function getSortOrders() {

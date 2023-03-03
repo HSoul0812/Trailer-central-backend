@@ -133,25 +133,25 @@ class ClappQueue
 
 
     /**
-     * Get Queue Data Array
+     * Get Queue Data JSON Object
      * 
-     * @return array{type: string,
-     *               location: string,
-     *               postCategory: int,
-     *               title: string,
-     *               stock: string,
-     *               price: float,
-     *               body: string,
-     *               make: string,
-     *               model: string,
-     *               size: string,
-     *               images: array<string>,
-     *               contact_name: string,
-     *               phone: string,
-     *               postal: string}
+     * @return string json<array{type: string,
+     *                           location: string,
+     *                           postCategory: int,
+     *                           title: string,
+     *                           stock: string,
+     *                           price: float,
+     *                           body: string,
+     *                           make: string,
+     *                           model: string,
+     *                           size: string,
+     *                           images: array<string>,
+     *                           contact_name: string,
+     *                           phone: string,
+     *                           postal: string}>
      */
-    public function qData(): array {
-        return [
+    public function json(): array {
+        return $this->clEncodeJson([
             'type' => $this->type,
             'location' => $this->location,
             'postCategory' => $this->postCategory,
@@ -166,7 +166,7 @@ class ClappQueue
             'phone' => $this->phone,
             'postal' => $this->postal,
             'images' => $this->images
-        ];
+        ]);
     }
 
 
