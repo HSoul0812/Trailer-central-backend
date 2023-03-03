@@ -42,7 +42,7 @@ class ClappPost
     /**
      * @var ClappQueue
      */
-    private $queueData;
+    private $qData;
 
 
     /**
@@ -199,7 +199,7 @@ class ClappPost
         // Create ClappPost Results
         return new ClappPost([
             'queue' => $queue,
-            'queue_data' => $qData,
+            'q_data' => $qData,
             'category' => $queue->inventory->category,
             'category_type' => $queue->profile->category->grouping,
             'subarea' => strtolower($queue->profile->subarea_alt_name),
