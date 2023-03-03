@@ -144,6 +144,11 @@ class ClappPost
     /**
      * @var string
      */
+    private $geographicArea;
+
+    /**
+     * @var string
+     */
     private $crossStreet1;
 
     /**
