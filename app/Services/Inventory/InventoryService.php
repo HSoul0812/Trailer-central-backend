@@ -1246,11 +1246,12 @@ class InventoryService implements InventoryServiceInterface
 
         //$description = preg_replace('/[[:^print:]]/', ' ', $description);
 
-//        preg_match('/<blockquote>(.*?)<\/blockquote>/s', $description, $match);
-//        if (!empty($match[0])) {
-//            $new_ul = strip_tags($match[0], '<blockquote><br><ul><ol><li><a><b><strong>');
-//            $description = str_replace($match[0], $new_ul, $description);
-//        }
+        preg_match('/<blockquote>(.*?)<\/blockquote>/s', $description, $match);
+        if (!empty($match[0])) {
+            $new_ul = strip_tags($match[0], '<blockquote><br><ul><ol><li><a><b><strong>');
+            $description = str_replace('<br /><br />', '<br />', $description);
+            $description = str_replace($match[0], $new_ul, $description);
+        }
 
 
         preg_match('/<ul.*>(.*?)<\/ul>/s', $description, $match);
