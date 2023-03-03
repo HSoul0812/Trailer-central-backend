@@ -171,6 +171,19 @@ class ClappQueue
 
 
     /**
+     * Has Phone?
+     * 
+     * @return bool
+     */
+    public function hasPhone() {
+        if($this->phone) {
+            return true;
+        }
+        return false;
+    }
+
+
+    /**
      * Get Trimmed Contact Name
      * 
      * @return string
