@@ -240,6 +240,7 @@ class Profile extends Model
     public function getCostsAttribute(): float {
         // Find Price
         $price = $this->prices()->where('category_id', $this->category->id)->first();
+        var_dump($this->id);
         var_dump($this->city_code);
         var_dump($this->category->id);
 
