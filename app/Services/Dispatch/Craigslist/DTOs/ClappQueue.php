@@ -3,6 +3,7 @@
 namespace App\Services\Dispatch\Craigslist\DTOs;
 
 use App\Models\Marketing\Craigslist\Queue;
+use App\Traits\Marketing\CraigslistHelper;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
 
@@ -13,7 +14,7 @@ use App\Traits\WithGetter;
  */
 class ClappQueue
 {
-    use WithConstructor, WithGetter;
+    use WithConstructor, CraigslistHelper, WithGetter;
 
 
     /**

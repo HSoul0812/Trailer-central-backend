@@ -2,8 +2,9 @@
 
 namespace App\Services\Dispatch\Craigslist\DTOs;
 
-use App\Services\Dispatch\Craigslist\DTOs\ClappQueue;
 use App\Models\Marketing\Craigslist\Queue;
+use App\Services\Dispatch\Craigslist\DTOs\ClappQueue;
+use App\Traits\Marketing\CraigslistHelper;
 use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
 
@@ -14,7 +15,7 @@ use App\Traits\WithGetter;
  */
 class ClappPost
 {
-    use WithConstructor, WithGetter;
+    use WithConstructor, CraigslistHelper, WithGetter;
 
 
     /**
