@@ -291,8 +291,8 @@ trait CraigslistHelper
                 $json->$k = $this->clEncodeJson($v);
             }
         }
-        elseif(is_string($d)) {
-            return utf8_encode($d);
+        elseif(is_string($json)) {
+            return utf8_encode($json);
         }
 
         return json_encode($json);
