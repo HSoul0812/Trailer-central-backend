@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * 
  * @package App\Models\Marketing\Craigslist
  */
-class Category extends Model
+class CategoryPrice extends Model
 {
     use TableAware;
 
