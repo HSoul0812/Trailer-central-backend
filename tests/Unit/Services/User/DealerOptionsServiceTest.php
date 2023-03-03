@@ -18,8 +18,8 @@ use Tests\TestCase;
 /**
  * Test for App\Services\User\DealerOptionsService
  *
- * Class InventoryServiceTest
- * @package Tests\Unit\Services\Inventory
+ * class DealerOptionsServiceTest
+ * @package Tests\Unit\Services\User
  *
  * @coversDefaultClass \App\Services\User\DealerOptionsService
  */
@@ -50,6 +50,9 @@ class DealerOptionsServiceTest extends TestCase
      */
     private $newDealerUserRepository;
 
+    /**
+     * @return void
+     */
     public function setUp(): void
     {
         parent::setUp();
@@ -71,16 +74,16 @@ class DealerOptionsServiceTest extends TestCase
     }
 
     /**
-     * @covers ::activateCrm
+     * @covers ::manageCrm
+     *
+     * @dataProvider validDataProviderForManageCrm
      *
      * @group DMS
      * @group DMS_DEALER_OPTIONS
+     * @throws \Exception
      */
-    public function testActivateCrm()
+    public function testActivateCrm($dealerId, $userId, $active)
     {
-        $dealerId = PHP_INT_MAX;
-        $userId = PHP_INT_MAX - 1;
-
         $user = new \StdClass();
         $crmUser = new \StdClass();
         $newDealerUser = $this->getEloquentMock(NewDealerUser::class);
@@ -107,7 +110,7 @@ class DealerOptionsServiceTest extends TestCase
             ->once()
             ->with([
                 'user_id' => $crmUser->user_id,
-                'active' => 1
+                'active' => $active
             ])
             ->andReturn($user);
 
@@ -133,8 +136,7 @@ class DealerOptionsServiceTest extends TestCase
 
         /** @var DealerOptionsService $service */
         $service = $this->app->make(DealerOptionsService::class);
-
-        $result = $service->activateCrm($dealerId);
+        $result = $service->manageCrm($dealerId, $active);
 
         $this->assertTrue($result);
     }
@@ -142,13 +144,14 @@ class DealerOptionsServiceTest extends TestCase
     /**
      * @covers ::activateCrm
      *
+     * @dataProvider validDataProviderForManageCrm
+     *
      * @group DMS
      * @group DMS_DEALER_OPTIONS
+     * @throws \Exception
      */
-    public function testActivateCrmWithoutCrmUser()
+    public function testActivateCrmWithoutCrmUser($dealerId, $userId, $active)
     {
-        $dealerId = PHP_INT_MAX;
-        $userId = PHP_INT_MAX - 1;
         $userName = 'test!11';
 
         $user = new \StdClass();
@@ -183,7 +186,7 @@ class DealerOptionsServiceTest extends TestCase
                 'last_name' => '',
                 'display_name' => '',
                 'dealer_name' => $user->name,
-                'active' => 1
+                'active' => $active
             ])
             ->andReturn($user);
 
@@ -207,10 +210,9 @@ class DealerOptionsServiceTest extends TestCase
 
         Log::shouldReceive('info');
 
-        /** @var DealerOptionsService $service */
+        /** @var DealerOptionsService $service **/
         $service = $this->app->make(DealerOptionsService::class);
-
-        $result = $service->activateCrm($dealerId);
+        $result = $service->manageCrm($dealerId, $active);
 
         $this->assertTrue($result);
     }
@@ -218,14 +220,14 @@ class DealerOptionsServiceTest extends TestCase
     /**
      * @covers ::activateCrm
      *
+     * @dataProvider validDataProviderForManageCrm
+     *
      * @group DMS
      * @group DMS_DEALER_OPTIONS
+     * @throws \Exception
      */
-    public function testActivateCrmWithoutCrmUserRole()
+    public function testActivateCrmWithoutCrmUserRole($dealerId, $userId, $active)
     {
-        $dealerId = PHP_INT_MAX;
-        $userId = PHP_INT_MAX - 1;
-
         $user = new \StdClass();
         $crmUser = new \StdClass();
         $newDealerUser = $this->getEloquentMock(NewDealerUser::class);
@@ -252,7 +254,7 @@ class DealerOptionsServiceTest extends TestCase
             ->once()
             ->with([
                 'user_id' => $crmUser->user_id,
-                'active' => 1
+                'active' => $active
             ])
             ->andReturn($user);
 
@@ -281,10 +283,9 @@ class DealerOptionsServiceTest extends TestCase
 
         Log::shouldReceive('info');
 
-        /** @var DealerOptionsService $service */
+        /** @var DealerOptionsService $service **/
         $service = $this->app->make(DealerOptionsService::class);
-
-        $result = $service->activateCrm($dealerId);
+        $result = $service->manageCrm($dealerId, $active);
 
         $this->assertTrue($result);
     }
@@ -292,14 +293,14 @@ class DealerOptionsServiceTest extends TestCase
     /**
      * @covers ::activateCrm
      *
+     * @dataProvider validDataProviderForManageCrm
+     *
      * @group DMS
      * @group DMS_DEALER_OPTIONS
+     * @throws \Exception
      */
-    public function testActivateCrmWithoutNewDealerUser()
+    public function testActivateCrmWithoutNewDealerUser($dealerId, $userId, $active)
     {
-        $dealerId = PHP_INT_MAX;
-        $userId = PHP_INT_MAX - 1;
-
         $userName = 'test_user_name';
         $userEmail = 'test_user_email@test.com';
 
@@ -367,7 +368,7 @@ class DealerOptionsServiceTest extends TestCase
             ->once()
             ->with([
                 'user_id' => $crmUser->user_id,
-                'active' => 1
+                'active' => $active
             ])
             ->andReturn($user);
 
@@ -391,142 +392,72 @@ class DealerOptionsServiceTest extends TestCase
 
         Log::shouldReceive('info');
 
-        /** @var DealerOptionsService $service */
+        /** @var DealerOptionsService $service **/
         $service = $this->app->make(DealerOptionsService::class);
-
-        $result = $service->activateCrm($dealerId);
+        $result = $service->manageCrm($dealerId, $active);
 
         $this->assertTrue($result);
     }
 
     /**
-     * @covers ::activateCrm
+     * @covers ::manageCrm
+     *
+     * @dataProvider invalidDataProviderForManageCrm
      *
      * @group DMS
      * @group DMS_DEALER_OPTIONS
+     * @throws \TypeError|\Exception
      */
-    public function testActivateCrmWithException()
+    public function testActivateCrmWithException($dealerId, $active)
     {
-        $dealerId = PHP_INT_MAX;
-
-        $user = null;
-
-        $this->userRepository
-            ->shouldReceive('beginTransaction')
-            ->once();
-
-        $this->userRepository
-            ->shouldReceive('get')
-            ->once()
-            ->with(['dealer_id' => $dealerId])
-            ->andReturn($user);
-
-        $this->crmUserRepository
-            ->shouldReceive('update')
-            ->never();
-
-        $this->crmUserRepository
-            ->shouldReceive('create')
-            ->never();
-
-        $this->crmUserRoleRepository
-            ->shouldReceive('get')
-            ->never();
-
-        $this->crmUserRoleRepository
-            ->shouldReceive('create')
-            ->never();
-
-        $this->userRepository
-            ->shouldReceive('commitTransaction')
-            ->never();
-
-        $this->userRepository
-            ->shouldReceive('rollbackTransaction')
-            ->once();
-
         Log::shouldReceive('error');
+        $this->expectException(\TypeError::class);
 
-        /** @var DealerOptionsService $service */
+        /** @var DealerOptionsService $service **/
         $service = $this->app->make(DealerOptionsService::class);
-
-        $result = $service->activateCrm($dealerId);
+        $result = $service->manageCrm($dealerId, $active);
 
         $this->assertFalse($result);
     }
 
     /**
-     * @covers ::deactivateCrm
-     *
-     * @group DMS
-     * @group DMS_DEALER_OPTIONS
+     * @return array[]
      */
-    public function testDeactivateCrm()
+    public function validDataProviderForManageCrm(): array
     {
-        $dealerId = PHP_INT_MAX;
-        $userId = PHP_INT_MAX - 1;
-
-        $user = new \StdClass();
-        $newDealerUser = new \StdClass();
-
-        $newDealerUser->user_id = $userId;
-
-        $user->newDealerUser = $newDealerUser;
-
-        $this->userRepository
-            ->shouldReceive('get')
-            ->once()
-            ->with(['dealer_id' => $dealerId])
-            ->andReturn($user);
-
-        $this->crmUserRepository
-            ->shouldReceive('update')
-            ->once()
-            ->with([
-                'user_id' => $newDealerUser->user_id,
-                'active' => false
-            ])
-            ->andReturn($user);
-
-        Log::shouldReceive('info');
-
-        /** @var DealerOptionsService $service */
-        $service = $this->app->make(DealerOptionsService::class);
-
-        $result = $service->deactivateCrm($dealerId);
-
-        $this->assertTrue($result);
+        return [
+            'Activate CRM' => [
+                'dealer_id' => PHP_INT_MAX,
+                'user_id' => PHP_INT_MAX - 1,
+                'active' => 1
+            ],
+            'Deactivate CRM' => [
+                'dealer_id' => PHP_INT_MAX,
+                'user_id' => PHP_INT_MAX - 1,
+                'active' => 0
+            ],
+            'Activate CRM without CRM user' => [
+                'dealer_id' => PHP_INT_MAX,
+                'user_id' => null,
+                'active' => 1
+            ]
+        ];
     }
 
     /**
-     * @covers ::deactivateCrm
-     *
-     * @group DMS
-     * @group DMS_DEALER_OPTIONS
+     * @return array[]
      */
-    public function testDeactivateCrmWithException()
+    public function invalidDataProviderForManageCrm(): array
     {
-        $dealerId = PHP_INT_MAX;
-
-        $user = null;
-
-        $this->userRepository
-            ->shouldReceive('get')
-            ->once()
-            ->with(['dealer_id' => $dealerId])
-            ->andReturn($user);
-
-        $this->crmUserRepository
-            ->shouldReceive('update')
-            ->never();
-
-        Log::shouldReceive('error');
-
-        /** @var DealerOptionsService $service */
-        $service = $this->app->make(DealerOptionsService::class);
-
-        $result = $service->deactivateCrm($dealerId);
-
-        $this->assertFalse($result);
+        return [
+            'Activate CRM without dealer' => [
+                'dealer_id' => null,
+                'active' => 1
+            ],
+            'Deactivate CRM without dealer' => [
+                'dealer_id' => null,
+                'active' => 0
+            ]
+        ];
     }
 }
