@@ -113,6 +113,10 @@ class ClappQueue
      */
     public static function fill(Queue $queue): ClappQueue {
         // Create ClappQueue From Session/Queue
+        var_dump([
+            'contact_name' => $queue->profile->contact_name,
+            'phone' => $queue->profile->phone,
+            'postal' => $queue->profile->postal]);
         return new ClappQueue([
             'type' => $queue->type,
             'location' => $queue->profile->location,
