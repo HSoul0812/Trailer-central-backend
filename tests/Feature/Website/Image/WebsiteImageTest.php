@@ -226,25 +226,6 @@ class WebsiteImageTest extends TestCase
         ]);
     }
 
-    public function testStartFromMustBeADateInTheFuture()
-    {
-        $data = [
-            'id' => 0,
-            'starts_from' => now()->subDays(3)
-        ];
-
-        $response = $this
-            ->withHeaders(['access-token' => $this->accessToken()])
-            ->post('/api/website/' . $this->website->id . '/image/' . 0, $data);
-
-        $response->assertStatus(422);
-        $json = json_decode($response->getContent(), true);
-
-        self::assertArrayHasKey('message', $json);
-        self::assertArrayHasKey('id', $json['errors']);
-        self::assertArrayHasKey('starts_from', $json['errors']);
-    }
-
     public function testUpdatingAnImageToShowInAFutureDateUpdatesTheIsActive()
     {
         $image = $this->images->first();

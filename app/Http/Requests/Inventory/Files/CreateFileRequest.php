@@ -14,6 +14,6 @@ class CreateFileRequest extends Request
         'dealer_id' => 'required|exists:App\Models\User\User,dealer_id',
         'inventory_id' => 'required|inventory_valid',
         'url' => 'string|required',
-        'title' => 'string'
+        'title' => 'string|required'
     ];
 }

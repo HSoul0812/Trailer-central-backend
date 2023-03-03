@@ -342,7 +342,10 @@ class Collector extends Resource
 
             HasMany::make('Admin Notes', 'collectorAdminNotes', AdminNote::class),
 
-            HasMany::make('Change Reports', 'collectorChangeReports', CollectorChangeReport::class)
+            HasMany::make('Change Reports', 'collectorChangeReports', CollectorChangeReport::class),
+
+            HasMany::make('Collector Logs', 'collectorLogs', CollectorLog::class)
+
         ];
     }
 
