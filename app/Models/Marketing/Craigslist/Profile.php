@@ -142,7 +142,7 @@ class Profile extends Model
      */
     public function prices(): HasMany
     {
-        return $this->hasMany(CategoryPrice::class, 'city_code', 'city_code');
+        return $this->hasMany(CategoryPrice::class, 'city_code', 'market_city');
     }
 
     /**
@@ -173,6 +173,16 @@ class Profile extends Model
     public function clCity(): BelongsTo
     {
         return $this->belongsTo(ClCity::class, 'city', 'name');
+    }
+
+    /**
+     * Get Market
+     * 
+     * @return BelongsTo
+     */
+    public function market(): BelongsTo
+    {
+        return $this->belongsTo(Market::class, 'city_code', 'market_city');
     }
 
     /**
@@ -240,9 +250,6 @@ class Profile extends Model
     public function getCostsAttribute(): float {
         // Find Price
         $price = $this->prices()->where('category_id', $this->category->id)->first();
-        var_dump($this->id);
-        var_dump($this->city_code);
-        var_dump($this->category->id);
 
         // Get Fee
         $fee = (float) config('marketing.cl.settings.costs.fee', '0.025');
