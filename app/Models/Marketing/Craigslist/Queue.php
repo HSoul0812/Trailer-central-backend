@@ -127,7 +127,7 @@ class Queue extends Model
      */
     public function overrides(): HasMany
     {
-        return $this->belongsTo(InventoryClapp::class, 'inventory_id', 'inventory_id');
+        return $this->hasMany(InventoryClapp::class, 'inventory_id', 'inventory_id');
     }
 
 
