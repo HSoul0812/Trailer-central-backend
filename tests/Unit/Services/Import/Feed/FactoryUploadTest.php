@@ -52,7 +52,7 @@ class FactoryUploadTest extends TestCase
         $this->uploadRepository
             ->shouldReceive('createOrUpdate')
             ->with([
-                'code' => $decode->code,
+                'code' => $decode['code'],
                 'type' => 'inventory',
                 'data' => $data,
             ])
@@ -70,12 +70,7 @@ class FactoryUploadTest extends TestCase
      * @throws PropertyDoesNotExists
      */
     public function testCantAddInventory($data) {
-        $apiUpload = $this->getEloquentMock(FeedApiUpload::class);
-
-        $this->uploadRepository
-            ->shouldReceive('createOrUpdate')
-            ->once()
-            ->andReturn($apiUpload);
+        $this->getEloquentMock(FeedApiUpload::class);
 
         $this->expectExceptionMessage('transactions invalid or not found in rawData');
 
