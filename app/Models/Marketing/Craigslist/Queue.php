@@ -169,58 +169,21 @@ class Queue extends Model
         return $map;
     }
 
+
     /**
-     * Get Current Title
+     * Get Initial URL Profile
      * 
      * @return string
      */
-    public function getCurrentTitleAttribute(): string {
-        // Return Title From Inventory
-        if(!empty($this->inventory) && !empty($this->inventory->title)) {
-            return $this->inventory->title;
-        }
-        return $this->parameters->title ?? '';
-    }
+    public function getInitialUrlAttribute(): string {
+        $domain = $this->profile->market->city_domain;
 
-    /**
-     * Get Current Stock
-     * 
-     * @return string
-     */
-    public function getCurrentStockAttribute(): string {
-        // Return Stock From Inventory
-        if(!empty($this->inventory) && !empty($this->inventory->stock)) {
-            return $this->inventory->stock;
-        }
-        return $this->parameters->stock ?? '';
-    }
+        // Append Lang/CC
+        $domain .= '?lang=en&cc=us';
 
-    /**
-     * Get Current Price
-     * 
-     * @return float
-     */
-    public function getCurrentPriceAttribute(): float {
-        // Return Price From Inventory
-        if(!empty($this->inventory) && !empty($this->inventory->price)) {
-            return $this->inventory->price;
-        }
-        return $this->parameters->price ? floatval($this->parameters->price) : 0;
+        // Return Final URL
+        return $domain;
     }
-
-    /**
-     * Get Current Primary Image
-     * 
-     * @return string
-     */
-    public function getCurrentImageAttribute(): string {
-        // Return Primary Image Inventory
-        if(!empty($this->inventory) && !empty($this->inventory->primary_image)) {
-            return $this->inventory->primary_image->image->filename;
-        }
-        return $this->parameters->images[0] ?? '';
-    }
-
 
     /**
      * Get Type From Parameters or Profile
@@ -549,5 +512,58 @@ class Queue extends Model
 
         // Return Final Images List
         return $images;
+    }
+
+
+    /**
+     * Get Current Title
+     * 
+     * @return string
+     */
+    public function getCurrentTitleAttribute(): string {
+        // Return Title From Inventory
+        if(!empty($this->inventory) && !empty($this->inventory->title)) {
+            return $this->inventory->title;
+        }
+        return $this->parameters->title ?? '';
+    }
+
+    /**
+     * Get Current Stock
+     * 
+     * @return string
+     */
+    public function getCurrentStockAttribute(): string {
+        // Return Stock From Inventory
+        if(!empty($this->inventory) && !empty($this->inventory->stock)) {
+            return $this->inventory->stock;
+        }
+        return $this->parameters->stock ?? '';
+    }
+
+    /**
+     * Get Current Price
+     * 
+     * @return float
+     */
+    public function getCurrentPriceAttribute(): float {
+        // Return Price From Inventory
+        if(!empty($this->inventory) && !empty($this->inventory->price)) {
+            return $this->inventory->price;
+        }
+        return $this->parameters->price ? floatval($this->parameters->price) : 0;
+    }
+
+    /**
+     * Get Current Primary Image
+     * 
+     * @return string
+     */
+    public function getCurrentImageAttribute(): string {
+        // Return Primary Image Inventory
+        if(!empty($this->inventory) && !empty($this->inventory->primary_image)) {
+            return $this->inventory->primary_image->image->filename;
+        }
+        return $this->parameters->images[0] ?? '';
     }
 }

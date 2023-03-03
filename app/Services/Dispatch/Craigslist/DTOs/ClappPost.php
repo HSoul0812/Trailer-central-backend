@@ -49,6 +49,11 @@ class ClappPost
     /**
      * @var string
      */
+    private $initUrl;
+
+    /**
+     * @var string
+     */
     private $category;
 
     /**
@@ -237,6 +242,7 @@ class ClappPost
         return new ClappPost([
             'queue' => $queue,
             'q_data' => $qData,
+            'init_url' => $queue->initial_url,
             'category' => $queue->inventory->category,
             'category_type' => $queue->profile->category->grouping,
             'subarea' => strtolower($queue->profile->market_subarea),
