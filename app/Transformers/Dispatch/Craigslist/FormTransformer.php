@@ -45,7 +45,7 @@ class FormTransformer extends TransformerAbstract
                 'postal'           => $clapp->postal(),
                 'PostingBody'      => $clapp->qData->trimmedBody(),
                 'language'         => $clapp->language,
-                'condition'        => $clapp->condition
+                'condition'        => $clapp->condition()
             ])
         ];
     }

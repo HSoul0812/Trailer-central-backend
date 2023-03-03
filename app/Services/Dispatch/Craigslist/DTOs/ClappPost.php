@@ -222,7 +222,7 @@ class ClappPost
             'postal' => $qData->postal,
             'posting_body' => $qData->trimmedBody(),
             'language' => self::LANGUAGE_DEFAULT,
-            'condition' => $this->clCondition($queue->inventory->condition),
+            'condition' => $queue->inventory->condition,
             'see_my_other' => $queue->profile->show_more_ads ? 'Y' : 'N',
             'want_a_map' => $queue->profile->use_map ? 'Y' : 'N',
             'vin' => $queue->inventory->vin,
@@ -262,6 +262,15 @@ class ClappPost
      */
     public function makeModel(): string {
         return $this->clTruncate($this->qData->make . ' ' . $this->qData->model, 32);
+    }
+
+    /**
+     * Get Condition
+     * 
+     * @return string
+     */
+    public function condition(): string {
+        return $this->clCondition($this->condition);
     }
 
 
