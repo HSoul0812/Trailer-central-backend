@@ -251,6 +251,11 @@ class Profile extends Model
         // Find Price
         $price = $this->prices()->where('category_id', $this->category->id)->first();
 
+        // No Price?!
+        if(empty($price->price)) {
+            return 0;
+        }
+
         // Get Fee
         $fee = (float) config('marketing.cl.settings.costs.fee', '0.025');
 
