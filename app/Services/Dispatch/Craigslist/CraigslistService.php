@@ -175,10 +175,12 @@ class CraigslistService implements CraigslistServiceInterface
 
         // Get Inventory if Needed
         foreach(DealerCraigslist::INVENTORY_INCLUDES as $include) {
-            if($params['include'] === DealerCraigslist::INCLUDE_INVENTORY) {
-                $dealerClapp[$include] = $this->getInventory($params, $startTime);
-            } elseif($params['include'] === DealerCraigslist::INCLUDE_UPDATES) {
-                $dealerClapp[$include] = $this->getUpdates($params, $startTime);
+            if(!empty($params['include']) && in_array($include, $params['include'])) {
+                if($params['include'] === DealerCraigslist::INCLUDE_INVENTORY) {
+                    $dealerClapp[$include] = $this->getInventory($params, $startTime);
+                } elseif($params['include'] === DealerCraigslist::INCLUDE_UPDATES) {
+                    $dealerClapp[$include] = $this->getUpdates($params, $startTime);
+                }
             }
             $nowTime = microtime(true);
             $this->log->info('Debug time after include ' . $include . ': ' . ($nowTime - $startTime));
@@ -188,9 +190,9 @@ class CraigslistService implements CraigslistServiceInterface
         foreach(DealerCraigslist::AVAILABLE_INCLUDES as $include) {
             if(!empty($params['include']) && in_array($include, $params['include'])) {
                 $dealerClapp[$include] = $this->$include->getAll(['dealer_id' => $dealerId]);
+                $nowTime = microtime(true);
+                $this->log->info('Debug time after include ' . $include . ': ' . ($nowTime - $startTime));
             }
-            $nowTime = microtime(true);
-            $this->log->info('Debug time after include ' . $include . ': ' . ($nowTime - $startTime));
         }
         $response = new DealerCraigslist($dealerClapp);
 
