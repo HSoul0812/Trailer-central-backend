@@ -8,11 +8,11 @@ use App\Traits\WithConstructor;
 use App\Traits\WithGetter;
 
 /**
- * Class ClappForm
+ * Class ClappPost
  * 
  * @package App\Services\Dispatch\Craigslist\DTOs
  */
-class ClappForm
+class ClappPost
 {
     use WithConstructor, WithGetter;
 
@@ -196,8 +196,8 @@ class ClappForm
         // Create ClappQueue From Session/Queue
         $qData = ClappQueue::fill($session);
 
-        // Create ClappForm Results
-        return new ClappForm([
+        // Create ClappPost Results
+        return new ClappPost([
             'queue_data' => $qData,
             'session' => $session,
             'category' => $session->inventory->category,

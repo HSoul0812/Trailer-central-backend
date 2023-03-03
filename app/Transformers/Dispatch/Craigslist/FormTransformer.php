@@ -2,7 +2,7 @@
 
 namespace App\Transformers\Dispatch\Craigslist;
 
-use App\Services\Marketing\Craigslist\DTOs\ClappForm;
+use App\Services\Marketing\Craigslist\DTOs\ClappPost;
 use League\Fractal\TransformerAbstract;
 
 /**
@@ -13,10 +13,10 @@ use League\Fractal\TransformerAbstract;
 class FormTransformer extends TransformerAbstract
 {
     /**
-     * @param ClappForm $clapp
+     * @param ClappPost $clapp
      * @return array
      */
-    public function transform(ClappForm $clapp): array
+    public function transform(ClappPost $clapp): array
     {
         // Initialize Params
         return [
@@ -53,11 +53,11 @@ class FormTransformer extends TransformerAbstract
     /**
      * Get Category-Specific Post Details
      * 
-     * @param ClappForm $clapp
+     * @param ClappPost $clapp
      * @param array $post
      * @return array
      */
-    private function byCategory(ClappForm $clapp, array $post): array {
+    private function byCategory(ClappPost $clapp, array $post): array {
         // Trailers
         if($clapp->qData->postCategory == 205 || $clapp->qData->postCategory == 206) {
             return $this->byTrailers($clapp, $post);
@@ -87,11 +87,11 @@ class FormTransformer extends TransformerAbstract
     /**
      * Get Trailer-Specific Post Data
      * 
-     * @param ClappForm $clapp
+     * @param ClappPost $clapp
      * @param array $post
      * @return array
      */
-    private function byTrailers(ClappForm $clapp, array $post): array {
+    private function byTrailers(ClappPost $clapp, array $post): array {
         // Make
         $post['year_manufactured'] = $clapp->year;
         $post['sale_manufacturer'] = $clapp->qData->trimmedMake();
@@ -108,11 +108,11 @@ class FormTransformer extends TransformerAbstract
     /**
      * Get Vehicle-Specific Post Data
      * 
-     * @param ClappForm $clapp
+     * @param ClappPost $clapp
      * @param array $post
      * @return array
      */
-    private function byVehicles(ClappForm $clapp, array $post) {
+    private function byVehicles(ClappPost $clapp, array $post) {
         // Make
         $post['auto_year'] = $clapp->year;
         $post['auto_make_model'] = $clapp->makeModel();
@@ -138,11 +138,11 @@ class FormTransformer extends TransformerAbstract
     /**
      * Get RV-Specific Post Data
      * 
-     * @param ClappForm $clapp
+     * @param ClappPost $clapp
      * @param array $post
      * @return type
      */
-    private function byRvs(ClappForm $clapp, array $post): array {
+    private function byRvs(ClappPost $clapp, array $post): array {
         // Make
         $post['auto_year'] = $clapp->qData->year;
         $post['auto_make_model'] = $clapp->makeModel();
@@ -172,11 +172,11 @@ class FormTransformer extends TransformerAbstract
     /**
      * Get Boat-Specific Post Data
      * 
-     * @param ClappForm $clapp
+     * @param ClappPost $clapp
      * @param array $post
      * @return array
      */
-    private function byBoats(ClappForm $clapp, array $post): array {
+    private function byBoats(ClappPost $clapp, array $post): array {
         // Make/Model/Year
         $post['year_manufactured'] = $clapp->year;
         $post['sale_manufacturer'] = $clapp->qData->trimmedMake();
@@ -195,11 +195,11 @@ class FormTransformer extends TransformerAbstract
     /**
      * Get Part-Specific Post Data
      * 
-     * @param ClappForm $clapp
+     * @param ClappPost $clapp
      * @param array $post
      * @return array
      */
-    private function byParts(ClappForm $clapp, array $post): array {
+    private function byParts(ClappPost $clapp, array $post): array {
         // Make
         $post['sale_manufacturer'] = $clapp->qData->trimmedMake();
         $post['sale_model'] = '';
@@ -214,11 +214,11 @@ class FormTransformer extends TransformerAbstract
     /**
      * Get Other Post Data
      * 
-     * @param ClappForm $clapp
+     * @param ClappPost $clapp
      * @param array $post
      * @return array
      */
-    private function byOther(ClappForm $clapp, array $post): array {
+    private function byOther(ClappPost $clapp, array $post): array {
         // Make/Model/Year
         $post['year_manufactured'] = $clapp->year;
         $post['sale_manufacturer'] = $clapp->qData->trimmedMake();

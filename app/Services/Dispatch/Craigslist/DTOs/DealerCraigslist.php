@@ -134,7 +134,7 @@ class DealerCraigslist
 
 
     /**
-     * @var Collection<ClappForm>
+     * @var Collection<ClappPost>
      */
     private $inventories;
 

@@ -10,7 +10,7 @@ use App\Repositories\Marketing\Craigslist\AccountRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\DealerRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\ProfileRepositoryInterface;
 use App\Repositories\Marketing\Craigslist\SchedulerRepositoryInterface;
-use App\Services\Dispatch\Craigslist\DTOs\ClappForm;
+use App\Services\Dispatch\Craigslist\DTOs\ClappPost;
 use App\Services\Dispatch\Craigslist\DTOs\ClappError;
 use App\Services\Dispatch\Craigslist\DTOs\DealerCraigslist;
 use Illuminate\Support\Collection;
@@ -262,7 +262,7 @@ class CraigslistService implements CraigslistServiceInterface
      *
      * @param array $params
      * @param null|float $startTime
-     * @return Collection<ClappForm> | Collection<ClappUpdate>
+     * @return Collection<ClappPost> | Collection<ClappUpdate>
      */
     private function getInventory(array $params, ?float $startTime = null): Collection {
         // Get Totals
@@ -284,11 +284,11 @@ class CraigslistService implements CraigslistServiceInterface
         $listings = new Collection();
         foreach ($sessions as $session) {
             $nowTime = microtime(true);
-            $clappForm = ClappForm::fill($session);
-            if($this->validatePost($session, $clappForm)) {
-                $listings->push($clappForm);
+            $clappPost = ClappPost::fill($session);
+            if($this->validatePost($session, $clappPost)) {
+                $listings->push($clappPost);
             }
-            $this->log->info('Debug time ClappForm #' . $session->session_id . ': ' . ($nowTime - $startTime));
+            $this->log->info('Debug time ClappPost #' . $session->session_id . ': ' . ($nowTime - $startTime));
         }
 
         // Return Results After Checking Balance
@@ -300,7 +300,7 @@ class CraigslistService implements CraigslistServiceInterface
      *
      * @param array $params
      * @param null|float $startTime
-     * @return Collection<ClappForm> | Collection<ClappUpdate>
+     * @return Collection<ClappPost> | Collection<ClappUpdate>
      */
     private function getUpdates(array $params, ?float $startTime = null): Collection {
         // Get Totals
@@ -335,19 +335,19 @@ class CraigslistService implements CraigslistServiceInterface
      * Check if the Current Post is Valid
      * 
      * @param Session $session
-     * @param ClappForm $clapp
+     * @param ClappPost $clapp
      * @return bool
      */
-    private function validatePost(Session $session, ClappForm $clapp): bool {
+    private function validatePost(Session $session, ClappPost $clapp): bool {
         return true;
     }
 
     /**
      * Check if the Dealer Has Enough Balance for All Posts
      * 
-     * @param Collection<ClappForm> $posts
+     * @param Collection<ClappPost> $posts
      * @param float $balance
-     * @return Collection<ClappForm>
+     * @return Collection<ClappPost>
      */
     private function validateBalance(Collection $posts, float $balance): Collection {
         // Get Min Balance
