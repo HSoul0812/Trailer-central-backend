@@ -2,6 +2,7 @@
 
 namespace App\Nova\Resources\Website;
 
+use App\Nova\Metrics\DealerWebsitesUptime;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
@@ -154,7 +155,9 @@ class Website extends Resource
      */
     public function cards(Request $request)
     {
-        return [];
+        return [
+            (new DealerWebsitesUptime())->width('1/6')
+        ];
     }
 
     /**
