@@ -49,6 +49,27 @@ class ClappPost
     /**
      * @var string
      */
+    private $category;
+
+    /**
+     * @var string
+     */
+    private $categoryType;
+
+    /**
+     * @var string
+     */
+    private $subarea;
+
+    /**
+     * @var string
+     */
+    private $market;
+
+
+    /**
+     * @var string
+     */
     private $fromEmail;
 
     /**
