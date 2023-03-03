@@ -180,6 +180,7 @@ class CraigslistService implements CraigslistServiceInterface
             } elseif($params['include'] === DealerCraigslist::INCLUDE_UPDATES) {
                 $dealerClapp[$include] = $this->getUpdates($params, $startTime);
             }
+            $nowTime = microtime(true);
             $this->log->info('Debug time after include ' . $include . ': ' . ($nowTime - $startTime));
         }
 
