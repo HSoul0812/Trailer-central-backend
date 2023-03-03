@@ -6,6 +6,7 @@ use App\Models\Traits\TableAware;
 use App\Models\Marketing\Craigslist\Session;
 use App\Models\Marketing\VirtualCard;
 use App\Models\Marketing\Craigslist\Account;
+use App\Models\Marketing\Craigslist\Balance;
 use App\Models\Marketing\Craigslist\Profile;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -57,6 +58,15 @@ class DealerClapp extends Model
      */
     public function dealer(): BelongsTo {
         return $this->belongsTo(User::class, 'dealer_id', 'dealer_id');
+    }
+
+    /**
+     * Get Clapp Balance
+     * 
+     * @return HasOne
+     */
+    public function balance(): HasOne {
+        return $this->hasOne(Balance::class, 'dealer_id', 'dealer_id');
     }
 
     /**

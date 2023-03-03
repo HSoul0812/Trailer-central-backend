@@ -32,6 +32,36 @@ class DealerCraigslist
 
 
     /**
+     * @const array<string> Craigslist Dealer Available Includes
+     */
+    const AVAILABLE_INCLUDES = [
+        'accounts',
+        'profiles',
+        'cards',
+        'tunnels'
+    ];
+
+
+    /**
+     * @const Include Inventories
+     */
+    const INCLUDE_INVENTORY = 'inventories';
+
+    /**
+     * @const Include Updates
+     */
+    const INCLUDE_UPDATES = 'updates';
+
+    /**
+     * @const array<string> Craigslist Dealer Inventory Includes
+     */
+    const INVENTORY_INCLUDE = [
+        self::INCLUDE_INVENTORY,
+        self::INCLUDE_UPDATES
+    ];
+
+
+    /**
      * @var string - in self::DEALER_TYPES
      */
     private $type;
@@ -104,38 +134,12 @@ class DealerCraigslist
 
 
     /**
-     * Get Proxy Settings
-     * 
-     * @return array
+     * @var Collection<ClappForm>
      */
-    public function getProxyConfig(): array {
-        return config('marketing.cl.settings.proxy', []);
-    }
+    private $inventories;
 
     /**
-     * Get Cookie Settings
-     * 
-     * @return array
+     * @var Collection<ClappUpdate>
      */
-    public function getCookieConfig(): array {
-        return config('marketing.cl.settings.cookie', []);
-    }
-
-    /**
-     * Get All URL's
-     * 
-     * @return array
-     */
-    public function getAllUrls(): array {
-        return config('marketing.cl.settings.urls', []);
-    }
-
-    /**
-     * Get All Selectors
-     * 
-     * @return array
-     */
-    public function getAllSelectors(): array {
-        return config('marketing.cl.selectors', []);
-    }
+    private $updates;
 }

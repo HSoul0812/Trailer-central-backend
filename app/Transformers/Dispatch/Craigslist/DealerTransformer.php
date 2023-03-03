@@ -6,6 +6,8 @@ use App\Transformers\Dispatch\TunnelTransformer;
 use App\Transformers\Marketing\VirtualCardTransformer;
 use App\Transformers\Marketing\Craigslist\AccountTransformer;
 use App\Transformers\Marketing\Craigslist\ProfileTransformer;
+use App\Transformers\Marketing\Craigslist\ClappFormTransformer;
+use App\Transformers\Marketing\Craigslist\ClappUpdateTransformer;
 use App\Services\Dispatch\Craigslist\DTOs\DealerCraigslist;
 use League\Fractal\TransformerAbstract;
 
@@ -21,6 +23,8 @@ class DealerTransformer extends TransformerAbstract
         'profiles',
         'cards',
         'tunnels',
+        'inventories',
+        'updates'
     ];
 
 
@@ -29,17 +33,23 @@ class DealerTransformer extends TransformerAbstract
      * @param ProfileTransformer $profileTransformer
      * @param TunnelTransformer $tunnelTransformer
      * @param VirtualCardTransformer $cardTransformer
+     * @param ClappFormTransformer $formTransformer
+     * @param ClappUpdateTransformer $updateTransformer
      */
     public function __construct(
         AccountTransformer $accountTransformer,
         ProfileTransformer $profileTransformer,
         TunnelTransformer $tunnelTransformer,
-        VirtualCardTransformer $cardTransformer
+        VirtualCardTransformer $cardTransformer,
+        ClappFormTransformer $formTransformer,
+        ClappUpdateTransformer $updateTransformer
     ) {
         $this->accountTransformer = $accountTransformer;
         $this->profileTransformer = $profileTransformer;
         $this->tunnelTransformer = $tunnelTransformer;
         $this->cardTransformer = $cardTransformer;
+        $this->formTransformer = $formTransformer;
+        $this->updateTransformer = $updateTransformer;
     }
 
     /**
@@ -81,5 +91,15 @@ class DealerTransformer extends TransformerAbstract
     public function includeCards(DealerCraigslist $dealer)
     {
         return $this->collection($dealer->cards, $this->cardTransformer);
+    }
+
+    public function includeInventories(DealerCraigslist $dealer)
+    {
+        return $this->collection($dealer->inventories, $this->formTransformer);
+    }
+
+    public function includeUpdates(DealerCraigslist $dealer)
+    {
+        return $this->collection($dealer->updates, $this->updateTransformer);
     }
 }

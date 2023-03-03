@@ -8,8 +8,10 @@ use App\Models\Marketing\Craigslist\City;
 use App\Models\Marketing\Craigslist\ClCity;
 use App\Models\Marketing\Craigslist\Subarea;
 use App\Models\Traits\TableAware;
+use Awobaz\Compoships\Compoships;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * Class Profile
@@ -18,7 +20,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Profile extends Model
 {
-    use TableAware;
+    use TableAware, Compoships;
 
 
     /**
@@ -134,6 +136,16 @@ class Profile extends Model
     }
 
     /**
+     * Get Prices for City
+     * 
+     * @return HasMany
+     */
+    public function prices(): HasMany
+    {
+        return $this->hasMany(CategoryPrice::class, 'city_code', 'city_code');
+    }
+
+    /**
      * Get Category
      * 
      * @return BelongsTo
@@ -173,6 +185,33 @@ class Profile extends Model
         return $this->belongsTo(Subarea::class, 'city_location', 'name');
     }
 
+
+    /**
+     * Get Country
+     * 
+     * @return string
+     */
+    public function getCountryAttribute(): string {
+        // Get Country From Profile Details
+        $country = 'us';
+        if(!empty($this->city_alt_name)) {
+            // Split Alt Name Up
+            $alts = explode(",", $this->city_alt_name);
+
+            // Check Alt Name
+            $alt = trim(end($alts));
+
+            // Country Exists at End of Alt Name?!
+            if(!empty($alt) && strlen($alt) === 2) {
+                $country = $alt;
+            }
+        }
+
+        // Return Updated Country
+        return strtolower($country);
+    }
+
+
     /**
      * Get Base URL
      * 
@@ -190,5 +229,74 @@ class Profile extends Model
 
         // Return Full URL Path
         return $this->cities->url . $category . $subarea . '/' . $by . '/';
+    }
+
+
+    /**
+     * Calculate Costs for Current Profile
+     * 
+     * @return float
+     */
+    public function getCostsAttribute(): float {
+        // Find Price
+        $price = $this->prices()->where('category_id', $this->category->id)->first();
+
+        // Get Fee
+        $fee = (float) config('marketing.cl.settings.costs.fee', '0.025');
+
+        // Add Fee to Cost
+        return $price->price + ($price->price * $fee);
+    }
+
+
+    /**
+     * Get Body Blurb From Profile
+     * 
+     * @return string
+     */
+    public function getBodyBlurbAttribute(): string {
+        // Find Blurb
+        $blurb = trim($this->blurb);
+
+        // Append Line Breaks
+        if(!empty($blurb)) {
+            $blurb .= "<br /><br />\n\n";
+        }
+
+        // Return Final Blurb
+        return $blurb;
+    }
+
+    /**
+     * Get Body Keywords From Profile
+     * 
+     * @return string
+     */
+    public function getBodyKeywordsAttribute(): string {
+        // Find Keywords
+        $keywords = trim($this->keywords);
+        if(!empty($keywords)) {
+            // Randomize Keywords?!
+            if($this->scramble === 1) {
+                // Break Down Keywords
+                $words = explode(',', $keywords);
+
+                // Trim Keywords
+                $trimmed = array_map('trim', $words); // trim everything
+
+                // Filter Out Empty Keywords (including 0 and false)
+                $filtered = array_filter($trimmed);
+                shuffle($filtered);
+
+                // Replace Existing Keywords
+                $keywords = implode($filtered, ', ');
+            }
+
+            // Append Line Breaks
+            $keywords .= "<br /><br />\n\n";
+        }
+
+        // Return Final Keywords
+        return $keywords ?? '';
     }
 }

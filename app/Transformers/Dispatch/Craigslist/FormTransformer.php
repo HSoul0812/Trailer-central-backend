@@ -1,0 +1,233 @@
+<?php
+
+namespace App\Transformers\Dispatch\Craigslist;
+
+use App\Services\Marketing\Craigslist\DTOs\ClappForm;
+use League\Fractal\TransformerAbstract;
+
+/**
+ * Class FormTransformer
+ * 
+ * @package App\Transformers\Dispatch\Craigslist
+ */
+class FormTransformer extends TransformerAbstract
+{
+    /**
+     * @param ClappForm $clapp
+     * @return array
+     */
+    public function transform(ClappForm $clapp): array
+    {
+        // Initialize Params
+        return [
+            'type'     => $clapp->categoryType,
+            'category' => $clapp->qData->postCategory,
+            'subarea'  => $clapp->subarea,
+            'hood'     => $clapp->GeographicArea,
+            'market'   => $clapp->market,
+            'images'   => $clapp->qData->images,
+            'post' => $this->byCategory($clapp, [
+                'FromEMail'        => $clapp->fromEmail,
+                'ConfirmEMail'     => $clapp->confirmEmail,
+                'PostingTitle'     => $clapp->postingTitle,
+                'Privacy'          => $clapp->privacy,
+                'Ask'              => $clapp->ask,
+                'show_phone_ok'    => $clapp->showPhoneOk,
+                'contact_name'     => $clapp->qData->trimmedContactName(),
+                'contact_phone'    => $clapp->contactPhone,
+                'contact_phone_ok' => $clapp->contactPhoneOk,
+                'contact_phone_extension' => $clapp->contactPhoneExt,
+                'GeographicArea'   => $clapp->geographicArea,
+                'xstreet0'         => $clapp->crossStreet1,
+                'xstreet1'         => $clapp->crossStreet2,
+                'city'             => $clapp->city,
+                'region'           => $clapp->region,
+                'postal'           => $clapp->postal(),
+                'PostingBody'      => $clapp->qData->trimmedBody(),
+                'language'         => $clapp->language,
+                'condition'        => $clapp->condition
+            ])
+        ];
+    }
+
+    /**
+     * Get Category-Specific Post Details
+     * 
+     * @param ClappForm $clapp
+     * @param array $post
+     * @return array
+     */
+    private function byCategory(ClappForm $clapp, array $post): array {
+        // Trailers
+        if($clapp->qData->postCategory == 205 || $clapp->qData->postCategory == 206) {
+            return $this->byTrailers($clapp, $post);
+        }
+        // Vehicles
+        elseif($clapp->qData->postCategory == 146 || $clapp->qData->postCategory == 145) {
+            return $this->byVehicles($clapp, $post);
+        }
+        // RV's
+        elseif($clapp->qData->postCategory == 124 || $clapp->qData->postCategory == 168) {
+            return $this->byRvs($clapp, $post);
+        }
+        // Boats
+        elseif($clapp->qData->postCategory == 119 || $clapp->qData->postCategory == 164) {
+            return $this->byBoats($clapp, $post);
+        }
+        // Auto Parts
+        elseif($clapp->qData->postCategory == 163) {
+            return $this->byParts($clapp, $post);
+        }
+        // Everything else
+        else {
+            return $this->byOther($clapp, $post);
+        }
+    }
+
+    /**
+     * Get Trailer-Specific Post Data
+     * 
+     * @param ClappForm $clapp
+     * @param array $post
+     * @return array
+     */
+    private function byTrailers(ClappForm $clapp, array $post): array {
+        // Make
+        $post['year_manufactured'] = $clapp->year;
+        $post['sale_manufacturer'] = $clapp->qData->trimmedMake();
+        $post['sale_model'] = $clapp->qData->trimmedModel();
+        $post['sale_size'] = $clapp->qData->size;
+
+        // Color
+        $post['auto_paint'] = $clapp->color;
+
+        // Return Trailer Post Details
+        return $post;
+    }
+
+    /**
+     * Get Vehicle-Specific Post Data
+     * 
+     * @param ClappForm $clapp
+     * @param array $post
+     * @return array
+     */
+    private function byVehicles(ClappForm $clapp, array $post) {
+        // Make
+        $post['auto_year'] = $clapp->year;
+        $post['auto_make_model'] = $clapp->makeModel();
+        $post['auto_vin'] = $clapp->vin;
+        $post['auto_miles'] = $clapp->miles;
+
+        // Parts
+        $post['auto_cylinders'] = '';
+        $post['auto_drivetrain'] = '';
+        $post['auto_fuel_type'] = '1';
+        $post['auto_size'] = '';
+        $post['auto_title_status'] = '1';
+        $post['auto_transmission'] = '2';
+        $post['auto_bodytype'] = '';
+
+        // Color
+        $post['auto_paint'] = $clapp->color;
+
+        // Return Vehicle Post Details
+        return $post;
+    }
+
+    /**
+     * Get RV-Specific Post Data
+     * 
+     * @param ClappForm $clapp
+     * @param array $post
+     * @return type
+     */
+    private function byRvs(ClappForm $clapp, array $post): array {
+        // Make
+        $post['auto_year'] = $clapp->qData->year;
+        $post['auto_make_model'] = $clapp->makeModel();
+        $post['auto_vin'] = $clapp->qData->vin;
+
+        // Condition
+        $post['auto_miles'] = $clapp->miles;
+        $post['sale_size'] = $clapp->qData->size;
+
+        // Get Auto Data
+        $post['auto_cylinders'] = '';
+        $post['auto_drivetrain'] = '';
+        $post['rv_type'] = $clapp->rvType();
+        $post['auto_title_status'] = '';
+
+        // Fuel Type
+        $post['auto_fuel_type'] = $clapp->rvFuelType();
+        $post['auto_transmission'] = $clapp->rvTransmission();
+
+        // Color
+        $post['auto_paint'] = $clapp->color;
+
+        // Return RV Post Details
+        return $post;
+    }
+
+    /**
+     * Get Boat-Specific Post Data
+     * 
+     * @param ClappForm $clapp
+     * @param array $post
+     * @return array
+     */
+    private function byBoats(ClappForm $clapp, array $post): array {
+        // Make/Model/Year
+        $post['year_manufactured'] = $clapp->year;
+        $post['sale_manufacturer'] = $clapp->qData->trimmedMake();
+        $post['sale_model'] = $clapp->qData->trimmedModel();
+
+        // Boat Specifics
+        $post['boat_length_overall'] = $clapp->boatLength();
+
+        // Handle Boat Category
+        $post['boat_propulsion_type'] = $clapp->boatPropulsion();
+
+        // Return Boat Post Details
+        return $post;
+    }
+
+    /**
+     * Get Part-Specific Post Data
+     * 
+     * @param ClappForm $clapp
+     * @param array $post
+     * @return array
+     */
+    private function byParts(ClappForm $clapp, array $post): array {
+        // Make
+        $post['sale_manufacturer'] = $clapp->qData->trimmedMake();
+        $post['sale_model'] = '';
+
+        // Get Condition
+        $post['sale_size'] = $clapp->qData->size;
+
+        // Return Parts Post Details
+        return $post;
+    }
+
+    /**
+     * Get Other Post Data
+     * 
+     * @param ClappForm $clapp
+     * @param array $post
+     * @return array
+     */
+    private function byOther(ClappForm $clapp, array $post): array {
+        // Make/Model/Year
+        $post['year_manufactured'] = $clapp->year;
+        $post['sale_manufacturer'] = $clapp->qData->trimmedMake();
+        $post['sale_model'] = $clapp->qData->trimmedModel();
+
+        // Get Condition
+        $post['sale_size'] = $clapp->qData->size;
+
+        // Return Other Post Details
+        return $post;
+    }
+}
